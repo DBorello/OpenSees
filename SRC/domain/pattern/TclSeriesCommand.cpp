@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-01-16 06:29:39 $
+// $Revision: 1.4 $
+// $Date: 2001-09-19 20:57:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -47,8 +47,12 @@
 // little function to free memory after invoke Tcl_SplitList
 //   note Tcl_Split list stores the array of pointers and the strings in 
 //   one array, which is why Tcl_Free needs only be called on the array.
+#ifndef TCL_Free
+#define TCL_Free 1
+#endif
+
 static void cleanup(char **argv) {
-#ifdef TCL_Free	    
+#ifdef TCL_Free	  
 	  Tcl_Free((char *) argv);
 #endif	    
 }
