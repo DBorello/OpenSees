@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 23:12:58 $
+// $Revision: 1.5 $
+// $Date: 2004-11-13 00:53:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/FileStream.cpp,v $
 
 
@@ -31,7 +31,7 @@ using std::ios;
 using std::setiosflags;
 
 FileStream::FileStream()
-  :fileOpen(0)
+  :fileOpen(0), fileName(0)
 {
 
 }
@@ -42,8 +42,31 @@ FileStream::~FileStream()
 }
 
 int 
-FileStream::setFile(const char *fileName, openMode mode)
+FileStream::setFile(const char *name, openMode mode)
 {
+  if (name == 0) {
+    std::cerr << "FileStream::setFile() - no name passed\n";
+    return -1;
+  }
+
+  // first create a copy of the file name
+  if (fileName != 0) {
+    if (strcmp(fileName, name) != 0)
+      delete [] fileName;
+    fileName == 0;
+  }
+  if (fileName == 0) {
+    fileName = new char[strlen(name)+1];
+    if (fileName == 0) {
+      std::cerr << "FileStream::setFile() - out of memory copying name: " << name << std::endl;
+      return -1;
+    }
+    
+    // copy the strings
+    strcpy(fileName, name);
+  }
+
+  // if file already open, close it
   if (fileOpen == 1) {
     theFile.close();
     fileOpen = 0;
@@ -65,16 +88,32 @@ FileStream::setFile(const char *fileName, openMode mode)
   return 0;
 }
 
-
 int 
-FileStream::setPrecision(int prec)
+FileStream::open(void)
 {
-  if (fileOpen != 0)
-    theFile << std::setprecision(prec);
+  // check setFile has been called
+  if (fileName == 0) {
+    std::cerr << "FileStream::open(void) - no file name has been set\n";
+    return -1;
+  }
+
+  // if file already open, return
+  if (fileOpen == 1) {
+    return 0;
+  }
+
+  // open file
+  theFile.open(fileName, ios::out| ios::app);
+  if (theFile.bad()) {
+    std::cerr << "WARNING - FileStream::open()";
+    std::cerr << " - could not open file " << fileName << std::endl;
+
+    return -1;
+  } else
+    fileOpen = 1;
 
   return 0;
 }
-
 
 int 
 FileStream::close(void)
@@ -85,6 +124,15 @@ FileStream::close(void)
   return 0;
 }
 
+
+int 
+FileStream::setPrecision(int prec)
+{
+  if (fileOpen != 0)
+    theFile << std::setprecision(prec);
+
+  return 0;
+}
 
 int 
 FileStream::setFloatField(floatField field)

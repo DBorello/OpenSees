@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-25 23:33:14 $
+// $Revision: 1.3 $
+// $Date: 2004-11-13 00:53:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/FileStream.h,v $
 
 #ifndef _FileStream
@@ -36,13 +36,17 @@ class FileStream : public OPS_Stream
   FileStream();
   virtual ~FileStream();
 
+
   int setFile(const char *fileName, openMode mode = OVERWRITE);
+  int open(void);
+  int close(void);
+
   int setPrecision(int precision);
   int setFloatField(floatField);
   int precision(int precision) {return 0;};
   int width(int width) {return 0;};
-  int close(void);
-
+  const char *getFileName(void) {return fileName;}
+  
   OPS_Stream& write(const char *s, int n);
   OPS_Stream& write(const unsigned char *s, int n);
   OPS_Stream& write(const signed char *s, int n);
@@ -73,6 +77,7 @@ class FileStream : public OPS_Stream
  private:
   ofstream theFile;
   int fileOpen;
+  char *fileName;
 };
 
 #endif
