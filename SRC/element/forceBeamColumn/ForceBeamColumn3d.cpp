@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-06-17 23:51:20 $
+// $Revision: 1.12 $
+// $Date: 2003-06-18 00:00:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -1173,7 +1173,7 @@ ForceBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   int i, j , k;
   int loc = 0;
 
-  static ID idData(9);  // one bigger than needed so no clash later
+  static ID idData(9);
   idData(0) = this->getTag();
   idData(1) = connectedExternalNodes(0);
   idData(2) = connectedExternalNodes(1);
@@ -1188,7 +1188,7 @@ ForceBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
       crdTransf->setDbTag(crdTransfDbTag);
   }
   idData(7) = crdTransfDbTag;
-  
+  idData(8) = (isTorsion) ? 1 : 0;
 
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
     opserr << "ForceBeamColumn3d::sendSelf() - %s\n",
@@ -1306,6 +1306,7 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   connectedExternalNodes(1) = idData(2);
   maxIters = idData(4);
   initialFlag = idData(5);
+  isTorsion = (idData(8) == 1) ? true : false;
   
   int crdTransfClassTag = idData(6);
   int crdTransfDbTag = idData(7);
