@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:09 $
+// $Revision: 1.2 $
+// $Date: 2001-07-03 06:58:55 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/TclPlaneTruss/MyTruss.h,v $
                                                                         
                                                                         
@@ -90,9 +90,9 @@ class MyTruss : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(ostream &s, int flag =0);    
 
-    int setResponse(char **argv, int argc, Information &eleInformation);
+    Response *setResponse(char **argv, int argc, Information &eleInfo);
     int getResponse(int responseID, Information &eleInformation);
-    
+
   protected:
     
   private:

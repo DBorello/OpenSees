@@ -3,8 +3,8 @@
 #
 # purpose: example1 in g3intro.tex
 #
-# $Revision: 1.1.1.1 $
-# $Date: 2000-09-15 08:23:09 $
+# $Revision: 1.2 $
+# $Date: 2001-07-03 06:58:55 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/TclPlaneTruss/example1.tcl,v $
                                                                         
 
@@ -23,13 +23,13 @@ node 4  72.0 96.0
 material Elastic 1 3000
 
 # add truss elements - command: truss trussID node1 node2 A matID
-#truss 1 1 4 10.0 1
-#truss 2 2 4 5.0 1
-#truss 3 3 4 5.0 1
+truss 1 1 4 10.0 1
+truss 2 2 4 5.0 1
+truss 3 3 4 5.0 1
 
-fTruss 1 1 4 10.0 3000
-fTruss 2 2 4 5.0 3000
-fTruss 3 3 4 5.0 3000
+#fTruss 1 1 4 10.0 3000
+#fTruss 2 2 4 5.0 3000
+#fTruss 3 3 4 5.0 3000
 
 # set the boundary conditions - command: fix nodeID xResrnt? yRestrnt?
 fix 1 1 1 

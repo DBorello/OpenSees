@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:09 $
+// $Revision: 1.2 $
+// $Date: 2001-07-03 06:58:54 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/TclPlaneTruss/MyTruss.cpp,v $                                                                        
                                                                         
 // File: ~/example/tcl/MyTruss.C
@@ -47,6 +47,7 @@
 #include <FEM_ObjectBroker.h>
 #include <UniaxialMaterial.h>
 #include <Renderer.h>
+#include <ElementResponse.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -64,6 +65,7 @@ MyTruss::MyTruss(int tag,
                  UniaxialMaterial &theMat, 
                  double a,
 		 double m)
+
 :Element(tag,ELE_TAG_MyTruss),     
  externalNodes(2),
  t(0), L(0.0), A(a), M(m), end1Ptr(0), end2Ptr(0), load(4)
@@ -528,7 +530,7 @@ MyTruss::Print(ostream &s, int flag)
 
 
 
-int 
+Response *
 MyTruss::setResponse(char **argv, int argc, Information &eleInformation)
 {
     //
@@ -536,41 +538,21 @@ MyTruss::setResponse(char **argv, int argc, Information &eleInformation)
     //
 
     // axial force
-    if (strcmp(argv[0],"axialForce") ==0) {
-	eleInformation.theType = DoubleType;
-	return 1;
-    } 
-
-    // tangent stiffness matrix
-    else if (strcmp(argv[0],"stiff") ==0) {
-	Matrix *newMatrix = new Matrix(trussK);
-	if (newMatrix == 0) {
-	  g3ErrorHandler->warning("WARNING Truss::setResponse() - out of memory creating matrix\n");
-	  return -1;
-	}
-	eleInformation.theMatrix = newMatrix;
-	eleInformation.theType = MatrixType;
-	return 2;
-    } 
+    if (strcmp(argv[0],"axialForce") ==0) 
+      return new ElementResponse(this, 1, 0.0);
 
     // a material quantity    
-    else if (strcmp(argv[0],"material") ==0) {
-      int ok = theMaterial->setResponse(&argv[1], argc-1, eleInformation);
-      if (ok < 0)
-	return -1;
-      else
-	return ok + 100; // note - we add 100 to valid material response so that can idetify as meterial response
-    } 
-    
-    // otherwise response quantity is unknown for the Truss class
+    else if (strcmp(argv[0],"material") == 0)
+      return theMaterial->setResponse(&argv[1], argc-1, eleInformation);
+
     else
-	return -1;
+	return 0;
 }
 
 
 
 int 
-MyTruss::getResponse(int responseID, Information &eleInformation)
+MyTruss::getResponse(int responseID, Information &eleInfo)
 {
  double strain;
  
@@ -579,21 +561,11 @@ MyTruss::getResponse(int responseID, Information &eleInformation)
       return -1;
       
     case 1:
-      strain = this->computeCurrentStrain();
       theMaterial->setTrialStrain(strain);
-      eleInformation.theDouble = A*theMaterial->getStress();    
-      return 0;
-      
-    case 2:
-      if (eleInformation.theMatrix != 0)
-	  *(eleInformation.theMatrix) = this->getTangentStiff();
-      return 0;      
+      return eleInfo.setDouble(A * theMaterial->getStress());
 
     default:
-      if (responseID >= 100) // we added 100 to valid material response
-	  return theMaterial->getResponse(responseID-100, eleInformation);
-      else
-	  return -1;
+      return 0;
   }
 }
 
