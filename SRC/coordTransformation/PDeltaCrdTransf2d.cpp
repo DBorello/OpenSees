@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-07 22:13:14 $
+// $Revision: 1.5 $
+// $Date: 2002-10-03 18:07:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -649,6 +649,213 @@ PDeltaCrdTransf2d::getGlobalStiffMatrix (const Matrix &kb, const Vector &pb)
 	}
 
 	return kg;
+}
+
+
+const Matrix &
+PDeltaCrdTransf2d::getInitialGlobalStiffMatrix (const Matrix &kb)
+{
+  static Matrix kg(6,6);
+  static double kl[6][6];
+  static double tmp[6][6];
+  
+  double oneOverL = 1.0/L;
+  
+  // Basic stiffness
+  double kb00, kb01, kb02, kb10, kb11, kb12, kb20, kb21, kb22;
+  kb00 = kb(0,0);		kb01 = kb(0,1);		kb02 = kb(0,2);
+  kb10 = kb(1,0);		kb11 = kb(1,1);		kb12 = kb(1,2);
+  kb20 = kb(2,0);		kb21 = kb(2,1);		kb22 = kb(2,2);
+  
+  // Transform basic stiffness to local system
+  kl[0][0] =  kb00;
+  kl[1][0] = -oneOverL*(kb10+kb20);
+  kl[2][0] = -kb10;
+  kl[3][0] = -kb00;
+  kl[4][0] = -kl[1][0];
+  kl[5][0] = -kb20;
+  
+  kl[0][1] = -oneOverL*(kb01+kb02);
+  kl[1][1] =  oneOverL*oneOverL*(kb11+kb12+kb21+kb22);
+  kl[2][1] =  oneOverL*(kb11+kb12);
+  kl[3][1] = -kl[0][1];
+  kl[4][1] = -kl[1][1];
+  kl[5][1] =  oneOverL*(kb21+kb22);
+  
+  kl[0][2] = -kb01;
+  kl[1][2] =  oneOverL*(kb11+kb21);
+  kl[2][2] =  kb11;
+  kl[3][2] =  kb01;
+  kl[4][2] = -kl[1][2];
+  kl[5][2] =  kb21;
+  
+  kl[0][3] = -kl[0][0];
+  kl[1][3] = -kl[1][0];
+  kl[2][3] = -kl[2][0];
+  kl[3][3] = -kl[3][0];
+  kl[4][3] = -kl[4][0];
+  kl[5][3] = -kl[5][0];
+  
+  kl[0][4] = -kl[0][1];
+  kl[1][4] = -kl[1][1];
+  kl[2][4] = -kl[2][1];
+  kl[3][4] = -kl[3][1];
+  kl[4][4] = -kl[4][1];
+  kl[5][4] = -kl[5][1];
+  
+  kl[0][5] = -kb02;
+  kl[1][5] =  oneOverL*(kb12+kb22);
+  kl[2][5] =  kb12;
+  kl[3][5] =  kb02;
+  kl[4][5] = -kl[1][5];
+  kl[5][5] =  kb22;
+  
+  // Include geometric stiffness effects in local system
+  //double NoverL = pb(0)*oneOverL;
+  //kl[1][1] += NoverL;
+  //kl[4][4] += NoverL;
+  //kl[1][4] -= NoverL;
+  //kl[4][1] -= NoverL;
+  
+  double t02 = 0.0;
+  double t12 = 0.0;
+  double t35 = 0.0;
+  double t45 = 0.0;
+  
+  if (nodeIOffset) {
+    t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+    t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+    t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+    t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+  }
+  
+  // Now transform from local to global ... compute kl*T
+  tmp[0][0] = kl[0][0]*cosTheta - kl[0][1]*sinTheta;
+  tmp[1][0] = kl[1][0]*cosTheta - kl[1][1]*sinTheta;
+  tmp[2][0] = kl[2][0]*cosTheta - kl[2][1]*sinTheta;
+  tmp[3][0] = kl[3][0]*cosTheta - kl[3][1]*sinTheta;
+  tmp[4][0] = kl[4][0]*cosTheta - kl[4][1]*sinTheta;
+  tmp[5][0] = kl[5][0]*cosTheta - kl[5][1]*sinTheta;
+  
+  tmp[0][1] = kl[0][0]*sinTheta + kl[0][1]*cosTheta;
+  tmp[1][1] = kl[1][0]*sinTheta + kl[1][1]*cosTheta;
+  tmp[2][1] = kl[2][0]*sinTheta + kl[2][1]*cosTheta;
+  tmp[3][1] = kl[3][0]*sinTheta + kl[3][1]*cosTheta;
+  tmp[4][1] = kl[4][0]*sinTheta + kl[4][1]*cosTheta;
+  tmp[5][1] = kl[5][0]*sinTheta + kl[5][1]*cosTheta;
+  
+  if (nodeIOffset) {
+    tmp[0][2] = kl[0][0]*t02 + kl[0][1]*t12 + kl[0][2];
+    tmp[1][2] = kl[1][0]*t02 + kl[1][1]*t12 + kl[1][2];
+    tmp[2][2] = kl[2][0]*t02 + kl[2][1]*t12 + kl[2][2];
+    tmp[3][2] = kl[3][0]*t02 + kl[3][1]*t12 + kl[3][2];
+    tmp[4][2] = kl[4][0]*t02 + kl[4][1]*t12 + kl[4][2];
+    tmp[5][2] = kl[5][0]*t02 + kl[5][1]*t12 + kl[5][2];
+  }
+  else {
+    tmp[0][2] = kl[0][2];
+    tmp[1][2] = kl[1][2];
+    tmp[2][2] = kl[2][2];
+    tmp[3][2] = kl[3][2];
+    tmp[4][2] = kl[4][2];
+    tmp[5][2] = kl[5][2];
+  }
+  
+  tmp[0][3] = kl[0][3]*cosTheta - kl[0][4]*sinTheta;
+  tmp[1][3] = kl[1][3]*cosTheta - kl[1][4]*sinTheta;
+  tmp[2][3] = kl[2][3]*cosTheta - kl[2][4]*sinTheta;
+  tmp[3][3] = kl[3][3]*cosTheta - kl[3][4]*sinTheta;
+  tmp[4][3] = kl[4][3]*cosTheta - kl[4][4]*sinTheta;
+  tmp[5][3] = kl[5][3]*cosTheta - kl[5][4]*sinTheta;
+  
+  tmp[0][4] = kl[0][3]*sinTheta + kl[0][4]*cosTheta;
+  tmp[1][4] = kl[1][3]*sinTheta + kl[1][4]*cosTheta;
+  tmp[2][4] = kl[2][3]*sinTheta + kl[2][4]*cosTheta;
+  tmp[3][4] = kl[3][3]*sinTheta + kl[3][4]*cosTheta;
+  tmp[4][4] = kl[4][3]*sinTheta + kl[4][4]*cosTheta;
+  tmp[5][4] = kl[5][3]*sinTheta + kl[5][4]*cosTheta;
+  
+  if (nodeJOffset) {
+    tmp[0][5] = kl[0][3]*t35 + kl[0][4]*t45 + kl[0][5];
+    tmp[1][5] = kl[1][3]*t35 + kl[1][4]*t45 + kl[1][5];
+    tmp[2][5] = kl[2][3]*t35 + kl[2][4]*t45 + kl[2][5];
+    tmp[3][5] = kl[3][3]*t35 + kl[3][4]*t45 + kl[3][5];
+    tmp[4][5] = kl[4][3]*t35 + kl[4][4]*t45 + kl[4][5];
+    tmp[5][5] = kl[5][3]*t35 + kl[5][4]*t45 + kl[5][5];
+  }
+  else {
+    tmp[0][5] = kl[0][5];
+    tmp[1][5] = kl[1][5];
+    tmp[2][5] = kl[2][5];
+    tmp[3][5] = kl[3][5];
+    tmp[4][5] = kl[4][5];
+    tmp[5][5] = kl[5][5];
+  }
+  
+  // Now compute T'*(kl*T)
+  kg(0,0) = cosTheta*tmp[0][0] - sinTheta*tmp[1][0];
+  kg(0,1) = cosTheta*tmp[0][1] - sinTheta*tmp[1][1];
+  kg(0,2) = cosTheta*tmp[0][2] - sinTheta*tmp[1][2];
+  kg(0,3) = cosTheta*tmp[0][3] - sinTheta*tmp[1][3];
+  kg(0,4) = cosTheta*tmp[0][4] - sinTheta*tmp[1][4];
+  kg(0,5) = cosTheta*tmp[0][5] - sinTheta*tmp[1][5];
+  
+  kg(1,0) = sinTheta*tmp[0][0] + cosTheta*tmp[1][0];
+  kg(1,1) = sinTheta*tmp[0][1] + cosTheta*tmp[1][1];
+  kg(1,2) = sinTheta*tmp[0][2] + cosTheta*tmp[1][2];
+  kg(1,3) = sinTheta*tmp[0][3] + cosTheta*tmp[1][3];
+  kg(1,4) = sinTheta*tmp[0][4] + cosTheta*tmp[1][4];
+  kg(1,5) = sinTheta*tmp[0][5] + cosTheta*tmp[1][5];
+  
+  if (nodeIOffset) {
+    kg(2,0) = t02*tmp[0][0] + t12*tmp[1][0] + tmp[2][0];
+    kg(2,1) = t02*tmp[0][1] + t12*tmp[1][1] + tmp[2][1];
+    kg(2,2) = t02*tmp[0][2] + t12*tmp[1][2] + tmp[2][2];
+    kg(2,3) = t02*tmp[0][3] + t12*tmp[1][3] + tmp[2][3];
+    kg(2,4) = t02*tmp[0][4] + t12*tmp[1][4] + tmp[2][4];
+    kg(2,5) = t02*tmp[0][5] + t12*tmp[1][5] + tmp[2][5];
+  }
+  else {
+    kg(2,0) = tmp[2][0];
+    kg(2,1) = tmp[2][1];
+    kg(2,2) = tmp[2][2];
+    kg(2,3) = tmp[2][3];
+    kg(2,4) = tmp[2][4];
+    kg(2,5) = tmp[2][5];
+  }
+  
+  kg(3,0) = cosTheta*tmp[3][0] - sinTheta*tmp[4][0];
+  kg(3,1) = cosTheta*tmp[3][1] - sinTheta*tmp[4][1];
+  kg(3,2) = cosTheta*tmp[3][2] - sinTheta*tmp[4][2];
+  kg(3,3) = cosTheta*tmp[3][3] - sinTheta*tmp[4][3];
+  kg(3,4) = cosTheta*tmp[3][4] - sinTheta*tmp[4][4];
+  kg(3,5) = cosTheta*tmp[3][5] - sinTheta*tmp[4][5];
+  
+  kg(4,0) = sinTheta*tmp[3][0] + cosTheta*tmp[4][0];
+  kg(4,1) = sinTheta*tmp[3][1] + cosTheta*tmp[4][1];
+  kg(4,2) = sinTheta*tmp[3][2] + cosTheta*tmp[4][2];
+  kg(4,3) = sinTheta*tmp[3][3] + cosTheta*tmp[4][3];
+  kg(4,4) = sinTheta*tmp[3][4] + cosTheta*tmp[4][4];
+  kg(4,5) = sinTheta*tmp[3][5] + cosTheta*tmp[4][5];
+  
+  if (nodeJOffset) {
+    kg(5,0) = t35*tmp[3][0] + t45*tmp[4][0] + tmp[5][0];
+    kg(5,1) = t35*tmp[3][1] + t45*tmp[4][1] + tmp[5][1];
+    kg(5,2) = t35*tmp[3][2] + t45*tmp[4][2] + tmp[5][2];
+    kg(5,3) = t35*tmp[3][3] + t45*tmp[4][3] + tmp[5][3];
+    kg(5,4) = t35*tmp[3][4] + t45*tmp[4][4] + tmp[5][4];
+    kg(5,5) = t35*tmp[3][5] + t45*tmp[4][5] + tmp[5][5];
+  }
+  else {
+    kg(5,0) = tmp[5][0];
+    kg(5,1) = tmp[5][1];
+    kg(5,2) = tmp[5][2];
+    kg(5,3) = tmp[5][3];
+    kg(5,4) = tmp[5][4];
+    kg(5,5) = tmp[5][5];
+  }
+  
+  return kg;
 }
   
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2002-10-03 18:07:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf.h,v $
                                                                         
                                                                         
@@ -70,6 +70,7 @@ class CrdTransf: public TaggedObject, public MovableObject
 
     virtual const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &uniformLoad) = 0;
     virtual const Matrix &getGlobalStiffMatrix    (const Matrix &basicStiff, const Vector &basicForce) = 0;
+    virtual const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff) = 0;
 
     // functions used in post-processing only    
     virtual const Vector &getPointGlobalCoordFromLocal (const Vector &localCoords) = 0;

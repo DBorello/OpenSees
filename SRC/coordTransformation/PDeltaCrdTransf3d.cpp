@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-06-07 22:20:13 $
+// $Revision: 1.7 $
+// $Date: 2002-10-03 18:07:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.cpp,v $
                                                                         
                                                                         
@@ -673,6 +673,168 @@ PDeltaCrdTransf3d::getGlobalStiffMatrix (const Matrix &KB, const Vector &pb)
 	kl[2][8] -= NoverL;
 	kl[8][2] -= NoverL;
 	
+	static double RWI[3][3];
+
+	if (nodeIOffset) {
+		// Compute RWI
+		RWI[0][0] = -R[0][1]*nodeIOffset[2] + R[0][2]*nodeIOffset[1];
+		RWI[1][0] = -R[1][1]*nodeIOffset[2] + R[1][2]*nodeIOffset[1];
+		RWI[2][0] = -R[2][1]*nodeIOffset[2] + R[2][2]*nodeIOffset[1];
+
+		RWI[0][1] =  R[0][0]*nodeIOffset[2] - R[0][2]*nodeIOffset[0];
+		RWI[1][1] =  R[1][0]*nodeIOffset[2] - R[1][2]*nodeIOffset[0];
+		RWI[2][1] =  R[2][0]*nodeIOffset[2] - R[2][2]*nodeIOffset[0];
+
+		RWI[0][2] = -R[0][0]*nodeIOffset[1] + R[0][1]*nodeIOffset[0];
+		RWI[1][2] = -R[1][0]*nodeIOffset[1] + R[1][1]*nodeIOffset[0];
+		RWI[2][2] = -R[2][0]*nodeIOffset[1] + R[2][1]*nodeIOffset[0];
+	}
+
+	static double RWJ[3][3];
+
+	if (nodeJOffset) {
+		// Compute RWJ
+		RWJ[0][0] = -R[0][1]*nodeJOffset[2] + R[0][2]*nodeJOffset[1];
+		RWJ[1][0] = -R[1][1]*nodeJOffset[2] + R[1][2]*nodeJOffset[1];
+		RWJ[2][0] = -R[2][1]*nodeJOffset[2] + R[2][2]*nodeJOffset[1];
+
+		RWJ[0][1] =  R[0][0]*nodeJOffset[2] - R[0][2]*nodeJOffset[0];
+		RWJ[1][1] =  R[1][0]*nodeJOffset[2] - R[1][2]*nodeJOffset[0];
+		RWJ[2][1] =  R[2][0]*nodeJOffset[2] - R[2][2]*nodeJOffset[0];
+
+		RWJ[0][2] = -R[0][0]*nodeJOffset[1] + R[0][1]*nodeJOffset[0];
+		RWJ[1][2] = -R[1][0]*nodeJOffset[1] + R[1][1]*nodeJOffset[0];
+		RWJ[2][2] = -R[2][0]*nodeJOffset[1] + R[2][1]*nodeJOffset[0];
+	}
+
+	// Transform local stiffness to global system
+	// First compute kl*T_{lg}
+	int m;
+	for (m = 0; m < 12; m++) {
+		tmp[m][0] = kl[m][0]*R[0][0] + kl[m][1]*R[1][0]  + kl[m][2]*R[2][0];
+		tmp[m][1] = kl[m][0]*R[0][1] + kl[m][1]*R[1][1]  + kl[m][2]*R[2][1];
+		tmp[m][2] = kl[m][0]*R[0][2] + kl[m][1]*R[1][2]  + kl[m][2]*R[2][2];
+
+		tmp[m][3] = kl[m][3]*R[0][0] + kl[m][4]*R[1][0]  + kl[m][5]*R[2][0];
+		tmp[m][4] = kl[m][3]*R[0][1] + kl[m][4]*R[1][1]  + kl[m][5]*R[2][1];
+		tmp[m][5] = kl[m][3]*R[0][2] + kl[m][4]*R[1][2]  + kl[m][5]*R[2][2];
+
+		if (nodeIOffset) {
+			tmp[m][3]  += kl[m][0]*RWI[0][0]  + kl[m][1]*RWI[1][0]  + kl[m][2]*RWI[2][0];
+			tmp[m][4]  += kl[m][0]*RWI[0][1]  + kl[m][1]*RWI[1][1]  + kl[m][2]*RWI[2][1];
+			tmp[m][5]  += kl[m][0]*RWI[0][2]  + kl[m][1]*RWI[1][2]  + kl[m][2]*RWI[2][2];
+		}
+
+		tmp[m][6] = kl[m][6]*R[0][0] + kl[m][7]*R[1][0]  + kl[m][8]*R[2][0];
+		tmp[m][7] = kl[m][6]*R[0][1] + kl[m][7]*R[1][1]  + kl[m][8]*R[2][1];
+		tmp[m][8] = kl[m][6]*R[0][2] + kl[m][7]*R[1][2]  + kl[m][8]*R[2][2];
+
+		tmp[m][9]  = kl[m][9]*R[0][0] + kl[m][10]*R[1][0] + kl[m][11]*R[2][0];
+		tmp[m][10] = kl[m][9]*R[0][1] + kl[m][10]*R[1][1] + kl[m][11]*R[2][1];
+		tmp[m][11] = kl[m][9]*R[0][2] + kl[m][10]*R[1][2] + kl[m][11]*R[2][2];
+
+		if (nodeJOffset) {
+			tmp[m][9]   += kl[m][6]*RWJ[0][0]  + kl[m][7]*RWJ[1][0]  + kl[m][8]*RWJ[2][0];
+			tmp[m][10]  += kl[m][6]*RWJ[0][1]  + kl[m][7]*RWJ[1][1]  + kl[m][8]*RWJ[2][1];
+			tmp[m][11]  += kl[m][6]*RWJ[0][2]  + kl[m][7]*RWJ[1][2]  + kl[m][8]*RWJ[2][2];
+		}
+
+	}
+
+	// Now compute T'_{lg}*(kl*T_{lg})
+	for (m = 0; m < 12; m++) {
+		kg(0,m) = R[0][0]*tmp[0][m] + R[1][0]*tmp[1][m]  + R[2][0]*tmp[2][m];
+		kg(1,m) = R[0][1]*tmp[0][m] + R[1][1]*tmp[1][m]  + R[2][1]*tmp[2][m];
+		kg(2,m) = R[0][2]*tmp[0][m] + R[1][2]*tmp[1][m]  + R[2][2]*tmp[2][m];
+
+		kg(3,m) = R[0][0]*tmp[3][m] + R[1][0]*tmp[4][m]  + R[2][0]*tmp[5][m];
+		kg(4,m) = R[0][1]*tmp[3][m] + R[1][1]*tmp[4][m]  + R[2][1]*tmp[5][m];
+		kg(5,m) = R[0][2]*tmp[3][m] + R[1][2]*tmp[4][m]  + R[2][2]*tmp[5][m];
+
+		if (nodeIOffset) {
+			kg(3,m) += RWI[0][0]*tmp[0][m]  + RWI[1][0]*tmp[1][m] + RWI[2][0]*tmp[2][m];
+			kg(4,m) += RWI[0][1]*tmp[0][m]  + RWI[1][1]*tmp[1][m] + RWI[2][1]*tmp[2][m];
+			kg(5,m) += RWI[0][2]*tmp[0][m]  + RWI[1][2]*tmp[1][m] + RWI[2][2]*tmp[2][m];
+		}
+
+		kg(6,m) = R[0][0]*tmp[6][m] + R[1][0]*tmp[7][m]  + R[2][0]*tmp[8][m];
+		kg(7,m) = R[0][1]*tmp[6][m] + R[1][1]*tmp[7][m]  + R[2][1]*tmp[8][m];
+		kg(8,m) = R[0][2]*tmp[6][m] + R[1][2]*tmp[7][m]  + R[2][2]*tmp[8][m];
+
+		kg(9,m)  = R[0][0]*tmp[9][m] + R[1][0]*tmp[10][m] + R[2][0]*tmp[11][m];
+		kg(10,m) = R[0][1]*tmp[9][m] + R[1][1]*tmp[10][m] + R[2][1]*tmp[11][m];
+		kg(11,m) = R[0][2]*tmp[9][m] + R[1][2]*tmp[10][m] + R[2][2]*tmp[11][m];
+
+		if (nodeJOffset) {
+			kg(9,m)  += RWJ[0][0]*tmp[6][m]  + RWJ[1][0]*tmp[7][m] + RWJ[2][0]*tmp[8][m];
+			kg(10,m) += RWJ[0][1]*tmp[6][m]  + RWJ[1][1]*tmp[7][m] + RWJ[2][1]*tmp[8][m];
+			kg(11,m) += RWJ[0][2]*tmp[6][m]  + RWJ[1][2]*tmp[7][m] + RWJ[2][2]*tmp[8][m];
+		}
+	}
+
+	return kg;
+}
+
+
+const Matrix &
+PDeltaCrdTransf3d::getInitialGlobalStiffMatrix (const Matrix &KB)
+{
+	static Matrix kg(12,12);	// Global stiffness for return
+	static double kb[6][6];		// Basic stiffness
+	static double kl[12][12];	// Local stiffness
+	static double tmp[12][12];	// Temporary storage
+
+	double oneOverL = 1.0/L;
+
+	int i,j;
+	for (i = 0; i < 6; i++)
+		for (j = 0; j < 6; j++)
+			kb[i][j] = KB(i,j);
+
+	// Transform basic stiffness to local system
+	// First compute kb*T_{bl}
+	for (i = 0; i < 6; i++) {
+		tmp[i][0]  = -kb[i][0];
+		tmp[i][1]  =  oneOverL*(kb[i][1]+kb[i][2]);
+		tmp[i][2]  = -oneOverL*(kb[i][3]+kb[i][4]);
+		tmp[i][3]  = -kb[i][5];
+		tmp[i][4]  =  kb[i][3];
+		tmp[i][5]  =  kb[i][1];
+		tmp[i][6]  =  kb[i][0];
+		tmp[i][7]  = -tmp[i][1];
+		tmp[i][8]  = -tmp[i][2];
+		tmp[i][9]  =  kb[i][5];
+		tmp[i][10] =  kb[i][4];
+		tmp[i][11] =  kb[i][2];
+	}
+	
+	// Now compute T'_{bl}*(kb*T_{bl})
+	for (i = 0; i < 12; i++) {
+		kl[0][i]  = -tmp[0][i];
+		kl[1][i]  =  oneOverL*(tmp[1][i]+tmp[2][i]);
+		kl[2][i]  = -oneOverL*(tmp[3][i]+tmp[4][i]);
+		kl[3][i]  = -tmp[5][i];
+		kl[4][i]  =  tmp[3][i];
+		kl[5][i]  =  tmp[1][i];
+		kl[6][i]  =  tmp[0][i];
+		kl[7][i]  = -kl[1][i];
+		kl[8][i]  = -kl[2][i];
+		kl[9][i]  =  tmp[5][i];
+		kl[10][i] =  tmp[4][i];
+		kl[11][i] =  tmp[2][i];
+	}
+
+	// Include geometric stiffness effects in local system
+	//	double NoverL = pb(0)*oneOverL;
+	//kl[1][1] += NoverL;
+	//kl[2][2] += NoverL;
+	//kl[7][7] += NoverL;
+	//kl[8][8] += NoverL;
+	//kl[1][7] -= NoverL;
+	//kl[7][1] -= NoverL;
+	//kl[2][8] -= NoverL;
+	//kl[8][2] -= NoverL;
+
 	static double RWI[3][3];
 
 	if (nodeIOffset) {

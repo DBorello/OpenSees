@@ -11,6 +11,11 @@ OBJS       = CrdTransf.o CrdTransf2d.o CrdTransf3d.o \
 
 all:         $(OBJS)
 
+
+lib: CorotCrdTransf2d.o CorotCrdTransf3d.o 
+	@$(AR) $(ARFLAGS) libCorot.a  CorotCrdTransf2d.o CorotCrdTransf3d.o 
+	@$(RANLIB) libCorot.a
+
 # Miscellaneous
 tidy:	
 	@$(RM) $(RMFLAGS) Makefile.bak *~ #*# core

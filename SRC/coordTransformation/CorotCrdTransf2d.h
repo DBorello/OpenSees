@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $                                                              
-// $Date: 2001-11-26 22:59:17 $                                                                  
+// $Revision: 1.3 $                                                              
+// $Date: 2002-10-03 18:07:52 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.h,v $                                                                
                                                                         
                                                                         
@@ -65,6 +65,7 @@ class CorotCrdTransf2d: public CrdTransf2d
 
     const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &uniformLoad);
     const Matrix &getGlobalStiffMatrix    (const Matrix &basicStiff, const Vector &basicForce);
+    const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff);
 
     CrdTransf2d *getCopy(void);
     

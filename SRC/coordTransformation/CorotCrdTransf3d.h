@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $                                                              
-// $Date: 2001-11-26 22:59:17 $                                                                  
+// $Revision: 1.3 $                                                              
+// $Date: 2002-10-03 18:07:53 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf3d.h,v $                                                                
                                                                         
                                                                         
@@ -66,6 +66,7 @@ class CorotCrdTransf3d: public CrdTransf3d
 
     const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &uniformLoad);
     const Matrix &getGlobalStiffMatrix    (const Matrix &basicStiff, const Vector &basicForce);
+    const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff);
 
     CrdTransf3d *getCopy(void);
         
@@ -83,6 +84,7 @@ class CorotCrdTransf3d: public CrdTransf3d
     int  getLocalAxes (void);
 
     void compTransfMatrixBasicGlobal(void);
+    void compTransfMatrixBasicGlobalNew(void);
     const Vector &getQuaternionFromRotMatrix(const Matrix &RotMatrix) const;
     const Vector &getQuaternionFromPseudoRotVector(const Vector &theta) const;
     const Vector &getTangScaledPseudoVectorFromQuaternion(const Vector &theta) const;
@@ -124,6 +126,9 @@ class CorotCrdTransf3d: public CrdTransf3d
     static Matrix Tp;     // transformation matrix to renumber dofs
     static Matrix T;      // transformation matrix from basic to global system
     static Matrix Lr2, Lr3, A; // auxiliary matrices	
+
+    Vector alphaI;  // last trial rotations end i
+    Vector alphaJ;  // last trial rotatations end j
 
 };
 #endif

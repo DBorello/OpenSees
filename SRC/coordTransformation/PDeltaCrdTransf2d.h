@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-07 22:13:14 $
+// $Revision: 1.4 $
+// $Date: 2002-10-03 18:07:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf2d.h,v $
                                                                         
                                                                         
@@ -71,6 +71,7 @@ class PDeltaCrdTransf2d: public CrdTransf2d
 
     const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &p0);
     const Matrix &getGlobalStiffMatrix    (const Matrix &basicStiff, const Vector &basicForce);
+    const Matrix &getInitialGlobalStiffMatrix(const Matrix &basicStiff);
 
     CrdTransf2d *getCopy(void);
     
