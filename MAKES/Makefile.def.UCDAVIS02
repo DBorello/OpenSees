@@ -75,7 +75,7 @@ SRCdir       = $(HOME)/OpenSees/SRC
 ifeq ($(PROGRAMMING_MODE), THREADS)
 SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_MT
 else
-SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU
+SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
 endif
 
 
