@@ -91,7 +91,7 @@ for {set element 1} {$element <= $numElements} {incr element} {
 	switch $element {
 	    1 {
 		puts "Element: ElasticBeamColumn"
-		element elasticBeamColumn 1 1 2 $A $E $G $J $Iz $Iy 1
+		element elasticBeamColumn 1 1 2 $A $E $G $J $Iy $Iz 1
 		set section $numSections ;# To get out of loop
 	    }
 	    2 {
