@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:29:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Information.h,v $
                                                                         
                                                                         
@@ -41,18 +41,35 @@
 class Matrix;
 class Vector;
 class ID;
+#include <Tensor.h>
+
+class ostream;
 
 enum InfoType {UnknownType, IntType, DoubleType, 
-	       IdType, VectorType, MatrixType};
+	       IdType, VectorType, MatrixType, TensorType};
 		   
-		   
-
 class Information
 {
   public:
     Information();
+	Information(int val);
+	Information(double val);
+	Information(const ID &val);
+	Information(const Vector &val);
+	Information(const Matrix &val);
+	Information(const Tensor &val);
+
     virtual ~Information();
-    
+
+	virtual int setInt(int newInt);
+	virtual int setDouble(double newDouble);
+    virtual int setID(const ID &newID);
+	virtual int setVector(const Vector &newVector);
+	virtual int setMatrix(const Matrix &newMatrix);
+	virtual int setTensor(const Tensor &newTensor);
+
+	virtual void Print(ostream &s, int flag = 0);
+
     // data that is stored in the information object
     InfoType	theType;   // information about data type
     int		theInt;    // an integer value
@@ -60,6 +77,7 @@ class Information
     ID		*theID;    // pointer to an ID object, created elsewhere
     Vector 	*theVector;// pointer to a Vector object, created elsewhere
     Matrix	*theMatrix;// pointer to a Matrix object, created elsewhere
+	Tensor  *theTensor;// pointer to a Tensor object, created elsewhere
 
   protected:
     
