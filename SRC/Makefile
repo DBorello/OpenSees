@@ -82,6 +82,7 @@ metis:
 	@$(CD) $(FE)/graph/partitioner/metis-2.0; $(MAKE) clean;
 	@$(CD) $(FE)/graph/partitioner/metis-2.0; $(MAKE) lib;
 
+
 FMK_LIBS = $(FE)/database/FE_Datastore.o
 
 
@@ -89,7 +90,6 @@ FMK_LIBS = $(FE)/database/FE_Datastore.o
 GLF_LIBS = $(FE)/element/zeroLength/ZeroLength.o \
 	$(FE)/element/zeroLength/ZeroLengthSection.o \
 	$(FE)/element/zeroLength/TclZeroLength.o
-
 
 
 REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
@@ -141,7 +141,43 @@ GGD_LIBS = $(FE)/element/joint/InternalSpring.o \
 	$(FE)/element/joint/MP_SimpleJoint2D.o \
 	$(FE)/element/joint/SimpleJoint2D.o \
 	$(FE)/element/joint/Joint2D.o \
-	$(FE)/element/joint/TclJoint2dCommand.o
+	$(FE)/element/joint/TclJoint2dCommand.o \
+	$(FE)/element/updatedLagrangianBeamColumn/Elastic2DGNL.o \
+	$(FE)/element/updatedLagrangianBeamColumn/Inelastic2DYS02.o \
+	$(FE)/element/updatedLagrangianBeamColumn/InelasticYS2DGNL.o \
+	$(FE)/element/updatedLagrangianBeamColumn/TclElement2dYS.o \
+	$(FE)/element/updatedLagrangianBeamColumn/Inelastic2DYS01.o \
+	$(FE)/element/updatedLagrangianBeamColumn/Inelastic2DYS03.o \
+	$(FE)/element/updatedLagrangianBeamColumn/TclElement2dGNL.o \
+	$(FE)/element/updatedLagrangianBeamColumn/UpdatedLagrangianBeam2D.o \
+	$(FE)/material/yieldSurface/yieldSurfaceBC/Attalla2D.o \
+	$(FE)/material/yieldSurface/yieldSurfaceBC/ElTawil2D.o \
+	$(FE)/material/yieldSurface/yieldSurfaceBC/ElTawil2DUnSym.o \
+	$(FE)/material/yieldSurface/yieldSurfaceBC/Hajjar2D.o \
+	$(FE)/material/yieldSurface/yieldSurfaceBC/Orbison2D.o \
+	$(FE)/material/yieldSurface/yieldSurfaceBC/YieldSurface_BC2D.o \
+	$(FE)/material/yieldSurface/yieldSurfaceBC/YieldSurface_BC.o \
+	$(FE)/material/yieldSurface/yieldSurfaceBC/TclModelBuilderYieldSurfaceBCCommand.o \
+	$(FE)/material/yieldSurface/evolution/BkStressLimSurface2D.o \
+	$(FE)/material/yieldSurface/evolution/CombinedIsoKin2D01.o \
+	$(FE)/material/yieldSurface/evolution/Isotropic2D01.o \
+	$(FE)/material/yieldSurface/evolution/Kinematic2D02.o \
+	$(FE)/material/yieldSurface/evolution/PeakOriented2D01.o \
+	$(FE)/material/yieldSurface/evolution/PlasticHardening2D.o \
+	$(FE)/material/yieldSurface/evolution/YS_Evolution.o \
+	$(FE)/material/yieldSurface/evolution/BoundingSurface2D.o \
+	$(FE)/material/yieldSurface/evolution/CombinedIsoKin2D02.o \
+	$(FE)/material/yieldSurface/evolution/Kinematic2D01.o \
+	$(FE)/material/yieldSurface/evolution/NullEvolution.o \
+	$(FE)/material/yieldSurface/evolution/PeakOriented2D02.o \
+	$(FE)/material/yieldSurface/evolution/YS_Evolution2D.o \
+	$(FE)/material/yieldSurface/evolution/TclModelBuilderYS_EvolutionCommand.o \
+	$(FE)/material/yieldSurface/plasticHardeningMaterial/ExponReducing.o \
+	$(FE)/material/yieldSurface/plasticHardeningMaterial/MultiLinearKp.o \
+	$(FE)/material/yieldSurface/plasticHardeningMaterial/NullPlasticMaterial.o \
+	$(FE)/material/yieldSurface/plasticHardeningMaterial/PlasticHardeningMaterial.o \
+	$(FE)/material/yieldSurface/plasticHardeningMaterial/QuadrReducing.o \
+	$(FE)/material/yieldSurface/plasticHardeningMaterial/TclModelBuilderYSPlasticMaterialCommand.o
 
 ERRORHANDLER_LIBS = $(FE)/handler/ErrorHandler.o \
 	$(FE)/handler/ConsoleErrorHandler.o 
@@ -453,7 +489,6 @@ MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
 	$(FE)/modelbuilder/tcl/TclModelBuilder.o \
 	$(FE)/modelbuilder/tcl/Block2D.o \
 	$(FE)/modelbuilder/tcl/Block3D.o 
-
 
 DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/domain/Domain.o \

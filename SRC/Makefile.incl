@@ -24,6 +24,9 @@ FE_INCLUDES  = -I$(FE)/matrix \
             	  -I$(FE)/material/section/repres/reinfLayer \
             	  -I$(FE)/material/section/repres/section \
             	  -I$(FE)/material/section/fiber \
+	          -I$(FE)/material/yieldSurface/evolution \
+	          -I$(FE)/material/yieldSurface/plasticHardeningMaterial \
+	          -I$(FE)/material/yieldSurface/yieldSurfaceBC \
             	  -I$(FE)/recorder \
             	  -I$(FE)/recorder/response \
             	  -I$(FE)/handler \
@@ -71,6 +74,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
             	  -I$(FE)/element/brick \
             	  -I$(FE)/element/shell \
             	  -I$(FE)/element/joint \
+            	  -I$(FE)/element/updatedLagrangianBeamColumn \
             	  -I$(FE)/analysis    \
             	  -I$(FE)/analysis/analysis \
             	  -I$(FE)/analysis/handler \
