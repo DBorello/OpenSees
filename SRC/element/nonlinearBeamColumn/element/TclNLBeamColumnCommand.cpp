@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-02-21 23:11:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-22 02:22:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/TclNLBeamColumnCommand.cpp,v $
                                                                                                                                  
 // File: ~/tcl/TclElmtBuilder.C
@@ -35,7 +35,6 @@
 
 #include <Domain.h>
 #include <Node.h>
-#include <ArrayOfTaggedObjects.h>
 #include <Matrix.h>
 
 #include <SectionForceDeformation.h>
