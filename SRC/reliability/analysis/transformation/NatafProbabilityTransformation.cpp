@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-27 23:45:45 $
+// $Revision: 1.3 $
+// $Date: 2004-01-22 01:56:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -1310,10 +1310,13 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 			double temp = 1.065+0.146*correlation+0.241*cov2-0.259*cov1+0.013*correlation*correlation+0.372*cov2*cov2+0.435*cov1*cov1;
 			newCorrelation = (temp+0.005*correlation*cov2+0.034*cov1*cov2-0.481*correlation*cov1)*correlation;
 		}
-		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0) ) {
+#ifndef _WIN32
+		// VC++.net has a limit of 128 on number of nested conditionals!!!!!!!!
+		else if ( (strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0 || strcmp(typeRv2,"WEIBULL") == 0)  &&  ( strcmp(typeRv2,"TYPE3SMALLESTVALUE") == 0  || strcmp(typeRv2,"WEIBULL") == 0 ) ) {
 			double temp = 1.063-0.004*correlation-0.200*(cov1+cov2)-0.001*correlation*correlation+0.337*(cov1*cov1+cov2*cov2);
 			newCorrelation = (temp+0.007*(correlation*cov1+correlation*cov2)-0.007*cov1*cov2)*correlation;
 		}
+#endif
 		/////////////////////////////////////////////////////////////////////////////////
 		else {
 			opserr << "Did not find the given combination of distributions in CorrelationModifier" << endln;
