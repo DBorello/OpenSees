@@ -61,21 +61,20 @@ fix 16  0  0  1
 
 # specific large deformation material model
 
-# Neo-Hookean
-set WE "-NH 11.83e5 0.4"
+# Neo-Hookean Compressible
+#nDMaterial FiniteDeformationElastic3D 1 NeoHookean3D 1971.67 422.5 0.0
 
-## Logarithmic
-#set WE "-Log 11.83e5 0.4"
+# Neo-Hookean Decoupled
+#nDMaterial FiniteDeformationElastic3D 1 DecoupledNH3D 1971.67 422.5 0.0
 
-## Ogden
-#set WE "-Ogden 11.83e5 0.4 3 6.3e5 0.012e5 -0.1e5 1.3 5.0 -2.0"
+## Logarithmic Decoupled
+#nDMaterial FiniteDeformationElastic3D 1 DecoupledLog3D 1971.67 422.5 0.0
 
-#Mooney-Rivlin
-#set WE "-MR 11.83e5 0.4 1.8484375e5 0.2640625e5"
+## Mooney-Rivlin, Decoupled
+#nDMaterial FiniteDeformationElastic3D 1 DecoupledMR3D 184.84375 26.40625 0.0
 
-
-# finite deformation elastic 3D material model
-nDMaterial FiniteDeformationElastic3D 1 -WEnergy $WE 0.0
+## Ogden, Decoupled
+nDMaterial FiniteDeformationElastic3D 1 DecoupledOgden3D 3 6.3e5 0.012e5 -0.1e5 1.3 5.0 -2.0 0.0
 
 # total lagrangian finite deformation node brick
 element TLFD20nBrick 1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 1 0.0 0.0 0.0
@@ -122,7 +121,7 @@ algorithm Newton
 numberer Plain
 analysis Static
 
-set NN2 100
+set NN2 20
 
 #recorder Element 1 -file element.out stress
 #recorder Element 1 -file force.out force
