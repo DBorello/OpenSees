@@ -1,5 +1,5 @@
-// $Revision: 1.3 $
-// $Date: 2001-07-19 16:29:46 $
+// $Revision: 1.4 $
+// $Date: 2001-08-27 18:11:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/TclUpdateMaterialStageCommand.cpp,v $
                                                                         
 // Written: ZHY
@@ -56,9 +56,8 @@ TclModelBuilderUpdateMaterialStageCommand(ClientData clientData,
   }	
 
   const char * c = a->getType();
-  if (strcmp(c, "PressureDependMultiYield") == 0 || 
-      strcmp(c, "PressureIndependMultiYield") == 0 ||
-      strcmp(c, "FluidSolidPorous") == 0) {
+	if (strcmp(c, "PlaneStrain") == 0 || 
+      strcmp(c, "ThreeDimensional") == 0 ) {
       Information info;
       a->updateParameter(value,info); 
   }
