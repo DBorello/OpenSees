@@ -288,7 +288,7 @@ class TwentyNodeBrick_u_p_U: public Element
     tensor ff;			      // wxy added 09/20/2001
     static tensor k;		// wxy added 01/16/2002
     // double thickness;	// Element thickness
-    double n;          		     // prrosity                              // wxy added 08/27/2001
+    double n;          		     // porosity                              // wxy added 08/27/2001
     double alpha;		     // coefficient for soil approximate equal 1. 
                                      //  // wxy added 08/27/2001
     double rho;      		     // Total density.
