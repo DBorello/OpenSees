@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-19 06:20:17 $
+// $Revision: 1.4 $
+// $Date: 2001-08-26 23:36:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticPlateSection.h,v $
 
 // Ed "C++" Love
@@ -37,8 +37,6 @@
 #include <ID.h>
 
 #include <SectionForceDeformation.h>
-
-#define SEC_TAG_ElasticPlateSection 4005 
 
 
 class ElasticPlateSection : public SectionForceDeformation {

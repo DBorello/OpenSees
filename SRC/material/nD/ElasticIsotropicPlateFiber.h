@@ -18,15 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-16 22:14:57 $
+// $Revision: 1.4 $
+// $Date: 2001-08-26 23:38:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlateFiber.h,v $
                                                                         
                                                                         
 #ifndef ElasticIsotropicPlateFiber_h
 #define ElasticIsotropicPlateFiber_h
-
-#define ND_TAG_ElasticIsotropicPlateFiber 9998 
 
 // File: ~/material/ElasticIsotropicPlateFiber.h
 //

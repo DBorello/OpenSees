@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-18 09:49:46 $
+// $Revision: 1.2 $
+// $Date: 2001-08-26 23:38:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/BidirectionalMaterial.h,v $
                                                                         
                                                                         
@@ -43,8 +43,6 @@
 #include <ID.h>
 
 #include <Tensor.h>
-
-#define ND_TAG_Bidirectional 1234
 
 class BidirectionalMaterial : public NDMaterial
 {

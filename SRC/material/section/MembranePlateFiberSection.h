@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-16 04:45:33 $
+// $Revision: 1.3 $
+// $Date: 2001-08-26 23:36:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/MembranePlateFiberSection.h,v $
 
 // Ed "C++" Love
@@ -39,8 +39,6 @@
 #include <NDMaterial.h>
 
 #include <SectionForceDeformation.h>
-
-#define SEC_TAG_MembranePlateFiberSection 4115 
 
 
 class MembranePlateFiberSection : public SectionForceDeformation{

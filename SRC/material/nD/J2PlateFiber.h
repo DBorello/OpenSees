@@ -13,14 +13,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-18 05:32:05 $
+// $Revision: 1.2 $
+// $Date: 2001-08-26 23:38:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlateFiber.h,v $
 
 #ifndef J2PlateFiber_h
 #define J2PlateFiber_h
-
-#define ND_TAG_J2PlateFiber 1234
 
 // Written: Ed "C++" Love
 //
