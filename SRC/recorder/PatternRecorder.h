@@ -18,24 +18,19 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-06-18 23:23:56 $
+// $Revision: 1.3 $
+// $Date: 2003-06-18 23:26:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/PatternRecorder.h,v $
                                                                         
 #ifndef PatternRecorder_h
 #define PatternRecorder_h
 
-// File: ~/recorder/PatternRecorder.h
-//
-// Written: fmk 
-// Created: 09/00
-// Revision: A
+// Written: MHS
+// Created: 2002
 //
 // Description: This file contains the class definition for 
-// PatternRecorder. A PatternRecorder is used to store the specified nodal dof responses
-// for the specified nodes in a file.
-//
-// What: "@(#) PatternRecorder.h, revA"
+// PatternRecorder. A PatternRecorder records loads values from
+// a LoadPattern.
 
 
 #include <Recorder.h>
@@ -52,7 +47,7 @@ class PatternRecorder: public Recorder
   public:
     PatternRecorder(int thePattern,
 		 Domain &theDomain,
-		 char *fileName,
+		 const char *fileName,
 		 double deltaT = 0.0,
 		 int startFlag = 0); 
 

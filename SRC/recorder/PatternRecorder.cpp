@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-06-18 23:23:56 $
+// $Revision: 1.3 $
+// $Date: 2003-06-18 23:26:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/PatternRecorder.cpp,v $
 
 // Written: MHS 
@@ -44,7 +44,7 @@ using std::ios;
 
 PatternRecorder::PatternRecorder(int pattern,
 				 Domain &theDom,
-				 char *theFileName,
+				 const char *theFileName,
 				 double dT,
 				 int startFlag)
   :thePattern(pattern), theDomain(&theDom),
