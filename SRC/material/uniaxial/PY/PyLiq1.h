@@ -28,8 +28,8 @@
 #include <FourNodeQuad.h>
 #include <FluidSolidPorousMaterial.h>
 #include <PySimple1.h>
-#include <iostream.h>
-#include <string.h>
+#include <iostream>
+#include <string>
 
 	class PyLiq1 : public PySimple1
 {

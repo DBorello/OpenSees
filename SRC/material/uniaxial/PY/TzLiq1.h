@@ -28,7 +28,7 @@
 #include <FourNodeQuad.h>
 #include <FluidSolidPorousMaterial.h>
 #include <TzSimple1.h>
-#include <iostream.h>
+#include <iostream>
 
 class TzLiq1 : public TzSimple1
 {
