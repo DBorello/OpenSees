@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-08-31 17:18:50 $
+// $Revision: 1.11 $
+// $Date: 2001-10-23 14:51:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -216,6 +216,16 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 					       theTclDomain, theTclBuilder, eleArgStart);
 	  return result;
   } else if (strcmp(argv[1],"Brick20N") == 0) {  //Boris Jeremic & Zhaohui
+          int eleArgStart = 1;
+	  int result = TclModelBuilder_addTwentyNodeBrick(clientData, interp, argc, argv,
+					       theTclDomain, theTclBuilder, eleArgStart);
+	  return result;
+  } else if (strcmp(argv[1],"Brick8N_u_p_U") == 0) {  //Boris Jeremic & Xiaoyan
+          int eleArgStart = 1;
+	  int result = TclModelBuilder_addTwentyNodeBrick(clientData, interp, argc, argv,
+					       theTclDomain, theTclBuilder, eleArgStart);
+	  return result;
+  } else if (strcmp(argv[1],"Brick20N_u_p_U") == 0) {  //Boris Jeremic & Xiaoyan
           int eleArgStart = 1;
 	  int result = TclModelBuilder_addTwentyNodeBrick(clientData, interp, argc, argv,
 					       theTclDomain, theTclBuilder, eleArgStart);
