@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2000-12-14 08:39:40 $
+// $Revision: 1.3 $
+// $Date: 2001-12-11 20:09:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonLineSearch.cpp,v $
 
 // Written: fmk 
@@ -40,47 +40,29 @@
 #include <ConvergenceTest.h>
 #include <ID.h>
 
-#define EquiALGORITHM_TAGS_NewtonLineSearch 2011 
 
 //Null Constructor
 NewtonLineSearch::NewtonLineSearch( )
 :EquiSolnAlgo(EquiALGORITHM_TAGS_NewtonLineSearch),
- theTest(0), tolerance(0.8), r0(0), x0(0), x(0), xOld(0)
+ theTest(0), theLineSearch(0)
 {   
 }
 
 
 //Constructor 
 NewtonLineSearch::NewtonLineSearch( ConvergenceTest &theT, 
-				    double LineSearchTolerance = 0.8 ) 
+				   LineSearch *theSearch) 
 :EquiSolnAlgo(EquiALGORITHM_TAGS_NewtonLineSearch),
- theTest(&theT), tolerance(LineSearchTolerance), r0(0), x0(0), x(0), xOld(0)
+ theTest(&theT), theLineSearch(theSearch)
 {
 
-  tolerance = fabs( LineSearchTolerance ) ;    
-  
-  if ( tolerance < 0.5 ) 
-      tolerance = 0.5 ;
-
-  if ( tolerance > 0.8 ) 
-      tolerance = 0.8 ;
 }
 
 
 // Destructor
 NewtonLineSearch::~NewtonLineSearch()
 {
-  if (r0 != 0)
-    delete r0 ;
 
-  if (x0 != 0)
-    delete x0 ;
-
-  if (x != 0)
-    delete x ;
-
-  if (xOld != 0)
-    delete xOld ;
 }
 
 void 
@@ -106,40 +88,7 @@ NewtonLineSearch::solveCurrentStep(void)
 	return -5;
     }	
 
-    // check that the vectors we have are of correct size
-    int systemSize = ( theSOE->getB() ).Size();
-    if ((r0 == 0) || (r0->Size() != systemSize)) {
-
-      if (r0 != 0) {
-	delete r0 ;
-	delete x ;
-	delete x0 ;
-	delete xOld ;
-      } // end if 
-
-      r0 = new Vector(systemSize) ;
-      x = new Vector(systemSize) ;
-      x0 = new Vector(systemSize) ;
-      xOld = new Vector(systemSize) ;
-      
-      if (r0 == 0 || x == 0 || x0 == 0 || xOld == 0 ||
-	  r0->Size() != systemSize || x->Size() != systemSize ||
-	  x0->Size() != systemSize || xOld->Size() != systemSize) {
-	cerr << "WARNING NewtonLineSearch::solveCurrentStep() - out of memory";
-	cerr << " creating vectors of size " << systemSize << endl;
-	if (r0 != 0)
-	  delete r0 ;
-	if (x0 != 0)
-	  delete x0 ;
-	if (x != 0)
-	  delete x ;
-	if (xOld != 0)
-	  delete xOld ;	
-	return -5;
-      } // end if
-
-  } // end if 
-
+    theLineSearch->newStep(*theSOE);
 
     // set itself as the ConvergenceTest objects EquiSolnAlgo
     theTest->setEquiSolnAlgo(*this);
@@ -155,17 +104,11 @@ NewtonLineSearch::solveCurrentStep(void)
       return -2;
     }	    
 
-    // create some references to the vector pointers
-    Vector &Resid0 = *r0 ;
-    Vector &dx0 = *x0 ;
-    Vector &dx = *x ;
-    Vector &dxOld = *xOld ;
-
     int result = -1;
     do {
 
 	//residual at this iteration before next solve 
-	Resid0 = theSOE->getB() ;
+	const Vector &Resid0 = theSOE->getB() ;
 
 	
 	//form the tangent
@@ -184,13 +127,11 @@ NewtonLineSearch::solveCurrentStep(void)
 
 
 	//line search direction 
-	dx0 = theSOE->getX() ;
+	const Vector &dx0 = theSOE->getX() ;
 
 	//intial value of s
-	double s0 = - (dx0 ^ Resid0) ; //what is this bullshit 
-	                               //inner product notation ?
-	
-	
+	double s0 = - (dx0 ^ Resid0) ; 
+
 	if (theIntegrator->update(theSOE->getX()) < 0) {
 	    cerr << "WARNING NewtonLineSearch::solveCurrentStep() -";
 	    cerr << "the Integrator failed in update()\n";	
@@ -209,81 +150,11 @@ NewtonLineSearch::solveCurrentStep(void)
 	//new value of s 
 	double s = - ( dx0 ^ Resid ) ;
 
-	//intialize r = ratio of residuals 
-	double r = 0.0 ;
-        double r0 = 0.0 ;
-	
-        if ( s0 != 0.0 ) 
-	    r = fabs( s / s0 ) ;
-	
-	r0 = r ;
-
-	/******************************************
-	if  ( r <= tolerance )
-	    cerr << "Line Search Not Required : ";
-	    cerr << "Residual Decrease Less Than Tolerance" << endl;
-        else
-	    cerr << "Line Search, Iteration " << 0 
-	         << " : Ratio |s/s0| = " << r 
-	         << endl ;
-	***************************************/
-	
-	double eta = 1.0 ; //initial value of line search parameter
-
-	int count = 0 ; //intial value of iteration counter 
-
-	dxOld = dx0 ;
-
-       
-	while ( r > tolerance  &&  count < 10 ) {
-	
-	    count++ ;
-
-	    eta *=  -s0 / (s - s0) ; 
-
-            //-- I don't know if these should be here-----
-	    if ( eta > 10.0 )  eta = 10.0 ;
-	    if (   r > r0   )  eta =  1.0 ;
-	    //--------------------------------------------
-	    
-	    //dx = ( eta * dx0 ) ; 
-	    dx = dx0 ;	
-	    dx *= eta ;
-	    //Dr. Francis Thomas McKenna wants to save one Vector constructor call
-	    
-	    if (theIntegrator->update( dx - dxOld ) < 0) {
-	      cerr << "WARNING NewtonLineSearch::solveCurrentStep() -";
-	      cerr << "the Integrator failed in update()\n";	
-	      return -4;
-	    }
-
-  	    if (theIntegrator->formUnbalance() < 0) {
-	      cerr << "WARNING NewtonLineSearch::solveCurrentStep() -";
-	      cerr << "the Integrator failed in formUnbalance()\n";	
-	      return -2;
-	    }	
-
-	    //new residual
-	    const Vector &ResidI = theSOE->getB() ;
-
-	    //new value of s
-	    s = - ( dx0 ^ ResidI ) ;
-
-	    //new value of r 
-	    r = fabs( s / s0 ) ; 
-
-	    cerr << "Line Search, Iteration " << count 
-		 << " : Ratio |s/s0| = " << r << endl ;
-
-	    //swap increments 
-	    dxOld = dx ; 
-
-	    if ( count == 10 ) 
-		cerr << "Line Search Terminated After 10 Iterations" << endl ;
-	    
-	} //end while
+	if (theLineSearch != 0)
+	  theLineSearch->search(s0, s, *theSOE, *theIntegrator);
 	
 	this->record(0);
+
 	result = theTest->test();
 
     } while (result == -1);
@@ -308,34 +179,7 @@ NewtonLineSearch::getTest(void)
 int
 NewtonLineSearch::sendSelf(int cTag, Channel &theChannel)
 {
-  int result = 0;
-  int dataTag = this->getDbTag();
-  ID data(2);
-  data(0) = theTest->getClassTag();
-  data(1) = theTest->getDbTag();
-  result = theChannel.sendID(dataTag, cTag, data);
-  if (result != 0) {
-    cerr << "NewtonLineSearch::sendSelf() - failed to send ID\n";
-    return result;
-  }
-
-  Vector tol(1);
-  tol(0) = tolerance;
-  result = theChannel.sendVector(dataTag, cTag, tol);
-  if (result != 0) {
-    cerr << "NewtonLineSearch::sendSelf() - failed to send Vector\n";
-    return result;
-  }  
-  
-  result = theTest->sendSelf(cTag, theChannel);
-  if (result != 0) {
-    cerr << "NewtonRaphson::sendSelf() - failed to send CTest object\n";
-    return result;
-  }
-
-  
-  
-  return 0;
+  return -1;
 }
 
 int
@@ -343,44 +187,18 @@ NewtonLineSearch::recvSelf(int cTag,
 			Channel &theChannel, 
 			FEM_ObjectBroker &theBroker)
 {
-    ID data(2);
-    int result;
-    int dataTag = this->getDbTag();
-
-    result = theChannel.recvID(dataTag, cTag, data);    
-    if (result != 0) {
-      cerr << "NewtonLineSearch::recvSelf() - failed to receive ID\n";
-      return result;
-    }
-    int ctType = data(0);
-    int ctDb = data(1);
-
-    
-    Vector tol(1);
-    result = theChannel.recvVector(dataTag, cTag, tol);
-    if (result != 0) {
-	cerr << "NewtonLineSearch::sendSelf() - failed to send Vector\n";
-	return result;
-    }      
-    tolerance = tol(0);
-    
-    theTest = theBroker.getNewConvergenceTest(ctType);
-    theTest->setDbTag(ctDb);
-    result = theTest->recvSelf(cTag, theChannel, theBroker);
-    if (result != 0) {
-      cerr << "NewtonLineSearch::recvSelf() - failed to recv CTest object\n";
-      return result;
-    }
-    
-    return 0;
+  return -1;
 }
 
 
 void
 NewtonLineSearch::Print(ostream &s, int flag)
 {
-    if (flag == 0) 
-	s << "NewtonLineSearch :: Line Search Tolerance = " << tolerance << endl ; 
+  if (flag == 0) 
+    s << "NewtonLineSearch\n";
+
+  if (theLineSearch != 0)
+    theLineSearch->Print(s, flag);
 }
 
 

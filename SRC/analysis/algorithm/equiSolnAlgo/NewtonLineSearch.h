@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2000-12-12 06:20:53 $
+// $Revision: 1.2 $
+// $Date: 2001-12-11 20:09:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonLineSearch.h,v $
 
 // Written: fmk 
@@ -39,34 +39,31 @@
 
 #include <EquiSolnAlgo.h>
 #include <Vector.h>
+#include <LineSearch.h>
 
 class NewtonLineSearch: public EquiSolnAlgo
 {
   public:
-    NewtonLineSearch( ) ;    
-    NewtonLineSearch(ConvergenceTest &theTest, double LineSearchTolerance ) ;
-    ~NewtonLineSearch( ) ;
+    NewtonLineSearch( );    
+    NewtonLineSearch(ConvergenceTest &theTest, LineSearch *theLineSearch);
+    ~NewtonLineSearch( );
 
-    int solveCurrentStep(void) ;    
-    void setTest(ConvergenceTest &theNewTest) ;
-    ConvergenceTest *getTest(void) ;     
+    int solveCurrentStep(void);    
+    void setTest(ConvergenceTest &theNewTest);
+    ConvergenceTest *getTest(void);     
     
-    virtual int sendSelf(int commitTag, Channel &theChannel) ;
+    virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 
-			 FEM_ObjectBroker &theBroker) ;
+			 FEM_ObjectBroker &theBroker);
 
-    void Print(ostream &s, int flag =0) ;    
+    void Print(ostream &s, int flag =0);    
     
   protected:
     
   private:
 
-    ConvergenceTest *theTest ;
-
-    double tolerance ;  // line search tolerance 
-    
-    Vector *r0, *x0, *x, *xOld;
-
+    ConvergenceTest *theTest;
+    LineSearch *theLineSearch;
 };
 
 #endif
