@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-20 00:37:25 $
+// $Revision: 1.5 $
+// $Date: 2001-10-25 21:33:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.cpp,v $
                                                                         
                                                                         
@@ -164,6 +164,10 @@ SectionForceDeformation::setResponse(char **argv, int argc, Information &sectInf
 	else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
 		return new MaterialResponse(this, 3, this->getSectionTangent());
 
+    // force and deformation
+    else if (strcmp(argv[0],"forceAndDeformation") == 0)
+      return new MaterialResponse(this, 4, Vector(2*this->getOrder()));
+
 	else
 		return 0;
 }
@@ -181,6 +185,18 @@ SectionForceDeformation::getResponse(int responseID, Information &secInfo)
 	case 3:
 		return secInfo.setMatrix(this->getSectionTangent());
 
+  case 4: {
+    Vector &theVec = *(secInfo.theVector);
+    const Vector &e = this->getSectionDeformation();
+    const Vector &s = this->getStressResultant();
+    int order = this->getOrder();
+    for (int i = 0; i < order; i++) {
+      theVec(i) = e(i);
+      theVec(i+order) = s(i);
+    }
+
+    return secInfo.setVector(theVec);
+  }
     default:
       return -1;
   }
