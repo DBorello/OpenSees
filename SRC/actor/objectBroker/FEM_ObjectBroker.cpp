@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-06-08 16:47:50 $
+// $Revision: 1.12 $
+// $Date: 2002-06-10 22:36:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -114,6 +114,10 @@
 #include <J2ThreeDimensional.h>
 #include <PlaneStressMaterial.h>
 #include <PlateFiberMaterial.h>
+
+#include <FluidSolidPorousMaterial.h>
+#include <PressureDependMultiYield.h>
+#include <PressureIndependMultiYield.h>
 
 // Fibers
 #include <UniaxialFiber2d.h>
@@ -663,49 +667,58 @@ FEM_ObjectBroker::getNewSection(int classTag)
 NDMaterial*
 FEM_ObjectBroker::getNewNDMaterial(int classTag)
 {
-    switch(classTag) {
-		case ND_TAG_ElasticIsotropicPlaneStrain2d:
-			return new ElasticIsotropicPlaneStrain2D();
+  switch(classTag) {
+  case ND_TAG_ElasticIsotropicPlaneStrain2d:
+    return new ElasticIsotropicPlaneStrain2D();
+    
+  case ND_TAG_ElasticIsotropicPlaneStress2d:
+    return new ElasticIsotropicPlaneStress2D();
 		
-		case ND_TAG_ElasticIsotropicPlaneStress2d:
-			return new ElasticIsotropicPlaneStress2D();
-		
-		case ND_TAG_ElasticIsotropicAxiSymm:
-			return new ElasticIsotropicAxiSymm();
+  case ND_TAG_ElasticIsotropicAxiSymm:
+    return new ElasticIsotropicAxiSymm();
+    
+  case ND_TAG_ElasticIsotropicPlateFiber:
+    return new ElasticIsotropicPlateFiber();
+    
+  case ND_TAG_ElasticIsotropic3D:
+    return new ElasticIsotropic3D();
+		  
+  case ND_TAG_J2PlaneStrain:
+    return new J2PlaneStrain();
+    
+  case ND_TAG_J2PlaneStress:
+    return new J2PlaneStress();
+    
+  case ND_TAG_J2AxiSymm:
+    return new J2AxiSymm();
+    
+  case ND_TAG_J2PlateFiber:
+    return new J2PlateFiber();
+    
+  case ND_TAG_J2ThreeDimensional:
+    return new J2ThreeDimensional();
+    
+  case ND_TAG_PlaneStressMaterial:
+    return new PlaneStressMaterial();
+		  
+  case ND_TAG_PlateFiberMaterial:
+    return new PlateFiberMaterial();
+    
+  case ND_TAG_FluidSolidPorousMaterial:
+    return new FluidSolidPorousMaterial();
 
-		case ND_TAG_ElasticIsotropicPlateFiber:
-			return new ElasticIsotropicPlateFiber();
+  case ND_TAG_PressureDependMultiYield:
+    return new PressureDependMultiYield();
 
-		case ND_TAG_ElasticIsotropic3D:
-			return new ElasticIsotropic3D();
-
-		case ND_TAG_J2PlaneStrain:
-			return new J2PlaneStrain();
-		
-		case ND_TAG_J2PlaneStress:
-			return new J2PlaneStress();
-		
-		case ND_TAG_J2AxiSymm:
-			return new J2AxiSymm();
-
-		case ND_TAG_J2PlateFiber:
-			return new J2PlateFiber();
-
-		case ND_TAG_J2ThreeDimensional:
-			return new J2ThreeDimensional();
-
-		case ND_TAG_PlaneStressMaterial:
-			return new PlaneStressMaterial();
-
-		case ND_TAG_PlateFiberMaterial:
-			return new PlateFiberMaterial();
-
-		default:
-			cerr << "FEM_ObjectBroker::getNewNDMaterial - ";
-			cerr << " - no NDMaterial type exists for class tag ";
-			cerr << classTag << endl;
-			return 0;   
-	 }
+  case ND_TAG_PressureIndependMultiYield:
+    return new PressureIndependMultiYield();
+    
+  default:
+    cerr << "FEM_ObjectBroker::getNewNDMaterial - ";
+    cerr << " - no NDMaterial type exists for class tag ";
+    cerr << classTag << endl;
+    return 0;   
+  }
 }
 
 Fiber*
