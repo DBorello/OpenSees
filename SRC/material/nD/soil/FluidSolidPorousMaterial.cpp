@@ -1,5 +1,5 @@
-// $Revision: 1.6 $
-// $Date: 2001-09-22 01:36:56 $
+// $Revision: 1.7 $
+// $Date: 2002-02-08 19:51:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -16,6 +16,8 @@
 #include <FluidSolidPorousMaterial.h>
 #include <Information.h>
 #include <MaterialResponse.h>
+#include <ID.h>
+#include <FEM_ObjectBroker.h>
 
 int FluidSolidPorousMaterial::loadStage = 0;
 double FluidSolidPorousMaterial::AtmoPress = 0.;
@@ -191,10 +193,26 @@ const Vector & FluidSolidPorousMaterial::getCommittedStrain (void)
 }
 
 
-double FluidSolidPorousMaterial::getCommittedPressure (void)
+const Vector & FluidSolidPorousMaterial::getCommittedPressure (void)
 {
-	return currentExcessPressure;
+	static Vector temp(2);
+
+	temp[0] = currentExcessPressure;
+  if (temp[0] == 0.) temp[1] = 0.;
+	else {
+  	if (ndm == 3) 
+	    temp[1] = (theSoilMaterial->getCommittedStress()[0]
+		            + theSoilMaterial->getCommittedStress()[1]
+			  				+ theSoilMaterial->getCommittedStress()[2])/3.;
+	  else 
+	    temp[1] = (theSoilMaterial->getCommittedStress()[0]
+		            + theSoilMaterial->getCommittedStress()[1])/2.;
+
+		temp[1] = fabs(temp[0])/(fabs(temp[1])+fabs(temp[0]));
+	}
+	return temp;
 }
+
 
 const Vector & FluidSolidPorousMaterial::getStrain (void)
 {
@@ -257,16 +275,110 @@ int FluidSolidPorousMaterial::getOrder (void) const
 
 int FluidSolidPorousMaterial::sendSelf(int commitTag, Channel &theChannel)
 {
-	// Need to implement
-	return 0;
+	int res = 0;
+
+	static Vector data(7);
+	data(0) = this->getTag();
+	data(1) = ndm;
+	data(2) = loadStage;
+  data(3) = AtmoPress;
+  data(4) = combinedBulkModulus;
+	data(5) = currentExcessPressure;
+  data(6) = currentVolumeStrain;
+
+  res += theChannel.sendVector(this->getDbTag(), commitTag, data);
+	if (res < 0) {
+		g3ErrorHandler->warning("%s -- could not send Vector",
+			"FluidSolidPorousMaterial::sendSelf");
+		return res;
+	}
+
+	ID classTags(2);
+
+	classTags(0) = theSoilMaterial->getClassTag();
+	int matDbTag = theSoilMaterial->getDbTag();
+	// NOTE: we do have to ensure that the material has a database
+	// tag if we are sending to a database channel.
+	if (matDbTag == 0) {
+		matDbTag = theChannel.getDbTag();
+		if (matDbTag != 0)
+			theSoilMaterial->setDbTag(matDbTag);
+	}
+	classTags(1) = matDbTag;
+
+	res += theChannel.sendID(this->getDbTag(), commitTag, classTags);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING FluidSolidPorousMaterial::sendSelf() - %d failed to send ID\n",
+			this->getTag());
+		return res;
+	}
+
+	// Finally, asks the material object to send itself
+	res += theSoilMaterial->sendSelf(commitTag, theChannel);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING FluidSolidPorousMaterial::sendSelf() - %d failed to send its Material\n",this->getTag());
+		return res;
+	}
+
+	return res;
 }
 
 
 int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker)    
 {
-	// Need to implement
-	return 0;
+	int res = 0;
+
+	static Vector data(7);
+
+	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
+	if (res < 0) {
+		g3ErrorHandler->warning("%s -- could not receive Vector",
+			"FluidSolidPorousMaterial::recvSelf");
+		return res;
+	}
+    
+	this->setTag((int)data(0));
+	ndm = data(1);
+	loadStage = data(2);
+  AtmoPress = data(3);
+  combinedBulkModulus = data(4);
+	currentExcessPressure = data(5);
+  currentVolumeStrain = data(6);
+
+	// now receives the ids of its material
+	ID classTags(2);
+
+	res += theChannel.recvID(this->getDbTag(), commitTag, classTags);
+	if (res < 0)  {
+		g3ErrorHandler->warning("FluidSolidPorousMaterial::recvSelf() - %s\n",
+			    "failed to recv ID data");
+		return res;
+	}    
+	
+	int matClassTag = classTags(0);
+	int matDbTag = classTags(1);
+	// Check that material is of the right type; if not,
+	// delete it and create a new one of the right type
+	if (theSoilMaterial->getClassTag() != matClassTag) {
+		delete theSoilMaterial;
+		theSoilMaterial = theBroker.getNewNDMaterial(matClassTag);
+		if (theSoilMaterial == 0) {
+			g3ErrorHandler->fatal("FluidSolidPorousMaterial::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+			return -1;
+		}
+	}
+
+	// Receive the material
+	theSoilMaterial->setDbTag(matDbTag);
+	res += theSoilMaterial->recvSelf(commitTag, theChannel, theBroker);
+	if (res < 0) {
+		g3ErrorHandler->warning("FluidSolidPorousMaterial::recvSelf() - material failed to recv itself");
+		return res;
+	}
+
+	return res;
 }
 
 
@@ -304,7 +416,7 @@ int FluidSolidPorousMaterial::getResponse (int responseID, Information &matInfo)
 			return matInfo.setMatrix(this->getTangent());
 			
 		case 4:
-			return matInfo.setDouble(this->getCommittedPressure());
+			return matInfo.setVector(this->getCommittedPressure());
 
 		default:
 			return -1;

@@ -1,5 +1,5 @@
-// $Revision: 1.17 $
-// $Date: 2001-12-07 01:05:53 $
+// $Revision: 1.18 $
+// $Date: 2002-02-08 19:51:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -22,15 +22,13 @@ double PressureDependMultiYield::AtmoPress = 0.;
 Matrix PressureDependMultiYield::theTangent(6,6);
 T2Vector PressureDependMultiYield::trialStrain;
 T2Vector PressureDependMultiYield::subStrainRate;
-Vector PressureDependMultiYield::workV(3);
 Vector PressureDependMultiYield::workV6(6);
-Matrix PressureDependMultiYield::workM(3,3);
 T2Vector PressureDependMultiYield::workT2V;
 
 const	double pi = 3.14159265358979;
 
 PressureDependMultiYield::PressureDependMultiYield (int tag, int nd, 
-						    double refShearModul,
+								double refShearModul,
 						    double refBulkModul, double frictionAng,
 						    double peakShearStra, double refPress, 
 						    double cohesi, 	double pressDependCoe,
@@ -45,7 +43,7 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
 						    double liquefactionParam2,
 						    double liquefactionParam3,
 						    double liquefactionParam4,
-						    double atm)
+						    double atm, double r, double ei)
  : NDMaterial(tag,ND_TAG_PressureDependMultiYield), currentStress(),
    trialStress(), currentStrain(), strainRate(),
    reversalStress(), PPZPivot(), PPZCenter(), 
@@ -87,7 +85,7 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
     cerr << "WARNING:PressureDependMultiYield:: cohesion < 0" << endl;
     cerr << "Will reset cohesion to zero." << endl;
     cohesi = 0.;
-  }
+  } 
   if (peakShearStra <= 0) {
     cerr << "FATAL:PressureDependMultiYield:: peakShearStra <= 0" << endl;
     g3ErrorHandler->fatal(" ");
@@ -106,6 +104,11 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
     cerr << "Will use 10 yield surfaces." << endl;
     numberOfYieldSurf = 10;
   }
+  if (numberOfYieldSurf > 40) {
+    cerr << "WARNING:PressureDependMultiYield::PressureDependMultiYield: numberOfSurfaces > 40" << endl;
+    cerr << "Will use 40 yield surfaces." << endl;
+    numberOfYieldSurf = 40;
+  }
   if (volLimit < 0) {
     cerr << "WARNING:PressureDependMultiYield:: volLimit < 0" << endl;
     cerr << "Will reset volLimit to zero." << endl;
@@ -115,7 +118,15 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
     cerr << "FATAL:PressureDependMultiYield:: atm <= 0" << endl;
     g3ErrorHandler->fatal(" ");
   }
-  
+  if (r < 0) {
+    cerr << "FATAL:PressureDependMultiYield:: rho <= 0" << endl;
+    g3ErrorHandler->fatal(" ");
+  }
+  if (ei < 0) {
+    cerr << "FATAL:PressureDependMultiYield:: e <= 0" << endl;
+    g3ErrorHandler->fatal(" ");
+  }
+
   ndm = nd;
   loadStage = 0;   //default
   refShearModulus = refShearModul;
@@ -137,6 +148,8 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
   liquefyParam3 = liquefactionParam3;
   liquefyParam4 = liquefactionParam4;
   AtmoPress = atm;
+  rho = r;
+	e = ei;
 
   e2p = committedActiveSurf = activeSurfaceNum = 0; 
   onPPZCommitted = onPPZ = -1 ; 
@@ -170,6 +183,7 @@ PressureDependMultiYield::PressureDependMultiYield ()
   phaseTransfAngle = contractParam1 = contractParam2 = 0.;
   dilateParam1 = dilateParam2 = volumeLimit = liquefyParam1 = 0.;
   liquefyParam2 = liquefyParam3 = liquefyParam4 = modulusFactor = 0.;
+  rho = e = 0.;
 
   theSurfaces = new MultiYieldSurface[1];
   committedSurfaces = new MultiYieldSurface[1];
@@ -206,7 +220,9 @@ PressureDependMultiYield::PressureDependMultiYield (const PressureDependMultiYie
   liquefyParam2 = a.liquefyParam2;
   liquefyParam3 = a.liquefyParam3;
   liquefyParam4 = a.liquefyParam4;
-  
+  rho = a.rho;
+	e = a.e;
+
   e2p = a.e2p;
   residualPress = a.residualPress;
   stressRatioPT = a.stressRatioPT;
@@ -381,6 +397,7 @@ const Matrix & PressureDependMultiYield::getTangent (void)
   if (ndm==3) 
     return theTangent;
   else {
+    static Matrix workM(3,3);
     workM(0,0) = theTangent(0,0);
     workM(0,1) = theTangent(0,1);
     workM(0,2) = 0.; //theTangent(0,3);
@@ -458,6 +475,7 @@ const Vector & PressureDependMultiYield::getStress (void)
   if (ndm==3)
     return trialStress.t2Vector();
   else {
+		static Vector workV(3);
     workV[0] = trialStress.t2Vector()[0];
     workV[1] = trialStress.t2Vector()[1];
     workV[2] = trialStress.t2Vector()[3];
@@ -480,6 +498,7 @@ int PressureDependMultiYield::commitState (void)
   tmp = currentStrain.t2Vector();
   tmp += strainRate.t2Vector();
   currentStrain.setData(tmp);
+
   tmp.Zero();
   strainRate.setData(tmp);
 
@@ -550,16 +569,171 @@ int PressureDependMultiYield::updateParameter(int responseID, Information &info)
 
 int PressureDependMultiYield::sendSelf(int commitTag, Channel &theChannel)
 {
-  // Need to implement
-  return 0;
+	int i, res = 0;
+
+	static Vector data(393), temp(6);
+	data(0) = this->getTag();
+	data(1) = ndm;
+	data(2) = loadStage;
+  data(3) = rho;
+  data(4) = e;
+  data(5) = refShearModulus;
+	data(6) = refBulkModulus;
+	data(7) = frictionAngle;
+  data(8) = peakShearStrain;
+  data(9) = refPressure;
+	data(10) = cohesion;
+	data(11) = pressDependCoeff;
+	data(12) = numOfSurfaces;
+	data(13) = phaseTransfAngle;
+  data(14) = contractParam1;
+  data(15) = contractParam2;
+  data(16) = dilateParam1;
+  data(17) = dilateParam2;
+  data(18) = volumeLimit;
+  data(19) = liquefyParam1;
+  data(20) = liquefyParam2;
+  data(21) = liquefyParam3;
+  data(22) = liquefyParam4;
+  data(23) = AtmoPress;
+  data(24) = residualPress;
+  data(25) = stressRatioPT;   
+  data(26) = e2p; 
+  data(27) = committedActiveSurf;
+  data(28) = strainPTOcta;
+  data(29) = pressureDCommitted;
+  data(30) = onPPZCommitted;
+  data(31) = PPZSizeCommitted;
+  data(32) = cumuDilateStrainOctaCommitted;
+  data(33) = maxCumuDilateStrainOctaCommitted;
+  data(34) = cumuTranslateStrainOctaCommitted;
+  data(35) = prePPZStrainOctaCommitted;
+  data(36) = oppoPrePPZStrainOctaCommitted;
+
+  temp = currentStress.t2Vector();
+	for(i = 0; i < 6; i++) data(i+37) = temp[i];
+
+  temp = currentStrain.t2Vector();
+	for(i = 0; i < 6; i++) data(i+43) = temp[i];
+	  
+  temp = PPZPivotCommitted.t2Vector();
+	for(i = 0; i < 6; i++) data(i+49) = temp[i];
+
+  temp = PPZCenterCommitted.t2Vector();
+	for(i = 0; i < 6; i++) data(i+55) = temp[i];
+
+  temp = lockStressCommitted.t2Vector();
+	for(i = 0; i < 6; i++) data(i+61) = temp[i];
+
+  temp = reversalStressCommitted.t2Vector();
+	for(i = 0; i < 6; i++) data(i+67) = temp[i];
+
+	for(i = 0; i < numOfSurfaces; i++) {
+		int k = 73 + i*8;
+		data(k) = committedSurfaces[i+1].size();
+		data(k+1) = committedSurfaces[i+1].modulus();
+		temp = committedSurfaces[i+1].center();
+    data(k+2) = temp(0);
+    data(k+3) = temp(1);
+    data(k+4) = temp(2);
+    data(k+5) = temp(3);
+    data(k+6) = temp(4);
+    data(k+7) = temp(5);
+	}
+
+  res += theChannel.sendVector(this->getDbTag(), commitTag, data);
+	if (res < 0) {
+		g3ErrorHandler->warning("%s -- could not send Vector",
+			"FluidSolidPorousMaterial::sendSelf");
+		return res;
+	}
+
+	return res;
 }
 
 
 int PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel, 
 				       FEM_ObjectBroker &theBroker)    
 {
-  // Need to implement
-  return 0;
+	int i, res = 0;
+
+	static Vector data(347), temp(6);
+
+	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
+	if (res < 0) {
+		g3ErrorHandler->warning("%s -- could not receive Vector",
+			"FluidSolidPorousMaterial::recvSelf");
+		return res;
+	}
+    
+	this->setTag((int)data(0));
+	ndm = data(1);
+	loadStage = data(2);
+  rho = data(3);
+	e = data(4);
+  refShearModulus = data(5);
+	refBulkModulus = data(6);
+	frictionAngle = data(7);
+  peakShearStrain = data(8);
+  refPressure = data(9);
+	cohesion = data(10);
+	pressDependCoeff = data(11);
+	numOfSurfaces = data(12);
+	phaseTransfAngle = data(13);
+  contractParam1 = data(14);
+  contractParam2 = data(15);
+  dilateParam1 = data(16);
+  dilateParam2 = data(17);
+  volumeLimit = data(18);
+  liquefyParam1 = data(19);
+  liquefyParam2 = data(20);
+  liquefyParam3 = data(21);
+  liquefyParam4 = data(22);
+  AtmoPress = data(23);
+  residualPress = data(24);
+  stressRatioPT = data(25);   
+  e2p = data(26); 
+  committedActiveSurf = data(27);
+  strainPTOcta = data(28);
+  pressureDCommitted = data(29);
+  onPPZCommitted = data(30);
+  PPZSizeCommitted = data(31);
+  cumuDilateStrainOctaCommitted = data(32);
+  maxCumuDilateStrainOctaCommitted = data(33);
+  cumuTranslateStrainOctaCommitted = data(34);
+  prePPZStrainOctaCommitted = data(35);
+  oppoPrePPZStrainOctaCommitted = data(36);
+
+	for(i = 0; i < 6; i++) temp[i] = data(i+37);
+  currentStress.setData(temp);
+
+	for(i = 0; i < 6; i++) temp[i] = data(i+43);
+  currentStrain.setData(temp);
+
+	for(i = 0; i < 6; i++) temp[i] = data(i+37);
+  PPZPivotCommitted.setData(temp);
+
+	for(i = 0; i < 6; i++) temp[i] = data(i+43);
+  PPZCenterCommitted.setData(temp);
+
+	for(i = 0; i < 6; i++) temp[i] = data(i+37);
+  lockStressCommitted.setData(temp);
+
+	for(i = 0; i < 6; i++) temp[i] = data(i+43);
+  reversalStressCommitted.setData(temp);
+
+	for(i = 0; i < numOfSurfaces; i++) {
+		int k = 73 + i*8;
+    temp(0) = data(k+2);
+    temp(1) = data(k+3);
+    temp(2) = data(k+4);
+    temp(3) = data(k+5);
+    temp(4) = data(k+6);
+    temp(5) = data(k+7);
+		committedSurfaces[i+1].setData(temp, data(k), data(k+1));
+	}
+
+	return res;
 }
 
 
@@ -594,13 +768,41 @@ void PressureDependMultiYield::Print(ostream &s, int flag )
 
 const Vector & PressureDependMultiYield::getCommittedStress (void)
 {
-  if (ndm==3)
-    return currentStress.t2Vector();
+	double scale = currentStress.deviatorRatio(residualPress)/committedSurfaces[numOfSurfaces].size();
+  if (ndm==3) {
+		static Vector temp7(7);
+    temp7[0] = currentStress.t2Vector()[0];
+    temp7[1] = currentStress.t2Vector()[1];
+    temp7[2] = currentStress.t2Vector()[2];
+    temp7[3] = currentStress.t2Vector()[3];
+    temp7[4] = currentStress.t2Vector()[4];
+    temp7[5] = currentStress.t2Vector()[5];
+    temp7[6] = scale;
+		return temp7;
+	}
+
   else {
-    workV[0] = currentStress.t2Vector()[0];
-    workV[1] = currentStress.t2Vector()[1];
-    workV[2] = currentStress.t2Vector()[3];
-    return workV;
+    double volume = -currentStress.volume();
+    double ratio = (volume+residualPress)/(-refPressure+residualPress);
+    ratio = pow(ratio, 1.-pressDependCoeff);
+
+    static Vector temp4(4);  
+    temp4[0] = currentStress.t2Vector()[0];
+    temp4[1] = currentStress.t2Vector()[1];
+    temp4[2] = currentStress.t2Vector()[3];
+    temp4[3] = scale;
+
+    /*temp4[4] = onPPZCommitted;
+    temp4[5] = PPZSizeCommitted;
+    temp4[6] = cumuDilateStrainOctaCommitted;
+    temp4[7] = maxCumuDilateStrainOctaCommitted;
+    temp4[8] = cumuTranslateStrainOctaCommitted;
+    temp4[9] = prePPZStrainOctaCommitted;
+    temp4[10] = PPZPivot.t2Vector()[3];
+		temp4[11] = PPZCenter.t2Vector()[3];
+		temp4[12] = pressureDCommitted;*/
+
+    return temp4;
   }
 }
 
@@ -610,6 +812,7 @@ const Vector & PressureDependMultiYield::getCommittedStrain (void)
   if (ndm==3)
     return currentStrain.t2Vector(1);
   else {
+		static Vector workV(3);
     workV[0] = currentStrain.t2Vector(1)[0];
     workV[1] = currentStrain.t2Vector(1)[1];
     workV[2] = currentStrain.t2Vector(1)[3];
@@ -944,7 +1147,7 @@ double PressureDependMultiYield::getPlasticPotential(const T2Vector & contactStr
   
   else {  //above PT
     if (trialRatio > currentRatio && shearLoading >= 0.) {  //dilation
-      if (pressureD == 0.) pressureD = currentStress.volume();
+      if (pressureD == 0.) pressureD = contactStress.volume();
       reversalStress = currentStress;
       updatePPZ(contactStress);  
       if (onPPZ==-1 || onPPZ==1) return LOCK_VALUE; 
@@ -965,6 +1168,7 @@ double PressureDependMultiYield::getPlasticPotential(const T2Vector & contactStr
 
   if (onPPZ > 0) onPPZ = 0;
   if (onPPZ != -1) PPZTranslation(contactStress);  
+
   return plasticPotential;
 }
 
@@ -972,18 +1176,18 @@ double PressureDependMultiYield::getPlasticPotential(const T2Vector & contactStr
 void PressureDependMultiYield::updatePPZ(const T2Vector & contactStress)
 {
   // PPZ inactive if liquefyParam1==0.
-  /*if (liquefyParam1==0.) {
+  if (liquefyParam1==0.) {
     if (onPPZ==2) {
-    distance = T2Vector(trialStrain.t2Vector() - PPZPivot.t2Vector());
-    cumuDilateStrainOcta = distance.octahedralShear(1);
+		  workT2V.setData(trialStrain.t2Vector() - PPZPivot.t2Vector());
+      cumuDilateStrainOcta = workT2V.octahedralShear(1);
     }
     else if (onPPZ != 2) {
-    onPPZ = 2;
-    PPZPivot = trialStrain;
-    cumuDilateStrainOcta = 0.;
+      onPPZ = 2;
+      PPZPivot = trialStrain;
+      cumuDilateStrainOcta = 0.;
     }
     return;
-    }*/
+  }
 
   // dilation: calc. cumulated dilative strain
   if (onPPZ==2) {
@@ -1007,6 +1211,7 @@ void PressureDependMultiYield::updatePPZ(const T2Vector & contactStress)
   }
   PPZSize = PPZLimit 
     + (prePPZStrainOcta+oppoPrePPZStrainOcta+maxCumuDilateStrainOcta)/2.;
+  //if (-contactStress.volume() > liquefyParam1) PPZSize = 0.;
 
   static Vector tmp(6);
   // calc. new PPZ center.
@@ -1033,7 +1238,7 @@ void PressureDependMultiYield::updatePPZ(const T2Vector & contactStress)
     PPZPivot = trialStrain;
     cumuDilateStrainOcta = 0.;
     cumuTranslateStrainOcta = 0.;
-    if (PPZLimit == 0.) maxCumuDilateStrainOcta = 0.;
+    //if (PPZLimit == 0.) maxCumuDilateStrainOcta = 0.;
   }
   else {  //inside PPZ
     if (onPPZ == 0 || onPPZ == 1) PPZTranslation(contactStress);
@@ -1045,7 +1250,7 @@ void PressureDependMultiYield::updatePPZ(const T2Vector & contactStress)
 
 void PressureDependMultiYield::PPZTranslation(const T2Vector & contactStress)
 {
-  //if (liquefyParam1==0.) return;
+  if (liquefyParam1==0.) return;
   
   double PPZTranslationLimit = getPPZLimits(2,contactStress);
   static Vector tmp(6);
@@ -1059,15 +1264,14 @@ void PressureDependMultiYield::PPZTranslation(const T2Vector & contactStress)
   if (temp > 0.) {
     cumuTranslateStrainOcta += temp;
     if (cumuTranslateStrainOcta <= PPZTranslationLimit) { // PPZ translation
-      static Vector tmp(6);
+
       //PPZPivot.setData(PPZPivot.t2Vector() + workT2V.unitDeviator() * temp);
-      //PPZCenter.setData(PPZCenter.t2Vector() + workT2V.unitDeviator() * temp);
       tmp = PPZPivot.t2Vector();
       tmp.addVector(1.0, workT2V.unitDeviator(), temp);
       PPZPivot.setData(tmp);
 
-      //PPZPivot.setData(PPZPivot.t2Vector() + workT2V.unitDeviator() * temp);
-      tmp = PPZPivot.t2Vector();
+      //PPZCenter.setData(PPZCenter.t2Vector() + workT2V.unitDeviator() * temp);
+      tmp = PPZCenter.t2Vector();
       tmp.addVector(1.0, workT2V.unitDeviator(), temp);
       PPZCenter.setData(tmp);
       

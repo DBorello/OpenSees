@@ -1,5 +1,5 @@
-// $Revision: 1.4 $
-// $Date: 2001-10-16 22:34:26 $
+// $Revision: 1.5 $
+// $Date: 2002-02-08 19:51:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/MultiYieldSurface.cpp,v $
                                                                         
 // Written: ZHY
@@ -36,11 +36,19 @@ MultiYieldSurface::~MultiYieldSurface()
 
 }
 
+void MultiYieldSurface::setData(const Vector & theCenter_init, 
+                                double theSize_init, double plas_modul)
+{
+  theSize = theSize_init;
+	theCenter = theCenter_init;
+  plastShearModulus = plas_modul;
+}
+
 void MultiYieldSurface::setCenter(const Vector & newCenter)
 {
   if (newCenter.Size() != 6) {
 	cerr << "FATAL:MultiYieldSurface::setCenter(Vector &): vector size not equal 6" << endl;
-	g3ErrorHandler->fatal("");
+	g3ErrorHandler->fatal(" ");
   }
 
   theCenter = newCenter;
@@ -71,13 +79,13 @@ double secondOrderEqn(double A, double B, double C, int i)
     cerr << "FATAL:second_order_eqn: A=0." << endl;
     if(i==0) cerr << " when finding reference point on outer surface." <<endl;
     else cerr << " when moving active surface." <<endl;
-    g3ErrorHandler->fatal("");   
+    g3ErrorHandler->fatal(" ");   
   }
   if(C == 0) return 0;
   if(B == 0){
     if(C/A > 0){
       cerr << "FATAL:second_order_eqn: Complex roots.\n";
-      g3ErrorHandler->fatal("");
+      g3ErrorHandler->fatal(" ");
     } 
     return sqrt(-C/A);
   }
@@ -89,7 +97,7 @@ double secondOrderEqn(double A, double B, double C, int i)
     if(i==0) cerr << " when finding reference point on outer surface." <<endl;
     else cerr << " when moving active surface." <<endl;
     cerr << "B2=" << B*B << " 4AC=" << 4.*A*C <<endl; 
-    g3ErrorHandler->fatal("");
+    g3ErrorHandler->fatal(" ");
   }
   
   if (B > 0) val1 = (-B - sqrt(determ)) / (2.*A);
@@ -107,7 +115,7 @@ double secondOrderEqn(double A, double B, double C, int i)
     else cerr << " when moving active surface." <<endl;
 		cerr << "A=" << A << " B=" << B << " C=" << C << " det=" << determ << 
 			" x1=" << val1 << " x2=" << val2 << endl;  
-    g3ErrorHandler->fatal("");   
+    g3ErrorHandler->fatal(" ");   
   }
   
   if (val1 < 0) return  val2;

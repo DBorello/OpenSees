@@ -1,5 +1,5 @@
-// $Revision: 1.5 $
-// $Date: 2001-10-16 22:34:30 $
+// $Revision: 1.6 $
+// $Date: 2002-02-08 19:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -30,7 +30,8 @@ public:
 				 double refPress,
 				 double cohesi,
 				 double pressDependCoe,
-				 int   numberOfYieldSurf);
+				 int   numberOfYieldSurf,
+				 double rho = 0. );
 
      // Default constructor
      PressureIndependMultiYield ();
@@ -41,6 +42,7 @@ public:
      // Destructor: clean up memory storage space.
      virtual ~PressureIndependMultiYield ();
 
+		 double getRho(void) {return rho;} ;
      // Sets the values of the trial strain tensor.
      int setTrialStrain (const Vector &strain);
 
@@ -63,9 +65,6 @@ public:
      int setTrialStrain (const Tensor &v, const Tensor &r) {return 0;}
      int setTrialStrainIncr (const Tensor &v) {return 0;}
      int setTrialStrainIncr (const Tensor &v, const Tensor &r) {return 0;}
-     const Tensor &getTangentTensor (void) {Tensor * t=new Tensor; return *t;}
-//jeremic@ucdavis.edu 22jan2001	      const Tensor &getStressTensor (void) {Tensor * t=new Tensor; return *t;}
-//jeremic@ucdavis.edu 22jan2001	 		 const Tensor &getStrainTensor(void) {Tensor * t=new Tensor; return *t;}
 
      // Accepts the current trial strain values as being on the solution path, and updates 
      // all model parameters related to stress/strain states. Return 0 on success.
@@ -105,6 +104,7 @@ private:
 	static int loadStage;  //=0 if elastic; =1 if plastic
 
   // user supplied
+	double rho;
 	double refShearModulus;
 	double refBulkModulus;
 	double frictionAngle;
@@ -127,8 +127,6 @@ private:
 	T2Vector currentStrain;
 	T2Vector strainRate;
 	static T2Vector subStrainRate;
-	static Vector workV;
-	static Matrix workM;
 
 	void elast2Plast(void);
 	// Called by constructor

@@ -1,5 +1,5 @@
-// $Revision: 1.4 $
-// $Date: 2001-10-16 22:34:32 $
+// $Revision: 1.5 $
+// $Date: 2002-02-08 19:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.h,v $
                                                                         
 // Written: ZHY
@@ -59,9 +59,6 @@ public:
 
   int operator == (const T2Vector & a) const;
   int isZero(void) const;
-
-  int sendSelf(int commitTag, Channel &theChannel);  
-  int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
 
 protected:
 

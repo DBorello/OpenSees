@@ -1,5 +1,5 @@
-// $Revision: 1.7 $
-// $Date: 2001-10-16 22:34:30 $
+// $Revision: 1.8 $
+// $Date: 2002-02-08 19:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.cpp,v $
                                                                         
 // Written: ZHY
@@ -270,23 +270,6 @@ T2Vector::isZero(void) const
     if(theT2Vector[i] != 0.0) return 0;
 
   return 1;
-}
-
-
-int 
-T2Vector::sendSelf(int commitTag, Channel &theChannel)
-{
-  // Need to implement
-  return 0;
-}
-
-
-int 
-T2Vector::recvSelf(int commitTag, Channel &theChannel, 
-		   FEM_ObjectBroker &theBroker)    
-{
-  // Need to implement
-  return 0;
 }
 
 

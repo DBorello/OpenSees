@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2001-08-07 22:31:03 $
+// $Revision: 1.3 $
+// $Date: 2002-02-08 19:51:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.h,v $
                                                                         
 // Written: ZHY
@@ -53,7 +53,7 @@ class FluidSolidPorousMaterial : public NDMaterial
      const Vector &getStrain (void);
      const Vector &getCommittedStress (void);
      const Vector &getCommittedStrain (void);
-     double getCommittedPressure (void);
+     const Vector &getCommittedPressure (void);
 
      // Accepts the current trial strain values as being on the solution path, and updates 
      // all model parameters related to stress/strain states. Return 0 on success.
@@ -98,10 +98,10 @@ class FluidSolidPorousMaterial : public NDMaterial
      double trialVolumeStrain;
      double currentVolumeStrain;
 
-	 static Vector workV3;
-	 static Vector workV6;
-	 static Matrix workM3;
-	 static Matrix workM6;
+	   static Vector workV3;
+	   static Vector workV6;
+	   static Matrix workM3;
+	   static Matrix workM6;
 };
 
 #endif

@@ -1,5 +1,5 @@
-// $Revision: 1.14 $
-// $Date: 2001-12-07 01:05:53 $
+// $Revision: 1.15 $
+// $Date: 2002-02-08 19:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -20,14 +20,12 @@
 int PressureIndependMultiYield::loadStage = 0;
 Matrix PressureIndependMultiYield::theTangent(6,6);
 T2Vector PressureIndependMultiYield::subStrainRate;
-Vector PressureIndependMultiYield::workV(3);
-Matrix PressureIndependMultiYield::workM(3,3);
 
 PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double refShearModul,
 							double refBulkModul, double frictionAng,
 							double peakShearStra, double refPress, 
 							double cohesi, 	double pressDependCoe,
-							int numberOfYieldSurf)
+							int numberOfYieldSurf, double r)
  : NDMaterial(tag,ND_TAG_PressureIndependMultiYield), currentStress(),
    trialStress(), currentStrain(), strainRate()
 {
@@ -76,6 +74,16 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double 
     cerr << "Will use 10 yield surfaces." << endl;
     numberOfYieldSurf = 10;
   }
+  if (numberOfYieldSurf > 40) {
+    cerr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: numberOfSurfaces > 40" << endl;
+    cerr << "Will use 40 yield surfaces." << endl;
+    numberOfYieldSurf = 40;
+  }
+  if (r < 0) {
+    cerr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: numberOfSurfaces <= 0" << endl;
+    cerr << "Will use 10 yield surfaces." << endl;
+    numberOfYieldSurf = 10;
+  }
 
   ndm = nd;
   loadStage = 0;   //default
@@ -87,7 +95,8 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double 
   cohesion = cohesi;
   pressDependCoeff = pressDependCoe;
   numOfSurfaces = numberOfYieldSurf;
-  
+  rho = r;
+
   e2p = 0;
   theSurfaces = new MultiYieldSurface[numOfSurfaces+1]; //first surface not used
   committedSurfaces = new MultiYieldSurface[numOfSurfaces+1]; 
@@ -113,6 +122,7 @@ PressureIndependMultiYield::PressureIndependMultiYield ()
   pressDependCoeff = 0.;
   numOfSurfaces = 1;
   residualPress = 0.;
+  rho = 0.;
 
   e2p = 0;
   theSurfaces = new MultiYieldSurface[1];
@@ -137,7 +147,8 @@ PressureIndependMultiYield::PressureIndependMultiYield (const PressureIndependMu
   pressDependCoeff = a.pressDependCoeff;
   numOfSurfaces = a.numOfSurfaces;
   residualPress = a.residualPress;
-  
+  rho = a.rho;
+
   e2p = a.e2p;
   committedActiveSurf = a.committedActiveSurf;
   activeSurfaceNum = a.activeSurfaceNum; 
@@ -287,6 +298,7 @@ const Matrix & PressureIndependMultiYield::getTangent (void)
   if (ndm==3) 
     return theTangent;
   else {
+  	static Matrix workM(3,3);
     workM(0,0) = theTangent(0,0);
     workM(0,1) = theTangent(0,1);
     workM(0,2) = theTangent(0,3);
@@ -349,6 +361,7 @@ const Vector & PressureIndependMultiYield::getStress (void)
   if (ndm==3)
     return trialStress.t2Vector();
   else {
+    static Vector workV(3);
     workV[0] = trialStress.t2Vector()[0];
     workV[1] = trialStress.t2Vector()[1];
     workV[2] = trialStress.t2Vector()[3];
@@ -430,16 +443,103 @@ int PressureIndependMultiYield::updateParameter(int responseID, Information &inf
 
 int PressureIndependMultiYield::sendSelf(int commitTag, Channel &theChannel)
 {
-  // Need to implement
-  return 0;
+	int i, res = 0;
+
+	static Vector data(347), temp(6);
+	data(0) = this->getTag();
+	data(1) = ndm;
+	data(2) = loadStage;
+  data(3) = rho;
+  data(4) = refShearModulus;
+	data(5) = refBulkModulus;
+	data(6) = frictionAngle;
+  data(7) = peakShearStrain;
+  data(8) = refPressure;
+	data(9) = cohesion;
+	data(10) = pressDependCoeff;
+	data(11) = numOfSurfaces;
+  data(12) = residualPress;
+  data(13) = e2p;
+	data(14) = committedActiveSurf;
+
+  temp = currentStress.t2Vector();
+	for(i = 0; i < 6; i++) data(i+15) = temp[i];
+
+  temp = currentStrain.t2Vector();
+	for(i = 0; i < 6; i++) data(i+21) = temp[i];
+	  
+	for(i = 0; i < numOfSurfaces; i++) {
+		int k = 27 + i*8;
+		data(k) = committedSurfaces[i+1].size();
+		data(k+1) = committedSurfaces[i+1].modulus();
+		temp = committedSurfaces[i+1].center();
+    data(k+2) = temp(0);
+    data(k+3) = temp(1);
+    data(k+4) = temp(2);
+    data(k+5) = temp(3);
+    data(k+6) = temp(4);
+    data(k+7) = temp(5);
+	}
+
+  res += theChannel.sendVector(this->getDbTag(), commitTag, data);
+	if (res < 0) {
+		g3ErrorHandler->warning("%s -- could not send Vector",
+			"FluidSolidPorousMaterial::sendSelf");
+		return res;
+	}
+
+	return res;
 }
 
 
 int PressureIndependMultiYield::recvSelf(int commitTag, Channel &theChannel, 
 					 FEM_ObjectBroker &theBroker)    
 {
-  // Need to implement
-  return 0;
+	int i, res = 0;
+
+	static Vector data(347), temp(6);
+
+	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
+	if (res < 0) {
+		g3ErrorHandler->warning("%s -- could not receive Vector",
+			"FluidSolidPorousMaterial::recvSelf");
+		return res;
+	}
+    
+	this->setTag((int)data(0));
+	ndm = data(1);
+	loadStage = data(2);
+  rho = data(3);
+  refShearModulus = data(4);
+	refBulkModulus = data(5);
+	frictionAngle = data(6);
+  peakShearStrain = data(7);
+  refPressure = data(8);
+	cohesion = data(9);
+	pressDependCoeff = data(10);
+	numOfSurfaces = data(11);
+  residualPress = data(12);
+  e2p = data(13);
+	committedActiveSurf = data(14);
+
+	for(i = 0; i < 6; i++) temp[i] = data(i+15);
+  currentStress.setData(temp);
+
+	for(i = 0; i < 6; i++) temp[i] = data(i+21);
+  currentStrain.setData(temp);
+
+	for(i = 0; i < numOfSurfaces; i++) {
+		int k = 27 + i*8;
+    temp(0) = data(k+2);
+    temp(1) = data(k+3);
+    temp(2) = data(k+4);
+    temp(3) = data(k+5);
+    temp(4) = data(k+6);
+    temp(5) = data(k+7);
+		committedSurfaces[i+1].setData(temp, data(k), data(k+1));
+	}
+
+	return res;
 }
 
 
@@ -474,14 +574,27 @@ void PressureIndependMultiYield::Print(ostream &s, int flag )
 
 const Vector & PressureIndependMultiYield::getCommittedStress (void)
 {
-  if (ndm==3)
-    return currentStress.t2Vector();
+	double scale = sqrt(3./2.)*currentStress.deviatorLength()/committedSurfaces[numOfSurfaces].size();
+  if (ndm==3) {
+		static Vector temp7(7), temp6(6);
+		temp6 = currentStress.t2Vector();
+    temp7[0] = temp6[0];
+    temp7[1] = temp6[1];
+    temp7[2] = temp6[2];
+    temp7[3] = temp6[3];
+    temp7[4] = temp6[4];
+    temp7[5] = temp6[5];
+    temp7[6] = scale;
+		return temp7;
+	}
   else {
-    workV[0] = currentStress.t2Vector()[0];
-    workV[1] = currentStress.t2Vector()[1];
-    workV[2] = currentStress.t2Vector()[3];
-    
-    return workV;
+    static Vector temp4(4), temp6(6);
+		temp6 = currentStress.t2Vector();
+    temp4[0] = temp6[0];
+    temp4[1] = temp6[1];
+    temp4[2] = temp6[3];
+    temp4[3] = scale;
+    return temp4;
   }
 }
 
@@ -491,9 +604,11 @@ const Vector & PressureIndependMultiYield::getCommittedStrain (void)
   if (ndm==3)
     return currentStrain.t2Vector(1);
   else {
-    workV[0] = currentStrain.t2Vector(1)[0];
-    workV[1] = currentStrain.t2Vector(1)[1];
-    workV[2] = currentStrain.t2Vector(1)[3];
+    static Vector workV(3), temp6(6);
+		temp6 = currentStrain.t2Vector(1);
+    workV[0] = temp6[0];
+    workV[1] = temp6[1];
+    workV[2] = temp6[3];
     return workV;
   }
 }

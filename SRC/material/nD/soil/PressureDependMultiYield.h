@@ -1,5 +1,5 @@
-// $Revision: 1.7 $
-// $Date: 2001-10-16 22:34:29 $
+// $Revision: 1.8 $
+// $Date: 2002-02-08 19:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -43,7 +43,9 @@ public:
 			       double liquefactionParam2,
 			       double liquefactionParam3,
 			       double liquefactionParam4,
-			       double atm);
+			       double atm,
+						 double rho = 0.,
+		         double e = 0.);
 
      // Default constructor
      PressureDependMultiYield ();
@@ -53,6 +55,8 @@ public:
 
      // Destructor: clean up memory storage space.
      virtual ~PressureDependMultiYield ();
+
+		 double getRho(void) {return rho;} ;
 
      // Sets the values of the trial strain tensor.
      int setTrialStrain (const Vector &strain);
@@ -76,9 +80,6 @@ public:
      int setTrialStrain (const Tensor &v, const Tensor &r) {return 0;}
      int setTrialStrainIncr (const Tensor &v) {return 0;}
      int setTrialStrainIncr (const Tensor &v, const Tensor &r) {return 0;}
-//     const Tensor &getTangentTensor (void) {Tensor * t=new Tensor; return *t;}
-//jeremic@ucdavis.edu 22jan2001     const stresstensor getStressTensor (void) {stresstensor t; return t;}
-//jeremic@ucdavis.edu 22jan2001		 const Tensor &getStrainTensor(void) {Tensor * t=new Tensor; return *t;}
 
      // Accepts the current trial strain values as being on the solution path, and updates 
      // all model parameters related to stress/strain states. Return 0 on success.
@@ -115,6 +116,8 @@ private:
   // user supplied 
      int ndm;  //num of dimensions (2 or 3)
      static int loadStage;  //=0 if elastic; =1 or 2 if plastic
+		 double rho;  //mass density
+		 double e;    //void ratio
      double refShearModulus;
      double refBulkModulus;
      double frictionAngle;
@@ -179,8 +182,6 @@ private:
      T2Vector PPZPivotCommitted;
      T2Vector PPZCenterCommitted;
      T2Vector lockStressCommitted;
-     static Vector workV;
-     static Matrix workM;
      static Vector workV6;
      static T2Vector workT2V;
      
@@ -214,7 +215,6 @@ private:
 
      // Return 1 if crossing the active surface; return 0 o/w
      int  isCrossingNextSurface(void);  
-
 };
 
 #endif
