@@ -224,6 +224,22 @@ SOURCE=..\..\..\Src\domain\load\Beam2dUniformLoad.cpp
 
 SOURCE=..\..\..\Src\domain\load\Beam2dUniformLoad.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\load\Beam3dPointLoad.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\load\Beam3dPointLoad.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\load\Beam3dUniformLoad.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\load\Beam3dUniformLoad.h
+# End Source File
 # End Group
 # Begin Group "brick"
 
