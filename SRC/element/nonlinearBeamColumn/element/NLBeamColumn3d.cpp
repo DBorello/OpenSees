@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-01-31 05:03:50 $
+// $Revision: 1.5 $
+// $Date: 2001-03-29 03:56:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -216,22 +216,25 @@ NLBeamColumn3d::~NLBeamColumn3d()
    }  
    
    if (b)
-       delete [] b;
-   if (bp)
-       delete [] bp;
+     delete [] b;
 
-   if (fs)
-       delete [] fs;
-   if (vs)
-       delete [] vs;
-   if (Ssr)
-       delete [] Ssr;
-   
-   if (vscommit)
-       delete [] vscommit;
+   if (bp)
+     delete [] bp;
+
+   if (fs) 
+     delete [] fs;
+
+   if (vs) 
+     delete [] vs;
+
+   if (Ssr) 
+     delete [] Ssr;
+
+   if (vscommit) 
+     delete [] vscommit;
 
    if (crdTransf)
-	   delete crdTransf;
+     delete crdTransf;   
 }
 
 
@@ -260,8 +263,7 @@ void
 NLBeamColumn3d::setDomain(Domain *theDomain)
 {
    // check Domain is not null - invoked when object removed from a domain
-   if (theDomain == 0)
-   {
+   if (theDomain == 0) {
       node1Ptr = 0;
       node2Ptr = 0;
 	  return;
@@ -319,6 +321,7 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    }
    this->initializeSectionHistoryVariables();
    this->setSectionInterpolation();
+   this->update();
 }
 
 
@@ -389,6 +392,9 @@ NLBeamColumn3d::revertToLastCommit()
    P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
    K = crdTransf->getGlobalStiffMatrix(kv, Se);
    
+   initialFlag = 0;
+   this->update();
+
    return err;
 }
 
@@ -424,6 +430,9 @@ NLBeamColumn3d::revertToStart()
 
    P.Zero();
    K.Zero();
+
+   initialFlag = 0;
+   this->update();
    
    return err;
 }
@@ -433,7 +442,6 @@ NLBeamColumn3d::revertToStart()
 const Matrix &
 NLBeamColumn3d::getTangentStiff(void)
 {
-   this->updateElementState();
    return K;
 }
     
@@ -441,7 +449,6 @@ NLBeamColumn3d::getTangentStiff(void)
 const Vector &
 NLBeamColumn3d::getResistingForce(void)
 {
-   this->updateElementState();
    return P;
 }
 
@@ -484,7 +491,8 @@ NLBeamColumn3d::setSectionInterpolation (void)
 
 
 
-int NLBeamColumn3d::updateElementState(void)
+int 
+NLBeamColumn3d::update(void)
 {
   // get element global end displacements
   static Vector Ue(NEGD);

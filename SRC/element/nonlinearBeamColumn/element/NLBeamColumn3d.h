@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:40:45 $
+// $Revision: 1.3 $
+// $Date: 2001-03-29 03:56:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -73,6 +73,7 @@ class NLBeamColumn3d: public Element
     int commitState(void);
     int revertToLastCommit(void);        
     int revertToStart(void);
+    int update(void);    
     
     const Matrix &getTangentStiff(void);
     const Matrix &getSecantStiff(void);    
@@ -94,11 +95,10 @@ class NLBeamColumn3d: public Element
     friend ostream &operator<<(ostream &s, NLBeamColumn3d &E);        
     void Print(ostream &s, int flag =0);    
 
-	Response *setResponse(char **argv, int argc, Information &eleInformation);
+    Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
     
   private:
-    int  updateElementState(void);
     void getGlobalDispls(Vector &dg) const;
     void getGlobalAccels(Vector &ag) const;             
     void getForceInterpolatMatrix(double xi, Matrix &b, const ID &code);

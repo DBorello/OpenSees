@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-01-26 07:33:22 $
+// $Revision: 1.8 $
+// $Date: 2001-03-29 03:56:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -198,8 +198,7 @@ NLBeamColumn2d::~NLBeamColumn2d()
 {
    int i;
    
-   if (sections)
-   {
+   if (sections) {
       for (i=0; i < nSections; i++)
          if (sections[i])
             delete sections[i];
@@ -207,20 +206,25 @@ NLBeamColumn2d::~NLBeamColumn2d()
    }
 
    if (b)
-	   delete [] b;
+     delete [] b;
+
    if (bp)
-	   delete [] bp;
-   
-   if (fs)
-       delete [] fs;
-   if (vs)
-       delete [] vs;
-   if (Ssr)
-       delete [] Ssr;
-   if (vscommit)
-       delete [] vscommit;
-     
-   
+     delete [] bp;
+
+   if (fs) 
+     delete [] fs;
+
+   if (vs) 
+     delete [] vs;
+
+   if (Ssr) 
+     delete [] Ssr;
+
+   if (vscommit) 
+     delete [] vscommit;
+
+   if (crdTransf)
+     delete crdTransf;   
 }
 
 
@@ -314,6 +318,7 @@ NLBeamColumn2d::setDomain(Domain *theDomain)
    }
    this->initializeSectionHistoryVariables();
    this->setSectionInterpolation();
+   this->update();
 }
 
 
@@ -386,7 +391,10 @@ int NLBeamColumn2d::revertToLastCommit()
    currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
    P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
    K = crdTransf->getGlobalStiffMatrix(kv, Se);
-   
+
+   initialFlag = 0;
+   this->update();
+
    return err;
 }
 
@@ -421,16 +429,17 @@ int NLBeamColumn2d::revertToStart()
 
    P.Zero();
    K.Zero();
-   
+   initialFlag = 0;
+   this->update();
    return err;
 }
+
 
 
 
 const Matrix &
 NLBeamColumn2d::getTangentStiff(void)
 {
-   this->updateElementState();
    return K;
 }
     
@@ -438,7 +447,6 @@ NLBeamColumn2d::getTangentStiff(void)
 const Vector &
 NLBeamColumn2d::getResistingForce(void)
 {
-   this->updateElementState();
    return P;
 }
 
@@ -482,7 +490,8 @@ NLBeamColumn2d::setSectionInterpolation (void)
 
 
 
-int NLBeamColumn2d::updateElementState()
+
+int NLBeamColumn2d::update()
 {
   // get element global end displacements
   static Vector Ue(NEGD);
@@ -491,9 +500,10 @@ int NLBeamColumn2d::updateElementState()
   // compute global end displacement increments
   static Vector dUe(NEGD);
   // dUe = Ue - Uepr
+
   dUe = Ue;
   dUe.addVector(1.0, Uepr,-1.0);
-  
+
   if (dUe.Norm() != 0.0  || initialFlag == 0) 
   {
       
@@ -611,7 +621,7 @@ int NLBeamColumn2d::updateElementState()
       vr *= L;
 
       // calculate element stiffness matrix
-      // invertMatrix(3, f, kv);
+      // invert3by3Matrix(f, kv);
 
       if (f.Solve(I,kv) < 0)
 	 g3ErrorHandler->warning("NLBeamColumn3d::updateElementState() - could not invert flexibility\n");
