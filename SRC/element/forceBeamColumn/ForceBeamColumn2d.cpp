@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-16 21:10:03 $
+// $Revision: 1.3 $
+// $Date: 2002-12-19 18:44:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -692,18 +692,18 @@ ForceBeamColumn2d::update()
 	    for (ii = 0; ii < order; ii++) {
 	      switch (code(ii)) {
 	      case SECTION_RESPONSE_P:
-		for (jj = 0; jj < 3; jj++)
+		for (jj = 0; jj < NEBD; jj++)
 		  f(0,jj) += fb(ii,jj);
 		break;
 	      case SECTION_RESPONSE_MZ:
-		for (jj = 0; jj < 3; jj++) {
+		for (jj = 0; jj < NEBD; jj++) {
 		  tmp = fb(ii,jj);
 		  f(1,jj) += xL1*tmp;
 		  f(2,jj) += xL*tmp;
 		}
 		break;
 	      case SECTION_RESPONSE_VY:
-		for (jj = 0; jj < 3; jj++) {
+		for (jj = 0; jj < NEBD; jj++) {
 		  tmp = oneOverL*fb(ii,jj);
 		  f(1,jj) += tmp;
 		  f(2,jj) += tmp;
@@ -723,12 +723,15 @@ ForceBeamColumn2d::update()
 	      dei = dvs(ii)*wtL;
 	      switch(code(ii)) {
 	      case SECTION_RESPONSE_P:
-		vr(0) += dei; break;
+		vr(0) += dei;
+		break;
 	      case SECTION_RESPONSE_MZ:
-		vr(1) += xL1*dei; vr(2) += xL*dei; break;
+		vr(1) += xL1*dei; vr(2) += xL*dei;
+		break;
 	      case SECTION_RESPONSE_VY:
 		tmp = oneOverL*dei;
-		vr(1) += tmp; vr(2) += tmp; break;
+		vr(1) += tmp; vr(2) += tmp; 
+		break;
 	      default:
 		break;
 	      }
@@ -1460,18 +1463,18 @@ ForceBeamColumn2d::getInitialFlexibility(Matrix &fe)
     for (ii = 0; ii < order; ii++) {
       switch (code(ii)) {
       case SECTION_RESPONSE_P:
-	for (jj = 0; jj < 3; jj++)
+	for (jj = 0; jj < NEBD; jj++)
 	  fe(0,jj) += fb(ii,jj);
 	break;
       case SECTION_RESPONSE_MZ:
-	for (jj = 0; jj < 3; jj++) {
+	for (jj = 0; jj < NEBD; jj++) {
 	  tmp = fb(ii,jj);
 	  fe(1,jj) += xL1*tmp;
 	  fe(2,jj) += xL*tmp;
 	}
 	break;
       case SECTION_RESPONSE_VY:
-	for (jj = 0; jj < 3; jj++) {
+	for (jj = 0; jj < NEBD; jj++) {
 	  tmp = oneOverL*fb(ii,jj);
 	  fe(1,jj) += tmp;
 	  fe(2,jj) += tmp;
@@ -1483,8 +1486,6 @@ ForceBeamColumn2d::getInitialFlexibility(Matrix &fe)
     }
   }
   
-  fe *= L;
-
   return 0;
 }
 
@@ -1569,10 +1570,6 @@ ForceBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformatio
   else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0)
     return new ElementResponse(this, 4, Vector(3));
   
-  // plastic hinge rotation -
-  else if (strcmp(argv[0],"hingeRotation") == 0 || strcmp(argv[0],"plasticHingeRotation") == 0)
-    return new ElementResponse(this, 5, Vector(2));
-  
   // section response -
   else if (strcmp(argv[0],"section") ==0) {
     if (argc <= 2)
@@ -1593,7 +1590,6 @@ int
 ForceBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 {
   static Vector vp(3);
-  static Vector thetap(2);
   static Matrix fe(3,3);
 
   if (responseID == 1)
@@ -1624,54 +1620,6 @@ ForceBeamColumn2d::getResponse(int responseID, Information &eleInfo)
     return eleInfo.setVector(vp);
   }
 
-  // Plastic hinge rotation
-  else if (responseID == 5) {
-    // Can figure out inflection point, but for now use half of integration points
-    int numPts = numSections/2;
-    
-    double L = crdTransf->getInitialLength();
-
-    double wt[maxNumSections];
-    beamIntegr->getSectionWeights(numSections, L, wt);
-    
-    thetap.Zero();
-    double data[10];
-    
-    for (int i = 0; i < numPts; i++) {
-      int order = sections[i]->getOrder();
-      const ID &code = sections[i]->getType();
-      const Matrix &fse = sections[i]->getInitialFlexibility();
-
-      double wtL = wt[i]*L;
-      
-      Vector ep(data,order);
-      ep = vs[i];
-      ep.addMatrixVector(1.0, fse, Ssr[i], -1.0);
-      
-      for (int ii = 0; ii < order; ii++)
-	if (code(ii) == SECTION_RESPONSE_MZ)
-	  thetap(0) += ep(ii)*wtL;
-    }
-    for (int j = 0; j < numPts; j++) {
-      int i = numSections-1-j;
-      int order = sections[i]->getOrder();
-      const ID &code = sections[i]->getType();
-      const Matrix &fse = sections[i]->getInitialFlexibility();
-      
-      double wtL = wt[i]*L;
-
-      Vector ep(data,order);
-      ep = vs[i];
-      ep.addMatrixVector(1.0, fse, Ssr[i], -1.0);
-      
-      for (int ii = 0; ii < order; ii++)
-	if (code(ii) == SECTION_RESPONSE_MZ)
-	  thetap(1) += ep(ii)*wtL;
-    }
-    
-    return eleInfo.setVector(thetap);
-  }
-  
   else
     return -1;
 }
