@@ -21,8 +21,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-02-14 22:51:32 $
+// $Revision: 1.2 $
+// $Date: 2003-02-25 23:17:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/OPS_Globals.h,v $
                                                                         
 // Written: fmk 
@@ -43,6 +43,13 @@ extern OPS_Stream &opserr;
 // #define opserr cerr
 // #define OPS_Stream ostream
 // #define endln endl
+
+#ifdef _TCL84
+#define TCL_Char const char
+#else
+#define TCL_Char char
+#endif
+
 
 class Domain;
 class Element;
