@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:24 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 06:00:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclMain.cpp,v $
                                                                         
                                                                         
@@ -167,10 +167,10 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc)
      */
 
     tty = isatty(0);
-    char one = '1';
-    char zero = '0';
+    char one[2] = "1";
+    char zero[2] = "0";
     Tcl_SetVar(interp, "tcl_interactive",
-	    ((fileName == NULL) && tty) ? &one : &zero, TCL_GLOBAL_ONLY);
+	    ((fileName == NULL) && tty) ? one : zero, TCL_GLOBAL_ONLY);
     
     /*
      * Invoke application-specific initialization.
@@ -287,6 +287,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc)
 	    gotPartial = 1;
 	    continue;
 	}
+
 
 	gotPartial = 0;
 	code = Tcl_RecordAndEvalObj(interp, commandPtr, 0);
