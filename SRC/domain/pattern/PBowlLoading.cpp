@@ -314,8 +314,8 @@ PBowlLoading::PBowlLoading(int tag,
 
       //Check if read in correctly
 //BJ test
-      cout << "# of plastic bowl element: " << numPBE << endln;
-      cout <<  (*PBowlElements);
+      opserr << "# of plastic bowl element: " << numPBE << endln;
+     opserr <<  (*PBowlElements);
 //BJ test
     }
   }
@@ -652,7 +652,7 @@ PBowlLoading::CompPBLoads()
           for (k = 0; k< no_bnode; k++) 
             {
               if ( Temp(j) == (*Bowl_node)(k) )
-              //cout << Temp(j) << "  " << Bowl_node(k) << endln;
+              //opserr << Temp(j) << "  " << Bowl_node(k) << endln;
               break;
             } //endofIF
 
@@ -670,11 +670,11 @@ PBowlLoading::CompPBLoads()
 
   //BJ test
    //check the bowl nodes
-   cout << "\nCheck all plastic bowl nodes...\n";
+   opserr << "\nCheck all plastic bowl nodes...\n";
    for (int bi=0;bi<no_bnode;bi++)
-      cout<< (*Bowl_node)(bi) <<"  ";
-   cout<< endln << "# of pbowl nodes = " << no_bnode<<endln;
-   //cout<<"finish inputting  and organizing the Bowl_node array"<<endln;
+      opserr<< (*Bowl_node)(bi) <<"  ";
+   opserr<< endln << "# of pbowl nodes = " << no_bnode<<endln;
+   //opserr<<"finish inputting  and organizing the Bowl_node array"<<endln;
   //BJ test
 
 
@@ -765,18 +765,18 @@ PBowlLoading::CompPBLoads()
 
   // BJ test
    //check the boundary bowl nodes
-   cout << "\nCheck all boundary bowl nodes...\n";
+   opserr << "\nCheck all boundary bowl nodes...\n";
    for (int bi = 0; bi < no_boundarynodes; bi++)
-        cout << (*BoundaryNodes)(bi) <<"  ";
-   cout<< endln << "# of boundary bowl nodes = " << no_boundarynodes << endln;
+        opserr << (*BoundaryNodes)(bi) <<"  ";
+   opserr<< endln << "# of boundary bowl nodes = " << no_boundarynodes << endln;
   
    //check the exterior bowl nodes
-   cout << "\nCheck all exterior bowl nodes...\n";
+   opserr << "\nCheck all exterior bowl nodes...\n";
    for (int bi = 0; bi < no_exteriornodes; bi++)
-        cout << (*ExteriorNodes)(bi) <<"  ";
-   cout<< endln << "# of exterior bowl nodes = " << no_exteriornodes << endln;
+        opserr << (*ExteriorNodes)(bi) <<"  ";
+   opserr<< endln << "# of exterior bowl nodes = " << no_exteriornodes << endln;
   
-   cout<<"finish inputting  and organizing the Bowl_node array"<<endln;
+   opserr<<"finish inputting  and organizing the Bowl_node array"<<endln;
   // BJ test
 
 
@@ -847,10 +847,10 @@ PBowlLoading::CompPBLoads()
    }
 
    //BJ test
-    cout << "B nodes: " << nB << " " << *B_node;
-    cout << "E nodes: " << nE << " " << *E_node;
+    opserr << "B nodes: " << nB << " " << *B_node;
+    opserr << "E nodes: " << nE << " " << *E_node;
 
-    cout << " ...Me before  " << Me;
+    opserr << " ...Me before  " << Me;
    //BJ test
    //Zero out the diagonal block of Boundary nodes
    int m;
@@ -872,14 +872,14 @@ PBowlLoading::CompPBLoads()
         }
 
    //BJ test
-    cout << " ...Me after  " << Me;
-    cout << " ...Ke after  " << Ke;
+    opserr << " ...Me after  " << Me;
+    opserr << " ...Ke after  " << Ke;
    //BJ test
 
    //   get the u and u_dotdot for this element
    for ( int t=0;t<thetimeSteps; t++)
    {
-     //cout << "element: " << i << "" << " Time step: " << t << endln;
+     //opserr << "element: " << i << "" << " Time step: " << t << endln;
      for (int j=0;j<NIE;j++)  //BJ make it into # of nodes per element (2D or 3D...)
      {
        for (int d=0;d<NDOF;d++)
@@ -911,7 +911,7 @@ PBowlLoading::CompPBLoads()
 
 //BJ test
 
- cout<<"\nFinish calculating the forces..." << endln << endln;
+ opserr<<"\nFinish calculating the forces..." << endln << endln;
 //BJ test
   LoadComputed = true;
 
@@ -966,7 +966,7 @@ PBowlLoading::getNodalLoad(int nodeTag, double time)
   //If beyond time step, return 0 loads
   else if (incr2 > thetimeSteps ) {
       //test if ( nodeTag == 109)
-      //test    cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad) << endln;
+      //test    opserr << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad) << endln;
       return (*nodalLoad);
   }
 
@@ -980,9 +980,10 @@ PBowlLoading::getNodalLoad(int nodeTag, double time)
   }
 
   //test if ( nodeTag == 109) {
-  //test    cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad) << endln;
+  //test    opserr << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad) << endln;
   //test }
 
   return (*nodalLoad);
 
 }
+
