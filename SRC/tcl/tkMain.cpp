@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.8 2003-02-25 23:34:47 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.9 2003-03-04 22:03:53 mhscott Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -440,14 +440,17 @@ Prompt(Tcl_Interp *interp, int partial)
 
 #ifdef _TCL84
   const char *promptCmd;
+  const char one[12] = "tcl_prompt1";
+  const char two[12] = "tcl_prompt2";
 #else
   char *promptCmd;
+  char one[12] = "tcl_prompt1";
+  char two[12] = "tcl_prompt2";
 #endif
+
   int code;
   Tcl_Channel outChannel, errChannel;
 
-  const char one[12] = "tcl_prompt1";
-  const char two[12] = "tcl_prompt2";
   promptCmd = Tcl_GetVar(interp, partial ? two : one, TCL_GLOBAL_ONLY);
 			   
   if (promptCmd == NULL) {
