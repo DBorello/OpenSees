@@ -26,10 +26,10 @@ libndarray.a: $(NDARRAY)
 ndarray: libndarray.a
 
 math_tst: $(NDARRAY) math_tst.o
-	$(LINKER) math_tst.o $(NDARRAY) -o math_tst
+	$(LINKER) $(LINKFLAGS) math_tst.o $(NDARRAY) -o math_tst
 
 elast_tst: $(NDARRAY) elast_tst.o
-	$(LINKER) elast_tst.o $(NDARRAY) -o elast_tst
+	$(LINKER) $(LINKFLAGS) elast_tst.o $(NDARRAY) -o elast_tst
 
 # Miscellaneous
 tidy:	

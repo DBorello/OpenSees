@@ -1,8 +1,3 @@
-// $Revision: 1.5 $
-// $Date: 2003-11-25 18:46:23 $
-// $Source: /usr/local/cvs/OpenSees/SRC/nDarray/math_tst.cpp,v $
-                                                                        
-                                                                        
 ///*
 //################################################################################
 //# COPY-YES  (C):     :-))                                                      #
@@ -17,13 +12,8 @@
 //# PROGRAMMER(S):     Boris Jeremic                                             #
 //#                                                                              #
 //#                                                                              #
-//# DATE:              November '92                                              #
-//# UPDATE HISTORY:    August 11 '93 additional tests                            #
-//#                    December 21 '93 additional tests                          #
-//#                    December 29 '93 additional tests                          #
-//#                    October  '94    additional tests                          #
-//#                    August 2000   additional tests                            #
-//#                                                                              #
+//# DATE:              April 2001                                                #
+//# UPDATE HISTORY:                                                              #
 //#                                                                              #
 //#                                                                              #
 //################################################################################
@@ -38,20 +28,13 @@
 #include "straint.h"
 #include "BJvector.h"
 #include "BJmatrix.h"
-
-
-#include <Tensor.h>
-//#include <G3Globals.h>
-//#include <ConsoleErrorHandler.h>
-//ErrorHandler *g3ErrorHandler;
+#include "iostream.h"
 
 int main(int argc, char *argv[])
 {
-//  g3ErrorHandler = new ConsoleErrorHandler();
-  
   if (argc != 2)
     {
-      puts("\a\n usage: math_tst matrix_file_name\n");
+      puts("\a\n usage: elast_tst test01.std\n");
       exit( 1 );
     }
 ::printf("\n\n-------------  MACHINE (CPU) DEPENDENT THINGS  --------------\n\n");
@@ -75,6 +58,49 @@ double       sqrt_d_eps       = sqrt(d_macheps());
 ::printf(" sqrt double macheps = %.20e \n",sqrt_d_eps);
 //::printf(" sqrt long double macheps = %.20Le \n",sqrt_ld_eps);
 
+
+double one = 1.0;
+double onepmc = 1.0+double_eps;
+::printf("\n one = %.32e \n",one);
+::printf("onepmc = %.32e \n",onepmc);
+if (one == onepmc) 
+  {
+    printf("1.0 == 1.0+double_eps -->>  OK \n");
+  }
+else 
+  {
+    printf("1.0 == 1.0+double_eps -->>  NOT OK \n");
+  }   
+
+
+
+double one2 = 10e20;
+double onepmc2 = 10e20*(1.0+double_eps);
+::printf("\n one2 = %.32e \n",one2);
+::printf("onepmc2 = %.32e \n",onepmc2);
+if (one2 == onepmc2) 
+  {
+    printf("10e20 == 10e20*(1.0+double_eps) -->>  OK \n");
+  }
+else 
+  {
+    printf("10e20 == 10e20*(1.0+double_eps) -->>  NOT OK \n");
+  }   
+
+
+
+double one3 = 1.0;
+double onepmc3 = 1.0+double_eps*10000.0;
+::printf("\n one3 = %.32e \n",one3);
+::printf("onepmc3 = %.32e\n",onepmc3);
+if (one3 == onepmc3) 
+  {
+    printf("1.0 == 1.0+double_eps*10.0 -->>  OK \n");
+  }
+else 
+  {
+    printf("1.0 == 1.0+double_eps*10.0 -->>  NOT OK \n");
+  }   
 
 
 ::printf("\n\n----------------  MATRIX  -----------------\n\n");
@@ -119,8 +145,8 @@ double       sqrt_d_eps       = sqrt(d_macheps());
   BJmatrix evect = sym_matrix.eigenvectors();
   evect.print("ev","Eigenvectors of sym_matrix");
 
-// matrix to file "test.$$$"
-  m.write_standard("test.$$$", "this is a test");
+// matrix to file "test.dat"
+  m.write_standard("test.dat", "this is a test");
 
 // equivalence of two matrices ( within tolerance sqrt(macheps) )
   if ( first_matrix == m ) ::printf("\n first_matrix == m  TRUE \n");
@@ -133,7 +159,6 @@ double       sqrt_d_eps       = sqrt(d_macheps());
 // equivalence of two matrices ( within tolerance sqrt(macheps) )
   if ( m2 == m ) ::printf("\a\n m2 == m  TRUE \n");
   else ::printf("\n m2 == m  NOTTRUE \n");
-
 // matrix substraction
   BJmatrix m3 =m-m;
   m3.print("m3","\nm-m = \n");
@@ -388,8 +413,8 @@ res2.print("r2","\n result");
 
 ::printf("\n\n----------------- TENSOR --------------------\n\n");
   
-  Tensor t0();
-  Tensor *ta = new Tensor;
+//  Tensor t0();
+//  Tensor *ta = new Tensor;
   
 // tensor default construcotr
   tensor t1;
@@ -402,9 +427,9 @@ res2.print("r2","\n result");
   tensor t2( 2, def_dim_2, t2values);
   t2.print("t2","\ntensor t2 (2nd-order with values assignement)");
 
-  fprintf(stderr,"rank of t2: %d ", t2.rank());
+  cerr << "rank of t2: " << t2.rank() << endl;
   for (int ii=1; ii<=t2.rank(); ii++) {
-   fprintf(stderr,"dimension of t2 in %d is %d ", ii, t2.dim(ii));
+    cerr << "dimension of t2 in " << ii << " is " << t2.dim(ii) << endl;
   }
 
 
@@ -486,9 +511,12 @@ res2.print("r2","\n result");
 
 	 tensor Ipmnq = I2("pm") * I2("nq");
   tensor Imnpq = I2("mn") * I2("pq");
-//  tensor Apqmn = alpha("pq") * I2("mn");
-  tensor X  =  Imnpq * (1.0/3.0) ;// - Apqmn * (1.0/3.0);
-	 X.print();
+
+
+
+////  tensor Apqmn = alpha("pq") * I2("mn");
+//  tensor X  = (1.0/3.0) * Imnpq ;// - Apqmn * (1.0/3.0);
+//	 X.print();
 
 
 // tensor multiplications 
@@ -602,6 +630,13 @@ res2.print("r2","\n result");
   ee2.print("ee2","\n\n e(\"ijk\")*e(\"ijk\") \n");
 
 
+
+
+
+
+
+
+
 //....................................................................
 // Linear Isotropic Elasticity Tensor
 // building elasticity tensor
@@ -612,11 +647,6 @@ res2.print("r2","\n result");
               ( (I_ikjl+I_iljk)*(Ey/(2.0*(1.0+nu))));
 // building compliance tensor in one command line
   tensor D1= (I_ijkl * (-nu/Ey)) + ( (I_ikjl+I_iljk) * ((1.0+nu)/(2.0*Ey)));
-
-
-  tensor test3 = E1("ijkl") * I2("kl");
-  test3.print("tst","\n\n E1(\"ijkl\") * I2(\"kl\")\n"); 
-
 
 // multiplication between them
   tensor test = E1("ijkl")*D1("klpq");
@@ -654,6 +684,65 @@ res2.print("r2","\n result");
 
   if ( D1 == D2 ) ::printf("\n D1 == D2  TRUE \n");
   else ::printf("\a\n\n\n  D1 == D2  NOTTRUE \n\n\n");
+
+
+ 
+//::printf("stack length is : %u \n",_stklen);
+double PIo3 = PI/3.0;
+//::printf("Pi/3.0 = %f \n",PIo3);
+//-------------------------------------------
+  double p_start     = 5000.000;
+  double q_start     = 2000.0;
+  double theta_start = PIo3;
+//..//  double theta_start = 0.4;
+
+stresstensor stress = stress.pqtheta2stress(p_start, q_start, theta_start);
+stress.report("stress\n");
+
+
+straintensor strain = D2("ijkl") * stress("kl");
+strain.report("strain = D2(\"ijkl\") * stress(\"kl\") \n");
+
+
+
+
+
+
+::printf("\n\n\n\n\n");
+::printf("\n\n----------------- STRESS TENSOR --------(Kaspar Willam tests)--------\n\n");
+  
+	 static double stressvalues[] = {  1.0, 2.0, 3.0,
+                                    2.0, 2.0, 5.0,
+                                    3.0, 5.0, 9.0  };
+
+  stresstensor sigma(stressvalues);
+  sigma.report("\n\n stress tensor sigma (2nd-order with values assignment)");
+
+
+	 stresstensor s = sigma.deviator();
+	 s.report("\n\n stress deviator s \n\n"); 
+
+	 stresstensor test01 = s("ij") * s("ij");
+	 test01.reportshort("\n\n\n test01 \n\n\n ");
+
+	 stresstensor KWtest01 =  s("ij") * s("jk");
+	 stresstensor KWtest02 =  KWtest01("ik") * I2("ik");
+	 KWtest02.reportshort("\n\n\n KWtest02 \n\n\n "); 
+
+
+//  static double stressvector[] = {-3.0, -2.0, 5.0, 2.0, 3.0, 5.0};
+  static double stressvector[] = {-3.0, -2.0, 5.0, 2.0*sqrt(2.0), 3.0*sqrt(2.0), 5.0*sqrt(2.0)};
+
+// vector constructor
+  BJvector stressvector01( 6, stressvector);
+  stressvector01.print("sigma","\n\n stressvector01\n");
+
+	 BJvector product = stressvector01.transpose() * stressvector01;
+  product.print("product","\n\n product = stressvector01*stressvector01 \n");
+
+
+::printf("\n\n\n");
+
 
 
 // --------------
