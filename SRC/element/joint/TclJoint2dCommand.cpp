@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.6 $
-// $Date: 2003-04-28 20:54:40 $
+// $Revision: 1.7 $
+// $Date: 2003-04-29 18:43:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/TclJoint2dCommand.cpp,v $
 
 // Written: Arash	Created: 04/01
@@ -39,7 +39,7 @@
 #include <Joint2D.h>
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, const char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,  
