@@ -87,6 +87,10 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=..\..\..\OTHER\SuperLU\colamd.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\OTHER\SuperLU\dcolumn_bmod.c
 # End Source File
 # Begin Source File
@@ -240,6 +244,10 @@ SOURCE=..\..\..\OTHER\SuperLU\xerbla.c
 # Begin Source File
 
 SOURCE=..\..\..\OTHER\SuperLU\Cnames.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\OTHER\SuperLU\colamd.h
 # End Source File
 # Begin Source File
 
