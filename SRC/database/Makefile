@@ -10,8 +10,8 @@ OBJS       = FE_Datastore.o FileDatastore.o TclDatabaseCommands.o MySqlDatastore
 
 all:         $(OBJS)
 
-test:  main.o 
-	$(LINKER) $(LINKFLAGS) main.o FE_Datastore.o FileDatastore.o $(FE_LIBRARY) \
+test:  NeesDataTest.o 
+	$(LINKER) $(LINKFLAGS) NeesDataTest.o NEESData.o $(FE_LIBRARY) \
 	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
 	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) $(METIS_LIBRARY) \
 	 -o test
