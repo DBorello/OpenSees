@@ -18,10 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $                                                              
-// $Date: 2000-10-07 06:49:14 $                                                                  
+// $Revision: 1.3 $                                                              
+// $Date: 2000-12-13 08:16:22 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
-                                                                        
                                                                         
 // File: ~/material/NDMaterial.C
 //
@@ -39,11 +38,21 @@
 #include <Matrix.h>
 #include <Vector.h>
 
+Matrix NDMaterial::errMatrix(1,1);
+Vector NDMaterial::errVector(1);
+Tensor NDMaterial::errTensor(2, def_dim_2, 0.0 );
+
 NDMaterial::NDMaterial(int tag, int classTag)
 :Material(tag,classTag)
 {
 
 }
+NDMaterial::NDMaterial()
+:Material(0, 0)
+{
+
+}
+
 
 
 NDMaterial::~NDMaterial()
@@ -51,19 +60,116 @@ NDMaterial::~NDMaterial()
 
 }
 
-//Boris Jeremic and Zhaohui Yang
-void
-NDMaterial::setEPS( const EPState &EPS )
+
+const Vector &
+NDMaterial::getCommittedStress(void) 
 {
-    // Do nothing
-    return;
+  return this->getStress();
 }
 
-EPState *
-NDMaterial::getEPS() const
+const Vector &
+NDMaterial::getCommittedStrain(void) 
 {
-    EPState *eps;
-    return   eps;
+  return this->getStrain();
+}
+
+// methods to set and retrieve state.
+int 
+NDMaterial::setTrialStrain(const Vector &v)
+{
+   g3ErrorHandler->fatal("NDMaterial::setTrialStrain -- subclass responsibility");
+   return 0;    
+}
+
+int 
+NDMaterial::setTrialStrain(const Vector &v, const Vector &r)
+{
+   g3ErrorHandler->fatal("NDMaterial::setTrialStrain -- subclass responsibility");
+   return 0;    
+}
+
+int 
+NDMaterial::setTrialStrainIncr(const Vector &v)
+{
+   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
+   return 0;    
+}
+
+int 
+NDMaterial::setTrialStrainIncr(const Vector &v, const Vector &r)
+{
+   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
+   return 0;    
+}
+
+const Matrix &
+NDMaterial::getTangent(void)
+{
+   g3ErrorHandler->fatal("NDMaterial::getTangent -- subclass responsibility");
+   return errMatrix;    
+}
+
+const Vector &
+NDMaterial::getStress(void)
+{
+   g3ErrorHandler->fatal("NDMaterial::getStress -- subclass responsibility");
+   return errVector;    
+}
+
+const Vector &
+NDMaterial::getStrain(void)
+{
+   g3ErrorHandler->fatal("NDMaterial::getStrain -- subclass responsibility");
+   return errVector;    
+}
+
+int 
+NDMaterial::setTrialStrain(const Tensor &v)
+{
+   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
+   return 0;    
+}
+
+int 
+NDMaterial::setTrialStrain(const Tensor &v, const Tensor &r)    
+{
+   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
+   return 0;    
+}
+
+int 
+NDMaterial::setTrialStrainIncr(const Tensor &v)
+{
+   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
+   return 0;    
+}
+
+int 
+NDMaterial::setTrialStrainIncr(const Tensor &v, const Tensor &r)
+{
+   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
+   return 0;    
+}
+
+const Tensor &
+NDMaterial::getTangentTensor(void)
+{
+   g3ErrorHandler->fatal("NDMaterial::getTangentTensor -- subclass responsibility");
+   return errTensor;    
+}
+
+const Tensor &
+NDMaterial::getStressTensor(void)
+{
+   g3ErrorHandler->fatal("NDMaterial::getStressTensor -- subclass responsibility");
+   return errTensor;    
+}
+
+const Tensor &
+NDMaterial::getStrainTensor(void)
+{
+   g3ErrorHandler->fatal("NDMaterial::getStrainTensor -- subclass responsibility");
+   return errTensor;    
 }
 
 

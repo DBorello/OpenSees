@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $                                                              
-// $Date: 2000-10-07 06:49:14 $                                                                  
+// $Revision: 1.3 $                                                              
+// $Date: 2000-12-13 08:16:22 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $                                                                
                                                                         
                                                                         
@@ -58,29 +58,27 @@ class NDMaterial : public Material
     virtual ~NDMaterial();
 
     // methods to set state and retrieve state using Matrix and Vector classes
-    virtual int setTrialStrain(const Vector &v) = 0;
-    virtual int setTrialStrain(const Vector &v, const Vector &r) = 0;
-    virtual int setTrialStrainIncr(const Vector &v) = 0;
-    virtual int setTrialStrainIncr(const Vector &v, const Vector &r) = 0;
-    virtual const Matrix &getTangent(void) = 0;
-    virtual const Vector &getStress(void) = 0;
-    virtual const Vector &getStrain(void) = 0;
+    virtual int setTrialStrain(const Vector &v);
+    virtual int setTrialStrain(const Vector &v, const Vector &r);
+    virtual int setTrialStrainIncr(const Vector &v);
+    virtual int setTrialStrainIncr(const Vector &v, const Vector &r);
+    virtual const Matrix &getTangent(void);
+    virtual const Vector &getStress(void);
+    virtual const Vector &getStrain(void);
+
+    // new methods for recorder requested by Zhouhui Yang .. MAY NOT STAY
+    virtual const Vector &getCommittedStress(void);
+    virtual const Vector &getCommittedStrain(void);    
 
     // methods to set and retrieve state using the Tensor class    
-    virtual int setTrialStrain(const Tensor &v) = 0;
-    virtual int setTrialStrain(const Tensor &v, const Tensor &r) = 0;    
-    virtual int setTrialStrainIncr(const Tensor &v) = 0;
-    virtual int setTrialStrainIncr(const Tensor &v, const Tensor &r) = 0;
-    virtual const Tensor &getTangentTensor(void) = 0;
-    virtual const Tensor &getStressTensor(void) = 0;
-    virtual const Tensor &getStrainTensor(void) = 0;
+    virtual int setTrialStrain(const Tensor &v);
+    virtual int setTrialStrain(const Tensor &v, const Tensor &r);    
+    virtual int setTrialStrainIncr(const Tensor &v);
+    virtual int setTrialStrainIncr(const Tensor &v, const Tensor &r);
+    virtual const Tensor &getTangentTensor(void);
+    virtual const Tensor &getStressTensor(void);
+    virtual const Tensor &getStrainTensor(void);
     
-    //Boris Jeremic and Zhaohui added____10-01-2000
-    //set and get the EPState used in Elasto-plastic 3D material
-    virtual void     setEPS( const EPState &EPS );
-    virtual EPState *getEPS( void ) const;  
-    
-
     virtual int commitState(void) = 0;
     virtual int revertToLastCommit(void) = 0;
     virtual int revertToStart(void) = 0;
@@ -97,6 +95,9 @@ class NDMaterial : public Material
   protected:
     
   private:
+    static Matrix errMatrix;
+    static Vector errVector;
+    static Tensor errTensor;
 };
 
 
