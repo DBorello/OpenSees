@@ -45,9 +45,17 @@ PySimple1::PySimple1()
 :UniaxialMaterial(0,0),
  soilType(0), pult(0.0), y50(0.0), drag(0.0), dashpot(0.0)
 {
-  // Initialize variables
-  //
+  // Initialize variables .. WILL NOT WORK AS NOTHING SET
   // this->revertToStart();
+
+  // need to set iterations and tolerance
+
+  // BTW maxIterations and tolerance should not be private variables, they
+  // should be static .. all PySimple1 materials share the same values & 
+  // these values don't change
+
+  maxIterations = 20;
+  tolerance     = 1.0e-12;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -508,8 +516,46 @@ PySimple1::commitState(void)
 int 
 PySimple1::revertToLastCommit(void)
 {
-	// Nothing to do here
-    return 0;
+  // Nothing to do here -- WRONG -- have a look at setTrialStrain() .. everything
+  // calculated based on trial values & trial values updated in method .. need to 
+  // reset to committed values
+  
+  // for convenience i am just gonna do the reverse of commit
+  
+  Ty       = Cy;
+  Tp       = Cp;
+  Ttangent = Ctangent;
+  
+  
+  TNFpinr   = CNFpinr;
+  TNFpinl   = CNFpinl; 
+  TNFyinr   = CNFyinr;
+  TNFyinl   = CNFyinl;	
+  TNF_p     = CNF_p;
+  TNF_y     = CNF_y;
+  TNF_tang  = CNF_tang;
+  
+  TDrag_pin = CDrag_pin;
+  TDrag_yin = CDrag_yin;
+  TDrag_p   = CDrag_p;
+  TDrag_y   = CDrag_y;
+  TDrag_tang= CDrag_tang;
+  
+  TClose_yleft  = CClose_yleft;
+  TClose_yright = CClose_yright;
+  TClose_p      = CClose_p;
+  TClose_y      = CClose_y;
+  TClose_tang   = CClose_tang;
+  
+  TGap_y    = CGap_y;
+  TGap_p    = CGap_p;
+  TGap_tang = CGap_tang;
+  
+  TFar_y    = CFar_y;
+  TFar_p    = CFar_p;
+  TFar_tang = CFar_tang;
+  
+  return 0;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -764,8 +810,11 @@ PySimple1::recvSelf(int cTag, Channel &theChannel,
 	TyRate    = data(37);
 	
 	initialTangent = data(38);
+
+	// set the trial quantities
+	this->revertToLastCommit();
   }
-    
+
   return res;
 }
 

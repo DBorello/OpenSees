@@ -45,9 +45,17 @@ QzSimple1::QzSimple1()
 :UniaxialMaterial(0,MAT_TAG_QzSimple1),
  QzType(0), Qult(0.0), z50(0.0), suction(0.0), dashpot(0.0)
 {
-  // Initialize variables
-  //
-  //	this->revertToStart();
+  // Initialize variables .. WILL NOT WORK AS NOTHING SET
+  // this->revertToStart();
+
+  // need to set iterations and tolerance
+
+  // BTW maxIterations and tolerance should not be private variables, they
+  // should be static .. all PySimple1 materials share the same values & 
+  // these values don't change
+
+  maxIterations = 20;
+  tolerance     = 1.0e-12;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -459,41 +467,41 @@ QzSimple1::getStrainRate(void)
 int 
 QzSimple1::commitState(void)
 {
-	// Commit trial history variable -- Combined element
+  // Commit trial history variable -- Combined element
     Cz       = Tz;
     CQ       = TQ;
     Ctangent = Ttangent;
     
-	// Commit trial history variables for Near Field component
-	CNF_Qinr   = TNF_Qinr;
-	CNF_Qinl   = TNF_Qinl; 
-	CNF_zinr   = TNF_zinr;
-	CNF_zinl   = TNF_zinl;	
-	CNF_Q      = TNF_Q;
-	CNF_z      = TNF_z;
-	CNF_tang   = TNF_tang;
-
-	// Commit trial history variables for Suction component
-	CSuction_Qin  = TSuction_Qin;
-	CSuction_zin  = TSuction_zin;
-	CSuction_Q    = TSuction_Q;
-	CSuction_z    = TSuction_z;
-	CSuction_tang = TSuction_tang;
-
-	// Commit trial history variables for Closure component
-	CClose_Q      = TClose_Q;
-	CClose_z      = TClose_z;
-	CClose_tang   = TClose_tang;
-
-	// Commit trial history variables for the Gap
-	CGap_z    = TGap_z;
-	CGap_Q    = TGap_Q;
-	CGap_tang = TGap_tang;
+    // Commit trial history variables for Near Field component
+    CNF_Qinr   = TNF_Qinr;
+    CNF_Qinl   = TNF_Qinl; 
+    CNF_zinr   = TNF_zinr;
+    CNF_zinl   = TNF_zinl;	
+    CNF_Q      = TNF_Q;
+    CNF_z      = TNF_z;
+    CNF_tang   = TNF_tang;
     
-	// Commit trial history variables for the Far Field
-	CFar_z    = TFar_z;
-	CFar_Q    = TFar_Q;
-	CFar_tang = TFar_tang;
+    // Commit trial history variables for Suction component
+    CSuction_Qin  = TSuction_Qin;
+    CSuction_zin  = TSuction_zin;
+    CSuction_Q    = TSuction_Q;
+    CSuction_z    = TSuction_z;
+    CSuction_tang = TSuction_tang;
+    
+    // Commit trial history variables for Closure component
+    CClose_Q      = TClose_Q;
+    CClose_z      = TClose_z;
+    CClose_tang   = TClose_tang;
+    
+    // Commit trial history variables for the Gap
+    CGap_z    = TGap_z;
+    CGap_Q    = TGap_Q;
+    CGap_tang = TGap_tang;
+    
+    // Commit trial history variables for the Far Field
+    CFar_z    = TFar_z;
+    CFar_Q    = TFar_Q;
+    CFar_tang = TFar_tang;
     
     return 0;
 }
@@ -502,8 +510,42 @@ QzSimple1::commitState(void)
 int 
 QzSimple1::revertToLastCommit(void)
 {
-	// Nothing to do here
-    return 0;
+  // Nothing to do here -- WRONG -- have a look at setTrialStrain() .. everything
+  // calculated based on trial values & trial values updated in method .. need to 
+  // reset to committed values
+  
+  // for convenience i am just gonna do the reverse of commit 
+  Tz       = Cz;
+  TQ       = CQ;
+  Ttangent = Ctangent;
+  
+  TNF_Qinr   = CNF_Qinr;
+  TNF_Qinl   = CNF_Qinl; 
+  TNF_zinr   = CNF_zinr;
+  TNF_zinl   = CNF_zinl;	
+  TNF_Q      = CNF_Q;
+  TNF_z      = CNF_z;
+  TNF_tang   = CNF_tang;
+  
+  TSuction_Qin  = CSuction_Qin;
+  TSuction_zin  = CSuction_zin;
+  TSuction_Q    = CSuction_Q;
+  TSuction_z    = CSuction_z;
+  TSuction_tang = CSuction_tang;
+  
+  TClose_Q      = CClose_Q;
+  TClose_z      = CClose_z;
+  TClose_tang   = CClose_tang;
+  
+  TGap_z    = CGap_z;
+  TGap_Q    = CGap_Q;
+  TGap_tang = CGap_tang;
+  
+  TFar_z    = CFar_z;
+  TFar_Q    = CFar_Q;
+  TFar_tang = CFar_tang;
+
+  return 0;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -821,6 +863,9 @@ QzSimple1::recvSelf(int cTag, Channel &theChannel,
 	TzRate    = data(36);
 	
 	initialTangent = data(37);
+
+	// set the trial quantities
+	this->revertToLastCommit();
   }
     
   return res;

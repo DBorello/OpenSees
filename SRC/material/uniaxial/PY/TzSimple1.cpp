@@ -44,9 +44,17 @@ TzSimple1::TzSimple1()
 :UniaxialMaterial(0,0),
  tzType(0), tult(0.0), z50(0.0), dashpot(0.0)
 {
-  // Initialize variables 
-  //
+  // Initialize variables .. WILL NOT WORK AS NOTHING SET
   // this->revertToStart();
+
+  // need to set iterations and tolerance
+
+  // BTW maxIterations and tolerance should not be private variables, they
+  // should be static .. all PySimple1 materials share the same values & 
+  // these values don't change
+
+  maxIterations = 20;
+  tolerance     = 1.0e-12;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -292,32 +300,50 @@ TzSimple1::getStrainRate(void)
 int
 TzSimple1::commitState(void)
 {
-	// Commit trial history variable -- Combined element
-    Cz       = Tz;
-    Ct       = Tt;
-    Ctangent = Ttangent;
+  // Commit trial history variable -- Combined element
+  Cz       = Tz;
+  Ct       = Tt;
+  Ctangent = Ttangent;
+  
+  // Commit trial history variables for Near Field component
+  CNF_tin = TNF_tin;
+  CNF_zin = TNF_zin;
+  CNF_t   = TNF_t;
+  CNF_z   = TNF_z;
+  CNF_tang= TNF_tang;
+  
+  // Commit trial history variables for the Far Field
+  CFar_z    = TFar_z;
+  CFar_t    = TFar_t;
+  CFar_tang = TFar_tang;
     
-	// Commit trial history variables for Near Field component
-	CNF_tin = TNF_tin;
-	CNF_zin = TNF_zin;
-	CNF_t   = TNF_t;
-	CNF_z   = TNF_z;
-	CNF_tang= TNF_tang;
-
-	// Commit trial history variables for the Far Field
-	CFar_z    = TFar_z;
-	CFar_t    = TFar_t;
-	CFar_tang = TFar_tang;
-    
-    return 0;
+  return 0;
 }
 
 /////////////////////////////////////////////////////////////////////
 int 
 TzSimple1::revertToLastCommit(void)
 {
-	// Nothing to do here
-    return 0;
+  // Nothing to do here -- WRONG -- have a look at setTrialStrain() .. everything
+  // calculated based on trial values & trial values updated in method .. need to 
+  // reset to committed values
+  
+  // for convenience i am just gonna do the reverse of commit
+  Tz       = Cz;
+  Tt       = Ct;
+  Ttangent = Ctangent;
+  
+  TNF_tin = CNF_tin;
+  TNF_zin = CNF_zin;
+  TNF_t   = CNF_t;
+  TNF_z   = CNF_z;
+  TNF_tang= CNF_tang;
+  
+  TFar_z    = CFar_z;
+  TFar_t    = CFar_t;
+  TFar_tang = CFar_tang;
+
+  return 0;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -488,6 +514,8 @@ TzSimple1::recvSelf(int cTag, Channel &theChannel,
 	TzRate    = data(18);
 	
 	initialTangent = data(19);
+	
+	this->revertToLastCommit();
   }
     
   return res;
