@@ -9,12 +9,13 @@ NDARRAY  = BJtensor.o \
 	   nDarray.o  \
 	   basics.o   \
 	   stresst.o  \
-	   straint.o 
+	   straint.o  \
+
 
 OBJS       = Vector.o ID.o Matrix.o  $(NDARRAY)
 
 ################### TARGETS ########################
-all: $(OBJS) 
+all: $(OBJS); $(AR) -rv $(NDARRAY_LIBRARY) $(NDARRAY)
 
 libndarray.a: $(NDARRAY)
 	$(AR) -rv $(NDARRAY_LIBRARY) $(NDARRAY)
@@ -41,7 +42,12 @@ tidy:
 
 clean: tidy
 	@$(RM) $(RMFLAGS) $(OBJS) *.o core test
-	@$(RM) $(RMFLAGS) math_tst elast_tst 
+	@$(RM) $(RMFLAGS) math_tst  
+	@$(RM) $(RMFLAGS) elast_tst 
+	@$(RM) $(RMFLAGS) test.\$\$\$ 
+	@$(RM) $(RMFLAGS) *.ti 
+	@$(RM) $(RMFLAGS) tca.map 
+	@$(RM) $(RMFLAGS) .inslog*
 
 spotless: clean
 
