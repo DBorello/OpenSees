@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.52 $
-// $Date: 2003-06-03 17:43:05 $
+// $Revision: 1.53 $
+// $Date: 2003-11-10 21:41:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -35,7 +35,11 @@
 extern "C" {
 #include <tcl.h>
 #include <tk.h>
+EXTERN int      Tcl_SetObjCmd _ANSI_ARGS_((ClientData clientData,
+                    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
 }
+
+
 
 #include <OPS_Globals.h>
 
@@ -272,6 +276,8 @@ int g3AppInit(Tcl_Interp *interp) {
     opserr.setFloatField(SCIENTIFIC);
     opserr.setFloatField(FIXEDD);
 #endif
+    Tcl_CreateObjCommand(interp, "pset", Tcl_SetObjCmd,
+			 (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
 
     Tcl_CreateCommand(interp, "wipe", &wipeModel,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
@@ -551,6 +557,9 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     theEigenAnalysis = 0;
   }
   */
+
+  if (theDatabase != 0)
+    delete theDatabase;
 
   theDomain.clearAll();
 
