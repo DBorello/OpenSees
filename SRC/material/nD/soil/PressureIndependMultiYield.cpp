@@ -1,5 +1,5 @@
-// $Revision: 1.6 $
-// $Date: 2001-08-07 22:31:04 $
+// $Revision: 1.7 $
+// $Date: 2001-08-15 02:21:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -205,7 +205,7 @@ int PressureIndependMultiYield::setTrialStrain (const Vector &strain)
 		g3ErrorHandler->fatal("");
 	}
 
-  strainRate = T2Vector(temp-currentStrain.t2Vector());
+  strainRate = T2Vector(temp-currentStrain.t2Vector(1),1);
 
 	return 0;
 }
@@ -233,7 +233,7 @@ int PressureIndependMultiYield::setTrialStrainIncr (const Vector &strain)
 		g3ErrorHandler->fatal("");
 	}
 
-  strainRate = T2Vector(temp);
+  strainRate = T2Vector(temp,1);
 	return 0;
 }
 
@@ -252,7 +252,8 @@ const Matrix & PressureIndependMultiYield::getTangent (void)
   	for (int i=0;i<6;i++) 
 	  	for (int j=0;j<6;j++) {
 		  	theTangent(i,j) = 0.;
-        if (i==j) theTangent(i,j) += 2.*refShearModulus;
+        if (i==j) theTangent(i,j) += refShearModulus;
+        if (i<3 && j<3 && i==j) theTangent(i,j) += refShearModulus;
 			  if (i<3 && j<3) theTangent(i,j) += (refBulkModulus - 2.*refShearModulus/3.);
 		}
 	}
@@ -271,7 +272,8 @@ const Matrix & PressureIndependMultiYield::getTangent (void)
 	  for (int i=0;i<6;i++) 
 		  for (int j=0;j<6;j++) {
 			  theTangent(i,j) = - coeff*devia[i]*devia[j];
-        if (i==j) theTangent(i,j) += 2.*refShearModulus;
+        if (i==j) theTangent(i,j) += refShearModulus;
+        if (i<3 && j<3 && i==j) theTangent(i,j) += refShearModulus;
 		  	if (i<3 && j<3) theTangent(i,j) += (refBulkModulus - 2.*refShearModulus/3.);
 			}
   }
@@ -299,7 +301,7 @@ const Vector & PressureIndependMultiYield::getStress (void)
 	if (loadStage != 0 && e2p == 0) elast2Plast();
 
 	if (loadStage==0) {  //linear elastic
-		Vector trialStrain = currentStrain.t2Vector() + strainRate.t2Vector();
+		Vector trialStrain = currentStrain.t2Vector(1) + strainRate.t2Vector(1);
     getTangent();
     Vector a = theTangent * trialStrain;
 		trialStress = T2Vector(a);
@@ -466,11 +468,11 @@ const Vector & PressureIndependMultiYield::getCommittedStress (void)
 const Vector & PressureIndependMultiYield::getCommittedStrain (void)
 {
 	if (ndm==3)
-    return currentStrain.t2Vector();
+    return currentStrain.t2Vector(1);
 	else {
-    workV[0] = currentStrain.t2Vector()[0];
-    workV[1] = currentStrain.t2Vector()[1];
-    workV[2] = currentStrain.t2Vector()[3];
+    workV[0] = currentStrain.t2Vector(1)[0];
+    workV[1] = currentStrain.t2Vector(1)[1];
+    workV[2] = currentStrain.t2Vector(1)[3];
     return workV;
   }
 }

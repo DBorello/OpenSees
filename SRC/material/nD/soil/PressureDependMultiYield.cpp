@@ -1,5 +1,5 @@
-// $Revision: 1.6 $
-// $Date: 2001-08-07 22:31:03 $
+// $Revision: 1.7 $
+// $Date: 2001-08-15 02:21:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -289,7 +289,7 @@ int PressureDependMultiYield::setTrialStrain (const Vector &strain)
 		g3ErrorHandler->fatal("");
 	}
 
-  strainRate = T2Vector(temp-currentStrain.t2Vector());
+  strainRate = T2Vector(temp-currentStrain.t2Vector(1),1);
 	return 0;
 }
 
@@ -316,7 +316,7 @@ int PressureDependMultiYield::setTrialStrainIncr (const Vector &strain)
 		g3ErrorHandler->fatal("");
 	}
 
-  strainRate = T2Vector(temp);
+  strainRate = T2Vector(temp,1);
 	return 0;
 }
 
@@ -330,21 +330,22 @@ int PressureDependMultiYield::setTrialStrainIncr (const Vector &strain, const Ve
 const Matrix & PressureDependMultiYield::getTangent (void)
 {
 	if (loadStage != 0 && e2p == 0) elast2Plast();
-
+ 
 	if (loadStage==0) {  //linear elastic
   	for (int i=0;i<6;i++) 
 	  	for (int j=0;j<6;j++) {
 		  	theTangent(i,j) = 0.;
-        if (i==j) theTangent(i,j) += 2.*refShearModulus;
+        if (i==j) theTangent(i,j) += refShearModulus;
+        if (i<3 && j<3 && i==j) theTangent(i,j) += refShearModulus;
 			  if (i<3 && j<3) theTangent(i,j) += (refBulkModulus - 2.*refShearModulus/3.);
 		}
 	}
 	else {
 	  double coeff1, coeff2;
   	static Vector devia(6);
-  	double factor = getModulusFactor(currentStress);
-  	double shearModulus = factor*refShearModulus;
-  	double bulkModulus = factor*refBulkModulus;		
+    double factor = getModulusFactor(currentStress);
+    double shearModulus = factor*refShearModulus;
+    double bulkModulus = factor*refBulkModulus;		
 	
     if (loadStage!=0 && committedActiveSurf > 0) {
 	  	T2Vector Q = getSurfaceNormal(currentStress);
@@ -361,7 +362,8 @@ const Matrix & PressureDependMultiYield::getTangent (void)
 	  for (int i=0;i<6;i++) 
 	  	for (int j=0;j<6;j++) {
 		  	theTangent(i,j) = - coeff2*devia[i]*devia[j];
-        if (i==j) theTangent(i,j) += 2.*shearModulus;
+        if (i==j) theTangent(i,j) += shearModulus;
+        if (i<3 && j<3 && i==j) theTangent(i,j) += shearModulus;
 		  	if (i<3 && j<3) theTangent(i,j) += (bulkModulus - 2.*shearModulus/3. - coeff1);
 			}
   }
@@ -372,12 +374,12 @@ const Matrix & PressureDependMultiYield::getTangent (void)
 	else {
 	  workM(0,0) = theTangent(0,0);
 	  workM(0,1) = theTangent(0,1);
-	  workM(0,2) = 0.;//theTangent(0,3);
+	  workM(0,2) = theTangent(0,3);
 	  workM(1,0) = theTangent(1,0);
 	  workM(1,1) = theTangent(1,1);
-	  workM(1,2) = 0.;//theTangent(1,3);
-	  workM(2,0) = 0.;//theTangent(3,0);
-	  workM(2,1) = 0.;//theTangent(3,1);
+	  workM(1,2) = theTangent(1,3);
+	  workM(2,0) = theTangent(3,0);
+	  workM(2,1) = theTangent(3,1);
 	  workM(2,2) = theTangent(3,3);
   	return workM;
 	}
@@ -393,7 +395,7 @@ const Vector & PressureDependMultiYield::getStress (void)
   if (loadStage==0) {  //linear elastic
     trialStrain = T2Vector(currentStrain.t2Vector() + strainRate.t2Vector());
     getTangent();
-    Vector a = theTangent * trialStrain.t2Vector();
+    Vector a = theTangent * trialStrain.t2Vector(1);
     trialStress = T2Vector(a);
   }
   else {
@@ -579,11 +581,11 @@ const Vector & PressureDependMultiYield::getCommittedStress (void)
 const Vector & PressureDependMultiYield::getCommittedStrain (void)
 {
 	if (ndm==3)
-    return currentStrain.t2Vector();
+    return currentStrain.t2Vector(1);
 	else {
-    workV[0] = currentStrain.t2Vector()[0];
-    workV[1] = currentStrain.t2Vector()[1];
-    workV[2] = currentStrain.t2Vector()[3];
+    workV[0] = currentStrain.t2Vector(1)[0];
+    workV[1] = currentStrain.t2Vector(1)[1];
+    workV[2] = currentStrain.t2Vector(1)[3];
     return workV;
   }
 }

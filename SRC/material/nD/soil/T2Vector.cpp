@@ -1,5 +1,5 @@
-// $Revision: 1.3 $
-// $Date: 2001-08-07 22:31:05 $
+// $Revision: 1.4 $
+// $Date: 2001-08-15 02:21:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.cpp,v $
                                                                         
 // Written: ZHY
@@ -19,6 +19,8 @@
 #define UP_LIMIT    10e+30
 #define LOW_LIMIT   10e-15
 
+
+Vector T2Vector::engrgStrain(6);
 
 double operator && (const Vector & a, const Vector & b)
 {
@@ -41,7 +43,7 @@ T2Vector::T2Vector() : theT2Vector(6), theDeviator(6), theVolume(0.)
 }
 
 
-T2Vector::T2Vector(const Vector & Vector_init) : theT2Vector(6), theDeviator(6)
+T2Vector::T2Vector(const Vector & Vector_init, int isEngrgStrain) : theT2Vector(6), theDeviator(6)
 {
 	if ( Vector_init.Size() != 6) {
 	  cerr << "FATAL:T2Vector::T2Vector(Vector &): vector size not equal to 6" << endl;
@@ -53,6 +55,10 @@ T2Vector::T2Vector(const Vector & Vector_init) : theT2Vector(6), theDeviator(6)
   for(int i=0; i<3; i++){
     theDeviator[i] = theT2Vector[i] - theVolume;
     theDeviator[i+3] = theT2Vector[i+3];
+		if (isEngrgStrain==1) {
+      theDeviator[i+3] /= 2.;
+      theT2Vector[i+3] /= 2.;
+		}
   }
 }
 
@@ -80,6 +86,31 @@ T2Vector::T2Vector(const Vector & deviat_init, double volume_init)
 T2Vector::~T2Vector()
 {
 }
+
+
+const Vector & T2Vector::t2Vector(int isEngrgStrain) const
+{
+	if (isEngrgStrain==0) return theT2Vector;
+
+  engrgStrain = theT2Vector;
+  for(int i=0; i<3; i++){
+      engrgStrain[i+3] *= 2.;
+	}
+	return engrgStrain;
+}
+
+
+const Vector & T2Vector::deviator(int isEngrgStrain) const
+{
+	if (isEngrgStrain==0) return theDeviator;
+
+  engrgStrain = theDeviator;
+  for(int i=0; i<3; i++){
+      engrgStrain[i+3] *= 2.;
+	}
+	return engrgStrain;
+}
+
 
 double T2Vector::t2VectorLength() const
 {

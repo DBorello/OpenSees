@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2000-12-19 03:35:02 $
+// $Revision: 1.2 $
+// $Date: 2001-08-15 02:21:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.h,v $
                                                                         
 // Written: ZHY
@@ -26,13 +26,13 @@ class T2Vector
 public:
   // constructors
   T2Vector();
-  T2Vector(const Vector & T2Vector_init);
+  T2Vector(const Vector & T2Vector_init, int isEngrgStrain=0);
   T2Vector(const Vector & deviat_init, double volume_init);
   
   ~T2Vector();
 
-  const Vector & t2Vector() const {return theT2Vector; } 
-  const Vector & deviator() const {return theDeviator; } 
+  const Vector & t2Vector(int isEngrgStrain=0) const; 
+  const Vector & deviator(int isEngrgStrain=0) const;
   double volume() const {return theVolume; }
   const Vector unitT2Vector() const;
   const Vector unitDeviator() const;
@@ -61,7 +61,7 @@ private:
   Vector theT2Vector;
   Vector theDeviator;
   double theVolume;
-
+  static Vector engrgStrain;
 };
 
 
