@@ -7,6 +7,7 @@ OBJS       = NDMaterial.o ElasticIsotropic3D.o ElasticIsotropicMaterial.o \
 	BidirectionalMaterial.o
 
 all:	$(OBJS)
+	@$(CD) $(FE)/material/nD/soil; $(MAKE);
 
 # Miscellaneous
 
@@ -17,7 +18,11 @@ clean: tidy
 	@$(RM) $(RMFLAGS) $(OBJS) *.o
 
 spotless: clean
+	@$(CD) $(FE)/material/nD/soil; $(MAKE) wipe;
 
 wipe: spotless
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
+
+

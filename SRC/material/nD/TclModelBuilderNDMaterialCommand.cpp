@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2000-12-18 09:51:43 $
+// $Revision: 1.5 $
+// $Date: 2000-12-19 04:00:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -39,6 +39,11 @@
 #include <ElasticIsotropicMaterial.h>
 #include <J2Plasticity.h>
 #include <BidirectionalMaterial.h>
+
+
+#include <PressureIndependMultiYield.h>
+#include <PressureDependMultiYield.h>
+#include <FluidSolidPorousMaterial.h>
 
 #include <string.h>
 
@@ -201,6 +206,133 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	theMaterial = new J2Plasticity (tag, 0, K, G, sig0, sigInf, 
 					delta, H);
     }	
+    
+    // Pressure Independend Multi-yield, by ZHY
+    else if (strcmp(argv[1],"PressureIndependMultiYield") == 0) {
+	const int numParam = 9;
+	int tag;  double param[numParam]; 	
+	char * arg[] = {"nd", "refShearModul", "refBulkModul", "frictionAng", 
+			"peakShearStra", "refPress", "cohesi", 
+			"pressDependCoe", "numberOfYieldSurf"};
+	if (argc < (3+numParam)) {
+	    cerr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: nDMaterial PressureIndependMultiYield tag? " << arg[0];
+	    cerr << "? "<< "\n";
+	    cerr << arg[1] << "? "<< arg[2] << "? "<< arg[3] << "? "<< "\n";
+	    cerr << arg[4] << "? "<< arg[5] << "? "<< arg[6] << "? "<< "\n";
+	    cerr << arg[7] << "? "<< arg[8] << "? "<<endl;
+	    return TCL_ERROR;
+	}    
+	
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid PressureIndependMultiYield tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	for (int i=3; i<(3+numParam); i++) 
+	    if (Tcl_GetDouble(interp, argv[i], &param[i-3]) != TCL_OK) {
+		cerr << "WARNING invalid " << arg[i-3] << "\n";
+		cerr << "nDMaterial PressureIndependMultiYield: " << tag << endl;
+		return TCL_ERROR;	
+	    }
+	
+	PressureIndependMultiYield * temp = 
+	    new PressureIndependMultiYield (tag, param[0], param[1], param[2], 
+					    param[3], param[4], param[5], param[6], 
+					    param[7], param[8]);
+	theMaterial = temp;
+    }	
+    
+    
+    // Pressure Dependend Multi-yield, by ZHY
+    else if (strcmp(argv[1],"PressureDependMultiYield") == 0) {
+	const int numParam = 20;
+	int tag;  double param[numParam]; 	
+	char * arg[] = {"nd", "refShearModul", "refBulkModul", "frictionAng", 
+			"peakShearStra", "refPress", "cohesi", "pressDependCoe", 
+			"numberOfYieldSurf", "phaseTransformAngle", 
+			"contractionParam1", "contractionParam2", 
+			"dilationParam1", "dilationParam2", "volLimit",
+			"liquefactionParam1", "liquefactionParam2", 
+			"liquefactionParam3", "liquefactionParam4", "atm"};
+	if (argc < (3+numParam)) {
+	    cerr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: nDMaterial PressureDependMultiYield tag? "<< arg[0];
+	    cerr << "? "<< "\n";
+	    cerr << arg[1] << "? "<< arg[2] << "? "<< arg[3] << "? "<< "\n";
+	    cerr << arg[4] << "? "<< arg[5] << "? "<< arg[6] << "? "<< "\n";
+	    cerr << arg[7] << "? "<< arg[8] << "? "<< arg[9] << "? "<< "\n";
+	    cerr << arg[10] << "? "<< arg[11] << "? "<< arg[12] << "? "<< "\n";
+	    cerr << arg[13] << "? "<< arg[14] << "? "<< arg[15] << "? "<< "\n"; 
+	    cerr << arg[16] << "? "<< arg[17] << "? "<< arg[18] << "? "<< "\n"; 
+	    cerr << arg[19] << "? " <<endl;
+	    return TCL_ERROR;
+	}    
+
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid PressureDependMultiYield tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	for (int i=3; i<(3+numParam); i++) 
+	  if (Tcl_GetDouble(interp, argv[i], &param[i-3] ) != TCL_OK) {
+	      cerr << "WARNING invalid " << arg[i-3] << "\n";
+	      cerr << "nDMaterial PressureDependMultiYield: " << tag << endl;
+	      return TCL_ERROR;	
+	  }
+
+	PressureDependMultiYield * temp =
+	    new PressureDependMultiYield (tag, param[0], param[1], param[2], 
+					  param[3], param[4], param[5], 
+					  param[6], param[7], param[8], 
+					  param[9], param[10], param[11], 
+					  param[12], param[13], param[14], 
+					  param[15], param[16], param[17], 
+					  param[18], param[19]);
+					  
+	theMaterial = temp;	
+    }	
+
+    // Fluid Solid Porous, by ZHY
+    else if (strcmp(argv[1],"FluidSolidPorous") == 0) {
+
+	int tag;  double param[4]; 	
+	char * arg[] = {"nd", "soilMatTag", "combinedBulkModul", "atm"};
+	if (argc < 7) {
+	    cerr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: nDMaterial FluidSolidPorous tag? "<< arg[0];
+	    cerr << "? "<< "\n";
+	    cerr << arg[1] << "? "<< arg[2] << "? "<< arg[3] << "? "<< endl;
+	    return TCL_ERROR;
+	}    
+
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid FluidSolidPorous tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	for (int i=3; i<7; i++) 
+	  if (Tcl_GetDouble(interp, argv[i], &param[i-3] ) != TCL_OK) {
+	      cerr << "WARNING invalid " << arg[i-3] << "\n";
+	      cerr << "nDMaterial FluidSolidPorous: " << tag << endl;
+	      return TCL_ERROR;	
+	  }
+
+	NDMaterial *soil = theTclBuilder->getNDMaterial(param[1]);
+	if (soil == 0) {
+	      cerr << "WARNING FluidSolidPorous: couldn't get soil material ";
+	      cerr << "tagged: " << param[1] << "\n";
+	      return TCL_ERROR;	
+	}
+
+	soil = soil->getCopy();
+	theMaterial = new FluidSolidPorousMaterial (tag, param[0], soil, 
+						    param[2], param[3]);
+    }	    
+    
     
     else {
 	cerr << "WARNING unknown type of nDMaterial: " << argv[1];
