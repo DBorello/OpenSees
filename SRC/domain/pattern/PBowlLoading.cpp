@@ -31,8 +31,8 @@
 //#                    13Nov2002 changes to split "b" and "e" nodes within
 //#                     the plastic bowl elements. Also, simple definition of
 //#                     of cubic bowl is now facilitated ...
-//#
-//#
+//#                    10Oct2003 split ifstream to three separate files as
+//#                     as it was giving some strange output on some systems...
 //#
 //===============================================================================
 
