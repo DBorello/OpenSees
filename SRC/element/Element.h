@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-11-26 22:53:47 $
+// $Revision: 1.5 $
+// $Date: 2002-05-15 23:23:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -76,7 +76,7 @@ class Element : public DomainComponent
     // methods to return the current linearized stiffness,
     // damping and mass matrices
     virtual const Matrix &getTangentStiff(void)=0;
-    virtual const Matrix &getSecantStiff(void)=0;    
+    virtual const Matrix &getSecantStiff(void){ return this->getTangentStiff();};
     virtual const Matrix &getDamp(void)=0;    
     virtual const Matrix &getMass(void)=0;    
 
