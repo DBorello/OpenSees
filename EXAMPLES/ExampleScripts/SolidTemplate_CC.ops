@@ -53,19 +53,22 @@ set ps "-CC 1.2"
 set ES1  "-NLp           0.85        0.19   0.06"
 
 #Tensorial evolution law
-set ET1  "-Linear  0.0"
+#set ET1  "-Linear  0.0"
+
+#Elastic model
+nDMaterial ElasticIsotropic3D 1 70000.0 0.3 1.8
 
 # initial stress
-set stressp "0.20 0 0  0 0.20 0  0 0 0.20"
+set stressp "-0.00001 0 0  0 -0.00001 0  0 0 -0.00001"
 
-#____________E______Eo_____v__rho________________po
-set EPS "70000.0 70000.0 0.3 1.8 -NOD 1 -NOS 1 200.1 -stressp $stressp"
+#________________po
+set EPS "-NOS 1 200.1 -stressp $stressp"
 
 #
-nDMaterial Template3Dep 1 -YS $ys -PS $ps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
+nDMaterial Template3Dep 2 1 -YS $ys -PS $ps -EPS $EPS -ELS1 $ES1
 
 #____________tag_____8 nodes______matID__bforce1_bforce2_bforce3_rho
-element Brick8N  1  5 6 7 8 1 2 3 4   1      0.0     0.0    $g    1.8
+element Brick8N  1  5 6 7 8 1 2 3 4   2      0.0     0.0    $g    1.8
     
 #stage 1
 #===========================================================

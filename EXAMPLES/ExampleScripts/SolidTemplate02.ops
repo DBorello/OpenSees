@@ -43,35 +43,33 @@ fix 4 0 0 1
 # Elastic material
 #==========================================================
 # Linear elastic material
-#nDMaterial ElasticIsotropic3D  2 70000 0.3 1.8
+nDMaterial ElasticIsotropic3D  2 70000 0.3 1.8
 
-#==========================================================
-# Pressure independent elastic material
-#nDMaterial PresureDependent3D 2 70000 0.3 1.8 0.6 200
-
+#PressureDependentElastic3D
+#nDMaterial PressureDependentElastic3D 2 70000.0 0.3 1.8 0.6 100 5
 
 #Elastic-plastic model
 #==========================================================
 # Drucker-Prager model
 #Yield surface 
-set DPys "-DP"
+set ys "-DP"
 
 #potential surface
-set DPps "-VM"
+set ps "-VM"
 
 # Scalar evolution law: linear hardening coef = 1.0
 set ES1  "-Leq  1.0"
 
 # Tensorial evolution law: linear hardening coef. = 0.0
-set ET1  "-Linear  0.0"
+#set ET1  "-Linear  0.0"
 
 # initial stress
-set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
+#set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
 
 #
-#__________E________Eo____v___rho______________alpha___k
-set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
-#
+#_______alpha___k
+#set EPS "-NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
+set EPS "-NOS 2  0.2  0.0 "
 # where
 #alpha = 2 sin(phi) / (3^0.5) / (3-sin(phi) ), phi is the friction angle
 # and k is the cohesion
@@ -79,10 +77,10 @@ set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
 #==========================================================
 ## Cam clay model
 # yield surface M = 1.2
-#set DPys "-CC 1.2"
+#set ys "-CC 1.2"
 
 # Potential surface M = 1.2
-#set DPps "-CC 1.2"
+#set ps "-CC 1.2"
 
 #Scalar evolution law___void ration___Lamda___Kappa 
 #set ES1  "-NLp            0.65       0.19    0.06"
@@ -90,19 +88,16 @@ set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
 #Tensorial evolution law
 #set ET1  "-Linear  0.0"
 
-# initial stress
-#set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
-
-#____________E______Eo_____v__rho________________po
-#set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 1 200.0 -stressp $stressp"
+#__rho________________po
+#set EPS "-NOD 1 -NOS 1 200.0"
 
 #==========================================================  
 ## von Mises model
 # Yield surface
-#set DPys "-VM"
+#set ys "-VM"
 
 # Potential surface
-#set DPps "-VM"
+#set ps "-VM"
 
 #Scalar evolution law
 #set ES1  "-Leq  0.0"
@@ -110,14 +105,12 @@ set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
 #Tensorial evolution law
 #set ET1  "-Linear  0.0"
 
-# initial stress
-#set stressp "0.10 0 0 0 0.0 0 0 0 0.0"
-
-#____________E______Eo_____v__rho________________Cu(undrained shear strength)
-#set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2 10.0 0.0 -stressp $stressp"
+#________Cu(undrained shear strength)
+#set EPS "-NOD 1 -NOS 2 10.0 0.0"
 
 #
-nDMaterial Template3Dep 1 -YS $DPys -PS $DPps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
+#nDMaterial Template3Dep 1 2 -YS $DPys -PS $DPps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
+nDMaterial Template3Dep 1 2 -YS $ys -PS $ps -EPS $EPS -ELS1 $ES1
 
 #____________tag_____8 nodes______matID__bforce1_bforce2_bforce3_rho
 element Brick8N  1  5 6 7 8 1 2 3 4   1      0.0     0.0    -9.81  1.8
@@ -179,7 +172,7 @@ pattern UniformExcitation  1   2  -accel $Series
 
 #Set up recorder for axial loading stage
 recorder Node -file node_y.out -time -node 5 -dof 2 disp
-recorder plot node_y.out "disp time horizontal" 10 400 600 300 -columns 1 2
+#recorder plot node_y.out "disp time horizontal" 10 400 600 300 -columns 1 2
 
 #recorder Element -ele 1 -file element.out force
 #recorder plot element.out "nodal force time horizontal" 10 800 300 300 -columns 1 2
