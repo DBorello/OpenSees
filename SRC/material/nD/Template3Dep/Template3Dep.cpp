@@ -36,12 +36,6 @@
 //#include <string.h>
 
 #include "Template3Dep.h"
-#include <Channel.h>
-#include <G3Globals.h>
-
-#include <DP_YS.h>
-#include <DP_PS.h>
-#include <EPState.h>
 
 //================================================================================
 // Constructor

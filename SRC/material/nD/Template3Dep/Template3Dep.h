@@ -46,6 +46,14 @@
 #include <EL_S.h>
 #include <EL_T.h>
 #include <EPState.h>
+
+#include <Channel.h>
+#include <G3Globals.h>
+
+#include <DP_YS.h>
+#include <DP_PS.h>
+#include <EPState.h>
+
 //#include <CDriver.h>
 
 class YieldSurface;
