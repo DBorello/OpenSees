@@ -39,10 +39,6 @@
 #include <Channel.h>
 #include <G3Globals.h>
 
-
-#include <stdlib.h>
-#include <iostream.h>
-
 #include <ConsoleErrorHandler.h>
 
 
