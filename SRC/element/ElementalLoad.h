@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:47 $
+// $Revision: 1.3 $
+// $Date: 2002-06-11 20:48:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/ElementalLoad.h,v $
                                                                         
                                                                         
@@ -51,9 +51,9 @@ class ElementalLoad : public Load
                                         // numElements left if removed
   protected:
     int setElementTags(const ID &theEleTags);
+    ID *theElementTags;     // copy of element tags, removed in setDomain
 
   private:
-    ID *theElementTags;     // copy of element tags, removed in setDomain
     Element **theElements;  // pointer to associated elements
     int numElements;        // number of associated elements
 };
