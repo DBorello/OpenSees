@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-07-31 22:11:36 $
+// $Revision: 1.7 $
+// $Date: 2001-08-28 19:07:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.h,v $
                                                                         
                                                                         
@@ -88,7 +88,7 @@ class Truss : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(ostream &s, int flag =0);    
 
-	Response *setResponse(char **argv, int argc, Information &eleInfo);
+    Response *setResponse(char **argv, int argc, Information &eleInfo);
     int getResponse(int responseID, Information &eleInformation);
 
     int setParameter (char **argv, int argc, Information &info);

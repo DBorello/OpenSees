@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-08-20 00:37:24 $
+// $Revision: 1.9 $
+// $Date: 2001-08-28 19:07:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -172,8 +172,13 @@ Truss::setDomain(Domain *theDomain)
 
     // if can't find both - send a warning message
     if ((end1Ptr == 0) || (end2Ptr == 0)) {
+      if (end1Ptr == 0)
 	g3ErrorHandler->warning("Truss::setDomain() - truss %d node %d %s\n",
 				this->getTag(), Nd1,
+				"does not exist in the model");
+      else
+	g3ErrorHandler->warning("Truss::setDomain() - truss %d node %d %s\n",
+				this->getTag(), Nd2,
 				"does not exist in the model");
 
       // fill this in so don't segment fault later
@@ -773,19 +778,11 @@ Truss::displaySelf(Renderer &theViewer, int displayMode, float fact)
 void
 Truss::Print(ostream &s, int flag)
 {
+  cerr << "HO\n";
     // compute the strain and axial force in the member
     double strain, force;
-    if (L == 0.0) {
-	strain = 0;
-	force = 0.0;
-    } else {
-	strain = this->computeCurrentStrain();
-	theMaterial->setTrialStrain(strain);
-	force = A*theMaterial->getStress();    
-    }
-    
-    for (int i=0; i<numDOF; i++)
-	(*theVector)(i) = (*t)(0,i)*force;
+    strain = theMaterial->getStrain();
+    force = A * theMaterial->getStress();
     
     if (flag == 0) { // print everything
 	s << "Element: " << this->getTag(); 
@@ -794,14 +791,18 @@ Truss::Print(ostream &s, int flag)
 	s << " Area: " << A << " Total Mass: " << M*2;
 	
 	s << " \n\t strain: " << strain;
-	s << " axial load: " << A*theMaterial->getStress();
-	if (theVector != 0) 
-	    s << " \n\t unbalanced load: " << *theVector;	
+	s << " axial load: " <<  force;
+	if (L != 0.0) {
+	  for (int i=0; i<numDOF; i++)
+	    (*theVector)(i) = (*t)(0,i)*force;
+	  s << " \n\t unbalanced load: " << *theVector;	
+	}
+
 	s << " \t Material: " << *theMaterial;
 	s << endl;
     } else if (flag == 1) {
 	s << this->getTag() << "  " << strain << "  ";
-	s << A*theMaterial->getStress() << endl;
+	s << force << endl;
     }
 }
 
@@ -844,57 +845,55 @@ Truss::computeCurrentStrainRate(void) const
 Response*
 Truss::setResponse(char **argv, int argc, Information &eleInfo)
 {
-    //
-    // we compare argv[0] for known response types for the Truss
-    //
+  //
+  // we compare argv[0] for known response types for the Truss
+  //
 
-    // force (axialForce)
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0)
-		return new ElementResponse(this, 1, 0.0);
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0)
+    return new ElementResponse(this, 1, 0.0);
 
-    else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-		strcmp(argv[0],"deformation") == 0)
-		return new ElementResponse(this, 2, 0.0);
+  else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+	   strcmp(argv[0],"deformation") == 0)
+    return new ElementResponse(this, 2, 0.0);
 
-    // tangent stiffness matrix
-    else if (strcmp(argv[0],"stiff") == 0)
-		return new ElementResponse(this, 3, *theMatrix);
+  // tangent stiffness matrix
+  else if (strcmp(argv[0],"stiff") == 0)
+    return new ElementResponse(this, 3, *theMatrix);
 
-    // a material quantity    
-    else if (strcmp(argv[0],"material") == 0)
-		return theMaterial->setResponse(&argv[1], argc-1, eleInfo);
-    
-	else
-		return 0;
+  // a material quantity    
+  else if (strcmp(argv[0],"material") == 0)
+    return theMaterial->setResponse(&argv[1], argc-1, eleInfo);
+  
+  else
+    return 0;
 }
 
 int 
 Truss::getResponse(int responseID, Information &eleInfo)
 {
  double strain;
- 
   switch (responseID) {
     case 1:
       //strain = this->computeCurrentStrain();
       //theMaterial->setTrialStrain(strain);
       //eleInformation.theDouble = A*theMaterial->getStress();    
       //return 0;
-	  return eleInfo.setDouble(A * theMaterial->getStress());
+      return eleInfo.setDouble(A * theMaterial->getStress());
       
     case 2:
       //strain = this->computeCurrentStrain();
       //eleInformation.theDouble = strain*L;    
       //return 0;      
-	  return eleInfo.setDouble(L * theMaterial->getStrain());
+      return eleInfo.setDouble(L * theMaterial->getStrain());
       
     case 3:
       //if (eleInformation.theMatrix != 0)
-	  //*(eleInformation.theMatrix) = this->getTangentStiff();
+      //*(eleInformation.theMatrix) = this->getTangentStiff();
       //return 0;      
-	  return eleInfo.setMatrix(this->getTangentStiff());
+      return eleInfo.setMatrix(this->getTangentStiff());
 
     default:
-	  return 0;
+      return 0;
   }
 }
 
@@ -913,17 +912,16 @@ Truss::setParameter (char **argv, int argc, Information &info)
 
     // a material parameter
     if (strcmp(argv[0],"material") == 0) {
-		int ok = theMaterial->setParameter(&argv[1], argc-1, info);
-		if (ok < 0)
-			return -1;
-		else
-			return ok + 100;
+      int ok = theMaterial->setParameter(&argv[1], argc-1, info);
+      if (ok < 0)
+	return -1;
+      else
+	return ok + 100;
     } 
     
     // otherwise parameter is unknown for the Truss class
     else
-		return -1;
-
+      return -1;
 }
     
 int
