@@ -54,18 +54,18 @@ class Template3Dep : public NDMaterial
 
   public:
     // constructor
-    Template3Dep(  int tag               ,
-                   YieldSurface     *YS_ ,        
-                   PotentialSurface *PS_ ,
-              	   EPState          *EPS_,
-	       	   EvolutionLaw_S   *ELS1_ , 
-	       	   EvolutionLaw_S   *ELS2_ , 
-	       	   EvolutionLaw_S   *ELS3_ , 
-	       	   EvolutionLaw_S   *ELS4_ , 
-	       	   EvolutionLaw_T   *ELT1_ ,
-	       	   EvolutionLaw_T   *ELT2_ ,
-	       	   EvolutionLaw_T   *ELT3_ ,
-	       	   EvolutionLaw_T   *ELT4_  );
+    Template3Dep( int tag                ,
+                  YieldSurface     *YS_ ,        
+                  PotentialSurface *PS_ ,
+              	  EPState          *EPS_,
+	       	  EvolutionLaw_S   *ELS1_ , 
+	       	  EvolutionLaw_S   *ELS2_ , 
+	       	  EvolutionLaw_S   *ELS3_ , 
+	       	  EvolutionLaw_S   *ELS4_ , 
+	       	  EvolutionLaw_T   *ELT1_ ,
+	       	  EvolutionLaw_T   *ELT2_ ,
+	       	  EvolutionLaw_T   *ELT3_ ,
+	       	  EvolutionLaw_T   *ELT4_  );
     
     // Constructor0
     // If no evolution law is provided, then there will be no hardening or softening!
@@ -142,43 +142,100 @@ class Template3Dep : public NDMaterial
     const Tensor &getStressTensor(void) ;
     const Tensor &getStrainTensor(void) ;
 
+    EPState * getEPS() const;
+    void setEPS( const EPState &eps);
+
     int commitState(void) ;
     int revertToLastCommit(void) ;
     int revertToStart(void) ;
     
-    NDMaterial *getCopy(void) ;
+    NDMaterial *getCopy(void);
     NDMaterial *getCopy(const char *code) ;
+
+    //Template3Dep getCopy(void);  //????/
+    //Template3Dep getCopy(const char *code) ;///???/
 
     const char *getType(void) const ;
     int getOrder(void) const ;
 
     int sendSelf(int commitTag, Channel &theChannel);  
-    int recvSelf(int commitTag, Channel &theChannel,  
-    FEM_ObjectBroker &theBroker);    
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
 
     void Print(ostream &s, int flag =0);
 
+    //Private Utility method
+  private:
+    
+     //These are from formerly CDriver
+     EPState ForwardEulerEPState( straintensor &strain_increment);
+     
+     EPState SemiBackwardEulerEPState( const straintensor &strain_increment);
+     
+     EPState FESubIncrementation( straintensor &strain_increment,
+                                  int number_of_subincrements);
+
+     EPState BackwardEulerEPState( const straintensor &strain_increment);
+
+     EPState BESubIncrementation( const straintensor & strain_increment,
+                                  int number_of_subincrements);                                                 
+						                                                  
+    //================================================================================
+    // this one is intended to shell the previous three and to decide 
+    // ( according to the data stored in Material_Model object ) 
+    // which constitutive tensor to return ( forward ( non-constistent
+    // or backward ( consistent ) or . . . 
+    
+    //virtual tensor ConstitutiveTensor(stresstensor   & final_stress, 
+    //                                 stresstensor   & start_stress,
+    //                                 straintensor   & strain_increment,
+    //                                 Material_Model & Criterion,
+    //                                 double           just_this_PP );
+    
+
+    //================================================================================
+    // trying to find intersection point
+    // according to M. Crisfield's book
+    // "Non-linear Finite Element Analysis of Solids and Structures "
+    // chapter 6.6.1 page 168.
+    //================================================================================
+    EPState PredictorEPState(straintensor & strain_increment);
+
+    stresstensor yield_surface_cross(const stresstensor & start_stress,
+                                     const stresstensor & end_stress);
+
+    double zbrentstress(const stresstensor & start_stress,
+                        const stresstensor & end_stress,
+                        double x1, double x2, double tol);
+
+    double func( const stresstensor &start_stress,
+                 const stresstensor &end_stress,
+                 double alfa );
+    
+   public: 
     tensor ElasticComplianceTensor(void) const;
     tensor ElasticStiffnessTensor(void) const;
 
-    // Utility method
-    YieldSurface *getYS() const;
-    PotentialSurface *getPS() const;
-    EPState *getEPS() const;
+   private:
+    YieldSurface * getYS() const;
+    PotentialSurface * getPS() const;
+
+    //EPState &getEPS(void);
     
     //get scalar evolution laws
-    EvolutionLaw_S *getELS1() const;
-    EvolutionLaw_S *getELS2() const;
-    EvolutionLaw_S *getELS3() const;
-    EvolutionLaw_S *getELS4() const;
+    EvolutionLaw_S * getELS1() const;
+    EvolutionLaw_S * getELS2() const;
+    EvolutionLaw_S * getELS3() const;		  
+    EvolutionLaw_S * getELS4() const;
 
     //get tensorial evolution laws
-    EvolutionLaw_T *getELT1() const;
-    EvolutionLaw_T *getELT2() const;
-    EvolutionLaw_T *getELT3() const;
-    EvolutionLaw_T *getELT4() const;
+    EvolutionLaw_T * getELT1() const;
+    EvolutionLaw_T * getELT2() const;
+    EvolutionLaw_T * getELT3() const;
+    EvolutionLaw_T * getELT4() const;
     
-    void setEPS( EPState &eps);
+
+    // Get n copies of the NDMaterial 
+    //NDMaterial **getCopy(int n) ;
 
     //================================================================================
     // Overloaded Insertion Operator
