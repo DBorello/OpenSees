@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:09:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/WindowDevice.cpp,v $
                                                                         
                                                                         
@@ -57,6 +57,8 @@
 #include <string.h>
 
 int WindowDevice::numWindowDevice(0);
+unsigned long WindowDevice::foreground(0);
+unsigned long WindowDevice::background(0);
 
 #ifdef _UNIX
 Display *WindowDevice::theDisplay;  
@@ -111,10 +113,10 @@ int oglSetPixelFormat(HDC hDC, BYTE type, DWORD flags)
                        PFD_SUPPORT_OPENGL;  /* draw using opengl */
     pfd.iPixelType   = type;                /* PFD_TYPE_RGBA or COLORINDEX */
     pfd.cColorBits   = 24;
-	pfd.cRedBits = 8;
-	pfd.cGreenBits = 8;
-	pfd.cBlueBits = 8;
-	pfd.cDepthBits = 16;
+    pfd.cRedBits = 8;
+    pfd.cGreenBits = 8;
+    pfd.cBlueBits = 8;
+    pfd.cDepthBits = 16;
     /* other criteria here */
     
     /* get the appropriate pixel format */
@@ -145,7 +147,7 @@ HWND oglCreateWindow(char* title, int x, int y, int width, int height,
 					 HGLRC *hRC, HDC *hDC)
 {
     WNDCLASS  wc;
-	HWND hWnd;
+    HWND hWnd;
     HINSTANCE hInstance;
 
     /* get this modules instance */
@@ -390,26 +392,29 @@ WindowDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
     hints.height = _height;
     hints.flags = PPosition | PSize;
 
-    /*
-    theDisplay = XOpenDisplay(title);	// init a display connection
-    if (theDisplay == 0) {              // and check we got one
-	cerr << "WindowDevice::initX11() - could not connect to display\n";
-	exit(-1);
-    }
-
-    theScreen = DefaultScreen(theDisplay);
-    */
-
     // set the defualt foreground and background colors
-    foreground = BlackPixel(theDisplay, theScreen);
-    background = WhitePixel(theDisplay, theScreen);    
+    XVisualInfo visual; 
+    visual.visual = 0;
+    int depth = DefaultDepth(theDisplay, theScreen);
 
+    
+    if (background == 0) {
+      if (XMatchVisualInfo(theDisplay, theScreen, depth, PseudoColor, &visual) == 0) {
+	  foreground = BlackPixel(theDisplay, theScreen);
+	  background = WhitePixel(theDisplay, theScreen);    
+
+      } else {
+	foreground = 0;
+	background = 255;
+      }
+    }
 
     // now open a window
     theWindow = XCreateSimpleWindow(theDisplay,RootWindow(theDisplay,0),
 				    hints.x, hints.y,
 				    hints.width,hints.height,4,
 				    foreground, background);
+
     if (theWindow == 0) {
 	cerr << "WindowDevice::WINOPEN() - could not open a window\n";
 	exit(-1);
@@ -426,44 +431,63 @@ WindowDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
 
       // create the colormap if the 1st window
       if (numWindowDevice == 1) {
+	int fail = false;
+	//	XMatchVisualInfo(theDisplay, theScreen, depth, PseudoColor, &visual);
+	if (XMatchVisualInfo(theDisplay, theScreen, depth, PseudoColor, &visual) == 0) {
+	  cerr << "WindowDevice::initX11() - could not get a visual for PseudoColor\n";
+	  cerr << "Colors diplayed will be all over the place\n";
+	  cmap = DefaultColormap(theDisplay, theScreen);
+	  fail = true;
+        } else {
+	  cerr << "WindowDevice::WINOPEN have created our own colormap, \n";
+	  cerr << "windows may change color as move mouse from one window to\n";
+	  cerr << "another - depends on your video card to use another colormap\n\n";	
+
+	  cmap = XCreateColormap(theDisplay,theWindow,
+				 visual.visual, AllocAll);
+	}
+
+
+	/*
 	cmap = XCreateColormap(theDisplay,theWindow,
 			   DefaultVisual(theDisplay,0),AllocAll);
+	*/
+
 	if (cmap == 0) {
 	    cerr << "WindowDevice::initX11() - could not get a new color table\n";
 	    exit(-1);
 	}	    
 
 	// we are going to try to allocate 256 new colors -- need 8 planes for this
-	int depth = DefaultDepth(theDisplay, theScreen);
+	depth = DefaultDepth(theDisplay, theScreen);
 	if (depth < 8) {
 	    cerr << "WindowDevice::initX11() - needed at least 8 planes\n";
 	    exit(-1);
 	}	    
-	int cnt = 0;
-	for (int red = 0; red < 8; red++) {
+	if (fail == false) {
+	  int cnt = 0;
+	  for (int red = 0; red < 8; red++) {
 	    for (int green = 0; green < 8; green++) {
 		for (int blue = 0; blue < 4; blue++) {
-		    pixels[32*red + 4*green + blue] = cnt;
-		    colors[cnt].pixel = pixels[32*red + 4*green + blue];
-		    colors[cnt].red = (65536/7)*red;
-		    colors[cnt].green = (65536/7)*green;
-		    colors[cnt].blue = (65536/3)*blue;
-		    colors[cnt].flags = DoRed | DoGreen | DoBlue;
-		    cnt++;
+		  pixels[32*red + 4*green + blue] = cnt;
+		  colors[cnt].pixel = pixels[32*red + 4*green + blue];
+		  colors[cnt].red = (65536/7)*red;
+		  colors[cnt].green = (65536/7)*green;
+		  colors[cnt].blue = (65536/3)*blue;
+		  colors[cnt].flags = DoRed | DoGreen | DoBlue;
+		  cnt++;
 		}			
 	    }
+	  }
+	  background = 0; //pixels[0];
+	  foreground = 255; // pixels[255];
+	  XStoreColors(theDisplay, cmap, colors, cnt);			    
 	}
-	background = 0; //pixels[0];
-	foreground = 255; // pixels[255];
-	XStoreColors(theDisplay, cmap, colors, cnt);			    
       }
 
       // now set the windows to use the colormap
       XSetWindowColormap(theDisplay, theWindow, cmap);    
     
-    } else {
-      foreground = BlackPixel(theDisplay, theScreen);
-      background = WhitePixel(theDisplay, theScreen);    
     }
 
     XSetBackground(theDisplay, theGC, background);
@@ -756,9 +780,6 @@ WindowDevice::initWindow(void) {
 
     // lets try using the default colormap
     cmap = DefaultColormap(theDisplay, theScreen);
-    XVisualInfo vinfo;    
-    if (XMatchVisualInfo(theDisplay, theScreen, 8, PseudoColor, &vinfo) == false)
-	cerr << "WindowDevice::initX11 - could not get info\n";
 
     // we now try to allocate some color cells from the colormap
     // we start by tring to obtain 256 colors, then 192, finally 64
@@ -781,6 +802,8 @@ WindowDevice::initWindow(void) {
 	    }
 	}
 	XStoreColors(theDisplay, cmap, colors, cnt);
+	foreground = pixels[0];
+	background = pixels[255];
 	
     } else if (XAllocColorCells(theDisplay, cmap, false, NULL, 0, pixels, 192) != 0) {
 	// we were able to allocate 192 colors from the table for our use	
@@ -799,6 +822,8 @@ WindowDevice::initWindow(void) {
 	    }
 	}
 	XStoreColors(theDisplay, cmap, colors, cnt);
+	foreground = pixels[0];
+	background = pixels[191];
     } else if (XAllocColorCells(theDisplay, cmap, false, NULL, 0, pixels, 64) != 0) {
 	colorFlag = 2;	
 	int cnt = 0;
@@ -815,13 +840,14 @@ WindowDevice::initWindow(void) {
 	    }
 	}
 	XStoreColors(theDisplay, cmap, colors, cnt);
+	foreground = pixels[0];
+	background = pixels[63];
     } else {
 	colorFlag = 3;
 	// lets create our own color table - 
 	// problem with this is that screen colors change as we enter
-	cerr << "WindowDevice::initX11() - could not any colors from the default\n";
-	cerr << "colormap - have to create our own for the app - windows will\n";
-	cerr << "windows will change color as move mouse from one window to another\n\n";	
+	cerr << "WindowDevice::initWindow() - could not add any colors to the\n";
+	cerr << "existing colormap - will try to create our own colormap\n";
     }
 #else
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:09:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/WindowDevice.h,v $
                                                                         
                                                                         
@@ -45,10 +45,6 @@
 ** Version: 0.1                                                       **
 ** Tag: RED                                                           **
 ** ****************************************************************** */
-                                                                        
-                                                                        
-                                                                        
-                                                                        
                                                                         
 #ifndef WindowDevice_H
 #define WindowDevice_H
@@ -128,7 +124,7 @@ class WindowDevice: public  Device
   Window theWindow; // the window associated with the Window
   GC theGC;         // the graphic context associated with the Window
   XSizeHints hints; // conatins the infor about where window is and its size
-  unsigned long foreground, background;  
+  static unsigned long foreground, background;  
   XStandardColormap theMap;  
   XEvent theEvent;
   static Display *theDisplay;  // the display all Window objecs display on
