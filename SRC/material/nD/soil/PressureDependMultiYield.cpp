@@ -1,5 +1,5 @@
-// $Revision: 1.26 $
-// $Date: 2003-02-14 23:01:30 $
+// $Revision: 1.27 $
+// $Date: 2003-02-15 00:53:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -1666,9 +1666,9 @@ void PressureDependMultiYield::updateActiveSurface(void)
     
     double xx1 = (t2 && t2) - 2./3.* outsize * outsize * conHeig * conHeig;
     double xx2 = (t1 && t1) - 2./3.* size * size * conHeig * conHeig;
-    opserr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in Direction of surface motion.\n" 
-	 << "X-1= " << X-1 <<" A= "<<A<<" B= "<<B<<" C= "<<C <<" M= "<<activeSurfaceNum<<" low_limit="<<LOW_LIMIT<<"\n"
-	 << "diff1= "<<xx1 <<" diff2= "<<xx2 <<" p= "<<conHeig<<" size= "<<size<<" outs= "<<outsize<<endln; 
+    opserr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in Direction of surface motion." << endln; 
+    opserr << "X-1= " << X-1 <<" A= "<<A<<" B= "<<B<<" C= "<<C <<" M= "<<activeSurfaceNum<<" low_limit="<<LOW_LIMIT<< endln;
+    opserr << "diff1= "<<xx1 <<" diff2= "<<xx2 <<" p= "<<conHeig<<" size= "<<size<<" outs= "<<outsize<<endln; 
    exit(-1);
   }
 
