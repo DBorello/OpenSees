@@ -120,6 +120,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/system_of_eqn/linearSOE/sparseSYM \
                -I$(FE)/system_of_eqn/linearSOE/petsc \
                -I$(FE)/system_of_eqn/linearSOE/umfGEN \
+               -I$(FE)/system_of_eqn/linearSOE/diagonal \
                -I$(FE)/system_of_eqn/linearSOE/cg \
                -I$(FE)/system_of_eqn/linearSOE/BJsolvers \
                -I$(FE)/system_of_eqn/linearSOE/itpack \
