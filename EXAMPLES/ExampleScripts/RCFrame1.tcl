@@ -23,8 +23,8 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame1.tcl
 #
-# $Revision: 1.4 $
-# $Date: 2002-12-17 02:03:54 $
+# $Revision: 1.5 $
+# $Date: 2003-07-15 21:32:23 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/RCFrame1.tcl,v $
 
 # comment out one of lines
@@ -189,7 +189,7 @@ analyze 40
 integrator DisplacementControl 3 1 .01
 
 # perform 25 analysis steps
-set maxU 7.5.0
+set maxU 7.5
 set currentDisp 0.0;
 set ok 0;
 
