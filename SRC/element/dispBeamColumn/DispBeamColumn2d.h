@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-06-06 18:43:33 $
+// $Revision: 1.7 $
+// $Date: 2002-06-07 21:51:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.h,v $
 
 // Written: MHS
@@ -86,45 +86,47 @@ class DispBeamColumn2d : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
     void Print(ostream &s, int flag =0);
 
-	Response *setResponse(char **argv, int argc, Information &eleInfo);
+    Response *setResponse(char **argv, int argc, Information &eleInfo);
     int getResponse(int responseID, Information &eleInfo);
 
-	int setParameter(char **argv, int argc, Information &info);
-	int updateParameter(int parameterID, Information &info);
+    int setParameter(char **argv, int argc, Information &info);
+    int updateParameter(int parameterID, Information &info);
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
-	const Vector & gradient(bool compute, int identifier);
+    const Vector & gradient(bool compute, int identifier);
 // AddingSensitivity:END ///////////////////////////////////////////
 
   protected:
     
   private:
-	int numSections;
+    int numSections;
     SectionForceDeformation **theSections; // pointer to the ND material objects
-	CrdTransf2d *crdTransf;        // pointer to coordinate tranformation object 
+    CrdTransf2d *crdTransf;        // pointer to coordinate tranformation object 
 
     ID connectedExternalNodes; // Tags of quad nodes
-	double L;
+    double L;
 
     Node *nd1Ptr;		// Pointers to quad nodes
     Node *nd2Ptr;
 
     static Matrix K;		// Element stiffness, damping, and mass Matrix
     static Vector P;		// Element resisting force vector
+
     Vector Q;		// Applied nodal loads
     Vector q;		// Basic force
     double q0[3];  // Fixed end forces in basic system
     double p0[3];  // Reactions in basic system
+
     double rho;			// Mass density per unit length
 
-	static double workArea[];
+    static double workArea[];
 
-	static GaussQuadRule1d01 quadRule;
+    static GaussQuadRule1d01 quadRule;
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
     int gradientIdentifier;
-	int gradientSectionTag;
-	int gradientMaterialTag;
+    int gradientSectionTag;
+    int gradientMaterialTag;
 // AddingSensitivity:END ///////////////////////////////////////////
 };
 
