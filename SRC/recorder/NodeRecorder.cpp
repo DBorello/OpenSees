@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.10 $
-// $Date: 2002-12-13 00:11:52 $
+// $Revision: 1.11 $
+// $Date: 2002-12-13 01:03:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -66,7 +66,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   theDofs = new ID(0, numDOF);
 
   int count = 0;
-  for (int i=0; i<numDOF; i++) {
+  int i;
+  for (i=0; i<numDOF; i++) {
     int dof = dofs(i);
     if (dof >= 0) {
       (*theDofs)[count] = dof;
@@ -81,7 +82,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   count = 0;
   int numNode = nodes.Size();
   theNodes = new ID(1, numNode);
-  for (int i=0; i<numNode; i++) {
+  for (i=0; i<numNode; i++) {
     int nodeTag = nodes(i);
     Node *theNode = theDomain->getNode(nodeTag);
     if (theNode == 0) {
@@ -154,7 +155,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   theDofs = new ID(0, numDOF);
 
   int count = 0;
-  for (int i=0; i<numDOF; i++) {
+  int i;
+  for (i=0; i<numDOF; i++) {
     int dof = dofs(i);
     if (dof >= 0) {
       (*theDofs)[count] = dof;
@@ -169,7 +171,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   count = 0;
   int numNode = nodes.Size();
   theNodes = new ID(1, numNode);
-  for (int i=0; i<numNode; i++) {
+  for (i=0; i<numNode; i++) {
     int nodeTag = nodes(i);
     Node *theNode = theDomain->getNode(nodeTag);
     if (theNode == 0) {
@@ -226,7 +228,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   dbColumns[0] = newColumn;
   
   int counter = 1;
-  for (int i=0; i<theNodes->Size(); i++) {
+  for (i=0; i<theNodes->Size(); i++) {
     int nodeTag = (*theNodes)(i);
     for (int j=0; j<theDofs->Size(); j++) {
       int dof = (*theDofs)(j);
