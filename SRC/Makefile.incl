@@ -1,5 +1,3 @@
-#		  -I$(FE)/material/section \
-
 
 FE_INCLUDES        = -I$(FE)/matrix \
 		  -I$(FE)/nDarray \
@@ -129,7 +127,8 @@ FE_INCLUDES        = -I$(FE)/matrix \
 		-I$(FE)/reliability/domain/distributions \
 		-I$(FE)/reliability/FEsensitivity \
 		-I$(FE)/reliability/tcl \
-		  -I$(FE) 
+		-I$(FE) \
+		-I$(SUPERLUdir) 	
 
 
 
