@@ -92,30 +92,30 @@ ERRORHANDLER_LIBS = $(FE)/handler/ErrorHandler.o \
 
 
 
- 
+
 JEREMIC_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o  \
 	$(FE)/material/nD/PressureDependentElastic3D.o \
 	$(FE)/material/nD/Template3Dep/MatPoint3D.o \
 	$(FE)/element/8nbrick/EightNodeBrick.o \
 	$(FE)/element/8nbrick/TclEightNodeBrickCommand.o \
-  	$(FE)/material/nD/Template3Dep/TclTemplate3DepCommand.o \
-  	$(FE)/material/nD/Template3Dep/Template3Dep.o \
-  	$(FE)/material/nD/Template3Dep/EPState.o \
-  	$(FE)/material/nD/Template3Dep/YS.o  \
-  	$(FE)/material/nD/Template3Dep/CAM_YS.o  \
-  	$(FE)/material/nD/Template3Dep/CAM_PS.o \
-  	$(FE)/material/nD/Template3Dep/DP_YS.o  \
-  	$(FE)/material/nD/Template3Dep/DP_PS.o \
-  	$(FE)/material/nD/Template3Dep/VM_YS.o  \
-  	$(FE)/material/nD/Template3Dep/VM_PS.o  \
-  	$(FE)/material/nD/Template3Dep/EL_T.o   \
-  	$(FE)/material/nD/Template3Dep/EL_S.o   \
-  	$(FE)/material/nD/Template3Dep/EL_NLEijMD.o \
-  	$(FE)/material/nD/Template3Dep/EL_NLEp.o  \
-  	$(FE)/material/nD/Template3Dep/EL_NLEeq.o  \
-  	$(FE)/material/nD/Template3Dep/EL_LEeq.o  \
-  	$(FE)/material/nD/Template3Dep/EL_NLEij.o \
-  	$(FE)/material/nD/Template3Dep/EL_LEij.o  \
+	$(FE)/material/nD/Template3Dep/TclTemplate3DepCommand.o \
+	$(FE)/material/nD/Template3Dep/Template3Dep.o \
+	$(FE)/material/nD/Template3Dep/EPState.o \
+	$(FE)/material/nD/Template3Dep/YS.o  \
+	$(FE)/material/nD/Template3Dep/CAM_YS.o  \
+	$(FE)/material/nD/Template3Dep/CAM_PS.o \
+	$(FE)/material/nD/Template3Dep/DP_YS.o  \
+	$(FE)/material/nD/Template3Dep/DP_PS.o \
+	$(FE)/material/nD/Template3Dep/VM_YS.o  \
+	$(FE)/material/nD/Template3Dep/VM_PS.o  \
+	$(FE)/material/nD/Template3Dep/EL_T.o   \
+	$(FE)/material/nD/Template3Dep/EL_S.o   \
+	$(FE)/material/nD/Template3Dep/EL_NLEijMD.o \
+	$(FE)/material/nD/Template3Dep/EL_NLEp.o  \
+	$(FE)/material/nD/Template3Dep/EL_NLEeq.o  \
+	$(FE)/material/nD/Template3Dep/EL_LEeq.o  \
+	$(FE)/material/nD/Template3Dep/EL_NLEij.o \
+	$(FE)/material/nD/Template3Dep/EL_LEij.o
 
 
 ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
@@ -124,6 +124,15 @@ ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
 	$(FE)/material/nD/soil/TclUpdateMaterialStageCommand.o \
 	$(FE)/material/nD/soil/PressureIndependMultiYield.o \
 	$(FE)/material/nD/soil/T2Vector.o
+
+ifeq ($(GRAPHICS), UsingOpenGL)
+
+RENDERER_LIBS = $(FE)/renderer/OpenGlDevice.o \
+	$(FE)/renderer/Renderer.o \
+	$(FE)/renderer/PlainMap.o \
+	$(FE)/renderer/OpenGlRenderer.o 
+
+else
 
 RENDERER_LIBS = $(FE)/renderer/db.o \
 	$(FE)/renderer/View.o \
@@ -141,6 +150,7 @@ RENDERER_LIBS = $(FE)/renderer/db.o \
 	$(FE)/renderer/X11Renderer.o \
 	$(FE)/renderer/PlainMap.o
 
+endif
 
 RECORDER_LIBS = $(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/DatastoreRecorder.o \
