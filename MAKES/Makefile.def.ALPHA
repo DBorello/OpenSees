@@ -92,6 +92,7 @@ Fort	= f90
 AR		= ar 
 ARFLAGS		= cqls
 RANLIB		= ranlib
+RANLIBFLAGS     = 
 
 # Compiler Flags
 #

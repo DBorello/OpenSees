@@ -104,6 +104,7 @@ FC	= /usr/bin/g77
 AR		= ar 
 ARFLAGS		= cqls
 RANLIB		= ranlib
+RANLIBFLAGS     =
 
 GRAPHICS = UsingOpenGL
 

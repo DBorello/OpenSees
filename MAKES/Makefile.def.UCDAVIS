@@ -322,9 +322,10 @@ LINKFLAGS       =  -g
 
 
 
-AR      = ar 
-ARFLAGS = cqls
-RANLIB  = ranlib
+AR          = ar 
+ARFLAGS     = cqls
+RANLIB      = ranlib
+RANLIBFLAGS =
 
 # Compiler Flags
 #

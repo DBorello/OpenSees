@@ -104,6 +104,7 @@ FC	= g77
 AR		= ar 
 ARFLAGS		= cqls
 RANLIB		= ranlib
+RANLIBFLAGS     =
 
 # Compiler Flags
 #
