@@ -136,8 +136,35 @@ puts [eigen 2]
 
 # Perform the transient analysis
 #         N   dt
-analyze 2000 0.01
-puts " "; puts "Transient analysis completed";
+set ok [analyze 2000 0.01]
+if {$ok != 0} {
+    set tFinal [expr 2000 * 0.01]
+    set tCurrent [getTime]
+    set ok 0
+    while {$ok == 0 && $tCurrent < $tFinal} {
+
+	set ok [analyze 1 .01]
+
+	# if the analysis fails try initial tangent iteration
+	if {$ok != 0} {
+	    puts "regular newton failed .. lets try an initail stiffness for this step"
+	    test NormDispIncr 1.0e-12  100 1
+	    algorithm Newton -initial
+	    set ok [analyze 1 .01]
+	    if {$ok == 0} {puts "that worked .. back to regular newton"}
+	    test NormDispIncr 1.0e-12  10 
+	    algorithm Newton
+	}
+
+	set tCurrent [getTime]
+    }
+}
+
+if {$ok == 0} {
+   puts "Transient analysis completed succesfully";
+} else {
+   puts "Transient analysis completed failed";    
+}
 
 # Perform an eigenvalue analysis
 puts [eigen 2]
