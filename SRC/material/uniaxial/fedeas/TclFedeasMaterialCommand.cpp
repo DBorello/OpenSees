@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2001-08-19 21:56:40 $
+// $Revision: 1.3 $
+// $Date: 2002-04-01 17:42:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/TclFedeasMaterialCommand.cpp,v $
 
 // Written: MHS
@@ -592,10 +592,10 @@ TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int
 	}
 
 	else if (strcmp(argv[1],"Steel1") == 0 || strcmp(argv[1],"Steel01") == 0) {
-		if (argc < 10) {
+		if (argc < 6) {
 			cerr << "WARNING invalid number of arguments\n";
 			printCommand(argc,argv);
-			cerr << "Want: uniaxialMaterial Steel01 tag? fy? E? b? a1? a2? a3? a4?" << endl;
+			cerr << "Want: uniaxialMaterial Steel01 tag? fy? E? b? <a1? a2? a3? a4?>" << endl;
 			return 0;
 		}
 
@@ -617,35 +617,38 @@ TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int
 			printCommand(argc, argv);
 			return 0;	
 		}
-		if (Tcl_GetDouble(interp, argv[6], &a1) != TCL_OK) {
-			cerr << "WARNING invalid a1\n";
-			printCommand(argc, argv);
-			return 0;	
+		if (argc > 9) {
+			if (Tcl_GetDouble(interp, argv[6], &a1) != TCL_OK) {
+				cerr << "WARNING invalid a1\n";
+				printCommand(argc, argv);
+				return 0;	
+			}
+			if (Tcl_GetDouble(interp, argv[7], &a2) != TCL_OK) {
+				cerr << "WARNING invalid a2\n";
+				printCommand(argc, argv);
+				return 0;	
+			}
+			if (Tcl_GetDouble(interp, argv[8], &a3) != TCL_OK) {
+				cerr << "WARNING invalid a3\n";
+				printCommand(argc, argv);
+				return 0;	
+			}
+			if (Tcl_GetDouble(interp, argv[9], &a4) != TCL_OK) {
+				cerr << "WARNING invalid a4\n";
+				printCommand(argc, argv);
+				return 0;	
+			}
+			theMaterial = new FedeasSteel1Material(tag, fy, E, b, a1, a2, a3, a4);
 		}
-		if (Tcl_GetDouble(interp, argv[7], &a2) != TCL_OK) {
-			cerr << "WARNING invalid a2\n";
-			printCommand(argc, argv);
-			return 0;	
-		}
-		if (Tcl_GetDouble(interp, argv[7], &a3) != TCL_OK) {
-			cerr << "WARNING invalid a3\n";
-			printCommand(argc, argv);
-			return 0;	
-		}
-		if (Tcl_GetDouble(interp, argv[9], &a4) != TCL_OK) {
-			cerr << "WARNING invalid a4\n";
-			printCommand(argc, argv);
-			return 0;	
-		}
-
-		theMaterial = new FedeasSteel1Material(tag, fy, E, b, a1, a2, a3, a4);
+		else
+			theMaterial = new FedeasSteel1Material(tag, fy, E, b);
 	}
 
 	else if (strcmp(argv[1],"Steel2") == 0 || strcmp(argv[1],"Steel02") == 0) {
-		if (argc < 13) {
+		if (argc < 6) {
 			cerr << "WARNING invalid number of arguments\n";
 			printCommand(argc,argv);
-			cerr << "Want: uniaxialMaterial Steel02 tag? fy? E? b? R0? cR1? cR2? a1? a2? a3? a4?" << endl;
+			cerr << "Want: uniaxialMaterial Steel02 tag? fy? E? b? <R0? cR1? cR2? <a1? a2? a3? a4?>>" << endl;
 			return 0;
 		}    
 
@@ -668,43 +671,51 @@ TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int
 			printCommand(argc, argv);
 			return 0;	
 		}
-		if (Tcl_GetDouble(interp, argv[6], &R0) != TCL_OK) {
-			cerr << "WARNING invalid R0\n";
-			printCommand(argc, argv);
-			return 0;	
+		if (argc > 8) {
+			if (Tcl_GetDouble(interp, argv[6], &R0) != TCL_OK) {
+				cerr << "WARNING invalid R0\n";
+				printCommand(argc, argv);
+				return 0;	
+			}
+			if (Tcl_GetDouble(interp, argv[7], &cR1) != TCL_OK) {
+				cerr << "WARNING invalid cR1\n";
+				printCommand(argc, argv);
+				return 0;	
+			}
+			if (Tcl_GetDouble(interp, argv[8], &cR2) != TCL_OK) {
+				cerr << "WARNING invalid cR2\n";
+				printCommand(argc, argv);
+				return 0;	
+			}
+			if (argc > 12) {
+				if (Tcl_GetDouble(interp, argv[9], &a1) != TCL_OK) {
+					cerr << "WARNING invalid a1\n";
+					printCommand(argc, argv);
+					return 0;	
+				}
+				if (Tcl_GetDouble(interp, argv[10], &a2) != TCL_OK) {
+					cerr << "WARNING invalid a2\n";
+					printCommand(argc, argv);
+					return 0;	
+				}
+				if (Tcl_GetDouble(interp, argv[11], &a3) != TCL_OK) {
+					cerr << "WARNING invalid a3\n";
+					printCommand(argc, argv);
+					return 0;	
+				}
+				if (Tcl_GetDouble(interp, argv[12], &a4) != TCL_OK) {
+					cerr << "WARNING invalid a4\n";
+					printCommand(argc, argv);
+					return 0;	
+				}
+				theMaterial = new FedeasSteel2Material(tag, fy, E, b, R0, cR1, cR2, a1, a2, a3, a4);
+			}
+			else
+				theMaterial = new FedeasSteel2Material(tag, fy, E, b, R0, cR1, cR2);
 		}
-		if (Tcl_GetDouble(interp, argv[7], &cR1) != TCL_OK) {
-			cerr << "WARNING invalid cR1\n";
-			printCommand(argc, argv);
-			return 0;	
-		}
-		if (Tcl_GetDouble(interp, argv[8], &cR2) != TCL_OK) {
-			cerr << "WARNING invalid cR2\n";
-			printCommand(argc, argv);
-			return 0;	
-		}
-		if (Tcl_GetDouble(interp, argv[9], &a1) != TCL_OK) {
-			cerr << "WARNING invalid a1\n";
-			printCommand(argc, argv);
-			return 0;	
-		}
-		if (Tcl_GetDouble(interp, argv[10], &a2) != TCL_OK) {
-			cerr << "WARNING invalid a2\n";
-			printCommand(argc, argv);
-			return 0;	
-		}
-		if (Tcl_GetDouble(interp, argv[11], &a3) != TCL_OK) {
-			cerr << "WARNING invalid a3\n";
-			printCommand(argc, argv);
-			return 0;	
-		}
-		if (Tcl_GetDouble(interp, argv[12], &a4) != TCL_OK) {
-			cerr << "WARNING invalid a4\n";
-			printCommand(argc, argv);
-			return 0;	
-		}
+		else
+			theMaterial = new FedeasSteel2Material(tag, fy, E, b);
 
-		theMaterial = new FedeasSteel2Material(tag, fy, E, b, R0, cR1, cR2, a1, a2, a3, a4);
 	}
 
 	return theMaterial;
