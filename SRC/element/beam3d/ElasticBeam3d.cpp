@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:39:45 $
+// $Revision: 1.3 $
+// $Date: 2001-01-31 10:41:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -45,11 +45,15 @@
 #include <math.h>
 #include <stdlib.h>
 
+Matrix ElasticBeam3d::K(12,12);
+Vector ElasticBeam3d::P(12);
+Matrix ElasticBeam3d::kb(6,6);
+
 ElasticBeam3d::ElasticBeam3d()
 :Element(0,ELE_TAG_ElasticBeam3d), 
  A(0), E(0), G(0), Jx(0), Iy(0), Iz(0), L(0.0), rho(0.0),
  connectedExternalNodes(2), theCoordTransf(0),
- m(12,12), d(12,12), Pinert(12), Q(12), kb(6,6), q(6)
+ Q(12), q(6)
 {
     // does nothing
 }
@@ -60,7 +64,7 @@ ElasticBeam3d::ElasticBeam3d(int tag, double a, double e, double g,
 :Element(tag,ELE_TAG_ElasticBeam3d), 
  A(a), E(e), G(g), Jx(jx), Iy(iy), Iz(iz), L(0.0), rho(r),
  connectedExternalNodes(2), theCoordTransf(0),
- m(12,12), d(12,12), Pinert(12), Q(12), kb(6,6), q(6)
+ Q(12), q(6)
 {
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;
@@ -133,14 +137,12 @@ ElasticBeam3d::setDomain(Domain *theDomain)
     if (L == 0.0)
 	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Element has zero length");
     
-    kb(0,0) = E*A/L;
-    kb(1,1) = kb(2,2) = 4*E*Iz/L;
-    kb(1,2) = kb(2,1) = 2*E*Iz/L;
-    kb(3,3) = kb(4,4) = 4*E*Iy/L;
-    kb(3,4) = kb(4,3) = 2*E*Iy/L;
-    kb(5,5) = G*Jx/L;
-    
-    m(0,0) = m(1,1) = m(2,2) = m(6,6) = m(7,7) = m(8,8) = rho*L/2;
+    EAoverL = E*A/L;
+    EIzoverL4 = 4*E*Iz/L;
+    EIzoverL2 = 2*E*Iz/L;
+    EIyoverL4 = 4*E*Iy/L;
+    EIyoverL2 = 2*E*Iy/L;
+    GJoverL = G*Jx/L;
 }
 
 int
@@ -168,13 +170,20 @@ ElasticBeam3d::getTangentStiff(void)
     
     const Vector &v = theCoordTransf->getBasicTrialDisp();
     
-    q(0) = kb(0,0)*v(0);
-    q(1) = kb(1,1)*v(1) + kb(1,2)*v(2);
-    q(2) = kb(2,1)*v(1) + kb(2,2)*v(2);
-    q(3) = kb(3,3)*v(3) + kb(3,4)*v(4);
-    q(4) = kb(4,3)*v(3) + kb(4,4)*v(4);    
-    q(5) = kb(5,5)*v(5);    
-    
+    q(0) = EAoverL*v(0);
+    q(1) = EIzoverL4*v(1) + EIzoverL2*v(2);
+    q(2) = EIzoverL2*v(1) + EIzoverL4*v(2);
+    q(3) = EIyoverL4*v(3) + EIyoverL2*v(4);
+    q(4) = EIyoverL2*v(3) + EIyoverL4*v(4);    
+    q(5) = GJoverL*v(5);
+
+	kb(0,0) = EAoverL;
+	kb(1,1) = kb(2,2) = EIzoverL4;
+	kb(2,1) = kb(1,2) = EIzoverL2;
+	kb(3,3) = kb(4,4) = EIyoverL4;
+	kb(4,3) = kb(3,4) = EIyoverL2;
+	kb(5,5) = GJoverL;
+
     return theCoordTransf->getGlobalStiffMatrix(kb,q);
 }
 
@@ -187,13 +196,29 @@ ElasticBeam3d::getSecantStiff(void)
 const Matrix &
 ElasticBeam3d::getDamp(void)
 {
-    return d;
+	K.Zero();
+
+    return K;
 }
 
 const Matrix &
 ElasticBeam3d::getMass(void)
 { 
-    return m;
+	K.Zero();
+
+	if (rho > 0.0) {
+		double m = 0.5*rho*L;
+		
+		K(0,0) = m;
+		K(1,1) = m;
+		K(2,2) = m;
+
+		K(6,6) = m;
+		K(7,7) = m;
+		K(8,8) = m;
+	}
+
+    return K;
 }
 
 void 
@@ -236,14 +261,16 @@ ElasticBeam3d::addInertiaLoadToUnbalance(const Vector &accel)
 
 	// Want to add ( - fact * M R * accel ) to unbalance
 	// Take advantage of lumped mass matrix
-	// Mass matrix is computed in setDomain()
-    Q(0) += -m(0,0) * Raccel1(0);
-    Q(1) += -m(1,1) * Raccel1(1);
-    Q(2) += -m(2,2) * Raccel1(2);
+	
+	double m = 0.5*rho*L;
+
+    Q(0) += -m * Raccel1(0);
+    Q(1) += -m * Raccel1(1);
+    Q(2) += -m * Raccel1(2);
     
-    Q(6) += -m(6,6) * Raccel2(0);    
-    Q(7) += -m(7,7) * Raccel2(1);
-    Q(8) += -m(8,8) * Raccel2(2);    
+    Q(6) += -m * Raccel2(0);    
+    Q(7) += -m * Raccel2(1);
+    Q(8) += -m * Raccel2(2);    
 
     return 0;
 }
@@ -251,20 +278,22 @@ ElasticBeam3d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 ElasticBeam3d::getResistingForceIncInertia()
 {	
-    Pinert = this->getResistingForce();
+    P = this->getResistingForce();
     
     const Vector &accel1 = node1Ptr->getTrialAccel();
     const Vector &accel2 = node2Ptr->getTrialAccel();    
     
-    Pinert(0) += m(0,0) * accel1(0);
-    Pinert(1) += m(1,1) * accel1(1);
-    Pinert(2) += m(2,2) * accel1(2);
-    
-    Pinert(6) += m(6,6) * accel2(0);    
-    Pinert(7) += m(7,7) * accel2(1);
-    Pinert(8) += m(8,8) * accel2(2);    
+	double m = 0.5*rho*L;
 
-	return Pinert;
+    P(0) += m * accel1(0);
+    P(1) += m * accel1(1);
+    P(2) += m * accel1(2);
+    
+    P(6) += m * accel2(0);    
+    P(7) += m * accel2(1);
+    P(8) += m * accel2(2);    
+
+	return P;
 }
 
 const Vector &
@@ -274,21 +303,21 @@ ElasticBeam3d::getResistingForce()
 
     const Vector &v = theCoordTransf->getBasicTrialDisp();
     
-    q(0) = kb(0,0)*v(0);
-    q(1) = kb(1,1)*v(1) + kb(1,2)*v(2);
-    q(2) = kb(2,1)*v(1) + kb(2,2)*v(2);
-    q(3) = kb(3,3)*v(3) + kb(3,4)*v(4);
-    q(4) = kb(4,3)*v(3) + kb(4,4)*v(4);    
-    q(5) = kb(5,5)*v(5);
-    
+    q(0) = EAoverL*v(0);
+    q(1) = EIzoverL4*v(1) + EIzoverL2*v(2);
+    q(2) = EIzoverL2*v(1) + EIzoverL4*v(2);
+    q(3) = EIyoverL4*v(3) + EIyoverL2*v(4);
+    q(4) = EIyoverL2*v(3) + EIyoverL4*v(4);    
+    q(5) = GJoverL*v(5);
+
     static Vector dummy(3);
     
-	Pinert = theCoordTransf->getGlobalResistingForce(q, dummy);
+	P = theCoordTransf->getGlobalResistingForce(q, dummy);
 
-	//Pinert = Pinert - Q;
-	Pinert.addVector(1.0, Q, -1.0);
+	// P = P - Q;
+	P.addVector(1.0, Q, -1.0);
 
-    return Pinert;
+    return P;
 
 }
 
@@ -438,11 +467,16 @@ ElasticBeam3d::setResponse(char **argv, int argc, Information &info)
 {
     // stiffness
     if (strcmp(argv[0],"stiffness") == 0)
-		return new ElementResponse(this, 1, Matrix(12,12));
+		return new ElementResponse(this, 1, K);
 
-    // forces
-    else if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-		return new ElementResponse(this, 2, Vector(12));
+    // global forces
+    else if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
+		strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
+		return new ElementResponse(this, 2, P);
+
+	// local forces
+    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
+		return new ElementResponse(this, 3, P);
 
     else
 		return 0;
@@ -451,12 +485,39 @@ ElasticBeam3d::setResponse(char **argv, int argc, Information &info)
 int
 ElasticBeam3d::getResponse (int responseID, Information &eleInfo)
 {
+	double V;
+
     switch (responseID) {
 		case 1: // stiffness
 			return eleInfo.setMatrix(this->getTangentStiff());
 
-		case 2: // forces
+		case 2: // global forces
 			return eleInfo.setVector(this->getResistingForce());
+
+		case 3: // local forces
+			// Axial
+			P(6) = q(0);
+			P(0) = -q(0);
+
+			// Torsion
+			P(11) = q(5);
+			P(5)  = -q(5);
+
+			// Moments about z and shears along y
+			P(2) = q(1);
+			P(8) = q(2);
+			V = (q(1)+q(2))/L;
+			P(1) = V;
+			P(7) = -V;
+
+			// Moments about y and shears along z
+			P(4)  = q(3);
+			P(10) = q(4);
+			V = (q(3)+q(4))/L;
+			P(3) = -V;
+			P(9) = V;
+
+			return eleInfo.setVector(P);
 
 		default:
 			return -1;

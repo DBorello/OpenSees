@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:38:26 $
+// $Revision: 1.3 $
+// $Date: 2001-01-31 10:41:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -45,11 +45,15 @@
 #include <math.h>
 #include <stdlib.h>
 
+Matrix ElasticBeam2d::K(6,6);
+Vector ElasticBeam2d::P(6);
+Matrix ElasticBeam2d::kb(3,3);
+
 ElasticBeam2d::ElasticBeam2d()
 :Element(0,ELE_TAG_ElasticBeam2d), 
  A(0), E(0), I(0), L(0.0), rho(0.0),
  connectedExternalNodes(2), theCoordTransf(0),
- m(6,6), d(6,6), Pinert(6), Q(6), kb(3,3), q(3)
+ Q(6), q(3)
 {
     // does nothing
 }
@@ -60,7 +64,7 @@ ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i,
 :Element(tag,ELE_TAG_ElasticBeam2d), 
  A(a), E(e), I(i), L(0.0), rho(r),
  connectedExternalNodes(2), theCoordTransf(0),
- m(6,6), d(6,6), Pinert(6), Q(6), kb(3,3), q(3)
+ Q(6), q(3)
 {
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;
@@ -133,11 +137,9 @@ ElasticBeam2d::setDomain(Domain *theDomain)
     if (L == 0.0)
 	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Element has zero length");
     
-    kb(0,0) = E*A/L;
-    kb(1,1) = kb(2,2) = 4*E*I/L;
-    kb(1,2) = kb(2,1) = 2*E*I/L;
-    
-    m(0,0) = m(1,1) = m(3,3) = m(4,4) = rho*L/2;
+    EAoverL = E*A/L;
+    EIoverL4 = 4*E*I/L;
+    EIoverL2 = 2*E*I/L;
 }
 
 int
@@ -165,11 +167,14 @@ ElasticBeam2d::getTangentStiff(void)
     
     const Vector &v = theCoordTransf->getBasicTrialDisp();
     
-    q(0) = kb(0,0)*v(0);
-    q(1) = kb(1,1)*v(1) + kb(1,2)*v(2);
-    q(2) = kb(2,1)*v(1) + kb(2,2)*v(2);
-    
-    //cerr << theCoordTransf->getGlobalStiffMatrix(kb,q);
+    q(0) = EAoverL*v(0);
+    q(1) = EIoverL4*v(1) + EIoverL2*v(2);
+    q(2) = EIoverL2*v(1) + EIoverL4*v(2);
+
+   	kb(0,0) = EAoverL;
+	kb(1,1) = kb(2,2) = EIoverL4;
+	kb(2,1) = kb(1,2) = EIoverL2;
+
 	return theCoordTransf->getGlobalStiffMatrix(kb,q);
 }
 
@@ -182,13 +187,27 @@ ElasticBeam2d::getSecantStiff(void)
 const Matrix &
 ElasticBeam2d::getDamp(void)
 {
-    return d;
+	K.Zero();
+
+	return K;
 }
 
 const Matrix &
 ElasticBeam2d::getMass(void)
 { 
-    return m;
+	K.Zero();
+
+	if (rho > 0.0) {
+		double m = 0.5*rho*L;
+		
+		K(0,0) = m;
+		K(1,1) = m;
+
+		K(3,3) = m;
+		K(4,4) = m;
+	}
+
+    return K;
 }
 
 void 
@@ -231,12 +250,14 @@ ElasticBeam2d::addInertiaLoadToUnbalance(const Vector &accel)
     
 	// Want to add ( - fact * M R * accel ) to unbalance
 	// Take advantage of lumped mass matrix
-	// Mass matrix is computed in setDomain()
-    Q(0) += -m(0,0) * Raccel1(0);
-    Q(1) += -m(1,1) * Raccel1(1);
+	
+	double m = 0.5*rho*L;
+
+    Q(0) += -m * Raccel1(0);
+    Q(1) += -m * Raccel1(1);
     
-    Q(3) += -m(3,3) * Raccel2(0);    
-    Q(4) += -m(4,4) * Raccel2(1);    
+    Q(3) += -m * Raccel2(0);    
+    Q(4) += -m * Raccel2(1);    
 
     return 0;
 }
@@ -244,18 +265,20 @@ ElasticBeam2d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 ElasticBeam2d::getResistingForceIncInertia()
 {	
-    Pinert = this->getResistingForce();
+    P = this->getResistingForce();
     
     const Vector &accel1 = node1Ptr->getTrialAccel();
     const Vector &accel2 = node2Ptr->getTrialAccel();    
     
-    Pinert(0) += m(0,0) * accel1(0);
-    Pinert(1) += m(1,1) * accel1(1);
-    
-    Pinert(3) += m(3,3) * accel2(0);    
-    Pinert(4) += m(4,4) * accel2(1);
+	double m = 0.5*rho*L;
 
-	return Pinert;
+    P(0) += m * accel1(0);
+    P(1) += m * accel1(1);
+    
+    P(3) += m * accel2(0);    
+    P(4) += m * accel2(1);
+
+	return P;
 }
 
 const Vector &
@@ -265,20 +288,18 @@ ElasticBeam2d::getResistingForce()
 
     const Vector &v = theCoordTransf->getBasicTrialDisp();
     
-    q(0) = kb(0,0)*v(0);
-    q(1) = kb(1,1)*v(1) + kb(1,2)*v(2);
-    q(2) = kb(2,1)*v(1) + kb(2,2)*v(2);
+    q(0) = EAoverL*v(0);
+    q(1) = EIoverL4*v(1) + EIoverL2*v(2);
+    q(2) = EIoverL2*v(1) + EIoverL4*v(2);
     
     static Vector dummy(2);
     
-	Pinert = theCoordTransf->getGlobalResistingForce(q, dummy);
+	P = theCoordTransf->getGlobalResistingForce(q, dummy);
 
-	//Pinert = Pinert - Q;
-	Pinert.addVector(1.0, Q, -1.0);
+	// P = P - Q;
+	P.addVector(1.0, Q, -1.0);
 
-	//cerr << "getResistingForce -- " << Pinert << endl;
-
-    return Pinert;
+    return P;
 }
 
 int
@@ -397,7 +418,7 @@ ElasticBeam2d::Print(ostream &s, int flag)
 int
 ElasticBeam2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
-    // first determine the end points of the quad based on
+    // first determine the end points of the beam based on
     // the display factor (a measure of the distorted image)
     const Vector &end1Crd = node1Ptr->getCrds();
     const Vector &end2Crd = node2Ptr->getCrds();	
@@ -421,11 +442,16 @@ ElasticBeam2d::setResponse(char **argv, int argc, Information &info)
 {
     // stiffness
     if (strcmp(argv[0],"stiffness") == 0)
-		return new ElementResponse(this, 1, Matrix(6,6));
+		return new ElementResponse(this, 1, K);
 
-    // forces
-    else if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-		return new ElementResponse(this, 2, Vector(6));
+    // global forces
+    else if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
+		strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
+		return new ElementResponse(this, 2, P);
+
+	// local forces
+    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
+		return new ElementResponse(this, 3, P);
 
     else
 		return 0;
@@ -434,12 +460,27 @@ ElasticBeam2d::setResponse(char **argv, int argc, Information &info)
 int
 ElasticBeam2d::getResponse (int responseID, Information &eleInfo)
 {
+	double V;
+
     switch (responseID) {
 		case 1: // stiffness
 			return eleInfo.setMatrix(this->getTangentStiff());
 
-		case 2: // forces
+		case 2: // global forces
 			return eleInfo.setVector(this->getResistingForce());
+
+		case 3: // local forces
+			// Axial
+			P(3) = q(0);
+			P(0) = -q(0);
+			// Moment
+			P(2) = q(1);
+			P(5) = q(2);
+			// Shear
+			V = (q(1)+q(2))/L;
+			P(1) = V;
+			P(4) = -V;
+			return eleInfo.setVector(P);
 
 		default:
 			return -1;

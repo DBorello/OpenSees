@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:39:45 $
+// $Revision: 1.3 $
+// $Date: 2001-01-31 10:41:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/ElasticBeam3d.h,v $
                                                                         
                                                                         
@@ -87,14 +87,20 @@ class ElasticBeam3d : public Element
     double A,E,G,Jx,Iy,Iz;
     double L;
 
+	double EAoverL;
+	double EIzoverL4;
+	double EIzoverL2;
+	double EIyoverL4;
+	double EIyoverL2;
+	double GJoverL;
+
     double rho;
     
-    Matrix m;
-    Matrix d;
-    Vector Pinert;
+	static Matrix K;
+    static Vector P;
 	Vector Q;
     
-    Matrix kb;
+    static Matrix kb;
     Vector q;
     
     Node *node1Ptr, *node2Ptr;

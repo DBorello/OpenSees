@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:38:26 $
+// $Revision: 1.3 $
+// $Date: 2001-01-31 10:41:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/ElasticBeam2d.h,v $
                                                                         
                                                                         
@@ -87,14 +87,17 @@ class ElasticBeam2d : public Element
     double A,E,I;
     double L;
 
+	double EAoverL;
+	double EIoverL4;
+	double EIoverL2;
+
     double rho;
     
-    Matrix m;
-    Matrix d;
-    Vector Pinert;
+	static Matrix K;
+    static Vector P;
 	Vector Q;
     
-    Matrix kb;
+    static Matrix kb;
     Vector q;
     
     Node *node1Ptr, *node2Ptr;
