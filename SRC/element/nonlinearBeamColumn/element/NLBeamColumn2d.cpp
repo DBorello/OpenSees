@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-01-25 08:57:32 $
+// $Revision: 1.5 $
+// $Date: 2001-01-26 06:51:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -335,7 +335,7 @@ NLBeamColumn2d::commitState()
       return err;
    
    // commit the transformation between coord. systems
-   if (err = crdTransf->commitState())
+   if ((err = crdTransf->commitState()) == 0)
       return err;
       
    // commit the element variables state
@@ -372,7 +372,7 @@ int NLBeamColumn2d::revertToLastCommit()
       return err;
    
    // revert the transformation to last commit
-   if (err = crdTransf->revertToLastCommit())
+   if ((err = crdTransf->revertToLastCommit()) == 0)
       return err;
      
    // revert the element state to last commit
@@ -410,7 +410,7 @@ int NLBeamColumn2d::revertToStart()
       return err;
    
    // revert the transformation to start
-   if (err = crdTransf->revertToStart())
+   if ((err = crdTransf->revertToStart()) == 0)
       return err;
   
    // revert the element state to start
@@ -1720,17 +1720,19 @@ NLBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformation)
 int 
 NLBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 {
+  static Vector force(6);
+  double V;
+
   switch (responseID) {
     case 1:  // global forces
       return eleInfo.setVector(P);
 
     case 2:
-      static Vector force(6);
       force(3) = Se(0);
       force(0) = -Se(0);
       force(2) = Se(1);
       force(5) = Se(2);
-      double V = (Se(1)+Se(2))/L;
+      V = (Se(1)+Se(2))/L;
       force(1) = V;
       force(4) = -V;
       return eleInfo.setVector(force);
