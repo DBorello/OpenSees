@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2002-07-23 17:03:53 $
+// $Revision: 1.19 $
+// $Date: 2002-10-22 19:49:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -172,6 +172,14 @@ extern int TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData,
 						    Domain*, 
 						    TclModelBuilder *, 
 						    int);
+
+//Rohit Kraul
+extern int
+TclModelBuilder_addElastic2dGNL(ClientData, Tcl_Interp *, int, char **,
+                Domain *,TclModelBuilder *);
+extern int
+TclModelBuilder_addElement2dYS(ClientData, Tcl_Interp *, int, char **,
+                Domain *,TclModelBuilder *);
 
 
 int
@@ -329,7 +337,22 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     int result = TclModelBuilder_addJoint2D(clientData, interp, argc, argv,
 						  theTclDomain, theTclBuilder);
     return result;
+  } else if ((strcmp(argv[1], "inelastic2dYS01")== 0) ||
+	     (strcmp(argv[1], "inelastic2dYS02")== 0) ||
+	     (strcmp(argv[1], "inelastic2dYS03")== 0) ||
+	     (strcmp(argv[1], "inelastic2dYS04")== 0) ||
+	     (strcmp(argv[1], "inelastic2dYS05")== 0)) {
+    int result = TclModelBuilder_addElement2dYS (clientData, interp,
+						 argc, argv,
+						 theTclDomain, theTclBuilder);
+    return result;	
+  } else if ((strcmp(argv[1],"element2dGNL") == 0) ||
+	     (strcmp(argv[1],"elastic2dGNL") == 0)) {
+    int result = TclModelBuilder_addElastic2dGNL(clientData, interp, argc, argv,
+						 theTclDomain, theTclBuilder);
+    return result;
   } else {
+    // element type not recognized
     cerr << "WARNING unknown element type: " <<  argv[1];
     cerr << "Valid types: truss, elasticBeamColumn, nonlinearBeamColumn, " << endl
 	 << "beamWithHinges, zeroLength, quad, brick, shellMITC4\n";
