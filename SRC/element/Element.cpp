@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-06-23 05:41:43 $
+// $Revision: 1.5 $
+// $Date: 2001-07-11 23:09:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -89,8 +89,13 @@ const Matrix &
 Element::getKi(void) {
   if (Ki != 0)
     return *Ki;
-  else
-    return this->getTangentStiff();
+  else {
+    this->setKi();
+    if (Ki == 0)
+      return this->getTangentStiff();
+    else
+      return *Ki;
+  }
 }
 
 
@@ -133,8 +138,7 @@ Element::addInertiaLoadToUnbalance(const Vector &accel)
   load = mass * RV;
   load *= -1.0;
 
-  this->addLoad(load);
-	 return 1; //added by jeremic@ucdavis.edu 22June2001 function has int return type!
+  return this->addLoad(load);
 }
 
 bool
