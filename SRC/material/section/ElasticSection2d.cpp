@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-08 06:28:00 $
+// $Revision: 1.3 $
+// $Date: 2001-05-22 07:33:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection2d.cpp,v $
                                                                         
                                                                         
@@ -47,13 +47,12 @@
 #include <G3Globals.h>
 #include <classTags.h>
 
-Vector ElasticSection2d::s(2);
 ID ElasticSection2d::code(2);
 
 ElasticSection2d::ElasticSection2d(void)
 :SectionForceDeformation(0, SEC_TAG_Elastic2d),
  E(0), A(0), I(0),
- k(2,2), f(2,2), e(2), eCommit(2)
+ e(2), eCommit(2)
 {
     if (code(0) != SECTION_RESPONSE_P)
     {
@@ -66,13 +65,13 @@ ElasticSection2d::ElasticSection2d
 (int tag, double E_in, double A_in, double I_in)
 :SectionForceDeformation(tag, SEC_TAG_Elastic2d),
  E(E_in), A(A_in), I(I_in),
- k(2,2), f(2,2), e(2), eCommit(2)
+ e(2), eCommit(2)
 {
     if (E <= 0.0)  {
 		g3ErrorHandler->warning("%s -- Input E <= 0.0 ... setting E to 1.0",
 			"ElasticSection2d::ElasticSection2d");
 		E = 1.0;
-    }
+  }
 	
     if (A <= 0.0)  {
 		g3ErrorHandler->warning("%s -- Input A <= 0.0 ... setting A to 1.0",
@@ -86,12 +85,6 @@ ElasticSection2d::ElasticSection2d
 		I = 1.0;
     }    
 	
-    k(0,0) = E*A;
-    k(1,1) = E*I;
-    
-    f(0,0) = 1/k(0,0);
-    f(1,1) = 1/k(1,1);
-
     if (code(0) != SECTION_RESPONSE_P)
     {
 	code(0) = SECTION_RESPONSE_P;	// P is the first quantity
@@ -103,7 +96,7 @@ ElasticSection2d::ElasticSection2d
 (int tag, double EA_in, double EI_in)
 :SectionForceDeformation(tag, SEC_TAG_Elastic2d),
  E(1), A(EA_in), I(EI_in),
- k(2,2), f(2,2), e(2), eCommit(2)
+ e(2), eCommit(2)
 {
     if (A <= 0.0)  {
       g3ErrorHandler->warning("%s -- Input EA <= 0.0 ... setting EA to 1.0",
@@ -117,12 +110,6 @@ ElasticSection2d::ElasticSection2d
       I = 1.0;
     }
 	
-    k(0,0) = A;
-    k(1,1) = I;
-    
-    f(0,0) = 1/A;
-    f(1,1) = 1/I;
-
     if (code(0) != SECTION_RESPONSE_P)
     {
 	code(0) = SECTION_RESPONSE_P;	// P is the first quantity
@@ -176,9 +163,10 @@ ElasticSection2d::getSectionDeformation (void)
 const Vector &
 ElasticSection2d::getStressResultant (void)
 {
-    // s = k*e;
-    s(0) = k(0,0)*e(0);
-    s(1) = k(1,1)*e(1);    
+	static Vector s(2);
+
+    s(0) = E*A*e(0);
+    s(1) = E*I*e(1);    
 
     return s;
 }
@@ -186,13 +174,23 @@ ElasticSection2d::getStressResultant (void)
 const Matrix &
 ElasticSection2d::getSectionTangent(void)
 {
-    return k;
+	static Matrix ks(2,2);
+
+	ks(0,0) = E*A;
+	ks(1,1) = E*I;
+
+    return ks;
 }
 
 const Matrix &
 ElasticSection2d::getSectionFlexibility (void)
 {
-    return f;
+	static Matrix fs(2,2);
+
+	fs(0,0) = 1.0/(E*A);
+	fs(1,1) = 1.0/(E*I);
+
+    return fs;
 }
 
 SectionForceDeformation*
@@ -268,13 +266,6 @@ ElasticSection2d::recvSelf(int commitTag, Channel &theChannel,
     I = data(3);
     eCommit(0) = data(4);
 	eCommit(1) = data(5);
-
-	// Set section stiffness and flexibility matrices
-	k(0,0) = E*A;
-	k(1,1) = E*I;
-
-	f(0,0) = 1/k(0,0);
-	f(1,1) = 1/k(1,1);
 
     return res;
 }

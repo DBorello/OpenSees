@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2001-05-22 07:33:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.h,v $
                                                                         
                                                                         
@@ -80,13 +80,9 @@ class ElasticSection3d: public SectionForceDeformation
    
     double E, A, Iz, Iy, G, J;
 
-    Matrix k;			// section stiffness matrix
-    Matrix f;			// section flexibility matrix
     Vector e;			// section trial deformations
     Vector eCommit;
 
-	static Vector s;			// section resisting forces, static for returns
-		
     static ID code;
 };
 

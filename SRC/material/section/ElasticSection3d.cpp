@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2001-05-22 07:33:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.cpp,v $
                                                                         
                                                                         
@@ -43,13 +43,12 @@
 
 #include <classTags.h>
 
-Vector ElasticSection3d::s(4);
 ID ElasticSection3d::code(4);
 
 ElasticSection3d::ElasticSection3d(void)
 :SectionForceDeformation(0, SEC_TAG_Elastic3d),
  E(0), A(0), Iz(0), Iy(0), G(0), J(0),
- k(4,4), f(4,4), e(4), eCommit(4)
+ e(4), eCommit(4)
 {
     if (code(0) != SECTION_RESPONSE_P)
     {
@@ -64,7 +63,7 @@ ElasticSection3d::ElasticSection3d
 (int tag, double E_in, double A_in, double Iz_in, double Iy_in, double G_in, double J_in)
 :SectionForceDeformation(tag, SEC_TAG_Elastic3d),
  E(E_in), A(A_in), Iz(Iz_in), Iy(Iy_in), G(G_in), J(J_in),
- k(4,4), f(4,4), e(4), eCommit(4)
+ e(4), eCommit(4)
 {
     if (E <= 0.0)  {
 		g3ErrorHandler->warning("%s -- Input E <= 0.0 ... setting E to 1.0",
@@ -102,16 +101,6 @@ ElasticSection3d::ElasticSection3d
 		J = 1.0;
     }
     
-    k(0,0) = E*A;
-    k(1,1) = E*Iz;
-    k(2,2) = E*Iy;
-    k(3,3) = G*J;
-    
-    f(0,0) = 1/k(0,0);
-    f(1,1) = 1/k(1,1);
-    f(2,2) = 1/k(2,2);
-    f(3,3) = 1/k(3,3);
-
     if (code(0) != SECTION_RESPONSE_P)
     {
 	code(0) = SECTION_RESPONSE_P;	// P is the first quantity
@@ -125,7 +114,7 @@ ElasticSection3d::ElasticSection3d
 (int tag, double EA_in, double EIz_in, double EIy_in, double GJ_in)
 :SectionForceDeformation(tag, SEC_TAG_Elastic3d),
  E(1), A(EA_in), Iz(EIz_in), Iy(EIy_in), G(1), J(GJ_in),
- k(4,4), f(4,4), e(4), eCommit(4)
+ e(4), eCommit(4)
 {
     if (A <= 0.0)  {
 		g3ErrorHandler->warning("%s -- Input EA <= 0.0 ... setting EA to 1.0",
@@ -151,16 +140,6 @@ ElasticSection3d::ElasticSection3d
 		J = 1.0;
     }
     
-    k(0,0) = A;
-    k(1,1) = Iz;
-    k(2,2) = Iy;
-    k(3,3) = J;
-    
-    f(0,0) = 1/A;
-    f(1,1) = 1/Iz;
-    f(2,2) = 1/Iy;
-    f(3,3) = 1/J;
-
     if (code(0) != SECTION_RESPONSE_P)
     {
 	code(0) = SECTION_RESPONSE_P;	// P is the first quantity
@@ -216,11 +195,12 @@ ElasticSection3d::getSectionDeformation (void)
 const Vector &
 ElasticSection3d::getStressResultant (void)
 {
-    // s = k*e;
-    s(0) = k(0,0)*e(0);
-    s(1) = k(1,1)*e(1);
-    s(2) = k(2,2)*e(2);
-    s(3) = k(3,3)*e(3);
+    static Vector s(4);
+
+    s(0) = E*A*e(0);
+    s(1) = E*Iz*e(1);
+    s(2) = E*Iy*e(2);
+    s(3) = G*J*e(3);
 
     return s;
 }
@@ -228,13 +208,27 @@ ElasticSection3d::getStressResultant (void)
 const Matrix &
 ElasticSection3d::getSectionTangent(void)
 {
-    return k;
+	static Matrix ks(4,4);
+
+	ks(0,0) = E*A;
+	ks(1,1) = E*Iz;
+	ks(2,2) = E*Iy;
+	ks(3,3) = G*J;
+
+    return ks;
 }
 
 const Matrix &
 ElasticSection3d::getSectionFlexibility (void)
 {
-    return f;
+	static Matrix fs(4,4);
+
+	fs(0,0) = 1.0/(E*A);
+	fs(1,1) = 1.0/(E*Iz);
+	fs(2,2) = 1.0/(E*Iy);
+	fs(3,3) = 1.0/(G*J);
+
+    return fs;
 }
 
 SectionForceDeformation*
@@ -320,17 +314,6 @@ ElasticSection3d::recvSelf(int commitTag, Channel &theChannel,
 	eCommit(1) = data(8);
 	eCommit(2) = data(9);
 	eCommit(3) = data(10);
-
-	// Set section stiffness and flexibility matrices
-	k(0,0) = E*A;
-	k(1,1) = E*Iz;
-	k(2,2) = E*Iy;
-	k(3,3) = G*J;
-
-	f(0,0) = 1/k(0,0);
-	f(1,1) = 1/k(1,1);
-	f(2,2) = 1/k(2,2);
-	f(3,3) = 1/k(3,3);
 
     return res;
 }
