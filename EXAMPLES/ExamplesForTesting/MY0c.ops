@@ -17,7 +17,7 @@ set matOpt   3      ;# 1 = drained, pressure depend;  2 = undrained, pressure de
 set massDen  0      ;# mass density
 set press   -80.    ;# isotropic consolidation pressure on quad element(s)
 set loadInc  0.45    ;# load increment per step for monotonic loading option
-set numAnalysisSteps 150
+set numAnalysisSteps 3
 set version  2      ;# OpenSees version (1=> version 1.1.1, 2=> version 1.1.2 and above)
 
 #############################################################

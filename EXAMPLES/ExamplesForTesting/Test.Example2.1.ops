@@ -63,7 +63,7 @@ puts "Estimated yield curvature: $Ky"
 set P -180
 
 set mu 15;		# Target ductility for analysis
-set numIncr 100;	# Number of analysis increments
+set numIncr 10;	# Number of analysis increments
 
 # Call the section analysis procedure
 source MomentCurvature.ops

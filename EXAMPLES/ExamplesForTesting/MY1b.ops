@@ -21,7 +21,7 @@ set loadFac  20      ;# load multiplier
 set loadBias 2       ;# Static shear load bias
 set period   3      ;# Period of applied Sine wave
 set deltaT   0.005   ;# time step for analysis
-set numSteps 1000   ;# Number of analysis steps
+set numSteps 3   ;# Number of analysis steps
 set gamma    0.6    ;# Newmark integration parameter
 set version  2      ;# OpenSees version (1=> version 1.1.1, 2=> version 1.1.2 and above)
 

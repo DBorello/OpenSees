@@ -1,11 +1,13 @@
-#[jeremic,zhyang]@ucdavis.edu
+#[jeremic,zcheng]@ucdavis.edu
 # ops example file using Template3Dep material
+# For Cross Anisotropic Model
 # Inelastic static analysis -- Triaxial test
 #
 #two load stages:
 # stage 1: isotropic compression
 # stage 2: triaxial shearing
 #May 7, 2001
+# Mar2004, Zhao and Boris -> changes
 
 
 # ################################
@@ -19,7 +21,6 @@ set p   5.0
 set np -5.0
 set ld -8.0 
 set lf1 0.01
-set NN1 10
 # ################################
 # build the model
 # #################################
@@ -55,30 +56,19 @@ set DPps "-VM"
 set ES1  "-Leq  1.0"
 set ET1  "-Linear  0.0"
 set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
-
-#
-#																																													 alpha		 k
-set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
+    
+# ElasticFlag = 0, Pressure independent Isotropic
+#             = 1, Pressure dendent Isotropic
+#             = 2, Pressure independent Cross Anisotropic
+#             = 3, Pressure dependent Cross Anisotropic
+#      default: 0, Pressure indendent Isotropic 
+    
+set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp -ElasticFlag 2 -Ev 70000.0 -nuhv 0.2 -Ghv 29166.666667"
 #
 # where
 #alpha = 2 sin(phi) / (3^0.5) / (3-sin(phi) ), phi is the friction angle
 # and k is the cohesion
 
-## Cam clay model
-#set DPys "-CC 1.2"
-#set DPps "-CC 1.2"
-#set ES1  "-NLp  0.65 0.19 0.06"
-#set ET1  "-Linear  0.0"
-#set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
-#set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 1 200.0 -stressp $stressp"
-
-# von Mises model
-#set DPys "-VM"
-#set DPps "-VM"
-#set ES1  "-Leq  0.0"
-#set ET1  "-Linear  0.0"
-#set stressp "0.10 0 0 0 0.0 0 0 0 0.0"
-#set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2 10.0 0.0 -stressp $stressp"
 #
 nDMaterial Template3Dep 1 -YS $DPys -PS $DPps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
 
@@ -110,6 +100,7 @@ algorithm Newton
 numberer RCM
 analysis Static
 
+set NN1 2
 analyze $NN1
 
 
@@ -144,7 +135,7 @@ recorder Node node_z.out disp -time -node 5 -dof 3
 recorder Element 1 -file element.out force
 #recorder plot element.out "nodal force displ horizontal" 10 800 300 300 -columns 1 3
 
-set NN2 10
+set NN2 2
 set ndz -0.0001
 
 system UmfPack

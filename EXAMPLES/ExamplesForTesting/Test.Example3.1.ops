@@ -126,7 +126,7 @@ element elasticBeamColumn   3   3   4    360    4030  8640    2
 # --------------------
 
 # Set a parameter for the axial load
-set P 180;                # 10% of axial capacity of columns
+set P 900;                # 50% of axial capacity of columns
 
 # Create a Plain load pattern with a Linear TimeSeries
 pattern Plain 1 "Linear" {
@@ -197,7 +197,7 @@ recorder Node nodeGravity.out disp -time -node 3 4 -dof 1 2 3
 initialize
 
 # perform the gravity load analysis, requires 10 steps to reach the load level
-analyze 10
+analyze 2
 
 
 # Print out the state of nodes 3 and 4

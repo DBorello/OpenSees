@@ -14,7 +14,7 @@
 # Sets up a recorder which writes moment-curvature results to file
 # section$secTag.out ... the moment is in column 1, and curvature in column 2
 
-proc MomentCurvature {secTag axialLoad maxK {numIncr 100} } {
+proc MomentCurvature {secTag axialLoad maxK {numIncr 10} } {
 	# Define two nodes at (0,0)
 	node 1 0.0 0.0
 	node 2 0.0 0.0

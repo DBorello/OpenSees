@@ -137,7 +137,7 @@ remove recorders
 #recorder Element 1 -file element.out pqall
 #recorder plot element.out "p vs. q" 10 500 300 300 -columns 1 2
 
-set NN2 300
+set NN2 10
 set ndz -0.001
 
 system UmfPack

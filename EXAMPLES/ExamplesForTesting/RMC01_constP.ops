@@ -92,7 +92,7 @@ algorithm Newton
 numberer RCM
 analysis Static
 
-set NN1 5
+set NN1 3
 analyze $NN1
 
 

@@ -28,7 +28,6 @@ set Ghv   [expr $alpha*$Ev/(2*(1+$nuhv))]
 
 set p     5.0
 set np   -5.0
-set NN1   1
 
 ###################
 # Build the model #
@@ -99,6 +98,7 @@ algorithm Newton
 numberer RCM
 analysis Static
 
+set NN1   1
 analyze $NN1
 print node 5 8
 

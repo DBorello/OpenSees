@@ -1,7 +1,4 @@
 #================================================================================
-# "Couple" system" is a system in which 
-#  solid particles and fluid coexist.
-#================================================================================
 # u--solid displacement
 # p--Pore pressure
 # U--Absolute fluid displacement(not relative to solid)
