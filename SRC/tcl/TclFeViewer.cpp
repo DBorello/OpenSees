@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-19 07:04:23 $
+// $Revision: 1.3 $
+// $Date: 2001-07-26 01:00:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.cpp,v $
                                                                         
                                                                         
@@ -44,8 +44,11 @@
 #include <Node.h>
 #include <NodeIter.h>
 
-#ifdef _WIN32
+#ifdef _WGL
 #include <OpenGLRenderer.h>
+#elif _GLX
+#include <OpenGLRenderer.h>
+#include <MesaRenderer.h>
 #else
 #include <X11Renderer.h>
 #endif
@@ -106,14 +109,17 @@ TclFeViewer::TclFeViewer(char *title, int xLoc, int yLoc, int width, int height,
 			 Domain &_theDomain, int WipeFlag,
 			 Tcl_Interp *interp)
   :theMap(0),theRenderer(0), theDomain(&_theDomain), 
-  theEleMode(-1), theNodeMode(-1), theDisplayFact(1), wipeFlag(WipeFlag)
+  theEleMode(-1), theNodeMode(-1), theDisplayFact(1), wipeFlag(WipeFlag),
+  vrpSet(0),vpwindowSet(0),clippingPlaneDistancesSet(0)
 {
 
   // set the static pointer used in the class
   theTclFeViewer = this;
   theMap = new PlainMap();
 
-#ifdef _WIN32
+#ifdef _WGL
+  theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap);
+#elif _GLX
   theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap);
 #else
   theRenderer = new X11Renderer(title, xLoc, yLoc, width, height, *theMap);
@@ -158,19 +164,22 @@ TclFeViewer::TclFeViewer(char *title, int xLoc, int yLoc, int width, int height,
 
 
 TclFeViewer::TclFeViewer(char *title, int xLoc, int yLoc, int width, int height, 
-						 char *fileName,
-			  Domain &_theDomain,
+			 char *fileName,
+			 Domain &_theDomain,
 			 Tcl_Interp *interp)
   :theMap(0),theRenderer(0), theDomain(&_theDomain),
-   theEleMode(-1), theNodeMode(-1), theDisplayFact(1), wipeFlag(1), count(0)
+   theEleMode(-1), theNodeMode(-1), theDisplayFact(1), wipeFlag(1), 
+  vrpSet(0),vpwindowSet(0),clippingPlaneDistancesSet(0)
 {
 
   // set the static pointer used in the class
   theTclFeViewer = this;
   theMap = new PlainMap();
-#ifdef _WIN32
-  cerr << "HERE I AM\n";
+#ifdef _WGL
   theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap, 0, fileName);
+#elif _GLX
+  theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap, 0, fileName);
+  // theRenderer = new MesaRenderer(title, xLoc, yLoc, width, height, *theMap);
 #else
   theRenderer = new X11Renderer(title, xLoc, yLoc, width, height, *theMap, fileName);
 #endif
@@ -229,12 +238,43 @@ TclFeViewer::record(int cTag)
   // first clear the image
 		
   if (wipeFlag == 1)
-		theRenderer->clearImage();
+    theRenderer->clearImage();
+
+  // set some quantities if not set
+  if (vrpSet == 0 || vpwindowSet == 0 || clippingPlaneDistancesSet == 0) {
+    const Vector &theBounds = theDomain->getPhysicalBounds();
+    double xAvg = (theBounds(0) + theBounds(3))/2.0;
+    double yAvg = (theBounds(1) + theBounds(4))/2.0;
+    double zAvg = (theBounds(2) + theBounds(5))/2.0;
+    
+    if (vrpSet == 0)
+      this->setVRP(xAvg, yAvg, zAvg);
+
+    double diff, xDiff, yDiff, zDiff;
+    xDiff = (theBounds(3) - theBounds(0));
+    yDiff = (theBounds(4) - theBounds(1));
+    zDiff = (theBounds(5) - theBounds(2));
+    diff = xDiff;
+    if (yDiff > diff)
+      diff = yDiff;
+    if (zDiff > diff)
+      diff = zDiff;
+
+    diff *= 1.25 * 0.5;
+    
+    if (vpwindowSet == 0)
+      this->setViewWindow(-diff,diff,-diff,diff);
+
+    if (clippingPlaneDistancesSet == 0) {
+      diff = sqrt(xDiff*xDiff + yDiff*yDiff + zDiff * zDiff);
+      this->setPlaneDist(diff,-diff);
+    }
+  }
 
   theRenderer->startImage();
   int res = 0;
 
-  if (theEleMode >= 0) {
+  if (theEleMode != 0) {
       ElementIter &theElements = theDomain->getElements();
       Element *theEle;
       while ((theEle = theElements()) != 0) {
@@ -246,7 +286,7 @@ TclFeViewer::record(int cTag)
       }
   }
   
-  if (theNodeMode >= 0) {
+  if (theNodeMode != 0) {
       NodeIter &theNodes = theDomain->getNodes();
       Node *theNode;
       while ((theNode = theNodes()) != 0) {
@@ -280,8 +320,12 @@ TclFeViewer::restart(void)
 int
 TclFeViewer::setVRP(float xLoc, float yLoc , float zLoc)
 {
-    // point on view plane    
-    return theRenderer->setVRP(xLoc, yLoc, zLoc);
+  int ok =  theRenderer->setVRP(xLoc, yLoc, zLoc);
+  if (ok == 0)
+    vrpSet = 1;
+
+  return ok;
+
 }
 
 int
@@ -294,66 +338,67 @@ TclFeViewer::setVPN(float xdirn, float ydirn, float zdirn)
 int
 TclFeViewer::setVUP(float xdirn, float ydirn, float zdirn)
 {
-    // view-up vector
-    return theRenderer->setVUP(xdirn, ydirn, zdirn);
+  return theRenderer->setVUP(xdirn, ydirn, zdirn);
 }    
 
 int
 TclFeViewer::setViewWindow(float uMin, float uMax, float vMin, float vMax)
 {
-    // view bounds  umin, umax, vmin, vmax
-    return theRenderer->setViewWindow(uMin, uMax, vMin, vMax);
+  int ok = theRenderer->setViewWindow(uMin, uMax, vMin, vMax);
+  if (ok == 0)
+    vpwindowSet = 1;
+
+  return ok;
 }        
 
 int
 TclFeViewer::setPlaneDist(float anear, float afar)
 {
-    // location of near, view & far clipping planes
-    return theRenderer->setPlaneDist(anear,afar);
+  int ok = theRenderer->setPlaneDist(anear,afar);
+  if (ok == 0)
+    clippingPlaneDistancesSet = 1;
+  return ok;
 }            
 
 int
-TclFeViewer::setProjectionMode(int mode)
+TclFeViewer::setProjectionMode(char *mode)
 {
     return theRenderer->setProjectionMode(mode);
 }                
 
 int
-TclFeViewer::setFillMode(int mode)
+TclFeViewer::setFillMode(char *mode)
 {
-    // 1 = wire, otherwise fill
-    return theRenderer->setFillMode(mode);
+  return theRenderer->setFillMode(mode);
 }                
 
 int
 TclFeViewer::setPRP(float uLoc, float vLoc , float nLoc)
 {
-    // eye location -- global coordinates
-    return theRenderer->setPRP(uLoc, vLoc, nLoc);
+  return theRenderer->setPRP(uLoc, vLoc, nLoc);
 }
     
     
 int
 TclFeViewer::setPortWindow(float left, float right, float bottom, float top)
 {     
-    // view port left, right, bottom, top [-1,1,-1,1]
-    return theRenderer->setPortWindow(left,right,bottom,top);    
+  return theRenderer->setPortWindow(left,right,bottom,top);    
 }
 
 int
 TclFeViewer::displayModel(int eleFlag, int nodeFlag, float displayFact)
 {
-    // methods invoked on the FE_Viewer
-    theEleMode = eleFlag;
-    theNodeMode = nodeFlag;    
-    theDisplayFact = displayFact;    
-    return this->record(0);
+  // methods invoked on the FE_Viewer
+  theEleMode = eleFlag;
+  theNodeMode = nodeFlag;    
+  theDisplayFact = displayFact;    
+  return this->record(0);
 }
 
 int
 TclFeViewer::clearImage(void)
 {
-    return theRenderer->clearImage();
+  return theRenderer->clearImage();
 }
     
 
@@ -535,14 +580,8 @@ TclFeViewer_setProjectionMode(ClientData clientData, Tcl_Interp *interp, int arg
       return TCL_ERROR;
   }    
 
-  // get the mode
-  int i;
-  if (Tcl_GetInt(interp, argv[1], &i) != TCL_OK) {
-      interp->result = "WARNING invalid modeID - projection modeID";
-      return TCL_ERROR;
-  }
-  
-  theTclFeViewer->setProjectionMode(i);    
+  // set the mode
+  theTclFeViewer->setProjectionMode(argv[1]);    
   return TCL_OK;  
 }
 
@@ -560,14 +599,8 @@ TclFeViewer_setFillMode(ClientData clientData, Tcl_Interp *interp, int argc,
       return TCL_ERROR;
   }    
 
-  // get the mode
-  int i;
-  if (Tcl_GetInt(interp, argv[1], &i) != TCL_OK) {
-      interp->result = "WARNING invalid modeID - fill modeID";
-      return TCL_ERROR;
-  }
-  
-  theTclFeViewer->setFillMode(i);    
+  // set the mode
+  theTclFeViewer->setFillMode(argv[1]);    
   return TCL_OK;  
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-19 07:04:23 $
+// $Revision: 1.3 $
+// $Date: 2001-07-26 01:00:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.h,v $
                                                                         
                                                                         
@@ -75,8 +75,8 @@ class TclFeViewer : public Recorder
     int setPlaneDist(float, float); // location of
                                // near, view & far clipping planes
 
-    int setProjectionMode(int); // 
-    int setFillMode(int);    // 1 = wire, otherwise fill
+    int setProjectionMode(char *); // 
+    int setFillMode(char *);    // 1 = wire, otherwise fill
     
     int setPRP(float, float, float); // eye location, global coords
 
@@ -98,7 +98,9 @@ class TclFeViewer : public Recorder
     int theNodeMode;    
     double theDisplayFact;
     int wipeFlag;
-    int count;
+    int vrpSet;
+    int vpwindowSet;
+    int clippingPlaneDistancesSet;
 };
 
 #endif

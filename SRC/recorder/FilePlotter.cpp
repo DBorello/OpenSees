@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-16 04:19:11 $
+// $Revision: 1.3 $
+// $Date: 2001-07-26 00:57:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.cpp,v $
                                                                         
                                                                         
@@ -44,11 +44,14 @@
 #include <ctype.h>
 #include <ID.h>
 
-#ifdef _WIN32
+#ifdef _WGL
+#include <OpenGLRenderer.h>
+#elif _GLX
 #include <OpenGLRenderer.h>
 #else
 #include <X11Renderer.h>
 #endif
+
 #include <PlainMap.h>
 #include <Vector.h>
 
@@ -62,7 +65,9 @@ FilePlotter::FilePlotter(char *_fileName,
 
   // create the window in which we plot on the screen
   theMap = new PlainMap();
-#ifdef _WIN32
+#ifdef _WGL
+  theRenderer = new OpenGLRenderer(windowTitle, xLoc, yLoc, width, height, *theMap);
+#elif _GLX
   theRenderer = new OpenGLRenderer(windowTitle, xLoc, yLoc, width, height, *theMap);
 #else
   theRenderer = new X11Renderer(windowTitle, xLoc, yLoc, width, height, *theMap);
@@ -71,8 +76,9 @@ FilePlotter::FilePlotter(char *_fileName,
   theRenderer->setVRP(0.0, 0.0, 0.0); 
   theRenderer->setVPN(0.0, 0.0, 1.0);
   theRenderer->setVUP(0.0, 1.0, 0.0);
-  theRenderer->setFillMode(1);             // wire mode
-  theRenderer->setPlaneDist(1.0, 100.0);
+  theRenderer->setFillMode("wire");             // wire mode
+  theRenderer->setProjectionMode("parallel");  // wire mode
+  theRenderer->setPlaneDist(1.0, -1.0);
   theRenderer->setPRP(0.0, 0.0, 10.0);
   theRenderer->setPortWindow(-1.0, 1.0, -1.0, 1.0);  // use the whole window
 
@@ -197,10 +203,10 @@ FilePlotter::plotFile(void)
 	}
 
 	// set the window bounds NOTE small border around the edges
-	double xBnd = (xMax-xMin)/10;
-	double yBnd = (yMax-yMin)/10;
+	double xBnd = (xMax-xMin)/8;
+	double yBnd = (yMax-yMin)/8;
     
-	theRenderer->setViewWindow(xMin-xBnd,xMax+2*xBnd,yMin-yBnd,yMax+yBnd);
+	theRenderer->setViewWindow(xMin-xBnd,xMax+xBnd,yMin-yBnd,yMax+yBnd);
       }
     }
 
@@ -217,8 +223,9 @@ FilePlotter::plotFile(void)
     if (numLines > 1) {
 
 
-      Vector pt1(3); Vector pt2(3);
-      pt1(2) = 0.0;  pt2(2) = 0.0;
+      static Vector pt1(3); 
+      static Vector pt2(3);
+      static Vector rgb(3);
 
       // clear the present image and get renderer ready to process data
       theRenderer->clearImage();
@@ -227,35 +234,34 @@ FilePlotter::plotFile(void)
       // draw the x axis
       pt1(0) = xMin; pt2(0) = xMax;
       pt1(1) = 0.0;  pt2(1) = 0.0;
-      theRenderer->drawLine(pt1, pt2, 0.0, 0.0);    
+      theRenderer->drawLine(pt1, pt2, rgb, rgb);    
 
       static char theText[20];
       if (xMin != 0.0 && -100*xMin > xMax) {
 	sprintf(theText,"%.2e",xMin);
-	theRenderer->drawGText(pt1, theText, strlen(theText));
+	theRenderer->drawText(pt1, theText, strlen(theText), 'l', 'b');
       }
       if (xMax != 0.0) {
 	sprintf(theText,"%.2e",xMax);
-	theRenderer->drawGText(pt2, theText, strlen(theText));
+	theRenderer->drawText(pt2, theText, strlen(theText), 'r', 'b');
       }
 
       // draw the y axis
       pt1(0) = 0.0; pt2(0) = 0.0;
       pt1(1) = yMin;  pt2(1) = yMax;
-      theRenderer->drawLine(pt1, pt2, 0.0, 0.0);        
+      theRenderer->drawLine(pt1, pt2, rgb, rgb);        
       
       if (yMin != 0.0 && -100 *yMin > yMax) {
 	sprintf(theText,"%.2e",yMin);
-	theRenderer->drawGText(pt1, theText, strlen(theText));
+	theRenderer->drawText(pt1, theText, strlen(theText), 'c', 't');
       }
       if (yMax != 0.0) {
 	sprintf(theText,"%.2e",yMax);
-	theRenderer->drawGText(pt2, theText, strlen(theText));
+	theRenderer->drawText(pt2, theText, strlen(theText), 'c', 'b');
       }
 
       Vector data1(numLineEntries);
       Vector data2(numLineEntries);
-
 
       // open the file
       theFile.open(fileName, ios::in);
@@ -275,7 +281,7 @@ FilePlotter::plotFile(void)
 	  pt1(1) = data1((*cols)(j+1));
 	  pt2(0) = data2((*cols)(j)); 
 	  pt2(1) = data2((*cols)(j+1));
-	  theRenderer->drawLine(pt1, pt2, 1.0, 1.0);
+	  theRenderer->drawLine(pt1, pt2, rgb, rgb);
 	}
 
 	data1 = data2;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-16 04:19:11 $
+// $Revision: 1.2 $
+// $Date: 2001-07-26 00:57:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/AlgorithmIncrements.cpp,v $
                                                                         
                                                                         
@@ -78,7 +78,7 @@ AlgorithmIncrements::AlgorithmIncrements(EquiSolnAlgo *theEquiAlgo,
   theRenderer->setVRP(0.0, 0.0, 0.0); 
   theRenderer->setVPN(0.0, 0.0, 1.0);
   theRenderer->setVUP(0.0, 1.0, 0.0);
-  theRenderer->setFillMode(1);             // wire mode
+  theRenderer->setFillMode("wire");             // wire mode
   theRenderer->setPlaneDist(1.0, 100.0);
   theRenderer->setPRP(0.0, 0.0, 10.0);
 
@@ -243,11 +243,11 @@ AlgorithmIncrements::plotData(const Vector &X, const Vector &B)
    static char theText[20];
    if (yMin != 0.0 && -100 *yMin > yMax) {
      sprintf(theText,"%.2e",yMin);
-     theRenderer->drawGText(pt1, theText, strlen(theText));
+     theRenderer->drawText(pt1, theText, strlen(theText));
    }
    if (yMax != 0.0) {
      sprintf(theText,"%.2e",yMax);
-     theRenderer->drawGText(pt2, theText, strlen(theText));
+     theRenderer->drawText(pt2, theText, strlen(theText));
    }
 
    pt1(0) = 1;
@@ -312,11 +312,11 @@ AlgorithmIncrements::plotData(const Vector &X, const Vector &B)
 
    if (yMin != 0.0 && -100 *yMin > yMax) {
      sprintf(theText,"%.2e",yMin);
-     theRenderer->drawGText(pt1, theText, strlen(theText));
+     theRenderer->drawText(pt1, theText, strlen(theText));
    }
    if (yMax != 0.0) {
      sprintf(theText,"%.2e",yMax);
-     theRenderer->drawGText(pt2, theText, strlen(theText));
+     theRenderer->drawText(pt2, theText, strlen(theText));
    }
 
    pt1(0) = 1;
