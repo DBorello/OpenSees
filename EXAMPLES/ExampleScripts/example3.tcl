@@ -4,8 +4,8 @@
 # purpose: example2 in g3intro.tex modified for TclModelBuilder
 #  and used to show ZeroLength element at node 0
 #
-# $Revision: 1.1.1.1 $
-# $Date: 2000-09-15 08:23:09 $
+# $Revision: 1.2 $
+# $Date: 2000-12-16 06:24:06 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/example3.tcl,v $
 
 
@@ -40,7 +40,7 @@ fix 5 1 1
 fix 2 1 1
 fix 3 1 1
 
-pattern Plain 1 Linear {
+pattern Plain 1 "Linear" {
     load 4 100 -50
 }
 

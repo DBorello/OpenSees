@@ -3,8 +3,8 @@
 #
 # purpose: example1 in OpenSeesIntro.tex
 #
-# $Revision: 1.1.1.1 $
-# $Date: 2000-09-15 08:23:09 $
+# $Revision: 1.2 $
+# $Date: 2000-12-16 06:24:06 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/example1.tcl,v $
 
 
@@ -37,7 +37,7 @@ fix 1 1 1
 fix 2 1 1
 fix 3 1 1
 
-pattern Plain 1 Linear {
+pattern Plain 1 "Linear" {
     # apply the load - command: load nodeID xForce yForce
     load 4 100 -50
 }
