@@ -9,7 +9,8 @@ tidy:
 	@$(RM) $(RMFLAGS) Makefile.bak 
 
 clean: tidy
-	@$(RM) $(RMFLAGS) $(OBJS) *.o
+	@$(RM) $(RMFLAGS) $(OBJS) 
+	@$(RM) $(RMFLAGS) *.o
 	@$(RM) $(RMFLAGS) .inslog*
 	@$(RM) $(RMFLAGS) tca.map
 
