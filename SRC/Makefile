@@ -721,6 +721,7 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/integrator/Newmark1.o \
 	$(FE)/analysis/integrator/HHT1.o \
 	$(FE)/analysis/integrator/CentralDifference.o \
+	$(FE)/analysis/integrator/CentralDifferenceAlternative.o \
 	$(FE)/analysis/integrator/WilsonTheta.o \
 	$(FE)/analysis/model/AnalysisModel.o \
 	$(FE)/analysis/model/simple/SimpleFE_Iter.o \

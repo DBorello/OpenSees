@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.57 $
-// $Date: 2004-11-13 08:09:23 $
+// $Revision: 1.58 $
+// $Date: 2005-01-27 04:34:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -143,6 +143,8 @@ OPS_Stream &opserr = sserr;
 #include <HHT1.h>
 #include <Newmark1.h> 
 #include <EigenIntegrator.h>
+#include <CentralDifferenceAlternative.h>
+//#include <CentralDifference.h>
 
 // analysis
 #include <StaticAnalysis.h>
@@ -2417,11 +2419,20 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       if (argc == 3)
 	  theTransientIntegrator = new WilsonTheta(theta);       
       else
-	  theTransientIntegrator = new WilsonTheta(theta, alphaM, betaK, betaKi, betaKc);
-
+	theTransientIntegrator = new WilsonTheta(theta, alphaM, betaK, betaKi, betaKc);
+      
       // if the analysis exists - we want to change the Integrator
-	  if (theTransientAnalysis != 0)
-		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+      if (theTransientAnalysis != 0)
+	theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }      
+
+
+  else if (strcmp(argv[1],"CentralDifferenceAlternative") == 0) {
+    theTransientIntegrator = new CentralDifferenceAlternative();       
+
+    // if the analysis exists - we want to change the Integrator
+    if (theTransientAnalysis != 0)
+      theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }      
 
   else {

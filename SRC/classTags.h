@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.62 $
-// $Date: 2005-01-18 21:38:44 $
+// $Revision: 1.63 $
+// $Date: 2005-01-27 04:30:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -414,6 +414,7 @@
 #define INTEGRATOR_TAGS_StaticSensitivity       13
 #define INTEGRATOR_TAGS_HSConstraint            14
 #define INTEGRATOR_TAGS_DistributedDisplacementControl     15
+#define INTEGRATOR_TAGS_CentralDifferenceAlternative       16
 
 
 #define LinSOE_TAGS_FullGenLinSOE		1
