@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-14 08:41:49 $
+// $Revision: 1.4 $
+// $Date: 2001-09-20 20:26:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclPatternCommand.cpp,v $
 
 // File: ~/domain/pattern/TclPatternComand.C
@@ -388,7 +388,10 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
 
   // use TCL_Eval to evaluate the list of load and single point constraint commands
   if (commandEndMarker < (argc-1)) {
-    Tcl_Eval(interp, argv[argc-1]);
+    if (Tcl_Eval(interp, argv[argc-1]) != TCL_OK) {
+	cerr << "WARNING - error reading load pattern information in { } ";
+	return TCL_ERROR;
+    }
   }
 
   theTclMultiSupportPattern = 0;
