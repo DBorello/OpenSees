@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-31 16:49:32 $
+// $Revision: 1.3 $
+// $Date: 2001-08-14 01:54:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -53,6 +53,10 @@ FedeasMaterial::FedeasMaterial(int tag, int classTag, int nhv, int ndata)
     if (hstv == 0)
       g3ErrorHandler->fatal("%s -- failed to allocate history array -- type %d",
 			    "FedeasMaterial::FedeasMaterial", this->getClassTag());
+
+    // Initialize to zero
+    for (int i = 0; i < 2*numHstv; i++)
+      hstv[i] = 0.0;
   }
   
   if (numData < 0)
@@ -64,10 +68,11 @@ FedeasMaterial::FedeasMaterial(int tag, int classTag, int nhv, int ndata)
     if (data == 0)
       g3ErrorHandler->fatal("%s -- failed to allocate data array -- type %d",
 			    "FedeasMaterial::FedeasMaterial", this->getClassTag());
+
+    // Initialize to zero
+    for (int i = 0; i < numData; i++)
+      data[i] = 0.0;
   }
-  
-  // Initialize history variables
-  this->revertToStart();
 }
 
 FedeasMaterial::~FedeasMaterial()
