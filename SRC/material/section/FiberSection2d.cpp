@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2003-05-21 23:51:23 $
+// $Revision: 1.21 $
+// $Date: 2004-08-25 22:17:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -628,10 +628,9 @@ FiberSection2d::Print(OPS_Stream &s, int flag)
   s << "\tCentroid: " << -yBar << endln;
 
   if (flag == 1) {
-    int loc = 0;
     for (int i = 0; i < numFibers; i++) {
-      s << "\nLocation (y) = (" << -matData[loc++] << ")";
-      s << "\nArea = " << matData[loc++] << endln;
+      s << "\nLocation (y) = (" << -matData[2*i] << ")";
+      s << "\nArea = " << matData[2*i+1] << endln;
       theMaterials[i]->Print(s, flag);
     }
   }
