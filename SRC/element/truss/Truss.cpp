@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-10-02 20:20:12 $
+// $Revision: 1.11 $
+// $Date: 2001-11-26 22:53:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -514,17 +514,13 @@ Truss::zeroLoad(void)
 }
 
 int 
-Truss::addLoad(const Vector &addP)
-{
-#ifdef _G3DEBUG    
-    if (dimension != addP.Size()) {
-	g3ErrorHandler->warning("Truss::addPtoUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
-	return -1;
-    }
-#endif
-    (*theLoad) += addP;
-	return 0;
+Truss::addLoad(ElementalLoad *theLoad, double loadFactor)
+
+{  
+  g3ErrorHandler->warning("Truss::addLoad - load type unknown for truss with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
 }
 
 int 
@@ -534,18 +530,18 @@ Truss::addInertiaLoadToUnbalance(const Vector &accel)
     if (L == 0.0 || M == 0.0) 
 	return 0;
 
-    // get R * accel from the nodes
-    const Vector &Raccel1 = end1Ptr->getRV(accel);
-    const Vector &Raccel2 = end2Ptr->getRV(accel);    
+  // get R * accel from the nodes
+  const Vector &Raccel1 = end1Ptr->getRV(accel);
+  const Vector &Raccel2 = end2Ptr->getRV(accel);    
 
-    int nodalDOF = numDOF/2;
+  int nodalDOF = numDOF/2;
     
 #ifdef _G3DEBUG    
-    if (nodalDOF != Raccel1.Size() || nodalDOF != Raccel2.Size()) {
-	g3ErrorHandler->warning("Truss::addInertiaLoadToUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
-	return -1;
-    }
+  if (nodalDOF != Raccel1.Size() || nodalDOF != Raccel2.Size()) {
+    g3ErrorHandler->warning("Truss::addInertiaLoadToUnbalance %s\n",
+			    "matrix and vector sizes are incompatable");
+    return -1;
+  }
 #endif
     
     // want to add ( - fact * M R * accel ) to unbalance
@@ -873,22 +869,12 @@ Truss::getResponse(int responseID, Information &eleInfo)
  double strain;
   switch (responseID) {
     case 1:
-      //strain = this->computeCurrentStrain();
-      //theMaterial->setTrialStrain(strain);
-      //eleInformation.theDouble = A*theMaterial->getStress();    
-      //return 0;
       return eleInfo.setDouble(A * theMaterial->getStress());
       
     case 2:
-      //strain = this->computeCurrentStrain();
-      //eleInformation.theDouble = strain*L;    
-      //return 0;      
       return eleInfo.setDouble(L * theMaterial->getStrain());
       
     case 3:
-      //if (eleInformation.theMatrix != 0)
-      //*(eleInformation.theMatrix) = this->getTangentStiff();
-      //return 0;      
       return eleInfo.setMatrix(this->getTangentStiff());
 
     default:
@@ -942,7 +928,7 @@ Truss::updateParameter (int parameterID, Information &info)
   }
 }
 
-// AddingSensitivity:BEGIN ///////////////////////////////////
+
 const Vector &
 Truss::gradient(bool compute, int identifier)
 {
@@ -958,92 +944,91 @@ Truss::gradient(bool compute, int identifier)
 			gradient(true, gradNumber)
 */
 
-// COMPUTE GRADIENTS
-	if (compute) {
+  // COMPUTE GRADIENTS
+  if (compute) {
 
-// IF "PHASE 1" IN THE GRADIENT COMPUTATIONS (RETURN GRADIENT VECTOR)
-		if (identifier == 0) {
+    // IF "PHASE 1" IN THE GRADIENT COMPUTATIONS (RETURN GRADIENT VECTOR)
+    if (identifier == 0) {
+      
+      theVector->Zero();
+      
+      if ( gradientIdentifier != 0 ) {
+	// Determine the current strain
+	double strain = this->computeCurrentStrain();
 
-			theVector->Zero();
+	// Set the strain at material level
+	theMaterial->setTrialStrain(strain);
 
-			if ( gradientIdentifier != 0 ) {
-
-				// Determine the current strain
-				double strain = this->computeCurrentStrain();
-
-				// Set the strain at material level
-				theMaterial->setTrialStrain(strain);
-
-				// Compute sensitivity depending on 'parameter'
-				if( gradientIdentifier == 1 ) {
-					double sigma = theMaterial->getStress();
-					for (int i=0; i<numDOF; i++)
-						(*theVector)(i) = (*t)(0,i)*sigma;
-				}
-				else {
-					double materialGradient=0; 
-					theMaterial->gradient(compute, identifier,materialGradient);
-					for (int i=0; i<numDOF; i++) {
-						(*theVector)(i) = (*t)(0,i)*A*materialGradient;
-					}
-				}
-			}
-
-			return *theVector;
-		}
-
-// IF "PHASE 2" IN THE GRADIENT COMPUTATIONS (COMMIT UNCONDITIONAL GRADIENT)
-		else {
-
-			if ( gradientIdentifier == 0 ) {
-			}
-			else if ( gradientIdentifier == 1 ) {
-				// Nothing needs to be committed if the area is random
-			}
-			else {
-
-				// Compute strain sensitivity
-				double sens1;
-				double sens2;
-
-				double dLength = 0.0;
-				for (int i=0; i<dimension; i++){
-					sens1 = end1Ptr->getGradient(i+1, identifier);
-					sens2 = end2Ptr->getGradient(i+1, identifier);
-					dLength -= (sens2-sens1)* (*t)(0,i);
-				}
-				double materialGradient = dLength/L;
-
-				// Pass it down to the material
-				theMaterial->gradient(compute,identifier,materialGradient);
-
-			}
-
-			return 0;
-		}
+	// Compute sensitivity depending on 'parameter'
+	if( gradientIdentifier == 1 ) {
+	  double sigma = theMaterial->getStress();
+	  for (int i=0; i<numDOF; i++)
+	    (*theVector)(i) = (*t)(0,i)*sigma;
 	}
-	
-// DO NOT COMPUTE GRADIENTS, JUST SET FLAG
 	else {
-
-		// Set gradient identifier
-		gradientIdentifier = identifier;
-
-		// The identifier needs to be passed "downwards" also when it's zero
-		if (identifier == 0 ) {
-			double dummy=0;
-			theMaterial->gradient(false, identifier,dummy);
-		}
-
-		// If the identifier is non-zero and the parameter belongs to the material
-		else if ( identifier > 100) {
-			double dummy=0;
-			theMaterial->gradient(false, identifier-100,dummy);
-		}
-
-		return 0;
-
+	  double materialGradient=0; 
+	  theMaterial->gradient(compute, identifier,materialGradient);
+	  for (int i=0; i<numDOF; i++) {
+	    (*theVector)(i) = (*t)(0,i)*A*materialGradient;
+	  }
 	}
+      }
+      
+      return *theVector;
+    }
 
+    // IF "PHASE 2" IN THE GRADIENT COMPUTATIONS (COMMIT UNCONDITIONAL GRADIENT)
+    else {
+      
+      if ( gradientIdentifier == 0 ) {
+      }
+      else if ( gradientIdentifier == 1 ) {
+
+	// Nothing needs to be committed if the area is random
+
+      }
+      else {
+	
+	// Compute strain sensitivity
+	double sens1;
+	double sens2;
+	
+	double dLength = 0.0;
+	for (int i=0; i<dimension; i++){
+	  sens1 = end1Ptr->getGradient(i+1, identifier);
+	  sens2 = end2Ptr->getGradient(i+1, identifier);
+	  dLength -= (sens2-sens1)* (*t)(0,i);
+	}
+	double materialGradient = dLength/L;
+	
+	// Pass it down to the material
+	theMaterial->gradient(compute,identifier,materialGradient);
+	
+      }
+      
+      return 0;
+    }
+  }
+  
+  // DO NOT COMPUTE GRADIENTS, JUST SET FLAG
+  else {
+
+    // Set gradient identifier
+    gradientIdentifier = identifier;
+    
+    // The identifier needs to be passed "downwards" also when it's zero
+    if (identifier == 0 ) {
+      double dummy=0;
+      theMaterial->gradient(false, identifier,dummy);
+    }
+    
+    // If the identifier is non-zero and the parameter belongs to the material
+    else if ( identifier > 100) {
+      double dummy=0;
+      theMaterial->gradient(false, identifier-100,dummy);
+    }
+    
+    return 0;
+  }
 }
-// AddingSensitivity:END /////////////////////////////////////////////
+

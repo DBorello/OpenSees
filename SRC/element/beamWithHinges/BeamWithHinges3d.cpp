@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-09-04 19:59:46 $
+// $Revision: 1.6 $
+// $Date: 2001-11-26 22:53:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
                                                                         
                                                                         
@@ -434,18 +434,12 @@ BeamWithHinges3d::zeroLoad(void)
 }
 
 int
-BeamWithHinges3d::addLoad(const Vector &moreLoad)
+BeamWithHinges3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-	if(moreLoad.Size() != 12) {
-		g3ErrorHandler->warning("%s -- moreLoad vector not of correct size",
-			"BeamWithHinges3d::addLoad");
-		return -1;
-	}
-
-	// load += moreLoad;
-	load.addVector(1.0, moreLoad, 1.0);
-	
-	return 0;
+  g3ErrorHandler->warning("BeamWithHinges3d::addLoad - load type unknown for ele with tag: %d",
+			  this->getTag());
+  
+  return -1;
 }
 
 int

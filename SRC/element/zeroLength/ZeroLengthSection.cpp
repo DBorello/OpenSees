@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:40:50 $
+// $Revision: 1.3 $
+// $Date: 2001-11-26 22:53:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -277,18 +277,21 @@ ZeroLengthSection::zeroLoad(void)
 	// does nothing now
 }
 
-int
-ZeroLengthSection::addLoad(const Vector &addP)
+int 
+ZeroLengthSection::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-	// does nothing now
-	return 0;
+  g3ErrorHandler->warning("ZeroLengthSection::addLoad - load type unknown for truss with tag: %d",
+			  this->getTag());
+  
+  return -1;
 }
+
 
 int 
 ZeroLengthSection::addInertiaLoadToUnbalance(const Vector &accel)
 {
-	// does nothing as element has no mass yet!
-	return 0;
+  // does nothing as element has no mass yet!
+  return 0;
 }
 
 const Vector &

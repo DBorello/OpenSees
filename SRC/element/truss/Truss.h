@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-08-28 19:07:13 $
+// $Revision: 1.8 $
+// $Date: 2001-11-26 22:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.h,v $
                                                                         
                                                                         
@@ -77,8 +77,9 @@ class Truss : public Element
     const Matrix &getMass(void);    
 
     void zeroLoad(void);	
-    int addLoad(const Vector &addP);
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
+
     const Vector &getResistingForce(void);
     const Vector &getResistingForceIncInertia(void);            
 
@@ -93,9 +94,7 @@ class Truss : public Element
 
     int setParameter (char **argv, int argc, Information &info);
     int updateParameter (int parameterID, Information &info);
-// AddingSensitivity:BEGIN //////////////////////////////////////////
-	const Vector & gradient(bool compute, int identifier);
-// AddingSensitivity:END ///////////////////////////////////////////
+    const Vector & gradient(bool compute, int identifier);
 
   protected:
     

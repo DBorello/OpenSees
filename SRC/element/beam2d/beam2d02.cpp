@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d02.cpp,v $
                                                                         
                                                                         
@@ -238,16 +238,37 @@ beam2d02::zeroLoad(void)
     load.Zero();
 }
 
-int
-beam2d02::addLoad(const Vector &moreLoad)
+
+int 
+beam2d02::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-    if (moreLoad.Size() != 6) {
-	cerr << "beam2d02::addLoad: vector not of correct size\n";
-	return -1;
-    }
-    load += moreLoad;
-    return 0;
+  g3ErrorHandler->warning("ElasticBeam2d::addLoad() - beam %d, does not handle ele loads\n", 
+			  this->getTag());
+  return -1;
 }
+
+
+int
+beam2d02::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  if (rho == 0.0)
+    return 0;
+
+  // Get R * accel from the nodes
+  const Vector &Raccel1 = node1Ptr->getRV(accel);
+  const Vector &Raccel2 = node2Ptr->getRV(accel);
+	
+  // Want to add ( - fact * M R * accel ) to unbalance
+  // Take advantage of lumped mass matrix
+  load(0) -= M * Raccel1(0);
+  load(1) -= M * Raccel1(1);
+    
+  load(3) -= M * Raccel2(0);    
+  load(4) -= M * Raccel2(1);    
+
+  return 0;
+}
+
 
 const Vector &
 beam2d02::getResistingForce()

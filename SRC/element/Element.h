@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 03:41:36 $
+// $Revision: 1.4 $
+// $Date: 2001-11-26 22:53:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -53,6 +53,7 @@ class Renderer;
 class Info;
 class Information;
 class Response;
+class ElementalLoad;
 
 class Element : public DomainComponent
 {
@@ -83,10 +84,12 @@ class Element : public DomainComponent
     virtual int   setKi(void);
     virtual const Matrix &getKi(void);
 
-    // methods for returning and applying loads
+    // methods for applying loads
     virtual void zeroLoad(void) =0;	
-    virtual int addLoad(const Vector &addP) =0;
-    virtual int addInertiaLoadToUnbalance(const Vector &accel); 
+    virtual int addLoad(ElementalLoad *theLoad, double loadFactor) =0;
+    virtual int addInertiaLoadToUnbalance(const Vector &accel) =0;
+
+    // methods for obtaining resisting force (force includes elemental loads)
     virtual const Vector &getResistingForce(void) =0;
     virtual const Vector &getResistingForceIncInertia(void) =0;        
 

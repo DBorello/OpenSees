@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-31 17:18:50 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -33,6 +33,8 @@
 // connect to a node with 6-dof. 
 
 #include <ElasticBeam2d.h>
+#include <ElementalLoad.h>
+
 #include <Domain.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -52,7 +54,7 @@ Matrix ElasticBeam2d::kb(3,3);
 ElasticBeam2d::ElasticBeam2d()
   :Element(0,ELE_TAG_ElasticBeam2d), 
   A(0), E(0), I(0), L(0.0), rho(0.0),
-  Q(6), q(3), node1Ptr(0), node2Ptr(0),
+  Q(6), q(3), q0(6), node1Ptr(0), node2Ptr(0),
   connectedExternalNodes(2), theCoordTransf(0)
 {
     // does nothing
@@ -63,7 +65,7 @@ ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i,
 		     CrdTransf2d &coordTransf, double r)
   :Element(tag,ELE_TAG_ElasticBeam2d), 
   A(a), E(e), I(i), L(0.0), rho(r),
-  Q(6), q(3), node1Ptr(0), node2Ptr(0),
+  Q(6), q(3), q0(6), node1Ptr(0), node2Ptr(0),
   connectedExternalNodes(2), theCoordTransf(0)
 {
     connectedExternalNodes(0) = Nd1;
@@ -214,54 +216,91 @@ ElasticBeam2d::getMass(void)
 void 
 ElasticBeam2d::zeroLoad(void)
 {
-	Q.Zero();
+  Q.Zero();
+  q0.Zero();
 
-    return;
+  return;
 }
 
-int
-ElasticBeam2d::addLoad(const Vector &moreLoad)
+int 
+ElasticBeam2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-    if (moreLoad.Size() != 6) {
-	g3ErrorHandler->warning("ElasticBeam2d::addLoad: vector not of correct size");
-	return -1;
-    }
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
+  
+  if (type == LOAD_TAG_Beam2dUniformLoad) {
+    double w = data(0) * loadFactor;
 
-	//Q += moreLoad;
-	Q.addVector(1.0, moreLoad, 1.0);
+    // fixed end forces
+    double V = 0.5*w*L;
+    double M = V*L/6.0; // w*l*l/12
 
-    return 0;
+    q0(1) += V;
+    q0(2) += -M;
+    q0(4) += V;
+    q0(5) += M;
+
+  } else if (type == LOAD_TAG_Beam2dPointLoad) {
+    double P = data(0) * loadFactor;
+    double a = data(1) * L;
+    double b = L-a;
+
+    double L2 = 1/(L*L);
+    double L3 = L2/L;
+    double a2 = a*a;
+    double b2 = b*b;
+
+    // fixed end forces
+    double M1 = -a * b2 * P * L2;
+    double M2 = a2 * b * P * L2;
+    double V1 = (3.0*a + b) * b2 * P * L3;
+    double V2 = (3.0*b + a) * a2 * P * L3;
+
+    double M1M2divL = (M1 + M2)/L;
+    q0(1) += V1 - M1M2divL; // -.. for affect of unbalanced M on computation of V in local
+    q0(2) += M1;
+    q0(4) += V2 + M1M2divL; // +.. for affect of unbalanced M on computation of V in local
+    q0(5) += M2;
+
+  } else  {
+    g3ErrorHandler->warning("ElasticBeam2d::addLoad() - beam %d,load type %d unknown\n", 
+			    this->getTag(), type);
+    return -1;
+  }
+
+  return 0;
 }
 
 int
 ElasticBeam2d::addInertiaLoadToUnbalance(const Vector &accel)
 {
-	if (rho == 0.0)
-		return 0;
-
-	// Get R * accel from the nodes
-	const Vector &Raccel1 = node1Ptr->getRV(accel);
-	const Vector &Raccel2 = node2Ptr->getRV(accel);
-	
-    if (3 != Raccel1.Size() || 3 != Raccel2.Size()) {
-		g3ErrorHandler->warning("ElasticBeam2d::addInertiaLoadToUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
-		return -1;
-    }
-    
-	// Want to add ( - fact * M R * accel ) to unbalance
-	// Take advantage of lumped mass matrix
-	
-	double m = 0.5*rho*L;
-
-    Q(0) += -m * Raccel1(0);
-    Q(1) += -m * Raccel1(1);
-    
-    Q(3) += -m * Raccel2(0);    
-    Q(4) += -m * Raccel2(1);    
-
+  if (rho == 0.0)
     return 0;
+
+  // Get R * accel from the nodes
+  const Vector &Raccel1 = node1Ptr->getRV(accel);
+  const Vector &Raccel2 = node2Ptr->getRV(accel);
+	
+  if (3 != Raccel1.Size() || 3 != Raccel2.Size()) {
+    g3ErrorHandler->warning("ElasticBeam2d::addInertiaLoadToUnbalance %s\n",
+			    "matrix and vector sizes are incompatable");
+    return -1;
+  }
+    
+  // Want to add ( - fact * M R * accel ) to unbalance
+  // Take advantage of lumped mass matrix
+	
+  double m = 0.5*rho*L;
+
+  Q(0) -= m * Raccel1(0);
+  Q(1) -= m * Raccel1(1);
+    
+  Q(3) -= m * Raccel2(0);    
+  Q(4) -= m * Raccel2(1);    
+
+  return 0;
 }
+
 
 const Vector &
 ElasticBeam2d::getResistingForceIncInertia()
@@ -271,7 +310,7 @@ ElasticBeam2d::getResistingForceIncInertia()
     const Vector &accel1 = node1Ptr->getTrialAccel();
     const Vector &accel2 = node2Ptr->getTrialAccel();    
     
-	double m = 0.5*rho*L;
+    double m = 0.5*rho*L;
 
     P(0) += m * accel1(0);
     P(1) += m * accel1(1);
@@ -279,7 +318,7 @@ ElasticBeam2d::getResistingForceIncInertia()
     P(3) += m * accel2(0);    
     P(4) += m * accel2(1);
 
-	return P;
+    return P;
 }
 
 const Vector &
@@ -289,21 +328,31 @@ ElasticBeam2d::getResistingForce()
 
     const Vector &v = theCoordTransf->getBasicTrialDisp();
     
-	double EoverL   = E/L;
-	double EAoverL  = A*EoverL;			// EA/L
-	double EIoverL2 = 2.0*I*EoverL;		// 2EI/L
-	double EIoverL4 = 2.0*EIoverL2;		// 4EI/L
+    double EoverL   = E/L;
+    double EAoverL  = A*EoverL;			// EA/L
+    double EIoverL2 = 2.0*I*EoverL;		// 2EI/L
+    double EIoverL4 = 2.0*EIoverL2;		// 4EI/L
 
+    // determine q = kv + q0
     q(0) = EAoverL*v(0);
     q(1) = EIoverL4*v(1) + EIoverL2*v(2);
     q(2) = EIoverL2*v(1) + EIoverL4*v(2);
-    
-    static Vector dummy(2);
-    
-	P = theCoordTransf->getGlobalResistingForce(q, dummy);
 
-	// P = P - Q;
-	P.addVector(1.0, Q, -1.0);
+    // add the q0 forces (stored in q0(3, 2 & 5))
+    q(0) += q0(3);
+    q(1) += q0(2);
+    q(2) += q0(5);
+
+    // set the element reactions in basic system (stored in q0(0, 1 and 4))
+    static Vector p0(3);
+    p0(0) = q0(0);
+    p0(1) = q0(1);
+    p0(2) = q0(4);
+    
+    P = theCoordTransf->getGlobalResistingForce(q, p0);
+
+    // P = P - Q;
+    P.addVector(1.0, Q, -1.0);
 
     return P;
 }
@@ -418,7 +467,10 @@ ElasticBeam2d::Print(ostream &s, int flag)
 {
     s << "\nElasticBeam2d: " << this->getTag() << endl;
     s << "\tConnected Nodes: " << connectedExternalNodes ;
-	s << "\tCoordTransf: " << theCoordTransf->getTag() << endl;
+    s << "\tCoordTransf: " << theCoordTransf->getTag() << endl;
+    double V = (q(1)+q(2))/L;
+    s << "\tEnd 1 Forces (P V M): " << -q(0)+q0(0) << ' ' << V + q0(1) << ' ' << q(1) << endl;
+    s << "\tEnd 2 Forces (P V M): " << q(0) << ' ' << -V+q0(4) << ' ' << q(2) << endl;
 }
 
 int
@@ -478,14 +530,14 @@ ElasticBeam2d::getResponse (int responseID, Information &eleInfo)
 		case 3: // local forces
 			// Axial
 			P(3) = q(0);
-			P(0) = -q(0);
+			P(0) = -q(0) + q0(0);
 			// Moment
 			P(2) = q(1);
 			P(5) = q(2);
 			// Shear
 			V = (q(1)+q(2))/L;
-			P(1) = V;
-			P(4) = -V;
+			P(1) = V + q0(1);
+			P(4) = -V + q0(4);
 			return eleInfo.setVector(P);
 
 		default:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-10-01 20:23:06 $
+// $Revision: 1.4 $
+// $Date: 2001-11-26 22:53:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.cpp,v $
 
 #include <iostream.h>
@@ -72,7 +72,7 @@ const double  EnhancedQuad::wg[] = { 1.0, 1.0, 1.0, 1.0 } ;
 EnhancedQuad::EnhancedQuad( ) :
 Element( 0, ELE_TAG_EnhancedQuad ),
 connectedExternalNodes(4),
-alpha(4) 
+alpha(4) , load(0)
 { 
 
 }
@@ -89,7 +89,7 @@ EnhancedQuad::EnhancedQuad(  int tag,
   :
 Element( tag, ELE_TAG_EnhancedQuad ),
 connectedExternalNodes(4),
-alpha(4)
+alpha(4), load(0)
 {
 
   connectedExternalNodes(0) = node1 ;
@@ -125,6 +125,9 @@ EnhancedQuad::~EnhancedQuad( )
     nodePointers[i] = 0 ;
 
   } //end for i
+
+  if (load != 0)
+    delete load;
 }
 
 
@@ -270,16 +273,62 @@ const Matrix&  EnhancedQuad::getMass( )
 } 
 
 
-//zero the load -- what load?
+
 void  EnhancedQuad::zeroLoad( )
 {
+  if (load != 0)
+    load->Zero();
+
   return ;
 }
 
-//add load -- what load?
-int  EnhancedQuad::addLoad( const Vector &addP )
+
+int 
+EnhancedQuad::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  return -1 ;
+  g3ErrorHandler->warning("EnhancedQuad::addLoad - load type unknown for ele with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
+}
+
+int
+EnhancedQuad::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  static const int numberGauss = 4 ;
+  static const int numberNodes = 4 ;
+  static const int ndf = 2 ; 
+
+  // check to see if have mass
+  int haveRho = 0;
+  for (int i = 0; i < numberGauss; i++) {
+    if (materialPointers[i]->getRho() != 0.0)
+      haveRho = 1;
+  }
+
+  if (haveRho == 0)
+    return 0;
+
+  // Compute mass matrix
+  int tangFlag = 1 ;
+  formInertiaTerms( tangFlag ) ;
+
+  // store computed RV fro nodes in resid vector
+  int count = 0;
+  for (int i=0; i<numberNodes; i++) {
+    const Vector &Raccel = nodePointers[i]->getRV(accel);
+    for (int j=0; j<ndf; j++)
+      resid(count++) = Raccel(i);
+  }
+
+  // create the load vector if one does not exist
+  if (load == 0) 
+    load = new Vector(numberNodes*ndf);
+
+  // add -M * RV(accel) to the load vector
+  load->addMatrixVector(1.0, mass, resid, -1.0);
+  
+  return 0;
 }
 
 
@@ -289,6 +338,10 @@ const Vector&  EnhancedQuad::getResistingForce( )
   int tang_flag = 0 ; //don't get the tangent
 
   formResidAndTangent( tang_flag ) ;
+
+  // subtract external loads 
+  if (load != 0)
+    resid -= *load;
 
   return resid ;   
 }
@@ -304,6 +357,10 @@ const Vector&  EnhancedQuad::getResistingForceIncInertia( )
 
   //inertia terms
   formInertiaTerms( tang_flag ) ;
+
+  // subtract external loads 
+  if (load != 0)
+    resid -= *load;
 
   return resid ;
 }

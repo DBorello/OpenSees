@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-11 22:24:06 $
+// $Revision: 1.3 $
+// $Date: 2001-11-26 22:53:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/feap/fElement.cpp,v $
                                                                         
                                                                         
@@ -560,12 +560,41 @@ fElement::zeroLoad(void)
 }
 
 int
-fElement::addLoad(const Vector &load)
+fElement::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  // does nothing now
-  if (theLoad != 0)
-    (*theLoad) += load;
-	return 0;
+  g3ErrorHandler->warning("fElement::addLoad - load type unknown for truss with tag: %d",
+			  this->getTag());
+  
+  return -1;
+}
+
+
+
+int 
+fElement::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  const Matrix &mass = this->getMass();
+  int nstR = nen*ndf;
+  Vector &resid = *(fElementV[nstR]);    
+  static const int numberNodes = 4 ;
+
+  // store computed RV fro nodes in resid vector
+  int count = 0;
+  for (int i=0; i<nen; i++) {
+    const Vector &Raccel = theNodes[i]->getRV(accel);
+    for (int j=0; j<ndf; j++)
+      resid(count++) = Raccel(i);
+  }
+
+  // create the load vector if one does not exist
+  if (theLoad == 0) 
+    theLoad = new Vector(nstR);
+
+  // add -M * RV(accel) to the load vector
+  theLoad->addMatrixVector(1.0, mass, resid, -1.0);
+
+  
+  return 0;
 }
 
 

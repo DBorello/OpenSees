@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-31 06:02:32 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.cpp,v $
                                                                         
 // Written: MHS 
@@ -450,9 +450,12 @@ CorotTrussSection::zeroLoad(void)
 }
 
 int 
-CorotTrussSection::addLoad(const Vector &addP)
+CorotTrussSection::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-	return 0;
+  g3ErrorHandler->warning("CorotTrussSection::addLoad - load type unknown for truss with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
 }
 
 int 

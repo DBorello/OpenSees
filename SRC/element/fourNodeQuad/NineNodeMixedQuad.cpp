@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-10-01 20:23:06 $
+// $Revision: 1.4 $
+// $Date: 2001-11-26 22:53:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.cpp,v $
 
 // Ed "C++" Love
@@ -61,7 +61,7 @@ double   NineNodeMixedQuad::wg[] = {  5.0/9.0,  8.0/9.0,  5.0/9.0 } ;
 //null constructor
 NineNodeMixedQuad :: NineNodeMixedQuad( ) :
 Element( 0, ELE_TAG_NineNodeMixedQuad ),
-connectedExternalNodes(9) 
+connectedExternalNodes(9) , load(0)
 { 
   return ; 
 }
@@ -80,7 +80,7 @@ NineNodeMixedQuad :: NineNodeMixedQuad( int tag,
 					int node9,
 					NDMaterial &theMaterial ) :
 Element( tag, ELE_TAG_NineNodeMixedQuad ),
-connectedExternalNodes(9) 
+connectedExternalNodes(9) , load(0)
 {
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
@@ -118,6 +118,9 @@ NineNodeMixedQuad :: ~NineNodeMixedQuad( )
 
     nodePointers[i] = 0 ;
   } //end for i
+
+  if (load != 0)
+    delete load;
 }
 
 
@@ -270,18 +273,63 @@ NineNodeMixedQuad::getMass( )
 } 
 
 
-//zero the load -- what load?
+
 void 
 NineNodeMixedQuad::zeroLoad( )
 {
-  return ;
+  if (load != 0)
+    load->Zero();
 }
 
-//add load -- what load?
-int  
-NineNodeMixedQuad::addLoad( const Vector &addP )
+
+
+int 
+NineNodeMixedQuad::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  return -1 ;
+  g3ErrorHandler->warning("NineNodeMixedQuad::addLoad - load type unknown for ele with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
+}
+
+int
+NineNodeMixedQuad::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  static const int numberGauss = 9 ;
+  static const int numberNodes = 9 ;
+  static const int ndf = 2 ; 
+
+  // check to see if have mass
+  int haveRho = 0;
+  for (int i = 0; i < numberGauss; i++) {
+    if (materialPointers[i]->getRho() != 0.0)
+      haveRho = 1;
+  }
+
+  if (haveRho == 0)
+    return 0;
+
+  // Compute mass matrix
+  int tangFlag = 1 ;
+  formInertiaTerms( tangFlag ) ;
+
+  // store computed RV fro nodes in resid vector
+  int count = 0;
+
+  for (int i=0; i<numberNodes; i++) {
+    const Vector &Raccel = nodePointers[i]->getRV(accel);
+    for (int j=0; j<ndf; j++)
+      resid(count++) = Raccel(i);
+  }
+
+  // create the load vector if one does not exist
+  if (load == 0) 
+    load = new Vector(numberNodes*ndf);
+
+  // add -M * RV(accel) to the load vector
+  load->addMatrixVector(1.0, mass, resid, -1.0);
+  
+  return 0;
 }
 
 
@@ -292,6 +340,10 @@ NineNodeMixedQuad::getResistingForce( )
   int tang_flag = 0 ; //don't get the tangent
 
   formResidAndTangent( tang_flag ) ;
+
+  // subtract external loads 
+  if (load != 0)
+    resid -= *load;
 
   return resid ;   
 }
@@ -308,6 +360,10 @@ NineNodeMixedQuad::getResistingForceIncInertia( )
 
   //inertia terms
   formInertiaTerms( tang_flag ) ;
+
+  // subtract external loads 
+  if (load != 0)
+    resid -= *load;
 
   return resid ;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:20 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/feap/fElement.h,v $
                                                                         
                                                                         
@@ -84,7 +84,9 @@ class fElement : public Element
     virtual const Matrix &getMass(void);    
 
     virtual void zeroLoad(void);	
-    virtual int addLoad(const Vector &addP);
+    virtual int addLoad(ElementalLoad *theLoad, double loadFactor);
+    virtual int addInertiaLoadToUnbalance(const Vector &accel);
+
     virtual const Vector &getResistingForce(void);
     virtual const Vector &getResistingForceIncInertia(void);            
 

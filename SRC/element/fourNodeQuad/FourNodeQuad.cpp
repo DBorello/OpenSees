@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2001-10-24 23:50:08 $
+// $Revision: 1.13 $
+// $Date: 2001-11-26 22:53:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -371,20 +371,21 @@ FourNodeQuad::zeroLoad(void)
 }
 
 int 
-FourNodeQuad::addLoad(const Vector &addLoad)
+FourNodeQuad::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-	if (addLoad.Size() != 8) {
-		g3ErrorHandler->warning("FourNodeQuad::addLoad %s\n",
-				"Vector not of correct size");
-		return -1;
-	}
-
-	// Add to the external nodal loads
-	//Q += addLoad;
-	Q.addVector(1.0, addLoad, 1.0);
-
-	return 0;
+  g3ErrorHandler->warning("FourNodeQuad::addLoad - load type unknown for ele with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
 }
+
+int 
+FourNodeQuad::update(void)
+{
+  
+  return 0;
+}
+
 
 int 
 FourNodeQuad::addInertiaLoadToUnbalance(const Vector &accel)

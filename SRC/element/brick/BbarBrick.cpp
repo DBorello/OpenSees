@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-10-01 20:15:20 $
+// $Revision: 1.5 $
+// $Date: 2001-11-26 22:53:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -271,16 +271,61 @@ const Matrix&  BbarBrick::getMass( )
   return mass ;
 } 
 
-//zero the load -- what load?
+
 void  BbarBrick::zeroLoad( )
 {
+  if (load != 0)
+    load->Zero();
+
   return ;
 }
 
-//add load -- what load?
-int  BbarBrick::addLoad( const Vector &addP )
+int 
+BbarBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  return -1 ;
+  g3ErrorHandler->warning("BbarBrick::addLoad - load type unknown for ele with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
+}
+
+int
+BbarBrick::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  static const int numberNodes = 8 ;
+  static const int numberGauss = 8 ;
+  static const int ndf = 3 ; 
+
+  // check to see if have mass
+  int haveRho = 0;
+  for (int i = 0; i < numberGauss; i++) {
+    if (materialPointers[i]->getRho() != 0.0)
+      haveRho = 1;
+  }
+
+  if (haveRho == 0)
+    return 0;
+
+  // Compute mass matrix
+  int tangFlag = 1 ;
+  formInertiaTerms( tangFlag ) ;
+
+  // store computed RV fro nodes in resid vector
+  int count = 0;
+  for (int i=0; i<numberNodes; i++) {
+    const Vector &Raccel = nodePointers[i]->getRV(accel);
+    for (int j=0; j<ndf; j++)
+      resid(count++) = Raccel(i);
+  }
+
+  // create the load vector if one does not exist
+  if (load == 0) 
+    load = new Vector(numberNodes*ndf);
+
+  // add -M * RV(accel) to the load vector
+  load->addMatrixVector(1.0, mass, resid, -1.0);
+  
+  return 0;
 }
 
 

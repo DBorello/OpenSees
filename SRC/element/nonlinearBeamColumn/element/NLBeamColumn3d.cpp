@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2001-10-27 01:16:22 $
+// $Revision: 1.12 $
+// $Date: 2001-11-26 22:53:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -759,7 +759,7 @@ const Matrix &
 NLBeamColumn3d::getMass(void)
 { 
     m(0,0) = m(1,1) = m(2,2) =
-    m(6,6) = m(7,7) = m(8,8) = rho * L/2;
+    m(6,6) = m(7,7) = m(8,8) = rho * L * 0.5;
   
     return m;
 }
@@ -772,15 +772,36 @@ NLBeamColumn3d::zeroLoad(void)
 }
 
 int
-NLBeamColumn3d::addLoad(const Vector &moreLoad)
+NLBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-    if (moreLoad.Size() != NEGD) 
-    {
-	cerr << "NLBeamColumn3d::addLoad: vector not of correct size\n";
-	return -1;
-    }
-    load += moreLoad;
+  g3ErrorHandler->warning("NLBeamColumn3d::addLoad - load type unknown for truss with tag: %d",
+			  this->getTag());
+  
+  return -1;
+}
+
+
+int 
+NLBeamColumn3d::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  // Check for a quick return
+  if (rho == 0.0)
     return 0;
+
+  // get R * accel from the nodes
+  const Vector &Raccel1 = node1Ptr->getRV(accel);
+  const Vector &Raccel2 = node2Ptr->getRV(accel);    
+
+  double m = 0.5*rho*L;
+
+  load(0) -= m*Raccel1(0);
+  load(1) -= m*Raccel1(1);
+  load(2) -= m*Raccel1(2);
+  load(6) -= m*Raccel2(0);
+  load(7) -= m*Raccel2(1);
+  load(8) -= m*Raccel2(2);
+
+  return 0;
 }
 
 
@@ -792,12 +813,21 @@ NLBeamColumn3d::getResistingForceIncInertia()
     static Vector ag(NEGD);
     
     f = this->getResistingForce();
-    this->getMass();
+    // this->getMass();
     this->getGlobalAccels(ag);
-    
+
+
     // Pinert = f + m * ag;
     Pinert = f;
-    Pinert.addMatrixVector(1.0, m, ag, 1.0);
+    //     Pinert.addMatrixVector(1.0, m, ag, 1.0);
+    double mass = rho * L * 0.5;
+    Pinert(0) += mass*ag(0);
+    Pinert(1) += mass*ag(1);
+    Pinert(2) += mass*ag(2);
+    Pinert(6) += mass*ag(6);
+    Pinert(7) += mass*ag(7);
+    Pinert(8) += mass*ag(8);    
+
 
     return Pinert;
 }

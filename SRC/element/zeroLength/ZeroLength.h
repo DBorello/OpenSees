@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-11-08 01:42:32 $
+// $Revision: 1.5 $
+// $Date: 2001-11-26 22:53:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.h,v $
                                                                         
                                                                         
@@ -101,8 +101,9 @@ class ZeroLength : public Element
     const Matrix &getMass(void);    
 
     void zeroLoad(void);	
-    int addLoad(const Vector &addP);
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);    
+
     const Vector &getResistingForce(void);
     const Vector &getResistingForceIncInertia(void);            
 

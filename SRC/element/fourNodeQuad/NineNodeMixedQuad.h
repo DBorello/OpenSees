@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-31 03:47:30 $
+// $Revision: 1.3 $
+// $Date: 2001-11-26 22:53:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.h,v $
 
 // Ed "C++" Love
@@ -99,11 +99,9 @@ class NineNodeMixedQuad : public Element {
     //return mass matrix
     const Matrix &getMass( ) ;
 
-    //zero the load -- what load?
     void zeroLoad( ) ;
- 
-    //add load -- what load?
-    int addLoad( const Vector &addP ) ;
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
+    int addInertiaLoadToUnbalance(const Vector &accel);
 
     //get residual
     const Vector &getResistingForce( ) ;
@@ -166,4 +164,5 @@ class NineNodeMixedQuad : public Element {
     //1d quadratic shape functions
     double shape1d( int code, int node, double xi ) ;
 
+    Vector *load;
 } ; 

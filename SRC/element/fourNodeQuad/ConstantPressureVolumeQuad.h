@@ -72,11 +72,9 @@ class ConstantPressureVolumeQuad : public Element
     //return mass matrix
     const Matrix &getMass( ) ;
 
-    //zero the load -- what load?
     void zeroLoad( ) ;
- 
-    //add load -- what load?
-    int addLoad( const Vector &addP ) ;
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
+    int addInertiaLoadToUnbalance(const Vector &accel);
 
     //get residual
     const Vector &getResistingForce( ) ;
@@ -138,5 +136,7 @@ class ConstantPressureVolumeQuad : public Element
 		  double shp[3][4], 
 		  double &xsj, 
 		  Matrix &sx ) ;
+
+    Vector *load;
 
 } ; 

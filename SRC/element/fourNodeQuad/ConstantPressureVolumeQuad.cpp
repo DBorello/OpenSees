@@ -53,7 +53,7 @@ double ConstantPressureVolumeQuad :: wg[] = { 1.0, 1.0, 1.0, 1.0 } ;
 //null constructor
 ConstantPressureVolumeQuad :: ConstantPressureVolumeQuad( ) :
 Element( 0, ELE_TAG_ConstantPressureVolumeQuad ),
-connectedExternalNodes(4) 
+connectedExternalNodes(4), load(0)
 { 
   return ; 
 }
@@ -68,7 +68,7 @@ ConstantPressureVolumeQuad :: ConstantPressureVolumeQuad(
 			    int node4,
 			    NDMaterial &theMaterial ) :
 Element( tag, ELE_TAG_ConstantPressureVolumeQuad ),
-connectedExternalNodes(4) 
+connectedExternalNodes(4), load(0)
 {
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
@@ -103,6 +103,8 @@ ConstantPressureVolumeQuad :: ~ConstantPressureVolumeQuad( )
     nodePointers[i] = 0 ;
   } //end for i
 
+  if (load != 0)
+    delete load;
 }
 
 
@@ -247,16 +249,62 @@ const Matrix& ConstantPressureVolumeQuad :: getMass( )
 } 
 
 
-//zero the load -- what load?
+
 void ConstantPressureVolumeQuad :: zeroLoad( )
 {
+  if (load != 0)
+    load->Zero();
+
   return ;
 }
 
-//add load -- what load?
-int  ConstantPressureVolumeQuad :: addLoad( const Vector &addP )
+int 
+ConstantPressureVolumeQuad::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  return -1 ;
+  g3ErrorHandler->warning("ConstantPressureVolumeQuad::addLoad - load type unknown for ele with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
+}
+
+int
+ConstantPressureVolumeQuad::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  static const int numberGauss = 9 ;
+  static const int numberNodes = 9 ;
+  static const int ndf = 2 ; 
+
+  // check to see if have mass
+  int haveRho = 0;
+  for (int i = 0; i < numberGauss; i++) {
+    if (materialPointers[i]->getRho() != 0.0)
+      haveRho = 1;
+  }
+
+  if (haveRho == 0)
+    return 0;
+
+  // Compute mass matrix
+  int tangFlag = 1 ;
+  formInertiaTerms( tangFlag ) ;
+
+  // store computed RV fro nodes in resid vector
+  int count = 0;
+
+  for (int i=0; i<numberNodes; i++) {
+    const Vector &Raccel = nodePointers[i]->getRV(accel);
+    for (int j=0; j<ndf; j++)
+      resid(count++) = Raccel(i);
+  }
+
+  // create the load vector if one does not exist
+  if (load == 0) 
+    load = new Vector(numberNodes*ndf);
+
+  // add -M * RV(accel) to the load vector
+  load->addMatrixVector(1.0, mass, resid, -1.0);
+  
+  return 0;
 }
 
 
@@ -266,6 +314,10 @@ const Vector& ConstantPressureVolumeQuad :: getResistingForce( )
   int tang_flag = 0 ; //don't get the tangent
 
   formResidAndTangent( tang_flag ) ;
+
+  // subtract external loads 
+  if (load != 0)
+    resid -= *load;
 
   return resid ;   
 }
@@ -281,6 +333,10 @@ const Vector& ConstantPressureVolumeQuad :: getResistingForceIncInertia( )
 
   //inertia terms
   formInertiaTerms( tang_flag ) ;
+
+  // subtract external loads 
+  if (load != 0)
+    resid -= *load;
 
   return resid ;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-31 06:02:32 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.h,v $
 
 #ifndef CorotTrussSection_h
@@ -71,8 +71,9 @@ class CorotTrussSection : public Element
     const Matrix &getMass(void);    
 
     void zeroLoad(void);	
-    int addLoad(const Vector &addP);
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
+
     const Vector &getResistingForce(void);
     const Vector &getResistingForceIncInertia(void);            
 

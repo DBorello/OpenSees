@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-11 23:09:00 $
+// $Revision: 1.6 $
+// $Date: 2001-11-26 22:53:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -76,11 +76,14 @@ int
 Element::setKi(void) {
   if (Ki != 0)
     delete Ki;
+
   Ki = new Matrix(this->getTangentStiff());
+
   if (Ki == 0) {
     cerr << "Element::setKi(void) - out of memory for element " << this->getTag() << endl;
     return -1;
   }
+
   return 0;
 }
       
@@ -99,7 +102,13 @@ Element::getKi(void) {
 }
 
 
+int 
+Element::addLoad(ElementalLoad *theLoad, double loadFactor) {
+  return 0;
+}
 
+
+/*
 int 
 Element::addInertiaLoadToUnbalance(const Vector &accel)
 {
@@ -140,6 +149,7 @@ Element::addInertiaLoadToUnbalance(const Vector &accel)
 
   return this->addLoad(load);
 }
+*/
 
 bool
 Element::isSubdomain(void)

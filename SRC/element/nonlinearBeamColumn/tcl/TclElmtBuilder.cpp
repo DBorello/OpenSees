@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-20 01:26:18 $
+// $Revision: 1.5 $
+// $Date: 2001-11-26 22:53:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/tcl/TclElmtBuilder.cpp,v $
                                                                                                                                  
 // File: ~/tcl/TclElmtBuilder.C
@@ -50,17 +50,13 @@
 #include <PDeltaCrdTransf2d.h>
 #include <PDeltaCrdTransf3d.h>
 
-
 #ifdef _WIN32
 #include <CorotCrdTransf2d.h>
 #include <CorotCrdTransf3d.h>
 #endif
 
-
 #include <GaussLobattoQuadRule1d01.h>
-
 #include <TclModelBuilder.h>
-
 
 //
 // some static variables used in the functions
@@ -565,10 +561,10 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 	 else if (strcmp(argv[1],"Corotational") == 0)
      	    crdTransf2d = new CorotCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
 #endif
-
 	 else
          {
             interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
+	    cerr << argv[1] << endl;
 	    return TCL_ERROR;
 	 }
      

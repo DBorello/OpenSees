@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-09-04 19:59:46 $
+// $Revision: 1.7 $
+// $Date: 2001-11-26 22:53:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
                                                                         
                                                                         
@@ -415,17 +415,12 @@ BeamWithHinges2d::zeroLoad(void)
 }
 
 int
-BeamWithHinges2d::addLoad(const Vector &moreLoad)
+BeamWithHinges2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-	if(moreLoad.Size() != 6) {
-		cerr << "BeamWithHinges2d::addLoad - Vector not of correct size.\n";
-		return -1;
-	}
-
-	//load += moreLoad;
-	load.addVector(1.0, moreLoad, 1.0);
-	
-	return 0;
+  g3ErrorHandler->warning("BeamWithHinges2d::addLoad - load type unknown for ele with tag: %d",
+			  this->getTag());
+  
+  return -1;
 }
 
 int
@@ -1138,8 +1133,14 @@ BeamWithHinges2d::setStiffMatrix(void)
     
 	// q += dq;
 	q.addVector(1.0, dq, 1.0);
+
+	static Vector p0(3);
+	double V = 0.5*currDistrLoad(1)*L;
+	p0(0) -= currDistrLoad(0)*L;
+	p0(1) -= V;
+	p0(2) -= V;
     
-	P = theCoordTransf->getGlobalResistingForce (q, currDistrLoad);
+	P = theCoordTransf->getGlobalResistingForce (q, p0);
 	K = theCoordTransf->getGlobalStiffMatrix (kb, q);
 
 	initialFlag = true;

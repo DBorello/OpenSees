@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-07 21:19:55 $
+// $Revision: 1.5 $
+// $Date: 2001-11-26 22:53:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.h,v $
 
 // Ed "C++" Love
@@ -94,11 +94,10 @@ class ShellMITC4 : public Element {
     //return mass matrix
     const Matrix &getMass( ) ;
 
-    //zero the load -- what load?
-    void zeroLoad( ) ;
- 
-    //add load -- what load?
-    int addLoad( const Vector &addP ) ;
+    // methods for applying loads
+    void zeroLoad(void);	
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
+    int addInertiaLoadToUnbalance(const Vector &accel);
 
     //get residual
     const Vector &getResistingForce( ) ;
@@ -205,6 +204,9 @@ class ShellMITC4 : public Element {
 		  const double x[2][4], 
 		  double shp[3][4], 
 		  double &xsj ) ;
+
+    // vector for applying loads
+    Vector *load;
 
 } ; 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-31 17:18:51 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -59,8 +59,8 @@ ElasticBeam3d::ElasticBeam3d()
 }
 
 ElasticBeam3d::ElasticBeam3d(int tag, double a, double e, double g, 
-		   double jx, double iy, double iz, int Nd1, int Nd2, 
-		   CrdTransf3d &coordTransf, double r)
+			     double jx, double iy, double iz, int Nd1, int Nd2, 
+			     CrdTransf3d &coordTransf, double r)
   :Element(tag,ELE_TAG_ElasticBeam3d), 
   A(a), E(e), G(g), Jx(jx), Iy(iy), Iz(iz), L(0.0), rho(r),
   Q(12), q(6), node1Ptr(0), node2Ptr(0),
@@ -77,8 +77,8 @@ ElasticBeam3d::ElasticBeam3d(int tag, double a, double e, double g,
 
 ElasticBeam3d::~ElasticBeam3d()
 {
-    if (theCoordTransf)
-	delete theCoordTransf;
+  if (theCoordTransf)
+    delete theCoordTransf;
 }
 
 int
@@ -226,55 +226,50 @@ ElasticBeam3d::getMass(void)
 void 
 ElasticBeam3d::zeroLoad(void)
 {
-	Q.Zero();
-
-    return;
+  Q.Zero();
+  return;
 }
 
-int
-ElasticBeam3d::addLoad(const Vector &moreLoad)
+
+int 
+ElasticBeam3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-    if (moreLoad.Size() != 12) {
-	g3ErrorHandler->warning("ElasticBeam3d::addLoad: vector not of correct size");
-	return -1;
-    }
-
-	//Q += moreLoad;
-	Q.addVector(1.0, moreLoad, 1.0);
-
-    return 0;
+  g3ErrorHandler->warning("ElasticBeam3d::addLoad - load type unknown for ele with tag: %d\n",
+			  this->getTag());
+  return -1;
 }
+
 
 int
 ElasticBeam3d::addInertiaLoadToUnbalance(const Vector &accel)
 {
-	if (rho == 0.0)
-		return 0;
-
-	// Get R * accel from the nodes
-	const Vector &Raccel1 = node1Ptr->getRV(accel);
-	const Vector &Raccel2 = node2Ptr->getRV(accel);
-	
-    if (6 != Raccel1.Size() || 6 != Raccel2.Size()) {
-		g3ErrorHandler->warning("ElasticBeam3d::addInertiaLoadToUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
-		return -1;
-    }
-
-	// Want to add ( - fact * M R * accel ) to unbalance
-	// Take advantage of lumped mass matrix
-	
-	double m = 0.5*rho*L;
-
-    Q(0) += -m * Raccel1(0);
-    Q(1) += -m * Raccel1(1);
-    Q(2) += -m * Raccel1(2);
-    
-    Q(6) += -m * Raccel2(0);    
-    Q(7) += -m * Raccel2(1);
-    Q(8) += -m * Raccel2(2);    
-
+  if (rho == 0.0)
     return 0;
+
+  // Get R * accel from the nodes
+  const Vector &Raccel1 = node1Ptr->getRV(accel);
+  const Vector &Raccel2 = node2Ptr->getRV(accel);
+	
+  if (6 != Raccel1.Size() || 6 != Raccel2.Size()) {
+    g3ErrorHandler->warning("ElasticBeam3d::addInertiaLoadToUnbalance %s\n",
+			    "matrix and vector sizes are incompatable");
+    return -1;
+  }
+
+  // Want to add ( - fact * M R * accel ) to unbalance
+  // Take advantage of lumped mass matrix
+	
+  double m = 0.5*rho*L;
+  
+  Q(0) -= m * Raccel1(0);
+  Q(1) -= m * Raccel1(1);
+  Q(2) -= m * Raccel1(2);
+    
+  Q(6) -= m * Raccel2(0);    
+  Q(7) -= m * Raccel2(1);
+  Q(8) -= m * Raccel2(2);    
+  
+  return 0;
 }
 
 const Vector &
@@ -285,7 +280,7 @@ ElasticBeam3d::getResistingForceIncInertia()
     const Vector &accel1 = node1Ptr->getTrialAccel();
     const Vector &accel2 = node2Ptr->getTrialAccel();    
     
-	double m = 0.5*rho*L;
+    double m = 0.5*rho*L;
 
     P(0) += m * accel1(0);
     P(1) += m * accel1(1);
@@ -295,7 +290,7 @@ ElasticBeam3d::getResistingForceIncInertia()
     P(7) += m * accel2(1);
     P(8) += m * accel2(2);    
 
-	return P;
+    return P;
 }
 
 const Vector &
@@ -306,12 +301,12 @@ ElasticBeam3d::getResistingForce()
     const Vector &v = theCoordTransf->getBasicTrialDisp();
     
     double oneOverL = 1.0/L;
-	double EoverL   = E*oneOverL;
-	double EAoverL  = A*EoverL;			// EA/L
-	double EIzoverL2 = 2.0*Iz*EoverL;		// 2EIz/L
-	double EIzoverL4 = 2.0*EIzoverL2;		// 4EIz/L
-	double EIyoverL2 = 2.0*Iy*EoverL;		// 2EIy/L
-	double EIyoverL4 = 2.0*EIyoverL2;		// 4EIy/L
+    double EoverL   = E*oneOverL;
+    double EAoverL  = A*EoverL;			// EA/L
+    double EIzoverL2 = 2.0*Iz*EoverL;		// 2EIz/L
+    double EIzoverL4 = 2.0*EIzoverL2;		// 4EIz/L
+    double EIyoverL2 = 2.0*Iy*EoverL;		// 2EIy/L
+    double EIyoverL4 = 2.0*EIyoverL2;		// 4EIy/L
     double GJoverL = G*Jx*oneOverL;         // GJ/L
 
     q(0) = EAoverL*v(0);
@@ -323,10 +318,10 @@ ElasticBeam3d::getResistingForce()
 
     static Vector dummy(3);
     
-	P = theCoordTransf->getGlobalResistingForce(q, dummy);
+    P = theCoordTransf->getGlobalResistingForce(q, dummy);
 
-	// P = P - Q;
-	P.addVector(1.0, Q, -1.0);
+    // P = P - Q;
+    P.addVector(1.0, Q, -1.0);
 
     return P;
 
@@ -335,7 +330,7 @@ ElasticBeam3d::getResistingForce()
 int
 ElasticBeam3d::sendSelf(int cTag, Channel &theChannel)
 {
-	int res = 0;
+    int res = 0;
 
     static Vector data(12);
     
@@ -349,7 +344,7 @@ ElasticBeam3d::sendSelf(int cTag, Channel &theChannel)
     data(7) = this->getTag();
     data(8) = connectedExternalNodes(0);
     data(9) = connectedExternalNodes(1);
-	data(10) = theCoordTransf->getClassTag();    	
+    data(10) = theCoordTransf->getClassTag();    	
 	
 	int dbTag = theCoordTransf->getDbTag();
 

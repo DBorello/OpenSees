@@ -121,8 +121,9 @@ class EightNodeBrick: public Element
     const Matrix &getConsMass (); 
 
     void zeroLoad ();
-    int addLoad(const Vector &addP);
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
+
     const Vector  FormEquiBodyForce(void);
     const Vector &getResistingForce ();
     const Vector &getResistingForceIncInertia ();

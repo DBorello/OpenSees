@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d04.h,v $
                                                                         
                                                                         
@@ -61,7 +61,9 @@ class beam2d04 : public Element
     const Matrix &getMass(void);    
 
     void zeroLoad(void);	
-    int addLoad(const Vector &load);    
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
+    int addInertiaLoadToUnbalance(const Vector &accel);
+
     const Vector &getResistingForce(void);
     const Vector &getResistingForceIncInertia(void);            
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-10-02 20:20:09 $
+// $Revision: 1.7 $
+// $Date: 2001-11-26 22:53:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -407,24 +407,12 @@ DispBeamColumn2d::zeroLoad(void)
 }
 
 int 
-DispBeamColumn2d::addLoad(const Vector &addLoad)
+DispBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-	if (addLoad.Size() != 6) {
-		g3ErrorHandler->warning("DispBeamColumn2d::addLoad %s\n",
-				"Vector not of correct size");
-		return -1;
-	}
+  g3ErrorHandler->warning("DispBeamColumn2d::addLoad - load type unknown for truss with tag: %d\n",
+			  this->getTag());
 
-	// Add to the external nodal loads
-	//Q.addVector(1.0, addLoad, 1.0);
-	Q(0) += addLoad(0);
-	Q(1) += addLoad(1);
-	Q(2) += addLoad(2);
-	Q(3) += addLoad(3);
-	Q(4) += addLoad(4);
-	Q(5) += addLoad(5);
-
-	return 0;
+  return -1;
 }
 
 int 
@@ -497,7 +485,7 @@ DispBeamColumn2d::getResistingForce()
 	}
 
 	// Transform forces
-	static Vector dummy(2);		// No distributed loads
+	static Vector dummy(3);		// No elemental loads
 	crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
 	P = crdTransf->getGlobalResistingForce(q,dummy);
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-10-01 20:15:20 $
+// $Revision: 1.5 $
+// $Date: 2001-11-26 22:53:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -69,7 +69,7 @@ const double  Brick::wg[] = { 1.0, 1.0, 1.0, 1.0,
 //null constructor
 Brick::Brick( ) :
 Element( 0, ELE_TAG_Brick ),
-connectedExternalNodes(8) 
+connectedExternalNodes(8), load(0)
 { 
 
 }
@@ -88,7 +88,7 @@ Brick::Brick(  int tag,
 			 int node8,
 			 NDMaterial &theMaterial ) :
 Element( tag, ELE_TAG_Brick ),
-connectedExternalNodes(8) 
+connectedExternalNodes(8) , load(0)
 {
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
@@ -130,6 +130,8 @@ Brick::~Brick( )
     nodePointers[i] = 0 ;
 
   } //end for i
+  if (load != 0)
+    delete load;
 }
 
 
@@ -272,16 +274,62 @@ const Matrix&  Brick::getMass( )
 } 
 
 
-//zero the load -- what load?
+
 void  Brick::zeroLoad( )
 {
+  if (load != 0)
+    load->Zero();
+
   return ;
 }
 
-//add load -- what load?
-int  Brick::addLoad( const Vector &addP )
+
+int 
+Brick::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  return -1 ;
+  g3ErrorHandler->warning("Brick::addLoad - load type unknown for truss with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
+}
+
+int
+Brick::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  static const int numberNodes = 8 ;
+  static const int numberGauss = 8 ;
+  static const int ndf = 3 ; 
+
+  // check to see if have mass
+  int haveRho = 0;
+  for (int i = 0; i < numberGauss; i++) {
+    if (materialPointers[i]->getRho() != 0.0)
+      haveRho = 1;
+  }
+
+  if (haveRho == 0)
+    return 0;
+
+  // Compute mass matrix
+  int tangFlag = 1 ;
+  formInertiaTerms( tangFlag ) ;
+
+  // store computed RV fro nodes in resid vector
+  int count = 0;
+  for (int i=0; i<numberNodes; i++) {
+    const Vector &Raccel = nodePointers[i]->getRV(accel);
+    for (int j=0; j<ndf; j++)
+      resid(count++) = Raccel(i);
+  }
+
+  // create the load vector if one does not exist
+  if (load == 0) 
+    load = new Vector(numberNodes*ndf);
+
+  // add -M * RV(accel) to the load vector
+  load->addMatrixVector(1.0, mass, resid, -1.0);
+  
+  return 0;
 }
 
 

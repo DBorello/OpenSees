@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-02 20:20:09 $
+// $Revision: 1.3 $
+// $Date: 2001-11-26 22:53:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.h,v $
 
 // Written: MHS
@@ -74,8 +74,9 @@ class DispBeamColumn3d : public Element
     const Matrix &getMass(void);
 
     void zeroLoad();
-    int addLoad(const Vector &addLoad);
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
+
     const Vector &getResistingForce(void);
     const Vector &getResistingForceIncInertia(void);            
 

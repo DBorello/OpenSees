@@ -18,44 +18,117 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/ElementalLoad.cpp,v $
                                                                         
                                                                         
-// File: ~/element/ElementalLoad.h
-//
 // Written: fmk 11/95
-// Revised:
-//
+//          modified 11/01 for new design
+
 // Purpose: This file contains the methods for class ElementalLoad.
-//
-// The interface:
 
 #include "ElementalLoad.h"
+#include <Element.h>
+#include <Domain.h>
 
-ElementalLoad::ElementalLoad(int elementTag, int tag, int cTag)
-:Load(tag, cTag), theElementTag(elementTag)
+ElementalLoad::ElementalLoad(int tag, int cTag, const ID &theEleTags)
+  :Load(tag, cTag), theElementTags(0), theElements(0), numElements(0)
 {
+  theElementTags = new ID(theEleTags);
+  if (theElementTags != 0) 
+    numElements = theElementTags->Size();
+}
+
+ElementalLoad::ElementalLoad(int tag, int cTag)
+  :Load(tag, cTag), theElementTags(0), theElements(0), numElements(0)
+{
+
 }
 
 // provided for the FEM_Object broker; the tag and elementTag need
 // to be supplied in recvSelf();
 ElementalLoad::ElementalLoad(int cTag)
-:Load(0, cTag), theElementTag(0)
+:Load(0, cTag), theElementTags(0), theElements(0), numElements(0)
 {
+
 }
 
 ElementalLoad::~ElementalLoad()
 {
-    ;
+  if (theElementTags != 0)
+    delete theElementTags;
+
+  if (theElements != 0)
+    delete [] theElements;
+}
+
+
+void
+ElementalLoad::setDomain(Domain *theDomain)
+{
+  this->DomainComponent::setDomain(theDomain);
+
+  int size = 0;
+  if (theElementTags != 0) {
+    size = theElementTags->Size();
+    if (theElements == 0)
+      delete [] theElements;
+    theElements = new Element *[size];
+    
+    for (int i=0; i<size; i++) {
+      theElements[i] = theDomain->getElement((*theElementTags)(i));
+      if (theElements[i] == 0) {
+	cerr << "WARNING - ElementalLoad::setDomain - ele with tag ";
+	cerr << (*theElementTags)(i) << " does not exist in the domain\n";
+      }
+    }
+  }
+}
+
+void 
+ElementalLoad::applyLoad(double loadFactor) 
+{
+  for (int i=0; i<numElements; i++)
+    if (theElements[i] != 0)
+      theElements[i]->addLoad(this, loadFactor);
+}
+
+
+const ID &
+ElementalLoad::getElementTags(void) 
+{
+   return *theElementTags;
 }
 
 
 int 
-ElementalLoad::getElementTag(void) const
+ElementalLoad::removeElement(int tag) 
 {
-    return theElementTag;
+  int loc = theElementTags->getLocation(tag);
+  if (loc >= 0) {
+    (*theElementTags)(loc) = -1;
+    for (int i=loc; i<numElements-1; i++)
+      theElements[i] = theElements[i+1];
+    numElements--;
+  }
+
+  return numElements;
 }
 
+int 
+ElementalLoad::setElementTags(const ID &theEleTags)
+{
+  if (theElementTags != 0) {
+    delete theElementTags;
+    numElements = 0;
+  }
+
+  theElementTags = new ID(theEleTags);
+  if (theElementTags != 0) 
+    numElements = theElementTags->Size();
+
+  return 0;
+}
+  
 

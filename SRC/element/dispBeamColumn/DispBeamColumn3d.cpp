@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-10-02 20:20:09 $
+// $Revision: 1.5 $
+// $Date: 2001-11-26 22:53:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -421,18 +421,12 @@ DispBeamColumn3d::zeroLoad(void)
 }
 
 int 
-DispBeamColumn3d::addLoad(const Vector &addLoad)
+DispBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-	if (addLoad.Size() != 12) {
-		g3ErrorHandler->warning("DispBeamColumn3d::addLoad %s\n",
-				"Vector not of correct size");
-		return -1;
-	}
+  g3ErrorHandler->warning("DispBeamColumn3d::addLoad - load type unknown for truss with tag: %d\n",
+			  this->getTag());
 
-	// Add to the external nodal loads
-	Q.addVector(1.0, addLoad, 1.0);
-
-	return 0;
+  return -1;
 }
 
 int 

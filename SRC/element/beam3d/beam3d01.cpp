@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/beam3d01.cpp,v $
                                                                         
                                                                         
@@ -375,16 +375,20 @@ beam3d01::zeroLoad(void)
     load.Zero();
 }
 
-int
-beam3d01::addLoad(const Vector &moreLoad)
+int 
+beam3d01::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-    if (moreLoad.Size() != 12) {
-	cerr << "beam3d01::addLoad: vector not of correct size\n";
-	return -1;
-    }
-    load += moreLoad;
-    return 0;
+  g3ErrorHandler->warning("beam3d01::addLoad() - beam %d, load type not handledx\n", 
+			  this->getTag());
+  return -1;
 }
+
+int
+beam3d01::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  return 0;
+}
+
 
 const Vector &
 beam3d01::getResistingForceIncInertia()

@@ -2722,20 +2722,15 @@ void EightNodeBrick::zeroLoad(void)
 
 
 //=============================================================================
-int  EightNodeBrick::addLoad(const Vector &addLoad)
-{
-     if (addLoad.Size() != 24) {
-     	g3ErrorHandler->warning("EightNodeBrick::addLoad %s\n",
-     			"Vector not of correct size");
-     	return -1;
-     }
-
-     // Add to the external nodal loads
-     //Q += addLoad;
-     Q.addVector(1.0, addLoad, 1.0);
-
-     return 0;
+int 
+EightNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
+{  
+  g3ErrorHandler->warning("EightNodeBrick::addLoad - load type unknown for ele with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
 }
+
 
 //=============================================================================
 int EightNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2001-10-27 01:16:22 $
+// $Revision: 1.20 $
+// $Date: 2001-11-26 22:53:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -428,7 +428,7 @@ NLBeamColumn2d::getTangentStiff(void)
 const Vector &
 NLBeamColumn2d::getResistingForce(void)
 {
-	static Vector dummy(2);
+	static Vector dummy(3);
 
 	crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
 	return crdTransf->getGlobalResistingForce(Se, dummy);
@@ -716,16 +716,35 @@ NLBeamColumn2d::zeroLoad(void)
 }
 
 int
-NLBeamColumn2d::addLoad(const Vector &moreLoad)
+NLBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-    if (moreLoad.Size() != 6) {
-	cerr << "NLBeamColumn2d::addLoad: vector not of correct size\n";
-	return -1;
-    }
-    load += moreLoad;
-    return 0;
+  g3ErrorHandler->warning("NLBeamColumn2d::addLoad - load type unknown for truss with tag: %d",
+			  this->getTag());
+  
+  return -1;
 }
 
+
+int 
+NLBeamColumn2d::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  // Check for a quick return
+  if (rho == 0.0)
+    return 0;
+
+  // get R * accel from the nodes
+  const Vector &Raccel1 = node1Ptr->getRV(accel);
+  const Vector &Raccel2 = node2Ptr->getRV(accel);    
+
+  double m = 0.5*rho*L;
+
+  load(0) -= m*Raccel1(0);
+  load(1) -= m*Raccel1(1);
+  load(3) -= m*Raccel2(0);
+  load(4) -= m*Raccel2(1);
+
+  return 0;
+}
 
 const Vector &
 NLBeamColumn2d::getResistingForceIncInertia()

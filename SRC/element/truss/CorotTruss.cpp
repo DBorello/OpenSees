@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-20 19:27:00 $
+// $Revision: 1.3 $
+// $Date: 2001-11-26 22:53:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -423,10 +423,15 @@ CorotTruss::zeroLoad(void)
 }
 
 int 
-CorotTruss::addLoad(const Vector &addP)
+CorotTruss::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-	return 0;
+  g3ErrorHandler->warning("CorotTruss::addLoad - load type unknown for truss with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
 }
+
+
 
 int 
 CorotTruss::addInertiaLoadToUnbalance(const Vector &accel)

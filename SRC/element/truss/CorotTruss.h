@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-20 01:38:13 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.h,v $
 
 #ifndef CorotTruss_h
@@ -71,15 +71,15 @@ class CorotTruss : public Element
     const Matrix &getMass(void);    
 
     void zeroLoad(void);	
-    int addLoad(const Vector &addP);
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
+
     const Vector &getResistingForce(void);
     const Vector &getResistingForceIncInertia(void);            
 
     // public methods for element output
     int sendSelf(int commitTag, Channel &theChannel);
-    int recvSelf(int commitTag, Channel &theChannel,
-		 FEM_ObjectBroker &theBroker);
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(ostream &s, int flag =0);    
 

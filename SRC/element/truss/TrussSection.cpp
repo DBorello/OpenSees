@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-05-22 05:26:10 $
+// $Revision: 1.5 $
+// $Date: 2001-11-26 22:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -531,18 +531,14 @@ TrussSection::zeroLoad(void)
 
 
 int 
-TrussSection::addLoad(const Vector &addP)
+TrussSection::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-#ifdef _G3DEBUG    
-    if (dimension != addP.Size()) {
-	g3ErrorHandler->warning("TrussSection::addPtoUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
-	return -1;
-    }
-#endif
-    (*theLoad) += addP;
-	return 0;
+  g3ErrorHandler->warning("TrussSection::addLoad - load type unknown for truss with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
 }
+
 
 int 
 TrussSection::addInertiaLoadToUnbalance(const Vector &accel)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-31 17:18:51 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.h,v $
                                                                         
                                                                         
@@ -68,7 +68,7 @@ class ElasticBeam2d : public Element
     const Matrix &getMass(void);    
 
     void zeroLoad(void);	
-    int addLoad(const Vector &load);  
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
 
     const Vector &getResistingForce(void);
@@ -98,6 +98,7 @@ class ElasticBeam2d : public Element
     
     static Matrix kb;
     Vector q;
+    Vector q0;  // hold element load affects q0 and p0 in one vector
     
     Node *node1Ptr, *node2Ptr;
     

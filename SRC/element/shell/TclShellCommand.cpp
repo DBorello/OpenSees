@@ -18,20 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-19 06:00:29 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/TclShellCommand.cpp,v $
                                                                         
-// File: ~/element/TclMembranePlateCommand.C
-// 
 // Written: fmk 
 // Created: 03/01
-// Revision: A
 //
-// Description: This file contains the implementation of the TclModelBuilder_addMembranePlate()
-// command. 
-//
-// What: "@(#) TclModelBuilder.C, revA"
+// What: "@(#) TclShellCommand.C, revA"
 
 #include <stdlib.h>
 #include <string.h>

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-10-01 20:15:20 $
+// $Revision: 1.4 $
+// $Date: 2001-11-26 22:53:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.h,v $
 
 // Ed "C++" Love
@@ -97,11 +97,9 @@ class BbarBrick : public Element {
     //return mass matrix
     const Matrix &getMass( ) ;
 
-    //zero the load -- what load?
     void zeroLoad( ) ;
- 
-    //add load -- what load?
-    int addLoad( const Vector &addP ) ;
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
+    int addInertiaLoadToUnbalance(const Vector &accel);
 
     //get residual
     const Vector &getResistingForce( ) ;
@@ -161,6 +159,7 @@ class BbarBrick : public Element {
     //Matrix transpose
     Matrix transpose( int dim1, int dim2, const Matrix &M ) ;
 
+    Vector *load;
 } ; 
 
 

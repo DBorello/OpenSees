@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:40:50 $
+// $Revision: 1.3 $
+// $Date: 2001-11-26 22:53:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthND.cpp,v $
                                                                         
 // Written: MHS
@@ -368,11 +368,13 @@ ZeroLengthND::zeroLoad(void)
 	// does nothing now
 }
 
-int
-ZeroLengthND::addLoad(const Vector &addP)
+int 
+ZeroLengthND::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-	// does nothing now
-	return 0;
+  g3ErrorHandler->warning("ZeroLength::addLoad - load type unknown for truss with tag: %d",
+			  this->getTag());
+  
+  return -1;
 }
 
 int 

@@ -2863,17 +2863,13 @@ void TwentyNodeBrick_u_p_U::zeroLoad()
 }
 
 //=============================================================================
-int  TwentyNodeBrick_u_p_U::addLoad(const Vector &addLoad)
-{
-     if (addLoad.Size() != 60) {
-     	g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::addLoad %s\n",
-     			"Vector not of correct size");
-     	return -1;
-     }
-
-     // Add to the external nodal loads
-     Q += addLoad;
-     return 0;
+int 
+TwentyNodeBrick_u_p_U::addLoad(ElementalLoad *theLoad, double loadFactor)
+{  
+  g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::addLoad - load type unknown for ele with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
 }
 
 //=============================================================================

@@ -161,8 +161,9 @@ class EightNodeBrick_u_p_U: public Element
 
 
     void zeroLoad ();
-    int addLoad(const Vector &addP);
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
+
     const Vector  FormEquiBodyForce();
     const Vector &getResistingForce ();
     const Vector &getResistingForceIncInertia ();

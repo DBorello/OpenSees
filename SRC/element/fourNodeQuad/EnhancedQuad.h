@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-10-01 20:23:06 $
+// $Revision: 1.5 $
+// $Date: 2001-11-26 22:53:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.h,v $
                                                                         
 #include <iostream.h>
@@ -93,9 +93,8 @@ class EnhancedQuad : public Element {
 
     //zero the load -- what load?
     void zeroLoad( ) ;
- 
-    //add load -- what load?
-    int addLoad( const Vector &addP ) ;
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
+    int addInertiaLoadToUnbalance(const Vector &accel);
 
     //get residual
     const Vector &getResistingForce( ) ;
@@ -192,7 +191,7 @@ class EnhancedQuad : public Element {
 		  double shp[3][4], 
 		  double &xsj ) ;
 
-    
+    Vector *load;
 } ; 
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 03:51:07 $
+// $Revision: 1.4 $
+// $Date: 2001-11-26 22:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.h,v $
                                                                         
                                                                         
@@ -77,8 +77,9 @@ class TrussSection : public Element
     const Matrix &getMass(void);    
 
     void zeroLoad(void);	
-    int addLoad(const Vector &addP);
+    int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
+
     const Vector &getResistingForce(void);
     const Vector &getResistingForceIncInertia(void);            
 
@@ -88,7 +89,7 @@ class TrussSection : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(ostream &s, int flag =0);    
     
-	Response *setResponse(char **argv, int argc, Information &eleInformation);
+    Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
     
     int setParameter (char **argv, int argc, Information &info);

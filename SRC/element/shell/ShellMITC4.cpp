@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-07 21:19:55 $
+// $Revision: 1.5 $
+// $Date: 2001-11-26 22:53:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -95,7 +95,7 @@ ShellMITC4::ShellMITC4(  int tag,
                          int node4,
 	                 SectionForceDeformation &theMaterial ) :
 Element( tag, ELE_TAG_ShellMITC4 ),
-connectedExternalNodes(4)
+connectedExternalNodes(4), load(0)
 {
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
@@ -220,6 +220,9 @@ ShellMITC4::~ShellMITC4( )
 	delete [] Bhat ;
 	Bhat = 0 ;
   } //end if Bhat
+
+  if (load != 0)
+    delete load;
 
 }
 //**************************************************************************
@@ -393,17 +396,55 @@ const Matrix&  ShellMITC4::getMass( )
 } 
 
 
-//zero the load -- what load?
 void  ShellMITC4::zeroLoad( )
 {
+  if (load != 0)
+    load->Zero();
+
   return ;
 }
 
-//add load -- what load?
-int  ShellMITC4::addLoad( const Vector &addP )
+
+int 
+ShellMITC4::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  return -1 ;
+  g3ErrorHandler->warning("ShellMITC4::addLoad - load type unknown for ele with tag: %d\n",
+			  this->getTag());
+  
+  return -1;
 }
+
+
+
+int 
+ShellMITC4::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  int tangFlag = 1 ;
+
+  int allRhoZero = 0;
+  for (int i=0; i<4; i++) {
+    if (materialPointers[i]->getRho() != 0.0)
+      allRhoZero = 1;
+  }
+
+  if (allRhoZero == 0) 
+    return 0;
+
+  int count = 0;
+  for (int i=0; i<4; i++) {
+    const Vector &Raccel = nodePointers[i]->getRV(accel);
+    for (int j=0; j<6; j++)
+      resid(count++) = Raccel(i);
+  }
+
+  formInertiaTerms( tangFlag ) ;
+  if (load == 0) 
+    load = new Vector(24);
+  load->addMatrixVector(1.0, mass, resid, -1.0);
+
+  return 0;
+}
+
 
 
 //get residual
@@ -412,6 +453,10 @@ const Vector&  ShellMITC4::getResistingForce( )
   int tang_flag = 0 ; //don't get the tangent
 
   formResidAndTangent( tang_flag ) ;
+
+  // subtract external loads 
+  if (load != 0)
+    resid -= *load;
 
   return resid ;   
 }
@@ -426,6 +471,10 @@ const Vector&  ShellMITC4::getResistingForceIncInertia( )
   formResidAndTangent( tang_flag ) ;
 
   formInertiaTerms( tang_flag ) ;
+
+  // subtract external loads 
+  if (load != 0)
+    resid -= *load;
 
   return resid ;
 }
@@ -510,7 +559,7 @@ ShellMITC4::formInertiaTerms( int tangFlag )
         resid( jj+p ) += ( temp * momentum(p) ) ;
 
       
-      if ( tangFlag == 1 ) {
+      if ( tangFlag == 1 && rhoH != 0.0) {
 
 	 //multiply by density
 	 temp *= rhoH ;

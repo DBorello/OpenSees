@@ -18,38 +18,44 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-11-26 22:53:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/ElementalLoad.h,v $
                                                                         
                                                                         
 #ifndef ElementalLoad_h
 #define ElementalLoad_h
 
-// File: ~/element/ElementalLoad.h
-//
 // Written: fmk 
-// Created: 11/96
-// Revision: A
 //
 // Purpose: This file contains the class definition for ElementalLoad.
 // ElementalLoad is an abstract class.
 
 #include <Load.h>
+class Element;
 
 class ElementalLoad : public Load
 {
   public:
-    ElementalLoad(int elementTag, int tag, int classTag);
+    ElementalLoad(int tag, int classTag, const ID &theElementTags);
+    ElementalLoad(int tag, int classTag);
     ElementalLoad(int classTag);    
     ~ElementalLoad();
 
-    virtual int getElementTag(void) const;
+    virtual void setDomain(Domain *theDomain);
+    virtual void applyLoad(double loadfactor);
+    virtual const Vector &getData(int &type, double loadFactor) = 0;
 
+    virtual const ID &getElementTags(void);
+    virtual int removeElement(int tag); // returns -1 if fails, 
+                                        // numElements left if removed
   protected:
-	
+    int setElementTags(const ID &theEleTags);
+
   private:
-    const int theElementTag; // tag indicating associated Element objects tag
+    ID *theElementTags;     // copy of element tags, removed in setDomain
+    Element **theElements;  // pointer to associated elements
+    int numElements;        // number of associated elements
 };
 
 #endif
