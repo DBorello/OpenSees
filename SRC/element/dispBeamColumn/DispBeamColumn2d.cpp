@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-20 00:37:24 $
+// $Revision: 1.3 $
+// $Date: 2001-08-24 03:58:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -114,6 +114,8 @@ DispBeamColumn2d::~DispBeamColumn2d()
     if (theSections)
 		delete [] theSections;
 
+	if (crdTransf)
+		delete crdTransf;
 }
 
 int
@@ -178,8 +180,6 @@ DispBeamColumn2d::setDomain(Domain *theDomain)
 	}
 
     this->DomainComponent::setDomain(theDomain);
-
-    this->update();
 }
 
 int

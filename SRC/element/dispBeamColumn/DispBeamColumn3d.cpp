@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-13 21:11:27 $
+// $Revision: 1.2 $
+// $Date: 2001-08-24 03:58:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -103,6 +103,9 @@ DispBeamColumn3d::~DispBeamColumn3d()
     // Delete the array of pointers to SectionForceDeformation pointer arrays
     if (theSections)
 		delete [] theSections;
+
+	if (crdTransf)
+		delete crdTransf;
 }
 
 int
@@ -167,8 +170,6 @@ DispBeamColumn3d::setDomain(Domain *theDomain)
 	}
 
     this->DomainComponent::setDomain(theDomain);
-
-    this->update();
 }
 
 int
