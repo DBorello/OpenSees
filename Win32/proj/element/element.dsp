@@ -123,6 +123,14 @@ SOURCE=..\..\..\SRC\element\Information.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\truss\CorotTruss.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\truss\CorotTruss.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\element\truss\TclTrussCommand.cpp
 # End Source File
 # Begin Source File
