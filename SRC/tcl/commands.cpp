@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2001-08-20 00:37:29 $
+// $Revision: 1.12 $
+// $Date: 2001-08-20 02:00:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2256,6 +2256,7 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
       theDomain.removeRecorders();
     }
 
+#ifdef _RELIABILITY
 // AddingSensitivity:BEGIN ///////////////////////////////////////
     else if (strcmp(argv[1],"randomVariablePositioner") == 0) {
 		int rvPosTag;
@@ -2267,6 +2268,7 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 		theReliabilityDomain->removeRandomVariablePositioner(rvPosTag);
 	}
 // AddingSensitivity:END ///////////////////////////////////////
+#endif
 
     else
       cerr << "WARNING remove element, loadPattern - only commands  available at the moment: " << endl;
@@ -2312,6 +2314,7 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
     return TCL_OK;
 }
 
+
 // AddingSensitivity:BEGIN ////////////////////////////////////
 int 
 sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
@@ -2354,13 +2357,14 @@ computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, char **arg
 	// during a path-dependent analysis.  The reason is that the reliability
 	// analysis will call this method BOTH for path dependent and independent problems. 
 
+#ifdef _RELIABILITY
 	if (theSensitivityAlgorithm->isPathDependent()) {
 	}
 	else {
 
 		theSensitivityAlgorithm->computeGradients();
 	}
-
+#endif
     return TCL_OK;
 }
 // AddingSensitivity:END //////////////////////////////////////
