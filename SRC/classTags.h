@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2001-12-07 01:03:57 $
+// $Revision: 1.25 $
+// $Date: 2002-02-27 21:48:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -58,6 +58,9 @@
 #define CONVERGENCE_TEST_CTestNormUnbalance      1
 #define CONVERGENCE_TEST_CTestNormDispIncr       2
 #define CONVERGENCE_TEST_CTestEnergyIncr         3
+#define CONVERGENCE_TEST_CTestRelativeNormUnbalance      4
+#define CONVERGENCE_TEST_CTestRelativeNormDispIncr       5
+#define CONVERGENCE_TEST_CTestRelativeEnergyIncr         6
 
 #define GRND_TAG_ElCentroGroundMotion            1
 #define GROUND_MOTION_TAG_GroundMotionRecord     2
