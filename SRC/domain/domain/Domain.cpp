@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2002-12-09 22:08:57 $
+// $Revision: 1.19 $
+// $Date: 2002-12-10 03:20:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -311,7 +311,8 @@ Domain::~Domain()
     if (theEigenvalues != 0)
       delete theEigenvalues;
 
-    for (int i=0; i<numRecorders; i++)  
+	int i;
+    for (i=0; i<numRecorders; i++)  
       delete theRecorders[i];
     
     if (theRecorders != 0) {
@@ -319,7 +320,7 @@ Domain::~Domain()
       theRecorders = 0;
     }
 
-    for (int i=0; i<numRegions; i++)  
+    for (i=0; i<numRegions; i++)  
       delete theRegions[i];
     
     if (theRegions != 0) {
@@ -746,7 +747,8 @@ Domain::clearAll(void) {
     theLoadPatterns->clearAll();
 
     // remove the recorders
-    for (int i=0; i<numRecorders; i++)
+	int i;
+    for (i=0; i<numRecorders; i++)
 	delete theRecorders[i];
     numRecorders = 0;
     
@@ -755,7 +757,7 @@ Domain::clearAll(void) {
       theRecorders = 0;
     }
 
-    for (int i=0; i<numRegions; i++)
+    for (i=0; i<numRegions; i++)
 	delete theRegions[i];
     numRegions = 0;
     

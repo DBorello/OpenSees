@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-12-09 21:49:57 $
+// $Revision: 1.2 $
+// $Date: 2002-12-10 03:20:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/region/MeshRegion.cpp,v $
                                                                         
                                                                         
@@ -365,7 +365,7 @@ MeshRegion::recvSelf(int commitTag, Channel &theChannel,
 
 
 void 
-MeshRegion::Print(ostream &s, int flag =0)
+MeshRegion::Print(ostream &s, int flag)
 {
   s << "Region: " << this->getTag() << endl;
   if (theElements != 0)
