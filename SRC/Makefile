@@ -162,6 +162,11 @@ GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
 	$(FE)/element/updatedLagrangianBeamColumn/Inelastic2DYS03.o \
 	$(FE)/element/updatedLagrangianBeamColumn/TclElement2dGNL.o \
 	$(FE)/element/updatedLagrangianBeamColumn/UpdatedLagrangianBeam2D.o \
+	$(FE)/element/updatedLagrangianBeamColumn/BilinearCyclic.o \
+	$(FE)/element/updatedLagrangianBeamColumn/CyclicModel.o \
+	$(FE)/element/updatedLagrangianBeamColumn/LinearCyclic.o \
+	$(FE)/element/updatedLagrangianBeamColumn/QuadraticCyclic.o \
+	$(FE)/element/updatedLagrangianBeamColumn/TclCyclicModelCommands.o \
 	$(FE)/material/yieldSurface/yieldSurfaceBC/Attalla2D.o \
 	$(FE)/material/yieldSurface/yieldSurfaceBC/ElTawil2D.o \
 	$(FE)/material/yieldSurface/yieldSurfaceBC/ElTawil2DUnSym.o \
@@ -169,6 +174,7 @@ GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
 	$(FE)/material/yieldSurface/yieldSurfaceBC/Orbison2D.o \
 	$(FE)/material/yieldSurface/yieldSurfaceBC/YieldSurface_BC2D.o \
 	$(FE)/material/yieldSurface/yieldSurfaceBC/YieldSurface_BC.o \
+	$(FE)/material/yieldSurface/yieldSurfaceBC/NullYS2D.o \
 	$(FE)/material/yieldSurface/yieldSurfaceBC/TclModelBuilderYieldSurfaceBCCommand.o \
 	$(FE)/material/yieldSurface/evolution/BkStressLimSurface2D.o \
 	$(FE)/material/yieldSurface/evolution/CombinedIsoKin2D01.o \
@@ -188,8 +194,8 @@ GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/MultiLinearKp.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/NullPlasticMaterial.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/PlasticHardeningMaterial.o \
-	$(FE)/material/yieldSurface/plasticHardeningMaterial/QuadrReducing.o \
-	$(FE)/material/yieldSurface/plasticHardeningMaterial/TclModelBuilderYSPlasticMaterialCommand.o
+	$(FE)/material/yieldSurface/plasticHardeningMaterial/TclModelBuilderYSPlasticMaterialCommand.o \
+	$(FE)/recorder/YsVisual.o 
 
 ERRORHANDLER_LIBS = $(FE)/handler/StandardStream.o \
 	$(FE)/handler/FileStream.o \
@@ -432,6 +438,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHardeningMaterial.o \
 	$(FE)/material/uniaxial/fedeas/Hard1.o \
+	$(FE)/material/uniaxial/fedeas/Steel2.o \
 	$(FE)/material/uniaxial/fedeas/FedeasBond1Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasBond2Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasConcr1Material.o \
