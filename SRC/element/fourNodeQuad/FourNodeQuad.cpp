@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-06-16 05:32:43 $
+// $Revision: 1.10 $
+// $Date: 2001-07-11 22:58:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -203,7 +203,7 @@ FourNodeQuad::commitState()
 
     // Loop over the integration points and commit the material states
     for (int i = 0; i < 4; i++)
-		retVal += theMaterial[i]->commitState();
+      retVal += theMaterial[i]->commitState();
 
     return retVal;
 }
@@ -770,26 +770,28 @@ FourNodeQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
     const Vector &end3Disp = nd3Ptr->getDisp();
     const Vector &end4Disp = nd4Ptr->getDisp();
 
-    static Vector v1(3);
-    static Vector v2(3);
-    static Vector v3(3);
-    static Vector v4(3);
+    static Matrix coords(4,3);
+    static Vector values(4);
 
-	for (int i = 0; i < 2; i++) {
-		v1(i) = end1Crd(i) + end1Disp(i)*fact;
-		v2(i) = end2Crd(i) + end2Disp(i)*fact;    
-		v3(i) = end3Crd(i) + end3Disp(i)*fact;    
-		v4(i) = end4Crd(i) + end4Disp(i)*fact;    
-	}
-	
-	int error = 0;
+    if (displayMode < 3 && displayMode > 0)
+	this->getResistingForce();
 
-	error += theViewer.drawLine (v1, v2, 1.0, 1.0);
-	error += theViewer.drawLine (v2, v3, 1.0, 1.0);
-	error += theViewer.drawLine (v3, v4, 1.0, 1.0);
-	error += theViewer.drawLine (v4, v1, 1.0, 1.0);
+    for (int i = 0; i < 2; i++) {
+      coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
+      coords(1,i) = end2Crd(i) + end2Disp(i)*fact;    
+      coords(2,i) = end3Crd(i) + end3Disp(i)*fact;    
+      coords(3,i) = end4Crd(i) + end4Disp(i)*fact;    
+      if (displayMode < 3 && displayMode > 0)
+	values(i) = P(displayMode*2+i);
+      else
+	values(i) = 1;
+    }
 
-	return error;
+    int error = 0;
+
+    error += theViewer.drawPolygon (coords, values);
+
+    return error;
 }
 
 Response*
@@ -961,7 +963,7 @@ double FourNodeQuad::shapeFunction(double xi, double eta)
     shp[1][2] =  L10onePluseta  + L11onePlusxi;		// N_3,2
     shp[1][3] = -L10onePluseta  + L11oneMinusxi;	// N_4,2
 
-	return detJ;
+    return detJ;
 }
 
 void 
