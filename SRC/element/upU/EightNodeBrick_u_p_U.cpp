@@ -66,6 +66,7 @@ EightNodeBrick_u_p_U::EightNodeBrick_u_p_U(int element_number,
   n(nn), alpha(alf), rho_s(rs), rho_f(rf),ks(kks), kf(kkf), pressure(pp)
   {
     //elem_numb = element_number;
+    rho=(1-n)*rho_s+n*rho_f;
     bf(0) = b1;
     bf(1) = b2;
     bf(2) = b3;
@@ -1568,18 +1569,17 @@ matrix EightNodeBrick_u_p_U::stiffness_matrixKep(const tensor  Kep)
 
     int Ki=0;
     int Kj=0;
-
     int i;
-			 for ( i=1 ; i<=8 ; i++ )  // i<=8 for 8 nodes
+    for ( i=1 ; i<=8 ; i++ )  // i<=8 for 8 nodes
       {
         int j;
-							 for ( j=1 ; j<=8 ; j++ )  // i<=8 for 8 nodes
+        for ( j=1 ; j<=8 ; j++ )  // i<=8 for 8 nodes
           {
             int k;
-											 for ( k=1 ; k<=3 ; k++ )
+            for ( k=1 ; k<=3 ; k++ )
               {
                 int l;
-															 for ( l=1 ; l<=3 ; l++ )
+	        for ( l=1 ; l<=3 ; l++ )
                   {
                     Ki = k+3*(i-1);
                     Kj = l+3*(j-1);
@@ -1893,7 +1893,7 @@ const Matrix &EightNodeBrick_u_p_U::getDamp ()
     matrix C2t=C2.transpose();
 
     int i;
-			 for ( i=0 ; i<8 ; i++ )  		
+    for ( i=0 ; i<8 ; i++ )  		
       {
         for ( int j=0 ; j<8 ; j++ )
           {
