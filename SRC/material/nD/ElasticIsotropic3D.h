@@ -1,37 +1,40 @@
-//#############################################################################
-//# COPYRIGHT (C):     :-))                                                   #
-//# PROJECT:           Object Oriented Finite Element Program                 #
-//# PURPOSE:                                                                  #
-//#                                                                           #
-//# CLASS:                                                                    #
-//#                                                                           #
-//# VERSION:                                                                  #
-//# LANGUAGE:          C++																																																				#
-//# TARGET OS:         DOS || UNIX || . . .                                   #
-//# DESIGNER(S):       Boris Jeremic, Zhaohui Yang                            #
-//# PROGRAMMER(S):     Boris Jeremic, Zhaohui Yang                            #
-//# CONTACT:           jeremic@ucdavis.edu                                    #
-//#                                                                           #
-//# DATE:              Aug, Sept, Oct 2000                                    #
-//# UPDATE HISTORY:                                                           #
-//#                                                                           #
-//#                                                                           #
-//#                                                                           #
-//#                                                                           #
-//# SHORT EXPLANATION: 																																																							#
-//#                                                                           #
-//#                                                                           #
-//#                                                                           #
-//#                                                                           #
-//#############################################################################
+/* ****************************************************************** **
+**    OpenSees - Open System for Earthquake Engineering Simulation    **
+**          Pacific Earthquake Engineering Research Center            **
+**                                                                    **
+**                                                                    **
+** (C) Copyright 1999, The Regents of the University of California    **
+** All Rights Reserved.                                               **
+**                                                                    **
+** Commercial use of this program without express permission of the   **
+** University of California, Berkeley, is strictly prohibited.  See   **
+** file 'COPYRIGHT'  in main directory for information on usage and   **
+** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
+**                                                                    **
+** Developed by:                                                      **
+**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
+**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
+**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
+**                                                                    **
+** ****************************************************************** */
                                                                         
-
-//$Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $
-//$Date: 2000-12-18 10:50:41 $
-//$Revision: 1.2 $
+// $Revision: 1.3 $                                                              
+// $Date: 2001-01-11 09:29:14 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $                                                                
+                                                                        
                                                                         
 #ifndef ElasticIsotropic3D_h
 #define ElasticIsotropic3D_h
+
+// File: ~/material/ElasticIsotropic3D.h
+//
+// Written: MHS
+// Created: Feb 2000
+// Revision: A
+//
+// Description: 
+//
+// What: "@(#) ElasticIsotropic3D.h, revA"
 
 #include <ElasticIsotropicMaterial.h>
 
@@ -43,10 +46,11 @@
 #include <stresst.h>
 #include <straint.h>
 
+
 class ElasticIsotropic3D : public ElasticIsotropicMaterial
 {
   public:
-    ElasticIsotropic3D (int tag, double E, double nu);
+    ElasticIsotropic3D (int tag, double E, double nu, double pr = 100.0, double pop = 0.0);
     ElasticIsotropic3D ();
     ~ElasticIsotropic3D ();
 
@@ -79,10 +83,10 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     FEM_ObjectBroker &theBroker);    
     
     void Print(ostream &s, int flag =0);
+    void setInitElasticStiffness(void);
 
   //Private functions
   private:
-    void setElasticStiffness(void);
 
 
   protected:
@@ -92,8 +96,11 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     Matrix D;			// Elastic constants
     Vector epsilon;		// Strain vector
 
+    double p_ref;               // Reference pressure, usually atmosphere pressure, i.e. 100kPa
+    double po;                  // Initial pressure of this material point
     stresstensor Stress;	// Stress tensor    
     Tensor Dt;			// Elastic constants tensor
+    Tensor Dt_commit;		// last-step Elastic constants tensor
     straintensor Strain;	// Strain tensor    
 	     
 };

@@ -1,48 +1,43 @@
-//#############################################################################
-//# COPYRIGHT (C):     :-))                                                   #
-//# PROJECT:           Object Oriented Finite Element Program                 #
-//# PURPOSE:                                                                  #
-//#                                                                           #
-//# CLASS:                                                                    #
-//#                                                                           #
-//# VERSION:                                                                  #
-//# LANGUAGE:          C++																																																				#
-//# TARGET OS:         DOS || UNIX || . . .                                   #
-//# DESIGNER(S):       Boris Jeremic, Zhaohui Yang                            #
-//# PROGRAMMER(S):     Boris Jeremic, Zhaohui Yang                            #
-//# CONTACT:           jeremic@ucdavis.edu                                    #
-//#                                                                           #
-//#                                                                           #
-//# DATE:              Aug, Sept, Oct 2000                                    #
-//# UPDATE HISTORY:                                                           #
-//#                                                                           #
-//#                                                                           #
-//#                                                                           #
-//#                                                                           #
-//# SHORT EXPLANATION: 																																																							#
-//#                                                                           #
-//#                                                                           #
-//#                                                                           #
-//#                                                                           #
-//#############################################################################
+/* ****************************************************************** **
+**    OpenSees - Open System for Earthquake Engineering Simulation    **
+**          Pacific Earthquake Engineering Research Center            **
+**                                                                    **
+**                                                                    **
+** (C) Copyright 1999, The Regents of the University of California    **
+** All Rights Reserved.                                               **
+**                                                                    **
+** Commercial use of this program without express permission of the   **
+** University of California, Berkeley, is strictly prohibited.  See   **
+** file 'COPYRIGHT'  in main directory for information on usage and   **
+** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
+**                                                                    **
+** Developed by:                                                      **
+**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
+**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
+**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
+**                                                                    **
+** ****************************************************************** */
+                                                                        
+// $Revision: 1.3 $                                                              
+// $Date: 2001-01-11 09:29:14 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $                                                                
 
-//$Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $
-//$Date: 2000-12-18 10:50:41 $
-//$Revision: 1.2 $
+//Boris Jeremic and Zhaohui Yang ___ 02-10-2000
+                                                                       
                                                                         
 #include <ElasticIsotropic3D.h>
 #include <Channel.h>
 #include <Tensor.h>
 
 ElasticIsotropic3D::ElasticIsotropic3D
-(int tag, double E, double nu) :
+(int tag, double E, double nu, double pr, double pop) :
  ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropic3D, E, nu),
- sigma(6), D(6,6), epsilon(6)
+ sigma(6), D(6,6), epsilon(6), p_ref(pr), po(pop)
 {
 	// Set up the elastic constant matrix for 3D elastic isotropic 
 	D.Zero();
         Dt = tensor( 4, def_dim_4, 0.0 ); 
-	setElasticStiffness();
+	setInitElasticStiffness();
 
 }
 
@@ -126,7 +121,10 @@ ElasticIsotropic3D::setTrialStrain (const Tensor &v, const Tensor &r)
 int
 ElasticIsotropic3D::setTrialStrainIncr (const Tensor &v)
 {
+    //cerr << " before set Tri St Incr " << Strain;
+    //cerr << " Strain Incr " << v << endln;
     Strain = Strain + v;
+    //cerr << " after setTrialStrainIncr  " << Strain << endln;
     return 0;
 }
 
@@ -140,13 +138,16 @@ ElasticIsotropic3D::setTrialStrainIncr (const Tensor &v, const Tensor &r)
 const Tensor&
 ElasticIsotropic3D::getTangentTensor (void)
 {
-    return Dt;
+    //setElasticStiffness();
+    //return Dt;
+    return Dt_commit;
 }
 
 const Tensor&
 ElasticIsotropic3D::getStressTensor (void)
 {
     Stress = Dt("ijkl") * Strain("kl");
+    //setElasticStiffness();
     return Stress;
 }
 
@@ -159,8 +160,41 @@ ElasticIsotropic3D::getStrainTensor (void)
 int
 ElasticIsotropic3D::commitState (void)
 {
-	// Nothing to commit
-	return 0;
+    //Set the new Elastic constants
+    tensor ret( 4, def_dim_4, 0.0 );
+    				       
+    // Kronecker delta tensor
+    tensor I2("I", 2, def_dim_2);
+
+    tensor I_ijkl = I2("ij")*I2("kl");
+
+
+    //I_ijkl.null_indices();
+    tensor I_ikjl = I_ijkl.transpose0110();
+    tensor I_iljk = I_ijkl.transpose0111();
+    tensor I4s = (I_ikjl+I_iljk)*0.5;
+    
+    //Update E according to 
+    Stress = getStressTensor();
+    //Dt("ijkl") * Strain("kl");
+    double p = Stress.p_hydrostatic();
+    //cerr << " p = " <<  p;
+
+    if (p <= 0.5) 
+      p = 0.5;
+
+    double Ec = E * pow(p/po, 0.6);
+    //cerr << " Eo = " << E << " Ec = " << Ec << endln;
+
+    // Building elasticity tensor
+    ret = I_ijkl*( Ec*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( Ec / (1.0 + v) );
+    
+    //ret.print();
+    Dt_commit = ret;
+    Dt = ret;
+    
+    return 0;
+
 }
 
 int
@@ -245,7 +279,7 @@ ElasticIsotropic3D::recvSelf(int commitTag, Channel &theChannel,
 
 	// Set up the elastic constant matrix for 3D elastic isotropic
 	D.Zero();
-	setElasticStiffness();
+	//setElasticStiffness();
 	
 	return res;
 }
@@ -257,12 +291,13 @@ ElasticIsotropic3D::Print(ostream &s, int flag)
 	s << "\ttag: " << this->getTag() << endl;
 	s << "\tE: " << E << endl;
 	s << "\tv: " << v << endl;
+	s << "\tpo: " << po << endl;
 	//s << "\tD: " << D << endl;
 }
 
 
 //================================================================================
-void ElasticIsotropic3D::setElasticStiffness(void)
+void ElasticIsotropic3D::setInitElasticStiffness(void)
 {    
     tensor ret( 4, def_dim_4, 0.0 );
     				       
@@ -276,12 +311,27 @@ void ElasticIsotropic3D::setElasticStiffness(void)
     tensor I_ikjl = I_ijkl.transpose0110();
     tensor I_iljk = I_ijkl.transpose0111();
     tensor I4s = (I_ikjl+I_iljk)*0.5;
+    
+    //Initialize E according to initial pressure in the gauss point
+    //Stress = getStressTensor();
+    //Dt("ijkl") * Strain("kl");
+    //double po = Stress.p_hydrostatic();
+
+    //cerr << " p_ref = " <<  p_ref << " po = " << po << endln;
+    //double po = 100.0; //kPa
+    if (po <= 0.5) 
+      po = 0.5;
+    double Eo = E * pow(po/p_ref, 0.6);
+
+    //cerr << " E@ref = " << E << " Eo = " << Eo << endln;
 
     // Building elasticity tensor
-    ret = I_ijkl*( E*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( E / (1.0 + v) );
+    ret = I_ijkl*( Eo*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( Eo / (1.0 + v) );
     
     //ret.print();
     Dt = ret;
+    Dt_commit = ret;
+
     //D = Dt;
 
     return;
