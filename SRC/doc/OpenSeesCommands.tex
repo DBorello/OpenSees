@@ -1619,6 +1619,51 @@ values. A $1$ specified for the i'th value indicates that the dof for
 the i'th degree-of-freedom is to be constrained, a $0$ that it is to be
 left unconstrained.
 
+\subsection{The fixX Command}
+{\sf\small
+\begin{verbatim}
+   fixX xCoordinate <-tol tol?> (ndf values?)
+\end{verbatim}
+}
+
+To construct multiple homogeneous single-point boundary constraints for 
+all nodes whose x-coordintae lies within tol of the specified xCoordinate.
+The user specifies the xCoordinate of the nodes to be constrained and ndf (0,1)
+values. A $1$ specified for the i'th value indicates that the dof for
+the i'th degree-of-freedom is to be constrained, a $0$ that it is to be
+left unconstrained. The optional flag -tol is followed by the user defined 
+tolerence, a default of 1e-10 is used.
+
+\subsection{The fixY Command}
+{\sf\small
+\begin{verbatim}
+   fixY yCoordinate <-tol tol?> (ndf values?)
+\end{verbatim}
+}
+
+To construct multiple homogeneous single-point boundary constraints for 
+all nodes whose y-coordintae lies within tol of the specified yCoordinate.
+The user specifies the yCoordinate of the nodes to be constrained and ndf (0,1)
+values. A $1$ specified for the i'th value indicates that the dof for
+the i'th degree-of-freedom is to be constrained, a $0$ that it is to be
+left unconstrained. The optional flag -tol is followed by the user defined 
+tolerence, a default of 1e-10 is used.
+
+\subsection{The fixZ Command}
+{\sf\small
+\begin{verbatim}
+   fixZ zCoordinate <-tol tol?> (ndf values?)
+\end{verbatim}
+}
+
+To construct multiple homogeneous single-point boundary constraints for 
+all nodes whose z-coordintae lies within tol of the specified zCoordinate.
+The user specifies the zCoordinate of the nodes to be constrained and ndf (0,1)
+values. A $1$ specified for the i'th value indicates that the dof for
+the i'th degree-of-freedom is to be constrained, a $0$ that it is to be
+left unconstrained. The optional flag -tol is followed by the user defined 
+tolerence, a default of 1e-10 is used.
+
 
 \subsection{Types of TimeSeries and Args used in other commands}
 
