@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-05-08 20:17:54 $
+// $Revision: 1.14 $
+// $Date: 2003-12-12 18:39:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -693,27 +693,34 @@ ElasticBeam3d::Print(OPS_Stream &s, int flag)
    }  else if (flag < -1) {
      int counter = (flag + 1) * -1;
      int eleTag = this->getTag();
-     int i;
      const Vector &force = this->getResistingForce();
-     s << "FORCE\t" << eleTag << "\t" << counter << "\t0";
-     for (i=0; i<3; i++)
-	s << "\t" << force(i);
-     s << endln;
-     s << "FORCE\t" << eleTag << "\t" << counter << "\t1";
-     for (i=0; i<3; i++)
-       s << "\t" << force(i+6);
-     s << endln;
-     s << "MOMENT\t" << eleTag << "\t" << counter << "\t0";
-     for (i=3; i<6; i++)
-       s << "\t" << force(i);
-     s << endln;
-     s << "MOMENT\t" << eleTag << "\t" << counter << "\t1";
-     for (i=3; i<6; i++)
-       s << "\t" << force(i+6);
-     s << endln;
+
+    double P, MZ1, MZ2, VY, MY1, MY2, VZ, T;
+    double L = theCoordTransf->getInitialLength();
+    double oneOverL = 1.0/L;
+    
+    P   = q(0);
+    MZ1 = q(1);
+    MZ2 = q(2);
+    VY  = (MZ1+MZ2)*oneOverL;
+    MY1 = q(3);
+    MY2 = q(4);
+    VZ  = (MY1+MY2)*oneOverL;
+    T   = q(5);
+
+    s << "FORCE\t" << eleTag << "\t" << counter << "\t0";
+    s << "\t" << -P+p0[0] << "\t"  <<  VY+p0[1] << "\t"  << -VZ+p0[3]  << endln;
+    s << "FORCE\t" << eleTag << "\t" << counter << "\t1";
+    s << "\t"  << P  << ' '  << -VY+p0[2] << ' ' << VZ+p0[4] << endln;
+    s << "MOMENT\t" << eleTag << "\t" << counter << "\t0";
+    s << "\t" << -T << "\t"  << MY1 << "\t" << MZ1 << endln;
+    s << "MOMENT\t" << eleTag << "\t" << counter << "\t1";
+    s << "\t" << T << ' ' << MY2 << ' '  <<  MZ2 << endln;
+    
    }
 
    else if (flag == 2){
+     this->getResistingForce(); // in case linear algo
 
      static Vector xAxis(3);
      static Vector yAxis(3);
@@ -758,6 +765,8 @@ ElasticBeam3d::Print(OPS_Stream &s, int flag)
       << T << ' ' << My2 << ' ' << Mz2 << endln;
    }
    else {
+
+     this->getResistingForce(); // in case linear algo
 
     s << "\nElasticBeam3d: " << this->getTag() << endln;
     s << "\tConnected Nodes: " << connectedExternalNodes ;
