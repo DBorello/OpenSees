@@ -18,13 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2004-05-11 00:06:15 $
+// $Revision: 1.25 $
+// $Date: 2004-09-01 04:03:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
 // Written: fmk 
 // Created: 04/98
+// Revision: AA
 //
 // Description: This file contains the function that is invoked
 // by the interpreter when the comand 'record' is invoked by the 
@@ -56,16 +57,18 @@
 #include <ElementIter.h>
 #include <Node.h>
 #include <Element.h>
+#include <DamageModel.h>
+#include <DamageRecorder.h>
 #include <MeshRegion.h>
 #include <GSA_Recorder.h>
 #include <YsVisual.h> //!!
+#include <TclModelBuilder.h>
+
+extern TclModelBuilder *theDamageTclModelBuilder;
 
 #include <EquiSolnAlgo.h>
-#include <NEESData.h>
 
 static EquiSolnAlgo *theAlgorithm =0;
-extern FE_Datastore *theDatabase;
-extern FEM_ObjectBroker theBroker;
 
 int
 TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
@@ -82,8 +85,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
     // needed for the type of Recorder, create the object and add to Domain
     //
     (*theRecorder) = 0;
-    FE_Datastore *theRecorderDatabase = 0;
-    bool destroyDatabase = false;
 
     // an Element Recorder or ElementEnvelope Recorder
     if ((strcmp(argv[1],"Element") == 0) || (strcmp(argv[1],"EnvelopeElement") == 0)
@@ -97,13 +98,11 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    return TCL_ERROR;
 	}    
 
-
 	int endEleIDs = 2;
 	int allFlag = 0;
 	while (Tcl_GetInt(interp, argv[endEleIDs], &eleID) == TCL_OK) {
 	  endEleIDs++;
 	}
-	Tcl_SetResult(interp, NULL, NULL);
 
 	// determine the number of elements
 	int numEle = 0;
@@ -140,10 +139,9 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	double dT = 0.0;
 	bool echoTime = false;
 	TCL_Char *fileName = 0;
-	TCL_Char *tableName = 0;
 	int loc = endEleIDs;
 	int flags = 0;
-	int eleData = argc;
+	int eleData = 0;
 
 	while (flags == 0 && loc < argc) {
 
@@ -162,6 +160,11 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    //
 	    loc++;
 	    int eleTag;
+	    while (loc < argc && Tcl_GetInt(interp, argv[loc], &eleTag) == TCL_OK) {
+	      eleIDs[numEle++] = eleTag;
+	      loc++;
+
+	    }
 
 	    if (strcmp(argv[loc],"all") == 0) {
 	      ElementIter &theEleIter = theDomain.getElements();
@@ -169,13 +172,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	      while ((theEle = theEleIter()) != 0)
 		eleIDs[numEle++] = theEle->getTag();
 	      loc++;
-	    } else {
-
-	      while (loc < argc && Tcl_GetInt(interp, argv[loc], &eleTag) == TCL_OK) {
-		eleIDs[numEle++] = eleTag;
-		loc++;
-	      }
-	      Tcl_SetResult(interp, NULL, NULL);
 	    }
 
 	  } else if (strcmp(argv[loc],"-eleRange") == 0) {
@@ -254,28 +250,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    fileName = argv[loc];
 	    loc++;
 	  }
-	  else if (strcmp(argv[loc],"-database") == 0) {
-	    // allow user to specify load pattern other than current
-	    loc++;
-	    theRecorderDatabase = theDatabase;
-	    if (theRecorderDatabase != 0)
-	      tableName = argv[loc];
-	    else {
-	      opserr << "WARNING recorder Element .. -database <fileName> - NO CURRENT DATABASE, results to File instead\n";
-	      fileName = argv[loc];
-	    }	    
-	    loc++;
-	  }
-
-	  else if (strcmp(argv[loc],"-nees") == 0) {
-	    // allow user to specify load pattern other than current
-	    loc++;
-	    theRecorderDatabase = new NEESData(argv[loc], theDomain, theBroker);
-	    tableName = argv[loc];
-	    destroyDatabase = true;
-	    loc++;
-	  }	    
-
 	  else {
 	    // first unknown string then is assumed to start 
 	    // element response request starts
@@ -292,11 +266,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    eleIDs[numEle++] = theEle->getTag();
 	}
 
-	if ((argc-eleData) == 0) {
-	  opserr << "WARNING recorder Element ..  - No response specified for element(s)\n";
-	  return TCL_ERROR;
-	}
-
 	const char **data = new const char *[argc-eleData];
 
 	int i,j;
@@ -304,28 +273,133 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  data[j] = argv[i];
 
 	// now construct the recorder
-	
-	if (tableName == 0) {
-	  if (strcmp(argv[1],"Element") == 0) 
-	    (*theRecorder) = new ElementRecorder(eleIDs, theDomain, data, 
-						 argc-eleData, echoTime, dT, fileName);
-	  else
-	    
-	    (*theRecorder) = new EnvelopeElementRecorder(eleIDs, theDomain, data, 
-							 argc-eleData, dT, fileName);
-	} else {
-	  if (strcmp(argv[1],"Element") == 0) 
-	    (*theRecorder) = new ElementRecorder(eleIDs, theDomain, data, 
-						 argc-eleData, echoTime, theRecorderDatabase, tableName, dT, destroyDatabase);
-	  else
-	    
-	    (*theRecorder) = new EnvelopeElementRecorder(eleIDs, theDomain, data, 
-							 argc-eleData, theRecorderDatabase, tableName, dT);
-	}
+	if (strcmp(argv[1],"Element") == 0) 
+	  (*theRecorder) = new ElementRecorder(eleIDs, theDomain, data, 
+					       argc-eleData, echoTime, dT, fileName);
+	else
+
+	  (*theRecorder) = new EnvelopeElementRecorder(eleIDs, theDomain, data, 
+						       argc-eleData, dT, fileName);
 
 	delete [] data;
     }
     
+
+	//////////////////////Begining of ElementDamage recorder//////////////////////
+	///////////////////////////////By Arash Altoontash////////////////////////////
+
+    else if ( (strcmp(argv[1],"Damage") == 0) || (strcmp(argv[1],"ElementDamage") == 0) ||
+		(strcmp(argv[1],"damage") == 0) || (strcmp(argv[1],"elementDamage") == 0) ) {
+		
+
+        if (argc < 7) {
+			opserr << "WARNING recorder ElementDamage eleID? <-time> "
+		<< "<-file fileName?> <-section secID1? secID2? ...> <-dof dofID?> <-damage dmgID?>";
+	    return TCL_ERROR;
+		}    
+		
+		double dT = 0.0;
+		bool echoTime = false;
+		TCL_Char *fileName = 0;
+		int loc = 2;
+		int eleID;
+
+		if ( Tcl_GetInt(interp, argv[loc], &eleID) != TCL_OK) {
+			opserr << "WARNING recorder ElementDamage: No element tag specified ";
+	    return TCL_ERROR;
+		}
+		loc++;
+
+		if ( (strcmp(argv[loc],"-time") == 0) || (strcmp(argv[loc],"-load") == 0) ) { 
+			// allow user to specify const load
+			echoTime = true;
+			loc++;
+		}		
+		else if ( strcmp(argv[loc],"-dT" ) == 0 ) {
+			// allow user to specify time step size for recording
+			loc++;
+			if (Tcl_GetDouble(interp, argv[loc], &dT) != TCL_OK)	
+				return TCL_ERROR;	
+			loc++;
+		} 
+		
+		if (strcmp(argv[loc],"-file") == 0) {
+			// allow user to specify load pattern other than current
+			loc++;
+			fileName = argv[loc];
+			loc++;
+		}
+		
+		if ( strcmp(argv[loc],"-section")!=0 && strcmp(argv[loc],"section")!=0 ) {
+			opserr << "WARNING recorder ElementDamage: Section keyword not specified ";
+			return TCL_ERROR;
+		}
+		loc++;
+	
+		int secID;		
+		int endSecIDs = loc;
+		int numSec = 0;
+		while ( Tcl_GetInt(interp, argv[endSecIDs], &secID ) == TCL_OK) {
+			endSecIDs++;
+		}
+
+		numSec = endSecIDs - loc ;
+		// create an ID to hold section/material tags
+        ID secIDs(numSec);
+		
+		// read in the sec tags to the ID
+		for (int i=loc; i<endSecIDs; i++) {
+			if (Tcl_GetInt(interp, argv[i], &secID) != TCL_OK)	
+				return TCL_ERROR;	
+			secIDs[loc-i] = secID;	  
+		}
+
+		loc = endSecIDs;
+
+		int dofID = 0;
+		if ( strcmp(argv[loc],"-dof")==0 || strcmp(argv[loc],"dof")==0 ||
+			 strcmp(argv[loc],"-DOF")==0 || strcmp(argv[loc],"DOF")==0 ) {
+			loc++;
+			if (Tcl_GetInt(interp, argv[loc], &dofID) != TCL_OK) {
+				opserr << "WARNING recorder ElementDamage: No dof tag specified ";
+				return TCL_ERROR;
+			}
+			loc++;
+		}
+
+		if ( strcmp(argv[loc],"-damage")!=0 && strcmp(argv[loc],"damage")!=0 ) {
+			opserr << "WARNING recorder ElementDamage: No damege tag specified ";
+			return TCL_ERROR;
+		}
+		loc++;
+
+		int dmgID;
+		if (Tcl_GetInt(interp, argv[loc], &dmgID) != TCL_OK) {
+			opserr << "WARNING recorder ElementDamage: No damege tag specified ";
+			return TCL_ERROR;
+		}
+		
+		DamageModel *dmgPTR;
+		dmgPTR = theDamageTclModelBuilder->getDamageModel(dmgID);
+		
+		if ( dmgPTR == NULL )
+		{
+			opserr << "WARNING recorder ElementDamage: specified damage model not found\n";
+			return TCL_ERROR;
+		}
+
+
+//	const char **data = new const char *[argc-eleData];
+
+
+	// now construct the recorder
+	(*theRecorder) = new DamageRecorder( eleID , secIDs, dofID , dmgPTR , theDomain, echoTime, dT , fileName );
+
+	
+    }
+	//////////////////////End of ElementDamage recorder////////////////////////////
+
+
     // create a recorder to write nodal displacement quantities to a file
     else if ((strcmp(argv[1],"Node") == 0) || (strcmp(argv[1],"EnvelopeNode") == 0) 
 	     || (strcmp(argv[1],"NodeEnvelope") == 0)) {	
@@ -339,14 +413,12 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 // AddingSensitivity:BEGIN ///////////////////////////////////
 	  int sensitivity = 0;
 // AddingSensitivity:END /////////////////////////////////////
-
       TCL_Char *responseID = 0;
       TCL_Char *fileName = 0;
-      TCL_Char *tableName = 0;
 
       int pos = 2;
 
-      /* KEEP - FOR LEGACY REASONS NEED TO KEEP THE FOLLOWING UGLY STUFF 
+      /* KEEP - FOR LEGACY REASONS NEED TO KEEP THE FOLLOWING UGLY STUFF */
       if ((strcmp(argv[pos],"-time") != 0) && (strcmp(argv[pos],"-load") != 0) &&
 	  (strcmp(argv[pos],"-dT") !=  0) && (strcmp(argv[pos],"-node") != 0) &&
 	  (strcmp(argv[pos],"-dof") != 0) && (strcmp(argv[pos],"-file") != 0)) {
@@ -354,14 +426,12 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	responseID = argv[3];
 	fileName = argv[2];
       } 
-      ********************** END OF KEEP ***************************  */
+      /* ********************** END OF KEEP ***************************  */
 
       int timeFlag = 0;
       int flags = 0;
       double dT = 0.0;
       int numNodes = 0;
-
-      bool destroyDatabase = false;
 	
       // create ID's to contain the node tags & the dofs
       ID theNodes(0,16);
@@ -384,23 +454,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  pos += 2;
 	}
 
-	else if (strcmp(argv[pos],"-database") == 0) {
-	  if (theRecorderDatabase != 0)
-	    tableName = argv[pos+1];
-	  else {
-	    opserr << "WARNING recorder Node .. -database <fileName> - NO CURRENT DATABASE, results to File instead\n";
-	    fileName = argv[pos+1];
-	  }
-
-	  pos += 2;
-	}
-	else if (strcmp(argv[pos],"-nees") == 0) {
-	  // allow user to specify load pattern other than current
-	  theRecorderDatabase = new NEESData(argv[pos+1], theDomain, theBroker);
-	  tableName = argv[pos+1];
-	  destroyDatabase = true;
-	  pos += 2;
-	}	    
 	else if (strcmp(argv[pos],"-dT") == 0) {
 	  pos ++;
 	  if (Tcl_GetDouble(interp, argv[pos], &dT) != TCL_OK)	
@@ -427,10 +480,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  } else {
 	    int node;
 	    for (int j=pos; j< argc; j++) 
-	      if (Tcl_GetInt(interp, argv[pos], &node) != TCL_OK) {
-		Tcl_SetResult(interp, NULL, NULL);
+	      if (Tcl_GetInt(interp, argv[pos], &node) != TCL_OK) 
 		j = argc;
-	      }
 	      else {
 		theNodes[numNodes] = node;
 		numNodes++;
@@ -500,10 +551,9 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  int numDOF = 0;
 	  int dof;
 	  for (int j=pos; j< argc; j++) 
-	    if (Tcl_GetInt(interp, argv[pos], &dof) != TCL_OK) {
-		Tcl_SetResult(interp, NULL, NULL);
+	    if (Tcl_GetInt(interp, argv[pos], &dof) != TCL_OK) 
 	      j = argc;
-	    } else {
+	    else {
 	      theDofs[numDOF] = dof-1;  // -1 for c indexing of the dof's
 	      numDOF++;
 	      pos++;
@@ -537,26 +587,14 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       }
 	
       // construct the recorder NOTE: AddingSensitivity...
-      if (tableName == 0) {
-	if (strcmp(argv[1],"Node") == 0) {
-	  (*theRecorder) = new NodeRecorder(theDofs, theNodes, sensitivity,
-					    theDomain, fileName, responseID, dT, timeFlag);
-	}
-	else
-	  
-	  (*theRecorder) = new EnvelopeNodeRecorder(theDofs, theNodes, 
-						    theDomain,
-						    fileName, responseID, dT);
-      } else {
-	if (strcmp(argv[1],"Node") == 0) 
-	  (*theRecorder) = new NodeRecorder(theDofs, theNodes, sensitivity,
-					    theDomain, theRecorderDatabase, tableName, responseID, dT, timeFlag, destroyDatabase);
-	else
-	  
-	  (*theRecorder) = new EnvelopeNodeRecorder(theDofs, theNodes, 
-						    theDomain,
-						    theRecorderDatabase, tableName, responseID, dT);
-      }
+      if (strcmp(argv[1],"Node") == 0) 
+	(*theRecorder) = new NodeRecorder(theDofs, theNodes, sensitivity,
+					  theDomain, fileName, responseID, dT, timeFlag);
+      else
+	
+	(*theRecorder) = new EnvelopeNodeRecorder(theDofs, theNodes, 
+						  theDomain,
+						  fileName, responseID, dT);
     } 
 
     else if (strcmp(argv[1],"Pattern") == 0) {
@@ -897,17 +935,19 @@ int
 TclAddRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
 	       TCL_Char **argv, Domain &theDomain)
 {
-  Recorder *theRecorder =0;
-  TclCreateRecorder(clientData, interp, argc, argv, theDomain, &theRecorder);
-  
-  if (theRecorder == 0)
-    return TCL_ERROR;
-  else if (theDomain.addRecorder(*theRecorder) < 0) {
-    opserr << "WARNING could not add to domain - recorder " << argv[1]<< endln;
-    delete theRecorder;
-    return TCL_ERROR;
-  } 
-  return TCL_OK;
+	Recorder *theRecorder;
+	TclCreateRecorder(clientData, interp, argc, argv, theDomain, &theRecorder);
+	
+	if ((theRecorder == 0) || (theDomain.addRecorder(*theRecorder)) < 0) {
+		opserr << "WARNING could not add to domain - recorder " << argv[1]<< endln;
+		if (theRecorder == 0) 
+			opserr << "could not create recorder\n";
+		else
+			delete theRecorder;
+		return TCL_ERROR;
+	} 
+	return TCL_OK;
+	
 }
 
 
@@ -915,18 +955,21 @@ int
 TclAddAlgorithmRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
 			TCL_Char **argv, Domain &theDomain, EquiSolnAlgo *theAlgo)
 {
-  Recorder *theRecorder = 0;
-  theAlgorithm = theAlgo;
-  TclCreateRecorder(clientData, interp, argc, argv, theDomain, &theRecorder);
-
-  if (theRecorder == 0)
-    return TCL_ERROR;
-  else if (theAlgo->addRecorder(*theRecorder) < 0) {
-    opserr << "WARNING could not add to algorithm - recorder " << argv[1]<< endln;
-    delete theRecorder;
-    return TCL_ERROR;
-  } 
-  return TCL_OK;
+	Recorder *theRecorder = 0;
+	theAlgorithm = theAlgo;
+	if (TclCreateRecorder(clientData, interp, argc, argv, theDomain,
+			&theRecorder) == TCL_ERROR) {
+		return TCL_ERROR;
+	} else {
+		// add the recorder to the domain, 
+		// NOTE: will not be called with theALgo == 0
+		// see ~/g3/SRC/tcl/commands.C file
+		if (theRecorder == 0 || theAlgo->addRecorder(*theRecorder) < 0) {
+			opserr << "WARNING could not add to algorithm - recorder " << argv[1]<< endln;
+			delete theRecorder;
+			return TCL_ERROR;
+		} 
+		return TCL_OK;
+	}
 }
-
 
