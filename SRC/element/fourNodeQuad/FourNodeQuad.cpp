@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2000-12-18 10:40:43 $
+// $Revision: 1.8 $
+// $Date: 2001-05-28 06:27:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -724,6 +724,9 @@ FourNodeQuad::Print(ostream &s, int flag)
 	s << "\tsurface pressure:  " << pressure << endl;
 	s << "\tbody forces:  " << b[0] << ' ' << b[1] << endl;
 	theMaterial[0]->Print(s,flag);
+	s << "\tStress (xx yy xy)" << endl;
+	for (int i = 0; i < 4; i++)
+		s << "\t\tGauss point " << i+1 << ": " << theMaterial[i]->getStress();
 }
 
 int
