@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-01-06 19:26:36 $
+// $Revision: 1.8 $
+// $Date: 2002-01-09 23:42:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -69,7 +69,7 @@ const double  BbarBrick::wg[] = { 1.0, 1.0, 1.0, 1.0,
 //null constructor
 BbarBrick::BbarBrick( ) :
 Element( 0, ELE_TAG_BbarBrick ),
-connectedExternalNodes(8) 
+connectedExternalNodes(8), load(0)
 { 
 
 }
@@ -88,7 +88,7 @@ BbarBrick::BbarBrick(  int tag,
 			 int node8,
 			 NDMaterial &theMaterial ) :
 Element( tag, ELE_TAG_BbarBrick ),
-connectedExternalNodes(8) 
+connectedExternalNodes(8), load(0)
 {
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
@@ -130,6 +130,9 @@ BbarBrick::~BbarBrick( )
     nodePointers[i] = 0 ;
 
   } //end for i
+  
+  if (load != 0)
+    delete load;
 }
 
 
@@ -338,6 +341,9 @@ const Vector&  BbarBrick::getResistingForce( )
 
   formResidAndTangent( tang_flag ) ;
 
+  if (load != 0)
+    resid -= *load;
+
   return resid ;   
 }
 
@@ -351,6 +357,9 @@ const Vector&  BbarBrick::getResistingForceIncInertia( )
   formResidAndTangent( tang_flag ) ;
 
   formInertiaTerms( tang_flag ) ;
+
+  if (load != 0)
+    resid -= *load;
 
   return resid ;
 }

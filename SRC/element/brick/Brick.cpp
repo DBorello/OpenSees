@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-01-06 19:26:37 $
+// $Revision: 1.8 $
+// $Date: 2002-01-09 23:42:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -342,6 +342,9 @@ const Vector&  Brick::getResistingForce( )
 
   formResidAndTangent( tang_flag ) ;
 
+  if (load != 0)
+    resid -= *load;
+
   return resid ;   
 }
 
@@ -355,6 +358,9 @@ const Vector&  Brick::getResistingForceIncInertia( )
   formResidAndTangent( tang_flag ) ;
 
   formInertiaTerms( tang_flag ) ;
+
+  if (load != 0)
+    resid -= *load;
 
   return resid ;
 }
