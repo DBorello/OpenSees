@@ -1,6 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// COPYRIGHT (C):     :-))
+// COPYLEFT (C):     :-))
+//``This  source code is Copyrighted in U.S., by the The Regents of the University
+//of California, for an indefinite period, and anybody caught using it without our
+//permission,  will  be  mighty  good friends of ourn, cause we don't give a darn.
+//Hack  it.  Compile it. Debug it. Run it. Yodel it. Enjoy it. We wrote it, that's
+//all we wanted to do.'' bj
 // PROJECT:           Object Oriented Finite Element Program
 // FILE:              EightNodeBrick.h
 // CLASS:             EightNodeBrick
@@ -18,6 +23,7 @@
 // DATE:              Aug. 2000
 // UPDATE HISTORY:			 Modified from Brick3D and FourNodeQuad.hh  07/06/00
 //																			 Sept. - Oct 2000 connected to OpenSees by Zhaohui
+//																			 Sept 2001 optimized to some extent (static tensors...)
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -153,10 +159,10 @@ class EightNodeBrick: public Element
     Node *nd7Ptr;
     Node *nd8Ptr;
 
-    Matrix K;		// Element stiffness Matrix
-    Matrix C;		// Element damping matrix
-    Matrix M;		// Element mass matrix
-    Vector P;		// Element resisting force vector
+    static Matrix K;		// Element stiffness Matrix
+    static Matrix C;		// Element damping matrix
+    static Matrix M;		// Element mass matrix
+    static Vector P;		// Element resisting force vector
     Vector Q;		// Applied nodal loads
     Vector bf;  	// Body forces
     
@@ -170,9 +176,9 @@ class EightNodeBrick: public Element
 
     //QuadRule1d *theQuadRule;	// Integration rule
 
-    Matrix J;		// Jacobian of transformation
-    Matrix L;		// Inverse of J
-    Matrix B;		// Strain interpolation matrix
+//    Matrix J;		// Jacobian of transformation
+//    Matrix L;		// Inverse of J
+//    Matrix B;		// Strain interpolation matrix
     
 	
     //    // static data - single copy for all objects of the class 
@@ -213,73 +219,8 @@ class EightNodeBrick: public Element
     //..NDMaterial  *MatPoint;  // Zhaohui  10-01-2000
     
     
-    // this tensor is tangent constitutive tensor MS definition.
-    // It represents the state at Material point before applying strain increment
-    // that was produced by incremental displacements
-    
-    // Zhaohui  10-01-2000
-    //..tensor * GPtangent_E;  // pointer to array of constitutive tensors for Material Points
-    
-    // this stress tensor is start_stress from my MS definition.
-    // It represents the state at Material point before applying strain increment
-    // that was produced by incremental displacements
-    
-    // Zhaohui  10-01-2000
-    //..stresstensor * GPstress;  // pointer to array of stresstensors for Material Points
-    
-    // 3D array of stresstensors models for each Material points
-    // this stress tensor is iterative stress.
-    // It represents the state at Material point during iterative procedure on FEM level.
-    // Zhaohui  10-01-2000
-    //stresstensor * GPiterative_stress;  // pointer to array of stresstensors for Material Points
-    //double * GPq_ast_iterative;  // pointer to array of iterative values of internal variable
-    
-    // 3D array of straintensors models for each Material points
-    // this strain tensor is strain_increment from my MS definition.
-    // It represents the additional strains that are to be
-    // integrated. After numerical integration is done, the return value
-    // ( from one of the numerical integration procedures )
-    // is stresstensor that should then be put in GPstress place!
-    // Zhaohui  10-01-2000
-    //straintensor * GPstrain;  // pointer to array of straintensors for Material Points
-    
-    // this is LM array. This array holds DOFs for this element
     int  LM[24]; // for 8noded x 3 = 24
   public:
-    //CONSTRUCTOR
-    //EightNodeBrick(int tag = 0, // default constructor
-    //               //int r_int_order = 0, //int s_int_order = 0, //int t_int_order = 0,
-    //               int node_numb_1  = 0,
-    //               int node_numb_2  = 0,
-    //               int node_numb_3  = 0,
-    //               int node_numb_4  = 0,
-    //               int node_numb_5  = 0,
-    //               int node_numb_6  = 0,
-    //               int node_numb_7  = 0,
-    //               int node_numb_8  = 0,
-    //               NDMaterial * Globalmmodel = 0,
-    //               //Node       * GlobalNodes = 0,   // maybe put NULL
-    //               //tensor   * IN_tangent_E = 0,         //stresstensor * INstress = 0,                //stresstensor * INiterative_stress = 0,                   //double       * INq_ast_iterative =0,                   //straintensor * INstrain = 0
-    //               EPState *eps =0
-    //               );
-
-    //void Initialize(int element_numb, // Initialize function
-    //                //short int r_int_order,
-    //                //short int s_int_order,
-    //                //short int t_int_order,
-    //                int node_numb_1,
-    //                int node_numb_2,
-    //                int node_numb_3,
-    //                int node_numb_4,
-    //                int node_numb_5,
-    //                int node_numb_6,
-    //                int node_numb_7,
-    //                int node_numb_8,
-    //                //Node * GlobalNodes,
-    //		    NDMaterial * Globalmmodel,
-    //                EPState *eps );
-    //		    //tensor   * IN_tangent_E,//stresstensor * INstress, //stresstensor * INiterative_stress, //double       * INq_ast_iterative, //straintensor * INstrain
-                    
     
     void incremental_Update(void);
     //void iterative_Update(void);
