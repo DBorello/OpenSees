@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2001-10-02 20:20:11 $
+// $Revision: 1.18 $
+// $Date: 2001-10-23 14:52:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -1299,10 +1299,8 @@ NLBeamColumn2d::Print(ostream &s, int flag)
       double V = (Secommit(1)+Secommit(2))/L;
       theVector(1) = V;
       theVector(4) = -V;
-      s << "\tEnd 1 Forces (P V M): "
-	  << theVector(0) << ' ' << theVector(1) << ' ' << theVector(2) << endl;
-      s << "\tEnd 2 Forces (P V M): "
-	  << theVector(3) << ' ' << theVector(4) << ' ' << theVector(5) << endl;
+      s << "\tEnd 1 Forces (P V M): " << theVector(0) << ' ' << theVector(1) << ' ' << theVector(2) << endl;
+      s << "\tEnd 2 Forces (P V M): " << theVector(3) << ' ' << theVector(4) << ' ' << theVector(5) << endl;
    }
 }
 
