@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-03-16 00:04:52 $
+// $Revision: 1.11 $
+// $Date: 2002-12-13 00:08:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -52,6 +52,8 @@
 // recorders
 #include <MaxNodeDispRecorder.h>
 #include <NodeRecorder.h>
+#include <EnvelopeNodeRecorder.h>
+#include <EnvelopeElementRecorder.h>
 #include <DriftRecorder.h>
 #include <ElementRecorder.h>
 #include <TclFeViewer.h>
@@ -82,10 +84,13 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
     (*theRecorder) = 0;
 
-    // an Element Recorder
-    if (strcmp(argv[1],"Element") == 0) {
-      int eleID;
-	if (argc < 4) {
+    // an Element Recorder or ElementEnvelope Recorder
+    if ((strcmp(argv[1],"Element") == 0) || (strcmp(argv[1],"EnvelopeElement") == 0) 
+	|| (strcmp(argv[1],"ElementEnvelope") == 0)) {
+      
+        /* KEEP - FOR LEGACY REASONS NEED TO KEEP THE FOLLOWING UGLY STUFF */
+        int eleID;
+        if (argc < 4) {
 	    cerr << "WARNING recorder Element eleID1? eleID2? ...  <-time> "
 		<< "<-file fileName?> parameters";
 	    return TCL_ERROR;
@@ -103,17 +108,15 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  endEleIDs += 1;
 	  allFlag = 1;
 	  numEle = theDomain.getNumElements();
-	} else
-	  numEle = endEleIDs-2;
+	} else if (Tcl_GetInt(interp, argv[endEleIDs], &eleID) != TCL_OK) 
+	  ;
+	else
+	  endEleIDs++;
+	  
+	numEle = endEleIDs-2;
 	
-        if ((endEleIDs-2) == 0) {
-	    cerr << "WARNING recorder Element eleID1? eleID2? .. <-time> "
-		<< "<-file fileName?> parameters";	    
-	    return TCL_ERROR;
-	}	    	    
-
 	// create an ID to hold ele tags
-        ID eleIDs(numEle); 
+        ID eleIDs(numEle, numEle+1); 
 
 	// read in the ele tags to the ID
 	if (allFlag == 1) {
@@ -129,42 +132,119 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    eleIDs[i-2] = eleID;	  
 	  }
 	}
+        /* ********************* END OF KEEP ****************************** */
 
 	double dT = 0.0;
 	bool echoTime = false;
 	char *fileName = 0;
-	int endMarker = endEleIDs;
+	int loc = endEleIDs;
 	int flags = 0;
 	int eleData = 0;
-	while (flags == 0 && endMarker < argc) {
-	  if (strcmp(argv[endMarker],"-time") == 0) {
+
+	while (flags == 0 && loc < argc) {
+
+	  if (strcmp(argv[loc],"-ele") == 0) {
+      
+	    // ensure no segmentation fault if user messes up
+	    if (argc < loc+2) {
+	      cerr << "WARNING recorder Element .. -ele tag1? .. - no ele tags specified\n";
+	      return TCL_ERROR;
+	    }
+	    
+	    //
+	    // read in a list of ele until end of command or other flag
+	    //
+	    loc++;
+	    int eleTag;
+	    while (loc < argc && Tcl_GetInt(interp, argv[loc++], &eleTag) == TCL_OK) {
+	      eleIDs[numEle++] = eleTag;
+	    }
+	    if (loc < argc) loc--;
+
+	    if (strcmp(argv[loc],"all") == 0) {
+	      ElementIter &theEleIter = theDomain.getElements();
+	      Element *theEle;
+	      while ((theEle = theEleIter()) != 0)
+		eleIDs[numEle++] = theEle->getTag();
+	      loc++;
+	    }
+	    
+	  } else if (strcmp(argv[loc],"-eleRange") == 0) {
+	    
+	    // ensure no segmentation fault if user messes up
+	    if (argc < loc+3) {
+	      cerr << "WARNING recorder Element .. -eleRange start? end?  .. - no ele tags specified\n";
+	      return TCL_ERROR;
+	    }
+	    
+	    //
+	    // read in start and end tags of two elements & add set [start,end]
+	    //
+	    
+	    int start, end;
+	    if (Tcl_GetInt(interp, argv[loc+1], &start) != TCL_OK) {
+	      cerr << "WARNING recorder Element -eleRange start? end? - invalid start " << argv[loc+1] << endl;
+	      return TCL_ERROR;
+	    }      
+	    if (Tcl_GetInt(interp, argv[loc+2], &end) != TCL_OK) {
+	      cerr << "WARNING recorder Element -eleRange start? end? - invalid end " << argv[loc+2] << endl;
+	      return TCL_ERROR;
+	    }      
+	    if (start > end) {
+	      int swap = end;
+	      end = start;
+	      start = swap;
+	    }
+
+	    for (int i=start; i<=end; i++)
+	      eleIDs[numEle++] = i;	    
+	    loc += 3;
+	  } 
+
+	  else if (strcmp(argv[loc],"-time") == 0) {
 	    // allow user to specify const load
 	    echoTime = true;
-	    endMarker++;
+	    loc++;
 	  } 
-	  else if (strcmp(argv[endMarker],"-dT") == 0) {
+
+	  else if (strcmp(argv[loc],"-dT") == 0) {
 	    // allow user to specify time step size for recording
-	    endMarker++;
-	    if (Tcl_GetDouble(interp, argv[endMarker], &dT) != TCL_OK)	
+	    loc++;
+	    if (Tcl_GetDouble(interp, argv[loc], &dT) != TCL_OK)	
 	      return TCL_ERROR;	
-	    endMarker++;
+	    loc++;
 	  } 
-	  else if (strcmp(argv[endMarker],"-file") == 0) {
+	  else if (strcmp(argv[loc],"-file") == 0) {
 	    // allow user to specify load pattern other than current
-	    endMarker++;
-	    fileName = argv[endMarker];
-	    endMarker++;
+	    loc++;
+	    fileName = argv[loc];
+	    loc++;
 	  }
 	  else {
 	    // first unknown string then is assumed to start 
 	    // element response request starts
-	    eleData = endMarker;
+	    eleData = loc;
 	    flags = 1;
 	  }
 	}
+
+	// if user has specified no element tags lets assume he wants them all
+	if (numEle == 0) {
+	  ElementIter &theEleIter = theDomain.getElements();
+	  Element *theEle;
+	  while ((theEle = theEleIter()) != 0)
+	    eleIDs[numEle++] = theEle->getTag();
+	}
+
+	// now construct the recorder
+	if (strcmp(argv[1],"Element") == 0)
 	
-	(*theRecorder) = new ElementRecorder(eleIDs, theDomain, &argv[eleData], 
-					     argc-eleData, echoTime, dT, fileName);
+	  (*theRecorder) = new ElementRecorder(eleIDs, theDomain, &argv[eleData], 
+					       argc-eleData, echoTime, dT, fileName);
+	else
+
+	  (*theRecorder) = new EnvelopeElementRecorder(eleIDs, theDomain, &argv[eleData], 
+						       argc-eleData, dT, fileName);
     }
     
     // a MaxNodeDisp Recorder
@@ -192,93 +272,166 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
     }
 
     // create a recorder to write nodal displacement quantities to a file
-    else if (strcmp(argv[1],"Node") == 0) {
-	if (argc < 7) {
-	    cerr << "WARNING recorder Node filename? response? <startFlag> ";
-	    cerr << "-node <list nodes> -dof <doflist>";
+    else if ((strcmp(argv[1],"Node") == 0) || (strcmp(argv[1],"EnvelopeNode") == 0) 
+	     || (strcmp(argv[1],"NodeEnvelope") == 0)) {	
+
+      if (argc < 7) {
+	    cerr << "WARNING recorder Node ";
+	    cerr << "-node <list nodes> -dof <doflist> -file <fileName> -dT <dT> reponse";
 	    return TCL_ERROR;
 	}    
 
-	char *responseID = argv[3];
+      char *responseID = 0;
+      char *fileName = 0;
 
-	int flag = 0;
-	int flags = 0;
-	int pos = 4;
-	double dT = 0.0;
+      int pos = 2;
 
-	// create ID's to contain the node tags & the dofs
-	ID theNodes(0,16);
-	ID theDofs(0, 6);
-	while (flags == 0 && pos < argc) {
+      /* KEEP - FOR LEGACY REASONS NEED TO KEEP THE FOLLOWING UGLY STUFF */
+      if ((strcmp(argv[pos],"-time") != 0) && (strcmp(argv[pos],"-load") != 0) &&
+	  (strcmp(argv[pos],"-dT") !=  0) && (strcmp(argv[pos],"-node") != 0) &&
+	  (strcmp(argv[pos],"-dof") != 0) && (strcmp(argv[pos],"-file") != 0)) {
+	pos = 4;
+	responseID = argv[3];
+	fileName = argv[2];
+      } 
+      /* ********************** END OF KEEP ***************************  */
 
-	  if (strcmp(argv[pos],"-time") == 0) {
-	    flag = 1;
-	    pos++;
-	  }
+      int timeFlag = 0;
+      int flags = 0;
+      double dT = 0.0;
+      int numNodes = 0;
+	
+      // create ID's to contain the node tags & the dofs
+      ID theNodes(0,16);
+      ID theDofs(0, 6);
 
-	  else if (strcmp(argv[pos],"-load") == 0) {
-	    flag = 2;      
-	    pos++;
-	  }
+      while (flags == 0 && pos < argc) {
 
-	  else if (strcmp(argv[pos],"-dT") == 0) {
-	      pos ++;
-	      if (Tcl_GetDouble(interp, argv[pos], &dT) != TCL_OK)	
-		return TCL_ERROR;		  
-	      pos++;
-	  }
+	if (strcmp(argv[pos],"-time") == 0) {
+	  timeFlag = 1;
+	  pos++;
+	}
+	
+	else if (strcmp(argv[pos],"-load") == 0) {
+	  timeFlag = 2;      
+	  pos++;
+	}
 
-	  else if (strcmp(argv[pos],"-node") == 0) {
-	    pos++;
+	else if (strcmp(argv[pos],"-file") == 0) {
+	  fileName = argv[pos+1];
+	  pos += 2;
+	}
 
-	    // read in the node tags or 'all' can be used
-	    int numNodes = 0;
-	    if (strcmp(argv[pos],"all") == 0) {
-	      numNodes = theDomain.getNumNodes();
-	      
-	      NodeIter &theNodeIter = theDomain.getNodes();
-	      Node *theNode;
-	      int loc=0;
-	      while ((theNode= theNodeIter()) != 0) {
-		int tag = theNode->getTag();
-		theNodes[loc++] = tag;
-		
-	      }
-	      pos++;
-	    } else {
-	      int node;
-	      for (int j=pos; j< argc; j++) 
-		if (Tcl_GetInt(interp, argv[pos], &node) != TCL_OK) 
-		  j = argc;
-	        else {
-		  theNodes[numNodes] = node;
-		  numNodes++;
-		  pos++;
-		}
+	else if (strcmp(argv[pos],"-dT") == 0) {
+	  pos ++;
+	  if (Tcl_GetDouble(interp, argv[pos], &dT) != TCL_OK)	
+	    return TCL_ERROR;		  
+	  pos++;
+	}
+
+	else if ((strcmp(argv[pos],"-node") == 0) || 
+		 (strcmp(argv[pos],"-nodes") == 0)) {
+	  pos++;
+	  
+	  // read in the node tags or 'all' can be used
+	  if (strcmp(argv[pos],"all") == 0) {
+	    numNodes = theDomain.getNumNodes();
+	    
+	    NodeIter &theNodeIter = theDomain.getNodes();
+	    Node *theNode;
+	    int loc=0;
+	    while ((theNode= theNodeIter()) != 0) {
+	      int tag = theNode->getTag();
+	      theNodes[loc++] = tag;
 	    }
-	  } 
-
-	  else if (strcmp(argv[pos],"-dof") == 0) {
 	    pos++;
-	    int numDOF = 0;
-	    int dof;
+	  } else {
+	    int node;
 	    for (int j=pos; j< argc; j++) 
-	      if (Tcl_GetInt(interp, argv[pos], &dof) != TCL_OK) 
+	      if (Tcl_GetInt(interp, argv[pos], &node) != TCL_OK) 
 		j = argc;
 	      else {
-		theDofs[numDOF] = dof-1;  // -1 for c indexing of the dof's
-		numDOF++;
+		theNodes[numNodes] = node;
+		numNodes++;
 		pos++;
 	      }
 	  }
+	} 
 
-	  else	 
-	    flags = 1;
+	else if (strcmp(argv[pos],"-nodeRange") == 0) {
+	    
+	  // ensure no segmentation fault if user messes up
+	  if (argc < pos+3) {
+	    cerr << "WARNING recorder Node .. -nodeRange start? end?  .. - no ele tags specified\n";
+	    return TCL_ERROR;
+	  }
+	  
+	  //
+	  // read in start and end tags of two elements & add set [start,end]
+	  //
+	    
+	  int start, end;
+	  if (Tcl_GetInt(interp, argv[pos+1], &start) != TCL_OK) {
+	    cerr << "WARNING recorder Node -nodeRange start? end? - invalid start " << argv[pos+1] << endl;
+	    return TCL_ERROR;
+	  }      
+	  if (Tcl_GetInt(interp, argv[pos+2], &end) != TCL_OK) {
+	    cerr << "WARNING recorder Node -nodeRange start? end? - invalid end " << argv[pos+2] << endl;
+	    return TCL_ERROR;
+	  }      
+	  if (start > end) {
+	    int swap = end;
+	    end = start;
+	    start = swap;
+	  }
+	  
+	  for (int i=start; i<=end; i++)
+	    theNodes[numNodes++] = i;	    
+	  pos += 3;
 	}
 
+	else if (strcmp(argv[pos],"-dof") == 0) {
+	  pos++;
+	  int numDOF = 0;
+	  int dof;
+	  for (int j=pos; j< argc; j++) 
+	    if (Tcl_GetInt(interp, argv[pos], &dof) != TCL_OK) 
+	      j = argc;
+	    else {
+	      theDofs[numDOF] = dof-1;  // -1 for c indexing of the dof's
+	      numDOF++;
+	      pos++;
+	    }
+	}
+	
+	else	 
+	  flags = 1;
+	}
+     
+      if (responseID == 0) {
+	responseID  = argv[pos];
+      }
+
+
+      if (numNodes == 0) {
+	NodeIter &theNodeIter = theDomain.getNodes();
+	Node *theNode;
+	while ((theNode= theNodeIter()) != 0) {
+	  int tag = theNode->getTag();
+	  theNodes[numNodes++] = tag;
+	}
+      }
+	
+      // construct the recorder
+      if (strcmp(argv[1],"Node") == 0) 
 	(*theRecorder) = new NodeRecorder(theDofs, theNodes, 
 					  theDomain,
-					  argv[2], responseID, dT, flag);
+					  fileName, responseID, dT, timeFlag);
+      else
+	
+	(*theRecorder) = new EnvelopeNodeRecorder(theDofs, theNodes, 
+						  theDomain,
+						  fileName, responseID, dT);
     } 
 
     // Create a recorder to write nodal drifts to a file
@@ -364,36 +517,36 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	if (Tcl_GetInt(interp, argv[7], &height) != TCL_OK)	
 	    return TCL_ERROR;	      
 
-	int endMarker = 8;
+	int loc = 8;
 
 	double dT = 0.0;
-	int loc = 0;
+	loc = 0;
 	ID cols(0,16);
-	while (endMarker < argc) {
-	  if (strcmp(argv[endMarker],"-columns") == 0) {
-	    if (argc < endMarker+2)
+	while (loc < argc) {
+	  if (strcmp(argv[loc],"-columns") == 0) {
+	    if (argc < loc+2)
 	      return TCL_ERROR;
 
 	    int colX, colY;
-	    endMarker++;
-	    if (Tcl_GetInt(interp, argv[endMarker], &colX) != TCL_OK)	
+	    loc++;
+	    if (Tcl_GetInt(interp, argv[loc], &colX) != TCL_OK)	
 	      return TCL_ERROR;	
-	    endMarker++;
-	    if (Tcl_GetInt(interp, argv[endMarker], &colY) != TCL_OK)	
+	    loc++;
+	    if (Tcl_GetInt(interp, argv[loc], &colY) != TCL_OK)	
 	      return TCL_ERROR;	
-	    endMarker++;
+	    loc++;
 	    cols[loc] = colX;
 	    cols[loc+1] = colY;
 	    loc+=2;
 	  } 
-	  else if (strcmp(argv[endMarker],"-dT") == 0) {
-	    endMarker++;
-	    if (Tcl_GetDouble(interp, argv[endMarker], &dT) != TCL_OK)	
+	  else if (strcmp(argv[loc],"-dT") == 0) {
+	    loc++;
+	    if (Tcl_GetDouble(interp, argv[loc], &dT) != TCL_OK)	
 	      return TCL_ERROR;	
-	    endMarker++;	    
+	    loc++;	    
 	  }
 	  else
-	    endMarker++;
+	    loc++;
 	}
 
 	FilePlotter *thePlotter = new FilePlotter(argv[2], argv[3], xLoc, yLoc, width, height, dT);
@@ -425,22 +578,22 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	char *fileName = 0;
 	bool displayRecord = false;
-	int endMarker = 7;
-	while (endMarker < argc) {
-	  if ((strcmp(argv[endMarker],"-file") == 0) ||
-	      (strcmp(argv[endMarker],"-file") == 0)) {
+	int loc = 7;
+	while (loc < argc) {
+	  if ((strcmp(argv[loc],"-file") == 0) ||
+	      (strcmp(argv[loc],"-file") == 0)) {
 	    
-	      if (argc < endMarker+1)
+	      if (argc < loc+1)
 		return TCL_ERROR;
-	      endMarker++;
-	      fileName = argv[endMarker];
-	      endMarker++;
-	  } else if (strcmp(argv[endMarker],"-display") == 0) {
+	      loc++;
+	      fileName = argv[loc];
+	      loc++;
+	  } else if (strcmp(argv[loc],"-display") == 0) {
 	    displayRecord = true;
-	    endMarker++;				   
+	    loc++;				   
 	  } 
 	  else
-	    endMarker++;
+	    loc++;
 	}
 
 	
@@ -450,9 +603,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	(*theRecorder) = thePlotter;
 
     }
-
-
-
 
     // no recorder type specified yet exists
     else {
