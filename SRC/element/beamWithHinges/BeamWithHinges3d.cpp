@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2002-12-16 21:10:00 $
+// $Revision: 1.16 $
+// $Date: 2003-01-16 18:19:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
 
 #include <BeamWithHinges3d.h>
@@ -510,11 +510,10 @@ BeamWithHinges3d::getInitialStiff(void)
     
   }
   // calculate element stiffness matrix
-  //invert3by3Matrix(f, kb);
-  static Matrix kbInit(3,3);
+  static Matrix kbInit(6,6);
   if (f.Solve(Iden,kbInit) < 0)
     g3ErrorHandler->warning("%s -- could not invert flexibility",
-			    "BeamWithHinges3d::update()");    
+			    "BeamWithHinges3d::getInitialStiff()");    
   
   return theCoordTransf->getInitialGlobalStiffMatrix(kbInit);
 }
@@ -1558,7 +1557,6 @@ BeamWithHinges3d::update(void)
     }
     
     // calculate element stiffness matrix
-    //invert3by3Matrix(f, kb);
     if (f.Solve(Iden,kb) < 0)
       g3ErrorHandler->warning("%s -- could not invert flexibility",
 			      "BeamWithHinges3d::update()");    
