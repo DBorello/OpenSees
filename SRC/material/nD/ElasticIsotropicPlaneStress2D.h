@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-16 04:41:14 $
+// $Revision: 1.3 $
+// $Date: 2001-07-16 22:14:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlaneStress2D.h,v $
                                                                         
                                                                         
@@ -75,11 +75,9 @@ class ElasticIsotropicPlaneStress2D : public ElasticIsotropicMaterial
 
   private:
     static Vector sigma;	// Stress vector ... class-wide for returns
-    Matrix D;				// Elastic constants
+    static Matrix D;		// Elastic constants
     Vector Tepsilon;		// Trial strains
 	Vector Cepsilon;		// Committed strains
-
-	void update(void);
 };
 
 

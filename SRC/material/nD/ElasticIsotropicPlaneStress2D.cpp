@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-16 04:41:14 $
+// $Revision: 1.3 $
+// $Date: 2001-07-16 22:14:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlaneStress2D.cpp,v $
                                                                         
                                                                         
@@ -29,18 +29,19 @@
 #include <Tensor.h>
 
 Vector ElasticIsotropicPlaneStress2D::sigma(3);
+Matrix ElasticIsotropicPlaneStress2D::D(3,3);
 
 ElasticIsotropicPlaneStress2D::ElasticIsotropicPlaneStress2D
 (int tag, double E, double nu, double rho) :
  ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropicPlaneStress2d, E, nu, rho),
- D(3,3), Tepsilon(3), Cepsilon(3)
+ Tepsilon(3), Cepsilon(3)
 {
-	this->update();
+
 }
 
 ElasticIsotropicPlaneStress2D::ElasticIsotropicPlaneStress2D():
  ElasticIsotropicMaterial (0, ND_TAG_ElasticIsotropicPlaneStress2d, 0.0, 0.0),
- D(3,3), Tepsilon(3), Cepsilon(3)
+ Tepsilon(3), Cepsilon(3)
 {
 
 }
@@ -51,35 +52,35 @@ ElasticIsotropicPlaneStress2D::~ElasticIsotropicPlaneStress2D ()
 }
 
 int
-ElasticIsotropicPlaneStress2D::setTrialStrain (const Vector &v)
+ElasticIsotropicPlaneStress2D::setTrialStrain (const Vector &strain)
 {
-	Tepsilon = v;
+	Tepsilon = strain;
 
 	return 0;
 }
 
 int
-ElasticIsotropicPlaneStress2D::setTrialStrain (const Vector &v, const Vector &r)
+ElasticIsotropicPlaneStress2D::setTrialStrain (const Vector &strain, const Vector &rate)
 {
-	Tepsilon = v;
+	Tepsilon = strain;
 
 	return 0;
 }
 
 int
-ElasticIsotropicPlaneStress2D::setTrialStrainIncr (const Vector &v)
+ElasticIsotropicPlaneStress2D::setTrialStrainIncr (const Vector &strain)
 {
 	Tepsilon = Cepsilon;
-	Tepsilon.addVector(1.0, v, 1.0);
+	Tepsilon.addVector(1.0, strain, 1.0);
 
 	return 0;
 }
 
 int
-ElasticIsotropicPlaneStress2D::setTrialStrainIncr (const Vector &v, const Vector &r)
+ElasticIsotropicPlaneStress2D::setTrialStrainIncr (const Vector &strain, const Vector &rate)
 {
 	Tepsilon = Cepsilon;
-	Tepsilon.addVector(1.0, v, 1.0);
+	Tepsilon.addVector(1.0, strain, 1.0);
 
 	return 0;
 }
@@ -87,16 +88,31 @@ ElasticIsotropicPlaneStress2D::setTrialStrainIncr (const Vector &v, const Vector
 const Matrix&
 ElasticIsotropicPlaneStress2D::getTangent (void)
 {
+    double d00 = E/(1.0-v*v);
+    double d01 = v*d00;
+    double d22 = 0.5*(d00-d01);
+
+    D(0,0) = D(1,1) = d00;
+    D(1,0) = D(0,1) = d01;
+    D(2,2) = d22;
+
 	return D;
 }
 
 const Vector&
 ElasticIsotropicPlaneStress2D::getStress (void)
 {
+    double d00 = E/(1.0-v*v);
+    double d01 = v*d00;
+    double d22 = 0.5*(d00-d01);
+
+    double eps0 = Tepsilon(0);
+    double eps1 = Tepsilon(1);
+
 	//sigma = D*epsilon;
-	sigma(0) = D(0,0)*Tepsilon(0) + D(0,1)*Tepsilon(1);
-	sigma(1) = D(1,0)*Tepsilon(0) + D(1,1)*Tepsilon(1);
-	sigma(2) = D(2,2)*Tepsilon(2);
+	sigma(0) = d00*eps0 + d01*eps1;
+	sigma(1) = d01*eps0 + d00*eps1;
+	sigma(2) = d22*Tepsilon(2);
 	
 	return sigma;
 }
@@ -138,7 +154,6 @@ ElasticIsotropicPlaneStress2D::getCopy (void)
 		new ElasticIsotropicPlaneStress2D (this->getTag(), E, v, rho);
 
 	theCopy->Cepsilon = Cepsilon;
-	// D is created in the constructor call
 
 	return theCopy;
 }
@@ -146,7 +161,7 @@ ElasticIsotropicPlaneStress2D::getCopy (void)
 const char*
 ElasticIsotropicPlaneStress2D::getType (void) const
 {
-	return "ElasticIsotropicPlaneStress2D";
+	return "PlaneStress";
 }
 
 int
@@ -160,14 +175,15 @@ ElasticIsotropicPlaneStress2D::sendSelf(int commitTag, Channel &theChannel)
 {
 	int res = 0;
 
-	static Vector data(6);
+	static Vector data(7);
 
 	data(0) = this->getTag();
 	data(1) = E;
 	data(2) = v;
-	data(3) = Cepsilon(0);
-	data(4) = Cepsilon(1);
-	data(5) = Cepsilon(2);
+    data(3) = rho;
+	data(4) = Cepsilon(0);
+	data(5) = Cepsilon(1);
+	data(6) = Cepsilon(2);
 
     res += theChannel.sendVector(this->getDbTag(), commitTag, data);
 	if (res < 0) {
@@ -185,7 +201,7 @@ ElasticIsotropicPlaneStress2D::recvSelf(int commitTag, Channel &theChannel,
 {
 	int res = 0;
 
-    static Vector data(6);
+    static Vector data(7);
 
 	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
 	if (res < 0) {
@@ -197,24 +213,10 @@ ElasticIsotropicPlaneStress2D::recvSelf(int commitTag, Channel &theChannel,
 	this->setTag((int)data(0));
     E = data(1);
 	v = data(2);
-	Cepsilon(0) = data(3);
-	Cepsilon(1) = data(4);
-	Cepsilon(2) = data(5);
-
-	this->update();
+    rho = data(3);
+	Cepsilon(0) = data(4);
+	Cepsilon(1) = data(5);
+	Cepsilon(2) = data(6);
 	
 	return res;
-}
-
-void 
-ElasticIsotropicPlaneStress2D::update(void)
-{
-	// Set up the elastic constant matrix for plane stress
-	D.Zero();
-	D(0,0) = 1.0;
-	D(0,1) = D(1,0) = v;
-	D(1,1) = 1.0;
-	D(2,2) = 0.5*(1.0-v);
-
-	D = D * E/(1-v*v);
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-16 04:41:14 $
+// $Revision: 1.3 $
+// $Date: 2001-07-16 22:14:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlateFiber.cpp,v $
                                                                         
                                                                         
@@ -36,7 +36,7 @@ ElasticIsotropicPlateFiber::ElasticIsotropicPlateFiber
  ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropicPlateFiber, E, nu, rho),
  Tepsilon(5), Cepsilon(5)
 {
-	this->update();
+
 }
 
 ElasticIsotropicPlateFiber::ElasticIsotropicPlateFiber():
@@ -52,35 +52,35 @@ ElasticIsotropicPlateFiber::~ElasticIsotropicPlateFiber ()
 }
 
 int
-ElasticIsotropicPlateFiber::setTrialStrain (const Vector &v)
+ElasticIsotropicPlateFiber::setTrialStrain (const Vector &strain)
 {
-	Tepsilon = v;
+	Tepsilon = strain;
 
 	return 0;
 }
 
 int
-ElasticIsotropicPlateFiber::setTrialStrain (const Vector &v, const Vector &r)
+ElasticIsotropicPlateFiber::setTrialStrain (const Vector &strain, const Vector &rate)
 {
-	Tepsilon = v;
+	Tepsilon = strain;
 
 	return 0;
 }
 
 int
-ElasticIsotropicPlateFiber::setTrialStrainIncr (const Vector &v)
+ElasticIsotropicPlateFiber::setTrialStrainIncr (const Vector &strain)
 {
 	Tepsilon = Cepsilon;
-	Tepsilon.addVector(1.0, v, 1.0);
+	Tepsilon.addVector(1.0, strain, 1.0);
 
 	return 0;
 }
 
 int
-ElasticIsotropicPlateFiber::setTrialStrainIncr (const Vector &v, const Vector &r)
+ElasticIsotropicPlateFiber::setTrialStrainIncr (const Vector &strain, const Vector &rate)
 {
 	Tepsilon = Cepsilon;
-	Tepsilon.addVector(1.0, v, 1.0);
+	Tepsilon.addVector(1.0, strain, 1.0);
 
 	return 0;
 }
@@ -88,19 +88,36 @@ ElasticIsotropicPlateFiber::setTrialStrainIncr (const Vector &v, const Vector &r
 const Matrix&
 ElasticIsotropicPlateFiber::getTangent (void)
 {
+    double d00 = E/(1.0-v*v);
+    double d01 = v*d00;
+    double d22 = 0.5*(d00-d01);
+
+	D(0,0) = D(1,1) = d00;
+	D(0,1) = D(1,0) = d01;
+	D(2,2) = d22;
+    D(2,3) = d22;
+    D(4,4) = d22;
+
 	return D;
 }
 
 const Vector&
 ElasticIsotropicPlateFiber::getStress (void)
 {
-	//sigma = D*epsilon;
-	sigma(0) = D(0,0)*Tepsilon(0) + D(0,1)*Tepsilon(1);
-	sigma(1) = D(1,0)*Tepsilon(0) + D(1,1)*Tepsilon(1);
+    double d00 = E/(1.0-v*v);
+    double d01 = v*d00;
+    double d22 = 0.5*(d00-d01);
 
-	sigma(2) = D(2,2)*Tepsilon(2);
-	sigma(3) = D(3,3)*Tepsilon(3);
-	sigma(4) = D(4,4)*Tepsilon(4);
+    double eps0 = Tepsilon(0);
+    double eps1 = Tepsilon(1);
+
+	//sigma = D*epsilon;
+	sigma(0) = d00*eps0 + d01*eps1;
+	sigma(1) = d01*eps0 + d00*eps1;
+
+	sigma(2) = d22*Tepsilon(2);
+	sigma(3) = d22*Tepsilon(3);
+	sigma(4) = d22*Tepsilon(4);
 	
 	return sigma;
 }
@@ -142,7 +159,6 @@ ElasticIsotropicPlateFiber::getCopy (void)
 		new ElasticIsotropicPlateFiber (this->getTag(), E, v, rho);
 
 	theCopy->Cepsilon = Cepsilon;
-	// D is created in the constructor call
 
 	return theCopy;
 }
@@ -150,7 +166,7 @@ ElasticIsotropicPlateFiber::getCopy (void)
 const char*
 ElasticIsotropicPlateFiber::getType (void) const
 {
-	return "ElasticIsotropicPlateFiber";
+	return "PlateFiber";
 }
 
 int
@@ -164,14 +180,17 @@ ElasticIsotropicPlateFiber::sendSelf(int commitTag, Channel &theChannel)
 {
 	int res = 0;
 
-	static Vector data(6);
+	static Vector data(9);
 
 	data(0) = this->getTag();
 	data(1) = E;
 	data(2) = v;
-	data(3) = Cepsilon(0);
-	data(4) = Cepsilon(1);
-	data(5) = Cepsilon(2);
+    data(3) = rho;
+	data(4) = Cepsilon(0);
+	data(5) = Cepsilon(1);
+	data(6) = Cepsilon(2);
+    data(7) = Cepsilon(3);
+    data(8) = Cepsilon(4);
 
     res += theChannel.sendVector(this->getDbTag(), commitTag, data);
 	if (res < 0) {
@@ -189,7 +208,7 @@ ElasticIsotropicPlateFiber::recvSelf(int commitTag, Channel &theChannel,
 {
 	int res = 0;
 
-    static Vector data(6);
+    static Vector data(9);
 
 	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
 	if (res < 0) {
@@ -201,27 +220,12 @@ ElasticIsotropicPlateFiber::recvSelf(int commitTag, Channel &theChannel,
 	this->setTag((int)data(0));
     E = data(1);
 	v = data(2);
-	Cepsilon(0) = data(3);
-	Cepsilon(1) = data(4);
-	Cepsilon(2) = data(5);
-
-	this->update();
+    rho = data(3);
+	Cepsilon(0) = data(4);
+	Cepsilon(1) = data(5);
+	Cepsilon(2) = data(6);
+	Cepsilon(3) = data(7);
+	Cepsilon(4) = data(8);
 	
 	return res;
-}
-
-void 
-ElasticIsotropicPlateFiber::update(void)
-{
-	// Set up the elastic constant matrix for plane stress
-	D.Zero();
-	D(0,0) = 1.0;
-	D(0,1) = D(1,0) = v;
-	D(1,1) = 1.0;
-	D(2,2) = 0.5*(1.0-v);
-
-        D(3,3) = D(2,2) ;
-        D(4,4) = D(2,2) ;
-      
-	D *= E/(1-v*v);
 }
