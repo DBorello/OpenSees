@@ -369,10 +369,10 @@ in the BasicBuilder object.
 \noindent To construct a uniaxial bilinear steel model with kinematic
 hardening and optional isotropic hardening described by a non-linear
 evolution equation. The model contains a yield strength of fy, an
-initial elastic tangent of E0, and a hardening ratio of b. The
-optional parameters a1, a2, a3, and a4 control the amount of isotropic
-hardening (default values are provided for no isitropic
-hardening). Specification of minimum and maximum failure strains 
+initial elastic tangent of E0, and a hardening ratio of b. Isotropic hardening is
+controlled by the parameters a1, a2, a3, and a4. For no isotropic hardening, a1 and
+a3 should be set to zero, while a2 and a4 should be anything non-zero.
+Specification of minimum and maximum failure strains 
 through the -min and -max switches is optional and must appear after
 the specification of the isoptropic hardening parameters, if
 present. The argument matTag is used to uniquely identify this
@@ -390,7 +390,8 @@ BasicBuilder object.
 linear unloading/reloading stiffness according to the work of Karsan-Jirsa and no
 strength in tension. The model contains a compressive strength of fpc,
 a strain at the compressive strength of epsc0, a crushing strength of
-fpcu, and a strain at the crushing strength of epscu. Compressive
+fpcu, and a strain at the crushing strength of epscu. The initial slope
+for this model is ($2f'_c/\varepsilon_{c0}$). Compressive
 concrete parameters should be input as negative values for
 this model. Specification of minimum and maximum
 failure strains through the -min and -max switches is optional. The argument 
@@ -430,6 +431,113 @@ unloading stiffness based on ductility, $\mu^{-\beta}$.
 % force-deformation relation given by $F = Cu^\alpha$, where C and $\alpha$ are constant.
 % The argument matTag is used to uniquely identify this UniaxialMaterial object 
 % among UniaxialMaterial objects in the BasicBuilder object.
+
+\subsubsection{FEDEAS Materials}
+This section lists the uniaxial material models available from the FEDEAS ML1D
+library developed by F.C. Filippou. For more information see the FEDEAS materials webpage:
+
+{\sf\small
+\begin{verbatim}
+   http://www.ce.berkeley.edu/~filippou/Research/Fedeas/material.htm
+\end{verbatim}
+}
+
+\noindent Currently, each of the following FEDEAS materials are only available
+with the Win32 version of OpenSees.
+
+\paragraph{Concrete02 Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial Concrete02 matTag? fpc? epsc0? fpcu? epscu? ratio? ft? Ets?
+\end{verbatim}
+}
+
+To construct a uniaxial concrete model with tensile strength and linear tension
+softening. The compressive envelope is defined by the compressive strength, fpc,
+cracking strain epsc0, crushing strength, fpcu, and strain at fpcu of epscu. The
+parameter ratio is the ratio between unloading slope at epscu and original slope
+($2f'_c/\varepsilon_{c0}$). Concrete tensile strength is given by ft, and Ets
+is the slope of the linear tension softening branch. The argument 
+matTag is used to uniquely identify this UniaxialMaterial object among 
+UniaxialMaterial objects in the BasicBuilder object.
+
+
+\paragraph{Concrete03 Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial Concrete03 matTag? fpc? epsc0? fpcu? epscu? ratio? ft?
+                                    epst0? ft0? beta? epstu?
+\end{verbatim}
+}
+
+To construct a uniaxial concrete model with tensile strength and nonlinear tension
+softening. The compressive envelope is defined by the compressive strength, fpc,
+cracking strain epsc0, crushing strength, fpcu, and strain at fpcu of epscu. The
+parameter ratio is the ratio between unloading slope at epscu and original slope
+($2f'_c/\varepsilon_{c0}$). Concrete tensile strength is given by ft. epst0 is the
+tensile strain at the transition from nonlinear to linear softening, and ft0 is the
+stress at this transition. The exponent of the tension softening curve is beta and
+epstu is the ultimate tensile strain. The argument 
+matTag is used to uniquely identify this UniaxialMaterial object among 
+UniaxialMaterial objects in the BasicBuilder object.
+
+
+\paragraph{Steel02 Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial Steel02 matTag? fy? E? b? R0? cR1? cR2? a1? a2? a3? a4?
+\end{verbatim}
+}
+
+To construct a uniaxial Menegotto-Pinto steel model with isotropic strain hardening.
+The yield stress is given by fy, the elastic modulus, E, and strain hardening ratio b.
+The factors R0, cR1, and cR2 control the transition from elastic to plastic branches.
+Reasonable values are R0 = 18.5, cR1 = 0.925, and cR2 = 0.15. Isotropic hardening is
+controlled by the parameters a1, a2, a3, and a4. For no isotropic hardening, a1 and
+a3 should be set to zero, while a2 and a4 should be anything non-zero. The argument 
+matTag is used to uniquely identify this UniaxialMaterial object among 
+UniaxialMaterial objects in the BasicBuilder object.
+
+
+\paragraph{Bond01 Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial Bond01 matTag? u1p? q1p? u2p? u3p? q3p?
+                                   u1n? q1n? u2n? u3n? q3n? s0? bb?
+\end{verbatim}  
+}
+
+To construct a Eligehausen bond model without damage. The tensile bond-slip backbone
+parameters are given by u1p (slip at first detachment), q1p (bond at first
+detachment), u2p (slip at start of degradation), u3p (slip at ultimate), and
+q3p (bond at ultimate). The corresponding bond-slip backbone parameters are
+indicated with a suffix of n (u1n, q1n, u2n, u3n, q3n).  The unloading stiffness
+is given by s0, and the exponent for the first branch of the backbone (prior
+to first detachment) is given by bb, i.e., $q = u^{bb}$. The argument 
+matTag is used to uniquely identify this UniaxialMaterial object among 
+UniaxialMaterial objects in the BasicBuilder object.
+
+
+\paragraph{Bond02 Material}
+{\sf\small
+\begin{verbatim}
+   uniaxialMaterial Bond02 matTag? u1p? q1p? u2p? u3p? q3p?
+                                   u1n? q1n? u2n? u3n? q3n? s0? bb? alp? aln?
+\end{verbatim}
+}
+
+To construct a Eligehausen bond model with damage. The tensile bond-slip backbone
+parameters are given by u1p (slip at first detachment), q1p (bond at first
+detachment), u2p (slip at start of degradation), u3p (slip at ultimate), and
+q3p (bond at ultimate). The corresponding bond-slip backbone parameters are
+indicated with a suffix of n (u1n, q1n, u2n, u3n, q3n).  The unloading stiffness
+is given by s0, and the exponent for the first branch of the backbone (prior
+to first detachment) is given by bb, i.e., $q = u^{bb}$. The arguments
+alp and aln are the damage factors in the positive and negative quadrants,
+respectively. The argument 
+matTag is used to uniquely identify this UniaxialMaterial object among 
+UniaxialMaterial objects in the BasicBuilder object.
+
 
 \subsection{The nDMaterial Command}
 {\sf\small
