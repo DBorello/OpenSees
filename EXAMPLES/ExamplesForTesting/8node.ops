@@ -51,7 +51,7 @@ nDMaterial ElasticIsotropic3D 1      [expr 10000*$kPa] 0.3  1.8
 set DPys "-DP"
                                                                                 
 #potential surface
-set DPps "-DP 0.0"
+set DPps "-DP 0.1"
                                                                                 
 # Scalar evolution law: linear hardening coef = 1.0
 set ES1  "-Leq 0.0"
