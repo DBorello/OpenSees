@@ -132,7 +132,7 @@ recorder Element 1 -time -file ele1secDef.out   section 1 deformation
 # ------------------------------
 
 # Perform an eigenvalue analysis
-eigen 2
+puts [eigen 2]
 
 # Perform the transient analysis
 #         N   dt
@@ -140,7 +140,7 @@ analyze 2000 0.01
 puts " "; puts "Transient analysis completed";
 
 # Perform an eigenvalue analysis
-eigen 2
+puts [eigen 2]
 
 # Print state of node 3
 print node 3
