@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2004-11-24 22:37:42 $
+// $Revision: 1.7 $
+// $Date: 2005-02-14 19:43:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/FileStream.cpp,v $
 
 
@@ -39,6 +39,9 @@ FileStream::~FileStream()
 {
   if (fileOpen == 1)
     theFile.close();
+  
+  if (fileName != 0)
+    delete [] fileName;
 }
 
 int 
