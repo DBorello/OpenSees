@@ -31,6 +31,9 @@ math_tst: $(NDARRAY) math_tst.o
 elast_tst: $(NDARRAY) elast_tst.o
 	$(LINKER) $(LINKFLAGS) elast_tst.o $(NDARRAY) -o elast_tst
 
+el-pl-test: $(NDARRAY) el-pl-test.o
+	$(LINKER) $(LINKFLAGS) el-pl-test.o $(NDARRAY) -o el-pl-test
+
 # Miscellaneous
 tidy:	
 	@$(RM) $(RMFLAGS) Makefile.bak *~ #*# core test
@@ -40,6 +43,7 @@ clean: tidy
 	@$(RM) $(RMFLAGS) $(OBJS) *.o core
 	@$(RM) $(RMFLAGS) math_tst  
 	@$(RM) $(RMFLAGS) elast_tst 
+	@$(RM) $(RMFLAGS) el-pl-test 
 	@$(RM) $(RMFLAGS) test.\$\$\$ 
 	@$(RM) $(RMFLAGS) *.ti 
 	@$(RM) $(RMFLAGS) tca.map 
