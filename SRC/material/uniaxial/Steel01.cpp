@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2004-07-15 21:34:10 $
+// $Revision: 1.14 $
+// $Date: 2005-01-25 21:55:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
-                                                                        
-// File: ~/material/Steel01.C
-//
 // Written: MHS 
 // Created: 06/99
 // Revision: A
@@ -147,38 +144,50 @@ int Steel01::setTrial (double strain, double &stress, double &tangent, double st
 
 void Steel01::determineTrialState (double dStrain)
 {
+      double fyOneMinusB = fy * (1.0 - b);
 
-      double c, c1, c2, c3, fyOneMinusB, c1c3, c1c2;
+      double Esh = b*E0;
+      double epsy = fy/E0;
+      
+      double c1 = Esh*Tstrain;
+      
+      double c2 = TshiftN*fyOneMinusB;
 
-      fyOneMinusB = fy * (1.0 - b);
+      double c3 = TshiftP*fyOneMinusB;
 
-	  double Esh = b*E0;
-	  double epsy = fy/E0;
+      double c = Cstress + E0*dStrain;
 
-      c1 = Esh*Tstrain;
+      /**********************************************************
+         removal of the following lines due to problems with
+	 optimization may be required (e.g. on gnucc compiler
+         with optimization turned on & -ffloat-store option not
+         used) .. replace them with line that follows but which 
+         now requires 2 function calls to achieve same result !!
+      ************************************************************/
 
-      c2 = TshiftN*fyOneMinusB;
+      double c1c3 = c1 + c3;
 
-      c3 = TshiftP*fyOneMinusB;
+      if (c1c3 < c)
+	Tstress = c1c3;
+      else
+	Tstress = c;
 
-      c1c3 = c1+c3;
+      double c1c2 = c1-c2;
 
-      c = Cstress + E0*dStrain;
+      if (c1c2 > Tstress)
+	Tstress = c1c2;
 
-		if (c1c3 < c)
-			Tstress = c1c3;
-		else
-			Tstress = c;
+      /* ***********************************************************
+      and replace them with:
 
-		c1c2=c1-c2;
-		if (c1c2 > Tstress)
-			Tstress = c1c2;
+      Tstress = fmax((c1-c2), fmin((c1+c3),c));
+      **************************************************************/
 
       if (fabs(Tstress-c) < DBL_EPSILON)
 	  Ttangent = E0;
       else
-	  Ttangent = Esh;      
-      
+	Ttangent = Esh;
+
       //
       // Determine if a load reversal has occurred due to the trial strain
       //
