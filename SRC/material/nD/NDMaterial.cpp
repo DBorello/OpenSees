@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $                                                              
-// $Date: 2003-10-30 22:43:47 $                                                                  
+// $Revision: 1.16 $                                                              
+// $Date: 2003-11-20 02:12:25 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -213,8 +213,11 @@ NDMaterial::setTrialFIncr(const Tensor &f, const Tensor &d)
    return -1;
 }
 
-
-
+const stresstensor NDMaterial::getCauchyStressTensor(void)
+{
+   opserr << "NDMaterial::getCauchyStressTensor -- subclass responsibility\n";
+   return errstresstensor;    
+}
 
 const Tensor &
 NDMaterial::getTangentTensor(void)
@@ -342,3 +345,5 @@ NDMaterial::commitSensitivity(Vector & strainSensitivity, int gradNumber, int nu
 	return 0;
 }
 // AddingSensitivity:END //////////////////////////////////////////
+
+

@@ -22,12 +22,12 @@
 **                                                                    **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.14 $                                                              
-// $Date: 2003-10-30 22:43:47 $                                                                  
-// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $                                                                
-                                                                        
-                                                                        
+
+// $Revision: 1.15 $
+// $Date: 2003-11-20 02:12:25 $
+// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $
+
+
 #ifndef NDMaterial_h
 #define NDMaterial_h
 
@@ -40,7 +40,7 @@
 // Description: This file contains the class definition for NDMaterial.
 // NDMaterial is an abstract base class and thus no objects of it's type
 // can be instantiated. It has pure virtual functions which must be
-// implemented in it's derived classes. 
+// implemented in it's derived classes.
 //
 // What: "@(#) NDMaterial.h, revA"
 
@@ -80,11 +80,11 @@ class NDMaterial : public Material
 
     // new methods for recorder requested by Zhouhui Yang .. MAY NOT STAY
     virtual const Vector &getCommittedStress(void);
-    virtual const Vector &getCommittedStrain(void);    
+    virtual const Vector &getCommittedStrain(void);
 
-    // methods to set and retrieve state using the Tensor class    
+    // methods to set and retrieve state using the Tensor class
     virtual int setTrialStrain(const Tensor &v);
-    virtual int setTrialStrain(const Tensor &v, const Tensor &r);    
+    virtual int setTrialStrain(const Tensor &v, const Tensor &r);
     virtual int setTrialStrainIncr(const Tensor &v);
     virtual int setTrialStrainIncr(const Tensor &v, const Tensor &r);
     virtual const Tensor &getTangentTensor(void);
@@ -93,19 +93,18 @@ class NDMaterial : public Material
     //Added Joey Aug. 13, 2001
     virtual const straintensor getPlasticStrainTensor(void);
 
-			 //Zhao (zcheng@ucdavis.edu) 
-			 // added Sept 22 2003 for Large Deformation, F is the Deformation Grandient
+//Zhao (zcheng@ucdavis.edu)
+// added Sept 22 2003 for Large Deformation, F is the Deformation Gradient
     virtual int setTrialF(const Tensor &f);
     virtual int setTrialF(const Tensor &f, const Tensor &d);
     virtual int setTrialFIncr(const Tensor &f);
     virtual int setTrialFIncr(const Tensor &f, const Tensor &d);
+    virtual const stresstensor getCauchyStressTensor(void);
 
-
-    
     virtual int commitState(void) = 0;
     virtual int revertToLastCommit(void) = 0;
     virtual int revertToStart(void) = 0;
-    
+
     virtual NDMaterial *getCopy(void) = 0;
     virtual NDMaterial *getCopy(const char *code) = 0;
 
@@ -118,17 +117,17 @@ class NDMaterial : public Material
 // AddingSensitivity:BEGIN //////////////////////////////////////////
     virtual int            setParameter             (const char **argv, int argc, Information &info);
     virtual int            updateParameter          (int parameterID, Information &info);
-	virtual int            activateParameter        (int parameterID);
-	virtual const Vector & getStressSensitivity     (int gradNumber, bool conditional);
-	virtual const Vector & getStrainSensitivity     (int gradNumber);
-	virtual const Matrix & getTangentSensitivity    (int gradNumber);
-	virtual const Matrix & getDampTangentSensitivity(int gradNumber);
-	virtual double         getRhoSensitivity        (int gradNumber);
-	virtual int            commitSensitivity        (Vector & strainGradient, int gradNumber, int numGrads);
+    virtual int            activateParameter        (int parameterID);
+    virtual const Vector & getStressSensitivity     (int gradNumber, bool conditional);
+    virtual const Vector & getStrainSensitivity     (int gradNumber);
+    virtual const Matrix & getTangentSensitivity    (int gradNumber);
+    virtual const Matrix & getDampTangentSensitivity(int gradNumber);
+    virtual double         getRhoSensitivity        (int gradNumber);
+    virtual int            commitSensitivity        (Vector & strainGradient, int gradNumber, int numGrads);
 // AddingSensitivity:END ///////////////////////////////////////////
 
   protected:
-    
+
   private:
     static Matrix errMatrix;
     static Vector errVector;

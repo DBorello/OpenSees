@@ -25,8 +25,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2003-10-02 15:25:16 $
+// $Revision: 1.32 $
+// $Date: 2003-11-20 02:12:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -612,6 +612,13 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
       theMaterial = TclModelBuilder_addTemplate3Dep(clientData, interp, argc, argv, 
 						    theTclBuilder, 2);
     }
+
+    else if (strcmp(argv[1],"FiniteDeformationElastic3D") == 0 ||
+             strcmp(argv[1],"FDElastic3D" ) == 0) {
+      theMaterial = TclModelBuilder_addFiniteDeformationElastic3D(clientData, interp, argc, argv,
+						    theTclBuilder, 1);
+    }
+
      else if (strcmp(argv[1],"PlaneStressMaterial") == 0 ||
  	     strcmp(argv[1],"PlaneStress") == 0) {
  	if (argc < 4) {
@@ -622,7 +629,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
  	}
  	
  	int tag, matTag;
- 	
+
  	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
  	    opserr << "WARNING invalid nDMaterial PlaneStress tag" << endln;
  	    return TCL_ERROR;		
@@ -643,7 +650,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
  	}
  
  	theMaterial = new PlaneStressMaterial( tag, *threeDMaterial );
-     }	
+     }
  
  
      else if (strcmp(argv[1],"PlateFiberMaterial") == 0 ||
@@ -722,7 +729,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
       theMaterial = TclModelBuilder_addFeapMaterial(clientData, 
 						    interp,
 						    argc, 
-						    argv, 
+						    argv,
 						    theTclBuilder);
     }
 
