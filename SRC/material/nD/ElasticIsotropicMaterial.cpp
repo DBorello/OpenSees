@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $                                                              
-// $Date: 2002-06-10 22:24:04 $                                                                  
+// $Revision: 1.16 $                                                              
+// $Date: 2002-06-19 23:19:53 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -28,6 +28,7 @@
 // Written: MHS 
 // Created: Feb 2000
 // Revision: A
+// Boris Jeremic (@ucdavis.edu) 19June2002 added getE, getnu
 //
 // Description: This file contains the class implementation for ElasticIsotropicMaterial.
 //
@@ -73,6 +74,20 @@ ElasticIsotropicMaterial::getRho()
 { 
   return rho ;
 }
+
+
+// Boris Jeremic (@ucdavis.edu) 19June2002
+double ElasticIsotropicMaterial::getE() 
+{ 
+  return E;
+}
+
+// Boris Jeremic (@ucdavis.edu) 19June2002
+double ElasticIsotropicMaterial::getnu() 
+{ 
+  return v;
+}
+
 
 
 NDMaterial*
