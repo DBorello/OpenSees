@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\damage,..\..\..\src\recorder\response,..\..\..\src\ndarray,..\..\..\src\modelbuilder,..\..\..\src,..\..\..\src\actor\actor,..\..\..\src\element,..\..\..\src\tagged,..\..\..\src\modelbuilder\tcl,..\..\..\src\handler,..\..\..\src\matrix,..\..\..\src\domain\component,c:\Program Files\Tcl\Include"
+				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\damage;..\..\..\src\recorder\response;..\..\..\src\ndarray;..\..\..\src\modelbuilder;..\..\..\src;..\..\..\src\actor\actor;..\..\..\src\element;..\..\..\src\tagged;..\..\..\src\modelbuilder\tcl;..\..\..\src\handler;..\..\..\src\matrix;..\..\..\src\domain\component;&quot;c:\Program Files\Tcl\Include&quot;"
 				PreprocessorDefinitions="_TCL84"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -57,7 +57,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="..\..\..\src\damage,..\..\..\src\recorder\response,..\..\..\src\ndarray,..\..\..\src\modelbuilder,..\..\..\src,..\..\..\src\actor\actor,..\..\..\src\element,..\..\..\src\tagged,..\..\..\src\modelbuilder\tcl,..\..\..\src\handler,..\..\..\src\matrix,..\..\..\src\domain\component,c:\Program Files\Tcl\Include"
+				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\damage;..\..\..\src\recorder\response;..\..\..\src\ndarray;..\..\..\src\modelbuilder;..\..\..\src;..\..\..\src\actor\actor;..\..\..\src\element;..\..\..\src\tagged;..\..\..\src\modelbuilder\tcl;..\..\..\src\handler;..\..\..\src\matrix;..\..\..\src\domain\component;&quot;c:\Program Files\Tcl\Include&quot;"
 				PreprocessorDefinitions="_TCL84"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"

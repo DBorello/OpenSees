@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\tcl,..\..\..\src\handler,..\..\..\src\domain\node,..\..\..\src\actor\actor,..\..\..\src\tagged,..\..\..\src\domain\component,..\..\..\src\renderer,..\..\..\src\matrix,..\..\..\src\utility,..\..\..\src\domain\domain,..\..\..\src,..\..\..\src\element,..\..\..\src\nDarray,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\tcl;..\..\..\src\handler;..\..\..\src\domain\node;..\..\..\src\actor\actor;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src\renderer;..\..\..\src\matrix;..\..\..\src\utility;..\..\..\src\domain\domain;..\..\..\src;..\..\..\src\element;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="_WIN32,_DEBUG,_LIB,_WGL,_TCL84"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -66,7 +66,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\src\tcl,..\..\..\src\handler,..\..\..\src\domain\node,..\..\..\src\actor\actor,..\..\..\src\tagged,..\..\..\src\domain\component,..\..\..\src\renderer,..\..\..\src\matrix,..\..\..\src\utility,..\..\..\src\domain\domain,..\..\..\src,..\..\..\src\element,..\..\..\src\nDarray,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\tcl;..\..\..\src\handler;..\..\..\src\domain\node;..\..\..\src\actor\actor;..\..\..\src\tagged;..\..\..\src\domain\component;..\..\..\src\renderer;..\..\..\src\matrix;..\..\..\src\utility;..\..\..\src\domain\domain;..\..\..\src;..\..\..\src\element;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,NDEBUG,_WGL,_LIB,_TCL84"
 				StringPooling="TRUE"
 				RuntimeLibrary="5"

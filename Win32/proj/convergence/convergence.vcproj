@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\analysis\integrator,..\..\..\src\handler,..\..\..\src\actor\objectBroker,..\..\..\src\system_of_eqn,..\..\..\src\system_of_eqn\linearSOE,..\..\..\src\analysis\algorithm,..\..\..\src\analysis\algorithm\equiSolnAlgo,..\..\..\src\actor\channel,..\..\..\src\matrix,..\..\..\src,..\..\..\src\actor\actor,..\..\..\src\convergenceTest,..\..\..\src\nDarray,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\analysis\integrator;..\..\..\src\handler;..\..\..\src\actor\objectBroker;..\..\..\src\system_of_eqn;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\analysis\algorithm;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\actor\channel;..\..\..\src\matrix;..\..\..\src;..\..\..\src\actor\actor;..\..\..\src\convergenceTest;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,_TCL84"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -66,7 +66,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\src\analysis\integrator,..\..\..\src\handler,..\..\..\src\actor\objectBroker,..\..\..\src\system_of_eqn,..\..\..\src\system_of_eqn\linearSOE,..\..\..\src\analysis\algorithm,..\..\..\src\analysis\algorithm\equiSolnAlgo,..\..\..\src\actor\channel,..\..\..\src\matrix,..\..\..\src,..\..\..\src\actor\actor,..\..\..\src\convergenceTest,..\..\..\src\nDarray,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\analysis\integrator;..\..\..\src\handler;..\..\..\src\actor\objectBroker;..\..\..\src\system_of_eqn;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\analysis\algorithm;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\actor\channel;..\..\..\src\matrix;..\..\..\src;..\..\..\src\actor\actor;..\..\..\src\convergenceTest;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_TCL84"
 				StringPooling="TRUE"
 				RuntimeLibrary="5"

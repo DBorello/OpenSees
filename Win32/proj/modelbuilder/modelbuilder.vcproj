@@ -21,8 +21,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\element\elasticBeamColumn,..\..\..\src\modelbuilder\tcl,..\..\..\src\coordTransformation,..\..\..\src\handler,..\..\..\src\domain\pattern,..\..\..\src\domain\load,..\..\..\src\actor\channel,..\..\..\src\domain\node,..\..\..\src\domain\constraints,..\..\..\src\tagged,..\..\..\src\actor\actor,..\..\..\src\domain\component,..\..\..\src\element,..\..\..\src\element\beam3d,..\..\..\src,..\..\..\src\matrix,..\..\..\src\domain\domain,..\..\..\src\modelbuilder,..\..\..\src\element\beam2d,..\..\..\src\nDarray,c:\Program Files\tcl"
-				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,_TCL84"
+				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\element\elasticBeamColumn;..\..\..\src\modelbuilder\tcl;..\..\..\src\coordTransformation;..\..\..\src\handler;..\..\..\src\domain\pattern;..\..\..\src\domain\load;..\..\..\src\actor\channel;..\..\..\src\domain\node;..\..\..\src\domain\constraints;..\..\..\src\tagged;..\..\..\src\actor\actor;..\..\..\src\domain\component;..\..\..\src\element;..\..\..\src\element\beam3d;..\..\..\src;..\..\..\src\matrix;..\..\..\src\domain\domain;..\..\..\src\modelbuilder;..\..\..\src\element\beam2d;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
+				PreprocessorDefinitions="c:\Program Files\tcl\include"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
 				PrecompiledHeaderFile=".\..\..\obj\modelbuilder\debug/modelbuilder.pch"
@@ -66,8 +66,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\src\element\elasticBeamColumn,..\..\..\src\modelbuilder\tcl,..\..\..\src\coordTransformation,..\..\..\src\handler,..\..\..\src\domain\pattern,..\..\..\src\domain\load,..\..\..\src\actor\channel,..\..\..\src\domain\node,..\..\..\src\domain\constraints,..\..\..\src\tagged,..\..\..\src\actor\actor,..\..\..\src\domain\component,..\..\..\src\element,..\..\..\src\element\beam3d,..\..\..\src,..\..\..\src\matrix,..\..\..\src\domain\domain,..\..\..\src\modelbuilder,..\..\..\src\element\beam2d,..\..\..\src\nDarray,c:\Program Files\tcl"
-				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_TCL84"
+				AdditionalIncludeDirectories="&quot;c:\Program Files\tcl\include&quot;;..\..\..\src\element\elasticBeamColumn;..\..\..\src\modelbuilder\tcl;..\..\..\src\coordTransformation;..\..\..\src\handler;..\..\..\src\domain\pattern;..\..\..\src\domain\load;..\..\..\src\actor\channel;..\..\..\src\domain\node;..\..\..\src\domain\constraints;..\..\..\src\tagged;..\..\..\src\actor\actor;..\..\..\src\domain\component;..\..\..\src\element;..\..\..\src\element\beam3d;..\..\..\src;..\..\..\src\matrix;..\..\..\src\domain\domain;..\..\..\src\modelbuilder;..\..\..\src\element\beam2d;..\..\..\src\nDarray;&quot;c:\Program Files\tcl&quot;"
+				PreprocessorDefinitions="c:\Program Files\tcl\include"
 				StringPooling="TRUE"
 				RuntimeLibrary="5"
 				EnableFunctionLevelLinking="TRUE"
