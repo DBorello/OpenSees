@@ -297,7 +297,11 @@ ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
 	$(FE)/material/nD/soil/TclUpdateMaterialStageCommand.o \
 	$(FE)/material/nD/soil/PressureIndependMultiYield.o \
 	$(FE)/material/nD/soil/T2Vector.o \
+	$(FE)/element/upU/BrickUP.o \
 	$(FE)/element/upU/FourNodeQuadUP.o \
+	$(FE)/element/upU/Nine_Four_Node_QuadUP.o \
+	$(FE)/element/upU/Twenty_Eight_Node_BrickUP.o \
+	$(FE)/element/upU/shp3dv.o \
 	$(FE)/element/upU/TclFourNodeQuadUPCommand.o
 
 ifeq ($(GRAPHICS), UsingOpenGL)
