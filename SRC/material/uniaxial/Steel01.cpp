@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 05:40:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
                                                                         
@@ -105,30 +105,33 @@ void Steel01::determineTrialState (double dStrain)
    if (Tstrain <= epsmin || Tstrain >= epsmax)
       Tfailed = 1;
 
-   if (Tfailed)
-   {
+   if (Tfailed) {
       Tstress = 0.0;
       Ttangent = 0.0;
-   }
-   else
-   {
-      double c, c1, c2, c3;
+   } else {
+
+     double c, c1, c2, c3;
 
       c = Cstress + E0*dStrain;
 
+      double fyOneMinusB = fy * (1.0 - b);
+
       c1 = Esh*Tstrain;
 
-      c2 = fy*TshiftN*(1-b);
+      c2 = TshiftN*fyOneMinusB;
 
-      c3 = fy*TshiftP*(1-b);
+      c3 = TshiftP*fyOneMinusB;
 
-      Tstress = c;
+      double c1c3 = c1+c3;
 
-      if ((c1+c3) < Tstress)
-         Tstress = c1+c3;
+      if (c1c3 < c) 
+         Tstress = c1c3;
+      else
+	Tstress = c;
 
-      if ((c1-c2) > Tstress)
-         Tstress = c1-c2;
+      double c1c2=c1-c2;
+      if (c1c2 > Tstress) 
+         Tstress = c1c2;
 
       if (fabs(Tstress-c) < 1.0e-15)
          Ttangent = E0;
@@ -137,6 +140,7 @@ void Steel01::determineTrialState (double dStrain)
 
       // Determine if a load reversal has occurred due to the trial strain
       detectLoadReversal (dStrain);
+
    }
 }
 
