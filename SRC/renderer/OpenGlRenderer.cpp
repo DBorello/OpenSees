@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:26 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:11:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -38,7 +38,7 @@
 #include <ColorMap.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <Matrix.h>
 
 #define PARALLEL_MODE 0
 #define PERSPECTIVE_MODE 1
@@ -474,7 +474,7 @@ OpenGLRenderer::drawLine(const Vector &end1, const Vector &end2,
 	theFile << end2(0) << " " << end2(1) << " " << end2(2) << " " << r 
 	    << " " << g << " " << b << " " << endl;
     }
-	glColor3f(r,g,b);
+    glColor3f(r,g,b);
 
     glVertex3f(end2(0),end2(1),end2(2));
     glEnd();
@@ -485,26 +485,41 @@ OpenGLRenderer::drawLine(const Vector &end1, const Vector &end2,
 
 
 int 
-OpenGLRenderer::drawTriangle(const Vector &pos1, const Vector &pos2,
-			   const Vector &pos3,
-			   float V1, float V2, float V3)
+OpenGLRenderer::drawPolygon(const Matrix &pos, const Vector &data)
+
 {
+#ifdef _G3DEBUG
+  if (pos.noCols() != 3) {
+    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix needs 3 cols\n");
+    return -1;
+  }
+  if (pos.noRows() != data.Size()) {
+    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix & vector incompatable\n");
+    return -1;
+  }
+#endif
 
-    float x,y,z, r, g, b;
-    
-    r = theMap->getRed(V1);
-    g = theMap->getGreen(V1);
-    b = theMap->getBlue(V1);
 
+    glBegin(GL_POLYGON);
+    int numRows = pos.noRows();
+    for (int i=0; i<numRows; i++) {
+      posX = pos(i,0);
+      posY = pos(i,1);
+      posZ = pos(i,2);
+      value = data(i);
+      r = theMap->getRed(value);
+      g = theMap->getGreen(value);
+      b = theMap->getBlue(value);      
 
-    r = theMap->getRed(V2);
-    g = theMap->getGreen(V2);
-    b = theMap->getBlue(V2);
+    if (aFile == 1) {
+	theFile << posX << " " << posY << " " << posZ << " " << r 
+	    << " " << g << " " << b << " " << endl;
+    }
+      glColor3f(r,g,b);
+      glVertex3f(end1(0),end1(1),end1(2));
+    }
 
-    r = theMap->getRed(V3);
-    g = theMap->getGreen(V3);
-    b = theMap->getBlue(V3);
-
+    glEnd();
 
     return 0;
 }

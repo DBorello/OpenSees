@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:11:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.h,v $
                                                                         
                                                                         
@@ -70,8 +70,7 @@ class X11Renderer : public Renderer
     virtual int drawLine(const Vector &end1, const Vector &end2, 
 			 const Vector &rgb1, const Vector &rgb2);
     
-    virtual int drawTriangle(const Vector &, const Vector &, const Vector &,
-		     float V1, float V2, float V3);
+    virtual int drawPolygon(const Matrix &points, const Vector &values);
 
     // 
     // the following are for setting up the vieing system

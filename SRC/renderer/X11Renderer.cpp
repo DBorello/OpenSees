@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:11:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.cpp,v $
                                                                         
                                                                         
@@ -40,6 +40,7 @@
 
 #include <db.H>
 
+#include <Matrix.h>
 #include <Vector.h>
 #include <View.h>
 #include <Projection.h>
@@ -332,88 +333,51 @@ X11Renderer::drawLine(const Vector &pos1, const Vector &pos2,
 
 
 int 
-X11Renderer::drawTriangle(const Vector &pos1, const Vector &pos2,
-			   const Vector &pos3,
-			   float V1, float V2, float V3)
+X11Renderer::drawPolygon(const Matrix &pos, const Vector &data)
+
 {
+#ifdef _G3DEBUG
+  if (pos.noCols() != 3) {
+    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix needs 3 cols\n");
+    return -1;
+  }
+  if (pos.noRows() != data.Size()) {
+    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix & vector incompatable\n");
+    return -1;
+  }
+#endif
+
   FACE *theFace = new FACE();	
 
   int size;
-  float x,y,z, r, g, b;
+  float posX,posY,posZ, r, g, b;
+  double value;
   MYPOINT *point;
 
   // add POINTs to the FACE  
-  size = pos1.Size();
-  if (size == 1) {
-    x = pos1(0);
-    y = 0;
-    z = 0;
-  } else if (size == 2) {
-    x = pos1(0);
-    y = pos1(1);
-    z = 0;
-  } else {
-    x = pos1(0);
-    y = pos1(1);
-    z = pos1(2);
-  }  
-  point = new MYPOINT(1,x,y,z);
-  r = theMap->getRed(V1);
-  g = theMap->getGreen(V1);
-  b = theMap->getBlue(V1);
-  point->r = r;
-  point->g = g;
-  point->b = b;
+  int numRows = pos.noRows();
+  for (int i=0; i<numRows; i++) {
+    posX = pos(i,0);
+    posY = pos(i,1);
+    posZ = pos(i,2);
+    value = data(i);
+    r = theMap->getRed(value);
+    g = theMap->getGreen(value);
+    b = theMap->getBlue(value);      
+
+    if (aFile == 1) {
+      theFile << posX << " " << posY << " " << posZ << " " << r 
+	      << " " << g << " " << b << " " << endl;
+    }	
+
+    point = new MYPOINT(1,posX,posY,posZ);
+    point->r = r;
+    point->g = g;
+    point->b = b;
     
-  theFace->AddPoint(*point);
+    theFace->AddPoint(*point);
+  }
 
-
-  size = pos2.Size();
-  if (size == 1) {
-    x = pos2(0);
-    y = 0;
-    z = 0;
-  } else if (size == 2) {
-    x = pos2(0);
-    y = pos2(1);
-    z = 0;
-  } else {
-    x = pos2(0);
-    y = pos2(1);
-    z = pos2(2);
-  }  
-  point = new MYPOINT(2,x,y,z);
-  r = theMap->getRed(V2);
-  g = theMap->getGreen(V2);
-  b = theMap->getBlue(V2);
-  point->r = r;
-  point->g = g;
-  point->b = b;
-    
-  theFace->AddPoint(*point);
-
-
-  size = pos3.Size();
-  if (size == 1) {
-    x = pos3(0);
-    y = 0;
-    z = 0;
-  } else if (size == 2) {
-    x = pos3(0);
-    y = pos3(1);
-    z = 0;
-  } else {
-    x = pos3(0);
-    y = pos3(1);
-    z = pos3(2);
-  }  
-  point = new MYPOINT(3,x,y,z);
-  r = theMap->getRed(V3);
-  g = theMap->getGreen(V3);
-  b = theMap->getBlue(V3);
-  point->r = r;
-  point->g = g;
-  point->b = b;
     
   theFace->AddPoint(*point);
 
