@@ -8,6 +8,7 @@ include ../../../Makefile.def
         PathIndependentMaterial.o CableMaterial.o \
 	ENTMaterial.o FedeasMaterial.o DrainMaterial.o \
 	BoucWenMaterial.o \
+	Pinching4Material.o BarSlipMaterial.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2003-03-06 18:34:15 $
+// $Revision: 1.19 $
+// $Date: 2003-06-11 18:19:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -48,6 +48,8 @@
 #include <ENTMaterial.h>		// MHS
 #include <CableMaterial.h>	// CC
 #include <BoucWenMaterial.h>	// Terje
+#include <Pinching4Material.h>   // NM
+#include <BarSlipMaterial.h>   // NM
 
 #include <Vector.h>
 #include <string.h>
@@ -932,6 +934,551 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 
 		theMaterial = new CableMaterial(tag, Ps, E, unitWeight, L_element);       
     }
+
+	else if (strcmp(argv[1],"Pinching4") == 0) {
+		if (argc != 41 && argc != 30 ) {
+			opserr << "WARNING insufficient arguments\n";
+			printCommand(argc,argv);
+			opserr << "Want: uniaxialMaterial Pinching4 tag? stress1p? strain1p? stress2p? strain2p? stress3p? strain3p? stress4p? strain4p? "
+				<< "\nstress1n? strain1n? stress2n? strain2n? stress3n? strain3n? stress4n? strain4n? rDispP? rForceP? uForceP? "
+				<< "\nrDispN? rForceN? uForceN? gammaK1? gammaK2? gammaK3? gammaK4? gammaKLimit? gammaD1? gammaD2? gammaD3? gammaD4? "
+				<< "\ngammaDLimit? gammaF1? gammaF2? gammaF3? gammaF4? gammaFLimit? gammaE? ";
+			return TCL_ERROR;
+		}
+
+		int tag;
+		double stress1p, stress2p, stress3p, stress4p;
+		double strain1p, strain2p, strain3p, strain4p;
+		double stress1n, stress2n, stress3n, stress4n;
+		double strain1n, strain2n, strain3n, strain4n;
+		double rDispP, rForceP, uForceP, rDispN, rForceN, uForceN;
+		double gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit;
+		double gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit;
+		double gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit;
+		double gammaE;
+
+		int i = 2;
+
+		if (Tcl_GetInt(interp, argv[i++], &tag) != TCL_OK) {
+			opserr << "WARNING invalid uniaxialMaterial Pinching4 tag" << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &stress1p) != TCL_OK) {
+			opserr << "WARNING invalid stress1p\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &strain1p) != TCL_OK) {
+			opserr << "WARNING invalid strain1p\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &stress2p) != TCL_OK) {
+			opserr << "WARNING invalid stress2p\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &strain2p) != TCL_OK) {
+			opserr << "WARNING invalid strain2p\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &stress3p) != TCL_OK) {
+			opserr << "WARNING invalid stress3p\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &strain3p) != TCL_OK) {
+			opserr << "WARNING invalid strain3p\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &stress4p) != TCL_OK) {
+			opserr << "WARNING invalid stress4p\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &strain4p) != TCL_OK) {
+			opserr << "WARNING invalid strain4p\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (argc == 41) {
+			if (Tcl_GetDouble(interp, argv[i++], &stress1n) != TCL_OK) {
+				opserr << "WARNING invalid stress1n\n";
+				opserr << "Pinching4 material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[i++], &strain1n) != TCL_OK) {
+				opserr << "WARNING invalid strain1n\n";
+				opserr << "Pinching4 material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[i++], &stress2n) != TCL_OK) {
+				opserr << "WARNING invalid stress2n\n";
+				opserr << "Pinching4 material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[i++], &strain2n) != TCL_OK) {
+				opserr << "WARNING invalid strain2n\n";
+				opserr << "Pinching4 material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[i++], &stress3n) != TCL_OK) {
+				opserr << "WARNING invalid stress3n\n";
+				opserr << "Pinching4 material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[i++], &strain3n) != TCL_OK) {
+				opserr << "WARNING invalid strain3n\n";
+				opserr << "Pinching4 material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[i++], &stress4n) != TCL_OK) {
+				opserr << "WARNING invalid stress4n\n";
+				opserr << "Pinching4 material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[i++], &strain4n) != TCL_OK) {
+				opserr << "WARNING invalid strain4n\n";
+				opserr << "Pinching4 material: " << tag << endln;
+				return TCL_ERROR;
+			}
+		
+		}
+		
+
+		if (Tcl_GetDouble(interp, argv[i++], &rDispP) != TCL_OK) {
+			opserr << "WARNING invalid rDispP\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &rForceP) != TCL_OK) {
+			opserr << "WARNING invalid rForceP\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &uForceP) != TCL_OK) {
+			opserr << "WARNING invalid uForceP\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (argc == 41) {
+			if (Tcl_GetDouble(interp, argv[i++], &rDispN) != TCL_OK) {
+				opserr << "WARNING invalid rDispN\n";
+				opserr << "Pinching4 material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[i++], &rForceN) != TCL_OK) {
+				opserr << "WARNING invalid rForceN\n";
+				opserr << "Pinching4 material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[i++], &uForceN) != TCL_OK) {
+				opserr << "WARNING invalid uForceN\n";
+				opserr << "Pinching4 material: " << tag << endln;
+				return TCL_ERROR;
+			}
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &gammaK1) != TCL_OK) {
+			opserr << "WARNING invalid gammaK1\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaK2) != TCL_OK) {
+			opserr << "WARNING invalid gammaK2\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaK3) != TCL_OK) {
+			opserr << "WARNING invalid gammaK3\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaK4) != TCL_OK) {
+			opserr << "WARNING invalid gammaK4\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaKLimit) != TCL_OK) {
+			opserr << "WARNING invalid gammaKLimit\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaD1) != TCL_OK) {
+			opserr << "WARNING invalid gammaD1\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}										   
+		if (Tcl_GetDouble(interp, argv[i++], &gammaD2) != TCL_OK) {
+			opserr << "WARNING invalid gammaD2\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaD3) != TCL_OK) {
+			opserr << "WARNING invalid gammaD3\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaD4) != TCL_OK) {
+			opserr << "WARNING invalid gammaD4\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaDLimit) != TCL_OK) {
+			opserr << "WARNING invalid gammaDLimit\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaF1) != TCL_OK) {
+			opserr << "WARNING invalid gammaF1\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaF2) != TCL_OK) {
+			opserr << "WARNING invalid gammaF2\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaF3) != TCL_OK) {
+			opserr << "WARNING invalid gammaF3\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaF4) != TCL_OK) {
+			opserr << "WARNING invalid gammaF4\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetDouble(interp, argv[i++], &gammaFLimit) != TCL_OK) {
+			opserr << "WARNING invalid gammaFLimit\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+		if (Tcl_GetDouble(interp, argv[i++], &gammaE) != TCL_OK) {
+			opserr << "WARNING invalid gammaE\n";
+			opserr << "Pinching4 material: " << tag << endln;
+			return TCL_ERROR;
+		}
+
+	// allocate the pinching material
+		if (argc == 41) {
+		theMaterial = new Pinching4Material (tag,
+			stress1p, strain1p, stress2p, strain2p, stress3p, strain3p, stress4p, strain4p,
+			stress1n, strain1n, stress2n, strain2n, stress3n, strain3n, stress4n, strain4n,
+			rDispP, rForceP, uForceP, rDispN, rForceN, uForceN, 
+			gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit,
+			gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit,
+			gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit, gammaE);
+		}
+		if (argc == 30) {
+		theMaterial = new Pinching4Material (tag,
+			stress1p, strain1p, stress2p, strain2p, stress3p, strain3p, stress4p, strain4p,
+			rDispP, rForceP, uForceP,  
+			gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit,
+			gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit,
+			gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit, gammaE);		
+		}
+   }
+   
+  else if (strcmp(argv[1],"BarSlip") == 0)
+   {
+		
+	   if (argc != 15 && argc != 37)
+	   {
+		   opserr << "WARNING insufficient arguments\n";
+		   printCommand(argc,argv);
+		   opserr << "Want: uniaxialMaterial BarSlip tag? fc? fy? Es? fu? Eh? db? ld? nb? width? depth? bsflag? type?"  << endln;
+		   return TCL_ERROR;
+	   }
+
+	   int tag, nb, bsf, typ;
+	   double fc, fy, Es, fu, Eh, ld, width, depth, db;
+
+	   int argStart = 2;
+
+	   if (Tcl_GetInt(interp, argv[argStart++], &tag) != TCL_OK)
+	   {
+		   opserr << "WARNING invalid tag\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   if (Tcl_GetDouble(interp, argv[argStart++], &fc) != TCL_OK)
+	   {
+		   opserr << "WARNING invalid fc\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   if (Tcl_GetDouble(interp, argv[argStart++], &fy) != TCL_OK)
+	   {
+		   opserr << "WARNING invalid fy\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   if (Tcl_GetDouble(interp, argv[argStart++], &Es) != TCL_OK)
+	   {
+		   opserr << "WARNING invalid Es\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   if (Tcl_GetDouble(interp, argv[argStart++], &fu) != TCL_OK)
+	   {
+		   opserr << "WARNING invalid fu\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   if (Tcl_GetDouble(interp, argv[argStart++], &Eh) != TCL_OK)
+	   {
+		   opserr << "WARNING invalid Eh\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   if (Tcl_GetDouble(interp, argv[argStart++], &db) != TCL_OK)
+	   {
+		   opserr << "WARNING invalid db\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   if (Tcl_GetDouble(interp, argv[argStart++], &ld) != TCL_OK)
+	   {
+		   opserr << "WARNING invalid ld\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   if (Tcl_GetInt(interp, argv[argStart++], &nb) != TCL_OK)
+	   {
+		   opserr << "WARNING invalid nbars\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   if (Tcl_GetDouble(interp, argv[argStart++], &width) != TCL_OK)
+	   {
+		   opserr << "WARNING invalid width\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   if (Tcl_GetDouble(interp, argv[argStart++], &depth) != TCL_OK)
+	   {
+		   opserr << "WARNING invalid depth\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+
+	   int y;
+	   y = argStart;
+
+	   double rDispP, rForceP, uForceP, rDispN, rForceN, uForceN;
+	   double gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit;
+	   double gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit;
+	   double gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit;
+	   double gammaE;
+
+	   if (argc == 37) {
+
+
+		   if (Tcl_GetDouble(interp, argv[y++], &rDispP) != TCL_OK) {
+				opserr << "WARNING invalid rDispP\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[y++], &rForceP) != TCL_OK) {
+				opserr << "WARNING invalid rForceP\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+	
+			if (Tcl_GetDouble(interp, argv[y++], &uForceP) != TCL_OK) {
+				opserr << "WARNING invalid uForceP\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[y++], &rDispN) != TCL_OK) {
+				opserr << "WARNING invalid rDispN\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[y++], &rForceN) != TCL_OK) {
+				opserr << "WARNING invalid rForceN\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[y++], &uForceN) != TCL_OK) {
+				opserr << "WARNING invalid uForceN\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+		   if (Tcl_GetDouble(interp, argv[y++], &gammaK1) != TCL_OK) {
+				opserr << "WARNING invalid gammaK1\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaK2) != TCL_OK) {
+				opserr << "WARNING invalid gammaK2\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaK3) != TCL_OK) {
+				opserr << "WARNING invalid gammaK3\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaK4) != TCL_OK) {
+				opserr << "WARNING invalid gammaK4\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaKLimit) != TCL_OK) {
+				opserr << "WARNING invalid gammaKLimit\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaD1) != TCL_OK) {
+				opserr << "WARNING invalid gammaD1\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}										   
+			if (Tcl_GetDouble(interp, argv[y++], &gammaD2) != TCL_OK) {
+				opserr << "WARNING invalid gammaD2\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaD3) != TCL_OK) {
+				opserr << "WARNING invalid gammaD3\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaD4) != TCL_OK) {
+				opserr << "WARNING invalid gammaD4\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaDLimit) != TCL_OK) {
+				opserr << "WARNING invalid gammaDLimit\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaF1) != TCL_OK) {
+				opserr << "WARNING invalid gammaF1\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaF2) != TCL_OK) {
+				opserr << "WARNING invalid gammaF2\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaF3) != TCL_OK) {
+				opserr << "WARNING invalid gammaF3\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaF4) != TCL_OK) {
+				opserr << "WARNING invalid gammaF4\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+			if (Tcl_GetDouble(interp, argv[y++], &gammaFLimit) != TCL_OK) {
+				opserr << "WARNING invalid gammaFLimit\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			if (Tcl_GetDouble(interp, argv[y++], &gammaE) != TCL_OK) {
+				opserr << "WARNING invalid gammaE\n";
+				opserr << "bar-Slip material: " << tag << endln;
+				return TCL_ERROR;
+			}
+
+	   }
+
+	   if ((strcmp(argv[y],"strong") == 0) || (strcmp(argv[y],"Strong") == 0) || (strcmp(argv[y],"weak") == 0) || (strcmp(argv[y],"Weak") == 0))
+	   {
+		   if ((strcmp(argv[y],"strong") == 0) || (strcmp(argv[y],"Strong") == 0))
+		   {
+			   bsf = 0;
+		   }
+
+		   if ((strcmp(argv[y],"weak") == 0) || (strcmp(argv[y],"Weak") == 0))
+		   {
+			   bsf = 1;
+		   }
+	   }
+	   else
+	   {
+		   opserr << "WARNING invalid bond strength specified\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+	   y ++;
+
+	   if ((strcmp(argv[y],"beamtop") == 0) || (strcmp(argv[y],"beamTop") == 0) || 
+		   (strcmp(argv[y],"beambot") == 0) || (strcmp(argv[y],"beamBot") == 0) || (strcmp(argv[y],"beambottom") == 0) || (strcmp(argv[y],"beamBottom") == 0) ||
+		   (strcmp(argv[y],"column") == 0))
+	   {
+		   if ((strcmp(argv[y],"beamtop") == 0) || (strcmp(argv[y],"beamTop") == 0))
+		   {
+			   typ = 0;
+		   }
+
+		   if ((strcmp(argv[y],"beambot") == 0) || (strcmp(argv[y],"beamBot") == 0) || (strcmp(argv[y],"beambottom") == 0) || (strcmp(argv[y],"beamBottom") == 0))
+		   {
+			   typ = 1;
+		   }
+
+		   if ((strcmp(argv[y],"column") == 0))
+		   {
+			   typ = 2;
+		   }
+	   }
+	   else
+	   {
+		   opserr << "WARNING invalid location of bar specified\n";
+		   opserr << "BarSlip: " << tag << endln;
+		   return TCL_ERROR;
+	   }
+
+	   // allocate the material
+	   if (argc == 15 ) {
+		   theMaterial = new BarSlipMaterial (tag, fc, fy, Es, fu, Eh, db, ld, nb, width, depth, bsf, typ);
+	   }
+
+	   if (argc == 37) {
+		   theMaterial = new BarSlipMaterial (tag, fc, fy, Es, fu, Eh, db, ld, nb, width, depth, 
+			rDispP, rForceP, uForceP, rDispN, rForceN, uForceN, 
+			gammaK1, gammaK2, gammaK3, gammaK4, gammaKLimit,
+			gammaD1, gammaD2, gammaD3, gammaD4, gammaDLimit,
+			gammaF1, gammaF2, gammaF3, gammaF4, gammaFLimit, gammaE, bsf, typ);
+	   }
+
+   }
 
 	else {
 		// Fedeas
