@@ -94,16 +94,9 @@ uniaxialMaterial Concrete01 1  -5.0 -0.005  -3.5  -0.02
 # Cover concrete
 uniaxialMaterial Concrete01 2  -4.0 -0.002   0.0 -0.006
 
-# Steel model with softening
-#                   tag   E      epsY
-uniaxialMaterial ElasticPP   4  29500  0.002333
-uniaxialMaterial ElasticPP   5   1100  0.03
-uniaxialMaterial Elastic     6   -600
-#                   tag mat1 mat2 mat3 ...
-uniaxialMaterial Parallel    3    4    5    6
-
-#uniaxialMaterial Steel01 3 100 30000 0.028
-
+# Steel model
+#                        tag fy   E     b
+uniaxialMaterial Steel01  3  60 30000 0.02
 
 # Torsional stiffness
 set G 2000

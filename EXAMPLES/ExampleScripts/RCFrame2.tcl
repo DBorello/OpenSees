@@ -23,13 +23,13 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame2.tcl
 #
-# $Revision: 1.1.1.1 $
-# $Date: 2000-09-15 08:23:09 $
+# $Revision: 1.2 $
+# $Date: 2000-12-19 03:57:15 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/RCFrame2.tcl,v $
 
 # comment out one of lines
-set displayMode "displayON"
-#set displayMode "displayOFF"
+#set displayMode "displayON"
+set displayMode "displayOFF"
 
 # Define the model builder
 model BasicBuilder -ndm 2 -ndf 3
@@ -59,13 +59,9 @@ uniaxialMaterial Concrete01 1 -4.00  -0.002    0.0 -0.006
 # Core concrete
 uniaxialMaterial Concrete01 2 -5.20  -0.005  -4.70  -0.02
 
-# Steel model with softening
-#                   tag   E      epsY
-uniaxialMaterial ElasticPP   4  29500  0.002333
-uniaxialMaterial ElasticPP   5   1100  0.03
-uniaxialMaterial Elastic     6   -600
-#                   tag mat1 mat2 mat3 ...
-uniaxialMaterial Parallel    3    4    5    6
+# Steel model
+#                        tag fy   E     b
+uniaxialMaterial Steel01  3  60 30000 0.02
 
 # Interior column section
 section fiberSec 1 {
