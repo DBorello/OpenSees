@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-19 04:02:10 $
+// $Revision: 1.4 $
+// $Date: 2001-07-26 00:56:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGLRenderer.h,v $
                                                                         
                                                                         
@@ -41,8 +41,12 @@
 #include <Renderer.h>
 #include <G3Globals.h>
 #include <fstream.h>
+#include <OpenGlDevice.h>
 
-#ifdef _UNIX
+#ifdef _GLX
+#include <GL/gl.h>
+#include <GL/glext.h>
+#include <GL/glx.h>
 
 #else 
 #include <windows.h>
@@ -68,16 +72,23 @@ class OpenGLRenderer : public Renderer
     virtual int clearImage(void);    
     virtual int startImage(void);
     virtual int doneImage(void);
-    
+
+    virtual int drawPoint(const Vector &, float V1, int width = 1);
+    virtual int drawPoint(const Vector &, const Vector &rgb1, int width = 1);    
+
     virtual int drawLine(const Vector &, const Vector &, 
-			 float V1, float V2);
-    
+			 float V1, float V2, int width = 1, int style = 1);
     virtual int drawLine(const Vector &end1, const Vector &end2, 
-			 const Vector &rgb1, const Vector &rgb2);
+			 const Vector &rgb1, const Vector &rgb2,
+			 int width = 1, int style = 1);
    
     virtual int drawPolygon(const Matrix &points, const Vector &values);
+    virtual int drawPolygon(const Matrix &points, const Matrix &rgbValues);
 
-    // 
+    virtual int drawText(const Vector &posGlobal, char *string, int length, 
+			 char horizontalJustify = 'l', char verticalJustify = 'b');    
+
+    //
     // the following are for setting up the vieing system
     //
 
@@ -93,8 +104,8 @@ class OpenGLRenderer : public Renderer
     virtual int setPlaneDist(float, float); // location of
                                // near and far clipping planes
 
-    virtual int setProjectionMode(int); // 
-    virtual int setFillMode(int);    // 1 = wire, otherwise fill
+    virtual int setProjectionMode(char *mode); // parallel or perspective
+    virtual int setFillMode(char *mode);    // wire or  fill
     
     virtual int setPRP(float u, float v, float n); // eye location if 
 	                         // perspective, dirn to +ViewPlane if parallel
@@ -103,65 +114,41 @@ class OpenGLRenderer : public Renderer
     virtual int setPortWindow(float, float, float, float); // view port
                               // left, right, bottom, top [-1,1,-1,1]
 				  
-    virtual int drawGText(const Vector &posGlobal, char *string, int length);    
-    virtual int drawLText(const Vector &posLocal, char *string, int length);     
-    
  protected:
-    int saveBmpImage(void);  // to save the current image into a .BMP file
 
-  // view
-  VECTOR vrp;
-  VECTOR vuv;
-  VECTOR vpn;
-  MATRIX ViewMat;
-  
-  // projection
-  int projection_mode;
-  VECTOR vpwindow;
-  VECTOR planedist;
-  VECTOR cop;
-  MATRIX ProjMat;
+ private:
+    char *windowTitle; // title name of the window
+    int height;        // current height of window in pixels
+    int width;         // current width of window in pixels
+    int xLoc;          // upper xLocation of window
+    int yLoc;          // upper yLocation of window
 
-  // clipping
-  float X, Y, Zfar, Znear;
+    int count;	               // number of times done image has been invoked
+    ofstream theFile; 	       // output stream if saving drawing commands
+    char *theOutputFileName;   // file name for output stream
 
-  float viewData[16];
-  float projData[16];
+    OpenGlDevice *theDevice;
 
-  // viewport
-  VECTOR portwindow;
+    // viewing 
+    Vector vrp;  // point on the view plane - global coords
+    Vector vuv;  // vector defining the view up vector, 
+    Vector vpn;  // vector defining the view plane normal
+    Vector cop;  // eye location - NOW IN GLOBAL COORDINATES
+    Matrix ViewMat;
 
-  private:
-#ifdef _UNIX
- 
-#else
-  // win32 stuff
-  HDC   theHDC;        // device context
-  HGLRC theHRC;        // openGL context
-  HWND  theWND;        // the window
-#endif
-  int winOpen;
-  int height;       // current height of window in pixels
-  int width;        // current width of window in pixels
-  int numPoints;	
-  int drawingPolygon;
-  int xLoc;
-  int yLoc;
+    // projection
+    int projectionMode;        // flag indicating projection mode
+    Vector vpWindow;           // view window bounds - local window coordinates (u,v)
+    double clippingPlanes[2];  // distance to front and back clipping planes FROM THE PLANE (n)
+    Matrix ProjMat;         
 
-  char title[50];
-  int aFile;                              // int flag indicating if data to be 
-                                          // sent to file or not
-					      
-  char theFileName[MAX_FILENAMELENGTH];   // tex file name  
-  char theBmpFileName[MAX_FILENAMELENGTH];// bmp file name        
-  int count;	                          // number of times done image has been invoked
-  ofstream theFile; 	                  // output stream
-  BITMAPINFO	info;
-  GLint	        viewport[4];
-  GLubyte       *bits;
-  long	        currentBitSize;
-  HBITMAP		theBitmap;
-  
+    // viewport
+    Vector portWindow;  // mapping to window - port window coords [-1,-1] to [1,1]
+
+    int fillMode;        // flag indicating fill mode
+
+    float viewData[16];
+    float projData[16];
 };
 
 #endif

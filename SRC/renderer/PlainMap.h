@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:26 $
+// $Revision: 1.2 $
+// $Date: 2001-07-26 00:56:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/PlainMap.h,v $
                                                                         
                                                                         
@@ -47,10 +47,16 @@ class PlainMap: public ColorMap
     float getRed(float value);
     float getGreen(float value);
     float getBlue(float value);
-    
+    int   getRGB(float value, float &red, float &green, float &blue);
+    int   startImage();
+
   protected:
     
   private:
+    float max, min;
+    float maxLast, minLast;
+    float *data;
+    int sizeData;
 };
 
 

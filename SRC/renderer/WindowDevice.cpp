@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-19 04:02:10 $
+// $Revision: 1.4 $
+// $Date: 2001-07-26 00:56:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/WindowDevice.cpp,v $
                                                                         
                                                                         
@@ -365,7 +365,7 @@ WindowDevice::~WindowDevice()
 #else
     if (winOpen == 0) { // we must close the window
       oglDestroyWindow(title,theWND, theHRC, theHDC);
-	}
+    }
 #endif
 }
 
@@ -398,7 +398,6 @@ WindowDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
     visual.visual = 0;
     int depth = DefaultDepth(theDisplay, theScreen);
 
-    
     if (background == 0) {
       if (XMatchVisualInfo(theDisplay, theScreen, depth, PseudoColor, &visual) == 0) {
 	  foreground = BlackPixel(theDisplay, theScreen);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:26 $
+// $Revision: 1.2 $
+// $Date: 2001-07-26 00:56:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Renderer.cpp,v $
                                                                         
                                                                         
@@ -93,22 +93,11 @@ Renderer::displayModel(int eleFlag, int nodeFlag,
 */
 
 int
-Renderer::drawVector(const Vector &position, const Vector &value)
+Renderer::drawVector(const Vector &position, const Vector &value, double factor)
 {
     return 0;
 }
 
-int
-Renderer::drawGText(const Vector &posGlobal, char *string, int length)
-{
-    return 0;
-}
-
-int
-Renderer::drawLText(const Vector &posLocal, char *string, int length)
-{
-    return 0;
-}
 
 void
 Renderer::setColorMap(ColorMap &map)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:11:52 $
+// $Revision: 1.3 $
+// $Date: 2001-07-26 00:56:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.h,v $
                                                                         
                                                                         
@@ -63,14 +63,19 @@ class X11Renderer : public Renderer
     virtual int clearImage(void);    
     virtual int startImage(void);
     virtual int doneImage(void);
+
+    virtual int drawPoint(const Vector &, float V1, int width = 1);
+    virtual int drawPoint(const Vector &, const Vector &rgb1, int width = 1);
     
     virtual int drawLine(const Vector &, const Vector &, 
-			 float V1, float V2);
+			 float V1, float V2, int width = 1, int style = 1);
 
     virtual int drawLine(const Vector &end1, const Vector &end2, 
-			 const Vector &rgb1, const Vector &rgb2);
+			 const Vector &rgb1, const Vector &rgb2,
+			 int width = 1, int style = 1);
     
     virtual int drawPolygon(const Matrix &points, const Vector &values);
+    virtual int drawPolygon(const Matrix &points, const Matrix &rgbValues);
 
     // 
     // the following are for setting up the vieing system
@@ -88,8 +93,8 @@ class X11Renderer : public Renderer
     virtual int setPlaneDist(float, float); // location of
                                // near and far clipping planes
 
-    virtual int setProjectionMode(int); // 
-    virtual int setFillMode(int);    // 1 = wire, otherwise fill
+    virtual int setProjectionMode(char *mode); // 
+    virtual int setFillMode(char *);    // 1 = wire, otherwise fill
     
     virtual int setPRP(float u, float v, float n); // eye location if 
 	                         // perspective, dirn to +ViewPlane if parallel
@@ -98,8 +103,8 @@ class X11Renderer : public Renderer
     virtual int setPortWindow(float, float, float, float); // view port
                               // left, right, bottom, top [-1,1,-1,1]
 				  
-    virtual int drawGText(const Vector &posGlobal, char *string, int length);    
-    virtual int drawLText(const Vector &posLocal, char *string, int length);     
+    virtual int drawText(const Vector &posGlobal, char *string, int length, 
+			 char horizontalJustify = 'l', char verticalJustify = 'b');    
     
  protected:
 

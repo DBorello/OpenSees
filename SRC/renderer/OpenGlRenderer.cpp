@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-05-19 07:18:55 $
+// $Revision: 1.6 $
+// $Date: 2001-07-26 00:56:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -40,252 +40,219 @@
 #include <stdlib.h>
 #include <Matrix.h>
 
+#ifdef _WGL
+#include <windows.h>
+#include <GL/glaux.h>
+#include <GL/glu.h>
+#include <GL/gl.h>
+
+#elif _GLX
+
+#include <GL/glut.h>
+
+#endif
+
 #define PARALLEL_MODE 0
 #define PERSPECTIVE_MODE 1
 
-//void itoa(int x, char *str);
-
-LONG WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{ 
-    LONG        lRet = 1;
-    PAINTSTRUCT ps;
-
-    switch(uMsg) {
-    case WM_CREATE:
-        break; 
-
-    case WM_DESTROY:
-        break; 
-
-    case WM_PAINT: 
-        BeginPaint(hWnd, &ps); 
-        EndPaint(hWnd, &ps); 
-        break; 
-
-    default: 
-        lRet = DefWindowProc (hWnd, uMsg, wParam, lParam); 
-        break; 
-    }
-
-    return lRet;
-}
-
-
-#ifdef _WIN32
-int oglSetPixelFormat(HDC hDC, BYTE type, DWORD flags);
-HWND oglCreateWindow(char* title, int x, int y, int width, int height,
-		     HGLRC *hRC, HDC *hDC);
-int oglDestroyWindow(char* title, HWND hWnd, HGLRC hRC, HDC hDC);
-int oglCreateBitmap(int width, int height, HGLRC *hRC, HDC *hDC, 
-						HBITMAP *theBitmap, BITMAPINFO *info, GLubyte **bits);
-
-
-int oglDestroyBitmap(HBITMAP *bitmap, HGLRC hRC, HDC hDC);
-#else
-
-#endif
-
+#define WIRE_MODE 0
+#define FILL_MODE 1
 
 #include <db.H>
-
 #include <Vector.h>
-#include <WindowDevice.h>
 
-OpenGLRenderer::OpenGLRenderer(char *_title, int _xLoc, int _yLoc, int _width, int _height,
-			 ColorMap &_theMap)
-  :Renderer(_theMap), winOpen(1), aFile(0), theFile(0), count(-1), bits(0)
+OpenGLRenderer::OpenGLRenderer(char *_title, int _xLoc, int _yLoc, 
+			       int _width, int _height, 
+			       ColorMap &_theMap)
+  :Renderer(_theMap),  
+  windowTitle(0), height(_height), width(_width), xLoc(_xLoc), yLoc(_yLoc),
+  count(-1), theFile(0), theOutputFileName(0), 
+  theDevice(0),
+  vrp(3), vuv(3), vpn(3), cop(3), ViewMat(4,4), 
+  projectionMode(0), vpWindow(4), ProjMat(4,4),
+  portWindow(4)
 {
-	    // set the WindowDevices title, height, wdth, xLoc and yLoc
-    strcpy(title, _title);
 
-    height = _height;
-    width = _width;  
-    xLoc = _xLoc;
-    yLoc = _yLoc;
+  // set the WindowDevices title, height, wdth, xLoc and yLoc
+  windowTitle = new char [strlen(_title)+1];
+  strcpy(windowTitle, _title);
 
-#ifdef _WIN32   
-    if (winOpen == 0)
-      oglDestroyWindow(title,theWND, theHRC, theHDC);      
+  fillMode = WIRE_MODE;
+  projectionMode = PARALLEL_MODE;
+  portWindow(0) = -1.0; portWindow(1) = 1.0;
+  portWindow(2) = -1.0;  portWindow(3) = 1.0;
 
-    theWND = oglCreateWindow(title, xLoc, yLoc, width, height, &theHRC, &theHDC);
-    if (theWND == NULL)
-      exit(1);
-#else
+  theDevice = new OpenGlDevice();
+  theDevice->WINOPEN(_title, _xLoc, _yLoc, _width, _height);
 
-#endif
-    winOpen = 0;
+  theDevice->CLEAR();
+  glClearColor(1.0f,1.0f,1.0f,1.0f);
 
-    wglMakeCurrent(theHDC, theHRC);
-    glClearColor(1.0f,1.0f,1.0f,1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-#ifdef _WIN32
-	SwapBuffers(theHDC);
-#endif
-    glFlush();
+  glFlush();
+  theDevice->ENDIMAGE();
 }
 
 
 
 
-OpenGLRenderer::OpenGLRenderer(char *_title, int _xLoc, int _yLoc, int _width, 
-			       int _height,	
-			       ColorMap &_theMap, char *fileName, char *bmpFileName)
-  :Renderer(_theMap), winOpen(1), theFile(0), count(-1), bits(0)
+OpenGLRenderer::OpenGLRenderer(char *_title, int _xLoc, int _yLoc, 
+			       int _width, int _height,	
+			       ColorMap &_theMap, 
+			       char *outputFileName, 
+			       char *bitmapFileName)
+  :Renderer(_theMap),  
+  windowTitle(0), height(_height), width(_width), xLoc(_xLoc), yLoc(_yLoc),
+  count(-1), theFile(0), theOutputFileName(0), 
+  theDevice(0),
+  vrp(3), vuv(3), vpn(3), cop(3), ViewMat(4,4), 
+  projectionMode(0), vpWindow(4), ProjMat(4,4),
+  portWindow(4)
 {
-	    // set the WindowDevices title, height, wdth, xLoc and yLoc
-    strcpy(title, _title);
+  // set the WindowDevices title, height, wdth, xLoc and yLoc
+  windowTitle = new char [strlen(_title)+1];
+  strcpy(windowTitle, _title);
 
-    height = _height;
-    width = _width;  
-    xLoc = _xLoc;
-    yLoc = _yLoc;
+  fillMode = WIRE_MODE;
+  projectionMode = PARALLEL_MODE;
+  portWindow(0) = -1.0; portWindow(1) = 1.0;
+  portWindow(2) = -1.0;  portWindow(3) = 1.0;
 
-#ifdef _WIN32   
+  theDevice = new OpenGlDevice();
+  if (bitmapFileName == 0)
+    theDevice->WINOPEN(_title, _xLoc, _yLoc, _width, _height);
+  else
+    theDevice->BITMAPOPEN(_title, _xLoc, _yLoc, _width, _height, bitmapFileName);
+  
+  theDevice->CLEAR();
 
-#else
 
-#endif
- 
+  // open the file for  making the movie
+  if (outputFileName != 0) {
+    windowTitle = new char [strlen(_title)+1];
+    theOutputFileName = new char [strlen(outputFileName)+1];
 
+    strcpy(windowTitle, _title);
+    strcpy(theOutputFileName, outputFileName);
 
-
-    // open the file for  making the movie
-    if (fileName != 0) {
-	if (strlen(fileName) > MAX_FILENAMELENGTH) 
-	    cerr <<"warning - OpenGLRenderer::OpenGLRenderer() - fileName " << fileName << "too long\n";
-	else {
-	    strcpy(theFileName, fileName);
-			/*
-		FILE *fp;
-		if ((fp = fopen(fileName,"w")) == NULL) {
-		*/
-	theFile.open(fileName, ios::out);
-	if (!theFile) {
-	  g3ErrorHandler->warning("WARNING - OpenGLRenderer::OpenGLRenderer() - could not open file %s\n",fileName);	  
-	  aFile = 0;
-	} else {
-      aFile = 1;
-	  theFile << title << endl;
-	  theFile << xLoc << " " << yLoc << " " << width << " " << height << endl;
-	}
-     if (winOpen == 0)
-      oglDestroyWindow(title,theWND, theHRC, theHDC);      
-
-    theWND = oglCreateWindow(title, xLoc, yLoc, width, height, &theHRC, &theHDC);
-    if (theWND == NULL)
-      exit(1);
-	winOpen = 0;
-
-	    
-	}
+    theFile.open(outputFileName, ios::out);
+    if (theFile.bad()) {
+      g3ErrorHandler->warning("WARNING - OpenGLRenderer::OpenGLRenderer() - could not open file %s\n",outputFileName);	  
+      theOutputFileName = 0;
+    } else {
+      theFile << windowTitle << endl;
+      theFile << xLoc << " " << yLoc << " " << width << " " << height << endl;
     }
-    
-    if (bmpFileName != 0) {
-		count = 100000;
-	if (strlen(bmpFileName) > MAX_FILENAMELENGTH) 
-	    g3ErrorHandler->warning("warning - X11Renderer::X11Renderer() - bmpFileName %s too long, max %d\n",
-				    bmpFileName, MAX_FILENAMELENGTH);
-	else {
-	    strcpy(theBmpFileName, bmpFileName); 
-		oglCreateBitmap(width, height, &theHRC, &theHDC, &theBitmap, &info, &bits);
- 
-	}
-    } 
-    
+  }
 
-    wglMakeCurrent(theHDC, theHRC);
-    glClearColor(1.0f,1.0f,1.0f,1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+  theDevice->CLEAR();
+  glClearColor(1.0f,1.0f,1.0f,1.0f);
 
-#ifdef _WIN32
-//	SwapBuffers(theHDC);
-#endif
-	glFlush();
+  glEnable(GL_DEPTH_TEST);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glFlush();
+  theDevice->ENDIMAGE();
 }
 
 OpenGLRenderer::~OpenGLRenderer()
 {
-#ifdef _WIN32
-   if (winOpen == 0) { // we must close the window
-		if (count == -1)
-       oglDestroyWindow(title,theWND, theHRC, theHDC);
-		else 
-		oglDestroyBitmap(&theBitmap, theHRC, theHDC);
-   }
-#else
+  if (theDevice != 0)
+    delete theDevice;
 
-#endif
-   if (aFile == 1)
-       theFile.close();
+  if (theOutputFileName != 0)
+    theFile.close();
 }
 
 
 int 
 OpenGLRenderer::clearImage(void)
 {
-#ifdef _WIN32
-    wglMakeCurrent(theHDC, theHRC);
-#else
+  theDevice->CLEAR();
+  glClearColor(1.0f,1.0f,1.0f,1.0f);
 
-#endif
-
-    glClearColor(1.0f,1.0f,1.0f,1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  
-    glFlush(); 
-    return 0;
+  glFlush(); 
+  theDevice->ENDIMAGE();
+  return 0;
 }
 
 int 
 OpenGLRenderer::startImage(void)
 {
-#ifdef _WIN32
-    wglMakeCurrent(theHDC, theHRC);
+  theMap->startImage();
 
-#else
-  
-#endif
+  theDevice->STARTIMAGE();
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_POINT_SMOOTH);
-	glEnable(GL_POLYGON_SMOOTH);
+  if (fillMode == WIRE_MODE) {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  } else {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  }
+
+  // glEnable(GL_BLEND);
+  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  // glEnable(GL_LINE_SMOOTH);
+  // glEnable(GL_POINT_SMOOTH);
+  // glEnable(GL_POLYGON_SMOOTH);
 
     //
     // set up the viewing transformation
     //
-    VECTOR u, v, n;
+    static Vector u(3), v(3), n(3);
+
+    // vpnCopy used to store vpn, if no vpn yet specified vpn = VRP-PRP
+    static Vector vpnCopy(3);
+
+    if (vpn(0) == 0.0 && vpn(1) == 0.0 && vpn(2) == 0.0) {
+      vpnCopy(0) = cop(0) - vrp(0);
+      vpnCopy(1) = cop(1) - vrp(1);
+      vpnCopy(2) = cop(2) - vrp(2);
+    } else {
+      vpnCopy(0) = vpn(0);
+      vpnCopy(1) = vpn(1);
+      vpnCopy(2) = vpn(2);
+    }
 
     for (int i=0; i<3; i++) {
-	n[i] = vpn[i];
-	v[i] = vuv[i];
+	n(i) = vpnCopy(i);
+	v(i) = vuv(i);
     }
-   
+
     if (n.Normalize() == 0) {
 	cerr << "View::update() - VPN cannot have zero length\n";
 	return -1;
     }
 
-    u = v % n;
+    // u = v % n;
+    u(0) = v(1)*n(2) - v(2)*n(1) ;
+    u(1) = v(2)*n(0) - v(0)*n(2) ;
+    u(2) = v(0)*n(1) - v(1)*n(0) ;
+
     if (u.Normalize() == 0) {
 	cerr << "View::update() - VUV X VPN cannot have zero length\n";
 	return -1;
     }
 
-    v = n % u;
-    v.Normalize();
+    //v = n % u;
+    v(0) = n(1)*u(2) - n(2)*u(1) ;
+    v(1) = n(2)*u(0) - n(0)*u(2) ;
+    v(2) = n(0)*u(1) - n(1)*u(0) ;
 
-    ViewMat.Set(       u[0],   v[0],   n[0], 0,
-         	       u[1],   v[1],   n[1], 0,
-		       u[2],   v[2],   n[2], 0,
-	      -vrp.Dot(u), -vrp.Dot(v), -vrp.Dot(n), 1.0);
+    v.Normalize();
+    
+    ViewMat(0,0) = u(0); ViewMat(0,1) = u(1); ViewMat(0,2) = u(2); ViewMat(0,3) = -(vrp^u);
+    ViewMat(1,0) = v(0); ViewMat(1,1) = v(1); ViewMat(1,2) = v(2); ViewMat(1,3) = -(vrp^v);
+    ViewMat(2,0) = n(0); ViewMat(2,1) = n(1); ViewMat(2,2) = n(2); ViewMat(2,3) = -(vrp^n);
+    ViewMat(3,0) =  0.0; ViewMat(3,1) =  0.0; ViewMat(3,2) = 0.0;  ViewMat(3,3) =  1.0;
 
     for (int j=0; j<4; j++)
 	for (int k=0; k<4; k++)
-	    viewData[j*4+k] = ViewMat.m[j][k];
-
+	    viewData[j+k*4] = ViewMat(j,k);
+    
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(viewData);
 
@@ -294,90 +261,124 @@ OpenGLRenderer::startImage(void)
    //
 
     float midU, midV, dopU, dopV, dopN, shU, shV, F, B;
-    float diffU, diffV;
-    midU = (vpwindow[0] + vpwindow[1])/2;
-    midV = (vpwindow[2] + vpwindow[3])/2;
-    dopN = -cop[2];
-    dopU = midU - cop[0];
-    dopV = midV - cop[1];
+    midU = (vpWindow(0) + vpWindow(1))/2;
+    midV = (vpWindow(2) + vpWindow(3))/2;
 
-    diffU = vpwindow[1]-vpwindow[0];
-    diffV = vpwindow[3]-vpwindow[2];      
-  
+    // PRP (COP) in viewing system
+    float PRPu = u(0)*cop(0) + u(1)*cop(1) + u(2)*cop(2) + ViewMat(0,3);
+    float PRPv = v(0)*cop(0) + v(1)*cop(1) + v(2)*cop(2) + ViewMat(1,3);
+    float PRPn = n(0)*cop(0) + n(1)*cop(1) + n(2)*cop(2) + ViewMat(2,3);
+
+    float diffU, diffV;// prpN;
+	
+    diffU = vpWindow(1)-vpWindow(0);
+    diffV = vpWindow(3)-vpWindow(2);      
+
+    dopU = midU - PRPu;
+    dopV = midV - PRPv;
+    dopN = -PRPn;
+
     shU = dopU/dopN;
     shV = dopV/dopN;
-    F = planedist[0];
-    B = planedist[2];
-    if (F < 0) F = -F; // warning MESSAGES !!!
-    if (B < 0) B = -B;
-  
-    if (projection_mode == PARALLEL_MODE) {
-      
-	if (F == -B)
-	    B = F;
+    F = clippingPlanes[0];
+    B = clippingPlanes[1];
 
-	ProjMat.Set(2.0/diffU,          0.0,          0.0,    0.0,
-       		          0.0,    2.0/diffV,         0.0,    0.0,
-		  2*shU/diffV,  2*shV/diffV,      1/(F+B),    0.0,
-	        -2*midU/diffU, -2*midV/diffV, -F/(F+B),    1.0);
-     
+    /******* the equiv of the viewData transformation using glu **************
+    glLoadIdentity();
+    gluLookAt(cop[0),cop[1),cop[2),vrp[0),vrp[1),vrp[2),vuv[0),vuv[1),vuv[2));
+    glTranslatef(0.0, 0.0, PRPn);  // note the PRPn transformation here
+    **************************************************************************/
+
+    if (projectionMode == PARALLEL_MODE) {
+
+      ProjMat(0,0) = 2.0/diffU; ProjMat(0,1) = 0.0; ProjMat(0,2) = 2.0*shU/diffU; 
+      ProjMat(0,3) = -2*midU/diffU,
+
+	ProjMat(1,0) = 0.0; ProjMat(1,1) = 2/diffV; ProjMat(1,2) = 2*shV/diffV; 
+	ProjMat(1,3) = -2*midV/diffV;
+
+	ProjMat(2,0) =  0.0; ProjMat(2,1) =  0.0; ProjMat(2,2) = 1.0;  ProjMat(2,3) =  0.0;
+	ProjMat(3,0) =  0.0; ProjMat(3,1) =  0.0; ProjMat(3,2) = 0.0;  ProjMat(3,3) =  1.0;
+      
+	for (int jj=0; jj<4; jj++)
+	  for (int kk=0; kk<4; kk++)
+	    projData[jj+kk*4] = ProjMat(jj,kk);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(projData);
+	glOrtho(-1.0, 1.0, -1.0, 1.0, -F, -B);
+
     } else { // perspective projection
+
+	double VRPn = -PRPn;  // VRP after T(-PRP)
+	float near = PRPn-F;
+	float far  = PRPn-B;
+	float zMin = near/far;
+
+	/**************** Having trouble with the following transformation ******
 	float a,b,c,e,f,g,h;
-	float diffU, diffV;// prpN;
-	
-	diffU = vpwindow[1]-vpwindow[0];
-	diffV = vpwindow[3]-vpwindow[2];      
-	dopN = -dopN; // dopN'
-      
-	if (dopN > 0) dopN = -dopN; // warning MESSAGE// warning MESSAGE
 
-	a = 2*dopN/(diffU * (dopN - B));
-	b = 2*dopN/(diffV * (dopN - B));
-	c = -1.0/(dopN - B);
+	a = 2.0*PRPn/(diffU * far);
+	b = 2.0*PRPn/(diffV * far);
+	c = -1.0/far;
 
-	float zMin = (dopN + F)*c;
-	if (zMin >= 0) {  // warning MESSAGE
-	    F = -1.0e-8-dopN;
-	    zMin = -1.0e8;
-	}
-     
-	e = 1/(1+zMin);
+	e = 1/(1-zMin);
 	f = -zMin * e;
 	
-	g = cop[0] - shU * cop[2];
-	h = cop[1] - shV * cop[2];
-  
+	g = PRPu - shU * PRPn;
+	h = PRPv - shV * PRPn;
+
 	ProjMat.Set(     a,   0.0,         0.0,    0.0,
 		       0.0,     b,         0.0,    0.0,
 		     a*shU, b*shV,         e*c,     -c,
-		       -a*g,  -b*h, e*c*dopN+f, -c*dopN);  // dopN = -cop[2]!
+		       -a*g,  -b*h, e*c*PRPn+f, -c*PRPn);  
+
+	for (int jj=0; jj<4; jj++)
+	  for (int kk=0; kk<4; kk++)
+	    projData[jj*4+kk) = ProjMat.m(jj)[kk);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(projData);
+	******* so in the meantime use the following - NO SHEARING  **************/
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(cop(0),cop(1),cop(2),vrp(0),vrp(1),vrp(2),vuv(0),vuv(1),vuv(2));
+
+	glMatrixMode(GL_PROJECTION);
+	float left = near*diffU/VRPn/2;
+	float bottom = near*diffV/VRPn/2;
+	float right = -left;
+	float top = -bottom;
+	glLoadIdentity();
+	glFrustum(left,right,bottom,top,near,far);	
+
     }
 
-    for (int jj=0; jj<4; jj++)
-	for (int kk=0; kk<4; kk++)
-	    projData[jj*4+kk] = ProjMat.m[jj][kk];
+    int xMin = floor((portWindow(0)+1) * width/2.0);
+    int xDiff = floor((portWindow(1)-portWindow(0)) * width/2.0);
+    int yMin = floor((portWindow(2)+1) * height/2.0);
+    int yDiff = floor((portWindow(3)-portWindow(2)) * height/2.0);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(projData);
+    glViewport((GLsizei) xMin, (GLsizei) yMin, (GLsizei) xDiff, (GLsizei) yDiff);
 
-    if (aFile == 1) {
+    if (theOutputFileName != 0) {
 	theFile << "StartImage\n";
-	theFile << "VRP " << vrp[0] << " " << vrp[1] << " " 
-	    << vrp[2] << " " << endl;
-	theFile << "VPN " << vpn[0] << " " << vpn[1] << " " 
-	    << vpn[2] << " " << endl;
-	theFile << "VUV " << vuv[0] << " " << vuv[1] << " " 
-	    << vuv[2] << " " << endl;
-	theFile << "COP " << cop[0] << " " << cop[1] << " " 
-	    << cop[2] << " " << endl;
+	theFile << "VRP " << vrp(0) << " " << vrp(1) << " " 
+	    << vrp(2) << " " << endl;
+	theFile << "VPN " << vpn(0) << " " << vpn(1) << " " 
+	    << vpn(2) << " " << endl;
+	theFile << "VUV " << vuv(0) << " " << vuv(1) << " " 
+	    << vuv(2) << " " << endl;
+	theFile << "COP " << cop(0) << " " << cop(1) << " " 
+	    << cop(2) << " " << endl;
 	
-	theFile << "PROJECTIONMODE " << projection_mode << endl;
-	theFile << "VPWINDOW " << vpwindow[0] << " " << vpwindow[1] << " "
-	    << vpwindow[2] << " " << vpwindow[3] << " " << endl;
-	theFile << "PLANES " << planedist[0] << " " << planedist[2] << "\n";
-	theFile << "PORTWINDOW " << portwindow[0] << " " << portwindow[1] << " "
-	    << portwindow[2] << " " << portwindow[3] << " " << endl;
-
+	theFile << "PROJECTIONMODE " << projectionMode << endl;
+	theFile << "VPWINDOW " << vpWindow(0) << " " << vpWindow(1) << " "
+	    << vpWindow(2) << " " << vpWindow(3) << " " << endl;
+	theFile << "PLANES " << clippingPlanes[0] << " " << clippingPlanes[1] << "\n";
+	theFile << "PORTWINDOW " << portWindow(0) << " " << portWindow(1) << " "
+	    << portWindow(2) << " " << portWindow(3) << " " << endl;
     } 
  
     // done
@@ -388,38 +389,78 @@ OpenGLRenderer::startImage(void)
 int 
 OpenGLRenderer::doneImage(void)
 {
-
- #ifdef _WIN32
-	wglMakeCurrent(theHDC, theHRC);
-    SwapBuffers(theHDC);
-#endif
-	glFlush();
-
-    if (aFile == 1) {
-	theFile << "DoneImage\n";
-    }
+  if (theOutputFileName != 0) {
+    theFile << "DoneImage\n";
+  }
     
-    if (count != -1) {
-	count++;
+  if (count != -1) {
+    count++;
+  }
 
-	this->saveBmpImage();
-    }
-
-
-
-    
-    return 0;
+  theDevice->ENDIMAGE();    
+  return 0;
 }
 
 int 
-OpenGLRenderer::drawLine(const Vector &pos1, const Vector &pos2, 
-		       float V1, float V2)
+OpenGLRenderer::drawPoint(const Vector &pos1, float V1, int numPixels)
 {
-  // open gl does a divide by zero error if points are the same - so check
-  if (pos1(0) == pos2(0) && pos1(1) == pos2(1) && pos1(2) == pos2(2))
-    return 0;
+    glPointSize(numPixels);
 
-  //glLineWidth(10);
+    glBegin(GL_POINTS);
+    float r, g, b;
+    r = theMap->getRed(V1);
+    g = theMap->getGreen(V1);
+    b = theMap->getBlue(V1);
+
+    glColor3f(r,g,b);
+    glVertex3f(pos1(0),pos1(1),pos1(2));
+    
+    if (theOutputFileName != 0) {
+	theFile << "Point\n" << pos1(0) << " " << pos1(1) << " " << pos1(2) 
+	    << " " << r << " " << g << " " << b << " " << endl;
+    }
+
+    glEnd();
+
+    return 0;  
+}
+
+
+int 
+OpenGLRenderer::drawPoint(const Vector &pos1, const Vector &rgb, int numPixels)
+{
+    glPointSize(numPixels);
+
+    glBegin(GL_POINTS);
+    float r, g, b;
+    r = rgb(0);
+    g = rgb(1);
+    b = rgb(2);
+
+    glColor3f(r,g,b);
+    glVertex3f(pos1(0),pos1(1),pos1(2));
+    
+    if (theOutputFileName != 0) {
+	theFile << "Point\n" << pos1(0) << " " << pos1(1) << " " << pos1(2) 
+	    << " " << r << " " << g << " " << b << " " << endl;
+    }
+
+    glEnd();
+
+    return 0;  
+}
+
+
+
+int 
+OpenGLRenderer::drawLine(const Vector &pos1, const Vector &pos2, 
+			 float V1, float V2, int width, int style)
+{
+    // open gl does a divide by zero error if points are the same - so check
+    if (pos1(0) == pos2(0) && pos1(1) == pos2(1) && pos1(2) == pos2(2))
+      return 0;
+
+    glLineWidth(width);
 
     glBegin(GL_LINES);
     float r, g, b;
@@ -431,7 +472,7 @@ OpenGLRenderer::drawLine(const Vector &pos1, const Vector &pos2,
 
     glVertex3f(pos1(0),pos1(1),pos1(2));
     
-    if (aFile == 1) {
+    if (theOutputFileName != 0) {
 	theFile << "Line\n" << pos1(0) << " " << pos1(1) << " " << pos1(2) 
 	    << " " << r << " " << g << " " << b << " " << endl;
     }
@@ -445,7 +486,7 @@ OpenGLRenderer::drawLine(const Vector &pos1, const Vector &pos2,
     glVertex3f(pos2(0),pos2(1),pos2(2));
     glEnd();
 
-    if (aFile == 1) {
+    if (theOutputFileName != 0) {
 	theFile << pos2(0) << " " << pos2(1) << " " << pos2(2) << " " << r 
 	    << " " << g << " " << b << " " << endl;
     }
@@ -454,13 +495,17 @@ OpenGLRenderer::drawLine(const Vector &pos1, const Vector &pos2,
 }
 
 
+
 int 
 OpenGLRenderer::drawLine(const Vector &end1, const Vector &end2, 
-			 const Vector &rgb1, const Vector &rgb2)
+			 const Vector &rgb1, const Vector &rgb2,
+			 int width, int style)
 {
-  // open gl does a divide by zero error if points are the same
-  if (end1(0) == end2(0) && end1(1) == end2(1) && end1(2) == end2(2))
-    return 0;
+    // open gl does a divide by zero error if points are the same
+    if (end1(0) == end2(0) && end1(1) == end2(1) && end1(2) == end2(2))
+      return 0;
+
+    glLineWidth(width);
 
     glBegin(GL_LINES);
     float r, g, b;
@@ -468,7 +513,7 @@ OpenGLRenderer::drawLine(const Vector &end1, const Vector &end2,
     g = rgb1(1);
     b = rgb1(2);
   
-    if (aFile == 1) {
+    if (theOutputFileName != 0) {
 	theFile << "Line\n" << end1(0) << " " << end1(1) << " " << end1(2) 
 	    << " " << r << " " << g << " " << b << " " << endl;
     }
@@ -479,7 +524,7 @@ OpenGLRenderer::drawLine(const Vector &end1, const Vector &end2,
     g = rgb2(1);
     b = rgb2(2);
   
-    if (aFile == 1) {
+    if (theOutputFileName != 0) {
 	theFile << end2(0) << " " << end2(1) << " " << end2(2) << " " << r 
 	    << " " << g << " " << b << " " << endl;
     }
@@ -522,7 +567,49 @@ OpenGLRenderer::drawPolygon(const Matrix &pos, const Vector &data)
       g = theMap->getGreen(value);
       b = theMap->getBlue(value);      
 
-    if (aFile == 1) {
+    if (theOutputFileName != 0) {
+	theFile << posX << " " << posY << " " << posZ << " " << r 
+	    << " " << g << " " << b << " " << endl;
+    }
+      glColor3f(r,g,b);
+      glVertex3f(posX, posY, posZ);
+    }
+
+    glEnd();
+
+    return 0;
+}
+
+
+int 
+OpenGLRenderer::drawPolygon(const Matrix &pos, const Matrix &rgbData)
+
+{
+#ifdef _G3DEBUG
+  if (pos.noCols() != 3 || rgbData.noCols() != 3) {
+    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix needs 3 cols\n");
+    return -1;
+  }
+  if (pos.noRows() != rgbData.noRows()) {
+    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix & vector incompatable\n");
+    return -1;
+  }
+#endif
+
+  double posX, posY, posZ;
+  float r,g,b;
+
+    glBegin(GL_POLYGON);
+    int numRows = pos.noRows();
+    for (int i=0; i<numRows; i++) {
+      posX = pos(i,0);
+      posY = pos(i,1);
+      posZ = pos(i,2);
+      r = rgbData(i,0);
+      g = rgbData(i,1);
+      b = rgbData(i,2);
+
+    if (theOutputFileName != 0) {
 	theFile << posX << " " << posY << " " << posZ << " " << r 
 	    << " " << g << " " << b << " " << endl;
     }
@@ -538,10 +625,9 @@ OpenGLRenderer::drawPolygon(const Matrix &pos, const Vector &data)
 
 
 int 
-OpenGLRenderer::drawGText(const Vector &pos, char *text, int length)
+OpenGLRenderer::drawText(const Vector &pos, char *text, int length,
+			 char horizontalJustify, char verticalJustify)
 {
-    MYPOINT *point;
-
     // add POINTs to the FACE  
     int size = pos.Size();
     float x,y,z;
@@ -559,37 +645,17 @@ OpenGLRenderer::drawGText(const Vector &pos, char *text, int length)
 	z = pos(2);
     }  
 
+    theDevice->drawText(x,y,z, text, length, horizontalJustify, verticalJustify);
+
     return 0;
 }
-
-int 
-OpenGLRenderer::drawLText(const Vector &pos, char *text, int length)
-{
-    int size = pos.Size();
-    float x,y;
-    if (size == 1) {
-	x = pos(0);
-	y = 0;
-    } else if (size == 2) {
-	x = pos(0);
-	y = pos(1);
-    } else {
-	x = pos(0);
-	y = pos(1);
-    }  
-
-//  theDevice->drawText(x,y, text, length);
-  
-    return 0;
-}
-
 
 int 
 OpenGLRenderer::setVRP(float x, float y, float z)
 {
-  vrp[0] = x;
-  vrp[1] = y;
-  vrp[2] = z;
+  vrp(0) = x;
+  vrp(1) = y;
+  vrp(2) = z;
 
   return 0;
 }
@@ -597,9 +663,9 @@ OpenGLRenderer::setVRP(float x, float y, float z)
 int 
 OpenGLRenderer::setVPN(float x, float y, float z)
 {
-  vpn[0] = x;
-  vpn[1] = y;
-  vpn[2] = z;
+  vpn(0) = x;
+  vpn(1) = y;
+  vpn(2) = z;
 
   return 0;
 }
@@ -607,9 +673,9 @@ OpenGLRenderer::setVPN(float x, float y, float z)
 int 
 OpenGLRenderer::setVUP(float x, float y, float z)
 {
-  vuv[0] = x;
-  vuv[1] = y;
-  vuv[2] = z;
+  vuv(0) = x;
+  vuv(1) = y;
+  vuv(2) = z;
 
   return 0;
 }
@@ -623,10 +689,10 @@ OpenGLRenderer::setViewWindow(float umin, float umax, float vmin, float vmax)
       return -1;
   }
 
-  vpwindow[0] = umin;
-  vpwindow[1] = umax;
-  vpwindow[2] = vmin;
-  vpwindow[3] = vmax;
+  vpWindow(0) = umin;
+  vpWindow(1) = umax;
+  vpWindow(2) = vmin;
+  vpWindow(3) = vmax;
 
   return 0;
 }
@@ -634,39 +700,45 @@ OpenGLRenderer::setViewWindow(float umin, float umax, float vmin, float vmax)
 int 
 OpenGLRenderer::setPlaneDist(float anear, float afar) 
 {
-
-   if ((anear < 0.0) || (afar < 0.0)) {
-      cerr << "OpenGLRenderer::setPlaneDist() - invalid planes";
+  if ((anear < afar)) {
+      cerr << "OpenGLRenderer::setClippingPlanes() - invalid planes";
       cerr << anear << " " << afar << endl;
       return -1;
   }
-  
-  planedist[0] = anear;
-  planedist[2] = afar;
+
+  clippingPlanes[0] = anear;
+  clippingPlanes[1] = afar;
 
   return 0;
 }
 
 int 
-OpenGLRenderer::setProjectionMode(int newMode)
+OpenGLRenderer::setProjectionMode(char *newMode)
 {
-  projection_mode = newMode;
+  if ((strcmp(newMode, "parallel") == 0) || (strcmp(newMode, "Parallel") == 0))
+    projectionMode = PARALLEL_MODE;
+  else if ((strcmp(newMode, "perspective") == 0) || (strcmp(newMode, "Perspective") == 0))
+    projectionMode = PERSPECTIVE_MODE;
   return 0;
 }
 
 int 
-OpenGLRenderer::setFillMode(int newMode)
+OpenGLRenderer::setFillMode(char *newMode)
 {
-//  theScan->setFillMode(newMode);
+  if ((strcmp(newMode, "wire") == 0) || (strcmp(newMode, "Wire") == 0))
+    fillMode = WIRE_MODE;
+  else if ((strcmp(newMode, "fill") == 0) || (strcmp(newMode, "Fill") == 0))
+    fillMode = FILL_MODE;
+
   return 0;
 }
 
 // eye location
 int 
 OpenGLRenderer::setPRP(float u, float v, float n){
-  cop[0] = u;
-  cop[1] = v;
-  cop[2] = n;
+  cop(0) = u;
+  cop(1) = v;
+  cop(2) = n;
 
   return 0;
 }
@@ -683,194 +755,11 @@ OpenGLRenderer::setPortWindow(float left, float right,
       return -1;
   }
 
-  portwindow[0] = left;
-  portwindow[1] = right;
-  portwindow[2] = bottom;
-  portwindow[3] = top;
+  portWindow(0) = left;
+  portWindow(1) = right;
+  portWindow(2) = bottom;
+  portWindow(3) = top;
 
   return 0;
 }
 
-int 
-OpenGLRenderer::saveBmpImage(void)
-{
-    long i,j, width;
-/*
-    // get dimensions of the window
-    glGetIntegerv(GL_VIEWPORT, viewport);
-	*/  
-    // create the file name 'bmpFileName$count.BMP'
-    char fileName[MAX_FILENAMELENGTH+14];
-    char intName[10];
-	
-    strcpy(fileName, theBmpFileName);
-	sprintf(intName,"%d",count);
-
-    strcat(fileName,&intName[1]);        
-    strcat(fileName,".BMP");
-
-    // open the file
-    FILE *fp;
-    if ((fp = fopen(fileName,"wb")) == NULL) {
-	g3ErrorHandler->warning("OpenGLRenderer::saveBmpImage() - %s %s\n",
-				"could not open file named", fileName);
-	count = -1;
-	return -1;
-    }	
-//cerr << "saving: " << fileName << endl;
-	
-	int bitsize = (info.bmiHeader.biWidth *
-        	   info.bmiHeader.biBitCount + 7) / 8 *
-		  abs(info.bmiHeader.biHeight);
-	int infosize;
-	infosize = sizeof(BITMAPINFOHEADER);
-    switch (info.bmiHeader.biCompression)
-	{
-	case BI_BITFIELDS :
-            infosize += 12; /* Add 3 RGB doubleword masks */
-            if (info.bmiHeader.biClrUsed == 0)
-	      break;
-	case BI_RGB :
-            if (info.bmiHeader.biBitCount > 8 &&
-        	info.bmiHeader.biClrUsed == 0)
-	      break;
-	case BI_RLE8 :
-	case BI_RLE4 :
-            if (info.bmiHeader.biClrUsed == 0)
-              infosize += (1 << info.bmiHeader.biBitCount) * 4;
-	    else
-              infosize += info.bmiHeader.biClrUsed * 4;
-	    break;
-	}
-
-    int size = sizeof(BITMAPFILEHEADER) + infosize + bitsize;
-
-    // check the bit map header info has been created, if not create one
-/*    if (info == 0) {
-	if ((info = (BITMAPINFO *)malloc(sizeof(BITMAPINFOHEADER))) < 0) {
-	    g3ErrorHandler->warning("OpenGLRenderer::saveBmpImage() - %s\n",
-				    "out of memory creating BITMAPINFO struct");
-	    count = -1;
-	    return -2;
-	}
-	info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	info->bmiHeader.biPlanes = 1;
-	info->bmiHeader.biBitCount = 24;
-	info->bmiHeader.biCompression = BI_RGB;
-	info->bmiHeader.biXPelsPerMeter = 2952;
-	info->bmiHeader.biYPelsPerMeter = 2952;
-	info->bmiHeader.biClrUsed = 0;
-	info->bmiHeader.biClrImportant = 0;
-    }
-    
-    // determine the number of bits needed to save the image
-    width = viewport[2]*3;
-    width = (width+3) & ~3;
-    bitsize = width * viewport[3];
-
-    // check the bits pointeris of correct size, if not
-    // delete the old and create a new one
-    if (bitsize != currentBitSize) {
-	if (currentBitSize != 0)
-	    free (bits);
-	if ((bits = (GLubyte *)calloc(bitsize, 1)) == 0) {
-	    g3ErrorHandler->warning("OpenGLRenderer::saveBmpImage() - %s\n",
-				    "out of memory creating BITMAPINFO struct");
-	    count = -1;
-	    free (info);
-	    info = 0;
-	    return -3;	    
-	}
-	currentBitSize = bitsize;
-    }
-
-    // set the info for the bit map header
-    info->bmiHeader.biWidth = viewport[2];
-    info->bmiHeader.biHeight = viewport[3];    
-    info->bmiHeader.biSizeImage = currentBitSize;        
-*/
-    // read the pixels from the frame buffer
-    glFinish();
-    glPixelStorei(GL_PACK_ALIGNMENT, 4);
-    glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-    glPixelStorei(GL_PACK_SKIP_ROWS, 0);
-    glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
-
-  if (bits == 0) cerr << "BITS ZERO\n";
-
-    glReadPixels(0, 0, info.bmiHeader.biWidth, info.bmiHeader.biHeight,
-		GL_BGR_EXT, GL_UNSIGNED_BYTE, bits);
-	
-
-   currentBitSize = info.bmiHeader.biWidth * info.bmiHeader.biHeight;
-    // create a header for the BMP file
-    BITMAPFILEHEADER header;
-    header.bfType      = 'MB'; /* Non-portable... sigh */
-    header.bfSize      = size;
-    header.bfReserved1 = 0;
-    header.bfReserved2 = 0;
-    header.bfOffBits   = sizeof(BITMAPFILEHEADER) + infosize;
-
-    if (fwrite(&header, 1, sizeof(BITMAPFILEHEADER), fp) < sizeof(BITMAPFILEHEADER))
-	{
-    // write the header to the file
-//    if (fwrite(&header, 1, sizeof(BITMAPFILEHEADER), fp) < sizeof(BITMAPFILEHEADER)) {
-	    g3ErrorHandler->warning("OpenGLRenderer::saveBmpImage() - %s\n",
-				    "failed to write BITMAPHEADER");
-	    fclose(fp);
-	    return -4;
-	}
-    if (fwrite(&info, 1, infosize, fp) < infosize)
-        {
-    // write the bit map information to the file
-//    if (fwrite(&info, 1, sizeof(BITMAPINFOHEADER), fp) < sizeof(BITMAPINFOHEADER)) {
-	    g3ErrorHandler->warning("OpenGLRenderer::saveBmpImage() - %s\n",
-				    "failed to write BITMAPINFOHEADER");
-	    fclose(fp);
-	    return -5;	    
-	}    
-    if (fwrite(bits, 1, bitsize, fp) < bitsize)
-        {
-    // now we write the bits
-    //if (fwrite(bits, 1, currentBitSize, fp) < currentBitSize) {
-	g3ErrorHandler->warning("OpenGLRenderer::saveBmpImage() - %s\n",
-				    "failed to write BITMAPINFOHEADER");
-	fclose(fp);
-	return -6;	
-    }        
-
-    // if get here we are done .. close file and return ok
-    fclose(fp);
-    return 0;
-}
-/*   
-char itoc(int x)
-{
- if (x == 1) return '1';
- if (x == 2) return '2';
- if (x == 3) return '3';
- if (x == 4) return '4';
- if (x == 5) return '5';
- if (x == 6) return '6';
- if (x == 7) return '7';
- if (x == 8) return '8';
- if (x == 9) return '9';
- return '0';
-}
-
-void
-itoa(int x, char *str)
-{
-  int y=x;
-  while (y >= 10) 
-    y = y/10;
-  cerr << y << " ";
-  str[0] = itoc(y);
-  str[1] = '\0';
-  if (x >= 10) {
-    int z = x/10;
-    z = x - 10*z;
-    itoa(z,&str[1]);
-  }
-}
-*/

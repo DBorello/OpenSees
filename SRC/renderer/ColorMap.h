@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:25 $
+// $Revision: 1.2 $
+// $Date: 2001-07-26 00:56:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/ColorMap.h,v $
                                                                         
                                                                         
@@ -46,7 +46,8 @@ class ColorMap
     virtual float getRed(float value) =0;
     virtual float getGreen(float value) =0;
     virtual float getBlue(float value) =0;
-    
+    virtual int   getRGB(float value, float &red, float &green, float &blue) =0;
+    virtual int   startImage() =0;
   protected:
     
   private:

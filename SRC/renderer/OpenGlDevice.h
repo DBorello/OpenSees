@@ -18,34 +18,43 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:26 $
+// $Revision: 1.2 $
+// $Date: 2001-07-26 00:56:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.h,v $
                                                                         
                                                                         
-#ifndef Device_H
-#define Device_H
+#ifndef OpenGlDevice_H
+#define OpenGlDevice_H
 
-#ifdef XWINDOWS
+#include <Device.h>
+
+#ifdef _GLX
+
 #include <X11/Xlib.h>
 #include <X11/X.h>
+#include <X11/Xutil.h>
+#include <X11/X.h>
+#include <X11/Xatom.h>
+#include <GL/gl.h>
+#include <GL/glext.h>
+#include <GL/glx.h>
+#define X11_MAX_COLORS 256
+
+#elif _WGL
+
+#include <windows.h>
+#include <gl\gl.h>
+#include <gl\glaux.h>
+
 #else
-#include <gl.h>
+
 #endif
 
-#define MAX_NUM_POINTS_FOR_POLYGON 256
-
-class Device
+class OpenGlDevice
 {
  public:
-  Device();
-  virtual ~Device();  
-
-  // Specify a 2D point to the hardware  
-  virtual void V2F(float x, float y);
-
-  // Specify a color to the hardware
-  virtual void C3F(float r, float g, float b);
+  OpenGlDevice();
+  virtual ~OpenGlDevice();  
 
   // Gets the width of the current window
   virtual int GetWidth();
@@ -53,48 +62,71 @@ class Device
   // Gets the height of the current window
   virtual int GetHeight();
 
-  // Call when about to begin/end drawing a polygon. All V2F calls
-  // from then on until ENDPOLYGON will be interpreted as 
-  // vertices of the polygon
-  virtual void BGNPOLYGON();
-  virtual void ENDPOLYGON();
-
-
-  // Same as BGNPOLYGON but for wireframe polygons
-  virtual void BGNCLOSEDLINE();
-  virtual void ENDCLOSEDLINE();
-
-  // Call when about to begin drawing a set of points. All V2F
-  // calls from then on until ENDPOINT will be interpreted as
-  // points.
-  virtual void BGNPOINT();
-  virtual void ENDPOINT();
-
-  // Necessary when operating in XWINDOWS mode since the drawn
+  // Necessary when operating since the drawn
   // image is buffered until this call is made.
+  virtual void STARTIMAGE();
   virtual void ENDIMAGE();
 
   // Opens a window of the specified width & height.
-  virtual void WINOPEN(int width, int height);
+  virtual void WINOPEN(char *title, int xLoc, int yLoc, int width, int height);
+  virtual void BITMAPOPEN(char *title, int xLoc, int yLoc, int width, int height,
+			  char *bitmapFile);
 
   // Clears the currently opened window
   virtual void CLEAR();
 
+  virtual void drawText(float x, float y, float z, char *text, int length, 
+			char horizontalJustify, char verticalJustify); 
+
 
  private:
-#ifdef XWINDOWS
-  int numPoints;
-  int drawingPolygon;
-  XPoint polygonPointArray[MAX_NUM_POINTS_FOR_POLYGON+1]; // +1 for wireframe polygons
-  Display *theDisplay;
-  Window theWindow;
-  GC theGC;
-  Colormap cmap;
+  void initWindow(void); // procedure called on construction of 1st Window
+  int saveBmpImage(void);  // to save the current image into a .BMP file
 
+#ifdef _GLX
+
+  // glx utility toolkit
+  Display *theDisplay;  // the display all Window objecs display on
+  Window theWindow;
+  int theScreen;        // the screen 
+  Colormap cmap;        // the colormap all X11 Window objects share   
+  GC theGC;
+  GLXContext cx;    
+  XSizeHints hints; // conatins the infor about where window is and its size
+                    //  static unsigned long foreground, background;
+  XEvent theEvent;
+  XVisualInfo *visual;
+  int swap_flag;
+
+  //  static XFontStruct *fontInfo;
+  XFontStruct *fontInfo;
+
+#elif _WGL
+
+  // win32 stuff using wgl toolkit
+  HDC         theHDC;        // device context
+  HGLRC       theHRC;        // openGL context
+  HWND        theWND;        // the window
+  BITMAPINFO  info;
+  HBITMAP     theBitmap;
+  GLint	      viewport[4];
+  GLubyte     *bits;
+  long	      currentBitSize;
+  int xLoc;
+  int yLoc;
 #else
-  int window_id;
+
 #endif
+
+  //  static GLuint FontBase;
+  GLuint FontBase;
+
+  static int numWindows;
+  int winOpen;
   int width, height;		// Width and height of our window
+  int count;
+  char *windowTitle;
+  char *bitmapFile;
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:11:52 $
+// $Revision: 1.3 $
+// $Date: 2001-07-26 00:56:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Renderer.h,v $
                                                                         
                                                                         
@@ -59,19 +59,23 @@ class Renderer
     virtual int doneImage(void) =0;
 
     // methods invoked by the objects to display themselves    
+    virtual int drawPoint(const Vector &, float V1, int width = 1) =0;
+    virtual int drawPoint(const Vector &, const Vector &rgb1, int width = 1) =0;
+
     virtual int drawLine(const Vector &, const Vector &, 
-			 float V1, float V2) =0;
+			 float V1, float V2, int width = 1, int style = 1) =0;
 
     virtual int drawLine(const Vector &end1, const Vector &end2, 
-			 const Vector &rgb1, const Vector &rgb2) =0;
+			 const Vector &rgb1, const Vector &rgb2,
+			 int width = 1, int style = 1) =0;
     
     virtual int drawPolygon(const Matrix &points, const Vector &values) =0;
+    virtual int drawPolygon(const Matrix &points, const Matrix &rgbValues) =0;
 
-    virtual int drawVector(const Vector &position, const Vector &value);
+    virtual int drawVector(const Vector &position, const Vector &value, double factor);
     
-    virtual int drawGText(const Vector &posGlobal, char *string, int length);    
-    virtual int drawLText(const Vector &posLocal, char *string, int length); 
-
+    virtual int drawText(const Vector &posGlobal, char *string, int length, 
+			  char horizontalJustify = 'l', char verticalJustify = 'b') =0;    
 
     // 
     // the following are for setting up the vieing system
@@ -87,13 +91,13 @@ class Renderer
                                // umin, umax, vmin, vmax
 
     virtual int setPlaneDist(float, float) =0; // location of
-                               // near and far clipping planes
+                               // near and far clipping planes from view plane
 
-    virtual int setProjectionMode(int) =0; // 
-    virtual int setFillMode(int) =0;    // 1 = wire, otherwise fill
+    virtual int setProjectionMode(char *mode) =0; //parallel or perspective
+    virtual int setFillMode(char *mode) =0;    // wire or fill
     
     virtual int setPRP(float u, float v, float n) =0; // eye location if 
-	                         // perspective, dirn to +ViewPlane if parallel
+	                       // perspective, dirn to +ViewPlane if parallel
 
     // the following are in normalized coordinates
     virtual int setPortWindow(float, float, float, float) =0; // view port

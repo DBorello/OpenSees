@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2001-07-26 00:56:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Device.cpp,v $
                                                                         
                                                                         
@@ -151,7 +151,6 @@ void
 X11Device::CLEAR()
 {
   XSetBackground(theDisplay, theGC, background);
-
   XClearWindow(theDisplay, theWindow);  
   XFlush(theDisplay);
 }

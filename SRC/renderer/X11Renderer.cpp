@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-03 06:45:05 $
+// $Revision: 1.4 $
+// $Date: 2001-07-26 00:56:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.cpp,v $
                                                                         
                                                                         
@@ -48,6 +48,11 @@
 #include <Clipping.h>
 #include <WindowDevice.h>
 #include <Scan.h>
+
+#define WIRE_MODE 1
+#define FILL_MODE 0
+//#define PARALLEL_MODE 0
+//#define PERSPECTIVE_MODE 1
 
 X11Renderer::X11Renderer(char *title, int xLoc, int yLoc, int width, int height,
 			 ColorMap &_theMap)
@@ -170,9 +175,46 @@ X11Renderer::doneImage(void)
   return 0;
 }
 
+
+int 
+X11Renderer::drawPoint(const Vector &pos1, float V1, int numPixels)
+{
+    float r, g, b;
+    r = theMap->getRed(V1);
+    g = theMap->getGreen(V1);
+    b = theMap->getBlue(V1);
+
+    if (aFile == 1) {
+	theFile << "Point\n" << pos1(0) << " " << pos1(1) << " " << pos1(2) 
+	    << " " << r << " " << g << " " << b << " " << endl;
+    }
+
+    return 0;  
+}
+
+
+int 
+X11Renderer::drawPoint(const Vector &pos1, const Vector &rgb, int numPixels)
+{
+    float r, g, b;
+    r = rgb(0);
+    g = rgb(1);
+    b = rgb(2);
+
+    if (aFile == 1  ) {
+	theFile << "Point\n" << pos1(0) << " " << pos1(1) << " " << pos1(2) 
+	    << " " << r << " " << g << " " << b << " " << endl;
+    }
+
+    return 0;  
+}
+
+
+
+
 int 
 X11Renderer::drawLine(const Vector &pos1, const Vector &pos2, 
-		       float V1, float V2)
+		       float V1, float V2, int width, int style)
 {
   FACE *theFace = new FACE();	
   
@@ -251,7 +293,8 @@ X11Renderer::drawLine(const Vector &pos1, const Vector &pos2,
 
 int 
 X11Renderer::drawLine(const Vector &pos1, const Vector &pos2, 
-		      const Vector &rgb1, const Vector &rgb2)
+		      const Vector &rgb1, const Vector &rgb2,
+		      int width, int style)
 {
   FACE *theFace = new FACE();	
   
@@ -338,18 +381,17 @@ X11Renderer::drawPolygon(const Matrix &pos, const Vector &data)
 {
 #ifdef _G3DEBUG
   if (pos.noCols() != 3) {
-    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix needs 3 cols\n");
+    g3ErrorHandler->warning("X11Renderer::drawPolygon - matrix needs 3 cols\n");
     return -1;
   }
   if (pos.noRows() != data.Size()) {
-    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix & vector incompatable\n");
+    g3ErrorHandler->warning("X11Renderer::drawPolygon - matrix & vector incompatable\n");
     return -1;
   }
 #endif
 
   FACE *theFace = new FACE();	
 
-  int size;
   float posX,posY,posZ, r, g, b;
   double value;
   MYPOINT *point;
@@ -392,9 +434,67 @@ X11Renderer::drawPolygon(const Matrix &pos, const Vector &data)
 }
 
 
+int 
+X11Renderer::drawPolygon(const Matrix &pos, const Matrix &data)
+
+{
+#ifdef _G3DEBUG
+  if (pos.noCols() != 3 || data.noCols() != 3) {
+    g3ErrorHandler->warning("X11Renderer::drawPolygon - matrix needs 3 cols\n");
+    return -1;
+  }
+  if (pos.noRows() != data.noRows()) {
+    g3ErrorHandler->warning("X11Renderer::drawPolygon - matrix & vector incompatable\n");
+    return -1;
+  }
+#endif
+
+  FACE *theFace = new FACE();	
+
+  float posX,posY,posZ, r, g, b;
+  MYPOINT *point;
+
+  // add POINTs to the FACE  
+  int numRows = pos.noRows();
+  for (int i=0; i<numRows; i++) {
+    posX = pos(i,0);
+    posY = pos(i,1);
+    posZ = pos(i,2);
+    r = data(i,0);
+    g = data(i,1);
+    b = data(i,2);      
+
+    if (aFile == 1) {
+      theFile << posX << " " << posY << " " << posZ << " " << r 
+	      << " " << g << " " << b << " " << endl;
+    }	
+
+    point = new MYPOINT(1,posX,posY,posZ);
+    point->r = r;
+    point->g = g;
+    point->b = b;
+    
+    theFace->AddPoint(*point);
+  }
+
+  // display the face
+  FACE &res1 = theView->transform(*theFace);
+  // cerr << "X11Renderer: face after view " << theFace;      
+  FACE &res2 = theProjection->transform(res1);
+  // cerr << "X11Renderer: face after projection " << theFace;        
+  FACE &res3 = theClipping->transform(res2);
+  // cerr << "X11Renderer: face after clipping " << theFace;          
+  FACE &res4 = theViewport->transform(res3);
+  // cerr << "X11Renderer: face after viewport " << theFace;            
+  theScan->scanPolygon(res4);
+  return 0;  
+}
+
+
 
 int 
-X11Renderer::drawGText(const Vector &pos, char *text, int length)
+X11Renderer::drawText(const Vector &pos, char *text, int length,
+		      char horizontalJustify, char verticalJustify)
 {
   MYPOINT *point;
 
@@ -440,11 +540,11 @@ X11Renderer::drawGText(const Vector &pos, char *text, int length)
   return 0;
 }
 
+/*
 int 
-X11Renderer::drawLText(const Vector &pos, char *text, int length)
+X11Renderer::drawLText(const Vector &pos, char *text, int length,
+		       char horizontalJustify, char verticalJustify)
 {
-//  MYPOINT *point;
-
   // add POINTs to the FACE  
   int size = pos.Size();
   float x,y;
@@ -463,7 +563,7 @@ X11Renderer::drawLText(const Vector &pos, char *text, int length)
   
   return 0;
 }
-
+*/
 
 
 
@@ -550,16 +650,27 @@ X11Renderer::setPlaneDist(float anear, float afar)
 }
 
 int 
-X11Renderer::setProjectionMode(int newMode)
+X11Renderer::setProjectionMode(char *newMode)
 {
-  theProjection->projection_mode = newMode;
+  int projectionMode = 0;
+  if ((strcmp(newMode, "parallel") == 0) || (strcmp(newMode, "Parallel") == 0))
+    projectionMode = PARALLEL_MODE;
+  else if ((strcmp(newMode, "perspective") == 0) || (strcmp(newMode, "Perspective") == 0))
+
+  theProjection->projection_mode = projectionMode;
   return 0;
 }
 
 int 
-X11Renderer::setFillMode(int newMode)
+X11Renderer::setFillMode(char *newMode)
 {
-  theScan->setFillMode(newMode);
+  int fillMode = 0;
+  if ((strcmp(newMode, "wire") == 0) || (strcmp(newMode, "Wire") == 0))
+    fillMode = WIRE_MODE;
+  else if ((strcmp(newMode, "fill") == 0) || (strcmp(newMode, "Fill") == 0))
+    fillMode = FILL_MODE;
+
+  theScan->setFillMode(fillMode);
   return 0;
 }
 
