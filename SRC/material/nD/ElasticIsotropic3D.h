@@ -18,38 +18,27 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $                                                              
-// $Date: 2001-07-17 03:44:13 $                                                                  
+// $Revision: 1.9 $                                                              
+// $Date: 2001-07-21 20:13:13 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $                                                                
                                                                         
                                                                         
 #ifndef ElasticIsotropic3D_h
 #define ElasticIsotropic3D_h
-
-// File: ~/material/ElasticIsotropic3D.h
-//
-// Written: MHS
-// Created: Feb 2000
-// Revision: A
-//
-// Description: 
-//
-// What: "@(#) ElasticIsotropic3D.h, revA"
-
+	 
 #include <ElasticIsotropicMaterial.h>
-
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
 
-#include <Tensor.h>
-#include <stresst.h>
 #include <straint.h>
+#include <stresst.h>
+#include <Tensor.h>
 
 class ElasticIsotropic3D : public ElasticIsotropicMaterial
 {
   public:
-    ElasticIsotropic3D (int tag, double E, double nu, double expp = 0.6, double pr = 100.0, double pop = 0.0);
+    ElasticIsotropic3D (int tag, double E, double nu);
     ElasticIsotropic3D ();
     ~ElasticIsotropic3D ();
 
@@ -67,7 +56,8 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     int setTrialStrainIncr (const Tensor &v, const Tensor &r);
     const Tensor &getTangentTensor (void);
     const stresstensor getStressTensor (void);
-    const Tensor &getStrainTensor (void);
+    const straintensor getStrainTensor (void);
+    //const Tensor& getStrainTensor (void);
 
     int commitState (void);
     int revertToLastCommit (void);
@@ -84,16 +74,20 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     void Print(ostream &s, int flag =0);
     void setInitElasticStiffness(void);
 
+  //Private functions
+  private:
+
+
   protected:
 
   private:
-    static Vector sigma;		// Stress vector
-    static Matrix D;			// Elastic constants
+    Vector sigma;		// Stress vector
+    Matrix D;			// Elastic constants
     Vector epsilon;		// Strain vector
 
-    double exp;                 // exponent usually 0.6
-    double p_ref;               // Reference pressure, usually atmosphere pressure, i.e. 100kPa
-    double po;                  // Initial pressure of this material point
+    //double exp;                 // exponent usually 0.6
+    //double p_ref;               // Reference pressure, usually atmosphere pressure, i.e. 100kPa
+    //double po;                  // Initial pressure of this material point
     stresstensor Stress;	// Stress tensor    
     Tensor Dt;			// Elastic constants tensor
     Tensor Dt_commit;		// last-step Elastic constants tensor

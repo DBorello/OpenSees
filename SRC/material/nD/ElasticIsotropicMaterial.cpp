@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $                                                              
-// $Date: 2001-07-16 22:59:55 $                                                                  
+// $Revision: 1.11 $                                                              
+// $Date: 2001-07-21 20:13:13 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -40,6 +40,7 @@
 #include <ElasticIsotropicPlaneStrain2D.h>
 #include <ElasticIsotropicAxiSymm.h>
 #include <ElasticIsotropic3D.h>
+#include <PressureDependentElastic3D.h>
 #include <ElasticIsotropicPlateFiber.h>
 
 #include <Tensor.h>
@@ -106,16 +107,31 @@ ElasticIsotropicMaterial::getCopy (const char *type)
 		// prior to copying the material model (calling this function)
 	return theModel;
     }
-    else if (strcmp(type,"ThreeDimensional") == 0 || strcmp(type,"3D") == 0)
+///////////////////////////////
+    else if (strcmp(type,"ThreeDimensional") == 0 || 
+			          strcmp(type,"3D") == 0 || 
+												 strcmp(type,"ElasticIsotropic3D") == 0)
     {
 	ElasticIsotropic3D *theModel;
-	theModel = new ElasticIsotropic3D (this->getTag(), E, v, 100.0, 0.0);
+	theModel = new ElasticIsotropic3D (this->getTag(), E, v);
 		// DOES NOT COPY sigma, D, and epsilon ...
 		// This function should only be called during element instantiation, so
 		// no state determination is performed on the material model object
 		// prior to copying the material model (calling this function)
 	return theModel;
     }
+///////////////////////////////
+    else if (strcmp(type,"PressureDependentElastic3D") == 0 ) 
+    {
+      PressureDependentElastic3D *theModel;
+      theModel = new PressureDependentElastic3D(this->getTag(), E, v, 0.6, 100.0, 0.0);
+    // DOES NOT COPY sigma, D, and epsilon ...
+    // This function should only be called during element instantiation, so
+    // no state determination is performed on the material model object
+    // prior to copying the material model (calling this function)
+    	return theModel;
+    }
+///////////////////////////////
     else if (strcmp(type,"PlateFiber") == 0)
     {
 	ElasticIsotropicPlateFiber *theModel;
@@ -251,14 +267,12 @@ const stresstensor ElasticIsotropicMaterial::getStressTensor (void)
 	 return t;
 }
 
-const Tensor&
-ElasticIsotropicMaterial::getStrainTensor (void)
+const straintensor ElasticIsotropicMaterial::getStrainTensor (void)
 {
 	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStrain -- subclass responsibility");
-
 	// Just to make it compile
-     Tensor *t = new Tensor;
-	 return *t;
+     straintensor t;
+	 return t;
 }
 
 int

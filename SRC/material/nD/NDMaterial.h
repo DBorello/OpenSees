@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $                                                              
-// $Date: 2001-01-23 08:47:09 $                                                                  
+// $Revision: 1.7 $                                                              
+// $Date: 2001-07-21 20:13:13 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $                                                                
                                                                         
                                                                         
@@ -41,6 +41,8 @@
 
 #include <Material.h>
 #include <Tensor.h>
+#include <straint.h>
+#include <stresst.h>
 
 class Matrix;
 class ID;
@@ -76,7 +78,7 @@ class NDMaterial : public Material
     virtual int setTrialStrainIncr(const Tensor &v, const Tensor &r);
     virtual const Tensor &getTangentTensor(void);
     virtual const stresstensor getStressTensor(void);
-    virtual const Tensor &getStrainTensor(void);
+    virtual const straintensor getStrainTensor(void);
     
     virtual int commitState(void) = 0;
     virtual int revertToLastCommit(void) = 0;

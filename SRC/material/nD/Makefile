@@ -5,7 +5,8 @@ OBJS       = NDMaterial.o ElasticIsotropic3D.o ElasticIsotropicMaterial.o \
 	ElasticIsotropicPlateFiber.o ElasticIsotropicAxiSymm.o\
 	TclModelBuilderNDMaterialCommand.o J2PlaneStrain.o \
 	J2PlaneStress.o  J2Plasticity.o J2AxiSymm.o J2ThreeDimensional.o \
-	BidirectionalMaterial.o J2PlateFiber.o 
+	BidirectionalMaterial.o J2PlateFiber.o  PressureDependentElastic3D.o
+
 
 TEMPLATE_OBJS =              \
                 MatPoint3D.o         \
@@ -31,7 +32,7 @@ TEMPLATE_OBJS =              \
 
 all:	$(OBJS) 
 	@$(CD) $(FE)/material/nD/soil; $(MAKE);
-	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE); 
+	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE);  $(AR) -rv $(MATMOD_LIBRARY) $(TEMPLATE_OBJS)
 
 # Miscellaneous
 

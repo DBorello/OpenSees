@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $                                                              
-// $Date: 2001-01-23 08:47:09 $                                                                  
+// $Revision: 1.7 $                                                              
+// $Date: 2001-07-21 20:13:13 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -172,8 +172,7 @@ const stresstensor NDMaterial::getStressTensor(void)
    return errstresstensor;    
 }
 
-const Tensor &
-NDMaterial::getStrainTensor(void)
+const straintensor NDMaterial::getStrainTensor(void)
 {
    g3ErrorHandler->fatal("NDMaterial::getStrainTensor -- subclass responsibility");
    return errTensor;    
