@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:25:25 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 18:06:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GumbelRV.cpp,v $
 
 
@@ -43,8 +43,6 @@ GumbelRV::GumbelRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"GUMBEL");
 	tag = passedTag ;
 	double pi = 3.14159265358979;
 	double gamma = 0.5772156649;
@@ -60,8 +58,6 @@ GumbelRV::GumbelRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"GUMBEL");
 	tag = passedTag ;
 	u = passedParameter1;
 	alpha = passedParameter2;
@@ -72,8 +68,6 @@ GumbelRV::GumbelRV(int passedTag,
 		 double passedStdv)
 :RandomVariable(passedTag, passedMean, passedStdv)
 {
-	type = new char[100];
-	strcpy(type,"GUMBEL");
 	tag = passedTag ;
 	double pi = 3.14159265358979;
 	double gamma = 0.5772156649;
@@ -88,8 +82,6 @@ GumbelRV::GumbelRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
 {
-	type = new char[100];
-	strcpy(type,"GUMBEL");
 	tag = passedTag ;
 	u = passedParameter1;
 	alpha = passedParameter2;
@@ -99,8 +91,6 @@ GumbelRV::GumbelRV(int passedTag,
 
 GumbelRV::~GumbelRV()
 {
-  if (type != 0)
-    delete [] type;
 }
 
 
@@ -131,10 +121,10 @@ GumbelRV::getInverseCDFvalue(double probValue)
 }
 
 
-char *
+const char *
 GumbelRV::getType()
 {
-	return type;
+	return "GUMBEL";
 }
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:25:25 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 18:06:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/BetaRV.cpp,v $
 
 
@@ -55,8 +55,6 @@ BetaRV::BetaRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"BETA");
 	tag = passedTag ;
 	a = passedParameter1;
 	b = passedParameter2;
@@ -79,8 +77,6 @@ BetaRV::BetaRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
 {
-	type = new char[100];
-	strcpy(type,"BETA");
 	tag = passedTag ;
 	a = passedParameter1;
 	b = passedParameter2;
@@ -92,8 +88,6 @@ BetaRV::BetaRV(int passedTag,
 
 BetaRV::~BetaRV()
 {
-  if (type != 0)
-    delete [] type;
 }
 
 
@@ -200,10 +194,10 @@ BetaRV::getInverseCDFvalue(double probValue)
 }
 
 
-char *
+const char *
 BetaRV::getType()
 {
-	return type;
+	return "BETA";
 }
 
 

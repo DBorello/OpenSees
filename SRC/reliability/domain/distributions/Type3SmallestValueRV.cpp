@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:25:26 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 18:06:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type3SmallestValueRV.cpp,v $
 
 
@@ -55,8 +55,6 @@ Type3SmallestValueRV::Type3SmallestValueRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"TYPE3SMALLESTVALUE");
 	tag = passedTag ;
 	epsilon = passedParameter1;
 	u = passedParameter2;
@@ -78,8 +76,6 @@ Type3SmallestValueRV::Type3SmallestValueRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
 {
-	type = new char[100];
-	strcpy(type,"TYPE3SMALLESTVALUE");
 	tag = passedTag ;
 	epsilon = passedParameter1;
 	u = passedParameter2;
@@ -90,8 +86,6 @@ Type3SmallestValueRV::Type3SmallestValueRV(int passedTag,
 
 Type3SmallestValueRV::~Type3SmallestValueRV()
 {
-  if (type != 0)
-    delete [] type;
 }
 
 
@@ -136,10 +130,10 @@ Type3SmallestValueRV::getInverseCDFvalue(double probValue)
 }
 
 
-char *
+const char *
 Type3SmallestValueRV::getType()
 {
-	return type;
+	return "TYPE3SMALLESTVALUE";
 }
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:25:26 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 18:06:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/UniformRV.cpp,v $
 
 
@@ -42,8 +42,6 @@ UniformRV::UniformRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"UNIFORM");
 	tag = passedTag;
 	a = passedMean - sqrt(3.0)*passedStdv;
 	b = passedMean + sqrt(3.0)*passedStdv;
@@ -62,8 +60,6 @@ UniformRV::UniformRV(int passedTag,
 				passedParameter4, 
 				passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"UNIFORM");
 	tag = passedTag ;
 	a = passedParameter1;
 	b = passedParameter2;
@@ -74,8 +70,6 @@ UniformRV::UniformRV(int passedTag,
 		 double passedStdv)
 :RandomVariable(passedTag, passedMean, passedStdv)
 {
-	type = new char[100];
-	strcpy(type,"UNIFORM");
 	tag = passedTag;
 	a = passedMean - sqrt(3.0)*passedStdv;
 	b = passedMean + sqrt(3.0)*passedStdv;
@@ -92,8 +86,6 @@ UniformRV::UniformRV(int passedTag,
 				passedParameter3, 
 				passedParameter4)
 {
-	type = new char[100];
-	strcpy(type,"UNIFORM");
 	tag = passedTag ;
 	a = passedParameter1;
 	b = passedParameter2;
@@ -103,8 +95,6 @@ UniformRV::UniformRV(int passedTag,
 
 UniformRV::~UniformRV()
 {
-  if (type != 0)
-    delete [] type;
 }
 
 
@@ -152,10 +142,10 @@ UniformRV::getInverseCDFvalue(double probValue)
 }
 
 
-char *
+const char *
 UniformRV::getType()
 {
-	return type;
+	return "UNIFORM";
 }
 
 

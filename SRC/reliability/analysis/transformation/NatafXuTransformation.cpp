@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:03 $
+// $Revision: 1.3 $
+// $Date: 2001-08-01 18:06:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafXuTransformation.cpp,v $
 
 
@@ -310,8 +310,6 @@ void
 NatafXuTransformation::setCorrelationMatrix()
 {
 	// Initial declarations
-	char* typeRv1;
-	char* typeRv2;
 	int rv1;
 	int rv2;
 	RandomVariable *rv1Ptr;
@@ -351,8 +349,8 @@ NatafXuTransformation::setCorrelationMatrix()
 		rv2Ptr = theReliabilityDomain->getRandomVariablePtr(rv2);
 
 		// Get the types of the two random variables
-		typeRv1 = rv1Ptr->getType();
-		typeRv2 = rv2Ptr->getType();
+		const char *typeRv1 = rv1Ptr->getType();
+		const char *typeRv2 = rv2Ptr->getType();
 
 		// Compute the coefficient of variation of the random variables
 		double cov1 = rv1Ptr->getStdv() / rv1Ptr->getMean();
@@ -362,7 +360,7 @@ NatafXuTransformation::setCorrelationMatrix()
 		// the type of the the two involved random variables
 
 		/////////////////////////////////////////////////////////////////////////////////
-		if ( strcmp(typeRv1,"		NORMAL") == 0  &&  strcmp(typeRv2,"LOGNORMAL") == 0  ) {
+		if ( strcmp(typeRv1,"NORMAL") == 0  &&  strcmp(typeRv2,"LOGNORMAL") == 0  ) {
 			double zeta2 = sqrt ( log ( 1.0 + cov2 * cov2 ) );
 			newCorrelation = correlation * cov2 / zeta2;
 		}

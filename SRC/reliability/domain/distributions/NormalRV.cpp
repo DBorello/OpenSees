@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:25:26 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 18:06:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/NormalRV.cpp,v $
 
 
@@ -43,8 +43,6 @@ NormalRV::NormalRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"NORMAL");
 	tag = passedTag ;
 	mju = passedMean;
 	sigma = passedStdv;
@@ -58,8 +56,6 @@ NormalRV::NormalRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"NORMAL");
 	tag = passedTag ;
 	mju = passedParameter1;
 	sigma = passedParameter2;
@@ -70,8 +66,6 @@ NormalRV::NormalRV(int passedTag,
 		 double passedStdv)
 :RandomVariable(passedTag, passedMean, passedStdv)
 {
-	type = new char[100];
-	strcpy(type,"NORMAL");
 	tag = passedTag ;
 	mju = passedMean;
 	sigma = passedStdv;
@@ -84,8 +78,6 @@ NormalRV::NormalRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
 {
-	type = new char[100];
-	strcpy(type,"NORMAL");
 	tag = passedTag ;
 	mju = passedParameter1;
 	sigma = passedParameter2;
@@ -95,8 +87,6 @@ NormalRV::NormalRV(int passedTag,
 
 NormalRV::~NormalRV()
 {
-  if (type != 0)
-    delete [] type;
 }
 
 
@@ -130,10 +120,10 @@ NormalRV::getInverseCDFvalue(double probValue)
 }
 
 
-char *
+const char *
 NormalRV::getType()
 {
-	return type;
+	return "NORMAL";
 }
 
 

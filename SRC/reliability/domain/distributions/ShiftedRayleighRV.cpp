@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:25:26 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 18:06:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/ShiftedRayleighRV.cpp,v $
 
 
@@ -43,8 +43,6 @@ ShiftedRayleighRV::ShiftedRayleighRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"SHIFTEDRAYLEIGH");
 	tag = passedTag;
 	double pi = 3.14159265358979;
 	u = 2.0 * passedStdv / sqrt(3.0*pi+4.0);
@@ -59,8 +57,6 @@ ShiftedRayleighRV::ShiftedRayleighRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"SHIFTEDRAYLEIGH");
 	tag = passedTag ;
 	u = passedParameter1;
 	x0 = passedParameter2;
@@ -71,8 +67,6 @@ ShiftedRayleighRV::ShiftedRayleighRV(int passedTag,
 		 double passedStdv)
 :RandomVariable(passedTag, passedMean, passedStdv)
 {
-	type = new char[100];
-	strcpy(type,"SHIFTEDRAYLEIGH");
 	tag = passedTag;
 	double pi = 3.14159265358979;
 	u = 2.0 * passedStdv / sqrt(3.0*pi+4.0);
@@ -86,8 +80,6 @@ ShiftedRayleighRV::ShiftedRayleighRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
 {
-	type = new char[100];
-	strcpy(type,"SHIFTEDRAYLEIGH");
 	tag = passedTag ;
 	u = passedParameter1;
 	x0 = passedParameter2;
@@ -97,8 +89,6 @@ ShiftedRayleighRV::ShiftedRayleighRV(int passedTag,
 
 ShiftedRayleighRV::~ShiftedRayleighRV()
 {
-  if (type != 0)
-    delete [] type;
 }
 
 
@@ -143,10 +133,10 @@ ShiftedRayleighRV::getInverseCDFvalue(double probValue)
 }
 
 
-char *
+const char *
 ShiftedRayleighRV::getType()
 {
-	return type;
+	return "SHIFTEDRAYLEIGH";
 }
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:25:25 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 18:06:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/LaplaceRV.cpp,v $
 
 
@@ -43,8 +43,6 @@ LaplaceRV::LaplaceRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"LAPLACE");
 	tag = passedTag ;
 	alpha = passedMean;
 	beta = sqrt(2.0)/passedStdv;
@@ -58,8 +56,6 @@ LaplaceRV::LaplaceRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"LAPLACE");
 	tag = passedTag ;
 	alpha = passedParameter1;
 	beta = passedParameter2;
@@ -70,8 +66,6 @@ LaplaceRV::LaplaceRV(int passedTag,
 		 double passedStdv)
 :RandomVariable(passedTag, passedMean, passedStdv)
 {
-	type = new char[100];
-	strcpy(type,"LAPLACE");
 	tag = passedTag ;
 	alpha = passedMean;
 	beta = sqrt(2.0)/passedStdv;
@@ -84,8 +78,6 @@ LaplaceRV::LaplaceRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
 {
-	type = new char[100];
-	strcpy(type,"LAPLACE");
 	tag = passedTag ;
 	alpha = passedParameter1;
 	beta = passedParameter2;
@@ -95,8 +87,6 @@ LaplaceRV::LaplaceRV(int passedTag,
 
 LaplaceRV::~LaplaceRV()
 {
-  if (type != 0)
-    delete [] type;
 }
 
 
@@ -134,10 +124,10 @@ LaplaceRV::getInverseCDFvalue(double rvValue)
 }
 
 
-char *
+const char *
 LaplaceRV::getType()
 {
-	return type;
+	return "LAPLACE";
 }
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:05 $
+// $Revision: 1.3 $
+// $Date: 2001-08-01 18:06:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type2LargestValueRV.h,v $
 
 
@@ -65,7 +65,7 @@ public:
 	double getPDFvalue(double rvValue);
 	double getCDFvalue(double rvValue);
 	double getInverseCDFvalue(double probValue);
-	char * getType();
+	const char * getType();
 	double getMean();
 	double getStdv();
 	double getParameter1();
@@ -80,7 +80,6 @@ protected:
 private:
 	double u;
 	double k;
-	char * type;
 	void setParameters(double mean, double stdv);
 	void function131(double xk, double cov, double mean);
 	void function132(double xk, double cov, double mean);

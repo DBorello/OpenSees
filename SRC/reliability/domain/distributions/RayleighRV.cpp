@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:25:26 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 18:06:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/RayleighRV.cpp,v $
 
 
@@ -54,8 +54,6 @@ RayleighRV::RayleighRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"RAYLEIGH");
 	tag = passedTag ;
 	u = passedParameter1;
 	startValue = passedStartValue;
@@ -75,8 +73,6 @@ RayleighRV::RayleighRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
 {
-	type = new char[100];
-	strcpy(type,"RAYLEIGH");
 	tag = passedTag ;
 	u = passedParameter1;
 	startValue = getMean();
@@ -85,8 +81,6 @@ RayleighRV::RayleighRV(int passedTag,
 
 RayleighRV::~RayleighRV()
 {
-  if (type != 0)
-    delete [] type;
 }
 
 
@@ -131,10 +125,10 @@ RayleighRV::getInverseCDFvalue(double probValue)
 }
 
 
-char *
+const char *
 RayleighRV::getType()
 {
-	return type;
+	return "RAYLEIGH";
 }
 
 

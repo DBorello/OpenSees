@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:25:25 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 18:06:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/ChiSquareRV.cpp,v $
 
 
@@ -44,8 +44,6 @@ ChiSquareRV::ChiSquareRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"CHISQUARE");
 	tag = passedTag ;
 	nu = 0.5*passedMean;
 	startValue = passedStartValue;
@@ -58,8 +56,6 @@ ChiSquareRV::ChiSquareRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"CHISQUARE");
 	tag = passedTag ;
 	nu = passedParameter1;
 	startValue = passedStartValue;
@@ -69,8 +65,6 @@ ChiSquareRV::ChiSquareRV(int passedTag,
 		 double passedStdv)
 :RandomVariable(passedTag, passedMean, passedStdv)
 {
-	type = new char[100];
-	strcpy(type,"CHISQUARE");
 	tag = passedTag ;
 	nu = 0.5*passedMean;
 	startValue = getMean();
@@ -82,8 +76,6 @@ ChiSquareRV::ChiSquareRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
 {
-	type = new char[100];
-	strcpy(type,"CHISQUARE");
 	tag = passedTag ;
 	nu = passedParameter1;
 	startValue = getMean();
@@ -92,8 +84,6 @@ ChiSquareRV::ChiSquareRV(int passedTag,
 
 ChiSquareRV::~ChiSquareRV()
 {
-  if (type != 0)
-    delete [] type;
 }
 
 
@@ -145,10 +135,10 @@ ChiSquareRV::getInverseCDFvalue(double rvValue)
 }
 
 
-char *
+const char *
 ChiSquareRV::getType()
 {
-	return type;
+	return "CHISQUARE";
 }
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:25:25 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 18:06:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/ExponentialRV.cpp,v $
 
 
@@ -54,8 +54,6 @@ ExponentialRV::ExponentialRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"EXPONENTIAL");
 	tag = passedTag ;
 	lambda = passedParameter1;
 	startValue = passedStartValue;
@@ -75,8 +73,6 @@ ExponentialRV::ExponentialRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
 {
-	type = new char[100];
-	strcpy(type,"EXPONENTIAL");
 	tag = passedTag ;
 	lambda = passedParameter1;
 	startValue = getMean();
@@ -85,8 +81,6 @@ ExponentialRV::ExponentialRV(int passedTag,
 
 ExponentialRV::~ExponentialRV()
 {
-  if (type != 0)
-    delete [] type;
 }
 
 
@@ -131,10 +125,10 @@ ExponentialRV::getInverseCDFvalue(double probValue)
 }
 
 
-char *
+const char *
 ExponentialRV::getType()
 {
-	return type;
+	return "EXPONENTIAL";
 }
 
 

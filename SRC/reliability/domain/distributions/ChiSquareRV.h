@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:04 $
+// $Revision: 1.3 $
+// $Date: 2001-08-01 18:06:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/ChiSquareRV.h,v $
 
 
@@ -65,7 +65,7 @@ public:
 	double getPDFvalue(double rvValue);
 	double getCDFvalue(double rvValue);
 	double getInverseCDFvalue(double probValue);
-	char * getType();
+	const char * getType();
 	double getMean();
 	double getStdv();
 	double getParameter1();
@@ -79,7 +79,6 @@ protected:
 
 private:
 	double nu;
-	char * type;
 
 };
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:25:26 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 18:06:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type2LargestValueRV.cpp,v $
 
 
@@ -44,8 +44,6 @@ Type2LargestValueRV::Type2LargestValueRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"TYPE2LARGESTVALUE");
 	tag = passedTag ;
 	setParameters(passedMean,passedStdv);
 	startValue = passedStartValue;
@@ -58,8 +56,6 @@ Type2LargestValueRV::Type2LargestValueRV(int passedTag,
 		 double passedStartValue)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
 {
-	type = new char[100];
-	strcpy(type,"TYPE2LARGESTVALUE");
 	tag = passedTag ;
 	u = passedParameter1;
 	k = passedParameter2;
@@ -70,8 +66,6 @@ Type2LargestValueRV::Type2LargestValueRV(int passedTag,
 		 double passedStdv)
 :RandomVariable(passedTag, passedMean, passedStdv)
 {
-	type = new char[100];
-	strcpy(type,"TYPE2LARGESTVALUE");
 	tag = passedTag ;
 	setParameters(passedMean,passedStdv);
 	startValue = getMean();
@@ -83,8 +77,6 @@ Type2LargestValueRV::Type2LargestValueRV(int passedTag,
 		 double passedParameter4)
 :RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
 {
-	type = new char[100];
-	strcpy(type,"TYPE2LARGESTVALUE");
 	tag = passedTag ;
 	u = passedParameter1;
 	k = passedParameter2;
@@ -94,8 +86,6 @@ Type2LargestValueRV::Type2LargestValueRV(int passedTag,
 
 Type2LargestValueRV::~Type2LargestValueRV()
 {
-  if (type != 0)
-    delete [] type;
 }
 
 
@@ -140,10 +130,10 @@ Type2LargestValueRV::getInverseCDFvalue(double probValue)
 }
 
 
-char *
+const char *
 Type2LargestValueRV::getType()
 {
-	return type;
+	return "TYPE2LARGESTVALUE";
 }
 
 
