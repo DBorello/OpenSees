@@ -671,6 +671,22 @@ SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration3d.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration2d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration2d.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration3d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauTwoBeamIntegration3d.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\element\forceBeamColumn\LobattoBeamIntegration.cpp
 # End Source File
 # Begin Source File
