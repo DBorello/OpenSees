@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2000-12-19 03:35:02 $
+// $Revision: 1.2 $
+// $Date: 2001-05-22 05:04:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.cpp,v $
                                                                         
 // Written: ZHY
@@ -210,4 +210,12 @@ istream & operator>> (istream & is, T2Vector & a)
 
   return is;
 }
+
+
+
+
+
+
+
+
 

@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2000-12-19 03:35:02 $
+// $Revision: 1.2 $
+// $Date: 2001-05-22 05:04:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -191,21 +191,24 @@ void PressureIndependMultiYield::elast2Plast(void)
 
 int PressureIndependMultiYield::setTrialStrain (const Vector &strain)
 {
-	Vector temp(6);
+	static Vector temp(6);
 	if (ndm==3 && strain.Size()==6) 
 		temp = strain;
 	else if (ndm==2 && strain.Size()==3) {
 	  temp[0] = strain[0];
 	  temp[1] = strain[1];
 	  temp[3] = strain[2];
-  }
+	  temp[4] = 0.0;
+	  temp[5] = 0.0;
+	  temp[2] = 0.0;
+	}
 	else {
 		cerr << "Fatal:D2PressDepMYS:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
 		g3ErrorHandler->fatal("");
 	}
 
-  strainRate = T2Vector(temp-currentStrain.t2Vector());
+	strainRate = T2Vector(temp-currentStrain.t2Vector());
 
 	return 0;
 }
@@ -219,13 +222,16 @@ int PressureIndependMultiYield::setTrialStrain (const Vector &strain, const Vect
 
 int PressureIndependMultiYield::setTrialStrainIncr (const Vector &strain)
 {
-	Vector temp(6);
+	static Vector temp(6);
 	if (ndm==3 && strain.Size()==6) 
 		temp = strain;
 	else if (ndm==2 && strain.Size()==3) {
 	  temp[0] = strain[0];
 	  temp[1] = strain[1];
 	  temp[3] = strain[2];
+	  temp[4] = 0.0;
+	  temp[5] = 0.0;
+	  temp[2] = 0.0;
   }
 	else {
 		cerr << "Fatal:D2PressDepMYS:: Material dimension is: " << ndm << endl;
@@ -233,7 +239,7 @@ int PressureIndependMultiYield::setTrialStrainIncr (const Vector &strain)
 		g3ErrorHandler->fatal("");
 	}
 
-  strainRate = T2Vector(temp);
+	strainRate = T2Vector(temp);
 	return 0;
 }
 
