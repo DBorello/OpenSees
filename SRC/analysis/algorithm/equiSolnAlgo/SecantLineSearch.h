@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-12-07 01:02:10 $
+// $Revision: 1.2 $
+// $Date: 2002-01-06 19:17:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/SecantLineSearch.h,v $
 
 // Written: fmk 
@@ -44,7 +44,7 @@
 
 #include <LineSearch.h>
 class Vector;
-class ostream;
+//class ostream; //Jeremic@ucdavis.edu taken out since there is an include<iostream.h> in LineSearch.h 
 
 class SecantLineSearch: public LineSearch
 {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-12-07 01:02:09 $
+// $Revision: 1.2 $
+// $Date: 2002-01-06 19:17:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/LineSearch.h,v $
                                                                         
 #ifndef LineSearch_h
@@ -37,11 +37,12 @@
 // What: "@(#)LineSearch.h, revA"
 
 #include <MovableObject.h>
+#include <iostream.h> //Jeremic@ucdavis.edu added!
 
 class SolutionAlgorithm;
 class IncrementalIntegrator;
 class LinearSOE;
-class ostream;
+//class ostream; //Jeremic@ucdavis.edu taken out since there is an include<iostream.h> in LineSearch.h 
 
 class LineSearch: public MovableObject
 {
