@@ -38,11 +38,11 @@ set beta 0.1
 
 set nIP 3
 
-set numElements 4
-set numSections 4
+set elements {1 2 3 4}
+set sections {1 2 3 4 5 6 7}
 
-for {set element 1} {$element <= $numElements} {incr element} {
-    for {set section 1} {$section <= $numSections} {incr section} {
+foreach element $elements {
+    foreach section $sections {
 	
 	model basic -ndm 2 -ndf 3
 	
@@ -76,6 +76,24 @@ for {set element 1} {$element <= $numElements} {incr element} {
 		section Uniaxial 2 1 P
 		section Aggregator 1 2 Mz -section 2
 	    }
+            5 {
+                puts "Section: YieldSurface01 (Orbison)"
+                ysEvolutionModel null 100 1.0 1.0
+                yieldSurface_BC Orbison2D 100 1.0e12 1.0e12 100
+                section YS_Section2D01 1 $E $A $I 100
+            }
+            6 {
+                puts "Section: YieldSurface01 (Attalla)"
+                ysEvolutionModel null 100 1.0 1.0
+                yieldSurface_BC Attalla2D 100 1.0e12 1.0e12 100
+                section YS_Section2D01 1 $E $A $I 100
+            }
+            7 {
+                puts "Section: YieldSurface01 (ElTawil)"
+                ysEvolutionModel null 100 1.0 1.0
+                yieldSurface_BC ElTawil2D 100 1.0e12 0.0 1.0e12 -1.0e12 100
+                section YS_Section2D01 1 $E $A $I 100
+            }
 	}
 
 	geomTransf Linear 1
@@ -84,7 +102,6 @@ for {set element 1} {$element <= $numElements} {incr element} {
 	    1 {
 		puts "Element: ElasticBeamColumn"
 		element elasticBeamColumn 1 1 2 $A $E $I 1
-		set section $numSections ;# To get out of loop
 	    }
 	    2 {
 		puts "Element: DispBeamColumn"
@@ -99,7 +116,7 @@ for {set element 1} {$element <= $numElements} {incr element} {
 		element beamWithHinges 1 1 2 1 $beta 1 $beta $E $A $I 1
 	    }
 	}
-
+	
 	printEigenvalues $E $A $I $L
 
 	fix 1 1 1 1
