@@ -242,6 +242,10 @@ SOURCE=..\..\..\Src\material\uniaxial\Py\QzSimple1.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\uniaxial\PY\TclPyTzQzMaterialCommand.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\Src\material\uniaxial\Py\TzSimple1.cpp
 # End Source File
 # Begin Source File
