@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-20 00:37:23 $
+// $Revision: 1.4 $
+// $Date: 2002-04-12 22:57:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.h,v $
                                                                         
                                                                         
@@ -33,7 +33,7 @@
 // Revision: A
 //
 // Purpose: This file contains the class interface for NodalLoad.
-// NodalLoad is a class for appling nodal loads to the model.
+// NodalLoad is a class for applying nodal loads to the model.
 
 #include <Load.h>
 #include <Node.h>
