@@ -57,6 +57,26 @@
 
 #include <Template3Dep.h>
 
+#include <NDMaterial.h>
+#include <Matrix.h>
+#include <Vector.h>
+#include <ID.h>
+#include <Renderer.h>
+#include <Domain.h>
+#include <string.h>
+#include <Information.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
+#include <ElementResponse.h>
+#include <ElementalLoad.h>
+
+#include <fstream.h>
+#include <iostream.h>
+#include <stdlib.h>
+
+
+
+
 
 class Node;
 
@@ -95,6 +115,7 @@ class TwentyNodeBrick: public Element
     const Matrix &getMass (); 
 
     const Matrix &getConsMass (); 
+    const Matrix &getLumpedMass (); 
 
     void zeroLoad ();
     int addLoad(ElementalLoad *theLoad, double loadFactor);    
