@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-20 00:37:24 $
+// $Revision: 1.4 $
+// $Date: 2002-04-12 22:57:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.h,v $
                                                                         
                                                                         
@@ -34,7 +34,7 @@
 //
 // Purpose: This file contains the class definition for LoadPattern.
 // LoadPattern is a concrete class. A LoadPattern object is used to 
-// to store reference loads and single point onstraints and a TimeSeries function
+// to store reference loads and single point constraints and a TimeSeries function
 // which is used to determine the load factor given the pseudo-time
 // to the model. 
 //
