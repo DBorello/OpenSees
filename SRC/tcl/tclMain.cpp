@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.8 2002-09-19 19:56:13 mhscott Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.9 2002-10-23 20:14:04 jeremic Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -128,6 +128,11 @@ char *TclGetStartupScriptFileName()
  *----------------------------------------------------------------------
  */
 
+// Boris Jeremic {
+#include <fstream.h>
+// } Boris Jeremic
+
+
 void
 g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
 {
@@ -148,6 +153,13 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
     fprintf(stderr,"\t    (c) Copyright 1999 The Regents of the University of California");
     fprintf(stderr,"\n\t\t\t\t All Rights Reserved \n\n\n");    
     /* fmk - end of modifications for OpenSees */
+// Boris Jeremic additions
+# ifdef _UNIX
+#include "version.txt"
+        fprintf(stderr,"\n %s \n\n\n", version);    
+# endif _UNIX
+// Boris Jeremic additions
+
 
     Tcl_FindExecutable(argv[0]);
     interp = Tcl_CreateInterp();
@@ -271,7 +283,11 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
 		    Tcl_WriteChars(outChannel, "OpenSees > ", 11);
 		}
 	    } else {
-		code = Tcl_EvalObjEx(interp, promptCmdPtr, 0);
+		
+// Boris Jeremic: this is the entry point!!!!!
+	 code = Tcl_EvalObjEx(interp, promptCmdPtr, 0);
+
+
 		inChannel = Tcl_GetStdChannel(TCL_STDIN);
 		outChannel = Tcl_GetStdChannel(TCL_STDOUT);
 		errChannel = Tcl_GetStdChannel(TCL_STDERR);
