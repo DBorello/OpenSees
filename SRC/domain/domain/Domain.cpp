@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-04-02 19:31:19 $
+// $Revision: 1.13 $
+// $Date: 2002-06-07 22:04:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -257,6 +257,8 @@ Domain::Domain(TaggedObjectStorage &theStorage)
     theBounds(3) = 0;
     theBounds(4) = 0;    
     theBounds(5) = 0;            
+
+    dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0;
 }
 
 
@@ -366,6 +368,7 @@ Domain::addElement(Element *element)
   bool result = theElements->addComponent(element);
   if (result == true) {
 	  element->setDomain(this);
+	  element->update();
 
       // finally check the ele has correct number of dof
 #ifdef _G3DEBUG
@@ -756,8 +759,15 @@ Domain::clearAll(void) {
     theBounds(4) = 0;    
     theBounds(5) = 0;        
 
-    // mark the domain as having changed
-    this->domainChange();
+    currentGeoTag = 0;
+    lastGeoSendTag = -1;
+
+    // rest the flag to be as initial
+    hasDomainChangedFlag = false;
+    nodeGraphBuiltFlag = false;
+    eleGraphBuiltFlag = false;
+
+    dbEle =0; dbNod =0; dbSPs =0; dbMPs =0; dbLPs = 0;
 }
 
 
@@ -1315,8 +1325,8 @@ Domain::revertToLastCommit(void)
 
     // apply load for the last committed time
     this->applyLoad(currentTime);
-    
-    return 0;
+
+    return this->update();
 }
 
 int
@@ -1345,8 +1355,8 @@ Domain::revertToStart(void)
 
     // apply load for the last committed time
     this->applyLoad(currentTime);
-    
-    return 0;
+
+    return this->update();
 }
 
 int
@@ -1785,47 +1795,53 @@ Domain::sendSelf(int cTag, Channel &theChannel)
 {
   // update the commitTag and currentGeoTag
   commitTag = cTag;
+
   this->hasDomainChanged();
 
   // first we send info about the current domain flag and the number of
   // elements, nodes, constraints and load patterns currently in the domain
   int numEle, numNod, numSPs, numMPs, numLPs;
+  numNod = theNodes->getNumComponents();
+  numEle = theElements->getNumComponents();
+  numSPs = theSPs->getNumComponents();
+  numMPs = theMPs->getNumComponents();  
+  numLPs = theLoadPatterns->getNumComponents();
+
   ID domainData(11);
   domainData(0) = currentGeoTag;
-  domainData(1) = numNod = theNodes->getNumComponents();
-  domainData(2) = numEle = theElements->getNumComponents();
-  domainData(3) = numSPs = theSPs->getNumComponents();
-  domainData(4) = numMPs = theMPs->getNumComponents();
-  domainData(5) = numLPs = theLoadPatterns->getNumComponents();
+
+  domainData(1) = numNod;
+  domainData(2) = numEle;
+  domainData(3) = numSPs;
+  domainData(4) = numMPs;
+  domainData(5) = numLPs;
 
   // add the database tag for the ID's storing node, element, constraints
   // and loadpattern data into domainData
   // NOTE: if these still 0 get new ones from the channel
   if (dbNod == 0) {
-    domainData(6) = dbNod = theChannel.getDbTag();
-    domainData(7) = dbEle = theChannel.getDbTag();
-    domainData(8) = dbSPs = theChannel.getDbTag();
-    domainData(9) = dbMPs = theChannel.getDbTag();
-    domainData(10) = dbLPs = theChannel.getDbTag();
-  } else {
-    domainData(6) = dbNod;
-    domainData(7) = dbEle;
-    domainData(8) = dbSPs;
-    domainData(9) = dbMPs;
-    domainData(10) = dbLPs;
-  }
+    dbNod = theChannel.getDbTag();
+    dbEle = theChannel.getDbTag();
+    dbSPs = theChannel.getDbTag();
+    dbMPs = theChannel.getDbTag();
+    dbLPs = theChannel.getDbTag();
+  } 
 
-    cerr << "DOMAIN::domainData: " << domainData;  
-  
+  domainData(6) = dbNod;
+  domainData(7) = dbEle;
+  domainData(8) = dbSPs;
+  domainData(9) = dbMPs;
+  domainData(10) = dbLPs;
+
   if (theChannel.sendID(theDbTag, commitTag, domainData) < 0) {
     g3ErrorHandler->warning("Domain::send - channel failed to send the initial ID");
     return -1;
   }    
 
   // send the time information
-  Vector domainTime(2);
-  domainTime(0) = currentTime;
-  domainTime(1) = committedTime;
+  Vector domainTime(1);
+  domainTime(0) = committedTime;
+
   if (theChannel.sendVector(theDbTag, commitTag, domainTime) < 0) {
     g3ErrorHandler->warning("Domain::send - channel failed to send the time Vector");
     return -2;
@@ -2073,22 +2089,21 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     return -1;
   }
 
-
   // recv the time information
-  Vector domainTime(2);
+  Vector domainTime(1);
   if (theChannel.recvVector(theDbTag, commitTag, domainTime) < 0) {
     g3ErrorHandler->warning("Domain::send - channel failed to recv thetime Vector");
     return -1;
   }    
-  currentTime = domainTime(0);
-  committedTime = domainTime(1);
 
+  currentTime = domainTime(0);
+  committedTime = currentTime;
 
   // 
   // now if the currentGeoTag does not agree with whats in the domain
   // we must wipe everything in the domain and recreate the domain based on the info from the channel
   //
-  if (domainData(0) != currentGeoTag) {
+  if (currentGeoTag == 0 || domainData(0) != currentGeoTag) {
     
     // set the currrentGeoTag
     int geoTag = domainData(0);
@@ -2103,6 +2118,9 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     // clear out the all the components in the current domain
     this->clearAll();
 
+    currentTime = domainTime(0);
+    committedTime = currentTime;
+
     // 
     // now we rebuild the nodes
     //
@@ -2111,7 +2129,6 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     numNod = domainData(1);
     dbNod = domainData(6);
     
-    cerr << "DOMAIN::numNode: " << numNod << " domainData: " << domainData;
     if (numNod != 0) {
       ID nodeData(2*numNod);
 
@@ -2205,7 +2222,6 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     
     numSPs = domainData(3);
     dbSPs = domainData(8);
-    
     if (numSPs != 0) {
       ID spData(2*numSPs);
 
@@ -2307,7 +2323,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
       for (i=0; i<numLPs; i++) {
 	int classTag = lpData(loc);
 	int dbTag = lpData(loc+1);
-      
+
 	LoadPattern *theLP = theBroker.getNewLoadPattern(classTag);
 	if (theLP == 0) {
 	  g3ErrorHandler->warning("Domain::recv - cannot create MP_Constraint with classTag %d ",
@@ -2362,6 +2378,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 				theEle->getTag());
 	return -8;
       }
+      theEle->update();
     }
 
     SP_Constraint *theSP;
@@ -2393,7 +2410,6 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 	return -11;
       }
     }  
-
   } 
 
   // now set the domains lastGeoSendTag and currentDomainChangedFlag

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-20 00:37:24 $
+// $Revision: 1.4 $
+// $Date: 2002-06-07 22:05:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
                                                                         
@@ -54,7 +54,7 @@ LoadPattern::LoadPattern(int tag, int clasTag)
 :DomainComponent(tag,clasTag),
  loadFactor(0), isConstant(1), 
  theSeries(0), 
- currentGeoTag(0), lastGeoSendTag(0),
+ currentGeoTag(0), lastGeoSendTag(-1),
  theNodalLoads(0), theElementalLoads(0), theSPs(0),
  theNodIter(0), theEleIter(0), theSpIter(0)
 {
@@ -86,7 +86,7 @@ LoadPattern::LoadPattern()
 :DomainComponent(0,PATTERN_TAG_LoadPattern),
  loadFactor(0), isConstant(1), 
  theSeries(0), 
- currentGeoTag(0), lastGeoSendTag(0),
+ currentGeoTag(0), lastGeoSendTag(-1),
  dbSPs(0), dbNod(0), dbEle(0), 
  theNodalLoads(0), theElementalLoads(0), theSPs(0),
  theNodIter(0), theEleIter(0), theSpIter(0)
@@ -118,7 +118,7 @@ LoadPattern::LoadPattern(int tag)
 :DomainComponent(tag,PATTERN_TAG_LoadPattern),
  loadFactor(0), isConstant(1), 
  theSeries(0), 
- currentGeoTag(0), lastGeoSendTag(0),
+ currentGeoTag(0), lastGeoSendTag(-1),
  dbSPs(0), dbNod(0), dbEle(0), 
  theNodalLoads(0), theElementalLoads(0), theSPs(0),
  theNodIter(0), theEleIter(0), theSpIter(0)
@@ -375,22 +375,27 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
 
   // into an ID we place all info needed to determine state of LoadPattern
   int numNodLd, numEleLd, numSPs;
-  ID lpData(11);
+  ID lpData(12);
 
+  numNodLd = theNodalLoads->getNumComponents();
+  numEleLd = theElementalLoads->getNumComponents();
+  numSPs = theSPs->getNumComponents();
+
+  lpData(11) = this->getTag();
   lpData(0) = currentGeoTag;
-  lpData(1) = numNodLd = theNodalLoads->getNumComponents();
-  lpData(2) = numEleLd = theElementalLoads->getNumComponents();
-  lpData(3) = numSPs = theSPs->getNumComponents();
+  lpData(1) = numNodLd;
+  lpData(2) = numEleLd;
+  lpData(3) = numSPs;
 
   if (dbNod == 0) {
-    lpData(4) = dbNod = theChannel.getDbTag();
-    lpData(5) = dbEle = theChannel.getDbTag();
-    lpData(6) = dbSPs = theChannel.getDbTag();
-  } else {
-    lpData(4) = dbNod;
-    lpData(5) = dbEle;
-    lpData(6) = dbSPs;
-  }
+    dbNod = theChannel.getDbTag();
+    dbEle = theChannel.getDbTag();
+    dbSPs = theChannel.getDbTag();
+  } 
+
+  lpData(4) = dbNod;
+  lpData(5) = dbEle;
+  lpData(6) = dbSPs;
 
   lpData(7) = isConstant;
 
@@ -437,7 +442,8 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   // NOTE THIS APPROACH MAY NEED TO CHANGE FOR VERY LARGE PROBLEMS IF CHANNEL CANNOT
   // HANDLE VERY LARGE ID OBJECTS.
   if (lastGeoSendTag != currentGeoTag) {
-    
+
+
     //
     // into an ID we are gonna place the class and db tags for each node so can rebuild
     // this ID we then send to the channel
@@ -468,7 +474,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
       }    
 
       // now send the ID
-      if (theChannel.sendID(dbNod, cTag, nodeData) < 0) {
+      if (theChannel.sendID(dbNod, currentGeoTag, nodeData) < 0) {
 	g3ErrorHandler->warning("LoadPattern::sendSelf - channel failed to send the NodalLoads ID");
 	return -4;
       }
@@ -497,7 +503,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
       }
 
       // now send the ID
-      if (theChannel.sendID(dbEle, cTag, elementData) < 0) {
+      if (theChannel.sendID(dbEle, currentGeoTag, elementData) < 0) {
 	g3ErrorHandler->warning("Domain::send - channel failed to send the element ID");
 	return -5;
       }
@@ -525,7 +531,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
 	loc+=2;
       }    
 
-      if (theChannel.sendID(dbSPs, cTag, spData) < 0) {
+      if (theChannel.sendID(dbSPs, currentGeoTag, spData) < 0) {
 	g3ErrorHandler->warning("LoadPAttern::sendSelf - channel failed sending SP_Constraint ID");
 	return -6;
       }
@@ -584,12 +590,14 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
 
   // into an ID we place all info needed to determine state of LoadPattern
   int numNod, numEle, numSPs;
-  ID lpData(11);
+  ID lpData(12);
 
   if (theChannel.recvID(myDbTag, cTag, lpData) < 0) {
     g3ErrorHandler->warning("LoadPattern::recvSelf - channel failed to recv the initial ID");
     return -1;
   }    
+
+  this->setTag(lpData(11));
 
   isConstant = lpData(7);
 
@@ -603,43 +611,39 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
   }
   
   // read data about the time series
-      
-  if (currentGeoTag != lpData(0) || theSeries == 0) {
+  if (lpData(8) != -1) {
     if (theSeries == 0) {
       theSeries = theBroker.getNewTimeSeries(lpData(8));
-      theSeries->setDbTag(lpData(9));
     } else if (theSeries->getClassTag() != lpData(8)) {
       delete theSeries;    
       theSeries = theBroker.getNewTimeSeries(lpData(8));
-      theSeries->setDbTag(lpData(9));
-    } else if (theSeries->getDbTag() != lpData(9)) {
-      theSeries->setDbTag(lpData(9));
-    }    
-
+    }
     if (theSeries == 0) {
       g3ErrorHandler->warning("LoadPattern::recvSelf - failed to create TimeSeries");
       return -3;
     }
-    
-    // set the database tag in the series
+  
     theSeries->setDbTag(lpData(9));
+
+    if (theSeries->recvSelf(cTag, theChannel, theBroker) < 0) {
+      g3ErrorHandler->warning("LoadPattern::recvSelf - the TimeSeries failed to recv");
+      return -3;
+    }
+  }
+
+  if (currentGeoTag != lpData(0)) {
 
     // clear out the all the components in the current load pattern
     this->clearAll();
 
-    if (theSeries != 0)
-      if (theSeries->recvSelf(cTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("LoadPattern::recvSelf - the TimeSeries failed to recv");
-		return -3;
-      }
-  
+    currentGeoTag = lpData(0);
+
     numNod = lpData(1);
     numEle = lpData(2);
     numSPs = lpData(3);
     dbNod = lpData(4);
     dbEle = lpData(5);
     dbSPs = lpData(6);    
-
 
     // 
     // now we rebuild the nodal loads
@@ -650,7 +654,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
       ID nodeData(2*numNod);
 
       // now receive the ID about the nodes, class tag and dbTags
-      if (theChannel.recvID(dbNod, cTag, nodeData) < 0) {
+      if (theChannel.recvID(dbNod, currentGeoTag, nodeData) < 0) {
 	g3ErrorHandler->warning("LoadPAttern::recvSelf - channel failed to recv the NodalLoad ID");
 	return -2;
       }
@@ -698,7 +702,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
     if (numEle != 0) {
       ID eleData(2*numEle);
       
-      if (theChannel.recvID(dbEle, cTag, eleData) < 0) {
+      if (theChannel.recvID(dbEle, currentGeoTag, eleData) < 0) {
 	g3ErrorHandler->warning("LoadPattern::recvSelf - channel failed to recv the EleLoad ID");
 	return -2;
       }
@@ -740,7 +744,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
     if (numSPs != 0) {
       ID spData(2*numSPs);
 
-      if (theChannel.recvID(dbSPs, cTag, spData) < 0) {
+      if (theChannel.recvID(dbSPs, currentGeoTag, spData) < 0) {
 	g3ErrorHandler->warning("LoadPattern::recvSelf - channel failed to recv the SP_Constraints ID");
 	return -2;
       }
