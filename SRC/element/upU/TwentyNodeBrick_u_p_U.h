@@ -160,16 +160,17 @@ class TwentyNodeBrick_u_p_U: public Element
     double getrho();		   
     int getNumExternalNodes () const;
     const ID &getExternalNodes ();
+    Node **getNodePtrs();
+
     int getNumDOF ();	
     void setDomain(Domain *theDomain);
 
-
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff (); 
-    const Matrix &getSecantStiff ();     
+    const Matrix &getInitialStiff(); 
     const Matrix &getMass (); 
     const Matrix &getConsMassM (); 
-    const Matrix &getDamp ();     
+    const Matrix &getDamp(); 
 
 //    const Matrix &getConsMassMs (); 
 //    const Matrix &getConsMassMf (); 
@@ -323,6 +324,8 @@ class TwentyNodeBrick_u_p_U: public Element
     
     int  LM[60]; // for 20noded x 3 = 60
 
+    Matrix *Ki;
+    static Node *theNodes[20];
 };
 
 

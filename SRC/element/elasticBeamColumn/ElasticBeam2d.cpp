@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-07-18 22:08:07 $
+// $Revision: 1.9 $
+// $Date: 2002-12-05 22:20:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -54,7 +54,7 @@ Matrix ElasticBeam2d::kb(3,3);
 ElasticBeam2d::ElasticBeam2d()
   :Element(0,ELE_TAG_ElasticBeam2d), 
   A(0.0), E(0.0), I(0.0), alpha(0.0), d(0.0), rho(0.0),
-  Q(6), q(3), node1Ptr(0), node2Ptr(0),
+  Q(6), q(3), 
   connectedExternalNodes(2), theCoordTransf(0)
 {
   // does nothing
@@ -65,6 +65,10 @@ ElasticBeam2d::ElasticBeam2d()
   p0[0] = 0.0;
   p0[1] = 0.0;
   p0[2] = 0.0;
+
+  // set node pointers to NULL
+  for (int i=0; i<2; i++)
+    theNodes[i] = 0;      
 }
 
 ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i, 
@@ -73,7 +77,7 @@ ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i,
 			     double r)
   :Element(tag,ELE_TAG_ElasticBeam2d), 
   A(a), E(e), I(i), alpha(Alpha), d(depth), rho(r),
-  Q(6), q(3), node1Ptr(0), node2Ptr(0),
+  Q(6), q(3),
   connectedExternalNodes(2), theCoordTransf(0)
 {
   connectedExternalNodes(0) = Nd1;
@@ -91,6 +95,10 @@ ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i,
   p0[0] = 0.0;
   p0[1] = 0.0;
   p0[2] = 0.0;
+
+  // set node pointers to NULL
+  for (int i=0; i<2; i++)
+    theNodes[i] = 0;      
 }
 
 ElasticBeam2d::~ElasticBeam2d()
@@ -111,6 +119,12 @@ ElasticBeam2d::getExternalNodes(void)
     return connectedExternalNodes;
 }
 
+Node **
+ElasticBeam2d::getNodePtrs(void) 
+{
+  return theNodes;
+}
+
 int
 ElasticBeam2d::getNumDOF(void)
 {
@@ -123,19 +137,19 @@ ElasticBeam2d::setDomain(Domain *theDomain)
     if (theDomain == 0)
 	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Domain is null");
     
-    node1Ptr = theDomain->getNode(connectedExternalNodes(0));
-    node2Ptr = theDomain->getNode(connectedExternalNodes(1));    
+    theNodes[0] = theDomain->getNode(connectedExternalNodes(0));
+    theNodes[1] = theDomain->getNode(connectedExternalNodes(1));    
     
-    if (node1Ptr == 0)
+    if (theNodes[0] == 0)
 	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Node 1: %i does not exist",
 			      connectedExternalNodes(0));
     
-    if (node2Ptr == 0)
+    if (theNodes[1] == 0)
 	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Node 2: %i does not exist",
 			      connectedExternalNodes(1));
  
-    int dofNd1 = node1Ptr->getNumberDOF();
-    int dofNd2 = node2Ptr->getNumberDOF();    
+    int dofNd1 = theNodes[0]->getNumberDOF();
+    int dofNd2 = theNodes[1]->getNumberDOF();    
     
     if (dofNd1 != 3)
 	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Node 1: %i has incorrect number of DOF",
@@ -147,7 +161,7 @@ ElasticBeam2d::setDomain(Domain *theDomain)
 	
     this->DomainComponent::setDomain(theDomain);
     
-    if (theCoordTransf->initialize(node1Ptr, node2Ptr) != 0)
+    if (theCoordTransf->initialize(theNodes[0], theNodes[1]) != 0)
 	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Error initializing coordinate transformation");
     
     double L = theCoordTransf->getInitialLength();
@@ -177,8 +191,6 @@ ElasticBeam2d::revertToStart()
 const Matrix &
 ElasticBeam2d::getTangentStiff(void)
 {
-  theCoordTransf->update();
-  
   const Vector &v = theCoordTransf->getBasicTrialDisp();
   
   double L = theCoordTransf->getInitialLength();
@@ -201,15 +213,24 @@ ElasticBeam2d::getTangentStiff(void)
   kb(1,1) = kb(2,2) = EIoverL4;
   kb(2,1) = kb(1,2) = EIoverL2;
   
-  return theCoordTransf->getGlobalStiffMatrix(kb,q);
+  return theCoordTransf->getGlobalStiffMatrix(kb, q);
 }
 
 const Matrix &
-ElasticBeam2d::getDamp(void)
+ElasticBeam2d::getInitialStiff(void)
 {
-  K.Zero();
+  double L = theCoordTransf->getInitialLength();
+
+  double EoverL   = E/L;
+  double EAoverL  = A*EoverL;			// EA/L
+  double EIoverL2 = 2.0*I*EoverL;		// 2EI/L
+  double EIoverL4 = 2.0*EIoverL2;		// 4EI/L
   
-  return K;
+  kb(0,0) = EAoverL;
+  kb(1,1) = kb(2,2) = EIoverL4;
+  kb(2,1) = kb(1,2) = EIoverL2;
+  
+  return theCoordTransf->getInitialGlobalStiffMatrix(kb);
 }
 
 const Matrix &
@@ -342,8 +363,8 @@ ElasticBeam2d::addInertiaLoadToUnbalance(const Vector &accel)
     return 0;
 
   // Get R * accel from the nodes
-  const Vector &Raccel1 = node1Ptr->getRV(accel);
-  const Vector &Raccel2 = node2Ptr->getRV(accel);
+  const Vector &Raccel1 = theNodes[0]->getRV(accel);
+  const Vector &Raccel2 = theNodes[1]->getRV(accel);
 	
   if (3 != Raccel1.Size() || 3 != Raccel2.Size()) {
     g3ErrorHandler->warning("ElasticBeam2d::addInertiaLoadToUnbalance %s\n",
@@ -365,18 +386,21 @@ ElasticBeam2d::addInertiaLoadToUnbalance(const Vector &accel)
   return 0;
 }
 
-
 const Vector &
 ElasticBeam2d::getResistingForceIncInertia()
 {	
   P = this->getResistingForce();
+
+  // add the damping forces if rayleigh damping
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    P += this->getRayleighDampingForces();
     
   if (rho == 0.0)
     return P;
 
   else {
-    const Vector &accel1 = node1Ptr->getTrialAccel();
-    const Vector &accel2 = node2Ptr->getTrialAccel();    
+    const Vector &accel1 = theNodes[0]->getTrialAccel();
+    const Vector &accel2 = theNodes[1]->getTrialAccel();    
     
     double L = theCoordTransf->getInitialLength();
     double m = 0.5*rho*L;
@@ -390,6 +414,7 @@ ElasticBeam2d::getResistingForceIncInertia()
     return P;
   }
 }
+
 
 const Vector &
 ElasticBeam2d::getResistingForce()
@@ -557,11 +582,11 @@ ElasticBeam2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
     // first determine the end points of the beam based on
     // the display factor (a measure of the distorted image)
-    const Vector &end1Crd = node1Ptr->getCrds();
-    const Vector &end2Crd = node2Ptr->getCrds();	
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
 
-    const Vector &end1Disp = node1Ptr->getDisp();
-    const Vector &end2Disp = node2Ptr->getDisp();
+    const Vector &end1Disp = theNodes[0]->getDisp();
+    const Vector &end2Disp = theNodes[1]->getDisp();
 
 	static Vector v1(3);
 	static Vector v2(3);

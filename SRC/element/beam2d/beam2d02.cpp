@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:50 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d02.cpp,v $
                                                                         
                                                                         
@@ -44,8 +44,7 @@ beam2d02::beam2d02()
    :Element(0,ELE_TAG_beam2d02), 
     A(0.0), E(0.0), I(0.0), M(0.0), L(0),
     connectedExternalNodes(2),
-    end1Ptr(0), end2Ptr(0),
-    Kd(3,3), m(6,6), d(6,6), 
+    Kd(3,3), m(6,6),
     q(3), rForce(6), load(6), 
     theCoordTrans(0)
 {
@@ -60,14 +59,16 @@ beam2d02::beam2d02(int tag, double a, double e, double i, int Nd1, int Nd2,
    :Element(tag,ELE_TAG_beam2d02), 
     A(a), E(e), I(i), M(rho), L(0),
     connectedExternalNodes(2),
-    end1Ptr(0), end2Ptr(0),
-    Kd(3,3), m(6,6), d(6,6), 
+    Kd(3,3), m(6,6), 
     q(3), rForce(6), load(6), 
     theCoordTrans(0)    
 {
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;    
-    
+
+    theNodes[0] = 0;
+    theNodes[1] = 0;
+
     theCoordTrans = theTrans.getCopy();
 }
 
@@ -95,6 +96,12 @@ beam2d02::getExternalNodes(void)
     return connectedExternalNodes;
 }
 
+Node **
+beam2d02::getNodePtrs(void) 
+{
+  return theNodes;
+}
+
 int
 beam2d02::getNumDOF(void) {
     return 6;
@@ -107,22 +114,22 @@ beam2d02::setDomain(Domain *theDomain)
     // first set the node pointers
     int Nd1 = connectedExternalNodes(0);
     int Nd2 = connectedExternalNodes(1);
-    end1Ptr = theDomain->getNode(Nd1);
-    end2Ptr = theDomain->getNode(Nd2);	
-    if (end1Ptr == 0) {
+    theNodes[0] = theDomain->getNode(Nd1);
+    theNodes[1] = theDomain->getNode(Nd2);	
+    if (theNodes[0] == 0) {
 	cerr << "WARNING beam2d02::setDomain(): Nd1: ";
 	cerr << Nd1 << "does not exist in model for beam \n" << *this;
 	return;
     }
-    if (end2Ptr == 0) {
+    if (theNodes[1] == 0) {
 	cerr << "WARNING beam2d02::setDomain(): Nd2: ";
 	cerr << Nd2 << "does not exist in model for beam\n" << *this;
 	return;
     }	
     
     // now verify the number of dof at node ends
-    int dofNd1 = end1Ptr->getNumberDOF();
-    int dofNd2 = end2Ptr->getNumberDOF();	
+    int dofNd1 = theNodes[0]->getNumberDOF();
+    int dofNd2 = theNodes[1]->getNumberDOF();	
     if (dofNd1 != 3 && dofNd2 != 3) {
 	cerr << "WARNING beam2d02::setDomain(): node " << Nd1;
 	cerr << " and/or node " << Nd2 << " have/has incorrect number ";
@@ -135,8 +142,8 @@ beam2d02::setDomain(Domain *theDomain)
 
     // determine length and direction cosines
     double dx,dy;
-    const Vector &end1Crd = end1Ptr->getCrds();
-    const Vector &end2Crd = end2Ptr->getCrds();	
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
     
     dx = end2Crd(0)-end1Crd(0);
     dy = end2Crd(1)-end1Crd(1);	
@@ -193,7 +200,7 @@ beam2d02::getTangentStiff(void)
 }
 
 const Matrix &
-beam2d02::getSecantStiff(void)
+beam2d02::getInitialStiff(void)
 {
     return this->getStiff();
 }
@@ -212,13 +219,6 @@ beam2d02::getStiff(void)
     //    return k;
 }
     
-const Matrix &
-beam2d02::getDamp(void)
-{
-    return d; // zero matrix still
-}
-
-
 const Matrix &
 beam2d02::getMass(void)
 { 
@@ -251,12 +251,12 @@ beam2d02::addLoad(ElementalLoad *theLoad, double loadFactor)
 int
 beam2d02::addInertiaLoadToUnbalance(const Vector &accel)
 {
-  if (rho == 0.0)
+  if (M == 0.0)
     return 0;
 
   // Get R * accel from the nodes
-  const Vector &Raccel1 = node1Ptr->getRV(accel);
-  const Vector &Raccel2 = node2Ptr->getRV(accel);
+  const Vector &Raccel1 = theNodes[0]->getRV(accel);
+  const Vector &Raccel2 = theNodes[1]->getRV(accel);
 	
   // Want to add ( - fact * M R * accel ) to unbalance
   // Take advantage of lumped mass matrix
@@ -292,13 +292,26 @@ beam2d02::getResistingForceIncInertia()
 {	
     this->getResistingForce();     
     
-    const Vector &end1Accel = end1Ptr->getTrialAccel();
-    const Vector &end2Accel = end2Ptr->getTrialAccel();    
-    Vector inertia(6);
-    rForce(0) += M*end1Accel(0);
-    rForce(1) += M*end1Accel(1);
-    rForce(3) += M*end2Accel(0);
-    rForce(4) += M*end2Accel(1);
+    if (M != 0.0) {
+      const Vector &end1Accel = theNodes[0]->getTrialAccel();
+      const Vector &end2Accel = theNodes[1]->getTrialAccel();    
+      Vector inertia(6);
+      rForce(0) += M*end1Accel(0);
+      rForce(1) += M*end1Accel(1);
+      rForce(3) += M*end2Accel(0);
+      rForce(4) += M*end2Accel(1);
+
+      // add rayleigh damping forces
+      if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+	rForce += this->getRayleighDampingForces();
+
+    } else {
+
+      // add rayleigh damping forces
+      if (betaK != 0.0 || betaK0 != 0.0)
+	rForce += this->getRayleighDampingForces();
+
+    }
 
     return rForce;    
 }
@@ -360,10 +373,10 @@ beam2d02::displaySelf(Renderer &theViewer, int displayMode, float fact)
     // first determine the two end points of the truss based on
     // the display factor (a measure of the distorted image)
     // store this information in 2 3d vectors v1 and v2
-    const Vector &end1Crd = end1Ptr->getCrds();
-    const Vector &end2Crd = end2Ptr->getCrds();	
-    const Vector &end1Disp = end1Ptr->getDisp();
-    const Vector &end2Disp = end2Ptr->getDisp();    
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
+    const Vector &end1Disp = theNodes[0]->getDisp();
+    const Vector &end2Disp = theNodes[1]->getDisp();    
 
     if (displayMode == 1 || displayMode == 2) {
 	Vector v1(3);

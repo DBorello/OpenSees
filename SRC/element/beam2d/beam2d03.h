@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:50 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d03.h,v $
                                                                         
                                                                         
@@ -48,15 +48,17 @@ class beam2d03 : public Element
     beam2d03(int tag, double A, double E, double I, int Nd1, int Nd2);
     ~beam2d03();
 
+    void setDomain(Domain *theDomain);
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
 
     int getNumDOF(void);
     int commitState(void);
     int revertToLastCommit(void);        
     
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
+    const Matrix &getInitialStiff(void);
     const Matrix &getDamp(void);    
     const Matrix &getMass(void);    
 
@@ -77,15 +79,13 @@ class beam2d03 : public Element
     double A,E,I;
     double L,sn,cs;
     ID  connectedExternalNodes;    
+    Node *theNodes[2];
 
     Matrix k; // the stiffness matrix
-    static Matrix m; // the mass matrix	
-    static Matrix d; // the damping matrix
 	
     Vector rForce;
     Vector load;
     Matrix trans;  // hold part of transformation matrix
-    int isStiffFormed;
 };
 
 #endif

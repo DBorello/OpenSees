@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-06-07 00:11:07 $
+// $Revision: 1.12 $
+// $Date: 2002-12-05 22:20:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -53,7 +53,6 @@ double  Brick::xl[3][8] ;
 Matrix  Brick::stiff(24,24) ;
 Vector  Brick::resid(24) ;
 Matrix  Brick::mass(24,24) ;
-Matrix  Brick::damping(24,24) ;
 
     
 //quadrature data
@@ -71,7 +70,7 @@ const double  Brick::wg[] = { 1.0, 1.0, 1.0, 1.0,
 //null constructor
 Brick::Brick( ) :
 Element( 0, ELE_TAG_Brick ),
-connectedExternalNodes(8), load(0)
+connectedExternalNodes(8), load(0), Ki(0)
 { 
   for (int i=0; i<8; i++ ) {
     materialPointers[i] = 0;
@@ -93,7 +92,7 @@ Brick::Brick(  int tag,
 			 int node8,
 			 NDMaterial &theMaterial ) :
 Element( tag, ELE_TAG_Brick ),
-connectedExternalNodes(8) , load(0)
+connectedExternalNodes(8) , load(0), Ki(0)
 {
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
@@ -137,6 +136,9 @@ Brick::~Brick( )
   } //end for i
   if (load != 0)
     delete load;
+
+  if (Ki != 0)
+    delete Ki;
 }
 
 
@@ -168,6 +170,11 @@ const ID&  Brick::getExternalNodes( )
   return connectedExternalNodes ;
 } 
 
+Node **  
+Brick::getNodePtrs(void) 
+{
+  return nodePointers ;
+} 
 
 //return number of dofs
 int  Brick::getNumDOF( ) 
@@ -247,24 +254,142 @@ const Matrix&  Brick::getTangentStiff( )
   return stiff ;
 }    
 
-
-//return secant matrix 
-const Matrix&  Brick::getSecantStiff( ) 
+const Matrix&  Brick::getInitialStiff( ) 
 {
-   int tang_flag = 1 ; //get the tangent
+  if (Ki != 0)
+    return *Ki;
 
-  //do tangent and residual here
-  formResidAndTangent( tang_flag ) ;  
+  //strains ordered : eps11, eps22, eps33, 2*eps12, 2*eps23, 2*eps31 
+  static const int ndm = 3 ;
+  static const int ndf = 3 ; 
+  static const int nstress = 6 ;
+  static const int numberNodes = 8 ;
+  static const int numberGauss = 8 ;
+  static const int nShape = 4 ;
+
+  int i, j, k, p, q ;
+  int jj, kk ;
+
+  
+  static double volume ;
+  static double xsj ;  // determinant jacaobian matrix 
+  static double dvol[numberGauss] ; //volume element
+  static double gaussPoint[ndm] ;
+  static Vector strain(nstress) ;  //strain
+  static double shp[nShape][numberNodes] ;  //shape functions at a gauss point
+  static double Shape[nShape][numberNodes][numberGauss] ; //all the shape functions
+  static Matrix stiffJK(ndf,ndf) ; //nodeJK stiffness 
+  static Matrix dd(nstress,nstress) ;  //material tangent
+
+
+  //---------B-matrices------------------------------------
+
+    static Matrix BJ(nstress,ndf) ;      // B matrix node J
+
+    static Matrix BJtran(ndf,nstress) ;
+
+    static Matrix BK(nstress,ndf) ;      // B matrix node k
+
+    static Matrix BJtranD(ndf,nstress) ;
+
+  //-------------------------------------------------------
+
+  
+  //zero stiffness and residual 
+  stiff.Zero( ) ;
+
+  //compute basis vectors and local nodal coordinates
+  computeBasis( ) ;
+
+  //gauss loop to compute and save shape functions 
+
+  int count = 0 ;
+  volume = 0.0 ;
+
+  for ( i = 0; i < 2; i++ ) {
+    for ( j = 0; j < 2; j++ ) {
+      for ( k = 0; k < 2; k++ ) {
+
+        gaussPoint[0] = sg[i] ;        
+	gaussPoint[1] = sg[j] ;        
+	gaussPoint[2] = sg[k] ;
+
+	//get shape functions    
+	shp3d( gaussPoint, xsj, shp, xl ) ;
+
+	//save shape functions
+	for ( p = 0; p < nShape; p++ ) {
+	  for ( q = 0; q < numberNodes; q++ )
+	    Shape[p][q][count] = shp[p][q] ;
+	} // end for p
+
+
+	//volume element to also be saved
+	dvol[count] = wg[count] * xsj ;  
+
+	//volume += dvol[count] ;
+
+	count++ ;
+
+      } //end for k
+    } //end for j
+  } // end for i 
+  
+
+  //gauss loop 
+  for ( i = 0; i < numberGauss; i++ ) {
+
+    //extract shape functions from saved array
+    for ( p = 0; p < nShape; p++ ) {
+       for ( q = 0; q < numberNodes; q++ )
+	  shp[p][q]  = Shape[p][q][i] ;
+    } // end for p
+
+
+    dd = materialPointers[i]->getInitialTangent( ) ;
+    dd *= dvol[i] ;
     
+    jj = 0;
+    for ( j = 0; j < numberNodes; j++ ) {
+
+      BJ = computeB( j, shp ) ;
+   
+      //transpose 
+      //BJtran = transpose( nstress, ndf, BJ ) ;
+      for (p=0; p<ndf; p++) {
+	for (q=0; q<nstress; q++) 
+	  BJtran(p,q) = BJ(q,p) ;
+      }//end for p
+
+      //BJtranD = BJtran * dd ;
+      BJtranD.addMatrixProduct(0.0,  BJtran, dd, 1.0) ;
+      
+      kk = 0 ;
+      for ( k = 0; k < numberNodes; k++ ) {
+	
+	BK = computeB( k, shp ) ;
+	
+	
+	//stiffJK =  BJtranD * BK  ;
+	stiffJK.addMatrixProduct(0.0,  BJtranD, BK, 1.0) ;
+	
+	for ( p = 0; p < ndf; p++ )  {
+	  for ( q = 0; q < ndf; q++ )
+	    stiff( jj+p, kk+q ) += stiffJK( p, q ) ;
+	} //end for p
+
+	kk += ndf ;
+
+      } // end for k loop
+
+      jj += ndf ;
+
+    } // end for j loop
+  } //end for i gauss loop 
+
+  Ki = new Matrix(stiff);
+
   return stiff ;
-}
-    
-
-//return damping matrix 
-const Matrix&  Brick::getDamp( ) 
-{
-  //not supported
-  return damping ;
 }    
 
 
@@ -357,6 +482,8 @@ const Vector&  Brick::getResistingForce( )
 //get residual with inertia terms
 const Vector&  Brick::getResistingForceIncInertia( )
 {
+  static Vector res(24);
+
   int tang_flag = 0 ; //don't get the tangent
 
   //do tangent and residual here 
@@ -364,10 +491,16 @@ const Vector&  Brick::getResistingForceIncInertia( )
 
   formInertiaTerms( tang_flag ) ;
 
-  if (load != 0)
-    resid -= *load;
+  res = resid;
 
-  return resid ;
+  // add the damping forces if rayleigh damping
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+      res += this->getRayleighDampingForces();
+
+  if (load != 0)
+    res -= *load;
+
+  return res;
 }
 
 

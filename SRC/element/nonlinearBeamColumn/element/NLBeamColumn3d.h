@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-06-07 18:03:04 $
+// $Revision: 1.12 $
+// $Date: 2002-12-05 22:20:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -67,18 +67,19 @@ class NLBeamColumn3d: public Element
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
 
     int getNumDOF(void);
-    
     void setDomain(Domain *theDomain);
+
     int commitState(void);
     int revertToLastCommit(void);        
     int revertToStart(void);
     int update(void);    
     
     const Matrix &getTangentStiff(void);
-    const Matrix &getDamp(void);    
-    const Matrix &getMass(void);    
+    const Matrix &getInitialStiff(void);
+    const Matrix &getMass(void);
 
     void zeroLoad(void);	
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -118,7 +119,7 @@ class NLBeamColumn3d: public Element
     SectionForceDeformation **sections;          // array of pointers to sections
     CrdTransf3d *crdTransf;        // pointer to coordinate tranformation object 
 	                           // (performs the transformation between the global and basic system)
-    Node   *node1Ptr, *node2Ptr;   // pointers to the nodes
+    Node *theNodes[2];
 
     double rho;                    // mass density per unit length
     int    maxIters;               // maximum number of local iterations
@@ -143,6 +144,7 @@ class NLBeamColumn3d: public Element
 
     Matrix *sp;  // Applied section forces due to element loads, 5 x nSections
     double p0[5]; // Reactions in the basic system due to element loads
+    Matrix *Ki;
 
     static Matrix theMatrix;
     static Vector theVector;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-16 21:37:02 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:20:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/NewElement.cpp,v $
                                                                         
 // Written: fmk 
@@ -78,6 +78,12 @@ NewElement::getExternalNodes(void)
     return connectedExternalNodes;
 }
 
+Node **
+NewElement::getNodePtrs(void)
+{
+  return 0;
+}
+
 int
 NewElement::getNumDOF(void) 
 {
@@ -126,26 +132,11 @@ NewElement::getTangentStiff(void)
 }
 
 const Matrix &
-NewElement::getSecantStiff(void)
+NewElement::getInitialStiff(void)
 {
   return theMatrix;
 }
     
-const Matrix &
-NewElement::getDamp(void)
-{
-  return theMatrix;
-}
-
-
-const Matrix &
-NewElement::getMass(void)
-{ 
-  return theMatrix;
-}
-
-
-
 void 
 NewElement::zeroLoad(void)
 {

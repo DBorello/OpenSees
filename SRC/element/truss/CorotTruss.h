@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-07 00:24:50 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.h,v $
 
 #ifndef CorotTruss_h
@@ -55,6 +55,8 @@ class CorotTruss : public Element
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
+
     int getNumDOF(void);	
     void setDomain(Domain *theDomain);
 
@@ -66,8 +68,7 @@ class CorotTruss : public Element
     
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
-    const Matrix &getDamp(void);    
+    const Matrix &getInitialStiff(void);
     const Matrix &getMass(void);    
 
     void zeroLoad(void);	
@@ -102,8 +103,7 @@ class CorotTruss : public Element
     double A; 	        // area of CorotTruss
     double M; 	        // rho and M*A*L/2 after setDomain()
 
-    Node *end1Ptr;  // pointer to the end1 node object
-    Node *end2Ptr;  // pointer to the end1 node object
+    Node *theNodes[2];
 
     Matrix R;	// Rotation matrix
 

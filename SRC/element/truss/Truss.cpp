@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-06-07 00:16:50 $
+// $Revision: 1.13 $
+// $Date: 2002-12-05 22:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -73,7 +73,7 @@ Truss::Truss(int tag,
   theMaterial(0), connectedExternalNodes(2),
   dimension(dim), numDOF(0), theLoad(0),
   theMatrix(0), theVector(0), t(0),
-  L(0.0), A(a), M(rho), end1Ptr(0), end2Ptr(0)
+  L(0.0), A(a), M(rho)
 {
     // get a copy of the material and check we obtained a valid copy
     theMaterial = theMat.getCopy();
@@ -88,6 +88,11 @@ Truss::Truss(int tag,
 			    "failed to create an ID of size 2");
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;        
+
+    // set node pointers to NULL
+    for (int i=0; i<2; i++)
+      theNodes[i] = 0;
+
 // AddingSensitivity:BEGIN /////////////////////////////////////
 	gradientIdentifier = 0;
 // AddingSensitivity:END //////////////////////////////////////
@@ -101,12 +106,16 @@ Truss::Truss()
  theMaterial(0),connectedExternalNodes(2),
  dimension(0), numDOF(0),
  theMatrix(0), theVector(0), t(0), 
- L(0.0), A(0.0), M(0.0), end1Ptr(0), end2Ptr(0)
+  L(0.0), A(0.0), M(0.0)
 {
     // ensure the connectedExternalNode ID is of correct size 
     if (connectedExternalNodes.Size() != 2)
       g3ErrorHandler->fatal("FATAL Truss::Truss - %s\n",
 			    "failed to create an ID of size 2");
+
+    for (int i=0; i<2; i++)
+      theNodes[i] = 0;
+
 // AddingSensitivity:BEGIN /////////////////////////////////////
 	gradientIdentifier = 0;
 // AddingSensitivity:END //////////////////////////////////////
@@ -140,6 +149,12 @@ Truss::getExternalNodes(void)
     return connectedExternalNodes;
 }
 
+Node **
+Truss::getNodePtrs(void) 
+{
+  return theNodes;
+}
+
 int
 Truss::getNumDOF(void) 
 {
@@ -158,8 +173,8 @@ Truss::setDomain(Domain *theDomain)
 {
     // check Domain is not null - invoked when object removed from a domain
     if (theDomain == 0) {
-	end1Ptr = 0;
-	end2Ptr = 0;
+	theNodes[0] = 0;
+	theNodes[1] = 0;
 	L = 0;
 	return;
     }
@@ -167,12 +182,12 @@ Truss::setDomain(Domain *theDomain)
     // first set the node pointers
     int Nd1 = connectedExternalNodes(0);
     int Nd2 = connectedExternalNodes(1);
-    end1Ptr = theDomain->getNode(Nd1);
-    end2Ptr = theDomain->getNode(Nd2);	
-
+    theNodes[0] = theDomain->getNode(Nd1);
+    theNodes[1] = theDomain->getNode(Nd2);	
+    
     // if can't find both - send a warning message
-    if ((end1Ptr == 0) || (end2Ptr == 0)) {
-      if (end1Ptr == 0)
+    if ((theNodes[0] == 0) || (theNodes[1] == 0)) {
+      if (theNodes[0] == 0)
 	g3ErrorHandler->warning("Truss::setDomain() - truss %d node %d %s\n",
 				this->getTag(), Nd1,
 				"does not exist in the model");
@@ -190,8 +205,8 @@ Truss::setDomain(Domain *theDomain)
     }
 
     // now determine the number of dof and the dimesnion    
-    int dofNd1 = end1Ptr->getNumberDOF();
-    int dofNd2 = end2Ptr->getNumberDOF();	
+    int dofNd1 = theNodes[0]->getNumberDOF();
+    int dofNd2 = theNodes[1]->getNumberDOF();	
 
     // if differing dof at the ends - print a warning message
     if (dofNd1 != dofNd2) {
@@ -245,7 +260,6 @@ Truss::setDomain(Domain *theDomain)
       return;
     }
 
-
     // create a transformation matrix for the element
     t = new Matrix(1,numDOF);
     theLoad = new Vector(numDOF);
@@ -269,8 +283,8 @@ Truss::setDomain(Domain *theDomain)
     
     // now determine the length, cosines and fill in the transformation
     // NOTE t = -t(every one else uses for residual calc)
-    const Vector &end1Crd = end1Ptr->getCrds();
-    const Vector &end2Crd = end2Ptr->getCrds();	
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
 
     if (dimension == 1) {
 	Matrix &trans = *t;      
@@ -356,7 +370,7 @@ Truss::setDomain(Domain *theDomain)
 	    trans(0,11) = 0;	    	    
 	}     
     }
-    
+
     // determine the nodal mass for lumped mass approach
     M = M * A * L/2;
 }   	 
@@ -412,28 +426,26 @@ Truss::getTangentStiff(void)
 }
 
 const Matrix &
-Truss::getSecantStiff(void)
+Truss::getInitialStiff(void)
 {
     if (L == 0.0) { // - problem in setDomain() no further warnings
 	theMatrix->Zero();
 	return *theMatrix;
     }
     
-    // get the current E from the material for this strain
-    double strain = this->computeCurrentStrain();
-
-    double stress = theMaterial->getStress();    
-    double E = stress/strain;
+    double E = theMaterial->getInitialTangent();
 
     // come back later and redo this if too slow
     Matrix &stiff = *theMatrix;
     Matrix &trans = *t;
+
     stiff = trans^trans;
+
     stiff *= A*E/L;  
-    
+
     return *theMatrix;
 }
-    
+
 const Matrix &
 Truss::getDamp(void)
 {
@@ -529,8 +541,8 @@ Truss::addInertiaLoadToUnbalance(const Vector &accel)
 	return 0;
 
   // get R * accel from the nodes
-  const Vector &Raccel1 = end1Ptr->getRV(accel);
-  const Vector &Raccel2 = end2Ptr->getRV(accel);    
+  const Vector &Raccel1 = theNodes[0]->getRV(accel);
+  const Vector &Raccel2 = theNodes[1]->getRV(accel);    
 
   int nodalDOF = numDOF/2;
     
@@ -588,8 +600,8 @@ Truss::getResistingForceIncInertia()
     if (L != 0.0 && M != 0.0) {
 	
 	// remember we set M = M*A*L/2 in setDoamin()
-	const Vector &accel1 = end1Ptr->getTrialAccel();
-	const Vector &accel2 = end2Ptr->getTrialAccel();	
+	const Vector &accel1 = theNodes[0]->getTrialAccel();
+	const Vector &accel2 = theNodes[1]->getTrialAccel();	
 	
 	int dof = dimension;
 	int start = numDOF/2;
@@ -735,10 +747,10 @@ Truss::displaySelf(Renderer &theViewer, int displayMode, float fact)
     // first determine the two end points of the truss based on
     // the display factor (a measure of the distorted image)
     // store this information in 2 3d vectors v1 and v2
-    const Vector &end1Crd = end1Ptr->getCrds();
-    const Vector &end2Crd = end2Ptr->getCrds();	
-    const Vector &end1Disp = end1Ptr->getDisp();
-    const Vector &end2Disp = end2Ptr->getDisp();    
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
+    const Vector &end1Disp = theNodes[0]->getDisp();
+    const Vector &end2Disp = theNodes[1]->getDisp();    
 
     if (displayMode == 1 || displayMode == 2) {
 	Vector v1(3);
@@ -805,8 +817,8 @@ Truss::computeCurrentStrain(void) const
     // NOTE method will not be called if L == 0
 
     // determine the strain
-    const Vector &disp1 = end1Ptr->getTrialDisp();
-    const Vector &disp2 = end2Ptr->getTrialDisp();	
+    const Vector &disp1 = theNodes[0]->getTrialDisp();
+    const Vector &disp2 = theNodes[1]->getTrialDisp();	
 
     double dLength = 0.0;
     for (int i=0; i<dimension; i++){
@@ -823,8 +835,8 @@ Truss::computeCurrentStrainRate(void) const
     // NOTE method will not be called if L == 0
 
     // determine the strain
-    const Vector &vel1 = end1Ptr->getTrialVel();
-    const Vector &vel2 = end2Ptr->getTrialVel();	
+    const Vector &vel1 = theNodes[0]->getTrialVel();
+    const Vector &vel2 = theNodes[1]->getTrialVel();	
 
     double dLength = 0.0;
     for (int i=0; i<dimension; i++){
@@ -864,7 +876,6 @@ Truss::setResponse(char **argv, int argc, Information &eleInfo)
 int 
 Truss::getResponse(int responseID, Information &eleInfo)
 {
- double strain;
   switch (responseID) {
     case 1:
       return eleInfo.setDouble(A * theMaterial->getStress());
@@ -993,8 +1004,8 @@ Truss::gradient(bool compute, int identifier)
 	
 	double dLength = 0.0;
 	for (int i=0; i<dimension; i++){
-	  sens1 = end1Ptr->getGradient(i+1, identifier);
-	  sens2 = end2Ptr->getGradient(i+1, identifier);
+	  sens1 = theNodes[0]->getGradient(i+1, identifier);
+	  sens2 = theNodes[1]->getGradient(i+1, identifier);
 	  dLength -= (sens2-sens1)* (*t)(0,i);
 	}
 	double materialGradient = dLength/L;

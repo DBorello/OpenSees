@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-04-23 21:43:13 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:20:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.h,v $
 
 // Ed "C++" Love
@@ -66,9 +66,10 @@ class Brick : public Element {
 
     //get the number of external nodes
     int getNumExternalNodes( ) const ;
- 
+
     //return connected external nodes
     const ID &getExternalNodes( ) ;
+    Node **getNodePtrs(void);
 
     //return number of dofs
     int getNumDOF( ) ;
@@ -86,16 +87,9 @@ class Brick : public Element {
     void Print( ostream &s, int flag ) ;
 	
     //return stiffness matrix 
-    const Matrix &getTangentStiff( ) ;
-    
-    //return secant matrix 
-    const Matrix &getSecantStiff( ) ;
-    
-    //return damping matrix
-    const Matrix &getDamp( ) ;
-    
-    //return mass matrix
-    const Matrix &getMass( ) ;
+    const Matrix &getTangentStiff();
+    const Matrix &getInitialStiff();    
+    const Matrix &getMass();    
 
     void zeroLoad( ) ;
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -161,6 +155,7 @@ class Brick : public Element {
     Matrix transpose( int dim1, int dim2, const Matrix &M ) ;
 
     Vector *load;
+    Matrix *Ki;
 } ; 
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-10-03 18:33:40 $
+// $Revision: 1.12 $
+// $Date: 2002-12-05 22:20:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -55,7 +55,7 @@ DispBeamColumn3d::DispBeamColumn3d(int tag, int nd1, int nd2,
 		CrdTransf3d &coordTransf, double r)
 :Element (tag, ELE_TAG_DispBeamColumn3d),
 numSections(numSec), theSections(0), crdTransf(0),
-connectedExternalNodes(2), nd1Ptr(0), nd2Ptr(0),
+connectedExternalNodes(2), 
 Q(12), q(6), rho(r)
 {
   // Allocate arrays of pointers to SectionForceDeformations
@@ -86,6 +86,10 @@ Q(12), q(6), rho(r)
   connectedExternalNodes(0) = nd1;
   connectedExternalNodes(1) = nd2;
 
+
+  theNodes[0] = 0;
+  theNodes[1] = 0;
+
   q0[0] = 0.0;
   q0[1] = 0.0;
   q0[2] = 0.0;
@@ -102,7 +106,7 @@ Q(12), q(6), rho(r)
 DispBeamColumn3d::DispBeamColumn3d()
 :Element (0, ELE_TAG_DispBeamColumn3d),
 numSections(0), theSections(0), crdTransf(0),
-connectedExternalNodes(2), nd1Ptr(0), nd2Ptr(0),
+connectedExternalNodes(2), 
 Q(12), q(6), rho(0.0)
 {
   q0[0] = 0.0;
@@ -116,6 +120,9 @@ Q(12), q(6), rho(0.0)
   p0[2] = 0.0;
   p0[3] = 0.0;
   p0[4] = 0.0;
+
+  theNodes[0] = 0;
+  theNodes[1] = 0;
 }
 
 DispBeamColumn3d::~DispBeamColumn3d()
@@ -145,6 +152,13 @@ DispBeamColumn3d::getExternalNodes()
     return connectedExternalNodes;
 }
 
+Node **
+DispBeamColumn3d::getNodePtrs()
+{
+
+    return theNodes;
+}
+
 int
 DispBeamColumn3d::getNumDOF()
 {
@@ -156,26 +170,26 @@ DispBeamColumn3d::setDomain(Domain *theDomain)
 {
 	// Check Domain is not null - invoked when object removed from a domain
     if (theDomain == 0) {
-	nd1Ptr = 0;
-	nd2Ptr = 0;
+	theNodes[0] = 0;
+	theNodes[1] = 0;
 	return;
     }
 
     int Nd1 = connectedExternalNodes(0);
     int Nd2 = connectedExternalNodes(1);
 
-    nd1Ptr = theDomain->getNode(Nd1);
-    nd2Ptr = theDomain->getNode(Nd2);
+    theNodes[0] = theDomain->getNode(Nd1);
+    theNodes[1] = theDomain->getNode(Nd2);
 
-    if (nd1Ptr == 0 || nd2Ptr == 0) {
+    if (theNodes[0] == 0 || theNodes[1] == 0) {
 	//g3ErrorHandler->fatal("FATAL ERROR DispBeamColumn3d (tag: %d), node not found in domain",
 	//	this->getTag());
 	
 	return;
     }
 
-    int dofNd1 = nd1Ptr->getNumberDOF();
-    int dofNd2 = nd2Ptr->getNumberDOF();
+    int dofNd1 = theNodes[0]->getNumberDOF();
+    int dofNd2 = theNodes[1]->getNumberDOF();
     
     if (dofNd1 != 6 || dofNd2 != 6) {
 	//g3ErrorHandler->fatal("FATAL ERROR DispBeamColumn3d (tag: %d), has differing number of DOFs at its nodes",
@@ -184,7 +198,7 @@ DispBeamColumn3d::setDomain(Domain *theDomain)
 	return;
     }
 
-	if (crdTransf->initialize(nd1Ptr, nd2Ptr)) {
+	if (crdTransf->initialize(theNodes[0], theNodes[1])) {
 		// Add some error check
 	}
 
@@ -418,16 +432,106 @@ DispBeamColumn3d::getTangentStiff()
   q(4) += q0[4];
 
   // Transform to global stiffness
-  crdTransf->update();	// Will remove once we clean up the corotational 3d transformation -- MHS
   K = crdTransf->getGlobalStiffMatrix(kb, q);
   
   return K;
 }
 
 const Matrix&
-DispBeamColumn3d::getDamp()
+DispBeamColumn3d::getInitialStiff()
 {
-  K.Zero();
+  static Matrix kb(6,6);
+  
+  // Zero for integral
+  kb.Zero();
+  
+  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  
+  // Assuming member is prismatic ... have to move inside
+  // the loop if it is not prismatic
+  int order = theSections[0]->getOrder();
+  const ID &code = theSections[0]->getType();
+  
+  double L = crdTransf->getInitialLength();
+  double oneOverL = 1.0/L;
+  Matrix ka(workArea, order, 6);
+  
+  // Loop over the integration points
+  for (int i = 0; i < numSections; i++) {
+    
+    // Get the section tangent stiffness and stress resultant
+    const Matrix &ks = theSections[i]->getInitialTangent();
+    
+    double xi6 = 6.0*pts(i,0);
+    ka.Zero();
+    
+    // Perform numerical integration
+    //kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
+    double wti = wts(i)*oneOverL;
+    double tmp;
+    int j, k;
+    for (j = 0; j < order; j++) {
+      switch(code(j)) {
+      case SECTION_RESPONSE_P:
+	for (k = 0; k < order; k++)
+	  ka(k,0) += ks(k,j)*wti;
+	break;
+      case SECTION_RESPONSE_MZ:
+	for (k = 0; k < order; k++) {
+	  tmp = ks(k,j)*wti;
+	  ka(k,1) += (xi6-4.0)*tmp;
+	  ka(k,2) += (xi6-2.0)*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_MY:
+	for (k = 0; k < order; k++) {
+	  tmp = ks(k,j)*wti;
+	  ka(k,3) += (xi6-4.0)*tmp;
+	  ka(k,4) += (xi6-2.0)*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_T:
+	for (k = 0; k < order; k++)
+	  ka(k,5) += ks(k,j)*wti;
+	break;
+      default:
+	break;
+      }
+    }
+    for (j = 0; j < order; j++) {
+      switch (code(j)) {
+      case SECTION_RESPONSE_P:
+	for (k = 0; k < 6; k++)
+	  kb(0,k) += ka(j,k);
+	break;
+      case SECTION_RESPONSE_MZ:
+	for (k = 0; k < 6; k++) {
+	  tmp = ka(j,k);
+	  kb(1,k) += (xi6-4.0)*tmp;
+	  kb(2,k) += (xi6-2.0)*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_MY:
+	for (k = 0; k < 6; k++) {
+	  tmp = ka(j,k);
+	  kb(3,k) += (xi6-4.0)*tmp;
+	  kb(4,k) += (xi6-2.0)*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_T:
+	for (k = 0; k < 6; k++)
+	  kb(5,k) += ka(j,k);
+	break;
+      default:
+	break;
+      }
+    }
+    
+  }
+
+  // Transform to global stiffness
+  K = crdTransf->getInitialGlobalStiffMatrix(kb);
   
   return K;
 }
@@ -553,8 +657,8 @@ DispBeamColumn3d::addInertiaLoadToUnbalance(const Vector &accel)
     return 0;
   
   // Get R * accel from the nodes
-  const Vector &Raccel1 = nd1Ptr->getRV(accel);
-  const Vector &Raccel2 = nd2Ptr->getRV(accel);
+  const Vector &Raccel1 = theNodes[0]->getRV(accel);
+  const Vector &Raccel2 = theNodes[1]->getRV(accel);
   
   if (6 != Raccel1.Size() || 6 != Raccel2.Size()) {
     g3ErrorHandler->warning("DispBeamColumn3d::addInertiaLoadToUnbalance %s\n",
@@ -633,10 +737,6 @@ DispBeamColumn3d::getResistingForce()
 
   // Transform forces
   Vector p0Vec(p0, 5);
-
-  // Will remove once we clean up the corotational 3d transformation -- MHS
-  crdTransf->update();
-
   P = crdTransf->getGlobalResistingForce(q, p0Vec);
   
   // Subtract other external nodal loads ... P_res = P_int - P_ext
@@ -648,25 +748,35 @@ DispBeamColumn3d::getResistingForce()
 const Vector&
 DispBeamColumn3d::getResistingForceIncInertia()
 {
-  // Check for a quick return
-  if (rho == 0.0)
-    return this->getResistingForce();
-  
-  const Vector &accel1 = nd1Ptr->getTrialAccel();
-  const Vector &accel2 = nd2Ptr->getTrialAccel();
-  
-  // Compute the current resisting force
   this->getResistingForce();
   
-  double L = crdTransf->getInitialLength();
-  double m = 0.5*rho*L;
+  if (rho != 0.0) {
+    const Vector &accel1 = theNodes[0]->getTrialAccel();
+    const Vector &accel2 = theNodes[1]->getTrialAccel();
+    
+    // Compute the current resisting force
+    this->getResistingForce();
+    
+    double L = crdTransf->getInitialLength();
+    double m = 0.5*rho*L;
   
-  P(0) += m*accel1(0);
-  P(1) += m*accel1(1);
-  P(2) += m*accel1(2);
-  P(6) += m*accel2(0);
-  P(7) += m*accel2(1);
-  P(8) += m*accel2(2);
+    P(0) += m*accel1(0);
+    P(1) += m*accel1(1);
+    P(2) += m*accel1(2);
+    P(6) += m*accel2(0);
+    P(7) += m*accel2(1);
+    P(8) += m*accel2(2);
+
+    // add the damping forces if rayleigh damping
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+      P += this->getRayleighDampingForces();
+
+  } else {
+
+    // add the damping forces if rayleigh damping
+    if (betaK != 0.0 || betaK0 != 0.0)
+      P += this->getRayleighDampingForces();
+  }
   
   return P;
 }
@@ -932,11 +1042,11 @@ DispBeamColumn3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
     // first determine the end points of the quad based on
     // the display factor (a measure of the distorted image)
-    const Vector &end1Crd = nd1Ptr->getCrds();
-    const Vector &end2Crd = nd2Ptr->getCrds();	
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
 
-    const Vector &end1Disp = nd1Ptr->getDisp();
-    const Vector &end2Disp = nd2Ptr->getDisp();
+    const Vector &end1Disp = theNodes[0]->getDisp();
+    const Vector &end2Disp = theNodes[1]->getDisp();
 
 	static Vector v1(3);
 	static Vector v2(3);

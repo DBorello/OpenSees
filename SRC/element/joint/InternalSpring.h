@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:41:08 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/InternalSpring.h,v $
                                                                         
 // Written: AAA 03/02
@@ -49,6 +49,8 @@ class InternalSpring : public Element
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
+
     int getNumDOF(void);
     void setDomain(Domain *theDomain);
     
@@ -57,8 +59,7 @@ class InternalSpring : public Element
     int revertToStart(void);            
     
     const Matrix &getTangentStiff(void);
-    const Matrix &getDamp(void);    
-    const Matrix &getMass(void);    
+    const Matrix &getInitialStiff(void);
 
     void zeroLoad(void);	
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -90,7 +91,9 @@ class InternalSpring : public Element
     Matrix *m; // the mass or damping matrix	
 
     Vector *load;
-	Vector *rForce;
+    Vector *rForce;
+
+    static Node *theNodes[1];
 };
 
 #endif

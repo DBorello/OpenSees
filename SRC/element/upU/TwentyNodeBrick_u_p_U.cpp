@@ -44,6 +44,8 @@ Matrix TwentyNodeBrick_u_p_U::C(140, 140);
 Matrix TwentyNodeBrick_u_p_U::M(140, 140);      
 Vector TwentyNodeBrick_u_p_U::p(140);	   
 tensor TwentyNodeBrick_u_p_U::k(2,def_dim_2,0.0);
+Node * TwentyNodeBrick_u_p_U::theNodes[20];
+
 //=========================================================================
 // Constructor. The dimension of K, C and M are(140,140)     Wxy 08/28/2001
 //=========================================================================
@@ -65,8 +67,8 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
 			       //tensor * IN_tangent_E,  //stresstensor * INstress, //stresstensor * INiterative_stress, //double * IN_q_ast_iterative, //straintensor * INstrain):  __ZHaohui 09-29-2000
 		               
   :Element(element_number, ELE_TAG_TwentyNodeBrick_u_p_U ),
-  connectedExternalNodes(20), Q(140), bf(3), 
-  n(nn), alpha(alf), rho_s(rs), rho_f(rf), ks(kks), kf(kkf), pressure(pp)
+   connectedExternalNodes(20), Q(140), bf(3), 
+   n(nn), alpha(alf), rho_s(rs), rho_f(rf), ks(kks), kf(kkf), pressure(pp), Ki(0)
   {
     //elem_numb = element_number;
     rho=(1-n)*rho_s+n*rho_f;
@@ -189,9 +191,10 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
 // Default Constructor. The dimension of K, C and M are(140,140)     Wxy 08/28/2001
 //=================================================================================
 
-TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U ():Element(0, ELE_TAG_TwentyNodeBrick_u_p_U ),
-connectedExternalNodes(20), Q(140), bf(3), 
-n(0), alpha(1), rho_s(0.0),rho_f(0.0), ks(0.0), kf(0.0), pressure(0.0), mmodel(0)
+TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U ()
+  :Element(0, ELE_TAG_TwentyNodeBrick_u_p_U ),
+   connectedExternalNodes(20), Q(140), bf(3),
+   n(0), alpha(1), rho_s(0.0),rho_f(0.0), ks(0.0), kf(0.0), pressure(0.0), mmodel(0), Ki(0)
 {
      matpoint = 0;
 }   
@@ -217,9 +220,11 @@ TwentyNodeBrick_u_p_U::~TwentyNodeBrick_u_p_U ()
     // Delete the array of pointers to NDMaterial pointer arrays
     if (matpoint)
     	delete [] matpoint;
-    
- 
+
+    if (Ki != 0)
+      delete Ki;
 }
+
 //=========================================================================
 // Shape functions in "element golbal level". dimension are(60,3)          
 // Since we define the mass Matrix Mf or Ms as four order tensor this 
@@ -3919,6 +3924,33 @@ const ID& TwentyNodeBrick_u_p_U::getExternalNodes ()
     return connectedExternalNodes;
 }
 
+Node **
+TwentyNodeBrick_u_p_U::getNodePtrs(void)
+{
+  theNodes[0] = nd1Ptr;
+  theNodes[1] = nd2Ptr;
+  theNodes[2] = nd3Ptr;
+  theNodes[3] = nd4Ptr;
+  theNodes[4] = nd5Ptr;
+  theNodes[5] = nd6Ptr;
+  theNodes[6] = nd7Ptr;
+  theNodes[7] = nd8Ptr;
+  theNodes[8] = nd9Ptr;
+  theNodes[9] = nd10Ptr;
+  theNodes[10] = nd11Ptr;
+  theNodes[11] = nd12Ptr;
+  theNodes[12] = nd13Ptr;
+  theNodes[13] = nd14Ptr;
+  theNodes[14] = nd15Ptr;
+  theNodes[15] = nd16Ptr;
+  theNodes[16] = nd17Ptr;
+  theNodes[17] = nd18Ptr;
+  theNodes[18] = nd19Ptr;
+  theNodes[19] = nd20Ptr;
+
+  return theNodes;
+}
+
 //=============================================================================
 int TwentyNodeBrick_u_p_U::getNumDOF ()
 {
@@ -4071,9 +4103,18 @@ void TwentyNodeBrick_u_p_U::setDomain (Domain *theDomain)
      return K;
 }    wxy commented 01/15/2002  */
 //=============================================================================
-const Matrix &TwentyNodeBrick_u_p_U::getSecantStiff () 
+const Matrix &TwentyNodeBrick_u_p_U::getInitialStiff () 
 {
-     return K;
+  if (Ki == 0)
+    Ki = new Matrix(this->getTangentStiff());
+
+  if (Ki == 0) {
+    cerr << "FATAL TwentyNodeBrick_u_p_U::getInitialStiff() -";
+    cerr << "ran out of memory\n";
+    exit(-1);
+  }  
+    
+  return *Ki;
 }
 //=============================================================================
 /* const Matrix &TwentyNodeBrick_u_p_U::getDamp () 

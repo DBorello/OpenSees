@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-11-26 22:53:53 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:20:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/feap/fElement.cpp,v $
                                                                         
                                                                         
@@ -55,6 +55,9 @@ double *fElement::tl;
 int    *fElement::ix;
 int    fElement::numfElements(0);
 
+static double *work = 0;
+static int sizeWork = 0;
+
 #define MAX_NST 64
 
 // constructor:
@@ -68,7 +71,7 @@ fElement::fElement(int tag,
 		   int numNh1, int numNh3)
 :Element(tag,classTag), nh1(numNh1), nh3(numNh3), h(0), eleType(EleType),
   theNodes(0), u(0), nen(NEN), ndf(NDF), ndm(NDM), d(0), data(0), 
- connectedNodes(0),nrCount(0), theLoad(0)
+ connectedNodes(0),nrCount(0), theLoad(0), Ki(0)
   
 {
     // allocate space for h array
@@ -77,13 +80,27 @@ fElement::fElement(int tag,
     if (nh1 != 0 || nh3 != 0) {
 	int sizeH = 2*nh1 + nh3;
 	h = new double[sizeH];
-	if (h == 0) {
+	if (sizeWork < sizeH) {
+	  if (work != 0)
+	    delete [] work;
+	  work = new double[sizeH];
+	  if (work == 0) {
+	    cerr << "FATAL: fElement::fElement() - eleTag: " << tag;
+	    cerr << " ran out of memory creating h of size " << 2*nh1+nh3 << endl;
+	    exit(-1);
+	  }	    
+	  sizeWork = sizeH;
+	}
+	if (h == 0 || work == 0) {
 	    cerr << "FATAL: fElement::fElement() - eleTag: " << tag;
 	    cerr << " ran out of memory creating h of size " << 2*nh1+nh3 << endl;
 	    exit(-1);
 	}	    
-	for (int i=0; i<sizeH; i++) h[i] = 0.0;
+
+	for (int i=0; i<sizeH; i++) 
+	  h[i] = 0.0;
     }
+
     connectedNodes = new ID(NEN);
     d = new double[sizeD];
     for (int i=0; i<sizeD; i++) d[i] = 0.0;
@@ -129,7 +146,7 @@ fElement::fElement(int tag,
 		   int NDM, int NDF, int iow)
 :Element(tag,classTag), nh1(0), nh3(0), h(0), eleType(EleType),
   theNodes(0), u(0), nen(NEN), ndf(NDF), ndm(NDM), d(0), data(0), 
-  connectedNodes(0), nrCount(0), theLoad(0)
+ connectedNodes(0), nrCount(0), theLoad(0), Ki(0)
 {
     connectedNodes = new ID(NEN);
     d = new double[sizeD];
@@ -144,13 +161,25 @@ fElement::fElement(int tag,
     // invoke the elmt() routine with isw == 1 to read in the element data
     // and create room for the h array stuff needed by the element
     this->invokefInit(1, iow); 
+
     // allocate space for h array
     if (nh1 < 0) nh1 = 0;
     if (nh3 < 0) nh3 = 0;
     if (nh1 != 0 || nh3 != 0) {
 	int sizeH = 2*nh1+nh3;
 	h = new double[sizeH];
-	if (h == 0) {
+	if (sizeWork < sizeH) {
+	  if (work != 0)
+	    delete [] work;
+	  work = new double[sizeH];
+	  if (work == 0) {
+	    cerr << "FATAL: fElement::fElement() - eleTag: " << tag;
+	    cerr << " ran out of memory creating h of size " << 2*nh1+nh3 << endl;
+	    exit(-1);
+	  }	    
+	  sizeWork = sizeH;
+	}
+	if (h == 0 || work == 0) {
 	    cerr << "FATAL: fElement::fElement() - eleTag: " << this->getTag();
 	    cerr << " ran out of memory creating h of size " << sizeH << endl;
 	    exit(-1);
@@ -197,7 +226,7 @@ fElement::fElement(int tag,
 fElement::fElement(int classTag)
 :Element(0, classTag), nh1(0), nh3(0), h(0),
  theNodes(0), u(0), nen(0), ndf(0), ndm(0), d(0), data(0), connectedNodes(0),
- theLoad(0)
+ theLoad(0), Ki(0)
 {
     // does nothing
 }
@@ -224,6 +253,9 @@ fElement::~fElement()
 	delete [] d;
     if (theLoad != 0)
       delete theLoad;
+
+    if (Ki != 0)
+      delete Ki;
 
     // if last element - clear up space allocated
 
@@ -254,6 +286,12 @@ const ID &
 fElement::getExternalNodes(void)
 {
     return *connectedNodes;
+}
+
+Node **
+fElement::getNodePtrs(void)
+{
+    return theNodes;
 }
 
 int
@@ -434,44 +472,6 @@ fElement::getTangentStiff(void)
 
 
 const Matrix &
-fElement::getSecantStiff(void)
-{
-    // check for quick return
-    if (nen == 0)
-	return (*fElementM[0]);
-    
-    // get the current load factor
-    Domain *theDomain=this->getDomain();
-    double dm = theDomain->getCurrentTime();
-    
-    // set ctan, ior and iow
-    double ctan[3];
-    ctan[0] = 1.0; ctan[1] = 0.0; ctan[2] = 0.0;
-    int ior = 0; int iow = 0;
-    
-    // call the ready routine to set ul, xl, tl and ix, NH1, NH2 and NH3
-    int NH1, NH2, NH3;    
-    int nstR = this->readyfRoutine(false);
-    
-    // zero the matrix
-    fElementM[nstR]->Zero();    
-    
-    // invoke the fortran subroutine
-    int isw = 3; 
-    int nstI = this->invokefRoutine(ior, iow, ctan, isw);
-
-    // check nst is as determined in readyfRoutine()
-    if (nstI != nstR) {
-	cerr << "FATAL fElement::getTangentStiff() problems with incompatable nst";
-	cerr << " ready: " << nstR << " invoke: " << nstI << endl;
-	exit(-1);
-    }
-    
-    // return the matrix
-    return *(fElementM[nstR]);
-}
-    
-const Matrix &
 fElement::getDamp(void)
 {
     // check for quick return
@@ -496,6 +496,8 @@ fElement::getDamp(void)
     
     // invoke the fortran subroutine
     int isw = 3; int nst = nen*ndf; int n = this->getTag();
+
+
     int nstI = this->invokefRoutine(ior, iow, ctan, isw);
     
     // check nst is as determined in readyfRoutine()
@@ -688,13 +690,15 @@ fElement::getResistingForceIncInertia()
 int
 fElement::sendSelf(int commitTag, Channel &theChannel)
 {
-    return 0;
+  cerr << "fElement::sendSelf() - not yet implemented\n";
+  return -1;
 }
 
 int
 fElement::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    return 0;
+  cerr << "fElement::recvSelf() - not yet implemented\n";
+  return -1;
 }
 
 
@@ -1002,6 +1006,22 @@ fElement::update()
     nrCount++;
     
     return 0;
+}
+
+
+const Matrix &
+fElement::getInitialStiff(void)
+{
+  if (Ki == 0)
+    Ki = new Matrix(this->getTangentStiff());
+
+  if (Ki == 0) {
+    cerr << "FATAL fElement::getInitialStiff() -";
+    cerr << "ran out of memory\n";
+    exit(-1);
+  }  
+    
+  return *Ki;
 }
 
 

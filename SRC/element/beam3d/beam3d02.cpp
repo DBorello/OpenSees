@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:51 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/beam3d02.cpp,v $
                                                                         
                                                                         
@@ -65,6 +65,9 @@ beam3d02::beam3d02(int tag, double a, double e, double g,
 {
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;    
+    
+    theNodes[0] = 0;
+    theNodes[1] = 0;
 }
 
 
@@ -89,6 +92,14 @@ beam3d02::getExternalNodes(void)
 {
     return connectedExternalNodes;
 }
+
+
+Node **
+beam3d02::getNodePtrs(void) 
+{
+    return theNodes;
+}
+
 
 int
 beam3d02::getNumDOF(void) {
@@ -119,7 +130,7 @@ beam3d02::getTangentStiff(void)
 }
 
 const Matrix &
-beam3d02::getSecantStiff(void)
+beam3d02::getInitialStiff(void)
 {
     return this->getStiff();
 }
@@ -130,62 +141,59 @@ beam3d02::getSecantStiff(void)
 
 
 void
-beam3d02::formVar(void)
+beam3d02::setDomain(Domain *theDomain)
 {
-    // compute the stiffness
-    if (isStiffFormed == 0) { 
 
-	int Nd1, Nd2;
-	Nd1 = connectedExternalNodes(0);
-	Nd2 = connectedExternalNodes(1);
-	Domain *theDomain = this->getDomain();
-	Node *end1Ptr = theDomain->getNode(Nd1);
-	Node *end2Ptr = theDomain->getNode(Nd2);	
+  int Nd1, Nd2;
+  Nd1 = connectedExternalNodes(0);
+  Nd2 = connectedExternalNodes(1);
 
-	if (end1Ptr == 0) {
-	    cerr << "beam3d02::getStiff: Nd1: ";
+  Node *end1Ptr = theDomain->getNode(Nd1);
+  Node *end2Ptr = theDomain->getNode(Nd2);	
+  theNodes[0] = end1Ptr;
+  theNodes[1] = end2Ptr;
+  
+  if (end1Ptr == 0) {
+    cerr << "beam3d02::getStiff: Nd1: ";
 	    cerr << Nd1 << "does not exist in model\n";
 	    exit(0);
-	}
-	if (end2Ptr == 0) {
-	    cerr << "beam3d02::getStiff: Nd2: ";
-	    cerr << Nd2 << "does not exist in model\n";
-	    exit(0);
-	}
-
-	const Vector &end1Crd = end1Ptr->getCrds();
-	const Vector &end2Crd = end2Ptr->getCrds();	
-    
-	dx = end2Crd(0)-end1Crd(0);
-	dy = end2Crd(1)-end1Crd(1);	
-	dz = end2Crd(2)-end1Crd(2);		
-    
-	L = sqrt(dx*dx + dy*dy + dz*dz);
-	double L2 = L*L;
-	double L3 = L*L*L;
-	if (L == 0.0) {
-	    cerr << "Element: " << this->getTag();
-	    cerr << " beam3d02::getStiff: 0 length\n";
-	    exit(-1);
-	}
-	
-	EA = E*A/L;
-	twoE = 2*E/L;
-	fourE = 4*E/L;
-	twelveE = 12*E/L3;
-	sixE = 6*E/L2;
-    }
-    isStiffFormed = 1;
+  }
+  if (end2Ptr == 0) {
+    cerr << "beam3d02::getStiff: Nd2: ";
+    cerr << Nd2 << "does not exist in model\n";
+    exit(0);
+  }
+  
+  // call the base class method
+  this->DomainComponent::setDomain(theDomain);
+  
+  const Vector &end1Crd = end1Ptr->getCrds();
+  const Vector &end2Crd = end2Ptr->getCrds();	
+  
+  dx = end2Crd(0)-end1Crd(0);
+  dy = end2Crd(1)-end1Crd(1);	
+  dz = end2Crd(2)-end1Crd(2);		
+  
+  L = sqrt(dx*dx + dy*dy + dz*dz);
+  double L2 = L*L;
+  double L3 = L*L*L;
+  if (L == 0.0) {
+    cerr << "Element: " << this->getTag();
+    cerr << " beam3d02::getStiff: 0 length\n";
+    exit(-1);
+  }
+  
+  EA = E*A/L;
+  twoE = 2*E/L;
+  fourE = 4*E/L;
+  twelveE = 12*E/L3;
+  sixE = 6*E/L2;
 }    
 
 
 const Matrix &
 beam3d02::getStiff(void)
 {
-    // compute the terms
-    if (isStiffFormed == 0) 
-	this->formVar();
-
     if (dy == 0.0 && dz == 0.0 && dx > 0.0 && theta == 90) {
 	k(0,0) = EA;  
 	k(6,0) = -EA;
@@ -557,10 +565,10 @@ beam3d02::getStiff(void)
 
 	    k(5,11) = -G*Jx/L;
 	    k(11,11) = G*Jx/L;	    
-	    
 	}	    
-	else {
 
+	else {
+	
 	int Nd1, Nd2;
 	Nd1 = connectedExternalNodes(0);
 	Nd2 = connectedExternalNodes(1);
@@ -588,19 +596,6 @@ beam3d02::getStiff(void)
     return k;
 }
     
-const Matrix &
-beam3d02::getDamp(void)
-{
-    return d;
-}
-
-
-const Matrix &
-beam3d02::getMass(void)
-{ 
-    return m;
-}
-
 void 
 beam3d02::zeroLoad(void)
 {
@@ -624,8 +619,13 @@ beam3d02::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 beam3d02::getResistingForceIncInertia()
 {	
-    return this->getResistingForce();
+    this->getResistingForce();
+    
+    // add rayleigh damping force if factors present
+    if (betaK != 0.0 || betaK0 != 0.0)
+	rForce += this->getRayleighDampingForces();
 
+    return rForce;
 }
 const Vector &
 beam3d02::getResistingForce()

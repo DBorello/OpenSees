@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-07-18 21:55:33 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:20:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_SimpleJoint2D.h,v $
                                                                         
 #ifndef MP_SimpleJoint2D_h
@@ -87,7 +87,7 @@ class MP_SimpleJoint2D : public MP_Constraint
     Node *RetainedNode;			// to identify the retained node
     Node *ConstrainedNode;		// to identify  the constrained node
 
-    int dbTag1, dbTag2;			// need a dbTag for the two ID's
+    int dbTag1, dbTag2, dbTag3; // need a dbTag for the two ID's
 	int LargeDisplacement;		// flag for large displacements enabled
 	double Length0;
 	Matrix *constraint;			// pointer to the constraint matrix

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:55 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.h,v $
 
 #ifndef CorotTrussSection_h
@@ -55,6 +55,8 @@ class CorotTrussSection : public Element
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
+
     int getNumDOF(void);	
     void setDomain(Domain *theDomain);
 
@@ -66,9 +68,8 @@ class CorotTrussSection : public Element
     
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
-    const Matrix &getDamp(void);    
-    const Matrix &getMass(void);    
+    const Matrix &getInitialStiff(void);
+    const Matrix &getMass(void);
 
     void zeroLoad(void);	
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -102,10 +103,9 @@ class CorotTrussSection : public Element
     double d21[3];	// current displacement offsets in basic system
     double M; 	    // rho and M*A*L/2 after setDomain()
 
-    Node *end1Ptr;  // pointer to the end1 node object
-    Node *end2Ptr;  // pointer to the end1 node object
+    Node *theNodes[2];
 
-	Matrix R;	// Rotation matrix
+    Matrix R;	// Rotation matrix
 
     Matrix *theMatrix;
 

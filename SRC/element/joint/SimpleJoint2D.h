@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2002-07-18 21:55:33 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:20:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/SimpleJoint2D.h,v $
 
 // Written: AAA 03/02
@@ -52,6 +52,7 @@ public:
 		UniaxialMaterial &Spring, 
 		Domain *theDomain,
 		int newNodeTag, 
+		int newRotEleTag,
 		int LrgDispFlag =0);
 	
   ~SimpleJoint2D();
@@ -59,6 +60,8 @@ public:
   // methods dealing with domain
   int	getNumExternalNodes(void) const;
   const	ID &getExternalNodes(void);
+  Node **getNodePtrs(void);
+
   int	getNumDOF(void);
   void	setDomain(Domain *theDomain);  
   bool	isSubdomain(void) { return false; } ;
@@ -72,9 +75,9 @@ public:
   // methods to return the current linearized stiffness,
   // damping and mass matrices
   const	Matrix &getTangentStiff(void);
-  const	Matrix &getSecantStiff(void);    
-  const	Matrix &getDamp(void);
-  const	Matrix &getMass(void);
+  const Matrix &getInitialStiff(void);
+  const Matrix &getDamp(void);
+  const Matrix &getMass(void);
 	
   // methods for returning and applying loads
   //virtual Vector &getUVLoadVector(double q1, double q2);
@@ -91,8 +94,8 @@ public:
   // method for obtaining information specific to an element
   Response* setResponse(char **argv, int argc, Information &eleInformation);
   int getResponse(int responseID, Information &eleInformation);
-  int sendSelf(int commitTag, Channel &theChannel) {return -1;}
-  int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker) {return -1;}
+  int sendSelf(int commitTag, Channel &theChannel);
+  int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
   void Print(ostream &s, int flag =0);
 
  protected:
@@ -100,13 +103,16 @@ public:
 
  private:
   ID		ExternalNodes, InternalConstraints;	
-  UniaxialMaterial *SpringC; 
   Node	*end1Ptr, *end2Ptr, *end3Ptr, *end4Ptr, *IntNodePtr;
   int		IntNode;
   Domain	*TheDomain;
-  int		numDof, nodeRecord, dofRecord;
+  int		RotElemtag;
+  Element *RotElemPtr;
+  int		numDof, nodeDbTag, dofDbTag;
   static	Matrix K;
   static	Vector V;
+
+  static Node *theNodes[5];
 };
 
 #endif

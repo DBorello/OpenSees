@@ -49,6 +49,8 @@ Matrix UpdatedLagrangianBeam2D::ZeroMatrix(6,6);
 Vector UpdatedLagrangianBeam2D::end1IncrDisp(3);
 Vector UpdatedLagrangianBeam2D::end2IncrDisp(3);
 
+Node *UpdatedLagrangianBeam2D::theNodes[2];
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -57,7 +59,7 @@ UpdatedLagrangianBeam2D::UpdatedLagrangianBeam2D(int classTag)
   :Element(0, classTag), isLinear(true), L(0.0), sn(0.0), cs(0),
    connectedExternalNodes(2), load(6),
    end1Ptr(0), end2Ptr(0),  eleForce(6), eleForce_hist(6), 
-   nodeRecord(0), dofRecord(0), m_Iter(-1)
+   nodeRecord(0), dofRecord(0), m_Iter(-1), Ki(0)
 {
 	numDof  = 6;
 	massDof = -1;// assumes no lumped mass
@@ -68,7 +70,7 @@ UpdatedLagrangianBeam2D::UpdatedLagrangianBeam2D(int tag, int classTag, int nd1,
   :Element(tag, classTag), isLinear(islinear), L(0.0), sn(0.0), cs(0),
    connectedExternalNodes(2), load(6),
    end1Ptr(0), end2Ptr(0),  eleForce(6), eleForce_hist(6), 
-   nodeRecord(0), dofRecord(0), m_Iter(-1)
+   nodeRecord(0), dofRecord(0), m_Iter(-1), Ki(0)
 {
 	connectedExternalNodes(0) = nd1;
 	connectedExternalNodes(1) = nd2;
@@ -79,7 +81,8 @@ UpdatedLagrangianBeam2D::UpdatedLagrangianBeam2D(int tag, int classTag, int nd1,
 
 UpdatedLagrangianBeam2D::~UpdatedLagrangianBeam2D()
 {
-
+  if (Ki != 0)
+    delete Ki;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -327,6 +330,15 @@ const ID &UpdatedLagrangianBeam2D::getExternalNodes(void)
     return connectedExternalNodes;
 }
 
+Node **
+UpdatedLagrangianBeam2D::getNodePtrs(void) 
+{
+  theNodes[0] = end1Ptr;
+  theNodes[1] = end2Ptr;
+  
+  return theNodes;
+}
+
 int UpdatedLagrangianBeam2D::getNumDOF(void) 
 {
     return numDof;
@@ -367,29 +379,24 @@ const Matrix &UpdatedLagrangianBeam2D::getTangentStiff(void)
     return Kt;
 }
 
-const Matrix &UpdatedLagrangianBeam2D::getSecantStiff(void)
+const Matrix &UpdatedLagrangianBeam2D::getInitialStiff(void)
 {
-    cerr << "WARNING (W_A_60) - UpdatedLagrangianBeam2D::getSecantStiff(..) [" << getTag() << "]\n";
-    cerr << "changed to getTangentStiff(..)\n";
-    return this->getTangentStiff();
+  if (Ki == 0)
+    Ki = new Matrix(this->getTangentStiff());
+  
+  return *Ki;
 }
 
-
-const Matrix &UpdatedLagrangianBeam2D::getDamp(void)
-{
-//    cerr << "WARNING (W_C_70) - UpdatedLagrangianBeam2D::getDamp(void) [" << getTag() << "]\n";
-//    cerr << "method not implemented, specify at global level\n";
-    return ZeroMatrix;
-}
 
 const Matrix &UpdatedLagrangianBeam2D::getMass(void)
 {
-    if(massDof==0)
-        return ZeroMatrix;
+  if(massDof==0)
+    return ZeroMatrix;
 
-	getLocalMass(M);
-    transformToGlobal(M);
-    return M;
+  getLocalMass(M);
+  transformToGlobal(M);
+
+  return M;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -523,8 +530,8 @@ double f5 = eleForce(5);
     force(4) =  sin*eleForce(3) + cos*eleForce(4);
     force(5) =  eleForce(5);
 
-	if(_debug)
-	{ cerr << "Global forces:\n " << force; cin.get();}
+    if(_debug)
+      { cerr << "Global forces:\n " << force; cin.get();}
 
     return force;
 }
@@ -543,37 +550,41 @@ UpdatedLagrangianBeam2D::getResistingForceIncInertia()
     // massDof =  0 if mass is specified at nodes
     // massDof >  0 for lumped mass
 
-    if(massDof == 0)
-        return force;
 
     // determine -Ma
-	// optimize for lumped mass
-	if(massDof > 0)
-	{
-		const Vector &end1Accel = end1Ptr->getTrialAccel();
-		const Vector &end2Accel = end2Ptr->getTrialAccel();
-		force(0) -= massDof*end1Accel(0);
-		force(1) -= massDof*end1Accel(1);
-		force(3) -= massDof*end2Accel(0);
-		force(4) -= massDof*end2Accel(1);
-	}
-    else if(massDof < 0)
-    {
-		M = this->getMass();
+    // optimize for lumped mass
+    if (massDof != 0) {
+      if(massDof > 0) {
+	const Vector &end1Accel = end1Ptr->getTrialAccel();
+	const Vector &end2Accel = end2Ptr->getTrialAccel();
+	force(0) -= massDof*end1Accel(0);
+	force(1) -= massDof*end1Accel(1);
+	force(3) -= massDof*end2Accel(0);
+	force(4) -= massDof*end2Accel(1);
+      } else if(massDof < 0) {
+	M = this->getMass();
+	
+	const Vector &end1Accel = end1Ptr->getTrialAccel();
+	const Vector &end2Accel = end2Ptr->getTrialAccel();
+	Vector Accel(6), f(6);
+	int i=0;
+	for(i=0; i<3; i++)
+	  {
+	    Accel(i)   = end1Accel(i);
+	    Accel(i+3) = end2Accel(i);
+	  }
+	f = M*Accel;
+	for(i=0; i<6; i++) force(i) -= f(i);
+      }
 
-		const Vector &end1Accel = end1Ptr->getTrialAccel();
-		const Vector &end2Accel = end2Ptr->getTrialAccel();
-		Vector Accel(6), f(6);
-		int i=0;
-		for(i=0; i<3; i++)
-		{
-			Accel(i)   = end1Accel(i);
-			Accel(i+3) = end2Accel(i);
-		}
-		f = M*Accel;
-		for(i=0; i<6; i++) force(i) -= f(i);
-	}
+      if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0) 
+	force += this->getRayleighDampingForces();
+    } else {
 
+      if (betaK != 0.0 || betaK0 != 0.0) 
+	force += this->getRayleighDampingForces();
+    }    
+    
     return force;
 }
 

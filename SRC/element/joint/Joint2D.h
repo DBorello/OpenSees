@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-07-18 21:55:31 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:20:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.h,v $
 
 // Written: AAA 03/02
@@ -62,6 +62,8 @@ public:
   // methods dealing with domain
   int	getNumExternalNodes(void) const;
   const	ID &getExternalNodes(void);
+  Node **getNodePtrs(void);
+
   int	getNumDOF(void);
   void	setDomain(Domain *theDomain);  
   bool	isSubdomain(void) { return false; } ;
@@ -75,9 +77,7 @@ public:
   // methods to return the current linearized stiffness,
   // damping and mass matrices
   const	Matrix &getTangentStiff(void);
-  const	Matrix &getSecantStiff(void);    
-  const	Matrix &getDamp(void);
-  const	Matrix &getMass(void);
+  const	Matrix &getInitialStiff(void);
 	
   // methods for returning and applying loads
   //virtual Vector &getUVLoadVector(double q1, double q2);
@@ -114,6 +114,8 @@ public:
   int		numDof, nodeRecord, dofRecord;
   static	Matrix K;
   static	Vector V;
+
+  static Node *theNodes[5];
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-09-25 20:40:53 $
+// $Revision: 1.9 $
+// $Date: 2002-12-05 22:20:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/tcl/TclElmtBuilder.cpp,v $
                                                                                                                                  
 // File: ~/tcl/TclElmtBuilder.C
@@ -248,7 +248,7 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
       }
       
       element = new NLBeamColumn2d(eleTag, iNode, jNode, numIntgrPts, sections,
-				   *theCrdTransf, massDens, nMaxLocIters, locToler);
+				   *theCrdTransf, massDens, nMaxLocIters, locToler, 10);
       
       delete [] sections;
     }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2002-11-05 22:55:21 $
+// $Revision: 1.19 $
+// $Date: 2002-12-05 22:20:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -74,18 +74,21 @@ GaussLobattoQuadRule1d01 NLBeamColumn3d::quadRule;
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
 NLBeamColumn3d::NLBeamColumn3d():
 Element(0,ELE_TAG_NLBeamColumn3d), connectedExternalNodes(2), 
-nSections(0), sections(0), crdTransf(0), node1Ptr(0), node2Ptr(0),
+nSections(0), sections(0), crdTransf(0), 
 rho(0), maxIters(0), tol(0), initialFlag(0), isTorsion(false),
 load(NEGD),
 kv(NEBD,NEBD), Se(NEBD), 
 kvcommit(NEBD,NEBD), Secommit(NEBD),
-fs(0), vs(0), Ssr(0), vscommit(0), sp(0)
+fs(0), vs(0), Ssr(0), vscommit(0), sp(0), Ki(0)
 {
   p0[0] = 0.0;
   p0[1] = 0.0;
   p0[2] = 0.0;
   p0[3] = 0.0;
   p0[4] = 0.0;
+  
+  theNodes[0] = 0;
+  theNodes[1] = 0;
 }
 
 // constructor which takes the unique element tag, sections,
@@ -96,13 +99,13 @@ NLBeamColumn3d::NLBeamColumn3d (int tag, int nodeI, int nodeJ,
                                 CrdTransf3d &coordTransf, double massDensPerUnitLength,
                                 int maxNumIters, double tolerance):
 Element(tag,ELE_TAG_NLBeamColumn3d), connectedExternalNodes(2), 
-nSections(numSections), sections(0), crdTransf(0), node1Ptr(0), node2Ptr(0),
-rho(massDensPerUnitLength), maxIters(maxNumIters), tol(tolerance), 
+nSections(numSections), sections(0), crdTransf(0),
+rho(massDensPerUnitLength), maxIters(maxNumIters), tol(tolerance),
 initialFlag(0), isTorsion(false),
 load(NEGD), 
 kv(NEBD,NEBD), Se(NEBD),  
 kvcommit(NEBD,NEBD), Secommit(NEBD),
-fs(0), vs(0), Ssr(0), vscommit(0), sp(0)
+fs(0), vs(0), Ssr(0), vscommit(0), sp(0), Ki(0)
 {
    connectedExternalNodes(0) = nodeI;
    connectedExternalNodes(1) = nodeJ;    
@@ -192,6 +195,9 @@ fs(0), vs(0), Ssr(0), vscommit(0), sp(0)
   p0[2] = 0.0;
   p0[3] = 0.0;
   p0[4] = 0.0;
+
+  theNodes[0] = 0;
+  theNodes[1] = 0;
 }
 
 
@@ -225,6 +231,9 @@ NLBeamColumn3d::~NLBeamColumn3d()
 
    if (sp != 0)
      delete sp;
+
+   if (Ki != 0)
+     delete Ki;
 }
 
 
@@ -242,6 +251,11 @@ NLBeamColumn3d::getExternalNodes(void)
    return connectedExternalNodes;
 }
 
+Node **
+NLBeamColumn3d::getNodePtrs(void) 
+{
+  return theNodes;
+}
 
 int
 NLBeamColumn3d::getNumDOF(void) 
@@ -254,8 +268,8 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
 {
    // check Domain is not null - invoked when object removed from a domain
    if (theDomain == 0) {
-      node1Ptr = 0;
-      node2Ptr = 0;
+      theNodes[0] = 0;
+      theNodes[1] = 0;
       return;
    }
 
@@ -264,17 +278,17 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    int Nd1 = connectedExternalNodes(0);  
    int Nd2 = connectedExternalNodes(1);
    
-   node1Ptr = theDomain->getNode(Nd1);
-   node2Ptr = theDomain->getNode(Nd2);  
+   theNodes[0] = theDomain->getNode(Nd1);
+   theNodes[1] = theDomain->getNode(Nd2);  
 
-   if (node1Ptr == 0)
+   if (theNodes[0] == 0)
    {
       cerr << "NLBeamColumn3d::setDomain: Nd1: ";
       cerr << Nd1 << "does not exist in model\n";
       exit(0);
    }
 
-   if (node2Ptr == 0) 
+   if (theNodes[1] == 0) 
    {
       cerr << "NLBeamColumn3d::setDomain: Nd2: ";
       cerr << Nd2 << "does not exist in model\n";
@@ -285,8 +299,8 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    this->DomainComponent::setDomain(theDomain);
     
    // ensure connected nodes have correct number of dof's
-   int dofNode1 = node1Ptr->getNumberDOF();
-   int dofNode2 = node2Ptr->getNumberDOF();
+   int dofNode1 = theNodes[0]->getNumberDOF();
+   int dofNode2 = theNodes[1]->getNumberDOF();
    
    if ((dofNode1 != NND) || (dofNode2 != NND))
    {
@@ -296,7 +310,7 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    
 
    // initialize the transformation
-   if (crdTransf->initialize(node1Ptr, node2Ptr))
+   if (crdTransf->initialize(theNodes[0], theNodes[1]))
    {
       cerr << "NLBeamColumn3d::setDomain(): Error initializing coordinate transformation";  
       exit(0);
@@ -422,7 +436,158 @@ NLBeamColumn3d::getTangentStiff(void)
 
   return crdTransf->getGlobalStiffMatrix(kv, Se);
 }
+
+
+const Matrix &
+NLBeamColumn3d::getInitialStiff(void)
+{
+
+  // check for quick return
+  if (Ki != 0)
+    return *Ki;
+
+  // get integration point positions and weights
+  const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
+  const Vector &weight = quadRule.getIntegrPointWeights(nSections);
+  
+  static Matrix f(NEBD,NEBD);   // element flexibility matrix
+
+  static Matrix I(NEBD,NEBD);   // an identity matrix for matrix inverse
+  int i;
+  
+  I.Zero();
+  for (i=0; i<NEBD; i++)
+    I(i,i) = 1.0;
+  
+  double L = crdTransf->getInitialLength();
+  double oneOverL  = 1.0/L;
+  
+  // initialize f and vr for integration
+  f.Zero();
+
+  for (i=0; i<nSections; i++) {
+    int order      = sections[i]->getOrder();
+    const ID &code = sections[i]->getType();
     
+    Vector Ss(workArea, order);
+    Vector dSs(&workArea[order], order);
+    Vector dvs(&workArea[2*order], order);
+    
+    Matrix fb(&workArea[3*order], order, NEBD);
+	
+    double xL  = xi_pt(i,0);
+    double xL1 = xL-1.0;
+    
+    // get section flexibility matrix
+    const Matrix &fSec = sections[i]->getInitialFlexibility();
+    
+    // f = f + (b^ fs * b) * weight(i);
+    //f.addMatrixTripleProduct(1.0, b[i], fs[i], weight(i));
+    int jj, ii;
+    fb.Zero();
+    double tmp;
+    for (ii = 0; ii < order; ii++) {
+      switch(code(ii)) {
+      case SECTION_RESPONSE_P:
+	for (jj = 0; jj < order; jj++)
+	  fb(jj,0) += fSec(jj,ii)*weight(i);
+	break;
+      case SECTION_RESPONSE_MZ:
+	for (jj = 0; jj < order; jj++) {
+	  tmp = fSec(jj,ii)*weight(i);
+	  fb(jj,1) += xL1*tmp;
+	  fb(jj,2) += xL*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_VY:
+	for (jj = 0; jj < order; jj++) {
+	  tmp = oneOverL*fSec(jj,ii)*weight(i);
+	  fb(jj,1) += tmp;
+	  fb(jj,2) += tmp;
+	}
+	break;
+      case SECTION_RESPONSE_MY:
+	for (jj = 0; jj < order; jj++) {
+	  tmp = fSec(jj,ii)*weight(i);
+	  fb(jj,3) += xL1*tmp;
+	  fb(jj,4) += xL*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_VZ:
+	for (jj = 0; jj < order; jj++) {
+	  tmp = oneOverL*fSec(jj,ii)*weight(i);
+	  fb(jj,3) += tmp;
+	  fb(jj,4) += tmp;
+	}
+	break;
+      case SECTION_RESPONSE_T:
+	for (jj = 0; jj < order; jj++)
+	  fb(jj,5) += fSec(jj,ii)*weight(i);
+	break;
+      default:
+	break;
+      }
+    }
+    for (ii = 0; ii < order; ii++) {
+      switch (code(ii)) {
+      case SECTION_RESPONSE_P:
+	for (jj = 0; jj < 6; jj++)
+	  f(0,jj) += fb(ii,jj);
+	break;
+      case SECTION_RESPONSE_MZ:
+	for (jj = 0; jj < 6; jj++) {
+	  tmp = fb(ii,jj);
+	  f(1,jj) += xL1*tmp;
+	  f(2,jj) += xL*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_VY:
+	for (jj = 0; jj < 6; jj++) {
+	  tmp = oneOverL*fb(ii,jj);
+	  f(1,jj) += tmp;
+	  f(2,jj) += tmp;
+	}
+	break;
+      case SECTION_RESPONSE_MY:
+	for (jj = 0; jj < 6; jj++) {
+	  tmp = fb(ii,jj);
+	  f(3,jj) += xL1*tmp;
+	  f(4,jj) += xL*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_VZ:
+	for (jj = 0; jj < 6; jj++) {
+	  tmp = oneOverL*fb(ii,jj);
+	  f(3,jj) += tmp;
+	  f(4,jj) += tmp;
+	}
+	break;
+      case SECTION_RESPONSE_T:
+	for (jj = 0; jj < 6; jj++)
+	  f(5,jj) += fb(ii,jj);
+	break;
+      default:
+	break;
+      }
+    }
+  }
+
+  f  *= L;
+  
+  if (!isTorsion)
+    f(5,5) = 1.0e-10;
+  
+  // calculate element stiffness matrix
+  static Matrix kvInit(NEBD, NEBD);
+  if (f.Solve(I,kvInit) < 0)
+    g3ErrorHandler->warning("NLBeamColumn3d::updateElementState() - could not invert flexibility\n");
+
+
+  // set Ki
+  Ki = new Matrix(crdTransf->getInitialGlobalStiffMatrix(kvInit));
+
+  return *Ki;
+}
 
 const Vector &
 NLBeamColumn3d::getResistingForce(void)
@@ -752,8 +917,8 @@ NLBeamColumn3d::update(void)
 void NLBeamColumn3d::getGlobalDispls(Vector &dg) const
 {
    // determine global displacements
-   const Vector &disp1 = node1Ptr->getTrialDisp();
-   const Vector &disp2 = node2Ptr->getTrialDisp();
+   const Vector &disp1 = theNodes[0]->getTrialDisp();
+   const Vector &disp2 = theNodes[1]->getTrialDisp();
 
    for (int i = 0; i < NND; i++)
    {
@@ -767,8 +932,8 @@ void NLBeamColumn3d::getGlobalDispls(Vector &dg) const
 void NLBeamColumn3d::getGlobalAccels(Vector &ag) const
 {
    // determine global displacements
-   const Vector &accel1 = node1Ptr->getTrialAccel();
-   const Vector &accel2 = node2Ptr->getTrialAccel();
+   const Vector &accel1 = theNodes[0]->getTrialAccel();
+   const Vector &accel2 = theNodes[1]->getTrialAccel();
 
    for (int i = 0; i < NND; i++)
    {
@@ -847,15 +1012,6 @@ void NLBeamColumn3d::getDistrLoadInterpolatMatrix(double xi, Matrix &bp, const I
 }
 
     
-const Matrix &
-NLBeamColumn3d::getDamp(void)
-{
-  theMatrix.Zero();
-
-  return theMatrix;
-}
-
-
 const Matrix &
 NLBeamColumn3d::getMass(void)
 { 
@@ -990,8 +1146,8 @@ NLBeamColumn3d::addInertiaLoadToUnbalance(const Vector &accel)
     return 0;
 
   // get R * accel from the nodes
-  const Vector &Raccel1 = node1Ptr->getRV(accel);
-  const Vector &Raccel2 = node2Ptr->getRV(accel);    
+  const Vector &Raccel1 = theNodes[0]->getRV(accel);
+  const Vector &Raccel2 = theNodes[1]->getRV(accel);    
 
   double L = crdTransf->getInitialLength();
   double m = 0.5*rho*L;
@@ -1012,24 +1168,36 @@ NLBeamColumn3d::getResistingForceIncInertia()
 {	
   // Check for a quick return
   if (rho == 0.0)
-    return this->getResistingForce();
-  
-  const Vector &accel1 = node1Ptr->getTrialAccel();
-  const Vector &accel2 = node2Ptr->getTrialAccel();
-  
-  // Compute the current resisting force
-  theVector = this->getResistingForce();
-  
-  double L = crdTransf->getInitialLength();
-  double m = 0.5*rho*L;
-  
-  theVector(0) += m*accel1(0);
-  theVector(1) += m*accel1(1);
-  theVector(2) += m*accel1(2);
-  theVector(6) += m*accel2(0);
-  theVector(7) += m*accel2(1);
-  theVector(8) += m*accel2(2);
-  
+    theVector = this->getResistingForce();
+
+  if (rho != 0.0) {
+    const Vector &accel1 = theNodes[0]->getTrialAccel();
+    const Vector &accel2 = theNodes[1]->getTrialAccel();
+    
+    // Compute the current resisting force
+    theVector = this->getResistingForce();
+    
+    double L = crdTransf->getInitialLength();
+    double m = 0.5*rho*L;
+    
+    theVector(0) += m*accel1(0);
+    theVector(1) += m*accel1(1);
+    theVector(2) += m*accel1(2);
+    theVector(6) += m*accel2(0);
+    theVector(7) += m*accel2(1);
+    theVector(8) += m*accel2(2);
+
+    // add the damping forces if rayleigh damping
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+      theVector += this->getRayleighDampingForces();
+    
+  } else {
+
+    // add the damping forces if rayleigh damping
+    if (betaK != 0.0 || betaK0 != 0.0)
+      theVector += this->getRayleighDampingForces();
+  }
+
   return theVector;
 }
 
@@ -1350,7 +1518,7 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
      int size = sections[ii]->getOrder();
      secDefSize   += size;
   }
-  
+
   Vector dData(2+NEBD+NEBD*NEBD+secDefSize);   
   
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
@@ -1526,10 +1694,10 @@ NLBeamColumn3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
     
        static Vector v1(NDM), v2(NDM);
 
-       const Vector &node1Crd = node1Ptr->getCrds();
-       const Vector &node2Crd = node2Ptr->getCrds();	
-       const Vector &node1Disp = node1Ptr->getDisp();
-       const Vector &node2Disp = node2Ptr->getDisp();    
+       const Vector &node1Crd = theNodes[0]->getCrds();
+       const Vector &node2Crd = theNodes[1]->getCrds();	
+       const Vector &node1Disp = theNodes[0]->getDisp();
+       const Vector &node2Disp = theNodes[1]->getDisp();    
 
        int i;
        

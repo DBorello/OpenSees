@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-04-23 21:43:13 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:20:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.h,v $
 
 // Ed "C++" Love
@@ -69,6 +69,7 @@ class BbarBrick : public Element {
  
     //return connected external nodes
     const ID &getExternalNodes( ) ;
+    Node **getNodePtrs(void);
 
     //return number of dofs
     int getNumDOF( ) ;
@@ -87,14 +88,7 @@ class BbarBrick : public Element {
 	
     //return stiffness matrix 
     const Matrix &getTangentStiff( ) ;
-    
-    //return secant matrix 
-    const Matrix &getSecantStiff( ) ;
-    
-    //return damping matrix
-    const Matrix &getDamp( ) ;
-    
-    //return mass matrix
+    const Matrix &getInitialStiff( ) ;
     const Matrix &getMass( ) ;
 
     void zeroLoad( ) ;
@@ -163,6 +157,7 @@ class BbarBrick : public Element {
     Matrix transpose( int dim1, int dim2, const Matrix &M ) ;
 
     Vector *load;
+    Matrix *Ki;
 } ; 
 
 

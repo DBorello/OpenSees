@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2002-06-07 00:28:42 $
+// $Revision: 1.19 $
+// $Date: 2002-12-05 22:20:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -44,7 +44,8 @@
 
 #include <G3Globals.h>
 
-Matrix FourNodeQuad::K(8,8);
+double FourNodeQuad::matrixData[64];
+Matrix FourNodeQuad::K(matrixData, 8, 8);
 Vector FourNodeQuad::P(8);
 double FourNodeQuad::shp[3][4];
 double FourNodeQuad::pts[4][2];
@@ -55,8 +56,7 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
 			   double p, double r, double b1, double b2)
 :Element (tag, ELE_TAG_FourNodeQuad), 
   theMaterial(0), connectedExternalNodes(4), 
-  nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0),
-  Q(8), pressureLoad(8), thickness(t), rho(r), pressure(p)
+  Q(8), pressureLoad(8), thickness(t), rho(r), pressure(p), Ki(0)
 {
 	pts[0][0] = -0.5773502691896258;
 	pts[0][1] = -0.5773502691896258;
@@ -104,27 +104,32 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
     connectedExternalNodes(1) = nd2;
     connectedExternalNodes(2) = nd3;
     connectedExternalNodes(3) = nd4;
+    
+    for (int i=0; i<4; i++)
+      theNodes[i] = 0;
 }
 
 FourNodeQuad::FourNodeQuad()
 :Element (0,ELE_TAG_FourNodeQuad),
   theMaterial(0), connectedExternalNodes(4), 
-  nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0),
-  Q(8), pressureLoad(8), thickness(0.0), rho(0.0), pressure(0.0)
+ Q(8), pressureLoad(8), thickness(0.0), rho(0.0), pressure(0.0), Ki(0)
 {
-	pts[0][0] = -0.577350269189626;
-	pts[0][1] = -0.577350269189626;
-	pts[1][0] =  0.577350269189626;
-	pts[1][1] = -0.577350269189626;
-	pts[2][0] =  0.577350269189626;
-	pts[2][1] =  0.577350269189626;
-	pts[3][0] = -0.577350269189626;
-	pts[3][1] =  0.577350269189626;
+  pts[0][0] = -0.577350269189626;
+  pts[0][1] = -0.577350269189626;
+  pts[1][0] =  0.577350269189626;
+  pts[1][1] = -0.577350269189626;
+  pts[2][0] =  0.577350269189626;
+  pts[2][1] =  0.577350269189626;
+  pts[3][0] = -0.577350269189626;
+  pts[3][1] =  0.577350269189626;
+  
+  wts[0] = 1.0;
+  wts[1] = 1.0;
+  wts[2] = 1.0;
+  wts[3] = 1.0;
 
-	wts[0] = 1.0;
-	wts[1] = 1.0;
-	wts[2] = 1.0;
-	wts[3] = 1.0;
+    for (int i=0; i<4; i++)
+      theNodes[i] = 0;
 }
 
 FourNodeQuad::~FourNodeQuad()
@@ -137,6 +142,9 @@ FourNodeQuad::~FourNodeQuad()
   // Delete the array of pointers to NDMaterial pointer arrays
   if (theMaterial)
     delete [] theMaterial;
+
+  if (Ki != 0)
+    delete Ki;
 }
 
 int
@@ -151,6 +159,13 @@ FourNodeQuad::getExternalNodes()
     return connectedExternalNodes;
 }
 
+
+Node **
+FourNodeQuad::getNodePtrs(void) 
+{
+  return theNodes;
+}
+
 int
 FourNodeQuad::getNumDOF()
 {
@@ -162,10 +177,10 @@ FourNodeQuad::setDomain(Domain *theDomain)
 {
 	// Check Domain is not null - invoked when object removed from a domain
     if (theDomain == 0) {
-	nd1Ptr = 0;
-	nd2Ptr = 0;
-	nd3Ptr = 0;
-	nd4Ptr = 0;
+	theNodes[0] = 0;
+	theNodes[1] = 0;
+	theNodes[2] = 0;
+	theNodes[3] = 0;
 	return;
     }
 
@@ -174,22 +189,22 @@ FourNodeQuad::setDomain(Domain *theDomain)
     int Nd3 = connectedExternalNodes(2);
     int Nd4 = connectedExternalNodes(3);
 
-    nd1Ptr = theDomain->getNode(Nd1);
-    nd2Ptr = theDomain->getNode(Nd2);
-    nd3Ptr = theDomain->getNode(Nd3);
-    nd4Ptr = theDomain->getNode(Nd4);
+    theNodes[0] = theDomain->getNode(Nd1);
+    theNodes[1] = theDomain->getNode(Nd2);
+    theNodes[2] = theDomain->getNode(Nd3);
+    theNodes[3] = theDomain->getNode(Nd4);
 
-    if (nd1Ptr == 0 || nd2Ptr == 0 || nd3Ptr == 0 || nd4Ptr == 0) {
+    if (theNodes[0] == 0 || theNodes[1] == 0 || theNodes[2] == 0 || theNodes[3] == 0) {
 	//g3ErrorHandler->fatal("FATAL ERROR FourNodeQuad (tag: %d), node not found in domain",
 	//	this->getTag());
 	
 	return;
     }
 
-    int dofNd1 = nd1Ptr->getNumberDOF();
-    int dofNd2 = nd2Ptr->getNumberDOF();
-    int dofNd3 = nd3Ptr->getNumberDOF();
-    int dofNd4 = nd4Ptr->getNumberDOF();
+    int dofNd1 = theNodes[0]->getNumberDOF();
+    int dofNd2 = theNodes[1]->getNumberDOF();
+    int dofNd3 = theNodes[2]->getNumberDOF();
+    int dofNd4 = theNodes[3]->getNumberDOF();
     
     if (dofNd1 != 2 || dofNd2 != 2 || dofNd3 != 2 || dofNd4 != 2) {
 	//g3ErrorHandler->fatal("FATAL ERROR FourNodeQuad (tag: %d), has differing number of DOFs at its nodes",
@@ -199,8 +214,8 @@ FourNodeQuad::setDomain(Domain *theDomain)
     }
     this->DomainComponent::setDomain(theDomain);
 
-	// Compute consistent nodal loads due to pressure
-	this->setPressureLoadAtNodes();
+    // Compute consistent nodal loads due to pressure
+    this->setPressureLoadAtNodes();
 }
 
 int
@@ -243,10 +258,10 @@ FourNodeQuad::revertToStart()
 int
 FourNodeQuad::update()
 {
-	const Vector &disp1 = nd1Ptr->getTrialDisp();
-	const Vector &disp2 = nd2Ptr->getTrialDisp();
-	const Vector &disp3 = nd3Ptr->getTrialDisp();
-	const Vector &disp4 = nd4Ptr->getTrialDisp();
+	const Vector &disp1 = theNodes[0]->getTrialDisp();
+	const Vector &disp2 = theNodes[1]->getTrialDisp();
+	const Vector &disp3 = theNodes[2]->getTrialDisp();
+	const Vector &disp4 = theNodes[3]->getTrialDisp();
 	
 	static double u[2][4];
 
@@ -299,51 +314,104 @@ FourNodeQuad::getTangentStiff()
 	// Loop over the integration points
 	for (int i = 0; i < 4; i++) {
 
-		// Determine Jacobian for this integration point
-		dvol = this->shapeFunction(pts[i][0], pts[i][1]);
-		dvol *= (thickness*wts[i]);
+	  // Determine Jacobian for this integration point
+	  dvol = this->shapeFunction(pts[i][0], pts[i][1]);
+	  dvol *= (thickness*wts[i]);
+	  
+	  // Get the material tangent
+	  const Matrix &D = theMaterial[i]->getTangent();
+	  
+	  // Perform numerical integration
+	  //K = K + (B^ D * B) * intWt(i)*intWt(j) * detJ;
+	  //K.addMatrixTripleProduct(1.0, B, D, intWt(i)*intWt(j)*detJ);
+	  
+	  double D00 = D(0,0); double D01 = D(0,1); double D02 = D(0,2);
+	  double D10 = D(1,0); double D11 = D(1,1); double D12 = D(1,2);
+	  double D20 = D(2,0); double D21 = D(2,1); double D22 = D(2,2);
 
-		// Get the material tangent
-		const Matrix &D = theMaterial[i]->getTangent();
+	  //	  for (int beta = 0, ib = 0, colIb =0, colIbP1 = 8; 
+	  //   beta < 4; 
+	  //   beta++, ib += 2, colIb += 16, colIbP1 += 16) {
+	    
+	  for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia += 2) {
+	    for (int beta = 0, ib = 0; beta < 4; beta++, ib += 2) {
+	      
+	      DB[0][0] = dvol * (D00 * shp[0][beta] + D02 * shp[1][beta]);
+	      DB[1][0] = dvol * (D10 * shp[0][beta] + D12 * shp[1][beta]);
+	      DB[2][0] = dvol * (D20 * shp[0][beta] + D22 * shp[1][beta]);
+	      DB[0][1] = dvol * (D01 * shp[1][beta] + D02 * shp[0][beta]);
+	      DB[1][1] = dvol * (D11 * shp[1][beta] + D12 * shp[0][beta]);
+	      DB[2][1] = dvol * (D21 * shp[1][beta] + D22 * shp[0][beta]);
+	      
 
-		// Perform numerical integration
-		//K = K + (B^ D * B) * intWt(i)*intWt(j) * detJ;
-		//K.addMatrixTripleProduct(1.0, B, D, intWt(i)*intWt(j)*detJ);
-		for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia += 2) {
-
-			for (int beta = 0, ib = 0; beta < 4; beta++, ib += 2) {
-
-				DB[0][0] = dvol * (D(0,0)*shp[0][beta] + D(0,2)*shp[1][beta]);
-				DB[1][0] = dvol * (D(1,0)*shp[0][beta] + D(1,2)*shp[1][beta]);
-				DB[2][0] = dvol * (D(2,0)*shp[0][beta] + D(2,2)*shp[1][beta]);
-				DB[0][1] = dvol * (D(0,1)*shp[1][beta] + D(0,2)*shp[0][beta]);
-				DB[1][1] = dvol * (D(1,1)*shp[1][beta] + D(1,2)*shp[0][beta]);
-				DB[2][1] = dvol * (D(2,1)*shp[1][beta] + D(2,2)*shp[0][beta]);
-
-				K(ia,ib) += shp[0][alpha]*DB[0][0] + shp[1][alpha]*DB[2][0];
-				K(ia,ib+1) += shp[0][alpha]*DB[0][1] + shp[1][alpha]*DB[2][1];
-				K(ia+1,ib) += shp[1][alpha]*DB[1][0] + shp[0][alpha]*DB[2][0];
-				K(ia+1,ib+1) += shp[1][alpha]*DB[1][1] + shp[0][alpha]*DB[2][1];
-
-			}
-		}
+	      K(ia,ib) += shp[0][alpha]*DB[0][0] + shp[1][alpha]*DB[2][0];
+	      K(ia,ib+1) += shp[0][alpha]*DB[0][1] + shp[1][alpha]*DB[2][1];
+	      K(ia+1,ib) += shp[1][alpha]*DB[1][0] + shp[0][alpha]*DB[2][0];
+	      K(ia+1,ib+1) += shp[1][alpha]*DB[1][1] + shp[0][alpha]*DB[2][1];
+	      //	      matrixData[colIb   +   ia] += shp[0][alpha]*DB[0][0] + shp[1][alpha]*DB[2][0];
+	      //matrixData[colIbP1 +   ia] += shp[0][alpha]*DB[0][1] + shp[1][alpha]*DB[2][1];
+	      //matrixData[colIb   + ia+1] += shp[1][alpha]*DB[1][0] + shp[0][alpha]*DB[2][0];
+	      //matrixData[colIbP1 + ia+1] += shp[1][alpha]*DB[1][1] + shp[0][alpha]*DB[2][1];
+	      
+	    }
+	  }
 	}
-
-	return K;
-}
-
-const Matrix&
-FourNodeQuad::getSecantStiff()
-{
-	return this->getTangentStiff();
-}
-
-const Matrix&
-FourNodeQuad::getDamp()
-{
-	K.Zero();
 	
 	return K;
+}
+
+
+const Matrix&
+FourNodeQuad::getInitialStiff()
+{
+  if (Ki != 0)
+    return *Ki;
+
+  K.Zero();
+  
+  double dvol;
+  double DB[3][2];
+  
+  // Loop over the integration points
+  for (int i = 0; i < 4; i++) {
+    
+    // Determine Jacobian for this integration point
+    dvol = this->shapeFunction(pts[i][0], pts[i][1]);
+    dvol *= (thickness*wts[i]);
+    
+    // Get the material tangent
+    const Matrix &D = theMaterial[i]->getInitialTangent();
+
+    double D00 = D(0,0); double D01 = D(0,1); double D02 = D(0,2);
+    double D10 = D(1,0); double D11 = D(1,1); double D12 = D(1,2);
+    double D20 = D(2,0); double D21 = D(2,1); double D22 = D(2,2);
+    
+    // Perform numerical integration
+    //K = K + (B^ D * B) * intWt(i)*intWt(j) * detJ;
+    //K.addMatrixTripleProduct(1.0, B, D, intWt(i)*intWt(j)*detJ);
+    for (int beta = 0, ib = 0, colIb =0, colIbP1 = 8; 
+	 beta < 4; 
+	 beta++, ib += 2, colIb += 16, colIbP1 += 16) {
+      
+      for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia += 2) {
+	
+	DB[0][0] = dvol * (D00 * shp[0][beta] + D02 * shp[1][beta]);
+	DB[1][0] = dvol * (D10 * shp[0][beta] + D12 * shp[1][beta]);
+	DB[2][0] = dvol * (D20 * shp[0][beta] + D22 * shp[1][beta]);
+	DB[0][1] = dvol * (D01 * shp[1][beta] + D02 * shp[0][beta]);
+	DB[1][1] = dvol * (D11 * shp[1][beta] + D12 * shp[0][beta]);
+	DB[2][1] = dvol * (D21 * shp[1][beta] + D22 * shp[0][beta]);
+	
+	matrixData[colIb   +   ia] += shp[0][alpha]*DB[0][0] + shp[1][alpha]*DB[2][0];
+	matrixData[colIbP1 +   ia] += shp[0][alpha]*DB[0][1] + shp[1][alpha]*DB[2][1];
+	matrixData[colIb   + ia+1] += shp[1][alpha]*DB[1][0] + shp[0][alpha]*DB[2][0];
+	matrixData[colIbP1 + ia+1] += shp[1][alpha]*DB[1][1] + shp[0][alpha]*DB[2][1];
+      }
+    }
+  }
+
+  Ki = new Matrix(K);
+  return K;
 }
 
 const Matrix&
@@ -388,9 +456,8 @@ FourNodeQuad::getMass()
 void
 FourNodeQuad::zeroLoad(void)
 {
-	Q.Zero();
-
-	return;
+  Q.Zero();
+  return;
 }
 
 int 
@@ -417,10 +484,10 @@ FourNodeQuad::addInertiaLoadToUnbalance(const Vector &accel)
 	  return 0;
 
 	// Get R * accel from the nodes
-	const Vector &Raccel1 = nd1Ptr->getRV(accel);
-	const Vector &Raccel2 = nd2Ptr->getRV(accel);
-	const Vector &Raccel3 = nd3Ptr->getRV(accel);
-	const Vector &Raccel4 = nd4Ptr->getRV(accel);
+	const Vector &Raccel1 = theNodes[0]->getRV(accel);
+	const Vector &Raccel2 = theNodes[1]->getRV(accel);
+	const Vector &Raccel3 = theNodes[2]->getRV(accel);
+	const Vector &Raccel4 = theNodes[3]->getRV(accel);
 
     if (2 != Raccel1.Size() || 2 != Raccel2.Size() || 2 != Raccel3.Size() ||
 		2 != Raccel4.Size()) {
@@ -509,13 +576,21 @@ FourNodeQuad::getResistingForceIncInertia()
 	  sum += rhoi[i];
 	}
 
-	if (sum == 0.0)
-	  return this->getResistingForce();
+	// if no mass terms .. just add damping terms
+	if (sum == 0.0) {
+	  this->getResistingForce();
 
-	const Vector &accel1 = nd1Ptr->getTrialAccel();
-	const Vector &accel2 = nd2Ptr->getTrialAccel();
-	const Vector &accel3 = nd3Ptr->getTrialAccel();
-	const Vector &accel4 = nd4Ptr->getTrialAccel();
+	  // add the damping forces if rayleigh damping
+	  if (betaK != 0.0 || betaK0 != 0.0)
+	    P += this->getRayleighDampingForces();
+
+	  return P;
+	}
+
+	const Vector &accel1 = theNodes[0]->getTrialAccel();
+	const Vector &accel2 = theNodes[1]->getTrialAccel();
+	const Vector &accel3 = theNodes[2]->getTrialAccel();
+	const Vector &accel4 = theNodes[3]->getTrialAccel();
 	
 	static double a[8];
 
@@ -537,6 +612,10 @@ FourNodeQuad::getResistingForceIncInertia()
 	// Take advantage of lumped mass matrix
 	for (i = 0; i < 8; i++)
 		P(i) += K(i,i)*a[i];
+
+	// add the damping forces if rayleigh damping
+	if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+	  P += this->getRayleighDampingForces();
 
 	return P;
 }
@@ -726,6 +805,7 @@ FourNodeQuad::Print(ostream &s, int flag)
 int
 FourNodeQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
+
     // first set the quantity to be displayed at the nodes;
     // if displayMode is 1 through 3 we will plot material stresses otherwise 0.0
 
@@ -744,15 +824,15 @@ FourNodeQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
     // now  determine the end points of the quad based on
     // the display factor (a measure of the distorted image)
     // store this information in 4 3d vectors v1 through v4
-    const Vector &end1Crd = nd1Ptr->getCrds();
-    const Vector &end2Crd = nd2Ptr->getCrds();	
-    const Vector &end3Crd = nd3Ptr->getCrds();	
-    const Vector &end4Crd = nd4Ptr->getCrds();	
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
+    const Vector &end3Crd = theNodes[2]->getCrds();	
+    const Vector &end4Crd = theNodes[3]->getCrds();	
 
-    const Vector &end1Disp = nd1Ptr->getDisp();
-    const Vector &end2Disp = nd2Ptr->getDisp();
-    const Vector &end3Disp = nd3Ptr->getDisp();
-    const Vector &end4Disp = nd4Ptr->getDisp();
+    const Vector &end1Disp = theNodes[0]->getDisp();
+    const Vector &end2Disp = theNodes[1]->getDisp();
+    const Vector &end3Disp = theNodes[2]->getDisp();
+    const Vector &end4Disp = theNodes[3]->getDisp();
 
     static Matrix coords(4,3);
 
@@ -891,10 +971,10 @@ FourNodeQuad::updateParameter(int parameterID, Information &info)
 
 double FourNodeQuad::shapeFunction(double xi, double eta)
 {
-	const Vector &nd1Crds = nd1Ptr->getCrds();
-	const Vector &nd2Crds = nd2Ptr->getCrds();
-	const Vector &nd3Crds = nd3Ptr->getCrds();
-	const Vector &nd4Crds = nd4Ptr->getCrds();
+	const Vector &nd1Crds = theNodes[0]->getCrds();
+	const Vector &nd2Crds = theNodes[1]->getCrds();
+	const Vector &nd3Crds = theNodes[2]->getCrds();
+	const Vector &nd4Crds = theNodes[3]->getCrds();
 
 	double oneMinuseta = 1.0-eta;
 	double onePluseta = 1.0+eta;
@@ -967,10 +1047,10 @@ FourNodeQuad::setPressureLoadAtNodes(void)
 	if (pressure == 0.0)
 		return;
 
-	const Vector &node1 = nd1Ptr->getCrds();
-	const Vector &node2 = nd2Ptr->getCrds();
-	const Vector &node3 = nd3Ptr->getCrds();
-	const Vector &node4 = nd4Ptr->getCrds();
+	const Vector &node1 = theNodes[0]->getCrds();
+	const Vector &node2 = theNodes[1]->getCrds();
+	const Vector &node3 = theNodes[2]->getCrds();
+	const Vector &node4 = theNodes[3]->getCrds();
 
 	double x1 = node1(0);
 	double y1 = node1(1);

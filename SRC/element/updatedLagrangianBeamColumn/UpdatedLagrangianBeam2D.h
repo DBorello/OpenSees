@@ -67,6 +67,8 @@ public:
   // methods dealing with nodes and number of external dof
   int		getNumExternalNodes(void) const;
   const	ID &getExternalNodes(void);
+  Node **getNodePtrs(void);
+
   int		getNumDOF(void);
   virtual void setDomain(Domain *theDomain);
   
@@ -76,9 +78,8 @@ public:
   // methods to return the current linearized stiffness,
   // damping and mass matrices
   virtual const	Matrix &getTangentStiff(void);
-  const	Matrix &getSecantStiff(void);
-  const	Matrix &getDamp(void);
-  const	Matrix &getMass(void);
+  virtual const Matrix &getInitialStiff(void);
+  virtual const Matrix &getMass(void);
   
   // methods for returning and applying loads
   virtual Vector &getUVLoadVector(double q1, double q2);
@@ -136,7 +137,9 @@ public:
 
   int     nodeRecord, dofRecord;
   int     m_Iter;
-  
+
+  Matrix *Ki;
+
   static Matrix K, Kg, Kt; // stiffness matrices
   static Matrix M; // mass matrix
   static Matrix D; // damping matrix
@@ -153,7 +156,8 @@ public:
   // used for temporarily storing nodal displacements
   static Vector end1IncrDisp;
   static Vector end2IncrDisp;
-  
+
+  static Node *theNodes[2];
 };
 
 

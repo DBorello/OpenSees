@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-11-26 22:53:58 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:20:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.h,v $
                                                                         
 // Written: MHS
@@ -61,6 +61,8 @@ class ZeroLengthSection : public Element
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
+
     int getNumDOF(void);	
     void setDomain(Domain *theDomain);
 
@@ -71,9 +73,7 @@ class ZeroLengthSection : public Element
 
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
-    const Matrix &getDamp(void);    
-    const Matrix &getMass(void);    
+    const Matrix &getInitialStiff(void);
 
     void zeroLoad(void);	
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -105,25 +105,24 @@ class ZeroLengthSection : public Element
     int numDOF;	                        // number of dof for ZeroLengthSection
     Matrix transformation;		// transformation matrix for orientation
 	
-	Matrix *A;	// Transformation matrix ... e = A*(u2-u1)
-	Vector *v;	// Section deformation vector, the element basic deformations
-
-	Matrix *K;	// Pointer to element stiffness matrix
-	Vector *P;	// Pointer to element force vector
-
-    Node *end1Ptr;      		// pointer to the end1 node object
-    Node *end2Ptr;      		// pointer to the end2 node object	
-
-	SectionForceDeformation *theSection;	// Pointer to section object
-	int order;		// Order of the section model
-
-	// Class wide matrices for return
-	static Matrix K6;
-	static Matrix K12;
-
-	// Class wide vectors for return
-	static Vector P6;
-	static Vector P12;
+    Matrix *A;	// Transformation matrix ... e = A*(u2-u1)
+    Vector *v;	// Section deformation vector, the element basic deformations
+    
+    Matrix *K;	// Pointer to element stiffness matrix
+    Vector *P;	// Pointer to element force vector
+    
+    Node *theNodes[2];
+    
+    SectionForceDeformation *theSection;	// Pointer to section object
+    int order;		// Order of the section model
+    
+    // Class wide matrices for return
+    static Matrix K6;
+    static Matrix K12;
+    
+    // Class wide vectors for return
+    static Vector P6;
+    static Vector P12;
 };
 
 #endif

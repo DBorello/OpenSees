@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-16 21:37:02 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:20:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/NewElement.h,v $
                                                                         
 #ifndef NewElement_h
@@ -50,6 +50,7 @@ class NewElement : public Element
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
     int getNumDOF(void);	
     void setDomain(Domain *theDomain);
 
@@ -62,9 +63,7 @@ class NewElement : public Element
     // public methods to obtain stiffness, mass, damping and 
     // residual information    
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
-    const Matrix &getDamp(void);    
-    const Matrix &getMass(void);    
+    const Matrix &getInitialStiff(void);    
 
     void zeroLoad(void);	
     int addLoad(const Vector &addP);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-07-18 22:08:07 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:20:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.h,v $
                                                                         
                                                                         
@@ -56,6 +56,8 @@ class ElasticBeam2d : public Element
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
+
     int getNumDOF(void);
     void setDomain(Domain *theDomain);
     
@@ -64,7 +66,7 @@ class ElasticBeam2d : public Element
     int revertToStart(void);
     
     const Matrix &getTangentStiff(void);
-    const Matrix &getDamp(void);    
+    const Matrix &getInitialStiff(void);
     const Matrix &getMass(void);    
 
     void zeroLoad(void);	
@@ -101,7 +103,7 @@ class ElasticBeam2d : public Element
     double q0[3];  // Fixed end forces in basic system
     double p0[3];  // Reactions in basic system
     
-    Node *node1Ptr, *node2Ptr;
+    Node *theNodes[2];
     
     ID  connectedExternalNodes;    
 

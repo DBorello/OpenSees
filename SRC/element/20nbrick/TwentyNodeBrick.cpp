@@ -64,7 +64,7 @@ TwentyNodeBrick::TwentyNodeBrick(int element_number,
 			       double r, double p)
 
   :Element(element_number, ELE_TAG_TwentyNodeBrick ),
-  connectedExternalNodes(20), Q(60), bf(3),
+  connectedExternalNodes(20), Ki(0), Q(60), bf(3),
   rho(r), pressure(p)
   {
     //elem_numb = element_number;
@@ -173,15 +173,21 @@ TwentyNodeBrick::TwentyNodeBrick(int element_number,
       connectedExternalNodes(18) = node_numb_19;
       connectedExternalNodes(19) = node_numb_20;
 
+      for (int i=0; i<20; i++)
+	theNodes[i] = 0;
+      
       nodes_in_brick = 20;
 
 }
 
 //====================================================================
 TwentyNodeBrick::TwentyNodeBrick ():Element(0, ELE_TAG_TwentyNodeBrick ),
-connectedExternalNodes(20), Q(60), bf(3), rho(0.0), pressure(0.0), mmodel(0)
+connectedExternalNodes(20), Ki(0), Q(60), bf(3), rho(0.0), pressure(0.0), mmodel(0)
 {
      matpoint = 0;
+
+     for (int i=0; i<20; i++)
+       theNodes[i] = 0;
 }
 
 
@@ -205,6 +211,9 @@ TwentyNodeBrick::~TwentyNodeBrick ()
     // Delete the array of pointers to NDMaterial pointer arrays
     if (matpoint)
     	delete [] matpoint;
+
+    if (Ki != 0)
+      delete Ki;
 
 }
 
@@ -1070,30 +1079,30 @@ tensor TwentyNodeBrick::Nodal_Coordinates(void)
     tensor N_coord(2, dimensions, 0.0);
 
     //Zhaohui using node pointers, which come from the Domain
-    const Vector &nd1Crds = nd1Ptr->getCrds();
-    const Vector &nd2Crds = nd2Ptr->getCrds();
-    const Vector &nd3Crds = nd3Ptr->getCrds();
-    const Vector &nd4Crds = nd4Ptr->getCrds();
-    const Vector &nd5Crds = nd5Ptr->getCrds();
-    const Vector &nd6Crds = nd6Ptr->getCrds();
-    const Vector &nd7Crds = nd7Ptr->getCrds();
-    const Vector &nd8Crds = nd8Ptr->getCrds();
+    const Vector &nd1Crds = theNodes[0]->getCrds();
+    const Vector &nd2Crds = theNodes[1]->getCrds();
+    const Vector &nd3Crds = theNodes[2]->getCrds();
+    const Vector &nd4Crds = theNodes[3]->getCrds();
+    const Vector &nd5Crds = theNodes[4]->getCrds();
+    const Vector &nd6Crds = theNodes[5]->getCrds();
+    const Vector &nd7Crds = theNodes[6]->getCrds();
+    const Vector &nd8Crds = theNodes[7]->getCrds();
 
-    const Vector &nd9Crds  =  nd9Ptr->getCrds();
-    const Vector &nd10Crds = nd10Ptr->getCrds();
-    const Vector &nd11Crds = nd11Ptr->getCrds();
-    const Vector &nd12Crds = nd12Ptr->getCrds();
+    const Vector &nd9Crds  =  theNodes[8]->getCrds();
+    const Vector &nd10Crds = theNodes[9]->getCrds();
+    const Vector &nd11Crds = theNodes[10]->getCrds();
+    const Vector &nd12Crds = theNodes[11]->getCrds();
 
-    const Vector &nd13Crds = nd13Ptr->getCrds();
-    const Vector &nd14Crds = nd14Ptr->getCrds();
-    const Vector &nd15Crds = nd15Ptr->getCrds();
-    const Vector &nd16Crds = nd16Ptr->getCrds();
+    const Vector &nd13Crds = theNodes[12]->getCrds();
+    const Vector &nd14Crds = theNodes[13]->getCrds();
+    const Vector &nd15Crds = theNodes[14]->getCrds();
+    const Vector &nd16Crds = theNodes[15]->getCrds();
 
 
-    const Vector &nd17Crds = nd17Ptr->getCrds();
-    const Vector &nd18Crds = nd18Ptr->getCrds();
-    const Vector &nd19Crds = nd19Ptr->getCrds();
-    const Vector &nd20Crds = nd20Ptr->getCrds();
+    const Vector &nd17Crds = theNodes[16]->getCrds();
+    const Vector &nd18Crds = theNodes[17]->getCrds();
+    const Vector &nd19Crds = theNodes[18]->getCrds();
+    const Vector &nd20Crds = theNodes[19]->getCrds();
     
     N_coord.val(1,1)=nd1Crds(0); N_coord.val(1,2)=nd1Crds(1); N_coord.val(1,3)=nd1Crds(2);
     N_coord.val(2,1)=nd2Crds(0); N_coord.val(2,2)=nd2Crds(1); N_coord.val(2,3)=nd2Crds(2);
@@ -1143,32 +1152,32 @@ tensor TwentyNodeBrick::incr_disp(void)
     //  }
 
     //Zhaohui using node pointers, which come from the Domain
-    //const Vector &TotDis1 = nd1Ptr->getTrialDisp();
-    //const Vector &incrdelDis1 = nd1Ptr->getIncrDisp();
+    //const Vector &TotDis1 = theNodes[0]->getTrialDisp();
+    //const Vector &incrdelDis1 = theNodes[0]->getIncrDisp();
     //Have to get IncrDeltaDisp, not IncrDisp for cumulation of incr_disp
-    const Vector &IncrDis1 = nd1Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis2 = nd2Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis3 = nd3Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis4 = nd4Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis5 = nd5Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis6 = nd6Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis7 = nd7Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis8 = nd8Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis1 = theNodes[0]->getIncrDeltaDisp();
+    const Vector &IncrDis2 = theNodes[1]->getIncrDeltaDisp();
+    const Vector &IncrDis3 = theNodes[2]->getIncrDeltaDisp();
+    const Vector &IncrDis4 = theNodes[3]->getIncrDeltaDisp();
+    const Vector &IncrDis5 = theNodes[4]->getIncrDeltaDisp();
+    const Vector &IncrDis6 = theNodes[5]->getIncrDeltaDisp();
+    const Vector &IncrDis7 = theNodes[6]->getIncrDeltaDisp();
+    const Vector &IncrDis8 = theNodes[7]->getIncrDeltaDisp();
 
-    const Vector &IncrDis9  = nd9Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis10 = nd10Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis11 = nd11Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis12 = nd12Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis9  = theNodes[8]->getIncrDeltaDisp();
+    const Vector &IncrDis10 = theNodes[9]->getIncrDeltaDisp();
+    const Vector &IncrDis11 = theNodes[10]->getIncrDeltaDisp();
+    const Vector &IncrDis12 = theNodes[11]->getIncrDeltaDisp();
 
-    const Vector &IncrDis13 = nd13Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis14 = nd14Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis15 = nd15Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis16 = nd16Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis13 = theNodes[12]->getIncrDeltaDisp();
+    const Vector &IncrDis14 = theNodes[13]->getIncrDeltaDisp();
+    const Vector &IncrDis15 = theNodes[14]->getIncrDeltaDisp();
+    const Vector &IncrDis16 = theNodes[15]->getIncrDeltaDisp();
     
-    const Vector &IncrDis17 = nd17Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis18 = nd18Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis19 = nd19Ptr->getIncrDeltaDisp();
-    const Vector &IncrDis20 = nd20Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis17 = theNodes[16]->getIncrDeltaDisp();
+    const Vector &IncrDis18 = theNodes[17]->getIncrDeltaDisp();
+    const Vector &IncrDis19 = theNodes[18]->getIncrDeltaDisp();
+    const Vector &IncrDis20 = theNodes[19]->getIncrDeltaDisp();
 
     increment_disp.val(1,1)=IncrDis1(0); increment_disp.val(1,2)=IncrDis1(1);increment_disp.val(1,3)=IncrDis1(2);
     increment_disp.val(2,1)=IncrDis2(0); increment_disp.val(2,2)=IncrDis2(1);increment_disp.val(2,3)=IncrDis2(2);
@@ -1205,49 +1214,49 @@ tensor TwentyNodeBrick::total_disp(void)
     tensor total_disp(2, dimensions, 0.0);
 
     //Zhaohui using node pointers, which come from the Domain
-    const Vector &TotDis1 = nd1Ptr->getTrialDisp();
-    cout<<"\ntot node " << nd1Ptr->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2) << endln;
-    const Vector &TotDis2 = nd2Ptr->getTrialDisp();
-    cout << "tot node " << nd2Ptr->getTag() << " x " << TotDis2(0) <<" y "<< TotDis2(1) << " z "<< TotDis2(2) << endln;
-    const Vector &TotDis3 = nd3Ptr->getTrialDisp();
-    cout << "tot node " << nd3Ptr->getTag() << " x " << TotDis3(0) <<" y "<< TotDis3(1) << " z "<< TotDis3(2) << endln;
-    const Vector &TotDis4 = nd4Ptr->getTrialDisp();
-    cout << "tot node " << nd4Ptr->getTag() << " x " << TotDis4(0) <<" y "<< TotDis4(1) << " z "<< TotDis4(2) << endln;
-    const Vector &TotDis5 = nd5Ptr->getTrialDisp();
-    cout << "tot node " << nd5Ptr->getTag() << " x " << TotDis5(0) <<" y "<< TotDis5(1) << " z "<< TotDis5(2) << endln;
-    const Vector &TotDis6 = nd6Ptr->getTrialDisp();
-    cout << "tot node " << nd6Ptr->getTag() << " x " << TotDis6(0) <<" y "<< TotDis6(1) << " z "<< TotDis6(2) << endln;
-    const Vector &TotDis7 = nd7Ptr->getTrialDisp();
-    cout << "tot node " << nd7Ptr->getTag() << " x " << TotDis7(0) <<" y "<< TotDis7(1) << " z "<< TotDis7(2) << endln;
-    const Vector &TotDis8 = nd8Ptr->getTrialDisp();
-    cout << "tot node " << nd8Ptr->getTag() << " x " << TotDis8(0) <<" y "<< TotDis8(1) << " z "<< TotDis8(2) << endln;
+    const Vector &TotDis1 = theNodes[0]->getTrialDisp();
+    cout<<"\ntot node " << theNodes[0]->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2) << endln;
+    const Vector &TotDis2 = theNodes[1]->getTrialDisp();
+    cout << "tot node " << theNodes[1]->getTag() << " x " << TotDis2(0) <<" y "<< TotDis2(1) << " z "<< TotDis2(2) << endln;
+    const Vector &TotDis3 = theNodes[2]->getTrialDisp();
+    cout << "tot node " << theNodes[2]->getTag() << " x " << TotDis3(0) <<" y "<< TotDis3(1) << " z "<< TotDis3(2) << endln;
+    const Vector &TotDis4 = theNodes[3]->getTrialDisp();
+    cout << "tot node " << theNodes[3]->getTag() << " x " << TotDis4(0) <<" y "<< TotDis4(1) << " z "<< TotDis4(2) << endln;
+    const Vector &TotDis5 = theNodes[4]->getTrialDisp();
+    cout << "tot node " << theNodes[4]->getTag() << " x " << TotDis5(0) <<" y "<< TotDis5(1) << " z "<< TotDis5(2) << endln;
+    const Vector &TotDis6 = theNodes[5]->getTrialDisp();
+    cout << "tot node " << theNodes[5]->getTag() << " x " << TotDis6(0) <<" y "<< TotDis6(1) << " z "<< TotDis6(2) << endln;
+    const Vector &TotDis7 = theNodes[6]->getTrialDisp();
+    cout << "tot node " << theNodes[6]->getTag() << " x " << TotDis7(0) <<" y "<< TotDis7(1) << " z "<< TotDis7(2) << endln;
+    const Vector &TotDis8 = theNodes[7]->getTrialDisp();
+    cout << "tot node " << theNodes[7]->getTag() << " x " << TotDis8(0) <<" y "<< TotDis8(1) << " z "<< TotDis8(2) << endln;
 
-    const Vector &TotDis9 = nd9Ptr->getTrialDisp();
-    cout << "tot node " << nd9Ptr->getTag() << " x " << TotDis9(0) <<" y "<< TotDis9(1) << " z "<< TotDis9(2) << endln;
-    const Vector &TotDis10 = nd10Ptr->getTrialDisp();
-    cout << "tot node " << nd10Ptr->getTag() << " x " << TotDis10(0) <<" y "<< TotDis10(1) << " z "<< TotDis10(2) << endln;
-    const Vector &TotDis11 = nd11Ptr->getTrialDisp();
-    cout << "tot node " << nd11Ptr->getTag() << " x " << TotDis11(0) <<" y "<< TotDis11(1) << " z "<< TotDis11(2) << endln;
-    const Vector &TotDis12 = nd12Ptr->getTrialDisp();
-    cout << "tot node " << nd12Ptr->getTag() << " x " << TotDis12(0) <<" y "<< TotDis12(1) << " z "<< TotDis12(2) << endln;
+    const Vector &TotDis9 = theNodes[8]->getTrialDisp();
+    cout << "tot node " << theNodes[8]->getTag() << " x " << TotDis9(0) <<" y "<< TotDis9(1) << " z "<< TotDis9(2) << endln;
+    const Vector &TotDis10 = theNodes[9]->getTrialDisp();
+    cout << "tot node " << theNodes[9]->getTag() << " x " << TotDis10(0) <<" y "<< TotDis10(1) << " z "<< TotDis10(2) << endln;
+    const Vector &TotDis11 = theNodes[10]->getTrialDisp();
+    cout << "tot node " << theNodes[10]->getTag() << " x " << TotDis11(0) <<" y "<< TotDis11(1) << " z "<< TotDis11(2) << endln;
+    const Vector &TotDis12 = theNodes[11]->getTrialDisp();
+    cout << "tot node " << theNodes[11]->getTag() << " x " << TotDis12(0) <<" y "<< TotDis12(1) << " z "<< TotDis12(2) << endln;
 
-    const Vector &TotDis13 = nd13Ptr->getTrialDisp();
-    cout << "tot node " << nd13Ptr->getTag() << " x " << TotDis13(0) <<" y "<< TotDis13(1) << " z "<< TotDis13(2) << endln;
-    const Vector &TotDis14 = nd14Ptr->getTrialDisp();
-    cout << "tot node " << nd14Ptr->getTag() << " x " << TotDis14(0) <<" y "<< TotDis14(1) << " z "<< TotDis14(2) << endln;
-    const Vector &TotDis15 = nd15Ptr->getTrialDisp();
-    cout << "tot node " << nd15Ptr->getTag() << " x " << TotDis15(0) <<" y "<< TotDis15(1) << " z "<< TotDis15(2) << endln;
-    const Vector &TotDis16 = nd16Ptr->getTrialDisp();
-    cout << "tot node " << nd16Ptr->getTag() << " x " << TotDis16(0) <<" y "<< TotDis16(1) << " z "<< TotDis16(2) << endln;
+    const Vector &TotDis13 = theNodes[12]->getTrialDisp();
+    cout << "tot node " << theNodes[12]->getTag() << " x " << TotDis13(0) <<" y "<< TotDis13(1) << " z "<< TotDis13(2) << endln;
+    const Vector &TotDis14 = theNodes[13]->getTrialDisp();
+    cout << "tot node " << theNodes[13]->getTag() << " x " << TotDis14(0) <<" y "<< TotDis14(1) << " z "<< TotDis14(2) << endln;
+    const Vector &TotDis15 = theNodes[14]->getTrialDisp();
+    cout << "tot node " << theNodes[14]->getTag() << " x " << TotDis15(0) <<" y "<< TotDis15(1) << " z "<< TotDis15(2) << endln;
+    const Vector &TotDis16 = theNodes[15]->getTrialDisp();
+    cout << "tot node " << theNodes[15]->getTag() << " x " << TotDis16(0) <<" y "<< TotDis16(1) << " z "<< TotDis16(2) << endln;
 
-    const Vector &TotDis17 = nd17Ptr->getTrialDisp();
-    cout << "tot node " << nd17Ptr->getTag() << " x " << TotDis17(0) <<" y "<< TotDis17(1) << " z "<< TotDis17(2) << endln;
-    const Vector &TotDis18 = nd18Ptr->getTrialDisp();
-    cout << "tot node " << nd18Ptr->getTag() << " x " << TotDis18(0) <<" y "<< TotDis18(1) << " z "<< TotDis18(2) << endln;
-    const Vector &TotDis19 = nd19Ptr->getTrialDisp();
-    cout << "tot node " << nd19Ptr->getTag() << " x " << TotDis19(0) <<" y "<< TotDis19(1) << " z "<< TotDis19(2) << endln;
-    const Vector &TotDis20 = nd20Ptr->getTrialDisp();
-    cout << "tot node " << nd20Ptr->getTag() << " x " << TotDis20(0) <<" y "<< TotDis20(1) << " z "<< TotDis20(2) << endln;
+    const Vector &TotDis17 = theNodes[16]->getTrialDisp();
+    cout << "tot node " << theNodes[16]->getTag() << " x " << TotDis17(0) <<" y "<< TotDis17(1) << " z "<< TotDis17(2) << endln;
+    const Vector &TotDis18 = theNodes[17]->getTrialDisp();
+    cout << "tot node " << theNodes[17]->getTag() << " x " << TotDis18(0) <<" y "<< TotDis18(1) << " z "<< TotDis18(2) << endln;
+    const Vector &TotDis19 = theNodes[18]->getTrialDisp();
+    cout << "tot node " << theNodes[18]->getTag() << " x " << TotDis19(0) <<" y "<< TotDis19(1) << " z "<< TotDis19(2) << endln;
+    const Vector &TotDis20 = theNodes[19]->getTrialDisp();
+    cout << "tot node " << theNodes[19]->getTag() << " x " << TotDis20(0) <<" y "<< TotDis20(1) << " z "<< TotDis20(2) << endln;
 
 
 
@@ -1307,14 +1316,14 @@ tensor TwentyNodeBrick::total_disp(FILE *fp, double * u)
     // Need more work
     
     //Zhaohui using node pointers, which come from the Domain
-    const Vector &TotDis1 = nd1Ptr->getTrialDisp();
-    const Vector &TotDis2 = nd2Ptr->getTrialDisp();
-    const Vector &TotDis3 = nd3Ptr->getTrialDisp();
-    const Vector &TotDis4 = nd4Ptr->getTrialDisp();
-    const Vector &TotDis5 = nd5Ptr->getTrialDisp();
-    const Vector &TotDis6 = nd6Ptr->getTrialDisp();
-    const Vector &TotDis7 = nd7Ptr->getTrialDisp();
-    const Vector &TotDis8 = nd8Ptr->getTrialDisp();
+    const Vector &TotDis1 = theNodes[0]->getTrialDisp();
+    const Vector &TotDis2 = theNodes[1]->getTrialDisp();
+    const Vector &TotDis3 = theNodes[2]->getTrialDisp();
+    const Vector &TotDis4 = theNodes[3]->getTrialDisp();
+    const Vector &TotDis5 = theNodes[4]->getTrialDisp();
+    const Vector &TotDis6 = theNodes[5]->getTrialDisp();
+    const Vector &TotDis7 = theNodes[6]->getTrialDisp();
+    const Vector &TotDis8 = theNodes[7]->getTrialDisp();
 
     total_disp.val(1,1)=TotDis1(0); total_disp.val(1,2)=TotDis1(1);total_disp.val(1,3)=TotDis1(2);
     total_disp.val(2,1)=TotDis2(0); total_disp.val(2,2)=TotDis2(1);total_disp.val(2,3)=TotDis2(2);
@@ -2069,26 +2078,26 @@ void TwentyNodeBrick::report(char * msg)
            //Xiaoyan changed .report to . Print in above line 09/27/00
 	   //  (nodes[G_N_numbs[in]]).Print(cout);
 
-	   nd1Ptr->Print(cout);
-	   nd2Ptr->Print(cout);
-	   nd3Ptr->Print(cout);
-	   nd4Ptr->Print(cout);
-	   nd5Ptr->Print(cout);
-	   nd6Ptr->Print(cout);
-           nd7Ptr->Print(cout);
-	   nd8Ptr->Print(cout);
-	   nd9Ptr->Print(cout);
-	   nd10Ptr->Print(cout);
-	   nd11Ptr->Print(cout);
- 	   nd12Ptr->Print(cout);
- 	   nd13Ptr->Print(cout);
-	   nd14Ptr->Print(cout);
-	   nd15Ptr->Print(cout);
-	   nd16Ptr->Print(cout);
-	   nd17Ptr->Print(cout);
-	   nd18Ptr->Print(cout);
-	   nd19Ptr->Print(cout);
-	   nd20Ptr->Print(cout);
+	   theNodes[0]->Print(cout);
+	   theNodes[1]->Print(cout);
+	   theNodes[2]->Print(cout);
+	   theNodes[3]->Print(cout);
+	   theNodes[4]->Print(cout);
+	   theNodes[5]->Print(cout);
+           theNodes[6]->Print(cout);
+	   theNodes[7]->Print(cout);
+	   theNodes[8]->Print(cout);
+	   theNodes[9]->Print(cout);
+	   theNodes[10]->Print(cout);
+ 	   theNodes[11]->Print(cout);
+ 	   theNodes[12]->Print(cout);
+	   theNodes[13]->Print(cout);
+	   theNodes[14]->Print(cout);
+	   theNodes[15]->Print(cout);
+	   theNodes[16]->Print(cout);
+	   theNodes[17]->Print(cout);
+	   theNodes[18]->Print(cout);
+	   theNodes[19]->Print(cout);
 
 	   //           for ( int jn=8 ; jn<20 ; jn++ )
            //             (nodes[G_N_numbs[jn]]).report("nodes from within element (last 15)\n");
@@ -2240,30 +2249,30 @@ void TwentyNodeBrick::computeGaussPoint(void)
     //}
 
     //Zhaohui using node pointers, which come from the Domain
-    const Vector &nd1Crds = nd1Ptr->getCrds();
-    const Vector &nd2Crds = nd2Ptr->getCrds();
-    const Vector &nd3Crds = nd3Ptr->getCrds();
-    const Vector &nd4Crds = nd4Ptr->getCrds();
+    const Vector &nd1Crds = theNodes[0]->getCrds();
+    const Vector &nd2Crds = theNodes[1]->getCrds();
+    const Vector &nd3Crds = theNodes[2]->getCrds();
+    const Vector &nd4Crds = theNodes[3]->getCrds();
 
-    const Vector &nd5Crds = nd5Ptr->getCrds();
-    const Vector &nd6Crds = nd6Ptr->getCrds();
-    const Vector &nd7Crds = nd7Ptr->getCrds();
-    const Vector &nd8Crds = nd8Ptr->getCrds();
+    const Vector &nd5Crds = theNodes[4]->getCrds();
+    const Vector &nd6Crds = theNodes[5]->getCrds();
+    const Vector &nd7Crds = theNodes[6]->getCrds();
+    const Vector &nd8Crds = theNodes[7]->getCrds();
 
-    const Vector &nd9Crds  = nd9Ptr->getCrds();
-    const Vector &nd10Crds = nd10Ptr->getCrds();
-    const Vector &nd11Crds = nd11Ptr->getCrds();
-    const Vector &nd12Crds = nd12Ptr->getCrds();
+    const Vector &nd9Crds  = theNodes[8]->getCrds();
+    const Vector &nd10Crds = theNodes[9]->getCrds();
+    const Vector &nd11Crds = theNodes[10]->getCrds();
+    const Vector &nd12Crds = theNodes[11]->getCrds();
 
-    const Vector &nd13Crds = nd13Ptr->getCrds();
-    const Vector &nd14Crds = nd14Ptr->getCrds();
-    const Vector &nd15Crds = nd15Ptr->getCrds();
-    const Vector &nd16Crds = nd16Ptr->getCrds();
+    const Vector &nd13Crds = theNodes[12]->getCrds();
+    const Vector &nd14Crds = theNodes[13]->getCrds();
+    const Vector &nd15Crds = theNodes[14]->getCrds();
+    const Vector &nd16Crds = theNodes[15]->getCrds();
     
-    const Vector &nd17Crds = nd17Ptr->getCrds();
-    const Vector &nd18Crds = nd18Ptr->getCrds();
-    const Vector &nd19Crds = nd19Ptr->getCrds();
-    const Vector &nd20Crds = nd20Ptr->getCrds();
+    const Vector &nd17Crds = theNodes[16]->getCrds();
+    const Vector &nd18Crds = theNodes[17]->getCrds();
+    const Vector &nd19Crds = theNodes[18]->getCrds();
+    const Vector &nd20Crds = theNodes[19]->getCrds();
 
     NodalCoord.val(1, 1)=nd1Crds( 0); NodalCoord.val(2, 1)=nd1Crds( 1); NodalCoord.val(3, 1)=nd1Crds( 2);
     NodalCoord.val(1, 2)=nd2Crds( 0); NodalCoord.val(2, 2)=nd2Crds( 1); NodalCoord.val(3, 2)=nd2Crds( 2);
@@ -2383,26 +2392,26 @@ void TwentyNodeBrick::reportTensorF(FILE * fp)
     //  }
 
     //Zhaohui using node pointers, which come from the Domain
-    const Vector &nd1Crds = nd1Ptr->getCrds();
-    const Vector &nd2Crds = nd2Ptr->getCrds();
-    const Vector &nd3Crds = nd3Ptr->getCrds();
-    const Vector &nd4Crds = nd4Ptr->getCrds();
-    const Vector &nd5Crds = nd5Ptr->getCrds();
-    const Vector &nd6Crds = nd6Ptr->getCrds();
-    const Vector &nd7Crds = nd7Ptr->getCrds();
-    const Vector &nd8Crds = nd8Ptr->getCrds();
-    const Vector &nd9Crds  =  nd9Ptr->getCrds();
-    const Vector &nd10Crds = nd10Ptr->getCrds();
-    const Vector &nd11Crds = nd11Ptr->getCrds();
-    const Vector &nd12Crds = nd12Ptr->getCrds();
-    const Vector &nd13Crds = nd13Ptr->getCrds();
-    const Vector &nd14Crds = nd14Ptr->getCrds();
-    const Vector &nd15Crds = nd15Ptr->getCrds();
-    const Vector &nd16Crds = nd16Ptr->getCrds();
-    const Vector &nd17Crds = nd17Ptr->getCrds();
-    const Vector &nd18Crds = nd18Ptr->getCrds();
-    const Vector &nd19Crds = nd19Ptr->getCrds();
-    const Vector &nd20Crds = nd20Ptr->getCrds();
+    const Vector &nd1Crds = theNodes[0]->getCrds();
+    const Vector &nd2Crds = theNodes[1]->getCrds();
+    const Vector &nd3Crds = theNodes[2]->getCrds();
+    const Vector &nd4Crds = theNodes[3]->getCrds();
+    const Vector &nd5Crds = theNodes[4]->getCrds();
+    const Vector &nd6Crds = theNodes[5]->getCrds();
+    const Vector &nd7Crds = theNodes[6]->getCrds();
+    const Vector &nd8Crds = theNodes[7]->getCrds();
+    const Vector &nd9Crds  =  theNodes[8]->getCrds();
+    const Vector &nd10Crds = theNodes[9]->getCrds();
+    const Vector &nd11Crds = theNodes[10]->getCrds();
+    const Vector &nd12Crds = theNodes[11]->getCrds();
+    const Vector &nd13Crds = theNodes[12]->getCrds();
+    const Vector &nd14Crds = theNodes[13]->getCrds();
+    const Vector &nd15Crds = theNodes[14]->getCrds();
+    const Vector &nd16Crds = theNodes[15]->getCrds();
+    const Vector &nd17Crds = theNodes[16]->getCrds();
+    const Vector &nd18Crds = theNodes[17]->getCrds();
+    const Vector &nd19Crds = theNodes[18]->getCrds();
+    const Vector &nd20Crds = theNodes[19]->getCrds();
 
     NodalCoord.val(1,1)=nd1Crds(0); NodalCoord.val(2,1)=nd1Crds(1); NodalCoord.val(3,1)=nd1Crds(2);
     NodalCoord.val(1,2)=nd2Crds(0); NodalCoord.val(2,2)=nd2Crds(1); NodalCoord.val(3,2)=nd2Crds(2);
@@ -2489,6 +2498,12 @@ const ID& TwentyNodeBrick::getExternalNodes ()
     return connectedExternalNodes;
 }
 
+Node ** 
+TwentyNodeBrick::getNodePtrs(void)
+{
+  return theNodes;
+}
+
 //=============================================================================
 int TwentyNodeBrick::getNumDOF ()
 {
@@ -2500,26 +2515,26 @@ void TwentyNodeBrick::setDomain (Domain *theDomain)
 {
     // Check Domain is not null - invoked when object removed from a domain
     if (theDomain == 0) {
-	nd1Ptr = 0;
-	nd2Ptr = 0;
-	nd3Ptr = 0;
-	nd4Ptr = 0;
-	nd5Ptr = 0;
-	nd6Ptr = 0;
-	nd7Ptr = 0;
-	nd8Ptr = 0;
-	nd9Ptr	= 0;
-        nd10Ptr = 0;
-        nd11Ptr = 0;
-        nd12Ptr = 0;
-        nd13Ptr = 0;
-        nd14Ptr = 0;
-        nd15Ptr = 0;
-        nd16Ptr = 0;
-        nd17Ptr = 0;
-        nd18Ptr = 0;
-        nd19Ptr = 0;
-        nd20Ptr = 0;
+	theNodes[0] = 0;
+	theNodes[1] = 0;
+	theNodes[2] = 0;
+	theNodes[3] = 0;
+	theNodes[4] = 0;
+	theNodes[5] = 0;
+	theNodes[6] = 0;
+	theNodes[7] = 0;
+	theNodes[8]	= 0;
+        theNodes[9] = 0;
+        theNodes[10] = 0;
+        theNodes[11] = 0;
+        theNodes[12] = 0;
+        theNodes[13] = 0;
+        theNodes[14] = 0;
+        theNodes[15] = 0;
+        theNodes[16] = 0;
+        theNodes[17] = 0;
+        theNodes[18] = 0;
+        theNodes[19] = 0;
     }
 
     //Added if-else for found a bug when trying removeElement from theDomain  07-19-2001 Zhaohui
@@ -2548,32 +2563,32 @@ void TwentyNodeBrick::setDomain (Domain *theDomain)
       int Nd20 = connectedExternalNodes(19);					 
 
 
-      nd1Ptr = theDomain->getNode(Nd1);
-      nd2Ptr = theDomain->getNode(Nd2);
-      nd3Ptr = theDomain->getNode(Nd3);
-      nd4Ptr = theDomain->getNode(Nd4);
-      nd5Ptr = theDomain->getNode(Nd5);
-      nd6Ptr = theDomain->getNode(Nd6);
-      nd7Ptr = theDomain->getNode(Nd7);
-      nd8Ptr = theDomain->getNode(Nd8);
-      nd9Ptr = theDomain->getNode(Nd9);
-      nd10Ptr = theDomain->getNode(Nd10);
-      nd11Ptr = theDomain->getNode(Nd11);
-      nd12Ptr = theDomain->getNode(Nd12);
-      nd13Ptr = theDomain->getNode(Nd13);
-      nd14Ptr = theDomain->getNode(Nd14);
-      nd15Ptr = theDomain->getNode(Nd15);
-      nd16Ptr = theDomain->getNode(Nd16);
-      nd17Ptr = theDomain->getNode(Nd17);
-      nd18Ptr = theDomain->getNode(Nd18);
-      nd19Ptr = theDomain->getNode(Nd19);
-      nd20Ptr = theDomain->getNode(Nd20);
+      theNodes[0] = theDomain->getNode(Nd1);
+      theNodes[1] = theDomain->getNode(Nd2);
+      theNodes[2] = theDomain->getNode(Nd3);
+      theNodes[3] = theDomain->getNode(Nd4);
+      theNodes[4] = theDomain->getNode(Nd5);
+      theNodes[5] = theDomain->getNode(Nd6);
+      theNodes[6] = theDomain->getNode(Nd7);
+      theNodes[7] = theDomain->getNode(Nd8);
+      theNodes[8] = theDomain->getNode(Nd9);
+      theNodes[9] = theDomain->getNode(Nd10);
+      theNodes[10] = theDomain->getNode(Nd11);
+      theNodes[11] = theDomain->getNode(Nd12);
+      theNodes[12] = theDomain->getNode(Nd13);
+      theNodes[13] = theDomain->getNode(Nd14);
+      theNodes[14] = theDomain->getNode(Nd15);
+      theNodes[15] = theDomain->getNode(Nd16);
+      theNodes[16] = theDomain->getNode(Nd17);
+      theNodes[17] = theDomain->getNode(Nd18);
+      theNodes[18] = theDomain->getNode(Nd19);
+      theNodes[19] = theDomain->getNode(Nd20);
 
-      if (nd1Ptr  == 0 || nd2Ptr  == 0 || nd3Ptr  == 0 || nd4Ptr  == 0 ||
-          nd5Ptr  == 0 || nd6Ptr  == 0 || nd7Ptr  == 0 || nd8Ptr  == 0 ||
-	  nd9Ptr  == 0 || nd10Ptr == 0 || nd11Ptr == 0 || nd12Ptr == 0 ||
-          nd13Ptr == 0 || nd14Ptr == 0 || nd15Ptr == 0 || nd16Ptr == 0 ||
-          nd17Ptr == 0 || nd18Ptr == 0 || nd19Ptr == 0 || nd20Ptr == 0 ) {
+      if (theNodes[0]  == 0 || theNodes[1]  == 0 || theNodes[2]  == 0 || theNodes[3]  == 0 ||
+          theNodes[4]  == 0 || theNodes[5]  == 0 || theNodes[6]  == 0 || theNodes[7]  == 0 ||
+	  theNodes[8]  == 0 || theNodes[9] == 0 || theNodes[10] == 0 || theNodes[11] == 0 ||
+          theNodes[12] == 0 || theNodes[13] == 0 || theNodes[14] == 0 || theNodes[15] == 0 ||
+          theNodes[16] == 0 || theNodes[17] == 0 || theNodes[18] == 0 || theNodes[19] == 0 ) {
 
       	g3ErrorHandler->fatal("FATAL ERROR TwentyNodeBrick (tag: %d), node not found in domain",
       		this->getTag());
@@ -2581,26 +2596,26 @@ void TwentyNodeBrick::setDomain (Domain *theDomain)
       	return;
       }
 
-      int dofNd1 = nd1Ptr->getNumberDOF();
-      int dofNd2 = nd2Ptr->getNumberDOF();
-      int dofNd3 = nd3Ptr->getNumberDOF();
-      int dofNd4 = nd4Ptr->getNumberDOF();
-      int dofNd5 = nd5Ptr->getNumberDOF();
-      int dofNd6 = nd6Ptr->getNumberDOF();
-      int dofNd7 = nd7Ptr->getNumberDOF();
-      int dofNd8 = nd8Ptr->getNumberDOF();
-      int dofNd9 = nd9Ptr->getNumberDOF();
-      int dofNd10 = nd10Ptr->getNumberDOF();
-      int dofNd11 = nd11Ptr->getNumberDOF();
-      int dofNd12 = nd12Ptr->getNumberDOF();
-      int dofNd13 = nd13Ptr->getNumberDOF();
-      int dofNd14 = nd14Ptr->getNumberDOF();
-      int dofNd15 = nd15Ptr->getNumberDOF();
-      int dofNd16 = nd16Ptr->getNumberDOF();
-      int dofNd17 = nd17Ptr->getNumberDOF();
-      int dofNd18 = nd18Ptr->getNumberDOF();
-      int dofNd19 = nd19Ptr->getNumberDOF();
-      int dofNd20 = nd20Ptr->getNumberDOF();
+      int dofNd1 = theNodes[0]->getNumberDOF();
+      int dofNd2 = theNodes[1]->getNumberDOF();
+      int dofNd3 = theNodes[2]->getNumberDOF();
+      int dofNd4 = theNodes[3]->getNumberDOF();
+      int dofNd5 = theNodes[4]->getNumberDOF();
+      int dofNd6 = theNodes[5]->getNumberDOF();
+      int dofNd7 = theNodes[6]->getNumberDOF();
+      int dofNd8 = theNodes[7]->getNumberDOF();
+      int dofNd9 = theNodes[8]->getNumberDOF();
+      int dofNd10 = theNodes[9]->getNumberDOF();
+      int dofNd11 = theNodes[10]->getNumberDOF();
+      int dofNd12 = theNodes[11]->getNumberDOF();
+      int dofNd13 = theNodes[12]->getNumberDOF();
+      int dofNd14 = theNodes[13]->getNumberDOF();
+      int dofNd15 = theNodes[14]->getNumberDOF();
+      int dofNd16 = theNodes[15]->getNumberDOF();
+      int dofNd17 = theNodes[16]->getNumberDOF();
+      int dofNd18 = theNodes[17]->getNumberDOF();
+      int dofNd19 = theNodes[18]->getNumberDOF();
+      int dofNd20 = theNodes[19]->getNumberDOF();
 
       if (dofNd1  != 3 || dofNd2  != 3 || dofNd3  != 3 || dofNd4  != 3 ||  
           dofNd5  != 3 || dofNd6  != 3 || dofNd7  != 3 || dofNd8  != 3 ||
@@ -2816,15 +2831,10 @@ const Matrix &TwentyNodeBrick::getTangentStiff ()
 }
 
 //=============================================================================
-const Matrix &TwentyNodeBrick::getSecantStiff ()
+const Matrix &TwentyNodeBrick::getInitialStiff ()
 {
-     return K;
-}
-
-//=============================================================================
-const Matrix &TwentyNodeBrick::getDamp ()
-{
-     return C;
+  cerr << "WARNING - TwentyNodeBrick::getInitialStiff() - not yet implemented\n";
+  return this->getTangentStiff();
 }
 
 //=============================================================================
@@ -3029,26 +3039,26 @@ int TwentyNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
 		return 0;
 
 	// Get R * accel from the nodes
-	const Vector &Raccel1  = nd1Ptr->getRV(accel);
-	const Vector &Raccel2  = nd2Ptr->getRV(accel);
-	const Vector &Raccel3  = nd3Ptr->getRV(accel);
-	const Vector &Raccel4  = nd4Ptr->getRV(accel);
-	const Vector &Raccel5  = nd5Ptr->getRV(accel);
-	const Vector &Raccel6  = nd6Ptr->getRV(accel);
-	const Vector &Raccel7  = nd7Ptr->getRV(accel);
-	const Vector &Raccel8  = nd8Ptr->getRV(accel);
-	const Vector &Raccel9  = nd9Ptr->getRV(accel);
-	const Vector &Raccel10 = nd10Ptr->getRV(accel);
-	const Vector &Raccel11 = nd11Ptr->getRV(accel);
-	const Vector &Raccel12 = nd12Ptr->getRV(accel);
-	const Vector &Raccel13 = nd13Ptr->getRV(accel);
-	const Vector &Raccel14 = nd14Ptr->getRV(accel);
-	const Vector &Raccel15 = nd15Ptr->getRV(accel);
-	const Vector &Raccel16 = nd16Ptr->getRV(accel);
-	const Vector &Raccel17 = nd17Ptr->getRV(accel);
-	const Vector &Raccel18 = nd18Ptr->getRV(accel);
-	const Vector &Raccel19 = nd19Ptr->getRV(accel);
-	const Vector &Raccel20 = nd20Ptr->getRV(accel);
+	const Vector &Raccel1  = theNodes[0]->getRV(accel);
+	const Vector &Raccel2  = theNodes[1]->getRV(accel);
+	const Vector &Raccel3  = theNodes[2]->getRV(accel);
+	const Vector &Raccel4  = theNodes[3]->getRV(accel);
+	const Vector &Raccel5  = theNodes[4]->getRV(accel);
+	const Vector &Raccel6  = theNodes[5]->getRV(accel);
+	const Vector &Raccel7  = theNodes[6]->getRV(accel);
+	const Vector &Raccel8  = theNodes[7]->getRV(accel);
+	const Vector &Raccel9  = theNodes[8]->getRV(accel);
+	const Vector &Raccel10 = theNodes[9]->getRV(accel);
+	const Vector &Raccel11 = theNodes[10]->getRV(accel);
+	const Vector &Raccel12 = theNodes[11]->getRV(accel);
+	const Vector &Raccel13 = theNodes[12]->getRV(accel);
+	const Vector &Raccel14 = theNodes[13]->getRV(accel);
+	const Vector &Raccel15 = theNodes[14]->getRV(accel);
+	const Vector &Raccel16 = theNodes[15]->getRV(accel);
+	const Vector &Raccel17 = theNodes[16]->getRV(accel);
+	const Vector &Raccel18 = theNodes[17]->getRV(accel);
+	const Vector &Raccel19 = theNodes[18]->getRV(accel);
+	const Vector &Raccel20 = theNodes[19]->getRV(accel);
 
     if (3 != Raccel1.Size()  || 3 != Raccel2.Size()  || 3 != Raccel3.Size()  || 3 != Raccel4.Size() ||
         3 != Raccel5.Size()  || 3 != Raccel6.Size()  || 3 != Raccel7.Size()  || 3 != Raccel8.Size() ||
@@ -3232,14 +3242,14 @@ const Vector TwentyNodeBrick::FormEquiBodyForce(void)
 //{
 //    //Get the coors of each node
 //
-//    const Vector &nd1Crds = nd1Ptr->getCrds();
-//    const Vector &nd2Crds = nd2Ptr->getCrds();
-//    const Vector &nd3Crds = nd3Ptr->getCrds();
-//    const Vector &nd4Crds = nd4Ptr->getCrds();
-//    const Vector &nd5Crds = nd5Ptr->getCrds();
-//    const Vector &nd6Crds = nd6Ptr->getCrds();
-//    const Vector &nd7Crds = nd7Ptr->getCrds();
-//    const Vector &nd8Crds = nd8Ptr->getCrds();
+//    const Vector &nd1Crds = theNodes[0]->getCrds();
+//    const Vector &nd2Crds = theNodes[1]->getCrds();
+//    const Vector &nd3Crds = theNodes[2]->getCrds();
+//    const Vector &nd4Crds = theNodes[3]->getCrds();
+//    const Vector &nd5Crds = theNodes[4]->getCrds();
+//    const Vector &nd6Crds = theNodes[5]->getCrds();
+//    const Vector &nd7Crds = theNodes[6]->getCrds();
+//    const Vector &nd8Crds = theNodes[7]->getCrds();
 //
 //    //dir is the ID for vertial direction, e.g. 1 means x-dir is vertical...
 //    double Zavg = nd1Crds( dir-1)+
@@ -3299,159 +3309,115 @@ const Vector &TwentyNodeBrick::getResistingForce ()
 //=============================================================================
 const Vector &TwentyNodeBrick::getResistingForceIncInertia ()
 {
-	// Check for a quick return
-	if (rho == 0.0)
-		return this->getResistingForce();
 
-	//cerr << "Node555 trialDisp " << nd1Ptr->getTrialDisp();
+  this->getResistingForce();
 
-	const Vector &accel1 = nd1Ptr->getTrialAccel();
-        //cout << "\nnode accel " << nd1Ptr->getTag() << " x " << accel1(0) <<" y "<< accel1(1) << " z "<< accel1(2) << endln;
+  //
+  // now add dynamic terms
+  // P += M * a + C * v
+  //
 
-	const Vector &accel2 = nd2Ptr->getTrialAccel();
-        //cout << "node accel " << nd2Ptr->getTag() << " x " << accel2(0) <<" y "<< accel2(1) << " z "<< accel2(2) << endln;
+  if (rho != 0.0) {
+    const Vector &accel1 = theNodes[0]->getTrialAccel();
+    const Vector &accel2 = theNodes[1]->getTrialAccel();
+    const Vector &accel3 = theNodes[2]->getTrialAccel();
+    const Vector &accel4 = theNodes[3]->getTrialAccel();
+    const Vector &accel5 = theNodes[4]->getTrialAccel();
+    const Vector &accel6 = theNodes[5]->getTrialAccel();
+    const Vector &accel7 = theNodes[6]->getTrialAccel();
+    const Vector &accel8 = theNodes[7]->getTrialAccel();
+    const Vector &accel9 = theNodes[8]->getTrialAccel();
+    const Vector &accel10 = theNodes[9]->getTrialAccel();
+    const Vector &accel11 = theNodes[10]->getTrialAccel();
+    const Vector &accel12 = theNodes[11]->getTrialAccel();
+    const Vector &accel13 = theNodes[12]->getTrialAccel();
+    const Vector &accel14 = theNodes[13]->getTrialAccel();
+    const Vector &accel15 = theNodes[14]->getTrialAccel();
+    const Vector &accel16 = theNodes[15]->getTrialAccel();
+    const Vector &accel17 = theNodes[16]->getTrialAccel();
+    const Vector &accel18 = theNodes[17]->getTrialAccel();
+    const Vector &accel19 = theNodes[18]->getTrialAccel();
+    const Vector &accel20 = theNodes[19]->getTrialAccel();
+    
+    static Vector a(60);  // originally 8
+    
+    a( 0) = accel1(0);
+    a( 1) = accel1(1);
+    a( 2) = accel1(2);
+    a( 3) = accel2(0);
+    a( 4) = accel2(1);
+    a( 5) = accel2(2);
+    a( 6) = accel3(0);
+    a( 7) = accel3(1);
+    a( 8) = accel3(2);
+    a( 9) = accel4(0);
+    a(10) = accel4(1);
+    a(11) = accel4(2);
+    a(12) = accel5(0);
+    a(13) = accel5(1);
+    a(14) = accel5(2);
+    a(15) = accel6(0);
+    a(16) = accel6(1);
+    a(17) = accel6(2);
+    a(18) = accel7(0);
+    a(19) = accel7(1);
+    a(20) = accel7(2);
+    a(21) = accel8(0);
+    a(22) = accel8(1);
+    a(23) = accel8(2);
+    a(24) = accel9(0);
+    a(25) = accel9(1);
+    a(26) = accel9(2);
+    a(27) = accel10(0);
+    a(28) = accel10(1);
+    a(29) = accel10(2);
+    a(30) = accel11(0);
+    a(31) = accel11(1);
+    a(32) = accel11(2);
+    a(33) = accel12(0);
+    a(34) = accel12(1);
+    a(35) = accel12(2);
+    a(36) = accel13(0);
+    a(37) = accel13(1);
+    a(38) = accel13(2);
+    a(39) = accel14(0);
+    a(40) = accel14(1);
+    a(41) = accel14(2);
+    a(42) = accel15(0);
+    a(43) = accel15(1);
+    a(44) = accel15(2);
+    a(45) = accel16(0);
+    a(46) = accel16(1);
+    a(47) = accel16(2);
+    a(48) = accel17(0);
+    a(49) = accel17(1);
+    a(50) = accel17(2);
+    a(51) = accel18(0);
+    a(52) = accel18(1);
+    a(53) = accel18(2);
+    a(54) = accel19(0);
+    a(55) = accel19(1);
+    a(56) = accel19(2);
+    a(57) = accel20(0);
+    a(58) = accel20(1);
+    a(59) = accel20(2);
 
-	const Vector &accel3 = nd3Ptr->getTrialAccel();
-        //cout << "node accel " << nd3Ptr->getTag() << " x " << accel3(0) <<" y "<< accel3(1) << " z "<< accel3(2) << endln;
+    // P += M * a
+    P.addMatrixVector(1.0, M, a, 1.0);
 
-	const Vector &accel4 = nd4Ptr->getTrialAccel();
-        //cout << "node accel " << nd4Ptr->getTag() << " x " << accel4(0) <<" y "<< accel4(1) << " z "<< accel4(2) << endln;
+    // add the damping forces if rayleigh damping
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+      P += this->getRayleighDampingForces();
 
-        // Xiaoyan added the following four 09/27/00
-	const Vector &accel5 = nd5Ptr->getTrialAccel();
-        //cout << "node accel " << nd5Ptr->getTag() << " x " << accel5(0) <<" y "<< accel5(1) << " z "<< accel5(2) << endln;
+  } else {
 
-	const Vector &accel6 = nd6Ptr->getTrialAccel();
-        //cout << "node accel " << nd6Ptr->getTag() << " x " << accel6(0) <<" y "<< accel6(1) << " z "<< accel6(2) << endln;
+    // add the damping forces if rayleigh damping
+    if (betaK != 0.0 || betaK0 != 0.0)
+      P += this->getRayleighDampingForces();
 
-	const Vector &accel7 = nd7Ptr->getTrialAccel();
-        //cout << "node accel " << nd7Ptr->getTag() << " x " << accel7(0) <<" y "<< accel7(1) << " z "<< accel7(2) << endln;
+  }
 
-	const Vector &accel8 = nd8Ptr->getTrialAccel();
-        //cout << "node accel " << nd8Ptr->getTag() << " x " << accel8(0) <<" y "<< accel8(1) << " z "<< accel8(2) << endln;
-
-	const Vector &accel9 = nd9Ptr->getTrialAccel();
-        //cout << "node accel " << nd9Ptr->getTag() << " x " << accel9(0) <<" y "<< accel9(1) << " z "<< accel9(2) << endln;
-
-	const Vector &accel10 = nd10Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
-
-	const Vector &accel11 = nd11Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
-
-	const Vector &accel12 = nd12Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
-
-	const Vector &accel13 = nd13Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
-
-	const Vector &accel14 = nd14Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
-
-	const Vector &accel15 = nd15Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
-
-	const Vector &accel16 = nd16Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
-
-	const Vector &accel17 = nd17Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
-
-	const Vector &accel18 = nd18Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
-
-	const Vector &accel19 = nd19Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
-
-	const Vector &accel20 = nd20Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
-
-
-	static Vector a(60);  // originally 8
-
-	a( 0) = accel1(0);
-	a( 1) = accel1(1);
-	a( 2) = accel1(2);
-	a( 3) = accel2(0);
-	a( 4) = accel2(1);
-	a( 5) = accel2(2);
-	a( 6) = accel3(0);
-	a( 7) = accel3(1);
-	a( 8) = accel3(2);
-	a( 9) = accel4(0);
-	a(10) = accel4(1);
-	a(11) = accel4(2);
-    	a(12) = accel5(0);
-	a(13) = accel5(1);
-	a(14) = accel5(2);
-	a(15) = accel6(0);
-	a(16) = accel6(1);
-	a(17) = accel6(2);
-	a(18) = accel7(0);
-	a(19) = accel7(1);
-	a(20) = accel7(2);
-	a(21) = accel8(0);
-	a(22) = accel8(1);
-	a(23) = accel8(2);
-	a(24) = accel9(0);
- 	a(25) = accel9(1);
-	a(26) = accel9(2);
-	a(27) = accel10(0);
-	a(28) = accel10(1);
-	a(29) = accel10(2);
-	a(30) = accel11(0);
-	a(31) = accel11(1);
-	a(32) = accel11(2);
-	a(33) = accel12(0);
-	a(34) = accel12(1);
-	a(35) = accel12(2);
-	a(36) = accel13(0);
-	a(37) = accel13(1);
-	a(38) = accel13(2);
-	a(39) = accel14(0);
-	a(40) = accel14(1);
-	a(41) = accel14(2);
-	a(42) = accel15(0);
-	a(43) = accel15(1);
-	a(44) = accel15(2);
-	a(45) = accel16(0);
-	a(46) = accel16(1);
-	a(47) = accel16(2);
-	a(48) = accel17(0);
-	a(49) = accel17(1);
-	a(50) = accel17(2);
-	a(51) = accel18(0);
-	a(52) = accel18(1);
-	a(53) = accel18(2);
-	a(54) = accel19(0);
-	a(55) = accel19(1);
-	a(56) = accel19(2);
-	a(57) = accel20(0);
-	a(58) = accel20(1);
-	a(59) = accel20(2);
-
-	// Compute the current resisting force
-	this->getResistingForce();
-
-	// Take advantage of lumped mass matrix
-	// Mass matrix is computed in setDomain()
-	//cout << " M_ii \n";
-
-        //double column_mass = 0;
-        //for (int i = 0; i < 24; i++)
-        //   column_mass += M(1,i);
-        //column_mass = column_mass/3.0;
-
-	//for (int i = 0; i < 60; i++)
-	//{
-	//   P(i) += M(i,i)*a(i);
-	//   //cout << " " << M(i, i);
-	//}
-
-	//cout << endln;
-	//cerr << "P+=Ma" << P<< endl;
-        P.addMatrixVector(1.0, M, a, 1.0);
-	return P;
+  return P;
 }
 
 //=============================================================================
@@ -3477,23 +3443,23 @@ int TwentyNodeBrick::displaySelf (Renderer &theViewer, int displayMode, float fa
     // first determine the end points of the quad based on
     // the display factor (a measure of the distorted image)
     // store this information in 4 3d vectors v1 through v4
-    const Vector &end1Crd = nd1Ptr->getCrds();
-    const Vector &end2Crd = nd2Ptr->getCrds();
-    const Vector &end3Crd = nd3Ptr->getCrds();
-    const Vector &end4Crd = nd4Ptr->getCrds();
-    const Vector &end5Crd = nd5Ptr->getCrds();
-    const Vector &end6Crd = nd6Ptr->getCrds();
-    const Vector &end7Crd = nd7Ptr->getCrds();
-    const Vector &end8Crd = nd8Ptr->getCrds();
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();
+    const Vector &end3Crd = theNodes[2]->getCrds();
+    const Vector &end4Crd = theNodes[3]->getCrds();
+    const Vector &end5Crd = theNodes[4]->getCrds();
+    const Vector &end6Crd = theNodes[5]->getCrds();
+    const Vector &end7Crd = theNodes[6]->getCrds();
+    const Vector &end8Crd = theNodes[7]->getCrds();
 
-    const Vector &end1Disp = nd1Ptr->getDisp();
-    const Vector &end2Disp = nd2Ptr->getDisp();
-    const Vector &end3Disp = nd3Ptr->getDisp();
-    const Vector &end4Disp = nd4Ptr->getDisp();
-    const Vector &end5Disp = nd5Ptr->getDisp();
-    const Vector &end6Disp = nd6Ptr->getDisp();
-    const Vector &end7Disp = nd7Ptr->getDisp();
-    const Vector &end8Disp = nd8Ptr->getDisp();
+    const Vector &end1Disp = theNodes[0]->getDisp();
+    const Vector &end2Disp = theNodes[1]->getDisp();
+    const Vector &end3Disp = theNodes[2]->getDisp();
+    const Vector &end4Disp = theNodes[3]->getDisp();
+    const Vector &end5Disp = theNodes[4]->getDisp();
+    const Vector &end6Disp = theNodes[5]->getDisp();
+    const Vector &end7Disp = theNodes[6]->getDisp();
+    const Vector &end8Disp = theNodes[7]->getDisp();
 
     static Vector v1(3);
     static Vector v2(3);
@@ -3549,26 +3515,26 @@ void TwentyNodeBrick::Print(ostream &s, int flag)
                                        t_integration_order;
     if ( total_number_of_Gauss_points != 0 )
       {
-	   nd1Ptr->Print(cout);
-	   nd2Ptr->Print(cout);
-	   nd3Ptr->Print(cout);
-	   nd4Ptr->Print(cout);
-	   nd5Ptr->Print(cout);
-	   nd6Ptr->Print(cout);
-           nd7Ptr->Print(cout);
-	   nd8Ptr->Print(cout);
-	   nd9Ptr->Print(cout);
-	   nd10Ptr->Print(cout);
-	   nd11Ptr->Print(cout);
-	   nd12Ptr->Print(cout);
-	   nd13Ptr->Print(cout);
-	   nd14Ptr->Print(cout);
-	   nd15Ptr->Print(cout);
-	   nd16Ptr->Print(cout);
-	   nd17Ptr->Print(cout);
-	   nd18Ptr->Print(cout);
-	   nd19Ptr->Print(cout);
-	   nd20Ptr->Print(cout);
+	   theNodes[0]->Print(cout);
+	   theNodes[1]->Print(cout);
+	   theNodes[2]->Print(cout);
+	   theNodes[3]->Print(cout);
+	   theNodes[4]->Print(cout);
+	   theNodes[5]->Print(cout);
+           theNodes[6]->Print(cout);
+	   theNodes[7]->Print(cout);
+	   theNodes[8]->Print(cout);
+	   theNodes[9]->Print(cout);
+	   theNodes[10]->Print(cout);
+	   theNodes[11]->Print(cout);
+	   theNodes[12]->Print(cout);
+	   theNodes[13]->Print(cout);
+	   theNodes[14]->Print(cout);
+	   theNodes[15]->Print(cout);
+	   theNodes[16]->Print(cout);
+	   theNodes[17]->Print(cout);
+	   theNodes[18]->Print(cout);
+	   theNodes[19]->Print(cout);
 
     }
     s << "Element mass density:  " << rho << endl << endl;
@@ -3719,8 +3685,8 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
 		Info(109+0) = Gsc(6); //Zcoor of middle layer
 
                 //Computing Height of element
-		const Vector &coor = nd18Ptr->getCrds();
-                const Vector &TotDis = nd18Ptr->getTrialDisp();		
+		const Vector &coor = theNodes[17]->getCrds();
+                const Vector &TotDis = theNodes[17]->getTrialDisp();		
 	        //checking Z-coor. of moddile layer gauss point
 		//if ( (coor(2) - Gsc(6)) > 0.0001 )
 		//  cerr << " Warning: Middle layer Gauss Point Z-coor. wrong...\n";
@@ -3769,8 +3735,8 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
 		if (strcmp(tp, "ElasticIsotropic3D") == 0 )
 		{
 		   wt = getWeightofGP();
-	           const Vector &end1Crd = nd1Ptr->getCrds();
-                   const Vector &end5Crd = nd5Ptr->getCrds();
+	           const Vector &end1Crd = theNodes[0]->getCrds();
+                   const Vector &end5Crd = theNodes[4]->getCrds();
 		   height = end1Crd(2) - end5Crd(2);
 		   //if  (getTag() == 432) {
 		   //   cout << getTag() << " height " << height << endln;
@@ -3977,15 +3943,15 @@ Vector TwentyNodeBrick::getWeightofGP(void)
 //	const Vector &intPt = theQuadRule->getIntegrPointCoords();
 //	const Vector &intWt = theQuadRule->getIntegrPointWeights();
 //
-//	const Vector &disp1 = nd1Ptr->getTrialDisp();
-//        const Vector &disp2 = nd2Ptr->getTrialDisp();
-//	const Vector &disp3 = nd3Ptr->getTrialDisp();
-//        const Vector &disp4 = nd4Ptr->getTrialDisp();
+//	const Vector &disp1 = theNodes[0]->getTrialDisp();
+//        const Vector &disp2 = theNodes[1]->getTrialDisp();
+//	const Vector &disp3 = theNodes[2]->getTrialDisp();
+//        const Vector &disp4 = theNodes[3]->getTrialDisp();
 //       // Xiaoyan added 5-8 07/06/00
-//        const Vector &disp5 = nd5Ptr->getTrialDisp();
-//        const Vector &disp6 = nd6Ptr->getTrialDisp();
-//	const Vector &disp7 = nd7Ptr->getTrialDisp();
-//        const Vector &disp8 = nd8Ptr->getTrialDisp();
+//        const Vector &disp5 = theNodes[4]->getTrialDisp();
+//        const Vector &disp6 = theNodes[5]->getTrialDisp();
+//	const Vector &disp7 = theNodes[6]->getTrialDisp();
+//        const Vector &disp8 = theNodes[7]->getTrialDisp();
 //
 //	static Vector u(24);	    //Changed from u(8) to u(24) Xiaoyn 07/06/00
 //
@@ -4118,15 +4084,15 @@ Vector TwentyNodeBrick::getWeightofGP(void)
 //	const Vector &intPt = theQuadRule->getIntegrPointCoords();
 //	const Vector &intWt = theQuadRule->getIntegrPointWeights();
 //
-//	const Vector &disp1 = nd1Ptr->getTrialDisp();
-//        const Vector &disp2 = nd2Ptr->getTrialDisp();
-//	const Vector &disp3 = nd3Ptr->getTrialDisp();
-//        const Vector &disp4 = nd4Ptr->getTrialDisp();
+//	const Vector &disp1 = theNodes[0]->getTrialDisp();
+//        const Vector &disp2 = theNodes[1]->getTrialDisp();
+//	const Vector &disp3 = theNodes[2]->getTrialDisp();
+//        const Vector &disp4 = theNodes[3]->getTrialDisp();
 //	//6-8 added by Xiaoyan 07/06/00
-//	const Vector &disp5 = nd5Ptr->getTrialDisp();
-//        const Vector &disp6 = nd6Ptr->getTrialDisp();
-//	const Vector &disp7 = nd7Ptr->getTrialDisp();
-//        const Vector &disp8 = nd8Ptr->getTrialDisp();
+//	const Vector &disp5 = theNodes[4]->getTrialDisp();
+//        const Vector &disp6 = theNodes[5]->getTrialDisp();
+//	const Vector &disp7 = theNodes[6]->getTrialDisp();
+//        const Vector &disp8 = theNodes[7]->getTrialDisp();
 //
 //
 //	static Vector u(24);	    //Changed from u(8) to u(24) Xiaoyn 07/06/00
@@ -4217,26 +4183,26 @@ Vector TwentyNodeBrick::getWeightofGP(void)
     // first determine the end points of the quad based on
     // the display factor (a measure of the distorted image)
     // store this information in 2 3d vectors v1 and v2
-//        const Vector &end1Crd = nd1Ptr->getCrds();
-//        const Vector &end2Crd = nd2Ptr->getCrds();
-//	const Vector &end3Crd = nd3Ptr->getCrds();
-//	const Vector &end4Crd = nd4Ptr->getCrds();
+//        const Vector &end1Crd = theNodes[0]->getCrds();
+//        const Vector &end2Crd = theNodes[1]->getCrds();
+//	const Vector &end3Crd = theNodes[2]->getCrds();
+//	const Vector &end4Crd = theNodes[3]->getCrds();
 //	// 5-8 were added by Xiaoyan
-//        const Vector &end5Crd = nd5Ptr->getCrds();
-//        const Vector &end6Crd = nd6Ptr->getCrds();
-//	const Vector &end7Crd = nd7Ptr->getCrds();
-//	const Vector &end8Crd = nd8Ptr->getCrds();
+//        const Vector &end5Crd = theNodes[4]->getCrds();
+//        const Vector &end6Crd = theNodes[5]->getCrds();
+//	const Vector &end7Crd = theNodes[6]->getCrds();
+//	const Vector &end8Crd = theNodes[7]->getCrds();
 ////---------------------------------------------------------------
-//    	const Vector &end1Disp = nd1Ptr->getDisp();
-//	const Vector &end2Disp = nd2Ptr->getDisp();
-//	const Vector &end3Disp = nd3Ptr->getDisp();
-//	const Vector &end4Disp = nd4Ptr->getDisp();
+//    	const Vector &end1Disp = theNodes[0]->getDisp();
+//	const Vector &end2Disp = theNodes[1]->getDisp();
+//	const Vector &end3Disp = theNodes[2]->getDisp();
+//	const Vector &end4Disp = theNodes[3]->getDisp();
 //
 	// 5-8 were added by Xiaoyan
-//        const Vector &end5Disp = nd5Ptr->getDisp();
-//	const Vector &end6Disp = nd6Ptr->getDisp();
-//	const Vector &end7Disp = nd7Ptr->getDisp();
-//	const Vector &end8Disp = nd8Ptr->getDisp();
+//        const Vector &end5Disp = theNodes[4]->getDisp();
+//	const Vector &end6Disp = theNodes[5]->getDisp();
+//	const Vector &end7Disp = theNodes[6]->getDisp();
+//	const Vector &end8Disp = theNodes[7]->getDisp();
 //
 //	Vector v1(3);
 //	Vector v2(3);
@@ -4304,15 +4270,15 @@ Vector TwentyNodeBrick::getWeightofGP(void)
 //TwentyNodeBrick::setJacobian (double r, double s, double t)
 ////Changed xi, eta to r,s and added t Xiaoyan 07/06/00
 //{
-//	const Vector &nd1Crds = nd1Ptr->getCrds();
-//	const Vector &nd2Crds = nd2Ptr->getCrds();
-//	const Vector &nd3Crds = nd3Ptr->getCrds();
-//	const Vector &nd4Crds = nd4Ptr->getCrds();
+//	const Vector &nd1Crds = theNodes[0]->getCrds();
+//	const Vector &nd2Crds = theNodes[1]->getCrds();
+//	const Vector &nd3Crds = theNodes[2]->getCrds();
+//	const Vector &nd4Crds = theNodes[3]->getCrds();
 //	// Xiaoyan added 5-8 07/06/00
-//	const Vector &nd5Crds = nd5Ptr->getCrds();
-//	const Vector &nd6Crds = nd6Ptr->getCrds();
-//	const Vector &nd7Crds = nd7Ptr->getCrds();
-//	const Vector &nd8Crds = nd8Ptr->getCrds();
+//	const Vector &nd5Crds = theNodes[4]->getCrds();
+//	const Vector &nd6Crds = theNodes[5]->getCrds();
+//	const Vector &nd7Crds = theNodes[6]->getCrds();
+//	const Vector &nd8Crds = theNodes[7]->getCrds();
 //
 ////	J(0,0) = -nd1Crds(0)*(1.0-eta) + nd2Crds(0)*(1.0-eta) +
 ////				nd3Crds(0)*(1.0+eta) - nd4Crds(0)*(1.0+eta);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:51 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/beam3d02.h,v $
                                                                         
                                                                         
@@ -51,15 +51,17 @@ class beam3d02 : public Element
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
 
     int getNumDOF(void);
+    void setDomain(Domain *theDomain);
+
+
     int commitState(void);
     int revertToLastCommit(void);        
     
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
-    const Matrix &getDamp(void);    
-    const Matrix &getMass(void);    
+    const Matrix &getInitialStiff(void);
 
     void zeroLoad(void);	
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -70,7 +72,6 @@ class beam3d02 : public Element
     
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
-    
     
     void Print(ostream &s, int flag =0);    
     
@@ -91,6 +92,7 @@ class beam3d02 : public Element
     
     ID  connectedExternalNodes;    
     int isStiffFormed;
+    Node *theNodes[2];
 };
 
 #endif

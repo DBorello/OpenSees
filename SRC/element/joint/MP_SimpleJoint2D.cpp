@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-07-18 21:55:32 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:20:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_SimpleJoint2D.cpp,v $
 
 // Written: Arash
@@ -38,9 +38,9 @@
  
 // constructor for FEM_ObjectBroker
 MP_SimpleJoint2D::MP_SimpleJoint2D()
-:MP_Constraint( CNSTRNT_TAG_MP_SimpleJoint2D ),thisDomain(0),
+:MP_Constraint( 0 , CNSTRNT_TAG_MP_SimpleJoint2D ),thisDomain(0),
  nodeRetained(0),nodeConstrained(0), MainDOF(0), AuxDOF(0),constraint(0),
- constrDOF(0),retainDOF(0),dbTag1(0), dbTag2(0), RetainedNode(0),
+ constrDOF(0),retainDOF(0),dbTag1(0), dbTag2(0), dbTag3(0), RetainedNode(0),
  ConstrainedNode(0), LargeDisplacement(0), Length0(0.0)
 {
     
@@ -50,9 +50,9 @@ MP_SimpleJoint2D::MP_SimpleJoint2D()
 // general constructor for ModelBuilder
 MP_SimpleJoint2D::MP_SimpleJoint2D(Domain *theDomain, int tag, int nodeRetain, int nodeConstr,
 		int Maindof, int LrgDsp )
-:MP_Constraint(CNSTRNT_TAG_MP_SimpleJoint2D ), thisDomain(theDomain),
+:MP_Constraint( tag , CNSTRNT_TAG_MP_SimpleJoint2D ), thisDomain(theDomain),
  nodeRetained(nodeRetain), nodeConstrained(nodeConstr), MainDOF(Maindof) ,AuxDOF(0),
- constraint(0), constrDOF(0), retainDOF(0), dbTag1(0), dbTag2(0),
+ constraint(0), constrDOF(0), retainDOF(0), dbTag1(0), dbTag2(0), dbTag3(0),
  RetainedNode(0), ConstrainedNode(0), LargeDisplacement( LrgDsp ), Length0(0.0)
 {
 
@@ -267,13 +267,137 @@ MP_SimpleJoint2D::isTimeVarying(void) const
 
 int MP_SimpleJoint2D::sendSelf(int commitTag, Channel &theChannel)
 {
-	return 0;
+	Vector data(14);
+    int dataTag = this->getDbTag();
+
+    data(0) = this->getTag(); 
+    data(1) = nodeRetained;
+    data(2) = nodeConstrained;
+	data(3) = AuxDOF;
+    data(4) = MainDOF;
+    
+	if (constrDOF == 0) data(5) = 0; else data(5) = constrDOF->Size();    
+	if (retainDOF == 0) data(6) = 0; else data(6) = retainDOF->Size();        
+    if (constraint == 0) data(7) = 0; else data(7) = constraint->noRows();
+	if (constraint == 0) data(8) = 0; else data(8) = constraint->noCols();   
+    // need two database tags for ID objects
+    if (constrDOF != 0 && dbTag1 == 0) dbTag1 = theChannel.getDbTag();
+    if (retainDOF != 0 && dbTag2 == 0) dbTag2 = theChannel.getDbTag();
+	if (constraint != 0 && dbTag3 == 0) dbTag3 = theChannel.getDbTag();
+
+    data(9) = dbTag1;
+    data(10) = dbTag2;
+	data(11) = dbTag3;
+    data(12) = LargeDisplacement;
+    data(13) = Length0;
+
+	// now send the data vector
+    int result = theChannel.sendVector(dataTag, commitTag, data);
+    if (result < 0) {
+		cerr << "WARNING MP_SimpleJoint2D::sendSelf - error sending ID data\n";
+		return result;  
+    }    
+    
+	// send constrDOF
+    if (constrDOF != 0 && constrDOF->Size() != 0) {
+		int result = theChannel.sendID(dbTag1, commitTag, *constrDOF);
+		if (result < 0) {
+			cerr << "WARNING MP_SimpleJoint2D::sendSelf ";
+			cerr << "- error sending constrained DOF data\n";
+			return result;
+		}
+	}
+
+	// send retainDOF
+    if (retainDOF != 0 && retainDOF->Size() != 0) {
+		int result = theChannel.sendID(dbTag2, commitTag, *retainDOF);
+		if (result < 0) {
+			cerr << "WARNING MP_SimpleJoint2D::sendSelf ";
+			cerr << "- error sending retained DOF data\n";
+			return result;
+		}
+    }
+
+	// send constraint matrix 
+    if (constraint != 0 && constraint->noRows() != 0) {
+
+
+	int result = theChannel.sendMatrix(dbTag3, commitTag, *constraint);
+	if (result < 0) {
+	    cerr << "WARNING MP_SimpleJoint2D::sendSelf ";
+	    cerr << "- error sending constraint Matrix data\n"; 
+	    return result;  
+	}
+    }
+
+    return 0;
 }
+
 
 int MP_SimpleJoint2D::recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker)
 {
-	return 0;
+    int dataTag = this->getDbTag();
+    Vector data(14);
+    int result = theChannel.recvVector(dataTag, commitTag, data);
+    if (result < 0) {
+	cerr << "WARNING MP_SimpleJoint2D::recvSelf - error receiving ID data\n";
+	return result;  
+    }    
+
+    this->setTag( (int) data(0));
+    nodeRetained = (int) data(1);
+    nodeConstrained = (int) data(2);
+	AuxDOF = (int) data(3);
+    MainDOF = (int) data(4);
+
+	int constrDOFsize = (int) data(5);
+	int retainDOFsize = (int) data(6);
+    int numRows = (int) data(7);
+	int numCols = (int) data(8); 
+	
+	dbTag1 = (int) data(9);
+    dbTag2 = (int) data(10);
+    dbTag3 = (int) data(11);
+	LargeDisplacement = (int) data(12);
+    Length0 = data(13);
+
+
+    // receive constrDOF ID
+    if (constrDOFsize != 0) {
+	constrDOF = new ID(constrDOFsize);
+	int result = theChannel.recvID(dbTag1, commitTag, *constrDOF);
+	if (result < 0) {
+	    cerr << "WARNING MP_SimpleJoint2D::recvSelf ";
+	    cerr << "- error receiving constrained data\n"; 
+	    return result;  
+	}	
+    }
+    
+    // receive retainDOF ID
+    if (retainDOFsize != 0) {
+	retainDOF = new ID(retainDOFsize);
+	int result = theChannel.recvID(dbTag2, commitTag, *retainDOF);
+	if (result < 0) {
+	    cerr << "WARNING MP_SimpleJoint2D::recvSelf ";
+	    cerr << "- error receiving retained data\n"; 
+	    return result;  
+	}	
+    }    
+    
+    // receive the constraint matrix
+	if (numRows != 0 && numCols != 0) {
+		constraint = new Matrix(numRows,numCols);
+
+		int result = theChannel.recvMatrix(dbTag3, commitTag, *constraint);
+		
+		if (result < 0) {
+			cerr << "WARNING MP_SimpleJoint2D::recvSelf ";
+			cerr << "- error receiving Matrix data\n";
+			return result;
+		}
+	}
+    return 0;
 }
 
 

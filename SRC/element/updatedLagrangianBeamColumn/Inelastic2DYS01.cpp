@@ -16,7 +16,7 @@ Inelastic2DYS01::Inelastic2DYS01(int tag, double a, double e, double iz,
 			    :InelasticYS2DGNL (tag, Nd1, Nd2, ysEnd1, ysEnd2,
 			                   rf_algo, islinear, rho),
 			     A(a), E(e), Iz(iz),
-			     damageFactorEnd1(0.0), damageFactorEnd2(0.0), fpeak(0.0)
+  damageFactorEnd1(0.0), damageFactorEnd2(0.0), fpeak(0.0)
 {
   massDof = A*L*rho;
   massDof = massDof/2;
@@ -25,7 +25,7 @@ Inelastic2DYS01::Inelastic2DYS01(int tag, double a, double e, double iz,
 
 Inelastic2DYS01::~Inelastic2DYS01()
 {
-	//does nothing
+
 }
 
 // very simple element

@@ -18,11 +18,6 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-
-// $Revision: 1.1 $
-// $Date: 2002-07-18 21:55:33 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/joint/TclJoint2dCommand.cpp,v $
-
 // Written: Arash	Created: 04/01
 // Revision: 
 //				AAA		05/01
@@ -64,11 +59,11 @@ TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,
 	// check the number of arguments is correct
 	int argStart = 2;
 	
-	if ((argc-argStart) < 8) {
+	if ((argc-argStart) < 9) {
 		cerr << "WARNING insufficient arguments\n";
 		printCommand(argc, argv);
 		cerr << "Want:\n";
-		cerr << "element Joint2D Tag? NodI? NodJ? NodK? NodL? NodC? MatC? LrgDsp?\n";
+		cerr << "element Joint2D Tag? NodI? NodJ? NodK? NodL? NodC? MatC? RotSpringTag? LrgDsp?\n";
 		cerr << "or:\n";
 		cerr << "element Joint2D Tag? NodI? NodJ? NodK? NodL? NodC? MatI? MatJ? MatK? MatL? MatC? LrgDsp?\n";
 		return TCL_ERROR;
@@ -124,7 +119,7 @@ TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,
 
 
 	// Decide to use SimpleJoint2D or Joint2D constructor, based on the number of arguments
-	if ((argc-argStart) == 8 ) {
+	if ((argc-argStart) == 9 ) {
 		// Using SimpleJoint2D constructor
 		
 		int PanelMatId;
@@ -134,9 +129,24 @@ TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,
 			return TCL_ERROR;
 		}
 
-	
+		int RotEleTag;
+		if (Tcl_GetInt(interp, argv[7+argStart], &RotEleTag) != TCL_OK) {
+			cerr << "WARNING invalid tag for rotational spring.\n";
+			cerr << "Joint2D element: " << Joint2DId << endl;
+			return TCL_ERROR;
+		}
+
+		// check domain for existence of spring element tag
+		Element *RotEle = theTclDomain->getElement(RotEleTag);
+		if (RotEle != 0) {
+			cerr << "WARNING element tag specified for the rotational spring already exists.\n";
+			cerr << "Use a new element tag.\n";
+			cerr << "Joint2D element: " << Joint2DId << endl;
+			return TCL_ERROR;
+		}
+		
 		int LargeDisp;
-		if (Tcl_GetInt(interp, argv[7+argStart], &LargeDisp) != TCL_OK) {
+		if (Tcl_GetInt(interp, argv[8+argStart], &LargeDisp) != TCL_OK) {
 			// use 0 as default
 			LargeDisp = 0;
 		}
@@ -156,6 +166,7 @@ TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,
 					*PanelMaterial , 
 					theTclDomain, 
 					CenterNodeTag,
+					RotEleTag,
 					LargeDisp);
 		
 		if (theSimpleJoint2D == 0) {

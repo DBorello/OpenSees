@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2002-06-07 21:50:30 $
+// $Revision: 1.16 $
+// $Date: 2002-12-05 22:20:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
 
 #include <BeamWithHinges2d.h>
@@ -55,7 +55,6 @@ BeamWithHinges2d::BeamWithHinges2d(void)
    beta1(0.0), beta2(0.0), rho(0.0),
    theCoordTransf(0),
    connectedExternalNodes(2),
-   node1Ptr(0), node2Ptr(0),
    kb(3,3), q(3), load(6),
    kbCommit(3,3), qCommit(3),
    initialFlag(0), maxIter(0), tolerance(0.0), sp(0)
@@ -70,6 +69,9 @@ BeamWithHinges2d::BeamWithHinges2d(void)
   v0[0] = 0.0;
   v0[1] = 0.0;
   v0[2] = 0.0;
+
+  theNodes[0] = 0;
+  theNodes[1] = 0;
 }
 
 BeamWithHinges2d::BeamWithHinges2d(int tag, int nodeI, int nodeJ,
@@ -83,7 +85,6 @@ BeamWithHinges2d::BeamWithHinges2d(int tag, int nodeI, int nodeJ,
    beta1(lpi), beta2(lpj), rho(r),
    theCoordTransf(0),
    connectedExternalNodes(2),
-   node1Ptr(0), node2Ptr(0),
    kb(3,3), q(3), load(6),
    kbCommit(3,3), qCommit(3),
    initialFlag(0), maxIter(max), tolerance(tol), sp(0)
@@ -125,6 +126,9 @@ BeamWithHinges2d::BeamWithHinges2d(int tag, int nodeI, int nodeJ,
   connectedExternalNodes(0) = nodeI;
   connectedExternalNodes(1) = nodeJ;
 
+  theNodes[0] = 0;
+  theNodes[1] = 0;
+
   // Set up section interpolation and hinge lengths
   this->setHinges();
 
@@ -162,6 +166,12 @@ BeamWithHinges2d::getExternalNodes(void)
   return connectedExternalNodes;
 }
 
+Node **
+BeamWithHinges2d::getNodePtrs()
+{
+    return theNodes;
+}
+
 int 
 BeamWithHinges2d::getNumDOF(void)
 {
@@ -175,8 +185,8 @@ BeamWithHinges2d::setDomain(Domain *theDomain)
   //geometry may change.  Therefore calculate all beam geometry here.
   
   if(theDomain == 0) {
-    node1Ptr = 0;
-    node2Ptr = 0;
+    theNodes[0] = 0;
+    theNodes[1] = 0;
     return;
   }
   
@@ -186,7 +196,7 @@ BeamWithHinges2d::setDomain(Domain *theDomain)
   // call the DomainComponent version of the function
   this->DomainComponent::setDomain(theDomain);
   
-  if (theCoordTransf->initialize(node1Ptr, node2Ptr) != 0)
+  if (theCoordTransf->initialize(theNodes[0], theNodes[1]) != 0)
     g3ErrorHandler->fatal("%s -- failed to initialize coordinate transformation",
 			  "BeamWithHinges2d::setDomain()");
   
@@ -285,19 +295,157 @@ BeamWithHinges2d::revertToStart(void)
 const Matrix &
 BeamWithHinges2d::getTangentStiff(void)
 {
-  // Will remove once we clean up the corotational 2d transformation -- MHS
-  theCoordTransf->update();
-
   return theCoordTransf->getGlobalStiffMatrix(kb, q);
 }
 
-const Matrix &
-BeamWithHinges2d::getDamp(void)
-{
-  theMatrix.Zero();
 
-  return theMatrix;
+const Matrix &
+BeamWithHinges2d::getInitialStiff(void)
+{
+  double L = theCoordTransf->getInitialLength();
+  double oneOverL = 1.0/L;
+
+  // Section locations along element length ...
+  double xi[2];
+
+  // and their integration weights
+  double lp[2];
+  
+  lp[0] = beta1*L;
+  lp[1] = beta2*L;
+
+  xi[0] = 0.5*lp[0];
+  xi[1] = L-0.5*lp[1];
+  
+  // element properties
+  static Matrix f(3,3);	// element flexibility
+  static Vector vr(3);	// Residual element deformations
+  
+  static Matrix Iden(3,3);   // an identity matrix for matrix inverse
+  Iden.Zero();
+  for (int i = 0; i < 3; i++)
+    Iden(i,i) = 1.0;
+
+  // Length of elastic interior
+  double Le = L-lp[0]-lp[1];
+  double LoverEA  = Le/(E*A);
+  double Lover3EI = Le/(3*E*I);
+  double Lover6EI = 0.5*Lover3EI;
+  
+  // Elastic flexibility of element interior
+  static Matrix fe(2,2);
+  fe(0,0) = fe(1,1) =  Lover3EI;
+  fe(0,1) = fe(1,0) = -Lover6EI;
+  
+  // Equilibrium transformation matrix
+  static Matrix B(2,2);
+  B(0,0) = 1.0 - beta1;
+  B(1,1) = 1.0 - beta2;
+  B(0,1) = -beta1;
+  B(1,0) = -beta2;
+  
+  // Transform the elastic flexibility of the element
+  // interior to the basic system
+  static Matrix fElastic(2,2);
+  fElastic.addMatrixTripleProduct(0.0, B, fe, 1.0);
+
+  // Set element flexibility to flexibility of elastic region
+  f(0,0) = LoverEA;
+  f(1,1) = fElastic(0,0);
+  f(2,2) = fElastic(1,1);
+  f(1,2) = fElastic(0,1);
+  f(2,1) = fElastic(1,0);
+  f(0,1) = f(1,0) = f(0,2) = f(2,0) = 0.0;
+    
+  for (int i = 0; i < 2; i++) {
+      
+    if (section[i] == 0 || lp[i] <= 0.0)
+      continue;
+      
+    // Get section information
+    int order = section[i]->getOrder();
+    const ID &code = section[i]->getType();
+    
+    Vector s(workArea, order);
+    Vector ds(&workArea[order], order);
+    Vector de(&workArea[2*order], order);
+    
+    Matrix fb(&workArea[3*order], order, 3);
+    
+    double x   = xi[i];
+    double xL  = x*oneOverL;
+    double xL1 = xL-1.0;
+      
+    // get section flexibility matrix
+    const Matrix &fSec = section[i]->getInitialFlexibility();
+            
+    // integrate section flexibility matrix
+    // f += (b^ fs * b) * lp[i];
+    //f.addMatrixTripleProduct(1.0, b, fSec, lp[i]);
+    int ii, jj;
+    fb.Zero();
+    double tmp;
+    for (ii = 0; ii < order; ii++) {
+      switch(code(ii)) {
+      case SECTION_RESPONSE_P:
+	for (jj = 0; jj < order; jj++)
+	  fb(jj,0) += fSec(jj,ii)*lp[i];
+	break;
+      case SECTION_RESPONSE_MZ:
+	for (jj = 0; jj < order; jj++) {
+	  tmp = fSec(jj,ii)*lp[i];
+	  fb(jj,1) += xL1*tmp;
+	  fb(jj,2) += xL*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_VY:
+	for (jj = 0; jj < order; jj++) {
+	  //tmp = oneOverL*fSec(jj,ii)*lp[i]*L/lp[i];
+	  tmp = fSec(jj,ii);
+	  fb(jj,1) += tmp;
+	  fb(jj,2) += tmp;
+	  }
+	break;
+      default:
+	break;
+      }
+    }
+    for (ii = 0; ii < order; ii++) {
+      switch (code(ii)) {
+      case SECTION_RESPONSE_P:
+	for (jj = 0; jj < 3; jj++)
+	  f(0,jj) += fb(ii,jj);
+	break;
+      case SECTION_RESPONSE_MZ:
+	for (jj = 0; jj < 3; jj++) {
+	  tmp = fb(ii,jj);
+	  f(1,jj) += xL1*tmp;
+	  f(2,jj) += xL*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_VY:
+	for (jj = 0; jj < 3; jj++) {
+	  tmp = oneOverL*fb(ii,jj);
+	  f(1,jj) += tmp;
+	  f(2,jj) += tmp;
+	}
+	break;
+      default:
+	break;
+      }
+    }
+  }
+
+  // calculate element stiffness matrix
+  //invert3by3Matrix(f, kb);
+  static Matrix kbInit(3,3);
+  if (f.Solve(Iden,kbInit) < 0)
+    g3ErrorHandler->warning("%s -- could not invert flexibility",
+			    "BeamWithHinges2d::update()");    
+  
+  return theCoordTransf->getInitialGlobalStiffMatrix(kbInit);
 }
+
 
 const Matrix &
 BeamWithHinges2d::getMass(void)
@@ -517,8 +665,8 @@ BeamWithHinges2d::addInertiaLoadToUnbalance(const Vector &accel)
   if (rho == 0.0)
     return 0;
   
-  const Vector &Raccel1 = node1Ptr->getRV(accel);
-  const Vector &Raccel2 = node2Ptr->getRV(accel);
+  const Vector &Raccel1 = theNodes[0]->getRV(accel);
+  const Vector &Raccel2 = theNodes[1]->getRV(accel);
   
   double L = theCoordTransf->getInitialLength();
   double mass = 0.5*L*rho;
@@ -535,9 +683,6 @@ BeamWithHinges2d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 BeamWithHinges2d::getResistingForce(void)
 {
-  // Will remove once we clean up the corotational 2d transformation -- MHS
-  theCoordTransf->update();
-
   Vector p0Vec(p0, 3);
 
   return theCoordTransf->getGlobalResistingForce(q, p0Vec);
@@ -546,32 +691,44 @@ BeamWithHinges2d::getResistingForce(void)
 const Vector &
 BeamWithHinges2d::getResistingForceIncInertia(void)
 {
-  if (rho == 0.0)
-    return this->getResistingForce();
+  theVector =  this->getResistingForce();
+
+  if (rho != 0.0) {
+
+    double ag[6];
   
-  double ag[6];
-  
-  const Vector &accel1 = node1Ptr->getTrialAccel();
-  const Vector &accel2 = node2Ptr->getTrialAccel();
-  
-  ag[0] = accel1(0);
-  ag[1] = accel1(1);
-  //ag[2] = accel1(2); // no rotational element mass
-  ag[3] = accel2(0);
-  ag[4] = accel2(1);
-  //ag[5] = accel2(2); // no rotational element mass
-  
-  theVector = this->getResistingForce();
-  
-  double L = theCoordTransf->getInitialLength();
-  double mass = 0.5*L*rho;
-  
-  int i,j;
-  for (i = 0, j = 3; i < 2; i++, j++) {
-    theVector(i) += mass*ag[i];
-    theVector(j) += mass*ag[j];
+    const Vector &accel1 = theNodes[0]->getTrialAccel();
+    const Vector &accel2 = theNodes[1]->getTrialAccel();
+    
+    ag[0] = accel1(0);
+    ag[1] = accel1(1);
+    //ag[2] = accel1(2); // no rotational element mass
+    ag[3] = accel2(0);
+    ag[4] = accel2(1);
+    //ag[5] = accel2(2); // no rotational element mass
+    
+    theVector = this->getResistingForce();
+    
+    double L = theCoordTransf->getInitialLength();
+    double mass = 0.5*L*rho;
+    
+    int i,j;
+    for (i = 0, j = 3; i < 2; i++, j++) {
+      theVector(i) += mass*ag[i];
+      theVector(j) += mass*ag[j];
+    }
+
+    // add the damping forces if rayleigh damping
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+      theVector += this->getRayleighDampingForces();
+
+  } else {
+
+    // add the damping forces if rayleigh damping
+    if (betaK != 0.0 || betaK0 != 0.0)
+      theVector += this->getRayleighDampingForces();
   }
-  
+    
   return theVector;
 }
 
@@ -882,22 +1039,22 @@ BeamWithHinges2d::Print(ostream &s, int flag)
 void 
 BeamWithHinges2d::setNodePtrs(Domain *theDomain)
 {
-  node1Ptr = theDomain->getNode(connectedExternalNodes(0));
-  node2Ptr = theDomain->getNode(connectedExternalNodes(1));
+  theNodes[0] = theDomain->getNode(connectedExternalNodes(0));
+  theNodes[1] = theDomain->getNode(connectedExternalNodes(1));
   
-  if(node1Ptr == 0) {
+  if(theNodes[0] == 0) {
     g3ErrorHandler->fatal("%s -- node 1 does not exist",
 			  "BeamWithHinges2d::setNodePtrs()");
   }
   
-  if(node2Ptr == 0) {
+  if(theNodes[1] == 0) {
     g3ErrorHandler->fatal("%s -- node 2 does not exist",
 			  "BeamWithHinges2d::setNodePtrs()");
   }
   
   // check for correct # of DOF's
-  int dofNd1 = node1Ptr->getNumberDOF();
-  int dofNd2 = node2Ptr->getNumberDOF();
+  int dofNd1 = theNodes[0]->getNumberDOF();
+  int dofNd2 = theNodes[1]->getNumberDOF();
   if ((dofNd1 != 3) || (dofNd2 != 3))  {
     g3ErrorHandler->fatal("%s -- nodal dof is not three",
 			  "BeamWithHinges2d::setNodePtrs()");
@@ -918,15 +1075,16 @@ BeamWithHinges2d::update(void)
   // Convert to basic system from local coord's (eliminate rb-modes)
   static Vector v(3);				// basic system deformations
   v = theCoordTransf->getBasicTrialDisp();
-  
+
   static Vector dv(3);
   dv = theCoordTransf->getBasicIncrDeltaDisp();
-  
+
   double L = theCoordTransf->getInitialLength();
   double oneOverL = 1.0/L;
 
   // Section locations along element length ...
   double xi[2];
+
   // and their integration weights
   double lp[2];
   
@@ -972,6 +1130,8 @@ BeamWithHinges2d::update(void)
   static Vector dq(3);
   //dq = kb * dv;   // using previous stiff matrix k,i
   dq.addMatrixVector(0.0, kb, dv, 1.0);
+
+  int converged = 0;
   
   for (int j = 0; j < maxIter; j++) {
     
@@ -985,7 +1145,7 @@ BeamWithHinges2d::update(void)
     f(1,2) = fElastic(0,1);
     f(2,1) = fElastic(1,0);
     f(0,1) = f(1,0) = f(0,2) = f(2,0) = 0.0;
-    
+
     // vr = fElastic*q + v0;
     vr(0) = LoverEA*q(0) + v0[0];
     vr(1) = fElastic(0,0)*q(1) + fElastic(0,1)*q(2) + v0[1];
@@ -1134,7 +1294,7 @@ BeamWithHinges2d::update(void)
 	  break;
 	}
       }
-      
+           
       // UNCOMMENT WHEN DISTRIBUTED LOADS ARE ADDED TO INTERFACE
       // vr.addMatrixVector(1.0, vElastic, currDistrLoad, 1.0);
       
@@ -1157,7 +1317,7 @@ BeamWithHinges2d::update(void)
 	}
       }
     }
-    
+  
     // calculate element stiffness matrix
     //invert3by3Matrix(f, kb);
     if (f.Solve(Iden,kb) < 0)
@@ -1167,20 +1327,25 @@ BeamWithHinges2d::update(void)
     // dv = v - vr;
     dv = v;
     dv.addVector(1.0, vr, -1.0);
+
     
     // determine resisting forces
     // dq = kb * dv;
     dq.addMatrixVector(0.0, kb, dv, 1.0);
-    
+
     double dW = dv^ dq;
-    
-    if (fabs(dW) < tolerance)
+
+    if (fabs(dW) < tolerance) 
       break;
+    
+    if ((maxIter != 1) && (j == (maxIter - 1))) {
+      converged = -1;
+    }
   }
-  
+
   // q += dq;
   q.addVector(1.0, dq, 1.0);
-  
+
   initialFlag = 1;
   
   return 0;
@@ -1342,11 +1507,11 @@ BeamWithHinges2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
   // first determine the end points of the quad based on
   // the display factor (a measure of the distorted image)
-  const Vector &end1Crd = node1Ptr->getCrds();
-  const Vector &end2Crd = node2Ptr->getCrds();	
+  const Vector &end1Crd = theNodes[0]->getCrds();
+  const Vector &end2Crd = theNodes[1]->getCrds();	
   
-  const Vector &end1Disp = node1Ptr->getDisp();
-  const Vector &end2Disp = node2Ptr->getDisp();
+  const Vector &end1Disp = theNodes[0]->getDisp();
+  const Vector &end2Disp = theNodes[1]->getDisp();
   
   static Vector v1(3);
   static Vector v2(3);

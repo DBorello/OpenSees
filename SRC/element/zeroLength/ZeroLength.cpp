@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-06-07 22:57:26 $
+// $Revision: 1.12 $
+// $Date: 2002-12-05 22:20:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -75,29 +75,28 @@ ZeroLength::ZeroLength(int tag,
  :Element(tag,ELE_TAG_ZeroLength),     
   connectedExternalNodes(2),
   dimension(dim), numDOF(0), transformation(3,3),
-  end1Ptr(0), end2Ptr(0),
   theMatrix(0), theVector(0),
   numMaterials1d(1), theMaterial1d(0), dir1d(0), t1d(0)
 {
-    // allocate memory for numMaterials1d uniaxial material models
-    theMaterial1d = new UniaxialMaterial*  [numMaterials1d];
-    dir1d	  = new ID(numMaterials1d);
-    
-    if ( theMaterial1d == 0 || dir1d == 0 )
-	g3ErrorHandler->fatal("FATAL ZeroLength::ZeroLength - failed to create a 1d  material or direction array\n");
-    
-    // initialize uniaxial materials and directions and check for valid values
-    (*dir1d)(0) = direction;
-    this->checkDirection( *dir1d );
-    
-    // get a copy of the material and check we obtained a valid copy
-    theMaterial1d[0] = theMat.getCopy();
-    if (theMaterial1d[0] == 0) 
-      g3ErrorHandler->fatal("FATAL ZeroLength::ZeroLength - failed to get a copy of material %d\n",
-			    theMat.getTag());
-
-    // establish the connected nodes and set up the transformation matrix for orientation
-    this->setUp( Nd1, Nd2, x, yp);
+  // allocate memory for numMaterials1d uniaxial material models
+  theMaterial1d = new UniaxialMaterial*  [numMaterials1d];
+  dir1d	  = new ID(numMaterials1d);
+  
+  if ( theMaterial1d == 0 || dir1d == 0 )
+    g3ErrorHandler->fatal("FATAL ZeroLength::ZeroLength - failed to create a 1d  material or direction array\n");
+  
+  // initialize uniaxial materials and directions and check for valid values
+  (*dir1d)(0) = direction;
+  this->checkDirection( *dir1d );
+  
+  // get a copy of the material and check we obtained a valid copy
+  theMaterial1d[0] = theMat.getCopy();
+  if (theMaterial1d[0] == 0) 
+    g3ErrorHandler->fatal("FATAL ZeroLength::ZeroLength - failed to get a copy of material %d\n",
+			  theMat.getTag());
+  
+  // establish the connected nodes and set up the transformation matrix for orientation
+  this->setUp( Nd1, Nd2, x, yp);
 }
 
 
@@ -112,7 +111,6 @@ ZeroLength::ZeroLength(int tag,
  :Element(tag,ELE_TAG_ZeroLength),     
   connectedExternalNodes(2),
   dimension(dim), numDOF(0), transformation(3,3),
-  end1Ptr(0), end2Ptr(0),
   theMatrix(0), theVector(0),
   numMaterials1d(n1dMat), theMaterial1d(0), dir1d(0), t1d(0)
 {
@@ -145,13 +143,12 @@ ZeroLength::ZeroLength(int tag,
 //   invoked by a FEM_ObjectBroker - blank object that recvSelf needs
 //   to be invoked upon
 ZeroLength::ZeroLength(void)
-:Element(0,ELE_TAG_ZeroLength),     
- connectedExternalNodes(2),
+  :Element(0,ELE_TAG_ZeroLength),     
+  connectedExternalNodes(2),
   dimension(0), numDOF(0), transformation(3,3),
- end1Ptr(0), end2Ptr(0),
- theMatrix(0), theVector(0),
+  theMatrix(0), theVector(0),
   numMaterials1d(0), theMaterial1d(0),
- dir1d(0), t1d(0)
+  dir1d(0), t1d(0)
 {
     // ensure the connectedExternalNode ID is of correct size 
     if (connectedExternalNodes.Size() != 2)
@@ -196,6 +193,13 @@ ZeroLength::getExternalNodes(void)
 }
 
 
+
+Node **
+ZeroLength::getNodePtrs(void) 
+{
+  return theNodes;
+}
+
 int
 ZeroLength::getNumDOF(void) 
 {
@@ -214,8 +218,8 @@ ZeroLength::setDomain(Domain *theDomain)
 {
     // check Domain is not null - invoked when object removed from a domain
     if (theDomain == 0) {
-	end1Ptr = 0;
-	end2Ptr = 0;
+	theNodes[0] = 0;
+	theNodes[1] = 0;
 	return;
     }
 
@@ -227,12 +231,12 @@ ZeroLength::setDomain(Domain *theDomain)
     // first set the node pointers
     int Nd1 = connectedExternalNodes(0);
     int Nd2 = connectedExternalNodes(1);
-    end1Ptr = theDomain->getNode(Nd1);
-    end2Ptr = theDomain->getNode(Nd2);	
+    theNodes[0] = theDomain->getNode(Nd1);
+    theNodes[1] = theDomain->getNode(Nd2);	
 
     // if can't find both - send a warning message
-    if ( end1Ptr == 0 || end2Ptr == 0 ) {
-      if (end1Ptr == 0) 
+    if ( theNodes[0] == 0 || theNodes[1] == 0 ) {
+      if (theNodes[0] == 0) 
         g3ErrorHandler->warning("WARNING ZeroLength::setDomain() - Nd1: %d does not exist in ",Nd1);
       else
         g3ErrorHandler->warning("WARNING ZeroLength::setDomain() - Nd2: %d does not exist in ",Nd2);
@@ -243,8 +247,8 @@ ZeroLength::setDomain(Domain *theDomain)
     }
 
     // now determine the number of dof and the dimension    
-    int dofNd1 = end1Ptr->getNumberDOF();
-    int dofNd2 = end2Ptr->getNumberDOF();	
+    int dofNd1 = theNodes[0]->getNumberDOF();
+    int dofNd2 = theNodes[1]->getNumberDOF();	
 
     // if differing dof at the ends - print a warning message
     if ( dofNd1 != dofNd2 ) {
@@ -254,9 +258,9 @@ ZeroLength::setDomain(Domain *theDomain)
     }	
 
     // Check that length is zero within tolerance
-    const Vector &end1Crd = end1Ptr->getCrds();
-    const Vector &end2Crd = end2Ptr->getCrds();	
-    const Vector     diff = end1Crd - end2Crd;
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
+    Vector diff = end1Crd - end2Crd;
     double L  = diff.Norm();
     double v1 = end1Crd.Norm();
     double v2 = end2Crd.Norm();
@@ -360,16 +364,16 @@ ZeroLength::update(void)
     double strainRate;
 
     // get trial displacements and take difference
-    const Vector& disp1 = end1Ptr->getTrialDisp();
-    const Vector& disp2 = end2Ptr->getTrialDisp();
-    const Vector  diff  = disp2-disp1;
-    const Vector& vel1  = end1Ptr->getTrialVel();
-    const Vector& vel2  = end2Ptr->getTrialVel();
-    const Vector  diffv = vel2-vel1;
+    const Vector& disp1 = theNodes[0]->getTrialDisp();
+    const Vector& disp2 = theNodes[1]->getTrialDisp();
+    Vector  diff  = disp2-disp1;
+    const Vector& vel1  = theNodes[0]->getTrialVel();
+    const Vector& vel2  = theNodes[1]->getTrialVel();
+    Vector  diffv = vel2-vel1;
     
     // loop over 1d materials
     
-    Matrix& tran = *t1d;
+    //    Matrix& tran = *t1d;
     int ret = 0;
     for (int mat=0; mat<numMaterials1d; mat++) {
 	// compute strain and rate; set as current trial for material
@@ -419,10 +423,39 @@ ZeroLength::getTangentStiff(void)
 
 
 const Matrix &
-ZeroLength::getSecantStiff(void)
+ZeroLength::getInitialStiff(void)
 {
-    // secant is not defined; use tangent
-    return this->getTangentStiff();
+    double E;
+
+    // stiff is a reference to the matrix holding the stiffness matrix
+    Matrix& stiff = *theMatrix;
+    
+    // zero stiffness matrix
+    stiff.Zero();
+    
+    // loop over 1d materials
+    
+    Matrix& tran = *t1d;;
+    for (int mat=0; mat<numMaterials1d; mat++) {
+      
+      // get tangent for material
+      E = theMaterial1d[mat]->getInitialTangent();
+      
+      // compute contribution of material to tangent matrix
+      for (int i=0; i<numDOF; i++)
+	for(int j=0; j<i+1; j++)
+	  stiff(i,j) +=  tran(mat,i) * E * tran(mat,j);
+      
+    }
+
+    // end loop over 1d materials 
+    
+    // complete symmetric stiffness matrix
+    for (int i=0; i<numDOF; i++)
+      for(int j=0; j<i; j++)
+	stiff(j,i) = stiff(i,j);
+
+    return stiff;
 }
     
 
@@ -728,16 +761,16 @@ int
 ZeroLength::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
     // ensure setDomain() worked
-    if (end1Ptr == 0 || end2Ptr == 0 )
+    if (theNodes[0] == 0 || theNodes[1] == 0 )
        return 0;
 
     // first determine the two end points of the ZeroLength based on
     // the display factor (a measure of the distorted image)
     // store this information in 2 3d vectors v1 and v2
-    const Vector &end1Crd = end1Ptr->getCrds();
-    const Vector &end2Crd = end2Ptr->getCrds();	
-    const Vector &end1Disp = end1Ptr->getDisp();
-    const Vector &end2Disp = end2Ptr->getDisp();    
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
+    const Vector &end1Disp = theNodes[0]->getDisp();
+    const Vector &end2Disp = theNodes[1]->getDisp();    
 
     if (displayMode == 1 || displayMode == 2) {
 	Vector v1(3);
@@ -820,50 +853,46 @@ ZeroLength::setResponse(char **argv, int argc, Information &eleInformation)
 int 
 ZeroLength::getResponse(int responseID, Information &eleInformation)
 {
-  double strain;
- 
-  const Vector& disp1 = end1Ptr->getTrialDisp();
-  const Vector& disp2 = end2Ptr->getTrialDisp();
+  const Vector& disp1 = theNodes[0]->getTrialDisp();
+  const Vector& disp2 = theNodes[1]->getTrialDisp();
   const Vector  diff  = disp2-disp1;
-
-  
   
   switch (responseID) {
-    case -1:
-      return -1;
-      
-    case 1:
-		if (eleInformation.theVector != 0) {
-			for (int i = 0; i < numMaterials1d; i++)
-				(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStress();
-		}
-      return 0;
-      
-    case 2:
-		if (eleInformation.theVector != 0) {
-			for (int i = 0; i < numMaterials1d; i++)
-				(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStrain();
-		}
-      return 0;      
-
-    case 4:
-                if (eleInformation.theVector != 0) {
-                         for (int i = 0; i < numMaterials1d; i++) {
-				(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStrain();
-				(*(eleInformation.theVector))(i+numMaterials1d) = theMaterial1d[i]->getStress();
-                         }
-		}
-      return 0;      
-      
-    case 3:
-		if (eleInformation.theMatrix != 0) {
-			for (int i = 0; i < numMaterials1d; i++)
-				(*(eleInformation.theMatrix))(i,i) = theMaterial1d[i]->getTangent();
-		}
-      return 0;      
-
-    default:
-		return -1;
+  case -1:
+    return -1;
+    
+  case 1:
+    if (eleInformation.theVector != 0) {
+      for (int i = 0; i < numMaterials1d; i++)
+	(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStress();
+    }
+    return 0;
+    
+  case 2:
+    if (eleInformation.theVector != 0) {
+      for (int i = 0; i < numMaterials1d; i++)
+	(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStrain();
+    }
+    return 0;      
+    
+  case 4:
+    if (eleInformation.theVector != 0) {
+      for (int i = 0; i < numMaterials1d; i++) {
+	(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStrain();
+	(*(eleInformation.theVector))(i+numMaterials1d) = theMaterial1d[i]->getStress();
+      }
+    }
+    return 0;      
+    
+  case 3:
+    if (eleInformation.theMatrix != 0) {
+      for (int i = 0; i < numMaterials1d; i++)
+	(*(eleInformation.theMatrix))(i,i) = theMaterial1d[i]->getTangent();
+    }
+    return 0;      
+    
+  default:
+    return -1;
   }
 }
 
@@ -884,7 +913,10 @@ ZeroLength::setUp( int Nd1, int Nd2,
     
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;
-    
+
+    for (int i=0; i<2; i++)
+      theNodes[i] = 0;
+
     // check that vectors for orientation are correct size
     if ( x.Size() != 3 || yp.Size() != 3 )
 	g3ErrorHandler->fatal("FATAL ZeroLength::setUp - incorrect dimension of orientation vectors\n");
@@ -918,6 +950,7 @@ ZeroLength::setUp( int Nd1, int Nd2,
 	transformation(1,i) = y(i)/yn;
 	transformation(2,i) = z(i)/zn;
      }
+
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-06-07 00:14:45 $
+// $Revision: 1.7 $
+// $Date: 2002-12-05 22:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.h,v $
 
 // Ed "C++" Love
@@ -66,6 +66,7 @@ class ShellMITC4 : public Element {
  
     //return connected external nodes
     const ID &getExternalNodes( ) ;
+    Node **getNodePtrs();
 
     //return number of dofs
     int getNumDOF( ) ;
@@ -84,15 +85,8 @@ class ShellMITC4 : public Element {
 	
     //return stiffness matrix 
     const Matrix &getTangentStiff( ) ;
-    
-    //return secant matrix 
-    const Matrix &getSecantStiff( ) ;
-    
-    //return damping matrix because frank is a dumb ass 
-    const Matrix &getDamp( ) ;
-    
-    //return mass matrix
-    const Matrix &getMass( ) ;
+    const Matrix &getInitialStiff();
+    const Matrix &getMass();
 
     // methods for applying loads
     void zeroLoad(void);	
@@ -207,7 +201,7 @@ class ShellMITC4 : public Element {
 
     // vector for applying loads
     Vector *load;
-
+    Matrix *Ki;
 } ; 
 
 

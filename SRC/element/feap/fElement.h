@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:53 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/feap/fElement.h,v $
                                                                         
                                                                         
@@ -69,6 +69,7 @@ class fElement : public Element
     // public methods for element operations
     virtual int getNumExternalNodes(void) const;
     virtual const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
 
     virtual int getNumDOF(void);	
     virtual void setDomain(Domain *theDomain);
@@ -79,7 +80,7 @@ class fElement : public Element
     virtual int update(void);
     
     virtual const Matrix &getTangentStiff(void);
-    virtual const Matrix &getSecantStiff(void);    
+    const Matrix &getInitialStiff(void);
     virtual const Matrix &getDamp(void);    
     virtual const Matrix &getMass(void);    
 
@@ -121,6 +122,7 @@ class fElement : public Element
     int nrCount;          // needed for Prof. Fillipou's Elmt05
 
     Vector *theLoad;    // vector to hold the applied load P
+    Matrix *Ki;
 	
     // static data - single copy for all objects of the class	
     static Matrix **fElementM;   // class wide matrices - use s array

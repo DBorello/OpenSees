@@ -45,6 +45,7 @@ Matrix EightNodeBrick_u_p_U::C(56, 56);
 Matrix EightNodeBrick_u_p_U::M(56, 56);      
 Vector EightNodeBrick_u_p_U::p(56);	   
 tensor EightNodeBrick_u_p_U::k(2,def_dim_2,0.0);
+Node * EightNodeBrick_u_p_U::theNodes[8];
 
 //=========================================================================
 // Constructor. The dimension of K, C and M are(56,56)       Wxy 08/28/2001
@@ -64,7 +65,7 @@ EightNodeBrick_u_p_U::EightNodeBrick_u_p_U(int element_number,
 			       //tensor * IN_tangent_E,  //stresstensor * INstress, //stresstensor * INiterative_stress, //double * IN_q_ast_iterative, //straintensor * INstrain):  __ZHaohui 09-29-2000
 		               
   :Element(element_number, ELE_TAG_EightNodeBrick_u_p_U ),
-  connectedExternalNodes(8), Q(56), bf(3), 
+   connectedExternalNodes(8), Q(56), bf(3), Ki(0),
   n(nn), alpha(alf), rho_s(rs), rho_f(rf), ks(kks), kf(kkf), pressure(pp)
   {
     //elem_numb = element_number;
@@ -168,9 +169,10 @@ EightNodeBrick_u_p_U::EightNodeBrick_u_p_U(int element_number,
 // Default Constructor. The dimension of K, C and M are(56,56)       Wxy 08/28/2001
 //=========================================================================
 
-EightNodeBrick_u_p_U::EightNodeBrick_u_p_U ():Element(0, ELE_TAG_EightNodeBrick_u_p_U ),
-connectedExternalNodes(8), Q(56), bf(3), 
-n(0), alpha(1), rho_s(0.0),rho_f(0.0), ks(0.0), kf(0.0), pressure(0.0), mmodel(0)
+EightNodeBrick_u_p_U::EightNodeBrick_u_p_U ()
+  :Element(0, ELE_TAG_EightNodeBrick_u_p_U ),
+   connectedExternalNodes(8), Q(56), bf(3), Ki(0),
+   n(0), alpha(1), rho_s(0.0),rho_f(0.0), ks(0.0), kf(0.0), pressure(0.0), mmodel(0)
 {
      matpoint = 0;
 }   
@@ -199,26 +201,8 @@ EightNodeBrick_u_p_U::~EightNodeBrick_u_p_U ()
     //if (mmodel)
     //	delete [] mmodel;
     
-    // Delete the quadrature rule
-    // Delete the node ptrs
-    /*
-    if ( nd1Ptr )
-    	delete  nd1Ptr;
-    if ( nd2Ptr )
-    	delete nd2Ptr;
-    if ( nd3Ptr )
-    	delete nd3Ptr;
-    if ( nd4Ptr )
-    	delete nd4Ptr;
-    if ( nd5Ptr )
-    	delete nd5Ptr;
-    if ( nd6Ptr )
-    	delete nd6Ptr;
-    if ( nd7Ptr )
-    	delete nd7Ptr;
-    if ( nd8Ptr )
-    	delete nd8Ptr;	    
-     */
+    if (Ki != 0)
+      delete Ki;
 
 }
 //=========================================================================
@@ -3284,6 +3268,22 @@ const ID& EightNodeBrick_u_p_U::getExternalNodes ()
     return connectedExternalNodes;
 }
 
+Node **
+EightNodeBrick_u_p_U::getNodePtrs (void)
+{
+  theNodes[0] = nd1Ptr;
+  theNodes[1] = nd2Ptr;
+  theNodes[2] = nd3Ptr;
+  theNodes[3] = nd4Ptr;
+  theNodes[4] = nd5Ptr;
+  theNodes[5] = nd6Ptr;
+  theNodes[6] = nd7Ptr;
+  theNodes[7] = nd8Ptr;
+
+  return theNodes;
+}
+
+
 //=============================================================================
 int EightNodeBrick_u_p_U::getNumDOF ()
 {
@@ -3362,9 +3362,18 @@ void EightNodeBrick_u_p_U::setDomain (Domain *theDomain)
 }
 //=============================================================================
 //=============================================================================
-const Matrix &EightNodeBrick_u_p_U::getSecantStiff () 
+const Matrix &EightNodeBrick_u_p_U::getInitialStiff () 
 {
-     return K;
+  if (Ki == 0)
+    Ki = new Matrix(this->getTangentStiff());
+
+  if (Ki == 0) {
+    cerr << "FATAL EightNodeBrick_u_p_U::getInitialStiff() -";
+    cerr << "ran out of memory\n";
+    exit(-1);
+  }  
+    
+  return *Ki;
 }
 //=============================================================================
 void EightNodeBrick_u_p_U::zeroLoad()

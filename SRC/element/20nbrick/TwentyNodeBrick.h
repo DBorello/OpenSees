@@ -98,6 +98,8 @@ class TwentyNodeBrick: public Element
 
     int getNumExternalNodes () const;
     const ID &getExternalNodes ();
+    Node **getNodePtrs();
+
     int getNumDOF ();	
     void setDomain(Domain *theDomain);
 
@@ -110,8 +112,7 @@ class TwentyNodeBrick: public Element
     // We haven't build the following functions. 
     // All the value of K M Dmp and F are nothing.
     const Matrix &getTangentStiff (); 
-    const Matrix &getSecantStiff ();     
-    const Matrix &getDamp ();     
+    const Matrix &getInitialStiff(); 
     const Matrix &getMass (); 
 
     const Matrix &getConsMass (); 
@@ -146,30 +147,8 @@ class TwentyNodeBrick: public Element
     int numDOF;	    		// Number of element DOF
     ID  connectedExternalNodes; // Tags of quad nodes
 
-    Node *nd1Ptr;		// Pointers  to nodes
-    Node *nd2Ptr;
-    Node *nd3Ptr;
-    Node *nd4Ptr;
-    
-    Node *nd5Ptr;
-    Node *nd6Ptr;
-    Node *nd7Ptr;
-    Node *nd8Ptr;
-
-    Node *nd9Ptr;
-    Node *nd10Ptr;
-    Node *nd11Ptr;
-    Node *nd12Ptr;
-
-    Node *nd13Ptr;
-    Node *nd14Ptr;
-    Node *nd15Ptr;
-    Node *nd16Ptr;
-
-    Node *nd17Ptr;
-    Node *nd18Ptr;
-    Node *nd19Ptr;
-    Node *nd20Ptr;
+    Matrix *Ki;
+    Node *theNodes[20];
 
     static Matrix K;    // Element stiffness Matrix
     static Matrix C;    // Element damping matrix

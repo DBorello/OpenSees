@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-11-26 22:53:57 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:20:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.h,v $
                                                                         
                                                                         
@@ -85,6 +85,8 @@ class ZeroLength : public Element
     // public methods to obtain inforrmation about dof & connectivity    
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
+
     int getNumDOF(void);	
     void setDomain(Domain *theDomain);
 
@@ -96,9 +98,9 @@ class ZeroLength : public Element
 
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
-    const Matrix &getDamp(void);    
-    const Matrix &getMass(void);    
+    const Matrix &getInitialStiff(void);
+    const Matrix &getDamp(void);
+    const Matrix &getMass(void);
 
     void zeroLoad(void);	
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -136,8 +138,7 @@ class ZeroLength : public Element
     int numDOF;	                        // number of dof for ZeroLength
     Matrix transformation;		// transformation matrix for orientation
 	
-    Node *end1Ptr;      		// pointer to the end1 node object
-    Node *end2Ptr;      		// pointer to the end2 node object	
+    Node *theNodes[2];
 
     Matrix *theMatrix; 	    	// pointer to objects matrix (a class Matrix)
     Vector *theVector;      	// pointer to objects vector (a class Vector)

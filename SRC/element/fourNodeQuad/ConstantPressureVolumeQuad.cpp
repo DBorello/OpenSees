@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-11-01 01:21:48 $
+// $Revision: 1.12 $
+// $Date: 2002-12-05 22:20:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.cpp,v $
 
 // Ed "C++" Love
@@ -48,7 +48,8 @@
 #include <FEM_ObjectBroker.h>
 
 //static data
-Matrix ConstantPressureVolumeQuad :: stiff(8,8)   ;
+double ConstantPressureVolumeQuad::matrixData[64];
+Matrix ConstantPressureVolumeQuad :: stiff(matrixData,8,8)   ;
 Vector ConstantPressureVolumeQuad :: resid(8)     ;
 Matrix ConstantPressureVolumeQuad :: mass(8,8)    ;
 Matrix ConstantPressureVolumeQuad :: damping(8,8) ;
@@ -161,12 +162,19 @@ int ConstantPressureVolumeQuad :: getNumExternalNodes( ) const
 {
   return 4 ;
 } 
- 
+
 
 //return connected external nodes
 const ID& ConstantPressureVolumeQuad :: getExternalNodes( ) 
 {
   return connectedExternalNodes ;
+} 
+
+
+Node **
+ConstantPressureVolumeQuad::getNodePtrs(void) 
+{
+  return nodePointers;
 } 
 
 
@@ -392,27 +400,16 @@ const Matrix& ConstantPressureVolumeQuad :: getTangentStiff( )
   return stiff ;
 }    
 
-//return stiffness matrix 
-const Matrix& ConstantPressureVolumeQuad :: getSecantStiff( ) 
-{
-  int tang_flag = 1 ; //get the tangent 
-
-  //do tangent and residual here
-  formResidAndTangent( tang_flag ) ;  
-
-  return stiff ;
-}    
-
-const Matrix& ConstantPressureVolumeQuad :: getInitialTangent( ) 
+const Matrix& ConstantPressureVolumeQuad :: getInitialStiff( ) 
 {
   int i,  j,  k, l, p, q ;
   int jj, kk ;
   
-  double tmp_shp[3][4] ; //shape functions
+  static double tmp_shp[3][4] ; //shape functions
 
-  double     shp[3][4][4] ; //shape functions at each gauss point
+  static double shp[3][4][4] ; //shape functions at each gauss point
 
-  double vol_avg_shp[3][4] ; // volume averaged shape functions
+  static double vol_avg_shp[3][4] ; // volume averaged shape functions
 
   double xsj ;  // determinant jacaobian matrix 
 
@@ -422,56 +419,55 @@ const Matrix& ConstantPressureVolumeQuad :: getInitialTangent( )
 
   double volume = 0.0 ; //volume of element
 
-  static Matrix BJ(4,2) ; //strain-displacement matrices
+  double pressure = 0.0 ; //constitutive pressure  
+
+  static Vector strain(4) ; //strain in vector form 
+
+  // static Vector sigBar(4) ; //stress in vector form
+  static Vector sig(4) ; //mixed stress in vector form
+
+  double trace = 0.0 ; //trace of the strain 
+
   static Matrix BJtran(2,4) ; 
   static Matrix BK(4,2) ;
 
-  static Matrix littleBJ(1,2) ; //volume strain-displacement matrices
   static Matrix littleBJtran(2,1) ;
   static Matrix littleBK(1,2) ; 
 
   static Matrix stiffJK(2,2) ; //nodeJ-nodeK 2x2 stiffness
+  static Vector residJ(2) ; //nodeJ residual 
   
   static Vector one(4) ; //rank 2 identity as a vector
-  static Matrix oneMatrix(4,1) ;
-  static Matrix oneTran(1,4) ;
   
   static Matrix Pdev(4,4) ; //deviator projector
 
-  static Matrix dd(4,4) ;  //material tangent
+  //  static Matrix dd(4,4) ;  //material tangent
 
   static Matrix ddPdev(4,4) ;
   static Matrix PdevDD(4,4) ;
 
-  static Matrix Pdev_dd_Pdev(4,4) ;
-  static Matrix Pdev_dd_one(4,1) ; 
-  static Matrix one_dd_Pdev(1,4) ;
+  static double Pdev_dd_Pdev_data[16];
+  static double Pdev_dd_one_data[4]; 
+  static double one_dd_Pdev_data[4];
+  static Matrix Pdev_dd_Pdev(Pdev_dd_Pdev_data, 4, 4);
+  static Matrix Pdev_dd_one(Pdev_dd_one_data, 4, 1); 
+  static Matrix one_dd_Pdev(one_dd_Pdev_data, 1,4) ;
+
   double bulk ;
   static Matrix BJtranD(2,4) ;
   static Matrix BJtranDone(2,1) ;
+
   static Matrix littleBJoneD(2,4) ;
   static Matrix littleBJtranBulk(2,1) ;
   
   //zero stiffness and residual 
-  stiff.Zero( ) ;
+  stiff.Zero();
 
   //one vector
   one(0) = 1.0 ;
   one(1) = 1.0 ;
   one(2) = 1.0 ;
   one(3) = 0.0 ;
-
-  //one matrix
-  oneMatrix(0,0) = 1.0 ;
-  oneMatrix(1,0) = 1.0 ;
-  oneMatrix(2,0) = 1.0 ;
-  oneMatrix(3,0) = 0.0 ;
-
-  //oneTran = this->transpose( 4, 1, oneMatrix ) ;
-  for (p=0; p<1; p++) {
-     for (q=0; q<4; q++) 
-        oneTran(p,q) = oneMatrix(q,p) ;
-  }//end for p
 
   //Pdev matrix
   Pdev.Zero( ) ;
@@ -489,7 +485,6 @@ const Matrix& ConstantPressureVolumeQuad :: getInitialTangent( )
   Pdev(2,2) =  two3 ;
 
   Pdev(3,3) = 1.0 ;
-
 
   //zero stuff
   volume = 0.0 ;
@@ -529,107 +524,113 @@ const Matrix& ConstantPressureVolumeQuad :: getInitialTangent( )
         vol_avg_shp[k][l] /= volume ; 
   } //end for k
 
-
+  //residual and tangent calculations gauss loop
   for ( i = 0; i < 4; i++ ) {
 
-    //stress for equilibrium
-    // comment out to get to compile: dd = materialPointers[i]->getTangent( ) ;
-	
+    static Matrix dd(4,4);
+
+    dd = materialPointers[i]->getInitialTangent( ) ;
+
     dd *= dvol[i] ;
-        
+    
     //Pdev_dd_Pdev = Pdev * dd * Pdev ;
     Pdev_dd_Pdev.addMatrixTripleProduct(0.0,
 					Pdev,
 					dd,
-					1.0 ) ;
-
+					1.0) ;
+      
     //Pdev_dd_one  = one3 * ( Pdev * dd * oneMatrix ) ;
-    PdevDD.addMatrixProduct(0.0, Pdev,dd,1.0 ) ;
-    Pdev_dd_one.addMatrixProduct(0.0, PdevDD,oneMatrix,one3 ) ;
+    PdevDD.addMatrixProduct(0.0, Pdev, dd, 1.0) ;
+    Pdev_dd_one(0,0) = one3 * (PdevDD(0,0) + PdevDD(0,1) + PdevDD(0,2));
+    Pdev_dd_one(1,0) = one3 * (PdevDD(1,0) + PdevDD(1,1) + PdevDD(1,2));
+    Pdev_dd_one(2,0) = one3 * (PdevDD(2,0) + PdevDD(2,1) + PdevDD(2,2));
+    Pdev_dd_one(3,0) = one3 * (PdevDD(3,0) + PdevDD(3,1) + PdevDD(3,2));
     
     //one_dd_Pdev  = one3 * ( oneTran * dd * Pdev ) ;
-    ddPdev.addMatrixProduct(0.0, dd,Pdev,1.0 ) ;
-    one_dd_Pdev.addMatrixProduct(0.0, oneTran,ddPdev,one3 ) ;
+    ddPdev.addMatrixProduct(0.0, dd, Pdev, 1.0) ;
+    one_dd_Pdev(0,0) = one3 * (ddPdev(0,0) + ddPdev(1,0) + ddPdev(2,0));
+    one_dd_Pdev(0,1) = one3 * (ddPdev(0,1) + ddPdev(1,1) + ddPdev(2,1));
+    one_dd_Pdev(0,2) = one3 * (ddPdev(0,2) + ddPdev(1,2) + ddPdev(2,2));
+    one_dd_Pdev(0,3) = one3 * (ddPdev(0,3) + ddPdev(1,3) + ddPdev(2,3));
     
-    bulk = one9 * (   dd(0,0) + dd(0,1) + dd(0,2)  
-		      + dd(1,0) + dd(1,1) + dd(1,2) 
-		      + dd(2,0) + dd(2,1) + dd(2,2) ) ;
-    
-    //residual and tangent loop over nodes
+    bulk = one9 * ( dd(0,0) + dd(0,1) + dd(0,2)  
+		    + dd(1,0) + dd(1,1) + dd(1,2) 
+		    + dd(2,0) + dd(2,1) + dd(2,2) ) ;
     
     jj = 0 ;
     for ( j = 0; j < 4; j++ ) {
       
-      BJ.Zero( );
-      BJ(0,0) = shp[0][j][i] ;
-      BJ(1,1) = shp[1][j][i] ; 
-
-      // BJ(2,0) for axi-symmetry 
-
-      BJ(3,0) = shp[1][j][i]  ;
-      BJ(3,1) = shp[0][j][i]  ;
-
-      littleBJ(0,0) = vol_avg_shp[0][j] ;
-      littleBJ(0,1) = vol_avg_shp[1][j] ;
-
-      // BJtran = this->transpose( 4, 2, BJ ) ;
-      for (p=0; p<2; p++) {
-	for (q=0; q<4; q++) 
-	  BJtran(p,q) = BJ(q,p) ;
-      }//end for p
-
-      //littleBJtran = this->transpose( 1, 2, littleBJ ) ;
-      for (p=0; p<2; p++) {
-	for (q=0; q<1; q++) 
-	  littleBJtran(p,q) = littleBJ(q,p) ;
-      }//end for p
-
-      //BJtranD          =  BJtran * Pdev_dd_Pdev ;
-      BJtranD.addMatrixProduct(0.0,  BJtran,Pdev_dd_Pdev,1.0 ) ;
+      double BJ00 = shp[0][j][i];
+      double BJ11 = shp[1][j][i]; 
+      double BJ30 = shp[1][j][i];
+      double BJ31 = shp[0][j][i];
       
-      //BJtranDone       =  BJtran * Pdev_dd_one ;
-      BJtranDone.addMatrixProduct(0.0,  BJtran,Pdev_dd_one,1.0 ) ;
+      BJtran.Zero( );
+      BJtran(0,0) = shp[0][j][i] ;
+      BJtran(1,1) = shp[1][j][i] ; 
+      
+      // BJ(2,0) for axi-symmetry 
+      
+      BJtran(0,3) = shp[1][j][i]  ;
+      BJtran(1,3) = shp[0][j][i]  ;
+      
+      //compute residual 
+      
+      double ltBJ00 = vol_avg_shp[0][j] ;
+      double ltBJ01 = vol_avg_shp[1][j] ;
+      
+      //BJtranD          =  BJtran * Pdev_dd_Pdev ;
+      // BJtranD.addMatrixProduct(0.0,  BJtran, Pdev_dd_Pdev, 1.0);
       
       //littleBJoneD     =  littleBJtran * one_dd_Pdev ;
-      littleBJoneD.addMatrixProduct(0.0,  littleBJtran,one_dd_Pdev,1.0 ) ;
+      // littleBJoneD.addMatrixProduct(0.0,  littleBJtran, one_dd_Pdev, 1.0);
+      
+      static double Adata[8];
+      static Matrix A(Adata, 2, 4);
+      
+      // A = BJtranD;
+      // A += littleBJoneD;
+      
+      for (int colA = 0, loc = 0, colPdev = 0; colA<4; colA++, colPdev += 4) {
+	double data3colA = Pdev_dd_Pdev_data[3+colPdev];
+	Adata[loc++] = BJ00*Pdev_dd_Pdev_data[colPdev] + BJ30*data3colA + ltBJ00*one_dd_Pdev_data[colA];
+	Adata[loc++] = BJ11*Pdev_dd_Pdev_data[1+colPdev] + BJ31*data3colA + ltBJ01*one_dd_Pdev_data[colA];
+      }
+      
+      //BJtranDone       =  BJtran * Pdev_dd_one ;
+      // BJtranDone.addMatrixProduct(0.0,  BJtran, Pdev_dd_one, 1.0);
       
       //littleBJtranBulk =  bulk * littleBJtran ;
-      littleBJtranBulk = littleBJtran ;
-      littleBJtranBulk *= bulk ;
+      // littleBJtranBulk = littleBJtran ;
+      // littleBJtranBulk *= bulk ;
+      
+      double B1, B2;
+      // B1 = BJtranDone(0,0) + littleBJtranBulk(0,0);
+      // B2 = BJtranDone(1,0) + littleBJtranBulk(1,0);
+      
+      B1 = BJ00*Pdev_dd_one_data[0] + BJ30*Pdev_dd_one_data[3] + ltBJ00 *bulk;
+      B2 = BJ11*Pdev_dd_one_data[1] + BJ31*Pdev_dd_one_data[3] + ltBJ01 *bulk;
+      
+      int colkk, colkkP1;
+      for ( k = 0, kk=0, colkk =0, colkkP1 =8; 
+	    k < 4; 
+	    k++, kk += 2, colkk += 16, colkkP1 += 16 ) {
 	
-      kk = 0 ;
-      for ( k = 0; k < 4; k++ ) {
+	double BK00 = shp[0][k][i];
+	double BK11 = shp[1][k][i];
+	double BK30 = shp[1][k][i];
+	double BK31 = shp[0][k][i];
 	
-	BK.Zero( );
-	BK(0,0) = shp[0][k][i] ;
-	BK(1,1) = shp[1][k][i] ;
-	
-	// BK(2,0) for axi-symmetry 
-	
-	BK(3,0) = shp[1][k][i] ;
-	BK(3,1) = shp[0][k][i] ;
-	
-	  
-	littleBK(0,0) = vol_avg_shp[0][k] ;
-	littleBK(0,1) = vol_avg_shp[1][k] ;
-	
+	double littleBK00 = vol_avg_shp[0][k];
+	double littleBK01 = vol_avg_shp[1][k];
+
 	//compute stiffness matrix
+        
+	stiff( jj,   kk   ) += Adata[0]*BK00 + Adata[6]*BK30 + B1 * littleBK00;
+	stiff( jj+1, kk   ) += Adata[1]*BK00 + Adata[7]*BK30 + B2 * littleBK00;
+	stiff( jj,   kk+1 ) += Adata[2]*BK11 + Adata[6]*BK31 + B1 * littleBK01;
+	stiff( jj+1, kk+1 ) += Adata[3]*BK11 + Adata[7]*BK31 + B2 * littleBK01;
 	
-	// stiffJK =  ( BJtranD + littleBJoneD ) * BK
-	//        +  ( BJtranDone + littleBJtranBulk ) * littleBK ; 
-	
-	  stiffJK.addMatrixProduct(0.0, BJtranD,BK,1.0 ) ;
-	  stiffJK.addMatrixProduct(1.0, littleBJoneD,BK,1.0 ) ;
-	  stiffJK.addMatrixProduct(1.0, BJtranDone,littleBK,1.0 ) ;
-	  stiffJK.addMatrixProduct(1.0, littleBJtranBulk,littleBK,1.0 ) ;
-	  
-	  
-	  stiff( jj,   kk   ) += stiffJK(0,0) ;
-	  stiff( jj+1, kk   ) += stiffJK(1,0) ;
-	  stiff( jj,   kk+1 ) += stiffJK(0,1) ;
-	  stiff( jj+1, kk+1 ) += stiffJK(1,1) ;
-	  
-	  kk += 2 ;
       } // end for k
       
       jj += 2 ;
@@ -639,21 +640,12 @@ const Matrix& ConstantPressureVolumeQuad :: getInitialTangent( )
   return stiff ;
 }    
 
-//return damping matrix
-const Matrix& ConstantPressureVolumeQuad :: getDamp( ) 
-{
-  //not supported
-  return damping ;
-}    
-
-
 //return mass matrix
 const Matrix& ConstantPressureVolumeQuad :: getMass( ) 
 {
   int tangFlag = 1 ;
 
   formInertiaTerms( tangFlag ) ;
-
   return mass ;
 } 
 
@@ -739,17 +731,24 @@ const Vector& ConstantPressureVolumeQuad :: getResistingForceIncInertia( )
 {
   int tang_flag = 0 ; //don't get the tangent
 
+  static Vector res(8);
+
   //do tangent and residual here 
   formResidAndTangent( tang_flag ) ;
 
   //inertia terms
   formInertiaTerms( tang_flag ) ;
+  res = resid;
 
   // subtract external loads 
   if (load != 0)
-    resid -= *load;
+    res -= *load;
 
-  return resid ;
+  // add the damping forces if rayleigh damping
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    res += this->getRayleighDampingForces();
+
+  return res ;
 }
 
 //*****************************************************************************
@@ -819,10 +818,6 @@ void   ConstantPressureVolumeQuad::formInertiaTerms( int tangFlag )
 
       temp = shp[massIndex][j] * dvol ;
 
-      for ( p = 0; p < ndf; p++ )
-        resid( jj+p ) += ( temp * momentum(p) )  ;
-
-      
       if ( tangFlag == 1 ) {
 
 	 //multiply by density
@@ -842,7 +837,12 @@ void   ConstantPressureVolumeQuad::formInertiaTerms( int tangFlag )
 
       } // end if tang_flag 
 
+      else
+	for ( p = 0; p < ndf; p++ )
+	  resid( jj+p ) += ( temp * momentum(p) )  ;
+
       jj += ndf ;
+
     } // end for j loop
 
 
@@ -893,11 +893,9 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
 
   double trace = 0.0 ; //trace of the strain 
 
-  static Matrix BJ(4,2) ; //strain-displacement matrices
   static Matrix BJtran(2,4) ; 
   static Matrix BK(4,2) ;
 
-  static Matrix littleBJ(1,2) ; //volume strain-displacement matrices
   static Matrix littleBJtran(2,1) ;
   static Matrix littleBK(1,2) ; 
 
@@ -913,18 +911,25 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
   static Matrix ddPdev(4,4) ;
   static Matrix PdevDD(4,4) ;
 
-  static Matrix Pdev_dd_Pdev(4,4) ;
-  static Matrix Pdev_dd_one(4,1) ; 
-  static Matrix one_dd_Pdev(1,4) ;
+  static double Pdev_dd_Pdev_data[16];
+  static double Pdev_dd_one_data[4]; 
+  static double one_dd_Pdev_data[4];
+  static Matrix Pdev_dd_Pdev(Pdev_dd_Pdev_data, 4, 4);
+  static Matrix Pdev_dd_one(Pdev_dd_one_data, 4, 1); 
+  static Matrix one_dd_Pdev(one_dd_Pdev_data, 1,4) ;
+
   double bulk ;
   static Matrix BJtranD(2,4) ;
   static Matrix BJtranDone(2,1) ;
+
   static Matrix littleBJoneD(2,4) ;
   static Matrix littleBJtranBulk(2,1) ;
   
   //zero stiffness and residual 
-  stiff.Zero( ) ;
-  resid.Zero( ) ;
+  if ( tang_flag == 1 ) 
+    stiff.Zero();
+  else
+    resid.Zero();
 
   //one vector
   one(0) = 1.0 ;
@@ -1007,32 +1012,34 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
 
     if ( tang_flag == 1 ) {    // compute matrices for stiffness calculation
       
-      const Matrix &dd = materialPointers[i]->getTangent( ) ;
+      static Matrix dd(4,4);
+      dd = materialPointers[i]->getTangent( ) ;
       
-      //	dd *= dvol[i] ;
+      dd *= dvol[i] ;
       
       //Pdev_dd_Pdev = Pdev * dd * Pdev ;
       Pdev_dd_Pdev.addMatrixTripleProduct(0.0,
 					  Pdev,
 					  dd,
-					  dvol[i]) ;
+					  1.0) ;
       
       //Pdev_dd_one  = one3 * ( Pdev * dd * oneMatrix ) ;
-      PdevDD.addMatrixProduct(0.0, Pdev,dd,1.0 ) ;
+      PdevDD.addMatrixProduct(0.0, Pdev, dd, 1.0) ;
       Pdev_dd_one(0,0) = one3 * (PdevDD(0,0) + PdevDD(0,1) + PdevDD(0,2));
       Pdev_dd_one(1,0) = one3 * (PdevDD(1,0) + PdevDD(1,1) + PdevDD(1,2));
       Pdev_dd_one(2,0) = one3 * (PdevDD(2,0) + PdevDD(2,1) + PdevDD(2,2));
       Pdev_dd_one(3,0) = one3 * (PdevDD(3,0) + PdevDD(3,1) + PdevDD(3,2));
       
       //one_dd_Pdev  = one3 * ( oneTran * dd * Pdev ) ;
+      ddPdev.addMatrixProduct(0.0, dd, Pdev, 1.0) ;
       one_dd_Pdev(0,0) = one3 * (ddPdev(0,0) + ddPdev(1,0) + ddPdev(2,0));
       one_dd_Pdev(0,1) = one3 * (ddPdev(0,1) + ddPdev(1,1) + ddPdev(2,1));
       one_dd_Pdev(0,2) = one3 * (ddPdev(0,2) + ddPdev(1,2) + ddPdev(2,2));
       one_dd_Pdev(0,3) = one3 * (ddPdev(0,3) + ddPdev(1,3) + ddPdev(2,3));
       
-      bulk = (one9 * dvol[i]) * (   dd(0,0) + dd(0,1) + dd(0,2)  
-				    + dd(1,0) + dd(1,1) + dd(1,2) 
-				    + dd(2,0) + dd(2,1) + dd(2,2) ) ;
+      bulk = one9 * ( dd(0,0) + dd(0,1) + dd(0,2)  
+		      + dd(1,0) + dd(1,1) + dd(1,2) 
+		      + dd(2,0) + dd(2,1) + dd(2,2) ) ;
       
     } else { // compute stress for residual calculation
       //stress for equilibrium
@@ -1047,11 +1054,12 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
       //multilply by volume elements and compute 
       sig *= dvol[i] ;
     }
-      
+        
     //residual and tangent loop over nodes
     jj = 0 ;
     for ( j = 0; j < 4; j++ ) {
-      
+
+      /********** expanding for efficiency the matrix operations that use these
       BJ.Zero( );
       BJ(0,0) = shp[0][j][i] ;
       BJ(1,1) = shp[1][j][i] ; 
@@ -1070,40 +1078,71 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
 	  BJtran(p,q) = BJ(q,p) ;
       }//end for p
 
+      for (p=0; p<2; p++) {
+        for (q=0; q<1; q++) 
+          littleBJtran(p,q) = littleBJ(q,p) ;
+      }//end for p
+
+      **********************************************************************/
+
+
+      double BJ00 = shp[0][j][i];
+      double BJ11 = shp[1][j][i]; 
+      double BJ30 = shp[1][j][i];
+      double BJ31 = shp[0][j][i];
+
+      BJtran.Zero( );
+      BJtran(0,0) = shp[0][j][i] ;
+      BJtran(1,1) = shp[1][j][i] ; 
+
+      // BJ(2,0) for axi-symmetry 
+
+      BJtran(0,3) = shp[1][j][i]  ;
+      BJtran(1,3) = shp[0][j][i]  ;
+
       //compute residual 
 
       if ( tang_flag == 1 ) { //stiffness matrix
 
-	//littleBJtran = this->transpose( 1, 2, littleBJ ) ;
-	for (p=0; p<2; p++) {
-	  for (q=0; q<1; q++) 
-	    littleBJtran(p,q) = littleBJ(q,p) ;
-	}//end for p
+	double ltBJ00 = vol_avg_shp[0][j] ;
+	double ltBJ01 = vol_avg_shp[1][j] ;
 
 	//BJtranD          =  BJtran * Pdev_dd_Pdev ;
-	BJtranD.addMatrixProduct(0.0,  BJtran, Pdev_dd_Pdev, 1.0);
-
-        //BJtranDone       =  BJtran * Pdev_dd_one ;
-	BJtranDone.addMatrixProduct(0.0,  BJtran, Pdev_dd_one, 1.0);
+	// BJtranD.addMatrixProduct(0.0,  BJtran, Pdev_dd_Pdev, 1.0);
 
 	//littleBJoneD     =  littleBJtran * one_dd_Pdev ;
-	littleBJoneD.addMatrixProduct(0.0,  littleBJtran, one_dd_Pdev, 1.0);
-	
-	//littleBJtranBulk =  bulk * littleBJtran ;
-	littleBJtranBulk = littleBJtran ;
-	littleBJtranBulk *= bulk ;
+	// littleBJoneD.addMatrixProduct(0.0,  littleBJtran, one_dd_Pdev, 1.0);
 
 	static double Adata[8];
 	static Matrix A(Adata, 2, 4);
-	A = BJtranD;
-	A += littleBJoneD;
+
+	// A = BJtranD;
+	// A += littleBJoneD;
+
+	for (int colA = 0, loc = 0, colPdev = 0; colA<4; colA++, colPdev += 4) {
+	  double data3colA = Pdev_dd_Pdev_data[3+colPdev];
+	  Adata[loc++] = BJ00*Pdev_dd_Pdev_data[colPdev] + BJ30*data3colA + ltBJ00*one_dd_Pdev_data[colA];
+	  Adata[loc++] = BJ11*Pdev_dd_Pdev_data[1+colPdev] + BJ31*data3colA + ltBJ01*one_dd_Pdev_data[colA];
+	}
+
+        //BJtranDone       =  BJtran * Pdev_dd_one ;
+	// BJtranDone.addMatrixProduct(0.0,  BJtran, Pdev_dd_one, 1.0);
+
+	//littleBJtranBulk =  bulk * littleBJtran ;
+	// littleBJtranBulk = littleBJtran ;
+	// littleBJtranBulk *= bulk ;
 
 	double B1, B2;
-	B1 = BJtranDone(0,0) + littleBJtranBulk(0,0);
-	B2 = BJtranDone(1,0) + littleBJtranBulk(1,0);
-	
-	kk = 0 ;
-	for ( k = 0; k < 4; k++ ) {
+	// B1 = BJtranDone(0,0) + littleBJtranBulk(0,0);
+	// B2 = BJtranDone(1,0) + littleBJtranBulk(1,0);
+
+	B1 = BJ00*Pdev_dd_one_data[0] + BJ30*Pdev_dd_one_data[3] + ltBJ00 *bulk;
+	B2 = BJ11*Pdev_dd_one_data[1] + BJ31*Pdev_dd_one_data[3] + ltBJ01 *bulk;
+
+	int colkk, colkkP1;
+	for ( k = 0, kk=0, colkk =0, colkkP1 =8; 
+	      k < 4; 
+	      k++, kk += 2, colkk += 16, colkkP1 += 16 ) {
 
 	  /**************************************************************
 	   REPLACING THESE LINES WITH THE 4 BELOW COMMENT FOR EFFICIENCY
@@ -1140,12 +1179,15 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
 	  //stiff( jj+1, kk+1 ) += stiffJK(1,1) + B2 * littleBK01;	  
 	  ***************************************************************/
 
+	  // matrixData[  colkk +   jj] += Adata[0]*BK00 + Adata[6]*BK30 + B1 * littleBK00;
+	  // matrixData[  colkk + jj+1] += Adata[1]*BK00 + Adata[7]*BK30 + B2 * littleBK00;
+	  // matrixData[colkkP1 +   jj] += Adata[2]*BK11 + Adata[6]*BK31 + B1 * littleBK01;
+	  // matrixData[colkkP1 + jj+1] += Adata[3]*BK11 + Adata[7]*BK31 + B2 * littleBK01;
 	  stiff( jj,   kk   ) += Adata[0]*BK00 + Adata[6]*BK30 + B1 * littleBK00;
 	  stiff( jj+1, kk   ) += Adata[1]*BK00 + Adata[7]*BK30 + B2 * littleBK00;
 	  stiff( jj,   kk+1 ) += Adata[2]*BK11 + Adata[6]*BK31 + B1 * littleBK01;
 	  stiff( jj+1, kk+1 ) += Adata[3]*BK11 + Adata[7]*BK31 + B2 * littleBK01;
 
-	  kk += 2 ;
 	} // end for k
 
       } else { // residual calculation
@@ -1166,29 +1208,6 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
 }
 
 
-//----------------------------------------------------------------------
-
-Matrix ConstantPressureVolumeQuad :: transpose( int dim1, 
-						int dim2, 
-						const Matrix &M ) 
-{
-  int i ;
-  int j ;
-
-  Matrix Mtran( dim2, dim1 ) ;
-
-  for ( i = 0; i < dim1; i++ ) {
-
-    for ( j = 0; j < dim2; j++ ) 
-      Mtran(j,i) = M(i,j) ;
-
-  } // end for i
-
-  return Mtran ;
-}
-
-//---------------------------------------------------------------------
-
 //shape function routine for four node quads
 void ConstantPressureVolumeQuad :: shape2d( double ss, double tt, 
 		                            const double x[2][4], 
@@ -1204,7 +1223,9 @@ void ConstantPressureVolumeQuad :: shape2d( double ss, double tt,
   static const double s[] = { -0.5,  0.5, 0.5, -0.5 } ;
   static const double t[] = { -0.5, -0.5, 0.5,  0.5 } ;
 
-  static Matrix xs(2,2) ;
+  static double xs[2][2];
+
+  //  static Matrix xs(2,2) ;
 
   for ( i = 0; i < 4; i++ ) {
       shp[2][i] = ( 0.5 + s[i]*ss )*( 0.5 + t[i]*tt ) ;
@@ -1215,23 +1236,24 @@ void ConstantPressureVolumeQuad :: shape2d( double ss, double tt,
   
   // Construct jacobian and its inverse
   
-  xs.Zero( ) ;
   for ( i = 0; i < 2; i++ ) {
     for ( j = 0; j < 2; j++ ) {
 
+      double value = 0;
       for ( k = 0; k < 4; k++ )
-	  xs(i,j) +=  x[i][k] * shp[j][k] ;
-
+	value +=  x[i][k] * shp[j][k] ;
+      // xs(i,j) +=  x[i][k] * shp[j][k] ;
+      xs[i][j] = value;
+      
     } //end for j
   }  // end for i 
 
-  xsj = xs(0,0)*xs(1,1) - xs(0,1)*xs(1,0) ;
+  xsj = xs[0][0]*xs[1][1] - xs[0][1]*xs[1][0] ;
 
-  sx(0,0) =  xs(1,1) / xsj ;
-  sx(1,1) =  xs(0,0) / xsj ;
-  sx(0,1) = -xs(0,1) / xsj ; 
-  sx(1,0) = -xs(1,0) / xsj ; 
-
+  sx(0,0) =  xs[1][1] / xsj ;
+  sx(1,1) =  xs[0][0] / xsj ;
+  sx(0,1) = -xs[0][1] / xsj ; 
+  sx(1,0) = -xs[1][0] / xsj ; 
 
   //form global derivatives 
   

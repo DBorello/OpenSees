@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-06-08 00:18:56 $
+// $Revision: 1.9 $
+// $Date: 2002-12-05 22:20:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.h,v $
 
 // Written: MHS
@@ -58,6 +58,8 @@ class DispBeamColumn2d : public Element
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
+
     int getNumDOF(void);
     void setDomain(Domain *theDomain);
 
@@ -69,7 +71,7 @@ class DispBeamColumn2d : public Element
     // public methods to obtain stiffness, mass, damping and residual information    
     int update(void);
     const Matrix &getTangentStiff(void);
-    const Matrix &getDamp(void);
+    const Matrix &getInitialStiff(void);
     const Matrix &getMass(void);
 
     void zeroLoad();
@@ -105,8 +107,7 @@ class DispBeamColumn2d : public Element
 
     ID connectedExternalNodes; // Tags of quad nodes
 
-    Node *nd1Ptr;		// Pointers to quad nodes
-    Node *nd2Ptr;
+    Node *theNodes[2];
 
     static Matrix K;		// Element stiffness, damping, and mass Matrix
     static Vector P;		// Element resisting force vector

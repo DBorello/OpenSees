@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-06-06 18:47:08 $
+// $Revision: 1.12 $
+// $Date: 2002-12-05 22:20:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.h,v $
                                                                         
                                                                         
@@ -64,24 +64,25 @@ class NLBeamColumn2d: public Element
     NLBeamColumn2d (int tag, int nodeI, int nodeJ, 
 		    int numSections, SectionForceDeformation *sectionPtrs[], 
 		    CrdTransf2d &coordTransf, double massDensPerUnitLength = 0.0, 
-		    int maxNumIters = 1, double tolerance = 1e-10);
+		    int maxNumIters = 1, double tolerance = 1e-10, int maxSub = 10);
     
     ~NLBeamColumn2d();
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
 
     int getNumDOF(void);
-    
     void setDomain(Domain *theDomain);
+
     int commitState(void);
     int revertToLastCommit(void);        
     int revertToStart(void);
     int update(void);    
     
     const Matrix &getTangentStiff(void);
-    const Matrix &getDamp(void);    
-    const Matrix &getMass(void);    
+    const Matrix &getInitialStiff(void);
+    const Matrix &getMass(void);
 
     void zeroLoad(void);	
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -102,8 +103,8 @@ class NLBeamColumn2d: public Element
     Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
     
-	int setParameter(char **argv, int argc, Information &info);
-	int updateParameter(int parameterID, Information &info);
+    int setParameter(char **argv, int argc, Information &info);
+    int updateParameter(int parameterID, Information &info);
 
   private:
     void getGlobalDispls(Vector &dg) const;
@@ -129,8 +130,8 @@ class NLBeamColumn2d: public Element
     double cosTheta, sinTheta;     // cossine directors
 
     int    initialFlag;            // indicates if the element has been initialized
-			       
-    Node   *node1Ptr, *node2Ptr;   // pointers to the nodes
+    
+    Node *theNodes[2];
 
     Vector load;                   // equivalent nodal loads ????
 
@@ -149,10 +150,19 @@ class NLBeamColumn2d: public Element
     Matrix *sp;  // Applied section forces due to element loads, 3 x nSections
     double p0[3]; // Reactions in the basic system due to element loads
 
+    Matrix *Ki;
+    int maxSubdivisions;
+
+    
     static Matrix theMatrix;
     static Vector theVector;
     static GaussLobattoQuadRule1d01 quadRule;
     static double workArea[];
+
+    static Vector *vsSubdivide; 
+    static Matrix *fsSubdivide; 
+    static Vector *SsrSubdivide;
+    static int NLBeamColumn2d::maxNumSections;
 };
 
 #endif

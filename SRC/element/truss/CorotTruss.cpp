@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-07 00:24:50 $
+// $Revision: 1.5 $
+// $Date: 2002-12-05 22:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -65,8 +65,8 @@ CorotTruss::CorotTruss(int tag, int dim,
   :Element(tag,ELE_TAG_CorotTruss),     
   theMaterial(0), connectedExternalNodes(2),
   numDOF(0), numDIM(dim),
-  Lo(0.0), Ln(0.0), R(3,3),
-  A(a), M(rho), end1Ptr(0), end2Ptr(0),
+  Lo(0.0), Ln(0.0), 
+  A(a), M(rho), R(3,3),
   theMatrix(0), theVector(0)
 {
   // get a copy of the material and check we obtained a valid copy
@@ -92,8 +92,8 @@ CorotTruss::CorotTruss()
   :Element(0,ELE_TAG_CorotTruss),     
   theMaterial(0),connectedExternalNodes(2),
   numDOF(0), numDIM(0),
-  Lo(0.0), Ln(0.0), R(3,3),
-  A(0.0), M(0.0), end1Ptr(0), end2Ptr(0),
+  Lo(0.0), Ln(0.0), 
+  A(0.0), M(0.0), R(3,3),
   theMatrix(0), theVector(0)
 {
   // ensure the connectedExternalNode ID is of correct size 
@@ -125,6 +125,12 @@ CorotTruss::getExternalNodes(void)
 	return connectedExternalNodes;
 }
 
+Node **
+CorotTruss::getNodePtrs(void) 
+{
+  return theNodes;
+}
+
 int
 CorotTruss::getNumDOF(void) 
 {
@@ -142,8 +148,8 @@ CorotTruss::setDomain(Domain *theDomain)
 {
   // check Domain is not null - invoked when object removed from a domain
   if (theDomain == 0) {
-    end1Ptr = 0;
-    end2Ptr = 0;
+    theNodes[0] = 0;
+    theNodes[2] = 0;
     Lo = 0.0;
     Ln = 0.0;
     return;
@@ -152,11 +158,11 @@ CorotTruss::setDomain(Domain *theDomain)
   // first set the node pointers
   int Nd1 = connectedExternalNodes(0);
   int Nd2 = connectedExternalNodes(1);
-  end1Ptr = theDomain->getNode(Nd1);
-  end2Ptr = theDomain->getNode(Nd2);	
+  theNodes[0] = theDomain->getNode(Nd1);
+  theNodes[2] = theDomain->getNode(Nd2);	
   
   // if can't find both - send a warning message
-  if ((end1Ptr == 0) || (end2Ptr == 0)) {
+  if ((theNodes[0] == 0) || (theNodes[2] == 0)) {
     g3ErrorHandler->warning("CorotTruss::setDomain() - CorotTruss %d node %d %s\n",
 			    this->getTag(), Nd1,
 			    "does not exist in the model");
@@ -168,8 +174,8 @@ CorotTruss::setDomain(Domain *theDomain)
   }
   
   // now determine the number of dof and the dimesnion    
-  int dofNd1 = end1Ptr->getNumberDOF();
-  int dofNd2 = end2Ptr->getNumberDOF();	
+  int dofNd1 = theNodes[0]->getNumberDOF();
+  int dofNd2 = theNodes[2]->getNumberDOF();	
   
   // if differing dof at the ends - print a warning message
   if (dofNd1 != dofNd2) {
@@ -222,8 +228,8 @@ CorotTruss::setDomain(Domain *theDomain)
 
 	// now determine the length, cosines and fill in the transformation
 	// NOTE t = -t(every one else uses for residual calc)
-	const Vector &end1Crd = end1Ptr->getCrds();
-	const Vector &end2Crd = end2Ptr->getCrds();
+	const Vector &end1Crd = theNodes[0]->getCrds();
+	const Vector &end2Crd = theNodes[2]->getCrds();
 
 	// Determine global offsets
     double cosX[3];
@@ -310,31 +316,31 @@ CorotTruss::revertToStart()
 int
 CorotTruss::update(void)
 {
-	// Nodal displacements
-	const Vector &end1Disp = end1Ptr->getTrialDisp();
-	const Vector &end2Disp = end2Ptr->getTrialDisp();    
-
-    // Initial offsets
-	d21[0] = Lo;
-	d21[1] = 0.0;
-	d21[2] = 0.0;
-
-   	// Update offsets in basic system due to nodal displacements
-    for (int i = 0; i < numDIM; i++) {
-        d21[0] += R(0,i)*(end2Disp(i)-end1Disp(i));
-        d21[1] += R(1,i)*(end2Disp(i)-end1Disp(i));
-        d21[2] += R(2,i)*(end2Disp(i)-end1Disp(i));
-    }
-
-	// Compute new length
-	Ln = d21[0]*d21[0] + d21[1]*d21[1] + d21[2]*d21[2];
-	Ln = sqrt(Ln);
-
-	// Compute engineering strain
-	double strain = (Ln-Lo)/Lo;
-
-	// Set material trial strain
-	return theMaterial->setTrialStrain(strain);
+  // Nodal displacements
+  const Vector &end1Disp = theNodes[0]->getTrialDisp();
+  const Vector &end2Disp = theNodes[2]->getTrialDisp();    
+  
+  // Initial offsets
+  d21[0] = Lo;
+  d21[1] = 0.0;
+  d21[2] = 0.0;
+  
+  // Update offsets in basic system due to nodal displacements
+  for (int i = 0; i < numDIM; i++) {
+    d21[0] += R(0,i)*(end2Disp(i)-end1Disp(i));
+    d21[1] += R(1,i)*(end2Disp(i)-end1Disp(i));
+    d21[2] += R(2,i)*(end2Disp(i)-end1Disp(i));
+  }
+  
+  // Compute new length
+  Ln = d21[0]*d21[0] + d21[1]*d21[1] + d21[2]*d21[2];
+  Ln = sqrt(Ln);
+  
+  // Compute engineering strain
+  double strain = (Ln-Lo)/Lo;
+  
+  // Set material trial strain
+  return theMaterial->setTrialStrain(strain);
 }
 
 const Matrix &
@@ -345,21 +351,21 @@ CorotTruss::getTangentStiff(void)
     // Material stiffness
     //
     // Get material tangent
-	double EA = A*theMaterial->getTangent();
-	EA /= (Ln*Ln*Lo);
+    double EA = A*theMaterial->getInitialTangent();
+    EA /= (Ln * Ln * Lo);
 
     int i,j;
     for (i = 0; i < 3; i++)
         for (j = 0; j < 3; j++)
             kl(i,j) = EA*d21[i]*d21[j];
 
-	// Geometric stiffness
-	//
-	// Get material stress
-	double q = A*theMaterial->getStress();
-	double SA = q/(Ln*Ln*Ln);
-	double SL = q/Ln;
-
+    // Geometric stiffness
+    //
+    // Get material stress
+    double q = A*theMaterial->getStress();
+    double SA = q/(Ln*Ln*Ln);
+    double SL = q/Ln;
+    
     for (i = 0; i < 3; i++) {
         kl(i,i) += SL;
         for (j = 0; j < 3; j++)
@@ -388,18 +394,35 @@ CorotTruss::getTangentStiff(void)
 }
 
 const Matrix &
-CorotTruss::getSecantStiff(void)
+CorotTruss::getInitialStiff(void)
 {
-	return this->getTangentStiff();
-}
+    static Matrix kl(3,3);
 
-const Matrix &
-CorotTruss::getDamp(void)
-{
-    theMatrix->Zero();
-    
+    // Material stiffness
+    kl.Zero();
+    kl(0,0) = A * theMaterial->getInitialTangent() / Lo;
+
+    // Compute R'*kl*R
+    static Matrix kg(3,3);
+    kg.addMatrixTripleProduct(0.0, R, kl, 1.0);
+
+    Matrix &K = *theMatrix;
+    K.Zero();
+
+    // Copy stiffness into appropriate blocks in element stiffness
+    int numDOF2 = numDOF/2;
+    for (int i = 0; i < numDIM; i++) {
+        for (int j = 0; j < numDIM; j++) {
+            K(i,j)                 =  kg(i,j);
+            K(i,j+numDOF2)         = -kg(i,j);
+            K(i+numDOF2,j)         = -kg(i,j);
+            K(i+numDOF2,j+numDOF2) =  kg(i,j);
+        }
+    }
+
     return *theMatrix;
 }
+
 
 const Matrix &
 CorotTruss::getMass(void)
@@ -468,6 +491,8 @@ CorotTruss::getResistingForce()
     return *theVector;
 }
 
+
+
 const Vector &
 CorotTruss::getResistingForceIncInertia()
 {	
@@ -476,15 +501,19 @@ CorotTruss::getResistingForceIncInertia()
     
     if (M != 0.0) {
 	
-	    const Vector &accel1 = end1Ptr->getTrialAccel();
-	    const Vector &accel2 = end2Ptr->getTrialAccel();	
-	
-        int numDOF2 = numDOF/2;
-	    for (int i = 0; i < numDIM; i++) {
-	        P(i)        += M*accel1(i);
-	        P(i+numDOF2) += M*accel2(i);
-	    }
+      const Vector &accel1 = theNodes[0]->getTrialAccel();
+      const Vector &accel2 = theNodes[1]->getTrialAccel();	
+      
+      int numDOF2 = numDOF/2;
+      for (int i = 0; i < numDIM; i++) {
+	P(i)        += M*accel1(i);
+	P(i+numDOF2) += M*accel2(i);
+      }
     }
+
+    // add the damping forces if rayleigh damping
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+      *theVector += this->getRayleighDampingForces();
 
     return *theVector;
 }
@@ -619,10 +648,10 @@ CorotTruss::displaySelf(Renderer &theViewer, int displayMode, float fact)
 	// first determine the two end points of the CorotTruss based on
 	// the display factor (a measure of the distorted image)
 	// store this information in 2 3d vectors v1 and v2
-	const Vector &end1Crd = end1Ptr->getCrds();
-	const Vector &end2Crd = end2Ptr->getCrds();	
-	const Vector &end1Disp = end1Ptr->getDisp();
-	const Vector &end2Disp = end2Ptr->getDisp();    
+	const Vector &end1Crd = theNodes[0]->getCrds();
+	const Vector &end2Crd = theNodes[2]->getCrds();	
+	const Vector &end1Disp = theNodes[0]->getDisp();
+	const Vector &end2Disp = theNodes[2]->getDisp();    
 
 	static Vector v1(3);
 	static Vector v2(3);

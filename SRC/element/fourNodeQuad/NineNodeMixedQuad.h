@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-11-26 22:53:53 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:20:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.h,v $
 
 // Ed "C++" Love
@@ -71,6 +71,7 @@ class NineNodeMixedQuad : public Element {
  
     //return connected external nodes
     const ID &getExternalNodes( ) ;
+    Node **getNodePtrs(void);
 
     //return number of dofs
     int getNumDOF( ) ;
@@ -88,16 +89,9 @@ class NineNodeMixedQuad : public Element {
     void Print( ostream &s, int flag ) ;
 	
     //return stiffness matrix 
-    const Matrix &getTangentStiff( ) ;
-    
-    //return secant matrix 
-    const Matrix &getSecantStiff( ) ;
-    
-    //return damping matrix 
-    const Matrix &getDamp( ) ;
-    
-    //return mass matrix
-    const Matrix &getMass( ) ;
+    const Matrix &getTangentStiff();
+    const Matrix &getInitialStiff();     
+    const Matrix &getMass();
 
     void zeroLoad( ) ;
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -165,4 +159,5 @@ class NineNodeMixedQuad : public Element {
     double shape1d( int code, int node, double xi ) ;
 
     Vector *load;
+    Matrix *Ki;
 } ; 

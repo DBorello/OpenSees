@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-07 22:57:26 $
+// $Revision: 1.5 $
+// $Date: 2002-12-05 22:20:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -62,7 +62,7 @@ Element(tag, ELE_TAG_ZeroLengthSection),
 connectedExternalNodes(2),
 dimension(dim), numDOF(0), 
 transformation(3,3), A(0), v(0), K(0), P(0),
-end1Ptr(0), end2Ptr(0), theSection(0), order(0)
+theSection(0), order(0)
 {
 	// Obtain copy of section model
 	theSection = sec.getCopy();
@@ -83,7 +83,7 @@ Element(0, ELE_TAG_ZeroLengthSection),
 connectedExternalNodes(2),
 dimension(0), numDOF(0), 
 transformation(3,3), A(0), v(0), K(0), P(0),
-end1Ptr(0), end2Ptr(0), theSection(0), order(0)
+theSection(0), order(0)
 {
 
 }
@@ -113,6 +113,12 @@ ZeroLengthSection::getExternalNodes(void)
     return connectedExternalNodes;
 }
 
+Node **
+ZeroLengthSection::getNodePtrs(void) 
+{
+  return theNodes;
+}
+
 int
 ZeroLengthSection::getNumDOF(void) 
 {
@@ -130,20 +136,20 @@ ZeroLengthSection::setDomain(Domain *theDomain)
 {
     // check Domain is not null - invoked when object removed from a domain
     if (theDomain == 0) {
-		end1Ptr = 0;
-		end2Ptr = 0;
+		theNodes[0] = 0;
+		theNodes[1] = 0;
 		return;
     }
 
     // first set the node pointers
     int Nd1 = connectedExternalNodes(0);
     int Nd2 = connectedExternalNodes(1);
-    end1Ptr = theDomain->getNode(Nd1);
-    end2Ptr = theDomain->getNode(Nd2);	
+    theNodes[0] = theDomain->getNode(Nd1);
+    theNodes[1] = theDomain->getNode(Nd2);	
 
     // if can't find both - send a warning message
-    if (end1Ptr == 0 || end2Ptr == 0) {
-		if (end1Ptr == 0) 
+    if (theNodes[0] == 0 || theNodes[1] == 0) {
+		if (theNodes[0] == 0) 
 			g3ErrorHandler->warning("%s -- Nd1: %d does not exist in ",
 				"ZeroLengthSection::setDomain()", Nd1);
 		else
@@ -157,8 +163,8 @@ ZeroLengthSection::setDomain(Domain *theDomain)
     }
 
     // now determine the number of dof and the dimension    
-    int dofNd1 = end1Ptr->getNumberDOF();
-    int dofNd2 = end2Ptr->getNumberDOF();	
+    int dofNd1 = theNodes[0]->getNumberDOF();
+    int dofNd2 = theNodes[1]->getNumberDOF();	
 
     // if differing dof at the ends - print a warning message
     if (dofNd1 != dofNd2) {
@@ -186,8 +192,8 @@ ZeroLengthSection::setDomain(Domain *theDomain)
 	}
 
     // Check that length is zero within tolerance
-    const Vector &end1Crd = end1Ptr->getCrds();
-    const Vector &end2Crd = end2Ptr->getCrds();	
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
     const Vector     diff = end1Crd - end2Crd;
     double L  = diff.Norm();
     double v1 = end1Crd.Norm();
@@ -247,28 +253,15 @@ ZeroLengthSection::getTangentStiff(void)
 }
 
 const Matrix &
-ZeroLengthSection::getSecantStiff(void)
+ZeroLengthSection::getInitialStiff(void)
 {
-    // secant is not defined; use tangent
-    return this->getTangentStiff();
-}
-
-const Matrix &
-ZeroLengthSection::getDamp(void)
-{
-	// Return zero damping
-	K->Zero();
-
-	return *K;
-}
-
-const Matrix &
-ZeroLengthSection::getMass(void)
-{
-	// Return zero mass
-	K->Zero();
-
-	return *K;
+  // Get section tangent stiffness, the element basic stiffness
+  const Matrix &kb = theSection->getInitialTangent();
+  
+  // Compute element stiffness ... K = A^*kb*A
+  K->addMatrixTripleProduct(0.0, *A, kb, 1.0);
+	
+  return *K;
 }
 
 void 
@@ -312,12 +305,19 @@ ZeroLengthSection::getResistingForce()
 	return *P;
 }
 
+
 const Vector &
 ZeroLengthSection::getResistingForceIncInertia()
 {	
-    // There is no mass, so return
-    return this->getResistingForce();
+    this->getResistingForce();
+    
+    // add the damping forces if rayleigh damping
+    if (betaK != 0.0 || betaK0 != 0.0)
+      *P += this->getRayleighDampingForces();
+
+    return *P;
 }
+
 
 int
 ZeroLengthSection::sendSelf(int commitTag, Channel &theChannel)
@@ -478,16 +478,16 @@ int
 ZeroLengthSection::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
     // ensure setDomain() worked
-    if (end1Ptr == 0 || end2Ptr == 0)
+    if (theNodes[0] == 0 || theNodes[1] == 0)
 		return 0;
 
     // first determine the two end points of the ZeroLengthSection based on
     // the display factor (a measure of the distorted image)
     // store this information in 2 3d vectors v1 and v2
-    const Vector &end1Crd = end1Ptr->getCrds();
-    const Vector &end2Crd = end2Ptr->getCrds();	
-    const Vector &end1Disp = end1Ptr->getDisp();
-    const Vector &end2Disp = end2Ptr->getDisp();    
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
+    const Vector &end1Disp = theNodes[0]->getDisp();
+    const Vector &end2Disp = theNodes[1]->getDisp();    
 
     if (displayMode == 1 || displayMode == 2) {
 		static Vector v1(3);
@@ -569,6 +569,9 @@ ZeroLengthSection::setUp(int Nd1, int Nd2, const Vector &x, const Vector &yp)
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;
     
+    for (int i=0; i<2; i++)
+      theNodes[i] = 0;
+
     // check that vectors for orientation are correct size
     if ( x.Size() != 3 || yp.Size() != 3 )
 		g3ErrorHandler->fatal("%s -- incorrect dimension of orientation vectors",
@@ -713,8 +716,8 @@ void
 ZeroLengthSection::computeSectionDefs(void)
 {
 	// Get nodal displacements
-	const Vector &u1 = end1Ptr->getTrialDisp();
-	const Vector &u2 = end2Ptr->getTrialDisp();
+	const Vector &u1 = theNodes[0]->getTrialDisp();
+	const Vector &u2 = theNodes[1]->getTrialDisp();
 
 	// Compute differential displacements
 	const Vector diff = u2 - u1;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:50 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d02.h,v $
                                                                         
                                                                         
@@ -51,6 +51,8 @@ class beam2d02 : public Element
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
+
     int getNumDOF(void);
     void setDomain(Domain *theDomain);
     
@@ -59,8 +61,7 @@ class beam2d02 : public Element
     int revertToStart(void);            
     
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
-    const Matrix &getDamp(void);    
+    const Matrix &getInitialStiff(void);
     const Matrix &getMass(void);    
 
     void zeroLoad(void);	
@@ -83,7 +84,7 @@ class beam2d02 : public Element
     double A,E,I,M;
     double L,sn,cs;
     ID  connectedExternalNodes;    
-    Node *end1Ptr, *end2Ptr;
+    Node *theNodes[2];
 
     Matrix Kd; // the stiffness matrix
     Matrix m; // the mass matrix	

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:50 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/beam3d01.cpp,v $
                                                                         
                                                                         
@@ -51,7 +51,8 @@ beam3d01::beam3d01()
  k(12,12), rForce(12), load(12), 
  connectedExternalNodes(2), isStiffFormed(0)
 {
-	// does nothing
+  theNodes[0] = 0;
+  theNodes[1] = 0;
 }
 
 beam3d01::beam3d01(int tag, double a, double e, double g, 
@@ -65,6 +66,9 @@ beam3d01::beam3d01(int tag, double a, double e, double g,
 {
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;    
+
+  theNodes[0] = 0;
+  theNodes[1] = 0;
 }
 
 
@@ -88,6 +92,12 @@ const ID &
 beam3d01::getExternalNodes(void) 
 {
     return connectedExternalNodes;
+}
+
+Node **
+beam3d01::getNodePtrs(void) 
+{
+  return theNodes;
 }
 
 int
@@ -118,7 +128,7 @@ beam3d01::getTangentStiff(void)
 }
 
 const Matrix &
-beam3d01::getSecantStiff(void)
+beam3d01::getInitialStiff(void)
 {
     return this->getStiff();
 }
@@ -151,6 +161,9 @@ beam3d01::getStiff(void)
 	    cerr << Nd2 << "does not exist in model\n";
 	    exit(0);
 	}
+	
+	theNodes[0] = end1Ptr;
+	theNodes[1] = end2Ptr;
 
 	double dx,dy,dz;
 	const Vector &end1Crd = end1Ptr->getCrds();
@@ -352,23 +365,6 @@ beam3d01::getStiff(void)
     return k;
 }
     
-const Matrix &
-beam3d01::getDamp(void)
-{
-    return d;
-}
-
-
-const Matrix &
-beam3d01::getMass(void)
-{ 
-    return m;
-}
-
-
-
-
-
 void 
 beam3d01::zeroLoad(void)
 {
@@ -393,7 +389,13 @@ beam3d01::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 beam3d01::getResistingForceIncInertia()
 {	
-    return this->getResistingForce();
+    this->getResistingForce();
+
+    // add rayleigh damping force if factors present    
+    if (betaK != 0.0 || betaK0 != 0.0)
+	rForce += this->getRayleighDampingForces();
+
+    return rForce;
 }
 
 const Vector &

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2002-07-18 21:55:33 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:20:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/SimpleJoint2D.cpp,v $
 
 // Written: AAA 03/02
@@ -42,9 +42,11 @@
 #include <ElasticMaterial.h>
 #include <ElementResponse.h>
 #include <SimpleJoint2D.h>
+#include <InternalSpring.h>
 
-Matrix SimpleJoint2D::K(16,16);
-Vector SimpleJoint2D::V(16);
+Matrix SimpleJoint2D::K(12,12);
+Vector SimpleJoint2D::V(12);
+Node * SimpleJoint2D::theNodes[5];
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -52,22 +54,24 @@ Vector SimpleJoint2D::V(16);
 
 SimpleJoint2D::SimpleJoint2D()
   :Element(0, ELE_TAG_SimpleJoint2D ), 
-  ExternalNodes(5), InternalConstraints(0), 
-  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0), SpringC(0),
-  IntNode(0), TheDomain(0), numDof(0), nodeRecord(0), dofRecord(0)
+  ExternalNodes(4), InternalConstraints(4), 
+  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0),
+  IntNode(0), TheDomain(0), RotElemtag(0), RotElemPtr(0),  
+  numDof(0), nodeDbTag(0), dofDbTag(0)
 {
 
 }
 
 SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
 			     UniaxialMaterial &Spring , Domain *theDomain, 
-			     int IntNodeTag, int LrgDisp)
+			     int IntNodeTag, int RotEleTag, int LrgDisp)
   :Element(tag, ELE_TAG_SimpleJoint2D ), 
-  ExternalNodes(5), InternalConstraints(4), 
-  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0), SpringC(0),
-  IntNode(IntNodeTag), TheDomain(0), numDof(0), nodeRecord(0), dofRecord(0)
+  ExternalNodes(4), InternalConstraints(4), 
+  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0),
+  IntNode(IntNodeTag), TheDomain(0), RotElemtag(RotEleTag), RotElemPtr(0),  
+  numDof(0), nodeDbTag(0), dofDbTag(0)
 {
-  numDof  = 16;
+  numDof  = 12;
 
   K.Zero();
   V.Zero();
@@ -84,7 +88,6 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
   ExternalNodes(1) = nd2;
   ExternalNodes(2) = nd3;
   ExternalNodes(3) = nd4;
-  ExternalNodes(4) = IntNodeTag;
   
   // Set the external node pointers
   end1Ptr = TheDomain->getNode(nd1);
@@ -176,9 +179,14 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
     cerr << "WARNING SimpleJoint2D::(): can not construct a paralelogram over external nodes\n";
     return;	
   }
-
-
+	
+  // Get the largest node number and compare it with begining MAX_NUMS
+  //  int MaxNodeInDomain = getMaxNodeNum( TheDomain ) +1;
+  // IntNode = ( MaxNodeInDomain > MAX_NUMS ) ? MaxNodeInDomain : MAX_NUMS;
+  
   // Generate internal node
+  // I am not using the node copy for future purposes, specially when 
+  // the new node coordinates are different	
   IntNodePtr = new Node ( IntNode , 4, Center1(0) , Center1(1) );
   if ( IntNodePtr == NULL ) 
     {
@@ -188,14 +196,6 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
 	g3ErrorHandler->warning("SimpleJoint2D::SimpleJoint2D - unable to add internal nodeto domain\n");
     }
   
-  // Copy the uniaxial material
-  SpringC = Spring.getCopy();
-  if ( SpringC == NULL )
-  {
-    cerr << "ERROR Joint2D::Joint2D(): Can not make copy of uniaxial materials, out of memory ";
-    exit(-1);
-  }
-
   // Generate and add constraints to domain
 
   // get the constraint numbers
@@ -225,32 +225,53 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
     cerr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 4\n";
     return;
   }
+
+  // add rotational spring
+  //   RotElemtag = getMaxEleNum( TheDomain ) + 1;
+  // RotElemtag = ( RotElemtag > MAX_NUMS ) ? RotElemtag : MAX_NUMS;
+  
+  RotElemPtr = new InternalSpring(RotElemtag,IntNode,4,2,3, Spring);
+  
+  if ( RotElemPtr == NULL ) {
+    g3ErrorHandler->warning("SimpleJoint2D::SimpleJoint2D - failed to genrate Rotational spring , out of memory\n");
+  } else {
+    // add the zero length spring to the domain
+    if ( theDomain->addElement( RotElemPtr ) == false) {
+      g3ErrorHandler->warning("SimpleJoint2D::SimpleJoint2D - Unable to add Rotational spring to domain\n");
+      delete RotElemPtr;
+    }
+  }
 }
 
 
 SimpleJoint2D::~SimpleJoint2D()
 {
-	if ( SpringC != NULL ) delete SpringC;
-
-//	MP_Constraint *Temp_MP;
-	for ( int i=0 ; i < 4 ; i++ )
+	if ( TheDomain != NULL)
 	{
-//		Temp_MP = theDomain->getMP_Constraint( InternalConstraints(i) );
-	
-//		if ( Temp_MP != NULL )
-//		{
-//		theDomain->removeMP_Constraint( InternalConstraints(i) );
-//		delete Temp_MP;
-//		}
+		if ( RotElemPtr != NULL )
+		{
+			int rotelemtag = RotElemPtr->getTag();
+			TheDomain->removeElement( rotelemtag );
+			delete RotElemPtr;
+		}
+		MP_Constraint *Temp_MP;
+		for ( int i=0 ; i < 4 ; i++ )
+		{
+			Temp_MP = TheDomain->getMP_Constraint( InternalConstraints(i) );
+			
+			if ( Temp_MP != NULL )
+			{
+				TheDomain->removeMP_Constraint( InternalConstraints(i) );
+				delete Temp_MP;
+			}
+		}
+		if ( IntNodePtr != NULL )
+		{
+			int intnodetag = IntNodePtr->getTag();
+			TheDomain->removeNode( intnodetag );
+			delete IntNodePtr;
+		}
 	}
-
-	if ( IntNodePtr != NULL )
-	{
-		int intnodetag = IntNodePtr->getTag();
-//		theDomain->removeNode( intnodetag );
-		delete IntNodePtr;
-	}
-
 }
 
 
@@ -302,27 +323,41 @@ int SimpleJoint2D::update(void)
 
 int SimpleJoint2D::commitState()
 {
-  return SpringC->commitState();
+  return 0;
 }
 
 int SimpleJoint2D::revertToLastCommit()
 {
-  return SpringC->revertToLastCommit();
+  return 0;
 }
 
 int SimpleJoint2D::revertToStart(void)
 {
-  return SpringC->revertToStart();
+  return 0;
 }
 
 int SimpleJoint2D::getNumExternalNodes(void) const
 {
-  return 5;
+  return 4;
 }
 
 const ID &SimpleJoint2D::getExternalNodes(void)
 {
+
   return ExternalNodes;
+}
+
+Node **
+SimpleJoint2D::getNodePtrs(void)
+{
+
+  theNodes[0] = end1Ptr;
+  theNodes[1] = end2Ptr;
+  theNodes[2] = end3Ptr;
+  theNodes[3] = end4Ptr;
+  theNodes[4] = IntNodePtr;
+
+  return theNodes;
 }
 
 int SimpleJoint2D::getNumDOF(void)
@@ -332,41 +367,22 @@ int SimpleJoint2D::getNumDOF(void)
 
 const Matrix &SimpleJoint2D::getTangentStiff(void)
 {
-	const Vector &dispC = IntNodePtr->getTrialDisp();
 
-	double DeltaC = dispC(3) - dispC(2);
-
-	int dummy;
-
-	dummy = SpringC->setTrialStrain(DeltaC);
-
-	double KC = SpringC->getTangent();
-
-	K.Zero();
-
-	K(14,14)=  KC;
-	K(14,15)= -KC;
-	K(15,14)= -KC;
-	K(15,15)=  KC;
-
-	return K;
+  return K;
 }
 
-const Matrix &SimpleJoint2D::getSecantStiff(void)
+const Matrix &SimpleJoint2D::getInitialStiff(void)
 {
-  return this->getTangentStiff();
+  return K;
 }
-
 
 const Matrix &SimpleJoint2D::getDamp(void)
 {	
-  K.Zero();
   return K;
 }
 
 const Matrix &SimpleJoint2D::getMass(void)
 {
-  K.Zero();
   return K;
 }
 
@@ -374,8 +390,7 @@ void SimpleJoint2D::Print(ostream &s, int flag )
 {
   s << "\nElement: " << getTag() << " type: SimpleJoint2D iNode: "
     << ExternalNodes(0) << " jNode: " << ExternalNodes(1) << "\n"
-    << " kNode: " << ExternalNodes(2) << " lNode: " << ExternalNodes(3) << "\n"
-	<< " Internal node: " << ExternalNodes(4) << "\n";
+    << " kNode: " << ExternalNodes(2) << " lNode: " << ExternalNodes(3) << "\n";
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -394,35 +409,21 @@ int SimpleJoint2D::addLoad(ElementalLoad *theLoad, double loadFactor)
 
 int SimpleJoint2D::addInertiaLoadToUnbalance(const Vector &accel)
 {
-  return 0;
+    return 0;
 }
 
 
 
 const Vector &SimpleJoint2D::getResistingForce()
 {
-	const Vector &dispC = IntNodePtr->getTrialDisp();
-
-	double DeltaC = dispC(3) - dispC(2);
-
-	int dummy = SpringC->setTrialStrain(DeltaC);
-
-	double FC = SpringC->getStress();
-
-	V.Zero();
-
-	V(14)= -FC;
-	V(15)=  FC;
-
-	return V;
+  return V;
 }
 
 const Vector &
 SimpleJoint2D::getResistingForceIncInertia()
 {
-  return this->getResistingForce();
+  return V;
 }
-
 
 
 int SimpleJoint2D::displaySelf(Renderer &theViewer, int displayMode, float fact)
@@ -493,22 +494,9 @@ Response* SimpleJoint2D::setResponse(char **argv, int argc, Information &eleInfo
 	else if (strcmp(argv[0],"size") == 0 || strcmp(argv[0],"jointSize") == 0 )
     return new ElementResponse(this, 2, Vector(2));
 
-	else if (strcmp(argv[0],"moment") == 0 || strcmp(argv[0],"force") == 0 )
-    return new ElementResponse(this, 3, 0.0);
-
-	else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-	   strcmp(argv[0],"deformation") == 0 )
-    return new ElementResponse(this, 4, 0.0);
-
-	else if (strcmp(argv[0],"defoANDforce") == 0 || strcmp(argv[0],"deformationANDforce") == 0 ||
-	   strcmp(argv[0],"deformationsANDforces") == 0 )
-    return new ElementResponse(this, 5, Vector(2));
-
-    else if ( strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0 )
-    return new ElementResponse(this, 6, Matrix(16,16) );
-	
 	else 
-		return 0;
+		return RotElemPtr->setResponse( argv , argc , eleInformation);
+  	
 }
 
 int SimpleJoint2D::getResponse(int responseID, Information &eleInformation)
@@ -562,24 +550,101 @@ int SimpleJoint2D::getResponse(int responseID, Information &eleInformation)
 		}
 		return 0;
 
-	case 3:
-		return eleInformation.setDouble( SpringC->getStress() );
-
-	case 4:
-		return eleInformation.setDouble( SpringC->getStrain() );
-
-	case 5:
-		if(eleInformation.theVector!=0)
-		{
-			(*(eleInformation.theVector))(0) = SpringC->getStrain();
-			(*(eleInformation.theVector))(1) = SpringC->getStress();
-		}
-		return 0;
-
-	case 6:
-		return eleInformation.setMatrix(this->getTangentStiff());
-
 	default:
 		return -1;
 	}
+}
+
+
+
+int SimpleJoint2D::sendSelf(int commitTag, Channel &theChannel)
+{
+	int res;
+	
+	int dataTag = this->getDbTag();
+	
+	static ID data(8);
+	data(0) = this->getTag();
+	data(1) = IntNode;
+	data(2) = RotElemtag;
+	data(3) = numDof;
+	
+	if (ExternalNodes.Size() != 0 && nodeDbTag == 0) nodeDbTag = theChannel.getDbTag();
+	if (InternalConstraints.Size() != 0 && dofDbTag == 0) dofDbTag = theChannel.getDbTag();
+	data(4) = nodeDbTag;
+	data(5) = dofDbTag;
+
+	data(6) = RotElemPtr->getClassTag();
+	int elmDbTag = RotElemPtr->getDbTag();
+	if (elmDbTag == 0) {
+		elmDbTag = theChannel.getDbTag();
+		if (elmDbTag != 0)
+			RotElemPtr->setDbTag(elmDbTag);
+	}
+	data(7) = elmDbTag;
+	
+	res = theChannel.sendID(dataTag, commitTag, data);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING SimpleJoint2D::sendSelf() - %d failed to send ID\n",this->getTag());
+		return -1;
+	}
+	
+	// sends the tags of it's external nodes
+	res = theChannel.sendID(nodeDbTag, commitTag, ExternalNodes);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING SimpleJoint2D::sendSelf() - %d failed to send Vector\n",this->getTag());
+		return -2;
+	}
+	
+	
+	// sends the tags of it's internal constraints
+	res = theChannel.sendID(dofDbTag, commitTag, InternalConstraints);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING SimpleJoint2D::sendSelf() - %d failed to send Vector\n",this->getTag());
+		return -2;
+	}
+	
+	return 0;
+}
+	  
+int SimpleJoint2D::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+	
+	int res;
+	int dataTag = this->getDbTag();
+	
+	static ID data(8);
+	res = theChannel.recvID(dataTag, commitTag, data);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING Truss::recvSelf() - failed to receive Vector\n");
+		return -1;
+	}
+	
+	this->setTag((int)data(0));
+	IntNode = data(1);
+	RotElemtag = data(2);
+	numDof = data(3);
+	nodeDbTag = data(4);
+	dofDbTag = data(5);
+	
+	int elmClassTag = data(6);
+	int elmDbTag = data(7);
+
+
+	// receives the tags of it's external nodes
+	res = theChannel.recvID(nodeDbTag, commitTag, ExternalNodes);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING SimpleJoint2D::recvSelf() - %d failed to receive external nodes\n", this->getTag());
+		return -2;
+	}
+
+	
+	// receives the tags of it's constraint tags
+	res = theChannel.recvID(dofDbTag, commitTag, InternalConstraints);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING SimpleJoint2D::recvSelf() - %d failed to receive internal constraints\n", this->getTag());
+		return -2;
+	}
+	
+	return 0;
 }

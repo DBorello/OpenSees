@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-06-07 21:50:30 $
+// $Revision: 1.9 $
+// $Date: 2002-12-05 22:20:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.h,v $
 
 #ifndef BeamWithHinges2d_h
@@ -54,6 +54,8 @@ class BeamWithHinges2d: public Element
   
   int getNumExternalNodes(void) const;
   const ID &getExternalNodes(void);
+  Node **getNodePtrs(void);
+
   int getNumDOF(void);
   void setDomain(Domain *theDomain);
   
@@ -63,7 +65,7 @@ class BeamWithHinges2d: public Element
   
   int update(void);
   const Matrix &getTangentStiff(void);
-  const Matrix &getDamp(void);
+  const Matrix &getInitialStiff(void);
   const Matrix &getMass(void);
   
   void zeroLoad(void);
@@ -102,7 +104,7 @@ class BeamWithHinges2d: public Element
   CrdTransf2d *theCoordTransf;
   
   ID connectedExternalNodes;    
-  Node *node1Ptr, *node2Ptr; 
+  Node *theNodes[2];
   
   Matrix fs[2];
   Vector sr[2];

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-07 00:29:00 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:20:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.h,v $
                                                                         
 // Written: MHS
@@ -56,6 +56,8 @@ class FourNodeQuad : public Element
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
+
     int getNumDOF(void);
     void setDomain(Domain *theDomain);
 
@@ -67,9 +69,8 @@ class FourNodeQuad : public Element
 
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);
-    const Matrix &getDamp(void);
-    const Matrix &getMass(void);
+    const Matrix &getInitialStiff(void);    
+    const Matrix &getMass(void);    
 
     void zeroLoad();
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -100,11 +101,9 @@ class FourNodeQuad : public Element
     
     ID connectedExternalNodes; // Tags of quad nodes
 
-    Node *nd1Ptr;		// Pointers to quad nodes
-    Node *nd2Ptr;
-    Node *nd3Ptr;
-    Node *nd4Ptr;
+    Node *theNodes[4];
 
+    static double matrixData[64];  // array data for matrix
     static Matrix K;		// Element stiffness, damping, and mass Matrix
     static Vector P;		// Element resisting force vector
     Vector Q;		        // Applied nodal loads
@@ -122,6 +121,8 @@ class FourNodeQuad : public Element
     // private member functions - only objects of this class can call these
     double shapeFunction(double xi, double eta);
     void setPressureLoadAtNodes(void);
+
+    Matrix *Ki;
 };
 
 #endif

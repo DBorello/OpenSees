@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-10-03 18:33:40 $
+// $Revision: 1.8 $
+// $Date: 2002-12-05 22:20:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -53,8 +53,7 @@ Matrix ElasticBeam3d::kb(6,6);
 ElasticBeam3d::ElasticBeam3d()
   :Element(0,ELE_TAG_ElasticBeam3d), 
   A(0), E(0), G(0), Jx(0), Iy(0), Iz(0), rho(0.0),
-  Q(12), q(6), node1Ptr(0), node2Ptr(0),
-  connectedExternalNodes(2), theCoordTransf(0)
+  Q(12), q(6), connectedExternalNodes(2), theCoordTransf(0)
 {
   // does nothing
   q0[0] = 0.0;
@@ -68,6 +67,10 @@ ElasticBeam3d::ElasticBeam3d()
   p0[2] = 0.0;
   p0[3] = 0.0;
   p0[4] = 0.0;
+  
+  // set node pointers to NULL
+  for (int i=0; i<2; i++)
+    theNodes[i] = 0;      
 }
 
 ElasticBeam3d::ElasticBeam3d(int tag, double a, double e, double g, 
@@ -75,8 +78,7 @@ ElasticBeam3d::ElasticBeam3d(int tag, double a, double e, double g,
 			     CrdTransf3d &coordTransf, double r)
   :Element(tag,ELE_TAG_ElasticBeam3d), 
   A(a), E(e), G(g), Jx(jx), Iy(iy), Iz(iz), rho(r),
-  Q(12), q(6), node1Ptr(0), node2Ptr(0),
-  connectedExternalNodes(2), theCoordTransf(0)
+  Q(12), q(6), connectedExternalNodes(2), theCoordTransf(0)
 {
   connectedExternalNodes(0) = Nd1;
   connectedExternalNodes(1) = Nd2;
@@ -97,6 +99,10 @@ ElasticBeam3d::ElasticBeam3d(int tag, double a, double e, double g,
   p0[2] = 0.0;
   p0[3] = 0.0;
   p0[4] = 0.0;
+
+  // set node pointers to NULL
+  for (int i=0; i<2; i++)
+    theNodes[i] = 0;      
 }
 
 ElasticBeam3d::~ElasticBeam3d()
@@ -117,6 +123,12 @@ ElasticBeam3d::getExternalNodes(void)
     return connectedExternalNodes;
 }
 
+Node **
+ElasticBeam3d::getNodePtrs(void) 
+{
+  return theNodes;
+}
+
 int
 ElasticBeam3d::getNumDOF(void)
 {
@@ -129,19 +141,19 @@ ElasticBeam3d::setDomain(Domain *theDomain)
     if (theDomain == 0)
 	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Domain is null");
     
-    node1Ptr = theDomain->getNode(connectedExternalNodes(0));
-    node2Ptr = theDomain->getNode(connectedExternalNodes(1));    
+    theNodes[0] = theDomain->getNode(connectedExternalNodes(0));
+    theNodes[1] = theDomain->getNode(connectedExternalNodes(1));    
     
-    if (node1Ptr == 0)
+    if (theNodes[0] == 0)
 	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Node 1: %i does not exist",
 			      connectedExternalNodes(0));
     
-    if (node2Ptr == 0)
+    if (theNodes[1] == 0)
 	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Node 2: %i does not exist",
 			      connectedExternalNodes(1));
  
-    int dofNd1 = node1Ptr->getNumberDOF();
-    int dofNd2 = node2Ptr->getNumberDOF();    
+    int dofNd1 = theNodes[0]->getNumberDOF();
+    int dofNd2 = theNodes[1]->getNumberDOF();    
     
     if (dofNd1 != 6)
 	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Node 1: %i has incorrect number of DOF",
@@ -153,7 +165,7 @@ ElasticBeam3d::setDomain(Domain *theDomain)
 	
     this->DomainComponent::setDomain(theDomain);
     
-    if (theCoordTransf->initialize(node1Ptr, node2Ptr) != 0)
+    if (theCoordTransf->initialize(theNodes[0], theNodes[1]) != 0)
 	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Error initializing coordinate transformation");
     
     double L = theCoordTransf->getInitialLength();
@@ -182,8 +194,6 @@ ElasticBeam3d::revertToStart()
 const Matrix &
 ElasticBeam3d::getTangentStiff(void)
 {
-  theCoordTransf->update();
-  
   const Vector &v = theCoordTransf->getBasicTrialDisp();
   
   double L = theCoordTransf->getInitialLength();
@@ -219,12 +229,30 @@ ElasticBeam3d::getTangentStiff(void)
   return theCoordTransf->getGlobalStiffMatrix(kb,q);
 }
 
-const Matrix &
-ElasticBeam3d::getDamp(void)
-{
-  K.Zero();
 
-  return K;
+const Matrix &
+ElasticBeam3d::getInitialStiff(void)
+{
+  //  const Vector &v = theCoordTransf->getBasicTrialDisp();
+  
+  double L = theCoordTransf->getInitialLength();
+  double oneOverL = 1.0/L;
+  double EoverL   = E*oneOverL;
+  double EAoverL  = A*EoverL;			// EA/L
+  double EIzoverL2 = 2.0*Iz*EoverL;		// 2EIz/L
+  double EIzoverL4 = 2.0*EIzoverL2;		// 4EIz/L
+  double EIyoverL2 = 2.0*Iy*EoverL;		// 2EIy/L
+  double EIyoverL4 = 2.0*EIyoverL2;		// 4EIy/L
+  double GJoverL = G*Jx*oneOverL;         // GJ/L
+  
+  kb(0,0) = EAoverL;
+  kb(1,1) = kb(2,2) = EIzoverL4;
+  kb(2,1) = kb(1,2) = EIzoverL2;
+  kb(3,3) = kb(4,4) = EIyoverL4;
+  kb(4,3) = kb(3,4) = EIyoverL2;
+  kb(5,5) = GJoverL;
+  
+  return theCoordTransf->getInitialGlobalStiffMatrix(kb);
 }
 
 const Matrix &
@@ -353,8 +381,8 @@ ElasticBeam3d::addInertiaLoadToUnbalance(const Vector &accel)
     return 0;
 
   // Get R * accel from the nodes
-  const Vector &Raccel1 = node1Ptr->getRV(accel);
-  const Vector &Raccel2 = node2Ptr->getRV(accel);
+  const Vector &Raccel1 = theNodes[0]->getRV(accel);
+  const Vector &Raccel2 = theNodes[1]->getRV(accel);
 	
   if (6 != Raccel1.Size() || 6 != Raccel2.Size()) {
     g3ErrorHandler->warning("ElasticBeam3d::addInertiaLoadToUnbalance %s\n",
@@ -378,17 +406,23 @@ ElasticBeam3d::addInertiaLoadToUnbalance(const Vector &accel)
   return 0;
 }
 
+
+
 const Vector &
 ElasticBeam3d::getResistingForceIncInertia()
 {	
   P = this->getResistingForce();
+
+  // add the damping forces if rayleigh damping
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    P += this->getRayleighDampingForces();
     
   if (rho == 0.0)
     return P;
 
   else{
-    const Vector &accel1 = node1Ptr->getTrialAccel();
-    const Vector &accel2 = node2Ptr->getTrialAccel();    
+    const Vector &accel1 = theNodes[0]->getTrialAccel();
+    const Vector &accel2 = theNodes[1]->getTrialAccel();    
     
     double L = theCoordTransf->getInitialLength();
     double m = 0.5*rho*L;
@@ -405,11 +439,10 @@ ElasticBeam3d::getResistingForceIncInertia()
   }
 }
 
+
 const Vector &
 ElasticBeam3d::getResistingForce()
 {
-  theCoordTransf->update();
-  
   const Vector &v = theCoordTransf->getBasicTrialDisp();
   
   double L = theCoordTransf->getInitialLength();
@@ -437,7 +470,11 @@ ElasticBeam3d::getResistingForce()
   
   Vector p0Vec(p0, 5);
   
+  //  cerr << q;
+
   P = theCoordTransf->getGlobalResistingForce(q, p0Vec);
+
+  // cerr << P;
   
   // P = P - Q;
   P.addVector(1.0, Q, -1.0);
@@ -587,11 +624,11 @@ ElasticBeam3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
     // first determine the end points of the quad based on
     // the display factor (a measure of the distorted image)
-    const Vector &end1Crd = node1Ptr->getCrds();
-    const Vector &end2Crd = node2Ptr->getCrds();	
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
 
-    const Vector &end1Disp = node1Ptr->getDisp();
-    const Vector &end2Disp = node2Ptr->getDisp();
+    const Vector &end1Disp = theNodes[0]->getDisp();
+    const Vector &end2Disp = theNodes[1]->getDisp();
 
 	static Vector v1(3);
 	static Vector v2(3);

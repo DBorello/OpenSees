@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-07-18 21:55:31 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:20:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.cpp,v $
 
 // Written: AAA 03/02
@@ -46,6 +46,7 @@
 
 Matrix Joint2D::K(16,16);
 Vector Joint2D::V(16);
+Node *Joint2D::theNodes[5];
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -54,8 +55,8 @@ Vector Joint2D::V(16);
 Joint2D::Joint2D()
   :Element(0, ELE_TAG_Joint2D ), 
   ExternalNodes(5), InternalConstraints(0), 
-  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0),
   Spring1(0), Spring2(0), Spring3(0), Spring4(0), SpringC(0),
+  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0),
   IntNode(0), TheDomain(0), numDof(0), nodeRecord(0), dofRecord(0)
 {
 
@@ -67,8 +68,8 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
 			     UniaxialMaterial &springC, Domain *theDomain, int LrgDisp)
   :Element(tag, ELE_TAG_Joint2D ), 
   ExternalNodes(5), InternalConstraints(4), 
-  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0),
   Spring1(0), Spring2(0), Spring3(0), Spring4(0), SpringC(0),
+  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0),
   IntNode(IntNodeTag), TheDomain(0), numDof(0), nodeRecord(0), dofRecord(0)
 {
   numDof  = 16;
@@ -342,6 +343,18 @@ const ID &Joint2D::getExternalNodes(void)
 	return ExternalNodes;
 }
 
+Node **
+Joint2D::getNodePtrs(void)
+{
+  theNodes[0] = end1Ptr;
+  theNodes[1] = end2Ptr;
+  theNodes[2] = end3Ptr;
+  theNodes[3] = end4Ptr;
+  theNodes[4] = IntNodePtr;
+
+  return theNodes;
+}
+
 int Joint2D::getNumDOF(void)
 {
   return numDof;
@@ -397,23 +410,36 @@ const Matrix &Joint2D::getTangentStiff(void)
 	return K;
 }
 
-const Matrix &Joint2D::getSecantStiff(void)
+const Matrix &Joint2D::getInitialStiff(void)
 {
-	return this->getTangentStiff();
+  double K1 = Spring1->getInitialTangent();
+  double K2 = Spring2->getInitialTangent();
+  double K3 = Spring3->getInitialTangent();
+  double K4 = Spring4->getInitialTangent();
+  double KC = SpringC->getInitialTangent();
+  
+  K.Zero();
+  
+  K(2,2)  =  K1;
+  K(2,15) = -K1;
+  K(5,5)  =  K2;
+  K(5,14) = -K2;
+  K(8,8)  =  K3;
+  K(8,15) = -K3;
+  K(11,11)=  K4;
+  K(11,14)= -K4;
+  K(14,5) = -K2;
+  K(14,11)= -K4;
+  K(14,14)=  K2 + K4 + KC;
+  K(14,15)= -KC;
+  K(15,2) = -K1;
+  K(15,8) = -K3;
+  K(15,14)= -KC;
+  K(15,15)=  K1 + K3 + KC;
+  
+  return K;
 }
 
-
-const Matrix &Joint2D::getDamp(void)
-{	
-	K.Zero();
-	return K;
-}
-
-const Matrix &Joint2D::getMass(void)
-{
-	K.Zero();
-	return K;
-}
 
 void Joint2D::Print(ostream &s, int flag )
 {
@@ -487,7 +513,13 @@ const Vector &Joint2D::getResistingForce()
 const Vector &
 Joint2D::getResistingForceIncInertia()
 {
-	return this->getResistingForce();
+  this->getResistingForce();
+
+  // add rayleigh damping forces if factors have been set
+  if (betaK != 0.0 || betaK0 != 0.0) 
+    V += this->getRayleighDampingForces();
+
+  return V;
 }
 
 

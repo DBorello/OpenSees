@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-11-01 01:17:52 $
+// $Revision: 1.9 $
+// $Date: 2002-12-05 22:20:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.h,v $
 
 // Ed "C++" Love
@@ -55,6 +55,8 @@ class ConstantPressureVolumeQuad : public Element
 
     int getNumExternalNodes( ) const ;
     const ID &getExternalNodes( ) ;
+    Node **getNodePtrs(void);
+
     int getNumDOF( ) ;
     void setDomain( Domain *theDomain ) ;
 
@@ -65,12 +67,9 @@ class ConstantPressureVolumeQuad : public Element
     int update(void);
 
     // public methods to obtain stiffness, mass, damping and residual information    
-    const Matrix &getTangentStiff( ) ;
-    const Matrix &getSecantStiff( ) ;
-    const Matrix &getInitialTangent( ) ;
-
-    const Matrix &getDamp( ) ;
-    const Matrix &getMass( ) ;
+    const Matrix &getTangentStiff();
+    const Matrix &getInitialStiff();
+    const Matrix &getMass();
 
     // public methods for updating ele load information
     void zeroLoad( ) ;
@@ -91,6 +90,7 @@ class ConstantPressureVolumeQuad : public Element
   private : 
 
     //static data
+    static double matrixData[64];  // array data for matrix
     static Matrix stiff ;
     static Vector resid ;
     static Matrix mass ;
@@ -125,8 +125,6 @@ class ConstantPressureVolumeQuad : public Element
     //inertia terms
     void formInertiaTerms( int tangFlag ) ;
 
-    Matrix transpose( int dim1, int dim2, const Matrix &M ) ;
-   
     //shape function routine for four node quads
     void shape2d( double ss, double tt, 
 		  const double x[2][4], 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-07-18 21:55:32 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:20:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint2D.cpp,v $
 
 // Written: Arash
@@ -38,7 +38,7 @@
  
 // constructor for FEM_ObjectBroker
 MP_Joint2D::MP_Joint2D()
-:MP_Constraint( CNSTRNT_TAG_MP_Joint2D ),thisDomain(0),
+:MP_Constraint( 0 , CNSTRNT_TAG_MP_Joint2D ),thisDomain(0),
  nodeRetained(0),nodeConstrained(0), MainDOF(0), constraint(0),
  constrDOF(0),retainDOF(0),dbTag1(0), dbTag2(0), RetainedNode(0),
  ConstrainedNode(0), LargeDisplacement(0), Length0(0.0)
@@ -50,7 +50,7 @@ MP_Joint2D::MP_Joint2D()
 // general constructor for ModelBuilder
 MP_Joint2D::MP_Joint2D(Domain *theDomain, int tag, int nodeRetain, int nodeConstr,
 		int Maindof, int LrgDsp )
-:MP_Constraint(CNSTRNT_TAG_MP_Joint2D ), thisDomain(theDomain),
+:MP_Constraint( tag , CNSTRNT_TAG_MP_Joint2D ), thisDomain(theDomain),
  nodeRetained(nodeRetain), nodeConstrained(nodeConstr), MainDOF(Maindof),
  constraint(0), constrDOF(0), retainDOF(0), dbTag1(0), dbTag2(0),
  RetainedNode(0), ConstrainedNode(0), LargeDisplacement( LrgDsp ), Length0(0.0)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-06-07 00:29:00 $
+// $Revision: 1.7 $
+// $Date: 2002-12-05 22:20:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.h,v $
                                                                         
 #include <iostream.h>
@@ -56,11 +56,9 @@ class EnhancedQuad : public Element {
     //set domain
     void setDomain( Domain *theDomain ) ;
 
-    //get the number of external nodes
     int getNumExternalNodes( ) const ;
- 
-    //return connected external nodes
     const ID &getExternalNodes( ) ;
+    Node **getNodePtrs(void);
 
     //return number of dofs
     int getNumDOF( ) ;
@@ -75,16 +73,9 @@ class EnhancedQuad : public Element {
     void Print( ostream &s, int flag ) ;
 	
     //return stiffness matrix 
-    const Matrix &getTangentStiff( ) ;
-    
-    //return secant matrix 
-    const Matrix &getSecantStiff( ) ;
-    
-    //return damping matrix
-    const Matrix &getDamp( ) ;
-    
-    //return mass matrix
-    const Matrix &getMass( ) ;
+    const Matrix &getTangentStiff();
+    const Matrix &getInitialStiff();
+    const Matrix &getMass();
 
     //zero the load -- what load?
     void zeroLoad( ) ;
@@ -187,6 +178,7 @@ class EnhancedQuad : public Element {
 		  double &xsj ) ;
 
     Vector *load;
+    Matrix *Ki;
 } ; 
 
 

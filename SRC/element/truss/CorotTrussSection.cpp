@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:55 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.cpp,v $
                                                                         
 // Written: MHS 
@@ -65,8 +65,7 @@ CorotTrussSection::CorotTrussSection(int tag, int dim,
   :Element(tag,ELE_TAG_CorotTrussSection),     
   theSection(0), connectedExternalNodes(2),
   numDOF(0), numDIM(dim),
-  Lo(0.0), Ln(0.0), R(3,3),
-  M(rho), end1Ptr(0), end2Ptr(0),
+  Lo(0.0), Ln(0.0), M(rho), R(3,3),
   theMatrix(0), theVector(0)
 {
   // get a copy of the material and check we obtained a valid copy
@@ -83,6 +82,10 @@ CorotTrussSection::CorotTrussSection(int tag, int dim,
   
   connectedExternalNodes(0) = Nd1;
   connectedExternalNodes(1) = Nd2;        
+
+  // set node pointers to NULL
+  for (int i=0; i<2; i++)
+    theNodes[i] = 0;
 }
 
 // constructor:
@@ -92,10 +95,13 @@ CorotTrussSection::CorotTrussSection()
   :Element(0,ELE_TAG_CorotTrussSection),     
   theSection(0),connectedExternalNodes(2),
   numDOF(0), numDIM(0),
-  Lo(0.0), Ln(0.0), R(3,3),
-  M(0.0), end1Ptr(0), end2Ptr(0),
+  Lo(0.0), Ln(0.0), M(0.0), R(3,3),
   theMatrix(0), theVector(0)
 {
+  // set node pointers to NULL
+  for (int i=0; i<2; i++)
+    theNodes[i] = 0;
+
   // ensure the connectedExternalNode ID is of correct size 
   if (connectedExternalNodes.Size() != 2)
     g3ErrorHandler->fatal("FATAL CorotTrussSection::CorotTrussSection - %s\n",
@@ -125,6 +131,13 @@ CorotTrussSection::getExternalNodes(void)
 	return connectedExternalNodes;
 }
 
+
+Node **
+CorotTrussSection::getNodePtrs(void) 
+{
+  return theNodes;
+}
+
 int
 CorotTrussSection::getNumDOF(void) 
 {
@@ -142,8 +155,8 @@ CorotTrussSection::setDomain(Domain *theDomain)
 {
   // check Domain is not null - invoked when object removed from a domain
   if (theDomain == 0) {
-    end1Ptr = 0;
-    end2Ptr = 0;
+    theNodes[0] = 0;
+    theNodes[1] = 0;
     Lo = 0.0;
     Ln = 0.0;
     return;
@@ -152,11 +165,11 @@ CorotTrussSection::setDomain(Domain *theDomain)
   // first set the node pointers
   int Nd1 = connectedExternalNodes(0);
   int Nd2 = connectedExternalNodes(1);
-  end1Ptr = theDomain->getNode(Nd1);
-  end2Ptr = theDomain->getNode(Nd2);	
+  theNodes[0] = theDomain->getNode(Nd1);
+  theNodes[1] = theDomain->getNode(Nd2);	
   
   // if can't find both - send a warning message
-  if ((end1Ptr == 0) || (end2Ptr == 0)) {
+  if ((theNodes[0] == 0) || (theNodes[1] == 0)) {
     g3ErrorHandler->warning("CorotTrussSection::setDomain() - CorotTrussSection %d node %d %s\n",
 			    this->getTag(), Nd1,
 			    "does not exist in the model");
@@ -168,8 +181,8 @@ CorotTrussSection::setDomain(Domain *theDomain)
   }
   
   // now determine the number of dof and the dimesnion    
-  int dofNd1 = end1Ptr->getNumberDOF();
-  int dofNd2 = end2Ptr->getNumberDOF();	
+  int dofNd1 = theNodes[0]->getNumberDOF();
+  int dofNd2 = theNodes[1]->getNumberDOF();	
   
   // if differing dof at the ends - print a warning message
   if (dofNd1 != dofNd2) {
@@ -222,8 +235,8 @@ CorotTrussSection::setDomain(Domain *theDomain)
 
 	// now determine the length, cosines and fill in the transformation
 	// NOTE t = -t(every one else uses for residual calc)
-	const Vector &end1Crd = end1Ptr->getCrds();
-	const Vector &end2Crd = end2Ptr->getCrds();
+	const Vector &end1Crd = theNodes[0]->getCrds();
+	const Vector &end2Crd = theNodes[1]->getCrds();
 
 	// Determine global offsets
     double cosX[3];
@@ -311,8 +324,8 @@ int
 CorotTrussSection::update(void)
 {
 	// Nodal displacements
-	const Vector &end1Disp = end1Ptr->getTrialDisp();
-	const Vector &end2Disp = end2Ptr->getTrialDisp();    
+	const Vector &end1Disp = theNodes[0]->getTrialDisp();
+	const Vector &end2Disp = theNodes[1]->getTrialDisp();    
 
     // Initial offsets
 	d21[0] = Lo;
@@ -415,16 +428,47 @@ CorotTrussSection::getTangentStiff(void)
 }
 
 const Matrix &
-CorotTrussSection::getSecantStiff(void)
+CorotTrussSection::getInitialStiff(void)
 {
-	return this->getTangentStiff();
-}
+    static Matrix kl(3,3);
 
-const Matrix &
-CorotTrussSection::getDamp(void)
-{
-    theMatrix->Zero();
+    // Material stiffness
+    //
+    // Get material tangent
+    int order = theSection->getOrder();
+    const ID &code = theSection->getType();
     
+    const Matrix &ks = theSection->getInitialTangent();
+    
+    double EA = 0.0;
+
+    int i,j;
+    for (i = 0; i < order; i++) {
+      if (code(i) == SECTION_RESPONSE_P) {
+	EA += ks(i,i);
+      }
+    }
+
+    kl(0,0) = EA / Lo;
+
+    // Compute R'*kl*R
+    static Matrix kg(3,3);
+    kg.addMatrixTripleProduct(0.0, R, kl, 1.0);
+    
+    Matrix &K = *theMatrix;
+    K.Zero();
+    
+    // Copy stiffness into appropriate blocks in element stiffness
+    int numDOF2 = numDOF/2;
+    for (i = 0; i < numDIM; i++) {
+      for (j = 0; j < numDIM; j++) {
+	K(i,j)                 =  kg(i,j);
+	K(i,j+numDOF2)         = -kg(i,j);
+	K(i+numDOF2,j)         = -kg(i,j);
+	K(i+numDOF2,j+numDOF2) =  kg(i,j);
+      }
+    }
+
     return *theMatrix;
 }
 
@@ -512,8 +556,8 @@ CorotTrussSection::getResistingForceIncInertia()
     
     if (M != 0.0) {
 	
-	    const Vector &accel1 = end1Ptr->getTrialAccel();
-	    const Vector &accel2 = end2Ptr->getTrialAccel();	
+	    const Vector &accel1 = theNodes[0]->getTrialAccel();
+	    const Vector &accel2 = theNodes[1]->getTrialAccel();	
 	
         int numDOF2 = numDOF/2;
 	    for (int i = 0; i < numDIM; i++) {
@@ -521,6 +565,10 @@ CorotTrussSection::getResistingForceIncInertia()
 	        P(i+numDOF2) += M*accel2(i);
 	    }
     }
+
+    // add the damping forces if rayleigh damping
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+      *theVector += this->getRayleighDampingForces();
 
     return *theVector;
 }
@@ -547,10 +595,10 @@ CorotTrussSection::displaySelf(Renderer &theViewer, int displayMode, float fact)
 	// first determine the two end points of the CorotTrussSection based on
 	// the display factor (a measure of the distorted image)
 	// store this information in 2 3d vectors v1 and v2
-	const Vector &end1Crd = end1Ptr->getCrds();
-	const Vector &end2Crd = end2Ptr->getCrds();	
-	const Vector &end1Disp = end1Ptr->getDisp();
-	const Vector &end2Disp = end2Ptr->getDisp();    
+	const Vector &end1Crd = theNodes[0]->getCrds();
+	const Vector &end2Crd = theNodes[1]->getCrds();	
+	const Vector &end1Disp = theNodes[0]->getDisp();
+	const Vector &end2Disp = theNodes[1]->getDisp();    
 
 	static Vector v1(3);
 	static Vector v2(3);

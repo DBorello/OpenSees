@@ -100,6 +100,8 @@ class EightNodeBrick: public Element
 		   
     int getNumExternalNodes () const;
     const ID &getExternalNodes ();
+    Node **getNodePtrs(void);
+
     int getNumDOF ();	
     void setDomain(Domain *theDomain);
 
@@ -113,8 +115,7 @@ class EightNodeBrick: public Element
     // All the value of K M Dmp and F are nothing. just
     // want to test the program.  Xiaoyan 08/16/00
     const Matrix &getTangentStiff (); 
-    const Matrix &getSecantStiff ();     
-    const Matrix &getDamp ();     
+    const Matrix &getInitialStiff(); 
     const Matrix &getMass (); 
 
     const Matrix &getConsMass (); 
@@ -147,17 +148,9 @@ class EightNodeBrick: public Element
     
     int numDOF;	    		// Number of element DOF
     ID  connectedExternalNodes; // Tags of quad nodes
-
-    Node *nd1Ptr;		// Pointers to quad nodes
-    Node *nd2Ptr;
-    Node *nd3Ptr;
-    Node *nd4Ptr;
     
-    // Xiaoyan added 5-8 07/06/00
-    Node *nd5Ptr;
-    Node *nd6Ptr;
-    Node *nd7Ptr;
-    Node *nd8Ptr;
+    Matrix *Ki;
+    Node *theNodes[8];
 
     static Matrix K;		// Element stiffness Matrix
     static Matrix C;		// Element damping matrix
@@ -260,7 +253,6 @@ class EightNodeBrick: public Element
 
     int  get_global_number_of_node(int local_node_number);
     int  get_Brick_Number(void);
-
 
     int * get_LM(void);
     //void set_LM(Node * node); // commented out temporarily 09-27-2000 Zhaohui

@@ -8,8 +8,8 @@
 // based on FourNodeQuad element by Michael Scott                            //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.2 $
-// $Date: 2002-05-20 22:12:15 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/FourNodeQuadUP.h,v $
         
 #ifndef FourNodeQuadUP_h
@@ -42,6 +42,8 @@ class FourNodeQuadUP : public Element
 
     int getNumExternalNodes(void) const;
     const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
+
     int getNumDOF(void);
     void setDomain(Domain *theDomain);
 
@@ -53,6 +55,7 @@ class FourNodeQuadUP : public Element
 
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);
+    const Matrix &getInitialStiff(void);
     const Matrix &getDamp(void);
     const Matrix &getMass(void);
 
@@ -115,6 +118,9 @@ class FourNodeQuadUP : public Element
     double mixtureRho(int ipt);  // Mixture mass density at integration point i
     void shapeFunction(void);
     void setPressureLoadAtNodes(void); 
+
+    Matrix *Ki;
+    static Node *theNodes[4];
 };
 
 #endif

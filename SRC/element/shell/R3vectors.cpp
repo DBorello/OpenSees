@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-07 00:15:31 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/R3vectors.cpp,v $
 
 // Ed "C++" Love
@@ -29,7 +29,7 @@
 #include <Matrix.h> 
 #include <math.h>
 
-//#define sign(a) ( (a)>0 ? 1:-1 )
+#define sign(a) ( (a)>0 ? 1:-1 )
 
 double  LovelyInnerProduct( const Vector &v, const Vector &w )
 {
@@ -112,9 +112,10 @@ Vector LovelyEig( const Matrix &M )
   a(1) = v(1,2) ;
   a(2) = v(2,0) ;
 
+
   for ( i = 0; i < 3; i++ ) {
        d(i) = v(i,i) ;
-       b(i) = d(i) ;
+       b(i) = v(i,i) ;
        z(i) = 0.0 ;
 
        for ( j = 0; j < 3; j++ ) 
@@ -125,27 +126,25 @@ Vector LovelyEig( const Matrix &M )
   } //end for i
 
    rot = 0 ;
-
    its = 0 ;
 
    sm = fabs(a(0)) + fabs(a(1)) + fabs(a(2)) ;
 
    while ( sm > tol ) {
      //.... set convergence test and threshold
-
       if ( its < 3 ) 
         thresh = 0.011*sm ;
       else
         thresh = 0.0 ;
       
       //.... perform sweeps for rotations
-
       for ( i = 0; i < 3; i++ ) {
 
 	j = (i+1)%3;
 	k = (j+1)%3;
 
 	aij  = a(i) ;
+
 	g    = 100.0 * fabs(aij) ;
 
           if ( fabs(d(i)) + g != fabs(d(i))  ||
@@ -159,12 +158,12 @@ Vector LovelyEig( const Matrix &M )
                 if( fabs(h)+g == fabs(h) )
 		   t = aij / h ;
                 else {
-		  // t = 2.0 * sign(h/aij) / ( fabs(h/aij) + sqrt(4.0+(h*h/aij/aij)));
+		  //t = 2.0 * sign(h/aij) / ( fabs(h/aij) + sqrt(4.0+(h*h/aij/aij)));
 		  double hDIVaij = h/aij;
 		  if (hDIVaij > 0.0) 
 		    t = 2.0 / (  hDIVaij + sqrt(4.0+(hDIVaij * hDIVaij)));
 		  else
-		   t = - 2.0 / (-hDIVaij + sqrt(4.0+(hDIVaij * hDIVaij)));
+		    t = - 2.0 / (-hDIVaij + sqrt(4.0+(hDIVaij * hDIVaij)));
 		}
 
 //.... set rotation parameters
@@ -184,7 +183,7 @@ Vector LovelyEig( const Matrix &M )
 //.... rotate off-diagonal terms
 
 		 h    = a(j) ;
-		 g    = a(k) ;
+		 g    = a[k] ;
 		 a(j) = h + s*(g - h*tau) ;
 		 a(k) = g - s*(h + g*tau) ;
 
@@ -200,8 +199,6 @@ Vector LovelyEig( const Matrix &M )
 		 rot = rot + 1 ;
 
 	      } // end if fabs > thresh 
-
-	       
            } //else
            else 
              a(i) = 0.0 ;
@@ -223,3 +220,4 @@ Vector LovelyEig( const Matrix &M )
 
    return d ;
 }
+

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-11-26 22:53:56 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -64,37 +64,16 @@ Vector TrussSection::trussV4(4);
 Vector TrussSection::trussV6(6);
 Vector TrussSection::trussV12(12);
 
-// constructor:
-//  responsible for allocating the necessary space needed by each object
-//  and storing the tags of the truss end nodes.
-/*TrussSection::TrussSection(int tag, 
-			   int dim,
-			   int Nd1, int Nd2, 
-			   SectionForceDeformation &theSect,
-			   double rho)
-:Element(tag,ELE_TAG_TrussSection),     
- connectedExternalNodes(2),
-  dimension(dim), numDOF(0), theLoad(0),
- theMatrix(0), theVector(0), t(0),
- L(0.0), M(rho), end1Ptr(0), end2Ptr(0), theSection(0), sectDim(2)
-{
-    // get a copy of the section and check we obtained a valid copy
-    theSection = theSect.getCopy();
-
-    connectedExternalNodes(0) = Nd1;
-    connectedExternalNodes(1) = Nd2;        
-}
-*/
 TrussSection::TrussSection(int tag, 
 			   int dim,
 			   int Nd1, int Nd2, 
 			   SectionForceDeformation &theSect,
 			   double rho)
 :Element(tag,ELE_TAG_TrussSection),     
- connectedExternalNodes(2),
+  connectedExternalNodes(2),
   dimension(dim), numDOF(0), theLoad(0), 
- theMatrix(0), theVector(0), t(0),
- L(0.0), M(rho), end1Ptr(0), end2Ptr(0), theSection(0)
+  theMatrix(0), theVector(0), t(0),
+  L(0.0), M(rho), theSection(0)
 {
     // get a copy of the material and check we obtained a valid copy
     theSection = theSect.getCopy();
@@ -118,6 +97,10 @@ TrussSection::TrussSection(int tag,
       g3ErrorHandler->fatal("FATAL TrussSection::TrussSection - failed to create an ID of correct size\n");
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;        
+
+    // set node pointers to NULL
+    for (int i=0; i<2; i++)
+      theNodes[i] = 0;    
 }
 
 // constructor:
@@ -126,13 +109,17 @@ TrussSection::TrussSection(int tag,
 TrussSection::TrussSection()
 :Element(0,ELE_TAG_TrussSection),     
  connectedExternalNodes(2),
- dimension(0), numDOF(0),
+  dimension(0), numDOF(0), theLoad(0),
  theMatrix(0), theVector(0), t(0), 
- L(0.0), M(0.0), end1Ptr(0), end2Ptr(0), theSection(0)
+ L(0.0), M(0.0), theSection(0)
 {
     // ensure the connectedExternalNode ID is of correct size 
     if (connectedExternalNodes.Size() != 2)
       g3ErrorHandler->fatal("FATAL TrussSection::TrussSection - failed to create an ID of correct size\n");
+
+    // set node pointers to NULL
+    for (int i=0; i<2; i++)
+      theNodes[i] = 0;    
 }
 
 //  destructor
@@ -159,6 +146,12 @@ TrussSection::getExternalNodes(void)
     return connectedExternalNodes;
 }
 
+Node **
+TrussSection::getNodePtrs(void) 
+{
+  return theNodes;
+}
+
 int
 TrussSection::getNumDOF(void) 
 {
@@ -177,8 +170,8 @@ TrussSection::setDomain(Domain *theDomain)
 {
     // check Domain is not null - invoked when object removed from a domain
     if (theDomain == 0) {
-	end1Ptr = 0;
-	end2Ptr = 0;
+	theNodes[0] = 0;
+	theNodes[1] = 0;
 	L = 0;
 	return;
     }
@@ -186,12 +179,12 @@ TrussSection::setDomain(Domain *theDomain)
     // first set the node pointers
     int Nd1 = connectedExternalNodes(0);
     int Nd2 = connectedExternalNodes(1);
-    end1Ptr = theDomain->getNode(Nd1);
-    end2Ptr = theDomain->getNode(Nd2);	
+    theNodes[0] = theDomain->getNode(Nd1);
+    theNodes[1] = theDomain->getNode(Nd2);	
 
     // if nodes not in domain, warning message & set default numDOF as 2
-    if ((end1Ptr == 0) || (end2Ptr == 0)){
-      if (end1Ptr == 0)
+    if ((theNodes[0] == 0) || (theNodes[1] == 0)){
+      if (theNodes[0] == 0)
         g3ErrorHandler->warning("TrussSection::setDomain() - Nd1: %d does not exist in ",Nd1);
       else
         g3ErrorHandler->warning("TrussSection::setDomain() - Nd2: %d does not exist in ",Nd2);
@@ -207,8 +200,8 @@ TrussSection::setDomain(Domain *theDomain)
     }
 
     // now determine the number of dof and the dimesnion    
-    int dofNd1 = end1Ptr->getNumberDOF();
-    int dofNd2 = end2Ptr->getNumberDOF();	
+    int dofNd1 = theNodes[0]->getNumberDOF();
+    int dofNd2 = theNodes[1]->getNumberDOF();	
 
     if (dofNd1 != dofNd2) {
       g3ErrorHandler->warning("WARNING TrussSection::setDomain(): nodes %d and %d %s %d\n",Nd1, Nd2,
@@ -270,8 +263,8 @@ TrussSection::setDomain(Domain *theDomain)
     
     // now determine the length, cosines and fill in the transformation
     // NOTE t = -t(every one else uses for residual calc)
-    const Vector &end1Crd = end1Ptr->getCrds();
-    const Vector &end2Crd = end2Ptr->getCrds();	
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
 
     if (dimension == 1) {
 	Matrix &trans = *t;      
@@ -434,7 +427,7 @@ TrussSection::getTangentStiff(void)
     int order = theSection->getOrder();
     const ID &code = theSection->getType();
 	
-    const Matrix &k = theSection->getSectionTangent();
+    const Matrix &k = theSection->getInitialTangent();
     double AE = 0.0;
     for (int i = 0; i < order; i++) {
       if (code(i) == SECTION_RESPONSE_P)
@@ -453,19 +446,12 @@ TrussSection::getTangentStiff(void)
 }
 
 const Matrix &
-TrussSection::getSecantStiff(void)
+TrussSection::getInitialStiff(void)
 {
+  cerr << "TrussSection::getInitialStiff - not implemented, returning current tangent\n";
   return this->getTangentStiff();
 }
     
-const Matrix &
-TrussSection::getDamp(void)
-{
-  theMatrix->Zero();
-  return *theMatrix; 
-}
-
-
 const Matrix &
 TrussSection::getMass(void)
 {   // zero the matrix
@@ -548,8 +534,8 @@ TrussSection::addInertiaLoadToUnbalance(const Vector &accel)
 	return 0;
 
     // get R * accel from the nodes
-    const Vector &Raccel1 = end1Ptr->getRV(accel);
-    const Vector &Raccel2 = end2Ptr->getRV(accel);    
+    const Vector &Raccel1 = theNodes[0]->getRV(accel);
+    const Vector &Raccel2 = theNodes[1]->getRV(accel);    
 
     int nodalDOF = numDOF/2;
     
@@ -607,6 +593,7 @@ TrussSection::getResistingForce()
 }
 
 
+
 const Vector &
 TrussSection::getResistingForceIncInertia()
 {	
@@ -616,17 +603,21 @@ TrussSection::getResistingForceIncInertia()
     if (L != 0.0 && M != 0.0) {
 	
 	// remember we set M = M*A*L/2 in setDoamin()
-	const Vector &accel1 = end1Ptr->getTrialAccel();
-	const Vector &accel2 = end2Ptr->getTrialAccel();	
+	const Vector &accel1 = theNodes[0]->getTrialAccel();
+	const Vector &accel2 = theNodes[1]->getTrialAccel();	
 	
 	int dof = dimension;
 	int start = numDOF/2;
 	for (int i=0; i<dof; i++) {
-	    (*theVector)(i) = (*theVector)(i) - M*accel1(i);
-	    (*theVector)(i+start) = (*theVector)(i+start) - M*accel2(i);
+	    (*theVector)(i) = (*theVector)(i) + M*accel1(i);
+	    (*theVector)(i+start) = (*theVector)(i+start) + M*accel2(i);
 	}
     }    
-    
+
+    // add the damping forces if rayleigh damping
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+      *theVector += this->getRayleighDampingForces();
+
     return *theVector;
 }
 
@@ -761,10 +752,10 @@ TrussSection::displaySelf(Renderer &theViewer, int displayMode, float fact)
     // first determine the two end points of the truss based on
     // the display factor (a measure of the distorted image)
     // store this information in 2 3d vectors v1 and v2
-    const Vector &end1Crd = end1Ptr->getCrds();
-    const Vector &end2Crd = end2Ptr->getCrds();	
-    const Vector &end1Disp = end1Ptr->getDisp();
-    const Vector &end2Disp = end2Ptr->getDisp();    
+    const Vector &end1Crd = theNodes[0]->getCrds();
+    const Vector &end2Crd = theNodes[1]->getCrds();	
+    const Vector &end1Disp = theNodes[0]->getDisp();
+    const Vector &end2Disp = theNodes[1]->getDisp();    
 
     if (displayMode == 1 || displayMode == 2) {
 	static Vector v1(3);
@@ -870,8 +861,8 @@ TrussSection::computeCurrentStrain(void) const
     // NOTE method will not be called if L == 0
 
     // determine the strain
-    const Vector &disp1 = end1Ptr->getTrialDisp();
-    const Vector &disp2 = end2Ptr->getTrialDisp();	
+    const Vector &disp1 = theNodes[0]->getTrialDisp();
+    const Vector &disp2 = theNodes[1]->getTrialDisp();	
 
     double dLength = 0.0;
     for (int i=0; i<dimension; i++){

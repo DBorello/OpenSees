@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:50 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d04.cpp,v $
                                                                         
                                                                         
@@ -53,8 +53,6 @@
 #include <stdlib.h>
 
 Matrix beam2d04::k(6,6);
-Matrix beam2d04::m(6,6);
-Matrix beam2d04::d(6,6);
 Matrix beam2d04::trans(6,6);
 
 // beam2d04(int tag, double A, double E, double I, int Nd1, int Nd2);
@@ -66,7 +64,8 @@ beam2d04::beam2d04()
     connectedExternalNodes(2), 
     rForce(6), load(6), isStiffFormed(0)
 {
-
+  theNodes[0] = 0;
+  theNodes[1] = 0;
 }
 
 beam2d04::beam2d04(int tag, double a, double e, double i, int Nd1, int Nd2)
@@ -76,6 +75,9 @@ beam2d04::beam2d04(int tag, double a, double e, double i, int Nd1, int Nd2)
 {
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;    
+    
+    theNodes[0] = 0;
+    theNodes[1] = 0;
 }
 
 
@@ -100,6 +102,12 @@ beam2d04::getExternalNodes(void)
     return connectedExternalNodes;
 }
 
+Node **
+beam2d04::getNodePtrs(void) 
+{
+  return theNodes;
+}
+
 int
 beam2d04::getNumDOF(void) {
     int i =6;
@@ -119,6 +127,9 @@ beam2d04::formVar(void)
 	Domain *theDomain = this->getDomain();
 	Node *end1Ptr = theDomain->getNode(Nd1);
 	Node *end2Ptr = theDomain->getNode(Nd2);	
+	theNodes[0] = end1Ptr;
+	theNodes[1] = end2Ptr;
+
 	if (end1Ptr == 0) {
 	    cerr << "beam2d04::formVar: Nd1: ";
 	    cerr << Nd1 << "does not exist in model\n";
@@ -180,7 +191,7 @@ beam2d04::getTangentStiff(void)
 }
 
 const Matrix &
-beam2d04::getSecantStiff(void)
+beam2d04::getInitialStiff(void)
 {
     return this->getStiff();
 }
@@ -291,19 +302,6 @@ beam2d04::getStiff(void)
     return k;
 }
     
-const Matrix &
-beam2d04::getDamp(void)
-{
-    return d;
-}
-
-
-const Matrix &
-beam2d04::getMass(void)
-{ 
-    return m;
-}
-
 
 
 void 
@@ -329,7 +327,12 @@ beam2d04::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 beam2d04::getResistingForceIncInertia()
 {	
-    return this->getResistingForce();
+    this->getResistingForce();
+
+    if (betaK != 0.0 || betaK0 != 0.0) 
+      rForce += this->getRayleighDampingForces();
+    
+    return rForce;
 }
 
 

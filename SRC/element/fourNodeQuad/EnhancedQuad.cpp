@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-06-07 00:28:42 $
+// $Revision: 1.9 $
+// $Date: 2002-12-05 22:20:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.cpp,v $
 
 #include <iostream.h>
@@ -47,7 +47,6 @@ double  EnhancedQuad::xl[2][4] ;
 Matrix  EnhancedQuad::stiff(8,8) ;
 Vector  EnhancedQuad::resid(8) ;
 Matrix  EnhancedQuad::mass(8,8) ;
-Matrix  EnhancedQuad::damping(8,8) ;
 
 double  EnhancedQuad::stressData[3][4] ;
 double  EnhancedQuad::tangentData[3][3][4] ;
@@ -75,7 +74,7 @@ const double  EnhancedQuad::wg[] = { 1.0, 1.0, 1.0, 1.0 } ;
 EnhancedQuad::EnhancedQuad( ) :
 Element( 0, ELE_TAG_EnhancedQuad ),
 connectedExternalNodes(4),
-alpha(4) , load(0)
+alpha(4) , load(0), Ki(0)
 { 
   for ( int i = 0 ;  i < 4; i++ ) {
     materialPointers[i] = 0;
@@ -97,7 +96,7 @@ EnhancedQuad::EnhancedQuad(  int tag,
   :
 Element( tag, ELE_TAG_EnhancedQuad ),
 connectedExternalNodes(4),
-alpha(4), load(0)
+alpha(4), load(0), Ki(0)
 {
 
   connectedExternalNodes(0) = node1 ;
@@ -139,6 +138,9 @@ EnhancedQuad::~EnhancedQuad( )
 
   if (load != 0)
     delete load;
+
+  if (Ki != 0)
+    delete Ki;
 }
 
 
@@ -169,6 +171,12 @@ const ID&  EnhancedQuad::getExternalNodes( )
   return connectedExternalNodes ;
 } 
 
+
+Node **
+EnhancedQuad::getNodePtrs(void) 
+{
+  return nodePointers;
+} 
 
 //return number of dofs
 int  EnhancedQuad::getNumDOF( ) 
@@ -249,23 +257,284 @@ const Matrix&  EnhancedQuad::getTangentStiff( )
 
 
 //return secant matrix 
-const Matrix&  EnhancedQuad::getSecantStiff( ) 
+const Matrix&  EnhancedQuad::getInitialStiff( ) 
 {
-   int tang_flag = 1 ; //get the tangent
 
-  //do tangent and residual here
-  formResidAndTangent( tang_flag ) ;  
+  if (Ki != 0)
+    return *Ki;
+
+  static const double tolerance = 1.0e-08 ;
+
+  static const int nIterations = 10 ;
+
+  static const int ndm = 2 ;
+
+  static const int ndf = 2 ; 
+
+  static const int nstress = 3 ;
+ 
+  static const int numberNodes = 4 ;
+
+  static const int numberGauss = 4 ;
+
+  static const int nShape = 3 ;
+
+  static const int nEnhanced = 4 ;
+  
+  static const int nModes = 2 ;
+
+  static const int numberDOF = 8 ;
+
+
+  int i, j, k, p, q ;
+  int jj, kk ;
+
+  int success ;
+
+  static double xsj[numberGauss] ;  // determinant jacaobian matrix 
+
+  static double dvol[numberGauss] ; //volume element
+
+  static Vector strain(nstress) ;  //strain
+
+  static double shp[nShape][numberNodes] ;  //shape functions at a gauss point
+
+  static double Shape[nShape][numberNodes][numberGauss] ; //all the shape functions
+
+  static Vector residJ(ndf) ; //nodeJ residual 
+
+  static Matrix stiffJK(ndf,ndf) ; //nodeJK stiffness 
+
+  static Matrix stiffKJ(ndf,ndf) ; //nodeKJ stiffness
+
+  static Vector stress(nstress) ;  //stress
+
+  static Matrix dd(nstress,nstress) ;  //material tangent
+
+  static Matrix J0(ndm,ndm) ; //Jacobian matrix at center of element
+
+  static Matrix J0inv(ndm,ndm) ; //inverse of above
+
+
+  static Matrix Kee(nEnhanced,nEnhanced) ;
+
+  static Vector residE(nEnhanced) ;
+
+  static Vector Umode(ndf) ;
+
+  static Vector dalpha(nEnhanced) ;
+
+  static Matrix Kue(numberDOF,nEnhanced) ;
+
+  static Matrix Keu(nEnhanced,numberDOF) ;
+
+  static Matrix KeeInvKeu(nEnhanced,numberDOF) ;
+
+
+  //---------B-matrices------------------------------------
+
+    static Matrix BJ(nstress,ndf) ;      // B matrix node J
+
+    static Matrix BJtran(ndf,nstress) ;
+
+    static Matrix BK(nstress,ndf) ;      // B matrix node k
+
+    static Matrix BKtran(ndf,nstress) ;
+
+    static Matrix BJtranD(ndf,nstress) ;
+
+    static Matrix BKtranD(ndf,nstress) ;
+  //-------------------------------------------------------
+
+  
+  //zero stiffness and residual 
+  stiff.Zero( ) ;
+
+  Kee.Zero( ) ;
+  residE.Zero( ) ;
+
+  Kue.Zero( ) ;
+  Keu.Zero( ) ;
+
+
+  //compute basis vectors and local nodal coordinates
+  computeBasis( ) ;
+
+  //compute Jacobian and inverse at center
+  double L1 = 0.0 ;
+  double L2 = 0.0 ;
+  computeJacobian( L1, L2, xl, J0, J0inv ) ; 
+
+  //gauss loop to compute and save shape functions 
+  double det ;
+  for ( i = 0; i < numberGauss; i++ ) {
+
+    //get shape functions    
+    shape2d( sg[i], tg[i], xl, shp, det ) ;
+
+    //save shape functions
+    for ( p = 0; p < nShape; p++ ) {
+       for ( q = 0; q < numberNodes; q++ )
+	  Shape[p][q][i] = shp[p][q] ;
+    } // end for p
+
+    //save jacobian determinant
+    xsj[i] = det ;
+
+    //volume element to also be saved
+    dvol[i] = wg[i] * det ;  
+
+  } // end for i gauss loop
+
+  Kee.Zero( ) ;
+  //gauss loop
+  for ( i = 0; i < numberGauss; i++ ) {
+
+    //tangent 
+    dd = materialPointers[i]->getInitialTangent( ) ;
     
-  return stiff ;
+    //multiply by volume element
+    dd *= dvol[i] ;
+    saveData( i, stress, dd ) ;   
+  }
+  Kee.Zero( ) ;
+  for ( i = 0; i < numberGauss; i++ ) {
+    //extract shape functions from saved array
+    for ( p = 0; p < nShape; p++ ) {
+      for ( q = 0; q < numberNodes; q++ )
+	shp[p][q]  = Shape[p][q][i] ;
+    } // end for p
+    
+    //enhanced residual and tangent calculations loops
+    jj = 0 ;
+    for ( j = 0; j < nModes; j++ ) {
+      
+      //compute B matrix 
+      BJ = computeBenhanced( j, sg[i], tg[i], xsj[i], J0inv ) ; 
+      
+      //transpose 
+      BJtran = transpose( BJ ) ;
+      
+      //BJtranD = BJtran * dd ;
+      BJtranD.addMatrixProduct(0.0, BJtran, dd, 1.0) ;
+      
+      kk = 0 ;
+      for ( k = 0; k < nModes; k++ ) {
+	
+	BK = computeBenhanced( k, sg[i], tg[i], xsj[i], J0inv ) ;
+	
+	//stiffJK =  BJtranD * BK  ;
+	stiffJK.addMatrixProduct(0.0, BJtranD,BK,1.0) ;
+	
+	for ( p = 0; p < ndf; p++ )  {
+	  for ( q = 0; q < ndf; q++ )
+	    Kee( jj+p, kk+q ) += stiffJK( p, q ) ;
+	} //end for p
+	
+	kk += ndf ;
+      } // end for k loop
+      
+      jj += ndf ;
+    } // end for j loop
+  } // end for i gauss loop 
+  
+  /// HERE
+  for ( i = 0; i < numberGauss; i++ ) {
+    //extract shape functions from saved array
+    for ( p = 0; p < nShape; p++ ) {
+       for ( q = 0; q < numberNodes; q++ )
+	  shp[p][q]  = Shape[p][q][i] ;
+    } // end for p
+
+
+    //recover stress and tangent from saved data
+    getData( i, stress, dd ) ;
+    jj = 0 ;
+    for ( j = 0; j < numberNodes; j++ ) {
+
+      BJ = computeB( j, shp ) ;
+   
+      //transpose 
+      BJtran = transpose( BJ ) ;
+
+      //BJtranD = BJtran * dd ;
+      BJtranD.addMatrixProduct(0.0, BJtran, dd, 1.0) ;
+      
+      //node-node stiffness
+      kk = 0 ;
+      for ( k = 0; k < numberNodes; k++ ) {
+	
+	BK = computeB( k, shp ) ;
+	
+	//stiffJK =  BJtranD * BK  ;
+	stiffJK.addMatrixProduct(0.0, BJtranD, BK,1.0) ;
+	
+	for ( p = 0; p < ndf; p++ )  {
+	  for ( q = 0; q < ndf; q++ )
+	    stiff( jj+p, kk+q ) += stiffJK( p, q ) ;
+	} //end for p
+	
+	kk += ndf ;
+      } // end for k loop
+      
+
+      //node-enhanced stiffness Kue 
+      kk = 0 ;
+      for ( k = 0; k < nModes; k++ ) {
+	
+	BK = computeBenhanced( k, sg[i], tg[i], xsj[i], J0inv ) ;
+	
+	//stiffJK =  BJtranD * BK  ;
+	stiffJK.addMatrixProduct(0.0, BJtranD,BK,1.0) ;
+	
+	for ( p = 0; p < ndf; p++ )  {
+	  for ( q = 0; q < ndf; q++ )
+	    Kue( jj+p, kk+q ) += stiffJK( p, q ) ;
+	} //end for p 
+	
+	kk += ndf ;
+      } // end for k loop
+
+      //enhanced-node stiffness Keu 
+      kk = 0 ;
+      for ( k = 0; k < nModes; k++ ) {
+	
+	BK = computeBenhanced( k, sg[i], tg[i], xsj[i], J0inv ) ;
+	
+	//transpose 
+	BKtran = transpose( BK ) ;
+	
+	//BKtranD = BKtran * dd ;
+	BKtranD.addMatrixProduct(0.0, BKtran,dd,1.0 ) ;
+	
+	//stiffKJ = (BKtran*dd)*BJ ;
+	stiffKJ.addMatrixProduct(0.0, BKtranD,BJ,1.0) ;
+	
+	for ( p = 0; p < ndf; p++ )  {
+	  for ( q = 0; q < ndf; q++ )
+	    Keu( kk+p, jj+q ) += stiffKJ( p, q ) ;
+	} //end for p  
+	
+	kk += ndf ;
+      } // end for k loop
+    
+      jj += ndf ;
+    } // end for j loop
+  
+  
+  } //end for i gauss loop 
+
+
+  Kee.Solve( Keu, KeeInvKeu ) ;
+
+  //stiff -= ( Kue * KeeInvKeu ) ;
+  stiff.addMatrixProduct(1.0,  Kue, KeeInvKeu, -1.0);
+
+  Ki = new Matrix(stiff);
+
+  return stiff;
 }
     
-
-//return damping matrix 
-const Matrix&  EnhancedQuad::getDamp( ) 
-{
-  //not supported
-  return damping ;
-}    
 
 
 //return mass matrix
@@ -362,17 +631,25 @@ const Vector&  EnhancedQuad::getResistingForceIncInertia( )
 {
   int tang_flag = 0 ; //don't get the tangent
 
+  static Vector res(8);
+
   //do tangent and residual here 
   formResidAndTangent( tang_flag ) ;
 
   //inertia terms
   formInertiaTerms( tang_flag ) ;
 
+  res = resid;
+
+  // add the damping forces if rayleigh damping
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    res += this->getRayleighDampingForces();
+
   // subtract external loads 
   if (load != 0)
-    resid -= *load;
+    res -= *load;
 
-  return resid ;
+  return res;
 }
 
 
@@ -413,7 +690,6 @@ void   EnhancedQuad::formInertiaTerms( int tangFlag )
 
   //compute basis vectors and local nodal coordinates
   computeBasis( ) ;
-
 
   //gauss loop 
   for ( i = 0; i < numberGauss; i++ ) {
@@ -470,12 +746,7 @@ void   EnhancedQuad::formInertiaTerms( int tangFlag )
 
       jj += ndf ;
     } // end for j loop
-
-
   } //end for i gauss loop 
-
-
-
 }
 
 //*********************************************************************
@@ -676,10 +947,8 @@ void  EnhancedQuad::formResidAndTangent( int tang_flag )
       //multiply by volume element
       dd *= dvol[i] ;
 
-
       //save stress and tangent (already multiplied by volume element)
       saveData( i, stress, dd ) ; 
-
 
       //enhanced residual and tangent calculations loops
 
@@ -711,7 +980,7 @@ void  EnhancedQuad::formResidAndTangent( int tang_flag )
 
           BK = computeBenhanced( k, sg[i], tg[i], xsj[i], J0inv ) ;
   
-          //stiffJK =  BJtranD * BK  ;
+	  //stiffJK =  BJtranD * BK  ;
 	  stiffJK.addMatrixProduct(0.0, BJtranD,BK,1.0) ;
 
           for ( p = 0; p < ndf; p++ )  {
@@ -753,7 +1022,6 @@ void  EnhancedQuad::formResidAndTangent( int tang_flag )
 
   //end enhanced strain parameters newton loop
   //-------------------------------------------------------------------
-
 
 
   //gauss loop 

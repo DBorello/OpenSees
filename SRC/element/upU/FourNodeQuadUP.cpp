@@ -9,8 +9,8 @@
 // based on FourNodeQuad element by Michael Scott		  	     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.2 $
-// $Date: 2002-05-20 22:12:15 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/FourNodeQuadUP.cpp,v $
 
 #include <FourNodeQuadUP.h>
@@ -36,6 +36,8 @@ double FourNodeQuadUP::pts[4][2];
 double FourNodeQuadUP::wts[4];
 double FourNodeQuadUP::dvol[4];
 double FourNodeQuadUP::shpBar[3][4];
+Node *FourNodeQuadUP::theNodes[4];
+
 
 FourNodeQuadUP::FourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
 	NDMaterial &m, const char *type, double t, double bulk, double r,
@@ -43,7 +45,7 @@ FourNodeQuadUP::FourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
 			double dampK)
 :Element (tag, ELE_TAG_FourNodeQuadUP), 
   theMaterial(0), connectedExternalNodes(4), 
-  nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0),
+  nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0), Ki(0),
   Q(12), pressureLoad(12), thickness(t), kc(bulk), rho(r), pressure(p),
   dM(dampM), dK(dampK)
 {
@@ -96,7 +98,7 @@ FourNodeQuadUP::FourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
 FourNodeQuadUP::FourNodeQuadUP()
 :Element (0,ELE_TAG_FourNodeQuadUP),
   theMaterial(0), connectedExternalNodes(4), 
-  nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0),
+ nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0), Ki(0),
   Q(12), pressureLoad(12), thickness(0.0), kc(0.0), rho(0.0), pressure(0.0),
  dM(0.0), dK(0.0)
 {
@@ -125,6 +127,9 @@ FourNodeQuadUP::~FourNodeQuadUP()
     // Delete the array of pointers to NDMaterial pointer arrays
     if (theMaterial)
 		delete [] theMaterial;
+
+    if (Ki != 0)
+      delete Ki;
 }
 
 int
@@ -137,6 +142,17 @@ const ID&
 FourNodeQuadUP::getExternalNodes()
 {
     return connectedExternalNodes;
+}
+
+Node **
+FourNodeQuadUP::getNodePtrs()
+{
+  theNodes[0] = nd1Ptr;
+  theNodes[1] = nd2Ptr;
+  theNodes[2] = nd3Ptr;
+  theNodes[3] = nd4Ptr;
+
+  return theNodes;
 }
 
 int
@@ -314,6 +330,21 @@ FourNodeQuadUP::getTangentStiff()
     }
   }
   return K;
+}
+
+
+const Matrix &FourNodeQuadUP::getInitialStiff () 
+{
+  if (Ki == 0)
+    Ki = new Matrix(this->getTangentStiff());
+
+  if (Ki == 0) {
+    cerr << "FATAL FourNodeQuadUP::getInitialStiff() -";
+    cerr << "ran out of memory\n";
+    exit(-1);
+  }  
+    
+  return *Ki;
 }
 
 const Matrix&

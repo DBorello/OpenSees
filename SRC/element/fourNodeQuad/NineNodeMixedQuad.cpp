@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-07 00:28:42 $
+// $Revision: 1.8 $
+// $Date: 2002-12-05 22:20:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.cpp,v $
 
 // Ed "C++" Love
@@ -52,7 +52,6 @@
 Matrix  NineNodeMixedQuad :: stiff(18,18)   ;
 Vector  NineNodeMixedQuad :: resid(18)     ;
 Matrix  NineNodeMixedQuad :: mass(18,18)    ;
-Matrix  NineNodeMixedQuad :: damping(18,18) ;
 double  NineNodeMixedQuad::xl[2][9];
  
 //quadrature data
@@ -64,7 +63,7 @@ double   NineNodeMixedQuad::wg[] = {  5.0/9.0,  8.0/9.0,  5.0/9.0 } ;
 //null constructor
 NineNodeMixedQuad :: NineNodeMixedQuad( ) :
 Element( 0, ELE_TAG_NineNodeMixedQuad ),
-connectedExternalNodes(9) , load(0)
+connectedExternalNodes(9) , load(0), Ki(0)
 { 
   for (int i=0; i<9; i++)
     materialPointers[i] = 0;
@@ -84,7 +83,7 @@ NineNodeMixedQuad :: NineNodeMixedQuad( int tag,
 					int node9,
 					NDMaterial &theMaterial ) :
 Element( tag, ELE_TAG_NineNodeMixedQuad ),
-connectedExternalNodes(9) , load(0)
+connectedExternalNodes(9) , load(0), Ki(0)
 {
   connectedExternalNodes(0) = node1 ;
   connectedExternalNodes(1) = node2 ;
@@ -125,6 +124,9 @@ NineNodeMixedQuad :: ~NineNodeMixedQuad( )
 
   if (load != 0)
     delete load;
+
+  if (Ki != 0)
+    delete Ki;
 }
 
 
@@ -152,6 +154,12 @@ const ID&
 NineNodeMixedQuad::getExternalNodes( ) 
 {
   return connectedExternalNodes ;
+} 
+
+Node **
+NineNodeMixedQuad::getNodePtrs(void) 
+{
+  return nodePointers;
 } 
 
 
@@ -245,25 +253,247 @@ NineNodeMixedQuad::getTangentStiff( )
 
 //return secant matrix 
 const Matrix& 
-NineNodeMixedQuad::getSecantStiff( ) 
+NineNodeMixedQuad::getInitialStiff( ) 
 {
-   int tang_flag = 1 ; //get the tangent
+  if (Ki != 0)
+    return *Ki;
 
-  //do tangent and residual here
-  formResidAndTangent( tang_flag ) ;  
+  static const int ndm = 2 ;
+
+  static const int ndf = 2 ; 
+
+  static const int nstress = 4 ;
+ 
+  static const int numberNodes = 9 ;
+
+  static const int numberGauss = 9 ;
+
+  static const int nShape = 3 ;
+
+  static const int nMixed = 3 ;
+
+  int i, j, k, p, q, r, s ;
+  int jj, kk ;
+
+  int success ;
+  
+  static double volume ;
+
+  static double xsj ;  // determinant jacaobian matrix 
+
+  static double dvol[numberGauss] ; //volume element
+
+  static double gaussPoint[ndm] ;
+
+  static double natCoorArray[ndm][numberGauss] ;
+
+  static Vector strain(nstress) ;  //strain
+
+  static double shp[nShape][numberNodes] ;  //shape functions at a gauss point
+
+  static double Shape[nShape][numberNodes][numberGauss] ; //all the shape functions
+
+  static double shpBar[nShape][numberNodes][nMixed] ; //mean value of shape functions
+
+  static double rightHandSide[nShape][numberNodes][nMixed] ;
+
+  static Vector residJ(ndf) ; //nodeJ residual 
+
+  static Matrix stiffJK(ndf,ndf) ; //nodeJK stiffness 
+
+  static Vector stress(nstress) ;  //stress
+
+  static Matrix dd(nstress,nstress) ;  //material tangent
+
+  static double interp[nMixed] ;
+
+  static Matrix Proj(3,3) ;   //projection matrix 
+  static Matrix ProjInv(3,3) ;
+
+  static Matrix Iden(3,3) ;
+  Iden(0,0) = 1.0 ;
+  Iden(1,1) = 1.0 ;
+  Iden(2,2) = 1.0 ;
+
+  //---------B-matrices------------------------------------
+
+    static Matrix BJ(nstress,ndf) ;      // B matrix node J
+
+    static Matrix BJtran(ndf,nstress) ;
+
+    static Matrix BK(nstress,ndf) ;      // B matrix node k
+
+    static Matrix BJtranD(ndf,nstress) ;
+
+  //-------------------------------------------------------
+
+  
+  //zero stiffness and residual 
+  stiff.Zero( ) ;
+
+  //node coordinates
+  computeBasis() ;
+
+  //zero mean shape functions
+  for ( p=0; p<nShape; p++ ) {
+    for ( q=0; q<numberNodes; q++ ) {
+
+      for (r=0; r<nMixed; r++ ) {
+	shpBar[p][q][r] = 0.0 ;
+	rightHandSide[p][q][r] = 0.0 ;
+      }
+
+    }//end for q
+  } // end for p
+
+
+  //zero volume
+  volume = 0.0 ;
+
+  //zero projection matrix  
+  Proj.Zero( ) ;
+  ProjInv.Zero( ) ;
+
+  //gauss loop to compute and save shape functions 
+  int count = 0 ;
+
+  for ( i = 0; i < 3; i++ ) {
+    for ( j = 0; j < 3; j++ ) {
+
+        gaussPoint[0] = sg[i] ;        
+	gaussPoint[1] = sg[j] ;        
+
+
+	//save gauss point locations
+	natCoorArray[0][count] = gaussPoint[0] ;
+	natCoorArray[1][count] = gaussPoint[1] ;
+
+
+	//get shape functions    
+	shape2dNine( gaussPoint, xl, shp, xsj ) ;
+
+
+	//save shape functions
+	for ( p=0; p<nShape; p++ ) {
+	  for ( q=0; q<numberNodes; q++ )
+	    Shape[p][q][count] = shp[p][q] ;
+	} // end for p
+
+	
+	//volume element to also be saved
+	dvol[count] = ( wg[i]*wg[j] ) * xsj ;  
+
+
+        //add to projection matrix
+	interp[0] = 1.0 ;
+	interp[1] = gaussPoint[0] ;
+	interp[2] = gaussPoint[1] ;
+	
+	for ( r=0; r<nMixed; r++ ) {
+	  for ( s=0; s<nMixed; s++ ) 
+	    Proj(r,s) += ( interp[r]*interp[s] * dvol[count] ) ;
+	}//end for r
+
+	volume += dvol[count] ;
+	
+	
+	//add to mean shape functions
+	for ( p=0; p<nShape; p++ ) {
+	  for ( q=0; q<numberNodes; q++ ) {
+
+	    for ( s=0; s<nMixed; s++ ) 
+	      rightHandSide[p][q][s] += ( shp[p][q] * interp[s] * dvol[count] ) ;
+
+	  }//end for q 
+	} // end for p
+
+
+	//increment gauss point counter
+	count++ ;
+
+    } //end for j
+  } // end for i 
+  
+
+
+  //invert projection matrix
+  //int Solve(const Matrix &M, Matrix &res) const;
+  Proj.Solve( Iden, ProjInv ) ;
+  
+  //mean value of shape functions
+  for ( p=0; p<nShape; p++ ) {
+    for ( q=0; q<numberNodes; q++ ) {
+
+      for (r=0; r<nMixed; r++ ) {
+	for (s=0; s<nMixed; s++ ) 
+	  shpBar[p][q][r] += ( ProjInv(r,s) * rightHandSide[p][q][s] ) ;
+      }//end for r
+
+    }//end for q
+  }//end for p
+
+
+  //gauss loop 
+  for ( i=0; i<numberGauss; i++ ) {
     
-  return stiff ;
+    //extract gauss point location
+    gaussPoint[0] = natCoorArray[0][i] ;
+    gaussPoint[1] = natCoorArray[1][i] ;
+
+    //extract shape functions from saved array
+    for ( p=0; p<nShape; p++ ) {
+       for ( q=0; q<numberNodes; q++ )
+	  shp[p][q]  = Shape[p][q][i] ;
+    } // end for p
+
+    dd = materialPointers[i]->getInitialTangent( ) ;
+    dd *= dvol[i] ;
+
+
+    //residual and tangent calculations node loops
+
+    jj = 0 ;
+    for ( j=0; j<numberNodes; j++ ) {
+
+      BJ = computeBbar( j, gaussPoint, shp, shpBar ) ;
+   
+      //transpose 
+      //BJtran = transpose( nstress, ndf, BJ ) ;
+      for (p=0; p<ndf; p++) {
+	for (q=0; q<nstress; q++) 
+	  BJtran(p,q) = BJ(q,p) ;
+      }//end for p
+
+
+      //BJtranD = BJtran * dd ;
+      BJtranD.addMatrixProduct(0.0,  BJtran,dd,1.0);
+
+      kk = 0 ;
+      for ( k=0; k<numberNodes; k++ ) {
+	
+	BK = computeBbar( k, gaussPoint, shp, shpBar ) ;
+  
+	
+	//stiffJK =  BJtranD * BK  ;
+	stiffJK.addMatrixProduct(0.0,  BJtranD,BK,1.0) ;
+
+	for ( p=0; p<ndf; p++ )  {
+	  for ( q=0; q<ndf; q++ )
+	    stiff( jj+p, kk+q ) += stiffJK( p, q ) ;
+	} //end for p
+	
+	kk += ndf ;
+      }//end for k loop
+
+      jj += ndf ;
+    }//end for j loop
+  }//end for i gauss loop 
+
+  Ki = new Matrix(stiff);
+
+  return stiff;
 }
     
-
-//return damping matrix
-const Matrix& 
-NineNodeMixedQuad::getDamp( ) 
-{
-  //not supported
-  return damping ;
-}    
-
 
 //return mass matrix
 const Matrix& 
@@ -361,17 +591,25 @@ NineNodeMixedQuad::getResistingForceIncInertia( )
 {
   int tang_flag = 0 ; //don't get the tangent
 
+  static Vector res(18);
+
   //do tangent and residual here 
   formResidAndTangent( tang_flag ) ;
 
   //inertia terms
   formInertiaTerms( tang_flag ) ;
 
+  res = resid;
+
+  // add the damping forces if rayleigh damping
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    res += this->getRayleighDampingForces();
+
   // subtract external loads 
   if (load != 0)
-    resid -= *load;
+    res -= *load;
 
-  return resid ;
+  return res;
 }
 
 //*****************************************************************************
@@ -387,7 +625,7 @@ NineNodeMixedQuad::formInertiaTerms( int tangFlag )
 
   static const int numberNodes = 9 ;
 
-  static const int numberGauss = 9 ;
+  //  static const int numberGauss = 9 ;
 
   static const int nShape = 3 ;
 
@@ -405,7 +643,7 @@ NineNodeMixedQuad::formInertiaTerms( int tangFlag )
 
   static double GaussPoint[2] ;
 
-  int i, j, k, p, q, r ;
+  int j, k, p, q, r ;
   int jj, kk ;
 
   double temp, rho, massJK ;
@@ -490,7 +728,6 @@ NineNodeMixedQuad::formResidAndTangent( int tang_flag )
 {
 
   //strains ordered : eps11, eps22, eps33, 2*eps12 
-
   //volumtric strains projected onto {1, \xi, \eta} natural coordinates
 
   static const int ndm = 2 ;

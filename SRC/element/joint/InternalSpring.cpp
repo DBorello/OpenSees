@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:41:08 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:20:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/InternalSpring.cpp,v $
 
 // Written: A. Altoontash & G. Deierlein 03/02
@@ -36,20 +36,21 @@
 #include <math.h>
 #include <stdlib.h>
 
+Node *InternalSpring::theNodes[1];
 
 InternalSpring::InternalSpring()
-   :Element(0,ELE_TAG_InternalSpring),
+   :Element(0,ELE_TAG_InternalSpring), Spring(0),
    connectedExternalNodes(1), nodPtr(0), NDOF(0), DOF1(0), DOF2(0),
-   Kd(0) , m(0) , load(0), rForce(0)
+   Kd(0) , load(0), rForce(0)
 {
 
 }
 
 
 InternalSpring::InternalSpring(int tag, int nod, int ndof, int dof1, int dof2, UniaxialMaterial &spring )
-   :Element(tag,ELE_TAG_InternalSpring), 
+   :Element(tag,ELE_TAG_InternalSpring), Spring(0),
     connectedExternalNodes(1), nodPtr(0), NDOF(ndof), DOF1(dof1), DOF2(dof2),
-	Kd(0) , m(0) , load(0), rForce(0)
+	Kd(0) , load(0), rForce(0)
 {
 	connectedExternalNodes(0) = nod;
 
@@ -72,7 +73,6 @@ InternalSpring::InternalSpring(int tag, int nod, int ndof, int dof1, int dof2, U
 InternalSpring::~InternalSpring()
 {
 	if ( Kd != NULL ) delete Kd;
-	if ( m != NULL ) delete m;
 	if ( load != NULL ) delete load;
 	if ( rForce != NULL ) delete rForce;
 	if ( Spring != NULL ) delete Spring;
@@ -91,52 +91,58 @@ InternalSpring::getExternalNodes(void)
     return connectedExternalNodes;
 }
 
+Node **
+InternalSpring::getNodePtrs(void) 
+{
+  theNodes[0] = nodPtr;
+  return theNodes;
+}
+
 int
 InternalSpring::getNumDOF(void) {
-    return NDOF;
+  return NDOF;
 }
 
 
 void
 InternalSpring::setDomain(Domain *theDomain)
 {
-
-	
-	// first get the node pointers
-    int Nd1 = connectedExternalNodes(0);
-    nodPtr = theDomain->getNode(Nd1);
-    if (nodPtr == 0) {
-	cerr << "WARNING spring2d::setDomain(): Node: ";
-	cerr << Nd1 << "does not exist in model for spring element \n" << *this;
-	return;
+  
+  
+  // first get the node pointers
+  int Nd1 = connectedExternalNodes(0);
+  nodPtr = theDomain->getNode(Nd1);
+  if (nodPtr == 0) {
+	    cerr << "WARNING spring2d::setDomain(): Node: ";
+	    cerr << Nd1 << "does not exist in model for spring element \n" << *this;
+	    return;
+  }
+  
+  
+  // now verify the number of dof at the node
+  int dofNode = nodPtr->getNumberDOF();
+  
+  if ( dofNode != NDOF ) {
+    cerr << "ERROR InternalSpring::setDomain(): node " << Nd1;
+    cerr << " number of degrees of freedom does not match specified value\n";
+    return;
+  }	
+  
+  if ( DOF1 < 0 || DOF2 < 0 || DOF1 >= NDOF || DOF2 >= NDOF )
+    {
+      cerr << "ERROR InternalSpring::setDomain(): Incorrect degrees of freedom specified.";
+      return;
     }
-
-    
-    // now verify the number of dof at the node
-    int dofNode = nodPtr->getNumberDOF();
-
-    if ( dofNode != NDOF ) {
-	cerr << "ERROR InternalSpring::setDomain(): node " << Nd1;
-	cerr << " number of degrees of freedom does not match specified value\n";
-	return;
-    }	
-
-    if ( DOF1 < 0 || DOF2 < 0 || DOF1 >= NDOF || DOF2 >= NDOF )
-	{
-		cerr << "ERROR InternalSpring::setDomain(): Incorrect degrees of freedom specified.";
-		return;
-	}
-
-	// initialize stiffness and force vectors
-    Kd = new Matrix(NDOF,NDOF);
-    m = new Matrix(NDOF,NDOF);	
-
-    load = new Vector(NDOF);
-	rForce = new Vector(NDOF);
-
-    // call the base class method
-    this->DomainComponent::setDomain(theDomain);
-	int dummy = this->revertToStart();
+  
+  // initialize stiffness and force vectors
+  Kd = new Matrix(NDOF,NDOF);
+  
+  load = new Vector(NDOF);
+  rForce = new Vector(NDOF);
+  
+  // call the base class method
+  this->DomainComponent::setDomain(theDomain);
+  this->revertToStart();
 }
 
 
@@ -161,41 +167,40 @@ InternalSpring::revertToStart()
 const Matrix &
 InternalSpring::getTangentStiff(void)
 {
-	double S;
-	double delta;
+  double S;
+  double delta;
+  
+  const Vector &disp = nodPtr->getTrialDisp();
+  
+  delta = disp(DOF2) - disp(DOF1);
+  
+  int dummy = Spring->setTrialStrain(delta);
+  S = Spring->getTangent();
 
-	const Vector &disp = nodPtr->getTrialDisp();
-	
-	delta = disp(DOF2) - disp(DOF1);
-
-	int dummy = Spring->setTrialStrain(delta);
-	S = Spring->getTangent();
-
-	Kd->Zero();
-    (*Kd)(DOF1,DOF1) = S;
-	(*Kd)(DOF2,DOF2) = S;
-	(*Kd)(DOF1,DOF2) = -S;
-	(*Kd)(DOF2,DOF1) = -S;
-
-    return (*Kd);
+  Kd->Zero();
+  (*Kd)(DOF1,DOF1) = S;
+  (*Kd)(DOF2,DOF2) = S;
+  (*Kd)(DOF1,DOF2) = -S;
+  (*Kd)(DOF2,DOF1) = -S;
+  
+  return (*Kd);
 }
 
 const Matrix &
-InternalSpring::getDamp(void)
+InternalSpring::getInitialStiff(void)
 {
-    m->Zero();
-	return (*m); // zero matrix still
+  double S;
+  
+  S = Spring->getInitialTangent();
+
+  Kd->Zero();
+  (*Kd)(DOF1,DOF1) = S;
+  (*Kd)(DOF2,DOF2) = S;
+  (*Kd)(DOF1,DOF2) = -S;
+  (*Kd)(DOF2,DOF1) = -S;
+  
+  return (*Kd);
 }
-
-
-const Matrix &
-InternalSpring::getMass(void)
-{ 
-	m->Zero();
-    return (*m);
-}
-
-
 
 void 
 InternalSpring::zeroLoad(void)
@@ -224,22 +229,20 @@ const Vector &
 InternalSpring::getResistingForce()
 {	
     double F;
-	double delta;
-
-   	const Vector &disp = nodPtr->getTrialDisp();
-	
-
-
-	delta = disp(DOF2) - disp(DOF1);
-
-	int dummy = Spring->setTrialStrain(delta);
-	
-	F = Spring->getStress();
-
-	rForce->Zero();
-	(*rForce)(DOF1) = -F;
-	(*rForce)(DOF2) = F;
-
+    double delta;
+    
+    const Vector &disp = nodPtr->getTrialDisp();
+    
+    delta = disp(DOF2) - disp(DOF1);
+    
+    Spring->setTrialStrain(delta);
+    
+    F = Spring->getStress();
+    
+    rForce->Zero();
+    (*rForce)(DOF1) = -F;
+    (*rForce)(DOF2) = F;
+    
     return (*rForce);
 }
 
@@ -247,7 +250,12 @@ InternalSpring::getResistingForce()
 const Vector &
 InternalSpring::getResistingForceIncInertia()
 {	
-    return this->getResistingForce();    
+    this->getResistingForce();    
+    
+    if (betaK != 0.0 || betaK0 != 0.0) 
+      *rForce += this->getRayleighDampingForces();
+    
+    return (*rForce);
 }
 
 
@@ -255,14 +263,88 @@ InternalSpring::getResistingForceIncInertia()
 int
 InternalSpring::sendSelf(int commitTag, Channel &theChannel)
 {
-  return 0;
+	int res;
+	
+	int dataTag = this->getDbTag();
+
+	
+	ID data(7);
+	data(0) = this->getTag();
+	data(1) = connectedExternalNodes(0);
+	data(2) = NDOF;
+	data(3) = DOF1;
+	data(4) = DOF2;
+	data(5) = Spring->getClassTag();
+
+	int matDbTag = Spring->getDbTag();
+	if (matDbTag == 0) {
+		matDbTag = theChannel.getDbTag();
+		if (matDbTag != 0)
+			Spring->setDbTag(matDbTag);
+	}
+	data(6) = matDbTag;
+	
+	res = theChannel.sendID(dataTag, commitTag, data);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING InternalSpring::sendSelf() - %d failed to send ID\n",this->getTag());
+		return -1;
+	}
+	
+	res = Spring->sendSelf(commitTag, theChannel);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING InternalSpring::sendSelf() - %d failed to send its Material\n",this->getTag());
+		return -3;
+	}
+	
+	return 0;
 }
 
 int
 InternalSpring::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    return 0;
+	int res;
+	int dataTag = this->getDbTag();
+
+	static ID data(7);
+	res = theChannel.recvID(dataTag, commitTag, data);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING InternalSpring::recvSelf() - failed to receive Vector\n");
+		return -1;
+	}
+	
+	this->setTag((int)data(0));
+
+
+	connectedExternalNodes(0) = data(1);
+	NDOF = data(2);
+	DOF1 = data(3);
+	DOF2 = data(4);
+	int matClassTag = data(5);
+	int matDbTag = data(6);
+	
+	if ((Spring == 0) || (Spring->getClassTag() != matClassTag)) {
+		if (Spring != 0)
+			delete Spring;
+		
+		// create a new material object
+		Spring = theBroker.getNewUniaxialMaterial(matClassTag);
+		if (Spring == 0) {
+			g3ErrorHandler->warning("WARNING InternalSpring::recvSelf() - %d failed to get a blank Material of type %d\n",
+				this->getTag(), matClassTag);
+			return -3;
+		}
+	}
+	
+	Spring->setDbTag(matDbTag); // note: we set the dbTag before we receive the material
+	res = Spring->recvSelf(commitTag, theChannel, theBroker);
+	if (res < 0) {
+		g3ErrorHandler->warning("WARNING InternalSpring::recvSelf() - %d failed to receive its Material\n", this->getTag());
+		return -3;
+	}
+	
+	return 0;
 }
+
 
 int
 InternalSpring::displaySelf(Renderer &theViewer, int displayMode, float fact)
