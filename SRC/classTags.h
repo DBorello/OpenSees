@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2002-06-06 21:26:33 $
+// $Revision: 1.32 $
+// $Date: 2002-06-18 01:08:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -62,10 +62,10 @@
 #define CONVERGENCE_TEST_CTestRelativeNormDispIncr       5
 #define CONVERGENCE_TEST_CTestRelativeEnergyIncr         6
 
-#define GRND_TAG_ElCentroGroundMotion            1
-#define GROUND_MOTION_TAG_GroundMotionRecord     2
+#define GRND_TAG_ElCentroGroundMotion                 1
+#define GROUND_MOTION_TAG_GroundMotionRecord          2
 #define GROUND_MOTION_TAG_InterpolatedGroundMotion    3
-#define GROUND_MOTION_TAG_GroundMotion     4
+#define GROUND_MOTION_TAG_GroundMotion                4
 
 
 #define TIMESERIES_INTEGRATOR_TAG_Trapezoidal 1
@@ -200,7 +200,7 @@
 
 #define PATTERN_TAG_LoadPattern		  1
 #define PATTERN_TAG_MultiSupportPattern	  3
-#define LOAD_TAG_UniformExcitation        2
+#define PATTERN_TAG_UniformExcitation        2
 #define LOAD_TAG_Beam2dUniformLoad        3
 #define LOAD_TAG_Beam2dPointLoad          4
 #define LOAD_TAG_Beam3dUniformLoad        5
