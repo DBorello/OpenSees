@@ -202,6 +202,10 @@ pattern Plain 1 Constant {
    }
 }
 
+#set rayleigh damping factors
+rayleigh 0.0 0.0 0.0 0.0018
+
+
 # Define earthquake excitation
 # ----------------------------
 # Set up the acceleration records for Tabas fault normal and fault parallel
@@ -235,7 +239,7 @@ constraints Transformation
 
 # Create the time integration scheme
 #                   gamma beta
-integrator Newmark   0.5  0.25 0.0 0.0 0.0 0.0018
+integrator Newmark   0.5  0.25 
 
 # Create the system of equation storage and solver
 system SparseGeneral -piv
@@ -249,14 +253,11 @@ analysis Transient
 # --------------------------
 # End of analysis generation
 # --------------------------
-
-
-# ----------------------------
-# Start of recorder generation
 # ----------------------------
 
 # Record DOF 1 and 2 displacements at nodes 9, 14, and 19
-recorder Node Node51.out disp -time -node 9 14 19 -dof 1 2
+recorder Node -file Node51.out -time -node 9 14 19 -dof 1 2 disp
+recorder plot Node51.out Node9_14_19_Xdisp 10 340 300 300 -columns 1 2 -columns 1 4 -columns 1 6  -dT 1.0
 
 # --------------------------
 # End of recorder generation
@@ -269,4 +270,11 @@ recorder Node Node51.out disp -time -node 9 14 19 -dof 1 2
 
 # Analysis duration of 20 seconds
 #       numSteps  dt
-analyze   2000   0.01
+set ok [analyze   2000   0.01]
+
+if {$ok != 0} {
+    puts "analysis FAILED"
+} else {
+    puts "analysis SUCCESSFULL"
+}
+

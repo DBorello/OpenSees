@@ -21,8 +21,8 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame3.tcl
 #
-# $Revision: 1.1.1.1 $
-# $Date: 2000-09-15 08:23:09 $
+# $Revision: 1.2 $
+# $Date: 2002-12-17 02:03:54 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/RCFrame3.tcl,v $
 
 
@@ -90,7 +90,7 @@ pattern Plain 1 Linear {
 algorithm Linear
 numberer RCM
 constraints Plain
-integrator LoadControl 1 1 1 1 
+integrator LoadControl 1.0
 system BandSPD
 
 analysis Static

@@ -221,7 +221,7 @@ test NormDispIncr 1.0e-8  10 0
 algorithm Newton
 
 # Create the integration scheme, the LoadControl scheme using steps of 0.1 
-integrator LoadControl 0.1 1 0.1 0.1
+integrator LoadControl 0.1
 
 # Create the system of equation, a SPD using a profile storage scheme
 system BandGeneral
@@ -257,8 +257,6 @@ analyze 10
 loadConst -time 0.0
 
 
-
-
 # ------------------------------
 # Add lateral loads 
 # ------------------------------
@@ -280,7 +278,7 @@ pattern Plain 2 Linear {
 
 # Create a recorder which writes to Node.out and prints
 # the current load factor (pseudo-time) and dof 1 displacements at node 2 & 3
-recorder Node Node41.out disp -time -node 2 3 -dof 1
+recorder Node -file Node41.out -time -node 2 3 -dof 1 disp
 
 # Source in some commands to display the model
 # comment out one of lines
@@ -289,7 +287,7 @@ set displayMode "displayON"
 
 if {$displayMode == "displayON"} {
     # a window to plot the nodal displacements versus load for node 3
-    recorder plot Node41.out Node3Xdisp 10 340 300 300 -columns 3 1
+    recorder plot Node41.out Node_3_Xdisp 10 340 300 300 -columns 3 1 -dT 1.0
 }
 
 # ------------------------------
@@ -318,7 +316,7 @@ while {$controlDisp < $maxU && $ok == 0} {
     if {$ok != 0} {
 	puts "... trying an initial tangent iteration"
 	test NormDispIncr 1.0e-8  4000 0
- 	algorithm Newton -initial
+ 	algorithm ModifiedNewton -initial
 	set ok [analyze 1]
 	test NormDispIncr 1.0e-8  10 0
 	algorithm Newton

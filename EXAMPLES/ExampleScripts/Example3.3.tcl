@@ -70,6 +70,7 @@ set accelSeries "Path -filePath $outFile -dt $dt -factor $g"
 #                         tag dir 
 pattern UniformExcitation  2   1  -accel $accelSeries
 
+rayleigh 0.0 0.0 0.0 0.000625
 
 # ----------------------------------------------------
 # End of additional modelling for dynamic loads
@@ -100,7 +101,7 @@ algorithm Newton
 numberer RCM
 
 # Create the integration scheme, the Newmark with alpha =0.5 and beta =.25
-integrator Newmark  0.5  0.25 0.0 0.0 0.0 0.000625
+integrator Newmark  0.5  0.25 
 
 # Create the analysis object
 analysis Transient
@@ -115,12 +116,12 @@ analysis Transient
 # ------------------------------
 
 # Create a recorder to monitor nodal displacements
-recorder Node node33.out disp -time -node 3 4 -dof 1 2 3
+recorder Node -time -file node33.out -node 3 4 -dof 1 2 3 disp
 
 # Create recorders to monitor section forces and deformations
 # at the base of the left column
-recorder Element 1 -time -file ele1secForce.out section 1 force
-recorder Element 1 -time -file ele1secDef.out   section 1 deformation
+recorder Element -ele 1 -time -file ele1secForce.out section 1 force
+recorder Element -ele 1 -time -file ele1secDef.out   section 1 deformation
 
 # --------------------------------
 # End of recorder generation
@@ -134,36 +135,37 @@ recorder Element 1 -time -file ele1secDef.out   section 1 deformation
 # Perform an eigenvalue analysis
 puts [eigen 2]
 
+
+
+# set some variables
+set tFinal [expr 2000 * 0.01]
+set tCurrent [getTime]
+set ok 0
+
 # Perform the transient analysis
-#         N   dt
-set ok [analyze 2000 0.01]
-if {$ok != 0} {
-    set tFinal [expr 2000 * 0.01]
-    set tCurrent [getTime]
-    set ok 0
-    while {$ok == 0 && $tCurrent < $tFinal} {
-
+while {$ok == 0 && $tCurrent < $tFinal} {
+    
+    set ok [analyze 1 .01]
+    
+    # if the analysis fails try initial tangent iteration
+    if {$ok != 0} {
+	puts "regular newton failed .. lets try an initail stiffness for this step"
+	test NormDispIncr 1.0e-12  100 0
+	algorithm ModifiedNewton -initial
 	set ok [analyze 1 .01]
-
-	# if the analysis fails try initial tangent iteration
-	if {$ok != 0} {
-	    puts "regular newton failed .. lets try an initail stiffness for this step"
-	    test NormDispIncr 1.0e-12  100 1
-	    algorithm Newton -initial
-	    set ok [analyze 1 .01]
-	    if {$ok == 0} {puts "that worked .. back to regular newton"}
-	    test NormDispIncr 1.0e-12  10 
-	    algorithm Newton
-	}
-
-	set tCurrent [getTime]
+	if {$ok == 0} {puts "that worked .. back to regular newton"}
+	test NormDispIncr 1.0e-12  10 
+	algorithm Newton
     }
+    
+    set tCurrent [getTime]
 }
 
+
 if {$ok == 0} {
-   puts "Transient analysis completed succesfully";
+   puts "Transient analysis completed SUCCESSFULLY";
 } else {
-   puts "Transient analysis completed failed";    
+   puts "Transient analysis completed FAILED";    
 }
 
 # Perform an eigenvalue analysis

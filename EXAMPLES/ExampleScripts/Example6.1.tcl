@@ -30,8 +30,8 @@ if {$Quad == "bbarQuad" } {
     set eleArgs "1"
 }
 
-set nx 8; # NOTE: nx MUST BE EVEN FOR THIS EXAMPLE
-set ny 2
+set nx 10; # NOTE: nx MUST BE EVEN FOR THIS EXAMPLE
+set ny 4
 set bn [expr $nx + 1 ] 
 set l1 [expr $nx/2 + 1 ] 
 set l2 [expr $l1 + $ny*($nx+1) ]
@@ -94,8 +94,7 @@ analyze   10
 # Start of recorder generation
 # ----------------------------
 
-
-recorder Node Node.out  disp -time -node $l1 -dof 2
+recorder Node -file Node.out -time -node $l1 -dof 2 disp
 recorder plot Node.out CenterNodeDisp 625 10 625 450 -columns 1 2
 
 # create the display
@@ -103,7 +102,7 @@ recorder display g3 10 10 800 200 -wipe
 prp 20 5.0 100.0
 vup 0 1 0
 viewWindow -30 30 -10 10
-display 10 0 5
+display 1 4 5
 
 # --------------------------
 # End of recorder generation

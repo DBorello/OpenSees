@@ -3,8 +3,8 @@
 #
 # purpose: example2 in OpenSeesIntro.tex modified for TclModelBuilder
 #
-# $Revision: 1.2 $
-# $Date: 2000-12-16 06:24:06 $
+# $Revision: 1.3 $
+# $Date: 2002-12-17 02:03:54 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/example2.tcl,v $
 
 
@@ -36,7 +36,7 @@ pattern Plain 1 "Linear" {
 # build the components for the analysis object
 system BandSPD
 constraints Plain
-integrator LoadControl 0.1 1 0.1 0.1
+integrator LoadControl 0.1 
 test NormUnbalance 1.0e-6
 algorithm Newton
 numberer RCM
@@ -45,7 +45,7 @@ numberer RCM
 analysis Static 
 
 # create a Recorder object for the nodal displacements at node 4
-recorder Node example.out disp -load -nodes 4 -dof 1 2
+recorder Node -file example.out -load -nodes 4 -dof 1 2 disp
 
 # perform the 10 steps
 analyze 10

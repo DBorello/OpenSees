@@ -7,7 +7,7 @@ model basic -ndm 3 -ndf 6
 section ElasticMembranePlateSection  1   3.0e3  0.25  1.175  1.27
 
 # set some parameters for node and element generation
-set Plate ShellMITC4
+set Plate shell
 
 set eleArgs "1"
 
@@ -73,7 +73,6 @@ analysis Static
 # Perform the gravity load analysis
 analyze 5
 
-
 # --------------------------
 # End of static analysis
 # --------------------------
@@ -82,12 +81,13 @@ analyze 5
 # Start of recorder generation
 # ----------------------------
 
-recorder Node Node.out  disp -time -node $mid -dof 2
+recorder Node -file Node.out -time -node $mid -dof 2 disp
 recorder plot Node.out CenterNodeDisp 625 10 625 450 -columns 1 2
+
 recorder display shellDynamics 10 10 600 600 -wipe
 prp -100 20 30
 vup 0 1 0 
-display 1 0 100
+display 2 4 100
 
 # --------------------------
 # End of recorder generation

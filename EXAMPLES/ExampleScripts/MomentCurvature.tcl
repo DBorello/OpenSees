@@ -28,7 +28,7 @@ proc MomentCurvature {secTag axialLoad maxK {numIncr 100} } {
 	element zeroLengthSection  1   1   2  $secTag
 
 	# Create recorder
-	recorder Node section$secTag.out disp -time -node 2 -dof 3
+	recorder Node -file section$secTag.out -time -node 2 -dof 3 disp
 
 	# Define constant axial load
 	pattern Plain 1 "Constant" {
@@ -36,7 +36,7 @@ proc MomentCurvature {secTag axialLoad maxK {numIncr 100} } {
 	}
 
 	# Define analysis parameters
-	integrator LoadControl 0 1 0 0
+	integrator LoadControl 0.0
 	system SparseGeneral -piv;	# Overkill, but may need the pivoting!
 	test NormUnbalance 1.0e-9 10
 	numberer Plain

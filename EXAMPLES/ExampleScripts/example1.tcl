@@ -3,8 +3,8 @@
 #
 # purpose: example1 in OpenSeesIntro.tex
 #
-# $Revision: 1.3 $
-# $Date: 2002-02-26 06:35:04 $
+# $Revision: 1.4 $
+# $Date: 2002-12-17 02:03:54 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/example1.tcl,v $
 
 
@@ -46,7 +46,7 @@ pattern Plain 1 "Linear" {
 # build the components for the analysis object
 system BandSPD
 constraints Plain
-integrator LoadControl 1.0 1 1.0 1.0
+integrator LoadControl 1.0
 algorithm Linear
 numberer RCM
 
@@ -54,7 +54,7 @@ numberer RCM
 analysis Static 
 
 # create a Recorder object for the nodal displacements at node 4
-recorder Node example.out  -load -nodes 4 -dof 1 2
+recorder Node -file example.out -load -nodes 4 -dof 1 2 disp
 
 # perform the analysis
 analyze 1

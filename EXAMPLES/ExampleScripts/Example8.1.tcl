@@ -9,15 +9,14 @@ model basic -ndm 3 -ndf 3
 # create the material
 nDMaterial ElasticIsotropic   1   100   0.25  1.27
 
-
 # Define geometry
 # ---------------
 
 # define some  parameters
 set eleArgs "1" 
 
-set element stdBrick
-#set element BbarBrick
+#set element stdBrick
+set element bbarBrick
 
 set nz 6
 set nx 2 
@@ -48,14 +47,13 @@ pattern Plain 1 Linear {
 # boundary conditions
 fixZ 0.0   1 1 1 
 
-
 # --------------------------------------------------------------------
 # Start of static analysis (creation of the analysis & analysis itself)
 # --------------------------------------------------------------------
 
 # Load control with variable load steps
 #                       init   Jd  min   max
-integrator LoadControl  1.0  1   1.0   10.0
+integrator LoadControl  1.0  1 
 
 # Convergence test
 #                  tolerance maxIter displayCode
@@ -79,6 +77,7 @@ analysis Static
 # Perform the analysis
 analyze 5
 
+
 # --------------------------
 # End of static analysis
 # --------------------------
@@ -87,13 +86,13 @@ analyze 5
 # Start of recorder generation
 # ----------------------------
 
-recorder Node Node.out  disp -time -node $nn -dof 1
+recorder Node -file Node.out -time -node $nn -dof 1 disp
 recorder plot Node.out CenterNodeDisp 625 10 625 450 -columns 1 2
 
 recorder display ShakingBeam 0 0 300 300 -wipe
 prp -100 100 120.5
 vup 0 1 0 
-display 1 0 1 
+display 1 4 1 
 
 # --------------------------
 # End of recorder generation
@@ -111,8 +110,11 @@ setTime 0.0
 # Now remove the loads and let the beam vibrate
 remove loadPattern 1
 
+# add some mass proportional damping
+rayleigh 0.01 0.0 0.0 0.0
+
 # Create the transient analysis
-test EnergyIncr     1.0e-10    20         1
+test EnergyIncr     1.0e-10    20   0
 algorithm Newton
 numberer RCM
 constraints Plain 

@@ -208,7 +208,7 @@ pattern UniformExcitation  2   1  -accel    $accelSeries
 pattern UniformExcitation  3   2  -accel    $accelSeries
 
 # Record DOF 1 and 2 displacements at nodes 9, 14, and 19
-recorder Node RigidFrame3D.out disp -time -node 9 14 19 -dof 1 2
+recorder Node -file RigidFrame3D.out -time -node 9 14 19 -dof 1 2 disp
 
 # Source in commands to display the structure
 source RigidFrame3Ddisplay.tcl

@@ -23,13 +23,13 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame1.tcl
 #
-# $Revision: 1.3 $
-# $Date: 2000-12-19 03:57:15 $
+# $Revision: 1.4 $
+# $Date: 2002-12-17 02:03:54 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/RCFrame1.tcl,v $
 
 # comment out one of lines
-#set displayMode "displayON"
-set displayMode "displayOFF"
+set displayMode "displayON"
+#set displayMode "displayOFF"
 
 # Define the model builder
 model BasicBuilder -ndm 2 -ndf 3
@@ -134,7 +134,7 @@ integrator LoadControl  1   3  .2  1
 
 # Convergence test
 #                  tolerance maxIter displayCode
-test NormDispIncr  1.0e-06     10         1
+test NormDispIncr  1.0e-12     10      0
 
 # Solution algorithm
 algorithm Newton
@@ -164,16 +164,16 @@ pattern Plain 2 Linear {
 
 # Create a recorder which writes to Node.out and prints
 # the current load factor (pseudo-time) and dof 1 displacements at node 2 & 3
-recorder Node Node.out disp -time -node 2 3 -dof 1
+recorder Node -file Node.out -time -node 2 3 -dof 1 disp
 
 # Create another recorder which writes to Element.out and prints
 # the section deformations at the base of the columns  (elements 1,3,5)
-recorder Element 1 3 5 -file Element.out section 1 deformations
+recorder Element -ele 1 3 5 -file Element.out section 1 deformations
 
 # Source in some g3 commands to display the model
 if {$displayMode == "displayON"} {
     # a window to plot the nodal displacements versus load for node 3
-    recorder plot Node.out Node3Xdisp 10 340 300 300 -columns 3 1
+    recorder plot Node.out Node3_Xdisp 10 340 300 300 -columns 3 1
 	
     # a window to show the displayed shape
     source RCFrameDisplay.tcl 
@@ -186,8 +186,33 @@ analysis Static
 analyze 40
 
 # Switch integrator to displacement control
-integrator DisplacementControl 3 1 .001 3 .001 1.0
+integrator DisplacementControl 3 1 .01
 
 # perform 25 analysis steps
-analyze 25
+set maxU 7.5.0
+set currentDisp 0.0;
+set ok 0;
 
+while {$ok == 0 && $currentDisp < $maxU} {
+
+    set ok [analyze 1]
+    
+    # if the analysis fails try initial tangent iteration
+    if {$ok != 0} {
+	puts "regular newton failed .. lets try an initail stiffness for this step"
+	test NormDispIncr 1.0e-12  2000 1
+	algorithm ModifiedNewton -initial
+	set ok [analyze 1]
+	if {$ok == 0} {puts "that worked .. back to regular newton"}
+	test NormDispIncr 1.0e-12  10 
+	algorithm Newton
+    }
+	
+    set currentDisp [nodeDisp 3 1]
+}
+
+if {$ok == 0} {
+   puts "analysis SUCCESSFULL";
+} else {
+   puts "analysis FAILED";    
+}

@@ -107,8 +107,8 @@ set np 5
 
 # Create the coulumns using Beam-column elements
 #                           tag ndI ndJ nsecs secID transfTag
-element nonlinearBeamColumn  1   1   3   $np    1       1
-element nonlinearBeamColumn  2   2   4   $np    1       1
+element nonlinearBeamColumn  1   1   3   $np    1       1 
+element nonlinearBeamColumn  2   2   4   $np    1       1 
 
 # Define beam elment
 # -----------------------------
@@ -165,7 +165,7 @@ test NormDispIncr 1.0e-12  10 3
 algorithm Newton
 
 # Create the integration scheme, the LoadControl scheme using steps of 0.1 
-integrator LoadControl 0.1 1 0.1 0.1
+integrator LoadControl 0.1
 
 # Create the analysis object
 analysis Static
@@ -181,12 +181,11 @@ analysis Static
 # ------------------------------
 
 # Create a recorder to monitor nodal displacements
-recorder Node nodeGravity.out disp -time -node 3 4 -dof 1 2 3
+recorder Node -file nodeGravity.out -time -node 3 4 -dof 1 2 3 disp
 
 # --------------------------------
 # End of recorder generation
 # ---------------------------------
-
 
 
 # ------------------------------

@@ -83,7 +83,7 @@ numberer RCM
 constraints Plain
 
 # Create the integration scheme, the LoadControl scheme using steps of 1.0
-integrator LoadControl 1.0 1 1.0 1.0
+integrator LoadControl 1.0
 
 # Create the solution algorithm, a Linear algorithm is created
 algorithm Linear
@@ -97,13 +97,12 @@ analysis Static
 # ------------------------------
 
 
-
 # ------------------------------
 # Start of recorder generation
 # ------------------------------
 
 # create a Recorder object for the nodal displacements at node 4
-recorder Node example.out disp -load -nodes 4 -dof 1 2
+recorder Node -file example.out -load -node 4 -dof 1 2 disp
 
 # --------------------------------
 # End of recorder generation

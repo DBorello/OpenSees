@@ -23,8 +23,8 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame2.tcl
 #
-# $Revision: 1.2 $
-# $Date: 2000-12-19 03:57:15 $
+# $Revision: 1.3 $
+# $Date: 2002-12-17 02:03:54 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/RCFrame2.tcl,v $
 
 # comment out one of lines
@@ -136,7 +136,7 @@ pattern Plain 1 Linear {
 
 # Create a recorder which writes to Node.out and prints
 # the current load factor (pseudo-time) and dof 1 displacements at node 2 & 3
-recorder Node Node.out disp -time -node 2 3 -dof 1
+recorder Node -file Node.out -time -node 2 3 -dof 1 disp
 
 # This is not necessary, but is here to prevent warning message for
 # "no integrator" when analysis object is created ... will get overridden
@@ -145,7 +145,7 @@ integrator LoadControl 1 1 1 1
 
 # Convergence test
 #                  tolerance maxIter displayCode
-test NormDispIncr  1.0e-06     10         1
+test NormDispIncr  1.0e-06     10       0
 
 # Solution algorithm
 algorithm Newton
@@ -179,7 +179,7 @@ pattern Plain 2 Linear {
 # Source in some g3 commands to display the model
 if {$displayMode == "displayON"} {
     # a window to plot the nodal displacements versus load for node 3
-    recorder plot Node.out Node3Xdisp 10 340 300 300 -columns 3 1
+    recorder plot Node.out Node3_Xdisp 10 340 300 300 -columns 3 1
 
     # a window to show the displayed shape
     source RCFrameDisplay.tcl 
@@ -194,7 +194,6 @@ proc runLoadControl {times initialLoadStep Jd minLoadStep maxLoadStep} {
      analyze 1
    }
 }
-
 
 set nSteps  100
 set initialLoadStep 1

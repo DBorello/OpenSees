@@ -86,11 +86,11 @@ integrator DisplacementControl  3   1   $dU  1 $dU $dU
 # remove recorders
 
 # Create a recorder to monitor nodal displacements
-recorder Node node32.out disp -time -node 3 4 -dof 1 2 3
+recorder Node -file node32.out -time -node 3 4 -dof 1 2 3 disp
 #recorder plot node32.out hi 10 10 300 300 -columns 2 1
 
 # Create a recorder to monitor element forces in columns
-recorder Element 1 2 -time -file ele32.out force
+recorder Element -ele 1 2 -time -file ele32.out force
 
 # --------------------------------
 # End of recorder generation
@@ -120,7 +120,7 @@ if {$ok != 0} {
 	if {$ok != 0} {
 	    puts "regular newton failed .. lets try an initail stiffness for this step"
 	    test NormDispIncr 1.0e-12  1000 0
-	    algorithm Newton -initial
+	    algorithm ModifiedNewton -initial
 	    set ok [analyze 1]
 	    if {$ok == 0} {puts "that worked .. back to regular newton"}
 	    test NormDispIncr 1.0e-12  10 
@@ -131,10 +131,11 @@ if {$ok != 0} {
     }
 }
 
+puts "";
 if {$ok == 0} {
-   puts "Pushover analysis completed succesfully";
+   puts "Pushover analysis completed SUCCESSFULLY";
 } else {
-   puts "Pushover analysis failed to complete";    
+   puts "Pushover analysis FAILED";    
 }
 
 # Print the state at node 3

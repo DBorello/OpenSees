@@ -22,8 +22,8 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame5.tcl
 #
-# $Revision: 1.2 $
-# $Date: 2000-12-19 03:57:15 $
+# $Revision: 1.3 $
+# $Date: 2002-12-17 02:03:54 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/RCFrame5.tcl,v $
 
 model BasicBuilder -ndm 2 -ndf 3
@@ -177,14 +177,14 @@ if {$patternType == "MultipleSupport"} {
 
   # Create a recorder which writes to Node.out and prints
   # the current time and all dof displacement at node 3 and 2
-  recorder Node MultiNodeDisp1.out disp -time -node 3 2 1 -dof 1 2 3
+  recorder Node -file MultiNodeDisp1.out -time -node 3 2 1 -dof 1 2 3 disp
 }
 
 
 if {$patternType == "UniformExcitation"} {
   pattern UniformExcitation  1 1 -accel $accelSeries -vel0 $vel0
 
-  recorder Node UniformNodeDisp1.out disp -time -node 3 2 1 -dof 1 2 3
+  recorder Node -file UniformNodeDisp1.out -time -node 3 2 1 -dof 1 2 3 disp
 }
 
 # Source in some g3 commands to display the model

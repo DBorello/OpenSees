@@ -86,9 +86,9 @@ load 8 $np $p  $np -pattern 2
 eleLoad -ele 1 -type -EightNodeBrickW
 
 #Set up recorder
-recorder Node node_iso.out disp -time -node 5 -dof 3
+recorder Node -file node_iso.out  -time -node 5 -dof 3 disp
 recorder plot node_iso.out "disp load"  10 10 300 300 -columns 2 1
-recorder Element 1 -time -file stress_iso.out stress
+recorder Element -ele 1 -time -file stress_iso.out stress
 recorder plot stress_iso.out "time Stress"  10 400 300 300 -columns 3 1
 
 system UmfPack
@@ -129,9 +129,7 @@ load 8 0.0 0.0 $np
 remove recorders
 
 #Set up recorder for axial loading stage
-#recorder Node node_z.out disp -time -node 5 -dof 3
-
-recorder Node node_z.out disp -time -node all -dof 3
+recorder Node -file node_z.out -time -node all -dof 3 disp
 recorder plot node_z.out "disp load vertical" 10 10 300 300 -columns 6 1
 
 # Elemental Recorder
@@ -142,9 +140,9 @@ recorder plot node_z.out "disp load vertical" 10 10 300 300 -columns 6 1
 # stress    -- 	  number of gauss points, stresses(Sigma_x, y, z, xy, xz, yz
 
 
-#recorder Element 1 -file element.out force
+#recorder Element -ele 1 -file element.out force
 #recorder plot element.out "nodal force displ horizontal" 10 800 300 300 -columns 1 3
-recorder Element 1 -time -file element.out plastify
+recorder Element -ele 1 -time -file element.out plastify
 recorder plot element.out "Plastified?" 10 400 300 300 -columns  6 1
 
 

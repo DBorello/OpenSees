@@ -136,7 +136,7 @@ load 8 $np $p  $np -pattern 2
 }
 
 #Set up recorder
-recorder Node node_iso.out disp -time -node 5 -dof 3
+recorder Node -file node_iso.out  -time -node 5 -dof 3 disp
 #recorder plot node_iso.out "disp load"  10 10 300 300 -columns 2 1
 
 system UmfPack
@@ -178,12 +178,10 @@ pattern UniformExcitation  1   2  -accel $Series
 
 
 #Set up recorder for axial loading stage
-#recorder Node node_z.out disp -time -node 5 -dof 3
-
-recorder Node node_y.out disp -time -node 5 -dof 2
+recorder Node -file node_y.out -time -node 5 -dof 2 disp
 recorder plot node_y.out "disp time horizontal" 10 400 600 300 -columns 1 2
 
-#recorder Element 1 -file element.out force
+#recorder Element -ele 1 -file element.out force
 #recorder plot element.out "nodal force time horizontal" 10 800 300 300 -columns 1 2
 
 
