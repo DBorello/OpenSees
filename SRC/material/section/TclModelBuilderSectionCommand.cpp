@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-06-16 04:45:33 $
+// $Revision: 1.7 $
+// $Date: 2001-08-10 18:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -1170,9 +1170,9 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
    }
    else if (strcmp(argv[1], "circ") == 0) 
    {
-      if (argc < 10)
+      if (argc < 8)
       {
-         interp->result = "WARNING invalid number of parameters: layer circ matTag numReinfBars reinfBarArea yCenter zCenter arcRadius startAng endAng";
+         interp->result = "WARNING invalid number of parameters: layer circ matTag numReinfBars reinfBarArea yCenter zCenter arcRadius <startAng endAng>";
          return TCL_ERROR;
       }
 
@@ -1226,19 +1226,25 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
       }
       //cerr << "\n\tradius: " << radius;
     
-      if (Tcl_GetDouble(interp, argv[argi++], &startAng) != TCL_OK)
-      {
-         interp->result = "WARNING invalid startAng: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
-         return TCL_ERROR;
-      }
-      //cerr << "\n\tstartAng: " << startAng;
+	  bool anglesSpecified = false;
 
-      if (Tcl_GetDouble(interp, argv[argi++], &endAng) != TCL_OK)
-      {
-         interp->result = "WARNING invalid endAng: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
-         return TCL_ERROR;
-      }
-      //cerr << "\n\tendAng: " << endAng;
+      if (argc > 9) {
+		  if (Tcl_GetDouble(interp, argv[argi++], &startAng) != TCL_OK)
+		  {
+			 interp->result = "WARNING invalid startAng: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
+			 return TCL_ERROR;
+		  }
+		  //cerr << "\n\tstartAng: " << startAng;
+
+		  if (Tcl_GetDouble(interp, argv[argi++], &endAng) != TCL_OK)
+		  {
+			 interp->result = "WARNING invalid endAng: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
+			 return TCL_ERROR;
+		  }
+		  //cerr << "\n\tendAng: " << endAng;
+
+		  anglesSpecified = true;
+	  }
 
       // get section 
       secTag = currentSectionTag;
@@ -1265,8 +1271,16 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
       center(0) = yCenter; 
       center(1) = zCenter; 
 
-      CircReinfLayer *reinfLayer = new CircReinfLayer (matTag, numReinfBars, reinfBarArea,
-                                                       center, radius, startAng, endAng);
+      CircReinfLayer *reinfLayer = 0;
+	  if (anglesSpecified)
+		  // Construct arc
+		  reinfLayer = new CircReinfLayer (matTag, numReinfBars, reinfBarArea,
+			center, radius, startAng, endAng);
+	  else
+		  // Construct circle
+		  reinfLayer = new CircReinfLayer (matTag, numReinfBars, reinfBarArea,
+			center, radius);
+
       if (!reinfLayer)
       {
          interp->result = "WARNING cannot alocate reinfLayer";
