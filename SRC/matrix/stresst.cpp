@@ -77,8 +77,8 @@
 //*/
 
 
-#ifndef STRESSTENSOR_CC
-#define STRESSTENSOR_CC
+#ifndef STRESSTENSOR_CPP
+#define STRESSTENSOR_CPP
 
 #include "stresst.h"
 
@@ -776,6 +776,44 @@ void stresstensor::reportTensor(char * msg) const
     		      this->cval(3,3));
   }
 
+
+//##############################################################################
+ostream& operator<< (ostream& os, const stresstensor & rhs)
+      {
+        //if ( msg ) ::printf("%s",msg);
+    
+        os.setf( ios::showpos | ios::scientific);
+        os.precision(4);
+        os.width(10);
+        //os << endln;
+    	//os << rhs.cval(1,1) << "  ";
+    	//os.width(10);
+    	//os << rhs.cval(1,2) << "  ";
+    	//os.width(10);
+    	//os << rhs.cval(1,3) << endln;
+        //os << rhs.cval(2,1) << "  ";
+    	//os.width(10);
+    	//os << rhs.cval(2,2) << "  ";
+    	//os.width(10);
+    	//os << rhs.cval(2,3) << endln;
+    	//
+        //os << rhs.cval(3,1) << "  ";
+    	//os.width(10);
+    	//os << rhs.cval(3,2) << "  ";
+    	//os.width(10);
+    	//os << rhs.cval(3,3) << endln;
+        
+    	os.width(10);
+    	//os << "p = " << rhs.p_hydrostatic();
+    	os << " "<< rhs.p_hydrostatic();
+    	os.width(10);
+    	//os << " q = " << rhs.q_deviatoric();
+    	os << " " << rhs.q_deviatoric();
+    	os.width(10);
+    	//os << " theta = " << rhs.theta();
+
+	return os;
+     }
 
 
 

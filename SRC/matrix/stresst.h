@@ -26,11 +26,12 @@
 //#                                                                              #
 //################################################################################
 //*/
-//
-#ifndef STRESSTENSOR_HH
-#define STRESSTENSOR_HH
 
-//#include "mmodel.hh"
+#ifndef STRESSTENSOR_H
+#define STRESSTENSOR_H
+
+#include <iostream.h>
+#include <iomanip.h>
 #include "BJtensor.h"
 
 class stresstensor : public BJtensor
@@ -39,7 +40,7 @@ class stresstensor : public BJtensor
     friend class Material_Model;
 
   public:
-// just send appropriate arguments to the base constructor
+    // just send appropriate arguments to the base constructor
     stresstensor(int rank_of_tensor=2, double initval=0.0); // default constructor
     stresstensor( double *values );
     stresstensor( double initvalue );
@@ -48,7 +49,7 @@ class stresstensor : public BJtensor
     stresstensor(const BJtensor & x); // copy-initializer
     stresstensor(const nDarray & x); // copy-initializer
 
-//....     ~stresstensor( );
+    //....     ~stresstensor( );
 
 
     stresstensor operator=(const stresstensor & rval);// stresstensor assignment
@@ -56,15 +57,15 @@ class stresstensor : public BJtensor
     stresstensor operator=(const nDarray & rval);// nDarray assignment to stresstensor
 
     stresstensor deep_copy(void);
-//..    stresstensor * p_deep_copy(void);
+    //..    stresstensor * p_deep_copy(void);
 
-//ini  // use "from" and initialize already allocated stress tensor from "from" values
-//ini      void Initialize( const stresstensor & from );
+    //ini  // use "from" and initialize already allocated stress tensor from "from" values
+    //ini      void Initialize( const stresstensor & from );
 
-//___// operator() overloading for 3D Gauss points!
-//___    stresstensor & operator()(short ir, short is, short it,
-//___                              short tr, short ts, short tt  );
-
+    //___// operator() overloading for 3D Gauss points!
+    //___    stresstensor & operator()(short ir, short is, short it,
+    //___                              short tr, short ts, short tt  );
+    
 
     double Iinvariant1( ) const;
     double Iinvariant2( ) const;
@@ -90,8 +91,8 @@ class stresstensor : public BJtensor
     double p_hydrostatic( ) const;
     double q_deviatoric( ) const;
 
-//--    stresstensor yield_surface_cross(stresstensor & end_stress,
-//--                                     Material_Model & YC);
+    //--    stresstensor yield_surface_cross(stresstensor & end_stress,
+    //--                                     Material_Model & YC);
 
     stresstensor pqtheta2stress( double, double, double );
 
@@ -105,30 +106,36 @@ class stresstensor : public BJtensor
     void reportAnim(void) const;
     void reportTensor(char *) const;
 
-//  // routine used by root finder, takes an alfa and returns the
-//  // yield function value for that alfa
-//    public:
-//      double func( stresstensor & start_stress,
-//                   stresstensor & end_stress,
-//                   Material_Model & YC,
-//                   double alfa );
-//  
-//  
-//  //..// polinomial root solver friend functions definitions
-//  //..public:
-//  //..friend void laguer(complex *, int , complex *, double , int );
-//  //..friend void zroots(complex *, int , complex *, int );
-//  //..
-//  
-  // zero of function
-  friend double zbrentstress(stresstensor   & start_stress,
+    //================================================================================
+    // Overloaded Insertion Operator	  ZHaohui Added Aug. 13, 2000
+    // prints an stresstensor's contents 
+    //================================================================================
+    friend ostream& operator<< (ostream& os, const stresstensor & rhs);
+
+    //  // routine used by root finder, takes an alfa and returns the
+    //  // yield function value for that alfa
+    //    public:
+    //      double func( stresstensor & start_stress,
+    //                   stresstensor & end_stress,
+    //                   Material_Model & YC,
+    //                   double alfa );
+    //  
+    //  
+    //  //..// polinomial root solver friend functions definitions
+    //  //..public:
+    //  //..friend void laguer(complex *, int , complex *, double , int );
+    //  //..friend void zroots(complex *, int , complex *, int );
+    //  //..
+    //  
+    // zero of function
+    friend double zbrentstress(stresstensor   & start_stress,
                              stresstensor   & end_stress,
                              Material_Model & YC,
                              double x1, double x2, double tol);
   
-//  friend double zbrent(double x1, double x2, double tol);
-//  
-//  
+    //  friend double zbrent(double x1, double x2, double tol);
+    //  
+    //  
 };
 
 #endif
