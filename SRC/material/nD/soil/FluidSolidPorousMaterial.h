@@ -1,5 +1,5 @@
-// $Revision: 1.10 $
-// $Date: 2003-07-15 20:31:55 $
+// $Revision: 1.11 $
+// $Date: 2003-10-07 21:20:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.h,v $
                                                                         
 // Written: ZHY
@@ -88,22 +88,26 @@ class FluidSolidPorousMaterial : public NDMaterial
 
      int updateParameter(int responseID, Information &eleInformation);
 
+     // RWB; PyLiq1 & TzLiq1 need to see the excess pore pressure and initial stresses.
+     friend class PyLiq1;
+     friend class TzLiq1;
+
    protected:
 
    private:
-	 static int matCount;
+     static int matCount;
      static int* ndmx;
      static int* loadStagex;
      static double* combinedBulkModulusx;
-	 static double pAtm;
-	 int matN;
+     static double pAtm;
+     int matN;
      NDMaterial * theSoilMaterial;
      double trialExcessPressure;
      double currentExcessPressure;
      double trialVolumeStrain;
      double currentVolumeStrain;
-	 double initMaxPress;
-	 int e2p;
+     double initMaxPress;
+     int e2p;
 
      static Vector workV3;
      static Vector workV6;

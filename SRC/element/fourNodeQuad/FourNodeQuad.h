@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-10-07 20:48:42 $
+// $Revision: 1.10 $
+// $Date: 2003-10-07 21:18:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.h,v $
                                                                         
 // Written: MHS
@@ -92,9 +92,9 @@ class FourNodeQuad : public Element
     int setParameter(const char **argv, int argc, Information &info);
     int updateParameter(int parameterID, Information &info);
 
-	//	RWB: PyLiq1 & TzLiq1 need to see ru within soil materials
-	friend class PyLiq1;
-	friend class TzLiq1;
+    // RWB; PyLiq1 & TzLiq1 need to see the excess pore pressure and initial stresses.
+    friend class PyLiq1;
+    friend class TzLiq1;
 
   protected:
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2003-02-25 23:32:53 $
+// $Revision: 1.24 $
+// $Date: 2003-10-07 21:18:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -790,6 +790,45 @@ opserr << "NLBeamColumn3d::recvSelf() - material " << i << "failed to recv itsel
 void
 FourNodeQuad::Print(OPS_Stream &s, int flag)
 {
+  if (flag == 2) {
+
+    s << "#FourNodeQuad\n";
+    
+    int i;
+    const int numNodes = 4;
+    const int nstress = 3 ;
+    
+    for (i=0; i<numNodes; i++) {
+      const Vector &nodeCrd = theNodes[i]->getCrds();
+      const Vector &nodeDisp = theNodes[i]->getDisp();
+      s << "#NODE " << nodeCrd(0) << " " << nodeCrd(1) << " " << endln;
+     }
+    
+    // spit out the section location & invoke print on the scetion
+    const int numMaterials = 4;
+
+    static Vector avgStress(nstress);
+    static Vector avgStrain(nstress);
+    avgStress.Zero();
+    avgStrain.Zero();
+    for (i=0; i<numMaterials; i++) {
+      avgStress += theMaterial[i]->getCommittedStress();
+      avgStrain += theMaterial[i]->getCommittedStrain();
+    }
+    avgStress /= numMaterials;
+    avgStrain /= numMaterials;
+
+    s << "#AVERAGE_STRESS ";
+    for (i=0; i<nstress; i++)
+      s << avgStress(i) << " " ;
+    s << endln;
+
+    s << "#AVERAGE_STRAIN ";
+    for (i=0; i<nstress; i++)
+      s << avgStrain(i) << " " ;
+    s << endln;
+
+  } else {
 	s << "\nFourNodeQuad, element id:  " << this->getTag() << endln;
 	s << "\tConnected external nodes:  " << connectedExternalNodes;
 	s << "\tthickness:  " << thickness << endln;
@@ -800,6 +839,7 @@ FourNodeQuad::Print(OPS_Stream &s, int flag)
 	s << "\tStress (xx yy xy)" << endln;
 	for (int i = 0; i < 4; i++)
 		s << "\t\tGauss point " << i+1 << ": " << theMaterial[i]->getStress();
+  }
 }
 
 int
