@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:47:46 $
+// $Revision: 1.3 $
+// $Date: 2002-06-13 01:59:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.cpp,v $
                                                                         
                                                                         
@@ -32,11 +32,14 @@
 // UniformExcitation is an abstract class.
 
 #include <UniformExcitation.h>
+#include <GroundMotion.h>
 #include <Domain.h>
 #include <NodeIter.h>
 #include <Node.h>
 #include <ElementIter.h>
 #include <Element.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
 
 UniformExcitation::UniformExcitation(GroundMotion &_theMotion, 
 				   int dof, int tag, double velZero)
@@ -104,7 +107,33 @@ UniformExcitation::applyLoad(double time)
 int 
 UniformExcitation::sendSelf(int commitTag, Channel &theChannel)
 {
-  cerr << "UniformExcitation::sendSelf() - not yet implemented\n";
+  int dbTag = this->getDbTag();
+
+  static Vector data(5);
+  data(0) = this->getTag();
+  data(1) = theDof;
+  data(2) = vel0;
+  data(3) = theMotion->getClassTag();
+  
+  int motionDbTag = theMotion->getDbTag();
+  if (motionDbTag == 0) {
+    motionDbTag = theChannel.getDbTag();
+    theMotion->setDbTag(motionDbTag);
+  }
+  data(4) = motionDbTag;
+
+  int res = theChannel.sendVector(dbTag, commitTag, data);
+  if (res < 0) {
+    cerr << "UniformExcitation::sendSelf() - channel failed to send data\n";
+    return res;
+  }
+      
+  res = theMotion->sendSelf(commitTag, theChannel);
+  if (res < 0) {
+    cerr << "UniformExcitation::sendSelf() - ground motion to send self\n";
+    return res;
+  }
+
   return 0;
 }
 
@@ -113,7 +142,38 @@ int
 UniformExcitation::recvSelf(int commitTag, Channel &theChannel, 
 			   FEM_ObjectBroker &theBroker)
 {
-  cerr << "UniformExcitation::recvSelf() - not yet implemented\n";
+  int dbTag = this->getDbTag();
+
+  static Vector data(5);
+  int res = theChannel.recvVector(dbTag, commitTag, data);
+  if (res < 0) {
+    cerr << "UniformExcitation::recvSelf() - channel failed to recv data\n";
+    return res;
+  }
+
+  this->setTag(data(0));
+  theDof = data(1);
+  vel0 = data(2);
+  int motionClassTag = data(3);
+  int motionDbTag = data(4);
+
+  if (theMotion == 0 || theMotion->getClassTag() != motionClassTag) {
+    if (theMotion != 0)
+      delete theMotion;
+    theMotion = theBroker.getNewGroundMotion(motionClassTag);
+    if (theMotion == 0) {
+      cerr << "UniformExcitation::recvSelf() - could not create a grond motion\n";
+      return -3;
+    }
+  }
+
+  theMotion->setDbTag(motionDbTag);
+  res = theMotion->recvSelf(commitTag, theChannel, theBroker);
+  if (res < 0) {
+      cerr << "UniformExcitation::recvSelf() - motion could not receive itself \n";
+      return res;
+  }
+
   return 0;
 }
 

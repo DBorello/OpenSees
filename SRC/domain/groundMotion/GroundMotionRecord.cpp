@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:30:53 $
+// $Revision: 1.3 $
+// $Date: 2002-06-13 01:59:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotionRecord.cpp,v $
                                                                         
                                                                         
@@ -42,7 +42,9 @@
 #include <iostream.h>
 #include <classTags.h>
 #include <Vector.h>
+#include <ID.h>
 #include <Channel.h>
+#include <FEM_ObjectBroker.h>
 
 GroundMotionRecord::GroundMotionRecord()
   :GroundMotion(GROUND_MOTION_TAG_GroundMotionRecord),
@@ -258,20 +260,149 @@ GroundMotionRecord::getDispVelAccel(double time)
 int 
 GroundMotionRecord::sendSelf(int commitTag, Channel &theChannel)
 {
-  // FIX -- need to send the TimeSeries's, etc.	
-  cerr << "GroundMotionRecord::sendSelf() -- not yet implemented" << endl;
-  return -1;
-  // return theChannel.sendVector(this->getDbTag(), commitTag, data);
+  int dbTag = this->getDbTag();
+
+  static ID idData(6);
+  
+  if (theAccelTimeSeries != 0) {
+    idData(0) = theAccelTimeSeries->getClassTag();
+    int seriesDbTag = theAccelTimeSeries->getDbTag();
+    if (seriesDbTag == 0) {
+      seriesDbTag = theChannel.getDbTag();
+      theAccelTimeSeries->setDbTag(seriesDbTag);
+    }
+    idData(1) = seriesDbTag;
+  } else
+    idData(0) = -1;
+
+  if (theVelTimeSeries != 0) {
+    idData(2) = theVelTimeSeries->getClassTag();
+    int seriesDbTag = theVelTimeSeries->getDbTag();
+    if (seriesDbTag == 0) {
+      seriesDbTag = theChannel.getDbTag();
+      theVelTimeSeries->setDbTag(seriesDbTag);
+    }
+    idData(3) = seriesDbTag;
+  } else
+    idData(2) = -1;
+
+  if (theDispTimeSeries != 0) {
+    idData(4) = theDispTimeSeries->getClassTag();
+    int seriesDbTag = theDispTimeSeries->getDbTag();
+    if (seriesDbTag == 0) {
+      seriesDbTag = theChannel.getDbTag();
+      theDispTimeSeries->setDbTag(seriesDbTag);
+    }
+    idData(5) = seriesDbTag;
+  } else
+    idData(4) = -1;
+
+  int res = theChannel.sendID(dbTag, commitTag, idData);
+  if (res < 0) {
+    cerr << "GroundMotionRecord::sendSelf() - channel failed to send data\n";
+    return res;
+  }
+
+  // now send the series
+  if (theAccelTimeSeries != 0) {
+    res = theAccelTimeSeries->sendSelf(commitTag, theChannel);
+    if (res < 0) {
+      cerr << "GroundMotionRecord::sendSelf - failed to send accel series\n";
+      return res;
+    }
+  }
+
+  if (theVelTimeSeries != 0) {
+    res = theVelTimeSeries->sendSelf(commitTag, theChannel);
+    if (res < 0) {
+      cerr << "GroundMotionRecord::sendSelf - failed to send velocity series\n";
+      return res;
+    }
+  }
+
+  if (theDispTimeSeries != 0) {
+    res = theDispTimeSeries->sendSelf(commitTag, theChannel);
+    if (res < 0) {
+      cerr << "GroundMotionRecord::sendSelf - failed to send disp series\n";
+      return res;
+    }
+  }
+
+  return 0;
 }
 
 
 int 
 GroundMotionRecord::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-  // FIX -- need to receive the TimeSeries's, etc.
-  cerr << "GroundMotionRecord::recvSelf() -- not yet impelemented" << endl;
-  return -1;
-  // theChannel.recvVector(this->getDbTag(), commitTag, data);
-  
-  // return 0;
+  int dbTag = this->getDbTag();
+  static ID idData(6);
+  int res = theChannel.recvID(dbTag, commitTag, idData);
+  if (res < 0) {
+    cerr << "UniformExcitation::sendSelf() - channel failed to send data\n";
+    return res;
+  }
+
+  int seriesClassTag = idData(0);
+  if (seriesClassTag != -1) {
+    int seriesDbTag = idData(1);
+    if (theAccelTimeSeries == 0 || theAccelTimeSeries->getClassTag() != seriesClassTag) {
+      if (theAccelTimeSeries != 0)
+	delete theAccelTimeSeries;
+      theAccelTimeSeries = theBroker.getNewTimeSeries(seriesClassTag);
+      if (theAccelTimeSeries == 0) {
+	cerr << "GroundMotionRecord::sendSelf - could not create a TimeSeries object\n";
+	return -2;
+      }
+    }
+    theAccelTimeSeries->setDbTag(seriesDbTag);
+    res = theAccelTimeSeries->recvSelf(commitTag, theChannel, theBroker);
+    if (res < 0) {
+      cerr << "UniformExcitation::sendSelf() - accel series failed to send data\n";
+      return res;
+    }
+  }
+
+  seriesClassTag = idData(2);
+  if (seriesClassTag != -1) {
+    int seriesDbTag = idData(3);
+    if (theVelTimeSeries == 0 || theVelTimeSeries->getClassTag() != seriesClassTag) {
+      if (theVelTimeSeries != 0)
+	delete theVelTimeSeries;
+      theVelTimeSeries = theBroker.getNewTimeSeries(seriesClassTag);
+      if (theVelTimeSeries == 0) {
+	cerr << "GroundMotionRecord::sendSelf - could not create a TimeSeries object\n";
+	return -2;
+      }
+    }
+    theVelTimeSeries->setDbTag(seriesDbTag);
+    res = theVelTimeSeries->recvSelf(commitTag, theChannel, theBroker);
+    if (res < 0) {
+      cerr << "UniformExcitation::sendSelf() - accel series failed to send data\n";
+      return res;
+    }
+  }
+
+  seriesClassTag = idData(4);
+  if (seriesClassTag != -1) {
+    int seriesDbTag = idData(5);
+    if (theDispTimeSeries == 0 || theDispTimeSeries->getClassTag() != seriesClassTag) {
+      if (theDispTimeSeries != 0)
+	delete theDispTimeSeries;
+      theDispTimeSeries = theBroker.getNewTimeSeries(seriesClassTag);
+      if (theDispTimeSeries == 0) {
+	cerr << "GroundMotionRecord::sendSelf - could not create a TimeSeries object\n";
+	return -2;
+      }
+    }
+    theDispTimeSeries->setDbTag(seriesDbTag);
+    res = theDispTimeSeries->recvSelf(commitTag, theChannel, theBroker);
+    if (res < 0) {
+      cerr << "UniformExcitation::sendSelf() - accel series failed to send data\n";
+      return res;
+    }
+  }
+
+  return 0;
 }
+

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:48:12 $
+// $Revision: 1.3 $
+// $Date: 2002-06-13 01:59:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.h,v $
                                                                         
                                                                         
@@ -40,7 +40,8 @@
 class UniformExcitation : public EarthquakePattern
 {
   public:
-    UniformExcitation(GroundMotion &theMotion, int dof, int tag, double vel0 = 0.0);  
+    UniformExcitation(GroundMotion &theMotion, 
+		      int dof, int tag, double vel0 = 0.0);  
     ~UniformExcitation();
 
     void setDomain(Domain *theDomain);    
