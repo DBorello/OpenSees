@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-05-15 21:42:43 $
+// $Revision: 1.13 $
+// $Date: 2003-05-15 22:29:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -350,10 +350,7 @@ OpenGlDevice::~OpenGlDevice()
 
 #ifdef _WGL
   if (winOpen == 0) { // we must close the window
-    if (count == -1)
       oglDestroyWindow(windowTitle,theWND, theHRC, theHDC);
-    else 
-      oglDestroyBitmap(&theBitmap, theHRC, theHDC);
   }
 
   if (FontBase != 0) {
@@ -542,189 +539,6 @@ OpenGlDevice::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int 
 
 
 
-void
-OpenGlDevice::BITMAPOPEN(const char *_title, int _xLoc, int _yLoc, 
-			 int _width, int _height, 
-			 const char *bitmapFileName)
-{
-  if (windowTitle != 0)
-    delete [] windowTitle;
-  
-  windowTitle = new char[strlen(_title)+1];
-  strcpy(windowTitle, _title);
-
-#ifdef _WGL
-  width = _width;
-  height = _height;
-  xLoc = _xLoc;
-  yLoc = _yLoc;
-
-  if (winOpen == 0)
-    oglDestroyWindow(windowTitle,theWND, theHRC, theHDC);      
- 
-  theWND = oglCreateWindow(windowTitle, _xLoc, _yLoc, _width, _height, &theHRC, &theHDC);
-  if (theWND == NULL)
-    exit(1);
-  winOpen = 0;
-  wglMakeCurrent(theHDC, theHRC);
-
-
-  if (bitmapFile != 0) {
-    count = 100000;
-    if (strlen(bitmapFile) > MAX_FILENAMELENGTH) 
-      opserr << "warning - OpenGlDevice::OpenGlDevice() - bitmapFile " <<
-	bitmapFile <<  "too long, max " << MAX_FILENAMELENGTH << endln;
-			      
-    else {
-      strcpy(bitmapFile, bitmapFileName); 
-      oglCreateBitmap(width, height, &theHRC, &theHDC, &theBitmap, &info, &bits);
-      
-    }
-  } 
-
-#elif _GLX
-
-  //XVisualInfo *visual;
-  XSetWindowAttributes swa;
-  swap_flag = GL_FALSE;
-  //Colormap cmap; //this overrides the other color map
-  //GLXContext cx;
-  //XEvent event;
-
-  theDisplay = XOpenDisplay("");      // init a display connection
-  if (theDisplay == 0) {              // and check we got one
-    opserr << "OpenGlDevice::initX11() - could not connect to display\n";
-    exit(-1);
-  }
-
-  theScreen = DefaultScreen(theDisplay);
-
-  if (winOpen == 0) { // we must close the old window
-    XFreeGC(theDisplay, theGC);
-    XDestroyWindow(theDisplay, theWindow);
-  }
-
-  /* get an appropriate visual*/
-  visual = glXChooseVisual(theDisplay, theScreen, attributeListSgl);
-  if (visual == NULL) {
-    visual = glXChooseVisual(theDisplay, theScreen, attributeListDbl);
-    swap_flag = GL_TRUE;
-  }
-
-  if(visual == NULL) {
-    opserr << "OpenGlDevice::BITMAPOPEN - unable to get visual\n";
-    exit(2);
-  }
-
-  /* create a color map */
-  //  cmap = XCreateColormap(theDisplay, RootWindow(theDisplay, visual->screen),
-  //		 visual->visual, AllocNone);
-  
-  /* create a window */
-  swa.colormap = XCreateColormap(theDisplay, RootWindow(theDisplay, visual->screen),
-				 visual->visual, AllocNone);
-
-  swa.border_pixel = 0;
-  swa.event_mask = StructureNotifyMask;
-
-  unsigned long mask;
-  mask =  CWBackPixel|CWBorderPixel|CWColormap|CWEventMask;
-  theWindow = XCreateWindow(theDisplay, RootWindow(theDisplay, visual->screen), 
-			    _xLoc, _yLoc, _width, _height,
-			    0, visual->depth, InputOutput, visual->visual,
-			    mask, &swa);
-
-  if (theWindow == 0) {
-    opserr << "OpenGlDevice::BITMAPOPEN() - could not open a window\n";
-    exit(-1);
-  }
-
-    
-  // define the position and size of the window - only hints
-  hints.x = _xLoc;
-  hints.y = _yLoc;
-  hints.width = _width;
-  hints.height = _height;
-  hints.flags = PPosition | PSize;
-  XSetNormalHints(theDisplay, theWindow, &hints);
-  XSetStandardProperties(theDisplay, theWindow, windowTitle, windowTitle, None, 0, 0, &hints);
-
-
-  /* create a GLX context */
-  cx = glXCreateContext(theDisplay, visual, NULL, GL_TRUE);
-  if (cx == 0) {
-    opserr << "OpenGlDevice::BITMAPOPEN() - could not create a glx context\n";
-    exit(-1);
-  }    
-
-  /*
-  theWindow = XCreateSimpleWindow(theDisplay,RootWindow(theDisplay,0),
-				  hints.x, hints.y,
-				  hints.width,hints.height,4,
-				  foreground, background);
-  */
-
-  
-  XMapWindow(theDisplay, theWindow);
-    
-  /* connect the context to the window */
-  glXMakeCurrent(theDisplay, theWindow, cx);
-
-  // create a graphical context
-  theGC = XCreateGC(theDisplay, theWindow, 0, 0);
-  winOpen = 0;
-
-  XVisualInfo visual; 
-  visual.visual = 0;
-  int depth = DefaultDepth(theDisplay, theScreen);
-
-  /*
-  if (background == 0) {
-    if (XMatchVisualInfo(theDisplay, theScreen, depth, PseudoColor, &visual) == 0) {
-      foreground = BlackPixel(theDisplay, theScreen);
-      background = WhitePixel(theDisplay, theScreen);    
-      
-    } else {
-      foreground = 0;
-      background = 255;
-    }
-  }
-  XSetBackground(theDisplay, theGC, background);
-  XSetForeground(theDisplay, theGC, foreground);
-  */
-
-  XMapWindow(theDisplay,theWindow);
-  XClearWindow(theDisplay, theWindow);      
-  XFlush(theDisplay);
-
-
-    Font id;
-    unsigned int first, last;
-
-    fontInfo = XLoadQueryFont(theDisplay, FontName);
-    if (!fontInfo) {
-      printf("Error: font %s not found\n", FontName);
-      exit(0);
-    }
-
-    id = fontInfo->fid;
-    first = fontInfo->min_char_or_byte2;
-    last = fontInfo->max_char_or_byte2;
-    opserr << first << " " << last << endln;  
-    FontBase = glGenLists((GLuint) last + 1);
-    if (!FontBase) {
-      printf("Error: unable to allocate display lists\n");
-      exit(0);
-    }
-
-    glXUseXFont(id, first, last - first + 1, FontBase + first);
-
-#else
-
-#endif
-
-
-}
 
 void
 
@@ -1185,11 +999,12 @@ OpenGlDevice::saveImageAsPNG(const char *fileName)
   //    free any memory allocated & close the file
   //
   png_destroy_write_struct(&png_ptr, &info_ptr);
+  
+  delete [] row_pointers;
 
 #endif
 
   delete [] image;
-  delete [] row_pointers;
   delete [] newFileName;
   fclose(fp);
   

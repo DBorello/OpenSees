@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-05-15 21:42:43 $
+// $Revision: 1.15 $
+// $Date: 2003-05-15 22:29:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -123,10 +123,10 @@ OpenGLRenderer::OpenGLRenderer(const char *_title, int _xLoc, int _yLoc,
   portWindow(2) = -1.0;  portWindow(3) = 1.0;
 
   theDevice = new OpenGlDevice();
-  if (bitmapFileName == 0)
-    theDevice->WINOPEN(_title, _xLoc, _yLoc, _width, _height);
-  else
-    theDevice->BITMAPOPEN(_title, _xLoc, _yLoc, _width, _height, bitmapFileName);
+  if (bitmapFileName != 0) {
+		opserr << "OpenGLRenderer:;OpenGlRenderer - feature to save image only to BMP removed\n";
+  }
+  theDevice->WINOPEN(_title, _xLoc, _yLoc, _width, _height);;
   
   theDevice->CLEAR();
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-05-15 21:42:43 $
+// $Revision: 1.6 $
+// $Date: 2003-05-15 22:29:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.h,v $
                                                                         
                                                                         
@@ -69,8 +69,6 @@ class OpenGlDevice
 
   // Opens a window of the specified width & height.
   virtual void WINOPEN(const char *title, int xLoc, int yLoc, int width, int height);
-  virtual void BITMAPOPEN(const char *title, int xLoc, int yLoc, int width, int height,
-			  const char *bitmapFile);
 
   // Clears the currently opened window
   virtual void CLEAR();
