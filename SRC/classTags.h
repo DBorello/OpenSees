@@ -18,10 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.50 $
-// $Date: 2003-08-14 20:24:32 $
+// $Revision: 1.51 $
+// $Date: 2003-08-29 07:39:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
-                                                                        
                                                                         
 // Written: fmk
 // Revision: A
@@ -38,6 +37,9 @@
 #define idType     3
 #define vectorType 4
 #define matrixType 5
+
+#define ACTOR_TAGS_SUBDOMAIN 1
+
 
 #define EigenSOE_TAGS_BandArpackSOE 	1
 #define EigenSOE_TAGS_SymArpackSOE 	2
@@ -391,6 +393,11 @@
 #define LinSOE_TAGS_SymSparseLinSOE         11
 #define LinSOE_TAGS_DiagonalLinSOE         12
 #define LinSOE_TAGS_ItpackLinSOE           13
+#define LinSOE_TAGS_ProfileSPDLinSOEGather	14
+#define LinSOE_TAGS_DistributedBandGenLinSOE		15
+#define LinSOE_TAGS_DistributedBandSPDLinSOE		16
+#define LinSOE_TAGS_DistributedProfileSPDLinSOE		17
+#define LinSOE_TAGS_DistributedSparseGenColLinSOE       18
 
 #define SOLVER_TAGS_FullGenLinLapackSolver  	1
 #define SOLVER_TAGS_BandGenLinLapackSolver  	2
@@ -409,6 +416,8 @@
 #define SOLVER_TAGS_SymSparseLinSolver 15
 #define SOLVER_TAGS_DiagonalLinSolver 16
 #define SOLVER_TAGS_Itpack            17
+#define SOLVER_TAGS_ProfileSPDLinSolverGather  	18
+#define SOLVER_TAGS_DistributedSuperLU		      	19
 
 #define DomDecompALGORITHM_TAGS_DomainDecompAlgo 1
 
