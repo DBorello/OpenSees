@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 11:35:47 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 18:26:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/Response.cpp,v $
                                                                         
 // Written: MHS 
@@ -29,7 +29,37 @@
 
 #include <Response.h>
 
-Response::Response()
+Response::Response(void):myInfo()
+{
+
+}
+
+Response::Response(int val):myInfo(val)
+{
+
+}
+
+Response::Response(double val):myInfo(val)
+{
+
+}
+
+Response::Response(const ID &val):myInfo(val)
+{
+
+}
+
+Response::Response(const Vector &val):myInfo(val)
+{
+
+}
+
+Response::Response(const Matrix &val):myInfo(val)
+{
+
+}
+
+Response::Response(const Tensor &val):myInfo(val)
 {
 
 }
@@ -37,4 +67,10 @@ Response::Response()
 Response::~Response()
 {
 
+}
+
+void
+Response::Print(ostream &s, int flag)
+{
+	myInfo.Print(s, flag);
 }

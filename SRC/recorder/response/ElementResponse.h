@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 11:35:47 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 18:26:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/ElementResponse.h,v $
                                                                         
 // Written: MHS 
@@ -53,12 +53,10 @@ public:
 	~ElementResponse();
 
 	int getResponse(void);
-	void Print(ostream &s, int flag = 0);
 
 private:
 	Element *theElement;
 	int responseID;
-	Information eleInfo;
 };
 
 #endif

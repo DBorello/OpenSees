@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 11:35:47 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 18:26:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/Response.h,v $
                                                                         
 // Written: MHS 
@@ -27,14 +27,36 @@
 //
 // Description: This file contains the Response class interface
 
+#ifndef Response_h
+#define Response_h
+
 class ostream;
+
+class ID;
+class Vector;
+class Matrix;
+class Tensor;
+
+#include <Information.h>
 
 class Response
 {
 public:
-	Response();
+	Response(void);
+	Response(int val);
+	Response(double val);
+	Response(const ID &val);
+	Response(const Vector &val);
+	Response(const Matrix &val);
+	Response(const Tensor &val);
+
 	virtual ~Response();
 
 	virtual int getResponse(void) = 0;
-	virtual void Print(ostream &s, int flag = 0) = 0;
+	virtual void Print(ostream &s, int flag = 0);
+
+	Information myInfo;
 };
+
+
+#endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 11:35:47 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 18:26:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/MaterialResponse.cpp,v $
                                                                         
 // Written: MHS 
@@ -31,43 +31,43 @@
 #include <Material.h>
 
 MaterialResponse::MaterialResponse(Material *mat, int id):
-Response(), theMaterial(mat), responseID(id), matInfo()
+Response(), theMaterial(mat), responseID(id)
 {
 
 }
 
 MaterialResponse::MaterialResponse(Material *mat, int id, int val):
-Response(), theMaterial(mat), responseID(id), matInfo(val)
+Response(val), theMaterial(mat), responseID(id)
 {
 
 }
 
 MaterialResponse::MaterialResponse(Material *mat, int id, double val):
-Response(), theMaterial(mat), responseID(id), matInfo(val)
+Response(val), theMaterial(mat), responseID(id)
 {
 
 }
 
 MaterialResponse::MaterialResponse(Material *mat, int id, const ID &val):
-Response(), theMaterial(mat), responseID(id), matInfo(val)
+Response(val), theMaterial(mat), responseID(id)
 {
 
 }
 
 MaterialResponse::MaterialResponse(Material *mat, int id, const Vector &val):
-Response(), theMaterial(mat), responseID(id), matInfo(val)
+Response(val), theMaterial(mat), responseID(id)
 {
 
 }
 
 MaterialResponse::MaterialResponse(Material *mat, int id, const Matrix &val):
-Response(), theMaterial(mat), responseID(id), matInfo(val)
+Response(val), theMaterial(mat), responseID(id)
 {
 
 }
 
 MaterialResponse::MaterialResponse(Material *mat, int id, const Tensor &val):
-Response(), theMaterial(mat), responseID(id), matInfo(val)
+Response(val), theMaterial(mat), responseID(id)
 {
 
 }
@@ -80,11 +80,5 @@ MaterialResponse::~MaterialResponse()
 int
 MaterialResponse::getResponse(void)
 {
-	return theMaterial->getResponse(responseID, matInfo);
-}
-
-void
-MaterialResponse::Print(ostream &s, int flag)
-{
-	matInfo.Print(s, flag);
+	return theMaterial->getResponse(responseID, myInfo);
 }

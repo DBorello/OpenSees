@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 11:35:47 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 18:26:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/ElementResponse.cpp,v $
                                                                         
 // Written: MHS 
@@ -31,43 +31,43 @@
 #include <Element.h>
 
 ElementResponse::ElementResponse(Element *ele, int id):
-Response(), theElement(ele), responseID(id), eleInfo()
+Response(), theElement(ele), responseID(id)
 {
 
 }
 
 ElementResponse::ElementResponse(Element *ele, int id, int val):
-Response(), theElement(ele), responseID(id), eleInfo(val)
+Response(val), theElement(ele), responseID(id)
 {
 
 }
 
 ElementResponse::ElementResponse(Element *ele, int id, double val):
-Response(), theElement(ele), responseID(id), eleInfo(val)
+Response(val), theElement(ele), responseID(id)
 {
 
 }
 
 ElementResponse::ElementResponse(Element *ele, int id, const ID &val):
-Response(), theElement(ele), responseID(id), eleInfo(val)
+Response(val), theElement(ele), responseID(id)
 {
 
 }
 
 ElementResponse::ElementResponse(Element *ele, int id, const Vector &val):
-Response(), theElement(ele), responseID(id), eleInfo(val)
+Response(val), theElement(ele), responseID(id)
 {
 
 }
 
 ElementResponse::ElementResponse(Element *ele, int id, const Matrix &val):
-Response(), theElement(ele), responseID(id), eleInfo(val)
+Response(val), theElement(ele), responseID(id)
 {
 
 }
 
 ElementResponse::ElementResponse(Element *ele, int id, const Tensor &val):
-Response(), theElement(ele), responseID(id), eleInfo(val)
+Response(val), theElement(ele), responseID(id)
 {
 
 }
@@ -80,11 +80,5 @@ ElementResponse::~ElementResponse()
 int
 ElementResponse::getResponse(void)
 {
-	return theElement->getResponse(responseID, eleInfo);
-}
-
-void
-ElementResponse::Print(ostream &s, int flag)
-{
-	eleInfo.Print(s, flag);
+	return theElement->getResponse(responseID, myInfo);
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 11:35:47 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 18:26:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/FiberResponse.cpp,v $
                                                                         
 // Written: MHS 
@@ -31,43 +31,43 @@
 #include <Fiber.h>
 
 FiberResponse::FiberResponse(Fiber *fib, int id):
-Response(), theFiber(fib), responseID(id), fibInfo()
+Response(), theFiber(fib), responseID(id)
 {
 
 }
 
 FiberResponse::FiberResponse(Fiber *fib, int id, int val):
-Response(), theFiber(fib), responseID(id), fibInfo(val)
+Response(val), theFiber(fib), responseID(id)
 {
 
 }
 
 FiberResponse::FiberResponse(Fiber *fib, int id, double val):
-Response(), theFiber(fib), responseID(id), fibInfo(val)
+Response(val), theFiber(fib), responseID(id)
 {
 
 }
 
 FiberResponse::FiberResponse(Fiber *fib, int id, const ID &val):
-Response(), theFiber(fib), responseID(id), fibInfo(val)
+Response(val), theFiber(fib), responseID(id)
 {
 
 }
 
 FiberResponse::FiberResponse(Fiber *fib, int id, const Vector &val):
-Response(), theFiber(fib), responseID(id), fibInfo(val)
+Response(val), theFiber(fib), responseID(id)
 {
 
 }
 
 FiberResponse::FiberResponse(Fiber *fib, int id, const Matrix &val):
-Response(), theFiber(fib), responseID(id), fibInfo(val)
+Response(val), theFiber(fib), responseID(id)
 {
 
 }
 
 FiberResponse::FiberResponse(Fiber *fib, int id, const Tensor &val):
-Response(), theFiber(fib), responseID(id), fibInfo(val)
+Response(val), theFiber(fib), responseID(id)
 {
 
 }
@@ -80,11 +80,5 @@ FiberResponse::~FiberResponse()
 int
 FiberResponse::getResponse(void)
 {
-	return theFiber->getResponse(responseID, fibInfo);
-}
-
-void
-FiberResponse::Print(ostream &s, int flag)
-{
-	fibInfo.Print(s, flag);
+	return theFiber->getResponse(responseID, myInfo);
 }
