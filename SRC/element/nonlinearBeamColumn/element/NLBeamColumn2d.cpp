@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2003-02-25 23:32:59 $
+// $Revision: 1.33 $
+// $Date: 2003-05-15 21:30:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -71,7 +71,6 @@ Vector *NLBeamColumn2d::vsSubdivide  = 0;
 Matrix *NLBeamColumn2d::fsSubdivide  = 0;
 Vector *NLBeamColumn2d::SsrSubdivide = 0;
 int NLBeamColumn2d::maxNumSections   = 0;
-
 
 
 // constructor:
@@ -608,7 +607,6 @@ NLBeamColumn2d::initializeSectionHistoryVariables (void)
  */
 int NLBeamColumn2d::update()
 {
-
   // if have completed a recvSelf() - do a revertToLastCommit
   // to get Ssr, etc. set correctly
   if (initialFlag == 2)
@@ -660,6 +658,7 @@ int NLBeamColumn2d::update()
 
   maxSubdivisions = 10;
 
+
   // fmk - modification to get compatable ele forces and deformations 
   //   for a change in deformation dV we try first a newton iteration, if
   //   that fails we try an initial flexibility iteration on first iteration 
@@ -669,6 +668,7 @@ int NLBeamColumn2d::update()
   //   if they both fail we subdivide dV & try to get compatable forces
   //   and deformations. if they work and we have subdivided we apply
   //   the remaining dV.
+
 
   while (converged == false && numSubdivide <= maxSubdivisions) {
 
@@ -1738,146 +1738,140 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
     const Vector &end1Disp = theNodes[0]->getDisp();
     const Vector &end2Disp = theNodes[1]->getDisp();
 
-	static Vector v1(3);
-	static Vector v2(3);
-
-	for (int i = 0; i < 2; i++) {
-		v1(i) = end1Crd(i) + end1Disp(i)*fact;
-		v2(i) = end2Crd(i) + end2Disp(i)*fact;    
-	}
-	
-	return theViewer.drawLine (v1, v2, 1.0, 1.0);
-  }
-   
-  else if (displayMode == 1) 
-   {
-       // first determine the two end points of the element based on
-       //  the display factor (a measure of the distorted image)
+    static Vector v1(3);
+    static Vector v2(3);
     
-       static Vector v1(3), v2(3);
-
-       const Vector &node1Crd = theNodes[0]->getCrds();
-       const Vector &node2Crd = theNodes[1]->getCrds();	
-       const Vector &node1Disp = theNodes[0]->getDisp();
-       const Vector &node2Disp = theNodes[1]->getDisp();    
-
-       v1(2) = 0.0;
-       v2(2) = 0.0;
+    for (int i = 0; i < 2; i++) {
+      v1(i) = end1Crd(i) + end1Disp(i)*fact;
+      v2(i) = end2Crd(i) + end2Disp(i)*fact;    
+    }
+    
+    return theViewer.drawLine (v1, v2, 1.0, 1.0);
+  }
+  
+  else if (displayMode == 1) {
+    // first determine the two end points of the element based on
+    //  the display factor (a measure of the distorted image)
+    
+    static Vector v1(3), v2(3);
+    
+    const Vector &node1Crd = theNodes[0]->getCrds();
+    const Vector &node2Crd = theNodes[1]->getCrds();	
+    const Vector &node1Disp = theNodes[0]->getDisp();
+    const Vector &node2Disp = theNodes[1]->getDisp();    
+    
+    v1(2) = 0.0;
+    v2(2) = 0.0;
               
-       
-       int i;
-       
-       // allocate array of vectors to store section coordinates and displacements
-       
-       Vector *coords = new Vector [nSections];
-     
-       if (!coords)
-       {
-	   opserr << "NLBeamColumn2d::displaySelf() -- failed to allocate coords array";   
-	   exit(-1);
-       }
-       
-       for (i = 0; i < nSections; i++)
-	  coords[i] = Vector(2);
-       
-       Vector *displs = new Vector [nSections];
-     
-       if (!displs)
-       {
-	   opserr << "NLBeamColumn2d::displaySelf() -- failed to allocate coords array";   
-	   exit(-1);
-       }
-
-       for (i = 0; i < nSections; i++)
-	  displs[i] = Vector(2);
-       
-       int error;
-       
-       this->compSectionDisplacements(coords, displs);
-
-       v1(0) = node1Crd(0) + node1Disp(0)*fact;
-       v1(1) = node1Crd(1) + node1Disp(1)*fact;
- 
-       ///opserr << "v1: " << v1;
-
-       // get global displacements and coordinates of each section          
-
-       for (i=0; i<nSections; i++) 
-       {
-	   
-          v2(0) = (coords[i])(0) + ((displs[i])(0))*fact;
-          v2(1) = (coords[i])(1) + ((displs[i])(1))*fact;
-       
-          error = theViewer.drawLine(v1, v2, 1.0, 1.0);
-	  
-          if (error)
-            return error;
-          v1 = v2;
-
-       }
-       
-       v2(0) = node2Crd(0) + node2Disp(0)*fact;
-       v2(1) = node2Crd(1) + node2Disp(1)*fact;
-       
-       error = theViewer.drawLine(v1, v2, 1.0, 1.0);
-
-       delete [] displs;
-       delete [] coords;
-
-       if (error)
-	  return error;
-   } 
-   
+    
+    int i;
+    
+    // allocate array of vectors to store section coordinates and displacements
+    static Vector *displs = 0;
+    static Vector *coords = 0;
+    static int numCoords = 0;
+    if (numCoords < maxNumSections) {
+      if (coords != 0) {
+	delete [] coords;
+	delete [] displs;
+      }
+      coords = new Vector [maxNumSections];
+      displs = new Vector [maxNumSections];
+      if (coords == 0 || displs == 0) {
+	opserr << "NLBeamColumn2d::displaySelf() -- failed to allocate coords array";   
+	exit(-1);
+      }
+      numCoords = maxNumSections;
+      for (i = 0; i < nSections; i++)
+	coords[i] = Vector(2);
+      
+      for (i = 0; i < nSections; i++)
+	displs[i] = Vector(2);
+    }
+    
+    int error;
+    
+    this->compSectionDisplacements(coords, displs);
+    
+    v1(0) = node1Crd(0) + node1Disp(0)*fact;
+    v1(1) = node1Crd(1) + node1Disp(1)*fact;
+    
+    ///opserr << "v1: " << v1;
+    
+    // get global displacements and coordinates of each section          
+    
+    for (i=0; i<nSections; i++) {
+      
+      v2(0) = (coords[i])(0) + ((displs[i])(0))*fact;
+      v2(1) = (coords[i])(1) + ((displs[i])(1))*fact;
+      
+      error = theViewer.drawLine(v1, v2, 1.0, 1.0);
+      
+      if (error)
+	return error;
+      v1 = v2;
+      
+    }
+    
+    v2(0) = node2Crd(0) + node2Disp(0)*fact;
+    v2(1) = node2Crd(1) + node2Disp(1)*fact;
+    
+    error = theViewer.drawLine(v1, v2, 1.0, 1.0);
+    
+    if (error)
+      return error;
+  } 
+  
   else if (displayMode == 3) {
-
-	
-       // plot the curvatures
-       // first determine the two end points of the element based on
-       //  the display factor (a measure of the distorted image)
-
-       static Vector v1(NDM), v2(NDM);
-
-       const Vector &node1Crd = theNodes[0]->getCrds();
-       const Vector &node2Crd = theNodes[1]->getCrds();	
-
-       v1(2) = 0.0;
-       v2(2) = 0.0;
-
-       // subdivide element into smaller parts to draw the deformed shape
-       double x_i, y_i, x_j, y_j, xg_xi0, yg_xi0, xi;
-       x_i = node1Crd(0);
-       y_i = node1Crd(1);
-       x_j = node2Crd(0);
-       y_j = node2Crd(1);
-       
-       // determine displaced position of node i      
-       xg_xi0 = x_i;
-       yg_xi0 = y_i;
-
-       // get integration point positions and weights
-       const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
-
-       // get section curvatures
-       Vector kappa(nSections); // curvature
-       Vector vs; // section deformations 
-       int i;
-       for (i=0; i<nSections; i++) {
-	 // THIS IS VERY INEFFICIENT ... CAN CHANGE IF RUNS TOO SLOW
-	 int sectionKey = 0;
-	 const ID &code = sections[i]->getType();
-	 int ii;
-	 for (ii = 0; ii < code.Size(); ii++)
-	   if (code(ii) == SECTION_RESPONSE_MZ) {
-	     sectionKey = ii;
-	     break;
-	   }
-	 
-	 if (ii == code.Size()) {
-	   opserr << "FATAL NLBeamColumn2d::displaySelf - section does not provide Mz response\n";
-	   exit(-1);
-	 }
-	 // get section deformations
-	 vs = sections[i]->getSectionDeformation();
+    
+    
+    // plot the curvatures
+    // first determine the two end points of the element based on
+    //  the display factor (a measure of the distorted image)
+    
+    static Vector v1(NDM), v2(NDM);
+    
+    const Vector &node1Crd = theNodes[0]->getCrds();
+    const Vector &node2Crd = theNodes[1]->getCrds();	
+    
+    v1(2) = 0.0;
+    v2(2) = 0.0;
+    
+    // subdivide element into smaller parts to draw the deformed shape
+    double x_i, y_i, x_j, y_j, xg_xi0, yg_xi0, xi;
+    x_i = node1Crd(0);
+    y_i = node1Crd(1);
+    x_j = node2Crd(0);
+    y_j = node2Crd(1);
+    
+    // determine displaced position of node i      
+    xg_xi0 = x_i;
+    yg_xi0 = y_i;
+    
+    // get integration point positions and weights
+    const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
+    
+    // get section curvatures
+    Vector kappa(nSections); // curvature
+    Vector vs; // section deformations 
+    int i;
+    for (i=0; i<nSections; i++) {
+      // THIS IS VERY INEFFICIENT ... CAN CHANGE IF RUNS TOO SLOW
+      int sectionKey = 0;
+      const ID &code = sections[i]->getType();
+      int ii;
+      for (ii = 0; ii < code.Size(); ii++)
+	if (code(ii) == SECTION_RESPONSE_MZ) {
+	  sectionKey = ii;
+	  break;
+	}
+      
+      if (ii == code.Size()) {
+	opserr << "FATAL NLBeamColumn2d::displaySelf - section does not provide Mz response\n";
+	exit(-1);
+      }
+      // get section deformations
+      vs = sections[i]->getSectionDeformation();
 	 kappa(i) = vs(sectionKey);
        }
        

@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2003-02-25 23:32:59 $
+// $Revision: 1.25 $
+// $Date: 2003-05-15 21:30:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
-// File: ~/element/NLBeamColumn3d.C
-//
 // Written: Remo Magalhaes de Souza (rmsouza.ce.berkeley.edu) on 03/99 
 // Revised: rms 06/99 (mass matrix)
 //          rms 07/99 (using setDomain)
@@ -1663,17 +1661,20 @@ NLBeamColumn3d::compSectionDisplacements(Vector sectionCoords[], Vector sectionD
 }
 
 
-
 void
 NLBeamColumn3d::Print(OPS_Stream &s, int flag)
 {
+
+  // flags with negative values are used by GSA
    if (flag == -1) { 
     int eleTag = this->getTag();
     s << "NL_BEAM\t" << eleTag << "\t";
     s << sections[0]->getTag() << "\t" << sections[nSections-1]->getTag(); 
     s  << "\t" << connectedExternalNodes(0) << "\t" << connectedExternalNodes(1);
     s << "\t0\t0.0000000\n";
-   }  else if (flag < -1) {
+   }  
+
+   else if (flag < -1) {
       int eleTag = this->getTag();
       int counter = (flag +1) * -1;
       int i;
@@ -1697,20 +1698,73 @@ NLBeamColumn3d::Print(OPS_Stream &s, int flag)
    }
    
    else if (flag == 1) {
-      s << "\nElement: " << this->getTag() << " Type: NLBeamColumn3d ";
-      s << "\tConnected Nodes: " << connectedExternalNodes ;
-      s << "\tNumber of Sections: " << nSections;
+     static Vector xAxis(3);
+     static Vector yAxis(3);
+     static Vector zAxis(3);
+     
+     crdTransf->getLocalAxes(xAxis, yAxis, zAxis);
+                        
+     s << "#NLBeamColumn3D\n";
+     s << "#LocalAxis " << xAxis(0) << " " << xAxis(1) << " " << xAxis(2) 
+       << " " << zAxis(0) << " " << zAxis(1) << " " << zAxis(2) << endln;
 
-//    for (int i = 0; i < nSections; i++)
-//       s << "\nSection "<<i<<" :" << *sections[i];
+     const Vector &node1Crd = theNodes[0]->getCrds();
+     const Vector &node2Crd = theNodes[1]->getCrds();	
+     const Vector &node1Disp = theNodes[0]->getDisp();
+     const Vector &node2Disp = theNodes[1]->getDisp();    
+     
+     s << "#NODE " << node1Crd(0) << " " << node1Crd(1) << " " << node1Crd(2)
+       << " " << node1Disp(0) << " " << node1Disp(1) << " " << node1Disp(2)
+       << " " << node1Disp(3) << " " << node1Disp(4) << " " << node1Disp(5) << endln;
+     
+     s << "#NODE " << node2Crd(0) << " " << node2Crd(1) << " " << node2Crd(2)
+       << " " << node2Disp(0) << " " << node2Disp(1) << " " << node2Disp(2)
+       << " " << node2Disp(3) << " " << node2Disp(4) << " " << node2Disp(5) << endln;
 
-//       s << "\nSection "<<0<<" :" << *sections[0];
-
-       s << "\tStiffness Matrix:\n" << kv;
-       s << "\tResisting Force: " << Se;
+     // allocate array of vectors to store section coordinates and displacements
+     static int maxNumSections = 0;
+     static Vector *coords = 0;
+     static Vector *displs = 0;
+     if (maxNumSections < nSections) {
+       if (coords != 0) 
+	 delete [] coords;
+       if (displs != 0)
+	 delete [] displs;
+       
+       coords = new Vector [nSections];
+       displs = new Vector [nSections];
+       
+       if (!coords) {
+	 opserr << "NLBeamColumn3d::Print() -- failed to allocate coords array";   
+	 exit(-1);
+       }
+       
+       int i;
+       for (i = 0; i < nSections; i++)
+	 coords[i] = Vector(NDM);
+       
+       if (!displs) {
+	 opserr << "NLBeamColumn3d::Print() -- failed to allocate coords array";   
+	 exit(-1);
+       }
+       
+       for (i = 0; i < nSections; i++)
+	 displs[i] = Vector(NDM);
+       
+       maxNumSections = nSections;
+     }
+     
+     // compute section location & displacements
+     this->compSectionDisplacements(coords, displs);
+     
+     // spit out the section location & invoke print on the scetion
+     for (int i=0; i<nSections; i++) {
+       s << "#SECTION " << (coords[i])(0) << " " << (coords[i])(1) << " " << (coords[i])(2);       s << " " << (displs[i])(0) << " " << (displs[i])(1) << " " << (displs[i])(2) << endln;
+       sections[i]->Print(s, flag); 
+     }
    }
-   else
-   {
+   
+   else {
       s << "\nElement: " << this->getTag() << " Type: NLBeamColumn3d ";
       s << "\tConnected Nodes: " << connectedExternalNodes ;
       s << "\tNumber of Sections: " << nSections << endln;
@@ -1730,74 +1784,80 @@ int
 NLBeamColumn3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
    
-   if (displayMode == 1) 
-   {
-       // first determine the two end points of the element based on
-       //  the display factor (a measure of the distorted image)
+  if (displayMode == 1) {
+
+    // first determine the two end points of the element based on
+    //  the display factor (a measure of the distorted image)
+    static Vector v1(NDM), v2(NDM);
     
-       static Vector v1(NDM), v2(NDM);
-
-       const Vector &node1Crd = theNodes[0]->getCrds();
-       const Vector &node2Crd = theNodes[1]->getCrds();	
-       const Vector &node1Disp = theNodes[0]->getDisp();
-       const Vector &node2Disp = theNodes[1]->getDisp();    
-
-       int i;
+    const Vector &node1Crd = theNodes[0]->getCrds();
+    const Vector &node2Crd = theNodes[1]->getCrds();	
+    const Vector &node1Disp = theNodes[0]->getDisp();
+    const Vector &node2Disp = theNodes[1]->getDisp();    
+    
+    int i;
+    
+    // allocate array of vectors to store section coordinates and displacements
+    static int maxNumSections = 0;
+    static Vector *coords = 0;
+    static Vector *displs = 0;
+    if (maxNumSections < nSections) {
+      if (coords != 0) 
+	delete [] coords;
+      if (displs != 0)
+	delete [] displs;
+      
+      coords = new Vector [nSections];
+      displs = new Vector [nSections];
+      
+      if (!coords) {
+	opserr << "NLBeamColumn3d::displaySelf() -- failed to allocate coords array";   
+	exit(-1);
+      }
+      
+      for (i = 0; i < nSections; i++)
+	coords[i] = Vector(NDM);
+      
+      if (!displs) {
+	opserr << "NLBeamColumn3d::displaySelf() -- failed to allocate coords array";   
+	exit(-1);
+      }
+      
+      for (i = 0; i < nSections; i++)
+	displs[i] = Vector(NDM);
+      
+      maxNumSections = nSections;
+    }
        
-       // allocate array of vectors to store section coordinates and displacements
-       
-       Vector *coords = new Vector [nSections];
-     
-       if (!coords)
-       {
-	   opserr << "NLBeamColumn3d::displaySelf() -- failed to allocate coords array";   
-	   exit(-1);
-       }
-       
-       for (i = 0; i < nSections; i++)
-	  coords[i] = Vector(NDM);
-       
-       Vector *displs = new Vector [nSections];
-     
-       if (!displs)
-       {
-	   opserr << "NLBeamColumn3d::displaySelf() -- failed to allocate coords array";   
-	   exit(-1);
-       }
+    // compute section location & displacements
+    int error;
+    this->compSectionDisplacements(coords, displs);
 
-       for (i = 0; i < nSections; i++)
-	  displs[i] = Vector(NDM);
-       
-       int error;
-       
-       this->compSectionDisplacements(coords, displs);
-
-       // get global displacements and coordinates of each section          
-
-       v1 = node1Crd + node1Disp*fact;
- 
-       // get global displacements and coordinates of each section          
-
-       for (i = 0; i<nSections; i++) 
-       {
-          v2 = coords[i] + displs[i]*fact;
-       
-          error = theViewer.drawLine(v1, v2, 1.0, 1.0);
-
-          if (error)
-            return error;
-          v1 = v2;
-
-       }  
-       
-       v2 = node2Crd + node2Disp*fact;
-       
-       error = theViewer.drawLine(v1, v2, 1.0, 1.0);
-
-       if (error)
-	  return error;
-   }
-   return 0;
+    // get global displacements and coordinates of each section          
+    
+    v1 = node1Crd + node1Disp*fact;
+    
+    // get global displacements and coordinates of each section          
+    
+    for (i = 0; i<nSections; i++) {
+      v2 = coords[i] + displs[i]*fact;
+      
+	 error = theViewer.drawLine(v1, v2, 1.0, 1.0);
+	 
+	 if (error)
+	   return error;
+	 v1 = v2;
+	 
+    }  
+    
+    v2 = node2Crd + node2Disp*fact;
+    
+    error = theViewer.drawLine(v1, v2, 1.0, 1.0);
+    
+    if (error)
+      return error;
+  }
+  return 0;
 }
 
 Response* 
