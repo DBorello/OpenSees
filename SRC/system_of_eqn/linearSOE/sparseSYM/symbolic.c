@@ -26,7 +26,7 @@
 #include <assert.h>
 #include "utility.h"
 #include "FeStructs.h"
-// #include "globalVars.h"
+/*#include "globalVars.h"*/
 
 
 #ifdef _WIN32
@@ -57,7 +57,7 @@ int setenvlpe(int neqns, double **penv, int *envlen);
 
 
 
-// int symFactorization(int *fxadj, int *adjncy, int neq, int LSPARSE)
+/* int symFactorization(int *fxadj, int *adjncy, int neq, int LSPARSE) */
 
 
 int symFactorization(int *fxadj, int *adjncy, int neq, int LSPARSE, 
