@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2002-07-31 22:54:44 $
+// $Revision: 1.18 $
+// $Date: 2002-12-05 22:37:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -153,6 +153,9 @@
 #include <ShellMITC4.h>
 #include <Brick.h>
 #include <BbarBrick.h>
+#include <InternalSpring.h>	// Arash
+#include <Joint2D.h>		// Arash
+#include <SimpleJoint2D.h>	// Arash
 
 #include <LinearCrdTransf2d.h>
 #include <LinearCrdTransf3d.h>
@@ -166,6 +169,8 @@
 
 // mp_constraint header files
 #include <MP_Constraint.h>
+#include <MP_Joint2D.h>
+#include <MP_SimpleJoint2D.h>
 
 // sp_constraint header files
 #include <SP_Constraint.h>
@@ -389,6 +394,15 @@ FEM_ObjectBroker::getNewElement(int classTag)
 
 	case ELE_TAG_BbarBrick:
 		return new BbarBrick();
+			
+	case ELE_TAG_InternalSpring:		// Arash
+		return new InternalSpring();	// Arash
+		
+	case ELE_TAG_Joint2D:				// Arash
+		return new Joint2D();			// Arash
+	
+	case ELE_TAG_SimpleJoint2D:			// Arash
+		return new SimpleJoint2D();		// Arash
 
 	default:
 	     cerr << "FEM_ObjectBroker::getNewElement - ";
@@ -422,8 +436,14 @@ FEM_ObjectBroker::getNewMP(int classTag)
 {
     switch(classTag) {
 	case CNSTRNT_TAG_MP_Constraint:  
-	     return new MP_Constraint(classTag);
-	     
+	     return new MP_Constraint( 0 , classTag);
+
+ 	case CNSTRNT_TAG_MP_Joint2D:			// Arash
+	     return new MP_Joint2D();			// Arash
+	
+ 	case CNSTRNT_TAG_MP_SimpleJoint2D:		// Arash
+	     return new MP_SimpleJoint2D();		// Arash
+		 	     
 	     
 	default:
 	     cerr << "FEM_ObjectBroker::getNewMP - ";
