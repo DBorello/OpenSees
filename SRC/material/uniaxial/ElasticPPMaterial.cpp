@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 05:53:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticPPMaterial.cpp,v $
                                                                         
                                                                         
@@ -42,18 +42,35 @@
 #include <float.h>
 
 
-ElasticPPMaterial::ElasticPPMaterial(int tag, double e, double epl)
+ElasticPPMaterial::ElasticPPMaterial(int tag, double e, double eyp)
 :UniaxialMaterial(tag,MAT_TAG_ElasticPPMaterial),
- commitStrain(0.0), trialStrain(0.0), E(e), 
- ep(epl), maxElasticYieldStrain(epl), minElasticYieldStrain(-epl)
+ ezero(0.0), E(e), ep(0.0)
 {
+	fyp = E*eyp;
+	fyn = -fyp;
+}
 
+ElasticPPMaterial::ElasticPPMaterial(int tag, double e, double eyp,
+	double eyn, double ez )
+:UniaxialMaterial(tag,MAT_TAG_ElasticPPMaterial),
+ ezero(ez), E(e), ep(0.0), eptrial(0.)
+{
+    if (eyp < 0) {
+	cerr << "ElasticPPMaterial::ElasticPPMaterial() - eyp < 0, setting > 0\n";
+	eyp *= -1.;
+    }
+    if (eyn > 0) {
+	cerr << "ElasticPPMaterial::ElasticPPMaterial() - eyn > 0, setting < 0\n";
+	eyn *= -1.;
+    }    
+    
+    fyp = E*eyp;
+    fyn = E*eyn;
 }
 
 ElasticPPMaterial::ElasticPPMaterial()
 :UniaxialMaterial(0,MAT_TAG_ElasticPPMaterial),
- commitStrain(0.0), E(0.0), ep(0.0),
- maxElasticYieldStrain(0.0), minElasticYieldStrain(0.0)
+ fyp(0.0), fyn(0.0), ezero(0.0), E(0.0), ep(0.0), eptrial(0.)
 {
 
 }
@@ -79,25 +96,59 @@ ElasticPPMaterial::getStrain(void)
 double 
 ElasticPPMaterial::getStress(void)
 {
-    if (trialStrain >= maxElasticYieldStrain) 
-	return E*ep;
-    else if (trialStrain <= minElasticYieldStrain)
-	return -E*ep;
-    else
-	return E*(trialStrain-(maxElasticYieldStrain+minElasticYieldStrain)/2);
-}
+    double sigtrial;	// trial stress
+    double f;		// yield function
+    double sig;		// stress
 
+    // compute trial stress
+    sigtrial = E * ( trialStrain - ezero - ep );
+
+    // evaluate yield function
+    if ( sigtrial >= 0.0 )
+	f =  sigtrial - fyp;
+    else
+	f = -sigtrial + fyn;
+
+    if ( f <= 0.0 )
+	// elastic
+        sig = sigtrial;
+
+    else
+    {
+	// plastic
+	if ( sigtrial > 0.0 )
+	{
+	   sig = fyp;
+	   eptrial = ep + f / E;
+	}
+	else
+	{
+	   sig = fyn;
+	   eptrial = ep - f / E;
+	}
+    }
+    
+    return sig;
+}
 
 
 double 
 ElasticPPMaterial::getTangent(void)
 {
-    if (trialStrain >= maxElasticYieldStrain) 
-	return 0;
-    else if (trialStrain <= minElasticYieldStrain)
-	return 0;
+    double sigtrial;	// trial stress
+    double f;		// yield function
+
+    // compute trial stress
+    sigtrial = E * ( trialStrain - ezero - ep );
+
+    // evaluate yield function
+    if ( sigtrial >= 0 )
+	f =  sigtrial - fyp;
     else
-	return E;
+	f = -sigtrial + fyn;
+
+    return ( f <= 0.0 ) ? E : 0.0;
+
 }
 
 double ElasticPPMaterial::getSecant ()
@@ -111,25 +162,14 @@ double ElasticPPMaterial::getSecant ()
 int 
 ElasticPPMaterial::commitState(void)
 {
-    if (trialStrain > maxElasticYieldStrain)  {
-	maxElasticYieldStrain = trialStrain;
-	minElasticYieldStrain = trialStrain-2*ep;
-    }
-    else if (trialStrain < minElasticYieldStrain) {
-	maxElasticYieldStrain = trialStrain+2*ep;
-	minElasticYieldStrain = trialStrain;
-    }	
-
-    commitStrain = trialStrain;
+    ep = eptrial;
     return 0;
-
-}
+}	
 
 
 int 
 ElasticPPMaterial::revertToLastCommit(void)
 {
-    trialStrain = commitStrain;
     return 0;
 }
 
@@ -137,11 +177,7 @@ ElasticPPMaterial::revertToLastCommit(void)
 int 
 ElasticPPMaterial::revertToStart(void)
 {
-    commitStrain = 0.0;
-    trialStrain = 0.0;
-    maxElasticYieldStrain = ep;
-    minElasticYieldStrain = -ep;
-
+    ep = 0.0;
     return 0;
 }
 
@@ -149,10 +185,9 @@ ElasticPPMaterial::revertToStart(void)
 UniaxialMaterial *
 ElasticPPMaterial::getCopy(void)
 {
-    ElasticPPMaterial *theCopy = new ElasticPPMaterial(this->getTag(),E,ep);
-    theCopy->trialStrain = trialStrain;
-    theCopy->maxElasticYieldStrain = maxElasticYieldStrain;    
-    theCopy->minElasticYieldStrain = minElasticYieldStrain;        
+    ElasticPPMaterial *theCopy =
+	 new ElasticPPMaterial(this->getTag(),E,fyp/E,fyn/E,ezero);
+    theCopy->ep = 0.0;
     return theCopy;
 }
 
@@ -163,11 +198,11 @@ ElasticPPMaterial::sendSelf(int cTag, Channel &theChannel)
   int res = 0;
   static Vector data(6);
   data(0) = this->getTag();
-  data(1) = commitStrain;
+  data(1) = ep;
   data(2) = E;
-  data(3) = ep;
-  data(4) = maxElasticYieldStrain;
-  data(5) = minElasticYieldStrain;
+  data(3) = ezero;
+  data(4) = fyp;
+  data(5) = fyn;
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
     cerr << "ElasticPPMaterial::sendSelf() - failed to send data\n";
@@ -186,12 +221,11 @@ ElasticPPMaterial::recvSelf(int cTag, Channel &theChannel,
     cerr << "ElasticPPMaterial::recvSelf() - failed to recv data\n";
   else {
     this->setTag(data(0));
-    commitStrain = data(1);
-    trialStrain = commitStrain;    
-    E = data(2);
-    ep = data(3);
-    maxElasticYieldStrain = data(4);
-    minElasticYieldStrain = data(5);    
+    ep    = data(1);
+    E     = data(2);
+    ezero = data(3);
+    fyp   = data(4);
+    fyn   = data(5);    
   }
 
   return res;
@@ -202,7 +236,7 @@ ElasticPPMaterial::Print(ostream &s, int flag)
 {
     s << "ElasticPP tag: " << this->getTag() << endl;
     s << "  E: " << E << endl;
-    s << "  epsy: " << ep << endl;
+    s << "  ep: " << ep << endl;
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 05:53:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -141,9 +141,25 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clienData, Tcl_Interp *interp
 	    cerr << "uniaxialMaterial ElasticPP: " << tag << endl;
 	    return TCL_ERROR;
 	}
-
-	// Parsing was successful, allocate the material
-	theMaterial = new ElasticPPMaterial(tag, E, ep);       
+	
+	// read in additional parameters eyn and ezero
+	if (argc > 6) {
+	    double eyn, ez;
+	    if (Tcl_GetDouble(interp, argv[5], &eyn) != TCL_OK) {
+		cerr << "WARNING invalid eyn\n";
+		cerr << "uniaxialMaterial ElasticPP: " << tag << endl;
+		return TCL_ERROR;
+	    }	    
+	    if (Tcl_GetDouble(interp, argv[6], &ez) != TCL_OK) {
+		cerr << "WARNING invalid ez\n";
+		cerr << "uniaxialMaterial ElasticPP: " << tag << endl;
+		return TCL_ERROR;
+	    }	    	    
+	    theMaterial = new ElasticPPMaterial(tag, E, ep, eyn, ez);
+	} else {
+	    // Parsing was successful, allocate the material
+	    theMaterial = new ElasticPPMaterial(tag, E, ep);       
+	}
     }
 
 	else if (strcmp(argv[1],"ElasticPPGap") == 0) {

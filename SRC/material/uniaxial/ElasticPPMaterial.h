@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 05:53:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticPPMaterial.h,v $
                                                                         
                                                                         
@@ -33,18 +33,8 @@
 // Revision: A
 //
 // Description: This file contains the class definition for 
-// ElasticMaterial. ElasticPPMaterial provides the abstraction
+// ElasticPPMaterial. ElasticPPMaterial provides the abstraction
 // of an elastic perfectly plastic uniaxial material, 
-//
-//                  ep
-//                  |>|
-//          stress  | +-----+
-//                  |/E    /
-//             -----+-+---+----strain
-//                  |    /
-//               ---+---+
-//                      |<->|
-//                       2ep
 //
 // What: "@(#) ElasticPPMaterial.h, revA"
 
@@ -53,8 +43,10 @@
 class ElasticPPMaterial : public UniaxialMaterial
 {
   public:
-    ElasticPPMaterial(int tag, double E, double ep);    
-	ElasticPPMaterial();    
+    ElasticPPMaterial(int tag, double E, double eyp);    
+    ElasticPPMaterial(int tag, double E, double eyp, double eyn, double ezero);    
+    ElasticPPMaterial();    
+
     ~ElasticPPMaterial();
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
@@ -79,14 +71,16 @@ class ElasticPPMaterial : public UniaxialMaterial
   protected:
     
   private:
-    double commitStrain;
-    double trialStrain;
-    double E;
-    double ep;    
-    double maxElasticYieldStrain;
-    double minElasticYieldStrain;
+    double fyp, fyn;	// positive and negative yield stress
+    double ezero;	// initial strain
+    double E;		// elastic modulus
+    double trialStrain;	// trial strain
+    double eptrial;	// current (trial) plastic strain
+    double ep;		// plastic strain at last commit
 };
 
 
 #endif
+
+
 
