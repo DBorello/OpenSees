@@ -70,6 +70,7 @@ FE_INCLUDES        = -I$(FE)/matrix \
 		  -I$(FE)/element/elasticBeamColumn \
 		  -I$(FE)/element/8nbrick \
 		  -I$(FE)/element/20nbrick \
+		  -I$(FE)/element/upU \
 		  -I$(FE)/element/brick \
 		  -I$(FE)/element/shell \
 		  -I$(FE)/analysis    \
