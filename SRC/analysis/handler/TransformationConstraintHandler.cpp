@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-09-05 21:59:58 $
+// $Revision: 1.3 $
+// $Date: 2001-09-17 22:41:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -161,6 +161,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	    cerr << " array of size " << numSPConstraints << endl;
 	    if (constrainedNodesMP != 0) delete constrainedNodesMP;
 	    if (constrainedNodesSP != 0) delete constrainedNodesSP;
+	    if (mps != 0) delete [] mps;
+	    if (sps != 0) delete [] sps;
 	    return -3;	    
 	}
 	SP_ConstraintIter &theSPs = theDomain->getDomainAndLoadPatternSPs();
@@ -254,6 +256,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 		cerr << " creating DOF_Group " << i << endl;	
 		if (constrainedNodesMP != 0) delete constrainedNodesMP;
 		if (constrainedNodesSP != 0) delete constrainedNodesSP;
+		if (mps != 0) delete [] mps;
+		if (sps != 0) delete [] sps;
 		return -4;    		
 	    }
 	
@@ -306,6 +310,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 		cerr << " creating FE_Element " << elePtr->getTag() << endl; 
 		if (constrainedNodesMP != 0) delete constrainedNodesMP;
 		if (constrainedNodesSP != 0) delete constrainedNodesSP;
+		if (mps != 0) delete [] mps;
+		if (sps != 0) delete [] sps;
 		return -5;
 	    }		
 	} else {
@@ -315,6 +321,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 		cerr << " creating TransformationFE " << elePtr->getTag() << endl; 
 		if (constrainedNodesMP != 0) delete constrainedNodesMP;
 		if (constrainedNodesSP != 0) delete constrainedNodesSP;
+		if (mps != 0) delete [] mps;
+		if (sps != 0) delete [] sps;
 		return -6;		    
 	    }
 	}
@@ -352,6 +360,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 			cerr << " this should not be - results suspect \n";
 			if (constrainedNodesMP != 0) delete constrainedNodesMP;
 			if (constrainedNodesSP != 0) delete constrainedNodesSP;
+			if (mps != 0) delete [] mps;
+			if (sps != 0) delete [] sps;
 		    }
 		}
 	    }
@@ -359,6 +369,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 
     if (constrainedNodesMP != 0) delete constrainedNodesMP;
     if (constrainedNodesSP != 0) delete constrainedNodesSP;
+    if (mps != 0) delete [] mps;
+    if (sps != 0) delete [] sps;
 
     return count3;
 }
