@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-05-30 01:42:35 $
+// $Revision: 1.5 $
+// $Date: 2001-09-18 00:29:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DisplacementControl.cpp,v $
                                                                         
                                                                         
@@ -82,6 +82,8 @@ DisplacementControl::~DisplacementControl()
 	delete deltaU;
     if (deltaUstep != 0)
 	delete deltaUstep;
+    if (deltaUbar != 0)
+	delete deltaUbar;
     if (phat != 0)
 	delete phat;
 }
