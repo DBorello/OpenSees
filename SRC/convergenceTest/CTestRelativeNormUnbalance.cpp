@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-03-02 00:48:12 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 23:11:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestRelativeNormUnbalance.cpp,v $
 
 #include <CTestRelativeNormUnbalance.h>
@@ -110,7 +110,7 @@ CTestRelativeNormUnbalance::test(void)
   // print the data if required
   if (printFlag == 1) {
     cerr << "\t CTestRelativeNormUnbalance::test() - iteration: " << currentIter;
-    cerr << " current ratio (|dR|/|dR0|): " << norm << " (max: " << tol << ")\n";
+    cerr << " norm: " << norm*norm0 << " norm0: " << norm0 << " current ratio (|dR|/|dR0|): " << norm << " (max: " << tol << ")\n";
   }
   // print the data if required
   if (printFlag == 4) {
@@ -177,13 +177,13 @@ CTestRelativeNormUnbalance::start(void)
     // set iteration count = 1
     norms.Zero();
     currentIter = 1;    
+    norm0 = 0.0;
 
-    // determine the initial norm .. the the norm of the initial unbalance
+    //     determine the initial norm .. the the norm of the initial unbalance
     const Vector &x = theSOE->getB();
     double norm = x.Norm();
     if (currentIter <= maxNumIter) 
-      norms(0) = norm;
-
+          norms(0) = norm;
     norm0 = norm;
 
     return 0;
