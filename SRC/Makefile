@@ -27,6 +27,7 @@ all:
 	@$(CD) $(FE)/element; $(MAKE);
 	@$(CD) $(FE)/reliability; $(MAKE);
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
+	@$(CD) $(FE)/damage; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS) \
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
@@ -62,6 +63,7 @@ all:
 	@$(CD) $(FE)/machine; $(MAKE);
 	@$(CD) $(FE)/element; $(MAKE);
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
+	@$(CD) $(FE)/damage; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS) \
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
@@ -203,7 +205,15 @@ GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/NullPlasticMaterial.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/PlasticHardeningMaterial.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/TclModelBuilderYSPlasticMaterialCommand.o \
-	$(FE)/recorder/YsVisual.o
+	$(FE)/recorder/YsVisual.o \
+	$(FE)/damage/DamageModel.o \
+	$(FE)/damage/Kratzig.o \
+	$(FE)/damage/ParkAng.o \
+	$(FE)/damage/DamageResponse.o \
+	$(FE)/damage/HystereticEnergy.o \
+	$(FE)/damage/Mehanny.o \
+	$(FE)/damage/NormalizedPeak.o \
+	$(FE)/damage/TclModelBuilderDamageModelCommand.o \
 
 ERRORHANDLER_LIBS = $(FE)/handler/StandardStream.o \
 	$(FE)/handler/FileStream.o \
@@ -364,7 +374,8 @@ RECORDER_LIBS = $(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/response/Response.o \
 	$(FE)/recorder/response/ElementResponse.o \
 	$(FE)/recorder/response/MaterialResponse.o \
-	$(FE)/recorder/response/FiberResponse.o
+	$(FE)/recorder/response/FiberResponse.o \
+	$(FE)/recorder/DamageRecorder.o 
 
 
 
@@ -518,7 +529,11 @@ DRAIN_LIBS = $(FE)/material/uniaxial/DrainMaterial.o \
 	$(FE)/material/uniaxial/drain/TclDrainMaterialCommand.o
 
 SNAP_LIBS = $(FE)/material/uniaxial/snap/TclSnapMaterialCommand.o \
-	$(FE)/material/uniaxial/snap/Pinching.o
+	$(FE)/material/uniaxial/snap/Pinching.o \
+	$(FE)/material/uniaxial/snap/Bilinear.o \
+	$(FE)/material/uniaxial/snap/Clough.o \
+	$(FE)/material/uniaxial/snap/CloughDamage.o \
+	$(FE)/material/uniaxial/snap/PinchingDamage.o \
 
 SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/ElasticSection2d.o \
@@ -764,6 +779,7 @@ wipe: spotless
 	@$(CD) $(FE)/coordTransformation; $(MAKE) wipe;
 	@$(CD) $(FE)/element; $(MAKE) wipe;
 	@$(CD) $(FE)/reliability; $(MAKE) wipe;
+	@$(CD) $(FE)/damage; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

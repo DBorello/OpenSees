@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.59 $
-// $Date: 2004-07-22 19:31:58 $
+// $Revision: 1.60 $
+// $Date: 2004-09-01 04:04:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -40,6 +40,11 @@
 
 #define ACTOR_TAGS_SUBDOMAIN 1
 
+#define DMG_TAG_HystereticEnergy 1
+#define DMG_TAG_ParkAng          2
+#define DMG_TAG_Kratzig          3
+#define DMG_TAG_Mehanny          4
+#define DMG_TAG_NormalizedPeak   5
 
 #define EigenSOE_TAGS_BandArpackSOE 	1
 #define EigenSOE_TAGS_SymArpackSOE 	2
@@ -137,6 +142,8 @@
 #define MAT_TAG_SnapBilinear		3001
 #define MAT_TAG_SnapClough		3002
 #define MAT_TAG_SnapPinch		3003
+#define MAT_TAG_SnapCloughDamage	3004
+#define MAT_TAG_SnapPinchingDamage	3005
 
 #define MAT_TAG_Clough1	201
 #define MAT_TAG_Clough2	202

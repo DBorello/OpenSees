@@ -2,6 +2,7 @@
 FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/nDarray \
                -I$(FE)/tagged \
+               -I$(FE)/damage \
                -I$(FE)/tcl \
                -I$(FE)/material \
                -I$(FE)/material/uniaxial \
@@ -153,6 +154,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/reliability/domain/spectrum \
                -I$(FE)/reliability/FEsensitivity \
                -I$(FE)/reliability/tcl \
+               -I$(FE)/unittest \
                -I$(FE) \
                -I$(SUPERLUdir) 	
                
