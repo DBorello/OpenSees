@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-11-27 07:01:40 $
+// $Revision: 1.7 $
+// $Date: 2001-11-27 16:39:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -421,8 +421,10 @@ ShellMITC4::addInertiaLoadToUnbalance(const Vector &accel)
 {
   int tangFlag = 1 ;
 
+  int i;
+
   int allRhoZero = 0;
-  for (int i=0; i<4; i++) {
+  for (i=0; i<4; i++) {
     if (materialPointers[i]->getRho() != 0.0)
       allRhoZero = 1;
   }
