@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-03-04 00:48:20 $
+// $Revision: 1.12 $
+// $Date: 2004-07-12 21:21:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -117,6 +117,9 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 
 int 
 nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+nodeCoord(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
 int 

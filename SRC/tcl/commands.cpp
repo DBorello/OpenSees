@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.53 $
-// $Date: 2003-11-10 21:41:57 $
+// $Revision: 1.54 $
+// $Date: 2004-07-12 21:21:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -336,6 +336,8 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "nodeDisp", &nodeDisp, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeVel", &nodeVel, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "nodeCoord", &nodeCoord, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "start", &startTimer, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
@@ -3003,6 +3005,50 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     
 	
     return TCL_OK;
+}
+
+int 
+nodeCoord(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+  // make sure at least one other argument to contain type of system
+  if (argc < 3) {
+    opserr << "WARNING want - nodeCoord nodeTag? dim?\n";
+    return TCL_ERROR;
+  }    
+  
+  int tag, dim;
+  
+  if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+    opserr << "WARNING nodeCoord nodeTag? dim? - could not read nodeTag? \n";
+    return TCL_ERROR;	        
+  }    
+  if (strcmp(argv[2],"X") == 0 || strcmp(argv[2],"x") == 0 ||
+      strcmp(argv[2],"1") == 0)
+    dim = 1;
+  else if (strcmp(argv[2],"Y") == 0 || strcmp(argv[2],"y") == 0 ||
+      strcmp(argv[2],"2") == 0)
+    dim = 2;
+  else if (strcmp(argv[2],"Z") == 0 || strcmp(argv[2],"z") == 0 ||
+      strcmp(argv[2],"3") == 0)
+    dim = 3;
+  else {
+    opserr << "WARNING nodeCoord nodeTag? dim? - could not read dim? \n";
+    return TCL_ERROR;	        
+  }        
+  
+  Node *theNode = theDomain.getNode(tag);
+  double value = 0.0;
+  if (theNode != 0) {
+    const Vector &coords = theNode->getCrds();
+    if (coords.Size() >= dim && dim > 0) {
+      value = coords(dim-1); // -1 for OpenSees vs C indexing
+    }
+  }
+  
+  // now we copy the value to the tcl string that is returned
+  sprintf(interp->result,"%35.20f",value);
+  
+  return TCL_OK;
 }
 
 
