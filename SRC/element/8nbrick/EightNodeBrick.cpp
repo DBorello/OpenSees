@@ -512,7 +512,7 @@ void EightNodeBrick::incremental_Update()
                 //--                det_of_Jacobian  = Jacobian.determinant();
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //....                dhGlobal.print("dh","dhGlobal");
                 //weight
                 //                weight = rw * sw * tw * det_of_Jacobian;
@@ -679,7 +679,7 @@ void EightNodeBrick::incremental_Update()
 //                //--                det_of_Jacobian  = Jacobian.determinant();
 //                //::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 //                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-//                dhGlobal = dh("ij") * JacobianINV("jk");
+//                dhGlobal = dh("ij") * JacobianINV("kj");
 //                //....                dhGlobal.print("dh","dhGlobal");
 //                //weight
 //                //                weight = rw * sw * tw * det_of_Jacobian;
@@ -1140,7 +1140,7 @@ tensor EightNodeBrick::getStiffnessTensor(void)
                 // determinant of Jacobian tensor ( matrix )
                 det_of_Jacobian  = Jacobian.determinant();
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //        ::fprintf(stdout," # %d \n\n\n\n\n\n\n\n", El_count);
 		//dhGlobal.print("dhGlobal");
                 //weight
@@ -1339,7 +1339,7 @@ void EightNodeBrick::set_strain_stress_tensor(FILE *fp, double * u)
                 // determinant of Jacobian tensor ( matrix )
                 det_of_Jacobian  = Jacobian.determinant();
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //weight
                 // straines at this Gauss point from displacement
                 strain = (dhGlobal("ib")*total_displacements("ia")).symmetrize11();
@@ -1428,7 +1428,7 @@ tensor EightNodeBrick::getMassTensor(void)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                //                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 
@@ -1549,7 +1549,7 @@ tensor EightNodeBrick::getMassTensor(void)
 //out19Jan2001                 det_of_Jacobian  = Jacobian.determinant();
 //out19Jan2001                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 //out19Jan2001                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-//out19Jan2001                 dhGlobal = dh("ij") * JacobianINV("jk");
+//out19Jan2001                 dhGlobal = dh("ij") * JacobianINV("kj");
 //out19Jan2001                 //weight
 //out19Jan2001                 weight = rw * sw * tw * det_of_Jacobian;
 //out19Jan2001                 //::::::   ::printf("\n\nIN THE STIFFNESS TENSOR INTEGRATOR ----**************** where = %d \n", where);
@@ -1972,7 +1972,7 @@ tensor EightNodeBrick::nodal_forces(void)
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -2167,7 +2167,7 @@ tensor EightNodeBrick::iterative_nodal_forces(void)
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 	  
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -2260,7 +2260,7 @@ tensor EightNodeBrick::nodal_forces_from_stress(stresstensor & stress)
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -2362,7 +2362,7 @@ tensor EightNodeBrick::linearized_nodal_forces(void)
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -2496,7 +2496,7 @@ tensor EightNodeBrick::linearized_nodal_forces(void)
 //....//                ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 //....
 //....// Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-//....                dhGlobal = dh("ij") * JacobianINV("jk");
+//....                dhGlobal = dh("ij") * JacobianINV("kj");
 //....// straines
 //....//  strain = (dh("ib")*displacements("ia")).symmetrize11();
 //....                strain = (dhGlobal("ib")*displacementsT("ia")).symmetrize11();
