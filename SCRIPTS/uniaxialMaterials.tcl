@@ -18,55 +18,53 @@ proc enable_buttons {} {
 
 
 # ##############################################################
-# Define the data structures & procedures for ElasticPP
+# Define the data structures & procedures for Concrete01
 # ##############################################################
 
-set ElasticPP(materialID) 0
-set ElasticPP(E) 0
-set ElasticPP(yieldStrain) 0    
+set Concrete01(materialId) 0
+set Concrete01(fc) 0
+set Concrete01(ec) 0
+set Concrete01(fu) 0
+set Concrete01(eu) 0
 
-# add ElasticPP the materials menu
-$m add command -label ElasticPP -command "SetElasticPP .elasticPP"
+$m add command -label Concrete01 -command "SetConcrete01 .concrete01"
 
-proc SetElasticPP { w } {
+proc SetConcrete01 {w} {
     global matID
 
-    # Turn off all buttons & create a top level window
-    disable_buttons
-    toplevel $w
-
     set count 0
-    foreach field {materialID E yieldStrain} {
+    foreach field {materialId fc ec fu eu} {
 	label $w.l$field -text $field
-	entry $w.e$field -textvariable ElasticPP($field) -relief sunken 
+	entry $w.e$field -textvariable Concrete01($field) -relief sunken 
 	grid $w.l$field -row $count -column 0 -sticky e
 	grid $w.e$field -row $count -column 1 -sticky ew
 	incr count
     }
 
-    button $w.ok -text OK -command "doneElasticPP; destroy $w; enable_buttons"
+    button $w.ok -text OK -command "doneConcrete01; destroy $w; enable_buttons"
     grid $w.ok -row 0 -rowspan 3 -column 2 -sticky nsew
 
-    $w.ematerialID config -state normal
-    set ElasticPP(materialID) [expr $matID + 1]
-    $w.ematerialID delete 0 end
-    $w.ematerialID insert 0 $ElasticPP(materialID)
-    $w.ematerialID config -state disabled
-
+    $w.ematerialId config -state normal
+    set Concrete01(materialId) [expr $matID + 1]
+    $w.ematerialId delete 0 end
+    $w.ematerialId insert 0 $Concrete01(materialId)
+    $w.ematerialId config -state disabled
 }
 
-proc doneElasticPP { } {
-    global matID
-    global ElasticPP
 
-    set matID $ElasticPP(materialID)
-    uniaxialMaterial ElasticPP $matID $ElasticPP(E) $ElasticPP(yieldStrain)
+proc doneConcrete01 { } {
+    global matID
+    global Concrete01
+
+    set matID $Concrete01(materialId)
+    uniaxialMaterial Concrete01 $matID $Concrete01(fc) $Concrete01(ec) $Concrete01(fu) $Concrete01(eu)
     eval uniaxialTest $matID
-    set matID $ElasticPP(materialID)
+    set matID $Concrete01(materialId)
 
     SetValues
     Reset
 }
+
 
 
 # ##############################################################
@@ -118,17 +116,22 @@ proc doneElastic { } {
     Reset
 }
 
+
+
+
+
 # ##############################################################
-# Define the data structures & procedures for PathIndependent
+# Define the data structures & procedures for ElasticPP
 # ##############################################################
 
-set PathInd(materialId) 0
-set PathInd(otherMatId) 0
+set ElasticPP(materialID) 0
+set ElasticPP(E) 0
+set ElasticPP(yieldStrain) 0    
 
-# add PathIndependent to the materials menu
-$m add command -label PathIndependent -command "SetPathInd .pathInd"
+# add ElasticPP the materials menu
+$m add command -label ElasticPP -command "SetElasticPP .elasticPP"
 
-proc SetPathInd {w} {
+proc SetElasticPP { w } {
     global matID
 
     # Turn off all buttons & create a top level window
@@ -136,37 +139,203 @@ proc SetPathInd {w} {
     toplevel $w
 
     set count 0
-    foreach field {materialId otherMatId} {
+    foreach field {materialID E yieldStrain} {
 	label $w.l$field -text $field
-	entry $w.e$field -textvariable PathInd($field) -relief sunken 
+	entry $w.e$field -textvariable ElasticPP($field) -relief sunken 
 	grid $w.l$field -row $count -column 0 -sticky e
 	grid $w.e$field -row $count -column 1 -sticky ew
 	incr count
     }
 
-    button $w.ok -text OK -command "donePathInd; destroy $w; enable_buttons;"
+    button $w.ok -text OK -command "doneElasticPP; destroy $w; enable_buttons"
     grid $w.ok -row 0 -rowspan 3 -column 2 -sticky nsew
 
-    $w.ematerialId config -state normal
-    set PathInd(materialId) [expr $matID + 1]
-    $w.ematerialId delete 0 end
-    $w.ematerialId insert 0 $PathInd(materialId)
-    $w.ematerialId config -state disabled
+    $w.ematerialID config -state normal
+    set ElasticPP(materialID) [expr $matID + 1]
+    $w.ematerialID delete 0 end
+    $w.ematerialID insert 0 $ElasticPP(materialID)
+    $w.ematerialID config -state disabled
+
 }
 
-
-proc donePathInd { } {
+proc doneElasticPP { } {
     global matID
-    global PathInd
+    global ElasticPP
 
-    set matID $PathInd(materialId)
-    uniaxialMaterial PathIndependent $matID $PathInd(otherMatId)
+    set matID $ElasticPP(materialID)
+    uniaxialMaterial ElasticPP $matID $ElasticPP(E) $ElasticPP(yieldStrain)
     eval uniaxialTest $matID
-    set matID $PathInd(materialId)
+    set matID $ElasticPP(materialID)
 
     SetValues
     Reset
 }
+
+
+
+
+
+# ##############################################################
+# Define the data structures & procedures for ElasticPPGap
+# ##############################################################
+
+set elasticPPGap(materialID) 0
+set elasticPPGap(E) 0
+set elasticPPGap(fy) 0    
+set elasticPPGap(gap) 0    
+
+# add elasticPPGap the materials menu
+$m add command -label ElasticPPGap -command "SetElasticPPGap .elasticPPGap"
+
+
+proc SetElasticPPGap {w} {
+    global matID
+
+    disable_buttons;
+    toplevel $w;
+
+    set count 0
+    foreach field {materialID E fy gap} {
+	label $w.l$field -text $field
+	entry $w.e$field -textvariable elasticPPGap($field) -relief sunken 
+	grid $w.l$field -row $count -column 0 -sticky e
+	grid $w.e$field -row $count -column 1 -sticky ew
+	incr count
+    }
+
+    button $w.ok -text OK -command "doneElasticPPGap; destroy $w; enable_buttons"
+    grid $w.ok -row 0 -rowspan 3 -column 2 -sticky nse
+
+    $w.ematerialID config -state normal
+    set elasticPPGap(materialID) [expr $matID + 1]
+    $w.ematerialID delete 0 end
+    $w.ematerialID insert 0 $elasticPPGap(materialID)
+    $w.ematerialID config -state disabled
+
+}
+
+
+proc doneElasticPPGap { } {
+    global matID
+    global elasticPPGap
+
+    set matID $elasticPPGap(materialID)
+    uniaxialMaterial ElasticPPGap $matID $elasticPPGap(E) $elasticPPGap(fy) $elasticPPGap(gap)
+    eval uniaxialTest $matID
+    set matID $elasticPPGap(materialID)
+
+    SetValues
+    Reset
+}
+
+
+
+# ##############################################################
+# Define the data structures & procedures for ENT
+# ##############################################################
+
+set ENT(materialID) 0
+set ENT(E) 0
+
+# add ENT the materials menu
+$m add command -label ENT -command "SetENT .ent"
+
+proc SetENT {w} {
+    global matID
+
+    # Turn off all buttons & create a top level window
+    disable_buttons
+    toplevel $w
+
+    set count 0
+    foreach field {materialID E} {
+	label $w.l$field -text $field
+	entry $w.e$field -textvariable ENT($field) -relief sunken 
+	grid $w.l$field -row $count -column 0 -sticky e
+	grid $w.e$field -row $count -column 1 -sticky ew
+	incr count
+    }
+
+    button $w.ok -text OK -command "doneENT; destroy $w; enable_buttons"
+    grid $w.ok -row 0 -rowspan 3 -column 2 -sticky nsew
+
+    $w.ematerialID config -state normal
+    set ENT(materialID) [expr $matID + 1]
+    $w.ematerialID delete 0 end
+    $w.ematerialID insert 0 $ENT(materialID)
+    $w.ematerialID config -state disabled
+}
+
+proc doneENT { } {
+    global matID
+    global ENT
+
+    set matID $ENT(materialID)
+    uniaxialMaterial ENT $matID $ENT(E)
+    eval uniaxialTest $matID
+    set matID $ENT(materialID)
+
+    SetValues
+    Reset
+}
+
+
+
+# ##############################################################
+# Define the data structures & procedures for Hardening
+# ##############################################################
+
+set Hardening(materialId) 0
+set Hardening(E) 0
+set Hardening(sigY) 0
+set Hardening(Hiso) 0
+set Hardening(Hkin) 0
+
+# add Hardening to the materials menu
+$m add command -label Hardening -command "SetHardening .hardening"
+
+proc SetHardening {w} {
+    global matID
+
+    # Turn off all buttons & create a top level window
+    disable_buttons
+    toplevel $w
+
+    set count 0
+    foreach field {materialId E sigY Hiso Hkin} {
+	label .hardening.l$field -text $field
+	entry .hardening.e$field -textvariable Hardening($field) -relief sunken 
+	grid .hardening.l$field -row $count -column 0 -sticky e
+	grid .hardening.e$field -row $count -column 1 -sticky ew
+	incr count
+    }
+
+    button .hardening.ok -text OK -command "doneHardening; destroy $w; enable_buttons"
+    grid .hardening.ok -row 0 -rowspan 3 -column 2 -sticky nsew
+
+    .hardening.ematerialId config -state normal
+    set Hardening(materialId) [expr $matID + 1]
+    .hardening.ematerialId delete 0 end
+    .hardening.ematerialId insert 0 $Hardening(materialId)
+    .hardening.ematerialId config -state disabled
+}
+
+
+proc doneHardening { } {
+    global matID
+    global Hardening
+
+    set matID $Hardening(materialId)
+    uniaxialMaterial Hardening $matID $Hardening(E) $Hardening(sigY) $Hardening(Hiso) $Hardening(Hkin)
+    eval uniaxialTest $matID
+    set matID $Hardening(materialId)
+
+    SetValues
+    Reset
+}
+
+
+
 
 
 # ##############################################################
@@ -237,20 +406,19 @@ proc doneHysteretic { } {
 }
 
 
+
 # ##############################################################
-# Define the data structures & procedures for Hardening
+# Define the data structures & procedures for Parallel
 # ##############################################################
 
-set Hardening(materialId) 0
-set Hardening(E) 0
-set Hardening(sigY) 0
-set Hardening(Hiso) 0
-set Hardening(Hkin) 0
+set Parallel(materialId) 0
+set Parallel(matTag1) 0
+set Parallel(matTag2) 0
 
-# add Hardening to the materials menu
-$m add command -label Hardening -command "SetHardening .hardening"
+# add Parallel to the materials menu
+$m add command -label Parallel -command "SetParallel .parallel"
 
-proc SetHardening {w} {
+proc SetParallel {w} {
     global matID
 
     # Turn off all buttons & create a top level window
@@ -258,85 +426,33 @@ proc SetHardening {w} {
     toplevel $w
 
     set count 0
-    foreach field {materialId E sigY Hiso Hkin} {
-	label .hardening.l$field -text $field
-	entry .hardening.e$field -textvariable Hardening($field) -relief sunken 
-	grid .hardening.l$field -row $count -column 0 -sticky e
-	grid .hardening.e$field -row $count -column 1 -sticky ew
-	incr count
-    }
-
-    button .hardening.ok -text OK -command "doneHardening; destroy $w; enable_buttons"
-    grid .hardening.ok -row 0 -rowspan 3 -column 2 -sticky nsew
-
-    .hardening.ematerialId config -state normal
-    set Hardening(materialId) [expr $matID + 1]
-    .hardening.ematerialId delete 0 end
-    .hardening.ematerialId insert 0 $Hardening(materialId)
-    .hardening.ematerialId config -state disabled
-}
-
-
-proc doneHardening { } {
-    global matID
-    global Hardening
-
-    set matID $Hardening(materialId)
-    uniaxialMaterial Hardening $matID $Hardening(E) $Hardening(sigY) $Hardening(Hiso) $Hardening(Hkin)
-    eval uniaxialTest $matID
-    set matID $Hardening(materialId)
-
-    SetValues
-    Reset
-}
-
-# ##############################################################
-# Define the data structures & procedures for Concrete01
-# ##############################################################
-
-set Concrete01(materialId) 0
-set Concrete01(fc) 0
-set Concrete01(ec) 0
-set Concrete01(fu) 0
-set Concrete01(eu) 0
-
-$m add command -label Concrete01 -command "SetConcrete01 .concrete01"
-
-proc SetConcrete01 {w} {
-    global matID
-
-    # Turn off all buttons & create a top level window
-    disable_buttons
-    toplevel $w
-
-    set count 0
-    foreach field {materialId fc ec fu eu} {
+    foreach field {materialId matTag1 matTag2} {
 	label $w.l$field -text $field
-	entry $w.e$field -textvariable Concrete01($field) -relief sunken 
+	entry $w.e$field -textvariable Parallel($field) -relief sunken 
 	grid $w.l$field -row $count -column 0 -sticky e
 	grid $w.e$field -row $count -column 1 -sticky ew
 	incr count
     }
 
-    button $w.ok -text OK -command "doneConcrete01; destroy $w; enable_buttons"
+    button $w.ok -text OK -command "doneParallel; destroy $w; enable_buttons;"
     grid $w.ok -row 0 -rowspan 3 -column 2 -sticky nsew
 
     $w.ematerialId config -state normal
-    set Concrete01(materialId) [expr $matID + 1]
+    set Parallel(materialId) [expr $matID + 1]
     $w.ematerialId delete 0 end
-    $w.ematerialId insert 0 $Concrete01(materialId)
+    $w.ematerialId insert 0 $Parallel(materialId)
     $w.ematerialId config -state disabled
 }
 
 
-proc doneConcrete01 { } {
+proc doneParallel { } {
     global matID
-    global Concrete01
+    global Parallel
 
-    set matID $Concrete01(materialId)
-    uniaxialMaterial Concrete01 $matID $Concrete01(fc) $Concrete01(ec) $Concrete01(fu) $Concrete01(eu)
+    set matID $Parallel(materialId)
+    uniaxialMaterial Parallel $matID $Parallel(matTag1) $Parallel(matTag2)
     eval uniaxialTest $matID
-    set matID $Concrete01(materialId)
+    set matID $Parallel(materialId)
 
     SetValues
     Reset
@@ -345,56 +461,106 @@ proc doneConcrete01 { } {
 
 
 
+
 # ##############################################################
-# Define the data structures & procedures for ElasticPPGap
+# Define the data structures & procedures for PathIndependent
 # ##############################################################
 
-set elasticPPGap(materialID) 0
-set elasticPPGap(E) 0
-set elasticPPGap(yieldStrain) 0    
-set elasticPPGap(gap) 0    
+set PathInd(materialId) 0
+set PathInd(otherMatId) 0
 
-# add elasticPPGap the materials menu
-$m add command -label ElasticPPGap -command "SetElasticPPGap .elasticPPGap"
+# add PathIndependent to the materials menu
+$m add command -label PathIndependent -command "SetPathInd .pathInd"
 
-proc SetElasticPPGap {w} {
+proc SetPathInd {w} {
     global matID
 
-    disable_buttons;
-    toplevel $w;
+    # Turn off all buttons & create a top level window
+    disable_buttons
+    toplevel $w
 
     set count 0
-    foreach field {materialID E yieldStrain gap} {
+    foreach field {materialId otherMatId} {
 	label $w.l$field -text $field
-	entry $w.e$field -textvariable elasticPPGap($field) -relief sunken 
+	entry $w.e$field -textvariable PathInd($field) -relief sunken 
 	grid $w.l$field -row $count -column 0 -sticky e
 	grid $w.e$field -row $count -column 1 -sticky ew
 	incr count
     }
 
-    button $w.ok -text OK -command "doneElasticPPGap; destroy $w; enable_buttons"
-    grid $w.ok -row 0 -rowspan 3 -column 2 -sticky nse
+    button $w.ok -text OK -command "donePathInd; destroy $w; enable_buttons;"
+    grid $w.ok -row 0 -rowspan 3 -column 2 -sticky nsew
 
-    $w.ematerialID config -state normal
-    set elasticPPGap(materialID) [expr $matID + 1]
-    $w.ematerialID delete 0 end
-    $w.ematerialID insert 0 $elasticPPGap(materialID)
-    $w.ematerialID config -state disabled
-
+    $w.ematerialId config -state normal
+    set PathInd(materialId) [expr $matID + 1]
+    $w.ematerialId delete 0 end
+    $w.ematerialId insert 0 $PathInd(materialId)
+    $w.ematerialId config -state disabled
 }
 
 
-proc doneElasticPPGap { } {
+proc donePathInd { } {
     global matID
-    global elasticPPGap
+    global PathInd
 
-    set matID $elasticPPGap(materialID)
-    uniaxialMaterial ElasticPPGap $matID $elasticPPGap(E) $elasticPPGap(yieldStrain) $elasticPPGap(gap)
+    set matID $PathInd(materialId)
+    uniaxialMaterial PathIndependent $matID $PathInd(otherMatId)
     eval uniaxialTest $matID
-    set matID $elasticPPGap(materialID)
+    set matID $PathInd(materialId)
 
     SetValues
     Reset
 }
 
 
+
+# ##############################################################
+# Define the data structures & procedures for Series
+# ##############################################################
+
+set Series(materialId) 0
+set Series(matTag1) 0
+set Series(matTag2) 0
+
+# add Series to the materials menu
+$m add command -label Series -command "SetSeries .series"
+
+proc SetSeries {w} {
+    global matID
+
+    # Turn off all buttons & create a top level window
+    disable_buttons
+    toplevel $w
+
+    set count 0
+    foreach field {materialId matTag1 matTag2} {
+	label $w.l$field -text $field
+	entry $w.e$field -textvariable Series($field) -relief sunken 
+	grid $w.l$field -row $count -column 0 -sticky e
+	grid $w.e$field -row $count -column 1 -sticky ew
+	incr count
+    }
+
+    button $w.ok -text OK -command "doneSeries; destroy $w; enable_buttons;"
+    grid $w.ok -row 0 -rowspan 3 -column 2 -sticky nsew
+
+    $w.ematerialId config -state normal
+    set Series(materialId) [expr $matID + 1]
+    $w.ematerialId delete 0 end
+    $w.ematerialId insert 0 $Series(materialId)
+    $w.ematerialId config -state disabled
+}
+
+
+proc doneSeries { } {
+    global matID
+    global Series
+
+    set matID $Series(materialId)
+    uniaxialMaterial Series $matID $Series(matTag1) $Series(matTag2)
+    eval uniaxialTest $matID
+    set matID $Series(materialId)
+
+    SetValues
+    Reset
+}
