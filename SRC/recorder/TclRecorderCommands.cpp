@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-16 04:19:12 $
+// $Revision: 1.4 $
+// $Date: 2001-10-17 16:07:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -52,6 +52,7 @@
 // recorders
 #include <MaxNodeDispRecorder.h>
 #include <NodeRecorder.h>
+#include <DriftRecorder.h>
 #include <ElementRecorder.h>
 #include <TclFeViewer.h>
 #include <FilePlotter.h>
@@ -255,6 +256,41 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	(*theRecorder) = new NodeRecorder(theDofs, theNodes, 
 					  theDomain,
 					  argv[2], responseID, flag);
+    } 
+
+    // Create a recorder to write nodal drifts to a file
+    else if (strcmp(argv[1],"Drift") == 0) {
+      if (argc < 7) {
+	cerr << "WARNING recorder Drift filename? <startFlag> ";
+	cerr << "node1? node2? dof? perpDirn?";
+	return TCL_ERROR;
+      }    
+      
+      
+      int flag = 0;
+      if (strcmp(argv[3],"-time") == 0) 
+	flag = 1;
+      if (strcmp(argv[3],"-load") == 0)
+	flag = 2;      
+      
+      int pos = 3;
+      if (flag != 0) pos = 4;
+      
+      int node1, node2, dof, perpDirn;
+      
+      if (Tcl_GetInt(interp, argv[pos++], &node1) != TCL_OK)	
+	return TCL_ERROR;	
+      if (Tcl_GetInt(interp, argv[pos++], &node2) != TCL_OK)	
+	return TCL_ERROR;	      
+      if (Tcl_GetInt(interp, argv[pos++], &dof) != TCL_OK)	
+	return TCL_ERROR;	
+      if (Tcl_GetInt(interp, argv[pos++], &perpDirn) != TCL_OK)	
+	return TCL_ERROR;
+
+      // Subtract one from dof and perpDirn for C indexing
+      (*theRecorder) = new DriftRecorder(node1, node2, dof-1, perpDirn-1,
+					 theDomain,
+					 argv[2], flag);
     } 
 
 
