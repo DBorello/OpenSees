@@ -32,9 +32,9 @@ all:
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
 	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) $(ELEMENT_BJ_LIBS) $(PY_RWB_BJ_LIBS) \
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
-	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) \
+	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) $(GGD_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
-	$(DRAIN_LIBS)
+	$(DRAIN_LIBS) $(FMK_LIBS)
 	@$(RANLIB) $(FE_LIBRARY)
 
 else
@@ -66,9 +66,9 @@ all:
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
 	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) $(ELEMENT_BJ_LIBS) $(PY_RWB_BJ_LIBS) \
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
-	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) \
+	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) $(GGD_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
-	$(DRAIN_LIBS)
+	$(DRAIN_LIBS) $(FMK_LIBS)
 	@$(RANLIB) $(FE_LIBRARY)
 
 endif
@@ -82,15 +82,19 @@ metis:
 	@$(CD) $(FE)/graph/partitioner/metis-2.0; $(MAKE) clean;
 	@$(CD) $(FE)/graph/partitioner/metis-2.0; $(MAKE) lib;
 
+FMK_LIBS = $(FE)/database/FE_Datastore.o \
+	$(FE)/database/BerkeleyDbDatastore.o \
+	$(FE)/coordTransformation/CorotCrdTransf2d.o \
+	$(FE)/coordTransformation/CorotCrdTransf3d.o 
+
+
+
 # the files that make up the FE_LIBRARY
 GLF_LIBS = $(FE)/element/zeroLength/ZeroLength.o \
 	$(FE)/element/zeroLength/ZeroLengthSection.o \
 	$(FE)/element/zeroLength/ZeroLengthND.o \
 	$(FE)/element/zeroLength/TclZeroLength.o
 
-
-#	$(FE)/coordTransformation/CorotCrdTransf2d.o \
-#	$(FE)/coordTransformation/CorotCrdTransf3d.o \
 
 
 REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
@@ -136,9 +140,13 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 	$(FE)/analysis/algorithm/eigenAlgo/StandardEigenAlgo.o 
 
 
+GGD_LIBS = $(FE)/element/joint/InternalSpring.o \
+	$(FE)/element/joint/MP_ForJoint2D.o \
+	$(FE)/element/joint/SimpleJoint2D.o \
+	$(FE)/element/joint/TclSimpleJoint2dCommand.o
+
 ERRORHANDLER_LIBS = $(FE)/handler/ErrorHandler.o \
 	$(FE)/handler/ConsoleErrorHandler.o 
-
 
 
 NDARRAY_BJ_LIBS = $(FE)/nDarray/basics.o \
@@ -188,18 +196,14 @@ PY_RWB_BJ_LIBS = $(FE)/material/uniaxial/PY/PySimple1.o \
 		 $(FE)/material/uniaxial/PY/TclPyTzQzMaterialCommand.o 
 
 
- 
- 
- 
-
-
-
 ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
 	$(FE)/material/nD/soil/MultiYieldSurface.o \
 	$(FE)/material/nD/soil/PressureDependMultiYield.o \
 	$(FE)/material/nD/soil/TclUpdateMaterialStageCommand.o \
 	$(FE)/material/nD/soil/PressureIndependMultiYield.o \
-	$(FE)/material/nD/soil/T2Vector.o
+	$(FE)/material/nD/soil/T2Vector.o \
+	$(FE)/element/upU/FourNodeQuadUP.o \
+	$(FE)/element/upU/TclFourNodeQuadUPCommand.o
 
 ifeq ($(GRAPHICS), UsingOpenGL)
 
@@ -242,11 +246,9 @@ RECORDER_LIBS = $(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/response/FiberResponse.o
 
 
-#	$(FE)/database/BerkeleyDbDatastore.o \
-#	$(FE)/database/MySqlDatastore.o \
 
 DATABASE_LIBS = $(FE)/database/FileDatastore.o \
-	$(FE)/database/FE_Datastore.o \
+	$(FE)/database/MySqlDatastore.o \
 	$(FE)/database/TclDatabaseCommands.o
 
 MATRIX_LIBS   = $(FE)/matrix/Matrix.o \
