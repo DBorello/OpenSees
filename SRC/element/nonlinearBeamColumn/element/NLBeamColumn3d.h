@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-05-16 00:07:39 $
+// $Revision: 1.11 $
+// $Date: 2002-06-07 18:03:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -140,6 +140,9 @@ class NLBeamColumn3d: public Element
     Vector *Ssr;                   // array of section resisting force vectors
  
     Vector *vscommit;              // array of commited section deformation vectors
+
+    Matrix *sp;  // Applied section forces due to element loads, 5 x nSections
+    double p0[5]; // Reactions in the basic system due to element loads
 
     static Matrix theMatrix;
     static Vector theVector;

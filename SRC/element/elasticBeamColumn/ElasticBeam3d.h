@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-05-16 00:07:39 $
+// $Revision: 1.4 $
+// $Date: 2002-06-07 18:01:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.h,v $
                                                                         
                                                                         
@@ -85,7 +85,6 @@ class ElasticBeam3d : public Element
  
   private:
     double A,E,G,Jx,Iy,Iz;
-    double L;
 
     double rho;
     
@@ -95,7 +94,9 @@ class ElasticBeam3d : public Element
     
     static Matrix kb;
     Vector q;
-    
+    double q0[5];  // Fixed end forces in basic system (no torsion)
+    double p0[5];  // Reactions in basic system (no torsion)
+ 
     Node *node1Ptr, *node2Ptr;
     
     ID  connectedExternalNodes;    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-05-25 00:25:53 $
+// $Revision: 1.11 $
+// $Date: 2002-06-07 18:03:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
 
 #include <BeamWithHinges3d.h>
@@ -42,6 +42,7 @@
 
 #include <Information.h>
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 #include <Renderer.h>
 
 Matrix BeamWithHinges3d::theMatrix(12,12);
@@ -57,10 +58,22 @@ BeamWithHinges3d::BeamWithHinges3d(void)
    node1Ptr(0), node2Ptr(0),
    kb(6,6), q(6), load(12),
    kbCommit(6,6), qCommit(6),
-   initialFlag(0), maxIter(0), tolerance(0.0)
+   initialFlag(0), maxIter(0), tolerance(0.0), sp(0)
 {
   section[0] = 0;
   section[1] = 0;
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
+
+  v0[0] = 0.0;
+  v0[1] = 0.0;
+  v0[2] = 0.0;
+  v0[3] = 0.0;
+  v0[4] = 0.0;
 }
 
 BeamWithHinges3d::BeamWithHinges3d(int tag, int nodeI, int nodeJ,
@@ -78,7 +91,7 @@ BeamWithHinges3d::BeamWithHinges3d(int tag, int nodeI, int nodeJ,
    node1Ptr(0), node2Ptr(0),
    kb(6,6), q(6), load(12),
    kbCommit(6,6), qCommit(6),
-   initialFlag(0), maxIter(max), tolerance(tol)
+   initialFlag(0), maxIter(max), tolerance(tol), sp(0)
 {
   if (E <= 0.0)  {
     g3ErrorHandler->fatal("%s -- input parameter E is <= 0.0",
@@ -131,6 +144,18 @@ BeamWithHinges3d::BeamWithHinges3d(int tag, int nodeI, int nodeJ,
   
   connectedExternalNodes(0) = nodeI;
   connectedExternalNodes(1) = nodeJ;
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
+
+  v0[0] = 0.0;
+  v0[1] = 0.0;
+  v0[2] = 0.0;
+  v0[3] = 0.0;
+  v0[4] = 0.0;
 }
 
 BeamWithHinges3d::~BeamWithHinges3d(void)
@@ -141,6 +166,9 @@ BeamWithHinges3d::~BeamWithHinges3d(void)
   
   if (theCoordTransf)
     delete theCoordTransf;
+
+  if (sp != 0)
+    delete sp;
 }
 
 int 
@@ -305,16 +333,280 @@ BeamWithHinges3d::getMass(void)
 void 
 BeamWithHinges3d::zeroLoad(void)
 {
+  if (sp != 0)
+    sp->Zero();
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
+
+  v0[0] = 0.0;
+  v0[1] = 0.0;
+  v0[2] = 0.0;
+  v0[3] = 0.0;
+  v0[4] = 0.0;
+
   load.Zero();
 }
 
 int
 BeamWithHinges3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("%s -- load type unknown for ele with tag: %d",
-			  "BeamWithHinges3d::addLoad", this->getTag());
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
   
-  return -1;
+  if (sp == 0) {
+    sp = new Matrix(5,2);
+    if (sp == 0)
+      g3ErrorHandler->fatal("%s -- out of memory",
+			    "BeamWithHinges3d::addLoad");
+  }
+
+  double L = theCoordTransf->getInitialLength();
+  double oneOverL = 1.0/L;
+
+  double lp1 = beta1*L;
+  double lp2 = beta2*L;
+  double Le = L-lp1-lp2;
+
+  // Section locations along element length ...
+  double xi[2];
+  xi[0] = 0.5*lp1;
+  xi[1] = L-0.5*lp2;
+
+  if (type == LOAD_TAG_Beam3dUniformLoad) {
+    double wy = data(0)*loadFactor;  // Transverse
+    double wz = data(1)*loadFactor;  // Transverse
+    double wx = data(2)*loadFactor;  // Axial
+
+    Matrix &s_p = *sp;
+
+    // Accumulate applied section forces due to uniform load
+    for (int i = 0; i < 2; i++) {
+      double x = xi[i];
+      // Axial
+      s_p(0,i) += wx*(L-x);
+      // Moment
+      s_p(1,i) += wy*0.5*x*(x-L);
+      // Shear
+      s_p(2,i) += wy*(x-0.5*L);
+      // Moment
+      s_p(3,i) += wz*0.5*x*(x-L);
+      // Shear
+      s_p(4,i) += wz*(x-0.5*L);
+    }
+
+    // Accumulate reactions in basic system
+    p0[0] -= wx*L;
+    double V;
+    V = 0.5*wy*L;
+    p0[1] -= V;
+    p0[2] -= V;
+    V = 0.5*wz*L;
+    p0[3] -= V;
+    p0[4] -= V;
+
+    // Quick return
+    if (Le == 0.0)
+      return 0;
+
+    // Accumulate basic deformations due to uniform load on interior
+    // Midpoint rule for axial
+    v0[0] += wx*0.5*(L-lp1+lp2)/(E*A)*Le;
+
+    // Two point Gauss for bending ... will not be exact when
+    // hinge lengths are not equal, but this is not a big deal!!!
+    double x1 = lp1 + 0.5*Le*(1.0-1/sqrt(3));
+    double x2 = lp1 + 0.5*Le*(1.0+1/sqrt(3));
+
+    double Mz1 = 0.5*wy*x1*(x1-L);
+    double Mz2 = 0.5*wy*x2*(x2-L);
+
+    double My1 = 0.5*wz*x1*(x1-L);
+    double My2 = 0.5*wz*x2*(x2-L);
+
+    double Le2EIz = Le/(2*E*Iz);
+    double Le2EIy = Le/(2*E*Iy);
+
+    double b1, b2;
+    b1 = x1*oneOverL;
+    b2 = x2*oneOverL;
+    v0[2] += Le2EIz*(b1*Mz1+b2*Mz2);
+    v0[4] += Le2EIy*(b1*My1+b2*My2);
+
+    b1 -= 1.0;
+    b2 -= 1.0;
+    v0[1] += Le2EIz*(b1*Mz1+b2*Mz2);
+    v0[3] += Le2EIy*(b1*My1+b2*My2);
+  }
+
+  else if (type == LOAD_TAG_Beam3dPointLoad) {
+    double Py = data(0)*loadFactor;
+    double Pz = data(1)*loadFactor;
+    double N  = data(2)*loadFactor;
+    double aOverL = data(3);
+    double a = aOverL*L;
+
+    double Vy2 = Py*aOverL;
+    double Vy1 = Py-Vy2;
+
+    double Vz2 = Pz*aOverL;
+    double Vz1 = Pz-Vz2;
+
+    Matrix &s_p = *sp;
+
+    // Accumulate applied section forces due to point load
+    for (int i = 0; i < 2; i++) {
+      double x = xi[i];
+      if (x <= a) {
+	s_p(0,i) += N;
+	s_p(1,i) -= x*Vy1;
+	s_p(2,i) -= Vy1;
+	s_p(3,i) -= x*Vz1;
+	s_p(4,i) -= Vz1;
+      }
+      else {
+	s_p(1,i) -= (L-x)*Vy2;
+	s_p(2,i) += Vy2;
+	s_p(3,i) -= (L-x)*Vz2;
+	s_p(4,i) += Vz2;
+      }
+    }
+
+    // Accumulate reactions in basic system
+    p0[0] -= N;
+    p0[1] -= Vy1;
+    p0[2] -= Vy2;
+    p0[3] -= Vz1;
+    p0[4] -= Vz2;
+
+    // Quick return
+    if (Le == 0.0)
+      return 0;
+
+    // Accumulate basic deformations of interior due to point load
+    double M1, M2, M3;
+    double b1, b2, b3;
+
+    // Point load is on left hinge
+    if (a < lp1) {
+      M1 = (lp1-L)*Vy2;
+      M2 = -lp2*Vy2;
+
+      double Le_6EI;
+      Le_6EI = Le/(6*E*Iz);
+
+      b1 = lp1*oneOverL;
+      b2 = 1.0-lp2*oneOverL;
+      v0[2] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[1] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      M1 = (lp1-L)*Vz2;
+      M2 = -lp2*Vz2;
+
+      Le_6EI = Le/(6*E*Iy);
+
+      b1 = lp1*oneOverL;
+      b2 = 1.0-lp2*oneOverL;
+      v0[4] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[3] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      // Nothing to do for axial
+      //v0[0] += 0.0;
+    }
+    // Point load is on right hinge
+    else if (a > L-lp2) {
+      M1 = -lp1*Vy1;
+      M2 = (lp2-L)*Vy1;
+
+      double Le_6EI;
+      Le_6EI = Le/(6*E*Iz);
+
+      b1 = lp1*oneOverL;
+      b2 = 1.0-lp2*oneOverL;
+      v0[2] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[1] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      M1 = -lp1*Vz1;
+      M2 = (lp2-L)*Vz1;
+
+      Le_6EI = Le/(6*E*Iy);
+
+      b1 = lp1*oneOverL;
+      b2 = 1.0-lp2*oneOverL;
+      v0[4] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[3] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      v0[0] += N*Le/(E*A);      
+    }
+    // Point load is on elastic interior
+    else {
+      M1 = -lp1*Vy1;
+      M2 = -lp2*Vy2;
+      M3 = -a*Vy1;
+
+      double L1_6EI;
+      double L2_6EI;
+
+      L1_6EI = (a-lp1)/(6*E*Iz);
+      L2_6EI = (Le-a+lp1)/(6*E*Iz);
+
+      b1 = lp1*oneOverL;
+      b2 = 1.0-lp2*oneOverL;
+      b3 = a*oneOverL;
+      v0[2] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[2] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      b3 -= 1.0;
+      v0[1] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[1] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      M1 = -lp1*Vz1;
+      M2 = -lp2*Vz2;
+      M3 = -a*Vz1;
+
+      L1_6EI = (a-lp1)/(6*E*Iy);
+      L2_6EI = (Le-a+lp1)/(6*E*Iy);
+
+      b1 = lp1*oneOverL;
+      b2 = 1.0-lp2*oneOverL;
+      b3 = a*oneOverL;
+      v0[4] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[4] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      b3 -= 1.0;
+      v0[3] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[3] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      v0[0] += N*(a-lp1)/(E*A);
+    }
+  }
+
+  else {
+    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
+			    "BeamWithHinges3d::addLoad()", this->getTag());
+    return -1;
+  }
+
+  return 0;  
 }
 
 int
@@ -341,12 +633,12 @@ BeamWithHinges3d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 BeamWithHinges3d::getResistingForce(void)
 {
-  static Vector dummy(3);
-  
   // Will remove once we clean up the corotational 3d transformation -- MHS
   theCoordTransf->update();
 
-  return theCoordTransf->getGlobalResistingForce (q, dummy);
+  Vector p0Vec(p0, 5);
+
+  return theCoordTransf->getGlobalResistingForce(q, p0Vec);
 }
 
 const Vector &
@@ -412,7 +704,6 @@ BeamWithHinges3d::Print(ostream &s, int flag)
   double L = theCoordTransf->getInitialLength();
   double oneOverL = 1.0/L;
 
-  // NOTE: This assumes NO element loads!!!
   P   = qCommit(0);
   Mz1 = qCommit(1);
   Mz2 = qCommit(2);
@@ -423,9 +714,9 @@ BeamWithHinges3d::Print(ostream &s, int flag)
   T   = qCommit(5);
 
   s << "\tEnd 1 Forces (P Mz Vy My Vz T): "
-    << -P << ' ' << Mz1 << ' ' <<  Vy << ' ' << My1 << ' ' <<  Vz << ' ' << -T << endl;
+    << -P+p0[0] << ' ' << Mz1 << ' ' <<  Vy+p0[1] << ' ' << My1 << ' ' <<  Vz+p0[3] << ' ' << -T << endl;
   s << "\tEnd 2 Forces (P Mz Vy My Vz T): "
-    <<  P << ' ' << Mz2 << ' ' << -Vy << ' ' << My2 << ' ' << -Vz << ' ' <<  T << endl;
+    <<  P << ' ' << Mz2 << ' ' << -Vy+p0[2] << ' ' << My2 << ' ' << -Vz+p0[4] << ' ' <<  T << endl;
   
   if (section[0] != 0) {
     s << "Hinge 1, section tag: " << section[0]->getTag() << 
@@ -556,11 +847,11 @@ BeamWithHinges3d::update(void)
     f(5,5) = LoverGJ;    
 
     // vr = fElastic * q;
-    vr(0) = LoverEA*q(0);
-    vr(1) = fElastic(0,0)*q(1) + fElastic(0,1)*q(2);
-    vr(2) = fElastic(1,0)*q(1) + fElastic(1,1)*q(2);
-    vr(3) = fElastic(2,2)*q(3) + fElastic(2,3)*q(4);
-    vr(4) = fElastic(3,2)*q(3) + fElastic(3,3)*q(4);
+    vr(0) = LoverEA*q(0) + v0[0];
+    vr(1) = fElastic(0,0)*q(1) + fElastic(0,1)*q(2) + v0[1];
+    vr(2) = fElastic(1,0)*q(1) + fElastic(1,1)*q(2) + v0[2];
+    vr(3) = fElastic(2,2)*q(3) + fElastic(2,3)*q(4) + v0[3];
+    vr(4) = fElastic(3,2)*q(3) + fElastic(3,3)*q(4) + v0[4];
     vr(5) = LoverGJ*q(5);
 
     for (int i = 0; i < 2; i++) {
@@ -589,25 +880,54 @@ BeamWithHinges3d::update(void)
       for (ii = 0; ii < order; ii++) {
 	switch(code(ii)) {
 	case SECTION_RESPONSE_P:
-	  s(ii) = q(0); break;
+	  s(ii) = q(0);
+	  break;
 	case SECTION_RESPONSE_MZ:
-	  s(ii) = xL1*q(1) + xL*q(2); break;
+	  s(ii) = xL1*q(1) + xL*q(2);
+	  break;
 	case SECTION_RESPONSE_VY:
-	  s(ii) = oneOverL*(q(1)+q(2)); break;
+	  s(ii) = oneOverL*(q(1)+q(2));
+	  break;
 	case SECTION_RESPONSE_MY:
-	  s(ii) = xL1*q(3) + xL*q(4); break;
+	  s(ii) = xL1*q(3) + xL*q(4);
+	  break;
 	case SECTION_RESPONSE_VZ:
-	  s(ii) = oneOverL*(q(3)+q(4)); break;
+	  s(ii) = oneOverL*(q(3)+q(4));
+	  break;
 	case SECTION_RESPONSE_T:
-	  s(ii) = q(5); break;
+	  s(ii) = q(5);
+	  break;
 	default:
-	  s(ii) = 0.0; break;
+	  s(ii) = 0.0;
+	  break;
 	}
       }
-      
-      // UNCOMMENT WHEN DISTRIBUTED LOADS ARE ADDED TO INTERFACE
-      // this->getDistrLoadInterpMatrix(bp, xi[i], code);
-      // s.addMatrixVector(1.0, bp, currDistrLoad, 1.0);
+
+      // Add the effects of element loads, if present
+      if (sp != 0) {
+	const Matrix &s_p = *sp;
+	for (ii = 0; ii < order; ii++) {
+	  switch(code(ii)) {
+	  case SECTION_RESPONSE_P:
+	    s(ii) += s_p(0,i);
+	    break;
+	  case SECTION_RESPONSE_MZ:
+	    s(ii) += s_p(1,i);
+	    break;
+	  case SECTION_RESPONSE_VY:
+	    s(ii) += s_p(2,i);
+	    break;
+	  case SECTION_RESPONSE_MY:
+	    s(ii) += s_p(3,i);
+	    break;
+	  case SECTION_RESPONSE_VZ:
+	    s(ii) += s_p(4,i);
+	    break;
+	  default:
+	    break;
+	  }
+	}
+      }
       
       // Increment in section forces
       // ds = s - sr
@@ -738,23 +1058,29 @@ BeamWithHinges3d::update(void)
       for (ii = 0; ii < order; ii++) {
 	switch(code(ii)) {
 	case SECTION_RESPONSE_P:
-	  vr(0) += de(ii)*lp[i]; break;
+	  vr(0) += de(ii)*lp[i];
+	  break;
 	case SECTION_RESPONSE_MZ:
 	  tmp = de(ii)*lp[i];
-	  vr(1) += xL1*tmp; vr(2) += xL*tmp; break;
+	  vr(1) += xL1*tmp; vr(2) += xL*tmp;
+	  break;
 	case SECTION_RESPONSE_VY:
 	  //tmp = oneOverL*de(ii)*lp[i]*L/lp[i];
 	  tmp = de(ii);
-	  vr(1) += tmp; vr(2) += tmp; break;
+	  vr(1) += tmp; vr(2) += tmp;
+	  break;
 	case SECTION_RESPONSE_MY:
 	  tmp = de(ii)*lp[i];
-	  vr(3) += xL1*tmp; vr(4) += xL*tmp; break;
+	  vr(3) += xL1*tmp; vr(4) += xL*tmp;
+	  break;
 	case SECTION_RESPONSE_VZ:
 	  //tmp = oneOverL*de(ii)*lp[i]*L/lp[i];
 	  tmp = de(ii);
-	  vr(3) += tmp; vr(4) += tmp; break;
+	  vr(3) += tmp; vr(4) += tmp;
+	  break;
 	case SECTION_RESPONSE_T:
-	  vr(5) += de(ii)*lp[i]; break;
+	  vr(5) += de(ii)*lp[i];
+	  break;
 	default:
 	  break;
 	}
@@ -912,7 +1238,7 @@ BeamWithHinges3d::setResponse(char **argv, int argc, Information &info)
 int
 BeamWithHinges3d::getResponse(int responseID, Information &eleInfo)
 {
-  double V;
+  double V, N, T, M1, M2;
   double L = theCoordTransf->getInitialLength();
   static Vector force(12);
   static Vector def(6);
@@ -950,15 +1276,33 @@ BeamWithHinges3d::getResponse(int responseID, Information &eleInfo)
     
   case 4: // local forces
     // Axial
-    force(3) = q(0);
-    force(0) = -q(0);
-    // Moment
-    force(2) = q(1);
-    force(5) = q(2);
-    // Shear
-    V = (q(1)+q(2))/L;
-    force(1) = V;
-    force(4) = -V;
+    N = q(0);
+    force(6) =  N;
+    force(0) = -N+p0[0];
+    
+    // Torsion
+    T = q(5);
+    force(9) =  T;
+    force(3) = -T;
+    
+    // Moments about z and shears along y
+    M1 = q(1);
+    M2 = q(2);
+    force(5)  = M1;
+    force(11) = M2;
+    V = (M1+M2)/L;
+    force(1) =  V+p0[1];
+    force(7) = -V+p0[2];
+    
+    // Moments about y and shears along z
+    M1 = q(3);
+    M2 = q(4);
+    force(4)  = M1;
+    force(10) = M2;
+    V = (M1+M2)/L;
+    force(2) = -V+p0[3];
+    force(8) =  V+p0[4];
+
     return eleInfo.setVector(force);
     
   default:

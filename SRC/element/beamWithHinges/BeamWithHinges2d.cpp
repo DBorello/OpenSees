@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-06-06 18:49:37 $
+// $Revision: 1.14 $
+// $Date: 2002-06-07 18:03:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
 
 #include <BeamWithHinges2d.h>
@@ -332,7 +332,7 @@ BeamWithHinges2d::addLoad(ElementalLoad *theLoad, double loadFactor)
     sp = new Matrix(3,2);
     if (sp == 0)
       g3ErrorHandler->fatal("%s -- out of memory",
-			    "TwoPointHingedBeam2d::addLoad");
+			    "BeamWithHinges2d::addLoad");
   }
 
   double L = theCoordTransf->getInitialLength();

@@ -1,4 +1,3 @@
-
 /* ****************************************************************** **
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
@@ -19,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2002-05-16 00:07:39 $
+// $Revision: 1.15 $
+// $Date: 2002-06-07 18:03:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -58,6 +57,7 @@
 #include <Renderer.h>
 #include <G3Globals.h>
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 
 #define  NDM   3         // dimension of the problem (3d)
 #define  NL    3         // size of uniform load vector
@@ -79,9 +79,13 @@ rho(0), maxIters(0), tol(0), initialFlag(0), isTorsion(false),
 load(NEGD),
 kv(NEBD,NEBD), Se(NEBD), 
 kvcommit(NEBD,NEBD), Secommit(NEBD),
-fs(0), vs(0), Ssr(0), vscommit(0)
+fs(0), vs(0), Ssr(0), vscommit(0), sp(0)
 {
-
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
 }
 
 // constructor which takes the unique element tag, sections,
@@ -98,7 +102,7 @@ initialFlag(0), isTorsion(false),
 load(NEGD), 
 kv(NEBD,NEBD), Se(NEBD),  
 kvcommit(NEBD,NEBD), Secommit(NEBD),
-fs(0), vs(0), Ssr(0), vscommit(0)
+fs(0), vs(0), Ssr(0), vscommit(0), sp(0)
 {
    connectedExternalNodes(0) = nodeI;
    connectedExternalNodes(1) = nodeJ;    
@@ -182,6 +186,12 @@ fs(0), vs(0), Ssr(0), vscommit(0)
        cerr << "NLBeamColumn3d::NLBeamColumn3d() -- failed to allocate vscommit array";   
        exit(-1);
    }
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
 }
 
 
@@ -212,6 +222,9 @@ NLBeamColumn3d::~NLBeamColumn3d()
 
    if (crdTransf)
      delete crdTransf;   
+
+   if (sp != 0)
+     delete sp;
 }
 
 
@@ -275,7 +288,7 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    int dofNode1 = node1Ptr->getNumberDOF();
    int dofNode2 = node2Ptr->getNumberDOF();
    
-   if ((dofNode1 !=NND ) || (dofNode2 != NND))
+   if ((dofNode1 != NND) || (dofNode2 != NND))
    {
       cerr << "NLBeamColumn3d::setDomain(): Nd2 or Nd1 incorrect dof ";
       exit(0);
@@ -410,7 +423,9 @@ NLBeamColumn3d::revertToStart()
 const Matrix &
 NLBeamColumn3d::getTangentStiff(void)
 {
-  crdTransf->update();	// Will remove once we clean up the corotational 3d transformation -- MHS
+  // Will remove once we clean up the corotational 3d transformation -- MHS
+  crdTransf->update();
+
   return crdTransf->getGlobalStiffMatrix(kv, Se);
 }
     
@@ -418,10 +433,12 @@ NLBeamColumn3d::getTangentStiff(void)
 const Vector &
 NLBeamColumn3d::getResistingForce(void)
 {
-  static Vector dummy(3);
+  // Will remove once we clean up the corotational 3d transformation -- MHS
+  crdTransf->update();
 
-  crdTransf->update();	// Will remove once we clean up the corotational 3d transformation -- MHS
-  return crdTransf->getGlobalResistingForce(Se, dummy);
+  Vector p0Vec(p0, 5);
+
+  return crdTransf->getGlobalResistingForce(Se, p0Vec);
 }
 
 
@@ -508,19 +525,52 @@ NLBeamColumn3d::update(void)
 	for (ii = 0; ii < order; ii++) {
 	  switch(code(ii)) {
 	  case SECTION_RESPONSE_P:
-	    Ss(ii) = Se(0); break;
+	    Ss(ii) = Se(0);
+	    break;
 	  case SECTION_RESPONSE_MZ:
-	    Ss(ii) = xL1*Se(1) + xL*Se(2); break;
+	    Ss(ii) = xL1*Se(1) + xL*Se(2);
+	    break;
 	  case SECTION_RESPONSE_VY:
-	    Ss(ii) = oneOverL*(Se(1)+Se(2)); break;
+	    Ss(ii) = oneOverL*(Se(1)+Se(2));
+	    break;
 	  case SECTION_RESPONSE_MY:
-	    Ss(ii) = xL1*Se(3) + xL*Se(4); break;
+	    Ss(ii) = xL1*Se(3) + xL*Se(4);
+	    break;
 	  case SECTION_RESPONSE_VZ:
-	    Ss(ii) = oneOverL*(Se(3)+Se(4)); break;
+	    Ss(ii) = oneOverL*(Se(3)+Se(4));
+	    break;
 	  case SECTION_RESPONSE_T:
-	    Ss(ii) = Se(5); break;
+	    Ss(ii) = Se(5);
+	    break;
 	  default:
-	    Ss(ii) = 0.0; break;
+	    Ss(ii) = 0.0;
+	    break;
+	  }
+	}
+
+	// Add the effects of element loads, if present
+	if (sp != 0) {
+	  const Matrix &s_p = *sp;
+	  for (ii = 0; ii < order; ii++) {
+	    switch(code(ii)) {
+	    case SECTION_RESPONSE_P:
+	      Ss(ii) += s_p(0,i);
+	      break;
+	    case SECTION_RESPONSE_MZ:
+	      Ss(ii) += s_p(1,i);
+	      break;
+	    case SECTION_RESPONSE_VY:
+	      Ss(ii) += s_p(2,i);
+	      break;
+	    case SECTION_RESPONSE_MY:
+	      Ss(ii) += s_p(3,i);
+	      break;
+	    case SECTION_RESPONSE_VZ:
+	      Ss(ii) += s_p(4,i);
+	      break;
+	    default:
+	      break;
+	    }
 	  }
 	}
 
@@ -823,16 +873,114 @@ NLBeamColumn3d::getMass(void)
 void 
 NLBeamColumn3d::zeroLoad(void)
 {
-    load.Zero();
+  if (sp != 0)
+    sp->Zero();
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
+
+  load.Zero();
 }
 
 int
 NLBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("NLBeamColumn3d::addLoad - load type unknown for truss with tag: %d",
-			  this->getTag());
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
   
-  return -1;
+  if (sp == 0) {
+    sp = new Matrix(5,nSections);
+    if (sp == 0)
+      g3ErrorHandler->fatal("%s -- out of memory",
+			    "NLBeamColumn3d::addLoad");
+  }
+
+  const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
+  double L = crdTransf->getInitialLength();
+
+  if (type == LOAD_TAG_Beam3dUniformLoad) {
+    double wy = data(0)*loadFactor;  // Transverse
+    double wz = data(1)*loadFactor;  // Transverse
+    double wx = data(2)*loadFactor;  // Axial
+
+    Matrix &s_p = *sp;
+
+    // Accumulate applied section forces due to element loads
+    for (int i = 0; i < nSections; i++) {
+      double x = xi_pt(i,0)*L;
+      // Axial
+      s_p(0,i) += wx*(L-x);
+      // Moment
+      s_p(1,i) += wy*0.5*x*(x-L);
+      // Shear
+      s_p(2,i) += wy*(x-0.5*L);
+      // Moment
+      s_p(3,i) += wz*0.5*x*(x-L);
+      // Shear
+      s_p(4,i) += wz*(x-0.5*L);
+    }
+
+    // Accumulate reactions in basic system
+    p0[0] -= wx*L;
+    double V;
+    V = 0.5*wy*L;
+    p0[1] -= V;
+    p0[2] -= V;
+    V = 0.5*wz*L;
+    p0[3] -= V;
+    p0[4] -= V;
+  }
+  else if (type == LOAD_TAG_Beam3dPointLoad) {
+    double Py = data(0)*loadFactor;
+    double Pz = data(1)*loadFactor;
+    double N  = data(2)*loadFactor;
+    double aOverL = data(3);
+    double a = aOverL*L;
+
+    double Vy2 = Py*aOverL;
+    double Vy1 = Py-Vy2;
+
+    double Vz2 = Pz*aOverL;
+    double Vz1 = Pz-Vz2;
+
+    Matrix &s_p = *sp;
+
+    // Accumulate applied section forces due to element loads
+    for (int i = 0; i < nSections; i++) {
+      double x = xi_pt(i,0)*L;
+      if (x <= a) {
+	s_p(0,i) += N;
+	s_p(1,i) -= x*Vy1;
+	s_p(2,i) -= Vy1;
+	s_p(3,i) -= x*Vz1;
+	s_p(4,i) -= Vz1;
+      }
+      else {
+	s_p(1,i) -= (L-x)*Vy2;
+	s_p(2,i) += Vy2;
+	s_p(3,i) -= (L-x)*Vz2;
+	s_p(4,i) += Vz2;
+      }
+    }
+
+    // Accumulate reactions in basic system
+    p0[0] -= N;
+    p0[1] -= Vy1;
+    p0[2] -= Vy2;
+    p0[3] -= Vz1;
+    p0[4] -= Vz2;
+  }
+
+  else {
+    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
+			    "NLBeamColumn3d::addLoad()", this->getTag());
+    return -1;
+  }
+
+  return 0;
 }
 
 
@@ -1523,51 +1671,57 @@ NLBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 {
   static Vector force(12);
   static Vector defoAndForce(24);
-  double V;
+  double V, N, T, M1, M2;
   int i;
   double L = crdTransf->getInitialLength();
-
+  
   switch (responseID) {      
-    case 1:  // forces
-      return eleInfo.setVector(this->getResistingForce());
-
-
-    case 4:
-      this->getGlobalDispls(force);
-      this->getResistingForce();
-      for (i = 0; i < 12; i++) {
-	defoAndForce(i) = force(i);
-	defoAndForce(i+12) = theVector(i);
-      }
-      return eleInfo.setVector(defoAndForce);
-
-    case 2:
-      // Axial
-      force(6) = Se(0);
-      force(0) = -Se(0);
-
-      // Torsion
-      force(11) = Se(5);
-      force(5)  = -Se(5);
+  case 1:  // forces
+    return eleInfo.setVector(this->getResistingForce());
+    
+    
+  case 4:
+    this->getGlobalDispls(force);
+    this->getResistingForce();
+    for (i = 0; i < 12; i++) {
+      defoAndForce(i) = force(i);
+      defoAndForce(i+12) = theVector(i);
+    }
+    return eleInfo.setVector(defoAndForce);
+    
+  case 2:
+    // Axial
+    N = Se(0);
+    force(6) =  N;
+    force(0) = -N+p0[0];
+    
+    // Torsion
+    T = Se(5);
+    force(9) =  T;
+    force(3) = -T;
+    
+    // Moments about z and shears along y
+    M1 = Se(1);
+    M2 = Se(2);
+    force(5)  = M1;
+    force(11) = M2;
+    V = (M1+M2)/L;
+    force(1) =  V+p0[1];
+    force(7) = -V+p0[2];
+    
+    // Moments about y and shears along z
+    M1 = Se(3);
+    M2 = Se(4);
+    force(4)  = M1;
+    force(10) = M2;
+    V = (M1+M2)/L;
+    force(2) = -V+p0[3];
+    force(8) =  V+p0[4];
       
-      // Moments about z and shears along y
-      force(2) = Se(1);
-      force(8) = Se(2);
-      V = (Se(1)+Se(2))/L;
-      force(1) = V;
-      force(7) = -V;
-
-      // Moments about y and shears along z
-      force(4)  = Se(3);
-      force(10) = Se(4);
-      V = (Se(3)+Se(4))/L;
-      force(3) = -V;
-      force(9) = V;
-      
-      return eleInfo.setVector(force);
-
-    default: 
-      return -1;
+    return eleInfo.setVector(force);
+    
+  default: 
+    return -1;
   }
 }
 

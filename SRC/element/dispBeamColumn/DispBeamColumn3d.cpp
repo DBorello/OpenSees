@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-05-16 00:07:38 $
+// $Revision: 1.8 $
+// $Date: 2002-06-07 18:02:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -41,6 +41,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 
 #include <G3Globals.h>
 
@@ -54,60 +55,82 @@ DispBeamColumn3d::DispBeamColumn3d(int tag, int nd1, int nd2,
 		CrdTransf3d &coordTransf, double r)
 :Element (tag, ELE_TAG_DispBeamColumn3d),
 numSections(numSec), theSections(0), crdTransf(0),
-connectedExternalNodes(2), L(0.0), nd1Ptr(0), nd2Ptr(0),
+connectedExternalNodes(2), nd1Ptr(0), nd2Ptr(0),
 Q(12), q(6), rho(r)
 {
-    // Allocate arrays of pointers to SectionForceDeformations
-    theSections = new SectionForceDeformation *[numSections];
+  // Allocate arrays of pointers to SectionForceDeformations
+  theSections = new SectionForceDeformation *[numSections];
+  
+  if (theSections == 0)
+    g3ErrorHandler->fatal("%s - failed to allocate section model pointer",
+			  "DispBeamColumn3d::DispBeamColumn3d");
+  
+  for (int i = 0; i < numSections; i++) {
     
-	if (theSections == 0)
-	    g3ErrorHandler->fatal("%s - failed to allocate section model pointer",
-			"DispBeamColumn3d::DispBeamColumn3d");
+    // Get copies of the material model for each integration point
+    theSections[i] = s.getCopy();
+    
+    // Check allocation
+    if (theSections[i] == 0)
+      g3ErrorHandler->fatal("%s -- failed to get a copy of section model",
+			    "DispBeamColumn3d::DispBeamColumn3d");
+  }
+  
+  crdTransf = coordTransf.getCopy();
+  
+  if (crdTransf == 0)
+    g3ErrorHandler->fatal("%s - failed to copy coordinate transformation",
+			  "DispBeamColumn3d::DispBeamColumn3d");
+  
+  // Set connected external node IDs
+  connectedExternalNodes(0) = nd1;
+  connectedExternalNodes(1) = nd2;
 
-    for (int i = 0; i < numSections; i++) {
+  q0[0] = 0.0;
+  q0[1] = 0.0;
+  q0[2] = 0.0;
+  q0[3] = 0.0;
+  q0[4] = 0.0;
 
-		// Get copies of the material model for each integration point
-		theSections[i] = s.getCopy();
-			
-		// Check allocation
-		if (theSections[i] == 0)
-			g3ErrorHandler->fatal("%s -- failed to get a copy of section model",
-				"DispBeamColumn3d::DispBeamColumn3d");
-	}
-
-	crdTransf = coordTransf.getCopy();
-
-	if (crdTransf == 0)
-	    g3ErrorHandler->fatal("%s - failed to copy coordinate transformation",
-			"DispBeamColumn3d::DispBeamColumn3d");
-
-	// Set connected external node IDs
-    connectedExternalNodes(0) = nd1;
-    connectedExternalNodes(1) = nd2;
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
 }
 
 DispBeamColumn3d::DispBeamColumn3d()
 :Element (0, ELE_TAG_DispBeamColumn3d),
 numSections(0), theSections(0), crdTransf(0),
-connectedExternalNodes(2), L(0.0), nd1Ptr(0), nd2Ptr(0),
+connectedExternalNodes(2), nd1Ptr(0), nd2Ptr(0),
 Q(12), q(6), rho(0.0)
 {
+  q0[0] = 0.0;
+  q0[1] = 0.0;
+  q0[2] = 0.0;
+  q0[3] = 0.0;
+  q0[4] = 0.0;
 
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
 }
 
 DispBeamColumn3d::~DispBeamColumn3d()
 {    
-    for (int i = 0; i < numSections; i++) {
-		if (theSections[i])
-			delete theSections[i];
-	}
-
-    // Delete the array of pointers to SectionForceDeformation pointer arrays
-    if (theSections)
-		delete [] theSections;
-
-	if (crdTransf)
-		delete crdTransf;
+  for (int i = 0; i < numSections; i++) {
+    if (theSections[i])
+      delete theSections[i];
+  }
+  
+  // Delete the array of pointers to SectionForceDeformation pointer arrays
+  if (theSections)
+    delete [] theSections;
+  
+  if (crdTransf)
+    delete crdTransf;
 }
 
 int
@@ -165,8 +188,7 @@ DispBeamColumn3d::setDomain(Domain *theDomain)
 		// Add some error check
 	}
 
-	L = crdTransf->getInitialLength();
-
+	double L = crdTransf->getInitialLength();
 	if (L == 0.0) {
 		// Add some error check
 	}
@@ -221,316 +243,427 @@ DispBeamColumn3d::revertToStart()
 int
 DispBeamColumn3d::update(void)
 {
-	// Update the transformation
-	crdTransf->update();
-
-    // Get basic deformations
-    static Vector v(6);
-	v = crdTransf->getBasicTrialDisp();
-
-	double oneOverL = 1.0/L;
-	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-
-	// Assuming member is prismatic ... have to move inside
-	// the loop if it is not prismatic
-	int order = theSections[0]->getOrder();
-	const ID &code = theSections[0]->getType();
-	Vector e(workArea, order);
-
-	// Loop over the integration points
-	for (int i = 0; i < numSections; i++) {
-
-		double xi6 = 6.0*pts(i,0);
-
-		int j;
-		for (j = 0; j < order; j++) {
-			switch(code(j)) {
-			case SECTION_RESPONSE_P:
-				e(j) = oneOverL*v(0); break;
-			case SECTION_RESPONSE_MZ:
-				e(j) = oneOverL*((xi6-4.0)*v(1) + (xi6-2.0)*v(2)); break;
-			case SECTION_RESPONSE_MY:
-				e(j) = oneOverL*((xi6-4.0)*v(3) + (xi6-2.0)*v(4)); break;
-			case SECTION_RESPONSE_T:
-				e(j) = oneOverL*v(5); break;
-			default:
-				e(j) = 0.0; break;
-			}
-		}
-
-		// Set the section deformations
-		theSections[i]->setTrialSectionDeformation(e);
-	}
-
-	return 0;
+  // Update the transformation
+  crdTransf->update();
+  
+  // Get basic deformations
+  static Vector v(6);
+  v = crdTransf->getBasicTrialDisp();
+  
+  double L = crdTransf->getInitialLength();
+  double oneOverL = 1.0/L;
+  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  
+  // Assuming member is prismatic ... have to move inside
+  // the loop if it is not prismatic
+  int order = theSections[0]->getOrder();
+  const ID &code = theSections[0]->getType();
+  Vector e(workArea, order);
+  
+  // Loop over the integration points
+  for (int i = 0; i < numSections; i++) {
+    
+    double xi6 = 6.0*pts(i,0);
+    
+    int j;
+    for (j = 0; j < order; j++) {
+      switch(code(j)) {
+      case SECTION_RESPONSE_P:
+	e(j) = oneOverL*v(0);
+	break;
+      case SECTION_RESPONSE_MZ:
+	e(j) = oneOverL*((xi6-4.0)*v(1) + (xi6-2.0)*v(2));
+	break;
+      case SECTION_RESPONSE_MY:
+	e(j) = oneOverL*((xi6-4.0)*v(3) + (xi6-2.0)*v(4));
+	break;
+      case SECTION_RESPONSE_T:
+	e(j) = oneOverL*v(5);
+	break;
+      default:
+	e(j) = 0.0;
+	break;
+      }
+    }
+    
+    // Set the section deformations
+    theSections[i]->setTrialSectionDeformation(e);
+  }
+  
+  return 0;
 }
 
 const Matrix&
 DispBeamColumn3d::getTangentStiff()
 {
-	static Matrix kb(6,6);
-
-	// Zero for integral
-	kb.Zero();
-	q.Zero();
-
-	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-
-	// Assuming member is prismatic ... have to move inside
-	// the loop if it is not prismatic
-	int order = theSections[0]->getOrder();
-	const ID &code = theSections[0]->getType();
-
-	double oneOverL = 1.0/L;
-	Matrix ka(workArea, order, 6);
-
-	// Loop over the integration points
-	for (int i = 0; i < numSections; i++) {
-
-		// Get the section tangent stiffness and stress resultant
-		const Matrix &ks = theSections[i]->getSectionTangent();
-		const Vector &s = theSections[i]->getStressResultant();
-
-		double xi6 = 6.0*pts(i,0);
-		ka.Zero();
-
-		// Perform numerical integration
-		//kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
-		double wti = wts(i)*oneOverL;
-		double tmp;
-		int j, k;
-		for (j = 0; j < order; j++) {
-			switch(code(j)) {
-			case SECTION_RESPONSE_P:
-				for (k = 0; k < order; k++)
-					ka(k,0) += ks(k,j)*wti;
-				break;
-			case SECTION_RESPONSE_MZ:
-				for (k = 0; k < order; k++) {
-					tmp = ks(k,j)*wti;
-					ka(k,1) += (xi6-4.0)*tmp;
-					ka(k,2) += (xi6-2.0)*tmp;
-				}
-                break;
-			case SECTION_RESPONSE_MY:
-				for (k = 0; k < order; k++) {
-					tmp = ks(k,j)*wti;
-					ka(k,3) += (xi6-4.0)*tmp;
-					ka(k,4) += (xi6-2.0)*tmp;
-				}
-				break;
-			case SECTION_RESPONSE_T:
-				for (k = 0; k < order; k++)
-					ka(k,5) += ks(k,j)*wti;
-				break;
-			default:
-				break;
-			}
-		}
-		for (j = 0; j < order; j++) {
-			switch (code(j)) {
-			case SECTION_RESPONSE_P:
-				for (k = 0; k < 6; k++)
-					kb(0,k) += ka(j,k);
-				break;
-			case SECTION_RESPONSE_MZ:
-				for (k = 0; k < 6; k++) {
-					tmp = ka(j,k);
-					kb(1,k) += (xi6-4.0)*tmp;
-					kb(2,k) += (xi6-2.0)*tmp;
-				}
-				break;
-			case SECTION_RESPONSE_MY:
-				for (k = 0; k < 6; k++) {
-					tmp = ka(j,k);
-					kb(3,k) += (xi6-4.0)*tmp;
-					kb(4,k) += (xi6-2.0)*tmp;
-				}
-				break;
-			case SECTION_RESPONSE_T:
-				for (k = 0; k < 6; k++)
-					kb(5,k) += ka(j,k);
-				break;
-			default:
-				break;
-			}
-		}
-
-		//q.addMatrixTransposeVector(1.0, *B, s, wts(i));
-		double si;
-		for (j = 0; j < order; j++) {
-			si = s(j)*wts(i);
-			switch(code(j)) {
-			case SECTION_RESPONSE_P:
-				q(0) += si; break;
-			case SECTION_RESPONSE_MZ:
-				q(1) += (xi6-4.0)*si; q(2) += (xi6-2.0)*si; break;
-			case SECTION_RESPONSE_MY:
-				q(3) += (xi6-4.0)*si; q(4) += (xi6-2.0)*si; break;
-			case SECTION_RESPONSE_T:
-				q(5) += si; break;
-			default:
-				break;
-			}
-		}
-
+  static Matrix kb(6,6);
+  
+  // Zero for integral
+  kb.Zero();
+  q.Zero();
+  
+  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  
+  // Assuming member is prismatic ... have to move inside
+  // the loop if it is not prismatic
+  int order = theSections[0]->getOrder();
+  const ID &code = theSections[0]->getType();
+  
+  double L = crdTransf->getInitialLength();
+  double oneOverL = 1.0/L;
+  Matrix ka(workArea, order, 6);
+  
+  // Loop over the integration points
+  for (int i = 0; i < numSections; i++) {
+    
+    // Get the section tangent stiffness and stress resultant
+    const Matrix &ks = theSections[i]->getSectionTangent();
+    const Vector &s = theSections[i]->getStressResultant();
+    
+    double xi6 = 6.0*pts(i,0);
+    ka.Zero();
+    
+    // Perform numerical integration
+    //kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
+    double wti = wts(i)*oneOverL;
+    double tmp;
+    int j, k;
+    for (j = 0; j < order; j++) {
+      switch(code(j)) {
+      case SECTION_RESPONSE_P:
+	for (k = 0; k < order; k++)
+	  ka(k,0) += ks(k,j)*wti;
+	break;
+      case SECTION_RESPONSE_MZ:
+	for (k = 0; k < order; k++) {
+	  tmp = ks(k,j)*wti;
+	  ka(k,1) += (xi6-4.0)*tmp;
+	  ka(k,2) += (xi6-2.0)*tmp;
 	}
+	break;
+      case SECTION_RESPONSE_MY:
+	for (k = 0; k < order; k++) {
+	  tmp = ks(k,j)*wti;
+	  ka(k,3) += (xi6-4.0)*tmp;
+	  ka(k,4) += (xi6-2.0)*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_T:
+	for (k = 0; k < order; k++)
+	  ka(k,5) += ks(k,j)*wti;
+	break;
+      default:
+	break;
+      }
+    }
+    for (j = 0; j < order; j++) {
+      switch (code(j)) {
+      case SECTION_RESPONSE_P:
+	for (k = 0; k < 6; k++)
+	  kb(0,k) += ka(j,k);
+	break;
+      case SECTION_RESPONSE_MZ:
+	for (k = 0; k < 6; k++) {
+	  tmp = ka(j,k);
+	  kb(1,k) += (xi6-4.0)*tmp;
+	  kb(2,k) += (xi6-2.0)*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_MY:
+	for (k = 0; k < 6; k++) {
+	  tmp = ka(j,k);
+	  kb(3,k) += (xi6-4.0)*tmp;
+	  kb(4,k) += (xi6-2.0)*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_T:
+	for (k = 0; k < 6; k++)
+	  kb(5,k) += ka(j,k);
+	break;
+      default:
+	break;
+      }
+    }
+    
+    //q.addMatrixTransposeVector(1.0, *B, s, wts(i));
+    double si;
+    for (j = 0; j < order; j++) {
+      si = s(j)*wts(i);
+      switch(code(j)) {
+      case SECTION_RESPONSE_P:
+	q(0) += si;
+	break;
+      case SECTION_RESPONSE_MZ:
+	q(1) += (xi6-4.0)*si; q(2) += (xi6-2.0)*si;
+	break;
+      case SECTION_RESPONSE_MY:
+	q(3) += (xi6-4.0)*si; q(4) += (xi6-2.0)*si;
+	break;
+      case SECTION_RESPONSE_T:
+	q(5) += si;
+	break;
+      default:
+	break;
+      }
+    }
+    
+  }
+  
+  q(0) += q0[0];
+  q(1) += q0[1];
+  q(2) += q0[2];
+  q(3) += q0[3];
+  q(4) += q0[4];
 
-	// Transform to global stiffness
-	K = crdTransf->getGlobalStiffMatrix(kb, q);
-
-	return K;
+  // Transform to global stiffness
+  K = crdTransf->getGlobalStiffMatrix(kb, q);
+  
+  return K;
 }
 
 const Matrix&
 DispBeamColumn3d::getDamp()
 {
-	K.Zero();
-	
-	return K;
+  K.Zero();
+  
+  return K;
 }
 
 const Matrix&
 DispBeamColumn3d::getMass()
 {
-	K.Zero();
-
-	if (rho == 0.0)
-		return K;
-
-	double m = 0.5*rho*L;
-
-	K(0,0) = K(1,1) = K(2,2) = K(6,6) = K(7,7) = K(8,8) = m;
-
-	return K;
+  K.Zero();
+  
+  if (rho == 0.0)
+    return K;
+  
+  double L = crdTransf->getInitialLength();
+  double m = 0.5*rho*L;
+  
+  K(0,0) = K(1,1) = K(2,2) = K(6,6) = K(7,7) = K(8,8) = m;
+  
+  return K;
 }
 
 void
 DispBeamColumn3d::zeroLoad(void)
 {
-	Q.Zero();
+  Q.Zero();
 
-	return;
+  q0[0] = 0.0;
+  q0[1] = 0.0;
+  q0[2] = 0.0;
+  q0[3] = 0.0;
+  q0[4] = 0.0;
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
+
+  return;
 }
 
 int 
 DispBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("DispBeamColumn3d::addLoad - load type unknown for truss with tag: %d\n",
-			  this->getTag());
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
+  double L = crdTransf->getInitialLength();
 
-  return -1;
+  if (type == LOAD_TAG_Beam3dUniformLoad) {
+    double wy = data(0)*loadFactor;  // Transverse
+    double wz = data(1)*loadFactor;  // Transverse
+    double wx = data(2)*loadFactor;  // Axial (+ve from node I to J)
+
+    double Vy = 0.5*wy*L;
+    double Mz = Vy*L/6.0; // wy*L*L/12
+    double Vz = 0.5*wz*L;
+    double My = Vz*L/6.0; // wz*L*L/12
+    double P = wx*L;
+
+    // Reactions in basic system
+    p0[0] -= P;
+    p0[1] -= Vy;
+    p0[2] -= Vy;
+    p0[3] -= Vz;
+    p0[4] -= Vz;
+
+    // Fixed end forces in basic system
+    q0[0] -= 0.5*P;
+    q0[1] -= Mz;
+    q0[2] += Mz;
+    q0[3] -= My;
+    q0[4] += My;
+  }
+  else if (type == LOAD_TAG_Beam3dPointLoad) {
+    double Py = data(0)*loadFactor;
+    double Pz = data(1)*loadFactor;
+    double N  = data(2)*loadFactor;
+    double aOverL = data(3);
+    double a = aOverL*L;
+    double b = L-a;
+
+    // Reactions in basic system
+    p0[0] -= N;
+    double V1, V2;
+    V1 = Py*(1.0-aOverL);
+    V2 = Py*aOverL;
+    p0[1] -= V1;
+    p0[2] -= V2;
+    V1 = Pz*(1.0-aOverL);
+    V2 = Pz*aOverL;
+    p0[3] -= V1;
+    p0[4] -= V2;
+
+    double L2 = 1.0/(L*L);
+    double a2 = a*a;
+    double b2 = b*b;
+
+    // Fixed end forces in basic system
+    q0[0] -= N*aOverL;
+    double M1, M2;
+    M1 = -a * b2 * Py * L2;
+    M2 = a2 * b * Py * L2;
+    q0[1] += M1;
+    q0[2] += M2;
+    M1 = -a * b2 * Pz * L2;
+    M2 = a2 * b * Pz * L2;
+    q0[3] += M1;
+    q0[4] += M2;
+  }
+  else {
+    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
+			    "DispBeamColumn2d::addLoad()", this->getTag());
+    return -1;
+  }
+
+  return 0;
 }
 
 int 
 DispBeamColumn3d::addInertiaLoadToUnbalance(const Vector &accel)
 {
-	// Check for a quick return
-	if (rho == 0.0) 
-		return 0;
-
-	// Get R * accel from the nodes
-	const Vector &Raccel1 = nd1Ptr->getRV(accel);
-	const Vector &Raccel2 = nd2Ptr->getRV(accel);
-
-    if (6 != Raccel1.Size() || 6 != Raccel2.Size()) {
-		g3ErrorHandler->warning("DispBeamColumn3d::addInertiaLoadToUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
-		return -1;
-    }
-
-	double m = 0.5*rho*L;
-
-    // Want to add ( - fact * M R * accel ) to unbalance
-	// Take advantage of lumped mass matrix
-	Q(0) -= m*Raccel1(0);
-	Q(1) -= m*Raccel1(1);
-    Q(2) -= m*Raccel1(2);
-	Q(6) -= m*Raccel2(0);
-	Q(7) -= m*Raccel2(1);
-    Q(8) -= m*Raccel2(2);
-
+  // Check for a quick return
+  if (rho == 0.0) 
     return 0;
+  
+  // Get R * accel from the nodes
+  const Vector &Raccel1 = nd1Ptr->getRV(accel);
+  const Vector &Raccel2 = nd2Ptr->getRV(accel);
+  
+  if (6 != Raccel1.Size() || 6 != Raccel2.Size()) {
+    g3ErrorHandler->warning("DispBeamColumn3d::addInertiaLoadToUnbalance %s\n",
+			    "matrix and vector sizes are incompatable");
+    return -1;
+  }
+  
+  double L = crdTransf->getInitialLength();
+  double m = 0.5*rho*L;
+  
+  // Want to add ( - fact * M R * accel ) to unbalance
+  // Take advantage of lumped mass matrix
+  Q(0) -= m*Raccel1(0);
+  Q(1) -= m*Raccel1(1);
+  Q(2) -= m*Raccel1(2);
+  Q(6) -= m*Raccel2(0);
+  Q(7) -= m*Raccel2(1);
+  Q(8) -= m*Raccel2(2);
+  
+  return 0;
 }
 
 const Vector&
 DispBeamColumn3d::getResistingForce()
 {
-	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  
+  // Assuming member is prismatic ... have to move inside
+  // the loop if it is not prismatic
+  int order = theSections[0]->getOrder();
+  const ID &code = theSections[0]->getType();
+  
+  // Zero for integration
+  q.Zero();
+  
+  // Loop over the integration points
+  for (int i = 0; i < numSections; i++) {
+    
+    double xi6 = 6.0*pts(i,0);
+    
+    // Get section stress resultant
+    const Vector &s = theSections[i]->getStressResultant();
+    
+    // Perform numerical integration on internal force
+    //q.addMatrixTransposeVector(1.0, *B, s, wts(i));
+    
+    double si;
+    for (int j = 0; j < order; j++) {
+      si = s(j)*wts(i);
+      switch(code(j)) {
+      case SECTION_RESPONSE_P:
+	q(0) += si;
+	break;
+      case SECTION_RESPONSE_MZ:
+	q(1) += (xi6-4.0)*si; q(2) += (xi6-2.0)*si;
+	break;
+      case SECTION_RESPONSE_MY:
+	q(3) += (xi6-4.0)*si; q(4) += (xi6-2.0)*si;
+	break;
+      case SECTION_RESPONSE_T:
+	q(5) += si;
+	break;
+      default:
+	break;
+      }
+    }
+    
+  }
+  
+  q(0) += q0[0];
+  q(1) += q0[1];
+  q(2) += q0[2];
+  q(3) += q0[3];
+  q(4) += q0[4];
 
-	// Assuming member is prismatic ... have to move inside
-	// the loop if it is not prismatic
-	int order = theSections[0]->getOrder();
-	const ID &code = theSections[0]->getType();
+  // Transform forces
+  Vector p0Vec(p0, 5);
 
-	// Zero for integration
-	q.Zero();
-
-	// Loop over the integration points
-	for (int i = 0; i < numSections; i++) {
-
-		double xi6 = 6.0*pts(i,0);
-
-		// Get section stress resultant
-		const Vector &s = theSections[i]->getStressResultant();
-
-		// Perform numerical integration on internal force
-		//q.addMatrixTransposeVector(1.0, *B, s, wts(i));
-
-		double si;
-		for (int j = 0; j < order; j++) {
-			si = s(j)*wts(i);
-			switch(code(j)) {
-			case SECTION_RESPONSE_P:
-				q(0) += si; break;
-			case SECTION_RESPONSE_MZ:
-				q(1) += (xi6-4.0)*si; q(2) += (xi6-2.0)*si; break;
-			case SECTION_RESPONSE_MY:
-				q(3) += (xi6-4.0)*si; q(4) += (xi6-2.0)*si; break;
-			case SECTION_RESPONSE_T:
-				q(5) += si; break;
-			default:
-				break;
-			}
-		}
-
-	}
-
-	// Transform forces
-	static Vector dummy(3);		// No distributed loads
-	P = crdTransf->getGlobalResistingForce(q,dummy);
-
-	// Subtract other external nodal loads ... P_res = P_int - P_ext
-	P.addVector(1.0, Q, -1.0);
-
-	return P;
+  P = crdTransf->getGlobalResistingForce(q, p0Vec);
+  
+  // Subtract other external nodal loads ... P_res = P_int - P_ext
+  P.addVector(1.0, Q, -1.0);
+  
+  return P;
 }
 
 const Vector&
 DispBeamColumn3d::getResistingForceIncInertia()
 {
-	// Check for a quick return
-	if (rho == 0.0)
-		return this->getResistingForce();
-
-	const Vector &accel1 = nd1Ptr->getTrialAccel();
-	const Vector &accel2 = nd2Ptr->getTrialAccel();
-	
-	// Compute the current resisting force
-	this->getResistingForce();
-
-	double m = 0.5*rho*L;
-
-	P(0) += m*accel1(0);
-	P(1) += m*accel1(1);
-    P(2) += m*accel1(2);
-	P(6) += m*accel2(0);
-	P(7) += m*accel2(1);
-    P(8) += m*accel2(2);
-
-	return P;
+  // Check for a quick return
+  if (rho == 0.0)
+    return this->getResistingForce();
+  
+  const Vector &accel1 = nd1Ptr->getTrialAccel();
+  const Vector &accel2 = nd2Ptr->getTrialAccel();
+  
+  // Compute the current resisting force
+  this->getResistingForce();
+  
+  double L = crdTransf->getInitialLength();
+  double m = 0.5*rho*L;
+  
+  P(0) += m*accel1(0);
+  P(1) += m*accel1(1);
+  P(2) += m*accel1(2);
+  P(6) += m*accel2(0);
+  P(7) += m*accel2(1);
+  P(8) += m*accel2(2);
+  
+  return P;
 }
 
 int
@@ -549,10 +682,29 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
 void
 DispBeamColumn3d::Print(ostream &s, int flag)
 {
-	s << "\nDispBeamColumn3d, element id:  " << this->getTag() << endl;
-	s << "\tConnected external nodes:  " << connectedExternalNodes;
-	s << "\tmass density:  " << rho << endl;
-	theSections[0]->Print(s,flag);
+  s << "\nDispBeamColumn3d, element id:  " << this->getTag() << endl;
+  s << "\tConnected external nodes:  " << connectedExternalNodes;
+  s << "\tmass density:  " << rho << endl;
+
+  double N, Mz1, Mz2, Vy, My1, My2, Vz, T;
+  double L = crdTransf->getInitialLength();
+  double oneOverL = 1.0/L;
+
+  N   = q(0);
+  Mz1 = q(1);
+  Mz2 = q(2);
+  Vy  = (Mz1+Mz2)*oneOverL;
+  My1 = q(3);
+  My2 = q(4);
+  Vz  = (My1+My2)*oneOverL;
+  T   = q(5);
+
+  s << "\tEnd 1 Forces (P Mz Vy My Vz T): "
+    << -N+p0[0] << ' ' << Mz1 << ' ' <<  Vy+p0[1] << ' ' << My1 << ' ' <<  Vz+p0[3] << ' ' << -T << endl;
+  s << "\tEnd 2 Forces (P Mz Vy My Vz T): "
+    <<  N << ' ' << Mz2 << ' ' << -Vy+p0[2] << ' ' << My2 << ' ' << -Vz+p0[4] << ' ' <<  T << endl;
+  
+  theSections[0]->Print(s,flag);
 }
 
 
@@ -609,37 +761,45 @@ DispBeamColumn3d::setResponse(char **argv, int argc, Information &eleInfo)
 int 
 DispBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 {
-  double V;
+  double N, V, M1, M2, T;
+  double L = crdTransf->getInitialLength();
 
   switch (responseID) {
-    case 1:  // global forces
-      return eleInfo.setVector(this->getResistingForce());
+  case 1:  // global forces
+    return eleInfo.setVector(this->getResistingForce());
+    
+  case 2:
+    // Axial
+    N = q(0);
+    P(6) =  N;
+    P(0) = -N+p0[0];
+    
+    // Torsion
+    T = q(5);
+    P(9) =  T;
+    P(3) = -T;
+    
+    // Moments about z and shears along y
+    M1 = q(1);
+    M2 = q(2);
+    P(5)  = M1;
+    P(11) = M2;
+    V = (M1+M2)/L;
+    P(1) =  V+p0[1];
+    P(7) = -V+p0[2];
+    
+    // Moments about y and shears along z
+    M1 = q(3);
+    M2 = q(4);
+    P(4)  = M1;
+    P(10) = M2;
+    V = (M1+M2)/L;
+    P(2) = -V+p0[3];
+    P(8) =  V+p0[4];
 
-    case 2:
-		// Axial
-		P(6) = q(0);
-		P(0) = -q(0);
-
-		// Torsion
-		P(11) = q(5);
-		P(5)  = -q(5);
-
-		// Moments about z and shears along y
-		P(2) = q(1);
-		P(8) = q(2);
-		V = (q(1)+q(2))/L;
-		P(1) = V;
-		P(7) = -V;
-
-		// Moments about y and shears along z
-		P(4)  = q(3);
-		P(10) = q(4);
-		V = (q(3)+q(4))/L;
-		P(3) = -V;
-		P(9) = V;
-      return eleInfo.setVector(P);
-      
-    default: 
-	  return -1;
+    return eleInfo.setVector(P);
+    
+  default: 
+    return -1;
   }
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-05-16 00:07:38 $
+// $Revision: 1.5 $
+// $Date: 2002-06-07 18:02:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.h,v $
 
 // Written: MHS
@@ -97,15 +97,16 @@ class DispBeamColumn3d : public Element
 	CrdTransf3d *crdTransf;        // pointer to coordinate tranformation object 
 
     ID connectedExternalNodes; // Tags of quad nodes
-	double L;
 
     Node *nd1Ptr;		// Pointers to quad nodes
     Node *nd2Ptr;
 
     static Matrix K;		// Element stiffness, damping, and mass Matrix
     static Vector P;		// Element resisting force vector
-	Vector Q;		// Applied nodal loads
-	Vector q;		// Basic force
+    Vector Q;		// Applied nodal loads
+    Vector q;		// Basic force
+    double q0[5];  // Fixed end forces in basic system (no torsion)
+    double p0[5];  // Reactions in basic system (no torsion)
     double rho;			// Mass density per unit length
 
 	static double workArea[];
