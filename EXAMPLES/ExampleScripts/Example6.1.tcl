@@ -126,6 +126,7 @@ algorithm Newton
 numberer RCM
 constraints Plain 
 integrator Newmark 0.5 0.25
+system ProfileSPD
 #integrator GeneralizedMidpoint 0.50
 analysis Transient
 

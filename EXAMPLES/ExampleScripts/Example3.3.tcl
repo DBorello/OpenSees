@@ -70,6 +70,7 @@ set accelSeries "Path -filePath $outFile -dt $dt -factor $g"
 #                         tag dir 
 pattern UniformExcitation  2   1  -accel $accelSeries
 
+# set the rayleigh damping factors for nodes & elements
 rayleigh 0.0 0.0 0.0 0.000625
 
 # ----------------------------------------------------
@@ -120,8 +121,8 @@ recorder Node -time -file node33.out -node 3 4 -dof 1 2 3 disp
 
 # Create recorders to monitor section forces and deformations
 # at the base of the left column
-recorder Element -ele 1 -time -file ele1secForce.out section 1 force
-recorder Element -ele 1 -time -file ele1secDef.out   section 1 deformation
+recorder Element -time -file ele1secForce.out -ele 1 section 1 force
+recorder Element -time -file ele1secDef.out   -ele 1 section 1 deformation
 
 # --------------------------------
 # End of recorder generation
@@ -133,8 +134,7 @@ recorder Element -ele 1 -time -file ele1secDef.out   section 1 deformation
 # ------------------------------
 
 # Perform an eigenvalue analysis
-puts [eigen 2]
-
+puts "eigen values at start of transient: [eigen 2]"
 
 
 # set some variables
@@ -161,7 +161,7 @@ while {$ok == 0 && $tCurrent < $tFinal} {
     set tCurrent [getTime]
 }
 
-
+# Print a message to indicate if analysis succesfull or not
 if {$ok == 0} {
    puts "Transient analysis completed SUCCESSFULLY";
 } else {
@@ -169,7 +169,7 @@ if {$ok == 0} {
 }
 
 # Perform an eigenvalue analysis
-puts [eigen 2]
+puts "eigen values at start of transient: [eigen 2]"
 
 # Print state of node 3
 print node 3

@@ -57,7 +57,7 @@ integrator LoadControl  1.0  1
 
 # Convergence test
 #                  tolerance maxIter displayCode
-test NormUnbalance     1.0e-10    20         1
+test NormUnbalance     1.0e-10    20     0
 
 # Solution algorithm
 algorithm Newton

@@ -102,12 +102,11 @@ analysis Static
 # ------------------------------
 
 # create a Recorder object for the nodal displacements at node 4
-recorder Node -file example.out -load -node 4 -dof 1 2 disp
+recorder Node -file example.out -time -node 4 -dof 1 2 disp
 
 # --------------------------------
 # End of recorder generation
 # ---------------------------------
-
 
 # ------------------------------
 # Finally perform the analysis

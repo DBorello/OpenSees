@@ -287,7 +287,7 @@ set displayMode "displayON"
 
 if {$displayMode == "displayON"} {
     # a window to plot the nodal displacements versus load for node 3
-    recorder plot Node41.out Node_3_Xdisp 10 340 300 300 -columns 3 1 -dT 1.0
+    recorder plot Node41.out Node_3_Xdisp 10 340 300 300 -columns 3 1 -dT 0.1
 }
 
 # ------------------------------

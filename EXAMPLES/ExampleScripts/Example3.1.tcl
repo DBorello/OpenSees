@@ -137,6 +137,8 @@ pattern Plain 1 "Linear" {
 	load  4   0.0  [expr -$P] 0.0
 }
 
+# initialize in case we need to do an initial stiffness iteration
+initialize
 
 # ------------------------------
 # End of model generation
@@ -192,16 +194,11 @@ recorder Node -file nodeGravity.out -time -node 3 4 -dof 1 2 3 disp
 # Finally perform the analysis
 # ------------------------------
 
-# initialize in case we need to do an initial stiffness iteration
-initialize
-
 # perform the gravity load analysis, requires 10 steps to reach the load level
 analyze 10
-
 
 # Print out the state of nodes 3 and 4
 print node 3 4
 
-
 # Print out the state of element 1
-print ele 1
+print ele 1 2 3

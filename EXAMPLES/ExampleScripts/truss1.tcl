@@ -13,8 +13,8 @@
 #              P
 #
 #
-# $Revision: 1.3 $
-# $Date: 2002-12-17 02:03:54 $
+# $Revision: 1.4 $
+# $Date: 2002-12-19 01:23:31 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/truss1.tcl,v $
 
 set DISPLAY ON
@@ -91,7 +91,7 @@ pattern Plain 2 Linear {
 }
 
 #create the recorder
-recorder Node -load -node 3  -dof 2 -file Node.out disp
+recorder Node -load -node 3 -dof 2 -file Node.out disp
 recorder Element -load -ele 1 2 3 -file Element.out axialForce
 
 if {$DISPLAY == "ON"} {

@@ -90,7 +90,7 @@ recorder Node -file node32.out -time -node 3 4 -dof 1 2 3 disp
 #recorder plot node32.out hi 10 10 300 300 -columns 2 1
 
 # Create a recorder to monitor element forces in columns
-recorder Element -ele 1 2 -time -file ele32.out force
+recorder Element -file ele32.out -time -ele 1 2 localForce
 
 # --------------------------------
 # End of recorder generation
