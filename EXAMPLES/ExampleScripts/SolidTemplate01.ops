@@ -42,47 +42,82 @@ fix 4 0 0 1
 
 # Elastic material
 # Linear elastic material
-#nDMaterial ElasticIsotropic3D  2 70000 0.3
-#nDMaterial ElasticIsotropic3DL  2 70000 0.3
+#nDMaterial ElasticIsotropic3D  2 70000 0.3 1.8
 
-# Nonlinear elastic material
-#nDMaterial ElasticIsotropic3DNL 2 70000 0.3 0.6 200
+#================================================================
+# Pressure independent elastic material
+#nDMaterial PresureDependent3D 2 70000 0.3 1.8 0.6 200
 
 #Elastic-plastic model
+#================================================================
 # Drucker-Prager model
+#Yield surface 
 set DPys "-DP"
+
+#potential surface
 set DPps "-VM"
+
+# Scalar evolution law: linear hardening coef = 1.0
 set ES1  "-Leq  1.0"
+
+# Tensorial evolution law: linear hardening coef. = 0.0
 set ET1  "-Linear  0.0"
+
+# initial stress
 set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
 
 #
-#																																													 alpha		 k
+#__________E________Eo____v___rho______________alpha___k
 set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
 #
 # where
 #alpha = 2 sin(phi) / (3^0.5) / (3-sin(phi) ), phi is the friction angle
 # and k is the cohesion
 
+#================================================================
 ## Cam clay model
+# yield surface M = 1.2
 #set DPys "-CC 1.2"
+
+# Potential surface M = 1.2
 #set DPps "-CC 1.2"
-#set ES1  "-NLp  0.65 0.19 0.06"
+
+#Scalar evolution law___void ratio___Lamda___Kappa 
+#set ES1  "-NLp           0.65        0.19   0.06"
+
+#Tensorial evolution law
 #set ET1  "-Linear  0.0"
+
+# initial stress
 #set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
+
+#____________E______Eo_____v__rho________________po
 #set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 1 200.0 -stressp $stressp"
 
+#================================================================
 # von Mises model
+# Yield surface
 #set DPys "-VM"
+
+# Potential surface
 #set DPps "-VM"
+
+#Scalar evolution law
 #set ES1  "-Leq  0.0"
+
+#Tensorial evolution law
 #set ET1  "-Linear  0.0"
+
+# initial stress
 #set stressp "0.10 0 0 0 0.0 0 0 0 0.0"
+
+#____________E______Eo_____v__rho________________Cu(undrained shear strength)
 #set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2 10.0 0.0 -stressp $stressp"
+
 #
 nDMaterial Template3Dep 1 -YS $DPys -PS $DPps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
 
-#            tag     8 nodes      matID  bforce1 bforce2 bforce3  rho
+#____________tag_____8 nodes______matID__bforce1_bforce2_bforce3_rho
 element brick  1  5 6 7 8 1 2 3 4   1      0.0     0.0    -9.81  1.8
     
 #stage 1
