@@ -18,12 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-11 22:59:25 $
+// $Revision: 1.2 $
+// $Date: 2001-07-11 23:50:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.h,v $
                                                                         
-
-
 #include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
@@ -35,9 +33,6 @@
 #include <Element.h>
 #include <Node.h>
 #include <NDMaterial.h>
-
-#define ELE_TAG_EnhancedQuad 3459
- 
 
 class EnhancedQuad : public Element {
 

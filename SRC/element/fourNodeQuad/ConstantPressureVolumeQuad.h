@@ -17,9 +17,6 @@
 #include <Node.h>
 #include <NDMaterial.h>
 
-#define ND_TAG_ConstantPressureVolumeQuad 2002 
-
-
 class ConstantPressureVolumeQuad : public Element 
 {
 

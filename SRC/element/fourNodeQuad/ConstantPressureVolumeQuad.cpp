@@ -51,7 +51,7 @@ double ConstantPressureVolumeQuad :: wg[] = { 1.0, 1.0, 1.0, 1.0 } ;
 
 //null constructor
 ConstantPressureVolumeQuad :: ConstantPressureVolumeQuad( ) :
-Element( 0, ND_TAG_ConstantPressureVolumeQuad ),
+Element( 0, ELE_TAG_ConstantPressureVolumeQuad ),
 connectedExternalNodes(4) 
 { 
   return ; 
@@ -66,7 +66,7 @@ ConstantPressureVolumeQuad :: ConstantPressureVolumeQuad(
 			    int node3,
 			    int node4,
 			    NDMaterial &theMaterial ) :
-Element( tag, ND_TAG_ConstantPressureVolumeQuad ),
+Element( tag, ELE_TAG_ConstantPressureVolumeQuad ),
 connectedExternalNodes(4) 
 {
   connectedExternalNodes(0) = node1 ;
