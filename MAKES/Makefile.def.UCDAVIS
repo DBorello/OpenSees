@@ -152,7 +152,6 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 # ######  KAI KAI  KAI KAI KAI KAI KAI KAI  KAI KAI KAI KAI      
 # CC++ =  KCC
 # CC =   KCC
-# LINKER= KCC
 # FC   =  g77
 # #FC   =  pgf90
 # LINKER= KCC 
@@ -169,7 +168,7 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 # ##..##..CCFLAGS = -c   --strict_warnings --inline_auto_space_time=1.0 +K3 --display_error_number -o $*.o # 196.760u 6.930s 3:26.86 98.4% 0+0k 0+0io 61538pf+0w
 # ##..##..CCFLAGS = -c   --strict_warnings --inline_auto_space_time=75.0 +K3 --display_error_number -o $*.o # 196.760u 6.930s 3:26.86 98.4% 0+0k 0+0io 61538pf+0w
 # ##..
-##..
+# ##..
 
 
 ########################################    GNU
