@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.58 $
-// $Date: 2004-07-20 22:23:06 $
+// $Revision: 1.59 $
+// $Date: 2004-07-22 19:31:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -179,6 +179,7 @@
 #define ND_TAG_FluidSolidPorousMaterial        100
 #define ND_TAG_PressureDependMultiYield		101
 #define ND_TAG_PressureIndependMultiYield		102
+#define ND_TAG_PressureDependMultiYield02		103
 #define ND_TAG_FeapMaterial                 1000
 #define ND_TAG_FeapMaterial01                 1001
 #define ND_TAG_FeapMaterial02                 1002
