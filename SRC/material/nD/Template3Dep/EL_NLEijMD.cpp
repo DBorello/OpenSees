@@ -38,25 +38,24 @@
 // Default constructor
 //================================================================================
 EvolutionLaw_NL_EijMD::EvolutionLaw_NL_EijMD( 
-                    //double eod,
-                    //double ad, 
-    		    double Mcd,    
-    		    double Med,    
-    		    //double Lambdad,
-    		    //double ec_refd, 
-    		    //double p_refd, 
-    		    double kc_bd, 
-    		    double kc_dd, 
-    		    double ke_bd, 
-    		    double ke_dd, 
-    		    double hod,	 
-    		    double Cmd,
-    		    double Aod,
-    		    double Fmaxd,   
-    	            double Cfd):    
-    		    //double ed,    
-  //eo(eod), a(ad), ec_ref(ec_refd), p_ref(p_refd), Lambda(Lambdad),
-  Mc(Mcd), Me(Med),  
+                           double eod = 0.85,
+    			   double ad  = 0.5,    
+    			   double Mcd = 1.14,//1.14, 
+    			   double Med = 1.14,//1.14, 
+    			   double Lambdad = 0.025,
+    			   double ec_refd = 0.8, 
+    			   double p_refd = 160.0, 
+    			   double kc_bd = 3.975, 
+    			   double kc_dd = 4.200, 
+    			   double ke_bd = 2.000, 
+    			   double ke_dd = 0.07,  
+    			   double hod = 1200,	 
+    			   double Cmd = 0.00,
+    			   double Aod = 2.64,    
+    			   double Fmaxd = 100,   
+    			   double Cfd = 100):
+    			   //double ed  = 0.85,    
+  eo(eod), a(ad), Mc(Mcd), Me(Med), Lambda(Lambdad), ec_ref(ec_refd), p_ref(p_refd),  
   kc_b(kc_bd), kc_d(kc_dd), ke_b(ke_bd), ke_d(ke_dd), ho(hod), Cm(Cmd),
   D(0.0), Ao(Aod), Fmax(Fmaxd), Cf(Cfd)
   { } 
@@ -67,18 +66,18 @@ EvolutionLaw_NL_EijMD::EvolutionLaw_NL_EijMD(
 
 EvolutionLaw_NL_EijMD::EvolutionLaw_NL_EijMD(const EvolutionLaw_NL_EijMD &MDE ) {
 
-    //this->a      = MDE.geta();
+    this->a      = MDE.geta();
     this->Mc     = MDE.getMc();
     this->Me     = MDE.getMe();
-    //this->Lambda = MDE.getLambda();
-    //this->ec_ref = MDE.getec_ref();
-    //this->p_ref=  MDE.getp_ref();
+    this->Lambda = MDE.getLambda();
+    this->ec_ref = MDE.getec_ref();
+    this->p_ref=  MDE.getp_ref();
     this->kc_b =  MDE.getkc_b();
     this->kc_d =  MDE.getkc_d();
     this->ke_b =  MDE.getke_b();
     this->ke_d =  MDE.getke_d();
     this->ho   =  MDE.getho();
-    //this->eo   =  MDE.geteo();
+    this->eo   =  MDE.geteo();
     //this->e   =  MDE.gete();
     this->Cm   =  MDE.getCm();
     //D is also needed in PS, so it is copied to 2nd cell of scalar var array
@@ -260,11 +259,11 @@ OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_NL_EijMD & MDEL)
     //os.width(10);       
     os << "Me = "  << MDEL.getMe() << "; ";
     //os.width(10);       
-    //os << "Lambda = " << MDEL.getLambda() << "; ";
+    os << "Lambda = " << MDEL.getLambda() << "; ";
     //os.width(10);       
-    //os << "ec_ref = " << MDEL.getec_ref() << "; ";
+    os << "ec_ref = " << MDEL.getec_ref() << "; ";
     //os.width(10);       
-    //os << "p_ref = " << MDEL.getp_ref() << "kPa"  << "; " << endln;
+    os << "p_ref = " << MDEL.getp_ref() << "kPa"  << "; " << endln;
 
     //os.width(10);       
     os << "kc_b = " << MDEL.getkc_b() << "; ";
@@ -322,11 +321,13 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
     double e = EPS->gete();
     //Should focus on plastic volumetric strain  Joey 02-18-03
     //double de = -(1.0 + geteo())*st_vol; //bug found should be (-st_vol) 07-16-02 Compressive strain is negative
-    double de = -(1.0 + (EPS->geteo()) )*st_vol;
+    //double de = -(1.0 + (EPS->geteo()) )*st_vol; //ZC
+    double de = -(1.0 + eo )*st_vol;    
     //e = e + de;
     EPS->sete( e + de );
     
-    double ec = (EPS->getec()) - (EPS->getLam()) * log( p / (EPS->getpo()) );
+    //double ec = (EPS->getec()) - (EPS->getLam()) * log( p / (EPS->getpo()) );
+    double ec = getec_ref() - getLambda() * log( p / getp_ref() );    
     double xi = EPS->gete() + de - ec;
     EPS->setpsi( xi );
     //EPS->setScalarVar(3, e); // e also stored in scalar array's 3nd cell for PS
@@ -493,11 +494,11 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
 //================================================================================
 // Private accessory functions
 
-////================================================================================
-//double EvolutionLaw_NL_EijMD::geta() const 
-//{
-//    return a;
-//}
+//================================================================================
+double EvolutionLaw_NL_EijMD::geta() const 
+{
+    return a;
+}
 
 //================================================================================
 double EvolutionLaw_NL_EijMD::getMc() const 
@@ -512,23 +513,23 @@ double EvolutionLaw_NL_EijMD::getMe() const
 }
 
 
-////================================================================================
-//double EvolutionLaw_NL_EijMD::getLambda() const
-//{
-//    return Lambda;
-//}
+//================================================================================
+double EvolutionLaw_NL_EijMD::getLambda() const
+{
+    return Lambda;
+}
 
-////================================================================================
-//double EvolutionLaw_NL_EijMD::getec_ref() const
-//{
-//    return ec_ref;
-//}
+//================================================================================
+double EvolutionLaw_NL_EijMD::getec_ref() const
+{
+    return ec_ref;
+}
 
-////================================================================================
-//double EvolutionLaw_NL_EijMD::getp_ref() const 
-//{
-//    return p_ref;
-//}
+//================================================================================
+double EvolutionLaw_NL_EijMD::getp_ref() const 
+{
+    return p_ref;
+}
 
 //================================================================================
 double EvolutionLaw_NL_EijMD::getkc_b() const
@@ -572,11 +573,11 @@ double EvolutionLaw_NL_EijMD::getCm() const
     return Cm;
 }
 
-////================================================================================
-//double EvolutionLaw_NL_EijMD::geteo() const
-//{       
-//    return eo;
-//}
+//================================================================================
+double EvolutionLaw_NL_EijMD::geteo() const
+{       
+    return eo;
+}
 
 ////================================================================================
 //double EvolutionLaw_NL_EijMD::gete() const

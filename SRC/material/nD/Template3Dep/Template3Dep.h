@@ -15,6 +15,7 @@
 #                                                                              #
 # DATE:              08-03-2000                                                #
 # UPDATE HISTORY:    09-12-2000                                                #
+#		     May 2004, Zhao Cheng spliting the elastic part	       #
 #                                                                              #
 #                                                                              #
 # SHORT EXPLANATION: The Template3Dep class is used to hold specific           #
@@ -44,6 +45,7 @@
 //#include <MD_YS.h>
 //#include <MD_PS.h>
 #include <YS.h>
+#include <PS.h>
 #include <EL_S.h>
 #include <EL_T.h>
 #include <EPState.h>
@@ -51,9 +53,14 @@
 #include <Channel.h>
 #include <G3Globals.h>
 
-#include <DP_YS.h>
-#include <DP_PS.h>
-#include <EPState.h>
+//#include <DP_YS.h>
+//#include <DP_PS.h>
+//#include <EPState.h>
+
+//** Include the Elastic Material Models here
+#include <ElasticIsotropic3D.h>
+#include <ElasticCrossAnisotropic.h>
+#include <PressureDependentElastic3D.h>
 
 //#include <CDriver.h>
 
@@ -66,6 +73,7 @@ class Template3Dep : public NDMaterial
   public:
     // constructor
     Template3Dep( int tag                ,
+                  NDMaterial	   &theElMat,
                   YieldSurface     *YS_ ,        
                   PotentialSurface *PS_ ,
               	  EPState          *EPS_,
@@ -81,6 +89,7 @@ class Template3Dep : public NDMaterial
     // Constructor0
     // If no evolution law is provided, then there will be no hardening or softening!
     Template3Dep(  int tag               ,
+                   NDMaterial	    &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
               	   EPState          *EPS_);
@@ -88,6 +97,7 @@ class Template3Dep : public NDMaterial
     // Constructor1
     // Only one scalar evolution law is provided!
     Template3Dep(  int tag               ,
+                   NDMaterial	    &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
               	   EPState          *EPS_,
@@ -96,6 +106,7 @@ class Template3Dep : public NDMaterial
     // Constructor2
     // Only one tensorial evolution law is provided!
     Template3Dep(  int tag               ,
+                   NDMaterial	    &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
               	   EPState          *EPS_,
@@ -104,6 +115,7 @@ class Template3Dep : public NDMaterial
     // Constructor 3
     // One scalar evolution law and one tensorial evolution law are provided!
     Template3Dep(  int tag               , 
+                   NDMaterial	    &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
               	   EPState          *EPS_,
@@ -113,6 +125,7 @@ class Template3Dep : public NDMaterial
     // Constructor 4
     // Two scalar evolution laws and one tensorial evolution law are provided!
     Template3Dep(  int tag               ,
+                   NDMaterial	    &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
               	   EPState          *EPS_,
@@ -123,6 +136,7 @@ class Template3Dep : public NDMaterial
     // Constructor 5
     // Two scalar evolution laws and two tensorial evolution laws are provided!
     Template3Dep(  int tag               ,
+                   NDMaterial	    &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
               	   EPState          *EPS_,
@@ -232,6 +246,7 @@ class Template3Dep : public NDMaterial
     tensor ElasticStiffnessTensor(void) const;
 
    private:
+    NDMaterial * getElMat() const;
     YieldSurface * getYS() const;
     PotentialSurface * getPS() const;
 
@@ -259,6 +274,8 @@ class Template3Dep : public NDMaterial
     friend OPS_Stream& operator<< (OPS_Stream& os, const Template3Dep & MP);
 
    private:
+
+    NDMaterial	 *theElasticMat;
 
     YieldSurface *YS;
 

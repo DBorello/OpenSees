@@ -16,6 +16,7 @@
 # DATE:              08-03-2000                                                  #
 # UPDATE HISTORY:    May 2004 Guanzhou changed Commit to be consistent           #
 #                             with theory                                        #
+#		     May 2004, Zhao Cheng splitted the elastic part	         #
 #                                                                                #
 #                                                                                #
 #                                                                                #
@@ -42,52 +43,59 @@
 //Normal Constructor 1
 //================================================================================
 
-EPState::EPState(double               Eod,
-                 double               Ed,
-                 double               nu,
-                 double               rho,
+//ZC05/2004 EPState::EPState(double               Eod,
+//ZC05/2004                  double               Ed,
+//ZC05/2004                  double               nu,
+//ZC05/2004                  double               rho,
+EPState::EPState(
                  const stresstensor  &stressp,
                  const straintensor  &strainp,
                  const straintensor  &Estrainp,
                  const straintensor  &Pstrainp,
                  const straintensor  &dEstrainp,
                  const straintensor  &dPstrainp,
-               int                  NScalarp,
-     const double       * Scalarp,
-           int                  NTensorp,
-           const stresstensor * Tensorp,
-           const tensor       & Eepp,
-               const stresstensor & Stress_commitp,
-               const straintensor & Strain_commitp,
-               const double       * Scalar_commitp,
-               const stresstensor * Tensor_commitp,
-               const tensor       & Eep_commitp,
-               const stresstensor & Stress_initp,
-               const straintensor & Strain_initp,
-               const double       * Scalar_initp,
-               const stresstensor * Tensor_initp,
-               const tensor       & Eep_initp,
+                 int                  NScalarp,
+                 const double       * Scalarp,
+                 int                  NTensorp,
+                 const stresstensor * Tensorp,
+                 const tensor       & Eepp,
+                 const stresstensor & Stress_commitp,
+                 const straintensor & Strain_commitp,
+                 const double       * Scalar_commitp,
+                 const stresstensor * Tensor_commitp,
+                 const tensor       & Eep_commitp,
+                 const stresstensor & Stress_initp,
+                 const straintensor & Strain_initp,
+                 const double       * Scalar_initp,
+                 const stresstensor * Tensor_initp,
+                 const tensor       & Eep_initp,
                  bool                 Convergedp,
-           int                  Elasticflagp,
-           double         Evp,
-           double               nuhvp,
-           double               Ghvp,
-           double               eop,
-           double               ecp,
-           double               Lamp,
-           double               pop,
-           double               ep,
-           double               psip,
-           double          ap
-     )
-: Eo(Eod), E_Young(Ed), nu_Poisson(nu), rho_mass_density(rho), CurrentStress(stressp),
+//ZC05/2004           int                  Elasticflagp,
+//ZC05/2004           double         Evp,
+//ZC05/2004           double               nuhvp,
+//ZC05/2004           double               Ghvp,
+//ZC05/2004           double               eop,
+//ZC05/2004           double               ecp,
+//ZC05/2004           double               Lamp,
+//ZC05/2004           double               pop,
+                 double               ep,
+                 double               psip )
+//ZC05/2004           double          ap
+//ZC05/2004     )
+//ZC05/2004: Eo(Eod), E_Young(Ed), nu_Poisson(nu), rho_mass_density(rho), CurrentStress(stressp),
+//ZC05/2004  CurrentStrain(strainp), ElasticStrain(Estrainp), PlasticStrain(Pstrainp),
+//ZC05/2004  dElasticStrain(dEstrainp), dPlasticStrain(dPstrainp), Eep(Eepp),
+//ZC05/2004  Stress_commit(Stress_commitp), Strain_commit(Strain_commitp),
+//ZC05/2004  Eep_commit(Eep_commitp), Stress_init(Stress_initp), Strain_init(Strain_initp),
+//ZC05/2004  Eep_init(Eep_initp), Converged (Convergedp),
+//ZC05/2004  Elasticflag(Elasticflagp),Ev(Evp),nuhv(nuhvp),Ghv(Ghvp),
+//ZC05/2004  eo(eop), ec(ecp), Lambda(Lamp), po(pop), e(ep), psi(psip), a(ap)
+: CurrentStress(stressp),
   CurrentStrain(strainp), ElasticStrain(Estrainp), PlasticStrain(Pstrainp),
   dElasticStrain(dEstrainp), dPlasticStrain(dPstrainp), Eep(Eepp),
   Stress_commit(Stress_commitp), Strain_commit(Strain_commitp),
   Eep_commit(Eep_commitp), Stress_init(Stress_initp), Strain_init(Strain_initp),
-  Eep_init(Eep_initp), Converged (Convergedp),
-  Elasticflag(Elasticflagp),Ev(Evp),nuhv(nuhvp),Ghv(Ghvp),
-  eo(eop), ec(ecp), Lambda(Lamp), po(pop), e(ep), psi(psip), a(ap)
+  Eep_init(Eep_initp), Converged (Convergedp), e(ep), psi(psip)
 {
 
       //Eo               = Eod;
@@ -140,10 +148,11 @@ EPState::EPState(double               Eod,
 //Normal Constructor 11
 //================================================================================
 
-EPState::EPState(double              Eod,
-                 double              Ed,
-                 double              nu,
-                 double              rho,
+//ZC05/2004EPState::EPState(double              Eod,
+//ZC05/2004                 double              Ed,
+//ZC05/2004                 double              nu,
+//ZC05/2004                 double              rho,
+EPState::EPState(
                  const stresstensor  stressp,
                  const straintensor  strainp,
                  const straintensor  Estrainp,
@@ -152,16 +161,18 @@ EPState::EPState(double              Eod,
                  const double       *Scalarp,
                  int                 NTensorp,
                  const stresstensor *Tensorp,
-                 int                 Elasticflagp,
-                 double              Evp,
-                 double              nuhvp,
-                 double              Ghvp,
-                 double              eop,
-                 double              ecp,
-                 double              Lamp,
-                 double              pop,
-                 double              ap
-     )
+		 double             ep,
+		 double             psip )
+//ZC05/2004                 int                 Elasticflagp,
+//ZC05/2004                 double              Evp,
+//ZC05/2004                 double              nuhvp,
+//ZC05/2004                 double              Ghvp,
+//ZC05/2004                 double              eop,
+//ZC05/2004                 double              ecp,
+//ZC05/2004                 double              Lamp,
+//ZC05/2004                 double              pop,
+//ZC05/2004                 double              ap
+//ZC05/2004     )
 //: Eo(Eod), E_Young(Ed), nu_Poisson(nu), rho_mass_density(rho),
 //  CurrentStress(stressp), CurrentStrain(strainp), ElasticStrain(Estrainp),
 //  PlasticStrain(Pstrainp), Stress_commit(stressp), Strain_commit(strainp),
@@ -170,10 +181,10 @@ EPState::EPState(double              Eod,
 //  eo(eop), ec(ecp), Lambda(Lamp),po(pop), e(eop), a(ap)
 {
 
-Eo  = Eod;
-E_Young  = Ed;
-nu_Poisson  = nu;
-rho_mass_density  = rho;
+//ZC05/2004Eo  = Eod;
+//ZC05/2004E_Young  = Ed;
+//ZC05/2004nu_Poisson  = nu;
+//ZC05/2004rho_mass_density  = rho;
 
 CurrentStress  = stressp;
 CurrentStrain  = strainp;
@@ -186,30 +197,20 @@ Strain_commit  = strainp;
 Stress_init  = stressp;
 Strain_init  = strainp;
 
-Elasticflag  = Elasticflagp;
-Ev  = Evp;
-nuhv  = nuhvp;
-Ghv  = Ghvp;
+//ZC05/2004Elasticflag  = Elasticflagp;
+//ZC05/2004Ev  = Evp;
+//ZC05/2004nuhv  = nuhvp;
+//ZC05/2004Ghv  = Ghvp;
 
-eo  = eop;
-ec  = ecp;
-Lambda  = Lamp;
-po  = pop;
-e  = eop;
-a  = ap;
+//ZC05/2004eo  = eop;
+//ZC05/2004ec  = ecp;
+//ZC05/2004Lambda  = Lamp;
+//ZC05/2004po  = pop;
+//ZC05/2004e  = eop;
+//ZC05/2004a  = ap;
 
-
-
-
-
-
-
-
-
-
-
-
-
+e = ep;    //ZC
+psi = psip;  //ZC
 
       //Eo               = Eod;
       //E_Young          = Ed;
@@ -273,53 +274,54 @@ a  = ap;
      }
 
      Converged = false;
-     psi = e - ec;
+//ZC05/2004     psi = e - ec;
 }
 
 //================================================================================
 //Normal Constructor 2
 //================================================================================
 
-EPState::EPState(double              Eod,
-                 double              Ed,
-                 double              nu,
-                 double              rho,
+//ZC05/2004EPState::EPState(double              Eod,
+//ZC05/2004                 double              Ed,
+//ZC05/2004                 double              nu,
+//ZC05/2004                 double              rho,
+EPState::EPState(
            int                 NScalarp,
            const double       *Scalarp,
            int                 NTensorp,
-           const stresstensor *Tensorp,
-           int                 Elasticflagp,
-           double        Evp,
-           double              nuhvp,
-           double              Ghvp,
-           double              eop,
-           double              ecp,
-           double              Lamp,
-           double              pop,
-           double         ap
+           const stresstensor *Tensorp
+//ZC05/2004           int                 Elasticflagp,
+//ZC05/2004           double        Evp,
+//ZC05/2004           double              nuhvp,
+//ZC05/2004           double              Ghvp,
+//ZC05/2004           double              eop,
+//ZC05/2004           double              ecp,
+//ZC05/2004           double              Lamp,
+//ZC05/2004           double              pop,
+//ZC05/2004           double         ap
      )
 //: Eo(Eod), E_Young(Ed), nu_Poisson(nu), rho_mass_density(rho),
 //  Elasticflag(Elasticflagp),Ev(Evp),nuhv(nuhvp),Ghv(Ghvp),
 //  eo(eop), ec(ecp), Lambda(Lamp), po(pop), e(eop), a(ap)
 {
 
-Eo = Eod;
-E_Young = Ed;
-nu_Poisson = nu;
-rho_mass_density = rho;
-Elasticflag = Elasticflagp;
-Ev = Evp;
-nuhv = nuhvp;
-Ghv = Ghvp;
-eo = eop;
-ec = ecp;
-Lambda = Lamp;
-po = pop;
-e = eop;
-a = a;
+//ZC05/2004Eo = Eod;
+//ZC05/2004E_Young = Ed;
+//ZC05/2004nu_Poisson = nu;
+//ZC05/2004rho_mass_density = rho;
+//ZC05/2004Elasticflag = Elasticflagp;
+//ZC05/2004Ev = Evp;
+//ZC05/2004nuhv = nuhvp;
+//ZC05/2004Ghv = Ghvp;
+//ZC05/2004eo = eop;
+//ZC05/2004ec = ecp;
+//ZC05/2004Lambda = Lamp;
+//ZC05/2004po = pop;
+//ZC05/2004e = eop;
+//ZC05/2004a = a;
 
-
-
+      e = 0.85;    //ZC
+      psi  = 0.05; //ZC
 
       //Eo               = Eod;
       //E_Young          = Ed;
@@ -380,7 +382,7 @@ a = a;
       }
 
       Converged = false;
-      psi = e - ec;
+//ZC05/2004      psi = e - ec;
 }
 
 
@@ -389,10 +391,12 @@ a = a;
 //================================================================================
 
 EPState::EPState( )
-: Eo(30000.0), E_Young(30000.0), nu_Poisson(0.3), rho_mass_density(0.0),
-  Converged(false),
-  Elasticflag(0),Ev(0.0),nuhv(0.0),Ghv(0.0),
-  eo(0.85), ec(0.80), Lambda(0.025), po(100.0), e(0.85), psi(0.05), a(0.5)
+//ZC05/2004: Eo(30000.0), E_Young(30000.0), nu_Poisson(0.3), rho_mass_density(0.0),
+//ZC05/2004  Converged(false),
+//ZC05/2004  Elasticflag(0),Ev(0.0),nuhv(0.0),Ghv(0.0),
+//ZC05/2004  eo(0.85), ec(0.80), Lambda(0.025), po(100.0), e(0.85), psi(0.05), a(0.5)
+: Converged(false), e(0.85), psi(0.05) //ZC05/2004
+
 {
 
       //Eo               = 30000.0;
@@ -419,11 +423,12 @@ EPState::EPState( )
 
 EPState* EPState::newObj() {
 
-      EPState * eps = new  EPState(this->getEo(),
-                 this->getE(),
-                 this->getnu(),
-                 this->getrho(),
-                                   this->getStress(),
+//ZC05/2004      EPState * eps = new  EPState(this->getEo(),
+//ZC05/2004                 this->getE(),
+//ZC05/2004                 this->getnu(),
+//ZC05/2004                 this->getrho(),
+      EPState * eps = new  EPState(
+                 this->getStress(),
                  this->getStrain(),
                  this->getElasticStrain(),
                  this->getPlasticStrain(),
@@ -434,28 +439,28 @@ EPState* EPState::newObj() {
                  this->getNTensorVar(),
                  this->getTensorVar(),
                  this->getEep(),
-                                   this->getStress_commit(),
+                 this->getStress_commit(),
                  this->getStrain_commit(),
                  this->getScalarVar_commit(),
                  this->getTensorVar_commit(),
                  this->getEep_commit(),
-                                   this->getStress_init(),
+                 this->getStress_init(),
                  this->getStrain_init(),
                  this->getScalarVar_init(),
                  this->getTensorVar_init(),
                  this->getEep_init(),
                  this->getConverged(),
-                             this->getElasticflag(),
-                             this->getEv(),
-                             this->getnuhv(),
-                             this->getGhv(),
-                 this->geteo(),
-                 this->getec(),
-                 this->getLam(),
-                 this->getpo(),
+//ZC05/2004                 this->getElasticflag(),
+//ZC05/2004                 this->getEv(),
+//ZC05/2004                 this->getnuhv(),
+//ZC05/2004                 this->getGhv(),
+//ZC05/2004                 this->geteo(),
+//ZC05/2004                 this->getec(),
+//ZC05/2004                 this->getLam(),
+//ZC05/2004                 this->getpo(),
                  this->gete(),
-                 this->getpsi(),
-                 this->geta()
+                 this->getpsi()
+//ZC05/2004                 this->geta()
            );
       return eps;
 }
@@ -466,10 +471,10 @@ EPState* EPState::newObj() {
 //================================================================================
 EPState::EPState( const EPState &rhs ) {
 
-      Eo               = rhs.getEo();
-      E_Young          = rhs.getE();
-      nu_Poisson       = rhs.getnu();
-      rho_mass_density = rhs.getrho();
+//ZC05/2004       Eo               = rhs.getEo();
+//ZC05/2004       E_Young          = rhs.getE();
+//ZC05/2004       nu_Poisson       = rhs.getnu();
+//ZC05/2004       rho_mass_density = rhs.getrho();
       CurrentStress    = rhs.getStress();
       CurrentStrain    = rhs.getStrain();
       ElasticStrain    = rhs.getElasticStrain();
@@ -495,7 +500,7 @@ EPState::EPState( const EPState &rhs ) {
       //   g3ErrorHandler->fatal("EPState::EPState insufficient memory for Scalar hardening vars");
       //   ::exit(1);
       //}
-    int i;
+      int i;
       for (i = 0; i < NScalarVar; i++) {
    ScalarVar[i] = rhs.ScalarVar[ i ];
    ScalarVar_commit[i] = rhs.ScalarVar_commit[ i ];
@@ -517,18 +522,18 @@ EPState::EPState( const EPState &rhs ) {
 
       Converged = rhs.getConverged();
 
-      Elasticflag = rhs.getElasticflag();
-      Ev        = rhs.getEv();
-      nuhv      = rhs.getnuhv();
-      Ghv       = rhs.getGhv();
+//ZC05/2004       Elasticflag = rhs.getElasticflag();
+//ZC05/2004       Ev        = rhs.getEv();
+//ZC05/2004       nuhv      = rhs.getnuhv();
+//ZC05/2004       Ghv       = rhs.getGhv();
 
-      eo        = rhs.geteo();
-      ec        = rhs.getec();
-      Lambda    = rhs.getLam();
-      po        = rhs.getpo();
-      e         = rhs.gete();
-      psi       = rhs.getpsi();
-      a         = rhs.geta();
+//ZC05/2004       eo        = rhs.geteo();
+//ZC05/2004       ec        = rhs.getec();
+//ZC05/2004       Lambda    = rhs.getLam();
+//ZC05/2004       po        = rhs.getpo();
+       e         = rhs.gete();
+       psi       = rhs.getpsi();
+//ZC05/2004       a         = rhs.geta();
 
 }
 
@@ -561,10 +566,10 @@ EPState::~EPState() {
 const EPState & EPState::operator=(const EPState &rhs ) {
 
       if ( this != &rhs ) {
-         Eo               = rhs.getEo();
-         E_Young          = rhs.getE();
-         nu_Poisson       = rhs.getnu();
-         rho_mass_density = rhs.getrho();
+//ZC05/2004          Eo               = rhs.getEo();
+//ZC05/2004          E_Young          = rhs.getE();
+//ZC05/2004          nu_Poisson       = rhs.getnu();
+//ZC05/2004          rho_mass_density = rhs.getrho();
 
          CurrentStress    = rhs.getStress();
          //opserr << "Current stress " << CurrentStress;
@@ -580,7 +585,7 @@ const EPState & EPState::operator=(const EPState &rhs ) {
          Stress_init   = rhs.getStress_init();
          Strain_init   = rhs.getStrain_init();
 
-   Eep              = rhs.getEep();
+         Eep              = rhs.getEep();
          Eep_commit = rhs.getEep_commit();
          Eep_init = rhs.getEep_init();
 
@@ -590,7 +595,7 @@ const EPState & EPState::operator=(const EPState &rhs ) {
          //   g3ErrorHandler->fatal("EPState::operator= insufficient memory for Scalar hardening vars");
          //   ::exit(1);
          //}
-     int i;
+         int i;
          for (i = 0; i < NScalarVar; i++) {
             ScalarVar[i] = rhs.ScalarVar[i];
             ScalarVar_commit[i] = rhs.ScalarVar_commit[i];
@@ -612,18 +617,18 @@ const EPState & EPState::operator=(const EPState &rhs ) {
 
          Converged = rhs.getConverged();
 
-         Elasticflag = rhs.getElasticflag();
-         Ev        = rhs.getEv();
-         nuhv      = rhs.getnuhv();
-         Ghv       = rhs.getGhv();
+//ZC05/2004          Elasticflag = rhs.getElasticflag();
+//ZC05/2004          Ev        = rhs.getEv();
+//ZC05/2004          nuhv      = rhs.getnuhv();
+//ZC05/2004          Ghv       = rhs.getGhv();
 
-         eo        = rhs.geteo();
-         ec        = rhs.getec();
-         Lambda    = rhs.getLam();
-         po        = rhs.getpo();
+//ZC05/2004          eo        = rhs.geteo();
+//ZC05/2004          ec        = rhs.getec();
+//ZC05/2004          Lambda    = rhs.getLam();
+//ZC05/2004          po        = rhs.getpo();
          e         = rhs.gete();
-         psi       = rhs.getpsi();
-         a         = rhs.geta();
+	 psi       = rhs.getpsi();
+//ZC05/2004          a         = rhs.geta();
 
       }
 
@@ -631,48 +636,48 @@ const EPState & EPState::operator=(const EPState &rhs ) {
 
 }
 
-//================================================================================
-int EPState::getElasticflag(void) const {
-      return Elasticflag;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 int EPState::getElasticflag(void) const {
+//ZC05/2004       return Elasticflag;
+//ZC05/2004 }
 
-//================================================================================
-double EPState::getE() const {
-      return E_Young;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 double EPState::getE() const {
+//ZC05/2004       return E_Young;
+//ZC05/2004 }
 
-//================================================================================
-// Ev: Young's modulus in a vertical direction -- [out-of-plane]
-double EPState::getEv() const {
-      return Ev;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 // Ev: Young's modulus in a vertical direction -- [out-of-plane]
+//ZC05/2004 double EPState::getEv() const {
+//ZC05/2004       return Ev;
+//ZC05/2004 }
 
-//================================================================================
-double EPState::getEo() const {
-      return Eo;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 double EPState::getEo() const {
+//ZC05/2004       return Eo;
+//ZC05/2004 }
 
-//================================================================================
-double EPState::getnu() const {
-      return nu_Poisson;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 double EPState::getnu() const {
+//ZC05/2004       return nu_Poisson;
+//ZC05/2004 }
+//ZC05/2004 
+//ZC05/2004 //================================================================================
+//ZC05/2004 // nuhv: Poisson's ratio for strain in the vertical direction due to a horizontal direct stress -- [out-of-plane]
+//ZC05/2004 double EPState::getnuhv() const {
+//ZC05/2004       return nuhv;
+//ZC05/2004 }
 
-//================================================================================
-// nuhv: Poisson's ratio for strain in the vertical direction due to a horizontal direct stress -- [out-of-plane]
-double EPState::getnuhv() const {
-      return nuhv;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 // Ghv: Modulus for shear deformation in a vertical direction plane-- [out-of-plane]
+//ZC05/2004 double EPState::getGhv() const {
+//ZC05/2004       return Ghv;
+//ZC05/2004 }
 
-//================================================================================
-// Ghv: Modulus for shear deformation in a vertical direction plane-- [out-of-plane]
-double EPState::getGhv() const {
-      return Ghv;
-}
-
-//================================================================================
-double EPState::getrho() const {
-      return rho_mass_density;
-};
+//ZC05/2004 //================================================================================
+//ZC05/2004 double EPState::getrho() const {
+//ZC05/2004       return rho_mass_density;
+//ZC05/2004 };
 
 //================================================================================
 int EPState::getNScalarVar() const {
@@ -689,15 +694,15 @@ bool EPState::getConverged() const {
       return Converged;
 }
 
-//================================================================================
-double EPState::geteo() const {
-      return eo;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 double EPState::geteo() const {
+//ZC05/2004       return eo;
+//ZC05/2004 }
 
-//================================================================================
-double EPState::getec() const {
-      return ec;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 double EPState::getec() const {
+//ZC05/2004       return ec;
+//ZC05/2004 }
 
 //================================================================================
 double EPState::gete() const {
@@ -706,23 +711,23 @@ double EPState::gete() const {
 
 //================================================================================
 double EPState::getpsi() const {
-      return psi;
+       return psi;
 }
 
-//================================================================================
-double EPState::getLam() const {
-      return Lambda;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 double EPState::getLam() const {
+//ZC05/2004       return Lambda;
+//ZC05/2004 }
 
-//================================================================================
-double EPState::getpo() const {
-      return po;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 double EPState::getpo() const {
+//ZC05/2004       return po;
+//ZC05/2004 }
 
-//================================================================================
-double EPState::geta() const {
-      return a;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 double EPState::geta() const {
+//ZC05/2004       return a;
+//ZC05/2004 }
 
 //================================================================================
 stresstensor EPState::getStress() const {
@@ -824,42 +829,42 @@ tensor EPState::getEep_init() const {
 
 }
 
-//================================================================================
-void EPState::setElasticflag( int efd ) {
-      Elasticflag = efd;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::setElasticflag( int efd ) {
+//ZC05/2004       Elasticflag = efd;
+//ZC05/2004 }
 
 
-//================================================================================
-void EPState::setEo( double Eod ) {
-      Eo = Eod;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::setEo( double Eod ) {
+//ZC05/2004       Eo = Eod;
+//ZC05/2004 }
 
 
-//================================================================================
-void EPState::setE( double Ey ) {
-      E_Young = Ey;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::setE( double Ey ) {
+//ZC05/2004       E_Young = Ey;
+//ZC05/2004 }
 
-//================================================================================
-void EPState::setEv( double Evd ) {
-      Ev = Evd;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::setEv( double Evd ) {
+//ZC05/2004       Ev = Evd;
+//ZC05/2004 }
 
-//================================================================================
-void EPState::setGhv( double Ghvd ) {
-      Ghv = Ghvd;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::setGhv( double Ghvd ) {
+//ZC05/2004       Ghv = Ghvd;
+//ZC05/2004 }
 
-//================================================================================
-void EPState::setnu( double nud ) {
-      nu_Poisson = nud;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::setnu( double nud ) {
+//ZC05/2004       nu_Poisson = nud;
+//ZC05/2004 }
 
-//================================================================================
-void EPState::setnuhv( double nuhvd ) {
-      nuhv = nuhvd;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::setnuhv( double nuhvd ) {
+//ZC05/2004       nuhv = nuhvd;
+//ZC05/2004 }
 
 //================================================================================
 void EPState::setStress(const stresstensor &newstress ) {
@@ -944,30 +949,30 @@ void EPState::setConverged( bool b) {
      Converged = b;
 }
 
-//================================================================================
-void EPState::seteo( double eod ) {
-      eo = eod;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::seteo( double eod ) {
+//ZC05/2004       eo = eod;
+//ZC05/2004 }
 
-//================================================================================
-void EPState::setec( double ecd ) {
-      ec = ecd;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::setec( double ecd ) {
+//ZC05/2004       ec = ecd;
+//ZC05/2004 }
 
-//================================================================================
-void EPState::setLam( double Lamd ) {
-      Lambda = Lamd;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::setLam( double Lamd ) {
+//ZC05/2004       Lambda = Lamd;
+//ZC05/2004 }
 
-//================================================================================
-void EPState::setpo( double pod ) {
-      po = pod;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::setpo( double pod ) {
+//ZC05/2004       po = pod;
+//ZC05/2004 }
 
-//================================================================================
-void EPState::seta( double ad ) {
-      a = ad;
-}
+//ZC05/2004 //================================================================================
+//ZC05/2004 void EPState::seta( double ad ) {
+//ZC05/2004       a = ad;
+//ZC05/2004 }
 
 //================================================================================
 void EPState::sete( double ed ) {
@@ -1355,38 +1360,38 @@ OPS_Stream & operator<< (OPS_Stream& os, const EPState & EPS)
       //        os.setf( ios::showpos | ios::scientific);
       os.precision(4);
         os.width(10);
-        os << endln << "Elastic plastic state parameters: "  << endln;
+//ZC05/2004         os << endln << "Elastic plastic state parameters: "  << endln;
+//ZC05/2004 
+//ZC05/2004   int ef = EPS.getElasticflag();
+//ZC05/2004   os << "\tElastic Flag = " << ef << ";";
+//ZC05/2004   if (ef == 1)
+//ZC05/2004      os << " pressure dependent isotropic material (default case, for soil)." << endln;
+//ZC05/2004   else if (ef == 2)
+//ZC05/2004      os << " pressure independent isotropic material." << endln;
+//ZC05/2004   else if (ef == 3)
+//ZC05/2004      os << " pressure independent cross-anisotropic material." << endln;
+//ZC05/2004   else if (ef == 4)
+//ZC05/2004      os << " pressure dependent cross-anisotropic material." << endln;
+//ZC05/2004   else
+//ZC05/2004      os << " elastic portion code not correct. Flag must be 1, 2, 3 or 4." << endln;
 
-  int ef = EPS.getElasticflag();
-  os << "\tElastic Flag = " << ef << ";";
-  if (ef == 1)
-     os << " pressure dependent isotropic material (default case, for soil)." << endln;
-  else if (ef == 2)
-     os << " pressure independent isotropic material." << endln;
-  else if (ef == 3)
-     os << " pressure independent cross-anisotropic material." << endln;
-  else if (ef == 4)
-     os << " pressure dependent cross-anisotropic material." << endln;
-  else
-     os << " elastic portion code not correct. Flag must be 1, 2, 3 or 4." << endln;
 
-
-        os << "\tEo = " << EPS.getEo() << ";";
-        os << " E_Young = " << EPS.getE() << ";";
-        //os.width(10);
-  os << " nu_Poisson = " << EPS.getnu() << ";";
-        os << " \tE_v = " << EPS.getEv() << ";";
-        os << " nu_hv = " << EPS.getnuhv() << ";";
-  os << " G_hv = " << EPS.getGhv() << ";";
-  os << " rho = " << EPS.getrho() << endln;
-
-        os << "\teo = " << EPS.geteo() << ";";
-        os << " ec = " << EPS.getec() << ";";
-        os << " Lambda = " << EPS.getLam() << ";";
-        os << " po = " << EPS.getpo() << ";";
+//ZC05/2004         os << "\tEo = " << EPS.getEo() << ";";
+//ZC05/2004         os << " E_Young = " << EPS.getE() << ";";
+//ZC05/2004         //os.width(10);
+//ZC05/2004   os << " nu_Poisson = " << EPS.getnu() << ";";
+//ZC05/2004         os << " \tE_v = " << EPS.getEv() << ";";
+//ZC05/2004         os << " nu_hv = " << EPS.getnuhv() << ";";
+//ZC05/2004   os << " G_hv = " << EPS.getGhv() << ";";
+//ZC05/2004   os << " rho = " << EPS.getrho() << endln;
+//ZC05/2004 
+//ZC05/2004         os << "\teo = " << EPS.geteo() << ";";
+//ZC05/2004         os << " ec = " << EPS.getec() << ";";
+//ZC05/2004         os << " Lambda = " << EPS.getLam() << ";";
+//ZC05/2004         os << " po = " << EPS.getpo() << ";";
   os << " e = " << EPS.gete() << endln;
   os << " psi = " << EPS.getpsi() << endln;
-        os << " a = " << EPS.geta() << ";";
+//ZC05/2004         os << " a = " << EPS.geta() << ";";
 
   if ( EPS.getConverged() )
      os << "\tConverged = ok! ";

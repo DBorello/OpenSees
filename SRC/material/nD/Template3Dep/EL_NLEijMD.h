@@ -21,11 +21,6 @@
 //                                                                               |
 //                                                                               |
 //                                                                               |
-// SHORT EXPLANATION: This is a nonlinear evolution law for the evoltion of a    |
-//                    tensorial variable alpha which depends on plastic strain   |
-//                    i.e. dalpha = (3/2)^0.5*h*[2*alpha_b*de_ij_p - de_eq*	     |
-//                    alpha_ij (Armstrong- Frederick Model                       |
-//                                                                               |
 //================================================================================
 
 #ifndef EL_NL_EIJMD_H
@@ -42,15 +37,15 @@ class EvolutionLaw_NL_EijMD : public EvolutionLaw_T
   // Private vars to define the MD evolution law
   private:			      
     // the exponential in G = Go (P/P_at)^a and K = Ko (P/P_at)^a
-    //double eo; //Initial void ratio  ...Moved to EPState Joey 02-12-03
-    //double a; 		       ...Moved to EPState Joey 02-12-03
+    double eo; //Initial void ratio  
+    double a; 		       
 
     //Critical state parameters
     double Mc;
     double Me;
-    //double Lambda; // slope of e vs. ln p ...Moved to EPState Joey 02-12-03
-    //double ec_ref; // critical void ratio at reference mean effective stress p  ...Moved to EPState Joey 02-12-03
-    //double p_ref;  // critical void ratio at reference mean effective stress p  ...Moved to EPState Joey 02-12-03
+    double Lambda; // slope of e vs. ln p 
+    double ec_ref; // critical void ratio at reference mean effective stress p  
+    double p_ref;  // critical void ratio at reference mean effective stress p  
 
     //surface evolution parameters
     double kc_b;  // b stands for bounding surface
@@ -79,22 +74,22 @@ class EvolutionLaw_NL_EijMD : public EvolutionLaw_T
     
     // default constructor
     EvolutionLaw_NL_EijMD( 
-                           //double eod = 0.85,
-    			   //double ad  = 0.5,    
-    			   double Mcd = 1.14,//1.14, 
-    			   double Med = 1.14,//1.14, 
-    			   //double Lamdad = 0.025,
-    			   //double ec_refd = 0.8, 
-    			   //double p_refd = 160.0, 
-    			   double kc_bd = 3.975, 
-    			   double kc_dd = 4.200, 
-    			   double ke_bd = 2.000, 
-    			   double ke_dd = 0.07,  
-    			   double hod = 1200,	 
-    			   double Cmd = 0.00,
-    			   double Aod = 2.64,    
-    			   double Fmaxd = 100,   
-    			   double Cfd = 100);
+                           double eod ,
+    			   double ad  ,    
+    			   double Mcd ,//1.14, 
+    			   double Med ,//1.14, 
+    			   double Lambdad ,
+    			   double ec_refd , 
+    			   double p_refd , 
+    			   double kc_bd , 
+    			   double kc_dd , 
+    			   double ke_bd , 
+    			   double ke_dd ,  
+    			   double hod ,	 
+    			   double Cmd ,
+    			   double Aod ,    
+    			   double Fmaxd ,   
+    			   double Cfd );
     			   //double ed  = 0.85,    
                            
     // Copy constructor
@@ -125,12 +120,12 @@ class EvolutionLaw_NL_EijMD : public EvolutionLaw_T
     // Set D value according to current EPState
     //void setD(EPState *EPS);   
 
-    //double geta() const;
+    double geta() const;
     double getMc() const;
     double getMe() const;
-    //double getLambda() const;
-    //double getec_ref() const;
-    //double getp_ref() const; 
+    double getLambda() const;
+    double getec_ref() const;
+    double getp_ref() const; 
 
     double getkc_b() const;  
     double getkc_d() const;  
@@ -138,7 +133,7 @@ class EvolutionLaw_NL_EijMD : public EvolutionLaw_T
     double getke_d() const;  
     double getho() const;
     double getCm() const;
-    //double geteo() const;
+    double geteo() const;
     //double gete() const;
 
     //Dilatancy parameter

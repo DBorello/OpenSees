@@ -14,7 +14,8 @@
 #                                                                              #
 #                                                                              #
 # DATE:              08-03-2000                                                #
-# UPDATE HISTORY:    09-12-2000                                                #
+# UPDATE HISTORY:    09-12-2000						       #
+#		     May 2004, Zhao Cheng splitting the elastic part	       #
 #                                                                              #
 #                                                                              #
 #                                                                              #
@@ -31,9 +32,7 @@
 #define ITMAX 30
 #define MAX_STEP_COUNT 30
 #define NUM_OF_SUB_INCR 30
-#define KK 1000.0  //conversion between Pa and kPa, or N and kN 1 - kPa, kN; 1000 - Pa, N
-//#define po 100.0 //Reference pressure Pa
-//#include <string.h>
+#define KK 1000.0  
 
 #include "Template3Dep.h"
 
@@ -43,6 +42,7 @@
 //================================================================================
 
 Template3Dep::Template3Dep( int tag                       ,
+                            NDMaterial	     &theElMat,
                             YieldSurface     *YS_   ,
                             PotentialSurface *PS_   ,
                             EPState          *EPS_  ,
@@ -56,6 +56,13 @@ Template3Dep::Template3Dep( int tag                       ,
                             EvolutionLaw_T   *ELT4_ )
 :NDMaterial(tag, ND_TAG_Template3Dep)
 {
+    // Get a copy of the material
+    theElasticMat = theElMat.getCopy();  
+    if (theElasticMat == 0) {
+      opserr << "Template3Dep:: Template3Dep failed to get copy of material\n";
+      exit(-1);
+    }
+
     if ( YS_ )
        YS = YS_->newObj();
     else
@@ -131,11 +138,19 @@ Template3Dep::Template3Dep( int tag                       ,
 // Constructor 0
 //================================================================================
 Template3Dep::Template3Dep( int tag                     ,
+                            NDMaterial	     &theElMat,
                             YieldSurface     *YS_ ,
                             PotentialSurface *PS_ ,
                             EPState          *EPS_)
 :NDMaterial(tag, ND_TAG_Template3Dep)
 {
+    // Get a copy of the material
+    theElasticMat = theElMat.getCopy();  
+    if (theElasticMat == 0) {
+      opserr << "Template3Dep:: Template3Dep failed to get copy of material\n";
+      exit(-1);
+    }
+
     if ( YS_ )
        YS = YS_->newObj();
     else
@@ -177,12 +192,19 @@ Template3Dep::Template3Dep( int tag                     ,
 //================================================================================
 
 Template3Dep::Template3Dep(   int tag                     ,
+                              NDMaterial       &theElMat,
                               YieldSurface     *YS_ ,
                               PotentialSurface *PS_ ,
                               EPState          *EPS_,
                               EvolutionLaw_S   *ELS1_ )
 :NDMaterial(tag, ND_TAG_Template3Dep)
 {
+    // Get a copy of the material
+    theElasticMat = theElMat.getCopy();  
+    if (theElasticMat == 0) {
+      opserr << "Template3Dep:: Template3Dep failed to get copy of material\n";
+      exit(-1);
+    }
 
     if ( YS_ )
        YS = YS_->newObj();
@@ -229,12 +251,19 @@ Template3Dep::Template3Dep(   int tag                     ,
 //================================================================================
 
 Template3Dep::Template3Dep(   int tag                     ,
+                              NDMaterial       &theElMat,
                               YieldSurface     *YS_ ,
                               PotentialSurface *PS_ ,
                               EPState          *EPS_,
                               EvolutionLaw_T   *ELT1_ )
 :NDMaterial(tag, ND_TAG_Template3Dep)
 {
+    // Get a copy of the material
+    theElasticMat = theElMat.getCopy();  
+    if (theElasticMat == 0) {
+      opserr << "Template3Dep:: Template3Dep failed to get copy of material\n";
+      exit(-1);
+    }
 
     if ( YS_ )
        YS = YS_->newObj();
@@ -281,6 +310,7 @@ Template3Dep::Template3Dep(   int tag                     ,
 //================================================================================
 
 Template3Dep::Template3Dep(   int tag,
+                              NDMaterial       &theElMat,
                               YieldSurface     *YS_ ,
                               PotentialSurface *PS_ ,
                               EPState          *EPS_,
@@ -288,6 +318,12 @@ Template3Dep::Template3Dep(   int tag,
                               EvolutionLaw_T   *ELT1_ )
 :NDMaterial(tag, ND_TAG_Template3Dep)
 {
+    // Get a copy of the material
+    theElasticMat = theElMat.getCopy();  
+    if (theElasticMat == 0) {
+      opserr << "Template3Dep:: Template3Dep failed to get copy of material\n";
+      exit(-1);
+    }
 
     if ( YS_ )
        YS = YS_->newObj();
@@ -337,6 +373,7 @@ Template3Dep::Template3Dep(   int tag,
 //================================================================================
 
 Template3Dep::Template3Dep(   int tag                     ,
+                              NDMaterial       &theElMat, 
                               YieldSurface     *YS_ ,
                               PotentialSurface *PS_ ,
                               EPState          *EPS_,
@@ -345,6 +382,12 @@ Template3Dep::Template3Dep(   int tag                     ,
                               EvolutionLaw_T   *ELT1_ )
 :NDMaterial(tag, ND_TAG_Template3Dep)
 {
+    // Get a copy of the material
+    theElasticMat = theElMat.getCopy();  
+    if (theElasticMat == 0) {
+      opserr << "Template3Dep:: Template3Dep failed to get copy of material\n";
+      exit(-1);
+    }
 
     if ( YS_ )
        YS = YS_->newObj();
@@ -399,6 +442,7 @@ Template3Dep::Template3Dep(   int tag                     ,
 //================================================================================
 
 Template3Dep::Template3Dep(   int tag                     ,
+                              NDMaterial       &theElMat,
                               YieldSurface     *YS_ ,
                               PotentialSurface *PS_ ,
                               EPState          *EPS_,
@@ -408,6 +452,12 @@ Template3Dep::Template3Dep(   int tag                     ,
             EvolutionLaw_T   *ELT2_)
 :NDMaterial(tag, ND_TAG_Template3Dep)
 {
+    // Get a copy of the material
+    theElasticMat = theElMat.getCopy();  
+    if (theElasticMat == 0) {
+      opserr << "Template3Dep:: Template3Dep failed to get copy of material\n";
+      exit(-1);
+    }
 
     if ( YS_ )
        YS = YS_->newObj();
@@ -470,6 +520,7 @@ Template3Dep::Template3Dep()
     //YS = new DPYieldSurface();
     //PS = new DPPotentialSurface();
     //EPS = new EPState();
+    theElasticMat = 0;
     YS  = 0;
     PS  = 0;
     EPS = 0;
@@ -482,6 +533,8 @@ Template3Dep::Template3Dep()
 
 Template3Dep::~Template3Dep()
 {
+    if (theElasticMat)
+       delete theElasticMat;
 
     if (YS)
        delete YS;
@@ -581,181 +634,185 @@ Template3Dep::~Template3Dep()
 tensor Template3Dep::ElasticComplianceTensor(void) const
 {
     tensor ret( 4, def_dim_4, 0.0 );
-
-    int eflag = (this->EPS)->getElasticflag();
-    double Ey = this->EPS->getEo();
-    double nuP =this->EPS->getnu();
     
-    // Zhao, 03-09-04
-    // eflag = 0, Pressure independent Isotropic
-    //       = 1, Pressure dendent Isotropic
-    //       = 2, Pressure independent Cross Anisotropic
-    //       = 3, Pressure dependent Cross Anisotropic
-    //   default: 0, Pressure indendent Isotropic 
-    
-    // Pressure independent Isotropic
-    if ( eflag == 0 )
-      {
-        if (Ey == 0)
-          {
-            opserr << endln << "Ey = 0! Can't give you D!!" << endln;
-            exit(1);
-          }
-
-      // Kronecker delta tensor
-      tensor I2("I", 2, def_dim_2);
-
-      tensor I_ijkl = I2("ij")*I2("kl");
-      //I_ijkl.null_indices();
-      tensor I_ikjl = I_ijkl.transpose0110();
-      tensor I_iljk = I_ijkl.transpose0111();
-      tensor I4s = (I_ikjl+I_iljk)*0.5;
-
-      // Building compliance tensor
-      ret = (I_ijkl * (-nuP/Ey)) + (I4s * ((1.0+nuP)/Ey));
-      }
-    
-    // Pressure dependent Isotropic
-    else if ( eflag == 1)
-      {
-      double E = Ey;
-      //opserr << " Eo= " << Ey;
-        if (Ey == 0)
-          {
-            opserr << endln << "Ey = 0! Can't give you D!!" << endln;
-            exit(1);
-          }
-
-      //Update E
-      stresstensor stc = (this->EPS)->getStress();
-      double p = stc.p_hydrostatic();
-      double po = EPS->getpo();
-
-      //opserr << " p = " <<  p;
-
-      //double po = 100.0; //kPa
-//BJ:  this is questionable to be re-examined!!!!!!!!!!!!!!!!!!!!
-      if (p <= 0.5000*KK) p = 0.500*KK;
-      E = Ey * pow(p/po/KK, 0.5); //0.5
-      //cerr << " Ec = " << Ey << endlnn;
-
-      // Kronecker delta tensor
-      tensor I2("I", 2, def_dim_2);
-
-      tensor I_ijkl = I2("ij")*I2("kl");
-      //I_ijkl.null_indices();
-      tensor I_ikjl = I_ijkl.transpose0110();
-      tensor I_iljk = I_ijkl.transpose0111();
-      tensor I4s = (I_ikjl+I_iljk)*0.5;
-
-      // Building compliance tensor
-      ret = (I_ijkl * (-nuP/E)) + (I4s * ((1.0+nuP)/E));
-      }
-   
-   // Pressure independent Anisotropic
-    else if (eflag == 2)
-      {
-      // Form compliance matrix D
-      double nu = nuP;
-      double Ev = this->EPS->getEv();
-      double Ghv = this->EPS->getGhv();
-      double nuhv = this->EPS->getnuhv();
-
-      double A = 1.0/Ey;
-      double B = 1.0/Ev;
-      //opserr << "A " << A << " B " << B;
-
-      Matrix D(6,6);
-      D(0,0) = D(1,1) = A;
-      D(2,2) = B;
-      D(0,1) = D(1,0) = -nu*A;
-      D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
-      //D(3,3) = (1.0+nu)*A;        // Bug found, 03-09-04
-      //D(4,4) = D(5,5) = 0.5/Ghv;  // ...
-      D(3,3) = 2.0*(1.0+nu)*A;
-      D(4,4) = D(5,5) = 1.0/Ghv;
-      //opserr << " C " << D;
-
-      //Convert Matric D to 4th order Elastic constants tensor ret; 
-      ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
-      ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
-      ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
-
-      ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
-      ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
-      ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
-
-      ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
-      ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
-      ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
-
-      }
-    
-    // Pressure dependent Anisotropic
-    else if (eflag == 3)
-      {
-      // Form compliance matrix D
-      double E = Ey;
-      double nu = nuP;
-      double Ev = this->EPS->getEv();
-      double Ghv = this->EPS->getGhv();
-      double nuhv = this->EPS->getnuhv();
-      //opserr << " Eo= " << Ey;
-        if (Ey == 0)
-          {
-            opserr << endln << "Ey = 0! Can't give you D!!" << endln;
-            exit(1);
-          }
-
-      //Update E
-      stresstensor stc = (this->EPS)->getStress();
-      double p = stc.p_hydrostatic();
-      double po = EPS->getpo();
-
-      //opserr << " p = " <<  p;
-
-      //double po = 100.0; //kPa
-      if (p <= 0.5000*KK) p = 0.500*KK;
-      Ey = Ey * pow(p/po/KK, 0.5); //0.5
-      Ev = Ev * pow(p/po/KK, 0.5); //0.5
-      Ghv = Ghv * pow(p/po/KK, 0.5); //0.5 
-      //cerr << " Ec = " << Ey << endlnn;      
-      
-      double A = 1.0/E;
-      double B = 1.0/Ev;
-      //opserr << "A " << A << " B " << B;
-
-      Matrix D(6,6);
-      D(0,0) = D(1,1) = A;
-      D(2,2) = B;
-      D(0,1) = D(1,0) = -nu*A;
-      D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
-      D(3,3) = 2.0*(1.0+nu)*A;
-      D(4,4) = D(5,5) = 1.0/Ghv;
-      //opserr << " C " << D;
-
-      //Convert Matric D to 4th order Elastic constants tensor ret;
-      ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
-      ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
-      ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
-
-      ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
-      ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
-      ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
-
-      ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
-      ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
-      ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
-
-      }
-    else
-      {
-      opserr << "Template3Dep::ElasticComplianceTensor failed to create elastic compliance tensor. Eflag must be 0-3: " <<  eflag << endln;
-      exit(-1);
-
-      }
+    ret = ElasticStiffnessTensor().inverse();
 
     return ret;
+
+//ZC05/2004     int eflag = (this->EPS)->getElasticflag();
+//ZC05/2004     double Ey = this->EPS->getEo();
+//ZC05/2004     double nuP =this->EPS->getnu();
+//ZC05/2004     
+//ZC05/2004     // Zhao, 03-09-04
+//ZC05/2004     // eflag = 0, Pressure independent Isotropic
+//ZC05/2004     //       = 1, Pressure dendent Isotropic
+//ZC05/2004     //       = 2, Pressure independent Cross Anisotropic
+//ZC05/2004     //       = 3, Pressure dependent Cross Anisotropic
+//ZC05/2004     //   default: 0, Pressure indendent Isotropic 
+//ZC05/2004     
+//ZC05/2004     // Pressure independent Isotropic
+//ZC05/2004     if ( eflag == 0 )
+//ZC05/2004       {
+//ZC05/2004         if (Ey == 0)
+//ZC05/2004           {
+//ZC05/2004             opserr << endln << "Ey = 0! Can't give you D!!" << endln;
+//ZC05/2004             exit(1);
+//ZC05/2004           }
+//ZC05/2004 
+//ZC05/2004       // Kronecker delta tensor
+//ZC05/2004       tensor I2("I", 2, def_dim_2);
+//ZC05/2004 
+//ZC05/2004       tensor I_ijkl = I2("ij")*I2("kl");
+//ZC05/2004       //I_ijkl.null_indices();
+//ZC05/2004       tensor I_ikjl = I_ijkl.transpose0110();
+//ZC05/2004       tensor I_iljk = I_ijkl.transpose0111();
+//ZC05/2004       tensor I4s = (I_ikjl+I_iljk)*0.5;
+//ZC05/2004 
+//ZC05/2004       // Building compliance tensor
+//ZC05/2004       ret = (I_ijkl * (-nuP/Ey)) + (I4s * ((1.0+nuP)/Ey));
+//ZC05/2004       }
+//ZC05/2004     
+//ZC05/2004     // Pressure dependent Isotropic
+//ZC05/2004     else if ( eflag == 1)
+//ZC05/2004       {
+//ZC05/2004       double E = Ey;
+//ZC05/2004       //opserr << " Eo= " << Ey;
+//ZC05/2004         if (Ey == 0)
+//ZC05/2004           {
+//ZC05/2004             opserr << endln << "Ey = 0! Can't give you D!!" << endln;
+//ZC05/2004             exit(1);
+//ZC05/2004           }
+//ZC05/2004 
+//ZC05/2004       //Update E
+//ZC05/2004       stresstensor stc = (this->EPS)->getStress();
+//ZC05/2004       double p = stc.p_hydrostatic();
+//ZC05/2004       double po = EPS->getpo();
+//ZC05/2004 
+//ZC05/2004       //opserr << " p = " <<  p;
+//ZC05/2004 
+//ZC05/2004       //double po = 100.0; //kPa
+//ZC05/2004 //BJ:  this is questionable to be re-examined!!!!!!!!!!!!!!!!!!!!
+//ZC05/2004       if (p <= 0.5000*KK) p = 0.500*KK;
+//ZC05/2004       E = Ey * pow(p/po/KK, 0.5); //0.5
+//ZC05/2004       //cerr << " Ec = " << Ey << endlnn;
+//ZC05/2004 
+//ZC05/2004       // Kronecker delta tensor
+//ZC05/2004       tensor I2("I", 2, def_dim_2);
+//ZC05/2004 
+//ZC05/2004       tensor I_ijkl = I2("ij")*I2("kl");
+//ZC05/2004       //I_ijkl.null_indices();
+//ZC05/2004       tensor I_ikjl = I_ijkl.transpose0110();
+//ZC05/2004       tensor I_iljk = I_ijkl.transpose0111();
+//ZC05/2004       tensor I4s = (I_ikjl+I_iljk)*0.5;
+//ZC05/2004 
+//ZC05/2004       // Building compliance tensor
+//ZC05/2004       ret = (I_ijkl * (-nuP/E)) + (I4s * ((1.0+nuP)/E));
+//ZC05/2004       }
+//ZC05/2004    
+//ZC05/2004    // Pressure independent Anisotropic
+//ZC05/2004     else if (eflag == 2)
+//ZC05/2004       {
+//ZC05/2004       // Form compliance matrix D
+//ZC05/2004       double nu = nuP;
+//ZC05/2004       double Ev = this->EPS->getEv();
+//ZC05/2004       double Ghv = this->EPS->getGhv();
+//ZC05/2004       double nuhv = this->EPS->getnuhv();
+//ZC05/2004 
+//ZC05/2004       double A = 1.0/Ey;
+//ZC05/2004       double B = 1.0/Ev;
+//ZC05/2004       //opserr << "A " << A << " B " << B;
+//ZC05/2004 
+//ZC05/2004       Matrix D(6,6);
+//ZC05/2004       D(0,0) = D(1,1) = A;
+//ZC05/2004       D(2,2) = B;
+//ZC05/2004       D(0,1) = D(1,0) = -nu*A;
+//ZC05/2004       D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
+//ZC05/2004       //D(3,3) = (1.0+nu)*A;        // Bug found, 03-09-04
+//ZC05/2004       //D(4,4) = D(5,5) = 0.5/Ghv;  // ...
+//ZC05/2004       D(3,3) = 2.0*(1.0+nu)*A;
+//ZC05/2004       D(4,4) = D(5,5) = 1.0/Ghv;
+//ZC05/2004       //opserr << " C " << D;
+//ZC05/2004 
+//ZC05/2004       //Convert Matric D to 4th order Elastic constants tensor ret; 
+//ZC05/2004       ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
+//ZC05/2004       ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
+//ZC05/2004       ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
+//ZC05/2004 
+//ZC05/2004       ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
+//ZC05/2004       ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
+//ZC05/2004       ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
+//ZC05/2004 
+//ZC05/2004       ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
+//ZC05/2004       ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
+//ZC05/2004       ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
+//ZC05/2004 
+//ZC05/2004       }
+//ZC05/2004     
+//ZC05/2004     // Pressure dependent Anisotropic
+//ZC05/2004     else if (eflag == 3)
+//ZC05/2004       {
+//ZC05/2004       // Form compliance matrix D
+//ZC05/2004       double E = Ey;
+//ZC05/2004       double nu = nuP;
+//ZC05/2004       double Ev = this->EPS->getEv();
+//ZC05/2004       double Ghv = this->EPS->getGhv();
+//ZC05/2004       double nuhv = this->EPS->getnuhv();
+//ZC05/2004       //opserr << " Eo= " << Ey;
+//ZC05/2004         if (Ey == 0)
+//ZC05/2004           {
+//ZC05/2004             opserr << endln << "Ey = 0! Can't give you D!!" << endln;
+//ZC05/2004             exit(1);
+//ZC05/2004           }
+//ZC05/2004 
+//ZC05/2004       //Update E
+//ZC05/2004       stresstensor stc = (this->EPS)->getStress();
+//ZC05/2004       double p = stc.p_hydrostatic();
+//ZC05/2004       double po = EPS->getpo();
+//ZC05/2004 
+//ZC05/2004       //opserr << " p = " <<  p;
+//ZC05/2004 
+//ZC05/2004       //double po = 100.0; //kPa
+//ZC05/2004       if (p <= 0.5000*KK) p = 0.500*KK;
+//ZC05/2004       Ey = Ey * pow(p/po/KK, 0.5); //0.5
+//ZC05/2004       Ev = Ev * pow(p/po/KK, 0.5); //0.5
+//ZC05/2004       Ghv = Ghv * pow(p/po/KK, 0.5); //0.5 
+//ZC05/2004       //cerr << " Ec = " << Ey << endlnn;      
+//ZC05/2004       
+//ZC05/2004       double A = 1.0/E;
+//ZC05/2004       double B = 1.0/Ev;
+//ZC05/2004       //opserr << "A " << A << " B " << B;
+//ZC05/2004 
+//ZC05/2004       Matrix D(6,6);
+//ZC05/2004       D(0,0) = D(1,1) = A;
+//ZC05/2004       D(2,2) = B;
+//ZC05/2004       D(0,1) = D(1,0) = -nu*A;
+//ZC05/2004       D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
+//ZC05/2004       D(3,3) = 2.0*(1.0+nu)*A;
+//ZC05/2004       D(4,4) = D(5,5) = 1.0/Ghv;
+//ZC05/2004       //opserr << " C " << D;
+//ZC05/2004 
+//ZC05/2004       //Convert Matric D to 4th order Elastic constants tensor ret;
+//ZC05/2004       ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
+//ZC05/2004       ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
+//ZC05/2004       ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
+//ZC05/2004 
+//ZC05/2004       ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
+//ZC05/2004       ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
+//ZC05/2004       ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
+//ZC05/2004 
+//ZC05/2004       ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
+//ZC05/2004       ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
+//ZC05/2004       ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
+//ZC05/2004 
+//ZC05/2004       }
+//ZC05/2004     else
+//ZC05/2004       {
+//ZC05/2004       opserr << "Template3Dep::ElasticComplianceTensor failed to create elastic compliance tensor. Eflag must be 0-3: " <<  eflag << endln;
+//ZC05/2004       exit(-1);
+//ZC05/2004 
+//ZC05/2004       }
+//ZC05/2004
+//ZC05/2004    return ret;
 }
 
 
@@ -766,154 +823,162 @@ tensor Template3Dep::ElasticStiffnessTensor(void) const
   {
     tensor ret( 4, def_dim_4, 0.0 );
 
-    int eflag = (this->EPS)->getElasticflag();
-
-    double Ey = this->EPS->getEo();
-    double nu =this->EPS->getnu();
-    
-    // Zhao, 03-09-04
-    // eflag = 0, Pressure dependent Isotropic
-    //       = 1, Pressure indendent Isotropic
-    //       = 2, Pressure dependent Cross Anisotropic
-    //       = 3, Pressure independent Cross Anisotropic
-    //   default: 0, Pressure indendent Isotropic
-    // Pressure dependent Isotropic
-    if ( eflag == 0) {
-       double E = Ey;
-       // Kronecker delta tensor
-       tensor I2("I", 2, def_dim_2);
-
-       tensor I_ijkl = I2("ij")*I2("kl");
-
-
-       //I_ijkl.null_indices();
-       tensor I_ikjl = I_ijkl.transpose0110();
-       tensor I_iljk = I_ijkl.transpose0111();
-       tensor I4s = (I_ikjl+I_iljk)*0.5;
-
-       // Building elasticity tensor
-       ret = I_ijkl*( E*nu / ( (1.0+nu)*(1.0 - 2.0*nu) ) ) + I4s*( E / (1.0 + nu) );
-       //ret.null_indices();
-    }    
-    else if ( eflag == 1) {
-
-       //Update E
-       stresstensor stc = (this->EPS)->getStress();
-       double p = stc.p_hydrostatic();
-       double po = EPS->getpo();
-       //cerr << " p = " <<  p;
-
-       //double po = 100.0; //kPa
-       if (p <= 0.5000*KK) p = 0.5000*KK;
-       double E = Ey * pow(p/po/KK, 0.5);//0.5
-       //cerr << " Eo = " << Ey ;
-       //cerr << " Ec = " << E << endlnn;
-
-
-       // Kronecker delta tensor
-       tensor I2("I", 2, def_dim_2);
-
-       tensor I_ijkl = I2("ij")*I2("kl");
-
-
-       //I_ijkl.null_indices();
-       tensor I_ikjl = I_ijkl.transpose0110();
-       tensor I_iljk = I_ijkl.transpose0111();
-       tensor I4s = (I_ikjl+I_iljk)*0.5;
-
-       // Building elasticity tensor
-       ret = I_ijkl*( E*nu / ( (1.0+nu)*(1.0 - 2.0*nu) ) ) + I4s*( E / (1.0 + nu) );
-       //ret.null_indices();
+    if (theElasticMat->setTrialStrain( this->EPS->getElasticStrain() ) < 0) {
+      opserr << "Template3Dep::theElasticMat setTrialStrain failed in material with strain ";
+      return -1;   
     }
-    else if ( eflag == 3) {
-      double E = Ey;
-      double Ev = this->EPS->getEv();
-      double Ghv = this->EPS->getGhv();
-      double nuhv = this->EPS->getnuhv();
-      //Update E
-      
-      stresstensor stc = (this->EPS)->getStress();
-      double p = stc.p_hydrostatic();
-      double po = EPS->getpo();
 
-      //double po = 100.0; //kPa
-      if (p <= 0.5000*KK) p = 0.500*KK;
-      E = Ey * pow(p/po/KK, 0.5); //0.5
-      Ev = Ev * pow(p/po/KK, 0.5); //0.5
-      Ghv = Ghv * pow(p/po/KK, 0.5); //0.5 
-      //cerr << " Ec = " << Ey << endlnn;  
-      double A = 1.0/E;
-      double B = 1.0/Ev;
-      //opserr << "A " << A << " B " << B;
-
-      Matrix D(6,6);
-      D(0,0) = D(1,1) = A;
-      D(2,2) = B;
-      D(0,1) = D(1,0) = -nu*A;
-      D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
-      D(3,3) = (1.0+nu)*A;
-      D(4,4) = D(5,5) = 0.5/Ghv;
-      //opserr << " C " << D;
-
-      // Do invertion once to get Elastic matrix D
-      D.Invert( D );
-
-      //Convert Matric D to 4th order Elastic constants tensor ret;
-      ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
-      ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
-      ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
-
-      ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
-      ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
-      ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
-
-      ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
-      ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
-      ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
-
-    }
-    else if ( eflag == 2) {
-      double Ev = this->EPS->getEv();
-      double Ghv = this->EPS->getGhv();
-      double nuhv = this->EPS->getnuhv();
-
-      double A = 1.0/Ey;
-      double B = 1.0/Ev;
-      //opserr << "A " << A << " B " << B;
-
-      Matrix D(6,6);
-      D(0,0) = D(1,1) = A;
-      D(2,2) = B;
-      D(0,1) = D(1,0) = -nu*A;
-      D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
-      D(3,3) = (1.0+nu)*A;
-      D(4,4) = D(5,5) = 0.5/Ghv;
-      //opserr << " C " << D;
-
-      // Do invertion once to get Elastic matrix D
-      D.Invert( D );
-
-      //Convert Matric D to 4th order Elastic constants tensor ret;
-      ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
-      ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
-      ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
-
-      ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
-      ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
-      ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
-
-      ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
-      ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
-      ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
-
-    }
-    else
-      {
-      opserr << "Template3Dep::ElasticStiffnessTensor failed to create elastic compliance tensor. Eflag must be 0-3: " <<  eflag << endln;
-      exit(-1);
-
-      }    
+    ret = theElasticMat->getTangentTensor();
     return ret;
+
+//ZC05/2004     int eflag = (this->EPS)->getElasticflag();
+//ZC05/2004 
+//ZC05/2004     double Ey = this->EPS->getEo();
+//ZC05/2004     double nu =this->EPS->getnu();
+//ZC05/2004     
+//ZC05/2004     // Zhao, 03-09-04
+//ZC05/2004     // eflag = 0, Pressure dependent Isotropic
+//ZC05/2004     //       = 1, Pressure indendent Isotropic
+//ZC05/2004     //       = 2, Pressure dependent Cross Anisotropic
+//ZC05/2004     //       = 3, Pressure independent Cross Anisotropic
+//ZC05/2004     //   default: 0, Pressure indendent Isotropic
+//ZC05/2004     // Pressure dependent Isotropic
+//ZC05/2004     if ( eflag == 0) {
+//ZC05/2004        double E = Ey;
+//ZC05/2004        // Kronecker delta tensor
+//ZC05/2004        tensor I2("I", 2, def_dim_2);
+//ZC05/2004 
+//ZC05/2004        tensor I_ijkl = I2("ij")*I2("kl");
+//ZC05/2004 
+//ZC05/2004 
+//ZC05/2004        //I_ijkl.null_indices();
+//ZC05/2004        tensor I_ikjl = I_ijkl.transpose0110();
+//ZC05/2004        tensor I_iljk = I_ijkl.transpose0111();
+//ZC05/2004        tensor I4s = (I_ikjl+I_iljk)*0.5;
+//ZC05/2004 
+//ZC05/2004        // Building elasticity tensor
+//ZC05/2004        ret = I_ijkl*( E*nu / ( (1.0+nu)*(1.0 - 2.0*nu) ) ) + I4s*( E / (1.0 + nu) );
+//ZC05/2004        //ret.null_indices();
+//ZC05/2004     }    
+//ZC05/2004     else if ( eflag == 1) {
+//ZC05/2004 
+//ZC05/2004        //Update E
+//ZC05/2004        stresstensor stc = (this->EPS)->getStress();
+//ZC05/2004        double p = stc.p_hydrostatic();
+//ZC05/2004        double po = EPS->getpo();
+//ZC05/2004        //cerr << " p = " <<  p;
+//ZC05/2004 
+//ZC05/2004        //double po = 100.0; //kPa
+//ZC05/2004        if (p <= 0.5000*KK) p = 0.5000*KK;
+//ZC05/2004        double E = Ey * pow(p/po/KK, 0.5);//0.5
+//ZC05/2004        //cerr << " Eo = " << Ey ;
+//ZC05/2004        //cerr << " Ec = " << E << endlnn;
+//ZC05/2004 
+//ZC05/2004 
+//ZC05/2004        // Kronecker delta tensor
+//ZC05/2004        tensor I2("I", 2, def_dim_2);
+//ZC05/2004 
+//ZC05/2004        tensor I_ijkl = I2("ij")*I2("kl");
+//ZC05/2004 
+//ZC05/2004 
+//ZC05/2004        //I_ijkl.null_indices();
+//ZC05/2004        tensor I_ikjl = I_ijkl.transpose0110();
+//ZC05/2004        tensor I_iljk = I_ijkl.transpose0111();
+//ZC05/2004        tensor I4s = (I_ikjl+I_iljk)*0.5;
+//ZC05/2004 
+//ZC05/2004        // Building elasticity tensor
+//ZC05/2004        ret = I_ijkl*( E*nu / ( (1.0+nu)*(1.0 - 2.0*nu) ) ) + I4s*( E / (1.0 + nu) );
+//ZC05/2004        //ret.null_indices();
+//ZC05/2004     }
+//ZC05/2004     else if ( eflag == 3) {
+//ZC05/2004       double E = Ey;
+//ZC05/2004       double Ev = this->EPS->getEv();
+//ZC05/2004       double Ghv = this->EPS->getGhv();
+//ZC05/2004       double nuhv = this->EPS->getnuhv();
+//ZC05/2004       //Update E
+//ZC05/2004       
+//ZC05/2004       stresstensor stc = (this->EPS)->getStress();
+//ZC05/2004       double p = stc.p_hydrostatic();
+//ZC05/2004       double po = EPS->getpo();
+//ZC05/2004 
+//ZC05/2004       //double po = 100.0; //kPa
+//ZC05/2004       if (p <= 0.5000*KK) p = 0.500*KK;
+//ZC05/2004       E = Ey * pow(p/po/KK, 0.5); //0.5
+//ZC05/2004       Ev = Ev * pow(p/po/KK, 0.5); //0.5
+//ZC05/2004       Ghv = Ghv * pow(p/po/KK, 0.5); //0.5 
+//ZC05/2004       //cerr << " Ec = " << Ey << endlnn;  
+//ZC05/2004       double A = 1.0/E;
+//ZC05/2004       double B = 1.0/Ev;
+//ZC05/2004       //opserr << "A " << A << " B " << B;
+//ZC05/2004 
+//ZC05/2004       Matrix D(6,6);
+//ZC05/2004       D(0,0) = D(1,1) = A;
+//ZC05/2004       D(2,2) = B;
+//ZC05/2004       D(0,1) = D(1,0) = -nu*A;
+//ZC05/2004       D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
+//ZC05/2004       D(3,3) = (1.0+nu)*A;
+//ZC05/2004       D(4,4) = D(5,5) = 0.5/Ghv;
+//ZC05/2004       //opserr << " C " << D;
+//ZC05/2004 
+//ZC05/2004       // Do invertion once to get Elastic matrix D
+//ZC05/2004       D.Invert( D );
+//ZC05/2004 
+//ZC05/2004       //Convert Matric D to 4th order Elastic constants tensor ret;
+//ZC05/2004       ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
+//ZC05/2004       ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
+//ZC05/2004       ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
+//ZC05/2004 
+//ZC05/2004       ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
+//ZC05/2004       ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
+//ZC05/2004       ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
+//ZC05/2004 
+//ZC05/2004       ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
+//ZC05/2004       ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
+//ZC05/2004       ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
+//ZC05/2004 
+//ZC05/2004     }
+//ZC05/2004     else if ( eflag == 2) {
+//ZC05/2004       double Ev = this->EPS->getEv();
+//ZC05/2004       double Ghv = this->EPS->getGhv();
+//ZC05/2004       double nuhv = this->EPS->getnuhv();
+//ZC05/2004 
+//ZC05/2004       double A = 1.0/Ey;
+//ZC05/2004       double B = 1.0/Ev;
+//ZC05/2004       //opserr << "A " << A << " B " << B;
+//ZC05/2004 
+//ZC05/2004       Matrix D(6,6);
+//ZC05/2004       D(0,0) = D(1,1) = A;
+//ZC05/2004       D(2,2) = B;
+//ZC05/2004       D(0,1) = D(1,0) = -nu*A;
+//ZC05/2004       D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
+//ZC05/2004       D(3,3) = (1.0+nu)*A;
+//ZC05/2004       D(4,4) = D(5,5) = 0.5/Ghv;
+//ZC05/2004       //opserr << " C " << D;
+//ZC05/2004 
+//ZC05/2004       // Do invertion once to get Elastic matrix D
+//ZC05/2004       D.Invert( D );
+//ZC05/2004 
+//ZC05/2004       //Convert Matric D to 4th order Elastic constants tensor ret;
+//ZC05/2004       ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
+//ZC05/2004       ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
+//ZC05/2004       ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
+//ZC05/2004 
+//ZC05/2004       ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
+//ZC05/2004       ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
+//ZC05/2004       ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
+//ZC05/2004 
+//ZC05/2004       ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
+//ZC05/2004       ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
+//ZC05/2004       ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
+//ZC05/2004 
+//ZC05/2004     }
+//ZC05/2004     else
+//ZC05/2004       {
+//ZC05/2004       opserr << "Template3Dep::ElasticStiffnessTensor failed to create elastic compliance tensor. Eflag must be 0-3: " <<  eflag << endln;
+//ZC05/2004       exit(-1);
+//ZC05/2004 
+//ZC05/2004       }    
+//ZC05/2004    return ret;
 }
 
 //================================================================================
@@ -1100,13 +1165,16 @@ const straintensor Template3Dep::getPlasticStrainTensor(void)
 //================================================================================
 double Template3Dep::getpsi(void)
 {
-    return EPS->getpsi();
+     //this function cannot be moved, 
+     //leave here for compiling..., Zhao04/22/04
+     return 0.05;
 }
 
 //================================================================================
 int Template3Dep::commitState(void)
 {
     int err;
+    theElasticMat->commitState();
     err = getEPS()->commitState();
     return err;
 }
@@ -1115,6 +1183,7 @@ int Template3Dep::commitState(void)
 int Template3Dep::revertToLastCommit(void)
 {
   int err;
+  theElasticMat->revertToLastCommit();
   err = EPS->revertToLastCommit();
   return err;
 }
@@ -1122,6 +1191,7 @@ int Template3Dep::revertToLastCommit(void)
 int Template3Dep::revertToStart(void)
 {
   int err;
+  theElasticMat->revertToStart();
   err = EPS->revertToStart();
   return err;
 }
@@ -1140,6 +1210,7 @@ NDMaterial * Template3Dep::getCopy(void)
 {
     NDMaterial * tmp =
             new Template3Dep( this->getTag()  ,
+	    *(this->getElMat()),
             this->getYS()   ,
             this->getPS()   ,
             this->getEPS()  ,
@@ -1164,6 +1235,7 @@ NDMaterial * Template3Dep::getCopy(const char *code)
     {
        Template3Dep * tmp =
             new Template3Dep( this->getTag()  ,
+	    *(this->getElMat()),
             this->getYS()   ,
             this->getPS()   ,
             this->getEPS()  ,
@@ -1272,14 +1344,14 @@ EPS->setConverged(rval.getConverged());
 
 */
 
-    EPS->setElasticflag(rval.getElasticflag());
-
-    EPS->setEo(rval.getEo());
-    EPS->setE(rval.getE());
-    EPS->setEv(rval.getEv());
-    EPS->setGhv(rval.getGhv());
-    EPS->setnu(rval.getnu());
-    EPS->setnuhv(rval.getnuhv());
+//ZC05/2004     EPS->setElasticflag(rval.getElasticflag());
+//ZC05/2004 
+//ZC05/2004     EPS->setEo(rval.getEo());
+//ZC05/2004     EPS->setE(rval.getE());
+//ZC05/2004     EPS->setEv(rval.getEv());
+//ZC05/2004     EPS->setGhv(rval.getGhv());
+//ZC05/2004     EPS->setnu(rval.getnu());
+//ZC05/2004     EPS->setnuhv(rval.getnuhv());
 
     EPS->setStress(rval.getStress());
     EPS->setStrain(rval.getStrain());
@@ -1319,16 +1391,23 @@ EPS->setConverged(rval.getConverged());
     EPS->Eep_init = rval.getEep_init();
     EPS->setConverged(rval.getConverged());
 
-    //Added Joey 02-13-03
-    EPS->seteo(rval.geteo());
-    EPS->setec(rval.getec());
-    EPS->setLam(rval.getLam());
-    EPS->setpo(rval.getpo());
+//ZC05/2004     //Added Joey 02-13-03
+//ZC05/2004     EPS->seteo(rval.geteo());
+//ZC05/2004     EPS->setec(rval.getec());
+//ZC05/2004     EPS->setLam(rval.getLam());
+//ZC05/2004     EPS->setpo(rval.getpo());
     EPS->sete(rval.gete());
     EPS->setpsi(rval.getpsi());
-    EPS->seta(rval.geta());
+//ZC05/2004     EPS->seta(rval.geta());
 }
 
+//================================================================================
+// Get the Elastic Material //ZC05/2004
+//================================================================================
+NDMaterial* Template3Dep::getElMat() const
+{
+    return theElasticMat;
+}
 
 
 //================================================================================
@@ -1520,7 +1599,6 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
       }
 
         //opserr <<" strain_increment.Iinvariant1() " << strain_increment.Iinvariant1() << endlnn;
-
         ElasticPredictorEPS.setEep(E);
         return ElasticPredictorEPS;
       }
@@ -2226,6 +2304,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   //double Ftolerance = pow( d_macheps(), 0.5)*1.00;
 
   double Ftolerance = pow( d_macheps(), 0.5)*1000*KK;  //Zhaohui UCD 10e6 for Pa, kg and m 1000 for kPa, ton and m
+
   //opserr << Ftolerance << endlnn;
   //  double Ftolerance = pow(d_macheps(),(1.0/2.0))*1.0;
   //  double entry_kappa_cone = Criterion.kappa_cone_get();
