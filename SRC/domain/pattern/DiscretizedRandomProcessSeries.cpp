@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:49:21 $
+// $Revision: 1.2 $
+// $Date: 2003-03-06 18:08:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/DiscretizedRandomProcessSeries.cpp,v $
 
 
@@ -43,7 +43,8 @@
 DiscretizedRandomProcessSeries::DiscretizedRandomProcessSeries(int num, 
 							       ModulatingFunction **theModFuncs,
 							       double p_mean,
-							       double p_maxStdv)
+							       double p_maxStdv,
+								   double p_maxStdvTime)
 :TimeSeries(TSERIES_TAG_DiscretizedRandomProcessSeries)
 {
 	randomVariables = 0;
@@ -52,46 +53,10 @@ DiscretizedRandomProcessSeries::DiscretizedRandomProcessSeries(int num,
 	numModFuncs = num;
 	mean = p_mean;
 	maxStdv = p_maxStdv;
+	maxStdvTime = p_maxStdvTime;
 
 
 	c = 0.0;
-/*
-	// Go through all modulating functions (and filters) to 
-	// compute the mean square.  Based on that the correction
-	// factor 'c' can be computed according to the user-
-	// specified target standard deviation. 
-	Filter *theFilter;
-	double maxAmplModFunc_k, maxAmplModFunc_l;
-	double maxAmplFilter_k, maxAmplFilter_l;
-	double sum_k;
-	double sum_l;
-	double filterSum;
-
-	sum_k = 0.0;
-	for (int k=0; k<numModFuncs; k++) {
-
-		sum_l = 0.0;
-		for (int l=0; l<numModFuncs; l++) {
-
-			// Get max amplitudes from modulating functions
-			maxAmplModFunc_k = theModulatingFunctions[k]->getMaxAmplitude();
-			maxAmplModFunc_l = theModulatingFunctions[l]->getMaxAmplitude();
-
-			// Get max amplitudes from filters (this may have to be corrected: should sum over all filters too... (for a given time?))
-			theFilter = theModulatingFunctions[k]->getFilter();
-			maxAmplFilter_k = theFilter->getMaxAmplitude();
-			theFilter = theModulatingFunctions[l]->getFilter();
-			maxAmplFilter_l = theFilter->getMaxAmplitude();
-			filterSum = maxAmplFilter_k*maxAmplFilter_l;
-
-			sum_l += maxAmplModFunc_k*filterSum;
-		}
-
-		sum_k += maxAmplModFunc_k*sum_l;
-	}
-
-	c = sqrt((pow(maxStdv,2.0)+pow(mean,2.0))/sum_k);
-*/
 }
 
 
@@ -235,12 +200,11 @@ DiscretizedRandomProcessSeries::Print(OPS_Stream &s, int flag)
 }
 
 int
-DiscretizedRandomProcessSeries::setParameter (char **argv, int argc, Information &info)
+DiscretizedRandomProcessSeries::setParameter (const char **argv, int argc, Information &info)
 {
     if (argc < 1)
         return -1;
 
-//	int rvNumber = atoi(argv[0]);
 	int rvNumber = info.theInt;
 
 	// The second argument tells when the random variable "kicks in".
@@ -279,41 +243,30 @@ DiscretizedRandomProcessSeries::setParameter (char **argv, int argc, Information
 
 
 		// Loop over all modulating functions
-		double sum1_k = 0.0;
+		double denominator = 0.0;
 		for (int k=0; k<numModFuncs; k++) {
 
 			// Get value of modulating function number k at time t
 			Filter *theFilter_k = theModulatingFunctions[k]->getFilter();
-			double time = (*kickInTimes)((int)floor(kickInTimes->Size()/2.0))+theFilter_k->getTimeOfMaxAmplitude();
-			double modFuncAmplitude_k = theModulatingFunctions[k]->getAmplitude(time);
+			double modFuncAmplitude_k = theModulatingFunctions[k]->getAmplitude(maxStdvTime);
 			
-			double sum1_l = 0.0;
-			for (int l=0; l<numModFuncs; l++) {
 
-				// Get value of modulating function number l at time t
-				double modFuncAmplitude_l = theModulatingFunctions[l]->getAmplitude(time);
-				Filter *theFilter_l = theModulatingFunctions[l]->getFilter();
+			// Loop over all rv's (even though some may be zero at this time)
+			double sum2 = 0.0;
+			for (int i=0; i<nrv; i++) {
 
-				// Loop over all rv's (even though some may be zero at this time)
-				double sum2 = 0.0;
-				for (int i=0; i<nrv; i++) {
-
-					// Get value of filter for argument (t-ti)
-					double filterAmplitude_k = theFilter_k->getAmplitude(time-(*kickInTimes)(i));
-					double filterAmplitude_l = theFilter_l->getAmplitude(time-(*kickInTimes)(i));
-					
-					// Add contribution 'ui * hi'
-					sum2 += filterAmplitude_k*filterAmplitude_l;
-				}
-
-				sum1_l += sum2*modFuncAmplitude_k*modFuncAmplitude_l;
+				// Get value of filter for argument (t-ti)
+				double filterAmplitude_k = theFilter_k->getAmplitude(maxStdvTime-(*kickInTimes)(i));
+				
+				// Add contribution 'ui * hi'
+				denominator += filterAmplitude_k*filterAmplitude_k
+					         * modFuncAmplitude_k*modFuncAmplitude_k;
 			}
-
-			sum1_k += sum1_l;
 		}
 
-		c = sqrt((pow(maxStdv,2.0)+pow(mean,2.0))/sum1_k);
+		c = sqrt(maxStdv*maxStdv/denominator);
 
+		//////////////////////////////////////
 	}
 	else {
 		(*kickInTimes)(rvNumber-1) = (double)atof(argv[0]);

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:49:21 $
+// $Revision: 1.2 $
+// $Date: 2003-03-06 18:08:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/DiscretizedRandomProcessSeries.h,v $
 
 
@@ -44,7 +44,8 @@ public:
     DiscretizedRandomProcessSeries(int num, 
 								   ModulatingFunction **theModFuncs,
 								   double p_mean,
-								   double targetStdv);
+								   double targetStdv,
+								   double targetStdvTime);
     ~DiscretizedRandomProcessSeries();
 
     // method to get load factor
@@ -64,7 +65,7 @@ public:
     void Print(OPS_Stream &s, int flag =0);    
     
 // AddingSensitivity:BEGIN //////////////////////////////////////////
-    int setParameter     (char **argv, int argc, Information &info);
+    int setParameter     (const char **argv, int argc, Information &info);
     int updateParameter  (int parameterID, Information &info);
 	int activateParameter(int parameterID);
 	double getFactorSensitivity(double time);
@@ -77,6 +78,7 @@ private:
 	double c;
 	double mean;
 	double maxStdv;
+	double maxStdvTime;
     ModulatingFunction **theModulatingFunctions;
 	Vector *randomVariables;
 	Vector *kickInTimes;
