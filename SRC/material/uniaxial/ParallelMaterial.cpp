@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-25 23:33:38 $
+// $Revision: 1.10 $
+// $Date: 2004-11-24 00:48:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ParallelMaterial.cpp,v $
                                                                         
                                                                         
@@ -363,7 +363,7 @@ ParallelMaterial::setResponse(const char **argv, int argc,
     return res;
 
   if (strcmp(argv[0],"stresses") == 0)
-    return new MaterialResponse(this, 1, Vector(numMaterials));
+    return new MaterialResponse(this, 100, Vector(numMaterials));
 
   else if (strcmp(argv[0],"material") == 0 ||
 	   strcmp(argv[0],"component") == 0) {
@@ -379,7 +379,7 @@ ParallelMaterial::setResponse(const char **argv, int argc,
   }
   
   else
-    return 0;
+    return this->UniaxialMaterial::setResponse(argv, argc, info);
 }
 
 int
@@ -389,12 +389,12 @@ ParallelMaterial::getResponse(int responseID, Information &info)
   int i;
 
   switch (responseID) {
-  case 1:
+  case 100:
     for (i = 0; i < numMaterials; i++)
       stresses(i) = theModels[i]->getStress();
     return info.setVector(stresses);
 
   default:
-    return -1;
+    return this->UniaxialMaterial::getResponse(responseID, info);
   }
 }

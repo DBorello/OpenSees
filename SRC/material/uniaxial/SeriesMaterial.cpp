@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:33:39 $
+// $Revision: 1.7 $
+// $Date: 2004-11-24 00:48:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SeriesMaterial.cpp,v $
 
 // Written: MHS
@@ -515,7 +515,7 @@ SeriesMaterial::setResponse(const char **argv, int argc,
     return res;
 
   if (strcmp(argv[0],"strains") == 0)
-    return new MaterialResponse(this, 1, Vector(numMaterials));
+    return new MaterialResponse(this, 100, Vector(numMaterials));
 
   else if (strcmp(argv[0],"material") == 0 ||
 	   strcmp(argv[0],"component") == 0) {
@@ -531,7 +531,7 @@ SeriesMaterial::setResponse(const char **argv, int argc,
   }
   
   else
-    return 0;
+    return this->UniaxialMaterial::setResponse(argv, argc, info);
 }
 
 int
@@ -540,10 +540,10 @@ SeriesMaterial::getResponse(int responseID, Information &info)
   Vector strains(strain, numMaterials);
 
   switch (responseID) {
-  case 1:
+  case 100:
     return info.setVector(strains);
 
   default:
-    return -1;
+    return this->UniaxialMaterial::getResponse(responseID, info);
   }
 }
