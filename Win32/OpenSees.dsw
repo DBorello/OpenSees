@@ -147,18 +147,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "nonlinearBeamColumn"=.\proj\nonlinearBeamColumn\nonlinearBeamColumn.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "openSees"=.\proj\openSees\openSees.dsp - Package Owner=<4>
 
 Package=<5>
@@ -202,9 +190,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name modelbuilder
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name nonlinearBeamColumn
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name recorder
@@ -279,9 +264,6 @@ Package=<4>
     Project_Dep_Name modelbuilder
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name nonlinearBeamColumn
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name recorder
     End Project Dependency
     Begin Project Dependency
@@ -346,9 +328,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name modelbuilder
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name nonlinearBeamColumn
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name recorder
