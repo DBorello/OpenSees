@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:36:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/MP_Constraint.cpp,v $
                                                                         
                                                                         
@@ -42,9 +42,9 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
  
-// constructor for FEM_ObjectBroker
-MP_Constraint::MP_Constraint(int clasTag)
-:DomainComponent(0,clasTag),
+// constructor for FEM_ObjectBroker			// Arash
+MP_Constraint::MP_Constraint( int tag , int clasTag )		
+:DomainComponent(tag,clasTag),
  nodeRetained(0),nodeConstrained(0),constraint(0),constrDOF(0),retainDOF(0),
  dbTag1(0), dbTag2(0)
 {
