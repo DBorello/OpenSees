@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2002-01-25 21:00:05 $
+// $Revision: 1.28 $
+// $Date: 2002-03-01 19:41:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1452,13 +1452,13 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
   else if (strcmp(argv[1],"KrylovNewton") == 0) {
     int formTangent = CURRENT_TANGENT;
     int maxDim = -1;
-    if (argc > 2)
-      maxDim = atoi(argv[2]);
-    if (argc > 3) {
-      if (strcmp(argv[3],"-secant") == 0) {
+    for (int i = 2; i < argc; i++) {
+      if (strcmp(argv[i],"-secant") == 0) {
 	formTangent = CURRENT_SECANT;
-      } else if (strcmp(argv[3],"-initial") == 0) {
+      } else if (strcmp(argv[i],"-initial") == 0) {
 	formTangent = INITIAL_TANGENT;
+      } else if (strcmp(argv[i],"-maxDim") == 0 && i+1 < argc) {
+	maxDim = atoi(argv[i+1]);	
       }
     }
 
