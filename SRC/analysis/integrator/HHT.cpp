@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 05:23:32 $
+// $Revision: 1.4 $
+// $Date: 2001-09-10 19:30:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.cpp,v $
                                                                         
                                                                         
@@ -43,6 +43,14 @@
 #include <AnalysisModel.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+
+//-----------------------------------------
+//set alpha = 0.5 
+//    beta  = 0.5 
+//    gamma = 1.0 
+//for symplectic midpoint
+//-----------------------------------------
+
 
 HHT::HHT()
 :TransientIntegrator(INTEGRATOR_TAGS_HHT),
@@ -77,6 +85,33 @@ HHT::HHT(double _alpha, double alpham, double betak, double betaki, double betak
 {
     if (alpham == 0.0 && betak == 0.0 && betaki == 0.0 && betakc == 0.0)
 	rayleighDamping = false;
+}
+
+
+//generalized HHT alpha method
+HHT::HHT(double _alpha, double _beta, double _gamma)
+:TransientIntegrator(INTEGRATOR_TAGS_HHT),
+ alpha(_alpha), gamma(_gamma), beta(_beta),
+ rayleighDamping(false), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+ c1(0.0), c2(0.0), c3(0.0), 
+ Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
+ Ualpha(0),Udotalpha(0)
+{
+
+}
+
+HHT::HHT(double _alpha, double _beta, double _gamma,
+	 double alpham, double betak, double betaki, double betakc)
+:TransientIntegrator(INTEGRATOR_TAGS_HHT),
+ alpha(_alpha), gamma(_gamma), beta(_beta),
+ rayleighDamping(true),
+ alphaM(alpham), betaK(betak), betaKi(betaki), betaKc(betakc),
+ c1(0.0), c2(0.0), c3(0.0), 
+ Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
+ Ualpha(0),Udotalpha(0)
+{
+  if (alpham == 0.0 && betak == 0.0 && betaki == 0.0 && betakc == 0.0)
+    rayleighDamping = false;
 }
 
 HHT::~HHT()
@@ -154,7 +189,8 @@ HHT::newStep(double deltaT)
     cerr << "dT = " << deltaT << endl;
     return -2;	
   }
-  c1 = 1.0;
+  
+  c1 = alpha;
   c2 = gamma/(beta*deltaT);
   c3 = 1.0/(beta*deltaT*deltaT);
 
@@ -231,7 +267,7 @@ HHT::formEleTangent(FE_Element *theEle)
   theEle->zeroTangent();
   if (statusFlag == CURRENT_TANGENT) {
     if (rayleighDamping == false) {
-      theEle->addKtToTang(c1);
+      theEle->addKtToTang(c1) ;
       theEle->addCtoTang(c2);
       theEle->addMtoTang(c3);
     } else {
@@ -435,8 +471,9 @@ HHT::update(const Vector &deltaU)
   //  determine the response at t+delta t
   (*U) += deltaU;
   Udot->addVector(1.0,deltaU,c2);
+
   Udotdot->addVector(1.0,deltaU,c3);
-  Ualpha->addVector(1.0,deltaU, alpha);
+  Ualpha->addVector(1.0,deltaU, c1 ) ;   //c1 = alpha
   Udotalpha->addVector(1.0,deltaU, c2*alpha);
   
   // update the responses at the DOFs
@@ -445,6 +482,7 @@ HHT::update(const Vector &deltaU)
 		    
   return 0;
 }    
+
 
 int
 HHT::commit(void)
@@ -516,8 +554,10 @@ HHT::Print(ostream &s, int flag)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theModel != 0) {
 	double currentTime = theModel->getCurrentDomainTime();
-	s << "\t HHT - currentTime: " << currentTime << " alpha: ";
-	s << alpha << " gamma: " << gamma << "  beta: " << beta << endl;
+	s << "\t HHT - currentTime: " << currentTime << endl ;
+        s << "\t alpha = " << alpha << endl ;
+	s << "\t beta  = " << beta  << endl ;
+        s << "\t gamma = " << gamma << endl ;
 	if (rayleighDamping == true) {
 	    s << "  Rayleigh Damping - alphaM: " << alphaM;
 	    s << "  betaK: " << betaK << endl;	    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 08:27:10 $
+// $Revision: 1.3 $
+// $Date: 2001-09-10 19:30:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.h,v $
                                                                         
                                                                         
@@ -52,6 +52,13 @@ class HHT : public TransientIntegrator
     HHT(double alpha, double alphaM, double betaKcurrent, 
 	double betaKinit, double betaKlastCommit);        
 
+    //generalized alpha method
+    HHT( double alpha, double beta, double gamma );
+    HHT( double alpha, double beta, double gamma,
+	 double alphaM, double betaKcurrent, 
+	 double betaKinit, double betaKlastCommit );
+
+    //destructor
     ~HHT();
 
     // Override residual calculation needed for Rayleigh damping
