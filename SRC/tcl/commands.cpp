@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2001-10-20 16:29:20 $
+// $Revision: 1.21 $
+// $Date: 2001-11-09 01:23:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1460,7 +1460,7 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
       return TCL_ERROR;	  
     }
       
-    theNewAlgo = new ModifiedNewton(*theTest); 
+    theNewAlgo = new ModifiedNewton(*theTest, formTangent); 
   }  
   
   else if (strcmp(argv[1],"NewtonLineSearch") == 0) {
