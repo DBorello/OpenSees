@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2004-06-24 22:40:21 $
+// $Revision: 1.24 $
+// $Date: 2004-08-31 22:26:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -96,6 +96,9 @@ extern MultiSupportPattern *theTclMultiSupportPattern;
 static int eleArgStart = 0;
 static int nodeLoadTag = 0;
 static int eleLoadTag = 0;
+
+static int currentSpTag = 0;
+
 // 
 // THE PROTOTYPES OF THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
@@ -289,6 +292,14 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   theYS_EvolutionModels = new ArrayOfTaggedObjects(32);
   thePlasticMaterials = new ArrayOfTaggedObjects(32);
 
+  SP_ConstraintIter &theSPs = theDomain.getSPs();
+  SP_Constraint *theSP;
+  while ((theSP = theSPs()) != 0) {
+    int spTag = theSP->getTag();
+    if (spTag >= currentSpTag)
+      currentSpTag = spTag+1;
+  }    
+
   // call Tcl_CreateCommand for class specific commands
   Tcl_CreateCommand(interp, "node", TclModelBuilder_addNode,
 		    (ClientData)NULL, NULL);
@@ -410,6 +421,8 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 
 TclModelBuilder::~TclModelBuilder()
 {
+  currentSpTag = 0;
+
   theUniaxialMaterials->clearAll();
   theNDMaterials->clearAll();
   theSections->clearAll(); 
@@ -1464,7 +1477,6 @@ TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int 
   }
 
   int ndf = theTclBuilder->getNDF();
-  int numSPs = theTclDomain->getNumSPs();
 
   // check number of arguments
   if (argc < (2 + ndf)) {
@@ -1490,7 +1502,7 @@ TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int 
     } else {
       if (theFixity != 0) {
 	// create a homogeneous constraint
-	SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
+	SP_Constraint *theSP = new SP_Constraint(currentSpTag, nodeId, i, 0.0);
 	if (theSP == 0) {
 	  opserr << "WARNING ran out of memory for SP_Constraint ";
 	  opserr << "fix " << nodeId << " " << ndf << " [0,1] conditions\n";
@@ -1502,7 +1514,7 @@ TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int 
 	  delete theSP;
 	  return TCL_ERROR;
 	}
-	numSPs++;      }
+	currentSpTag++;      }
     }
   }
 
@@ -1522,7 +1534,6 @@ TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
   }
 
   int ndf = theTclBuilder->getNDF();
-  int numSPs = theTclDomain->getNumSPs();
 
   // check number of arguments
   if (argc < (2 + ndf)) {
@@ -1580,7 +1591,7 @@ TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
 	theFixity = fixity(i);
 	if (theFixity != 0) {
 	  // create a homogeneous constraint
-	  SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
+	  SP_Constraint *theSP = new SP_Constraint(currentSpTag, nodeId, i, 0.0);
 	  if (theSP == 0) {
 	    opserr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
 	    opserr << " - fixX " << xLoc << " " << ndf << " [0,1] conditions\n";
@@ -1592,7 +1603,7 @@ TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
 	    delete theSP;
 	    return TCL_ERROR;
 	  }
-	  numSPs++;      
+	  currentSpTag++;      
 	}
       }
     }
@@ -1616,7 +1627,6 @@ TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
   }
 
   int ndf = theTclBuilder->getNDF();
-  int numSPs = theTclDomain->getNumSPs();
 
   // check number of arguments
   if (argc < (2 + ndf)) {
@@ -1676,7 +1686,7 @@ TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
 	  theFixity = fixity(i);
 	  if (theFixity != 0) {
 	    // create a homogeneous constraint
-	    SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
+	    SP_Constraint *theSP = new SP_Constraint(currentSpTag, nodeId, i, 0.0);
 	    if (theSP == 0) {
 	      opserr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
 	      opserr << " - fixY " << yLoc << " " << ndf << " [0,1] conditions\n";
@@ -1688,7 +1698,7 @@ TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
 	      delete theSP;
 	      return TCL_ERROR;
 	    }
-	    numSPs++;      
+	    currentSpTag++;      
 	  }
 	}
       }
@@ -1712,7 +1722,6 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
   }
 
   int ndf = theTclBuilder->getNDF();
-  int numSPs = theTclDomain->getNumSPs();
 
   // check number of arguments
   if (argc < (2 + ndf)) {
@@ -1772,7 +1781,7 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
 	  theFixity = fixity(i);
 	  if (theFixity != 0) {
 	    // create a homogeneous constraint
-	    SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
+	    SP_Constraint *theSP = new SP_Constraint(currentSpTag, nodeId, i, 0.0);
 	    if (theSP == 0) {
 	      opserr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
 	      opserr << " - fixZ " << zLoc << " " << ndf << " [0,1] conditions\n";
@@ -1784,7 +1793,7 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
 	      delete theSP;
 	      return TCL_ERROR;
 	    }
-	    numSPs++;      
+	    currentSpTag++;      
 	  }
 	}
       }
