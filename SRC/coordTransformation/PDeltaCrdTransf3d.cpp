@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-06-05 06:01:09 $
+// $Revision: 1.2 $
+// $Date: 2001-07-13 23:26:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.cpp,v $
                                                                         
                                                                         
@@ -875,9 +875,9 @@ PDeltaCrdTransf3d::getPointGlobalCoordFromLocal(const Vector &xl)
 
    // xg = xg + Rlj'*xl
    //xg.addMatrixTransposeVector(1.0, Rlj, xl, 1.0);
-   xg(0) += R[0][0]*xl(0) + R[0][1]*xl(1) + R[0][2]*xl(2);
-   xg(1) += R[1][0]*xl(0) + R[1][1]*xl(1) + R[1][2]*xl(2);
-   xg(2) += R[2][0]*xl(0) + R[2][1]*xl(1) + R[2][2]*xl(2);
+   xg(0) += R[0][0]*xl(0) + R[1][0]*xl(1) + R[2][0]*xl(2);
+   xg(1) += R[0][1]*xl(0) + R[1][1]*xl(1) + R[2][1]*xl(2);
+   xg(2) += R[0][2]*xl(0) + R[1][2]*xl(1) + R[2][2]*xl(2);
      
    return xg;  
 }
