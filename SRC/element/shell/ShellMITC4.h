@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-11 21:23:20 $
+// $Revision: 1.3 $
+// $Date: 2001-07-12 00:09:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.h,v $
 
 // Ed "C++" Love
@@ -39,8 +39,6 @@
 #include <Node.h>
 #include <SectionForceDeformation.h>
 #include <R3vectors.h>
-
-#define  ELE_TAG_ShellMITC4 3457 
 
 class ShellMITC4 : public Element {
 
