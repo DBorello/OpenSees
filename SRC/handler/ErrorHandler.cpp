@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-01-06 19:48:29 $
+// $Revision: 1.3 $
+// $Date: 2002-02-08 20:43:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/ErrorHandler.cpp,v $
                                                                         
                                                                         
@@ -48,12 +48,12 @@ ErrorHandler::~ErrorHandler()
 }
  
 void
-ErrorHandler::outputMessage(ostream &theStream, const char *msg,
-va_list args) 
+ErrorHandler::outputMessage(ostream &theStream, const char *msg, va_list args) 
 {
   int dataInt;
   double dataDouble;
   char *dataString;
+  char dataChar;
 
   int pos =0;
   int done =0;
@@ -64,14 +64,16 @@ va_list args)
   // from the next arg on the va_list and send it to the stream
 
   while (done != 1) {
+
     // if reach string end then we are done
     if (msg[pos] == '\0')
       break;
 
     // otherwise parse string , looking for special %d and %f
-    if (msg[pos] != '%')
-      theStream << &msg[pos];
-     else {
+    if (msg[pos] != '%') {
+      dataChar = msg[pos];
+      theStream << dataChar;
+    } else {
       pos++;
       switch(msg[pos]) {
       case 'd':
