@@ -514,6 +514,8 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/domain/partitioned/PartitionedDomainEleIter.o \
 	$(FE)/domain/domain/partitioned/PartitionedDomainSubIter.o \
 	$(FE)/domain/partitioner/DomainPartitioner.o \
+	$(FE)/domain/region/MeshRegion.o \
+	$(FE)/domain/region/TclRegionCommands.o \
 	$(FE)/domain/node/Node.o \
 	$(FE)/domain/node/NodalLoad.o \
 	$(FE)/domain/constraints/SP_Constraint.o \

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.38 $
-// $Date: 2002-12-06 02:11:41 $
+// $Revision: 1.39 $
+// $Date: 2002-12-09 21:59:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -67,8 +67,7 @@
 #define GROUND_MOTION_TAG_InterpolatedGroundMotion    3
 #define GROUND_MOTION_TAG_GroundMotion                4
 
-
-#define REGION_TAG_Region      1
+#define REGION_TAG_MeshRegion      1
 
 #define TIMESERIES_INTEGRATOR_TAG_Trapezoidal 1
 

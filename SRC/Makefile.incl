@@ -1,6 +1,6 @@
 
 FE_INCLUDES  = -I$(FE)/matrix \
-		             -I$(FE)/nDarray \
+		-I$(FE)/nDarray \
             	  -I$(FE)/tagged \
             	  -I$(FE)/tcl \
             	  -I$(FE)/material \
@@ -54,11 +54,13 @@ FE_INCLUDES  = -I$(FE)/matrix \
             	  -I$(FE)/domain/partitioner	\
             	  -I$(FE)/domain/loadBalancer	\
             	  -I$(FE)/domain/subdomain	\
+            	  -I$(FE)/domain/region \
             	  -I$(FE)/domain/node	\
             	  -I$(FE)/domain/load	\
             	  -I$(FE)/domain/pattern	\
             	  -I$(FE)/domain/groundMotion	\
             	  -I$(FE)/domain/constraints	\
+            	  -I$(FE)/domain/region \
             	  -I$(FE)/element	\
             	  -I$(FE)/element/beam2d	\
             	  -I$(FE)/element/beam3d	\
