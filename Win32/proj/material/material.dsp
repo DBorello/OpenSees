@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\material\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\material\uniaxial\py" /I "..\..\..\src\material\uniaxial\snap" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\material\uniaxial\py" /I "..\..\..\src\material\uniaxial\snap" /I "..\..\..\src\material\yieldSurface\yieldSurfaceBC" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\material\yieldSurface\plasticHardeningMaterial" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\obj\material\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "c:\Program Files\tcl\include" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\material\uniaxial\py" /I "..\..\..\src\material\uniaxial\snap" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "MHS_INSURE" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "c:\Program Files\tcl\include" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\material\uniaxial\py" /I "..\..\..\src\material\uniaxial\snap" /I "..\..\..\src\material\yieldSurface\yieldSurfaceBC" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\material\yieldSurface\plasticHardeningMaterial" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "MHS_INSURE" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -1049,6 +1049,234 @@ SOURCE=..\..\..\SRC\material\section\SectionForceDeformation.h
 
 SOURCE=..\..\..\SRC\material\section\TclModelBuilderSectionCommand.cpp
 # End Source File
+# End Group
+# Begin Group "yieldSurface"
+
+# PROP Default_Filter ""
+# Begin Group "yieldSurfaceBC"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Attalla2D.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Attalla2D.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\ElTawil2D.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\ElTawil2D.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\ElTawil2DUnSym.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\ElTawil2DUnSym.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Hajjar2D.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Hajjar2D.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Orbison2D.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Orbison2D.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\TclModelBuilderYieldSurfaceBCCommand.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\YieldSurface_BC.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\YieldSurface_BC.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\YieldSurface_BC2D.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\YieldSurface_BC2D.h
+# End Source File
+# End Group
+# Begin Group "evolution"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\BkStressLimSurface2D.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\BkStressLimSurface2D.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\BoundingSurface2D.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\BoundingSurface2D.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\CombinedIsoKin2D01.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\CombinedIsoKin2D01.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\CombinedIsoKin2D02.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\CombinedIsoKin2D02.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\Isotropic2D01.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\Isotropic2D01.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\Kinematic2D01.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\Kinematic2D01.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\Kinematic2D02.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\Kinematic2D02.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\NullEvolution.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\NullEvolution.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\PeakOriented2D01.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\PeakOriented2D01.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\PeakOriented2D02.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\PeakOriented2D02.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\PlasticHardening2D.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\PlasticHardening2D.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\TclModelBuilderYS_EvolutionCommand.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\YS_Evolution.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\YS_Evolution.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\YS_Evolution2D.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\evolution\YS_Evolution2D.h
+# End Source File
+# End Group
+# Begin Group "plasticHardening"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\ExponReducing.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\ExponReducing.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\MultiLinearKp.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\MultiLinearKp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\NullPlasticMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\NullPlasticMaterial.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\PlasticHardeningMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\PlasticHardeningMaterial.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\QuadrReducing.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\QuadrReducing.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\TclModelBuilderYSPlasticMaterialCommand.cpp
+# End Source File
+# End Group
 # End Group
 # Begin Source File
 
