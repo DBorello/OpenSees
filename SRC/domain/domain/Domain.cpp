@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-08-28 19:05:36 $
+// $Revision: 1.7 $
+// $Date: 2001-09-05 22:00:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -315,6 +315,12 @@ Domain::~Domain()
 	free((void *)theRecorders);
 	theRecorders = 0;
     }
+
+    if (theNodeGraph != 0)
+      delete theNodeGraph;
+
+    if (theElementGraph != 0)
+      delete theElementGraph;
   
     theRecorders = 0;
     numRecorders = 0;
@@ -1294,8 +1300,9 @@ Domain::revertToLastCommit(void)
     
     Element *elePtr;
     ElementIter &theElemIter = this->getElements();    
-    while ((elePtr = theElemIter()) != 0) 
+    while ((elePtr = theElemIter()) != 0) {
 	elePtr->revertToLastCommit();
+    }
 
     // set the current time and load factor in the domain to last committed
     currentTime = committedTime;
@@ -1321,9 +1328,10 @@ Domain::revertToStart(void)
 
     Element *elePtr;
     ElementIter &theElements = this->getElements();    
-    while ((elePtr = theElements()) != 0) 
+    while ((elePtr = theElements()) != 0) {
 	elePtr->revertToStart();
-    
+    }
+
     // set the current time and load factor in the domain to last committed
     committedTime = 0;
     currentTime = 0;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2001-09-05 21:59:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -136,6 +136,7 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	    cerr << "WARNING TransformationConstraintHandler::handle() - ";
 	    cerr << "ran out of memory for MP_Constraints"; 
 	    cerr << " array of size " << numMPConstraints << endl;
+	    if (constrainedNodesMP != 0) delete constrainedNodesMP;
 	    return -3;	    
 	}
 	MP_ConstraintIter &theMPs = theDomain->getMPs();
@@ -158,6 +159,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	    cerr << "WARNING TransformationConstraintHandler::handle() - ";
 	    cerr << "ran out of memory for SP_Constraints"; 
 	    cerr << " array of size " << numSPConstraints << endl;
+	    if (constrainedNodesMP != 0) delete constrainedNodesMP;
+	    if (constrainedNodesSP != 0) delete constrainedNodesSP;
 	    return -3;	    
 	}
 	SP_ConstraintIter &theSPs = theDomain->getDomainAndLoadPatternSPs();
@@ -249,6 +252,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 		cerr << "WARNING TransformationConstraintHandler::handle() ";
 		cerr << "- ran out of memory";
 		cerr << " creating DOF_Group " << i << endl;	
+		if (constrainedNodesMP != 0) delete constrainedNodesMP;
+		if (constrainedNodesSP != 0) delete constrainedNodesSP;
 		return -4;    		
 	    }
 	
@@ -299,6 +304,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 		cerr << "WARNING TransformationConstraintHandler::handle()";
 		cerr << " - ran out of memory";
 		cerr << " creating FE_Element " << elePtr->getTag() << endl; 
+		if (constrainedNodesMP != 0) delete constrainedNodesMP;
+		if (constrainedNodesSP != 0) delete constrainedNodesSP;
 		return -5;
 	    }		
 	} else {
@@ -306,6 +313,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 		cerr << "WARNING TransformationConstraintHandler::handle()";
 		cerr << " - ran out of memory";
 		cerr << " creating TransformationFE " << elePtr->getTag() << endl; 
+		if (constrainedNodesMP != 0) delete constrainedNodesMP;
+		if (constrainedNodesSP != 0) delete constrainedNodesSP;
 		return -6;		    
 	    }
 	}
@@ -341,10 +350,15 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 			cerr << "WARNING TransformationConstraintHandler::handle() ";
 			cerr << " - boundary sp constraint in subdomain";
 			cerr << " this should not be - results suspect \n";
+			if (constrainedNodesMP != 0) delete constrainedNodesMP;
+			if (constrainedNodesSP != 0) delete constrainedNodesSP;
 		    }
 		}
 	    }
 	}
+
+    if (constrainedNodesMP != 0) delete constrainedNodesMP;
+    if (constrainedNodesSP != 0) delete constrainedNodesSP;
 
     return count3;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-26 06:19:13 $
+// $Revision: 1.3 $
+// $Date: 2001-09-05 21:59:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/numberer/DOF_Numberer.cpp,v $
                                                                         
                                                                         
@@ -83,7 +83,8 @@ DOF_Numberer::DOF_Numberer()
 
 DOF_Numberer::~DOF_Numberer() 
 {
-
+  if (theGraphNumberer != 0)
+    delete theGraphNumberer;
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-31 22:11:33 $
+// $Revision: 1.5 $
+// $Date: 2001-09-05 21:59:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -216,8 +216,9 @@ FE_Element::~FE_Element()
     if (numDOF > MAX_NUM_DOF) {
 	if (theTangent != 0) delete theTangent;
 	if (theResidual != 0) delete theResidual;
-	if (Kc != 0) delete Kc;
     }
+
+    if (Kc != 0) delete Kc;
 
     // if this is the last FE_Element, clean up the
     // storage for the matrix and vector objects
