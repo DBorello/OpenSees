@@ -1,6 +1,7 @@
 include ../../../../Makefile.def
 
-OBJS       = PySimple1.o  QzSimple1.o TzSimple1.o
+OBJS       = PySimple1.o  QzSimple1.o TzSimple1.o \
+	TclPyTzQzMaterialCommand.o
 
 all:         $(OBJS)
 

@@ -184,7 +184,8 @@ ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
 
 PY_RWB_BJ_LIBS = $(FE)/material/uniaxial/PY/PySimple1.o \
 		 $(FE)/material/uniaxial/PY/QzSimple1.o \
-		 $(FE)/material/uniaxial/PY/TzSimple1.o 
+		 $(FE)/material/uniaxial/PY/TzSimple1.o \
+		 $(FE)/material/uniaxial/PY/TclPyTzQzMaterialCommand.o 
 
 
  
