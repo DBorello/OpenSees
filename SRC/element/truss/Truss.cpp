@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2001-11-26 22:53:55 $
+// $Revision: 1.12 $
+// $Date: 2002-06-07 00:16:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -359,8 +359,6 @@ Truss::setDomain(Domain *theDomain)
     
     // determine the nodal mass for lumped mass approach
     M = M * A * L/2;
-    
-    this->update();
 }   	 
 
 
