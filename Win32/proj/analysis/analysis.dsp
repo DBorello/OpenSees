@@ -570,5 +570,49 @@ SOURCE=..\..\..\SRC\analysis\handler\TransformationConstraintHandler.cpp
 SOURCE=..\..\..\SRC\analysis\handler\TransformationConstraintHandler.h
 # End Source File
 # End Group
+# Begin Group "lineSearch"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\BisectionLineSearch.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\BisectionLineSearch.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\InitialInterpolatedLineSearch.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\InitialInterpolatedLineSearch.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\LineSearch.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\LineSearch.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\RegulaFalsiLineSearch.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\RegulaFalsiLineSearch.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\SecantLineSearch.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\SecantLineSearch.h
+# End Source File
+# End Group
 # End Target
 # End Project
