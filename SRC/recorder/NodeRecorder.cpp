@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2004-05-11 00:07:34 $
+// $Revision: 1.18 $
+// $Date: 2004-11-13 00:57:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -38,31 +38,30 @@
 #include <ID.h>
 #include <Matrix.h>
 #include <FE_Datastore.h>
+#include <DataOutputHandler.h>
 
 #include <string.h>
-
-#include <fstream>
-using std::ifstream;
-
-#include <iomanip>
-using std::ios;
 
 NodeRecorder::NodeRecorder(const ID &dofs, 
 			   const ID &nodes, 
 			   int psensitivity,
-			   Domain &theDom,
-			   const char *theFileName,
 			   const char *dataToStore,
+			   Domain &theDom,
+			   DataOutputHandler &theOutputHandler,
 			   double dT,
 			   int startFlag)
-:theDofs(0), theNodes(0), disp(1 + nodes.Size()*dofs.Size()), 
- theDomain(&theDom), flag(startFlag), fileName(0), dataFlag(0), 
+:theDofs(0), theNodes(0), response(1 + nodes.Size()*dofs.Size()), 
+ theDomain(&theDom), theHandler(&theOutputHandler),
+ flag(startFlag), dataFlag(0), 
  deltaT(dT), nextTimeStampToRecord(0.0), 
- db(0), dbColumns(0), numDbColumns(0), destroyDatabase(false), sensitivity(psensitivity){
-  // verify dof are valid 
+ sensitivity(psensitivity)
+{
+  //
+  // store copy of dof's to be recorder, verifying dof are valid, i.e. >= 0
+  //
+
   int numDOF = dofs.Size();
   theDofs = new ID(0, numDOF);
-
 
   int count = 0;
   int i;
@@ -77,7 +76,10 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     }
   }
 
+  //
   // verify the nodes exist 
+  //
+
   count = 0;
   int numNode = nodes.Size();
   theNodes = new ID(1, numNode);
@@ -92,120 +94,11 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     }
   }
 
-  // create char array to store file name
-  if (theFileName != 0) {
-    int fileNameLength = strlen(theFileName) + 1;
-    fileName = new char[fileNameLength];
-    if (fileName == 0) {
-      opserr << "NodeRecorder::NodeRecorder - out of memory creating string of size: " <<
-	fileNameLength << endln;
-      exit(-1);
-    }
-    
-    // copy the strings
-    strcpy(fileName, theFileName);    
+  response.Zero();
 
-    // open the file
-    theFile.open(fileName, ios::out);
-    if (theFile.bad()) {
-      opserr << "WARNING - NodeRecorder::NodeRecorder()";
-      opserr << " - could not open file " << fileName << endln;
-      delete [] fileName;
-      fileName = 0;
-    }
-  }
-
-  disp.Zero();
-
-  if (dataToStore == 0 || (strcmp(dataToStore, "disp") == 0)) {
-    dataFlag = 0;
-  } else if ((strcmp(dataToStore, "vel") == 0)) {
-    dataFlag = 1;
-  } else if ((strcmp(dataToStore, "accel") == 0)) {
-    dataFlag = 2;
-  } else if ((strcmp(dataToStore, "incrDisp") == 0)) {
-    dataFlag = 3;
-  } else if ((strcmp(dataToStore, "incrDeltaDisp") == 0)) {
-    dataFlag = 4;
-  } else if ((strncmp(dataToStore, "eigen",5) == 0)) {
-    int mode = atoi(&(dataToStore[5]));
-    if (mode > 0)
-      dataFlag = 10 + mode;
-    else
-      dataFlag = 6;
-  } else {
-    dataFlag = 6;
-    opserr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
-    opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
-  }
-}
-
-
-NodeRecorder::NodeRecorder(const ID &dofs, 
-			   const ID &nodes, 
-			   int psensitivity,
-			   Domain &theDom,
-			   FE_Datastore *database,
-			   const char *dbTable,
-			   const char *dataToStore,
-			   double dT,
-			   int startFlag,
-			   bool invokeDatabaseDestructor )
-:theDofs(0), theNodes(0), disp(1 + nodes.Size()*dofs.Size()), 
- theDomain(&theDom), flag(startFlag), fileName(0), dataFlag(0), 
- deltaT(dT), nextTimeStampToRecord(0.0), 
- db(database), dbColumns(0), numDbColumns(0), destroyDatabase(invokeDatabaseDestructor), sensitivity(psensitivity)
-{
-  // verify dof are valid 
-  int numDOF = dofs.Size();
-  theDofs = new ID(0, numDOF);
-
-  int count = 0;
-  int i;
-  for (i=0; i<numDOF; i++) {
-    int dof = dofs(i);
-    if (dof >= 0) {
-      (*theDofs)[count] = dof;
-      count++;
-    } else {
-      opserr << "NodeRecorder::NodeRecorder - invalid dof  " << dof << " will be ignored\n";
-    }
-  }
-
-  // verify the nodes exist 
-  count = 0;
-
-  int numNode = nodes.Size();
-  theNodes = new ID(1, numNode);
-  for (i=0; i<numNode; i++) {
-    int nodeTag = nodes(i);
-    Node *theNode = theDomain->getNode(nodeTag);
-    if (theNode == 0) {
-      opserr << "NodeRecorder::NodeRecorder - invalid node  " << nodeTag;
-      opserr << " does not exist in domain - will be ignored\n";
-    } else {
-      (*theNodes)[count++] = nodeTag;
-    }
-  }
-
-  // create char array to store table name
-  if (dbTable != 0) {
-    int fileNameLength = strlen(dbTable) + 1;
-    fileName = new char[fileNameLength];
-    if (fileName == 0) {
-      opserr << "NodeRecorder::NodeRecorder - out of memory creating string of size: " << 
-	fileNameLength << endln;
-      db = 0;
-    }
-
-    // copy the strings
-    strcpy(fileName, dbTable);
-  } else {
-    fileName = 0;
-    db = 0;
-  }
-
-  disp.Zero();
+  //
+  // set the data flag used as aswitch to get the response in a record
+  //
 
   if (dataToStore == 0 || (strcmp(dataToStore, "disp") == 0)) {
     dataFlag = 0;
@@ -229,53 +122,43 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
   }
 
-  // now create the columns strings for the database
+  //
+  // need to create the data description, i.e. what each column of data is
+  //
 
-  if (fileName != 0 && db != 0) {
-    numDbColumns = 1 + nodes.Size()*dofs.Size();
-    dbColumns = new char *[numDbColumns];
+  int numDbColumns = 1 + nodes.Size()*dofs.Size();
+  char **dbColumns = new char *[numDbColumns];
     
-    static char aColumn[256]; // assumes a column name will not be longer than 256 characters
+  static char aColumn[128]; // assumes a column name will not be longer than 256 characters
     
-    char *newColumn = new char[5];
-    sprintf(newColumn, "%s","time");  
-    dbColumns[0] = newColumn;
-    
-    int counter = 1;
-    for (i=0; i<theNodes->Size(); i++) {
-      int nodeTag = (*theNodes)(i);
-      for (int j=0; j<theDofs->Size(); j++) {
-	int dof = (*theDofs)(j);
-	sprintf(aColumn, "Node%d_%s_%d", nodeTag, dataToStore, dof+1);
-	int lenColumn = strlen(aColumn);
-	char *newColumn = new char[lenColumn+1];
-	strcpy(newColumn, aColumn);
-	dbColumns[counter] = newColumn;
-	counter++;
-      }
-    }
-    
-    // create the table in the database
-    db->createTable(dbTable, numDbColumns, dbColumns);
-
-  } else 
-    opserr << "NodeRecorder::NodeRecorder - no database or table name supplied, standard out will be used instead!\n";
-}
-
-
-NodeRecorder::~NodeRecorder()
-{
-  if (theDofs != 0)
-    delete theDofs;
+  char *newColumn = new char[5];
+  sprintf(newColumn, "%s","time");  
+  dbColumns[0] = newColumn;
   
-  if (theNodes != 0)
-    delete theNodes;
+  int counter = 1;
+  for (i=0; i<theNodes->Size(); i++) {
+    int nodeTag = (*theNodes)(i);
+    for (int j=0; j<theDofs->Size(); j++) {
+      int dof = (*theDofs)(j);
+      sprintf(aColumn, "Node%d_%s_%d", nodeTag, dataToStore, dof+1);
+      int lenColumn = strlen(aColumn);
+      char *newColumn = new char[lenColumn+1];
+      strcpy(newColumn, aColumn);
+      dbColumns[counter] = newColumn;
+      counter++;
+    }
+  }
 
-  if (theFile.is_open())
-    theFile.close();
+  //
+  // call open in the handler with the data description
+  //
 
-  if (fileName != 0)
-    delete [] fileName;
+  if (theHandler != 0)
+    theHandler->open(dbColumns, numDbColumns);
+
+  //
+  // clean up the data description
+  //
 
   if (dbColumns != 0) {
 
@@ -284,227 +167,150 @@ NodeRecorder::~NodeRecorder()
 
       delete [] dbColumns;
   }
+}
 
-  if (destroyDatabase == true && db != 0)
-    delete db;
+
+
+
+NodeRecorder::~NodeRecorder()
+{
+  if (theHandler != 0)
+    delete theHandler;
+
+  if (theDofs != 0)
+    delete theDofs;
+  
+  if (theNodes != 0)
+    delete theNodes;
 }
 
 int 
 NodeRecorder::record(int commitTag, double timeStamp)
 {
-    // now we go get the displacements from the nodes
-    int numDOF = theDofs->Size();
-    int numNodes = theNodes->Size();
+  if (theHandler == 0) {
+    opserr << "NodeRecorder::record() - no DataOutputHandler has been set\n";
+    return -1;
+  }
 
-    if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
-      
-      if (deltaT != 0.0) 
-	nextTimeStampToRecord = timeStamp + deltaT;
 
-      for (int i=0; i<numNodes; i++) {
-	int cnt = i*numDOF + 1;
-	Node *theNode = theDomain->getNode((*theNodes)(i));
-	if (theNode != 0) {
-	  if (dataFlag == 0) {
-// AddingSensitivity:BEGIN ///////////////////////////////////
-	    if (sensitivity==0) {
-	      const Vector &theDisp = theNode->getTrialDisp();
-	      for (int j=0; j<numDOF; j++) {
-		int dof = (*theDofs)(j);
-		if (theDisp.Size() > dof) {
-		  disp(cnt) = theDisp(dof);
-		}
-		else {
-		  disp(cnt) = 0.0;
-		}
-		cnt++;
-	      }
-	    }
-	    else {
-	      for (int j=0; j<numDOF; j++) {
-		int dof = (*theDofs)(j);
-		disp(cnt) = theNode->getDispSensitivity(dof+1, sensitivity);
-	      }
-	    }
-// AddingSensitivity:END /////////////////////////////////////
-	  } else if (dataFlag == 1) {
-	    const Vector &theDisp = theNode->getTrialVel();
+  int numDOF = theDofs->Size();
+  int numNodes = theNodes->Size();
+  
+  if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
+
+    if (deltaT != 0.0) 
+      nextTimeStampToRecord = timeStamp + deltaT;
+
+    //
+    // now we go get the responses from the nodes & place them in disp vector
+    //
+
+    for (int i=0; i<numNodes; i++) {
+      int cnt = i*numDOF + 1; 
+      Node *theNode = theDomain->getNode((*theNodes)(i));
+      if (theNode != 0) {
+	if (dataFlag == 0) {
+	  // AddingSensitivity:BEGIN ///////////////////////////////////
+	  if (sensitivity==0) {
+	    const Vector &theResponse = theNode->getTrialDisp();
 	    for (int j=0; j<numDOF; j++) {
-		int dof = (*theDofs)(j);
-		if (theDisp.Size() > dof) {
-		    disp(cnt) = theDisp(dof);
-		} else 
-		  disp(cnt) = 0.0;
-
-		cnt++;
-	    }
-	  } else if (dataFlag == 2) {
-	    const Vector &theDisp = theNode->getTrialAccel();
-	    for (int j=0; j<numDOF; j++) {
-		int dof = (*theDofs)(j);
-		if (theDisp.Size() > dof) {
-		    disp(cnt) = theDisp(dof);
-		} else 
-		  disp(cnt) = 0.0;
-
-		cnt++;
-	    }
-	  } else if (dataFlag == 3) {
-	    const Vector &theDisp = theNode->getIncrDisp();
-	    for (int j=0; j<numDOF; j++) {
-		int dof = (*theDofs)(j);
-		if (theDisp.Size() > dof) {
-		    disp(cnt) = theDisp(dof);
-		} else 
-		  disp(cnt) = 0.0;
-
-		cnt++;
-	    }
-	  } else if (dataFlag == 4) {
-	    const Vector &theDisp = theNode->getIncrDeltaDisp();
-	    for (int j=0; j<numDOF; j++) {
-		int dof = (*theDofs)(j);
-		if (theDisp.Size() > dof) {
-		    disp(cnt) = theDisp(dof);
-		} else 
-		  disp(cnt) = 0.0;
-
-		cnt++;
-	    }
-	  } else if (dataFlag > 10) {
-	    int mode = dataFlag - 10;
-	    int column = mode - 1;
-	    const Matrix &theEigenvectors = theNode->getEigenvectors();
-	    if (theEigenvectors.noCols() > column) {
-	      int noRows = theEigenvectors.noRows();
-	      for (int j=0; j<numDOF; j++) {
-		int dof = (*theDofs)(j);
-		if (noRows > dof) {
-		  disp(cnt) = theEigenvectors(dof,column);
-		} else 
-		  disp(cnt) = 0.0;
-		cnt++;		
+	      int dof = (*theDofs)(j);
+	      if (theResponse.Size() > dof) {
+		response(cnt) = theResponse(dof);
 	      }
-	    } else {
-	      for (int j=0; j<numDOF; j++) {
-		disp(cnt) = 0.0;
+	      else {
+		response(cnt) = 0.0;
 	      }
+	      cnt++;
+	    }
+	  }
+	  else {
+	    for (int j=0; j<numDOF; j++) {
+	      int dof = (*theDofs)(j);
+	      response(cnt) = theNode->getDispSensitivity(dof+1, sensitivity);
+	    }
+	  }
+	  // AddingSensitivity:END /////////////////////////////////////
+	} else if (dataFlag == 1) {
+	  const Vector &theResponse = theNode->getTrialVel();
+	  for (int j=0; j<numDOF; j++) {
+	    int dof = (*theDofs)(j);
+	    if (theResponse.Size() > dof) {
+	      response(cnt) = theResponse(dof);
+	    } else 
+	      response(cnt) = 0.0;
+	    
+	    cnt++;
+	  }
+	} else if (dataFlag == 2) {
+	  const Vector &theResponse = theNode->getTrialAccel();
+	  for (int j=0; j<numDOF; j++) {
+	    int dof = (*theDofs)(j);
+	    if (theResponse.Size() > dof) {
+	      response(cnt) = theResponse(dof);
+	    } else 
+	      response(cnt) = 0.0;
+	    
+	    cnt++;
+	  }
+	} else if (dataFlag == 3) {
+	  const Vector &theResponse = theNode->getIncrDisp();
+	  for (int j=0; j<numDOF; j++) {
+	    int dof = (*theDofs)(j);
+	    if (theResponse.Size() > dof) {
+	      response(cnt) = theResponse(dof);
+	    } else 
+	      response(cnt) = 0.0;
+	    
+	    cnt++;
+	  }
+	} else if (dataFlag == 4) {
+	  const Vector &theResponse = theNode->getIncrDeltaDisp();
+	  for (int j=0; j<numDOF; j++) {
+	    int dof = (*theDofs)(j);
+	    if (theResponse.Size() > dof) {
+	      response(cnt) = theResponse(dof);
+	    } else 
+	      response(cnt) = 0.0;
+	    
+	    cnt++;
+	  }
+	} else if (dataFlag > 10) {
+	  int mode = dataFlag - 10;
+	  int column = mode - 1;
+	  const Matrix &theEigenvectors = theNode->getEigenvectors();
+	  if (theEigenvectors.noCols() > column) {
+	    int noRows = theEigenvectors.noRows();
+	    for (int j=0; j<numDOF; j++) {
+	      int dof = (*theDofs)(j);
+	      if (noRows > dof) {
+		response(cnt) = theEigenvectors(dof,column);
+	      } else 
+		response(cnt) = 0.0;
+	      cnt++;		
+	    }
+	  } else {
+	    for (int j=0; j<numDOF; j++) {
+	      response(cnt) = 0.0;
 	    }
 	  }
 	}
       }
-
-
-      if (fileName == 0 && db == 0) {      
-
-	// write them to opserr
-	if (flag == 1)
-	  opserr << timeStamp << " ";
-	else if (flag == 2)
-	  opserr << timeStamp << " ";
-	
-	for (int j=1; j<=numNodes*numDOF; j++) {
-	  char outputstring[50];
-	  sprintf(outputstring,"%26.16e",disp(j));
-	  opserr << outputstring << " ";
-	}
-	
-	opserr << endln;
-	
-      } else if (fileName != 0 && db == 0) {
-
-	// write them to the file
-	if (flag == 1)
-	  theFile << timeStamp << " ";
-	else if (flag == 2)
-	  theFile << timeStamp << " ";
-	
-	// AddingSensitivity:BEGIN ///////////////////////////////////////
-	for (int j=1; j<=numNodes*numDOF; j++) {
-	  char outputstring[50];
-	  sprintf(outputstring,"%26.16e",disp(j));
-	  theFile << outputstring << " ";
-	}
-	// AddingSensitivity:END /////////////////////////////////////////
-	
-	theFile << endln;
-	theFile.flush();
-	
-      } else {	  
-
-	// insert the data into the database
-	disp(0) = timeStamp;
-	db->insertData(fileName, dbColumns, commitTag, disp);
-      }
     }
     
-    return 0;
-}
-
-int 
-NodeRecorder::playback(int commitTag)
-{
-  if (theFile.bad())
-    return 0;
-    
-  // close o/p file to ensure all buffered data gets written to file
-  theFile.close(); 
-
-  int numDOF = theDofs->Size();
-  int numNodes = theNodes->Size();  
-  
-  // open a stream for reading from the file
-  ifstream inputFile;
-  inputFile.open(fileName, ios::in);
-  if (inputFile.bad()) {
-    opserr << "WARNING - NodeRecorder::playback() - could not open file ";
-    opserr << fileName << endln;
-    return -1;
-  }   
-
-  double data;
-  // read file up until line we want
-  for (int i=0; i<(commitTag-1); i++)
-    // now read in a line
-    if (flag == 1 || flag == 2) {
-	inputFile >> data;
-	for (int i=0; i<numNodes*numDOF; i++)
-	    inputFile >> data;
-    }
-
-  // now read in our line and print out
-  if (flag == 1 || flag == 2) {
-      inputFile >> data;
-      opserr << data << " ";
-      for (int i=0; i<numNodes*numDOF; i++) {
-	  inputFile >> data;
-	  opserr << data << " ";
-      }	
-      opserr << endln;
+    // insert the data into the database
+    response(0) = timeStamp;
+    theHandler->write(response);
   }
-  inputFile.close();
-      
-    // open file again for writing
-    theFile.open(fileName, ios::app);
-    if (theFile.bad()) {
-      opserr << "WARNING - NodeRecorder::playback() - could not open file ";
-      opserr << fileName << endln;
-      return -1;
-    }    
-  
-  // does nothing
+    
   return 0;
 }
 
 void
 NodeRecorder::restart(void)
 {
-  theFile.close();
-  theFile.open(fileName, ios::out);
-  if (theFile.bad()) {
-    opserr << "WARNING - NodeRecorder::restart() - could not open file ";
-    opserr << fileName << endln;
-  }
+  opserr << "WARNING NodeRecorder::restart() - does nothing, OutputHandlers will contain old & new data\n";
+  opserr << "   - typically most users want to use \"remove -recorders\" before this as want to save all data\n";
 }
 
 

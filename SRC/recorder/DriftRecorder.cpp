@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2004-01-29 23:30:29 $
+// $Revision: 1.7 $
+// $Date: 2004-11-13 00:57:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -35,93 +35,178 @@
 #include <Vector.h>
 #include <ID.h>
 #include <Matrix.h>
-
-#include <iomanip>
-using std::ios;
-
+#include <DataOutputHandler.h>
 #include <string.h>
 
 DriftRecorder::DriftRecorder(int ni, int nj, int df, int dirn,
-			     Domain &theDom, const char *fileName, int sflag)
-  :ndI(ni), ndJ(nj), dof(df), perpDirn(dirn), oneOverL(0.0),
-   theDomain(&theDom), flag(sflag)
- 
+			     Domain &theDom, DataOutputHandler &theDataOutputHandler)
+  :ndI(1), ndJ(1), dof(df), perpDirn(dirn), oneOverL(1), data(2),
+   theDomain(&theDom), theHandler(&theDataOutputHandler)
 {
-  theFileName = new char[strlen(fileName)+1];
-  if (theFileName == 0) {
-    opserr << "DriftRecorder::DriftRecorder -- out of memory copying fileName " << endln;
-    exit(-1);
-  }
+  ndI(0) = ni;
+  ndJ(0) = nj;
   
-  strcpy(theFileName, fileName);    
-  
-  theFile.open(fileName, ios::out);
-  if (theFile.bad()) {
-    opserr << "WARNING - FileNodeDispRecorder::FileNodeDispRecorder()";
-    opserr << " - could not open file " << fileName << endln;
-  }    
-  
-  Node *nodeI = theDomain->getNode(ndI);
-  Node *nodeJ = theDomain->getNode(ndJ);
+  Node *nodeI = theDomain->getNode(ni);
+  Node *nodeJ = theDomain->getNode(nj);
 
+  if (nodeI == 0 || nodeJ == 0) {
+    opserr << "DriftRecorder::DriftRecorder-- node " << nodeI << " or " << nodeJ << " not in domain\n";    
+    oneOverL(0) = 0.0;
+  }
+
+  int numDbColumns = 2;
+  char **dbColumns = new char *[numDbColumns];
+  static char aColumn[128]; // assumes a column name will not be longer than 256 characters
+  
+  char *timeColumn = new char[5];
+  sprintf(timeColumn, "%s","time");  
+  dbColumns[0] = timeColumn;
+  
   const Vector &crdI = nodeI->getCrds();
   const Vector &crdJ = nodeJ->getCrds();
 
   if (crdI(dirn) == crdJ(dirn)) {
     opserr << "DriftRecorder::DriftRecorder-- Nodal projection has zero component along chosen direction\n";
-    oneOverL = 0.0;
+    oneOverL(0) = 0.0;
   }
   else 
-    oneOverL = 1.0/fabs(crdJ(dirn) - crdI(dirn));
+    oneOverL(0) = 1.0/fabs(crdJ(dirn) - crdI(dirn));
+
+  sprintf(aColumn, "Drift%d_%d_%d", ni, nj, dirn);
+  int lenColumn = strlen(aColumn);
+  char *newColumn = new char[lenColumn+1];
+  strcpy(newColumn, aColumn);
+  dbColumns[1] = newColumn;
+  //
+  // call open in the handler with the data description
+  //
+  
+  if (theHandler != 0)
+    theHandler->open(dbColumns, numDbColumns);
+  
+  //
+  // clean up the data description
+  //
+  
+  if (dbColumns != 0) {
+    
+    for (int i=0; i<numDbColumns; i++) 
+      delete [] dbColumns[i];
+    
+    delete [] dbColumns;
+  }
+}
+
+
+DriftRecorder::DriftRecorder(const ID &nI, const ID &nJ, int df, int dirn,
+			     Domain &theDom, DataOutputHandler &theDataOutputHandler)
+  :ndI(nI), ndJ(nJ), dof(df), perpDirn(dirn), oneOverL(nI.Size()), data(nI.Size()+1),
+   theDomain(&theDom), theHandler(&theDataOutputHandler)
+ {
+   int ndIsize = ndI.Size();
+   int ndJsize = ndJ.Size();
+   if (ndIsize != ndJsize) {
+     opserr << "FATAL - DriftRecorder::DriftRecorder() - error node arrays differ in size\n";
+     exit(-1);
+   }
+
+   //
+   // create the data description for the OutputHandler & compute length between nodes
+   //
+
+   int numDbColumns = 1 + ndIsize;
+   char **dbColumns = new char *[numDbColumns];
+   
+   static char aColumn[128]; // assumes a column name will not be longer than 256 characters
+   
+   char *newColumn = new char[5];
+   sprintf(newColumn, "%s","time");  
+   dbColumns[0] = newColumn;
+
+   for (int i=0; i<ndIsize; i++) {
+     int ni = ndI(i);
+     int nj = ndJ(i);
+     
+     Node *nodeI = theDomain->getNode(ni);
+     Node *nodeJ = theDomain->getNode(nj);
+     
+     if (nodeI == 0 || nodeJ == 0) {
+       opserr << "DriftRecorder::DriftRecorder-- node " << nodeI << " or " << nodeJ << " not in domain\n";    
+       oneOverL(0) = 0.0;
+     }
+     
+     const Vector &crdI = nodeI->getCrds();
+     const Vector &crdJ = nodeJ->getCrds();
+     
+     if (crdI(dirn) == crdJ(dirn)) {
+       opserr << "DriftRecorder::DriftRecorder-- Nodal projection has zero component along chosen direction\n";
+       oneOverL(i) = 0.0;
+     }
+     else 
+       oneOverL(i) = 1.0/fabs(crdJ(dirn) - crdI(dirn));
+
+     sprintf(aColumn, "Drift%d_%d_%d", ni, nj, dirn);
+     int lenColumn = strlen(aColumn);
+     char *newColumn = new char[lenColumn+1];
+     strcpy(newColumn, aColumn);
+     dbColumns[i+1] = newColumn;
+   }
+
+   //
+   // call open in the handler with the data description
+   //
+   
+   if (theHandler != 0)
+     theHandler->open(dbColumns, numDbColumns);
+   
+   //
+   // clean up the data description
+   //
+   
+   if (dbColumns != 0) {
+
+     for (int i=0; i<numDbColumns; i++) 
+       delete [] dbColumns[i];
+
+     delete [] dbColumns;
+   }
 }
 
 DriftRecorder::~DriftRecorder()
 {
-  if (!theFile)
-    theFile.close();
-  if (theFileName != 0)
-    delete [] theFileName;
+  if (theHandler != 0)
+    delete theHandler;
 }
 
 int 
 DriftRecorder::record(int commitTag, double timeStamp)
 {
-  Node *nodeI = theDomain->getNode(ndI);
-  Node *nodeJ = theDomain->getNode(ndJ);
-
-  const Vector &dispI = nodeI->getTrialDisp();
-  const Vector &dispJ = nodeJ->getTrialDisp();
-
-  double dx = dispJ(dof)-dispI(dof);
-
-  if (flag == 1)
-    theFile << theDomain->getCurrentTime() << " ";
-  else if (flag == 2)
-    theFile << theDomain->getCurrentTime() << " ";
+  data(0) = theDomain->getCurrentTime();
   
-  theFile << dx*oneOverL;
-  
-  theFile << endln;
-  theFile.flush();
-  
-  return 0;
-}
+  for (int i=0; i<ndI.Size(); i++) {
+    if (oneOverL(i) != 0.0) {
+      Node *nodeI = theDomain->getNode(ndI(i));
+      Node *nodeJ = theDomain->getNode(ndJ(i));
+      
+      const Vector &dispI = nodeI->getTrialDisp();
+      const Vector &dispJ = nodeJ->getTrialDisp();
+      
+      double dx = dispJ(dof)-dispI(dof);
+      
+      
+      data(i+1) =  dx*oneOverL(i);
+    }
+    else
+      data(i+1) = 0.0;
+  }
 
-int 
-DriftRecorder::playback(int commitTag)
-{
-  opserr << "WARNING -- DriftRecorder::playback() -- not implemented" << endln;
-
+  theHandler->write(data);
   return 0;
 }
 
 void
 DriftRecorder::restart(void)
 {
-  theFile.close();
-  theFile.open(theFileName, ios::out);
-  if (theFile.bad()) {
-    opserr << "WARNING - DriftRecorder::restart() - could not open file ";
-    opserr << theFileName << endln;
-  }
+  opserr << "DriftRecorder::restart() - should not be called\n";
+  //  theHandler->restart();
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-01-29 23:30:29 $
+// $Revision: 1.5 $
+// $Date: 2004-11-13 00:57:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.h,v $
                                                                         
 #ifndef EnvelopeElementRecorder_h
@@ -30,10 +30,6 @@
 // What: "@(#) EnvelopeElementRecorder.h, revA"
 
 #include <Recorder.h>
-
-#include <fstream>
-using std::ofstream;
-
 #include <Information.h>
 #include <OPS_Globals.h>
 #include <ID.h>
@@ -45,29 +41,22 @@ class Matrix;
 class Element;
 class Response;
 class FE_Datastore;
+class DataOutputHandler;
 
 class EnvelopeElementRecorder: public Recorder
 {
   public:
     EnvelopeElementRecorder(const ID &eleID, 
-			    Domain &theDomain, 
 			    const char **argv, 
 			    int argc,
-			    double deltaT = 0.0, 
-			    const char *fileName =0);
-
-    EnvelopeElementRecorder(const ID &eleID, 
 			    Domain &theDomain, 
-			    const char **argv, 
-			    int argc,
-			    FE_Datastore *db, 
-			    const char *tableName, 
+			    DataOutputHandler &theOutputHandler,
 			    double deltaT = 0.0);
 
-    ~EnvelopeElementRecorder();
-    int record(int commitTag, double timeStamp);
-    int playback(int commitTag);
 
+    ~EnvelopeElementRecorder();
+
+    int record(int commitTag, double timeStamp);
     void restart(void);    
     
   protected:
@@ -78,15 +67,10 @@ class EnvelopeElementRecorder: public Recorder
     Response **theResponses;
 
     Domain *theDomain;
-    char *fileName;                // file name  
-    ofstream theFile; 	           // output stream
+    DataOutputHandler *theHandler;
 
     double deltaT;
     double nextTimeStampToRecord;
-
-    FE_Datastore *db;
-    char **dbColumns;
-    int numDbColumns;
 
     Matrix *data;
     Vector *currentData;

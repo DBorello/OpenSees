@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.4 $
-// $Date: 2004-01-29 23:30:30 $
+// $Revision: 1.5 $
+// $Date: 2004-11-13 00:57:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.h,v $
                                                                         
 
@@ -43,35 +43,23 @@
 #include <Vector.h>
 #include <Matrix.h>
 
-#include <fstream>
-using std::ofstream;
-
 class Domain;
 class FE_Datastore;
+class DataOutputHandler;
 
 class EnvelopeNodeRecorder: public Recorder
 {
   public:
     EnvelopeNodeRecorder(const ID &theDof, 
-		 const ID &theNodes, 
-		 Domain &theDomain,
-		 const char *fileName,
-		 const char *dataToStore,
-		 double deltaT = 0.0,
-		 int startFlag = 0); 
-
-    EnvelopeNodeRecorder(const ID &theDof, 
-		 const ID &theNodes, 
-		 Domain &theDomain,
-		 FE_Datastore *database,
-		 const char *dbTable,
-		 const char *dataToStore,
-		 double deltaT = 0.0,
-		 int startFlag = 0); 
+			 const ID &theNodes, 
+			 const char *dataToStore,
+			 Domain &theDomain,
+			 DataOutputHandler &theOutputHandler,
+			 double deltaT = 0.0);
     
     ~EnvelopeNodeRecorder();
+
     int record(int commitTag, double timeStamp);
-    int playback(int commitTag);
     void restart(void);    
     
   protected:
@@ -81,21 +69,14 @@ class EnvelopeNodeRecorder: public Recorder
     ID *theNodes;
     Vector *currentData;
     Matrix *data;
-    Domain *theDomain;
 
-    int flag;   // flag indicating whether time, load factor or nothing printed
-	        // at start of each line in file
-    char *fileName;
-    ofstream theFile;     
+    Domain *theDomain;
+    DataOutputHandler *theHandler;
 
     int dataFlag; // flag indicating what it is to be stored in recorder
 
     double deltaT;
     double nextTimeStampToRecord;
-
-    FE_Datastore *db;
-    char **dbColumns;
-    int numDbColumns;
 
     bool first;
 };

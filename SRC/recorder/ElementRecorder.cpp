@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2004-05-11 00:07:34 $
+// $Revision: 1.17 $
+// $Date: 2004-11-13 00:57:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -39,84 +39,34 @@
 #include <string.h>
 #include <Response.h>
 #include <FE_Datastore.h>
-
+#include <DataOutputHandler.h>
 #include <OPS_Globals.h>
 
-#include <iomanip>
-using std::ios;
 
-ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom, 
-				 const char **argv, int argc,
-				 bool echoTime, double dT, const char *theFileName)
-:numEle(eleID.Size()), responseID(eleID.Size()), theDomain(&theDom),
- echoTimeFlag(echoTime), fileName(0), deltaT(dT), nextTimeStampToRecord(0.0), 
- db(0), dbColumns(0), numDbColumns(0), data(0), destroyDatabase(false)
-{
-  theResponses = new Response *[numEle];
-  for (int j=0; j<numEle; j++)
-    theResponses[j] = 0;
-
-  Information eleInfo(1.0);
-  for (int i=0; i<numEle; i++) {
-    Element *theEle = theDom.getElement(eleID(i));
-    if (theEle == 0) {
-      opserr << "WARNING ElementRecorder::ElementRecorder() -";
-      opserr << " no element with tag: " << eleID(i) << " exists in Domain\n";
-      theResponses[i] = 0;
-    } else {
-      theResponses[i] = theEle->setResponse(argv, argc, eleInfo);
-    }
-  }
-
-  // if file is specified, copy name and open the file
-  if (theFileName != 0) {
-    // create char array to store file name
-    int fileNameLength = strlen(theFileName) + 1;
-    fileName = new char[fileNameLength];
-    if (fileName == 0) {
-      opserr << "ElementRecorder::ElementRecorder - out of memory creating string " <<
-	fileNameLength << " long\n";
-      exit(-1);
-    }
-
-    // copy file name string
-    strcpy(fileName, theFileName);    
-
-    // open the file
-    theFile.open(fileName, ios::out);
-    if (theFile.bad()) {
-      opserr << "WARNING - ElementRecorder::ElementRecorder()";
-      opserr << " - could not open file " << fileName << endln;
-    }    
-  }
-  
-  // no file .. results will be sent to opserr
-  else
-    fileName = 0;
-}
-
-
-ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom, 
-				 const char **argv, int argc,
+ElementRecorder::ElementRecorder(const ID &eleID, 
+				 const char **argv, 
+				 int argc,
 				 bool echoTime, 
-				 FE_Datastore *database, 
-				 const char *tableName, 
-				 double dT,
-				 bool invokeDatabaseDestructor)
-:numEle(eleID.Size()), responseID(eleID.Size()), theDomain(&theDom),
- echoTimeFlag(echoTime), fileName(0), deltaT(dT), nextTimeStampToRecord(0.0), 
- db(database), dbColumns(0), numDbColumns(0), data(0), 
- destroyDatabase(invokeDatabaseDestructor)
+				 Domain &theDom, 
+				 DataOutputHandler &theOutputHandler,
+				 double dT)
+:numEle(eleID.Size()), responseID(eleID.Size()), theResponses(0), 
+ theDomain(&theDom), theHandler(&theOutputHandler),
+ echoTimeFlag(echoTime), deltaT(dT), nextTimeStampToRecord(0.0), data(0)
 {
+  // 
+  // Set the response objects:
+  //   1. create an array of pointers for them
+  //   2. iterate over the elements invoking setResponse() to get the new objects & determine size of data
+  //
 
-  numDbColumns = 0;
+  int numDbColumns = 0;
   if (echoTimeFlag == true) 
     numDbColumns = 1;  // 1 for the pseudo-time
 
   theResponses = new Response *[numEle];
-
-  for (int jj=0; jj<numEle; jj++)
-    theResponses[jj] = 0;
+  for (int j=0; j<numEle; j++)
+    theResponses[j] = 0;
 
   Information eleInfo(1.0);
   int i;
@@ -137,30 +87,15 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
     }
   }
 
-  // create char array to store table name
-  if (db != 0 && tableName != 0) {
-    int fileNameLength = strlen(tableName) + 1;
-    fileName = new char[fileNameLength];
-    if (fileName == 0) {
-      opserr << "ElementRecorder::ElementRecorder - out of memory creating string " <<
-	fileNameLength << " long\n";
-      exit(-1);
-    }
-    
-    // copy the strings
-    strcpy(fileName, tableName);    
-  } else {
-    db = 0;
-    fileName = 0;
-  }
+  //
+  // now create the columns strings for the data description
+  // for each element do a getResponse() 
+  //
 
-  // now create the columns strings for the database
-  // for each element do a getResponse() & print the result
-  dbColumns = new char *[numDbColumns];
-  
+  char **dbColumns = new char *[numDbColumns];
   static char aColumn[1012]; // assumes a column name will not be longer than 256 characters
-  
   char *newColumn = new char[5];
+
   sprintf(newColumn, "%s","time");  
   dbColumns[0] = newColumn;
   
@@ -223,31 +158,15 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
       if (data[j] == ' ') data[j]='_';
   }
 
-  // create the table in the database
-  if (db != 0 && fileName != 0)
-    db->createTable(fileName, numDbColumns, dbColumns);
-  else {
-    opserr << "ElementRecorder::ElementRecorder - database pointer is NULL\n";
-  }
-  
-  // create the vector to hold the data
-  data = new Vector(numDbColumns);
-}
-  
-ElementRecorder::~ElementRecorder()
-{
-    // close the file
-    if (!theFile.bad())
-	theFile.close();    
+  //
+  // call open in the handler with the data description
+  //
 
-    if (theResponses != 0) {
-      for (int i = 0; i < numEle; i++)
-	delete theResponses[i];
-      delete [] theResponses;
-    }
+  theHandler->open(dbColumns, numDbColumns);
 
-    if (fileName != 0)
-      delete [] fileName;
+  //
+  // clean up the data description
+  //
 
   if (dbColumns != 0) {
 
@@ -256,9 +175,22 @@ ElementRecorder::~ElementRecorder()
 
       delete [] dbColumns;
   }
+  
+  // create the vector to hold the data
+  data = new Vector(numDbColumns);
+}
 
-  if (destroyDatabase == true && db != 0)
-    delete db;
+
+ElementRecorder::~ElementRecorder()
+{
+  //
+  // invoke the destructor on the respons eobjects
+  //
+  if (theResponses != 0) {
+    for (int i = 0; i < numEle; i++)
+      delete theResponses[i];
+    delete [] theResponses;
+  }
 }
 
 
@@ -266,96 +198,44 @@ int
 ElementRecorder::record(int commitTag, double timeStamp)
 {
   int result = 0;
+
   if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
-      
+
     if (deltaT != 0.0) 
       nextTimeStampToRecord = timeStamp + deltaT;
+    
 
-    if (db == 0) {
-      // print out the pseudo time if requested
-      if (echoTimeFlag == true) {
-	if (!theFile) 
-	  opserr << timeStamp << " ";			
-	else 
-	  theFile << timeStamp << " ";	
-      }
-      
-      // get the responses and write to file if file or opserr specified
-      // for each element do a getResponse() & print the result
-      for (int i=0; i< numEle; i++) {
-	if (theResponses[i] != 0) {
-	  
+    int loc = 0;
+    if (echoTimeFlag == true) 
+      (*data)(loc++) = timeStamp;
+    
+    // for each element do a getResponse() & print the result
+    for (int i=0; i< numEle; i++) {
+      if (theResponses[i] != 0) {
+	
 	// ask the element for the reponse
-	  int res;
-	  if (( res = theResponses[i]->getResponse()) < 0)
-	    result = res;
-	  else {
-	    // print results to file or stderr depending on whether
-	    // a file was opened
-	    
-	    if (theFile.bad())
-	      theResponses[i]->Print(opserr);	    
-	    else {
-	      theResponses[i]->Print(theFile);
-	      theFile << "  ";  // added for OSP
-	    }
-	  }
-	} 
-      }
-      if (theFile.bad()) 
-	opserr << endln;
-      else {
-	theFile << " \n";
-	theFile.flush();
-      }
+	int res;
+	if (( res = theResponses[i]->getResponse()) < 0)
+	  result = res;
+	else {
+	  Information &eleInfo = theResponses[i]->getInformation();
+	  const Vector &eleData = eleInfo.getData();
+	  for (int j=0; j<eleData.Size(); j++)
+	    (*data)(loc++) = eleData(j);
+	}
+      } 
     }
-
-    else {  // send the data to the database
-
-      int loc = 0;
-      if (echoTimeFlag == true) 
-	(*data)(loc++) = timeStamp;
-
-      // for each element do a getResponse() & print the result
-      for (int i=0; i< numEle; i++) {
-	if (theResponses[i] != 0) {
-	  
-	// ask the element for the reponse
-	  int res;
-	  if (( res = theResponses[i]->getResponse()) < 0)
-	    result = res;
-	  else {
-	    Information &eleInfo = theResponses[i]->getInformation();
-	    const Vector &eleData = eleInfo.getData();
-	    for (int j=0; j<eleData.Size(); j++)
-	      (*data)(loc++) = eleData(j);
-	  }
-	} 
-      }
-      
-      db->insertData(fileName, dbColumns, commitTag, *data);
-    }
-
+    
+    theHandler->write(*data);
   }
-
+  
   // succesfull completion - return 0
   return result;
-}
-
-
-int 
-ElementRecorder::playback(int commitTag)
-{
-    return 0;
 }
 
 void 
 ElementRecorder::restart(void)
 {
-  theFile.close();
-  theFile.open(fileName, ios::out);
-  if (!theFile) {
-    opserr << "WARNING - ElementRecorder::restart() - could not open file ";
-    opserr << fileName << endln;
-  }    
+  if (data != 0)
+    data->Zero();
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2004-01-29 23:30:29 $
+// $Revision: 1.6 $
+// $Date: 2004-11-13 00:57:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.h,v $
                                                                         
 #ifndef DriftRecorder_h
@@ -33,35 +33,39 @@
 
 #include <Recorder.h>
 #include <ID.h>
+#include <Vector.h>
 
-#include <fstream>
-using std::ofstream;
 class Domain;
+class DataOutputHandler;
 
 class DriftRecorder: public Recorder
 {
  public:
   DriftRecorder(int ndI, int ndJ, int dof, int perpDirn,
-		Domain &theDomain, const char *fileName, int startFlag = 0); 
+		Domain &theDomain, 
+		DataOutputHandler &theHandler);
+
+  DriftRecorder(const ID &ndI, const ID &ndJ, int dof, int perpDirn,
+		Domain &theDomain, 
+		DataOutputHandler &theHandler);
   
   ~DriftRecorder();
+
   int record(int commitTag, double timeStamp);
-  int playback(int commitTag);
   void restart(void);    
   
  protected:
   
  private:	
-  int ndI;
-  int ndJ;
+  ID ndI;
+  ID ndJ;
   int dof;
   int perpDirn;
-  double oneOverL;
+  Vector oneOverL;
+  Vector data;
+
   Domain *theDomain;
-  int flag;   // flag indicating whether time, load factor or nothing printed
-  // at start of each line in file
-  char *theFileName;
-  ofstream theFile;     
+  DataOutputHandler *theHandler;
 };
 
 #endif

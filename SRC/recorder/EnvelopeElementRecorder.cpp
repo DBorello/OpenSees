@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2004-02-19 01:06:27 $
+// $Revision: 1.6 $
+// $Date: 2004-11-13 00:57:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -39,40 +39,39 @@
 #include <Response.h>
 #include <FE_Datastore.h>
 #include <Information.h>
+#include <DataOutputHandler.h>
 
-#include <iomanip>
-using std::ios;
-
-EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom, 
-						 const char **argv, int argc,
-						 double dT, const char *theFileName)
+EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, 
+						 const char **argv, 
+						 int argc,
+						 Domain &theDom, 
+						 DataOutputHandler &theOutputHandler,
+						 double dT)
 :numEle(eleID.Size()), responseID(eleID.Size()), theDomain(&theDom),
- fileName(0), deltaT(dT), nextTimeStampToRecord(0.0), 
- db(0), dbColumns(0), numDbColumns(0), 
+ theHandler(&theOutputHandler), deltaT(dT), nextTimeStampToRecord(0.0), 
  data(0), currentData(0), first(true)
 {
   theResponses = new Response *[numEle];
   for (int j=0; j<numEle; j++)
     theResponses[j] = 0;
 
- 
   Information eleInfo(1.0);
-  
-  for (int i=0; i<numEle; i++) {
-    Element *theEle = theDom.getElement(eleID(i));
+  int numDbColumns = 0;
+
+  for (int ii=0; ii<numEle; ii++) {
+    Element *theEle = theDom.getElement(eleID(ii));
     if (theEle == 0) {
       opserr << "WARNING EnvelopeElementRecorder::EnvelopeElementRecorder() -";
-      opserr << " no element with tag: " << eleID(i) << " exists in Domain\n";
-      theResponses[i] = 0;
+      opserr << " no element with tag: " << eleID(ii) << " exists in Domain\n";
+      theResponses[ii] = 0;
     } else {
-      theResponses[i] = theEle->setResponse(argv, argc, eleInfo);
-      Information &eleInfo = theResponses[i]->getInformation();
+      theResponses[ii] = theEle->setResponse(argv, argc, eleInfo);
+      Information &eleInfo = theResponses[ii]->getInformation();
       const Vector &eleData = eleInfo.getData();
       numDbColumns += eleData.Size();
     }
   }
   
-
   // create the matrix & vector that holds the data
   data = new Matrix(3, numDbColumns);
   currentData = new Vector(numDbColumns);
@@ -81,90 +80,15 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
     exit(-1);
   }
   
-  
-  // if file is specified, copy name and open the file
-  if (theFileName != 0) {
-
-    // create char array to store file name
-    int fileNameLength = strlen(theFileName) + 1;
-    fileName = new char[fileNameLength];
-    if (fileName == 0) {
-      opserr << "EnvelopeElementRecorder::EnvelopeElementRecorder - out of memory creating string " <<
-	fileNameLength << endln;
-      exit(-1);
-    }
-
-    // copy file name string
-    strcpy(fileName, theFileName);    
-  }
-  
-
-
-}
-
-
-EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom, 
-						 const char **argv, int argc,
-						 FE_Datastore *database, 
-						 const char *tableName, 
-						 double dT)
-  :numEle(eleID.Size()), responseID(eleID.Size()), theDomain(&theDom),
-   fileName(0), deltaT(dT), nextTimeStampToRecord(0.0), 
-   db(database), dbColumns(0), numDbColumns(0), 
-   data(0), currentData(0), first(true)
-{
-  Information eleInfo(1.0);
-  int i;
-  for (i=0; i<numEle; i++) {
-    Element *theEle = theDom.getElement(eleID(i));
-    if (theEle == 0) {
-      opserr << "WARNING EnvelopeElementRecorder::EnvelopeElementRecorder() -";
-      opserr << " no element with tag: " << eleID(i) << " exists in Domain\n";
-      theResponses[i] = 0;
-    } else {
-      theResponses[i] = theEle->setResponse(argv, argc, eleInfo);
-      if (theResponses[i] != 0) {
-      
-	// from the response determine no of cols for each
-	Information &eleInfo = theResponses[i]->getInformation();
-	const Vector &eleData = eleInfo.getData();
-	numDbColumns += eleData.Size();
-      }
-    }
-  }
-
-  // create the matrix & vector that holds the data
-  data = new Matrix(3, numDbColumns);
-  currentData = new Vector(numDbColumns);
-  if (data == 0 || currentData == 0) {
-    opserr << "EnvelopeElementRecorder::EnvelopeElementRecorder() - out of memory\n";
-    exit(-1);
-  }
-
-  // create char array to store table name
-  int fileNameLength = strlen(tableName) + 1;
-  fileName = new char[fileNameLength];
-  if (fileName == 0) {
-    opserr << "EnvelopeElementRecorder::EnvelopeElementRecorder - out of memory creating string " << fileNameLength << endln;
-    exit(-1);
-  }
-
-  // copy the strings
-  strcpy(fileName, tableName);    
-
   // now create the columns strings for the database
   // for each element do a getResponse() & print the result
-  dbColumns = new char *[numDbColumns];
-
+  char **dbColumns = new char *[numDbColumns];
   static char aColumn[1012]; // assumes a column name will not be longer than 256 characters
   
-  char *newColumn = new char[5];
-  sprintf(newColumn, "%s","time");  
-  dbColumns[0] = newColumn;
 
   int lengthString = 0;
-  for (i=0; i<argc; i++)
-    lengthString += strlen(argv[i])+1;
+  for (int l=0; l<argc; l++)
+    lengthString += strlen(argv[l])+1;
   char *dataToStore = new char[lengthString];
   lengthString = 0;
   for (int j=0; j<argc; j++) {
@@ -178,8 +102,8 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
       lengthString += argLength+1;
   }
 
-  int counter = 1;
-  for (i=0; i<eleID.Size(); i++) {
+  int counter = 0;
+  for (int i=0; i<eleID.Size(); i++) {
     int eleTag = eleID(i);
     int numVariables = 0;
     if (theResponses[i]!= 0) {
@@ -214,37 +138,22 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
   }
 
   // replace spaces with undescore for tables
-  for (i=0; i<numDbColumns; i++) {
-    char *data = dbColumns[i];
+  for (int k=0; k<numDbColumns; k++) {
+    char *data = dbColumns[k];
     int length = strlen(data);
     for (int j=0; j<length; j++)
       if (data[j] == ' ') data[j]='_';
   }
 
-  // create the table in the database
-  if (db != 0)
-    db->createTable(fileName, numDbColumns, dbColumns);
-  else {
-    opserr << "ElementRecorder::ElementRecorder - database pointer is NULL\n";
-  }
-}
-  
-EnvelopeElementRecorder::~EnvelopeElementRecorder()
-{
-    if (theResponses != 0) {
-      for (int i = 0; i < numEle; i++)
-	delete theResponses[i];
-      delete [] theResponses;
-    }
+  //
+  // call open in the handler with the data description
+  //
 
-    if (fileName != 0)
-      delete [] fileName;
+  theHandler->open(dbColumns, numDbColumns);
 
-    if (data != 0)
-      delete data;
-    
-    if (currentData != 0)
-      delete currentData;
+  //
+  // clean up the data description
+  //
 
   if (dbColumns != 0) {
 
@@ -253,6 +162,37 @@ EnvelopeElementRecorder::~EnvelopeElementRecorder()
 
       delete [] dbColumns;
   }
+
+}
+  
+EnvelopeElementRecorder::~EnvelopeElementRecorder()
+{
+  //
+  // write the data
+  //
+
+  for (int i=0; i<3; i++) {
+    int size = currentData->Size();
+    for (int j=0; j<size; j++)
+      (*currentData)(j) = (*data)(i,j);
+    theHandler->write(*currentData);
+  }
+
+  //
+  // clean up the memory
+  //
+
+  if (theResponses != 0) {
+    for (int i = 0; i < numEle; i++)
+      delete theResponses[i];
+    delete [] theResponses;
+  }
+  
+  if (data != 0)
+    delete data;
+  
+  if (currentData != 0)
+    delete currentData;
 }
 
 
@@ -289,8 +229,9 @@ EnvelopeElementRecorder::record(int commitTag, double timeStamp)
     // check if max or min
     // check if currentData modifies the saved data
     bool writeIt = false;
+    int size = currentData->Size();
     if (first == true) {
-      for (int i=0; i<numDbColumns; i++) {
+      for (int i=0; i<size; i++) {
 	(*data)(0,i) = (*currentData)(i);
 	(*data)(1,i) = (*currentData)(i);
 	(*data)(2,i) = fabs((*currentData)(i));
@@ -298,7 +239,7 @@ EnvelopeElementRecorder::record(int commitTag, double timeStamp)
 	writeIt = true;
       } 
     } else {
-      for (int i=0; i<numDbColumns; i++) {
+      for (int i=0; i<size; i++) {
 	double value = (*currentData)(i);
 	if ((*data)(0,i) > value) {
 	  (*data)(0,i) = value;
@@ -315,45 +256,10 @@ EnvelopeElementRecorder::record(int commitTag, double timeStamp)
 	}
       }
     }
-
-    // if any value has changed .. write it out
-    if (writeIt == true) {
-      if (db == 0) {      
-	
-	// open the file
-	if (fileName != 0)
-	  theFile.open(fileName, ios::out);
-	if (theFile.bad()) {
-	  opserr << "WARNING - EnvelopeNodeRecorder::EnvelopeNodeRecorder()";
-	  opserr << " - could not open file " << fileName << endln;
-	}    
-	
-	for (int i=0; i<3; i++) {
-	  for (int j=0; j<numDbColumns; j++) 
-	    theFile << (*data)(i,j) << " ";
-	  theFile << endln;
-	}
-	theFile.close(); 	  
-      } else {
-	for (int i=0; i<3; i++) {
-	  for (int j=0; j<numDbColumns; j++)
-	    (*currentData)(j) = (*data)(i,j);
-	  db->insertData(fileName, dbColumns, i, *currentData);
-	}
-      }
-    }    
   }    
 
   // succesfull completion - return 0
   return result;
-}
-
-
-int 
-EnvelopeElementRecorder::playback(int commitTag)
-{
-  opserr << data;
-  return 0;
 }
 
 void 

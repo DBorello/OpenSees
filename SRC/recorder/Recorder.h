@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2004-01-29 23:30:30 $
+// $Revision: 1.4 $
+// $Date: 2004-11-13 00:57:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/Recorder.h,v $
                                                                         
                                                                         
@@ -44,7 +44,6 @@ class Recorder
     Recorder() {};
     virtual ~Recorder() {};
     virtual int record(int commitTag, double timeStamp) =0;
-    virtual int playback(int commitTag) =0;
     
     virtual void restart(void) =0;    
     

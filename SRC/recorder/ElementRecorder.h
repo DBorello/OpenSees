@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2004-05-11 00:07:34 $
+// $Revision: 1.10 $
+// $Date: 2004-11-13 00:57:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
                                                                         
@@ -38,12 +38,8 @@
 // What: "@(#) ElementRecorder.h, revA"
 
 #include <Recorder.h>
-#include <fstream>
-using std::ofstream;
-
 #include <Information.h>
 #include <ID.h>
-
 
 class Domain;
 class Vector;
@@ -51,21 +47,22 @@ class Matrix;
 class Element;
 class Response;
 class FE_Datastore;
+class DataOutputHandler;
 
 class ElementRecorder: public Recorder
 {
   public:
-    ElementRecorder(const ID &eleID, Domain &theDomain, const char **argv, int argc,
-		    bool echoTime, double deltaT = 0.0, const char *fileName =0);
-
-    ElementRecorder(const ID &eleID, Domain &theDomain, const char **argv, int argc,
-		    bool echoTime, FE_Datastore *db, const char *tableName, double deltaT = 0.0,
-		    bool invokeDatabaseDestructor = false);
+    ElementRecorder(const ID &eleID, 
+		    const char **argv, 
+		    int argc,
+		    bool echoTime, 
+		    Domain &theDomain, 
+		    DataOutputHandler &theOutputHandler,
+		    double deltaT = 0.0);
 
     ~ElementRecorder();
-    int record(int commitTag, double timeStamp);
-    int playback(int commitTag);
 
+    int record(int commitTag, double timeStamp);
     void restart(void);    
     
   protected:
@@ -77,19 +74,14 @@ class ElementRecorder: public Recorder
     Response **theResponses;
 
     Domain *theDomain;
+    DataOutputHandler *theHandler;
+
     bool echoTimeFlag;             // flag indicating if pseudo time also printed
-    char *fileName;                // file name  
-    ofstream theFile; 	           // output stream
 
     double deltaT;
     double nextTimeStampToRecord;
 
-    FE_Datastore *db;
-    char **dbColumns;
-    int numDbColumns;
     Vector *data;
-
-    bool destroyDatabase;
 };
 
 
