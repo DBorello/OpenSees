@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-07-13 21:29:27 $
+// $Revision: 1.7 $
+// $Date: 2001-07-23 19:58:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -48,6 +48,7 @@
 
 #include <Domain.h>
 #include <Node.h>
+#include <NodeIter.h>
 #include <SP_Constraint.h>
 #include <SP_ConstraintIter.h>
 #include <MP_Constraint.h>
@@ -115,7 +116,15 @@ TclModelBuilder_addSeries(ClientData clientData, Tcl_Interp *interp, int argc,
 int
 TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int argc,
 				 char **argv);
-
+int
+TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp, int argc,
+				   char **argv);
+int
+TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp, int argc,
+				   char **argv);
+int
+TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp, int argc,
+				   char **argv);
 int
 TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
                                 int argc, char **argv);
@@ -256,6 +265,15 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 		    (ClientData)NULL, NULL);
 
   Tcl_CreateCommand(interp, "fix", TclModelBuilder_addHomogeneousBC,
+		    (ClientData)NULL, NULL);
+
+  Tcl_CreateCommand(interp, "fixX", TclModelBuilder_addHomogeneousBC_X,
+		    (ClientData)NULL, NULL);
+
+  Tcl_CreateCommand(interp, "fixY", TclModelBuilder_addHomogeneousBC_Y,
+		    (ClientData)NULL, NULL);
+
+  Tcl_CreateCommand(interp, "fixZ", TclModelBuilder_addHomogeneousBC_Z,
 		    (ClientData)NULL, NULL);
 
   Tcl_CreateCommand(interp, "sp", TclModelBuilder_addSP,
@@ -958,6 +976,294 @@ TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int 
   // if get here we have sucessfully created the node and added it to the domain
   return TCL_OK;
 }
+
+
+int
+TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp, 
+				   int argc, char **argv)
+{
+  // ensure the destructor has not been called - 
+  if (theTclBuilder == 0) {
+    cerr << "WARNING builder has been destroyed - elasticBeam \n";    
+    return TCL_ERROR;
+  }
+
+  int ndf = theTclBuilder->getNDF();
+  int numSPs = theTclDomain->getNumSPs();
+
+  // check number of arguments
+  if (argc < (2 + ndf)) {
+    cerr << "WARNING bad command - want: fixX xLoc " << ndf << " [0,1] conditions";
+    printCommand(argc, argv);
+    return TCL_ERROR;
+  }    
+
+  // get the xCrd of nodes to be constrained
+  double xLoc;
+  if (Tcl_GetDouble(interp, argv[1], &xLoc) != TCL_OK) {
+      cerr << "WARNING invalid xCrd - fixX xLoc " << ndf << " [0,1] conditions\n";
+      return TCL_ERROR;
+  }
+
+  // read in the fixities
+  ID fixity(ndf);
+  for (int i=0; i<ndf; i++) {
+    if (Tcl_GetInt(interp, argv[2+i], &fixity(i)) != TCL_OK) {
+      cerr << "WARNING invalid fixity " << i+1 << " - fixX " << xLoc;
+      cerr << " " << ndf << " fixities\n";
+      return TCL_ERROR;
+    } 
+  }
+
+  // set the tolerance, the allowable difference in nodal coordinate and
+  // what the value user specified to see if node is constrained or not
+  double tol = 1.0e-18;
+  if (argc >= (4 + ndf)) {
+    if (strcmp(argv[2+ndf],"-tol") == 0)
+    if (Tcl_GetDouble(interp, argv[3+ndf], &tol) != TCL_OK) {
+      cerr << "WARNING invalid tol specified - fixX " << xLoc << endl;
+      return TCL_ERROR;
+    }       
+  }
+
+  NodeIter &theNodes = theTclDomain->getNodes();
+  Node *theNode;
+
+  // loop over all the nodes
+  while ((theNode = theNodes()) != 0) {
+    const Vector &theCrd = theNode->getCrds();
+    double nodeX = theCrd(0);
+
+    // add a single point constraint if Xcrd of node is within tol of xLoc
+    if (fabs(nodeX - xLoc) < tol) {
+      int nodeId = theNode->getTag();
+      int theFixity = 0;
+
+      // loop over all the ndf values valid for the node
+      int numDOF = theNode->getNumberDOF();
+      if (numDOF  < ndf) numDOF = ndf;
+
+      for (int i=0; i<numDOF; i++) {
+	theFixity = fixity(i);
+	if (theFixity != 0) {
+	  // create a homogeneous constraint
+	  SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
+	  if (theSP == 0) {
+	    cerr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
+	    cerr << " - fixX " << xLoc << " " << ndf << " [0,1] conditions\n";
+	    return TCL_ERROR;
+	  }
+	  if (theTclDomain->addSP_Constraint(theSP) == false) {
+	    cerr << "WARNING could not add SP_Constraint to domain for node " << nodeId;
+	    cerr << " - fixX " << xLoc << " " << ndf << " [0,1] conditions\n";
+	    delete theSP;
+	    return TCL_ERROR;
+	  }
+	  numSPs++;      
+	}
+      }
+    }
+  }
+
+  // if get here we have sucessfully created the node and added it to the domain
+  return TCL_OK;
+}
+
+
+
+
+int
+TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp, 
+				   int argc, char **argv)
+{
+  // ensure the destructor has not been called - 
+  if (theTclBuilder == 0) {
+    cerr << "WARNING builder has been destroyed - elasticBeam \n";    
+    return TCL_ERROR;
+  }
+
+  int ndf = theTclBuilder->getNDF();
+  int numSPs = theTclDomain->getNumSPs();
+
+  // check number of arguments
+  if (argc < (2 + ndf)) {
+    cerr << "WARNING bad command - want: fixY yLoc " << ndf << " [0,1] conditions";
+    printCommand(argc, argv);
+    return TCL_ERROR;
+  }    
+
+  // get the yCrd of nodes to be constrained
+  double yLoc;
+  if (Tcl_GetDouble(interp, argv[1], &yLoc) != TCL_OK) {
+      cerr << "WARNING invalid yCrd - fixY yLoc " << ndf << " [0,1] conditions\n";
+      return TCL_ERROR;
+  }
+
+  // read in the fixities
+  ID fixity(ndf);
+  for (int i=0; i<ndf; i++) {
+    if (Tcl_GetInt(interp, argv[2+i], &fixity(i)) != TCL_OK) {
+      cerr << "WARNING invalid fixity " << i+1 << " - fixY " << yLoc;
+      cerr << " " << ndf << " fixities\n";
+      return TCL_ERROR;
+    } 
+  }
+
+  // set the tolerance, the allowable difference in nodal coordinate and
+  // what the value user specified to see if node is constrained or not
+  double tol = 1.0e-18;
+  if (argc >= (4 + ndf)) {
+    if (strcmp(argv[2+ndf],"-tol") == 0)
+    if (Tcl_GetDouble(interp, argv[3+ndf], &tol) != TCL_OK) {
+      cerr << "WARNING invalid tol specified - fixY " << yLoc << endl;
+      return TCL_ERROR;
+    }       
+  }
+
+  NodeIter &theNodes = theTclDomain->getNodes();
+  Node *theNode;
+
+  // loop over all the nodes
+  while ((theNode = theNodes()) != 0) {
+    const Vector &theCrd = theNode->getCrds();
+    if (theCrd.Size() > 1) {
+      double nodeY = theCrd(1);
+
+      // add a single point constraint if Xcrd of node is within tol of yLoc
+      if (fabs(nodeY - yLoc) < tol) {
+
+	int nodeId = theNode->getTag();
+	int theFixity = 0;
+
+	// loop over all the ndf values valid for the node
+	int numDOF = theNode->getNumberDOF();
+	if (numDOF  < ndf) numDOF = ndf;
+
+	for (int i=0; i<numDOF; i++) {
+	  theFixity = fixity(i);
+	  if (theFixity != 0) {
+	    // create a homogeneous constraint
+	    SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
+	    if (theSP == 0) {
+	      cerr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
+	      cerr << " - fixY " << yLoc << " " << ndf << " [0,1] conditions\n";
+	      return TCL_ERROR;
+	    }
+	    if (theTclDomain->addSP_Constraint(theSP) == false) {
+	      cerr << "WARNING could not add SP_Constraint to domain for node " << nodeId;
+	      cerr << " - fixY " << yLoc << " " << ndf << " [0,1] conditions\n";
+	      delete theSP;
+	      return TCL_ERROR;
+	    }
+	    numSPs++;      
+	  }
+	}
+      }
+    }
+  }
+
+  // if get here we have sucessfully created the node and added it to the domain
+  return TCL_OK;
+}
+
+
+
+int
+TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp, 
+				   int argc, char **argv)
+{
+  // ensure the destructor has not been called - 
+  if (theTclBuilder == 0) {
+    cerr << "WARNING builder has been destroyed - elasticBeam \n";    
+    return TCL_ERROR;
+  }
+
+  int ndf = theTclBuilder->getNDF();
+  int numSPs = theTclDomain->getNumSPs();
+
+  // check number of arguments
+  if (argc < (2 + ndf)) {
+    cerr << "WARNING bad command - want: fixZ zLoc " << ndf << " [0,1] conditions";
+    printCommand(argc, argv);
+    return TCL_ERROR;
+  }    
+
+  // get the yCrd of nodes to be constrained
+  double zLoc;
+  if (Tcl_GetDouble(interp, argv[1], &zLoc) != TCL_OK) {
+      cerr << "WARNING invalid zCrd - fixZ zLoc " << ndf << " [0,1] conditions\n";
+      return TCL_ERROR;
+  }
+
+  // read in the fixities
+  ID fixity(ndf);
+  for (int i=0; i<ndf; i++) {
+    if (Tcl_GetInt(interp, argv[2+i], &fixity(i)) != TCL_OK) {
+      cerr << "WARNING invalid fixity " << i+1 << " - fixZ " << zLoc;
+      cerr << " " << ndf << " fixities\n";
+      return TCL_ERROR;
+    } 
+  }
+
+  // set the tolerance, the allowable difference in nodal coordinate and
+  // what the value user specified to see if node is constrained or not
+  double tol = 1.0e-18;
+  if (argc >= (4 + ndf)) {
+    if (strcmp(argv[2+ndf],"-tol") == 0)
+    if (Tcl_GetDouble(interp, argv[3+ndf], &tol) != TCL_OK) {
+      cerr << "WARNING invalid tol specified - fixZ " << zLoc << endl;
+      return TCL_ERROR;
+    }       
+  }
+
+  NodeIter &theNodes = theTclDomain->getNodes();
+  Node *theNode;
+
+  // loop over all the nodes
+  while ((theNode = theNodes()) != 0) {
+    const Vector &theCrd = theNode->getCrds();
+    if (theCrd.Size() > 2) {
+      double nodeZ = theCrd(2);
+
+      // add a single point constraint if Xcrd of node is within tol of zLoc
+      if (fabs(nodeZ - zLoc) < tol) {
+
+	int nodeId = theNode->getTag();
+	int theFixity = 0;
+
+	// loop over all the ndf values valid for the node
+	int numDOF = theNode->getNumberDOF();
+	if (numDOF  < ndf) numDOF = ndf;
+
+	for (int i=0; i<numDOF; i++) {
+	  theFixity = fixity(i);
+	  if (theFixity != 0) {
+	    // create a homogeneous constraint
+	    SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
+	    if (theSP == 0) {
+	      cerr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
+	      cerr << " - fixZ " << zLoc << " " << ndf << " [0,1] conditions\n";
+	      return TCL_ERROR;
+	    }
+	    if (theTclDomain->addSP_Constraint(theSP) == false) {
+	      cerr << "WARNING could not add SP_Constraint to domain for node " << nodeId;
+	      cerr << " - fixZ " << zLoc << " " << ndf << " [0,1] conditions\n";
+	      delete theSP;
+	      return TCL_ERROR;
+	    }
+	    numSPs++;      
+	  }
+	}
+      }
+    }
+  }
+
+  // if get here we have sucessfully created the node and added it to the domain
+  return TCL_OK;
+}
+
+
+
 
 
 int
