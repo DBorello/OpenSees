@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-08-29 07:08:55 $
+// $Revision: 1.4 $
+// $Date: 2003-10-15 00:35:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/shadow/Shadow.cpp,v $
                                                                         
 
@@ -46,7 +46,7 @@ Shadow::Shadow(Channel &theChan,
 	       FEM_ObjectBroker &myBroker)
 :theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(0)
 {
-
+  theChannel->setUpConnection();
 }
 
 
@@ -55,7 +55,7 @@ Shadow::Shadow(Channel &theChan,
 	       ChannelAddress &theAddress)
 :theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(&theAddress)
 {
-
+  theChannel->setUpConnection();
 }
 
 Shadow::Shadow(int actorType,
@@ -73,7 +73,7 @@ Shadow::Shadow(int actorType,
   }
 
   // now call setUpShadow on the channel
-  theChannel->setUpShadow();
+  theChannel->setUpConnection();
   theRemoteActorsAddress = theChannel->getLastSendersAddress();
 }
 
