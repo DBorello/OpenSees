@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-03-20 18:00:10 $
+// $Revision: 1.4 $
+// $Date: 2002-04-11 01:55:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.cpp,v $
 
 // File: ~/material/EPPGapMaterial.C
@@ -93,17 +93,17 @@ double
 EPPGapMaterial::getStress(void)
 {
     if (fy >= 0) {
-       if (trialStrain >= maxElasticYieldStrain)
+       if (trialStrain > maxElasticYieldStrain)
            return fy;
-       else if (trialStrain <= minElasticYieldStrain)
+       else if (trialStrain < minElasticYieldStrain)
            return 0;
        else
            return E*(trialStrain-minElasticYieldStrain);
     }
     else {
-       if (trialStrain <= maxElasticYieldStrain)
+       if (trialStrain < maxElasticYieldStrain)
            return fy;
-       else if (trialStrain >= minElasticYieldStrain)
+       else if (trialStrain > minElasticYieldStrain)
            return 0;
        else
            return E*(trialStrain-minElasticYieldStrain);
@@ -114,17 +114,17 @@ double
 EPPGapMaterial::getTangent(void)
 {
     if (fy >= 0) {
-       if (trialStrain >= maxElasticYieldStrain)
+       if (trialStrain > maxElasticYieldStrain)
            return 0;
-       else if (trialStrain <= minElasticYieldStrain)
+       else if (trialStrain < minElasticYieldStrain)
            return 0;
        else
            return E;
     }
     else {
-       if (trialStrain <= maxElasticYieldStrain)
+       if (trialStrain < maxElasticYieldStrain)
            return 0;
-       else if (trialStrain >= minElasticYieldStrain)
+       else if (trialStrain > minElasticYieldStrain)
            return 0;
        else
            return E;
