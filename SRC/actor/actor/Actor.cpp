@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-08-29 07:10:12 $
+// $Revision: 1.3 $
+// $Date: 2003-10-15 00:34:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/Actor.cpp,v $
                                                                         
                                                                         
@@ -46,30 +46,29 @@
 Actor::Actor(Channel &theChan,
 	     FEM_ObjectBroker &myBroker,
 	     int numActorMethods)
-:numMethods(0), maxNumMethods(numActorMethods), actorMethods(0),
- theChannel(&theChan), theBroker(&myBroker), theRemoteShadowsAddress(0)
+:theBroker(&myBroker), theChannel(&theChan),
+ numMethods(0), maxNumMethods(numActorMethods), actorMethods(0), theRemoteShadowsAddress(0)
 {
-    // call setUpActor on the channel and get shadows address
-    
-    theChan.setUpActor();
-    theRemoteShadowsAddress = theChan.getLastSendersAddress();
+  // call setUpActor on the channel and get shadows address
+  theChannel->setUpConnection();
+  theRemoteShadowsAddress = theChan.getLastSendersAddress();
 
-    if (numActorMethods != 0)
-	actorMethods = new ActorMethod *[numActorMethods];
-
-    if (actorMethods == 0)
-	maxNumMethods = 0;
-
-    for (int i=0; i<numMethods; i++)
-	actorMethods[i] = 0;
+  if (numActorMethods != 0)
+    actorMethods = new ActorMethod *[numActorMethods];
+  
+  if (actorMethods == 0)
+    maxNumMethods = 0;
+  
+  for (int i=0; i<numMethods; i++)
+    actorMethods[i] = 0;
 }
 
 
 Actor::~Actor()
 {
-    // delete the array of actorMethods if constructed one
-    if (actorMethods != 0)
-	delete actorMethods;
+  // delete the array of actorMethods if constructed one
+  if (actorMethods != 0)
+    delete actorMethods;
 }
 
 

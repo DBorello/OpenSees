@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-08-29 07:10:12 $
+// $Revision: 1.3 $
+// $Date: 2003-10-15 00:34:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/Actor.h,v $
                                                                         
                                                                         
@@ -43,6 +43,7 @@ class MovableObject;
 class Matrix;
 class Vector;
 class ID;
+class FEM_ObjectBroker;
 
 class ActorMethod
 {
@@ -51,14 +52,12 @@ class ActorMethod
     int (*theMethod)();
 };
 
-class FEM_ObjectBroker;
-
 class Actor
 {
   public:
     Actor(Channel &theChannel, 
 	  FEM_ObjectBroker &theBroker,
-	  int numActorMethods);
+	  int numActorMethods =0);
     
     virtual ~Actor();
     
