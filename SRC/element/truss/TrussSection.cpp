@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-03-17 19:33:47 $
+// $Revision: 1.14 $
+// $Date: 2003-03-28 20:57:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -313,7 +313,13 @@ TrussSection::setDomain(Domain *theDomain)
 
 
     // create the load vector
-    theLoad = new Vector(numDOF);
+    if (theLoad == 0)
+      theLoad = new Vector(numDOF);
+    else if (theLoad->Size() != numDOF) {
+      delete theLoad;
+      theLoad = new Vector(numDOF);
+    }
+
     if (theLoad == 0) {
       opserr << "TrussSection::setDomain - truss " << this->getTag() << 
 	"out of memory creating vector of size" << numDOF << endln;
