@@ -2771,7 +2771,7 @@ const Matrix &EightNodeBrick::getMass ()
      //opserr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
      //opserr << "" << M.Output(opserr);
      //opserr << " M " << M;
-     
+
      return M;
 }
 
@@ -2999,6 +2999,10 @@ const Vector &EightNodeBrick::getResistingForceIncInertia ()
   //
 
   if (rho != 0.0) {
+
+    // form the mass matrix
+    this->getMass();
+
     const Vector &accel1 = theNodes[0]->getTrialAccel();
     const Vector &accel2 = theNodes[1]->getTrialAccel();
     const Vector &accel3 = theNodes[2]->getTrialAccel();	               		    
@@ -3046,7 +3050,7 @@ const Vector &EightNodeBrick::getResistingForceIncInertia ()
   } else {
 
     // add the damping forces if rayleigh damping
-    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0) 
       P += this->getRayleighDampingForces();
   }
 

@@ -3319,6 +3319,10 @@ const Vector &TwentyNodeBrick::getResistingForceIncInertia ()
   //
 
   if (rho != 0.0) {
+
+    // form the mass matrix
+    this->getMass();
+
     const Vector &accel1 = theNodes[0]->getTrialAccel();
     const Vector &accel2 = theNodes[1]->getTrialAccel();
     const Vector &accel3 = theNodes[2]->getTrialAccel();
