@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2002-03-01 19:41:28 $
+// $Revision: 1.29 $
+// $Date: 2002-03-01 21:02:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1457,8 +1457,8 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
 	formTangent = CURRENT_SECANT;
       } else if (strcmp(argv[i],"-initial") == 0) {
 	formTangent = INITIAL_TANGENT;
-      } else if (strcmp(argv[i],"-maxDim") == 0 && i+1 < argc) {
-	maxDim = atoi(argv[i+1]);	
+      } else if (strcmp(argv[i++],"-maxDim") == 0 && i < argc) {
+	maxDim = atoi(argv[i]);
       }
     }
 
@@ -1475,20 +1475,19 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
   else if (strcmp(argv[1],"Broyden") == 0) {
     int formTangent = CURRENT_TANGENT;
     int count = -1;
-    if (argc > 2) {
-      count = atoi(argv[2]);
-    }
-    if (argc > 3) {
-      if (strcmp(argv[3],"-secant") == 0) {
-	formTangent = CURRENT_SECANT;
-      } else if (strcmp(argv[3],"-initial") == 0) {
-	formTangent = INITIAL_TANGENT;
-      }
-    }
 
     if (theTest == 0) {
       interp->result = "ERROR: No ConvergenceTest yet specified\n";
       return TCL_ERROR;	  
+    }
+    for (int i = 2; i < argc; i++) {
+      if (strcmp(argv[i],"-secant") == 0) {
+	formTangent = CURRENT_SECANT;
+      } else if (strcmp(argv[i],"-initial") == 0) {
+	formTangent = INITIAL_TANGENT;
+      } else if (strcmp(argv[i++],"-count") == 0 && i < argc) {
+	count = atoi(argv[i]);
+      }
     }
 
     if (count == -1)
@@ -1500,14 +1499,13 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
   else if (strcmp(argv[1],"BFGS") == 0) {
     int formTangent = CURRENT_TANGENT;
     int count = -1;
-    if (argc > 2) {
-      count = atoi(argv[2]);
-    }
-    if (argc > 3) {
-      if (strcmp(argv[3],"-secant") == 0) {
+    for (int i = 2; i < argc; i++) {
+      if (strcmp(argv[i],"-secant") == 0) {
 	formTangent = CURRENT_SECANT;
-      } else if (strcmp(argv[3],"-initial") == 0) {
+      } else if (strcmp(argv[i],"-initial") == 0) {
 	formTangent = INITIAL_TANGENT;
+      } else if (strcmp(argv[i++],"-count") == 0 && i < argc) {
+	count = atoi(argv[i]);
       }
     }
 
