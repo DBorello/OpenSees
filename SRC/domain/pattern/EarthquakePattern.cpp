@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-10-10 21:15:25 $
+// $Revision: 1.4 $
+// $Date: 2002-10-18 21:01:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,7 @@
 #include <ErrorHandler.h>
 
 EarthquakePattern::EarthquakePattern(int tag, int _classTag)
-:LoadPattern(tag, _classTag), theMotions(0), numMotions(0), uDotG(0), uDotDotG(0)
+  :LoadPattern(tag, _classTag), theMotions(0), numMotions(0), uDotG(0), uDotDotG(0), currentTime(0.0)
 {
 
 }
