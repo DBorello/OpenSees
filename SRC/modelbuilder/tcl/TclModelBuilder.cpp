@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2004-08-31 22:26:12 $
+// $Revision: 1.25 $
+// $Date: 2004-09-01 03:56:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -84,6 +84,7 @@
 #include <YS_Evolution.h>
 #include <PlasticHardeningMaterial.h>
 #include <CyclicModel.h> //!!
+#include <DamageModel.h> //!!
 
 //
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
@@ -138,6 +139,13 @@ TclModelBuilder_addYS_PlasticMaterial(ClientData clientData, Tcl_Interp *interp,
 int //!!
 TclModelBuilder_addCyclicModel(ClientData clientData, Tcl_Interp *interp,
 				    int argc, TCL_Char **argv);			    
+int //!!
+TclModelBuilder_addDamageModel(ClientData clientData, Tcl_Interp *interp,
+			       int argc, TCL_Char **argv);	
+
+int
+TclModelBuilder_addPattern(ClientData clientData, Tcl_Interp *interp, int argc,
+			   TCL_Char **argv);
 
 int
 TclModelBuilder_addPattern(ClientData clientData, Tcl_Interp *interp, int argc,   
@@ -289,6 +297,7 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   the3dGeomTransfs = new ArrayOfTaggedObjects(32);  
   theYieldSurface_BCs = new ArrayOfTaggedObjects(32);
   theCycModels = new ArrayOfTaggedObjects(32); //!!
+  theDamageModels = new ArrayOfTaggedObjects(32); //!!
   theYS_EvolutionModels = new ArrayOfTaggedObjects(32);
   thePlasticMaterials = new ArrayOfTaggedObjects(32);
 
@@ -326,6 +335,9 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 		    (ClientData)NULL, NULL);
 
   Tcl_CreateCommand(interp, "cyclicModel", TclModelBuilder_addCyclicModel,
+		    (ClientData)NULL, NULL); //!!
+
+  Tcl_CreateCommand(interp, "damageModel", TclModelBuilder_addDamageModel,
 		    (ClientData)NULL, NULL); //!!
 
   Tcl_CreateCommand(interp, "pattern", TclModelBuilder_addPattern,
@@ -433,6 +445,7 @@ TclModelBuilder::~TclModelBuilder()
   theYS_EvolutionModels->clearAll();
   thePlasticMaterials->clearAll();
   theCycModels->clearAll();//!!
+  theDamageModels->clearAll();//!!
 
   // free up memory allocated in the constructor
   delete theUniaxialMaterials;
@@ -445,6 +458,7 @@ TclModelBuilder::~TclModelBuilder()
   delete theYS_EvolutionModels;
   delete thePlasticMaterials;
   delete theCycModels;//!!
+  delete theDamageModels;//!!
 
   // set the pointers to 0 
   theTclDomain =0;
@@ -1012,6 +1026,18 @@ TclModelBuilder_addCyclicModel(ClientData clientData, Tcl_Interp *interp,
 						argc, argv, theTclBuilder);
 }
 
+//!!
+extern int TclModelBuilderDamageModelCommand(ClientData clienData, Tcl_Interp *interp, int argc,
+				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
+
+int
+TclModelBuilder_addDamageModel(ClientData clientData, Tcl_Interp *interp,
+				    int argc, TCL_Char **argv)
+
+{
+  return TclModelBuilderDamageModelCommand(clientData, interp,
+						argc, argv, theTclBuilder);
+}
 
 extern int
 TclPatternCommand(ClientData clientData, Tcl_Interp *interp, 
@@ -2583,3 +2609,26 @@ TclModelBuilder_UpdateParameter(ClientData clientData,
 				       argc, argv, theTclBuilder);
 }
 
+int //!!
+TclModelBuilder::addDamageModel(DamageModel &theDM)
+{
+  bool result = theDamageModels->addComponent(&theDM);
+  if (result == true)
+    return 0;
+  else {
+    opserr << "TclModelBuilder::addDamageModel() - failed to add : " << theDM;
+    return -1;
+  }
+}
+
+DamageModel * //!!
+TclModelBuilder::getDamageModel(int tag)
+{
+  TaggedObject *mc = theDamageModels->getComponentPtr(tag);
+  if (mc == 0)
+    return 0;
+
+  // otherweise we do a cast and return
+  DamageModel *result = (DamageModel *)mc;
+  return result;
+}

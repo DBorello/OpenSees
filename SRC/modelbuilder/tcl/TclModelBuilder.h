@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-05-07 20:38:20 $
+// $Revision: 1.5 $
+// $Date: 2004-09-01 03:56:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.h,v $
                                                                         
-                                                                        
-// File: ~/modelbuilder/tcl/TclModelBuilder.h
-// 
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -53,6 +50,7 @@ class YieldSurface_BC;
 class YS_Evolution;
 class PlasticHardeningMaterial;
 class CyclicModel;	 //!!
+class DamageModel;
 
 class CrdTransf2d;
 class CrdTransf3d;
@@ -101,8 +99,10 @@ class TclModelBuilder : public ModelBuilder
     YS_Evolution *getYS_EvolutionModel(int tag);
     int addPlasticMaterial(PlasticHardeningMaterial &theMaterial);
     PlasticHardeningMaterial *getPlasticMaterial(int tag);
-	int addCyclicModel(CyclicModel &theModel); //!!
+    int addCyclicModel(CyclicModel &theModel); //!!
     CyclicModel *getCyclicModel(int tag); //!!
+    int addDamageModel(DamageModel &theModel); //!!
+    DamageModel *getDamageModel(int tag); //!!
 
   protected:
 
@@ -119,7 +119,8 @@ class TclModelBuilder : public ModelBuilder
     TaggedObjectStorage *theYieldSurface_BCs;
     TaggedObjectStorage *thePlasticMaterials;
     TaggedObjectStorage *theYS_EvolutionModels;
-	TaggedObjectStorage *theCycModels; //!!
+    TaggedObjectStorage *theCycModels; //!!
+    TaggedObjectStorage *theDamageModels; //!!
 
     Tcl_Interp *theInterp;
 };
