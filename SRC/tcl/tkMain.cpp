@@ -1,29 +1,6 @@
-/* ****************************************************************** **
-**    OpenSees - Open System for Earthquake Engineering Simulation    **
-**          Pacific Earthquake Engineering Research Center            **
-**                                                                    **
-**                                                                    **
-** (C) Copyright 1999, The Regents of the University of California    **
-** All Rights Reserved.                                               **
-**                                                                    **
-** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
-** file 'COPYRIGHT'  in main directory for information on usage and   **
-** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-**                                                                    **
-** Developed by:                                                      **
-**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-**                                                                    **
-** ****************************************************************** */
-                                                                        
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:24 $
-// $Source: /usr/local/cvs/OpenSees/SRC/tcl/tkMain.cpp,v $
-                                                                        
 /* 
- * tkMain.c --
+ * 
+ * TkMain.c --
  *
  *	This file contains a generic main program for Tk-based applications.
  *	It can be used as-is for many applications, just by supplying a
@@ -32,28 +9,53 @@
  *	for Tk applications.
  *
  * Copyright (c) 1990-1994 The Regents of the University of California.
- * Copyright (c) 1994-1996 Sun Microsystems, Inc.
+ * Copyright (c) 1994-1997 Sun Microsystems, Inc.
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * SCCS: @(#) tkMain.c 1.154 97/08/29 10:40:43
+ * RCS: @(#) $Id: tkMain.cpp,v 1.2 2001-08-18 00:22:12 fmk Exp $
  */
+
+/*                       MODIFIED   FOR                              */
+
+/* ****************************************************************** **
+**    OpenSees - Open System for Earthquake Engineering Simulation    **
+**          Pacific Earthquake Engineering Research Center            **
+** ****************************************************************** */
 
 extern "C" {
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <tcl.h>
+  // #include <tclInt.h>
 #include <tk.h>
-}
-
-
+//#include "tkInt.h"
 #ifdef NO_STDLIB_H
 #   include "../compat/stdlib.h"
 #else
 #   include <stdlib.h>
 #endif
+}
+#ifdef __WIN32__
+#include "tkWinInt.h"
+#endif
+
+
+
+
+typedef struct ThreadSpecificData {
+    Tcl_Interp *interp;         /* Interpreter for this thread. */
+    Tcl_DString command;        /* Used to assemble lines of terminal input
+				 * into Tcl commands. */
+    Tcl_DString line;           /* Used to read the next line from the
+				 * terminal input. */
+    int tty;                    /* Non-zero means standard input is a 
+				 * terminal-like device.  Zero means it's
+				 * a file. */
+} ThreadSpecificData;
+Tcl_ThreadDataKey dataKey;
 
 /*
  * Declarations for various library procedures and variables (don't want
@@ -64,54 +66,12 @@ extern "C" {
  * some systems.
  */
 
-extern "C" int	isatty _ANSI_ARGS_((int fd));
 #if !defined(__WIN32__) && !defined(_WIN32)
-extern "C" char *		strrchr _ANSI_ARGS_((CONST char *string, int c));
+extern "C" int		isatty _ANSI_ARGS_((int fd));
+extern "C" char *	strrchr _ANSI_ARGS_((CONST char *string, int c)) throw();
 #endif
 extern "C" void		TkpDisplayWarning _ANSI_ARGS_((char *msg,
-			    char *title));
-
-/*
- * Global variables used by the main program:
- */
-
-Tk_Window w; /* the main window for the application */
-
-static Tcl_Interp *interp;	/* Interpreter for this application. */
-static Tcl_DString command;	/* Used to assemble lines of terminal input
-				 * into Tcl commands. */
-static Tcl_DString line;	/* Used to read the next line from the
-                                 * terminal input. */
-static int tty;			/* Non-zero means standard input is a
-				 * terminal-like device.  Zero means it's
-				 * a file. */
-
-
-/*
- * Command-line options:
- */
-
-int synchronize = 0;
-char *fileName = NULL;
-char *name = NULL;
-char *display = NULL;
-char *geometry = NULL;
-
-Tk_ArgvInfo argTable[] = {
-    {"-file", TK_ARGV_STRING, (char *) NULL, (char *) &fileName,
-	"File from which to read commands"},
-    {"-geometry", TK_ARGV_STRING, (char *) NULL, (char *) &geometry,
-	"Initial geometry for window"},
-    {"-display", TK_ARGV_STRING, (char *) NULL, (char *) &display,
-	"Display to use"},
-    {"-name", TK_ARGV_STRING, (char *) NULL, (char *) &name,
-	"Name to use for application"},
-    {"-sync", TK_ARGV_CONSTANT, (char *) 1, (char *) &synchronize,
-	"Use synchronous mode for display server"},
-    {(char *) NULL, TK_ARGV_END, (char *) NULL, (char *) NULL,
-	(char *) NULL}
-};
-
+						       char *title));
 
 /*
  * Forward declarations for procedures defined later in this file.
@@ -121,10 +81,27 @@ static void		Prompt _ANSI_ARGS_((Tcl_Interp *interp, int partial));
 static void		StdinProc _ANSI_ARGS_((ClientData clientData,
 			    int mask));
 
+
+static char *tclStartupScriptFileName = NULL;
+
+void TclSetStartupScriptFileName(char *fileName)
+{
+    tclStartupScriptFileName = fileName;
+}
+
+
+char *TclGetStartupScriptFileName()
+{
+    return tclStartupScriptFileName;
+}
+
+
+
+
 /*
  *----------------------------------------------------------------------
  *
- * Tk_Main --
+ * Tk_MainOpenSees --
  *
  *	Main program for Wish and most other Tk-based applications.
  *
@@ -139,25 +116,48 @@ static void		StdinProc _ANSI_ARGS_((ClientData clientData,
  *
  *----------------------------------------------------------------------
  */
-
 void
-Tk_Main(int argc, char **argv, Tcl_AppInitProc *appInitProc)
+Tk_MainOpenSees(int argc, char **argv, Tcl_AppInitProc *appInitProc, Tcl_Interp *interp)
 {
     char *args, *fileName;
-    char buf[20];
+    char buf[TCL_INTEGER_SPACE];
     int code;
     size_t length;
     Tcl_Channel inChannel, outChannel;
+    Tcl_DString argString;
+    ThreadSpecificData *tsdPtr;
 
-    fprintf(stderr,"\n\n\t\t\t G3 -- Framework for Seismic Simulation");
-    fprintf(stderr,"\n\t\t     Pacific Earthquake Engineering Research Center\n\n");
+#ifdef __WIN32__
+    HANDLE handle;
+#endif
+
+    /* fmk - beginning of modifications for OpenSees */
+    fprintf(stderr,"\n\n\t OpenSees -- Open System For Earthquake Engineering Simulation");
+    fprintf(stderr,"\n\tPacific Earthquake Engineering Research Center -- Version 1.2\n\n");
     
-    fprintf(stderr,"\t     (c) Copyright 1999 The Regents of the University of California");
+    fprintf(stderr,"\t    (c) Copyright 1999 The Regents of the University of California");
     fprintf(stderr,"\n\t\t\t\t All Rights Reserved \n\n\n");    
+    /* fmk - end of modifications for OpenSees */
 
+    /*
+     * Ensure that we are getting the matching version of Tcl.  This is
+     * really only an issue when Tk is loaded dynamically.
+     */
+
+    if (Tcl_InitStubs(interp, TCL_VERSION, 1) == NULL) {
+	abort();
+    }
+
+    tsdPtr = (ThreadSpecificData *) 
+	Tcl_GetThreadData(&dataKey, sizeof(ThreadSpecificData));
     
     Tcl_FindExecutable(argv[0]);
-    interp = Tcl_CreateInterp();
+    tsdPtr->interp = interp;
+
+#if (defined(__WIN32__) || defined(MAC_TCL))
+    Tk_InitConsoleChannels(interp);
+#endif
+    
 #ifdef TCL_MEM_DEBUG
     Tcl_InitMemory(interp);
 #endif
@@ -169,7 +169,8 @@ Tk_Main(int argc, char **argv, Tcl_AppInitProc *appInitProc)
      * use it as the name of a script file to process.
      */
 
-    fileName = NULL;
+    fileName = TclGetStartupScriptFileName();
+
     if (argc > 1) {
 	length = strlen(argv[1]);
 	if ((length >= 2) && (strncmp(argv[1], "-file", length) == 0)) {
@@ -177,24 +178,33 @@ Tk_Main(int argc, char **argv, Tcl_AppInitProc *appInitProc)
 	    argv++;
 	}
     }
-    if ((argc > 1) && (argv[1][0] != '-')) {
-	fileName = argv[1];
-	argc--;
-	argv++;
+    if (fileName == NULL) {
+	if ((argc > 1) && (argv[1][0] != '-')) {
+	    fileName = argv[1];
+	    argc--;
+	    argv++;
+	}
     }
-
+    
     /*
      * Make command-line arguments available in the Tcl variables "argc"
      * and "argv".
      */
 
     args = Tcl_Merge(argc-1, argv+1);
-    Tcl_SetVar(interp, "argv", args, TCL_GLOBAL_ONLY);
+    Tcl_ExternalToUtfDString(NULL, args, -1, &argString);
+    Tcl_SetVar(interp, "argv", Tcl_DStringValue(&argString), TCL_GLOBAL_ONLY);
+    Tcl_DStringFree(&argString);
     ckfree(args);
     sprintf(buf, "%d", argc-1);
+
+    if (fileName == NULL) {
+	Tcl_ExternalToUtfDString(NULL, argv[0], -1, &argString);
+    } else {
+	fileName = Tcl_ExternalToUtfDString(NULL, fileName, -1, &argString);
+    }
     Tcl_SetVar(interp, "argc", buf, TCL_GLOBAL_ONLY);
-    Tcl_SetVar(interp, "argv0", (fileName != NULL) ? fileName : argv[0],
-	    TCL_GLOBAL_ONLY);
+    Tcl_SetVar(interp, "argv0", Tcl_DStringValue(&argString), TCL_GLOBAL_ONLY);
 
     /*
      * Set the "tcl_interactive" variable.
@@ -208,19 +218,41 @@ Tk_Main(int argc, char **argv, Tcl_AppInitProc *appInitProc)
      */
 
 #ifdef __WIN32__
-    tty = 1;
+    handle = GetStdHandle(STD_INPUT_HANDLE);
+
+    if ((handle == INVALID_HANDLE_VALUE) || (handle == 0) 
+	     || (GetFileType(handle) == FILE_TYPE_UNKNOWN)) {
+	/*
+	 * If it's a bad or closed handle, then it's been connected
+	 * to a wish console window.
+	 */
+
+	tsdPtr->tty = 1;
+    } else if (GetFileType(handle) == FILE_TYPE_CHAR) {
+	/*
+	 * A character file handle is a tty by definition.
+	 */
+
+	tsdPtr->tty = 1;
+    } else {
+	tsdPtr->tty = 0;
+    }
+
 #else
-    tty = isatty(0);
+    tsdPtr->tty = isatty(0);
 #endif
+    char one[2] = "1";
+    char zero[2] = "0";
     Tcl_SetVar(interp, "tcl_interactive",
-	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
+	    ((fileName == NULL) && tsdPtr->tty) ? one : zero, TCL_GLOBAL_ONLY);
 
     /*
      * Invoke application-specific initialization.
      */
 
     if ((*appInitProc)(interp) != TCL_OK) {
-	TkpDisplayWarning(interp->result, "Application initialization failed");
+	TkpDisplayWarning(Tcl_GetStringResult(interp),
+		"Application initialization failed");
     }
 
     /*
@@ -228,6 +260,7 @@ Tk_Main(int argc, char **argv, Tcl_AppInitProc *appInitProc)
      */
 
     if (fileName != NULL) {
+	Tcl_ResetResult(interp);
 	code = Tcl_EvalFile(interp, fileName);
 	if (code != TCL_OK) {
 	    /*
@@ -241,7 +274,7 @@ Tk_Main(int argc, char **argv, Tcl_AppInitProc *appInitProc)
 	    Tcl_DeleteInterp(interp);
 	    Tcl_Exit(1);
 	}
-	tty = 0;
+	tsdPtr->tty = 0;
     } else {
 
 	/*
@@ -259,17 +292,18 @@ Tk_Main(int argc, char **argv, Tcl_AppInitProc *appInitProc)
 	    Tcl_CreateChannelHandler(inChannel, TCL_READABLE, StdinProc,
 		    (ClientData) inChannel);
 	}
-	if (tty) {
+	if (tsdPtr->tty) {
 	    Prompt(interp, 0);
 	}
     }
+    Tcl_DStringFree(&argString);
 
     outChannel = Tcl_GetStdChannel(TCL_STDOUT);
     if (outChannel) {
 	Tcl_Flush(outChannel);
     }
-    Tcl_DStringInit(&command);
-    Tcl_DStringInit(&line);
+    Tcl_DStringInit(&tsdPtr->command);
+    Tcl_DStringInit(&tsdPtr->line);
     Tcl_ResetResult(interp);
 
     /*
@@ -310,12 +344,15 @@ StdinProc(ClientData clientData, int mask)
     char *cmd;
     int code, count;
     Tcl_Channel chan = (Tcl_Channel) clientData;
+    ThreadSpecificData *tsdPtr = (ThreadSpecificData *) 
+            Tcl_GetThreadData(&dataKey, sizeof(ThreadSpecificData));
+    Tcl_Interp *interp = tsdPtr->interp;
 
-    count = Tcl_Gets(chan, &line);
+    count = Tcl_Gets(chan, &tsdPtr->line);
 
     if (count < 0) {
 	if (!gotPartial) {
-	    if (tty) {
+	    if (tsdPtr->tty) {
 		Tcl_Exit(0);
 	    } else {
 		Tcl_DeleteChannelHandler(chan, StdinProc, (ClientData) chan);
@@ -324,9 +361,10 @@ StdinProc(ClientData clientData, int mask)
 	} 
     }
 
-    (void) Tcl_DStringAppend(&command, Tcl_DStringValue(&line), -1);
-    cmd = Tcl_DStringAppend(&command, "\n", -1);
-    Tcl_DStringFree(&line);
+    (void) Tcl_DStringAppend(&tsdPtr->command, Tcl_DStringValue(
+            &tsdPtr->line), -1);
+    cmd = Tcl_DStringAppend(&tsdPtr->command, "\n", -1);
+    Tcl_DStringFree(&tsdPtr->line);
     if (!Tcl_CommandComplete(cmd)) {
         gotPartial = 1;
         goto prompt;
@@ -349,17 +387,14 @@ StdinProc(ClientData clientData, int mask)
 	Tcl_CreateChannelHandler(chan, TCL_READABLE, StdinProc,
 		(ClientData) chan);
     }
-    Tcl_DStringFree(&command);
-    if (*interp->result != 0) {
-	if ((code != TCL_OK) || (tty)) {
-	    /*
-	     * The statement below used to call "printf", but that resulted
-	     * in core dumps under Solaris 2.3 if the result was very long.
-             *
-             * NOTE: This probably will not work under Windows either.
-	     */
-
-	    puts(interp->result);
+    Tcl_DStringFree(&tsdPtr->command);
+    if (Tcl_GetStringResult(interp)[0] != '\0') {
+	if ((code != TCL_OK) || (tsdPtr->tty)) {
+	    chan = Tcl_GetStdChannel(TCL_STDOUT);
+	    if (chan) {
+		Tcl_WriteObj(chan, Tcl_GetObjResult(interp));
+		Tcl_WriteChars(chan, "\n", 1);
+	    }
 	}
     }
 
@@ -368,7 +403,7 @@ StdinProc(ClientData clientData, int mask)
      */
 
     prompt:
-    if (tty) {
+    if (tsdPtr->tty) {
 	Prompt(interp, gotPartial);
     }
     Tcl_ResetResult(interp);
@@ -399,8 +434,10 @@ Prompt(Tcl_Interp *interp, int partial)
     int code;
     Tcl_Channel outChannel, errChannel;
 
-    promptCmd = Tcl_GetVar(interp,
-	partial ? "tcl_prompt2" : "tcl_prompt1", TCL_GLOBAL_ONLY);
+    char one[12] = "tcl_prompt1";
+    char two[12] = "tcl_prompt2";
+    promptCmd = Tcl_GetVar(interp, partial ? two : one, TCL_GLOBAL_ONLY);
+			   
     if (promptCmd == NULL) {
 defaultPrompt:
 	if (!partial) {
@@ -413,7 +450,7 @@ defaultPrompt:
 
 	    outChannel = Tcl_GetChannel(interp, "stdout", NULL);
             if (outChannel != (Tcl_Channel) NULL) {
-                Tcl_Write(outChannel, "g3 > ", 5);
+                Tcl_WriteChars(outChannel, "OpenSees > ", 11);
             }
 	}
     } else {
@@ -429,8 +466,8 @@ defaultPrompt:
             
 	    errChannel = Tcl_GetChannel(interp, "stderr", NULL);
             if (errChannel != (Tcl_Channel) NULL) {
-                Tcl_Write(errChannel, interp->result, -1);
-                Tcl_Write(errChannel, "\n", 1);
+                Tcl_WriteObj(errChannel, Tcl_GetObjResult(interp));
+                Tcl_WriteChars(errChannel, "\n", 1);
             }
 	    goto defaultPrompt;
 	}
@@ -440,12 +477,6 @@ defaultPrompt:
         Tcl_Flush(outChannel);
     }
 }
-
-
-
-
-
-
 
 
 

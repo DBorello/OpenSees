@@ -18,11 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 06:03:23 $
+// $Revision: 1.3 $
+// $Date: 2001-08-18 00:22:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclAppInit.cpp,v $
-                                                                        
-                                                                        
+
+
 /* 
  * tclAppInit.c --
  *
@@ -31,16 +31,17 @@
  *
  * Copyright (c) 1993 The Regents of the University of California.
  * Copyright (c) 1994-1997 Sun Microsystems, Inc.
+ * Copyright (c) 1998-1999 by Scriptics Corporation.
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * SCCS: @(#) tclAppInit.c 1.20 97/03/24 14:29:43
+ * RCS: @(#) $Id: tclAppInit.cpp,v 1.3 2001-08-18 00:22:12 fmk Exp $
  */
 
 extern "C" {
-#include <tk.h>
 #include <tcl.h>
+#include <tk.h>
 }
 
 #include "commands.h"
@@ -55,12 +56,26 @@ extern "C" int matherr();
 int *tclDummyMathPtr = (int *) matherr;
 #endif
 
+
 #ifdef TCL_TEST
-EXTERN int		TclObjTest_Init _ANSI_ARGS_((Tcl_Interp *interp));
-EXTERN int		Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+
+extern "C" {
+#include "tclInt.h"
+}
+
+extern int		Procbodytest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+extern int		Procbodytest_SafeInit _ANSI_ARGS_((Tcl_Interp *interp));
+extern int		TclObjTest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+extern int		Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+#ifdef TCL_THREADS
+extern int		TclThread_Init _ANSI_ARGS_((Tcl_Interp *interp));
+#endif
+
 #endif /* TCL_TEST */
+
 #ifdef TCL_XT_TEST
-EXTERN int		Tclxttest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+extern void		XtToolkitInitialize _ANSI_ARGS_((void));
+extern int		Tclxttest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 #endif
 
 /*
@@ -77,8 +92,6 @@ EXTERN int		Tclxttest_Init _ANSI_ARGS_((Tcl_Interp *interp));
  * Side effects:
  *	Whatever the application does.
  *
- * revision: modified somewhat for g3 and C++ by fmk.
- *
  *----------------------------------------------------------------------
  */
 
@@ -87,13 +100,41 @@ extern void g3TclMain(int argc, char **argv, Tcl_AppInitProc *appInitProc);
 int
 main(int argc, char **argv)
 {
-    
+    /*
+     * The following #if block allows you to change the AppInit
+     * function by using a #define of TCL_LOCAL_APPINIT instead
+     * of rewriting this entire file.  The #if checks for that
+     * #define and uses Tcl_AppInit if it doesn't exist.
+     */
+
+#ifndef TCL_LOCAL_APPINIT
+#define TCL_LOCAL_APPINIT Tcl_AppInit    
+#endif
+
+  /* fmk - comment out the following block to get to compile 
+    extern "C" int TCL_LOCAL_APPINIT _ANSI_ARGS_((Tcl_Interp *interp));
+  fmk - end commented block */
+
+    /*
+     * The following #if block allows you to change how Tcl finds the startup
+     * script, prime the library or encoding paths, fiddle with the argv,
+     * etc., without needing to rewrite Tcl_Main()
+     */
+
+#ifdef TCL_LOCAL_MAIN_HOOK
+    extern int TCL_LOCAL_MAIN_HOOK _ANSI_ARGS_((int *argc, char ***argv));
+#endif
+
 #ifdef TCL_XT_TEST
     XtToolkitInitialize();
 #endif
 
-    g3TclMain(argc, argv, Tcl_AppInit);
-	    
+#ifdef TCL_LOCAL_MAIN_HOOK
+    TCL_LOCAL_MAIN_HOOK(&argc, &argv);
+#endif
+
+    g3TclMain(argc, argv, TCL_LOCAL_APPINIT);
+
     return 0;			/* Needed only to prevent compiler warning. */
 }
 
@@ -108,7 +149,7 @@ main(int argc, char **argv)
  *
  * Results:
  *	Returns a standard Tcl completion code, and leaves an error
- *	message in interp->result if an error occurs.
+ *	message in the interp's result if an error occurs.
  *
  * Side effects:
  *	Depends on the startup script.
@@ -117,10 +158,9 @@ main(int argc, char **argv)
  */
 
 
-int
-Tcl_AppInit(Tcl_Interp *interp)
+
+int Tcl_AppInit(Tcl_Interp *interp)
 {
-    
     if (Tcl_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
@@ -139,6 +179,16 @@ Tcl_AppInit(Tcl_Interp *interp)
     if (TclObjTest_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
+#ifdef TCL_THREADS
+    if (TclThread_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+#endif
+    if (Procbodytest_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "procbodytest", Procbodytest_Init,
+            Procbodytest_SafeInit);
 #endif /* TCL_TEST */
 
     /*
@@ -157,7 +207,6 @@ Tcl_AppInit(Tcl_Interp *interp)
      * they weren't already created by the init procedures called above.
      */
 
-
     if (g3AppInit(interp) < 0)
 	return TCL_ERROR;
 
@@ -171,12 +220,3 @@ Tcl_AppInit(Tcl_Interp *interp)
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclshrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
-
-
-
-
-
-
-
-
-

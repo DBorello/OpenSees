@@ -1,29 +1,3 @@
-/* ****************************************************************** **
-**    OpenSees - Open System for Earthquake Engineering Simulation    **
-**          Pacific Earthquake Engineering Research Center            **
-**                                                                    **
-**                                                                    **
-** (C) Copyright 1999, The Regents of the University of California    **
-** All Rights Reserved.                                               **
-**                                                                    **
-** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
-** file 'COPYRIGHT'  in main directory for information on usage and   **
-** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-**                                                                    **
-** Developed by:                                                      **
-**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-**                                                                    **
-** ****************************************************************** */
-                                                                        
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:24 $
-// $Source: /usr/local/cvs/OpenSees/SRC/tcl/tkAppInit.cpp,v $
-                                                                        
-                                                                        
-
 /* 
  * tkAppInit.c --
  *
@@ -31,38 +5,40 @@
  *	use in wish and similar Tk-based applications.
  *
  * Copyright (c) 1993 The Regents of the University of California.
- * Copyright (c) 1994 Sun Microsystems, Inc.
+ * Copyright (c) 1994-1997 Sun Microsystems, Inc.
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * SCCS: @(#) tkAppInit.c 1.22 96/05/29 09:47:08
+ * RCS: @(#) $Id: tkAppInit.cpp,v 1.2 2001-08-18 00:22:12 fmk Exp $
  */
 
 extern "C" {
-#include <tk.h>
-#include <tcl.h>
-
+#include "tk.h"
+#include "locale.h"
 }
-  //#include "tkConfig.h"
+
+
+extern void
+Tk_MainOpenSees(int argc, char **argv, Tcl_AppInitProc *appInitProc, Tcl_Interp *interp);
 
 #include "commands.h"
-Tk_Window w;
 
 /*
  * The following variable is a special hack that is needed in order for
  * Sun shared libraries to be used for Tcl.
  */
 
+#ifdef _UNIX
 extern "C" int matherr();
 int *tclDummyMathPtr = (int *) matherr;
+#endif
 
-static void *badArg;
 
 #ifdef TK_TEST
-EXTERN int		Tktest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+extern "C" int		Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+extern "C" int		Tktest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 #endif /* TK_TEST */
-
 
 /*
  *----------------------------------------------------------------------
@@ -84,7 +60,32 @@ EXTERN int		Tktest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 int
 main(int argc, char **argv)
 {
-    Tk_Main(argc, argv, Tcl_AppInit);
+    /*
+     * The following #if block allows you to change the AppInit
+     * function by using a #define of TCL_LOCAL_APPINIT instead
+     * of rewriting this entire file.  The #if checks for that
+     * #define and uses Tcl_AppInit if it doesn't exist.
+     */
+    
+#ifndef TK_LOCAL_APPINIT
+#define TK_LOCAL_APPINIT Tcl_AppInit    
+#endif
+  /*
+    extern int TK_LOCAL_APPINIT _ANSI_ARGS_((Tcl_Interp *interp));
+  */
+
+    /*
+     * The following #if block allows you to change how Tcl finds the startup
+     * script, prime the library or encoding paths, fiddle with the argv,
+     * etc., without needing to rewrite Tk_Main()
+     */
+    
+#ifdef TK_LOCAL_MAIN_HOOK
+    extern int TK_LOCAL_MAIN_HOOK _ANSI_ARGS_((int *argc, char ***argv));
+    TK_LOCAL_MAIN_HOOK(&argc, &argv);
+#endif
+
+    Tk_MainOpenSees(argc, argv, TK_LOCAL_APPINIT, Tcl_CreateInterp());
     return 0;			/* Needed only to prevent compiler warning. */
 }
 
@@ -99,7 +100,7 @@ main(int argc, char **argv)
  *
  * Results:
  *	Returns a standard Tcl completion code, and leaves an error
- *	message in interp->result if an error occurs.
+ *	message in the interp's result if an error occurs.
  *
  * Side effects:
  *	Depends on the startup script.
@@ -118,6 +119,11 @@ Tcl_AppInit(Tcl_Interp *interp)
     }
     Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);
 #ifdef TK_TEST
+    if (Tcltest_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
+            (Tcl_PackageInitProc *) NULL);
     if (Tktest_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
@@ -144,7 +150,7 @@ Tcl_AppInit(Tcl_Interp *interp)
 
     if (g3AppInit(interp) < 0)
 	return TCL_ERROR;
-    
+
     /*
      * Specify a user-specific startup file to invoke if the application
      * is run interactively.  Typically the startup file is "~/.apprc"
@@ -155,6 +161,9 @@ Tcl_AppInit(Tcl_Interp *interp)
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.wishrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
+
+
+
 
 
 
