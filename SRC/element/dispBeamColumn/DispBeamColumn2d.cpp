@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2003-03-11 02:55:59 $
+// $Revision: 1.22 $
+// $Date: 2003-03-11 21:30:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -1063,7 +1063,7 @@ DispBeamColumn2d::setParameter (const char **argv, int argc, Information &info)
 	//
 
 	// Initial declarations
-	int ok;
+	int ok = -1;
 
 	// If the parameter belongs to the element itself
 	if (strcmp(argv[0],"rho") == 0) {
@@ -1205,81 +1205,57 @@ DispBeamColumn2d::getMassSensitivity(int gradNumber)
 const Vector &
 DispBeamColumn2d::getResistingForceSensitivity(int gradNumber)
 {
-
 	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
 	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
 
-	// Assuming member is prismatic ... have to move inside
-	// the loop if it is not prismatic
-	int order = theSections[0]->getOrder();
-	const ID &code = theSections[0]->getType();
-
 	double L = crdTransf->getInitialLength();
+	double oneOverL = 1.0/L;
 
 	// Zero for integration
 	q.Zero();
-	Vector qsens(q.Size());
+	static Vector qsens(3);
 	qsens.Zero();
 
 	// Some extra declarations
-	Vector dAdh_u(3);
-	Vector A_u(3);
-	Matrix kbmine(3,3);
-	Matrix dkbdh(3,3);
-	Vector dqdh(3);
-	Vector dkbdh_v(3);	
-	dqdh.Zero();
-	int j, k;
-	Matrix ka(workArea, order, 3);
-	int i;
-	double d1oLdh = 0.0;
+	static Matrix kbmine(3,3);
+	kbmine.Zero();
 
+	//Matrix dkbdh(3,3);
+
+	int j, k;
+	double d1oLdh = 0.0;
 
 	// Check if a nodal coordinate is random
 	bool randomNodeCoordinate = false;
-	Vector nodeParameterID(2);
-	nodeParameterID(0) = (double)theNodes[0]->getCrdsSensitivity();
-	nodeParameterID(1) = (double)theNodes[1]->getCrdsSensitivity();
-	if (nodeParameterID.Norm() != 0.0) {
+	static ID nodeParameterID(2);
+	nodeParameterID(0) = theNodes[0]->getCrdsSensitivity();
+	nodeParameterID(1) = theNodes[1]->getCrdsSensitivity();
+	if (nodeParameterID(0) != 0 || nodeParameterID(1) != 0) {
 
 		randomNodeCoordinate = true;
  
-
 		const Vector &ndICoords = theNodes[0]->getCrds();
 		const Vector &ndJCoords = theNodes[1]->getCrds();
 
 		double dx = ndJCoords(0) - ndICoords(0);
 		double dy = ndJCoords(1) - ndICoords(1);
 
+		if (nodeParameterID(0) == 1) // here x1 is random
+		  d1oLdh = dx/(L*L*L);
+		if (nodeParameterID(0) == 2) // here y1 is random
+		  d1oLdh = dy/(L*L*L);
 
-		for (int ii=0; ii<2; ii++) {
-
-
-			if (ii==0) {
-
-				if ( ((int)nodeParameterID(ii))==1 ) { // here x1 is random
-					d1oLdh = dx/(L*L*L);
-				}
-				else if ( ((int)nodeParameterID(ii))==2 ) { // here y1 is random
-					d1oLdh = dy/(L*L*L);
-				}
-			}
-			else if (ii==1) {
-
-				if ( ((int)nodeParameterID(ii))==1 ) { // here x2 is random
-					d1oLdh = -dx/(L*L*L);
-				}
-				else if ( ((int)nodeParameterID(ii))==2 ) { // here y2 is random
-					d1oLdh = -dy/(L*L*L);
-				}
-
-			}
-		}
+		if (nodeParameterID(1) == 1) // here x2 is random
+		  d1oLdh = -dx/(L*L*L);
+		if (nodeParameterID(1) == 2) // here y2 is random
+		  d1oLdh = -dy/(L*L*L);
 	}
 
-
 	// Loop over the integration points
-	for (i = 0; i < numSections; i++) {
+	for (int i = 0; i < numSections; i++) {
+
+	  int order = theSections[i]->getOrder();
+	  const ID &code = theSections[i]->getType();
 
 		double xi6 = 6.0*pts(i,0);
 
@@ -1319,6 +1295,7 @@ DispBeamColumn2d::getResistingForceSensitivity(int gradNumber)
 			//kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
 			double wti = wts(i);
 			double tmp;
+			Matrix ka(workArea, order, 3);
 			ka.Zero();
 			for (j = 0; j < order; j++) {
 				switch(code(j)) {
@@ -1360,32 +1337,33 @@ DispBeamColumn2d::getResistingForceSensitivity(int gradNumber)
 
 	}
 
-	dAdh_u = crdTransf->getBasicTrialDispShapeSensitivity(); // v = A u
-	dqdh = (1.0/L) * (kbmine * dAdh_u);
-
-	A_u = crdTransf->getBasicTrialDisp(); // v = A u
-	dkbdh_v = (d1oLdh) * (kbmine * A_u);
-
+	static Vector dqdh(3);
+	const Vector &dAdh_u = crdTransf->getBasicTrialDispShapeSensitivity();
+	//dqdh = (1.0/L) * (kbmine * dAdh_u);
+	dqdh.addMatrixVector(0.0, kbmine, dAdh_u, oneOverL);
+	
+	static Vector dkbdh_v(3);	
+	const Vector &A_u = crdTransf->getBasicTrialDisp();
+	//dkbdh_v = (d1oLdh) * (kbmine * A_u);
+	dkbdh_v.addMatrixVector(0.0, kbmine, A_u, d1oLdh);
 
 	// Transform forces
 	static Vector dummy(3);		// No distributed loads
 
 	// Term 5
-	P = (-1)*crdTransf->getGlobalResistingForce(qsens,dummy);
+	P = crdTransf->getGlobalResistingForce(qsens,dummy);
 
 	if (randomNodeCoordinate) {
-
 		// Term 1
-		P += (-1)*crdTransf->getGlobalResistingForceShapeSensitivity(q,dummy);
-		
+		P += crdTransf->getGlobalResistingForceShapeSensitivity(q,dummy);
 		
 		// Term 2
-		P += (-1)*crdTransf->getGlobalResistingForce(dqdh,dummy);
+		P += crdTransf->getGlobalResistingForce(dqdh,dummy);
 
-		
 		// Term 4
-		P += (-1)*crdTransf->getGlobalResistingForce(dkbdh_v,dummy);
+		P += crdTransf->getGlobalResistingForce(dkbdh_v,dummy);
 	}
+
 	return P;
 }
 
@@ -1395,7 +1373,6 @@ DispBeamColumn2d::getResistingForceSensitivity(int gradNumber)
 int
 DispBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
 {
-
     // Get basic deformation and sensitivities
 	const Vector &v = crdTransf->getBasicTrialDisp();
 
@@ -1405,17 +1382,16 @@ DispBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
 	double L = crdTransf->getInitialLength();
 	double oneOverL = 1.0/L;
 	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
 
 	// Some extra declarations
-	double d1oLdh=0.0;
+	double d1oLdh = 0.0;
 
 	// Check if a nodal coordinate is random
 	bool randomNodeCoordinate = false;
-	static Vector nodeParameterID(2);
+	static ID nodeParameterID(2);
 	nodeParameterID(0) = theNodes[0]->getCrdsSensitivity();
 	nodeParameterID(1) = theNodes[1]->getCrdsSensitivity();
-	if (nodeParameterID.Norm() != 0.0) {
+	if (nodeParameterID(0) != 0 || nodeParameterID(1) != 0) {
 
 		vsens += crdTransf->getBasicTrialDispShapeSensitivity();
 
@@ -1427,36 +1403,20 @@ DispBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
 		double dx = ndJCoords(0) - ndICoords(0);
 		double dy = ndJCoords(1) - ndICoords(1);
 
-		for (int ii=0; ii<2; ii++) {
+		if (nodeParameterID(0) == 1) // here x1 is random
+		  d1oLdh = dx/(L*L*L);
+		if (nodeParameterID(0) == 2) // here y1 is random
+		  d1oLdh = dy/(L*L*L);
 
-
-			if (ii==0) {
-
-				if ( ((int)nodeParameterID(ii))==1 ) { // here x1 is random
-					d1oLdh = dx/(L*L*L);
-				}
-				else if ( ((int)nodeParameterID(ii))==2 ) { // here y1 is random
-					d1oLdh = dy/(L*L*L);
-				}
-			}
-			else if (ii==1) {
-
-				if ( ((int)nodeParameterID(ii))==1 ) { // here x2 is random
-					d1oLdh = -dx/(L*L*L);
-				}
-				else if ( ((int)nodeParameterID(ii))==2 ) { // here y2 is random
-					d1oLdh = -dy/(L*L*L);
-				}
-
-			}
-		}
+		if (nodeParameterID(1) == 1) // here x2 is random
+		  d1oLdh = -dx/(L*L*L);
+		if (nodeParameterID(1) == 2) // here y2 is random
+		  d1oLdh = -dy/(L*L*L);
 	}
 
 	// Loop over the integration points
 	for (int i = 0; i < numSections; i++) {
 
-		// Assuming member is prismatic ... have to move inside
-		// the loop if it is not prismatic
 		int order = theSections[i]->getOrder();
 		const ID &code = theSections[i]->getType();
 		
@@ -1464,8 +1424,7 @@ DispBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
 		
 		double xi6 = 6.0*pts(i,0);
 
-		int j;
-		for (j = 0; j < order; j++) {
+		for (int j = 0; j < order; j++) {
 			switch(code(j)) {
 			case SECTION_RESPONSE_P:
 				e(j) = oneOverL*vsens(0)
