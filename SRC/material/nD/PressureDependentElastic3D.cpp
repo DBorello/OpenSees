@@ -270,7 +270,7 @@ NDMaterial* PressureDependentElastic3D::getCopy (void)
 
 const char* PressureDependentElastic3D::getType (void) const
   {
-    return "PressureDependentElastic3D";
+    return "ThreeDimensional";
   }
 
 int PressureDependentElastic3D::getOrder (void) const

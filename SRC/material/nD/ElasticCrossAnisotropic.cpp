@@ -80,7 +80,7 @@ double ElasticCrossAnisotropic::getrho()
 ///////////////////////////////////////////////////////////////////////////////
 NDMaterial* ElasticCrossAnisotropic::getCopy (const char *type)
 {
-    if (strcmp(type,"ElasticCrossAnisotropic") == 0)
+    if (strcmp(type,"ThreeDimensional") == 0)
     {
   ElasticCrossAnisotropic *theModel;
   theModel = new ElasticCrossAnisotropic (this->getTag(), Eh, Ev, nuhv, nuhh, Ghv, rho);
@@ -259,7 +259,7 @@ ElasticCrossAnisotropic::getCopy (void)
 const char*
 ElasticCrossAnisotropic::getType (void) const
 {
-  return "ElasticCrossAnisotropic";
+  return "ThreeDimensional";
 }
 
 int

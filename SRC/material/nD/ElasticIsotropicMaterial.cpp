@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $                                                              
-// $Date: 2003-02-14 23:01:25 $                                                                  
+// $Revision: 1.19 $                                                              
+// $Date: 2004-02-24 20:50:58 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -126,8 +126,7 @@ ElasticIsotropicMaterial::getCopy (const char *type)
     }
 ///////////////////////////////
     else if (strcmp(type,"ThreeDimensional") == 0 || 
-			          strcmp(type,"3D") == 0 || 
-												 strcmp(type,"ElasticIsotropic3D") == 0)
+	     strcmp(type,"3D") == 0)
     {
 	ElasticIsotropic3D *theModel;
 	theModel = new ElasticIsotropic3D (this->getTag(), E, v, rho);
@@ -136,17 +135,6 @@ ElasticIsotropicMaterial::getCopy (const char *type)
 		// no state determination is performed on the material model object
 		// prior to copying the material model (calling this function)
 	return theModel;
-    }
-///////////////////////////////
-    else if (strcmp(type,"PressureDependentElastic3D") == 0 ) 
-    {
-      PressureDependentElastic3D *theModel;
-      theModel = new PressureDependentElastic3D(this->getTag(), E, v, 0.0, 0.5, 100.0, 0.0);
-    // DOES NOT COPY sigma, D, and epsilon ...
-    // This function should only be called during element instantiation, so
-    // no state determination is performed on the material model object
-    // prior to copying the material model (calling this function)
-    	return theModel;
     }
 ///////////////////////////////
     else if (strcmp(type,"PlateFiber") == 0)
