@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2002-07-12 19:04:02 $
+// $Revision: 1.34 $
+// $Date: 2002-07-18 21:52:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -201,12 +201,13 @@
 
 #define PATTERN_TAG_LoadPattern		  1
 #define PATTERN_TAG_MultiSupportPattern	  3
-#define PATTERN_TAG_UniformExcitation        2
+#define PATTERN_TAG_UniformExcitation     2
 #define LOAD_TAG_Beam2dUniformLoad        3
 #define LOAD_TAG_Beam2dPointLoad          4
 #define LOAD_TAG_Beam3dUniformLoad        5
 #define LOAD_TAG_Beam3dPointLoad          6
 #define LOAD_TAG_BrickSelfWeight          7
+#define LOAD_TAG_Beam2dTempLoad           8
 
 
 #define MAT_TAG_IsotropicLinElastic         1001
@@ -265,6 +266,7 @@
 
 #define ELE_TAG_InternalSpring   9900
 #define ELE_TAG_SimpleJoint2D    9901
+#define ELE_TAG_Joint2D    9902
 
 #define CRDTR_TAG_LinearCrdTransf2d 1
 #define CRDTR_TAG_PDeltaCrdTransf2d 2
@@ -286,7 +288,8 @@
 #define CNSTRNT_TAG_MP_Constraint 	2
 #define CNSTRNT_TAG_ImposedMotionSP	3
 #define CNSTRNT_TAG_ImposedMotionSP1	4
-#define CNSTRNT_TAG_MP_ForJoint2D       5
+#define CNSTRNT_TAG_MP_Joint2D       5
+#define CNSTRNT_TAG_MP_SimpleJoint2D       5
 
 
 #define MATRIX_TAG_Matrix 	1

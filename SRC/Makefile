@@ -136,9 +136,11 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 
 
 GGD_LIBS = $(FE)/element/joint/InternalSpring.o \
-	$(FE)/element/joint/MP_ForJoint2D.o \
+	$(FE)/element/joint/MP_Joint2D.o \
+	$(FE)/element/joint/MP_SimpleJoint2D.o \
 	$(FE)/element/joint/SimpleJoint2D.o \
-	$(FE)/element/joint/TclSimpleJoint2dCommand.o
+	$(FE)/element/joint/Joint2D.o \
+	$(FE)/element/joint/TclJoint2dCommand.o
 
 ERRORHANDLER_LIBS = $(FE)/handler/ErrorHandler.o \
 	$(FE)/handler/ConsoleErrorHandler.o 
@@ -477,6 +479,7 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/load/Load.o \
 	$(FE)/domain/load/Beam2dUniformLoad.o \
 	$(FE)/domain/load/Beam2dPointLoad.o \
+	$(FE)/domain/load/Beam2dTempLoad.o \
 	$(FE)/domain/load/Beam3dUniformLoad.o \
 	$(FE)/domain/load/Beam3dPointLoad.o \
 	$(FE)/domain/load/BrickSelfWeight.o \
