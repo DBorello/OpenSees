@@ -16,17 +16,17 @@
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
-** With a lot additions from                                          **
+** With a lot of additions by                                         **
 **   Boris Jeremic    (jeremic@ucdavis.edu)                           **
 **   Zaohui Yang      (zhyang@ucdavis.edu)                            **
-**                                                                    **
+**   Zhao Cheng       (zcheng@ucdavis.edu)                            **
 **                                                                    **
 **                                                                    **
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2003-08-29 00:25:44 $
+// $Revision: 1.31 $
+// $Date: 2003-10-02 15:25:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -54,10 +54,16 @@
 #include <string.h>
 
 #include <Template3Dep.h>
+#include <FiniteDeformationElastic3D.h>
 
 Template3Dep *
 TclModelBuilder_addTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int argc, 
 				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
+
+FiniteDeformationElastic3D *
+TclModelBuilder_addFiniteDeformationElastic3D(ClientData clientData, Tcl_Interp *interp,  int argc, 
+				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
+
 
 NDMaterial *
 TclModelBuilder_addFeapMaterial(ClientData clientData, Tcl_Interp *interp,

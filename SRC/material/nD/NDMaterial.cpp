@@ -16,10 +16,14 @@
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
+**                                                                    **
+** Additions and changes by:                                          **
+**   Boris Jeremic (@ucdavis.edu)                                     **
+**                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $                                                              
-// $Date: 2003-10-02 15:22:22 $                                                                  
+// $Revision: 1.14 $                                                              
+// $Date: 2003-10-02 15:25:16 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C

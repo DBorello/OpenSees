@@ -16,10 +16,15 @@
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
+**                                                                    **
+** Additions and changes by:                                          **
+**   Boris Jeremic (@ucdavis.edu)                                     **
+**                                                                    **
+**                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $                                                              
-// $Date: 2003-02-25 23:33:23 $                                                                  
+// $Revision: 1.13 $                                                              
+// $Date: 2003-10-02 15:25:16 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $                                                                
                                                                         
                                                                         
@@ -87,6 +92,15 @@ class NDMaterial : public Material
     virtual const straintensor getStrainTensor(void);
     //Added Joey Aug. 13, 2001
     virtual const straintensor getPlasticStrainTensor(void);
+
+			 //Zhao (zcheng@ucdavis.edu) 
+			 // added Sept 22 2003 for Large Deformation, F is the Deformation Grandient
+    virtual int setTrialF(const Tensor &f);
+    virtual int setTrialF(const Tensor &f, const Tensor &d);
+    virtual int setTrialFIncr(const Tensor &f);
+    virtual int setTrialFIncr(const Tensor &f, const Tensor &d);
+
+
     
     virtual int commitState(void) = 0;
     virtual int revertToLastCommit(void) = 0;
