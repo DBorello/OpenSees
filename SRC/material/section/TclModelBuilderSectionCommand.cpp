@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-05-03 06:34:58 $
+// $Revision: 1.5 $
+// $Date: 2001-05-19 06:26:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -45,8 +45,11 @@
 #include <FiberSection2d.h>
 #include <FiberSection3d.h>
 #include <FiberSectionRepr.h>
+
 #include <ElasticPlateSection.h>
 #include <ElasticMembranePlateSection.h>
+#include <MembranePlateFiberSection.h>
+
 #include <QuadPatch.h>
 #include <CircPatch.h>
 #include <QuadCell.h>
@@ -443,6 +446,45 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	}	
 
 	theSection = new ElasticMembranePlateSection (tag, E, nu, h);
+    }	
+
+    else if (strcmp(argv[1],"PlateFiber") == 0) {
+	if (argc < 5) {
+	    cerr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: section PlateFiber tag? matTag? h? " << endl;
+	    return TCL_ERROR;
+	}
+	
+	int tag, matTag;
+	double  h;
+	
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid section PlateFiber tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	if (Tcl_GetInt (interp, argv[3], &matTag) != TCL_OK) {
+	    cerr << "WARNING invalid matTag" << endl;
+	    cerr << "PlateFiber section: " << matTag << endl;	    	    
+	    return TCL_ERROR;
+	}	
+
+	if (Tcl_GetDouble (interp, argv[4], &h) != TCL_OK) {
+	    cerr << "WARNING invalid h" << endl;
+	    cerr << "PlateFiber section: " << tag << endl;	    	    
+	    return TCL_ERROR;
+	}	
+
+	NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matTag);
+	if (theMaterial == 0) {
+	    cerr << "WARNING nD material does not exist\n";
+	    cerr << "nD material: " << matTag; 
+	    cerr << "\nPlateFiber section: " << tag << endl;
+	    return TCL_ERROR;
+	}
+
+	theSection = new MembranePlateFiberSection( tag, h, *theMaterial );
     }	
     
     else {
@@ -1518,7 +1560,7 @@ TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, in
     if (section == 0) {
       return TCL_ERROR;
     }
-    
+
     //
     // now parse the ouput file containing the fiber data, 
     // create fibers and add them to the section
@@ -1529,6 +1571,7 @@ TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, in
     ifstream theFile;
     theFile.open(fileName, ios::in);
     if (!theFile) {
+      cerr << "section UCFiber - could not open file named " << *fileName;
       return TCL_ERROR;
     } else {
       int foundStart = 0;
@@ -1553,6 +1596,7 @@ TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, in
 
 	UniaxialMaterial *theMaterial = theTclModelBuilder->getUniaxialMaterial(matTag);
 	if (theMaterial == 0) {
+	  cerr << "section UCFiber - no material exists with tag << " << matTag << endl;
 	  return TCL_ERROR;
 	}
 	
