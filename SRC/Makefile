@@ -301,6 +301,7 @@ RECORDER_LIBS = $(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/NodeRecorder.o \
 	$(FE)/recorder/EnvelopeNodeRecorder.o \
 	$(FE)/recorder/DriftRecorder.o \
+	$(FE)/recorder/PatternRecorder.o \
 	$(FE)/recorder/ElementRecorder.o \
 	$(FE)/recorder/EnvelopeElementRecorder.o \
 	$(FE)/recorder/FilePlotter.o \
