@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-06-07 22:04:16 $
+// $Revision: 1.14 $
+// $Date: 2002-10-02 21:46:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -1366,14 +1366,20 @@ Domain::update(void)
   ops_Dt = dT;
   ops_TheActiveDomain = this;
 
+  int ok = 0;
+
   // invoke update on all the ele's
   ElementIter &theEles = this->getElements();
   Element *theEle;
 
-  while ((theEle = theEles()) != 0)
-    theEle->update();
+  while ((theEle = theEles()) != 0) {
+    ok += theEle->update();
+  }
 
-  return 0;
+  if (ok != 0)
+    cerr << "Domain::update - domain failed in update\n";
+
+  return ok;
 }
 
 
