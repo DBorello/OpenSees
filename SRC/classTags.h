@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.41 $
-// $Date: 2002-12-17 22:35:35 $
+// $Revision: 1.42 $
+// $Date: 2003-01-28 18:02:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -128,8 +128,6 @@
 #define MAT_TAG_SnapBilinear		3001
 #define MAT_TAG_SnapClough		3002
 #define MAT_TAG_SnapPinch		3003
-//Boris Jeremic took out: double definition?
-//#define MAT_TAG_Pinching		3004
 
 #define MAT_TAG_Clough1	201
 #define MAT_TAG_Clough2	202
@@ -146,11 +144,12 @@
 #define SEC_TAG_Fiber		8
 #define SEC_TAG_FiberSection2d		9
 #define SEC_TAG_FiberSection3d		10
-#define SEC_TAG_BeamFiberSection	11
-#define SEC_TAG_ElasticPlateSection	12
-#define SEC_TAG_ElasticMembranePlateSection	13
-#define SEC_TAG_MembranePlateFiberSection	14 
-#define SEC_TAG_Bidirectional	15 
+#define SEC_TAG_FiberSectionGJ		11
+#define SEC_TAG_BeamFiberSection	12
+#define SEC_TAG_ElasticPlateSection	13
+#define SEC_TAG_ElasticMembranePlateSection	14
+#define SEC_TAG_MembranePlateFiberSection	15 
+#define SEC_TAG_Bidirectional	16
 
 #define ND_TAG_ElasticIsotropic					10
 #define ND_TAG_ElasticIsotropicPlaneStrain2d	11
