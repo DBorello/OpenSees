@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\material\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\material\uniaxial\py" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\obj\material\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "c:\Program Files\tcl\include" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "MHS_INSURE" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "c:\Program Files\tcl\include" /I "..\..\..\src\material\uniaxial\fedeas" /I "..\..\..\src\material\uniaxial\drain" /I "..\..\..\src\domain\domain" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\material\uniaxial\py" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "MHS_INSURE" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -221,6 +221,38 @@ SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainPinch1Material.h
 SOURCE=..\..\..\SRC\material\uniaxial\drain\TclDrainMaterialCommand.cpp
 # End Source File
 # End Group
+# Begin Group "py_tz_qz"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\Src\material\uniaxial\Py\PySimple1.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\material\uniaxial\Py\PySimple1.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\material\uniaxial\Py\QzSimple1.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\material\uniaxial\Py\QzSimple1.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\material\uniaxial\Py\TzSimple1.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\material\uniaxial\Py\TzSimple1.h
+# End Source File
+# End Group
+# Begin Group "snap"
+
+# PROP Default_Filter ""
+# End Group
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\uniaxial\CableMaterial.cpp
@@ -300,6 +332,14 @@ SOURCE=..\..\..\SRC\material\uniaxial\HystereticMaterial.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\uniaxial\HystereticMaterial.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\material\uniaxial\MinMaxMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\material\uniaxial\MinMaxMaterial.h
 # End Source File
 # Begin Source File
 
