@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2001-07-12 21:54:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/matrixutil/MatrixUtil.cpp,v $
                                                                         
                                                                         
@@ -32,8 +32,7 @@ double invert2by2Matrix(const Matrix &a, Matrix &b)
 {
    double det = a(0,0)*a(1,1)-a(0,1)*a(1,0);
 
-   if (det != 0)
-   {
+   if (det != 0.0) {
       b(0,0) =  a(1,1)/det;
       b(1,1) =  a(0,0)/det;
       b(1,0) = -a(0,1)/det;
@@ -65,8 +64,7 @@ double invert3by3Matrix(const Matrix &a, Matrix &b)
  
    det =  a00a11*a22 + 2 * a01a02*a12 - (a00*a12a12 + a01a01*a22 + a02a02*a11);
 
-   if (det != 0)
-   {
+   if (det != 0) {
       b(0,0) = (a11*a22 - a12a12 )/det;
       b(0,1) = (a02*a12 - a01*a22)/det;    
       b(0,2) = (a01*a12 - a02*a11)/det;

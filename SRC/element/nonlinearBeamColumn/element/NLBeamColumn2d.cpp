@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-06-23 05:57:01 $
+// $Revision: 1.11 $
+// $Date: 2001-07-12 21:54:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -73,7 +73,7 @@
 NLBeamColumn2d::NLBeamColumn2d(): 
 
 Element(0,ELE_TAG_NLBeamColumn2d), connectedExternalNodes(2), 
-nSections(0), sections(0), node1Ptr(0), node2Ptr(0),
+nSections(0), sections(0), crdTransf(0), node1Ptr(0), node2Ptr(0),
 rho(0), maxIters(0), tol(0), initialFlag(0), prevDistrLoad(NL),
 K(NEGD,NEGD), m(NEGD,NEGD), d(NEGD,NEGD), P(NEGD), Pinert(NEGD), load(NEGD), 
 Uepr(NEGD), kv(NEBD,NEBD), Se(NEBD),
@@ -253,10 +253,6 @@ NLBeamColumn2d::getNumDOF(void)
 void
 NLBeamColumn2d::setDomain(Domain *theDomain)
 {
-   //cerr << setiosflags(ios::scientific);
-   //cerr << setiosflags(ios::showpos);
-   //cerr << setprecision(8);
-        
    // check Domain is not null - invoked when object removed from a domain
    if (theDomain == 0)
    {
@@ -318,7 +314,15 @@ NLBeamColumn2d::setDomain(Domain *theDomain)
    }
    this->initializeSectionHistoryVariables();
    this->setSectionInterpolation();
-   this->update();
+   
+   if (initialFlag == 2) {
+     static Vector currDistrLoad(NL);
+     currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
+     crdTransf->update();
+     P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
+     K = crdTransf->getGlobalStiffMatrix(kv, Se);
+   } else
+     this->update();
 }
 
 
@@ -907,10 +911,7 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   
   // put  distrLoadCommit into the Vector
   for (i=0; i<NL; i++) 
-  {
-    dData(loc) = distrLoadcommit(i);
-    loc++;
-  }
+    dData(loc++) = distrLoadcommit(i);
 
   // place UeCommit into Vector
   for (i=0; i<NEGD; i++)
@@ -931,13 +932,11 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
 	dData(loc++) = (vscommit[k])(i);
 
   
-  if (theChannel.sendVector(dbTag, commitTag, dData) < 0)  
-  {
+  if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
      g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
 	 		     "failed to send Vector data");
      return -1;
   }    
-
 
   return 0;
 }    
@@ -952,7 +951,6 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   int dbTag = this->getDbTag();
   int i,j,k;
   
-
   static ID idData(9); // one bigger than needed 
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
@@ -974,7 +972,9 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   if (crdTransf == 0 || crdTransf->getClassTag() != crdTransfClassTag) {
       if (crdTransf != 0)
 	  delete crdTransf;
+
       crdTransf = theBroker.getNewCrdTransf2d(crdTransfClassTag);
+
       if (crdTransf == 0) {
 	  g3ErrorHandler->warning("NLBeamColumn2d::recvSelf() - %s %d\n",
 				  "failed to obtain a CrdTrans object with classTag",
@@ -982,8 +982,9 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	  return -2;	  
       }
   }
+
   crdTransf->setDbTag(crdTransfDbTag);
-  
+
   // invoke recvSelf on the crdTransf obkject
   if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0)  
   {
@@ -991,8 +992,6 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	     		     "failed to recv crdTranf");
      return -3;
   }      
-
-  
   
   //
   // recv an ID for the sections containing each sections dbTag and classTag
@@ -1010,9 +1009,9 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   //
   // now receive the sections
   //
-
   
   if (nSections != idData(3)) {
+
     //
     // we do not have correct number of sections, must delete the old and create
     // new ones before can recvSelf on the sections
@@ -1054,6 +1053,7 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	return -1;
       }     
     }
+
   } else {
 
     // 
@@ -1090,7 +1090,6 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   }
   
   
-  
   // into a vector place distrLoadCommit, rho, UeCommit, Secommit and kvcommit
   int secDefSize = 0;
   int secFlexSize = 0;
@@ -1114,14 +1113,10 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   // place double variables into Vector
   rho = dData(loc++);
   tol = dData(loc++);
-  
+
   // put  distrLoadCommit into the Vector
   for (i=0; i<NL; i++) 
-  {
     distrLoadcommit(i) = dData(loc++);
-    dData(loc) = distrLoadcommit(i);
-    loc++;
-  }
 
   // place UeCommit into Vector
   for (i=0; i<NEGD; i++)
@@ -1136,99 +1131,109 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
      for (j=0; j<NEBD; j++)
         kvcommit(i,j) = dData(loc++);
 
-	prevDistrLoad = distrLoadcommit;
-	Uepr = Uecommit;
-	kv   = kvcommit;
-	Se   = Secommit;
+  prevDistrLoad = distrLoadcommit;
+  Uepr = Uecommit;
+  kv   = kvcommit;
+  Se   = Secommit;
 
-	// Delete the old
-	if (vscommit != 0)
-		delete [] vscommit;
+  // Delete the old
+  if (vscommit != 0)
+    delete [] vscommit;
 
-	// Allocate the right number
-	vscommit = new Vector[nSections];
-	if (vscommit == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate vscommit array",
-			"NLBeamColumn2d::recvSelf");
-		return -1;
-	}
+  // Allocate the right number
+  vscommit = new Vector[nSections];
+  if (vscommit == 0) {
+    g3ErrorHandler->warning("%s -- failed to allocate vscommit array",
+			    "NLBeamColumn2d::recvSelf");
+    return -1;
+  }
 
-	for (k = 0; k < nSections; k++) {
-		int order = sections[k]->getOrder();
+  for (k = 0; k < nSections; k++) {
+    int order = sections[k]->getOrder();
 
-		// place vscommit into vector
-		vscommit[k] = Vector(order);
-		for (i = 0; i < order; i++)
-			(vscommit[k])(i) = dData(loc++);
-	}
+    // place vscommit into vector
+    vscommit[k] = Vector(order);
+    for (i = 0; i < order; i++)
+      (vscommit[k])(i) = dData(loc++);
+  }
 	
-	// Delete the old
-	if (fs != 0)
-		delete [] fs;
+  // Delete the old
+  if (fs != 0)
+    delete [] fs;
 
-	// Allocate the right number
-	fs = new Matrix[nSections];  
-	if (fs == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate fs array",
-			"NLBeamColumn2d::recvSelf");
-		return -1;
-	}
+  // Allocate the right number
+  fs = new Matrix[nSections];  
+  if (fs == 0) {
+    g3ErrorHandler->warning("%s -- failed to allocate fs array",
+			    "NLBeamColumn2d::recvSelf");
+    return -1;
+  }
    
-	// Delete the old
-	if (vs != 0)
-		delete [] vs;
+  // Delete the old
+  if (vs != 0)
+    delete [] vs;
 
-	// Allocate the right number
-	vs = new Vector[nSections];  
-	if (vs == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate vs array",
-			"NLBeamColumn2d::recvSelf");
-		return -1;
-	}
+  // Allocate the right number
+  vs = new Vector[nSections];  
+  if (vs == 0) {
+    g3ErrorHandler->warning("%s -- failed to allocate vs array",
+			    "NLBeamColumn2d::recvSelf");
+    return -1;
+  }
 	
-	// Delete the old
-	if (Ssr != 0)
-		delete [] Ssr;
+  // Delete the old
+  if (Ssr != 0)
+    delete [] Ssr;
 
-	// Allocate the right number
-	Ssr = new Vector[nSections];  
-	if (Ssr == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate Ssr array",
-			"NLBeamColumn2d::recvSelf");
-		return -1;
-	}
+  // Allocate the right number
+  Ssr = new Vector[nSections];  
+  if (Ssr == 0) {
+    g3ErrorHandler->warning("%s -- failed to allocate Ssr array",
+			    "NLBeamColumn2d::recvSelf");
+    return -1;
+  }
 
-	// Set up section history variables 
-	this->initializeSectionHistoryVariables();
+  // Set up section history variables 
+  this->initializeSectionHistoryVariables();
 
-	// Delete the old
-	if (b != 0)
-		delete [] b;
+  // Delete the old
+  if (b != 0)
+    delete [] b;
 
-	// Allocate the right number
-	b = new Matrix[nSections];  
-	if (b == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate b array",
-			"NLBeamColumn2d::recvSelf");
-		return -1;
-	}
+  // Allocate the right number
+  b = new Matrix[nSections];  
+  if (b == 0) {
+    g3ErrorHandler->warning("%s -- failed to allocate b array",
+			    "NLBeamColumn2d::recvSelf");
+    return -1;
+  }
 
-	// Delete the old
-	if (bp != 0)
-		delete [] bp;
+  // Delete the old
+  if (bp != 0)
+    delete [] bp;
 
-	// Allocate the right number
-	bp = new Matrix[nSections];  
-	if (bp == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate bp array",
-			"NLBeamColumn2d::recvSelf");
-		return -1;
-	}
+  // Allocate the right number
+  bp = new Matrix[nSections];  
+  if (bp == 0) {
+    g3ErrorHandler->warning("%s -- failed to allocate bp array",
+			    "NLBeamColumn2d::recvSelf");
+    return -1;
+  }
 
-	// Set up section force interpolation matrices
-	this->setSectionInterpolation();
+  // Set up section force interpolation matrices
+  this->setSectionInterpolation();
 
-	return 0;
+  if (node1Ptr != 0) {
+     static Vector currDistrLoad(NL);
+     currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
+     crdTransf->update();
+     P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
+     K = crdTransf->getGlobalStiffMatrix(kv, Se);
+  }
+
+  initialFlag = 2;  
+
+  return 0;
 }
 
 
@@ -1364,8 +1369,27 @@ ostream &operator<<(ostream &s, NLBeamColumn2d &E)
 int
 NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
+  if (displayMode == 2) {
+    // first determine the end points of the beam based on
+    // the display factor (a measure of the distorted image)
+    const Vector &end1Crd = node1Ptr->getCrds();
+    const Vector &end2Crd = node2Ptr->getCrds();	
+
+    const Vector &end1Disp = node1Ptr->getDisp();
+    const Vector &end2Disp = node2Ptr->getDisp();
+
+	static Vector v1(3);
+	static Vector v2(3);
+
+	for (int i = 0; i < 2; i++) {
+		v1(i) = end1Crd(i) + end1Disp(i)*fact;
+		v2(i) = end2Crd(i) + end2Disp(i)*fact;    
+	}
+	
+	return theViewer.drawLine (v1, v2, 1.0, 1.0);
+  }
    
-   if (displayMode == 1) 
+  else if (displayMode == 1) 
    {
        // first determine the two end points of the element based on
        //  the display factor (a measure of the distorted image)
@@ -1436,6 +1460,8 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
        v2(1) = node2Crd(1) + node2Disp(1)*fact;
        
        error = theViewer.drawLine(v1, v2, 1.0, 1.0);
+
+       delete [] displs;
 
        if (error)
 	  return error;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 03:56:11 $
+// $Revision: 1.4 $
+// $Date: 2001-07-12 21:54:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -122,7 +122,7 @@ class NLBeamColumn3d: public Element
 
     double L;                      // length
     int    initialFlag;            // indicates if the element has been initialized
-	bool isTorsion;
+    bool isTorsion;
 	
     Node   *node1Ptr, *node2Ptr;   // pointers to the nodes
 

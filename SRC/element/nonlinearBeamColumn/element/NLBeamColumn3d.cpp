@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-06-23 06:01:09 $
+// $Revision: 1.7 $
+// $Date: 2001-07-12 21:54:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -72,12 +72,12 @@
 NLBeamColumn3d::NLBeamColumn3d():
 
 Element(0,ELE_TAG_NLBeamColumn3d), connectedExternalNodes(2), 
-nSections(0), sections(0), node1Ptr(0), node2Ptr(0),
+nSections(0), sections(0), crdTransf(0), node1Ptr(0), node2Ptr(0),
 rho(0), maxIters(0), tol(0), initialFlag(0), prevDistrLoad(NL),
 K(NEGD,NEGD), m(NEGD,NEGD), d(NEGD,NEGD), P(NEGD), Pinert(NEGD), load(NEGD), Uepr(NEGD),
 kv(NEBD,NEBD), Se(NEBD), 
 distrLoadcommit(NL), Uecommit(NEGD), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0), bp(0),
-fs(0), vs(0), Ssr(0), vscommit(0), crdTransf(0), isTorsion(false)
+fs(0), vs(0), Ssr(0), vscommit(0), isTorsion(false)
 {
 
 }
@@ -321,7 +321,15 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    }
    this->initializeSectionHistoryVariables();
    this->setSectionInterpolation();
-   this->update();
+
+   if (initialFlag == 2) {
+     static Vector currDistrLoad(NL);
+     currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
+     crdTransf->update();
+     P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
+     K = crdTransf->getGlobalStiffMatrix(kv, Se);
+   } else
+     this->update();
 }
 
 
@@ -1129,11 +1137,7 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   
   // put  distrLoadCommit into the Vector
   for (i=0; i<NL; i++) 
-  {
     distrLoadcommit(i) = dData(loc++);
-    dData(loc) = distrLoadcommit(i);
-    loc++;
-  }
 
   // place UeCommit into Vector
   for (i=0; i<NEGD; i++)
@@ -1240,7 +1244,18 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	// Set up section force interpolation matrices
 	this->setSectionInterpolation();
 
-	return 0;
+
+  if (node1Ptr != 0) {
+     static Vector currDistrLoad(NL);
+     currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
+     crdTransf->update();
+     P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
+     K = crdTransf->getGlobalStiffMatrix(kv, Se);
+  }
+
+  initialFlag = 2;  
+
+  return 0;
 }
 
 
@@ -1459,6 +1474,11 @@ NLBeamColumn3d::setResponse(char **argv, int argc, Information &eleInformation)
     else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
 		return new ElementResponse(this, 2, P);
 
+    else if ((strcmp(argv[0],"defoANDforce") == 0) ||
+	     (strcmp(argv[0],"deformationANDforce") == 0) ||
+	     (strcmp(argv[0],"deformationsANDforces") == 0))
+		return new ElementResponse(this, 4, Vector(24));
+
     // section response -
     else if (strcmp(argv[0],"section") ==0) {
 		if (argc <= 2)
@@ -1479,11 +1499,21 @@ int
 NLBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 {
   static Vector force(12);
+  static Vector defoAndForce(24);
   double V;
+  int i;
 
   switch (responseID) {      
     case 1:  // forces
 		return eleInfo.setVector(P);
+
+    case 4:
+      for (i = 0; i < 12; i++) {
+	defoAndForce(i) = Uecommit(i);
+	defoAndForce(i+12) = P(i);
+      }
+      return eleInfo.setVector(defoAndForce);
+
     case 2:
 		// Axial
 		force(6) = Se(0);
