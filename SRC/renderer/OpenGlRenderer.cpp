@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-09-21 20:29:11 $
+// $Revision: 1.10 $
+// $Date: 2001-10-05 00:53:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -408,10 +408,8 @@ OpenGLRenderer::drawPoint(const Vector &pos1, float V1, int numPixels)
 
     glBegin(GL_POINTS);
     float r, g, b;
-    r = theMap->getRed(V1);
-    g = theMap->getGreen(V1);
-    b = theMap->getBlue(V1);
 
+    theMap->getRGB(V1, r, g, b);
     glColor3f(r,g,b);
     glVertex3f(pos1(0),pos1(1),pos1(2));
     
@@ -464,10 +462,8 @@ OpenGLRenderer::drawLine(const Vector &pos1, const Vector &pos2,
 
     glBegin(GL_LINES);
     float r, g, b;
-    r = theMap->getRed(V1);
-    g = theMap->getGreen(V1);
-    b = theMap->getBlue(V1);
 
+    theMap->getRGB(V1, r, g, b);
     glColor3f(r,g,b);
 
     glVertex3f(pos1(0),pos1(1),pos1(2));
@@ -477,10 +473,7 @@ OpenGLRenderer::drawLine(const Vector &pos1, const Vector &pos2,
 	    << " " << r << " " << g << " " << b << " " << endl;
     }
 
-    r = theMap->getRed(V2);
-    g = theMap->getGreen(V2);
-    b = theMap->getBlue(V2);
-
+    theMap->getRGB(V2, r, g, b);
     glColor3f(r,g,b);
 
     glVertex3f(pos2(0),pos2(1),pos2(2));
@@ -563,9 +556,7 @@ OpenGLRenderer::drawPolygon(const Matrix &pos, const Vector &data)
       posY = pos(i,1);
       posZ = pos(i,2);
       value = data(i);
-      r = theMap->getRed(value);
-      g = theMap->getGreen(value);
-      b = theMap->getBlue(value);      
+      theMap->getRGB(value, r, g, b);
 
     if (theOutputFileName != 0) {
 	theFile << posX << " " << posY << " " << posZ << " " << r 
