@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-01-16 06:29:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.cpp,v $
                                                                         
                                                                         
@@ -191,7 +191,76 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
 }
 
 
+PathTimeSeries::PathTimeSeries(char *fileName, 
+			       double theFactor)
+  :TimeSeries(TSERIES_TAG_PathTimeSeries),
+   thePath(0), time(0), currentTimeLoc(0), 
+   cFactor(theFactor), dbTag1(0), dbTag2(0)
+{
+	// determine the number of data points
+	int numDataPoints = 0;
+	double dataPoint;
+	ifstream theFile;
+  
+	// first open and go through file counting entries
+	theFile.open(fileName, ios::in);
+	if (!theFile) {
+		cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
+		cerr << " - could not open file " << fileName << endl;
+	}
+	else {
+		while (theFile >> dataPoint) {
+			numDataPoints++;
+			theFile >> dataPoint;	// Read in second value of pair
+		}
+	}
+	theFile.close();
 
+	// create a vector and read in the data
+	if (numDataPoints != 0) {
+
+		// now create the two vector
+		thePath = new Vector(numDataPoints);
+		time = new Vector(numDataPoints);
+
+		// ensure did not run out of memory creating copies
+		if (thePath == 0 || thePath->Size() == 0 || time == 0 || time->Size() == 0) {
+	  
+			cerr << "WARNING PathTimeSeries::PathTimeSeries() - out of memory\n ";
+			if (thePath != 0)
+				delete thePath;
+			if (time != 0)
+				delete time;
+			thePath = 0;
+			time = 0;
+		}
+      
+		// first open the file and read in the data
+		theFile.open(fileName, ios::in);
+		if (!theFile) {
+			cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
+			cerr << " - could not open file " << fileName << endl;
+			delete thePath;
+			delete time;
+			thePath = 0;
+			time =0;
+		}
+		else { // read in the time and then read the value
+			int count = 0;
+			while (theFile >> dataPoint) {
+				(*time)(count) = dataPoint;
+				theFile >> dataPoint;
+				(*thePath)(count) = dataPoint;
+				count++;
+			}
+
+			// finally close the file
+			theFile.close();
+		} 
+	
+	}
+    
+}
 
 PathTimeSeries::~PathTimeSeries()
 {

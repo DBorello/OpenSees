@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-14 08:43:03 $
+// $Revision: 1.3 $
+// $Date: 2001-01-16 06:29:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -239,6 +239,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
     double timeIncr = 0.0;
     int endMarker =  1;
     bool done = false;
+	char *fileName = 0;
     char *fileTimeName = 0;
     char *filePathName = 0;
     Vector *dataPath = 0;
@@ -271,6 +272,14 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	  return 0;
 	}
       } 
+
+      else if (strcmp(argv[endMarker],"-file") == 0) {
+	// allow user to specify the file name containg time and data points
+	endMarker++;
+	if (endMarker != argc) {
+	  fileName = argv[endMarker];
+	}
+      }
 
       else if (strcmp(argv[endMarker],"-filePath") == 0) {
 	// allow user to specify the file name containg the data points
@@ -361,6 +370,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 
     if (filePathName != 0 && fileTimeName == 0 && timeIncr != 0.0)
       theSeries = new PathSeries(filePathName, timeIncr, cFactor);
+	else if (fileName != 0)
+		theSeries = new PathTimeSeries(fileName, cFactor);
     else if (filePathName != 0 && fileTimeName != 0)
       theSeries = new PathTimeSeries(filePathName, fileTimeName, cFactor); 
     else if (dataPath != 0 && dataTime == 0 && timeIncr != 0.0) {
