@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:15 $
+// $Revision: 1.2 $
+// $Date: 2003-10-15 00:32:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/address/SocketAddress.cpp,v $
                                                                         
                                                                         
-// File: ~/actor/SocketAddress.C
-//
 // Written: fmk 11/95
 // Revised:
 //

@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:15 $
+// $Revision: 1.2 $
+// $Date: 2003-10-15 00:32:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/address/SocketAddress.h,v $
                                                                         
-                                                                        
-// File: ~/actor/SocketAddress.h
-//
 // Written: fmk 11/95
 // Revised:
 //
@@ -48,7 +45,10 @@ class SocketAddress: public ChannelAddress
     virtual ~SocketAddress();
 
   private:
-    struct sockaddr_in  addr;
+    union {
+      struct sockaddr_in  addr_in;
+      struct sockaddr  addr;      
+    } address;
     int addrLength;    
 
     friend class UDP_Socket;
