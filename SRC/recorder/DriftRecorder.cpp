@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.11 $
-// $Date: 2005-03-30 20:12:10 $
+// $Revision: 1.12 $
+// $Date: 2005-03-31 01:33:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -58,7 +58,7 @@ DriftRecorder::DriftRecorder(int ni,
 			     DataOutputHandler &theDataOutputHandler,
 			     bool timeFlag)
   :Recorder(RECORDER_TAGS_DriftRecorder),
-   ndI(0), ndJ(0), dof(df), perpDirn(dirn), oneOverL(0), data(0),
+   ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0), data(0),
    theDomain(&theDom), theHandler(&theDataOutputHandler),
    initializationDone(false), numNodes(0), echoTimeFlag(timeFlag)
 {
@@ -80,7 +80,7 @@ DriftRecorder::DriftRecorder(const ID &nI,
 			     DataOutputHandler &theDataOutputHandler,
 			     bool timeFlag)
   :Recorder(RECORDER_TAGS_DriftRecorder),
-   ndI(0), ndJ(0), dof(df), perpDirn(dirn), oneOverL(0), data(0),
+   ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0), data(0),
    theDomain(&theDom), theHandler(&theDataOutputHandler),
    initializationDone(false), numNodes(0), echoTimeFlag(timeFlag)
 {
