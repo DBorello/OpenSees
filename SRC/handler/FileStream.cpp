@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:33:14 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 23:12:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/FileStream.cpp,v $
 
 
@@ -28,6 +28,7 @@
 #include <iomanip>
 using std::cerr;
 using std::ios;
+using std::setiosflags;
 
 FileStream::FileStream()
   :fileOpen(0)
@@ -90,11 +91,11 @@ FileStream::setFloatField(floatField field)
 {
   if (field == FIXEDD) {
     if (fileOpen != 0)
-      theFile << ios::fixed;
+      theFile << setiosflags(ios::fixed);
   }
   else if (field == SCIENTIFIC) {
     if (fileOpen != 0)
-      theFile << ios::scientific;
+      theFile << setiosflags(ios::scientific);
   }
 
   return 0;

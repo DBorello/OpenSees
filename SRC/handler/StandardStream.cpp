@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:33:14 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 23:12:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/StandardStream.cpp,v $
 
 #include <StandardStream.h>
@@ -27,6 +27,7 @@
 #include <iomanip>
 using std::cerr;
 using std::ios;
+using std::setiosflags;
 
 StandardStream::StandardStream()
   :fileOpen(0)
@@ -79,14 +80,14 @@ int
 StandardStream::setFloatField(floatField field)
 {
   if (field == FIXEDD) {
-    cerr << ios::fixed;
+	  cerr << setiosflags(ios::fixed);
     if (fileOpen != 0)
-      theFile << ios::fixed;
+      theFile << setiosflags(ios::fixed);
   }
   else if (field == SCIENTIFIC) {
-    cerr << ios::scientific;
+    cerr << setiosflags(ios::scientific);
     if (fileOpen != 0)
-      theFile << ios::scientific;
+      theFile << setiosflags(ios::scientific);
   }
 
   return 0;
