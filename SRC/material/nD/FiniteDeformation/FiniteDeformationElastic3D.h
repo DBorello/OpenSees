@@ -41,7 +41,6 @@
 
 
 #include <stdlib.h>
-#include <iostream.h>
 
 #include <ConsoleErrorHandler.h>
 
@@ -84,8 +83,8 @@ class FiniteDeformationElastic3D : public NDMaterial
     virtual int revertToLastCommit(void) ;
     virtual int revertToStart(void) ;
 
-    virtual FiniteDeformationElastic3D *getCopy (void);
-    virtual FiniteDeformationElastic3D *getCopy (const char *type){};
+    virtual NDMaterial *getCopy (void);
+    virtual NDMaterial *getCopy (const char *type);
 
     virtual const char *getType (void) const;
     virtual int getOrder (void) const;

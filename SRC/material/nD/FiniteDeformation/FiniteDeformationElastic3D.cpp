@@ -582,12 +582,20 @@ int FiniteDeformationElastic3D::revertToStart (void)
    return 0;
 }
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-FiniteDeformationElastic3D * FiniteDeformationElastic3D::getCopy (void)
+NDMaterial * FiniteDeformationElastic3D::getCopy (void)
 {
     FiniteDeformationElastic3D   *theCopy =
     new FiniteDeformationElastic3D (this->getTag(), this->getWEnergy(), this->getRho());
 
     return theCopy;
+}
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NDMaterial * FiniteDeformationElastic3D::getCopy (const char *type)
+{
+    
+	opserr << "FiniteDeformationElastic3D::getCopy(const char *) - not yet implemented\n";
+
+    return 0;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 const char* FiniteDeformationElastic3D::getType (void) const
