@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-09-19 16:52:02 $
+// $Revision: 1.5 $
+// $Date: 2002-02-13 02:01:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.h,v $
                                                                         
                                                                         
@@ -137,6 +137,8 @@ class Matrix
     friend class TCP_SocketNoDelay;
     friend class UDP_Socket;
     friend class MPI_Channel;
+    friend class MySqlDatastore;
+    friend class BerkeleyDbDatastore;
 
   protected:
 

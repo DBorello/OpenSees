@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:14:39 $
+// $Revision: 1.3 $
+// $Date: 2002-02-13 02:01:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.h,v $
                                                                         
                                                                         
@@ -74,6 +74,8 @@ class ID
     friend class TCP_Socket;
     friend class TCP_SocketNoDelay;
     friend class MPI_Channel;
+    friend class MySqlDatastore;
+    friend class BerkeleyDbDatastore;
     
   private:
     static int ID_NOT_VALID_ENTRY;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-23 20:41:19 $
+// $Revision: 1.5 $
+// $Date: 2002-02-13 02:01:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.h,v $
 
                                                                         
@@ -50,7 +50,6 @@ class Message;
 class SystemOfEqn;
 
 #include <Tensor.h>
-
 
 class Vector
 {
@@ -118,6 +117,8 @@ class Vector
     friend class TCP_Socket;
     friend class UDP_Socket;
     friend class MPI_Channel;
+    friend class MySqlDatastore;
+    friend class BerkeleyDbDatastore;
     
   private:
     static double VECTOR_NOT_VALID_ENTRY;
