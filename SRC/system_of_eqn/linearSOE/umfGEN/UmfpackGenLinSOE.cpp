@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:17:54 $
+// $Revision: 1.3 $
+// $Date: 2002-02-23 00:45:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.cpp,v $
                                                                         
                                                                         
@@ -95,7 +95,7 @@ UmfpackGenLinSOE::setSize(Graph &theGraph)
 	newNNZ += theAdjacency.Size() +1; // the +1 is for the diag entry
     }
     nnz = newNNZ;
-    lValue = 10*nnz; // 10 because 3 was not working for some instances
+    lValue = 20*nnz; // 20 because 3 (10 also) was not working for some instances
 
     cerr << "UmfpackGenLinSOE::setSize - n " << size << " nnz " << nnz << " lVal " << lValue << endl;
 
