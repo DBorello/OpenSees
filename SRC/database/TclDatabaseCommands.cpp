@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2004-01-29 23:10:41 $
+// $Revision: 1.7 $
+// $Date: 2004-06-03 20:02:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/TclDatabaseCommands.cpp,v $
                                                                         
                                                                         
@@ -122,11 +122,11 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **a
     if (argc == 3)
       theDatabase = new MySqlDatastore(argv[2], theDomain, theBroker);
     else {
-      char *database = argv[2];
-      char *host = NULL;
-      char *user = NULL;
-      char *passwd = NULL;
-      char *socket = NULL;
+      const char *database = argv[2];
+      const char *host = NULL;
+      const char *user = NULL;
+      const char *passwd = NULL;
+      const char *socket = NULL;
       int port = 0;
       int clientFlag = 0;
 
