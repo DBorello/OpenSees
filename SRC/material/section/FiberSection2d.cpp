@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2004-08-25 22:17:46 $
+// $Revision: 1.22 $
+// $Date: 2005-03-07 21:32:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -268,7 +268,9 @@ FiberSection2d::getSectionDeformation(void)
 const Matrix&
 FiberSection2d::getInitialTangent(void)
 {
-  kData[0] = 0.0; kData[1] = 0.0; kData[2] = 0.0; kData[3] = 0.0;
+  static double kInitial[4];
+  static Matrix kInitialMatrix(kInitial, 2, 2);
+  kInitial[0] = 0.0; kInitial[1] = 0.0; kInitial[2] = 0.0; kInitial[3] = 0.0;
 
   int loc = 0;
 
@@ -281,14 +283,14 @@ FiberSection2d::getInitialTangent(void)
 
     double ks0 = tangent * A;
     double ks1 = ks0 * y;
-    kData[0] += ks0;
-    kData[1] += ks1;
-    kData[3] += ks1 * y;
+    kInitial[0] += ks0;
+    kInitial[1] += ks1;
+    kInitial[3] += ks1 * y;
   }
 
-  kData[2] = kData[1];
+  kInitial[2] = kInitial[1];
 
-  return *ks;
+  return kInitialMatrix;
 }
 
 const Matrix&
@@ -639,6 +641,10 @@ FiberSection2d::Print(OPS_Stream &s, int flag)
 Response*
 FiberSection2d::setResponse(const char **argv, int argc, Information &sectInfo)
 {
+  opserr << "START\n";
+  for (int i=0; i<argc; i++)
+    opserr << argv[i] << endln;
+  opserr << "END\n";
   // See if the response is one of the defaults
   Response *res = SectionForceDeformation::setResponse(argv, argc, sectInfo);
   if (res != 0)

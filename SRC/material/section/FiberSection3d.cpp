@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2004-08-25 22:17:46 $
+// $Revision: 1.19 $
+// $Date: 2005-03-07 21:32:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -285,9 +285,14 @@ FiberSection3d::setTrialSectionDeformation (const Vector &deforms)
 const Matrix&
 FiberSection3d::getInitialTangent(void)
 {
-  kData[0] = 0.0; kData[1] = 0.0; kData[2] = 0.0; kData[3] = 0.0;
-  kData[4] = 0.0; kData[5] = 0.0; kData[6] = 0.0; kData[7] = 0.0;
-  kData[8] = 0.0; 
+  static double kInitialData[9];
+  static Matrix kInitial(kInitialData, 3, 3);
+  
+  kInitialData[0] = 0.0; kInitialData[1] = 0.0; 
+  kInitialData[2] = 0.0; kInitialData[3] = 0.0;
+  kInitialData[4] = 0.0; kInitialData[5] = 0.0; 
+  kInitialData[6] = 0.0; kInitialData[7] = 0.0;
+  kInitialData[8] = 0.0; 
 
   int loc = 0;
 
@@ -304,21 +309,21 @@ FiberSection3d::getInitialTangent(void)
     double vas2 = z*value;
     double vas1as2 = vas1*z;
 
-    kData[0] += value;
-    kData[1] += vas1;
-    kData[2] += vas2;
+    kInitialData[0] += value;
+    kInitialData[1] += vas1;
+    kInitialData[2] += vas2;
     
-    kData[4] += vas1 * y;
-    kData[5] += vas1as2;
+    kInitialData[4] += vas1 * y;
+    kInitialData[5] += vas1as2;
     
-    kData[8] += vas2 * z; 
+    kInitialData[8] += vas2 * z; 
   }
 
-  kData[3] = kData[1];
-  kData[6] = kData[2];
-  kData[7] = kData[5];
+  kInitialData[3] = kInitialData[1];
+  kInitialData[6] = kInitialData[2];
+  kInitialData[7] = kInitialData[5];
 
-  return *ks;
+  return kInitial;
 }
 
 const Vector&
