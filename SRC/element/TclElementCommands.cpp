@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-04-02 21:04:44 $
+// $Revision: 1.14 $
+// $Date: 2002-04-12 21:42:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -39,6 +39,16 @@
 #include <string.h>
 #include <iostream.h>
 #include <Domain.h>
+
+#include <ElasticBeam2d.h>
+#include <ElasticBeam3d.h>
+
+//Zhaohui Yang (UCD)
+#include <EightNodeBrick.h>
+#include <TwentyNodeBrick.h>
+
+#include <CrdTransf2d.h>
+#include <CrdTransf3d.h>
 
 #include <TclModelBuilder.h>
 
