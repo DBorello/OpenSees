@@ -107,16 +107,27 @@ RANLIB		= ranlib
 #    C FLAGS used -DUSE_VENDOR_BLAS (needed in SuperLU) if UNIX in C++ FLAGS
 #
 
-C++FLAGS        = -Wall -O2 -D_UNIX -ftemplate-depth-30 -D_LINUX
-#C++FLAGS        =  -Wall -pg -O2 -D_UNIX -ftemplate-depth-30 -D_LINUX
+C++FLAGS         = -Wall  -funroll-loops -fcse-follow-jumps \
+		 -fthread-jumps -fcse-skip-blocks -frerun-cse-after-loop \
+		 -felide-constructors \
+		 -fcaller-saves  -ffloat-store -fforce-addr \
+		 -fschedule-insns -fschedule-insns2 -D_LINUX -D_UNIX \
+		 -fexpensive-optimizations \
+		 -fforce-addr -fforce-mem -finline-functions \
+		 -fkeep-inline-functions \
+              -fno-function-cse -fno-inline -fno-peephole \
+              -fomit-frame-pointer \
+              -fschedule-insns -fschedule-insns2 \
+              -fstrength-reduce -fthread-jumps 
+
+# modified as optimizaton currently causing problems with Steel01 code
+#C++FLAGS        =  -Wall -O2 -D_UNIX -ftemplate-depth-30 -D_LINUX
 CFLAGS          = -Wall -O2
-#CFLAGS          = -Wall -pg -O2
 FFLAGS          = -Wall -O
 
 # Linker
 LINKER          = $(CC++)
 LINKFLAGS       = 
-#LINKFLAGS       =  -pg
 
 # Misc
 MAKE		= make

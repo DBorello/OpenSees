@@ -98,8 +98,7 @@ RANLIB		= ranlib
 #    C FLAGS used -DUSE_VENDOR_BLAS (needed in SuperLU) if UNIX in C++ FLAGS
 #
 
-#C++FLAGS        = -O5 -w0 -DXWINDOWS -D_UNIX -D_ALPHA
-C++FLAGS        =  -g -w0 -DXWINDOWS -D_UNIX -D_ALPHA -g
+C++FLAGS        = -O5 -w0 -DXWINDOWS -D_UNIX -D_ALPHA
 CFLAGS          = -O5 -DUSE_VENDOR_BLAS -D_UNIX -D_ALPHA
 FFLAGS	        = -O
 
