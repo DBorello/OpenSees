@@ -821,7 +821,7 @@ int UpdatedLagrangianBeam2D::displaySelf(Renderer &theViewer, int displayMode, f
 	return 0;
 }
 
-Response* UpdatedLagrangianBeam2D::setResponse(char **argv, int argc, Information &eleInformation)
+Response* UpdatedLagrangianBeam2D::setResponse(const char **argv, int argc, Information &eleInformation)
 {
     // force (axialForce)
     if ((strcmp(argv[0],"force") == 0) ||

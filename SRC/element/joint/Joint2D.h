@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2003-03-04 21:07:18 $
+// $Revision: 1.6 $
+// $Date: 2003-03-11 20:41:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.h,v $
 
 // Written: Arash & GGD
@@ -96,7 +96,7 @@ public:
   int	displaySelf(Renderer &theViewer, int displayMode, float fact);  
 	
   // method for obtaining information specific to an element
-  Response* setResponse(char **argv, int argc, Information &eleInformation);
+  Response* setResponse(const char **argv, int argc, Information &eleInformation);
   int getResponse(int responseID, Information &eleInformation);
   int sendSelf(int commitTag, Channel &theChannel);
   int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);

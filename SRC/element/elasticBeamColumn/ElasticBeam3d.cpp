@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-02-25 01:08:39 $
+// $Revision: 1.12 $
+// $Date: 2003-03-11 20:42:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -762,7 +762,7 @@ ElasticBeam3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-ElasticBeam3d::setResponse(char **argv, int argc, Information &info)
+ElasticBeam3d::setResponse(const char **argv, int argc, Information &info)
 {
     // stiffness
     if (strcmp(argv[0],"stiffness") == 0)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:03 $
+// $Revision: 1.4 $
+// $Date: 2003-03-11 20:40:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/NewElement.h,v $
                                                                         
 #ifndef NewElement_h
@@ -78,10 +78,10 @@ class NewElement : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(OPS_Stream &s, int flag =0);    
 
-    Response *setResponse(char **argv, int argc, Information &eleInfo);
+    Response *setResponse(const char **argv, int argc, Information &eleInfo);
     int getResponse(int responseID, Information &eleInformation);
 
-    int setParameter (char **argv, int argc, Information &info);
+    int setParameter (const char **argv, int argc, Information &info);
     int updateParameter (int parameterID, Information &info);
 
   protected:

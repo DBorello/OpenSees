@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2003-03-04 21:07:18 $
+// $Revision: 1.7 $
+// $Date: 2003-03-11 20:41:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.cpp,v $
 
 // Written: Arash & GGD
@@ -576,7 +576,7 @@ int Joint2D::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
 //most-probably requires to be overridden
-Response* Joint2D::setResponse(char **argv, int argc, Information &eleInformation)
+Response* Joint2D::setResponse(const char **argv, int argc, Information &eleInformation)
 {
 //
 // we compare argv[0] for known response types for the Truss

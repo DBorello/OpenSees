@@ -97,7 +97,7 @@ public:
   virtual int displaySelf(Renderer &theViewer,
 			  int displayMode, float fact);
   
-  virtual Response *setResponse(char **argv, int argc,
+  virtual Response *setResponse(const char **argv, int argc,
 				Information &eleInformation);
   virtual int getResponse(int responseID, Information &eleInformation);
   
