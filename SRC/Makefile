@@ -123,6 +123,7 @@ RECORDER_LIBS = $(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/NodeRecorder.o \
 	$(FE)/recorder/ElementRecorder.o \
 	$(FE)/recorder/FilePlotter.o \
+	$(FE)/recorder/AlgorithmIncrements.o \
 	$(FE)/recorder/TclRecorderCommands.o \
 	$(FE)/recorder/response/Response.o \
 	$(FE)/recorder/response/ElementResponse.o \
@@ -213,9 +214,11 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/J2PlaneStrain.o \
 	$(FE)/material/nD/J2AxiSymm.o \
 	$(FE)/material/nD/J2ThreeDimensional.o \
+	$(FE)/material/nD/J2PlateFiber.o \
 	$(FE)/material/nD/ElasticIsotropicMaterial.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStress2D.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStrain2D.o \
+	$(FE)/material/nD/ElasticIsotropicPlateFiber.o \
 	$(FE)/material/nD/BidirectionalMaterial.o \
 	$(FE)/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.o \
 	$(FE)/material/nD/TclModelBuilderNDMaterialCommand.o 
@@ -225,9 +228,14 @@ SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/ElasticSection2d.o \
 	$(FE)/material/section/ElasticSection3d.o \
 	$(FE)/material/section/FiberSection.o \
+	$(FE)/material/section/FiberSection2d.o \
+	$(FE)/material/section/FiberSection3d.o \
 	$(FE)/material/section/SectionAggregator.o \
 	$(FE)/material/section/GenericSection1d.o \
 	$(FE)/material/section/GenericSectionNd.o \
+	$(FE)/material/section/ElasticPlateSection.o \
+	$(FE)/material/section/ElasticMembranePlateSection.o \
+	$(FE)/material/section/MembranePlateFiberSection.o \
 	$(FE)/material/section/fiber/Fiber.o \
 	$(FE)/material/section/fiber/UniaxialFiber2d.o \
 	$(FE)/material/section/fiber/UniaxialFiber3d.o \
@@ -274,6 +282,7 @@ SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 
 MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
 	$(FE)/modelbuilder/PlaneFrame.o \
+	$(FE)/modelbuilder/tcl/TclUniaxialMaterialTester.o \
 	$(FE)/modelbuilder/tcl/TclModelBuilder.o 
 
 
