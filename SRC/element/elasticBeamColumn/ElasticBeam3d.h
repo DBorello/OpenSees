@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:08 $
+// $Revision: 1.7 $
+// $Date: 2003-02-25 01:08:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.h,v $
                                                                         
                                                                         
@@ -70,6 +70,7 @@ class ElasticBeam3d : public Element
     int revertToLastCommit(void);        
     int revertToStart(void);
     
+    int update(void);
     const Matrix &getTangentStiff(void);
     const Matrix &getInitialStiff(void);
     const Matrix &getMass(void);    
