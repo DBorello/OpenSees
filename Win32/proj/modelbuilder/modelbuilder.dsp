@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\modelbuilder\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\element\elasticBeamColumn" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\handler" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\domain\load" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\element\beam3d" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\nDarray" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\element\elasticBeamColumn" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\handler" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\domain\load" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\element\beam3d" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\nDarray" /I "c:\Program Files\tcl" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\obj\modelbuilder\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\element\elasticBeamColumn" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\handler" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\domain\load" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\element\beam3d" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\nDarray" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\element\elasticBeamColumn" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\handler" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\domain\load" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\element\beam3d" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\nDarray" /I "c:\Program Files\tcl" /D "WIN32" /D "_DEBUG" /D "_LIB" /D "_MBCS" /D "_TCL84" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
