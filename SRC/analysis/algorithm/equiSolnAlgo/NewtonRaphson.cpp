@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-03-29 05:30:30 $
+// $Revision: 1.5 $
+// $Date: 2001-09-12 21:31:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonRaphson.cpp,v $
                                                                         
                                                                         
@@ -220,9 +220,9 @@ NewtonRaphson::recvSelf(int cTag,
 void
 NewtonRaphson::Print(ostream &s, int flag)
 {
-    if (flag == 0) {
-	s << "ModifiedNewton";
-    }
+  if (flag == 0) {
+    s << "NewtonRaphson" << endl;
+  }
 }
 
 
