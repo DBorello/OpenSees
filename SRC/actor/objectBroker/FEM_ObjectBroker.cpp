@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-06-07 22:07:34 $
+// $Revision: 1.10 $
+// $Date: 2002-06-07 23:03:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -132,7 +132,7 @@
 #include <CorotTrussSection.h>
 #include <ZeroLength.h>
 #include <ZeroLengthSection.h>
-#include <ZeroLengthND.h>
+//#include <ZeroLengthND.h>
 #include <FourNodeQuad.h>
 #include <EnhancedQuad.h>
 #include <NineNodeMixedQuad.h>
@@ -326,8 +326,8 @@ FEM_ObjectBroker::getNewElement(int classTag)
 	case ELE_TAG_ZeroLengthSection:  
 	     return new ZeroLengthSection(); 	     
 
-	case ELE_TAG_ZeroLengthND:  
-	     return new ZeroLengthND(); 	     
+	     //case ELE_TAG_ZeroLengthND:  
+	     //return new ZeroLengthND(); 	     
 	     
 	case ELE_TAG_FourNodeQuad:  
 	     return new FourNodeQuad(); 	     
@@ -980,7 +980,7 @@ FEM_ObjectBroker::getNewStaticIntegrator(int classTag)
 {
     switch(classTag) {
 	case INTEGRATOR_TAGS_LoadControl:  
-	     return new LoadControl(1.0,1.0,1.0,.10); // must recvSelf
+	     return new LoadControl(1.0,1,1.0,.10); // must recvSelf
 	     
 	     
 	case INTEGRATOR_TAGS_ArcLength:  
@@ -1020,7 +1020,7 @@ FEM_ObjectBroker::getNewIncrementalIntegrator(int classTag)
 {
     switch(classTag) {
 	case INTEGRATOR_TAGS_LoadControl:  
-	     return new LoadControl(1.0,1.0,1.0,1.0); // must recvSelf
+	     return new LoadControl(1.0,1,1.0,1.0); // must recvSelf
 	    
 	     
 	case INTEGRATOR_TAGS_ArcLength:  
