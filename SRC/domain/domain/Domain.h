@@ -1,4 +1,4 @@
- /* ****************************************************************** **
+/* ****************************************************************** **
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
 **                                                                    **
@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2004-11-13 18:58:04 $
+// $Revision: 1.12 $
+// $Date: 2004-11-24 22:49:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
 // Written: fmk 
@@ -130,6 +130,7 @@ class Domain
 
     // methods to query the state of the domain
     virtual double  getCurrentTime(void) const;
+    virtual int     getCommitTag(void) const;    	
     virtual int getNumElements(void) const;
     virtual int getNumNodes(void) const;
     virtual int getNumSPs(void) const;
@@ -170,10 +171,8 @@ class Domain
     
     // methods for output
     virtual int  addRecorder(Recorder &theRecorder);    	
-//BorisJeremic took it out 13Nov2004
-//out BJ     virtual int  playback(int cTag);    	    
-//BorisJeremic took it out 13Nov2004
     virtual int  removeRecorders(void);
+
     virtual int  addRegion(MeshRegion &theRegion);    	
     virtual MeshRegion *getRegion(int region);    	
 
@@ -187,7 +186,10 @@ class Domain
   protected:    
     virtual int buildEleGraph(Graph *theEleGraph);
     virtual int buildNodeGraph(Graph *theNodeGraph);
-    
+
+    Recorder **theRecorders;
+    int numRecorders;    
+
   private:
     double currentTime;               // current pseudo time
     double committedTime;             // the committed pseudo time
@@ -217,9 +219,6 @@ class Domain
     LoadPatternIter       *theLoadPatternIter;        
     SingleDomAllSP_Iter   *allSP_Iter;
     
-    Recorder **theRecorders;
-    int numRecorders;    
-
     MeshRegion **theRegions;
     int numRegions;    
 

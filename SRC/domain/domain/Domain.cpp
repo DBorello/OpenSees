@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2004-11-13 18:58:04 $
+// $Revision: 1.26 $
+// $Date: 2004-11-24 22:49:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -73,14 +73,16 @@
 #include <FEM_ObjectBroker.h>
 
 Domain::Domain()
-:currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
+:theRecorders(0), numRecorders(0),
+ currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
  dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
  eleGraphBuiltFlag(false),  nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0), 
- theRecorders(0), numRecorders(0), theRegions(0), numRegions(0), commitTag(0),
+ theRegions(0), numRegions(0), commitTag(0),
  theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
 {
+  
     // init the arrays for storing the domain components
     theElements = new ArrayOfTaggedObjects(4096);
     theNodes    = new ArrayOfTaggedObjects(4096);
@@ -118,12 +120,13 @@ Domain::Domain()
 
 Domain::Domain(int numNodes, int numElements, int numSPs, int numMPs,
 	       int numLoadPatterns)
-:currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
+:theRecorders(0), numRecorders(0),
+ currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
  dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0),
- theRecorders(0), numRecorders(0), theRegions(0), numRegions(0), commitTag(0),
+ theRegions(0), numRegions(0), commitTag(0),
  theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
 {
     // init the arrays for storing the domain components
@@ -165,7 +168,8 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
 	       TaggedObjectStorage &theMPsStorage,
 	       TaggedObjectStorage &theSPsStorage,
 	       TaggedObjectStorage &theLoadPatternsStorage)
-:currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
+:theRecorders(0), numRecorders(0),
+ currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
  dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
@@ -175,7 +179,7 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
  theSPs(&theSPsStorage),
  theMPs(&theMPsStorage), 
  theLoadPatterns(&theLoadPatternsStorage),
- theRecorders(0), numRecorders(0), theRegions(0), numRegions(0), commitTag(0),
+ theRegions(0), numRegions(0), commitTag(0),
  theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
 {
     // init the iters    
@@ -219,12 +223,13 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
 
 
 Domain::Domain(TaggedObjectStorage &theStorage)
-:currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
+:theRecorders(0), numRecorders(0),
+ currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
  dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0), 
- theRecorders(0), numRecorders(0), theRegions(0), numRegions(0), commitTag(0),
+ theRegions(0), numRegions(0), commitTag(0),
  theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
 {
     // init the arrays for storing the domain components
@@ -620,7 +625,7 @@ Domain::addNodalLoad(NodalLoad *load, int pattern)
     int nodTag = load->getNodeTag();
     Node *res = this->getNode(nodTag);
     if (res == 0) {
-      opserr << "Domain::addNodalLoad() - no node with tag " << nodTag << 
+      opserr << "Domain::addNodalLoad() HI - no node with tag " << nodTag << 
 	"exits in  the model, not adding the nodal load"  << *load << endln;
 	return false;
     }
@@ -642,7 +647,7 @@ Domain::addNodalLoad(NodalLoad *load, int pattern)
       return false;
     }
 
-    // load->setDomain(this);    // done in LoadPattern::addNodalLoad()
+    load->setDomain(this);    // done in LoadPattern::addNodalLoad()
     this->domainChange();
 
     return result;
@@ -1039,6 +1044,12 @@ double
 Domain::getCurrentTime(void) const
 {
     return currentTime;
+}
+
+int
+Domain::getCommitTag(void) const
+{
+  return commitTag;
 }
 
 
@@ -1508,25 +1519,30 @@ OPS_Stream &operator<<(OPS_Stream &s, Domain &M)
 }
 
 
-int  
+int
 Domain::addRecorder(Recorder &theRecorder)
 {
-    Recorder **newRecorders = new Recorder *[numRecorders + 1]; 
-    if (newRecorders == 0) {
-	opserr << "Domain::addRecorder() - could not add ran out of memory\n";
-	return -1;
-    }
-    
-    for (int i=0; i<numRecorders; i++)
-	newRecorders[i] = theRecorders[i];
-    newRecorders[numRecorders] = &theRecorder;
+  if (theRecorder.setDomain(*this) != 0) {
+    opserr << "Domain::addRecorder() - recorder could not be added\n";
+    return -1;
+  }
 
-    if (theRecorders != 0)
-      delete [] theRecorders;
-    
-    theRecorders = newRecorders;
-    numRecorders++;
-    return 0;
+  Recorder **newRecorders = new Recorder *[numRecorders + 1]; 
+  if (newRecorders == 0) {
+    opserr << "Domain::addRecorder() - could not add ran out of memory\n";
+    return -1;
+  }
+  
+  for (int i=0; i<numRecorders; i++)
+    newRecorders[i] = theRecorders[i];
+  newRecorders[numRecorders] = &theRecorder;
+  
+  if (theRecorders != 0)
+    delete [] theRecorders;
+  
+  theRecorders = newRecorders;
+  numRecorders++;
+  return 0;
 }
 
 
