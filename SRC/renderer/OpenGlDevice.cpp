@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-09-17 22:54:24 $
+// $Revision: 1.7 $
+// $Date: 2001-10-27 02:56:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -798,8 +798,9 @@ void
 OpenGlDevice::drawText(float x, float y, float z, char *text, int length,
 		       char horizontalJustify, char verticalJustify)
 {
+
 #ifdef _WGL
-	glColor3f(0.0,0.0,0.0);
+  glColor3f(0.0,0.0,0.0);
   glRasterPos3f(x,y,z);
   glListBase(FontBase);
   glCallLists(strlen(text), GL_UNSIGNED_BYTE, text);
@@ -816,7 +817,7 @@ OpenGlDevice::drawText(float x, float y, float z, char *text, int length,
   int height = fontInfo->ascent;  
   if (horizontalJustify != 'l') {
     char *s;
-    int width;
+    int width = 0;
     for (s=text; *s; s++) {
       width += fontInfo->per_char[*s].width;
     }
@@ -833,7 +834,7 @@ OpenGlDevice::drawText(float x, float y, float z, char *text, int length,
       moveY = -height/2;
   } else
     moveY = +2;
-    
+
   glBitmap(0, 0, 0, 0, (GLfloat)moveX, (GLfloat)moveY, NULL);
 
   // finally draw the text
