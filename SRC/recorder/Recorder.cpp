@@ -18,46 +18,57 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
+// $Revision: 1.1 $
 // $Date: 2004-11-24 22:41:22 $
-// $Source: /usr/local/cvs/OpenSees/SRC/recorder/Recorder.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/recorder/Recorder.cpp,v $
                                                                         
-                                                                        
-#ifndef Recorder_h
-#define Recorder_h
 
 // Written: fmk 
 // Created: 11/98
 // Revision: A
 //
-// Description: This file contains the class definition for Recorder.
-// Recorder is an abstract base class. An Recorder object is used
-// in the program to store/restore information at each commit().
+// Description: This file contains the class implementation for Recorder.
 //
-// What: "@(#) Recorder.h, revA"
+// What: "@(#) Recorder.cpp, revA"
 
-class Domain;
-#include <MovableObject.h>
+#include <Recorder.h>
+#include <OPS_Globals.h>
 
-class Recorder: public MovableObject
+Recorder::Recorder(int classTag)
+  :MovableObject(classTag)
 {
-  public:
-    Recorder(int classTag);
-    virtual ~Recorder();
 
-    virtual int record(int commitTag, double timeStamp) =0;
+}
 
-    
-    virtual int restart(void);
-    virtual int setDomain(Domain &theDomain);
-    virtual int sendSelf(int commitTag, Channel &theChannel);  
-    virtual int recvSelf(int commitTag, Channel &theChannel, 
-			 FEM_ObjectBroker &theBroker);
-  protected:
-    
-  private:	
-};
+Recorder::~Recorder() 
+{
 
+}
 
-#endif
+int 
+Recorder::restart(void)
+{
+  return 0;
+}
 
+int 
+Recorder::setDomain(Domain &theDomain)
+{
+  opserr << "Recorder::setDomain() - not yet implemented\n";
+  return 0;
+}
+
+int 
+Recorder::sendSelf(int commitTag, Channel &theChannel)
+{
+  opserr << "Recorder::sendSelf() - not yet implemented\n";
+  return 0;
+}
+
+int 
+Recorder::recvSelf(int commitTag, Channel &theChannel, 
+		   FEM_ObjectBroker &theBroker)
+{
+  opserr << "Recorder::recvSelf() - not yet implemented\n";
+  return 0;
+}
