@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-10-10 18:32:04 $
+// $Revision: 1.4 $
+// $Date: 2002-12-13 00:18:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Information.cpp,v $
                                                                         
                                                                         
@@ -54,151 +54,179 @@ Information::Information(double val)
   :theType(DoubleType), theDouble(val),
   theID(0), theVector(0), theMatrix(0), theTensor(0)
 {
-    // does nothing
+  // does nothing
 }
 
 Information::Information(const ID &val) 
   :theType(IdType),
   theID(0), theVector(0), theMatrix(0), theTensor(0)
 {
-	// Make a copy
-    theID = new ID(val);
+  // Make a copy
+  theID = new ID(val);
 
-	if (theID == 0)
-		g3ErrorHandler->warning("%s -- failed to allocate ID",
-			"Information::Information");
+  if (theID == 0)
+    g3ErrorHandler->warning("%s -- failed to allocate ID",
+			    "Information::Information");
 }
 
 Information::Information(const Vector &val) 
   :theType(VectorType),
   theID(0), theVector(0), theMatrix(0), theTensor(0)
 {
-	// Make a copy
-    theVector = new Vector(val);
-
-    if (theVector == 0)
-      g3ErrorHandler->warning("%s -- failed to allocate Vector",
-			      "Information::Information");
+  // Make a copy
+  theVector = new Vector(val);
+  
+  if (theVector == 0)
+    g3ErrorHandler->warning("%s -- failed to allocate Vector",
+			    "Information::Information");
 }
 
 Information::Information(const Matrix &val) 
   :theType(MatrixType),
-  theID(0), theVector(0), theMatrix(0), theTensor(0)
+   theID(0), theVector(0), theMatrix(0), theTensor(0)
 {
-	// Make a copy
-    theMatrix = new Matrix(val);
-
-	if (theMatrix == 0)
-		g3ErrorHandler->warning("%s -- failed to allocate Matrix",
-			"Information::Information");
+  // Make a copy
+  theMatrix = new Matrix(val);
+  
+  if (theMatrix == 0)
+    g3ErrorHandler->warning("%s -- failed to allocate Matrix",
+			    "Information::Information");
 }
 
 Information::Information(const Tensor &val) 
   :theType(TensorType),
   theID(0), theVector(0), theMatrix(0), theTensor(0)
 {
-	// Make a copy
-    theTensor = new Tensor(val);
-
-	if (theTensor == 0)
-		g3ErrorHandler->warning("%s -- failed to allocate Tensor",
-			"Information::Information");
+  // Make a copy
+  theTensor = new Tensor(val);
+  
+  if (theTensor == 0)
+    g3ErrorHandler->warning("%s -- failed to allocate Tensor",
+			    "Information::Information");
 }
 
 Information::~Information() 
 {
-    if (theID != 0)
-	delete theID;
-
-    if (theVector != 0)
-	delete theVector;
-    
-    if (theMatrix != 0)
-	delete theMatrix;
-
-    if (theTensor != 0)
-	delete theTensor;
+  if (theID != 0)
+    delete theID;
+  
+  if (theVector != 0)
+    delete theVector;
+  
+  if (theMatrix != 0)
+    delete theMatrix;
+  
+  if (theTensor != 0)
+    delete theTensor;
 }
 
 int 
 Information::setInt(int newInt)
 {
-	theInt = newInt;
-
-	return 0;
+  theInt = newInt;
+  
+  return 0;
 }
 
 int 
 Information::setDouble(double newDouble)
 {
-	theDouble = newDouble;
-
-	return 0;
+  theDouble = newDouble;
+  
+  return 0;
 }
 
 int 
 Information::setID(const ID &newID)
 {
-	if (theID != 0) {
-		*theID = newID;
-		return 0;
-	}
-	else
-		return -1;
+  if (theID != 0) {
+    *theID = newID;
+    return 0;
+  } else
+    return -1;
 }
 
 int 
 Information::setVector(const Vector &newVector)
 {
-	if (theVector != 0) {
-		*theVector = newVector;
-		return 0;
-	}
-	else
-		return -1;
+  if (theVector != 0) {
+    *theVector = newVector;
+    return 0;
+  }
+  else
+    return -1;
 }
 
 int 
 Information::setMatrix(const Matrix &newMatrix)
 {
-	if (theMatrix != 0) {
-		*theMatrix = newMatrix;
-		return 0;
-	}
-	else
-		return -1;
+  if (theMatrix != 0) {
+    *theMatrix = newMatrix;
+    return 0;
+  }
+  else
+    return -1;
 }
 
 int 
 Information::setTensor(const Tensor &newTensor)
 {
-	if (theTensor != 0) {
-		*theTensor = newTensor;
-		return 0;
-	}
-	else
-		return -1;
+  if (theTensor != 0) {
+    *theTensor = newTensor;
+    return 0;
+  }
+  else
+    return -1;
 }
 
 void 
 Information::Print(ostream &s, int flag)
 {
-    if (theType == IntType)
-      s << theInt << " ";
-    else if (theType == DoubleType)
-      s << theDouble << " ";
-    else if (theType == IdType && theID != 0)
-      for (int i=0; i<theID->Size(); i++)
-	s << (*theID)(i) << " ";
-    else if (theType == VectorType && theVector != 0)
-      for (int i=0; i<theVector->Size(); i++)
-	s << (*theVector)(i) << " ";
-    else if (theType == MatrixType && theMatrix != 0)
-      s << *theMatrix;
-    else if (theType == TensorType && theTensor != 0)
-      // No overloaded << for Tensors yet!
-      //s << *theTensor;
-      s << "No Tensor output";
-    else
-      return;
+  if (theType == IntType)
+    s << theInt << " ";
+  else if (theType == DoubleType)
+    s << theDouble << " ";
+  else if (theType == IdType && theID != 0)
+    for (int i=0; i<theID->Size(); i++)
+      s << (*theID)(i) << " ";
+  else if (theType == VectorType && theVector != 0)
+    for (int i=0; i<theVector->Size(); i++)
+      s << (*theVector)(i) << " ";
+  else if (theType == MatrixType && theMatrix != 0)
+    s << *theMatrix;
+  else if (theType == TensorType && theTensor != 0)
+    // No overloaded << for Tensors yet!
+    //s << *theTensor;
+    s << "No Tensor output";
+  else
+    return;
+}
+
+const Vector &
+Information::getData(void) 
+{
+  if (theType == IntType) {
+    if (theVector == 0) 
+      theVector = new Vector(1);
+    (*theVector)(0) = theInt;
+  } else if (theType == DoubleType) {
+    if (theVector == 0) 
+      theVector = new Vector(1);
+    (*theVector)(0) = theDouble;
+  } else if (theType == IdType && theID != 0) {
+    if (theVector == 0) 
+      theVector = new Vector(theID->Size());
+    for (int i=0; i<theID->Size(); i++)
+      (*theVector)(i) =  (*theID)(i);
+  } else if (theType == MatrixType && theMatrix != 0) {
+    int noRows = theMatrix->noRows();
+    int noCols = theMatrix->noCols();
+    if (theVector == 0) 
+      theVector = new Vector(noRows * noCols);
+    for (int i=0; i<noRows; i++)
+      for (int j=0; j<noCols; j++)
+	(*theVector)(i) = (*theMatrix)(i,j);
+  }
+  
+  return *theVector;
 }

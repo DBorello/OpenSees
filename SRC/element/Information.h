@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-10-10 18:32:04 $
+// $Revision: 1.4 $
+// $Date: 2002-12-13 00:18:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Information.h,v $
                                                                         
                                                                         
@@ -52,23 +52,25 @@ class Information
 {
   public:
     Information();
-	Information(int val);
-	Information(double val);
-	Information(const ID &val);
-	Information(const Vector &val);
-	Information(const Matrix &val);
-	Information(const Tensor &val);
-
+    Information(int val);
+    Information(double val);
+    Information(const ID &val);
+    Information(const Vector &val);
+    Information(const Matrix &val);
+    Information(const Tensor &val);
+    
     virtual ~Information();
-
-	virtual int setInt(int newInt);
-	virtual int setDouble(double newDouble);
+    
+    virtual int setInt(int newInt);
+    virtual int setDouble(double newDouble);
     virtual int setID(const ID &newID);
-	virtual int setVector(const Vector &newVector);
-	virtual int setMatrix(const Matrix &newMatrix);
-	virtual int setTensor(const Tensor &newTensor);
+    virtual int setVector(const Vector &newVector);
+    virtual int setMatrix(const Matrix &newMatrix);
+    virtual int setTensor(const Tensor &newTensor);
+    
+    virtual void Print(ostream &s, int flag = 0);
+    virtual const Vector &getData(void);
 
-	virtual void Print(ostream &s, int flag = 0);
 
     // data that is stored in the information object
     InfoType	theType;   // information about data type
@@ -77,11 +79,12 @@ class Information
     ID		*theID;    // pointer to an ID object, created elsewhere
     Vector 	*theVector;// pointer to a Vector object, created elsewhere
     Matrix	*theMatrix;// pointer to a Matrix object, created elsewhere
-        Tensor  *theTensor;// pointer to a Tensor object, created elsewhere
+    Tensor      *theTensor;// pointer to a Tensor object, created elsewhere
 
   protected:
     
-  private:    
+  private:        
+
 };
 
 #endif
