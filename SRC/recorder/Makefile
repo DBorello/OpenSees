@@ -2,7 +2,8 @@ include ../../Makefile.def
 
 OBJS       = DatastoreRecorder.o MaxNodeDispRecorder.o \
 	ElementRecorder.o TclRecorderCommands.o FilePlotter.o \
-	NodeRecorder.o AlgorithmIncrements.o DriftRecorder.o
+	NodeRecorder.o AlgorithmIncrements.o DriftRecorder.o \
+	EnvelopeNodeRecorder.o  EnvelopeElementRecorder.o
 
 # Compilation control
 
