@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\src\handler,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="..\..\..\SRC\actor\message;..\..\..\SRC\actor\channel;..\..\..\SRC\database;..\..\..\SRC\nDarray;..\..\..\arc\objectbroker;..\..\..\src\matrix;..\..\..\src;..\..\..\src\actor\actor;..\..\..\src\handler;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_TCL84"
 				StringPooling="TRUE"
 				RuntimeLibrary="5"
@@ -65,7 +65,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\handler,c:\Program Files\tcl"
+				AdditionalIncludeDirectories="..\..\..\SRC\actor\message;..\..\..\SRC\actor\channel;..\..\..\SRC\database;..\..\..\SRC\nDarray;..\..\..\arc\objectbroker;..\..\..\src\matrix;..\..\..\src;..\..\..\src\actor\actor;..\..\..\src\handler;&quot;c:\Program Files\tcl&quot;"
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,_TCL84"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -105,6 +105,18 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
+				RelativePath="..\..\..\SRC\handler\DataOutputDatabaseHandler.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\handler\DataOutputFileHandler.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\handler\DataOutputHandler.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\handler\DataOutputStreamHandler.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\Src\handler\FileStream.cpp">
 			</File>
 			<File
@@ -117,6 +129,15 @@
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
+			<File
+				RelativePath="..\..\..\SRC\handler\DataOutputDatabaseHandler.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\handler\DataOutputFileHandler.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\handler\DataOutputHandler.h">
+			</File>
 			<File
 				RelativePath="..\..\..\Src\handler\FileStream.h">
 			</File>

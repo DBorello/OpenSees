@@ -222,6 +222,12 @@
 			Name="crdTransf"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\coordTransformation\CorotCrdTransf2d.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\coordTransformation\CorotCrdTransf3d.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\coordTransformation\CrdTransf.cpp">
 			</File>
 			<File
