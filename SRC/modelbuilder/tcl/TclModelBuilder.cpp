@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-06-06 18:27:20 $
+// $Revision: 1.14 $
+// $Date: 2002-06-07 17:41:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -55,6 +55,8 @@
 #include <NodalLoad.h>
 #include <Beam2dPointLoad.h>
 #include <Beam2dUniformLoad.h>
+#include <Beam3dPointLoad.h>
+#include <Beam3dUniformLoad.h>
 #include <BrickSelfWeight.h>
 #include <LoadPattern.h>
 
@@ -979,8 +981,31 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
 	return TCL_ERROR;
       }
       theLoad = new Beam2dUniformLoad(eleLoadTag, wt, wa, theEleTags);    
-    } else { 
-      cerr << "WARNING eleLoad -beamUniform currently only valid only for ndm=2\n";     
+    }
+    else if (ndm == 3) {
+      double wy, wz;
+      double wx = 0.0;
+      if (Tcl_GetDouble(interp, argv[count], &wy) != TCL_OK) {
+	cerr << "WARNING eleLoad - invalid wy " << argv[count]
+	     << " for -beamUniform \n";
+	return TCL_ERROR;
+      }
+      count++;
+      if (Tcl_GetDouble(interp, argv[count], &wz) != TCL_OK) {
+	cerr << "WARNING eleLoad - invalid wz " << argv[count]
+	     << " for -beamUniform \n";
+	return TCL_ERROR;
+      }
+      count++;
+      if (count < argc && Tcl_GetDouble(interp, argv[count], &wx) != TCL_OK) {
+	cerr << "WARNING eleLoad - invalid wx " << argv[count]
+	     << " for -beamUniform \n";
+	return TCL_ERROR;
+      }
+      theLoad = new Beam3dUniformLoad(eleLoadTag, wy, wz, wx, theEleTags);    
+    }
+    else { 
+      cerr << "WARNING eleLoad -beamUniform currently only valid only for ndm=2 or 3\n";     
       return TCL_ERROR;
     }
   } else if (strcmp(argv[count],"-beamPoint") == 0) {
@@ -1008,7 +1033,36 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
       }
 
       theLoad = new Beam2dPointLoad(eleLoadTag, P, x, theEleTags, N);    
-    } else {
+    }
+    else if (ndm == 3) {
+      double Py, Pz, x;
+      double N = 0.0;
+      if (Tcl_GetDouble(interp, argv[count], &Py) != TCL_OK) {
+	cerr << "WARNING eleLoad - invalid Py " << argv[count] << " for -beamPoint\n";		
+	return TCL_ERROR;
+      } 
+      if (Tcl_GetDouble(interp, argv[count+1], &Pz) != TCL_OK) {
+	cerr << "WARNING eleLoad - invalid Pz " << argv[count] << " for -beamPoint\n";		
+	return TCL_ERROR;
+      } 
+      if (Tcl_GetDouble(interp, argv[count+2], &x) != TCL_OK) {
+	cerr << "WARNING eleLoad - invalid xDivL " << argv[count+2] << " for -beamPoint\n";	
+	return TCL_ERROR;
+      } 
+      if (count+3 < argc && Tcl_GetDouble(interp, argv[count+3], &N) != TCL_OK) {
+	cerr << "WARNING eleLoad - invalid N " << argv[count+3] << " for -beamPoint\n";		
+	return TCL_ERROR;
+      } 
+
+      if (x < 0.0 || x > 1.0) {
+	cerr << "WARNING eleLoad - invalid xDivL of " << x;
+	cerr << " for -beamPoint (valid range [0.0, 1.0]\n";
+	return TCL_ERROR;
+      }
+
+      theLoad = new Beam3dPointLoad(eleLoadTag, Py, Pz, x, theEleTags, N);    
+    }
+    else {
       cerr << "WARNING eleLoad -beamPoint type currently only valid only for ndm=2\n";
       return TCL_ERROR;
     }  
