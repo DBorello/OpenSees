@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-13 08:10:48 $
+// $Revision: 1.2 $
+// $Date: 2001-01-23 08:46:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2AxiSymm.cpp,v $
 
 // Written: Ed "C++" Love
@@ -233,15 +233,15 @@ const Tensor& J2AxiSymm :: getTangentTensor( )
   return rank4 ;
 }
 
-const Tensor& J2AxiSymm :: getStressTensor( ) 
-{
-  return rank2 ;
-}
-
-const Tensor& J2AxiSymm :: getStrainTensor( ) 
-{
-  return rank2 ;
-}
+//jeremic@ucdavis.edu 22jan2001const Tensor& J2AxiSymm :: getStressTensor( ) 
+//jeremic@ucdavis.edu 22jan2001{
+//jeremic@ucdavis.edu 22jan2001  return rank2 ;
+//jeremic@ucdavis.edu 22jan2001}
+//jeremic@ucdavis.edu 22jan2001
+//jeremic@ucdavis.edu 22jan2001const Tensor& J2AxiSymm :: getStrainTensor( ) 
+//jeremic@ucdavis.edu 22jan2001{
+//jeremic@ucdavis.edu 22jan2001  return rank2 ;
+//jeremic@ucdavis.edu 22jan2001}
 
 
 //this is frank's problem

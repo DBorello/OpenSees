@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-13 08:12:17 $
+// $Revision: 1.2 $
+// $Date: 2001-01-23 08:46:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlaneStress.h,v $
 
 #ifndef J2PlaneStress_h
@@ -120,8 +120,8 @@ class J2PlaneStress : public J2Plasticity {
   int setTrialStrainIncr(const Tensor &v) ;
   int setTrialStrainIncr(const Tensor &v, const Tensor &r) ;
   const Tensor& getTangentTensor( ) ;
-  const Tensor& getStressTensor( ) ;
-  const Tensor& getStrainTensor( ) ;  
+//jeremic@ucdavis.edu 22jan2001  const Tensor& getStressTensor( ) ;
+//jeremic@ucdavis.edu 22jan2001  const Tensor& getStrainTensor( ) ;  
 
   //this is frank's problem
   int sendSelf(int commitTag, Channel &theChannel) ;  

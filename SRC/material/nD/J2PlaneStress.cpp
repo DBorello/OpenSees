@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-13 08:12:17 $
+// $Revision: 1.2 $
+// $Date: 2001-01-23 08:46:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlaneStress.cpp,v $
 
 // Written: Ed "C++" Love
@@ -267,15 +267,15 @@ const Tensor& J2PlaneStress :: getTangentTensor( )
   return rank4 ;
 }
 
-const Tensor& J2PlaneStress :: getStressTensor( ) 
-{
-  return rank2 ;
-}
-
-const Tensor& J2PlaneStress :: getStrainTensor( ) 
-{
-  return rank2 ;
-}
+//jeremic@ucdavis.edu 22jan2001const Tensor& J2PlaneStress :: getStressTensor( ) 
+//jeremic@ucdavis.edu 22jan2001{
+//jeremic@ucdavis.edu 22jan2001  return rank2 ;
+//jeremic@ucdavis.edu 22jan2001}
+//jeremic@ucdavis.edu 22jan2001
+//jeremic@ucdavis.edu 22jan2001const Tensor& J2PlaneStress :: getStrainTensor( ) 
+//jeremic@ucdavis.edu 22jan2001{
+//jeremic@ucdavis.edu 22jan2001  return rank2 ;
+//jeremic@ucdavis.edu 22jan2001}
 
 
 //this is frank's problem

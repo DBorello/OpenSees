@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-13 08:12:17 $
+// $Revision: 1.2 $
+// $Date: 2001-01-23 08:46:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2ThreeDimensional.cpp,v $
 
 // Written: Ed "C++" Love
@@ -252,15 +252,15 @@ const Tensor& J2ThreeDimensional :: getTangentTensor( )
   return rank4 ;
 }
 
-const Tensor& J2ThreeDimensional :: getStressTensor( ) 
-{
-  return rank2 ;
-}
-
-const Tensor& J2ThreeDimensional :: getStrainTensor( ) 
-{
-  return rank2 ;
-}
+//jeremic@ucdavis.edu 22jan2001const Tensor& J2ThreeDimensional :: getStressTensor( ) 
+//jeremic@ucdavis.edu 22jan2001{
+//jeremic@ucdavis.edu 22jan2001  return rank2 ;
+//jeremic@ucdavis.edu 22jan2001}
+//jeremic@ucdavis.edu 22jan2001
+//jeremic@ucdavis.edu 22jan2001const Tensor& J2ThreeDimensional :: getStrainTensor( ) 
+//jeremic@ucdavis.edu 22jan2001{
+//jeremic@ucdavis.edu 22jan2001  return rank2 ;
+//jeremic@ucdavis.edu 22jan2001}
 
 
 //this is frank's problem
