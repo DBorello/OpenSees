@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-04 00:48:17 $
+// $Revision: 1.11 $
+// $Date: 2003-03-05 00:53:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
                                                                         
@@ -45,16 +45,10 @@
 
 Steel01::Steel01
 (int tag, double FY, double E, double B,
- double A1, double A2, double A3, double A4,
- double min, double max) :
+ double A1, double A2, double A3, double A4):
    UniaxialMaterial(tag,MAT_TAG_Steel01),
-   fy(FY), E0(E), b(B), a1(A1), a2(A2), a3(A3), a4(A4),
-   epsmin(min), epsmax(max)
+   fy(FY), E0(E), b(B), a1(A1), a2(A2), a3(A3), a4(A4)
 {
-   // Calculated material parameters
-   epsy = fy/E0;         // Yield strain
-   Esh = b*E0;           // Hardening modulus
-
    // Sets all history and state variables to initial values
    // History variables
    CminStrain = 0.0;
@@ -62,14 +56,12 @@ Steel01::Steel01
    CshiftP = 1.0;
    CshiftN = 1.0;
    Cloading = 0;
-   Cfailed = 0;
 
    TminStrain = 0.0;
    TmaxStrain = 0.0;
    TshiftP = 1.0;
    TshiftN = 1.0;
    Tloading = 0;
-   Tfailed = 0;
 
    // State variables
    Cstrain = 0.0;
@@ -87,8 +79,7 @@ Steel01::Steel01
 }
 
 Steel01::Steel01():UniaxialMaterial(0,MAT_TAG_Steel01),
- fy(0.0), E0(0.0), b(0.0), a1(0.0), a2(0.0), a3(0.0), a4(0.0),
- epsmin(0.0), epsmax(0.0)
+ fy(0.0), E0(0.0), b(0.0), a1(0.0), a2(0.0), a3(0.0), a4(0.0)
 {
 
 // AddingSensitivity:BEGIN /////////////////////////////////////
@@ -114,7 +105,6 @@ int Steel01::setTrialStrain (double strain, double strainRate)
    TshiftP = CshiftP;
    TshiftN = CshiftN;
    Tloading = Cloading;
-   Tfailed = Cfailed;
 
    // Set trial strain
    Tstrain = strain;
@@ -137,7 +127,6 @@ int Steel01::setTrial (double strain, double &stress, double &tangent, double st
    TshiftP = CshiftP;
    TshiftN = CshiftN;
    Tloading = Cloading;
-   Tfailed = Cfailed;
 
    // Set trial strain
    Tstrain = strain;
@@ -159,18 +148,12 @@ int Steel01::setTrial (double strain, double &stress, double &tangent, double st
 void Steel01::determineTrialState (double dStrain)
 {
 
-   if (Tstrain <= epsmin || Tstrain >= epsmax)
-      Tfailed = 1;
-
-   if (Tfailed) {
-      Tstress = 0.0;
-      Ttangent = 0.0;
-      return;
-   } else {
-
       double c, c1, c2, c3, fyOneMinusB, c1c3, c1c2;
 
       fyOneMinusB = fy * (1.0 - b);
+
+	  double Esh = b*E0;
+	  double epsy = fy/E0;
 
       c1 = Esh*Tstrain;
 
@@ -182,29 +165,14 @@ void Steel01::determineTrialState (double dStrain)
 
       c = Cstress + E0*dStrain;
 
-
-
-		if (c1c3 < c) {
+		if (c1c3 < c)
 			Tstress = c1c3;
-			state = 2; // positive yielding
-		}
-		else {
+		else
 			Tstress = c;
-			state = 1; // elastic 
-		}
 
 		c1c2=c1-c2;
-		if (c1c2 > Tstress) {
+		if (c1c2 > Tstress)
 			Tstress = c1c2;
-			state = 3; // negative yielding
-		}
-
-
-
-
-
-
-
 
       if (fabs(Tstress-c) < DBL_EPSILON)
 	  Ttangent = E0;
@@ -240,7 +208,6 @@ void Steel01::determineTrialState (double dStrain)
 	    TminStrain = Cstrain;
 	  TshiftP = 1 + a3*pow((TmaxStrain-TminStrain)/(2.0*a4*epsy),0.8);
       }
-   }
 }
 
 void Steel01::detectLoadReversal (double dStrain)
@@ -253,6 +220,8 @@ void Steel01::detectLoadReversal (double dStrain)
       else
          Tloading = -1;
    }
+
+   double epsy = fy/E0;
 
    // Transition from loading to unloading, i.e. positive strain increment
    // to negative strain increment
@@ -303,7 +272,6 @@ int Steel01::commitState ()
    CshiftP = TshiftP;
    CshiftN = TshiftN;
    Cloading = Tloading;
-   Cfailed = Tfailed;
 
    // State variables
    Cstrain = Tstrain;
@@ -321,7 +289,6 @@ int Steel01::revertToLastCommit ()
    TshiftP = CshiftP;
    TshiftN = CshiftN;
    Tloading = Cloading;
-   Tfailed = Cfailed;
 
    // Reset trial state variables to last committed state
    Tstrain = Cstrain;
@@ -339,14 +306,12 @@ int Steel01::revertToStart ()
    CshiftP = 1.0;
    CshiftN = 1.0;
    Cloading = 0;
-   Cfailed = 0;
 
    TminStrain = 0.0;
    TmaxStrain = 0.0;
    TshiftP = 1.0;
    TshiftN = 1.0;
    Tloading = 0;
-   Tfailed = 0;
 
    // State variables
    Cstrain = 0.0;
@@ -368,11 +333,7 @@ int Steel01::revertToStart ()
 UniaxialMaterial* Steel01::getCopy ()
 {
    Steel01* theCopy = new Steel01(this->getTag(), fy, E0, b,
-				  a1, a2, a3, a4, epsmin, epsmax);
-
-   // Calculated material properties
-   theCopy->epsy = epsy;
-   theCopy->Esh = Esh;
+				  a1, a2, a3, a4);
 
    // Converged history variables
    theCopy->CminStrain = CminStrain;
@@ -380,15 +341,13 @@ UniaxialMaterial* Steel01::getCopy ()
    theCopy->CshiftP = CshiftP;
    theCopy->CshiftN = CshiftN;
    theCopy->Cloading = Cloading;
-   theCopy->Cfailed = Cfailed;
 
    // Trial history variables
-   theCopy->TminStrain = CminStrain;
-   theCopy->TmaxStrain = CmaxStrain;
-   theCopy->TshiftP = CshiftP;
-   theCopy->TshiftN = CshiftN;
-   theCopy->Tloading = Cloading;
-   theCopy->Tfailed = Cfailed;
+   theCopy->TminStrain = TminStrain;
+   theCopy->TmaxStrain = TmaxStrain;
+   theCopy->TshiftP = TshiftP;
+   theCopy->TshiftN = TshiftN;
+   theCopy->Tloading = Tloading;
 
    // Converged state variables
    theCopy->Cstrain = Cstrain;
@@ -406,7 +365,7 @@ UniaxialMaterial* Steel01::getCopy ()
 int Steel01::sendSelf (int commitTag, Channel& theChannel)
 {
    int res = 0;
-   static Vector data(19);
+   static Vector data(16);
    data(0) = this->getTag();
 
    // Material properties
@@ -417,21 +376,18 @@ int Steel01::sendSelf (int commitTag, Channel& theChannel)
    data(5) = a2;
    data(6) = a3;
    data(7) = a4;
-   data(8) = epsmin;
-   data(9) = epsmax;
 
    // History variables from last converged state
-   data(10) = CminStrain;
-   data(11) = CmaxStrain;
-   data(12) = CshiftP;
-   data(13) = CshiftN;
-   data(14) = Cloading;
-   data(15) = Cfailed;
+   data(8) = CminStrain;
+   data(9) = CmaxStrain;
+   data(10) = CshiftP;
+   data(11) = CshiftN;
+   data(12) = Cloading;
 
    // State variables from last converged state
-   data(16) = Cstrain;
-   data(17) = Cstress;
-   data(18) = Ctangent;
+   data(13) = Cstrain;
+   data(14) = Cstress;
+   data(15) = Ctangent;
 
    // Data is only sent after convergence, so no trial variables
    // need to be sent through data vector
@@ -447,7 +403,7 @@ int Steel01::recvSelf (int commitTag, Channel& theChannel,
                                 FEM_ObjectBroker& theBroker)
 {
    int res = 0;
-   static Vector data(19);
+   static Vector data(16);
    res = theChannel.recvVector(this->getDbTag(), commitTag, data);
   
    if (res < 0) {
@@ -465,19 +421,13 @@ int Steel01::recvSelf (int commitTag, Channel& theChannel,
       a2 = data(5);
       a3 = data(6);
       a4 = data(7);
-      epsmin = data(8);
-      epsmax = data(9);
-
-      epsy = fy/E0;
-      Esh = b*E0;
 
       // History variables from last converged state
-      CminStrain = data(10);
-      CmaxStrain = data(11);
-      CshiftP = data(12);
-      CshiftN = data(13);
-      Cloading = int(data(14));
-      Cfailed = int(data(15));
+      CminStrain = data(8);
+      CmaxStrain = data(9);
+      CshiftP = data(10);
+      CshiftN = data(11);
+      Cloading = int(data(12));
 
       // Copy converged history values into trial values since data is only
       // sent (received) after convergence
@@ -486,12 +436,11 @@ int Steel01::recvSelf (int commitTag, Channel& theChannel,
       TshiftP = CshiftP;
       TshiftN = CshiftN;
       Tloading = Cloading;
-      Tfailed = Cfailed;
 
       // State variables from last converged state
-      Cstrain = data(16);
-      Cstress = data(17);
-      Ctangent = data(18);      
+      Cstrain = data(13);
+      Cstress = data(14);
+      Ctangent = data(15);      
 
       // Copy converged state values into trial values
       Tstrain = Cstrain;
@@ -512,10 +461,6 @@ void Steel01::Print (OPS_Stream& s, int flag)
    s << "  a2: " << a2 << " ";
    s << "  a3: " << a3 << " ";
    s << "  a4: " << a4 << " ";
-   if (epsmin != NEG_INF_STRAIN)
-     s << "  epsmin: " << epsmin << " ";
-   if (epsmax != POS_INF_STRAIN)
-     s << "  epsmax: " << epsmax << endln;
 }
 
 
@@ -556,14 +501,6 @@ Steel01::setParameter(const char **argv, int argc, Information &info)
 		info.theType = DoubleType;
 		return 7;
 	}
-	if (strcmp(argv[0],"epsmin") == 0) {
-		info.theType = DoubleType;
-		return 8;
-	}
-	if (strcmp(argv[0],"epsmax") == 0) {
-		info.theType = DoubleType;
-		return 9;
-	}
 	else
 		opserr << "WARNING: Could not set parameter in Steel01. " << endln;
                 
@@ -599,18 +536,10 @@ Steel01::updateParameter(int parameterID, Information &info)
 	case 7:
 		this->a4 = info.theDouble;
 		break;
-	case 8:
-		this->epsmin = info.theDouble;
-		break;
-	case 9:
-		this->epsmax = info.theDouble;
-		break;
 	default:
 		return -1;
 	}
 
-	epsy = fy/E0;           // Yield strain
-	Esh = b*E0;             // Hardening modulus
 	Ttangent = E0;          // Initial stiffness
 
 	return 0;
@@ -628,12 +557,6 @@ Steel01::activateParameter(int passedParameterID)
 }
 
 
-
-double
-Steel01::getStrainSensitivity(int gradNumber)
-{
-	return 0.0;
-}
 
 double
 Steel01::getStressSensitivity(int gradNumber, bool conditional)
@@ -671,6 +594,7 @@ Steel01::getStressSensitivity(int gradNumber, bool conditional)
 	double dStrain = Tstrain-Cstrain;
 	double sigmaElastic = Cstress + E0*dStrain;
 	double fyOneMinusB = fy * (1.0 - b);
+	double Esh = b*E0;
 	double c1 = Esh*Tstrain;
 	double c2 = TshiftN*fyOneMinusB;
 	double c3 = TshiftP*fyOneMinusB;
@@ -716,21 +640,6 @@ Steel01::getInitialTangentSensitivity(int gradNumber)
 }
 
 
-
-double
-Steel01::getDampTangentSensitivity(int gradNumber)
-{
-	return 0.0;
-}
-
-
-
-double
-Steel01::getRhoSensitivity(int gradNumber)
-{
-	return 0.0;
-}
-
 int
 Steel01::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
 {
@@ -772,6 +681,7 @@ Steel01::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGra
 	double dStrain = Tstrain-Cstrain;
 	double sigmaElastic = Cstress + E0*dStrain;
 	double fyOneMinusB = fy * (1.0 - b);
+	double Esh = b*E0;
 	double c1 = Esh*Tstrain;
 	double c2 = TshiftN*fyOneMinusB;
 	double c3 = TshiftP*fyOneMinusB;

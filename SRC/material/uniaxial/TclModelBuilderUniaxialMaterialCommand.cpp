@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-02-25 23:33:40 $
+// $Revision: 1.17 $
+// $Date: 2003-03-05 00:53:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -404,7 +404,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
 	    opserr << "Want: uniaxialMaterial Steel01 tag? fy? E0? b?";
-	    opserr << " <a1? a2? a3? a4?> <-min min?> <-max max?>" << endln;	
+	    opserr << " <a1? a2? a3? a4?>" << endln;	
 	    return TCL_ERROR;
 	}
 
@@ -415,32 +415,6 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	    return TCL_ERROR;
 	}
 
-	// Search for min and max strains
-	double epsmin = NEG_INF_STRAIN;
-	double epsmax = POS_INF_STRAIN;
-	int numMatParam = argc - 3;
-	
-	for (int j = 3; j < argc; j++) {
-	    if (strcmp(argv[j],"-min") == 0) {
-		if ((j+1) >= argc || Tcl_GetDouble (interp, argv[j+1], &epsmin) != TCL_OK) {
-		    opserr << "WARNING invalid min\n";
-		    opserr << "uniaxialMaterial Steel01: " << tag << endln;
-		    return TCL_ERROR;
-		}
-		j++;
-		numMatParam -= 2;
-	    }
-	    if (strcmp(argv[j],"-max") == 0) {
-		if ((j+1) >= argc || Tcl_GetDouble (interp, argv[j+1], &epsmax) != TCL_OK) {
-		    opserr << "WARNING invalid max\n";
-		    opserr << "uniaxialMaterial Steel01: " << tag << endln;
-		    return TCL_ERROR;
-		}
-		j++;
-		numMatParam -= 2;
-	    }
-	}	
-	
 	// Read required Steel01 material parameters
 	double fy, E, b;
 	
@@ -463,13 +437,10 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	}
 
 	// Read optional Steel01 material parameters
-	double a1 = STEEL_01_DEFAULT_A1;
-	double a2 = STEEL_01_DEFAULT_A2;
-	double a3 = STEEL_01_DEFAULT_A3;
-	double a4 = STEEL_01_DEFAULT_A4;
+	double a1, a2, a3, a4;
 
-	if (numMatParam > 3) {
-	    if (numMatParam < 7) {
+	if (argc > 6) {
+	    if (argc < 10) {
 		opserr << "WARNING insufficient number of hardening parameters\n";
 		opserr << "uniaxialMaterial Steel01: " << tag << endln;
 		return TCL_ERROR;
@@ -498,18 +469,20 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 		opserr << "uniaxialMaterial Steel01: " << tag << endln;
 		return TCL_ERROR;
 	    }
-	}
 
-	// Parsing was successful, allocate the material
-	theMaterial = new Steel01 (tag, fy, E, b, a1, a2, a3, a4, epsmin, epsmax);
+		// Parsing was successful, allocate the material
+		theMaterial = new Steel01 (tag, fy, E, b, a1, a2, a3, a4);
+	}
+	else
+		// Parsing was successful, allocate the material
+		theMaterial = new Steel01 (tag, fy, E, b);
     }
 
     else if (strcmp(argv[1],"Concrete01") == 0) {
 	if (argc < 7) {
 	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    opserr << "Want: uniaxialMaterial Concrete01 tag? fpc? epsc0? fpcu? epscu?";
-	    opserr << " <-min min?> <-max max?>" << endln;
+	    opserr << "Want: uniaxialMaterial Concrete01 tag? fpc? epsc0? fpcu? epscu?" << endln;
 	    return TCL_ERROR;
 	}
 
@@ -518,30 +491,6 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    opserr << "WARNING invalid uniaxialMaterial Concrete01 tag" << endln;
 	    return TCL_ERROR;
-	}
-
-	// Search for min and max strain
-	double epsmin = NEG_INF_STRAIN;
-	double epsmax = POS_INF_STRAIN;
-	
-	for (int j = 3; j < argc; j++) {
-	    if (strcmp(argv[j],"-min") == 0) {
-		if ((j+1) >= argc || Tcl_GetDouble(interp, argv[j+1], &epsmin) != TCL_OK) {
-		    opserr << "WARNING invalid min\n";
-		    opserr << "Concrete01 material: " << tag << endln;
-		    return TCL_ERROR;
-		}
-		j++;
-	    }
-
-	    if (strcmp(argv[j],"-max") == 0) {
-		if ((j+1) >= argc || Tcl_GetDouble(interp, argv[j+1], &epsmax) != TCL_OK) {
-		    opserr << "WARNING invalid max\n";
-		    opserr << "Concrete01 material: " << tag << endln;
-		    return TCL_ERROR;
-		}
-		j++;
-	    }
 	}
 
 	// Read required Concrete01 material parameters

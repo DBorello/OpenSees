@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-03-04 00:48:17 $
+// $Revision: 1.10 $
+// $Date: 2003-03-05 00:53:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.h,v $
                                                                         
                                                                         
@@ -53,8 +53,7 @@ class Steel01 : public UniaxialMaterial
   public:
     Steel01(int tag, double fy, double E0, double b,
        double a1 = STEEL_01_DEFAULT_A1, double a2 = STEEL_01_DEFAULT_A2,
-       double a3 = STEEL_01_DEFAULT_A3, double a4 = STEEL_01_DEFAULT_A4,
-       double min = NEG_INF_STRAIN, double max = POS_INF_STRAIN);
+       double a3 = STEEL_01_DEFAULT_A3, double a4 = STEEL_01_DEFAULT_A4);
     Steel01();
     ~Steel01();
 
@@ -83,10 +82,7 @@ class Steel01 : public UniaxialMaterial
     int    updateParameter          (int parameterID, Information &info);
 	int    activateParameter        (int parameterID);
 	double getStressSensitivity     (int gradNumber, bool conditional);
-	double getStrainSensitivity     (int gradNumber);
 	double getInitialTangentSensitivity(int gradNumber);
-	double getDampTangentSensitivity(int gradNumber);
-	double getRhoSensitivity        (int gradNumber);
 	int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
 // AddingSensitivity:END ///////////////////////////////////////////
 
@@ -101,12 +97,6 @@ class Steel01 : public UniaxialMaterial
     double a2;
     double a3;
     double a4;  // a1 through a4 are coefficients for isotropic hardening
-    double epsmin;  // Minimum allowable strain
-    double epsmax;  // Maximum allowable strain
-
-    /*** Calculated Material Properties ***/
-    double epsy;
-    double Esh;
 
     /*** CONVERGED History Variables ***/
     double CminStrain;  // Minimum strain in compression
@@ -117,9 +107,6 @@ class Steel01 : public UniaxialMaterial
                         // 1 = loading (positive strain increment)
                         // -1 = unloading (negative strain increment)
                         // 0 initially
-    int Cfailed;        // Flag indicating failure ...  a committed strain
-                        // has fallen out of the range [epsmin, epsmax]
-
 
     /*** CONVERGED State Variables ***/    
     double Cstrain;
@@ -132,7 +119,6 @@ class Steel01 : public UniaxialMaterial
     double TshiftP;
     double TshiftN;
     int Tloading;
-    int Tfailed;
     
     /*** TRIAL State Variables ***/
     double Tstrain;
@@ -149,7 +135,6 @@ class Steel01 : public UniaxialMaterial
 // AddingSensitivity:BEGIN //////////////////////////////////////////
     int parameterID;
 	Matrix *SHVs;
-	int state;
 // AddingSensitivity:END ///////////////////////////////////////////
 };
 

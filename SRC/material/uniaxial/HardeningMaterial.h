@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2003-03-04 00:48:17 $
+// $Revision: 1.8 $
+// $Date: 2003-03-05 00:53:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.h,v $
 
 #ifndef HardeningMaterial_h
@@ -67,10 +67,7 @@ class HardeningMaterial : public UniaxialMaterial
     int    updateParameter          (int parameterID, Information &info);
 	int    activateParameter        (int parameterID);
 	double getStressSensitivity     (int gradNumber, bool conditional);
-	double getStrainSensitivity     (int gradNumber);
 	double getInitialTangentSensitivity    (int gradNumber);
-	double getDampTangentSensitivity(int gradNumber);
-	double getRhoSensitivity        (int gradNumber);
 	int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
 // AddingSensitivity:END ///////////////////////////////////////////
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-03-04 00:48:17 $
+// $Revision: 1.10 $
+// $Date: 2003-03-05 00:53:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
                                                                         
@@ -64,7 +64,7 @@ Concrete01::Concrete01
 		epscu = -epscu;
 
 	// Initial tangent
-	Ec0 = 2*fpc/epsc0;
+	double Ec0 = 2*fpc/epsc0;
 	Ctangent = Ec0;
 	CunloadSlope = Ec0;
 	Ttangent = Ec0;
@@ -270,6 +270,7 @@ void Concrete01::envelope ()
 	if (Tstrain > epsc0) {
 		double eta = Tstrain/epsc0;
 		Tstress = fpc*(2*eta-eta*eta);
+		double Ec0 = 2.0*fpc/epsc0;
 		Ttangent = Ec0*(1.0-eta);
 	}
 	else if (Tstrain > epscu) {
@@ -299,6 +300,8 @@ void Concrete01::unload ()
 	TendStrain = ratio*epsc0;
 
 	double temp1 = TminStrain - TendStrain;
+
+	double Ec0 = 2.0*fpc/epsc0;
 
 	double temp2 = Tstress/Ec0;
 
@@ -362,6 +365,8 @@ int Concrete01::revertToLastCommit ()
 
 int Concrete01::revertToStart ()
 {
+	double Ec0 = 2.0*fpc/epsc0;
+
    // History variables
    CminStrain = 0.0;
    CunloadSlope = Ec0;
@@ -447,8 +452,6 @@ int Concrete01::recvSelf (int commitTag, Channel& theChannel,
       epsc0 = data(2);
       fpcu = data(3);
       epscu = data(4);
-
-      Ec0 = 2*fpc/epsc0;
 
       // History variables from last converged state
       CminStrain = data(5);
@@ -543,7 +546,7 @@ Concrete01::updateParameter(int parameterID, Information &info)
 		epscu = -epscu;
 
 	// Initial tangent
-	Ec0 = 2*fpc/epsc0;
+	double Ec0 = 2*fpc/epsc0;
 	Ctangent = Ec0;
 	CunloadSlope = Ec0;
 	Ttangent = Ec0;
@@ -561,34 +564,6 @@ Concrete01::activateParameter(int passedParameterID)
 
 	return 0;
 }
-
-double
-Concrete01::getStrainSensitivity(int gradNumber)
-{
-	return 0.0; 
-}
-
-double
-Concrete01::getTangentSensitivity(int gradNumber)
-{
-	return 0.0; 
-}
-
-double
-Concrete01::getDampTangentSensitivity(int gradNumber)
-{
-	return 0.0; 
-}
-
-double
-Concrete01::getRhoSensitivity(int gradNumber)
-{
-	return 0.0; 
-}
-
-
-
-
 
 double
 Concrete01::getStressSensitivity(int gradNumber, bool conditional)

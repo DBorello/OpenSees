@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-03-04 00:48:17 $
+// $Revision: 1.9 $
+// $Date: 2003-03-05 00:53:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.h,v $
                                                                         
                                                                         
@@ -55,7 +55,7 @@ class Concrete01 : public UniaxialMaterial
       double getStrain(void);      
       double getStress(void);
       double getTangent(void);
-      double getInitialTangent(void) {return Ec0;};
+      double getInitialTangent(void) {return 2.0*fpc/epsc0;}
 
       int commitState(void);
       int revertToLastCommit(void);    
@@ -74,10 +74,6 @@ class Concrete01 : public UniaxialMaterial
     int    updateParameter          (int parameterID, Information &info);
 	int    activateParameter        (int parameterID);
 	double getStressSensitivity     (int gradNumber, bool conditional);
-	double getStrainSensitivity     (int gradNumber);
-	double getTangentSensitivity    (int gradNumber);
-	double getDampTangentSensitivity(int gradNumber);
-	double getRhoSensitivity        (int gradNumber);
 	int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
 // AddingSensitivity:END ///////////////////////////////////////////
 
@@ -87,7 +83,6 @@ class Concrete01 : public UniaxialMaterial
       /*** Material Properties ***/
       double fpc;    // Compressive strength
       double epsc0;  // Strain at compressive strength
-	  double Ec0;
       double fpcu;   // Crushing strength
       double epscu;  // Strain at crushing strength
 

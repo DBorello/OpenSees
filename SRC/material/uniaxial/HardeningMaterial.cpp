@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.9 $
-// $Date: 2003-03-04 00:48:17 $
+// $Revision: 1.10 $
+// $Date: 2003-03-05 00:53:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.cpp,v $
 
 // Written: MHS
@@ -355,14 +355,6 @@ HardeningMaterial::activateParameter(int passedParameterID)
 
 
 double
-HardeningMaterial::getStrainSensitivity(int gradNumber)
-{
-	return 0.0;
-}
-
-
-
-double
 HardeningMaterial::getStressSensitivity(int gradNumber, bool conditional)
 {
 
@@ -446,20 +438,6 @@ HardeningMaterial::getInitialTangentSensitivity(int gradNumber)
 	else {
 		return 0.0;
 	}
-}
-
-
-double
-HardeningMaterial::getRhoSensitivity(int gradNumber)
-{
-	return 0.0;
-}
-
-
-double
-HardeningMaterial::getDampTangentSensitivity(int gradNumber)
-{
-	return 0.0;
 }
 
 
