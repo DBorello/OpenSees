@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-10-27 23:45:43 $
+// $Revision: 1.7 $
+// $Date: 2005-03-21 21:35:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/randomNumber/CStdLibRandGenerator.cpp,v $
 
 
@@ -58,7 +58,7 @@ CStdLibRandGenerator::generate_nIndependentUniformNumbers(int n, double lower, d
 {
 	// Initial declarations
 	int j;
-	int randomNumberBetween0And32767;
+	int randomNumberBetween0AndRAND_MAX;
 	double randomNumberBetween0And1;
 	Vector randomArray(n);
 
@@ -69,17 +69,17 @@ CStdLibRandGenerator::generate_nIndependentUniformNumbers(int n, double lower, d
 	}
 	for ( j=0; j<n; j++)
 	{
-		// Generate a number between 0 and 32767
-		randomNumberBetween0And32767 = rand();
+		// Generate a number between 0 and RAND_MAX
+		randomNumberBetween0AndRAND_MAX = rand();
 
 		// Modify it so that the value lies between 0 and 1
-		randomNumberBetween0And1 = (double)randomNumberBetween0And32767/32767.0;
+		randomNumberBetween0And1 = (double)randomNumberBetween0AndRAND_MAX/RAND_MAX;
 
 		// Transform according to uniform distribution
 		randomArray(j) = (upper-lower)*randomNumberBetween0And1 + lower;
 	}
 
-	seed = randomNumberBetween0And32767;
+	seed = randomNumberBetween0AndRAND_MAX;
 	
 	if (generatedNumbers == 0) {
 		generatedNumbers = new Vector(n);
@@ -102,7 +102,7 @@ CStdLibRandGenerator::generate_nIndependentStdNormalNumbers(int n, int seedIn)
 {
 	// Initial declarations
 	int j;
-	int randomNumberBetween0And32767;
+	int randomNumberBetween0AndRAND_MAX;
 	double randomNumberBetween0And1;
 	Vector randomArray(n);
 	NormalRV *aStdNormRV = 0;
@@ -123,11 +123,11 @@ CStdLibRandGenerator::generate_nIndependentStdNormalNumbers(int n, int seedIn)
 	}
 	for ( j=0; j<n; j++)
 	{
-		// Generate a number between 0 and 32767
-		randomNumberBetween0And32767 = rand();
+		// Generate a number between 0 and RAND_MAX
+		randomNumberBetween0AndRAND_MAX = rand();
 
 		// Modify it so that the value lies between 0 and 1
-		randomNumberBetween0And1 = (double)randomNumberBetween0And32767/32767.0;
+		randomNumberBetween0And1 = (double)randomNumberBetween0AndRAND_MAX/RAND_MAX;
 
 
 		// Treat two special cases
@@ -146,7 +146,7 @@ CStdLibRandGenerator::generate_nIndependentStdNormalNumbers(int n, int seedIn)
 		//       from 0 to 1 in fact is equal to x itself.
 		randomArray(j) = aStdNormRV->getInverseCDFvalue(randomNumberBetween0And1); 
 	}
-	seed = randomNumberBetween0And32767;
+	seed = randomNumberBetween0AndRAND_MAX;
 
 	if (generatedNumbers == 0) {
 		generatedNumbers = new Vector(n);
