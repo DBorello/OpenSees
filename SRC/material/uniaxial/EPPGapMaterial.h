@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-11 17:51:41 $
+// $Revision: 1.4 $
+// $Date: 2002-11-04 19:22:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.h,v $
 
 // File: ~/material/EPPGapMaterial.h
@@ -33,6 +33,8 @@
 // of an elastic perfectly plastic (tension only) path dependent uniaxial 
 // material, with an initial gap offset (force-displacement units)
 // For compression only behavior, enter negative gap and ep
+// Damage can accumulate through specification of damage = 1 switch,
+// otherwise damage = 0
 //
 //                  gap ep
 //                  |<>|>|
@@ -53,7 +55,7 @@
 class EPPGapMaterial : public UniaxialMaterial
 {
   public:
-    EPPGapMaterial(int tag, double E, double fy, double gap);    
+    EPPGapMaterial(int tag, double E, double fy, double gap, int damage = 0);
     EPPGapMaterial();  
     ~EPPGapMaterial();
 
@@ -85,6 +87,7 @@ class EPPGapMaterial : public UniaxialMaterial
     double gap;
     double maxElasticYieldStrain;
     double minElasticYieldStrain;
+    int damage;
 
     double trialStress;      // current trial stress
     double trialTangent;     // current trial tangent

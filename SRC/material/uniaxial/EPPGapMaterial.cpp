@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-06-11 17:51:41 $
+// $Revision: 1.7 $
+// $Date: 2002-11-04 19:22:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.cpp,v $
 
 // File: ~/material/EPPGapMaterial.C
@@ -41,10 +41,10 @@
 #include <float.h>
 
 
-EPPGapMaterial::EPPGapMaterial(int tag, double e, double fyl, double gap0)
+EPPGapMaterial::EPPGapMaterial(int tag, double e, double fyl, double gap0, int accum)
 :UniaxialMaterial(tag,MAT_TAG_EPPGap),
  commitStrain(0.0), trialStrain(0.0), E(e), fy(fyl), gap(gap0),
- minElasticYieldStrain(gap0)
+ minElasticYieldStrain(gap0),damage(accum)
 {
 	if (E == 0.0) {
 		g3ErrorHandler->warning("%s -- E is zero, continuing with E = fy/0.002",
@@ -62,11 +62,16 @@ EPPGapMaterial::EPPGapMaterial(int tag, double e, double fyl, double gap0)
 		g3ErrorHandler->warning("%s -- Alternate signs on fy and E encountered, continuing anyway",
 			"EPPGapMaterial::EPPGapMaterial");
 	}
+        
+        if ( (damage < 0) || (damage > 1) ) {
+            g3ErrorHandler->warning("%s -- damage switch must be 0 or 1",
+			"EPPGapMaterial::EPPGapMaterial");
+	}
 }
 
 EPPGapMaterial::EPPGapMaterial()
 :UniaxialMaterial(0,MAT_TAG_EPPGap),
- E(0.0), fy(0.0), gap(0.0), minElasticYieldStrain(0.0)
+ E(0.0), fy(0.0), gap(0.0), minElasticYieldStrain(0.0), damage(0)
 {
 
 }
@@ -146,7 +151,8 @@ EPPGapMaterial::commitState(void)
            maxElasticYieldStrain = trialStrain;
            minElasticYieldStrain = trialStrain-fy/E;
        }
-       else if (trialStrain < minElasticYieldStrain && trialStrain > gap)  {
+       else if (trialStrain < minElasticYieldStrain && trialStrain > gap
+                && damage == 0 )  {
            maxElasticYieldStrain = trialStrain+fy/E;
            minElasticYieldStrain = trialStrain;
        }
@@ -156,7 +162,8 @@ EPPGapMaterial::commitState(void)
            maxElasticYieldStrain = trialStrain;
            minElasticYieldStrain = trialStrain-fy/E;
        }
-       else if (trialStrain > minElasticYieldStrain && trialStrain < gap)  {
+       else if (trialStrain > minElasticYieldStrain && trialStrain < gap
+                && damage == 0 )  {
            maxElasticYieldStrain = trialStrain+fy/E;
            minElasticYieldStrain = trialStrain;
        }
@@ -192,7 +199,7 @@ EPPGapMaterial::revertToStart(void)
 UniaxialMaterial *
 EPPGapMaterial::getCopy(void)
 {
-    EPPGapMaterial *theCopy = new EPPGapMaterial(this->getTag(),E,fy,gap);
+    EPPGapMaterial *theCopy = new EPPGapMaterial(this->getTag(),E,fy,gap,damage);
     theCopy->trialStrain = trialStrain;
     theCopy->maxElasticYieldStrain = maxElasticYieldStrain;
     theCopy->minElasticYieldStrain = minElasticYieldStrain;
@@ -204,7 +211,7 @@ int
 EPPGapMaterial::sendSelf(int cTag, Channel &theChannel)
 {
   int res = 0;
-  static Vector data(7);
+  static Vector data(8);
   data(0) = this->getTag();
   data(1) = commitStrain;
   data(2) = E;
@@ -212,6 +219,7 @@ EPPGapMaterial::sendSelf(int cTag, Channel &theChannel)
   data(4) = gap;
   data(5) = maxElasticYieldStrain;
   data(6) = minElasticYieldStrain;
+  data(7) = damage;
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
@@ -225,7 +233,7 @@ EPPGapMaterial::recvSelf(int cTag, Channel &theChannel,
 				 FEM_ObjectBroker &theBroker)
 {
   int res = 0;
-  static Vector data(7);
+  static Vector data(8);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   if (res < 0)
     cerr << "EPPGapMaterial::recvSelf() - failed to recv data\n";
@@ -238,6 +246,7 @@ EPPGapMaterial::recvSelf(int cTag, Channel &theChannel,
     gap = data(4);
     maxElasticYieldStrain = data(5);
     minElasticYieldStrain = data(6);
+    damage = (int)data(7);
   }
 
   return res;
@@ -250,4 +259,6 @@ EPPGapMaterial::Print(ostream &s, int flag)
     s << "  E: " << E << endl;
     s << "  fy: " << fy << endl;
     s << "  initial gap: " << gap << endl;
+    if (damage == 1)
+        s << "  damage accumulation specified" << endl;
 }
