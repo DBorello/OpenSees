@@ -163,5 +163,4 @@ class PySimple1 : public UniaxialMaterial
 };
 
 
-#endif /PYSIMPLE1_H
-
+#endif

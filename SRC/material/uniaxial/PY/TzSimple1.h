@@ -109,4 +109,4 @@ class TzSimple1 : public UniaxialMaterial
 };
 
 
-#endif /TZSIMPLE1_H
+#endif

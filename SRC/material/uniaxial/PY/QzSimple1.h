@@ -158,4 +158,4 @@ class QzSimple1 : public UniaxialMaterial
 
 };
 
-#endif /QZSIMPLE1_H
+#endif
