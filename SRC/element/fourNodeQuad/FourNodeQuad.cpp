@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-10-18 06:00:45 $
+// $Revision: 1.4 $
+// $Date: 2000-12-13 05:31:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
                                                                         
                                                                         
@@ -52,7 +52,7 @@
 
 #include <G3Globals.h>
 
-Matrix FourNodeQuad::N (2,8);
+Matrix FourNodeQuad::N(2,8);
 
 FourNodeQuad::FourNodeQuad (int tag, int nd1, int nd2, int nd3, int nd4,
 	NDMaterial &m, const char *type, double t,
@@ -300,7 +300,7 @@ FourNodeQuad::getTangentStiff ()
 		}
 	}
 
-	K = K * thickness;
+	K *= thickness;
 
 	return K;
 }
@@ -323,7 +323,7 @@ FourNodeQuad::getMass ()
 	M.Zero();
 
 	if (rho == 0.0)
-		return M;
+	  return M;
 
 	const Matrix &intPt = theQuadRule->getIntegrPointCoords();
 	const Vector &intWt = theQuadRule->getIntegrPointWeights();
@@ -350,7 +350,7 @@ FourNodeQuad::getMass ()
 		}
 	}
 
-	M = M * (thickness * rho);
+	M *= (thickness * rho);
 
 	// Lumped mass ... can be optional
 	for (j = 0; j < 8; j++) {
@@ -491,7 +491,7 @@ FourNodeQuad::getResistingForce ()
 		}
 	}
 
-	P = P * thickness;
+	P *= thickness;
 
 	// Subtract pressure loading from resisting force
 	if (pressure != 0.0) {
@@ -757,6 +757,7 @@ FourNodeQuad::Print (ostream &s, int flag)
 	s << "\tmass density:  " << rho << endl;
 	s << "\tsurface pressure:  " << pressure << endl;
 	s << "\tMaterial: " << theMaterial[0][0]->getType() << endl;
+	theMaterial[0][0]->Print(s,flag);
 }
 
 int
@@ -767,18 +768,18 @@ FourNodeQuad::displaySelf (Renderer &theViewer, int displayMode, float fact)
     // store this information in 4 3d vectors v1 through v4
     const Vector &end1Crd = nd1Ptr->getCrds();
     const Vector &end2Crd = nd2Ptr->getCrds();	
-	const Vector &end3Crd = nd3Ptr->getCrds();	
-	const Vector &end4Crd = nd4Ptr->getCrds();	
+    const Vector &end3Crd = nd3Ptr->getCrds();	
+    const Vector &end4Crd = nd4Ptr->getCrds();	
 
     const Vector &end1Disp = nd1Ptr->getDisp();
     const Vector &end2Disp = nd2Ptr->getDisp();
     const Vector &end3Disp = nd3Ptr->getDisp();
-	const Vector &end4Disp = nd4Ptr->getDisp();
+    const Vector &end4Disp = nd4Ptr->getDisp();
 
-	static Vector v1(3);
-	static Vector v2(3);
-	static Vector v3(3);
-	static Vector v4(3);
+    static Vector v1(3);
+    static Vector v2(3);
+    static Vector v3(3);
+    static Vector v4(3);
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -1007,7 +1008,8 @@ FourNodeQuad::getMaterialIndices(int pointNum, int &i, int &j)
 void
 FourNodeQuad::formNMatrix (double xi, double eta)
 {
-	N.Zero();
+	N(0,1) = N(0,3) = N(0,5) = N(0,7) = 0.0;
+	N(1,0) = N(1,2) = N(1,4) = N(1,6) = 0.0;
 
 	N(0,0) = N(1,1) = 0.25*(1.0-xi)*(1.0-eta);		// N_1
 	N(0,2) = N(1,3) = 0.25*(1.0+xi)*(1.0-eta);		// N_2
@@ -1035,7 +1037,7 @@ FourNodeQuad::setJacobian (double xi, double eta)
 	J(1,1) = -nd1Crds(1)*(1.0-xi) - nd2Crds(1)*(1.0+xi) +
 				nd3Crds(1)*(1.0+xi) + nd4Crds(1)*(1.0-xi);
 
-	J = J * 0.25;
+	J *= 0.25;
 
 	// L = inv(J)
 	L(0,0) = J(1,1);
@@ -1043,14 +1045,12 @@ FourNodeQuad::setJacobian (double xi, double eta)
 	L(0,1) = -J(1,0);
 	L(1,1) = J(0,0);
 
-	L = L / formDetJ (xi, eta);
+	L /= formDetJ (xi, eta);
 }
 
 void
 FourNodeQuad::formBMatrix (double xi, double eta)
 {
-    B.Zero();
-
     double L00 = L(0,0);
     double L10 = L(1,0);
     double L01 = L(0,1);
@@ -1058,13 +1058,21 @@ FourNodeQuad::formBMatrix (double xi, double eta)
 
     // See Cook, Malkus, Plesha p. 169 for the derivation of these terms
     B(0,0) = L00*-0.25*(1.0-eta) + L01*-0.25*(1.0-xi);		// N_1,1
+    B(0,1) = 0.0;
     B(0,2) = L00*0.25*(1.0-eta) + L01*-0.25*(1.0+xi);		// N_2,1
+    B(0,3) = 0.0;
     B(0,4) = L00*0.25*(1.0+eta) + L01*0.25*(1.0+xi);		// N_3,1
+    B(0,5) = 0.0;
     B(0,6) = L00*-0.25*(1.0+eta) + L01*0.25*(1.0-xi);		// N_4,1
-	
+    B(0,7) = 0.0;    
+
+    B(1,0) = 0.0;	
     B(1,1) = L10*-0.25*(1.0-eta) + L11*-0.25*(1.0-xi);	// N_1,2
+    B(1,2) = 0.0;	
     B(1,3) = L10*0.25*(1.0-eta) + L11*-0.25*(1.0+xi);		// N_2,2
+    B(1,4) = 0.0;	
     B(1,5) = L10*0.25*(1.0+eta) + L11*0.25*(1.0+xi);		// N_3,2
+    B(1,6) = 0.0;	
     B(1,7) = L10*-0.25*(1.0+eta) + L11*0.25*(1.0-xi);		// N_4,2
 
     B(2,0) = B(1,1);
@@ -1142,4 +1150,11 @@ FourNodeQuad::setPressureLoadAtNodes(void)
 
 	//pressureLoad = pressureLoad*thickness;
 }
+
+
+
+
+
+
+
 
