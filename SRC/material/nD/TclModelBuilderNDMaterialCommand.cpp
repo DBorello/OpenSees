@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2001-08-04 01:52:54 $
+// $Revision: 1.13 $
+// $Date: 2001-08-07 22:18:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -36,6 +36,8 @@
 #include <J2Plasticity.h>
 #include <BidirectionalMaterial.h>
 
+#include <PlaneStressMaterial.h>
+#include <PlateFiberMaterial.h>
 
 #include <PressureIndependMultiYield.h>
 #include <PressureDependMultiYield.h>
@@ -481,14 +483,79 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	      return TCL_ERROR;	
 	}
 
-	soil = soil->getCopy();
-	theMaterial = new FluidSolidPorousMaterial (tag, param[0], soil, 
+	theMaterial = new FluidSolidPorousMaterial (tag, param[0], *soil, 
 						    param[2], param[3]);
     }	    
     else if (strcmp(argv[1],"Template3Dep") == 0) {
       theMaterial = TclModelBuilder_addTemplate3Dep(clientData, interp, argc, argv, 
 						    theTclBuilder, 2);
     }
+     else if (strcmp(argv[1],"PlaneStressMaterial") == 0 ||
+ 	     strcmp(argv[1],"PlaneStress") == 0) {
+ 	if (argc < 3) {
+ 	    cerr << "WARNING insufficient arguments\n";
+ 	    printCommand(argc,argv);
+ 	    cerr << "Want: nDMaterial PlaneStress tag? matTag?" << endl;
+ 	    return TCL_ERROR;
+ 	}
+ 	
+ 	int tag, matTag;
+ 	
+ 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+ 	    cerr << "WARNING invalid nDMaterial PlaneStress tag" << endl;
+ 	    return TCL_ERROR;		
+ 	}
+ 
+ 	if (Tcl_GetInt (interp, argv[3], &matTag) != TCL_OK) {
+ 	    cerr << "WARNING invalid matTag" << endl;
+ 	    cerr << "PlaneStress: " << matTag << endl;	    	    
+ 	    return TCL_ERROR;
+ 	}	
+ 
+ 	NDMaterial *threeDMaterial = theTclBuilder->getNDMaterial(matTag);
+ 	if (threeDMaterial == 0) {
+ 	    cerr << "WARNING nD material does not exist\n";
+ 	    cerr << "nD material: " << matTag; 
+ 	    cerr << "\nPlaneStress nDMaterial: " << tag << endl;
+ 	    return TCL_ERROR;
+ 	}
+ 
+ 	theMaterial = new PlaneStressMaterial( tag, *threeDMaterial );
+     }	
+ 
+ 
+     else if (strcmp(argv[1],"PlateFiberMaterial") == 0 ||
+ 	     strcmp(argv[1],"PlateFiber") == 0) {
+ 	if (argc < 3) {
+ 	    cerr << "WARNING insufficient arguments\n";
+ 	    printCommand(argc,argv);
+ 	    cerr << "Want: nDMaterial PlateFiber tag? matTag?" << endl;
+ 	    return TCL_ERROR;
+ 	}
+ 	
+ 	int tag, matTag;
+ 	
+ 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+ 	    cerr << "WARNING invalid nDMaterial PlateFiber tag" << endl;
+ 	    return TCL_ERROR;		
+ 	}
+ 
+ 	if (Tcl_GetInt (interp, argv[3], &matTag) != TCL_OK) {
+ 	    cerr << "WARNING invalid matTag" << endl;
+ 	    cerr << "PlateFiber: " << matTag << endl;	    	    
+ 	    return TCL_ERROR;
+ 	}	
+ 
+ 	NDMaterial *threeDMaterial = theTclBuilder->getNDMaterial(matTag);
+ 	if (threeDMaterial == 0) {
+ 	    cerr << "WARNING nD material does not exist\n";
+ 	    cerr << "nD material: " << matTag; 
+ 	    cerr << "\nPlateFiber nDMaterial: " << tag << endl;
+ 	    return TCL_ERROR;
+ 	}
+ 
+ 	theMaterial = new PlateFiberMaterial( tag, *threeDMaterial );
+     }	
     
     else {
 	cerr << "WARNING unknown type of nDMaterial: " << argv[1];
@@ -513,4 +580,5 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     
     return TCL_OK;
 }
+
 
