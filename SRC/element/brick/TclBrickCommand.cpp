@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-08-01 18:13:35 $
+// $Revision: 1.6 $
+// $Date: 2003-08-28 22:51:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/TclBrickCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -123,8 +123,9 @@ TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,  int argc,
     return TCL_ERROR;
   }
   
-  double b1, b2, b3;
-  b1 = 0.0; b2=0.0; b3=0.0;
+  double b1=0.0;
+  double b2=0.0; 
+  double b3=0.0;
   if ((argc-eleArgStart) > 11) {
     if (Tcl_GetDouble(interp, argv[11+eleArgStart], &b1) != TCL_OK) {
        opserr << "WARNING invalid b1\n";
@@ -152,7 +153,7 @@ TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,  int argc,
   // now create the Brick and add it to the Domain
   Brick *theBrick = new Brick(BrickId,Node1,Node2,Node3,Node4,
 			      Node5, Node6, Node7, Node8, *theMaterial,
-			      b1, b2, b3);
+				  b1, b2, b3);
 
   if (theBrick == 0) {
     opserr << "WARNING ran out of memory creating element\n";
@@ -258,9 +259,36 @@ TclModelBuilder_addBBarBrick(ClientData clientData, Tcl_Interp *interp,  int arg
     return TCL_ERROR;
   }
   
+  double b1=0.0;
+  double b2=0.0;
+  double b3=0.0;
+  if ((argc-eleArgStart) > 11) {
+    if (Tcl_GetDouble(interp, argv[11+eleArgStart], &b1) != TCL_OK) {
+       opserr << "WARNING invalid b1\n";
+       opserr << "\nBbarBrick element: " << BbarBrickId << endln;
+       return TCL_ERROR;
+	}
+  }
+
+  if ((argc-eleArgStart) > 12) {
+    if (Tcl_GetDouble(interp, argv[12+eleArgStart], &b2) != TCL_OK) {
+       opserr << "WARNING invalid b2\n";
+       opserr << "\nBbarBrick element: " << BbarBrickId << endln;
+       return TCL_ERROR;
+	}
+  }
+
+  if ((argc-eleArgStart) > 13) {
+    if (Tcl_GetDouble(interp, argv[13+eleArgStart], &b3) != TCL_OK) {
+       opserr << "WARNING invalid b3\n";
+       opserr << "\nBbarBrick element: " << BbarBrickId << endln;
+       return TCL_ERROR;
+	}
+  }
+
   // now create the BbarBrick and add it to the Domain
   BbarBrick *theBbarBrick = new BbarBrick(BbarBrickId,Node1,Node2,Node3,Node4,
-			      Node5, Node6, Node7, Node8, *theMaterial);
+			      Node5, Node6, Node7, Node8, *theMaterial, b1, b2, b3);
 
   if (theBbarBrick == 0) {
     opserr << "WARNING ran out of memory creating element\n";
