@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-10-01 18:21:49 $
+// $Revision: 1.7 $
+// $Date: 2001-10-09 20:27:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -52,14 +52,14 @@ int Matrix::intWork[INT_WORK_AREA];
 //
 
 Matrix::Matrix()
-:numRows(0), numCols(0),dataSize(0),data(0),fromFree(0)
+:numRows(0), numCols(0), dataSize(0), data(0), fromFree(0)
 {
     // does nothing
 }
 
 
 Matrix::Matrix(int nRows,int nCols)
-:numRows(nRows),numCols(nCols),fromFree(0)
+:numRows(nRows), numCols(nCols), dataSize(0), data(0), fromFree(0)
 {
 #ifdef _G3DEBUG
     if (nRows < 0) {
@@ -112,13 +112,12 @@ Matrix::Matrix(double *theData, int row, int col)
 }
 
 Matrix::Matrix(const Matrix &other)
-:fromFree(0)
+:numRows(0), numCols(0), dataSize(0), data(0), fromFree(0)
 {
     numRows = other.numRows;
     numCols = other.numCols;
     dataSize = other.dataSize;
-    data = 0;
-    
+
     if (dataSize != 0) {
       data = new double[dataSize];
       // data = (double *)malloc(dataSize*sizeof(double));

@@ -1,30 +1,8 @@
-/* ****************************************************************** **
-**    OpenSees - Open System for Earthquake Engineering Simulation    **
-**          Pacific Earthquake Engineering Research Center            **
-**                                                                    **
-**                                                                    **
-** (C) Copyright 1999, The Regents of the University of California    **
-** All Rights Reserved.                                               **
-**                                                                    **
-** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
-** file 'COPYRIGHT'  in main directory for information on usage and   **
-** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-**                                                                    **
-** Developed by:                                                      **
-**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-**                                                                    **
-** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-22 06:35:56 $
+// $Revision: 1.3 $
+// $Date: 2001-10-09 20:27:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/f2c.h,v $
                                                                         
-                                                                        
-
-
 /*
 // NOTE: this is a modified file of f2c.h to work with most C++ compilers.
 //       f2c.h for example, defines abs() as a macro, casuing parsing
@@ -245,7 +223,9 @@ typedef doublereal E_f;	/* real function with -R not specified */
 #undef u3b
 #undef u3b2
 #undef u3b5
+#ifndef _KAI
 #undef unix
+#endif
 #undef vax
 #endif
 #endif
@@ -308,9 +288,13 @@ extern integer e_wsli(void);
 extern integer e_wsue(void);
 extern int ef1asc_(ftnint *, ftnlen *, ftnint *, ftnlen *);
 extern integer ef1cmc_(ftnint *, ftnlen *, ftnint *, ftnlen *);
+#ifndef _KAI
 extern double erf(double) throw();
+#endif
 extern double erf_(float *);
+#ifndef _KAI
 extern double erfc(double) throw();
+#endif
 extern double erfc_(float *);
 extern integer f_back(alist *);
 extern integer f_clos(cllist *);
