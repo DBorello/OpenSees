@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:40 $
+// $Revision: 1.4 $
+// $Date: 2004-11-13 08:08:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/SolutionAlgorithm.cpp,v $
                                                                         
                                                                         
@@ -80,11 +80,3 @@ SolutionAlgorithm::record(int cTag)
     return 0;
 }
 
-int  
-SolutionAlgorithm::playback(int cTag)
-{
-    for (int i=0; i<numRecorders; i++)
-	theRecorders[i]->playback(cTag);
-
-    return 0;
-}
