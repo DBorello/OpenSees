@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:44:30 $
+// $Revision: 1.3 $
+// $Date: 2001-05-08 06:52:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber2d.cpp,v $
                                                                         
                                                                         
@@ -96,7 +96,7 @@ UniaxialFiber2d::setTrialFiberStrain(const Vector &vs)
 	// Use the section kinematic matrix to get the fiber strain
     // eps = as * vs;
 	double strain = vs(0) + y*vs(1); // fiber strain
-
+	
 	return theMaterial->setTrialStrain(strain);
 }
 
@@ -111,7 +111,7 @@ UniaxialFiber2d::getFiberStressResultants (void)
     // fs = as^ * area * sigma;
     double df = theMaterial->getStress() * area;
 
-	fs(0) = df;
+    fs(0) = df;
     fs(1) = y * df;
 
     return fs;
@@ -127,12 +127,12 @@ UniaxialFiber2d::getFiberTangentStiffContr(void)
     // tangent stiffness matrix
     // ks = (as^as) * area * Et;
     double value = theMaterial->getTangent() * area;
-	double value_as1 = value*y;
+    double value_as1 = value*y;
     
-	ks(0,0) = value;
+    ks(0,0) = value;
     ks(0,1) = value_as1;
     ks(1,0) = value_as1;
-	ks(1,1) = value_as1 * y;
+    ks(1,1) = value_as1 * y;
 
     return ks;
 }
@@ -144,13 +144,13 @@ UniaxialFiber2d::getFiberSecantStiffContr (void)
     // secant stiffness matrix
     // ks = (as^as) * area * S;
     double value = theMaterial->getSecant() * area;
-	double value_as1 = value*y;
+    double value_as1 = value*y;
 
     ks(0,0) = value;
     ks(0,1) = value_as1;
     ks(1,0) = value_as1;
-	ks(1,1) = value_as1 * y;
-
+    ks(1,1) = value_as1 * y;
+	
     return ks;
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:34:31 $
+// $Revision: 1.3 $
+// $Date: 2001-05-08 06:52:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/Fiber.h,v $
                                                                         
                                                                         
@@ -46,6 +46,7 @@
 class Vector;
 class Matrix;
 class ID;
+class UniaxialMaterial;
 class Information;
 class Response;
 
@@ -58,19 +59,22 @@ class Fiber : public TaggedObject, public MovableObject
     virtual int    setTrialFiberStrain(const Vector &vs)=0;
     virtual Vector &getFiberStressResultants(void) =0;
     virtual Matrix &getFiberTangentStiffContr(void) =0;
+    virtual Matrix &getFiberSecantStiffContr(void) =0;    
 	
     virtual int    commitState(void)=0;
     virtual int    revertToLastCommit(void)=0;    
     virtual int    revertToStart(void)=0;
     
-	virtual Fiber *getCopy(void) = 0;
-	virtual int getOrder(void) = 0;
-	virtual const ID &getType(void) = 0;
+    virtual Fiber *getCopy(void) = 0;
+    virtual int getOrder(void) = 0;
+    virtual const ID &getType(void) = 0;
 
-	virtual Response *setResponse(char **argv, int argc, Information &info);
-	virtual int getResponse(int responseID, Information &info);
+    virtual Response *setResponse(char **argv, int argc, Information &info);
+    virtual int getResponse(int responseID, Information &info);
 
-	virtual void getFiberLocation(double &y, double &z) = 0;
+    virtual void getFiberLocation(double &y, double &z) =0;
+    virtual UniaxialMaterial *getMaterial(void) =0;
+    virtual double getArea(void) =0;
 
   protected:
     

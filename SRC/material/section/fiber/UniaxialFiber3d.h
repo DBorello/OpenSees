@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-18 11:08:31 $
+// $Revision: 1.4 $
+// $Date: 2001-05-08 06:52:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber3d.h,v $
                                                                         
                                                                         
@@ -66,17 +66,19 @@ class UniaxialFiber3d: public Fiber
     int   revertToStart(void);
     
     Fiber *getCopy(void);
-	int getOrder(void);
-	const ID &getType(void);
+    int getOrder(void);
+    const ID &getType(void);
 
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
     void Print(ostream &s, int flag =0);
     
-	Response *setResponse(char **argv, int argc, Information &info);
-	int getResponse(int responseID, Information &info);
+    Response *setResponse(char **argv, int argc, Information &info);
+    int getResponse(int responseID, Information &info);
 
-	void getFiberLocation(double &y, double &z);
+    void getFiberLocation(double &y, double &z);
+    UniaxialMaterial *getMaterial(void) {return theMaterial;};
+    double getArea(void) {return area;};
 
   protected:
     
@@ -87,7 +89,7 @@ class UniaxialFiber3d: public Fiber
 	                            // section deformations into fiber strain	
     static Matrix ks;       // static class wide matrix object for returns
     static Vector fs;	    // static class wide vector object for returns					
-	static ID code;
+    static ID code;
 };
 
 

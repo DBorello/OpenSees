@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:44:30 $
+// $Revision: 1.3 $
+// $Date: 2001-05-08 06:52:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber2d.h,v $
                                                                         
                                                                         
@@ -64,29 +64,31 @@ class UniaxialFiber2d : public Fiber
     int   revertToStart(void);
     
     Fiber *getCopy(void);
-	int getOrder(void);
-	const ID &getType(void);
+    int getOrder(void);
+    const ID &getType(void);
 
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
     void Print(ostream &s, int flag =0);
     
-	Response *setResponse(char **argv, int argc, Information &info);
-	int getResponse(int responseID, Information &info);
+    Response *setResponse(char **argv, int argc, Information &info);
+    int getResponse(int responseID, Information &info);
 	
-	void getFiberLocation(double &y, double &z);
+    void getFiberLocation(double &y, double &z);
+    UniaxialMaterial *getMaterial(void) {return theMaterial;};
+    double getArea(void) {return area;};
 
   protected:
     
   private:
     UniaxialMaterial *theMaterial;   // pointer to a material
     double area;                          // area of the fiber 
-	double y;		// fiber location
+    double y;		// fiber location
 
     static Matrix ks;       // static class wide matrix object for returns
     static Vector fs;	    // static class wide vector object for returns
 
-	static ID code;
+    static ID code;
 };
 
 
