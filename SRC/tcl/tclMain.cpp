@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.9 2002-10-23 20:14:04 jeremic Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.10 2002-10-24 23:36:28 mhscott Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -157,7 +157,7 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
 # ifdef _UNIX
 #include "version.txt"
         fprintf(stderr,"\n %s \n\n\n", version);    
-# endif _UNIX
+# endif
 // Boris Jeremic additions
 
 
