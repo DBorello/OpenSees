@@ -1,4 +1,4 @@
-#Jeremic@ucdavis.edu zhyang@ucdavis.edu
+#jeremic@ucdavis.edu zhyang@ucdavis.edu
 #Example with 8 brick elements and one pile
 # 20Jan2001
 
@@ -189,4 +189,4 @@ analysis Transient
 analyze 375 0.04
 
 
-	
+wipe
