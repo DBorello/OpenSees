@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-07 20:59:50 $
+// $Revision: 1.2 $
+// $Date: 2001-08-07 22:17:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlateFiberMaterial.h,v $
 
 // Ed "C++" Love
@@ -38,8 +38,6 @@
 #include <ID.h> 
 #include <NDMaterial.h>
 
-
-#define ND_TAG_PlateFiberMaterial 4115 
 
 
 class PlateFiberMaterial: public NDMaterial{
