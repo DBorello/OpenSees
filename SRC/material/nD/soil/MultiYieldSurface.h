@@ -1,5 +1,5 @@
-// $Revision: 1.3 $
-// $Date: 2001-09-13 19:11:13 $
+// $Revision: 1.4 $
+// $Date: 2001-10-16 22:34:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/MultiYieldSurface.h,v $
                                                                         
 // Written: ZHY
@@ -30,12 +30,12 @@ public:
   MultiYieldSurface(const Vector & center_init, double size_init, 
                     double plas_modul); 
   ~MultiYieldSurface();
-	const Vector & center() const {return theCenter; }
-	double size() const {return theSize; }
-	double modulus() const {return plastShearModulus; }
+  const Vector & center() const {return theCenter; }
+  double size() const {return theSize; }
+  double modulus() const {return plastShearModulus; }
   void  setCenter(const Vector & newCenter);
   friend ostream & operator<< (ostream & os, const MultiYieldSurface & );  
-	friend istream & operator>> (istream & is, MultiYieldSurface & );
+  friend istream & operator>> (istream & is, MultiYieldSurface & );
 
 protected:
 

@@ -1,5 +1,5 @@
-// $Revision: 1.3 $
-// $Date: 2001-09-13 19:11:14 $
+// $Revision: 1.4 $
+// $Date: 2001-10-16 22:34:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.h,v $
                                                                         
 // Written: ZHY
@@ -35,11 +35,14 @@ public:
   
   ~T2Vector();
 
+  void setData(const Vector &init, int isEngrgStrain =0);
+  void setData(const Vector &deviat, double volume);
+
   const Vector & t2Vector(int isEngrgStrain=0) const; 
   const Vector & deviator(int isEngrgStrain=0) const;
   double volume() const {return theVolume; }
-  const Vector unitT2Vector() const;
-  const Vector unitDeviator() const;
+  const Vector &unitT2Vector() const;
+  const Vector &unitDeviator() const;
   double t2VectorLength() const;
   double deviatorLength() const;
   double octahedralShear(int isEngrgStrain=0) const;
@@ -55,8 +58,9 @@ public:
   double angleBetweenDeviator(const T2Vector &) const; 
 
   int operator == (const T2Vector & a) const;
+  int isZero(void) const;
 
-	int sendSelf(int commitTag, Channel &theChannel);  
+  int sendSelf(int commitTag, Channel &theChannel);  
   int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
 
 protected:

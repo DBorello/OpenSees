@@ -1,5 +1,5 @@
-// $Revision: 1.4 $
-// $Date: 2001-08-26 23:29:02 $
+// $Revision: 1.5 $
+// $Date: 2001-10-16 22:34:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -22,15 +22,15 @@ class PressureIndependMultiYield : public NDMaterial
 public:
      // Initialization constructor
      PressureIndependMultiYield (int tag, 
-			                int nd,
-                      double refShearModul,
-    									double refBulkModul,
-                	    double frictionAng,
-											double peakShearStra,
-											double refPress,
-											double cohesi,
-											double pressDependCoe,
-                      int   numberOfYieldSurf);
+				 int nd,
+				 double refShearModul,
+				 double refBulkModul,
+				 double frictionAng,
+				 double peakShearStra,
+				 double refPress,
+				 double cohesi,
+				 double pressDependCoe,
+				 int   numberOfYieldSurf);
 
      // Default constructor
      PressureIndependMultiYield ();
@@ -44,10 +44,10 @@ public:
      // Sets the values of the trial strain tensor.
      int setTrialStrain (const Vector &strain);
 
-		 // Sets the values of the trial strain and strain rate tensors.
-		 int setTrialStrain(const Vector &v, const Vector &r);
+     // Sets the values of the trial strain and strain rate tensors.
+     int setTrialStrain(const Vector &v, const Vector &r);
 
-		 int setTrialStrainIncr(const Vector &v);
+     int setTrialStrainIncr(const Vector &v);
      int setTrialStrainIncr(const Vector &v, const Vector &r);
 
      // Calculates current tangent stiffness.
@@ -55,11 +55,11 @@ public:
         
      // Calculates the corresponding stress increment (rate), for a given strain increment. 
      const Vector &getStress (void);
-		 const Vector &getStrain (void);
-	   const Vector &getCommittedStress (void);
-	   const Vector &getCommittedStrain (void);
+     const Vector &getStrain (void);
+     const Vector &getCommittedStress (void);
+     const Vector &getCommittedStrain (void);
 
-		 int setTrialStrain (const Tensor &v) {return 0;}
+     int setTrialStrain (const Tensor &v) {return 0;}
      int setTrialStrain (const Tensor &v, const Tensor &r) {return 0;}
      int setTrialStrainIncr (const Tensor &v) {return 0;}
      int setTrialStrainIncr (const Tensor &v, const Tensor &r) {return 0;}
@@ -74,7 +74,7 @@ public:
      // Revert the stress/strain states to the last committed states. Return 0 on success.
      int revertToLastCommit (void);
 
-		 int revertToStart(void) {return 0;}
+     int revertToStart(void) {return 0;}
 
      // Return an exact copy of itself.
      NDMaterial *getCopy (void);
@@ -88,14 +88,14 @@ public:
      // Return ndm.
      int getOrder (void) const ;
 
-		 int sendSelf(int commitTag, Channel &theChannel);  
+     int sendSelf(int commitTag, Channel &theChannel);  
      int recvSelf(int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker);    
+		  FEM_ObjectBroker &theBroker);    
     
-		 int getResponse (int responseID, Information &matInformation);
+     int getResponse (int responseID, Information &matInformation);
      void Print(ostream &s, int flag =0);
 
-		 //void setCurrentStress(const Vector stress) { currentStress=T2Vector(stress); }
+     //void setCurrentStress(const Vector stress) { currentStress=T2Vector(stress); }
      int updateParameter(int responseID, Information &eleInformation);	
 
 protected:
@@ -115,57 +115,57 @@ private:
 	int    numOfSurfaces;
 
 	// internal
-  double residualPress;
+	double residualPress;
 	static Matrix theTangent;  //classwise member
 	int e2p;
-  MultiYieldSurface * theSurfaces; // NOTE: surfaces[0] is not used  
-  MultiYieldSurface * committedSurfaces;  
-  int    activeSurfaceNum;  
+	MultiYieldSurface * theSurfaces; // NOTE: surfaces[0] is not used  
+	MultiYieldSurface * committedSurfaces;  
+	int    activeSurfaceNum;  
 	int    committedActiveSurf;
-  T2Vector currentStress;
-  T2Vector trialStress;
-  T2Vector currentStrain;
-  T2Vector strainRate;
-  static T2Vector subStrainRate;
+	T2Vector currentStress;
+	T2Vector trialStress;
+	T2Vector currentStrain;
+	T2Vector strainRate;
+	static T2Vector subStrainRate;
 	static Vector workV;
 	static Matrix workM;
 
 	void elast2Plast(void);
 	// Called by constructor
-  void setUpSurfaces(void);  
+	void setUpSurfaces(void);  
 
-  double yieldFunc(const T2Vector & stress, const MultiYieldSurface * surfaces, 
-		               int surface_num);
+	double yieldFunc(const T2Vector & stress, const MultiYieldSurface * surfaces, 
+			 int surface_num);
 
-  void deviatorScaling(T2Vector & stress, const MultiYieldSurface * surfaces, 
-		                   int surfaceNum);
+	void deviatorScaling(T2Vector & stress, const MultiYieldSurface * surfaces, 
+			     int surfaceNum);
 
 	void initSurfaceUpdate(void);
 
 	void paramScaling(void);
 
-  // Return num_strain_subincre
-  int setSubStrainRate(void);
+	// Return num_strain_subincre
+	int setSubStrainRate(void);
 
 	int isLoadReversal(void);
 
-	T2Vector getContactStress(void);
+	void getContactStress(T2Vector &contactStress);
 
-  Vector getSurfaceNormal(const T2Vector & stress); 
+	void getSurfaceNormal(const T2Vector & stress, Vector &surfaceNormal); 
 
-  void setTrialStress(T2Vector & stress); 
+	void setTrialStress(T2Vector & stress); 
 
-  double getLoadingFunc(const T2Vector & contact, 
-		                    const Vector & surfaceNormal,int crossedSurface);
+	double getLoadingFunc(const T2Vector & contact, 
+			      const Vector & surfaceNormal,int crossedSurface);
 
-  void stressCorrection(int crossedSurface);
+	void stressCorrection(int crossedSurface);
+	
+	void updateActiveSurface(void);
+	
+	void updateInnerSurface(void);
 
-  void updateActiveSurface(void);
-
-  void updateInnerSurface(void);
-
-  // Return 1 if crossing the active surface; return 0 o/w
-  int  isCrossingNextSurface(void);  
+	// Return 1 if crossing the active surface; return 0 o/w
+	int  isCrossingNextSurface(void);  
 
 };
 
