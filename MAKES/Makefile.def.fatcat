@@ -44,7 +44,7 @@ COMPILER = GCC
 
 
 #DEBUG_MODE = DEBUG, NO_DEBUG
-DEBUG_MODE = DEBUG
+DEBUG_MODE = NO_DEBUG
 
 #RELIABILITY = YES_RELIABILITY, NO_RELIABILITY
 RELIABILITY = NO_RELIABILITY
@@ -249,25 +249,25 @@ else
 RELIABILITY_FLAG =
 endif
 
+# 
+# # debug
+# C++FLAGS        =  -g -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) 
+# CFLAGS          =  -g -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) 
+# FFLAGS          =  -Wall -g
+# LINKFLAGS       =  -g
+# #OpenSees_PROGRAM = $(HOME)/bin/OpenSees.debug
+# OpenSees_PROGRAM = $(HOME)/bin/OpenSees.debug
 
-# debug
-C++FLAGS        =  -g -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) 
-CFLAGS          =  -g -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) 
-FFLAGS          =  -Wall -g
-LINKFLAGS       =  -g
-#OpenSees_PROGRAM = $(HOME)/bin/OpenSees.debug
-OpenSees_PROGRAM = $(HOME)/bin/OpenSees.debug
 
 
-
-# # optimize a bit
-# DEBUG_MODE      =   NO_DEBUG
-# C++FLAGS        =  -O2 -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG) 
-# CFLAGS          =  -O2
-# FFLAGS          =  -O2
-# LINKFLAGS       =  
-# #OpenSees_PROGRAM = $(HOME)/bin/OpenSees.optimized.a.bit
-# OpenSees_PROGRAM = $(HOME)/bin/OpenSees.opt
+# optimize a bit
+DEBUG_MODE      =   NO_DEBUG
+C++FLAGS        =  -O2 -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG) 
+CFLAGS          =  -O2
+FFLAGS          =  -O2
+LINKFLAGS       =  
+#OpenSees_PROGRAM = $(HOME)/bin/OpenSees.optimized.a.bit
+OpenSees_PROGRAM = $(HOME)/bin/OpenSees.opt
 
 
 # # optimize a LOT
