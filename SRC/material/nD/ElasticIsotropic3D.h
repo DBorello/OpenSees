@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $                                                              
-// $Date: 2001-07-21 20:13:13 $                                                                  
+// $Revision: 1.10 $                                                              
+// $Date: 2001-07-25 19:56:34 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $                                                                
                                                                         
                                                                         
@@ -38,7 +38,7 @@
 class ElasticIsotropic3D : public ElasticIsotropicMaterial
 {
   public:
-    ElasticIsotropic3D (int tag, double E, double nu);
+    ElasticIsotropic3D (int tag, double E, double nu, double rho);
     ElasticIsotropic3D ();
     ~ElasticIsotropic3D ();
 
@@ -74,20 +74,11 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     void Print(ostream &s, int flag =0);
     void setInitElasticStiffness(void);
 
-  //Private functions
   private:
-
-
-  protected:
-
-  private:
-    Vector sigma;		// Stress vector
-    Matrix D;			// Elastic constants
+    static Vector sigma;               // Stress vector
+    static Matrix D;                   // Elastic constantsVector sigma;		// Stress vector
     Vector epsilon;		// Strain vector
 
-    //double exp;                 // exponent usually 0.6
-    //double p_ref;               // Reference pressure, usually atmosphere pressure, i.e. 100kPa
-    //double po;                  // Initial pressure of this material point
     stresstensor Stress;	// Stress tensor    
     Tensor Dt;			// Elastic constants tensor
     Tensor Dt_commit;		// last-step Elastic constants tensor
