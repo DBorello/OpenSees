@@ -287,6 +287,9 @@ SOURCE=..\..\..\SRC\reliability\analysis\transformation\XuTransformation.cpp
 SOURCE=..\..\..\SRC\reliability\analysis\transformation\XuTransformation.h
 # End Source File
 # End Group
+# Begin Group "types"
+
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=..\..\..\SRC\reliability\analysis\analysis\FORMAnalysis.cpp
@@ -327,6 +330,7 @@ SOURCE=..\..\..\SRC\reliability\analysis\analysis\SystemAnalysis.cpp
 
 SOURCE=..\..\..\SRC\reliability\analysis\analysis\SystemAnalysis.h
 # End Source File
+# End Group
 # End Group
 # Begin Group "domain"
 
@@ -547,14 +551,6 @@ SOURCE=..\..\..\SRC\reliability\tcl\TclReliabilityBuilder.h
 # Begin Group "FEsensitivity"
 
 # PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\..\SRC\reliability\FEsensitivity\PathDepSensitivityAlgorithm.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\reliability\FEsensitivity\PathDepSensitivityAlgorithm.h
-# End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\reliability\FEsensitivity\SensitivityAlgorithm.cpp
