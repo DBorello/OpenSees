@@ -48,7 +48,26 @@ BkStressLimSurface2D::BkStressLimSurface2D(int tag, int classTag, double min_iso
 
 BkStressLimSurface2D::~BkStressLimSurface2D()
 {
+  if (kinMatX != 0)
+    delete kinMatX;
 
+  if (kinMatY != 0)
+    delete kinMatY;
+
+  if (isoMatXPos != 0)
+    delete isoMatXPos;
+
+  if (isoMatXNeg != 0)
+    delete isoMatXNeg;
+
+  if (isoMatYPos != 0)
+    delete isoMatYPos;
+
+  if (isoMatYNeg != 0)
+    delete isoMatYNeg;
+	
+  if (limSurface != 0)
+    delete limSurface;
 }
 
 int BkStressLimSurface2D::commitState(int status)

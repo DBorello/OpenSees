@@ -37,7 +37,17 @@ direction(dir), defPosX(true), defPosY(true)
 
 PlasticHardening2D::~PlasticHardening2D()
 {
+  if (kpMatXPos != 0)
+    delete kpMatXPos;
 
+  if (kpMatXNeg != 0)
+    delete kpMatXNeg;
+
+  if (kpMatYPos != 0)
+    delete kpMatYPos;
+
+  if (kpMatYNeg != 0)
+    delete kpMatYNeg;
 }
 
 int PlasticHardening2D::commitState(int status)

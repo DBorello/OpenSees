@@ -81,6 +81,9 @@ YieldSurface_BC::~YieldSurface_BC()
 {
     if(T!=0) delete T;
     if(S!=0) delete S;
+
+    if (hModel != 0)
+      delete hModel;
 }
 
 int YieldSurface_BC::commitState(Vector &force)

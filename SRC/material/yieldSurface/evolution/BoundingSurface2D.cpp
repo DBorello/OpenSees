@@ -25,7 +25,14 @@ BoundingSurface2D::BoundingSurface2D(int tag, int classTag, double min_iso_facto
 
 BoundingSurface2D::~BoundingSurface2D()
 {
+  if (kpMatX != 0)
+    delete kpMatX;
 
+  if (kpMatY != 0)
+    delete kpMatY;
+
+  if (boundSurface != 0)
+    delete boundSurface;
 }
 
 int BoundingSurface2D::commitState(int status)
