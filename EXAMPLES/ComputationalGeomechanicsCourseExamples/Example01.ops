@@ -1,0 +1,98 @@
+#!/home/jeremic/bin/OpenSees.debub
+# jeremic@ucdavis.edu
+# 08 April 2004
+# solid model, 8 node brick
+
+
+
+# ################################
+# create the modelbuilder
+# #################################
+
+model BasicBuilder -ndm 3 -ndf 3
+
+##set displayMode "displayON"
+###set displayMode "displayOFF"
+
+set g 9.81
+
+
+# ################################
+# build the model
+# #################################
+
+# nodes
+node 1 1.0 1.0 0.0
+node 2 0.0 1.0 0.0
+node 3 0.0 0.0 0.0
+node 4 1.0 0.0 0.0
+node 5 1.0 1.0 1.0
+node 6 0.0 1.0 1.0
+node 7 0.0 0.0 1.0
+node 8 1.0 0.0 1.0
+
+
+# displacement boundary conditions
+fix 1   0 0 1
+fix 2   1 0 1
+fix 3   1 1 1
+fix 4   0 1 1
+#fix 5 1 0 1
+#fix 6 1 0 1
+#fix 7 1 0 1
+#fix 8 1 0 1
+
+# elastic material
+nDMaterial ElasticIsotropic3D 1 100 0.2 1.8
+
+#            tag     8 nodes      matID  bforce1 bforce2 bforce3   massdensity
+element Brick8N  1  5 6 7 8 1 2 3 4   1      0.0     0.0    -9.81    1.8
+#element stdBrick  1  5 6 7 8 1 2 3 4   1      0.0     0.0    -9.81    1.8
+
+pattern Plain 1 Linear {
+   load  5      0    0  -2.50
+   load  6      0    0  -2.50
+   load  7      0    0  -2.50
+   load  8      0    0  -2.50
+}
+
+
+# ################################
+# create the analysis
+# #################################
+
+set lf1 1.0
+
+system UmfPack
+#constraints Penalty 1e9 1e9
+#test NormDispIncr 1.0e-8 30 1
+#test NormUnbalance 1.0e-8 30 1
+integrator LoadControl $lf1 1 $lf1 $lf1
+algorithm Linear
+#algorithm Newton
+numberer RCM
+analysis Static
+
+
+
+
+# ################################
+# perform the analysis
+# #################################
+
+analyze 1 1.0
+
+
+print node 1
+print node 2
+print node 3
+print node 4
+print node 5
+print node 6
+print node 7
+print node 8
+
+
+print -ele 1
+
+wipe
