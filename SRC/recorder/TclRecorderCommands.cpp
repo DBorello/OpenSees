@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-12-13 00:08:57 $
+// $Revision: 1.12 $
+// $Date: 2002-12-13 21:29:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -50,7 +50,6 @@
 #include <EquiSolnAlgo.h>
 
 // recorders
-#include <MaxNodeDispRecorder.h>
 #include <NodeRecorder.h>
 #include <EnvelopeNodeRecorder.h>
 #include <EnvelopeElementRecorder.h>
@@ -63,6 +62,7 @@
 #include <ElementIter.h>
 #include <Node.h>
 #include <Element.h>
+#include <MeshRegion.h>
 
 #include <EquiSolnAlgo.h>
 
@@ -201,6 +201,30 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    loc += 3;
 	  } 
 
+	  else if (strcmp(argv[loc],"-region") == 0) {
+	    // allow user to specif elements via a region
+
+	    if (argc < loc+2) {
+	      cerr << "WARNING recorder Element .. -region tag?  .. - no region specified\n";
+	      return TCL_ERROR;
+	    }
+	    int tag;
+	    if (Tcl_GetInt(interp, argv[loc+1], &tag) != TCL_OK) {
+	      cerr << "WARNING recorder Element -region tag? - invalid tag " << argv[loc+1] << endl;
+	      return TCL_ERROR;
+	    }      
+	    MeshRegion *theRegion = theDomain.getRegion(tag);
+	    if (theRegion == 0) {
+	      cerr << "WARNING recorder Element -region " << tag << " - region does not exist" << endl;
+	      return TCL_OK;
+	    }      
+	    const ID &eleRegion = theRegion->getElements();
+	    for (int i=0; i<eleRegion.Size(); i++)
+	      eleIDs[numEle++] = eleRegion(i);
+
+	    loc += 2;
+	  } 
+
 	  else if (strcmp(argv[loc],"-time") == 0) {
 	    // allow user to specify const load
 	    echoTime = true;
@@ -247,30 +271,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 						       argc-eleData, dT, fileName);
     }
     
-    // a MaxNodeDisp Recorder
-    else if (strcmp(argv[1],"MaxNodeDisp") == 0) {
-	int dof;
-	if (argc < 5) {
-	    cerr << "WARNING recorder MaxNodeDisp <dof> node <list nodes>";
-	    return TCL_ERROR;
-	}    
-	if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK)	
-	    return TCL_ERROR;	
-	
-	dof--; // subtract 1 for interpreter to C indexing
-
-	int numNodes = argc -4;
-	ID theNodes(numNodes);
-	for (int i=0; i<numNodes; i++) {
-	    int node;
-	    if (Tcl_GetInt(interp, argv[i+4], &node) != TCL_OK)	
-		return TCL_ERROR;		  
-	    theNodes(i) = node;
-	}
-	
-	(*theRecorder) = new MaxNodeDispRecorder(dof, theNodes, theDomain);
-    }
-
     // create a recorder to write nodal displacement quantities to a file
     else if ((strcmp(argv[1],"Node") == 0) || (strcmp(argv[1],"EnvelopeNode") == 0) 
 	     || (strcmp(argv[1],"NodeEnvelope") == 0)) {	
@@ -390,6 +390,30 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  pos += 3;
 	}
 
+	else if (strcmp(argv[pos],"-region") == 0) {
+	  // allow user to specif elements via a region
+	  
+	  if (argc < pos+2) {
+	    cerr << "WARNING recorder Node .. -region tag?  .. - no region specified\n";
+	    return TCL_ERROR;
+	  }
+	  int tag;
+	  if (Tcl_GetInt(interp, argv[pos+1], &tag) != TCL_OK) {
+	    cerr << "WARNING recorder Node -region tag? - invalid tag " << argv[pos+1] << endl;
+	    return TCL_ERROR;
+	  }      
+	  MeshRegion *theRegion = theDomain.getRegion(tag);
+	  if (theRegion == 0) {
+	    cerr << "WARNING recorder Node -region " << tag << " - region does not exist" << endl;
+	    return TCL_OK;
+	  }      
+	  const ID &nodeRegion = theRegion->getNodes();
+	  for (int i=0; i<nodeRegion.Size(); i++)
+	    theNodes[numNodes++] = nodeRegion(i);
+	  
+	  pos += 2;
+	} 
+	
 	else if (strcmp(argv[pos],"-dof") == 0) {
 	  pos++;
 	  int numDOF = 0;
@@ -411,7 +435,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       if (responseID == 0) {
 	responseID  = argv[pos];
       }
-
 
       if (numNodes == 0) {
 	NodeIter &theNodeIter = theDomain.getNodes();
