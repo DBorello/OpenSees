@@ -57,7 +57,7 @@ set ES1  "-Leq  1.0"
 set ET1  "-Linear  0.0"
 
 # initial stress
-set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
+set stressp "-0.10 0 0  0 -0.10 0  0 0 -0.10"
 
 # EPState
 #__________E________Eo____v___rho______________alpha___k
@@ -92,7 +92,7 @@ recorder Node node_iso.out disp -time -node 5 -dof 3
 
 system UmfPack
 constraints Penalty 1e12 1e12
-test NormDispIncr 1.0e-8 30 0
+test NormDispIncr 1.0e-8 30 1
 integrator LoadControl $lf1 1 $lf1 $lf1
 algorithm Newton
 numberer RCM
@@ -137,7 +137,7 @@ set ndz -0.0001
 
 system UmfPack
 constraints Penalty 1e12 1e12
-test NormDispIncr 1.0e-08 30  0
+test NormDispIncr 1.0e-08 30  1
 integrator DisplacementControl 5 3 $ndz 1 $ndz $ndz
 algorithm Newton
 numberer RCM
