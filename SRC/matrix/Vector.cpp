@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-23 20:41:18 $
+// $Revision: 1.5 $
+// $Date: 2001-09-10 16:35:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -247,7 +247,9 @@ Vector::Normalize(void)
 
   length = 1.0/length;
   for (int j=0; j<sz; j++)
-    theData[j] *= length;  
+    theData[j] *= length;
+
+  return 0;
 }
 
 int
