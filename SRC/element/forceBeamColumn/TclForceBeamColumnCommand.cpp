@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:32:52 $
+// $Revision: 1.7 $
+// $Date: 2003-03-21 01:10:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -168,7 +168,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	opserr << "\nforceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
-  }
+    }
 
     
     SectionForceDeformation **sections = new SectionForceDeformation *[nIP];
@@ -271,7 +271,6 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       sections[i] = theSection;
     
     LobattoBeamIntegration beamIntegr;
-    Element *theElement = 0;
 
     if (ndm == 2)
       theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
