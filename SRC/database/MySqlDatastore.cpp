@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:54 $
+// $Revision: 1.6 $
+// $Date: 2004-01-29 23:00:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/MySqlDatastore.cpp,v $
 
 #include <MySqlDatastore.h>
@@ -44,7 +44,7 @@ MySqlDatastore::MySqlDatastore(const char *projectName,
   mysql_init(&mysql);
 
   // connect to the server
-  if (mysql_real_connect(&mysql, NULL, NULL, NULL, NULL, 0, "/var/lib/mysql/mysql.sock", 0) == NULL) {
+  if (mysql_real_connect(&mysql, NULL, NULL, NULL, NULL, 0, "/tmp/mysql.sock", 0) == NULL) {
 
       opserr << "MySqlDatastore::MySqlDatastore() - could not connect to server\n";
       opserr << mysql_error(&mysql) << endln;
@@ -65,6 +65,50 @@ MySqlDatastore::MySqlDatastore(const char *projectName,
     }
   }
 
+}
+
+
+
+MySqlDatastore::MySqlDatastore(const char *databaseName,
+			       const char *host,
+			       const char *user,
+			       const char *passwd,
+			       unsigned int port,
+			       const char *socket,
+			       unsigned int clientFlag,
+			       Domain &theDomain, 
+			       FEM_ObjectBroker &theObjectBroker,
+			       int run)
+  :FE_Datastore(theDomain, theObjectBroker), dbTag(0), dbRun(run), 
+   connection(true), query(0), sizeQuery(0), sizeColumnString(0)
+{
+  // initialise the mysql structure
+  mysql_init(&mysql);
+
+  // connect to the server & database
+  if (mysql_real_connect(&mysql, host, user, passwd, databaseName, port, socket, clientFlag) == NULL) {
+
+  // connect to the server & see if can link to database, or create a new one if one does not exist
+    if (mysql_real_connect(&mysql, host, user, passwd, NULL, port, socket, clientFlag) == NULL) {
+      opserr << "MySqlDatastore::MySqlDatastore() - could not connect to server\n";
+      opserr << mysql_error(&mysql) << endln;
+      connection = false;
+
+    } else {
+
+      // link to the database, 
+      if (mysql_select_db(&mysql, databaseName) != 0) {
+	
+	// if no database exists, try creating one
+	if (this->createOpenSeesDatabase(databaseName) != 0) {
+	  connection = false;
+	  mysql_close(&mysql);
+	  opserr << "MySqlDatastore::MySqlDatastore() - could not open the database\n";
+	  opserr << mysql_error(&mysql) << endln;      
+	}
+      }
+    }
+  }
 }
 
 
@@ -617,11 +661,27 @@ MySqlDatastore::insertData(const char *tableName, char *columns[], int commitTag
 
   // execute the query
   if (mysql_query(&mysql, query) != 0) {
-    opserr << "MySqlDatastore::insertData() - failed to insert the data";
-    opserr << endln << mysql_error(&mysql) << endln;          
-    opserr << "SQL query: " << query << endln;          
-    return -3;
-  } 
+
+
+    //
+    // if INSERT fails we reformulate query and try an UPDATE
+    //
+
+    // formulate the query
+    sprintf(query, "UPDATE %s SET %s=%f", tableName, columns[0], data(0));
+    char *p = query + strlen(query);
+    for (int i=1; i<data.Size(); i++)
+      p += sprintf(p, ", %s=%f ", columns[i], data(i));  
+    sprintf(p, " WHERE dbRun=%d AND commitTag=%d", dbTag, commitTag);  
+
+    // invoke the query on the database
+    if (mysql_query(&mysql, query) != 0) {    
+      opserr << "MySqlDatastore::insertData() - failed to send the data to MySQL database";
+      opserr << p;
+      opserr << endln << mysql_error(&mysql) << endln;          
+      return -3;      
+    }
+  }
 
   return 0;
 }
