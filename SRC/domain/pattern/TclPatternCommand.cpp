@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2002-11-05 06:18:07 $
+// $Revision: 1.7 $
+// $Date: 2002-11-14 16:01:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclPatternCommand.cpp,v $
 
 // File: ~/domain/pattern/TclPatternComand.C
@@ -30,9 +30,8 @@
 // Modified: fmk 11/00 - removed TimeSeries stuff from file, now an external procedure
 // Revision: B
 //
-//  Nov.  2002:  Zhaohui  Yang and Boris Jeremic added Plastic Bowl loading (aka
-//  Domain Reduction Method) commands
-//
+//  Modified:  Nov.    2002,  Zhaohui  Yang and Boris Jeremic added Plastic Bowl
+//  loading (aka Domain Reduction Method) commands
 //
 // Description: This file contains the function invoked when the user invokes
 // the Pattern command in the interpreter. It is invoked by the
@@ -107,20 +106,20 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
 
       if (thePattern == 0 || theSeries == 0) {
 
-	  if (thePattern == 0) {
-	      cerr << "WARNING - out of memory creating LoadPattern ";
-	      cerr << patternID << endl;
-	  } else {
-	      cerr << "WARNING - problem creating TimeSeries for LoadPattern ";
-	      cerr << patternID << endl;
-	  }
+    if (thePattern == 0) {
+        cerr << "WARNING - out of memory creating LoadPattern ";
+        cerr << patternID << endl;
+    } else {
+        cerr << "WARNING - problem creating TimeSeries for LoadPattern ";
+        cerr << patternID << endl;
+    }
 
-	  // clean up the memory and return an error
-	  if (thePattern != 0)
-	      delete thePattern;
-	  if (theSeries != 0)
-	      delete theSeries;
-	  return TCL_ERROR;
+    // clean up the memory and return an error
+    if (thePattern != 0)
+        delete thePattern;
+    if (theSeries != 0)
+        delete theSeries;
+    return TCL_ERROR;
       }
 
       thePattern->setTimeSeries(theSeries);
@@ -129,26 +128,26 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
 
   else if (strcmp(argv[1],"UniformExcitation") == 0) {
 
-	int dir;
-	char inputDir;
-	inputDir = argv[3][0];
-	switch (inputDir)  {
+  int dir;
+  char inputDir;
+  inputDir = argv[3][0];
+  switch (inputDir)  {
 
-		case 'X': case 'x': case '1': // Global X
-			dir = 0;
-			break;
-		case 'Y': case 'y': case '2': // Global Y
-			dir = 1;
-			break;
-		case 'Z': case 'z': case '3': // Global Z
-			dir = 2;
-			break;
-		default:
-			cerr << "WARNING cannot read direction for excitation \n";
-			cerr << "UniformExcitation " << patternID << " dir factor" << endl;
-			return TCL_ERROR;
-			break;
-	}
+    case 'X': case 'x': case '1': // Global X
+      dir = 0;
+      break;
+    case 'Y': case 'y': case '2': // Global Y
+      dir = 1;
+      break;
+    case 'Z': case 'z': case '3': // Global Z
+      dir = 2;
+      break;
+    default:
+      cerr << "WARNING cannot read direction for excitation \n";
+      cerr << "UniformExcitation " << patternID << " dir factor" << endl;
+      return TCL_ERROR;
+      break;
+  }
 
 
 
@@ -162,136 +161,136 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
       bool doneSeries = false;
       while (currentArg < argc-1 && doneSeries == false) {
 
-	if ((strcmp(argv[currentArg],"-vel0") == 0) ||
-	    (strcmp(argv[currentArg],"-initialVel") == 0)) {
+  if ((strcmp(argv[currentArg],"-vel0") == 0) ||
+      (strcmp(argv[currentArg],"-initialVel") == 0)) {
 
-	  currentArg++;
-	  if ((currentArg < argc) &&
-	      (Tcl_GetDouble(interp, argv[currentArg], &vel0) != TCL_OK)) {
-	    cerr << "WARNING invalid vel0: pattern type UniformExciation\n";
-	    return TCL_ERROR;
-	  }
+    currentArg++;
+    if ((currentArg < argc) &&
+        (Tcl_GetDouble(interp, argv[currentArg], &vel0) != TCL_OK)) {
+      cerr << "WARNING invalid vel0: pattern type UniformExciation\n";
+      return TCL_ERROR;
+    }
 
-	  currentArg++;
-	}
+    currentArg++;
+  }
 
 
-	else if ((strcmp(argv[currentArg],"-accel") == 0) ||
-		 (strcmp(argv[currentArg],"-acceleration") == 0)) {
+  else if ((strcmp(argv[currentArg],"-accel") == 0) ||
+     (strcmp(argv[currentArg],"-acceleration") == 0)) {
 
-	  currentArg++;
-	  accelSeries = TclSeriesCommand(clientData, interp, argv[currentArg]);
-	  if (accelSeries == 0) {
-	    cerr << "WARNING invalid accel series: pattern UniformExcitation -accel <args>\n";
-	    return TCL_ERROR;
-	  }
+    currentArg++;
+    accelSeries = TclSeriesCommand(clientData, interp, argv[currentArg]);
+    if (accelSeries == 0) {
+      cerr << "WARNING invalid accel series: pattern UniformExcitation -accel <args>\n";
+      return TCL_ERROR;
+    }
 
-	  currentArg++;
+    currentArg++;
 
-	} else if ((strcmp(argv[currentArg],"-vel") == 0) ||
-		   (strcmp(argv[currentArg],"-velocity") == 0)) {
+  } else if ((strcmp(argv[currentArg],"-vel") == 0) ||
+       (strcmp(argv[currentArg],"-velocity") == 0)) {
 
-	  currentArg++;
-	  velSeries = TclSeriesCommand(clientData, interp, argv[currentArg]);
+    currentArg++;
+    velSeries = TclSeriesCommand(clientData, interp, argv[currentArg]);
 
-	  if (velSeries == 0) {
-	    cerr << "WARNING invalid vel series: " << argv[currentArg];
-	    cerr << " pattern UniformExcitation -vel {series}\n";
-	    return TCL_ERROR;
-	  }
+    if (velSeries == 0) {
+      cerr << "WARNING invalid vel series: " << argv[currentArg];
+      cerr << " pattern UniformExcitation -vel {series}\n";
+      return TCL_ERROR;
+    }
 
-	  currentArg++;
+    currentArg++;
 
-	} else if ((strcmp(argv[currentArg],"-disp") == 0) ||
-		   (strcmp(argv[currentArg],"-displacement") == 0)) {
+  } else if ((strcmp(argv[currentArg],"-disp") == 0) ||
+       (strcmp(argv[currentArg],"-displacement") == 0)) {
 
-	  currentArg++;
-	  dispSeries = TclSeriesCommand(clientData, interp, argv[currentArg]);
+    currentArg++;
+    dispSeries = TclSeriesCommand(clientData, interp, argv[currentArg]);
 
-	  if (dispSeries == 0) {
-	    cerr << "WARNING invalid vel series: " << argv[currentArg];
-	    cerr << " pattern UniformExcitation -vel {series}\n";
-	    return TCL_ERROR;
-	  }
+    if (dispSeries == 0) {
+      cerr << "WARNING invalid vel series: " << argv[currentArg];
+      cerr << " pattern UniformExcitation -vel {series}\n";
+      return TCL_ERROR;
+    }
 
-	  currentArg++;
-	} else if ((strcmp(argv[currentArg],"-int") == 0) ||
-		   (strcmp(argv[currentArg],"-integrator") == 0)) {
+    currentArg++;
+  } else if ((strcmp(argv[currentArg],"-int") == 0) ||
+       (strcmp(argv[currentArg],"-integrator") == 0)) {
 
-	  currentArg++;
-	  seriesIntegrator = TclSeriesIntegratorCommand(clientData, interp,
-							argv[currentArg]);
-	  if (seriesIntegrator == 0) {
-	    cerr << "WARNING invalid series integrator: " << argv[currentArg];
-	    cerr << " - pattern UniformExcitation -int {Series Integrator}\n";
-	    return TCL_ERROR;
-	  }
-	  currentArg++;
-	}
+    currentArg++;
+    seriesIntegrator = TclSeriesIntegratorCommand(clientData, interp,
+              argv[currentArg]);
+    if (seriesIntegrator == 0) {
+      cerr << "WARNING invalid series integrator: " << argv[currentArg];
+      cerr << " - pattern UniformExcitation -int {Series Integrator}\n";
+      return TCL_ERROR;
+    }
+    currentArg++;
+  }
 
-	else
-	  doneSeries = true;
+  else
+    doneSeries = true;
       }
 
       if (dispSeries == 0 && velSeries == 0 && accelSeries == 0) {
-	  cerr << "WARNING invalid series, want - pattern UniformExcitation";
-	  cerr << "-disp {dispSeries} -vel {velSeries} -accel {accelSeries} ";
-	  cerr << "-int {Series Integrator}\n";
-	  return TCL_ERROR;
+    cerr << "WARNING invalid series, want - pattern UniformExcitation";
+    cerr << "-disp {dispSeries} -vel {velSeries} -accel {accelSeries} ";
+    cerr << "-int {Series Integrator}\n";
+    return TCL_ERROR;
       }
 
       GroundMotion *theMotion = new GroundMotion(dispSeries, velSeries,
-						 accelSeries, seriesIntegrator);
+             accelSeries, seriesIntegrator);
 
       if (theMotion == 0) {
-	  cerr << "WARNING ran out of memory creating ground motion - pattern UniformExcitation ";
-	  cerr << patternID << endl;
+    cerr << "WARNING ran out of memory creating ground motion - pattern UniformExcitation ";
+    cerr << patternID << endl;
 
-	  return TCL_ERROR;
+    return TCL_ERROR;
       }
 
-	// create the UniformExcitation Pattern
-	thePattern = new UniformExcitation(*theMotion, dir, patternID, vel0);
+  // create the UniformExcitation Pattern
+  thePattern = new UniformExcitation(*theMotion, dir, patternID, vel0);
 
-	if (thePattern == 0) {
-	    cerr << "WARNING ran out of memory creating load pattern - pattern UniformExcitation ";
-	    cerr << patternID << endl;
+  if (thePattern == 0) {
+      cerr << "WARNING ran out of memory creating load pattern - pattern UniformExcitation ";
+      cerr << patternID << endl;
 
-	    // clean up memory allocated up to this point and return an error
-	    if (theMotion != 0)
-		delete theMotion;
+      // clean up memory allocated up to this point and return an error
+      if (theMotion != 0)
+    delete theMotion;
 
-	    return TCL_ERROR;
-	}
+      return TCL_ERROR;
+  }
 
-	// Added by MHS to prevent call to Tcl_Eval at end of this function
-	commandEndMarker = currentArg;
+  // Added by MHS to prevent call to Tcl_Eval at end of this function
+  commandEndMarker = currentArg;
   }
 
   else if (strcmp(argv[1],"Uniform") == 0) {
 
-	// First search for file name and time step
-	int numInputs = argc;
-	char *accelFileName = 0;
-	double dt = 0.0;
-	for (int i = 5; i < argc; i++)
-	{
-	  if (strcmp (argv[i],"-accel") == 0 && i+2 < argc)
-	    {
-			// Read the input file name
+  // First search for file name and time step
+  int numInputs = argc;
+  char *accelFileName = 0;
+  double dt = 0.0;
+  for (int i = 5; i < argc; i++)
+  {
+    if (strcmp (argv[i],"-accel") == 0 && i+2 < argc)
+      {
+      // Read the input file name
             accelFileName = argv[i+1];
 
-			// Read the time interval
+      // Read the time interval
             if (Tcl_GetDouble(interp, argv[i+2], &dt) != TCL_OK)
-			{
-			  cerr << "WARNING problem reading ground motion "
-				   << "time interval - pattern UniformExcitation: "
-		           << patternID << endl;
-		      return TCL_ERROR;
-			}
-			numInputs -= 3;
+      {
+        cerr << "WARNING problem reading ground motion "
+           << "time interval - pattern UniformExcitation: "
+               << patternID << endl;
+          return TCL_ERROR;
+      }
+      numInputs -= 3;
 
-		}
+    }
     }
 
     if (numInputs < 5) {
@@ -300,168 +299,254 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
       return TCL_ERROR;
     }
 
-	int dir;
+  int dir;
     char inputDir;
     inputDir = argv[3][0];
-	switch (inputDir)
-	{
-		case 'X': case 'x': case '1': // Global X
-			dir = 0;
-			break;
-		case 'Y': case 'y': case '2': // Global Y
-			dir = 1;
-			break;
-		case 'Z': case 'z': case '3': // Global Z
-			dir = 2;
-			break;
-		default:
-			cerr << "WARNING cannot read direction for excitation \n";
-			cerr << "UniformExcitation " << patternID << " dir factor" << endl;
-			return TCL_ERROR;
-			break;
-	}
+  switch (inputDir)
+  {
+    case 'X': case 'x': case '1': // Global X
+      dir = 0;
+      break;
+    case 'Y': case 'y': case '2': // Global Y
+      dir = 1;
+      break;
+    case 'Z': case 'z': case '3': // Global Z
+      dir = 2;
+      break;
+    default:
+      cerr << "WARNING cannot read direction for excitation \n";
+      cerr << "UniformExcitation " << patternID << " dir factor" << endl;
+      return TCL_ERROR;
+      break;
+  }
 
-	double factor;
-	if (Tcl_GetDouble(interp, argv[4], &factor) != TCL_OK) {
-	  cerr << "WARNING insufficient number of arguments - want: pattern ";
-	  cerr << "UniformExcitation " << patternID << " dir factor\n";
-	  return TCL_ERROR;
-	}
+  double factor;
+  if (Tcl_GetDouble(interp, argv[4], &factor) != TCL_OK) {
+    cerr << "WARNING insufficient number of arguments - want: pattern ";
+    cerr << "UniformExcitation " << patternID << " dir factor\n";
+    return TCL_ERROR;
+  }
 
     GroundMotionRecord *theMotion;
 
 
     // read in the ground motion
-	if (accelFileName == 0)
-	{
-		cerr << "WARNING -- No ground motion data provided\n";
-		cerr << "UniformExcitation tag: " << patternID << endl;
-		return TCL_ERROR;
-	}
+  if (accelFileName == 0)
+  {
+    cerr << "WARNING -- No ground motion data provided\n";
+    cerr << "UniformExcitation tag: " << patternID << endl;
+    return TCL_ERROR;
+  }
 
     theMotion = new GroundMotionRecord(accelFileName, dt, factor);
 
-	if (theMotion == 0) {
-	  cerr << "WARNING ran out of memory creating ground motion - pattern UniformExcitation ";
-	  cerr << patternID << endl;
+  if (theMotion == 0) {
+    cerr << "WARNING ran out of memory creating ground motion - pattern UniformExcitation ";
+    cerr << patternID << endl;
 
-	  return TCL_ERROR;
+    return TCL_ERROR;
     }
 
     // create the UniformExcitation Pattern
     thePattern = new UniformExcitation(*theMotion, dir, patternID);
 
     if (thePattern == 0) {
-	  cerr << "WARNING ran out of memory creating load pattern - pattern UniformExcitation ";
-	  cerr << patternID << endl;
+    cerr << "WARNING ran out of memory creating load pattern - pattern UniformExcitation ";
+    cerr << patternID << endl;
 
-	  // clean up memory allocated up to this point and return an error
-	  if (theMotion != 0)
-	    delete theMotion;
+    // clean up memory allocated up to this point and return an error
+    if (theMotion != 0)
+      delete theMotion;
 
-	  return TCL_ERROR;
+    return TCL_ERROR;
     }
   }
 
   else if ((strcmp(argv[1],"MultipleSupportExcitation") == 0) ||
-	   (strcmp(argv[1],"MultipleSupport") == 0) ||
-	   (strcmp(argv[1],"MultiSupport") == 0)) {
+     (strcmp(argv[1],"MultipleSupport") == 0) ||
+     (strcmp(argv[1],"MultiSupport") == 0)) {
 
       theTclMultiSupportPattern = new MultiSupportPattern(patternID);
       thePattern = theTclMultiSupportPattern;
 
       if (thePattern == 0) {
-	  cerr << "WARNING ran out of memory creating load pattern - pattern MultipleSupportExcitation ";
-	  cerr << patternID << endl;
+    cerr << "WARNING ran out of memory creating load pattern - pattern MultipleSupportExcitation ";
+    cerr << patternID << endl;
 
       }
       commandEndMarker = 2;
   }
 
-//BJ:  Added Joey Yang and Boris Jeremic at UC Davis Nov2002
-//BJ:  Added Joey Yang and Boris Jeremic at UC Davis Nov2002
-//BJ:  Added Joey Yang and Boris Jeremic at UC Davis Nov2002
-//BJ:  Added Joey Yang and Boris Jeremic at UC Davis Nov2002
-//BJ:  Added Joey Yang and Boris Jeremic at UC Davis Nov2002
-  else if (strcmp(argv[1],"PBowlLoading") == 0)
-    {
+//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
+//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
+//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
+//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
+//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
+//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
+//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
+//Added Joey Yang and Boris Jeremic at UC Davis 10/31/2002
+  else if (strcmp(argv[1],"PBowlLoading") == 0) {
 
-// First search for file name and time step
+      // First search for file name and time step
       char *PBEleFileName = 0;
       char *accelFileName = 0;
       char *displFileName = 0;
       double dt = 0.02;
       double cf = 1.00;
+      double xp = 0.0;
+      double xm = 0.0;
+      double yp = 0.0;
+      double ym = 0.0;
+      double zp = 0.0;
+      double zm = 0.0;
+
       int currentArg = 3;
 
       while (currentArg < argc-1)
-        {
-          if ((strcmp(argv[currentArg],"-pbele") == 0) ||
-              (strcmp(argv[currentArg],"-PBEle") == 0))
-            {
+      {
+    if ((strcmp(argv[currentArg],"-pbele") == 0) ||
+        (strcmp(argv[currentArg],"-PBEle") == 0)) {
 
-              currentArg++;
-              PBEleFileName = argv[currentArg];
-              currentArg++;
-            }
-          else if ((strcmp(argv[currentArg],"-acce") == 0) ||
-                   (strcmp(argv[currentArg],"-acceleration") == 0))
-            {
-
-              currentArg++;
-              accelFileName = argv[currentArg];
-              currentArg++;
-            }
-          else if ((strcmp(argv[currentArg],"-disp") == 0) ||
-                   (strcmp(argv[currentArg],"-displacement") == 0))
-            {
-
-              currentArg++;
-              displFileName = argv[currentArg];
-              currentArg++;
-            }
-          else if (strcmp(argv[currentArg],"-dt") == 0)
-            {
-
-              currentArg++;
-              if (Tcl_GetDouble(interp, argv[currentArg], &dt) != TCL_OK)
-                {
-                  cerr << "WARNING problem reading ground motion "
-                  << "time interval - pattern PBowlLoading: "
-                  << patternID << endl;
-                  return TCL_ERROR;
-                }
-              currentArg++;
-            }
-          else if ((strcmp(argv[currentArg],"-factor") == 0)||
-                   (strcmp(argv[currentArg],"-Factor") == 0 ))
-            {
-
-              currentArg++;
-                if (Tcl_GetDouble(interp, argv[currentArg], &cf) != TCL_OK)
-                  {
-                    cerr << "WARNING problem reading ground motion "
-                    << "load factor - pattern PBowlLoading: "
-                    << patternID << endl;
-                    return TCL_ERROR;
-                  }
-              currentArg++;
-            }
-        } //End of while loop
-
-      thePattern = new PBowlLoading(patternID, PBEleFileName, displFileName, accelFileName, dt, cf);
-      if (thePattern == 0)
-        {
-          cerr << "WARNING ran out of memory creating load pattern - pattern PBowlLoading ";
-          cerr << patternID << endl;
-        }
-//BJ: Added by Joey Yang to prevent call to Tcl_Eval at end of this function
-//BJ: Added by Joey Yang to prevent call to Tcl_Eval at end of this function
-//BJ: Added by Joey Yang to prevent call to Tcl_Eval at end of this function
-//BJ: Added by Joey Yang to prevent call to Tcl_Eval at end of this function
-//BJ: Added by Joey Yang to prevent call to Tcl_Eval at end of this function
-      commandEndMarker = currentArg;
+      currentArg++;
+      PBEleFileName = argv[currentArg];
+      currentArg++;
     }
+    else if ((strcmp(argv[currentArg],"-acce") == 0) ||
+        (strcmp(argv[currentArg],"-acceleration") == 0)) {
+
+      currentArg++;
+      accelFileName = argv[currentArg];
+      currentArg++;
+    }
+    else if ((strcmp(argv[currentArg],"-disp") == 0) ||
+         (strcmp(argv[currentArg],"-displacement") == 0)) {
+
+      currentArg++;
+      displFileName = argv[currentArg];
+      currentArg++;
+    }
+    else if (strcmp(argv[currentArg],"-dt") == 0)  {
+
+      currentArg++;
+          if (Tcl_GetDouble(interp, argv[currentArg], &dt) != TCL_OK)
+      {
+        cerr << "WARNING problem reading ground motion "
+           << "time interval - pattern PBowlLoading: "
+               << patternID << endl;
+        return TCL_ERROR;
+      }
+      currentArg++;
+    }
+    else if ((strcmp(argv[currentArg],"-factor") == 0)||
+       (strcmp(argv[currentArg],"-Factor") == 0 )) {
+
+      currentArg++;
+          if (Tcl_GetDouble(interp, argv[currentArg], &cf) != TCL_OK)
+      {
+        cerr << "WARNING problem reading ground motion "
+           << "load factor - pattern PBowlLoading: "
+               << patternID << endl;
+        return TCL_ERROR;
+      }
+      currentArg++;
+    }
+
+    else if ((strcmp(argv[currentArg],"-xminus") == 0)||
+       (strcmp(argv[currentArg],"-xm"   ) == 0 )) {
+
+      currentArg++;
+          if (Tcl_GetDouble(interp, argv[currentArg], &xm) != TCL_OK)
+      {
+        cerr << "WARNING problem reading ground motion "
+           << "Left x  - pattern PBowlLoading: "
+               << patternID << endl;
+        return TCL_ERROR;
+      }
+      currentArg++;
+    }
+
+    else if ((strcmp(argv[currentArg],"-xplus") == 0)||
+       (strcmp(argv[currentArg],"-xp"   ) == 0 )) {
+
+      currentArg++;
+          if (Tcl_GetDouble(interp, argv[currentArg], &xp) != TCL_OK)
+      {
+        cerr << "WARNING problem reading ground motion "
+           << "Right x  - pattern PBowlLoading: "
+               << patternID << endl;
+        return TCL_ERROR;
+      }
+      currentArg++;
+    }
+
+    else if ((strcmp(argv[currentArg],"-yminus") == 0)||
+       (strcmp(argv[currentArg],"-ym"   ) == 0 )) {
+
+      currentArg++;
+          if (Tcl_GetDouble(interp, argv[currentArg], &ym) != TCL_OK)
+      {
+        cerr << "WARNING problem reading ground motion "
+           << "Left y  - pattern PBowlLoading: "
+               << patternID << endl;
+        return TCL_ERROR;
+      }
+      currentArg++;
+    }
+
+    else if ((strcmp(argv[currentArg],"-yplus") == 0)||
+       (strcmp(argv[currentArg],"-yp"   ) == 0 )) {
+
+      currentArg++;
+          if (Tcl_GetDouble(interp, argv[currentArg], &yp) != TCL_OK)
+      {
+        cerr << "WARNING problem reading ground motion "
+           << "Right y  - pattern PBowlLoading: "
+               << patternID << endl;
+        return TCL_ERROR;
+      }
+      currentArg++;
+    }
+
+    else if ((strcmp(argv[currentArg],"-zminus") == 0)||
+       (strcmp(argv[currentArg],"-zm"   ) == 0 )) {
+
+      currentArg++;
+          if (Tcl_GetDouble(interp, argv[currentArg], &zm) != TCL_OK)
+      {
+        cerr << "WARNING problem reading ground motion "
+           << "Left z  - pattern PBowlLoading: "
+               << patternID << endl;
+        return TCL_ERROR;
+      }
+      currentArg++;
+    }
+
+    else if ((strcmp(argv[currentArg],"-zplus") == 0)||
+       (strcmp(argv[currentArg],"-zp"   ) == 0 )) {
+
+      currentArg++;
+          if (Tcl_GetDouble(interp, argv[currentArg], &zp) != TCL_OK)
+      {
+        cerr << "WARNING problem reading ground motion "
+           << "Right y  - pattern PBowlLoading: "
+               << patternID << endl;
+        return TCL_ERROR;
+      }
+      currentArg++;
+    }
+
+      } //End of while loop
+
+      //test cout << "Tcl parameters dt " << dt << " xp " << xp << " xm " << xm << " yp " << yp << " ym " << ym << " zm " << zm << " done...\n";
+      thePattern = new PBowlLoading(patternID, PBEleFileName, displFileName, accelFileName, dt, cf, xp, xm, yp, ym, zp, zm);
+      if (thePattern == 0) {
+      cerr << "WARNING ran out of memory creating load pattern - pattern PBowlLoading ";
+      cerr << patternID << endl;
+
+      }
+// Added by Joey Yang to prevent call to Tcl_Eval at end of this function
+      commandEndMarker = currentArg;
+  }
 
   else {
       cerr << "WARNING unknown pattern type " << argv[1];
@@ -482,8 +567,8 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
   // use TCL_Eval to evaluate the list of load and single point constraint commands
   if (commandEndMarker < (argc-1)) {
     if (Tcl_Eval(interp, argv[argc-1]) != TCL_OK) {
-	cerr << "WARNING - error reading load pattern information in { } ";
-	return TCL_ERROR;
+  cerr << "WARNING - error reading load pattern information in { } ";
+  return TCL_ERROR;
     }
   }
 
