@@ -14,6 +14,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/beamWithHinges; $(MAKE);
 	@$(CD) $(FE)/element/8nbrick; $(MAKE);
 	@$(CD) $(FE)/element/20nbrick; $(MAKE);
+	@$(CD) $(FE)/element/upU; $(MAKE);
 	@$(CD) $(FE)/element/shell; $(MAKE);
 	@$(CD) $(FE)/element/brick; $(MAKE);
 	@$(CD) $(FE)/element/dispBeamColumn; $(MAKE);
@@ -37,6 +38,7 @@ spotless: clean
 	@$(CD) $(FE)/element/beamWithHinges; $(MAKE) wipe;
 	@$(CD) $(FE)/element/8nbrick; $(MAKE) wipe;
 	@$(CD) $(FE)/element/20nbrick; $(MAKE) wipe;
+	@$(CD) $(FE)/element/upU; $(MAKE) wipe;
 	@$(CD) $(FE)/element/shell; $(MAKE) wipe;
 	@$(CD) $(FE)/element/brick; $(MAKE) wipe;
 	@$(CD) $(FE)/element/dispBeamColumn; $(MAKE) wipe;
