@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.10 2002-10-24 23:36:28 mhscott Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.11 2002-11-15 22:45:31 jeremic Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -128,9 +128,9 @@ char *TclGetStartupScriptFileName()
  *----------------------------------------------------------------------
  */
 
-// Boris Jeremic {
-#include <fstream.h>
-// } Boris Jeremic
+//// Boris Jeremic {
+//#include <fstream.h>
+//// } Boris Jeremic
 
 
 void
@@ -155,8 +155,8 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
     /* fmk - end of modifications for OpenSees */
 // Boris Jeremic additions
 # ifdef _UNIX
-#include "version.txt"
-        fprintf(stderr,"\n %s \n\n\n", version);    
+   #include "version.txt"
+   fprintf(stderr,"\n %s \n\n\n", version);    
 # endif
 // Boris Jeremic additions
 
@@ -286,6 +286,10 @@ g3TclMain(int argc, char **argv, Tcl_AppInitProc * appInitProc)
 		
 // Boris Jeremic: this is the entry point!!!!!
 	 code = Tcl_EvalObjEx(interp, promptCmdPtr, 0);
+
+
+
+
 
 
 		inChannel = Tcl_GetStdChannel(TCL_STDIN);
