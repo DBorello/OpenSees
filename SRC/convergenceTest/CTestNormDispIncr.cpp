@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:58:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestNormDispIncr.cpp,v $
                                                                         
                                                                         
@@ -32,7 +32,8 @@
 
 CTestNormDispIncr::CTestNormDispIncr()	    	
 :ConvergenceTest(CONVERGENCE_TEST_CTestNormDispIncr),
- theSOE(0), tol(0), maxNumIter(0), currentIter(0), printFlag(0), totalNumIter(1)
+ theSOE(0), tol(0), maxNumIter(0), currentIter(0), printFlag(0), 
+ norms(1)
 {
     
 }
@@ -40,7 +41,7 @@ CTestNormDispIncr::CTestNormDispIncr()
 CTestNormDispIncr::CTestNormDispIncr(double theTol, int maxIter, int printIt)
 :ConvergenceTest(CONVERGENCE_TEST_CTestNormDispIncr),
  theSOE(0), tol(theTol), maxNumIter(maxIter), currentIter(0), printFlag(printIt),
- totalNumIter(1)
+ norms(maxIter)
 {
     tol = theTol;
 }
@@ -61,7 +62,7 @@ CTestNormDispIncr::setEquiSolnAlgo(EquiSolnAlgo &theAlgo)
 {
     theSOE = theAlgo.getLinearSOEptr();
     if (theSOE == 0) {
-	cerr << "WARNING: CTestNormDisp::setEquiSolnAlgo - no SOE\n";	
+	cerr << "WARNING: CTestNormDisp::setEquiSolnAlgo() - no SOE\n";	
 	return -1;
     }
     else
@@ -72,55 +73,71 @@ CTestNormDispIncr::setEquiSolnAlgo(EquiSolnAlgo &theAlgo)
 int
 CTestNormDispIncr::test(void)
 {
-    // this should not happen if the rturn from start() is checked
-    if (theSOE == 0)
-       return -2;
+  // check to ensure the SOE has been set - this should not happen if the 
+  // return from start() is checked
+  if (theSOE == 0)
+    return -2;
 
-    const Vector &x = theSOE->getX();
-	
-    double norm = x.Norm();
-// cerr << "called norm: " << norm << "Vector: " << x << endl;
-    // print the data if required
-    if (printFlag == 1) {
-      cerr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
-      cerr << " current Norm: " << norm << " (max permissable: " << tol << ")\n";
-    } 
+  // check to ensure the algo does invoke start() - this is needed otherwise
+  // may never get convergence later on in analysis!
+  if (currentIter == 0) {
+    cerr << "WARNING: CTestNormDisp::test() - start() was never invoked.\n";	
+    return -2;
+  }
 
-    if (norm <= tol){ // the algorithm converged
-      if (printFlag != 0) {
-	if (printFlag == 1) 
-	  cerr << endl;
-	else if (printFlag == 2) {
-	  cerr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
-	  cerr << " current Norm: " << norm << " (max permissable: " << tol << ")\n";
-	}
-	else if (printFlag == 3) {
-	  cerr << "\t CTestNormDispIncr::test() - #iteration: " << currentIter;
-	  cerr << "(total #iteration: " << totalNumIter << ") current Norm: ";
-	  cerr << norm << " (max permissable: " << tol << ")\n";
-	} 
+  // get the X vector & determine it's norm & save the value in norms vector
+  const Vector &x = theSOE->getX();
+  double norm = x.Norm();
+  if (currentIter <= maxNumIter) 
+    norms(currentIter-1) = norm;
 
-	  
+
+  // print the data if required
+  if (printFlag == 1) {
+    cerr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
+    cerr << " current Norm: " << norm << " (max permissable: " << tol << ")\n";
+  } 
+
+  //
+  // check if the algorithm converged
+  //
+
+  // if converged - print & return ok
+  if (norm <= tol){ 
+
+    // do some printing first
+    if (printFlag != 0) {
+      if (printFlag == 1) 
+	cerr << endl;
+      else if (printFlag == 2) {
+	cerr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
+	cerr << " current Norm: " << norm << " (max permissable: " << tol << ")\n";
       }
-      return currentIter;
     }
 
-	else if (printFlag == 5 && currentIter >= maxNumIter) {
-		cerr << "WARNING: CTestDispIncr::test() - failed to converge but GOING ON\n";
-		return currentIter;
-	}
-    else if (currentIter >= maxNumIter) { // failes to converge
-	cerr << "WARNING: CTestDispIncr::test() - failed to converge \n";
-	cerr << "after: " << currentIter << " iterations\n";	
-	currentIter++;    
-	return -2;
-    } 
+    // return the number of times test has been called
+    return currentIter;
+  }
 
-    else { // has not yet converged
-      currentIter++;    
-      totalNumIter++;    
-      return -1;
-    }
+  // algo failed to converged after specified number of iterations - but RETURN OK
+  else if (printFlag == 5 && currentIter >= maxNumIter) {
+    cerr << "WARNING: CTestDispIncr::test() - failed to converge but GOING ON\n";
+    return currentIter;
+  }
+
+  // algo failed to converged after specified number of iterations - return FAILURE -2
+  else if (currentIter >= maxNumIter) { // failes to converge
+    cerr << "WARNING: CTestDispIncr::test() - failed to converge \n";
+    cerr << "after: " << currentIter << " iterations\n";	
+    currentIter++;    
+    return -2;
+  } 
+
+  // algo not yet converged - increment counter and return -1
+  else { // has not yet converged
+    currentIter++;    
+    return -1;
+  }
 }
 
 
@@ -133,10 +150,38 @@ CTestNormDispIncr::start(void)
     }
 
     // set iteration count = 1
+    norms.Zero();
     currentIter = 1;
     return 0;
 }
 
+
+int 
+CTestNormDispIncr::getNumTests()
+{
+  return currentIter;
+}
+
+
+int 
+CTestNormDispIncr::getMaxNumTests(void)
+{
+  return maxNumIter;
+}
+
+double 
+CTestNormDispIncr::getRatioNumToMax(void)
+{
+    double div = maxNumIter;
+    return currentIter/div;
+}
+
+
+const Vector &
+CTestNormDispIncr::getNorms() 
+{
+  return norms;
+}
 
 int 
 CTestNormDispIncr::sendSelf(int cTag, Channel &theChannel)
@@ -168,6 +213,7 @@ CTestNormDispIncr::recvSelf(int cTag, Channel &theChannel,
   else {
       tol = x(0);
       maxNumIter = x(1);
+      norms.resize(maxNumIter);
   }
   return res;
 }

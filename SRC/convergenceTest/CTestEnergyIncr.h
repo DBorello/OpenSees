@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:58:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestEnergyIncr.h,v $
                                                                         
                                                                         
@@ -56,6 +56,11 @@ class CTestEnergyIncr: public ConvergenceTest
     int test(void);
     int start(void);
     
+    int getNumTests(void);
+    int getMaxNumTests(void);        
+    double getRatioNumToMax(void);                
+    const Vector &getNorms(void);    
+    
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);    
@@ -64,11 +69,13 @@ class CTestEnergyIncr: public ConvergenceTest
 
   private:
     LinearSOE *theSOE;
-    double tol;
+    double tol;         // the tol on the energy used to test for convergence
 
-    int maxNumIter;
-    int currentIter;
-    int printFlag;
+    int maxNumIter;     // max number of iterations
+    int currentIter;    // number of times test() has been invokes since last start()
+    int printFlag;      // a flag indicating if to print on test
+    
+    Vector norms;       // vector to hold the norms
 };
 
 #endif

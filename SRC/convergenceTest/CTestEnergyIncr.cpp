@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:58:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestEnergyIncr.cpp,v $
                                                                         
                                                                         
@@ -42,14 +42,16 @@
 
 CTestEnergyIncr::CTestEnergyIncr()	    	
 :ConvergenceTest(CONVERGENCE_TEST_CTestEnergyIncr),
- theSOE(0), tol(0), maxNumIter(0), currentIter(0), printFlag(0)
+ theSOE(0), tol(0), maxNumIter(0), currentIter(0), printFlag(0),
+ norms(1)
 {
     
 }
 
 CTestEnergyIncr::CTestEnergyIncr(double theTol, int maxIter, int printIt)
 :ConvergenceTest(CONVERGENCE_TEST_CTestEnergyIncr),
- theSOE(0), tol(theTol), maxNumIter(maxIter), currentIter(0),printFlag(printIt)
+ theSOE(0), tol(theTol), maxNumIter(maxIter), currentIter(0),printFlag(printIt),
+ norms(maxNumIter)
 {
 
 }
@@ -81,44 +83,75 @@ CTestEnergyIncr::setEquiSolnAlgo(EquiSolnAlgo &theAlgo)
 int
 CTestEnergyIncr::test(void)
 {
-    if (theSOE == 0) {
-	return -2;
-    }
-    
-    const Vector &b = theSOE->getB();
-    const Vector &x = theSOE->getX();    
-    double product = x ^ b;
-    if (product < 0.0)
-	product *= -0.5;
-    else
-	product *= 0.5;
+  // check to ensure the SOE has been set - this should not happen if the 
+  // return from start() is checked
+  if (theSOE == 0)
+    return -2;
 
-    // print the data if required
-    if (printFlag == 1) {
-      cerr << "CTestEnergyIncr::test() - iteration: " << currentIter;
-      cerr << " current Product: " << product << " (max permissable: " << tol << ")\n";
-    }
+  // check to ensure the algo does invoke start() - this is needed otherwise
+  // may never get convergence later on in analysis!
+  if (currentIter == 0) {
+    cerr << "WARNING: CTestEnergyIncr::test() - start() was never invoked.\n";	
+    return -2;
+  }
 
-    if (product <= tol) {
-      if (printFlag != 0) {
-	if (printFlag == 1) 
-	  cerr << endl;
-	else if (printFlag == 2) {
-	  cerr << "CTestEnergyIncr::test() - iteration: " << currentIter;
-	  cerr << " last incr: " << product << " (max permissable: " << tol << ")\n";
-	}
+
+  // determine the energy & save value in norms vector
+  const Vector &b = theSOE->getB();
+  const Vector &x = theSOE->getX();    
+  double product = x ^ b;
+  if (product < 0.0)
+    product *= -0.5;
+  else
+    product *= 0.5;
+
+  if (currentIter <= maxNumIter) 
+    norms(currentIter-1) = product;
+
+  // print the data if required
+  if (printFlag == 1) {
+    cerr << "CTestEnergyIncr::test() - iteration: " << currentIter;
+    cerr << " current Product: " << product << " (max permissable: " << tol << ")\n";
+  }
+
+
+  //
+  // check if the algorithm converged
+  //
+
+  // if converged - print & return ok
+  if (product <= tol) {
+
+    // do some printing first
+    if (printFlag != 0) {
+      if (printFlag == 1) 
+	cerr << endl;
+      else if (printFlag == 2) {
+	cerr << "CTestEnergyIncr::test() - iteration: " << currentIter;
+	cerr << " last incr: " << product << " (max permissable: " << tol << ")\n";
       }
-      return currentIter;
     }
 
-    else if (currentIter >= maxNumIter) { // >= in case algorithm does not check
-	cerr << "WARNING: CTestEnergyIncr::test() - failed to converge \n";
-	cerr << "after: " << currentIter << " iterations\n";	
-	currentIter++;    
-	return -2;
-    } 
+    // return the number of times test has been called - SUCCESSFULL
+    return currentIter;
+  }
 
-    else {
+  // algo failed to converged after specified number of iterations - but RETURN OK
+  else if (printFlag == 5 && currentIter >= maxNumIter) {
+    cerr << "WARNING: CTestEnergyIncr::test() - failed to converge but GOING ON\n";
+    return currentIter;
+  }
+
+  // algo failed to converged after specified number of iterations - return FAILURE -2
+  else if (currentIter >= maxNumIter) { // >= in case algorithm does not check
+    cerr << "WARNING: CTestEnergyIncr::test() - failed to converge \n";
+    cerr << "after: " << currentIter << " iterations\n";	
+    currentIter++;    
+    return -2;
+  } 
+
+  // algo not yet converged - increment counter and return -1
+  else {
       currentIter++;    
       return -1;
     }
@@ -133,8 +166,37 @@ CTestEnergyIncr::start(void)
     }
 
     currentIter = 1;
+    norms.Zero();
     return 0;
 }
+
+
+int 
+CTestEnergyIncr::getNumTests(void)
+{
+  return currentIter;
+}
+
+int 
+CTestEnergyIncr::getMaxNumTests(void)
+{
+  return maxNumIter;
+}
+
+double 
+CTestEnergyIncr::getRatioNumToMax(void)
+{
+    double div = maxNumIter;
+    return currentIter/div;
+}
+
+
+const Vector &
+CTestEnergyIncr::getNorms(void) 
+{
+  return norms;
+}
+
 
 int 
 CTestEnergyIncr::sendSelf(int cTag, Channel &theChannel)
@@ -143,6 +205,7 @@ CTestEnergyIncr::sendSelf(int cTag, Channel &theChannel)
   Vector x(2);
   x(0) = tol;
   x(1) = maxNumIter;
+
   
   res = theChannel.sendVector(this->getDbTag(), cTag, x);
   if (res < 0) 
@@ -167,6 +230,7 @@ CTestEnergyIncr::recvSelf(int cTag, Channel &theChannel,
   else {
       tol = x(0);
       maxNumIter = x(1);
+      norms.resize(maxNumIter);
   }
     
   return res;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:58:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestNormUnbalance.cpp,v $
                                                                         
                                                                         
@@ -32,14 +32,15 @@
 
 CTestNormUnbalance::CTestNormUnbalance()	    	
 :ConvergenceTest(CONVERGENCE_TEST_CTestNormUnbalance),
- theSOE(0), tol(0.0), maxNumIter(0), currentIter(0), printFlag(0)
+ theSOE(0), tol(0.0), maxNumIter(0), currentIter(0), printFlag(0), norms(1)
 {
     
 }
 
 CTestNormUnbalance::CTestNormUnbalance(double theTol, int maxIter, int printIt)
 :ConvergenceTest(CONVERGENCE_TEST_CTestNormUnbalance),
- theSOE(0), tol(theTol), maxNumIter(maxIter), currentIter(0), printFlag(printIt)
+ theSOE(0), tol(theTol), maxNumIter(maxIter), currentIter(0), printFlag(printIt),
+ norms(maxNumIter)
 {
 
 }
@@ -71,52 +72,114 @@ CTestNormUnbalance::setEquiSolnAlgo(EquiSolnAlgo &theAlgo)
 int
 CTestNormUnbalance::test(void)
 {
-    const Vector &x = theSOE->getB();
-    double norm = x.Norm();
+  // check to ensure the SOE has been set - this should not happen if the 
+  // return from start() is checked
+  if (theSOE == 0)
+    return -2;
 
-    // print the data if required
-    if (printFlag == 1) {
-      cerr << "\t CTestNormUnbalance::test() - iteration: " << currentIter;
-      cerr << " current Norm: " << norm << " (max permissable: " << tol << ")\n";
-    }
+  // check to ensure the algo does invoke start() - this is needed otherwise
+  // may never get convergence later on in analysis!
+  if (currentIter == 0) {
+    cerr << "WARNING: CTestNormDisp::test() - start() was never invoked.\n";	
+    return -2;
+  }
 
-    if (norm <= tol) { // the algorithm converged
-      if (printFlag != 0) {
-	if (printFlag == 1) 
-	  cerr << endl;
-	else if (printFlag == 2) {
-	  cerr << "\t CTestNormUnbalance::test() - iteration: " << currentIter;
-	  cerr << " last Norm: " << norm << " (max permissable: " << tol << ")\n";
-	}
+
+  // get the B vector & determine it's norm & save the value in norms vector
+  const Vector &x = theSOE->getB();
+  double norm = x.Norm();
+  if (currentIter <= maxNumIter) 
+    norms(currentIter-1) = norm;
+
+  // print the data if required
+  if (printFlag == 1) {
+    cerr << "\t CTestNormUnbalance::test() - iteration: " << currentIter;
+    cerr << " current Norm: " << norm << " (max permissable: " << tol << ")\n";
+  }
+
+  //
+  // check if the algorithm converged
+  //
+
+  // if converged - print & return ok
+  if (norm <= tol) { // the algorithm converged
+    
+    // do some printing first
+    if (printFlag != 0) {
+      if (printFlag == 1) 
+	cerr << endl;
+      else if (printFlag == 2) {
+	cerr << "\t CTestNormUnbalance::test() - iteration: " << currentIter;
+	cerr << " last Norm: " << norm << " (max permissable: " << tol << ")\n";
       }
-      return currentIter;
-    } 
-
-    else if (currentIter >= maxNumIter) { // the algorithm failed to converge
-      cerr << "WARNING: CTestNormUnbalance::test() - failed to converge \n";
-      cerr << "after: " << currentIter << " iterations\n";	
-      currentIter++;  // we increment in case analysis does not check for convergence
-      return -2;
-    } 
-
-    else { // the algorithm has not converged yet
-      currentIter++;    
-      return -1;
     }
+
+    // return the number of times test has been called
+    return currentIter;
+  } 
+
+  // algo failed to converged after specified number of iterations - but RETURN OK
+  else if (printFlag == 5 && currentIter >= maxNumIter) {
+    cerr << "WARNING: CTestUnbalanceIncr::test() - failed to converge but GOING ON\n";
+    return currentIter;
+  }
+
+  // algo failed to converged after specified number of iterations - return FAILURE -2
+  else if (currentIter >= maxNumIter) { // the algorithm failed to converge
+    cerr << "WARNING: CTestNormUnbalance::test() - failed to converge \n";
+    cerr << "after: " << currentIter << " iterations\n";	
+    currentIter++;  // we increment in case analysis does not check for convergence
+    return -2;
+  } 
+
+  // algo not yet converged - increment counter and return -1
+  else { // the algorithm has not converged yet
+    currentIter++;    
+    return -1;
+  }
 }
 
 
 int
 CTestNormUnbalance::start(void)
 {
-    currentIter = 1;
     if (theSOE == 0) {
 	cerr << "WARNING: CTestNormUnbalance::test() - no SOE returning true\n";
 	return -1;
     }
-    
+
+    // set iteration count = 1
+    norms.Zero();
+    currentIter = 1;    
     return 0;
 }
+
+
+int 
+CTestNormUnbalance::getNumTests()
+{
+  return currentIter;
+}
+
+int 
+CTestNormUnbalance::getMaxNumTests(void)
+{
+  return maxNumIter;
+}
+
+double 
+CTestNormUnbalance::getRatioNumToMax(void)
+{
+    double div = maxNumIter;
+    return currentIter/div;
+}
+
+const Vector &
+CTestNormUnbalance::getNorms() 
+{
+  return norms;
+}
+
 
 int 
 CTestNormUnbalance::sendSelf(int cTag, Channel &theChannel)
@@ -148,6 +211,7 @@ CTestNormUnbalance::recvSelf(int cTag, Channel &theChannel,
   else {
       tol = x(0);
       maxNumIter = x(1);
+      norms.resize(maxNumIter);
   }
   return res;
 }

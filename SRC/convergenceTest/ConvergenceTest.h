@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:58:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/ConvergenceTest.h,v $
                                                                         
                                                                         
@@ -37,9 +37,11 @@
 // to test the convergence of an algorithm. 
 
 #include <MovableObject.h>
+#include <Vector.h>
 #include <bool.h>
 
 class EquiSolnAlgo;
+
 
 class ConvergenceTest: public MovableObject
 {
@@ -51,7 +53,13 @@ class ConvergenceTest: public MovableObject
     virtual int setEquiSolnAlgo(EquiSolnAlgo &theAlgorithm) =0;
     virtual int start(void) =0;
     virtual int test(void) = 0;
-
+    
+    virtual int getNumTests(void) =0;    
+    virtual int getMaxNumTests(void) =0;        
+    virtual double getRatioNumToMax(void) =0;            
+    virtual const Vector &getNorms(void) =0;
+    
+    
   protected:
 
   private:
