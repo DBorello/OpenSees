@@ -33,6 +33,9 @@ BASE		= /usr/local
 HOME		= /home/jeremic
 FE		= $(HOME)/oofep/OpenSees/SRC
 
+GRAPHICS = UsingOpenGL
+
+
 BLASdir      = $(HOME)/oofep/OpenSees/OTHER/BLAS
 CBLASdir     = $(HOME)/oofep/OpenSees/OTHER/CBLAS
 LAPACKdir    = $(HOME)/oofep/OpenSees/OTHER/LAPACK
@@ -42,15 +45,6 @@ UMFPACKdir   = $(HOME)/oofep/OpenSees/OTHER/UMFPACK
 METISdir     = $(HOME)/oofep/OpenSees/OTHER/METIS
 SRCdir       = $(HOME)/oofep/OpenSees/SRC
 
-
-#DIRS        = $(BLASdir)   \
-#													 $(CBLASdir)  \
-#													 $(LAPACKdir) \
-#              $(SUPERLUdir)\
-#              $(ARPACKdir) \
-#              $(UMFPACKdir)\ 
-#              $(METISdir)  \
-#               $(SRCdir)			 
 
 DIRS        = $(SUPERLUdir)\
               $(ARPACKdir) \
@@ -76,31 +70,37 @@ DIRS        = $(SUPERLUdir)\
 # Note: For libraries that will be created (any in DIRS above)
 # make sure the directory exsists where you want the library to go!
 			      
-FE_LIBRARY      = $(HOME)/lib/libOpenSees.a
-NDARRAY_LIBRARY = $(HOME)/lib/libndarray.a 
-MATMOD_LIBRARY  = $(HOME)/lib/libmatmod.a  
-LAPACK_LIBRARY  = $(HOME)/lib/libLapack.a
-BLAS_LIBRARY    = $(HOME)/lib/libBlas.a
-SUPERLU_LIBRARY = $(HOME)/lib/libSuperLU.a
-CBLAS_LIBRARY   = $(HOME)/lib/libCBlas.a
-ARPACK_LIBRARY  = $(HOME)/lib/libArpack.a
-UMFPACK_LIBRARY = $(HOME)/lib/libUmfpack.a
-METIS_LIBRARY   = $(HOME)/lib/libMetis.a
-TCL_LIBRARY     = /usr/lib/libtk8.0.so \
-                  /usr/X11R6/lib/libX11.a \
-                  /usr/lib/libtcl8.0.so
+FE_LIBRARY          = $(HOME)/lib/libOpenSees.a
+NDARRAY_LIBRARY     = $(HOME)/lib/libndarray.a  # BJ_UCD jeremic@ucdavis.edu 
+MATMOD_LIBRARY      = $(HOME)/lib/libmatmod.a   # BJ_UCD jeremic@ucdavis.edu 
+BJMISC_LIBRARY      = $(HOME)/lib/libBJmisc.a  # BJ_UCD jeremic@ucdavis.edu
+LAPACK_LIBRARY      = $(HOME)/lib/libLapack.a	
+BLAS_LIBRARY        = $(HOME)/lib/libBlas.a
+SUPERLU_LIBRARY     = $(HOME)/lib/libSuperLU.a
+CBLAS_LIBRARY       = $(HOME)/lib/libCBlas.a
+ARPACK_LIBRARY      = $(HOME)/lib/libArpack.a
+UMFPACK_LIBRARY     = $(HOME)/lib/libUmfpack.a
+METIS_LIBRARY       = $(HOME)/lib/libMetis.a
+TCL_LIBRARY         = /usr/lib/libtk8.3.so\
+                      /usr/lib/libtcl8.3.so
+BLITZ_LIBRARY       = $(HOME)/lib/libblitz.a
+GRAPHIC_LIBRARY     = /usr/lib/libGL.a\
+                      /usr/X11R6/lib/libX11.a\
+                      /usr/X11R6/lib/libXext.a\
+	                     /usr/lib/libGLU.a
+RELIABILITY_LIBRARY = $(HOME)/lib/libReliability.a
 
 
 # WATCH OUT .. These libraries are removed when 'make wipe' is invoked.
 # $(FE_LIBRARY) \
 #WIPE_LIBS	= $(NDARRAY_LIBRARY)  $(MAT_MOD_LIBRARY)  $(FE_LIBRARY)
 WIPE_LIBS	= $(FE_LIBRARY) \
-		$(SUPERLU_LIBRARY) \
-		$(ARPACK_LIBRARY) \
-		$(UMFPACK_LIBRARY) \
-	 $(METIS_LIBRARY)	 \
-	 $(NDARRAY_LIBRARY) \
-  $(MATMOD_LIBRARY)
+		          $(SUPERLU_LIBRARY) \
+		          $(ARPACK_LIBRARY) \
+		          $(UMFPACK_LIBRARY) \
+	           $(METIS_LIBRARY)	 \
+	           $(NDARRAY_LIBRARY) \
+            $(MATMOD_LIBRARY)
 
 # %---------------------------------------------------------%
 # | SECTION 4: COMPILERS                                    |
@@ -120,7 +120,7 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 # FC	    = g77
 
 
-# Boris Jeremic BJ_UCD jeremic@ucdavis.edu
+# Boris Jeremic@ucdavis.edu
 ###################################################  Portland Group
 # ########  PGI PGI  PGI PGI PGI PGI PGI PGI  PGI PGI PGI PGI      
 # CC++            =  pgCC
@@ -169,7 +169,8 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 ########################################    GNU
 CC++            =  g++
 CC              =  gcc
-Fort            =  g77
+FC              =  g77
+F90           	 = 
 LINKER          =  g++
 																					 
 #C++FLAGS        =  -O2 -D_UNIX
@@ -177,9 +178,9 @@ LINKER          =  g++
 #FFLAGS          =  -O2
 #LINKFLAGS       =  
 
-C++FLAGS        =  -g -D_UNIX -Wall
+C++FLAGS        =  -g -D_LINUX -D_UNIX -D_GLX -Wall
 CFLAGS          =  -g	 -Wall
-FFLAGS          =  -g
+FFLAGS          =  -Wall -O
 LINKFLAGS       =  -g
 #####..
 ##..CC++ = g++
@@ -287,9 +288,9 @@ SHELL           = /bin/sh
 .DEFAULT:
 	@$(ECHO) "Unknown target $@, try:  make help"
 #
-# %-------------------------------------------%
-# |  Command to build .o files from .f files. |
-# %-------------------------------------------%
+# %-----------------------------------------------%
+# |  Command to build .o files from source files. |
+# %-----------------------------------------------%
 #
 
 .cpp.o:
@@ -299,12 +300,22 @@ SHELL           = /bin/sh
 .C.o:
 	@$(ECHO) Making $@ from $<
 	$(CC++) $(C++FLAGS) $(INCLUDES) -c $< -o $@
+
 .c.o:
 	@$(ECHO) Making $@ from $<
 	$(CC) $(CFLAGS) -c $< -o $@
+
 .f.o:      
 	@$(ECHO) Making $@ from $<
 	$(FC) $(FFLAGS) -c $< -o $@
+
+.f77.o:      
+	@$(ECHO) Making $@ from $<
+	$(FC) $(FFLAGS) -c $< -o $@
+
+.f90.o:      
+	@$(ECHO) Making $@ from $<
+	$(FC90) $(FFLAGS) -c $< -o $@
 
 # %---------------------------------------------------------%
 # | SECTION 6: OTHER LIBRARIES                              |
@@ -327,6 +338,7 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(LAPACK_LIBRARY)  \
   $(BLAS_LIBRARY) \
   $(CBLAS_LIBRARY) \
+		$(GRAPHIC_LIBRARY)\
   -lg2c -ldl
 #  $(MPI_LIB_DIR) \ # BJ_UCD
 
@@ -354,7 +366,7 @@ MACHINE_INCLUDES        = -I/usr/include      \
 # this file contains all the OpenSees/SRC includes
 include $(FE)/Makefile.incl
 
-TCL_INCLUDES = 
+TCL_INCLUDES = -I/usr/local/include
 
 INCLUDES = $(TCL_INCLUDES) $(FE_INCLUDES) $(MACHINE_INCLUDES)
 
