@@ -10,7 +10,7 @@
 //
 //# PROJECT:           Object Oriented Finite Element Program
 //# PURPOSE:           Finite Deformation Hyper-Elastic classes
-//# CLASS:             
+//# CLASS:
 //#
 //# VERSION:           0.6_(1803398874989) (golden section)
 //# LANGUAGE:          C++
@@ -20,11 +20,10 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:   
+//# UPDATE HISTORY:    Sept 2003
 //#
 //#
 //===============================================================================
-
 
 // fd_test.cpp
 
@@ -40,7 +39,7 @@
 
 #include "FiniteDeformationElastic3D.h"
 
-   
+
 // standard C++ includes
 #include <stdlib.h>
 #include <iostream.h>
@@ -100,25 +99,25 @@ printf("   deltagamma  = %.12e\n",deltagamma);
 
 double gamma = 0.0;
 Tensor aStress(2, def_dim_2, 0.0);
- 
+
 for ( gamma = gammastart ; gamma <= gammaend ; gamma = gamma + deltagamma )
 {
-  printf("\n   gamma  = %.12e\n",gamma);
+	printf("\n   gamma  = %.12e\n",gamma);
 
 // /***********************************************************************************/
 // /*   Simple shear                                                                  */
 // /***********************************************************************************/
-  double F11 = 1.0;    double F12 = gamma;  double F13 = 0.0;
-     double F21 = 0.0;    double F22 = 1.0;    double F23 = 0.0;
-  double F31 = 0.0;    double F32 = 0.0;    double F33 = 1.0;
+	double F11 = 1.0;    double F12 = gamma;  double F13 = 0.0;
+   	double F21 = 0.0;    double F22 = 1.0;    double F23 = 0.0;
+	double F31 = 0.0;    double F32 = 0.0;    double F33 = 1.0;
 
 //
 //**************************************************************************************/
 //*   Pure Extension                                                                   */
 //**************************************************************************************/
-//    double F11 = 1.0+gamma;  double F12 = 0.0;        double F13 = 0.0;
-//    double F21 = 0.0;        double F22 = 1.00001;     double F23 = 0.0;
-//    double F31 = 0.0;        double F32 = 0.0;        double F33 =1.00002;
+// 	 double F11 = 1.0+gamma;  double F12 = 0.0;        double F13 = 0.0;
+// 	 double F21 = 0.0;        double F22 = 1.00001;     double F23 = 0.0;
+// 	 double F31 = 0.0;        double F32 = 0.0;        double F33 =1.00002;
 
 
 //
@@ -130,7 +129,7 @@ for ( gamma = gammastart ; gamma <= gammaend ; gamma = gamma + deltagamma )
 //  double F31 = 0.0;           double F32 = 0.0;              double F33 = 1.000001;
 
 
-// 
+//
 ///************************************************************************************/
 ///*   Triaxial compression                                                           */
 ///************************************************************************************/
@@ -140,11 +139,11 @@ for ( gamma = gammastart ; gamma <= gammaend ; gamma = gamma + deltagamma )
 //  double F31 = 0.0;       double F32 = 0.0;                     double F33 = 1.0+gamma*dilatancy;
 
 
-    double F_values[] = {  F11,  F12,  F13,
+  	double F_values[] = {  F11,  F12,  F13,
                                F21,  F22,  F23,
                                F31,  F32,  F33 };
 
-         Tensor thisf(2, def_dim_2, F_values);
+ 	      Tensor thisf(2, def_dim_2, F_values);
               thisf.print("F","\nDeformation Gradient:");
               thisFDstate.setTrialF(thisf);
               Tensor thisC = thisFDstate.getC();
@@ -173,13 +172,13 @@ for ( gamma = gammastart ; gamma <= gammaend ; gamma = gamma + deltagamma )
 //              thisvolStiffTensor.print("K","\nTangent Tensor");
 //              Tensor thisStrain = thisFDstate.getStrainTensor();
 //              thisStrain.print("E","\nGreen Strain Tensor:");
-//              Tensor thisStress = thisFDstate.getStressTensor();
-//              thisStress.print("S","\n2nd PK Stress Tensor:");
-//              Tensor thisFPKStress = thisFDstate.getFPKStressTensor();
-//              thisFPKStress.print("P","\n1st PK Stress Tensor:");
+//              Tensor thisPK2Stress = thisFDstate.getPK2StressTensor();
+//              thisPK2Stress.print("S","\n2nd PK Stress Tensor:");
+//              Tensor thisFPKStress = thisFDstate.getPK1StressTensor();
+//              thisPK1Stress.print("P","\n1st PK Stress Tensor:");
               stresstensor tStress = thisFDstate.getCauchyStressTensor();
               tStress.print("S2","\n");
-}       
+}
         return 1;
 }
 

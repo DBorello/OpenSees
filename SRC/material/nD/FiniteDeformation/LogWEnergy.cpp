@@ -10,7 +10,7 @@
 //
 //# PROJECT:           Object Oriented Finite Element Program
 //# PURPOSE:           Finite Deformation Hyper-Elastic classes
-//# CLASS:             
+//# CLASS:
 //#
 //# VERSION:           0.6_(1803398874989) (golden section)
 //# LANGUAGE:          C++
@@ -20,11 +20,10 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:   
+//# UPDATE HISTORY:    Sept 2003
 //#
 //#
 //===============================================================================
-
 
 #ifndef LogWEnergy_CPP
 #define LogWEnergy_CPP
@@ -76,7 +75,7 @@ const double LogWEnergy::wE(const double &J_in, const Vector &lambda_wave_in)
     double w_total = w_iso + w_vol;
     return w_total;
   }
-  
+
 //================================================================================
 // d(iso)w / d(lambda)
 //================================================================================

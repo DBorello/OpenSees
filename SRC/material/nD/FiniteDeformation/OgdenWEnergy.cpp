@@ -10,7 +10,7 @@
 //
 //# PROJECT:           Object Oriented Finite Element Program
 //# PURPOSE:           Finite Deformation Hyper-Elastic classes
-//# CLASS:             
+//# CLASS:
 //#
 //# VERSION:           0.6_(1803398874989) (golden section)
 //# LANGUAGE:          C++
@@ -20,7 +20,7 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:   
+//# UPDATE HISTORY:
 //#
 //#
 //===============================================================================
@@ -78,7 +78,7 @@ const double  OgdenWEnergy::wE(const double &J_in, const Vector &lambda_wave_in 
                     pow ( lambda_wave_in(2),  mur_Ogden(i-1) ) - 1.0 ) ;
      }
     return wEnergy;
-  }  
+  }
 
 //================================================================================
 // d(iso)w / d(lambda)

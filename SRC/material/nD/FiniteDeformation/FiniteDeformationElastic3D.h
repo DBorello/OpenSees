@@ -10,7 +10,7 @@
 //
 //# PROJECT:           Object Oriented Finite Element Program
 //# PURPOSE:           Finite Deformation Hyper-Elastic classes
-//# CLASS:             
+//# CLASS:
 //#
 //# VERSION:           0.6_(1803398874989) (golden section)
 //# LANGUAGE:          C++
@@ -20,11 +20,10 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:   
+//# UPDATE HISTORY:    Sept 2003
 //#
 //#
 //===============================================================================
-
 
 #ifndef FiniteDeformationElastic3D_h
 #define FiniteDeformationElastic3D_h
@@ -62,30 +61,16 @@ class FiniteDeformationElastic3D : public NDMaterial
 //    virtual double getE(void);
 //    virtual double getnu(void);
 
-    virtual WEnergy *getWEnergy(void);
-
     virtual int setTrialF(const Tensor &f);
     virtual int setTrialF(const Tensor &f, const Tensor &d);
     virtual int setTrialFIncr(const Tensor &f);
     virtual int setTrialFIncr(const Tensor &f, const Tensor &d);
 
-    virtual const Tensor getF(void);
-    virtual const Tensor getC(void);
-    virtual const double getJ(void) ;
-    virtual const Vector getlambda(void) ;
-    virtual const Vector getlambda_wave(void) ;
-    
-    virtual const Vector wa(void) ;
-    virtual const Tensor Yab(void) ;
-    virtual const Tensor FDisoStiffness(void) ;
-    virtual const Tensor FDvolStiffness(void) ;
     virtual const Tensor& getTangentTensor(void) ;
 //    virtual const Tensor& getInitailTangentTensor(void) ;
-    
+
     virtual const  straintensor getStrainTensor(void) ;  // Default Green Strain
     virtual const  stresstensor getStressTensor(void) ; // Default 2nd Piola Kirchhoff Stress
-    virtual const  stresstensor getFPKStressTensor(void) ;
-    virtual const  stresstensor getCauchyStressTensor(void) ;
 
 //    virtual const Vector &getStress(void);
 //    virtual const Vector &getStrain(void);
@@ -94,13 +79,13 @@ class FiniteDeformationElastic3D : public NDMaterial
 //    virtual const straintensor getCommittedStrain(void);
 
 //    virtual const straintensor getPlasticStrainTensor(void);
-   
+
     virtual int commitState(void) ;
     virtual int revertToLastCommit(void) ;
     virtual int revertToStart(void) ;
-    
-    virtual NDMaterial *getCopy (void);
-    virtual NDMaterial *getCopy (const char *type){};
+
+    virtual FiniteDeformationElastic3D *getCopy (void);
+    virtual FiniteDeformationElastic3D *getCopy (const char *type){};
 
     virtual const char *getType (void) const;
     virtual int getOrder (void) const;
@@ -113,6 +98,24 @@ class FiniteDeformationElastic3D : public NDMaterial
 
     virtual int setParameter(char **argv, int argc, Information &info);
     virtual int updateParameter(int parameterID, Information &info);
+
+  private:
+
+    WEnergy *getWEnergy(void);
+
+    const Tensor getF(void);
+    const Tensor getC(void);
+    const double getJ(void) ;
+    const Vector getlambda(void) ;
+    const Vector getlambda_wave(void) ;
+
+    const Vector wa(void) ;
+    const Tensor Yab(void) ;
+    const Tensor FDisoStiffness(void) ;
+    const Tensor FDvolStiffness(void) ;
+
+    const  stresstensor getPK1StressTensor(void) ;
+    const  stresstensor getCauchyStressTensor(void) ;
 
   protected:
 

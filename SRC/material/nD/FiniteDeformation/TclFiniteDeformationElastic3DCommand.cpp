@@ -10,7 +10,7 @@
 //
 //# PROJECT:           Object Oriented Finite Element Program
 //# PURPOSE:           Finite Deformation Hyper-Elastic classes
-//# CLASS:             
+//# CLASS:
 //#
 //# VERSION:           0.6_(1803398874989) (golden section)
 //# LANGUAGE:          C++
@@ -51,7 +51,7 @@ WEnergy *EvaluateWEnergyArgs(ClientData, Tcl_Interp *, TCL_Char *tclString);
 // note Tcl_Split list stores the array of pointers and the strings in
 // one array, which is why Tcl_Free needs only be called on the array.
 
-static void cleanup(TCL_Char **argv) 
+static void cleanup(TCL_Char **argv)
 {
     Tcl_Free((char *) argv);
 }
@@ -67,30 +67,30 @@ TclModelBuilder_addFiniteDeformationElastic3D(ClientData clientData, Tcl_Interp 
 
   int loc = eleArgStart;
 
-  if (Tcl_GetInt(interp, argv[loc+1], &tag) != TCL_OK) 
+  if (Tcl_GetInt(interp, argv[loc+1], &tag) != TCL_OK)
   {
     opserr << "nDMaterial FiniteDeformationElastic3D - invalid tag " << argv[loc+1] << endln;
     return 0;
   }
 
-  if ( (strcmp(argv[loc+2],"-wenergy") == 0) || (strcmp(argv[loc+2],"-WEnergy") == 0) 
-          || (strcmp(argv[loc+2],"-w") == 0) || (strcmp(argv[loc+2],"-W") == 0) ) 
+  if ( (strcmp(argv[loc+2],"-wenergy") == 0) || (strcmp(argv[loc+2],"-WEnergy") == 0)
+          || (strcmp(argv[loc+2],"-w") == 0) || (strcmp(argv[loc+2],"-W") == 0) )
   {
       wenergy = EvaluateWEnergyArgs(clientData, interp, argv[loc+3]);
-      if (wenergy == 0) 
+      if (wenergy == 0)
       {
         opserr << "nDMaterial FiniteDeformationElastic3D - could not create a WEnergy from" << argv[loc+3] << endln;
         return 0;
       }
   }
 
-  if (Tcl_GetDouble(interp, argv[loc+4], &rho_in) != TCL_OK) 
+  if (Tcl_GetDouble(interp, argv[loc+4], &rho_in) != TCL_OK)
   {
     opserr << "nDMaterial FiniteDeformationElastic3D - invalid rho " << argv[loc+4] << endln;
     return 0;
   }
 
-  else 
+  else
   {
       opserr << "nDMaterial FiniteDeformationElastic3D - don't understand %s\n";
       return 0;
@@ -116,7 +116,7 @@ WEnergy *EvaluateWEnergyArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
   TCL_Char **argv;
 
   // split the list
-  if (Tcl_SplitList(interp, tclString, &argc, &argv) != TCL_OK) 
+  if (Tcl_SplitList(interp, tclString, &argc, &argv) != TCL_OK)
     return 0;
 
   if (argc == 0)
@@ -126,19 +126,19 @@ WEnergy *EvaluateWEnergyArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
   WEnergy *wenergy = 0;
 
   // #1 Logarithmic
-  if ((strcmp(argv[0],"-Log") == 0) || (strcmp(argv[0],"-log") == 0) || (strcmp(argv[0],"-Logarithmic") == 0) ) 
+  if ((strcmp(argv[0],"-Log") == 0) || (strcmp(argv[0],"-log") == 0) || (strcmp(argv[0],"-Logarithmic") == 0) )
     {
       double E_in = 0.0;
       double nu_in = 0.0;
-      if (argc > 2) 
+      if (argc > 2)
       {
-        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK) 
+        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK)
         {
           opserr << "Warning: invalid Young's Module for Logarithmic Strain Energy Function.";
           return 0;
         }
 
-        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK) 
+        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK)
         {
           opserr << "Warning: invalid Poisson Ratio for Logarithmic Strain Energy Function.";
           return 0;
@@ -149,19 +149,19 @@ WEnergy *EvaluateWEnergyArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
    }
 
   // #2 Mooney Rivlin
-    if ((strcmp(argv[0],"-MR") == 0) || (strcmp(argv[0],"-MooneyRivlin") == 0) ) 
+    if ((strcmp(argv[0],"-MR") == 0) || (strcmp(argv[0],"-MooneyRivlin") == 0) )
     {
       double c1_in = 0.0;
       double c2_in = 0.0;
-      if (argc > 2) 
+      if (argc > 2)
       {
-        if (Tcl_GetDouble(interp, argv[1], &c1_in) != TCL_OK) 
+        if (Tcl_GetDouble(interp, argv[1], &c1_in) != TCL_OK)
         {
           opserr << "Warning: invalid 1st material parameter for Mooney-Rivlin Strain Energy Function.";
           return 0;
         }
 
-        if (Tcl_GetDouble(interp, argv[2], &c2_in) != TCL_OK) 
+        if (Tcl_GetDouble(interp, argv[2], &c2_in) != TCL_OK)
         {
           opserr << "Warning: invalid 2nd material parameter for Mooney-Rivlin Strain Energy Function.";
           return 0;
@@ -172,19 +172,19 @@ WEnergy *EvaluateWEnergyArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
    }
 
   // #3 Neo Hookean
-    if ((strcmp(argv[0],"-NH") == 0) || (strcmp(argv[0],"-NeoHookean") == 0) ) 
+    if ((strcmp(argv[0],"-NH") == 0) || (strcmp(argv[0],"-NeoHookean") == 0) )
     {
       double E_in = 0.0;
       double nu_in = 0.0;
-      if (argc > 2) 
+      if (argc > 2)
       {
-        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK) 
+        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK)
         {
           opserr << "Warning: invalid Young's Module for Neo-Hookean Strain Energy Function.";
           return 0;
         }
 
-        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK) 
+        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK)
         {
           opserr << "Warning: invalid Poisson Ratio for Neo-Hookean Strain Energy Function.";
           return 0;
@@ -195,53 +195,53 @@ WEnergy *EvaluateWEnergyArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
    }
 
   // #4 Ogden
-  if ((strcmp(argv[0],"-Ogden") == 0) || (strcmp(argv[0],"-ogden") == 0) ) 
+  if ((strcmp(argv[0],"-Ogden") == 0) || (strcmp(argv[0],"-ogden") == 0) )
     {
       int N_in = 0;
 
-      if (argc > 2*N_in+1) 
+      if (argc > 2*N_in+1)
       {
-        if (Tcl_GetInt(interp, argv[1], &N_in) != TCL_OK) 
+        if (Tcl_GetInt(interp, argv[1], &N_in) != TCL_OK)
         {
           opserr << "Warning: invalid vector parameter number for Ogden Strain Energy Function.";
           return 0;
         }
 
         Vector cr_in(N_in);
-	Vector mur_in(N_in);
+  Vector mur_in(N_in);
 
-	for (int i=0; i<N_in; i++)
-	{
-          if (Tcl_GetDouble(interp, argv[2+i], &cr_in(i)) != TCL_OK) 
+  for (int i=0; i<N_in; i++)
+  {
+          if (Tcl_GetDouble(interp, argv[2+i], &cr_in(i)) != TCL_OK)
           {
             opserr << "Warning: invalid vector parameter for Ogden Strain Energy Function.";
             return 0;
           }
-          if (Tcl_GetDouble(interp, argv[2+N_in+i], &mur_in(i)) != TCL_OK) 
+          if (Tcl_GetDouble(interp, argv[2+N_in+i], &mur_in(i)) != TCL_OK)
           {
             opserr << "Warning: invalid vector parameter for Ogden Strain Energy Function.";
             return 0;
           }
-	}
+  }
 
       wenergy = new OgdenWEnergy(N_in, cr_in, mur_in);
      }
    }
 
   // #5 Simo Pister
-    if ((strcmp(argv[0],"-SP") == 0) || (strcmp(argv[0],"-SimoPister") == 0) ) 
+    if ((strcmp(argv[0],"-SP") == 0) || (strcmp(argv[0],"-SimoPister") == 0) )
     {
       double E_in = 0.0;
       double nu_in = 0.0;
-      if (argc > 2) 
+      if (argc > 2)
       {
-        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK) 
+        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK)
         {
           opserr << "Warning: invalid Young's Module for Simo-Pister Strain Energy Function.";
           return 0;
         }
 
-        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK) 
+        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK)
         {
           opserr << "Warning: invalid Poisson Ratio for Simo-Pister Strain Energy Function.";
           return 0;
