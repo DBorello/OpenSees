@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-19 06:53:38 $
+// $Revision: 1.4 $
+// $Date: 2001-06-20 04:37:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -35,6 +35,7 @@
 #include <HystereticMaterial.h>
 #include <G3Globals.h>
 #include <math.h>
+#include <float.h>
 
 HystereticMaterial::HystereticMaterial(int tag,
 			double m1p, double r1p, double m2p, double r2p, double m3p, double r3p,
@@ -43,8 +44,12 @@ HystereticMaterial::HystereticMaterial(int tag,
 UniaxialMaterial(tag, MAT_TAG_Hysteretic),
 mom1p(m1p), rot1p(r1p), mom2p(m2p), rot2p(r2p), mom3p(m3p), rot3p(r3p),
 mom1n(m1n), rot1n(r1n), mom2n(m2n), rot2n(r2n), mom3n(m3n), rot3n(r3n),
-pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(b)
+pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(0.0)
 {
+    if (b != 0.0)
+        g3ErrorHandler->warning("%s -- beta parameter has been temporarily disabled",
+            "HystereticMaterial::HystereticMaterial");
+
 	bool error = false;
 	
 	// Positive backbone parameters
@@ -89,8 +94,12 @@ HystereticMaterial::HystereticMaterial(int tag,
 UniaxialMaterial(tag, MAT_TAG_Hysteretic),
 mom1p(m1p), rot1p(r1p), mom3p(m2p), rot3p(r2p),
 mom1n(m1n), rot1n(r1n), mom3n(m2n), rot3n(r2n),
-pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(b)
+pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(0.0)
 {
+    if (b != 0.0)
+        g3ErrorHandler->warning("%s -- beta parameter has been temporarily disabled",
+            "HystereticMaterial::HystereticMaterial");
+
 	bool error = false;
 	
 	// Positive backbone parameters
@@ -200,18 +209,10 @@ HystereticMaterial::getTangent(void)
 	return Ttangent;
 }
 
-double
-HystereticMaterial::getSecant(void)
-{
-	return Ttangent;
-}
-
 void
 HystereticMaterial::positiveIncrement(double dStrain)
 {
-	TrotNu = CrotNu;
-
-	double k = pow((CrotMax+1.0e-6)/rot1p,beta);
+	double k = pow((CrotMin+1.0e-6)/rot1n,beta);
 	k = (k < 1.0) ? 1.0 : 1.0/k;
 
 	if (TloadIndicator == 2) {
@@ -272,9 +273,8 @@ HystereticMaterial::positiveIncrement(double dStrain)
 				Tstress = tmpmo1;
 				Ttangent = E1n;
 			}
-			else {
+			else
 				Tstress = tmpmo2;
-			}
 		}
 	}
 
@@ -286,18 +286,15 @@ HystereticMaterial::positiveIncrement(double dStrain)
 			Tstress = tmpmo1;
 			Ttangent = E1n;
 		}
-		else {
+		else
 			Tstress = tmpmo2;
-		}
 	}
 }
 
 void
 HystereticMaterial::negativeIncrement(double dStrain)
 {
-	TrotPu = CrotPu;
-
-	double k = pow((TrotMin-1.0e-6)/rot1n,beta);
+	double k = pow((CrotMax-1.0e-6)/rot1p,beta);
 	k = (k < 1.0) ? 1.0 : 1.0/k;
 
 	if (TloadIndicator == 1) {
@@ -358,9 +355,8 @@ HystereticMaterial::negativeIncrement(double dStrain)
 				Tstress = tmpmo1;
 				Ttangent = E1p;
 			}
-			else {
+			else
 				Tstress = tmpmo2;
-			}
 		}
 	}
 
@@ -372,9 +368,8 @@ HystereticMaterial::negativeIncrement(double dStrain)
 			Tstress = tmpmo1;
 			Ttangent = E1p;
 		}
-		else {
+		else
 			Tstress = tmpmo2;
-		}
 	}
 }
 
@@ -516,10 +511,10 @@ HystereticMaterial::posEnvlpStress(double strain)
 		return E1p*strain;
 	else if (strain <= rot2p)
 		return mom1p + E2p*(strain-rot1p);
-	else if (strain <= rot3p)
+	else if (strain <= rot3p || E3p > 0.0)
 		return mom2p + E3p*(strain-rot2p);
 	else
-		return mom3p + E1p*1.0e-15*(strain-rot3p);
+		return mom3p;
 }
 
 double
@@ -531,10 +526,10 @@ HystereticMaterial::negEnvlpStress(double strain)
 		return E1n*strain;
 	else if (strain >= rot2n)
 		return mom1n + E2n*(strain-rot1n);
-	else if (strain >= rot3n)
+	else if (strain >= rot3n || E3n > 0.0)
 		return mom2n + E3n*(strain-rot2n);
 	else
-		return mom3n + E1n*1.0e-15*(strain-rot3n);
+		return mom3n;
 }
 
 double
@@ -546,7 +541,7 @@ HystereticMaterial::posEnvlpTangent(double strain)
 		return E1p;
 	else if (strain <= rot2p)
 		return E2p;
-	else if (strain <= rot3p)
+	else if (strain <= rot3p || E3p > 0.0)
 		return E3p;
 	else
 		return E1p*1.0e-9;
@@ -561,7 +556,7 @@ HystereticMaterial::negEnvlpTangent(double strain)
 		return E1n;
 	else if (strain >= rot2n)
 		return E2n;
-	else if (strain >= rot3n)
+	else if (strain >= rot3n || E3n > 0.0)
 		return E3n;
 	else
 		return E1n*1.0e-9;
