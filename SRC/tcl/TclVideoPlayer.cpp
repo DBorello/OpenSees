@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-19 07:04:23 $
+// $Revision: 1.3 $
+// $Date: 2001-07-26 01:13:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclVideoPlayer.cpp,v $
                                                                         
                                                                         
@@ -203,8 +203,8 @@ TclVideoPlayer::play(void)
 
     // read in projection mode data and set in renderer
     theFile >> drivel; 
-    theFile >> mode;
-    theRenderer->setProjectionMode(mode);
+    theFile >> drivel;
+    theRenderer->setProjectionMode(drivel);
 
     // read in view data and set in renderer
     theFile >> drivel; 
