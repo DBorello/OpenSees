@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-03-29 03:56:11 $
+// $Revision: 1.6 $
+// $Date: 2001-06-23 06:01:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -1130,7 +1130,8 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   // put  distrLoadCommit into the Vector
   for (i=0; i<NL; i++) 
   {
-    dData(loc) = distrLoadcommit(i) = dData(loc++);
+    distrLoadcommit(i) = dData(loc++);
+    dData(loc) = distrLoadcommit(i);
     loc++;
   }
 
