@@ -631,6 +631,14 @@ SOURCE=..\..\..\SRC\element\forceBeamColumn\ForceBeamColumn2d.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\forceBeamColumn\ForceBeamColumn3d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\ForceBeamColumn3d.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration2d.cpp
 # End Source File
 # Begin Source File
@@ -639,11 +647,27 @@ SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration2d.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration3d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeMidpointBeamIntegration3d.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration2d.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration2d.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration3d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\HingeRadauBeamIntegration3d.h
 # End Source File
 # Begin Source File
 
@@ -672,6 +696,10 @@ SOURCE=..\..\..\SRC\element\forceBeamColumn\UserDefinedHingeIntegration2d.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\element\forceBeamColumn\UserDefinedHingeIntegration2d.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\forceBeamColumn\UserDefinedHingeIntegration3d.cpp
 # End Source File
 # End Group
 # Begin Source File
