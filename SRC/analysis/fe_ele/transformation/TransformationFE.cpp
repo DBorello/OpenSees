@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2004-10-12 21:55:54 $
+// $Revision: 1.10 $
+// $Date: 2005-02-04 22:57:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -803,6 +803,49 @@ TransformationFE::getC_Force(const Vector &accel, double fact)
   return *modResidual;
 }
 
+
+void  
+TransformationFE::addD_Force(const Vector &disp,  double fact)
+{
+    if (fact == 0.0)
+	return;
+
+    static Vector response;
+    response.setData(dataBuffer, numOriginalDOF);
+		    
+    for (int i=0; i<numTransformedDOF; i++) {
+	int loc = (*modID)(i);
+	if (loc >= 0)
+	    (*modResidual)(i) = disp(loc);
+	else
+	    (*modResidual)(i) = 0.0;
+    }
+    transformResponse(*modResidual, response);
+    this->addLocalD_Force(response, fact);
+}   	 
+
+void  
+TransformationFE::addM_Force(const Vector &disp,  double fact)
+{
+    if (fact == 0.0)
+	return;
+
+    static Vector response;
+    response.setData(dataBuffer, numOriginalDOF);
+		    
+    for (int i=0; i<numTransformedDOF; i++) {
+	int loc = (*modID)(i);
+	if (loc >= 0)
+	    (*modResidual)(i) = disp(loc);
+	else
+	    (*modResidual)(i) = 0.0;
+    }
+    transformResponse(*modResidual, response);
+    this->addLocalM_Force(response, fact);
+}   	 
+
+
+
 // CHANGE THE ID SENT
 const Vector &
 TransformationFE::getLastResponse(void)
@@ -861,3 +904,47 @@ TransformationFE::transformResponse(const Vector &modResp,
 
     return 0;
 }
+
+
+// AddingSensitivity:BEGIN /////////////////////////////////
+void  
+TransformationFE::addD_ForceSensitivity(int gradNumber, const Vector &disp,  double fact)
+{
+    if (fact == 0.0)
+	return;
+
+    static Vector response;
+    response.setData(dataBuffer, numOriginalDOF);
+		    
+    for (int i=0; i<numTransformedDOF; i++) {
+	int loc = (*modID)(i);
+	if (loc >= 0)
+	    (*modResidual)(i) = disp(loc);
+	else
+	    (*modResidual)(i) = 0.0;
+    }
+    transformResponse(*modResidual, response);
+    this->addLocalD_ForceSensitivity(gradNumber, response, fact);
+}   	 
+
+void  
+TransformationFE::addM_ForceSensitivity(int gradNumber, const Vector &disp,  double fact)
+{
+    if (fact == 0.0)
+	return;
+
+    static Vector response;
+    response.setData(dataBuffer, numOriginalDOF);
+		    
+    for (int i=0; i<numTransformedDOF; i++) {
+	int loc = (*modID)(i);
+	if (loc >= 0)
+	    (*modResidual)(i) = disp(loc);
+	else
+	    (*modResidual)(i) = 0.0;
+    }
+    transformResponse(*modResidual, response);
+    this->addLocalM_ForceSensitivity(gradNumber, response, fact);
+}   	 
+
+// AddingSensitivity:END ////////////////////////////////////

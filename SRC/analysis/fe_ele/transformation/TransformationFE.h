@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2004-10-12 21:55:54 $
+// $Revision: 1.6 $
+// $Date: 2005-02-04 22:57:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.h,v $
                                                                         
                                                                         
 #ifndef TransformationFE_h
 #define TransformationFE_h
 
-// File: ~/analysis/fe_ele/transformation/TransformationFE.h
-// 
 // Written: fmk 
 // Created: 05/99
 // Revision: A
@@ -65,8 +63,17 @@ class TransformationFE: public FE_Element
     virtual const Vector &getK_Force(const Vector &accel, double fcat = 1.0);
     virtual const Vector &getM_Force(const Vector &accel, double fcat = 1.0);
     virtual const Vector &getC_Force(const Vector &vel, double fcat = 1.0);
+    virtual void  addD_Force(const Vector &vel,   double fact = 1.0);
+    virtual void  addM_Force(const Vector &accel, double fact = 1.0);    
+    
     const Vector &getLastResponse(void);
     int addSP(SP_Constraint &theSP);
+
+
+    // AddingSensitivity:BEGIN ////////////////////////////////////
+    virtual void addM_ForceSensitivity       (int gradNumber, const Vector &vect, double fact = 1.0);
+    virtual void addD_ForceSensitivity       (int gradNumber, const Vector &vect, double fact = 1.0);
+    // AddingSensitivity:END //////////////////////////////////////
     
   protected:
     int transformResponse(const Vector &modResponse, Vector &unmodResponse);
