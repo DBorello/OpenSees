@@ -214,6 +214,7 @@ GRAPH_LIBS = $(FE)/graph/graph/DOF_Graph.o \
 
 ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/Information.o \
+	$(FE)/element/ElementalLoad.o \
 	$(FE)/element/beam2d/beam2d03.o \
 	$(FE)/element/beam2d/beam2d04.o \
 	$(FE)/element/beam3d/beam3d01.o \
@@ -408,6 +409,8 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/load/NodalLoadIter.o \
 	$(FE)/domain/load/ElementalLoadIter.o \
 	$(FE)/domain/load/Load.o \
+	$(FE)/domain/load/Beam2dUniformLoad.o \
+	$(FE)/domain/load/Beam2dPointLoad.o \
 	$(FE)/domain/pattern/LoadPattern.o \
 	$(FE)/domain/pattern/EarthquakePattern.o \
 	$(FE)/domain/pattern/MultiSupportPattern.o \

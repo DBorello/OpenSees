@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2001-11-19 22:39:03 $
+// $Revision: 1.23 $
+// $Date: 2001-11-26 23:10:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -36,9 +36,9 @@
 #ifndef classTags_h
 #define classTags_h
 
-#define intType 1
+#define intType    1
 #define doubleType 2
-#define idType 3
+#define idType     3
 #define vectorType 4
 #define matrixType 5
 
@@ -183,6 +183,9 @@
 #define PATTERN_TAG_LoadPattern		  1
 #define PATTERN_TAG_MultiSupportPattern	  3
 #define LOAD_TAG_UniformExcitation        2
+#define LOAD_TAG_Beam2dUniformLoad        3
+#define LOAD_TAG_Beam2dPointLoad          4
+
 
 #define MAT_TAG_IsotropicLinElastic         1001
 #define MAT_TAG_IsotropicLinElasticPoint    1002
