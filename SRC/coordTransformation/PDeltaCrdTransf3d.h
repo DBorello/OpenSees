@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-06-05 06:01:09 $
+// $Revision: 1.2 $
+// $Date: 2002-06-07 22:20:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.h,v $
                                                                         
                                                                         
@@ -67,7 +67,7 @@ class PDeltaCrdTransf3d: public CrdTransf3d
     const Vector &getBasicIncrDisp      (void);
     const Vector &getBasicIncrDeltaDisp (void);
 
-    const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &uniformLoad);
+    const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &p0);
     const Matrix &getGlobalStiffMatrix    (const Matrix &basicStiff, const Vector &basicForce);
 
     CrdTransf3d *getCopy(void);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-07 22:13:15 $
+// $Revision: 1.6 $
+// $Date: 2002-06-07 22:20:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.cpp,v $
                                                                         
                                                                         
@@ -538,7 +538,7 @@ PDeltaCrdTransf3d::getBasicIncrDeltaDisp(void)
 
 
 const Vector &
-PDeltaCrdTransf3d::getGlobalResistingForce(const Vector &pb, const Vector &unifLoad)
+PDeltaCrdTransf3d::getGlobalResistingForce(const Vector &pb, const Vector &p0)
 {
 	// transform resisting forces from the basic system to local coordinates
 	static double pl[12];
@@ -565,16 +565,11 @@ PDeltaCrdTransf3d::getGlobalResistingForce(const Vector &pb, const Vector &unifL
 	pl[10] =  q4;
 	pl[11] =  q2;
 
-	// add end forces due to uniform distributed
-	// loads to the system with rigid body modes
-	pl[0] -= unifLoad(0)*L;
-	double V;
-	V = 0.5*unifLoad(1)*L;
-	pl[1] -= V;
-	pl[7] -= V;
-	V = 0.5*unifLoad(2)*L;
-	pl[2] -= V;
-	pl[8] -= V;
+	pl[0] += p0(0);
+	pl[1] += p0(1);
+	pl[7] += p0(2);
+	pl[2] += p0(3);
+	pl[8] += p0(4);
 
 	// Include leaning column effects (P-Delta)
 	double NoverL;
