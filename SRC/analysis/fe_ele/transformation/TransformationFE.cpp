@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-22 01:02:05 $
+// $Revision: 1.7 $
+// $Date: 2003-06-24 21:54:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -396,6 +396,7 @@ TransformationFE::getTangent(Integrator *theNewIntegrator)
 	noRowsOriginal += numDOFi;
 	startRow += noRowsTransformed;
     }
+
     return *modTangent;
 }
 
@@ -413,6 +414,7 @@ TransformationFE::getResidual(Integrator *theNewIntegrator)
 	transCounter++;
 	    
     const Vector &theResidual = this->FE_Element::getResidual(theNewIntegrator);
+
 
     // DO THE SP STUFF TO THE TANGENT
     
@@ -446,6 +448,7 @@ TransformationFE::getResidual(Integrator *theNewIntegrator)
 	startRowTransformed += noRows;
 	startRowOriginal += noCols;
     }
+
     return *modResidual;
 }
 

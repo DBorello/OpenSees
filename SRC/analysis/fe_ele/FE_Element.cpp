@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-11 21:17:04 $
+// $Revision: 1.11 $
+// $Date: 2003-06-24 21:54:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -511,8 +511,13 @@ FE_Element::getTangForce(const Vector &disp, double fact)
 	// get the components we need out of the vector
 	// and place in a temporary vector
 	Vector tmp(numDOF);
-	for (int i=0; i<numDOF; i++)
+	for (int i=0; i<numDOF; i++) {
+	  int dof = myID(i);
+	  if (dof >= 0)
 	    tmp(i) = disp(myID(i));
+	  else
+	    tmp(i) = 0.0;
+	}
 
 	if (myEle->isSubdomain() == false) {
 	    // form the tangent again and then add the force
