@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-03-29 04:00:34 $
+// $Revision: 1.5 $
+// $Date: 2001-05-18 04:51:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -2165,7 +2165,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 				  theEle->getTag());
 	  return -3;
 	}			
-	
+
 	loc+=2;
       }
     }

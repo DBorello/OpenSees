@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-12 07:40:23 $
+// $Revision: 1.2 $
+// $Date: 2001-05-18 04:51:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TrapezoidalTimeSeriesIntegrator.cpp,v $
                                                                         
                                                                         
@@ -84,35 +84,38 @@ TrapezoidalTimeSeriesIntegrator::integrate(TimeSeries *theSeries, double delta)
 
     return 0;
   }
-  else {
-    int i;                // Counter for indexing
-    double dummyTime;     // Dummy variable for integrating
-    double previousValue; // Temporary storage to avoid accessing same value twice
-	                        // through identical method calls
-    double currentValue;
-      
-    // Set the first point
-    // Assuming initial condition is zero, i.e. F(0) = 0
-    (*theIntegratedValues)[0] = theSeries->getFactor(0.0) * delta * 0.5;
 
-    previousValue = (*theIntegratedValues)[0];
-    
-    dummyTime = delta;
-    
-    for (i = 1; i < numSteps; i++, dummyTime += delta) {
-      currentValue = theSeries->getFactor(dummyTime);
+  int i;                // Counter for indexing
+  double dummyTime;     // Dummy variable for integrating
+  double previousValue; // Temporary storage to avoid accessing same value twice
+	                        // through identical method calls
+  double currentValue;
       
-      // Apply the trapezoidal rule to update the integrated value
-      (*theIntegratedValues)[i] = (*theIntegratedValues)[i-1] +
-	delta*0.5 * (currentValue + previousValue);
-      
-      previousValue = currentValue;
-    }
+  // Set the first point
+  // Assuming initial condition is zero, i.e. F(0) = 0
+
+
+  (*theIntegratedValues)[0] = theSeries->getFactor(0.0) * delta * 0.5;
+
+  previousValue = (*theIntegratedValues)[0];
+  
+  dummyTime = delta;
     
-    // Set the last point
+  for (i = 1; i < numSteps; i++, dummyTime += delta) {
+    currentValue = theSeries->getFactor(dummyTime);
+    
+    // Apply the trapezoidal rule to update the integrated value
     (*theIntegratedValues)[i] = (*theIntegratedValues)[i-1] +
-      delta*0.5 * (theSeries->getFactor(dummyTime));
+      delta*0.5 * (currentValue + previousValue);
+    
+    previousValue = currentValue;
   }
+
+  /*
+  // Set the last point
+  (*theIntegratedValues)[i] = (*theIntegratedValues)[i-1] +
+    delta*0.5 * (theSeries->getFactor(dummyTime));
+  */
 
   // Set the method return value
   PathSeries *returnSeries = new PathSeries (*theIntegratedValues, delta);

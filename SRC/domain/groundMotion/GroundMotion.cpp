@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:30:53 $
+// $Revision: 1.3 $
+// $Date: 2001-05-18 04:51:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotion.cpp,v $
                                                                         
                                                                         
@@ -97,7 +97,6 @@ GroundMotion::integrate(TimeSeries *theSeries, double delta)
 
   // integrate the series, if no vel series exists set it to new one
   TimeSeries *theNewSeries = theIntegrator->integrate(theSeries, delta);
-
 
   if(theNewSeries == 0) {
     g3ErrorHandler->warning("GroundMotion::integrate %s\n",
@@ -216,7 +215,6 @@ GroundMotion::getDisp(double time)
 
   if (theDispSeries != 0)
     return theDispSeries->getFactor(time);
-
 
   // if theVel is not 0, integrate vel series to get disp series
   else if (theVelSeries != 0) {
