@@ -467,6 +467,14 @@ SOURCE=..\..\..\SRC\element\20nbrick\TwentyNodeBrick.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\upU\BrickUP.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\upU\BrickUP.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\Src\element\upU\EightNodeBrick_u_p_U.cpp
 # End Source File
 # Begin Source File
@@ -483,6 +491,18 @@ SOURCE=..\..\..\Src\element\upU\FourNodeQuadUP.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\upU\Nine_Four_Node_QuadUP.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\upU\Nine_Four_Node_QuadUP.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\upU\shp3dv.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\element\upU\TclEightNodeBrick_u_p_U.cpp
 # End Source File
 # Begin Source File
@@ -492,6 +512,14 @@ SOURCE=..\..\..\Src\element\upU\TclFourNodeQuadUPCommand.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\element\upU\TclTwentyNodeBrick_u_p_U.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\upU\Twenty_Eight_Node_BrickUP.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\upU\Twenty_Eight_Node_BrickUP.h
 # End Source File
 # Begin Source File
 

@@ -95,6 +95,10 @@ SOURCE=..\..\..\SRC\database\FileDatastore.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\database\NEESData.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\database\TclDatabaseCommands.cpp
 # End Source File
 # End Group
@@ -108,6 +112,10 @@ SOURCE=..\..\..\SRC\database\FE_Datastore.h
 # Begin Source File
 
 SOURCE=..\..\..\SRC\database\FileDatastore.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\database\NEESData.h
 # End Source File
 # End Group
 # End Target
