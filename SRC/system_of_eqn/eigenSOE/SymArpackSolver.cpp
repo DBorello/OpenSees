@@ -117,7 +117,7 @@ SymArpackSolver::solve(void)
     if (n == 0)
 	return 0;
 
-	timer (FACTOR);
+//	timer (FACTOR);
 	if (factored == false) {
 
 	   //factor the matrix
