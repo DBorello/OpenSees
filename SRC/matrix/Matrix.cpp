@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-09-19 16:52:02 $
+// $Revision: 1.6 $
+// $Date: 2001-10-01 18:21:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -1013,6 +1013,9 @@ Matrix::operator*(const Matrix &M) const
 	return result;
     } 
 
+    result.addMatrixProduct(0.0, *this, M, 1.0);
+    
+    /****************************************************
     double *resDataPtr = result.data;	    
 
     int innerDim = numCols;
@@ -1031,6 +1034,7 @@ Matrix::operator*(const Matrix &M) const
 	*resDataPtr++ = sum;
       }
     }
+    ******************************************************/
     return result;
 }
 
