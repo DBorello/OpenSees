@@ -1,6 +1,7 @@
 include ../../../../Makefile.def
 
 OBJS       = feapCommon.o \
+	TclFeapMaterialCommand.o \
 	FeapMaterial01.o matl01.o \
 	FeapMaterial02.o matl02.o \
 	FeapMaterial03.o matl03.o
