@@ -269,8 +269,10 @@ endif
 RECORDER_LIBS = $(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/DatastoreRecorder.o \
 	$(FE)/recorder/NodeRecorder.o \
+	$(FE)/recorder/EnvelopeNodeRecorder.o \
 	$(FE)/recorder/DriftRecorder.o \
 	$(FE)/recorder/ElementRecorder.o \
+	$(FE)/recorder/EnvelopeElementRecorder.o \
 	$(FE)/recorder/FilePlotter.o \
 	$(FE)/recorder/AlgorithmIncrements.o \
 	$(FE)/recorder/TclRecorderCommands.o \
