@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.0
-// $Date: 12/20/2001
-// $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Pinching.cpp
+// $Revision: 1.2 $
+// $Date: 2002-07-12 19:51:40 $
+// $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Pinching.cpp,v $
 //
 //
 // Pinching.cpp: implementation of the Pinching class from Fortran version.
