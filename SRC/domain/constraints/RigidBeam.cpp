@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:55 $
+// $Revision: 1.3 $
+// $Date: 2005-01-08 01:22:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/RigidBeam.cpp,v $
                                                                         
                                                                         
@@ -39,7 +39,7 @@
 #include <RigidBeam.h>
 
 
-RigidBeam::RigidBeam(Domain &theDomain, int nR, int nC, int startMPtag) {
+RigidBeam::RigidBeam(Domain &theDomain, int nR, int nC, int mPtag) {
 
     
     // get a pointer to the retained and constrained nodes - make sure they exist
@@ -125,8 +125,8 @@ RigidBeam::RigidBeam(Domain &theDomain, int nR, int nC, int startMPtag) {
     }	
     
     // create the MP_Constraint
-    MP_Constraint *newC = new MP_Constraint(startMPtag+1, nR, nC, 
-					    mat, id, id);
+    MP_Constraint *newC = new MP_Constraint(mPtag, nR, nC, mat, id, id);
+					    
     if (newC == 0) {
       opserr << "RigidBeam::RigidBeam - for nodes " << nC << " and " << nR << ", out of memory\n";
     } else {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-04-02 22:02:34 $
+// $Revision: 1.4 $
+// $Date: 2005-01-08 01:22:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/RigidRod.cpp,v $
                                                                         
                                                                         
@@ -40,7 +40,7 @@
 #include <RigidRod.h>
 
 
-RigidRod::RigidRod(Domain &theDomain, int nR, int nC, int startMPtag) {
+RigidRod::RigidRod(Domain &theDomain, int nR, int nC, int mPtag) {
 
     
     // get a pointer to the retained node and constrained nodes - ensure these exist
@@ -97,8 +97,8 @@ RigidRod::RigidRod(Domain &theDomain, int nR, int nC, int startMPtag) {
     }
 
     // create the MP_Constraint
-    MP_Constraint *newC = new MP_Constraint(startMPtag+1, nR, nC, 
-					    mat, id, id);
+    MP_Constraint *newC = new MP_Constraint(mPtag, nR, nC, mat, id, id);
+					    
     if (newC == 0) {
       opserr << "RigidRod::RigidRod - for nodes " << nR << " and " << nC << " out of memory\n";
       exit(-1);
