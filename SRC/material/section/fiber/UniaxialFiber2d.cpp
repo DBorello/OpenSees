@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-08 06:52:13 $
+// $Revision: 1.4 $
+// $Date: 2002-01-06 20:00:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber2d.cpp,v $
                                                                         
                                                                         
@@ -336,7 +336,7 @@ void UniaxialFiber2d::Print(ostream &s, int flag)
 {
     s << "\nUniaxialFiber2d, tag: " << this->getTag() << endl;
     s << "\tArea: " << area << endl; 
-    s << "\tMatrix as: " << 1.0 << ' ' << y << endl; 
+    s << "\tMatrix as: " << 1.0 << " " << y << endl; 
     s << "\tMaterial, tag: " << theMaterial->getTag() << endl;
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2001-11-28 00:03:55 $
+// $Revision: 1.12 $
+// $Date: 2002-01-06 20:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -1607,7 +1607,7 @@ TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, in
     ifstream theFile;
     theFile.open(fileName, ios::in);
     if (!theFile) {
-      cerr << "section UCFiber - could not open file named " << *fileName;
+      cerr << "section UCFiber - could not open file named " << fileName;
       return TCL_ERROR;
     } else {
       int foundStart = 0;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-06-16 04:45:33 $
+// $Revision: 1.5 $
+// $Date: 2002-01-06 20:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticMembranePlateSection.cpp,v $
 
 // Ed "C++" Love
@@ -244,10 +244,10 @@ const Matrix&  ElasticMembranePlateSection::getSectionTangent( )
 void  ElasticMembranePlateSection::Print( ostream &s, int flag )
 {
   s << "ElasticMembranePlateSection: \n " ;
-  s <<  "  Young's Modulus E = "  <<  E  <<  '\n' ;
-  s <<  "  Poisson's Ratio nu = " <<  nu <<  '\n' ;
-  s <<  "  Thickness h = "        <<  h  <<  '\n' ;
-  s <<  "  Density rho = "        <<  (rhoH/h)  <<  '\n' ;
+  s <<  "  Young's Modulus E = "  <<  E  <<  endl ;
+  s <<  "  Poisson's Ratio nu = " <<  nu <<  endl ;
+  s <<  "  Thickness h = "        <<  h  <<  endl ;
+  s <<  "  Density rho = "        <<  (rhoH/h)  <<  endl ;
 
   return ;
 }

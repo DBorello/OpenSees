@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-16 04:45:33 $
+// $Revision: 1.3 $
+// $Date: 2002-01-06 20:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/MembranePlateFiberSection.cpp,v $
 
 // Ed "C++" Love
@@ -456,7 +456,7 @@ const Matrix&  MembranePlateFiberSection::getSectionTangent( )
 void  MembranePlateFiberSection::Print( ostream &s, int flag )
 {
   s << "MembranePlateFiberSection: \n " ;
-  s <<  "  Thickness h = "        <<  h  <<  '\n' ;
+  s <<  "  Thickness h = "        <<  h  <<  endl ;
 
   theFibers[0]->Print( s, flag ) ;
 

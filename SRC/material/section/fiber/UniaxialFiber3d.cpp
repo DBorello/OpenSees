@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:44:30 $
+// $Revision: 1.3 $
+// $Date: 2002-01-06 20:00:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber3d.cpp,v $
                                                                         
                                                                         
@@ -361,7 +361,7 @@ void UniaxialFiber3d::Print(ostream &s, int flag)
 {
     s << "\nUniaxialFiber3d, tag: " << this->getTag() << endl;
     s << "\tArea: " << area << endl; 
-    s << "\tMatrix as: " << 1.0 << ' ' << as[0] << ' ' << as[1] << endl; 
+    s << "\tMatrix as: " << 1.0 << " " << as[0] << " " << as[1] << endl; 
     s << "\tMaterial, tag: " << theMaterial->getTag() << endl;
 }
 
