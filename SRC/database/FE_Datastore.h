@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-04-02 18:47:50 $
+// $Revision: 1.4 $
+// $Date: 2002-06-18 01:06:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.h,v $
                                                                         
                                                                         
@@ -70,6 +70,7 @@ class FE_Datastore: public Channel
     // in the ModelBuilder and Channel classes for database applications
 
     virtual int getDbTag(void) =0;
+    virtual int isDatastore(void);
 
     virtual int commitState(int commitTag);    
     virtual int restoreState(int commitTag);        

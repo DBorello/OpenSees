@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:15 $
+// $Revision: 1.2 $
+// $Date: 2002-06-18 01:05:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Channel.cpp,v $
                                                                         
                                                                         
@@ -47,6 +47,12 @@ Channel::~Channel()
 {
     
 }    
+
+int
+Channel::isDatastore(void)
+{
+  return 0;
+}
 
 int
 Channel::getDbTag(void)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-02-12 20:13:33 $
+// $Revision: 1.3 $
+// $Date: 2002-06-18 01:06:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -619,7 +619,6 @@ FileDatastore::sendID(int dataTag, int commitTag,
     cerr << "FileDatastore::sendID() - the database does not deal with IDs of this size ";
     cerr << idSize << endl;
   }
-
 
   // open a file if not already opened
   if (ids[idSize] == 0) {

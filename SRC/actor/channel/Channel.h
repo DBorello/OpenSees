@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:15 $
+// $Revision: 1.2 $
+// $Date: 2002-06-18 01:05:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Channel.h,v $
                                                                         
                                                                         
@@ -61,7 +61,8 @@ class Channel
     virtual int setUpActor(void) =0;
     virtual int setNextAddress(const ChannelAddress &theAddress) =0;
     virtual ChannelAddress *getLastSendersAddress(void) =0;
-    
+
+    virtual int isDatastore(void);
     virtual int getDbTag(void);
     
     // methods to send/receive messages and objects on channels.

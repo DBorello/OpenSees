@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-04-02 18:47:50 $
+// $Revision: 1.4 $
+// $Date: 2002-06-18 01:06:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.cpp,v $
                                                                         
                                                                         
@@ -60,6 +60,11 @@ FE_Datastore::~FE_Datastore()
     // does nothing
 }
 
+int
+FE_Datastore::isDatastore(void)
+{
+  return 1;
+}
 
 /********************************************************************
  *                   CHANNEL METHODS  THAT DO NOTHING               *
