@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-06-18 23:18:10 $
+// $Revision: 1.2 $
+// $Date: 2003-06-18 23:23:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/PatternRecorder.cpp,v $
 
 // Written: MHS 
