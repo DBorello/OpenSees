@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-04-04 01:01:06 $
+// $Revision: 1.8 $
+// $Date: 2003-05-08 20:20:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -1782,8 +1782,9 @@ ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
      crdTransf->getLocalAxes(xAxis, yAxis, zAxis);
                         
      s << "#ForceBeamColumn3D\n";
-     s << "#LocalAxis " << xAxis(0) << " " << xAxis(1) << " " << xAxis(2) 
-       << " " << zAxis(0) << " " << zAxis(1) << " " << zAxis(2) << endln;
+     s << "#LocalAxis " << xAxis(0) << " " << xAxis(1) << " " << xAxis(2);
+     s << " " << yAxis(0) << " " << yAxis(1) << " " << yAxis(2) << " ";
+     s << zAxis(0) << " " << zAxis(1) << " " << zAxis(2) << endln;
 
      const Vector &node1Crd = theNodes[0]->getCrds();
      const Vector &node2Crd = theNodes[1]->getCrds();	
@@ -1797,6 +1798,23 @@ ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
      s << "#NODE " << node2Crd(0) << " " << node2Crd(1) << " " << node2Crd(2)
        << " " << node2Disp(0) << " " << node2Disp(1) << " " << node2Disp(2)
        << " " << node2Disp(3) << " " << node2Disp(4) << " " << node2Disp(5) << endln;
+
+
+     double P  = Secommit(0);
+     double MZ1 = Secommit(1);
+     double MZ2 = Secommit(2);
+     double MY1 = Secommit(3);
+     double MY2 = Secommit(4);
+     double L = crdTransf->getInitialLength();
+     double VY = (MZ1+MZ2)/L;
+     theVector(1) =  VY;
+     theVector(4) = -VY;
+     double VZ = (MY1+MY2)/L;
+     double T  = Secommit(5);
+     s << "#END_FORCES " << -P+p0[0] << ' '  <<  VY+p0[1] << ' '  << -VZ+p0[3] << ' ' 
+       << -T << ' '  << MY1 << ' ' << MZ1 << endln;
+     s << "#END_FORCES "  << P  << ' '  << -VY+p0[2] << ' ' << VZ+p0[4] << ' '  
+       << T << ' ' << MY2 << ' '  <<  MZ2 << endln;
 
      // allocate array of vectors to store section coordinates and displacements
      static int maxNumSections = 0;
@@ -1836,7 +1854,8 @@ ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
      
      // spit out the section location & invoke print on the scetion
      for (int i=0; i<numSections; i++) {
-       s << "#SECTION " << (coords[i])(0) << " " << (coords[i])(1) << " " << (coords[i])(2);       s << " " << (displs[i])(0) << " " << (displs[i])(1) << " " << (displs[i])(2) << endln;
+       s << "#SECTION " << (coords[i])(0) << " " << (coords[i])(1) << " " << (coords[i])(2);       
+       s << " " << (displs[i])(0) << " " << (displs[i])(1) << " " << (displs[i])(2) << endln;
        sections[i]->Print(s, flag); 
      }
    }
@@ -1862,7 +1881,7 @@ ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
        << MY1 << " " << -VZ+p0[3] << " " << T << endln;
      s << "\tEnd 2 Forces (P MZ VY MY VZ T): "
        << P        << " " << MZ2 << " " << -VY+p0[2] << " " 
-       << MY2 << " " <<  VZ+p0[4] << " " << T << endln;
+       << MY2 << " " <<  VZ+p0[4] << " " << -T << endln;
      
      if (flag == 1) { 
        for (int i = 0; i < numSections; i++)
