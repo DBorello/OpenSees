@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-03-04 19:07:23 $
+// $Revision: 1.4 $
+// $Date: 2002-03-04 19:57:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/section/FiberSectionRepr.cpp,v $
                                                                         
                                                                         
@@ -182,7 +182,7 @@ int FiberSectionRepr::addPatch (const Patch & aPatch)
    if (nPatches < maxNPatches)
       patch[nPatches++] = aPatch.getCopy();
 
-   // out of room: make a new bigger array, copy old over and then add new patch
+   // out of room: make a new bigger array, copy old over, delete old array and then add new patch
    else {
      maxNPatches *= 2;
      Patch **patches = new Patch*[maxNPatches];     
@@ -192,6 +192,8 @@ int FiberSectionRepr::addPatch (const Patch & aPatch)
      }
      for (int i=0; i<nPatches; i++)
        patches[i] = patch[i];
+     
+     delete [] patch;
      patch = patches;
      patch[nPatches++] = aPatch.getCopy();
    }
@@ -207,7 +209,7 @@ int FiberSectionRepr::addReinfLayer (const ReinfLayer & aReinfLayer)
       reinfLayer[nReinfLayers++] = aReinfLayer.getCopy();
 
 
-   // out of room: make a new bigger array, copy old over and then add new patch
+   // out of room: make a new bigger array, copy old over, delete old array and then add new layer
    else {
      maxNReinfLayers *= 2;
      ReinfLayer **reinfLayers = new ReinfLayer*[maxNReinfLayers];     
@@ -217,6 +219,8 @@ int FiberSectionRepr::addReinfLayer (const ReinfLayer & aReinfLayer)
      }
      for (int i=0; i<nReinfLayers; i++)
        reinfLayers[i] = reinfLayer[i];
+
+     delete [] reinfLayer;
      reinfLayer = reinfLayers;
      reinfLayer[nReinfLayers++] = aReinfLayer.getCopy();
    }
