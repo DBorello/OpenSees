@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2003-02-25 23:34:25 $
+// $Revision: 1.19 $
+// $Date: 2003-05-07 20:38:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -79,6 +79,7 @@
 #include <YieldSurface_BC.h>
 #include <YS_Evolution.h>
 #include <PlasticHardeningMaterial.h>
+#include <CyclicModel.h> //!!
 
 //
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
@@ -126,7 +127,11 @@ TclModelBuilder_addYS_EvolutionModel(ClientData clientData, Tcl_Interp *interp,
 int
 TclModelBuilder_addYS_PlasticMaterial(ClientData clientData, Tcl_Interp *interp,
 				    int argc, TCL_Char **argv);
-			    
+
+int //!!
+TclModelBuilder_addCyclicModel(ClientData clientData, Tcl_Interp *interp,
+				    int argc, TCL_Char **argv);			    
+
 int
 TclModelBuilder_addPattern(ClientData clientData, Tcl_Interp *interp, int argc,   
 			   TCL_Char **argv);
@@ -258,6 +263,7 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   the2dGeomTransfs = new ArrayOfTaggedObjects(32);  
   the3dGeomTransfs = new ArrayOfTaggedObjects(32);  
   theYieldSurface_BCs = new ArrayOfTaggedObjects(32);
+  theCycModels = new ArrayOfTaggedObjects(32); //!!
   theYS_EvolutionModels = new ArrayOfTaggedObjects(32);
   thePlasticMaterials = new ArrayOfTaggedObjects(32);
 
@@ -285,6 +291,9 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 
   Tcl_CreateCommand(interp, "plasticMaterial", TclModelBuilder_addYS_PlasticMaterial,
 		    (ClientData)NULL, NULL);
+
+  Tcl_CreateCommand(interp, "cyclicModel", TclModelBuilder_addCyclicModel,
+		    (ClientData)NULL, NULL); //!!
 
   Tcl_CreateCommand(interp, "pattern", TclModelBuilder_addPattern,
 		    (ClientData)NULL, NULL);
@@ -376,6 +385,7 @@ TclModelBuilder::~TclModelBuilder()
   theYieldSurface_BCs->clearAll();
   theYS_EvolutionModels->clearAll();
   thePlasticMaterials->clearAll();
+  theCycModels->clearAll();//!!
 
   // free up memory allocated in the constructor
   delete theUniaxialMaterials;
@@ -387,6 +397,7 @@ TclModelBuilder::~TclModelBuilder()
   delete theYieldSurface_BCs;
   delete theYS_EvolutionModels;
   delete thePlasticMaterials;
+  delete theCycModels;//!!
 
   // set the pointers to 0 
   theTclDomain =0;
@@ -560,6 +571,20 @@ TclModelBuilder::addYieldSurface_BC(YieldSurface_BC &theYS)
   }
 }
 
+int //!!
+TclModelBuilder::addCyclicModel(CyclicModel &theCM)
+{
+//	TaggedObject *mc = &theYS;
+
+  bool result = theCycModels->addComponent(&theCM);
+  if (result == true)
+    return 0;
+  else {
+    opserr << "TclModelBuilder::addCyclicModel() - failed to add : " << theCM;
+    return -1;
+  }
+}
+
 YieldSurface_BC *
 TclModelBuilder::getYieldSurface_BC(int tag)
 {
@@ -572,6 +597,17 @@ TclModelBuilder::getYieldSurface_BC(int tag)
   return result;
 }
 
+CyclicModel * //!!
+TclModelBuilder::getCyclicModel(int tag)
+{
+  TaggedObject *mc = theCycModels->getComponentPtr(tag);
+  if (mc == 0)
+    return 0;
+
+  // otherweise we do a cast and return
+  CyclicModel *result = (CyclicModel *)mc;
+  return result;
+}
 
 int
 TclModelBuilder::addPlasticMaterial(PlasticHardeningMaterial &theMat)
@@ -913,6 +949,19 @@ TclModelBuilder_addYS_PlasticMaterial(ClientData clientData, Tcl_Interp *interp,
   return TclModelBuilderPlasticMaterialCommand(clientData, interp,
 						argc, argv, theTclBuilder);
 }
+
+//!!
+extern int TclModelBuilderCyclicModelCommand(ClientData clienData, Tcl_Interp *interp, int argc,
+				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
+int
+TclModelBuilder_addCyclicModel(ClientData clientData, Tcl_Interp *interp,
+				    int argc, TCL_Char **argv)
+
+{
+  return TclModelBuilderCyclicModelCommand(clientData, interp,
+						argc, argv, theTclBuilder);
+}
+
 
 extern int
 TclPatternCommand(ClientData clientData, Tcl_Interp *interp, 
