@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:33 $
+// $Revision: 1.7 $
+// $Date: 2003-12-12 18:41:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.cpp,v $
                                                                         
                                                                         
@@ -327,11 +327,15 @@ ElasticSection3d::recvSelf(int commitTag, Channel &theChannel,
 void
 ElasticSection3d::Print(OPS_Stream &s, int flag)
 {
-  s << "ElasticSection3d, tag: " << this->getTag() << endln;
-  s << "\t E: " << E << endln;
-  s << "\t A: " << A << endln;
-  s << "\tIz: " << Iz << endln;
-  s << "\tIy: " << Iy << endln;
-  s << "\t G: " << G << endln;
-  s << "\t J: " << J << endln;
+  if (flag == 2) {
+
+  } else {
+    s << "ElasticSection3d, tag: " << this->getTag() << endln;
+    s << "\t E: " << E << endln;
+    s << "\t A: " << A << endln;
+    s << "\tIz: " << Iz << endln;
+    s << "\tIy: " << Iy << endln;
+    s << "\t G: " << G << endln;
+    s << "\t J: " << J << endln;
+  }
 }
