@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-03-06 18:02:26 $
+// $Revision: 1.12 $
+// $Date: 2004-10-08 22:03:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.cpp,v $
                                                                         
                                                                         
-// File: ~/crdTransf/LinearCrdTransf2d.C
-//
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -50,9 +48,10 @@ LinearCrdTransf2d::LinearCrdTransf2d(int tag):
   CrdTransf2d(tag, CRDTR_TAG_LinearCrdTransf2d),
   nodeIPtr(0), nodeJPtr(0),
   nodeIOffset(0), nodeJOffset(0),
-  cosTheta(0), sinTheta(0), L(0)
+  cosTheta(0), sinTheta(0), L(0),
+  nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 {
-	// Does nothing
+  // Does nothing
 }
 
 // constructor:
@@ -62,7 +61,8 @@ LinearCrdTransf2d::LinearCrdTransf2d(int tag,
   CrdTransf2d(tag, CRDTR_TAG_LinearCrdTransf2d),
   nodeIPtr(0), nodeJPtr(0),
   nodeIOffset(0), nodeJOffset(0),
-  cosTheta(0), sinTheta(0), L(0)
+  cosTheta(0), sinTheta(0), L(0),
+  nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 {
 	// check rigid joint offset for node I
 	if (&rigJntOffset1 == 0 || rigJntOffset1.Size() != 2 ) {
@@ -96,7 +96,8 @@ LinearCrdTransf2d::LinearCrdTransf2d():
   CrdTransf2d(0, CRDTR_TAG_LinearCrdTransf2d),
   nodeIPtr(0), nodeJPtr(0),
   nodeIOffset(0), nodeJOffset(0),
-  cosTheta(0), sinTheta(0), L(0)
+  cosTheta(0), sinTheta(0), L(0),
+  nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 {
 
 }
@@ -106,10 +107,14 @@ LinearCrdTransf2d::LinearCrdTransf2d():
 // destructor:
 LinearCrdTransf2d::~LinearCrdTransf2d() 
 {
-	if (nodeIOffset)
-		delete [] nodeIOffset;
-	if (nodeJOffset)
-		delete [] nodeJOffset;
+  if (nodeIOffset)
+    delete [] nodeIOffset;
+  if (nodeJOffset)
+    delete [] nodeJOffset;
+  if (nodeIInitialDisp != 0)
+    delete [] nodeIInitialDisp;
+  if (nodeJInitialDisp != 0)
+    delete [] nodeJInitialDisp;
 }
 
 
@@ -148,11 +153,34 @@ LinearCrdTransf2d::initialize(Node *nodeIPointer, Node *nodeJPointer)
       opserr << "\ninvalid pointers to the element nodes\n";
       return -1;
    }
-       
+
+   // see if there is some initial displacements at nodes
+   if (initialDispChecked == false) {
+     const Vector &nodeIDisp = nodeIPtr->getDisp();
+     const Vector &nodeJDisp = nodeJPtr->getDisp();
+     for (int i=0; i<3; i++)
+       if (nodeIDisp(i) != 0.0) {
+	 nodeIInitialDisp = new double [3];
+	 for (int j=0; j<3; j++)
+	   nodeIInitialDisp[j] = nodeIDisp(j);
+	 i = 3;
+       }
+     
+     for (int j=0; j<3; j++)
+       if (nodeJDisp(j) != 0.0) {
+	 nodeJInitialDisp = new double [3];
+	 for (int i=0; i<3; i++)
+	   nodeJInitialDisp[i] = nodeJDisp(i);
+	 j = nodeIDisp.Size();
+       }
+
+     initialDispChecked = true;
+   }
+      
    // get element length and orientation
    if ((error = this->computeElemtLengthAndOrient()))
       return error;
-      
+
    return 0;
 }
 
@@ -176,6 +204,16 @@ LinearCrdTransf2d::computeElemtLengthAndOrient()
    dx(0) = ndJCoords(0) - ndICoords(0);
    dx(1) = ndJCoords(1) - ndICoords(1);
 
+   if (nodeIInitialDisp != 0) {
+     dx(0) -= nodeIInitialDisp[0];
+     dx(1) -= nodeIInitialDisp[1];
+   }
+
+   if (nodeJInitialDisp != 0) {
+     dx(0) += nodeJInitialDisp[0];
+     dx(1) += nodeJInitialDisp[1];
+   }
+   
    if (nodeJOffset != 0) {
      dx(0) += nodeJOffset[0];
      dx(1) += nodeJOffset[1];
@@ -185,7 +223,7 @@ LinearCrdTransf2d::computeElemtLengthAndOrient()
      dx(0) -= nodeIOffset[0];
      dx(1) -= nodeIOffset[1];
    }
-   
+
    // calculate the element length
    L = dx.Norm();
 
@@ -202,8 +240,6 @@ LinearCrdTransf2d::computeElemtLengthAndOrient()
    
    return 0;
 }
-
-
 
 
 
@@ -224,42 +260,52 @@ LinearCrdTransf2d::getDeformedLength(void)
 const Vector &
 LinearCrdTransf2d::getBasicTrialDisp (void)
 {
-	// determine global displacements
-	const Vector &disp1 = nodeIPtr->getTrialDisp();
-	const Vector &disp2 = nodeJPtr->getTrialDisp();
+  // determine global displacements
+  const Vector &disp1 = nodeIPtr->getTrialDisp();
+  const Vector &disp2 = nodeJPtr->getTrialDisp();
+  
+  static double ug[6];
+  for (int i = 0; i < 3; i++) {
+    ug[i]   = disp1(i);
+    ug[i+3] = disp2(i);
+  }
 
-	static double ug[6];
-	for (int i = 0; i < 3; i++) {
-		ug[i]   = disp1(i);
-		ug[i+3] = disp2(i);
-	}
-
-	static Vector ub(3);
-
-	double oneOverL = 1.0/L;
-	double sl = sinTheta*oneOverL;
-	double cl = cosTheta*oneOverL;
-
+  if (nodeIInitialDisp != 0) {
+    for (int j=0; j<3; j++)
+      ug[j] -= nodeIInitialDisp[j];
+  }
+    
+  if (nodeJInitialDisp != 0) {
+    for (int j=0; j<3; j++)
+      ug[j+3] -= nodeJInitialDisp[j];
+  }
+  
+  static Vector ub(3);
+  
+  double oneOverL = 1.0/L;
+  double sl = sinTheta*oneOverL;
+  double cl = cosTheta*oneOverL;
+  
   ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] +
     cosTheta*ug[3] + sinTheta*ug[4];
   
   ub(1) = -sl*ug[0] + cl*ug[1] + ug[2] +
     sl*ug[3] - cl*ug[4];
-
+  
   if (nodeIOffset != 0) {
     double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
     double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
     ub(0) -= t02*ug[2];
     ub(1) += oneOverL*t12*ug[2];
   }
-
+  
   if (nodeJOffset != 0) {
     double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
     double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
     ub(0) += t35*ug[5];
     ub(1) -= oneOverL*t45*ug[5];
   }
-
+  
   ub(2) = ub(1) + ug[5] - ug[2];
 
   return ub;
@@ -270,27 +316,37 @@ LinearCrdTransf2d::getBasicTrialDisp (void)
 const Vector &
 LinearCrdTransf2d::getBasicTrialDispShapeSensitivity (void)
 {
-	// Want to return dAdh * u
+  // Want to return dAdh * u
+  
+  // determine global displacements
+  const Vector &disp1 = nodeIPtr->getTrialDisp();
+  const Vector &disp2 = nodeJPtr->getTrialDisp();
+  
+  static double ug[6];
+  for (int i = 0; i < 3; i++) {
+    ug[i]   = disp1(i);
+    ug[i+3] = disp2(i);
+  }
 
-	// determine global displacements
-	const Vector &disp1 = nodeIPtr->getTrialDisp();
-	const Vector &disp2 = nodeJPtr->getTrialDisp();
-
-	static double ug[6];
-	for (int i = 0; i < 3; i++) {
-		ug[i]   = disp1(i);
-		ug[i+3] = disp2(i);
-	}
-
-	static Vector ub(3);
-	ub.Zero();
-
-	static ID nodeParameterID(2);
-	nodeParameterID(0) = nodeIPtr->getCrdsSensitivity();
-	nodeParameterID(1) = nodeJPtr->getCrdsSensitivity();
-
-	if (nodeParameterID(0) != 0 || nodeParameterID(1) != 0) {
-
+  if (nodeIInitialDisp != 0) {
+    for (int j=0; j<3; j++)
+      ug[j] -= nodeIInitialDisp[j];
+  }
+    
+  if (nodeJInitialDisp != 0) {
+    for (int j=0; j<3; j++)
+      ug[j+3] -= nodeJInitialDisp[j];
+  }
+  
+  static Vector ub(3);
+  ub.Zero();
+  
+  static ID nodeParameterID(2);
+  nodeParameterID(0) = nodeIPtr->getCrdsSensitivity();
+  nodeParameterID(1) = nodeJPtr->getCrdsSensitivity();
+  
+  if (nodeParameterID(0) != 0 || nodeParameterID(1) != 0) {
+    
 	  if (nodeIOffset != 0 || nodeJOffset != 0) {
 	    opserr << "ERROR: Currently a node offset cannot be used in " << endln
 		   << " conjunction with random nodal coordinates." << endln;
@@ -332,9 +388,9 @@ LinearCrdTransf2d::getBasicTrialDispShapeSensitivity (void)
 	  ub(1) = -dsldh*ug[0] + dcldh*ug[1] + dsldh*ug[3] - dcldh*ug[4];
 	  
 	  ub(2) = ub(1);
-	}
-
-	return ub;
+  }
+  
+  return ub;
 }
 
 
@@ -851,24 +907,44 @@ LinearCrdTransf2d::sendSelf(int cTag, Channel &theChannel)
 {
   int res = 0;
   
-  static Vector data(10);
+  static Vector data(12);
   data(0) = this->getTag();
   data(1) = L;
   if (nodeIOffset != 0) {
-    data(2) = 1.0;
-    data(3) = nodeIOffset[0];
-    data(4) = nodeIOffset[1];
-    data(5) = nodeIOffset[2];
-  } else
+    data(2) = nodeIOffset[0];
+    data(3) = nodeIOffset[1];
+  } else {
     data(2) = 0.0;
-  
+    data(3) = 0.0;
+  }
+
   if (nodeJOffset != 0) {
-    data(6) = 1.0;
-    data(7) = nodeJOffset[0];
-    data(8) = nodeJOffset[1];
-    data(9) = nodeJOffset[2];
-  } else
+    data(4) = nodeJOffset[0];
+    data(5) = nodeJOffset[1];
+  } else {
+    data(4) = 0.0;
+    data(5) = 0.0;
+  }
+
+  if (nodeIInitialDisp != 0) {
+    data(6) = nodeIInitialDisp[0];
+    data(7) = nodeIInitialDisp[1];
+    data(8) = nodeIInitialDisp[2];
+  } else {
     data(6) = 0.0;
+    data(7) = 0.0;
+    data(8) = 0.0;
+  }
+
+  if (nodeJInitialDisp != 0) {
+    data(9) = nodeJInitialDisp[0];
+    data(10) = nodeJInitialDisp[1];
+    data(11) = nodeJInitialDisp[2];
+  } else {
+    data(9) = 0.0;
+    data(10) = 0.0;
+    data(11) = 0.0;
+  }
   
   res += theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) {
@@ -886,7 +962,7 @@ LinearCrdTransf2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
 {
   int res = 0;
   
-  static Vector data(10);
+  static Vector data(12);
   
   res += theChannel.recvVector(this->getDbTag(), cTag, data);
   if (res < 0) {
@@ -898,21 +974,55 @@ LinearCrdTransf2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
   L = data(1);
   data(0) = this->getTag();
   data(1) = L;
-  if (data(2) == 1.0) {
+
+  int flag;
+  int i,j;
+
+  flag = 0;
+  for (i=2; i<=3; i++)
+    if (data(i) != 0.0)
+      flag = 1;
+  if (flag == 1) {
     if (nodeIOffset == 0)
-      nodeIOffset = new double[3];
-    nodeIOffset[0] = data(3);
-    nodeIOffset[1] = data(4);
-    nodeIOffset[2] = data(5);
-  } 
-  
-  if (data(6) == 1.0) {
+      nodeIOffset = new double[2];
+    for (i=2, j=0; i<=3; i++, j++)
+      nodeIOffset[j] = data(i);
+  }
+
+  flag = 0;
+  for (i=4; i<=5; i++)
+    if (data(i) != 0.0)
+      flag = 1;
+  if (flag == 1) {
     if (nodeJOffset == 0)
-      nodeJOffset = new double[3];
-    nodeJOffset[0] = data(7);
-    nodeJOffset[1] = data(8);
-    nodeJOffset[2] = data(9);
-  } 
+      nodeJOffset = new double[2];
+    for (i=4, j=0; i<=5; i++, j++)
+      nodeJOffset[j] = data(i);
+  }
+
+  flag = 0;
+  for (i=6; i<=8; i++)
+    if (data(i) != 0.0)
+      flag = 1;
+  if (flag == 1) {
+    if (nodeIInitialDisp == 0)
+      nodeIInitialDisp = new double[3];
+    for (i=6, j=0; i<=7; i++, j++)
+      nodeIInitialDisp[j] = data(i);
+  }
+
+  flag = 0;
+  for (i=9; i<=11; i++)
+    if (data(i) != 0.0)
+      flag = 1;
+  if (flag == 1) {
+    if (nodeJInitialDisp == 0)
+      nodeJInitialDisp = new double [3];
+    for (i=9, j=0; i<=11; i++, j++)
+      nodeJInitialDisp[j] = data(i);
+  }
+
+  initialDispChecked = true;
 
   return res;
 }
@@ -952,6 +1062,16 @@ LinearCrdTransf2d::getPointGlobalDisplFromBasic (double xi, const Vector &uxb)
    {
       ug(i)   = disp1(i);
       ug(i+3) = disp2(i);
+   }
+
+   if (nodeIInitialDisp != 0) {
+     for (int j=0; j<3; j++)
+       ug[j] -= nodeIInitialDisp[j];
+   }
+   
+   if (nodeJInitialDisp != 0) {
+     for (int j=0; j<3; j++)
+       ug[j+3] -= nodeJInitialDisp[j];
    }
 
    // transform global end displacements to local coordinates

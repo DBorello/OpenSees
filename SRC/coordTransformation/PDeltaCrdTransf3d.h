@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-04-04 16:53:30 $
+// $Revision: 1.6 $
+// $Date: 2004-10-08 22:03:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.h,v $
-                                                                        
-                                                                        
-// File: ~/crdTransf/PDeltaCrdTransf3d.h
-//
+                                                          
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -96,8 +93,10 @@ class PDeltaCrdTransf3d: public CrdTransf3d
     double R[3][3];	// Transformation matrix
 
     double L;                // undeformed element length
-	double ul17;	// Transverse local displacement offsets of P-Delta
-	double ul28;
+    double ul17;	// Transverse local displacement offsets of P-Delta
+    double ul28;
+    double *nodeIInitialDisp, *nodeJInitialDisp;
+    bool initialDispChecked;
 };
 
 #endif

@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:53 $
+// $Revision: 1.6 $
+// $Date: 2004-10-08 22:03:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf2d.h,v $
-                                                                        
-                                                                        
-// File: ~/crdTransf/PDeltaCrdTransf2d.h
-//
+
+
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -97,6 +95,8 @@ class PDeltaCrdTransf2d: public CrdTransf2d
 
     double L;                // undeformed element length
     double ul14;	// Transverse local displacement offset of P-Delta
+    double *nodeIInitialDisp, *nodeJInitialDisp;
+    bool initialDispChecked;
 };
 
 #endif

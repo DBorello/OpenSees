@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-04-04 16:53:29 $
+// $Revision: 1.8 $
+// $Date: 2004-10-08 22:03:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.h,v $
                                                                         
-                                                                        
-// File: ~/crdTransf/LinearCrdTransf3d.h
-//
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -97,6 +94,8 @@ class LinearCrdTransf3d: public CrdTransf3d
     double R[3][3];	// Transformation matrix
     
     double L;           // undeformed element length
+    double *nodeIInitialDisp, *nodeJInitialDisp;
+    bool initialDispChecked;
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-04-04 16:53:29 $
+// $Revision: 1.12 $
+// $Date: 2004-10-08 22:03:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,8 @@
 LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane):
   CrdTransf3d(tag, CRDTR_TAG_LinearCrdTransf3d),
   nodeIPtr(0), nodeJPtr(0),
-  nodeIOffset(0), nodeJOffset(0), L(0)
+  nodeIOffset(0), nodeJOffset(0), L(0),
+  nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 {
 	for (int i = 0; i < 2; i++)
 		for (int j = 0; j < 3; j++)
@@ -59,11 +60,12 @@ LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane):
 
 // constructor:
 LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
-										   const Vector &rigJntOffset1,
-										   const Vector &rigJntOffset2):
+				     const Vector &rigJntOffset1,
+				     const Vector &rigJntOffset2):
   CrdTransf3d(tag, CRDTR_TAG_LinearCrdTransf3d),
   nodeIPtr(0), nodeJPtr(0),
-  nodeIOffset(0), nodeJOffset(0), L(0)
+  nodeIOffset(0), nodeJOffset(0), L(0),
+  nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 {
 	for (int i = 0; i < 2; i++)
 		for (int j = 0; j < 3; j++)
@@ -106,7 +108,8 @@ LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
 LinearCrdTransf3d::LinearCrdTransf3d():
   CrdTransf3d(0, CRDTR_TAG_LinearCrdTransf3d),
   nodeIPtr(0), nodeJPtr(0),
-  nodeIOffset(0), nodeJOffset(0), L(0)
+  nodeIOffset(0), nodeJOffset(0), L(0),
+  nodeIInitialDisp(0), nodeJInitialDisp(0), initialDispChecked(false)
 {
 	for (int i = 0; i < 3; i++)
 		for (int j = 0; j < 3; j++)
@@ -118,10 +121,14 @@ LinearCrdTransf3d::LinearCrdTransf3d():
 // destructor:
 LinearCrdTransf3d::~LinearCrdTransf3d() 
 {
-	if (nodeIOffset)
-		delete [] nodeIOffset;
-	if (nodeJOffset)
-		delete [] nodeJOffset;
+  if (nodeIOffset)
+    delete [] nodeIOffset;
+  if (nodeJOffset)
+    delete [] nodeJOffset;
+  if (nodeIInitialDisp != 0)
+    delete [] nodeIInitialDisp;
+  if (nodeJInitialDisp != 0)
+    delete [] nodeJInitialDisp;
 }
 
 
@@ -160,11 +167,33 @@ LinearCrdTransf3d::initialize(Node *nodeIPointer, Node *nodeJPointer)
       opserr << "\ninvalid pointers to the element nodes\n";
       return -1;
    }
-       
+
+   // see if there is some initial displacements at nodes
+   if (initialDispChecked == false) {
+     const Vector &nodeIDisp = nodeIPtr->getDisp();
+     const Vector &nodeJDisp = nodeJPtr->getDisp();
+     for (int i=0; i<6; i++)
+       if (nodeIDisp(i) != 0.0) {
+	 nodeIInitialDisp = new double [6];
+	 for (int j=0; j<6; j++)
+	   nodeIInitialDisp[j] = nodeIDisp(j);
+	 i = 6;
+       }
+     
+     for (int j=0; j<6; j++)
+       if (nodeJDisp(j) != 0.0) {
+	 nodeJInitialDisp = new double [6];
+	 for (int i=0; i<6; i++)
+	   nodeJInitialDisp[i] = nodeJDisp(i);
+	 j = 6;
+       }
+
+     initialDispChecked = true;
+   }
+     
    // get element length and orientation
    if ((error = this->computeElemtLengthAndOrient()))
       return error;
-
 
    static Vector XAxis(3);
    static Vector YAxis(3);
@@ -210,6 +239,18 @@ LinearCrdTransf3d::computeElemtLengthAndOrient()
      dx(2) -= nodeIOffset[2];
    }
 
+   if (nodeIInitialDisp != 0) {
+     dx(0) -= nodeIInitialDisp[0];
+     dx(1) -= nodeIInitialDisp[1];
+     dx(2) -= nodeIInitialDisp[2];
+   }
+
+   if (nodeJInitialDisp != 0) {
+     dx(0) += nodeJInitialDisp[0];
+     dx(1) += nodeJInitialDisp[1];
+     dx(2) += nodeJInitialDisp[2];
+   }
+
    // calculate the element length
    L = dx.Norm();
 
@@ -231,7 +272,7 @@ LinearCrdTransf3d::computeElemtLengthAndOrient()
 int
 LinearCrdTransf3d::getLocalAxes(Vector &XAxis, Vector &YAxis, Vector &ZAxis)
 {
-	// Compute y = v cross x
+  // Compute y = v cross x
 	// Note: v(i) is stored in R[2][i]
 	static Vector vAxis(3);
 	vAxis(0) = R[2][0];	vAxis(1) = R[2][1];	vAxis(2) = R[2][2];
@@ -296,15 +337,25 @@ LinearCrdTransf3d::getDeformedLength(void)
 const Vector &
 LinearCrdTransf3d::getBasicTrialDisp (void)
 {
-	// determine global displacements
-	const Vector &disp1 = nodeIPtr->getTrialDisp();
-	const Vector &disp2 = nodeJPtr->getTrialDisp();
-
-	static double ug[12];
-	for (int i = 0; i < 6; i++) {
-		ug[i]   = disp1(i);
-		ug[i+6] = disp2(i);
-	}
+  // determine global displacements
+  const Vector &disp1 = nodeIPtr->getTrialDisp();
+  const Vector &disp2 = nodeJPtr->getTrialDisp();
+  
+  static double ug[12];
+  for (int i = 0; i < 6; i++) {
+    ug[i]   = disp1(i);
+    ug[i+6] = disp2(i);
+  }
+  
+  if (nodeIInitialDisp != 0) {
+    for (int j=0; j<6; j++)
+      ug[j] -= nodeIInitialDisp[j];
+  }
+    
+  if (nodeJInitialDisp != 0) {
+    for (int j=0; j<6; j++)
+      ug[j+6] -= nodeJInitialDisp[j];
+  }
 
 	double oneOverL = 1.0/L;
 
@@ -921,28 +972,65 @@ LinearCrdTransf3d::sendSelf(int cTag, Channel &theChannel)
 {
   int res = 0;
   
-  static Vector data(13);
+  static Vector data(23);
   data(0) = this->getTag();
   data(1) = L;
-  if (nodeIOffset != 0) {
-    data(2) = 1.0;
-    data(3) = nodeIOffset[0];
-    data(4) = nodeIOffset[1];
-    data(5) = nodeIOffset[2];
-  } else
-    data(2) = 0.0;
-  
-  if (nodeJOffset != 0) {
-    data(6) = 1.0;
-    data(7) = nodeJOffset[0];
-    data(8) = nodeJOffset[1];
-    data(9) = nodeJOffset[2];
-  } else
-    data(6) = 0.0;
 
-  data(10) = R[2][0];
-  data(11) = R[2][1];
-  data(12) = R[2][2];
+  if (nodeIOffset != 0) {
+    data(2) = nodeIOffset[0];
+    data(3) = nodeIOffset[1];
+    data(4) = nodeIOffset[2];
+  } else {
+    data(2) = 0.0;
+    data(3) = 0.0;
+    data(4) = 0.0;
+  }
+
+  if (nodeJOffset != 0) {
+    data(5) = nodeJOffset[0];
+    data(6) = nodeJOffset[1];
+    data(7) = nodeJOffset[2];
+  } else {
+    data(5) = 0.0;
+    data(6) = 0.0;
+    data(7) = 0.0;
+  }
+
+  if (nodeIInitialDisp != 0) {
+    data(8) = nodeIInitialDisp[0];
+    data(9) = nodeIInitialDisp[1];
+    data(10) = nodeIInitialDisp[2];
+    data(11) = nodeIInitialDisp[3];
+    data(12) = nodeIInitialDisp[4];
+    data(13) = nodeIInitialDisp[5];
+  } else {
+    data(8)  = 0.0;
+    data(9)  = 0.0;
+    data(10) = 0.0;
+    data(11) = 0.0;
+    data(12) = 0.0;
+    data(13) = 0.0;
+  }
+
+  if (nodeJInitialDisp != 0) {
+    data(14) = nodeJInitialDisp[0];
+    data(15) = nodeJInitialDisp[1];
+    data(16) = nodeJInitialDisp[2];
+    data(17) = nodeJInitialDisp[3];
+    data(18) = nodeJInitialDisp[4];
+    data(19) = nodeJInitialDisp[5];
+  } else {
+    data(14) = 0.0;
+    data(15) = 0.0;
+    data(16) = 0.0;
+    data(17) = 0.0;
+    data(18) = 0.0;
+    data(19) = 0.0;
+  }
+
+  data(20) = R[2][0];
+  data(21) = R[2][1];
+  data(22) = R[2][2];
   
   res += theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) {
@@ -961,7 +1049,7 @@ LinearCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
 {
   int res = 0;
   
-  static Vector data(13);
+  static Vector data(23);
   
   res += theChannel.recvVector(this->getDbTag(), cTag, data);
   if (res < 0) {
@@ -974,26 +1062,61 @@ LinearCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
   L = data(1);
   data(0) = this->getTag();
   data(1) = L;
-  if (data(2) == 1.0) {
+
+
+  int flag;
+  int i,j;
+
+  flag = 0;
+  for (i=2; i<=4; i++)
+    if (data(i) != 0.0)
+      flag = 1;
+  if (flag == 1) {
     if (nodeIOffset == 0)
       nodeIOffset = new double[3];
-    nodeIOffset[0] = data(3);
-    nodeIOffset[1] = data(4);
-    nodeIOffset[2] = data(5);
-  } 
-  
-  if (data(6) == 1.0) {
+    for (i=2, j=0; i<=4; i++, j++)
+      nodeIOffset[j] = data(i);
+  }
+
+  flag = 0;
+  for (i=5; i<=7; i++)
+    if (data(i) != 0.0)
+      flag = 1;
+  if (flag == 1) {
     if (nodeJOffset == 0)
       nodeJOffset = new double[3];
-    nodeJOffset[0] = data(7);
-    nodeJOffset[1] = data(8);
-    nodeJOffset[2] = data(9);
-  } 
+    for (i=5, j=0; i<=7; i++, j++)
+      nodeJOffset[j] = data(i);
+  }
 
-  R[2][0] = data(10);
-  R[2][1] = data(11);
-  R[2][2] = data(12);
+  flag = 0;
+  for (i=8; i<=13; i++)
+    if (data(i) != 0.0)
+      flag = 1;
+  if (flag == 1) {
+    if (nodeIInitialDisp == 0)
+      nodeIInitialDisp = new double[6];
+    for (i=8, j=0; i<=13; i++, j++)
+      nodeIInitialDisp[j] = data(i);
+  }
 
+  flag = 0;
+  for (i=14; i<=19; i++)
+    if (data(i) != 0.0)
+      flag = 1;
+  if (flag == 1) {
+    if (nodeJInitialDisp == 0)
+      nodeJInitialDisp = new double [6];
+    for (i=14, j=0; i<=19; i++, j++)
+      nodeJInitialDisp[j] = data(i);
+  }
+
+  R[2][0] = data(20);
+  R[2][1] = data(21);
+  R[2][2] = data(22);
+
+
+  initialDispChecked = true;
   return res;
 }
  	
@@ -1007,10 +1130,17 @@ LinearCrdTransf3d::getPointGlobalCoordFromLocal(const Vector &xl)
    xg = nodeIPtr->getCrds();
    
    if (nodeIOffset) {
-	   xg(0) += nodeIOffset[0];
-	   xg(1) += nodeIOffset[1];
-	   xg(2) += nodeIOffset[2];
+     xg(0) += nodeIOffset[0];
+     xg(1) += nodeIOffset[1];
+     xg(2) += nodeIOffset[2];
    }
+
+   if (nodeIInitialDisp != 0) {
+     xg(0) -= nodeIInitialDisp[0];
+     xg(1) -= nodeIInitialDisp[1];
+     xg(2) -= nodeIInitialDisp[2];
+   }
+     
 
    // xg = xg + Rlj'*xl
    //xg.addMatrixTransposeVector(1.0, Rlj, xl, 1.0);
@@ -1035,6 +1165,18 @@ LinearCrdTransf3d::getPointGlobalDisplFromBasic (double xi, const Vector &uxb)
       ug[i]   = disp1(i);
       ug[i+6] = disp2(i);
    }
+
+  if (nodeIInitialDisp != 0) {
+    for (int j=0; j<6; j++)
+      ug[j] -= nodeIInitialDisp[j];
+  }
+    
+  if (nodeJInitialDisp != 0) {
+    for (int j=0; j<6; j++)
+      ug[j+6] -= nodeJInitialDisp[j];
+  }
+
+
 
    // transform global end displacements to local coordinates
    //ul.addMatrixVector(0.0, Tlg,  ug, 1.0);       //  ul = Tlg *  ug;

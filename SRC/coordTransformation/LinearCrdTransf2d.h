@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:48:09 $
+// $Revision: 1.7 $
+// $Date: 2004-10-08 22:03:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.h,v $
                                                                         
-                                                                        
-// File: ~/crdTransf/LinearCrdTransf2d.h
-//
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -100,6 +97,8 @@ class LinearCrdTransf2d: public CrdTransf2d
     double cosTheta, sinTheta;
 
     double L;                // undeformed element length
+    double *nodeIInitialDisp, *nodeJInitialDisp;
+    bool initialDispChecked;
 };
 
 #endif
