@@ -321,6 +321,14 @@ SOURCE=..\..\..\SRC\coordTransformation\PDeltaCrdTransf2d.cpp
 
 SOURCE=..\..\..\SRC\coordTransformation\PDeltaCrdTransf2d.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\coordTransformation\PDeltaCrdTransf3d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\coordTransformation\PDeltaCrdTransf3d.h
+# End Source File
 # End Group
 # Begin Group "fourNodeQuad"
 
