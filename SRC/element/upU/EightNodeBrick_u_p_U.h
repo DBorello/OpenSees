@@ -19,6 +19,12 @@
 // UPDATE HISTORY:    Modified from EightNodeBrick.h.  Reorganized a lot by Xiaoyan
 //									       
 //
+//  "Coupled system": Solid and fluid coexist.
+//                    u-- Solid displacement
+//                    p-- Pore pressure
+//                    U-- Absolute fluid displacement
+//
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 

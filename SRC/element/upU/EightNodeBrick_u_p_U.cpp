@@ -16,8 +16,14 @@
 // DESIGNER:          Boris Jeremic, Xiaoyan Wu
 // PROGRAMMER:        Boris Jeremic, Xiaoyan Wu
 // DATE:              Aug. 2001
-// UPDATE HISTORY:    Modified from EightNodeBrick.cpp  reorganied a lot by Xiaoyan
+// UPDATE HISTORY:    Modified from EightNodeBrick.cpp  reorganized a lot by Xiaoyan
 //								   
+//
+//  "Coupled system": Solid and fluid coexist.
+//                    u-- Solid displacement
+//                    p-- Pore pressure
+//                    U-- Absolute fluid displacement
+//
 //
 //
 ///////////////////////////////////////////////////////////////////////////////

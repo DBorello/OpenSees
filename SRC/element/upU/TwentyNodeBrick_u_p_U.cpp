@@ -20,6 +20,12 @@
 //								   
 //
 //
+//  "Coupled system": Solid and fluid coexist.
+//                    u-- Solid displacement
+//                    p-- Pore pressure
+//                    U-- Absolute fluid displacement
+//
+//
 ///////////////////////////////////////////////////////////////////////////////
 //
 
