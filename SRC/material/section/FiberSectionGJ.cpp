@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:33 $
+// $Revision: 1.3 $
+// $Date: 2003-02-17 21:16:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSectionGJ.cpp,v $
                                                                         
 // Written: fmk
@@ -719,26 +719,70 @@ FiberSectionGJ::setResponse(char **argv, int argc, Information &sectInfo)
   
   // Check if fiber response is requested
   else if (strcmp(argv[0],"fiber") == 0) {
-    int key = 0;
+    int key = numFibers;
     int passarg = 2;
     
     if (argc <= 2)          // not enough data input
       return 0;
-    else if (argc <= 3)		// fiber number was input directly
+    
+    if (argc <= 3)		  // fiber number was input directly
       key = atoi(argv[1]);
+    
+    if (argc > 4) {         // find fiber closest to coord. with mat tag
+      int matTag = atoi(argv[3]);
+      double yCoord = atof(argv[1]);
+      double zCoord = atof(argv[2]);
+      double closestDist;
+      double ySearch, zSearch, dy, dz;
+      double distance;
+      int j;
+      // Find first fiber with specified material tag
+      for (j = 0; j < numFibers; j++) {
+	if (matTag == theMaterials[j]->getTag()) {
+	  ySearch = -matData[3*j];
+	  zSearch =  matData[3*j+1];
+	  dy = ySearch-yCoord;
+	  dz = zSearch-zCoord;
+	  closestDist = sqrt(dy*dy + dz*dz);
+	  key = j;
+	  break;
+	}
+      }
+      // Search the remaining fibers
+      for ( ; j < numFibers; j++) {
+	if (matTag == theMaterials[j]->getTag()) {
+	  ySearch = -matData[3*j];
+	  zSearch =  matData[3*j+1];
+	  dy = ySearch-yCoord;
+	  dz = zSearch-zCoord;
+	  distance = sqrt(dy*dy + dz*dz);
+	  if (distance < closestDist) {
+	    closestDist = distance;
+	    key = j;
+	  }
+	}
+      }
+      passarg = 4;
+    }
+
     else {                  // fiber near-to coordinate specified
       double yCoord = atof(argv[1]);
       double zCoord = atof(argv[2]);
-      double ySearch = -matData[0];
-      double zSearch =  matData[1];
-      double closestDist = sqrt( pow(ySearch-yCoord,2) +
-                                 pow(zSearch-zCoord,2) );
+      double closestDist;
+      double ySearch, zSearch, dy, dz;
       double distance;
+      ySearch = -matData[0];
+      zSearch =  matData[1];
+      dy = ySearch-yCoord;
+      dz = zSearch-zCoord;
+      closestDist = sqrt(dy*dy + dz*dz);
+      key = 0;
       for (int j = 1; j < numFibers; j++) {
 	ySearch = -matData[3*j];
 	zSearch =  matData[3*j+1];
-	distance = sqrt( pow(ySearch-yCoord,2) +
-			 pow(zSearch-zCoord,2) );
+	dy = ySearch-yCoord;
+	dz = zSearch-zCoord;
+	distance = sqrt(dy*dy + dz*dz);
 	if (distance < closestDist) {
 	  closestDist = distance;
 	  key = j;

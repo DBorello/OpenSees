@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-02-17 19:28:29 $
+// $Revision: 1.13 $
+// $Date: 2003-02-17 21:16:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -779,7 +779,8 @@ FiberSection3d::setResponse(char **argv, int argc, Information &sectInfo)
       dy = ySearch-yCoord;
       dz = zSearch-zCoord;
       closestDist = sqrt(dy*dy + dz*dz);
-      for (int j = 0; j < numFibers; j++) {
+      key = 0;
+      for (int j = 1; j < numFibers; j++) {
 	ySearch = -matData[3*j];
 	zSearch =  matData[3*j+1];
 	dy = ySearch-yCoord;
