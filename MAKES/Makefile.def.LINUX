@@ -73,7 +73,9 @@ CBLAS_LIBRARY   = $(HOME)/lib/libCBlas.a
 ARPACK_LIBRARY  = $(HOME)/lib/libArpack.a
 UMFPACK_LIBRARY = $(HOME)/lib/libUmfpack.a
 METIS_LIBRARY   = $(HOME)/lib/libMetis.a
-TCL_LIBRARY = /usr/lib/libtk8.0.so /usr/X11R6/lib/libX11.a /usr/lib/libtcl8.0.so
+TCL_LIBRARY = /usr/lib/libtk8.3.so /usr/lib/libtcl8.3.so
+GRAPHIC_LIBRARY = /usr/lib/libGL.a /usr/X11R6/lib/libX11.a /usr/X11R6/lib/libXext.a \
+	/usr/lib/libGLU.a
 BLITZ_LIBRARY = $(HOME)/blitz/lib/libblitz.a
 
 # WATCH OUT .. These libraries are removed when 'make wipe' is invoked.
