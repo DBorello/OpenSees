@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-02-17 06:47:28 $
+// $Revision: 1.4 $
+// $Date: 2001-03-29 04:00:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -1231,6 +1231,20 @@ Domain::setLoadConstant(void)
     LoadPatternIter &thePatterns = this->getLoadPatterns();
     while((thePattern = thePatterns()) != 0)
       thePattern->setLoadConstant();
+}
+
+int
+Domain::initialize(void)
+{
+  int result = 0;
+  Element *elePtr;
+  ElementIter &theElemIter = this->getElements();    
+  while ((elePtr = theElemIter()) != 0) {
+    int res = elePtr->setKi();
+    if (res != 0)
+      result = res;
+  }
+  return result;
 }
 
 

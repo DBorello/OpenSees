@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-02-17 06:47:28 $
+// $Revision: 1.3 $
+// $Date: 2001-03-29 04:00:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
                                                                         
@@ -149,6 +149,7 @@ class Domain
     virtual  void setCommittedTime(double newTime);        
     virtual  void applyLoad(double pseudoTime);
     virtual  void setLoadConstant(void);    
+    virtual  int  initialize(void);    
     
     virtual  int  commit(void);
     virtual  int  revertToLastCommit(void);
