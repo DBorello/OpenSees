@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:04 $
+// $Revision: 1.3 $
+// $Date: 2001-08-01 00:25:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/LaplaceRV.cpp,v $
 
 
@@ -95,6 +95,8 @@ LaplaceRV::LaplaceRV(int passedTag,
 
 LaplaceRV::~LaplaceRV()
 {
+  if (type != 0)
+    delete [] type;
 }
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:05 $
+// $Revision: 1.3 $
+// $Date: 2001-08-01 00:25:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type2LargestValueRV.cpp,v $
 
 
@@ -94,6 +94,8 @@ Type2LargestValueRV::Type2LargestValueRV(int passedTag,
 
 Type2LargestValueRV::~Type2LargestValueRV()
 {
+  if (type != 0)
+    delete [] type;
 }
 
 
