@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:32:47 $
+// $Revision: 1.2 $
+// $Date: 2003-03-06 18:14:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.cpp,v $
 
 //
@@ -85,7 +85,6 @@ OutCrossingAnalysis::analyze(void)
 
 	// Alert the user that the analysis has started
 	opserr << "Random Vibration Analysis is running ... " << endln;
-
 
 	// Declare variables used in this method
 	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
@@ -166,12 +165,14 @@ OutCrossingAnalysis::analyze(void)
 
 
 			// Inform the user
+			char printTime[10];
+			sprintf(printTime, "%5.3f", (i*sampleFreq*dt) );
 			if (analysisType == 1) {
 				strcpy(string,theLimitStateFunction->getExpression());
-				opserr << " ...evaluating -G1=" << string << " at time " << (i*sampleFreq*dt) << "..." << endln;
+				opserr << " ...evaluating -G1=" << string << " at time " << printTime << " ..." << endln;
 			}
 			else {
-				opserr << " ...evaluating performance function at time " << (i*sampleFreq*dt) << "..." << endln;
+				opserr << " ...evaluating performance function at time " << printTime << " ..." << endln;
 			}
 
 
@@ -190,6 +191,7 @@ OutCrossingAnalysis::analyze(void)
 				outputFile << "#           index         failure       out-crossing    of single     #" << endln;
 				outputFile << "#  Time      beta        probability       rate         excursion     #" << endln;
 				outputFile << "#                                                                     #" << endln;
+				outputFile.flush();
 			}
 
 			if (!DSPTfailed) {
@@ -346,6 +348,7 @@ OutCrossingAnalysis::analyze(void)
 				
 				outputFile.setf( ios::fixed, ios::floatfield );
 				outputFile<<"    #" << endln;
+				outputFile.flush();
 
 
 				// Inform the user
