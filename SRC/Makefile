@@ -450,6 +450,7 @@ SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/ElasticSection3d.o \
 	$(FE)/material/section/FiberSection2d.o \
 	$(FE)/material/section/FiberSection3d.o \
+	$(FE)/material/section/FiberSectionGJ.o \
 	$(FE)/material/section/SectionAggregator.o \
 	$(FE)/material/section/GenericSection1d.o \
 	$(FE)/material/section/ElasticPlateSection.o \

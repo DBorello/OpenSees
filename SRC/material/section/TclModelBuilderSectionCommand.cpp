@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2002-11-05 21:55:28 $
+// $Revision: 1.19 $
+// $Date: 2003-01-28 18:23:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -44,6 +44,7 @@
 //#include <FiberSection.h>
 #include <FiberSection2d.h>
 #include <FiberSection3d.h>
+#include <FiberSectionGJ.h>
 #include <FiberSectionRepr.h>
 
 #include <ElasticPlateSection.h>
@@ -576,7 +577,8 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 static int currentSectionTag = 0;
     
 int
-buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTag);
+buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
+	     int secTag, bool isTorsion, double GJ);
 
 int
 TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
@@ -612,6 +614,16 @@ TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int 
     }	
 
     int brace = 3; // Start of recursive parse
+    double GJ = 1.0;
+    bool isTorsion = false;
+    if (strcmp(argv[3],"-GJ") == 0) {
+      if (Tcl_GetDouble(interp, argv[4], &GJ) != TCL_OK) {
+	interp->result = "WARNING invalid GJ";
+	return TCL_ERROR;
+      }
+      isTorsion = true;
+      brace = 5;
+    }
 
     // parse the information inside the braces (patches and reinforcing layers)
     if (Tcl_Eval(interp, argv[brace]) != TCL_OK) {
@@ -620,7 +632,7 @@ TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int 
     }
 
     // build the fiber section (for analysis)
-    if (buildSection(interp, theTclModelBuilder, secTag) != TCL_OK) {
+    if (buildSection(interp, theTclModelBuilder, secTag, isTorsion, GJ) != TCL_OK) {
 	cerr << "WARNING - error constructing the section ";
 	return TCL_ERROR;
     }
@@ -1368,7 +1380,8 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
 
 // build the section
 int 
-buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTag)
+buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
+	     int secTag, bool isTorsion, double GJ)
 {
    SectionRepres *sectionRepres = theTclModelBuilder->getSectionRepres(secTag);
    if (sectionRepres == 0) 
@@ -1572,7 +1585,11 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
 	 }
 	
 	 //SectionForceDeformation *section = new FiberSection(secTag, numFibers, fiber);
-	 SectionForceDeformation *section = new FiberSection3d(secTag, numFibers, fiber);
+	 SectionForceDeformation *section = 0;
+	 if (isTorsion)
+	   section = new FiberSectionGJ(secTag, numFibers, fiber, GJ);
+	 else
+	   section = new FiberSection3d(secTag, numFibers, fiber);
    
 	 // Delete fibers
 	 for (i = 0; i < numFibers; i++)
