@@ -121,6 +121,14 @@ tensor DPPotentialSurface::d2Qods2(const EPState *EPS) const {
     return d2Qods2;
 }
 
+// For Consistent Algorithm, Z Cheng, Jan 2004
+tensor DPPotentialSurface::d2Qodsds1(const EPState *EPS) const 
+{  
+  tensor I("I", 2, def_dim_2);
+  tensor d2Qoverdsds1 = I;
+  return d2Qoverdsds1;
+}
+
 //================================================================================
 
 double DPPotentialSurface::getalfa2() const {

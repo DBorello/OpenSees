@@ -96,6 +96,17 @@ tensor VMPotentialSurface::d2Qods2(const EPState *EPS) const {
     return d2Qods2;
 }
 
+// For Consistent Algorithm, Z Cheng, Jan 2004
+tensor VMPotentialSurface::d2Qodsdt1(const EPState *EPS) const 
+{  
+  tensor d2Qoverdsdt1(4, def_dim_4, 0.0);
+  tensor I2("I", 2, def_dim_2);
+  tensor I4 = I2("ij") * I2("mn");
+  I2.null_indices();
+  d2Qoverdsdt1 = ( I4.transpose0110() + I4.transpose0111() ) * (-1.5);
+  return d2Qoverdsdt1;
+}
+
 //================================================================================
 // friend OPS_Stream functions for output
 //================================================================================

@@ -49,8 +49,8 @@ class RMC01PotentialSurface : public PotentialSurface
 {
   // Private vars to define the RMC01 Potential Surface
   private:
-  		  
-  
+
+
   public:
     RMC01PotentialSurface( ){ };   // Default constructor
     ~RMC01PotentialSurface() { }; //Not all virtual functions  redefined
@@ -58,6 +58,9 @@ class RMC01PotentialSurface : public PotentialSurface
 
     tensor dQods(const EPState *EPS  ) const;
     tensor d2Qods2(const EPState *EPS) const;
+    
+    tensor d2Qodsds1(const EPState *EPS) const; // For Consistent Algorithm, Z Cheng, Jan 2004    
+    
     void print() { opserr << *this; };
 
     //================================================================================

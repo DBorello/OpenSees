@@ -45,7 +45,9 @@ class VMPotentialSurface : public PotentialSurface
 
     tensor dQods(const EPState *EPS) const;
     tensor d2Qods2(const EPState *EPS) const;
-
+       
+    tensor d2Qodsdt1(const EPState *EPS) const; // For Consistent Algorithm, Z Cheng, Jan 2004
+    
     void print() { opserr << *this; }; 
   
     //================================================================================

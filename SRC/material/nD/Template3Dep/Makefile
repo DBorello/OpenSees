@@ -37,14 +37,15 @@ OBJS  = Template3Dep.o \
         VM_PS.o	  \
         VM_YS.o	  \
         YS.o	  \
+        PS.o     \
         MD_PS01.o	  \
         MD_PS.o	  \
         DP_YS01.o	  \
         MD_YS.o	  \
         Tri_a_fail_crit_YS.o \
-                RMC01.o      \
-                RMC01_PS.o   \
-                RMC01_YS.o   
+        RMC01.o      \
+        RMC01_PS.o   \
+        RMC01_YS.o   
 
 ################### TARGETS ########################
 all: $(OBJS) 

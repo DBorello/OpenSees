@@ -44,7 +44,18 @@ class PotentialSurface
     virtual tensor dQods(const EPState *EPS ) const =  0;  //pure virtual func
     virtual tensor d2Qods2(const EPState *EPS ) const = 0; //pure virtual func   
     virtual void print() = 0; //pure virtual func
-
+    
+    // Added for Consistent Algorithm, Z. Cheng, Jan 2004
+    // Ref. Jeremic & Sture, Mechanics of Cohesive-Frictional Materials, Vol.2 165-183 (1997) 
+    virtual tensor d2Qodsds1(const EPState *EPS ) const;
+    virtual tensor d2Qodsds2(const EPState *EPS ) const;
+    virtual tensor d2Qodsds3(const EPState *EPS ) const;
+    virtual tensor d2Qodsds4(const EPState *EPS ) const;
+    virtual tensor d2Qodsdt1(const EPState *EPS ) const;
+    virtual tensor d2Qodsdt2(const EPState *EPS ) const;
+    virtual tensor d2Qodsdt3(const EPState *EPS ) const;
+    virtual tensor d2Qodsdt4(const EPState *EPS ) const;
+                                 
     //================================================================================
     // Overloaded Insertion Operator
     // prints an PotentialSurface's contents 

@@ -92,6 +92,15 @@ tensor CAMPotentialSurface::d2Qods2(const EPState *EPS) const
 }
 
 
+// For Consistent Algorithm, Z Cheng, Jan 2004
+tensor CAMPotentialSurface::d2Qodsds1(const EPState *EPS) const 
+{  
+  tensor d2Qoverdsds1(2, def_dim_2, 0.0);
+  tensor DpoDs = EPS->getStress().dpoverds();
+  tensor D2QoDpDs1 = -M*M;
+  d2Qoverdsds1 = DpoDs * D2QoDpDs1;
+  return d2Qoverdsds1;
+}
        
 // moved to stresstensor Boris Jeremic@ucdavis.edu 21Aug2001
 // // I took these functions from mmodel.cpp, programmed by Dr. Jeremic
