@@ -1,6 +1,6 @@
 include ../../../Makefile.def
 
-OBJS       = EightNodeBrick.o 
+OBJS       = EightNodeBrick.o
 #OBJS       = brick3d.o 
 
 all:         $(OBJS)

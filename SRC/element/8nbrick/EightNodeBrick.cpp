@@ -20,12 +20,14 @@
 //																			 Sept. - Oct 2000 connected to OpenSees by Zhaohui
 //
 //
-// CONTACT:           jeremic@ucdavis.edu
 ///////////////////////////////////////////////////////////////////////////////
 //
 
+#ifndef EIGHTNODEBRICK_CPP
+#define EIGHTNODEBRICK_CPP
+
 #include <EightNodeBrick.h>
-#define FixedOrder 3
+#define FixedOrder 2
 
 
 //====================================================================
@@ -35,18 +37,24 @@
 EightNodeBrick::EightNodeBrick(int element_number,
                                int node_numb_1, int node_numb_2, int node_numb_3, int node_numb_4,
                                int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
-                               NDMaterial * Globalmmodel, const char * type, double b1, double b2,
-			       double p, double r, EPState *InitEPS)
+                               NDMaterial * Globalmmodel, double b1, double b2,double b3,
+			       double r, double p)
+			       // int dirp, double surflevelp)
+			       //, EPState *InitEPS)  const char * type,
                                // Set it to 3 //int r_int_order, //int s_int_order, //int t_int_order,
 			       //tensor * IN_tangent_E,  //stresstensor * INstress, //stresstensor * INiterative_stress, //double * IN_q_ast_iterative, //straintensor * INstrain):  __ZHaohui 09-29-2000
 		               
   :Element(element_number, ELE_TAG_EightNodeBrick ),
-  connectedExternalNodes(8), K(24, 24), C(24, 24), M(24, 24), P(24),Q(24), b(2), rho(r), pressure(p)
+  connectedExternalNodes(8), K(24, 24), C(24, 24), M(24, 24), P(24),Q(24), bf(3), 
+  rho(r), pressure(p)
   {
     //elem_numb = element_number;
-    b(0) = b1;
-    b(1) = b2;    
+    bf(0) = b1;
+    bf(1) = b2;
+    bf(2) = b3;
+
     determinant_of_Jacobian = 0.0;
+    
     //r_integration_order = r_int_order; 
     //s_integration_order = s_int_order; 
     //t_integration_order = t_int_order; 
@@ -54,18 +62,19 @@ EightNodeBrick::EightNodeBrick(int element_number,
     s_integration_order = FixedOrder; // Gauss-Legendre integration order in s direction
     t_integration_order = FixedOrder; // Gauss-Legendre integration order in t direction
 
-    mmodel = Globalmmodel->getCopy( type ); // One global mat model
+    //Not needed. Right now we have one NDMaterial for each material point
+    //mmodel = Globalmmodel->getCopy( type ); // One global mat model
 
     int total_number_of_Gauss_points = r_integration_order*s_integration_order*t_integration_order;
     
     // according to ARM pp.61 default constructor will be called!!
-    //IntegrationPoint * MatPoint = new IntegrationPoint[total_number_of_Gauss_points];
+    //MatPoint3D * matpoint = new MatPoint3D[total_number_of_Gauss_points];
     //prebaci sve u jednodimenzioni niz jer samo prvi stepen pointera moze da se pokriva
     //sa onim stosom derived * ->> base * !!
 
     if ( total_number_of_Gauss_points != 0 )
       {
-        //MatPoint = Globalmmodel->new_mm(total_number_of_Gauss_points);
+        //matpoint = Globalmmodel->new_mm(total_number_of_Gauss_points);
 	
         // Zhaohui -- All the following members are moved into gauss-point EPState: gpEPS
 	//GPstress = new stresstensor[total_number_of_Gauss_points];
@@ -74,13 +83,13 @@ EightNodeBrick::EightNodeBrick(int element_number,
         //GPstrain = new straintensor[total_number_of_Gauss_points];
         //GPtangent_E = new tensor[total_number_of_Gauss_points];//default constructor called
         
-	MatPoint  = new IntegrationPoint[total_number_of_Gauss_points];
+	matpoint  = new MatPoint3D * [total_number_of_Gauss_points];
 
       }
     else
       {
 	//GPstress = 0;//GPiterative_stress = 0;//GPq_ast_iterative  = 0; //GPstrain = 0;//GPtangent_E = 0;
-        MatPoint  = 0;
+        matpoint  = 0;
     }
     ////////////////////////////////////////////////////////////////////
     //dakle posto:
@@ -126,9 +135,9 @@ EightNodeBrick::EightNodeBrick(int element_number,
                 //DB
                 //DB// I suspect that [] should be overloaded so that compiler knows which
                 //DB// material model is returning a pointer and fot the purpose
-                //DB//MatPoint[where].report("mmodel within before Initialization");
-                //DB//MatPoint[where].report("mmodel within before Initialization"); // operator[] overloaded
-                //DB(MatPoint)->operator[](where).report("mmodel within before Initialization"); // operator[] overloaded
+                //DB//matpoint[where].report("mmodel within before Initialization");
+                //DB//matpoint[where].report("mmodel within before Initialization"); // operator[] overloaded
+                //DB(matpoint)->operator[](where).report("mmodel within before Initialization"); // operator[] overloaded
                 //DB                                                               // for NDMaterial and
                 //DB                                                               // derived types!
 
@@ -139,23 +148,25 @@ EightNodeBrick::EightNodeBrick(int element_number,
                 //GPq_ast_iterative[where] = IN_q_ast_iterative[where];
                 //GPstrain[where].Initialize(*INstrain);
                 
-                // Already assigned the copy of Globalmmodel to each element of MatPoint
-		//(MatPoint)->operator[](where).Initialize(*Globalmmodel);
+                // Already assigned the copy of Globalmmodel to each element of matpoint
+		//(matpoint)->operator[](where).Initialize(*Globalmmodel);
 
-                NDMaterial *NMD = Globalmmodel;
-		if (strcmp( Globalmmodel->getType(), "Template3Dep" ) == 0)
- 		   NMD = 0;
+                //NDMaterial *NMD = Globalmmodel->getCopy();
+		//if (strcmp( Globalmmodel->getType(), "Template3Dep" ) == 0)
+ 		//   NMD = 0;
 
-                MatPoint[where].Initialize(GP_c_r,
+                //cout << "where = " << where << endln;
+		matpoint[where] = new MatPoint3D(GP_c_r,
                                          GP_c_s,
                                          GP_c_t,
                                          r, s, t,
                                          rw, sw, tw,
-                                         InitEPS, 
-					 NMD);
+                                         //InitEPS, 
+					 Globalmmodel);
+					 //NMD);
 					 //&( GPstress[where] ), //&( GPiterative_stress[where] ), //IN_q_ast_iterative[where] ,//&( GPstrain[where] ),  //&( GPtangent_E[where] ),
-                                         //&( (MatPoint)->operator[](where) )
-                                          // ugly syntax but it works! Still don't know what's wrong   // with the old style MatPoint[where]
+                                         //&( (matpoint)->operator[](where) )
+                                         // ugly syntax but it works! Still don't know what's wrong   // with the old style matpoint[where]
               }                
           }
       }
@@ -170,21 +181,15 @@ EightNodeBrick::EightNodeBrick(int element_number,
       connectedExternalNodes(6) = node_numb_7;
       connectedExternalNodes(7) = node_numb_8;
 
-      //nodes = GlobalNodes;
-
-      // loop nodes 9-20 and :
-      //  1) put the right coordinates on place,
-      //  2) calculate the total number of nodes
-
       nodes_in_brick = 8;
       
 }
 
 //====================================================================
 EightNodeBrick::EightNodeBrick ():Element(0, ELE_TAG_EightNodeBrick ),
-connectedExternalNodes(8), K(24, 24), C(24, 24), M(24, 24), P(24),Q(24), b(2), rho(0.0), pressure(0.0), mmodel(0)
+connectedExternalNodes(8), K(24, 24), C(24, 24), M(24, 24), P(24),Q(24), bf(3), rho(0.0), pressure(0.0), mmodel(0)
 {
-     MatPoint = 0;
+     matpoint = 0;
 }   
 
 
@@ -193,185 +198,189 @@ connectedExternalNodes(8), K(24, 24), C(24, 24), M(24, 24), P(24),Q(24), b(2), r
 // this one takes only one material model and forwards it to all
 // Gauss points.
 //#############################################################################
-
-int EightNodeBrick::Initialize(int element_number,
-                                int node_numb_1, int node_numb_2, int node_numb_3, int node_numb_4,
-                                int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
-                                NDMaterial * Globalmmodel, const char * type, double b1, double b2,
-                                double p, double r, EPState * InitEPS
-			        //tensor       * IN_tangent_E,//stresstensor * INstress, //stresstensor * INiterative_stress, //double  * IN_q_ast_iterative, //straintensor * INstrain
-			        )   
-  {
-    //elem_numb = element_number;
-    b(0) = b1;
-    b(1) = b2;
-    rho = r;
-    pressure = p;
-    // r_integration_order = r_int_order; 
-    // s_integration_order = s_int_order; 
-    // t_integration_order = t_int_order; 
-    r_integration_order = FixedOrder; // Gauss-Legendre integration order in r direction
-    s_integration_order = FixedOrder; // Gauss-Legendre integration order in s direction
-    t_integration_order = FixedOrder; // Gauss-Legendre integration order in t direction
-
-    mmodel = Globalmmodel->getCopy(); // One global mat model
-
-    int total_number_of_Gauss_points = r_integration_order*
-                                       s_integration_order*
-                                       t_integration_order;
-
-    //MatPoint = Globalmmodel->new_mm(total_number_of_Gauss_points);
-    //MatPoint = Globalmmodel->getCopy(total_number_of_Gauss_points);
-    
-    //GPstress = new stresstensor[total_number_of_Gauss_points];
-    //GPiterative_stress = new stresstensor[total_number_of_Gauss_points];
-    //GPq_ast_iterative  = new double[total_number_of_Gauss_points];
-    //GPstrain = new straintensor[total_number_of_Gauss_points];
-    //GPtangent_E = new tensor[total_number_of_Gauss_points];
-    //MatPoint  = new IntegrationPoint[total_number_of_Gauss_points];
-
-    MatPoint = new IntegrationPoint[total_number_of_Gauss_points];
-
-    ////////////////////////////////////////////////////////////////////
-    //dakle posto:
-    //// according to ARM pp.61 default constructor will be called!!
-    //onda oni vec postoje u memoriji i samo im treba dodeliti prave
-    //vrednosti iz onog modela koji je prenesen unutra. Znaci onInitializxe funkcija
-    //sa modelom kao argumentom Initialize(taj_Model).
-    //za stresstensor i straintensor isto to napravi
-    //tu Initialize funkciju pa da uzima argument i da samo
-    //koristi njegove vrednosti pa stavi u vec postojece mesto
-    //u memoriji ove vrednsoti. Takodje unutar brick3d napravi ih
-    //( te stresstensor , straintensor i mmodel ) static da ostanu tu
-    //da se ne pozove destructor . . .
-
-    short where = 0;
-
-    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
-      {
-        double r = get_Gauss_p_c( r_integration_order, GP_c_r );
-        double rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
-          {
-            double s = get_Gauss_p_c( s_integration_order, GP_c_s );
-            double sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
-              {
-                double t = get_Gauss_p_c( t_integration_order, GP_c_t );
-                double tw = get_Gauss_p_w( t_integration_order, GP_c_t );
-
-                // this short routine is supposed to calculate position of
-                // Gauss point from 3D array of short's
-                where =
-                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
-
-                //DB::printf("\n\nBefore Initialization **************** where = %d \n",where);
-                //DB::printf("GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
-                //DB            GP_c_r,GP_c_s,GP_c_t);
-                //DB
-                //DBGPstress[where].reportshort("stress within before Initialization");
-                //DBGPstrain[where].reportshort("strain within before Initialization");
-                //DB
-                //DB// I suspect that [] should be overloaded so that compiler knows which
-                //DB// material model is returning a pointer and fot the purpose
-                //DB//MatPoint[where].report("mmodel within before Initialization");
-                //DB//MatPoint[where].report("mmodel within before Initialization"); // operator[] overloaded
-                //DB(MatPoint)->operator[](where).report("mmodel within before Initialization"); // operator[] overloaded
-                //DB                                                               // for NDMaterial and
-                //DB                                                               // derived types!
-                
-                //.MatPoint[where].Initialize(GP_c_r,
-                //.                         GP_c_s,
-                //.                         GP_c_t,
-                //.                         r, s, t,
-                //.                         rw, sw, tw,
-                //.                         &( GPstress[where] ),
-                //.                         &( GPstrain[where] ),
-                //.                         &( (MatPoint)->operator[](where) )
-                //.                        );      // ugly syntax but it works!
-                //.                                // still don't know what's wrong
-                //.                                // with the old style MatPoint[where]
-                // Initialize it with the elastic stiffness tensor at the begining
-                //````double Ey = (MatPoint)->operator[](where).E();
-                //````double nu = (MatPoint)->operator[](where).nu();
-                //````tensor Constitutive = (MatPoint)->operator[](where).StiffnessTensorE(Ey,nu);
-                //````
-                //````GPtangent_E[where].Initialize_all(Constitutive);
-                
-		//GPtangent_E[where].Initialize_all(*IN_tangent_E);                
-                //GPstress[where].Initialize(*INstress);                
-                //GPiterative_stress[where].Initialize(*INiterative_stress);
-                //GPq_ast_iterative[where] = IN_q_ast_iterative[where];	  
-                //GPstrain[where].Initialize(*INstrain);
-                
-		//(MatPoint)->operator[](where).Initialize(*Globalmmodel);
-		// Already initialized using Globalmmodel in getCopy() --Zhaohui 09-29-2000
-
-                NDMaterial *NMD = Globalmmodel;
-		if (strcmp( Globalmmodel->getType(), "Template3Dep" ) == 0)
- 		   NMD = 0;
-
-                MatPoint[where].Initialize(GP_c_r,
-                                           GP_c_s,
-                                           GP_c_t,
-                                           r, s, t,
-                                           rw, sw, tw,
-                                           InitEPS,
-					   NMD );
-                                           // &( GPstress[where] ), //&( GPiterative_stress[where] ), // IN_q_ast_iterative[where],
-                                           // &( GPstrain[where] ),  //&( GPtangent_E[where] ),  // ZHaohui 09-29-2000
-                                           // &( (MatPoint)->operator[](where) )
-                                           // ugly syntax but it works! // still don't know what's wrong   // with the old style MatPoint[where]
-              }                                 
-          }
-      }
-
-      // Set connected external node IDs
-      connectedExternalNodes(0) = node_numb_1;
-      connectedExternalNodes(1) = node_numb_2;
-      connectedExternalNodes(2) = node_numb_3;
-      connectedExternalNodes(3) = node_numb_4;
-      connectedExternalNodes(4) = node_numb_5;
-      connectedExternalNodes(5) = node_numb_6;
-      connectedExternalNodes(6) = node_numb_7;
-      connectedExternalNodes(7) = node_numb_8;
-      
-      //G_N_numbs[0] = node_numb_1;
-      //G_N_numbs[1] = node_numb_2;
-      //G_N_numbs[2] = node_numb_3;
-      //G_N_numbs[3] = node_numb_4;
-      //G_N_numbs[4] = node_numb_5;
-      //G_N_numbs[5] = node_numb_6;
-      //G_N_numbs[6] = node_numb_7;
-      //G_N_numbs[7] = node_numb_8;
-      
-      //nodes = GlobalNodes;
-
-      // loop nodes 9-20 and :
-      //  1) put the right coordinates on place,
-      //  2) calculate the total number of nodes
-      // loop nodes 9-20 and :
-      //  1) put the right coordinates on place,
-      //  2) calculate the total number of nodes
-      nodes_in_brick = 8;
-      //    for ( int i=8 ; i<20 ; i++ )
-      //      {
-      //        if (G_N_numbs[i] == 0 )
-      //          {
-      //                   node_existance[i-8] = 0;
-      //          }
-      //        else
-      //          {
-      //            nodes_in_brick++;
-      //            node_existance[i-8] = 1;
-      //          }
-      //      }
-      //    Node * N = new Node[nodes_in_brick];
-      //  // Xiaoyan comment for only 8 nodes  07/11/00
-      return 0;
-  }
+//
+//int EightNodeBrick::Initialize(int element_number,
+//                                int node_numb_1, int node_numb_2, int node_numb_3, int node_numb_4,
+//                                int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
+//                                NDMaterial * Globalmmodel,  double b1, double b2, double b3,
+//                                double p, double r
+//				//, EPState * InitEPS  const char * type,
+//			        //tensor       * IN_tangent_E,//stresstensor * INstress, //stresstensor * INiterative_stress, //double  * IN_q_ast_iterative, //straintensor * INstrain
+//			        )   
+//  {
+//    //elem_numb = element_number;
+//    bf(0) = b1;
+//    bf(1) = b2;
+//    bf(2) = b3;
+//    rho = r;
+//    pressure = p;
+//    // r_integration_order = r_int_order; 
+//    // s_integration_order = s_int_order; 
+//    // t_integration_order = t_int_order; 
+//    r_integration_order = FixedOrder; // Gauss-Legendre integration order in r direction
+//    s_integration_order = FixedOrder; // Gauss-Legendre integration order in s direction
+//    t_integration_order = FixedOrder; // Gauss-Legendre integration order in t direction
+//
+//    //mmodel = Globalmmodel->getCopy(); // One global mat model
+//
+//    int total_number_of_Gauss_points = r_integration_order*
+//                                       s_integration_order*
+//                                       t_integration_order;
+//
+//    //matpoint = Globalmmodel->new_mm(total_number_of_Gauss_points);
+//    //matpoint = Globalmmodel->getCopy(total_number_of_Gauss_points);
+//    
+//    //GPstress = new stresstensor[total_number_of_Gauss_points];
+//    //GPiterative_stress = new stresstensor[total_number_of_Gauss_points];
+//    //GPq_ast_iterative  = new double[total_number_of_Gauss_points];
+//    //GPstrain = new straintensor[total_number_of_Gauss_points];
+//    //GPtangent_E = new tensor[total_number_of_Gauss_points];
+//    //matpoint  = new MatPoint3D[total_number_of_Gauss_points];
+//
+//    matpoint = new MatPoint3D * [total_number_of_Gauss_points];
+//
+//    ////////////////////////////////////////////////////////////////////
+//    //dakle posto:
+//    //// according to ARM pp.61 default constructor will be called!!
+//    //onda oni vec postoje u memoriji i samo im treba dodeliti prave
+//    //vrednosti iz onog modela koji je prenesen unutra. Znaci onInitializxe funkcija
+//    //sa modelom kao argumentom Initialize(taj_Model).
+//    //za stresstensor i straintensor isto to napravi
+//    //tu Initialize funkciju pa da uzima argument i da samo
+//    //koristi njegove vrednosti pa stavi u vec postojece mesto
+//    //u memoriji ove vrednsoti. Takodje unutar brick3d napravi ih
+//    //( te stresstensor , straintensor i mmodel ) static da ostanu tu
+//    //da se ne pozove destructor . . .
+//
+//    short where = 0;
+//
+//    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+//      {
+//        double r = get_Gauss_p_c( r_integration_order, GP_c_r );
+//        double rw = get_Gauss_p_w( r_integration_order, GP_c_r );
+//
+//        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+//          {
+//            double s = get_Gauss_p_c( s_integration_order, GP_c_s );
+//            double sw = get_Gauss_p_w( s_integration_order, GP_c_s );
+//
+//            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+//              {
+//                double t = get_Gauss_p_c( t_integration_order, GP_c_t );
+//                double tw = get_Gauss_p_w( t_integration_order, GP_c_t );
+//
+//                // this short routine is supposed to calculate position of
+//                // Gauss point from 3D array of short's
+//                where =
+//                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+//
+//                //DB::printf("\n\nBefore Initialization **************** where = %d \n",where);
+//                //DB::printf("GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
+//                //DB            GP_c_r,GP_c_s,GP_c_t);
+//                //DB
+//                //DBGPstress[where].reportshort("stress within before Initialization");
+//                //DBGPstrain[where].reportshort("strain within before Initialization");
+//                //DB
+//                //DB// I suspect that [] should be overloaded so that compiler knows which
+//                //DB// material model is returning a pointer and fot the purpose
+//                //DB//matpoint[where].report("mmodel within before Initialization");
+//                //DB//matpoint[where].report("mmodel within before Initialization"); // operator[] overloaded
+//                //DB(matpoint)->operator[](where).report("mmodel within before Initialization"); // operator[] overloaded
+//                //DB                                                               // for NDMaterial and
+//                //DB                                                               // derived types!
+//                
+//                //.matpoint[where].Initialize(GP_c_r,
+//                //.                         GP_c_s,
+//                //.                         GP_c_t,
+//                //.                         r, s, t,
+//                //.                         rw, sw, tw,
+//                //.                         &( GPstress[where] ),
+//                //.                         &( GPstrain[where] ),
+//                //.                         &( (matpoint)->operator[](where) )
+//                //.                        );      // ugly syntax but it works!
+//                //.                                // still don't know what's wrong
+//                //.                                // with the old style matpoint[where]
+//                // Initialize it with the elastic stiffness tensor at the begining
+//                //````double Ey = (matpoint)->operator[](where).E();
+//                //````double nu = (matpoint)->operator[](where).nu();
+//                //````tensor Constitutive = (matpoint)->operator[](where).StiffnessTensorE(Ey,nu);
+//                //````
+//                //````GPtangent_E[where].Initialize_all(Constitutive);
+//                
+//		//GPtangent_E[where].Initialize_all(*IN_tangent_E);                
+//                //GPstress[where].Initialize(*INstress);                
+//                //GPiterative_stress[where].Initialize(*INiterative_stress);
+//                //GPq_ast_iterative[where] = IN_q_ast_iterative[where];	  
+//                //GPstrain[where].Initialize(*INstrain);
+//                
+//		//(matpoint)->operator[](where).Initialize(*Globalmmodel);
+//		// Already initialized using Globalmmodel in getCopy() --Zhaohui 09-29-2000
+//
+//                //NDMaterial *NMD = Globalmmodel->getCopy();
+//		//if (strcmp( Globalmmodel->getType(), "Template3Dep" ) == 0)
+// 		//   NMD = 0;
+//
+//                //matpoint[where].Initialize(GP_c_r,
+//                matpoint[where] = new MatPoint3D(GP_c_r,
+//                                           GP_c_s,
+//                                           GP_c_t,
+//                                           r, s, t,
+//                                           rw, sw, tw,
+//                                           //InitEPS,
+//					   Globalmmodel);
+//					   //NMD );
+//                                           // &( GPstress[where] ), //&( GPiterative_stress[where] ), // IN_q_ast_iterative[where],
+//                                           // &( GPstrain[where] ),  //&( GPtangent_E[where] ),  // ZHaohui 09-29-2000
+//                                           // &( (matpoint)->operator[](where) )
+//                                           // ugly syntax but it works! // still don't know what's wrong   // with the old style matpoint[where]
+//              }                                 
+//          }
+//      }
+//
+//      // Set connected external node IDs
+//      connectedExternalNodes(0) = node_numb_1;
+//      connectedExternalNodes(1) = node_numb_2;
+//      connectedExternalNodes(2) = node_numb_3;
+//      connectedExternalNodes(3) = node_numb_4;
+//      connectedExternalNodes(4) = node_numb_5;
+//      connectedExternalNodes(5) = node_numb_6;
+//      connectedExternalNodes(6) = node_numb_7;
+//      connectedExternalNodes(7) = node_numb_8;
+//      
+//      //G_N_numbs[0] = node_numb_1;
+//      //G_N_numbs[1] = node_numb_2;
+//      //G_N_numbs[2] = node_numb_3;
+//      //G_N_numbs[3] = node_numb_4;
+//      //G_N_numbs[4] = node_numb_5;
+//      //G_N_numbs[5] = node_numb_6;
+//      //G_N_numbs[6] = node_numb_7;
+//      //G_N_numbs[7] = node_numb_8;
+//      
+//      //nodes = GlobalNodes;
+//
+//      // loop nodes 9-20 and :
+//      //  1) put the right coordinates on place,
+//      //  2) calculate the total number of nodes
+//      // loop nodes 9-20 and :
+//      //  1) put the right coordinates on place,
+//      //  2) calculate the total number of nodes
+//      nodes_in_brick = 8;
+//      //    for ( int i=8 ; i<20 ; i++ )
+//      //      {
+//      //        if (G_N_numbs[i] == 0 )
+//      //          {
+//      //                   node_existance[i-8] = 0;
+//      //          }
+//      //        else
+//      //          {
+//      //            nodes_in_brick++;
+//      //            node_existance[i-8] = 1;
+//      //          }
+//      //      }
+//      //    Node * N = new Node[nodes_in_brick];
+//      //  // Xiaoyan comment for only 8 nodes  07/11/00
+//      return 0;
+//  }
 
 //#############################################################################
 
@@ -379,27 +388,41 @@ int EightNodeBrick::Initialize(int element_number,
 
 EightNodeBrick::~EightNodeBrick ()
 {
+    
+    int total_number_of_Gauss_points = r_integration_order*s_integration_order*t_integration_order;
+    
+    for (int i = 0; i < total_number_of_Gauss_points; i++) 
+    {
+    	    // Delete the NDMaterials at each integration point
+    	    if (matpoint[i])
+    		delete matpoint[i];    	
+    }	
+    
+    // Delete the array of pointers to NDMaterial pointer arrays
+    if (matpoint)
+    	delete [] matpoint;
 
-    //int order = theQuadRule->getOrder();
-    //
-    //for (int i = 0; i < order; i++) {
-    //	for (int j = 0; j < order; j++)
-    //	    // Delete the NDMaterials at each integration point
-    //	    if (theMaterial[i][j])
-    //		delete theMaterial[i][j];
-    //	
-    //	// Delete each array of NDMaterial pointers
-    //	if (theMaterial[i])
-    //	    delete [] theMaterial[i];
-    //}	
-    //
-    //// Delete the array of pointers to NDMaterial pointer arrays
-    //if (theMaterial)
-    //	delete [] theMaterial;
-    //
-    //// Delete the quadrature rule
-    //if (theQuadRule)
-    //	delete theQuadRule;
+    if (mmodel)
+    	delete [] mmodel;
+
+    // Delete the quadrature rule
+    if ( nd1Ptr )
+    	delete nd1Ptr;
+    if ( nd2Ptr )
+    	delete nd2Ptr;
+    if ( nd3Ptr )
+    	delete nd3Ptr;
+    if ( nd4Ptr )
+    	delete nd4Ptr;
+    if ( nd5Ptr )
+    	delete nd5Ptr;
+    if ( nd6Ptr )
+    	delete nd6Ptr;
+    if ( nd7Ptr )
+    	delete nd7Ptr;
+    if ( nd8Ptr )
+    	delete nd8Ptr;
+    
 
 }
      // comment by Xiaoyan 07/11/00
@@ -417,7 +440,7 @@ void EightNodeBrick::incremental_Update()
     short where = 0;
     //,,,,,    double weight = 0.0;
     
-    //double this_one_PP = (MatPoint)->operator[](where).IS_Perfect_Plastic();
+    //double this_one_PP = (matpoint)->operator[](where).IS_Perfect_Plastic();
 
     int dh_dim[] = {8,3};   //Xiaoyan changed from {20,3} to {8,3}  07/12/00
     tensor dh(2, dh_dim, 0.0);
@@ -484,7 +507,7 @@ void EightNodeBrick::incremental_Update()
                 //::::::                      GP_c_r,GP_c_s,GP_c_t,where);
                 //::::::   ::printf("WEIGHT = %f", weight);
                 //::::::   ::printf("determinant of Jacobian = %f", determinant_of_Jacobian);
-                //::::::   MatPoint[where].report("Gauss Point\n");
+                //::::::   matpoint[where].report("Gauss Point\n");
                 // incremental straines at this Gauss point
                 // now in Update we know the incremental displacements so let's find
                 // the incremental strain
@@ -499,13 +522,13 @@ void EightNodeBrick::incremental_Update()
 
 		// Getting final_stress_after_integration is  Done inside CDriver on EPState____ZHaohui 
 		//final_stress_after_integration = GPiterative_stress[where];
-		//(MatPoint)->operator[](where).kappa_set(final_stress_after_integration,
+		//(matpoint)->operator[](where).kappa_set(final_stress_after_integration,
                 //                                 GPq_ast_iterative[where]);
                 
 		//....         final_stress_after_integration =
-                //....           (MatPoint)->operator[](where).FinalStress(*(GPstress+where),
+                //....           (matpoint)->operator[](where).FinalStress(*(GPstress+where),
                 //....                                                     incremental_strain,
-                //....                                                     (MatPoint)->operator[](where),
+                //....                                                     (matpoint)->operator[](where),
                 //....                                                     number_of_subincrements,
                 //....                                                     this_one_PP);
                 //....//final_stress_after_integration.reportshortpqtheta("\n final_stress_after_integration GAUSS \n");
@@ -515,31 +538,33 @@ void EightNodeBrick::incremental_Update()
 
 	        
 	        //Constitutive =
-                //  (MatPoint)->operator[](where).ConstitutiveTensor(final_stress_after_integration,
+                //  (matpoint)->operator[](where).ConstitutiveTensor(final_stress_after_integration,
                 //                                                   *(GPstress+where),
                 //                                                   incremental_strain,
-                //                                                   (MatPoint)->operator[](where),
+                //                                                   (matpoint)->operator[](where),
                 //                                                   this_one_PP);
-	        // ZHaohui modified __09-29-2000
-		
-		//EPState trialEPS = *(mmodel->getEPS());
-		
-	        EPState *tmp_eps = (MatPoint[where]).getEPS();
-	        NDMaterial *tmp_ndm = (MatPoint[where]).getNDMat();
+	        
+		// ZHaohui modified __09-29-2000
+			      		
+	        // Now no EPState  but NDMaterial for each MatPoint
+		//EPState *tmp_eps = (matpoint[where]).getEPS();
+	        //NDMaterial *tmp_ndm = (matpoint[where]).getNDMat();
 
-		if ( tmp_eps ) { //if there is an EPState for the MatPoint
-		  mmodel->setEPS( *tmp_eps );
-		  if ( ! (mmodel->setTrialStrainIncr( incremental_strain)) )
-               	     g3ErrorHandler->warning("EightNodeBrick::incremental_Update (tag: %d), not converged",
-					 this->getTag());
-		  MatPoint[where].setEPS( mmodel->getEPS() );
-		}
-		else if ( tmp_ndm ) 
-		  (MatPoint[where].p_matmodel)->setTrialStrainIncr( incremental_strain );
-		else {
-               	   g3ErrorHandler->fatal("EightNodeBrick::incremental_Update (tag: %d), no strain or stress state vars", this->getTag());
-		   exit(1);
-		}
+		//if ( tmp_eps ) { //if there is an EPState for the MatPoint3D
+		//  mmodel->setEPS( *tmp_eps );
+		
+		if ( ! ( (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)) )
+               	   g3ErrorHandler->warning("EightNodeBrick::incremental_Update (tag: %d), not converged",
+		 		 this->getTag());
+		//matpoint[where].setEPS( mmodel->getEPS() );
+		//}
+		
+		//else if ( tmp_ndm ) 
+		//  (matpoint[where].p_matmodel)->setTrialStrainIncr( incremental_strain );
+		//else {
+               	//   g3ErrorHandler->fatal("EightNodeBrick::incremental_Update (tag: %d), no strain or stress state vars", this->getTag());
+		//   exit(1);
+		//}
 		   	        
 		//Constitutive = trialEPS.getEep();	        
 	        
@@ -603,7 +628,7 @@ void EightNodeBrick::incremental_Update()
 //    tensor dhGlobal;
 //
 //    int number_of_subincrements = 1;
-//    //double this_one_PP = (MatPoint)->operator[](where).IS_Perfect_Plastic();
+//    //double this_one_PP = (matpoint)->operator[](where).IS_Perfect_Plastic();
 //
 //    stresstensor final_stress_after_integration;
 //    //    stresstensor incremental_stress;
@@ -648,7 +673,7 @@ void EightNodeBrick::incremental_Update()
 //                //::::::                      GP_c_r,GP_c_s,GP_c_t,where);
 //                //::::::   ::printf("WEIGHT = %f", weight);
 //                //::::::   ::printf("determinant of Jacobian = %f", determinant_of_Jacobian);
-//                //::::::   MatPoint[where].report("Gauss Point\n");
+//                //::::::   matpoint[where].report("Gauss Point\n");
 //                incremental_strain =
 //                   (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
 //                incremental_strain.null_indices();
@@ -663,9 +688,9 @@ void EightNodeBrick::incremental_Update()
 //         
 //	        // Zhaohui commented out_____02-10-2000
 //		final_stress_after_integration =
-//                    (MatPoint)->operator[](where).FinalStress(*(GPstress+where),
+//                    (matpoint)->operator[](where).FinalStress(*(GPstress+where),
 //                                                     incremental_strain,
-//                                                     (MatPoint)->operator[](where),
+//                                                     (matpoint)->operator[](where),
 //                                                     number_of_subincrements,
 //                                                     this_one_PP);
 //                
@@ -684,7 +709,7 @@ void EightNodeBrick::incremental_Update()
 //	        // this is update of iterative_stress state at this Gauss point
 //                GPiterative_stress[where].Initialize(final_stress_after_integration);
 //                GPq_ast_iterative[where] =
-//                  (MatPoint)->operator[](where).kappa_get(final_stress_after_integration);
+//                  (matpoint)->operator[](where).kappa_get(final_stress_after_integration);
 //                //             GPstress[where].Initialize(final_stress_after_integration);
 //                //GPiterative_stress[where].reportshortpqtheta("\n iterative_stress at GAUSS point in iterative_Update\n");
 //                GPiterative_stress[where].reportshort("\n iterative_stress at GAUSS point in iterative_Update\n");
@@ -1003,7 +1028,7 @@ tensor EightNodeBrick::dh_drst_at(double r1, double r2, double r3)
 //  }
 
 ////#############################################################################
-Finite_Element & EightNodeBrick::operator[](int subscript)
+EightNodeBrick & EightNodeBrick::operator[](int subscript)
   {
     return ( *(this+subscript) );
   }
@@ -1048,7 +1073,6 @@ tensor EightNodeBrick::getStiffnessTensor(void)
     double det_of_Jacobian = 0.0;
 
     static int disp_dim[] = {8,3};   // Xiaoyan changed from {20,3} to {8,3}
-
     tensor incremental_displacements(2,disp_dim,0.0); // \Delta u
 
     straintensor incremental_strain;
@@ -1067,9 +1091,11 @@ tensor EightNodeBrick::getStiffnessTensor(void)
 
     stresstensor final_stress_after_integration;
     stresstensor incremental_stress;
+    
     // tensor of incremental displacements taken from node objects
-    incremental_displacements = incr_disp();
-    //..    incremental_displacements.print("incr_disp");
+    //incremental_displacements = incr_disp();
+    //cout << "\n=======" << getTag() << "===========\n";
+    //incremental_displacements.print("incr_disp");
 
     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
@@ -1116,7 +1142,7 @@ tensor EightNodeBrick::getStiffnessTensor(void)
                 //I.print("I");
 
                 //printf("determinant of Jacobian = %.6e", det_of_Jacobian);
-                //MatPoint[where].report("Gauss Point\n");
+                //matpoint[where].report("Gauss Point\n");
 
                 // incremental straines at this Gauss point
                 //GPstress[where].reportshortpqtheta("\n stress at GAUSS point in stiffness_tensor1\n");
@@ -1144,14 +1170,10 @@ tensor EightNodeBrick::getStiffnessTensor(void)
                 // this final stress after integration is used ONLY to obtain Constitutive tensor
                 // at this Gauss point.
                 
-                //=====================================================================================
-                // Need to change:  to use new Template3Dep 
-                // ZHaohui 09-27-2000   xxxxxxxxxxxxxxxxxxxxxxxxx
-
                 //final_stress_after_integration =
-                //    (MatPoint)->operator[](where).FinalStress(*(GPstress+where),
+                //    (matpoint)->operator[](where).FinalStress(*(GPstress+where),
                 //                                 incremental_strain,
-                //                                 (MatPoint)->operator[](where),
+                //                                 (matpoint)->operator[](where),
                 //                                 number_of_subincrements,
                 //                                 this_one_PP);
                 //final_stress_after_integration.reportshortpqtheta("\n final_stress_after_integration in stiffness_tensor5\n");
@@ -1173,32 +1195,37 @@ tensor EightNodeBrick::getStiffnessTensor(void)
                 // calculate the constitutive tensor
                 //......         Constitutive =  GPtangent_E[where];
 
-		//Constitutive =  (MatPoint)->operator[](where).ConstitutiveTensor(final_stress_after_integration,
+		//Constitutive =  (matpoint)->operator[](where).ConstitutiveTensor(final_stress_after_integration,
                 //                                         *(GPstress+where),
                 //                                          incremental_strain,
-                //                                          (MatPoint)->operator[](where),
+                //                                          (matpoint)->operator[](where),
                 //                                          this_one_PP);
                 //Constitutive.print("C","\n\n C tensor \n");
                 
-	        EPState *tmp_eps = (MatPoint[where]).getEPS();
-	        NDMaterial *tmp_ndm = (MatPoint[where]).getNDMat();
+	        //EPState *tmp_eps = (matpoint[where]).getEPS();
+	        //NDMaterial *tmp_ndm = (matpoint[where]).getNDMat();
 
-		if ( tmp_eps ) {     //Elasto-plastic case
-		    mmodel->setEPS( *tmp_eps );
-		    if ( ! (mmodel->setTrialStrainIncr( incremental_strain)) )
-               	       g3ErrorHandler->warning("EightNodeBrick::incremental_Update (tag: %d), not converged",
-					 this->getTag());
-		    Constitutive = mmodel->getTangentTensor();
-      		    MatPoint[where].setEPS( mmodel->getEPS() );
-		}
-		else if ( tmp_ndm ) { //Elastic case
-		    (MatPoint[where].p_matmodel)->setTrialStrainIncr( incremental_strain );
-		    Constitutive = (MatPoint[where].p_matmodel)->getTangentTensor();
-		}
-		else {
-               	   g3ErrorHandler->fatal("EightNodeBrick::incremental_Update (tag: %d), could not getTangentTensor", this->getTag());
-		   exit(1);
-		}
+		//if ( tmp_eps ) {     //Elasto-plastic case
+		//    mmodel->setEPS( *tmp_eps );
+		
+		//int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
+		//if ( err)
+               	//   g3ErrorHandler->warning("EightNodeBrick::getStiffnessTensor (tag: %d), not converged",
+		//    		 this->getTag());
+		
+		Constitutive = (matpoint[where]->matmodel)->getTangentTensor();
+                //Constitutive.print("C","\n\n C tensor \n");
+     		
+		//    matpoint[where].setEPS( mmodel->getEPS() );
+		//}
+		//else if ( tmp_ndm ) { //Elastic case
+		//    (matpoint[where].p_matmodel)->setTrialStrainIncr( incremental_strain );
+		//    Constitutive = (matpoint[where].p_matmodel)->getTangentTensor();
+		//}
+		//else {
+               	//   g3ErrorHandler->fatal("EightNodeBrick::incremental_Update (tag: %d), could not getTangentTensor", this->getTag());
+		//   exit(1);
+		//}
 			  
 		//printf("Constitutive.trace = %12.6e\n", Constitutive.trace());
                 //Kmat = this->stiffness_matrix(Constitutive);
@@ -1225,6 +1252,7 @@ tensor EightNodeBrick::getStiffnessTensor(void)
               }
           }
       }
+    //Kk.print("K","\n\n K tensor \n"); 
     //K = Kk;
     return Kk;
   }
@@ -1300,9 +1328,9 @@ void EightNodeBrick::set_strain_stress_tensor(FILE *fp, double * u)
                 // at this Gauss point.
 
                 //Constitutive =  GPtangent_E[where];
-                //Constitutive =  (MatPoint->getEPS() )->getEep();
+                //Constitutive =  (matpoint->getEPS() )->getEep();
                 // if set total displ, then it should be elstic material
-		Constitutive =  ( MatPoint->getNDMat() )->getTangentTensor();
+		Constitutive =  ( matpoint[where]->matmodel)->getTangentTensor();
 
        		stress = Constitutive("ijkl") * strain("kl");   //<<<<<<<<<<<<<<<
                 stress.null_indices();
@@ -1319,12 +1347,12 @@ void EightNodeBrick::set_strain_stress_tensor(FILE *fp, double * u)
   }
 
 
-
 ////#############################################################################
 //  tensor EightNodeBrick::mass_tensor(Elastic  mmodel)
 tensor EightNodeBrick::getMassTensor(void)
   {
-    int M_dim[] = {24,24};    // Xiaoyan changed from {60,60} to {24,24}
+    //int M_dim[] = {8,3,3,8}; 
+    int M_dim[] = {24,24};    
     tensor Mm(2,M_dim,0.0);
 
     double r  = 0.0;
@@ -1342,7 +1370,8 @@ tensor EightNodeBrick::getMassTensor(void)
     tensor dh(2, dh_dim, 0.0);
 
     int h_dim[] = {24,3};	// Xiaoyan changed from {60,3} to {24,3}
-    //    int h_dim[] = {20,3};
+    //int h_dim[] = {8,3};	// Xiaoyan changed from {60,3} to {24,3}
+    //int h_dim[] = {20,3};
     tensor H(2, h_dim, 0.0);
 
     double det_of_Jacobian = 0.0;
@@ -1350,7 +1379,7 @@ tensor EightNodeBrick::getMassTensor(void)
     tensor Jacobian;
 
     double RHO;
-    RHO= rho; 
+    RHO= rho; 	 //global
 
     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
@@ -1406,11 +1435,11 @@ tensor EightNodeBrick::getMassTensor(void)
 
      
 
-                // IntegrationPoint GaPo = IntegrationPoint::GP()+where;
+                // matpoint GaPo = MatPoint3D::GP()+where;
 
 		// if it's elasto-plastic, then use the rho at each integration point
-		if ( MatPoint[where].getEPS() ) 
-		   RHO= (MatPoint[where].getEPS())->getrho();  
+		//if ( matpoint[where] ) //need to refine possible bug
+		//  RHO= matpoint[where]->getrho();  
 
 		//printf("RHO = %10.3e",RHO);
                 //		getchar();
@@ -1426,16 +1455,18 @@ tensor EightNodeBrick::getMassTensor(void)
 
 		Mm = Mm + H("ib")*H("kb")*weight;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
-	      //	M.print("M","AFTER");
+	      	//Mm.printshort("M");
               }
           }
       }
     //M = Mm;
+    //Mm.printshort("M");
     return Mm;
   }
 
 
 ////#############################################################################
+// Not for OpenSees
 double EightNodeBrick::Potential_Energy(void)
   {
 //    double Potential_Energy_Estimate = 0.0;
@@ -1507,7 +1538,7 @@ double EightNodeBrick::Potential_Energy(void)
                 //                                      GP_c_r,GP_c_s,GP_c_t);
                 //::fprintf(stdout,"WEIGHT = %f", weight);
                 //::fprintf(stdout,"determinant of Jacobian = %f", determinant_of_Jacobian);
-                //::::::   MatPoint[where].report("Gauss Point\n");
+                //::::::   matpoint[where].report("Gauss Point\n");
                 //::::::
                 // incremental straines at this Gauss point
                 //----   GPstress[where].reportshortpqtheta("\n stress at GAUSS point in stiffness_tensor1\n");
@@ -1518,8 +1549,8 @@ double EightNodeBrick::Potential_Energy(void)
                 //GPiterative_stress[where].reportshortpqtheta("\n ITERATIVE stress at GAUSS point in Potential_Energy\n");
 
                 //stress_sum = GPstress[where] + GPiterative_stress[where];
-                stress_sum = (MatPoint[where].getEPS())->getStress() 
-		                + (MatPoint[where].getEPS())->getStress_commit();
+                stress_sum = matpoint[where]->getStressTensor() 
+		                + (matpoint[where]->matmodel->getEPS())->getStress_commit(); //????? 
                 
 		//stress_sum.reportshortpqtheta("\n ITERATIVE stress_SUM at GAUSS point in Potential_Energy\n");
 
@@ -1669,15 +1700,39 @@ tensor EightNodeBrick::incr_disp(void)
     //  }
     
     //Zhaohui using node pointers, which come from the Domain
-    const Vector &IncrDis1 = nd1Ptr->getIncrDisp();
-    const Vector &IncrDis2 = nd2Ptr->getIncrDisp();
-    const Vector &IncrDis3 = nd3Ptr->getIncrDisp();
-    const Vector &IncrDis4 = nd4Ptr->getIncrDisp();
-    const Vector &IncrDis5 = nd5Ptr->getIncrDisp();
-    const Vector &IncrDis6 = nd6Ptr->getIncrDisp();
-    const Vector &IncrDis7 = nd7Ptr->getIncrDisp();
-    const Vector &IncrDis8 = nd8Ptr->getIncrDisp();
-    
+    //const Vector &TotDis1 = nd1Ptr->getTrialDisp();
+    //const Vector &incrdelDis1 = nd1Ptr->getIncrDisp();
+    //Have to get IncrDeltaDisp, not IncrDisp for cumulation of incr_disp
+    const Vector &IncrDis1 = nd1Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis2 = nd2Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis3 = nd3Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis4 = nd4Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis5 = nd5Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis6 = nd6Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis7 = nd7Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis8 = nd8Ptr->getIncrDeltaDisp();
+
+    //if ( getTag() == 486 || getTag() == 566 || getTag() == 956)
+    //{
+    //cerr <<" \n\n element " << getTag() << endln;
+    //cerr<<"\n tot node " << nd1Ptr->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2);
+    //
+    //cerr<<"\n incr node " << nd1Ptr->getTag() <<" x "<< incrdelDis1(0) <<" y "<< incrdelDis1(1) << " z "<< incrdelDis1(2);
+    //
+    //cerr << "\nincr del node " << nd1Ptr->getTag() << " x " << IncrDis1(0) <<" y "<< IncrDis1(1) << " z "<< IncrDis1(2) << endln;
+    //
+    //cerr << " incr del node " << nd2Ptr->getTag() << " x " << IncrDis2(0) <<" y "<< IncrDis2(1) << " z "<< IncrDis2(2) << endln;
+    //
+    //cerr << " incr del node " << nd3Ptr->getTag() << " x " << IncrDis3(0) <<" y "<< IncrDis3(1) << " z "<< IncrDis3(2) << endln;
+    //
+    //cerr << " incr del node " << nd4Ptr->getTag() << " x " << IncrDis4(0) <<" y "<< IncrDis4(1) << " z "<< IncrDis4(2) << endln;
+    //
+    //cerr << " incr del node " << nd5Ptr->getTag() << " x " << IncrDis5(0) <<" y "<< IncrDis5(1) << " z "<< IncrDis5(2) << endln;
+    //cerr << " incr del node " << nd6Ptr->getTag() << " x " << IncrDis6(0) <<" y "<< IncrDis6(1) << " z "<< IncrDis6(2) << endln;
+    //cerr << " incr del node " << nd7Ptr->getTag() << " x " << IncrDis7(0) <<" y "<< IncrDis7(1) << " z "<< IncrDis7(2) << endln;
+    //cerr << " incr del node " << nd8Ptr->getTag() << " x " << IncrDis8(0) <<" y "<< IncrDis8(1) << " z "<< IncrDis8(2) << endln;
+    //}
+
     increment_disp.val(1,1)=IncrDis1(0); increment_disp.val(1,2)=IncrDis1(1);increment_disp.val(1,3)=IncrDis1(2);
     increment_disp.val(2,1)=IncrDis2(0); increment_disp.val(2,2)=IncrDis2(1);increment_disp.val(2,3)=IncrDis2(2);
     increment_disp.val(3,1)=IncrDis3(0); increment_disp.val(3,2)=IncrDis3(1);increment_disp.val(3,3)=IncrDis3(2);
@@ -1689,6 +1744,43 @@ tensor EightNodeBrick::incr_disp(void)
     
     return increment_disp;
   }
+
+////#############################################################################
+tensor EightNodeBrick::total_disp(void)
+  {
+    const int dimensions[] = {8,3};  // Xiaoyan changed from {20,3} to {8,3} for 8 nodes
+    tensor total_disp(2, dimensions, 0.0);
+      
+    //Zhaohui using node pointers, which come from the Domain
+    const Vector &TotDis1 = nd1Ptr->getTrialDisp();
+    cout<<"\ntot node " << nd1Ptr->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2) << endln;
+    const Vector &TotDis2 = nd2Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd2Ptr->getTag() << " x " << TotDis2(0) <<" y "<< TotDis2(1) << " z "<< TotDis2(2) << endln;
+    const Vector &TotDis3 = nd3Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd3Ptr->getTag() << " x " << TotDis3(0) <<" y "<< TotDis3(1) << " z "<< TotDis3(2) << endln;
+    const Vector &TotDis4 = nd4Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd4Ptr->getTag() << " x " << TotDis4(0) <<" y "<< TotDis4(1) << " z "<< TotDis4(2) << endln;
+    const Vector &TotDis5 = nd5Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd5Ptr->getTag() << " x " << TotDis5(0) <<" y "<< TotDis5(1) << " z "<< TotDis5(2) << endln;
+    const Vector &TotDis6 = nd6Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd6Ptr->getTag() << " x " << TotDis6(0) <<" y "<< TotDis6(1) << " z "<< TotDis6(2) << endln;
+    const Vector &TotDis7 = nd7Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd7Ptr->getTag() << " x " << TotDis7(0) <<" y "<< TotDis7(1) << " z "<< TotDis7(2) << endln;
+    const Vector &TotDis8 = nd8Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd8Ptr->getTag() << " x " << TotDis8(0) <<" y "<< TotDis8(1) << " z "<< TotDis8(2) << endln;
+    
+    total_disp.val(1,1)=TotDis1(0); total_disp.val(1,2)=TotDis1(1);total_disp.val(1,3)=TotDis1(2);
+    total_disp.val(2,1)=TotDis2(0); total_disp.val(2,2)=TotDis2(1);total_disp.val(2,3)=TotDis2(2);
+    total_disp.val(3,1)=TotDis3(0); total_disp.val(3,2)=TotDis3(1);total_disp.val(3,3)=TotDis3(2);
+    total_disp.val(4,1)=TotDis4(0); total_disp.val(4,2)=TotDis4(1);total_disp.val(4,3)=TotDis4(2);
+    total_disp.val(5,1)=TotDis5(0); total_disp.val(5,2)=TotDis5(1);total_disp.val(5,3)=TotDis5(2);
+    total_disp.val(6,1)=TotDis6(0); total_disp.val(6,2)=TotDis6(1);total_disp.val(6,3)=TotDis6(2);
+    total_disp.val(7,1)=TotDis7(0); total_disp.val(7,2)=TotDis7(1);total_disp.val(7,3)=TotDis7(2);
+    total_disp.val(8,1)=TotDis8(0); total_disp.val(8,2)=TotDis8(1);total_disp.val(8,3)=TotDis8(2);
+
+    return total_disp;
+  }
+
 
 ////#############################################################################
 tensor EightNodeBrick::total_disp(FILE *fp, double * u)
@@ -1736,6 +1828,7 @@ tensor EightNodeBrick::total_disp(FILE *fp, double * u)
 
     return total_disp;
   }
+
 
 ////#############################################################################
 int EightNodeBrick::get_global_number_of_node(int local_node_number)
@@ -1812,6 +1905,13 @@ tensor EightNodeBrick::nodal_forces(void)
 
     double det_of_Jacobian = 0.0;
 
+    straintensor incremental_strain;
+
+    static int disp_dim[] = {8,3};   // Xiaoyan changed from {20,3} to {8,3}
+    tensor incremental_displacements(2,disp_dim,0.0); // \Delta u
+
+    incremental_displacements = incr_disp();
+
     tensor Jacobian;
     tensor JacobianINV;
     tensor dhGlobal;
@@ -1861,7 +1961,7 @@ tensor EightNodeBrick::nodal_forces(void)
                 //..                           GP_c_r,GP_c_s,GP_c_t);
                 //..::printf("WEIGHT = %f", weight);
                 //..::printf("determinant of Jacobian = %f", det_of_Jacobian);
-                //..MatPoint[where].report("Gauss Point\n");
+                //..matpoint[where].report("Gauss Point\n");
 
                 //..   // samo jos odredi ovaj tensor E i to za svaku gauss tacku drugaciji !!!!!!!!!!!!
                 //..   ovde negde bi trebalo da se na osnovu inkrementalnih pomeranja
@@ -1877,7 +1977,7 @@ tensor EightNodeBrick::nodal_forces(void)
                 //                incremental_strain.null_indices();
                 ////incremental_strain.reportshort("\n incremental_strain tensor at GAUSS point\n");
                 //
-                ////                integr_type = (MatPoint)->operator[](where).integration_type();
+                ////                integr_type = (matpoint)->operator[](where).integration_type();
                 ////                if ( !strcmp(integr_type,"BakcwardEuler")
 
                 //..   dakle ovde posalji strain_increment jer se stari stress cuva u okviru svake
@@ -1898,32 +1998,76 @@ tensor EightNodeBrick::nodal_forces(void)
                 //                   stress_at_GP = (GPstress)->operator[](where);
                 //stress_at_GP = GPstress[where];
 
-	        EPState *tmp_eps = (MatPoint[where]).getEPS();
-	        NDMaterial *tmp_ndm = (MatPoint[where]).getNDMat();
+	        //EPState *tmp_eps = (matpoint[where]->matmodel)->getEPS();
+		//stress_at_GP = tmp_eps->getStress();
+		//cout << "tmp_eps" << (*tmp_eps);
 
-		if ( tmp_eps ) {     //Elasto-plastic case
- 		    stress_at_GP = (MatPoint[where].getEPS())->getStress();
-		}
-		else if ( tmp_ndm ) { //Elastic case
-             	    stress_at_GP = (MatPoint[where].getNDMat())->getStressTensor();
-		}
-		else {
-               	   g3ErrorHandler->fatal("EightNodeBrick::nodal_forces (tag: %d), could not getStress", this->getTag());
-		   exit(1);
-		}
+	        //NDMaterial *tmp_ndm = (matpoint[where]).getNDMat();
+		
+		//if ( tmp_eps ) {     //Elasto-plastic case
+ 		
+		//stress_at_GP = (matpoint[where].matmodel->getEPS())->getStress();
+		
+		//   EPState *tmp_eps = (matpoint[where]->matmodel)->getEPS();
+		//   stress_at_GP = tmp_eps->getStress();
 
-                //..stress_at_GP.reportshort("\n stress_at_GPtensor at GAUSS point for nodal forces \n");
+		
+		
+		incremental_strain =
+                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+		if (where == 0)
+   		//cout << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
+		cout << " el tag = "<< getTag();
+		
+		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
+		if ( err)
+               	   g3ErrorHandler->warning("EightNodeBrick::getStiffnessTensor (tag: %d), not converged",
+		    		 this->getTag());
+
+
+
+		//char *test = matpoint[where]->matmodel->getType();
+		if (strcmp(matpoint[where]->matmodel->getType(),"ElasticIsotropic3D") == 0)
+		   stress_at_GP = matpoint[where]->getStressTensor();
+		else
+		{
+	           //Some thing funny happened when getting stress directly from matpoint[where], i have to do it this way!
+		   EPState *tmp_eps = (matpoint[where]->matmodel)->getEPS();
+		   stress_at_GP = tmp_eps->getStress();
+		   //delete tmp_eps;
+	       	}
+		
+           	//double  p = stress_at_GP.p_hydrostatic();
+                //if ( p < 0.0 ) 
+	        //{
+	        //  cerr << getTag();
+	        //  cerr << " ***p  =    " << p << endln;
+	        //}
+
+		//cerr << " nodal_force ::: stress_at_GP " << stress_at_GP << endln;
+		
+		//}
+		//else if ( tmp_ndm ) { //Elastic case
+             	//    stress_at_GP = (matpoint[where].getNDMat())->getStressTensor();
+		//}
+		//else {
+               	//   g3ErrorHandler->fatal("EightNodeBrick::nodal_forces (tag: %d), could not getStress", this->getTag());
+		//   exit(1);
+		//}
+
+                //stress_at_GP.report("\n stress_at_GPtensor at GAUSS point for nodal forces \n");
 
                 // nodal forces See Zienkievicz part 1 pp 108
                 nodal_forces =
                      nodal_forces + dhGlobal("ib")*stress_at_GP("ab")*weight;
-                //::::::  nodal_forces.print("nf","\n\n Nodal Forces \n");
+                //nodal_forces.print("nf","\n\n Nodal Forces \n");
  
               }
           }
       }
 
-
+    //cout << "\n element no. " << getTag() << endln;
+    //nodal_forces.print("nf","\n Nodal Forces \n");
     return nodal_forces;
 
   }
@@ -2006,8 +2150,8 @@ tensor EightNodeBrick::iterative_nodal_forces(void)
                 //                   stress_at_GP = (GPstress)->operator[](where);
                 //stress_at_GP = GPiterative_stress[where];
                 
-		//stress_at_GP = ( MatPoint[where].getTrialEPS() )->getStress();
-                stress_at_GP = ( MatPoint[where].getEPS() )->getStress();
+		//stress_at_GP = ( matpoint[where].getTrialEPS() )->getStress();
+                stress_at_GP = matpoint[where]->getStressTensor();
                 stress_at_GP.reportshortpqtheta("\n iterative_stress at GAUSS point in iterative_nodal_force\n");
 
                 // nodal forces See Zienkievicz part 1 pp 108
@@ -2212,27 +2356,27 @@ tensor EightNodeBrick::linearized_nodal_forces(void)
 
                 //Constitutive = GPtangent_E[where];
                 
-	        EPState *tmp_eps = (MatPoint[where]).getEPS();
-	        NDMaterial *tmp_ndm = (MatPoint[where]).getNDMat();
+	        //EPState *tmp_eps = (matpoint[where]).getEPS();
+	        //NDMaterial *tmp_ndm = (matpoint[where]).getNDMat();
 
-		if ( tmp_eps ) {     //Elasto-plastic case
-		    mmodel->setEPS( *tmp_eps );
-		    if ( ! (mmodel->setTrialStrainIncr( incremental_strain)) )
-               	       g3ErrorHandler->warning("EightNodeBrick::incremental_Update (tag: %d), not converged",
-					 this->getTag());
-		    Constitutive = mmodel->getTangentTensor();
-      		    MatPoint[where].setEPS( mmodel->getEPS() ); //Set the new EPState back
-		}
-		else if ( tmp_ndm ) { //Elastic case
-		    (MatPoint[where].p_matmodel)->setTrialStrainIncr( incremental_strain );
-		    Constitutive = (MatPoint[where].p_matmodel)->getTangentTensor();
-		}
-		else {
-               	   g3ErrorHandler->fatal("EightNodeBrick::incremental_Update (tag: %d), could not getTangentTensor", this->getTag());
-		   exit(1);
-		}
+		//if ( tmp_eps ) {     //Elasto-plastic case
+		//    mmodel->setEPS( *tmp_eps );
+		if ( ! (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)  )
+               	   g3ErrorHandler->warning("EightNodeBrick::linearized_nodal_forces (tag: %d), not converged",
+		    		 this->getTag());
+		Constitutive = (matpoint[where]->matmodel)->getTangentTensor();
+      		//    matpoint[where].setEPS( mmodel->getEPS() ); //Set the new EPState back
+		//}
+		//else if ( tmp_ndm ) { //Elastic case
+		//    (matpoint[where].p_matmodel)->setTrialStrainIncr( incremental_strain );
+		//    Constitutive = (matpoint[where].p_matmodel)->getTangentTensor();
+		//}
+		//else {
+               	//   g3ErrorHandler->fatal("EightNodeBrick::incremental_Update (tag: %d), could not getTangentTensor", this->getTag());
+		//   exit(1);
+		//}
 		
-		//Constitutive = ( MatPoint[where].getEPS() )->getEep();
+		//Constitutive = ( matpoint[where].getEPS() )->getEep();
                 //..//GPtangent_E[where].print("\n tangent E at GAUSS point \n");
 
                 final_linearized_stress =
@@ -2360,7 +2504,7 @@ tensor EightNodeBrick::linearized_nodal_forces(void)
 ////#############################################################################
 //double EightNodeBrick::get_first_q_ast(void)
 //  {
-//    double ret = MatPoint[0].kappa_cone_get();
+//    double ret = matpoint[0].kappa_cone_get();
 //
 //    return ret;
 //
@@ -2368,7 +2512,7 @@ tensor EightNodeBrick::linearized_nodal_forces(void)
 ////#############################################################################
 //double EightNodeBrick::get_first_etacone(void)
 //  {
-//    double ret = MatPoint[0].etacone();
+//    double ret = matpoint[0].etacone();
 //
 //    return ret;
 //
@@ -2448,10 +2592,10 @@ void EightNodeBrick::report(char * msg)
                 ::printf("\n\n----------------**************** where = %d \n", where);
                 ::printf("                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
                             GP_c_r,GP_c_s,GP_c_t);
-                MatPoint[where].report("Integration Point\n");
+                matpoint[where]->report("Material Point\n");
                 //GPstress[where].reportshort("stress at Gauss Point");
                 //GPstrain[where].reportshort("strain at Gauss Point");
-                //MatPoint[where].report("Material model  at Gauss Point");
+                //matpoint[where].report("Material model  at Gauss Point");
               }
           }
       }
@@ -2508,7 +2652,7 @@ void EightNodeBrick::reportPAK(char * msg)
 void EightNodeBrick::reportpqtheta(int GP_numb)
   {
     short where = GP_numb-1;
-    MatPoint[where].reportpqtheta("");
+    matpoint[where]->reportpqtheta("");
   }
 
 //#############################################################################
@@ -2540,7 +2684,7 @@ void EightNodeBrick::reportTensor(char * msg)
     // special case for 8 nodes only
     static const int dim[] = {3, 8}; // static-> see ARM pp289-290
     tensor NodalCoord(2, dim, 0.0);
-    tensor IntegrationPointCoord(2, dim, 0.0);
+    tensor matpointCoord(2, dim, 0.0);
     int h_dim[] = {24,3};   // Xiaoyan changed from {60,3} to {24,3} for 8 nodes
     tensor H(2, h_dim, 0.0);
 
@@ -2605,22 +2749,22 @@ void EightNodeBrick::reportTensor(char * msg)
  	       for (int encount=1 ; encount <= 8 ; encount++ ) 
                 //	       for (int encount=0 ; encount <= 7 ; encount++ ) 
 	         {
-                  //  IntegrationPointCoord.val(1,where+1) =+NodalCoord.val(1,where+1) * H.val(encount*3-2,1);
-                  //  IntegrationPointCoord.val(2,where+1) =+NodalCoord.val(2,where+1) * H.val(encount*3-1,2);
-                  //  IntegrationPointCoord.val(3,where+1) =+NodalCoord.val(3,where+1) * H.val(encount*3-0,3);
-                  IntegrationPointCoord.val(1,where+1) +=NodalCoord.val(1,encount) * H.val(encount*3-2,1);
-                  //::printf("-- NO nodal, H_val :%d %+.2e %+.2e %+.5e\n", encount,NodalCoord.val(1,encount),H.val(encount*3-2,1),IntegrationPointCoord.val(1,where+1) );
-                  IntegrationPointCoord.val(2,where+1) +=NodalCoord.val(2,encount) * H.val(encount*3-1,2);
-                  IntegrationPointCoord.val(3,where+1) +=NodalCoord.val(3,encount) * H.val(encount*3-0,3);
+                  //  matpointCoord.val(1,where+1) =+NodalCoord.val(1,where+1) * H.val(encount*3-2,1);
+                  //  matpointCoord.val(2,where+1) =+NodalCoord.val(2,where+1) * H.val(encount*3-1,2);
+                  //  matpointCoord.val(3,where+1) =+NodalCoord.val(3,where+1) * H.val(encount*3-0,3);
+                  matpointCoord.val(1,where+1) +=NodalCoord.val(1,encount) * H.val(encount*3-2,1);
+                  //::printf("-- NO nodal, H_val :%d %+.2e %+.2e %+.5e\n", encount,NodalCoord.val(1,encount),H.val(encount*3-2,1),matpointCoord.val(1,where+1) );
+                  matpointCoord.val(2,where+1) +=NodalCoord.val(2,encount) * H.val(encount*3-1,2);
+                  matpointCoord.val(3,where+1) +=NodalCoord.val(3,encount) * H.val(encount*3-0,3);
 
 		  }
 		  			  
     ::printf("gauss point# %d   %+.6e %+.6e %+.6e \n", where+1, 
-                                                       IntegrationPointCoord.val(1,where+1),
-                                                       IntegrationPointCoord.val(2,where+1),
-                                                       IntegrationPointCoord.val(3,where+1));
+                                                       matpointCoord.val(1,where+1),
+                                                       matpointCoord.val(2,where+1),
+                                                       matpointCoord.val(3,where+1));
 
-    //MatPoint[where].reportTensor("");
+    //matpoint[where].reportTensor("");
 
 		
               }
@@ -2638,13 +2782,10 @@ void EightNodeBrick::reportTensor(char * msg)
 
 void EightNodeBrick::reportTensorF(FILE * fp)
   {
-//    if ( msg ) ::printf("** %s\n",msg);
+    //if ( msg ) ::printf("** %s\n",msg);
 
-// special case for 8 nodes only
-// special case for 8 nodes only
-// special case for 8 nodes only
-// special case for 8 nodes only
-// special case for 8 nodes only
+    // special case for 8 nodes only
+    // special case for 8 nodes only
     double r  = 0.0;
     double s  = 0.0;
     double t  = 0.0;
@@ -2654,7 +2795,7 @@ void EightNodeBrick::reportTensorF(FILE * fp)
     // special case for 8 nodes only
     static const int dim[] = {3, 8}; // static-> see ARM pp289-290
     tensor NodalCoord(2, dim, 0.0);
-    tensor IntegrationPointCoord(2, dim, 0.0);
+    tensor matpointCoord(2, dim, 0.0);
     int h_dim[] = {24,3};  // Xiaoyan changed from {60,3} to {24,3} for 8 nodes
 
     tensor H(2, h_dim, 0.0);
@@ -2718,22 +2859,22 @@ void EightNodeBrick::reportTensorF(FILE * fp)
  	       for (int encount=1 ; encount <= 8 ; encount++ ) 
                 //	       for (int encount=0 ; encount <= 7 ; encount++ ) 
 	       {
-                  //  IntegrationPointCoord.val(1,where+1) =+NodalCoord.val(1,where+1) * H.val(encount*3-2,1);
-                  //  IntegrationPointCoord.val(2,where+1) =+NodalCoord.val(2,where+1) * H.val(encount*3-1,2);
-                  //  IntegrationPointCoord.val(3,where+1) =+NodalCoord.val(3,where+1) * H.val(encount*3-0,3);
-                  IntegrationPointCoord.val(1,where+1) +=NodalCoord.val(1,encount) * H.val(encount*3-2,1);
-                  //::printf("-- NO nodal, H_val :%d %+.2e %+.2e %+.5e\n", encount,NodalCoord.val(1,encount),H.val(encount*3-2,1),IntegrationPointCoord.val(1,where+1) );
-                  IntegrationPointCoord.val(2,where+1) +=NodalCoord.val(2,encount) * H.val(encount*3-1,2);
-                  IntegrationPointCoord.val(3,where+1) +=NodalCoord.val(3,encount) * H.val(encount*3-0,3);
+                  //  matpointCoord.val(1,where+1) =+NodalCoord.val(1,where+1) * H.val(encount*3-2,1);
+                  //  matpointCoord.val(2,where+1) =+NodalCoord.val(2,where+1) * H.val(encount*3-1,2);
+                  //  matpointCoord.val(3,where+1) =+NodalCoord.val(3,where+1) * H.val(encount*3-0,3);
+                  matpointCoord.val(1,where+1) +=NodalCoord.val(1,encount) * H.val(encount*3-2,1);
+                  //::printf("-- NO nodal, H_val :%d %+.2e %+.2e %+.5e\n", encount,NodalCoord.val(1,encount),H.val(encount*3-2,1),matpointCoord.val(1,where+1) );
+                  matpointCoord.val(2,where+1) +=NodalCoord.val(2,encount) * H.val(encount*3-1,2);
+                  matpointCoord.val(3,where+1) +=NodalCoord.val(3,encount) * H.val(encount*3-0,3);
 
 	       }
 		  			  
     fprintf(fp, "gauss point# %d   %+.6e %+.6e %+.6e \n", where+1, 
-                                                          IntegrationPointCoord.val(1,where+1),
-                                                          IntegrationPointCoord.val(2,where+1),
-                                                          IntegrationPointCoord.val(3,where+1));
+                                                          matpointCoord.val(1,where+1),
+                                                          matpointCoord.val(2,where+1),
+                                                          matpointCoord.val(3,where+1));
 
-    //MatPoint[where].reportTensor("");
+    //matpoint[where].reportTensor("");
 
 		
               }
@@ -2854,26 +2995,63 @@ int EightNodeBrick::commitState ()
     //	    for (k = 0; k < t_integration_order; k++)	    // added t_integration_order,
     //         retVal += (GaussPtheMaterial[i][j][k]).commitState();  
 
-    EPState *tmp_eps;
-    NDMaterial *tmp_ndm; 
-    
-    for (i = 0; i < count; i++)	{
-    
-       tmp_eps = (MatPoint[i]).getEPS();
-       tmp_ndm = (MatPoint[i]).getNDMat();
-       
-       if ( tmp_eps ) {     //Elasto-plastic case
-           retVal += (MatPoint[i].gpEPS)->commitState(); //commit the State vars
-       }
-       else if ( tmp_ndm ) { //Elastic case
-           retVal += (MatPoint[i].p_matmodel)->commitState();
-       }
-       else {
-          g3ErrorHandler->warning("EightNodeBrick::commit (tag: %d), No state params", this->getTag());
-          //exit(1);
-       }
-    }
-     
+    Vector pp = getResistingForce();
+
+    //if ( this->getTag() == 1 || this->getTag() == 700)
+    //{
+      for (i = 0; i < count; i++)	
+      {
+         retVal += matpoint[i]->commitState();
+         //if (i == 4 && strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
+         stresstensor st;
+	 stresstensor prin;
+	 if (strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
+         {
+      	  st = ( (matpoint[i]->matmodel)->getEPS())->getStress();
+      	  prin = st.principal();
+	 }
+	 else
+	 {
+       	  st = matpoint[i]->getStressTensor();
+      	  prin = st.principal();
+	 
+	 }
+      
+	  //double  p = st.p_hydrostatic();
+	  //double  p = -1*( prin.cval(1, 1)+ prin.cval(2, 2) +prin.cval(3, 3) )/3.0;
+      	  //cerr << "\n " << prin.cval(1, 1) << "   " << prin.cval(2, 2) << "  " <<  prin.cval(3, 3) << endln;
+          //if ( getTag() == 960) 
+          //cerr << " El= " << getTag() << " , p    " << p << endln;
+          
+	  //printf(stderr, " Gauss Point i = %d ", (i+1));
+	  //printf(stderr, " Gauss Point i = %d ", (i+1));
+	  
+
+          //if ( p < 0 ) 
+	  //{
+	  //  cerr << getTag();
+	  //  cerr << " ***p  =    " << p << endln;
+	  //}		             	  
+      	  //J2D
+      	  //cerr << "        " << st.q_deviatoric();
+            
+      	  //double q;	  
+      	  //if ( fabs(prin.cval(1, 1) - prin.cval(2, 2) ) <=  0.0001 )
+      	  //{
+      	  //    q = prin.cval(1, 1) - prin.cval(3, 3);
+      	  //    //cerr << "1 = 2"; 
+      	  //}
+      	  //else
+      	  //    q = prin.cval(3, 3) - prin.cval(1, 1);
+      
+      	  //Triaxial compr.
+      	  //cerr << "        " << q;
+         //}
+      }
+        
+      //output nodal force
+      //cerr << "    " << pp(2) << endln;    
+    //} 
     return retVal;
 }
 
@@ -2893,25 +3071,9 @@ int EightNodeBrick::revertToLastCommit ()
 		      					   // added t_integration_order,
 	    //retVal += (theMaterial[i][j][k]).revertToLastCommit();
 
-    EPState *tmp_eps;
-    NDMaterial *tmp_ndm; 
-    
-    for (i = 0; i < count; i++)	{
-    
-       tmp_eps = (MatPoint[i]).getEPS();
-       tmp_ndm = (MatPoint[i]).getNDMat();
-       
-       if ( tmp_eps ) {     //Elasto-plastic case
-           retVal += (MatPoint[i].gpEPS)->revertToLastCommit(); 
-       }
-       else if ( tmp_ndm ) { //Elastic case
-           retVal += (MatPoint[i].p_matmodel)->revertToLastCommit();
-       }
-       else {
-          g3ErrorHandler->warning("EightNodeBrick::revertToLastCommit (tag: %d), No state params", this->getTag());
-          //exit(1);
-       }
-    }
+    for (i = 0; i < count; i++)	    
+       retVal += matpoint[i]->revertToLastCommit(); 
+   
 
     return retVal;
 }
@@ -2931,25 +3093,9 @@ int EightNodeBrick::revertToStart ()
 
     int count  = r_integration_order* s_integration_order * t_integration_order;
     	     
-    EPState *tmp_eps;
-    NDMaterial *tmp_ndm; 
+    for (i = 0; i < count; i++)
+       retVal += matpoint[i]->revertToStart(); 
     
-    for (i = 0; i < count; i++)	{
-    
-       tmp_eps = (MatPoint[i]).getEPS();
-       tmp_ndm = (MatPoint[i]).getNDMat();
-       
-       if ( tmp_eps ) {     //Elasto-plastic case
-           retVal += (MatPoint[i].gpEPS)->revertToStart(); //commit the State vars
-       }
-       else if ( tmp_ndm ) { //Elastic case
-           retVal += (MatPoint[i].p_matmodel)->revertToStart();
-       }
-       else {
-          g3ErrorHandler->warning("EightNodeBrick::revertToStart (tag: %d), no state parameters", this->getTag());
-          //exit(1);
-       }
-    }
     
     return retVal;
 
@@ -2961,12 +3107,27 @@ int EightNodeBrick::revertToStart ()
 const Matrix &EightNodeBrick::getTangentStiff () 
 { 
      tensor stifftensor = getStiffnessTensor();
-     tensor stiffmatrix = stiffness_matrix ( stifftensor );
-     for (int i = 0; i < 24; i++) {
-        for (int j = 0; j < 24; j++) {
-	    K(i, j) = stiffmatrix.val(i+1, j+1);
-	}
+     int Ki=0;
+     int Kj=0;
+     
+     for ( int i=1 ; i<=8 ; i++ )  
+     {
+        for ( int j=1 ; j<=8 ; j++ )  
+        {
+           for ( int k=1 ; k<=3 ; k++ )
+           {
+              for ( int l=1 ; l<=3 ; l++ )
+              {
+                 Ki = k+3*(i-1);
+                 Kj = l+3*(j-1);
+                 K( Ki-1 , Kj-1 ) = stifftensor.cval(i,k,l,j);
+              }
+           }
+        }
      }
+
+     //cout << " K " << K << endln;
+     //K.Output(cout);
      return K;
 }
 
@@ -2983,8 +3144,75 @@ const Matrix &EightNodeBrick::getDamp ()
 }
 
 //=============================================================================
+//Get lumped mass
 const Matrix &EightNodeBrick::getMass () 
 {
+     tensor masstensor = getMassTensor();
+     //int Ki=0;
+     //int Kj=0;
+     
+     //double tot_mass = 0.0;
+     //double diag_mass = 0.0;
+     double column_mass;
+
+     for ( int i=1 ; i<=24 ; i++ )  
+     {
+        column_mass = 0.0;
+	for ( int j=1 ; j<=24 ; j++ )  
+        {
+           
+	   //M( i-1 , j-1 ) = masstensor.cval(i,j);
+	   
+	   column_mass += masstensor.cval(i,j);
+	   M( i-1 , j-1 ) = 0;
+	   //tot_mass += M( i-1 , j-1 );
+	   //if (i == j)
+	   //   diag_mass += M( i-1 , j-1 );
+        }
+	M( i-1 , i-1 ) = column_mass;
+
+     }
+
+     //cerr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
+     //cerr << "" << M.Output(cout);
+     //cerr << " M " << M;
+     
+     return M;
+}
+
+//=============================================================================
+//Get consistent mass
+const Matrix &EightNodeBrick::getConsMass () 
+{
+     tensor masstensor = getMassTensor();
+     //int Ki=0;
+     //int Kj=0;
+     
+     //double tot_mass = 0.0;
+     //double diag_mass = 0.0;
+     //double column_mass;
+
+     for ( int i=1 ; i<=24 ; i++ )  
+     {
+        //column_mass = 0.0;
+	for ( int j=1 ; j<=24 ; j++ )  
+        {           
+	   M( i-1 , j-1 ) = masstensor.cval(i,j);
+	   
+	   //column_mass += masstensor.cval(i,j);
+	   //M( i-1 , j-1 ) = 0;
+	   //tot_mass += M( i-1 , j-1 );
+	   //if (i == j)
+	   //   diag_mass += M( i-1 , j-1 );
+        }
+	//M( i-1 , i-1 ) = column_mass;
+
+     }
+
+     //cerr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
+     //cerr << "" << M.Output(cout);
+     //cerr << " M " << M;
+     
      return M;
 }
 
@@ -3032,7 +3260,7 @@ int EightNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
        	3 != Raccel4.Size() || 3 != Raccel5.Size() || 3 != Raccel6.Size() || 
 	3 != Raccel7.Size() || 3 != Raccel8.Size()  ){	
 	// Xiaoyan changed 2 to 3 and added Racce15-18  09/27/00
-		g3ErrorHandler->warning("FourNodeQuad::addInertiaLoadToUnbalance %s\n",
+		g3ErrorHandler->warning("EightNodeBrick::addInertiaLoadToUnbalance %s\n",
 				"matrix and vector sizes are incompatable");
 		return -1;
     }
@@ -3065,21 +3293,139 @@ int EightNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
 	ra(22) = Raccel8(1);
 	ra(23) = Raccel8(2);
 
+
     // Want to add ( - fact * M R * accel ) to unbalance
-	// Take advantage of lumped mass matrix
-	// Mass matrix is computed in setDomain()
-    for (int i = 0; i < 24; i++)   // Changed form 8 to 24  Xiaoyan 09/27/00
+    // Take advantage of lumped mass matrix
+    // Mass matrix is computed in setDomain()
+    
+    //double column_mass = 0;
+    //for (int i = 0; i < 24; i++)   
+    //   column_mass += M(1,i);
+    //column_mass = column_mass/3.0;
+
+    //cerr << " addInerti... column_mass " << column_mass << endln;
+
+    for (int i = 0; i < 24; i++)   
 		Q(i) += -M(i,i)*ra(i);
 
     return 0;
 }
 
+//=============================================================================
+const Vector EightNodeBrick::FormEquiBodyForce(void)
+{
+    Vector bforce(24);  
+
+    // Check for a quick return
+    //cerr << "rho " << rho << endln;
+    if (rho == 0.0) 
+    	return bforce;
+
+    Vector ba(24);  
+
+    ba(0) =  bf(0);
+    ba(1) =  bf(1);
+    ba(2) =  bf(2);
+    ba(3) =  bf(0);
+    ba(4) =  bf(1);
+    ba(5) =  bf(2);
+    ba(6) =  bf(0);
+    ba(7) =  bf(1);
+    ba(8) =  bf(2);
+    ba(9) =  bf(0);
+    ba(10) = bf(1);
+    ba(11) = bf(2);
+    ba(12) = bf(0);
+    ba(13) = bf(1);
+    ba(14) = bf(2);
+    ba(15) = bf(0);
+    ba(16) = bf(1);
+    ba(17) = bf(2);
+    ba(18) = bf(0);
+    ba(19) = bf(1);
+    ba(20) = bf(2);
+    ba(21) = bf(0);
+    ba(22) = bf(1);
+    ba(23) = bf(2);
+
+    //Form equivalent body force
+    bforce.addMatrixVector(0.0, M, ba, 1.0);
+    //cerr << " ba " << ba;
+    //cerr << " M " << M;
+    //if (getTag() == 886)
+    //cerr << " @@@@@ FormEquiBodyForce  " << bforce;
+    
+    return bforce;
+}
+
+//=============================================================================
+// Setting initial E according to the initial pressure p
+//void EightNodeBrick::setInitE(void)
+//{
+//    //Get the coors of each node
+//
+//    const Vector &nd1Crds = nd1Ptr->getCrds();
+//    const Vector &nd2Crds = nd2Ptr->getCrds();
+//    const Vector &nd3Crds = nd3Ptr->getCrds();
+//    const Vector &nd4Crds = nd4Ptr->getCrds();
+//    const Vector &nd5Crds = nd5Ptr->getCrds();
+//    const Vector &nd6Crds = nd6Ptr->getCrds();
+//    const Vector &nd7Crds = nd7Ptr->getCrds();
+//    const Vector &nd8Crds = nd8Ptr->getCrds();
+//    
+//    //dir is the ID for vertial direction, e.g. 1 means x-dir is vertical...
+//    double Zavg = nd1Crds( dir-1)+
+//    		   nd2Crds( dir-1)+
+//    		   nd3Crds( dir-1)+
+//    		   nd4Crds( dir-1)+
+//    		   nd5Crds( dir-1)+
+//    		   nd6Crds( dir-1)+
+//    		   nd7Crds( dir-1)+
+//    		   nd8Crds( dir-1);
+//    Zavg = Zavg / 8;
+//    
+//    //Estimate the pressure at that depth
+//    double sigma_v = (Zavg - surflevel) * rho * 9.81; //units in SI system
+//    double ko = 0.5;
+//    double p_est = sigma_v*( 2.0*ko+1.0)/3.0;
+//    //cerr << " Initial P " << p_est << endln;
+//
+//    int i;
+//
+//    // Loop over the integration points and set the initial material state
+//    int count  = r_integration_order* s_integration_order * t_integration_order;
+//    
+//    //For elastic-isotropic material
+//    if (strcmp(matpoint[i]->matmodel->getType(),"ElasticIsotropic3D") == 0)
+//    {
+//       for (i = 0; i < count; i++)	
+//           (matpoint[i]->matmodel)->setElasticStiffness( p_est );
+//    }
+//        
+//    //return ;
+//}
 
 
 //=============================================================================
 const Vector &EightNodeBrick::getResistingForce () 
 {     
-     return P;
+    int force_dim[] = {8,3}; 
+    tensor nodalforces(2,force_dim,0.0);
+     
+    nodalforces = nodal_forces();
+
+    //converting nodalforce tensor to vector
+    for (int i = 0; i< 8; i++)
+      for (int j = 0; j < 3; j++)
+	P(i *3 + j) = nodalforces.cval(i+1, j+1);
+
+    //cerr << "P" << P;
+    //cerr << "Q" << Q;
+
+    P = P - Q;
+
+    //cerr << "P-Q" << P;
+    return P;
 }
 
 //=============================================================================
@@ -3089,15 +3435,32 @@ const Vector &EightNodeBrick::getResistingForceIncInertia ()
 	if (rho == 0.0)
 		return this->getResistingForce();
 
+	//cerr << "Node555 trialDisp " << nd1Ptr->getTrialDisp();
+
 	const Vector &accel1 = nd1Ptr->getTrialAccel();
+        //cout << "\nnode accel " << nd1Ptr->getTag() << " x " << accel1(0) <<" y "<< accel1(1) << " z "<< accel1(2) << endln;
+
 	const Vector &accel2 = nd2Ptr->getTrialAccel();
-	const Vector &accel3 = nd3Ptr->getTrialAccel();
-	const Vector &accel4 = nd4Ptr->getTrialAccel();
-        // Xiaoyan added the following four 09/27/00	
-	const Vector &accel5 = nd5Ptr->getTrialAccel();
-	const Vector &accel6 = nd6Ptr->getTrialAccel();
-	const Vector &accel7 = nd7Ptr->getTrialAccel();
-	const Vector &accel8 = nd8Ptr->getTrialAccel();
+        //cout << "node accel " << nd2Ptr->getTag() << " x " << accel2(0) <<" y "<< accel2(1) << " z "<< accel2(2) << endln;
+							               		    
+	const Vector &accel3 = nd3Ptr->getTrialAccel();	               		    
+        //cout << "node accel " << nd3Ptr->getTag() << " x " << accel3(0) <<" y "<< accel3(1) << " z "<< accel3(2) << endln;
+							               		    
+	const Vector &accel4 = nd4Ptr->getTrialAccel();	               		    
+        //cout << "node accel " << nd4Ptr->getTag() << " x " << accel4(0) <<" y "<< accel4(1) << " z "<< accel4(2) << endln;
+							               		    
+        // Xiaoyan added the following four 09/27/00
+	const Vector &accel5 = nd5Ptr->getTrialAccel();	               		    
+        //cout << "node accel " << nd5Ptr->getTag() << " x " << accel5(0) <<" y "<< accel5(1) << " z "<< accel5(2) << endln;
+							               		    
+	const Vector &accel6 = nd6Ptr->getTrialAccel();	               		    
+        //cout << "node accel " << nd6Ptr->getTag() << " x " << accel6(0) <<" y "<< accel6(1) << " z "<< accel6(2) << endln;
+							               		    
+	const Vector &accel7 = nd7Ptr->getTrialAccel();	               		    
+        //cout << "node accel " << nd7Ptr->getTag() << " x " << accel7(0) <<" y "<< accel7(1) << " z "<< accel7(2) << endln;
+							               		    
+	const Vector &accel8 = nd8Ptr->getTrialAccel();	               		    
+        //cout << "node accel " << nd8Ptr->getTag() << " x " << accel8(0) <<" y "<< accel8(1) << " z "<< accel8(2) << endln;
 	
 	static Vector a(24);  // originally 8
 
@@ -3132,9 +3495,20 @@ const Vector &EightNodeBrick::getResistingForceIncInertia ()
 
 	// Take advantage of lumped mass matrix
 	// Mass matrix is computed in setDomain()
-	for (int i = 0; i < 24; i++)
-		P(i) += M(i,i)*a(i);
+	//cout << " M_ii \n";
 
+        //double column_mass = 0;
+        //for (int i = 0; i < 24; i++)   
+        //   column_mass += M(1,i);
+        //column_mass = column_mass/3.0;
+
+	for (int i = 0; i < 24; i++)
+	{   
+	   P(i) += M(i,i)*a(i);
+	   //cout << " " << M(i, i);
+	}
+	//cout << endln;
+	//cerr << "P+=Ma" << P<< endl;
 	return P;
 } 
 
@@ -3222,8 +3596,48 @@ int EightNodeBrick::displaySelf (Renderer &theViewer, int displayMode, float fac
 //=============================================================================
 void EightNodeBrick::Print(ostream &s, int flag =0)
 {
-     // Not implemtented yet
-     //return 0;
+    //report(" EightNodeBrick ");
+    s << "EightNodeBrick, element id:  " << this->getTag() << endl;
+    s << "Connected external nodes:  " << connectedExternalNodes;
+
+    int total_number_of_Gauss_points = r_integration_order*
+                                       s_integration_order*
+                                       t_integration_order;
+    if ( total_number_of_Gauss_points != 0 )
+      {
+	   nd1Ptr->Print(cout);
+	   nd2Ptr->Print(cout);
+	   nd3Ptr->Print(cout);
+	   nd4Ptr->Print(cout);
+	   nd5Ptr->Print(cout);
+	   nd6Ptr->Print(cout);
+           nd7Ptr->Print(cout);
+	   nd8Ptr->Print(cout);
+    }
+    s << "Element mass density:  " << rho << endl << endl;
+    s << "Material model:  " << endl;
+
+    for( int GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+    {
+      for( int GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+      {
+        for( int GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+        {
+           // this short routine is supposed to calculate position of
+           // Gauss point from 3D array of short's
+           short where =
+           ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+
+           s << "\n where = " << where << endln;
+           s << " GP_c_r= " << GP_c_r << "GP_c_s = " << GP_c_s << " GP_c_t = " << GP_c_t << endln;
+           matpoint[where]->report("Material Point\n");
+           //GPstress[where].reportshort("stress at Gauss Point");
+           //GPstrain[where].reportshort("strain at Gauss Point");
+           //matpoint[where].report("Material model  at Gauss Point");
+        }
+      }
+    }	 
+
 }
 
 //=============================================================================
@@ -3237,8 +3651,11 @@ int EightNodeBrick::getResponse (int responseID, Information &eleInformation)
 {
      return 0;
 }
-//=============================================================================
 
+
+
+
+//=============================================================================
 
 //const Matrix&
 //EightNodeBrick::getTangentStiff ()
@@ -3835,4 +4252,69 @@ int EightNodeBrick::getResponse (int responseID, Information &eleInformation)
 //    return J(0,0)*J(1,1)*J(2,2)+J(1,0)*J(2,1)*J(0,2)+J(2,0)*J(0,1)*J(1,2)
 //         - J(2,0)*J(1,1)*J(0,2)-J(0,0)*J(2,1)*J(1,2)-J(0,1)*J(1,0)*J(2,2);
 //}
-//
+
+
+double EightNodeBrick::get_Gauss_p_c(short order, short point_numb)
+  {
+//  Abscissae coefficient of the Gaussian quadrature formula
+// starting from 1 not from 0
+    static double Gauss_coordinates[7][7];
+
+    Gauss_coordinates[1][1] = 0.0 ;
+    Gauss_coordinates[2][1] = -0.577350269189626;
+    Gauss_coordinates[2][2] = -Gauss_coordinates[2][1];
+    Gauss_coordinates[3][1] = -0.774596669241483;
+    Gauss_coordinates[3][2] = 0.0;
+    Gauss_coordinates[3][3] = -Gauss_coordinates[3][1];
+    Gauss_coordinates[4][1] = -0.861136311594053;
+    Gauss_coordinates[4][2] = -0.339981043584856;
+    Gauss_coordinates[4][3] = -Gauss_coordinates[4][2];
+    Gauss_coordinates[4][4] = -Gauss_coordinates[4][1];
+    Gauss_coordinates[5][1] = -0.906179845938664;
+    Gauss_coordinates[5][2] = -0.538469310105683;
+    Gauss_coordinates[5][3] = 0.0;
+    Gauss_coordinates[5][4] = -Gauss_coordinates[5][2];
+    Gauss_coordinates[5][5] = -Gauss_coordinates[5][1];
+    Gauss_coordinates[6][1] = -0.932469514203152;
+    Gauss_coordinates[6][2] = -0.661209386466265;
+    Gauss_coordinates[6][3] = -0.238619186083197;
+    Gauss_coordinates[6][4] = -Gauss_coordinates[6][3];
+    Gauss_coordinates[6][5] = -Gauss_coordinates[6][2];
+    Gauss_coordinates[6][6] = -Gauss_coordinates[6][1];
+
+    return Gauss_coordinates[order][point_numb];
+ }
+
+double EightNodeBrick::get_Gauss_p_w(short order, short point_numb)
+  {
+//  Weight coefficient of the Gaussian quadrature formula
+// starting from 1 not from 0
+    static double Gauss_weights[7][7]; // static data ??
+
+    Gauss_weights[1][1] = 2.0;
+    Gauss_weights[2][1] = 1.0;
+    Gauss_weights[2][2] = 1.0;
+    Gauss_weights[3][1] = 0.555555555555556;
+    Gauss_weights[3][2] = 0.888888888888889;
+    Gauss_weights[3][3] = Gauss_weights[3][1];
+    Gauss_weights[4][1] = 0.347854845137454;
+    Gauss_weights[4][2] = 0.652145154862546;
+    Gauss_weights[4][3] = Gauss_weights[4][2];
+    Gauss_weights[4][4] = Gauss_weights[4][1];
+    Gauss_weights[5][1] = 0.236926885056189;
+    Gauss_weights[5][2] = 0.478628670499366;
+    Gauss_weights[5][3] = 0.568888888888889;
+    Gauss_weights[5][4] = Gauss_weights[5][2];
+    Gauss_weights[5][5] = Gauss_weights[5][1];
+    Gauss_weights[6][1] = 0.171324492379170;
+    Gauss_weights[6][2] = 0.360761573048139;
+    Gauss_weights[6][3] = 0.467913934572691;
+    Gauss_weights[6][4] = Gauss_weights[6][3];
+    Gauss_weights[6][5] = Gauss_weights[6][2];
+    Gauss_weights[6][6] = Gauss_weights[6][1];
+
+    return Gauss_weights[order][point_numb];
+  }
+
+
+#endif

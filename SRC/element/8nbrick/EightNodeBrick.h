@@ -19,27 +19,24 @@
 // UPDATE HISTORY:			 Modified from Brick3D and FourNodeQuad.hh  07/06/00
 //																			 Sept. - Oct 2000 connected to OpenSees by Zhaohui
 //
-// CONTACT:           jeremic@ucdavis.edu
 ///////////////////////////////////////////////////////////////////////////////
 //
 
 
-#ifndef EightNodeBrick_h
-#define EightNodeBrick_h
+#ifndef EIGHTNODEBRICK_H
+#define EIGHTNODEBRICK_H
 
 #ifndef _bool_h
 #include "bool.h"
 #endif
 
 #include <Element.h>
-//#include <Node.h> 
+#include <Node.h> 
 
 // Commented by Xiaoyan. Use  ~/fem/node.hh  08/04/00
 // Released Node.h now. Wu use Opensees's Node.09/27/00
 
 
-#include <Matrix.h>
-#include <Vector.h>
 #include <ID.h>
 #include <Renderer.h>
 #include <Domain.h>
@@ -62,8 +59,8 @@
 
 //#include <node.h>
 //#include <mmodel.h>
-#include <fe.h>
-#include <gausspnt.h>
+//#include <fe.h>
+#include <MatPoint3D.h>
 
 //#include <NDMaterial.h>
 #include <Template3Dep.h>
@@ -73,24 +70,28 @@ class Node;
 //class NDMaterial;
 //class QuadRule1d;
 
-class EightNodeBrick: public Finite_Element, public Element
+class EightNodeBrick: public Element
 {
 
   public:
     EightNodeBrick(int element_number,
                    int node_numb_1, int node_numb_2, int node_numb_3, int node_numb_4,
                    int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
-                   NDMaterial * Globalmmodel, const char * type, double b1, double b2,
-		   double p, double r, EPState *InitEPS);
+                   NDMaterial * Globalmmodel, double b1, double b2, double b3,
+		   double r, double p);
+		   // int dir, double surflevel);
+		   //, EPState *InitEPS);   const char * type,
 
     EightNodeBrick ();
     ~EightNodeBrick();
 
-    int Initialize(int element_number,
-                   int node_numb_1, int node_numb_2, int node_numb_3, int node_numb_4,
-                   int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
-                   NDMaterial * Globalmmodel, const char * type, double b1, double b2,
-                   double p, double r, EPState * InitEPS);
+    //Not needed Zhaohui
+    //int Initialize(int element_number,
+    //               int node_numb_1, int node_numb_2, int node_numb_3, int node_numb_4,
+    //               int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
+    //               NDMaterial * Globalmmodel, double b1, double b2, double b3,
+    //               double p, double r);
+    //		   //, EPState * InitEPS);const char * type,
 		   
     int getNumExternalNodes () const;
     const ID &getExternalNodes ();
@@ -111,9 +112,12 @@ class EightNodeBrick: public Finite_Element, public Element
     const Matrix &getDamp ();     
     const Matrix &getMass (); 
 
+    const Matrix &getConsMass (); 
+
     void zeroLoad ();
     int addLoad(const Vector &addP);
     int addInertiaLoadToUnbalance(const Vector &accel);
+    const Vector  FormEquiBodyForce(void);
     const Vector &getResistingForce ();
     const Vector &getResistingForceIncInertia ();
 
@@ -154,14 +158,15 @@ class EightNodeBrick: public Finite_Element, public Element
     Matrix M;		// Element mass matrix
     Vector P;		// Element resisting force vector
     Vector Q;		// Applied nodal loads
-    Vector b;		// Body forces
-
-    // K, M and P are commented by Xiaoyan . We use the K, M and P from Brick3D
-
+    Vector bf;  	// Body forces
+    
     // double thickness;	// Element thickness
     double rho;		// Mass per unit volume
     double pressure;	// Normal surface traction (pressure) over entire element
-    int order;		// Order of the quadrature rule
+    int    order;  	// Order of the quadrature rule
+
+    //int dir;            // Direction of vertial coord.
+    //double surflevel;   // free surface level above or below this element
 
     //QuadRule1d *theQuadRule;	// Integration rule
 
@@ -179,68 +184,64 @@ class EightNodeBrick: public Finite_Element, public Element
     //    void formBMatrix (double r, double s, double t);	   // and added t
     //    static void formNMatrix (double r, double s, double t);  // 07/06/00
     
-    // Commented by Xiaoyan. We use Brick3D for calculating these.
-
-
-  //  The following is taken from brick3d.hh. Xiaoyan 07/11
   private:
     // element number (tag)
     //unsigned int  elem_numb;      
     
     double determinant_of_Jacobian;
-    //int  G_N_numbs[8];  // Global node numbers for this element  Xiaoyan changed from 20 to 8
+    //int  G_N_numbs[8];     // Global node numbers for this element  Xiaoyan changed from 20 to 8
         
-    int nodes_in_brick;     // number of nodes ( from 8-20 //8 now Zhaohui)  
+    int nodes_in_brick;      // number of nodes ( from 8-20 //8 now Zhaohui)  
     
-    //Node * nodes;                 // pointer to GLOBAL nodes
+    //Node * nodes;          // pointer to GLOBAL nodes
     
-    NDMaterial * mmodel;          // pointer to GLOBAL material models
+    NDMaterial * mmodel;     // pointer to GLOBAL material models
     
     int r_integration_order; // Gauss-Legendre integration order in r direction
     int s_integration_order; // Gauss-Legendre integration order in s direction
     int t_integration_order; // Gauss-Legendre integration order in t direction
     
-    // Now I want 3D array of Gauss points!
-    // MatPoint[r_integration_order][s_integration_order][t_integration_order]
-    // 3D array of Gauss points
-    IntegrationPoint * MatPoint;    // pointer to array of Gauss Points
+    // Now I want 3D array of Material points!
+    // MatPoint3D[r_integration_order][s_integration_order][t_integration_order]
+    // 3D array of Material points
+    MatPoint3D ** matpoint;  // pointer to array of Material Points
     
-    // 3D array of material models for each Gauss points
-    //NDMaterial *GPmmodel;  // pointer to array of material models for Gauss Points
+    // 3D array of material models for each Material points
+    // NDMaterial *GPmmodel;  // pointer to array of material models for Material Points
     // Do we need this one? 
     
     //..NDMaterial  *MatPoint;  // Zhaohui  10-01-2000
     
     
     // this tensor is tangent constitutive tensor MS definition.
-    // It represents the state at Gauss point before applying strain increment
+    // It represents the state at Material point before applying strain increment
     // that was produced by incremental displacements
     
     // Zhaohui  10-01-2000
-    //..tensor * GPtangent_E;  // pointer to array of constitutive tensors for Gauss Points
+    //..tensor * GPtangent_E;  // pointer to array of constitutive tensors for Material Points
     
     // this stress tensor is start_stress from my MS definition.
-    // It represents the state at Gauss point before applying strain increment
+    // It represents the state at Material point before applying strain increment
     // that was produced by incremental displacements
     
     // Zhaohui  10-01-2000
-    //..stresstensor * GPstress;  // pointer to array of stresstensors for Gauss Points
+    //..stresstensor * GPstress;  // pointer to array of stresstensors for Material Points
     
-    // 3D array of stresstensors models for each Gauss points
+    // 3D array of stresstensors models for each Material points
     // this stress tensor is iterative stress.
-    // It represents the state at Gauss point during iterative procedure on FEM level.
+    // It represents the state at Material point during iterative procedure on FEM level.
     // Zhaohui  10-01-2000
-    //stresstensor * GPiterative_stress;  // pointer to array of stresstensors for Gauss Points
+    //stresstensor * GPiterative_stress;  // pointer to array of stresstensors for Material Points
     //double * GPq_ast_iterative;  // pointer to array of iterative values of internal variable
     
-    // 3D array of straintensors models for each Gauss points
+    // 3D array of straintensors models for each Material points
     // this strain tensor is strain_increment from my MS definition.
     // It represents the additional strains that are to be
     // integrated. After numerical integration is done, the return value
     // ( from one of the numerical integration procedures )
     // is stresstensor that should then be put in GPstress place!
     // Zhaohui  10-01-2000
-    //straintensor * GPstrain;  // pointer to array of straintensors for Gauss Points
+    //straintensor * GPstrain;  // pointer to array of straintensors for Material Points
     
     // this is LM array. This array holds DOFs for this element
     int  LM[24]; // for 8noded x 3 = 24
@@ -290,7 +291,7 @@ class EightNodeBrick: public Finite_Element, public Element
 
     //CE Dynamic Allocation for for brick3d s.
     //Finite_Element * new_el( int total );
-    Finite_Element & operator[](int subscript);
+    EightNodeBrick & operator[](int subscript);
     //Finite_Element & operator[](int subscript);
     //Finite_Element & operator[](int subscript);
    
@@ -306,6 +307,8 @@ class EightNodeBrick: public Finite_Element, public Element
     tensor Nodal_Coordinates(void);
 
     tensor incr_disp(void);
+    tensor total_disp(void);
+
     tensor total_disp(FILE *fp, double * u);
 
     tensor stiffness_matrix(const tensor & K);
@@ -319,7 +322,9 @@ class EightNodeBrick: public Finite_Element, public Element
     int * get_LM(void);
     //void set_LM(Node * node); // commented out temporarily 09-27-2000 Zhaohui
 
-
+    //these two files are originally in fe.h
+    double get_Gauss_p_c(short order, short point_numb);
+    double get_Gauss_p_w(short order, short point_numb);
 
     // returns nodal forces for given stress field in an element
     tensor nodal_forces(void);
@@ -330,7 +335,7 @@ class EightNodeBrick: public Finite_Element, public Element
     // returns nodal forces for given incremental strain field in an element
     // by using the linearized constitutive tensor from the begining of the step !
     tensor linearized_nodal_forces(void);
-    // updates Gauss point stresses and strains from given displacements
+    // updates Material point stresses and strains from given displacements
     tensor update_stress_strain(tensor & disp);
 
     void report(char *);
@@ -341,6 +346,10 @@ class EightNodeBrick: public Finite_Element, public Element
     void reportTensor(char *);
     void reportCIPIC(char *);
     void reportTensorF(FILE *);
+
+    // Setting initial E according to the initial pressure
+    //void setInitE(void);
+    //void reportStressTensorF(FILE *);
 
 };
 
