@@ -35,13 +35,13 @@
 //================================================================================
 // Normal constructor
 //================================================================================
-OgdenWEnergy::OgdenWEnergy(double E_in, double nu_in, int N_in, Vector cr_in, Vector mur_in )
+OgdenWEnergy::OgdenWEnergy(double E_in, double nu_in, int N_in, double  *cr_in, double *mur_in )
 {
     E = E_in;
     nu = nu_in;
     N_Ogden = N_in;
     cr_Ogden = cr_in;
-    mur_Ogden = mur_in;
+    mur_Ogden = mur_in; 
 }
 
 //OgdenWEnergy::OgdenWEnergy( )
@@ -62,7 +62,7 @@ OgdenWEnergy::~OgdenWEnergy( )
 //================================================================================
 WEnergy * OgdenWEnergy::newObj( )
   {
-    OgdenWEnergy  *new_WEnergy = new OgdenWEnergy( E, nu, N_Ogden,  cr_Ogden,  mur_Ogden);
+    WEnergy  *new_WEnergy = new OgdenWEnergy( E, nu, N_Ogden,  cr_Ogden,  mur_Ogden);
     return new_WEnergy;
   }
 
@@ -82,12 +82,12 @@ const double OgdenWEnergy::getnu()
 const double  OgdenWEnergy::wE(const double &J_in, const Vector &lambda_wave_in )
   {
     double wEnergy = 0.0;
-    for (int i=1; i<=N_Ogden; i++)
+    for (int i=0; i<N_Ogden; i++)
      {
-        wEnergy += (cr_Ogden(i-1)/mur_Ogden(i-1)) *
-                   (pow ( lambda_wave_in(0),  mur_Ogden(i-1) ) +
-                    pow ( lambda_wave_in(1),  mur_Ogden(i-1) ) +
-                    pow ( lambda_wave_in(2),  mur_Ogden(i-1) ) - 1.0 ) ;
+        wEnergy += *(cr_Ogden+i) / *(mur_Ogden+i) *
+                   (pow ( lambda_wave_in(0),  *(mur_Ogden+i) ) +
+                    pow ( lambda_wave_in(1),  *(mur_Ogden+i) ) +
+                    pow ( lambda_wave_in(2),  *(mur_Ogden+i) ) - 3.0 ) ;
      }
     return wEnergy;
   }
@@ -98,11 +98,11 @@ const double  OgdenWEnergy::wE(const double &J_in, const Vector &lambda_wave_in 
 const Vector  OgdenWEnergy::disowOdlambda( const Vector &lambda_wave_in)
   {
     Vector disowOverdlambda(3);
-    for (int i=1; i<=N_Ogden; i++)
+    for (int i=0; i<N_Ogden; i++)
      {
-        disowOverdlambda(0) += cr_Ogden(i-1) * pow(lambda_wave_in(0),  mur_Ogden(i-1) -1.0);
-        disowOverdlambda(1) += cr_Ogden(i-1) * pow(lambda_wave_in(1),  mur_Ogden(i-1) -1.0);
-        disowOverdlambda(2) += cr_Ogden(i-1) * pow(lambda_wave_in(2),  mur_Ogden(i-1) -1.0);
+        disowOverdlambda(0) += *(cr_Ogden+i) * pow( lambda_wave_in(0),  (*(mur_Ogden+i) -1.0) );
+        disowOverdlambda(1) += *(cr_Ogden+i) * pow( lambda_wave_in(1),  (*(mur_Ogden+i) -1.0) );
+        disowOverdlambda(2) += *(cr_Ogden+i) * pow( lambda_wave_in(2),  (*(mur_Ogden+i) -1.0) );
      }
     return disowOverdlambda;
   }
@@ -113,28 +113,17 @@ const Vector  OgdenWEnergy::disowOdlambda( const Vector &lambda_wave_in)
 const Vector  OgdenWEnergy::d2isowOdlambda2(const Vector &lambda_wave_in )
   {
     Vector d2isowOverdlambda2(3);
-    for (int i=1; i<=N_Ogden; i++)
+    for (int i=0; i<N_Ogden; i++)
      {
         d2isowOverdlambda2(0) +=
-            cr_Ogden(i-1) * (mur_Ogden(i-1) -0) * pow(lambda_wave_in(0),  mur_Ogden(i-1) -2);
+            *(cr_Ogden+i) * (*(mur_Ogden+i) -1.0) * pow( lambda_wave_in(0),  (*(mur_Ogden+i) -2.0) );
         d2isowOverdlambda2(1) +=
-            cr_Ogden(i-1) * (mur_Ogden(i-1) -1) * pow(lambda_wave_in(1),  mur_Ogden(i-1) -2);
-        d2isowOverdlambda2(2) +=
-            cr_Ogden(i-1) * (mur_Ogden(i-1) -2) * pow(lambda_wave_in(2),  mur_Ogden(i-1) -2);
+            *(cr_Ogden+i) * (*(mur_Ogden+i) -1.0) * pow( lambda_wave_in(1),  (*(mur_Ogden+i) -2.0) );
+        d2isowOverdlambda2(2) +=			 
+            *(cr_Ogden+i) * (*(mur_Ogden+i) -1.0) * pow( lambda_wave_in(2),  (*(mur_Ogden+i) -2.0) );
      }
     return d2isowOverdlambda2;
   }
-
-
-
-//================================================================================
-// friend ostream functions for output
-//================================================================================
-////OPS_Stream & operator<< (OPS_Stream & os, const OgdenWEnergy & W)
-////{
-////    os << "Ogden Strain Energy Function: " << endln;
-////    return os;
-////}
 
 #endif
 

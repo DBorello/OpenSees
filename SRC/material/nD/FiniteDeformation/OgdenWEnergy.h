@@ -42,10 +42,10 @@ class OgdenWEnergy : public WEnergy
     double E;
     double nu;
     int N_Ogden;
-    Vector cr_Ogden;
-    Vector mur_Ogden;
+    double *cr_Ogden;
+    double *mur_Ogden;
   public:
-    OgdenWEnergy(double, double, int , Vector , Vector  );
+    OgdenWEnergy(double, double, int , double * , double *  );
 //    OgdenWEnergy( );
     ~OgdenWEnergy( );
     WEnergy *newObj( );
@@ -55,9 +55,9 @@ class OgdenWEnergy : public WEnergy
     const double  wE(const double &, const Vector &) ;
     const Vector  disowOdlambda(const Vector & )  ;
     const Vector  d2isowOdlambda2(const Vector & )  ;
-//    const tensor  d2isowOdlambda1dlambda2( const Vector &lambda_wave_in)  ;
-//    const double  dvolwOdJ( const double &J_in)  ;
-//    const double  d2volwOdJ2( const double &J_in) ;
+//    const tensor  d2isowOdlambda1dlambda2( const Vector &)  ;
+//    const double  dvolwOdJ( const double &)  ;
+//    const double  d2volwOdJ2( const double &) ;
 
 //    friend OPS_Stream& operator<< (OPS_Stream& os, const OgdenWEnergy &W);
 

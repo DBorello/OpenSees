@@ -38,8 +38,16 @@ NeoHookeanWEnergy::NeoHookeanWEnergy(double E_in, double nu_in )
 {
    E = E_in;
    nu = nu_in;
-   G = 0.5*E_in/(1.0+nu_in);
-   K = 0.33333333333333333333333*E_in/(1.0-2.0*nu_in);
+   if (nu != -1.0)
+     G = 0.5*E_in/(1.0+nu_in);
+   else
+     opserr << "Poisson's ratio = -1.0, not permited for this model (NeoHookeanWEnergy)";
+
+   if (nu != 0.5)
+      K = 0.3333333333333333333*E/(1.0-2.0*nu);
+   else
+      opserr << "Poisson's ratio = 0.5, not permited for this model (NeoHookeanWEnergy)";
+//      K = 1.0e20;
 }
 
 //NeoHookeanWEnergy::NeoHookeanWEnergy(  )
@@ -60,7 +68,7 @@ NeoHookeanWEnergy::~NeoHookeanWEnergy( )
 //================================================================================
 WEnergy * NeoHookeanWEnergy::newObj( )
   {
-    NeoHookeanWEnergy  *new_WEnergy = new NeoHookeanWEnergy(E,  nu);
+    WEnergy  *new_WEnergy = new NeoHookeanWEnergy(E,  nu);
     return new_WEnergy;
   }
 
@@ -135,15 +143,6 @@ const double  NeoHookeanWEnergy::d2volwOdJ2(const double &J_in )
 //  double temp2 = 0.0;
   return temp2;
 }
-
-//================================================================================
-// friend ostream functions for output
-//================================================================================
-////OPS_Stream & operator<< (OPS_Stream & os, const NeoHookeanWEnergy & W)
-////{
-////    os << "NeoHookean Strain Energy Function: " << endln;
-////    return os;
-////}
 
 #endif
 

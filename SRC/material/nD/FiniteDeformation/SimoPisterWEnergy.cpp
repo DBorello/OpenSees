@@ -38,8 +38,17 @@ SimoPisterWEnergy::SimoPisterWEnergy(double E_in, double nu_in )
 {
    E = E_in;
    nu = nu_in;
-   G = E/2/(1.0+nu);
-   K = E/3/(1.0-2*nu);
+
+   if (nu != -1.0)
+     G = 0.5*E/(1.0+nu);
+   else
+     opserr << "Poisson's ratio = -1.0, not permited for this model (SimoPisterWEnergy)";
+   
+   if (nu != 0.5)
+     K = 0.33333333333333*E/(1.0-2.0*nu);
+   else
+    opserr << "Poisson's ratio = 0.5, not permited for this model (SimoPisterWEnergy)";
+
 }
 
 //SimoPisterWEnergy::SimoPisterWEnergy( )
@@ -60,7 +69,7 @@ SimoPisterWEnergy::~SimoPisterWEnergy( )
 //================================================================================
 WEnergy * SimoPisterWEnergy::newObj( )
   {
-    SimoPisterWEnergy  *new_WEnergy = new SimoPisterWEnergy(E,  nu);
+    WEnergy  *new_WEnergy = new SimoPisterWEnergy(E,  nu);
     return new_WEnergy;
   }
 
@@ -100,15 +109,6 @@ const double  SimoPisterWEnergy::d2volwOdJ2(const double &J_in )
    double d2colwOverdJ2 = K * (2.0 / J_in / J_in + 2.0) * 0.25;
    return d2colwOverdJ2;
 }
-
-//================================================================================
-// friend ostream functions for output
-//================================================================================
-////OPS_Stream & operator<< (OPS_Stream & os, const SimoPisterWEnergy & W)
-////{
-////    os << "SimoPister Strain Energy Function: " << endln;
-////    return os;
-////}
 
 #endif
 

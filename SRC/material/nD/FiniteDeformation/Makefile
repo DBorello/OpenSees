@@ -7,7 +7,9 @@ OBJS       = FiniteDeformationElastic3D.o \
              MooneyRivlinWEnergy.o \
              NeoHookeanWEnergy.o \
              OgdenWEnergy.o \
-             SimoPisterWEnergy.o
+             SimoPisterWEnergy.o \
+	     OgdenSimoWEnergy.o \
+	     MooneyRivlinSimoWEnergy.o
 
 OBJS1       = FiniteDeformationElastic3D.o \
              W.o \
@@ -15,7 +17,9 @@ OBJS1       = FiniteDeformationElastic3D.o \
              MooneyRivlinWEnergy.o \
              NeoHookeanWEnergy.o \
              OgdenWEnergy.o \
-             SimoPisterWEnergy.o
+             SimoPisterWEnergy.o \
+	     OgdenSimoWEnergy.o \
+	     MooneyRivlinSimoWEnergy.o
 
 all: $(OBJS)
 

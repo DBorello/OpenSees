@@ -130,6 +130,13 @@ class FiniteDeformationElastic3D : public NDMaterial
      double nu;
 
      Tensor F;
+     Tensor C;
+     double J;
+     Tensor Cinv;
+     double lambda1, lambda2, lambda3;
+     double lambda_wave1, lambda_wave2, lambda_wave3;
+     int caseIndex; 
+
      Tensor Stiffness;
      straintensor thisGreenStrain;
      stresstensor thisPK2Stress;

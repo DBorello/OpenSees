@@ -178,32 +178,17 @@ const Tensor FiniteDeformationElastic3D::getF(void)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 const Tensor FiniteDeformationElastic3D::getC(void)
 {
-   F = this->getF();
-   tensor C = (F.transpose11())("ij")*F("jk");
-   F.null_indices();
-   (F.transpose11()).null_indices();
-   C.null_indices();
-   C.symmetrize11();
-
    return C;
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------
 const double FiniteDeformationElastic3D::getJ(void)
 {
-   F = this->getF();
-   double J0 = F.determinant( );
-   return J0;
+   return J;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
 const Vector FiniteDeformationElastic3D::getlambda(void)
 {
-  tensor C = this->getC();
-  tensor eigtensor = C.eigenvalues();
   Vector lambda(3);
-
-  double lambda1 = sqrt(eigtensor.cval(1));
-  double lambda2 = sqrt(eigtensor.cval(2));
-  double lambda3 = sqrt(eigtensor.cval(3));
 
   lambda(0) = lambda1;
   lambda(1) = lambda2;
@@ -214,14 +199,10 @@ const Vector FiniteDeformationElastic3D::getlambda(void)
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 const Vector FiniteDeformationElastic3D::getlambda_wave(void)
 {
-  Vector lambda(3);
-  lambda = this->getlambda();
-  double J = this->getJ();
-  double JJJ = pow(J, -0.33333333333333333333333333333);
   Vector lambda_wave(3);
-  lambda_wave(0) = lambda(0) *JJJ;
-  lambda_wave(1) = lambda(1) *JJJ;
-  lambda_wave(2) = lambda(2) *JJJ;
+  lambda_wave(0) = lambda_wave1;
+  lambda_wave(1) = lambda_wave2;
+  lambda_wave(2) = lambda_wave3;
 
   return lambda_wave;
 }
@@ -250,10 +231,10 @@ const Tensor FiniteDeformationElastic3D::Yab(void)
         lambda_wave = this->getlambda_wave();
         Tensor  d2 = W->d2isowOdlambda1dlambda2(lambda_wave);
         Vector  d1 = W->disowOdlambda(lambda_wave);
-  Vector  d11 = W->d2isowOdlambda2(lambda_wave);
-  d2.val(1,1) = d11(0);
-  d2.val(2,2) = d11(1);
-  d2.val(3,3) = d11(2);
+        Vector  d11 = W->d2isowOdlambda2(lambda_wave);
+        d2.val(1,1) = d11(0);
+        d2.val(2,2) = d11(1);
+        d2.val(3,3) = d11(2);
         Vector tempi(3);
         double tempd = d1(0)*lambda_wave(0) + d1(1)*lambda_wave(1) + d1(2)*lambda_wave(2) ;
         double tempcd = 0.0;
@@ -291,50 +272,33 @@ const Tensor FiniteDeformationElastic3D::FDisoStiffness(void)
   Tensor I4s = (I_ikjl+I_iljk)*0.5;
   Tensor  tempI = I4s - I_ijkl;
 
-  Vector lambda(3);
-    lambda = this->getlambda();
-  Vector lambda_wave(3);
-    lambda_wave = this->getlambda_wave();
-  tensor C = this->getC( );
-  double J = this->getJ( );
-
-  Tensor Cinv = C.inverse( );
-  Cinv.symmetrize11();
-  Tensor CinvCinv = Cinv("ij") * Cinv("kl") ;
-  Cinv.null_indices(); CinvCinv.null_indices();
+  Tensor CinvCinv = Cinv("ij") * Cinv("kl");
+  CinvCinv.null_indices(); Cinv.null_indices(); 
 
   Tensor ICinv = ( CinvCinv.transpose0110() + CinvCinv.transpose0111() ) * (0.5);
 
   Tensor CinvCinv_ICinv = CinvCinv - ICinv;
 
-  double lambda1 = lambda(0);
-  double lambda2 = lambda(1);
-  double lambda3 = lambda(2);
-
   double I1 = lambda1*lambda1 + lambda2*lambda2 + lambda3*lambda3;
 
-  int caseIndex = this->getCaseIndex();
+  Vector Wa = this->wa();
+  Tensor yab = this->Yab();
+
   Tensor L_iso(2,def_dim_2,0.0);
 
   if(caseIndex == 0)
   {
-    double d1 = 2.0*lambda1*lambda1*lambda1*lambda1
-                      - I1*lambda1*lambda1 + J*J/(lambda1*lambda1);
-    double d2 = 2.0*lambda2*lambda2*lambda2*lambda2
-                      - I1*lambda2*lambda2 + J*J/(lambda2*lambda2);
-    double d3 = 2.0*lambda3*lambda3*lambda3*lambda3
-                      - I1*lambda3*lambda3 + J*J/(lambda3*lambda3);
+    double d1 = (lambda1+lambda2)*(lambda1+lambda3)*(lambda1-lambda2)*(lambda1-lambda3);
+    double d2 = (lambda2+lambda3)*(lambda2+lambda1)*(lambda2-lambda3)*(lambda2-lambda1);
+    double d3 = (lambda3+lambda1)*(lambda3+lambda2)*(lambda3-lambda1)*(lambda3-lambda2);
 
     Tensor M1 = ( C - I_ij*(I1-lambda1*lambda1) + Cinv*(J*J/(lambda1*lambda1)) ) * (1.0/d1);
     Tensor M2 = ( C - I_ij*(I1-lambda2*lambda2) + Cinv*(J*J/(lambda2*lambda2)) ) * (1.0/d2);
     Tensor M3 = ( C - I_ij*(I1-lambda3*lambda3) + Cinv*(J*J/(lambda3*lambda3)) ) * (1.0/d3);
 
-    double d1p = 4.0 *lambda1*lambda1*lambda1*lambda1 - I1*lambda1*lambda1
-                   - J*J /(lambda1*lambda1);
-    double d2p = 4.0 *lambda2*lambda2*lambda2*lambda2 - I1*lambda2*lambda2
-                   - J*J /(lambda2*lambda2);
-    double d3p = 4.0 *lambda3*lambda3*lambda3*lambda3 - I1*lambda3*lambda3
-                   - J*J /(lambda3*lambda3);
+    double d1p = 4.0 *lambda1*lambda1*lambda1*lambda1 - I1*lambda1*lambda1 - J*J /(lambda1*lambda1);
+    double d2p = 4.0 *lambda2*lambda2*lambda2*lambda2 - I1*lambda2*lambda2 - J*J /(lambda2*lambda2);
+    double d3p = 4.0 *lambda3*lambda3*lambda3*lambda3 - I1*lambda3*lambda3 - J*J /(lambda3*lambda3);
 
     Tensor Cm1M1M1Cm1 = Cinv("ij")*M1("kl") + M1("ij")*Cinv("kl");
     Cinv.null_indices(); M1.null_indices(); Cm1M1M1Cm1.null_indices();
@@ -366,8 +330,6 @@ const Tensor FiniteDeformationElastic3D::FDisoStiffness(void)
     Tensor calM2 = ( tempI + (CinvCinv_ICinv -Cm1M2M2Cm1)*(J*J/(lambda2*lambda2)) + dM2M2d*(lambda2*lambda2) - M2M2*d2p ) *(1.0/d2);
     Tensor calM3 = ( tempI + (CinvCinv_ICinv -Cm1M3M3Cm1)*(J*J/(lambda3*lambda3)) + dM3M3d*(lambda3*lambda3) - M3M3*d3p ) *(1.0/d3);
 
-    Vector Wa = this->wa();
-    Tensor yab = this->Yab();
     Tensor L_iso_1 = ( calM1*Wa(0) + calM2*Wa(1) + calM3*Wa(2) ) * 2.0;
     Tensor L_iso_2 =  M1("ij") * M1("kl") * yab.cval(1,1)  + M1("ij") * M2("kl") * yab.cval(1,2)  + M1("ij") * M3("kl") * yab.cval(1,3)  +
                       M2("ij") * M1("kl") * yab.cval(2,1)  + M2("ij") * M2("kl") * yab.cval(2,2)  + M2("ij") * M3("kl") * yab.cval(2,3)  +
@@ -377,12 +339,10 @@ const Tensor FiniteDeformationElastic3D::FDisoStiffness(void)
 
   if(caseIndex == 11)
   {
-    double d1 = 2.0*lambda1*lambda1*lambda1*lambda1
-                      - I1*lambda1*lambda1 + J*J/(lambda1*lambda1);
-    Tensor M1 = ( C - I_ij*(I1-lambda1*lambda1) + Cinv*(J*J/(lambda1*lambda1)) ) * (1.0/d1);
+    double d1 = (lambda1+lambda2)*(lambda1+lambda3)*(lambda1-lambda2)*(lambda1-lambda3);
+    Tensor M1 = (I_ij - Cinv * (lambda2*lambda2)) * (1.0/(lambda1+lambda2)/(lambda1-lambda2));
     Tensor Mr = Cinv - M1;
-    double d1p = 4.0 *lambda1*lambda1*lambda1*lambda1 - I1*lambda1*lambda1
-                   - J*J /(lambda1*lambda1);
+    double d1p = 4.0 *lambda1*lambda1*lambda1*lambda1 - I1*lambda1*lambda1 - J*J /(lambda1*lambda1);
     Tensor Cm1M1M1Cm1 = Cinv("ij")*M1("kl") + M1("ij")*Cinv("kl");
     Cinv.null_indices(); M1.null_indices(); Cm1M1M1Cm1.null_indices();
     Tensor dM1M1d = I_ij("ij")*M1("kl") + M1("ij")*I_ij("kl");
@@ -391,45 +351,18 @@ const Tensor FiniteDeformationElastic3D::FDisoStiffness(void)
     M1.null_indices(); M1M1.null_indices();
     Tensor calM1 = ( tempI + (CinvCinv_ICinv -Cm1M1M1Cm1)*(J*J/(lambda1*lambda1)) + dM1M1d*(lambda1*lambda1) - M1M1*d1p ) *(1.0/d1);
     Tensor calMr = (ICinv + calM1) * (-1.0);
-    Vector Wa = this->wa();
-    Tensor yab = this->Yab();
-    Tensor L_iso_1 = ( calM1*Wa(0) + calMr*Wa(1) ) * 2.0;
-    Tensor L_iso_2 =  M1("ij") * M1("kl") * yab.cval(1,1)  + M1("ij") * Mr("kl") * yab.cval(1,2)  +
-                      Mr("ij") * M1("kl") * yab.cval(2,1)  + Mr("ij") * Mr("kl") * yab.cval(2,2);
-    L_iso = L_iso_1 + L_iso_2 ;
-  }
-
-  if(caseIndex == 12)
-  {
-    double d2 = 2.0*lambda2*lambda2*lambda2*lambda2
-                      - I1*lambda2*lambda2 + J*J/(lambda2*lambda2);
-    Tensor M2 = ( C - I_ij*(I1-lambda2*lambda2) + Cinv*(J*J/(lambda2*lambda2)) ) * (1.0/d2);
-    Tensor Mr = Cinv - M2;
-    double d2p = 4.0 *lambda2*lambda2*lambda2*lambda2 - I1*lambda2*lambda2;
-    Tensor Cm1M2M2Cm1 = Cinv("ij")*M2("kl") + M2("ij")*Cinv("kl");
-    Cinv.null_indices(); M2.null_indices(); Cm1M2M2Cm1.null_indices();
-    Tensor dM2M2d = I_ij("ij")*M2("kl") + M2("ij")*I_ij("kl");
-    I_ij.null_indices(); M2.null_indices(); dM2M2d.null_indices();
-    Tensor M2M2 = M2("ij") * M2("kl");
-    M2.null_indices(); M2M2.null_indices();
-    Tensor calM2 = ( tempI + (CinvCinv_ICinv -Cm1M2M2Cm1)*(J*J/(lambda2*lambda2)) + dM2M2d*(lambda2*lambda2) - M2M2*d2p ) *(1.0/d2);
-    Tensor calMr = (ICinv + calM2) * (-1.0);
-    Vector Wa = this->wa();
-    Tensor yab = this->Yab();
-    Tensor L_iso_1 = ( calM2*Wa(1) + calMr*Wa(2) ) * 2.0;
-    Tensor L_iso_2 =  M2("ij") * M2("kl") * yab.cval(2,2)  + M2("ij") * Mr("kl") * yab.cval(2,3)  +
-                      Mr("ij") * M2("kl") * yab.cval(3,2)  + Mr("ij") * Mr("kl") * yab.cval(3,3);
+    Tensor L_iso_1 = ( calM1*Wa(0) + calMr*Wa(2) ) * 2.0;
+    Tensor L_iso_2 =  M1("ij") * M1("kl") * yab.cval(1,1)  + M1("ij") * Mr("kl") * yab.cval(1,3)  +
+                      Mr("ij") * M1("kl") * yab.cval(3,1)  + Mr("ij") * Mr("kl") * yab.cval(3,3);
     L_iso = L_iso_1 + L_iso_2 ;
   }
 
   if(caseIndex == 13)
   {
-    double d3 = 2.0*lambda3*lambda3*lambda3*lambda3
-                      - I1*lambda3*lambda3 + J*J/(lambda3*lambda3);
-    Tensor M3 = ( C - I_ij*(I1-lambda3*lambda3) + Cinv*(J*J/(lambda3*lambda3)) ) * (1.0/d3);
+    double d3 = (lambda3+lambda1)*(lambda3+lambda2)*(lambda3-lambda1)*(lambda3-lambda2);
+    Tensor M3 = (I_ij - Cinv * (lambda2*lambda2)) * (1.0/(lambda3+lambda2)/(lambda3-lambda2));
     Tensor Mr = Cinv - M3;
-    double d3p = 4.0 *lambda3*lambda3*lambda3*lambda3 - I1*lambda3*lambda3
-                   - J*J /(lambda3*lambda3);
+    double d3p = 4.0 *lambda3*lambda3*lambda3*lambda3 - I1*lambda3*lambda3 - J*J /(lambda3*lambda3);
     Tensor Cm1M3M3Cm1 = Cinv("ij")*M3("kl") + M3("ij")*Cinv("kl");
     Cinv.null_indices(); M3.null_indices(); Cm1M3M3Cm1.null_indices();
     Tensor dM3M3d = I_ij("ij")*M3("kl") + M3("ij")*I_ij("kl");
@@ -438,8 +371,6 @@ const Tensor FiniteDeformationElastic3D::FDisoStiffness(void)
     M3.null_indices(); M3M3.null_indices();
     Tensor calM3 = ( tempI + (CinvCinv_ICinv -Cm1M3M3Cm1)*(J*J/(lambda3*lambda3)) + dM3M3d*(lambda3*lambda3) - M3M3*d3p ) *(1.0/d3);
     Tensor calMr = (ICinv + calM3) * (-1.0);
-    Vector Wa = this->wa();
-    Tensor yab = this->Yab();
     Tensor L_iso_1 = ( calM3*Wa(2) + calMr*Wa(0) ) * 2.0;
     Tensor L_iso_2 =  M3("ij") * M3("kl") * yab.cval(3,3)  + M3("ij") * Mr("kl") * yab.cval(3,1)  +
                       Mr("ij") * M3("kl") * yab.cval(1,3)  + Mr("ij") * Mr("kl") * yab.cval(1,1);
@@ -450,12 +381,11 @@ const Tensor FiniteDeformationElastic3D::FDisoStiffness(void)
   {
     Vector lambda_wave(3);
     lambda_wave = this->getlambda_wave();
-    Vector lambda(3);
-    lambda = this->getlambda();
     Vector  d11 = W->d2isowOdlambda2(lambda_wave);
     Vector  d1 = W->disowOdlambda(lambda_wave);
-    double G2linear = d11(0)*lambda_wave(0)*lambda_wave(0) + d1(0)*lambda_wave(0);
+    double G2linear = d11(1)*lambda_wave2*lambda_wave2 + d1(1)*lambda_wave2;
     if (G2linear == 0.0) G2linear = E / (1.0+nu);
+
     L_iso = ( ICinv - CinvCinv * (1.0/3.0) ) * G2linear;
   }
 
@@ -464,13 +394,9 @@ const Tensor FiniteDeformationElastic3D::FDisoStiffness(void)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 const Tensor FiniteDeformationElastic3D::FDvolStiffness(void)
 {
-   tensor C = this->getC();
-   Tensor Cinv = C.inverse( );
-   Cinv.symmetrize11();
    Tensor CinvCinv = Cinv("ij")*Cinv("kl") ;
    Cinv.null_indices(); CinvCinv.null_indices();
    Tensor ICinv = ( CinvCinv.transpose0110() + CinvCinv.transpose0111() ) * (0.5);
-   double J = this->getJ();
    double dWdJ = W->dvolwOdJ(J);
    double d2WdJ2 = W->d2volwOdJ2(J);
    double wj = d2WdJ2*J*J + J*dWdJ;
@@ -488,7 +414,15 @@ const Tensor& FiniteDeformationElastic3D::getTangentTensor(void)
 const Tensor
 &FiniteDeformationElastic3D::getInitialTangentTensor(void)
 {
-   return this->getTangentTensor();
+    tensor I2("I", 2, def_dim_2);
+    tensor I_ijkl = I2("ij")*I2("kl");
+    tensor I_ikjl = I_ijkl.transpose0110();
+    tensor I_iljk = I_ijkl.transpose0111();
+    tensor I4s = (I_ikjl+I_iljk)*0.5;
+    static tensor L0;
+    L0 = I_ijkl*( E*nu / ( (1.0+nu)*(1.0 - 2.0*nu) ) ) + I4s*( E / (1.0 + nu) );
+
+    return L0;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 const straintensor FiniteDeformationElastic3D::getStrainTensor(void)
@@ -510,7 +444,6 @@ const stresstensor FiniteDeformationElastic3D::getPK1StressTensor(void)
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 const stresstensor FiniteDeformationElastic3D::getCauchyStressTensor(void)
 {
-   double J = this->getJ();
    stresstensor thisSPKStress = this->getStressTensor();
    stresstensor thisCauchyStress = F("ij") * thisSPKStress("jk") * (F.transpose11())("kl") * (1.0/J);
    return thisCauchyStress;
@@ -530,11 +463,23 @@ int FiniteDeformationElastic3D::revertToStart (void)
 {
    Tensor F0("I", 2, def_dim_2);
    F = F0;
+   C = F0;
+   Cinv = F0;
 
    Tensor ss_zero(2,def_dim_2,0.0);
    thisPK2Stress = ss_zero;
    thisGreenStrain = ss_zero;
    Stiffness = getInitialTangentTensor();
+
+   J = 1.0;
+   lambda1 = 1.0;
+   lambda2 = 1.0;
+   lambda3 = 1.0;
+   lambda_wave1 = 1.0;
+   lambda_wave2 = 1.0;
+   lambda_wave3 = 1.0;
+
+   caseIndex = 0;
 
    return 0;
 }
@@ -545,6 +490,16 @@ NDMaterial * FiniteDeformationElastic3D::getCopy (void)
     new FiniteDeformationElastic3D (this->getTag(), this->getWEnergy(), this->getRho());
 
     theCopy->F = F;
+    theCopy->C = C;
+    theCopy->Cinv = Cinv;
+    theCopy->J = J;
+    theCopy->lambda1 = lambda1;
+    theCopy->lambda2 = lambda2;
+    theCopy->lambda3 = lambda3;
+    theCopy->lambda_wave1 = lambda_wave1;
+    theCopy->lambda_wave2 = lambda_wave2;
+    theCopy->lambda_wave3 = lambda_wave3;
+
     theCopy->Stiffness = Stiffness;
     theCopy->thisGreenStrain = thisGreenStrain;
     theCopy->thisPK2Stress = thisPK2Stress;
@@ -635,75 +590,83 @@ int FiniteDeformationElastic3D::updateParameter(int parameterID, Information &in
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 int FiniteDeformationElastic3D::ComputeTrials()
 {
-   Tensor I_ij("I", 2, def_dim_2);
+   // C:
+   C = (F.transpose11())("ij")*F("jk");
+   F.null_indices(); (F.transpose11()).null_indices(); C.null_indices();
+   C.symmetrize11();
 
-   double J = this->getJ( );
-
-   Vector lambda(3);
-   lambda = this->getlambda();
-   Vector lambda_wave(3);
-   lambda_wave = this->getlambda_wave();
-   tensor C = this->getC( );
-   Tensor Cinv = C.inverse( );
+   // Cinv:
+   Cinv = C.inverse( );
    Cinv.symmetrize11();
-   double lambda1 = lambda(0);
-   double lambda2 = lambda(1);
-   double lambda3 = lambda(2);
-   double I1 = lambda1*lambda1+lambda2*lambda2+lambda3*lambda3;
+
+   // J:
+   J = F.determinant( );
+
+   // lambda:
+   tensor eigtensor = C.eigenvalues();
+   lambda1 = sqrt(eigtensor.cval(1));
+   lambda2 = sqrt(eigtensor.cval(2));
+   lambda3 = sqrt(eigtensor.cval(3));
+
+   // lambda_wave
+   double JJJ = pow(J, -0.33333333333333333333333333333);
+   lambda_wave1 = lambda1 *JJJ;
+   lambda_wave2 = lambda2 *JJJ;
+   lambda_wave3 = lambda3 *JJJ;
+
+   // caseIndex, note lambda1 >= lambda2 >= lambda3 implied by C.eigenvalues()
+   double diff12 = fabs(lambda1-lambda2);
+   double diff23 = fabs(lambda2-lambda3);
+   double perturbation = pow( d_macheps(), (0.4) );
+   if ( diff12 >= perturbation && diff23 >= perturbation )
+	caseIndex = 0;
+   else if (diff12 >= perturbation && diff23 < perturbation )
+	caseIndex = 11;
+   else if (diff12 < perturbation && diff23 >= perturbation )
+	caseIndex = 13;
+   else if (diff12 < perturbation &&  diff23 < perturbation )
+	caseIndex = 2;
+   else   {opserr << "FiniteDeformationElastic3D::getCaseIndex -- unknown case! \n";
+	exit (-1);}
+
+   Tensor I_ij("I", 2, def_dim_2);
 
    Tensor isoPK2Stress(2, def_dim_2, 0.0);
 
-   int caseIndex = this->getCaseIndex();
+   Vector Wa = this->wa();
+
+   double I1 = lambda1*lambda1+lambda2*lambda2+lambda3*lambda3;
 
    if (caseIndex == 0)
    {
-     double d1 = 2.0 * lambda1*lambda1*lambda1*lambda1
-                      - I1 *  lambda1*lambda1 + J*J/(lambda1*lambda1);
-     double d2 = 2.0 * lambda2*lambda2*lambda2*lambda2
-                      - I1 *  lambda2*lambda2 + J*J/(lambda2*lambda2);
-     double d3 = 2.0 * lambda3*lambda3*lambda3*lambda3
-                      - I1 *  lambda3*lambda3 + J*J/(lambda3*lambda3);
+     double d1 = (lambda1+lambda2)*(lambda1+lambda3)*(lambda1-lambda2)*(lambda1-lambda3);
+     double d2 = (lambda2+lambda3)*(lambda2+lambda1)*(lambda2-lambda3)*(lambda2-lambda1);
+     double d3 = (lambda3+lambda1)*(lambda3+lambda2)*(lambda3-lambda1)*(lambda3-lambda2);
+
      Tensor M1 = ( C - I_ij*(I1-lambda1*lambda1) + Cinv *(J*J/(lambda1*lambda1)) ) * (1.0/d1);
      Tensor M2 = ( C - I_ij*(I1-lambda2*lambda2) + Cinv *(J*J/(lambda2*lambda2)) ) * (1.0/d2);
      Tensor M3 = ( C - I_ij*(I1-lambda3*lambda3) + Cinv *(J*J/(lambda3*lambda3)) ) * (1.0/d3);
-     Vector Wa = this->wa();
+
      isoPK2Stress = M1*Wa(0) + M2*Wa(1) + M3*Wa(2);
    }
 
    if (caseIndex == 11)
    {
-     double d1 = 2.0 * lambda1*lambda1*lambda1*lambda1
-                      - I1 *  lambda1*lambda1 + J*J/(lambda1*lambda1);
-     Tensor M1 = ( C - I_ij*(I1-lambda1*lambda1) + Cinv *(J*J/(lambda1*lambda1)) ) * (1.0/d1);
+     Tensor M1 = (I_ij - Cinv * (lambda2*lambda2)) * (1.0/(lambda1+lambda2)/(lambda1-lambda2));
      Tensor Mr = Cinv - M1;
-     Vector Wa = this->wa();
      isoPK2Stress = Mr*Wa(2) + M1*Wa(0);
-   }
-
-   if (caseIndex == 12)
-   {
-     double d2 = 2.0 * lambda2*lambda2*lambda2*lambda2
-                      - I1 *  lambda2*lambda2 + J*J/(lambda2*lambda2);
-     Tensor M2 = ( C - I_ij*(I1-lambda2*lambda2) + Cinv *(J*J/(lambda2*lambda2)) ) * (1.0/d2);
-     Tensor Mr = Cinv - M2;
-     Vector Wa = this->wa();
-     isoPK2Stress = Mr*Wa(0) + M2*Wa(1);
    }
 
    if (caseIndex == 13)
    {
-     double d3 = 2.0 * lambda3*lambda3*lambda3*lambda3
-                      - I1 *  lambda3*lambda3 + J*J/(lambda3*lambda3);
-     Tensor M3 = ( C - I_ij*(I1-lambda3*lambda3) + Cinv *(J*J/(lambda3*lambda3)) ) * (1.0/d3);
+     Tensor M3 = (I_ij - Cinv * (lambda2*lambda2)) * (1.0/(lambda3+lambda2)/(lambda3-lambda2));
      Tensor Mr = Cinv - M3;
-     Vector Wa = this->wa();
-     isoPK2Stress = Mr*Wa(1) + M3*Wa(2);
+     isoPK2Stress = Mr*Wa(0) + M3*Wa(2);
    }
 
    if (caseIndex == 2)
    {
-     Tensor zeroT(2, def_dim_2, 0.0);
-     isoPK2Stress = zeroT;
+
    }
 
    double dWdJ = W->dvolwOdJ(J);
@@ -722,37 +685,7 @@ int FiniteDeformationElastic3D::ComputeTrials()
 //--------------------------------------------------------------------------------------------------------------------------------------
 int FiniteDeformationElastic3D::getCaseIndex()
 {
-   Vector lambda(3);
-   lambda = this->getlambda();
-   double lambda1 = lambda(0);
-   double lambda2 = lambda(1);
-   double lambda3 = lambda(2);
-   double diff12 = fabs(lambda1-lambda2);
-   double diff23 = fabs(lambda2-lambda3);
-   double diff31 = fabs(lambda3-lambda1);
-
-   double perturbation = pow( d_macheps(), (0.5) );
-   static int caseIdx;
-
-   if (diff12 >= perturbation && diff23 >= perturbation && diff31 >= perturbation )
-  caseIdx = 0;
-   if (diff12 < perturbation && (diff23 >= perturbation || diff31 >= perturbation) )
-  caseIdx = 13;
-   if (diff23 < perturbation && (diff31 >= perturbation || diff12 >= perturbation) )
-  caseIdx = 11;
-   if (diff31 < perturbation && (diff12 >= perturbation || diff23 >= perturbation) )
-  caseIdx = 12;
-   if (diff12 < perturbation &&  diff23 < perturbation && diff31 < perturbation )
-  caseIdx = 2;
-
-   if (caseIdx !=  0 &&
-       caseIdx != 11 &&
-       caseIdx != 12 &&
-       caseIdx != 13 &&
-       caseIdx !=  2 )
-   opserr << "FiniteDeformationElastic3D::getCaseIndex -- unknown case! \n";
-
-   return caseIdx;
+   return caseIndex;
 }
 
 

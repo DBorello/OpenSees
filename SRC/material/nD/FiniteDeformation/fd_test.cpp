@@ -74,7 +74,8 @@ OPS_Stream &opserr = sserr;
 #include "SimoPisterWEnergy.h"
 #include "OgdenWEnergy.h"
 #include "MooneyRivlinWEnergy.h"
-
+#include "OgdenSimoWEnergy.h"
+#include "MooneyRivlinSimoWEnergy.h"
 
 int main()
 {
@@ -86,14 +87,14 @@ double nu_in = 0.4;
 
 ////********** for Odegen
 //int Nogden = 3;
-//Vector cr(3);
-//Vector mur(3);
-//cr(0) = 6.3e5;
-//cr(1) = 0.012e5;
-//cr(2) = -0.1e5;
-//mur(0) = 1.3;
-//mur(1) = 5.0;
-//mur(2) = -2.0;
+//double cr[3];
+//double mur[3];
+//cr[0] = 6.3e5;
+//cr[1] = 0.012e5;
+//cr[2] = -0.1e5;
+//mur[0] = 1.3;
+//mur[1] = 5.0;
+//mur[2] = -2.0;
 
 ////********** for Mooney-Rivlin
 //double c1_in = 1.8484375e5;
@@ -108,12 +109,15 @@ NeoHookeanWEnergy  thisFDW( E_in, nu_in );
 //SimoPisterWEnergy  thisFDW( E_in, nu_in );
 //OgdenWEnergy  thisFDW( E_in, nu_in, Nogden, cr, mur);
 //MooneyRivlinWEnergy  thisFDW( E_in, nu_in, c1_in, c2_in );
+//OgdenSimoWEnergy  thisFDW( E_in, nu_in, Nogden, cr, mur );
+//MooneyRivlinSimoWEnergy  thisFDW( E_in, nu_in, c1_in, c2_in );
+
 
 FiniteDeformationElastic3D  thisFDstate( 0, 0, &thisFDW, rho_in);
 
 double gammastart = 0.0;
-double gammaend = 0.51;
-double deltagamma = 0.1;
+double gammaend = 0.0011;
+double deltagamma = 0.001;
 printf("   gammastart  = %.12e\n",gammastart);
 printf("   gammaend  = %.12e\n",gammaend);
 printf("   deltagamma  = %.12e\n",deltagamma);
@@ -128,18 +132,25 @@ for ( gamma = gammastart ; gamma <= gammaend ; gamma = gamma + deltagamma )
 // /***********************************************************************************/
 // /*   Simple shear                                                                  */
 // /***********************************************************************************/
-  double F11 = 1.0;    double F12 = 0.0;    double F13 = gamma;
-     double F21 = 0.0;    double F22 = 1.0;    double F23 = 0.0;
-  double F31 = 0.0;    double F32 = 0.0;    double F33 = 1.0;
+ double F11 = 1.0;    double F12 = 0.0;    double F13 = gamma;
+ double F21 = 0.0;    double F22 = 1.0;    double F23 = 0.0;
+ double F31 = 0.0;    double F32 = 0.0;    double F33 = 1.0;
 
 //
 //**************************************************************************************/
 //*   Pure Extension                                                                   */
 //**************************************************************************************/
 //   double F11 = 1.0+gamma;  double F12 = 0.0;        double F13 = 0.0;
-//    double F21 = 0.0;        double F22 = 1.0;        double F23 = 0.0;
-//    double F31 = 0.0;        double F32 = 0.0;        double F33 = 1.0;
+//   double F21 = 0.0;        double F22 = 1.0;        double F23 = 0.0;
+//   double F31 = 0.0;        double F32 = 0.0;        double F33 = 1.0;
 
+//
+//**************************************************************************************/
+//*   Simple Extension                                                                   */
+//**************************************************************************************/
+//   double F11 = 1.0+gamma;  double F12 = 0.0;        double F13 = 0.0;
+//   double F21 = 0.0;        double F22 = 1.0/sqrt(1.0+gamma);        double F23 = 0.0;
+//   double F31 = 0.0;        double F32 = 0.0;        double F33 = 1.0/sqrt(1.0+gamma);
 
 //
 ///************************************************************************************/
@@ -173,34 +184,14 @@ for ( gamma = gammastart ; gamma <= gammaend ; gamma = gamma + deltagamma )
                                F31,  F32,  F33 };
 
          Tensor thisf(2, def_dim_2, F_values);
-              thisf.print("F","\nDeformation Gradient:");
+              thisf.print("F","\n");
               thisFDstate.setTrialF(thisf);
 //              Tensor thisC = thisFDstate.getC();
-//              thisC.print("C","\nTensor of C");
+//              thisC.print("C","\n");
 //              double thisJ = thisFDstate.getJ();
 //              printf("\nJ = %lf\n", thisJ);
-//              Tensor thisStrain = thisFDstate.getStrainTensor();
-//              Tensor thisStress = thisFDstate.getStressTensor();
-//              thisStrain.print("Strain","\nGreen Strain");
-//              thisStress.print("Stress","\nThe 2nd PK Stress");
-//              Vector thislambda =  thisFDstate.getlambda();
-//              printf("\nlambda 1 = %lf, lambda 2 = %lf, lambda 3 = %lf\n", thislambda(0), thislambda(1), thislambda(2));
-//              Vector thislambda_wave =  thisFDstate.getlambda_wave();
-//              printf("\nlambda_w 1 = %lf, lambda_w 2 = %lf, lambda_w 3 = %lf\n", thislambda_wave(0), thislambda_wave(1), thislambda_wave(2));
-//              Vector thisWa = thisFDstate.wa();
-//              printf("\nWa 1 = %lf, Wa 2 = %lf, Wa 3 = %lf\n", thisWa(0), thisWa(1), thisWa(2));
-//              Tensor thisyab = thisFDstate.Yab();
-//              thisyab.print("yab","Yab");
-//              Tensor thisisoStiffTensor = thisFDstate.FDisoStiffness();
-//              thisisoStiffTensor.print("Kiso","\nISO Tangent Tensor");
 
-              Tensor thisStiffTensor = thisFDstate.getTangentTensor();
-              thisStiffTensor.print("K","\n");
 
-//              Tensor thisvolStiffTensor = thisFDstate.FDvolStiffness();
-//              thisvolStiffTensor.print("K","\nTangent Tensor");
-//              Tensor thisStrain = thisFDstate.getStrainTensor();
-//              thisStrain.print("E","\nGreen Strain Tensor:");
               Tensor thisPK2Stress = thisFDstate.getStressTensor();
               thisPK2Stress.print("PK2","\n2nd PK Stress Tensor:");
 //              Tensor thisFPKStress = thisFDstate.getPK1StressTensor();

@@ -61,7 +61,7 @@ MooneyRivlinWEnergy::~MooneyRivlinWEnergy( )
 //================================================================================
 WEnergy * MooneyRivlinWEnergy::newObj()
   {
-    MooneyRivlinWEnergy  *new_WEnergy = new MooneyRivlinWEnergy (E, nu, c1, c2);
+    WEnergy  *new_WEnergy = new MooneyRivlinWEnergy (E, nu, c1, c2);
     return new_WEnergy;
   }
 
@@ -96,9 +96,9 @@ const double MooneyRivlinWEnergy::wE(const double &J_in, const Vector &lambda_wa
 const Vector MooneyRivlinWEnergy::disowOdlambda(const Vector &lambda_wave_in)
   {
         Vector disowOverdlambda(3);
-        disowOverdlambda(0) = 2 * c1 *lambda_wave_in(0) - 2.0 * c2 * pow(lambda_wave_in(0), -3);
-        disowOverdlambda(1) = 2 * c1 *lambda_wave_in(1) - 2.0 * c2 * pow(lambda_wave_in(1), -3);
-        disowOverdlambda(2) = 2 * c1 *lambda_wave_in(2) - 2.0 * c2 * pow(lambda_wave_in(2), -3);
+        disowOverdlambda(0) = 2.0 * c1 *lambda_wave_in(0) - 2.0 * c2 * pow(lambda_wave_in(0), -3.0);
+        disowOverdlambda(1) = 2.0 * c1 *lambda_wave_in(1) - 2.0 * c2 * pow(lambda_wave_in(1), -3.0);
+        disowOverdlambda(2) = 2.0 * c1 *lambda_wave_in(2) - 2.0 * c2 * pow(lambda_wave_in(2), -3.0);
     return disowOverdlambda;
   }
 
@@ -108,20 +108,30 @@ const Vector MooneyRivlinWEnergy::disowOdlambda(const Vector &lambda_wave_in)
 const Vector MooneyRivlinWEnergy::d2isowOdlambda2(const Vector &lambda_wave_in)
   {
         Vector d2isowOverdlambda2(3);
-        d2isowOverdlambda2(0) = 2 * c1  - 6.0 * c2 * pow(lambda_wave_in(0), -4);
-        d2isowOverdlambda2(1) = 2 * c1  - 6.0 * c2 * pow(lambda_wave_in(1), -4);
-        d2isowOverdlambda2(2) = 2 * c1  - 6.0 * c2 * pow(lambda_wave_in(2), -4);
+        d2isowOverdlambda2(0) = 2.0 * c1  + 6.0 * c2 * pow(lambda_wave_in(0), -4.0);
+        d2isowOverdlambda2(1) = 2.0 * c1  + 6.0 * c2 * pow(lambda_wave_in(1), -4.0);
+        d2isowOverdlambda2(2) = 2.0 * c1  + 6.0 * c2 * pow(lambda_wave_in(2), -4.0);
     return d2isowOverdlambda2;
   }
 
 //================================================================================
-// friend ostream functions for output
+// d(vol)w / dJ
 //================================================================================
-////OPS_Stream & operator<< (OPS_Stream & os, const MooneyRivlinWEnergy & W)
-////{
-////    os << "MooneyRivlin Strain Energy Function: " << endln;
-////    return os;
-////}
+//const double MooneyRivlinWEnergy::dvolwOdJ(const double &J_in)
+//{
+//   return  0.0;
+//}
+
+//================================================================================
+// d2(vol)w / dJ2
+//================================================================================
+//const double MooneyRivlinWEnergy::d2volwOdJ2(const double &J_in)
+//{
+//   if (nu != 0.5)
+//   	return  E/3.0/(1-2.0*nu);
+//   else
+//   	return 1.0e20;
+//}
 
 #endif
 
