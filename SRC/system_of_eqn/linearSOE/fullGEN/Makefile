@@ -13,7 +13,7 @@ clean: tidy
 	@$(RM) $(RMFLAGS) $(OBJS) *.o
 
 spotless: clean
-	@$(RM) $(RMFLAGS) $(PROGRAM) 
+	@$(RM) $(RMFLAGS)
 
 wipe: spotless
 
