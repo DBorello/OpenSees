@@ -97,7 +97,7 @@ equalDOF 14 28 1 2 3
 equalDOF 23 29 1 2 3
 
 # elastic material
-nDMaterial ElasticIsotropic3D 1 $Es 0.3
+nDMaterial ElasticIsotropic3D 1 $Es 0.3 $rho_s
 # the template material of yours
 #sset YS {DruckerPrager }
 #set PS {DruckerPrager 0.05}
