@@ -1,5 +1,5 @@
-// $Revision: 1.31 $
-// $Date: 2004-02-24 22:25:51 $
+// $Revision: 1.32 $
+// $Date: 2004-06-07 23:45:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -1109,14 +1109,14 @@ void PressureDependMultiYield::getBackbone (Matrix & bb)
 
 		for (int i=1; i<=numOfSurfaces; i++) {
 			if (i==1) {
-				stress2 = theSurfaces[i].size()*conHeig/sqrt(3);
+				stress2 = theSurfaces[i].size()*conHeig/sqrt(3.0);
 				strain2 = stress2/shearModulus;
 				bb(1,k*2) = strain2; bb(1,k*2+1) = shearModulus;
 			} else {
 				stress1 = stress2; strain1 = strain2;
 				plastModulus = factor*theSurfaces[i-1].modulus();
 				elast_plast = 2*shearModulus*plastModulus/(2*shearModulus+plastModulus);
-				stress2 = theSurfaces[i].size()*conHeig/sqrt(3);
+				stress2 = theSurfaces[i].size()*conHeig/sqrt(3.0);
 			  strain2 = 2*(stress2-stress1)/elast_plast + strain1;
 				gre = stress2/strain2;
         bb(i,k*2) = strain2; bb(i,k*2+1) = gre;
