@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:09 $
+// $Revision: 1.2 $
+// $Date: 2000-12-19 05:15:33 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/Example1/main.cpp,v $
 
 
@@ -45,8 +45,6 @@
 #include <ConsoleErrorHandler.h>
 
 #include <ArrayOfTaggedObjects.h>
-#include <MapOfTaggedObjects.h>
-#include <MapOfTaggedObjectsIter.h>
 
 // includes for the domain classes
 #include <Domain.h>
@@ -81,11 +79,7 @@ int main(int argc, char **argv)
     //  and build the model
     //
 
-//    Domain *theDomain = new Domain();
-
-    MapOfTaggedObjects theStorage;
-//    ArrayOfTaggedObjects theStorage(32);    
-    Domain *theDomain = new Domain(theStorage);
+    Domain *theDomain = new Domain();
     
     // create the nodes using constructor: 
     //		Node(tag, ndof, crd1, crd2)
