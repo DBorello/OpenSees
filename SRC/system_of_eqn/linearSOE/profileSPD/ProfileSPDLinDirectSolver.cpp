@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-02-17 06:32:38 $
+// $Revision: 1.3 $
+// $Date: 2001-09-17 20:00:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectSolver.cpp,v $
                                                                         
                                                                         
@@ -75,7 +75,7 @@ ProfileSPDLinDirectSolver::setSize(void)
     size = theSOE->size;
     
     if (RowTop != 0) delete [] RowTop;
-    if (topRowPtr != 0) delete [] topRowPtr;
+    if (topRowPtr != 0) free((void *)topRowPtr);
     if (invD != 0) delete [] invD;
 
     RowTop = new int[size];
