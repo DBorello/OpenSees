@@ -1,7 +1,7 @@
 # Material model: FiniteDeformationElastic3D
 # Element model: TotalLagrangianFD20NodeBrick
 # Pure Shear Test
-# By Zhao Cheng, zcheng@ucdavis.edu
+# Zhao Cheng and Boris Jeremic [zcheng,jeremic]@ucdavis.edu
 
 # wipe previous analysis
 wipeAnalysis
@@ -118,11 +118,11 @@ integrator DisplacementControl 1 1 $ndz 2 $ndz $ndz
 test NormDispIncr 1.0e-5 50  1
 system SparseGeneral
 constraints Plain
-algorithm KrylovNewton
+algorithm Newton
 numberer Plain
 analysis Static
 
-set NN2 10
+set NN2 5
 
 #recorder Element 1 -file element.out stress
 #recorder Element 1 -file force.out force
