@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-18 23:38:04 $
+// $Revision: 1.4 $
+// $Date: 2003-02-19 15:43:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/VrmlViewer.cpp,v $
                                                                         
                                                                         
@@ -41,7 +41,7 @@
 #include <iomanip>
 using std::ios;
 
-#include <string>
+#include <string.h>
 
 #include <stdlib.h>
 #include <stdio.h>

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-26 00:56:05 $
+// $Revision: 1.4 $
+// $Date: 2003-02-19 15:43:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Renderer.h,v $
                                                                         
                                                                         
@@ -37,6 +37,8 @@
 
 #ifndef Renderer_h
 #define Renderer_h
+
+#include <OPS_Globals.h>
 
 class Vector;
 class Matrix;
