@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 05:59:54 $
+// $Revision: 1.4 $
+// $Date: 2001-09-04 22:29:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticPPMaterial.cpp,v $
                                                                         
                                                                         
@@ -178,6 +178,7 @@ ElasticPPMaterial::revertToLastCommit(void)
 int 
 ElasticPPMaterial::revertToStart(void)
 {
+    trialStrain = 0.0;
     ep = 0.0;
     return 0;
 }

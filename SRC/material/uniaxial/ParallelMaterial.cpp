@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-09-04 22:29:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ParallelMaterial.cpp,v $
                                                                         
                                                                         
@@ -200,7 +200,7 @@ ParallelMaterial::commitState(void)
 int 
 ParallelMaterial::revertToLastCommit(void)
 {
-    Tfailed = Cfailed;
+  Tfailed = Cfailed;
 
     // invoke commitState() on each of local MaterialModel objects
     for (int i=0; i<numMaterials; i++)
@@ -218,6 +218,9 @@ int
 ParallelMaterial::revertToStart(void)
 {
     Cfailed = 0;
+    Tfailed = 0;
+    trialStrain = 0.0;
+    trialStrainRate = 0.0;
 
     // invoke commitState() on each of local MaterialModel objects
     for (int i=0; i<numMaterials; i++)
