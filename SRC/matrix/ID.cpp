@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-05-16 20:04:18 $
+// $Revision: 1.3 $
+// $Date: 2002-05-28 19:07:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -273,7 +273,6 @@ ID::operator=(const ID &V)
 		arraySize = V.sz;
 		if (data != 0)
 		    free((void *)data);
-		sz = V.sz;
 		data = (int *)malloc(arraySize*sizeof(int));		
 		// check we got the memory requested
 		if (data == 0) {
@@ -283,6 +282,7 @@ ID::operator=(const ID &V)
 		    arraySize = 0;
 		}
 	    }
+	    sz = V.sz;
 	}
 	
 	// copy the data
