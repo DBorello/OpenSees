@@ -2015,10 +2015,10 @@ tensor EightNodeBrick::nodal_forces(void)
 		
 		incremental_strain =
                      (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-		if (where == 0)
-   		//cout << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
-		cout << " el tag = "<< getTag();
-		
+//		if (where == 0)
+//   		//cout << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
+////		cout << " el tag = "<< getTag();
+//		
 		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
 		if ( err)
                	   g3ErrorHandler->warning("EightNodeBrick::getStiffnessTensor (tag: %d), not converged",
