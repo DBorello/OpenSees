@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $                                                              
-// $Date: 2001-07-13 22:09:24 $                                                                  
+// $Revision: 1.9 $                                                              
+// $Date: 2001-07-16 22:27:46 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $                                                                
 
 //Boris Jeremic and Zhaohui Yang ___ 02-10-2000
@@ -55,33 +55,33 @@ ElasticIsotropic3D::~ElasticIsotropic3D ()
 }
 
 int
-ElasticIsotropic3D::setTrialStrain (const Vector &v)
+ElasticIsotropic3D::setTrialStrain (const Vector &strain)
 {
-	epsilon = v;
+	epsilon = strain;
 
 	return 0;
 }
 
 int
-ElasticIsotropic3D::setTrialStrain (const Vector &v, const Vector &r)
+ElasticIsotropic3D::setTrialStrain (const Vector &strain, const Vector &rate)
 {
-	epsilon = v;
+	epsilon = strain;
 
 	return 0;
 }
 
 int
-ElasticIsotropic3D::setTrialStrainIncr (const Vector &v)
+ElasticIsotropic3D::setTrialStrainIncr (const Vector &strain)
 {
-	epsilon += v;
+	epsilon += strain;
 
 	return 0;
 }
 
 int
-ElasticIsotropic3D::setTrialStrainIncr (const Vector &v, const Vector &r)
+ElasticIsotropic3D::setTrialStrainIncr (const Vector &strain, const Vector &rate)
 {
-	epsilon += v;
+	epsilon += strain;
 
 	return 0;
 }
@@ -91,14 +91,17 @@ ElasticIsotropic3D::getTangent (void)
 {
 	double mu2 = E/(1.0+v);
 	double lam = v*mu2/(1.0-2.0*v);
-	double mu = 0.50*mu2;
+	double mu  = 0.50*mu2;
 
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++)
-			D(j,i) = lam;
-		D(i,i) += mu2;
-		D(i+3,i+3) = mu;
-	}
+    mu2 += lam;
+
+    D(0,0) = D(1,1) = D(2,2) = mu2;
+    D(0,1) = D(1,0) = lam;
+    D(0,2) = D(2,0) = lam;
+    D(1,2) = D(2,1) = lam;
+    D(3,3) = mu;
+    D(4,4) = mu;
+    D(5,5) = mu;
 
 	return D;
 }
@@ -108,17 +111,17 @@ ElasticIsotropic3D::getStress (void)
 {
 	double mu2 = E/(1.0+v);
 	double lam = v*mu2/(1.0-2.0*v);
-	double mu = 0.50*mu2;
+	double mu  = 0.50*mu2;
 
-	double tmp1 = lam+mu2;
+	mu2 += lam;
 	
 	double eps0 = epsilon(0);
 	double eps1 = epsilon(1);
 	double eps2 = epsilon(2);
 
-	sigma(0) = tmp1*eps0 + lam*(eps1+eps2);
-	sigma(1) = tmp1*eps1 + lam*(eps2+eps0);
-	sigma(2) = tmp1*eps2 + lam*(eps0+eps1);
+	sigma(0) = mu2*eps0 + lam*(eps1+eps2);
+	sigma(1) = mu2*eps1 + lam*(eps2+eps0);
+	sigma(2) = mu2*eps2 + lam*(eps0+eps1);
 
 	sigma(3) = mu*epsilon(3);
 	sigma(4) = mu*epsilon(4);
@@ -269,11 +272,12 @@ ElasticIsotropic3D::sendSelf(int commitTag, Channel &theChannel)
 {
 	int res = 0;
 
-	static Vector data(3);
+	static Vector data(4);
 
 	data(0) = this->getTag();
 	data(1) = E;
 	data(2) = v;
+    data(3) = rho;
 
     	res += theChannel.sendVector(this->getDbTag(), commitTag, data);
 	if (res < 0) {
@@ -291,7 +295,7 @@ ElasticIsotropic3D::recvSelf(int commitTag, Channel &theChannel,
 {
 	int res = 0;
 
-	static Vector data(6);
+	static Vector data(4);
 
 	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
 	if (res < 0) {
@@ -301,11 +305,11 @@ ElasticIsotropic3D::recvSelf(int commitTag, Channel &theChannel,
 	}
     
 	this->setTag((int)data(0));
-    	E = data(1);
+    E = data(1);
 	v = data(2);
+    rho = data(3);
 
 	// Set up the elastic constant matrix for 3D elastic isotropic
-	D.Zero();
 	//setElasticStiffness();
 	
 	return res;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $                                                              
-// $Date: 2001-05-26 05:33:05 $                                                                  
+// $Revision: 1.7 $                                                              
+// $Date: 2001-07-16 22:27:46 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $                                                                
                                                                         
                                                                         
@@ -84,16 +84,13 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     void Print(ostream &s, int flag =0);
     void setInitElasticStiffness(void);
 
-  //Private functions
-  private:
-
-
   protected:
 
   private:
     static Vector sigma;		// Stress vector
     static Matrix D;			// Elastic constants
     Vector epsilon;		// Strain vector
+    double rho;         // Mass density per unit volume
 
     double exp;                 // exponent usually 0.6
     double p_ref;               // Reference pressure, usually atmosphere pressure, i.e. 100kPa
