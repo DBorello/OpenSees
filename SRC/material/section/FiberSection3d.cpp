@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-02-14 23:01:33 $
+// $Revision: 1.12 $
+// $Date: 2003-02-17 19:28:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -735,18 +735,34 @@ FiberSection3d::setResponse(char **argv, int argc, Information &sectInfo)
       int matTag = atoi(argv[3]);
       double yCoord = atof(argv[1]);
       double zCoord = atof(argv[2]);
-      double closestDist = 987654321.0;
+      double closestDist;
       double ySearch, zSearch, dy, dz;
       double distance;
-      for (int j = 0; j < numFibers; j++) {
-	ySearch = -matData[3*j];
-	zSearch =  matData[3*j+1];
-	dy = ySearch-yCoord;
-	dz = zSearch-zCoord;
-	distance = dy*dy + dz*dz;
-	if (matTag == theMaterials[j]->getTag() && distance < closestDist) {
-	  closestDist = distance;
+      int j;
+      // Find first fiber with specified material tag
+      for (j = 0; j < numFibers; j++) {
+	if (matTag == theMaterials[j]->getTag()) {
+	  ySearch = -matData[3*j];
+	  zSearch =  matData[3*j+1];
+	  dy = ySearch-yCoord;
+	  dz = zSearch-zCoord;
+	  closestDist = sqrt(dy*dy + dz*dz);
 	  key = j;
+	  break;
+	}
+      }
+      // Search the remaining fibers
+      for ( ; j < numFibers; j++) {
+	if (matTag == theMaterials[j]->getTag()) {
+	  ySearch = -matData[3*j];
+	  zSearch =  matData[3*j+1];
+	  dy = ySearch-yCoord;
+	  dz = zSearch-zCoord;
+	  distance = sqrt(dy*dy + dz*dz);
+	  if (distance < closestDist) {
+	    closestDist = distance;
+	    key = j;
+	  }
 	}
       }
       passarg = 4;
@@ -755,15 +771,20 @@ FiberSection3d::setResponse(char **argv, int argc, Information &sectInfo)
     else {                  // fiber near-to coordinate specified
       double yCoord = atof(argv[1]);
       double zCoord = atof(argv[2]);
-      double closestDist = 987654321.0;
+      double closestDist;
       double ySearch, zSearch, dy, dz;
       double distance;
+      ySearch = -matData[0];
+      zSearch =  matData[1];
+      dy = ySearch-yCoord;
+      dz = zSearch-zCoord;
+      closestDist = sqrt(dy*dy + dz*dz);
       for (int j = 0; j < numFibers; j++) {
 	ySearch = -matData[3*j];
 	zSearch =  matData[3*j+1];
 	dy = ySearch-yCoord;
 	dz = zSearch-zCoord;
-	distance = dy*dy + dz*dz;
+	distance = sqrt(dy*dy + dz*dz);
 	if (distance < closestDist) {
 	  closestDist = distance;
 	  key = j;
