@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2002-10-23 22:58:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.h,v $
                                                                         
                                                                         
@@ -89,7 +89,8 @@ class TransformationFE: public FE_Element
     Matrix *modTangent;
     Vector *modResidual;
     int numGroups;
-    int numEleNodalDOF;
+    int numTransformedDOF;
+    int numOriginalDOF;
     TransformationConstraintHandler *theHandler;
     
     // static variables - single copy for all objects of the class	
@@ -101,6 +102,7 @@ class TransformationFE: public FE_Element
     static int sizeTransformations; // size of theTransformations array
     static double *dataBuffer;
     static double *localKbuffer;
+    static int    *dofData;
     static int sizeBuffer;
 };
 
