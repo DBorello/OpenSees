@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-18 21:45:41 $
+// $Revision: 1.5 $
+// $Date: 2001-08-19 23:01:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -367,7 +367,7 @@ extern "C" int _stdcall STEEL_2(double *matpar, double *hstvP, double *hstv,
 #define concrete_1_		CONCRETE_1
 #define concrete_2_		CONCRETE_2
 #define concrete_3_		CONCRETE_3
-#define hard_1_			HARD_1
+#define hard_1__		HARD_1
 #define hyster_1_		HYSTER_1
 #define hyster_2_		HYSTER_2
 #define steel_1_		STEEL_1
@@ -395,9 +395,9 @@ extern "C" int concrete_3_(double *matpar, double *hstvP, double *hstv,
 			   double *strainP, double *stressP, double *dStrain,
 			   double *tangent, double *stress, int *ist);
 
-extern "C" int hard_1_(double *matpar, double *hstvP, double *hstv,
-		       double *strainP, double *stressP, double *dStrain,
-		       double *tangent, double *stress, int *ist);
+extern "C" int hard_1__(double *matpar, double *hstvP, double *hstv,
+			double *strainP, double *stressP, double *dStrain,
+			double *tangent, double *stress, int *ist);
 
 extern "C" int hyster_1_(double *matpar, double *hstvP, double *hstv,
 			 double *strainP, double *stressP, double *dStrain,
@@ -427,7 +427,7 @@ FedeasMaterial::invokeSubroutine(int ist)
   
   switch (this->getClassTag()) {
   case MAT_TAG_FedeasHardening:
-    hard_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+    hard_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
     	&sigma, &tangent, &ist);
     break;
 
