@@ -23,13 +23,13 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame1.tcl
 #
-# $Revision: 1.1.1.1 $
-# $Date: 2000-09-15 08:23:09 $
+# $Revision: 1.2 $
+# $Date: 2000-10-18 05:57:14 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/RCFrame1.tcl,v $
 
 # comment out one of lines
-set displayMode "displayON"
-#set displayMode "displayOFF"
+#set displayMode "displayON"
+set displayMode "displayOFF"
 
 # Define the model builder
 model BasicBuilder -ndm 2 -ndf 3
