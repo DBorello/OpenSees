@@ -18,19 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-11-26 22:53:51 $
+// $Revision: 1.7 $
+// $Date: 2002-05-15 22:13:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
-                                                                        
-                                                                        
-///////////////////////////////////////////////////////////
-// File:  ~/Src/element/beamWithHinges/BeamWithHinges3d.cpp
-//
-// Written by MHS
-// June 2000
-//
-// Purpose:  This cpp file contains the definitions
-// for BeamWithHinges3d.
 
 #include <BeamWithHinges3d.h>
 #include <Element.h>
@@ -40,404 +30,295 @@
 #include <Matrix.h>
 #include <Vector.h>						
 #include <Node.h>
-#include <MatrixUtil.h>						//For 3x3 matrix inversion
-#include <math.h>							//For sqrt function
-#include <stdlib.h>						
-#include <iostream.h>						//Not needed
+#include <MatrixUtil.h>
+#include <math.h>
+#include <stdlib.h>
+#include <iostream.h>
 #include <string.h>
 #include <stdio.h>
 
 #include <SectionForceDeformation.h>
-#include <ElasticSection3d.h>	// For numerical integration of interior
 #include <CrdTransf3d.h>
 
 #include <Information.h>
 #include <ElementResponse.h>
 #include <Renderer.h>
 
+Matrix BeamWithHinges3d::theMatrix(12,12);
+Vector BeamWithHinges3d::theVector(12);
+double BeamWithHinges3d::workArea[200];
+
 BeamWithHinges3d::BeamWithHinges3d(void)
-	:Element(0, ELE_TAG_BeamWithHinges3d),
-	E(0), Iz(0), Iy(0), A(0), L(0),
-	G(0), J(0), alpha(0),
-	sectionI(0), sectionJ(0),
-	connectedExternalNodes(2),
-	node1Ptr(0), node2Ptr(0),
-	hingeIlen(0), hingeJlen(0),
-	K(12,12), m(12,12), d(12,12), fElastic(6,6), vElastic(6,3),
-	UePrev(12), P(12), Pinert(12), kb(6,6), q(6),
-	load(12), prevDistrLoad(3), 
-	distrLoadCommit(3),	UeCommit(12), 
-	kbCommit(6,6), qCommit(6), massDens(0),
-	shearLength(1.0), shearIkeyVY(-1), shearJkeyVY(-1),
-	shearIkeyVZ(-1), shearJkeyVZ(-1),
-	shearWeightIVY(1.0), shearWeightIVZ(1.0),
-    shearWeightJVY(1.0), shearWeightJVZ(1.0),
-	theCoordTransf(0), maxIter(1), tolerance(1.0e-10), initialFlag(false)
+  :Element(0, ELE_TAG_BeamWithHinges3d),
+   E(0.0), A(0.0), Iz(0.0), Iy(0.0), G(0.0), J(0.0),
+   lp1(0.0), lp2(0.0), rho(0.0),
+   theCoordTransf(0),
+   connectedExternalNodes(2),
+   node1Ptr(0), node2Ptr(0),
+   kb(6,6), q(6), load(12),
+   kbCommit(6,6), qCommit(6),
+   initialFlag(0), maxIter(0), tolerance(0.0)
 {
-
+  section[0] = 0;
+  section[1] = 0;
 }
 
 BeamWithHinges3d::BeamWithHinges3d(int tag, int nodeI, int nodeJ,
-						double E_in, double Iz_in, double Iy_in, double A_in,
-						double G_in, double J_in, double alpha_in,
-						SectionForceDeformation &sectionRefI, double I_length,
-						SectionForceDeformation &sectionRefJ, double J_length,
-						CrdTransf3d &coordTransf, double shearL,
-						double massDensityPerUnitLength, int max, double tol)
-	:Element(tag, ELE_TAG_BeamWithHinges3d),
-	E(E_in), Iz(Iz_in), Iy(Iy_in), A(A_in),
-	G(G_in), J(J_in), alpha(alpha_in),
-	sectionI(0), sectionJ(0),
-	connectedExternalNodes(2),
-	node1Ptr(0), node2Ptr(0),
-	hingeIlen(I_length), hingeJlen(J_length),
-	K(12,12), m(12,12), d(12,12), fElastic(6,6), vElastic(6,3),
-	UePrev(12), P(12), Pinert(12), kb(6,6), q(6),
-	load(12), prevDistrLoad(3), 
-	distrLoadCommit(3),	UeCommit(12), 
-	kbCommit(6,6), qCommit(6),
-	massDens(massDensityPerUnitLength),
-	shearLength(shearL), shearIkeyVY(-1), shearJkeyVY(-1),
-	shearIkeyVZ(-1), shearJkeyVZ(-1),
-	shearWeightIVY(1.0), shearWeightIVZ(1.0),
-    shearWeightJVY(1.0), shearWeightJVZ(1.0),
-	theCoordTransf(0), maxIter(max), tolerance(tol), initialFlag(false)
+				   double e, double a, double iz,
+				   double iy, double g, double j,
+				   SectionForceDeformation &sectionRefI, double lpi,
+				   SectionForceDeformation &sectionRefJ, double lpj,
+				   CrdTransf3d &coordTransf,
+				   double r, int max, double tol)
+  :Element(tag, ELE_TAG_BeamWithHinges3d),
+   E(e), A(a), Iz(iz), Iy(iy), G(g), J(j),
+   lp1(lpi), lp2(lpj), rho(r),
+   theCoordTransf(0),
+   connectedExternalNodes(2),
+   node1Ptr(0), node2Ptr(0),
+   kb(6,6), q(6), load(12),
+   kbCommit(6,6), qCommit(6),
+   initialFlag(0), maxIter(max), tolerance(tol)
 {
-	if (E <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Paramater E is zero or negative.";
-		//exit(-1);
-	}
-	
-	if (Iz <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter Iz is zero or negative.";
-		//exit(-1);
-	}
-	
-	if (Iy <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter Iy is zero or negative.";
-		//exit(-1);
-	}
-	
-	if (A <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter A is zero or negative.";
-		//exit(-1); 
-	}
+  if (E <= 0.0)  {
+    g3ErrorHandler->fatal("%s -- input parameter E is <= 0.0",
+			  "BeamWithHinges3d::BeamWithHinges3d");
+  }
 
-	if (G <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter G is zero or negative.";
-		//exit(-1); 
-	}
-	
-	if (J <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter J is zero or negative.";
-		//exit(-1); 
-	}	
+  if (A <= 0.0)  {
+    g3ErrorHandler->fatal("%s -- input parameter A is <= 0.0",
+			  "BeamWithHinges3d::BeamWithHinges3d");
+  }
+  
+  if (Iz <= 0.0)  {
+    g3ErrorHandler->fatal("%s -- input parameter Iz is <= 0.0",
+			  "BeamWithHinges3d::BeamWithHinges3d");
+  }
 
-	if (alpha < 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter alpha is negative.";
-		//exit(-1); 
-	}
+  if (Iy <= 0.0)  {
+    g3ErrorHandler->fatal("%s -- input parameter Iy is <= 0.0",
+			  "BeamWithHinges3d::BeamWithHinges3d");
+  }
+  
+  if (G <= 0.0)  {
+    g3ErrorHandler->fatal("%s -- input parameter G is <= 0.0",
+			  "BeamWithHinges3d::BeamWithHinges3d");
+  }
 
-	// Get copies of sections
-	sectionI = sectionRefI.getCopy();
-	
-	if (sectionI == 0)
-		g3ErrorHandler->fatal("%s -- failed to get copy of section I",
-			"BeamWithHinges3d::BeamWithHinges3d");
-
-	sectionJ = sectionRefJ.getCopy();
-
-	if (sectionJ == 0)
-		g3ErrorHandler->fatal("%s -- failed to get copy of section J",
-			"BeamWithHinges3d::BeamWithHinges3d");
-
-	theCoordTransf = coordTransf.getCopy();
-	
-	if (theCoordTransf == 0)
-	    g3ErrorHandler->fatal("%s -- failed to get copy of coordinate transformation",
-			"BeamWithHinges3d::BeamWithHinges3d");
-	
-	connectedExternalNodes(0) = nodeI;
-	connectedExternalNodes(1) = nodeJ;
-}
-
-BeamWithHinges3d::BeamWithHinges3d(int tag, int nodeI, int nodeJ,
-				   double E_in, double Iz_in, double Iy_in, double A_in,
-				   double G_in, double J_in, double alpha_in,
-				   SectionForceDeformation &sectionRefI, double I_length,
-				   SectionForceDeformation &sectionRefJ, double J_length,
-				   CrdTransf3d &coordTransf, const Vector &distrLoad,
-				   double shearL, double massDensityPerUnitLength,
-				   int max, double tol)
-	:Element(tag, ELE_TAG_BeamWithHinges3d),
-	E(E_in), Iz(Iz_in), Iy(Iy_in), A(A_in),
-	G(G_in), J(J_in), alpha(alpha_in),
-	sectionI(0), sectionJ(0),
-	connectedExternalNodes(2),
-	node1Ptr(0), node2Ptr(0),
-	hingeIlen(I_length), hingeJlen(J_length),
-	K(12,12), m(12,12), d(12,12), fElastic(6,6), vElastic(6,3),
-	UePrev(12), P(12), Pinert(12), kb(6,6), q(6),
-	load(12), prevDistrLoad(3), 
-	distrLoadCommit(3),	UeCommit(12), 
-	kbCommit(6,6), qCommit(6),
-	massDens(massDensityPerUnitLength),
-	shearLength(shearL), shearIkeyVY(-1), shearJkeyVY(-1),
-	shearIkeyVZ(-1), shearJkeyVZ(-1),
-	shearWeightIVY(1.0), shearWeightIVZ(1.0),
-    shearWeightJVY(1.0), shearWeightJVZ(1.0),
-	theCoordTransf(0), maxIter(max), tolerance(tol), initialFlag(false)
-{
-	if (E <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Paramater E is zero or negative.";
-		//exit(-1);
-	}
-	
-	if (Iz <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter Iz is zero or negative.";
-		//exit(-1);
-	}
-	
-	if (Iy <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter Iy is zero or negative.";
-		//exit(-1);
-	}
-	
-	if (A <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter A is zero or negative.";
-		//exit(-1); 
-	}
-
-	if (G <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter G is zero or negative.";
-		//exit(-1); 
-	}
-	
-	if (J <= 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter J is zero or negative.";
-		//exit(-1); 
-	}	
-
-	if (alpha < 0.0)  {
-		cerr << "FATAL - BeamWithHinges3d::BeamWithHinges3d() - Parameter alpha is negative.";
-		//exit(-1); 
-	}
-
-	// Get copies of sections
-	sectionI = sectionRefI.getCopy();
-	
-	if (sectionI == 0)
-		g3ErrorHandler->fatal("%s -- failed to get copy of section I",
-			"BeamWithHinges3d::BeamWithHinges3d");
-
-	sectionJ = sectionRefJ.getCopy();
-
-	if (sectionJ == 0)
-		g3ErrorHandler->fatal("%s -- failed to get copy of section J",
-			"BeamWithHinges3d::BeamWithHinges3d");
-
-	theCoordTransf = coordTransf.getCopy();
-	
-	if (theCoordTransf == 0)
-	    g3ErrorHandler->fatal("%s -- failed to get copy of coordinate transformation",
-			"BeamWithHinges3d::BeamWithHinges3d");
-
-	connectedExternalNodes(0) = nodeI;					//node tags
-	connectedExternalNodes(1) = nodeJ;
+  if (J <= 0.0)  {
+    g3ErrorHandler->fatal("%s -- input parameter J is <= 0.0",
+			  "BeamWithHinges3d::BeamWithHinges3d");
+  }
+  
+  // Get copies of sections
+  section[0] = sectionRefI.getCopy();
+  
+  if (section[0] == 0)
+    g3ErrorHandler->fatal("%s -- failed to get copy of section I",
+			  "BeamWithHinges3d::BeamWithHinges3d");
+  
+  section[1] = sectionRefJ.getCopy();
+  
+  if (section[1] == 0)
+    g3ErrorHandler->fatal("%s -- failed to get copy of section J",
+			  "BeamWithHinges3d::BeamWithHinges3d");
+  
+  theCoordTransf = coordTransf.getCopy();
+  
+  if (theCoordTransf == 0)
+    g3ErrorHandler->fatal("%s -- failed to get copy of coordinate transformation",
+			  "BeamWithHinges3d::BeamWithHinges3d");
+  
+  connectedExternalNodes(0) = nodeI;
+  connectedExternalNodes(1) = nodeJ;
 }
 
 BeamWithHinges3d::~BeamWithHinges3d(void)
 {
-	//Only hinges must be destroyed
-	if (sectionI)
-		delete sectionI;
-
-	if (sectionJ)
-		delete sectionJ;
-	
-	if (theCoordTransf)
-	    delete theCoordTransf;
+  for (int i = 0; i < 2; i++)
+    if (section[i] != 0)
+      delete section[i];
+  
+  if (theCoordTransf)
+    delete theCoordTransf;
 }
 
 int 
 BeamWithHinges3d::getNumExternalNodes(void) const
 {
-	return 2;
+  return 2;
 }
 
 const ID &
 BeamWithHinges3d::getExternalNodes(void)
 {
-	return connectedExternalNodes;
+  return connectedExternalNodes;
 }
 
 int 
 BeamWithHinges3d::getNumDOF(void)
 {
-	return 12;
+  return 12;
 }
 
 void
-BeamWithHinges3d::setDomain (Domain *theDomain)
+BeamWithHinges3d::setDomain(Domain *theDomain)
 {
-	//This function may be called after a beam is constructed, so
-	//geometry may change.  Therefore calculate all beam geometry here.
+  //This function may be called after a beam is constructed, so
+  //geometry may change.  Therefore calculate all beam geometry here.
+  
+  if(theDomain == 0) {
+    node1Ptr = 0;
+    node2Ptr = 0;
+    return;
+  }
+  
+  // set the node pointers and verify them
+  this->setNodePtrs(theDomain);
+  
+  // call the DomainComponent version of the function
+  this->DomainComponent::setDomain(theDomain);
+  
+  if (theCoordTransf->initialize(node1Ptr, node2Ptr) != 0)
+    g3ErrorHandler->fatal("%s -- failed to initialize coordinate transformation",
+			  "BeamWithHinges3d::setDomain()");
+  
+  // get element length
+  double L = theCoordTransf->getInitialLength();
+  if (L == 0.0)
+    g3ErrorHandler->fatal("%s -- element has zero length",
+			  "BeamWithHinges3d::setDomain()");
 
-	if(theDomain == 0) {
-		node1Ptr = 0;
-		node2Ptr = 0;
-		return;
-	}
-	
-	// set the node pointers and verify them
-	this->setNodePtrs(theDomain);
+  // Set up section interpolation and hinge lengths
+  this->setHinges();
 
-	// call the DomainComponent version of the function
-	this->DomainComponent::setDomain(theDomain);
-
-	if (theCoordTransf->initialize(node1Ptr, node2Ptr) != 0) {
-	    cerr << "BeamWithHinges3d::setDomain(): Error initializing coordinate transformation";  
-	    exit(-1);
-	}
-	
-	// get element length
-	L = theCoordTransf->getInitialLength();
-	
-	if (L <= 0.0) {
-	    g3ErrorHandler->fatal("%s -- element has zero length",
-			"BeamWithHinges3d::setDomain");
-	}
-
-	// Set up section interpolation and hinge lengths
-	this->setHinges();
-
-	// Calculate the elastic contribution to the element flexibility
-	this->setElasticFlex();
-
-	// Set the element lumped mass matrix
-	this->setMass();
+  if (initialFlag == 2)
+    theCoordTransf->update();
+  else
+    this->update();
 }
 
 int
 BeamWithHinges3d::commitState(void)
 {
-	int err = 0;
-	
-	err += sectionI->commitState();
-	err += sectionJ->commitState();
-
-	err += theCoordTransf->commitState();
-	
-	distrLoadCommit = prevDistrLoad;
-	UeCommit = UePrev;
-	kbCommit = kb;
-	qCommit = q;
-
-	initialFlag = false;
-	
-	return err;
+  int err = 0;
+  
+  for (int i = 0; i < 2; i++) {
+    if (section[i] != 0)
+      err += section[i]->commitState();
+  }
+  
+  err += theCoordTransf->commitState();
+  
+  kbCommit = kb;
+  qCommit = q;
+  
+  //initialFlag = 0;
+  
+  return err;
 }
 
 int
 BeamWithHinges3d::revertToLastCommit(void)
 {
-	int err = 0;
+  int err = 0;
+  
+  // Revert the sections and then get their last commited
+  // deformations, stress resultants, and flexibilities
+  for (int i = 0; i < 2; i++) {
+    if (section[i] != 0) {
+      err += section[i]->revertToLastCommit();
+      e[i] = section[i]->getSectionDeformation();
+      sr[i] = section[i]->getStressResultant();
+      fs[i] = section[i]->getSectionFlexibility();
+    }
+  }
+  
+  // Commit the coordinate transformation
+  err += theCoordTransf->revertToLastCommit();
+  
+  kb = kbCommit;
+  q = qCommit;
+  
+  initialFlag = 0;
+  this->update();
 
-	// Revert the sections and then get their last commited
-	// deformations, stress resultants, and flexibilities
-	err += sectionI->revertToLastCommit();
-	e1 = sectionI->getSectionDeformation();
-	sr1 = sectionI->getStressResultant();
-	fs1 = sectionI->getSectionFlexibility();
-
-	err += sectionJ->revertToLastCommit();
-	e3 = sectionJ->getSectionDeformation();
-	sr3 = sectionJ->getStressResultant();
-	fs3 = sectionJ->getSectionFlexibility();
-
-	// Commit the coordinate transformation
-	err += theCoordTransf->revertToLastCommit();
-
-	prevDistrLoad = distrLoadCommit;
-	UePrev = UeCommit;
-	kb = kbCommit;
-	q = qCommit;
-
-	initialFlag = false;
-
-	return err;
+  return err;
 }
 
 int
 BeamWithHinges3d::revertToStart(void)
 {
-    int err = 0;
-    
-    err += sectionI->revertToStart();
-    err += sectionJ->revertToStart();    
-    
-    err += theCoordTransf->revertToStart();
-    
-    fs1.Zero();
-    fs3.Zero();    
-    
-    e1.Zero();
-    e3.Zero();	
+  int err = 0;
+  
+  for (int i = 0; i < 2; i++) {
+    if (section[i] != 0) {
+      err += section[i]->revertToStart();
+      fs[i].Zero();
+      e[i].Zero();
+      sr[i].Zero();
+    }
+  }
+  
+  err += theCoordTransf->revertToStart();
+  
+  kb.Zero();
+  q.Zero();
+  
+  initialFlag = 0;
+  this->update();
 
-    sr1.Zero();
-    sr3.Zero();
-    
-    distrLoadCommit.Zero();
-    UeCommit.Zero();
-    kbCommit.Zero();
-    qCommit.Zero();
-
-    prevDistrLoad.Zero();
-    UePrev.Zero();
-    kb.Zero();
-    q.Zero();
-
-	return err;
+  return err;
 }
 
 const Matrix &
 BeamWithHinges3d::getTangentStiff(void)
 {
-	this->setStiffMatrix();				//update first and then return K
-	return K;
+  // Will remove once we clean up the corotational 3d transformation -- MHS
+  theCoordTransf->update();
+
+  return theCoordTransf->getGlobalStiffMatrix(kb, q);
 }
 
 const Matrix &
 BeamWithHinges3d::getSecantStiff(void)
 {
-	return this->getTangentStiff();
+  return this->getTangentStiff();
 }
 
 const Matrix &
 BeamWithHinges3d::getDamp(void)
 {
-	return d;	// zero matrix
+  theMatrix.Zero();
+
+  return theMatrix;
 }
 
 const Matrix &
 BeamWithHinges3d::getMass(void)
 {
-	// Lumped mass matrix only!!
-	// Assumed that hinge's massDens/length is the same as the beam's!!
-	return m;
+  theMatrix.Zero();
+
+  if (rho != 0.0) {
+    double L = theCoordTransf->getInitialLength();  
+    theMatrix(0,0) = theMatrix(1,1) = theMatrix(2,2) = 
+      theMatrix(6,6) = theMatrix(7,7) = theMatrix(8,8) = 0.5*L*rho;
+  }
+  
+  return theMatrix;
 }
 
 void 
 BeamWithHinges3d::zeroLoad(void)
 {
-	load.Zero();
+  load.Zero();
 }
 
 int
 BeamWithHinges3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("BeamWithHinges3d::addLoad - load type unknown for ele with tag: %d",
-			  this->getTag());
+  g3ErrorHandler->warning("%s -- load type unknown for ele with tag: %d",
+			  "BeamWithHinges3d::addLoad", this->getTag());
   
   return -1;
 }
@@ -445,379 +326,124 @@ BeamWithHinges3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 int
 BeamWithHinges3d::addInertiaLoadToUnbalance(const Vector &accel)
 {
-	if (massDens == 0.0)
-		return 0;
-
-	static Vector ag(12);
-
-	const Vector &Raccel1 = node1Ptr->getRV(accel);
-	const Vector &Raccel2 = node2Ptr->getRV(accel);
-
-	int i,j;
-	for (i = 0, j = 6; i < 3; i++, j++) {
-		load(i) += m(i,i) * Raccel1(i);
-		load(j) += m(j,j) * Raccel2(i);	// Yes, this should be 'i'
-	}
-	
-	return 0;
+  if (rho == 0.0)
+    return 0;
+  
+  const Vector &Raccel1 = node1Ptr->getRV(accel);
+  const Vector &Raccel2 = node2Ptr->getRV(accel);
+  
+  double L = theCoordTransf->getInitialLength();
+  double mass = 0.5*L*rho;
+  
+  int i,j;
+  for (i = 0, j = 6; i < 3; i++, j++) {
+    load(i) += mass*Raccel1(i);
+    load(j) += mass*Raccel2(i);	// Yes, this should be 'i'
+  }
+  
+  return 0;
 }
 
 const Vector &
 BeamWithHinges3d::getResistingForce(void)
 {
-	this->setStiffMatrix();
+  static Vector dummy(3);
+  
+  // Will remove once we clean up the corotational 3d transformation -- MHS
+  theCoordTransf->update();
 
-	// Subtract external nodal loads
-	P.addVector(1.0, load, -1.0);
-
-	return P;
+  return theCoordTransf->getGlobalResistingForce (q, dummy);
 }
 
 const Vector &
 BeamWithHinges3d::getResistingForceIncInertia(void)
 {
-	if (massDens == 0.0)
-		return this->getResistingForce();
-
-	static Vector ag(12);
-	
-	this->getGlobalAccels(ag);
-	
-	Pinert = this->getResistingForce();
-	
-	int i,j;
-	for (i = 0, j = 6; i < 3; i++, j++) {
-		Pinert(i) += m(i,i) * ag(i);
-		Pinert(j) += m(j,j) * ag(j);
-	}
-
-	return Pinert;
+  if (rho == 0.0)
+    return this->getResistingForce();
+  
+  double ag[12];
+  
+  const Vector &accel1 = node1Ptr->getTrialAccel();
+  const Vector &accel2 = node2Ptr->getTrialAccel();
+  
+  ag[0] = accel1(0);
+  ag[1] = accel1(1);
+  ag[2] = accel1(2);
+  ag[6] = accel2(0);
+  ag[7] = accel2(1);
+  ag[8] = accel2(2);
+  
+  theVector = this->getResistingForce();
+  
+  double L = theCoordTransf->getInitialLength();
+  double mass = 0.5*L*rho;
+  
+  int i,j;
+  for (i = 0, j = 6; i < 3; i++, j++) {
+    theVector(i) += mass*ag[i];
+    theVector(j) += mass*ag[j];
+  }
+  
+  return theVector;
 }
 
 int
 BeamWithHinges3d::sendSelf(int commitTag, Channel &theChannel)
 {
-	int res = 0;
-
-	int elemDbTag = this->getDbTag();
-
-	static ID idData(13);
-	
-	int orderI = sectionI->getOrder();
-	int orderJ = sectionJ->getOrder();
-
-	idData(0) = this->getTag();
-	idData(1) = sectionI->getClassTag();
-	idData(2) = sectionJ->getClassTag();
-	idData(5) = theCoordTransf->getClassTag();
-	idData(7) = orderI;
-	idData(8) = orderJ;
-	idData(9) = maxIter;
-	idData(10) = (initialFlag) ? 1 : 0;
-	idData(11) = connectedExternalNodes(0);
-	idData(12) = connectedExternalNodes(1);
-
-	int sectDbTag;
-
-	sectDbTag = sectionI->getDbTag();
-    if (sectDbTag == 0) {
-		sectDbTag = theChannel.getDbTag();
-		sectionI->setDbTag(sectDbTag);
-    }
-    idData(3) = sectDbTag;
-
-	sectDbTag = sectionJ->getDbTag();
-    if (sectDbTag == 0) {
-		sectDbTag = theChannel.getDbTag();
-		sectionJ->setDbTag(sectDbTag);
-    }
-    idData(4) = sectDbTag;
-
-	sectDbTag = theCoordTransf->getDbTag();
-    if (sectDbTag == 0) {
-		sectDbTag = theChannel.getDbTag();
-		theCoordTransf->setDbTag(sectDbTag);
-    }
-    idData(6) = sectDbTag;
-
-	// Send the data ID
-	res += theChannel.sendID(elemDbTag, commitTag, idData);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send data ID",
-			"BeamWithHinges3d::sendSelf");
-		return res;
-	}
-
-	// Ask the sectionI to send itself
-	res += sectionI->sendSelf(commitTag, theChannel);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send section I",
-			"BeamWithHinges3d::sendSelf");
-		return res;
-	}
-
-	// Ask the sectionJ to send itself
-	res += sectionJ->sendSelf(commitTag, theChannel);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send section J",
-			"BeamWithHinges3d::sendSelf");
-		return res;
-	}
-
-	// data, kbcommit, qcommit, Uecommit, distrLoadcommit
-	static Vector data(13 + 6*6 + 6 + 12 + 3);
-	
-	data(0) = L;
-	data(1) = E;  
-	data(2) = A;
-	data(3) = Iz;  
-	data(4) = Iy;
-	data(5) = G;
-	data(6) = J;
-	data(7) = alpha;
-	data(8) = massDens;
-	data(9) = hingeIlen/L;		// convert back to ratios
-	data(10) = hingeJlen/L;
-	data(11) = tolerance;
-	data(12) = shearLength/L;
-
-	// Jam committed history variables into the data vector
-	int i,j;
-	int loc = 13;
-	for (i = 0; i < 6; i++)
-		for (j = 0; j < 6; j++)
-			data(loc++) = kbCommit(i,j);
-
-	for (i = 0; i < 6; i++)
-		data(loc++) = qCommit(i);
-
-	for (i = 0; i < 12; i++)
-		data(loc++) = UeCommit(i);
-
-	for (i = 0; i < 3; i++)
-		data(loc++) = distrLoadCommit(i);
-
-	// Send the data vector
-	res += theChannel.sendVector(elemDbTag, commitTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send tags ID",
-			"BeamWithHinges3d::sendSelf");
-		return res;
-	}
-
-	// Ask the coordinate transformation to send itself
-	res += theCoordTransf->sendSelf(commitTag, theChannel);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send coordinate transformation",
-			"BeamWithHinges3d::sendSelf");
-		return res;
-	}
-
-	return res;
+  return -1;
 }
 
 int 
 BeamWithHinges3d::recvSelf(int commitTag, Channel &theChannel,
-						 FEM_ObjectBroker &theBroker)
+			       FEM_ObjectBroker &theBroker)
 {
-	int res = 0;
+  initialFlag = 2;
 
-	int elemDbTag = this->getDbTag();
-
-	static ID idData(13);
-
-	// Receive the ID data
-	res += theChannel.recvID(elemDbTag, commitTag, idData);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to received data ID",
-			"BeamWithHinges3d::recvSelf");
-		return res;
-	}
-
-	this->setTag(idData(0));
-	maxIter = idData(9);
-	initialFlag = (idData(10) == 1) ? true : false;
-	connectedExternalNodes(0) = idData(11);
-	connectedExternalNodes(1) = idData(12);
-
-	int secTag;
-
-	// Receive section I
-	secTag = idData(1);
-
-	if (sectionI == 0)
-		sectionI = theBroker.getNewSection(secTag);
-
-	// Check that the section is of the right type; if not, delete
-	// the current one and get a new one of the right type
-	if (sectionI->getClassTag() != secTag) {
-		delete sectionI;
-		sectionI = theBroker.getNewSection(secTag);
-	}
-
-	if (sectionI == 0) {
-		g3ErrorHandler->warning("%s -- could not get a Section",
-			"BeamWithHinges3d::recvSelf");
-		return -1;
-	}
-
-	// Now, receive the section
-	sectionI->setDbTag(idData(3));
-	res += sectionI->recvSelf(commitTag, theChannel, theBroker);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive Section I",
-			"BeamWithHinges3d::recvSelf");
-		return res;
-	}
-
-	// Receive section J
-	secTag = idData(2);
-
-	if (sectionJ == 0)
-		sectionJ = theBroker.getNewSection(secTag);
-
-	// Check that the section is of the right type; if not, delete
-	// the current one and get a new one of the right type
-	else if (sectionJ->getClassTag() != secTag) {
-		delete sectionJ;
-		sectionJ = theBroker.getNewSection(secTag);
-	}
-
-	if (sectionJ == 0) {
-		g3ErrorHandler->warning("%s -- could not get a Section",
-			"BeamWithHinges3d::recvSelf");
-		return -1;
-	}
-
-	// Now, receive the section
-	sectionJ->setDbTag(idData(4));
-	res += sectionJ->recvSelf(commitTag, theChannel, theBroker);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive Section J",
-			"BeamWithHinges3d::recvSelf");
-		return res;
-	}
-
-	int orderI = idData(7);
-	int orderJ = idData(8);
-
-	static Vector data(13 + 6*6 + 6 + 12 + 3);
-
-	res += theChannel.recvVector(elemDbTag, commitTag, data);
-	if(res < 0) {
-		g3ErrorHandler->warning("%s -- failed to receive Vector data",
-			"BeamWithHinges3d::recvSelf");
-		return res;
-	}
-
-	L = data(0);
-	E = data(1);
-	A = data(2);
-	Iz = data(3);
-	Iy = data(4);
-	G = data(5);
-	J = data(6);
-	alpha = data(7);
-	massDens = data(8);
-	hingeIlen = data(9);
-	hingeJlen = data(10);
-	tolerance = data(11);
-	shearLength = data(12);
-
-	// Set up the section force interpolation
-	this->setHinges();
-
-	// Compute the elastic flexibility
-	this->setElasticFlex();
-
-	// Get committed history variables from the data vector
-	int i,j;
-	int loc = 13;
-	for (i = 0; i < 6; i++)
-		for (j = 0; j < 6; j++)
-			kbCommit(i,j) = data(loc++);
-
-	for (i = 0; i < 6; i++)
-		qCommit(i) = data(loc++);
-
-	for (i = 0; i < 12; i++)
-		UeCommit(i) = data(loc++);
-
-	for (i = 0; i < 3; i++)
-		distrLoadCommit(i) = data(loc++);
-
-	// Receive the coordinate transformation
-	int crdTag = idData(5);
-
-	// Allocate new CoordTransf if null
-	if (theCoordTransf == 0)
-		theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
-
-	// Check that the CoordTransf is of the right type; if not, delete
-	// the current one and get a new one of the right type
-	else if (theCoordTransf->getClassTag() != crdTag) {
-		delete theCoordTransf;
-		theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
-	}
-
-	// Check if either allocation failed
-	if (theCoordTransf == 0) {
-		g3ErrorHandler->warning("%s -- could not get a CrdTransf3d",
-			"BeamWithHinges3d::recvSelf");
-		return -1;
-	}
-
-	// Now, receive the CoordTransf
-	theCoordTransf->setDbTag(idData(6));
-	res += theCoordTransf->recvSelf(commitTag, theChannel, theBroker);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive CoordTransf",
-			"BeamWithHinges3d::recvSelf");
-		return res;
-	}
-	
-	// Revert the element to the last committed state that was just received
-	// Can't call this->revertToLastCommit() because this->setDomain() may
-	// not have been called yet
-	sectionI->revertToLastCommit();
-	e1 = sectionI->getSectionDeformation();
-	sr1 = sectionI->getStressResultant();
-	fs1 = sectionI->getSectionFlexibility();
-
-	sectionJ->revertToLastCommit();
-	e3 = sectionJ->getSectionDeformation();
-	sr3 = sectionJ->getStressResultant();
-	fs3 = sectionJ->getSectionFlexibility();
-
-	prevDistrLoad = distrLoadCommit;
-	UePrev = UeCommit;
-	kb = kbCommit;
-	q = qCommit;
-
-	initialFlag = false;
-
-	return res;
+  return -1;
 }
 
 void 
 BeamWithHinges3d::Print(ostream &s, int flag)
 {
-	s << "\nBeamWithHinges3d, tag: " << this->getTag() << endl;
-	s << "\tConnected Nodes: " << connectedExternalNodes;
-	s << "\tE: " << E << endl;
-	s << "\tA: " << A << endl;
-	s << "\tIz: " << Iz << endl;
-	s << "\tIy: " << Iy << endl;
-	s << "\tG: " << G << endl;
-	s << "\tJ: " << J << endl;
+  s << "\nBeamWithHinges3d, tag: " << this->getTag() << endl;
+  s << "\tConnected Nodes: " << connectedExternalNodes;
+  s << "\tE:  " << E << endl;
+  s << "\tA:  " << A << endl;
+  s << "\tIz: " << Iz << endl;
+  s << "\tIy: " << Iy << endl;
+  s << "\tG:  " << G << endl;
+  s << "\tJ:  " << J << endl;
+  
+  double P, Mz1, Mz2, Vy, My1, My2, Vz, T;
+  double L = theCoordTransf->getInitialLength();
+  double oneOverL = 1.0/L;
 
-	if (sectionI)
-		s << "\tHinge I, section tag: " << sectionI->getTag() << 
-			", length: " << hingeIlen << endl;
+  // NOTE: This assumes NO element loads!!!
+  P   = qCommit(0);
+  Mz1 = qCommit(1);
+  Mz2 = qCommit(2);
+  Vy  = (Mz1+Mz2)*oneOverL;
+  My1 = qCommit(3);
+  My2 = qCommit(4);
+  Vz  = (My1+My2)*oneOverL;
+  T   = qCommit(5);
 
-	if (sectionJ)
-		s << "\tHinge J, section tag: " << sectionJ->getTag() << 
-			", length: " << hingeJlen << endl;
+  s << "\tEnd 1 Forces (P Mz Vy My Vz T): "
+    << -P << ' ' << Mz1 << ' ' <<  Vy << ' ' << My1 << ' ' <<  Vz << ' ' << -T << endl;
+  s << "\tEnd 2 Forces (P Mz Vy My Vz T): "
+    <<  P << ' ' << Mz2 << ' ' << -Vy << ' ' << My2 << ' ' << -Vz << ' ' <<  T << endl;
+  
+  if (section[0] != 0) {
+    s << "Hinge 1, section tag: " << section[0]->getTag() << 
+      ", length: " << lp1 << endl;
+    section[0]->Print(s,flag);
+  }
+  
+  if (section[1] != 0) {
+    s << "Hinge 2, section tag: " << section[2]->getTag() << 
+      ", length: " << lp2 << endl;
+    section[1]->Print(s,flag);
+  }
 }
 
 //////////////////////////////
@@ -826,764 +452,618 @@ BeamWithHinges3d::Print(ostream &s, int flag)
 void 
 BeamWithHinges3d::setNodePtrs(Domain *theDomain)
 {
-	node1Ptr = theDomain->getNode(connectedExternalNodes(0));
-	node2Ptr = theDomain->getNode(connectedExternalNodes(1));
-
-	if(node1Ptr == 0) {
-		g3ErrorHandler->fatal("%s -- end node %d not found in domain",
-			"BeamWithHinges3d::setDomain", connectedExternalNodes(0));
-	}
-	
-	if(node2Ptr == 0) {
-		g3ErrorHandler->fatal("%s -- end node %d not found in domain",
-			"BeamWithHinges3d::setDomain", connectedExternalNodes(1));
-	}
-	
-	// check for correct # of DOF's
-	int dofNd1 = node1Ptr->getNumberDOF();
-	int dofNd2 = node2Ptr->getNumberDOF();
-	if (dofNd1 != 6 || dofNd2 != 6) {
-		g3ErrorHandler->fatal("%s -- nodal degrees of freedom not compatible with element",
-			"BeamWithHinges3d::setDomain");
-	}
-}
-
-void
-BeamWithHinges3d::getGlobalDispls(Vector &dg)    //get nodal displacements
-{
-	const Vector &disp1 = node1Ptr->getTrialDisp();
-	const Vector &disp2 = node2Ptr->getTrialDisp();
-
-	dg(0) = disp1(0);		//left side
-	dg(1) = disp1(1);
-	dg(2) = disp1(2);
-	dg(3) = disp1(3);		
-	dg(4) = disp1(4);
-	dg(5) = disp1(5);
-	
-	dg(6) = disp2(0);		//right side
-	dg(7) = disp2(1);
-	dg(8) = disp2(2);
-	dg(9) = disp2(3);		
-	dg(10) = disp2(4);
-	dg(11) = disp2(5);	
-}
-
-void
-BeamWithHinges3d::getGlobalAccels(Vector &ag)	//for dynamic analysis
-{
-	const Vector &accel1 = node1Ptr->getTrialAccel();
-	const Vector &accel2 = node2Ptr->getTrialAccel();
-
-	ag(0) = accel1(0);
-	ag(1) = accel1(1);
-	ag(2) = accel1(2);
-	ag(3) = accel1(3);
-	ag(4) = accel1(4);
-	ag(5) = accel1(5);
-	
-	ag(6) = accel2(0);
-	ag(7) = accel2(1);
-	ag(8) = accel2(2);
-	ag(9) = accel2(3);
-	ag(10) = accel2(4);
-	ag(11) = accel2(5);	
-}
-
-void
-BeamWithHinges3d::setElasticFlex ()
-{
-	//calculates the middle beam flexibility matrix
-	//this is obtained by integrating (from lp1 to L-lp2) the matrix
-	//b ^ fs ^ b, where fs is a constant linear section flexibility matrix.
-	
-	fElastic.Zero();
-	vElastic.Zero();
-	
-	double a = hingeIlen;
-	double b = L-hingeJlen;
-
-	// Integrate elastic portion numerically 
-	// Create elastic section
-	static Matrix fElas(4,4);
-	fElas(0,0) = 1/(E*A);
-	fElas(1,1) = 1/(E*Iz);
-	fElas(2,2) = 1/(E*Iy);
-	fElas(3,3) = 1/(G*J);
-
-	// Section code passed to force interpolation
-	static ID code(4);
-	code(0) = SECTION_RESPONSE_P;
-	code(1) = SECTION_RESPONSE_MZ;
-	code(2) = SECTION_RESPONSE_MY;
-	code(3) = SECTION_RESPONSE_T;
-
-	// Section force interpolation matrix
-	static Matrix bElas(4,6);
-	
-	// Mapping from [-1,1] to [a,b]
-	double alpha = 0.5*(b-a);	// Jacobian
-	double beta = 0.5*(a+b);
-
-	// Integration points ... the weights are 1.0*(0.5*(b-a)) ==> alpha
-	const double xsi = 1.0/sqrt(3.0);
-	double x1 = alpha*(-xsi) + beta;
-	double x2 = alpha*xsi + beta;	
-
-	int dum;	
-	// Get interpolations at sample points and integrate
-	this->getForceInterpMatrix(bElas, x1, code, dum, dum);
-	fElastic.addMatrixTripleProduct(1.0, bElas, fElas, alpha);
-	vElastic.addMatrix(1.0, bElas^ fElas, alpha);
-	
-	this->getForceInterpMatrix(bElas, x2, code, dum, dum);
-	fElastic.addMatrixTripleProduct(1.0, bElas, fElas, alpha);
-	vElastic.addMatrix(1.0, bElas^ fElas, alpha);
-	
-	/*
-	double shearFlex = 0.0;
-
-	if (alpha > 0.0)
-		shearFlex = 1/((G*A*alpha)*L*L) * (b-a);
-
-	fElastic(0,0) = 1/(E*A) * ( b-a );
-	
-	fElastic(1,1) = 1/(E*Iz) * ( 1/(3*L*L)*(b*b*b-a*a*a) - 1/L*(b*b-a*a) + b-a ) + shearFlex;
-	fElastic(2,2) = 1/(E*Iz) * ( 1/(3*L*L)*(b*b*b-a*a*a) ) + shearFlex;
-	fElastic(1,2) = 1/(E*Iz) * ( 1/(3*L*L)*(b*b*b-a*a*a) - 1/(2*L)*(b*b-a*a) ) + shearFlex;
-	fElastic(2,1) = fElastic(1,2);
-
-	fElastic(3,3) = 1/(E*Iy) * ( 1/(3*L*L)*(b*b*b-a*a*a) - 1/L*(b*b-a*a) + b-a ) + shearFlex;
-	fElastic(4,4) = 1/(E*Iy) * ( 1/(3*L*L)*(b*b*b-a*a*a) ) + shearFlex;
-	fElastic(3,4) = 1/(E*Iy) * ( 1/(3*L*L)*(b*b*b-a*a*a) - 1/(2*L)*(b*b-a*a) ) + shearFlex;
-	fElastic(4,3) = fElastic(3,4);
-	
-	fElastic(5,5) = 1/(G*J) * ( b-a );
-
-	vElastic.Zero();
-
-	vElastic(0,0) = 1/(E*A) * ( b-a - 1/(2*L)*(b*b-a*a) );
-	vElastic(1,1) = 1/(E*Iz) * ( 1/(4*L*L*L)*(b*b*b*b-a*a*a*a) - 1/(3*L*L)*(b*b*b-a*a*a) );
-	vElastic(3,2) = 1/(E*Iy) * ( 1/(4*L*L*L)*(b*b*b*b-a*a*a*a) - 1/(3*L*L)*(b*b*b-a*a*a) );	
-
-	if (alpha > 0.0) {
-	    vElastic(2,1) = 1/(G*A*alpha) * ( 1/(2*L*L)*(b*b-a*a) - 1/(2*L)*(b-a) );
-	    vElastic(4,2) = 1/(G*A*alpha) * ( 1/(2*L*L)*(b*b-a*a) - 1/(2*L)*(b-a) );
-	}
-	*/
-}
-
-void
-BeamWithHinges3d::setStiffMatrix(void)
-{
-    // Get element global end displacements
-    static Vector Ue(12);
-    this->getGlobalDispls(Ue);
-    
-    // Compute global end deformation increments
-    static Vector dUe(12);
-    //dUe = Ue - UePrev;
-	dUe = Ue;
-	dUe.addVector(1.0, UePrev, -1.0);
-
-    // Check if global end displacements have been changed
-    if (dUe.Norm() != 0.0 || initialFlag == false) {
-	// Compute distributed loads and increments
-	static Vector currDistrLoad(3);
-	static Vector distrLoadIncr(3); 
-	
-	currDistrLoad.Zero();
-	//distrLoadIncr = currDistrLoad - prevDistrLoad;
-	distrLoadIncr = currDistrLoad;
-	distrLoadIncr.addVector(1.0, prevDistrLoad, -1.0);
-	
-	prevDistrLoad = currDistrLoad;
-	
-	// Update the end deformations
-	UePrev = Ue;
-	
-	theCoordTransf->update();
-	
-	// Convert to basic system from local coord's (eleminate rb-modes)
-	static Vector v(6);				// basic system deformations
-	static Vector dv(6);
-
-	v = theCoordTransf->getBasicTrialDisp();
-	dv = theCoordTransf->getBasicIncrDeltaDisp();
-	
-	// calculate nodal force increments and update nodal forces
-	static Vector dq(6);
-
-	//dq = kb * dv;					// using previous stiff matrix k,i
-	dq.addMatrixVector(0.0, kb, dv, 1.0);
-	
-	// Element properties
-	static Matrix f(6,6);	// Element flexibility
-	static Vector vr(6);	// Residual element deformations
-	
-	
-	Vector s1(sectionI->getStressResultant());
-	Vector ds1(s1);
-	Vector de1(s1);
-	
-	Vector s3(sectionJ->getStressResultant());
-	Vector ds3(s3);	
-	Vector de3(s3);
-	
-	static Matrix I(6,6);
-	for (int i = 0; i < 6; i++)
-		I(i,i) = 1.0;
-
-	for (int j = 0; j < maxIter; j++) {
-	    
-	    //q += dq;
-		q.addVector(1.0, dq, 1.0);
-	    
-	    // Section forces
-	    //s1 = b1*q + bp1*currDistrLoad;
-		s1.addMatrixVector(0.0, b1, q, 1.0);
-		s1.addMatrixVector(1.0, bp1, currDistrLoad, 1.0);
-
-	    //s3 = b3*q + bp3*currDistrLoad;
-		s3.addMatrixVector(0.0, b3, q, 1.0);
-		s3.addMatrixVector(1.0, bp3, currDistrLoad, 1.0);
-	    
-	    // Increment in section forces
-		// ds1 = s1 - sr1
-		ds1 = s1;
-		ds1.addVector(1.0, sr1, -1.0);
-
-		// ds3 = s3 - sr3
-		ds3 = s3;
-		ds3.addVector(1.0, sr3, -1.0);
-
-	    // compute section deformation increments and update current deformations
-	    //e1 += fs1 * ds1;
-		//e3 += fs3 * ds3;
-		de1.addMatrixVector(0.0, fs1, ds1, 1.0);
-		if (initialFlag != false)
-			e1.addVector(1.0, de1, 1.0);
-		
-	    de3.addMatrixVector(0.0, fs3, ds3, 1.0);
-		if (initialFlag != false)
-			e3.addVector(1.0, de3, 1.0);
-	    
-	    /*** Dependent on section type ***/
-	    // set section deformations
-	    sectionI->setTrialSectionDeformation(e1);
-	    sectionJ->setTrialSectionDeformation(e3);
-	    
-	    /*** Dependent on section type ***/
-	    // get section resisting forces
-	    sr1 = sectionI->getStressResultant();
-	    sr3 = sectionJ->getStressResultant();
-	    
-	    /*** Dependent on section type ***/
-	    // get section flexibility matrix
-	    fs1 = sectionI->getSectionFlexibility();
-	    fs3 = sectionJ->getSectionFlexibility();
-	    
-		// ds1 = s1 - sr1;
-		// ds3 = s3 - sr3;
-		ds1 = s1;
-		ds1.addVector(1.0, sr1, -1.0);
-		ds3 = s3;
-		ds3.addVector(1.0, sr3, -1.0);
-
-		de1.addMatrixVector(0.0, fs1, ds1, 1.0);
-		de3.addMatrixVector(0.0, fs3, ds3, 1.0);
-	    
-	    // Use special integration on the diagonal shear flexibility and shear
-		// deformation terms
-		int i;
-		int orderI = sectionI->getOrder();
-		const ID &codeI = sectionI->getType();
-		for (i = 0; i < orderI; i++) {
-			if (codeI(i) == SECTION_RESPONSE_VY) {
-				fs1(i,i) *= shearWeightIVY;
-				e1(i) *= shearWeightIVY;
-				de1(i) *= shearWeightIVY;
-			}
-			if (codeI(i) == SECTION_RESPONSE_VZ) {
-				fs1(i,i) *= shearWeightIVZ;
-				e1(i) *= shearWeightIVZ;
-				de1(i) *= shearWeightIVZ;
-			}
-		}
-
-		int orderJ = sectionJ->getOrder();
-		const ID &codeJ = sectionJ->getType();
-		for (i = 0; i < orderJ; i++) {
-			if (codeJ(i) == SECTION_RESPONSE_VY) {
-				fs3(i,i) *= shearWeightJVY;
-				e3(i) *= shearWeightJVY;
-				de3(i) *= shearWeightJVY;
-			}
-			if (codeJ(i) == SECTION_RESPONSE_VZ) {
-				fs3(i,i) *= shearWeightJVZ;
-				e3(i) *= shearWeightJVZ;
-				de3(i) *= shearWeightJVZ;
-			}
-		}
-	    
-		f = fElastic;
-
-	    // integrate section flexibility matrix
-	    // Matrix f1 = (b1^ fs1 * b1) * hingeIlen;
-		f.addMatrixTripleProduct(1.0, b1, fs1, hingeIlen);
-
-	    // Matrix f3 = (b3^ fs3 * b3) * hingeJlen;
-		f.addMatrixTripleProduct(1.0, b3, fs3, hingeJlen);
-
-		// vr = fElastic * q;
-		vr.addMatrixVector(0.0, fElastic, q, 1.0);
-
-		// vr = vr + vElastic*currDistrLoad;
-		vr.addMatrixVector(1.0, vElastic, currDistrLoad, 1.0);
-
-	    // vr += vr1, where vr1 = (b1^ (e1+de1)) * hingeIlen;
-		vr.addMatrixTransposeVector(1.0, b1, e1 + de1, hingeIlen);
-
-	    // vr += vr3, where vr3 = (b3^ (e3+de3)) * hingeJlen;
-	    vr.addMatrixTransposeVector(1.0, b3, e3 + de3, hingeJlen);
-
-	    // Undo the temporary change for integrating shear terms, as
-		// e1 and e3 are history variables
-		for (i = 0; i < orderI; i++) {
-			if (codeI(i) == SECTION_RESPONSE_VY) {
-				fs1(i,i) /= shearWeightIVY;
-				e1(i) /= shearWeightIVY;
-				de1(i) /= shearWeightIVY;
-			}
-			if (codeI(i) == SECTION_RESPONSE_VZ) {
-				fs1(i,i) /= shearWeightIVZ;
-				e1(i) /= shearWeightIVZ;
-				de1(i) /= shearWeightIVZ;
-			}
-		}
-	    
-		for (i = 0; i < orderJ; i++) {
-			if (codeJ(i) == SECTION_RESPONSE_VY) {
-				fs3(i,i) /= shearWeightJVY;
-				e3(i) /= shearWeightJVY;
-				de3(i) /= shearWeightJVY;
-			}
-			if (codeJ(i) == SECTION_RESPONSE_VZ) {
-				fs3(i,i) /= shearWeightJVZ;
-				e3(i) /= shearWeightJVZ;
-				de3(i) /= shearWeightJVZ;
-			}
-		}
-
-	    // calculate element stiffness matrix
-	    if (f.Solve(I,kb) < 0)
-			g3ErrorHandler->warning("%s -- could not invert flexibility",
-				"BeamWithHinges3d::setStiffMatrix");
-	
-	    //dv = v - vr;
-		dv = v;
-		dv.addVector(1.0, vr, -1.0);
-	
-	    // determine resisting forces
-	    // dq = kb * dv;
-		dq.addMatrixVector(0.0, kb, dv, 1.0);
-	
-	    double dW = dv^ dq;
-
-	    if (fabs(dW) < tolerance)
-			break;
-	}	
-    
-	// q += dq;
-	q.addVector(1.0, dq, 1.0);
-    
-	P = theCoordTransf->getGlobalResistingForce (q, currDistrLoad);
-	K = theCoordTransf->getGlobalStiffMatrix (kb, q);
-
-	initialFlag = true;
-    }
-
-    return;
-}
-
-void
-BeamWithHinges3d::setMass(void)
-{
-	//Note:  Lumped mass matrix only!
-	//Note:  It is assumed that section's massDens is the same as beam's.
-	m.Zero();
-	m(0,0) = m(1,1) = m(2,2) = m(6,6) = m(7,7) = m(8,8) = massDens * L / 2.0;
-}
-
-void
-BeamWithHinges3d::setHinges (void)
-{
-	// Get the number of section response quantities
-	int orderI = sectionI->getOrder();
-	int orderJ = sectionJ->getOrder();
-
-	// Set interpolation matrices
-	b1 = Matrix(orderI,6);
-	b3 = Matrix(orderJ,6);
-
-	// Set distributed load interpolation matrices
-	bp1 = Matrix(orderI,3);
-	bp3 = Matrix(orderJ,3);
-
-	fs1 = Matrix(orderI,orderI);
-	fs3 = Matrix(orderJ,orderJ);
-
-	e1 = Vector(orderI);
-	e3 = Vector(orderJ);
-	
-	sr1 = Vector(orderI);
-	sr3 = Vector(orderJ);
-
-	// Turn the hinge length ratios into actual lengths since L is not
-	// known until setDomain() is called
-	hingeIlen *= L;
-	hingeJlen *= L;
-	shearLength *= L;
-
-	// Interpolation points
-	double x1 = hingeIlen/2.0;
-	double x3 = L - hingeJlen/2.0;
-
-	// Get codes which indicate the ordering of section response quantities
-	const ID &Icode = sectionI->getType();
-	const ID &Jcode = sectionJ->getType();
-
-	// Get the force interpolation matrix for each section
-	this->getForceInterpMatrix (b1, x1, Icode, shearIkeyVY, shearIkeyVZ);
-	this->getForceInterpMatrix (b3, x3, Jcode, shearJkeyVY, shearJkeyVZ);
-
-	// Get the distributed load interpolation matrix for each section
-	this->getDistrLoadInterpMatrix (bp1, x1, Icode);
-	this->getDistrLoadInterpMatrix (bp3, x3, Jcode);
-	
-	if (shearIkeyVY >= 0 && hingeIlen > 0.0)
-	    shearWeightIVY = shearLength/hingeIlen;
-	else {
-	    shearWeightIVY = 1.0;
-	    shearIkeyVY = 0;
-	}
-	
-	if (shearIkeyVZ >= 0 && hingeIlen > 0.0)
-	    shearWeightIVZ = shearLength/hingeIlen;
-	else {
-	    shearWeightIVZ = 1.0;
-	    shearIkeyVZ = 0;
-	}	
-	
-	if (shearJkeyVY >= 0 && hingeJlen > 0.0)
-	    shearWeightJVY = shearLength/hingeJlen;
-	else {
-	    shearWeightJVY = 1.0;
-	    shearJkeyVY = 0;
-	}
-	
-	if (shearJkeyVZ >= 0 && hingeJlen > 0.0)
-	    shearWeightJVZ = shearLength/hingeJlen;
-	else {
-	    shearWeightJVZ = 1.0;
-	    shearJkeyVZ = 0;
-	}		
-}
-
-void
-BeamWithHinges3d::getForceInterpMatrix (Matrix &b, double x, const ID &code,
-					int &shearKeyVY, int &shearKeyVZ)
-{			
-    b.Zero();
-
-	shearKeyVY = -1;
-	shearKeyVZ = -1;
-
-    double xsi = x/L;
-
-    for (int i = 0; i < code.Size(); i++) {
-	switch (code(i)) {
-	  case SECTION_RESPONSE_MZ:		// Moment, Mz, interpolation
-	    b(i,1) = xsi - 1.0;
-	    b(i,2) = xsi;
-	    break;
-	  case SECTION_RESPONSE_P:		// Axial, P, interpolation
-	    b(i,0) = 1.0;
-	    break;
-	  case SECTION_RESPONSE_VY:		// Shear, Vy, interpolation
-	    b(i,1) = 1.0/L;
-	    b(i,2) = 1.0/L;
-	    shearKeyVY = i;
-	    break;
-	  case SECTION_RESPONSE_MY:
-	    b(i,3) = xsi - 1.0;
-	    b(i,4) = xsi;
-	    break;
-	  case SECTION_RESPONSE_VZ:
-	    b(i,3) = 1.0/L;
-	    b(i,4) = 1.0/L;
-	    shearKeyVZ = i;
-	    break;
-	  case SECTION_RESPONSE_T:
-	    b(i,5) = 1.0;
-	    break;
-	  default:
-	    break;
-	}
-    }
-}
-
-void
-BeamWithHinges3d::getDistrLoadInterpMatrix (Matrix &bp, double x, const ID & code)
-{
-    bp.Zero();
-
-    double xsi = x/L;
-
-    for (int i = 0; i < code.Size(); i++) {
-	switch (code(i)) {
-	  case SECTION_RESPONSE_MZ:		// Moment, Mz, interpolation
-	    bp(i,1) = 0.5*xsi*(xsi-1);
-	    break;
-	  case SECTION_RESPONSE_P:		// Axial, P, interpolation
-	    bp(i,0) = 1 - xsi;
-	    break;
-	  case SECTION_RESPONSE_VY:		// Shear, Vy, interpolation
-	    bp(i,1) = xsi - 0.5;
-	    break;
-	  case SECTION_RESPONSE_MY:		// Moment, My, interpolation
-	    bp(i,1) = 0.5*xsi*(xsi-1);
-	    break;
-	  case SECTION_RESPONSE_VZ:		// Shear, Vz, interpolation
-	    bp(i,1) = xsi - 0.5;
-	    break;	    
-	  case SECTION_RESPONSE_T:		// Torsion, T, interpolation
-	    break;
-	  default:
-	    break;
-	}
-    }
-}
-
-Response*
-BeamWithHinges3d::setResponse (char **argv, int argc, Information &info)
-{
-    // hinge rotations
-    if (strcmp(argv[0],"rotation") == 0)
-		return new ElementResponse(this, 1, Vector(4));
-
-    // global forces
-    else if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
-		strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
-		return new ElementResponse(this, 2, P);
-    
-    // stiffness
-    else if (strcmp(argv[0],"stiffness") == 0)
-		return new ElementResponse(this, 3, K);
-
-	// local forces
-    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
-		return new ElementResponse(this, 4, P);
-
-	// section response
-	else if (strcmp(argv[0],"section") == 0) {
-		int sectionNum = atoi(argv[1]);
-	
-		if (sectionNum == 1)
-			return sectionI->setResponse(&argv[2], argc-2, info);
-		else if (sectionNum == 2)
-			return sectionJ->setResponse(&argv[2], argc-2, info);
-		else
-			return 0;
-    }
-	else
-		return 0;
+  node1Ptr = theDomain->getNode(connectedExternalNodes(0));
+  node2Ptr = theDomain->getNode(connectedExternalNodes(1));
+  
+  if(node1Ptr == 0) {
+    g3ErrorHandler->fatal("%s -- node 1 does not exist",
+			  "BeamWithHinges3d::setNodePtrs()");
+  }
+  
+  if(node2Ptr == 0) {
+    g3ErrorHandler->fatal("%s -- node 2 does not exist",
+			  "BeamWithHinges3d::setNodePtrs()");
+  }
+  
+  // check for correct # of DOF's
+  int dofNd1 = node1Ptr->getNumberDOF();
+  int dofNd2 = node2Ptr->getNumberDOF();
+  if ((dofNd1 != 6) || (dofNd2 != 6))  {
+    g3ErrorHandler->fatal("%s -- nodal dof is not three",
+			  "BeamWithHinges3d::setNodePtrs()");
+  }
 }
 
 int
-BeamWithHinges3d::getResponse (int responseID, Information &eleInfo)
+BeamWithHinges3d::update(void)
 {
-	double V;
-	static Vector rot(4);
-	static Vector force(12);
+  // Update the coordinate transformation
+  theCoordTransf->update();
+  
+  // Convert to basic system from local coord's (eliminate rb-modes)
+  static Vector v(6);				// basic system deformations
+  v = theCoordTransf->getBasicTrialDisp();
+  
+  static Vector dv(6);
+  dv = theCoordTransf->getBasicIncrDeltaDisp();
+  
+  double L = theCoordTransf->getInitialLength();
+  double oneOverL = 1.0/L;
 
-    switch (responseID) {
-      case 1: { // hinge rotations ... flexibility formulation, so add deformations
-		int i;
-		rot.Zero();
-		
-		const Vector &defI = sectionI->getSectionDeformation();
-		int orderI = sectionI->getOrder();
-		const ID &codeI = sectionI->getType();
-		for (i = 0; i < orderI; i++) {
-			if (codeI(i) == SECTION_RESPONSE_MZ)
-				rot(0) += defI(i)*hingeIlen;
-			if (codeI(i) == SECTION_RESPONSE_MY)
-				rot(1) += defI(i)*hingeIlen;
-		}
+  // Section locations along element length ...
+  double xi[2];
+  // and their integration weights
+  double lp[2];
+  
+  xi[0] = 0.5*lp1;
+  xi[1] = L-0.5*lp2;
+  
+  lp[0] = lp1;
+  lp[1] = lp2;
 
-		const Vector &defJ = sectionJ->getSectionDeformation();
-		int orderJ = sectionJ->getOrder();
-		const ID &codeJ = sectionJ->getType();
-		for (i = 0; i < orderJ; i++) {
-			if (codeJ(i) == SECTION_RESPONSE_MZ)
-				rot(2) += defJ(i)*hingeJlen;
-			if (codeJ(i) == SECTION_RESPONSE_MY)
-				rot(3) += defJ(i)*hingeJlen;
-		}
+  // element properties
+  static Matrix f(6,6);	// element flexibility
+  static Vector vr(6);	// Residual element deformations
+  
+  static Matrix Iden(6,6);   // an identity matrix for matrix inverse
+  Iden.Zero();
+  for (int i = 0; i < 6; i++)
+    Iden(i,i) = 1.0;
 
-		return eleInfo.setVector(rot);
+  // Length of elastic interior
+  double Le = L-lp1-lp2;
+  double LoverEA   = Le/(E*A);
+  double Lover3EIz = Le/(3*E*Iz);
+  double Lover6EIz = 0.5*Lover3EIz;
+  double Lover3EIy = Le/(3*E*Iy);
+  double Lover6EIy = 0.5*Lover3EIy;
+  double LoverGJ   = Le/(G*J);
+
+  // Elastic flexibility of element interior
+  static Matrix fe(4,4);
+  fe(0,0) = fe(1,1) =  Lover3EIz;
+  fe(0,1) = fe(1,0) = -Lover6EIz;
+  fe(2,2) = fe(3,3) =  Lover3EIy;
+  fe(2,3) = fe(3,2) = -Lover6EIy;
+  
+  // Equilibrium transformation matrix
+  static Matrix B(4,4);
+  double beta1 = lp1*oneOverL;
+  double beta2 = lp2*oneOverL;
+  B(0,0) = B(2,2) = 1.0 - beta1;
+  B(1,1) = B(3,3) = 1.0 - beta2;
+  B(0,1) = B(2,3) = -beta1;
+  B(1,0) = B(3,2) = -beta2;
+  
+  // Transform the elastic flexibility of the element
+  // interior to the basic system
+  static Matrix fElastic(4,4);
+  fElastic.addMatrixTripleProduct(0.0, B, fe, 1.0);
+
+  // calculate nodal force increments and update nodal forces
+  static Vector dq(6);
+  //dq = kb * dv;   // using previous stiff matrix k,i
+  dq.addMatrixVector(0.0, kb, dv, 1.0);
+  
+  for (int j = 0; j < maxIter; j++) {
+    
+    // q += dq;
+    q.addVector(1.0, dq, 1.0);
+    
+    // Set element flexibility to flexibility of elastic region
+    f.Zero();
+    f(0,0) = LoverEA;
+    f(1,1) = fElastic(0,0);
+    f(2,2) = fElastic(1,1);
+    f(1,2) = fElastic(0,1);
+    f(2,1) = fElastic(1,0);
+    f(3,3) = fElastic(2,2);
+    f(4,4) = fElastic(3,3);
+    f(3,4) = fElastic(2,3);
+    f(4,3) = fElastic(3,2);
+    f(5,5) = LoverGJ;    
+
+    // vr = fElastic * q;
+    vr(0) = LoverEA*q(0);
+    vr(1) = fElastic(0,0)*q(1) + fElastic(0,1)*q(2);
+    vr(2) = fElastic(1,0)*q(1) + fElastic(1,1)*q(2);
+    vr(3) = fElastic(2,2)*q(3) + fElastic(2,3)*q(4);
+    vr(4) = fElastic(3,2)*q(3) + fElastic(3,3)*q(4);
+    vr(5) = LoverGJ*q(5);
+
+    for (int i = 0; i < 2; i++) {
+      
+      if (section[i] == 0 || lp[i] <= 0.0)
+	continue;
+      
+      // Get section information
+      int order = section[i]->getOrder();
+      const ID &code = section[i]->getType();
+      
+      Vector s(workArea, order);
+      Vector ds(&workArea[order], order);
+      Vector de(&workArea[2*order], order);
+      
+      Matrix fb(&workArea[3*order], order, 6);
+      
+      double xL = xi[i]*oneOverL;
+      double xL1 = xL-1.0;
+      
+      int ii;
+      // Section forces
+      // s = b*q + bp*currDistrLoad;
+      //this->getForceInterpMatrix(b, xi[i], code);
+      //s.addMatrixVector(0.0, b, q, 1.0);
+      for (ii = 0; ii < order; ii++) {
+	switch(code(ii)) {
+	case SECTION_RESPONSE_P:
+	  s(ii) = q(0); break;
+	case SECTION_RESPONSE_MZ:
+	  s(ii) = xL1*q(1) + xL*q(2); break;
+	case SECTION_RESPONSE_VY:
+	  s(ii) = oneOverL*(q(1)+q(2)); break;
+	case SECTION_RESPONSE_MY:
+	  s(ii) = xL1*q(3) + xL*q(4); break;
+	case SECTION_RESPONSE_VZ:
+	  s(ii) = oneOverL*(q(3)+q(4)); break;
+	case SECTION_RESPONSE_T:
+	  s(ii) = q(5); break;
+	default:
+	  s(ii) = 0.0; break;
+	}
       }
-
-      case 2: // global forces
-		  return eleInfo.setVector(P);
-
-      case 3: // stiffness
-		  return eleInfo.setMatrix(K);
-
-	  case 4: // local forces
-		// Axial
-		force(6) = q(0);
-		force(0) = -q(0);
-
-		// Torsion
-		force(11) = q(5);
-		force(5)  = -q(5);
-
-		// Moments about z and shears along y
-		force(2) = q(1);
-		force(8) = q(2);
-		V = (q(1)+q(2))/L;
-		force(1) = V;
-		force(7) = -V;
-
-		// Moments about y and shears along z
-		force(4)  = q(3);
-		force(10) = q(4);
-		V = (q(3)+q(4))/L;
-		force(3) = -V;
-		force(9) = V;
-
-		return eleInfo.setVector(force);
-
-      default:
-		  return -1;
-
+      
+      // UNCOMMENT WHEN DISTRIBUTED LOADS ARE ADDED TO INTERFACE
+      // this->getDistrLoadInterpMatrix(bp, xi[i], code);
+      // s.addMatrixVector(1.0, bp, currDistrLoad, 1.0);
+      
+      // Increment in section forces
+      // ds = s - sr
+      ds = s;
+      ds.addVector(1.0, sr[i], -1.0);
+      
+      // compute section deformation increments and update current deformations
+      // e += fs * ds;
+      de.addMatrixVector(0.0, fs[i], ds, 1.0);
+      if (initialFlag != 0)
+	e[i].addVector(1.0, de, 1.0);
+      
+      // set section deformations
+      section[i]->setTrialSectionDeformation(e[i]);
+      
+      // get section resisting forces
+      sr[i] = section[i]->getStressResultant();
+      
+      // get section flexibility matrix
+      fs[i] = section[i]->getSectionFlexibility();
+      
+      // ds = s - sr;
+      ds = s;
+      ds.addVector(1.0, sr[i], -1.0);
+      
+      de.addMatrixVector(0.0, fs[i], ds, 1.0);
+      
+      // integrate section flexibility matrix
+      // f += (b^ fs * b) * lp[i];
+      //f.addMatrixTripleProduct(1.0, b, fSec, lp[i]);
+      int jj;
+      fb.Zero();
+      double tmp;
+      const Matrix &fSec = fs[i];
+      for (ii = 0; ii < order; ii++) {
+	switch(code(ii)) {
+	case SECTION_RESPONSE_P:
+	  for (jj = 0; jj < order; jj++)
+	    fb(jj,0) += fSec(jj,ii)*lp[i];
+	  break;
+	case SECTION_RESPONSE_MZ:
+	  for (jj = 0; jj < order; jj++) {
+	    tmp = fSec(jj,ii)*lp[i];
+	    fb(jj,1) += xL1*tmp;
+	    fb(jj,2) += xL*tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_VY:
+	  for (jj = 0; jj < order; jj++) {
+	    tmp = oneOverL*fSec(jj,ii)*lp[i];
+	    fb(jj,1) += tmp;
+	    fb(jj,2) += tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_MY:
+	  for (jj = 0; jj < order; jj++) {
+	    tmp = fSec(jj,ii)*lp[i];
+	    fb(jj,3) += xL1*tmp;
+	    fb(jj,4) += xL*tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_VZ:
+	  for (jj = 0; jj < order; jj++) {
+	    tmp = oneOverL*fSec(jj,ii)*lp[i];
+	    fb(jj,3) += tmp;
+	    fb(jj,4) += tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_T:
+	  for (jj = 0; jj < order; jj++)
+	    fb(jj,5) += fSec(jj,ii)*lp[i];
+	  break;
+	default:
+	  break;
+	}
+      }
+      for (ii = 0; ii < order; ii++) {
+	switch (code(ii)) {
+	case SECTION_RESPONSE_P:
+	  for (jj = 0; jj < 6; jj++)
+	    f(0,jj) += fb(ii,jj);
+	  break;
+	case SECTION_RESPONSE_MZ:
+	  for (jj = 0; jj < 6; jj++) {
+	    tmp = fb(ii,jj);
+	    f(1,jj) += xL1*tmp;
+	    f(2,jj) += xL*tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_VY:
+	  for (jj = 0; jj < 6; jj++) {
+	    tmp = oneOverL*fb(ii,jj);
+	    f(1,jj) += tmp;
+	    f(2,jj) += tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_MY:
+	  for (jj = 0; jj < 6; jj++) {
+	    tmp = fb(ii,jj);
+	    f(3,jj) += xL1*tmp;
+	    f(4,jj) += xL*tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_VZ:
+	  for (jj = 0; jj < 6; jj++) {
+	    tmp = oneOverL*fb(ii,jj);
+	    f(3,jj) += tmp;
+	    f(4,jj) += tmp;
+	  }
+	  break;
+	case SECTION_RESPONSE_T:
+	  for (jj = 0; jj < 6; jj++)
+	    f(5,jj) += fb(ii,jj);
+	  break;
+	default:
+	  break;
+	}
+      }
+      
+      // UNCOMMENT WHEN DISTRIBUTED LOADS ARE ADDED TO INTERFACE
+      // vr.addMatrixVector(1.0, vElastic, currDistrLoad, 1.0);
+      
+      // vr += (b^ (e+de)) * lp[i];
+      de.addVector(1.0, e[i], 1.0);
+      //vr.addMatrixTransposeVector(1.0, b, de, lp[i]);
+      double dei;
+      for (ii = 0; ii < order; ii++) {
+	dei = de(ii)*lp[i];
+	switch(code(ii)) {
+	case SECTION_RESPONSE_P:
+	  vr(0) += dei; break;
+	case SECTION_RESPONSE_MZ:
+	  vr(1) += xL1*dei; vr(2) += xL*dei; break;
+	case SECTION_RESPONSE_VY:
+	  tmp = oneOverL*dei;
+	  vr(1) += tmp; vr(2) += tmp; break;
+	case SECTION_RESPONSE_MY:
+	  vr(3) += xL1*dei; vr(4) += xL*dei; break;
+	case SECTION_RESPONSE_VZ:
+	  tmp = oneOverL*dei;
+	  vr(3) += tmp; vr(4) += tmp; break;
+	case SECTION_RESPONSE_T:
+	  vr(5) += dei; break;
+	default:
+	  break;
+	}
+      }
     }
+    
+    // calculate element stiffness matrix
+    //invert3by3Matrix(f, kb);
+    if (f.Solve(Iden,kb) < 0)
+      g3ErrorHandler->warning("%s -- could not invert flexibility",
+			      "BeamWithHinges3d::update()");    
+
+    // dv = v - vr;
+    dv = v;
+    dv.addVector(1.0, vr, -1.0);
+    
+    // determine resisting forces
+    // dq = kb * dv;
+    dq.addMatrixVector(0.0, kb, dv, 1.0);
+    
+    double dW = dv^ dq;
+    
+    if (fabs(dW) < tolerance)
+      break;
+  }
+  
+  // q += dq;
+  q.addVector(1.0, dq, 1.0);
+  
+  initialFlag = 1;
+  
+  return 0;
+}
+
+void
+BeamWithHinges3d::setHinges(void)
+{
+  for (int i = 0; i < 2; i++) {
+    if (section[i] == 0)
+      continue;
+    
+    // Get the number of section response quantities
+    int order = section[i]->getOrder();
+    
+    fs[i] = Matrix(order,order);
+    e[i]  = Vector(order);
+    sr[i] = Vector(order);
+  }
+}
+
+void
+BeamWithHinges3d::getForceInterpMatrix(Matrix &b, double x, const ID &code)
+{			
+  b.Zero();
+  
+  double L = theCoordTransf->getInitialLength();
+  double xi = x/L;
+  
+  for (int i = 0; i < code.Size(); i++) {
+    switch (code(i)) {
+    case SECTION_RESPONSE_MZ:		// Moment, Mz, interpolation
+      b(i,1) = xi - 1.0;
+      b(i,2) = xi;
+      break;
+    case SECTION_RESPONSE_P:		// Axial, P, interpolation
+      b(i,0) = 1.0;
+      break;
+    case SECTION_RESPONSE_VY:		// Shear, Vy, interpolation
+      b(i,1) = b(i,2) = 1.0/L;
+      break;
+    case SECTION_RESPONSE_MY:		// Moment, My, interpolation
+      b(i,3) = xi - 1.0;
+      b(i,4) = xi;
+      break;
+    case SECTION_RESPONSE_VZ:		// Shear, Vz, interpolation
+      b(i,3) = b(i,4) = 1.0/L;
+      break;
+    case SECTION_RESPONSE_T:		// Torsion, T, interpolation
+      b(i,5) = 1.0;
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+void
+BeamWithHinges3d::getDistrLoadInterpMatrix(Matrix &bp, double x, const ID & code)
+{
+  bp.Zero();
+
+  double L = theCoordTransf->getInitialLength();
+  double xi = x/L;
+  
+  for (int i = 0; i < code.Size(); i++) {
+    switch (code(i)) {
+    case SECTION_RESPONSE_MZ:		// Moment, Mz, interpolation
+      bp(i,1) = 0.5*xi*(xi-1);
+      break;
+    case SECTION_RESPONSE_P:		// Axial, P, interpolation
+      bp(i,0) = 1.0-xi;
+      break;
+    case SECTION_RESPONSE_VY:		// Shear, Vy, interpolation
+      bp(i,1) = xi-0.5;
+      break;
+    case SECTION_RESPONSE_MY:		// Moment, My, interpolation
+      bp(i,2) = 0.5*xi*(xi-1);
+      break;
+    case SECTION_RESPONSE_VZ:		// Shear, Vz, interpolation
+      bp(i,2) = xi-0.5;
+      break;
+    case SECTION_RESPONSE_T:		// Torsion, T, interpolation
+      bp(i,3) = 1.0-xi;
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+Response*
+BeamWithHinges3d::setResponse(char **argv, int argc, Information &info)
+{
+  // hinge rotations
+  if (strcmp(argv[0],"plasticDeformation") == 0 ||
+      strcmp(argv[0],"plasticRotation") == 0)
+    return new ElementResponse(this, 1, Vector(3));
+  
+  // global forces
+  else if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
+	   strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
+    return new ElementResponse(this, 2, theVector);
+  
+  // stiffness
+  else if (strcmp(argv[0],"stiffness") == 0)
+    return new ElementResponse(this, 3, theMatrix);
+  
+  // local forces
+  else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
+    return new ElementResponse(this, 4, theVector);
+  
+  // section response
+  else if (strcmp(argv[0],"section") == 0) {
+    int sectionNum = atoi(argv[1]) - 1;
+    
+    if (sectionNum >= 0 && sectionNum < 2)
+      if (section[sectionNum] != 0)
+	return section[sectionNum]->setResponse(&argv[2], argc-2, info);
+    return 0;
+  }
+  else
+    return 0;
+}
+
+int
+BeamWithHinges3d::getResponse(int responseID, Information &eleInfo)
+{
+  double V;
+  double L = theCoordTransf->getInitialLength();
+  static Vector force(12);
+  static Vector def(6);
+  
+  switch (responseID) {
+  case 1: {
+    const Vector &v = theCoordTransf->getBasicTrialDisp();
+    double LoverEA   = L/(E*A);
+    double Lover3EIz = L/(3*E*Iz);
+    double Lover6EIz = 0.5*Lover3EIz;
+    double LoverGJ   = L/(G*J);
+    double Lover3EIy = L/(3*E*Iy);
+    double Lover6EIy = 0.5*Lover3EIy;
+
+    double q1 = qCommit(1);
+    double q2 = qCommit(2);
+    double q3 = qCommit(3);
+    double q4 = qCommit(4);
+
+    def(0) = v(0) - LoverEA*qCommit(0);
+    def(1) = v(1) - Lover3EIz*q1 + Lover6EIz*q2;
+    def(2) = v(2) + Lover6EIz*q1 - Lover3EIz*q2;
+    def(3) = v(3) - Lover3EIy*q3 + Lover6EIy*q4;
+    def(4) = v(4) + Lover6EIy*q3 - Lover3EIy*q4;
+    def(5) = v(5) - LoverGJ*qCommit(5);
+
+    return eleInfo.setVector(def);
+  }
+  
+  case 2: // global forces
+    return eleInfo.setVector(this->getResistingForce());
+    
+  case 3: // stiffness
+    return eleInfo.setMatrix(this->getTangentStiff());
+    
+  case 4: // local forces
+    // Axial
+    force(3) = q(0);
+    force(0) = -q(0);
+    // Moment
+    force(2) = q(1);
+    force(5) = q(2);
+    // Shear
+    V = (q(1)+q(2))/L;
+    force(1) = V;
+    force(4) = -V;
+    return eleInfo.setVector(force);
+    
+  default:
+    return -1;
+  }
 }
 
 int
 BeamWithHinges3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
-    // first determine the end points of the quad based on
-    // the display factor (a measure of the distorted image)
-    const Vector &end1Crd = node1Ptr->getCrds();
-    const Vector &end2Crd = node2Ptr->getCrds();	
-
-    const Vector &end1Disp = node1Ptr->getDisp();
-    const Vector &end2Disp = node2Ptr->getDisp();
-
-	static Vector v1(3);
-	static Vector v2(3);
-
-	for (int i = 0; i < 3; i++) {
-		v1(i) = end1Crd(i) + end1Disp(i)*fact;
-		v2(i) = end2Crd(i) + end2Disp(i)*fact;    
-	}
-	
-	return theViewer.drawLine (v1, v2, 1.0, 1.0);
+  // first determine the end points of the quad based on
+  // the display factor (a measure of the distorted image)
+  const Vector &end1Crd = node1Ptr->getCrds();
+  const Vector &end2Crd = node2Ptr->getCrds();	
+  
+  const Vector &end1Disp = node1Ptr->getDisp();
+  const Vector &end2Disp = node2Ptr->getDisp();
+  
+  static Vector v1(3);
+  static Vector v2(3);
+  
+  for (int i = 0; i < 3; i++) {
+    v1(i) = end1Crd(i) + end1Disp(i)*fact;
+    v2(i) = end2Crd(i) + end2Disp(i)*fact;    
+  }
+  
+  return theViewer.drawLine (v1, v2, 1.0, 1.0);
 }
 
 int
-BeamWithHinges3d::setParameter (char **argv, int argc, Information &info)
+BeamWithHinges3d::setParameter(char **argv, int argc, Information &info)
 {
-    // E of the beam interior
-    if (strcmp(argv[0],"E") == 0) {
-	info.theType = DoubleType;
-	return 1;
-    }
+  // E of the beam interior
+  if (strcmp(argv[0],"E") == 0) {
+    info.theType = DoubleType;
+    return 1;
+  }
+  
+  // A of the beam interior
+  else if (strcmp(argv[0],"A") == 0) {
+    info.theType = DoubleType;
+    return 3;
+  }
+  
+  // I of the beam interior
+  else if (strcmp(argv[0],"Iz") == 0) {
+    info.theType = DoubleType;
+    return 4;
+  }
+  
+  // Section parameter
+  else if (strcmp(argv[0],"section") ==0) {
+    if (argc <= 2)
+      return -1;
     
-    // G of the beam interior
-    else if (strcmp(argv[0],"G") == 0) {
-	info.theType = DoubleType;
-	return 2;
-    }
+    int sectionNum = atoi(argv[1]);
     
-    // A of the beam interior
-    else if (strcmp(argv[0],"A") == 0) {
-	info.theType = DoubleType;
-	return 3;
-    }
+    int ok = -1;
     
-    // I of the beam interior
-    else if (strcmp(argv[0],"Iz") == 0) {
-	info.theType = DoubleType;
-	return 4;
-    }
+    if (sectionNum == 1)
+      ok = section[0]->setParameter (&argv[2], argc-2, info);
+    if (sectionNum == 2)
+      ok = section[1]->setParameter (&argv[2], argc-2, info);
     
-    // alpha of the beam interior
-    else if (strcmp(argv[0],"a") == 0 || strcmp(argv[0],"alpha") == 0) {
-	info.theType = DoubleType;
-	return 5;
-    }
-    
-    // Section parameter
-    else if (strcmp(argv[0],"section") ==0) {
-	if (argc <= 2)
-	    return -1;
-	
-	int sectionNum = atoi(argv[1]);
-	
-	int ok = -1;
-	
-	if (sectionNum == 1)
-	    ok = sectionI->setParameter (&argv[2], argc-2, info);
-	if (sectionNum == 2)
-	    ok = sectionJ->setParameter (&argv[2], argc-2, info);
-	
-	if (ok < 0)
-	    return -1;
-	else if (ok < 100)
-	    return sectionNum*100 + ok;
-	else 
-	    return -1;
-    }
-    
-    // Unknown parameter
-    else
-	return -1;
+    if (ok < 0)
+      return -1;
+    else if (ok < 100)
+      return sectionNum*100 + ok;
+    else 
+      return -1;
+  }
+  
+  // Unknown parameter
+  else
+    return -1;
 }	
 
 int
-BeamWithHinges3d::updateParameter (int parameterID, Information &info)
+BeamWithHinges3d::updateParameter(int parameterID, Information &info)
 {
-    switch (parameterID) {
-      case 1:
-	this->E = info.theDouble;
-	return 0;
-      case 2:
-	this->G = info.theDouble;
-	return 0;
-      case 3:
-	this->A = info.theDouble;
-	return 0;
-      case 4:
-	this->Iz = info.theDouble;
-	return 0;
-      case 5:
-	this->alpha = info.theDouble;
-	return 0;
-      default:
-	if (parameterID >= 100) { // section quantity
-	    int sectionNum = parameterID/100; 
-	    if (sectionNum == 1)
-		return sectionI->updateParameter (parameterID-100, info);
-	    else if (sectionNum == 2)
-		return sectionJ->updateParameter (parameterID-2*100, info);
-	    else
-		return -1;
-	}
-	else // unknown
-	    return -1;
-	}	
+  switch (parameterID) {
+  case 1:
+    this->E = info.theDouble;
+    return 0;
+  case 3:
+    this->A = info.theDouble;
+    return 0;
+  case 4:
+    this->Iz = info.theDouble;
+    return 0;
+  default:
+    if (parameterID >= 100) { // section quantity
+      int sectionNum = parameterID/100; 
+      if (sectionNum == 1)
+	return section[0]->updateParameter (parameterID-100, info);
+      if (sectionNum == 2)
+	return section[1]->updateParameter (parameterID-2*100, info);
+      else
+	return -1;
+    }
+    else // unknown
+      return -1;
+  }	
 }	
