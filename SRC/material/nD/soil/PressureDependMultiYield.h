@@ -1,9 +1,9 @@
 //<<<<<<< PressureDependMultiYield.h
-// $Revision: 1.16 $
-// $Date: 2003-02-25 23:33:30 $
+// $Revision: 1.17 $
+// $Date: 2003-07-15 20:31:57 $
 //=======
-// $Revision: 1.16 $
-// $Date: 2003-02-25 23:33:30 $
+// $Revision: 1.17 $
+// $Date: 2003-07-15 20:31:57 $
 //>>>>>>> 1.7
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
                                                                         
@@ -51,7 +51,7 @@ public:
 			       double volLimit2 = 0.02,
 			       double volLimit3 = 0.7,
 			       double atm = 101.,
-						 double cohesi = 0.5);
+						 double cohesi = 0.1);
 
      // Default constructor
      PressureDependMultiYield ();
@@ -62,7 +62,7 @@ public:
      // Destructor: clean up memory storage space.
      virtual ~PressureDependMultiYield ();
 
-		 double getRho(void) {return rho;} ;
+		 double getRho(void) {return rhox[matN];} ;
 
      // Sets the values of the trial strain tensor.
      int setTrialStrain (const Vector &strain);
@@ -124,41 +124,44 @@ protected:
 
 private:
   // user supplied 
-     int ndm;  //num of dimensions (2 or 3)
-     static int loadStage;  //=0 if elastic; =1 or 2 if plastic
-     double rho;  //mass density
-     double refShearModulus;
-     double refBulkModulus;
-     double frictionAngle;
-     double peakShearStrain;
-     double refPressure;
-     double cohesion;
-     double pressDependCoeff;
-     int    numOfSurfaces;
-     double phaseTransfAngle; 
-     double contractParam1;
-     double dilateParam1;
-     double dilateParam2;
-     double liquefyParam1;
-     double liquefyParam2;
-     double liquefyParam4;
-     double einit;    //initial void ratio
-     double volLimit1;
-     double volLimit2;
-     double volLimit3;
+	 static int matCount;
+     static int* ndmx;  //num of dimensions (2 or 3)
+     static int* loadStagex;  //=0 if elastic; =1 or 2 if plastic
+     static double* rhox;  //mass density
+     static double* refShearModulusx;
+     static double* refBulkModulusx;
+     static double* frictionAnglex;
+     static double* peakShearStrainx;
+     static double* refPressurex;
+     static double* cohesionx;
+     static double* pressDependCoeffx;
+     static int*    numOfSurfacesx;
+     static double* phaseTransfAnglex; 
+     static double* contractParam1x;
+     static double* dilateParam1x;
+     static double* dilateParam2x;
+     static double* liquefyParam1x;
+     static double* liquefyParam2x;
+     static double* liquefyParam4x;
+     static double* einitx;    //initial void ratio
+     static double* volLimit1x;
+     static double* volLimit2x;
+     static double* volLimit3x;
      static double pAtm;
 
      // internal
-     double residualPress;
-     double stressRatioPT;
+     static double* residualPressx;
+     static double* stressRatioPTx;
      static Matrix theTangent;
      
+	 int matN;
      int e2p;
      MultiYieldSurface * theSurfaces; // NOTE: surfaces[0] is not used  
      MultiYieldSurface * committedSurfaces;  
      int    activeSurfaceNum;  
      int    committedActiveSurf;
      double modulusFactor;
+	 double initPress;
      T2Vector currentStress;
      T2Vector trialStress;
      T2Vector currentStrain;
@@ -207,7 +210,7 @@ private:
 
      // Return num_strain_subincre
      int setSubStrainRate(void);
-     int isLoadReversal(void);
+     int isLoadReversal(const T2Vector &);
      int isCriticalState(const T2Vector & stress);
      void getContactStress(T2Vector &contactStress);
      void getSurfaceNormal(const T2Vector & stress, T2Vector &normal); 

@@ -1,5 +1,5 @@
-// $Revision: 1.9 $
-// $Date: 2003-02-25 23:33:28 $
+// $Revision: 1.10 $
+// $Date: 2003-07-15 20:31:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.h,v $
                                                                         
 // Written: ZHY
@@ -25,7 +25,7 @@ class FluidSolidPorousMaterial : public NDMaterial
   public:
      // Initialization constructor
      FluidSolidPorousMaterial (int tag, int nd, NDMaterial &soilMat,
-			       double combinedBulkModul);
+			       double combinedBulkModul, double atm=101.);
 
      // Default constructor
      FluidSolidPorousMaterial ();
@@ -91,14 +91,19 @@ class FluidSolidPorousMaterial : public NDMaterial
    protected:
 
    private:
-     int ndm;
-     static int loadStage;
-     double combinedBulkModulus;
+	 static int matCount;
+     static int* ndmx;
+     static int* loadStagex;
+     static double* combinedBulkModulusx;
+	 static double pAtm;
+	 int matN;
      NDMaterial * theSoilMaterial;
      double trialExcessPressure;
      double currentExcessPressure;
      double trialVolumeStrain;
      double currentVolumeStrain;
+	 double initMaxPress;
+	 int e2p;
 
      static Vector workV3;
      static Vector workV6;

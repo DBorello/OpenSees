@@ -1,5 +1,5 @@
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:33:32 $
+// $Revision: 1.7 $
+// $Date: 2003-07-15 20:31:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/TclUpdateMaterialStageCommand.cpp,v $
                                                                         
 // Written: ZHY
@@ -60,6 +60,68 @@ TclModelBuilderUpdateMaterialStageCommand(ClientData clientData,
       strcmp(c, "ThreeDimensional") == 0 ) {
       Information info;
       a->updateParameter(value,info); 
+  }
+  else {
+      opserr << "WARNING UpdateMaterialStage: The tagged is not a "<<endln;
+      opserr << "PressureDependMultiYield/PressureIndependMultiYield/FluidSolidPorous material. " << endln;
+      return TCL_ERROR;		
+  }
+
+  return TCL_OK;
+}
+
+
+int
+TclModelBuilderUpdateParameterCommand(ClientData clientData, 
+					  Tcl_Interp *interp, 
+					  int argc,
+					  char **argv, 
+					  TclModelBuilder *theTclBuilder)
+{
+  if (argc < 5) {
+      opserr << "WARNING insufficient number of updateParameter arguments\n";
+      opserr << "Want: updateParameter -material matNum? -param? newValue?" << endln;
+      return TCL_ERROR;
+  }
+
+  if (strcmp(argv[1],"-material") != 0) {
+      opserr << "WARNING UpdateParameter: Only accept parameter '-material' for now" << endln;
+      return TCL_ERROR;		
+  }		
+
+  int tag, id; double value; 
+
+  if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+      opserr << "WARNING MYSstage: invalid material tag" << endln;
+      return TCL_ERROR;		
+  }
+
+  NDMaterial * a = theTclBuilder->getNDMaterial(tag);
+  if (a==0) {
+      opserr << "WARNING UpdateMaterialStage: couldn't get NDmaterial tagged: " << tag << endln;
+      return TCL_ERROR;		
+  }
+
+  if (strcmp(argv[3],"-refG") == 0) 
+		id = 10;
+	else if (strcmp(argv[3],"-refB") == 0) 
+	  id = 11;
+	else {
+      opserr << "WARNING UpdateMaterialStage: Only accept parameter '-refG' or '-refB' for now" << endln;
+      return TCL_ERROR;		
+  }		
+
+  if (Tcl_GetDouble(interp, argv[4], &value) != TCL_OK) {
+      opserr << "WARNING UpdateMaterialStage: invalid parameter value" << endln;
+      return TCL_ERROR;		
+  }	
+
+  const char * c = a->getType();
+	if (strcmp(c, "PlaneStrain") == 0 || 
+      strcmp(c, "ThreeDimensional") == 0 ) {
+      Information info;
+      info.setDouble(value);
+      a->updateParameter(id,info); 
   }
   else {
       opserr << "WARNING UpdateMaterialStage: The tagged is not a "<<endln;

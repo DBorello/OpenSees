@@ -1,5 +1,5 @@
-// $Revision: 1.13 $
-// $Date: 2003-02-25 23:33:32 $
+// $Revision: 1.14 $
+// $Date: 2003-07-15 20:31:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -43,7 +43,7 @@ public:
      // Destructor: clean up memory storage space.
      virtual ~PressureIndependMultiYield ();
 
-		 double getRho(void) {return rho;} ;
+		 double getRho(void) {return rhox[matN];} ;
      // Sets the values of the trial strain tensor.
      int setTrialStrain (const Vector &strain);
 
@@ -105,24 +105,26 @@ public:
 protected:
 
 private:
-	int ndm;  //num of dimensions (2 or 3)
-	static int loadStage;  //=0 if elastic; =1 if plastic
+	static int matCount;
+	static int* loadStagex;  //=0 if elastic; =1 if plastic
 
   // user supplied
-	double rho;
-	double refShearModulus;
-	double refBulkModulus;
-	double frictionAngle;
-	double peakShearStrain;
-	double refPressure;
-	double cohesion;
-	double pressDependCoeff;
-	int    numOfSurfaces;
+	static int* ndmx;  //num of dimensions (2 or 3)
+	static double* rhox;
+	static double* frictionAnglex;
+	static double* peakShearStrainx;
+	static double* refPressurex;
+	static double* cohesionx;
+	static double* pressDependCoeffx;
+	static int*    numOfSurfacesx;
 
 	// internal
-	double residualPress;
+	static double* residualPressx;
 	static Matrix theTangent;  //classwise member
 	int e2p;
+	int matN;
+	double refShearModulus;
+	double refBulkModulus;
 	MultiYieldSurface * theSurfaces; // NOTE: surfaces[0] is not used  
 	MultiYieldSurface * committedSurfaces;  
 	int    activeSurfaceNum;  
@@ -141,7 +143,7 @@ private:
 			 int surface_num);
 
 	void deviatorScaling(T2Vector & stress, const MultiYieldSurface * surfaces, 
-			     int surfaceNum);
+			     int surfaceNum, int count=0);
 
 	void initSurfaceUpdate(void);
 
