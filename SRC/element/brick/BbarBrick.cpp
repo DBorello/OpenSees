@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-11-27 07:01:40 $
+// $Revision: 1.7 $
+// $Date: 2002-01-06 19:26:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -211,17 +211,17 @@ int  BbarBrick::revertToStart( )
 //print out element data
 void  BbarBrick::Print( ostream &s, int flag )
 {
-  s << '\n' ;
+  s << endl ;
   s << "Volume/Pressure Eight Node BbarBrick \n" ;
-  s << "Element Number: " << this->getTag() << '\n' ;
-  s << "Node 1 : " << connectedExternalNodes(0) << '\n' ;
-  s << "Node 2 : " << connectedExternalNodes(1) << '\n' ;
-  s << "Node 3 : " << connectedExternalNodes(2) << '\n' ;
-  s << "Node 4 : " << connectedExternalNodes(3) << '\n' ;
-  s << "Node 5 : " << connectedExternalNodes(4) << '\n' ;
-  s << "Node 6 : " << connectedExternalNodes(5) << '\n' ;
-  s << "Node 7 : " << connectedExternalNodes(6) << '\n' ;
-  s << "Node 8 : " << connectedExternalNodes(7) << '\n' ;
+  s << "Element Number: " << this->getTag() << endl ;
+  s << "Node 1 : " << connectedExternalNodes(0) << endl ;
+  s << "Node 2 : " << connectedExternalNodes(1) << endl ;
+  s << "Node 3 : " << connectedExternalNodes(2) << endl ;
+  s << "Node 4 : " << connectedExternalNodes(3) << endl ;
+  s << "Node 5 : " << connectedExternalNodes(4) << endl ;
+  s << "Node 6 : " << connectedExternalNodes(5) << endl ;
+  s << "Node 7 : " << connectedExternalNodes(6) << endl ;
+  s << "Node 8 : " << connectedExternalNodes(7) << endl ;
 
   s << "Material Information : \n " ;
   materialPointers[0]->Print( s, flag ) ;
