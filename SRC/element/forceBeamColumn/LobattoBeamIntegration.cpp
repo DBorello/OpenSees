@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-12-13 22:25:48 $
+// $Revision: 1.2 $
+// $Date: 2003-02-21 22:27:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/LobattoBeamIntegration.cpp,v $
 
 #include <LobattoBeamIntegration.h>

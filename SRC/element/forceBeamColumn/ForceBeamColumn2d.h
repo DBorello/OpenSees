@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:09 $
+// $Revision: 1.3 $
+// $Date: 2003-02-21 22:27:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.h,v $
 
 #ifndef ForceBeamColumn2d_h
