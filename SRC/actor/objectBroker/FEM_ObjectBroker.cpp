@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-08-27 00:20:09 $
+// $Revision: 1.7 $
+// $Date: 2002-04-06 20:59:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -62,6 +62,14 @@
 #include <SeriesMaterial.h>
 #include <CableMaterial.h>
 #include <ENTMaterial.h>
+
+//PY springs: RWBoulanger and BJeremic
+#include <PySimple1.h>
+#include <TzSimple1.h>
+#include <QzSimple1.h>
+//temp out BJ #include <PyLiq1.h>
+//temp out BJ #include <TzLiq1.h>
+
 
 #include <FedeasBond1Material.h>
 #include <FedeasBond2Material.h>
@@ -505,6 +513,24 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
 
 	case MAT_TAG_Hardening:
 		return new HardeningMaterial();
+
+
+//PY springs: RWBoulanger and BJeremic
+	case MAT_TAG_PySimple1:
+		return new PySimple1();
+
+//temp out BJ	case MAT_TAG_PyLiq1:
+//temp out BJ		return new PyLiq1();
+
+	case MAT_TAG_TzSimple1:
+		return new TzSimple1();
+
+//temp out BJ	case MAT_TAG_TzLiq1:
+//temp out BJ		return new TzLiq1();
+
+	case MAT_TAG_QzSimple1:
+		return new QzSimple1();
+
 
 	case MAT_TAG_Hysteretic:
 		return new HystereticMaterial();

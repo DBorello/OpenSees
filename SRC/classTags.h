@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2002-02-27 21:48:03 $
+// $Revision: 1.26 $
+// $Date: 2002-04-06 20:59:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -95,6 +95,13 @@
 #define MAT_TAG_ENTMaterial				14
 #define MAT_TAG_Penalty					15
 
+//B Jeremic
+#define MAT_TAG_PySimple1        205
+#define MAT_TAG_TzSimple1        206
+#define MAT_TAG_QzSimple1        207
+#define MAT_TAG_PyLiq1           208
+#define MAT_TAG_TzLiq1           209
+
 #define MAT_TAG_FedeasMaterial         1000
 #define MAT_TAG_FedeasBond1       1001
 #define MAT_TAG_FedeasBond2       1002
@@ -160,6 +167,8 @@
 #define ND_TAG_PlaneStressMaterial          2000
 #define ND_TAG_PlateFiberMaterial          2001
 #define ND_TAG_BeamFiberMaterial		2002
+#define ND_TAG_CompressibleFluid		3001
+
 
 #define FIBER_TAG_Uniaxial2d	1
 #define FIBER_TAG_Uniaxial3d	2
@@ -188,6 +197,7 @@
 #define LOAD_TAG_UniformExcitation        2
 #define LOAD_TAG_Beam2dUniformLoad        3
 #define LOAD_TAG_Beam2dPointLoad          4
+#define LOAD_TAG_BrickSelfWeight          5
 
 
 #define MAT_TAG_IsotropicLinElastic         1001
