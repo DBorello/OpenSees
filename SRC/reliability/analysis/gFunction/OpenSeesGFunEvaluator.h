@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:02 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 01:30:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.h,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//			haukaas 06/22/01 (analysis commands batch read from file)
 //
 
 #ifndef OpenSeesGFunEvaluator_h
@@ -47,7 +48,7 @@ class OpenSeesGFunEvaluator : public GFunEvaluator
 {
 
 public:
-	OpenSeesGFunEvaluator(int numIter, Tcl_Interp *passedTclInterp,
+	OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 						ReliabilityDomain *passedReliabilityDomain);
 	~OpenSeesGFunEvaluator();
 
@@ -58,7 +59,6 @@ protected:
 
 private:
 	double g;
-	int numIter;
 	Tcl_Interp *theTclInterp;
 	ReliabilityDomain *theReliabilityDomain;
 

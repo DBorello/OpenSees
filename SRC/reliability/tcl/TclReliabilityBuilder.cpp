@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-06-14 08:07:49 $
+// $Revision: 1.6 $
+// $Date: 2001-07-31 01:30:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -31,6 +31,8 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//			haukaas 06/22/01 ('numIter' taken away from OpenSeesGFunEvaluator)
+//			haukaas 06/22/01 (updated destructor)
 //
 
 #include <stdlib.h>
@@ -196,14 +198,49 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   theStructuralDomain	= &passedDomain;
   theReliabilityDomain	= new ReliabilityDomain();
 
-//  ResultsContainer *theResultsContainer = new ResultsContainer();
-//  theReliabilityDomain->addResultsContainer(theResultsContainer);
 
 }
 
 TclReliabilityBuilder::~TclReliabilityBuilder()
 {
-  cerr << "Terje needs to write code: TclReliabilityBuilder::~TclReliabilityBuilder()\n";
+	if (theReliabilityDomain != 0)
+		delete theReliabilityDomain;
+	
+	if (theGFunEvaluator != 0)
+		delete theGFunEvaluator;
+	
+	if (theSensitivityEvaluator != 0)
+		delete theSensitivityEvaluator;
+	
+	if (theStepSizeRule != 0)
+		delete theStepSizeRule;
+	
+	if (theSearchDirection != 0)
+		delete theSearchDirection;
+	
+	if (theXuTransformation != 0)
+		delete theXuTransformation;
+	
+	if (theRandomNumberGenerator != 0)
+		delete theRandomNumberGenerator;
+	
+	if (theFindDesignPoint != 0)
+		delete theFindDesignPoint;
+	
+	if (theFindCurvatures != 0)
+		delete theFindCurvatures;
+	
+	if (theFORMAnalysis != 0)
+		delete theFORMAnalysis;
+	
+	if (theSORMAnalysis != 0)
+		delete theSORMAnalysis;
+	
+	if (theSimulationAnalysis != 0)
+		delete theSimulationAnalysis;
+	
+	if (theSystemAnalysis != 0)
+		delete theSystemAnalysis;
 }
 
 
@@ -1374,14 +1411,7 @@ TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *i
 	// GET INPUT PARAMETER (string) AND CREATE THE OBJECT
 	if (strcmp(argv[1],"OpenSeesGFunEvaluator") == 0) {
 
-	  int numIter;
-	  // GET INPUT PARAMETER (integer)
-	  if (Tcl_GetInt(interp, argv[2], &numIter) != TCL_OK) {
-		cerr << "WARNING invalid input: numIter \n";
-		return TCL_ERROR;
-	  }
-
-		theGFunEvaluator = new OpenSeesGFunEvaluator(numIter, interp, theReliabilityDomain);
+		theGFunEvaluator = new OpenSeesGFunEvaluator(interp, theReliabilityDomain);
 	}
 	else if (strcmp(argv[1],"BasicGFunEvaluator") == 0) {
 		theGFunEvaluator = new BasicGFunEvaluator(interp, theReliabilityDomain);

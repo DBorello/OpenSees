@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:02 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 01:30:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//			haukaas 06/22/01 (analysis commands batch read from file)
 //
 
 #include <fstream.h>
@@ -46,11 +47,10 @@
 #include <string.h>
 
 
-OpenSeesGFunEvaluator::OpenSeesGFunEvaluator(int passedNumIter, Tcl_Interp *passedTclInterp,
+OpenSeesGFunEvaluator::OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 					ReliabilityDomain *passedReliabilityDomain)
 :GFunEvaluator()
 {
-	numIter					= passedNumIter;
 	theTclInterp			= passedTclInterp;
 	theReliabilityDomain	= passedReliabilityDomain;
 }
@@ -79,12 +79,60 @@ OpenSeesGFunEvaluator::evaluate_g(Vector passed_x)
 		theRandomVariablePositioner->update(passed_x(rvNumber-1));
 	}
 
-	// Run the structural analysis
-//	char theAnalyzeCommand[12] = "analyze 100";
-	char theAnalyzeCommand[12];
-	sprintf(theAnalyzeCommand,"analyze %d",numIter);
+
+	// Set a default value of the wait flag
+	char theSetFlagCommand[30];
+	sprintf(theSetFlagCommand,"set waitFlag 1");
+	Tcl_Eval( theTclInterp, theSetFlagCommand );
+
+
+	// Run the structural analysis by reading from "analysiscommands.tcl"
+	// (the user may change the value of the waitFlag)
+	char theAnalyzeCommand[30];
+	sprintf(theAnalyzeCommand,"source feanalysiscommands.tcl");
 	Tcl_Eval( theTclInterp, theAnalyzeCommand );
+
+
+	// Possibly wait for user to change analysiscommands file
+	// (check the wait flag in the analysiscommands file)
+	double waitFlag;
+	char theCheckWaitFlagCommand[12];
+	sprintf(theCheckWaitFlagCommand,"$waitFlag");
 	
+	Tcl_ExprDouble( theTclInterp, theCheckWaitFlagCommand, &waitFlag );
+	
+	if (waitFlag == 1.0) { // Need to wait
+		int waitIn;
+		cerr << "  FE analysis done...waitFlag is set to 1...type an integer to continue... " << endl;
+		cin >> waitIn;
+	}
+	else { // Don't wait
+	}
+
+
+//	// Possibly wait for user to change analysiscommands file 
+//	int waitIn;
+//	double waitFlag;
+//	char theCheckWaitFlagCommand[12];
+//	sprintf(theCheckWaitFlagCommand,"$waitFlag");
+//	Tcl_ExprDouble( theTclInterp, theCheckWaitFlagCommand, &waitFlag );
+//	
+//	if (waitFlag == 1.0) { // Need to wait
+//		int waitIn;
+//		cerr << "   Waiting in case you want to edit analysis commands file." << endl;
+//		cerr << "   Type 1 to wait next time too, type 0 to NOT wait anymore. " << endl;
+//		cin >> waitIn;
+//		waitFlag = (int)waitIn;
+//	}
+//	else { // Don't wait
+//	}
+//
+//	sprintf(theSetWaitFlagCommand,"set waitFlag %d",waitIn);
+//	Tcl_Eval( theTclInterp, theSetWaitFlagCommand);
+
+
+
+
 	// "Download" limit-state function from reliability domain
 	int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 	LimitStateFunction *theLimitStateFunction = 
