@@ -87,7 +87,7 @@ tensor MDPotentialSurface01::dQods(const EPState *EPS) const {
     //exit(1);
   }
   
-  dQoverds =  n + D * I2 *(1.0/3.0);
+  dQoverds =  n + I2 * (D *(1.0/3.0));
 
   return dQoverds;
 }
@@ -191,7 +191,7 @@ tensor MDPotentialSurface01::dnods(const EPState *EPS) const
   tensor Ipmnq = I2("pm") * I2("nq");
   tensor Imnpq = I2("mn") * I2("pq");
   tensor Apqmn = alpha("pq") * I2("mn");
-  tensor X  = Ipmnq - (1.0/3.0)*Imnpq  - (1.0/3.0)*Apqmn;
+  tensor X  = Ipmnq - Imnpq * (1.0/3.0) - Apqmn * (1.0/3.0);
 
   //Ipmnq.print("in MD_PS01", "");
   
