@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2004-11-25 00:00:55 $
+// $Revision: 1.27 $
+// $Date: 2004-11-25 00:18:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -243,8 +243,9 @@
 #include <TransientIntegrator.h>
 #include <Newmark.h>
 #include <DisplacementControl.h>
+#ifdef _PARALLEL_PROCESSING
 #include <DistributedDisplacementControl.h>
-
+#endif
 // system of eqn header files
 #include <LinearSOE.h>
 #include <DomainSolver.h>
@@ -1236,9 +1237,10 @@ FEM_ObjectBroker::getNewStaticIntegrator(int classTag)
 	case INTEGRATOR_TAGS_LoadControl:  
 	     return new LoadControl(1.0,1,1.0,.10); // must recvSelf
 
+#ifdef _PARALLEL_PROCESSING
 	case INTEGRATOR_TAGS_DistributedDisplacementControl:  
 	     return new DistributedDisplacementControl(); // must recvSelf
-	     
+#endif	     
 	     
 	case INTEGRATOR_TAGS_ArcLength:  
 	     return new ArcLength(1.0);      // must recvSelf
@@ -1286,10 +1288,11 @@ FEM_ObjectBroker::getNewIncrementalIntegrator(int classTag)
 	     
 	case INTEGRATOR_TAGS_Newmark:  
 	     return new Newmark();
-	     
+
+#ifdef _PARALLEL_PROCESSING	     
 	case INTEGRATOR_TAGS_DistributedDisplacementControl:  
 	     return new DistributedDisplacementControl(); // must recvSelf
-
+#endif
 	     
 	default:
 	     opserr << "FEM_ObjectBroker::getNewIncrementalIntegrator - ";
