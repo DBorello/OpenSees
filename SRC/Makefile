@@ -308,6 +308,7 @@ PY_SJB_RWB_BJ_LIBS = $(FE)/material/uniaxial/PY/PySimple1.o \
 ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
 	$(FE)/material/nD/soil/MultiYieldSurface.o \
 	$(FE)/material/nD/soil/PressureDependMultiYield.o \
+	$(FE)/material/nD/soil/PressureDependMultiYield02.o \
 	$(FE)/material/nD/soil/TclUpdateMaterialStageCommand.o \
 	$(FE)/material/nD/soil/PressureIndependMultiYield.o \
 	$(FE)/material/nD/soil/T2Vector.o \
@@ -316,7 +317,10 @@ ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
 	$(FE)/element/upU/Nine_Four_Node_QuadUP.o \
 	$(FE)/element/upU/Twenty_Eight_Node_BrickUP.o \
 	$(FE)/element/upU/shp3dv.o \
-	$(FE)/element/upU/TclFourNodeQuadUPCommand.o
+	$(FE)/element/upU/TclFourNodeQuadUPCommand.o \
+	$(FE)/element/20nbrick/TclTwenty_Node_BrickCommand.o \
+	$(FE)/element/20nbrick/Twenty_Node_Brick.o 
+
 
 ifeq ($(GRAPHICS), UsingOpenGL)
 
