@@ -24,7 +24,7 @@
 // UPDATE HISTORY:    Modified from Brick3D and FourNodeQuad.hh  07/06/00
 //                    Sept. - Oct 2000 connected to OpenSees by Zhaohui
 //                    Sept 2001 optimized to some extent (static tensors...)
-//
+//                    May 2004 Guanzhou added update()
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -563,7 +563,7 @@ void EightNodeBrick::incremental_Update()
     //if ( tmp_eps ) { //if there is an EPState for the MatPoint3D
     //  mmodel->setEPS( *tmp_eps );
     
-    if ( ! ( (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)) )
+    if ( ( (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)) )
       opserr << "EightNodeBrick::incremental_Update (tag: " << this->getTag() << "), not converged\n";
           
     //matpoint[where].setEPS( mmodel->getEPS() );
@@ -1358,6 +1358,7 @@ tensor EightNodeBrick::incr_disp(void)
     const Vector &IncrDis7 = theNodes[6]->getIncrDeltaDisp();
     const Vector &IncrDis8 = theNodes[7]->getIncrDeltaDisp();
 
+
     //if ( getTag() == 486 || getTag() == 566 || getTag() == 956)
     //{
     //opserr <<" \n\n element " << getTag() << endlnn;
@@ -1399,21 +1400,21 @@ tensor EightNodeBrick::total_disp(void)
       
     //Zhaohui using node pointers, which come from the Domain
     const Vector &TotDis1 = theNodes[0]->getTrialDisp();
-    opserr<<"\ntot node " << theNodes[0]->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2) << endln;
+//    opserr<<"\ntot node " << theNodes[0]->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2) << endln;
     const Vector &TotDis2 = theNodes[1]->getTrialDisp();                        
-    opserr << "tot node " << theNodes[1]->getTag() << " x " << TotDis2(0) <<" y "<< TotDis2(1) << " z "<< TotDis2(2) << endln;
+//    opserr << "tot node " << theNodes[1]->getTag() << " x " << TotDis2(0) <<" y "<< TotDis2(1) << " z "<< TotDis2(2) << endln;
     const Vector &TotDis3 = theNodes[2]->getTrialDisp();                        
-    opserr << "tot node " << theNodes[2]->getTag() << " x " << TotDis3(0) <<" y "<< TotDis3(1) << " z "<< TotDis3(2) << endln;
+//    opserr << "tot node " << theNodes[2]->getTag() << " x " << TotDis3(0) <<" y "<< TotDis3(1) << " z "<< TotDis3(2) << endln;
     const Vector &TotDis4 = theNodes[3]->getTrialDisp();                        
-    opserr << "tot node " << theNodes[3]->getTag() << " x " << TotDis4(0) <<" y "<< TotDis4(1) << " z "<< TotDis4(2) << endln;
+//    opserr << "tot node " << theNodes[3]->getTag() << " x " << TotDis4(0) <<" y "<< TotDis4(1) << " z "<< TotDis4(2) << endln;
     const Vector &TotDis5 = theNodes[4]->getTrialDisp();                        
-    opserr << "tot node " << theNodes[4]->getTag() << " x " << TotDis5(0) <<" y "<< TotDis5(1) << " z "<< TotDis5(2) << endln;
+//    opserr << "tot node " << theNodes[4]->getTag() << " x " << TotDis5(0) <<" y "<< TotDis5(1) << " z "<< TotDis5(2) << endln;
     const Vector &TotDis6 = theNodes[5]->getTrialDisp();                        
-    opserr << "tot node " << theNodes[5]->getTag() << " x " << TotDis6(0) <<" y "<< TotDis6(1) << " z "<< TotDis6(2) << endln;
+//    opserr << "tot node " << theNodes[5]->getTag() << " x " << TotDis6(0) <<" y "<< TotDis6(1) << " z "<< TotDis6(2) << endln;
     const Vector &TotDis7 = theNodes[6]->getTrialDisp();                        
-    opserr << "tot node " << theNodes[6]->getTag() << " x " << TotDis7(0) <<" y "<< TotDis7(1) << " z "<< TotDis7(2) << endln;
+//    opserr << "tot node " << theNodes[6]->getTag() << " x " << TotDis7(0) <<" y "<< TotDis7(1) << " z "<< TotDis7(2) << endln;
     const Vector &TotDis8 = theNodes[7]->getTrialDisp();                        
-    opserr << "tot node " << theNodes[7]->getTag() << " x " << TotDis8(0) <<" y "<< TotDis8(1) << " z "<< TotDis8(2) << endln;
+//    opserr << "tot node " << theNodes[7]->getTag() << " x " << TotDis8(0) <<" y "<< TotDis8(1) << " z "<< TotDis8(2) << endln;
     
     total_disp.val(1,1)=TotDis1(0); total_disp.val(1,2)=TotDis1(1);total_disp.val(1,3)=TotDis1(2);
     total_disp.val(2,1)=TotDis2(0); total_disp.val(2,2)=TotDis2(1);total_disp.val(2,3)=TotDis2(2);
@@ -1636,15 +1637,15 @@ tensor EightNodeBrick::nodal_forces(void)
 
     
     
-    incremental_strain =
-                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-//    if (where == 0)
-//       //opserr << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
-////    opserr << " el tag = "<< getTag();
-//    
-    int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
-    if ( err)
-      opserr << "EightNodeBrick::getStiffnessTensor (tag: " << this->getTag() << "), not converged\n";
+//Guanzhou out 5-6-2004    incremental_strain =
+//Guanzhou out 5-6-2004                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+//Guanzhou out 5-6-2004//    if (where == 0)
+//Guanzhou out 5-6-2004//       //opserr << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
+//Guanzhou out 5-6-2004////    opserr << " el tag = "<< getTag();
+//Guanzhou out 5-6-2004//    
+//Guanzhou out 5-6-2004    int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
+//Guanzhou out 5-6-2004    if ( err)
+//Guanzhou out 5-6-2004      opserr << "EightNodeBrick::getStiffnessTensor (tag: " << this->getTag() << "), not converged\n";
          
 
     //char *test = matpoint[where]->matmodel->getType();
@@ -4178,4 +4179,73 @@ double EightNodeBrick::get_Gauss_p_w(short order, short point_numb)
   }
 
 
+int EightNodeBrick::update(void) //Note: Guanzhou takes this pretty much out of incremental_Update(), Apr. 2004
+  {
+
+    double r  = 0.0;
+    double s  = 0.0;
+    double t  = 0.0;
+
+    short where = 0;
+
+    static int dh_dim[] = {8,3};
+    tensor dh(2, dh_dim, 0.0);
+
+    static int disp_dim[] = {8,3};
+    tensor incr_displacements(2,disp_dim,0.0);
+
+    straintensor incr_strain;
+
+    tensor Jacobian;
+    tensor JacobianINV;
+    tensor dhGlobal;
+
+    incr_displacements = incr_disp();//Get incrmental disp from domain
+
+    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+      {
+        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+
+        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+          {
+            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+
+            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+              {
+                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+
+                where =
+                   ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+                // derivatives of local coordiantes with respect to local coordiantes
+                dh = dh_drst_at(r,s,t);
+                // Jacobian tensor ( matrix )
+                Jacobian = Jacobian_3D(dh);
+                //....                Jacobian.print("J");
+                // Inverse of Jacobian tensor ( matrix )
+                JacobianINV = Jacobian_3Dinv(dh);
+                //....                JacobianINV.print("JINV");
+                // determinant of Jacobian tensor ( matrix )
+                //--                det_of_Jacobian  = Jacobian.determinant();
+                //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
+                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                dhGlobal = dh("ij") * JacobianINV("kj");
+                // incrmental straines at this Gauss point
+                // now in Update we know the total displacements so let's find
+                // the total strain
+                incr_strain =
+                    (dhGlobal("ib")*incr_displacements("ia")).symmetrize11();
+                incr_strain.null_indices();
+
+                if ( ( (matpoint[where]->matmodel)->setTrialStrainIncr( incr_strain)) )
+                  opserr << "EightNodeBrick::update (tag: " << this->getTag() << "), Update Failed\n";
+
+              }
+          }
+      }
+
+      return 0;
+      
+  }
+
+  
 #endif

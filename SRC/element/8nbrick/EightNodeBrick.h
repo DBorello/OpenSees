@@ -98,6 +98,9 @@ class EightNodeBrick: public Element
     //               double p, double r);
     //             //, EPState * InitEPS);const char * type,
 
+    // update, Guanzhou added Apr. 2004 to update incremental strain in the domain
+    int update(void);
+
     int getNumExternalNodes () const;
     const ID &getExternalNodes ();
     Node **getNodePtrs(void);
@@ -219,6 +222,7 @@ class EightNodeBrick: public Element
 
     void incremental_Update(void);
     //void iterative_Update(void);
+
 
     tensor H_3D(double r1, double r2, double r3);
     tensor interp_poli_at(double r, double s, double t);

@@ -102,6 +102,9 @@ class TwentySevenNodeBrick: public Element
     int revertToLastCommit ();
     int revertToStart ();
 
+    // update, Guanzhou added Apr. 2004 to update incremental strain in the domain
+    int update(void);
+
     // public methods to obtain stiffness, mass, damping and residual information
     // We haven't build the following functions.
     // All the value of K M Dmp and F are nothing.

@@ -16,7 +16,7 @@
 // DESIGNER:          Boris Jeremic, Guanzhou Jie
 // PROGRAMMER:        Guanzhou Jie and Boris Jeremic
 // DATE:              Oct. 2003
-// UPDATE HISTORY:
+// UPDATE HISTORY:    May 2004 Guanzhou added update()
 //
 //
 //
@@ -1908,19 +1908,19 @@ tensor TwentySevenNodeBrick::nodal_forces(void)
 
 
 
-    incremental_strain =
-                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-//    if (where == 0)
-//       //opserr << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
-////    opserr << " el tag = "<< getTag();
-//
-    int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
-    if ( err) {
-       //cout << "incr_strn " <<  incremental_strain;
-             //cout << "incr_disp " <<  incremental_displacements;
-                    opserr << "TwentySevenNodeBrick::nodal_forces (tag: " << this->getTag() << ", not converged\n";
-       exit(-1);
-    }
+//out May 5 2004, Guanzhou    incremental_strain =
+//out May 5 2004, Guanzhou                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+//out May 5 2004, Guanzhou//    if (where == 0)
+//out May 5 2004, Guanzhou//       //opserr << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
+//out May 5 2004, Guanzhou////    opserr << " el tag = "<< getTag();
+//out May 5 2004, Guanzhou//
+//out May 5 2004, Guanzhou    int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
+//out May 5 2004, Guanzhou    if ( err) {
+//out May 5 2004, Guanzhou       //cout << "incr_strn " <<  incremental_strain;
+//out May 5 2004, Guanzhou             //cout << "incr_disp " <<  incremental_displacements;
+//out May 5 2004, Guanzhou                    opserr << "TwentySevenNodeBrick::nodal_forces (tag: " << this->getTag() << ", not converged\n";
+//out May 5 2004, Guanzhou       exit(-1);
+//out May 5 2004, Guanzhou    }
 
     //char *test = matpoint[where]->matmodel->getType();
     // fmk - changing if so if into else block must be Template3Dep
@@ -5196,6 +5196,94 @@ double TwentySevenNodeBrick::get_Gauss_p_w(short order, short point_numb)
 
     return Gauss_weights[order][point_numb];
   }
+
+int TwentySevenNodeBrick::update()  //Guanzhou added May 6, 2004
+  {
+    double r  = 0.0;
+    // double rw = 0.0;
+    double s  = 0.0;
+    // double sw = 0.0;
+    double t  = 0.0;
+    // double tw = 0.0;
+
+    short where = 0;
+    //,,,,,    double weight = 0.0;
+
+    int dh_dim[] = {27,3};
+    tensor dh(2, dh_dim, 0.0);
+
+
+    static int disp_dim[] = {27,3};
+    tensor incremental_displacements(2,disp_dim,0.0);
+
+    straintensor incremental_strain;
+
+    tensor Jacobian;
+    tensor JacobianINV;
+    tensor dhGlobal;
+
+    incremental_displacements = incr_disp();
+
+    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+      {
+        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+        //--        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
+        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+          {
+            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+            //--            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
+            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+            {
+                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+                //--                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
+                // this short routine is supposed to calculate position of
+                // Gauss point from 3D array of short's
+                where =
+                   ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+                // derivatives of local coordiantes with respect to local coordiantes
+                dh = dh_drst_at(r,s,t);
+                // Jacobian tensor ( matrix )
+                Jacobian = Jacobian_3D(dh);
+                //....                Jacobian.print("J");
+                // Inverse of Jacobian tensor ( matrix )
+                JacobianINV = Jacobian_3Dinv(dh);
+                //....                JacobianINV.print("JINV");
+                // determinant of Jacobian tensor ( matrix )
+                //--                det_of_Jacobian  = Jacobian.determinant();
+                //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
+                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                //dhGlobal = dh("ij") * JacobianINV("jk"); // Zhaohui 09-02-2001
+                dhGlobal = dh("ij") * JacobianINV("kj");
+                //....                dhGlobal.print("dh","dhGlobal");
+                //weight
+                //                weight = rw * sw * tw * det_of_Jacobian;
+                //::::::   ::printf("\n\nIN THE STIFFNESS TENSOR INTEGRATOR ----**************** where = %d \n", where);
+                //::::::   ::printf(" void TwentySevenNodeBrick::incremental_Update()\n");
+                //::::::   ::printf(" GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d    --->>>  where = %d \n",
+                //::::::                      GP_c_r,GP_c_s,GP_c_t,where);
+                //::::::   ::printf("WEIGHT = %f", weight);
+                //::::::   ::printf("determinant of Jacobian = %f", determinant_of_Jacobian);
+                //::::::   matpoint[where].report("Gauss Point\n");
+                // incremental straines at this Gauss point
+                // now in Update we know the incremental displacements so let's find
+                // the incremental strain
+                incremental_strain =
+                    (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+                incremental_strain.null_indices();
+                //incremental_strain.reportshort("\n incremental_strain tensor at GAUSS point\n");
+
+                // here comes the final_stress calculation actually on only needs to copy stresses
+                // from the iterative data . . .
+                //(GPstress+where)->reportshortpqtheta("\n stress START GAUSS \n");
+
+    if ( ( (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)) )
+      opserr << "TwentySevenNodeBrick::update (tag: " << this->getTag() << "), update() failed\n";
+            }
+          }
+      }
+    return 0;
+  }
+
 
 
 #endif
