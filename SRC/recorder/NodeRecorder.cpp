@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2004-11-24 22:42:25 $
+// $Revision: 1.20 $
+// $Date: 2004-11-25 00:53:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -307,7 +307,7 @@ NodeRecorder::setDomain(Domain &theDom)
 int 
 NodeRecorder::sendSelf(int commitTag, Channel &theChannel)
 {
-  if (theChannel.isDatastore() == true) {
+  if (theChannel.isDatastore() == 0) {
     opserr << "NodeRecorder::sendSelf() - does not send data to a datastore\n";
     return -1;
   }
@@ -365,7 +365,7 @@ int
 NodeRecorder::recvSelf(int commitTag, Channel &theChannel, 
 		       FEM_ObjectBroker &theBroker)
 {
-  if (theChannel.isDatastore() == true) {
+  if (theChannel.isDatastore() == 0) {
     opserr << "NodeRecorder::sendSelf() - does not send data to a datastore\n";
     return -1;
   }

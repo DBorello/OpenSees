@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.8 $
-// $Date: 2004-11-24 22:42:25 $
+// $Revision: 1.9 $
+// $Date: 2004-11-25 00:53:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -343,7 +343,7 @@ EnvelopeNodeRecorder::setDomain(Domain &theDom)
 int
 EnvelopeNodeRecorder::sendSelf(int commitTag, Channel &theChannel)
 {
-  if (theChannel.isDatastore() == true) {
+  if (theChannel.isDatastore() == 0) {
     opserr << "EnvelopeNodeRecorder::sendSelf() - does not send data to a datastore\n";
     return -1;
   }
@@ -397,7 +397,7 @@ int
 EnvelopeNodeRecorder::recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker)
 {
-  if (theChannel.isDatastore() == true) {
+  if (theChannel.isDatastore() == 0) {
     opserr << "EnvelopeNodeRecorder::sendSelf() - does not send data to a datastore\n";
     return -1;
   }

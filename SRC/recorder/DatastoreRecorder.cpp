@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-11-24 22:45:28 $
+// $Revision: 1.5 $
+// $Date: 2004-11-25 00:53:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DatastoreRecorder.cpp,v $
                                                                         
                                                                         
@@ -68,7 +68,7 @@ DatastoreRecorder::playback(int commitTag)
 int
 DatastoreRecorder::restart(void)
 {
-
+	return 0;
 }
 
 
