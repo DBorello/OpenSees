@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-06-07 21:51:34 $
+// $Revision: 1.10 $
+// $Date: 2002-07-11 22:02:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -418,6 +418,7 @@ DispBeamColumn3d::getTangentStiff()
   q(4) += q0[4];
 
   // Transform to global stiffness
+  crdTransf->update();	// Will remove once we clean up the corotational 3d transformation -- MHS
   K = crdTransf->getGlobalStiffMatrix(kb, q);
   
   return K;
@@ -632,6 +633,9 @@ DispBeamColumn3d::getResistingForce()
 
   // Transform forces
   Vector p0Vec(p0, 5);
+
+  // Will remove once we clean up the corotational 3d transformation -- MHS
+  crdTransf->update();
 
   P = crdTransf->getGlobalResistingForce(q, p0Vec);
   
