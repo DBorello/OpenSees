@@ -1,14 +1,15 @@
 //===============================================================================
-//# COPYRIGHT (C): Woody's (Guthrie) like license:
-//                 ``This    source  code is Copyrighted in  
-//                 U.S.,  for  an  indefinite  period,  and  
-//                 anybody  caught  using  it  without  our  
-//                 permission,  will be mighty good friends  
-//                 of  ourn,  cause  we  don't give a darn.  
-//                 Hack  it.  Compile it. Debug it. Run it.  
-//                 Yodel  it. Enjoy it. We wrote it, that's  
-//                 all we wanted to do.''                    
-//
+//# COPYRIGHT (C): Woody's license (by BJ):                 
+//#                ``This  source  code  is  Copyrighted in
+//#                U.S.,  for  an  indefinite  period,  and
+//#                anybody  caught  using  it  without  our
+//#                permission,  will be mighty good friends
+//#                of  ourn,  cause  we  don't give a darn.
+//#                Hack  it.  Compile it. Debug it. Run it.
+//#                Yodel  it. Enjoy it. We wrote it, that's
+//#                all we wanted to do.''																		
+//#              
+//#  
 //# PROJECT:           Object Oriented Finite Element Program
 //# PURPOSE:           Plastic Bowl (aka Domain Reduction) implementation:
 //#                    This file contains the class definition for PBowlLoading.
@@ -16,6 +17,8 @@
 //#                    which implements the plastic bowl loading 
 //#                    (aka Domain Reduction Method) as described 
 //#                    by Jacobo Bielak et al.
+
+
 //# CLASS:             PBowlLoading
 //#
 //# VERSION:           0.61803398874989 (golden section)
@@ -26,17 +29,22 @@
 //#
 //#
 //# DATE:              21Oct2002
-//# UPDATE HISTORY:    31Oct2002 some memory leaks fixed...
+//# UPDATE HISTORY:    31Oct2002 fixed some memory leaks
+//#                    04Nov2002 changed the way plastic bowl elements are 
+//#                    input.  
+//#
+//#
+//#
+//#
 //#
 //===============================================================================
 
 #ifndef PBowlLoading_h
 #define PBowlLoading_h
 
-// Purpose: 
 #include <LoadPattern.h>
-
 #include <Matrix.h>
+
 #include <Domain.h>
 #include <NodeIter.h>
 #include <Node.h>
@@ -58,7 +66,7 @@ class PBowlLoading : public LoadPattern
   public:
     PBowlLoading();
     PBowlLoading(int tag,
-                 const ID &PBElements,
+                 char *PBEfName,
                  char *DispfName,
                  char *AccefName,
                  double theTimeIncr=1.0,
@@ -78,7 +86,7 @@ class PBowlLoading : public LoadPattern
     LoadPattern *getCopy(void);
 
   protected:
-    void addPBElements(const ID &PBEle);    //Adding plastic bowl elements
+    //void addPBElements(const ID &PBEle);    //Adding plastic bowl elements
     //void addPBNodes(const ID &PBNodes);     //Adding plastic bowl nodes
     //void addPBLoads(const Matrix &PBLoads); //Adding plastic bowl loades
     void CompPBLoads();        //Finding all plastic bowl nodes and compute the equivalent forces from plastic bowl loading

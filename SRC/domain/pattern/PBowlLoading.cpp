@@ -1,14 +1,14 @@
 //===============================================================================
-//# COPYRIGHT (C): Woody's (Guthrie) like license:
-//                 ``This    source  code is Copyrighted in
-//                 U.S.,  for  an  indefinite  period,  and
-//                 anybody  caught  using  it  without  our
-//                 permission,  will be mighty good friends
-//                 of  ourn,  cause  we  don't give a darn.
-//                 Hack  it.  Compile it. Debug it. Run it.
-//                 Yodel  it. Enjoy it. We wrote it, that's
-//                 all we wanted to do.''
-//
+//# COPYRIGHT (C): Woody's license (by BJ):
+//#                ``This  source  code  is  Copyrighted in
+//#                U.S.,  for  an  indefinite  period,  and
+//#                anybody  caught  using  it  without  our
+//#                permission,  will be mighty good friends
+//#                of  ourn,  cause  we  don't give a darn.
+//#                Hack  it.  Compile it. Debug it. Run it.
+//#                Yodel  it. Enjoy it. We wrote it, that's
+//#                all we wanted to do.''																		
+//#
 //# PROJECT:           Object Oriented Finite Element Program
 //# PURPOSE:           Plastic Bowl (aka Domain Reduction) implementation:
 //#                    This file contains the class definition
@@ -24,9 +24,9 @@
 //#
 //#
 //# DATE:              21Oct2002
-//# UPDATE HISTORY:    31Oct2002 some memory leaks fixed...
-//#
-//#
+//# UPDATE HISTORY:    31Oct2002 fixed some memory leaks
+//#                    04Nov2002 changed the way plastic bowl elements are 
+//#                    input.  
 //#
 //#
 //#
@@ -36,6 +36,7 @@
 // PBowlLoading is an subclass of loadPattern.
 
 #include <PBowlLoading.h>
+
 
 
 PBowlLoading::PBowlLoading()
@@ -50,7 +51,7 @@ Udd(0)
 }
 
 PBowlLoading::PBowlLoading(int tag,
-                           const ID &_PBElements,
+                           char *PBEfName,
                            char *DispfName,
                            char *AccefName,
                            double theTimeIncr,
@@ -64,6 +65,7 @@ PBowlLoading::PBowlLoading(int tag,
     int timeSteps1, timeSteps2;
     int numDataPoints =0;
     double dataPoint;
+    int eleID;
 
 
     ifstream theFile;
@@ -76,7 +78,7 @@ PBowlLoading::PBowlLoading(int tag,
       {
         cerr << "WARNING - PBowlLoading::PBowlLoading()";
         cerr << " - could not open file " << DispfName << endl;
-	exit(1);
+        exit(1);
       }
     else
       {
@@ -104,7 +106,7 @@ PBowlLoading::PBowlLoading(int tag,
     if (theFile.bad()) {
       cerr << "WARNING - PBowlLoading::PBowlLoading()";
       cerr << " - could not open file " << DispfName << endl;
-    } else {
+     } else {
 
       // now create the vector
       if ( numDataPoints - thetimeSteps*(numDataPoints/thetimeSteps) != 0 ) {
@@ -116,24 +118,24 @@ PBowlLoading::PBowlLoading(int tag,
 
       // ensure we did not run out of memory
       if (U == 0 || U->noRows() == 0 || U->noCols() == 0) {
-  cerr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
-  cerr << " a Matrix of size (cols*rows): " << cols << " * " << thetimeSteps << endl;
+         cerr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
+         cerr << " a Matrix of size (cols*rows): " << cols << " * " << thetimeSteps << endl;
 
-  if (U != 0)
-    delete U;
-  U = 0;
+      if (U != 0)
+         delete U;
+         U = 0;
       }
 
       // read the data from the file
       else {
-  theFile >> timeSteps1;
-  for (int t=0; t< thetimeSteps; t++)
+         theFile >> timeSteps1;
+         for (int t=0; t< thetimeSteps; t++)
            for  (int j=0;j<cols; j++) {
-        theFile >> dataPoint;
-        (*U)(j, t) = dataPoint;
+               theFile >> dataPoint;
+               (*U)(j, t) = dataPoint;
            }
-  }
       }
+     }
 
       // finally close the file
       theFile.close();
@@ -184,31 +186,99 @@ PBowlLoading::PBowlLoading(int tag,
 
       // ensure we did not run out of memory
       if (Udd == 0 || Udd->noRows() == 0 || Udd->noCols() == 0) {
-  cerr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
-  cerr << " a Matrix of size (cols*rows): " << cols << " * " << thetimeSteps << endl;
+         cerr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
+         cerr << " a Matrix of size (cols*rows): " << cols << " * " << thetimeSteps << endl;
 
-  if (Udd != 0)
-    delete Udd;
-  Udd = 0;
+      if (Udd != 0)
+        delete Udd;
+        Udd = 0;
       }
 
       // read the data from the file
       else {
-  theFile >> timeSteps2;
-  for (int t=0; t< thetimeSteps; t++)
+        theFile >> timeSteps2;
+        for (int t=0; t< thetimeSteps; t++)
            for  (int j=0;j<cols; j++) {
-        theFile >> dataPoint;
-        (*Udd)(j, t) = dataPoint;
+              theFile >> dataPoint;
+              (*Udd)(j, t) = dataPoint;
            }
+        }
+    }
+
+    // finally close the file
+    theFile.close();
   }
+
+
+  //--------------------------------
+  //Adding plastic bowl elements
+  //from file to PBowlElements
+  //--------------------------------
+  theFile.open(PBEfName);
+  numDataPoints = 0;
+  int numPBE = 0;
+
+  if (theFile.bad()) {
+    cerr << "WARNING - PBowlLoading::PBowlLoading()";
+    cerr << " - could not open file " << PBEfName << endl;
+    exit(2);
+  } else {
+    //Input the number of Plastic Bowl elements
+    theFile >> numPBE;
+    //Loop to count the number of data points
+    while (theFile >> eleID)
+      numDataPoints++;
+  }
+  theFile.close();
+  if ( numPBE !=  numDataPoints) {
+    cerr << "WARNING - PBowlLoading::PBowlLoading()";
+    cerr << " - Number of plastic bowl elements not equal to the number of elements provided... " << numDataPoints << numPBE << PBEfName << endl;
+    exit(3);
+  }
+
+
+  // create a vector and read in the data
+  if (numDataPoints != 0) {
+
+    // first open the file
+    theFile.open(PBEfName, ios::in);
+    if (theFile.bad()) {
+      cerr << "WARNING - PBowlLoading::PBowlLoading()";
+      cerr << " - could not open file " << AccefName << endl;
+    } else {
+
+      // now create the vector
+      PBowlElements = new ID(numPBE);
+
+      // ensure we did not run out of memory
+      if (PBowlElements == 0 || PBowlElements->Size() == 0 ) {
+         cerr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
+         cerr << " a ID of size: " << PBowlElements->Size()<< endl;
+
+         if (PBowlElements != 0)
+          delete PBowlElements;
+         PBowlElements = 0;
+      }
+
+      // read the data from the file
+      else {
+        theFile >> numPBE;
+        int i;
+	for (i=0; i< numPBE; i++) {
+              theFile >> eleID;
+              (*PBowlElements)(i) = eleID;
+        }
       }
 
       // finally close the file
       theFile.close();
+
+      //Check if read in correctly
+//test      cout << "# of plastic bowl element: " << numPBE << endl;
+//test      cout <<  (*PBowlElements);
+    }
   }
 
-  //Adding the plastic bowl node ID
-  this->addPBElements(_PBElements);
   LoadComputed = false;
 }
 
@@ -224,9 +294,10 @@ PBowlLoading::~PBowlLoading()
 }
 
 
-void PBowlLoading::setDomain(Domain *theDomain)
-  {
-    this->LoadPattern::setDomain(theDomain);
+void
+PBowlLoading::setDomain(Domain *theDomain)
+{
+  this->LoadPattern::setDomain(theDomain);
 
   // // now we go through and set all the node velocities to be vel0
   // if (vel0 != 0.0) {
@@ -245,459 +316,443 @@ void PBowlLoading::setDomain(Domain *theDomain)
   //     theNode->commitState();
   //   }
   // }
+}
+
+
+void
+PBowlLoading::applyLoad(double time)
+{
+
+  Domain *theDomain = this->getDomain();
+  if (theDomain == 0)
+    return;
+
+  //Finding the all the nodes in the plastic bowl and sort it ascendingly
+  if ( !LoadComputed )
+     this->CompPBLoads();
+
+  // see if quick return, i.e. no plastic bowl nodes or domain set
+  int numPBnodes = PBowlNodes->Size();
+  if (numPBnodes == 0)
+    return;
+
+  //Apply loads on each plastic bowl nodes
+  Node *theNode;
+  for (int i=0; i<numPBnodes; i++) {
+    const Vector &load=this->getNodalLoad((*PBowlNodes)[i], time);
+    theNode = theDomain->getNode( (*PBowlNodes)[i] );
+    theNode->addUnbalancedLoad(load);
   }
 
+}
 
-void PBowlLoading::applyLoad(double time)
-  {
+int
+PBowlLoading::sendSelf(int commitTag, Channel &theChannel)
+{
+  cerr << "PBowlLoading::sendSelf() - not yet implemented\n";
+  return 0;
+}
 
-    Domain *theDomain = this->getDomain();
-    if (theDomain == 0)
-      return;
+int
+PBowlLoading::recvSelf(int commitTag, Channel &theChannel,
+       FEM_ObjectBroker &theBroker)
+{
+  cerr << "PBowlLoading::recvSelf() - not yet implemented\n";
+  return 0;
+}
 
-    //Finding the all the nodes in the plastic bowl and sort it ascendingly
-    if ( !LoadComputed )
-       this->CompPBLoads();
+/* **********************************************************************************************
+int
+PBowlLoading::sendSelf(int commitTag, Channel &theChannel)
+{
+  // first send the tag and info about the number of ground motions
+  int myDbTag = this->getDbTag();
+  ID theData(2);
+  theData(0) = this->getTag();
+  theData(1) = numMotions;
 
-    // see if quick return, i.e. no plastic bowl nodes or domain set
-    int numPBnodes = PBowlNodes->Size();
-    if (numPBnodes == 0)
-      return;
+  if (theChannel.sendID(myDbTag, commitTag, theData) < 0) {
+    g3ErrorHandler->warning("PBowlLoading::sendSelf - channel failed to send the initial ID");
+    return -1;
+  }
 
-    //Apply loads on each plastic bowl nodes
-    Node *theNode;
-    for (int i=0; i<numPBnodes; i++) {
-      const Vector &load=this->getNodalLoad((*PBowlNodes)[i], time);
-      theNode = theDomain->getNode( (*PBowlNodes)[i] );
-      theNode->addUnbalancedLoad(load);
+  // now for each motion we send it's classsss tag and dbtag
+  ID theMotionsData(2*numMotions);
+  for (int i=0; i<numMotions; i++) {
+    theMotionsData[i] = theMotions[i]->getClassTag();
+    int motionsDbTag = theMotions[i]->getDbTag();
+    if (motionsDbTag == 0) {
+      motionsDbTag = theChannel.getDbTag();
+      theMotions[i]->setDbTag(motionsDbTag);
+    }
+    theMotionsData[i+numMotions] = motionsDbTag;
+  }
+
+  if (theChannel.sendID(myDbTag, commitTag, theMotionsData) < 0) {
+    g3ErrorHandler->warning("PBowlLoading::sendSelf - channel failed to send the motions ID");
+    return -1;
+  }
+
+  // now we send each motion
+  for (int j=0; j<numMotions; j++)
+    if (theMotions[j]->sendSelf(commitTag, theChannel) < 0) {
+      g3ErrorHandler->warning("PBowlLoading::sendSelf - motion no: %d failed in sendSelf", j);
+      return -1;
     }
 
+  // if get here successfull
+  return 0;
+}
+
+int
+PBowlLoading::recvSelf(int commitTag, Channel &theChannel,
+       FEM_ObjectBroker &theBroker)
+{
+  // first get the tag and info about the number of ground motions from the Channel
+  int myDbTag = this->getDbTag();
+  ID theData(2);
+  if (theChannel.recvID(myDbTag, commitTag, theData) < 0) {
+    g3ErrorHandler->warning("PBowlLoading::recvSelf - channel failed to recv the initial ID");
+    return -1;
   }
 
-int PBowlLoading::sendSelf(int commitTag, Channel &theChannel)
-  {
-    cerr << "PBowlLoading::sendSelf() - not yet implemented\n";
-    return 0;
+  // set current tag
+  this->setTag(theData(0));
+
+  // now get info about each channel
+  ID theMotionsData (2*theData(1));
+  if (theChannel.recvID(myDbTag, commitTag, theMotionsData) < 0) {
+    g3ErrorHandler->warning("PBowlLoading::recvSelf - channel failed to recv the motions ID");
+    return -1;
   }
 
-int PBowlLoading::recvSelf(int commitTag,
-                           Channel &theChannel,
-                           FEM_ObjectBroker &theBroker)
-  {
-    cerr << "PBowlLoading::recvSelf() - not yet implemented\n";
-    return 0;
+
+  if (numMotions != theData(1)) {
+
+    //
+    // we must delete the old motions and create new ones and then invoke recvSelf on these new ones
+    //
+
+    if (numMotions != 0) {
+      for (int i=0; i<numMotions; i++)
+  delete theMotions[i];
+      delete [] theMotions;
+    }
+    numMotions = theData[1];
+    theMotions = new (GroundMotion *)[numMotions];
+    if (theMotions == 0) {
+      g3ErrorHandler->warning("PBowlLoading::recvSelf - out of memory creating motion array of size %d\n", numMotions);
+      numMotions = 0;
+      return -1;
+    }
+
+    for (int i=0; i<numMotions; i++) {
+      theMotions[i] = theBroker.getNewGroundMotion(theMotionsData[i]);
+      if (theMotions[i] == 0) {
+  g3ErrorHandler->warning("PBowlLoading::recvSelf - out of memory creating motion array of size %d\n", numMotions);
+  numMotions = 0;
+  return -1;
+      }
+      theMotions[i]->setDbTag(theMotionsData[i+numMotions]);
+      if (theMotions[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
+  g3ErrorHandler->warning("PBowlLoading::recvSelf - motion no: %d failed in recvSelf", i);
+  numMotions = 0;
+  return -1;
+      }
+    }
+
+  } else {
+
+    //
+    // we invoke rrecvSelf on the motions, note if a motion not of correct class
+    // we must invoke the destructor on the motion and create a new one of correct type
+    //
+
+    for (int i=0; i<numMotions; i++) {
+      if (theMotions[i]->getClassTag() == theMotionsData[i]) {
+  if (theMotions[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
+    g3ErrorHandler->warning("PBowlLoading::recvSelf - motion no: %d failed in recvSelf", i);
+    return -1;
+  }
+      } else {
+  // motion not of correct type
+  delete theMotions[i];
+  theMotions[i] = theBroker.getNewGroundMotion(theMotionsData[i]);
+  if (theMotions[i] == 0) {
+    g3ErrorHandler->warning("PBowlLoading::recvSelf - out of memory creating motion array of size %d\n", numMotions);
+    numMotions = 0;
+    return -1;
+  }
+  theMotions[i]->setDbTag(theMotionsData[i+numMotions]);
+  if (theMotions[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
+    g3ErrorHandler->warning("PBowlLoading::recvSelf - motion no: %d failed in recvSelf", i);
+    numMotions = 0;
+    return -1;
+  }
+      }
+    }
   }
 
-//**********************************************************************************************
-//*int
-//*PBowlLoading::sendSelf(int commitTag, Channel &theChannel)
-//*{
-//*  // first send the tag and info about the number of ground motions
-//*  int myDbTag = this->getDbTag();
-//*  ID theData(2);
-//*  theData(0) = this->getTag();
-//*  theData(1) = numMotions;
-//*
-//*  if (theChannel.sendID(myDbTag, commitTag, theData) < 0) {
-//*    g3ErrorHandler->warning("PBowlLoading::sendSelf - channel failed to send the initial ID");
-//*    return -1;
-//*  }
-//*
-//*  // now for each motion we send it's classsss tag and dbtag
-//*  ID theMotionsData(2*numMotions);
-//*  for (int i=0; i<numMotions; i++) {
-//*    theMotionsData[i] = theMotions[i]->getClassTag();
-//*    int motionsDbTag = theMotions[i]->getDbTag();
-//*    if (motionsDbTag == 0) {
-//*      motionsDbTag = theChannel.getDbTag();
-//*      theMotions[i]->setDbTag(motionsDbTag);
-//*    }
-//*    theMotionsData[i+numMotions] = motionsDbTag;
-//*  }
-//*
-//*  if (theChannel.sendID(myDbTag, commitTag, theMotionsData) < 0) {
-//*    g3ErrorHandler->warning("PBowlLoading::sendSelf - channel failed to send the motions ID");
-//*    return -1;
-//*  }
-//*
-//*  // now we send each motion
-//*  for (int j=0; j<numMotions; j++)
-//*    if (theMotions[j]->sendSelf(commitTag, theChannel) < 0) {
-//*      g3ErrorHandler->warning("PBowlLoading::sendSelf - motion no: %d failed in sendSelf", j);
-//*      return -1;
-//*    }
-//*
-//*  // if get here successfull
-//*  return 0;
-//*}
-//*
-//*int
-//*PBowlLoading::recvSelf(int commitTag, Channel &theChannel,
-//*       FEM_ObjectBroker &theBroker)
-//*{
-//*  // first get the tag and info about the number of ground motions from the Channel
-//*  int myDbTag = this->getDbTag();
-//*  ID theData(2);
-//*  if (theChannel.recvID(myDbTag, commitTag, theData) < 0) {
-//*    g3ErrorHandler->warning("PBowlLoading::recvSelf - channel failed to recv the initial ID");
-//*    return -1;
-//*  }
-//*
-//*  // set current tag
-//*  this->setTag(theData(0));
-//*
-//*  // now get info about each channel
-//*  ID theMotionsData (2*theData(1));
-//*  if (theChannel.recvID(myDbTag, commitTag, theMotionsData) < 0) {
-//*    g3ErrorHandler->warning("PBowlLoading::recvSelf - channel failed to recv the motions ID");
-//*    return -1;
-//*  }
-//*
-//*
-//*  if (numMotions != theData(1)) {
-//*
-//*    //
-//*    // we must delete the old motions and create new ones and then invoke recvSelf on these new ones
-//*    //
-//*
-//*    if (numMotions != 0) {
-//*      for (int i=0; i<numMotions; i++)
-//*  delete theMotions[i];
-//*      delete [] theMotions;
-//*    }
-//*    numMotions = theData[1];
-//*    theMotions = new (GroundMotion *)[numMotions];
-//*    if (theMotions == 0) {
-//*      g3ErrorHandler->warning("PBowlLoading::recvSelf - out of memory creating motion array of size %d\n", numMotions);
-//*      numMotions = 0;
-//*      return -1;
-//*    }
-//*
-//*    for (int i=0; i<numMotions; i++) {
-//*      theMotions[i] = theBroker.getNewGroundMotion(theMotionsData[i]);
-//*      if (theMotions[i] == 0) {
-//*  g3ErrorHandler->warning("PBowlLoading::recvSelf - out of memory creating motion array of size %d\n", numMotions);
-//*  numMotions = 0;
-//*  return -1;
-//*      }
-//*      theMotions[i]->setDbTag(theMotionsData[i+numMotions]);
-//*      if (theMotions[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-//*  g3ErrorHandler->warning("PBowlLoading::recvSelf - motion no: %d failed in recvSelf", i);
-//*  numMotions = 0;
-//*  return -1;
-//*      }
-//*    }
-//*
-//*  } else {
-//*
-//*    //
-//*    // we invoke rrecvSelf on the motions, note if a motion not of correct class
-//*    // we must invoke the destructor on the motion and create a new one of correct type
-//*    //
-//*
-//*    for (int i=0; i<numMotions; i++) {
-//*      if (theMotions[i]->getClassTag() == theMotionsData[i]) {
-//*  if (theMotions[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-//*    g3ErrorHandler->warning("PBowlLoading::recvSelf - motion no: %d failed in recvSelf", i);
-//*    return -1;
-//*  }
-//*      } else {
-//*  // motion not of correct type
-//*  delete theMotions[i];
-//*  theMotions[i] = theBroker.getNewGroundMotion(theMotionsData[i]);
-//*  if (theMotions[i] == 0) {
-//*    g3ErrorHandler->warning("PBowlLoading::recvSelf - out of memory creating motion array of size %d\n", numMotions);
-//*    numMotions = 0;
-//*    return -1;
-//*  }
-//*  theMotions[i]->setDbTag(theMotionsData[i+numMotions]);
-//*  if (theMotions[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-//*    g3ErrorHandler->warning("PBowlLoading::recvSelf - motion no: %d failed in recvSelf", i);
-//*    numMotions = 0;
-//*    return -1;
-//*  }
-//*      }
-//*    }
-//*  }
-//*
-//*  // if get here successfull
-//*  return 0;
-//*}
-//*
-//*
-//******************************************************************************************
+  // if get here successfull
+  return 0;
+}
 
-void PBowlLoading::Print(ostream &s, int flag)
-  {
-    cerr << "PBowlLoading::Print() - not yet implemented\n";
-  }
+
+***************************************************************************************** */
+
+void
+PBowlLoading::Print(ostream &s, int flag)
+{
+  cerr << "PBowlLoading::Print() - not yet implemented\n";
+}
 
 
 
 // method to obtain a blank copy of the LoadPattern
-LoadPattern * PBowlLoading::getCopy(void)
+LoadPattern *
+PBowlLoading::getCopy(void)
+{
+
+  cerr << "PBowlLoading::getCopy() - not yet implemented\n";
+  return 0;
+}
+
+/* ****************************************************************************************
+// method to obtain a blank copy of the LoadPattern
+LoadPattern *
+PBowlLoading::getCopy(void)
+{
+  PBowlLoading *theCopy = new PBowlLoading(0, 0);
+  theCopy->setTag(this->getTag);
+  theCopy->numMotions = numMotions;
+  theCopy->theMotions = new (GroundMotion *)[numMotions];
+  for (int i=0; i<numMotions; i++)
+    theCopy->theMotions[i] = theMotions[i];
+
+  return 0;
+}
+***************************************************************************************** */
+
+// void
+// PBowlLoading::addPBElements(const ID &PBEle)
+// {
+//   // create a copy of the vector containg plastic bowl elements
+//   PBowlElements = new ID(PBEle);
+//   // ensure we did not run out of memory
+//   if (PBowlElements == 0 || PBowlElements->Size() == 0) {
+//     cerr << "PBowlLoading::addPBElements() - ran out of memory constructing";
+//     cerr << " a Vector of size: " <<  PBowlElements->Size() << endl;
+//     if (PBowlElements != 0)
+//       delete PBowlElements;
+//     PBowlElements = 0;
+//   }
+//
+// }
+
+
+void
+PBowlLoading::CompPBLoads()
+{
+  //===========================================================
+  // Finding all plastic bowl nodes
+  //===========================================================
+  Domain *theDomain = this->getDomain();
+
+  //Assume all the plastic bowl elements have the same number of nodes
+  Element *theElement = theDomain->getElement( (*PBowlElements)(0) );
+  int NIE = theElement->getNumExternalNodes();
+
+  int max_bnode = PBowlElements->Size() * NIE;
+  ID *Bowl_node = new ID(max_bnode);
+  ID FirstEle = theElement->getExternalNodes();
+
+  int i, j, k;
+  //Inital node list from the first plastic bowl element
+  for (i = 0; i<NIE; i++)
+     (*Bowl_node)(i) = FirstEle(i);
+
+  //--------------------------------------------------
+  //Just make a list of all plastic bowl nodes, no need to sort??? Joey Yang Oct. 18, 2002
+  //--------------------------------------------------
+
+  int no_bnode = NIE;
+  int Bowl_elem_nb = PBowlElements->Size();
+  ID Temp;
+
+  for ( i=1; i<Bowl_elem_nb; i++)
   {
-    cerr << "PBowlLoading::getCopy() - not yet implemented\n";
-    return 0;
-  }
-
-//*****************************************************************************************
-//*// method to obtain a blank copy of the LoadPattern
-//*LoadPattern *
-//*PBowlLoading::getCopy(void)
-//*{
-//*  PBowlLoading *theCopy = new PBowlLoading(0, 0);
-//*  theCopy->setTag(this->getTag);
-//*  theCopy->numMotions = numMotions;
-//*  theCopy->theMotions = new (GroundMotion *)[numMotions];
-//*  for (int i=0; i<numMotions; i++)
-//*    theCopy->theMotions[i] = theMotions[i];
-//*
-//*  return 0;
-//*}
-//******************************************************************************************
-
-void PBowlLoading::addPBElements(const ID &PBEle)
-  {
-    // create a copy of the vector containg plastic bowl elements
-    PBowlElements = new ID(PBEle);
-    // ensure we did not run out of memory
-    if (PBowlElements == 0 || PBowlElements->Size() == 0) {
-      cerr << "PBowlLoading::addPBElements() - ran out of memory constructing";
-      cerr << " a Vector of size: " <<  PBowlElements->Size() << endl;
-      if (PBowlElements != 0)
-        delete PBowlElements;
-      PBowlElements = 0;
-    }
-
-  }
-
-
-void PBowlLoading::CompPBLoads()
-  {
-    //===========================================================
-    // Finding all plastic bowl nodes
-    //===========================================================
-    Domain *theDomain = this->getDomain();
-
-    //Assume all the plastic bowl elements have the same number of nodes
-    Element *theElement = theDomain->getElement( (*PBowlElements)(0) );
-    int NIE = theElement->getNumExternalNodes();
-
-    int max_bnode = PBowlElements->Size() * NIE;
-    ID *Bowl_node = new ID(max_bnode);
-    ID FirstEle = theElement->getExternalNodes();
-
-    int i, j, k;
-    //Inital node list from the first plastic bowl element
-    for (i = 0; i<NIE; i++)
-       (*Bowl_node)(i) = FirstEle(i);
-
-    //--------------------------------------------------
-    //Just make a list of all plastic bowl nodes, no need to sort??? Joey Yang Oct. 18, 2002
-    //--------------------------------------------------
-
-    int no_bnode = NIE;
-    int Bowl_elem_nb = PBowlElements->Size();
-    ID Temp;
-
-    for ( i=1; i<Bowl_elem_nb; i++)
+      theElement = theDomain->getElement( (*PBowlElements)(i) );
+      Temp = theElement->getExternalNodes();
+      for ( j=0;j<NIE;j++)
       {
-        theElement = theDomain->getElement( (*PBowlElements)(i) );
-        Temp = theElement->getExternalNodes();
-        for ( j=0;j<NIE;j++)
-          {
-            for (k = 0; k< no_bnode; k++)
-              {
-                if ( Temp(j) == (*Bowl_node)(k) )
-                //cout << Temp(j) << "  " << Bowl_node(k) << endl;
-                break;
-              } //endofIF
+        for (k = 0; k< no_bnode; k++) {
+           if ( Temp(j) == (*Bowl_node)(k) )
+           //cout << Temp(j) << "  " << Bowl_node(k) << endl;
+           break;
+        } //endofIF
 
-          //If no duplicate, add new node; otherwise, skip
-          if ( k == no_bnode)
-            {
-              (*Bowl_node)(no_bnode) = Temp(j);
-              no_bnode ++;
-            } //end of for (k=0...)
+        //If no duplicate, add new node; otherwise, skip
+        if ( k == no_bnode) {
+          (*Bowl_node)(no_bnode) = Temp(j);
+          no_bnode ++;
+        } //end of for (k=0...)
 
-          }//end of for (j=0...)
-
-      }
-    //--Joey------------------------------------------------
-
-    //check the bowl nodes
-    cout << "\nCheck all plastic bowl nodes...\n";
-    for (int bi=0;bi<no_bnode;bi++)
-         cout<< (*Bowl_node)(bi) <<"  ";
-    cout<< endl << "# of pbowl nodes = " << no_bnode<<endl;
-    //cout<<"finish inputting  and organizing the Bowl_node array"<<endl;
-
-
-    //Adding all plastic bowl nodes
-    PBowlNodes = new ID(no_bnode);
-
-    if (PBowlNodes == 0 || PBowlNodes->Size() == 0)
-      {
-        cerr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
-        cerr << " a Vector of size: " <<  PBowlNodes->Size() << endl;
-        if (PBowlNodes != 0)
-          {
-            delete PBowlNodes;
-          }
-        PBowlNodes = 0;
-      }
-    for (i =0; i < no_bnode; i++)
-      {
-        (*PBowlNodes)(i) = (*Bowl_node)(i);
-      }
-
-    //===========================================================
-    // Computing the equivalent(effective) forces for all plastic bowl nodes
-    //===========================================================
-
-    int cols = Udd->noRows();
-    //Matrix to hold the computed effective nodal forces for all plastic bowl DOFs and each time step
-    Matrix *F = new Matrix(cols, thetimeSteps);
-
-    //Assume all plastic bowl nodes have the same number of DOFs
-    Node *theNode = theDomain->getNode((*PBowlNodes)(0));
-    int NDOF = theNode->getNumberDOF();
-
-    Vector *Fm = new Vector(NIE*NDOF);
-    Vector *Fk  = new Vector(NIE*NDOF);
-    //Matrix *Ke= new Matrix(NIE*NDOF,NIE*NDOF);
-    //Matrix *Me= new Matrix(NIE*NDOF,NIE*NDOF);
-    Vector *u_e = new Vector(NIE*NDOF);
-    Vector *udd_e = new Vector(NIE*NDOF);
-
-
-    // intialize the F()
-    for ( i=0;i<cols; i++)
-        for ( j=0;j<thetimeSteps; j++)
-           (*F)(i,j)=0;
-
-    Element *theBowlElements;
-
-    for ( i=0; i<Bowl_elem_nb; i++)
-      {
-       // get the Brick;
-       theBowlElements = theDomain->getElement( (*PBowlElements)(i) );
-       const ID &nd = theBowlElements->getExternalNodes();
-
-       //Matrix Ke = theBowlElements ->getTangentStiff();
-       //Matrix Me = theBowlElements ->getMass();
-
-       //   get the u and u_dotdot for this element
-       for ( int t=0;t<thetimeSteps; t++)
-         {
-           //cout << "element: " << i << "" << " Time step: " << t << endl;
-           for (int j=0;j<NIE;j++)  //BJ make it into # of nodes per element (2D or 3D...)
-             {
-               for (int d=0;d<NDOF;d++)
-                 {
-                   (*u_e)(j*NDOF+d)      = (*U)( nd(j)*NDOF-NDOF+d,t);
-                   (*udd_e)(j*NDOF+d)    = (*Udd)( nd(j)*NDOF-NDOF+d,t);
-            //if ( (*nd)(j) == 109 )
-     //  cout << "----nd(J) u udd t= " << t << " dim =" << d << " " << (*nd)(j) << " " <<  (*u_e)(j*NDOF+d) << " " << (*udd_e)(j*NDOF+d) << endl;
-     //fflush(stdout);
-                 }
-             }
-
-           Fm->addMatrixVector(0.0, theBowlElements ->getMass(), (*udd_e), 1.0);
-       //cout<<"Fm = \n"<<Fm<<endl;
-       //cout<<Ke;
-
-           Fk->addMatrixVector(0.0, theBowlElements ->getTangentStiff(), (*u_e), 1.0);
-       //cout<<"Fk = \n"<<Fk<<endl;
-
-           for (int k=0;k<NIE; k++)
-             for (int d=0;d<NDOF;d++)
-               (*F)( nd(k)*NDOF-NDOF+d,t) =
-                 (*F)( nd(k)*NDOF-NDOF+d,t) - (*Fm)(k*NDOF+d) - (*Fk)(k*NDOF+d);
-
-         } //end for timestep
-
-      }  // end for bowl element
-
-    PBowlLoads = new Matrix(*F);
-    //cout <<  PBowlLoads->noCols() << " " << PBowlLoads->noRows() << endl;
-
-    // ensure we did not run out of memory
-    if (PBowlLoads->noRows() == 0 || PBowlLoads->noCols() == 0 )
-      {
-        cerr << "PBowlLoading::PBowlLoads() - ran out of memory";
-        cerr << " a Matrix of size: " <<  PBowlLoads->noRows() << " * " << PBowlLoads->noCols() << endl;
-      }
-
-    cout<<"\nFinish calculating the forces..." << endl << endl;
-    LoadComputed = true;
-
-    delete Fm;
-    delete Fk;
-    delete u_e;
-    delete udd_e;
-    delete F;
+      }//end of for (j=0...)
 
   }
+  //--Joey------------------------------------------------
+
+  //check the bowl nodes
+//test  cout << "\nCheck all plastic bowl nodes...\n";
+//test  for (int bi=0;bi<no_bnode;bi++)
+//test       cout<< (*Bowl_node)(bi) <<"  ";
+//test  cout<< endl << "# of pbowl nodes = " << no_bnode<<endl;
+  //cout<<"finish inputting  and organizing the Bowl_node array"<<endl;
 
 
-const Vector & PBowlLoading::getNodalLoad(int nodeTag, double time)
+  //Adding all plastic bowl nodes
+  PBowlNodes = new ID(no_bnode);
+
+  if (PBowlNodes == 0 || PBowlNodes->Size() == 0) {
+    cerr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
+    cerr << " a Vector of size: " <<  PBowlNodes->Size() << endl;
+    if (PBowlNodes != 0)
+      delete PBowlNodes;
+    PBowlNodes = 0;
+  }
+  for (i =0; i < no_bnode; i++)
+   (*PBowlNodes)(i) = (*Bowl_node)(i);
+
+  //===========================================================
+  // Computing the equivalent(effective) forces for all plastic bowl nodes
+  //===========================================================
+
+  int cols = Udd->noRows();
+  //Matrix to hold the computed effective nodal forces for all plastic bowl DOFs and each time step
+  Matrix *F = new Matrix(cols, thetimeSteps);
+
+  //Assume all plastic bowl nodes have the same number of DOFs
+  Node *theNode = theDomain->getNode((*PBowlNodes)(0));
+  int NDOF = theNode->getNumberDOF();
+
+  Vector *Fm = new Vector(NIE*NDOF);
+  Vector *Fk  = new Vector(NIE*NDOF);
+  //Matrix *Ke= new Matrix(NIE*NDOF,NIE*NDOF);
+  //Matrix *Me= new Matrix(NIE*NDOF,NIE*NDOF);
+  Vector *u_e = new Vector(NIE*NDOF);
+  Vector *udd_e = new Vector(NIE*NDOF);
+
+
+  // intialize the F()
+  for ( i=0;i<cols; i++)
+      for ( j=0;j<thetimeSteps; j++)
+         (*F)(i,j)=0;
+
+  Element *theBowlElements;
+
+  for ( i=0; i<Bowl_elem_nb; i++)
   {
-    Vector *dummy = new Vector(0);
-    //Get the node
-    Domain *theDomain = this->getDomain();
-    Node *theNode = theDomain->getNode(nodeTag);
-    if (theNode == 0) 
-      {
-        cerr << "PBowlLoading::getNodalLoad() - no nodes associtated to the nodeTag " << nodeTag << "\n";
-        return ( *dummy );
-      }
+   // get the Brick;
+   theBowlElements = theDomain->getElement( (*PBowlElements)(i) );
+   const ID &nd = theBowlElements->getExternalNodes();
 
-    delete dummy;
-  
-    //Create the nodal load vector accoding to the DOFs the node has
-    int numDOF = theNode->getNumberDOF();
-    Vector *nodalLoad = new Vector(numDOF);
-  
-  
-    //Get the nodal loads associated to the nodeTag
-    // check for a quick return
-    if (time < 0.0 || PBowlLoads == 0)
-      return (*nodalLoad);
-  
-    // determine indexes into the data array whose boundary holds the time
-    double incr = time/PBTimeIncr;
-    int incr1 = (int) floor(incr)-1;
-    int incr2 = incr1 + 1;
-    double value1=0, value2=0;
+   //Matrix Ke = theBowlElements ->getTangentStiff();
+   //Matrix Me = theBowlElements ->getMass();
 
-    int i;
-    if ( incr2 == thetimeSteps )
-      {
-        for (i = 0; i < numDOF; i++)
-          { 
-            (*nodalLoad)(i) = (*PBowlLoads)(i, incr1);
-          }
-      }
-    //If beyond time step, return 0 loads
-    else if (incr2 > thetimeSteps ) 
-      {
+   //   get the u and u_dotdot for this element
+   for ( int t=0;t<thetimeSteps; t++)
+   {
+     //cout << "element: " << i << "" << " Time step: " << t << endl;
+     for (int j=0;j<NIE;j++)  //BJ make it into # of nodes per element (2D or 3D...)
+     {
+       for (int d=0;d<NDOF;d++)
+       {
+         (*u_e)(j*NDOF+d)      = (*U)( nd(j)*NDOF-NDOF+d,t);
+         (*udd_e)(j*NDOF+d)    = (*Udd)( nd(j)*NDOF-NDOF+d,t);
+       }
+     }
+
+     Fm->addMatrixVector(0.0, theBowlElements ->getMass(), (*udd_e), 1.0);
+
+     Fk->addMatrixVector(0.0, theBowlElements ->getTangentStiff(), (*u_e), 1.0);
+
+     for (int k=0;k<NIE; k++)
+        for (int d=0;d<NDOF;d++)
+            (*F)( nd(k)*NDOF-NDOF+d,t) = (*F)( nd(k)*NDOF-NDOF+d,t) - (*Fm)(k*NDOF+d) - (*Fk)(k*NDOF+d);
+
+   } //end for timestep
+
+  }  // end for bowl element
+
+  PBowlLoads = new Matrix(*F);
+
+  // ensure we did not run out of memory
+  if (PBowlLoads->noRows() == 0 || PBowlLoads->noCols() == 0 ) {
+    cerr << "PBowlLoading::PBowlLoads() - ran out of memory";
+    cerr << " a Matrix of size: " <<  PBowlLoads->noRows() << " * " << PBowlLoads->noCols() << endl;
+  }
+
+//test  cout<<"\nFinish calculating the forces..." << endl << endl;
+  LoadComputed = true;
+
+  delete Fm;
+  delete Fk;
+  delete u_e;
+  delete udd_e;
+  delete F;
+
+}
+
+
+const Vector &
+PBowlLoading::getNodalLoad(int nodeTag, double time)
+{
+  Vector *dummy = new Vector(0);
+  //Get the node
+  Domain *theDomain = this->getDomain();
+  Node *theNode = theDomain->getNode(nodeTag);
+  if (theNode == 0) {
+     cerr << "PBowlLoading::getNodalLoad() - no nodes associtated to the nodeTag " << nodeTag << "\n";
+     return ( *dummy );
+  }
+
+  delete dummy;
+
+  //Create the nodal load vector accoding to the DOFs the node has
+  int numDOF = theNode->getNumberDOF();
+  Vector *nodalLoad = new Vector(numDOF);
+
+
+  //Get the nodal loads associated to the nodeTag
+  // check for a quick return
+  if (time < 0.0 || PBowlLoads == 0)
+    return (*nodalLoad);
+
+  // determine indexes into the data array whose boundary holds the time
+  double incr = time/PBTimeIncr;
+  int incr1 = (int) floor(incr)-1;
+  int incr2 = incr1 + 1;
+  double value1=0, value2=0;
+
+  int i;
+  if ( incr2 == thetimeSteps )
+    for (i = 0; i < numDOF; i++)
+       (*nodalLoad)(i) = (*PBowlLoads)(i, incr1);
+  //If beyond time step, return 0 loads
+  else if (incr2 > thetimeSteps ) {
 //test    if ( nodeTag == 109)
 //test       cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad)(0) << " "<< (*nodalLoad)(1) << " "<< (*nodalLoad)(2) << endl;
-        return (*nodalLoad);
-      }
+    return (*nodalLoad);
+  }
 
   //If within time step, return interpolated values
-  else 
-    {
-      for (i = 0; i < numDOF; i++)
-        {
-          value1 = (*PBowlLoads)(numDOF*(nodeTag-1)+i, incr1);
-          value2 = (*PBowlLoads)(numDOF*(nodeTag-1)+i, incr2);
-          (*nodalLoad)(i) = cFactor*(value1 + (value2-value1)*(time/PBTimeIncr - incr2));
-        }
+  else {
+    for (i = 0; i < numDOF; i++){
+       value1 = (*PBowlLoads)(numDOF*(nodeTag-1)+i, incr1);
+       value2 = (*PBowlLoads)(numDOF*(nodeTag-1)+i, incr2);
+       (*nodalLoad)(i) = cFactor*(value1 + (value2-value1)*(time/PBTimeIncr - incr2));
     }
+  }
 
 //test  if ( nodeTag == 109)
 //test    cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad)(0) << " "<< (*nodalLoad)(1) << " "<< (*nodalLoad)(2) << endl;
