@@ -942,6 +942,14 @@ SOURCE=..\..\..\SRC\material\nD\FiniteDeformation\LogWEnergy.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\nD\FiniteDeformation\MooneyRivlinSimoWEnergy.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\FiniteDeformation\MooneyRivlinSimoWEnergy.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\nD\FiniteDeformation\MooneyRivlinWEnergy.cpp
 # End Source File
 # Begin Source File
@@ -955,6 +963,14 @@ SOURCE=..\..\..\SRC\material\nD\FiniteDeformation\NeoHookeanWEnergy.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\nD\FiniteDeformation\NeoHookeanWEnergy.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\FiniteDeformation\OgdenSimoWEnergy.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\FiniteDeformation\OgdenSimoWEnergy.h
 # End Source File
 # Begin Source File
 
