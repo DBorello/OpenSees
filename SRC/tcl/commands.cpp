@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2001-10-02 00:19:29 $
+// $Revision: 1.19 $
+// $Date: 2001-10-19 23:47:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -212,6 +212,11 @@ TclVideoPlayer *theTclVideoPlayer =0;
 extern int myCommands(Tcl_Interp *interp);
 
 int g3AppInit(Tcl_Interp *interp) {
+
+#ifndef _LINUX  
+    cerr.setf(ios_base::scientific, ios_base::floatfield);
+#endif
+
     Tcl_CreateCommand(interp, "wipe", &wipeModel,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
     Tcl_CreateCommand(interp, "wipeAnalysis", &wipeAnalysis,

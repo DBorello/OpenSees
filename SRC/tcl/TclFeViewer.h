@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-26 01:00:29 $
+// $Revision: 1.4 $
+// $Date: 2001-10-19 23:47:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.h,v $
                                                                         
                                                                         
@@ -61,8 +61,8 @@ class TclFeViewer : public Recorder
 
     int buildFE_Model(void);
     
-    int record(int cTag);
-    int playback(int cTag);
+    int record(int commitTag, double timeStamp);
+    int playback(int commitTag);
     void restart(void);    
 
     // methods invoked on the ViewingSystem

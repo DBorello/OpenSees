@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 00:57:44 $
+// $Revision: 1.5 $
+// $Date: 2001-10-19 23:47:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.cpp,v $
                                                                         
                                                                         
@@ -227,7 +227,7 @@ TclFeViewer::~TclFeViewer()
 }
     
 int 
-TclFeViewer::record(int cTag)
+TclFeViewer::record(int cTag, double timeStamp)
 {
   //  theRenderer->displayModel(thetheEleMode, theNodeMode, theDisplayFact);
 
@@ -390,7 +390,7 @@ TclFeViewer::displayModel(int eleFlag, int nodeFlag, float displayFact)
   theEleMode = eleFlag;
   theNodeMode = nodeFlag;    
   theDisplayFact = displayFact;    
-  return this->record(0);
+  return this->record(0, 0.0);
 }
 
 int
