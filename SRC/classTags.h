@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2001-10-01 21:03:40 $
+// $Revision: 1.22 $
+// $Date: 2001-11-19 22:39:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -44,10 +44,14 @@
 
 #define EigenSOE_TAGS_BandArpackSOE 	1
 #define EigenSOE_TAGS_SymArpackSOE 	2
+#define EigenSOE_TAGS_SymBandEigenSOE   3
+
 #define EigenSOLVER_TAGS_BandArpackSolver 	1
 #define EigenSOLVER_TAGS_SymArpackSolver 	2
+#define EigenSOLVER_TAGS_SymBandEigenSolver     3
 
 #define EigenALGORITHM_TAGS_Frequency 1
+#define EigenALGORITHM_TAGS_Standard  2
 
 #define EigenINTEGRATOR_TAGS_Eigen 1
 
