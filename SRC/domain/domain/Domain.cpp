@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-02-26 06:30:17 $
+// $Revision: 1.12 $
+// $Date: 2002-04-02 19:31:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -72,7 +72,7 @@
 #include <FEM_ObjectBroker.h>
 
 Domain::Domain()
-:currentTime(0.0), committedTime(0.0), currentGeoTag(0),
+:currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
  dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
  eleGraphBuiltFlag(false),  nodeGraphBuiltFlag(false), theNodeGraph(0), 
@@ -116,7 +116,7 @@ Domain::Domain()
 
 Domain::Domain(int numNodes, int numElements, int numSPs, int numMPs,
 	       int numLoadPatterns)
-:currentTime(0.0), committedTime(0.0), currentGeoTag(0),
+:currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
  dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
@@ -163,7 +163,7 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
 	       TaggedObjectStorage &theMPsStorage,
 	       TaggedObjectStorage &theSPsStorage,
 	       TaggedObjectStorage &theLoadPatternsStorage)
-:currentTime(0.0), committedTime(0.0), currentGeoTag(0),
+:currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
  dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
@@ -217,7 +217,7 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
 
 
 Domain::Domain(TaggedObjectStorage &theStorage)
-:currentTime(0.0), committedTime(0.0), currentGeoTag(0),
+:currentTime(0.0), committedTime(0.0), dT(0.0), currentGeoTag(0),
  hasDomainChangedFlag(false), theDbTag(0), lastGeoSendTag(-1),
  dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
@@ -746,6 +746,7 @@ Domain::clearAll(void) {
     // set the time back to 0.0
     currentTime = 0.0;
     committedTime = 0.0;
+    dT = 0.0;
 
     // set the bounds around the origin
     theBounds(0) = 0;
@@ -1176,18 +1177,24 @@ void
 Domain::setCurrentTime(double newTime)
 {
     currentTime = newTime;
+    dT = currentTime - committedTime;
 }
 
 void
 Domain::setCommittedTime(double newTime)
 {
     committedTime = newTime;
+    dT = currentTime - committedTime;
 }
 
 
 void
 Domain::applyLoad(double timeStep)
 {
+    // set the current pseudo time in the domai to be newTime
+    currentTime = timeStep;
+    dT = currentTime - committedTime;
+
     //
     // first loop over nodes and elements getting them to first zero their loads
     //
@@ -1222,9 +1229,6 @@ Domain::applyLoad(double timeStep)
     SP_Constraint *theSP;
     while ((theSP = theSPs()) != 0)
 	theSP->applyConstraint(timeStep);
-
-    // set the current pseudo time in the domai to be newTime
-    currentTime = timeStep;
 }
 
 
@@ -1276,6 +1280,7 @@ Domain::commit(void)
 
     // set the new committed time in the domain
     committedTime = currentTime;
+    dT = 0.0;
 
     // invoke record on all recorders
     for (int i=0; i<numRecorders; i++)
@@ -1306,6 +1311,7 @@ Domain::revertToLastCommit(void)
 
     // set the current time and load factor in the domain to last committed
     currentTime = committedTime;
+    dT = 0.0;
 
     // apply load for the last committed time
     this->applyLoad(currentTime);
@@ -1335,6 +1341,7 @@ Domain::revertToStart(void)
     // set the current time and load factor in the domain to last committed
     committedTime = 0;
     currentTime = 0;
+    dT = 0.0;
 
     // apply load for the last committed time
     this->applyLoad(currentTime);
@@ -1345,14 +1352,18 @@ Domain::revertToStart(void)
 int
 Domain::update(void)
 {
-    // invoke update on all the ele's .. subdomains need this
-    ElementIter &theEles = this->getElements();
-    Element *theEle;
+  // set the global constants
+  ops_Dt = dT;
+  ops_TheActiveDomain = this;
 
-    while ((theEle = theEles()) != 0)
-	theEle->update();
+  // invoke update on all the ele's
+  ElementIter &theEles = this->getElements();
+  Element *theEle;
 
-    return 0;
+  while ((theEle = theEles()) != 0)
+    theEle->update();
+
+  return 0;
 }
 
 

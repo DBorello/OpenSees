@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-12-07 00:43:36 $
+// $Revision: 1.5 $
+// $Date: 2002-04-02 19:31:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
                                                                         
@@ -187,6 +187,7 @@ class Domain
   private:
     double currentTime;               // current pseudo time
     double committedTime;             // the committed pseudo time
+    double dT;                        // difference between committed and current time
     int	   currentGeoTag;             // an integer used to mark if domain has changed
     bool   hasDomainChangedFlag;      // a bool flag used to indicate if GeoTag needs to be ++
     int    theDbTag;                   // the Domains unique database tag == 0
