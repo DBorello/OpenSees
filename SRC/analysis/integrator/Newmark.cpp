@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-14 23:00:49 $
+// $Revision: 1.11 $
+// $Date: 2003-03-06 20:32:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
                                                                         
                                                                         
@@ -508,4 +508,25 @@ Newmark::Print(OPS_Stream &s, int flag)
     } else 
 	s << "\t Newmark - no associated AnalysisModel\n";
 }
+
+// AddingSensitivity:BEGIN //////////////////////////////
+int
+Newmark::revertToStart()
+{
+  if (Ut != 0) 
+    Ut->Zero();
+  if (Utdot != 0) 
+    Utdot->Zero();
+  if (Utdotdot != 0) 
+    Utdotdot->Zero();
+  if (U != 0) 
+    U->Zero();
+  if (Udot != 0) 
+    Udot->Zero();
+  if (Udotdot != 0) 
+    Udotdot->Zero();
+  
+  return 0;
+}
+// AddingSensitivity:END ////////////////////////////////
 

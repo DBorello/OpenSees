@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:48:08 $
+// $Revision: 1.7 $
+// $Date: 2003-03-06 20:32:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/TransientIntegrator.cpp,v $
                                                                         
                                                                         
@@ -116,14 +116,4 @@ TransientIntegrator::formNodUnbalance(DOF_Group *theDof)
   theDof->zeroUnbalance();
   theDof->addPIncInertiaToUnbalance();
   return 0;
-}    
-
-
-int
-TransientIntegrator::revertToStart()
-{
-	opserr << "ERROR: revertToStart() method not yet implemented " << endln
-		<< " for the chosen type of integrator. " << endln;
-
-	return 0;
 }    

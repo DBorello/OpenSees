@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-04-10 16:25:58 $
+// $Revision: 1.7 $
+// $Date: 2003-03-06 20:32:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.h,v $
                                                                         
                                                                         
@@ -82,10 +82,13 @@ class IncrementalIntegrator : public Integrator
     virtual int commit(void);
     virtual int revertToLastStep(void);
     virtual int initialize(void);
+
+// AddingSensitivity:BEGIN //////////////////////////////////
+    virtual int revertToStart();
+// AddingSensitivity:END ////////////////////////////////////
     
     // method introduced for domain decomposition
     virtual int getLastResponse(Vector &result, const ID &id);
-
     
   protected:
     LinearSOE *getLinearSOEPtr(void) const;

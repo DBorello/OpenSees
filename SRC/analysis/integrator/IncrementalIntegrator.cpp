@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:48 $
+// $Revision: 1.6 $
+// $Date: 2003-03-06 20:32:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.cpp,v $
                                                                         
                                                                         
@@ -184,6 +184,14 @@ IncrementalIntegrator::revertToLastStep(void)
   return 0;
 }   
 
+int
+IncrementalIntegrator::revertToStart()
+{
+  opserr << "ERROR: revertToStart() method not yet implemented " << endln
+	 << " for the chosen type of integrator. " << endln;
+  
+  return 0;
+}    
 
 LinearSOE *
 IncrementalIntegrator::getLinearSOEPtr(void) const
