@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-08-13 22:59:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.cpp,v $
                                                                         
                                                                         
@@ -45,7 +45,6 @@ HardeningMaterial::HardeningMaterial(int tag, double e, double s,
  E(e), sigmaY(s), K(k), H(h)
 {
     this->revertToStart();
-	this->revertToLastCommit();
 }
 
 HardeningMaterial::HardeningMaterial()
@@ -53,7 +52,6 @@ HardeningMaterial::HardeningMaterial()
  E(0.0), sigmaY(0.0), K(0.0), H(0.0)
 {
 	this->revertToStart();
-	this->revertToLastCommit();
 }
 
 HardeningMaterial::~HardeningMaterial()
@@ -141,7 +139,6 @@ int
 HardeningMaterial::commitState(void)
 {
     // Commit trial state variables
-    Cstrain = Tstrain;
     CplasticStrain = TplasticStrain;
     CbackStress = TbackStress;
     Chardening = Thardening;
@@ -154,15 +151,6 @@ HardeningMaterial::commitState(void)
 int 
 HardeningMaterial::revertToLastCommit(void)
 {
-    // Set trial state to last committed state
-    Tstrain = Cstrain;
-    TplasticStrain = CplasticStrain;
-    TbackStress = CbackStress;
-    Thardening = Chardening;
-
-    // Recompute trial stress and trial tangent
-	this->setTrialStrain(Cstrain);
-
     return 0;
 }
 
@@ -170,7 +158,6 @@ int
 HardeningMaterial::revertToStart(void)
 {
     // Reset committed state variables
-    Cstrain = 0.0;
     CplasticStrain = 0.0;
     CbackStress = 0.0;
     Chardening = 0.0;
@@ -196,7 +183,6 @@ HardeningMaterial::getCopy(void)
     theCopy->Thardening = Thardening;
     
     // Copy committed state variables
-    theCopy->Cstrain = Cstrain;
     theCopy->CplasticStrain = CplasticStrain;
     theCopy->CbackStress = CbackStress;
     theCopy->Chardening = Chardening;
@@ -209,17 +195,16 @@ HardeningMaterial::sendSelf(int cTag, Channel &theChannel)
 {
   int res = 0;
   
-  static Vector data(9);
+  static Vector data(8);
   
   data(0) = this->getTag();
   data(1) = E;
   data(2) = sigmaY;
   data(3) = K;
   data(4) = H;
-  data(5) = Cstrain;
-  data(6) = CplasticStrain;
-  data(7) = CbackStress;
-  data(8) = Chardening;
+  data(5) = CplasticStrain;
+  data(6) = CbackStress;
+  data(7) = Chardening;
   
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
@@ -234,7 +219,7 @@ HardeningMaterial::recvSelf(int cTag, Channel &theChannel,
 {
   int res = 0;
   
-  static Vector data(9);
+  static Vector data(8);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
@@ -248,10 +233,9 @@ HardeningMaterial::recvSelf(int cTag, Channel &theChannel,
     sigmaY = data(2);
     K = data(3);
     H = data(4);
-    Cstrain = data(5);
-    CplasticStrain = data(6);
-    CbackStress = data(7);
-    Chardening = data(8);
+    CplasticStrain = data(5);
+    CbackStress = data(6);
+    Chardening = data(7);
 
     // Set the trial state variables
     revertToLastCommit();

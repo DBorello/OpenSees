@@ -6,7 +6,7 @@ include ../../../Makefile.def
         HystereticMaterial.o EPPGapMaterial.o \
         ViscousMaterial.o SeriesMaterial.o \
         PathIndependentMaterial.o CableMaterial.o \
-	FedeasMaterial.o \
+	ENTMaterial.o FedeasMaterial.o  \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)

@@ -259,6 +259,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/ViscousMaterial.o \
 	$(FE)/material/uniaxial/PathIndependentMaterial.o \
 	$(FE)/material/uniaxial/CableMaterial.o \
+	$(FE)/material/uniaxial/ENTMaterial.o \
 	$(FE)/material/nD/NDMaterial.o \
 	$(FE)/material/nD/J2Plasticity.o \
 	$(FE)/material/nD/J2PlaneStress.o \
@@ -278,6 +279,8 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/TclModelBuilderNDMaterialCommand.o 
 
 FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
+	$(FE)/material/uniaxial/fedeas/FedeasHardeningMaterial.o \
+	$(FE)/material/uniaxial/fedeas/Hard1.o 
 
 SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/ElasticSection2d.o \

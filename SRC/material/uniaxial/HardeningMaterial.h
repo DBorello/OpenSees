@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-08-13 22:59:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.h,v $
                                                                         
                                                                         
@@ -85,7 +85,6 @@ class HardeningMaterial : public UniaxialMaterial
     double Thardening;	// Trial internal hardening variable
 	
     // Committed history variables
-    double Cstrain;	// Committed strain
     double CplasticStrain;	// Committed plastic strain
     double CbackStress;	// Committed back stress;
     double Chardening;	// Committed internal hardening variable
