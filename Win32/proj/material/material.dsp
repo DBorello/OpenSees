@@ -343,6 +343,14 @@ SOURCE=..\..\..\SRC\material\uniaxial\EPPGapMaterial.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\uniaxial\FatigueMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\FatigueMaterial.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\uniaxial\FedeasMaterial.cpp
 # End Source File
 # Begin Source File
