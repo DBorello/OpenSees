@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-03-29 03:51:07 $
+// $Revision: 1.5 $
+// $Date: 2001-06-14 22:16:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -863,6 +863,15 @@ Truss::getResponse(int responseID, Information &eleInfo)
 int
 Truss::setParameter (char **argv, int argc, Information &info)
 {
+    if (argc < 1)
+        return -1;
+
+    // Cross sectional area of the truss itself
+    if (strcmp(argv[0],"A") == 0) {
+        info.theType = DoubleType;
+        return 1;
+    }
+
     // a material parameter
     if (strcmp(argv[0],"material") == 0) {
 		int ok = theMaterial->setParameter(&argv[1], argc-1, info);
@@ -885,6 +894,10 @@ Truss::updateParameter (int parameterID, Information &info)
     case -1:
       return -1;
       
+    case 1:
+        this->A = info.theDouble;
+        return 0;
+
     default:
       if (parameterID >= 100)
 	  return theMaterial->updateParameter(parameterID-100, info);
