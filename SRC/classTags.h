@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2001-08-26 23:34:16 $
+// $Revision: 1.19 $
+// $Date: 2001-08-28 23:33:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -215,6 +215,7 @@
 #define ELE_TAG_BeamWithHinges2d  401  
 #define ELE_TAG_BeamWithHinges3d  402
 #define ELE_TAG_EightNodeBrick   7001
+#define ELE_TAG_TwentyNodeBrick   7002
 #define ELE_TAG_PlateMITC4      2023 
 #define ELE_TAG_ShellMITC4      2024 
 #define ELE_TAG_Plate1          2022 

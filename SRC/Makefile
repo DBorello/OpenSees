@@ -107,8 +107,6 @@ NDARRAY_BJ_LIBS = $(FE)/nDarray/basics.o \
 MATMOD_BJ_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o  \
 	$(FE)/material/nD/PressureDependentElastic3D.o \
 	$(FE)/material/nD/Template3Dep/MatPoint3D.o \
-	$(FE)/element/8nbrick/EightNodeBrick.o \
-	$(FE)/element/8nbrick/TclEightNodeBrickCommand.o \
 	$(FE)/material/nD/Template3Dep/TclTemplate3DepCommand.o \
 	$(FE)/material/nD/Template3Dep/Template3Dep.o \
 	$(FE)/material/nD/Template3Dep/EPState.o \
@@ -129,7 +127,9 @@ MATMOD_BJ_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o  \
 	$(FE)/material/nD/Template3Dep/EL_LEij.o
 
 ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
-                  $(FE)/element/8nbrick/TclEightNodeBrickCommand.o
+                  $(FE)/element/8nbrick/TclEightNodeBrickCommand.o \
+                  $(FE)/element/20nbrick/TwentyNodeBrick.o \
+                  $(FE)/element/20nbrick/TclTwentyNodeBrickCommand.o 
 
 
 ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
