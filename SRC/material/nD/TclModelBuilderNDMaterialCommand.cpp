@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2000-12-19 04:00:06 $
+// $Revision: 1.6 $
+// $Date: 2001-01-24 07:46:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -37,6 +37,7 @@
 #include <TclModelBuilder.h>
 
 #include <ElasticIsotropicMaterial.h>
+#include <ElasticIsotropic3D.h>
 #include <J2Plasticity.h>
 #include <BidirectionalMaterial.h>
 
@@ -70,7 +71,56 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     NDMaterial *theMaterial = 0;
 
     // Check argv[1] for ND material type
-    if (strcmp(argv[1],"ElasticIsotropic") == 0) {
+
+    //jan 20, 2001 Boris Jeremic & ZHaohui Yang jeremic|zhyang@ucdavis.edu
+    if (strcmp(argv[1],"ElasticIsotropic3D") == 0) {
+	if (argc < 5) {
+	    cerr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: nDMaterial ElasticIsotropic3D tag? E? v? exp?" << endl;
+	    return TCL_ERROR;
+	}    
+
+	int tag;
+	double E, v, expp;
+	
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid ElasticIsotropic3D tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
+	    cerr << "WARNING invalid E\n";
+	    cerr << "nDMaterial ElasticIsotropic3D: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[4], &v) != TCL_OK) {
+	    cerr << "WARNING invalid v\n";
+	    cerr << "nDMaterial ElasticIsotropic3D: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+	
+	if( argc == 6 )
+	   //get the exponent of the pressure sensitive elastic material)
+	   if (Tcl_GetDouble(interp, argv[5], &expp) != TCL_OK) {
+	       cerr << "WARNING invalid v\n";
+	       cerr << "nDMaterial ElasticIsotropic3D: " << tag << endl;
+	       return TCL_ERROR;	
+	   }
+	else
+	   expp = 0.0;
+
+	//NDMaterial *temp = new ElasticIsotropic3D (tag, E, v, expp);
+	theMaterial = new ElasticIsotropic3D (tag, E, v, expp);
+	// Obtain a specific copy if requested
+	//if (argc > 5)
+	//    theMaterial = temp->getCopy(argv[5]);
+	//else
+	//    theMaterial = temp;
+	}	
+
+    else if (strcmp(argv[1],"ElasticIsotropic") == 0) {
 	if (argc < 5) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
