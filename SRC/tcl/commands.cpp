@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-06-14 22:22:22 $
+// $Revision: 1.8 $
+// $Date: 2001-07-19 00:41:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -83,8 +83,9 @@ extern "C" {
 #include <NewtonLineSearch.h>
 #include <ModifiedNewton.h>
 #include <FrequencyAlgo.h>
-//#include <Broyden.h>
-//#include <BFGS.h>
+#include <Broyden.h>
+#include <BFGS.h>
+#include <KrylovNewton.h>
 
 // constraint handlers
 #include <PlainHandler.h>
@@ -183,6 +184,10 @@ static ConvergenceTest *theTest =0;
 static bool builtModel = false;
 
 static EigenAnalysis *theEigenAnalysis = 0;
+
+static char *resDataPtr = 0;
+static int resDataSize = 0;
+
 
 ErrorHandler *g3ErrorHandler =0;
 TclVideoPlayer *theTclVideoPlayer =0;
@@ -1258,6 +1263,73 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
     theNewAlgo = new NewtonRaphson(*theTest, formTangent); 
   }
 
+  else if (strcmp(argv[1],"KrylovNewton") == 0) {
+    int formTangent = CURRENT_TANGENT;
+    if (argc > 2) {
+      if (strcmp(argv[2],"-secant") == 0) {
+	formTangent = CURRENT_SECANT;
+      } else if (strcmp(argv[2],"-initial") == 0) {
+	formTangent = INITIAL_TANGENT;
+      }
+    }
+
+    if (theTest == 0) {
+      interp->result = "ERROR: No ConvergenceTest yet specified\n";
+      return TCL_ERROR;	  
+    }
+    theNewAlgo = new KrylovNewton(*theTest, formTangent); 
+  }
+
+  else if (strcmp(argv[1],"Broyden") == 0) {
+    int formTangent = CURRENT_TANGENT;
+    int count = -1;
+    if (argc > 2) {
+      count = atoi(argv[2]);
+    }
+    if (argc > 3) {
+      if (strcmp(argv[3],"-secant") == 0) {
+	formTangent = CURRENT_SECANT;
+      } else if (strcmp(argv[3],"-initial") == 0) {
+	formTangent = INITIAL_TANGENT;
+      }
+    }
+
+    if (theTest == 0) {
+      interp->result = "ERROR: No ConvergenceTest yet specified\n";
+      return TCL_ERROR;	  
+    }
+
+    if (count == -1)
+      theNewAlgo = new Broyden(*theTest, formTangent); 
+    else
+      theNewAlgo = new Broyden(*theTest, formTangent, count); 
+  }
+
+  else if (strcmp(argv[1],"BFGS") == 0) {
+    int formTangent = CURRENT_TANGENT;
+    int count = -1;
+    if (argc > 2) {
+      count = atoi(argv[2]);
+    }
+    if (argc > 3) {
+      if (strcmp(argv[3],"-secant") == 0) {
+	formTangent = CURRENT_SECANT;
+      } else if (strcmp(argv[3],"-initial") == 0) {
+	formTangent = INITIAL_TANGENT;
+      }
+    }
+
+    if (theTest == 0) {
+      interp->result = "ERROR: No ConvergenceTest yet specified\n";
+      return TCL_ERROR;	  
+    }
+
+    if (count == -1)
+      theNewAlgo = new BFGS(*theTest, formTangent); 
+    else
+      theNewAlgo = new BFGS(*theTest, formTangent, count); 
+  }
+  
   else if (strcmp(argv[1],"ModifiedNewton") == 0) {
     int formTangent = CURRENT_TANGENT;
     if (argc > 2) {
@@ -1931,19 +2003,26 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 
     }    
 
+    int requiredDataSize = 20*numEigen;
+    if (requiredDataSize > resDataSize) {
+      if (resDataPtr != 0)
+	delete [] resDataPtr;
+
+      resDataPtr = new char[requiredDataSize];
+    }
+    for (int i=0; i<requiredDataSize; i++)
+      resDataPtr[i] = '\n';
 
     if (theEigenAnalysis->analyze(numEigen) == 0) {
-      char *eigenvalueS = new char[15 * numEigen];    
+      //      char *eigenvalueS = new char[15 * numEigen];    
       const Vector &eigenvalues = theDomain.getEigenvalues();
       int cnt = 0;
 
       for (int i=0; i<numEigen; i++) {
-	double eigenvalue = eigenvalues[i];
-	cnt += sprintf(&eigenvalueS[cnt], "%.6e  ", eigenvalues[i]);
+	cnt += sprintf(&resDataPtr[cnt], "%.6e  ", eigenvalues[i]);
       }
 
-      Tcl_SetResult(interp, eigenvalueS, TCL_VOLATILE);
-      delete [] eigenvalueS;
+      Tcl_SetResult(interp, resDataPtr, TCL_STATIC);
     }
 
     delete theEigenAnalysis;
