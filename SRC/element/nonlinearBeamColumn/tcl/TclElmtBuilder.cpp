@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2001-05-30 07:15:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/tcl/TclElmtBuilder.cpp,v $
                                                                                                                                  
 // File: ~/tcl/TclElmtBuilder.C
@@ -46,6 +46,7 @@
 //#include <LargeDispBeamColumn3d.h>
 
 #include <LinearCrdTransf2d.h>
+#include <PDeltaCrdTransf2d.h>
 //#include <CorotCrdTransf2d.h>
 #include <LinearCrdTransf3d.h>
 //#include <CorotCrdTransf3d.h>
@@ -489,98 +490,82 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
    NDF = theTclModelBuilder->getNDF();   // number of degrees of freedom per node
 
    // create 2d coordinate transformation
-   if (NDM == 2 && NDF == 3)     
-   {
-      if ((strcmp(argv[1],"Linear") == 0) || (strcmp(argv[1],"LinearWithPDelta") == 0) || (strcmp(argv[1],"Corotational") == 0))
-      {
-	 int crdTransfTag;
-         Vector jntOffsetI(2), jntOffsetJ(2);
+	if (NDM == 2 && NDF == 3) {
+
+		int crdTransfTag;
+		Vector jntOffsetI(2), jntOffsetJ(2);
 	 
-	 if (argc < 3) 
-	 {
-       	    interp->result = "WARNING insufficient arguments - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>"; 
-	    return TCL_ERROR;
-	 }
+		if (argc < 3) {
+			interp->result = "WARNING insufficient arguments - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>"; 
+			return TCL_ERROR;
+		}
 	    
-         int argi = 2;  
-         if (Tcl_GetInt(interp, argv[argi++], &crdTransfTag) != TCL_OK)
-	 {	
-	    interp->result = "WARNING invalid tag - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
-	    return  TCL_ERROR;
-	 }
+		int argi = 2;  
+		if (Tcl_GetInt(interp, argv[argi++], &crdTransfTag) != TCL_OK) {	
+			interp->result = "WARNING invalid tag - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+			return  TCL_ERROR;
+		}
 
-	 // allow additional options at end of command
-	 int i;
+		// allow additional options at end of command
+		int i;
 
-	 while (argi != argc) 
-         {
-	    if (strcmp(argv[argi],"-jntOffset") == 0) 
-            {
-	       argi++;
-               for (i = 0; i < 2; i++)
-	       {
-                  if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetI(i)) != TCL_OK) 
-                  {
-                     interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
-		     return TCL_ERROR;
-                  }
-	       }
- 
-	       for (i = 0; i < 2; i++)
-               {
-	          if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetJ(i)) != TCL_OK) 
-		  {
-                     interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
-		     return TCL_ERROR;
-		  }
-               }
-	    }
-	 
-	    else
-	    {
-               interp->result = "WARNING bad command - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
-               cerr << "invalid: " << argv[argi] << endl;
-               return TCL_ERROR;
-            }
-         }
+		while (argi != argc) {
+			if (strcmp(argv[argi],"-jntOffset") == 0) {
+				argi++;
+				for (i = 0; i < 2; i++) {
+					if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetI(i)) != TCL_OK) {
+						interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+						return TCL_ERROR;
+					}
+				}
+				
+				for (i = 0; i < 2; i++) {
+					if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetJ(i)) != TCL_OK) {
+						interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+						return TCL_ERROR;
+					}
+				}
+			}
+			else {
+				interp->result = "WARNING bad command - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+				cerr << "invalid: " << argv[argi] << endl;
+				return TCL_ERROR;
+			}
+		}
 
-	 // construct the transformation object
-    
-         CrdTransf2d *crdTransf2d;
+		// construct the transformation object
+		CrdTransf2d *crdTransf2d;
 
-	 if (strcmp(argv[1],"Linear") == 0)
-     	    crdTransf2d = new LinearCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ, 0);
-
-	 else if (strcmp(argv[1],"LinearWithPDelta") == 0)
-     	    crdTransf2d = new LinearCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ, 1);
-
-	 //else if (strcmp(argv[1],"Corotational") == 0)
-     //	    crdTransf2d = new CorotCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
-	 else
-         {
-            interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
-	    return TCL_ERROR;
-	 }
-     
-	 if (crdTransf2d == 0)
-	 {
-            interp->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
-	    return TCL_ERROR;
-	 }
-
-	 // add the transformation to the modelBuilder
-	 if (theTclModelBuilder->addCrdTransf2d(*crdTransf2d)) 
-	 {
-             interp->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
-             return TCL_ERROR;
-         }
-      }
-      else
-      {
-         interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid geomTransf type";
-         return TCL_ERROR;
-      }
-   }
+		if (strcmp(argv[1],"Linear") == 0) {
+			if (jntOffsetI.Norm() > 0.0 || jntOffsetJ.Norm() > 0.0)
+				crdTransf2d = new LinearCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
+			else
+				crdTransf2d = new LinearCrdTransf2d(crdTransfTag);
+		}
+		else if (strcmp(argv[1],"LinearWithPDelta") == 0 || strcmp(argv[1],"PDelta") == 0) {
+			if (jntOffsetI.Norm() > 0.0 || jntOffsetJ.Norm() > 0.0)
+				crdTransf2d = new PDeltaCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
+			else
+				crdTransf2d = new PDeltaCrdTransf2d(crdTransfTag);
+		}
+		//else if (strcmp(argv[1],"Corotational") == 0)
+		//	    crdTransf2d = new CorotCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
+		else {
+			interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
+			return TCL_ERROR;
+		}
+		
+		if (crdTransf2d == 0) {
+			interp->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
+			return TCL_ERROR;
+		}
+		
+		// add the transformation to the modelBuilder
+		if (theTclModelBuilder->addCrdTransf2d(*crdTransf2d)) {
+			interp->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
+			return TCL_ERROR;
+		}
+	}
    else if  (NDM == 3 && NDF == 6)
    {
       if ((strcmp(argv[1],"Linear") == 0) || (strcmp(argv[1],"LinearWithPDelta") == 0) || (strcmp(argv[1],"Corotational") == 0))

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-05-08 05:24:10 $
+// $Revision: 1.7 $
+// $Date: 2001-05-30 07:15:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -175,9 +175,11 @@
 
 
 #define CRDTR_TAG_LinearCrdTransf2d 1
-#define CRDTR_TAG_CorotCrdTransf2d  2
-#define CRDTR_TAG_LinearCrdTransf3d 3
-#define CRDTR_TAG_CorotCrdTransf3d  4
+#define CRDTR_TAG_PDeltaCrdTransf2d 2
+#define CRDTR_TAG_CorotCrdTransf2d  3
+#define CRDTR_TAG_LinearCrdTransf3d 4
+#define CRDTR_TAG_PDeltaCrdTransf3d 5
+#define CRDTR_TAG_CorotCrdTransf3d  6
 
 #define NOD_TAG_Node      	1
 #define NOD_TAG_DummyNode 	2

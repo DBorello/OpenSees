@@ -59,6 +59,7 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/coordTransformation/CrdTransf2d.o \
 	$(FE)/coordTransformation/CrdTransf3d.o \
 	$(FE)/coordTransformation/LinearCrdTransf2d.o \
+	$(FE)/coordTransformation/PDeltaCrdTransf2d.o \
 	$(FE)/coordTransformation/LinearCrdTransf3d.o \
 	$(FE)/element/nonlinearBeamColumn/tcl/TclElmtBuilder.o
 

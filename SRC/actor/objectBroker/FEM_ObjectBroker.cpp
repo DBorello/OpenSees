@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-03 06:35:32 $
+// $Revision: 1.4 $
+// $Date: 2001-05-30 07:15:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -100,6 +100,7 @@
 #include <NLBeamColumn3d.h>
 
 #include <LinearCrdTransf2d.h>
+#include <PDeltaCrdTransf2d.h>
 #include <LinearCrdTransf3d.h>
 
 // node header files
@@ -385,6 +386,8 @@ FEM_ObjectBroker::getNewCrdTransf2d(int classTag)
 	switch(classTag) {
 	case CRDTR_TAG_LinearCrdTransf2d:
 		return new LinearCrdTransf2d();
+	case CRDTR_TAG_PDeltaCrdTransf2d:
+		return new PDeltaCrdTransf2d();
 	//case CRDTR_TAG_CorotCrdTransf2d :
 	//	return new CorotCrdTransf2d();
 	default:
