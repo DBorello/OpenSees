@@ -1,5 +1,5 @@
-// $Revision: 1.10 $
-// $Date: 2001-09-20 04:21:09 $
+// $Revision: 1.11 $
+// $Date: 2001-09-22 01:36:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -19,19 +19,17 @@
 
 int PressureIndependMultiYield::loadStage = 0;
 Matrix PressureIndependMultiYield::theTangent(6,6);
-T2Vector PressureIndependMultiYield::subStrainRate = Vector(6);
+T2Vector PressureIndependMultiYield::subStrainRate;
 Vector PressureIndependMultiYield::workV(3);
 Matrix PressureIndependMultiYield::workM(3,3);
-
-const Vector zeroVector(6);
 
 PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double refShearModul,
     			  		                  double refBulkModul, double frictionAng,
 								                  double peakShearStra, double refPress, 
 																	double cohesi, 	double pressDependCoe,
 																	int numberOfYieldSurf)
- : NDMaterial(tag,ND_TAG_PressureIndependMultiYield), currentStress(zeroVector),
-   trialStress(zeroVector), currentStrain(zeroVector), strainRate(zeroVector)
+ : NDMaterial(tag,ND_TAG_PressureIndependMultiYield), currentStress(),
+   trialStress(), currentStrain(), strainRate()
 {
 	if (nd !=2 && nd !=3) {
 		cerr << "FATAL:PressureIndependMultiYield:: dimension error" << endl;
@@ -101,8 +99,8 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double 
 
 PressureIndependMultiYield::PressureIndependMultiYield () 
  : NDMaterial(0,ND_TAG_PressureIndependMultiYield), 
-   currentStress(zeroVector), trialStress(zeroVector), currentStrain(zeroVector), 
-	 strainRate(zeroVector)
+   currentStress(), trialStress(), currentStrain(), 
+	 strainRate()
 {
 	ndm = 3;
   loadStage = 0;   
@@ -197,7 +195,10 @@ int PressureIndependMultiYield::setTrialStrain (const Vector &strain)
 	else if (ndm==2 && strain.Size()==3) {
 	  temp[0] = strain[0];
 	  temp[1] = strain[1];
+	  temp[2] = 0.0;
 	  temp[3] = strain[2];
+	  temp[4] = 0.0;
+	  temp[5] = 0.0;
   }
 	else {
 		cerr << "Fatal:D2PressDepMYS:: Material dimension is: " << ndm << endl;
@@ -522,8 +523,9 @@ void PressureIndependMultiYield::setUpSurfaces (void)
         if (plast_modul < 0) plast_modul = 0;
         if (plast_modul > UP_LIMIT) plast_modul = UP_LIMIT;
         if (ii==numOfSurfaces) plast_modul = 0;
-         
-        committedSurfaces[ii] = MultiYieldSurface(zeroVector,size,plast_modul);
+
+		static Vector temp(6);
+        committedSurfaces[ii] = MultiYieldSurface(temp,size,plast_modul);
   }  // ii   
 }
 
@@ -594,10 +596,11 @@ void PressureIndependMultiYield::paramScaling(void)
   refShearModulus *= scale;
    
   double plastModul, size;
+  static Vector temp(6);
 	for (int i=1; i<=numOfSurfaces; i++) {
 		 plastModul = committedSurfaces[i].modulus() * scale;
      size = committedSurfaces[i].size() * conHeig;
-     committedSurfaces[i] =  MultiYieldSurface(zeroVector,size,plastModul);
+     committedSurfaces[i] =  MultiYieldSurface(temp,size,plastModul);
 	}
 }
 
@@ -612,7 +615,7 @@ void PressureIndependMultiYield::setTrialStress(T2Vector & stress)
 int PressureIndependMultiYield::setSubStrainRate(void)
 {
 	if (activeSurfaceNum==numOfSurfaces) return 1;
-  if (strainRate==T2Vector(zeroVector)) return 0;
+  if (strainRate==T2Vector()) return 0;
 
 	double elast_plast_modulus;
 	if (activeSurfaceNum==0) elast_plast_modulus = 2*refShearModulus;

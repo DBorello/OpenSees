@@ -1,5 +1,5 @@
-// $Revision: 1.5 $
-// $Date: 2001-09-20 04:21:08 $
+// $Revision: 1.6 $
+// $Date: 2001-09-22 01:36:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -19,7 +19,6 @@
 
 int FluidSolidPorousMaterial::loadStage = 0;
 double FluidSolidPorousMaterial::AtmoPress = 0.;
-const Vector zeroVector(6);
 
 Vector FluidSolidPorousMaterial::workV3(3);
 Vector FluidSolidPorousMaterial::workV6(6);

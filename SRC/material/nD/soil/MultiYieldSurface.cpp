@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2001-08-07 22:31:03 $
+// $Revision: 1.3 $
+// $Date: 2001-09-22 01:36:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/MultiYieldSurface.cpp,v $
                                                                         
 // Written: ZHY
@@ -16,22 +16,19 @@
 
 #include <MultiYieldSurface.h>
 
-const Vector zeroVector = Vector(6);
-
 
 // YieldSurface class methods
-MultiYieldSurface::MultiYieldSurface()
+MultiYieldSurface::MultiYieldSurface():
+theSize(0.0), theCenter(6), plastShearModulus(0.0)
 {
-  theSize = plastShearModulus = 0.;
-  theCenter = zeroVector;
+
 }
 
 MultiYieldSurface::MultiYieldSurface(const Vector & theCenter_init, 
-                                     double theSize_init, double plas_modul) 
+                                     double theSize_init, double plas_modul):
+theSize(theSize_init), theCenter(theCenter_init), plastShearModulus(plas_modul)
 {
-  theCenter = theCenter_init;
-  theSize = theSize_init;
-  plastShearModulus = plas_modul;
+
 }
 
 MultiYieldSurface::~MultiYieldSurface()
