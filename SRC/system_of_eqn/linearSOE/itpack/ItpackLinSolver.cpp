@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-05-28 19:20:14 $
+// $Revision: 1.2 $
+// $Date: 2002-06-08 16:17:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/itpack/ItpackLinSolver.cpp,v $
                                                                         
 // Written: MHS
@@ -36,7 +36,7 @@
 #include <ID.h>
 
 ItpackLinSolver::ItpackLinSolver(int meth, int iter, double om)
-  :LinearSOESolver(SolverTags_Itpack),
+  :LinearSOESolver(SOLVER_TAGS_Itpack),
    theSOE(0), IA(0), JA(0), n(0),
    iwksp(0), wksp(0), nwksp(0), maxIter(iter),
    method(meth), omega(om)
@@ -45,7 +45,7 @@ ItpackLinSolver::ItpackLinSolver(int meth, int iter, double om)
 }    
 
 ItpackLinSolver::ItpackLinSolver()
-  :LinearSOESolver(SolverTags_Itpack),
+  :LinearSOESolver(SOLVER_TAGS_Itpack),
    theSOE(0), IA(0), JA(0), n(0),
    iwksp(0), wksp(0), nwksp(0), maxIter(0),
    method(0), omega(0.0)

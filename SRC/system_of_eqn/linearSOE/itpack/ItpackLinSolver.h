@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-05-28 19:20:14 $
+// $Revision: 1.2 $
+// $Date: 2002-06-08 16:17:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/itpack/ItpackLinSolver.h,v $
 
 #ifndef ItpackLinSolver_h
@@ -33,8 +33,6 @@
 // unsymmetric linear system of equations using 1d arrays in Fortan style
 
 #include <LinearSOESolver.h>
-
-#define SolverTags_Itpack 1976
 
 // Adaptive methods
 #define ItpackJCG         1

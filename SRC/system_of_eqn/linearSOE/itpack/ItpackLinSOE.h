@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-05-28 19:20:14 $
+// $Revision: 1.2 $
+// $Date: 2002-06-08 16:17:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/itpack/ItpackLinSOE.h,v $
                                                                         
                                                                         
@@ -41,8 +41,6 @@
 
 #include <LinearSOE.h>
 #include <Vector.h>
-
-#define LinSOE_TAGS_ItpackLinSOE 1976
 
 class ItpackLinSolver;
 
