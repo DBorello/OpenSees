@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2000-10-14 05:44:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -67,14 +67,12 @@ Truss::Truss(int tag,
 	     int dim,
 	     int Nd1, int Nd2, 
 	     UniaxialMaterial &theMat,
-	     double a, double rho,
-	     double A0, double Ak, double Bk)
+	     double a, double rho)
  :Element(tag,ELE_TAG_Truss),     
   theMaterial(0), connectedExternalNodes(2),
   dimension(dim), numDOF(0), theLoad(0),
   theMatrix(0), theVector(0), t(0),
-  L(0.0), A(a), M(rho), end1Ptr(0), end2Ptr(0),
-  alpha0(A0), alphaK(Ak), betaK(Bk), E0(0.0)
+  L(0.0), A(a), M(rho), end1Ptr(0), end2Ptr(0)
 {
     // get a copy of the material and check we obtained a valid copy
     theMaterial = theMat.getCopy();
@@ -89,9 +87,6 @@ Truss::Truss(int tag,
 			    "failed to create an ID of size 2");
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;        
-
-    // set the initial tangent
-    E0 = theMaterial->getTangent();    
 }
 
 // constructor:
@@ -428,67 +423,7 @@ Truss::getSecantStiff(void)
 const Matrix &
 Truss::getDamp(void)
 {
-    if (L == 0.0) { // - problem in setDomain() no further warnings
-	theMatrix->Zero();
-	return *theMatrix;
-    }
-
-    if (alpha0 == 0.0 && alphaK == 0.0)
-	theMatrix->Zero();
-    else {
-	// determine the current strain given trial displacements at nodes
-	double strain = this->computeCurrentStrain();
-
-	// get the current E from the material for this strain
-	theMaterial->setTrialStrain(strain);
-	double E = theMaterial->getTangent();
-	
-	// come back later and redo this if too slow
-	Matrix &stiff = *theMatrix;
-	Matrix &trans = *t;
-
-	stiff = trans^trans;
-
-	double Etotal = E + E0;
-	stiff *= A * Etotal / L;  
-    }
-    
-    if (betaK != 0.0 && M != 0.0) {
-	Matrix &mass = *theMatrix;	
-	if (dimension == 1 && numDOF == 2) {
-	    mass(0,0) += M; 
-	    mass(1,1) += M;
-	}
-	else if (dimension == 2 && numDOF == 4) {
-	    mass(0,0) += M; 
-	    mass(1,1) += M;
-	    mass(2,2) += M; 
-	    mass(3,3) += M;	
-	}
-	else if (dimension == 2 && numDOF == 6) {
-	    mass(0,0) += M; 
-	    mass(1,1) += M;
-	    mass(3,3) += M;
-	    mass(4,4) += M; 
-	}
-	else if (dimension == 3 && numDOF == 6) {
-	    mass(0,0) += M; 
-	    mass(1,1) += M;
-	    mass(2,2) += M; 
-	    mass(3,3) += M;
-	    mass(4,4) += M; 
-	    mass(5,5) += M;		
-	}
-	else if (dimension == 3 && numDOF == 12) {
-	    mass(0,0) += M; 
-	    mass(1,1) += M;
-	    mass(2,2) += M; 
-	    mass(6,6) += M; 
-	    mass(7,7) += M;
-	    mass(8,8) += M; 
-	}  
-    }
-
+    theMatrix->Zero();
     return *theMatrix; 
 }
 
@@ -663,7 +598,7 @@ Truss::sendSelf(int commitTag, Channel &theChannel)
   // truss packs it's data into a Vector and sends this to theChannel
   // along with it's dbTag and the commitTag passed in the arguments
 
-  Vector data(11);
+  static Vector data(7);
   data(0) = this->getTag();
   data(1) = dimension;
   data(2) = numDOF;
@@ -672,10 +607,6 @@ Truss::sendSelf(int commitTag, Channel &theChannel)
       data(6) = M * 2 / (L*A);
   else
       data(6) = M;
-  data(7) = alpha0;
-  data(8) = alphaK;
-  data(9) = betaK;
-  data(10) = E0;
   
   data(4) = theMaterial->getClassTag();
   int matDbTag = theMaterial->getDbTag();
@@ -723,7 +654,7 @@ Truss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   // truss creates a Vector, receives the Vector and then sets the 
   // internal data with the data in the Vector
 
-  Vector data(11);
+  static Vector data(7);
   res = theChannel.recvVector(dataTag, commitTag, data);
   if (res < 0) {
     g3ErrorHandler->warning("WARNING Truss::recvSelf() - failed to receive Vector\n");
@@ -735,10 +666,6 @@ Truss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   numDOF = data(2);
   A = data(3);
   M = data(6);
-  alpha0 = data(7);
-  alphaK = data(8);
-  betaK = data(9);
-  E0 = data(10);
   
   // truss now receives the tags of it's two external nodes
   res = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2000-10-14 05:44:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.h,v $
                                                                         
                                                                         
@@ -53,8 +53,7 @@ class Truss : public Element
 	  int dimension,
 	  int Nd1, int Nd2, 
 	  UniaxialMaterial &theMaterial,
-	  double A, double rho=0.0, 
-	  double a0 = 0.0, double aK = 0.0, double bK = 0.0); 
+	  double A, double rho=0.0);
     
     Truss();    
     ~Truss();
@@ -118,12 +117,6 @@ class Truss : public Element
     Node *end1Ptr;  // pointer to the end1 node object
     Node *end2Ptr;  // pointer to the end1 node object	
 
-    // parameters for damping: alpha0 * K0 + alphaK * ktang + betaK * M
-    double alpha0;   
-    double alphaK;
-    double betaK;
-    double E0;
-    
     // static data - single copy for all objects of the class	
     static Matrix trussM2;   // class wide matrix for 2*2
     static Matrix trussM4;   // class wide matrix for 4*4
