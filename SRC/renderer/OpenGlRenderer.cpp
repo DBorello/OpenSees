@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-05-03 06:45:05 $
+// $Revision: 1.5 $
+// $Date: 2001-05-19 07:18:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -415,7 +415,12 @@ int
 OpenGLRenderer::drawLine(const Vector &pos1, const Vector &pos2, 
 		       float V1, float V2)
 {
-	//glLineWidth(10);
+  // open gl does a divide by zero error if points are the same - so check
+  if (pos1(0) == pos2(0) && pos1(1) == pos2(1) && pos1(2) == pos2(2))
+    return 0;
+
+  //glLineWidth(10);
+
     glBegin(GL_LINES);
     float r, g, b;
     r = theMap->getRed(V1);
@@ -453,6 +458,10 @@ int
 OpenGLRenderer::drawLine(const Vector &end1, const Vector &end2, 
 			 const Vector &rgb1, const Vector &rgb2)
 {
+  // open gl does a divide by zero error if points are the same
+  if (end1(0) == end2(0) && end1(1) == end2(1) && end1(2) == end2(2))
+    return 0;
+
     glBegin(GL_LINES);
     float r, g, b;
     r = rgb1(0);
