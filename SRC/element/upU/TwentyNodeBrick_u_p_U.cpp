@@ -34,7 +34,6 @@
 #ifndef TWENTYNODEBRICK_U_P_U_CPP
 #define TWENTYNODEBRICK_U_P_U_CPP
 
-#include <fstream.h>
 #include <TwentyNodeBrick_u_p_U.h>
 #define FixedOrder 3
 
@@ -1674,50 +1673,86 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
     tensor tP   = getStiffnessTensorP();
     matrix Kep = stiffness_matrixKep(tKep);
     matrix G1  = stiffness_matrixG1(tG1);
-    matrix G2  = stiffness_matrixG1(tG2);
+    matrix G2  = stiffness_matrixG2(tG2);
     matrix P   = stiffness_matrixP(tP);
 
     Kep.write_standard("Kupu.dat", "stiffness part of KupU");
     G1.write_standard("G1upu.dat", "stiffness part of G1upU");
     G2.write_standard("G2upu.dat", "stiffness part of G2upU");
     P.write_standard("Pupu.dat", "stiffness part of PupU");
-//    matrix G1t=G1.transpose();
-//    matrix G2t=G2.transpose();
+    matrix G1t=G1.transpose();
+    matrix G2t=G2.transpose();
+//    G1t.write_standard("G1t.dat", "stiffness part of G1upU");
+//    G2t.write_standard("G2t.dat", "stiffness part of G1upU");
 
-	int i;
-    for ( i=1 ; i<=60 ; i++ )  		
+    for ( int i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=1 ; j<=60 ; j++ )
+        for ( int j=0 ; j<20 ; j++ )
           {
-	    K(i-1,j-1)=Kep.val(i,j);	    // Add Kep to K
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    K(i*7+n ,  j*7+m)=Kep.val(3*i+n+1, 3*j+1+m);     // Add Kep to K
+		  }
+	      }
 	  }
       }
 
-    for ( i=1 ; i<=60 ; i++ )		
+    for ( int i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=1 ; j<=20 ; j++ )
+        for(int n=0; n<3; n++)
           {
-	    K(   i-1,60+j-1)=-G1.val(i,j);     // Add -G1 to K
-	    K(80+i-1,60+j-1)=-G2.val(i,j);     // Add -G2 to K
+            for ( int j=0 ; j<20 ; j++ )
+	      {
+	         K(i*7+n ,  j*7+3)=-G1.val(3*i+n+1, j+1);     // Add -G1 to K
+	      }
 	  }
       }
 
-    for ( i=1 ; i<=20 ; i++ )	      
+    for ( int i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=1 ; j<=60 ; j++ )
-          {
-	    K(60+i-1,   j-1)=G1.val(j,i);     // Add G1^T to K
-	    K(60+i-1,80+j-1)=G2.val(j,i);     // Add G2^T to K
+        for ( int j=0 ; j<20 ; j++ )
+           {
+              for(int n=0; n<3; n++)
+   	      {
+   	         K(i*7+3 ,  j*7+n)=-G1t.val(i+1, 3*j+1+n);     // Add -G1T to K
+	      }
 	  }
       }
 
-    for ( i=1 ; i<=20 ; i++ )	      
+
+    for ( int i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=1 ; j<=20 ; j++ )
-          {
-	    K(60+i-1,60+j-1)=P.val(i,j);	     // Add P (pore pressure) to K
+        for ( int j=0 ; j<20 ; j++ )
+	  {
+	     K(i*7+3 ,  j*7+3)=-P.val(i+1, j+1);     // Add -P to K
 	  }
       }
+
+
+    for ( int i=0 ; i<20 ; i++ )  		
+      {
+        for ( int j=0 ; j<20 ; j++ )
+           {
+              for(int n=0; n<3; n++)
+   	      {
+   	         K(i*7+3 ,  j*7+n+4)=-G2t.val(i+1, 3*j+1+n);     // Add -G2T to K
+	      }
+	  }
+      }
+
+    for ( int i=0 ; i<20 ; i++ )  		
+      {
+        for(int n=0; n<3; n++)
+          {
+            for ( int j=0 ; j<20 ; j++ )
+	      {
+	         K(i*7+n+4 ,  j*7+3)=-G2.val(3*i+n+1, j+1);     // Add -G2 to K
+	      }
+	  }
+      }
+
      ofstream outK("K.dat");	// want to check the whole K
      K.Output(outK);
 
@@ -1839,17 +1874,66 @@ const Matrix &TwentyNodeBrick_u_p_U::getDamp()
     matrix C1 = damping_matrixC1(tC1);
     matrix C2 = damping_matrixC2(tC2);
     matrix C3 = damping_matrixC3(tC3);
+//    C1.write_standard("C1.dat", "Damping matrix");
+//    C2.write_standard("C2.dat", "Damping matrix");
+//    C3.write_standard("C3.dat", "Damping matrix");
 
     matrix C2t=C2.transpose();
+//    C2t.write_standard("C2t.dat", "Damping matrix");
 
-    for ( int i=1 ; i<=60 ; i++ )  		
+    for ( int i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=1 ; j<=60 ; j++ )
+        for ( int j=0 ; j<20 ; j++ )
           {
-	    C(   i-1,   j-1)= C1.val(i,j);    // Add  C1  to C
-	    C(   i-1,80+j-1)=-C2.val(i,j);    // Add -C2  to C
- 	    C(80+i-1,   j-1)=-C2t.val(i,j);   // Add -C2t to C
- 	    C(80+i-1,80+j-1)= C3.val(i,j);    // Add  C3  to C
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    C(i*7+n ,  j*7+m)=C1.val(3*i+n+1, 3*j+1+m);     // Add C1 to C
+		  }
+	      }
+	  }
+      }
+
+     for ( int i=0 ; i<20 ; i++ )  		
+      {
+        for ( int j=0 ; j<20 ; j++ )
+          {
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    C(i*7+n ,  j*7+m+4)=-C2.val(3*i+n+1, 3*j+1+m);     // Add -C2 to C
+		  }
+	      }
+	  }
+      }
+
+    for ( int i=0 ; i<20 ; i++ )  		
+      {
+        for ( int j=0 ; j<20 ; j++ )
+          {
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    C(i*7+n+4 ,  j*7+m)=-C2t.val(3*i+n+1, 3*j+1+m);     // Add -C2t to C
+		  }
+	      }
+	  }
+      }
+
+    for ( int i=0 ; i<20 ; i++ )  		
+      {
+        for ( int j=0 ; j<20 ; j++ )
+          {
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    C(i*7+n+4,  j*7+m+4)=C3.val(3*i+n+1, 3*j+1+m);     // Add C3 to C
+		  }
+	      }
 	  }
       }
 
@@ -1929,15 +2013,36 @@ const Matrix &TwentyNodeBrick_u_p_U::getMass()
     tensor tMf  = getMassTensorMf();
     matrix  Ms =  mass_matrixMs(tMs);
     matrix  Mf =  mass_matrixMf(tMf);
+//    Ms.write_standard("Ms.dat", "Mass matrix");
+//    Mf.write_standard("Mf.dat", "Mass matrix");
 
-    for ( int i=1 ; i<=60 ; i++ )  		
+    for ( int i=0 ; i<20 ; i++ )  		
       {
-        for ( int j=1 ; j<=60 ; j++ )
+        for ( int j=0 ; j<20 ; j++ )
           {
-	    M(   i-1,   j-1)=Ms.val(i,j);	   // Add Ms to M
-	    M(80+i-1,80+j-1)=Mf.val(i,j);	   // Add Mf to M
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    M(i*7+n ,  j*7+m)=Ms.val(3*i+n+1, 3*j+1+m);     // Add Ms to M
+		  }
+	      }
 	  }
       }
+    for ( int i=0 ; i<20 ; i++ )  		
+      {
+        for ( int j=0 ; j<20 ; j++ )
+          {
+	    for(int n=0; n<3; n++)
+	      {
+	        for(int m=0; m<3; m++)
+		  {
+ 		    M(i*7+n+4 ,  j*7+m+4)=Mf.val(3*i+n+1, 3*j+1+m);     // Add Mf to M
+		  }
+	      }
+	  }
+      }
+
      ofstream outM("M.dat");	// want to check the whole M
      M.Output(outM);
 
@@ -3826,129 +3931,171 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 
 	static Vector ra(140);  // change from ra(60) to ra(140)  Xiaoyan 02/01/02
 
-// Acceleration for solid part
 	ra( 0) = Raccel1(0);
 	ra( 1) = Raccel1(1);
 	ra( 2) = Raccel1(2);
-	ra( 3) = Raccel2(0);
-	ra( 4) = Raccel2(1);
-	ra( 5) = Raccel2(2);
-	ra( 6) = Raccel3(0);
-	ra( 7) = Raccel3(1);
-	ra( 8) = Raccel3(2);
-	ra( 9) = Raccel4(0);
-	ra(10) = Raccel4(1);
-	ra(11) = Raccel4(2);
-    	ra(12) = Raccel5(0);
-	ra(13) = Raccel5(1);
-	ra(14) = Raccel5(2);
-	ra(15) = Raccel6(0);
-	ra(16) = Raccel6(1);
-	ra(17) = Raccel6(2);
-	ra(18) = Raccel7(0);
-	ra(19) = Raccel7(1);
-	ra(20) = Raccel7(2);
-	ra(21) = Raccel8(0);
-	ra(22) = Raccel8(1);
-	ra(23) = Raccel8(2);
-	ra(24) = Raccel9(0);
- 	ra(25) = Raccel9(1);
-	ra(26) = Raccel9(2);
-	ra(27) = Raccel10(0);
-	ra(28) = Raccel10(1);
-	ra(29) = Raccel10(2);
-	ra(30) = Raccel11(0);
-	ra(31) = Raccel11(1);
-	ra(32) = Raccel11(2);
-	ra(33) = Raccel12(0);
-	ra(34) = Raccel12(1);
-	ra(35) = Raccel12(2);
-	ra(36) = Raccel13(0);
-	ra(37) = Raccel13(1);
-	ra(38) = Raccel13(2);
-	ra(39) = Raccel14(0);
-	ra(40) = Raccel14(1);
-	ra(41) = Raccel14(2);
-	ra(42) = Raccel15(0);
-	ra(43) = Raccel15(1);
-	ra(44) = Raccel15(2);
-	ra(45) = Raccel16(0);
-	ra(46) = Raccel16(1);
-	ra(47) = Raccel16(2);
-	ra(48) = Raccel17(0);
-	ra(49) = Raccel17(1);
-	ra(50) = Raccel17(2);
-	ra(51) = Raccel18(0);
-	ra(52) = Raccel18(1);
-	ra(53) = Raccel18(2);
-	ra(54) = Raccel19(0);
-	ra(55) = Raccel19(1);
-	ra(56) = Raccel19(2);
-	ra(57) = Raccel20(0);
-	ra(58) = Raccel20(1);
-	ra(59) = Raccel20(2);
-// Acceleration for fluid part
-	ra( 80) = Raccel1(4);
-	ra( 81) = Raccel1(5);
-	ra( 82) = Raccel1(6);
-	ra( 83) = Raccel2(4);
-	ra( 84) = Raccel2(5);
-	ra( 85) = Raccel2(6);
-	ra( 86) = Raccel3(4);
-	ra( 87) = Raccel3(5);
-	ra( 88) = Raccel3(6);
-	ra( 89) = Raccel4(4);
-	ra(90) = Raccel4(5);
-	ra(91) = Raccel4(6);
-    	ra(92) = Raccel5(4);
-	ra(93) = Raccel5(5);
-	ra(94) = Raccel5(6);
-	ra(95) = Raccel6(4);
-	ra(96) = Raccel6(5);
-	ra(97) = Raccel6(6);
-	ra(98) = Raccel7(4);
-	ra(99) = Raccel7(5);
-	ra(100) = Raccel7(6);
-	ra(101) = Raccel8(4);
-	ra(102) = Raccel8(5);
-	ra(103) = Raccel8(6);
-	ra(104) = Raccel9(4);
- 	ra(105) = Raccel9(5);
-	ra(106) = Raccel9(6);
-	ra(107) = Raccel10(4);
-	ra(108) = Raccel10(5);
-	ra(109) = Raccel10(6);
-	ra(110) = Raccel11(4);
-	ra(111) = Raccel11(5);
-	ra(112) = Raccel11(6);
-	ra(113) = Raccel12(4);
-	ra(114) = Raccel12(5);
-	ra(115) = Raccel12(6);
-	ra(116) = Raccel13(4);
-	ra(117) = Raccel13(5);
-	ra(118) = Raccel13(6);
-	ra(119) = Raccel14(4);
-	ra(120) = Raccel14(5);
-	ra(121) = Raccel14(6);
-	ra(122) = Raccel15(4);
-	ra(123) = Raccel15(5);
-	ra(124) = Raccel15(6);
-	ra(125) = Raccel16(4);
-	ra(126) = Raccel16(5);
-	ra(127) = Raccel16(6);
-	ra(128) = Raccel17(4);
-	ra(129) = Raccel17(5);
-	ra(130) = Raccel17(6);
-	ra(131) = Raccel18(4);
-	ra(132) = Raccel18(5);
-	ra(133) = Raccel18(6);
-	ra(134) = Raccel19(4);
-	ra(135) = Raccel19(5);
-	ra(136) = Raccel19(6);
+	ra( 3) = 0.0;
+	ra( 4) = Raccel1(4);
+	ra( 5) = Raccel1(5);
+	ra( 6) = Raccel1(6);
+
+	ra( 7) = Raccel2(0);
+	ra( 8) = Raccel2(1);
+	ra( 9) = Raccel2(2);
+	ra( 10) = 0.0;
+	ra( 11) = Raccel2(4);
+	ra( 12) = Raccel2(5);
+	ra( 13) = Raccel2(6);
+
+	ra(14) = Raccel3(0);
+	ra(15) = Raccel3(1);
+	ra(16) = Raccel3(2);
+    	ra(17) = 0.0;
+	ra(18) = Raccel3(4);
+	ra(19) = Raccel3(5);
+	ra(20) = Raccel3(6);
+
+	ra(21) = Raccel4(0);
+	ra(22) = Raccel4(1);
+	ra(23) = Raccel4(2);
+	ra(24) = 0.0;
+ 	ra(25) = Raccel4(4);
+	ra(26) = Raccel4(5);
+	ra(27) = Raccel4(6);
+
+	ra(28) = Raccel5(0);
+	ra(29) = Raccel5(1);
+	ra(30) = Raccel5(2);
+	ra(31) = 0.0;
+	ra(32) = Raccel5(4);
+	ra(33) = Raccel5(5);
+	ra(34) = Raccel5(6);
+
+	ra(35) = Raccel6(0);
+	ra(36) = Raccel6(1);
+	ra(37) = Raccel6(2);
+	ra(38) = 0.0;
+	ra(39) = Raccel6(4);
+	ra(40) = Raccel6(5);
+	ra(41) = Raccel6(6);
+
+	ra(42) = Raccel7(0);
+	ra(43) = Raccel7(1);
+	ra(44) = Raccel7(2);
+	ra(45) = 0.0;
+	ra(46) = Raccel7(4);
+	ra(47) = Raccel7(5);
+	ra(48) = Raccel7(6);
+
+	ra(49) = Raccel8(0);
+	ra(50) = Raccel8(1);
+	ra(51) = Raccel8(2);
+	ra(52) = 0.0;
+	ra(53) = Raccel8(4);
+	ra(54) = Raccel8(5);
+	ra(55) = Raccel8(6);
+
+	ra(56) = Raccel9(0);
+	ra(57) = Raccel9(1);
+	ra(58) = Raccel9(2);
+	ra(59) = 0.0;
+	ra(60) = Raccel9(4);
+	ra(61) = Raccel9(5);
+	ra(62) = Raccel9(6);
+
+ 	ra(63) = Raccel10(0);
+	ra(64) = Raccel10(1);
+	ra(65) = Raccel10(2);
+	ra(66) = 0.0;
+	ra(67) = Raccel10(4);
+	ra(68) = Raccel10(5);
+	ra(69) = Raccel10(6);
+
+ 	ra(70) = Raccel11(0);
+	ra(71) = Raccel11(1);
+	ra(72) = Raccel11(2);
+	ra(73) = 0.0;
+	ra(74) = Raccel11(4);
+	ra(75) = Raccel11(5);
+	ra(76) = Raccel11(6);
+
+ 	ra(77) = Raccel12(0);
+	ra(78) = Raccel12(1);
+	ra(79) = Raccel12(2);
+	ra(80) = 0.0;	
+	ra(81) = Raccel12(4);
+	ra(82) = Raccel12(5);
+	ra(83) = Raccel12(6);
+
+	ra( 84) = Raccel13(0);
+	ra( 85) = Raccel13(1);
+	ra( 86) = Raccel13(2);
+	ra( 87) = 0.0;
+	ra( 88) = Raccel13(4);
+	ra( 89) = Raccel13(5);
+	ra( 90) = Raccel13(6);
+
+	ra(91) = Raccel14(0);
+	ra(92) = Raccel14(1);
+    	ra(92) = Raccel14(2);
+	ra(94) = 0.0;
+	ra(95) = Raccel14(4);
+	ra(96) = Raccel14(5);
+	ra(97) = Raccel14(6);
+
+	ra(98) = Raccel15(0);
+	ra(99) = Raccel15(1);
+	ra(100) = Raccel15(2);
+	ra(101) = 0.0;
+	ra(102) = Raccel15(4);
+	ra(103) = Raccel15(5);
+	ra(104) = Raccel15(6);
+
+	ra(105) = Raccel16(0);
+ 	ra(106) = Raccel16(1);
+	ra(107) = Raccel16(2);
+	ra(108) = 0.0;
+	ra(109) = Raccel16(4);
+	ra(110) = Raccel16(5);
+	ra(111) = Raccel16(6);
+
+	ra(112) = Raccel17(0);
+	ra(113) = Raccel17(1);
+	ra(114) = Raccel17(2);
+	ra(115) = 0.0;
+	ra(116) = Raccel17(4);
+	ra(117) = Raccel17(5);
+	ra(118) = Raccel17(6);
+
+	ra(119) = Raccel18(0);
+	ra(120) = Raccel18(1);
+	ra(121) = Raccel18(2);
+	ra(122) = 0.0;
+	ra(123) = Raccel18(4);
+	ra(124) = Raccel18(5);
+	ra(125) = Raccel18(6);
+
+	ra(126) = Raccel19(0);
+	ra(127) = Raccel19(1);
+	ra(128) = Raccel19(2);
+	ra(129) = 0.0;
+	ra(130) = Raccel19(4);
+	ra(131) = Raccel19(5);
+	ra(132) = Raccel19(6);
+
+	ra(133) = Raccel20(0);
+	ra(134) = Raccel20(1);
+	ra(135) = Raccel20(2);
+	ra(136) = 0.0;
 	ra(137) = Raccel20(4);
 	ra(138) = Raccel20(5);
 	ra(139) = Raccel20(6);
-
+      for(int i=0; i<140; i++)
+       {
+         if(i%10==0)
+	   cout<<endl;
+	   cout<<" "<<ra(i);
+       }     // added to check the value of ra      02/18/2002
 
     // Want to add ( - fact * M R * accel ) to unbalance
     // Take advantage of lumped mass matrix
@@ -3981,67 +4128,167 @@ const Vector TwentyNodeBrick_u_p_U::FormEquiBodyForce()
     Vector ba(140);  
 // The body force(gravity g) are same for solid part and fluid part
 //     Solid part         Fluid part 
-    ba( 0) = bf(0);    ba(80)  = bf(0);
-    ba( 1) = bf(1);    ba(81)  = bf(1);
-    ba( 2) = bf(2);    ba(82)  = bf(2);
-    ba( 3) = bf(0);    ba(83)  = bf(0);
-    ba( 4) = bf(1);    ba(84)  = bf(1);
-    ba( 5) = bf(2);    ba(85)  = bf(2);
-    ba( 6) = bf(0);    ba(86)  = bf(0);
-    ba( 7) = bf(1);    ba(87)  = bf(1);
-    ba( 8) = bf(2);    ba(88)  = bf(2);
-    ba( 9) = bf(0);    ba(89)  = bf(0);
-    ba(10) = bf(1);    ba(90)  = bf(1);
-    ba(11) = bf(2);    ba(91)  = bf(2);
-    ba(15) = bf(0);    ba(92)  = bf(0);
-    ba(13) = bf(1);    ba(93)  = bf(1);
-    ba(14) = bf(2);    ba(94)  = bf(2);
-    ba(15) = bf(0);    ba(95)  = bf(0);
-    ba(16) = bf(1);    ba(96)  = bf(1);
-    ba(17) = bf(2);    ba(97)  = bf(2);
-    ba(18) = bf(0);    ba(98)  = bf(0);
-    ba(19) = bf(1);    ba(99)  = bf(1);
-    ba(20) = bf(2);    ba(100) = bf(2);
-    ba(21) = bf(0);    ba(101)  = bf(0);
-    ba(22) = bf(1);    ba(102)  = bf(1);
-    ba(23) = bf(2);    ba(103)  = bf(2);
-    ba(24) = bf(0);    ba(104)  = bf(0);
-    ba(25) = bf(1);    ba(105)  = bf(1);
-    ba(26) = bf(2);    ba(106)  = bf(2);
-    ba(27) = bf(0);    ba(107)  = bf(0);
-    ba(28) = bf(1);    ba(108)  = bf(1);
-    ba(29) = bf(2);    ba(109)  = bf(2);
-    ba(30) = bf(0);    ba(110)  = bf(0);
-    ba(31) = bf(1);    ba(111)  = bf(1);
-    ba(32) = bf(2);    ba(112)  = bf(2);
-    ba(33) = bf(0);    ba(113)  = bf(0);
-    ba(34) = bf(1);    ba(114)  = bf(1);
-    ba(35) = bf(2);    ba(115)  = bf(2);
-    ba(36) = bf(0);    ba(116)  = bf(0);
-    ba(37) = bf(1);    ba(117)  = bf(1);
-    ba(38) = bf(2);    ba(118)  = bf(2);
-    ba(39) = bf(0);    ba(119)  = bf(0);
-    ba(40) = bf(1);    ba(120)  = bf(1);
-    ba(41) = bf(2);    ba(121)  = bf(2);
-    ba(42) = bf(0);    ba(122)  = bf(0);
-    ba(43) = bf(1);    ba(123)  = bf(1);
-    ba(44) = bf(2);    ba(124)  = bf(2);
-    ba(45) = bf(0);    ba(125)  = bf(0);
-    ba(46) = bf(1);    ba(126)  = bf(1);
-    ba(47) = bf(2);    ba(127)  = bf(2);
-    ba(48) = bf(0);    ba(128)  = bf(0);
-    ba(49) = bf(1);    ba(129)  = bf(1);
-    ba(50) = bf(2);    ba(130)  = bf(2);
-    ba(51) = bf(0);    ba(131)  = bf(0);
-    ba(52) = bf(1);    ba(132)  = bf(1);
-    ba(53) = bf(2);    ba(133)  = bf(2);
-    ba(54) = bf(0);    ba(134)  = bf(0);
-    ba(55) = bf(1);    ba(135)  = bf(1);
-    ba(56) = bf(2);    ba(136)  = bf(2);
-    ba(57) = bf(0);    ba(137)  = bf(0);
-    ba(58) = bf(1);    ba(138)  = bf(1);
-    ba(59) = bf(2);    ba(139)  = bf(2);
+    ba( 0) = bf(0);    
+    ba( 1) = bf(1);    
+    ba( 2) = bf(2);
+    ba( 3)=  0.0;
+    ba( 4) = bf(0);    
+    ba( 5) = bf(1);    
+    ba( 6) = bf(2);    
 
+    ba( 7) = bf(0);    
+    ba( 8) = bf(1);    
+    ba( 9) = bf(2);    
+    ba(10) = 0.0;    
+    ba(11) = bf(0);    
+    ba(15) = bf(1);    
+    ba(13) = bf(2); 
+       
+    ba(14) = bf(0);    
+    ba(15) = bf(1);    
+    ba(16) = bf(2);    
+    ba(17) = 0.0;      
+    ba(18) = bf(0);    
+    ba(19) = bf(1);    
+    ba(20) = bf(2);    
+
+    ba(21) = bf(0);    
+    ba(22) = bf(1);    
+    ba(23) = bf(2);    
+    ba(24) = 0.0;      
+    ba(25) = bf(0);    
+    ba(26) = bf(1);    
+    ba(27) = bf(2);    
+
+    ba(28) = bf(0);    
+    ba(29) = bf(1);    
+    ba(30) = bf(2);    
+    ba(31) = 0.0;      
+    ba(32) = bf(0);    
+    ba(33) = bf(1);    
+    ba(34) = bf(2);    
+
+    ba(35) = bf(0);    
+    ba(36) = bf(1);    
+    ba(37) = bf(2);    
+    ba(38) = 0.0;      
+    ba(39) = bf(0);    
+    ba(40) = bf(1);    
+    ba(41) = bf(2);    
+
+    ba(42) = bf(0);    
+    ba(43) = bf(1);    
+    ba(44) = bf(2);    
+    ba(45) = 0.0;      
+    ba(46) = bf(0);    
+    ba(47) = bf(1);    
+    ba(48) = bf(2);    
+
+    ba(49) = bf(0);    
+    ba(50) = bf(1);    
+    ba(51) = bf(2);    
+    ba(52) = 0.0;      
+    ba(53) = bf(0);    
+    ba(54) = bf(1);    
+    ba(55) = bf(2);    
+
+    ba(56) = bf(0);    
+    ba(57) = bf(1);    
+    ba(58) = bf(2);    
+    ba(59) = 0.0;  
+    ba(60) = bf(0);   
+    ba(61) = bf(1);   
+    ba(62) = bf(2);   
+
+    ba(63) = bf(0);   
+    ba(64) = bf(1);   
+    ba(65) = bf(2);   
+    ba(66) = 0.0;     
+    ba(67) = bf(0);   
+    ba(68) = bf(1);   
+    ba(69) = bf(2);   
+
+    ba(70) = bf(0);   
+    ba(71) = bf(1);   
+    ba(72) = bf(2);   
+    ba(73) = 0.0;     
+    ba(74) = bf(0);   
+    ba(75) = bf(1);   
+    ba(76) = bf(2);   
+
+    ba(77) = bf(0);   
+    ba(78) = bf(1);   
+    ba(79) = bf(2);   
+    ba(80) = 0.0;     
+    ba(81)  =bf(0); 
+    ba(82)  =bf(1); 
+    ba(83)  =bf(2); 
+
+    ba(84)  =bf(0); 
+    ba(85)  =bf(1); 
+    ba(86)  =bf(2); 
+    ba(87)  =0.0;   
+    ba(88)  =bf(0); 
+    ba(89)  =bf(1); 
+    ba(90)  =bf(2); 
+
+    ba(91)  =bf(0); 
+    ba(92)  =bf(1); 
+    ba(93)  =bf(2); 
+    ba(94)  =0.0;   
+    ba(95)  =bf(0); 
+    ba(96)  =bf(1); 
+    ba(97)  =bf(2); 
+
+    ba(98)  =  bf(0);
+    ba(99)  =  bf(1);
+    ba(100) =  bf(2);
+    ba(101)  = 0.0;  
+    ba(102)  = bf(0);
+    ba(103)  = bf(1);
+    ba(104)  = bf(2);
+
+    ba(105)  = bf(0);
+    ba(106)  = bf(1);
+    ba(107)  = bf(2);
+    ba(108)  = 0.0;  
+    ba(109)  = bf(0);
+    ba(110)  = bf(1);
+    ba(111)  = bf(2);
+
+    ba(112)  = bf(0);
+    ba(113)  = bf(1);
+    ba(114)  = bf(2);
+    ba(115)  = 0.0;  
+    ba(116)  = bf(0);
+    ba(117)  = bf(1);
+    ba(118)  = bf(2);
+
+    ba(119)  = bf(0);
+    ba(120)  = bf(1);
+    ba(121)  = bf(2);
+    ba(122)  = 0.0;  
+    ba(123)  = bf(0);
+    ba(124)  = bf(1);
+    ba(125)  = bf(2);
+
+    ba(126)  = bf(0);
+    ba(127)  = bf(1);
+    ba(128)  = bf(2);
+    ba(129)  = 0.0;  
+    ba(130)  = bf(0);
+    ba(131)  = bf(1);
+    ba(132)  = bf(2);
+
+    ba(133)  = bf(0);
+    ba(134)  = bf(1);
+    ba(135)  = bf(2);
+    ba(136)  = 0.0;  
+    ba(137)  = bf(0);
+    ba(138)  = bf(1);
+    ba(139)  = bf(2);
+
+    
     //Form equivalent body force
     bforce.addMatrixVector(0.0, M, ba, 1.0);
     //cerr << " ba " << ba;
@@ -4205,128 +4452,167 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForceIncInertia ()
 
 	static Vector a(140);  // originally 8
 
-// Acceleration for solid part	      Xioayan 02/08/2002
+// Modified to 3-solid 1-p 3-fluid        Xioayan 03/14/2002
 	a( 0) = accel1(0);
 	a( 1) = accel1(1);
 	a( 2) = accel1(2);
-	a( 3) = accel2(0);
-	a( 4) = accel2(1);
-	a( 5) = accel2(2);
-	a( 6) = accel3(0);
-	a( 7) = accel3(1);
-	a( 8) = accel3(2);
-	a( 9) = accel4(0);
-	a(10) = accel4(1);
-	a(11) = accel4(2);
-    	a(15) = accel5(0);
-	a(13) = accel5(1);
-	a(14) = accel5(2);
-	a(15) = accel6(0);
-	a(16) = accel6(1);
-	a(17) = accel6(2);
-	a(18) = accel7(0);
-	a(19) = accel7(1);
-	a(20) = accel7(2);
-	a(21) = accel8(0);
-	a(22) = accel8(1);
-	a(23) = accel8(2);
-	a(24) = accel9(0);
- 	a(25) = accel9(1);
-	a(26) = accel9(2);
-	a(27) = accel10(0);
-	a(28) = accel10(1);
-	a(29) = accel10(2);
-	a(30) = accel11(0);
-	a(31) = accel11(1);
-	a(32) = accel11(2);
-	a(33) = accel12(0);
-	a(34) = accel12(1);
-	a(35) = accel12(2);
-	a(36) = accel13(0);
-	a(37) = accel13(1);
-	a(38) = accel13(2);
-	a(39) = accel14(0);
-	a(40) = accel14(1);
-	a(41) = accel14(2);
-	a(42) = accel15(0);
-	a(43) = accel15(1);
-	a(44) = accel15(2);
-	a(45) = accel16(0);
-	a(46) = accel16(1);
-	a(47) = accel16(2);
-	a(48) = accel17(0);
-	a(49) = accel17(1);
-	a(50) = accel17(2);
-	a(51) = accel18(0);
-	a(52) = accel18(1);
-	a(53) = accel18(2);
-	a(54) = accel19(0);
-	a(55) = accel19(1);
-	a(56) = accel19(2);
-	a(57) = accel20(0);
-	a(58) = accel20(1);
-	a(59) = accel20(2);
-// Acceleration for fluid part	    Xioayan 02/08/2002
-	a( 80) = accel1(4);
-	a( 81) = accel1(5);
-	a( 82) = accel1(6);
-	a( 83) = accel2(4);
-	a( 84) = accel2(5);
-	a( 85) = accel2(6);
-	a( 86) = accel3(4);
-	a( 87) = accel3(5);
-	a( 88) = accel3(6);
-	a( 89) = accel4(4);
-	a(90) = accel4(5);
-	a(91) = accel4(6);
-    	a(92) = accel5(4);
-	a(93) = accel5(5);
-	a(94) = accel5(6);
-	a(95) = accel6(4);
-	a(96) = accel6(5);
-	a(97) = accel6(6);
-	a(98) = accel7(4);
-	a(99) = accel7(5);
-	a(100) = accel7(6);
-	a(101) = accel8(4);
-	a(102) = accel8(5);
-	a(103) = accel8(6);
-	a(104) = accel9(4);
- 	a(105) = accel9(5);
-	a(106) = accel9(6);
-	a(107) = accel10(4);
-	a(108) = accel10(5);
-	a(109) = accel10(6);
-	a(110) = accel11(4);
-	a(111) = accel11(5);
-	a(112) = accel11(6);
-	a(113) = accel12(4);
-	a(114) = accel12(5);
-	a(115) = accel12(6);
-	a(116) = accel13(4);
-	a(117) = accel13(5);
-	a(118) = accel13(6);
-	a(119) = accel14(4);
-	a(120) = accel14(5);
-	a(121) = accel14(6);
-	a(122) = accel15(4);
-	a(123) = accel15(5);
-	a(124) = accel15(6);
-	a(125) = accel16(4);
-	a(126) = accel16(5);
-	a(127) = accel16(6);
-	a(128) = accel17(4);
-	a(129) = accel17(5);
-	a(130) = accel17(6);
-	a(131) = accel18(4);
-	a(132) = accel18(5);
-	a(133) = accel18(6);
-	a(134) = accel19(4);
-	a(135) = accel19(5);
-	a(136) = accel19(6);
+	a( 3) = 0.0;
+	a( 4) = accel1(4);
+	a( 5) = accel1(5);
+	a( 6) = accel1(6);
+
+	a( 7) = accel2(0);
+	a( 8) = accel2(1);
+	a( 9) = accel2(2);
+	a(10) = 0.0;
+	a(11) = accel2(4);
+    	a(15) = accel2(5);
+	a(13) = accel2(6);
+
+	a(14) = accel3(0);
+	a(15) = accel3(1);
+	a(16) = accel3(2);
+	a(17) = 0.0;
+	a(18) = accel3(4);
+	a(19) = accel3(5);
+	a(20) = accel3(6);
+
+	a(21) = accel4(0);
+	a(22) = accel4(1);
+	a(23) = accel4(2);
+	a(24) = 0.0;
+ 	a(25) = accel4(4);
+	a(26) = accel4(5);
+	a(27) = accel4(6);
+
+	a(28) = accel5(0);
+	a(29) = accel5(1);
+	a(30) = accel5(2);
+	a(31) = 0.0;    
+	a(32) = accel5(4);
+	a(33) = accel5(5);
+	a(34) = accel5(6);
+
+	a(35) = accel6(0);
+	a(36) = accel6(1);
+	a(37) = accel6(2);
+	a(38) = 0.0;    
+	a(39) = accel6(4);
+	a(40) = accel6(5);
+	a(41) = accel6(6);
+
+	a(42) = accel7(0);
+	a(43) = accel7(1);
+	a(44) = accel7(2);
+	a(45) = 0.0;   
+	a(46) = accel7(4);
+	a(47) = accel7(5);
+	a(48) = accel7(6);
+
+	a(49) = accel8(0);
+	a(50) = accel8(1);
+	a(51) = accel8(2);
+	a(52) = 0.0;   
+	a(53) = accel8(4);
+	a(54) = accel8(5);
+	a(55) = accel8(6);
+
+	a(56) = accel9(0);
+	a(57) = accel9(1);
+	a(58) = accel9(2);
+	a(59) = 0.0;    
+	a(60) = accel9(4);
+	a(61) = accel9(5);
+	a(62) = accel9(6);
+
+	a(63) = accel10(0);
+	a(64) = accel10(1);
+	a(65) = accel10(2);
+	a(66) = 0.0;   
+	a(67) = accel10(4);
+	a(68) = accel10(5);
+	a(69) = accel10(6);
+
+ 	a(70) = accel11(0);
+	a(71) = accel11(1);
+	a(72) = accel11(2);
+	a(73) = 0.0;
+	a(74) = accel11(4);
+	a(75) = accel11(5);
+	a(76) = accel11(6);
+
+ 	a(77) = accel12(0);
+	a(78) = accel12(1);
+	a(79) = accel12(2);
+	a(80) = 0.0;
+	a(81) = accel12(4);
+	a(82) = accel12(5);
+	a(83) = accel12(6);
+
+	a( 84) = accel13(0);
+	a( 85) = accel13(1);
+	a( 86) = accel13(2);	 
+	a( 87) = 0.0;
+	a( 88) = accel13(4);
+	a( 89) = accel13(5);
+	a( 90) = accel13(6);
+
+ 	a(91) = accel14(1);
+	a(92) = accel14(1);
+    	a(93) = accel14(2);
+	a(94) = 0.0;	 
+	a(95) = accel14(4);
+	a(96) = accel14(5);
+	a(97) = accel14(6);
+
+	a(98)  = accel15(0);
+	a(99)  = accel15(1);
+	a(100)  = accel15(2);
+	a(101) = 0.0;	  
+	a(102) = accel15(4);
+	a(103) = accel15(5);
+	a(104) = accel15(6);
+
+	a(105) = accel16(0);
+ 	a(106) = accel16(1);
+	a(107) = accel16(2);
+	a(108) = 0.0;;	  
+	a(109) = accel16(4);
+	a(110) = accel16(5);
+	a(111) = accel16(6);
+
+	a(112) = accel17(0);
+	a(113) = accel17(1);
+	a(114) = accel17(2);
+	a(115) = 0.0;
+	a(116) = accel17(4);
+	a(117) = accel17(5);
+	a(118) = accel17(6);
+
+	a(119) = accel18(0);
+	a(120) = accel18(1);
+	a(121) = accel18(2);
+	a(122) = 0.0;
+	a(123) = accel18(4);
+	a(124) = accel18(5);
+	a(125) = accel18(6);
+
+	a(126) = accel19(0);
+	a(127) = accel19(1);
+	a(128) = accel19(2);
+	a(129) = 0.0;
+	a(130) = accel19(4);
+	a(131) = accel19(5);
+	a(132) = accel19(6);
+	     
+	a(133) = accel20(0);
+	a(134) = accel20(1);
+	a(135) = accel20(2);
+	a(136) = 0.0;	  
 	a(137) = accel20(4);
 	a(138) = accel20(5);
 	a(139) = accel20(6);
+
  
 		   		   
 	// Compute the current resisting force
@@ -4699,18 +4985,18 @@ tensor TwentyNodeBrick_u_p_U::nodal_forces()
 
     tensor nodal_FORCES(2,force_dim,0.0);
 
-    for( int i=0; i<20; i++)
+    for( int i=1; i<=20; i++)
       {
 	  // part for u
-          nodal_FORCES.val(i,0) = nodalForceFu.val(i,0);
           nodal_FORCES.val(i,1) = nodalForceFu.val(i,1);
           nodal_FORCES.val(i,2) = nodalForceFu.val(i,2);
+          nodal_FORCES.val(i,3) = nodalForceFu.val(i,3);
 	  // part for p
-          nodal_FORCES.val(i,3) = 0.0;
+          nodal_FORCES.val(i,4) = 0.0;
 	  // part for U
-          nodal_FORCES.val(i,4) = nodalForceFU.val(i,4);
           nodal_FORCES.val(i,5) = nodalForceFU.val(i,5);
           nodal_FORCES.val(i,6) = nodalForceFU.val(i,6);
+          nodal_FORCES.val(i,7) = nodalForceFU.val(i,7);
       }
      return nodal_FORCES;
   }
