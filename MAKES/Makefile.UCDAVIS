@@ -89,8 +89,10 @@ wipe:
 		$(MAKE) wipe; \
 		$(CD) $(HOME); \
 	done );
-	@$ (RM) $(RMFLAGS) $(WIPE_LIBS) *.o *~ core
-	@$(CD) $(FE)/../EXAMPLES;  $(MAKE) wipe;
+		@$(ECHO) WIPING WIPE_LIBS
+	 $(RM) $(RMFLAGS) $(WIPE_LIBS) 
+		@$(ECHO) MAKE WIPE in EXAMPLES
+	 $(CD) $(FE)/../EXAMPLES;  $(MAKE) wipe;
 
 help:
     @$(ECHO) "usage: make ?"
