@@ -5,6 +5,7 @@ include ../Makefile.def
 all:
 	@$(RM) $(RMFLAGS) $(FE_LIBRARY);
 	@$(CD) $(FE)/matrix; $(MAKE);
+	@$(CD) $(FE)/nDarray; $(MAKE);
 	@$(CD) $(FE)/database; $(MAKE);
 	@$(CD) $(FE)/system_of_eqn; $(MAKE);
 	@$(CD) $(FE)/modelbuilder; $(MAKE);
@@ -25,7 +26,8 @@ all:
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS)\
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
-	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)  $(JEREMIC_LIBS)\
+	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
+	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) \
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
@@ -93,8 +95,16 @@ ERRORHANDLER_LIBS = $(FE)/handler/ErrorHandler.o \
 
 
 
+NDARRAY_BJ_LIBS = $(FE)/nDarray/basics.o \
+	$(FE)/nDarray/nDarray.o \
+	$(FE)/nDarray/BJmatrix.o \
+	$(FE)/nDarray/BJvector.o \
+	$(FE)/nDarray/BJtensor.o \
+	$(FE)/nDarray/straint.o  \
+	$(FE)/nDarray/stresst.o 
 
-JEREMIC_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o  \
+
+MATMOD_BJ_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o  \
 	$(FE)/material/nD/PressureDependentElastic3D.o \
 	$(FE)/material/nD/Template3Dep/MatPoint3D.o \
 	$(FE)/element/8nbrick/EightNodeBrick.o \
@@ -172,13 +182,6 @@ DATABASE_LIBS = $(FE)/database/FileDatastore.o \
 MATRIX_LIBS   = $(FE)/matrix/Matrix.o \
 	$(FE)/matrix/Vector.o \
 	$(FE)/matrix/ID.o  \
-	$(FE)/matrix/nDarray.o \
-	$(FE)/matrix/BJtensor.o \
-	$(FE)/matrix/BJmatrix.o \
-	$(FE)/matrix/BJvector.o \
-	$(FE)/matrix/straint.o \
-	$(FE)/matrix/stresst.o \
-	$(FE)/matrix/basics.o
 
 TAGGED_LIBS =   $(FE)/tagged/TaggedObject.o \
 	$(FE)/tagged/storage/ArrayOfTaggedObjects.o \
@@ -246,6 +249,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/brick/shp3d.o \
 	$(FE)/element/brick/TclBrickCommand.o 
 
+
 MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/UniaxialMaterial.o \
 	$(FE)/material/uniaxial/ElasticMaterial.o \
@@ -290,8 +294,7 @@ FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHyster1Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHyster2Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasSteel1Material.o \
-	$(FE)/material/uniaxial/fedeas/FedeasSteel2Material.o \
-	$(FE)/material/uniaxial/fedeas/TclFedeasMaterialCommand.o
+	$(FE)/material/uniaxial/fedeas/FedeasSteel2Material.o 
 
 DRAIN_LIBS = $(FE)/material/uniaxial/DrainMaterial.o \
 	$(FE)/material/uniaxial/drain/DrainHardeningMaterial.o \
@@ -508,6 +511,7 @@ wipe: spotless
 	@$(CD) $(FE)/domain; $(MAKE) wipe;
 	@$(CD) $(FE)/modelbuilder; $(MAKE) wipe;
 	@$(CD) $(FE)/matrix; $(MAKE) wipe;
+	@$(CD) $(FE)/nDarray; $(MAKE) wipe;
 	@$(CD) $(FE)/convergenceTest; $(MAKE) wipe;
 	@$(CD) $(FE)/database; $(MAKE) wipe;
 	@$(CD) $(FE)/recorder; $(MAKE) wipe;
