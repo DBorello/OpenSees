@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.35 $
-// $Date: 2002-10-22 22:37:04 $
+// $Revision: 1.36 $
+// $Date: 2002-10-24 22:27:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -264,6 +264,8 @@
 #define ELE_TAG_HingedBeam3d     9873
 #define ELE_TAG_TwoPointHingedBeam2d     9874
 #define ELE_TAG_TwoPointHingedBeam3d     9875
+#define ELE_TAG_OnePointHingedBeam2d     9876
+#define ELE_TAG_OnePointHingedBeam3d     9877
 
 #define ELE_TAG_InternalSpring   9900
 #define ELE_TAG_SimpleJoint2D    9901
@@ -323,7 +325,7 @@
 #define EquiALGORITHM_TAGS_SplitNewton 		6
 #define EquiALGORITHM_TAGS_KrylovNewton         7
 #define EquiALGORITHM_TAGS_NewtonLineSearch     8
-#define EquiALGORITHM_TAGS_RestartNewton         9
+#define EquiALGORITHM_TAGS_PeriodicNewton         9
 #define EquiALGORITHM_TAGS_SecantNewton         10
 #define EquiALGORITHM_TAGS_AccelNewton          11
 
