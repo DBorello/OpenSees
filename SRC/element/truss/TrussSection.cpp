@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 03:51:07 $
+// $Revision: 1.4 $
+// $Date: 2001-05-22 05:26:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -595,7 +595,8 @@ TrussSection::getResistingForce()
 	
     const Vector &s = theSection->getStressResultant();
     double force = 0.0;
-    for (int i = 0; i < order; i++) {
+    int i;
+    for (i = 0; i < order; i++) {
       if (code(i) == SECTION_RESPONSE_P)
 	force += s(i);
     }
