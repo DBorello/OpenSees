@@ -94,7 +94,12 @@ load 8 $np $p  $np -pattern 2
 system UmfPack
 constraints Plain
 test NormDispIncr 1.0e-8 30 0
-integrator LoadControl 1 1 1 1
+
+#integrator DisplacementControl  3   1   $dU  1 $dU $dU
+#integrator ArcLength 0.0075 1.0
+integrator HSConstraint 0.0075 1.0 1.0 1.0
+
+#integrator LoadControl 1 1 1 1
 algorithm Newton
 numberer RCM
 analysis Static

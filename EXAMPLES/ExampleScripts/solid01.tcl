@@ -1,3 +1,4 @@
+#!/home/jeremic/bin/OpenSees.debug
 # tcl version of main_T3Dep_1_dy.cpp
 # zhyang@ucdavis.edu
 # jeremic@ucdavis.edu

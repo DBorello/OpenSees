@@ -83,7 +83,7 @@ load 8 $np $p  $np -pattern 2
 
 #stress recorder
 recorder Element all -time -file SigmaIso.out stress
-recorder plot SigmaIso.out "Load factor vs. Normal stress"  10 200 300 300 -columns 1 3
+#recorder plot SigmaIso.out "Load factor vs. Normal stress"  10 200 300 300 -columns 1 3
 
 system UmfPack
 constraints Penalty 1e12 1e12
@@ -132,14 +132,13 @@ remove recorders
 #recorder Node node_z.out disp -time -node 5 -dof 3
 
 recorder Node node_z.out disp -time -node 5 -dof 3
-recorder plot node_z.out "Disp vs Pseudo-Load" 10 100 300 300 -columns 2 1
+#recorder plot node_z.out "Disp vs Pseudo-Load" 10 100 300 300 -columns 2 1
 
 recorder Element 1 -file element.out pqall
-recorder plot element.out "p vs. q" 10 500 300 300 -columns 1 2
+#recorder plot element.out "p vs. q" 10 500 300 300 -columns 1 2
 
 set NN2 300
 set ndz -0.0002
-
 system UmfPack
 constraints Penalty 1e12 1e12
 test NormDispIncr 1.0e-08 30  0

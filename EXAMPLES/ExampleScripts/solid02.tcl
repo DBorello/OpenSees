@@ -1,6 +1,7 @@
 #jeremic@ucdavis.edu zhyang@ucdavis.edu
 #Example with 8 brick elements and one pile
 # 20Jan2001
+# 22apr03 -> fixed element numbering
 
 
 # tcl version of main_T3Dep_1_dy.cpp
@@ -51,7 +52,7 @@ node  26   0.000000E+00  2.000000E+00  2.000000E+00
 node  27   2.000000E+00  2.000000E+00  2.000000E+00
 
 fix  1 1 1 1
-fix  2 1 1 1  
+fix  2 1 1 1
 fix  3 1 1 1
 fix  4 1 1 1
 fix  5 1 1 1
@@ -75,7 +76,7 @@ fix 24 1 0 1
 fix 25 1 0 1
 fix 26 1 0 1
 fix 27 1 0 1
-    
+
 #add beam nodes
 model BasicBuilder -ndm 3 -ndf 6
 
@@ -93,8 +94,8 @@ equalDOF 19 25 2
 equalDOF 20 26 2
 equalDOF 21 27 2
 
-equalDOF 14 28 1 2 3
-equalDOF 23 29 1 2 3
+equalDOF  28 14 1 2 3
+equalDOF  29 23 1 2 3
 
 # elastic material
 nDMaterial ElasticIsotropic3D 1 $Es 0.3 $rho_s
@@ -108,21 +109,21 @@ nDMaterial ElasticIsotropic3D 1 $Es 0.3 $rho_s
 #set tensors {0.0 0.0 0.0}
 #set NOS 3
 #set NOT 3
-#set EPS {3000.0 3000.0 0.3 1.8 $startstress $otherstrain $otherstrain 
+#set EPS {3000.0 3000.0 0.3 1.8 $startstress $otherstrain $otherstrain
 #         $otherstrain $otherstrain $NOS $scalars $NOT $tensors}
 #
 #nDMaterial Template 1 -YS $YS -PS $PS -EPS $EPS ......
 
 #            tag            8 nodes                  matID    bforce1,2&3    	 massdensity
-#element brick  1   5    6    7    8    1    2    3   4 1  0.0 0.0 -9.81     
-element Brick8N  1    2    5    4    1   11   14   13  10 1  0.0 0.0 [expr -$g]	 1.8
-element Brick8N  2    3    6    5    2   12   15   14  11 1  0.0 0.0 [expr -$g]	 1.8
-element Brick8N  3    5    8    7    4   14   17   16  13 1  0.0 0.0 [expr -$g]	 1.8
-element Brick8N  4    6    9    8    5   15   18   17  14 1  0.0 0.0 [expr -$g]	 1.8
-element Brick8N  5   11   14   13   10   20   23   22  19 1  0.0 0.0 [expr -$g]	 1.8
-element Brick8N  6   12   15   14   11   21   24   23  20 1  0.0 0.0 [expr -$g]	 1.8
-element Brick8N  7   14   17   16   13   23   26   25  22 1  0.0 0.0 [expr -$g]	 1.8
-element Brick8N  8   15   18   17   14   24   27   26  23 1  0.0 0.0 [expr -$g]	 1.8
+#element brick   1   5    6    7    8    1    2    3   4 1  0.0 0.0 -9.81
+element Brick8N  1  11   14   13   10    2    5    4    1   1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  2  12   15   14   11    3    6    5    2   1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  3  14   17   16   13    5    8    7    4   1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  4  15   18   17   14    6    9    8    5   1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  5  20   23   22   19   11   14   13   10   1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  6  21   24   23   20   12   15   14   11   1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  7  23   26   25   22   14   17   16   13   1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  8  24   27   26   23   15   18   17   14   1  0.0 0.0 [expr -$g]	 1.8
 
 # Elastic modulus of aluminium kPa
 set Ea 7.0e7
@@ -131,7 +132,7 @@ set Ea 7.0e7
 set G 2.63e7
 
 # Beam cross-sectional area
-set Abeam 1.493e-4 
+set Abeam 1.493e-4
 
 # Beam polar moment of inertia
 set Jbeam 1.463e-8
@@ -151,15 +152,15 @@ element elasticBeamColumn 10  29  30 $Abeam $Ea $G $Jbeam $Ibeam $Ibeam  1
 
 set Series "Path -filePath NR228.txt -dt 0.005 -factor 1"
 
-pattern UniformExcitation  1   2  -accel $Series 
+pattern UniformExcitation  1   2  -accel $Series
 
 # create the recorder
 #recorder Node Node.out disp -time -node  1 2 3 4 5 6 7 8 -dof 1 2 3
 recorder Node -file node1.out -time -node 14 23 30 -dof 2 disp
 
 recorder plot node.out Middel_of_soil 10 10 300 300 -columns 2 1
-recorder plot node1.out "PEER workshop, solid02.tcl: Top_of_soil" 0 0 500 100 -columns 1 3 
-recorder plot node1.out "PEER workshop, solid02.tcl: Superstructure" 0 130 500 100 -columns 1 4 
+recorder plot node1.out "PEER workshop, solid02.tcl: Top_of_soil" 0 0 500 100 -columns 1 3
+recorder plot node1.out "PEER workshop, solid02.tcl: Superstructure" 0 130 500 100 -columns 1 4
 
 # #################################
 # create the transient analysis
@@ -169,7 +170,7 @@ integrator Newmark  0.55  0.2756
 numberer RCM
 #constraints Plain
 constraints Penalty 1e12 1e12
-#constraints Transformation    
+#constraints Transformation
 test NormDispIncr 2.0e-5 20 0
 
 #constraints Lagrange 1.0 1.0
@@ -177,7 +178,9 @@ test NormDispIncr 2.0e-5 20 0
 
 algorithm Newton
 numberer RCM
-system UmfPack
+
+#system UmfPack
+system SparseGeneral
 
 analysis Transient
 
