@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-07-18 22:09:28 $
+// $Revision: 1.2 $
+// $Date: 2002-07-26 18:41:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dTempLoad.cpp,v $
                                                                         
 // Written: Scott R. Hamilton 15 July 2002
@@ -105,5 +105,4 @@ Beam2dTempLoad::Print(ostream &s, int flag)
   s << "Beam2dTempLoad - reference load : " << Ttop1 << " change in temp at top of node 1 : " << Tbot1 << " change in temp at bottom of node 1\n";
   s <<  Ttop2 << " change in temp at top of node 2 : " << Tbot2 << " change in temp at bottom of node 2\n";
   s << "  elements acted on: " << this->getElementTags();
-  cerr <<"Got here";
 }
