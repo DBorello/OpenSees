@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-26 00:57:12 $
+// $Revision: 1.4 $
+// $Date: 2001-09-05 22:41:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.cpp,v $
                                                                         
                                                                         
@@ -167,8 +167,8 @@ FilePlotter::plotFile(void)
 	    }
 	  } else { // a y value if (numLineEntries == colY) {
 	    if (numLineEntries == (*cols)(i)) {
-	      if (yValue < yMin) yMin = xValue;
-	      if (yValue > yMax) yMax = xValue;	  
+	      if (xValue < yMin) yMin = xValue;
+	      if (xValue > yMax) yMax = xValue;	  
 	    } 
 	  }
 	}
