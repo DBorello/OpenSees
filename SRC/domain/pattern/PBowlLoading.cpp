@@ -84,19 +84,22 @@ PBowlLoading::PBowlLoading(int tag,
 	     zMinus(zminus)
   {
     // determine the number of data points .. open file and count num entries
-    int timeSteps1, timeSteps2;
+    int timeSteps1 = 0;
+    int timeSteps2 = 0;
     int numDataPoints =0;
     double dataPoint;
     int eleID;
 
 
-    ifstream theFile;
+    ifstream theFileACC;
+    ifstream theFileDIS;
+    ifstream theFileELE;
 
   //--------------------------------
   //Input displacement data
   //--------------------------------
-    theFile.open(DispfName);
-    if (theFile.bad())
+    theFileDIS.open(DispfName);
+    if (theFileDIS.bad())
       {
         opserr << "WARNING - PBowlLoading::PBowlLoading()";
         opserr << " - could not open file " << DispfName << endln;
@@ -105,12 +108,13 @@ PBowlLoading::PBowlLoading(int tag,
     else
       {
         //Input the number of time steps first
-        theFile >> timeSteps1;
+        theFileDIS >> timeSteps1;
+    fprintf(stderr, "timesteps1= %d", timeSteps1);
         //Loop to count the number of data points
-        while (theFile >> dataPoint)
+        while (theFileDIS >> dataPoint)
           numDataPoints++;
       }
-    theFile.close();
+    theFileDIS.close();
     UnumDataPoints = numDataPoints;
     thetimeSteps = timeSteps1;
     if ( timeSteps1 == 0)
@@ -124,8 +128,8 @@ PBowlLoading::PBowlLoading(int tag,
     if (numDataPoints != 0) {
 
     // first open the file
-    theFile.open(DispfName, ios::in);
-    if (theFile.bad()) {
+    theFileDIS.open(DispfName, ios::in);
+    if (theFileDIS.bad()) {
       opserr << "WARNING - PBowlLoading::PBowlLoading()";
       opserr << " - could not open file " << DispfName << endln;
      } else {
@@ -150,37 +154,39 @@ PBowlLoading::PBowlLoading(int tag,
 
       // read the data from the file
       else {
-         theFile >> timeSteps1;
+         theFileDIS >> timeSteps1;
          for (int t=0; t< thetimeSteps; t++)
            for  (int j=0;j<cols; j++) {
-               theFile >> dataPoint;
+               theFileDIS >> dataPoint;
                (*U)(j, t) = dataPoint;
            }
       }
      }
 
       // finally close the file
-      theFile.close();
+      theFileDIS.close();
   }
 
   //--------------------------------
   //Input acceleration data
   //--------------------------------
-  theFile.open(AccefName);
+  theFileACC.open(AccefName);
   numDataPoints = 0;
 
-  if (theFile.bad()) {
+  if (theFileACC.bad()) {
     opserr << "WARNING - PBowlLoading::PBowlLoading()";
     opserr << " - could not open file " << AccefName << endln;
     exit(2);
   } else {
     //Input the number of time steps first
-    theFile >> timeSteps2;
+    theFileACC >> timeSteps2;
+    fprintf(stderr, "timesteps2= %d", timeSteps2);
     //Loop to count the number of data points
-    while (theFile >> dataPoint)
+    while (theFileACC >> dataPoint)
       numDataPoints++;
   }
-  theFile.close();
+  theFileACC.close();
+
   UddnumDataPoints = numDataPoints;
   if ( timeSteps1 !=  timeSteps2) {
     opserr << "WARNING - PBowlLoading::PBowlLoading()";
@@ -192,8 +198,8 @@ PBowlLoading::PBowlLoading(int tag,
   if (numDataPoints != 0) {
 
     // first open the file
-    theFile.open(AccefName, ios::in);
-    if (theFile.bad()) {
+    theFileACC.open(AccefName, ios::in);
+    if (theFileACC.bad()) {
       opserr << "WARNING - PBowlLoading::PBowlLoading()";
       opserr << " - could not open file " << AccefName << endln;
     } else {
@@ -218,17 +224,17 @@ PBowlLoading::PBowlLoading(int tag,
 
       // read the data from the file
       else {
-        theFile >> timeSteps2;
+        theFileACC >> timeSteps2;
         for (int t=0; t< thetimeSteps; t++)
            for  (int j=0;j<cols; j++) {
-              theFile >> dataPoint;
+              theFileACC >> dataPoint;
               (*Udd)(j, t) = dataPoint;
            }
         }
     }
 
     // finally close the file
-    theFile.close();
+    theFileACC.close();
   }
 
 
@@ -236,22 +242,22 @@ PBowlLoading::PBowlLoading(int tag,
   //Adding plastic bowl elements
   //from file to PBowlElements
   //--------------------------------
-  theFile.open(PBEfName);
+  theFileELE.open(PBEfName);
   numDataPoints = 0;
   int numPBE = 0;
 
-  if (theFile.bad()) {
+  if (theFileELE.bad()) {
     opserr << "WARNING - PBowlLoading::PBowlLoading()";
     opserr << " - could not open file " << PBEfName << endln;
     exit(2);
   } else {
     //Input the number of Plastic Bowl elements
-    theFile >> numPBE;
+    theFileELE >> numPBE;
     //Loop to count the number of data points
-    while (theFile >> eleID)
+    while (theFileELE >> eleID)
       numDataPoints++;
   }
-  theFile.close();
+  theFileELE.close();
   if ( numPBE !=  numDataPoints) {
     opserr << "WARNING - PBowlLoading::PBowlLoading()";
     opserr << " - Number of plastic bowl elements not equal to the number of elements provided... " << numDataPoints << numPBE << PBEfName << endln;
@@ -263,8 +269,8 @@ PBowlLoading::PBowlLoading(int tag,
   if (numDataPoints != 0) {
 
     // first open the file
-    theFile.open(PBEfName, ios::in);
-    if (theFile.bad()) {
+    theFileELE.open(PBEfName, ios::in);
+    if (theFileELE.bad()) {
       opserr << "WARNING - PBowlLoading::PBowlLoading()";
       opserr << " - could not open file " << AccefName << endln;
     } else {
@@ -284,16 +290,16 @@ PBowlLoading::PBowlLoading(int tag,
 
       // read the data from the file
       else {
-        theFile >> numPBE;
+        theFileELE >> numPBE;
         int i;
 	for (i=0; i< numPBE; i++) {
-              theFile >> eleID;
+              theFileELE >> eleID;
               (*PBowlElements)(i) = eleID;
         }
       }
 
       // finally close the file
-      theFile.close();
+      theFileELE.close();
 
       //Check if read in correctly
 //test      cout << "# of plastic bowl element: " << numPBE << endln;
