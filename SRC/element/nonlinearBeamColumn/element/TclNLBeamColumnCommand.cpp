@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:32:59 $
+// $Revision: 1.4 $
+// $Date: 2003-04-18 16:31:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/TclNLBeamColumnCommand.cpp,v $
                                                                                                                                  
 // Written: Remo M. de Souza (rmsouza@ce.berkeley.edu)
@@ -39,6 +39,10 @@
 
 #include <NLBeamColumn2d.h>
 #include <NLBeamColumn3d.h>
+
+#include <LobattoBeamIntegration.h>
+#include <ForceBeamColumn2d.h>
+#include <ForceBeamColumn3d.h>
 
 // #include <LargeDispBeamColumn3d.h>
 
@@ -244,8 +248,12 @@ TclModelBuilder_addNLBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	return TCL_ERROR;
       }
       
-      element = new NLBeamColumn2d(eleTag, iNode, jNode, numIntgrPts, sections,
-				   *theCrdTransf, massDens, nMaxLocIters, locToler, 10);
+      //element = new NLBeamColumn2d(eleTag, iNode, jNode, numIntgrPts, sections,
+      //			   *theCrdTransf, massDens, nMaxLocIters, locToler, 10);
+      LobattoBeamIntegration beamIntegr;
+      element = new ForceBeamColumn2d(eleTag, iNode, jNode, numIntgrPts,
+				      sections, beamIntegr, *theCrdTransf,
+				      massDens, nMaxLocIters, locToler);
       
       delete [] sections;
     }
@@ -258,9 +266,14 @@ TclModelBuilder_addNLBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	return TCL_ERROR;
       }
       
-      element = new NLBeamColumn3d(eleTag, iNode, jNode, numIntgrPts, sections,
-				   *theCrdTransf, massDens, nMaxLocIters, locToler);
-      
+      //element = new NLBeamColumn3d(eleTag, iNode, jNode, numIntgrPts, sections,
+      //			   *theCrdTransf, massDens, nMaxLocIters, locToler);
+        
+      LobattoBeamIntegration beamIntegr;
+      element = new ForceBeamColumn3d(eleTag, iNode, jNode, numIntgrPts,
+				      sections, beamIntegr, *theCrdTransf,
+				      massDens, nMaxLocIters, locToler);
+
       delete [] sections;
     }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2003-04-03 23:37:28 $
+// $Revision: 1.27 $
+// $Date: 2003-04-18 16:31:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -219,8 +219,8 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 						theTclDomain, theTclBuilder, eleArgStart);    
     return result;
   } else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
-    int result = TclModelBuilder_addForceBeamColumn(clientData, interp, argc, argv,
-						    theTclDomain, theTclBuilder);
+    int result = TclModelBuilder_addNLBeamColumn(clientData, interp, argc, argv,
+						 theTclDomain, theTclBuilder);
     return result;
   } else if (strcmp(argv[1],"dispBeamColumn") == 0) {
     int result = TclModelBuilder_addDispBeamColumn(clientData, interp, argc, argv,
