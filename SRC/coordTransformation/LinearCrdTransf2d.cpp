@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-04 23:30:57 $
+// $Revision: 1.11 $
+// $Date: 2003-03-06 18:02:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -37,6 +37,7 @@
 // and basic coordinate systems
 
 
+#include <ID.h>
 #include <Vector.h>
 #include <Matrix.h>
 #include <Node.h>
@@ -284,77 +285,53 @@ LinearCrdTransf2d::getBasicTrialDispShapeSensitivity (void)
 	static Vector ub(3);
 	ub.Zero();
 
-	Vector nodeParameterID(2);
-	nodeParameterID(0) = (double)nodeIPtr->getCrdsSensitivity();
-	nodeParameterID(1) = (double)nodeJPtr->getCrdsSensitivity();
-	bool nodeCoordIsRandom = false;
-	if (nodeParameterID.Norm() != 0.0) {
+	static ID nodeParameterID(2);
+	nodeParameterID(0) = nodeIPtr->getCrdsSensitivity();
+	nodeParameterID(1) = nodeJPtr->getCrdsSensitivity();
 
-		nodeCoordIsRandom = true;
+	if (nodeParameterID(0) != 0 || nodeParameterID(1) != 0) {
 
-
-		if (nodeIOffset == 0) {
-			if (nodeIOffset[0] != 0.0 || nodeIOffset[1] != 0.0) {
-				opserr << "ERROR: Currently a node offset cannot be used in " << endln
-					 << " conjunction with random nodal coordinates." << endln;
-			}
-		}
-	}
-
-	if (nodeCoordIsRandom) {
+	  if (nodeIOffset != 0 || nodeJOffset != 0) {
+	    opserr << "ERROR: Currently a node offset cannot be used in " << endln
+		   << " conjunction with random nodal coordinates." << endln;
+	  }
 	 
-		if (nodeIOffset!=0) {
-			if (nodeIOffset[0]!=0.0 || nodeIOffset[1]!=0.0) {
-				opserr << "ERROR: Cannot handle node offset with random nodal coordinate." << endln;
-			}
-		}
+	  double dcosdh, dsindh, dsldh, dcldh;
 
-		double dcosdh, dsindh, dsldh, dcldh;
+	  double dx = cosTheta*L; 
+	  double dy = sinTheta*L;	
 
-		double dx = cosTheta*L; 
-		double dy = sinTheta*L;	
+	  if (nodeParameterID(0) == 1) { // here x1 is random
+	    dcosdh = (-L+dx*dx/L)/(L*L);
+	    dsindh = dx*dy/(L*L*L);
+	    dcldh = (-L*L+dx*dx*2)/(L*L*L*L);
+	    dsldh = 2*dx*dy/(L*L*L*L);
+	  }
+	  if (nodeParameterID(0) == 2) { // here y1 is random
+	    dsindh = (-L+dy*dy/L)/(L*L);
+	    dcosdh = dx*dy/(L*L*L);
+	    dsldh = (-L*L+dy*dy*2)/(L*L*L*L);
+	    dcldh = 2*dx*dy/(L*L*L*L);
+	  }
 
-		for (int i=0; i<2; i++) {
+	  if (nodeParameterID(1) == 1) { // here x2 is random
+	    dcosdh = (L-dx*dx/L)/(L*L);
+	    dsindh = -dx*dy/(L*L*L);
+	    dcldh = (L*L-dx*dx*2)/(L*L*L*L);
+	    dsldh = -2*dx*dy/(L*L*L*L);
+	  }
+	  if (nodeParameterID(1) == 2) { // here y2 is random
+	    dsindh = (L-dy*dy/L)/(L*L);
+	    dcosdh = -dx*dy/(L*L*L);
+	    dsldh = (L*L-dy*dy*2)/(L*L*L*L);
+	    dcldh = -2*dx*dy/(L*L*L*L);
+	  }
 
-
-			if (i==0) {
-
-				if ( ((int)nodeParameterID(i))==1 ) { // here x1 is random
-					dcosdh = (-L+dx*dx/L)/(L*L);
-					dsindh = dx*dy/(L*L*L);
-					dcldh = (-L*L+dx*dx*2)/(L*L*L*L);
-					dsldh = 2*dx*dy/(L*L*L*L);
-				}
-				else if ( ((int)nodeParameterID(i))==2 ) { // here y1 is random
-					dsindh = (-L+dy*dy/L)/(L*L);
-					dcosdh = dx*dy/(L*L*L);
-					dsldh = (-L*L+dy*dy*2)/(L*L*L*L);
-					dcldh = 2*dx*dy/(L*L*L*L);
-				}
-			}
-			else if (i==1) {
-
-				if ( ((int)nodeParameterID(i))==1 ) { // here x2 is random
-					dcosdh = (L-dx*dx/L)/(L*L);
-					dsindh = -dx*dy/(L*L*L);
-					dcldh = (L*L-dx*dx*2)/(L*L*L*L);
-					dsldh = -2*dx*dy/(L*L*L*L);
-				}
-				else if ( ((int)nodeParameterID(i))==2 ) { // here y2 is random
-					dsindh = (L-dy*dy/L)/(L*L);
-					dcosdh = -dx*dy/(L*L*L);
-					dsldh = (L*L-dy*dy*2)/(L*L*L*L);
-					dcldh = -2*dx*dy/(L*L*L*L);
-				}
-
-			}
-		}
-
-		ub(0) = -dcosdh*ug[0] - dsindh*ug[1] + dcosdh*ug[3] + dsindh*ug[4];
-
-		ub(1) = -dsldh*ug[0] + dcldh*ug[1] + dsldh*ug[3] - dcldh*ug[4];
-
-		ub(2) = ub(1);
+	  ub(0) = -dcosdh*ug[0] - dsindh*ug[1] + dcosdh*ug[3] + dsindh*ug[4];
+	  
+	  ub(1) = -dsldh*ug[0] + dcldh*ug[1] + dsldh*ug[3] - dcldh*ug[4];
+	  
+	  ub(2) = ub(1);
 	}
 
 	return ub;
@@ -536,63 +513,44 @@ LinearCrdTransf2d::getGlobalResistingForceShapeSensitivity(const Vector &pb, con
 	static Vector pg(6);
 	pg.Zero();
 
-	Vector nodeParameterID(2);
-	nodeParameterID(0) = (double)nodeIPtr->getCrdsSensitivity();
-	nodeParameterID(1) = (double)nodeJPtr->getCrdsSensitivity();
-	bool nodeCoordIsRandom = false;
-	if (nodeParameterID.Norm() != 0.0) {
+	static ID nodeParameterID(2);
+	nodeParameterID(0) = nodeIPtr->getCrdsSensitivity();
+	nodeParameterID(1) = nodeJPtr->getCrdsSensitivity();
 
-		nodeCoordIsRandom = true;
+	if (nodeParameterID(0) != 0 || nodeParameterID(1) != 0) {
 
-
-		if (nodeIOffset == 0) {
-			if (nodeIOffset[0] != 0.0 || nodeIOffset[1] != 0.0) {
-				opserr << "ERROR: Currently a node offset cannot be used in " << endln
-					 << " conjunction with random nodal coordinates." << endln;
-			}
+		if (nodeIOffset != 0 || nodeJOffset != 0) {
+		  opserr << "ERROR: Currently a node offset cannot be used in " << endln
+			 << " conjunction with random nodal coordinates." << endln;
 		}
-	}
-
-	if (nodeCoordIsRandom) {
 	 
 		double dcosdh, dsindh, d1oLdh;
 
 		double dx = cosTheta*L;
 		double dy = sinTheta*L;	
 
-		for (int i=0; i<2; i++) {
-
-
-			if (i==0) {
-
-				if ( ((int)nodeParameterID(i))==1 ) { // here x1 is random
-					dcosdh = (-L+dx*dx/L)/(L*L);
-					dsindh = dx*dy/(L*L*L);
-					d1oLdh = dx/(L*L*L);
-				}
-				else if ( ((int)nodeParameterID(i))==2 ) { // here y1 is random
-					dsindh = (-L+dy*dy/L)/(L*L);
-					dcosdh = dx*dy/(L*L*L);
-					d1oLdh = dy/(L*L*L);
-				}
-			}
-			else if (i==1) {
-
-				if ( ((int)nodeParameterID(i))==1 ) { // here x2 is random
-					dcosdh = (L-dx*dx/L)/(L*L);
-					dsindh = -dx*dy/(L*L*L);
-					d1oLdh = -dx/(L*L*L);
-				}
-				else if ( ((int)nodeParameterID(i))==2 ) { // here y2 is random
-					dsindh = (L-dy*dy/L)/(L*L);
-					dcosdh = -dx*dy/(L*L*L);
-					d1oLdh = -dy/(L*L*L);
-				}
-
-			}
+		if (nodeParameterID(0) == 1) { // here x1 is random
+		  dcosdh = (-L+dx*dx/L)/(L*L);
+		  dsindh = dx*dy/(L*L*L);
+		  d1oLdh = dx/(L*L*L);
 		}
-
-
+		if (nodeParameterID(0) == 2) { // here y1 is random
+		  dsindh = (-L+dy*dy/L)/(L*L);
+		  dcosdh = dx*dy/(L*L*L);
+		  d1oLdh = dy/(L*L*L);
+		}
+		
+		if (nodeParameterID(1) == 1) { // here x2 is random
+		  dcosdh = (L-dx*dx/L)/(L*L);
+		  dsindh = -dx*dy/(L*L*L);
+		  d1oLdh = -dx/(L*L*L);
+		}
+		if (nodeParameterID(1) == 2) { // here y2 is random
+		  dsindh = (L-dy*dy/L)/(L*L);
+		  dcosdh = -dx*dy/(L*L*L);
+		  d1oLdh = -dy/(L*L*L);
+		}
+		  
 		pg(0) = dcosdh*pl[0] - dsindh*pl[1] - sinTheta*d1oLdh*(q1+q2);
 		pg(1) = dsindh*pl[0] + dcosdh*pl[1] + cosTheta*d1oLdh*(q1+q2);
    
