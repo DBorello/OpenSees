@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-02-17 04:03:10 $
+// $Revision: 1.4 $
+// $Date: 2001-09-19 16:52:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.h,v $
                                                                         
                                                                         
@@ -142,8 +142,8 @@ class Matrix
 
   private:
     static double MATRIX_NOT_VALID_ENTRY;
-    static double *matrixWork;
-    static int *intWork;
+    static double matrixWork[];
+    static int intWork[];
     int numRows;
     int numCols;
     int dataSize;

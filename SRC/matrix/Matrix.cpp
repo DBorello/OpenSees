@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-02-17 04:03:10 $
+// $Revision: 1.5 $
+// $Date: 2001-09-19 16:52:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -43,8 +43,8 @@
 #define INT_WORK_AREA 20
 
 double Matrix::MATRIX_NOT_VALID_ENTRY =0.0;
-double *Matrix::matrixWork = new double [MATRIX_WORK_AREA];
-int *Matrix::intWork = new int [INT_WORK_AREA];
+double Matrix::matrixWork[MATRIX_WORK_AREA];
+int Matrix::intWork[INT_WORK_AREA];
 //double *Matrix::matrixWork = (double *)malloc(400*sizeof(double));
 
 //
