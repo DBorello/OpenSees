@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:00:53 $
+// $Revision: 1.7 $
+// $Date: 2003-04-04 16:53:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.h,v $
                                                                         
                                                                         
@@ -81,10 +81,12 @@ class LinearCrdTransf3d: public CrdTransf3d
     // functions used in post-processing only    
     const Vector &getPointGlobalCoordFromLocal (const Vector &localCoords);
     const Vector &getPointGlobalDisplFromBasic (double xi, const Vector &basicDisps);
+
+    int  getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis);
   
   private:
-    int  computeElemtLengthAndOrient (void);
-    int  getLocalAxes (void);
+    int  computeElemtLengthAndOrient(void);
+
 
     // internal data
     Node *nodeIPtr, 

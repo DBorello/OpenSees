@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-25 22:06:34 $
+// $Revision: 1.10 $
+// $Date: 2003-04-04 16:53:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.cpp,v $
                                                                         
                                                                         
@@ -169,9 +169,13 @@ PDeltaCrdTransf3d::initialize(Node *nodeIPointer, Node *nodeJPointer)
    // get element length and orientation
    if ((error = this->computeElemtLengthAndOrient()))
       return error;
+
+   static Vector XAxis(3);
+   static Vector YAxis(3);
+   static Vector ZAxis(3);
       
    // get 3by3 rotation matrix
-   if ((error = this->getLocalAxes()))
+   if ((error = this->getLocalAxes(XAxis, YAxis, ZAxis)))      
       return error;
 
    return 0;
@@ -269,7 +273,7 @@ PDeltaCrdTransf3d::computeElemtLengthAndOrient()
 
 
 int
-PDeltaCrdTransf3d::getLocalAxes(void)
+PDeltaCrdTransf3d::getLocalAxes(Vector &XAxis, Vector &YAxis, Vector &ZAxis)
 {
 	// Compute y = v cross x
 	// Note: v(i) is stored in R[2][i]
@@ -278,6 +282,7 @@ PDeltaCrdTransf3d::getLocalAxes(void)
 
 	static Vector xAxis(3);
 	xAxis(0) = R[0][0];	xAxis(1) = R[0][1];	xAxis(2) = R[0][2];
+	XAxis(0) = xAxis(0);    XAxis(1) = xAxis(1);    XAxis(2) = xAxis(2);
 
 	static Vector yAxis(3);
 
@@ -295,12 +300,15 @@ PDeltaCrdTransf3d::getLocalAxes(void)
 
 	yAxis /= ynorm;
 
+	YAxis(0) = yAxis(0);    YAxis(1) = yAxis(1);    YAxis(2) = yAxis(2);
+
 	// Compute z = x cross y
 	static Vector zAxis(3);
 
 	zAxis(0) = xAxis(1)*yAxis(2) - xAxis(2)*yAxis(1);
 	zAxis(1) = xAxis(2)*yAxis(0) - xAxis(0)*yAxis(2);
 	zAxis(2) = xAxis(0)*yAxis(1) - xAxis(1)*yAxis(0);
+	ZAxis(0) = zAxis(0);    ZAxis(1) = zAxis(1);    ZAxis(2) = zAxis(2);
 
 	// Fill in transformation matrix
 	R[1][0] = yAxis(0);

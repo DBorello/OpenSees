@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:53 $
+// $Revision: 1.5 $
+// $Date: 2003-04-04 16:53:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.h,v $
                                                                         
                                                                         
@@ -81,10 +81,11 @@ class PDeltaCrdTransf3d: public CrdTransf3d
     // functions used in post-processing only    
     const Vector &getPointGlobalCoordFromLocal (const Vector &localCoords);
     const Vector &getPointGlobalDisplFromBasic (double xi, const Vector &basicDisps);
+
+    int  getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis);
   
   private:
     int  computeElemtLengthAndOrient (void);
-    int  getLocalAxes (void);
 
     // internal data
     Node *nodeIPtr, 

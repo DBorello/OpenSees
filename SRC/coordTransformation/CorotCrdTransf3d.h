@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $                                                              
-// $Date: 2003-02-14 23:00:52 $                                                                  
+// $Revision: 1.6 $                                                              
+// $Date: 2003-04-04 16:53:30 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf3d.h,v $                                                                
                                                                         
                                                                         
@@ -79,10 +79,9 @@ class CorotCrdTransf3d: public CrdTransf3d
     const Vector &getPointGlobalCoordFromLocal (const Vector &localCoords);
     const Vector &getPointGlobalDisplFromBasic (double xi, const Vector &basicDisps);
 
-  private:
-    int  computeElemtLengthAndOrient (void);
-    int  getLocalAxes (void);
+    int  getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis);
 
+  private:
     void compTransfMatrixBasicGlobal(void);
     void compTransfMatrixBasicGlobalNew(void);
     const Vector &getQuaternionFromRotMatrix(const Matrix &RotMatrix) const;

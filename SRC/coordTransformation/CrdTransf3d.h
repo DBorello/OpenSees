@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2003-04-04 16:53:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf3d.h,v $
                                                                         
                                                                         
@@ -38,8 +38,9 @@
 
 #ifndef CrdTransf3d_h
 #define CrdTransf3d_h
-
 #include <CrdTransf.h>
+
+class Vector;
 
 class CrdTransf3d: public CrdTransf
 {
@@ -48,7 +49,8 @@ class CrdTransf3d: public CrdTransf
     virtual ~CrdTransf3d();
   
     virtual CrdTransf3d *getCopy(void)=0;
- 
+    virtual int  getLocalAxes(Vector &xAxis, Vector &yAxis, Vector &zAxis) =0; 
+
   protected:
     
   private:
