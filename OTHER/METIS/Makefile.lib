@@ -1,0 +1,56 @@
+LIBDIR = $(HOME)/lib
+include ../../Makefile.def
+
+INCLUDES = -I. 
+OPTIMIZATION = -O2
+
+DEBUGFLAGS = -DMETISLIB 
+EXTRADEFINES =  $(DEBUGFLAGS) 
+CFLAGS = $(OPTIMIZATION) $(EXTRADEFINES) $(INCLUDES)
+
+MLEVEL_OBJS = util.o match.o coarsen.o memory.o fm.o  \
+              GKlib.o htable.o list.o refine.o bucketlist.o stat.o \
+              mlevelpart.o separator.o mlevelorder.o smbfactor.o \
+              smbfct.o mincover.o initpart.o lanczos.o mmd.o balpart.o \
+              kwaypart.o kwayfm.o kwaygreedy.o entrypoint.o io.o
+              
+
+
+all: $(MLEVEL_OBJS)
+	@$(RM) $(RMFLAGS) $(METIS_LIBRARY);
+	$(AR) $(ARFLAGS) $(METIS_LIBRARY) $(MLEVEL_OBJS)
+	$(RANLIB) $(METIS_LIBRARY)
+
+clean:
+	rm -f *.o
+
+checkin:
+	@for file in *.[c,h]; \
+	  do \
+	  ci -u -m'Maintance' $$file;\
+	  done 
+
+checkin2:
+	@for file in *.[c,h]; \
+	  do \
+	  ci $$file;\
+	  rcs -U $$file;\
+	  co $$file;\
+	  done 
+
+realclean:
+	rm -f *.o $(LIBDIR)/$(METIS_LIBRARY)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
