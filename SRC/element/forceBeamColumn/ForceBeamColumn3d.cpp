@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-04-02 01:51:52 $
+// $Revision: 1.7 $
+// $Date: 2003-04-04 01:01:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -1649,38 +1649,226 @@ ForceBeamColumn3d::getInitialFlexibility(Matrix &fe)
 
 void ForceBeamColumn3d::compSectionDisplacements(Vector sectionCoords[], Vector sectionDispls[]) const
 {
+   // get basic displacements and increments
+   static Vector ub(NEBD);
+   ub = crdTransf->getBasicTrialDisp();    
+
+   double L = crdTransf->getInitialLength();
+  
+   // get integration point positions and weights
+   static double pts[maxNumSections];
+   beamIntegr->getSectionLocations(numSections, L, pts);
+
+   // setup Vandermode and CBDI influence matrices
+   int i;
+   double xi;
+ 
+   // get CBDI influence matrix
+   Matrix ls(numSections, numSections);
+   getCBDIinfluenceMatrix(numSections, pts, L, ls);
+     
+   // get section curvatures
+   Vector kappa_y(numSections);  // curvature
+   Vector kappa_z(numSections);  // curvature
+   static Vector vs;                // section deformations 
+        
+   for (i=0; i<numSections; i++) {
+       // THIS IS VERY INEFFICIENT ... CAN CHANGE IF RUNS TOO SLOW
+       int sectionKey1 = 0;
+       int sectionKey2 = 0;
+       const ID &code = sections[i]->getType();
+       int j;
+       for (j = 0; j < code.Size(); j++)
+       {
+	   if (code(j) == SECTION_RESPONSE_MZ)
+	       sectionKey1 = j;
+	   if (code(j) == SECTION_RESPONSE_MY)
+	       sectionKey2 = j;
+       }
+       if (sectionKey1 == 0) {
+	 opserr << "FATAL NLBeamColumn3d::compSectionResponse - section does not provide Mz response\n";
+	 exit(-1);
+       }
+       if (sectionKey2 == 0) {
+	 opserr << "FATAL NLBeamColumn3d::compSectionResponse - section does not provide My response\n";
+	 exit(-1);
+       }
+       
+       // get section deformations
+       vs = sections[i]->getSectionDeformation();
+       
+       kappa_z(i) = vs(sectionKey1);
+       kappa_y(i) = vs(sectionKey2); 
+   }
+
+   //cout << "kappa_y: " << kappa_y;   
+   //cout << "kappa_z: " << kappa_z;   
+   
+   Vector v(numSections), w(numSections);
+   static Vector xl(NDM), uxb(NDM);
+   static Vector xg(NDM), uxg(NDM); 
+   // double theta;                             // angle of twist of the sections
+
+   // v = ls * kappa_z;  
+   v.addMatrixVector (0.0, ls, kappa_z, 1.0);  
+   // w = ls * kappa_y *  (-1);  
+   w.addMatrixVector (0.0, ls, kappa_y, -1.0);
+   
+   for (i=0; i<numSections; i++)
+   {
+      xi = pts[i];
+
+      xl(0) = xi * L;
+      xl(1) = 0;
+      xl(2) = 0;
+
+      // get section global coordinates
+      sectionCoords[i] = crdTransf->getPointGlobalCoordFromLocal(xl);
+
+      // compute section displacements
+      //theta  = xi * ub(5); // consider linear variation for angle of twist. CHANGE LATER!!!!!!!!!!
+      uxb(0) = xi * ub(0); // consider linear variation for axial displacement. CHANGE LATER!!!!!!!!!!
+      uxb(1) = v(i);
+      uxb(2) = w(i);
+          
+      // get section displacements in global system 
+      sectionDispls[i] = crdTransf->getPointGlobalDisplFromBasic(xi, uxb);
+   }	       
   return;	       
 }
 
 void
 ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
 {
-  s << "\nElement: " << this->getTag() << " Type: ForceBeamColumn3d ";
-  s << "\tConnected Nodes: " << connectedExternalNodes ;
-  s << "\tNumber of Sections: " << numSections;
-  s << "\tMass density: " << rho << endln;
-  double P  = Secommit(0);
-  double MZ1 = Secommit(1);
-  double MZ2 = Secommit(2);
-  double MY1 = Secommit(3);
-  double MY2 = Secommit(4);
-  double L = crdTransf->getInitialLength();
-  double VY = (MZ1+MZ2)/L;
-  theVector(1) =  VY;
-  theVector(4) = -VY;
-  double VZ = (MY1+MY2)/L;
-  double T  = Secommit(5);
-  s << "\tEnd 1 Forces (P MZ VY MY VZ T): "
-    << -P+p0[0] << " " << MZ1 << " " <<  VY+p0[1] << " " 
-    << MY1 << " " << -VZ+p0[3] << " " << T << endln;
-  s << "\tEnd 2 Forces (P MZ VY MY VZ T): "
-    << P        << " " << MZ2 << " " << -VY+p0[2] << " " 
-    << MY2 << " " <<  VZ+p0[4] << " " << T << endln;
-  
-  if (flag == 1) { 
-    for (int i = 0; i < numSections; i++)
-      s << "\numSections "<<i<<" :" << *sections[i];
+  // flags with negative values are used by GSA
+  if (flag == -1) { 
+    int eleTag = this->getTag();
+    s << "NL_BEAM\t" << eleTag << "\t";
+    s << sections[0]->getTag() << "\t" << sections[numSections-1]->getTag(); 
+    s  << "\t" << connectedExternalNodes(0) << "\t" << connectedExternalNodes(1);
+    s << "\t0\t0.0000000\n";
+  }  
+
+  // flags with negative values are used by GSA  
+  else if (flag < -1) {
+    int eleTag = this->getTag();
+    int counter = (flag +1) * -1;
+    int i;
+    const Vector &force = this->getResistingForce();
+    s << "FORCE\t" << eleTag << "\t" << counter << "\t0";
+    for (i=0; i<3; i++)
+      s << "\t" << force(i);
+    s << endln;
+    s << "FORCE\t" << eleTag << "\t" << counter << "\t1";
+    for (i=0; i<3; i++)
+      s << "\t" << force(i+6);
+    s << endln;
+    s << "MOMENT\t" << eleTag << "\t" << counter << "\t0";
+    for (i=3; i<6; i++)
+      s << "\t" << force(i);
+    s << endln;
+    s << "MOMENT\t" << eleTag << "\t" << counter << "\t1";
+    for (i=3; i<6; i++)
+      s << "\t" << force(i+6);
+    s << endln;
   }
+
+  // flag set to 2 used to print everything .. used for viewing data for UCSD renderer  
+   else if (flag == 2) {
+     static Vector xAxis(3);
+     static Vector yAxis(3);
+     static Vector zAxis(3);
+     
+     crdTransf->getLocalAxes(xAxis, yAxis, zAxis);
+                        
+     s << "#ForceBeamColumn3D\n";
+     s << "#LocalAxis " << xAxis(0) << " " << xAxis(1) << " " << xAxis(2) 
+       << " " << zAxis(0) << " " << zAxis(1) << " " << zAxis(2) << endln;
+
+     const Vector &node1Crd = theNodes[0]->getCrds();
+     const Vector &node2Crd = theNodes[1]->getCrds();	
+     const Vector &node1Disp = theNodes[0]->getDisp();
+     const Vector &node2Disp = theNodes[1]->getDisp();    
+     
+     s << "#NODE " << node1Crd(0) << " " << node1Crd(1) << " " << node1Crd(2)
+       << " " << node1Disp(0) << " " << node1Disp(1) << " " << node1Disp(2)
+       << " " << node1Disp(3) << " " << node1Disp(4) << " " << node1Disp(5) << endln;
+     
+     s << "#NODE " << node2Crd(0) << " " << node2Crd(1) << " " << node2Crd(2)
+       << " " << node2Disp(0) << " " << node2Disp(1) << " " << node2Disp(2)
+       << " " << node2Disp(3) << " " << node2Disp(4) << " " << node2Disp(5) << endln;
+
+     // allocate array of vectors to store section coordinates and displacements
+     static int maxNumSections = 0;
+     static Vector *coords = 0;
+     static Vector *displs = 0;
+     if (maxNumSections < numSections) {
+       if (coords != 0) 
+	 delete [] coords;
+       if (displs != 0)
+	 delete [] displs;
+       
+       coords = new Vector [numSections];
+       displs = new Vector [numSections];
+       
+       if (!coords) {
+	 opserr << "NLBeamColumn3d::Print() -- failed to allocate coords array";   
+	 exit(-1);
+       }
+       
+       int i;
+       for (i = 0; i < numSections; i++)
+	 coords[i] = Vector(NDM);
+       
+       if (!displs) {
+	 opserr << "NLBeamColumn3d::Print() -- failed to allocate coords array";   
+	 exit(-1);
+       }
+       
+       for (i = 0; i < numSections; i++)
+	 displs[i] = Vector(NDM);
+       
+       maxNumSections = numSections;
+     }
+     
+     // compute section location & displacements
+     this->compSectionDisplacements(coords, displs);
+     
+     // spit out the section location & invoke print on the scetion
+     for (int i=0; i<numSections; i++) {
+       s << "#SECTION " << (coords[i])(0) << " " << (coords[i])(1) << " " << (coords[i])(2);       s << " " << (displs[i])(0) << " " << (displs[i])(1) << " " << (displs[i])(2) << endln;
+       sections[i]->Print(s, flag); 
+     }
+   }
+   
+   else {
+     s << "\nElement: " << this->getTag() << " Type: ForceBeamColumn3d ";
+     s << "\tConnected Nodes: " << connectedExternalNodes ;
+     s << "\tNumber of Sections: " << numSections;
+     s << "\tMass density: " << rho << endln;
+     double P  = Secommit(0);
+     double MZ1 = Secommit(1);
+     double MZ2 = Secommit(2);
+     double MY1 = Secommit(3);
+     double MY2 = Secommit(4);
+     double L = crdTransf->getInitialLength();
+     double VY = (MZ1+MZ2)/L;
+     theVector(1) =  VY;
+     theVector(4) = -VY;
+     double VZ = (MY1+MY2)/L;
+     double T  = Secommit(5);
+     s << "\tEnd 1 Forces (P MZ VY MY VZ T): "
+       << -P+p0[0] << " " << MZ1 << " " <<  VY+p0[1] << " " 
+       << MY1 << " " << -VZ+p0[3] << " " << T << endln;
+     s << "\tEnd 2 Forces (P MZ VY MY VZ T): "
+       << P        << " " << MZ2 << " " << -VY+p0[2] << " " 
+       << MY2 << " " <<  VZ+p0[4] << " " << T << endln;
+     
+     if (flag == 1) { 
+       for (int i = 0; i < numSections; i++)
+	 s << "\numSections "<<i<<" :" << *sections[i];
+     }
+   }
 }
 
 OPS_Stream &operator<<(OPS_Stream &s, ForceBeamColumn3d &E)

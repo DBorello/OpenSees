@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-04-02 01:51:52 $
+// $Revision: 1.10 $
+// $Date: 2003-04-04 01:01:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -527,7 +527,7 @@ ForceBeamColumn2d::update()
 	  numIters = 10*maxIters; // allow 10 times more iterations for initial tangent
 	
 	for (j=0; j <numIters; j++) {
-	  
+
 	  // initialize f and vr for integration
 	  f.Zero();
 	  vr.Zero();
