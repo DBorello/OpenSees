@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2002-06-20 22:36:55 $
+// $Revision: 1.17 $
+// $Date: 2002-07-31 22:54:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -62,6 +62,7 @@
 #include <SeriesMaterial.h>
 #include <CableMaterial.h>
 #include <ENTMaterial.h>
+#include <MinMaxMaterial.h>
 
 //PY springs: RWBoulanger and BJeremic
 #include <PySimple1.h>
@@ -564,8 +565,7 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
 	case MAT_TAG_Hardening:
 		return new HardeningMaterial();
 
-
-//PY springs: RWBoulanger and BJeremic
+	//PY springs: RWBoulanger and BJeremic
 	case MAT_TAG_PySimple1:
 		return new PySimple1();
 
@@ -644,6 +644,9 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
 
 	case MAT_TAG_DrainPinch1:
 		return new DrainPinch1Material();
+
+        case MAT_TAG_MinMax:
+	  return new MinMaxMaterial();
 
 	default:
 	     cerr << "FEM_ObjectBroker::getPtrNewUniaxialMaterial - ";
