@@ -32,13 +32,9 @@
 //#                                                                              #
 //#                                                                              #
 //#                                                                              #
-//# SHORT EXPLANATION: base functions for rounded Mohr-Coulomb yield surface     #
-//#                    and potential function                                    #
 //#                                                                              #
-//================================================================================
-
-#ifndef RMC01_CPP
-#define RMC01_CPP
+//################################################################################
+//*/
 
 #include "RMC01.h"
 
@@ -63,7 +59,7 @@ double g_0( double theta, double e )
   }
 
 //#############################################################################
-double g_prime( double theta, double e )
+double g_prime( double theta, double e ) 
   {
     double g_prime = 0.0;
 
@@ -109,7 +105,7 @@ double g_prime( double theta, double e )
   }
 
 //#############################################################################
-double g_second( double theta, double e )
+double g_second( double theta, double e ) 
   {
     double g_second = 0.0;
 
@@ -167,12 +163,3 @@ double g_second( double theta, double e )
 
     return g_second;
   }
-
-
-
-
-#endif
-
-
-
-
