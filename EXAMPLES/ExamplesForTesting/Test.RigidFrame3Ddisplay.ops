@@ -2,7 +2,7 @@ set displayType "PLAN"
 #set displayType "PERSPECTIVE"
 	
 # a window showing the displaced shape
-recorder display g3 10 10 300 300 -wipe
+#recorder display g3 10 10 300 300 -wipe
 
 if {$displayType == "PERSPECTIVE"} {
 	prp -7500 -5000 50000

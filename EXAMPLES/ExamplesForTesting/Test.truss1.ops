@@ -13,8 +13,8 @@
 #              P
 #
 #
-# $Revision: 1.3 $
-# $Date: 2001-09-18 17:25:43 $
+# $Revision: 1.4 $
+# $Date: 2002-06-21 17:02:22 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExamplesForTesting/Test.truss1.ops,v $
 
 set DISPLAY ON
@@ -112,7 +112,7 @@ analysis Static
 
 if {$DISPLAY == "ON"} {
     # create the display
-    recorder display g3 10 10 800 200
+#    recorder display g3 10 10 800 200
     prp 20 5.0 100.0
     vrp 20 5.0 0
     vup 0 1 0
