@@ -29,8 +29,9 @@
 \vspace{.2in}
 \section{Introduction}
 This document is intended to outline the rudimentary commands
-currently available with opensees. opensees is an interpreter being developed for
-use with OpenSees. OpenSees is an object-oriented framework under construction for
+currently available with the OpenSees interpreter. This interpreter
+is an an extension of the Tcl/Tk language for use with OpenSees. OpenSees 
+is an object-oriented framework under construction for 
 finite element analysis. OpenSees's intended users are in the research
 community. A key feature of OpenSees is the interchangeability of components
 and the ability to integrate existing libraries and new components
@@ -89,11 +90,11 @@ state of the model at each step in the solution procedure. Several
 Recorder objects are created by the analyst to monitor the analysis.
 \end{enumerate}
 
-The main abstractions of OpenSees will be explained using opensees. opensees is an
-interpreter for openseesTcl, an extension of the Tcl scripting language.
+The main abstractions of OpenSees will be explained using the OpenSees interpreter.
+The interpreter is an extension of the Tcl scripting language.
 Tcl is a string based procedural command language which allows
 substitution, loops, mathematical expressions, and procedures. 
-opensees adds commands to Tcl for finite element analysis.
+The OpenSees interpreter adds commands to Tcl for finite element analysis.
 Each of these commands is associated (bound) with a C++
 procedure that is provided. It is this procedure that is called upon
 by the interpreter to parse the command. In this document we
@@ -1622,7 +1623,7 @@ left unconstrained.
 \subsection{The fixX Command}
 {\sf\small
 \begin{verbatim}
-   fixX xCoordinate <-tol tol?> (ndf values?)
+   fixX xCoordinate (ndf values?) <-tol tol?>
 \end{verbatim}
 }
 
@@ -1637,7 +1638,7 @@ tolerence, a default of 1e-10 is used.
 \subsection{The fixY Command}
 {\sf\small
 \begin{verbatim}
-   fixY yCoordinate <-tol tol?> (ndf values?)
+   fixY yCoordinate (ndf values?) <-tol tol?>
 \end{verbatim}
 }
 
@@ -1652,7 +1653,7 @@ tolerence, a default of 1e-10 is used.
 \subsection{The fixZ Command}
 {\sf\small
 \begin{verbatim}
-   fixZ zCoordinate <-tol tol?> (ndf values?)
+   fixZ zCoordinate (ndf values?) <-tol tol?>
 \end{verbatim}
 }
 
