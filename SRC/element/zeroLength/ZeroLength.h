@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:40:50 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 18:46:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.h,v $
                                                                         
                                                                         
@@ -114,9 +114,13 @@ class ZeroLength : public Element
 	Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
     
+	void updateDir (const Vector& x, const Vector& y);
+
   protected:
     
   private:
+	  Etype elemType;
+
     // private methods
     void   setUp ( int Nd1, int Nd2, const Vector& x, const Vector& y);
     void   checkDirection (  ID& dir ) const;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-06-22 03:45:14 $
+// $Revision: 1.6 $
+// $Date: 2001-07-31 18:46:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -212,8 +212,6 @@ ZeroLength::getNumDOF(void)
 void
 ZeroLength::setDomain(Domain *theDomain)
 {
-    Etype elemType;
-    
     // check Domain is not null - invoked when object removed from a domain
     if (theDomain == 0) {
 	end1Ptr = 0;
@@ -1062,4 +1060,9 @@ ZeroLength::computeCurrentStrain1d( int mat,
     return strain;
 }
 	      
-	             
+void
+ZeroLength::updateDir(const Vector& x, const Vector& y)
+{
+	this->setUp(connectedExternalNodes(0), connectedExternalNodes(1), x, y);
+	this->setTran1d(elemType, numMaterials1d);
+}
