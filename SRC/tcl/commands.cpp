@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2001-09-10 20:34:28 $
+// $Revision: 1.15 $
+// $Date: 2001-09-12 21:39:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -125,6 +125,7 @@ extern "C" {
 #include <BandGenLinLapackSolver.h>
 
 
+#include <ConjugateGradientSolver.h>
 
 #include <FullGenLinSOE.h>
 #include <FullGenLinLapackSolver.h>
@@ -1225,6 +1226,11 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc,
       theSOE = new UmfpackGenLinSOE(*theSolver);      
   }	  
 
+  else if (strcmp(argv[1],"FullGeneral") == 0) {
+    // now must determine the type of solver to create from rest of args
+    FullGenLinLapackSolver *theSolver = new FullGenLinLapackSolver();
+    theSOE = new FullGenLinSOE(*theSolver);
+  }
 
   else {
     interp->result = "WARNING No SystemOfEqn type exists) ";
@@ -1364,10 +1370,13 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
 
   else if (strcmp(argv[1],"KrylovNewton") == 0) {
     int formTangent = CURRENT_TANGENT;
-    if (argc > 2) {
-      if (strcmp(argv[2],"-secant") == 0) {
+    int maxDim = -1;
+    if (argc > 2)
+      maxDim = atoi(argv[2]);
+    if (argc > 3) {
+      if (strcmp(argv[3],"-secant") == 0) {
 	formTangent = CURRENT_SECANT;
-      } else if (strcmp(argv[2],"-initial") == 0) {
+      } else if (strcmp(argv[3],"-initial") == 0) {
 	formTangent = INITIAL_TANGENT;
       }
     }
@@ -1376,7 +1385,10 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
       interp->result = "ERROR: No ConvergenceTest yet specified\n";
       return TCL_ERROR;	  
     }
-    theNewAlgo = new KrylovNewton(*theTest, formTangent); 
+    if (maxDim == -1)
+      theNewAlgo = new KrylovNewton(*theTest, formTangent); 
+    else
+      theNewAlgo = new KrylovNewton(*theTest, formTangent, maxDim); 
   }
 
   else if (strcmp(argv[1],"Broyden") == 0) {
