@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-11-26 22:53:52 $
+// $Revision: 1.6 $
+// $Date: 2002-03-22 20:47:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -619,7 +619,7 @@ DispBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 
   switch (responseID) {
     case 1:  // global forces
-      return eleInfo.setVector(P);
+      return eleInfo.setVector(this->getResistingForce());
 
     case 2:
 		// Axial
