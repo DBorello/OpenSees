@@ -368,7 +368,7 @@ SHELL           = /bin/sh
 # %---------------------------------------------------------%
 
 .SUFFIXES:
-.SUFFIXES:	.C .c .f .f90 .cpp .o .cpp .h
+.SUFFIXES:	.C .c .f .f90 .cpp .o .h
 
 #
 # %------------------%
@@ -430,6 +430,7 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(CBLAS_LIBRARY) \
   $(GRAPHIC_LIBRARY)\
   $(RELIABILITY_LIBRARY)\
+  $(FEDEAS_LIBRARY)\
   -lg2c -ldl
 #  $(FEDEAS_LIBRARY)\
 #  $(MPI_LIB_DIR) \ # BJ_UCD
