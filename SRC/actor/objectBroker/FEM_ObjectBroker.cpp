@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2002-06-13 02:00:18 $
+// $Revision: 1.15 $
+// $Date: 2002-06-18 01:07:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -230,6 +230,7 @@
 
 // load patterns
 #include <LoadPattern.h>
+#include <UniformExcitation.h>
 #include <GroundMotion.h>
 
 // time series
@@ -802,6 +803,9 @@ FEM_ObjectBroker::getNewLoadPattern(int classTag)
 	case PATTERN_TAG_LoadPattern:
 	     return new LoadPattern();
 
+	case PATTERN_TAG_UniformExcitation:
+	     return new UniformExcitation();
+
 	default:
 	     cerr << "FEM_ObjectBroker::getPtrLoadPattern - ";
 	     cerr << " - no Load type exists for class tag ";
@@ -816,6 +820,10 @@ GroundMotion *
 FEM_ObjectBroker::getNewGroundMotion(int classTag)
 {
     switch(classTag) {
+
+        case GROUND_MOTION_TAG_GroundMotion:
+	  return new GroundMotion(GROUND_MOTION_TAG_GroundMotion);
+
 	default:
 	     cerr << "FEM_ObjectBroker::getPtrGroundMotion - ";
 	     cerr << " - no Load type exists for class tag ";
