@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2001-03-29 05:36:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.h,v $
                                                                         
                                                                         
@@ -69,7 +69,6 @@ class FE_Element
     virtual void  addMtoTang(double fact = 1.0);    
     virtual int   setKc(void);
     virtual void  addKcToTang(double fact = 1.0);    
-    virtual int   setKi(void);
     virtual void  addKiToTang(double fact = 1.0);        
     
     // methods to allow integrator to build residual    
@@ -113,7 +112,6 @@ class FE_Element
     Matrix *theTangent;
     Integrator *theIntegrator; // need for Subdomain
     Matrix *Kc;                // the committed tangent
-    Matrix *Ki;                // the committed tangent    
     
     // static variables - single copy for all objects of the class	
     static Matrix errMatrix;

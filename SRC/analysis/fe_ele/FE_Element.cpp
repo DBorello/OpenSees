@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2001-03-29 05:36:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -60,7 +60,7 @@ int FE_Element::numFEs(0);           // number of objects
 FE_Element::FE_Element(Element *ele)
 :myDOF_Groups((ele->getExternalNodes()).Size()), myID(ele->getNumDOF()), 
  numDOF(ele->getNumDOF()), theModel(0), myEle(ele), 
- theResidual(0), theTangent(0), theIntegrator(0), Kc(0), Ki(0)
+ theResidual(0), theTangent(0), theIntegrator(0), Kc(0)
 {
     if (numDOF <= 0) {
 	cerr << "FE_Element::FE_Element(Element *) ";
@@ -167,7 +167,7 @@ FE_Element::FE_Element(Element *ele)
 
 FE_Element::FE_Element(int numDOF_Group, int ndof)
 :myDOF_Groups(numDOF_Group), myID(ndof), numDOF(ndof), theModel(0),
- myEle(0), theResidual(0), theTangent(0), theIntegrator(0), Kc(0), Ki(0)
+ myEle(0), theResidual(0), theTangent(0), theIntegrator(0), Kc(0)
 {
     // this is for a subtype, the subtype must set the myDOF_Groups ID array
     numFEs++;
@@ -207,7 +207,6 @@ FE_Element::~FE_Element()
 	if (theTangent != 0) delete theTangent;
 	if (theResidual != 0) delete theResidual;
 	if (Kc != 0) delete Kc;
-	if (Ki != 0) delete Ki;
     }
 
     // if this is the last FE_Element, clean up the
@@ -481,40 +480,19 @@ FE_Element::addKcToTang(double fact)
 
 
 
-int
-FE_Element::setKi(void) 
-{
-  if (myEle != 0) {
-
-    if (Ki == 0) {
-      Ki = new Matrix(myEle->getTangentStiff());
-      if (Ki == 0 || Ki->noCols() == 0) {
-	cerr << "WARNING FE_Element::setKi() - out of memory";
-	return -1;
-      }
-    } else
-      (*Ki) = myEle->getTangentStiff();
-  }
-
-  return 0;
-}
-
 void  
 FE_Element::addKiToTang(double fact)
 {
   if (myEle != 0) {
-
-    if (Ki != 0) {
-      // check for a quick return	
-      if (fact == 0.0) 
-	return;
-      else if (myEle->isSubdomain() == false)	    	    
-	theTangent->addMatrix(1.0, *Ki, fact);
-      else {
+    // check for a quick return	
+    if (fact == 0.0) 
+      return;
+    else if (myEle->isSubdomain() == false)	    	    
+      theTangent->addMatrix(1.0, myEle->getKi(), fact);
+    else {
 	cerr << "WARNING FE_Element::addKiToTang() - ";
 	cerr << "- this should not be called on a Subdomain!\n";
-      }    	    	    	
-    }
+    }    	    	    	
   }	
   else {
     cerr << "WARNING FE_Element::addKiToTang() - no Element *given ";
