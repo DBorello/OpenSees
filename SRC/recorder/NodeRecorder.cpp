@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.8 $
-// $Date: 2002-04-03 00:06:20 $
+// $Revision: 1.9 $
+// $Date: 2002-05-04 17:41:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -187,7 +187,7 @@ NodeRecorder::~NodeRecorder()
 	theFile.close();
 
     if (fileName != 0)
-      delete fileName;
+      delete [] fileName;
 
     if (dbColumns != 0) {
       for (int i=0; i<numDbColumns; i++)
