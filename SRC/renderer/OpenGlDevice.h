@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-05-15 22:29:00 $
+// $Revision: 1.7 $
+// $Date: 2004-06-07 23:09:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.h,v $
                                                                         
                                                                         
@@ -30,14 +30,15 @@
 
 #ifdef _GLX
 
+#include <GL/gl.h>
+#include <GL/glx.h>
+
 #include <X11/Xlib.h>
 #include <X11/X.h>
 #include <X11/Xutil.h>
 #include <X11/X.h>
 #include <X11/Xatom.h>
-#include <GL/gl.h>
-#include <GL/glext.h>
-#include <GL/glx.h>
+
 #define X11_MAX_COLORS 256
 
 #elif _WGL

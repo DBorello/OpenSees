@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-05-15 22:29:00 $
+// $Revision: 1.14 $
+// $Date: 2004-06-07 23:09:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -33,7 +33,6 @@
 #define _PNG
 #include <png.h>
 #endif
-
 
 
 int OpenGlDevice::numWindows(0);

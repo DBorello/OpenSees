@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-05-15 21:42:43 $
+// $Revision: 1.9 $
+// $Date: 2004-06-07 23:09:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGLRenderer.h,v $
                                                                         
                                                                         
@@ -43,7 +43,6 @@ using std::ofstream;
 
 #ifdef _GLX
 #include <GL/gl.h>
-#include <GL/glext.h>
 #include <GL/glx.h>
 
 #else 
