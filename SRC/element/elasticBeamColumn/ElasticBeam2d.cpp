@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-06-06 18:39:47 $
+// $Revision: 1.7 $
+// $Date: 2002-06-06 18:44:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -57,7 +57,14 @@ ElasticBeam2d::ElasticBeam2d()
   Q(6), q(3), node1Ptr(0), node2Ptr(0),
   connectedExternalNodes(2), theCoordTransf(0)
 {
-    // does nothing
+  // does nothing
+  q0[0] = 0.0;
+  q0[1] = 0.0;
+  q0[2] = 0.0;
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
 }
 
 ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i, 
@@ -68,13 +75,21 @@ ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i,
   Q(6), q(3), node1Ptr(0), node2Ptr(0),
   connectedExternalNodes(2), theCoordTransf(0)
 {
-    connectedExternalNodes(0) = Nd1;
-    connectedExternalNodes(1) = Nd2;
+  connectedExternalNodes(0) = Nd1;
+  connectedExternalNodes(1) = Nd2;
     
-    theCoordTransf = coordTransf.getCopy();
+  theCoordTransf = coordTransf.getCopy();
     
-    if (!theCoordTransf)
-	g3ErrorHandler->fatal("ElasticBeam2d::ElasticBeam2d -- failed to get copy of coordinate transformation");
+  if (!theCoordTransf)
+    g3ErrorHandler->fatal("ElasticBeam2d::ElasticBeam2d -- failed to get copy of coordinate transformation");
+
+  q0[0] = 0.0;
+  q0[1] = 0.0;
+  q0[2] = 0.0;
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
 }
 
 ElasticBeam2d::~ElasticBeam2d()
