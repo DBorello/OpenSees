@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 05:29:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -115,6 +115,7 @@ ZeroLength::ZeroLength(int tag,
   end1Ptr(0), end2Ptr(0),
   numMaterials1d(n1dMat), theMaterial1d(0), dir1d(0), t1d(0)
 {
+
     // allocate memory for numMaterials1d uniaxial material models
     theMaterial1d = new UniaxialMaterial*  [numMaterials1d];
     dir1d	  = new ID(numMaterials1d);
@@ -164,10 +165,15 @@ ZeroLength::~ZeroLength()
 {
     // invoke the destructor on any objects created by the object
     // that the object still holds a pointer to
-    
-    // delete memory of 1d materials
+
+    // invoke destructors on material objects
+    for (int mat=0; mat<numMaterials1d; mat++) 
+	delete theMaterial1d[mat];
+
+    // delete memory of 1d materials    
     if (theMaterial1d != 0)
 	delete [] theMaterial1d;
+
     if (t1d != 0)
 	delete t1d;
     if (dir1d != 0 )
@@ -417,7 +423,7 @@ ZeroLength::getDamp(void)
 
     // damp is a reference to the matrix holding the damping matrix
     Matrix& damp = *theMatrix;
-    
+ 
     // get trial displacements and take difference
     const Vector& disp1 = end1Ptr->getTrialDisp();
     const Vector& disp2 = end2Ptr->getTrialDisp();
@@ -425,12 +431,11 @@ ZeroLength::getDamp(void)
     const Vector& vel1  = end1Ptr->getTrialVel();
     const Vector& vel2  = end2Ptr->getTrialVel();
     const Vector  diffv = vel2-vel1;
-
+    
     // zero stiffness matrix
     damp.Zero();
     
     // loop over 1d materials
-    
     Matrix& tran = *t1d;;
     for (int mat=0; mat<numMaterials1d; mat++) {
 	
@@ -448,12 +453,12 @@ ZeroLength::getDamp(void)
 		damp(i,j) +=  tran(mat,i) * eta * tran(mat,j);
 
     } // end loop over 1d materials 
-    
+
     // complete symmetric stiffness matrix
     for (int i=0; i<numDOF; i++)
 	for(int j=0; j<i; j++)
 	    damp(j,i) = damp(i,j);
-    
+
     return damp;
 }
 
