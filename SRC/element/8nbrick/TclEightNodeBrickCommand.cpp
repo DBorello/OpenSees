@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-09 23:03:56 $
+// $Revision: 1.5 $
+// $Date: 2001-08-10 01:15:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/8nbrick/TclEightNodeBrickCommand.cpp,v $
                                                                         
                                                                         
@@ -79,7 +79,8 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
   }
   
   // read the 8 node tags
-  for (int i=0; i<8; i++) {
+  int i;
+  for (i=0; i<8; i++) {
       if (Tcl_GetInt(interp, argv[2+i+eleArgStart], &nodes[i]) != TCL_OK) {
 	  g3ErrorHandler->warning("command: element brick %d - invalid integer tag %s",      
 				  eleID, argv[2+i+eleArgStart]);
@@ -105,7 +106,7 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
   //type = argv[11+eleArgStart];
 
   // read the 3 bodyforce accel's 
-  for (int i=0; i<3; i++) {
+  for (i=0; i<3; i++) {
       if (Tcl_GetDouble(interp, argv[11+i+eleArgStart], &bodyforces[i]) != TCL_OK) {
 	  g3ErrorHandler->warning("command: element brick %d - invalid bodyforces tag %s",      
 				  eleID, argv[11+i+eleArgStart]);
