@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-19 00:02:25 $
+// $Revision: 1.6 $
+// $Date: 2001-08-13 21:45:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -47,6 +47,7 @@
 #include <ViscousMaterial.h>	// Sasani
 #include <PathIndependentMaterial.h>	// MHS
 #include <SeriesMaterial.h>		// MHS
+#include <ENTMaterial.h>		// MHS
 
 /*
 #include <FedeasSteel2Material.h>	// MHS
@@ -130,6 +131,33 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clienData, Tcl_Interp *interp
 	theMaterial = new ElasticMaterial(tag, E, eta);       
         //dum << tag " << tag << " E " << E << " eta " << eta <<endl;
     }
+
+	else if (strcmp(argv[1],"ENT") == 0) {
+	if (argc < 4) {
+	    cerr << "WARNING invalid number of arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: uniaxialMaterial ENT tag? E?" << endl;
+	    return TCL_ERROR;
+	}    
+
+	int tag;
+	double E;
+	
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid uniaxialMaterial ENT tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
+	    cerr << "WARNING invalid E\n";
+	    cerr << "uniaxiaMaterial ENT: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	// Parsing was successful, allocate the material
+	theMaterial = new ENTMaterial(tag, E);       
+     
+	}
 
     else if (strcmp(argv[1],"ElasticPP") == 0) {
 	if (argc < 5) {
