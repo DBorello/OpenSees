@@ -17,7 +17,7 @@
 
 {\bf August 21, 2001} 
 
-{\bf Michael Scott and Gregory L. Fenves} 
+{\bf Michael H. Scott and Gregory L. Fenves} 
 
 {\bf PEER, University of California, Berkeley}
 \end{center}
@@ -337,19 +337,21 @@ class HardeningMaterial : public UniaxialMaterial
       double sigmaY;  // Yield stress
       double Hiso;    // Isotropic hardening modulus
       double Hkin;    // Kinematic hardening modulus
-	
-      // Trial state variables
-      double Tstrain;         // Trial strain
-      double Tstress;         // Trial stress
-      double Ttangent;        // Trial tangent
-      double TplasticStrain;  // Trial plastic strain
-      double TbackStress;     // Trial back stress
-      double Thardening;      // Trial internal hardening variable
-	
+
       // Committed history variables
       double CplasticStrain;  // Committed plastic strain
       double CbackStress;     // Committed back stress;
       double Chardening;      // Committed internal hardening variable
+
+      // Trial history variables
+      double TplasticStrain;  // Trial plastic strain
+      double TbackStress;     // Trial back stress
+      double Thardening;      // Trial internal hardening variable
+
+      // Trial state variables
+      double Tstrain;   // Trial strain
+      double Tstress;   // Trial stress
+      double Ttangent;  // Trial tangent
 };
 \end{verbatim}
 }
@@ -360,28 +362,28 @@ $E$, yield stress, $\sigma_y$, isotropic hardening modulus, $H_{iso}$, and kinem
 hardening modulus, $H_{kin}$. The UniaxialMaterial
 base class constructor is invoked with the arguments tag and MAT\_TAG\_Hardening (defined
 in classTags.h). The material parameters for this object are initialized in
-the initialization list with the arguments passed to the constructor, and the
-committed history variables are initialized to $0.0$.
+the initialization list with the arguments passed to the constructor, and all
+history variables are initialized by invoking {\em revertToStart()}.
 The second constructor is a default constructor which sets all
-material parameters and committed history variables to $0.0$.
+material parameters to $0.0$ then invokes {\em revertToStart()}.
 
 {\sf\small
 \begin{verbatim}
 HardeningMaterial::HardeningMaterial(int tag, double e, double s,
                                      double hi, double hk)
 :UniaxialMaterial(tag,MAT_TAG_Hardening),
- E(e), sigmaY(s), Hiso(hi), Hkin(hk),
- CplasticStrain(0.0), CbackStress(0.0), Chardening(0.0)
+ E(e), sigmaY(s), Hiso(hi), Hkin(hk)
 {
-   // Does nothing
+   // Initialize variables
+   this->revertToStart();
 }
 
 HardeningMaterial::HardeningMaterial()
 :UniaxialMaterial(0,MAT_TAG_Hardening),
- E(0.0), sigmaY(0.0), Hiso(0.0), Hkin(0.0),
- CplasticStrain(0.0), CbackStress(0.0), Chardening(0.0)
+ E(0.0), sigmaY(0.0), Hiso(0.0), Hkin(0.0)
 {
-   // Does nothing
+   // Initialize variables
+   this->revertToStart();
 }
 \end{verbatim}
 }
@@ -477,7 +479,7 @@ HardeningMaterial::getStrain(void)
 \noindent The next set of methods deal with the path dependent behavior of this
 HardeningMaterial object. The method {\em commitState()} sets the committed history variables
 to be their corresponding trial values. Nothing needs to be done in the method
-{\em revertToLastCommit()}, and all committed history variables are set to $0.0$ in
+{\em revertToLastCommit()}, and all history variables are set to $0.0$ in
 {\em revertToStart()}.
 
 {\sf\small
@@ -496,16 +498,27 @@ HardeningMaterial::commitState(void)
 int 
 HardeningMaterial::revertToLastCommit(void)
 {
+   // Nothing to do here
    return 0;
 }
 
 int 
 HardeningMaterial::revertToStart(void)
 {
-   // Reset committed state variables
+   // Reset committed history variables
    CplasticStrain = 0.0;
    CbackStress = 0.0;
    Chardening = 0.0;
+
+   // Reset trial history variables
+   TplasticStrain = 0.0;
+   TbackStress = 0.0;
+   Thardening = 0.0;
+
+   // Initialize state variables
+   Tstrain = 0.0;
+   Tstress = 0.0;
+   Ttangent = E;
 
    return 0;
 }
@@ -526,18 +539,20 @@ HardeningMaterial::getCopy(void)
    HardeningMaterial *theCopy = 
       new HardeningMaterial(this->getTag(), E, sigmaY, Hiso, Hkin);
 
+   // Copy committed history variables
+   theCopy->CplasticStrain = CplasticStrain;
+   theCopy->CbackStress = CbackStress;
+   theCopy->Chardening = Chardening;
+
+   // Copy trial history variables
+   theCopy->TplasticStrain = TplasticStrain;
+   theCopy->TbackStress = TbackStress;
+   theCopy->Thardening = Thardening;
+
    // Copy trial state variables
    theCopy->Tstrain = Tstrain;
    theCopy->Tstress = Tstress;
    theCopy->Ttangent = Ttangent;
-   theCopy->TplasticStrain = TplasticStrain;
-   theCopy->TbackStress = TbackStress;
-   theCopy->Thardening = Thardening;
-    
-   // Copy committed state variables
-   theCopy->CplasticStrain = CplasticStrain;
-   theCopy->CbackStress = CbackStress;
-   theCopy->Chardening = Chardening;
     
    return theCopy;
 }
