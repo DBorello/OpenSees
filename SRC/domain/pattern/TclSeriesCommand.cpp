@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-03-04 00:48:12 $
+// $Revision: 1.9 $
+// $Date: 2003-03-05 19:34:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -189,6 +189,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 
 // AddingSensitivity:BEGIN ///////////////////////////////////
 
+#ifdef _RELIABILITY
 
 	else if (strcmp(argv[0],"DiscretizedRandomProcess") == 0) {
 
@@ -224,7 +225,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 				return 0;
 			}
 
-			theModFunc = 0;
+			theModFunc = 0; 
 			theModFunc = theReliabilityDomain->getModulatingFunction(tagI);
 
 			if (theModFunc == 0) {
@@ -236,6 +237,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 			else {
 				theModFUNCS[i] = theModFunc;
 			}
+
 		}	
 
 		// Parsing was successful, create the random process series object
@@ -290,6 +292,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 		theSeries = new SimulatedRandomProcessSeries(theRandomNumberGenerator,theSpectrum,numFreqIntervals,mean);
 	}
 
+#endif
   
 // AddingSensitivity:END /////////////////////////////////////
 
