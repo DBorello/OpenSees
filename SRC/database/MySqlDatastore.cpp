@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-02-12 20:12:22 $
+// $Revision: 1.2 $
+// $Date: 2002-03-19 00:21:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/MySqlDatastore.cpp,v $
 
 #include <MySqlDatastore.h>
@@ -557,7 +557,7 @@ MySqlDatastore::createOpenSeesDatabase(const char *projectName)
   }
 
   // now create the tables in the database
-  sprintf(query, "CREATE TABLE Messages ( dbTag INT NOT NULL, commitTag INT NOT NULL, size INT NOT NULL,
+  sprintf(query, "CREATE TABLE Messages ( dbTag INT NOT NULL, commitTag INT NOT NULL, size INT NOT NULL,\
                                           data MEDIUMBLOB, PRIMARY KEY (dbTag, commitTag, size) )");
 
   if (this->execute(query) != 0) {
@@ -565,7 +565,7 @@ MySqlDatastore::createOpenSeesDatabase(const char *projectName)
     return -3;
   }
 
-  sprintf(query, "CREATE TABLE Matrices ( dbTag INT NOT NULL, commitTag INT NOT NULL, size INT NOT NULL,
+  sprintf(query, "CREATE TABLE Matrices ( dbTag INT NOT NULL, commitTag INT NOT NULL, size INT NOT NULL,\
                                          data MEDIUMBLOB, PRIMARY KEY (dbTag, commitTag, size) )");
 
   if (this->execute(query) != 0) {
@@ -573,7 +573,7 @@ MySqlDatastore::createOpenSeesDatabase(const char *projectName)
     return -3;
   }
 
-  sprintf(query, "CREATE TABLE Vectors ( dbTag INT NOT NULL, commitTag INT NOT NULL, size INT NOT NULL,
+  sprintf(query, "CREATE TABLE Vectors ( dbTag INT NOT NULL, commitTag INT NOT NULL, size INT NOT NULL,\
                                          data MEDIUMBLOB, PRIMARY KEY (dbTag, commitTag, size) )");
 
   if (this->execute(query) != 0) {
@@ -581,7 +581,7 @@ MySqlDatastore::createOpenSeesDatabase(const char *projectName)
     return -3;
   }
 
-  sprintf(query, "CREATE TABLE IDs ( dbTag INT NOT NULL, commitTag INT NOT NULL, size INT NOT NULL,
+  sprintf(query, "CREATE TABLE IDs ( dbTag INT NOT NULL, commitTag INT NOT NULL, size INT NOT NULL,\
                                      data MEDIUMBLOB, PRIMARY KEY (dbTag, commitTag, size) )");
 
   if (this->execute(query) != 0) {
