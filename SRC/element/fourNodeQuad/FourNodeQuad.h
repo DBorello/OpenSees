@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-25 23:32:54 $
+// $Revision: 1.9 $
+// $Date: 2003-10-07 20:48:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.h,v $
                                                                         
 // Written: MHS
@@ -91,6 +91,10 @@ class FourNodeQuad : public Element
 
     int setParameter(const char **argv, int argc, Information &info);
     int updateParameter(int parameterID, Information &info);
+
+	//	RWB: PyLiq1 & TzLiq1 need to see ru within soil materials
+	friend class PyLiq1;
+	friend class TzLiq1;
 
   protected:
     
