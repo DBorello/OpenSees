@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-06 18:44:03 $
+// $Revision: 1.8 $
+// $Date: 2002-07-18 22:08:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -53,7 +53,7 @@ Matrix ElasticBeam2d::kb(3,3);
 
 ElasticBeam2d::ElasticBeam2d()
   :Element(0,ELE_TAG_ElasticBeam2d), 
-  A(0), E(0), I(0), rho(0.0),
+  A(0.0), E(0.0), I(0.0), alpha(0.0), d(0.0), rho(0.0),
   Q(6), q(3), node1Ptr(0), node2Ptr(0),
   connectedExternalNodes(2), theCoordTransf(0)
 {
@@ -68,10 +68,11 @@ ElasticBeam2d::ElasticBeam2d()
 }
 
 ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i, 
-		     int Nd1, int Nd2, 
-		     CrdTransf2d &coordTransf, double r)
+			     int Nd1, int Nd2, 
+			     CrdTransf2d &coordTransf, double Alpha, double depth,
+			     double r)
   :Element(tag,ELE_TAG_ElasticBeam2d), 
-  A(a), E(e), I(i), rho(r),
+  A(a), E(e), I(i), alpha(Alpha), d(depth), rho(r),
   Q(6), q(3), node1Ptr(0), node2Ptr(0),
   connectedExternalNodes(2), theCoordTransf(0)
 {
@@ -271,6 +272,7 @@ ElasticBeam2d::addLoad(ElementalLoad *theLoad, double loadFactor)
     q0[1] -= M;
     q0[2] += M;
   }
+
   else if (type == LOAD_TAG_Beam2dPointLoad) {
     double P = data(0)*loadFactor;
     double N = data(1)*loadFactor;
@@ -296,6 +298,34 @@ ElasticBeam2d::addLoad(ElementalLoad *theLoad, double loadFactor)
     q0[1] += M1;
     q0[2] += M2;
   }
+  
+  else if (type == LOAD_TAG_Beam2dTempLoad) {
+    double Ttop1 = data(0)* loadFactor;
+    double Tbot1 = data(1)* loadFactor;
+    double Ttop2 = data(2)* loadFactor;
+    double Tbot2 = data(3)* loadFactor;
+        
+    // fixed end forces due to a linear thermal load
+    double dT1 = Ttop1-Tbot1;
+    double dT = (Ttop2-Tbot2)-(Ttop1-Tbot1);
+    double a = alpha/d;  // constant based on temp difference at top and bottom, 
+    // coefficient of thermal expansion and beam depth
+    double M1 = a*E*I*(-dT1+(4.0/3.0)*dT); //Fixed End Moment end 1
+    double M2 = a*E*I*(dT1+(5.0/3.0)*dT); //Fixed End Moment end 2
+    double F = alpha*(((Ttop2+Ttop1)/2+(Tbot2+Tbot1)/2)/2)*E*A; // Fixed End Axial Force
+    double M1M2divL =(M1+M2)/L; // Fixed End Shear
+    
+    // Reactions in basic system
+    p0[0] += 0;
+    p0[1] += M1M2divL;
+    p0[2] -= M1M2divL;
+
+    // Fixed end forces in basic system
+    q0[0] -= F;
+    q0[1] += M1;
+    q0[2] += M2;
+  }
+
   else {
     g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
 			    "ElasticBeam2d::addLoad()", this->getTag());
@@ -397,28 +427,30 @@ ElasticBeam2d::getResistingForce()
 int
 ElasticBeam2d::sendSelf(int cTag, Channel &theChannel)
 {
-	int res = 0;
+  int res = 0;
 
-    static Vector data(9);
+    static Vector data(11);
     
-	data(0) = A;
+    data(0) = A;
     data(1) = E; 
     data(2) = I; 
     data(3) = rho;
     data(4) = this->getTag();
     data(5) = connectedExternalNodes(0);
     data(6) = connectedExternalNodes(1);
-	data(7) = theCoordTransf->getClassTag();
+    data(7) = theCoordTransf->getClassTag();
     	
-	int dbTag = theCoordTransf->getDbTag();
+    int dbTag = theCoordTransf->getDbTag();
+    
+    if (dbTag == 0) {
+      dbTag = theChannel.getDbTag();
+      if (dbTag != 0)
+	theCoordTransf->setDbTag(dbTag);
+    }
 
-	if (dbTag == 0) {
-		dbTag = theChannel.getDbTag();
-		if (dbTag != 0)
-			theCoordTransf->setDbTag(dbTag);
-	}
-
-	data(8) = dbTag;
+    data(8) = dbTag;
+    data(9) = alpha;
+    data(10) = d;
 
 	// Send the data vector
     res += theChannel.sendVector(this->getDbTag(), cTag, data);
@@ -444,7 +476,7 @@ ElasticBeam2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 {
     int res = 0;
 	
-	static Vector data(9);
+    static Vector data(11);
 
     res += theChannel.recvVector(this->getDbTag(), cTag, data);
     if (res < 0) {
@@ -456,6 +488,9 @@ ElasticBeam2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
     A = data(0);
     E = data(1); 
     I = data(2); 
+    alpha = data(9);
+    d = data(10);
+
     rho = data(3);
     this->setTag((int)data(4));
     connectedExternalNodes(0) = (int)data(5);

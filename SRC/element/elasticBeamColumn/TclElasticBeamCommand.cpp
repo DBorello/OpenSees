@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-31 17:18:51 $
+// $Revision: 1.2 $
+// $Date: 2002-07-18 22:08:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/TclElasticBeamCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -70,7 +70,7 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
 
     // check the number of arguments
     if ((argc-eleArgStart) < 8) {
-      cerr << "WARNING bad command - want: elasticBeamColumn beamId iNode jNode A E I transTag\n";
+      cerr << "WARNING bad command - want: elasticBeamColumn beamId iNode jNode A E I <alpha> <d> transTag\n";
       printCommand(argc, argv);
       return TCL_ERROR;
     }    
@@ -105,11 +105,32 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
       cerr << "WARNING invalid I - elasticBeamColumn " << beamId << " iNode jNode A E I\n";
       return TCL_ERROR;
     }  
-    if (Tcl_GetInt(interp, argv[7+eleArgStart], &transTag) != TCL_OK) {
-      cerr << "WARNING invalid transTag - elasticBeamColumn " << beamId << " iNode jNode A E I\n";
-      return TCL_ERROR;
+
+    double alpha = 0.0;
+    double d = 0.0;
+
+    if ((argc-eleArgStart) == 10) {    
+      if (Tcl_GetDouble(interp, argv[7+eleArgStart], &alpha) != TCL_OK) {
+	cerr << "WARNING invalid alpha - elasticBeamColumn " << beamId << " iNode jNode A E I alpha d \n";
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[8+eleArgStart], &d) != TCL_OK) {
+	cerr << "WARNING invalid d - elasticBeamColumn " << beamId << " iNode jNode A E I alpha d \n";
+	return TCL_ERROR;
+      }
+      if (Tcl_GetInt(interp, argv[9+eleArgStart], &transTag) != TCL_OK) {
+	cerr << "WARNING invalid transTag - elasticBeamColumn " << beamId << " iNode jNode A E I alpha d transTag\n";
+	return TCL_ERROR;
+      }
+    } 
+
+    else {
+      if (Tcl_GetInt(interp, argv[7+eleArgStart], &transTag) != TCL_OK) {
+	cerr << "WARNING invalid transTag - elasticBeamColumn " << beamId << " iNode jNode A E I transTag\n";
+	return TCL_ERROR;
+      }
     }
-    
+
     CrdTransf2d *theTrans = theTclBuilder->getCrdTransf2d(transTag);
     
     if (theTrans == 0) {
@@ -118,7 +139,7 @@ TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp, int ar
     }
     
     // now create the beam and add it to the Domain
-    theBeam = new ElasticBeam2d (beamId,A,E,I,iNode,jNode, *theTrans);
+    theBeam = new ElasticBeam2d (beamId,A,E,I,iNode,jNode, *theTrans, alpha, d, 0.0);
     
     if (theBeam == 0) {
       cerr << "WARNING ran out of memory creating beam - elasticBeamColumn ";	

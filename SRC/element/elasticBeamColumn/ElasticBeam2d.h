@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-06 18:39:47 $
+// $Revision: 1.5 $
+// $Date: 2002-07-18 22:08:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.h,v $
                                                                         
                                                                         
@@ -50,7 +50,8 @@ class ElasticBeam2d : public Element
   public:
     ElasticBeam2d();        
     ElasticBeam2d(int tag, double A, double E, double I, 
-		  int Nd1, int Nd2, CrdTransf2d &theTransf, double rho = 0.0);
+		  int Nd1, int Nd2, CrdTransf2d &theTransf, 
+		  double alpha = 0.0, double d = 0.0, double rho = 0.0);
     ~ElasticBeam2d();
 
     int getNumExternalNodes(void) const;
@@ -87,7 +88,8 @@ class ElasticBeam2d : public Element
 
   private:
     double A,E,I;
-
+    double alpha, d;
+    
     double rho;
     
     static Matrix K;
