@@ -28,7 +28,6 @@
 #ifndef ElasticCrossAnisotropic_h
 #define ElasticCrossAnisotropic_h
 
-#include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

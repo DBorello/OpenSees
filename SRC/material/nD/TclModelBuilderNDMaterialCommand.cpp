@@ -25,8 +25,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2003-04-10 05:46:47 $
+// $Revision: 1.29 $
+// $Date: 2003-04-11 18:08:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -280,9 +280,9 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     else if (strcmp(argv[1],"ElasticCrossAnisotropic") == 0) {
  //cout << "argc" << argc;
  if (argc < 8) {
-     cerr << "WARNING insufficient arguments\n";
+     opserr << "WARNING insufficient arguments\n";
      printCommand(argc,argv);
-     cerr << "Want: nDMaterial ElasticCrossAnisotropic tag? Ehh? Ehv? nuhv? nuvv? Ghv? <rho?>" << endl;
+     opserr << "Want: nDMaterial ElasticCrossAnisotropic tag? Ehh? Ehv? nuhv? nuvv? Ghv? <rho?>" << endln;
      return TCL_ERROR;
  }    
 
@@ -291,43 +291,43 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
  double rho = 0.0;
  
  if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-     cerr << "WARNING invalid ElasticCrossAnisotropic tag" << endl;
+     opserr << "WARNING invalid ElasticCrossAnisotropic tag" << endln;
      return TCL_ERROR;  
  }
 
  if (Tcl_GetDouble(interp, argv[3], &Eh) != TCL_OK) {
-     cerr << "WARNING invalid Eh\n";
-     cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+     opserr << "WARNING invalid Eh\n";
+     opserr << "nDMaterial ElasticCrossAnisotropic: " << tag << endln;
      return TCL_ERROR; 
  }
 
  if (Tcl_GetDouble(interp, argv[4], &Ev) != TCL_OK) {
-     cerr << "WARNING invalid Ev\n";
-     cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+     opserr << "WARNING invalid Ev\n";
+     opserr << "nDMaterial ElasticCrossAnisotropic: " << tag << endln;
      return TCL_ERROR; 
  }
  
  if (Tcl_GetDouble(interp, argv[5], &nuhv) != TCL_OK) {
-     cerr << "WARNING invalid nuhv\n";
-     cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+     opserr << "WARNING invalid nuhv\n";
+     opserr << "nDMaterial ElasticCrossAnisotropic: " << tag << endln;
      return TCL_ERROR; 
  }
 
  if (Tcl_GetDouble(interp, argv[6], &nuhh) != TCL_OK) {
-     cerr << "WARNING invalid nuhh\n";
-     cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+     opserr << "WARNING invalid nuhh\n";
+     opserr << "nDMaterial ElasticCrossAnisotropic: " << tag << endln;
      return TCL_ERROR; 
  }
 
  if (Tcl_GetDouble(interp, argv[7], &Ghv) != TCL_OK) {
-     cerr << "WARNING invalid Ghv\n";
-     cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+     opserr << "WARNING invalid Ghv\n";
+     opserr << "nDMaterial ElasticCrossAnisotropic: " << tag << endln;
      return TCL_ERROR; 
  }
 
         if (argc > 8 && Tcl_GetDouble(interp, argv[8], &rho) != TCL_OK) {
-            cerr << "WARNING invalid rho\n";
-            cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+            opserr << "WARNING invalid rho\n";
+            opserr << "nDMaterial ElasticCrossAnisotropic: " << tag << endln;
             return TCL_ERROR;   
         }
 
