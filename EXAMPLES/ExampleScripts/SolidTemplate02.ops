@@ -1,0 +1,178 @@
+#[Jeremic,zhyang]@ucdavis.edu
+# tcl example file using Template3Dep material
+# Inelastic static analysis -- Triaxial test
+#
+#two load stages:
+# stage 1: isotropic compression
+# stage 2: triaxial shearing
+#May 7, 2001
+
+
+# ################################
+# create the modelbuilder
+# #################################
+
+model BasicBuilder -ndm 3 -ndf 3
+
+set g   9.81
+set p   5.0
+set np -5.0
+set ld -8.0 
+set lf1 0.01
+set NN1 100
+# ################################
+# build the model
+# #################################
+
+node 1 1.0 1.0 0.0
+node 2 0.0 1.0 0.0
+node 3 0.0 0.0 0.0
+node 4 1.0 0.0 0.0
+node 5 1.0 1.0 1.0
+node 6 0.0 1.0 1.0
+node 7 0.0 0.0 1.0
+node 8 1.0 0.0 1.0
+
+#triaxial test boundary
+fix 1 0 1 1
+fix 2 1 1 1
+fix 3 1 0 1
+fix 4 0 0 1
+ 
+
+# Elastic material
+# Linear elastic material
+#nDMaterial ElasticIsotropic3D  2 70000 0.3
+#nDMaterial ElasticIsotropic3DL  2 70000 0.3
+
+# Nonlinear elastic material
+#nDMaterial ElasticIsotropic3DNL 2 70000 0.3 0.6 200
+
+#Elastic-plastic model
+# Drucker-Prager model
+set DPys "-DP"
+set DPps "-VM"
+set ES1  "-Leq  1.0"
+set ET1  "-Linear  0.0"
+set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
+
+#
+#																																													 alpha		 k
+set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
+#
+# where
+#alpha = 2 sin(phi) / (3^0.5) / (3-sin(phi) ), phi is the friction angle
+# and k is the cohesion
+
+## Cam clay model
+#set DPys "-CC 1.2"
+#set DPps "-CC 1.2"
+#set ES1  "-NLp  0.65 0.19 0.06"
+#set ET1  "-Linear  0.0"
+#set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
+#set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 1 200.0 -stressp $stressp"
+
+# von Mises model
+#set DPys "-VM"
+#set DPps "-VM"
+#set ES1  "-Leq  0.0"
+#set ET1  "-Linear  0.0"
+#set stressp "0.10 0 0 0 0.0 0 0 0 0.0"
+#set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2 10.0 0.0 -stressp $stressp"
+#
+nDMaterial Template3Dep 1 -YS $DPys -PS $DPps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
+
+#            tag     8 nodes      matID  bforce1 bforce2 bforce3  rho
+element brick  1  5 6 7 8 1 2 3 4   1      0.0     0.0    -9.81  1.8
+    
+#stage 1
+#===========================================================
+#isotropic load
+pattern Plain 2 "Linear" {
+load 1 $np 0   0   -pattern 2
+load 3 0   $p  0   -pattern 2
+load 4 $np $p  0   -pattern 2
+load 5 $np $np $np -pattern 2
+load 6 $p  $np $np -pattern 2
+load 7 $p  $p  $np -pattern 2
+load 8 $np $p  $np -pattern 2
+}
+
+#Set up recorder
+recorder Node node_iso.out disp -time -node 5 -dof 3
+#recorder plot node_iso.out "disp load"  10 10 300 300 -columns 2 1
+
+system UmfPack
+constraints Penalty 1e12 1e12
+test NormDispIncr 1.0e-8 30 0
+integrator LoadControl $lf1 1 $lf1 $lf1
+algorithm Newton
+numberer RCM
+analysis Static
+
+analyze $NN1
+
+
+#stage 2
+#===========================================================
+#Axial loading
+wipeAnalysis
+#loadConst
+
+equalDOF 5 6 2 2
+equalDOF 5 7 2 2
+equalDOF 5 8 2 2
+       	  
+
+#set previous load constant
+loadConst time 0
+
+## Before shifting to disp. control, apply reference load on the top
+#pattern Plain 3 "Linear" {
+#load 5 0.0 0.0 $np 
+#load 6 0.0 0.0 $np
+#load 7 0.0 0.0 $np 
+#load 8 0.0 0.0 $np
+#}
+
+set Series "Path -filePath NR228.txt -dt 0.005 -factor 1"
+
+pattern UniformExcitation  1   2  -accel $Series 
+
+
+#Set up recorder for axial loading stage
+#recorder Node node_z.out disp -time -node 5 -dof 3
+
+recorder Node node_y.out disp -time -node 5 -dof 2
+recorder plot node_y.out "disp time horizontal" 10 400 600 300 -columns 1 2
+
+#recorder Element 1 -file element.out force
+#recorder plot element.out "nodal force time horizontal" 10 800 300 300 -columns 1 2
+
+
+# #################################
+# create the transient analysis
+# #################################
+
+integrator Newmark  0.55  0.2756
+#constraints Plain
+constraints Penalty 1e12 1e12
+#constraints Transformation    
+test NormDispIncr 2.0e-5 20 0
+
+algorithm Newton
+numberer RCM
+system UmfPack
+analysis Transient
+
+# ################################
+# perform the analysis
+# #################################
+
+analyze 200 0.04
+
+
+wipe
+
+
+
