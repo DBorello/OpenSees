@@ -1,5 +1,5 @@
-// $Revision: 1.5 $
-// $Date: 2002-02-08 19:51:25 $
+// $Revision: 1.6 $
+// $Date: 2002-02-08 19:54:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.h,v $
                                                                         
 // Written: ZHY

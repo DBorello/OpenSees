@@ -1,5 +1,5 @@
-// $Revision: 1.5 $
-// $Date: 2002-02-08 19:51:24 $
+// $Revision: 1.6 $
+// $Date: 2002-02-08 19:54:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/MultiYieldSurface.cpp,v $
                                                                         
 // Written: ZHY

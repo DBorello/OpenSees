@@ -1,5 +1,5 @@
-// $Revision: 1.15 $
-// $Date: 2002-02-08 19:51:25 $
+// $Revision: 1.16 $
+// $Date: 2002-02-08 19:54:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
