@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-02-17 06:48:48 $
+// $Revision: 1.5 $
+// $Date: 2001-07-26 00:58:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1240,19 +1240,26 @@ Node::Print(ostream &s, int flag)
 int
 Node::displaySelf(Renderer &theRenderer, int displayMode, float fact)
 {
-    if (displayMode == 1) { // draw a text string containing tag
-	const Vector &theDisp = this->getDisp();
-	Vector position(*Crd);
-	for (int i=0; i<Crd->Size(); i++) 
-	    position(i) += theDisp(i)*fact;	
-	
-	static char theText[20];
-	sprintf(theText,"%d",this->getTag());
-	// NodeItoa(this->getTag(), theText);    
-	return theRenderer.drawGText(position, theText, strlen(theText));
-    }
-    
+
+  if (displayMode == 0)
     return 0;
+
+  const Vector &theDisp = this->getDisp();
+  Vector position(*Crd);
+  for (int i=0; i<Crd->Size(); i++) 
+    position(i) += theDisp(i)*fact;	
+	
+  if (displayMode == -1) { 
+    // draw a text string containing tag
+    static char theText[20];
+    sprintf(theText,"%d",this->getTag());
+    return theRenderer.drawText(position, theText, strlen(theText));
+
+  } else if (displayMode > 0) 
+    // draw a point - pixel size equals displayMode tag
+    return theRenderer.drawPoint(position, 0.0, displayMode);
+  
+  return 0;
 }
 
 
