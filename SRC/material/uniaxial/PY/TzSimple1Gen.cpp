@@ -10,6 +10,10 @@
 //              December 2, 2003									//
 //////////////////////////////////////////////////////////////////////
 
+$Revision: 1.2 $
+$Date: 2004-06-25 22:19:40 $
+$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/TzSimple1Gen.cpp,v $
+
 #include "TzSimple1Gen.h"
 
 using namespace std;
@@ -85,12 +89,12 @@ TzSimple1Gen::~TzSimple1Gen()
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Function to call appropriate subroutines given input from main
-void TzSimple1Gen::WriteTzSimple1(char *file1, char *file2, char *file3, char *file4, char *file5)
+void TzSimple1Gen::WriteTzSimple1(const char *file1, const char *file2, const char *file3, const char *file4, const char *file5)
 {
 	GetTzSimple1(file1, file2, file3, file4, file5);
 }
 
-void TzSimple1Gen::WriteTzSimple1(char *file1, char *file2, char *file3, char *file4, char *file5, char *file6)
+void TzSimple1Gen::WriteTzSimple1(const char *file1, const char *file2, const char *file3, const char *file4, const char *file5, const char *file6)
 {
 	GetTzSimple1(file1, file2, file3, file4, file5);
 	GetPattern(file6);
@@ -99,7 +103,7 @@ void TzSimple1Gen::WriteTzSimple1(char *file1, char *file2, char *file3, char *f
 ///////////////////////////////////////////////////////////////////////////////////////
 // Function to write an output file containing tz materials
 // given nodes, pile elements and tz elements
-void TzSimple1Gen::GetTzSimple1(char *file1, char *file2, char *file3, char *file4, char *file5)
+void TzSimple1Gen::GetTzSimple1(const char *file1, const char *file2, const char *file3, const char *file4, const char *file5)
 {
 
 	// Define local variables
@@ -275,7 +279,7 @@ void TzSimple1Gen::GetTzSimple1(char *file1, char *file2, char *file3, char *fil
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Function to get applied constraints
-void TzSimple1Gen::GetPattern(char *file6)
+void TzSimple1Gen::GetPattern(const char *file6)
 {
 	double ztrib1, ztrib2, maxz, minz, dzsub, sublength, zsub, depthsub;
 	int node, i, j, k;
@@ -407,7 +411,7 @@ void TzSimple1Gen::GetPattern(char *file6)
 
 /////////////////////////////////////////////////////////////////////////
 // Function to get node numbers and coordinates
-void TzSimple1Gen::GetNodes(char *file)
+void TzSimple1Gen::GetNodes(const char *file)
 {
 	int i = 0;
 	char *trash = new char[1000];
@@ -451,7 +455,7 @@ void TzSimple1Gen::GetNodes(char *file)
 
 //////////////////////////////////////////////////////////////////////////////////
 // Function to get tz element numbers, material numbers, and direction tags
-void TzSimple1Gen::GetTzElements(char *file)
+void TzSimple1Gen::GetTzElements(const char *file)
 {
 	int i = 0;
 	char *trash = new char[1000];
@@ -499,7 +503,7 @@ void TzSimple1Gen::GetTzElements(char *file)
 
 //////////////////////////////////////////////////////////////////////////////////
 // Function to get pile element numbers and node numbers
-void TzSimple1Gen::GetPileElements(char *file)
+void TzSimple1Gen::GetPileElements(const char *file)
 {
 	int i = 0;
 	char* trash = new char[1000];
@@ -545,7 +549,7 @@ void TzSimple1Gen::GetPileElements(char *file)
 
 //////////////////////////////////////////////////////////////////////////////////
 // Function to get soil properties
-void TzSimple1Gen::GetSoilProperties(char *file)
+void TzSimple1Gen::GetSoilProperties(const char *file)
 {
 	int i = 0;
 	int I = 0;
@@ -698,7 +702,7 @@ void TzSimple1Gen::GetSoilProperties(char *file)
 	
 ///////////////////////////////////////////////////////////////////////////////////////
 // Member function to calculate pult
-double TzSimple1Gen::GetTult(char *type)
+double TzSimple1Gen::GetTult(const char *type)
 {
 	double tult_0, tult_1, tult_ru;
 
@@ -747,7 +751,7 @@ double TzSimple1Gen::GetTult(char *type)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Member function to return y50
-double TzSimple1Gen::GetZ50(char *type)
+double TzSimple1Gen::GetZ50(const char *type)
 {
 	if(strcmp(type,"tz4")==0)
 		return ZULT/8.0;
@@ -759,7 +763,7 @@ double TzSimple1Gen::GetZ50(char *type)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Member function to get the number of rows in a file that begin with a certain string
-int TzSimple1Gen::NumRows(char *file, char *begin)
+int TzSimple1Gen::NumRows(const char *file, const char *begin)
 {
 	if(!file)
 	{

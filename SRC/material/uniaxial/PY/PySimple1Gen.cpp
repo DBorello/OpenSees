@@ -10,6 +10,10 @@
 //              December 2, 2003									//
 //////////////////////////////////////////////////////////////////////
 
+$Revision: 1.2 $
+$Date: 2004-06-25 22:19:40 $
+$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/PySimple1Gen.cpp,v $
+
 #include "PySimple1Gen.h"
 
 using namespace std;
@@ -102,13 +106,13 @@ PySimple1Gen::~PySimple1Gen()
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Function to call appropriate subroutines given input from main
-void PySimple1Gen::WritePySimple1(char *file1, char *file2, char *file3, char *file4, char *file5)
+void PySimple1Gen::WritePySimple1(const char *file1, const char *file2, const char *file3, const char *file4, const char *file5)
 {
 	GetPySimple1(file1, file2, file3, file4, file5);
 	return;
 }
 
-void PySimple1Gen::WritePySimple1(char *file1, char *file2, char *file3, char *file4, char *file5, char *file6)
+void PySimple1Gen::WritePySimple1(const char *file1, const char *file2, const char *file3, const char *file4, const char *file5, const char *file6)
 {
 
 	GetPySimple1(file1, file2, file3, file4, file5);
@@ -119,7 +123,7 @@ void PySimple1Gen::WritePySimple1(char *file1, char *file2, char *file3, char *f
 ///////////////////////////////////////////////////////////////////////////////////////
 // Function to write an output file containing the py materials
 // given nodes, pile elements and py elements
-void PySimple1Gen::GetPySimple1(char *file1, char *file2, char *file3, char *file4, char *file5)
+void PySimple1Gen::GetPySimple1(const char *file1, const char *file2, const char *file3, const char *file4, const char *file5)
 {
 	// Define local variables
 	int i, j, k, pyelenum, PyIndex, pymat, NODENUM;
@@ -354,7 +358,7 @@ void PySimple1Gen::GetPySimple1(char *file1, char *file2, char *file3, char *fil
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Function to get applied constraints
-void PySimple1Gen::GetPattern(char *file6)
+void PySimple1Gen::GetPattern(const char *file6)
 {
 	double ztrib1, ztrib2, maxz, minz, dzsub, sublength, zsub, depthsub;
 	int node, i, j, k;
@@ -487,7 +491,7 @@ void PySimple1Gen::GetPattern(char *file6)
 
 /////////////////////////////////////////////////////////////////////////
 // Function to get node numbers and coordinates
-void PySimple1Gen::GetNodes(char *file)
+void PySimple1Gen::GetNodes(const char *file)
 {
 	int i = 0;
 	char *trash2 = new char[5];
@@ -530,7 +534,7 @@ void PySimple1Gen::GetNodes(char *file)
 
 //////////////////////////////////////////////////////////////////////////////////
 // Function to get py element numbers, material numbers, and direction tags
-void PySimple1Gen::GetPyElements(char *file)
+void PySimple1Gen::GetPyElements(const char *file)
 {
 	int i = 0;
 	char *trash = new char[1000];
@@ -579,7 +583,7 @@ void PySimple1Gen::GetPyElements(char *file)
 
 //////////////////////////////////////////////////////////////////////////////////
 // Function to get pile element numbers and node numbers
-void PySimple1Gen::GetPileElements(char *file)
+void PySimple1Gen::GetPileElements(const char *file)
 {
 	int i = 0;
 	char* trash = new char[1000];
@@ -625,7 +629,7 @@ void PySimple1Gen::GetPileElements(char *file)
 
 //////////////////////////////////////////////////////////////////////////////////
 // Function to get soil properties
-void PySimple1Gen::GetSoilProperties(char *file)
+void PySimple1Gen::GetSoilProperties(const char *file)
 {
 	int i = 0;
 	int I = 0;
@@ -812,7 +816,7 @@ void PySimple1Gen::GetSoilProperties(char *file)
 	
 ///////////////////////////////////////////////////////////////////////////////////////
 // Member function to calculate pult
-double PySimple1Gen::GetPult(char *type)
+double PySimple1Gen::GetPult(const char *type)
 {
 	double alpha, beta, Ko, Ka, pu1, pu2, A;
 	double deg = 3.141592654/180;
@@ -942,7 +946,7 @@ double PySimple1Gen::GetPult(char *type)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Member function to return y50
-double PySimple1Gen::GetY50(char *type)
+double PySimple1Gen::GetY50(const char *type)
 {
 	double csigma = sqrt(50/stress);  // correction factor for overburden
 	if(depth == 0)
@@ -1000,7 +1004,7 @@ double PySimple1Gen::GetY50(char *type)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Member function to get the number of rows in a file that begin with a certain string
-int PySimple1Gen::NumRows(char *file, char *begin)
+int PySimple1Gen::NumRows(const char *file, const char *begin)
 {
 	if(!file)
 	{

@@ -1,3 +1,7 @@
+$Revision: 1.2 $
+$Date: 2004-06-25 22:19:40 $
+$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/PySimple1Gen.h,v $
+
 #include <fstream>
 #include <cmath>
 #include <iostream>
@@ -21,20 +25,20 @@ class PySimple1Gen
 	char **MatType, *PatternInfo;
 
 	// Member functions for reading input files:
-	void GetNodes(char *file);
-	void GetPyElements(char *file);
-	void GetPileElements(char *file);
-	void GetSoilProperties(char *file);
-	int NumRows(char *file, char *begin);
+	void GetNodes(const char *file);
+	void GetPyElements(const char *file);
+	void GetPileElements(const char *file);
+	void GetSoilProperties(const char *file);
+	int NumRows(const char *file, const char *begin);
 
 
 	// Member functions for generating output:
-	void GetPySimple1(char *file1, char *file2, char *file3, char *file4, char *file5);
-	void GetPattern(char *file6);
+	void GetPySimple1(const char *file1, const char *file2, const char *file3, const char *file4, const char *file5);
+	void GetPattern(const char *file6);
 
 	// Member functions for calculating pult:
-	double GetPult(char *type);
-	double GetY50(char *type);
+	double GetPult(const char *type);
+	double GetY50(const char *type);
 	double GetVStress(double z);
 	double linterp(double x1, double x2, double y1, double y2, double x3);
 	double GetMp(double *vx, double *vy, double x, int length);
@@ -44,8 +48,8 @@ class PySimple1Gen
 public:
 
 	// Public member functions accessed from TclModelBuilder.cpp
-	void WritePySimple1(char *file1, char *file2, char *file3, char *file4, char *file5);
-	void WritePySimple1(char *file1, char *file2, char *file3, char *file4, char *file5, char *file6);
+	void WritePySimple1(const char *file1, const char *file2, const char *file3, const char *file4, const char *file5);
+	void WritePySimple1(const char *file1, const char *file2, const char *file3, const char *file4, const char *file5, const char *file6);
 
 	PySimple1Gen();
 	~PySimple1Gen();
