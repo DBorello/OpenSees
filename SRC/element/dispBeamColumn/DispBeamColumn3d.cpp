@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2003-02-25 23:32:50 $
+// $Revision: 1.18 $
+// $Date: 2003-04-08 19:00:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -1082,7 +1082,7 @@ DispBeamColumn3d::setResponse(const char **argv, int argc, Information &eleInfo)
       return new ElementResponse(this, 4, Vector(6));
     
     // section response -
-    else if (strcmp(argv[0],"section") ==0) {
+    else if (strcmp(argv[0],"section") == 0 || strcmp(argv[0],"-section") == 0) {
 		if (argc <= 2)
 			return 0;
 	

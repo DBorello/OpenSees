@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2003-03-11 21:54:12 $
+// $Revision: 1.24 $
+// $Date: 2003-04-08 19:00:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -984,7 +984,7 @@ DispBeamColumn2d::setResponse(const char **argv, int argc, Information &eleInfo)
       return new ElementResponse(this, 4, Vector(3));
     
     // section response -
-    else if (strcmp(argv[0],"section") ==0) {
+    else if (strcmp(argv[0],"section") == 0 || strcmp(argv[0],"-section") == 0) {
       if (argc <= 2)
 	return 0;
       
@@ -1072,7 +1072,7 @@ DispBeamColumn2d::setParameter (const char **argv, int argc, Information &info)
 	}
 
 	// If the parameter is belonging to a section or lower
-	else if (strcmp(argv[0],"-section") == 0 || strcmp(argv[0],"section") == 0) {
+	else if (strcmp(argv[0],"section") == 0 || strcmp(argv[0],"-section") == 0) {
 
 		// For now, no parameters of the section itself:
 		if (argc<5) {
