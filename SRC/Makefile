@@ -196,12 +196,20 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/beamWithHinges/TclBeamWithHingesBuilder.o \
 	$(FE)/element/beamWithHinges/BeamWithHinges2d.o \
 	$(FE)/element/beamWithHinges/BeamWithHinges3d.o \
-	$(FE)/element/fourNodeQuad/TclFourNodeQuadCommand.o \
-	$(FE)/element/fourNodeQuad/FourNodeQuad.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn2d.o \
 	$(FE)/element/dispBeamColumn/DispBeamColumn3d.o \
-	$(FE)/element/dispBeamColumn/TclDispBeamColumnCommand.o
-
+	$(FE)/element/dispBeamColumn/TclDispBeamColumnCommand.o \
+	$(FE)/element/fourNodeQuad/TclFourNodeQuadCommand.o \
+	$(FE)/element/fourNodeQuad/FourNodeQuad.o \
+	$(FE)/element/fourNodeQuad/ConstantPressureVolumeQuad.o \
+	$(FE)/element/fourNodeQuad/EnhancedQuad.o \
+	$(FE)/element/shell/ShellMITC4.o \
+	$(FE)/element/shell/R3vectors.o \
+	$(FE)/element/shell/TclShellCommand.o \
+	$(FE)/element/brick/Brick.o \
+	$(FE)/element/brick/BbarBrick.o \
+	$(FE)/element/brick/shp3d.o \
+	$(FE)/element/brick/TclBrickCommand.o 
 
 MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/UniaxialMaterial.o \
@@ -216,6 +224,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/EPPGapMaterial.o \
 	$(FE)/material/uniaxial/ViscousMaterial.o \
 	$(FE)/material/uniaxial/PathIndependentMaterial.o \
+	$(FE)/material/uniaxial/CableMaterial.o \
 	$(FE)/material/nD/NDMaterial.o \
 	$(FE)/material/nD/J2Plasticity.o \
 	$(FE)/material/nD/J2PlaneStress.o \
@@ -292,7 +301,9 @@ SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
 	$(FE)/modelbuilder/PlaneFrame.o \
 	$(FE)/modelbuilder/tcl/TclUniaxialMaterialTester.o \
-	$(FE)/modelbuilder/tcl/TclModelBuilder.o 
+	$(FE)/modelbuilder/tcl/TclModelBuilder.o \
+	$(FE)/modelbuilder/tcl/Block2D.o \
+	$(FE)/modelbuilder/tcl/Block3D.o 
 
 
 DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
@@ -357,6 +368,9 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/NewtonRaphson.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/ModifiedNewton.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/NewtonLineSearch.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/Broyden.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/BFGS.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/KrylovNewton.o \
 	$(FE)/convergenceTest/ConvergenceTest.o \
 	$(FE)/convergenceTest/CTestNormUnbalance.o \
 	$(FE)/convergenceTest/CTestNormDispIncr.o \
