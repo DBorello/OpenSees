@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:40:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -59,6 +59,7 @@
 #include <FEM_ObjectBroker.h>
 #include <Renderer.h>
 #include <G3Globals.h>
+#include <ElementResponse.h>
 
 #define  NDM   3         // dimension of the problem (3d)
 #define  NL    3         // size of uniform load vector
@@ -76,7 +77,7 @@ rho(0), maxIters(0), tol(0), initialFlag(0), prevDistrLoad(NL),
 K(NEGD,NEGD), m(NEGD,NEGD), d(NEGD,NEGD), P(NEGD), Pinert(NEGD), load(NEGD), Uepr(NEGD),
 kv(NEBD,NEBD), Se(NEBD), 
 distrLoadcommit(NL), Uecommit(NEGD), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0), bp(0),
-fs(0), vs(0), Ssr(0), vscommit(0), crdTransf(0)
+fs(0), vs(0), Ssr(0), vscommit(0), crdTransf(0), isTorsion(false)
 {
 
 }
@@ -96,7 +97,7 @@ initialFlag(0), prevDistrLoad(NL),
 K(NEGD,NEGD), m(NEGD,NEGD), d(NEGD,NEGD), P(NEGD), Pinert(NEGD), load(NEGD), 
 Uepr(NEGD), kv(NEBD,NEBD), Se(NEBD),  
 distrLoadcommit(NL), Uecommit(NEGD), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0), bp(0),
-fs(0), vs(0), Ssr(0), vscommit(0)
+fs(0), vs(0), Ssr(0), vscommit(0), isTorsion(false)
 {
    connectedExternalNodes(0) = nodeI;
    connectedExternalNodes(1) = nodeJ;    
@@ -130,7 +131,19 @@ fs(0), vs(0), Ssr(0), vscommit(0)
 	  cerr << "Error: NLBeamColumn3d::NLBeamColumn3d: could not create copy of section " << i << endl;
           exit(-1);
       }
+
+	  int order = sections[i]->getOrder();
+	  const ID &code = sections[i]->getType();
+	  for (int j = 0; j < order; j++) {
+		if (code(j) == SECTION_RESPONSE_T)
+			isTorsion = true;
+	  }
    }
+
+   if (!isTorsion)
+	   g3ErrorHandler->warning("%s -- no torsion detected in sections, %s",
+			"NLBeamColumn3d::NLBeamColumn3d",
+			"continuing with element torsional stiffness of 1.0e10");
 
    // get copy of the transformation object   
    crdTransf = coordTransf.getCopy(); 
@@ -285,7 +298,7 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    
    if ((dofNode1 !=NND ) || (dofNode2 != NND))
    {
-      cerr << "beam2d05::setDomain(): Nd2 or Nd1 incorrect dof ";
+      cerr << "NLBeamColumn3d::setDomain(): Nd2 or Nd1 incorrect dof ";
       exit(0);
    }
    
@@ -594,10 +607,12 @@ int NLBeamColumn3d::updateElementState(void)
       f  *= L;
       vr *= L;
 
+	  if (!isTorsion)
+		  f(5,5) = 1.0e-10;
+
       // calculate element stiffness matrix
       // invertMatrix(5, f, kv);
-
-      if (f.Solve(I,kv) < 0)
+	if (f.Solve(I,kv) < 0)
 	 g3ErrorHandler->warning("NLBeamColumn3d::updateElementState() - could not invert flexibility\n");
 
       dv = v - vr;
@@ -606,7 +621,7 @@ int NLBeamColumn3d::updateElementState(void)
       dSe.addMatrixVector(0.0, kv, dv, 1.0);
       
       dW = dv^ dSe;
-      if (dW < tol)
+      if (fabs(dW) < tol)
         break;
     }     
       
@@ -804,7 +819,7 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   int i, j , k;
   int loc = 0;
   
-  static ID idData(9);  // one bigger than needed so no clash later
+  static ID idData(9);
   idData(0) = this->getTag();
   idData(1) = connectedExternalNodes(0);
   idData(2) = connectedExternalNodes(1);
@@ -820,6 +835,7 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
        }
   }
   idData(7) = crdTransfDbTag;
+  idData(8) = (isTorsion) ? 1 : 0;
   
 
   if (theChannel.sendID(dbTag, commitTag, idData) < 0)  
@@ -936,13 +952,13 @@ int
 NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
    //
-  // into an ID of size 7 place the integer data
+  // into an ID of size 9 place the integer data
   //
   int dbTag = this->getDbTag();
   int i,j,k;
   
 
-  static ID idData(9); // one bigger than needed 
+  static ID idData(9);
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
     g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - %s\n",
@@ -955,6 +971,7 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   connectedExternalNodes(1) = idData(2);
   maxIters = idData(4);
   initialFlag = idData(5);
+  isTorsion = (idData(8) == 1) ? true : false;
   
   int crdTransfClassTag = idData(6);
   int crdTransfDbTag = idData(7);
@@ -1370,7 +1387,8 @@ NLBeamColumn3d::Print(ostream &s, int flag)
 //       s << "\nSection "<<0<<" :" << *sections[0];
 
        s << "\tStiffness Matrix:\n" << kv;
-         s << "\tResisting Force: " << Se;
+       s << "\tResisting Force: " << Se;
+	   sections[0]->Print(s,flag);
 
    }
 }
@@ -1456,10 +1474,7 @@ NLBeamColumn3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
    return 0;
 }
 
-
-
-
-int 
+Response* 
 NLBeamColumn3d::setResponse(char **argv, int argc, Information &eleInformation)
 {
     //
@@ -1467,61 +1482,33 @@ NLBeamColumn3d::setResponse(char **argv, int argc, Information &eleInformation)
     //
 
     // force - 
-    if ((strcmp(argv[0],"forces") == 0) || (strcmp(argv[0],"force") == 0)) {
-	Vector *newVector = new Vector(NEBD);
-	if (newVector == 0) {
-	    cerr << "NLBeamColumn3d::setResponse() - out of memory creating vector\n";
-	    return -1;
-	}	
-	eleInformation.theVector = newVector;	
-	eleInformation.theType = VectorType;
-	return 1;
-    } 
+    if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0)
+		return new ElementResponse(this, 1, P);
 
     // section response -
     else if (strcmp(argv[0],"section") ==0) {
-	if (argc <= 2)
-	    return -1;
+		if (argc <= 2)
+			return 0;
 	
-	int sectionNum = atoi(argv[1]);
-	if ((sectionNum > 0) && (sectionNum <= nSections)) {
-	    int ok = sections[sectionNum-1]->setResponse(&argv[2], argc-2, 
-							 eleInformation);
-	    if (ok < 0)
-		return -1;
-	    else if (ok >= 0 && ok < MAX_SECTION_RESPONSE_ID)
-		return sectionNum*MAX_SECTION_RESPONSE_ID + ok;  
-	    else 
-		return -1;
-	}
+		int sectionNum = atoi(argv[1]);
+		if (sectionNum > 0 && sectionNum <= nSections)
+			return sections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInformation);
+		else
+			return 0;
     }
     
-    return -1;
+	else
+		return 0;
 }
 
 int 
-NLBeamColumn3d::getResponse(int responseID, Information &eleInformation)
+NLBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 {
-  switch (responseID) {
-
-    case -1: // unknown 
-      return -1;
-      
+  switch (responseID) {      
     case 1:  // forces
-      if (eleInformation.theVector != 0)
-	  *(eleInformation.theVector) = Se;
-      return 0;            
+		return eleInfo.setVector(P);
 
     default: 
-      if (responseID >= MAX_SECTION_RESPONSE_ID) { // section quantity
-	  int sectionNum = responseID/MAX_SECTION_RESPONSE_ID; 
-	  if ((sectionNum > 0) && (sectionNum <= nSections)) {
-	      return sections[sectionNum-1]->
-		  getResponse(responseID-MAX_SECTION_RESPONSE_ID*sectionNum, 
-			      eleInformation);
-	  } else
-	      return -1;
-      } else // unknown
 	  return -1;
   }
 }

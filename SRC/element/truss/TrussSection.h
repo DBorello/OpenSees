@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:40:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.h,v $
                                                                         
                                                                         
@@ -87,7 +87,7 @@ class TrussSection : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(ostream &s, int flag =0);    
     
-    int setResponse(char **argv, int argc, Information &eleInformation);
+	Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
     
     int setParameter (char **argv, int argc, Information &info);
@@ -124,8 +124,8 @@ class TrussSection : public Element
     static Matrix trussM6;   // class wide matrix for 6*6
     static Matrix trussM12;  // class wide matrix for 12*12
     static Vector trussV2;   // class wide Vector for size 2
-    static Vector trussV3;   // class wide Vector for size 2	
-    static Vector trussV4;   // class wide Vector for size 44
+    static Vector trussV3;   // class wide Vector for size 3	
+    static Vector trussV4;   // class wide Vector for size 4
     static Vector trussV6;   // class wide Vector for size 6
     static Vector trussV12;  // class wide Vector for size 12
 };

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:43:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -37,6 +37,7 @@
 #include <UniaxialMaterial.h>
 #include <string.h>
 #include <Information.h>
+#include <MaterialResponse.h>
 
 UniaxialMaterial::UniaxialMaterial(int tag, int clasTag)
 :Material(tag,clasTag)
@@ -76,44 +77,44 @@ UniaxialMaterial::getCopy(SectionForceDeformation *s)
 	return this->getCopy();
 }
 
-int 
+Response* 
 UniaxialMaterial::setResponse(char **argv, int argc, Information &matInfo)
 {
     // stress
-    if (strcmp(argv[0],"stress") ==0) {
-	matInfo.theType = DoubleType;
-	return 1;
-    } 
+    if (strcmp(argv[0],"stress") == 0)
+		return new MaterialResponse(this, 1, this->getStress());
 
     // tangent
-    else if (strcmp(argv[0],"tangent") ==0) {
-	matInfo.theType = DoubleType;
-	return 2;
-    }
+    else if (strcmp(argv[0],"tangent") == 0)
+		return new MaterialResponse(this, 2, this->getTangent());
+
+    // strain
+	else if (strcmp(argv[0],"strain") == 0)
+		return new MaterialResponse(this, 3, this->getStrain());
 
     // otherwise unknown
     else
-	return -1;
+		return 0;
 }
 
 int 
 UniaxialMaterial::getResponse(int responseID, Information &matInfo)
 {
-    // each subclass must implements it's own stuff    
+  // each subclass must implement its own stuff    
   switch (responseID) {
-    case -1:
-      return -1;
-      
     case 1:
-      matInfo.theDouble = this->getStress();    
+      matInfo.setDouble(this->getStress());
       return 0;
       
     case 2:
-      matInfo.theDouble = this->getTangent();    
+      matInfo.setDouble(this->getTangent());
+      return 0;      
+
+    case 3:
+      matInfo.setDouble(this->getStrain());
       return 0;      
       
     default:      
       return -1;
   }
-    
 }

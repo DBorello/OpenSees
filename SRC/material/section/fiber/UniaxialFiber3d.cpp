@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:44:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber3d.cpp,v $
                                                                         
                                                                         
@@ -47,6 +47,8 @@
 #include <FEM_ObjectBroker.h>
 #include <ID.h>
 #include <SectionForceDeformation.h>
+#include <Information.h>
+#include <FiberResponse.h>
 
 Matrix UniaxialFiber3d::ks(3,3); 
 Vector UniaxialFiber3d::fs(3); 
@@ -363,3 +365,31 @@ void UniaxialFiber3d::Print(ostream &s, int flag)
     s << "\tMaterial, tag: " << theMaterial->getTag() << endl;
 }
 
+Response*
+UniaxialFiber3d::setResponse(char **argv, int argc, Information &info)
+{
+	if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)		
+		return new FiberResponse(this, 1, Vector(3));
+
+	else
+		return theMaterial->setResponse(argv, argc, info);
+}
+
+int
+UniaxialFiber3d::getResponse(int responseID, Information &fibInfo)
+{
+	switch(responseID) {
+		case 1:
+			return fibInfo.setVector(this->getFiberStressResultants());
+
+		default:
+			return -1;
+	}
+}
+
+void 
+UniaxialFiber3d::getFiberLocation(double &yLoc, double &zLoc)
+{
+	yLoc = -as[0];
+	zLoc = as[1];
+}

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:45:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -40,6 +40,7 @@
 #include <MatrixUtil.h>
 #include <classTags.h>
 #include <SectionAggregator.h>
+#include <MaterialResponse.h>
 #include <ID.h>
 
 #include <classTags.h>
@@ -674,11 +675,40 @@ SectionAggregator::Print(ostream &s, int flag)
 {
     s << "\nSection Aggregator, tag: " << this->getTag() << endl;
 	s << "\tSection code: " << *code;
-    if (theSection)
+    if (theSection) {
 		s << "\tSection, tag: " << theSection->getTag() << endl;
+		theSection->Print(s, flag);
+	}
     s << "\tUniaxial Additions" << endl;
     for (int i = 0; i < numMats; i++)
 		s << "\t\tUniaxial Material, tag: " << theAdditions[i]->getTag() << endl;
+}
+
+Response*
+SectionAggregator::setResponse(char **argv, int argc, Information &info)
+{
+	// See if the response is one of the defaults
+	Response *res = SectionForceDeformation::setResponse(argv, argc, info);
+	if (res != 0)
+		return res;
+
+	// If not, forward the request to the section (need to do this to get fiber response)
+	// CURRENTLY NOT SENDING ANYTHING OFF TO THE UniaxialMaterials ... Probably
+	// don't need anything more from them than stress, strain, and stiffness, 
+	// which are covered in base class method ... can change if need arises
+	else if (theSection != 0)
+		return theSection->setResponse(argv, argc, info);
+
+	else
+		return 0;
+}
+
+int
+SectionAggregator::getResponse(int responseID, Information &info)
+{
+	// Just call the base class method ... don't need to define
+	// this function, but keeping it here just for clarity
+	return SectionForceDeformation::getResponse(responseID, info);
 }
 
 int

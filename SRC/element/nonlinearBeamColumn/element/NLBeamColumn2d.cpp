@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:20 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:40:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -59,7 +59,7 @@
 #include <Renderer.h>
 #include <math.h>
 #include <G3Globals.h>
-
+#include <ElementResponse.h>
 
 #define  NDM   2         // dimension of the problem (2d)
 #define  NL    2         // size of uniform load vector
@@ -622,7 +622,7 @@ int NLBeamColumn2d::updateElementState()
       dSe.addMatrixVector(0.0, kv, dv, 1.0);
       
       dW = dv^ dSe;
-      if (dW < tol)
+      if (fabs(dW) < tol)
         break;
     }     
       
@@ -1673,10 +1673,7 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
    return 0;
 }
 
-
-
-
-int 
+Response*
 NLBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformation)
 {
     //
@@ -1684,62 +1681,33 @@ NLBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformation)
     //
 
     // force - 
-    if ((strcmp(argv[0],"forces") == 0) || (strcmp(argv[0],"force") == 0)) {
-	Vector *newVector = new Vector(NEBD);
-	if (newVector == 0) {
-	    cerr << "NLBeamColumn2d::setResponse() - out of memory creating vector\n";
-	    return -1;
-	}	
-	eleInformation.theVector = newVector;	
-	eleInformation.theType = VectorType;
-	return 1;
-    } 
+    if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0)
+		return new ElementResponse(this, 1, P);
 
     // section response -
     else if (strcmp(argv[0],"section") ==0) {
-	if (argc <= 2)
-	    return -1;
+		if (argc <= 2)
+			return 0;
 	
-	int sectionNum = atoi(argv[1]);
-	if ((sectionNum > 0) && (sectionNum <= nSections)) {
-	    int ok = sections[sectionNum-1]->setResponse(&argv[2], argc-2, 
-							 eleInformation);
-	    if (ok < 0)
-		return -1;
-	    else if (ok >= 0 && ok < MAX_SECTION_RESPONSE_ID) {
-		return sectionNum*MAX_SECTION_RESPONSE_ID + ok;
-	    }
-	    else 
-		return -1;
+		int sectionNum = atoi(argv[1]);
+		if (sectionNum > 0 && sectionNum <= nSections)
+			return sections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInformation);
+		else
+			return 0;
 	}
-    }
     
-    return -1;
+	else
+		return 0;
 }
 
 int 
-NLBeamColumn2d::getResponse(int responseID, Information &eleInformation)
+NLBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 {
   switch (responseID) {
-
-    case -1: // unknown 
-      return -1;
-      
     case 1:  // forces
-      if (eleInformation.theVector != 0)
-	  *(eleInformation.theVector) = Se;
-      return 0;            
+		return eleInfo.setVector(P);
 
     default: 
-      if (responseID >= MAX_SECTION_RESPONSE_ID) { // section quantity
-	  int sectionNum = responseID/MAX_SECTION_RESPONSE_ID; 
-	  if ((sectionNum > 0) && (sectionNum <= nSections)) {
-	      return sections[sectionNum-1]->
-		  getResponse(responseID-MAX_SECTION_RESPONSE_ID*sectionNum, 
-			      eleInformation);
-	  } else
-	      return -1;
-      } else // unknown
 	  return -1;
   }
 }

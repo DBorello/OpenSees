@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 05:29:13 $
+// $Revision: 1.3 $
+// $Date: 2000-12-18 10:40:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -49,6 +49,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <ElementResponse.h>
 
 // initialise the class wide variables
 Matrix ZeroLength::ZeroLengthM2(2,2);
@@ -800,61 +801,62 @@ ZeroLength::Print(ostream &s, int flag)
     }
 }
 
-
-int 
+Response*
 ZeroLength::setResponse(char **argv, int argc, Information &eleInformation)
 {
-    //
-    // we compare argv[0] for known response types for the ZeroLength
-    //
+    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
+		Vector *newVector = new Vector(numMaterials1d);
+		if (newVector == 0) {
+			g3ErrorHandler->warning("WARNING ZeroLength::setResponse() - %d out of memory creating matrix\n",
+				  this->getTag());
+			return 0;
+		}
+		eleInformation.theType = VectorType;
+		eleInformation.theVector = newVector;
 
-    // force (axialForce)
-    if ((strcmp(argv[0],"force") == 0) || 
-	(strcmp(argv[0],"forces") == 0) || 
-	(strcmp(argv[0],"axialForce") == 0)) {
-	eleInformation.theType = DoubleType;
-	return 1;
-    } 
+		return new ElementResponse(this, 1);
+    }
     
-    else if ((strcmp(argv[0],"defo") == 0) || 
-	(strcmp(argv[0],"deformations") == 0) ||
-	(strcmp(argv[0],"deformation") == 0)) {
-	eleInformation.theType = DoubleType;
-	return 2;
-    }     
+    else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+		strcmp(argv[0],"deformation") == 0) {
+		Vector *newVector = new Vector(numMaterials1d);
+		if (newVector == 0) {
+			g3ErrorHandler->warning("WARNING ZeroLength::setResponse() - %d out of memory creating matrix\n",
+				  this->getTag());
+			return 0;
+		}
+		eleInformation.theType = VectorType;
+		eleInformation.theVector = newVector;
+
+		return new ElementResponse(this, 2);
+     }     
 
     // tangent stiffness matrix
     else if (strcmp(argv[0],"stiff") == 0) {
-	Matrix *newMatrix = new Matrix(*theMatrix);
-	if (newMatrix == 0) {
-	  g3ErrorHandler->warning("WARNING ZeroLength::setResponse() - %d out of memory creating matrix\n",
+		Matrix *newMatrix = new Matrix(*theMatrix);
+		if (newMatrix == 0) {
+			g3ErrorHandler->warning("WARNING ZeroLength::setResponse() - %d out of memory creating matrix\n",
 				  this->getTag());
-	  return -1;
-	}
-	eleInformation.theMatrix = newMatrix;
-	eleInformation.theType = MatrixType;
-	return 3;
+			return 0;
+		}
+		eleInformation.theMatrix = newMatrix;
+		eleInformation.theType = MatrixType;
+		
+		return new ElementResponse(this, 3);
     } 
 
-    // a material quantity    
-    else if (strcmp(argv[0],"material") == 0) {
+	else if (strcmp(argv[0],"material") == 0) {
 		if (argc <= 2)
-			return -1;
+			return 0;
 		int matNum = atoi(argv[1]);
 		if (matNum < 1 || matNum > numMaterials1d)
-			return -1;
-		int ok = theMaterial1d[matNum-1]->setResponse(&argv[2], argc-2, eleInformation);
-		if (ok > 0 && ok <= 100)
-			return ok + 100*matNum;
+			return 0;
 		else
-			return -1;
-    } 
-    
-    // otherwise response quantity is unknown for the ZeroLength class
-    else
-	return -1;
+			return theMaterial1d[matNum-1]->setResponse(&argv[2], argc-2, eleInformation);
+    }
+	else 
+		return 0;
 }
-
 
 int 
 ZeroLength::getResponse(int responseID, Information &eleInformation)
@@ -870,14 +872,17 @@ ZeroLength::getResponse(int responseID, Information &eleInformation)
       return -1;
       
     case 1:
-      strain = this->computeCurrentStrain1d(0,diff);
-      theMaterial1d[0]->setTrialStrain(strain);
-      eleInformation.theDouble = theMaterial1d[0]->getStress();    
+		if (eleInformation.theVector != 0) {
+			for (int i = 0; i < numMaterials1d; i++)
+				(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStress();
+		}
       return 0;
       
     case 2:
-      strain = this->computeCurrentStrain1d(0,diff);
-      eleInformation.theDouble = strain;    
+		if (eleInformation.theVector != 0) {
+			for (int i = 0; i < numMaterials1d; i++)
+				(*(eleInformation.theVector))(i) = this->computeCurrentStrain1d(i,diff);
+		}
       return 0;      
       
     case 3:
@@ -886,15 +891,7 @@ ZeroLength::getResponse(int responseID, Information &eleInformation)
       return 0;      
 
     default:
-		if (responseID > 100) {
-			int matNum = responseID/100;
-			if (matNum < 1 || matNum > numMaterials1d)
-				return -1;
-			else 
-				return theMaterial1d[matNum-1]->getResponse(responseID-matNum*100, eleInformation);
-		}
-		else
-			return -1;
+		return -1;
   }
 }
 

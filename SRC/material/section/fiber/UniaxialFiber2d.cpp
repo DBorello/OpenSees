@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:44:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber2d.cpp,v $
                                                                         
                                                                         
@@ -45,6 +45,8 @@
 #include <FEM_ObjectBroker.h>
 #include <ID.h>
 #include <SectionForceDeformation.h>
+#include <Information.h>
+#include <FiberResponse.h>
 
 Matrix UniaxialFiber2d::ks(2,2); 
 Vector UniaxialFiber2d::fs(2); 
@@ -336,4 +338,33 @@ void UniaxialFiber2d::Print(ostream &s, int flag)
     s << "\tArea: " << area << endl; 
     s << "\tMatrix as: " << 1.0 << ' ' << y << endl; 
     s << "\tMaterial, tag: " << theMaterial->getTag() << endl;
+}
+
+Response*
+UniaxialFiber2d::setResponse(char **argv, int argc, Information &info)
+{
+	if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
+		return new FiberResponse(this, 1, Vector(2));
+
+	else
+		return theMaterial->setResponse(argv, argc, info);
+}
+
+int
+UniaxialFiber2d::getResponse(int responseID, Information &fibInfo)
+{
+	switch(responseID) {
+	case 1:
+		return fibInfo.setVector(this->getFiberStressResultants());
+
+	default:
+		return -1;
+	}
+}
+
+void 
+UniaxialFiber2d::getFiberLocation(double &yLoc, double &zLoc)
+{
+	yLoc = -y;
+	zLoc = 0.0;
 }

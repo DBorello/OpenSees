@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/ElasticBeam2d.h,v $
                                                                         
                                                                         
@@ -42,6 +42,8 @@
 class Channel;
 class Information;
 class CrdTransf2d;
+class Response;
+class Renderer;
 
 class ElasticBeam2d : public Element
 {
@@ -76,8 +78,9 @@ class ElasticBeam2d : public Element
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
     
     void Print(ostream &s, int flag = 0);    
+    int displaySelf(Renderer &theViewer, int displayMode, float fact);
 
-    int setResponse (char **argv, int argc, Information &info);
+	Response *setResponse (char **argv, int argc, Information &info);
     int getResponse (int responseID, Information &info);
  
   private:

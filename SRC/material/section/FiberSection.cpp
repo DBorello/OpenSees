@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:45:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection.cpp,v $
                                                                         
 // Written: MHS
@@ -41,6 +41,8 @@
 #include <FiberSection.h>
 #include <ID.h>
 #include <FEM_ObjectBroker.h>
+#include <Information.h>
+#include <MaterialResponse.h>
 
 // constructors:
 FiberSection::FiberSection(int tag, int num, Fiber **fibers): 
@@ -521,5 +523,62 @@ FiberSection::Print(ostream &s, int flag)
 	s << "\tSection code: " << *code;
 	s << "\tNumber of Fibers: " << numFibers << endl;
 	for (int i = 0; i < numFibers; i++)
-		theFibers[i]->Print(cout, flag);
+		theFibers[i]->Print(s, flag);
+}
+
+Response*
+FiberSection::setResponse(char **argv, int argc, Information &sectInfo)
+{
+	// See if the response is one of the defaults
+	Response *res = SectionForceDeformation::setResponse(argv, argc, sectInfo);
+	if (res != 0)
+		return res;
+
+	// Check if fiber response is requested
+    else if (strcmp(argv[0],"fiber") == 0) {
+        int key = 0;
+        int passarg = 2;
+
+        if (argc <= 2)          // not enough data input
+            return 0;
+        else if (argc <= 3)		// fiber number was input directly
+            key = atoi(argv[1]);
+        else {                  // fiber near-to coordinate specified
+            double yCoord = atof(argv[1]);
+			double zCoord = atof(argv[2]);
+			double ySearch, zSearch;
+	        theFibers[0]->getFiberLocation(ySearch,zSearch);
+			double closestDist = sqrt( pow(ySearch-yCoord,2) +
+                                 pow(zSearch-zCoord,2) );
+			double distance;
+			for (int j = 1; j < numFibers; j++) {
+				theFibers[j]->getFiberLocation(ySearch,zSearch);
+				distance = sqrt( pow(ySearch-yCoord,2) +
+                                 pow(zSearch-zCoord,2) );
+				if (distance < closestDist) {
+					closestDist = distance;
+					key = j;
+				}
+			}
+			theFibers[key]->getFiberLocation(ySearch,zSearch);
+		    passarg = 3;
+		}
+	
+        if (key < numFibers)
+			return theFibers[key]->setResponse(&argv[passarg],argc-passarg,sectInfo);
+        else
+            return 0;
+    }
+			
+    // otherwise response quantity is unknown for the FiberSection class
+    else
+		return 0;    
+}
+
+int 
+FiberSection::getResponse(int responseID, Information &sectInfo)
+{
+	// Just call the base class method ... don't need to define
+	// this function, but keeping it here just for clarity
+	return SectionForceDeformation::getResponse(responseID, sectInfo);
 }

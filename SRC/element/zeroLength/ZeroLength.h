@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:40:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.h,v $
                                                                         
                                                                         
@@ -54,6 +54,7 @@ enum Etype { D1N2, D2N4, D2N6, D3N6, D3N12 };
 class Node;
 class Channel;
 class UniaxialMaterial;
+class Response;
 
 class ZeroLength : public Element
 {
@@ -110,7 +111,7 @@ class ZeroLength : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(ostream &s, int flag =0);    
 
-    int setResponse(char **argv, int argc, Information &eleInformation);
+	Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
     
   protected:

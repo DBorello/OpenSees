@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2000-12-16 09:19:07 $
+// $Revision: 1.7 $
+// $Date: 2000-12-18 10:40:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -40,6 +40,7 @@
 #include <Information.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <ElementResponse.h>
 
 #include <G3Globals.h>
 
@@ -763,77 +764,41 @@ FourNodeQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
 	return error;
 }
 
-int 
-FourNodeQuad::setResponse(char **argv, int argc, Information &eleInformation)
+Response*
+FourNodeQuad::setResponse(char **argv, int argc, Information &eleInfo)
 {
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
-		Vector *newVector = new Vector(8);
-		if (newVector == 0) {
-		g3ErrorHandler->warning("WARNING FourNodeQuad::setResponse() - %d out of memory creating vector\n",
-				  this->getTag());
-		return -1;
-		}
-		eleInformation.theVector = newVector;
-		eleInformation.theType = VectorType;
-		return 1;
-    } 
+    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
+		return new ElementResponse(this, 1, P);
     
-    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0) {
-		Matrix *newMatrix = new Matrix(8,8);
-		if (newMatrix == 0) {
-		g3ErrorHandler->warning("WARNING FourNodeQuad::setResponse() - %d out of memory creating matrix\n",
-				  this->getTag());
-		return -1;
-		}
-		eleInformation.theMatrix = newMatrix;
-		eleInformation.theType = MatrixType;
-		return 2;
-    } 
+    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
+		return new ElementResponse(this, 2, K);
 
 	else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
 		int pointNum = atoi(argv[1]);
-		if (pointNum > 0 && pointNum <= 4) {
-			int ok = theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInformation);
-			if (ok < 0)
-				return -1;
-		    else if (ok >= 0 && ok < 100)
-				return pointNum*100 + ok;
-		}
+		if (pointNum > 0 && pointNum <= 4)
+			return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
 	    else 
-			return -1;
+			return 0;
 	}
  
     // otherwise response quantity is unknown for the quad class
     else
-	return -1;
+		return 0;
 }
 
 int 
-FourNodeQuad::getResponse (int responseID, Information &eleInformation)
+FourNodeQuad::getResponse(int responseID, Information &eleInfo)
 {
 	switch (responseID) {
-		case -1:
-			return -1;
       
 		case 1:
-			if (eleInformation.theVector != 0)
-				*(eleInformation.theVector) = this->getResistingForce();    
-			return 0;
+			return eleInfo.setVector(this->getResistingForce());
       
 		case 2:
-			if (eleInformation.theMatrix != 0)
-				*(eleInformation.theMatrix) = this->getTangentStiff();
-			return 0;      
+			return eleInfo.setMatrix(this->getTangentStiff());
+
 		default: 
-			if (responseID >= 100) { // material quantity
-				int pointNum = responseID/100;
-				if (pointNum > 0 && pointNum <= 4) {
-					return theMaterial[pointNum-1]->getResponse(responseID-100*pointNum, eleInformation);
-				}
-				else
-					return -1;
-			} else // unknown
-				return -1;
+			return -1;
 	}
 }
 

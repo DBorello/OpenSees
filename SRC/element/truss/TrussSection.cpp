@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:40:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -43,6 +43,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <SectionForceDeformation.h>
+#include <ElementResponse.h>
 
 #include <G3Globals.h>
 
@@ -915,8 +916,7 @@ TrussSection::computeCurrentStrain(void) const
     return dLength/L;
 }
 
-
-int 
+Response*
 TrussSection::setResponse(char **argv, int argc, Information &eleInformation)
 {
     //
@@ -924,44 +924,39 @@ TrussSection::setResponse(char **argv, int argc, Information &eleInformation)
     //
 
     // axial force
-    if ((strcmp(argv[0],"force") == 0) || 
-	(strcmp(argv[0],"forces") == 0) || 
-	(strcmp(argv[0],"axialForce") == 0)) {
-	eleInformation.theType = DoubleType;
-	return 1;
+    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || 
+		strcmp(argv[0],"axialForce") == 0) {
+		eleInformation.theType = DoubleType;
+		return new ElementResponse(this, 1);
     } 
 
-    else if ((strcmp(argv[0],"defo") == 0) || 
-	(strcmp(argv[0],"deformations") == 0) ||
-	(strcmp(argv[0],"deformation") == 0)) {
-	eleInformation.theType = DoubleType;
-	return 2;
-    }         
+    else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+		strcmp(argv[0],"deformation") == 0) {
+		eleInformation.theType = DoubleType;
+		return new ElementResponse(this, 2);
+    }     
+    
     // tangent stiffness matrix
     else if (strcmp(argv[0],"stiff") ==0) {
-	Matrix *newMatrix = new Matrix(*theMatrix);
-	if (newMatrix == 0) {
-	  g3ErrorHandler->warning("WARNING TrussSection::setResponse() - %d out of memory creating matrix\n",
-				  this->getTag());
-	  return -1;
-	}
-	eleInformation.theMatrix = newMatrix;
-	eleInformation.theType = MatrixType;
-	return 3;
+		Matrix *newMatrix = new Matrix(*theMatrix);
+		if (newMatrix == 0) {
+			g3ErrorHandler->warning("WARNING TrussSection::setResponse() - %d out of memory creating matrix\n",
+				this->getTag());
+		return 0;
+		}
+
+		eleInformation.theMatrix = newMatrix;
+		eleInformation.theType = MatrixType;
+		return new ElementResponse(this, 3);
     } 
 
     // a section quantity    
-    else if (strcmp(argv[0],"section") ==0) {
-	int ok = theSection->setResponse(&argv[1], argc-1, eleInformation);
-	if (ok < 0)
-	    return -1;
-	else
-	    return ok + 100;
-    } 
+    else if (strcmp(argv[0],"section") ==0)
+		return theSection->setResponse(&argv[1], argc-1, eleInformation);
     
     // otherwise response quantity is unknown for the Truss class
     else
-	return -1;
+		return 0;
 }
 
 int 
@@ -970,9 +965,6 @@ TrussSection::getResponse(int responseID, Information &eleInformation)
  double strain, force;
  
   switch (responseID) {
-    case -1:
-      return -1;
-      
     case 1:
       if (L == 0.0) {
 	  strain = 0;

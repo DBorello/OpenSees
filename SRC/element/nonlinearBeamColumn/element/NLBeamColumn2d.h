@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:20 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:40:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.h,v $
                                                                         
                                                                         
@@ -53,6 +53,8 @@
 #include <Channel.h>
 #include <SectionForceDeformation.h>
 #include <CrdTransf2d.h>
+
+class Response;
 
 class NLBeamColumn2d: public Element
 {
@@ -94,7 +96,7 @@ class NLBeamColumn2d: public Element
     friend ostream &operator<<(ostream &s, NLBeamColumn2d &E);        
     void Print(ostream &s, int flag =0);    
 
-    int setResponse(char **argv, int argc, Information &eleInformation);
+	Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
     
   private:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $                                                              
-// $Date: 2000-12-13 08:16:22 $                                                                  
+// $Revision: 1.4 $                                                              
+// $Date: 2000-12-18 10:48:08 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $                                                                
                                                                         
                                                                         
@@ -41,14 +41,12 @@
 
 #include <Material.h>
 #include <Tensor.h>
-#include <EPState.h>
-#include <YS.h>
-#include <PS.h>
 
 class Matrix;
 class ID;
 class Vector;
 class Information;
+class Response;
 
 class NDMaterial : public Material
 {
@@ -89,7 +87,7 @@ class NDMaterial : public Material
     virtual const char *getType(void) const = 0;
     virtual int getOrder(void) const = 0;
 
-    virtual int setResponse (char **argv, int argc, Information &matInformation);
+    virtual Response *setResponse (char **argv, int argc, Information &matInformation);
     virtual int getResponse (int responseID, Information &matInformation);
 
   protected:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-14 05:44:53 $
+// $Revision: 1.3 $
+// $Date: 2000-12-18 10:40:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -49,6 +49,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <ElementResponse.h>
 
 // initialise the class wide variables
 Matrix Truss::trussM2(2,2);
@@ -804,87 +805,60 @@ Truss::computeCurrentStrain(void) const
     return dLength/L;
 }
 
-
-
-int 
-Truss::setResponse(char **argv, int argc, Information &eleInformation)
+Response*
+Truss::setResponse(char **argv, int argc, Information &eleInfo)
 {
     //
     // we compare argv[0] for known response types for the Truss
     //
 
     // force (axialForce)
-    if ((strcmp(argv[0],"force") == 0) || 
-	(strcmp(argv[0],"forces") == 0) || 
-	(strcmp(argv[0],"axialForce") == 0)) {
-	eleInformation.theType = DoubleType;
-	return 1;
-    } 
-    
-    else if ((strcmp(argv[0],"defo") == 0) || 
-	(strcmp(argv[0],"deformations") == 0) ||
-	(strcmp(argv[0],"deformation") == 0)) {
-	eleInformation.theType = DoubleType;
-	return 2;
-    }     
+    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"axialForce") == 0)
+		return new ElementResponse(this, 1, 0.0);
+
+    else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+		strcmp(argv[0],"deformation") == 0)
+		return new ElementResponse(this, 2, 0.0);
 
     // tangent stiffness matrix
-    else if (strcmp(argv[0],"stiff") == 0) {
-	Matrix *newMatrix = new Matrix(*theMatrix);
-	if (newMatrix == 0) {
-	  g3ErrorHandler->warning("WARNING Truss::setResponse() - %d out of memory creating matrix\n",
-				  this->getTag());
-	  return -1;
-	}
-	eleInformation.theMatrix = newMatrix;
-	eleInformation.theType = MatrixType;
-	return 3;
-    } 
+    else if (strcmp(argv[0],"stiff") == 0)
+		return new ElementResponse(this, 3, *theMatrix);
 
     // a material quantity    
-    else if (strcmp(argv[0],"material") == 0) {
-	int ok = theMaterial->setResponse(&argv[1], argc-1, eleInformation);
-	if (ok < 0)
-	    return -1;
-	else
-	    return ok + 100;
-    } 
+    else if (strcmp(argv[0],"material") == 0)
+		return theMaterial->setResponse(&argv[1], argc-1, eleInfo);
     
-    // otherwise response quantity is unknown for the Truss class
-    else
-	return -1;
+	else
+		return 0;
 }
 
 int 
-Truss::getResponse(int responseID, Information &eleInformation)
+Truss::getResponse(int responseID, Information &eleInfo)
 {
  double strain;
  
   switch (responseID) {
-    case -1:
-      return -1;
-      
     case 1:
-      strain = this->computeCurrentStrain();
-      theMaterial->setTrialStrain(strain);
-      eleInformation.theDouble = A*theMaterial->getStress();    
-      return 0;
+      //strain = this->computeCurrentStrain();
+      //theMaterial->setTrialStrain(strain);
+      //eleInformation.theDouble = A*theMaterial->getStress();    
+      //return 0;
+	  return eleInfo.setDouble(A * theMaterial->getStress());
       
     case 2:
-      strain = this->computeCurrentStrain();
-      eleInformation.theDouble = strain*L;    
-      return 0;      
+      //strain = this->computeCurrentStrain();
+      //eleInformation.theDouble = strain*L;    
+      //return 0;      
+	  return eleInfo.setDouble(L * theMaterial->getStrain());
       
     case 3:
-      if (eleInformation.theMatrix != 0)
-	  *(eleInformation.theMatrix) = this->getTangentStiff();
-      return 0;      
+      //if (eleInformation.theMatrix != 0)
+	  //*(eleInformation.theMatrix) = this->getTangentStiff();
+      //return 0;      
+	  return eleInfo.setMatrix(this->getTangentStiff());
 
     default:
-      if (responseID >= 100)
-	  return theMaterial->getResponse(responseID-100, eleInformation);
-      else
-	  return -1;
+	  return 0;
   }
 }
 

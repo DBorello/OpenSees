@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-10-28 05:43:25 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:40:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -37,7 +37,7 @@
 #include <FEM_ObjectBroker.h>
 #include <SectionForceDeformation.h>
 #include <Renderer.h>
-//#include <ElementResponse.h>
+#include <ElementResponse.h>
 
 #include <G3Globals.h>
 
@@ -508,7 +508,6 @@ ZeroLengthSection::Print(ostream &s, int flag)
 	s << "\tSection, tag: " << theSection->getTag() << endl;
 }
 
-/*
 Response*
 ZeroLengthSection::setResponse(char **argv, int argc, Information &eleInformation)
 {
@@ -517,8 +516,13 @@ ZeroLengthSection::setResponse(char **argv, int argc, Information &eleInformatio
 		return new ElementResponse(this, 1, *P);
 
     // element stiffness matrix
-    else if (strcmp(argv[0],"stiff") == 0)
+    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
 		return new ElementResponse(this, 2, *K);
+
+    else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+		strcmp(argv[0],"deformation") == 0) {
+		return new ElementResponse(this, 3, Vector(order));
+	}     
 
 	else if (strcmp(argv[0],"section") == 0)
 		return theSection->setResponse(&argv[1], argc-1, eleInformation);
@@ -537,11 +541,14 @@ ZeroLengthSection::getResponse(int responseID, Information &eleInfo)
     case 2:
 		return eleInfo.setMatrix(this->getTangentStiff());
 
+	case 3:
+		this->computeSectionDefs();
+		return eleInfo.setVector(*v);
+
     default:
 		return -1;
   }
 }
-*/
 
 // Private methods
 

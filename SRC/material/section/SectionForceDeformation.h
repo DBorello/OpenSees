@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:45:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.h,v $
                                                                         
                                                                         
@@ -45,8 +45,9 @@
 #include <ID.h>
 
 class Information;
+class Response;
 
-#define MAX_SECTION_RESPONSE_ID 100
+#define MAX_SECTION_RESPONSE_ID 10000
 
 #define SECTION_RESPONSE_MZ		1
 #define SECTION_RESPONSE_P		2
@@ -77,7 +78,7 @@ class SectionForceDeformation : public Material
 		virtual const ID &getType (void) const = 0;
 		virtual int getOrder (void) const = 0;
 
-		virtual int setResponse(char **argv, int argc, Information &info);
+		virtual Response *setResponse(char **argv, int argc, Information &info);
 		virtual int getResponse(int responseID, Information &info);
 
 	protected:

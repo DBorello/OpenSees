@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:38:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -39,6 +39,8 @@
 
 #include <CrdTransf2d.h>
 #include <Information.h>
+#include <ElementResponse.h>
+#include <Renderer.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -167,7 +169,8 @@ ElasticBeam2d::getTangentStiff(void)
     q(1) = kb(1,1)*v(1) + kb(1,2)*v(2);
     q(2) = kb(2,1)*v(1) + kb(2,2)*v(2);
     
-    return theCoordTransf->getGlobalStiffMatrix(kb,q);
+    //cerr << theCoordTransf->getGlobalStiffMatrix(kb,q);
+	return theCoordTransf->getGlobalStiffMatrix(kb,q);
 }
 
 const Matrix &
@@ -272,6 +275,8 @@ ElasticBeam2d::getResistingForce()
 
 	//Pinert = Pinert - Q;
 	Pinert.addVector(1.0, Q, -1.0);
+
+	//cerr << "getResistingForce -- " << Pinert << endl;
 
     return Pinert;
 }
@@ -390,53 +395,54 @@ ElasticBeam2d::Print(ostream &s, int flag)
 }
 
 int
-ElasticBeam2d::setResponse (char **argv, int argc, Information &info)
+ElasticBeam2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
-    // Basic stiffness
-    if (strcmp(argv[0],"stiffness") == 0) {
-        Matrix *newMatrix = new Matrix(3,3);
-        if (newMatrix == 0) {
-            g3ErrorHandler->warning("WARNING ElasticBeam2d::setResponse() - %d out of memory creating matrix\n",
-                                    this->getTag());
-            return -1;
-        }
-        info.theMatrix = newMatrix;
-        info.theType = MatrixType;
-        return 1;
-    }
+    // first determine the end points of the quad based on
+    // the display factor (a measure of the distorted image)
+    const Vector &end1Crd = node1Ptr->getCrds();
+    const Vector &end2Crd = node2Ptr->getCrds();	
 
-    // Basic forces
-    else if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
-	Vector *newVector = new Vector(3);
-	if (newVector == 0) {
-	    g3ErrorHandler->warning("WARNING ElasticBeam2d::setResponse() - %d out of memory creating vector\n",
-                                    this->getTag());
-            return -1;
+    const Vector &end1Disp = node1Ptr->getDisp();
+    const Vector &end2Disp = node2Ptr->getDisp();
+
+	static Vector v1(3);
+	static Vector v2(3);
+
+	for (int i = 0; i < 2; i++) {
+		v1(i) = end1Crd(i) + end1Disp(i)*fact;
+		v2(i) = end2Crd(i) + end2Disp(i)*fact;    
 	}
-	info.theVector = newVector;
-	info.theType = VectorType;
-	return 2;
-    }
+	
+	return theViewer.drawLine (v1, v2, 1.0, 1.0);
+}
+
+Response*
+ElasticBeam2d::setResponse(char **argv, int argc, Information &info)
+{
+    // stiffness
+    if (strcmp(argv[0],"stiffness") == 0)
+		return new ElementResponse(this, 1, Matrix(6,6));
+
+    // forces
+    else if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
+		return new ElementResponse(this, 2, Vector(6));
+
     else
-	return -1;
+		return 0;
 }
 
 int
-ElasticBeam2d::getResponse (int responseID, Information &info)
+ElasticBeam2d::getResponse (int responseID, Information &eleInfo)
 {
     switch (responseID) {
-      case -1:
-	return -1;
-      case 1: // Basic stiffness
-	if (info.theMatrix != 0)
-	    *(info.theMatrix) = kb;
-	return 0;
-      case 2: // Basic forces
-	if (info.theVector != 0)
-	    *(info.theVector) = q;
-	return 0;
-      default:
-	return -1;
+		case 1: // stiffness
+			return eleInfo.setMatrix(this->getTangentStiff());
+
+		case 2: // forces
+			return eleInfo.setVector(this->getResistingForce());
+
+		default:
+			return -1;
     }
 }
 

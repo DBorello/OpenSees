@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:20 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:40:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.h,v $
                                                                         
                                                                         
@@ -57,6 +57,8 @@ class FEM_ObjectBroker;
 class SectionForceDeformation;
 
 class CrdTransf2d;
+class Response;
+class Renderer;
 
 class BeamWithHinges2d: public Element
 {
@@ -106,14 +108,15 @@ class BeamWithHinges2d: public Element
     int recvSelf (int commitTag, Channel &theChannel, 
 		  FEM_ObjectBroker &theBroker);
 
-    int setResponse (char **argv, int argc, Information &info);
+	Response *setResponse (char **argv, int argc, Information &info);
     int getResponse (int responseID, Information &info);
     
     int setParameter (char **argv, int argc, Information &info);
     int updateParameter (int parameterID, Information &info);
     
     void Print (ostream &s, int flag = 0);
-    
+    int displaySelf(Renderer &theViewer, int displayMode, float fact);
+
   protected:
     
   private:

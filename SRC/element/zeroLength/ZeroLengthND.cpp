@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-10-28 05:43:24 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:40:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthND.cpp,v $
                                                                         
 // Written: MHS
@@ -38,7 +38,7 @@
 #include <NDMaterial.h>
 #include <UniaxialMaterial.h>
 #include <Renderer.h>
-//#include <ElementResponse.h>
+#include <ElementResponse.h>
 
 #include <G3Globals.h>
 
@@ -675,7 +675,6 @@ ZeroLengthND::Print(ostream &s, int flag)
 		s << "\tUniaxialMaterial, tag: " << the1DMaterial->getTag() << endl;
 }
 
-/*
 Response*
 ZeroLengthND::setResponse(char **argv, int argc, Information &eleInformation)
 {
@@ -684,7 +683,7 @@ ZeroLengthND::setResponse(char **argv, int argc, Information &eleInformation)
 		return new ElementResponse(this, 1, *P);
 
     // element stiffness matrix
-    else if (strcmp(argv[0],"stiff") == 0)
+    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
 		return new ElementResponse(this, 2, *K);
 
     else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
@@ -696,7 +695,7 @@ ZeroLengthND::setResponse(char **argv, int argc, Information &eleInformation)
    }     
 
 	else if (strcmp(argv[0],"material") == 0) {
-		// See if ND Material can handle request ...
+		// See if NDMaterial can handle request ...
 		Response *res = theNDMaterial->setResponse(&argv[1], argc-1, eleInformation);
 		if (res != 0)
 			return res;
@@ -719,13 +718,14 @@ ZeroLengthND::getResponse(int responseID, Information &eleInfo)
 {
   switch (responseID) {
 	case 1:
-		return eleInfo.setVector(*P);
+		return eleInfo.setVector(this->getResistingForce());
 		
     case 2:
-		return eleInfo.setMatrix(*K);
+		return eleInfo.setMatrix(this->getTangentStiff());
 
 	case 3:
 		if (eleInfo.theVector != 0) {
+			this->computeStrain();
 			const Vector &tmp = *v;	// NDMaterial strains
 			Vector &def = *(eleInfo.theVector);
 			for (int i = 0; i < order; i++)
@@ -733,13 +733,12 @@ ZeroLengthND::getResponse(int responseID, Information &eleInfo)
 			if (the1DMaterial != 0)
 				def(order) = e;	// UniaxialMaterial strain
 		}
-      return 0;
+		return 0;
 
     default:
 		return -1;
   }
 }
-*/
 
 // Private methods
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $                                                              
-// $Date: 2000-12-13 08:16:22 $                                                                  
+// $Revision: 1.4 $                                                              
+// $Date: 2000-12-18 10:48:08 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -37,6 +37,7 @@
 #include <G3Globals.h>
 #include <Matrix.h>
 #include <Vector.h>
+#include <MaterialResponse.h>
 
 Matrix NDMaterial::errMatrix(1,1);
 Vector NDMaterial::errVector(1);
@@ -47,19 +48,17 @@ NDMaterial::NDMaterial(int tag, int classTag)
 {
 
 }
+
 NDMaterial::NDMaterial()
 :Material(0, 0)
 {
 
 }
 
-
-
 NDMaterial::~NDMaterial()
 {
 
 }
-
 
 const Vector &
 NDMaterial::getCommittedStress(void) 
@@ -172,69 +171,35 @@ NDMaterial::getStrainTensor(void)
    return errTensor;    
 }
 
-
-int
+Response*
 NDMaterial::setResponse (char **argv, int argc, Information &matInfo)
 {
-    if (strcmp(argv[0],"stress") ==0 || strcmp(argv[0],"stresses") == 0) {
-		Vector *newVector = new Vector(this->getStress());
-		if (newVector == 0) {
-			g3ErrorHandler->warning("WARNING NDMaterial::setResponse() - %d out of memory creating vector\n",
-				    this->getTag());
-			return -1;
-		}
-		matInfo.theVector = newVector;
-		matInfo.theType = VectorType;
-		return 1;
-    } 
+    if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
+		return new MaterialResponse(this, 1, this->getStress());
 
-	else if (strcmp(argv[0],"strain") == 0 || strcmp(argv[0],"strains") == 0) {
-		Vector *newVector = new Vector(this->getStrain());
-		if (newVector == 0) {
-			g3ErrorHandler->warning("WARNING NDMaterial::setResponse() - %d out of memory creating vector\n",
-				    this->getTag());
-			return -1;
-		}
-		matInfo.theVector = newVector;
-		matInfo.theType = VectorType;
-		return 2;
-    } 
-
-    else if (strcmp(argv[0],"tangent") == 0) {
-		Matrix *newMatrix = new Matrix(this->getTangent());
-		if (newMatrix == 0) {
-			g3ErrorHandler->warning("WARNING NDMaterial::setResponse() - %d out of memory creating matrix\n",
-				    this->getTag());
-			return -1;
-		}
-		matInfo.theMatrix = newMatrix;
-		matInfo.theType = MatrixType;
-		return 3;
-    } 
-
-    else
-		return -1;
-
+    else if (strcmp(argv[0],"strain") == 0 || strcmp(argv[0],"strains") == 0)
+		return new MaterialResponse(this, 2, this->getStrain());
+    
+	else if (strcmp(argv[0],"tangent") == 0)
+		return new MaterialResponse(this, 3, this->getTangent());
+    
+	else
+		return 0;
 }
 
 int 
 NDMaterial::getResponse (int responseID, Information &matInfo)
 {
 	switch (responseID) {
-		case -1:
-			return -1;
 		case 1:
-			if (matInfo.theVector != 0)
-				*(matInfo.theVector) = this->getStress();
-			return 0;
+			return matInfo.setVector(this->getStress());
+
 		case 2:
-			if (matInfo.theVector != 0)
-				*(matInfo.theVector) = this->getStrain();
-			return 0;
+			return matInfo.setVector(this->getStrain());
+
 		case 3:
-			if (matInfo.theMatrix != 0)
-				*(matInfo.theMatrix) = this->getTangent();
-			return 0;
+			return matInfo.setMatrix(this->getTangent());
+			
 		default:
 			return -1;
 	}

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-14 09:33:50 $
+// $Revision: 1.3 $
+// $Date: 2000-12-18 10:40:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.h,v $
                                                                         
 // Written: MHS
@@ -42,6 +42,7 @@
 
 class Node;
 class NDMaterial;
+class Response;
 
 class FourNodeQuad : public Element
 {
@@ -82,7 +83,7 @@ class FourNodeQuad : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
     void Print(ostream &s, int flag =0);
 
-    int setResponse(char **argv, int argc, Information &eleInformation);
+	Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
 
     int setParameter(char **argv, int argc, Information &info);

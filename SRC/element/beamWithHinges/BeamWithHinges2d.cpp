@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-11-02 08:24:52 $
+// $Revision: 1.4 $
+// $Date: 2000-12-18 10:40:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
                                                                         
                                                                         
@@ -59,6 +59,8 @@
 #include <CrdTransf2d.h>
 
 #include <Information.h>
+#include <ElementResponse.h>
+#include <Renderer.h>
 
 BeamWithHinges2d::BeamWithHinges2d(void)
 	:Element(0, ELE_TAG_BeamWithHinges2d),
@@ -1250,127 +1252,93 @@ BeamWithHinges2d::getDistrLoadInterpMatrix (Matrix &bp, double x, const ID & cod
     }
 }
 
-int
+Response*
 BeamWithHinges2d::setResponse (char **argv, int argc, Information &info)
 {
-    //
-    // we compare argv[0] for known response types for BeamWithHinges
-    //
-
     // hinge rotations
-    if (strcmp(argv[0],"rotation") == 0) {
-	Vector *newVector = new Vector(2);
-	if (newVector == 0) {
-	    g3ErrorHandler->warning("WARNING BeamWithHinges2d::setResponse() - %d out of memory creating vector\n",
-				    this->getTag());
-	    return -1;
-	}
-	info.theVector = newVector;
-	info.theType = VectorType;
-	return 1;
-    }
+    if (strcmp(argv[0],"rotation") == 0)
+		return new ElementResponse(this, 1, Vector(2));
 
-    // basic forces
-    else if (strcmp(argv[0],"force") == 0) {
-	Vector *newVector = new Vector(6);
-	if (newVector == 0) {
-	    g3ErrorHandler->warning("WARNING BeamWithHinges2d::setResponse() - %d out of memory creating vector\n",
-				    this->getTag());
-	    return -1;
-	}
-	info.theVector = newVector;
-	info.theType = VectorType;
-	return 2;
-    }
+    // forces
+    else if (strcmp(argv[0],"force") == 0)
+		return new ElementResponse(this, 2, P);
     
-    // basic stiffness
-    else if (strcmp(argv[0],"stiffness") == 0) {
-	Matrix *newMatrix = new Matrix(3,3);
-	if (newMatrix == 0) {
-	    g3ErrorHandler->warning("WARNING BeamWithHinges2d::setResponse() - %d out of memory creating matrix\n",
-				    this->getTag());
-	    return -1;
-	}
-	info.theMatrix = newMatrix;
-	info.theType = MatrixType;
-	return 3;
-    }
+    // stiffness
+    else if (strcmp(argv[0],"stiffness") == 0)
+		return new ElementResponse(this, 3, K);
 
-    // section response
-    else if (strcmp(argv[0],"section") == 0) {
-	int sectionNum = atoi(argv[1]);
+	// section response
+	else if (strcmp(argv[0],"section") == 0) {
+		int sectionNum = atoi(argv[1]);
 	
-	int ok = 0;
-	
-	if (sectionNum == 1)
-	    ok += sectionI->setResponse(&argv[2], argc-2, info);
-	else if (sectionNum == 2)
-	    ok += sectionJ->setResponse(&argv[2], argc-2, info);
+		if (sectionNum == 1)
+			return sectionI->setResponse(&argv[2], argc-2, info);
+		else if (sectionNum == 2)
+			return sectionJ->setResponse(&argv[2], argc-2, info);
+		else
+			return 0;
+    }
 	else
-	    return -1;
-	
-	if (ok < 0)
-	    return -1;
-	else if (ok >= 0 && ok < MAX_SECTION_RESPONSE_ID)
-	    return sectionNum*MAX_SECTION_RESPONSE_ID + ok;
-    }
-
-    else
-	return -1;
+		return 0;
 }
 
 int
-BeamWithHinges2d::getResponse (int responseID, Information &info)
+BeamWithHinges2d::getResponse (int responseID, Information &eleInfo)
 {
-    switch (responseID) {
-      case -1:
-	return -1;
-      case 1: { // hinge rotations
-	  int i;
-	  Vector &temp = *(info.theVector);
-	  temp.Zero();
-	  const Vector &defI = sectionI->getSectionDeformation();
-	  int orderI = sectionI->getOrder();
-	  const ID &codeI = sectionI->getType();
-	  for (i = 0; i < orderI; i++)
-		  if (codeI(i) == SECTION_RESPONSE_MZ)
-			  temp(0) += defI(i);
-	  const Vector &defJ = sectionJ->getSectionDeformation();
-	  int orderJ = sectionJ->getOrder();
-	  const ID &codeJ = sectionJ->getType();
-	  for (i = 0; i < orderJ; i++)
-		  if (codeJ(i) == SECTION_RESPONSE_MZ)
-			  temp(1) += defJ(i);
-	  return 0;
+	switch (responseID) {
+		case 1: { // hinge rotations ... flexibility formulation, so add deformations
+			int i;
+			static Vector temp(2);
+			temp.Zero();
+
+			const Vector &defI = sectionI->getSectionDeformation();
+			int orderI = sectionI->getOrder();
+			const ID &codeI = sectionI->getType();
+			for (i = 0; i < orderI; i++)
+				if (codeI(i) == SECTION_RESPONSE_MZ)
+					temp(0) += defI(i)*hingeIlen;
+
+			const Vector &defJ = sectionJ->getSectionDeformation();
+			int orderJ = sectionJ->getOrder();
+			const ID &codeJ = sectionJ->getType();
+			for (i = 0; i < orderJ; i++)
+				if (codeJ(i) == SECTION_RESPONSE_MZ)
+					temp(1) += defJ(i)*hingeJlen;
+
+			return eleInfo.setVector(temp);
       }
-      case 2: { // basic forces
-	  if (info.theVector != 0)
-	      *(info.theVector) = P;
-	  return 0;
-      }
-      case 3: { // basic stiffness
-	  if (info.theMatrix != 0)
-	      *(info.theMatrix) = kbCommit;
-	  return 0;
-      }
-      default: {
-	  if (responseID >= MAX_SECTION_RESPONSE_ID) { // section quantity
-	      
-	      int sectionNum = responseID/MAX_SECTION_RESPONSE_ID; 
-	      
-	      if (sectionNum > 0 && sectionNum <= 2) {
-		  if (sectionNum == 1)
-		      return sectionI->getResponse (responseID-MAX_SECTION_RESPONSE_ID, info);
-		  else if (sectionNum == 2)
-		      return sectionJ->getResponse (responseID-MAX_SECTION_RESPONSE_ID*2, info);
-	      }
-	      else // unknown section
+
+      case 2: // forces
+		  return eleInfo.setVector(P);
+
+      case 3: // stiffness
+		  return eleInfo.setMatrix(K);
+
+      default:
 		  return -1;
-	  }
-	  else // unknown response quantity
-	      return -1;
-      }
     }
+}
+
+int
+BeamWithHinges2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
+{
+    // first determine the end points of the quad based on
+    // the display factor (a measure of the distorted image)
+    const Vector &end1Crd = node1Ptr->getCrds();
+    const Vector &end2Crd = node2Ptr->getCrds();	
+
+    const Vector &end1Disp = node1Ptr->getDisp();
+    const Vector &end2Disp = node2Ptr->getDisp();
+
+	static Vector v1(3);
+	static Vector v2(3);
+
+	for (int i = 0; i < 2; i++) {
+		v1(i) = end1Crd(i) + end1Disp(i)*fact;
+		v2(i) = end2Crd(i) + end2Disp(i)*fact;    
+	}
+	
+	return theViewer.drawLine (v1, v2, 1.0, 1.0);
 }
 
 int

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:20 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:40:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -50,6 +50,8 @@
 #include <Channel.h>
 #include <SectionForceDeformation.h>
 #include <CrdTransf3d.h>
+
+class Response;
 
 class NLBeamColumn3d: public Element
 {
@@ -92,7 +94,7 @@ class NLBeamColumn3d: public Element
     friend ostream &operator<<(ostream &s, NLBeamColumn3d &E);        
     void Print(ostream &s, int flag =0);    
 
-    int setResponse(char **argv, int argc, Information &eleInformation);
+	Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
     
   private:
@@ -120,7 +122,8 @@ class NLBeamColumn3d: public Element
 
     double L;                      // length
     int    initialFlag;            // indicates if the element has been initialized
-			       
+	bool isTorsion;
+	
     Node   *node1Ptr, *node2Ptr;   // pointers to the nodes
 
     Matrix K;                      // stiffness matrix

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-10-28 05:43:25 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:40:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthND.h,v $
                                                                         
 // Written: MHS
@@ -103,8 +103,8 @@ class ZeroLengthND : public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
     void Print(ostream &s, int flag =0);    
 
-    //Response *setResponse(char **argv, int argc, Information &eleInformation);
-    //int getResponse(int responseID, Information &eleInformation);
+    Response *setResponse(char **argv, int argc, Information &eleInformation);
+    int getResponse(int responseID, Information &eleInformation);
     
   protected:
     

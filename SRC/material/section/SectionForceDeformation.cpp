@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:45:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.cpp,v $
                                                                         
                                                                         
@@ -37,6 +37,7 @@
 #include <Information.h>
 #include <Matrix.h>
 #include <Vector.h>
+#include <MaterialResponse.h>
 
 #include <string.h>
 
@@ -89,6 +90,7 @@ SectionForceDeformation::getSectionFlexibility ()
 	return *fDefault;
 }
 
+/*
 int 
 SectionForceDeformation::setResponse(char **argv, int argc, Information &sectInfo)
 {
@@ -138,28 +140,39 @@ SectionForceDeformation::setResponse(char **argv, int argc, Information &sectInf
     else
 	return -1;    
 }
+*/
+
+Response*
+SectionForceDeformation::setResponse(char **argv, int argc, Information &sectInfo)
+{
+    // deformations
+    if (strcmp(argv[0],"deformations") == 0 || strcmp(argv[0],"deformation") == 0)
+		return new MaterialResponse(this, 1, this->getSectionDeformation());
+    
+	// forces
+	else if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0)
+		return new MaterialResponse(this, 2, this->getStressResultant());
+
+	// tangent
+	else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
+		return new MaterialResponse(this, 3, this->getSectionTangent());
+
+	else
+		return 0;
+}
 
 int 
-SectionForceDeformation::getResponse(int responseID, Information &sectInfo)
+SectionForceDeformation::getResponse(int responseID, Information &secInfo)
 {
   switch (responseID) {
-    case -1:
-      return -1;
-      
     case 1:
-      if (sectInfo.theVector != 0)
-	  *(sectInfo.theVector) = this->getSectionDeformation();
-     return 0;
-      
+		return secInfo.setVector(this->getSectionDeformation());
+
     case 2:
-      if (sectInfo.theVector != 0)
-	  *(sectInfo.theVector) = this->getStressResultant();
-      return 0;      
+		return secInfo.setVector(this->getStressResultant());
 
 	case 3:
-		if (sectInfo.theMatrix != 0)
-			*(sectInfo.theMatrix) = this->getSectionTangent();
-		return 0;
+		return secInfo.setMatrix(this->getSectionTangent());
 
     default:
       return -1;
