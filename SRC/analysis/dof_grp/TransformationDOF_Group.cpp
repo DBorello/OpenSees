@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-04-22 23:28:59 $
+// $Revision: 1.6 $
+// $Date: 2002-04-30 21:07:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -305,6 +305,8 @@ TransformationDOF_Group::getNumConstrainedDOF(void) const
 const Matrix &
 TransformationDOF_Group::getTangent(Integrator *theIntegrator) 
 {
+
+
     const Matrix &unmodTangent = this->DOF_Group::getTangent(theIntegrator);
     Matrix *T = this->getT();
     if (T != 0) {
@@ -643,26 +645,27 @@ TransformationDOF_Group::getT(void)
 	return Trans;
     }
     
-    int numNodalDOF = this->DOF_Group::getNumDOF();
-    // const ID &retainedDOF = theMP->getRetainedDOFs();
+    int numNodalDOF = myNode->getNumberDOF();
+    const ID &retainedDOF = theMP->getRetainedDOFs();
     const ID &constrainedDOF = theMP->getConstrainedDOFs();    
     int numNodalDOFConstrained = constrainedDOF.Size();
     int numRetainedDOF = numNodalDOF - numNodalDOFConstrained;
-    //    int numReatainedNodeDOF = retainedDOF.Size();
+    int numRetainedNodeDOF = retainedDOF.Size();
 
     Trans->Zero();
     const Matrix &Ccr = theMP->getConstraint();
     int col = 0;
     for (int i=0; i<numNodalDOF; i++) {
-	int loc = constrainedDOF.getLocation(i);
-	if (loc < 0) {
-	    (*Trans)(i,col) = 1.0;
-	    col++;
-	} else {
-	    for (int j=0; j<numRetainedDOF; j++)
-		(*Trans)(i,j+numRetainedDOF) = Ccr(loc,j);
-	}	
-    }    
+      int loc = constrainedDOF.getLocation(i);
+      if (loc < 0) {
+	(*Trans)(i,col) = 1.0;
+	col++;
+      } else {
+	for (int j=0; j<numRetainedNodeDOF; j++)
+	  (*Trans)(i,j+numRetainedDOF) = Ccr(loc,j);
+      }
+    }
+
     return Trans;    
 }
 
