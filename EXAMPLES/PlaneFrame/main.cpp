@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:09 $
+// $Revision: 1.2 $
+// $Date: 2003-02-19 22:12:16 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/PlaneFrame/main.cpp,v $
                                                                         
 // File: ~/model/main.C
@@ -39,10 +39,8 @@
 
 // standard C++ includes
 #include <stdlib.h>
-#include <iostream.h>
-
-#include <G3Globals.h>
-#include <ConsoleErrorHandler.h>
+#include <OPS_Globals.h>
+#include <StandardStream.h>
 
 // includes for the domain classes
 #include <Domain.h>
@@ -60,13 +58,17 @@
 #include <BandSPDLinLapackSolver.h>
 
 
-ErrorHandler *g3ErrorHandler;
+// init the global variabled defined in OPS_Globals.h
+StandardStream sserr;
+OPS_Stream &opserr = sserr;
+
+double        ops_Dt = 0;
+Domain       *ops_TheActiveDomain = 0;
+Element      *ops_TheActiveElement = 0;
+
 
 int main(int argc, char **argv)
 {
-    
-    //  first build our error handler
-    g3ErrorHandler = new ConsoleErrorHandler();
     
     //
     //	now create a domain and a modelbuilder
@@ -93,7 +95,7 @@ int main(int argc, char **argv)
     
     AnalysisModel     *theModel = new AnalysisModel();
     EquiSolnAlgo      *theSolnAlgo = new Linear();
-    StaticIntegrator  *theIntegrator = new LoadControl(1.0, 1.0, 1.0, 1.0);
+    StaticIntegrator  *theIntegrator = new LoadControl(1.0, 1, 1.0, 1.0);
     ConstraintHandler *theHandler = new PenaltyConstraintHandler(1.0e8,1.0e8);
     RCM               *theRCM = new RCM();
     DOF_Numberer      *theNumberer = new DOF_Numberer(*theRCM);    
@@ -110,7 +112,7 @@ int main(int argc, char **argv)
 
     // perform the analysis & print out the results for the domain
     theAnalysis.analyze(1);
-    cerr << *theDomain;
+    opserr << *theDomain;
 
     exit(0);
 }	
