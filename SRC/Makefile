@@ -215,6 +215,8 @@ MATMOD_BJ_LIBS = $(FE)/material/nD/ElasticIsotropic3D.o  \
                  $(FE)/material/nD/Template3Dep/Template3Dep.o \
                  $(FE)/material/nD/Template3Dep/EPState.o \
                  $(FE)/material/nD/Template3Dep/YS.o \
+                 $(FE)/material/nD/Template3Dep/MD_YS.o  \
+                 $(FE)/material/nD/Template3Dep/MD_PS.o \
                  $(FE)/material/nD/Template3Dep/CAM_YS.o  \
                  $(FE)/material/nD/Template3Dep/CAM_PS.o \
                  $(FE)/material/nD/Template3Dep/DP_YS.o  \
