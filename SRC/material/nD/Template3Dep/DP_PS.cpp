@@ -64,7 +64,7 @@ PotentialSurface * DPPotentialSurface::newObj() {
 
 
 //================================================================================
-// tensor dQ/dsigma_ij = a*delta_ij + 0.5*sqrt(2.0)*(s_ij-alpha_ij)/|s_ij-alpha_ij|
+// tensor dQ/dsigma_ij
 //================================================================================
 
 tensor DPPotentialSurface::dQods(const EPState *EPS) const {
@@ -72,28 +72,40 @@ tensor DPPotentialSurface::dQods(const EPState *EPS) const {
     
 	tensor KroneckerI("I", 2, def_dim_2);
     //double temp1 =  EPS->getScalarVar(1);    
-    double temp1 = getalfa2();
+    double temp1 = getalfa2();    
     
     stresstensor alpha;
+    stresstensor s_bar;
     stresstensor Tnsr0;
-    stresstensor sigma = EPS->getStress();
+    double temp6 = 0.0;
+    stresstensor temp5;
+    stresstensor sigma = EPS->getStress();   
+    double p = sigma.p_hydrostatic();
+    stresstensor sdev = sigma.deviator();
     double halfRt2 = 0.5 * sqrt(2.0);
     int nod = EPS->getNTensorVar();
     if ( nod >=1 )  { //May not have kinematic hardening
-      alpha = EPS->getTensorVar(1); 
+      alpha = EPS->getTensorVar(1);  
+      s_bar = sdev - (alpha*p);
+      temp5 = alpha("ij") * s_bar("ij");
+      temp5.null_indices();
+      temp6 = temp5.trace();
+      Tnsr0 = KroneckerI*(temp6/3.0);
     }
-    stresstensor sigma_bar = sigma - alpha;   
-    stresstensor s_bar = sigma_bar.deviator();
+    else {
+	  s_bar = sdev;
+    }
     stresstensor temp3 = s_bar("ij") * s_bar("ij");
     temp3.null_indices();
     double temp4 = temp3.trace();
     temp4 = sqrt(temp4);
+    Tnsr0 += s_bar;
     double eps = pow( d_macheps(), 0.5 );
     if ( fabs(temp4) > eps )  {
-      Tnsr0 = s_bar * (1.0/temp4);
+      Tnsr0 = Tnsr0 * (halfRt2/temp4);
     }
     	    
-    dQods = KroneckerI*temp1 + Tnsr0*halfRt2; 
+    dQods = (KroneckerI * temp1) + Tnsr0;; 
         
     return dQods;
 }
@@ -109,30 +121,45 @@ tensor DPPotentialSurface::d2Qods2(const EPState *EPS) const {
 	tensor KroneckerI("I", 2, def_dim_2);
 	tensor T1 = KroneckerI("ij")*KroneckerI("mn");
 	T1.null_indices();
-	tensor T2 = (T1.transpose0110()+T1.transpose0111())*0.5 - T1*(1.0/3.0);
+	tensor T2 = (T1.transpose0110()+T1.transpose0111())*0.5;
+	tensor T3 = T2 - T1*(1.0/3.0);
 	
     //double temp1 =  EPS->getScalarVar(1);    
-    double temp1 = getalfa2();
+    //double temp1 = getalfa2();
     
+    tensor T4;
     stresstensor alpha;
+    stresstensor s_bar;
+    tensor temp9(4, def_dim_4, 0.0);
     stresstensor sigma = EPS->getStress();
+    double p = sigma.p_hydrostatic();
+    stresstensor sdev = sigma.deviator();
     double halfRt2 = 0.5 * sqrt(2.0);
     int nod = EPS->getNTensorVar();
     if ( nod >=1 )  { //May not have kinematic hardening
-      alpha = EPS->getTensorVar(1); 
+      alpha = EPS->getTensorVar(1);
+      temp9 = KroneckerI("ij") * alpha("mn");
+      temp9.null_indices();
+      T4 = T2 + temp9*(1.0/3.0);
+      s_bar = sdev - (alpha*p);
     }
-    stresstensor sigma_bar = sigma - alpha;   
-    stresstensor s_bar = sigma_bar.deviator();
-    stresstensor temp3 = s_bar("ij") * s_bar("ij");
-    temp3.null_indices();
+    else {
+	  s_bar = sdev;
+	  T4 = T2;
+    }
+    T4 = T2 - temp9;
+    tensor temp3 = s_bar("ij") * s_bar("ij");
+    temp3.null_indices();  
     double temp4 = temp3.trace();
     temp4 = sqrt(temp4);
     tensor temp5 = s_bar("ij")*s_bar("mn");
     double eps = pow( d_macheps(), 0.5 );
     if ( fabs(temp4) > eps )  {
-      d2Qods2 =T1 * (1.0/temp4) - temp5*(1.0/(temp4*temp4*temp4));
-    }
-
+      d2Qods2 = T3 * (halfRt2/temp4) - temp5*(halfRt2/(temp4*temp4*temp4));
+      d2Qods2 = T4("ijkl") * d2Qods2("klmn");
+      d2Qods2.null_indices();
+    }   
+    
     return d2Qods2;
 }
 
@@ -162,20 +189,3 @@ OPS_Stream& operator<< (OPS_Stream& os, const DPPotentialSurface &PS)
 
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 

@@ -65,7 +65,7 @@ YieldSurface * DPYieldSurface::newObj() {
 
 //================================================================================
 //  Yield criterion evaluation function F(EPState)
-//  f = a*I1 + 0.5*sqrt(2.0)*||s_ij-alpha_ij|| - k =0
+//  f = a*I1 + 0.5*sqrt(2.0)*||s_ij - p*alpha_ij|| - k =0
 //================================================================================
 
 double DPYieldSurface::f(const EPState *EPS) const {
@@ -73,14 +73,19 @@ double DPYieldSurface::f(const EPState *EPS) const {
     double temp2 = temp1 * EPS->getScalarVar(1);
 
     stresstensor alpha;
+    stresstensor s_bar;
     stresstensor sigma = EPS->getStress();
+    double p = sigma.p_hydrostatic();
+    stresstensor sdev = sigma.deviator();
     double halfRt2 = 0.5 * sqrt(2.0);
     int nod = EPS->getNTensorVar();
     if ( nod >=1 )  { //May not have kinematic hardening
-      alpha = EPS->getTensorVar(1); 
+      alpha = EPS->getTensorVar(1);   
+      s_bar = sdev - (alpha*p);
     }
-    stresstensor sigma_bar = sigma - alpha;   
-    stresstensor s_bar = sigma_bar.deviator();
+    else {
+	  s_bar = sdev;
+    }  
     stresstensor temp3 = s_bar("ij") * s_bar("ij");
     temp3.null_indices();
     double temp4 = temp3.trace();
@@ -95,7 +100,7 @@ double DPYieldSurface::f(const EPState *EPS) const {
 }
 
 //================================================================================
-// tensor dF/dsigma_ij = a*delta_ij + 0.5*sqrt(2.0)*(s_ij-alpha_ij)/|s_ij-alpha_ij|
+// tensor dF/dsigma_ij
 //================================================================================
 
 tensor DPYieldSurface::dFods(const EPState *EPS) const {
@@ -105,25 +110,37 @@ tensor DPYieldSurface::dFods(const EPState *EPS) const {
     double temp1 =  EPS->getScalarVar(1);    
     
     stresstensor alpha;
+    stresstensor s_bar;
     stresstensor Tnsr0;
-    stresstensor sigma = EPS->getStress();
+    double temp6 = 0.0;
+    stresstensor temp5;
+    stresstensor sigma = EPS->getStress();   
+    double p = sigma.p_hydrostatic();
+    stresstensor sdev = sigma.deviator();
     double halfRt2 = 0.5 * sqrt(2.0);
     int nod = EPS->getNTensorVar();
     if ( nod >=1 )  { //May not have kinematic hardening
-      alpha = EPS->getTensorVar(1); 
+      alpha = EPS->getTensorVar(1);  
+      s_bar = sdev - (alpha*p);
+      temp5 = alpha("ij") * s_bar("ij");
+      temp5.null_indices();
+      temp6 = temp5.trace();
+      Tnsr0 = KroneckerI*(temp6/3.0);
     }
-    stresstensor sigma_bar = sigma - alpha;   
-    stresstensor s_bar = sigma_bar.deviator();
+    else {
+	  s_bar = sdev;
+    }
     stresstensor temp3 = s_bar("ij") * s_bar("ij");
     temp3.null_indices();
     double temp4 = temp3.trace();
     temp4 = sqrt(temp4);
+    Tnsr0 += s_bar;
     double eps = pow( d_macheps(), 0.5 );
     if ( fabs(temp4) > eps )  {
-      Tnsr0 = s_bar * (1.0/temp4);
+      Tnsr0 = Tnsr0 * (halfRt2/temp4);
     }
-    	    
-    dFods = KroneckerI*temp1 + Tnsr0*halfRt2; 
+        	    
+    dFods = (KroneckerI*temp1) + Tnsr0; 
         
     return dFods;
 }
@@ -151,7 +168,7 @@ double DPYieldSurface::xi_s2( const EPState *EPS ) const {
 
 
 //================================================================================
-// double xi_t1 = dF/dt1 = dF/dalpha = -0.5*sqrt(2.0)*(s_ij-alpha_ij)/|s_ij-alpha_ij|
+// double xi_t1 = dF/dt1 = dF/dalpha 
 //================================================================================
 
 tensor DPYieldSurface::xi_t1( const EPState *EPS) const {
@@ -159,12 +176,13 @@ tensor DPYieldSurface::xi_t1( const EPState *EPS) const {
     
     stresstensor alpha;
     stresstensor sigma = EPS->getStress();
+    double p = sigma.p_hydrostatic();
     double halfRt2 = 0.5 * sqrt(2.0);
     int nod = EPS->getNTensorVar();
     if ( nod >=1 )  { //May not have kinematic hardening
       alpha = EPS->getTensorVar(1); 
     }
-    stresstensor sigma_bar = sigma - alpha;   
+    stresstensor sigma_bar = sigma - alpha*p;   
     stresstensor s_bar = sigma_bar.deviator();
     stresstensor temp3 = s_bar("ij") * s_bar("ij");
     temp3.null_indices();
@@ -172,7 +190,7 @@ tensor DPYieldSurface::xi_t1( const EPState *EPS) const {
     temp4 = sqrt(temp4);
     double eps = pow( d_macheps(), 0.5 );
     if ( fabs(temp4) > eps )  {
-      xi = s_bar * (-0.5 * sqrt(2.0)/temp4); //Note the Negative 1 here
+      xi = s_bar * (-halfRt2*p/temp4); //Note the Negative 1 here
     }
         
     return xi;
@@ -188,4 +206,3 @@ OPS_Stream& operator<< (OPS_Stream& os, const DPYieldSurface & YS)
 }
 
 #endif
-
