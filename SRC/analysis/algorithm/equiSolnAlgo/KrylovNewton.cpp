@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2001-08-27 22:55:57 $
+// $Revision: 1.5 $
+// $Date: 2001-09-12 21:32:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.cpp,v $
 
 // Written: MHS
@@ -48,35 +48,37 @@
 #include <fstream.h>
 
 // Constructor
-KrylovNewton::KrylovNewton(int theTangentToUse)
+KrylovNewton::KrylovNewton(int theTangentToUse, int maxDim)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_KrylovNewton),
  theTest(0), tangent(theTangentToUse),
- v(0), Av(0), AvData(0), rData(0), work(0),
- maxTests(0), numEqns(0), numVecs(0), lwork(0)
+ v(0), Av(0), AvData(0), rData(0), work(0), lwork(0),
+ numEqns(0), maxDimension(maxDim)
 {
-
+  if (maxDimension < 1)
+    maxDimension = 1;
 }
 
-KrylovNewton::KrylovNewton(ConvergenceTest &theT, int theTangentToUse)
+KrylovNewton::KrylovNewton(ConvergenceTest &theT, int theTangentToUse, int maxDim)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_KrylovNewton),
  theTest(&theT), tangent(theTangentToUse),
- v(0), Av(0), AvData(0), rData(0), work(0),
- maxTests(0), numEqns(0), numVecs(0), lwork(0)
+ v(0), Av(0), AvData(0), rData(0), work(0), lwork(0),
+ numEqns(0), maxDimension(maxDim)
 {
-
+  if (maxDimension < 1)
+    maxDimension = 1;
 }
 
 // Destructor
 KrylovNewton::~KrylovNewton()
 {
   if (v != 0) {
-    for (int i = 0; i < numVecs; i++)
+    for (int i = 0; i < maxDimension+1; i++)
       delete v[i];
     delete [] v;
   }
 
   if (Av != 0) {
-    for (int i = 0; i < numVecs; i++)
+    for (int i = 0; i < maxDimension; i++)
       delete Av[i];
     delete [] Av;
   }
@@ -102,9 +104,9 @@ KrylovNewton::solveCurrentStep(void)
 {
   // set up some pointers and check they are valid
   // NOTE this could be taken away if we set Ptrs as protecetd in superclass
-  AnalysisModel   *theAnaModel = this->getAnalysisModelPtr();
+  AnalysisModel *theAnaModel = this->getAnalysisModelPtr();
   IncrementalIntegrator *theIntegrator = this->getIncrementalIntegratorPtr();
-  LinearSOE  *theSOE = this->getLinearSOEptr();
+  LinearSOE *theSOE = this->getLinearSOEptr();
   
   if ((theAnaModel == 0) || (theIntegrator == 0) || (theSOE == 0)
       || (theTest == 0)){
@@ -113,35 +115,34 @@ KrylovNewton::solveCurrentStep(void)
     return -5;
   }	
 
-  // Get size information from convergence test and SOE
-  maxTests = theTest->getMaxNumTests();
-  numVecs  = 2 + maxTests;
+  // Get size information from SOE
   numEqns  = theSOE->getNumEqn();
 
   if (v == 0) {
-    v = new Vector*[numVecs];
-    for (int i = 0; i < numVecs; i++)
+    // Need to allocate an extra vector for "next" update
+    v = new Vector*[maxDimension+1];
+    for (int i = 0; i < maxDimension+1; i++)
       v[i] = new Vector(numEqns);
   }
 
   if (Av == 0) {
-    Av = new Vector*[numVecs];
-    for (int i = 0; i < numVecs; i++)
+    Av = new Vector*[maxDimension];
+    for (int i = 0; i < maxDimension; i++)
       Av[i] = new Vector(numEqns);
   }
 
   if (AvData == 0)
-    AvData = new double [maxTests*numEqns];
+    AvData = new double [maxDimension*numEqns];
 
   if (rData == 0)
     // The LAPACK least squares subroutine overwrites the RHS vector
     // with the solution vector ... these vectors are not the same
     // size, so we need to use the max size
-    rData = new double [(numEqns > maxTests) ? numEqns : maxTests];
+    rData = new double [(numEqns > maxDimension) ? numEqns : maxDimension];
 
-  // Length of work vector should be >= 2*min(numEqns,maxTests)
+  // Length of work vector should be >= 2*min(numEqns,maxDimension)
   // See dgels subroutine documentation
-  lwork = 2 * ((numEqns < maxTests) ? numEqns : maxTests);
+  lwork = 2 * ((numEqns < maxDimension) ? numEqns : maxDimension);
   
   if (work == 0)
     work = new double [lwork];
@@ -167,32 +168,43 @@ KrylovNewton::solveCurrentStep(void)
     cerr << "the Integrator failed in formTangent()\n";
     return -1;
   }    
-  
-  // Solve for residual f(y_0) = J^{-1} R(y_0)
-  if (theSOE->solve() < 0) {
-    cerr << "WARNING KrylovNewton::solveCurrentStep() -";
-    cerr << "the LinearSysOfEqn failed in solve()\n";	
-    return -3;
-  }
 
-  // Not using Av[0], for the subspace vectors, so
-  // use it for the residual vector
-  Vector &r = *(Av[0]);
+  // Loop counter
+  int k = 1;
 
-  // Update y ... y_1 = y_0 + v_1 --> (y_0 is zero) --> y_1 = v_1
-  // --> (v_1 = f(y_0)) --> y_1 = f(y_0)
-  r = theSOE->getX();
-
-  // Store first update v_1 = r_0
-  *(v[1]) = r;
+  // Current dimension of Krylov subspace
+  int dim = 0;
 
   int result = -1;
-  int k = 1;
 
   do {
 
+    // Clear the subspace if its dimension has exceeded max
+    if (dim == maxDimension) {
+      dim = 0;
+      if (theIntegrator->formTangent(tangent) < 0){
+	cerr << "WARNING KrylovNewton::solveCurrentStep() -";
+	cerr << "the Integrator failed to produce new formTangent()\n";
+	return -1;
+      }
+    }
+
+    // Solve for residual f(y_k) = J^{-1} R(y_k)
+    if (theSOE->solve() < 0) {
+      cerr << "WARNING KrylovNewton::solveCurrentStep() -";
+      cerr << "the LinearSysOfEqn failed in solve()\n";	
+      return -3;
+    }
+
+    // Solve least squares A w_{k+1} = r_k
+    if (this->leastSquares(dim) < 0) {
+      cerr << "WARNING KrylovNewton::solveCurrentStep() -";
+      cerr << "the Integrator failed in leastSquares()\n";
+      return -1;
+    }		    
+
     // Update system with v_k
-    if (theIntegrator->update(*(v[k])) < 0) {
+    if (theIntegrator->update(*(v[dim])) < 0) {
       cerr << "WARNING KrylovNewton::solveCurrentStep() -";
       cerr << "the Integrator failed in update()\n";	
       return -4;
@@ -204,26 +216,9 @@ KrylovNewton::solveCurrentStep(void)
       cerr << "the Integrator failed in formUnbalance()\n";	
       return -2;
     }
-    
-    // Solve for residual f(y_k) = J^{-1} R(y_k)
-    if (theSOE->solve() < 0) {
-      cerr << "WARNING KrylovNewton::solveCurrentStep() -";
-      cerr << "the LinearSysOfEqn failed in solve()\n";	
-      return -3;
-    }
 
-    // Compute Av_k = f(y_{k-1}) - f(y_k) = r_{k-1} - r_k
-    // NOTE: Not using Av[0] so that notation follows paper
-    *(Av[k]) = r;
-    r = theSOE->getX();
-    Av[k]->addVector(1.0, r, -1.0);
-
-    // Solve least squares A w_{k+1} = r_k
-    if (this->leastSquares(k) < 0) {
-      cerr << "WARNING KrylovNewton::solveCurrentStep() -";
-      cerr << "the Integrator failed in leastSquares()\n";
-      return -1;
-    }		    
+    // Increase current dimension of Krylov subspace
+    dim++;
 
     result = theTest->test();
     this->record(k++);
@@ -263,7 +258,9 @@ KrylovNewton::recvSelf(int cTag, Channel &theChannel,
 void
 KrylovNewton::Print(ostream &s, int flag)
 {
-  s << "KrylovNewton\n";
+  s << "KrylovNewton";
+  s << "\n\tMax subspace dimension: " << maxDimension;
+  s << "\n\tNumber of equations: " << numEqns << endl;
 }
 
 #ifdef _WIN32
@@ -283,18 +280,29 @@ extern "C" int dgels_(char *T, int *M, int *N, int *NRHS,
 int
 KrylovNewton::leastSquares(int k)
 {
+  LinearSOE *theSOE = this->getLinearSOEptr();  
+  const Vector &r = theSOE->getX();
+
+  // v_{k+1} = w_{k+1} + q_{k+1}
+  *(v[k])  = r;
+  *(Av[k]) = r;
+
+  // Subspace is empty
+  if (k == 0)
+    return 0;
+
+  // Compute Av_k = f(y_{k-1}) - f(y_k) = r_{k-1} - r_k
+  Av[k-1]->addVector(1.0, r, -1.0);
+
   int i,j;
 
   // Put subspace vectors into AvData
   Matrix A(AvData, numEqns, k);
   for (i = 0; i < k; i++) {
-    Vector &Ai = *(Av[i+1]);
+    Vector &Ai = *(Av[i]);
     for (j = 0; j < numEqns; j++)
       A(j,i) = Ai(j);
   }
-
-  // Reference to the residual vector
-  Vector &r = *(Av[0]);
 
   // Put residual vector into rData (need to save r for later!)
   Vector B(rData, numEqns);
@@ -327,21 +335,18 @@ KrylovNewton::leastSquares(int k)
     return info;
   }
   
-  // v_{k+1} = w_{k+1} + q_{k+1}
-  *(v[k+1]) = r;
-  
   // Compute the correction vector
   double cj;
-  for (j = 1; j <= k; j++) {
+  for (j = 0; j < k; j++) {
     
     // Solution to least squares is written to rData
-    cj = rData[j-1];
+    cj = rData[j];
     
     // Compute w_{k+1} = c_1 v_1 + ... + c_k v_k
-    v[k+1]->addVector(1.0, *(v[j]), cj);
+    v[k]->addVector(1.0, *(v[j]), cj);
     
     // Compute least squares residual q_{k+1} = r_k - c_1 Av_1 - ... - c_k Av_k
-    v[k+1]->addVector(1.0, *(Av[j]), -cj);
+    v[k]->addVector(1.0, *(Av[j]), -cj);
   }
   
   return 0;

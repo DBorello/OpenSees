@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-27 22:55:57 $
+// $Revision: 1.5 $
+// $Date: 2001-09-12 21:32:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.h,v $
                                                                         
 #ifndef KrylovNewton_h
@@ -42,8 +42,8 @@
 class KrylovNewton: public EquiSolnAlgo
 {
   public:
-    KrylovNewton(int tangent = CURRENT_TANGENT);    
-    KrylovNewton(ConvergenceTest &theTest, int tangent = CURRENT_TANGENT);
+    KrylovNewton(int tangent = CURRENT_TANGENT, int maxDim = 10);    
+    KrylovNewton(ConvergenceTest &theTest, int tangent = CURRENT_TANGENT, int maxDim = 10);
     ~KrylovNewton();
 
     int solveCurrentStep(void);    
@@ -72,15 +72,16 @@ class KrylovNewton: public EquiSolnAlgo
     double *rData;
     double *work;
 
-    // Size information
-    int maxTests;
-    int numEqns;
-    int numVecs;
-
     // Length of work array
     int lwork;
 
-    int leastSquares(int k);
+    // Size information
+    int numEqns;
+    int maxDimension;
+
+    // Private lsq routine to do Krylov updates
+    // dimension is the current dimension of the subspace
+    int leastSquares(int dimension);
 };
 
 #endif
