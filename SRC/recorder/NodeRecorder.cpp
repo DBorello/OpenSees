@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:25 $
+// $Revision: 1.2 $
+// $Date: 2001-05-03 05:59:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -43,6 +43,7 @@
 #include <Node.h>
 #include <Vector.h>
 #include <ID.h>
+#include <Matrix.h>
 
 #include <iostream.h>
 #include <fstream.h>
@@ -81,6 +82,12 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     dataFlag = 3;
   } else if ((strcmp(dataToStore, "incrDeltaDisp") == 0)) {
     dataFlag = 4;
+  } else if ((strncmp(dataToStore, "eigen",5) == 0)) {
+    int mode = atoi(&(dataToStore[5]));
+    if (mode > 0)
+      dataFlag = 10 + mode;
+    else
+      dataFlag = 6;
   } else {
     dataFlag = 6;
     cerr << "NodeRecorder::NodeRecorder - dataToStore " << *dataToStore;
@@ -111,7 +118,9 @@ NodeRecorder::record(int commitTag)
 		int dof = theDofs(j);
 		if (theDisp.Size() > dof) {
 		    disp(cnt) = theDisp(dof);
-		}
+		}else 
+		  disp(cnt) = 0.0;
+
 		cnt++;
 	    }
 	  } else if (dataFlag == 1) {
@@ -120,7 +129,9 @@ NodeRecorder::record(int commitTag)
 		int dof = theDofs(j);
 		if (theDisp.Size() > dof) {
 		    disp(cnt) = theDisp(dof);
-		}
+		} else 
+		  disp(cnt) = 0.0;
+
 		cnt++;
 	    }
 	  } else if (dataFlag == 2) {
@@ -129,7 +140,9 @@ NodeRecorder::record(int commitTag)
 		int dof = theDofs(j);
 		if (theDisp.Size() > dof) {
 		    disp(cnt) = theDisp(dof);
-		}
+		} else 
+		  disp(cnt) = 0.0;
+
 		cnt++;
 	    }
 	  } else if (dataFlag == 3) {
@@ -138,7 +151,9 @@ NodeRecorder::record(int commitTag)
 		int dof = theDofs(j);
 		if (theDisp.Size() > dof) {
 		    disp(cnt) = theDisp(dof);
-		}
+		} else 
+		  disp(cnt) = 0.0;
+
 		cnt++;
 	    }
 	  } else if (dataFlag == 4) {
@@ -147,8 +162,30 @@ NodeRecorder::record(int commitTag)
 		int dof = theDofs(j);
 		if (theDisp.Size() > dof) {
 		    disp(cnt) = theDisp(dof);
-		}
+		} else 
+		  disp(cnt) = 0.0;
+
 		cnt++;
+	    }
+	  } else if (dataFlag > 10) {
+	    int mode = dataFlag - 10;
+	    int column = mode - 1;
+	    const Matrix &theEigenvectors = theNode->getEigenvectors();
+	    if (theEigenvectors.noCols() > column) {
+	      int noRows = theEigenvectors.noRows();
+	      for (int j=0; j<numDOF; j++) {
+		int dof = theDofs(j);
+		if (noRows > dof) {
+		  disp(cnt) = theEigenvectors(dof,column);
+		} else 
+		  disp(cnt) = 0.0;
+		cnt++;		
+	      }
+	    } else {
+	      for (int j=0; j<numDOF; j++) {
+		int dof = theDofs(j);
+		disp(cnt) = 0.0;
+	      }
 	    }
 	  }
 	}
