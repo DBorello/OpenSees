@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-25 23:34:41 $
+// $Revision: 1.8 $
+// $Date: 2003-02-26 18:56:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.cpp,v $
                                                                         
                                                                         
@@ -57,7 +57,7 @@ using std::ios;
 //#define PARALLEL_MODE 0
 //#define PERSPECTIVE_MODE 1
 
-X11Renderer::X11Renderer(char *title, int xLoc, int yLoc, int width, int height,
+X11Renderer::X11Renderer(const char *title, int xLoc, int yLoc, int width, int height,
 			 ColorMap &_theMap)
   :Renderer(_theMap), theFileName(0)
 {
@@ -79,9 +79,9 @@ X11Renderer::X11Renderer(char *title, int xLoc, int yLoc, int width, int height,
 }
 
 
-X11Renderer::X11Renderer(char *title, int xLoc, int yLoc, int width, int height,
+X11Renderer::X11Renderer(const char *title, int xLoc, int yLoc, int width, int height,
 			 ColorMap &_theMap,
-			 char *fileName)
+			 const char *fileName)
   :Renderer(_theMap)
 {
     theView = new View;

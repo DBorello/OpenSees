@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:25 $
+// $Revision: 1.2 $
+// $Date: 2003-02-26 18:56:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Device.h,v $
                                                                         
                                                                         
@@ -69,7 +69,7 @@ class Device
   virtual void ENDIMAGE() =0;
 
   // to open a window
-  virtual void WINOPEN(char *title, int xLoc, int yLoc, int width, int height) =0;
+  virtual void WINOPEN(const char *title, int xLoc, int yLoc, int width, int height) =0;
 
   // Clears the currently opened window
   virtual void CLEAR() =0;

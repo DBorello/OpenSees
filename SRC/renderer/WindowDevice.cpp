@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:58 $
+// $Revision: 1.6 $
+// $Date: 2003-02-26 18:56:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/WindowDevice.cpp,v $
                                                                         
                                                                         
@@ -343,7 +343,7 @@ WindowDevice::~WindowDevice()
 }
 
 void
-WindowDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _height)
+WindowDevice::WINOPEN(const char *_title, int _xLoc, int _yLoc, int _width, int _height)
 {
     // set the WindowDevices title, height, wdth, xLoc and yLoc
     strcpy(title, _title);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:58 $
+// $Revision: 1.4 $
+// $Date: 2003-02-26 18:56:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/WindowDevice.h,v $
                                                                         
 #ifndef WindowDevice_H
@@ -87,7 +87,7 @@ class WindowDevice: public  Device
   virtual void ENDIMAGE();
 
   // Opens a window of the specified width & height.
-  virtual void WINOPEN(char *title, int xLoc, int yLoc, int width, int height);
+  virtual void WINOPEN(const char *title, int xLoc, int yLoc, int width, int height);
 
   // Clears the currently opened window
   virtual void CLEAR();
