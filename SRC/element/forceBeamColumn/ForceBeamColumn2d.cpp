@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-19 21:06:23 $
+// $Revision: 1.5 $
+// $Date: 2003-01-28 01:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -41,7 +41,6 @@
 #include <ElementalLoad.h>
 
 #define  NDM   2         // dimension of the problem (2d)
-#define  NL    2         // size of uniform load vector
 #define  NND   3         // number of nodal dof's
 #define  NEGD  6         // number of element global dof's
 #define  NEBD  3         // number of element dof's in the basic system
@@ -96,7 +95,7 @@ ForceBeamColumn2d::ForceBeamColumn2d (int tag, int nodeI, int nodeJ,
 					  BeamIntegration &bi,
 					  CrdTransf2d &coordTransf, double massDensPerUnitLength,
 					  int maxNumIters, double tolerance):
-  Element(tag,ELE_TAG_ForceBeamColumn2d), connectedExternalNodes(NL),
+  Element(tag,ELE_TAG_ForceBeamColumn2d), connectedExternalNodes(2),
   beamIntegr(0), numSections(0), sections(0), crdTransf(0),
   rho(massDensPerUnitLength),maxIters(maxNumIters), tol(tolerance), 
   initialFlag(0),

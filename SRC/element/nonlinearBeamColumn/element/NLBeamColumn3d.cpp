@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2002-12-16 21:10:06 $
+// $Revision: 1.21 $
+// $Date: 2003-01-28 01:19:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -60,7 +60,6 @@
 #include <ElementalLoad.h>
 
 #define  NDM   3         // dimension of the problem (3d)
-#define  NL    3         // size of uniform load vector
 #define  NND   6         // number of nodal dof's
 #define  NEGD 12         // number of element global dof's
 #define  NEBD  6         // number of element dof's in the basic system

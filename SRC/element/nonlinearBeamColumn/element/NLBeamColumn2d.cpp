@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2002-12-17 02:09:46 $
+// $Revision: 1.30 $
+// $Date: 2003-01-28 01:19:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -63,7 +63,6 @@
 #include <fstream.h>
 
 #define  NDM   2         // dimension of the problem (2d)
-#define  NL    2         // size of uniform load vector
 #define  NND   3         // number of nodal dof's
 #define  NEGD  6         // number of element global dof's
 #define  NEBD  3         // number of element dof's in the basic system
@@ -108,7 +107,7 @@ NLBeamColumn2d::NLBeamColumn2d (int tag, int nodeI, int nodeJ,
                                 int numSections, SectionForceDeformation *sectionPtrs[],
                                 CrdTransf2d &coordTransf, double massDensPerUnitLength,
 				int maxNumIters, double tolerance, int maxSub):
-Element(tag,ELE_TAG_NLBeamColumn2d), connectedExternalNodes(NL),
+Element(tag,ELE_TAG_NLBeamColumn2d), connectedExternalNodes(2),
 nSections(numSections), sections(sectionPtrs), crdTransf(0),
 rho(massDensPerUnitLength),maxIters(maxNumIters), tol(tolerance), 
 cosTheta(0.0), sinTheta(1.0), initialFlag(0),
