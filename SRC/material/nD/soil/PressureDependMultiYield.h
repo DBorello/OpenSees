@@ -1,5 +1,5 @@
-// $Revision: 1.4 $
-// $Date: 2001-08-26 23:29:02 $
+// $Revision: 1.5 $
+// $Date: 2001-09-14 22:57:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -76,7 +76,7 @@ public:
      int setTrialStrain (const Tensor &v, const Tensor &r) {return 0;}
      int setTrialStrainIncr (const Tensor &v) {return 0;}
      int setTrialStrainIncr (const Tensor &v, const Tensor &r) {return 0;}
-     const Tensor &getTangentTensor (void) {Tensor * t=new Tensor; return *t;}
+//     const Tensor &getTangentTensor (void) {Tensor * t=new Tensor; return *t;}
 //jeremic@ucdavis.edu 22jan2001     const stresstensor getStressTensor (void) {stresstensor t; return t;}
 //jeremic@ucdavis.edu 22jan2001		 const Tensor &getStrainTensor(void) {Tensor * t=new Tensor; return *t;}
 
@@ -182,6 +182,8 @@ private:
 	T2Vector lockStressCommitted;
 	static Vector workV;
 	static Matrix workM;
+	static Vector workV6;
+	static T2Vector workT2V;
 
 	void elast2Plast(void);
 	// Called by constructor
