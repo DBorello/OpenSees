@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2004-11-25 00:53:12 $
+// $Revision: 1.20 $
+// $Date: 2005-02-14 20:35:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -512,6 +512,8 @@ ElementRecorder::initialize(void)
       delete [] dbColumns;
   }
   
+  delete [] dataToStore;
+
   // create the vector to hold the data
   data = new Vector(numDbColumns);
 
@@ -519,6 +521,8 @@ ElementRecorder::initialize(void)
     opserr << "ElementRecorder::initialize() - out of memory\n";
     return -1;
   }
+
+  
 
   initializationDone = true;
   return 0;
