@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-16 04:19:11 $
+// $Revision: 1.4 $
+// $Date: 2001-06-30 01:24:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -134,16 +134,20 @@ ElementRecorder::record(int commitTag)
 	
 	if (theFile.bad())
 	  theResponses[i]->Print(cerr);	    
-	else
+	else {
 	  theResponses[i]->Print(theFile);
+	  theFile << "  ";  // added for OSP
+	}
       }
     } 
   }
 
   if (theFile.bad()) 
     cerr << endl;
-  else
+  else {
     theFile << " \n";
+    theFile.flush();
+  }
 
   // succesfull completion - return 0
   return result;
