@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-12-05 22:20:49 $
+// $Revision: 1.13 $
+// $Date: 2002-12-06 20:26:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -914,7 +914,8 @@ ZeroLength::setUp( int Nd1, int Nd2,
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;
 
-    for (int i=0; i<2; i++)
+	int i;
+    for (i=0; i<2; i++)
       theNodes[i] = 0;
 
     // check that vectors for orientation are correct size
@@ -945,7 +946,7 @@ ZeroLength::setUp( int Nd1, int Nd2,
     }
     
     // create transformation matrix of direction cosines
-    for ( int i=0; i<3; i++ ) {
+    for ( i=0; i<3; i++ ) {
 	transformation(0,i) = x(i)/xn;
 	transformation(1,i) = y(i)/yn;
 	transformation(2,i) = z(i)/zn;

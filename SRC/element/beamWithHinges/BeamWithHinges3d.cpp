@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-12-05 22:20:37 $
+// $Revision: 1.14 $
+// $Date: 2002-12-06 20:26:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
 
 #include <BeamWithHinges3d.h>
@@ -344,7 +344,8 @@ BeamWithHinges3d::getInitialStiff(void)
   static Matrix f(6,6);	// element flexibility
   static Matrix Iden(6,6);   // an identity matrix for matrix inverse
   Iden.Zero();
-  for (int i = 0; i < 6; i++)
+  int i;
+  for (i = 0; i < 6; i++)
     Iden(i,i) = 1.0;
 
   // Length of elastic interior
@@ -388,7 +389,7 @@ BeamWithHinges3d::getInitialStiff(void)
   f(4,3) = fElastic(3,2);
   f(5,5) = LoverGJ;    
   
-  for (int i = 0; i < 2; i++) {
+  for (i = 0; i < 2; i++) {
     
     if (section[i] == 0 || lp[i] <= 0.0)
       continue;

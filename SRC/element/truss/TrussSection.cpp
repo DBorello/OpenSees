@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-12-05 22:20:45 $
+// $Revision: 1.7 $
+// $Date: 2002-12-06 20:26:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -99,7 +99,7 @@ TrussSection::TrussSection(int tag,
     connectedExternalNodes(1) = Nd2;        
 
     // set node pointers to NULL
-    for (int i=0; i<2; i++)
+    for (i=0; i<2; i++)
       theNodes[i] = 0;    
 }
 

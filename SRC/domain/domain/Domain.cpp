@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2002-12-05 22:24:32 $
+// $Revision: 1.16 $
+// $Date: 2002-12-06 20:26:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -1259,7 +1259,7 @@ Domain::initialize(void)
   Element *elePtr;
   ElementIter &theElemIter = this->getElements();    
   while ((elePtr = theElemIter()) != 0) 
-    elePtr->getInitialStiff();
+    const Matrix &ret = elePtr->getInitialStiff();
 
   return 0;
 }

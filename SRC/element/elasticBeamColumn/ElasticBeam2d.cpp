@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-05 22:20:39 $
+// $Revision: 1.10 $
+// $Date: 2002-12-06 20:26:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -97,8 +97,8 @@ ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i,
   p0[2] = 0.0;
 
   // set node pointers to NULL
-  for (int i=0; i<2; i++)
-    theNodes[i] = 0;      
+  theNodes[0] = 0;
+  theNodes[1] = 0;
 }
 
 ElasticBeam2d::~ElasticBeam2d()

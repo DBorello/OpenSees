@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2002-12-05 22:20:37 $
+// $Revision: 1.17 $
+// $Date: 2002-12-06 20:26:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
 
 #include <BeamWithHinges2d.h>
@@ -323,7 +323,8 @@ BeamWithHinges2d::getInitialStiff(void)
   
   static Matrix Iden(3,3);   // an identity matrix for matrix inverse
   Iden.Zero();
-  for (int i = 0; i < 3; i++)
+  int i;
+  for (i = 0; i < 3; i++)
     Iden(i,i) = 1.0;
 
   // Length of elastic interior
@@ -357,7 +358,7 @@ BeamWithHinges2d::getInitialStiff(void)
   f(2,1) = fElastic(1,0);
   f(0,1) = f(1,0) = f(0,2) = f(2,0) = 0.0;
     
-  for (int i = 0; i < 2; i++) {
+  for (i = 0; i < 2; i++) {
       
     if (section[i] == 0 || lp[i] <= 0.0)
       continue;

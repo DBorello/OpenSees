@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-12-05 22:18:51 $
+// $Revision: 1.8 $
+// $Date: 2002-12-06 20:26:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -101,7 +101,8 @@ Element::setRayleighDampingFactors(double alpham, double betak, double betak0)
       if (nextMatrices == 0) {
 	g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
       }
-      for (int j=0; j<numMatrices; j++)
+	  int j;
+      for (j=0; j<numMatrices; j++)
 	nextMatrices[j] = theMatrices[j];
       Matrix *theMatrix = new Matrix(numDOF, numDOF);
       if (theMatrix == 0) {
@@ -115,7 +116,7 @@ Element::setRayleighDampingFactors(double alpham, double betak, double betak0)
 	g3ErrorHandler->fatal("Element::getTheVector - out of memory");
       }
 
-      for (int j=0; j<numMatrices; j++) {
+      for (j=0; j<numMatrices; j++) {
 	nextVectors1[j] = theVectors1[j];
 	nextVectors2[j] = theVectors2[j];
       }
@@ -205,7 +206,8 @@ Element::getResistingForceIncInertia(void)
   Node **theNodes = this->getNodePtrs();
   int numNodes = this->getNumExternalNodes();
 
-  for (int i=0; i<numNodes; i++) {
+  int i;
+  for (i=0; i<numNodes; i++) {
     const Vector &acc = theNodes[i]->getAccel();
     for (int i=0; i<acc.Size(); i++) {
       (*theVector2)(loc++) = acc(i);
@@ -220,7 +222,7 @@ Element::getResistingForceIncInertia(void)
 
   // determine the vel vector from ele nodes
   loc = 0;
-  for (int i=0; i<numNodes; i++) {
+  for (i=0; i<numNodes; i++) {
     const Vector &vel = theNodes[i]->getTrialVel();
     for (int i=0; i<vel.Size(); i++) {
       (*theVector2)(loc++) = vel[i];

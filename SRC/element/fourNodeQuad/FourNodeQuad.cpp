@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2002-12-05 22:20:40 $
+// $Revision: 1.20 $
+// $Date: 2002-12-06 20:26:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -88,7 +88,8 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
       g3ErrorHandler->fatal("%s - failed allocate material model pointer",
 			"FourNodeQuad::FourNodeQuad");
 
-    for (int i = 0; i < 4; i++) {
+	int i;
+    for (i = 0; i < 4; i++) {
       
       // Get copies of the material model for each integration point
       theMaterial[i] = m.getCopy(type);
@@ -105,7 +106,7 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
     connectedExternalNodes(2) = nd3;
     connectedExternalNodes(3) = nd4;
     
-    for (int i=0; i<4; i++)
+    for (i=0; i<4; i++)
       theNodes[i] = 0;
 }
 

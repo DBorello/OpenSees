@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-18 01:06:09 $
+// $Revision: 1.4 $
+// $Date: 2002-12-06 20:26:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.h,v $
                                                                         
                                                                         
@@ -45,8 +45,8 @@
 
 class FEM_ObjectBroker;
 
-#define maxIDsize   512
-#define maxVectSize 512
+#define maxIDsize   1024
+#define maxVectSize 1024
 #define maxMatSize  512
 
 struct IDdata{
