@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-31 16:49:32 $
+// $Revision: 1.3 $
+// $Date: 2001-08-18 21:45:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.h,v $
                                                                       
 // Written: MHS
@@ -28,7 +28,10 @@
 // Description: This file contains the class definition for 
 // FedeasMaterial. FedeasMaterial provides a FORTRAN interface
 // for programming uniaxial material models, using the subroutine
-// interface from the FEDEAS ML1D library.
+// interface from the FEDEAS ML1D library, developed by F.C. Filippou.
+//
+// For more information visit the FEDEAS web page:
+//    http://www.ce.berkeley.edu/~filippou/Research/fedeas.htm
 
 #ifndef FedeasMaterial_h
 #define FedeasMaterial_h

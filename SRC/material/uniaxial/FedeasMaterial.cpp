@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-14 01:54:15 $
+// $Revision: 1.4 $
+// $Date: 2001-08-18 21:45:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -28,7 +28,10 @@
 // Description: This file contains the class definition for 
 // FedeasMaterial. FedeasMaterial provides a FORTRAN interface
 // for programming uniaxial material models, using the subroutine
-// interface from the FEDEAS ML1D library.
+// interface from the FEDEAS ML1D library, developed by F.C. Filippou.
+//
+// For more information visit the FEDEAS web page:
+//    http://www.ce.berkeley.edu/~filippou/Research/fedeas.htm
 
 #include <G3Globals.h>
 #include <FedeasMaterial.h>
@@ -277,6 +280,9 @@ FedeasMaterial::Print(ostream &s, int flag)
   s << "FedeasMaterial, type: ";
 	
   switch (this->getClassTag()) {
+  case MAT_TAG_FedeasHardening:
+    s << "Hardening" << endl;
+    break;
   case MAT_TAG_FedeasBond1:
     s << "Bond1" << endl;
     break;
@@ -291,9 +297,6 @@ FedeasMaterial::Print(ostream &s, int flag)
     break;
   case MAT_TAG_FedeasConcrete3:
     s << "Concrete3" << endl;
-    break;
-  case MAT_TAG_FedeasHardening:
-    s << "Hardening" << endl;
     break;
   case MAT_TAG_FedeasHysteretic1:
     s << "Hysteretic1" << endl;
@@ -423,54 +426,99 @@ FedeasMaterial::invokeSubroutine(int ist)
   double dEpsilon = epsilon-epsilonP;
   
   switch (this->getClassTag()) {
+  case MAT_TAG_FedeasHardening:
+    hard_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+    	&sigma, &tangent, &ist);
+    break;
+
   case MAT_TAG_FedeasBond1:
-    //bond_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
-    //	&sigma, &tangent, &ist);
+#ifdef _WIN32
+    bond_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
+    	&sigma, &tangent, &ist);
+#else
+	g3ErrorHandler->fatal("%s -- Bond1 subroutine not yet linked",
+		"FedeasMaterial::invokeSubroutine"); 
+#endif
     break;
     
   case MAT_TAG_FedeasBond2:
-    //bond_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
-    //	&sigma, &tangent, &ist);
+#ifdef _WIN32
+    bond_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
+    	&sigma, &tangent, &ist);
+#else
+	g3ErrorHandler->fatal("%s -- Bond2 subroutine not yet linked",
+		"FedeasMaterial::invokeSubroutine"); 
+#endif
     break;
     
   case MAT_TAG_FedeasConcrete1:
-    //concrete_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    //	&sigma, &tangent, &ist);
+#ifdef _WIN32
+    concrete_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+    	&sigma, &tangent, &ist);
+#else
+	g3ErrorHandler->fatal("%s -- Concrete1 subroutine not yet linked",
+		"FedeasMaterial::invokeSubroutine"); 
+#endif
     break;
     
   case MAT_TAG_FedeasConcrete2:
-    //concrete_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    //	&sigma, &tangent, &ist);
+#ifdef _WIN32
+    concrete_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+    	&sigma, &tangent, &ist);
+#else
+	g3ErrorHandler->fatal("%s -- Concrete2 subroutine not yet linked",
+		"FedeasMaterial::invokeSubroutine"); 
+#endif
     break;
     
   case MAT_TAG_FedeasConcrete3:
-    //concrete_3_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    //	&sigma, &tangent, &ist);
+#ifdef _WIN32
+    concrete_3_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+    	&sigma, &tangent, &ist);
+#else
+	g3ErrorHandler->fatal("%s -- Concrete3 subroutine not yet linked",
+		"FedeasMaterial::invokeSubroutine"); 
+#endif
     break;
-    
-  case MAT_TAG_FedeasHardening:
-    //hard_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    //	&sigma, &tangent, &ist);
-    break;
-    
+        
   case MAT_TAG_FedeasHysteretic1:
-    //hyster_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    //	&sigma, &tangent, &ist);
+#ifdef _WIN32
+    hyster_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+    	&sigma, &tangent, &ist);
+#else
+	g3ErrorHandler->fatal("%s -- Hysteretic1 subroutine not yet linked",
+		"FedeasMaterial::invokeSubroutine"); 
+#endif
     break;
     
   case MAT_TAG_FedeasHysteretic2:
-    //hyster_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    //	&sigma, &tangent, &ist);
+#ifdef _WIN32
+    hyster_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+    	&sigma, &tangent, &ist);
+#else
+	g3ErrorHandler->fatal("%s -- Hysteretic2 subroutine not yet linked",
+		"FedeasMaterial::invokeSubroutine"); 
+#endif
     break;
     
   case MAT_TAG_FedeasSteel1:
-    //steel_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    //	&sigma, &tangent, &ist);
+#ifdef _WIN32
+    steel_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+    	&sigma, &tangent, &ist);
+#else
+	g3ErrorHandler->fatal("%s -- Steel1 subroutine not yet linked",
+		"FedeasMaterial::invokeSubroutine"); 
+#endif
     break;
     
   case MAT_TAG_FedeasSteel2:
-    //steel_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    //	&sigma, &tangent, &ist);
+#ifdef _WIN32
+    steel_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+    	&sigma, &tangent, &ist);
+#else
+	g3ErrorHandler->fatal("%s -- Steel2 subroutine not yet linked",
+		"FedeasMaterial::invokeSubroutine"); 
+#endif
     break;
     
     // Add more cases as needed
