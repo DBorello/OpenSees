@@ -60,9 +60,13 @@ class HSConstraint : public StaticIntegrator
     double psi_f2;
     double u_ref2;
     Matrix *scalingMatrix;
-    Vector *deltaUhat, *deltaUbar, *deltaU, *deltaUstep;
+    Vector *deltaUhat;
+    Vector *deltaUbar;
+    Vector *deltaU;
+    Vector *deltaUstep;
     Vector *phat; // the reference load vector
-    double deltaLambdaStep, currentLambda;
+    double deltaLambdaStep;
+    double currentLambda;
     int signLastDeltaLambdaStep;
 };
 

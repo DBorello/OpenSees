@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:46 $
+// $Revision: 1.6 $
+// $Date: 2003-10-02 20:56:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/ArcLength.cpp,v $
                                                                         
                                                                         
@@ -143,7 +143,6 @@ ArcLength::update(const Vector &dU)
       + ((*deltaUstep)^(*deltaUhat));
     b *= 2.0;
     double c = 2*((*deltaUstep)^(*deltaUbar)) + ((*deltaUbar)^(*deltaUbar));
-
     // check for a solution to quadratic
     double b24ac = b*b - 4.0*a*c;
     if (b24ac < 0) {
@@ -190,6 +189,8 @@ ArcLength::update(const Vector &dU)
     // update the model
     theModel->incrDisp(*deltaU);    
     theModel->applyLoadDomain(currentLambda);    
+
+
     theModel->updateDomain();
     
     // set the X soln in linearSOE to be deltaU for convergence Test
