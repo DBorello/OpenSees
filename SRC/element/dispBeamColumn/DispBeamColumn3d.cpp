@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-07-11 22:02:45 $
+// $Revision: 1.11 $
+// $Date: 2002-10-03 18:33:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -497,8 +497,8 @@ DispBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
     q0[0] -= 0.5*P;
     q0[1] -= Mz;
     q0[2] += Mz;
-    q0[3] -= My;
-    q0[4] += My;
+    q0[3] += My;
+    q0[4] -= My;
   }
   else if (type == LOAD_TAG_Beam3dPointLoad) {
     double Py = data(0)*loadFactor;
@@ -533,8 +533,8 @@ DispBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
     q0[2] += M2;
     M1 = -a * b2 * Pz * L2;
     M2 = a2 * b * Pz * L2;
-    q0[3] += M1;
-    q0[4] += M2;
+    q0[3] -= M1;
+    q0[4] -= M2;
   }
   else {
     g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
@@ -915,7 +915,7 @@ DispBeamColumn3d::Print(ostream &s, int flag)
   Vy  = (Mz1+Mz2)*oneOverL;
   My1 = q(3);
   My2 = q(4);
-  Vz  = (My1+My2)*oneOverL;
+  Vz  = -(My1+My2)*oneOverL;
   T   = q(5);
 
   s << "\tEnd 1 Forces (P Mz Vy My Vz T): "
@@ -982,6 +982,7 @@ DispBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 {
   double N, V, M1, M2, T;
   double L = crdTransf->getInitialLength();
+  double oneOverL = 1.0/L;
 
   switch (responseID) {
   case 1:  // global forces
@@ -1003,7 +1004,7 @@ DispBeamColumn3d::getResponse(int responseID, Information &eleInfo)
     M2 = q(2);
     P(5)  = M1;
     P(11) = M2;
-    V = (M1+M2)/L;
+    V = (M1+M2)*oneOverL;
     P(1) =  V+p0[1];
     P(7) = -V+p0[2];
     
@@ -1012,7 +1013,7 @@ DispBeamColumn3d::getResponse(int responseID, Information &eleInfo)
     M2 = q(4);
     P(4)  = M1;
     P(10) = M2;
-    V = (M1+M2)/L;
+    V = -(M1+M2)*oneOverL;
     P(2) = -V+p0[3];
     P(8) =  V+p0[4];
 

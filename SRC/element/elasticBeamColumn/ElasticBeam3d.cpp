@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-10-03 17:56:19 $
+// $Revision: 1.7 $
+// $Date: 2002-10-03 18:33:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -629,7 +629,8 @@ ElasticBeam3d::getResponse (int responseID, Information &eleInfo)
 {
   double N, V, M1, M2, T;
   double L = theCoordTransf->getInitialLength();
-  
+  double oneOverL = 1.0/L;
+
   switch (responseID) {
   case 1: // stiffness
     return eleInfo.setMatrix(this->getTangentStiff());
@@ -653,7 +654,7 @@ ElasticBeam3d::getResponse (int responseID, Information &eleInfo)
     M2 = q(2);
     P(5)  = M1;
     P(11) = M2;
-    V = (M1+M2)/L;
+    V = (M1+M2)*oneOverL;
     P(1) =  V+p0[1];
     P(7) = -V+p0[2];
     
@@ -662,7 +663,7 @@ ElasticBeam3d::getResponse (int responseID, Information &eleInfo)
     M2 = q(4);
     P(4)  = M1;
     P(10) = M2;
-    V = (M1+M2)/L;
+    V = -(M1+M2)*oneOverL;
     P(2) = -V+p0[3];
     P(8) =  V+p0[4];
     
