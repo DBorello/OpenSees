@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.4 $
+// $Date: 2002-05-16 20:03:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.h,v $
                                                                         
                                                                         
@@ -48,15 +48,17 @@
 class SectionAggregator : public SectionForceDeformation
 {
   public:
-    SectionAggregator (); 
+    SectionAggregator(); 
 
-    SectionAggregator (int tag, SectionForceDeformation &theSection,
-		       int numAdditions, UniaxialMaterial **theAdditions, const ID &code); 
-    SectionAggregator (int tag, int numAdditions, UniaxialMaterial **theAdditions, const ID &code); 
-    SectionAggregator (int tag, SectionForceDeformation &thesection,
-		       UniaxialMaterial &theAddition, int c);
+    SectionAggregator(int tag, SectionForceDeformation &theSection,
+		      int numAdditions, UniaxialMaterial **theAdditions,
+		      const ID &code); 
+    SectionAggregator(int tag, int numAdditions,
+		      UniaxialMaterial **theAdditions, const ID &code); 
+    SectionAggregator(int tag, SectionForceDeformation &thesection,
+		      UniaxialMaterial &theAddition, int c);
 
-    ~SectionAggregator ();
+    ~SectionAggregator();
 
     int   setTrialSectionDeformation(const Vector &deforms); 
     const Vector &getSectionDeformation(void);
@@ -79,30 +81,30 @@ class SectionAggregator : public SectionForceDeformation
  
     void Print(ostream &s, int flag =0);
 
-	Response *setResponse(char **argv, int argc, Information &info);
-	int getResponse(int responseID, Information &info);
+    Response *setResponse(char **argv, int argc, Information &info);
+    int getResponse(int responseID, Information &info);
 
-	int setVariable(const char *argv);
-	int getVariable(int variableID, double &info);
+    int setVariable(const char *argv);
+    int getVariable(int variableID, double &info);
 
   protected:
     
   private:
     
-    Vector e;       // section trial deformations
-    Vector s;      // section resisting forces
-    Matrix ks;       // section stiffness
-    Matrix fs;       // section flexibility
-   
     SectionForceDeformation *theSection;
     UniaxialMaterial **theAdditions;
 
-	ID *code;
-	int order;
-	int theSectionOrder;
-	int numMats;
+    ID matCodes;
+    int numMats;
+    
+    Vector theVector;  // Storage for section deformations and stress resultants
+    Matrix theMatrix;  // Storage for section stiffness and flexibility
+    ID theCode;        // Storage for section type information
+   
+    int otherDbTag;
 
-	int otherDbTag;
+    static double workArea[];
+    static int codeArea[];
 };
 
 #endif

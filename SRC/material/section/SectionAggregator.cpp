@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.4 $
+// $Date: 2002-05-16 20:03:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -45,145 +45,118 @@
 
 #include <classTags.h>
 
+// Assumes section order is less than or equal to 10.
+// Can increase if needed!!!
+double SectionAggregator::workArea[10*10];
+int    SectionAggregator::codeArea[10];
+
 // constructors:
 SectionAggregator::SectionAggregator (int tag, SectionForceDeformation &theSec,
 				      int numAdds, UniaxialMaterial **theAdds,
 				      const ID &addCodes): 
-  SectionForceDeformation(tag, SEC_TAG_Aggregator), numMats(numAdds),
-  theSection(0), theAdditions(0), code(0), otherDbTag(0)
+  SectionForceDeformation(tag, SEC_TAG_Aggregator), 
+  theSection(0), theAdditions(0), matCodes(addCodes), numMats(numAdds),
+  theVector(workArea, theSec.getOrder()+numAdds),
+  theMatrix(workArea, theSec.getOrder()+numAdds, theSec.getOrder()+numAdds),
+  theCode(codeArea, theSec.getOrder()+numAdds),
+  otherDbTag(0)
 {
     theSection = theSec.getCopy();
     
     if (!theSection)
-	g3ErrorHandler->fatal("SectionAggregator - failed to get copy of section");
+	g3ErrorHandler->fatal("%s -- failed to get copy of section",
+			      "SectionAggregator::SectionAggregator");
 
-    theSectionOrder = theSection->getOrder();
-
-    order = numMats + theSectionOrder;
-
-    ks = Matrix(order,order);
-    fs = Matrix(order,order);
-    s = Vector(order);
-    e = Vector(order);
-    
     if (!theAdds)
-	g3ErrorHandler->fatal("SectionAggregator - null uniaxial material array passed");
+	g3ErrorHandler->fatal("%s -- null uniaxial material array passed",
+			      "SectionAggregator::SectionAggregator");
 
     theAdditions = new UniaxialMaterial *[numMats];
 
     if (!theAdditions)
-	g3ErrorHandler->fatal("SectionAggregator - failed to allocate pointers");
+	g3ErrorHandler->fatal("%s -- failed to allocate pointers",
+			      "SectionAggregator::SectionAggregator");
     
     int i;
     
     for (i = 0; i < numMats; i++) {
 	if (!theAdds[i])
-	    g3ErrorHandler->fatal("SectionAggregator - null uniaxial material pointer passed");
+	    g3ErrorHandler->fatal("%s -- null uniaxial material pointer passed",
+				  "SectionAggregator::SectionAggregator");
 	
 	theAdditions[i] = theAdds[i]->getCopy(this);
 	
 	if (!theAdditions[i])
-	    g3ErrorHandler->fatal("SectionAggregator - failed to copy uniaxial material");
-    }	
-    
-    code = new ID(order);
-    
-    if (!code)
-    	g3ErrorHandler->fatal("SectionAggregator - failed to allocate ID");
-    
-    const ID &secCode = theSection->getType();
-    
-    for (i = 0; i < theSectionOrder; i++)
-	(*code)(i) = secCode(i);
-    
-    for ( ; i < order; i++)
-	(*code)(i) = addCodes(i-theSectionOrder);
+	    g3ErrorHandler->fatal("%s -- failed to copy uniaxial material",
+				  "SectionAggregator::SectionAggregator");
+    }
 }
 
-SectionAggregator::SectionAggregator (int tag, int numAdds, UniaxialMaterial **theAdds,
+SectionAggregator::SectionAggregator (int tag, int numAdds,
+				      UniaxialMaterial **theAdds,
 				      const ID &addCodes): 
   SectionForceDeformation(tag, SEC_TAG_Aggregator), 
-  theSection(0), theAdditions(0), code(0), 
-  theSectionOrder(0), numMats(numAdds), order(numAdds), otherDbTag(0)
+  theSection(0), theAdditions(0), matCodes(numAdds), numMats(numAdds),
+  theVector(workArea, numAdds),
+  theMatrix(workArea, numAdds, numAdds),
+  theCode(codeArea, numAdds),
+  otherDbTag(0)
 {
-    ks = Matrix(order,order);
-    fs = Matrix(order,order);
-    s = Vector(order);
-    e = Vector(order);
-    
     if (!theAdds)
-	g3ErrorHandler->fatal("SectionAggregator - null uniaxial material array passed");
+	g3ErrorHandler->fatal("%s -- null uniaxial material array passed",
+			      "SectionAggregator::SectionAggregator");
 
     theAdditions = new UniaxialMaterial *[numMats];
 
     if (!theAdditions)
-	g3ErrorHandler->fatal("SectionAggregator - failed to allocate pointers");
+	g3ErrorHandler->fatal("%s -- failed to allocate pointers",
+			      "SectionAggregator::SectionAggregator");
     
     int i;
     
     for (i = 0; i < numMats; i++) {
 	if (!theAdds[i])
-	    g3ErrorHandler->fatal("SectionAggregator - null uniaxial material pointer passed");
+	    g3ErrorHandler->fatal("%s -- null uniaxial material pointer passed",
+				  "SectionAggregator::SectionAggregator");
 	
 	theAdditions[i] = theAdds[i]->getCopy(this);
 	
 	if (!theAdditions[i])
-	    g3ErrorHandler->fatal("SectionAggregator - failed to copy uniaxial material");
-    }	
-    
-    code = new ID(addCodes);
-    
-    if (!code)
-    	g3ErrorHandler->fatal("SectionAggregator - failed to allocate ID");
+	    g3ErrorHandler->fatal("%s -- failed to copy uniaxial material",
+				  "SectionAggregator::SectionAggregator");
+    }
 }
 
 SectionAggregator::SectionAggregator (int tag, SectionForceDeformation &theSec,
 				      UniaxialMaterial &theAddition, int c) :
   SectionForceDeformation(tag, SEC_TAG_Aggregator),
-  theSection(0), theAdditions(0), code(0), numMats(1), otherDbTag(0)
+  theSection(0), theAdditions(0), matCodes(1), numMats(1),
+  theVector(workArea, theSec.getOrder()+1),
+  theMatrix(workArea, theSec.getOrder()+1, theSec.getOrder()+1),
+  theCode(codeArea, theSec.getOrder()+1),
+  otherDbTag(0)
 {
     theSection = theSec.getCopy();
     
     if (!theSection)
-	g3ErrorHandler->fatal("SectionAggregator - failed to get copy of section");
-
-    theSectionOrder = theSection->getOrder();
-
-    order = 1 + theSectionOrder;
-
-    ks = Matrix(order,order);
-    fs = Matrix(order,order);
-    s = Vector(order);
-    e = Vector(order);
+	g3ErrorHandler->fatal("%s -- failed to get copy of section",
+			      "SectionAggregator::SectionAggregator");
 
     theAdditions = new UniaxialMaterial *[1];
 
     theAdditions[0] = theAddition.getCopy(this);
     
     if (!theAdditions[0])
-	g3ErrorHandler->fatal("SectionAggregator - failed to copy uniaxial material");
+	g3ErrorHandler->fatal("%s -- failed to copy uniaxial material",
+			      "SectionAggregator::SectionAggregator");
     
-    code = new ID(order);
-    
-    if (!code)
-    	g3ErrorHandler->fatal("SectionAggregator - failed to allocate ID");
-    
-    const ID &secCode = theSection->getType();
-    int i;
-    
-    for (i = 0; i < theSectionOrder; i++)
-		(*code)(i) = secCode(i);
-    
-    (*code)(i) = c;
+    matCodes(0) = c;
 }
-
-
 
 // constructor for blank object that recvSelf needs to be invoked upon
 SectionAggregator::SectionAggregator():
   SectionForceDeformation(0, SEC_TAG_Aggregator),
-  theSection(0), theAdditions(0), code(0), numMats(0),
-  order(0), theSectionOrder(0), otherDbTag(0)
+  theSection(0), theAdditions(0), numMats(0), otherDbTag(0)
 {
 
 }
@@ -202,216 +175,240 @@ SectionAggregator::~SectionAggregator()
 
    if (theAdditions)
        delete [] theAdditions;
-   
-   if (code)
-       delete code;
 }
 
-int SectionAggregator::setTrialSectionDeformation (const Vector &deforms)
+int SectionAggregator::setTrialSectionDeformation (const Vector &def)
 {
-	e = deforms;
+  int ret = 0;
+  int i = 0;
 
-	int ret = 0;
-	int i = 0;
+  int theSectionOrder = 0;
 
-    if (theSection) {
-		Vector v(theSectionOrder);
+  if (theSection) {
+    theSectionOrder = theSection->getOrder();
+    Vector v(workArea, theSectionOrder);
     
-		for (i = 0; i < theSectionOrder; i++)
-			v(i) = e(i);
+    for (i = 0; i < theSectionOrder; i++)
+      v(i) = def(i);
+    
+    ret = theSection->setTrialSectionDeformation(v);
+  }
 
-		ret = theSection->setTrialSectionDeformation(v);
-	}
-	
-	for ( ; i < order; i++)
-		ret += theAdditions[i-theSectionOrder]->setTrialStrain(e(i));
-
-	return ret;
+  int order = theSectionOrder + numMats;
+  
+  for ( ; i < order; i++)
+    ret += theAdditions[i-theSectionOrder]->setTrialStrain(def(i));
+  
+  return ret;
 }
 
 const Vector &
 SectionAggregator::getSectionDeformation(void)
 {
-   return e;
+  int i = 0;
+
+  int theSectionOrder = 0;
+    
+  if (theSection) {
+    const Vector &v = theSection->getSectionDeformation();
+    theSectionOrder = theSection->getOrder();
+    
+    for (i = 0; i < theSectionOrder; i++)
+      theVector(i) = v(i);
+  }
+  
+  int order = theSectionOrder + numMats;
+
+  for ( ; i < order; i++)
+    theVector(i) = theAdditions[i-theSectionOrder]->getStrain();
+
+  return theVector;
 }
 
 const Matrix &
 SectionAggregator::getSectionTangent(void)
 {
-    int i = 0;
+  int i = 0;
 
-    if (theSection) {
+  int theSectionOrder = 0;
 
-		const Matrix &k = theSection->getSectionTangent();
+  // Zero before assembly
+  theMatrix.Zero();
 
-		int j;
-	
-		for (i = 0; i < theSectionOrder; i++)
-			for (j = 0; j < theSectionOrder; j++)
-				ks(i,j) = k(i,j);
-    }
-    
-    for ( ; i < order; i++) {
-		ks(i,i) = theAdditions[i-theSectionOrder]->getTangent();
-		if (ks(i,i) == 0.0) {
-			g3ErrorHandler->warning("WARNING SectionAggregator::getSectionTangent - singular section stiffness");
-			ks(i,i) = 1.e-12;
-		}
-	}
+  if (theSection) {
+    const Matrix &ks = theSection->getSectionTangent();
+    theSectionOrder = theSection->getOrder();
 
-    return ks;
+    for (i = 0; i < theSectionOrder; i++)
+      for (int j = 0; j < theSectionOrder; j++)
+	theMatrix(i,j) = ks(i,j);
+  }
+  
+  int order = theSectionOrder + numMats;
+
+  for ( ; i < order; i++)
+    theMatrix(i,i) = theAdditions[i-theSectionOrder]->getTangent();
+  
+  return theMatrix;
 }
 
 const Matrix &
 SectionAggregator::getSectionFlexibility(void)
 {
-    int i = 0;
+  int i = 0;
     
-    if (theSection) {
-    
-		const Matrix &f = theSection->getSectionFlexibility();
-    
-		int j;
-	
-		for (i = 0; i < theSectionOrder; i++)
-			for (j = 0; j < theSectionOrder; j++)
-				fs(i,j) = f(i,j);
+  int theSectionOrder = 0;
+
+  // Zero before assembly
+  theMatrix.Zero();
+
+  if (theSection) {
+    const Matrix &fs = theSection->getSectionFlexibility();
+    theSectionOrder = theSection->getOrder();
+
+    for (i = 0; i < theSectionOrder; i++)
+      for (int j = 0; j < theSectionOrder; j++)
+	theMatrix(i,j) = fs(i,j);
+  }
+  
+  int order = theSectionOrder + numMats;
+
+  for ( ; i < order; i++) {
+    double k = theAdditions[i-theSectionOrder]->getTangent();
+    if (k == 0.0) {
+      g3ErrorHandler->warning("%s -- singular section stiffness",
+			       "SectionAggregator::getSectionFlexibility");
+      theMatrix(i,i) = 1.e14;
     }
-    
-    double k;
-    
-    for ( ; i < order; i++) {
-		k = theAdditions[i-theSectionOrder]->getTangent();
-		if (k == 0.0) {
-			g3ErrorHandler->warning("WARNING SectionAggregator::getSectionFlexibility - singular section stiffness");
-		    fs(i,i) = 1.e14;
-		}
-		else
-			fs(i,i) = 1/k;
-    }	
-    
-    return fs;
+    else
+      theMatrix(i,i) = 1/k;
+  }	
+  
+  return theMatrix;
 }
 
 const Vector &
 SectionAggregator::getStressResultant(void)
 {
-    int i = 0;
+  int i = 0;
+
+  int theSectionOrder = 0;
     
-    if (theSection) {
+  if (theSection) {
+    const Vector &s = theSection->getStressResultant();
+    theSectionOrder = theSection->getOrder();
+    
+    for (i = 0; i < theSectionOrder; i++)
+      theVector(i) = s(i);
+  }
+  
+  int order = theSectionOrder + numMats;
 
-		const Vector &p = theSection->getStressResultant();
-
-		for (i = 0; i < theSectionOrder; i++)
-			s(i) = p(i);
-	}
-	
-    for ( ; i < order; i++)
-		s(i) = theAdditions[i-theSectionOrder]->getStress();
-
-    return s;
+  for ( ; i < order; i++)
+    theVector(i) = theAdditions[i-theSectionOrder]->getStress();
+  
+  return theVector;
 }
 
 SectionForceDeformation *
 SectionAggregator::getCopy(void)
 {
-    SectionAggregator *theCopy;
+  SectionAggregator *theCopy = 0;
     
-    if (theSection) {
-	ID *c = new ID(numMats);
-
-	for (int i = 0; i < numMats; i++)
-	    (*c)(i) = (*code)(i+theSectionOrder);
-    
-	theCopy = new SectionAggregator (this->getTag(), *theSection, numMats, theAdditions, *c);
-	
-	delete c;
-    }
-    else
-	theCopy = new SectionAggregator (this->getTag(), order, theAdditions, *code);
-    
-    if (!theCopy)
-	g3ErrorHandler->fatal("SectionAggregator::getCopy - failed to allocate copy");
-    
-    theCopy->e = e;  // section deformations
-    theCopy->s = s;  // section forces
-    theCopy->ks = ks;  // section stiffness
-    theCopy->fs = fs;  // section flexibility
-
-    return theCopy;
+  if (theSection)
+    theCopy = new SectionAggregator(this->getTag(), *theSection,
+				    numMats, theAdditions, matCodes);
+  else
+    theCopy = new SectionAggregator(this->getTag(), numMats,
+				    theAdditions, matCodes);
+  
+  if (theCopy == 0)
+    g3ErrorHandler->fatal("%s -- failed to allocate copy",
+			  "SectionAggregator::getCopy");
+  
+  return theCopy;
 }
 
 const ID&
 SectionAggregator::getType ()
 {
-    return *code;
+  int i = 0;
+
+  int theSectionOrder = 0;
+    
+  if (theSection) {
+    const ID &secType = theSection->getType();
+    theSectionOrder = theSection->getOrder();
+    
+    for (i = 0; i < theSectionOrder; i++)
+      theCode(i) = secType(i);
+  }
+  
+  int order = theSectionOrder + numMats;
+
+  for ( ; i < order; i++)
+    theCode(i) = matCodes(i-theSectionOrder);
+
+  return theCode;
 }
 
 int
 SectionAggregator::getOrder () const
 {
-    return order;
+  int order = numMats;
+
+  if (theSection != 0)
+    order += theSection->getOrder();
+
+  return order;
 }
 
 int
 SectionAggregator::commitState(void)
 {
-    int err = 0;
+  int err = 0;
     
-	if (theSection)
-	err += theSection->commitState();
-    
-    for (int i = 0; i < numMats; i++)
-	err += theAdditions[i]->commitState();
-    
-	return err;
-}	
+  if (theSection)
+    err += theSection->commitState();
+  
+  for (int i = 0; i < numMats; i++)
+    err += theAdditions[i]->commitState();
+  
+  return err;
+}
 
 int
 SectionAggregator::revertToLastCommit(void)
 {
-	int err = 0;
-
-	int i = 0;
-
-	// Revert the section, then reconstruct the section deformation vector
-	// to its last committed value
-    if (theSection) {
-		err += theSection->revertToLastCommit();
-		const Vector &esec = theSection->getSectionDeformation();
-		
-		for (i = 0; i < theSectionOrder; i++)
-			e(i) = esec(i);
-	}
-	
-	// Do the same for the uniaxial materials
-    for ( ; i < order; i++) {
-		int j = i-theSectionOrder;
-		err += theAdditions[j]->revertToLastCommit();
-		e(i) = theAdditions[j]->getStrain();
-	}
-
-	return err;
+  int err = 0;
+  
+  int i = 0;
+  
+  // Revert the section
+  if (theSection)
+    err += theSection->revertToLastCommit();
+  
+  // Do the same for the uniaxial materials
+  for (i = 0; i < numMats; i++)
+    err += theAdditions[i]->revertToLastCommit();
+  
+  return err;
 }	
 
 int
 SectionAggregator::revertToStart(void)
 {
-    int err = 0;
-    
-    if (theSection)
-	err += theSection->revertToStart();
-    
-    for (int i = 0; i < numMats; i++)
-	err += theAdditions[i]->revertToStart();
-    
-    // revert the section variables to start
-    e.Zero();
-    s.Zero();
-    ks.Zero();
-    fs.Zero(); 
-    
-    return err;
+  int err = 0;
+  
+  // Revert the section
+  if (theSection)
+    err += theSection->revertToStart();
+  
+  // Do the same for the uniaxial materials
+  for (int i = 0; i < numMats; i++)
+    err += theAdditions[i]->revertToStart();
+  
+  return err;
 }
 
 int
@@ -426,10 +423,12 @@ SectionAggregator::sendSelf(int cTag, Channel &theChannel)
 	// Create ID for tag and section order data
 	static ID data(5);
 
+	int order = this->getOrder();
+
 	data(0) = this->getTag();
 	data(1) = otherDbTag;
 	data(2) = order;
-	data(3) = theSectionOrder;
+	data(3) = (theSection != 0) ? theSection->getOrder() : 0;
 	data(4) = numMats;
 
 	// Send the tag and section order data
@@ -440,20 +439,10 @@ SectionAggregator::sendSelf(int cTag, Channel &theChannel)
 		return res;
 	}
 
-	if (order > 0) {
-		// Send the committed section deformations
-		res += theChannel.sendVector(this->getDbTag(), cTag, e);
-		if (res < 0) {
-			g3ErrorHandler->warning("%s -- failed to send section deformations",
-				"SectionAggregator::sendSelf");
-			return res;
-		}
-	}
-
 	// Determine how many classTags there are and allocate ID vector
 	// for the tags and section code
 	int numTags = (theSection == 0) ? numMats : numMats + 1;
-	ID classTags(2*numTags + order);
+	ID classTags(2*numTags + numMats);
 
 	// Loop over the UniaxialMaterials filling in class and db tags
 	int i, dbTag;
@@ -486,10 +475,10 @@ SectionAggregator::sendSelf(int cTag, Channel &theChannel)
 		classTags(2*numTags-1) = dbTag;
 	}
 
-	// Put the section code into the ID vector
+	// Put the UniaxialMaterial codes into the ID vector
 	int j = 2*numTags;
-	for (i = 0; i < order; i++, j++)
-		classTags(j) = (*code)(i);
+	for (i = 0; i < numMats; i++, j++)
+	  classTags(j) = matCodes(i);
 
 	// Send the material class and db tags and section code
 	res += theChannel.sendID(otherDbTag, cTag, classTags);
@@ -538,29 +527,18 @@ SectionAggregator::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
     
 	this->setTag(data(0));
 	otherDbTag = data(1);
-	order = data(2);
-	theSectionOrder = data(3);
+	int order = data(2);
+	int theSectionOrder = data(3);
 	numMats = data(4);
 
 	if (order > 0) {
-		
-		ks = Matrix(order,order);
-	    fs = Matrix(order,order);
-		s = Vector(order);
-		e = Vector(order);
-
-		// Receive the committed section deformations
-		res += theChannel.recvVector(this->getDbTag(), cTag, e);
-		if (res < 0) {
-			g3ErrorHandler->warning("%s -- failed to receive section deformations",
-				"SectionAggregator::recvSelf");
-			return res;
-		}
+	  theMatrix = Matrix(workArea, order,order);
+	  theVector = Vector(workArea, order);
 	}
 
 	// Determine how many classTags there are and allocate ID vector
    	int numTags = (theSectionOrder == 0) ? numMats : numMats + 1;
-	ID classTags(numTags*2 + order);
+	ID classTags(numTags*2 + numMats);
 
 	// Receive the material class and db tags
     res += theChannel.recvID(otherDbTag, cTag, classTags);
@@ -649,23 +627,10 @@ SectionAggregator::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
 		return res;
 	}
 
-	// Check if section ID code is null or wrong size, reallocate if so
-	if (code == 0)
-		code = new ID(order);
-	else if (code->Size() != order) {
-		delete code;
-		code = new ID(order);
-	}
-	if (code == 0) {
-		g3ErrorHandler->warning("%s -- could not allocate new code ID",
-			"SectionAggregator::recvSelf");
-		return -1;
-	}
-
 	// Fill in the section code
 	int j = 2*numTags;
-	for (i = 0; i < order; i++, j++)
-		(*code)(i) = classTags(j);
+	for (i = 0; i < numMats; i++, j++)
+	  matCodes(i) = classTags(j);
 
     return res;
 }
@@ -673,15 +638,15 @@ SectionAggregator::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
 void
 SectionAggregator::Print(ostream &s, int flag)
 {
-    s << "\nSection Aggregator, tag: " << this->getTag() << endl;
-	s << "\tSection code: " << *code;
-    if (theSection) {
-		s << "\tSection, tag: " << theSection->getTag() << endl;
-		theSection->Print(s, flag);
-	}
-    s << "\tUniaxial Additions" << endl;
-    for (int i = 0; i < numMats; i++)
-		s << "\t\tUniaxial Material, tag: " << theAdditions[i]->getTag() << endl;
+  s << "\nSection Aggregator, tag: " << this->getTag() << endl;
+  if (theSection) {
+    s << "\tSection, tag: " << theSection->getTag() << endl;
+    theSection->Print(s, flag);
+  }
+  s << "\tUniaxial Additions" << endl;
+  for (int i = 0; i < numMats; i++)
+    s << "\t\tUniaxial Material, tag: " << theAdditions[i]->getTag() << endl;
+  s << "\tUniaxial codes " << matCodes << endl;
 }
 
 Response*
@@ -730,28 +695,35 @@ SectionAggregator::setVariable(const char *argv)
 int
 SectionAggregator::getVariable(int variableID, double &info)
 {
-	int i;
+  int i;
 
-	info = 0.0;
+  info = 0.0;
 
-	switch (variableID) {
-		case 1:	// Axial strain
-			// Series model ... add all sources of deformation
-			for (i = 0; i < order; i++)
-				if ((*code)(i) == SECTION_RESPONSE_P)
-					info += e(i);
-			return 0;
-		case 2:	// Curvature about the section z-axis
-			for (i = 0; i < order; i++)
-				if ((*code)(i) == SECTION_RESPONSE_MZ)
-					info += e(i);
-			return 0;
-		case 3:	// Curvature about the section y-axis
-			for (i = 0; i < order; i++)
-				if ((*code)(i) == SECTION_RESPONSE_MY)
-					info += e(i);
-			return 0;
-		default:
-			return -1;
-	}
+  int order = numMats;
+  if (theSection != 0)
+    order += theSection->getOrder();
+
+  const Vector &e = this->getSectionDeformation();
+  const ID &code  = this->getType();
+
+  switch (variableID) {
+  case 1:	// Axial strain
+    // Series model ... add all sources of deformation
+    for (i = 0; i < order; i++)
+      if (code(i) == SECTION_RESPONSE_P)
+	info += e(i);
+    return 0;
+  case 2:	// Curvature about the section z-axis
+    for (i = 0; i < order; i++)
+      if (code(i) == SECTION_RESPONSE_MZ)
+	info += e(i);
+    return 0;
+  case 3:	// Curvature about the section y-axis
+    for (i = 0; i < order; i++)
+      if (code(i) == SECTION_RESPONSE_MY)
+	info += e(i);
+    return 0;
+  default:
+    return -1;
+  }
 }
