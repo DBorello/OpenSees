@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-05-15 22:27:31 $
+// $Revision: 1.6 $
+// $Date: 2003-05-15 23:20:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Renderer.cpp,v $
                                                                         
                                                                         
@@ -87,7 +87,7 @@ Renderer::Renderer(const char *title, ColorMap &_theMap)
 
   // set this in current slot
   theRenderers[loc] = this;
-  char *titleCopy = new char [strlen(title+1)];
+  char *titleCopy = new char [strlen(title)+1];
   strcpy(titleCopy, title);
   theTitles[loc] = titleCopy;
 }
