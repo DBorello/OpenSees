@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <string.h>
+#include <OPS_Stream.h>
 
 #include <Domain.h>
 #include <Node.h>
@@ -14,10 +17,10 @@
 
 int
 TclModelBuilder_addElastic2dGNL (ClientData clientData, Tcl_Interp *interp,
-				 int argc, TCL_Char **argv,
+				 int argc, char **argv,
 				 Domain *theDomain, TclModelBuilder *theBuilder)
 {
-	//opserr << "Press key to continue...\n";
+	//cerr << "Press key to continue...\n";
 	//cin.get();
 
     if(tcl_debug)
@@ -108,6 +111,7 @@ TclModelBuilder_addElastic2dGNL (ClientData clientData, Tcl_Interp *interp,
 	{
 		opserr << "WARNING ran out of memory creating element\n";
 		opserr << "Elastic2dGNL: " << tag << endln;
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 
@@ -115,7 +119,7 @@ TclModelBuilder_addElastic2dGNL (ClientData clientData, Tcl_Interp *interp,
 	{
 		opserr << "WARNING TclElmtBuilder - addElastic2dGNL - could not add element to domain ";
 		opserr << tag << endln;
-		delete theElement;
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 

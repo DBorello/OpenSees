@@ -4,7 +4,7 @@ OBJS       = UpdatedLagrangianBeam2D.o Elastic2DGNL.o \
 	Inelastic2DYS02.o InelasticYS2DGNL.o Inelastic2DYS01.o \
 	Inelastic2DYS03.o TclElement2dGNL.o TclElement2dYS.o \
 	CyclicModel.o LinearCyclic.o BilinearCyclic.o QuadraticCyclic.o \
-	TclCycModel.o
+	TclCyclicModelCommands.o
 
 all:         $(OBJS)
 

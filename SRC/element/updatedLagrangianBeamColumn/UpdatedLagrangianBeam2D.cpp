@@ -864,12 +864,12 @@ Response* UpdatedLagrangianBeam2D::setResponse(const char **argv, int argc, Info
     // a material quantity: needs to be implemented in subclasses
 
     // otherwise response quantity is unknown for the UpdatedLagrangianBeam2D class
-    else
+    /*else
     {
     	opserr << "WARNING (W_C_90) - UpdatedLagrangianBeam2D::setResponse(..) [" << getTag() << "]\n";
 		opserr << "unknown response quantity\n";
 		return 0;
-	}
+	}*/
 	
 	return 0;
 }

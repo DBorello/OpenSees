@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <string.h>
+#include <OPS_Stream.h>
 
 #include <Domain.h>
 #include <Node.h>
 #include <Matrix.h>
 
+#include <CyclicModel.h>
 #include <Inelastic2DYS01.h>
 #include <Inelastic2DYS02.h>
 #include <Inelastic2DYS03.h>
@@ -21,11 +23,11 @@
 
 int
 TclModelBuilder_addElement2dYS01 (ClientData clientData, Tcl_Interp *interp,
-				  int argc, TCL_Char **argv,
-				  Domain *theDomain, TclModelBuilder *theBuilder)
+								   int argc, char **argv,
+								   Domain *theDomain, TclModelBuilder *theBuilder)
 {
-	//opserr << "Press key to continue...\n";
-	//exit(-1);
+	//cerr << "Press key to continue...\n";
+	//cin.get();
 
     if(tcl_debug)
         opserr << " TclModelBuilder_addElement2dGNL \n";
@@ -136,7 +138,7 @@ TclModelBuilder_addElement2dYS01 (ClientData clientData, Tcl_Interp *interp,
 	{
 		opserr << "WARNING ran out of memory creating element\n";
 		opserr << "element2dYS: " << tag << endln;
-		exit(-1);
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 
@@ -144,7 +146,7 @@ TclModelBuilder_addElement2dYS01 (ClientData clientData, Tcl_Interp *interp,
 	{
 		opserr << "WARNING TclElmtBuilder - addelement2dYS - could not add element to domain ";
 		opserr << tag << endln;
-		exit(-1);
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 
@@ -156,19 +158,19 @@ TclModelBuilder_addElement2dYS01 (ClientData clientData, Tcl_Interp *interp,
 
 int
 TclModelBuilder_addElement2dYS02 (ClientData clientData, Tcl_Interp *interp,
-				  int argc, TCL_Char **argv,
-				  Domain *theDomain, TclModelBuilder *theBuilder)
+								   int argc, char **argv,
+								   Domain *theDomain, TclModelBuilder *theBuilder)
 {
-	//opserr << "Press key to continue...\n";
-	//exit(-1);
+	//cerr << "Press key to continue...\n";
+	//cin.get();
 
     if(tcl_debug)
         opserr << " TclModelBuilder_addElement2dGNL \n";
 
-	if (argc < 12)
+	if (argc < 14)
 	{
 		opserr << "WARNING insufficient arguments\n";
-		opserr << "element element2dYS tag? Nd1? Nd2? A? E? Iz? ysID1? ysID2? power? algo?";
+		opserr << "element element2dYS tag? Nd1? Nd2? A? E? Iz? ysID1? ysID2? cycType? wt? power? algo?";
 
 		return TCL_ERROR;
 	}
@@ -177,8 +179,10 @@ TclModelBuilder_addElement2dYS02 (ClientData clientData, Tcl_Interp *interp,
 	double E, A, I;
 //	double massDens = 0.0;
 	int ysID1, ysID2;
+	int cyc_type;
+//	double wt;
 
-	int rf_algo;
+	int rf_algo=-1;
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 	{
@@ -237,22 +241,36 @@ TclModelBuilder_addElement2dYS02 (ClientData clientData, Tcl_Interp *interp,
 		return TCL_ERROR;
 	}
 
-	double pow_min, pow_Kun;
-	if (Tcl_GetDouble (interp, argv[10], &pow_min) != TCL_OK)
+		if (Tcl_GetInt(interp, argv[10], &cyc_type) != TCL_OK)
+	{
+		opserr << "WARNING invalid cyc_type\n";
+		opserr << "element2dYS: " << tag << endln;
+		return TCL_ERROR;
+	}
+
+	/*if (Tcl_GetDouble (interp, argv[11], &wt) != TCL_OK)
+	{
+		opserr << "WARNING invalid wt\n";
+		opserr << "element2dYS: " << tag << endln;
+		return TCL_ERROR;
+	}*/
+
+	double delpmax, alfa, beta;
+	if (Tcl_GetDouble (interp, argv[11], &delpmax) != TCL_OK)
 	{
 		opserr << "WARNING invalid power\n";
 		opserr << "element2dYS: " << tag << endln;
 		return TCL_ERROR;
 	}
 	
-	if (Tcl_GetDouble (interp, argv[11], &pow_Kun) != TCL_OK)
+	if (Tcl_GetDouble (interp, argv[12], &alfa) != TCL_OK)
 	{
 		opserr << "WARNING invalid power\n";
 		opserr << "element2dYS: " << tag << endln;
 		return TCL_ERROR;
 	}
 
-	if (Tcl_GetInt (interp, argv[12], &rf_algo) != TCL_OK)
+	if (Tcl_GetDouble (interp, argv[13], &beta) != TCL_OK)
 	{
 		opserr << "WARNING invalid rfalgo\n";
 		opserr << "element2dYS: " << tag << endln;
@@ -279,9 +297,9 @@ TclModelBuilder_addElement2dYS02 (ClientData clientData, Tcl_Interp *interp,
 //				YieldSurface_BC *ysEnd1,  YieldSurface_BC *ysEnd2,
 //				int rf_algo, bool islinear, double rho)
 
-
-Element *theElement = new Inelastic2DYS02(tag, A, E, I, ndI, ndJ, theYS1, theYS2, pow_min, pow_Kun, rf_algo);
-
+	CyclicModel *theModel = theBuilder->getCyclicModel(cyc_type);
+//Element *theElement = new Inelastic2DYS02(tag, A, E, I, ndI, ndJ, theYS1, theYS2, cyc_type, wt, delpmax, alfa, beta, rf_algo);
+Element *theElement = new Inelastic2DYS02(tag, A, E, I, ndI, ndJ, theYS1, theYS2, theModel, delpmax, alfa, beta, rf_algo);
     opserr << "Inelastic2DYS02 created\n";
 
 	if(tcl_debug) opserr << "\tElement created\n";
@@ -291,7 +309,7 @@ Element *theElement = new Inelastic2DYS02(tag, A, E, I, ndI, ndJ, theYS1, theYS2
 	{
 		opserr << "WARNING ran out of memory creating element\n";
 		opserr << "element2dYS: " << tag << endln;
-		exit(-1);
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 
@@ -301,7 +319,7 @@ Element *theElement = new Inelastic2DYS02(tag, A, E, I, ndI, ndJ, theYS1, theYS2
 	{
 		opserr << "WARNING TclElmtBuilder - addelement2dYS - could not add element to domain ";
 		opserr << tag << endln;
-		exit(-1);
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 
@@ -314,11 +332,11 @@ Element *theElement = new Inelastic2DYS02(tag, A, E, I, ndI, ndJ, theYS1, theYS2
 
 int
 TclModelBuilder_addElement2dYS03 (ClientData clientData, Tcl_Interp *interp,
-								   int argc, TCL_Char **argv,
+								   int argc, char **argv,
 								   Domain *theDomain, TclModelBuilder *theBuilder)
 {
-	//opserr << "Press key to continue...\n";
-	//exit(-1);
+	//cerr << "Press key to continue...\n";
+	//cin.get();
 
     if(tcl_debug)
         opserr << " TclModelBuilder_addElement2dGNL \n";
@@ -450,7 +468,7 @@ Element *theElement = new Inelastic2DYS03(tag, aTens, aComp, E,
 	{
 		opserr << "WARNING ran out of memory creating element\n";
 		opserr << "element2dYS: " << tag << endln;
-		exit(-1);
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 
@@ -460,7 +478,7 @@ Element *theElement = new Inelastic2DYS03(tag, aTens, aComp, E,
 	{
 		opserr << "WARNING TclElmtBuilder - addelement2dYS - could not add element to domain ";
 		opserr << tag << endln;
-		exit(-1);
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 
@@ -474,11 +492,11 @@ Element *theElement = new Inelastic2DYS03(tag, aTens, aComp, E,
 /*
 int
 TclModelBuilder_addElement2dYS04 (ClientData clientData, Tcl_Interp *interp,
-                                  int argc, TCL_Char **argv,
-                                  Domain *theDomain, TclModelBuilder *theBuilder)
+								   int argc, char **argv,
+								   Domain *theDomain, TclModelBuilder *theBuilder)
 {
-	//opserr << "Press key to continue...\n";
-	//exit(-1);
+	//cerr << "Press key to continue...\n";
+	//cin.get();
 
 	if (argc < 11)
 	{
@@ -558,10 +576,10 @@ TclModelBuilder_addElement2dYS04 (ClientData clientData, Tcl_Interp *interp,
 		return TCL_ERROR;
 	}
 
-	YieldSurface_BC *theYS1 = theBuilder->getYieldSurface_BC(ysID1);
+		YieldSurface_BC *theYS1 = theBuilder->getYieldSurface_BC(ysID1);
 	if(theYS1 == 0)
 	{
-		opserr << "WARNING element2dYS04: " << tag << "\n";
+		opserr << "WARNING element2dYS: " << tag << "\n";
 		opserr <<  " no yield surface exists with tag: " << ysID1 << endln;
 		return TCL_ERROR;
 	}
@@ -569,7 +587,7 @@ TclModelBuilder_addElement2dYS04 (ClientData clientData, Tcl_Interp *interp,
 	YieldSurface_BC *theYS2 = theBuilder->getYieldSurface_BC(ysID2);
 	if(theYS2 == 0)
 	{
-		opserr << "WARNING element2dYS04: " << tag << "\n";
+		opserr << "WARNING element2dYS: " << tag << "\n";
 		opserr <<  " no yield surface exists with tag: " << ysID2 << endln;
 		return TCL_ERROR;
 	}
@@ -587,7 +605,7 @@ TclModelBuilder_addElement2dYS04 (ClientData clientData, Tcl_Interp *interp,
 	{
 		opserr << "WARNING ran out of memory creating element\n";
 		opserr << "element2dYS04: " << tag << endln;
-		exit(-1);
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 
@@ -595,7 +613,7 @@ TclModelBuilder_addElement2dYS04 (ClientData clientData, Tcl_Interp *interp,
 	{
 		opserr << "WARNING TclElmtBuilder - addelement2dYS - could not add element to domain ";
 		opserr << tag << endln;
-		exit(-1);
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 
@@ -603,16 +621,16 @@ TclModelBuilder_addElement2dYS04 (ClientData clientData, Tcl_Interp *interp,
 
 	return TCL_OK;
 }
+*/
 
-
-
+/*
 int
 TclModelBuilder_addElement2dYS05 (ClientData clientData, Tcl_Interp *interp,
-int argc, TCL_Char **argv,
-Domain *theDomain, TclModelBuilder *theBuilder)
+								   int argc, char **argv,
+								   Domain *theDomain, TclModelBuilder *theBuilder)
 {
-	//opserr << "Press key to continue...\n";
-	//exit(-1);
+	//cerr << "Press key to continue...\n";
+	//cin.get();
 
 	if (argc < 11)
 	{
@@ -721,7 +739,7 @@ Domain *theDomain, TclModelBuilder *theBuilder)
 	{
 		opserr << "WARNING ran out of memory creating element\n";
 		opserr << "element2dYS05: " << tag << endln;
-		exit(-1);
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 
@@ -729,7 +747,7 @@ Domain *theDomain, TclModelBuilder *theBuilder)
 	{
 		opserr << "WARNING TclElmtBuilder - addelement2dYS - could not add element to domain ";
 		opserr << tag << endln;
-		exit(-1);
+		opserr << "\a";
 		return TCL_ERROR;
 	}
 
@@ -742,8 +760,8 @@ Domain *theDomain, TclModelBuilder *theBuilder)
 /*******************************************************************************************/
 int
 TclModelBuilder_addElement2dYS (ClientData clientData, Tcl_Interp *interp,
-				int argc, TCL_Char **argv,
-				Domain *theTclDomain, TclModelBuilder *theTclBuilder)
+								   int argc, char **argv,
+								   Domain *theTclDomain, TclModelBuilder *theTclBuilder)
 {
 
   if (strcmp(argv[1],"inelastic2dYS01") == 0) {
@@ -762,14 +780,14 @@ TclModelBuilder_addElement2dYS (ClientData clientData, Tcl_Interp *interp,
 						 theTclDomain, theTclBuilder);
     return result;
   }
-  
-  /*else if (strcmp(argv[1],"inelastic2dYS04") == 0) {
+
+/*	else if (strcmp(argv[1],"inelastic2dYS04") == 0) {
 	  int result = TclModelBuilder_addElement2dYS04
 	  (clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
     return result;
-  }
-  else if (strcmp(argv[1],"inelastic2dYS05") == 0) {
+  }*/
+  /*else if (strcmp(argv[1],"inelastic2dYS05") == 0) {
 	  int result = TclModelBuilder_addElement2dYS05
 	  (clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
