@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 06:19:32 $
+// $Revision: 1.3 $
+// $Date: 2001-03-29 05:30:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/ModifiedNewton.h,v $
                                                                         
                                                                         
@@ -48,8 +48,8 @@ class ConvergenceTest;
 class ModifiedNewton: public EquiSolnAlgo
 {
   public:
-    ModifiedNewton();    
-    ModifiedNewton(ConvergenceTest &theTest);
+    ModifiedNewton(int tangent = CURRENT_TANGENT);
+    ModifiedNewton(ConvergenceTest &theTest, int tangent = CURRENT_TANGENT);
     ~ModifiedNewton();
 
     int solveCurrentStep(void);    
@@ -66,6 +66,7 @@ class ModifiedNewton: public EquiSolnAlgo
     
   private:
     ConvergenceTest *theTest;
+    int tangent;
 };
 
 #endif

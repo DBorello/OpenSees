@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 06:19:32 $
+// $Revision: 1.3 $
+// $Date: 2001-03-29 05:30:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/EquiSolnAlgo.h,v $
                                                                         
                                                                         
@@ -42,9 +42,9 @@
 // What: "@(#)EquiSolnAlgo.h, revA"
 
 #include <SolutionAlgorithm.h>
+#include <IncrementalIntegrator.h>
 
 class AnalysisModel;
-class IncrementalIntegrator;
 class LinearSOE;
 class ConvergenceTest;
 

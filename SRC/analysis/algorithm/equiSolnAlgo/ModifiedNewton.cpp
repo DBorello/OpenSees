@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-02-17 04:22:24 $
+// $Revision: 1.4 $
+// $Date: 2001-03-29 05:30:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/ModifiedNewton.cpp,v $
                                                                         
                                                                         
@@ -48,17 +48,17 @@
 #include <ConvergenceTest.h>
 
 // Constructor
-ModifiedNewton::ModifiedNewton()
+ModifiedNewton::ModifiedNewton(int theTangentToUse)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_ModifiedNewton),
- theTest(0)
+ theTest(0), tangent(theTangentToUse)
 {
 
 }
 
 
-ModifiedNewton::ModifiedNewton(ConvergenceTest &theT)
+ModifiedNewton::ModifiedNewton(ConvergenceTest &theT, int theTangentToUse)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_ModifiedNewton),
- theTest(&theT)
+ theTest(&theT), tangent(theTangentToUse)
 {
 
 }
@@ -101,17 +101,18 @@ ModifiedNewton::solveCurrentStep(void)
     
     // we form the tangent
     
-    if (theIncIntegratorr->formTangent() < 0){
-	cerr << "WARNING ModifiedNewton::solveCurrentStep() -";
-	cerr << "the Integrator failed in formTangent()\n";
-	return -1;
-    }		    
-
     if (theIncIntegratorr->formUnbalance() < 0) {
 	cerr << "WARNING ModifiedNewton::solveCurrentStep() -";
 	cerr << "the Integrator failed in formUnbalance()\n";	
 	return -2;
     }	
+
+    if (theIncIntegratorr->formTangent(tangent) < 0){
+	cerr << "WARNING ModifiedNewton::solveCurrentStep() -";
+	cerr << "the Integrator failed in formTangent()\n";
+	return -1;
+    }		    
+
 
     // repeat until convergence is obtained or reach max num iterations
     int result = -1;

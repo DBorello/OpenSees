@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-02-17 04:22:24 $
+// $Revision: 1.4 $
+// $Date: 2001-03-29 05:30:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonRaphson.cpp,v $
                                                                         
                                                                         
@@ -52,17 +52,17 @@
 #include <fstream.h>
 
 // Constructor
-NewtonRaphson::NewtonRaphson()
+NewtonRaphson::NewtonRaphson(int theTangentToUse)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_NewtonRaphson),
- theTest(0)
+ theTest(0), tangent(theTangentToUse)
 {
 
 }
 
 
-NewtonRaphson::NewtonRaphson(ConvergenceTest &theT)
+NewtonRaphson::NewtonRaphson(ConvergenceTest &theT, int theTangentToUse)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_NewtonRaphson),
- theTest(&theT)
+ theTest(&theT), tangent(theTangentToUse)
 {
 
 }
@@ -70,6 +70,7 @@ NewtonRaphson::NewtonRaphson(ConvergenceTest &theT)
 // Destructor
 NewtonRaphson::~NewtonRaphson()
 {
+  
 
 }
 
@@ -97,6 +98,14 @@ NewtonRaphson::solveCurrentStep(void)
 	return -5;
     }	
 
+
+    if (theIntegrator->formUnbalance() < 0) {
+      cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
+      cerr << "the Integrator failed in formUnbalance()\n";	
+      return -2;
+    }	    
+
+
     // set itself as the ConvergenceTest objects EquiSolnAlgo
     theTest->setEquiSolnAlgo(*this);
     if (theTest->start() < 0) {
@@ -105,16 +114,11 @@ NewtonRaphson::solveCurrentStep(void)
       return -3;
     }
 
-    if (theIntegrator->formUnbalance() < 0) {
-      cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
-      cerr << "the Integrator failed in formUnbalance()\n";	
-      return -2;
-    }	    
 
     int result = -1;
     int count = 0;
     do {
-	if (theIntegrator->formTangent() < 0){
+	if (theIntegrator->formTangent(tangent) < 0){
 	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
 	    cerr << "the Integrator failed in formTangent()\n";
 	    return -1;
