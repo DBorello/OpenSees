@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-20 01:38:13 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 06:02:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TclTrussCommand.cpp,v $
                                                                         
                                                                         
@@ -43,6 +43,7 @@
 #include <TrussSection.h>
 #include <TclModelBuilder.h>
 #include <CorotTruss.h>
+#include <CorotTrussSection.h>
 
 extern void printCommand(int argc, char **argv);
 
@@ -145,9 +146,11 @@ TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
       }
   
       // now create the truss and add it to the Domain
-      TrussSection *theTruss = 0;       
-
-	  theTruss = new TrussSection(trussId,ndm,iNode,jNode,*theSection);
+      Element *theTruss = 0;
+      if (strcmp(argv[eleArgStart],"corotTruss") == 0)
+          theTruss = new CorotTrussSection(trussId,ndm,iNode,jNode,*theSection);
+      else
+          theTruss = new TrussSection(trussId,ndm,iNode,jNode,*theSection);
       
       if (theTruss == 0) {
 	  cerr << "WARNING ran out of memory creating element\n";
