@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.h,v $
                                                                         
                                                                         
@@ -40,10 +40,10 @@
 class UniformExcitation : public EarthquakePattern
 {
   public:
-    UniformExcitation(GroundMotion &theMotion, int dof, int tag);  
+    UniformExcitation(GroundMotion &theMotion, int dof, int tag, double vel0 = 0.0);  
     ~UniformExcitation();
 
-    // pure virtual functions
+    void setDomain(Domain *theDomain);    
     void applyLoad(double time);
     void Print(ostream &s, int flag =0);
 
@@ -57,6 +57,7 @@ class UniformExcitation : public EarthquakePattern
  private:
     GroundMotion *theMotion; // the ground motion
     int theDof;      // the dof corrseponding to the ground motion
+    double vel0;     // the initial velocity, should be neg of ug dot(0)
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:47:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.cpp,v $
                                                                         
                                                                         
@@ -39,9 +39,9 @@
 #include <Element.h>
 
 UniformExcitation::UniformExcitation(GroundMotion &_theMotion, 
-				   int dof, int tag)
+				   int dof, int tag, double velZero)
 :EarthquakePattern(tag, LOAD_TAG_UniformExcitation), 
- theMotion(&_theMotion), theDof(dof)
+  theMotion(&_theMotion), theDof(dof), vel0(velZero)
 {
   // add the motion to the list of ground motions
   this->addMotion(*theMotion);
@@ -51,6 +51,31 @@ UniformExcitation::UniformExcitation(GroundMotion &_theMotion,
 UniformExcitation::~UniformExcitation()
 {
 
+}
+
+
+void
+UniformExcitation::setDomain(Domain *theDomain) 
+{
+  this->LoadPattern::setDomain(theDomain);
+
+  // now we go through and set all the node velocities to be vel0
+  if (vel0 != 0.0) {
+    NodeIter &theNodes = theDomain->getNodes();
+    Node *theNode;
+    Vector newVel(1);
+    int currentSize = 1;
+    while ((theNode = theNodes()) != 0) {
+      int numDOF = theNode->getNumberDOF();
+      if (numDOF != currentSize) 
+	newVel.resize(numDOF);
+      
+      newVel = theNode->getVel();
+      newVel(theDof) = vel0;
+      theNode->setTrialVel(newVel);
+      theNode->commitState();
+    }
+  }
 }
 
 void
