@@ -95,19 +95,11 @@ SOURCE=..\..\..\SRC\recorder\ElementRecorder.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\recorder\FileNodeDispRecorder.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\SRC\recorder\FilePlotter.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\recorder\MaxNodeDispRecorder.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\recorder\NodeIncrDispRecorder.cpp
 # End Source File
 # Begin Source File
 
@@ -131,19 +123,11 @@ SOURCE=..\..\..\SRC\recorder\ElementRecorder.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\recorder\FileNodeDispRecorder.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\SRC\recorder\FilePlotter.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\recorder\MaxNodeDispRecorder.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\recorder\NodeIncrDispRecorder.h
 # End Source File
 # Begin Source File
 

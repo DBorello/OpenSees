@@ -93,14 +93,6 @@ SOURCE=..\..\..\SRC\modelbuilder\ModelBuilder.cpp
 
 SOURCE=..\..\..\SRC\modelbuilder\PlaneFrame.cpp
 # End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\modelbuilder\Quick2dFrame.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\modelbuilder\Quick3dFrame.cpp
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -112,14 +104,6 @@ SOURCE=..\..\..\SRC\modelbuilder\ModelBuilder.h
 # Begin Source File
 
 SOURCE=..\..\..\SRC\modelbuilder\PlaneFrame.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\modelbuilder\Quick2dFrame.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\modelbuilder\Quick3dFrame.h
 # End Source File
 # End Group
 # End Target

@@ -87,30 +87,6 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\SRC\material\uniaxial\BiLinear.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\uniaxial\BiLinear.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\uniaxial\Clough1.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\uniaxial\Clough1.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\uniaxial\Clough2.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\uniaxial\Clough2.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\SRC\material\uniaxial\Concrete01.cpp
 # End Source File
 # Begin Source File
@@ -172,14 +148,6 @@ SOURCE=..\..\..\SRC\material\uniaxial\PathIndependentMaterial.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\uniaxial\PathIndependentMaterial.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\uniaxial\Pinch1.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\uniaxial\Pinch1.h
 # End Source File
 # Begin Source File
 
