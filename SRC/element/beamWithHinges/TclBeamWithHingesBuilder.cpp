@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:20 $
+// $Revision: 1.2 $
+// $Date: 2002-05-15 22:17:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/TclBeamWithHingesBuilder.cpp,v $
                                                                         
                                                                         
@@ -210,8 +210,8 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	    return TCL_ERROR;
 	}	
 	
-	Element *theElement = new BeamWithHinges2d (tag, ndI, ndJ, E, I, A, 1.0, 0.0,
-		*sectionI, lenI, *sectionJ, lenJ, *theTransf, shearLength, massDens, numIters, tol);
+	Element *theElement = new BeamWithHinges2d (tag, ndI, ndJ, E, A, I,
+		*sectionI, lenI, *sectionJ, lenJ, *theTransf, massDens, numIters, tol);
 
 	// Ensure we have created the element, out of memory if got here and no element
 	if (theElement == 0) {
@@ -388,8 +388,8 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	    return TCL_ERROR;
 	}		
 
-	Element *theElement = new BeamWithHinges3d (tag, ndI, ndJ, E, Iz, Iy, A, G, J, 0.0,
-		*sectionI, lenI, *sectionJ, lenJ, *theTransf, shearLength, massDens, numIters, tol);
+	Element *theElement = new BeamWithHinges3d (tag, ndI, ndJ, E, A, Iz, Iy, G, J,
+		*sectionI, lenI, *sectionJ, lenJ, *theTransf, massDens, numIters, tol);
 
 	// Ensure we have created the element, out of memory if got here and no element
 	if (theElement == 0) {
