@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2004-11-05 22:57:03 $
+// $Revision: 1.27 $
+// $Date: 2005-01-03 22:32:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -2085,7 +2085,13 @@ TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
 	    return TCL_ERROR;
 	  }
 
-	  rcDOF (j) = --dofID;    // Decrement for C++ indexing
+	  dofID -= 1; // Decrement for C++ indexing
+	  if (dofID < 0) {
+	    opserr << "WARNING invalid dofID: " << argv[i]
+		   << " must be >= 1";
+	    return TCL_ERROR;
+	  }
+	  rcDOF (j) = dofID;    
 	  Ccr (j,j) = 1.0;
         }
 
