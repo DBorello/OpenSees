@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2002-07-18 22:00:35 $
+// $Revision: 1.18 $
+// $Date: 2002-07-23 17:03:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -320,6 +320,10 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     int result = TclModelBuilder_addZeroLengthSection(clientData, interp, argc, argv,
 					       theTclDomain, theTclBuilder);
     return result;
+  } else if (strcmp(argv[1],"zeroLengthND") == 0) {
+    cerr << "element zeroLengthND is no longer available, please use "
+	 << "the zeroLengthSection element instead" << endl;
+    return TCL_ERROR;
   } else if ((strcmp(argv[1],"Joint2D") == 0) ||
 	     (strcmp(argv[1],"Joint2D") == 0)) {
     int result = TclModelBuilder_addJoint2D(clientData, interp, argc, argv,
