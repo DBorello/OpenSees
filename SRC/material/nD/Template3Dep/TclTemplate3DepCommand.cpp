@@ -466,7 +466,11 @@ EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
   }
   EPState *EPS = 0;
 
-  double Eod, Ed, nu, rho;
+  double Eod = 0.0;
+  double Ed = 0.0;
+  double nu = 0.0;
+  double rho = 0.0; 
+  
   if (argc < 5) {
 
     cleanup(argv);
@@ -501,7 +505,15 @@ EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
   int NoD = 0;
   double *scalars = 0;
   stresstensor *tensors = 0;
-  double ed = 0.80, ecd = 0.75, lamd=0.025, p_refd= 100.0, ad=0.5;
+  int     Elasticflagp = 0;
+  double  Evp   = 0.0;
+  double  nuhvp = 0.0;
+  double  Ghvp = 0.0;  
+  double  eod = 0.80;
+  double  ecd = 0.75;
+  double  lamd=0.025;
+  double  p_refd= 100.0;
+  double  ad=0.5;
 
   // switch on remaining args;
   double *values_stp = new double[9];
@@ -582,8 +594,40 @@ EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
 
       //cout << " NoD " << NoD << " " << loc << "\n";
     }
-    else if  (strcmp(argv[loc],"-e") == 0) {
-      if (Tcl_GetDouble(interp, argv[loc+1], &ed) != TCL_OK) {
+    else if  (strcmp(argv[loc],"-ElasticFlag") == 0 || strcmp(argv[loc],"-elasticflag") == 0) {
+      if (Tcl_GetInt(interp, argv[loc+1], &Elasticflagp) != TCL_OK) {
+      opserr << "nDMaterial Templated3Dep -EPS - invalid e " << argv[loc+1] << endln;
+      cleanup(argv);
+      return 0;
+      }
+      loc+=2;
+    }
+    else if  (strcmp(argv[loc],"-Ev") == 0) {
+      if (Tcl_GetDouble(interp, argv[loc+1], &Evp) != TCL_OK) {
+      opserr << "nDMaterial Templated3Dep -EPS - invalid Ev " << argv[loc+1] << endln;
+      cleanup(argv);
+      return 0;
+      }
+      loc+=2;
+    }
+    else if  (strcmp(argv[loc],"-nuhv") == 0) {
+      if (Tcl_GetDouble(interp, argv[loc+1], &nuhvp) != TCL_OK) {
+      opserr << "nDMaterial Templated3Dep -EPS - invalid nuhv " << argv[loc+1] << endln;
+      cleanup(argv);
+      return 0;
+      }
+      loc+=2;
+    }
+    else if  (strcmp(argv[loc],"-Ghv") == 0) {
+      if (Tcl_GetDouble(interp, argv[loc+1], &Ghvp) != TCL_OK) {
+      opserr << "nDMaterial Templated3Dep -EPS - invalid Ghv " << argv[loc+1] << endln;
+      cleanup(argv);
+      return 0;
+      }
+      loc+=2;
+    }    
+    else if  (strcmp(argv[loc],"-eo") == 0) {
+      if (Tcl_GetDouble(interp, argv[loc+1], &eod) != TCL_OK) {
       opserr << "nDMaterial Templated3Dep -EPS - invalid e " << argv[loc+1] << endln;
       cleanup(argv);
       return 0;
@@ -631,10 +675,10 @@ EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
 //  cout << " Tcl check e " << ed << " ec " << ecd << " lambda " << lamd << " p_ref " << p_refd << " a " << ad << "\n";
 
 
-   int                 Elasticflagp = 1;
-   double              Evp   = 0.0;
-   double              nuhvp = 0.0;
-   double              Ghvp = 0.0;
+//   int                 Elasticflagp = 1;
+//   double              Evp   = 0.0;
+//   double              nuhvp = 0.0;
+//   double              Ghvp = 0.0;
 
 
 
@@ -654,7 +698,7 @@ EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
                     Evp,            //       double              Evp   = 0.0,
                     nuhvp,          //       double              nuhvp = 0.0,
                     Ghvp,           //       double              Ghvp = 0.0,
-                    ed,             //       double              eop = 0.85,
+                    eod,            //       double              eop = 0.85,
                     ecd,            //       double              ecp = 0.80,
                     lamd,           //       double              Lam = 0.025,
                     p_refd,         //       double              pop = 100.0,

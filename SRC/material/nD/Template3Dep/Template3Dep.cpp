@@ -280,7 +280,7 @@ Template3Dep::Template3Dep(   int tag                     ,
 // Constructor 3
 //================================================================================
 
-Template3Dep::Template3Dep(   int tag                     ,
+Template3Dep::Template3Dep(   int tag,
                               YieldSurface     *YS_ ,
                               PotentialSurface *PS_ ,
                               EPState          *EPS_,
@@ -585,10 +585,121 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
     int eflag = (this->EPS)->getElasticflag();
     double Ey = this->EPS->getEo();
     double nuP =this->EPS->getnu();
-
-    // Pressure dependent Isotropic
-    if ( eflag == 1)
+    
+    // Zhao, 03-09-04
+    // eflag = 0, Pressure independent Isotropic
+    //       = 1, Pressure dendent Isotropic
+    //       = 2, Pressure independent Cross Anisotropic
+    //       = 3, Pressure dependent Cross Anisotropic
+    //   default: 0, Pressure indendent Isotropic 
+    
+    // Pressure independent Isotropic
+    if ( eflag == 0 )
       {
+        if (Ey == 0)
+          {
+            opserr << endln << "Ey = 0! Can't give you D!!" << endln;
+            exit(1);
+          }
+
+      // Kronecker delta tensor
+      tensor I2("I", 2, def_dim_2);
+
+      tensor I_ijkl = I2("ij")*I2("kl");
+      //I_ijkl.null_indices();
+      tensor I_ikjl = I_ijkl.transpose0110();
+      tensor I_iljk = I_ijkl.transpose0111();
+      tensor I4s = (I_ikjl+I_iljk)*0.5;
+
+      // Building compliance tensor
+      ret = (I_ijkl * (-nuP/Ey)) + (I4s * ((1.0+nuP)/Ey));
+      }
+    
+    // Pressure dependent Isotropic
+    else if ( eflag == 1)
+      {
+      double E = Ey;
+      //opserr << " Eo= " << Ey;
+        if (Ey == 0)
+          {
+            opserr << endln << "Ey = 0! Can't give you D!!" << endln;
+            exit(1);
+          }
+
+      //Update E
+      stresstensor stc = (this->EPS)->getStress();
+      double p = stc.p_hydrostatic();
+      double po = EPS->getpo();
+
+      //opserr << " p = " <<  p;
+
+      //double po = 100.0; //kPa
+//BJ:  this is questionable to be re-examined!!!!!!!!!!!!!!!!!!!!
+      if (p <= 0.5000*KK) p = 0.500*KK;
+      E = Ey * pow(p/po/KK, 0.5); //0.5
+      //cerr << " Ec = " << Ey << endlnn;
+
+      // Kronecker delta tensor
+      tensor I2("I", 2, def_dim_2);
+
+      tensor I_ijkl = I2("ij")*I2("kl");
+      //I_ijkl.null_indices();
+      tensor I_ikjl = I_ijkl.transpose0110();
+      tensor I_iljk = I_ijkl.transpose0111();
+      tensor I4s = (I_ikjl+I_iljk)*0.5;
+
+      // Building compliance tensor
+      ret = (I_ijkl * (-nuP/E)) + (I4s * ((1.0+nuP)/E));
+      }
+   
+   // Pressure independent Anisotropic
+    else if (eflag == 2)
+      {
+      // Form compliance matrix D
+      double nu = nuP;
+      double Ev = this->EPS->getEv();
+      double Ghv = this->EPS->getGhv();
+      double nuhv = this->EPS->getnuhv();
+
+      double A = 1.0/Ey;
+      double B = 1.0/Ev;
+      //opserr << "A " << A << " B " << B;
+
+      Matrix D(6,6);
+      D(0,0) = D(1,1) = A;
+      D(2,2) = B;
+      D(0,1) = D(1,0) = -nu*A;
+      D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
+      //D(3,3) = (1.0+nu)*A;        // Bug found, 03-09-04
+      //D(4,4) = D(5,5) = 0.5/Ghv;  // ...
+      D(3,3) = 2.0*(1.0+nu)*A;
+      D(4,4) = D(5,5) = 1.0/Ghv;
+      //opserr << " C " << D;
+
+      //Convert Matric D to 4th order Elastic constants tensor ret; 
+      ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
+      ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
+      ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
+
+      ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
+      ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
+      ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
+
+      ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
+      ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
+      ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
+
+      }
+    
+    // Pressure dependent Anisotropic
+    else if (eflag == 3)
+      {
+      // Form compliance matrix D
+      double E = Ey;
+      double nu = nuP;
+      double Ev = this->EPS->getEv();
+      double Ghv = this->EPS->getGhv();
+      double nuhv = this->EPS->getnuhv();
       //opserr << " Eo= " << Ey;
         if (Ey == 0)
           {
@@ -606,31 +717,10 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
       //double po = 100.0; //kPa
       if (p <= 0.5000*KK) p = 0.500*KK;
       Ey = Ey * pow(p/po/KK, 0.5); //0.5
-      //cerr << " Ec = " << Ey << endlnn;
-
-      // Kronecker delta tensor
-      tensor I2("I", 2, def_dim_2);
-
-      tensor I_ijkl = I2("ij")*I2("kl");
-      //I_ijkl.null_indices();
-      tensor I_ikjl = I_ijkl.transpose0110();
-      tensor I_iljk = I_ijkl.transpose0111();
-      tensor I4s = (I_ikjl+I_iljk)*0.5;
-
-      // Building compliance tensor
-      ret = (I_ijkl * (-nuP/Ey)) + (I4s * ((1.0+nuP)/Ey));
-      }
-
-    // Pressure dependent Anisotropic
-    else if (eflag == 3)
-      {
-      // Form compliance matrix D
-      double E = Ey;
-      double nu = nuP;
-      double Ev = this->EPS->getEv();
-      double Ghv = this->EPS->getGhv();
-      double nuhv = this->EPS->getnuhv();
-
+      Ev = Ev * pow(p/po/KK, 0.5); //0.5
+      Ghv = Ghv * pow(p/po/KK, 0.5); //0.5 
+      //cerr << " Ec = " << Ey << endlnn;      
+      
       double A = 1.0/E;
       double B = 1.0/Ev;
       //opserr << "A " << A << " B " << B;
@@ -640,8 +730,8 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
       D(2,2) = B;
       D(0,1) = D(1,0) = -nu*A;
       D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
-      D(3,3) = (1.0+nu)*A;
-      D(4,4) = D(5,5) = 0.5/Ghv;
+      D(3,3) = 2.0*(1.0+nu)*A;
+      D(4,4) = D(5,5) = 1.0/Ghv;
       //opserr << " C " << D;
 
       //Convert Matric D to 4th order Elastic constants tensor ret;
@@ -660,7 +750,7 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
       }
     else
       {
-      opserr << "Template3Dep::ElasticComplianceTensor failed to create elastic compliance tensor. Eflag must be 1 or 3: " <<  eflag << endln;
+      opserr << "Template3Dep::ElasticComplianceTensor failed to create elastic compliance tensor. Eflag must be 0-3: " <<  eflag << endln;
       exit(-1);
 
       }
@@ -680,9 +770,32 @@ tensor Template3Dep::ElasticStiffnessTensor(void) const
 
     double Ey = this->EPS->getEo();
     double nu =this->EPS->getnu();
-
+    
+    // Zhao, 03-09-04
+    // eflag = 0, Pressure dependent Isotropic
+    //       = 1, Pressure indendent Isotropic
+    //       = 2, Pressure dependent Cross Anisotropic
+    //       = 3, Pressure independent Cross Anisotropic
+    //   default: 0, Pressure indendent Isotropic
     // Pressure dependent Isotropic
-    if ( eflag == 1) {
+    if ( eflag == 0) {
+       double E = Ey;
+       // Kronecker delta tensor
+       tensor I2("I", 2, def_dim_2);
+
+       tensor I_ijkl = I2("ij")*I2("kl");
+
+
+       //I_ijkl.null_indices();
+       tensor I_ikjl = I_ijkl.transpose0110();
+       tensor I_iljk = I_ijkl.transpose0111();
+       tensor I4s = (I_ikjl+I_iljk)*0.5;
+
+       // Building elasticity tensor
+       ret = I_ijkl*( E*nu / ( (1.0+nu)*(1.0 - 2.0*nu) ) ) + I4s*( E / (1.0 + nu) );
+       //ret.null_indices();
+    }    
+    else if ( eflag == 1) {
 
        //Update E
        stresstensor stc = (this->EPS)->getStress();
@@ -708,22 +821,27 @@ tensor Template3Dep::ElasticStiffnessTensor(void) const
        tensor I_iljk = I_ijkl.transpose0111();
        tensor I4s = (I_ikjl+I_iljk)*0.5;
 
-       //double x = I4s.trace();
-       //opserr << "xxxxxx " << x << endlnn;
-
-       //I4s.null_indices();
-
        // Building elasticity tensor
        ret = I_ijkl*( E*nu / ( (1.0+nu)*(1.0 - 2.0*nu) ) ) + I4s*( E / (1.0 + nu) );
        //ret.null_indices();
     }
     else if ( eflag == 3) {
-      // Form compliance matrix D
       double E = Ey;
       double Ev = this->EPS->getEv();
       double Ghv = this->EPS->getGhv();
       double nuhv = this->EPS->getnuhv();
+      //Update E
+      
+      stresstensor stc = (this->EPS)->getStress();
+      double p = stc.p_hydrostatic();
+      double po = EPS->getpo();
 
+      //double po = 100.0; //kPa
+      if (p <= 0.5000*KK) p = 0.500*KK;
+      E = Ey * pow(p/po/KK, 0.5); //0.5
+      Ev = Ev * pow(p/po/KK, 0.5); //0.5
+      Ghv = Ghv * pow(p/po/KK, 0.5); //0.5 
+      //cerr << " Ec = " << Ey << endlnn;  
       double A = 1.0/E;
       double B = 1.0/Ev;
       //opserr << "A " << A << " B " << B;
@@ -754,10 +872,48 @@ tensor Template3Dep::ElasticStiffnessTensor(void) const
       ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
 
     }
+    else if ( eflag == 2) {
+      double Ev = this->EPS->getEv();
+      double Ghv = this->EPS->getGhv();
+      double nuhv = this->EPS->getnuhv();
 
+      double A = 1.0/Ey;
+      double B = 1.0/Ev;
+      //opserr << "A " << A << " B " << B;
+
+      Matrix D(6,6);
+      D(0,0) = D(1,1) = A;
+      D(2,2) = B;
+      D(0,1) = D(1,0) = -nu*A;
+      D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
+      D(3,3) = (1.0+nu)*A;
+      D(4,4) = D(5,5) = 0.5/Ghv;
+      //opserr << " C " << D;
+
+      // Do invertion once to get Elastic matrix D
+      D.Invert( D );
+
+      //Convert Matric D to 4th order Elastic constants tensor ret;
+      ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
+      ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
+      ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
+
+      ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
+      ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
+      ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
+
+      ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
+      ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
+      ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
+
+    }
+    else
+      {
+      opserr << "Template3Dep::ElasticStiffnessTensor failed to create elastic compliance tensor. Eflag must be 0-3: " <<  eflag << endln;
+      exit(-1);
+
+      }    
     return ret;
-
-
 }
 
 //================================================================================

@@ -391,7 +391,7 @@ a = a;
 EPState::EPState( )
 : Eo(30000.0), E_Young(30000.0), nu_Poisson(0.3), rho_mass_density(0.0),
   Converged(false),
-  Elasticflag(1),Ev(0.0),nuhv(0.0),Ghv(0.0),
+  Elasticflag(0),Ev(0.0),nuhv(0.0),Ghv(0.0),
   eo(0.85), ec(0.80), Lambda(0.025), po(100.0), e(0.85), psi(0.05), a(0.5)
 {
 
@@ -1259,17 +1259,22 @@ void EPState::setInit() {
 }
 
 //================================================================================
-int EPState::commitState () {
+int EPState::commitState () 
+  {
+
+
+//      opserr << "\n\n\n\n int EPState::commitState ()\n\n\n\n";
+
 
       int err = 0;
       // commit the variables state
-      //CurrentStress   = Stress_init;
-      //CurrentStrain   = Strain_init;
-      //Eep = Eep_init;
+      CurrentStress   = Stress_init;
+      CurrentStrain   = Strain_init;
+      Eep = Eep_init;
 
-      Stress_commit   = CurrentStress;
-      Strain_commit   = CurrentStrain;
-      Eep_commit = Eep;
+      //Stress_commit   = CurrentStress;
+      //Strain_commit   = CurrentStrain;
+      //Eep_commit = Eep;
 
     int i;
       for (i = 0; i < NScalarVar; i++) {
@@ -1284,7 +1289,7 @@ int EPState::commitState () {
 
       return err;
 
-}
+  }
 
 //================================================================================
 int EPState::revertToLastCommit () {

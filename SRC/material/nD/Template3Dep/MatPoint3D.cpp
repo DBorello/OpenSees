@@ -308,7 +308,8 @@ void MatPoint3D::report(char *msg) const
     //if ( msg ) ::printf("%s",msg);
     if ( msg )  opserr << msg;
     
-    ::printf("\n\t---Gauss point #r %d #s %d  #t %d \n",
+    ::printf("\n\n\n---------------------------------------------------- \n");
+    ::printf("Gauss point #r %d #s %d  #t %d \n",
                                  GP_number_r(), GP_number_s(), GP_number_t());
 
     ::printf("\tr->%.8e   s->%.8e   t->%.8e  \n",
@@ -317,10 +318,24 @@ void MatPoint3D::report(char *msg) const
     ::printf("\tr_weight->%.8e   s_weight->%.8e   t_weight->%.8e  \n",
      r_weight(),s_weight(),t_weight());
 
-    //p_stress->reportshort("stress at this Gauss-Legendre point\n");
+
+    if ( matmodel ) 
+      {
+        opserr << (*matmodel);
+
+        stresstensor tmpstress = matmodel->getStressTensor();
+        tmpstress.report("stress at this Gauss-Legendre point\n");
+
+        straintensor tmpstrain = matmodel->getStrainTensor();
+        tmpstrain.report("strain at this Gauss-Legendre point\n");
+      }
+    else
+      opserr << "Empty Material Model\n"; 
+
+    //p_stress->report("stress at this Gauss-Legendre point\n");
     //p_iterative_stress->reportshortpqtheta("ITERATIVE stress at this Gauss-Legendre point\n");
     //::printf("ITERATIVE q_ast_iterative = %.8e  \n",q_ast_iterative);
-    //p_strain->reportshort("strain at this Gauss-Legendre point\n");
+    //p_strain->report("strain at this Gauss-Legendre point\n");
     //matmodel->report("material model at this Gauss-Legendre point\n");
     
     //if (gpEPS) 
@@ -328,11 +343,6 @@ void MatPoint3D::report(char *msg) const
     //else
     //  opserr << "Empty EPState\n"; 
     
-    if (matmodel) 
-      opserr << (*matmodel);
-    else
-      opserr << "Empty Material Model\n"; 
-
   }
 
 //=============================================================================
