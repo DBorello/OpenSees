@@ -1,6 +1,6 @@
 
-// $Revision: 1.1 $
-// $Date: 2001-08-23 16:45:49 $
+// $Revision: 1.2 $
+// $Date: 2004-06-01 21:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/basics.h,v $
 
 //#############################################################################
@@ -109,6 +109,11 @@
   static const int def_dim_2[] = {3, 3}; // static-> see ARM pp289-290
   static const int def_dim_3[] = {3, 3, 3}; // static-> see ARM pp289-290
   static const int def_dim_4[] = {3, 3, 3, 3}; // static-> see ARM pp289-290
+
+// Cosserat
+  static const int Cosserat_def_dim_2[] = {6, 6}; // static-> see ARM pp289-290
+  static const int Cosserat_def_dim_4[] = {6, 6, 6, 6}; // static-> see ARM pp289-290
+
 #endif
 
 #ifndef TEST

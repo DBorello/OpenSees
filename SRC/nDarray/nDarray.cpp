@@ -1,5 +1,5 @@
-// $Revision: 1.3 $
-// $Date: 2002-02-26 06:22:52 $
+// $Revision: 1.4 $
+// $Date: 2004-06-01 21:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/nDarray.cpp,v $
                                                                         
                                                                         
@@ -317,11 +317,12 @@ nDarray::nDarray(int rank_of_nDarray, int rows, int cols, double values)
 // create a unit nDarray
 nDarray::nDarray(const char *flag, int rank_of_nDarray, const int *pdim)
 {
-  if ( flag[0] != 'I' && flag[0] != 'e' )
+  if ( flag[0] != 'I' && flag[0] != 'e' && flag[0] != 'C' )
    {
     ::printf("\nTo create a 2nd rank Kronecker delta type: nDarray (\"I\",2,dims);\n");
 //    ::printf(  "To create a 4th rank unit nDarray type: nDarray (\"I\",4,dims);\n");
     ::printf(  "To create a 3th rank Levi-Civita BJtensor type: nDarray (\"e\",3,dims);\n");
+    ::printf(  "To create a 2nd rank Cosserat Kronecker delta type: nDarray (\"C\",3,dims);\n");
     ::exit( 1 );
    }
  // create the structure:
@@ -367,15 +368,18 @@ nDarray::nDarray(const char *flag, int rank_of_nDarray, const int *pdim)
           }
 
                 case 2:   // Kronecker delta
-             {
-               for ( int i2=1 ; i2<=pc_nDarray_rep->dim[0] ; i2++ )
-                 {
-                   for ( int j2=1 ; j2<=pc_nDarray_rep->dim[1] ; j2++ )
-                     {
+             
+                if ( flag[0] == 'I' )
+                  {
+                    for ( int i2=1 ; i2<=pc_nDarray_rep->dim[0] ; i2++ )
+                      {
+                        for ( int j2=1 ; j2<=pc_nDarray_rep->dim[1] ; j2++ )
+                          {
                        val(i2,j2) = (i2 == j2 ? 1  : 0);
                      }
                  }
                break;
+             
              }
 
         case 3:  // Levi - Civita permutation BJtensor

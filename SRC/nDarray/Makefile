@@ -9,7 +9,9 @@ NDARRAY  = BJtensor.o \
 	   nDarray.o  \
 	   basics.o   \
 	   stresst.o  \
-	   straint.o  
+	   straint.o  \
+	   Cosseratstresst.o  \
+	   Cosseratstraint.o  
 
 
 OBJS       = $(NDARRAY)

@@ -97,6 +97,10 @@ class nDarray_rep
     friend class BJvector;
     friend class stresstensor;
     friend class straintensor;
+
+    friend class Cosseratstresstensor;
+    friend class Cosseratstraintensor;
+
   private:
     double *pd_nDdata;  // nD array as 1D array
     int nDarray_rank;   ///*  nDarray rank :
@@ -130,6 +134,9 @@ class nDarray
 
     friend class stresstensor;
     friend class straintensor;
+
+    friend class Cosseratstresstensor;
+    friend class Cosseratstraintensor;
 
 //.. no need    friend class GaussPoint;
           // explanation why this one should be a friend instead
