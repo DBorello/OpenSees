@@ -17,28 +17,21 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.2 $
-// $Date: 2001-08-13 22:59:22 $
+
+// $Revision: 1.3 $
+// $Date: 2001-08-15 01:58:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.h,v $
-                                                                        
-                                                                        
+
 #ifndef HardeningMaterial_h
 #define HardeningMaterial_h
 
-// File: ~/material/HardeningMaterial.h
-//
 // Written: MHS
 // Created: May 2000
-// Revision: A
 //
 // Description: This file contains the class definition for 
 // HardeningMaterial.  HardeningMaterial provides the abstraction
 // for a one-dimensional rate-independent plasticity model
 // with combined isotropic and kinematic hardening.
-//
-//
-// What: "@(#) HardeningMaterial.h, revA"
 
 #include <UniaxialMaterial.h>
 
@@ -53,7 +46,6 @@ class HardeningMaterial : public UniaxialMaterial
     double getStrain(void);          
     double getStress(void);
     double getTangent(void);
-    double getSecant (void);
 
     int commitState(void);
     int revertToLastCommit(void);    
@@ -73,21 +65,23 @@ class HardeningMaterial : public UniaxialMaterial
     // Material parameters
     double E;	// Elastic modulus
     double sigmaY;	// Yield stress
-    double K;	// Isotropic hardening parameter
-    double H;	// Kinematic hardening parameter
-	
-    // Trial state variables
-    double Tstrain;	// Trial strain
-    double Tstress;	// Trial stress
-    double Ttangent;	// Trial tangent
-    double TplasticStrain;	// Trial plastic strain
-    double TbackStress;	// Trial back stress
-    double Thardening;	// Trial internal hardening variable
+    double Hiso;	// Isotropic hardening parameter
+    double Hkin;	// Kinematic hardening parameter
 	
     // Committed history variables
     double CplasticStrain;	// Committed plastic strain
-    double CbackStress;	// Committed back stress;
-    double Chardening;	// Committed internal hardening variable
+    double CbackStress;		// Committed back stress;
+    double Chardening;		// Committed internal hardening variable
+
+	// Trial history variables
+    double TplasticStrain;	// Trial plastic strain
+    double TbackStress;		// Trial back stress
+    double Thardening;		// Trial internal hardening variable
+
+    // Trial state variables
+    double Tstrain;		// Trial strain
+    double Tstress;		// Trial stress
+    double Ttangent;	// Trial tangent
 };
 
 

@@ -17,22 +17,17 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.2 $
-// $Date: 2001-08-13 22:59:22 $
+
+// $Revision: 1.3 $
+// $Date: 2001-08-15 01:58:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.cpp,v $
-                                                                        
-                                                                        
-// File: ~/material/HardeningMaterial.C
-//
+
 // Written: MHS
 // Created: May 2000
 // Revision: A
 //
 // Description: This file contains the class implementation for 
 // HardeningMaterial. 
-//
-// What: "@(#) HardeningMaterial.C, revA"
 
 #include <HardeningMaterial.h>
 #include <Vector.h>
@@ -40,23 +35,25 @@
 #include <math.h>
 
 HardeningMaterial::HardeningMaterial(int tag, double e, double s,
-				 double k, double h)
+				 double hi, double hk)
 :UniaxialMaterial(tag,MAT_TAG_Hardening),
- E(e), sigmaY(s), K(k), H(h)
+ E(e), sigmaY(s), Hiso(hi), Hkin(hk)
 {
+	// Initialize variables
     this->revertToStart();
 }
 
 HardeningMaterial::HardeningMaterial()
 :UniaxialMaterial(0,MAT_TAG_Hardening),
- E(0.0), sigmaY(0.0), K(0.0), H(0.0)
+ E(0.0), sigmaY(0.0), Hiso(0.0), Hkin(0.0)
 {
+	// Initialize variables
 	this->revertToStart();
 }
 
 HardeningMaterial::~HardeningMaterial()
 {
-    // does nothing
+    // Does nothing
 }
 
 int 
@@ -72,7 +69,7 @@ HardeningMaterial::setTrialStrain (double strain, double strainRate)
     double xsi = Tstress - CbackStress;
 
     // Compute yield criterion
-    double f = fabs(xsi) - (sigmaY + K*Chardening);
+    double f = fabs(xsi) - (sigmaY + Hiso*Chardening);
     
     // Elastic step ... no updates required
     if (f <= 0.0)
@@ -84,7 +81,7 @@ HardeningMaterial::setTrialStrain (double strain, double strainRate)
     else
     {
 	// Compute consistency parameter
-	double dGamma = f / (E+K+H);
+	double dGamma = f / (E+Hiso+Hkin);
 
 	// Find sign of xsi
 	int sign = (xsi < 0) ? -1 : 1;
@@ -96,13 +93,13 @@ HardeningMaterial::setTrialStrain (double strain, double strainRate)
 	TplasticStrain = CplasticStrain + dGamma*sign;
 	
 	// Update back stress
-	TbackStress = CbackStress + dGamma*H*sign;
+	TbackStress = CbackStress + dGamma*Hkin*sign;
 	
 	// Update internal hardening variable
 	Thardening = Chardening + dGamma;
 	
 	// Set trial tangent
-	Ttangent = E*(H+K) / (E+H+K);
+	Ttangent = E*(Hkin+Hiso) / (E+Hkin+Hiso);
     }
 
     return 0;
@@ -120,15 +117,6 @@ HardeningMaterial::getTangent(void)
     return Ttangent;
 }
 
-double
-HardeningMaterial::getSecant (void)
-{
-    if (Tstrain != 0.0)
-	return Tstress/Tstrain;
-    else
-	return E;
-}
-
 double 
 HardeningMaterial::getStrain(void)
 {
@@ -138,12 +126,10 @@ HardeningMaterial::getStrain(void)
 int 
 HardeningMaterial::commitState(void)
 {
-    // Commit trial state variables
+    // Commit trial history variables
     CplasticStrain = TplasticStrain;
     CbackStress = TbackStress;
     Chardening = Thardening;
-
-    // Do not need to commit the trial stress or trial tangent
     
     return 0;
 }
@@ -151,20 +137,28 @@ HardeningMaterial::commitState(void)
 int 
 HardeningMaterial::revertToLastCommit(void)
 {
+	// Nothing to do here
     return 0;
 }
 
 int 
 HardeningMaterial::revertToStart(void)
 {
-    // Reset committed state variables
+    // Reset committed history variables
     CplasticStrain = 0.0;
     CbackStress = 0.0;
     Chardening = 0.0;
 
-    // Reset the trial state
-    this->revertToLastCommit();    
-    
+	// Reset trial history variables
+    TplasticStrain = 0.0;
+	TbackStress = 0.0;
+	Thardening = 0.0;
+
+	// Initialize state variables
+	Tstrain = 0.0;
+	Tstress = 0.0;
+	Ttangent = E;
+
     return 0;
 }
 
@@ -172,20 +166,22 @@ UniaxialMaterial *
 HardeningMaterial::getCopy(void)
 {
     HardeningMaterial *theCopy =
-	new HardeningMaterial(this->getTag(), E, sigmaY, K, H);
+	new HardeningMaterial(this->getTag(), E, sigmaY, Hiso, Hkin);
+
+    // Copy committed history variables
+    theCopy->CplasticStrain = CplasticStrain;
+    theCopy->CbackStress = CbackStress;
+    theCopy->Chardening = Chardening;
+
+	// Copy trial history variables
+    theCopy->TplasticStrain = TplasticStrain;
+    theCopy->TbackStress = TbackStress;
+    theCopy->Thardening = Thardening;
 
     // Copy trial state variables
     theCopy->Tstrain = Tstrain;
     theCopy->Tstress = Tstress;
     theCopy->Ttangent = Ttangent;
-    theCopy->TplasticStrain = TplasticStrain;
-    theCopy->TbackStress = TbackStress;
-    theCopy->Thardening = Thardening;
-    
-    // Copy committed state variables
-    theCopy->CplasticStrain = CplasticStrain;
-    theCopy->CbackStress = CbackStress;
-    theCopy->Chardening = Chardening;
     
     return theCopy;
 }
@@ -200,8 +196,8 @@ HardeningMaterial::sendSelf(int cTag, Channel &theChannel)
   data(0) = this->getTag();
   data(1) = E;
   data(2) = sigmaY;
-  data(3) = K;
-  data(4) = H;
+  data(3) = Hiso;
+  data(4) = Hkin;
   data(5) = CplasticStrain;
   data(6) = CbackStress;
   data(7) = Chardening;
@@ -231,14 +227,11 @@ HardeningMaterial::recvSelf(int cTag, Channel &theChannel,
     this->setTag((int)data(0));
     E = data(1);
     sigmaY = data(2);
-    K = data(3);
-    H = data(4);
+    Hiso = data(3);
+    Hkin = data(4);
     CplasticStrain = data(5);
     CbackStress = data(6);
     Chardening = data(7);
-
-    // Set the trial state variables
-    revertToLastCommit();
   }
     
   return res;
@@ -250,8 +243,8 @@ HardeningMaterial::Print(ostream &s, int flag)
     s << "HardeningMaterial, tag: " << this->getTag() << endl;
     s << "  E: " << E << endl;
     s << "  sigmaY: " << sigmaY << endl;
-    s << "  K: " << K << endl;
-    s << "  H: " << H << endl;
+    s << "  Hiso: " << Hiso << endl;
+    s << "  Hkin: " << Hkin << endl;
 }
 
 
