@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-12-07 00:48:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.h,v $
                                                                         
                                                                         
@@ -75,8 +75,8 @@ class Subdomain: public Element, public Domain
     // Domain methods which must be rewritten
     virtual bool addNode(Node *);	
     virtual Node *removeNode(int tag);        
-    virtual NodeIter  &getNodes(void);    
-    virtual Node *getNodePtr(int tag);            
+    virtual NodeIter &getNodes(void);    
+    virtual Node *getNode(int tag);            
     virtual int getNumNodes(void) const;    
     virtual int commit(void);
     virtual int revertToLastCommit(void);    
@@ -106,7 +106,9 @@ class Subdomain: public Element, public Domain
     virtual const Matrix &getMass(void);    
 
     virtual void  zeroLoad(void);
-    virtual int	  addLoad(const Vector &load);
+    virtual int addLoad(ElementalLoad *theLoad, double loadFactor);
+    virtual int addInertiaLoadToUnbalance(const Vector &accel);
+
     virtual const Vector &getResistingForce(void);    
     virtual const Vector &getResistingForceIncInertia(void);        
     virtual bool isSubdomain(void);    
@@ -119,6 +121,7 @@ class Subdomain: public Element, public Domain
     void setFE_ElementPtr(FE_Element *theFE_Ele);
     virtual const Vector &getLastExternalSysResponse(void);
     virtual int computeNodalResponse(void);    
+    virtual int newStep(double deltaT);
 
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 

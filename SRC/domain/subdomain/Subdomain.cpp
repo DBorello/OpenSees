@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-12-07 00:48:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
                                                                         
@@ -253,7 +253,7 @@ Subdomain::getNodes()
 }
 
 Node *
-Subdomain::getNodePtr(int tag) 
+Subdomain::getNode(int tag) 
 {
 
   TaggedObject *object = internalNodes->getComponentPtr(tag);
@@ -486,11 +486,18 @@ Subdomain::zeroLoad(void)
     cerr << "Subdomain::zeroLoad() - should not be called\n";
 }
 
+
 int	  
-Subdomain::addLoad(const Vector &load)
+Subdomain::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
     cerr << "Subdomain::addLoad() - should not be called\n";
     return 0;
+}
+
+int	  
+Subdomain::addInertiaLoadToUnbalance(const Vector &accel)
+{
+  return 0;
 }
 
 
@@ -657,6 +664,14 @@ Subdomain::computeNodalResponse(void)
     }
 }
 
+
+int 
+Subdomain::newStep(double dT)
+{
+  theAnalysis->newStep(dT);
+  return -1;
+}
+
 int 
 Subdomain::sendSelf(int cTag, Channel &theChannel)
 {
@@ -724,7 +739,7 @@ Subdomain::buildMap(void)
 	int numExtNodes = theExtNodes.Size();
 	int locInMap =0;
 	for (int i=0; i<numExtNodes; i++) {
-	  Node *nodePtr = this->getNodePtr(theExtNodes(i));
+	  Node *nodePtr = this->getNode(theExtNodes(i));
 	  int numNodeDOF = nodePtr->getNumberDOF();
 	  DOF_Group *theDOF = nodePtr->getDOF_GroupPtr();
 	  const ID &theLocalID = theDOF->getID();
