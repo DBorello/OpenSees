@@ -36,6 +36,8 @@
 #include <EightNodeBrick_u_p_U.h>
 #define FixedOrder 2
 
+#include <fstream.h>
+
 // Changed to static data members on 01/16/2002
 
 Matrix EightNodeBrick_u_p_U::K(56, 56);      
@@ -1746,7 +1748,7 @@ const Matrix &EightNodeBrick_u_p_U::getTangentStiff ()
       }
 
 
-    for ( int i=0 ; i<8 ; i++ )  		
+    for ( i=0 ; i<8 ; i++ )  		
       {
         for ( int j=0 ; j<8 ; j++ )
            {
