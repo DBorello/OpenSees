@@ -638,4 +638,38 @@ void straintensor::reportshort(char * msg) const
 
   }
 
+OPS_Stream& operator<< (OPS_Stream& os, const straintensor & rhs)
+{
+  opserr << "straintensor: I1 = " << rhs.Iinvariant1() << ", I2 = " << rhs.Iinvariant2() << ", I3 = " << 
+    rhs.Iinvariant3() << endln;
+
+  opserr << "st_trace = " << rhs.trace() << ", mean pressure p = " << rhs.trace()/3.0 << endln;
+
+  /*
+    tensor I2("I", 2, def_dim_2);
+
+    straintensor st_vol = I2 * trace() * (1./3.);
+    st_vol.print("st_v","tensor st_vol (volumetric part of the st tensor)");
+
+    straintensor st_dev = this->deviator();  // - st_vol;
+    st_dev.print("st_d","tensor st_dev (strain deviator)");
+
+    ::printf("J1 = %.8e ; J2 = %.8e ; J3 = %.8e ;\n",
+              Jinvariant1(),Jinvariant2(),Jinvariant3());
+
+    straintensor st_principal = principal();
+    st_principal.print("st_p","principal strain tensor");
+
+
+    ::printf("sig_oct = %.8e  , tau_oct = %.8e\n",
+              sigma_octahedral(), tau_octahedral());
+
+
+    ::printf("ksi=%.6e, ro=%.6e, theta=%.6e=%.6e*PI \n",
+              ksi(),    ro(),    theta(),  thetaPI());
+
+  */
+  return os;
+}
+
 #endif

@@ -30,6 +30,7 @@
 #ifndef STRAINTENSOR_HH
 #define STRAINTENSOR_HH
 
+#include <OPS_Globals.h>
 #include "BJtensor.h"
 
 class straintensor : public tensor
@@ -94,6 +95,8 @@ class straintensor : public tensor
 
     void report(char *) const;
     void reportshort(char *) const;
+
+    friend OPS_Stream& operator<< (OPS_Stream& os, const straintensor & rhs);
 
 //..// polinomial root solver friend functions definitions
 //..public:

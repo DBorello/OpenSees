@@ -32,6 +32,8 @@
 
 #include <OPS_Globals.h>
 #include "BJtensor.h"
+class Material_Model;
+
 
 class stresstensor : public BJtensor
 {
