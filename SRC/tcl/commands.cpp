@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-05-18 04:49:41 $
+// $Revision: 1.6 $
+// $Date: 2001-06-13 05:13:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -83,6 +83,8 @@ extern "C" {
 #include <NewtonLineSearch.h>
 #include <ModifiedNewton.h>
 #include <FrequencyAlgo.h>
+//#include <Broyden.h>
+//#include <BFGS.h>
 
 // constraint handlers
 #include <PlainHandler.h>
@@ -155,6 +157,14 @@ extern "C" {
 #include <ConsoleErrorHandler.h>
 
 #include <TclVideoPlayer.h>
+
+
+
+#ifdef _RELIABILITY
+#include <TclReliabilityBuilder.h>
+static TclReliabilityBuilder *theReliabilityBuilder = 0;
+int reliability(ClientData, Tcl_Interp *, int, char **);
+#endif
 
 ModelBuilder *theBuilder =0;
 Domain theDomain;
@@ -241,6 +251,12 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "nodeDisp", nodeDisp, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
 
+#ifdef _RELIABILITY
+    Tcl_CreateCommand(interp, "reliability", reliability, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
+    theReliabilityBuilder = 0;
+#endif
+
     theAlgorithm =0;
     theHandler =0;
     theNumberer =0;
@@ -260,6 +276,21 @@ int g3AppInit(Tcl_Interp *interp) {
     return myCommands(interp);
 }
 
+
+#ifdef _RELIABILITY
+
+int 
+reliability(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+{
+  if (theReliabilityBuilder == 0) {
+    theReliabilityBuilder = new TclReliabilityBuilder(theDomain,interp);
+    return TCL_OK;
+  }
+  else
+    return TCL_ERROR;
+}
+
+#endif
 
 int 
 wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, 
@@ -283,6 +314,12 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc,
       delete theTransientAnalysis;  
   }
 
+#ifdef _RELIABILITY
+  if (theReliabilityBuilder != 0) {
+    delete theReliabilityBuilder;
+    theReliabilityBuilder = 0;
+  }
+#endif
 
   // NOTE : DON'T do the above on theVariableTimeStepAnalysis
   // as it and theTansientAnalysis are one in the same
@@ -1220,7 +1257,7 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
     }
     theNewAlgo = new NewtonRaphson(*theTest, formTangent); 
   }
-  
+
   else if (strcmp(argv[1],"ModifiedNewton") == 0) {
     int formTangent = CURRENT_TANGENT;
     if (argc > 2) {
