@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomainActor.cpp,v $
                                                                         
                                                                         
@@ -64,14 +64,14 @@ int main(int argv, char **argc)
     // theChannel = new TCP_SocketNoDelay(port,machine);
     // }   
     else {
-	cerr << "ACTOR PROCESS: ShadowSubdomainActor Exiting ";	
-	cerr << "- invalid channel type " << channelType << endl;
+	opserr << "ACTOR PROCESS: ShadowSubdomainActor Exiting ";	
+	opserr << "- invalid channel type " << channelType << endln;
 	exit(-1);
     }
 
     if (theChannel == 0) {
-	cerr << "ACTOR PROCESS: ShadowSubdomainActor Exiting ";	
-	cerr << "- could not create the channel " << endl;
+	opserr << "ACTOR PROCESS: ShadowSubdomainActor Exiting ";	
+	opserr << "- could not create the channel " << endln;
 	exit(-1);
     }	
 
@@ -89,8 +89,8 @@ int main(int argv, char **argc)
     theActor.run();
 
     // exit normally
-    cerr << "ShadowSubdomainActor:: ACTOR PROCESS EXITING\n\n";
-    // cerr << theActor;
+    opserr << "ShadowSubdomainActor:: ACTOR PROCESS EXITING\n\n";
+    // opserr << theActor;
     exit(0);
 }
 

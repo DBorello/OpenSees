@@ -19,7 +19,7 @@ public:
 	virtual ~YS_Evolution2D();
 
 //  Methods inherited
-	virtual void	Print(ostream &s, int flag =0) =0;
+	virtual void	Print(OPS_Stream &s, int flag =0) =0;
 	virtual YS_Evolution *getCopy(void) = 0;
     virtual Response *setResponse(char **argv, int argc, Information &info);
 	virtual int 	getResponse(int responseID, Information &info);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2002-12-06 21:11:18 $
+// $Revision: 1.26 $
+// $Date: 2003-02-14 23:01:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -59,10 +59,10 @@ TclModelBuilder_addFeapMaterial(ClientData clientData, Tcl_Interp *interp,
 
 static void printCommand(int argc, char **argv)
 {
-    cerr << "Input command: ";
+    opserr << "Input command: ";
     for (int i=0; i<argc; i++)
-	cerr << argv[i] << " ";
-    cerr << endl;
+	opserr << argv[i] << " ";
+    opserr << endln;
 } 
 
 int
@@ -71,8 +71,8 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 {
     // Make sure there is a minimum number of arguments
     if (argc < 3) {
-	cerr << "WARNING insufficient number of ND material arguments\n";
-	cerr << "Want: nDMaterial type? tag? <specific material args>" << endl;
+	opserr << "WARNING insufficient number of ND material arguments\n";
+	opserr << "Want: nDMaterial type? tag? <specific material args>" << endln;
 	return TCL_ERROR;
     }
 
@@ -85,9 +85,9 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     // Pressure dependent elastic material
     if (strcmp(argv[1],"PressureDependentElastic3D") == 0) {
 	if (argc < 6) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial PressureDependentElastic3D tag? E? v? rho?" << endl;
+	    opserr << "Want: nDMaterial PressureDependentElastic3D tag? E? v? rho?" << endln;
 	    return TCL_ERROR;
 	}    
 
@@ -100,25 +100,25 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	double pop = 0.0;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid PressureDependentElastic3D tag" << endl;
+	    opserr << "WARNING invalid PressureDependentElastic3D tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
-	    cerr << "WARNING invalid E\n";
-	    cerr << "nDMaterial PressureDependentElastic3D: E" << tag << endl;
+	    opserr << "WARNING invalid E\n";
+	    opserr << "nDMaterial PressureDependentElastic3D: E" << tag << endln;
 	    return TCL_ERROR;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[4], &v) != TCL_OK) {
-	    cerr << "WARNING invalid v\n";
-	    cerr << "nDMaterial PressureDependentElastic3D: v" << tag << endl;
+	    opserr << "WARNING invalid v\n";
+	    opserr << "nDMaterial PressureDependentElastic3D: v" << tag << endln;
 	    return TCL_ERROR;	
 	}
 				 
 	if (Tcl_GetDouble(interp, argv[5], &rho) != TCL_OK) {
-	    cerr << "WARNING invalid v\n";
-	    cerr << "nDMaterial PressureDependentElastic3D: rho" << tag << endl;
+	    opserr << "WARNING invalid v\n";
+	    opserr << "nDMaterial PressureDependentElastic3D: rho" << tag << endln;
 	    return TCL_ERROR;	
 	}
 	
@@ -126,36 +126,36 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	if( argc == 6 ) 
 	{
      	   theMaterial = new PressureDependentElastic3D (tag, E, v, rho);
-	   //cerr << "nDMaterial PressureDependentElastic3D: expp =" << expp << endl;
+	   //opserr << "nDMaterial PressureDependentElastic3D: expp =" << expp << endln;
 	}
 //////////////////////////////////////////////////////////////////////////////////
 	else if( argc == 7 ) 
 	{
 	   //get the exponent of the pressure sensitive elastic material)
 	   if (Tcl_GetDouble(interp, argv[6], &expp) != TCL_OK) {
-	       cerr << "WARNING invalid v\n";
-	       cerr << "nDMaterial PressureDependentElastic3D: " << tag << endl;
+	       opserr << "WARNING invalid v\n";
+	       opserr << "nDMaterial PressureDependentElastic3D: " << tag << endln;
 	       return TCL_ERROR;	
 	   }
      	   theMaterial = new PressureDependentElastic3D (tag, E, v, rho, expp);
-	   //cerr << "nDMaterial PressureDependentElastic3D: expp =" << expp << endl;
+	   //opserr << "nDMaterial PressureDependentElastic3D: expp =" << expp << endln;
 	}
 //////////////////////////////////////////////////////////////////////////////////
 	else if (argc == 8 ) 
 	{
 	   //get the exponent pressure of the pressure sensitive elastic material)
 	   if (Tcl_GetDouble(interp, argv[6], &expp) != TCL_OK) {
-	       cerr << "WARNING invalid v\n";
-	       cerr << "nDMaterial PressureDependentElastic3D: expp" << tag << endl;
+	       opserr << "WARNING invalid v\n";
+	       opserr << "nDMaterial PressureDependentElastic3D: expp" << tag << endln;
 	       return TCL_ERROR;	
 	   } 
 	   //get the reference pressure of the pressure sensitive elastic material)
 	   if (Tcl_GetDouble(interp, argv[7], &prp) != TCL_OK) {
-	       cerr << "WARNING invalid v\n";
-	       cerr << "nDMaterial PressureDependentElastic3D: prp " << tag << endl;
+	       opserr << "WARNING invalid v\n";
+	       opserr << "nDMaterial PressureDependentElastic3D: prp " << tag << endln;
 	       return TCL_ERROR;	
 	   }
-	   //cerr << "nDMaterial ElasticIsotropic3D: prp =" << prp << endl;
+	   //opserr << "nDMaterial ElasticIsotropic3D: prp =" << prp << endln;
      	   theMaterial = new PressureDependentElastic3D (tag, E, v, rho, expp, prp);
 	}
 //////////////////////////////////////////////////////////////////////////////////
@@ -163,23 +163,23 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	{
 	   //get the exponent of the pressure sensitive elastic material)
 	   if (Tcl_GetDouble(interp, argv[6], &expp) != TCL_OK) {
-	       cerr << "WARNING invalid v\n";
-	       cerr << "nDMaterial PressureDependentElastic3D: expp" << tag << endl;
+	       opserr << "WARNING invalid v\n";
+	       opserr << "nDMaterial PressureDependentElastic3D: expp" << tag << endln;
 	       return TCL_ERROR;	
 	   }
 	   //get the reference pressure of the pressure sensitive elastic material)
 	   if (Tcl_GetDouble(interp, argv[7], &prp) != TCL_OK) {
-	       cerr << "WARNING invalid v\n";
-	       cerr << "nDMaterial PressureDependentElastic3D: prp" << tag << endl;
+	       opserr << "WARNING invalid v\n";
+	       opserr << "nDMaterial PressureDependentElastic3D: prp" << tag << endln;
 	       return TCL_ERROR;	
 	   }
 	   //get the cutoff pressure po of the pressure sensitive elastic material)
 	   if (Tcl_GetDouble(interp, argv[8], &pop) != TCL_OK) {
-	       cerr << "WARNING invalid v\n";
-	       cerr << "nDMaterial PressureDependentElastic3D: pop" << tag << endl;
+	       opserr << "WARNING invalid v\n";
+	       opserr << "nDMaterial PressureDependentElastic3D: pop" << tag << endln;
 	       return TCL_ERROR;	
 	   }
-	   //cerr << "nDMaterial PressureDependentElastic3D: pop =" << pop << endl;
+	   //opserr << "nDMaterial PressureDependentElastic3D: pop =" << pop << endln;
      	   theMaterial = new PressureDependentElastic3D (tag, E, v, rho, expp, prp, pop);
 	}
 
@@ -189,9 +189,9 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     else if ( strcmp(argv[1],"ElasticIsotropic3D") == 0 )
     {
 	if (argc < 6) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial ElasticIsotropic3D tag? E? v? <rho?>" << endl;
+	    opserr << "Want: nDMaterial ElasticIsotropic3D tag? E? v? <rho?>" << endln;
 	    return TCL_ERROR;
 	}    
 
@@ -201,27 +201,27 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	double rho = 0.0;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid ElasticIsotropic3D tag" << endl;
+	    opserr << "WARNING invalid ElasticIsotropic3D tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
-	    cerr << "WARNING invalid E\n";
-	    cerr << "nDMaterial ElasticIsotropic3D: " << tag << endl;
+	    opserr << "WARNING invalid E\n";
+	    opserr << "nDMaterial ElasticIsotropic3D: " << tag << endln;
 	    return TCL_ERROR;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[4], &v) != TCL_OK) {
-	    cerr << "WARNING invalid v\n";
-	    cerr << "nDMaterial ElasticIsotropic3D: " << tag << endl;
+	    opserr << "WARNING invalid v\n";
+	    opserr << "nDMaterial ElasticIsotropic3D: " << tag << endln;
 	    return TCL_ERROR;	
 	}
 	
  
  if (argc > 5 && Tcl_GetDouble(interp, argv[5], &rho) != TCL_OK) 
    {
-     cerr << "WARNING invalid rho\n";
-     cerr << "nDMaterial ElasticIsotropic: " << tag << endl;
+     opserr << "WARNING invalid rho\n";
+     opserr << "nDMaterial ElasticIsotropic: " << tag << endln;
      return TCL_ERROR;   
    }
 
@@ -231,9 +231,9 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 
     else if (strcmp(argv[1],"ElasticIsotropic") == 0) {
 	if (argc < 5) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial ElasticIsotropic tag? E? v? <rho?>" << endl;
+	    opserr << "Want: nDMaterial ElasticIsotropic tag? E? v? <rho?>" << endln;
 	    return TCL_ERROR;
 	}    
 
@@ -242,26 +242,26 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	double rho = 0.0;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid ElasticIsotropic tag" << endl;
+	    opserr << "WARNING invalid ElasticIsotropic tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
-	    cerr << "WARNING invalid E\n";
-	    cerr << "nDMaterial ElasticIsotropic: " << tag << endl;
+	    opserr << "WARNING invalid E\n";
+	    opserr << "nDMaterial ElasticIsotropic: " << tag << endln;
 	    return TCL_ERROR;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[4], &v) != TCL_OK) {
-	    cerr << "WARNING invalid v\n";
-	    cerr << "nDMaterial ElasticIsotropic: " << tag << endl;
+	    opserr << "WARNING invalid v\n";
+	    opserr << "nDMaterial ElasticIsotropic: " << tag << endln;
 	    return TCL_ERROR;	
 	}
 
  if (argc > 5 && Tcl_GetDouble(interp, argv[5], &rho) != TCL_OK) 
    {
-     cerr << "WARNING invalid rho\n";
-     cerr << "nDMaterial ElasticIsotropic: " << tag << endl;
+     opserr << "WARNING invalid rho\n";
+     opserr << "nDMaterial ElasticIsotropic: " << tag << endln;
      return TCL_ERROR;   
    }
 
@@ -272,9 +272,9 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     else if ((strcmp(argv[1],"J2Plasticity") == 0)  ||
 	     (strcmp(argv[1],"J2") == 0)) {
 	if (argc < 9) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial J2Plasticity tag? K? G? sig0? sigInf? delta? H? <eta?>" << endl;
+	    opserr << "Want: nDMaterial J2Plasticity tag? K? G? sig0? sigInf? delta? H? <eta?>" << endln;
 	    return TCL_ERROR;
 	}    
 
@@ -283,47 +283,47 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	double eta = 0.0;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid J2Plasticity tag" << endl;
+	    opserr << "WARNING invalid J2Plasticity tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	if (Tcl_GetDouble(interp, argv[3], &K) != TCL_OK) {
-	    cerr << "WARNING invalid K\n";
-	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    opserr << "WARNING invalid K\n";
+	    opserr << "nDMaterial J2Plasticity: " << tag << endln;
 	    return TCL_ERROR;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[4], &G) != TCL_OK) {
-	    cerr << "WARNING invalid G\n";
-	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    opserr << "WARNING invalid G\n";
+	    opserr << "nDMaterial J2Plasticity: " << tag << endln;
 	    return TCL_ERROR;	
 	}	
 
 	if (Tcl_GetDouble(interp, argv[5], &sig0) != TCL_OK) {
-	    cerr << "WARNING invalid sig0\n";
-	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    opserr << "WARNING invalid sig0\n";
+	    opserr << "nDMaterial J2Plasticity: " << tag << endln;
 	    return TCL_ERROR;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[6], &sigInf) != TCL_OK) {
-	    cerr << "WARNING invalid sigInf\n";
-	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    opserr << "WARNING invalid sigInf\n";
+	    opserr << "nDMaterial J2Plasticity: " << tag << endln;
 	    return TCL_ERROR;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[7], &delta) != TCL_OK) {
-	    cerr << "WARNING invalid delta\n";
-	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    opserr << "WARNING invalid delta\n";
+	    opserr << "nDMaterial J2Plasticity: " << tag << endln;
 	    return TCL_ERROR;	
 	}	
 	if (Tcl_GetDouble(interp, argv[8], &H) != TCL_OK) {
-	    cerr << "WARNING invalid H\n";
-	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    opserr << "WARNING invalid H\n";
+	    opserr << "nDMaterial J2Plasticity: " << tag << endln;
 	    return TCL_ERROR;	
 	}			
 	if (argc > 9 && Tcl_GetDouble(interp, argv[9], &eta) != TCL_OK) {
-	    cerr << "WARNING invalid eta\n";
-	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    opserr << "WARNING invalid eta\n";
+	    opserr << "nDMaterial J2Plasticity: " << tag << endln;
 	    return TCL_ERROR;	
 	}			
 
@@ -346,25 +346,25 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 			"frictionAng (=0)", "refPress (=100)", "pressDependCoe (=0.0)",
 	    "numberOfYieldSurf (=20)"};
 	if (argc < (3+numParam)) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial PressureIndependMultiYield tag? " << arg[0];
-	    cerr << "? "<< "\n";
-	    cerr << arg[1] << "? "<< arg[2] << "? "<< arg[3] << "? "<< "\n";
-	    cerr << arg[4] << "? "<< arg[5] << "? "<< arg[6] << "? "<< "\n";
-	    cerr << arg[7] << "? "<< arg[8] << "? "<< arg[9] << "? "<<endl;
+	    opserr << "Want: nDMaterial PressureIndependMultiYield tag? " << arg[0];
+	    opserr << "? "<< "\n";
+	    opserr << arg[1] << "? "<< arg[2] << "? "<< arg[3] << "? "<< "\n";
+	    opserr << arg[4] << "? "<< arg[5] << "? "<< arg[6] << "? "<< "\n";
+	    opserr << arg[7] << "? "<< arg[8] << "? "<< arg[9] << "? "<<endln;
 	    return TCL_ERROR;
 	}    
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid PressureIndependMultiYield tag" << endl;
+	    opserr << "WARNING invalid PressureIndependMultiYield tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	for (int i=3; (i<argc && i<13); i++) 
 	    if (Tcl_GetDouble(interp, argv[i], &param[i-3]) != TCL_OK) {
-		    cerr << "WARNING invalid " << arg[i-3] << "\n";
-		    cerr << "nDMaterial PressureIndependMultiYield: " << tag << endl;
+		    opserr << "WARNING invalid " << arg[i-3] << "\n";
+		    opserr << "nDMaterial PressureIndependMultiYield: " << tag << endln;
 		    return TCL_ERROR;	
 	    }
 	
@@ -375,8 +375,8 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
      gredu = new double[int(2*param[9])];
 		 for (int i=0; i<2*param[9]; i++) 
 	      if (Tcl_GetDouble(interp, argv[i+13], &gredu[i]) != TCL_OK) {
-		      cerr << "WARNING invalid " << arg[i-3] << "\n";
-		      cerr << "nDMaterial PressureIndependMultiYield: " << tag << endl;
+		      opserr << "WARNING invalid " << arg[i-3] << "\n";
+		      opserr << "nDMaterial PressureIndependMultiYield: " << tag << endln;
 		      return TCL_ERROR;	
 				}
   }
@@ -415,29 +415,29 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 			"e (=0.6)", "volLimit1 (=0.9)", "volLimit2 (=0.02)", 
 			"volLimit3 (=0.7)", "Atmospheric pressure (=101)", "cohesi (=.5)"};
 	if (argc < (3+numParam)) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial PressureDependMultiYield tag? "<< arg[0];
-	    cerr << "? "<< "\n";
-	    cerr << arg[1] << "? "<< arg[2] << "? "<< arg[3] << "? "<< "\n";
-	    cerr << arg[4] << "? "<< arg[5] << "? "<< arg[6] << "? "<< "\n";
-	    cerr << arg[7] << "? "<< arg[8] << "? "<< arg[9] << "? "<< "\n";
-	    cerr << arg[10] << "? "<< arg[11] << "? "<< arg[12] << "? "<< "\n";
-	    cerr << arg[13] << "? "<< arg[14] << "? "<< arg[15] << "? "<< "\n"; 
-	    cerr << arg[16] << "? "<< arg[17] << "? "<< arg[18] << "? "<< "\n"; 
-	    cerr << arg[19] << "? "<< arg[20] << "? "<< arg[21] << "? "<< endl; 
+	    opserr << "Want: nDMaterial PressureDependMultiYield tag? "<< arg[0];
+	    opserr << "? "<< "\n";
+	    opserr << arg[1] << "? "<< arg[2] << "? "<< arg[3] << "? "<< "\n";
+	    opserr << arg[4] << "? "<< arg[5] << "? "<< arg[6] << "? "<< "\n";
+	    opserr << arg[7] << "? "<< arg[8] << "? "<< arg[9] << "? "<< "\n";
+	    opserr << arg[10] << "? "<< arg[11] << "? "<< arg[12] << "? "<< "\n";
+	    opserr << arg[13] << "? "<< arg[14] << "? "<< arg[15] << "? "<< "\n"; 
+	    opserr << arg[16] << "? "<< arg[17] << "? "<< arg[18] << "? "<< "\n"; 
+	    opserr << arg[19] << "? "<< arg[20] << "? "<< arg[21] << "? "<< endln; 
 	    return TCL_ERROR;
 	}    
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid PressureDependMultiYield tag" << endl;
+	    opserr << "WARNING invalid PressureDependMultiYield tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	for (int i=3; (i<argc && i<19); i++) 
 	  if (Tcl_GetDouble(interp, argv[i], &param[i-3]) != TCL_OK) {
-		    cerr << "WARNING invalid " << arg[i-3] << "\n";
-		    cerr << "nDMaterial PressureDependMultiYield: " << tag << endl;
+		    opserr << "WARNING invalid " << arg[i-3] << "\n";
+		    opserr << "nDMaterial PressureDependMultiYield: " << tag << endln;
 		    return TCL_ERROR;	
 	  }
 	
@@ -449,8 +449,8 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 
 		 for (int i=0; i<2*param[15]; i++) 
 	      if (Tcl_GetDouble(interp, argv[i+19], &gredu[i]) != TCL_OK) {
-		      cerr << "WARNING invalid " << arg[i-3] << "\n";
-		      cerr << "nDMaterial PressureIndependMultiYield: " << tag << endl;
+		      opserr << "WARNING invalid " << arg[i-3] << "\n";
+		      opserr << "nDMaterial PressureIndependMultiYield: " << tag << endln;
 		      return TCL_ERROR;	
 				}
   }
@@ -458,15 +458,15 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	if (gredu != 0) {
 	  for (int i=19+int(2*param[15]); i<argc; i++) 
 	    if (Tcl_GetDouble(interp, argv[i], &param[i-3-int(2*param[15])]) != TCL_OK) {
-		      cerr << "WARNING invalid " << arg[i-3-int(2*param[15])] << "\n";
-		      cerr << "nDMaterial PressureDependMultiYield: " << tag << endl;
+		      opserr << "WARNING invalid " << arg[i-3-int(2*param[15])] << "\n";
+		      opserr << "nDMaterial PressureDependMultiYield: " << tag << endln;
 		      return TCL_ERROR;	
 			}
   } else {
 	  for (int i=19; i<argc; i++) 
 	    if (Tcl_GetDouble(interp, argv[i], &param[i-3]) != TCL_OK) {
-		      cerr << "WARNING invalid " << arg[i-3-int(2*param[15])] << "\n";
-		      cerr << "nDMaterial PressureDependMultiYield: " << tag << endl;
+		      opserr << "WARNING invalid " << arg[i-3-int(2*param[15])] << "\n";
+		      opserr << "nDMaterial PressureDependMultiYield: " << tag << endln;
 		      return TCL_ERROR;	
 			}
   } 
@@ -490,30 +490,30 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	int tag;  double param[3]; 	
 	char * arg[] = {"nd", "soilMatTag", "combinedBulkModul"};
 	if (argc < 6) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial FluidSolidPorous tag? "<< arg[0];
-	    cerr << "? "<< "\n";
-	    cerr << arg[1] << "? "<< arg[2] << "? "<< endl;
+	    opserr << "Want: nDMaterial FluidSolidPorous tag? "<< arg[0];
+	    opserr << "? "<< "\n";
+	    opserr << arg[1] << "? "<< arg[2] << "? "<< endln;
 	    return TCL_ERROR;
 	}    
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid FluidSolidPorous tag" << endl;
+	    opserr << "WARNING invalid FluidSolidPorous tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	for (int i=3; i<6; i++) 
 	  if (Tcl_GetDouble(interp, argv[i], &param[i-3] ) != TCL_OK) {
-	      cerr << "WARNING invalid " << arg[i-3] << "\n";
-	      cerr << "nDMaterial FluidSolidPorous: " << tag << endl;
+	      opserr << "WARNING invalid " << arg[i-3] << "\n";
+	      opserr << "nDMaterial FluidSolidPorous: " << tag << endln;
 	      return TCL_ERROR;	
 	  }
 
 	NDMaterial *soil = theTclBuilder->getNDMaterial(param[1]);
 	if (soil == 0) {
-	      cerr << "WARNING FluidSolidPorous: couldn't get soil material ";
-	      cerr << "tagged: " << param[1] << "\n";
+	      opserr << "WARNING FluidSolidPorous: couldn't get soil material ";
+	      opserr << "tagged: " << param[1] << "\n";
 	      return TCL_ERROR;	
 	}
 
@@ -527,30 +527,30 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
      else if (strcmp(argv[1],"PlaneStressMaterial") == 0 ||
  	     strcmp(argv[1],"PlaneStress") == 0) {
  	if (argc < 4) {
- 	    cerr << "WARNING insufficient arguments\n";
+ 	    opserr << "WARNING insufficient arguments\n";
  	    printCommand(argc,argv);
- 	    cerr << "Want: nDMaterial PlaneStress tag? matTag?" << endl;
+ 	    opserr << "Want: nDMaterial PlaneStress tag? matTag?" << endln;
  	    return TCL_ERROR;
  	}
  	
  	int tag, matTag;
  	
  	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
- 	    cerr << "WARNING invalid nDMaterial PlaneStress tag" << endl;
+ 	    opserr << "WARNING invalid nDMaterial PlaneStress tag" << endln;
  	    return TCL_ERROR;		
  	}
  
  	if (Tcl_GetInt (interp, argv[3], &matTag) != TCL_OK) {
- 	    cerr << "WARNING invalid matTag" << endl;
- 	    cerr << "PlaneStress: " << matTag << endl;	    	    
+ 	    opserr << "WARNING invalid matTag" << endln;
+ 	    opserr << "PlaneStress: " << matTag << endln;	    	    
  	    return TCL_ERROR;
  	}	
  
  	NDMaterial *threeDMaterial = theTclBuilder->getNDMaterial(matTag);
  	if (threeDMaterial == 0) {
- 	    cerr << "WARNING nD material does not exist\n";
- 	    cerr << "nD material: " << matTag; 
- 	    cerr << "\nPlaneStress nDMaterial: " << tag << endl;
+ 	    opserr << "WARNING nD material does not exist\n";
+ 	    opserr << "nD material: " << matTag; 
+ 	    opserr << "\nPlaneStress nDMaterial: " << tag << endln;
  	    return TCL_ERROR;
  	}
  
@@ -561,30 +561,30 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
      else if (strcmp(argv[1],"PlateFiberMaterial") == 0 ||
  	     strcmp(argv[1],"PlateFiber") == 0) {
  	if (argc < 4) {
- 	    cerr << "WARNING insufficient arguments\n";
+ 	    opserr << "WARNING insufficient arguments\n";
  	    printCommand(argc,argv);
- 	    cerr << "Want: nDMaterial PlateFiber tag? matTag?" << endl;
+ 	    opserr << "Want: nDMaterial PlateFiber tag? matTag?" << endln;
  	    return TCL_ERROR;
  	}
  	
  	int tag, matTag;
  	
  	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
- 	    cerr << "WARNING invalid nDMaterial PlateFiber tag" << endl;
+ 	    opserr << "WARNING invalid nDMaterial PlateFiber tag" << endln;
  	    return TCL_ERROR;		
  	}
  
  	if (Tcl_GetInt (interp, argv[3], &matTag) != TCL_OK) {
- 	    cerr << "WARNING invalid matTag" << endl;
- 	    cerr << "PlateFiber: " << matTag << endl;	    	    
+ 	    opserr << "WARNING invalid matTag" << endln;
+ 	    opserr << "PlateFiber: " << matTag << endln;	    	    
  	    return TCL_ERROR;
  	}	
  
  	NDMaterial *threeDMaterial = theTclBuilder->getNDMaterial(matTag);
  	if (threeDMaterial == 0) {
- 	    cerr << "WARNING nD material does not exist\n";
- 	    cerr << "nD material: " << matTag; 
- 	    cerr << "\nPlateFiber nDMaterial: " << tag << endl;
+ 	    opserr << "WARNING nD material does not exist\n";
+ 	    opserr << "nD material: " << matTag; 
+ 	    opserr << "\nPlateFiber nDMaterial: " << tag << endln;
  	    return TCL_ERROR;
  	}
  
@@ -594,30 +594,30 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
      else if (strcmp(argv[1],"BeamFiberMaterial") == 0 ||
  	     strcmp(argv[1],"BeamFiber") == 0) {
  	if (argc < 4) {
- 	    cerr << "WARNING insufficient arguments\n";
+ 	    opserr << "WARNING insufficient arguments\n";
  	    printCommand(argc,argv);
- 	    cerr << "Want: nDMaterial BeamFiber tag? matTag?" << endl;
+ 	    opserr << "Want: nDMaterial BeamFiber tag? matTag?" << endln;
  	    return TCL_ERROR;
  	}
  	
  	int tag, matTag;
  	
  	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
- 	    cerr << "WARNING invalid nDMaterial BeamFiber tag" << endl;
+ 	    opserr << "WARNING invalid nDMaterial BeamFiber tag" << endln;
  	    return TCL_ERROR;		
  	}
  
  	if (Tcl_GetInt (interp, argv[3], &matTag) != TCL_OK) {
- 	    cerr << "WARNING invalid matTag" << endl;
- 	    cerr << "BeamFiber: " << matTag << endl;	    	    
+ 	    opserr << "WARNING invalid matTag" << endln;
+ 	    opserr << "BeamFiber: " << matTag << endln;	    	    
  	    return TCL_ERROR;
  	}	
  
  	NDMaterial *threeDMaterial = theTclBuilder->getNDMaterial(matTag);
  	if (threeDMaterial == 0) {
- 	    cerr << "WARNING nD material does not exist\n";
- 	    cerr << "nD material: " << matTag; 
- 	    cerr << "\nBeamFiber nDMaterial: " << tag << endl;
+ 	    opserr << "WARNING nD material does not exist\n";
+ 	    opserr << "nD material: " << matTag; 
+ 	    opserr << "\nBeamFiber nDMaterial: " << tag << endln;
  	    return TCL_ERROR;
  	}
  
@@ -625,8 +625,8 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
      }	
 	 
     else if (strcmp(argv[1],"Bidirectional") == 0) {
-      cerr << "nDMaterial Bidirectional is now a section model, please "
-	   << "change to \'section Bidirectional\'" << endl;
+      opserr << "nDMaterial Bidirectional is now a section model, please "
+	   << "change to \'section Bidirectional\'" << endln;
       return TCL_ERROR;
     }
 
@@ -636,14 +636,14 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     }
 
     if (theMaterial == 0) {
-	cerr << "WARNING count not create nDMaterial: " << argv[1];
+	opserr << "WARNING count not create nDMaterial: " << argv[1];
 	return TCL_ERROR;
     }
 
     // Now add the material to the modelBuilder
     if (theTclBuilder->addNDMaterial(*theMaterial) < 0) {
-	cerr << "WARNING could not add material to the domain\n";
-	cerr << *theMaterial << endl;
+	opserr << "WARNING could not add material to the domain\n";
+	opserr << *theMaterial << endln;
 	delete theMaterial; // invoke the material objects destructor, otherwise mem leak
 	return TCL_ERROR;
     }

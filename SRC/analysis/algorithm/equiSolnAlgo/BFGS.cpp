@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 01:06:16 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/BFGS.cpp,v $
                                                                         
 // Written: Ed Love
@@ -36,10 +36,6 @@
 #include <FEM_ObjectBroker.h>
 #include <ConvergenceTest.h>
 #include <ID.h>
-
-
-#include <fstream.h>
-
 
 // Constructor
 BFGS::BFGS(int theTangentToUse, int n )
@@ -173,16 +169,16 @@ BFGS::solveCurrentStep(void)
 
     if ((theAnaModel == 0) || (theIntegrator == 0) || (theSOE == 0)
 	|| (theTest == 0)){
-	cerr << "WARNING BFGS::solveCurrentStep() - setLinks() has";
-	cerr << " not been called - or no ConvergenceTest has been set\n";
+	opserr << "WARNING BFGS::solveCurrentStep() - setLinks() has";
+	opserr << " not been called - or no ConvergenceTest has been set\n";
 	return -5;
     }	
 
     // set itself as the ConvergenceTest objects EquiSolnAlgo
     theTest->setEquiSolnAlgo(*this);
     if (theTest->start() < 0) {
-      cerr << "BFGS::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in start()\n";
+      opserr << "BFGS::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in start()\n";
       return -3;
     }
 
@@ -199,32 +195,32 @@ BFGS::solveCurrentStep(void)
     int count = 0;
     do {
 
-      // cerr << "      BFGS -- Forming New Tangent" << endl;
+      // opserr << "      BFGS -- Forming New Tangent" << endln;
 
       //form the initial tangent
       if (theIntegrator->formTangent(tangent) < 0){
-         cerr << "WARNING BFGS::solveCurrentStep() -";
-         cerr << "the Integrator failed in formTangent()\n";
+         opserr << "WARNING BFGS::solveCurrentStep() -";
+         opserr << "the Integrator failed in formTangent()\n";
          return -1; 
       }
 
       //form the initial residual 
       if (theIntegrator->formUnbalance() < 0) {
-        cerr << "WARNING BFGS::solveCurrentStep() -";
-        cerr << "the Integrator failed in formUnbalance()\n";	
+        opserr << "WARNING BFGS::solveCurrentStep() -";
+        opserr << "the Integrator failed in formUnbalance()\n";	
       }	    
 
       //solve
       if (theSOE->solve() < 0) {
-	  cerr << "WARNING BFGS::solveCurrentStep() -";
-	  cerr << "the LinearSysOfEqn failed in solve()\n";	
+	  opserr << "WARNING BFGS::solveCurrentStep() -";
+	  opserr << "the LinearSysOfEqn failed in solve()\n";	
 	  return -3;
 	}	    
 
       //update
       if ( theIntegrator->update(theSOE->getX() ) < 0) {
-	cerr << "WARNING BFGS::solveCurrentStep() -";
-	cerr << "the Integrator failed in update()\n";	
+	opserr << "WARNING BFGS::solveCurrentStep() -";
+	opserr << "the Integrator failed in update()\n";	
 	return -4;
       }	        
 
@@ -250,8 +246,8 @@ BFGS::solveCurrentStep(void)
 
       //form the residual again
       if (theIntegrator->formUnbalance() < 0) {
-        cerr << "WARNING BFGS::solveCurrentStep() -";
-        cerr << "the Integrator failed in formUnbalance()\n";	
+        opserr << "WARNING BFGS::solveCurrentStep() -";
+        opserr << "the Integrator failed in formUnbalance()\n";	
       }	    
 
       if ( residNew == 0 ) 
@@ -275,8 +271,8 @@ BFGS::solveCurrentStep(void)
       
         //solve
         if (theSOE->solve() < 0) {
-	    cerr << "WARNING BFGS::solveCurrentStep() -";
-	    cerr << "the LinearSysOfEqn failed in solve()\n";	
+	    opserr << "WARNING BFGS::solveCurrentStep() -";
+	    opserr << "the LinearSysOfEqn failed in solve()\n";	
 	    return -3;
         }	    
 
@@ -290,14 +286,14 @@ BFGS::solveCurrentStep(void)
         BFGSUpdate( theIntegrator, theSOE, *du, *b, nBFGS ) ;
 
         if ( theIntegrator->update( *du ) < 0 ) {
-	   cerr << "WARNING BFGS::solveCurrentStep() -";
-	   cerr << "the Integrator failed in update()\n";	
+	   opserr << "WARNING BFGS::solveCurrentStep() -";
+	   opserr << "the Integrator failed in update()\n";	
 	   return -4;
         }	        
 
-	/* cerr << "        BFGS Iteration " << nBFGS 
+	/* opserr << "        BFGS Iteration " << nBFGS 
             << " Residual Norm = " 
-            << sqrt( (*residNew) ^ (*residNew) ) << endl;
+            << sqrt( (*residNew) ^ (*residNew) ) << endln;
 	*/
         
         //increment broyden counter
@@ -314,8 +310,8 @@ BFGS::solveCurrentStep(void)
 
         //form the residual again
         if (theIntegrator->formUnbalance() < 0) {
-          cerr << "WARNING BFGS::solveCurrentStep() -";
-          cerr << "the Integrator failed in formUnbalance()\n";	
+          opserr << "WARNING BFGS::solveCurrentStep() -";
+          opserr << "the Integrator failed in formUnbalance()\n";	
         }	    
 
         result = localTest->test();
@@ -331,8 +327,8 @@ BFGS::solveCurrentStep(void)
 
 
     if (result == -2) {
-      cerr << "BFGS::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in test()\n";
+      opserr << "BFGS::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in test()\n";
       return -3;
     }
 
@@ -365,8 +361,8 @@ void  BFGS::BFGSUpdate(IncrementalIntegrator *theIntegrator,
 
 
   if (theSOE->solve() < 0) {
-       cerr << "WARNING BFGS::solveCurrentStep() -";
-       cerr << "the LinearSysOfEqn failed in solve()\n";	
+       opserr << "WARNING BFGS::solveCurrentStep() -";
+       opserr << "the LinearSysOfEqn failed in solve()\n";	
    }	    
   
   if ( z[nBFGS] == 0 ) 
@@ -487,10 +483,10 @@ BFGS::recvSelf(int cTag,
 
 
 void
-BFGS::Print(ostream &s, int flag)
+BFGS::Print(OPS_Stream &s, int flag)
 {
     if (flag == 0) {
-      s << "BFGS" << endl;
-      s << "  Number of Iterations = " << numberLoops << endl;
+      s << "BFGS" << endln;
+      s << "  Number of Iterations = " << numberLoops << endln;
     }
 }

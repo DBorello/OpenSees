@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2001-12-11 20:09:35 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonLineSearch.cpp,v $
 
 // Written: fmk 
@@ -83,8 +83,8 @@ NewtonLineSearch::solveCurrentStep(void)
 
     if ((theAnaModel == 0) || (theIntegrator == 0) || (theSOE == 0)
 	|| (theTest == 0)){
-	cerr << "WARNING NewtonLineSearch::solveCurrentStep() - setLinks() has";
-	cerr << " not been called - or no ConvergenceTest has been set\n";
+	opserr << "WARNING NewtonLineSearch::solveCurrentStep() - setLinks() has";
+	opserr << " not been called - or no ConvergenceTest has been set\n";
 	return -5;
     }	
 
@@ -93,14 +93,14 @@ NewtonLineSearch::solveCurrentStep(void)
     // set itself as the ConvergenceTest objects EquiSolnAlgo
     theTest->setEquiSolnAlgo(*this);
     if (theTest->start() < 0) {
-      cerr << "NewtonLineSearch::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in start()\n";
+      opserr << "NewtonLineSearch::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in start()\n";
       return -3;
     }
 
     if (theIntegrator->formUnbalance() < 0) {
-      cerr << "WARNING NewtonLineSearch::solveCurrentStep() -";
-      cerr << "the Integrator failed in formUnbalance()\n";	
+      opserr << "WARNING NewtonLineSearch::solveCurrentStep() -";
+      opserr << "the Integrator failed in formUnbalance()\n";	
       return -2;
     }	    
 
@@ -113,15 +113,15 @@ NewtonLineSearch::solveCurrentStep(void)
 	
 	//form the tangent
         if (theIntegrator->formTangent() < 0){
-	    cerr << "WARNING NewtonLineSearch::solveCurrentStep() -";
-	    cerr << "the Integrator failed in formTangent()\n";
+	    opserr << "WARNING NewtonLineSearch::solveCurrentStep() -";
+	    opserr << "the Integrator failed in formTangent()\n";
 	    return -1;
 	}		    
 	
 	//solve 
 	if (theSOE->solve() < 0) {
-	    cerr << "WARNING NewtonLineSearch::solveCurrentStep() -";
-	    cerr << "the LinearSysOfEqn failed in solve()\n";	
+	    opserr << "WARNING NewtonLineSearch::solveCurrentStep() -";
+	    opserr << "the LinearSysOfEqn failed in solve()\n";	
 	    return -3;
 	}	    
 
@@ -133,14 +133,14 @@ NewtonLineSearch::solveCurrentStep(void)
 	double s0 = - (dx0 ^ Resid0) ; 
 
 	if (theIntegrator->update(theSOE->getX()) < 0) {
-	    cerr << "WARNING NewtonLineSearch::solveCurrentStep() -";
-	    cerr << "the Integrator failed in update()\n";	
+	    opserr << "WARNING NewtonLineSearch::solveCurrentStep() -";
+	    opserr << "the Integrator failed in update()\n";	
 	    return -4;
 	}	        
 
 	if (theIntegrator->formUnbalance() < 0) {
-	    cerr << "WARNING NewtonLineSearch::solveCurrentStep() -";
-	    cerr << "the Integrator failed in formUnbalance()\n";	
+	    opserr << "WARNING NewtonLineSearch::solveCurrentStep() -";
+	    opserr << "the Integrator failed in formUnbalance()\n";	
 	    return -2;
 	}	
 
@@ -160,8 +160,8 @@ NewtonLineSearch::solveCurrentStep(void)
     } while (result == -1);
 
     if (result == -2) {
-      cerr << "NewtonLineSearch::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in test()\n";
+      opserr << "NewtonLineSearch::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in test()\n";
       return -3;
     }
 
@@ -192,7 +192,7 @@ NewtonLineSearch::recvSelf(int cTag,
 
 
 void
-NewtonLineSearch::Print(ostream &s, int flag)
+NewtonLineSearch::Print(OPS_Stream &s, int flag)
 {
   if (flag == 0) 
     s << "NewtonLineSearch\n";

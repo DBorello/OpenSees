@@ -9,7 +9,6 @@
 #include <MatrixUtil.h>
 #include <stdlib.h>
 
-#include <G3Globals.h>
 #include <classTags.h>
 
 #define SEC_TAG_YS2d -1
@@ -42,7 +41,7 @@ YieldSurfaceSection2d::YieldSurfaceSection2d
   
   if(ptrys==0)
     {
-      cout << "WARNING - InelasticYS2DGNL(): ys1 = 0" << endl;
+      opserr << "WARNING - InelasticYS2DGNL(): ys1 = 0" << endln;
     }
   else
     {
@@ -133,8 +132,7 @@ YieldSurfaceSection2d::setTrialSectionDeformation (const Vector &def)
     }
   else // driftOld outside - bug or bad constraints or continued from not converged state
     {
-      cerr << "WARNING: YieldSurfaceSection2d::setTrialSectionDeformation, driftOld outside [" << getTag()<<"]\n";
-      cin.get();
+      opserr << "WARNING: YieldSurfaceSection2d::setTrialSectionDeformation, driftOld outside [" << getTag()<<"]\n";
     }
   
   double dF_in0 = s(0) - surfaceForce(0);
@@ -245,10 +243,10 @@ YieldSurfaceSection2d::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void
-YieldSurfaceSection2d::Print(ostream &s, int flag)
+YieldSurfaceSection2d::Print(OPS_Stream &s, int flag)
 {
-  s << "YieldSurfaceSection2d, tag: " << this->getTag() << endl;
-  s << "\tYield Surface:" << *ys << endl;
+  s << "YieldSurfaceSection2d, tag: " << this->getTag() << endln;
+  s << "\tYield Surface:" << *ys << endln;
   s << "\tSection Force:" << sCommit;
   s << "\tSection Defom:" << eCommit;
 }

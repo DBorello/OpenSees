@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-10 23:04:00 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ParallelMaterial.cpp,v $
                                                                         
                                                                         
@@ -54,8 +54,8 @@ ParallelMaterial::ParallelMaterial(
     theModels = new UniaxialMaterial *[num];
 
     if (theModels == 0) {
-	cerr << "FATAL ParallelMaterial::ParallelMaterial() ";
-	cerr << " ran out of memory for array of size: " << num << "\n";
+	opserr << "FATAL ParallelMaterial::ParallelMaterial() ";
+	opserr << " ran out of memory for array of size: " << num << "\n";
 	exit(-1);
     }
 
@@ -172,9 +172,9 @@ ParallelMaterial::commitState(void)
     // invoke commitState() on each of local MaterialModel objects
     for (int i=0; i<numMaterials; i++)
 	if (theModels[i]->commitState() != 0) {
-	    cerr << "WARNING ParallelMaterial::commitState() ";
-	    cerr << "MaterialModel failed to commitState():" ;
-	    theModels[i]->Print(cerr);
+	    opserr << "WARNING ParallelMaterial::commitState() ";
+	    opserr << "MaterialModel failed to commitState():" ;
+	    theModels[i]->Print(opserr);
 	}
     
     return 0;    
@@ -186,9 +186,9 @@ ParallelMaterial::revertToLastCommit(void)
     // invoke commitState() on each of local MaterialModel objects
     for (int i=0; i<numMaterials; i++)
 	if (theModels[i]->revertToLastCommit() != 0) {
-	    cerr << "WARNING ParallelMaterial::revertToLastCommit() ";
-	    cerr << "MaterialModel failed to revertToLastCommit():" ;
-	    theModels[i]->Print(cerr);
+	    opserr << "WARNING ParallelMaterial::revertToLastCommit() ";
+	    opserr << "MaterialModel failed to revertToLastCommit():" ;
+	    theModels[i]->Print(opserr);
 	}
     
     return 0;    
@@ -204,9 +204,9 @@ ParallelMaterial::revertToStart(void)
     // invoke commitState() on each of local MaterialModel objects
     for (int i=0; i<numMaterials; i++)
 	if (theModels[i]->revertToStart() != 0) {
-	    cerr << "WARNING ParallelMaterial::revertToStart() ";
-	    cerr << "MaterialModel failed to revertToStart():" ;
-	    theModels[i]->Print(cerr);
+	    opserr << "WARNING ParallelMaterial::revertToStart() ";
+	    opserr << "MaterialModel failed to revertToStart():" ;
+	    theModels[i]->Print(opserr);
 	}
     
     return 0;    
@@ -243,7 +243,7 @@ ParallelMaterial::sendSelf(int cTag, Channel &theChannel)
 
     res = theChannel.sendID(dbTag, cTag, data);
     if (res < 0) {
-      cerr << "ParallelMaterial::sendSelf() - failed to send data\n";
+      opserr << "ParallelMaterial::sendSelf() - failed to send data\n";
       return res;
     }
 
@@ -264,7 +264,7 @@ ParallelMaterial::sendSelf(int cTag, Channel &theChannel)
 
     res = theChannel.sendID(dbTag, cTag, classTags);
     if (res < 0) {
-      cerr << "ParallelMaterial::sendSelf() - failed to send data\n";
+      opserr << "ParallelMaterial::sendSelf() - failed to send data\n";
       return res;
     }
 
@@ -284,7 +284,7 @@ ParallelMaterial::recvSelf(int cTag, Channel &theChannel,
 
     res = theChannel.recvID(dbTag, cTag, data);
     if (res < 0) {
-      cerr << "ParallelMaterial::recvSelf() - failed to send data\n";
+      opserr << "ParallelMaterial::recvSelf() - failed to send data\n";
       return res;
     }
 
@@ -301,8 +301,8 @@ ParallelMaterial::recvSelf(int cTag, Channel &theChannel,
 
       theModels = new UniaxialMaterial *[numMaterials];      
       if (theModels == 0) {
-	cerr << "FATAL ParallelMaterial::recvSelf() - ran out of memory";
-	cerr << " for array of size: " << numMaterials << "\n";
+	opserr << "FATAL ParallelMaterial::recvSelf() - ran out of memory";
+	opserr << " for array of size: " << numMaterials << "\n";
 	return -2;
       }
       for (int i=0; i<numMaterials; i++)
@@ -314,7 +314,7 @@ ParallelMaterial::recvSelf(int cTag, Channel &theChannel,
     ID classTags(numMaterials*2);
     res = theChannel.recvID(dbTag, cTag, classTags);
     if (res < 0) {
-      cerr << "ParallelMaterial::recvSelf() - failed to send data\n";
+      opserr << "ParallelMaterial::recvSelf() - failed to send data\n";
       return res;
     }
 
@@ -332,8 +332,8 @@ ParallelMaterial::recvSelf(int cTag, Channel &theChannel,
 	    theMaterialModel->setDbTag(classTags(i+numMaterials));
 	}
 	else {
-	    cerr << "FATAL ParallelMaterial::recvSelf() ";
-	    cerr << " could not get a UniaxialMaterial \n";
+	    opserr << "FATAL ParallelMaterial::recvSelf() ";
+	    opserr << " could not get a UniaxialMaterial \n";
 	    exit(-1);
 	}    	    
       }
@@ -343,9 +343,9 @@ ParallelMaterial::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-ParallelMaterial::Print(ostream &s, int flag)
+ParallelMaterial::Print(OPS_Stream &s, int flag)
 {
-    s << "Parallel tag: " << this->getTag() << endl;
+    s << "Parallel tag: " << this->getTag() << endln;
     for (int i=0; i<numMaterials; i++) {
       s << " ";
       theModels[i]->Print(s, flag);

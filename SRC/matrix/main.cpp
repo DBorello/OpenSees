@@ -18,25 +18,50 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/main.cpp,v $
                                                                         
                                                                         
-
-
-#include <iostream.h>
 #include "Vector.h"
 #include "ID.h"
 #include "Matrix.h"
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <ConsoleErrorHandler.h>
+#include <StandardStream.h>
 
-ErrorHandler *g3ErrorHandler;
+StandardStream sserr;
+OPS_Stream &opserr = sserr;
 
 int main()
 {
-  g3ErrorHandler = new ConsoleErrorHandler();
+
+  opserr.setPrecision(14);
+  opserr.setFloatField(SCIENTIFIC);
+
+  Matrix a(3,3);
+  a(0,0)= 1.35691200000000e+08; a(0,1)= 1.49035621973463e+07; a(0,2) =  -3.72529029846191e-09;
+  a(1,0) = 1.49035621973463e+07; a(1,1)= 1.63692388430620e+06; a(1,2)= -4.65661287307739e-10;
+  a(2,0) =-3.72529029846191e-09; a(2,1)=  -4.65661287307739e-10; a(2,2)= 3.19209024960000e+07;
+
+  opserr << a;
+
+  Matrix b(3,3);
+
+  a.Invert(b);
+  opserr << b;
+
+  opserr << a*b;
+
+  Matrix I(3,3);
+  for (int i=0; i<3; i++)
+    I(i,i) = 1.0;
+
+  opserr << a.Solve(I,b);
+  
+  opserr << b;
+  opserr << a*b;
+  opserr << I;
 
   /*
     // Vector  TEST
@@ -93,7 +118,7 @@ int main()
 
   */
 
-    /*
+  /*
     Matrix ZA = A(id2,id2);
     cout << "Matrix &ZA=A(id2,id2): ZA -> " << ZA;
     Matrix &ZB = A(id1,id2);
@@ -104,6 +129,7 @@ int main()
     cout << "        ZB=A(id1,id1): ZB -> " << ZB;        
     */
 
+  /*
     cout << "\n\n\n***** Matrix TEST ***** \n";    	
     Matrix A(2,2);
     cout << "      Matrix A; A -> " << A;
@@ -165,13 +191,13 @@ int main()
     Matrix AA(2,2); AA(0,0) = 1; AA(0,1) = 2; AA(1,0) = 4; AA(1,1) = 9;
     Vector b(2), x(2); b(0) = 1; b(1) = 2;
 
-    cerr << " AA -> " << AA;
-    cerr << "  b -> " << b;
+    opserr << " AA -> " << AA;
+    opserr << "  b -> " << b;
 
     AA.Solve(b,x);
 
-    cerr << "AA.solve(b,x) x-> " << x;
-    cerr << "AA * x -> " << AA*x;
+    opserr << "AA.solve(b,x) x-> " << x;
+    opserr << "AA * x -> " << AA*x;
 
 
 
@@ -180,14 +206,14 @@ int main()
     bb(0,2) = 11; bb(1,2) = 12;
     Matrix xx(2,3);
 
-    cerr << " AA -> " << AA;
-    cerr << " bb -> " << bb;
+    opserr << " AA -> " << AA;
+    opserr << " bb -> " << bb;
 
     AA.Solve(bb,xx);
 
-    cerr << "AA.solve(bb,xx) xx-> " << xx;
-    cerr << "AA * xx -> " << AA*xx;
-
+    opserr << "AA.solve(bb,xx) xx-> " << xx;
+    opserr << "AA * xx -> " << AA*xx;
+  */
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-18 01:06:09 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -38,12 +38,13 @@
 // What: "@(#) FileDatastore.C, revA"
 
 #include "FileDatastore.h"
-#include <iostream.h>
-#include <fstream.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <bool.h>
+#include <iostream>
+using std::ios;
 
 #include <FEM_ObjectBroker.h>
 #include <Domain.h>
@@ -66,7 +67,7 @@ FileDatastore::FileDatastore(char *dataBaseName,
   mats = (fstream **)malloc(maxMatSize*sizeof(fstream *));
 
   if (ids == 0 || vects == 0 || mats == 0) {
-    cerr << "FileDatastore::FileDatastore() - ran out of memory\n";
+    opserr << "FileDatastore::FileDatastore() - ran out of memory\n";
     exit(-1);
   }
 
@@ -147,7 +148,7 @@ FileDatastore::sendMsg(int dataTag, int commitTag,
 		       const Message &, 
 		       ChannelAddress *theAddress)
 {
-  cerr << "FileDatastore::sendMsg() - not yet implemented\n";
+  opserr << "FileDatastore::sendMsg() - not yet implemented\n";
   return -1;
 }		       
 
@@ -156,7 +157,7 @@ FileDatastore::recvMsg(int dataTag, int commitTag,
 		       Message &, 
 		       ChannelAddress *theAddress)
 {
-  cerr << "FileDatastore::recvMsg() - not yet implemented\n";
+  opserr << "FileDatastore::recvMsg() - not yet implemented\n";
   return -1;
 }		       
 
@@ -173,8 +174,8 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
   int matSize = noMatRows * noMatCols;;
 
   if (matSize >= maxMatSize) {
-    cerr << "FileDatastore::sendMatrix() - the database does not deal ";
-    cerr << "with Matrixs of this size " << matSize << endl;
+    opserr << "FileDatastore::sendMatrix() - the database does not deal ";
+    opserr << "with Matrixs of this size " << matSize << endln;
     return -1;
   }
 
@@ -301,8 +302,8 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
   int matSize = noMatRows * noMatCols;;
 
   if (matSize >= maxMatSize) {
-    cerr << "FileDatastore::recvMatrix() - the database does not deal with Mats";
-    cerr << " of this size " << matSize << endl;
+    opserr << "FileDatastore::recvMatrix() - the database does not deal with Mats";
+    opserr << " of this size " << matSize << endln;
     return -1;
   }
 
@@ -403,8 +404,8 @@ FileDatastore::sendVector(int dataTag, int commitTag,
   // we first ensure that the ID is not too big
   int vectSize = theVector.Size();
   if (vectSize >= maxVectSize) {
-    cerr << "FileDatastore::sendVector() - the database does not deal ";
-    cerr << "with Vectors of this size " << vectSize << endl;
+    opserr << "FileDatastore::sendVector() - the database does not deal ";
+    opserr << "with Vectors of this size " << vectSize << endln;
   }
 
   // open a file if not already opened 
@@ -520,8 +521,8 @@ FileDatastore::recvVector(int dataTag, int commitTag,
   // we first check ID not too big
   int vectSize = theVector.Size();
   if (vectSize >= maxVectSize) {
-    cerr << "FileDatastore::recvVector() - the database does not deal with Vects";
-    cerr << " of this size " << vectSize << endl;
+    opserr << "FileDatastore::recvVector() - the database does not deal with Vects";
+    opserr << " of this size " << vectSize << endln;
     return -1;
   }
   
@@ -616,8 +617,8 @@ FileDatastore::sendID(int dataTag, int commitTag,
   // we first ensure that the ID is not too big
   int idSize = theID.Size();
   if (idSize >= maxIDsize) {
-    cerr << "FileDatastore::sendID() - the database does not deal with IDs of this size ";
-    cerr << idSize << endl;
+    opserr << "FileDatastore::sendID() - the database does not deal with IDs of this size ";
+    opserr << idSize << endln;
   }
 
   // open a file if not already opened
@@ -737,8 +738,8 @@ FileDatastore::recvID(int dataTag, int commitTag,
   // we first check ID not too big
   int idSize = theID.Size();
   if (idSize >= maxIDsize) {
-    cerr << "FileDatastore::recvID() - the database does not deal with IDs";
-    cerr << " of this size "  << idSize << endl;
+    opserr << "FileDatastore::recvID() - the database does not deal with IDs";
+    opserr << " of this size "  << idSize << endln;
     return -1;
   }
 
@@ -765,10 +766,10 @@ FileDatastore::recvID(int dataTag, int commitTag,
       while (pos < loc) {
 	  theStream->read((char *)&idBuffer, stepSize);
 	  /*
-	  cerr << idBuffer.dbTag << " " << idBuffer.commitTag;
+	  opserr << idBuffer.dbTag << " " << idBuffer.commitTag;
 	  for (int i=0; i<idSize; i++)
-	    cerr << " " << idBuffer.data[i];
-	  cerr << endl;
+	    opserr << " " << idBuffer.data[i];
+	  opserr << endln;
 	  */
 	  
 	  if ((idBuffer.dbTag >= dataTag) && 
@@ -848,8 +849,8 @@ FileDatastore::openFile(char *fileName)
 #endif
     
     if (res == 0) {
-	cerr << "FATAL - FileDatastore::openFile() - could not open file ";
-	cerr << fileName << endl;
+	opserr << "FATAL - FileDatastore::openFile() - could not open file ";
+	opserr << fileName << endln;
 	exit(-1);
     }
   

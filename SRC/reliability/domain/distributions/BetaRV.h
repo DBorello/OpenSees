@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 18:06:57 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/BetaRV.h,v $
 
 
@@ -61,7 +61,7 @@ public:
 			 double parameter3,
 			 double parameter4);
 	~BetaRV();
-	void Print(ostream &s, int flag =0);
+	void Print(OPS_Stream &s, int flag =0);
 	double getPDFvalue(double rvValue);
 	double getCDFvalue(double rvValue);
 	double getInverseCDFvalue(double probValue);

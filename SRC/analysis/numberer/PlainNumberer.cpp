@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-26 06:19:13 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/numberer/PlainNumberer.cpp,v $
                                                                         
                                                                         
@@ -79,14 +79,14 @@ PlainNumberer::numberDOF(int lastDOF)
     if (theModel != 0) theDomain = theModel->getDomainPtr();
 
     if (theModel == 0 || theDomain == 0) {
-	cerr << "WARNING PlainNumberer::numberDOF(int) -";
-	cerr << " - no AnalysisModel - has setLinks() been invoked?\n";
+	opserr << "WARNING PlainNumberer::numberDOF(int) -";
+	opserr << " - no AnalysisModel - has setLinks() been invoked?\n";
 	return -1;
     }
     
     if (lastDOF != -1) {
-	cerr << "WARNING PlainNumberer::numberDOF(int lastDOF):";
-	cerr << " does not use the lastDOF as requested\n";
+	opserr << "WARNING PlainNumberer::numberDOF(int lastDOF):";
+	opserr << " does not use the lastDOF as requested\n";
     }
     
     // iterate throgh  the DOFs first time setting -2 values
@@ -187,13 +187,13 @@ PlainNumberer::numberDOF(ID &lastDOFs)
     if (theModel != 0) theDomain = theModel->getDomainPtr();
 
     if (theModel == 0 || theDomain == 0) {
-	cerr << "WARNING PlainNumberer::numberDOF(int) -";
-	cerr << " - no AnalysisModel - has setLinks() been invoked?\n";
+	opserr << "WARNING PlainNumberer::numberDOF(int) -";
+	opserr << " - no AnalysisModel - has setLinks() been invoked?\n";
 	return -1;
     }
     
-    cerr << "WARNING PlainNumberer::numberDOF(ID):";
-    cerr << " does not use the lastDOFs as requested\n";
+    opserr << "WARNING PlainNumberer::numberDOF(ID):";
+    opserr << " does not use the lastDOFs as requested\n";
     
     // iterate throgh  the DOFs first time setting -2 values
     DOF_GrpIter &theDOFs = theModel->getDOFs();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-11-16 21:48:26 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltyMP_FE.cpp,v $
                                                                         
                                                                         
@@ -71,7 +71,7 @@ PenaltyMP_FE::PenaltyMP_FE(Domain &theDomain,
     if (tang == 0 || resid == 0 || C == 0 ||
 	tang->noCols() != size || C->noCols() != size || 
 	resid->Size() != size) {
-	cerr << "FATAL PenaltyMP_FE::PenaltyMP_FE() - out of memory\n";
+	opserr << "FATAL PenaltyMP_FE::PenaltyMP_FE() - out of memory\n";
 	exit(-1);
     }
 	    
@@ -79,9 +79,9 @@ PenaltyMP_FE::PenaltyMP_FE(Domain &theDomain,
     theConstrainedNode = theDomain.getNode(theMP->getNodeConstrained());
 
     if (theRetainedNode == 0 || theConstrainedNode == 0) {
-	cerr << "FATAL PenaltyMP_FE::PenaltyMP_FE() - Constrained or Retained";
-	cerr << " Node does not exist in Domain\n";
-	cerr << theMP->getNodeRetained() << " " << theMP->getNodeConstrained() << endl;
+	opserr << "FATAL PenaltyMP_FE::PenaltyMP_FE() - Constrained or Retained";
+	opserr << " Node does not exist in Domain\n";
+	opserr << theMP->getNodeRetained() << " " << theMP->getNodeConstrained() << endln;
 	exit(-1);
     }	
 
@@ -92,12 +92,12 @@ PenaltyMP_FE::PenaltyMP_FE(Domain &theDomain,
     if (dofGrpPtr != 0) 
 	myDOF_Groups(0) = dofGrpPtr->getTag();	    
     else 
-	cerr << "WARNING PenaltyMP_FE::PenaltyMP_FE() - node no Group yet?\n"; 
+	opserr << "WARNING PenaltyMP_FE::PenaltyMP_FE() - node no Group yet?\n"; 
     dofGrpPtr = theConstrainedNode->getDOF_GroupPtr();
     if (dofGrpPtr != 0) 
 	myDOF_Groups(1) = dofGrpPtr->getTag();	        
     else
-	cerr << "WARNING PenaltyMP_FE::PenaltyMP_FE() - node no Group yet?\n"; 
+	opserr << "WARNING PenaltyMP_FE::PenaltyMP_FE() - node no Group yet?\n"; 
     
     
     if (theMP->isTimeVarying() == false) {
@@ -131,8 +131,8 @@ PenaltyMP_FE::setID(void)
     // associated with the constrained node
     DOF_Group *theConstrainedNodesDOFs = theConstrainedNode->getDOF_GroupPtr();
     if (theConstrainedNodesDOFs == 0) {
-	cerr << "WARNING PenaltyMP_FE::setID(void)";
-	cerr << " - no DOF_Group with Constrained Node\n";
+	opserr << "WARNING PenaltyMP_FE::setID(void)";
+	opserr << " - no DOF_Group with Constrained Node\n";
 	return -2;
     }    
 
@@ -145,15 +145,15 @@ PenaltyMP_FE::setID(void)
 	if (constrained < 0 || 
 	    constrained >= theConstrainedNode->getNumberDOF()) {
 	    
-	    cerr << "WARNING PenaltyMP_FE::setID(void) - unknown DOF ";
-	    cerr << constrained << " at Node\n";
+	    opserr << "WARNING PenaltyMP_FE::setID(void) - unknown DOF ";
+	    opserr << constrained << " at Node\n";
 	    myID(i) = -1; // modify so nothing will be added to equations
 	    result = -3;
 	}    	
 	else {
 	    if (constrained >= theConstrainedNodesID.Size()) {
-		cerr << "WARNING PenaltyMP_FE::setID(void) - ";
-		cerr << " Nodes DOF_Group too small\n";
+		opserr << "WARNING PenaltyMP_FE::setID(void) - ";
+		opserr << " Nodes DOF_Group too small\n";
 		myID(i) = -1; // modify so nothing will be added to equations
 		result = -4;
 	    }
@@ -165,8 +165,8 @@ PenaltyMP_FE::setID(void)
     // now determine the IDs for the retained dof's
     DOF_Group *theRetainedNodesDOFs = theRetainedNode->getDOF_GroupPtr();
     if (theRetainedNodesDOFs == 0) {
-	cerr << "WARNING PenaltyMP_FE::setID(void)";
-	cerr << " - no DOF_Group with Retained Node\n";
+	opserr << "WARNING PenaltyMP_FE::setID(void)";
+	opserr << " - no DOF_Group with Retained Node\n";
 	return -2;
     }    
     
@@ -177,15 +177,15 @@ PenaltyMP_FE::setID(void)
     for (int j=0; j<size2; j++) {
 	int retained = RetainedDOFs(j);
 	if (retained < 0 || retained >= theRetainedNode->getNumberDOF()) {
-	    cerr << "WARNING PenaltyMP_FE::setID(void) - unknown DOF ";
-	    cerr << retained << " at Node\n";
+	    opserr << "WARNING PenaltyMP_FE::setID(void) - unknown DOF ";
+	    opserr << retained << " at Node\n";
 	    myID(j+size1) = -1; // modify so nothing will be added
 	    result = -3;
 	}    	
 	else {
 	    if (retained >= theRetainedNodesID.Size()) {
-		cerr << "WARNING PenaltyMP_FE::setID(void) - ";
-		cerr << " Nodes DOF_Group too small\n";
+		opserr << "WARNING PenaltyMP_FE::setID(void) - ";
+		opserr << " Nodes DOF_Group too small\n";
 		myID(j+size1) = -1; // modify so nothing will be added 
 		result = -4;
 	    }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-26 00:56:06 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Renderer.cpp,v $
                                                                         
                                                                         
@@ -68,8 +68,8 @@ Renderer::displayModel(int eleFlag, int nodeFlag,
       while ((theEle = theElements()) != 0) {
 	  res = theEle->displaySelf(*this, eleFlag, fact);
 	  if (res < 0) {
-	      cerr << "Renderer::displayModel() - Element: ";
-	      cerr << theEle->getTag() << " failed to display itself\n";
+	      opserr << "Renderer::displayModel() - Element: ";
+	      opserr << theEle->getTag() << " failed to display itself\n";
 	  }
       }
   }
@@ -80,8 +80,8 @@ Renderer::displayModel(int eleFlag, int nodeFlag,
       while ((theNode = theNodes()) != 0) {
 	  res = theNode->displaySelf(*this, nodeFlag, fact);
 	  if (res < 0) {
-	      cerr << "Renderer::displayModel() - Node: ";
-	      cerr << theNode->getTag() << " failed to display itself\n";
+	      opserr << "Renderer::displayModel() - Node: ";
+	      opserr << theNode->getTag() << " failed to display itself\n";
 	  }
       }
   }  

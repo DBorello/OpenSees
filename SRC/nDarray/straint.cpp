@@ -312,7 +312,7 @@ double straintensor::equivalent( ) const	  //Zhaohui added 09-02-2000
     tensor temp  = pstrain("ij") * pstrain("ij");
     double tempd = temp.trace();
     double e_eq  = pow( 2.0 * tempd / 3.0, 0.5 );
-    //cout << "e_eq = " << e_eq << endln;
+    //cout << "e_eq = " << e_eq << endlnn;
     return e_eq;
 
 }

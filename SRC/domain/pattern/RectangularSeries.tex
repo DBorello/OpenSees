@@ -29,7 +29,7 @@ pseudo time $<=$ tFinish, otherwise factor $ =0.0$. \\
 \indent {\em  virtual int sendSelf(int commitTag, Channel \&theChannel);}\\
 \indent {\em  virtual int recvSelf(int commitTag, Channel \&theChannel,
 FEM\_ObjectBroker \&theBroker);}\\
-\indent {\em  virtual void Print(ostream \&s, int flag =0);}\\
+\indent {\em  virtual void Print(OPS_Stream \&s, int flag =0);}\\
 
 \noindent {\bf Constructor} \\ 
 \indent {\em RectangularSeries(double tStart, double tFinish, double cFactor = 1.0);}\\ 
@@ -57,6 +57,6 @@ the Channel object. \\
 FEM\_ObjectBroker \&theBroker);}\\
 Does the mirror image of {\em sendSelf()}. \\
 
-\indent {\em  virtual void Print(ostream \&s, int flag =0) =0;}\\
+\indent {\em  virtual void Print(OPS_Stream \&s, int flag =0) =0;}\\
 Prints the string 'RectangularSeries' and the values {\em tStart}, {\em
 tFinish} and {\em factor}. 

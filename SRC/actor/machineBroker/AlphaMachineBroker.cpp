@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/machineBroker/AlphaMachineBroker.cpp,v $
                                                                         
                                                                         
@@ -41,7 +41,6 @@
 #include <string.h>
 #include <remote.h>
 #include <Channel.h>
-#include <iostream.h>
 
 AlphaMachineBroker::AlphaMachineBroker()
 :currentMachine(0),maxNumMachines(8)
@@ -88,7 +87,7 @@ AlphaMachineBroker::startActor(char *actorProgram,
 	machine = machines[currentMachine];
     }
     currentMachine++;
-cerr << "CurrentMachine : " << machine <<  endl;
+    //opserr << "CurrentMachine : " << machine <<  endln;
     strcpy(remotecmd,REMOTE);
     strcat(remotecmd," ");          
     strcat(remotecmd,machine);

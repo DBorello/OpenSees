@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:57 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GumbelRV.cpp,v $
 
 
@@ -36,6 +36,7 @@
 #include <GumbelRV.h>
 #include <math.h>
 #include <string.h>
+#include <OPS_Globals.h>
 
 GumbelRV::GumbelRV(int passedTag, 
 		 double passedMean,
@@ -95,7 +96,7 @@ GumbelRV::~GumbelRV()
 
 
 void
-GumbelRV::Print(ostream &s, int flag)
+GumbelRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -153,5 +154,5 @@ GumbelRV::getStartValue()
 
 double GumbelRV::getParameter1()  {return u;}
 double GumbelRV::getParameter2()  {return alpha;}
-double GumbelRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double GumbelRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double GumbelRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double GumbelRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}

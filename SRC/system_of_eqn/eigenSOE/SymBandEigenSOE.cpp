@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-11-19 22:44:00 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/SymBandEigenSOE.cpp,v $
 
 // Written: MHS
@@ -99,8 +99,9 @@ SymBandEigenSOE::setSize(Graph &theGraph)
     A = new double[newSize];
     
     if (A == 0) {
-      g3ErrorHandler->warning("%s -- ran out of memory for A, size = %d, superD = %d",
-			      "SymBandEigenSOE::setSize()", size, numSuperD);
+      opserr << "SymBandEigenSOE::setSize() -- ran out of memory for A, size = " <<
+	size <<  " and numSuperD = : " << numSuperD << endln;
+			      
       Asize = 0; size = 0; numSuperD = 0;
       result= -1;
     }
@@ -118,13 +119,13 @@ SymBandEigenSOE::setSize(Graph &theGraph)
   EigenSolver *theSolvr = this->getSolver();
   int solverOK = theSolvr->setSize();
   if (solverOK < 0) {
-    g3ErrorHandler->warning("%s -- solver failed in setSize()",
-			    "SymBandEigenSOE::setSize()");
+    opserr << "SymBandEigenSOE::setSize() -- solver failed in setSize()\n";
+			    
     return solverOK;
   } 
   
-  cerr << "SymBandEigenSOE::setSize() -- size = " << size << ", numSuperD = "
-       << numSuperD << endl;
+  opserr << "SymBandEigenSOE::setSize() -- size = " << size << ", numSuperD = "
+       << numSuperD << endln;
 
   return result;    
 }
@@ -139,8 +140,7 @@ SymBandEigenSOE::addA(const Matrix &m, const ID &id, double fact)
   // check that m and id are of similar size
   int idSize = id.Size();    
   if (idSize != m.noRows() && idSize != m.noCols()) {
-    g3ErrorHandler->warning("%s -- Matrix and ID not of similar sizes",
-			    "SymBandEigenSOE::addA()");
+    opserr << "SymBandEigenSOE::addA() -- Matrix and ID not of similar sizes,\n";
     return -1;
   }
 

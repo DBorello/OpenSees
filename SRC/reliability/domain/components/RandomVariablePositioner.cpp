@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 22:11:38 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.cpp,v $
 
 
@@ -51,7 +51,7 @@ RandomVariablePositioner::RandomVariablePositioner (int passedTag,
 		parameterID = theObject->setParameter (argv, argc, theInfo);
 
 	if (parameterID < 0)
-		cerr << "RandomVariablePositioner::RandomVariablePositioner "<< tag <<" -- unable to set parameter" << endl;
+		opserr << "RandomVariablePositioner::RandomVariablePositioner "<< tag <<" -- unable to set parameter" << endln;
 }
 
 
@@ -84,7 +84,7 @@ RandomVariablePositioner::setSensitivityFlag (int flag)
 }
 
 void
-RandomVariablePositioner::Print(ostream &s, int flag)  
+RandomVariablePositioner::Print(OPS_Stream &s, int flag)  
 {
 }
 

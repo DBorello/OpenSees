@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-12-17 02:11:06 $
+// $Revision: 1.11 $
+// $Date: 2003-02-14 23:01:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/tcl/TclElmtBuilder.cpp,v $
                                                                                                                                  
 // File: ~/tcl/TclElmtBuilder.C
@@ -32,7 +32,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 
 #include <Domain.h>
 #include <Node.h>
@@ -43,7 +42,8 @@
 
 #include <NLBeamColumn2d.h>
 #include <NLBeamColumn3d.h>
-//#include <LargeDispBeamColumn3d.h>
+
+// #include <LargeDispBeamColumn3d.h>
 
 #include <GaussLobattoQuadRule1d01.h>
 #include <TclModelBuilder.h>
@@ -79,11 +79,11 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
   List = Tcl_Merge (inArgc, inArgv);
   if (List == 0)
   {
-      interp->result = "WARNING - TclModelBuilder_addFrameElement - problem merging list";
-      return TCL_ERROR;
+    opserr << "WARNING - TclModelBuilder_addFrameElement - problem merging list\n";
+    return TCL_ERROR;
   }
 
-//  cerr << "List :" << List << endl;
+//  opserr << "List :" << List << endln;
 
   // remove braces from list
   for (int i = 0; List[i] != '\0'; i++)
@@ -97,16 +97,16 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
        
   if (Tcl_SplitList(interp, List, &argc, &argv) != TCL_OK)
   {
-     interp->result = "WARNING - TclModelBuilder_addFrameElement - problem spliting list";
-     return TCL_ERROR;
+    opserr <<  "WARNING - TclModelBuilder_addFrameElement - problem spliting list\n";
+    return TCL_ERROR;
   }
       
   Tcl_Free (List);
   
-//  cerr << "argc : " << argc; 
+//  opserr << "argc : " << argc; 
 //  for (int i=0; i<argc; i++)
 //  {
-//    cerr <<"string " << i << " : " << argv[i] << endl;
+//    opserr <<"string " << i << " : " << argv[i] << endln;
 //  }
 
 
@@ -117,40 +117,40 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
     int secTag[10]; // Max size of integration rule ... can change if needed
     
     if (argc < 8) {
-      interp->result = "WARNING bad command - want: element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      opserr << "WARNING bad command - want: element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
       return TCL_ERROR;
     }
     int argi = 2;  
     if (Tcl_GetInt(interp, argv[argi++], &eleTag) != TCL_OK) {
-      interp->result = "WARNING invalid eleTag: element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>"; 
+      opserr << "WARNING invalid eleTag: element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n"; 
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[argi++], &iNode) != TCL_OK) {
-      interp->result = "WARNING invalid iNode:  element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      opserr << "WARNING invalid iNode:  element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[argi++], &jNode) != TCL_OK) {
-      interp->result = "WARNING invalid jNode: element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      opserr << "WARNING invalid jNode: element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[argi++], &numIntgrPts) != TCL_OK) {
-      interp->result = "WARNING invalid numIntgrPts: element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      opserr << "WARNING invalid numIntgrPts: element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
       return TCL_ERROR;
     }
 
     if (strcmp(argv[argi], "-sections") == 0) {
       argi++;
       if (argi+numIntgrPts > argc) {
-	interp->result = "WARNING insufficient number of section tags - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+	opserr << "WARNING insufficient number of section tags - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
 	return TCL_ERROR;
       }
       int section;
       for (int i = 0; i < numIntgrPts; i++) {
 	if (Tcl_GetInt(interp, argv[argi+i], &section) != TCL_OK) {
-	  interp->result = "WARNING invalid secTag - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+	  opserr << "WARNING invalid secTag - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
 	  return TCL_ERROR;
 	}
 	secTag[i] = section;
@@ -161,7 +161,7 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
     else {
       int section;
       if (Tcl_GetInt(interp, argv[argi++], &section) != TCL_OK) {
-	interp->result = "WARNING invalid secTag - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+	opserr << "WARNING invalid secTag - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
 	return TCL_ERROR;
       }
       for (int i = 0; i < numIntgrPts; i++)
@@ -169,21 +169,21 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
     }
 
     if (argi >= argc || Tcl_GetInt(interp, argv[argi++], &transfTag) != TCL_OK) {
-      interp->result = "WARNING invalid transfTag? - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      opserr << "WARNING invalid transfTag? - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
       return TCL_ERROR;
     }
 
-    // allow some additional options at end of command
+    // some  additional options at end of command .. setting defaults of 10 and 1.0e-10
     double massDens = 0.0;
     int    nMaxLocIters = 10;
-    double locToler = 1e-10;
+    double locToler = 1e-08;
     
     while (argi != argc) {
       if (strcmp(argv[argi],"-mass") == 0) {
 	// allow user to specify mass (per unit length)
 	argi++;
 	if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &massDens) != TCL_OK) {
-	  interp->result = "WARNING invalid massDens - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+	  opserr << "WARNING invalid massDens - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
 	  return TCL_ERROR;
 	} 
       }
@@ -192,19 +192,19 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
 	// allow user to specify maximum number of local iterations
 	argi++;
 	if (argi == argc || Tcl_GetInt(interp, argv[argi++], &nMaxLocIters) != TCL_OK) {
-	  interp->result = "WARNING invalid nMaxLocIters - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+	  opserr << "WARNING invalid nMaxLocIters - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
 	  return TCL_ERROR;
 	} 
 
 	// specify local tolerance 
 	if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &locToler) != TCL_OK) {
-	  interp->result = "WARNING invalid locToler - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+	  opserr << "WARNING invalid locToler - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
 	  return TCL_ERROR;
 	} 
       }
       else {
-	interp->result = "WARNING bad command  - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
-	cerr << "invalid: " << argv[argi] << endl;
+	opserr << "WARNING bad command  - element nonlinearBeamColumn eleTag? iNode? jNode? numIntgrPts? secTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>\n";
+	opserr << "invalid: " << argv[argi] << endln;
 	return TCL_ERROR;
       }
     }
@@ -216,7 +216,7 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
     SectionForceDeformation **sections = new SectionForceDeformation* [numIntgrPts];
     
     if (!sections) {
-      interp->result = "WARNING TclElmtBuilder - addFrameElement - Insufficient memory to create sections";
+      opserr << "WARNING TclElmtBuilder - addFrameElement - Insufficient memory to create sections\n";
       return TCL_ERROR;
     }
 
@@ -224,8 +224,8 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
       SectionForceDeformation *theSection = theTclModelBuilder->getSection(secTag[j]);
 
       if (theSection == 0) {
-	cerr << "WARNING TclElmtBuilder - frameElement - no Section found with tag ";
-	cerr << secTag[j] << endl;
+	opserr << "WARNING TclElmtBuilder - frameElement - no Section found with tag ";
+	opserr << secTag[j] << endln;
 	delete [] sections;
 	return TCL_ERROR;
       }
@@ -233,7 +233,7 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
       sections[j] = theSection;
     }
 
-    // cerr << "massDens " << massDens << endl;
+    // opserr << "massDens " << massDens << endln;
      
     // construct the element
 
@@ -242,8 +242,8 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
       CrdTransf2d *theCrdTransf = theTclModelBuilder->getCrdTransf2d(transfTag);
       
       if (theCrdTransf == 0) {
-	cerr << "WARNING TclElmtBuilder - frameElement - no geometric transformation found with tag ";
-	cerr << transfTag << endl;
+	opserr << "WARNING TclElmtBuilder - frameElement - no geometric transformation found with tag ";
+	opserr << transfTag << endln;
 	return TCL_ERROR;
       }
       
@@ -256,8 +256,8 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
       CrdTransf3d *theCrdTransf = theTclModelBuilder->getCrdTransf3d(transfTag);
       
       if (theCrdTransf == 0) {
-	cerr << "WARNING TclElmtBuilder - frameElement - no geometric transformation found with tag ";
-	cerr << transfTag << endl;
+	opserr << "WARNING TclElmtBuilder - frameElement - no geometric transformation found with tag ";
+	opserr << transfTag << endln;
 	return TCL_ERROR;
       }
       
@@ -268,19 +268,19 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
     }
 
     if (element == 0) {
-      interp->result = "WARNING  TclElmtBuilder - addFrameElement - ran out of memory to create element";
+      opserr << "WARNING  TclElmtBuilder - addFrameElement - ran out of memory to create element\n";
       return TCL_ERROR;
     }
    
     if (theTclModelBuilderDomain->addElement(element) == false) {
-      cerr << "WARNING TclElmtBuilder - addFrameElement - could not add element to domain ";
-      cerr << eleTag << endl;
+      opserr << "WARNING TclElmtBuilder - addFrameElement - could not add element to domain ";
+      opserr << eleTag << endln;
       return TCL_ERROR;
     } 
     
   }
   else {
-    cerr << "WARNING NDM = " << NDM << " and NDF = " << NDF << "is imcompatible with available frame elements";
+    opserr << "WARNING NDM = " << NDM << " and NDF = " << NDF << "is imcompatible with available frame elements\n";
     return TCL_ERROR;
   }      
 

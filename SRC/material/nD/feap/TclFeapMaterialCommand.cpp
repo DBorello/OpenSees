@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-12-06 21:09:24 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/feap/TclFeapMaterialCommand.cpp,v $
 
 #include <FeapMaterial01.h>
@@ -32,10 +32,10 @@
 
 static void printCommand(int argc, char **argv)
 {
-    cerr << "Input command: ";
+    opserr << "Input command: ";
     for (int i=0; i<argc; i++)
-	cerr << argv[i] << " ";
-    cerr << endl;
+	opserr << argv[i] << " ";
+    opserr << endln;
 } 
 
 NDMaterial *
@@ -44,14 +44,14 @@ TclModelBuilder_addFeapMaterial(ClientData clientData, Tcl_Interp *interp,
 				TclModelBuilder *theTclBuilder)
 {
   if (argc < 3) {
-    cerr << "WARNING insufficient number of arguments\n";
+    opserr << "WARNING insufficient number of arguments\n";
     printCommand(argc, argv);
     return 0;
   }
   
   int tag;
   if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-    cerr << "WARNING invalid uniaxialMaterial tag\n";
+    opserr << "WARNING invalid uniaxialMaterial tag\n";
     printCommand(argc, argv);
     return 0;
   }
@@ -60,21 +60,21 @@ TclModelBuilder_addFeapMaterial(ClientData clientData, Tcl_Interp *interp,
 
   if (strcmp(argv[1],"ElasticFeap") == 0 || strcmp(argv[1],"FeapElastic") == 0) {
     if (argc < 5) {
-      cerr << "WARNING invalid number of arguments\n";
+      opserr << "WARNING invalid number of arguments\n";
       printCommand(argc,argv);
-      cerr << "Want: nDMaterial ElasticFeap tag? E? nu?" << endl;
+      opserr << "Want: nDMaterial ElasticFeap tag? E? nu?" << endln;
       return 0;
     }
     
     double E, nu;
 
     if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
-      cerr << "WARNING invalid E\n";
+      opserr << "WARNING invalid E\n";
       printCommand(argc, argv);
       return 0;       
     }
     if (Tcl_GetDouble(interp, argv[4], &nu) != TCL_OK) {
-      cerr << "WARNING invalid nu\n";
+      opserr << "WARNING invalid nu\n";
       printCommand(argc, argv);
       return 0;       
     }
@@ -84,31 +84,31 @@ TclModelBuilder_addFeapMaterial(ClientData clientData, Tcl_Interp *interp,
 
   else if (strcmp(argv[1],"J2Feap") == 0 || strcmp(argv[1],"FeapJ2") == 0) {
     if (argc < 7) {
-      cerr << "WARNING invalid number of arguments\n";
+      opserr << "WARNING invalid number of arguments\n";
       printCommand(argc,argv);
-      cerr << "Want: nDMaterial J2Feap tag? K? G? sigY? Hiso?" << endl;
+      opserr << "Want: nDMaterial J2Feap tag? K? G? sigY? Hiso?" << endln;
       return 0;
     }
 
     double K, G, sigY, Hiso;
 
     if (Tcl_GetDouble(interp, argv[3], &K) != TCL_OK) {
-      cerr << "WARNING invalid K\n";
+      opserr << "WARNING invalid K\n";
       printCommand(argc, argv);
       return 0;       
     }
     if (Tcl_GetDouble(interp, argv[4], &G) != TCL_OK) {
-      cerr << "WARNING invalid G\n";
+      opserr << "WARNING invalid G\n";
       printCommand(argc, argv);
       return 0;       
     }
     if (Tcl_GetDouble(interp, argv[5], &sigY) != TCL_OK) {
-      cerr << "WARNING invalid sigY\n";
+      opserr << "WARNING invalid sigY\n";
       printCommand(argc, argv);
       return 0;       
     }
     if (Tcl_GetDouble(interp, argv[6], &Hiso) != TCL_OK) {
-      cerr << "WARNING invalid Hiso\n";
+      opserr << "WARNING invalid Hiso\n";
       printCommand(argc, argv);
       return 0;       
     }
@@ -118,46 +118,46 @@ TclModelBuilder_addFeapMaterial(ClientData clientData, Tcl_Interp *interp,
 
   else if (strcmp(argv[1],"ViscousFeap") == 0 || strcmp(argv[1],"FeapViscous") == 0) {
     if (argc < 10) {
-      cerr << "WARNING invalid number of arguments\n";
+      opserr << "WARNING invalid number of arguments\n";
       printCommand(argc,argv);
-      cerr << "Want: nDMaterial ViscousFeap tag? K? G? muK? muG? lamK? lamG? theta?" << endl;
+      opserr << "Want: nDMaterial ViscousFeap tag? K? G? muK? muG? lamK? lamG? theta?" << endln;
       return 0;
     }
 
     double K, G, muK, muG, lamK, lamG, theta;
 
     if (Tcl_GetDouble(interp, argv[3], &K) != TCL_OK) {
-      cerr << "WARNING invalid K\n";
+      opserr << "WARNING invalid K\n";
       printCommand(argc, argv);
       return 0;       
     }
     if (Tcl_GetDouble(interp, argv[4], &G) != TCL_OK) {
-      cerr << "WARNING invalid G\n";
+      opserr << "WARNING invalid G\n";
       printCommand(argc, argv);
       return 0;
     }
     if (Tcl_GetDouble(interp, argv[5], &muK) != TCL_OK) {
-      cerr << "WARNING invalid muK\n";
+      opserr << "WARNING invalid muK\n";
       printCommand(argc, argv);
       return 0;       
     }
     if (Tcl_GetDouble(interp, argv[6], &muG) != TCL_OK) {
-      cerr << "WARNING invalid muG\n";
+      opserr << "WARNING invalid muG\n";
       printCommand(argc, argv);
       return 0;
     }
     if (Tcl_GetDouble(interp, argv[7], &lamK) != TCL_OK) {
-      cerr << "WARNING invalid lamK\n";
+      opserr << "WARNING invalid lamK\n";
       printCommand(argc, argv);
       return 0;       
     }
     if (Tcl_GetDouble(interp, argv[8], &lamG) != TCL_OK) {
-      cerr << "WARNING invalid lamG\n";
+      opserr << "WARNING invalid lamG\n";
       printCommand(argc, argv);
       return 0;
     }
     if (Tcl_GetDouble(interp, argv[9], &theta) != TCL_OK) {
-      cerr << "WARNING invalid theta\n";
+      opserr << "WARNING invalid theta\n";
       printCommand(argc, argv);
       return 0;
     }

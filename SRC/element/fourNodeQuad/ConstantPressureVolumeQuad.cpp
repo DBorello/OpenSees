@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-12-16 21:10:04 $
+// $Revision: 1.14 $
+// $Date: 2003-02-14 23:01:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.cpp,v $
 
 // Ed "C++" Love
@@ -28,7 +28,6 @@
 // Plane Strain (NOT PLANE STRESS)
 
 
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -109,9 +108,8 @@ connectedExternalNodes(4), load(0)
       materialPointers[i] = theMaterial.getCopy("AxiSymmetric2D") ;
 
       if (materialPointers[i] == 0) {
-
-	  g3ErrorHandler->fatal("ConstantPressureVolumeQuad::constructor %s",
-				"- failed to get a material of type: AxiSymmetric2D");
+	opserr << "ConstantPressureVolumeQuad::constructor - failed to get a material of type: AxiSymmetric2D\n";
+	exit(-1);
       } //end if
       
   } //end for i 
@@ -192,7 +190,7 @@ int ConstantPressureVolumeQuad :: commitState( )
 
   // call element commitState to do any base class stuff
   if ((success = this->Element::commitState()) != 0) {
-    cerr << "ConstantPressureVolumeQuad::commitState () - failed in base class";
+    opserr << "ConstantPressureVolumeQuad::commitState () - failed in base class";
   }    
 
   for (int i = 0; i < 4; i++ ) 
@@ -377,20 +375,20 @@ ConstantPressureVolumeQuad :: update( )
 }
 
 //print out element data
-void ConstantPressureVolumeQuad :: Print( ostream &s, int flag )
+void ConstantPressureVolumeQuad :: Print( OPS_Stream &s, int flag )
 {
-  s << endl ;
+  s << endln ;
   s << "Four Node Quad -- Mixed Pressure/Volume -- Plane Strain \n" ;
-  s << "Element Number " << this->getTag() << endl ;
-  s << "Node 1 : " << connectedExternalNodes(0) << endl ;
-  s << "Node 2 : " << connectedExternalNodes(1) << endl ;
-  s << "Node 3 : " << connectedExternalNodes(2) << endl ;
-  s << "Node 4 : " << connectedExternalNodes(3) << endl ;
+  s << "Element Number " << this->getTag() << endln ;
+  s << "Node 1 : " << connectedExternalNodes(0) << endln ;
+  s << "Node 2 : " << connectedExternalNodes(1) << endln ;
+  s << "Node 3 : " << connectedExternalNodes(2) << endln ;
+  s << "Node 4 : " << connectedExternalNodes(3) << endln ;
   s << "Material Information : \n " ;
 
   materialPointers[0]->Print( s, flag ) ;
 
-  s << endl ;
+  s << endln ;
 }
 
 //return stiffness matrix 
@@ -666,9 +664,7 @@ void ConstantPressureVolumeQuad :: zeroLoad( )
 int 
 ConstantPressureVolumeQuad::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("ConstantPressureVolumeQuad::addLoad - load type unknown for ele with tag: %d\n",
-			  this->getTag());
-  
+  opserr << "ConstantPressureVolumeQuad::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
   return -1;
 }
 
@@ -1313,7 +1309,7 @@ ConstantPressureVolumeQuad::displaySelf(Renderer &theViewer, int displayMode, fl
       values(i) = 1;  */
     }
 
-    //cerr << coords;
+    //opserr << coords;
     int error = 0;
 
     error += theViewer.drawPolygon (coords, values);
@@ -1360,8 +1356,8 @@ int ConstantPressureVolumeQuad :: sendSelf (int commitTag, Channel &theChannel)
 
   res += theChannel.sendID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING ConstantPressureVolumeQuad::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING ConstantPressureVolumeQuad::sendSelf() - " << this->getTag() << " failed to send ID\n"; 
+			    
     return res;
   }
 
@@ -1369,7 +1365,7 @@ int ConstantPressureVolumeQuad :: sendSelf (int commitTag, Channel &theChannel)
   for (i = 0; i < 4; i++) {
     res += materialPointers[i]->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING ConstantPressureVolumeQuad::sendSelf() - %d failed to send its Material\n",this->getTag());
+      opserr << "WARNING ConstantPressureVolumeQuad::sendSelf() - " << this->getTag() << "failed to send its Material\n";
       return res;
     }
   }
@@ -1390,7 +1386,7 @@ ConstantPressureVolumeQuad :: recvSelf (int commitTag,
   // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING ConstantPressureVolumeQuad::recvSelf() - %d failed to receive ID\n", this->getTag());
+    opserr << "WARNING ConstantPressureVolumeQuad::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return res;
   }
 
@@ -1409,16 +1405,16 @@ ConstantPressureVolumeQuad :: recvSelf (int commitTag,
       // Allocate new material with the sent class tag
       materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
       if (materialPointers[i] == 0) {
-	g3ErrorHandler->warning("ConstantPressureVolumeQuad::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
+	opserr << "ConstantPressureVolumeQuad::recvSelf() - " <<
+	  "Broker could not create NDMaterial of class type" << matClassTag << endln;
 	return -1;
       }
       // Now receive materials into the newly allocated space
       materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn3d::recvSelf() - material " << 
+	  i << "failed to recv itself\n";
 	return res;
       }
     }
@@ -1434,17 +1430,17 @@ ConstantPressureVolumeQuad :: recvSelf (int commitTag,
 	delete materialPointers[i];
 	materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
 	if (materialPointers[i] == 0) {
-	  g3ErrorHandler->fatal("ConstantPressureVolumeQuad::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
-	  return -1;
+	  opserr << "ConstantPressureVolumeQuad::recvSelf() - " << 
+	    "Broker could not create NDMaterial of class type" << matClassTag << endln;
+	exit(-1);
 	}
       }
       // Receive the material
       materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("ConstantPressureVolumeQuad::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "ConstantPressureVolumeQuad::recvSelf() - material  " << i <<
+	  "failed to recv itself\n";
 	return res;
       }
     }

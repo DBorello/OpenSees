@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Graph.h,v $
                                                                         
                                                                         
@@ -44,7 +44,7 @@
 #include "bool.h"
 #endif
 
-#include <iostream.h>
+#include <OPS_Stream.h>
 
 class Vertex;
 class VertexIter;
@@ -68,8 +68,8 @@ class Graph
     virtual int getNumEdge(void) const;
     virtual Vertex *removeVertex(int tag, bool removeEdgeFlag = true);
     
-    virtual void Print(ostream &s, int flag =0);
-    friend ostream &operator<<(ostream &s, Graph &M);    
+    virtual void Print(OPS_Stream &s, int flag =0);
+    friend OPS_Stream &operator<<(OPS_Stream &s, Graph &M);    
     
   protected:
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/loadBalancer/LoadBalancer.cpp,v $
                                                                         
                                                                         
@@ -57,8 +57,8 @@ DomainPartitioner *
 LoadBalancer::getDomainPartitioner(void)
 {
     if (theDomainPartitioner == 0) {
-	cerr << "WARNING LoadBalancer::getDomainPartitioner() ";
-	cerr << " no DomainPartitioner is set - has setLinks() been called?\n";
+	opserr << "WARNING LoadBalancer::getDomainPartitioner() ";
+	opserr << " no DomainPartitioner is set - has setLinks() been called?\n";
     }
     
     return theDomainPartitioner;

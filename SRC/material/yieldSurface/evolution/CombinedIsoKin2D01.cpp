@@ -44,13 +44,13 @@ YS_Evolution *CombinedIsoKin2D01::getCopy(void)
 						deformable, direction);
 	if(theCopy==0)
 	{
-		cerr << "WARNING - CombinedIsoKin2D01, unable to get copy\n";
+		opserr << "WARNING - CombinedIsoKin2D01, unable to get copy\n";
 	}
 	
 	return theCopy;
 }
 
-void CombinedIsoKin2D01::Print(ostream &s, int flag)
+void CombinedIsoKin2D01::Print(OPS_Stream &s, int flag)
 {
 	s << "CombinedIsoKin2D01 \n";
 	s << "iso_Ratio = " << isotropicRatio << "\n";

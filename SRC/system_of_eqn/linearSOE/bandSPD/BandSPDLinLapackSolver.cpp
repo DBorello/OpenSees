@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/BandSPDLinLapackSolver.cpp,v $
                                                                         
                                                                         
@@ -78,8 +78,8 @@ int
 BandSPDLinLapackSolver::solve(void)
 {
     if (theSOE == 0) {
-	cerr << "WARNING BandSPDLinLapackSolver::solve(void)- ";
-	cerr << " No LinearSOE object has been set\n";
+	opserr << "WARNING BandSPDLinLapackSolver::solve(void)- ";
+	opserr << " No LinearSOE object has been set\n";
 	return -1;
     }
 
@@ -123,8 +123,8 @@ BandSPDLinLapackSolver::solve(void)
 
     // check if successfull
     if (info != 0) {
-	cerr << "WARNING BandSPDLinLapackSolver::solve() - the LAPACK";
-	cerr << " routines returned " << info << endl;
+	opserr << "WARNING BandSPDLinLapackSolver::solve() - the LAPACK";
+	opserr << " routines returned " << info << endln;
 	return -info;
     }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-12-16 21:12:06 $
+// $Revision: 1.9 $
+// $Date: 2003-02-14 23:00:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
                                                                         
@@ -39,7 +39,7 @@
 #ifndef Domain_h
 #define Domain_h
 
-#include <iostream.h>
+#include <OPS_Stream.h>
 #include <Vector.h>
 
 #ifndef _bool_h
@@ -177,8 +177,8 @@ class Domain
     virtual int  addRegion(MeshRegion &theRegion);    	
     virtual MeshRegion *getRegion(int region);    	
 
-    virtual void Print(ostream &s, int flag =0);
-    friend ostream &operator<<(ostream &s, Domain &M);    
+    virtual void Print(OPS_Stream &s, int flag =0);
+    friend OPS_Stream &operator<<(OPS_Stream &s, Domain &M);    
 
     virtual int sendSelf(int commitTag, Channel &theChannel);  
     virtual int recvSelf(int commitTag, Channel &theChannel, 

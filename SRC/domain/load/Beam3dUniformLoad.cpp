@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-11 20:46:39 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam3dUniformLoad.cpp,v $
                                                                         
 
@@ -79,13 +79,13 @@ Beam3dUniformLoad::sendSelf(int commitTag, Channel &theChannel)
 
   int result = theChannel.sendVector(dbTag, commitTag, vectData);
   if (result < 0) {
-    cerr << "Beam3dUniformLoad::sendSelf - failed to send data\n";
+    opserr << "Beam3dUniformLoad::sendSelf - failed to send data\n";
     return result;
   }
 
   result = theChannel.sendID(dbTag, commitTag, theElements);
   if (result < 0) {
-    cerr << "Beam3dUniformLoad::sendSelf - failed to send element tags\n";
+    opserr << "Beam3dUniformLoad::sendSelf - failed to send element tags\n";
     return result;
   }
   
@@ -102,7 +102,7 @@ Beam3dUniformLoad::recvSelf(int commitTag, Channel &theChannel,
 
   int result = theChannel.recvVector(dbTag, commitTag, vectData);
   if (result < 0) {
-    cerr << "Beam3dUniformLoad::sendSelf - failed to send data\n";
+    opserr << "Beam3dUniformLoad::sendSelf - failed to send data\n";
     return result;
   }
 
@@ -117,14 +117,14 @@ Beam3dUniformLoad::recvSelf(int commitTag, Channel &theChannel,
       delete theElementTags;
     theElementTags = new ID(numEle);
     if (theElementTags == 0) {
-      cerr << "Beam3dUniformLoad::sendSelf - failed to create an ID\n";
+      opserr << "Beam3dUniformLoad::sendSelf - failed to create an ID\n";
       return -3;
     }
   }
 
   result = theChannel.recvID(dbTag, commitTag, *theElementTags);
   if (result < 0) {
-    cerr << "Beam3dUniformLoad::sendSelf - failed to send element tags\n";
+    opserr << "Beam3dUniformLoad::sendSelf - failed to send element tags\n";
     return result;
   }
   
@@ -132,11 +132,11 @@ Beam3dUniformLoad::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void 
-Beam3dUniformLoad::Print(ostream &s, int flag)
+Beam3dUniformLoad::Print(OPS_Stream &s, int flag)
 {
-  s << "Beam3dUniformLoad - Reference load" << endl;
-  s << "  Transverse (y): " << wy << endl;
-  s << "  Transverse (z): " << wz << endl;
-  s << "  Axial (x):      " << wx << endl;
+  s << "Beam3dUniformLoad - Reference load" << endln;
+  s << "  Transverse (y): " << wy << endln;
+  s << "  Transverse (z): " << wz << endln;
+  s << "  Axial (x):      " << wx << endln;
   s << "  Elements acted on: " << this->getElementTags();
 }

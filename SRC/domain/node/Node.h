@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:23:00 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.h,v $
                                                                         
                                                                         
@@ -123,7 +123,7 @@ class Node : public DomainComponent
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
-    virtual void Print(ostream &s, int flag = 0);
+    virtual void Print(OPS_Stream &s, int flag = 0);
     virtual int displaySelf(Renderer &theRenderer, int displayMode, float fact);
 // AddingSensitivity:BEGIN ///////////////////////////////////////
     int setGradient(const Vector &v, int gradNum, int numGrads);

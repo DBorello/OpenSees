@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-01-09 23:13:32 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/20nbrick/TclTwentyNodeBrickCommand.cpp,v $
                                                                         
                                                                         
@@ -37,7 +37,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
+#include <OPS_Stream.h>
 #include <Domain.h>
 
 #include <ErrorHandler.h>
@@ -53,14 +53,14 @@ TclModelBuilder_addTwentyNodeBrick(ClientData clientData, Tcl_Interp *interp,  i
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-      g3ErrorHandler->warning("command: element Brick20N - no modelbuilder");
+      opserr << "command: element Brick20N - no modelbuilder\n";
       return TCL_ERROR;
   }
 
   // check the number of arguments is correct
   if ((argc-eleArgStart) < 27) {
-      g3ErrorHandler->warning("command: element Brick20N - insufficient args - want %s",
-          "element Brick20N eleTag? node1? node2? .. node20?  matTag? bforce1? bforce2? bforce3? massDensity?\n");
+    opserr << "command: element Brick20N - insufficient args - want " << 
+      "element Brick20N eleTag? node1? node2? .. node20?  matTag? bforce1? bforce2? bforce3? massDensity?\n";
       return TCL_ERROR;
   }    
 
@@ -72,35 +72,34 @@ TclModelBuilder_addTwentyNodeBrick(ClientData clientData, Tcl_Interp *interp,  i
   
   // read the eleTag
   if (Tcl_GetInt(interp, argv[1+eleArgStart], &eleID) != TCL_OK) {
-      g3ErrorHandler->warning("command: element Brick20N - invalid integer tag %s",      
-			      argv[1+eleArgStart]);
-
-      return TCL_ERROR;
+    opserr << "command: element Brick20N - invalid integer tag " << argv[1+eleArgStart] << endln;
+    return TCL_ERROR;
   }
   
   // read the 20 node tags
   int i;
   for (i=0; i<20; i++) {
       if (Tcl_GetInt(interp, argv[2+i+eleArgStart], &nodes[i]) != TCL_OK) {
-	  g3ErrorHandler->warning("command: element Brick20N %d - invalid integer tag %s",      
-				  eleID, argv[2+i+eleArgStart]);
+	opserr << "command: element Brick20N " << eleID << " - invalid integer tag " <<
+	  argv[2+i+eleArgStart] << endln;
 	  return TCL_ERROR;
       }
   }
 
   // read in material tag & check the material exists in the model builder
   if (Tcl_GetInt(interp, argv[22+eleArgStart], &matID) != TCL_OK) {
-      g3ErrorHandler->warning("command: element Brick20N %d - invalid matID tag %s",      
-			      eleID, argv[22+eleArgStart]);      
-      return TCL_ERROR;
+    opserr << "command: element Brick20N " << eleID << " - invalid matID tag " <<      
+      argv[22+eleArgStart] << endln;      
+    
+    return TCL_ERROR;
   }
 
   NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
   
   if (theMaterial == 0) {
-      g3ErrorHandler->warning("command: element Brick20N %d - no NDMaterial with tag %s exists",
-			      eleID, argv[22+eleArgStart]);      
-      return TCL_ERROR;      
+    opserr << "command: element Brick20N " << eleID << 
+      " - no NDMaterial with tag " << argv[22+eleArgStart] << "exists\n";
+    return TCL_ERROR;      
   }
   
   //type = argv[11+eleArgStart];
@@ -108,16 +107,16 @@ TclModelBuilder_addTwentyNodeBrick(ClientData clientData, Tcl_Interp *interp,  i
   // read the 3 bodyforce accel's 
   for (i=0; i<3; i++) {
       if (Tcl_GetDouble(interp, argv[23+i+eleArgStart], &bodyforces[i]) != TCL_OK) {
-	  g3ErrorHandler->warning("command: element Brick20N %d - invalid bodyforces tag %s",      
-				  eleID, argv[23+i+eleArgStart]);
-	  return TCL_ERROR;
+	opserr << "command: element Brick20N " << eleID << " - invalid bodyforces tag " <<
+	  argv[23+i+eleArgStart] << endln;
+	return TCL_ERROR;
       }
   }
 
   // now get the massDensity
   if (Tcl_GetDouble(interp, argv[26+eleArgStart], &massDensity) != TCL_OK) {
-      g3ErrorHandler->warning("command: element Brick20N %d - invalid massDensity %s",      
-    			  eleID, argv[26+eleArgStart]);      
+    opserr << "command: element Brick20N " << eleID << "- invalid massDensity " <<
+      argv[26+eleArgStart] << endln;      
       return TCL_ERROR;
   }  
   
@@ -129,15 +128,14 @@ TclModelBuilder_addTwentyNodeBrick(ClientData clientData, Tcl_Interp *interp,  i
 					       theMaterial, bodyforces[0], bodyforces[1], bodyforces[2], massDensity, 0.0);
 					      
   if (theEle == 0) {
-      g3ErrorHandler->warning("command: element Brick20N %d - out of memory", eleID);      
+    opserr << "command: element Brick20N " << eleID << " - out of memory\n";      
       return TCL_ERROR;
   }
 
   if (theTclDomain->addElement(theEle) == false) {
-      g3ErrorHandler->warning("command: element Brick20N %d - could not add ele to domain", 
-			      eleID);      
-      delete theEle;
-      return TCL_ERROR;
+    opserr << "command: element Brick20N  - could not add ele: " << eleID << " to domain\n";
+    delete theEle;
+    return TCL_ERROR;
   }
 
   // if get here we have sucessfully created the node and added it to the domain

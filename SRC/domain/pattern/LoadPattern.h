@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-10-10 21:06:16 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.h,v $
                                                                         
                                                                         
@@ -88,7 +88,7 @@ class LoadPattern : public DomainComponent
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
-    virtual void Print(ostream &s, int flag =0);        
+    virtual void Print(OPS_Stream &s, int flag =0);        
 
     // method to obtain a blank copy of the LoadPattern
     virtual LoadPattern *getCopy(void);

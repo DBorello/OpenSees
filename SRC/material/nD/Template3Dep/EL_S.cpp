@@ -60,14 +60,14 @@ double EvolutionLaw_S::h_s( EPState *EPS, PotentialSurface *PS){
 //================================================================================
 void EvolutionLaw_S::print()
 {
-    cout << (*this);
+    opserr << (*this);
 }
 
 //================================================================================
 // Overloaded Insertion Operator
 // prints an Evolution Law_S's contents 
 //================================================================================
-ostream& operator<< (ostream& os, const EvolutionLaw_S & EL)
+OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_S & EL)
 {
    os << "Scalar Evolution Law's Parameters: " << endln;
    return os;

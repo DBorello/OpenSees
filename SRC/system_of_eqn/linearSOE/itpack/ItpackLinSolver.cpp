@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-08 16:17:26 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:02:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/itpack/ItpackLinSolver.cpp,v $
                                                                         
 // Written: MHS
@@ -341,7 +341,7 @@ ItpackLinSolver::solve(void)
   theSOE->Aformed = true;
 
   if (ier > 0) {
-    cerr << "ItpackLinSolver::solve() -- returned ier = " << ier << endl;
+    opserr << "ItpackLinSolver::solve() -- returned ier = " << ier << endln;
     return -ier;
   }
   else

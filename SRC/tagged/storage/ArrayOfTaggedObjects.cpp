@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tagged/storage/ArrayOfTaggedObjects.cpp,v $
                                                                         
                                                                         
@@ -37,7 +37,7 @@
 #include <TaggedObject.h>
 #include <ArrayOfTaggedObjects.h>
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 ArrayOfTaggedObjects::ArrayOfTaggedObjects(int size)
 :numComponents(0),sizeComponentArray(0), positionLastEntry(0),
@@ -49,11 +49,7 @@ ArrayOfTaggedObjects::ArrayOfTaggedObjects(int size)
     
     // check we obtained enough memory and set the array size
     if (theComponents == 0) {
-	g3ErrorHandler->warning("%s %s %d\n",
-				"ArrayOfTaggedObjects::ArrayOfTaggedObjects - ",
-				"failed to allocate an array of size",
-				size);
-	sizeComponentArray = 0;
+      opserr << "ArrayOfTaggedObjects::ArrayOfTaggedObjects - failed to allocate an array of size " << size << endln;
     } else 
 	sizeComponentArray = size;
 
@@ -76,9 +72,8 @@ ArrayOfTaggedObjects::setSize(int newSize)
 {
     // check a valid size
     if (newSize < 0 && newSize > sizeComponentArray) {
-	g3ErrorHandler->warning("ArrayOfTaggedObjects::setSize - invalid size %d\n",
-				newSize);
-	return -1;	
+      opserr << "ArrayOfTaggedObjects::setSize - invalid size " << newSize << endln;
+      return -1;	
     } 
 
     if (newSize < 2) newSize = 2; // make 2 the min size;
@@ -90,10 +85,8 @@ ArrayOfTaggedObjects::setSize(int newSize)
 
     if (newArray == 0) {
 	// cannot increase size to newSize, keep as is and return error
-	g3ErrorHandler->warning("ArrayOfTaggedObjects::setSize - %s %d\n",
-				"failed to allocate an array of size ",
-				newSize);
-	return -2;
+      opserr << "ArrayOfTaggedObjects::setSize - failed to allocate an array of size " << newSize << endln;
+      return -2;
     } 
 
     // 
@@ -138,11 +131,9 @@ ArrayOfTaggedObjects::setSize(int newSize)
 	    if (oldArray[j] != 0)
 		if (this->addComponent(oldArray[j]) == false) {
 		    // this should never happen - but in case it does
-		    g3ErrorHandler->warning("%s %s %d\n",
-			       "SERIOUS ERROR: ArrayOfTaggedObjects::setSize() - ",
-			       "we have lost a component with tag: ",
-			       oldArray[j]->getTag());
-		    error = -3;
+		  opserr << "SERIOUS ERROR: ArrayOfTaggedObjects::setSize() - we have lost a component with tag: " <<
+		    oldArray[j]->getTag() << endln;
+		  error = -3;
 		}    
     }
 
@@ -161,22 +152,19 @@ ArrayOfTaggedObjects::addComponent(TaggedObject *newComponent)
 //    if (allowMultiple == false) {
 	TaggedObject *other = this->getComponentPtr(newComponent->getTag());
 	if (other != 0) {
-	    g3ErrorHandler->warning("%s %s %d\n",	    
-		      "WARNING ArrayOfTaggedObjects::addComponent() - component",
-		      " with tag already exists, not adding component with tag: ",
-		      newComponent->getTag());
-	    return false;
+	  opserr << "WARNING ArrayOfTaggedObjects::addComponent() - component" <<
+	    " with tag already exists, not adding component with tag: " <<
+	    newComponent->getTag() << endln;
+	  return false;
 	}
 //    }
     
     // check to see if size of current array is big enough. if not resize.
     if (numComponents == sizeComponentArray) 
 	if (this->setSize(2*numComponents) < 0) {
-	    g3ErrorHandler->warning("%s %s %d\n",	    	    
-			      "ArrayOfTaggedObjects::addComponent() ",
-			      "- failed to enlarge the array with size",
-			      2*numComponents);
-	    return false;
+	  opserr << "ArrayOfTaggedObjects::addComponent()- failed to enlarge the array with size" <<
+	    2*numComponents << endln;
+	  return false;
 	}
     
     // we try to the Component in nicely, i.e. in
@@ -201,10 +189,8 @@ ArrayOfTaggedObjects::addComponent(TaggedObject *newComponent)
 
     // just in case we don't get a location ..  though we should!!
     if (positionLastNoFitEntry == sizeComponentArray) {
-	g3ErrorHandler->warning("%s %s",
-				"ArrayOfTaggedObjects::addComponent() - could not ",
-				"- find a vacant spot after enlarging!!\n");
-	return false;
+      opserr << "ArrayOfTaggedObjects::addComponent() - could not - find a vacant spot after enlarging!!\n";
+      return false;
     }
 	
     theComponents[positionLastNoFitEntry] = newComponent;
@@ -344,8 +330,7 @@ ArrayOfTaggedObjects::getEmptyCopy(void)
     ArrayOfTaggedObjects *theCopy = new ArrayOfTaggedObjects(sizeComponentArray);
     
     if (theCopy == 0) {
-	g3ErrorHandler->warning("ArrayOfTaggedObjects::getEmptyCopy - %s\n",
-				"out of memory");
+      opserr << "ArrayOfTaggedObjects::getEmptyCopy - out of memory\n";
     }
 
     return theCopy;
@@ -381,11 +366,11 @@ ArrayOfTaggedObjects::clearAll(bool invokeDestructors)
 
 
 
-// void Print(ostream &s, int flag) const
+// void Print(OPS_Stream &s, int flag) const
 //	method which invokes Print on all components
 
 void
-ArrayOfTaggedObjects::Print(ostream &s, int flag)
+ArrayOfTaggedObjects::Print(OPS_Stream &s, int flag)
 {
     // go through the array invoking Print on non-zero entries
     for (int i=0; i<=positionLastEntry; i++)

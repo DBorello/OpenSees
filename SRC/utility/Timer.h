@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-09-19 19:56:20 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:02:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/Timer.h,v $
                                                                         
                                                                         
@@ -45,13 +45,14 @@
 #else
 
 #include <time.h>
+#include <unistd.h>
 
 #endif
 #include <sys/times.h>
 #include <sys/resource.h>
 #endif
 
-#include <iostream.h>
+#include <OPS_Globals.h>
 
 class Timer
 {
@@ -65,8 +66,8 @@ class Timer
     double getCPU(void) const;
     int getNumPageFaults(void) const;
     
-    virtual void Print(ostream &s) const;   
-    friend ostream &operator<<(ostream &s, const Timer &E);    
+    virtual void Print(OPS_Stream &s) const;   
+    friend OPS_Stream &operator<<(OPS_Stream &s, const Timer &E);    
 
   protected:
     

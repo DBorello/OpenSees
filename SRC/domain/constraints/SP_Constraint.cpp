@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/SP_Constraint.cpp,v $
                                                                         
                                                                         
@@ -146,7 +146,7 @@ SP_Constraint::sendSelf(int cTag, Channel &theChannel)
 
     int result = theChannel.sendVector(this->getDbTag(), cTag, data);
     if (result < 0) 
-	cerr << "WARNING SP_Constraint::sendSelf - error sending Vector data\n";
+	opserr << "WARNING SP_Constraint::sendSelf - error sending Vector data\n";
 
     return result;
 }
@@ -159,7 +159,7 @@ SP_Constraint::recvSelf(int cTag, Channel &theChannel,
                      // two messages
     int result = theChannel.recvVector(this->getDbTag(), cTag, data);
     if (result < 0) {
-	cerr << "WARNING SP_Constraint::recvSelf - error receiving Vector data\n";
+	opserr << "WARNING SP_Constraint::recvSelf - error receiving Vector data\n";
 	return result;
     }
     
@@ -181,11 +181,11 @@ SP_Constraint::recvSelf(int cTag, Channel &theChannel,
 
 
 void
-SP_Constraint::Print(ostream &s, int flag) 
+SP_Constraint::Print(OPS_Stream &s, int flag) 
 {
     s << "SP_Constraint: " << this->getTag();
     s << "\t Node: " << nodeTag << " DOF: " << dofNumber;
-    s << " value: " << valueC << endl;
+    s << " value: " << valueC << endln;
 }
 
 

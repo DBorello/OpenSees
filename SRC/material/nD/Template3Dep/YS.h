@@ -60,7 +60,7 @@ class YieldSurface
     // Overloaded Insertion Operator
     // prints an YieldSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const YieldSurface & YS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const YieldSurface & YS);
 };
 
 

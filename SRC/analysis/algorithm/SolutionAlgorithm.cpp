@@ -18,15 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-19 23:10:44 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/SolutionAlgorithm.cpp,v $
                                                                         
                                                                         
 #include <SolutionAlgorithm.h>
 #include <Recorder.h>
 #include <stdlib.h>
-
+#include <OPS_Globals.h>
 
 SolutionAlgorithm::SolutionAlgorithm(int clasTag)
 :MovableObject(clasTag), theRecorders(0), numRecorders(0)
@@ -55,7 +55,7 @@ SolutionAlgorithm::addRecorder(Recorder &theRecorder)
 {
     Recorder **newRecorders = (Recorder **)malloc((numRecorders+1)*sizeof(Recorder *));
     if (newRecorders == 0) {
-	cerr << "SolutionAlgorithm::addRecorder - ran out of memory\n";
+	opserr << "SolutionAlgorithm::addRecorder - ran out of memory\n";
 	return -1;
     }
     

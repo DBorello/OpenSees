@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/main.cpp,v $
                                                                         
                                                                         
@@ -34,7 +34,7 @@
 //
 
 #include <stdlib.h>
-#include <iostream.h>
+#include <iOPS_Stream.h>
 #include <ConsoleErrorHandler.h>
 
 #include <Timer.h>
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
     FileDatastore &theDb = *theDatabase;
 
   /*
-    cerr << "TESTING IDs: \n";
+    opserr << "TESTING IDs: \n";
     ID id1(2);
     id1(0) = 1; id1(1) = 2;
 
@@ -93,24 +93,24 @@ int main(int argc, char **argv)
     theDb.sendID(2,1,id2);
     theDb.sendID(2,2,id1);
 
-    cerr << "RESULTS\n";    
+    opserr << "RESULTS\n";    
     ID id5(2);
     theDb.recvID(1,1,id5);
-    cerr << id5;
+    opserr << id5;
     theDb.recvID(1,2,id5);
-    cerr << id5;
+    opserr << id5;
     theDb.recvID(2,1,id5);
-    cerr << id5;
+    opserr << id5;
     theDb.recvID(2,2,id5);
-    cerr << id5;
+    opserr << id5;
     theDb.recvID(1,1,id5);
-    cerr << id5;
+    opserr << id5;
     theDb.recvID(1,2,id5);
-    cerr << id5;
+    opserr << id5;
     theDb.recvID(2,1,id5);
-    cerr << id5;
+    opserr << id5;
     theDb.recvID(2,2,id5);
-    cerr << id5;
+    opserr << id5;
 
     theDb.sendID(2,2,id1);
     theDb.sendID(2,1,id2);
@@ -118,24 +118,24 @@ int main(int argc, char **argv)
     theDb.sendID(1,1,id4);
 
     theDb.recvID(1,1,id5);
-    cerr << id5;
+    opserr << id5;
     theDb.recvID(1,2,id5);
-    cerr << id5;
+    opserr << id5;
     theDb.recvID(2,1,id5);
-    cerr << id5;
+    opserr << id5;
     theDb.recvID(2,2,id5);
-    cerr << id5;
+    opserr << id5;
 
     theDb.sendID(4,4,id5);
     theDb.recvID(4,4,id5);
-    cerr << id5;
+    opserr << id5;
 
     theDb.recvID(5,5,id5);
-    cerr << id5;
+    opserr << id5;
     */
   
     /**************************
-    cerr << "TESTING VECTORS: \n";
+    opserr << "TESTING VECTORS: \n";
 
     Vector vect1(2);
     vect1(0) = 1.11111; vect1(1) = 2.222e3;
@@ -154,16 +154,16 @@ int main(int argc, char **argv)
     theDb.sendVector(2,1,vect3);
     theDb.sendVector(2,2,vect4);
 
-    cerr << "RESULTS\n";    
+    opserr << "RESULTS\n";    
     Vector vect5(2);
     theDb.recvVector(1,1,vect5);
-    cerr << vect5;
+    opserr << vect5;
     theDb.recvVector(1,2,vect5);
-    cerr << vect5;
+    opserr << vect5;
     theDb.recvVector(2,1,vect5);
-    cerr << vect5;
+    opserr << vect5;
     theDb.recvVector(2,2,vect5);
-    cerr << vect5;
+    opserr << vect5;
 
     theDb.sendVector(2,2,vect1);
     theDb.sendVector(2,1,vect2);
@@ -171,24 +171,24 @@ int main(int argc, char **argv)
     theDb.sendVector(1,1,vect4);
 
     theDb.recvVector(1,1,vect5);
-    cerr << vect5;
+    opserr << vect5;
     theDb.recvVector(1,2,vect5);
-    cerr << vect5;
+    opserr << vect5;
     theDb.recvVector(2,1,vect5);
-    cerr << vect5;
+    opserr << vect5;
     theDb.recvVector(2,2,vect5);
-    cerr << vect5;
+    opserr << vect5;
 
 
     theDb.sendVector(4,4,vect5);
     theDb.recvVector(4,4,vect5);
-    cerr << vect5;
+    opserr << vect5;
 
     theDb.recvVector(5,5,vect5);
-    cerr << vect5;
+    opserr << vect5;
     **************************/
     /*
-    cerr << "TESTING MATRICES: \n";
+    opserr << "TESTING MATRICES: \n";
 
     Matrix mat1(2,2);
     mat1(0,0) = 1.11111; mat1(0,1) = 2.222e3;
@@ -203,15 +203,15 @@ int main(int argc, char **argv)
 
     Matrix mat3(2,2);
     theDb.recvMatrix(1,1,mat3);
-    cerr << mat3;
+    opserr << mat3;
     
 
     theDb.recvMatrix(2,1,mat3);
-    cerr << mat3;
+    opserr << mat3;
 
     theDb.sendMatrix(2,1,mat1);
     theDb.recvMatrix(2,1,mat3);
-    cerr << mat3;
+    opserr << mat3;
     */
 
 //  theModelBuilder->buildFE_Model();
@@ -231,7 +231,7 @@ int main(int argc, char **argv)
     theDb.restoreElement(2,0);
     */
 
-  cerr << *theDomain;
+  opserr << *theDomain;
 
     delete theDatabase;
 

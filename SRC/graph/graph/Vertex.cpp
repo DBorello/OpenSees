@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Vertex.cpp,v $
                                                                         
                                                                         
@@ -121,7 +121,7 @@ Vertex::getAdjacency(void) const
 }
 
 void
-Vertex::Print(ostream &s, int flag)
+Vertex::Print(OPS_Stream &s, int flag)
 {
     s << this->getTag() << " " ;
     s << myRef << " ";

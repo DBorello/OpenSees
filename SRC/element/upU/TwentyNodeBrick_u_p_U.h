@@ -37,8 +37,7 @@
 #include "bool.h"
 #endif
 
-
-#include <fstream.h>	  // add for the output of stiffness matrix K  02/04/2002
+#include <fstream>	  // add for the output of stiffness matrix K  02/04/2002
 
 #include <Element.h>
 #include <Node.h> 
@@ -55,8 +54,6 @@
 #include <string.h>
 
 #include <GaussQuadRule1d.h>
-
-#include <G3Globals.h>
 
 // Xiaoyan added from brick3d.hh   07/11/00
 #include <basics.h>
@@ -210,8 +207,8 @@ class TwentyNodeBrick_u_p_U: public Element
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);
     int displaySelf (Renderer &theViewer, int displayMode, float fact);
-    void Print(ostream &s, int flag =0);   
-    //    Do nothing with void Print (ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);   
+    //    Do nothing with void Print (OPS_Stream &s, int flag =0);
     //    use Brick3D report.  08/16/00
     Response *setResponse (char **argv, int argc, Information &eleInformation);
     int getResponse (int responseID, Information &eleInformation);

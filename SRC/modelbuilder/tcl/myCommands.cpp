@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-24 18:28:31 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/myCommands.cpp,v $
                                                                         
                                                                         
@@ -42,8 +42,6 @@
 #include <tcl.h>
 #include <tk.h>
 
-#include <iostream.h>
-#include <fstream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,8 +65,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
 {
     // make sure at least one other argument to contain model builder type given
     if (argc < 2) {
-      cerr << "WARNING need to specify a model type, valid types:\n";
-      cerr << "\tBasicBuilder\n";
+      opserr << "WARNING need to specify a model type, valid types:\n";
+      opserr << "\tBasicBuilder\n";
       return TCL_ERROR;
     }    
 
@@ -84,8 +82,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
       int ndf = 0;
       
       if (argc < 4) {
-	cerr << "WARNING incorrect number of command arguments\n";
-	cerr << "model modelBuilderType -ndm ndm? <-ndf ndf?> \n";
+	opserr << "WARNING incorrect number of command arguments\n";
+	opserr << "model modelBuilderType -ndm ndm? <-ndf ndf?> \n";
 	return TCL_ERROR;
       }
 
@@ -96,8 +94,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  argPos++;
 	  if (argPos < argc)
 	    if (Tcl_GetInt(interp, argv[argPos], &ndm) != TCL_OK) {
-	      cerr << "WARNING error reading ndm: " << argv[argPos];
-	      cerr << "\nmodel modelBuilderType -ndm ndm? <-ndf ndf?>\n";
+	      opserr << "WARNING error reading ndm: " << argv[argPos];
+	      opserr << "\nmodel modelBuilderType -ndm ndm? <-ndf ndf?>\n";
 	      return TCL_ERROR;
 	    }	  
 	  argPos++;
@@ -108,8 +106,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  argPos++;
 	  if (argPos < argc)
 	    if (Tcl_GetInt(interp, argv[argPos], &ndf) != TCL_OK) {
-	      cerr << "WARNING error reading ndf: " << argv[argPos];
-	      cerr << "\nmodel modelBuilderType -ndm ndm? <-ndf ndf?>\n";
+	      opserr << "WARNING error reading ndf: " << argv[argPos];
+	      opserr << "\nmodel modelBuilderType -ndm ndm? <-ndf ndf?>\n";
 	      return TCL_ERROR;
 	    }	  
 	  argPos++;
@@ -121,8 +119,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
 
       // check that ndm was specified
       if (ndm == 0) {
-	cerr << "WARNING need to specify ndm\n";
-	cerr << "model modelBuilderType -ndm ndm? <-ndf ndf?>\n";
+	opserr << "WARNING need to specify ndm\n";
+	opserr << "model modelBuilderType -ndm ndm? <-ndf ndf?>\n";
 	return TCL_ERROR;
       }
 
@@ -135,8 +133,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
 	else if (ndm == 3)
 	  ndf = 6;
 	else {
-	  cerr << "WARNING specified ndm, " << ndm << ", will not work\n";
-	  cerr << "with any elements in BasicBuilder\n";
+	  opserr << "WARNING specified ndm, " << ndm << ", will not work\n";
+	  opserr << "with any elements in BasicBuilder\n";
 	  return TCL_ERROR;
 	}
       }
@@ -144,7 +142,7 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
       // create the model builder
       theBuilder = new TclModelBuilder(theDomain, interp, ndm, ndf);
       if (theBuilder == 0) {
-	cerr << "WARNING ran out of memory in creating BasicBuilder model\n";
+	opserr << "WARNING ran out of memory in creating BasicBuilder model\n";
 	return TCL_ERROR;
       }
     }
@@ -158,7 +156,7 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
       }
       theBuilder = new TclUniaxialMaterialTester(theDomain, interp, count);
       if (theBuilder == 0) {
-	cerr << "WARNING ran out of memory in creating TclUniaxialMAterialTester model\n";
+	opserr << "WARNING ran out of memory in creating TclUniaxialMAterialTester model\n";
 	return TCL_ERROR;
       }
     }
@@ -166,7 +164,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
     else
     {
       Tcl_SetResult(interp, "WARNING unknown model builder type", TCL_STATIC);
-      cerr << "WARNING model builder type " << argv[1]
+
+      opserr << "WARNING model builder type " << argv[1]
 	   << " not supported\n";
       return TCL_ERROR;
     }

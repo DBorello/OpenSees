@@ -34,6 +34,7 @@
 
 #include "EPState.h"
 
+
 class PotentialSurface
 {
   public:
@@ -48,7 +49,7 @@ class PotentialSurface
     // Overloaded Insertion Operator
     // prints an PotentialSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const PotentialSurface & PS)
+    friend OPS_Stream& operator<< (OPS_Stream& os, const PotentialSurface & PS)
     {
        os << "Potential Surface Parameters: " << endln;
        return os;

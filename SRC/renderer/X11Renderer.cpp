@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-26 00:56:06 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.cpp,v $
                                                                         
                                                                         
@@ -108,8 +108,8 @@ X11Renderer::X11Renderer(char *title, int xLoc, int yLoc, int width, int height,
 	  aFile = 0;
 	} else {
 	  aFile = 1;
-	  theFile << title << endl;
-	  theFile << xLoc << " " << yLoc << " " << width << " " << height << endl;
+	  theFile << title << endln;
+	  theFile << xLoc << " " << yLoc << " " << width << " " << height << endln;
 	}
       } 
     }
@@ -148,16 +148,16 @@ X11Renderer::startImage(void)
 
   if (aFile == 1) {
     theFile << "StartImage\n";
-    theFile << "VRP " << theView->vrp[0] << " " << theView->vrp[1] << " " << theView->vrp[2] << " " << endl;
-    theFile << "VPN " << theView->vpn[0] << " " << theView->vpn[1] << " " << theView->vpn[2] << " " << endl;
-    theFile << "VUV " << theView->vuv[0] << " " << theView->vuv[1] << " " << theView->vuv[2] << " " << endl;
-    theFile << "COP " << theProjection->cop[0] << " " << theProjection->cop[1] << " " << theProjection->cop[2] << " " << endl;
-    theFile << "PROJECTIONMODE " << theProjection->projection_mode << endl;
+    theFile << "VRP " << theView->vrp[0] << " " << theView->vrp[1] << " " << theView->vrp[2] << " " << endln;
+    theFile << "VPN " << theView->vpn[0] << " " << theView->vpn[1] << " " << theView->vpn[2] << " " << endln;
+    theFile << "VUV " << theView->vuv[0] << " " << theView->vuv[1] << " " << theView->vuv[2] << " " << endln;
+    theFile << "COP " << theProjection->cop[0] << " " << theProjection->cop[1] << " " << theProjection->cop[2] << " " << endln;
+    theFile << "PROJECTIONMODE " << theProjection->projection_mode << endln;
     theFile << "VPWINDOW " << theProjection->vpwindow[0] << " " << theProjection->vpwindow[1] << " "
-	    << theProjection->vpwindow[2] << " " << theProjection->vpwindow[3] << " " << endl;
-    theFile << "PLANES " << theProjection->planedist[0] << " " << theProjection->planedist[2] << " " << endl;
+	    << theProjection->vpwindow[2] << " " << theProjection->vpwindow[3] << " " << endln;
+    theFile << "PLANES " << theProjection->planedist[0] << " " << theProjection->planedist[2] << " " << endln;
     theFile << "PORTWINDOW " << theViewport->portwindow[0] << " " << theViewport->portwindow[1] << " "
-	    << theViewport->portwindow[2] << " " << theViewport->portwindow[3] << " " << endl;
+	    << theViewport->portwindow[2] << " " << theViewport->portwindow[3] << " " << endln;
 
   } 
 
@@ -186,7 +186,7 @@ X11Renderer::drawPoint(const Vector &pos1, float V1, int numPixels)
 
     if (aFile == 1) {
 	theFile << "Point\n" << pos1(0) << " " << pos1(1) << " " << pos1(2) 
-	    << " " << r << " " << g << " " << b << " " << endl;
+	    << " " << r << " " << g << " " << b << " " << endln;
     }
 
     return 0;  
@@ -203,7 +203,7 @@ X11Renderer::drawPoint(const Vector &pos1, const Vector &rgb, int numPixels)
 
     if (aFile == 1  ) {
 	theFile << "Point\n" << pos1(0) << " " << pos1(1) << " " << pos1(2) 
-	    << " " << r << " " << g << " " << b << " " << endl;
+	    << " " << r << " " << g << " " << b << " " << endln;
     }
 
     return 0;  
@@ -248,7 +248,7 @@ X11Renderer::drawLine(const Vector &pos1, const Vector &pos2,
   theFace->AddPoint(*point);
 
   if (aFile == 1) {
-    theFile << "Line\n" << x << " " << y << " " << z << " " << r << " " << g << " " << b << " " << endl;
+    theFile << "Line\n" << x << " " << y << " " << z << " " << r << " " << g << " " << b << " " << endln;
   }
 
   size = pos2.Size();
@@ -276,17 +276,17 @@ X11Renderer::drawLine(const Vector &pos1, const Vector &pos2,
   theFace->AddPoint(*point);
 
   if (aFile == 1) {
-    theFile << x << " " << y << " " << z << " " << r << " " << g << " " << b << " " << endl;
+    theFile << x << " " << y << " " << z << " " << r << " " << g << " " << b << " " << endln;
   }
 
   FACE &res1 = theView->transform(*theFace);
-  // cerr << "X11Renderer: face after view " << theFace;      
+  // opserr << "X11Renderer: face after view " << theFace;      
   FACE &res2 = theProjection->transform(res1);
-  // cerr << "X11Renderer: face after projection " << theFace;        
+  // opserr << "X11Renderer: face after projection " << theFace;        
   FACE &res3 = theClipping->transform(res2);
-  // cerr << "X11Renderer: face after clipping " << theFace;          
+  // opserr << "X11Renderer: face after clipping " << theFace;          
   FACE &res4 = theViewport->transform(res3);
-  // cerr << "X11Renderer: face after viewport " << theFace;            
+  // opserr << "X11Renderer: face after viewport " << theFace;            
   theScan->scanLine(res4);
   return 0;  
 }
@@ -328,7 +328,7 @@ X11Renderer::drawLine(const Vector &pos1, const Vector &pos2,
   theFace->AddPoint(*point);
 
   if (aFile == 1) {
-    theFile << "Line\n" << x << " " << y << " " << z << " " << r << " " << g << " " << b << " " << endl;
+    theFile << "Line\n" << x << " " << y << " " << z << " " << r << " " << g << " " << b << " " << endln;
   }
 
   size = pos2.Size();
@@ -356,17 +356,17 @@ X11Renderer::drawLine(const Vector &pos1, const Vector &pos2,
   theFace->AddPoint(*point);
 
   if (aFile == 1) {
-    theFile << x << " " << y << " " << z << " " << r << " " << g << " " << b << " " << endl;
+    theFile << x << " " << y << " " << z << " " << r << " " << g << " " << b << " " << endln;
   }
 
   FACE &res1 = theView->transform(*theFace);
-  // cerr << "X11Renderer: face after view " << theFace;      
+  // opserr << "X11Renderer: face after view " << theFace;      
   FACE &res2 = theProjection->transform(res1);
-  // cerr << "X11Renderer: face after projection " << theFace;        
+  // opserr << "X11Renderer: face after projection " << theFace;        
   FACE &res3 = theClipping->transform(res2);
-  // cerr << "X11Renderer: face after clipping " << theFace;          
+  // opserr << "X11Renderer: face after clipping " << theFace;          
   FACE &res4 = theViewport->transform(res3);
-  // cerr << "X11Renderer: face after viewport " << theFace;            
+  // opserr << "X11Renderer: face after viewport " << theFace;            
   theScan->scanLine(res4);
   return 0;  
 }
@@ -409,7 +409,7 @@ X11Renderer::drawPolygon(const Matrix &pos, const Vector &data)
 
     if (aFile == 1) {
       theFile << posX << " " << posY << " " << posZ << " " << r 
-	      << " " << g << " " << b << " " << endl;
+	      << " " << g << " " << b << " " << endln;
     }	
 
     point = new MYPOINT(1,posX,posY,posZ);
@@ -422,13 +422,13 @@ X11Renderer::drawPolygon(const Matrix &pos, const Vector &data)
 
   // display the face
   FACE &res1 = theView->transform(*theFace);
-  // cerr << "X11Renderer: face after view " << theFace;      
+  // opserr << "X11Renderer: face after view " << theFace;      
   FACE &res2 = theProjection->transform(res1);
-  // cerr << "X11Renderer: face after projection " << theFace;        
+  // opserr << "X11Renderer: face after projection " << theFace;        
   FACE &res3 = theClipping->transform(res2);
-  // cerr << "X11Renderer: face after clipping " << theFace;          
+  // opserr << "X11Renderer: face after clipping " << theFace;          
   FACE &res4 = theViewport->transform(res3);
-  // cerr << "X11Renderer: face after viewport " << theFace;            
+  // opserr << "X11Renderer: face after viewport " << theFace;            
   theScan->scanPolygon(res4);
   return 0;  
 }
@@ -466,7 +466,7 @@ X11Renderer::drawPolygon(const Matrix &pos, const Matrix &data)
 
     if (aFile == 1) {
       theFile << posX << " " << posY << " " << posZ << " " << r 
-	      << " " << g << " " << b << " " << endl;
+	      << " " << g << " " << b << " " << endln;
     }	
 
     point = new MYPOINT(1,posX,posY,posZ);
@@ -479,13 +479,13 @@ X11Renderer::drawPolygon(const Matrix &pos, const Matrix &data)
 
   // display the face
   FACE &res1 = theView->transform(*theFace);
-  // cerr << "X11Renderer: face after view " << theFace;      
+  // opserr << "X11Renderer: face after view " << theFace;      
   FACE &res2 = theProjection->transform(res1);
-  // cerr << "X11Renderer: face after projection " << theFace;        
+  // opserr << "X11Renderer: face after projection " << theFace;        
   FACE &res3 = theClipping->transform(res2);
-  // cerr << "X11Renderer: face after clipping " << theFace;          
+  // opserr << "X11Renderer: face after clipping " << theFace;          
   FACE &res4 = theViewport->transform(res3);
-  // cerr << "X11Renderer: face after viewport " << theFace;            
+  // opserr << "X11Renderer: face after viewport " << theFace;            
   theScan->scanPolygon(res4);
   return 0;  
 }
@@ -570,15 +570,15 @@ X11Renderer::drawLText(const Vector &pos, char *text, int length,
 int
 X11Renderer::displayFace(FACE &theFace)
 {
-  // cerr << "X11Renderer: input face " << theFace;    
+  // opserr << "X11Renderer: input face " << theFace;    
   FACE &res1 = theView->transform(theFace);
-  // cerr << "X11Renderer: face after view " << theFace;      
+  // opserr << "X11Renderer: face after view " << theFace;      
   FACE &res2 = theProjection->transform(res1);
-  // cerr << "X11Renderer: face after projection " << theFace;        
+  // opserr << "X11Renderer: face after projection " << theFace;        
   FACE &res3 = theClipping->transform(res2);
-  // cerr << "X11Renderer: face after clipping " << theFace;          
+  // opserr << "X11Renderer: face after clipping " << theFace;          
   FACE &res4 = theViewport->transform(res3);
-  // cerr << "X11Renderer: face after viewport " << theFace;            
+  // opserr << "X11Renderer: face after viewport " << theFace;            
   theScan->scanPolygon(res4);
   return 0;
 }
@@ -620,8 +620,8 @@ int
 X11Renderer::setViewWindow(float umin, float umax, float vmin, float vmax)
 {
   if (umin > umax || vmin > vmax) {
-      cerr << "X11Renderer::setViewWindow() - invalid window ";
-      cerr << umin << " "<< umax << " "<< vmin << " "<< vmax << endl;
+      opserr << "X11Renderer::setViewWindow() - invalid window ";
+      opserr << umin << " "<< umax << " "<< vmin << " "<< vmax << endln;
       return -1;
   }
 
@@ -638,8 +638,8 @@ X11Renderer::setPlaneDist(float anear, float afar)
 {
 
    if ((anear < 0.0) || (afar < 0.0)) {
-      cerr << "X11Renderer::setPlaneDist() - invalid planes";
-      cerr << anear << " " << afar << endl;
+      opserr << "X11Renderer::setPlaneDist() - invalid planes";
+      opserr << anear << " " << afar << endln;
       return -1;
   }
   
@@ -691,8 +691,8 @@ X11Renderer::setPortWindow(float left, float right,
   if (left < -1 || right > 1 || bottom < -1 || top > 1
       || left > right || bottom > top) {
       
-      cerr << "X11Renderer::setPortWindow() - bounds invalid ";
-      cerr << left << " "<< right << " "<< bottom << " "<< top << endl;
+      opserr << "X11Renderer::setPortWindow() - bounds invalid ";
+      opserr << left << " "<< right << " "<< bottom << " "<< top << endln;
       return -1;
   }
 

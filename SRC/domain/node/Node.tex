@@ -81,7 +81,7 @@ retrieve these quantities.\\
 \&theChannel);} \\
 \indent\indent {\em virtual int recvSelf(int commitTag, Channel \&theChannel,
 FEM\_ObjectBroker \&theBroker);} \\ 
-\indent\indent {\em void Print(ostream \&s, int flag = 0);} \\
+\indent\indent {\em void Print(OPS_Stream \&s, int flag = 0);} \\
 \indent\indent {\em int displaySelf(Renderer \&theRenderer, int flag,
 float fact);} \\
 
@@ -394,7 +394,7 @@ object to fill these with data. The data placed here by the Channel
 object correspond to the data put there by the sending Node object.\\
 
 
-{\em void Print(ostream \&s, int flag = 0);} \\
+{\em void Print(OPS_Stream \&s, int flag = 0);} \\
 Causes the Node to print out its tag, mass matrix, and committed
 response quantities. \\ 
 

@@ -15,7 +15,7 @@ public:
                         PlasticHardeningMaterial &kpy );
 	virtual ~PeakOriented2D01();
 	
-	virtual void	Print(ostream &s, int flag =0);
+	virtual void	Print(OPS_Stream &s, int flag =0);
 	virtual YS_Evolution *getCopy(void);
 	
 private:

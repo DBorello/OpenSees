@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/section/SectionRepres.h,v $
                                                                         
                                                                         
@@ -56,7 +56,7 @@ class SectionRepres: public TaggedObject
     // Section inquiring functions
      
     virtual int  getType(void) const = 0;
-    friend ostream &operator<<(ostream &s, const SectionRepres &sectionRepres);    
+    friend OPS_Stream &operator<<(OPS_Stream &s, const SectionRepres &sectionRepres);    
     
   protected:
     

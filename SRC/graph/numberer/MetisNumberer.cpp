@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/numberer/MetisNumberer.cpp,v $
                                                                         
                                                                         
@@ -133,16 +133,16 @@ Metis::checkOptions(void)
     
     if ((myPtype != 1) || (myPtype != 2)) {
 	okFlag = false;
-	cerr << "WARNING: Metis::partition ";
-	cerr << " - Illegal Ptype " << myPtype << endl;
+	opserr << "WARNING: Metis::partition ";
+	opserr << " - Illegal Ptype " << myPtype << endln;
     }
 	
     if ((myMtype != 1) ||  (myMtype != 2) || (myMtype != 3) || 
 	((myMtype != 4) || (myMtype != 5) || myMtype != 11) || 
 	(myMtype != 21) || (myMtype != 51)) {
 	okFlag = false;
-	cerr << "WARNING: Metis::partition ";
-	cerr << " - Illegal Mtype " << myMtype << endl;
+	opserr << "WARNING: Metis::partition ";
+	opserr << " - Illegal Mtype " << myMtype << endln;
     }
 
     if (myPtype == 1)  
@@ -150,30 +150,30 @@ Metis::checkOptions(void)
 	    (myRtype != 11) || (myRtype != 12) || (myRtype != 13) ||
 	    (myRtype != 20)) {
 	    okFlag = false;
-	    cerr << "WARNING: Metis::partition ";
-	    cerr << " - Illegal Rtype " << myRtype << endl;
-	    cerr << " for Ptype " << myPtype << endl;	    
+	    opserr << "WARNING: Metis::partition ";
+	    opserr << " - Illegal Rtype " << myRtype << endln;
+	    opserr << " for Ptype " << myPtype << endln;	    
 	}
     else 
 	if (myPtype == 2)
 	    if ((myRtype != 11) || (myRtype != 12) || (myRtype != 20)) {
 		okFlag = false;
-		cerr << "WARNING: Metis::partition ";
-		cerr << " - Illegal Rtype " << myRtype << endl;
-		cerr << " for Ptype " << myPtype << endl;	    
+		opserr << "WARNING: Metis::partition ";
+		opserr << " - Illegal Rtype " << myRtype << endln;
+		opserr << " for Ptype " << myPtype << endln;	    
 	    }
     
     if ((myIPtype != 1) || (myIPtype != 2) || (myIPtype != 3) || 
 	(myIPtype != 4)) {
 	okFlag = false;
-	cerr << "WARNING: Metis::partition ";
-	cerr << " - Illegal IPtype " << myIPtype << endl;
+	opserr << "WARNING: Metis::partition ";
+	opserr << " - Illegal IPtype " << myIPtype << endln;
     }	    
 	
     if (myCoarsenTo < 0) {
 	okFlag = false;
-	cerr << "WARNING: Metis::partition ";
-	cerr << " - Illegal coarsen To " << myCoarsenTo << endl;
+	opserr << "WARNING: Metis::partition ";
+	opserr << " - Illegal coarsen To " << myCoarsenTo << endln;
     }	    
 
     if (okFlag == false)
@@ -225,15 +225,15 @@ Metis::partition(Graph &theGraph, int numPart)
     else if (START_VERTEX_NUM == 1)
 	numbering = 1;
     else {
-	cerr << "WARNING Metis::partition - No partitioning done";
-	cerr << " vertex numbering must start at 0 or 1\n";
+	opserr << "WARNING Metis::partition - No partitioning done";
+	opserr << " vertex numbering must start at 0 or 1\n";
 	return (-2);
     }
     int edgecut;
     
     if ((options == 0) || (partition == 0) || (xadj == 0) || (adjncy == 0)) {
-	cerr << "WARNING Metis::partition - No partitioning done";
-	cerr << " as ran out of memory\n";
+	opserr << "WARNING Metis::partition - No partitioning done";
+	opserr << " as ran out of memory\n";
 	return (-2);
     }
 
@@ -251,8 +251,8 @@ Metis::partition(Graph &theGraph, int numPart)
 	// if so WARNING message, clean up and return -2
 
 	if (vertexPtr == 0) {
-	    cerr << "WARNING Metis::partition - No partitioning done";
-	    cerr << " Metis requires consequtive Vertex Numbering\n";
+	    opserr << "WARNING Metis::partition - No partitioning done";
+	    opserr << " Metis requires consequtive Vertex Numbering\n";
 	    
 	    delete [] options;
 	    delete [] partition;

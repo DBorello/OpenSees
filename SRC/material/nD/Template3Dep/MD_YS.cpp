@@ -29,8 +29,6 @@
 #include "MD_YS.h"
 #include <basics.h>
 
-#include <G3Globals.h>
-
 //================================================================================
 // Normal constructor
 //================================================================================
@@ -117,14 +115,14 @@ tensor MDYieldSurface::dFods(const EPState *EPS) const {
     stresstensor norm2 = r_bar("ij") * r_bar("ij");
     double norm = sqrt( norm2.trace() );
     
-    //cout << "d_macheps " << d_macheps() << endln;
+    //cout << "d_macheps " << d_macheps() << endlnn;
 
     stresstensor n;
     if ( norm >= d_macheps() ){ 
       n = r_bar *(1.0 / norm );
     }
     else {
-      g3ErrorHandler->fatal("MDYieldSurface::dFods  |n_ij| = 0, divide by zero! Program exits.");
+      opserr << "MDYieldSurface::dFods  |n_ij| = 0, divide by zero! Program exits.\n";
       exit(-1);
     }
     //EPS->setTensorVar( 3, n); //update n_ij//
@@ -187,7 +185,7 @@ tensor MDYieldSurface::xi_t1( const EPState *EPS) const {
     n = r_bar *(1.0 / norm );
   }
   else {
-    g3ErrorHandler->fatal("MDYieldSurface::dFods  |n_ij| = 0, divide by zero! Program exits.");
+    opserr << "MDYieldSurface::dFods  |n_ij| = 0, divide by zero! Program exits.\n";
     exit(-1);
   }
     
@@ -195,7 +193,7 @@ tensor MDYieldSurface::xi_t1( const EPState *EPS) const {
 }
 
 
-ostream& operator<< (ostream& os, const MDYieldSurface & YS)
+OPS_Stream& operator<< (OPS_Stream& os, const MDYieldSurface & YS)
 {
    os << "Manzari-Dafalias Yield Surface Parameters: " << endln;
    return os;

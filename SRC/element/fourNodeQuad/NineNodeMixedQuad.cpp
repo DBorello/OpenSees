@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-16 21:10:05 $
+// $Revision: 1.10 $
+// $Date: 2003-02-14 23:01:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.cpp,v $
 
 // Ed "C++" Love
@@ -28,7 +28,6 @@
 // Plane Strain (NOT PLANE STRESS)
 //
 
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -102,8 +101,7 @@ connectedExternalNodes(9) , load(0), Ki(0)
     
     if (materialPointers[i] == 0) {
 
-      g3ErrorHandler->fatal("NineNodeMixedQuad::constructor %s",
-				"- failed to get a material of type: AxiSymmetric2D");
+      opserr << "NineNodeMixedQuad::constructor() - failed to get a material of type: AxiSymmetric2D\n";
     } //end if
       
   } //end for i 
@@ -180,7 +178,7 @@ NineNodeMixedQuad::commitState( )
 
   // call element commitState to do any base class stuff
   if ((success = this->Element::commitState()) != 0) {
-    cerr << "NineNodeMixedQuad::commitState () - failed in base class";
+    opserr << "NineNodeMixedQuad::commitState () - failed in base class\n";
   }    
 
   for ( i=0; i<9; i++ ) 
@@ -220,26 +218,26 @@ NineNodeMixedQuad::revertToStart( )
 
 //print out element data
 void 
-NineNodeMixedQuad::Print( ostream &s, int flag )
+NineNodeMixedQuad::Print( OPS_Stream &s, int flag )
 {
-  s << endl ;
+  s << endln ;
   s << "Nine Node Quad -- Mixed Pressure/Volume -- Plane Strain \n" ;
-  s << "Element Number " << this->getTag() << endl ;
-  s << "Node 1 : " << connectedExternalNodes(0) << endl ;
-  s << "Node 2 : " << connectedExternalNodes(1) << endl ;
-  s << "Node 3 : " << connectedExternalNodes(2) << endl ;
-  s << "Node 4 : " << connectedExternalNodes(3) << endl ;
-  s << "Node 5 : " << connectedExternalNodes(4) << endl ;
-  s << "Node 6 : " << connectedExternalNodes(5) << endl ;
-  s << "Node 7 : " << connectedExternalNodes(6) << endl ;
-  s << "Node 8 : " << connectedExternalNodes(7) << endl ;
-  s << "Node 9 : " << connectedExternalNodes(8) << endl ;
+  s << "Element Number " << this->getTag() << endln ;
+  s << "Node 1 : " << connectedExternalNodes(0) << endln ;
+  s << "Node 2 : " << connectedExternalNodes(1) << endln ;
+  s << "Node 3 : " << connectedExternalNodes(2) << endln ;
+  s << "Node 4 : " << connectedExternalNodes(3) << endln ;
+  s << "Node 5 : " << connectedExternalNodes(4) << endln ;
+  s << "Node 6 : " << connectedExternalNodes(5) << endln ;
+  s << "Node 7 : " << connectedExternalNodes(6) << endln ;
+  s << "Node 8 : " << connectedExternalNodes(7) << endln ;
+  s << "Node 9 : " << connectedExternalNodes(8) << endln ;
 
   s << "Material Information : \n " ;
 
   materialPointers[0]->Print( s, flag ) ;
 
-  s << endl ;
+  s << endln ;
 }
 
 
@@ -280,8 +278,6 @@ NineNodeMixedQuad::getInitialStiff( )
   int i, j, k, p, q, r, s ;
   int jj, kk ;
 
-  int success ;
-  
   static double volume ;
 
   static double xsj ;  // determinant jacaobian matrix 
@@ -525,9 +521,7 @@ NineNodeMixedQuad::zeroLoad( )
 int 
 NineNodeMixedQuad::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("NineNodeMixedQuad::addLoad - load type unknown for ele with tag: %d\n",
-			  this->getTag());
-  
+  opserr << "NineNodeMixedQuad::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
   return -1;
 }
 
@@ -1338,7 +1332,7 @@ NineNodeMixedQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
       values(i) = 1;  */
     }
 
-    //cerr << coords;
+    //opserr << coords;
     int error = 0;
 
     error += theViewer.drawPolygon (coords, values);
@@ -1392,8 +1386,8 @@ NineNodeMixedQuad::sendSelf (int commitTag, Channel &theChannel)
 
   res += theChannel.sendID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING NineNodeMixedQuad::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING NineNodeMixedQuad::sendSelf() - " << this->getTag() << " failed to send ID\n";
+      
     return res;
   }
 
@@ -1401,7 +1395,7 @@ NineNodeMixedQuad::sendSelf (int commitTag, Channel &theChannel)
   for (i = 0; i < 9; i++) {
     res += materialPointers[i]->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING NineNodeMixedQuad::sendSelf() - %d failed to send its Material\n",this->getTag());
+      opserr << "WARNING NineNodeMixedQuad::sendSelf() - " << this->getTag() << " failed to send its Material\n";
       return res;
     }
   }
@@ -1422,7 +1416,7 @@ NineNodeMixedQuad::recvSelf (int commitTag,
   // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING NineNodeMixedQuad::recvSelf() - %d failed to receive ID\n", this->getTag());
+    opserr << "WARNING NineNodeMixedQuad::recvSelf() - " << this->getTag() << "  failed to receive ID\n";
     return res;
   }
 
@@ -1447,16 +1441,15 @@ NineNodeMixedQuad::recvSelf (int commitTag,
       // Allocate new material with the sent class tag
       materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
       if (materialPointers[i] == 0) {
-	g3ErrorHandler->warning("NineNodeMixedQuad::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
+	opserr << "NineNodeMixedQuad::recvSelf() - Broker could not create NDMaterial of class type" << matClassTag << endln;
 	return -1;
       }
       // Now receive materials into the newly allocated space
       materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "NineNodeMixedQuad::recvSelf() - material " <<
+	  i << "failed to recv itself\n";
 	return res;
       }
     }
@@ -1472,17 +1465,16 @@ NineNodeMixedQuad::recvSelf (int commitTag,
 	delete materialPointers[i];
 	materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
 	if (materialPointers[i] == 0) {
-	  g3ErrorHandler->fatal("NineNodeMixedQuad::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
-	  return -1;
+	  opserr << "NineNodeMixedQuad::recvSelf() - Broker could not create NDMaterial of class type" << matClassTag << endln;
+	  exit(-1);
 	}
       }
       // Receive the material
       materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("NineNodeMixedQuad::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "NineNodeMixedQuad::recvSelf() - material " <<
+	  i << "failed to recv itself\n";
 	return res;
       }
     }

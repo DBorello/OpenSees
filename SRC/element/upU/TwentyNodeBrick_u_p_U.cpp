@@ -1066,11 +1066,11 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 //		e = (matpoint[where]->matmodel)->getE();
-//		cout<<"e=  "<<e<<endl;
+//		cout<<"e=  "<<e<<endln;
 //		nu = (matpoint[where]->matmodel)->getnu();
-//		cout<<"nu=  "<<nu<<endl;
+//		cout<<"nu=  "<<nu<<endln;
 //		KS=e/(3*(1-2*nu));
-//		cout<<"KS="<<KS<<endl;
+//		cout<<"KS="<<KS<<endln;
 //		QQ= N/KF+(ALPHA-N)/KS;
 		P = P + hp("K") * hp("L")*QQ*weight;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
@@ -2663,84 +2663,84 @@ tensor TwentyNodeBrick_u_p_U::total_dispDu()
       
     // Get first three total displacement for solid part. Xiaoyan 02/08/2002
     const Vector &TotDis1 = nd1Ptr->getTrialDisp();
-    cout<<"\ntot node " << nd1Ptr->getTag() <<" ux "<< TotDis1(0) <<" uy "<< TotDis1(1) << " uz "<< TotDis1(2) 
+    opserr<<"\ntot node " << nd1Ptr->getTag() <<" ux "<< TotDis1(0) <<" uy "<< TotDis1(1) << " uz "<< TotDis1(2) 
                         << endln;
 
     const Vector &TotDis2 = nd2Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd2Ptr->getTag() << " ux " << TotDis2(0) <<" uy "<< TotDis2(1) << " uz "<< TotDis2(2) 
+    opserr << "tot node " << nd2Ptr->getTag() << " ux " << TotDis2(0) <<" uy "<< TotDis2(1) << " uz "<< TotDis2(2) 
                         << endln;
 
     const Vector &TotDis3 = nd3Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd3Ptr->getTag() << " ux " << TotDis3(0) <<" uy "<< TotDis3(1) << " uz "<< TotDis3(2) 
+    opserr << "tot node " << nd3Ptr->getTag() << " ux " << TotDis3(0) <<" uy "<< TotDis3(1) << " uz "<< TotDis3(2) 
                         << endln;
 
     const Vector &TotDis4 = nd4Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd4Ptr->getTag() << " ux " << TotDis4(0) <<"uy "<< TotDis4(1) << " uz "<< TotDis4(2)
+    opserr << "tot node " << nd4Ptr->getTag() << " ux " << TotDis4(0) <<"uy "<< TotDis4(1) << " uz "<< TotDis4(2)
                         << endln;
 
     const Vector &TotDis5 = nd5Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd5Ptr->getTag() << " ux " << TotDis5(0) <<" uy "<< TotDis5(1) << " uz "<< TotDis5(2) 
+    opserr << "tot node " << nd5Ptr->getTag() << " ux " << TotDis5(0) <<" uy "<< TotDis5(1) << " uz "<< TotDis5(2) 
                         << endln;
 
     const Vector &TotDis6 = nd6Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd6Ptr->getTag() << " ux " << TotDis6(0) <<" uy "<< TotDis6(1) << " uz "<< TotDis6(2) 
+    opserr << "tot node " << nd6Ptr->getTag() << " ux " << TotDis6(0) <<" uy "<< TotDis6(1) << " uz "<< TotDis6(2) 
                         << endln;
 
     const Vector &TotDis7 = nd7Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd7Ptr->getTag() << " ux " << TotDis7(0) <<" uy "<< TotDis7(1) << " uz "<< TotDis7(2) 
+    opserr << "tot node " << nd7Ptr->getTag() << " ux " << TotDis7(0) <<" uy "<< TotDis7(1) << " uz "<< TotDis7(2) 
                         << endln;
 
     const Vector &TotDis8 = nd8Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd8Ptr->getTag() << " ux " << TotDis8(0) <<" uy "<< TotDis8(1) << " uz "<< TotDis8(2) 
+    opserr << "tot node " << nd8Ptr->getTag() << " ux " << TotDis8(0) <<" uy "<< TotDis8(1) << " uz "<< TotDis8(2) 
                         << endln;
 
     const Vector &TotDis9 = nd9Ptr->getTrialDisp();
-    cout << "tot node " << nd9Ptr->getTag() << " ux " << TotDis9(0) <<" uy "<< TotDis9(1) << " uz "<< TotDis9(2) 
+    opserr << "tot node " << nd9Ptr->getTag() << " ux " << TotDis9(0) <<" uy "<< TotDis9(1) << " uz "<< TotDis9(2) 
                         << endln;
 
     const Vector &TotDis10 = nd10Ptr->getTrialDisp();
-    cout << "tot node " << nd10Ptr->getTag() << " ux " << TotDis10(0) <<" uy "<< TotDis10(1) << " uz "<< TotDis10(2) 
+    opserr << "tot node " << nd10Ptr->getTag() << " ux " << TotDis10(0) <<" uy "<< TotDis10(1) << " uz "<< TotDis10(2) 
                         << endln;
 
     const Vector &TotDis11 = nd11Ptr->getTrialDisp();
-    cout << "tot node " << nd11Ptr->getTag() << " ux " << TotDis11(0) <<" uy "<< TotDis11(1) << " uz "<< TotDis11(2) 
+    opserr << "tot node " << nd11Ptr->getTag() << " ux " << TotDis11(0) <<" uy "<< TotDis11(1) << " uz "<< TotDis11(2) 
                         << endln;
 
     const Vector &TotDis12 = nd12Ptr->getTrialDisp();
-    cout << "tot node " << nd12Ptr->getTag() << " ux " << TotDis12(0) <<" uy "<< TotDis12(1) << " uz "<< TotDis12(2) 
+    opserr << "tot node " << nd12Ptr->getTag() << " ux " << TotDis12(0) <<" uy "<< TotDis12(1) << " uz "<< TotDis12(2) 
                         << endln;
 
 
     const Vector &TotDis13 = nd13Ptr->getTrialDisp();
-    cout << "tot node " << nd13Ptr->getTag() << " ux " << TotDis13(0) <<" uy "<< TotDis13(1) << " uz "<< TotDis13(2) 
+    opserr << "tot node " << nd13Ptr->getTag() << " ux " << TotDis13(0) <<" uy "<< TotDis13(1) << " uz "<< TotDis13(2) 
                         << endln;
 
     const Vector &TotDis14 = nd14Ptr->getTrialDisp();
-    cout << "tot node " << nd14Ptr->getTag() << " ux " << TotDis14(0) <<" uy "<< TotDis14(1) << " uz "<< TotDis14(2) 
+    opserr << "tot node " << nd14Ptr->getTag() << " ux " << TotDis14(0) <<" uy "<< TotDis14(1) << " uz "<< TotDis14(2) 
                         << endln;
 
     const Vector &TotDis15 = nd15Ptr->getTrialDisp();
-    cout << "tot node " << nd15Ptr->getTag() << " ux " << TotDis15(0) <<" uy "<< TotDis15(1) << " uz "<< TotDis15(2) 
+    opserr << "tot node " << nd15Ptr->getTag() << " ux " << TotDis15(0) <<" uy "<< TotDis15(1) << " uz "<< TotDis15(2) 
                         << endln;
 
     const Vector &TotDis16 = nd16Ptr->getTrialDisp();
-    cout << "tot node " << nd16Ptr->getTag() << " ux " << TotDis16(0) <<" uy "<< TotDis16(1) << " uz "<< TotDis16(2) 
+    opserr << "tot node " << nd16Ptr->getTag() << " ux " << TotDis16(0) <<" uy "<< TotDis16(1) << " uz "<< TotDis16(2) 
                         << endln;
 
     const Vector &TotDis17 = nd17Ptr->getTrialDisp();
-    cout << "tot node " << nd17Ptr->getTag() << " ux " << TotDis17(0) <<" uy "<< TotDis17(1) << " uz "<< TotDis17(2)
+    opserr << "tot node " << nd17Ptr->getTag() << " ux " << TotDis17(0) <<" uy "<< TotDis17(1) << " uz "<< TotDis17(2)
                         << endln;
 
     const Vector &TotDis18 = nd18Ptr->getTrialDisp();
-    cout << "tot node " << nd18Ptr->getTag() << " ux " << TotDis18(0) <<" uy "<< TotDis18(1) << " uz "<< TotDis18(2) 
+    opserr << "tot node " << nd18Ptr->getTag() << " ux " << TotDis18(0) <<" uy "<< TotDis18(1) << " uz "<< TotDis18(2) 
                         << endln;
 
     const Vector &TotDis19 = nd19Ptr->getTrialDisp();
-    cout << "tot node " << nd19Ptr->getTag() << " ux " << TotDis19(0) <<" uy "<< TotDis19(1) << " uz "<< TotDis19(2) 
+    opserr << "tot node " << nd19Ptr->getTag() << " ux " << TotDis19(0) <<" uy "<< TotDis19(1) << " uz "<< TotDis19(2) 
                         << endln;
 
     const Vector &TotDis20 = nd20Ptr->getTrialDisp();
-    cout << "tot node " << nd20Ptr->getTag() << " ux " << TotDis20(0) <<" uy "<< TotDis20(1) << " uz "<< TotDis20(2) 
+    opserr << "tot node " << nd20Ptr->getTag() << " ux " << TotDis20(0) <<" uy "<< TotDis20(1) << " uz "<< TotDis20(2) 
                         << endln;
 
 
@@ -2842,84 +2842,84 @@ tensor TwentyNodeBrick_u_p_U::total_dispDU()
       
     //Zhaohui using node pointers, which come from the Domain
     const Vector &TotDis1 = nd1Ptr->getTrialDisp();
-    cout<<"\ntot node " << nd1Ptr->getTag() 
+    opserr<<"\ntot node " << nd1Ptr->getTag() 
 			<<" Ux "<< TotDis1(4) << " Uy "<< TotDis1(5)<< " Uz "<< TotDis1(6)<< endln;
 
     const Vector &TotDis2 = nd2Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd2Ptr->getTag() 
+    opserr << "tot node " << nd2Ptr->getTag() 
     			<<" Ux "<< TotDis2(4) << " Uy "<< TotDis2(5)<< " Uz "<< TotDis2(6)<< endln;
 
     const Vector &TotDis3 = nd3Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd3Ptr->getTag()  
+    opserr << "tot node " << nd3Ptr->getTag()  
 			<<" Ux "<< TotDis3(4) << " Uy "<< TotDis3(5)<< " Uz "<< TotDis3(6)<< endln;
 
     const Vector &TotDis4 = nd4Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd4Ptr->getTag() 
+    opserr << "tot node " << nd4Ptr->getTag() 
 			<<" Ux "<< TotDis4(4) << " Uy "<< TotDis4(5)<< " Uz "<< TotDis4(6)<< endln;
 
     const Vector &TotDis5 = nd5Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd5Ptr->getTag()  
+    opserr << "tot node " << nd5Ptr->getTag()  
 			<<" Ux "<< TotDis5(4) << " Uy "<< TotDis5(5)<< " Uz "<< TotDis5(6)<< endln;
 
     const Vector &TotDis6 = nd6Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd6Ptr->getTag()  
+    opserr << "tot node " << nd6Ptr->getTag()  
 			<<" Ux "<< TotDis6(4) << " Uy "<< TotDis6(5)<< " Uz "<< TotDis6(6)<< endln;
 
     const Vector &TotDis7 = nd7Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd7Ptr->getTag() 
+    opserr << "tot node " << nd7Ptr->getTag() 
 			<<" Ux "<< TotDis7(4) << " Uy "<< TotDis7(5)<< " Uz "<< TotDis7(6)<< endln;
 
     const Vector &TotDis8 = nd8Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd8Ptr->getTag() 
+    opserr << "tot node " << nd8Ptr->getTag() 
 			<<" Ux "<< TotDis8(4) << " Uy "<< TotDis8(5)<< " Uz "<< TotDis8(6)<< endln;
 
     const Vector &TotDis9 = nd9Ptr->getTrialDisp();
-    cout << "tot node " << nd9Ptr->getTag() 
+    opserr << "tot node " << nd9Ptr->getTag() 
 			<<" Ux "<< TotDis9(4) << " Uy "<< TotDis9(5)<< " Uz "<< TotDis9(6)<< endln;
 
     const Vector &TotDis10 = nd10Ptr->getTrialDisp();
-    cout << "tot node " << nd10Ptr->getTag()  
+    opserr << "tot node " << nd10Ptr->getTag()  
 			<<" Ux "<< TotDis10(4) << " Uy "<< TotDis10(5)<< " Uz "<< TotDis10(6)<< endln;
 
     const Vector &TotDis11 = nd11Ptr->getTrialDisp();
-    cout << "tot node " << nd11Ptr->getTag()  
+    opserr << "tot node " << nd11Ptr->getTag()  
 			<<" Ux "<< TotDis11(4) << " Uy "<< TotDis11(5)<< " Uz "<< TotDis11(6)<< endln;
 
     const Vector &TotDis12 = nd12Ptr->getTrialDisp();
-    cout << "tot node " << nd12Ptr->getTag()  
+    opserr << "tot node " << nd12Ptr->getTag()  
 			<<" Ux "<< TotDis12(4) << " Uy "<< TotDis12(5)<< " Uz "<< TotDis12(6)<< endln;
 
 
     const Vector &TotDis13 = nd13Ptr->getTrialDisp();
-    cout << "tot node " << nd13Ptr->getTag() 
+    opserr << "tot node " << nd13Ptr->getTag() 
 			<<" Ux "<< TotDis13(4) << " Uy "<< TotDis13(5)<< " Uz "<< TotDis13(6)<< endln;
 
     const Vector &TotDis14 = nd14Ptr->getTrialDisp();
-    cout << "tot node " << nd14Ptr->getTag()  
+    opserr << "tot node " << nd14Ptr->getTag()  
 			<<" Ux "<< TotDis14(4) << " Uy "<< TotDis14(5)<< " Uz "<< TotDis14(6)<< endln;
 
     const Vector &TotDis15 = nd15Ptr->getTrialDisp();
-    cout << "tot node " << nd15Ptr->getTag()  
+    opserr << "tot node " << nd15Ptr->getTag()  
 			<<" Ux "<< TotDis15(4) << " Uy "<< TotDis15(5)<< " Uz "<< TotDis15(6)<< endln;
 
     const Vector &TotDis16 = nd16Ptr->getTrialDisp();
-    cout << "tot node " << nd16Ptr->getTag()  
+    opserr << "tot node " << nd16Ptr->getTag()  
 			<<" Ux "<< TotDis16(4) << " Uy "<< TotDis16(5)<< " Uz "<< TotDis16(6)<< endln;
 
     const Vector &TotDis17 = nd17Ptr->getTrialDisp();
-    cout << "tot node " << nd17Ptr->getTag()  
+    opserr << "tot node " << nd17Ptr->getTag()  
 			<<" Ux "<< TotDis17(4) << " Uy "<< TotDis17(5)<< " Uz "<< TotDis17(6)<< endln;
 
     const Vector &TotDis18 = nd18Ptr->getTrialDisp();
-    cout << "tot node " << nd18Ptr->getTag() 
+    opserr << "tot node " << nd18Ptr->getTag() 
 			<<" Ux "<< TotDis18(4) << " Uy "<< TotDis18(5)<< " Uz "<< TotDis18(6)<< endln;
 
     const Vector &TotDis19 = nd19Ptr->getTrialDisp();
-    cout << "tot node " << nd19Ptr->getTag()  
+    opserr << "tot node " << nd19Ptr->getTag()  
 			<<" Ux "<< TotDis19(4) << " Uy "<< TotDis19(5)<< " Uz "<< TotDis19(6)<< endln;
 
     const Vector &TotDis20 = nd20Ptr->getTrialDisp();
-    cout << "tot node " << nd20Ptr->getTag()  
+    opserr << "tot node " << nd20Ptr->getTag()  
 			<<" Ux "<< TotDis20(4) << " Uy "<< TotDis20(5)<< " Uz "<< TotDis20(6)<< endln;
 
 
@@ -3330,8 +3330,8 @@ void TwentyNodeBrick_u_p_U::incremental_UpdateDu()
 		//  mmodel->setEPS( *tmp_eps );
 		
 		if ( ! ( (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)) )
-               	   g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::incremental_Update (tag: %d), not converged",
-		 		 this->getTag());
+		  opserr << "TwentyNodeBrick_u_p_U::incremental_Update (tag: " << this->getTag() << "), not converged\n";
+		 		 
 		//matpoint[where].setEPS( mmodel->getEPS() );
 		//}
 		
@@ -3494,8 +3494,8 @@ void TwentyNodeBrick_u_p_U::incremental_UpdateDU()
 		//  mmodel->setEPS( *tmp_eps );
 		
 		if ( ! ( (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)) )
-               	   g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::incremental_Update (tag: %d), not converged",
-		 		 this->getTag());
+		  opserr << "TwentyNodeBrick_u_p_U::incremental_Update (tag: " << this->getTag() << "), not converged\n";
+		 	   
 		//matpoint[where].setEPS( mmodel->getEPS() );
 		//}
 		
@@ -3740,7 +3740,7 @@ int TwentyNodeBrick_u_p_U::commitState ()
 
     // call element commitState to do any base class stuff
     if ((retVal = this->Element::commitState()) != 0) {
-      cerr << "TwentyNodeBrick_u_p_U::commitState () - failed in base class";
+      opserr << "TwentyNodeBrick_u_p_U::commitState () - failed in base class";
     }    
 
     // Loop over the integration points and commit the material states
@@ -3771,24 +3771,24 @@ int TwentyNodeBrick_u_p_U::commitState ()
          stn = matpoint[i]->getStrainTensor();
        	 stnprin = stn.principal();
          /*
-	 cerr << "\nGauss Point: " << i << endln;
-	 cerr << "sigma11: "<< st.cval(1, 1) << " "<< st.cval(1, 2) << " " << st.cval(1, 3) << endln; 
-	 cerr << "sigma21: "<< st.cval(2, 1) << " "<< st.cval(2, 2) << " " << st.cval(2, 3) << endln; 
- 	 cerr << "sigma31: "<< st.cval(3, 1) << " "<< st.cval(3, 2) << " " << st.cval(3, 3) << endln << endln; 
+	 opserr << "\nGauss Point: " << i << endln;
+	 opserr << "sigma11: "<< st.cval(1, 1) << " "<< st.cval(1, 2) << " " << st.cval(1, 3) << endln; 
+	 opserr << "sigma21: "<< st.cval(2, 1) << " "<< st.cval(2, 2) << " " << st.cval(2, 3) << endln; 
+ 	 opserr << "sigma31: "<< st.cval(3, 1) << " "<< st.cval(3, 2) << " " << st.cval(3, 3) << endln << endln; 
 	 */     	  
-	 //cerr << "strain11: "<< stn.cval(1, 1) << " "<< stn.cval(1, 2) << " " << stn.cval(1, 3) << endln; 
-	 //cerr << "strain21: "<< stn.cval(2, 1) << " "<< stn.cval(2, 2) << " " << stn.cval(2, 3) << endln; 
- 	 //cerr << "strain31: "<< stn.cval(3, 1) << " "<< stn.cval(3, 2) << " " << stn.cval(3, 3) << endln; 
+	 //opserr << "strain11: "<< stn.cval(1, 1) << " "<< stn.cval(1, 2) << " " << stn.cval(1, 3) << endln; 
+	 //opserr << "strain21: "<< stn.cval(2, 1) << " "<< stn.cval(2, 2) << " " << stn.cval(2, 3) << endln; 
+ 	 //opserr << "strain31: "<< stn.cval(3, 1) << " "<< stn.cval(3, 2) << " " << stn.cval(3, 3) << endln; 
 	 
 //	 double  p = -1*( prin.cval(1, 1)+ prin.cval(2, 2) +prin.cval(3, 3) )/3.0;	        commented by Xiaoyan
 //	 double  ev = -1*( stnprin.cval(1, 1)+ stnprin.cval(2, 2) + stnprin.cval(3, 3) )/3.0;   commented by Xiaoyan 
                                                                                                 // 09/24/2001. 
 											   // These are unused variable
 
-	 //cerr << "   " << p;
+	 //opserr << "   " << p;
 
 	 //if (p < 0)
-	 //  cout  << "gs pnt:" << i << "  p="<< p;
+	 //  opserr  << "gs pnt:" << i << "  p="<< p;
 
       	 
 	 double q;
@@ -3796,17 +3796,17 @@ int TwentyNodeBrick_u_p_U::commitState ()
       	 if ( fabs(prin.cval(1, 1) - prin.cval(2, 2) ) <=  0.001 )
       	 {
       	     q = prin.cval(1, 1) - prin.cval(3, 3);
-      	     //cerr << "1 = 2"; 
+      	     //opserr << "1 = 2"; 
       	 }
       	 else
       	     q = prin.cval(3, 3) - prin.cval(1, 1);
       	 
 	 //Triaxial compr.  fabs
-      	 //cerr << "     " << st.cval(2, 3); //tau_yz
-	 //cerr << "     " << q;      	 
-	 ////----cerr << "     " << fabs(q);
+      	 //opserr << "     " << st.cval(2, 3); //tau_yz
+	 //opserr << "     " << q;      	 
+	 ////----opserr << "     " << fabs(q);
 
-      	 //cerr << "     " << ev << endln;
+      	 //opserr << "     " << ev << endln;
 
 //out22Jan2001	 if (strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
 //out22Jan2001          {
@@ -3822,9 +3822,9 @@ int TwentyNodeBrick_u_p_U::commitState ()
       
 	  //double  p = st.p_hydrostatic();
 	  //double  p = -1*( prin.cval(1, 1)+ prin.cval(2, 2) +prin.cval(3, 3) )/3.0;
-      	  //cerr << "\n " << prin.cval(1, 1) << "   " << prin.cval(2, 2) << "  " <<  prin.cval(3, 3) << endln;
+      	  //opserr << "\n " << prin.cval(1, 1) << "   " << prin.cval(2, 2) << "  " <<  prin.cval(3, 3) << endln;
           //if ( getTag() == 960) 
-          //cerr << " El= " << getTag() << " , p    " << p << endln;
+          //opserr << " El= " << getTag() << " , p    " << p << endln;
           
 	  //printf(stderr, " Gauss Point i = %d ", (i+1));
 	  //printf(stderr, " Gauss Point i = %d ", (i+1));
@@ -3832,31 +3832,31 @@ int TwentyNodeBrick_u_p_U::commitState ()
 
           //if ( p < 0 ) 
 	  //{
-	  //  cerr << getTag();
-	  //  cerr << " ***p  =    " << p << endln;
+	  //  opserr << getTag();
+	  //  opserr << " ***p  =    " << p << endln;
 	  //}		             	  
       	  //J2D
-      	  //cerr << "        " << st.q_deviatoric();
+      	  //opserr << "        " << st.q_deviatoric();
             
       	  //double q;	  
       	  //if ( fabs(prin.cval(1, 1) - prin.cval(2, 2) ) <=  0.0001 )
       	  //{
       	  //    q = prin.cval(1, 1) - prin.cval(3, 3);
-      	  //    //cerr << "1 = 2"; 
+      	  //    //opserr << "1 = 2"; 
       	  //}
       	  //else
       	  //    q = prin.cval(3, 3) - prin.cval(1, 1);
       
       	  //Triaxial compr.
-      	  //cerr << "        " << q;
+      	  //opserr << "        " << q;
          //}
       }
         
-      //cout << " at elements " << this->getTag() << endln;    
+      //opserr << " at elements " << this->getTag() << endln;    
 
 
       //output nodal force
-      //cerr << "    " << pp(2) << endln;    
+      //opserr << "    " << pp(2) << endln;    
     //} 
     return retVal;
 }
@@ -4052,10 +4052,8 @@ void TwentyNodeBrick_u_p_U::setDomain (Domain *theDomain)
           nd13Ptr == 0 || nd14Ptr == 0 || nd15Ptr == 0 || nd16Ptr == 0 ||
           nd17Ptr == 0 || nd18Ptr == 0 || nd19Ptr == 0 || nd20Ptr == 0 ) {
       
-      	g3ErrorHandler->fatal("FATAL ERROR TwentyNodeBrick_u_p_U (tag: %d), node not found in domain",
-      		this->getTag());
-      	
-      	return;
+      	opserr << "FATAL ERROR TwentyNodeBrick_u_p_U (tag: " << this->getTag() << "), node not found in domain\n";
+      	exit(-1);
       }
       
       int dofNd1 = nd1Ptr->getNumberDOF();
@@ -4088,10 +4086,8 @@ void TwentyNodeBrick_u_p_U::setDomain (Domain *theDomain)
           dofNd9  != 7 || dofNd10 != 7 || dofNd11 != 7 || dofNd12 != 7 ||
           dofNd13 != 7 || dofNd14 != 7 || dofNd15 != 7 || dofNd16 != 7 ||
           dofNd17 != 7 || dofNd18 != 7 || dofNd19 != 7 || dofNd20 != 7 ) {
-      	g3ErrorHandler->fatal("FATAL ERROR TwentyNodeBrick_u_p_U (tag: %d), has differing number of DOFs at its nodes",
-      		this->getTag());
-
-      	return;
+      	opserr << "FATAL ERROR TwentyNodeBrick_u_p_U (tag: " << this->getTag() << "), has differing number of DOFs at its nodes\n";
+	exit(-1);
       }
       this->DomainComponent::setDomain(theDomain);
     }   
@@ -4099,11 +4095,11 @@ void TwentyNodeBrick_u_p_U::setDomain (Domain *theDomain)
 //=============================================================================
 /*const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff () 
 { 
-     cout<<"stiffness matrix\n\n";
+     opserr<<"stiffness matrix\n\n";
      for (int i=0;i<60;i++)
        for ( int j=0;j<60;j++)
-        cout<<K(i,j);
-     cout<<endl;
+        opserr<<K(i,j);
+     opserr<<endln;
       
      return K;
 }    wxy commented 01/15/2002  */
@@ -4114,8 +4110,8 @@ const Matrix &TwentyNodeBrick_u_p_U::getInitialStiff ()
     Ki = new Matrix(this->getTangentStiff());
 
   if (Ki == 0) {
-    cerr << "FATAL TwentyNodeBrick_u_p_U::getInitialStiff() -";
-    cerr << "ran out of memory\n";
+    opserr << "FATAL TwentyNodeBrick_u_p_U::getInitialStiff() -";
+    opserr << "ran out of memory\n";
     exit(-1);
   }  
     
@@ -4141,8 +4137,7 @@ void TwentyNodeBrick_u_p_U::zeroLoad()
 int 
 TwentyNodeBrick_u_p_U::addLoad(ElementalLoad *theLoad, double loadFactor)
 {  
-  g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::addLoad - load type unknown for ele with tag: %d\n",
-			  this->getTag());
+  opserr << "TwentyNodeBrick_u_p_U::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
   
   return -1;
 }
@@ -4183,9 +4178,8 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
         7 != Raccel17.Size() || 7 != Raccel14.Size() || 7 != Raccel15.Size() || 7 != Raccel16.Size()||
         7 != Raccel17.Size() || 7 != Raccel18.Size() || 7 != Raccel19.Size() || 7 != Raccel20.Size()   ){
 	// Xiaoyan changed 2 to 3 and added Racce15-18  09/27/00
-		g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
-		return -1;
+      opserr << "TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance matrix and vector sizes are incompatable\n";
+      return -1;
     }
 
 	static Vector ra(140);  // change from ra(60) to ra(140)  Xiaoyan 02/01/02
@@ -4352,8 +4346,8 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 //out 06/03/2002      int i;
 //out 06/03/2002      for ( i=0; i<140; i++)
 //out 06/03/2002       {
-//out 06/03/2002         if(i%10==0) cout<<endl;
-//out 06/03/2002     	   cout<<" "<<ra(i);
+//out 06/03/2002         if(i%10==0) opserr<<endln;
+//out 06/03/2002     	   opserr<<" "<<ra(i);
 //out 06/03/2002       }     // added to check the value of ra      02/18/2002
 
     // Want to add ( - fact * M R * accel ) to unbalance
@@ -4365,12 +4359,12 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
     //   column_mass += M(1,i);
     //column_mass = column_mass/3.0;
 
-    //cerr << " addInerti... column_mass " << column_mass << endln;
+    //opserr << " addInerti... column_mass " << column_mass << endln;
 
 //    for ( i = 0; i < nodes_in_brick*7; i++)
 //  	   {
 //      		Q(i)    += -M(i,i)*ra(i);
-//		cout<<Q(i);  // 05/02/2002
+//		opserr<<Q(i);  // 05/02/2002
 //  	   }
     Q.addMatrixVector(1.0, M, ra, -1.0);
     return 0;
@@ -4382,7 +4376,7 @@ const Vector TwentyNodeBrick_u_p_U::FormEquiBodyForce()
     Vector bforce(140);  
 
     // Check for a quick return
-    //cerr << "rho " << rho << endln;
+    //opserr << "rho " << rho << endln;
     if (rho == 0.0) 
     	return bforce;
 
@@ -4552,10 +4546,10 @@ const Vector TwentyNodeBrick_u_p_U::FormEquiBodyForce()
     
     //Form equivalent body force
     bforce.addMatrixVector(0.0, M, ba, 1.0);
-    //cerr << " ba " << ba;
-    //cerr << " M " << M;
+    //opserr << " ba " << ba;
+    //opserr << " M " << M;
     //if (getTag() == 886)
-//    cerr << " @@@@@ FormEquiBodyForce  " << bforce;
+//    opserr << " @@@@@ FormEquiBodyForce  " << bforce;
 
     return bforce;
 }
@@ -4590,7 +4584,7 @@ const Vector TwentyNodeBrick_u_p_U::FormEquiBodyForce()
 //    double sigma_v = (Zavg - surflevel) * rho * 9.81; //units in SI system
 //    double ko = 0.5;
 //    double p_est = sigma_v*( 2.0*ko+1.0)/3.0;
-//    //cerr << " Initial P " << p_est << endln;
+//    //opserr << " Initial P " << p_est << endln;
 //
 //    int i;
 //
@@ -4621,8 +4615,8 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForce ()
       for (int j = 0; j < 7; j++)
 	p(i *7 + j) = nodalforces.cval(i+1, j+1);    // p--Vector--start 0
 						     // nodalforces--tensor start 1
-   // cerr << "p" << p;
-   // cerr << "Q" << Q;
+   // opserr << "p" << p;
+   // opserr << "Q" << Q;
 /*   for ( int i=0; i<140; i++)
     {
       printf("p(%d) = %lf    ",i, p(i));
@@ -4636,7 +4630,7 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForce ()
     p = p - Q;
 //    for ( int i=0; i<140; i++)
 //      printf("p(%d) = %lf   ",i, p(i));   // check
-//    //cerr << "p-Q" << p;
+//    //opserr << "p-Q" << p;
 //    fflush(stdout);
     return p;
 }
@@ -4648,68 +4642,68 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForceIncInertia ()
 	if (rho == 0.0)
 		return this->getResistingForce();
 
-	//cerr << "Node555 trialDisp " << nd1Ptr->getTrialDisp();
+	//opserr << "Node555 trialDisp " << nd1Ptr->getTrialDisp();
 
 	const Vector &accel1 = nd1Ptr->getTrialAccel();
-        //cout << "\nnode accel " << nd1Ptr->getTag() << " ux " << accel1(0) <<" uy "<< accel1(1) << " uz "<< accel1(2) << endln;
+        //opserr << "\nnode accel " << nd1Ptr->getTag() << " ux " << accel1(0) <<" uy "<< accel1(1) << " uz "<< accel1(2) << endln;
 
 	const Vector &accel2 = nd2Ptr->getTrialAccel();
-        //cout << "node accel " << nd2Ptr->getTag() << " ux " << accel2(0) <<" uy "<< accel2(1) << " uz "<< accel2(2) << endln;
+        //opserr << "node accel " << nd2Ptr->getTag() << " ux " << accel2(0) <<" uy "<< accel2(1) << " uz "<< accel2(2) << endln;
 							               		    
 	const Vector &accel3 = nd3Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd3Ptr->getTag() << " ux " << accel3(0) <<" uy "<< accel3(1) << " uz "<< accel3(2) << endln;
+        //opserr << "node accel " << nd3Ptr->getTag() << " ux " << accel3(0) <<" uy "<< accel3(1) << " uz "<< accel3(2) << endln;
 							               		    
 	const Vector &accel4 = nd4Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd4Ptr->getTag() << " ux " << accel4(0) <<" uy "<< accel4(1) << " uz "<< accel4(2) << endln;
+        //opserr << "node accel " << nd4Ptr->getTag() << " ux " << accel4(0) <<" uy "<< accel4(1) << " uz "<< accel4(2) << endln;
 							               		    
         // Xiaoyan added the following four 09/27/00
 	const Vector &accel5 = nd5Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd5Ptr->getTag() << " ux " << accel5(0) <<" uy "<< accel5(1) << " uz "<< accel5(2) << endln;
+        //opserr << "node accel " << nd5Ptr->getTag() << " ux " << accel5(0) <<" uy "<< accel5(1) << " uz "<< accel5(2) << endln;
 							               		    
 	const Vector &accel6 = nd6Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd6Ptr->getTag() << " ux " << accel6(0) <<" uy "<< accel6(1) << " uz "<< accel6(2) << endln;
+        //opserr << "node accel " << nd6Ptr->getTag() << " ux " << accel6(0) <<" uy "<< accel6(1) << " uz "<< accel6(2) << endln;
 							               		    
 	const Vector &accel7 = nd7Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd7Ptr->getTag() << " ux " << accel7(0) <<" uy "<< accel7(1) << " uz "<< accel7(2) << endln;
+        //opserr << "node accel " << nd7Ptr->getTag() << " ux " << accel7(0) <<" uy "<< accel7(1) << " uz "<< accel7(2) << endln;
 							               		    
 	const Vector &accel8 = nd8Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd8Ptr->getTag() << " ux " << accel8(0) <<" uy "<< accel8(1) << " uz "<< accel8(2) << endln;
+        //opserr << "node accel " << nd8Ptr->getTag() << " ux " << accel8(0) <<" uy "<< accel8(1) << " uz "<< accel8(2) << endln;
 	
 	const Vector &accel9 = nd9Ptr->getTrialAccel();
-        //cout << "node accel " << nd9Ptr->getTag() << " ux " << accel9(0) <<" uy "<< accel9(1) << " uz "<< accel9(2) << endln;
+        //opserr << "node accel " << nd9Ptr->getTag() << " ux " << accel9(0) <<" uy "<< accel9(1) << " uz "<< accel9(2) << endln;
 
 	const Vector &accel10 = nd10Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
+        //opserr << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel11 = nd11Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
+        //opserr << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel12 = nd12Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
+        //opserr << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel13 = nd13Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
+        //opserr << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel14 = nd14Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
+        //opserr << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel15 = nd15Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
+        //opserr << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel16 = nd16Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
+        //opserr << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel17 = nd17Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
+        //opserr << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel18 = nd18Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
+        //opserr << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel19 = nd19Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
+        //opserr << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel20 = nd20Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
+        //opserr << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 
 	static Vector a(140);  // originally 8
@@ -4882,7 +4876,7 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForceIncInertia ()
 
 	// Take advantage of lumped mass matrix
 	// Mass matrix is computed in setDomain()
-	//cout << " M_ii \n";
+	//opserr << " M_ii \n";
 
         //double column_mass = 0;
         //for (int i = 0; i < 24; i++)   
@@ -4892,10 +4886,10 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForceIncInertia ()
 /*	for (int i = 0; i < 140; i++)
 	{   
 	   p(i ) += M(i,i)*a(i);
-	   //cout << " " << M(i, i);
+	   //opserr << " " << M(i, i);
 	}
-	//cout << endln;
-	//cerr << "P+=Ma" << P<< endl;
+	//opserr << endln;
+	//opserr << "P+=Ma" << P<< endln;
 */
 	p.addMatrixVector(1.0, M, a, 1.0);
 	return p;
@@ -5096,13 +5090,12 @@ tensor TwentyNodeBrick_u_p_U::nodal_forcesFu()
 		incremental_strain =
                      (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
 //		if (where == 0)
-//   		//cout << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
-////		cout << " el tag = "<< getTag();
+//   		//opserr << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
+////		opserr << " el tag = "<< getTag();
 //		
 		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
 		if ( err)
-               	   g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::getStiffnessTensor (tag: %d), not converged",
-		    		 this->getTag());
+		  opserr << "TwentyNodeBrick_u_p_U::getStiffnessTensor (tag: " << this->getTag() << "), not converged\n";
 
 
 
@@ -5121,7 +5114,7 @@ tensor TwentyNodeBrick_u_p_U::nodal_forcesFu()
           }
       }
 
-//    cout << "\n element no. " << getTag() << endln;
+//    opserr << "\n element no. " << getTag() << endln;
 //    nodal_forcesFu.print("Fu","\n Nodal Forces \n");
     return nodal_forcesFu;
 
@@ -5216,12 +5209,12 @@ tensor TwentyNodeBrick_u_p_U::nodal_forcesFU()
 //		incremental_strain =
 //                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
 //		if (where == 0)
-//   		//cout << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
-////		cout << " el tag = "<< getTag();
+//   		//opserr << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
+////		opserr << " el tag = "<< getTag();
 //		
 //		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
 //		if ( err)
-//               	   g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::getStiffnessTensor (tag: %d), not converged",
+//               	   opserr << "TwentyNodeBrick_u_p_U::getStiffnessTensor (tag: %d), not converged",
 //		    		 this->getTag());
 
 
@@ -5254,7 +5247,7 @@ tensor TwentyNodeBrick_u_p_U::nodal_forcesFU()
           }
       }
 
-//    cout << "\n element no. " << getTag() << endln;
+//    opserr << "\n element no. " << getTag() << endln;
 //    nodal_forcesFU.print("FU","\n Nodal Forces \n");
  
     return nodal_forcesFU;
@@ -5285,7 +5278,7 @@ tensor TwentyNodeBrick_u_p_U::nodal_forces()
           nodal_FORCES.val(i,7) = nodalForceFU.val(i,3);
       }
 // the following two lines are added  on 05/02/2002
-//     cout << "\n element no. " << getTag() << endln;
+//     opserr << "\n element no. " << getTag() << endln;
 //     nodal_FORCES.print("nf","\n Nodal Forces \n");
      return nodal_FORCES;
   }
@@ -5692,8 +5685,7 @@ tensor TwentyNodeBrick_u_p_U::linearized_nodal_forces()
 		//if ( tmp_eps ) {     //Elasto-plastic case
 		//    mmodel->setEPS( *tmp_eps );
 		if ( ! (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)  )
-               	   g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::linearized_nodal_forces (tag: %d), not converged",
-		    		 this->getTag());
+		  opserr << "TwentyNodeBrick_u_p_U::linearized_nodal_forces (tag: " << this->getTag() << "), not converged\n";
 		Constitutive = (matpoint[where]->matmodel)->getTangentTensor();
       		//    matpoint[where].setEPS( mmodel->getEPS() ); //Set the new EPState back
 		//}
@@ -5866,10 +5858,10 @@ int TwentyNodeBrick_u_p_U::displaySelf (Renderer &theViewer, int displayMode, fl
 }     
 
 //=============================================================================
-void TwentyNodeBrick_u_p_U::Print(ostream &s, int flag)
+void TwentyNodeBrick_u_p_U::Print(OPS_Stream &s, int flag)
 {
     //report(" TwentyNodeBrick_u_p_U ");
-    s << "TwentyNodeBrick_u_p_U, element id:  " << this->getTag() << endl;
+    s << "TwentyNodeBrick_u_p_U, element id:  " << this->getTag() << endln;
     s << "Connected external nodes:  " << connectedExternalNodes;
 
     int total_number_of_Gauss_points = r_integration_order*
@@ -5877,33 +5869,33 @@ void TwentyNodeBrick_u_p_U::Print(ostream &s, int flag)
                                        t_integration_order;
     if ( total_number_of_Gauss_points != 0 )
       {
-	   nd1Ptr->Print(cout);
-	   nd2Ptr->Print(cout);
-	   nd3Ptr->Print(cout);
-	   nd4Ptr->Print(cout);
+	   nd1Ptr->Print(s);
+	   nd2Ptr->Print(s);
+	   nd3Ptr->Print(s);
+	   nd4Ptr->Print(s);
 
-	   nd5Ptr->Print(cout);
-	   nd6Ptr->Print(cout);
-           nd7Ptr->Print(cout);
-	   nd8Ptr->Print(cout);
+	   nd5Ptr->Print(s);
+	   nd6Ptr->Print(s);
+           nd7Ptr->Print(s);
+	   nd8Ptr->Print(s);
 
-	   nd9Ptr->Print(cout);
-	   nd10Ptr->Print(cout);
-	   nd11Ptr->Print(cout);
-	   nd12Ptr->Print(cout);
+	   nd9Ptr->Print(s);
+	   nd10Ptr->Print(s);
+	   nd11Ptr->Print(s);
+	   nd12Ptr->Print(s);
 
-	   nd13Ptr->Print(cout);
-	   nd14Ptr->Print(cout);
-	   nd15Ptr->Print(cout);
-	   nd16Ptr->Print(cout);
+	   nd13Ptr->Print(s);
+	   nd14Ptr->Print(s);
+	   nd15Ptr->Print(s);
+	   nd16Ptr->Print(s);
 
-	   nd17Ptr->Print(cout);
-	   nd18Ptr->Print(cout);
-	   nd19Ptr->Print(cout);
-	   nd20Ptr->Print(cout);
+	   nd17Ptr->Print(s);
+	   nd18Ptr->Print(s);
+	   nd19Ptr->Print(s);
+	   nd20Ptr->Print(s);
     }
-    s << "Element mass density:  " << rho << endl << endl;
-    s << "Material model:  " << endl;
+    s << "Element mass density:  " << rho << endln << endln;
+    s << "Material model:  " << endln;
 
     for( int GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
     {
@@ -6006,32 +5998,32 @@ void TwentyNodeBrick_u_p_U::report(char * msg)
            //for ( int in=0 ; in<8 ; in++ )
            //             (nodes[G_N_numbs[in]]).report("nodes from within element (first 8)\n");
            //Xiaoyan changed .report to . Print in above line 09/27/00
-	   //  (nodes[G_N_numbs[in]]).Print(cout);
+	   //  (nodes[G_N_numbs[in]]).Print(opserr);
 
-	   nd1Ptr->Print(cout);
-	   nd2Ptr->Print(cout);
-	   nd3Ptr->Print(cout);
-	   nd4Ptr->Print(cout);
+	   nd1Ptr->Print(opserr);
+	   nd2Ptr->Print(opserr);
+	   nd3Ptr->Print(opserr);
+	   nd4Ptr->Print(opserr);
 
-	   nd5Ptr->Print(cout);
-	   nd6Ptr->Print(cout);
-           nd7Ptr->Print(cout);
-	   nd8Ptr->Print(cout);
+	   nd5Ptr->Print(opserr);
+	   nd6Ptr->Print(opserr);
+           nd7Ptr->Print(opserr);
+	   nd8Ptr->Print(opserr);
 
-	   nd9Ptr->Print(cout);
-	   nd10Ptr->Print(cout);
-	   nd11Ptr->Print(cout);
- 	   nd12Ptr->Print(cout);
+	   nd9Ptr->Print(opserr);
+	   nd10Ptr->Print(opserr);
+	   nd11Ptr->Print(opserr);
+ 	   nd12Ptr->Print(opserr);
 
- 	   nd13Ptr->Print(cout);
-	   nd14Ptr->Print(cout);
-	   nd15Ptr->Print(cout);
-	   nd16Ptr->Print(cout);
+ 	   nd13Ptr->Print(opserr);
+	   nd14Ptr->Print(opserr);
+	   nd15Ptr->Print(opserr);
+	   nd16Ptr->Print(opserr);
 
-	   nd17Ptr->Print(cout);
-	   nd18Ptr->Print(cout);
-	   nd19Ptr->Print(cout);
-	   nd20Ptr->Print(cout);
+	   nd17Ptr->Print(opserr);
+	   nd18Ptr->Print(opserr);
+	   nd19Ptr->Print(opserr);
+	   nd20Ptr->Print(opserr);
 
 	   //           for ( int jn=8 ; jn<20 ; jn++ )
            //             (nodes[G_N_numbs[jn]]).report("nodes from within element (last 12)\n");

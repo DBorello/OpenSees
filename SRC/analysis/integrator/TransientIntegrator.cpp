@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-10-02 21:43:46 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/TransientIntegrator.cpp,v $
                                                                         
                                                                         
@@ -65,8 +65,8 @@ TransientIntegrator::formTangent(int statFlag)
     LinearSOE *theLinSOE = this->getLinearSOEPtr();
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theLinSOE == 0 || theModel == 0) {
-	cerr << "WARNING TransientIntegrator::formTangent() ";
-	cerr << "no LinearSOE or AnalysisModel has been set\n";
+	opserr << "WARNING TransientIntegrator::formTangent() ";
+	opserr << "no LinearSOE or AnalysisModel has been set\n";
 	return -1;
     }
     
@@ -81,7 +81,7 @@ TransientIntegrator::formTangent(int statFlag)
     
     while ((dofPtr = theDOFs()) != 0) {
 	if (theLinSOE->addA(dofPtr->getTangent(this),dofPtr->getID()) <0) {
-	    cerr << "TransientIntegrator::formTangent() - failed to addA:dof\n";
+	    opserr << "TransientIntegrator::formTangent() - failed to addA:dof\n";
 	    result = -1;
 	}
     }    
@@ -91,7 +91,7 @@ TransientIntegrator::formTangent(int statFlag)
     FE_Element *elePtr;    
     while((elePtr = theEles2()) != 0)     {
 	if (theLinSOE->addA(elePtr->getTangent(this),elePtr->getID()) < 0) {
-	    cerr << "TransientIntegrator::formTangent() - failed to addA:ele\n";
+	    opserr << "TransientIntegrator::formTangent() - failed to addA:ele\n";
 	    result = -2;
 	}
     }

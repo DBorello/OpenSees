@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-10 18:00:38 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/reinfLayer/ReinfLayer.h,v $
                                                                         
                                                                         
@@ -30,7 +30,7 @@
 #ifndef ReinfLayer_h 
 #define ReinfLayer_h 
 
-#include <iostream.h>
+#include <OPS_Globals.h>
 
 class ReinfBar;
 
@@ -57,8 +57,8 @@ class ReinfLayer
     virtual ReinfLayer *getCopy             (void) const = 0;
     virtual ReinfBar   *getReinfBars        (void) const = 0;     
    
-    virtual void Print(ostream &s, int flag =0) const = 0;   
-    friend ostream &operator<<(ostream &s, const ReinfLayer &ReinfLayer);    
+    virtual void Print(OPS_Stream &s, int flag =0) const = 0;   
+    friend OPS_Stream &operator<<(OPS_Stream &s, const ReinfLayer &ReinfLayer);    
     
   protected:
     

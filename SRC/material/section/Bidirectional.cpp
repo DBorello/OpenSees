@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-09-11 23:02:33 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/Bidirectional.cpp,v $
 
 #include <Bidirectional.h>           
@@ -317,7 +317,7 @@ Bidirectional::sendSelf(int cTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "Bidirectional::sendSelf() - failed to send data\n";
+    opserr << "Bidirectional::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -332,7 +332,7 @@ Bidirectional::recvSelf(int cTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
-      cerr << "Bidirectional::recvSelf() - failed to receive data\n";
+      opserr << "Bidirectional::recvSelf() - failed to receive data\n";
       E = 0; 
       this->setTag(0);      
   }
@@ -356,11 +356,11 @@ Bidirectional::recvSelf(int cTag, Channel &theChannel,
 }
 
 void
-Bidirectional::Print(ostream &s, int flag)
+Bidirectional::Print(OPS_Stream &s, int flag)
 {
-	s << "Bidirectional, tag: " << this->getTag() << endl;
-	s << "\tE:    " << E << endl;
-	s << "\tsigY: " << sigY<< endl;
-	s << "\tHiso: " << Hiso << endl;
-	s << "\tHkin: " << Hkin << endl;
+	s << "Bidirectional, tag: " << this->getTag() << endln;
+	s << "\tE:    " << E << endln;
+	s << "\tsigY: " << sigY<< endln;
+	s << "\tHiso: " << Hiso << endln;
+	s << "\tHkin: " << Hkin << endln;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/DOF_GroupGraph.cpp,v $
                                                                         
                                                                         
@@ -53,8 +53,8 @@ DOF_GroupGraph::DOF_GroupGraph(AnalysisModel &theModel)
     int numVertex = myModel.getNumDOF_Groups();
 
     if (numVertex == 0) {
-	cerr << "WARNING DOF_GroupGraph::DOF_GroupGraph";
-	cerr << "  - 0 vertices, has the Domain been populated?\n";
+	opserr << "WARNING DOF_GroupGraph::DOF_GroupGraph";
+	opserr << "  - 0 vertices, has the Domain been populated?\n";
 	return;
     }	
 	
@@ -71,8 +71,8 @@ DOF_GroupGraph::DOF_GroupGraph(AnalysisModel &theModel)
     theDOF_GroupTagVertices = new int [maxDofNum+1];
 
     if (theDOF_GroupTagVertices == 0) {
-	cerr << "WARNING DOF_GroupGraph::DOF_GroupGraph ";
-	cerr << " - Not Enough Memory for DOF_GroupTagVertices\n";
+	opserr << "WARNING DOF_GroupGraph::DOF_GroupGraph ";
+	opserr << " - Not Enough Memory for DOF_GroupTagVertices\n";
 	return;
     }
     
@@ -88,9 +88,9 @@ DOF_GroupGraph::DOF_GroupGraph(AnalysisModel &theModel)
 	Vertex *vertexPtr = new Vertex(count,DOF_GroupTag);
 
 	if (vertexPtr == 0) {
-	    cerr << "WARNING DOF_GroupGraph::DOF_GroupGraph";
-	    cerr << " - Not Enough Memory to create ";
-	    cerr << count << "th Vertex\n";
+	    opserr << "WARNING DOF_GroupGraph::DOF_GroupGraph";
+	    opserr << " - Not Enough Memory to create ";
+	    opserr << count << "th Vertex\n";
 	    delete [] theDOF_GroupTagVertices;
 	    return;
 	}

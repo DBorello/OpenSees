@@ -42,6 +42,7 @@
 #include <ElementalLoad.h>
 #define FixedOrder 3
 
+
 Matrix TwentyNodeBrick::K(60, 60);      
 Matrix TwentyNodeBrick::C(60, 60);      
 Matrix TwentyNodeBrick::M(60, 60);      
@@ -302,8 +303,7 @@ void TwentyNodeBrick::incremental_Update()
                 //(GPstress+where)->reportshortpqtheta("\n stress START GAUSS \n");
 
 		if ( ! ( (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)) )
-               	   g3ErrorHandler->warning("TwentyNodeBrick::incremental_Update (tag: %d), not converged",
-		 		 this->getTag());
+		  opserr << "TwentyNodeBrick::incremental_Update (tag: " << this->getTag() << "), not converged\n";
 		//matpoint[where].setEPS( mmodel->getEPS() );
             }
           }
@@ -1215,48 +1215,48 @@ tensor TwentyNodeBrick::total_disp(void)
 
     //Zhaohui using node pointers, which come from the Domain
     const Vector &TotDis1 = theNodes[0]->getTrialDisp();
-    cout<<"\ntot node " << theNodes[0]->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2) << endln;
+    opserr<<"\ntot node " << theNodes[0]->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2) << endln;
     const Vector &TotDis2 = theNodes[1]->getTrialDisp();
-    cout << "tot node " << theNodes[1]->getTag() << " x " << TotDis2(0) <<" y "<< TotDis2(1) << " z "<< TotDis2(2) << endln;
+    opserr << "tot node " << theNodes[1]->getTag() << " x " << TotDis2(0) <<" y "<< TotDis2(1) << " z "<< TotDis2(2) << endln;
     const Vector &TotDis3 = theNodes[2]->getTrialDisp();
-    cout << "tot node " << theNodes[2]->getTag() << " x " << TotDis3(0) <<" y "<< TotDis3(1) << " z "<< TotDis3(2) << endln;
+    opserr << "tot node " << theNodes[2]->getTag() << " x " << TotDis3(0) <<" y "<< TotDis3(1) << " z "<< TotDis3(2) << endln;
     const Vector &TotDis4 = theNodes[3]->getTrialDisp();
-    cout << "tot node " << theNodes[3]->getTag() << " x " << TotDis4(0) <<" y "<< TotDis4(1) << " z "<< TotDis4(2) << endln;
+    opserr << "tot node " << theNodes[3]->getTag() << " x " << TotDis4(0) <<" y "<< TotDis4(1) << " z "<< TotDis4(2) << endln;
     const Vector &TotDis5 = theNodes[4]->getTrialDisp();
-    cout << "tot node " << theNodes[4]->getTag() << " x " << TotDis5(0) <<" y "<< TotDis5(1) << " z "<< TotDis5(2) << endln;
+    opserr << "tot node " << theNodes[4]->getTag() << " x " << TotDis5(0) <<" y "<< TotDis5(1) << " z "<< TotDis5(2) << endln;
     const Vector &TotDis6 = theNodes[5]->getTrialDisp();
-    cout << "tot node " << theNodes[5]->getTag() << " x " << TotDis6(0) <<" y "<< TotDis6(1) << " z "<< TotDis6(2) << endln;
+    opserr << "tot node " << theNodes[5]->getTag() << " x " << TotDis6(0) <<" y "<< TotDis6(1) << " z "<< TotDis6(2) << endln;
     const Vector &TotDis7 = theNodes[6]->getTrialDisp();
-    cout << "tot node " << theNodes[6]->getTag() << " x " << TotDis7(0) <<" y "<< TotDis7(1) << " z "<< TotDis7(2) << endln;
+    opserr << "tot node " << theNodes[6]->getTag() << " x " << TotDis7(0) <<" y "<< TotDis7(1) << " z "<< TotDis7(2) << endln;
     const Vector &TotDis8 = theNodes[7]->getTrialDisp();
-    cout << "tot node " << theNodes[7]->getTag() << " x " << TotDis8(0) <<" y "<< TotDis8(1) << " z "<< TotDis8(2) << endln;
+    opserr << "tot node " << theNodes[7]->getTag() << " x " << TotDis8(0) <<" y "<< TotDis8(1) << " z "<< TotDis8(2) << endln;
 
     const Vector &TotDis9 = theNodes[8]->getTrialDisp();
-    cout << "tot node " << theNodes[8]->getTag() << " x " << TotDis9(0) <<" y "<< TotDis9(1) << " z "<< TotDis9(2) << endln;
+    opserr << "tot node " << theNodes[8]->getTag() << " x " << TotDis9(0) <<" y "<< TotDis9(1) << " z "<< TotDis9(2) << endln;
     const Vector &TotDis10 = theNodes[9]->getTrialDisp();
-    cout << "tot node " << theNodes[9]->getTag() << " x " << TotDis10(0) <<" y "<< TotDis10(1) << " z "<< TotDis10(2) << endln;
+    opserr << "tot node " << theNodes[9]->getTag() << " x " << TotDis10(0) <<" y "<< TotDis10(1) << " z "<< TotDis10(2) << endln;
     const Vector &TotDis11 = theNodes[10]->getTrialDisp();
-    cout << "tot node " << theNodes[10]->getTag() << " x " << TotDis11(0) <<" y "<< TotDis11(1) << " z "<< TotDis11(2) << endln;
+    opserr << "tot node " << theNodes[10]->getTag() << " x " << TotDis11(0) <<" y "<< TotDis11(1) << " z "<< TotDis11(2) << endln;
     const Vector &TotDis12 = theNodes[11]->getTrialDisp();
-    cout << "tot node " << theNodes[11]->getTag() << " x " << TotDis12(0) <<" y "<< TotDis12(1) << " z "<< TotDis12(2) << endln;
+    opserr << "tot node " << theNodes[11]->getTag() << " x " << TotDis12(0) <<" y "<< TotDis12(1) << " z "<< TotDis12(2) << endln;
 
     const Vector &TotDis13 = theNodes[12]->getTrialDisp();
-    cout << "tot node " << theNodes[12]->getTag() << " x " << TotDis13(0) <<" y "<< TotDis13(1) << " z "<< TotDis13(2) << endln;
+    opserr << "tot node " << theNodes[12]->getTag() << " x " << TotDis13(0) <<" y "<< TotDis13(1) << " z "<< TotDis13(2) << endln;
     const Vector &TotDis14 = theNodes[13]->getTrialDisp();
-    cout << "tot node " << theNodes[13]->getTag() << " x " << TotDis14(0) <<" y "<< TotDis14(1) << " z "<< TotDis14(2) << endln;
+    opserr << "tot node " << theNodes[13]->getTag() << " x " << TotDis14(0) <<" y "<< TotDis14(1) << " z "<< TotDis14(2) << endln;
     const Vector &TotDis15 = theNodes[14]->getTrialDisp();
-    cout << "tot node " << theNodes[14]->getTag() << " x " << TotDis15(0) <<" y "<< TotDis15(1) << " z "<< TotDis15(2) << endln;
+    opserr << "tot node " << theNodes[14]->getTag() << " x " << TotDis15(0) <<" y "<< TotDis15(1) << " z "<< TotDis15(2) << endln;
     const Vector &TotDis16 = theNodes[15]->getTrialDisp();
-    cout << "tot node " << theNodes[15]->getTag() << " x " << TotDis16(0) <<" y "<< TotDis16(1) << " z "<< TotDis16(2) << endln;
+    opserr << "tot node " << theNodes[15]->getTag() << " x " << TotDis16(0) <<" y "<< TotDis16(1) << " z "<< TotDis16(2) << endln;
 
     const Vector &TotDis17 = theNodes[16]->getTrialDisp();
-    cout << "tot node " << theNodes[16]->getTag() << " x " << TotDis17(0) <<" y "<< TotDis17(1) << " z "<< TotDis17(2) << endln;
+    opserr << "tot node " << theNodes[16]->getTag() << " x " << TotDis17(0) <<" y "<< TotDis17(1) << " z "<< TotDis17(2) << endln;
     const Vector &TotDis18 = theNodes[17]->getTrialDisp();
-    cout << "tot node " << theNodes[17]->getTag() << " x " << TotDis18(0) <<" y "<< TotDis18(1) << " z "<< TotDis18(2) << endln;
+    opserr << "tot node " << theNodes[17]->getTag() << " x " << TotDis18(0) <<" y "<< TotDis18(1) << " z "<< TotDis18(2) << endln;
     const Vector &TotDis19 = theNodes[18]->getTrialDisp();
-    cout << "tot node " << theNodes[18]->getTag() << " x " << TotDis19(0) <<" y "<< TotDis19(1) << " z "<< TotDis19(2) << endln;
+    opserr << "tot node " << theNodes[18]->getTag() << " x " << TotDis19(0) <<" y "<< TotDis19(1) << " z "<< TotDis19(2) << endln;
     const Vector &TotDis20 = theNodes[19]->getTrialDisp();
-    cout << "tot node " << theNodes[19]->getTag() << " x " << TotDis20(0) <<" y "<< TotDis20(1) << " z "<< TotDis20(2) << endln;
+    opserr << "tot node " << theNodes[19]->getTag() << " x " << TotDis20(0) <<" y "<< TotDis20(1) << " z "<< TotDis20(2) << endln;
 
 
 
@@ -1509,7 +1509,7 @@ tensor TwentyNodeBrick::nodal_forces(void)
 
 	        //EPState *tmp_eps = (matpoint[where]->matmodel)->getEPS();
 		//stress_at_GP = tmp_eps->getStress();
-		//cout << "tmp_eps" << (*tmp_eps);
+		//opserr << "tmp_eps" << (*tmp_eps);
 
 	        //NDMaterial *tmp_ndm = (matpoint[where]).getNDMat();
 
@@ -1525,20 +1525,16 @@ tensor TwentyNodeBrick::nodal_forces(void)
 		incremental_strain =
                      (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
 //		if (where == 0)
-//   		//cout << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
-////		cout << " el tag = "<< getTag();
+//   		//opserr << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
+////		opserr << " el tag = "<< getTag();
 //
 		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
 		if ( err) {
-		   cout << "incr_strn " <<  incremental_strain;
-      		   cout << "incr_disp " <<  incremental_displacements;		
-               	   g3ErrorHandler->fatal("TwentyNodeBrick::nodal_forces (tag: %d), not converged",
-		    		 this->getTag());		
-
-	           fflush(stdout);
+		   opserr << "incr_strn " <<  incremental_strain;
+      		   opserr << "incr_disp " <<  incremental_displacements;		
+               	   opserr << "TwentyNodeBrick::nodal_forces (tag: " << this->getTag() << ", not converged\n";
+		   exit(-1);
 		}
-
-
 
 		//char *test = matpoint[where]->matmodel->getType();
 		// fmk - changing if so if into else block must be Template3Dep
@@ -1559,11 +1555,11 @@ tensor TwentyNodeBrick::nodal_forces(void)
            	//double  p = stress_at_GP.p_hydrostatic();
                 //if ( p < 0.0 )
 	        //{
-	        //  cerr << getTag();
-	        //  cerr << " ***p  =    " << p << endln;
+	        //  opserr << getTag();
+	        //  opserr << " ***p  =    " << p << endln;
 	        //}
 
-		//cerr << " nodal_force ::: stress_at_GP " << stress_at_GP << endln;
+		//opserr << " nodal_force ::: stress_at_GP " << stress_at_GP << endln;
 
 		//}
 		//else if ( tmp_ndm ) { //Elastic case
@@ -1585,7 +1581,7 @@ tensor TwentyNodeBrick::nodal_forces(void)
           }
       }
 
-    //cout << "\n element no. " << getTag() << endln;
+    //opserr << "\n element no. " << getTag() << endln;
     //nodal_forces.print("nf","\n Nodal Forces \n");
     return nodal_forces;
 
@@ -1884,8 +1880,8 @@ tensor TwentyNodeBrick::linearized_nodal_forces(void)
 		//if ( tmp_eps ) {     //Elasto-plastic case
 		//    mmodel->setEPS( *tmp_eps );
 		if ( ! (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)  )
-               	   g3ErrorHandler->warning("TwentyNodeBrick::linearized_nodal_forces (tag: %d), not converged",
-		    		 this->getTag());
+		  opserr << "TwentyNodeBrick::linearized_nodal_forces (tag: " << this->getTag() << "), not converged\n";
+
 		Constitutive = (matpoint[where]->matmodel)->getTangentTensor();
       		//    matpoint[where].setEPS( mmodel->getEPS() ); //Set the new EPState back
 		//}
@@ -2076,28 +2072,28 @@ void TwentyNodeBrick::report(char * msg)
            //for ( int in=0 ; in<8 ; in++ )
            //             (nodes[G_N_numbs[in]]).report("nodes from within element (first 8)\n");
            //Xiaoyan changed .report to . Print in above line 09/27/00
-	   //  (nodes[G_N_numbs[in]]).Print(cout);
+	   //  (nodes[G_N_numbs[in]]).Print(opserr);
 
-	   theNodes[0]->Print(cout);
-	   theNodes[1]->Print(cout);
-	   theNodes[2]->Print(cout);
-	   theNodes[3]->Print(cout);
-	   theNodes[4]->Print(cout);
-	   theNodes[5]->Print(cout);
-           theNodes[6]->Print(cout);
-	   theNodes[7]->Print(cout);
-	   theNodes[8]->Print(cout);
-	   theNodes[9]->Print(cout);
-	   theNodes[10]->Print(cout);
- 	   theNodes[11]->Print(cout);
- 	   theNodes[12]->Print(cout);
-	   theNodes[13]->Print(cout);
-	   theNodes[14]->Print(cout);
-	   theNodes[15]->Print(cout);
-	   theNodes[16]->Print(cout);
-	   theNodes[17]->Print(cout);
-	   theNodes[18]->Print(cout);
-	   theNodes[19]->Print(cout);
+	   theNodes[0]->Print(opserr);
+	   theNodes[1]->Print(opserr);
+	   theNodes[2]->Print(opserr);
+	   theNodes[3]->Print(opserr);
+	   theNodes[4]->Print(opserr);
+	   theNodes[5]->Print(opserr);
+           theNodes[6]->Print(opserr);
+	   theNodes[7]->Print(opserr);
+	   theNodes[8]->Print(opserr);
+	   theNodes[9]->Print(opserr);
+	   theNodes[10]->Print(opserr);
+ 	   theNodes[11]->Print(opserr);
+ 	   theNodes[12]->Print(opserr);
+	   theNodes[13]->Print(opserr);
+	   theNodes[14]->Print(opserr);
+	   theNodes[15]->Print(opserr);
+	   theNodes[16]->Print(opserr);
+	   theNodes[17]->Print(opserr);
+	   theNodes[18]->Print(opserr);
+	   theNodes[19]->Print(opserr);
 
 	   //           for ( int jn=8 ; jn<20 ; jn++ )
            //             (nodes[G_N_numbs[jn]]).report("nodes from within element (last 15)\n");
@@ -2590,10 +2586,8 @@ void TwentyNodeBrick::setDomain (Domain *theDomain)
           theNodes[12] == 0 || theNodes[13] == 0 || theNodes[14] == 0 || theNodes[15] == 0 ||
           theNodes[16] == 0 || theNodes[17] == 0 || theNodes[18] == 0 || theNodes[19] == 0 ) {
 
-      	g3ErrorHandler->fatal("FATAL ERROR TwentyNodeBrick (tag: %d), node not found in domain",
-      		this->getTag());
-
-      	return;
+      	opserr << "FATAL ERROR TwentyNodeBrick (tag: " << this->getTag() << " ), node not found in domain\n";
+	exit(-1);
       }
 
       int dofNd1 = theNodes[0]->getNumberDOF();
@@ -2622,10 +2616,9 @@ void TwentyNodeBrick::setDomain (Domain *theDomain)
           dofNd9  != 3 || dofNd10 != 3 || dofNd11 != 3 || dofNd12 != 3 ||
           dofNd13 != 3 || dofNd14 != 3 || dofNd15 != 3 || dofNd16 != 3 ||
           dofNd17 != 3 || dofNd18 != 3 || dofNd19 != 3 || dofNd20 != 3 ) {
-      	g3ErrorHandler->fatal("FATAL ERROR TwentyNodeBrick (tag: %d), has differing number of DOFs at its nodes",
-      		this->getTag());
-
-      	return;
+      	opserr << "FATAL ERROR TwentyNodeBrick (tag: " << this->getTag() << 
+	  "), has differing number of DOFs at its nodes\n";
+	exit(-1);
       }
       this->DomainComponent::setDomain(theDomain);
     }
@@ -2638,7 +2631,7 @@ int TwentyNodeBrick::commitState ()
 
   // call element commitState to do any base class stuff
   if ((retVal = this->Element::commitState()) != 0) {
-    cerr << "TwentyNodeBrick::commitState () - failed in base class";
+    opserr << "TwentyNodeBrick::commitState () - failed in base class";
   }    
 
     // int order = theQuadRule->getOrder();     // Commented by Xiaoyan
@@ -2673,21 +2666,21 @@ int TwentyNodeBrick::commitState ()
          stn = matpoint[i]->getStrainTensor();
        	 stnprin = stn.principal();
          /*
-	 cerr << "\nGauss Point: " << i << endln;
-	 cerr << "sigma11: "<< st.cval(1, 1) << " "<< st.cval(1, 2) << " " << st.cval(1, 3) << endln;
-	 cerr << "sigma21: "<< st.cval(2, 1) << " "<< st.cval(2, 2) << " " << st.cval(2, 3) << endln;
- 	 cerr << "sigma31: "<< st.cval(3, 1) << " "<< st.cval(3, 2) << " " << st.cval(3, 3) << endln << endln;
+	 opserr << "\nGauss Point: " << i << endln;
+	 opserr << "sigma11: "<< st.cval(1, 1) << " "<< st.cval(1, 2) << " " << st.cval(1, 3) << endln;
+	 opserr << "sigma21: "<< st.cval(2, 1) << " "<< st.cval(2, 2) << " " << st.cval(2, 3) << endln;
+ 	 opserr << "sigma31: "<< st.cval(3, 1) << " "<< st.cval(3, 2) << " " << st.cval(3, 3) << endln << endln;
 	 */
-	 //cerr << "strain11: "<< stn.cval(1, 1) << " "<< stn.cval(1, 2) << " " << stn.cval(1, 3) << endln;
-	 //cerr << "strain21: "<< stn.cval(2, 1) << " "<< stn.cval(2, 2) << " " << stn.cval(2, 3) << endln;
- 	 //cerr << "strain31: "<< stn.cval(3, 1) << " "<< stn.cval(3, 2) << " " << stn.cval(3, 3) << endln;
+	 //opserr << "strain11: "<< stn.cval(1, 1) << " "<< stn.cval(1, 2) << " " << stn.cval(1, 3) << endln;
+	 //opserr << "strain21: "<< stn.cval(2, 1) << " "<< stn.cval(2, 2) << " " << stn.cval(2, 3) << endln;
+ 	 //opserr << "strain31: "<< stn.cval(3, 1) << " "<< stn.cval(3, 2) << " " << stn.cval(3, 3) << endln;
 
 	 double  p = -1*( prin.cval(1, 1)+ prin.cval(2, 2) +prin.cval(3, 3) )/3.0;
 	 double  ev = -1*( stnprin.cval(1, 1)+ stnprin.cval(2, 2) + stnprin.cval(3, 3) )/3.0;
-	 //cerr << "   " << p;
+	 //opserr << "   " << p;
 
 	 //if (p < 0)
-	 //  cout  << "gs pnt:" << i << "  p="<< p;
+	 //  opserr  << "gs pnt:" << i << "  p="<< p;
 
 
 	 double q;
@@ -2695,17 +2688,17 @@ int TwentyNodeBrick::commitState ()
       	 if ( fabs(prin.cval(1, 1) - prin.cval(2, 2) ) <=  0.001 )
       	 {
       	     q = prin.cval(1, 1) - prin.cval(3, 3);
-      	     //cerr << "1 = 2";
+      	     //opserr << "1 = 2";
       	 }
       	 else
       	     q = prin.cval(3, 3) - prin.cval(1, 1);
 
 	 //Triaxial compr.  fabs
-      	 //cerr << "     " << st.cval(2, 3); //tau_yz
-	 //cerr << "     " << q;
-	 ////----cerr << "     " << fabs(q);
+      	 //opserr << "     " << st.cval(2, 3); //tau_yz
+	 //opserr << "     " << q;
+	 ////----opserr << "     " << fabs(q);
 
-      	 //cerr << "     " << ev << endln;
+      	 //opserr << "     " << ev << endln;
 
 //out22Jan2001	 if (strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
 //out22Jan2001          {
@@ -2721,9 +2714,9 @@ int TwentyNodeBrick::commitState ()
 
 	  //double  p = st.p_hydrostatic();
 	  //double  p = -1*( prin.cval(1, 1)+ prin.cval(2, 2) +prin.cval(3, 3) )/3.0;
-      	  //cerr << "\n " << prin.cval(1, 1) << "   " << prin.cval(2, 2) << "  " <<  prin.cval(3, 3) << endln;
+      	  //opserr << "\n " << prin.cval(1, 1) << "   " << prin.cval(2, 2) << "  " <<  prin.cval(3, 3) << endln;
           //if ( getTag() == 960)
-          //cerr << " El= " << getTag() << " , p    " << p << endln;
+          //opserr << " El= " << getTag() << " , p    " << p << endln;
 
 	  //printf(stderr, " Gauss Point i = %d ", (i+1));
 	  //printf(stderr, " Gauss Point i = %d ", (i+1));
@@ -2731,31 +2724,31 @@ int TwentyNodeBrick::commitState ()
 
           //if ( p < 0 )
 	  //{
-	  //  cerr << getTag();
-	  //  cerr << " ***p  =    " << p << endln;
+	  //  opserr << getTag();
+	  //  opserr << " ***p  =    " << p << endln;
 	  //}
       	  //J2D
-      	  //cerr << "        " << st.q_deviatoric();
+      	  //opserr << "        " << st.q_deviatoric();
 
       	  //double q;
       	  //if ( fabs(prin.cval(1, 1) - prin.cval(2, 2) ) <=  0.0001 )
       	  //{
       	  //    q = prin.cval(1, 1) - prin.cval(3, 3);
-      	  //    //cerr << "1 = 2";
+      	  //    //opserr << "1 = 2";
       	  //}
       	  //else
       	  //    q = prin.cval(3, 3) - prin.cval(1, 1);
 
       	  //Triaxial compr.
-      	  //cerr << "        " << q;
+      	  //opserr << "        " << q;
          //}
       }
 
-      //cout << " at elements " << this->getTag() << endln;
+      //opserr << " at elements " << this->getTag() << endln;
 
 
       //output nodal force
-      //cerr << "    " << pp(2) << endln;
+      //opserr << "    " << pp(2) << endln;
     //}
       
     return retVal;
@@ -2832,15 +2825,15 @@ const Matrix &TwentyNodeBrick::getTangentStiff ()
         }
      }
 
-     //cout << " K " << K << endln;
-     //K.Output(cout);
+     //opserr << " K " << K << endln;
+     //K.Output(opserr);
      return K;
 }
 
 //=============================================================================
 const Matrix &TwentyNodeBrick::getInitialStiff ()
 {
-  cerr << "WARNING - TwentyNodeBrick::getInitialStiff() - not yet implemented\n";
+  opserr << "WARNING - TwentyNodeBrick::getInitialStiff() - not yet implemented\n";
   return this->getTangentStiff();
 }
 
@@ -2875,9 +2868,9 @@ const Matrix &TwentyNodeBrick::getConsMass ()
 
      }
 
-     //cerr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
-     //cerr << "" << M.Output(cout);
-     //cerr << " M " << M;
+     //opserr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
+     //opserr << "" << M.Output(opserr);
+     //opserr << " M " << M;
 
      return M;
 }
@@ -2912,9 +2905,9 @@ const Matrix &TwentyNodeBrick::getMass ()
 
      }
 
-     //cerr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
-     //cerr << "" << M.Output(cout);
-     //cerr << " M " << M;
+     //opserr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
+     //opserr << "" << M.Output(opserr);
+     //opserr << " M " << M;
 
      return M;
 }
@@ -2939,7 +2932,7 @@ TwentyNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
     
       Vector bforce(60);
       // Check for a quick return
-      //cerr << "rho " << rho << endln;
+      //opserr << "rho " << rho << endln;
       if (rho == 0.0)
       	return 0;
     
@@ -3014,8 +3007,8 @@ TwentyNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
       bforce.addMatrixVector(0.0, M, ba, 1.0);
       Q.addVector(1.0, bforce, 1.0);       
     } else  {
-      g3ErrorHandler->warning("TwentyNodeBrick::addLoad() - 20NodeBrick %d,load type %d unknown\n", 
-    			    this->getTag(), type);
+      opserr << "TwentyNodeBrick::addLoad() - 20NodeBrick " << this->getTag() << 
+	",load type " << type << " unknown\n";
       return -1;
     }
 
@@ -3027,7 +3020,7 @@ TwentyNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
 //int  TwentyNodeBrick::addLoad(const Vector &addLoad)
 //{
 //     if (addLoad.Size() != 60) {
-//     	g3ErrorHandler->warning("TwentyNodeBrick::addLoad %s\n",
+//     	opserr << "TwentyNodeBrick::addLoad %s\n",
 //     			"Vector not of correct size");
 //     	return -1;
 //     }
@@ -3073,8 +3066,8 @@ int TwentyNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
         3 != Raccel13.Size() || 3 != Raccel14.Size() || 3 != Raccel15.Size() || 3 != Raccel16.Size()||
         3 != Raccel17.Size() || 3 != Raccel18.Size() || 3 != Raccel19.Size() || 3 != Raccel20.Size()   ){
 	// Xiaoyan changed 2 to 3 and added Racce15-18  09/27/00
-		g3ErrorHandler->warning("TwentyNodeBrick::addInertiaLoadToUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
+opserr << "TwentyNodeBrick::addInertiaLoadToUnbalance " <<
+  "matrix and vector sizes are incompatable\n";
 		return -1;
     }
 
@@ -3151,7 +3144,7 @@ int TwentyNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
     //   column_mass += M(1,i);
     //column_mass = column_mass/3.0;
 
-    //cerr << " addInerti... column_mass " << column_mass << endln;
+    //opserr << " addInerti... column_mass " << column_mass << endln;
 
     //for (int i = 0; i < nodes_in_brick*3; i++)
     //		Q(i) += -M(i,i)*ra(i);
@@ -3166,7 +3159,7 @@ const Vector TwentyNodeBrick::FormEquiBodyForce(void)
     Vector bforce(60);
 
     // Check for a quick return
-    //cerr << "rho " << rho << endln;
+    //opserr << "rho " << rho << endln;
     if (rho == 0.0)
     	return bforce;
 
@@ -3235,10 +3228,10 @@ const Vector TwentyNodeBrick::FormEquiBodyForce(void)
 
     //Form equivalent body force
     bforce.addMatrixVector(0.0, M, ba, 1.0);
-    //cerr << " ba " << ba;
-    //cerr << " M " << M;
+    //opserr << " ba " << ba;
+    //opserr << " M " << M;
     //if (getTag() == 886)
-    //cerr << " @@@@@ FormEquiBodyForce  " << bforce;
+    //opserr << " @@@@@ FormEquiBodyForce  " << bforce;
 
     return bforce;
 }
@@ -3273,7 +3266,7 @@ const Vector TwentyNodeBrick::FormEquiBodyForce(void)
 //    double sigma_v = (Zavg - surflevel) * rho * 9.81; //units in SI system
 //    double ko = 0.5;
 //    double p_est = sigma_v*( 2.0*ko+1.0)/3.0;
-//    //cerr << " Initial P " << p_est << endln;
+//    //opserr << " Initial P " << p_est << endln;
 //
 //    int i;
 //
@@ -3304,12 +3297,12 @@ const Vector &TwentyNodeBrick::getResistingForce ()
       for (int j = 0; j < 3; j++)
 	P(i *3 + j) = nodalforces.cval(i+1, j+1);
 
-    //cerr << "P" << P;
-    //cerr << "Q" << Q;
+    //opserr << "P" << P;
+    //opserr << "Q" << Q;
 
     P = P - Q;
 
-    //cerr << "P-Q" << P;
+    //opserr << "P-Q" << P;
     return P;
 }
 
@@ -3511,10 +3504,10 @@ int TwentyNodeBrick::displaySelf (Renderer &theViewer, int displayMode, float fa
 }
 
 //=============================================================================
-void TwentyNodeBrick::Print(ostream &s, int flag)
+void TwentyNodeBrick::Print(OPS_Stream &s, int flag)
 {
     //report(" TwentyNodeBrick ");
-    s << "TwentyNodeBrick, element id:  " << this->getTag() << endl;
+    s << "TwentyNodeBrick, element id:  " << this->getTag() << endln;
     s << "Connected external nodes:  " << connectedExternalNodes;
 
     int total_number_of_Gauss_points = r_integration_order*
@@ -3522,30 +3515,30 @@ void TwentyNodeBrick::Print(ostream &s, int flag)
                                        t_integration_order;
     if ( total_number_of_Gauss_points != 0 )
       {
-	   theNodes[0]->Print(cout);
-	   theNodes[1]->Print(cout);
-	   theNodes[2]->Print(cout);
-	   theNodes[3]->Print(cout);
-	   theNodes[4]->Print(cout);
-	   theNodes[5]->Print(cout);
-           theNodes[6]->Print(cout);
-	   theNodes[7]->Print(cout);
-	   theNodes[8]->Print(cout);
-	   theNodes[9]->Print(cout);
-	   theNodes[10]->Print(cout);
-	   theNodes[11]->Print(cout);
-	   theNodes[12]->Print(cout);
-	   theNodes[13]->Print(cout);
-	   theNodes[14]->Print(cout);
-	   theNodes[15]->Print(cout);
-	   theNodes[16]->Print(cout);
-	   theNodes[17]->Print(cout);
-	   theNodes[18]->Print(cout);
-	   theNodes[19]->Print(cout);
+	   theNodes[0]->Print(opserr);
+	   theNodes[1]->Print(opserr);
+	   theNodes[2]->Print(opserr);
+	   theNodes[3]->Print(opserr);
+	   theNodes[4]->Print(opserr);
+	   theNodes[5]->Print(opserr);
+           theNodes[6]->Print(opserr);
+	   theNodes[7]->Print(opserr);
+	   theNodes[8]->Print(opserr);
+	   theNodes[9]->Print(opserr);
+	   theNodes[10]->Print(opserr);
+	   theNodes[11]->Print(opserr);
+	   theNodes[12]->Print(opserr);
+	   theNodes[13]->Print(opserr);
+	   theNodes[14]->Print(opserr);
+	   theNodes[15]->Print(opserr);
+	   theNodes[16]->Print(opserr);
+	   theNodes[17]->Print(opserr);
+	   theNodes[18]->Print(opserr);
+	   theNodes[19]->Print(opserr);
 
     }
-    s << "Element mass density:  " << rho << endl << endl;
-    s << "Material model:  " << endl;
+    s << "Element mass density:  " << rho << endln << endln;
+    s << "Material model:  " << endln;
 
     for( int GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
     {
@@ -3696,20 +3689,20 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
                 const Vector &TotDis = theNodes[17]->getTrialDisp();		
 	        //checking Z-coor. of moddile layer gauss point
 		//if ( (coor(2) - Gsc(6)) > 0.0001 )
-		//  cerr << " Warning: Middle layer Gauss Point Z-coor. wrong...\n";
+		//  opserr << " Warning: Middle layer Gauss Point Z-coor. wrong...\n";
 
 		//Info(109+0) = Gsc(6);
 		Info(109+1) = TotDis(0); //x-displacement ...Lateral displacement
 		//Info(109+3) = Gsc(6); 
 		//Info(109+6) = Gsc(9); 
-		//cout << " Zz " << Gsc(3) << " " << Gsc(6) << " "<< Gsc(9) << endln;
+		//opserr << " Zz " << Gsc(3) << " " << Gsc(6) << " "<< Gsc(9) << endln;
 
                 const char *tp = matpoint[1]->getType();
                 int tag = matpoint[1]->getTag();
-		//cerr << "Materail Tag:" << tag << endln;
+		//opserr << "Materail Tag:" << tag << endln;
 		//tp = "ElasticIsotropic3D";
 		float height = 1;
-   	        //cout << "height" << height;
+   	        //opserr << "height" << height;
 		double offset[30];
 		//single pile group My ---- change multiplier to y
 		offset[1] = -0.000;/*pile no. 1 */  offset[4] = -0.000;/*pile no. 4 3X3*/
@@ -3746,8 +3739,8 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
                    const Vector &end5Crd = theNodes[4]->getCrds();
 		   height = end1Crd(2) - end5Crd(2);
 		   //if  (getTag() == 432) {
-		   //   cout << getTag() << " height " << height << endln;
-		   //   cout << " Weight " << wt << endln;
+		   //   opserr << getTag() << " height " << height << endln;
+		   //   opserr << " Weight " << wt << endln;
 		   //}
 		}
 
@@ -3777,8 +3770,8 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
 	   		  Info(i*4+4) = sts.cval(3,3);//Assign sigma_zz
 		          //if  (getTag() == 432) {
 			  //    sts.print();
-			  //    cout << " rs " << rs << "\n "<< Info(i*4+1) << " " ; 
-			  //    cout << Info(i*4+2) << " "<< Info(i*4+3)<< " sts "<< Info(i*4+4) << "\n "; 
+			  //    opserr << " rs " << rs << "\n "<< Info(i*4+1) << " " ; 
+			  //    opserr << Info(i*4+2) << " "<< Info(i*4+3)<< " sts "<< Info(i*4+4) << "\n "; 
 		          //}
 			  if (strcmp(tp, "ElasticIsotropic3D") == 0 ){
 			     Mt(GP_c_t-1) += wt(rs)*sts.cval(3,3)*( Info(i*4+1)-offset[tag] )/height;//x--Calculating Moment_y wt(ts) / height = Area corresponding to the gauss point stress
@@ -3787,8 +3780,8 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
 			  }
 		
 		          //if  (getTag() == 432) {
-			  //   cout << (GP_c_t-1) << " " << Mt(GP_c_t-1) << endln ;
-			  //   cout << (GP_c_t-1) << " " << Q(GP_c_t-1) << endln ;
+			  //   opserr << (GP_c_t-1) << " " << Mt(GP_c_t-1) << endln ;
+			  //   opserr << (GP_c_t-1) << " " << Q(GP_c_t-1) << endln ;
 	                  //}
 	        	}
 		    }
@@ -3801,7 +3794,7 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
 		//Info(109+7) = Mt(2);
 		//Info(109+8) = Q(2);
 
-		//cout << " Mt " << Mt(0) << " " << Mt(1) << " "<< Mt(2) << endln;
+		//opserr << " Mt " << Mt(0) << " " << Mt(1) << " "<< Mt(2) << endln;
  	   	return eleInfo.setVector( Info );
 	      }
 	   case 4:
@@ -3918,19 +3911,19 @@ Vector TwentyNodeBrick::getWeightofGP(void)
 
                 weight = rw * sw * tw * det_of_Jacobian;
 		Weight(rs) += weight;//Volume calculation
-              	//cout << " where " << where << " r  " << r << " s  " << s << " t " << t << endln;
+              	//opserr << " where " << where << " r  " << r << " s  " << s << " t " << t << endln;
 		
 		//Mm = Mm + H("ib")*H("kb")*weight;
 	        //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mm.printshort("M");
               }
-	      //cout << " rs " << rs << " " << Weight(rs) << endln;
+	      //opserr << " rs " << rs << " " << Weight(rs) << endln;
 	      tmp += Weight(rs);
           }
       }
     //M = Mm;
     //Mm.printshort("M");
-    //cout << " total: " << tmp << endln;
+    //opserr << " total: " << tmp << endln;
 
     return Weight;
   }
@@ -4174,13 +4167,13 @@ Vector TwentyNodeBrick::getWeightofGP(void)
 //
 //
 //void
-//TwentyNodeBrick::Print (ostream &s, int flag)
+//TwentyNodeBrick::Print (OPS_Stream &s, int flag)
 //{
-//	s << "TwentyNodeBrick, element id:  " << this->getTag() << endl;
+//	s << "TwentyNodeBrick, element id:  " << this->getTag() << endln;
 //	s << "Connected external nodes:  " << connectedExternalNodes;
-//	s << "Material model:  " << theMaterial[0][0]->getType() << endl;
-//	s << "Element thickness:  " << thickness << endl;
-//	s << "Element mass density:  " << rho << endl << endl;
+//	s << "Material model:  " << theMaterial[0][0]->getType() << endln;
+//	s << "Element thickness:  " << thickness << endln;
+//	s << "Element mass density:  " << rho << endln << endln;
 //}
 //
 //

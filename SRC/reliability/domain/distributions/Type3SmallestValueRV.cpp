@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:58 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type3SmallestValueRV.cpp,v $
 
 
@@ -37,6 +37,7 @@
 #include <GammaRV.h>
 #include <math.h>
 #include <string.h>
+#include <OPS_Globals.h>
 
 Type3SmallestValueRV::Type3SmallestValueRV(int passedTag, 
 		 double passedMean,
@@ -45,7 +46,7 @@ Type3SmallestValueRV::Type3SmallestValueRV(int passedTag,
 :RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
 {
 	// Note: this constructor is void.
-	cerr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endl;
+	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
 }
 Type3SmallestValueRV::Type3SmallestValueRV(int passedTag, 
 		 double passedParameter1,
@@ -67,7 +68,7 @@ Type3SmallestValueRV::Type3SmallestValueRV(int passedTag,
 :RandomVariable(passedTag, passedMean, passedStdv)
 {
 	// Note: this constructor is void.
-	cerr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endl;
+	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
 }
 Type3SmallestValueRV::Type3SmallestValueRV(int passedTag, 
 		 double passedParameter1,
@@ -90,7 +91,7 @@ Type3SmallestValueRV::~Type3SmallestValueRV()
 
 
 void
-Type3SmallestValueRV::Print(ostream &s, int flag)
+Type3SmallestValueRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -170,6 +171,6 @@ Type3SmallestValueRV::getStartValue()
 double Type3SmallestValueRV::getParameter1()  {return epsilon;}
 double Type3SmallestValueRV::getParameter2()  {return u;}
 double Type3SmallestValueRV::getParameter3()  {return k;}
-double Type3SmallestValueRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double Type3SmallestValueRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
 
 

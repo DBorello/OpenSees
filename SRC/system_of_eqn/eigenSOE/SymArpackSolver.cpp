@@ -97,8 +97,8 @@ int
 SymArpackSolver::solve(void)
 { 
     if (theSOE == 0) {
-	cerr << "WARNING SymArpackSolver::solve(void)- ";
-	cerr << " No EigenSOE object has been set\n";
+	opserr << "WARNING SymArpackSolver::solve(void)- ";
+	opserr << " No EigenSOE object has been set\n";
 	return -1;
     }
 
@@ -125,7 +125,7 @@ SymArpackSolver::solve(void)
 	   int factor;
 	   factor = pfsfct(n, diag, penv, nblks, xblk, begblk, first, rowblks);
 	   if (factor>0) {
-		  cerr << "In SymArpackSolver: error in factorization.\n";
+		  opserr << "In SymArpackSolver: error in factorization.\n";
 		  return -1;
 	   }
 	   factored = true;
@@ -206,14 +206,14 @@ SymArpackSolver::solve(void)
     }
 
     if (info < 0) {
-        cerr << "BandArpackSolver::Error with _saupd info = " << info <<endl;
+        opserr << "BandArpackSolver::Error with _saupd info = " << info <<endln;
 	return info;
     } else {
         if (info == 1) {
-	    cerr << "BandArpackSolver::Maximum number of iteration reached." << endl;
+	    opserr << "BandArpackSolver::Maximum number of iteration reached." << endln;
 	} else if (info == 3) {
-	    cerr << "BandArpackSolver::No Shifts could be applied during implicit," << endl;
-	    cerr << "Arnoldi update, try increasing NCV." << endl;
+	    opserr << "BandArpackSolver::No Shifts could be applied during implicit," << endln;
+	    opserr << "Arnoldi update, try increasing NCV." << endln;
 	}
 	double sigma = theSOE->shift;
 	if (iparam[4] > 0) {
@@ -230,7 +230,7 @@ SymArpackSolver::solve(void)
 		    workl, &lworkl, &info);
 #endif
 	    if (info != 0) {
-	        cerr << "BandArpackSolver::Error with dseupd_" << info;
+	        opserr << "BandArpackSolver::Error with dseupd_" << info;
 		return -1;
 	    }
 	}
@@ -272,9 +272,9 @@ SymArpackSolver::setSize()
 
 	eigenV = new Vector(size);
 	if (eigenV == 0 || eigenV->Size() != size) {
-	    cerr << "WARNING BandGenLinLapackSolver::setSize() ";
-	    cerr << " - ran out of memory for eigenVector of size ";
-	    cerr << theSOE->size << endl;
+	    opserr << "WARNING BandGenLinLapackSolver::setSize() ";
+	    opserr << " - ran out of memory for eigenVector of size ";
+	    opserr << theSOE->size << endln;
 	    return -2;	    
 	}
     }
@@ -374,7 +374,7 @@ SymArpackSolver::getEigenvector(int mode)
     int      *invp = theSOE->invp;
     
     if (mode <= 0 || mode > theNev) {
-        cerr << "BandArpackSOE::mode is out of range(1 - nev)";
+        opserr << "BandArpackSOE::mode is out of range(1 - nev)";
 	exit (0);
     }
     int size = theSOE->size;
@@ -392,7 +392,7 @@ double
 SymArpackSolver::getEigenvalue(int mode)
 {
     if (mode <= 0 || mode > theNev) {
-        cerr << "BandArpackSOE::mode is out of range(1 - nev)";
+        opserr << "BandArpackSOE::mode is out of range(1 - nev)";
 	exit (0);
     }
     return value[mode - 1];

@@ -97,10 +97,10 @@ tensor VMPotentialSurface::d2Qods2(const EPState *EPS) const {
 }
 
 //================================================================================
-// friend ostream functions for output
+// friend OPS_Stream functions for output
 //================================================================================
 
-ostream& operator<< (ostream& os, const VMPotentialSurface & YS)
+OPS_Stream& operator<< (OPS_Stream& os, const VMPotentialSurface & YS)
 {
     os << "Von Mises Potential Surface Parameters: " << endln;
     return os;

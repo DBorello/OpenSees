@@ -49,7 +49,7 @@ results in the following equation:
 \indent {\em int sendSelf(int commitTag, Channel \&theChannel);}\\ 
 \indent {\em int recvSelf(int commitTag, Channel \&theChannel,
 FEM\_ObjectBroker \&theBroker);}\\ 
-\indent {\em int Print(ostream \&s, int flag = 0);}\\
+\indent {\em int Print(OPS_Stream \&s, int flag = 0);}\\
 
 \noindent {\bf Constructors} \\
 \indent {\em LoadPath(Vector \&loadPath);}\\ 
@@ -100,5 +100,5 @@ Creates a new Vector and receives the Vector from the Channel.
 Returns $0$ if successful, a warning message is printed and a $-1$ is
 returned if {\em theChannel} fails to receive the Vector or the ID.\\
 
-{\em int Print(ostream \&s, int flag = 0);}\\
+{\em int Print(OPS_Stream \&s, int flag = 0);}\\
 The object sends to $s$ its type, the current value of $\lambda$.

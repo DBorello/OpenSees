@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-12-13 22:25:48 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.h,v $
 
 #ifndef ForceBeamColumn2d_h
@@ -77,8 +77,8 @@ class ForceBeamColumn2d: public Element
   int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
   int displaySelf(Renderer &theViewer, int displayMode, float fact);        
   
-  friend ostream &operator<<(ostream &s, ForceBeamColumn2d &E);        
-  void Print(ostream &s, int flag =0);    
+  friend OPS_Stream &operator<<(OPS_Stream &s, ForceBeamColumn2d &E);        
+  void Print(OPS_Stream &s, int flag =0);    
   
   Response *setResponse(char **argv, int argc, Information &eleInformation);
   int getResponse(int responseID, Information &eleInformation);

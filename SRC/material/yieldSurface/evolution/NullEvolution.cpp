@@ -87,7 +87,7 @@ const Vector & NullEvolution::getEquiPlasticStiffness()
 	else if (dimension == 3)
 		return vec_dim_3;
 	else
-		cerr << "NullEvolution::getEquiPlasticStiffness() - error dimension\n";
+		opserr << "NullEvolution::getEquiPlasticStiffness() - error dimension\n";
 
 	return vec_dim_3;
 }

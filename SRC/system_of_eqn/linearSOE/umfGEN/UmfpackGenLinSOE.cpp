@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-02-23 00:45:30 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:02:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.cpp,v $
                                                                         
                                                                         
@@ -34,8 +34,6 @@
 // UMFPACK2.2.1 routines.
 //
 // What: "@(#) UmfpackGenLinSolver.h, revA"
-
-#include <fstream.h>
 
 #include <UmfpackGenLinSOE.h>
 #include <UmfpackGenLinSolver.h>
@@ -97,7 +95,7 @@ UmfpackGenLinSOE::setSize(Graph &theGraph)
     nnz = newNNZ;
     lValue = 20*nnz; // 20 because 3 (10 also) was not working for some instances
 
-    cerr << "UmfpackGenLinSOE::setSize - n " << size << " nnz " << nnz << " lVal " << lValue << endl;
+    opserr << "UmfpackGenLinSOE::setSize - n " << size << " nnz " << nnz << " lVal " << lValue << endln;
 
     if (lValue > Asize) { // we have to get more space for A and colA
 
@@ -110,9 +108,9 @@ UmfpackGenLinSOE::setSize(Graph &theGraph)
       colA = new int[newNNZ];
 	
       if (A == 0 || colA == 0) {
-	cerr << "WARNING UmfpackGenLinSOE::UmfpackGenLinSOE :";
-	cerr << " ran out of memory for A and colA with nnz = ";
-	cerr << newNNZ << " \n";
+	opserr << "WARNING UmfpackGenLinSOE::UmfpackGenLinSOE :";
+	opserr << " ran out of memory for A and colA with nnz = ";
+	opserr << newNNZ << " \n";
 	size = 0; Asize = 0; nnz = 0;
 	result =  -1;
       } 
@@ -145,9 +143,9 @@ UmfpackGenLinSOE::setSize(Graph &theGraph)
 	rowStartA = new int[size+1]; 
 	
         if (B == 0 || X == 0 || rowStartA == 0) {
-            cerr << "WARNING UmfpackGenLinSOE::UmfpackGenLinSOE :";
-	    cerr << " ran out of memory for vectors (size) (";
-	    cerr << size << ") \n";
+            opserr << "WARNING UmfpackGenLinSOE::UmfpackGenLinSOE :";
+	    opserr << " ran out of memory for vectors (size) (";
+	    opserr << size << ") \n";
 	    size = 0; Bsize = 0;
 	    result =  -1;
         }
@@ -182,8 +180,8 @@ UmfpackGenLinSOE::setSize(Graph &theGraph)
 
 	theVertex = theGraph.getVertexPtr(a);
 	if (theVertex == 0) {
-	  cerr << "WARNING:UmfpackGenLinSOE::setSize :";
-	  cerr << " vertex " << a << " not in graph! - size set to 0\n";
+	  opserr << "WARNING:UmfpackGenLinSOE::setSize :";
+	  opserr << " vertex " << a << " not in graph! - size set to 0\n";
 	  size = 0;
 	  return -1;
 	}
@@ -238,8 +236,8 @@ UmfpackGenLinSOE::setSize(Graph &theGraph)
     LinearSOESolver *the_Solver = this->getSolver();
     int solverOK = the_Solver->setSize();
     if (solverOK < 0) {
-	cerr << "WARNING:UmfpackGenLinSOE::setSize :";
-	cerr << " solver failed setSize()\n";
+	opserr << "WARNING:UmfpackGenLinSOE::setSize :";
+	opserr << " solver failed setSize()\n";
 	return solverOK;
     }    
     return result;
@@ -256,8 +254,8 @@ UmfpackGenLinSOE::addA(const Matrix &m, const ID &id, double fact)
     
     // check that m and id are of similar size
     if (idSize != m.noRows() && idSize != m.noCols()) {
-	cerr << "UmfpackGenLinSOE::addA() ";
-	cerr << " - Matrix and ID not of similar sizes\n";
+	opserr << "UmfpackGenLinSOE::addA() ";
+	opserr << " - Matrix and ID not of similar sizes\n";
 	return -1;
     }
     
@@ -315,8 +313,8 @@ UmfpackGenLinSOE::addB(const Vector &v, const ID &id, double fact)
     int idSize = id.Size();    
     // check that m and id are of similar size
     if (idSize != v.Size() ) {
-	cerr << "UmfpackGenLinSOE::addB() ";
-	cerr << " - Vector and ID not of similar sizes\n";
+	opserr << "UmfpackGenLinSOE::addB() ";
+	opserr << " - Vector and ID not of similar sizes\n";
 	return -1;
     }    
 
@@ -352,8 +350,8 @@ UmfpackGenLinSOE::setB(const Vector &v, double fact)
 
 
     if (v.Size() != size) {
-	cerr << "WARNING BandGenLinSOE::setB() -";
-	cerr << " incomptable sizes " << size << " and " << v.Size() << endl;
+	opserr << "WARNING BandGenLinSOE::setB() -";
+	opserr << " incomptable sizes " << size << " and " << v.Size() << endln;
 	return -1;
     }
     
@@ -411,7 +409,7 @@ const Vector &
 UmfpackGenLinSOE::getX(void)
 {
     if (vectX == 0) {
-	cerr << "FATAL UmfpackGenLinSOE::getX - vectX == 0";
+	opserr << "FATAL UmfpackGenLinSOE::getX - vectX == 0";
 	exit(-1);
     }
     return *vectX;
@@ -421,7 +419,7 @@ const Vector &
 UmfpackGenLinSOE::getB(void)
 {
     if (vectB == 0) {
-	cerr << "FATAL UmfpackGenLinSOE::getB - vectB == 0";
+	opserr << "FATAL UmfpackGenLinSOE::getB - vectB == 0";
 	exit(-1);
     }        
     return *vectB;
@@ -448,8 +446,8 @@ UmfpackGenLinSOE::setUmfpackGenLinSolver(UmfpackGenLinSolver &newSolver)
     if (size != 0) {
 	int solverOK = newSolver.setSize();
 	if (solverOK < 0) {
-	    cerr << "WARNING:UmfpackGenLinSOE::setSolver :";
-	    cerr << "the new solver could not setSeize() - staying with old\n";
+	    opserr << "WARNING:UmfpackGenLinSOE::setSolver :";
+	    opserr << "the new solver could not setSeize() - staying with old\n";
 	    return -1;
 	}
     }

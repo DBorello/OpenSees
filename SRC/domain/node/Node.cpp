@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-12-05 22:23:00 $
+// $Revision: 1.12 $
+// $Date: 2003-02-14 23:00:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,7 @@
 #include <DOF_Group.h>
 #include <Renderer.h>
 #include <string.h>
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 Matrix **Node::theMatrices = 0;
 int Node::numMatrices = 0;
@@ -111,13 +111,15 @@ Node::Node(int tag, int ndof, double Crd1)
   if (index == -1) {
     Matrix **nextMatrices = new Matrix *[numMatrices+1];
     if (nextMatrices == 0) {
-      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+      opserr << "Element::getTheMatrix - out of memory\n";
+      exit(-1);
     }
     for (int j=0; j<numMatrices; j++)
       nextMatrices[j] = theMatrices[j];
     Matrix *theMatrix = new Matrix(ndof, ndof);
     if (theMatrix == 0) {
-      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+      opserr << "Element::getTheMatrix - out of memory\n";
+      exit(-1);
     }
     nextMatrices[numMatrices] = theMatrix;
     if (numMatrices != 0) 
@@ -159,13 +161,15 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2)
   if (index == -1) {
     Matrix **nextMatrices = new Matrix *[numMatrices+1];
     if (nextMatrices == 0) {
-      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+      opserr << "Element::getTheMatrix - out of memory\n";
+      exit(-1);
     }
     for (int j=0; j<numMatrices; j++)
       nextMatrices[j] = theMatrices[j];
     Matrix *theMatrix = new Matrix(ndof, ndof);
     if (theMatrix == 0) {
-      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+      opserr << "Element::getTheMatrix - out of memory\n";
+      exit(-1);
     }
     nextMatrices[numMatrices] = theMatrix;
     if (numMatrices != 0) 
@@ -209,13 +213,15 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2, double Crd3)
   if (index == -1) {
     Matrix **nextMatrices = new Matrix *[numMatrices+1];
     if (nextMatrices == 0) {
-      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+      opserr << "Element::getTheMatrix - out of memory\n";
+      exit(-1);
     }
     for (int j=0; j<numMatrices; j++)
       nextMatrices[j] = theMatrices[j];
     Matrix *theMatrix = new Matrix(ndof, ndof);
     if (theMatrix == 0) {
-      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+      opserr << "Element::getTheMatrix - out of memory\n";
+      exit(-1);
     }
     nextMatrices[numMatrices] = theMatrix;
     if (numMatrices != 0) 
@@ -244,14 +250,14 @@ Node::Node(const Node *otherNode)
     if (otherNode->Crd != 0) {
 	Crd = new Vector(*(otherNode->Crd));
 	if (Crd == 0) {
-	    cerr << " FATAL Node::Node(node *) - ran out of memory for Crd\n";
+	    opserr << " FATAL Node::Node(node *) - ran out of memory for Crd\n";
 	    exit(-1);
 	}
     }
 
     if (otherNode->commitDisp != 0) {
 	if (this->createDisp() < 0) {
-	    cerr << " FATAL Node::Node(node *) - ran out of memory for displacement\n";
+	    opserr << " FATAL Node::Node(node *) - ran out of memory for displacement\n";
 	    exit(-1);
 	}
 	for (int i=0; i<4*numberDOF; i++)
@@ -260,7 +266,7 @@ Node::Node(const Node *otherNode)
     
     if (otherNode->commitVel != 0) {
 	if (this->createVel() < 0) {
-	    cerr << " FATAL Node::Node(node *) - ran out of memory for velocity\n";
+	    opserr << " FATAL Node::Node(node *) - ran out of memory for velocity\n";
 	    exit(-1);
 	}
 	for (int i=0; i<2*numberDOF; i++)
@@ -269,7 +275,7 @@ Node::Node(const Node *otherNode)
     
     if (otherNode->commitAccel != 0) {
 	if (this->createAccel() < 0) {
-	    cerr << " FATAL Node::Node(node *) - ran out of memory for acceleration\n";
+	    opserr << " FATAL Node::Node(node *) - ran out of memory for acceleration\n";
 	    exit(-1);
 	}
 	for (int i=0; i<2*numberDOF; i++)
@@ -279,7 +285,7 @@ Node::Node(const Node *otherNode)
     if (otherNode->unbalLoad != 0){
 	unbalLoad = new Vector(*(otherNode->unbalLoad));    
 	if (unbalLoad == 0) {
-	    cerr << " FATAL Node::Node(node *) - ran out of memory for Load\n";
+	    opserr << " FATAL Node::Node(node *) - ran out of memory for Load\n";
 	    exit(-1);
 	}
     }    
@@ -287,14 +293,14 @@ Node::Node(const Node *otherNode)
     if (otherNode->mass != 0) {
 	mass = new Matrix(*(otherNode->mass)) ;
 	if (mass == 0) {
-	    cerr << " FATAL Node::Node(node *) - ran out of memory for mass\n";
+	    opserr << " FATAL Node::Node(node *) - ran out of memory for mass\n";
 	    exit(-1);
 	}
     }
     if (otherNode->R != 0) {
       R = new Matrix(*(otherNode->R));
 	if (R == 0) {
-	    cerr << " FATAL Node::Node(node *) - ran out of memory for R\n";
+	    opserr << " FATAL Node::Node(node *) - ran out of memory for R\n";
 	    exit(-1);
 	}
     }
@@ -410,7 +416,7 @@ Node::getDisp(void)
     // setTrialDisp() or incrTrialDisp()
     if (commitDisp == 0) {
 	if (this->createDisp() < 0) {
-	    cerr << "FATAL Node::getDisp() -- ran out of memory\n";
+	    opserr << "FATAL Node::getDisp() -- ran out of memory\n";
 	    exit(-1);
 	}
     }
@@ -427,7 +433,7 @@ Node::getVel(void)
     // setTrialVel() or incrTrialVel()    
     if (commitVel == 0) {
 	if (this->createVel() < 0) {
-	    cerr << "FATAL Node::getVel() -- ran out of memory\n";
+	    opserr << "FATAL Node::getVel() -- ran out of memory\n";
 	    exit(-1);
 	}
     }    
@@ -445,7 +451,7 @@ Node::getAccel(void)
     // setTrialAccel() or incrTrialAccel()        
     if (commitAccel == 0) {
 	if (this->createAccel() < 0) {
-	    cerr << "FATAL Node::getAccel() -- ran out of memory\n";
+	    opserr << "FATAL Node::getAccel() -- ran out of memory\n";
 	    exit(-1);
 	}
     }
@@ -465,7 +471,7 @@ Node::getTrialDisp(void)
 {
     if (trialDisp == 0) {
 	if (this->createDisp() < 0) {
-	    cerr << "FATAL Node::getTrialDisp() -- ran out of memory\n";
+	    opserr << "FATAL Node::getTrialDisp() -- ran out of memory\n";
 	    exit(-1);
 	}
     }    
@@ -480,7 +486,7 @@ Node::getTrialVel(void)
 {
     if (trialVel == 0) {
 	if (this->createVel() < 0) {
-	    cerr << "FATAL Node::getTrialVel() -- ran out of memory\n";
+	    opserr << "FATAL Node::getTrialVel() -- ran out of memory\n";
 	    exit(-1);
 	}
     }    
@@ -495,7 +501,7 @@ Node::getTrialAccel(void)
 {
     if (trialAccel == 0) {
 	if (this->createAccel() < 0) {
-	    cerr << "FATAL Node::getTrialAccel() - ran out of memory\n";
+	    opserr << "FATAL Node::getTrialAccel() - ran out of memory\n";
 	    exit(0);
 	}
     }    
@@ -507,7 +513,7 @@ Node::getIncrDisp(void)
 {
     if (incrDisp == 0) {
 	if (this->createDisp() < 0) {
-	    cerr << "FATAL Node::getTrialDisp() -- ran out of memory\n";
+	    opserr << "FATAL Node::getTrialDisp() -- ran out of memory\n";
 	    exit(-1);
 	}
     }    
@@ -520,7 +526,7 @@ Node::getIncrDeltaDisp(void)
 {
     if (incrDeltaDisp == 0) {
 	if (this->createDisp() < 0) {
-	    cerr << "FATAL Node::getTrialDisp() -- ran out of memory\n";
+	    opserr << "FATAL Node::getTrialDisp() -- ran out of memory\n";
 	    exit(-1);
 	}
     }    
@@ -534,7 +540,7 @@ Node::setTrialDisp(const Vector &newTrialDisp)
 {
     // check vector arg is of correct size
     if (newTrialDisp.Size() != numberDOF) {
-	    cerr << "WARNING Node::setTrialDisp() - incompatable sizes\n";
+	    opserr << "WARNING Node::setTrialDisp() - incompatable sizes\n";
 	    return -2;
 	}    
 
@@ -543,7 +549,7 @@ Node::setTrialDisp(const Vector &newTrialDisp)
     // getDisp(), or incrTrialDisp()        
     if (trialDisp == 0) {
 	if (this->createDisp() < 0) {
-	    cerr << "FATAL Node::setTrialDisp() - ran out of memory\n";
+	    opserr << "FATAL Node::setTrialDisp() - ran out of memory\n";
 	    exit(-1);
 	}    
     }
@@ -565,7 +571,7 @@ Node::setTrialVel(const Vector &newTrialVel)
 {
     // check vector arg is of correct size
     if (newTrialVel.Size() != numberDOF) {
-	    cerr << "WARNING Node::setTrialVel() - incompatable sizes\n";
+	    opserr << "WARNING Node::setTrialVel() - incompatable sizes\n";
 	    return -2;
     }    
 
@@ -574,7 +580,7 @@ Node::setTrialVel(const Vector &newTrialVel)
     // getVEl(), or incrTrialVel()        
     if (trialVel == 0) {
 	if (this->createVel() < 0) {
-	    cerr << "FATAL Node::setTrialVel() - ran out of memory\n";
+	    opserr << "FATAL Node::setTrialVel() - ran out of memory\n";
 	    exit(-1);
 	}
     }      
@@ -591,14 +597,14 @@ Node::setTrialAccel(const Vector &newTrialAccel)
 {
     // check vector arg is of correct size
     if (newTrialAccel.Size() != numberDOF) {
-	    cerr << "WARNING Node::setTrialAccel() - incompatable sizes\n";
+	    opserr << "WARNING Node::setTrialAccel() - incompatable sizes\n";
 	    return -2;
     }    
 
     // create a copy if no trial exists    
     if (trialAccel == 0) {
 	if (this->createAccel() < 0) {
-	    cerr << "FATAL Node::setTrialAccel() - ran out of memory\n";
+	    opserr << "FATAL Node::setTrialAccel() - ran out of memory\n";
 	    exit(-1);
 	}
     }        
@@ -615,14 +621,14 @@ Node::incrTrialDisp(const Vector &incrDispl)
 {
     // check vector arg is of correct size
     if (incrDispl.Size() != numberDOF) {
-	cerr << "WARNING Node::incrTrialDisp() - incompatable sizes\n";
+	opserr << "WARNING Node::incrTrialDisp() - incompatable sizes\n";
 	return -2;
     }    
 
     // create a copy if no trial exists andd add committed
     if (trialDisp == 0) {
 	if (this->createDisp() < 0) {
-	    cerr << "FATAL Node::incrTrialDisp() - ran out of memory\n";
+	    opserr << "FATAL Node::incrTrialDisp() - ran out of memory\n";
 	    exit(-1);
 	}    
 	for (int i = 0; i<numberDOF; i++) {
@@ -651,14 +657,14 @@ Node::incrTrialVel(const Vector &incrVel)
 {
     // check vector arg is of correct size
     if (incrVel.Size() != numberDOF) {
-	cerr << "WARNING Node::incrTrialVel() - incompatable sizes\n";
+	opserr << "WARNING Node::incrTrialVel() - incompatable sizes\n";
 	return -2;
     }    
 
     // create Vectors and array if none exist and set trial
     if (trialVel == 0) {
 	if (this->createVel() < 0) {
-	    cerr << "FATAL Node::incrTrialVel - ran out of memory\n";
+	    opserr << "FATAL Node::incrTrialVel - ran out of memory\n";
 	    exit(-1);
 	}    
 	for (int i = 0; i<numberDOF; i++)
@@ -680,14 +686,14 @@ Node::incrTrialAccel(const Vector &incrAccel)
 {
     // check vector arg is of correct size
     if (incrAccel.Size() != numberDOF) {
-	cerr << "WARNING Node::incrTrialAccel() - incompatable sizes\n";
+	opserr << "WARNING Node::incrTrialAccel() - incompatable sizes\n";
 	return -2;
     }    
 
     // create a copy if no trial exists andd add committed    
     if (trialAccel == 0) {
 	if (this->createAccel() < 0) {
-	    cerr << "FATAL Node::incrTrialAccel() - ran out of memory\n";
+	    opserr << "FATAL Node::incrTrialAccel() - ran out of memory\n";
 	    exit(-1);
 	}    
 	for (int i = 0; i<numberDOF; i++)
@@ -716,8 +722,8 @@ Node::addUnbalancedLoad(const Vector &add, double fact)
 {
     // check vector arg is of correct size
     if (add.Size() != numberDOF) {
-	cerr << "Node::addunbalLoad - load to add of incorrect size ";
-	cerr << add.Size() << " should be " <<  numberDOF << endl;	
+	opserr << "Node::addunbalLoad - load to add of incorrect size ";
+	opserr << add.Size() << " should be " <<  numberDOF << endln;	
 	return -1;
     }
 
@@ -725,7 +731,7 @@ Node::addUnbalancedLoad(const Vector &add, double fact)
     if (unbalLoad == 0) {
 	unbalLoad = new Vector(add); 
 	if (unbalLoad == 0) {
-	    cerr << "FATAL Node::addunbalLoad - ran out of memory\n";
+	    opserr << "FATAL Node::addunbalLoad - ran out of memory\n";
 	    exit(-1);
 	}
 	if (fact != 1.0)
@@ -750,7 +756,7 @@ Node::addInertiaLoadToUnbalance(const Vector &accelG, double fact)
 
   // otherwise we must determine MR accelG
   if (accelG.Size() != R->noCols()) {
-    cerr << "Node::addInertiaLoadToUnbalance - accelG not of correct dimension";
+    opserr << "Node::addInertiaLoadToUnbalance - accelG not of correct dimension";
     return -1;
   }
 
@@ -758,7 +764,7 @@ Node::addInertiaLoadToUnbalance(const Vector &accelG, double fact)
   if (unbalLoad == 0) {
       unbalLoad = new Vector(numberDOF); 
       if (unbalLoad == 0 || unbalLoad->Size() != numberDOF) {
-	  cerr << "FATAL Node::addunbalLoad - ran out of memory\n";
+	  opserr << "FATAL Node::addunbalLoad - ran out of memory\n";
 	  exit(-1);
       }  
   }
@@ -782,7 +788,7 @@ Node::getUnbalancedLoad(void)
     if (unbalLoad == 0) {
 	unbalLoad = new Vector(numberDOF);
 	if (unbalLoad == 0 || unbalLoad->Size() != numberDOF) {
-	    cerr << "FATAL Node::getunbalLoad() -- ran out of memory\n";
+	    opserr << "FATAL Node::getunbalLoad() -- ran out of memory\n";
 	    exit(-1);
 	}
     }
@@ -800,7 +806,7 @@ Node::getUnbalancedLoadIncInertia(void)
     if (unbalLoadWithInertia == 0) {
 	unbalLoadWithInertia = new Vector(this->getUnbalancedLoad());
 	if (unbalLoadWithInertia == 0) {
-	    cerr << "FATAL Node::getunbalLoadWithInertia -- ran out of memory\n";
+	    opserr << "FATAL Node::getunbalLoadWithInertia -- ran out of memory\n";
 	    exit(-1);
 	}
     } else
@@ -949,7 +955,7 @@ Node::setMass(const Matrix &newMass)
 {
     // check right size
     if (newMass.noRows() != numberDOF || newMass.noCols() != numberDOF) {
-	cerr << "Node::setMass - incompatable matrices\n";
+	opserr << "Node::setMass - incompatable matrices\n";
 	return -1;
     }	
 
@@ -957,7 +963,7 @@ Node::setMass(const Matrix &newMass)
     if (mass == 0) {
 	mass = new Matrix(newMass);
 	if (mass == 0 || mass->noRows() != numberDOF) {
-	    cerr << "FATAL Node::setMass - ran out of memory\n";
+	    opserr << "FATAL Node::setMass - ran out of memory\n";
 	    return -1;
 	}
 	return 0;
@@ -983,7 +989,7 @@ Node::setNumColR(int numCol)
     R = new Matrix(numberDOF, numCol);
 
   if (R == 0 || R->noRows() != numberDOF) {
-      cerr << "FATAL Node::setNumColR() - out of memory\n";
+      opserr << "FATAL Node::setNumColR() - out of memory\n";
       exit(-1);
   }
 
@@ -996,13 +1002,13 @@ Node::setR(int row, int col, double Value)
 {
   // ensure R had been set
   if (R == 0) {
-    cerr << "Node:setR() - R has not been initialised\n";
+    opserr << "Node:setR() - R has not been initialised\n";
     return -1;
   }
   
   // ensure row, col in range (matrix assignment will catch this - extra work)
   if (row < 0 || row > numberDOF || col < 0 || col > R->noCols()) {
-    cerr << "Node:setR() - row, col index out of range\n";
+    opserr << "Node:setR() - row, col index out of range\n";
     return -1;
   }
 
@@ -1022,7 +1028,7 @@ Node::getRV(const Vector &V)
     if (unbalLoadWithInertia == 0) {
 	unbalLoadWithInertia = new Vector(numberDOF);
 	if (unbalLoadWithInertia == 0) {
-	    cerr << "Node::getunbalLoadWithInertia -- ran out of memory\n";
+	    opserr << "Node::getunbalLoadWithInertia -- ran out of memory\n";
 	    exit(-1);
 	}
     } 
@@ -1035,8 +1041,8 @@ Node::getRV(const Vector &V)
     
     // check dimesions of R and V
     if (R->noCols() != V.Size()) {
-	cerr << "WARNING Node::getRV() - R and V of incompatable dimesions\n";
-	cerr << "R: " << *R << "V: " << V;
+	opserr << "WARNING Node::getRV() - R and V of incompatable dimesions\n";
+	opserr << "R: " << *R << "V: " << V;
 	unbalLoadWithInertia->Zero();
 	return *unbalLoadWithInertia;
     }    
@@ -1052,9 +1058,8 @@ Node::setNumEigenvectors(int numVectorsToStore)
 {
   // ensure a positive number of vectors
   if (numVectorsToStore <= 0) {
-      g3ErrorHandler->warning("Node::setNumEigenvectors() - %d < 0\n", 
-			      numVectorsToStore);
-      return -1;
+    opserr << "Node::setNumEigenvectors() - " << numVectorsToStore << " < 0\n";
+    return -1;
   }    
 
   // if matrix not yet assigned or not of correct size delete old and create new
@@ -1065,7 +1070,7 @@ Node::setNumEigenvectors(int numVectorsToStore)
 
     theEigenvectors = new Matrix(numberDOF, numVectorsToStore);
     if (theEigenvectors == 0 || theEigenvectors->noCols() != numVectorsToStore) {
-      g3ErrorHandler->warning("Node::setNumEigenvectors() - out of memory\n");
+      opserr << "Node::setNumEigenvectors() - out of memory\n";
       return -2;
     }
   } else
@@ -1078,12 +1083,12 @@ int
 Node::setEigenvector(int mode, const Vector &eigenVector)
 {
   if (theEigenvectors == 0 || theEigenvectors->noCols() < mode) {
-      g3ErrorHandler->warning("Node::setEigenvectors() - mode %d invalid\n", mode);
-      return -1;
+    opserr << "Node::setEigenvectors() - mode " << mode << " invalid\n";
+    return -1;
   }
 
   if (eigenVector.Size() != numberDOF) {
-      g3ErrorHandler->warning("Node::setEigenvectors() - eigenvector of incorrect size\n");
+      opserr << "Node::setEigenvectors() - eigenvector of incorrect size\n";
       return -2;
   }
   // set the values
@@ -1097,7 +1102,7 @@ Node::getEigenvectors(void)
 {
   // check the eigen vectors have been set
   if (theEigenvectors == 0)
-    g3ErrorHandler->fatal("Node::getEigenvectors() - eigenvectors have not been set\n");
+    opserr << "Node::getEigenvectors() - eigenvectors have not been set\n";
   
   return *theEigenvectors;
 }
@@ -1145,20 +1150,20 @@ Node::sendSelf(int cTag, Channel &theChannel)
 
     res = theChannel.sendID(dataTag, cTag, data);
     if (res < 0) {
-      cerr << " Node::sendSelf() - failed to send ID data\n";
+      opserr << " Node::sendSelf() - failed to send ID data\n";
       return res;
     }
 
     res = theChannel.sendVector(dataTag, cTag, *Crd);
     if (res < 0) {
-      cerr << " Node::sendSelf() - failed to send Vecor data\n";
+      opserr << " Node::sendSelf() - failed to send Vecor data\n";
       return res;
     }
 
     if (commitDisp != 0) {
 	res = theChannel.sendVector(dbTag1, cTag, *commitDisp);	
 	if (res < 0) {
-	  cerr << " Node::sendSelf() - failed to send Disp data\n";
+	  opserr << " Node::sendSelf() - failed to send Disp data\n";
 	  return res;
 	}
     }
@@ -1166,7 +1171,7 @@ Node::sendSelf(int cTag, Channel &theChannel)
     if (commitVel != 0) {
 	res = theChannel.sendVector(dbTag2, cTag, *commitVel);		
 	if (res < 0) {
-	  cerr << " Node::sendSelf() - failed to send Vel data\n";
+	  opserr << " Node::sendSelf() - failed to send Vel data\n";
 	  return res;
 	}
     }
@@ -1174,7 +1179,7 @@ Node::sendSelf(int cTag, Channel &theChannel)
     if (commitAccel != 0) {
 	res = theChannel.sendVector(dbTag3, cTag, *commitAccel); 
 	if (res < 0) {
-	  cerr << " Node::sendSelf() - failed to send Accel data\n";
+	  opserr << " Node::sendSelf() - failed to send Accel data\n";
 	  return res;
 	}
     }
@@ -1182,7 +1187,7 @@ Node::sendSelf(int cTag, Channel &theChannel)
     if (mass != 0) {
 	res = theChannel.sendMatrix(dataTag, cTag, *mass);
 	if (res < 0) {
-	  cerr << " Node::sendSelf() - failed to send Mass data\n";
+	  opserr << " Node::sendSelf() - failed to send Mass data\n";
 	  return res;
 	}
     }
@@ -1190,7 +1195,7 @@ Node::sendSelf(int cTag, Channel &theChannel)
     if (R != 0) {
 	res = theChannel.sendMatrix(dataTag, cTag, *R);
 	if (res < 0) {
-	  cerr << " Node::sendSelf() - failed to send R data\n";
+	  opserr << " Node::sendSelf() - failed to send R data\n";
 	  return res;
 	}
     }    
@@ -1198,7 +1203,7 @@ Node::sendSelf(int cTag, Channel &theChannel)
     if (unbalLoad  != 0) {
 	res = theChannel.sendVector(dbTag4, cTag, *unbalLoad);	
 	if (res < 0) {
-	  cerr << " Node::sendSelf() - failed to send Load data\n";
+	  opserr << " Node::sendSelf() - failed to send Load data\n";
 	  return res;
 	}
     }
@@ -1218,7 +1223,7 @@ Node::recvSelf(int cTag, Channel &theChannel,
     ID data(14);
     res = theChannel.recvID(dataTag, cTag, data);
     if (res < 0) {
-      cerr << "Node::recvSelf() - failed to receive ID data\n";
+      opserr << "Node::recvSelf() - failed to receive ID data\n";
       return res;
     }
 
@@ -1238,12 +1243,12 @@ Node::recvSelf(int cTag, Channel &theChannel,
 
     // check we did not run out of memory
     if (Crd == 0) {
-      g3ErrorHandler->warning("Node::recvSelf() - out of memory creating Coordinate vector\n");
+      opserr << "Node::recvSelf() - out of memory creating Coordinate vector\n";
       return -1;
     }
 
     if (theChannel.recvVector(dataTag, cTag, *Crd) < 0) {
-      g3ErrorHandler->warning("Node::recvSelf() - failed to receive the Coordinate vector\n");
+      opserr << "Node::recvSelf() - failed to receive the Coordinate vector\n";
       return -2;
     }
 	
@@ -1254,7 +1259,7 @@ Node::recvSelf(int cTag, Channel &theChannel,
 
       // recv the committed disp
       if (theChannel.recvVector(dbTag1, cTag, *commitDisp) < 0) {
-	g3ErrorHandler->warning("Node::recvSelf - failed to receive Disp data\n");
+	opserr << "Node::recvSelf - failed to receive Disp data\n";
 	return res;
       }
 
@@ -1276,7 +1281,7 @@ Node::recvSelf(int cTag, Channel &theChannel,
 
       // recv the committed vel
       if (theChannel.recvVector(dbTag2, cTag, *commitVel) < 0) {
-	g3ErrorHandler->warning("Node::recvSelf - failed to receive Velocity data\n");
+	opserr << "Node::recvSelf - failed to receive Velocity data\n";
 	return -3;
       }
 
@@ -1292,7 +1297,7 @@ Node::recvSelf(int cTag, Channel &theChannel,
 
       // recv the committed accel
       if (theChannel.recvVector(dbTag3, cTag, *commitAccel) < 0) {
-	g3ErrorHandler->warning("Node::recvSelf - failed to receive Acceleration data\n");
+	opserr << "Node::recvSelf - failed to receive Acceleration data\n";
 	return -4;
       }
       
@@ -1306,12 +1311,12 @@ Node::recvSelf(int cTag, Channel &theChannel,
       if (mass == 0) {
 	mass = new Matrix(numberDOF,numberDOF);
 	if (mass == 0) {
-	  g3ErrorHandler->warning("Node::recvData -- ran out of memory\n");
+	  opserr << "Node::recvData -- ran out of memory\n";
 	  return -5;
 	}
       }
       if (theChannel.recvMatrix(dataTag, cTag, *mass) < 0) {
-	g3ErrorHandler->warning("Node::recvSelf() - failed to receive Mass data\n");
+	opserr << "Node::recvSelf() - failed to receive Mass data\n";
 	return -6;
       }
     }            
@@ -1322,13 +1327,13 @@ Node::recvSelf(int cTag, Channel &theChannel,
       if (R == 0) {
 	R = new Matrix(numberDOF, noCols);
 	if (R == 0) {
-	  g3ErrorHandler->warning("Node::recvData -- ran out of memory\n");
+	  opserr << "Node::recvData -- ran out of memory\n";
 	  return -1;
 	}
       }
       // now recv the R matrix
       if (theChannel.recvMatrix(dataTag, cTag, *R) < 0) {
-	g3ErrorHandler->warning("Node::recvSelf() - failed to receive R data\n");
+	opserr << "Node::recvSelf() - failed to receive R data\n";
 	return res;
       }
     }
@@ -1338,12 +1343,12 @@ Node::recvSelf(int cTag, Channel &theChannel,
       if (unbalLoad == 0) {
 	unbalLoad = new Vector(numberDOF);
 	if (unbalLoad == 0) {
-	  g3ErrorHandler->warning("Node::recvData -- ran out of memory\n");
+	  opserr << "Node::recvData -- ran out of memory\n";
 	  return -10;
 	}
       }
       if (theChannel.recvVector(dbTag4, cTag, *unbalLoad) < 0) {
-	g3ErrorHandler->warning("Node::recvSelf() - failed to receive Load data\n");
+	opserr << "Node::recvSelf() - failed to receive Load data\n";
 	return res;
       }
     }        
@@ -1354,10 +1359,10 @@ Node::recvSelf(int cTag, Channel &theChannel,
 
 
 void
-Node::Print(ostream &s, int flag)
+Node::Print(OPS_Stream &s, int flag)
 {
   if (flag == 0) { // print out everything
-    s << "\n Node: " << this->getTag() << endl;
+    s << "\n Node: " << this->getTag() << endln;
     s << "\tCoordinates  : " << *Crd;
     if (commitDisp != 0)         
 	s << "\tcommitDisps: " << *commitDisp;
@@ -1423,8 +1428,8 @@ Node::createDisp(void)
   disp = new double[4*numberDOF];
     
   if (disp == 0) {
-    g3ErrorHandler->warning("WARNING - Node::createDisp() %s %d\n",
-			    "ran out of memory for array of size", 2*numberDOF);
+    opserr << "WARNING - Node::createDisp() ran out of memory for array of size " << 2*numberDOF << endln;
+			    
     return -1;
   }
   for (int i=0; i<4*numberDOF; i++)
@@ -1436,8 +1441,8 @@ Node::createDisp(void)
   incrDeltaDisp = new Vector(&disp[3*numberDOF], numberDOF);
   
   if (commitDisp == 0 || trialDisp == 0 || incrDisp == 0 || incrDeltaDisp == 0) {
-    g3ErrorHandler->warning("WARNING - Node::createDisp() %s \n",
-			    "ran out of memory creating Vectors(double *,int)");
+    opserr << "WARNING - Node::createDisp() " <<
+      "ran out of memory creating Vectors(double *,int)";
     return -2;
   }
     
@@ -1451,9 +1456,8 @@ Node::createVel(void)
     vel = new double[2*numberDOF];
     
     if (vel == 0) {
-      g3ErrorHandler->warning("WARNING - Node::createVel() %s %d\n",
-			      "ran out of memory for array of size ",2*numberDOF);
-	return -1;
+      opserr << "WARNING - Node::createVel() ran out of memory for array of size " << 2*numberDOF << endln;
+      return -1;
     }
     for (int i=0; i<2*numberDOF; i++)
       vel[i] = 0.0;
@@ -1462,8 +1466,8 @@ Node::createVel(void)
     trialVel = new Vector(vel, numberDOF);
     
     if (commitVel == 0 || trialVel == 0) {
-      g3ErrorHandler->warning("WARNING - Node::createVel() %s\n",
-			      "ran out of memory creating Vectors(double *,int) ");
+      opserr << "WARNING - Node::createVel() %s" <<
+	"ran out of memory creating Vectors(double *,int) \n";
       return -2;
     }
     
@@ -1476,9 +1480,8 @@ Node::createAccel(void)
     accel = new double[2*numberDOF];
     
     if (accel == 0) {
-      g3ErrorHandler->warning("WARNING - Node::createAccel() %s %d\n",
-				"ran out of memory for array of size ",2*numberDOF);
-	return -1;
+      opserr << "WARNING - Node::createAccel() ran out of memory for array of size " << 2*numberDOF << endln;
+      return -1;
     }
     for (int i=0; i<2*numberDOF; i++)
 	accel[i] = 0.0;
@@ -1487,9 +1490,8 @@ Node::createAccel(void)
     trialAccel = new Vector(accel, numberDOF);
     
     if (commitAccel == 0 || trialAccel == 0) {
-	g3ErrorHandler->warning("WARNING - Node::createAccel() %s\n",
-				"ran out of memory creating Vectors(double *,int)");
-	return -2;
+      opserr << "WARNING - Node::createAccel() ran out of memory creating Vectors(double *,int)\n";
+      return -2;
     }
 
     return 0;

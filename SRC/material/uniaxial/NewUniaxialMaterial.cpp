@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2002-06-10 23:03:59 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/NewUniaxialMaterial.cpp,v $
 
 // Written: MHS
@@ -129,7 +129,7 @@ NewUniaxialMaterial::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-NewUniaxialMaterial::Print(ostream &s, int flag)
+NewUniaxialMaterial::Print(OPS_Stream &s, int flag)
 {
   return;
 }

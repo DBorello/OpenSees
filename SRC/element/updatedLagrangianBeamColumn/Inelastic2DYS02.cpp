@@ -55,11 +55,11 @@ int Inelastic2DYS02::commitState()
 	if(delPmax2 < delp2)
 		delPmax2 = delp2;
 
-	cerr   << delp1
+	opserr   << delp1
 	<< " " << delPmax1
 	<< " " << delp2
 	<< " " << delPmax2
-	<< endl;
+	<< endln;
 	
 	        
 //	cout << "diff = " << diff; (diff < 0) ? cout << ", unloading\n" : cout << ", loading\n";
@@ -80,7 +80,7 @@ Vector tmp(6);
 	getTrialNaturalDisp(tmp);
 	sumNatrDisp =  fabs(tmp(2)) + fabs(tmp(5));
 //    double diff =  sumNatrDisp - sumNatrDisp_hist;
-//    cout << "sumNd = " << sumNatrDisp << ", sumNd_hist = " << sumNatrDisp_hist << endl;
+//    cout << "sumNd = " << sumNatrDisp << ", sumNd_hist = " << sumNatrDisp_hist << endln;
 		
 Vector df(6), testForce(6);
 	  getLocalStiff(K, 1);
@@ -93,7 +93,7 @@ Vector df(6), testForce(6);
     
 // 	double diff = sumMi_1 - sumMi_2;
 	double diff = sumtest - sumMi_1;
-//	cout << "sumtest = " << sumtest << ", i-1 = " <<  sumMi_1 << endl;
+//	cout << "sumtest = " << sumtest << ", i-1 = " <<  sumMi_1 << endln;
 //	cout << "test force = " << testForce;
 //	cout << "Force hist = " << this->eleForce_hist;
 /*
@@ -116,18 +116,18 @@ Vector df(6), testForce(6);
 //    if(loading)
 //		cout << "Loading\n"; else cout << "unloading \n"; cin.get();
 			
-	// cout << "Base = " << rotInElas << endl;
+	// cout << "Base = " << rotInElas << endln;
 	// calculated only once
 	if( (end1Damage && rotInElas==-1.0) || (end2Damage && rotInElas==-1.0) )
 	{
-		cout << " Initialized \n";
-		end1Damage ? cout << "e1 \n" : cout << "!e1 \n";
-		end2Damage ? cout << "e2 \n" : cout << "!e2 \n";
+		opserr << " Initialized \n";
+		end1Damage ? opserr << "e1 \n" : opserr << "!e1 \n";
+		end2Damage ? opserr << "e2 \n" : opserr << "!e2 \n";
 		rotInElas = fabs(tmp(2)) + fabs(tmp(5));
 		forceInElas = fabs(eleForce_hist(2)) + fabs(eleForce_hist(5));
 
-		cout << "BaseRot = " << rotInElas << ", Base Force = " << forceInElas << endl; // cin.get();
-		cout << "mp = " << mp << endl;
+		opserr << "BaseRot = " << rotInElas << ", Base Force = " << forceInElas << endln; // cin.get();
+		opserr << "mp = " << mp << endln;
 
 	}//initialize it now
  	
@@ -148,9 +148,9 @@ Vector df(6), testForce(6);
 
 
 	double sumRot = fabs(tmp(2)) + fabs(tmp(5));
-//	cout << "r_curr before = " << m_avg;
+//	opserr << "r_curr before = " << m_avg;
 	sumRot = sumRot/normalzR;
-//	cout << ", r_curr after = " << m_avg << endl;
+//	opserr << ", r_curr after = " << m_avg << endln;
 
 	if(peakRot < sumRot)
 		peakRot = sumRot;
@@ -159,12 +159,12 @@ Vector df(6), testForce(6);
 double delP_ult = 0.03;
 	peakRot = delPmax1/delP_ult;
 				
-//	cout << "Curr Rotation = " << m_avg << ", Peak = " << fpeak << ", Base = " << rotInElas << endl;
+//	opserr << "Curr Rotation = " << m_avg << ", Peak = " << fpeak << ", Base = " << rotInElas << endln;
 
 // 	if(end1Damage)
-// 		cout << "End1 Damage \n";
+// 		opserr << "End1 Damage \n";
 // 	if(end2Damage)
-// 		cout << "End2 Damage \n";
+// 		opserr << "End2 Damage \n";
 //
 // 		if(end1Damage || end2Damage) cin.get();
 	// assuming that the 2 surfaces are same and symmetric (for now)
@@ -172,7 +172,7 @@ double delP_ult = 0.03;
 
 // peak-force based
 	
-//	cout << "normalzF = " << normalzF << ", Base Force = " << forceInElas << endl;
+//	opserr << "normalzF = " << normalzF << ", Base Force = " << forceInElas << endln;
 
 	// assuming double curvature
 	double sumForce = fabs(eleForce_hist(2)) + fabs(eleForce_hist(5));
@@ -222,7 +222,7 @@ double offset = 0.0; //1.5;
 	  // IminFactor = 1/exp(powKmin*x)*I0factor;
 	  //IminFactor = I0factor/pow(peakRot,powKmin);
 	  
-	  //		cerr << "powKmin = " << powKmin << ", peakRot = " << peakRot << ", Imin= " << IminFactor << endl;
+	  //		opserr << "powKmin = " << powKmin << ", peakRot = " << peakRot << ", Imin= " << IminFactor << endln;
 	  
 	  
 	  if(IminFactor < 0.02)
@@ -234,11 +234,11 @@ double offset = 0.0; //1.5;
 	    iFactor = (IminFactor + iFactor)/2;
 	  
 	  //iFactor = (sumForce*(1 - IminFactor))/fpeak + IminFactor;
-	  // cout << "peakRot = " << peakRot << ", Imin = " << IminFactor << ", Ifactor = " << iFactor << endl;
-	  // cout << "sumForce = " << sumForce << ", Peak-Force = " << fpeak << endl << endl;
+	  // opserr << "peakRot = " << peakRot << ", Imin = " << IminFactor << ", Ifactor = " << iFactor << endln;
+	  // opserr << "sumForce = " << sumForce << ", Peak-Force = " << fpeak << endln << endln;
 	}
 	
-	//	cout << "Rot i = " << tmp(2) << ", Rot j = " << tmp(5) << endl;
+	//	opserr << "Rot i = " << tmp(2) << ", Rot j = " << tmp(5) << endln;
 	
 	// assuming some degrading parameter independent of damage
 	// just based on peak

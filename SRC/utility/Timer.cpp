@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/Timer.cpp,v $
                                                                         
                                                                         
@@ -34,8 +34,6 @@
 //
 // What: "@(#) Timer.h, revA"
 
-
-
 #include<Timer.h>
 #include <bool.h>
 
@@ -44,7 +42,7 @@ extern "C" int getrusage(int who, struct rusage *rusage);
 #endif
 
 #ifndef CLK_TCK
-#define CLK_TCK _sysconf(3)
+#define CLK_TCK sysconf(_SC_CLK_TCK)
 #endif
 
 Timer::Timer() 
@@ -127,7 +125,7 @@ Timer::getNumPageFaults(void) const
 
 
 void 
-Timer::Print(ostream &s) const
+Timer::Print(OPS_Stream &s) const
 {
 #ifdef _WIN32
     // fill in later
@@ -136,9 +134,9 @@ Timer::Print(ostream &s) const
     double Real = (t2-t1)/(double) clktck;
     double CPU  = (tmsend.tms_utime - tmsstart.tms_utime)/(double) clktck;
     double System  = (tmsend.tms_stime - tmsstart.tms_stime)/(double) clktck;
-    s << endl;
+    s << endln;
     s << "TIME(sec) Real: " << Real << "  CPU: " << CPU;
-    s << "   System: " << System << endl;
+    s << "   System: " << System << endln;
 
     int r2no = r2us->ru_minflt;
     int r2yes = r2us->ru_majflt;
@@ -164,12 +162,12 @@ Timer::Print(ostream &s) const
     r1no = r1us->ru_nswap;
     r2yes = r2us->ru_maxrss;
     
-    s << "Swapped: " << r2no-r1no << " Max Res Set Size: " << r2yes << endl;
-    s << endl;
+    s << "Swapped: " << r2no-r1no << " Max Res Set Size: " << r2yes << endln;
+    s << endln;
 #endif    
 }    
 
-ostream &operator<<(ostream &s, const Timer &E)
+OPS_Stream &operator<<(OPS_Stream &s, const Timer &E)
 {
     E.Print(s);
     return s;

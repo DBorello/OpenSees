@@ -31,10 +31,6 @@
 #define EL_LEeq_H
 
 #include <math.h>
-
-#include <iostream.h>
-#include <iomanip.h>
-
 #include "EL_S.h"
 
 class EvolutionLaw_L_Eeq : public EvolutionLaw_S
@@ -78,7 +74,7 @@ class EvolutionLaw_L_Eeq : public EvolutionLaw_S
     // Overloaded Insertion Operator	  Zhaohui Added Aug. 13, 2000
     // prints Linear EvolutionLaw's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const EvolutionLaw_L_Eeq & LEL);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_L_Eeq & LEL);
 
     
 };

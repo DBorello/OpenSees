@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tagged/storage/ArrayOfTaggedObjects.h,v $
                                                                         
                                                                         
@@ -68,7 +68,7 @@ class ArrayOfTaggedObjects : public TaggedObjectStorage
     virtual TaggedObjectStorage *getEmptyCopy(void);
     virtual void clearAll(bool invokeDestructor = true);
     
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
     friend class ArrayOfTaggedObjectsIter;
     
   protected:    

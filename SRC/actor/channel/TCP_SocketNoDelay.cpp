@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_SocketNoDelay.cpp,v $
                                                                         
                                                                         
@@ -62,12 +62,12 @@ TCP_SocketNoDelay::TCP_SocketNoDelay()
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
- 	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not open socket\n";
+ 	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not open socket\n";
     }
 
     // bind local address to it
     if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
-	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not bind local address\n";
+	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not bind local address\n";
     }
     
     // get my_address info
@@ -103,13 +103,13 @@ TCP_SocketNoDelay::TCP_SocketNoDelay(unsigned int port)
     // open a socket
 
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not open socket\n";
+	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not open socket\n";
     }
     
     // bind local address to it
 
     if (bind(sockfd,(struct sockaddr *)&my_Addr,sizeof(my_Addr)) < 0) {
-	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not bind local address\n";
+	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not bind local address\n";
     }    
 
     // get my_address info
@@ -142,12 +142,12 @@ TCP_SocketNoDelay::TCP_SocketNoDelay(unsigned int other_Port, char *other_InetAd
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
- 	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not open socket\n";
+ 	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not open socket\n";
     }
 
     // bind local address to it
     if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
-	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not bind local address\n";
+	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not bind local address\n";
     }
     myPort = ntohs(my_Addr.sin_port);    
 }    
@@ -170,7 +170,7 @@ TCP_SocketNoDelay::setUpActor(void)
     if (connect(sockfd, (struct sockaddr *) &other_Addr, 
 		sizeof(other_Addr))< 0) {
 	
-	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not connect\n";
+	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not connect\n";
 	return -1;
     }
     // get my_address info
@@ -183,16 +183,16 @@ TCP_SocketNoDelay::setUpActor(void)
     optlen = 1;
     if ((setsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
 		    (char *) &optlen, sizeof(int))) < 0) { 
-	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not set TCP_NODELAY\n";
+	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not set TCP_NODELAY\n";
     }	  
 
     /*
     int flag=sizeof(int);
     if ((getsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
 		    (char *) &optlen, &flag)) < 0) { 
-	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not set TCP_NODELAY\n";
+	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not set TCP_NODELAY\n";
     }	        
-    cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - " << optlen << " flag " << flag <<  endl;
+    opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - " << optlen << " flag " << flag <<  endln;
     */
     
     return 0;
@@ -209,7 +209,7 @@ TCP_SocketNoDelay::setUpShadow(void)
     newsockfd = accept(sockfd, (struct sockaddr *) &other_Addr, &addrLength);
 
     if (newsockfd < 0) {
-	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not accept connection\n";
+	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not accept connection\n";
 	return -1;
     }    
     
@@ -228,16 +228,16 @@ TCP_SocketNoDelay::setUpShadow(void)
     optlen = 1;
     if ((setsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
 		    (char *) &optlen, sizeof(int))) < 0) { 
-	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not set TCP_NODELAY\n";
+	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not set TCP_NODELAY\n";
     }	  
 
     /*
     int flag=sizeof(int);
     if ((getsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
 		    (char *) &optlen, &flag)) < 0) { 
-	cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not set TCP_NODELAY\n";
+	opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - could not set TCP_NODELAY\n";
     }	        
-    cerr << "TCP_SocketNoDelay::TCP_SocketNoDelay - " << optlen << " flag " << flag <<  endl;
+    opserr << "TCP_SocketNoDelay::TCP_SocketNoDelay - " << optlen << " flag " << flag <<  endln;
     */
     
     return 0;
@@ -255,15 +255,15 @@ TCP_SocketNoDelay::setNextAddress(const ChannelAddress &theAddress)
 	    if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 		     theSocketAddress->addrLength) != 0) {
 		
-		cerr << "TCP_SocketNoDelay::recvMsg() - a TCP_SocketNoDelay ";
-		cerr << "can only communicate with one other TCP_SocketNoDelay\n"; 
+		opserr << "TCP_SocketNoDelay::recvMsg() - a TCP_SocketNoDelay ";
+		opserr << "can only communicate with one other TCP_SocketNoDelay\n"; 
 		return -1;
 	    }
 	}
     else {
-	cerr << "TCP_SocketNoDelay::setNextAddress() - a TCP_SocketNoDelay ";
-	cerr << "can only communicate with a TCP_SocketNoDelay";
-	cerr << " address given is not of type SocketAddress\n"; 
+	opserr << "TCP_SocketNoDelay::setNextAddress() - a TCP_SocketNoDelay ";
+	opserr << "can only communicate with a TCP_SocketNoDelay";
+	opserr << " address given is not of type SocketAddress\n"; 
 	return -1;	    
     }		    	
 	
@@ -283,18 +283,18 @@ TCP_SocketNoDelay::sendObj(MovableObject &theObject,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with a TCP_SocketNoDelay";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with a TCP_SocketNoDelay";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
 	    
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 		 theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with one other TCP_SocketNoDelay";
-	    cerr << " address given is not that address\n"; 
+	    opserr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with one other TCP_SocketNoDelay";
+	    opserr << " address given is not that address\n"; 
 	    return -1;	    
 	}	
     }    
@@ -312,16 +312,16 @@ TCP_SocketNoDelay::recvObj(MovableObject &theObject,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with a TCP_SocketNoDelay";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with a TCP_SocketNoDelay";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_SocketNoDelay::recvMsg() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with one other TCP_SocketNoDelay\n"; 
+	    opserr << "TCP_SocketNoDelay::recvMsg() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with one other TCP_SocketNoDelay\n"; 
 	    return -1;
 	}
     }
@@ -341,16 +341,16 @@ TCP_SocketNoDelay::recvMsg(Message &msg, ChannelAddress *theAddress)
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with a TCP_SocketNoDelay";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with a TCP_SocketNoDelay";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_SocketNoDelay::recvMsg() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with one other TCP_SocketNoDelay\n"; 
+	    opserr << "TCP_SocketNoDelay::recvMsg() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with one other TCP_SocketNoDelay\n"; 
 	    return -1;
 	}
     }
@@ -383,16 +383,16 @@ TCP_SocketNoDelay::sendMsg(const Message &msg, ChannelAddress *theAddress)
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with a TCP_SocketNoDelay";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with a TCP_SocketNoDelay";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_SocketNoDelay::recvMsg() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with one other TCP_SocketNoDelay\n"; 
+	    opserr << "TCP_SocketNoDelay::recvMsg() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with one other TCP_SocketNoDelay\n"; 
 	    return -1;
 	}
     }
@@ -425,16 +425,16 @@ TCP_SocketNoDelay::recvMatrix(Matrix &theMatrix, ChannelAddress *theAddress)
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with a TCP_SocketNoDelay";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with a TCP_SocketNoDelay";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_SocketNoDelay::recvMatrix() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with one other TCP_SocketNoDelay\n"; 
+	    opserr << "TCP_SocketNoDelay::recvMatrix() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with one other TCP_SocketNoDelay\n"; 
 	    return -1;
 	}
     }
@@ -467,17 +467,17 @@ TCP_SocketNoDelay::sendMatrix(const Matrix &theMatrix, ChannelAddress *theAddres
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with a TCP_SocketNoDelay";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with a TCP_SocketNoDelay";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		        SocketAddress *theSocketAddress = 0;
 
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_SocketNoDelay::recvMatrix() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with one other TCP_SocketNoDelay\n"; 
+	    opserr << "TCP_SocketNoDelay::recvMatrix() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with one other TCP_SocketNoDelay\n"; 
 	    return -1;
 	}
     }
@@ -515,16 +515,16 @@ TCP_SocketNoDelay::recvVector(Vector &theVector, ChannelAddress *theAddress)
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with a TCP_SocketNoDelay";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with a TCP_SocketNoDelay";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_SocketNoDelay::recvVector() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with one other TCP_SocketNoDelay\n"; 
+	    opserr << "TCP_SocketNoDelay::recvVector() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with one other TCP_SocketNoDelay\n"; 
 	    return -1;
 	}
     }
@@ -557,16 +557,16 @@ TCP_SocketNoDelay::sendVector(const Vector &theVector, ChannelAddress *theAddres
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with a TCP_SocketNoDelay";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with a TCP_SocketNoDelay";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_SocketNoDelay::recvVector() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with one other TCP_SocketNoDelay\n"; 
+	    opserr << "TCP_SocketNoDelay::recvVector() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with one other TCP_SocketNoDelay\n"; 
 	    return -1;
 	}
     }
@@ -599,16 +599,16 @@ TCP_SocketNoDelay::recvID(ID &theID, ChannelAddress *theAddress)
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with a TCP_SocketNoDelay";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with a TCP_SocketNoDelay";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_SocketNoDelay::recvID() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with one other TCP_SocketNoDelay\n"; 
+	    opserr << "TCP_SocketNoDelay::recvID() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with one other TCP_SocketNoDelay\n"; 
 	    return -1;
 	}
     }
@@ -641,16 +641,16 @@ TCP_SocketNoDelay::sendID(const ID &theID, ChannelAddress *theAddress)
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with a TCP_SocketNoDelay";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_SocketNoDelay::sendObj() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with a TCP_SocketNoDelay";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_SocketNoDelay::recvID() - a TCP_SocketNoDelay ";
-	    cerr << "can only communicate with one other TCP_SocketNoDelay\n"; 
+	    opserr << "TCP_SocketNoDelay::recvID() - a TCP_SocketNoDelay ";
+	    opserr << "can only communicate with one other TCP_SocketNoDelay\n"; 
 	    return -1;
 	}
     }

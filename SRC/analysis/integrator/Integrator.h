@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Integrator.h,v $
                                                                         
                                                                         
@@ -39,7 +39,7 @@
 // What: "@(#) Integrator.h, revA"
 
 #include <MovableObject.h>
-#include <iostream.h>
+#include <OPS_Globals.h>
 
 class FE_Element;
 class DOF_Group;
@@ -64,7 +64,7 @@ class Integrator: public MovableObject
     virtual int getLastResponse(Vector &result, const ID &id) =0;
 
     // Method provided for Output
-    virtual void Print(ostream &s, int flag =0) =0;
+    virtual void Print(OPS_Stream &s, int flag =0) =0;
     
   protected:
 

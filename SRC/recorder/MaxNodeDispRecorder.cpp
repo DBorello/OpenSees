@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-19 23:09:44 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/MaxNodeDispRecorder.cpp,v $
                                                                         
                                                                         
@@ -79,7 +79,7 @@ MaxNodeDispRecorder::record(int commitTag, double timeStamp)
 int 
 MaxNodeDispRecorder::playback(int commitTag)
 {
-    cerr << "Max Recorded Displacement: " << maxDisp << endl;
+    opserr << "Max Recorded Displacement: " << maxDisp << endln;
     return 0;
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-12 23:08:09 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/Block3D.cpp,v $
                                                                         
 // Written: Ed Love
@@ -62,10 +62,10 @@ void  Block3D::setUpXl( const ID &nodeID, const Matrix &coorArray )
 
   for ( i=0; i<8; i++ ){
     if ( nodeID(i) == -1 ) {
-      cerr << "Warning : in Block3D, block node " 
+      opserr << "Warning : in Block3D, block node " 
 	   << i 
 	   << " is not defined.  No Generation will take place."
-	   << endl;
+	   << endln;
       break; 
     }//end if
   }//end for i

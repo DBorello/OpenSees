@@ -18,17 +18,16 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-10-27 02:56:10 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
 #include <OpenGlDevice.h>
-#include <iostream.h>
+#include <OPS_Globals.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <G3Globals.h>
 
 int OpenGlDevice::numWindows(0);
 // GLuint OpenGlDevice::FontBase(0);
@@ -242,7 +241,7 @@ int oglCreateBitmap(int width, int height, HGLRC *hRC, HDC *hDC,
 
 	/*
 	if ((*bits = (GLubyte *)(calloc(width*height, 1))) == 0){
-		cerr << "BITS ZERO\n";
+		opserr << "BITS ZERO\n";
 		return -1;
 	}
 	*/
@@ -421,7 +420,7 @@ OpenGlDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
 
   theDisplay = XOpenDisplay("");      // init a display connection
   if (theDisplay == 0) {              // and check we got one
-    cerr << "OpenGlDevice::initX11() - could not connect to display\n";
+    opserr << "OpenGlDevice::initX11() - could not connect to display\n";
     exit(-1);
   }
 
@@ -447,7 +446,7 @@ OpenGlDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
   }
 
   if(visual == NULL) {
-    cerr << "OpenGlDevice::WINOPEN - unable to get visual\n";
+    opserr << "OpenGlDevice::WINOPEN - unable to get visual\n";
     exit(2);
   }
 
@@ -470,7 +469,7 @@ OpenGlDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
 			    mask, &swa);
 
   if (theWindow == 0) {
-    cerr << "OpenGlDevice::WINOPEN() - could not open a window\n";
+    opserr << "OpenGlDevice::WINOPEN() - could not open a window\n";
     exit(-1);
   }
     
@@ -486,7 +485,7 @@ OpenGlDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
   /* create a GLX context */
   cx = glXCreateContext(theDisplay, visual, NULL, GL_TRUE);
   if (cx == 0) {
-    cerr << "OpenGlDevice::WINOPEN() - could not create a glx context\n";
+    opserr << "OpenGlDevice::WINOPEN() - could not create a glx context\n";
     exit(-1);
   }    
 
@@ -568,8 +567,9 @@ OpenGlDevice::BITMAPOPEN(char *_title, int _xLoc, int _yLoc,
   if (bitmapFile != 0) {
     count = 100000;
     if (strlen(bitmapFile) > MAX_FILENAMELENGTH) 
-      g3ErrorHandler->warning("warning - OpenGlDevice::OpenGlDevice() - bitmapFile %s too long, max %d\n",
-			      bitmapFile, MAX_FILENAMELENGTH);
+      opserr << "warning - OpenGlDevice::OpenGlDevice() - bitmapFile " <<
+	bitmapFile <<  "too long, max " << MAX_FILENAMELENGTH << endln;
+			      
     else {
       strcpy(bitmapFileName, bitmapFile); 
       oglCreateBitmap(width, height, &theHRC, &theHDC, &theBitmap, &info, &bits);
@@ -588,7 +588,7 @@ OpenGlDevice::BITMAPOPEN(char *_title, int _xLoc, int _yLoc,
 
   theDisplay = XOpenDisplay("");      // init a display connection
   if (theDisplay == 0) {              // and check we got one
-    cerr << "OpenGlDevice::initX11() - could not connect to display\n";
+    opserr << "OpenGlDevice::initX11() - could not connect to display\n";
     exit(-1);
   }
 
@@ -607,7 +607,7 @@ OpenGlDevice::BITMAPOPEN(char *_title, int _xLoc, int _yLoc,
   }
 
   if(visual == NULL) {
-    cerr << "OpenGlDevice::BITMAPOPEN - unable to get visual\n";
+    opserr << "OpenGlDevice::BITMAPOPEN - unable to get visual\n";
     exit(2);
   }
 
@@ -630,7 +630,7 @@ OpenGlDevice::BITMAPOPEN(char *_title, int _xLoc, int _yLoc,
 			    mask, &swa);
 
   if (theWindow == 0) {
-    cerr << "OpenGlDevice::BITMAPOPEN() - could not open a window\n";
+    opserr << "OpenGlDevice::BITMAPOPEN() - could not open a window\n";
     exit(-1);
   }
 
@@ -648,7 +648,7 @@ OpenGlDevice::BITMAPOPEN(char *_title, int _xLoc, int _yLoc,
   /* create a GLX context */
   cx = glXCreateContext(theDisplay, visual, NULL, GL_TRUE);
   if (cx == 0) {
-    cerr << "OpenGlDevice::BITMAPOPEN() - could not create a glx context\n";
+    opserr << "OpenGlDevice::BITMAPOPEN() - could not create a glx context\n";
     exit(-1);
   }    
 
@@ -705,7 +705,7 @@ OpenGlDevice::BITMAPOPEN(char *_title, int _xLoc, int _yLoc,
     id = fontInfo->fid;
     first = fontInfo->min_char_or_byte2;
     last = fontInfo->max_char_or_byte2;
-    cerr << first << " " << last << endl;  
+    opserr << first << " " << last << endln;  
     FontBase = glGenLists((GLuint) last + 1);
     if (!FontBase) {
       printf("Error: unable to allocate display lists\n");
@@ -868,8 +868,7 @@ OpenGlDevice::saveBmpImage(void)
     // open the file
     FILE *fp;
     if ((fp = fopen(fileName,"wb")) == NULL) {
-	g3ErrorHandler->warning("OpenGLDevice::saveBmpImage() - %s %s\n",
-				"could not open file named", fileName);
+      opserr << "OpenGLDevice::saveBmpImage() - could not open file named" <<  fileName << endln;
 	count = -1;
 	return -1;
     }	
@@ -903,7 +902,7 @@ OpenGlDevice::saveBmpImage(void)
     // check the bit map header info has been created, if not create one
 /*    if (info == 0) {
 	if ((info = (BITMAPINFO *)malloc(sizeof(BITMAPINFOHEADER))) < 0) {
-	    g3ErrorHandler->warning("OpenGLDevice::saveBmpImage() - %s\n",
+	    opserr << "OpenGLDevice::saveBmpImage() - %s\n",
 				    "out of memory creating BITMAPINFO struct");
 	    count = -1;
 	    return -2;
@@ -929,7 +928,7 @@ OpenGlDevice::saveBmpImage(void)
 	if (currentBitSize != 0)
 	    free (bits);
 	if ((bits = (GLubyte *)calloc(bitsize, 1)) == 0) {
-	    g3ErrorHandler->warning("OpenGLDevice::saveBmpImage() - %s\n",
+	    opserr << "OpenGLDevice::saveBmpImage() - %s\n",
 				    "out of memory creating BITMAPINFO struct");
 	    count = -1;
 	    free (info);
@@ -951,7 +950,7 @@ OpenGlDevice::saveBmpImage(void)
     glPixelStorei(GL_PACK_SKIP_ROWS, 0);
     glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
 
-    if (bits == 0) cerr << "BITS ZERO\n";
+    if (bits == 0) opserr << "BITS ZERO\n";
 
     glReadPixels(0, 0, info.bmiHeader.biWidth, info.bmiHeader.biHeight,
 		GL_BGR_EXT, GL_UNSIGNED_BYTE, bits);
@@ -970,7 +969,7 @@ OpenGlDevice::saveBmpImage(void)
 	{
     // write the header to the file
 //    if (fwrite(&header, 1, sizeof(BITMAPFILEHEADER), fp) < sizeof(BITMAPFILEHEADER)) {
-	    g3ErrorHandler->warning("OpenGLDevice::saveBmpImage() - %s\n",
+	    opserr << "OpenGLDevice::saveBmpImage() - %s\n",
 				    "failed to write BITMAPHEADER");
 	    fclose(fp);
 	    return -4;
@@ -979,7 +978,7 @@ OpenGlDevice::saveBmpImage(void)
         {
     // write the bit map information to the file
 //    if (fwrite(&info, 1, sizeof(BITMAPINFOHEADER), fp) < sizeof(BITMAPINFOHEADER)) {
-	    g3ErrorHandler->warning("OpenGLDevice::saveBmpImage() - %s\n",
+	    opserr << "OpenGLDevice::saveBmpImage() - %s\n",
 				    "failed to write BITMAPINFOHEADER");
 	    fclose(fp);
 	    return -5;	    
@@ -988,7 +987,7 @@ OpenGlDevice::saveBmpImage(void)
         {
     // now we write the bits
     //if (fwrite(bits, 1, currentBitSize, fp) < currentBitSize) {
-	g3ErrorHandler->warning("OpenGLDevice::saveBmpImage() - %s\n",
+	opserr << "OpenGLDevice::saveBmpImage() - %s\n",
 				    "failed to write BITMAPINFOHEADER");
 	fclose(fp);
 	return -6;	

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Linear.cpp,v $
                                                                         
                                                                         
@@ -42,7 +42,6 @@
 #include <StaticAnalysis.h>
 #include <StaticIntegrator.h>
 #include <LinearSOE.h>
-#include <iostream.h>    
 #include <Vector.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -77,35 +76,35 @@ Linear::solveCurrentStep(void)
 	this->getIncrementalIntegratorPtr(); 
 
     if ((theAnalysisModel == 0) || (theIncIntegrator ==0 ) || (theSOE == 0)){
-	cerr << "WARNING Linear::solveCurrentStep() -";
-	cerr << "setLinks() has not been called.\n";
+	opserr << "WARNING Linear::solveCurrentStep() -";
+	opserr << "setLinks() has not been called.\n";
 	return -5;
     }
 
     if (theIncIntegrator->formTangent() < 0) {
-	cerr << "WARNING Linear::solveCurrentStep() -";
-	cerr << "the Integrator failed in formTangent()\n";
+	opserr << "WARNING Linear::solveCurrentStep() -";
+	opserr << "the Integrator failed in formTangent()\n";
 	return -1;
     }	
 
     
     if (theIncIntegrator->formUnbalance() < 0) {
-	cerr << "WARNING Linear::solveCurrentStep() -";
-	cerr << "the Integrator failed in formUnbalance()\n";	
+	opserr << "WARNING Linear::solveCurrentStep() -";
+	opserr << "the Integrator failed in formUnbalance()\n";	
 	return -2;
     }
 
     if (theSOE->solve() < 0) {
-	cerr << "WARNING Linear::solveCurrentStep() -";
-	cerr << "the LinearSOE failed in solve()\n";	
+	opserr << "WARNING Linear::solveCurrentStep() -";
+	opserr << "the LinearSOE failed in solve()\n";	
 	return -3;
     }
 
     const Vector &deltaU = theSOE->getX();
 
     if (theIncIntegrator->update(deltaU) < 0) {
-	cerr << "WARNING Linear::solveCurrentStep() -";
-	cerr << "the Integrator failed in update()\n";	
+	opserr << "WARNING Linear::solveCurrentStep() -";
+	opserr << "the Integrator failed in update()\n";	
 	return -4;
     }
 
@@ -115,8 +114,8 @@ Linear::solveCurrentStep(void)
 void
 Linear::setTest(ConvergenceTest &theNewTest)
 {
-  cerr << " WARNINGLinear::setTest() - linear algorithm does";
-  cerr << " not use a ConvergenceTest\n"; 
+  opserr << " WARNINGLinear::setTest() - linear algorithm does";
+  opserr << " not use a ConvergenceTest\n"; 
 }
 
 int
@@ -133,7 +132,7 @@ Linear::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 
 
 void
-Linear::Print(ostream &s, int flag)
+Linear::Print(OPS_Stream &s, int flag)
 {
     s << "\t Linear algorithm";
 }

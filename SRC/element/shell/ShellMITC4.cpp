@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-12-16 21:10:07 $
+// $Revision: 1.12 $
+// $Date: 2003-02-14 23:01:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -27,7 +27,6 @@
 // B-bar four node shell element with membrane and drill
 //
 
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -175,8 +174,7 @@ connectedExternalNodes(4), load(0), Ki(0)
 
       if (materialPointers[i] == 0) {
 
-	  g3ErrorHandler->fatal("ShellMITC4::constructor %s",
-		"- failed to get a material of type: ShellSection");
+	opserr << "ShellMITC4::constructor - failed to get a material of type: ShellSection\n";
       } //end if
       
   } //end for i 
@@ -320,8 +318,8 @@ void  ShellMITC4::setDomain( Domain *theDomain )
      nodePointers[i] = theDomain->getNode( connectedExternalNodes(i) ) ;
      
      if (nodePointers[i] == 0) {
-       cerr << "ShellMITC4::setDomain - no node " << connectedExternalNodes(i);
-       cerr << " exists in the model\n";
+       opserr << "ShellMITC4::setDomain - no node " << connectedExternalNodes(i);
+       opserr << " exists in the model\n";
      }
   }
 
@@ -383,7 +381,7 @@ int  ShellMITC4::commitState( )
 
   // call element commitState to do any base class stuff
   if ((success = this->Element::commitState()) != 0) {
-    cerr << "ShellMITC4::commitState () - failed in base class";
+    opserr << "ShellMITC4::commitState () - failed in base class";
   }    
 
   for (int i = 0; i < 4; i++ ) 
@@ -420,20 +418,20 @@ int  ShellMITC4::revertToStart( )
 }
 
 //print out element data
-void  ShellMITC4::Print( ostream &s, int flag )
+void  ShellMITC4::Print( OPS_Stream &s, int flag )
 {
-  s << endl ;
+  s << endln ;
   s << "MITC4 Bbar Non-Locking Four Node Shell \n" ;
-  s << "Element Number: " << this->getTag() << endl ;
-  s << "Node 1 : " << connectedExternalNodes(0) << endl ;
-  s << "Node 2 : " << connectedExternalNodes(1) << endl ;
-  s << "Node 3 : " << connectedExternalNodes(2) << endl ;
-  s << "Node 4 : " << connectedExternalNodes(3) << endl ;
+  s << "Element Number: " << this->getTag() << endln ;
+  s << "Node 1 : " << connectedExternalNodes(0) << endln ;
+  s << "Node 2 : " << connectedExternalNodes(1) << endln ;
+  s << "Node 3 : " << connectedExternalNodes(2) << endln ;
+  s << "Node 4 : " << connectedExternalNodes(3) << endln ;
 
   s << "Material Information : \n " ;
   materialPointers[0]->Print( s, flag ) ;
 
-  s << endl ;
+  s << endln ;
 }
 
 //return stiffness matrix 
@@ -747,9 +745,7 @@ void  ShellMITC4::zeroLoad( )
 int 
 ShellMITC4::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("ShellMITC4::addLoad - load type unknown for ele with tag: %d\n",
-			  this->getTag());
-  
+  opserr << "ShellMITC4::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
   return -1;
 }
 
@@ -2067,8 +2063,7 @@ int  ShellMITC4::sendSelf (int commitTag, Channel &theChannel)
 
   res += theChannel.sendID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING ShellMITC4::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING ShellMITC4::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
   }
 
@@ -2077,8 +2072,7 @@ int  ShellMITC4::sendSelf (int commitTag, Channel &theChannel)
 
   res += theChannel.sendVector(dataTag, commitTag, vectData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING ShellMITC4::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING ShellMITC4::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
   }
 
@@ -2086,7 +2080,7 @@ int  ShellMITC4::sendSelf (int commitTag, Channel &theChannel)
   for (i = 0; i < 4; i++) {
     res += materialPointers[i]->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING ShellMITC4::sendSelf() - %d failed to send its Material\n",this->getTag());
+      opserr << "WARNING ShellMITC4::sendSelf() - " << this->getTag() << " failed to send its Material\n";
       return res;
     }
   }
@@ -2106,7 +2100,7 @@ int  ShellMITC4::recvSelf (int commitTag,
   // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING ShellMITC4::recvSelf() - %d failed to receive ID\n", this->getTag());
+    opserr << "WARNING ShellMITC4::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return res;
   }
 
@@ -2119,8 +2113,7 @@ int  ShellMITC4::recvSelf (int commitTag,
   static Vector vectData(1);
   res += theChannel.recvVector(dataTag, commitTag, vectData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING ShellMITC4::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING ShellMITC4::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
   }
 
@@ -2135,16 +2128,15 @@ int  ShellMITC4::recvSelf (int commitTag,
       // Allocate new material with the sent class tag
       materialPointers[i] = theBroker.getNewSection(matClassTag);
       if (materialPointers[i] == 0) {
-	g3ErrorHandler->warning("ShellMITC4::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
+	opserr << "ShellMITC4::recvSelf() - Broker could not create NDMaterial of class type" << matClassTag << endln;;
 	return -1;
       }
       // Now receive materials into the newly allocated space
       materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn3d::recvSelf() - material " << i <<
+	  "failed to recv itself\n";
 	return res;
       }
     }
@@ -2160,17 +2152,15 @@ int  ShellMITC4::recvSelf (int commitTag,
 	delete materialPointers[i];
 	materialPointers[i] = theBroker.getNewSection(matClassTag);
 	if (materialPointers[i] == 0) {
-	  g3ErrorHandler->fatal("ShellMITC4::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
-	  return -1;
+	  opserr << "ShellMITC4::recvSelf() - Broker could not create NDMaterial of class type" << matClassTag << endln;
+	  exit(-1);
 	}
       }
       // Receive the material
       materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("ShellMITC4::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "ShellMITC4::recvSelf() - material " << i << "failed to recv itself\n";
 	return res;
       }
     }
@@ -2228,7 +2218,7 @@ ShellMITC4::displaySelf(Renderer &theViewer, int displayMode, float fact)
       */
     }
 
-    //cerr << coords;
+    //opserr << coords;
     int error = 0;
 
     //error += theViewer.drawPolygon (coords, values);

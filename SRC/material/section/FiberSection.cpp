@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection.cpp,v $
                                                                         
 // Written: MHS
@@ -517,11 +517,11 @@ FiberSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
 }
 
 void
-FiberSection::Print(ostream &s, int flag)
+FiberSection::Print(OPS_Stream &s, int flag)
 {
-	s << "\nFiberSection, tag: " << this->getTag() << endl;
+	s << "\nFiberSection, tag: " << this->getTag() << endln;
 	s << "\tSection code: " << *code;
-	s << "\tNumber of Fibers: " << numFibers << endl;
+	s << "\tNumber of Fibers: " << numFibers << endln;
 	
 	if (flag == 1)
 		for (int i = 0; i < numFibers; i++)

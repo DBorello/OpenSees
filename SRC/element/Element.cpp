@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-16 21:07:45 $
+// $Revision: 1.10 $
+// $Date: 2003-02-14 23:01:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -109,21 +109,23 @@ Element::setRayleighDampingFactors(double alpham, double betak, double betak0, d
     if (index == -1) {
       Matrix **nextMatrices = new Matrix *[numMatrices+1];
       if (nextMatrices == 0) {
-	g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+	opserr << "Element::getTheMatrix - out of memory\n";
       }
 	  int j;
       for (j=0; j<numMatrices; j++)
 	nextMatrices[j] = theMatrices[j];
       Matrix *theMatrix = new Matrix(numDOF, numDOF);
       if (theMatrix == 0) {
-	g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+	opserr << "Element::getTheMatrix - out of memory\n";
+	exit(-1);
       }
       nextMatrices[numMatrices] = theMatrix;
 
       Vector **nextVectors1 = new Vector *[numMatrices+1];
       Vector **nextVectors2 = new Vector *[numMatrices+1];
       if (nextVectors1 == 0 || nextVectors2 == 0) {
-	g3ErrorHandler->fatal("Element::getTheVector - out of memory");
+	opserr << "Element::getTheVector - out of memory\n";
+	exit(-1);
       }
 
       for (j=0; j<numMatrices; j++) {
@@ -134,8 +136,10 @@ Element::setRayleighDampingFactors(double alpham, double betak, double betak0, d
       Vector *theVector1 = new Vector(numDOF);
       Vector *theVector2 = new Vector(numDOF);
       if (theVector1 == 0 || theVector2 == 0) {
-	g3ErrorHandler->fatal("Element::getTheVector - out of memory");
+	opserr << "Element::getTheVector - out of memory\n";
+	exit(-1);
       }
+
       nextVectors1[numMatrices] = theVector1;
       nextVectors2[numMatrices] = theVector2;
 
@@ -157,7 +161,7 @@ Element::setRayleighDampingFactors(double alpham, double betak, double betak0, d
     if (Kc == 0) 
       Kc = new Matrix(this->getTangentStiff());
     if (Kc == 0) {
-      cerr << "WARNING - ELEMENT::setRayleighDampingFactors - out of memory\n";
+      opserr << "WARNING - ELEMENT::setRayleighDampingFactors - out of memory\n";
       betaKc = 0.0;
     }
 

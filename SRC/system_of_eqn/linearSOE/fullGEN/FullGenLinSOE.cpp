@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:17:52 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:02:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/fullGEN/FullGenLinSOE.cpp,v $
                                                                         
                                                                         
@@ -66,9 +66,9 @@ FullGenLinSOE::FullGenLinSOE(int N, FullGenLinSolver &theSolvr)
     A = new double[size*size];
 	
     if (A == 0) {
-	cerr << "WARNING :FullGenLinSOE::FullGenLinSOE :";
-	cerr << " ran out of memory for A (size,size) (";
-	cerr << size <<", " << size << ") \n";
+	opserr << "WARNING :FullGenLinSOE::FullGenLinSOE :";
+	opserr << " ran out of memory for A (size,size) (";
+	opserr << size <<", " << size << ") \n";
 	size = 0; 
     } else {
 	// zero the matrix
@@ -80,9 +80,9 @@ FullGenLinSOE::FullGenLinSOE(int N, FullGenLinSolver &theSolvr)
 	X = new double[size];
 	
 	if (B == 0 || X == 0) {
-	    cerr << "WARNING :FullGenLinSOE::FullGenLinSOE :";
-	    cerr << " ran out of memory for vectors (size) (";
-	    cerr << size << ") \n";
+	    opserr << "WARNING :FullGenLinSOE::FullGenLinSOE :";
+	    opserr << " ran out of memory for vectors (size) (";
+	    opserr << size << ") \n";
 	    size = 0; Bsize = 0;
 	} else {
 	    Bsize = size;
@@ -101,8 +101,8 @@ FullGenLinSOE::FullGenLinSOE(int N, FullGenLinSolver &theSolvr)
     
     // invoke setSize() on the Solver        
     if (theSolvr.setSize() < 0) {
-	cerr << "WARNING :FullGenLinSOE::FullGenLinSOE :";
-	cerr << " solver failed setSize() in constructor\n";
+	opserr << "WARNING :FullGenLinSOE::FullGenLinSOE :";
+	opserr << " solver failed setSize() in constructor\n";
     }    
     
 }
@@ -139,9 +139,9 @@ FullGenLinSOE::setSize(Graph &theGraph)
 	A = new double[size*size];
 	
         if (A == 0) {
-            cerr << "WARNING FullGenLinSOE::FullGenLinSOE :";
-	    cerr << " ran out of memory for A (size,size) (";
-	    cerr << size <<", " << size << ") \n";
+            opserr << "WARNING FullGenLinSOE::FullGenLinSOE :";
+	    opserr << " ran out of memory for A (size,size) (";
+	    opserr << size <<", " << size << ") \n";
 	    size = 0; Asize = 0;
 	    result =  -1;
         } else
@@ -165,9 +165,9 @@ FullGenLinSOE::setSize(Graph &theGraph)
 	X = new double[size];
 	
         if (B == 0 || X == 0) {
-            cerr << "WARNING FullGenLinSOE::FullGenLinSOE :";
-	    cerr << " ran out of memory for vectors (size) (";
-	    cerr << size << ") \n";
+            opserr << "WARNING FullGenLinSOE::FullGenLinSOE :";
+	    opserr << " ran out of memory for vectors (size) (";
+	    opserr << size << ") \n";
 	    size = 0; Bsize = 0;
 	    result =  -1;
         }
@@ -198,8 +198,8 @@ FullGenLinSOE::setSize(Graph &theGraph)
     LinearSOESolver *theSolvr = this->getSolver();
     int solverOK = theSolvr->setSize();
     if (solverOK < 0) {
-	cerr << "WARNING:FullGenLinSOE::setSize :";
-	cerr << " solver failed setSize()\n";
+	opserr << "WARNING:FullGenLinSOE::setSize :";
+	opserr << " solver failed setSize()\n";
 	return solverOK;
     }    
     
@@ -216,7 +216,7 @@ FullGenLinSOE::addA(const Matrix &m, const ID &id, double fact)
     
     // check that m and id are of similar size
     if (idSize != m.noRows() && idSize != m.noCols()) {
-	cerr << "FullGenLinSOE::addA()	- Matrix and ID not of similar sizes\n";
+	opserr << "FullGenLinSOE::addA()	- Matrix and ID not of similar sizes\n";
 	return -1;
     }
     
@@ -264,7 +264,7 @@ FullGenLinSOE::addB(const Vector &v, const ID &id, double fact)
     int idSize = id.Size();    
     // check that m and id are of similar size
     if (idSize != v.Size() ) {
-	cerr << "FullGenLinSOE::addB()	- Vector and ID not of similar sizes\n";
+	opserr << "FullGenLinSOE::addB()	- Vector and ID not of similar sizes\n";
 	return -1;
     }    
 
@@ -300,8 +300,8 @@ FullGenLinSOE::setB(const Vector &v, double fact)
 
 
     if (v.Size() != size) {
-	cerr << "WARNING BandGenLinSOE::setB() -";
-	cerr << " incomptable sizes " << size << " and " << v.Size() << endl;
+	opserr << "WARNING BandGenLinSOE::setB() -";
+	opserr << " incomptable sizes " << size << " and " << v.Size() << endln;
 	return -1;
     }
     
@@ -358,7 +358,7 @@ const Vector &
 FullGenLinSOE::getX(void)
 {
     if (vectX == 0) {
-	cerr << "FATAL FullGenLinSOE::getX - vectX == 0";
+	opserr << "FATAL FullGenLinSOE::getX - vectX == 0";
 	exit(-1);
     }
     return *vectX;
@@ -368,7 +368,7 @@ const Vector &
 FullGenLinSOE::getB(void)
 {
     if (vectB == 0) {
-	cerr << "FATAL FullGenLinSOE::getB - vectB == 0";
+	opserr << "FATAL FullGenLinSOE::getB - vectB == 0";
 	exit(-1);
     }        
     return *vectB;
@@ -395,8 +395,8 @@ FullGenLinSOE::setFullGenSolver(FullGenLinSolver &newSolver)
     if (size != 0) {
 	int solverOK = newSolver.setSize();
 	if (solverOK < 0) {
-	    cerr << "WARNING:FullGenLinSOE::setSolver :";
-	    cerr << "the new solver could not setSeize() - staying with old\n";
+	    opserr << "WARNING:FullGenLinSOE::setSolver :";
+	    opserr << "the new solver could not setSeize() - staying with old\n";
 	    return -1;
 	}
     }

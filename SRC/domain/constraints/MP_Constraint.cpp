@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-05 22:36:03 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/MP_Constraint.cpp,v $
                                                                         
                                                                         
@@ -63,7 +63,7 @@ MP_Constraint::MP_Constraint(int tag, int nodeRetain, int nodeConstr,
     retainDOF = new ID(retainedDOF);    
     if (constrDOF == 0 || constrainedDOF.Size() != constrDOF->Size() ||
 	retainDOF == 0 || retainedDOF.Size() != retainDOF->Size()) { 
-	cerr << "MP_Constraint::MP_Constraint - ran out of memory 1\n";
+	opserr << "MP_Constraint::MP_Constraint - ran out of memory 1\n";
 	exit(-1);
     }    
 }
@@ -81,13 +81,13 @@ MP_Constraint::MP_Constraint(int tag, int nodeRetain, int nodeConstr, Matrix &co
     retainDOF = new ID(retainedDOF);    
     if (constrDOF == 0 || constrainedDOF.Size() != constrDOF->Size() ||
 	retainDOF == 0 || retainedDOF.Size() != retainDOF->Size()) { 
-	cerr << "MP_Constraint::MP_Constraint - ran out of memory 1\n";
+	opserr << "MP_Constraint::MP_Constraint - ran out of memory 1\n";
 	exit(-1);
     }    
     
     constraint = new Matrix(constr);
     if (constraint == 0 || constr.noCols() != constr.noCols()) { 
-	cerr << "MP_Constraint::MP_Constraint - ran out of memory 2\n";
+	opserr << "MP_Constraint::MP_Constraint - ran out of memory 2\n";
 	exit(-1);
     }        
 }
@@ -125,8 +125,8 @@ const ID &
 MP_Constraint::getConstrainedDOFs(void) const
 {
     if (constrDOF == 0) {
-	cerr << "MP_Constraint::getConstrainedDOF - no ID was set, ";
-	cerr << "was recvSelf() ever called? or subclass incorrect?\n";	
+	opserr << "MP_Constraint::getConstrainedDOF - no ID was set, ";
+	opserr << "was recvSelf() ever called? or subclass incorrect?\n";	
 	exit(-1);
     }
 
@@ -139,8 +139,8 @@ const ID &
 MP_Constraint::getRetainedDOFs(void) const
 {
     if (retainDOF == 0) {
-	cerr << "MP_Constraint::getRetainedDOFs - no ID was set\n ";
-	cerr << "was recvSelf() ever called? or subclass incorrect?\n";		
+	opserr << "MP_Constraint::getRetainedDOFs - no ID was set\n ";
+	opserr << "was recvSelf() ever called? or subclass incorrect?\n";		
 	exit(-1);
     }
 
@@ -166,7 +166,7 @@ const Matrix &
 MP_Constraint::getConstraint(void)
 {
     if (constraint == 0) {
-	cerr << "MP_Constraint::getConstraint - no Matrix was set\n";
+	opserr << "MP_Constraint::getConstraint - no Matrix was set\n";
 	exit(-1);
     }    
 
@@ -199,15 +199,15 @@ MP_Constraint::sendSelf(int cTag, Channel &theChannel)
 
     int result = theChannel.sendID(dataTag, cTag, data);
     if (result < 0) {
-	cerr << "WARNING MP_Constraint::sendSelf - error sending ID data\n";
+	opserr << "WARNING MP_Constraint::sendSelf - error sending ID data\n";
 	return result;  
     }    
     
     if (constraint != 0 && constraint->noRows() != 0) {
 	int result = theChannel.sendMatrix(dataTag, cTag, *constraint);
 	if (result < 0) {
-	    cerr << "WARNING MP_Constraint::sendSelf ";
-	    cerr << "- error sending Matrix data\n"; 
+	    opserr << "WARNING MP_Constraint::sendSelf ";
+	    opserr << "- error sending Matrix data\n"; 
 	    return result;  
 	}
     }
@@ -215,8 +215,8 @@ MP_Constraint::sendSelf(int cTag, Channel &theChannel)
     if (constrDOF != 0 && constrDOF->Size() != 0) {
 	int result = theChannel.sendID(dbTag1, cTag, *constrDOF);
 	if (result < 0) {
-	    cerr << "WARNING MP_Constraint::sendSelf ";
-	    cerr << "- error sending constrained data\n"; 
+	    opserr << "WARNING MP_Constraint::sendSelf ";
+	    opserr << "- error sending constrained data\n"; 
 	    return result;  
 	}
     }
@@ -224,8 +224,8 @@ MP_Constraint::sendSelf(int cTag, Channel &theChannel)
     if (retainDOF != 0 && retainDOF->Size() != 0) {
 	int result = theChannel.sendID(dbTag2, cTag, *retainDOF);
 	if (result < 0) {
-	    cerr << "WARNING MP_Constraint::sendSelf ";
-	    cerr << "- error sending retained data\n"; 
+	    opserr << "WARNING MP_Constraint::sendSelf ";
+	    opserr << "- error sending retained data\n"; 
 	    return result;  
 	}
     }
@@ -242,7 +242,7 @@ MP_Constraint::recvSelf(int cTag, Channel &theChannel,
     ID data(9);
     int result = theChannel.recvID(dataTag, cTag, data);
     if (result < 0) {
-	cerr << "WARNING MP_Constraint::recvSelf - error receiving ID data\n";
+	opserr << "WARNING MP_Constraint::recvSelf - error receiving ID data\n";
 	return result;  
     }    
 
@@ -259,8 +259,8 @@ MP_Constraint::recvSelf(int cTag, Channel &theChannel,
 	
 	int result = theChannel.recvMatrix(dataTag, cTag, *constraint);
 	if (result < 0) {
-	    cerr << "WARNING MP_Constraint::recvSelf ";
-	    cerr << "- error receiving Matrix data\n"; 
+	    opserr << "WARNING MP_Constraint::recvSelf ";
+	    opserr << "- error receiving Matrix data\n"; 
 	    return result;  
 	}
     }    
@@ -269,8 +269,8 @@ MP_Constraint::recvSelf(int cTag, Channel &theChannel,
 	constrDOF = new ID(size);
 	int result = theChannel.recvID(dbTag1, cTag, *constrDOF);
 	if (result < 0) {
-	    cerr << "WARNING MP_Constraint::recvSelf ";
-	    cerr << "- error receiving constrained data\n"; 
+	    opserr << "WARNING MP_Constraint::recvSelf ";
+	    opserr << "- error receiving constrained data\n"; 
 	    return result;  
 	}	
     }
@@ -280,8 +280,8 @@ MP_Constraint::recvSelf(int cTag, Channel &theChannel,
 	retainDOF = new ID(size);
 	int result = theChannel.recvID(dbTag2, cTag, *retainDOF);
 	if (result < 0) {
-	    cerr << "WARNING MP_Retainaint::recvSelf ";
-	    cerr << "- error receiving retained data\n"; 
+	    opserr << "WARNING MP_Retainaint::recvSelf ";
+	    opserr << "- error receiving retained data\n"; 
 	    return result;  
 	}	
     }    
@@ -292,7 +292,7 @@ MP_Constraint::recvSelf(int cTag, Channel &theChannel,
 
 
 void
-MP_Constraint::Print(ostream &s, int flag)
+MP_Constraint::Print(OPS_Stream &s, int flag)
 {     
     s << "MP_Constraint: " << this->getTag() << "\n";
     s << "\tNode Constrained: " << nodeConstrained;

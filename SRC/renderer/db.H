@@ -171,8 +171,5 @@ private:
 
 };
 
-
-extern ostream &operator<<(ostream &, MYPOINT &);
-extern ostream &operator<<(ostream &, FACE &);
 #endif
 

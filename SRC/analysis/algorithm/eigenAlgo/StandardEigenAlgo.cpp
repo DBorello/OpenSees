@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-11-19 22:41:02 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/eigenAlgo/StandardEigenAlgo.cpp,v $
                                                                         
 // Written: MHS
@@ -35,7 +35,6 @@
 #include <EigenAnalysis.h>
 #include <EigenIntegrator.h>
 #include <EigenSOE.h>
-#include <iostream.h>
 #include <Vector.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -61,20 +60,17 @@ StandardEigenAlgo::solveCurrentStep(int numModes)
   
   if ((theModel == 0) || (theIntegrator == 0) || (theSOE == 0)) {
 
-    g3ErrorHandler->warning("%s -- setLinks() has not been called",
-			    "StandardEigenAlgo::solverCurrentStep()");
+    opserr << "StandardEigenAlgo::solverCurrentStep() -- setLinks() has not been called\n";
     return -1;
   }
   
   if (theIntegrator->formK() < 0) {
-    g3ErrorHandler->warning("%s -- the Integrator failed in formK()",
-			    "StandardEigenAlgo::solverCurrentStep()");
+    opserr << "StandardEigenAlgo::solverCurrentStep() -- the Integrator failed in formK()\n";
     return -2;
   }
   
   if (theSOE->solve(numModes) < 0) {
-    g3ErrorHandler->warning("%s -- the EigenSOE failed in solve()",
-			    "StandardEigenAlgo::solverCurrentStep()");
+    opserr << "StandardEigenAlgo::solverCurrentStep() -- the EigenSOE failed in solve()\n";
     return -4;
   }
   
@@ -104,7 +100,7 @@ StandardEigenAlgo::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-StandardEigenAlgo::Print(ostream &s, int flag)
+StandardEigenAlgo::Print(OPS_Stream &s, int flag)
 {
   s << "\tStandardEigenAlgo\n";
 }

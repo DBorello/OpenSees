@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:24:07 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlaneStressMaterial.cpp,v $
 
 //
@@ -206,7 +206,7 @@ PlaneStressMaterial::setTrialStrain( const Vector &strainFromElement )
     threeDstrain(5) = this->Tgamma02 ;
 
     if (theMaterial->setTrialStrain( threeDstrain ) < 0) {
-      cerr << "PlaneStressMaterial::setTrialStrain() - setTrialStrain in material failed with strain " << threeDstrain;
+      opserr << "PlaneStressMaterial::setTrialStrain() - setTrialStrain in material failed with strain " << threeDstrain;
       return -1;
     }
 
@@ -376,7 +376,7 @@ PlaneStressMaterial::indexMap( int i )
 
 //print out data
 void  
-PlaneStressMaterial::Print( ostream &s, int flag )
+PlaneStressMaterial::Print( OPS_Stream &s, int flag )
 {
   s << "General Plane Stress Material \n" ;
   s << " Tag: " << this->getTag() << "\n" ; 
@@ -406,7 +406,7 @@ PlaneStressMaterial::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
-    cerr << "PlaneStressMaterial::sendSelf() - failed to send id data\n";
+    opserr << "PlaneStressMaterial::sendSelf() - failed to send id data\n";
     return res;
   }
 
@@ -418,14 +418,14 @@ PlaneStressMaterial::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) {
-    cerr << "PlaneStressMaterial::sendSelf() - failed to send vector data\n";
+    opserr << "PlaneStressMaterial::sendSelf() - failed to send vector data\n";
     return res;
   }
 
   // now send the materials data
   res = theMaterial->sendSelf(commitTag, theChannel);
   if (res < 0) 
-    cerr << "PlaneStressMaterial::sendSelf() - failed to send vector material\n";
+    opserr << "PlaneStressMaterial::sendSelf() - failed to send vector material\n";
 
   return res;
 }
@@ -439,7 +439,7 @@ PlaneStressMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBrok
   static ID idData(3);
   res = theChannel.sendID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
-    cerr << "PlaneStressMaterial::sendSelf() - failed to send id data\n";
+    opserr << "PlaneStressMaterial::sendSelf() - failed to send id data\n";
     return res;
   }
 
@@ -453,7 +453,7 @@ PlaneStressMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBrok
       delete theMaterial;
     theMaterial = theBroker.getNewNDMaterial(matClassTag);
     if (theMaterial == 0) {
-      cerr << "PlaneStressMaterial::recvSelf() - failed to get a material of type: " << matClassTag << endl;
+      opserr << "PlaneStressMaterial::recvSelf() - failed to get a material of type: " << matClassTag << endln;
       return -1;
     }
   }
@@ -463,7 +463,7 @@ PlaneStressMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBrok
   static Vector vecData(3);
   res = theChannel.recvVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) {
-    cerr << "PlaneStressMaterial::sendSelf() - failed to send vector data\n";
+    opserr << "PlaneStressMaterial::sendSelf() - failed to send vector data\n";
     return res;
   }
 
@@ -478,7 +478,7 @@ PlaneStressMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBrok
   // now receive the materials data
   res = theMaterial->recvSelf(commitTag, theChannel, theBroker);
   if (res < 0) 
-    cerr << "PlaneStressMaterial::sendSelf() - failed to send vector material\n";
+    opserr << "PlaneStressMaterial::sendSelf() - failed to send vector material\n";
   
   return res;
 }

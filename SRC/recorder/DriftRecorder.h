@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-19 23:09:43 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.h,v $
                                                                         
 #ifndef DriftRecorder_h
@@ -34,7 +34,8 @@
 #include <Recorder.h>
 #include <ID.h>
 
-#include <fstream.h>
+#include <fstream>
+using std::ofstream;
 class Domain;
 
 class DriftRecorder: public Recorder

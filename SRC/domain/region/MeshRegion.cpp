@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-16 21:12:06 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/region/MeshRegion.cpp,v $
                                                                         
                                                                         
@@ -90,7 +90,7 @@ MeshRegion::setNodes(const ID &theNods)
   // create empty lists
   Domain *theDomain = this->getDomain();
   if (theDomain == 0) {
-    cerr << "MeshRegion::setNodes() - no domain yet set\n";
+    opserr << "MeshRegion::setNodes() - no domain yet set\n";
     return -1;
   }
 
@@ -98,7 +98,7 @@ MeshRegion::setNodes(const ID &theNods)
   theNodes = new ID(0, numNodes);
   theElements = new ID(0, numNodes);
   if (theNodes == 0 || theElements == 0) {
-    cerr << "MeshRegion::setElements() - ran out of memory\n";
+    opserr << "MeshRegion::setElements() - ran out of memory\n";
     return -1;
   }
 
@@ -163,7 +163,7 @@ MeshRegion::setElements(const ID &theEles)
   theElements = new ID(0, numEle); // don't copy yet .. make sure ele in domain
   theNodes = new ID(0, numEle); // initial guess at size of ID
   if (theElements == 0 || theNodes == 0) {
-    cerr << "MeshRegion::setElements() - ran out of memory\n";
+    opserr << "MeshRegion::setElements() - ran out of memory\n";
     return -1;
   }
 
@@ -176,7 +176,7 @@ MeshRegion::setElements(const ID &theEles)
 
   Domain *theDomain = this->getDomain();
   if (theDomain == 0) {
-    cerr << "MeshRegion::setElements() - no domain yet set\n";
+    opserr << "MeshRegion::setElements() - no domain yet set\n";
     return -1;
   }
 
@@ -208,7 +208,7 @@ const ID &
 MeshRegion::getNodes(void)
 {
   if (theNodes == 0)
-    cerr << "FATAL::MeshRegion::getNodes(void) - no nodes yet set\n";
+    opserr << "FATAL::MeshRegion::getNodes(void) - no nodes yet set\n";
   
   return *theNodes;
 }
@@ -217,7 +217,7 @@ const ID &
 MeshRegion::getElements(void)
 {
   if (theElements == 0)
-    cerr << "FATAL::MeshRegion::getElements(void) - no elements yet set\n";
+    opserr << "FATAL::MeshRegion::getElements(void) - no elements yet set\n";
   
   return *theElements;
 }
@@ -234,7 +234,7 @@ MeshRegion::setRayleighDampingFactors(double alpham, double betak, double betak0
   // now set the damping factors at the nodes & elements
   Domain *theDomain = this->getDomain();
   if (theDomain == 0) {
-    cerr << "MeshRegion::setRayleighDampingFactors() - no domain yet set\n";
+    opserr << "MeshRegion::setRayleighDampingFactors() - no domain yet set\n";
     return -1;
   }
   if (theElements != 0) {
@@ -285,7 +285,7 @@ MeshRegion::sendSelf(int commitTag, Channel &theChannel)
   lpData(5) = dbEle;
 
   if (theChannel.sendID(myDbTag, commitTag, lpData) < 0) {
-    g3ErrorHandler->warning("MeshRegion::sendSelf - channel failed to send the initial ID");
+   opserr << "MeshRegion::sendSelf - channel failed to send the initial ID\n";
     return -1;
   }    
 
@@ -296,12 +296,12 @@ MeshRegion::sendSelf(int commitTag, Channel &theChannel)
   if (lastGeoSendTag != currentGeoTag) {
     if (numNod != 0) 
       if (theChannel.sendID(dbNod, currentGeoTag, *theNodes) < 0) {
-	g3ErrorHandler->warning("MeshRegion::sendSelf - channel failed to send the nodes");
+	opserr << "MeshRegion::sendSelf - channel failed to send the nodes\n";
 	return -1;
       }
     if (numEle != 0) 
       if (theChannel.sendID(dbEle, currentGeoTag, *theElements) < 0) {
-	g3ErrorHandler->warning("MeshRegion::sendSelf - channel failed to send the elements");
+	opserr << "MeshRegion::sendSelf - channel failed to send the elements\n";
 	return -1;
       }
 
@@ -312,7 +312,7 @@ MeshRegion::sendSelf(int commitTag, Channel &theChannel)
     dData(3) = betaKc;
 
     if (theChannel.sendVector(dbEle, currentGeoTag, dData) < 0) {
-      g3ErrorHandler->warning("MeshRegion::sendSelf - channel failed to send the elements");
+     opserr << "MeshRegion::sendSelf - channel failed to send the elements\n";
       return -1;
     }  
 
@@ -337,7 +337,7 @@ MeshRegion::recvSelf(int commitTag, Channel &theChannel,
   ID lpData(6);
 
   if (theChannel.recvID(myDbTag, commitTag, lpData) < 0) {
-    g3ErrorHandler->warning("MeshRegion::recvSelf - channel failed to recv the initial ID");
+   opserr << "MeshRegion::recvSelf - channel failed to recv the initial ID\n";
     return -1;
   }
 
@@ -365,19 +365,19 @@ MeshRegion::recvSelf(int commitTag, Channel &theChannel,
 
     if (numNod != 0) 
       if (theChannel.recvID(dbNod, currentGeoTag, *theNodes) < 0) {
-	g3ErrorHandler->warning("MeshRegion::sendSelf - channel failed to recv the nodes");
+	opserr << "MeshRegion::sendSelf - channel failed to recv the nodes\n";
 	return -1;
       }
     if (numEle != 0) 
       if (theChannel.recvID(dbEle, currentGeoTag, *theElements) < 0) {
-	g3ErrorHandler->warning("MeshRegion::sendSelf - channel failed to recv the elements");
+	opserr << "MeshRegion::sendSelf - channel failed to recv the elements\n";
 	return -1;
       }
 
     Vector dData(4);
 
     if (theChannel.sendVector(dbEle, currentGeoTag, dData) < 0) {
-      g3ErrorHandler->warning("MeshRegion::sendSelf - channel failed to send the elements");
+     opserr << "MeshRegion::sendSelf - channel failed to send the elements\n";
       return -1;
     }  
     alphaM = dData(0);
@@ -393,15 +393,15 @@ MeshRegion::recvSelf(int commitTag, Channel &theChannel,
 
 
 void 
-MeshRegion::Print(ostream &s, int flag)
+MeshRegion::Print(OPS_Stream &s, int flag)
 {
-  s << "Region: " << this->getTag() << endl;
+  s << "Region: " << this->getTag() << endln;
   if (theElements != 0)
     s << "Elements: "<< *theElements;
   if (theNodes != 0)
     s << "Nodes: "<< *theNodes;
   if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0) {
     s << "rayleigh damping factors:: alphaM: " << alphaM << " betaK: ";
-    s << betaK << " betaK0: " << betaK0 << endl;
+    s << betaK << " betaK0: " << betaK0 << endln;
   }
 }

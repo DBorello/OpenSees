@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-26 23:00:05 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.h,v $
                                                                       
 // Written: MHS
@@ -61,7 +61,7 @@ class FedeasMaterial : public UniaxialMaterial
   virtual int recvSelf(int commitTag, Channel &theChannel, 
 		       FEM_ObjectBroker &theBroker);    
   
-  virtual void Print(ostream &s, int flag = 0);
+  virtual void Print(OPS_Stream &s, int flag = 0);
   
  protected:
   // Invokes the FORTRAN subroutine

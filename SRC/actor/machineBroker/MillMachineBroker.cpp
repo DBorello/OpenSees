@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/machineBroker/MillMachineBroker.cpp,v $
                                                                         
                                                                         
@@ -41,7 +41,6 @@
 #include <string.h>
 #include <remote.h>
 #include <Channel.h>
-#include <iostream.h>
 
 MillMachineBroker::MillMachineBroker()
 :currentMachine(0),maxNumMachines(5)
@@ -93,7 +92,7 @@ MillMachineBroker::startActor(char *actorProgram,
     strcat(remotecmd,theChannel.addToProgram());    
     strcat(remotecmd,"\n");
 
-cerr << "MillMachineBroker::Constructor - command\n"<< remotecmd;
+    // opserr << "MillMachineBroker::Constructor - command\n"<< remotecmd;
     system(remotecmd);
 
     return 0;

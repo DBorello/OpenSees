@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-18 01:06:09 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.cpp,v $
                                                                         
                                                                         
@@ -40,7 +40,7 @@
 #include <FEM_ObjectBroker.h>
 #include <MovableObject.h>
 #include <Domain.h>
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 
 
@@ -130,7 +130,7 @@ FE_Datastore::commitState(int commitTag)
   if (theDomain != 0) {
     res = theDomain->sendSelf(commitTag, *this);
     if (res < 0) {
-      g3ErrorHandler->warning("FE_Datastore::commitState - domain failed to sendSelf\n");
+      opserr << "FE_Datastore::commitState - domain failed to sendSelf\n";
     }
   }
     
@@ -147,7 +147,7 @@ FE_Datastore::restoreState(int commitTag)
   if (theDomain != 0) {
     res = theDomain->recvSelf(commitTag, *this, *theObjectBroker);
     if (res < 0) {
-      g3ErrorHandler->warning("FE_Datastore::restoreState - domain failed to recvSelf\n");
+      opserr << "FE_Datastore::restoreState - domain failed to recvSelf\n";
     }
   }
     
@@ -160,7 +160,7 @@ FE_Datastore::restoreState(int commitTag)
 int 
 FE_Datastore::createTable(const char*table, int numColumns, char *columns[])
 {
-  g3ErrorHandler->warning("FE_Datastore::createTable - not yet implemented\n");
+  opserr << "FE_Datastore::createTable - not yet implemented\n";
   return -1;
 }
 
@@ -169,7 +169,7 @@ int
 FE_Datastore::insertData(const char *tableName, char *columns[], 
 			int commitTag, const Vector &data)
 {
-  g3ErrorHandler->warning("FE_Datastore::insertData - not yet implemented\n");
+  opserr << "FE_Datastore::insertData - not yet implemented\n";
   return -1;
 }
 
@@ -177,6 +177,6 @@ FE_Datastore::insertData(const char *tableName, char *columns[],
 int 
 FE_Datastore::getData(const char *table, char *column[], int commitTag, Vector &data)
 {
-  g3ErrorHandler->warning("FE_Datastore::getData - not yet implemented\n");
+  opserr << "FE_Datastore::getData - not yet implemented\n";
   return -1;
 }

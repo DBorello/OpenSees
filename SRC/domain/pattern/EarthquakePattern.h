@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-10-10 21:15:26 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.h,v $
                                                                         
                                                                         
@@ -54,7 +54,7 @@ class EarthquakePattern : public LoadPattern
     virtual int sendSelf(int commitTag, Channel &theChannel) =0;
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker) =0;
-    virtual void Print(ostream &s, int flag =0);        
+    virtual void Print(OPS_Stream &s, int flag =0);        
 
     // method to obtain a blank copy of the LoadPattern
     virtual LoadPattern *getCopy(void) =0;

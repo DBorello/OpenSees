@@ -19,7 +19,7 @@ public:
 
 //    virtual Response *setResponse(char **argv, int argc, Information &info);
 //    virtual int 	getResponse(int responseID, Information &info);
-    virtual void	Print(ostream &s, int flag =0)=0;
+    virtual void	Print(OPS_Stream &s, int flag =0)=0;
     virtual int 	sendSelf(int commitTag, Channel &theChannel){return -1;}
     virtual int 	recvSelf(int commitTag, Channel &theChannel,
 					FEM_ObjectBroker &theBroker){return -1;}

@@ -32,10 +32,7 @@
 #include <straint.h>
 #include <BJtensor.h>
 
-#include <iostream.h>
-#include <iomanip.h>
-
-#define endln "\n"
+#include <OPS_Globals.h>
 
 // Constants
 #define MaxNScalarVar 4
@@ -233,7 +230,7 @@ class EPState
     // Overloaded Insertion Operator
     // prints an EPState's contents 
     //================================================================================
-    friend ostream & operator<< (ostream& os, const EPState & EPS);
+    friend OPS_Stream & operator<< (OPS_Stream& os, const EPState & EPS);
 
 };
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-12-07 00:50:52 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/ArcLength.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,6 @@
 #include <LinearSOE.h>
 #include <Vector.h>
 #include <Channel.h>
-#include <iostream.h>
 #include <math.h>
 
 ArcLength::ArcLength(double arcLength, double alpha)
@@ -79,8 +78,8 @@ ArcLength::newStep(void)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING ArcLength::newStep() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING ArcLength::newStep() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }
 
@@ -125,8 +124,8 @@ ArcLength::update(const Vector &dU)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING ArcLength::update() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING ArcLength::update() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }
 
@@ -148,15 +147,15 @@ ArcLength::update(const Vector &dU)
     // check for a solution to quadratic
     double b24ac = b*b - 4.0*a*c;
     if (b24ac < 0) {
-      cerr << "ArcLength::update() - imaginary roots due to multiple instability";
-      cerr << " directions - initial load increment was too large\n";
-      cerr << "a: " << a << " b: " << b << " c: " << c << " b24ac: " << b24ac << endl;
+      opserr << "ArcLength::update() - imaginary roots due to multiple instability";
+      opserr << " directions - initial load increment was too large\n";
+      opserr << "a: " << a << " b: " << b << " c: " << c << " b24ac: " << b24ac << endln;
       return -1;
     }			       
     double a2 = 2.0*a;
     if (a2 == 0.0) {
-      cerr << "ArcLength::update() - zero denominator";
-      cerr << " alpha was set to 0.0 and zero reference load\n";
+      opserr << "ArcLength::update() - zero denominator";
+      opserr << " alpha was set to 0.0 and zero reference load\n";
       return -2;
     }			       
 
@@ -208,8 +207,8 @@ ArcLength::domainChanged(void)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING ArcLength::update() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING ArcLength::update() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }    
     int size = theModel->getNumEqn(); // ask model in case N+1 space
@@ -219,8 +218,8 @@ ArcLength::domainChanged(void)
 	    delete deltaUhat;   // delete the old
 	deltaUhat = new Vector(size);
 	if (deltaUhat == 0 || deltaUhat->Size() != size) { // check got it
-	    cerr << "FATAL ArcLength::domainChanged() - ran out of memory for";
-	    cerr << " deltaUhat Vector of size " << size << endl;
+	    opserr << "FATAL ArcLength::domainChanged() - ran out of memory for";
+	    opserr << " deltaUhat Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -230,8 +229,8 @@ ArcLength::domainChanged(void)
 	    delete deltaUbar;   // delete the old
 	deltaUbar = new Vector(size);
 	if (deltaUbar == 0 || deltaUbar->Size() != size) { // check got it
-	    cerr << "FATAL ArcLength::domainChanged() - ran out of memory for";
-	    cerr << " deltaUbar Vector of size " << size << endl;
+	    opserr << "FATAL ArcLength::domainChanged() - ran out of memory for";
+	    opserr << " deltaUbar Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -242,8 +241,8 @@ ArcLength::domainChanged(void)
 	    delete deltaU;   // delete the old
 	deltaU = new Vector(size);
 	if (deltaU == 0 || deltaU->Size() != size) { // check got it
-	    cerr << "FATAL ArcLength::domainChanged() - ran out of memory for";
-	    cerr << " deltaU Vector of size " << size << endl;
+	    opserr << "FATAL ArcLength::domainChanged() - ran out of memory for";
+	    opserr << " deltaU Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -253,8 +252,8 @@ ArcLength::domainChanged(void)
 	    delete deltaUstep;  
 	deltaUstep = new Vector(size);
 	if (deltaUstep == 0 || deltaUstep->Size() != size) { 
-	    cerr << "FATAL ArcLength::domainChanged() - ran out of memory for";
-	    cerr << " deltaUstep Vector of size " << size << endl;
+	    opserr << "FATAL ArcLength::domainChanged() - ran out of memory for";
+	    opserr << " deltaUstep Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -264,8 +263,8 @@ ArcLength::domainChanged(void)
 	    delete phat;  
 	phat = new Vector(size);
 	if (phat == 0 || phat->Size() != size) { 
-	    cerr << "FATAL ArcLength::domainChanged() - ran out of memory for";
-	    cerr << " phat Vector of size " << size << endl;
+	    opserr << "FATAL ArcLength::domainChanged() - ran out of memory for";
+	    opserr << " phat Vector of size " << size << endln;
 	    exit(-1);
 	}
     }    
@@ -291,7 +290,7 @@ ArcLength::domainChanged(void)
       }
 
     if (haveLoad == 0) {
-      cerr << "WARNING ArcLength::domainChanged() - zero reference load";
+      opserr << "WARNING ArcLength::domainChanged() - zero reference load";
       return -1;
     }
 
@@ -310,7 +309,7 @@ ArcLength::sendSelf(int cTag,
   data(4)  = signLastDeltaLambdaStep;
 
   if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
-      cerr << "ArcLength::sendSelf() - failed to send the data\n";
+      opserr << "ArcLength::sendSelf() - failed to send the data\n";
       return -1;
   }
   return 0;
@@ -323,7 +322,7 @@ ArcLength::recvSelf(int cTag,
 {
   Vector data(5);
   if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
-      cerr << "ArcLength::sendSelf() - failed to send the data\n";
+      opserr << "ArcLength::sendSelf() - failed to send the data\n";
       return -1;
   }      
 
@@ -337,14 +336,14 @@ ArcLength::recvSelf(int cTag,
 }
 
 void
-ArcLength::Print(ostream &s, int flag)
+ArcLength::Print(OPS_Stream &s, int flag)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theModel != 0) {
 	double cLambda = theModel->getCurrentDomainTime();
 	s << "\t ArcLength - currentLambda: " << cLambda;
 	s << "  arcLength: " << sqrt(arcLength2) <<  "  alpha: ";
-	s << sqrt(alpha2) << endl;
+	s << sqrt(alpha2) << endln;
     } else 
 	s << "\t ArcLength - no associated AnalysisModel\n";
 }

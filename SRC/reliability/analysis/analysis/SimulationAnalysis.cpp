@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-02 18:09:26 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SimulationAnalysis.cpp,v $
 
 
@@ -86,7 +86,7 @@ SimulationAnalysis::analyze(void)
 {
 
 	// Alert the user that the simulation analysis has started
-	cerr << "Simulation Analysis is running ... " << endl;
+	opserr << "Simulation Analysis is running ... " << endln;
 
 
 	// Declaration of some of the data used in the algorithm
@@ -117,7 +117,7 @@ SimulationAnalysis::analyze(void)
 	
 	// Check if computer ran out of memory
 	if (aStdNormRV==0) {
-		cerr << "SimulationAnalysis::analyze() - out of memory while instantiating internal objects." << endl;
+		opserr << "SimulationAnalysis::analyze() - out of memory while instantiating internal objects." << endln;
 		return -1;
 	}
 
@@ -138,8 +138,8 @@ SimulationAnalysis::analyze(void)
 	MatrixOperations *theMatrixOperations = 0;
 	theMatrixOperations = new MatrixOperations(covariance);
 	if (theMatrixOperations == 0) {
-		cerr << "SimulationAnalysis::analyze() - could not create" << endl
-			<< " the object to perform matrix operations." << endl;
+		opserr << "SimulationAnalysis::analyze() - could not create" << endln
+			<< " the object to perform matrix operations." << endln;
 		return -1;
 	}
 
@@ -147,8 +147,8 @@ SimulationAnalysis::analyze(void)
 	// Cholesky decomposition of covariance matrix
 	result = theMatrixOperations->computeLowerCholesky();
 	if (result < 0) {
-		cerr << "SimulationAnalysis::analyze() - could not compute" << endl
-			<< " the Cholesky decomposition of the covariance matrix." << endl;
+		opserr << "SimulationAnalysis::analyze() - could not compute" << endln
+			<< " the Cholesky decomposition of the covariance matrix." << endln;
 		return -1;
 	}
 	chol_covariance = theMatrixOperations->getLowerCholesky();
@@ -157,8 +157,8 @@ SimulationAnalysis::analyze(void)
 	// Inverse of covariance matrix
 	result = theMatrixOperations->computeInverse();
 	if (result < 0) {
-		cerr << "SimulationAnalysis::analyze() - could not compute" << endl
-			<< " the inverse of the covariance matrix." << endl;
+		opserr << "SimulationAnalysis::analyze() - could not compute" << endln
+			<< " the inverse of the covariance matrix." << endln;
 		return -1;
 	}
 	inv_covariance = theMatrixOperations->getInverse();
@@ -167,8 +167,8 @@ SimulationAnalysis::analyze(void)
 	// Compute the determinant, knowing that this is a diagonal matrix
 	result = theMatrixOperations->computeTrace();
 	if (result < 0) {
-		cerr << "SimulationAnalysis::analyze() - could not compute" << endl
-			<< " the trace of the covariance matrix." << endl;
+		opserr << "SimulationAnalysis::analyze() - could not compute" << endln
+			<< " the trace of the covariance matrix." << endln;
 		return -1;
 	}
 	det_covariance = theMatrixOperations->getTrace();
@@ -194,7 +194,7 @@ SimulationAnalysis::analyze(void)
 
 
 		// Inform the user which limit-state function is being evaluated
-		cerr << "Limit-state function number: " << lsf << endl;
+		opserr << "Limit-state function number: " << lsf << endln;
 
 
 		// Set tag of "active" limit-state function
@@ -206,8 +206,8 @@ SimulationAnalysis::analyze(void)
 		lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 		theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 		if (theLimitStateFunction == 0) {
-			cerr << "SimulationAnalysis::analyze() - could not find" << endl
-				<< " limit-state function with tag #" << lsf << "." << endl;
+			opserr << "SimulationAnalysis::analyze() - could not find" << endln
+				<< " limit-state function with tag #" << lsf << "." << endln;
 			return -1;
 		}
 
@@ -221,14 +221,14 @@ SimulationAnalysis::analyze(void)
 			}
 			result = theXuTransformation->set_x(startValues);
 			if (result < 0) {
-				cerr << "SimulationAnalysis::analyze() - could not " << endl
-					<< " set the x-vector for xu-transformation. " << endl;
+				opserr << "SimulationAnalysis::analyze() - could not " << endln
+					<< " set the x-vector for xu-transformation. " << endln;
 				return -1;
 			}
 			result = theXuTransformation->transform_x_to_u();
 			if (result < 0) {
-				cerr << "SimulationAnalysis::analyze() - could not " << endl
-					<< " transform x to u. " << endl;
+				opserr << "SimulationAnalysis::analyze() - could not " << endln
+					<< " transform x to u. " << endln;
 				return -1;
 			}
 			point = theXuTransformation->get_u();
@@ -243,8 +243,8 @@ SimulationAnalysis::analyze(void)
 			point = theLimitStateFunction->designPoint_u_inStdNormalSpace;
 		}
 		else {
-			cerr << "SimulationAnalysis::analyze() - " << pointToSampleAround << endl
-				<< " is not a valid point to sample around." << endl;
+			opserr << "SimulationAnalysis::analyze() - " << pointToSampleAround << endln
+				<< " is not a valid point to sample around." << endln;
 			return -1;
 		}
 
@@ -258,8 +258,8 @@ SimulationAnalysis::analyze(void)
 			// Create array of standard normal random numbers
 			result = theRandomNumberGenerator->generate_nIndependentStdNormalNumbers(numRV);
 			if (result < 0) {
-				cerr << "SimulationAnalysis::analyze() - could not generate" << endl
-					<< " random numbers for simulation." << endl;
+				opserr << "SimulationAnalysis::analyze() - could not generate" << endln
+					<< " random numbers for simulation." << endln;
 				return -1;
 			}
 			randomArray = theRandomNumberGenerator->getGeneratedNumbers();
@@ -272,16 +272,16 @@ SimulationAnalysis::analyze(void)
 			// Transform into original space
 			result = theXuTransformation->set_u(u);
 			if (result < 0) {
-				cerr << "SimulationAnalysis::analyze() - could not " << endl
-					<< " set the u-vector for xu-transformation. " << endl;
+				opserr << "SimulationAnalysis::analyze() - could not " << endln
+					<< " set the u-vector for xu-transformation. " << endln;
 				return -1;
 			}
 
 			
 			result = theXuTransformation->transform_u_to_x();
 			if (result < 0) {
-				cerr << "SimulationAnalysis::analyze() - could not " << endl
-					<< " transform u to x. " << endl;
+				opserr << "SimulationAnalysis::analyze() - could not " << endln
+					<< " transform u to x. " << endln;
 				return -1;
 			}
 			x = theXuTransformation->get_x();
@@ -290,8 +290,8 @@ SimulationAnalysis::analyze(void)
 			// Evaluate limit-state function
 			result = theGFunEvaluator->evaluate_g(x);
 			if (result < 0) {
-				cerr << "SimulationAnalysis::analyze() - could not " << endl
-					<< " evaluate limit-state function. " << endl;
+				opserr << "SimulationAnalysis::analyze() - could not " << endln
+					<< " evaluate limit-state function. " << endln;
 				return -1;
 			}
 			gFunctionValue = theGFunEvaluator->get_g();

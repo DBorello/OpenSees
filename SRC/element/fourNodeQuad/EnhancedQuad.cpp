@@ -18,11 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-12-16 21:10:04 $
+// $Revision: 1.11 $
+// $Date: 2003-02-14 23:01:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.cpp,v $
 
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -105,9 +104,10 @@ alpha(4), load(0), Ki(0)
   connectedExternalNodes(3) = node4 ;
 
   if (strcmp(type,"PlaneStrain") != 0 && strcmp(type,"PlaneStress") != 0
-      && strcmp(type,"PlaneStrain2D") != 0 && strcmp(type,"PlaneStress2D") != 0)
-    g3ErrorHandler->fatal("%s -- improper material type %s for EnhancedQuad",
-			  "EnhancedQuad::EnhancedQuad", type);
+      && strcmp(type,"PlaneStrain2D") != 0 && strcmp(type,"PlaneStress2D") != 0) {
+    opserr << "EnhancedQuad::EnhancedQuad -- improper material type " << type << " for EnhancedQuad\n";
+    exit(-1);
+  }
 
   int i ;
   for ( i = 0 ;  i < 4; i++ ) {
@@ -115,9 +115,8 @@ alpha(4), load(0), Ki(0)
       materialPointers[i] = theMaterial.getCopy(type) ;
 
       if (materialPointers[i] == 0) {
-
-	  g3ErrorHandler->fatal("%s -- failed to get a material of type %s",
-				"EnhancedQuad::EnhancedQuad", type);
+	opserr << "EnhancedQuad::EnhancedQuad -- failed to get a material of type " << type << endln;
+	exit(-1);
       } //end if
       
   } //end for i 
@@ -192,7 +191,7 @@ int  EnhancedQuad::commitState( )
 
   // call element commitState to do any base class stuff
   if ((success = this->Element::commitState()) != 0) {
-    cerr << "EnhancedQuad::commitState () - failed in base class";
+    opserr << "EnhancedQuad::commitState () - failed in base class";
   }    
 
   for (int i = 0; i < 4; i++ ) 
@@ -232,20 +231,20 @@ int  EnhancedQuad::revertToStart( )
 }
 
 //print out element data
-void  EnhancedQuad::Print( ostream &s, int flag )
+void  EnhancedQuad::Print( OPS_Stream &s, int flag )
 {
-  s << endl ;
+  s << endln ;
   s << "Enhanced Strain Four Node Quad \n" ;
-  s << "Element Number: " << this->getTag() << endl ;
-  s << "Node 1 : " << connectedExternalNodes(0) << endl ;
-  s << "Node 2 : " << connectedExternalNodes(1) << endl ;
-  s << "Node 3 : " << connectedExternalNodes(2) << endl ;
-  s << "Node 4 : " << connectedExternalNodes(3) << endl ;
+  s << "Element Number: " << this->getTag() << endln ;
+  s << "Node 1 : " << connectedExternalNodes(0) << endln ;
+  s << "Node 2 : " << connectedExternalNodes(1) << endln ;
+  s << "Node 3 : " << connectedExternalNodes(2) << endln ;
+  s << "Node 4 : " << connectedExternalNodes(3) << endln ;
 
   s << "Material Information : \n " ;
   materialPointers[0]->Print( s, flag ) ;
 
-  s << endl ;
+  s << endln ;
 }
 
 //return stiffness matrix 
@@ -266,10 +265,6 @@ const Matrix&  EnhancedQuad::getInitialStiff( )
 
   if (Ki != 0)
     return *Ki;
-
-  static const double tolerance = 1.0e-08 ;
-
-  static const int nIterations = 10 ;
 
   static const int ndm = 2 ;
 
@@ -292,8 +287,6 @@ const Matrix&  EnhancedQuad::getInitialStiff( )
 
   int i, j, k, p, q ;
   int jj, kk ;
-
-  int success ;
 
   static double xsj[numberGauss] ;  // determinant jacaobian matrix 
 
@@ -567,9 +560,7 @@ void  EnhancedQuad::zeroLoad( )
 int 
 EnhancedQuad::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("EnhancedQuad::addLoad - load type unknown for ele with tag: %d\n",
-			  this->getTag());
-  
+  opserr << "EnhancedQuad::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
   return -1;
 }
 
@@ -662,8 +653,6 @@ const Vector&  EnhancedQuad::getResistingForceIncInertia( )
 
 void   EnhancedQuad::formInertiaTerms( int tangFlag ) 
 {
-
-  static const int ndm = 2 ;
 
   static const int ndf = 2 ; 
 
@@ -1008,14 +997,14 @@ void  EnhancedQuad::formResidAndTangent( int tang_flag )
 
     Kee.Solve( residE, dalpha ) ;
 
-    if (dalpha(0) > 1.0e10)  cerr << "dalpha: " << residE << dalpha;
+    if (dalpha(0) > 1.0e10)  opserr << "dalpha: " << residE << dalpha;
 
     this->alpha += dalpha ;
 
     count++ ;
     if ( count > nIterations ) {
-      cerr << "Exceeded " << nIterations
-	   << " iterations solving for enhanced strain parameters " << endl ;
+      opserr << "Exceeded " << nIterations
+	   << " iterations solving for enhanced strain parameters " << endln ;
       break ;
     } //end if 
 
@@ -1492,16 +1481,14 @@ int  EnhancedQuad::sendSelf (int commitTag, Channel &theChannel)
 
   res += theChannel.sendID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING EnhancedQuad::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING EnhancedQuad::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
   }
 
 
   res += theChannel.sendVector(dataTag, commitTag, alpha);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING EnhancedQuad::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING EnhancedQuad::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
   }
 
@@ -1509,7 +1496,7 @@ int  EnhancedQuad::sendSelf (int commitTag, Channel &theChannel)
   for (i = 0; i < 4; i++) {
     res += materialPointers[i]->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING EnhancedQuad::sendSelf() - %d failed to send its Material\n",this->getTag());
+      opserr << "WARNING EnhancedQuad::sendSelf() - " << this->getTag() << " failed to send its Material\n";
       return res;
     }
   }
@@ -1529,7 +1516,7 @@ int  EnhancedQuad::recvSelf (int commitTag,
   // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING EnhancedQuad::recvSelf() - %d failed to receive ID\n", this->getTag());
+    opserr << "WARNING EnhancedQuad::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return res;
   }
 
@@ -1543,8 +1530,7 @@ int  EnhancedQuad::recvSelf (int commitTag,
 
   res += theChannel.recvVector(dataTag, commitTag, alpha);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING EnhancedQuad::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING EnhancedQuad::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
   }
 
@@ -1557,16 +1543,14 @@ int  EnhancedQuad::recvSelf (int commitTag,
       // Allocate new material with the sent class tag
       materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
       if (materialPointers[i] == 0) {
-	g3ErrorHandler->warning("EnhancedQuad::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
+	opserr << "EnhancedQuad::recvSelf() - Broker could not create NDMaterial of class type " << matClassTag << endln;
 	return -1;
       }
       // Now receive materials into the newly allocated space
       materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn3d::recvSelf() - material " << i << "failed to recv itself\n";
 	return res;
       }
     }
@@ -1583,9 +1567,8 @@ int  EnhancedQuad::recvSelf (int commitTag,
 	delete materialPointers[i];
 	materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
 	if (materialPointers[i] == 0) {
-	  g3ErrorHandler->fatal("EnhancedQuad::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
-	  return -1;
+	  opserr << "EnhancedQuad::recvSelf() - Broker could not create NDMaterial of class type" << matClassTag << endln;
+	  exit(-1);
 	}
       materialPointers[i]->setDbTag(matDbTag);
       }
@@ -1593,8 +1576,7 @@ int  EnhancedQuad::recvSelf (int commitTag,
 
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("EnhancedQuad::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "EnhancedQuad::recvSelf() - material " << i << "failed to recv itself\n";
 	return res;
       }
     }

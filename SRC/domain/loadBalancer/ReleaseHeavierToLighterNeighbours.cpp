@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/loadBalancer/ReleaseHeavierToLighterNeighbours.cpp,v $
                                                                         
                                                                         
@@ -68,8 +68,8 @@ ReleaseHeavierToLighterNeighbours::balance(Graph &theWeightedGraph)
     // check to see a domain partitioner has been set
     DomainPartitioner *thePartitioner = this->getDomainPartitioner();    
     if (thePartitioner == 0) {
-	cerr << "ReleaseHeavierToLighterNeighbours::balance ";
-	cerr << "- No DomainPartitioner has been set\n";
+	opserr << "ReleaseHeavierToLighterNeighbours::balance ";
+	opserr << "- No DomainPartitioner has been set\n";
 	return -1;
     }
 
@@ -81,9 +81,9 @@ ReleaseHeavierToLighterNeighbours::balance(Graph &theWeightedGraph)
 			    true,
 			    factorGreater);  
 	if (res < 0) {
-	    cerr << "WARNING ReleaseHeavierToLighterNeighbours";
-	    cerr << "::balance - DomainPartitioner returned ";
-	    cerr << res << endl;
+	    opserr << "WARNING ReleaseHeavierToLighterNeighbours";
+	    opserr << "::balance - DomainPartitioner returned ";
+	    opserr << res << endln;
 	    return res;    
 	}
     }

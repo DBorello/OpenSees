@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2002-06-10 22:57:40 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.cpp,v $
 
 // Written: MHS
@@ -216,7 +216,7 @@ HardeningMaterial::sendSelf(int cTag, Channel &theChannel)
   
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "HardeningMaterial::sendSelf() - failed to send data\n";
+    opserr << "HardeningMaterial::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -231,7 +231,7 @@ HardeningMaterial::recvSelf(int cTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
-      cerr << "HardeningMaterial::recvSelf() - failed to receive data\n";
+      opserr << "HardeningMaterial::recvSelf() - failed to receive data\n";
       E = 0; 
       this->setTag(0);      
   }
@@ -254,12 +254,12 @@ HardeningMaterial::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-HardeningMaterial::Print(ostream &s, int flag)
+HardeningMaterial::Print(OPS_Stream &s, int flag)
 {
-    s << "HardeningMaterial, tag: " << this->getTag() << endl;
-    s << "  E: " << E << endl;
-    s << "  sigmaY: " << sigmaY << endl;
-    s << "  Hiso: " << Hiso << endl;
-    s << "  Hkin: " << Hkin << endl;
-    s << "  eta: " << eta << endl;
+    s << "HardeningMaterial, tag: " << this->getTag() << endln;
+    s << "  E: " << E << endln;
+    s << "  sigmaY: " << sigmaY << endln;
+    s << "  Hiso: " << Hiso << endln;
+    s << "  Hkin: " << Hkin << endln;
+    s << "  eta: " << eta << endln;
 }

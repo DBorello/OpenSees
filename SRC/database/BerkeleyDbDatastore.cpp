@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-02-12 20:12:39 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/BerkeleyDbDatastore.cpp,v $
 
 #include <BerkeleyDbDatastore.h>
@@ -48,8 +48,8 @@ BerkeleyDbDatastore::BerkeleyDbDatastore(const char *projectName,
 
     // Create the directory, read/write/access owner only.
     if (mkdir(project, S_IRWXU) != 0) {
-      cerr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed mkdir: ";
-      cerr << project << " " << strerror(errno);
+      opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed mkdir: ";
+      opserr << project << " " << strerror(errno);
       connection = false;
       return;
     }
@@ -58,8 +58,8 @@ BerkeleyDbDatastore::BerkeleyDbDatastore(const char *projectName,
   // create the environment handle
   int ret = 0;
   if ((ret = db_env_create(&dbenv, 0)) != 0) {
-    cerr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed db_env_create: ";
-    cerr << db_strerror(ret) << endl;
+    opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed db_env_create: ";
+    opserr << db_strerror(ret) << endln;
     connection = false;
   }
 
@@ -71,8 +71,8 @@ BerkeleyDbDatastore::BerkeleyDbDatastore(const char *projectName,
 			 DB_CREATE | DB_INIT_LOG | DB_PRIVATE | DB_INIT_MPOOL, 
 			 S_IRUSR | S_IWUSR)) != 0) {
 			 
-    cerr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed db_env_create: ";
-    cerr << db_strerror(ret) << endl;
+    opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed db_env_create: ";
+    opserr << db_strerror(ret) << endln;
     connection = false;
     return;
   }
@@ -81,20 +81,20 @@ BerkeleyDbDatastore::BerkeleyDbDatastore(const char *projectName,
   // initialise the db structuress
   int result;
   if ((result = db_create(&dbMatrix, dbenv, 0)) != 0) {
-    cerr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to init dbMatrix";
-    cerr << db_strerror(result) << endl;
+    opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to init dbMatrix";
+    opserr << db_strerror(result) << endln;
     connection = false;
     return;
   }
   if ((result = db_create(&dbVector, dbenv, 0)) != 0) {
-    cerr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to init dbVector";
-    cerr << db_strerror(result) << endl;
+    opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to init dbVector";
+    opserr << db_strerror(result) << endln;
     connection = false;
     return;
   }
   if ((result = db_create(&dbID, dbenv, 0)) != 0) {
-    cerr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to init dbID";
-    cerr << db_strerror(result) << endl;
+    opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to init dbID";
+    opserr << db_strerror(result) << endln;
     connection = false;
     return;
   }
@@ -119,8 +119,8 @@ BerkeleyDbDatastore::BerkeleyDbDatastore(const char *projectName,
     //type = DB_UNKNOWN;
     if ((result = dbMatrix->open(dbMatrix, "Matrices.db", NULL, type, 
 				 DB_CREATE, 0664)) != 0) {
-      cerr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to open dbMatrix\n";
-      cerr << db_strerror(result) << endl;
+      opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to open dbMatrix\n";
+      opserr << db_strerror(result) << endln;
       connection = false;     
       return;
     } 
@@ -131,8 +131,8 @@ BerkeleyDbDatastore::BerkeleyDbDatastore(const char *projectName,
     //type = DB_UNKNOWN;
     if ((result = dbVector->open(dbVector, "Vectors.db", NULL, type, 
 				 DB_CREATE, 0664)) != 0) {
-      cerr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to open dbVector\n";
-      cerr << db_strerror(result) << endl;
+      opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to open dbVector\n";
+      opserr << db_strerror(result) << endln;
       connection = false;     
       return;
     } 
@@ -143,8 +143,8 @@ BerkeleyDbDatastore::BerkeleyDbDatastore(const char *projectName,
     //type = DB_UNKNOWN;
     if ((result = dbID->open(dbID, "IDs.db", NULL, type, 
 				 DB_CREATE, 0664)) != 0) {
-      cerr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to open dbID\n";
-      cerr << db_strerror(result) << endl;
+      opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to open dbID\n";
+      opserr << db_strerror(result) << endln;
       connection = false;     
       return;
     } 
@@ -181,7 +181,7 @@ BerkeleyDbDatastore::sendMsg(int dataTag, int commitTag,
 		       const Message &, 
 		       ChannelAddress *theAddress)
 {
-  cerr << "BerkeleyDbDatastore::sendMsg() - not yet implemented\n";
+  opserr << "BerkeleyDbDatastore::sendMsg() - not yet implemented\n";
   return -1;
 }		       
 
@@ -190,7 +190,7 @@ BerkeleyDbDatastore::recvMsg(int dataTag, int commitTag,
 		       Message &, 
 		       ChannelAddress *theAddress)
 {
-  cerr << "BerkeleyDbDatastore::recvMsg() - not yet implemented\n";
+  opserr << "BerkeleyDbDatastore::recvMsg() - not yet implemented\n";
   return -1;
 }		       
 
@@ -220,7 +220,7 @@ BerkeleyDbDatastore::sendMatrix(int dbTag, int commitTag,
 
   int ret;
   if ((ret = dbMatrix->put(dbMatrix, NULL, &key, &data, 0)) != 0) {
-    cerr << "BerkeleyDbDatastore::sendMatrix() - failed to send the Matrix to database\n";
+    opserr << "BerkeleyDbDatastore::sendMatrix() - failed to send the Matrix to database\n";
     dbMatrix->err(dbMatrix, ret, "DB->put");
     return -2;      
   }
@@ -255,7 +255,7 @@ BerkeleyDbDatastore::recvMatrix(int dbTag, int commitTag,
 
   int ret;
   if ((ret = dbMatrix->get(dbMatrix, NULL, &key, &data, 0)) != 0) {
-    cerr << "BerkeleyDbDatastore::recvMatrix() - failed to get the Matrix from database\n";
+    opserr << "BerkeleyDbDatastore::recvMatrix() - failed to get the Matrix from database\n";
     dbMatrix->err(dbMatrix, ret, "DB->get");
     return -2;      
   }
@@ -290,7 +290,7 @@ BerkeleyDbDatastore::sendVector(int dbTag, int commitTag,
 
   int ret;
   if ((ret = dbVector->put(dbVector, NULL, &key, &data, 0)) != 0) {
-    cerr << "BerkeleyDbDatastore::sendVector() - failed to send the Vector to database\n";
+    opserr << "BerkeleyDbDatastore::sendVector() - failed to send the Vector to database\n";
     dbVector->err(dbVector, ret, "DB->put");
     return -2;      
   }
@@ -325,7 +325,7 @@ BerkeleyDbDatastore::recvVector(int dbTag, int commitTag,
 
   int ret;
   if ((ret = dbVector->get(dbVector, NULL, &key, &data, 0)) != 0) {
-    cerr << "BerkeleyDbDatastore::recvVector() - failed to get the Vector from database\n";
+    opserr << "BerkeleyDbDatastore::recvVector() - failed to get the Vector from database\n";
     dbVector->err(dbVector, ret, "DB->get");
     return -2;      
   }
@@ -361,7 +361,7 @@ BerkeleyDbDatastore::sendID(int dbTag, int commitTag,
   data.flags = DB_DBT_USERMEM;
 
   if ((ret = dbID->put(dbID, 0, &key, &data, 0)) != 0) {
-    cerr << "BerkeleyDbDatastore::sendID() - failed to send the ID to database\n";
+    opserr << "BerkeleyDbDatastore::sendID() - failed to send the ID to database\n";
     dbID->err(dbID, ret, "DB->put");
     return -2;      
   }
@@ -396,7 +396,7 @@ BerkeleyDbDatastore::recvID(int dbTag, int commitTag,
 
   int ret;
   if ((ret = dbID->get(dbID, NULL, &key, &data, 0)) != 0) {
-    cerr << "BerkeleyDbDatastore::recvID() - failed to get the ID from database\n";
+    opserr << "BerkeleyDbDatastore::recvID() - failed to get the ID from database\n";
     dbID->err(dbID, ret, "DB->get");
     return -2;      
   }

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:58 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/ShiftedExponentialRV.cpp,v $
 
 
@@ -36,6 +36,7 @@
 #include <ShiftedExponentialRV.h>
 #include <math.h>
 #include <string.h>
+#include <OPS_Globals.h>
 
 ShiftedExponentialRV::ShiftedExponentialRV(int passedTag, 
 		 double passedMean,
@@ -91,7 +92,7 @@ ShiftedExponentialRV::~ShiftedExponentialRV()
 
 
 void
-ShiftedExponentialRV::Print(ostream &s, int flag)
+ShiftedExponentialRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -161,5 +162,5 @@ ShiftedExponentialRV::getStartValue()
 
 double ShiftedExponentialRV::getParameter1()  {return lambda;}
 double ShiftedExponentialRV::getParameter2()  {return x0;}
-double ShiftedExponentialRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double ShiftedExponentialRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double ShiftedExponentialRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double ShiftedExponentialRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}

@@ -130,7 +130,7 @@ double DPPotentialSurface::getalfa2() const {
 }
 
 //================================================================================
-ostream& operator<< (ostream& os, const DPPotentialSurface &PS)
+OPS_Stream& operator<< (OPS_Stream& os, const DPPotentialSurface &PS)
 {
    os << "Drucker-Prager Potential Surface Parameters: " << endln;
    os << "alfa2 = " << PS.getalfa2() << endln;

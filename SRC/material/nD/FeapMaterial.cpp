@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-05 22:49:10 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/FeapMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -28,7 +28,7 @@
 // Description: This file contains the class definition for 
 // FeapMaterial. FeapMaterial wraps a Feap material subroutine.
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <FeapMaterial.h>
 #include <Vector.h>
 #include <Matrix.h>
@@ -64,9 +64,11 @@ FeapMaterial::FeapMaterial(int tag, int classTag, int nhv, int ndata, double r)
   if (numHV > 0) {
     // Allocate history array
     hstv = new double[2*numHV];
-    if (hstv == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate history array -- type %d",
-			    "FeapMaterial::FeapMaterial", classTag);
+    if (hstv == 0) {
+      opserr <<  "FeapMaterial::FeapMaterial -- failed to allocate history array -- type: " << classTag << endln;
+      exit(-1);
+    }
+			    
     
     // Zero out the history variables
     for (int i = 0; i < 2*numHV; i++)
@@ -79,9 +81,10 @@ FeapMaterial::FeapMaterial(int tag, int classTag, int nhv, int ndata, double r)
   if (numData > 0) {
     // Allocate material parameter array
     ud = new double[numData];
-    if (ud == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate ud array -- type %d",
-			    "FeapMaterial::FeapMaterial", classTag);
+    if (ud == 0) {
+      opserr << "FeapMaterial::FeapMaterial -- failed to allocate ud array -- type: " << classTag << endln;
+      exit(-1);
+    }
   }
   
   // Zero the strain vector
@@ -133,8 +136,8 @@ FeapMaterial::setTrialStrain(const Vector &strain)
     eps[3] = strain(3);
     break;
   default:
-    g3ErrorHandler->fatal("%s -- unknown material formulation",
-			  "FeapMaterial::setTrialStrain");
+    opserr << "FeapMaterial::FeapMaterial -- unknown material formulation\n";
+    exit(-1);
     break;
   }
 
@@ -167,8 +170,9 @@ FeapMaterial::getStrain(void)
     strain4(3) = eps[3];
     return strain4;
   default:
-    g3ErrorHandler->fatal("%s -- unknown material formulation",
-			  "FeapMaterial::getStrain");
+    opserr << "FeapMaterial::getSTrain -- unknown material formulation\n";
+    exit(-1);
+      
     return strain6;
   }
 }
@@ -198,8 +202,8 @@ FeapMaterial::getStress(void)
     sigma4(3) = sig[3];
     return sigma4;
   default:
-    g3ErrorHandler->fatal("%s -- unknown material formulation",
-			  "FeapMaterial::getStress");
+    opserr << "FeapMaterial::getStress -- unknown material formulation\n";
+      exit(-1);
     return sigma6;
   }
 }
@@ -234,8 +238,8 @@ FeapMaterial::getTangent(void)
 	tangent4(i,j) = tangent6(i,j);
     return tangent4;
   default:
-    g3ErrorHandler->fatal("%s -- unknown material formulation",
-			  "FeapMaterial::getTangent");
+    opserr << "FeapMaterial::getTangent -- unknown material formulation\n";
+    exit(-1);
     return tangent6;
   }
 }
@@ -310,8 +314,7 @@ FeapMaterial::getCopy(const char *type)
     theCopy->myFormulation = AxiSymmetric;
   
   else {
-    g3ErrorHandler->fatal("%s -- Invalid type (%s) for FeapMaterial",
-			  "FeapMaterial::getCopy", type);
+    opserr << "FeapMaterial::getCopy -- Invalid type (" << type << ") for FeapMaterial\n";
     return 0;
   }
   
@@ -329,8 +332,7 @@ FeapMaterial::getType(void) const
   case AxiSymmetric:
     return "AxiSymmetric";
   default:
-    g3ErrorHandler->fatal("%s -- unknown material formulation",
-			  "FeapMaterial::getType");
+    opserr << "FeapMaterial::getTYpe -- unknown material formulation\n";
     return "Unknown";
   }
 }
@@ -346,8 +348,7 @@ FeapMaterial::getOrder(void) const
   case AxiSymmetric:
     return 4;
   default:
-    g3ErrorHandler->fatal("%s -- unknown material formulation",
-			  "FeapMaterial::getOrder");
+    opserr << "FeapMaterial::getOrder -- unknown material formulation\n";
     return 0;
   }
 }
@@ -366,7 +367,7 @@ FeapMaterial::sendSelf(int commitTag, Channel &theChannel)
   
   res += theChannel.sendID(this->getDbTag(), commitTag, idData);
   if (res < 0) 
-    cerr << "FeapMaterial::sendSelf() - failed to send ID data\n";
+    opserr << "FeapMaterial::sendSelf() - failed to send ID data\n";
   
   Vector vecData(numHV+numData);
   
@@ -381,7 +382,7 @@ FeapMaterial::sendSelf(int commitTag, Channel &theChannel)
   
   res += theChannel.sendVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) 
-    cerr << "FeapMaterial::sendSelf() - failed to send Vector data\n";
+    opserr << "FeapMaterial::sendSelf() - failed to send Vector data\n";
   
   return res;
 }
@@ -396,7 +397,7 @@ FeapMaterial::recvSelf(int commitTag, Channel &theChannel,
   
   res += theChannel.recvID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
-    cerr << "FeapMaterial::recvSelf() - failed to receive ID data\n";
+    opserr << "FeapMaterial::recvSelf() - failed to receive ID data\n";
     return res;
   }
   
@@ -409,7 +410,7 @@ FeapMaterial::recvSelf(int commitTag, Channel &theChannel,
   
   res += theChannel.recvVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) {
-    cerr << "FeapMaterial::recvSelf() - failed to receive Vector data\n";
+    opserr << "FeapMaterial::recvSelf() - failed to receive Vector data\n";
     return res;
   }
   
@@ -426,32 +427,32 @@ FeapMaterial::recvSelf(int commitTag, Channel &theChannel,
 }
     
 void
-FeapMaterial::Print(ostream &s, int flag)
+FeapMaterial::Print(OPS_Stream &s, int flag)
 {
-  s << "FeapMaterial, tag: " << this->getTag() << endl;
-  s << "Material formulation: " << this->getType() << endl;
+  s << "FeapMaterial, tag: " << this->getTag() << endln;
+  s << "Material formulation: " << this->getType() << endln;
   s << "Material subroutine: ";
   
   switch (this->getClassTag()) {
   case ND_TAG_FeapMaterial01:
-    s << "matl01" << endl;
+    s << "matl01" << endln;
     break;
 
   case ND_TAG_FeapMaterial02:
-    s << "matl02" << endl;
+    s << "matl02" << endln;
     break;
 
   case ND_TAG_FeapMaterial03:
-    s << "matl03" << endl;
+    s << "matl03" << endln;
     break;
     
     // Add more cases as needed
   default:
-    s << this->getClassTag() << endl;
+    s << this->getClassTag() << endln;
     break;
   }
   
-  s << "Material density: " << rho << endl;
+  s << "Material density: " << rho << endln;
 }
 
 #ifdef _WIN32
@@ -534,8 +535,7 @@ FeapMaterial::invokeSubroutine(int isw)
     
     // Add more cases as needed
   default:
-    g3ErrorHandler->fatal("%s -- unknown material type",
-			  "FeapMaterial::invokeSubroutine");
+    opserr << "FeapMaterial::invokeSubroutine -- unknown material type\n";
     return -1;
   }
   

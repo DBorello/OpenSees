@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-10-14 19:30:55 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.h,v $
                                                                         
 #ifndef KrylovNewton_h
@@ -53,7 +53,7 @@ class KrylovNewton: public EquiSolnAlgo
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
-    void Print(ostream &s, int flag =0);    
+    void Print(OPS_Stream &s, int flag =0);    
     
   protected:
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/numberer/RCM.cpp,v $
                                                                         
                                                                         
@@ -86,7 +86,7 @@ RCM::number(Graph &theGraph, int startVertex)
 	theRefResult = new ID(numVertex);
 
 	if (theRefResult == 0) {
-	    cerr << "ERROR:  RCM::number - Out of Memory\n";
+	    opserr << "ERROR:  RCM::number - Out of Memory\n";
 	    theRefResult = new ID(0);
 	    numVertex = 0;
 	    return *theRefResult;
@@ -115,8 +115,8 @@ RCM::number(Graph &theGraph, int startVertex)
     if (startVertexTag != -1) {
 	vertexPtr = theGraph.getVertexPtr(startVertexTag);
 	if (vertexPtr == 0) {
-	    cerr << "WARNING:  RCM::number - No vertex with tag ";
-	    cerr << startVertexTag << "Exists - using first come from iter\n";
+	    opserr << "WARNING:  RCM::number - No vertex with tag ";
+	    opserr << startVertexTag << "Exists - using first come from iter\n";
 	    startVertexTag = -1;
 	}
     }	
@@ -246,7 +246,7 @@ RCM::number(Graph &theGraph, int startVertex)
 	// check to see if graph is disconneted
 	
 	if ((currentMark == nextMark) && (currentMark >= 0)) {
-	    cerr << "WARNING:  RCM::number - Disconnected graph -2 \n ";
+	    opserr << "WARNING:  RCM::number - Disconnected graph -2 \n ";
 	    
 	    // loop over iter till we get a vertex not yet Tmped
 	    
@@ -304,7 +304,7 @@ RCM::number(Graph &theGraph, const ID &startVertices)
 	theRefResult = new ID(numVertex);
 
 	if (theRefResult == 0) {
-	    cerr << "ERROR:  RCM::number - Out of Memory\n";
+	    opserr << "ERROR:  RCM::number - Out of Memory\n";
 	    theRefResult = new ID(0);
 	    numVertex = 0;
 	    return *theRefResult;
@@ -337,8 +337,8 @@ RCM::number(Graph &theGraph, const ID &startVertices)
 	if (startVertexTag != -1) {
 	    vertexPtr = theGraph.getVertexPtr(startVertexTag);
 	    if (vertexPtr == 0) {
-		cerr << "WARNING:  RCM::number - No vertex with tag ";
-		cerr << startVertexTag << "Exists - using first come from iter\n";
+		opserr << "WARNING:  RCM::number - No vertex with tag ";
+		opserr << startVertexTag << "Exists - using first come from iter\n";
 		startVertexTag = -1;
 	    }
 	}	
@@ -456,7 +456,7 @@ RCM::number(Graph &theGraph, const ID &startVertices)
 
 	    // loop over iter till we get a vertex not yet Tmped
 	    if ((currentMark == nextMark) && (currentMark >= 0)) {
-		cerr << "WARNING:  RCM::number - Disconnected graph\n";
+		opserr << "WARNING:  RCM::number - Disconnected graph\n";
 		
 		while (((vertexPtr = vertexIter2()) != 0) && 
 		       (vertexPtr->getTmp() != -1)) 

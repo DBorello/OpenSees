@@ -122,7 +122,7 @@ double EvolutionLaw_NL_Ep::h_s( EPState *EPS, PotentialSurface *PS){
 //================================================================================
 void EvolutionLaw_NL_Ep::print()
 {
-    cout << (*this);
+    opserr << (*this);
 }
 
 
@@ -146,9 +146,9 @@ double EvolutionLaw_NL_Ep::getkappa() const
 
 
 //================================================================================
-ostream& operator<< (ostream& os, const EvolutionLaw_NL_Ep & LEL)
+OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_NL_Ep & LEL)
 {
-    os.unsetf( ios::scientific );
+  //    os.unsetf( ios::scientific );
     os.precision(5);
 
     os.width(10);       

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LinearSeries.cpp,v $
                                                                         
                                                                         
@@ -71,7 +71,7 @@ LinearSeries::sendSelf(int commitTag, Channel &theChannel)
   data(0) = cFactor;
   int result = theChannel.sendVector(dbTag,commitTag, data);
   if (result < 0) {
-    cerr << "LinearSeries::sendSelf() - channel failed to send data\n";
+    opserr << "LinearSeries::sendSelf() - channel failed to send data\n";
     return result;
   }
   return 0;
@@ -86,7 +86,7 @@ LinearSeries::recvSelf(int commitTag, Channel &theChannel,
   Vector data(1);
   int result = theChannel.recvVector(dbTag,commitTag, data);
   if (result < 0) {
-    cerr << "LinearSeries::sendSelf() - channel failed to receive data\n";
+    opserr << "LinearSeries::sendSelf() - channel failed to receive data\n";
     cFactor = 1.0;
     return result;
   }
@@ -97,7 +97,7 @@ LinearSeries::recvSelf(int commitTag, Channel &theChannel,
 
 
 void
-LinearSeries::Print(ostream &s, int flag)
+LinearSeries::Print(OPS_Stream &s, int flag)
 {
     s << "Linear Series: constant factor: " << cFactor << "\n";
 

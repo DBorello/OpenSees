@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-16 21:09:59 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d02.cpp,v $
                                                                         
                                                                         
@@ -117,13 +117,13 @@ beam2d02::setDomain(Domain *theDomain)
     theNodes[0] = theDomain->getNode(Nd1);
     theNodes[1] = theDomain->getNode(Nd2);	
     if (theNodes[0] == 0) {
-	cerr << "WARNING beam2d02::setDomain(): Nd1: ";
-	cerr << Nd1 << "does not exist in model for beam \n" << *this;
+	opserr << "WARNING beam2d02::setDomain(): Nd1: ";
+	opserr << Nd1 << "does not exist in model for beam \n" << *this;
 	return;
     }
     if (theNodes[1] == 0) {
-	cerr << "WARNING beam2d02::setDomain(): Nd2: ";
-	cerr << Nd2 << "does not exist in model for beam\n" << *this;
+	opserr << "WARNING beam2d02::setDomain(): Nd2: ";
+	opserr << Nd2 << "does not exist in model for beam\n" << *this;
 	return;
     }	
     
@@ -131,9 +131,9 @@ beam2d02::setDomain(Domain *theDomain)
     int dofNd1 = theNodes[0]->getNumberDOF();
     int dofNd2 = theNodes[1]->getNumberDOF();	
     if (dofNd1 != 3 && dofNd2 != 3) {
-	cerr << "WARNING beam2d02::setDomain(): node " << Nd1;
-	cerr << " and/or node " << Nd2 << " have/has incorrect number ";
-	cerr << "of dof's at end for beam\n " << *this;
+	opserr << "WARNING beam2d02::setDomain(): node " << Nd1;
+	opserr << " and/or node " << Nd2 << " have/has incorrect number ";
+	opserr << "of dof's at end for beam\n " << *this;
 	return;
     }	
 
@@ -150,8 +150,8 @@ beam2d02::setDomain(Domain *theDomain)
     
     L = sqrt(dx*dx + dy*dy);
     if (L == 0.0) {
-	cerr << "WARNING beam2d02::setDomain(): beam " << this->getTag();
-	cerr << " has zero length for beam\n" << *this;
+	opserr << "WARNING beam2d02::setDomain(): beam " << this->getTag();
+	opserr << " has zero length for beam\n" << *this;
 	return;  
     }
 
@@ -182,7 +182,7 @@ beam2d02::commitState()
   
   // call element commitState to do any base class stuff
   if ((retVal = this->Element::commitState()) != 0) {
-    cerr << "beam2d02::commitState () - failed in base class";
+    opserr << "beam2d02::commitState () - failed in base class";
   }    
 
   retVal = theCoordTrans->commitState();
@@ -250,8 +250,7 @@ beam2d02::zeroLoad(void)
 int 
 beam2d02::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("ElasticBeam2d::addLoad() - beam %d, does not handle ele loads\n", 
-			  this->getTag());
+  opserr << "ElasticBeam2d::addLoad() - beam " << this->getTag() << ", does not handle ele loads\n";
   return -1;
 }
 
@@ -337,13 +336,13 @@ beam2d02::sendSelf(int commitTag, Channel &theChannel)
   int result = 0;
   result = theChannel.sendVector(dataTag, commitTag, data);
   if (result < 0) {
-    cerr << "beam2d02::sendSelf - failed to send data\n";
+    opserr << "beam2d02::sendSelf - failed to send data\n";
     return -1;
   }
   
   result = theChannel.sendID(dataTag, commitTag, connectedExternalNodes);
   if (result < 0) {
-    cerr << "beam2d02::sendSelf - failed to send data\n";
+    opserr << "beam2d02::sendSelf - failed to send data\n";
     return -1;
   }
     
@@ -359,7 +358,7 @@ beam2d02::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 
     result = theChannel.recvVector(dataTag, commitTag, data);
     if (result < 0) {
-	cerr << "beam2d02::recvSelf - failed to recv data\n";
+	opserr << "beam2d02::recvSelf - failed to recv data\n";
 	return -1;
     }
 
@@ -368,7 +367,7 @@ beam2d02::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 
     result = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
     if (result < 0) {
-	cerr << "beam2d02::recvSelf - failed to recv data\n";
+	opserr << "beam2d02::recvSelf - failed to recv data\n";
 	return -1;
     }
     
@@ -400,7 +399,7 @@ beam2d02::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 void
-beam2d02::Print(ostream &s, int flag)
+beam2d02::Print(OPS_Stream &s, int flag)
 {
     // compute current state
     this->getResistingForce();
@@ -408,7 +407,7 @@ beam2d02::Print(ostream &s, int flag)
     s << "Element: " << this->getTag(); 
     s << " type: beam2d02  iNode: " << connectedExternalNodes(0);    
     s << " jNode: " << connectedExternalNodes(1);
-    s << " Area: " << A << " E: " << E << " I: " << I << endl;
+    s << " Area: " << A << " E: " << E << " I: " << I << endln;
     s << " resisting Force: " << rForce;
 }
 

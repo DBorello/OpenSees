@@ -37,7 +37,7 @@ are determined from the solution to the system of equations. \\
 \indent\indent {\em virtual  int getLastResponse(Vector \&result, const
 ID \&id) =0;} \\ \\
 \indent\indent // Public Method added for Output \\
-\indent\indent {\em virtual void Print(ostream \&s, int flag = 0) =0;}\\
+\indent\indent {\em virtual void Print(OPS_Stream \&s, int flag = 0) =0;}\\
 
 \noindent {\bf Constructor} \\
 \indent {\em Integrator(int classTag);}\\ 
@@ -82,7 +82,7 @@ in the ID {\em id} and to place them in the Vector {\em result}. This
 is provided for domain decomposition methods. To return $0$ if
 successful, a negative number otherwise. \\ 
 
-\indent {\em virtual void Print(ostream \&s, int flag = 0) =0;}\\
+\indent {\em virtual void Print(OPS_Stream \&s, int flag = 0) =0;}\\
 The Integrator is to send information to the stream based on the
 integer {\em flag}. 
 

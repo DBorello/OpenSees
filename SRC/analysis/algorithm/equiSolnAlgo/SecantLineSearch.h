@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2002-01-06 19:17:50 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/SecantLineSearch.h,v $
 
 // Written: fmk 
@@ -44,7 +44,7 @@
 
 #include <LineSearch.h>
 class Vector;
-//class ostream; //Jeremic@ucdavis.edu taken out since there is an include<iostream.h> in LineSearch.h 
+//class OPS_Stream; //Jeremic@ucdavis.edu taken out since there is an include<iOPS_Stream.h> in LineSearch.h 
 
 class SecantLineSearch: public LineSearch
 {
@@ -65,7 +65,7 @@ class SecantLineSearch: public LineSearch
 
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
-    void Print(ostream &s, int flag =0) ;    
+    void Print(OPS_Stream &s, int flag =0) ;    
     
   protected:
     

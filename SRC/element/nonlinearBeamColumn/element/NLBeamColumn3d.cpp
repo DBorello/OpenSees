@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2003-01-28 01:19:13 $
+// $Revision: 1.22 $
+// $Date: 2003-02-14 23:01:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -46,7 +46,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
-#include <iomanip.h>
 
 #include <Information.h>
 #include <NLBeamColumn3d.h>
@@ -55,7 +54,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Renderer.h>
-#include <G3Globals.h>
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
 
@@ -113,29 +111,29 @@ fs(0), vs(0), Ssr(0), vscommit(0), sp(0), Ki(0)
    
    if (!sectionPtrs)
    {
-       cerr << "Error: NLBeamColumn3d::NLBeamColumn3d:  invalid section pointer ";
+       opserr << "Error: NLBeamColumn3d::NLBeamColumn3d:  invalid section pointer ";
        exit(-1);
    }	  
    
    sections = new SectionForceDeformation *[nSections];
    if (!sections)
    {
-       cerr << "Error: NLBeamColumn3d::NLBeamColumn3d: could not alocate section pointer";
+       opserr << "Error: NLBeamColumn3d::NLBeamColumn3d: could not alocate section pointer";
        exit(-1);
    }  
-   
+
    for (int i = 0; i < nSections; i++)
    {
       if (!sectionPtrs[i])
       {
-	  cerr << "Error: NLBeamColumn3d::NLBeamColumn3d: section pointer " << i << endl;
+	  opserr << "Error: NLBeamColumn3d::NLBeamColumn3d: section pointer " << i << endln;
           exit(-1);
       }  
        
       sections[i] = sectionPtrs[i]->getCopy();
       if (!sections[i])
       {
-	  cerr << "Error: NLBeamColumn3d::NLBeamColumn3d: could not create copy of section " << i << endl;
+	  opserr << "Error: NLBeamColumn3d::NLBeamColumn3d: could not create copy of section " << i << endln;
           exit(-1);
       }
 
@@ -148,44 +146,40 @@ fs(0), vs(0), Ssr(0), vscommit(0), sp(0), Ki(0)
    }
 
    if (!isTorsion)
-	   g3ErrorHandler->warning("%s -- no torsion detected in sections, %s",
-			"NLBeamColumn3d::NLBeamColumn3d",
-			"continuing with element torsional stiffness of 1.0e10");
-
+     opserr << "NLBeamColumn3d::NLBeamColumn3d -- no torsion detected in sections, " <<
+       "continuing with element torsional stiffness of 1.0e10\n";
+   
    // get copy of the transformation object   
    crdTransf = coordTransf.getCopy(); 
    if (!crdTransf)
    {
-      cerr << "Error: NLBeamColumn3d::NLBeamColumn3d: could not create copy of coordinate transformation object" << endl;
-      exit(-1);
+     opserr << "Error: NLBeamColumn3d::NLBeamColumn3d: could not create copy of coordinate transformation object" << endln;
+     exit(-1);
    }
 
    // alocate section flexibility matrices and section deformation vectors
    fs  = new Matrix [nSections];
-   if (!fs)
-   {
-       cerr << "NLBeamColumn3d::NLBeamColumn3d() -- failed to allocate fs array";
-       exit(-1);
+   if (!fs) {
+     opserr << "NLBeamColumn3d::NLBeamColumn3d() -- failed to allocate fs array";
+     exit(-1);
    }
    
    vs = new Vector [nSections];
-   if (!vs)
-   {
-       cerr << "NLBeamColumn3d::NLBeamColumn3d() -- failed to allocate vs array";
-       exit(-1);
+   if (!vs) {
+     opserr << "NLBeamColumn3d::NLBeamColumn3d() -- failed to allocate vs array";
+     exit(-1);
    }
 
    Ssr = new Vector [nSections];
-   if (!Ssr)
-   {
-       cerr << "NLBeamColumn3d::NLBeamColumn3d() -- failed to allocate Ssr array";
-       exit(-1);
+   if (!Ssr) {
+     opserr << "NLBeamColumn3d::NLBeamColumn3d() -- failed to allocate Ssr array";
+     exit(-1);
    }
  
    vscommit = new Vector [nSections];
    if (!vscommit)
-   {
-       cerr << "NLBeamColumn3d::NLBeamColumn3d() -- failed to allocate vscommit array";   
+     {
+       opserr << "NLBeamColumn3d::NLBeamColumn3d() -- failed to allocate vscommit array";   
        exit(-1);
    }
 
@@ -282,15 +276,15 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
 
    if (theNodes[0] == 0)
    {
-      cerr << "NLBeamColumn3d::setDomain: Nd1: ";
-      cerr << Nd1 << "does not exist in model\n";
+      opserr << "NLBeamColumn3d::setDomain: Nd1: ";
+      opserr << Nd1 << "does not exist in model\n";
       exit(0);
    }
 
    if (theNodes[1] == 0) 
    {
-      cerr << "NLBeamColumn3d::setDomain: Nd2: ";
-      cerr << Nd2 << "does not exist in model\n";
+      opserr << "NLBeamColumn3d::setDomain: Nd2: ";
+      opserr << Nd2 << "does not exist in model\n";
       exit(0);
    }
 
@@ -303,7 +297,7 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    
    if ((dofNode1 != NND) || (dofNode2 != NND))
    {
-      cerr << "NLBeamColumn3d::setDomain(): Nd2 or Nd1 incorrect dof ";
+      opserr << "NLBeamColumn3d::setDomain(): Nd2 or Nd1 incorrect dof ";
       exit(0);
    }
    
@@ -311,7 +305,7 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    // initialize the transformation
    if (crdTransf->initialize(theNodes[0], theNodes[1]))
    {
-      cerr << "NLBeamColumn3d::setDomain(): Error initializing coordinate transformation";  
+      opserr << "NLBeamColumn3d::setDomain(): Error initializing coordinate transformation";  
       exit(0);
    }
     
@@ -319,7 +313,7 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    double L = crdTransf->getInitialLength();
    if (L == 0.0)
    {
-      cerr << "NLBeamColumn3d::setDomain(): Zero element length:" << this->getTag();  
+      opserr << "NLBeamColumn3d::setDomain(): Zero element length:" << this->getTag();  
       exit(0);
    }
 
@@ -337,7 +331,7 @@ NLBeamColumn3d::commitState()
 
    // call element commitState to do any base class stuff
    if ((err = this->Element::commitState()) != 0) {
-     cerr << "NLBeamColumn3d::commitState () - failed in base class";
+     opserr << "NLBeamColumn3d::commitState () - failed in base class";
      return err;
    }    
 
@@ -585,7 +579,7 @@ NLBeamColumn3d::getInitialStiff(void)
   // calculate element stiffness matrix
   static Matrix kvInit(NEBD, NEBD);
   if (f.Solve(I,kvInit) < 0)
-    g3ErrorHandler->warning("NLBeamColumn3d::updateElementState() - could not invert flexibility\n");
+    opserr << "NLBeamColumn3d::updateElementState() - could not invert flexibility\n";
 
 
   // set Ki
@@ -748,25 +742,26 @@ NLBeamColumn3d::update(void)
 	  // compute section deformation increments
 	  //       vs += fs * dSs;     
 	  dvs.addMatrixVector(0.0, fs[i], dSs, 1.0);
-	  
+
+
 	  if (initialFlag != 0)
 	    vs[i] += dvs;
-	  
+
 	  sections[i]->setTrialSectionDeformation(vs[i]);
 	  
 	  // get section resisting forces
 	  Ssr[i] = sections[i]->getStressResultant();
-	  
+
 	  // get section flexibility matrix
           fs[i] = sections[i]->getSectionFlexibility();
-	  
+
 	  // calculate section residual deformations
 	  // dvs = fs * (Ss - Ssr);
 	  dSs = Ss;
 	  dSs.addVector(1.0, Ssr[i], -1.0);  // dSs = Ss - Ssr[i];
-            
+
 	  dvs.addMatrixVector(0.0, fs[i], dSs, 1.0);
-	      
+
           // integrate element flexibility matrix
 	  // f = f + (b^ fs * b) * weight(i);
       	  //f.addMatrixTripleProduct(1.0, b[i], fs[i], weight(i));
@@ -894,8 +889,8 @@ NLBeamColumn3d::update(void)
 	f(5,5) = 1.0e-10;
 
       // calculate element stiffness matrix
-      if (f.Solve(I,kv) < 0)
-	g3ErrorHandler->warning("NLBeamColumn3d::updateElementState() - could not invert flexibility\n");
+      if (f.Invert(kv) < 0)
+	opserr << "NLBeamColumn3d::updateElementState() - could not invert flexibility\n";
 
       // dv = v - vr;
       dv = v;
@@ -907,7 +902,17 @@ NLBeamColumn3d::update(void)
       dW = dv^ dSe;
       if (fabs(dW) < tol)
         break;
-    }     
+
+      if (maxIters == 1) {
+	opserr << "NLBeamColumn3d::updateElementState() - element: " << this->getTag() << " failed to converge but going on\n";
+	break;
+      }
+      if (j == (maxIters-1)) {
+	opserr << "NLBeamColumn3d::updateElementState() - element: " << this->getTag() << " failed to converge\n";
+	opserr << "dW: " << dW  << "\n dv: " << dv << " dSe: " << dSe << endln;
+	return -1;
+      }
+    }
       
     // determine resisting forces
     Se += dSe;
@@ -1052,9 +1057,10 @@ NLBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
   
   if (sp == 0) {
     sp = new Matrix(5,nSections);
-    if (sp == 0)
-      g3ErrorHandler->fatal("%s -- out of memory",
-			    "NLBeamColumn3d::addLoad");
+    if (sp == 0) {
+      opserr << "NLBeamColumn3d::addLoad -- out of memory\n";
+      exit(-1);
+    }
   }
 
   const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
@@ -1081,7 +1087,7 @@ NLBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
       // Shear
       s_p(4,i) += wz*(x-0.5*L);
     }
-
+  
     // Accumulate reactions in basic system
     p0[0] -= wx*L;
     double V;
@@ -1134,8 +1140,7 @@ NLBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
   }
 
   else {
-    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
-			    "NLBeamColumn3d::addLoad()", this->getTag());
+    opserr << "NLBeamColumn3d::addLoad()  -- load type unknown for element with tag: " << this->getTag() << endln;
     return -1;
   }
 
@@ -1234,14 +1239,14 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   idData(8) = (isTorsion) ? 1 : 0;
   
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
-     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-	     		     "failed to send ID data");
+     opserr << "NLBeamColumn3d::sendSelf() - %s\n",
+	     		     "failed to send ID data";
      return -1;
   }    
   
   if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
-     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-	     		     "failed to send crdTranf");
+     opserr << "NLBeamColumn3d::sendSelf() - %s\n",
+	     		     "failed to send crdTranf";
      return -1;
   }      
   
@@ -1266,8 +1271,8 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   }
 
   if (theChannel.sendID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send ID data");
+    opserr << "NLBeamColumn3d::sendSelf() - %s\n",
+			    "failed to send ID data";
     return -1;
   }    
 
@@ -1277,8 +1282,8 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   
   for (j = 0; j<nSections; j++) {
     if (sections[j]->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - section %d %s\n",
-			      j,"failed to send itself");
+      opserr << "NLBeamColumn3d::sendSelf() - section " << 
+	j << "failed to send itself\n";
       return -1;
     }
   }
@@ -1312,8 +1317,8 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
 	dData(loc++) = (vscommit[k])(i);
   
   if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
-     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-	 		     "failed to send Vector data");
+     opserr << "NLBeamColumn3d::sendSelf() - %s\n",
+	 		     "failed to send Vector data";
      return -1;
   }    
 
@@ -1333,8 +1338,8 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   static ID idData(9);
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
-    g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "NLBeamColumn3d::recvSelf() - %s\n",
+			    "failed to recv ID data";
     return -1;
   }    
 
@@ -1354,18 +1359,17 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	  delete crdTransf;
       crdTransf = theBroker.getNewCrdTransf3d(crdTransfClassTag);
       if (crdTransf == 0) {
-	  g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - %s %d\n",
-				  "failed to obtain a CrdTrans object with classTag",
-				  crdTransfClassTag);
-	  return -2;	  
+	opserr << "NLBeamColumn3d::recvSelf() - failed to obtain a CrdTrans object with classTag" <<
+	  crdTransfClassTag << endln;
+	return -2;	  
       }
   }
   crdTransf->setDbTag(crdTransfDbTag);
 
   // invoke recvSelf on the crdTransf obkject
   if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0) {
-     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-	     		     "failed to recv crdTranf");
+    opserr << "NLBeamColumn3d::sendSelf() - failed to recv crdTranf\n";
+	     		     
      return -3;
   }      
   
@@ -1377,8 +1381,8 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   int loc = 0;
 
   if (theChannel.recvID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "NLBeamColumn3d::recvSelf() - %s\n",
+			    "failed to recv ID data";
     return -1;
   }    
 
@@ -1402,9 +1406,8 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     // create a new array to hold pointers
     sections = new SectionForceDeformation *[idData(3)];
     if (sections == 0) {
-      g3ErrorHandler->fatal("NLBeamColumn3d::recvSelf() - %s %d\n",
-			      "out of memory creating sections array of size",idData(3));
-      return -1;
+      opserr << "NLBeamColumn3d::recvSelf() - out of memory creating sections array of size" << idData(3) << endln;
+      exit(-1);
     }    
 
     // create all those matrices and vectors
@@ -1418,8 +1421,8 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     // Allocate the right number
     vscommit = new Vector[nSections];
     if (vscommit == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate vscommit array",
-			      "NLBeamColumn3d::recvSelf");
+      opserr << "%s -- failed to allocate vscommit array",
+			      "NLBeamColumn3d::recvSelf";
       return -1;
     }
   
@@ -1430,8 +1433,8 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     // Allocate the right number
     fs  = new Matrix[nSections];  
     if (fs == 0) {
-     g3ErrorHandler->warning("%s -- failed to allocate fs array",
-			     "NLBeamColumn3d::recvSelf");
+     opserr << "%s -- failed to allocate fs array",
+			     "NLBeamColumn3d::recvSelf";
      return -1;
     } 
     
@@ -1442,8 +1445,8 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     // Allocate the right number
     vs = new Vector[nSections];  
     if (vs == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate vs array",
-			      "NLBeamColumn3d::recvSelf");
+      opserr << "%s -- failed to allocate vs array",
+			      "NLBeamColumn3d::recvSelf";
       return -1;
     }
    
@@ -1454,8 +1457,8 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     // Allocate the right number
     Ssr = new Vector[nSections];  
     if (Ssr == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate Ssr array",
-			      "NLBeamColumn3d::recvSelf");
+      opserr << "%s -- failed to allocate Ssr array",
+			      "NLBeamColumn3d::recvSelf";
       return -1;
     }
     
@@ -1465,15 +1468,15 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
       loc += 2;
       sections[i] = theBroker.getNewSection(sectClassTag);
       if (sections[i] == 0) {
-	g3ErrorHandler->fatal("NLBeamColumn3d::recvSelf() - %s %d\n",
-			      "Broker could not create Section of class type",sectClassTag);
+	opserr << "NLBeamColumn3d::recvSelf() - " << 
+	  "Broker could not create Section of class type " << sectClassTag << endln;
 	return -1;
       }
 
       sections[i]->setDbTag(sectDbTag);
       if (sections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn3d::recvSelf() - section " <<
+	  i << "failed to recv itself\n";
 	return -1;
       }     
     }
@@ -1500,17 +1503,17 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	delete sections[i];
 	sections[i] = theBroker.getNewSection(sectClassTag);
 	if (sections[i] == 0) {
-	  g3ErrorHandler->fatal("NLBeamColumn3d::recvSelf() - %s %d\n",
-				"Broker could not create Section of class type",sectClassTag);
-	  return -1;
+	  opserr << "NLBeamColumn3d::recvSelf() - " <<
+	    "Broker could not create Section of class type" << sectClassTag << endln;
+	  exit(-1);
 	}
       }
 
       // recvvSelf on it
       sections[i]->setDbTag(sectDbTag);
       if (sections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn3d::recvSelf() - section " << 
+	  i << "failed to recv itself\n";
 	return -1;
       }     
     }
@@ -1527,8 +1530,7 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   Vector dData(2+NEBD+NEBD*NEBD+secDefSize);   
   
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
-    g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-			    "failed to recv Vector data");
+    opserr << "NLBeamColumn3d::sendSelf() - failed to recv Vector data\n";
     return -1;
   }    
   
@@ -1605,11 +1607,15 @@ NLBeamColumn3d::compSectionDisplacements(Vector sectionCoords[], Vector sectionD
 	   if (code(j) == SECTION_RESPONSE_MY)
 	       sectionKey2 = j;
        }
-       if (sectionKey1 == 0)
-	   g3ErrorHandler->fatal("FATAL NLBeamColumn3d::compSectionResponse - section does not provide Mz response\n");
-       if (sectionKey2 == 0)
-	   g3ErrorHandler->fatal("FATAL NLBeamColumn3d::compSectionResponse - section does not provide My response\n");
-
+       if (sectionKey1 == 0) {
+	 opserr << "FATAL NLBeamColumn3d::compSectionResponse - section does not provide Mz response\n";
+	 exit(-1);
+       }
+       if (sectionKey2 == 0) {
+	 opserr << "FATAL NLBeamColumn3d::compSectionResponse - section does not provide My response\n";
+	 exit(-1);
+       }
+       
        // get section deformations
        vs = sections[i]->getSectionDeformation();
        
@@ -1655,10 +1661,38 @@ NLBeamColumn3d::compSectionDisplacements(Vector sectionCoords[], Vector sectionD
 
 
 void
-NLBeamColumn3d::Print(ostream &s, int flag)
+NLBeamColumn3d::Print(OPS_Stream &s, int flag)
 {
-   if (flag == 1)
-   {
+   if (flag == -1) { 
+    int eleTag = this->getTag();
+    s << "NL_BEAM\t" << eleTag << "\t";
+    s << sections[0]->getTag() << "\t" << sections[nSections-1]->getTag(); 
+    s  << "\t" << connectedExternalNodes(0) << "\t" << connectedExternalNodes(1);
+    s << "\t0\t0.0000000\n";
+   }  else if (flag < -1) {
+      int eleTag = this->getTag();
+      int counter = (flag +1) * -1;
+      int i;
+      const Vector &force = this->getResistingForce();
+      s << "FORCE\t" << eleTag << "\t" << counter << "\t0";
+      for (i=0; i<3; i++)
+	s << "\t" << force(i);
+      s << endln;
+      s << "FORCE\t" << eleTag << "\t" << counter << "\t1";
+      for (i=0; i<3; i++)
+	s << "\t" << force(i+6);
+      s << endln;
+      s << "MOMENT\t" << eleTag << "\t" << counter << "\t0";
+      for (i=3; i<6; i++)
+	s << "\t" << force(i);
+      s << endln;
+      s << "MOMENT\t" << eleTag << "\t" << counter << "\t1";
+      for (i=3; i<6; i++)
+	s << "\t" << force(i+6);
+      s << endln;
+   }
+   
+   else if (flag == 1) {
       s << "\nElement: " << this->getTag() << " Type: NLBeamColumn3d ";
       s << "\tConnected Nodes: " << connectedExternalNodes ;
       s << "\tNumber of Sections: " << nSections;
@@ -1675,14 +1709,14 @@ NLBeamColumn3d::Print(ostream &s, int flag)
    {
       s << "\nElement: " << this->getTag() << " Type: NLBeamColumn3d ";
       s << "\tConnected Nodes: " << connectedExternalNodes ;
-      s << "\tNumber of Sections: " << nSections << endl;
+      s << "\tNumber of Sections: " << nSections << endln;
       s << "\tElement End Forces (P MZ1 MZ2 MY1 MY2 T): " << Secommit;
       s << "\tResisting Force: " << this->getResistingForce();
    }
 }
 
 
-ostream &operator<<(ostream &s, NLBeamColumn3d &E)
+OPS_Stream &operator<<(OPS_Stream &s, NLBeamColumn3d &E)
 {
     E.Print(s);
     return s;
@@ -1712,7 +1746,7 @@ NLBeamColumn3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
      
        if (!coords)
        {
-	   cerr << "NLBeamColumn3d::displaySelf() -- failed to allocate coords array";   
+	   opserr << "NLBeamColumn3d::displaySelf() -- failed to allocate coords array";   
 	   exit(-1);
        }
        
@@ -1723,7 +1757,7 @@ NLBeamColumn3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
      
        if (!displs)
        {
-	   cerr << "NLBeamColumn3d::displaySelf() -- failed to allocate coords array";   
+	   opserr << "NLBeamColumn3d::displaySelf() -- failed to allocate coords array";   
 	   exit(-1);
        }
 
@@ -1872,41 +1906,41 @@ NLBeamColumn3d::setParameter (char **argv, int argc, Information &info)
 	// If the parameter is belonging to a section or lower
 	if (strcmp(argv[0],"section") == 0) {
 
-		// For now, no parameters of the section itself:
-		if (argc<5) {
-			cerr << "For now: cannot handle parameters of the section itself." << endl;
-			return -1;
-		}
+	  // For now, no parameters of the section itself:
+	  if (argc<5) {
+	    opserr << "For now: cannot handle parameters of the section itself." << endln;
+	    return -1;
+	  }
 
-		// Reveal section and material tag numbers
-		int paramSectionTag = atoi(argv[1]);
-		int paramMatTag     = atoi(argv[3]);
+	  // Reveal section and material tag numbers
+	  int paramSectionTag = atoi(argv[1]);
+	  int paramMatTag     = atoi(argv[3]);
 
-		// Store section and material tag in theInfo
-		ID *theID = new ID(2);
-		(*theID)(0) = paramSectionTag;
-		(*theID)(1) = paramMatTag;
-		info.theID = theID;
-                
-		// Find the right section and call its setParameter method
-		for (int i=0; i<nSections; i++) {
-			if (paramSectionTag == sections[i]->getTag()) {
-				ok = sections[i]->setParameter(&argv[2], argc-2, info);
-			}
-		}
-		
-		if (ok < 0) {
-			cerr << "NLBeamColumn2d::setParameter() - could not set parameter. " << endl;
-			return -1;
-		}
-		else {
-			return ok + 100;
-		}
+	  // Store section and material tag in theInfo
+	  ID *theID = new ID(2);
+	  (*theID)(0) = paramSectionTag;
+	  (*theID)(1) = paramMatTag;
+	  info.theID = theID;
+	  
+	  // Find the right section and call its setParameter method
+	  for (int i=0; i<nSections; i++) {
+	    if (paramSectionTag == sections[i]->getTag()) {
+	      ok = sections[i]->setParameter(&argv[2], argc-2, info);
+	    }
+	  }
+	  
+	  if (ok < 0) {
+	    opserr << "NLBeamColumn2d::setParameter() - could not set parameter. " << endln;
+	    return -1;
+	  }
+	  else {
+	    return ok + 100;
+	  }
 	}
-    
+	
 	// otherwise parameter is unknown for the NLBeamColumn2d class
 	else
-		return -1;
+	  return -1;
 }
 
 int
@@ -1930,7 +1964,7 @@ NLBeamColumn3d::updateParameter (int parameterID, Information &info)
 				}
 			}
 			if (ok < 0) {
-				cerr << "NLBeamColumn2d::updateParameter() - could not update parameter. " << endl;
+				opserr << "NLBeamColumn2d::updateParameter() - could not update parameter. " << endln;
 				return ok;
 			}
 			else {

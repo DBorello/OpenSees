@@ -174,7 +174,7 @@ class Template3Dep : public NDMaterial
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);    
 
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
 
     //Private Utility method
   private:
@@ -254,7 +254,7 @@ class Template3Dep : public NDMaterial
     //================================================================================
     // Overloaded Insertion Operator
     //================================================================================
-    friend ostream& operator<< (ostream& os, const Template3Dep & MP);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const Template3Dep & MP);
 
    private:
 

@@ -61,7 +61,7 @@ t}^{(i-1)}\right) \]
 \indent {\em int sendSelf(int commitTag, Channel \&theChannel);}\\ 
 \indent {\em int recvSelf(int commitTag, Channel \&theChannel,
 FEM\_ObjectBroker \&theBroker);}\\ 
-\indent {\em int Print(ostream \&s, int flag = 0);}\\
+\indent {\em int Print(OPS_Stream \&s, int flag = 0);}\\
 
 \noindent {\bf Constructors} \\
 \indent {\em HHT();}\\ 
@@ -244,7 +244,7 @@ RayleighDampingFlag, $\alpha_M$ and $\beta_K$. Returns $0$
 if successful. A warning message is printed, and a $-1$ is returned if
 {\em theChannel} fails to receive the Vector.\\
 
-{\em int Print(ostream \&s, int flag = 0);}\\
+{\em int Print(OPS_Stream \&s, int flag = 0);}\\
 The object sends to $s$ its type, the current time, $\alpha$, $\gamma$ and
 $\beta$. If Rayleigh damping is specified, the constants $\alpha_M$ and
 $\beta_K$ are also printed.

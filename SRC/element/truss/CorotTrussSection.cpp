@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-16 21:10:08 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.cpp,v $
                                                                         
 // Written: MHS 
@@ -36,8 +36,6 @@
 #include <FEM_ObjectBroker.h>
 #include <SectionForceDeformation.h>
 #include <Renderer.h>
-
-#include <G3Globals.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -70,15 +68,18 @@ CorotTrussSection::CorotTrussSection(int tag, int dim,
 {
   // get a copy of the material and check we obtained a valid copy
   theSection = theSec.getCopy();
-  if (theSection == 0) 
-    g3ErrorHandler->fatal("FATAL CorotTrussSection::CorotTrussSection - %d %s %d\n", tag,
-			  "failed to get a copy of material with tag ",
-			  theSec.getTag());
+  if (theSection == 0) {
+    opserr << "FATAL CorotTrussSection::CorotTrussSection - " << tag << 
+      "failed to get a copy of material with tag " << theSec.getTag() << endln;
+    exit(-1);
+  }
   
   // ensure the connectedExternalNode ID is of correct size & set values
-  if (connectedExternalNodes.Size() != 2)
-    g3ErrorHandler->fatal("FATAL CorotTrussSection::CorotTrussSection - %d %s\n", tag,
-			  "failed to create an ID of size 2");
+  if (connectedExternalNodes.Size() != 2) {
+    opserr << "FATAL CorotTrussSection::CorotTrussSection - " <<  tag <<
+      "failed to create an ID of size 2\n";
+    exit(-1);
+  }
   
   connectedExternalNodes(0) = Nd1;
   connectedExternalNodes(1) = Nd2;        
@@ -103,9 +104,10 @@ CorotTrussSection::CorotTrussSection()
     theNodes[i] = 0;
 
   // ensure the connectedExternalNode ID is of correct size 
-  if (connectedExternalNodes.Size() != 2)
-    g3ErrorHandler->fatal("FATAL CorotTrussSection::CorotTrussSection - %s\n",
-			  "failed to create an ID of size 2");
+  if (connectedExternalNodes.Size() != 2) {
+    opserr << "FATAL CorotTrussSection::CorotTrussSection - failed to create an ID of size 2\n";
+    exit(-1);
+  }			  
 }
 
 //  destructor
@@ -170,9 +172,8 @@ CorotTrussSection::setDomain(Domain *theDomain)
   
   // if can't find both - send a warning message
   if ((theNodes[0] == 0) || (theNodes[1] == 0)) {
-    g3ErrorHandler->warning("CorotTrussSection::setDomain() - CorotTrussSection %d node %d %s\n",
-			    this->getTag(), Nd1,
-			    "does not exist in the model");
+    opserr << "CorotTrussSection::setDomain() - CorotTrussSection " << 			  
+      this->getTag() << " node doe not exist in the model\n";
     
     // fill this in so don't segment fault later
     numDOF = 6;    
@@ -186,8 +187,8 @@ CorotTrussSection::setDomain(Domain *theDomain)
   
   // if differing dof at the ends - print a warning message
   if (dofNd1 != dofNd2) {
-    g3ErrorHandler->warning("WARNING CorotTrussSection::setDomain(): nodes %d and %d %s %d\n",Nd1, Nd2,
-			    "have differing dof at ends for CorotTrussSection",this->getTag());
+    opserr << "WARNING CorotTrussSection::setDomain(): nodes have differing dof at ends for CorotTrussSection" <<
+      this->getTag() << endln;
     
     // fill this in so don't segment fault later
     numDOF = 6;    
@@ -221,8 +222,7 @@ CorotTrussSection::setDomain(Domain *theDomain)
     theVector = &V12;
   }
   else {
-    g3ErrorHandler->warning("%s -- nodal DOF %d not compatible with element",
-			    "CorotTrussSection::setDomain", dofNd1);
+    opserr << "CorotTrussSection::setDomain -- nodal DOF not compatible with element " << this->getTag() << endln;
     
     // fill this in so don't segment fault later
     numDOF = 6;    
@@ -305,7 +305,7 @@ CorotTrussSection::commitState()
   int retVal = 0;
   // call element commitState to do any base class stuff
   if ((retVal = this->Element::commitState()) != 0) {
-    cerr << "CorotTrussSection::commitState () - failed in base class";
+    opserr << "CorotTrussSection::commitState () - failed in base class";
   }    
   retVal = theSection->commitState();
   return retVal;
@@ -501,9 +501,7 @@ CorotTrussSection::zeroLoad(void)
 int 
 CorotTrussSection::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("CorotTrussSection::addLoad - load type unknown for truss with tag: %d\n",
-			  this->getTag());
-  
+  opserr << "CorotTrussSection::addLoad - load type unknown for truss with tag: " <<  this->getTag() << endln;
   return -1;
 }
 
@@ -616,16 +614,16 @@ CorotTrussSection::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 void
-CorotTrussSection::Print(ostream &s, int flag)
+CorotTrussSection::Print(OPS_Stream &s, int flag)
 {
-	s << "\nCorotTrussSection, tag: " << this->getTag() << endl;
+	s << "\nCorotTrussSection, tag: " << this->getTag() << endln;
 	s << "\tConnected Nodes: " << connectedExternalNodes;
-	s << "\tUndeformed Length: " << Lo << endl;
-	s << "\tCurrent Length: " << Ln << endl;
-	s << "\tRotation matrix: " << endl;
+	s << "\tUndeformed Length: " << Lo << endln;
+	s << "\tCurrent Length: " << Ln << endln;
+	s << "\tRotation matrix: " << endln;
 
 	if (theSection) {
-		s << "\tSection, tag: " << theSection->getTag() << endl;
+		s << "\tSection, tag: " << theSection->getTag() << endln;
 		theSection->Print(s,flag);
 	}
 }

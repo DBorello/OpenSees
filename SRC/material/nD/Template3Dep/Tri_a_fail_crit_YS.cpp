@@ -279,7 +279,7 @@ double TriFCYieldSurface::get_c() const
 }
 
 
-ostream& operator<< (ostream& os, const TriFCYieldSurface & YS)
+OPS_Stream& operator<< (OPS_Stream& os, const TriFCYieldSurface & YS)
 {
  
    os << "Triaxial-Failure-Criterion-for-Concrete Yield Surface Parameters: " << endln;
@@ -287,7 +287,7 @@ ostream& operator<< (ostream& os, const TriFCYieldSurface & YS)
    os << "ftens = " << YS.ftens << endln;
    os << "el= " << YS.el << endln;
    os << "c= " << YS.c << endln;
-   setprecision(4);
+   os.precision(4);
    return os;
 
 

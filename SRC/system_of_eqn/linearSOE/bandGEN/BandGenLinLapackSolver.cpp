@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:28 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/BandGenLinLapackSolver.cpp,v $
                                                                         
                                                                         
@@ -79,16 +79,16 @@ int
 BandGenLinLapackSolver::solve(void)
 {
     if (theSOE == 0) {
-	cerr << "WARNING BandGenLinLapackSolver::solve(void)- ";
-	cerr << " No LinearSOE object has been set\n";
+	opserr << "WARNING BandGenLinLapackSolver::solve(void)- ";
+	opserr << " No LinearSOE object has been set\n";
 	return -1;
     }
 
     int n = theSOE->size;    
     // check iPiv is large enough
     if (iPivSize < n) {
-	cerr << "WARNING BandGenLinLapackSolver::solve(void)- ";
-	cerr << " iPiv not large enough - has setSize() been called?\n";
+	opserr << "WARNING BandGenLinLapackSolver::solve(void)- ";
+	opserr << " iPiv not large enough - has setSize() been called?\n";
 	return -1;
     }	    
 
@@ -131,8 +131,8 @@ BandGenLinLapackSolver::solve(void)
 #endif
     // check if successfull
     if (info != 0) {
-	cerr << "WARNING BandGenLinLapackSolver::solve() -";
-	cerr << "LAPACK routine returned " << info << endl;
+	opserr << "WARNING BandGenLinLapackSolver::solve() -";
+	opserr << "LAPACK routine returned " << info << endln;
 	return -info;
     }
 
@@ -152,9 +152,9 @@ BandGenLinLapackSolver::setSize()
 	
 	iPiv = new int[theSOE->size];
 	if (iPiv == 0) {
-	    cerr << "WARNING BandGenLinLapackSolver::setSize() ";
-	    cerr << " - ran out of memory for iPiv of size ";
-	    cerr << theSOE->size << endl;
+	    opserr << "WARNING BandGenLinLapackSolver::setSize() ";
+	    opserr << " - ran out of memory for iPiv of size ";
+	    opserr << theSOE->size << endln;
 	    return -1;
 	} else
 	    iPivSize = theSOE->size;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/reinfBar/ReinfBar.cpp,v $
                                                                         
                                                                         
@@ -91,7 +91,7 @@ const Vector & ReinfBar::getPosition(void) const
 }
 
 
-void ReinfBar::Print(ostream &s, int flag) const
+void ReinfBar::Print(OPS_Stream &s, int flag) const
 {
    s << "\nReinforcing Bar area: " << area;
    s << "\nMaterial ID: " << matID;
@@ -101,5 +101,5 @@ void ReinfBar::Print(ostream &s, int flag) const
 }
 
 
-//    friend ostream &operator<<(ostream &s, ReinfBar &reinfBar);    
+//    friend OPS_Stream &operator<<(OPS_Stream &s, ReinfBar &reinfBar);    
 

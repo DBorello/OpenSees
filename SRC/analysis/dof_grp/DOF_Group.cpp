@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-12-05 22:31:50 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:00:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -65,15 +65,15 @@ DOF_Group::DOF_Group(int tag, Node *node)
     // get number of DOF & verify valid
     int numDOF = node->getNumberDOF();
     if (numDOF <= 0) {
-	cerr << "DOF_Group::DOF_Group(Node *) ";
-	cerr << " node must have at least 1 dof " << *node;
+	opserr << "DOF_Group::DOF_Group(Node *) ";
+	opserr << " node must have at least 1 dof " << *node;
 	exit(-1);
     }	
 
     // check the ID created is of appropriate size
     if (myID.Size() != numDOF) {
-	cerr << "DOF_Group::DOF_Group(Node *) ";
-	cerr << " ran out of memory creating ID for node " << *node;
+	opserr << "DOF_Group::DOF_Group(Node *) ";
+	opserr << " ran out of memory creating ID for node " << *node;
 	exit(-1);
     }
 
@@ -89,8 +89,8 @@ DOF_Group::DOF_Group(int tag, Node *node)
 	theVectors  = new Vector *[MAX_NUM_DOF+1];
 	
 	if (theMatrices == 0 || theVectors == 0) {
-	    cerr << "DOF_Group::DOF_Group(Node *) ";
-	    cerr << " ran out of memory";	    
+	    opserr << "DOF_Group::DOF_Group(Node *) ";
+	    opserr << " ran out of memory";	    
 	}
 	for (int i=0; i<MAX_NUM_DOF; i++) {
 	    theMatrices[i] = 0;
@@ -109,9 +109,9 @@ DOF_Group::DOF_Group(int tag, Node *node)
 	    tangent = theMatrices[numDOF];
 	    if (unbalance == 0 || unbalance->Size() != numDOF ||	
 		tangent == 0 || tangent->noCols() != numDOF)	{  
-		cerr << "DOF_Group::DOF_Group(Node *) ";
-		cerr << " ran out of memory for vector/Matrix of size :";
-		cerr << numDOF << endl;
+		opserr << "DOF_Group::DOF_Group(Node *) ";
+		opserr << " ran out of memory for vector/Matrix of size :";
+		opserr << numDOF << endln;
 		exit(-1);
 	    }
 	} else {
@@ -125,9 +125,9 @@ DOF_Group::DOF_Group(int tag, Node *node)
 	if (unbalance == 0 || unbalance->Size() ==0 ||
 	    tangent ==0 || tangent->noRows() ==0) {
 	    
-	    cerr << "DOF_Group::DOF_Group(Node *) ";
-	    cerr << " ran out of memory for vector/Matrix of size :";
-	    cerr << numDOF << endl;
+	    opserr << "DOF_Group::DOF_Group(Node *) ";
+	    opserr << " ran out of memory for vector/Matrix of size :";
+	    opserr << numDOF << endln;
 	    exit(-1);
 	}
     }
@@ -144,15 +144,15 @@ DOF_Group::DOF_Group(int tag, int ndof)
     // get number of DOF & verify valid
     int numDOF = ndof;
     if (numDOF <= 0) {
-	cerr << "DOF_Group::DOF_Group(int, int ndof) ";
-	cerr << ndof << " ndof specified, there must be at least 1\n";
+	opserr << "DOF_Group::DOF_Group(int, int ndof) ";
+	opserr << ndof << " ndof specified, there must be at least 1\n";
 	exit(-1);
     }	
 
     // check the ID created is of appropriate size
     if (myID.Size() != numDOF) {
-	cerr << "DOF_Group::DOF_Group(int, int ndof) ";
-	cerr << " ran out of memory creating ID of size " << ndof << endl;
+	opserr << "DOF_Group::DOF_Group(int, int ndof) ";
+	opserr << " ran out of memory creating ID of size " << ndof << endln;
 	exit(-1);
     }
 
@@ -168,8 +168,8 @@ DOF_Group::DOF_Group(int tag, int ndof)
 	theVectors  = new Vector *[MAX_NUM_DOF+1];
 	
 	if (theMatrices == 0 || theVectors == 0) {
-	    cerr << "DOF_Group::DOF_Group(int, int ndof) ";
-	    cerr << " ran out of memory";	    
+	    opserr << "DOF_Group::DOF_Group(int, int ndof) ";
+	    opserr << " ran out of memory";	    
 	}
 	for (int i=0; i<MAX_NUM_DOF; i++) {
 	    theMatrices[i] = 0;
@@ -188,9 +188,9 @@ DOF_Group::DOF_Group(int tag, int ndof)
 	    tangent = theMatrices[numDOF];
 	    if (unbalance == 0 || unbalance->Size() != numDOF ||	
 		tangent == 0 || tangent->noCols() != numDOF)	{  
-		cerr << "DOF_Group::DOF_Group(int, int ndof) ";
-		cerr << " ran out of memory for vector/Matrix of size :";
-		cerr << numDOF << endl;
+		opserr << "DOF_Group::DOF_Group(int, int ndof) ";
+		opserr << " ran out of memory for vector/Matrix of size :";
+		opserr << numDOF << endln;
 		exit(-1);
 	    }
 	} else {
@@ -204,9 +204,9 @@ DOF_Group::DOF_Group(int tag, int ndof)
 	if (unbalance == 0 || tangent ==0 ||
 	    tangent ==0 || tangent->noRows() ==0) {
 	    
-	    cerr << "DOF_Group::DOF_Group(int, int ndof) ";
-	    cerr << " ran out of memory for vector/Matrix of size :";
-	    cerr << numDOF << endl;
+	    opserr << "DOF_Group::DOF_Group(int, int ndof) ";
+	    opserr << " ran out of memory for vector/Matrix of size :";
+	    opserr << numDOF << endln;
 	    exit(-1);
 	}
     }
@@ -258,8 +258,8 @@ DOF_Group::setID(int index, int value)
     if ((index >= 0) && (index < numDOF))
 	myID(index) = value;
     else {
-	cerr << "WARNING DOF_Group::setID - invalid location ";
-	cerr << index << " in ID of size " << numDOF << endl;
+	opserr << "WARNING DOF_Group::setID - invalid location ";
+	opserr << index << " in ID of size " << numDOF << endln;
     }	
 }
 
@@ -343,13 +343,13 @@ DOF_Group::addMtoTang(double fact)
 {
     if (myNode != 0) {
 	if (tangent->addMatrix(1.0, myNode->getMass(), fact) < 0) {
-	    cerr << "DOF_Group::addMtoTang(void) ";
-	    cerr << " invoking addMatrix() on the tangent failed\n";	    
+	    opserr << "DOF_Group::addMtoTang(void) ";
+	    opserr << " invoking addMatrix() on the tangent failed\n";	    
 	}
     }
     else {
-	cerr << "DOF_Group::addMtoTang(void) - no Node associated";
-	cerr << " subclass should provide the method \n";	    
+	opserr << "DOF_Group::addMtoTang(void) - no Node associated";
+	opserr << " subclass should provide the method \n";	    
     }	
 }
 
@@ -359,13 +359,13 @@ DOF_Group::addCtoTang(double fact)
 {
     if (myNode != 0) {
 	if (tangent->addMatrix(1.0, myNode->getDamp(), fact) < 0) {
-	    cerr << "DOF_Group::addMtoTang(void) ";
-	    cerr << " invoking addMatrix() on the tangent failed\n";	    
+	    opserr << "DOF_Group::addMtoTang(void) ";
+	    opserr << " invoking addMatrix() on the tangent failed\n";	    
 	}
     }
     else {
-	cerr << "DOF_Group::addMtoTang(void) - no Node associated";
-	cerr << " subclass should provide the method \n";	    
+	opserr << "DOF_Group::addMtoTang(void) - no Node associated";
+	opserr << " subclass should provide the method \n";	    
     }	
 }
 
@@ -393,13 +393,13 @@ DOF_Group::addPtoUnbalance(double fact)
 {
     if (myNode != 0) {
 	if (unbalance->addVector(1.0, myNode->getUnbalancedLoad(), fact) < 0) {
-	    cerr << "DOF_Group::addPIncInertiaToUnbalance() -";
-	    cerr << " invoking addVector() on the unbalance failed\n";	    
+	    opserr << "DOF_Group::addPIncInertiaToUnbalance() -";
+	    opserr << " invoking addVector() on the unbalance failed\n";	    
 	}
     }
     else {
-	cerr << "DOF_Group::addPtoUnbalance() - no Node associated";
-	cerr << " subclass should provide the method \n";	    
+	opserr << "DOF_Group::addPtoUnbalance() - no Node associated";
+	opserr << " subclass should provide the method \n";	    
     }		
 }
 
@@ -411,13 +411,13 @@ DOF_Group::addPIncInertiaToUnbalance(double fact)
 	if (unbalance->addVector(1.0, myNode->getUnbalancedLoadIncInertia(), 
 				 fact) < 0) {
 
-	    cerr << "DOF_Group::addPIncInertiaToUnbalance() - ";
-	    cerr << " invoking addVector() on the unbalance failed\n";	    
+	    opserr << "DOF_Group::addPIncInertiaToUnbalance() - ";
+	    opserr << " invoking addVector() on the unbalance failed\n";	    
 	}
     }
      else {
-	cerr << "DOF_Group::addPIncInertiaToUnbalance() - no Node associated";
-	cerr << " subclass should provide the method \n";	    
+	opserr << "DOF_Group::addPIncInertiaToUnbalance() - no Node associated";
+	opserr << " subclass should provide the method \n";	    
     }		
 }
 
@@ -426,8 +426,8 @@ void
 DOF_Group::addM_Force(const Vector &Udotdot, double fact)
 {
     if (myNode == 0) {
-	cerr << "DOF_Group::addM_Force() - no Node associated";	
-	cerr << " subclass should not call this method \n";	    
+	opserr << "DOF_Group::addM_Force() - no Node associated";	
+	opserr << " subclass should not call this method \n";	    
 	return;
     }
 
@@ -441,8 +441,8 @@ DOF_Group::addM_Force(const Vector &Udotdot, double fact)
     }
 	
     if (unbalance->addMatrixVector(1.0, myNode->getMass(), accel, fact) < 0) {  
-	cerr << "DOF_Group::addM_Force() ";
-	cerr << " invoking addMatrixVector() on the unbalance failed\n";
+	opserr << "DOF_Group::addM_Force() ";
+	opserr << " invoking addMatrixVector() on the unbalance failed\n";
     }
     else {
 
@@ -454,8 +454,8 @@ const Vector &
 DOF_Group::getCommittedDisp(void)
 {
     if (myNode == 0) {
-	cerr << "DOF_Group::getCommittedDisp: no associated Node ";
-	cerr << " returning the error Vector\n";
+	opserr << "DOF_Group::getCommittedDisp: no associated Node ";
+	opserr << " returning the error Vector\n";
 	return errVect;
     }
     return myNode->getDisp();
@@ -466,8 +466,8 @@ const Vector &
 DOF_Group::getCommittedVel(void)
 {
     if (myNode == 0) {
-	cerr << "DOF_Group::getCommittedVel: no associated Node ";
-	cerr << " returning the error Vector\n";
+	opserr << "DOF_Group::getCommittedVel: no associated Node ";
+	opserr << " returning the error Vector\n";
 	return errVect;	
     }
     return myNode->getVel();
@@ -478,8 +478,8 @@ const Vector &
 DOF_Group::getCommittedAccel(void)
 {
     if (myNode == 0) {
-	cerr << "DOF_Group::getCommittedAccel: no associated Node ";
-	cerr << " returning the error Vector\n";
+	opserr << "DOF_Group::getCommittedAccel: no associated Node ";
+	opserr << " returning the error Vector\n";
 	return errVect;	
     }
     return myNode->getAccel();
@@ -493,7 +493,7 @@ void
 DOF_Group::setNodeDisp(const Vector &u)
 {
     if (myNode == 0) {
-	cerr << "DOF_Group::setNodeDisp: no associated Node\n";
+	opserr << "DOF_Group::setNodeDisp: no associated Node\n";
 	return;
     }
     
@@ -521,7 +521,7 @@ DOF_Group::setNodeVel(const Vector &udot)
 {
 
     if (myNode == 0) {
-	cerr << "DOF_Group::setNodeVel: 0 Node Pointer\n";
+	opserr << "DOF_Group::setNodeVel: 0 Node Pointer\n";
 	return;
     }
     
@@ -551,7 +551,7 @@ DOF_Group::setNodeAccel(const Vector &udotdot)
 {
 
     if (myNode == 0) {
-	cerr << "DOF_Group::setNodeAccel: 0 Node Pointer\n";
+	opserr << "DOF_Group::setNodeAccel: 0 Node Pointer\n";
 	return;
     }
 
@@ -578,14 +578,14 @@ void
 DOF_Group::incrNodeDisp(const Vector &u)
 {
     if (myNode == 0) {
-	cerr << "DOF_Group::setNodeDisp: 0 Node Pointer\n";
+	opserr << "DOF_Group::setNodeDisp: 0 Node Pointer\n";
 	exit(-1);
     }
 
     Vector &disp = *unbalance;;
 
     if (disp.Size() == 0) {
-      cerr << "DOF_Group::setNodeIncrDisp - out of space\n";
+      opserr << "DOF_Group::setNodeIncrDisp - out of space\n";
       return;
     }
     int i;
@@ -611,7 +611,7 @@ DOF_Group::incrNodeVel(const Vector &udot)
 {
 
     if (myNode == 0) {
-	cerr << "DOF_Group::setNodeVel: 0 Node Pointer\n";
+	opserr << "DOF_Group::setNodeVel: 0 Node Pointer\n";
 	exit(-1);
     }
     
@@ -639,7 +639,7 @@ DOF_Group::incrNodeAccel(const Vector &udotdot)
 {
 
     if (myNode == 0) {
-	cerr << "DOF_Group::setNodeAccel: 0 Node Pointer\n";
+	opserr << "DOF_Group::setNodeAccel: 0 Node Pointer\n";
 	exit(-1);
     }
 
@@ -663,7 +663,7 @@ DOF_Group::setEigenvector(int mode, const Vector &theVector)
 {
 
     if (myNode == 0) {
-	cerr << "DOF_Group::setNodeAccel: 0 Node Pointer\n";
+	opserr << "DOF_Group::setNodeAccel: 0 Node Pointer\n";
 	exit(-1);
     }
 
@@ -702,13 +702,13 @@ DOF_Group::addLocalM_Force(const Vector &accel, double fact)
     if (myNode != 0) {
 	if (unbalance->addMatrixVector(1.0, myNode->getMass(), accel, fact) < 0) {  
 				       
-	    cerr << "DOF_Group::addM_Force() ";
-	    cerr << " invoking addMatrixVector() on the unbalance failed\n"; 
+	    opserr << "DOF_Group::addM_Force() ";
+	    opserr << " invoking addMatrixVector() on the unbalance failed\n"; 
 	}
     }
     else {
-	cerr << "DOF_Group::addM_Force() - no Node associated";
-	cerr << " subclass should not call this method \n";	    
+	opserr << "DOF_Group::addM_Force() - no Node associated";
+	opserr << " subclass should not call this method \n";	    
     }		
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectBlockSolver.cpp,v $
                                                                         
                                                                         
@@ -65,8 +65,8 @@ ProfileSPDLinDirectBlockSolver::setSize(void)
 {
 
     if (theSOE == 0) {
-	cerr << "ProfileSPDLinDirectBlockSolver::setSize()";
-	cerr << " No system has been set\n";
+	opserr << "ProfileSPDLinDirectBlockSolver::setSize()";
+	opserr << " No system has been set\n";
 	return -1;
     }
 
@@ -88,8 +88,8 @@ ProfileSPDLinDirectBlockSolver::setSize(void)
       invD = new double[size]; 
 	
       if (RowTop == 0 || topRowPtr == 0 || invD == 0) {
-	cerr << "Warning :ProfileSPDLinDirectBlockSolver::ProfileSPDLinDirectBlockSolver :";
-	cerr << " ran out of memory for work areas \n";
+	opserr << "Warning :ProfileSPDLinDirectBlockSolver::ProfileSPDLinDirectBlockSolver :";
+	opserr << " ran out of memory for work areas \n";
 	return -1;
       }
     }
@@ -121,8 +121,8 @@ ProfileSPDLinDirectBlockSolver::solve(void)
 {
     // check for quick returns
     if (theSOE == 0) {
-	cerr << "ProfileSPDLinDirectBlockSolver::solve(void): ";
-	cerr << " - No ProfileSPDSOE has been assigned\n";
+	opserr << "ProfileSPDLinDirectBlockSolver::solve(void): ";
+	opserr << " - No ProfileSPDSOE has been assigned\n";
 	return -1;
     }
     
@@ -207,14 +207,14 @@ ProfileSPDLinDirectBlockSolver::solve(void)
 
 	      // check that the diag > the tolerance specified
 	      if (ajj <= 0.0) {
-		cerr << "ProfileSPDLinDirectBlockSolver::solve() - ";
-		cerr << " aii < 0 (i, aii): (" << currentRow << ", " << ajj << ")\n"; 
+		opserr << "ProfileSPDLinDirectBlockSolver::solve() - ";
+		opserr << " aii < 0 (i, aii): (" << currentRow << ", " << ajj << ")\n"; 
 		return(-2);
 	      }
 	      if (ajj <= minDiagTol) {
-		cerr << "ProfileSPDLinDirectBlockSolver::solve() - ";
-		cerr << " aii < minDiagTol (i, aii): (" << currentRow;
-		cerr << ", " << ajj << ")\n"; 
+		opserr << "ProfileSPDLinDirectBlockSolver::solve() - ";
+		opserr << " aii < minDiagTol (i, aii): (" << currentRow;
+		opserr << ", " << ajj << ")\n"; 
 		return(-2);
 	      }		
 	      invD[currentRow] = 1.0/ajj; 
@@ -338,8 +338,8 @@ int
 ProfileSPDLinDirectBlockSolver::setProfileSOE(ProfileSPDLinSOE &theNewSOE)
 {
     if (theSOE != 0) {
-	cerr << "ProfileSPDLinDirectBlockSolver::setProfileSOE() - ";
-	cerr << " has already been called \n";	
+	opserr << "ProfileSPDLinDirectBlockSolver::setProfileSOE() - ";
+	opserr << " has already been called \n";	
 	return -1;
     }
     
@@ -351,7 +351,7 @@ int
 ProfileSPDLinDirectBlockSolver::sendSelf(int cTag, Channel &theChannel)
 {
     if (size != 0)
-	cerr << "ProfileSPDLinDirectBlockSolver::sendSelf - does not send itself YET\n"; 
+	opserr << "ProfileSPDLinDirectBlockSolver::sendSelf - does not send itself YET\n"; 
     return 0;
 }
 

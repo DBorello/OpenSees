@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-12-16 21:17:48 $
+// $Revision: 1.9 $
+// $Date: 2003-02-14 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.cpp,v $
                                                                         
                                                                         
@@ -146,14 +146,14 @@ HHT::newStep(double deltaT)
 {
 
   if (beta == 0 || gamma == 0 ) {
-    cerr << "HHT::newStep() - error in variable\n";
-    cerr << "gamma = " << gamma << " beta= " << beta << endl;
+    opserr << "HHT::newStep() - error in variable\n";
+    opserr << "gamma = " << gamma << " beta= " << beta << endln;
     return -1;
   }
     
   if (deltaT <= 0.0) {
-    cerr << "HHT::newStep() - error in variable\n";
-    cerr << "dT = " << deltaT << endl;
+    opserr << "HHT::newStep() - error in variable\n";
+    opserr << "dT = " << deltaT << endln;
     return -2;	
   }
   
@@ -164,7 +164,7 @@ HHT::newStep(double deltaT)
   AnalysisModel *theModel = this->getAnalysisModelPtr();
 
   if (U == 0) {
-    cerr << "HHT::newStep() - domainChange() failed or hasn't been called\n";
+    opserr << "HHT::newStep() - domainChange() failed or hasn't been called\n";
     return -3;	
   }
 
@@ -197,7 +197,7 @@ HHT::newStep(double deltaT)
   double time = theModel->getCurrentDomainTime();
   time +=deltaT;
   if (theModel->updateDomain(time, deltaT) < 0) {
-    cerr << "HHT::newStep() - failed to update the domain\n";
+    opserr << "HHT::newStep() - failed to update the domain\n";
     return -4;
   }
 
@@ -303,7 +303,7 @@ HHT::domainChanged()
 	Ualpha == 0 || Ualpha->Size() != size ||
 	Udotalpha == 0 || Udotalpha->Size() != size) {
   
-      cerr << "HHT::domainChanged - ran out of memory\n";
+      opserr << "HHT::domainChanged - ran out of memory\n";
 
       // delete the old
       if (Ut != 0)
@@ -386,20 +386,20 @@ HHT::update(const Vector &deltaU)
 {
   AnalysisModel *theModel = this->getAnalysisModelPtr();
   if (theModel == 0) {
-    cerr << "WARNING HHT::update() - no AnalysisModel set\n";
+    opserr << "WARNING HHT::update() - no AnalysisModel set\n";
     return -1;
   }	
 
   // check domainChanged() has been called, i.e. Ut will not be zero
   if (Ut == 0) {
-    cerr << "WARNING HHT::update() - domainChange() failed or not called\n";
+    opserr << "WARNING HHT::update() - domainChange() failed or not called\n";
     return -2;
   }	
 
   // check deltaU is of correct size
   if (deltaU.Size() != U->Size()) {
-    cerr << "WARNING HHT::update() - Vectors of incompatable size ";
-    cerr << " expecting " << U->Size() << " obtained " << deltaU.Size() << endl;
+    opserr << "WARNING HHT::update() - Vectors of incompatable size ";
+    opserr << " expecting " << U->Size() << " obtained " << deltaU.Size() << endln;
     return -3;
   }
     
@@ -414,7 +414,7 @@ HHT::update(const Vector &deltaU)
   // update the responses at the DOFs
   theModel->setResponse(*Ualpha,*Udotalpha,*Udotdot);        
   if (theModel->updateDomain() < 0) {
-    cerr << "HHT::update() - failed to update the domain\n";
+    opserr << "HHT::update() - failed to update the domain\n";
     return -4;
   }
 		    
@@ -427,7 +427,7 @@ HHT::commit(void)
 {
   AnalysisModel *theModel = this->getAnalysisModelPtr();
   if (theModel == 0) {
-    cerr << "WARNING HHT::commit() - no AnalysisModel set\n";
+    opserr << "WARNING HHT::commit() - no AnalysisModel set\n";
     return -1;
   }	  
 
@@ -452,7 +452,7 @@ HHT::sendSelf(int cTag, Channel &theChannel)
     data(7) = betaKc;
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
-	cerr << "WARNING HHT::sendSelf() - could not send data\n";
+	opserr << "WARNING HHT::sendSelf() - could not send data\n";
 	return -1;
     }	
     return 0;
@@ -463,7 +463,7 @@ HHT::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
     Vector data(8);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
-	cerr << "WARNING HHT::recvSelf() - could not receive data\n";
+	opserr << "WARNING HHT::recvSelf() - could not receive data\n";
 	return -1;
     }
 
@@ -480,17 +480,17 @@ HHT::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 }
 
 void
-HHT::Print(ostream &s, int flag)
+HHT::Print(OPS_Stream &s, int flag)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theModel != 0) {
 	double currentTime = theModel->getCurrentDomainTime();
-	s << "\t HHT - currentTime: " << currentTime << endl ;
-        s << "\t alpha = " << alpha << endl ;
-	s << "\t beta  = " << beta  << endl ;
-        s << "\t gamma = " << gamma << endl ;
+	s << "\t HHT - currentTime: " << currentTime << endln ;
+        s << "\t alpha = " << alpha << endln ;
+	s << "\t beta  = " << beta  << endln ;
+        s << "\t gamma = " << gamma << endln ;
 	s << "  Rayleigh Damping - alphaM: " << alphaM;
-	s << "  betaK: " << betaK << "   betaKi: " << betaKi << endl;	    
+	s << "  betaK: " << betaK << "   betaKi: " << betaKi << endln;	    
     } else 
 	s << "\t HHT - no associated AnalysisModel\n";
 }

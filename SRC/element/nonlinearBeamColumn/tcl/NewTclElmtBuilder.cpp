@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/tcl/NewTclElmtBuilder.cpp,v $
                                                                         
                                                                         
@@ -34,7 +34,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
+#include <iOPS_Stream.h>
 
 #include <Domain.h>
 #include <Node.h>
@@ -87,11 +87,11 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
   List = Tcl_Merge (inArgc, inArgv);
   if (List == 0)
   {
-      interp->result = "WARNING - TclModelBuilder_addFrameElement - problem merging list";
+      blah->result = "WARNING - TclModelBuilder_addFrameElement - problem merging list";
       return TCL_ERROR;
   }
 
-//  cerr << "List :" << List << endl;
+//  opserr << "List :" << List << endln;
 
   // remove braces from list
   for (int i = 0; List[i] != '\0'; i++)
@@ -105,16 +105,16 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
        
   if (Tcl_SplitList(interp, List, &argc, &argv) != TCL_OK)
   {
-     interp->result = "WARNING - TclModelBuilder_addFrameElement - problem spliting list";
+     blah->result = "WARNING - TclModelBuilder_addFrameElement - problem spliting list";
      return TCL_ERROR;
   }
       
   Tcl_Free (List);
   
-//  cerr << "argc : " << argc; 
+//  opserr << "argc : " << argc; 
 //  for (int i=0; i<argc; i++)
 //  {
-//    cerr <<"string " << i << " : " << argv[i] << endl;
+//    opserr <<"string " << i << " : " << argv[i] << endln;
 //  }
 
 
@@ -126,37 +126,37 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
 
     if (argc < 7)
     {
-      interp->result = "WARNING bad command - want: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING bad command - want: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
     int argi = 2;  
     if (Tcl_GetInt(interp, argv[argi++], &eleTag) != TCL_OK)
     {
-      interp->result = "WARNING invalid eleTag: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>"; 
+      blah->result = "WARNING invalid eleTag: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>"; 
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[argi++], &iNode) != TCL_OK)
     {
-      interp->result = "WARNING invalid iNode:  element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING invalid iNode:  element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[argi++], &jNode) != TCL_OK)
     {
-      interp->result = "WARNING invalid jNode: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING invalid jNode: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[argi++], &intgrTag) != TCL_OK)
     {
-      interp->result = "WARNING invalid numIntgrPts: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING invalid numIntgrPts: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[argi++], &transfTag) != TCL_OK)
     {
-      interp->result = "WARNING invalid transfTag? - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING invalid transfTag? - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
     
@@ -173,7 +173,7 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
          argi++;
          if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &massDens) != TCL_OK)
          {
-            interp->result = "WARNING invalid massDens - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+            blah->result = "WARNING invalid massDens - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
             return TCL_ERROR;
          } 
       }
@@ -184,21 +184,21 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
          argi++;
          if (argi == argc || Tcl_GetInt(interp, argv[argi++], &nMaxLocIters) != TCL_OK)
          {
-	    interp->result = "WARNING invalid nMaxLocIters - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+	    blah->result = "WARNING invalid nMaxLocIters - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
             return TCL_ERROR;
          } 
 
          // specify local tolerance 
          if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &locToler) != TCL_OK)
          {
-            interp->result = "WARNING invalid locToler - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+            blah->result = "WARNING invalid locToler - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
             return TCL_ERROR;
          } 
       }
       else
       {
-         interp->result = "WARNING bad command  - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
-         cerr << "invalid: " << argv[argi] << endl;
+         blah->result = "WARNING bad command  - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+         opserr << "invalid: " << argv[argi] << endln;
          return TCL_ERROR;
       }
     }
@@ -208,8 +208,8 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
 
     if (theCrdTransf == 0) 
     {
-       cerr << "WARNING TclElmtBuilder - frameElement - no geometric transformation found with tag ";
-       cerr << transfTag << endl;
+       opserr << "WARNING TclElmtBuilder - frameElement - no geometric transformation found with tag ";
+       opserr << transfTag << endln;
        return TCL_ERROR;
     }
         
@@ -218,8 +218,8 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
 
     if (theIntegration == 0) 
     {
-       cerr << "WARNING TclElmtBuilder - frameElement - no element integration found with tag ";
-       cerr << integrTag << endl;
+       opserr << "WARNING TclElmtBuilder - frameElement - no element integration found with tag ";
+       opserr << integrTag << endln;
        return TCL_ERROR;
     }
 /*      
@@ -227,8 +227,8 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
 
     if (theSection == 0) 
     {
-       cerr << "WARNING TclElmtBuilder - frameElement - no Section found with tag ";
-       cerr << secTag << endl;
+       opserr << "WARNING TclElmtBuilder - frameElement - no Section found with tag ";
+       opserr << secTag << endln;
        return TCL_ERROR;
     }
 
@@ -238,7 +238,7 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
     
     if (!sections)
     {
-      interp->result = "WARNING TclElmtBuilder - addFrameElement - Insufficient memory to create sections";
+      blah->result = "WARNING TclElmtBuilder - addFrameElement - Insufficient memory to create sections";
       return TCL_ERROR;
     }
 
@@ -246,7 +246,7 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
        sections[j] = theSection;
 */
     
-    // cerr << "massDens " << massDens << endl;
+    // opserr << "massDens " << massDens << endln;
      
     // construct the element
     
@@ -259,20 +259,20 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
     }   
     else
     {
-      interp->result = "WARNING TclElmtBuilder - addFrameElement - invalid elemType";
+      blah->result = "WARNING TclElmtBuilder - addFrameElement - invalid elemType";
       return TCL_ERROR;
     }
      
     if (element == 0)
     {
-      interp->result = "WARNING  TclElmtBuilder - addFrameElement - ran out of memory to create element";
+      blah->result = "WARNING  TclElmtBuilder - addFrameElement - ran out of memory to create element";
       return TCL_ERROR;
     }
    
    if (theTclModelBuilderDomain->addElement(element) == false) 
    {
-      cerr << "WARNING TclElmtBuilder - addFrameElement - could not add element to domain ";
-      cerr << eleTag << endl;
+      opserr << "WARNING TclElmtBuilder - addFrameElement - could not add element to domain ";
+      opserr << eleTag << endln;
       return TCL_ERROR;
     } 
   }
@@ -285,43 +285,43 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
         
     if (argc < 8)
     {
-      interp->result = "WARNING bad command - want: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING bad command - want: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
     int argi = 2;
     if (Tcl_GetInt(interp, argv[argi++], &eleTag) != TCL_OK)
     {
-      interp->result = "WARNING invalid eleTag: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING invalid eleTag: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[argi++], &iNode) != TCL_OK)
     {
-      interp->result = "WARNING invalid iNode: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING invalid iNode: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[argi++], &jNode) != TCL_OK)
     {
-      interp->result = "WARNING invalid jNode: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING invalid jNode: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[argi++], &numIntgrPts) != TCL_OK)
     {
-      interp->result = "WARNING invalid numIntgrPts: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING invalid numIntgrPts: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[argi++], &secTag) != TCL_OK)
     {
-      interp->result = "WARNING invalid secTag: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING invalid secTag: element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
    
     if (Tcl_GetInt(interp, argv[argi++], &transfTag) != TCL_OK)
     {
-      interp->result = "WARNING invalid transfTag - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+      blah->result = "WARNING invalid transfTag - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
       return TCL_ERROR;
     }
     
@@ -338,7 +338,7 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
          argi++;
          if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &massDens) != TCL_OK)
          {
-            interp->result = "WARNING invalid massDens - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+            blah->result = "WARNING invalid massDens - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
             return TCL_ERROR;
          } 
       }
@@ -349,21 +349,21 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
          argi++;
          if (argi == argc || Tcl_GetInt(interp, argv[argi++], &nMaxLocIters) != TCL_OK)
          {
-	    interp->result = "WARNING invalid nMaxLocIters - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+	    blah->result = "WARNING invalid nMaxLocIters - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
             return TCL_ERROR;
          } 
 
          // specify local tolerance 
          if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &locToler) != TCL_OK)
          {
-            interp->result = "WARNING invalid locToler - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
+            blah->result = "WARNING invalid locToler - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>";
             return TCL_ERROR;
          } 
       }
       else
       {
-         interp->result = "WARNING bad command  - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>"; 
-         cerr << "invalid: " << argv[argi] << endl;
+         blah->result = "WARNING bad command  - element nonlinearBeamColumn eleTag? iNode? jNode? integrTag? transfTag? <-mass massDens?> <-iter nMaxLocIters? locToler?>"; 
+         opserr << "invalid: " << argv[argi] << endln;
          return TCL_ERROR;
       }
     }
@@ -373,8 +373,8 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
 
     if (theCrdTransf == 0) 
     {
-       cerr << "WARNING TclElmtBuilder - frameElement - no geometric transformation found with tag ";
-       cerr << transfTag << endl;
+       opserr << "WARNING TclElmtBuilder - frameElement - no geometric transformation found with tag ";
+       opserr << transfTag << endln;
        return TCL_ERROR;
     }
     
@@ -382,8 +382,8 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
 
     if (theSection == 0) 
     {
-       cerr << "WARNING Tcl3dFrame - frameElement - no Section found with tag";
-       cerr << secTag << endl;
+       opserr << "WARNING Tcl3dFrame - frameElement - no Section found with tag";
+       opserr << secTag << endln;
        return TCL_ERROR;
     }
 
@@ -395,7 +395,7 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
     
     if (!sections)
     {
-      interp->result = "WARNING TclElmtBuilder - addFrameElement - Insufficient memory to create sections";
+      blah->result = "WARNING TclElmtBuilder - addFrameElement - Insufficient memory to create sections";
       return TCL_ERROR; 
     }
 
@@ -414,20 +414,20 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
     }
     else
     {
-       interp->result = "WARNING TclElmtBuilder - addFrameElement - invalid elemType";
+       blah->result = "WARNING TclElmtBuilder - addFrameElement - invalid elemType";
        return TCL_ERROR;
     }
      
     if (element == 0)
     {
-      interp->result = "WARNING  TclElmtBuilder - addFrameElement - ran out of memory to create element";
+      blah->result = "WARNING  TclElmtBuilder - addFrameElement - ran out of memory to create element";
       return TCL_ERROR;
     }
    
     if (theTclModelBuilderDomain->addElement(element) == false) 
     {
-      cerr << "WARNING TclElmtBuilder - addFrameElement - could not add element to domain ";
-      cerr << eleTag << endl;
+      opserr << "WARNING TclElmtBuilder - addFrameElement - could not add element to domain ";
+      opserr << eleTag << endln;
       return TCL_ERROR;
     }
     
@@ -435,7 +435,7 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
   
   else
   {
-     cerr << "WARNING NDM = " << NDM << " and NDF = " << NDF << "is imcompatible with available frame elements";
+     opserr << "WARNING NDM = " << NDM << " and NDF = " << NDF << "is imcompatible with available frame elements";
      return TCL_ERROR;
   }      
 
@@ -479,14 +479,14 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 	 
 	 if (argc < 3) 
 	 {
-       	    interp->result = "WARNING insufficient arguments - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>"; 
+       	    blah->result = "WARNING insufficient arguments - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>"; 
 	    return TCL_ERROR;
 	 }
 	    
          int argi = 2;  
          if (Tcl_GetInt(interp, argv[argi++], &crdTransfTag) != TCL_OK)
 	 {	
-	    interp->result = "WARNING invalid tag - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+	    blah->result = "WARNING invalid tag - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
 	    return  TCL_ERROR;
 	 }
 
@@ -501,7 +501,7 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 	       {
                   if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetI(i)) != TCL_OK) 
                   {
-                     interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+                     blah->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
 		     return TCL_ERROR;
                   }
 	       }
@@ -510,7 +510,7 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
                {
 	          if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetJ(i)) != TCL_OK) 
 		  {
-                     interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+                     blah->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
 		     return TCL_ERROR;
 		  }
                }
@@ -518,8 +518,8 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 	 
 	    else
 	    {
-               interp->result = "WARNING bad command - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
-               cerr << "invalid: " << argv[argi] << endl;
+               blah->result = "WARNING bad command - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+               opserr << "invalid: " << argv[argi] << endln;
                return TCL_ERROR;
             }
          }
@@ -538,26 +538,26 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
      	    crdTransf2d = new CorotCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
 	 else
          {
-            interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
+            blah->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
 	    return TCL_ERROR;
 	 }
      
 	 if (crdTransf2d == 0)
 	 {
-            interp->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
+            blah->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
 	    return TCL_ERROR;
 	 }
 
 	 // add the transformation to the modelBuilder
 	 if (theTclModelBuilder->addCrdTransf2d(*crdTransf2d)) 
 	 {
-             interp->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
+             blah->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
              return TCL_ERROR;
          }
       }
       else
       {
-         interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid geomTransf type";
+         blah->result = "WARNING TclElmtBuilder - addGeomTransf - invalid geomTransf type";
          return TCL_ERROR;
       }
    }
@@ -571,32 +571,32 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 
 	 if (argc < 6) 
 	 {
-       	    interp->result = "WARNING insufficient arguments - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+       	    blah->result = "WARNING insufficient arguments - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
 	    return TCL_ERROR;
 	 }
 	    
          int argi = 2;  
          if (Tcl_GetInt(interp, argv[argi++], &crdTransfTag) != TCL_OK)
 	 {	
-	    interp->result = "WARNING invalid tag - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+	    blah->result = "WARNING invalid tag - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
 	    return  TCL_ERROR;
 	 }
 
 	 if (Tcl_GetDouble(interp, argv[argi++], &vecxzPlane(0)) != TCL_OK)
 	 {
-             interp->result = "WARNING invalid vecxzPlaneX - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+             blah->result = "WARNING invalid vecxzPlaneX - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
 	     return TCL_ERROR;
 	 }
    
          if (Tcl_GetDouble(interp, argv[argi++], &vecxzPlane(1)) != TCL_OK)
 	 {
-             interp->result = "WARNING invalid vecxzPlaneY - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+             blah->result = "WARNING invalid vecxzPlaneY - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
 	     return TCL_ERROR;
 	 }
   
          if (Tcl_GetDouble(interp, argv[argi++], &vecxzPlane(2)) != TCL_OK)
 	 {
-             interp->result = "WARNING invalid vecxzPlaneZ - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+             blah->result = "WARNING invalid vecxzPlaneZ - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
 	     return TCL_ERROR;
 	 }
   
@@ -612,7 +612,7 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 	       {
                   if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetI(i)) != TCL_OK) 
                   {
-                     interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >"; 
+                     blah->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >"; 
 		     return TCL_ERROR;
                   }
 	       }
@@ -621,7 +621,7 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
                {
 	          if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetJ(i)) != TCL_OK) 
 		  {
-                     interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";  
+                     blah->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";  
 		     return TCL_ERROR;
 		  }
                }
@@ -629,8 +629,8 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 	 
 	    else
 	    {
-               interp->result = "WARNING bad command - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >"; 
-               cerr << "invalid: " << argv[argi] << endl;
+               blah->result = "WARNING bad command - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >"; 
+               opserr << "invalid: " << argv[argi] << endln;
                return TCL_ERROR;
             }
          }
@@ -639,7 +639,7 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
     
          CrdTransf3d *crdTransf3d;
 	 
-	 cerr << " transftype: " << argv[1];
+	 opserr << " transftype: " << argv[1];
 
 	 if (strcmp(argv[1],"Linear") == 0)
      	    crdTransf3d = new LinearCrdTransf3d(crdTransfTag, vecxzPlane, jntOffsetI, jntOffsetJ, 0);
@@ -651,34 +651,34 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
      	    crdTransf3d = new CorotCrdTransf3d(crdTransfTag, vecxzPlane, jntOffsetI, jntOffsetJ);
 	 else
          {
-            interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
+            blah->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
 	    return TCL_ERROR;
 	 }
      
 	 if (crdTransf3d == 0)
 	 {
-            interp->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
+            blah->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
 	    return TCL_ERROR;
 	 }
-	 cerr << "crdTransf3d: " << *crdTransf3d;
+	 opserr << "crdTransf3d: " << *crdTransf3d;
 
 	 // add the transformation to the modelBuilder
 	 if (theTclModelBuilder->addCrdTransf3d(*crdTransf3d)) 
 	 {
-             interp->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
+             blah->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
 
              return TCL_ERROR;
          }
       }
       else 
       {
-         interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid geomTransf type ";
+         blah->result = "WARNING TclElmtBuilder - addGeomTransf - invalid geomTransf type ";
          return TCL_ERROR;
       }
   }
   else
   {
-     cerr << "WARNING NDM = " << NDM << " and NDF = " << NDF << "is imcompatible with available frame elements";
+     opserr << "WARNING NDM = " << NDM << " and NDF = " << NDF << "is imcompatible with available frame elements";
      return TCL_ERROR;
   }      
 
@@ -715,33 +715,33 @@ TclModelBuilder_addBeamColumnIntegrat(ClientData clientData, Tcl_Interp *interp,
 	 
 	 if (argc < 5) 
 	 {
-       	    interp->result = "WARNING insufficient arguments - want: elemIntegrat type? tag? numIntgrPts? sectTag1? sectTag2? ... sectTagN?"; 
+       	    blah->result = "WARNING insufficient arguments - want: elemIntegrat type? tag? numIntgrPts? sectTag1? sectTag2? ... sectTagN?"; 
 	    return TCL_ERROR;
 	 }
 	    
          int argi = 2;  
          if (Tcl_GetInt(interp, argv[argi++], &integrTag) != TCL_OK)
 	 {	
-	    interp->result = "WARNING invalid tag - want: elemIntegrat type? tag? numIntgrPts? sectTag1? sectTag2? ... sectTagN?"; 
+	    blah->result = "WARNING invalid tag - want: elemIntegrat type? tag? numIntgrPts? sectTag1? sectTag2? ... sectTagN?"; 
 	    return  TCL_ERROR;
 	 }
 
          if (Tcl_GetInt(interp, argv[argi++], &numIntgrPts) != TCL_OK)
 	 {	
-	    interp->result = "WARNING invalid tag - want: elemIntegrat type? tag? numIntgrPts? sectTag1? sectTag2? ... sectTagN?"; 
+	    blah->result = "WARNING invalid tag - want: elemIntegrat type? tag? numIntgrPts? sectTag1? sectTag2? ... sectTagN?"; 
 	    return  TCL_ERROR;
 	 }
 
 	 if (integrTag < 2)
 	 {	
-	    interp->result = "WARNING invalid numIntgrPts. Must be > 1";
+	    blah->result = "WARNING invalid numIntgrPts. Must be > 1";
 	    return  TCL_ERROR;
 	 }    
 	 ID sectTags(numIntgrPts);
 	 
 	 if (Tcl_GetInt(interp, argv[argi++], &sectTags(0)) != TCL_OK)
 	 {	
-	    interp->result = "WARNING invalid tag - want: elemIntegrat type? tag? numIntgrPts? sectTag1? sectTag2? ... sectTagN?"; 
+	    blah->result = "WARNING invalid tag - want: elemIntegrat type? tag? numIntgrPts? sectTag1? sectTag2? ... sectTagN?"; 
 	    return  TCL_ERROR;
 	 }
 	 
@@ -758,7 +758,7 @@ TclModelBuilder_addBeamColumnIntegrat(ClientData clientData, Tcl_Interp *interp,
 	       {
                   if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetI(i)) != TCL_OK) 
                   {
-                     interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+                     blah->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
 		     return TCL_ERROR;
                   }
 	       }
@@ -767,7 +767,7 @@ TclModelBuilder_addBeamColumnIntegrat(ClientData clientData, Tcl_Interp *interp,
                {
 	          if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetJ(i)) != TCL_OK) 
 		  {
-                     interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+                     blah->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
 		     return TCL_ERROR;
 		  }
                }
@@ -775,8 +775,8 @@ TclModelBuilder_addBeamColumnIntegrat(ClientData clientData, Tcl_Interp *interp,
 	 
 	    else
 	    {
-               interp->result = "WARNING bad command - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
-               cerr << "invalid: " << argv[argi] << endl;
+               blah->result = "WARNING bad command - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+               opserr << "invalid: " << argv[argi] << endln;
                return TCL_ERROR;
             }
          }
@@ -795,26 +795,26 @@ TclModelBuilder_addBeamColumnIntegrat(ClientData clientData, Tcl_Interp *interp,
      	    crdTransf2d = new CorotCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
 	 else
          {
-            interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
+            blah->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
 	    return TCL_ERROR;
 	 }
      
 	 if (crdTransf2d == 0)
 	 {
-            interp->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
+            blah->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
 	    return TCL_ERROR;
 	 }
 
 	 // add the transformation to the modelBuilder
 	 if (theTclModelBuilder->addCrdTransf2d(*crdTransf2d)) 
 	 {
-             interp->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
+             blah->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
              return TCL_ERROR;
          }
       }
       else
       {
-         interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid geomTransf type";
+         blah->result = "WARNING TclElmtBuilder - addGeomTransf - invalid geomTransf type";
          return TCL_ERROR;
       }
    }
@@ -828,32 +828,32 @@ TclModelBuilder_addBeamColumnIntegrat(ClientData clientData, Tcl_Interp *interp,
 
 	 if (argc < 6) 
 	 {
-       	    interp->result = "WARNING insufficient arguments - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+       	    blah->result = "WARNING insufficient arguments - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
 	    return TCL_ERROR;
 	 }
 	    
          int argi = 2;  
          if (Tcl_GetInt(interp, argv[argi++], &crdTransfTag) != TCL_OK)
 	 {	
-	    interp->result = "WARNING invalid tag - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+	    blah->result = "WARNING invalid tag - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
 	    return  TCL_ERROR;
 	 }
 
 	 if (Tcl_GetDouble(interp, argv[argi++], &vecxzPlane(0)) != TCL_OK)
 	 {
-             interp->result = "WARNING invalid vecxzPlaneX - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+             blah->result = "WARNING invalid vecxzPlaneX - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
 	     return TCL_ERROR;
 	 }
    
          if (Tcl_GetDouble(interp, argv[argi++], &vecxzPlane(1)) != TCL_OK)
 	 {
-             interp->result = "WARNING invalid vecxzPlaneY - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+             blah->result = "WARNING invalid vecxzPlaneY - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
 	     return TCL_ERROR;
 	 }
   
          if (Tcl_GetDouble(interp, argv[argi++], &vecxzPlane(2)) != TCL_OK)
 	 {
-             interp->result = "WARNING invalid vecxzPlaneZ - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+             blah->result = "WARNING invalid vecxzPlaneZ - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
 	     return TCL_ERROR;
 	 }
   
@@ -869,7 +869,7 @@ TclModelBuilder_addBeamColumnIntegrat(ClientData clientData, Tcl_Interp *interp,
 	       {
                   if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetI(i)) != TCL_OK) 
                   {
-                     interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >"; 
+                     blah->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >"; 
 		     return TCL_ERROR;
                   }
 	       }
@@ -878,7 +878,7 @@ TclModelBuilder_addBeamColumnIntegrat(ClientData clientData, Tcl_Interp *interp,
                {
 	          if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetJ(i)) != TCL_OK) 
 		  {
-                     interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";  
+                     blah->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";  
 		     return TCL_ERROR;
 		  }
                }
@@ -886,8 +886,8 @@ TclModelBuilder_addBeamColumnIntegrat(ClientData clientData, Tcl_Interp *interp,
 	 
 	    else
 	    {
-               interp->result = "WARNING bad command - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >"; 
-               cerr << "invalid: " << argv[argi] << endl;
+               blah->result = "WARNING bad command - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >"; 
+               opserr << "invalid: " << argv[argi] << endln;
                return TCL_ERROR;
             }
          }
@@ -896,7 +896,7 @@ TclModelBuilder_addBeamColumnIntegrat(ClientData clientData, Tcl_Interp *interp,
     
          CrdTransf3d *crdTransf3d;
 	 
-	 cerr << " transftype: " << argv[1];
+	 opserr << " transftype: " << argv[1];
 
 	 if (strcmp(argv[1],"Linear") == 0)
      	    crdTransf3d = new LinearCrdTransf3d(crdTransfTag, vecxzPlane, jntOffsetI, jntOffsetJ, 0);
@@ -908,34 +908,34 @@ TclModelBuilder_addBeamColumnIntegrat(ClientData clientData, Tcl_Interp *interp,
      	    crdTransf3d = new CorotCrdTransf3d(crdTransfTag, vecxzPlane, jntOffsetI, jntOffsetJ);
 	 else
          {
-            interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
+            blah->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
 	    return TCL_ERROR;
 	 }
      
 	 if (crdTransf3d == 0)
 	 {
-            interp->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
+            blah->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
 	    return TCL_ERROR;
 	 }
-	 cerr << "crdTransf3d: " << *crdTransf3d;
+	 opserr << "crdTransf3d: " << *crdTransf3d;
 
 	 // add the transformation to the modelBuilder
 	 if (theTclModelBuilder->addCrdTransf3d(*crdTransf3d)) 
 	 {
-             interp->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
+             blah->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
 
              return TCL_ERROR;
          }
       }
       else 
       {
-         interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid geomTransf type ";
+         blah->result = "WARNING TclElmtBuilder - addGeomTransf - invalid geomTransf type ";
          return TCL_ERROR;
       }
   }
   else
   {
-     cerr << "WARNING NDM = " << NDM << " and NDF = " << NDF << "is imcompatible with available frame elements";
+     opserr << "WARNING NDM = " << NDM << " and NDF = " << NDF << "is imcompatible with available frame elements";
      return TCL_ERROR;
   }      
 

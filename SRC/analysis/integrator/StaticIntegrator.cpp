@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:33:29 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/StaticIntegrator.cpp,v $
                                                                         
                                                                         
@@ -84,8 +84,8 @@ int
 StaticIntegrator::formNodTangent(DOF_Group *theDof)
 {
     // should never be called
-    cerr << "StaticIntegrator::formNodTangent() -";
-    cerr << " this method should never have been called!\n";
+    opserr << "StaticIntegrator::formNodTangent() -";
+    opserr << " this method should never have been called!\n";
     return -1;
 }    
 

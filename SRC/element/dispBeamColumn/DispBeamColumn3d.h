@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-19 21:31:32 $
+// $Revision: 1.10 $
+// $Date: 2003-02-14 23:01:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.h,v $
 
 // Written: MHS
@@ -86,7 +86,7 @@ class DispBeamColumn3d : public Element
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
 
 	Response *setResponse(char **argv, int argc, Information &eleInfo);
     int getResponse(int responseID, Information &eleInfo);

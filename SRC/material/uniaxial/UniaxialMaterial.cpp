@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-10 23:04:03 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -38,7 +38,6 @@
 #include <string.h>
 #include <Information.h>
 #include <MaterialResponse.h>
-#include <G3Globals.h>
 #include <float.h>
 #include <Vector.h>
 
@@ -60,7 +59,10 @@ UniaxialMaterial::setTrial(double strain, double &stress, double &tangent, doubl
   if (res == 0) {
     stress = this->getStress();
     tangent = this->getTangent();
+  } else {
+    opserr << "BARF\n";
   }
+
   return res;
 }
 

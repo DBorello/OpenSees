@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2001-12-11 20:09:35 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonLineSearch.h,v $
 
 // Written: fmk 
@@ -56,7 +56,7 @@ class NewtonLineSearch: public EquiSolnAlgo
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
 
-    void Print(ostream &s, int flag =0);    
+    void Print(OPS_Stream &s, int flag =0);    
     
   protected:
     

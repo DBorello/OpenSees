@@ -29,8 +29,6 @@
 #include <basics.h>
 #include <math.h>
 
-#include <G3Globals.h>
-
 //================================================================================
 // Normal constructor
 //================================================================================
@@ -81,7 +79,7 @@ tensor MDPotentialSurface01::dQods(const EPState *EPS) const {
     n = temp_f1 * (1.0 / temp_f3 );
   }
   else {
-    g3ErrorHandler->fatal("MDPotentialSurface01::dQods  |n_ij| = 0, divide by zero! Program exits.");
+    opserr << "MDPotentialSurface01::dQods  |n_ij| = 0, divide by zero! Program exits.\n";
     exit(-1);
     //::printf(" \n\n n_ij not defined!!!! Program exits\n");
     //exit(1);
@@ -112,7 +110,7 @@ tensor MDPotentialSurface01::d2Qods2(const EPState *EPS) const
   tensor S = stress.deviator();
   double p = stress.p_hydrostatic();
   p = p -  Pc;
-  cerr << " p = " << p << endln;
+  opserr << " p = " << p << endln;
   
   tensor alpha = EPS->getTensorVar( 1 ); //the first tensor hardening var is alpha_ij
 	   
@@ -126,7 +124,7 @@ tensor MDPotentialSurface01::d2Qods2(const EPState *EPS) const
     n = temp_f1 * (1.0 / temp_f3 );
   }
   else {
-    g3ErrorHandler->fatal("MDPotentialSurface01::dQods  |n_ij| = 0, divide by zero! Program exits.");
+    opserr << "MDPotentialSurface01::dQods  |n_ij| = 0, divide by zero! Program exits.\n";
     exit(-1);
     //::printf(" \n\n n_ij not defined!!!! Program exits\n");
     //exit(1);
@@ -141,7 +139,7 @@ tensor MDPotentialSurface01::d2Qods2(const EPState *EPS) const
 
   if (p < 0.0)
   {
-     g3ErrorHandler->fatal("MDPotentialSurface01::d2Qods2  p < 0, Program exits.");
+    opserr << "MDPotentialSurface01::d2Qods2  p < 0, Program exits.\n";
      exit(-1);
   }
   double ec = 0.80 - 0.025 * log( p / 160 );
@@ -329,7 +327,7 @@ tensor MDPotentialSurface01::dthetaoverds(const EPState *EPS) const
    return ret;
 }
 
-ostream& operator<< (ostream& os, const MDPotentialSurface01 &PS)
+OPS_Stream& operator<< (OPS_Stream& os, const MDPotentialSurface01 &PS)
 {
    os << "Manzari-Dafalias Potential Surface 01( with Pc) Parameters: " << endln;
    os << "Pc = " << PS.Pc << endln;

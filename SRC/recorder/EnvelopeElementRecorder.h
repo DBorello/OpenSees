@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-12-13 00:06:14 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.h,v $
                                                                         
 #ifndef EnvelopeElementRecorder_h
@@ -30,10 +30,12 @@
 // What: "@(#) EnvelopeElementRecorder.h, revA"
 
 #include <Recorder.h>
-#include <fstream.h>
+
+#include <fstream>
+using std::ofstream;
 
 #include <Information.h>
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <ID.h>
 
 

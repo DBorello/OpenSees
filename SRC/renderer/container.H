@@ -1,7 +1,7 @@
 #ifndef CONTAINER_H
 #define CONTAINER_H
 
-#include <iostream.h>
+#include <OPS_Globals.h>
 
 template <class T> class LIST_CONTAINER
 {
@@ -163,7 +163,7 @@ public:
     {
       if (sentinel->next == sentinel)
 	{
-	  cerr << "List is empty, cannot remove head" << endl;
+	  opserr << "List is empty, cannot remove head" << endln;
 	  return 0;
 	}
       if (current == sentinel->next)
@@ -180,7 +180,7 @@ public:
     {
       if (sentinel->previous == sentinel)
 	{
-	  cerr << "List is empty, cannot remove tail" << endl;
+	  opserr << "List is empty, cannot remove tail" << endln;
 	  return 0;
 	}
       if (current == sentinel->previous)
@@ -202,7 +202,7 @@ public:
     {
       if (order == NOT_SORTED)
 	{
-	  cerr << "Calling AddSorted on an unsorted list" << endl;
+	  opserr << "Calling AddSorted on an unsorted list" << endln;
 	  return -1;
 	}
       LIST_CONTAINER<T> *ptr;
@@ -241,7 +241,7 @@ public:
     {
       if (order == NOT_SORTED)
 	{
-	  cerr << "Calling Resort on an unsorted list" << endl;
+	  opserr << "Calling Resort on an unsorted list" << endln;
 	  return;
 	}
       LIST_CONTAINER<T> *ptr1, *ptr2, *oldNext;
@@ -293,7 +293,7 @@ public:
     {
       if (numEntries == 0)
 	{
-	  cerr << "ERROR: Tried to Pop an empty list." << endl;
+	  opserr << "ERROR: Tried to Pop an empty list." << endln;
 	  return 0;
 	}
       if (current == sentinel->next)
@@ -373,7 +373,7 @@ public:
     {
       if (current == sentinel)
 	{
-	  cerr << "Cannot remove sentinel" << endl;
+	  opserr << "Cannot remove sentinel" << endln;
 	  return 0;
 	}
       LIST_CONTAINER<T> *newCurrent = current->next;

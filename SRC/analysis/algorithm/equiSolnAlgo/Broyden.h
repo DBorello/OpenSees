@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-06-14 05:17:41 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Broyden.h,v $
                                                                         
 #ifndef Broyden_h
@@ -63,7 +63,7 @@ class Broyden: public EquiSolnAlgo
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
 
-    void Print(ostream &s, int flag =0);    
+    void Print(OPS_Stream &s, int flag =0);    
     
   protected:
     

@@ -80,9 +80,9 @@ Vector \&V) const; } \\
 \indent {\em Matrix operator{ }$\hat{ }$(const Matrix \&M) const;} \\ 
 \indent {\em Matrix \&operator+=(const Matrix \&M); } \\
 \indent {\em Matrix \&operator-=(const Matrix \&M); } \\
-\indent {\em void Output(ostream \&s) const;} \\
+\indent {\em void Output(OPS_Stream \&s) const;} \\
 \indent {\em void Input(istream \&s);} \\
-\indent {\em friend ostream \&operator$<<$(ostream \&s, const
+\indent {\em friend OPS_Stream \&operator$<<$(OPS_Stream \&s, const
 Matrix \&M);} \\ 
 \indent {\em friend istream \&operator$>>$(istream \&s, const
 Matrix \&M);} \\ 
@@ -325,19 +325,19 @@ for the type of the current Matrix, to see whether the performance can
 be improved by avoiding having to call the overloaded (i,j) operators,
 if {\em M} is of type genMatrix. \\
 
-\indent {\em void Output(ostream \&s) const;} \\
+\indent {\em void Output(OPS_Stream \&s) const;} \\
 To print the contents of the Matrix to the output stream {\em s}. The
 method will print the contents one row at a time. \\ 
 
 \indent {\em void Input(istream \&s);} \\
 To read the contents of the Matrix from the input stream {\em s}. The method expects the components one row at a time. \\
 
-{\em friend ostream \&operator$<<$(ostream \&s, const Matrix \&M);} \\
+{\em friend OPS_Stream \&operator$<<$(OPS_Stream \&s, const Matrix \&M);} \\
 A function to print out the contents of the Matrix {\em M} to the
 output stream {\em s}. Does this by invoking {\em Output()} on the
 Matrix {\em M}.\\ 
 
-{\em friend ostream \&operator$>>$(istream \&s, const Matrix \&M);} \\
+{\em friend OPS_Stream \&operator$>>$(istream \&s, const Matrix \&M);} \\
 A function to print out the contents of the Matrix {\em M} to the
 output stream {\em s}. Does this by invoking {\em Output()} on the
 Matrix {\em M}.\\ 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-10-24 22:26:14 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/PeriodicNewton.h,v $
 
 #ifndef PeriodicNewton_h
@@ -54,7 +54,7 @@ class PeriodicNewton: public EquiSolnAlgo
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
 
-    void Print(ostream &s, int flag =0);    
+    void Print(OPS_Stream &s, int flag =0);    
     
   protected:
     

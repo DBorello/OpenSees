@@ -1,6 +1,6 @@
 include ../../Makefile.def
 
-OBJS       =ErrorHandler.o ConsoleErrorHandler.o
+OBJS       = OPS_Stream.o StandardStream.o FileStream.o
 
 # Compilation control
 

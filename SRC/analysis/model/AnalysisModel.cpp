@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-12-16 21:17:50 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:00:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -75,16 +75,16 @@ AnalysisModel::AnalysisModel()
 
   theFEs = new FE_Element *[sizeEle];
   if (theFEs == 0) {
-      cerr << "FATAL:AnalysisModel::AnalysisModel()";
-      cerr << " ran out of memory creating array for FE_Elements\n";
+      opserr << "FATAL:AnalysisModel::AnalysisModel()";
+      opserr << " ran out of memory creating array for FE_Elements\n";
       exit(-1);
   }
   for (int i=0; i<sizeEle; i++) theFEs[i] = 0;
 
   theDOFs = new DOF_Group *[sizeDOF];
   if (theDOFs == 0) {
-      cerr << "FATAL:AnalysisModel::AnalysisModel()";
-      cerr << " ran out of memory creating array for DOF_Groups\n";
+      opserr << "FATAL:AnalysisModel::AnalysisModel()";
+      opserr << " ran out of memory creating array for DOF_Groups\n";
       exit(-1);
   }
   for (int j=0; j<sizeDOF; j++) theDOFs[j] = 0;
@@ -134,8 +134,8 @@ AnalysisModel::addFE_Element(FE_Element *theElement)
       int newArraySize = 2 * sizeEle;
       FE_Element **newArray = new FE_Element *[newArraySize];
       if (newArray == 0) {
-	  cerr << "AnalysisModel::addFE_Element -";
-	  cerr << "could not allocate enough memory for new array\n";
+	  opserr << "AnalysisModel::addFE_Element -";
+	  opserr << "could not allocate enough memory for new array\n";
 	  exit(-1);
       }
       
@@ -182,8 +182,8 @@ AnalysisModel::addDOF_Group(DOF_Group *theDOF_Group)
       int newArraySize = 2 * sizeDOF;
       DOF_Group **newArray = new DOF_Group *[newArraySize];
       if (newArray == 0) {
-	  cerr << "AnalysisModel::addDOF_Group -";
-	  cerr << "could not allocate enough memory for new array\n";
+	  opserr << "AnalysisModel::addDOF_Group -";
+	  opserr << "could not allocate enough memory for new array\n";
 	  exit(-1);
       }      
       int i;
@@ -422,7 +422,7 @@ AnalysisModel::applyLoadDomain(double pseudoTime)
     // check to see there is a Domain linked to the Model
 
     if (myDomain == 0) {
-	cerr << "WARNING: AnalysisModel::applyLoadDomain. No Domain linked.\n";
+	opserr << "WARNING: AnalysisModel::applyLoadDomain. No Domain linked.\n";
 	return;
     }
 
@@ -437,7 +437,7 @@ AnalysisModel::updateDomain(void)
     // check to see there is a Domain linked to the Model
 
     if (myDomain == 0) {
-	cerr << "WARNING: AnalysisModel::updateDomain. No Domain linked.\n";
+	opserr << "WARNING: AnalysisModel::updateDomain. No Domain linked.\n";
 	return -1;
     }
 
@@ -453,7 +453,7 @@ AnalysisModel::updateDomain(double newTime, double dT)
     // check to see there is a Domain linked to the Model
 
     if (myDomain == 0) {
-	cerr << "WARNING: AnalysisModel::updateDomain. No Domain linked.\n";
+	opserr << "WARNING: AnalysisModel::updateDomain. No Domain linked.\n";
 	return -1;
     }
 
@@ -469,13 +469,13 @@ AnalysisModel::commitDomain(void)
 {
     // check to see there is a Domain linked to the Model
     if (myDomain == 0) {
-	cerr << "WARNING: AnalysisModel::commitDomain. No Domain linked.\n";
+	opserr << "WARNING: AnalysisModel::commitDomain. No Domain linked.\n";
 	return -1;
     }
 
     // invoke the method
     if (myDomain->commit() < 0) {
-	cerr << "WARNING: AnalysisModel::commitDomain - Domain::commit() failed\n";
+	opserr << "WARNING: AnalysisModel::commitDomain - Domain::commit() failed\n";
 	return -2;
     }	
 
@@ -488,15 +488,15 @@ AnalysisModel::revertDomainToLastCommit(void)
     // check to see there is a Domain linked to the Model
 
     if (myDomain == 0) {
-	cerr << "WARNING: AnalysisModel::revertDomainToLastCommit.";
-	cerr << " No Domain linked.\n";
+	opserr << "WARNING: AnalysisModel::revertDomainToLastCommit.";
+	opserr << " No Domain linked.\n";
 	return -1;
     }
 
     // invoke the method
     if (myDomain->revertToLastCommit() < 0) {
-	cerr << "WARNING: AnalysisModel::revertDomainToLastCommit.";
-	cerr << " Domain::revertToLastCommit() failed.\n";
+	opserr << "WARNING: AnalysisModel::revertDomainToLastCommit.";
+	opserr << " Domain::revertToLastCommit() failed.\n";
 	return -2;
     }	
     return 0;
@@ -508,8 +508,8 @@ AnalysisModel::getCurrentDomainTime(void)
     // check to see there is a Domain linked to the Model
 
     if (myDomain == 0) {
-	cerr << "WARNING: AnalysisModel::getCurrentDomainTime.";
-	cerr << " No Domain linked.\n";
+	opserr << "WARNING: AnalysisModel::getCurrentDomainTime.";
+	opserr << " No Domain linked.\n";
 	return 0.0;
     }
 
@@ -522,8 +522,8 @@ void
 AnalysisModel::setCurrentDomainTime(double newTime)
 {
     if (myDomain == 0) {
-	cerr << "WARNING: AnalysisModel::getCurrentDomainTime.";
-	cerr << " No Domain linked.\n";
+	opserr << "WARNING: AnalysisModel::getCurrentDomainTime.";
+	opserr << " No Domain linked.\n";
     }
 
     // invoke the method
@@ -536,8 +536,8 @@ void
 AnalysisModel::setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc)
 {
     if (myDomain == 0) {
-	cerr << "WARNING: AnalysisModel::getCurrentDomainTime.";
-	cerr << " No Domain linked.\n";
+	opserr << "WARNING: AnalysisModel::getCurrentDomainTime.";
+	opserr << " No Domain linked.\n";
     }
 
     // invoke the method

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-07-12 18:14:36 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/MinMaxMaterial.cpp,v $
 
 // Written: MHS
@@ -34,7 +34,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 MinMaxMaterial::MinMaxMaterial(int tag, UniaxialMaterial &material,
 			       double min, double max)
@@ -43,9 +43,10 @@ MinMaxMaterial::MinMaxMaterial(int tag, UniaxialMaterial &material,
 {
   theMaterial = material.getCopy();
 
-  if (theMaterial == 0)
-    g3ErrorHandler->fatal("%s -- failed to get copy of material",
-			  "MinMaxMaterial::MinMaxMaterial");
+  if (theMaterial == 0) {
+    opserr <<  "MinMaxMaterial::MinMaxMaterial -- failed to get copy of material\n";
+    exit(-1);
+  }
 }
 
 MinMaxMaterial::MinMaxMaterial()
@@ -177,7 +178,7 @@ MinMaxMaterial::sendSelf(int cTag, Channel &theChannel)
   }
   dataID(2) = matDbTag;
   if (theChannel.sendID(dbTag, cTag, dataID) < 0) {
-    cerr << "MinMaxMaterial::sendSelf() - failed to send the ID\n";
+    opserr << "MinMaxMaterial::sendSelf() - failed to send the ID\n";
     return -1;
   }
 
@@ -190,12 +191,12 @@ MinMaxMaterial::sendSelf(int cTag, Channel &theChannel)
     dataVec(2) = 0.0;
 
   if (theChannel.sendVector(dbTag, cTag, dataVec) < 0) {
-    cerr << "MinMaxMaterial::sendSelf() - failed to send the Vector\n";
+    opserr << "MinMaxMaterial::sendSelf() - failed to send the Vector\n";
     return -2;
   }
 
   if (theMaterial->sendSelf(cTag, theChannel) < 0) {
-    cerr << "MinMaxMaterial::sendSelf() - failed to send the Material\n";
+    opserr << "MinMaxMaterial::sendSelf() - failed to send the Material\n";
     return -3;
   }
 
@@ -210,7 +211,7 @@ MinMaxMaterial::recvSelf(int cTag, Channel &theChannel,
 
   static ID dataID(3);
   if (theChannel.recvID(dbTag, cTag, dataID) < 0) {
-    cerr << "MinMaxMaterial::recvSelf() - failed to get the ID\n";
+    opserr << "MinMaxMaterial::recvSelf() - failed to get the ID\n";
     return -1;
   }
   this->setTag(int(dataID(0)));
@@ -220,8 +221,8 @@ MinMaxMaterial::recvSelf(int cTag, Channel &theChannel,
     int matClassTag = int(dataID(1));
     theMaterial = theBroker.getNewUniaxialMaterial(matClassTag);
     if (theMaterial == 0) {
-      cerr << "MinMaxMaterial::recvSelf() - failed to create Material with classTag " 
-	   << dataID(0) << endl;
+      opserr << "MinMaxMaterial::recvSelf() - failed to create Material with classTag " 
+	   << dataID(0) << endln;
       return -2;
     }
   }
@@ -229,7 +230,7 @@ MinMaxMaterial::recvSelf(int cTag, Channel &theChannel,
 
   static Vector dataVec(3);
   if (theChannel.recvVector(dbTag, cTag, dataVec) < 0) {
-    cerr << "MinMaxMaterial::recvSelf() - failed to get the Vector\n";
+    opserr << "MinMaxMaterial::recvSelf() - failed to get the Vector\n";
     return -3;
   }
 
@@ -244,17 +245,17 @@ MinMaxMaterial::recvSelf(int cTag, Channel &theChannel,
   Tfailed = Cfailed;
 
   if (theMaterial->recvSelf(cTag, theChannel, theBroker) < 0) {
-    cerr << "MinMaxMaterial::recvSelf() - failed to get the Material\n";
+    opserr << "MinMaxMaterial::recvSelf() - failed to get the Material\n";
     return -4;
   }
   return 0;
 }
 
 void 
-MinMaxMaterial::Print(ostream &s, int flag)
+MinMaxMaterial::Print(OPS_Stream &s, int flag)
 {
-  s << "MinMaxMaterial tag: " << this->getTag() << endl;
-  s << "\tMaterial: " << theMaterial->getTag() << endl;
-  s << "\tMin strain: " << minStrain << endl;
-  s << "\tMax strain: " << maxStrain << endl;
+  s << "MinMaxMaterial tag: " << this->getTag() << endln;
+  s << "\tMaterial: " << theMaterial->getTag() << endln;
+  s << "\tMin strain: " << minStrain << endln;
+  s << "\tMax strain: " << maxStrain << endln;
 }

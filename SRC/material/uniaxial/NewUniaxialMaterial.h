@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-10 23:04:00 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/NewUniaxialMaterial.h,v $
 
 // Written: MHS
@@ -58,7 +58,7 @@ class NewUniaxialMaterial : public UniaxialMaterial
   int recvSelf(int commitTag, Channel &theChannel, 
 	       FEM_ObjectBroker &theBroker);    
   
-  void Print(ostream &s, int flag =0);
+  void Print(OPS_Stream &s, int flag =0);
   
  protected:
   

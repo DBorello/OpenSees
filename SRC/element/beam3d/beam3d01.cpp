@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-16 21:10:00 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/beam3d01.cpp,v $
                                                                         
                                                                         
@@ -145,13 +145,13 @@ beam3d01::getStiff(void)
 	Node *end2Ptr = theDomain->getNode(Nd2);	
 
 	if (end1Ptr == 0) {
-	    cerr << "beam3d01::getStiff: Nd1: ";
-	    cerr << Nd1 << "does not exist in model\n";
+	    opserr << "beam3d01::getStiff: Nd1: ";
+	    opserr << Nd1 << "does not exist in model\n";
 	    exit(0);
 	}
 	if (end2Ptr == 0) {
-	    cerr << "beam3d01::getStiff: Nd2: ";
-	    cerr << Nd2 << "does not exist in model\n";
+	    opserr << "beam3d01::getStiff: Nd2: ";
+	    opserr << Nd2 << "does not exist in model\n";
 	    exit(0);
 	}
 	
@@ -170,8 +170,8 @@ beam3d01::getStiff(void)
 	double L2 = L*L;
 	double L3 = L*L*L;
 	if (L == 0.0) {
-	    cerr << "Element: " << this->getTag();
-	    cerr << " beam3d01::getStiff: 0 length\n";
+	    opserr << "Element: " << this->getTag();
+	    opserr << " beam3d01::getStiff: 0 length\n";
 	    return k;  
 	}
 	
@@ -346,8 +346,8 @@ beam3d01::getStiff(void)
 	    k(11,11) = G*Jx/L;	    
 	}	    
 	else {
-	    cerr << "beam3d01::getStiff - NOT FINISHED";
-	    cerr << " members not located along global axis directions\n";
+	    opserr << "beam3d01::getStiff - NOT FINISHED";
+	    opserr << " members not located along global axis directions\n";
 	    exit(0);
 	    
 	}
@@ -367,8 +367,7 @@ beam3d01::zeroLoad(void)
 int 
 beam3d01::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("beam3d01::addLoad() - beam %d, load type not handledx\n", 
-			  this->getTag());
+  opserr << "beam3d01::addLoad() - beam " << this->getTag() << "load type unknown\n";
   return -1;
 }
 
@@ -468,7 +467,7 @@ beam3d01::sendSelf(int commitTag, Channel &theChannel)
     int result = 0;
     result = theChannel.sendVector(dataTag, commitTag, data);
     if (result < 0) {
-	cerr << "beam3d01::sendSelf - failed to send data\n";
+	opserr << "beam3d01::sendSelf - failed to send data\n";
 	return -1;
     }
     
@@ -484,7 +483,7 @@ beam3d01::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 
     result = theChannel.recvVector(dataTag, commitTag, data);
     if (result < 0) {
-	cerr << "beam3d01::recvSelf - failed to recv data\n";
+	opserr << "beam3d01::recvSelf - failed to recv data\n";
 	return -1;
     }
 
@@ -503,11 +502,11 @@ beam3d01::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 
 
 void
-beam3d01::Print(ostream &s, int flag)
+beam3d01::Print(OPS_Stream &s, int flag)
 {
     s << "Element: " << this->getTag(); 
     s << " type: beam3d01  iNode: " << connectedExternalNodes(0);
-    s << " jNode: " << connectedExternalNodes(1) << " Length: " << L << endl;
+    s << " jNode: " << connectedExternalNodes(1) << " Length: " << L << endln;
 //    s << "\tStiffness Matrix:\n" << k;
     s << "\tResisting Force: " << rForce;
 //    s << "\tElemt End Force: " << eForce;    

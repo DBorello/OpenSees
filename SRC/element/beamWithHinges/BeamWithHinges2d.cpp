@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2002-12-16 21:10:00 $
+// $Revision: 1.19 $
+// $Date: 2003-02-14 23:01:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
 
 #include <BeamWithHinges2d.h>
@@ -33,7 +33,6 @@
 #include <MatrixUtil.h>
 #include <math.h>
 #include <stdlib.h>
-#include <iostream.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -90,39 +89,42 @@ BeamWithHinges2d::BeamWithHinges2d(int tag, int nodeI, int nodeJ,
    initialFlag(0), maxIter(max), tolerance(tol), sp(0)
 {
   if (E <= 0.0)  {
-    g3ErrorHandler->fatal("%s -- input parameter E is <= 0.0",
-			  "BeamWithHinges2d::BeamWithHinges2d");
+    opserr << "BeamWithHinges2d::BeamWithHinges2d -- input parameter E is <= 0.0\n";
+    exit(-1);
   }
   
   if (I <= 0.0)  {
-    g3ErrorHandler->fatal("%s -- input parameter I is <= 0.0",
-			  "BeamWithHinges2d::BeamWithHinges2d");
+    opserr << "BeamWithHinges2d::BeamWithHinges2d -- input parameter I is <= 0.0\n";
+    exit(-1);
   }
   
   if (A <= 0.0)  {
-    g3ErrorHandler->fatal("%s -- input parameter A is <= 0.0",
-			  "BeamWithHinges2d::BeamWithHinges2d");
+    opserr << "BeamWithHinges2d::BeamWithHinges2d -- input parameter A is <= 0.0\n";
+    exit(-1);
   }
   
   // Get copies of sections
   section[0] = sectionRefI.getCopy();
   
-  if (section[0] == 0)
-    g3ErrorHandler->fatal("%s -- failed to get copy of section I",
-			  "BeamWithHinges2d::BeamWithHinges2d");
+  if (section[0] == 0) {
+    opserr << "BeamWithHinges2d::BeamWithHinges2d -- failed to get copy of section I\n";
+    exit(-1);
+  }
   
   section[1] = sectionRefJ.getCopy();
   
-  if (section[1] == 0)
-    g3ErrorHandler->fatal("%s -- failed to get copy of section J",
-			  "BeamWithHinges2d::BeamWithHinges2d");
+  if (section[1] == 0) {
+    opserr << "BeamWithHinges2d::BeamWithHinges2d -- failed to get copy of section J\n";
+    exit(-1);
+  }
   
   theCoordTransf = coordTransf.getCopy();
   
-  if (theCoordTransf == 0)
-    g3ErrorHandler->fatal("%s -- failed to get copy of coordinate transformation",
-			  "BeamWithHinges2d::BeamWithHinges2d");
-  
+  if (theCoordTransf == 0) {
+    opserr << "BeamWithHinges2d::BeamWithHinges2d -- failed to get copy of coordinate transformation\n";
+    exit(-1);
+  }
+
   connectedExternalNodes(0) = nodeI;
   connectedExternalNodes(1) = nodeJ;
 
@@ -196,15 +198,17 @@ BeamWithHinges2d::setDomain(Domain *theDomain)
   // call the DomainComponent version of the function
   this->DomainComponent::setDomain(theDomain);
   
-  if (theCoordTransf->initialize(theNodes[0], theNodes[1]) != 0)
-    g3ErrorHandler->fatal("%s -- failed to initialize coordinate transformation",
-			  "BeamWithHinges2d::setDomain()");
+  if (theCoordTransf->initialize(theNodes[0], theNodes[1]) != 0) {
+    opserr << "BeamWithHinges2d::setDomain() -- failed to initialize coordinate transformation\n";
+    exit(-1);
+  }
   
   // get element length
   double L = theCoordTransf->getInitialLength();
-  if (L == 0.0)
-    g3ErrorHandler->fatal("%s -- element has zero length",
-			  "BeamWithHinges2d::setDomain()");
+  if (L == 0.0) {
+    opserr << "BeamWithHinges2d::setDomain() -- element has zero length\n";
+    exit(-1);
+  }
 
   if (initialFlag == 2)
     theCoordTransf->update();
@@ -219,7 +223,7 @@ BeamWithHinges2d::commitState(void)
 
   // call element commitState to do any base class stuff
   if ((err = this->Element::commitState()) != 0) {
-    cerr << "BeamWithHinges2d::commitState () - failed in base class";
+    opserr << "BeamWithHinges2d::commitState () - failed in base class";
   }    
   
   for (int i = 0; i < 2; i++) {
@@ -446,8 +450,7 @@ BeamWithHinges2d::getInitialStiff(void)
   //invert3by3Matrix(f, kb);
   static Matrix kbInit(3,3);
   if (f.Solve(Iden,kbInit) < 0)
-    g3ErrorHandler->warning("%s -- could not invert flexibility",
-			    "BeamWithHinges2d::update()");    
+    opserr << "BeamWithHinges2d::update() -- could not invert flexibility\n";
   
   return theCoordTransf->getInitialGlobalStiffMatrix(kbInit);
 }
@@ -491,9 +494,10 @@ BeamWithHinges2d::addLoad(ElementalLoad *theLoad, double loadFactor)
   
   if (sp == 0) {
     sp = new Matrix(3,2);
-    if (sp == 0)
-      g3ErrorHandler->fatal("%s -- out of memory",
-			    "BeamWithHinges2d::addLoad");
+    if (sp == 0) {
+      opserr << "BeamWithHinges2d::addLoad  -- out of memory\n";
+      exit(-1);
+    }
   }
 
   double L = theCoordTransf->getInitialLength();
@@ -657,8 +661,7 @@ BeamWithHinges2d::addLoad(ElementalLoad *theLoad, double loadFactor)
   }
 
   else {
-    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
-			    "BeamWithHinges2d::addLoad()", this->getTag());
+    opserr << "BeamWithHinges2d::addLoad() -- load type unknown for element with tag: " << this->getTag() << endln;
     return -1;
   }
 
@@ -777,16 +780,14 @@ BeamWithHinges2d::sendSelf(int commitTag, Channel &theChannel)
   }  
 
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
-    g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-			    "failed to send ID data");
+    opserr << "NLBeamColumn2d::sendSelf() - failed to send ID data\n";
     return -1;
   }    
 
   // send the coordinate transformation
   
   if (theCoordTransf->sendSelf(commitTag, theChannel) < 0) {
-    g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-			    "failed to send crdTranf");
+    opserr << "NLBeamColumn2d::sendSelf() - failed to send crdTranf\n";
     return -1;
   }      
 
@@ -796,8 +797,7 @@ BeamWithHinges2d::sendSelf(int commitTag, Channel &theChannel)
   
   for (j = 0; j<2; j++) {
     if (section[j]->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - section %d %s\n",
-			      j,"failed to send itself");
+      opserr << "NLBeamColumn2d::sendSelf() - section " << j << "failed to send itself\n";
       return -1;
     }
   }
@@ -841,9 +841,8 @@ BeamWithHinges2d::sendSelf(int commitTag, Channel &theChannel)
 	dData(loc++) = (eCommit[k])(i);
 
   if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
-     g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-	 		     "failed to send Vector data");
-     return -1;
+    opserr << "NLBeamColumn2d::sendSelf() - failed to send Vector data\n";
+    return -1;
   }    
 
   return 0;
@@ -861,8 +860,7 @@ BeamWithHinges2d::recvSelf(int commitTag, Channel &theChannel,
   static ID idData(11);  
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
-    g3ErrorHandler->warning("NLBeamColumn2d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "NLBeamColumn2d::recvSelf() - failed to recv ID data\n";
     return -1;
   }    
 
@@ -884,10 +882,9 @@ BeamWithHinges2d::recvSelf(int commitTag, Channel &theChannel,
       theCoordTransf = theBroker.getNewCrdTransf2d(crdTransfClassTag);
 
       if (theCoordTransf == 0) {
-	  g3ErrorHandler->warning("NLBeamColumn2d::recvSelf() - %s %d\n",
-				  "failed to obtain a CrdTrans object with classTag",
-				  crdTransfClassTag);
-	  return -2;	  
+	opserr << "NLBeamColumn2d::recvSelf() - " << 
+	  "failed to obtain a CrdTrans object with classTag" << crdTransfClassTag << endln;
+      return -2;	  
       }
   }
 
@@ -896,9 +893,8 @@ BeamWithHinges2d::recvSelf(int commitTag, Channel &theChannel,
   // invoke recvSelf on the crdTransf obkject
   if (theCoordTransf->recvSelf(commitTag, theChannel, theBroker) < 0)  
   {
-     g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-	     		     "failed to recv crdTranf");
-     return -3;
+    opserr << "NLBeamColumn2d::sendSelf() - failed to recv crdTranf\n";
+    return -3;
   }      
 
   //
@@ -915,14 +911,13 @@ BeamWithHinges2d::recvSelf(int commitTag, Channel &theChannel,
       loc += 2;
       section[i] = theBroker.getNewSection(sectClassTag);
       if (section[i] == 0) {
-	g3ErrorHandler->fatal("NLBeamColumn2d::recvSelf() - %s %d\n",
-			      "Broker could not create Section of class type",sectClassTag);
-	return -1;
+	opserr << "NLBeamColumn2d::recvSelf() - " << 
+	  "Broker could not create Section of class type" << sectClassTag << endln;
+	exit(-1);
       }
       section[i]->setDbTag(sectDbTag);
       if (section[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("NLBeamColumn2d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn2d::recvSelf() - section " << i << "failed to recv itself\n";
 	return -1;
       }     
     }
@@ -944,17 +939,16 @@ BeamWithHinges2d::recvSelf(int commitTag, Channel &theChannel,
 	delete section[i];
 	section[i] = theBroker.getNewSection(sectClassTag);
 	if (section[i] == 0) {
-	  g3ErrorHandler->fatal("NLBeamColumn2d::recvSelf() - %s %d\n",
-				"Broker could not create Section of class type",sectClassTag);
-	  return -1;
+	  opserr << "NLBeamColumn2d::recvSelf() - " <<
+	    "Broker could not create Section of class type" << sectClassTag << endln;
+	  exit(-1);
 	}
       }
-
+    
       // recvvSelf on it
       section[i]->setDbTag(sectDbTag);
       if (section[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("NLBeamColumn2d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn2d::recvSelf() - section " <<  i << "failed to recv itself\n";
 	return -1;
       }     
     }
@@ -972,8 +966,7 @@ BeamWithHinges2d::recvSelf(int commitTag, Channel &theChannel,
   loc = 0;
 
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0) {
-     g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-	 		     "failed to send Vector data");
+     opserr << "NLBeamColumn2d::sendSelf() - failed to send Vector data\n";
      return -1;
   }    
 
@@ -1006,13 +999,13 @@ BeamWithHinges2d::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void 
-BeamWithHinges2d::Print(ostream &s, int flag)
+BeamWithHinges2d::Print(OPS_Stream &s, int flag)
 {
-  s << "\nBeamWithHinges2d, tag: " << this->getTag() << endl;
+  s << "\nBeamWithHinges2d, tag: " << this->getTag() << endln;
   s << "\tConnected Nodes: " << connectedExternalNodes;
-  s << "\tE: " << E << endl;
-  s << "\tA: " << A << endl;
-  s << "\tI: " << I << endl;
+  s << "\tE: " << E << endln;
+  s << "\tA: " << A << endln;
+  s << "\tI: " << I << endln;
   
   double P, V, M1, M2;
   double L = theCoordTransf->getInitialLength();
@@ -1022,19 +1015,19 @@ BeamWithHinges2d::Print(ostream &s, int flag)
   V = (M1+M2)/L;
 
   s << "\tEnd 1 Forces (P V M): "
-    << -P+p0[0] << ' ' <<  V+p0[1] << ' ' << M1 << endl;
+    << -P+p0[0] << ' ' <<  V+p0[1] << ' ' << M1 << endln;
   s << "\tEnd 2 Forces (P V M): "
-    <<  P << ' ' << -V+p0[2] << ' ' << M2 << endl;
+    <<  P << ' ' << -V+p0[2] << ' ' << M2 << endln;
   
   if (section[0] != 0) {
     s << "Hinge 1, section tag: " << section[0]->getTag() << 
-      ", length: " << beta1*L << endl;
+      ", length: " << beta1*L << endln;
     section[0]->Print(s,flag);
   }
   
   if (section[1] != 0) {
     s << "Hinge 2, section tag: " << section[2]->getTag() << 
-      ", length: " << beta2*L << endl;
+      ", length: " << beta2*L << endln;
     section[1]->Print(s,flag);
   }
 }
@@ -1049,21 +1042,21 @@ BeamWithHinges2d::setNodePtrs(Domain *theDomain)
   theNodes[1] = theDomain->getNode(connectedExternalNodes(1));
   
   if(theNodes[0] == 0) {
-    g3ErrorHandler->fatal("%s -- node 1 does not exist",
-			  "BeamWithHinges2d::setNodePtrs()");
+    opserr << "BeamWithHinges2d::setNodePtrs() -- node 1 does not exist\n";
+    exit(-1);
   }
   
   if(theNodes[1] == 0) {
-    g3ErrorHandler->fatal("%s -- node 2 does not exist",
-			  "BeamWithHinges2d::setNodePtrs()");
+    opserr << "BeamWithHinges2d::setNodePtrs() -- node 2 does not exist\n";
+    exit(-1);
   }
   
   // check for correct # of DOF's
   int dofNd1 = theNodes[0]->getNumberDOF();
   int dofNd2 = theNodes[1]->getNumberDOF();
   if ((dofNd1 != 3) || (dofNd2 != 3))  {
-    g3ErrorHandler->fatal("%s -- nodal dof is not three",
-			  "BeamWithHinges2d::setNodePtrs()");
+    opserr << "BeamWithHinges2d::setNodePtrs() -- nodal dof is not three";
+    exit(-1);
   }
 }
 
@@ -1327,8 +1320,8 @@ BeamWithHinges2d::update(void)
     // calculate element stiffness matrix
     //invert3by3Matrix(f, kb);
     if (f.Solve(Iden,kb) < 0)
-      g3ErrorHandler->warning("%s -- could not invert flexibility",
-			      "BeamWithHinges2d::update()");    
+      opserr << "BeamWithHinges2d::update() -- could not invert flexibility\n";
+			      
 
     // dv = v - vr;
     dv = v;

@@ -44,10 +44,10 @@ void Orbison2D::getGradient(double &gx, double &gy, double x, double y)
     
     if(forceLocation(drift)!=0)
     {
-     	cerr << "ERROR - Orbison2D::getGradient(double &gx, double &gy, double x, double y)\n";
-        cerr << "Force point not on the yield surface\n";
-		cout << " fx = " << x << ", fy = " << y  << " drift = " << drift << "\n";
-        cin.get();
+     	opserr << "ERROR - Orbison2D::getGradient(double &gx, double &gy, double x, double y)\n";
+        opserr << "Force point not on the yield surface\n";
+	opserr << " fx = " << x << ", fy = " << y  << " drift = " << drift << "\n";
+        
     }
     else
     {
@@ -75,8 +75,8 @@ YieldSurface_BC *Orbison2D::getCopy(void)
     Orbison2D *theCopy = new Orbison2D(this->getTag(), capX, capY, *hModel);
     if(theCopy==0)
     {
-     	cerr << "Orbison2D::getCopy(void) - unable to make copy\n";
-     	cin.get();
+     	opserr << "Orbison2D::getCopy(void) - unable to make copy\n";
+     	
     }
     //later  copy all the state variables
     return theCopy;
@@ -111,7 +111,7 @@ double x1, y1, xOld, yOld, x2, y2;
 		//if(x < 0.2 || x > 0.85)
 		{
 			if(displayMode==100)
-				cout << " x = " << x << ", y = " << y << "\n";
+				opserr << " x = " << x << ", y = " << y << "\n";
 
             //////////////////////// x>0, y>0
             x1 = x;
@@ -185,7 +185,7 @@ double x1, y1, xOld, yOld, x2, y2;
 }
 
 
-void Orbison2D::Print(ostream &s, int flag)
+void Orbison2D::Print(OPS_Stream &s, int flag)
 {
     s << "\nYield Surface No: " << this->getTag() << " type: Attalla2D\n";
 }

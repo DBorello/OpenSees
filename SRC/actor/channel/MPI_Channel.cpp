@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/MPI_Channel.cpp,v $
                                                                         
                                                                         
@@ -74,8 +74,8 @@ MPI_Channel::setUpShadow(void)
 ChannelAddress *
 MPI_Channel::getLastSendersAddress(void) 
 {
-    cerr << "MPI_Channel::getLastSendersAddress(void) - ";
-    cerr << " this should not be called - need MPI-2.0 to use\n";
+    opserr << "MPI_Channel::getLastSendersAddress(void) - ";
+    opserr << " this should not be called - need MPI-2.0 to use\n";
 
     return 0;
 }    
@@ -91,9 +91,9 @@ MPI_Channel::setNextAddress(const ChannelAddress &theAddress)
       otherComm= theMPI_ChannelAddress->otherComm;
     }
     else {
-	cerr << "MPI_Channel::setNextAddress() - an MPI_Channel ";
-	cerr << "can only communicate with an MPI_Channel";
-	cerr << " address given is not of type MPI_ChannelAddress\n"; 
+	opserr << "MPI_Channel::setNextAddress() - an MPI_Channel ";
+	opserr << "can only communicate with an MPI_Channel";
+	opserr << " address given is not of type MPI_ChannelAddress\n"; 
 	return -1;	    
     }		    	
 	
@@ -116,9 +116,9 @@ MPI_Channel::sendObj(int commitTag,
 	otherComm= theMPI_ChannelAddress->otherComm;
       }
 	else {
-	    cerr << "MPI_Channel::sendObj() - a MPI_Channel ";
-	    cerr << "can only communicate with a MPI_Channel";
-	    cerr << " address given is not of type MPI_ChannelAddress\n"; 
+	    opserr << "MPI_Channel::sendObj() - a MPI_Channel ";
+	    opserr << "can only communicate with a MPI_Channel";
+	    opserr << " address given is not of type MPI_ChannelAddress\n"; 
 	    return -1;	    
 	}		    
     }    
@@ -139,9 +139,9 @@ MPI_Channel::recvObj(int commitTag,
 	otherTag = theMPI_ChannelAddress->otherTag;
 	otherComm= theMPI_ChannelAddress->otherComm;
       } else {
-	cerr << "MPI_Channel::recvObj() - a MPI_Channel ";
-	cerr << "can only communicate with a MPI_Channel";
-	cerr << " address given is not of type MPI_ChannelAddress\n"; 
+	opserr << "MPI_Channel::recvObj() - a MPI_Channel ";
+	opserr << "can only communicate with a MPI_Channel";
+	opserr << " address given is not of type MPI_ChannelAddress\n"; 
 	return -1;	    
       }		    
     }
@@ -163,9 +163,9 @@ MPI_Channel::recvMsg(int dbTag, int commitTag, Message &msg, ChannelAddress *the
 	otherTag = theMPI_ChannelAddress->otherTag;
 	otherComm= theMPI_ChannelAddress->otherComm;
       } else {
-	cerr << "MPI_Channel::recvMesg() - a MPI_Channel ";
-	cerr << "can only communicate with a MPI_Channel";
-	cerr << " address given is not of type MPI_ChannelAddress\n"; 
+	opserr << "MPI_Channel::recvMesg() - a MPI_Channel ";
+	opserr << "can only communicate with a MPI_Channel";
+	opserr << " address given is not of type MPI_ChannelAddress\n"; 
 	return -1;	    
       }		    
     }
@@ -182,8 +182,8 @@ MPI_Channel::recvMsg(int dbTag, int commitTag, Message &msg, ChannelAddress *the
     int count =0;
     MPI_Get_count(&status, MPI_CHAR, &count);
     if (count != nleft) {
-      cerr << "MPI_Channel::recvMesg() -";
-      cerr << " incorrect size of Message received ";
+      opserr << "MPI_Channel::recvMesg() -";
+      opserr << " incorrect size of Message received ";
       return -1;
     }
     else
@@ -205,9 +205,9 @@ MPI_Channel::sendMsg(int dbTag, int commitTag, const Message &msg, ChannelAddres
 	otherTag = theMPI_ChannelAddress->otherTag;
 	otherComm= theMPI_ChannelAddress->otherComm;
       } else {
-	cerr << "MPI_Channel::sendMsg() - a MPI_Channel ";
-	cerr << "can only communicate with a MPI_Channel";
-	cerr << " address given is not of type MPI_ChannelAddress\n"; 
+	opserr << "MPI_Channel::sendMsg() - a MPI_Channel ";
+	opserr << "can only communicate with a MPI_Channel";
+	opserr << " address given is not of type MPI_ChannelAddress\n"; 
 	return -1;	    
       }		    
     }
@@ -235,9 +235,9 @@ MPI_Channel::recvMatrix(int dbTag, int commitTag, Matrix &theMatrix, ChannelAddr
 	otherTag = theMPI_ChannelAddress->otherTag;
 	otherComm= theMPI_ChannelAddress->otherComm;
       } else {
-	cerr << "MPI_Channel::recvMatrix() - a MPI_Channel ";
-	cerr << "can only communicate with a MPI_Channel";
-	cerr << " address given is not of type MPI_ChannelAddress\n"; 
+	opserr << "MPI_Channel::recvMatrix() - a MPI_Channel ";
+	opserr << "can only communicate with a MPI_Channel";
+	opserr << " address given is not of type MPI_ChannelAddress\n"; 
 	return -1;	    
       }		    
     }
@@ -255,8 +255,8 @@ MPI_Channel::recvMatrix(int dbTag, int commitTag, Matrix &theMatrix, ChannelAddr
     int count = 0;
     MPI_Get_count(&status, MPI_DOUBLE, &count);
     if (count != nleft) {
-      cerr << "MPI_Channel::recvMatrix() -";
-      cerr << " incorrect number of entries for Matrix received ";
+      opserr << "MPI_Channel::recvMatrix() -";
+      opserr << " incorrect number of entries for Matrix received ";
       return -1;
     }
     else
@@ -278,9 +278,9 @@ MPI_Channel::sendMatrix(int dbTag, int commitTag, const Matrix &theMatrix, Chann
 	otherTag = theMPI_ChannelAddress->otherTag;
 	otherComm= theMPI_ChannelAddress->otherComm;
       } else {
-	cerr << "MPI_Channel::sendMatrix() - a MPI_Channel ";
-	cerr << "can only communicate with a MPI_Channel";
-	cerr << " address given is not of type MPI_ChannelAddress\n"; 
+	opserr << "MPI_Channel::sendMatrix() - a MPI_Channel ";
+	opserr << "can only communicate with a MPI_Channel";
+	opserr << " address given is not of type MPI_ChannelAddress\n"; 
 	return -1;	    
       }		    
     }
@@ -316,9 +316,9 @@ MPI_Channel::recvVector(int dbTag, int commitTag, Vector &theVector, ChannelAddr
 	otherTag = theMPI_ChannelAddress->otherTag;
 	otherComm= theMPI_ChannelAddress->otherComm;
       } else {
-	cerr << "MPI_Channel::recvVector() - a MPI_Channel ";
-	cerr << "can only communicate with a MPI_Channel";
-	cerr << " address given is not of type MPI_ChannelAddress\n"; 
+	opserr << "MPI_Channel::recvVector() - a MPI_Channel ";
+	opserr << "can only communicate with a MPI_Channel";
+	opserr << " address given is not of type MPI_ChannelAddress\n"; 
 	return -1;	    
       }		    
     }
@@ -335,8 +335,8 @@ MPI_Channel::recvVector(int dbTag, int commitTag, Vector &theVector, ChannelAddr
     int count =0;
     MPI_Get_count(&status, MPI_DOUBLE, &count);
     if (count != nleft) {
-      cerr << "MPI_Channel::recvVector() -";
-      cerr << " incorrect number of entries for Vector received ";
+      opserr << "MPI_Channel::recvVector() -";
+      opserr << " incorrect number of entries for Vector received ";
       return -1;
     }
     else
@@ -358,9 +358,9 @@ MPI_Channel::sendVector(int dbTag, int commitTag, const Vector &theVector, Chann
 	otherTag = theMPI_ChannelAddress->otherTag;
 	otherComm= theMPI_ChannelAddress->otherComm;
       } else {
-	cerr << "MPI_Channel::sendVector() - a MPI_Channel ";
-	cerr << "can only communicate with a MPI_Channel";
-	cerr << " address given is not of type MPI_ChannelAddress\n"; 
+	opserr << "MPI_Channel::sendVector() - a MPI_Channel ";
+	opserr << "can only communicate with a MPI_Channel";
+	opserr << " address given is not of type MPI_ChannelAddress\n"; 
 	return -1;	    
       }		    
     }
@@ -391,9 +391,9 @@ MPI_Channel::recvID(int dbTag, int commitTag, ID &theID, ChannelAddress *theAddr
 	otherTag = theMPI_ChannelAddress->otherTag;
 	otherComm= theMPI_ChannelAddress->otherComm;
       } else {
-	cerr << "MPI_Channel::recvID() - a MPI_Channel ";
-	cerr << "can only communicate with a MPI_Channel";
-	cerr << " address given is not of type MPI_ChannelAddress\n"; 
+	opserr << "MPI_Channel::recvID() - a MPI_Channel ";
+	opserr << "can only communicate with a MPI_Channel";
+	opserr << " address given is not of type MPI_ChannelAddress\n"; 
 	return -1;	    
       }		    
     }
@@ -410,8 +410,8 @@ MPI_Channel::recvID(int dbTag, int commitTag, ID &theID, ChannelAddress *theAddr
     int count =0;
     MPI_Get_count(&status, MPI_INT, &count);
     if (count != nleft) {
-      cerr << "MPI_Channel::recvID() -";
-      cerr << " incorrect number of entries for ID received ";
+      opserr << "MPI_Channel::recvID() -";
+      opserr << " incorrect number of entries for ID received ";
       return -1;
     }
     else
@@ -433,9 +433,9 @@ MPI_Channel::sendID(int dbTag, int commitTag, const ID &theID, ChannelAddress *t
 	otherTag = theMPI_ChannelAddress->otherTag;
 	otherComm= theMPI_ChannelAddress->otherComm;
       } else {
-	cerr << "MPI_Channel::sendID() - a MPI_Channel ";
-	cerr << "can only communicate with a MPI_Channel";
-	cerr << " address given is not of type MPI_ChannelAddress\n"; 
+	opserr << "MPI_Channel::sendID() - a MPI_Channel ";
+	opserr << "can only communicate with a MPI_Channel";
+	opserr << " address given is not of type MPI_ChannelAddress\n"; 
 	return -1;	    
       }		    
     }
@@ -464,8 +464,8 @@ MPI_Channel::getPortNumber(void) const
 char *
 MPI_Channel::addToProgram(void)
 {
-    cerr << "MPI_Channel::addToProgram(void) - ";
-    cerr << " this should not be called - need MPI-2.0\n";
+    opserr << "MPI_Channel::addToProgram(void) - ";
+    opserr << " this should not be called - need MPI-2.0\n";
     char *newStuff =(char *)malloc(10*sizeof(char));
     for (int i=0; i<10; i++) 
 	newStuff[i] = ' ';

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/SubstructuringAnalysis.cpp,v $
                                                                         
                                                                         
@@ -79,8 +79,8 @@ SubstructuringAnalysis::~SubstructuringAnalysis()
 int 
 SubstructuringAnalysis::analyze(void)
 {
-    cerr << "SubstructuringAnalysis::analyze(void)";
-    cerr << "does nothing and should not have been called\n";
+    opserr << "SubstructuringAnalysis::analyze(void)";
+    opserr << "does nothing and should not have been called\n";
     return -1;
 }
 

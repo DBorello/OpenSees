@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-12-16 21:17:49 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:00:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark1.cpp,v $
                                                                         
                                                                         
@@ -102,14 +102,14 @@ Newmark1::newStep(double deltaT)
 {
 
   if (beta == 0 || gamma == 0 ) {
-    cerr << "Newton::newStep() - error in variable\n";
-    cerr << "gamma = " << gamma << " beta= " << beta << endl;
+    opserr << "Newton::newStep() - error in variable\n";
+    opserr << "gamma = " << gamma << " beta= " << beta << endln;
     return -1;
   }
 
   if (deltaT <= 0.0) {
-    cerr << "Newmark1::newStep() - error in variable\n";
-    cerr << "dT = " << deltaT << endl;
+    opserr << "Newmark1::newStep() - error in variable\n";
+    opserr << "dT = " << deltaT << endln;
     return -2;	
   }
 
@@ -124,7 +124,7 @@ Newmark1::newStep(double deltaT)
   AnalysisModel *theModel = this->getAnalysisModelPtr();
 
   if (U == 0) {
-    cerr << "Newton::newStep() - domainChange() failed or hasn't been called\n";
+    opserr << "Newton::newStep() - domainChange() failed or hasn't been called\n";
     return -3;	
   }
 
@@ -148,7 +148,7 @@ Newmark1::newStep(double deltaT)
   time +=deltaT;
 
   if (theModel->updateDomain(time, deltaT) < 0) {
-    cerr << "Newmark1::newStep() - failed to update the domain\n";
+    opserr << "Newmark1::newStep() - failed to update the domain\n";
     return -4;
   }
   
@@ -231,7 +231,7 @@ Newmark1::domainChanged()
 	Udot == 0 || Udot->Size() != size ||
 	Udotdot == 0 || Udotdot->Size() != size) {
       
-      cerr << "Newmark1::domainChanged - ran out of memory\n";
+      opserr << "Newmark1::domainChanged - ran out of memory\n";
 
       // delete the old
       if (Up != 0)
@@ -308,20 +308,20 @@ Newmark1::update(const Vector &deltaU)
 {
   AnalysisModel *theModel = this->getAnalysisModelPtr();
   if (theModel == 0) {
-    cerr << "WARNING Newmark1::update() - no AnalysisModel set\n";
+    opserr << "WARNING Newmark1::update() - no AnalysisModel set\n";
     return -1;
   }	
 
   // check domainChanged() has been called, i.e. Ut will not be zero
   if (U == 0) {
-    cerr << "WARNING Newmark1::update() - domainChange() failed or not called\n";
+    opserr << "WARNING Newmark1::update() - domainChange() failed or not called\n";
     return -2;
   }	
 
   // check deltaU is of correct size
   if (deltaU.Size() != U->Size()) {
-    cerr << "WARNING Newmark1::update() - Vectors of incompatable size ";
-    cerr << " expecting " << U->Size() << " obtained " << deltaU.Size() << endl;
+    opserr << "WARNING Newmark1::update() - Vectors of incompatable size ";
+    opserr << " expecting " << U->Size() << " obtained " << deltaU.Size() << endln;
     return -3;
   }
     
@@ -338,7 +338,7 @@ Newmark1::update(const Vector &deltaU)
   // update the responses at the DOFs
   theModel->setResponse(*U,*Udot,*Udotdot);        
   if (theModel->updateDomain() < 0) {
-    cerr << "Newmark1::newStep() - failed to update the domain\n";
+    opserr << "Newmark1::newStep() - failed to update the domain\n";
     return -4;
   }
 		    
@@ -358,7 +358,7 @@ Newmark1::sendSelf(int cTag, Channel &theChannel)
     data(6) = betaKc;
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
-	cerr << "WARNING Newmark1::sendSelf() - could not send data\n";
+	opserr << "WARNING Newmark1::sendSelf() - could not send data\n";
 	return -1;
     }	
     return 0;
@@ -369,7 +369,7 @@ Newmark1::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
     Vector data(7);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
-	cerr << "WARNING Newmark1::recvSelf() - could not receive data\n";
+	opserr << "WARNING Newmark1::recvSelf() - could not receive data\n";
 	gamma = 0.5; beta = 0.25; 
 	return -1;
     }
@@ -386,16 +386,16 @@ Newmark1::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 }
 
 void
-Newmark1::Print(ostream &s, int flag)
+Newmark1::Print(OPS_Stream &s, int flag)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theModel != 0) {
 	double currentTime = theModel->getCurrentDomainTime();
 	s << "\t Newmark1 - currentTime: " << currentTime;
-	s << "  gamma: " << gamma << "  beta: " << beta << endl;
-	s << " c1: " << c1 << " c2: " << c2 << " c3: " << c3 << endl;
+	s << "  gamma: " << gamma << "  beta: " << beta << endln;
+	s << " c1: " << c1 << " c2: " << c2 << " c3: " << c3 << endln;
 	s << "  Rayleigh Damping - alphaM: " << alphaM;
-	s << "  betaK: " << betaK << "  betaKi: " << betaKi << endl;	    
+	s << "  betaK: " << betaK << "  betaKi: " << betaKi << endln;	    
     } else 
 	s << "\t Newmark1 - no associated AnalysisModel\n";
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-26 00:56:06 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/PlainMap.cpp,v $
                                                                         
 // Written: fmk 
@@ -32,7 +32,7 @@
 // What: "@(#) PlainMap.h, revA"
 
 #include <PlainMap.h>
-#include <iostream.h>
+#include <OPS_Stream.h>
 #include <stdlib.h>
 #include <math.h>
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/domainDecompAlgo/DomainDecompAlgo.cpp,v $
                                                                         
                                                                         
@@ -78,8 +78,8 @@ DomainDecompAlgo::solveCurrentStep(void)
 	return 0;
     }
     else {
-	cerr << "DomainDecompAlgo::solveCurrentStep() ";
-	cerr << "no links have been set\n";
+	opserr << "DomainDecompAlgo::solveCurrentStep() ";
+	opserr << "no links have been set\n";
 	return -1;
     }
 }

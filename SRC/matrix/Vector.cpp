@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-09-19 16:47:17 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:01:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -78,8 +78,7 @@ Vector::Vector(int size)
   theData = new double [size];
 
   if (theData == 0) {
-    g3ErrorHandler->fatal("Vector::Vector(int) - out of memory creating vector of size %d\n",size);
-    
+    opserr << "Vector::Vector(int) - out of memory creating vector of size " << size << endln;
     sz = 0; // set this should fatal error handler not kill process!!
   }
     
@@ -121,8 +120,8 @@ Vector::Vector(const Vector &other)
   theData = new double [other.sz];    
   
   if (theData == 0) {
-    g3ErrorHandler->fatal("Vector::Vector(int) - out of memory creating vector of size %d\n",sz);
-    sz = 0;
+    opserr << "Vector::Vector(int) - out of memory creating vector of size " << sz << endln;
+    exit(-1);
   }
 
   // copy the component data
@@ -155,7 +154,7 @@ Vector::setData(double *newData, int size){
   fromFree = 1;
 
   if (sz <= 0) {
-    g3ErrorHandler->warning("Vector::Vector(double *, size) - size %d specified <= 0\n",size);
+    opserr << " Vector::Vector(double *, size) - size specified: " << size << " <= 0\n";
     sz = 0;
   }
 
@@ -169,7 +168,7 @@ Vector::resize(int newSize){
 
   // first check that newSize is valid
   if (newSize <= 0) {
-    g3ErrorHandler->warning("Vector::resize) - size %d specified <= 0\n",newSize); 
+    opserr << "Vector::resize) - size specified " << newSize << " <= 0\n";
     return -1;
   } 
   
@@ -186,7 +185,7 @@ Vector::resize(int newSize){
     // theData = (double *)malloc(newSize*sizeof(double));    
     theData = new double[newSize];
     if (theData == 0) {
-      g3ErrorHandler->fatal("Vector::resize() - out of memory for size %d\n",newSize);
+      opserr << "Vector::resize() - out of memory for size " << newSize << endln;
       sz = 0;
       return -2;
     }
@@ -223,11 +222,9 @@ Vector::Assemble(const Vector &V, const ID &l, double fact )
     else {
       result = -1;
       if (pos < sz)
-	g3ErrorHandler->warning("Vector::Assemble() %d out of range [1 %d]\n",
-				pos, sz-1);
+	opserr << "Vector::Assemble() " << pos << " out of range [1, " << sz-1 << "]\n";
       else
-	g3ErrorHandler->warning("Vector::Assemble() %d out of range [1 %d]\n",
-				pos, V.Size()-1);
+	opserr << "Vector::Assemble() " << pos << " out of range [1, "<< V.Size()-1 << "]\n";
     }
   }
   return result;
@@ -665,7 +662,7 @@ Vector::operator()(const ID &rows) const
 
   // check if obtained VEctor of correct size
   if (result.Size() != rows.Size()) {
-    g3ErrorHandler->warning("Vector::()(ID) - new Vector could not be constructed\n");
+    opserr << "Vector::()(ID) - new Vector could not be constructed\n";
     return result;
   }
 
@@ -674,8 +671,7 @@ Vector::operator()(const ID &rows) const
   for (int i=0; i<rows.Size(); i++) {
     pos = rows(i);
     if (pos <0 || pos >= sz) {
-      g3ErrorHandler->warning("Vector::()(ID) - invalid location %d outside range [0,%d]\n",
-			      pos,sz-1);
+      opserr << "Vector::()(ID) - invalid location " << pos << " outside range [0, " << sz-1 << "]\n";
     } else
       result(i) = (*this)(pos);
   }
@@ -735,45 +731,45 @@ Vector::operator=(const Tensor &V)
 {
   int rank = V.rank();
   if (rank != 2) {
-      g3ErrorHandler->warning("Vector::operator=() - tensor must be of rank 2\n");
-      return *this;
+    opserr << "Vector::operator=() - tensor must be of rank 2\n";
+    return *this;
   }
   int dim = V.dim(1);
   if (dim != V.dim(2)) {
-      g3ErrorHandler->warning("Vector::operator=() - tensor must have square dimensions\n");
-      return *this;
+    opserr << "Vector::operator=() - tensor must have square dimensions\n";
+    return *this;
   }
-
+  
   if (dim != 2 || dim != 3 || dim != 1) {
-      g3ErrorHandler->warning("Vector::operator=() - tensor must be of dimension 2 or 3\n");
-      return *this;
+    opserr << "Vector::operator=() - tensor must be of dimension 2 or 3\n";
+    return *this;
   }      
   
   if (dim == 1) {
-      if (sz != 1) {
-	  g3ErrorHandler->warning("Vector::operator=() - Vector size must be 1\n"); 
-	  return *this;
-      }
-      theData[0] = V.cval(1,1);
+    if (sz != 1) {
+      opserr << "Vector::operator=() - Vector size must be 1\n"; 
+      return *this;
+    }
+    theData[0] = V.cval(1,1);
   } else if (dim == 2) {
-      if (sz != 3) {
-	  g3ErrorHandler->warning("Vector::operator=() - Vector size must be 3\n"); 
-	  return *this;
-      }
-      theData[0] = V.cval(1,1);
-      theData[1] = V.cval(2,2);
-      theData[2] = V.cval(1,2);
+    if (sz != 3) {
+      opserr << "Vector::operator=() - Vector size must be 3\n"; 
+      return *this;
+    }
+    theData[0] = V.cval(1,1);
+    theData[1] = V.cval(2,2);
+    theData[2] = V.cval(1,2);
   } else {
-      if (sz != 6) {
-	  g3ErrorHandler->warning("Vector::operator=() - Vector size must be 6\n"); 
-	  return *this;
-      }      
-      theData[0] = V.cval(1,1);
-      theData[1] = V.cval(2,2);
-      theData[2] = V.cval(3,3);
-      theData[3] = V.cval(1,2);
-      theData[4] = V.cval(1,3);
-      theData[5] = V.cval(2,3);
+    if (sz != 6) {
+      opserr << "Vector::operator=() - Vector size must be 6\n"; 
+      return *this;
+    }      
+    theData[0] = V.cval(1,1);
+    theData[1] = V.cval(2,2);
+    theData[2] = V.cval(3,3);
+    theData[3] = V.cval(1,2);
+    theData[4] = V.cval(1,3);
+    theData[5] = V.cval(2,3);
   }
   return *this;
 }
@@ -848,7 +844,7 @@ Vector::operator+(double fact) const
 {
   Vector result(*this);
   if (result.Size() != sz) 
-    g3ErrorHandler->warning("Vector::operator+(double) - ran out of memory for new Vector\n");
+    opserr << "Vector::operator+(double) - ran out of memory for new Vector\n";
 
   result += fact;
   return result;
@@ -865,7 +861,7 @@ Vector::operator-(double fact) const
 {
     Vector result(*this);
     if (result.Size() != sz) 
-      g3ErrorHandler->warning("Vector::operator-(double) - ran out of memory for new Vector\n");
+      opserr << "Vector::operator-(double) - ran out of memory for new Vector\n";
 
     result -= fact;
     return result;
@@ -882,7 +878,7 @@ Vector::operator*(double fact) const
 {
     Vector result(*this);
     if (result.Size() != sz) 
-      g3ErrorHandler->warning("Vector::operator-(double) - ran out of memory for new Vector\n");
+      opserr << "Vector::operator*(double) - ran out of memory for new Vector\n";
 
     result *= fact;
     return result;
@@ -897,11 +893,11 @@ Vector
 Vector::operator/(double fact) const
 {
     if (fact == 0.0) 
-      g3ErrorHandler->warning("Vector::operator/(double fact) - divide-by-zero error coming\n");
+      opserr << "Vector::operator/(double fact) - divide-by-zero error coming\n";
 
     Vector result(*this);
     if (result.Size() != sz) 
-      g3ErrorHandler->warning("Vector::operator-(double) - ran out of memory for new Vector\n");
+      opserr << "Vector::operator/(double) - ran out of memory for new Vector\n";
 
     result /= fact;
     return result;
@@ -918,8 +914,7 @@ Vector::operator+=(const Vector &other)
 {
 #ifdef _G3DEBUG
   if (sz != other.sz) {
-    g3ErrorHandler->warning("WARNING Vector::operator+=(Vector):Vectors not of same sizes: %d %d\n",
-			     sz, other.sz);
+    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: << "sz << " != " << other.sz << endln;
     return *this;
   }    
 #endif
@@ -940,8 +935,7 @@ Vector::operator-=(const Vector &other)
 {
 #ifdef _G3DEBUG
   if (sz != other.sz) {
-    g3ErrorHandler->warning("WARNING Vector::operator-=(Vector): Vectors not of same sizes: %d %d\n",
-			    sz, other.sz);
+    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: << "sz << " != " << other.sz << endln;
     return *this;
   }
 #endif
@@ -962,9 +956,7 @@ Vector::operator+(const Vector &b) const
 {
 #ifdef _G3DEBUG
   if (sz != b.sz) {
-    g3ErrorHandler->warning( "Vector::operator+(Vector): Vectors not of same size, sizes: %d %d",
-			     sz, b.sz);
-			     
+    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: << "sz << " != " << b.sz << endln;
     return *this;
   }
 #endif
@@ -973,7 +965,7 @@ Vector::operator+(const Vector &b) const
 
     // check new Vector of correct size
   if (result.Size() != sz) {
-    g3ErrorHandler->warning("Vector::operator-(Vector): new Vector not of correct size ");
+    opserr << "Vector::operator-(Vector): new Vector not of correct size \n";
     return result;
   }
   result += b;
@@ -990,8 +982,7 @@ Vector::operator-(const Vector &b) const
 {
 #ifdef _G3DEBUG
   if (sz != b.sz) {
-    g3ErrorHandler->warning("WARNING Vector::operator-(Vector): Vectors not of same sizes: %d %d\n",
-			    sz, b.sz);
+    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: << "sz << " != " << b.sz << endln;
     return *this;
   }
 #endif
@@ -1000,7 +991,7 @@ Vector::operator-(const Vector &b) const
 
   // check new Vector of correct size
   if (result.Size() != sz) {
-    g3ErrorHandler->warning("Vector::operator-(Vector): new Vector not of correct size ");
+    opserr << "Vector::operator-(Vector): new Vector not of correct size \n";
     return result;
   }
 
@@ -1017,8 +1008,7 @@ Vector::operator^(const Vector &V) const
 {
 #ifdef _G3DEBUG
   if (sz != V.sz) {
-    g3ErrorHandler->warning( "WARNING Vector::operator-(Vector): Vectors not of same sizes: %d %d\n",
-			    sz, V.sz);
+    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: << "sz << " != " << V.sz << endln;
     return 0.0;
   }
 #endif
@@ -1057,21 +1047,22 @@ Vector::operator/(const Matrix &M) const
 
 
 
-// friend ostream &operator<<(ostream &s, const Vector &V)
-//	A function is defined to allow user to print the vectors using ostreams.
+// friend OPS_Stream &operator<<(OPS_Stream &s, const Vector &V)
+//	A function is defined to allow user to print the vectors using OPS_Streams.
 
-ostream &operator<<(ostream &s, const Vector &V)
+OPS_Stream &operator<<(OPS_Stream &s, const Vector &V)
 {
   for (int i=0; i<V.Size(); i++) 
       s << V(i) << " ";
 
-  return s << "\n";
+  return s << endln;
 }
 
 // friend istream &operator>>(istream &s, Vector &V)
 //	A function is defined to allow user to input the data into a Vector which has already
 //	been constructed with data, i.e. Vector(int) or Vector(const Vector &) constructors.
 
+/*
 istream &operator>>(istream &s, Vector &V)
 {
   for (int i=0; i<V.Size(); i++) 
@@ -1079,7 +1070,7 @@ istream &operator>>(istream &s, Vector &V)
   
     return s;
 }
-
+*/
 
 
 Vector operator*(double a, const Vector &V)
@@ -1102,8 +1093,8 @@ Vector::Assemble(const Vector &V, int init_pos, double fact)
   }
   else 
   {
-     cerr << "WARNING: Vector::Assemble(const Vector &V, int init_pos, double fact): ";
-     cerr << "position outside bounds \n";
+     opserr << "WARNING: Vector::Assemble(const Vector &V, int init_pos, double fact): ";
+     opserr << "position outside bounds \n";
      res = -1;
   }
 
@@ -1127,8 +1118,8 @@ Vector::Extract(const Vector &V, int init_pos, double fact)
   }
   else 
   {
-     cerr << "WARNING: Vector::Assemble(const Vector &V, int init_pos, double fact): ";
-     cerr << "position outside bounds \n";
+     opserr << "WARNING: Vector::Assemble(const Vector &V, int init_pos, double fact): ";
+     opserr << "position outside bounds \n";
      res = -1;
   }
 

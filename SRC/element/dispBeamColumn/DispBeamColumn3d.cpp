@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2002-12-19 21:31:32 $
+// $Revision: 1.16 $
+// $Date: 2003-02-14 23:01:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -43,8 +43,6 @@
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
 
-#include <G3Globals.h>
-
 Matrix DispBeamColumn3d::K(12,12);
 Vector DispBeamColumn3d::P(12);
 double DispBeamColumn3d::workArea[200];
@@ -61,9 +59,10 @@ Q(12), q(6), rho(r)
   // Allocate arrays of pointers to SectionForceDeformations
   theSections = new SectionForceDeformation *[numSections];
   
-  if (theSections == 0)
-    g3ErrorHandler->fatal("%s - failed to allocate section model pointer",
-			  "DispBeamColumn3d::DispBeamColumn3d");
+  if (theSections == 0) {
+    opserr << "DispBeamColumn3d::DispBeamColumn3d - failed to allocate section model pointer\n";
+    exit(-1);
+  }
   
   for (int i = 0; i < numSections; i++) {
     
@@ -71,16 +70,18 @@ Q(12), q(6), rho(r)
     theSections[i] = s[i]->getCopy();
     
     // Check allocation
-    if (theSections[i] == 0)
-      g3ErrorHandler->fatal("%s -- failed to get a copy of section model",
-			    "DispBeamColumn3d::DispBeamColumn3d");
+    if (theSections[i] == 0) {
+      opserr << "DispBeamColumn3d::DispBeamColumn3d -- failed to get a copy of section model\n";
+      exit(-1);
+    }
   }
   
   crdTransf = coordTransf.getCopy();
   
-  if (crdTransf == 0)
-    g3ErrorHandler->fatal("%s - failed to copy coordinate transformation",
-			  "DispBeamColumn3d::DispBeamColumn3d");
+  if (crdTransf == 0) {
+    opserr << "DispBeamColumn3d::DispBeamColumn3d - failed to copy coordinate transformation\n";
+    exit(-1);
+  }
   
   // Set connected external node IDs
   connectedExternalNodes(0) = nd1;
@@ -182,7 +183,7 @@ DispBeamColumn3d::setDomain(Domain *theDomain)
     theNodes[1] = theDomain->getNode(Nd2);
 
     if (theNodes[0] == 0 || theNodes[1] == 0) {
-	//g3ErrorHandler->fatal("FATAL ERROR DispBeamColumn3d (tag: %d), node not found in domain",
+	//opserr << "FATAL ERROR DispBeamColumn3d (tag: %d), node not found in domain",
 	//	this->getTag());
 	
 	return;
@@ -192,7 +193,7 @@ DispBeamColumn3d::setDomain(Domain *theDomain)
     int dofNd2 = theNodes[1]->getNumberDOF();
     
     if (dofNd1 != 6 || dofNd2 != 6) {
-	//g3ErrorHandler->fatal("FATAL ERROR DispBeamColumn3d (tag: %d), has differing number of DOFs at its nodes",
+	//opserr << "FATAL ERROR DispBeamColumn3d (tag: %d), has differing number of DOFs at its nodes",
 	//	this->getTag());
 	
 	return;
@@ -220,7 +221,7 @@ DispBeamColumn3d::commitState()
 
     // call element commitState to do any base class stuff
     if ((retVal = this->Element::commitState()) != 0) {
-      cerr << "DispBeamColumn3d::commitState () - failed in base class";
+      opserr << "DispBeamColumn3d::commitState () - failed in base class";
     }    
 
     // Loop over the integration points and commit the material states
@@ -650,8 +651,8 @@ DispBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
     q0[4] -= M2;
   }
   else {
-    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
-			    "DispBeamColumn2d::addLoad()", this->getTag());
+    opserr << "DispBeamColumn2d::addLoad() -- load type unknown for element with tag: " << 
+      this->getTag() << endln;
     return -1;
   }
 
@@ -670,8 +671,7 @@ DispBeamColumn3d::addInertiaLoadToUnbalance(const Vector &accel)
   const Vector &Raccel2 = theNodes[1]->getRV(accel);
   
   if (6 != Raccel1.Size() || 6 != Raccel2.Size()) {
-    g3ErrorHandler->warning("DispBeamColumn3d::addInertiaLoadToUnbalance %s\n",
-			    "matrix and vector sizes are incompatable");
+    opserr << "DispBeamColumn3d::addInertiaLoadToUnbalance matrix and vector sizes are incompatable\n";
     return -1;
   }
   
@@ -812,16 +812,14 @@ DispBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   idData(5) = crdTransfDbTag;
   
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
-    g3ErrorHandler->warning("DispBeamColumn3d::sendSelf() - %s\n",
-	     		     "failed to send ID data");
+    opserr << "DispBeamColumn3d::sendSelf() - failed to send ID data\n";
      return -1;
   }    
 
   // send the coordinate transformation
   
   if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
-     g3ErrorHandler->warning("DispBeamColumn3d::sendSelf() - %s\n",
-	     		     "failed to send crdTranf");
+     opserr << "DispBeamColumn3d::sendSelf() - failed to send crdTranf\n";
      return -1;
   }      
 
@@ -847,8 +845,7 @@ DispBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   }
 
   if (theChannel.sendID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("DispBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send ID data");
+    opserr << "DispBeamColumn3d::sendSelf() - failed to send ID data\n";
     return -1;
   }    
 
@@ -858,8 +855,7 @@ DispBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   
   for (j = 0; j<numSections; j++) {
     if (theSections[j]->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("DispBeamColumn3d::sendSelf() - section %d %s\n",
-			      j,"failed to send itself");
+      opserr << "DispBeamColumn3d::sendSelf() - section " << j << "failed to send itself\n";
       return -1;
     }
   }
@@ -880,8 +876,7 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
   static ID idData(7); // one bigger than needed so no clash with section ID
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
-    g3ErrorHandler->warning("DispBeamColumn3d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "DispBeamColumn3d::recvSelf() - failed to recv ID data\n";
     return -1;
   }    
 
@@ -900,10 +895,10 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
       crdTransf = theBroker.getNewCrdTransf3d(crdTransfClassTag);
 
       if (crdTransf == 0) {
-	  g3ErrorHandler->warning("DispBeamColumn3d::recvSelf() - %s %d\n",
-				  "failed to obtain a CrdTrans object with classTag",
-				  crdTransfClassTag);
-	  return -2;	  
+	opserr << "DispBeamColumn3d::recvSelf() - " <<
+	  "failed to obtain a CrdTrans object with classTag" <<
+	  crdTransfClassTag << endln;
+	return -2;	  
       }
   }
 
@@ -911,8 +906,7 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
 
   // invoke recvSelf on the crdTransf object
   if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0) {
-    g3ErrorHandler->warning("DispBeamColumn3d::sendSelf() - %s\n",
-			    "failed to recv crdTranf");
+    opserr << "DispBeamColumn3d::sendSelf() - failed to recv crdTranf\n";
     return -3;
   }      
   
@@ -924,8 +918,7 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
   int loc = 0;
 
   if (theChannel.recvID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("DispBeamColumn3d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "DispBeamColumn3d::recvSelf() - failed to recv ID data\n";
     return -1;
   }    
 
@@ -950,9 +943,9 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
     // create a new array to hold pointers
     theSections = new SectionForceDeformation *[idData(3)];
     if (theSections == 0) {
-      g3ErrorHandler->fatal("DispBeamColumn3d::recvSelf() - %s %d\n",
-			      "out of memory creating sections array of size",idData(3));
-      return -1;
+      opserr << "DispBeamColumn3d::recvSelf() - out of memory creating sections array of size" <<
+	idData(3) << endln;
+      exit(-1);
     }    
 
     // create a section and recvSelf on it
@@ -965,14 +958,14 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
       loc += 2;
       theSections[i] = theBroker.getNewSection(sectClassTag);
       if (theSections[i] == 0) {
-	g3ErrorHandler->fatal("DispBeamColumn3d::recvSelf() - %s %d\n",
-			      "Broker could not create Section of class type",sectClassTag);
-	return -1;
+	opserr << "DispBeamColumn3d::recvSelf() - Broker could not create Section of class type" <<
+	  sectClassTag << endln;
+	exit(-1);
       }
       theSections[i]->setDbTag(sectDbTag);
       if (theSections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("DispBeamColumn3d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "DispBeamColumn3d::recvSelf() - section " <<
+	  i << "failed to recv itself\n";
 	return -1;
       }     
     }
@@ -996,17 +989,17 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
 	delete theSections[i];
 	theSections[i] = theBroker.getNewSection(sectClassTag);
 	if (theSections[i] == 0) {
-	  g3ErrorHandler->fatal("DispBeamColumn3d::recvSelf() - %s %d\n",
-				"Broker could not create Section of class type",sectClassTag);
-	  return -1;
+	  opserr << "DispBeamColumn3d::recvSelf() - Broker could not create Section of class type" <<
+	    sectClassTag << endln;
+	  exit(-1);
 	}
       }
 
       // recvSelf on it
       theSections[i]->setDbTag(sectDbTag);
       if (theSections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("DispBeamColumn3d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "DispBeamColumn3d::recvSelf() - section " << 
+	  i << "failed to recv itself\n";
 	return -1;
       }     
     }
@@ -1016,11 +1009,11 @@ DispBeamColumn3d::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void
-DispBeamColumn3d::Print(ostream &s, int flag)
+DispBeamColumn3d::Print(OPS_Stream &s, int flag)
 {
-  s << "\nDispBeamColumn3d, element id:  " << this->getTag() << endl;
+  s << "\nDispBeamColumn3d, element id:  " << this->getTag() << endln;
   s << "\tConnected external nodes:  " << connectedExternalNodes;
-  s << "\tmass density:  " << rho << endl;
+  s << "\tmass density:  " << rho << endln;
 
   double N, Mz1, Mz2, Vy, My1, My2, Vz, T;
   double L = crdTransf->getInitialLength();
@@ -1036,12 +1029,12 @@ DispBeamColumn3d::Print(ostream &s, int flag)
   T   = q(5);
 
   s << "\tEnd 1 Forces (P Mz Vy My Vz T): "
-    << -N+p0[0] << ' ' << Mz1 << ' ' <<  Vy+p0[1] << ' ' << My1 << ' ' <<  Vz+p0[3] << ' ' << -T << endl;
+    << -N+p0[0] << ' ' << Mz1 << ' ' <<  Vy+p0[1] << ' ' << My1 << ' ' <<  Vz+p0[3] << ' ' << -T << endln;
   s << "\tEnd 2 Forces (P Mz Vy My Vz T): "
-    <<  N << ' ' << Mz2 << ' ' << -Vy+p0[2] << ' ' << My2 << ' ' << -Vz+p0[4] << ' ' <<  T << endl;
+    <<  N << ' ' << Mz2 << ' ' << -Vy+p0[2] << ' ' << My2 << ' ' << -Vz+p0[4] << ' ' <<  T << endln;
   
-  for (int i = 0; i < numSections; i++)
-    theSections[i]->Print(s,flag);
+  //for (int i = 0; i < numSections; i++)
+  //theSections[i]->Print(s,flag);
 }
 
 

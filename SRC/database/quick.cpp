@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/quick.cpp,v $
                                                                         
                                                                         
@@ -32,8 +32,8 @@ FileDatastore::sendID(int dataTag, int commitTag,
   // we first ensure that the ID is not too big
   int idSize = theID.Size();
   if (idSize >= maxIDsize) {
-    cerr << "FileDatastore::sendID() - the database does not deal with IDs of this size ";
-    cerr << idSize << endl;
+    opserr << "FileDatastore::sendID() - the database does not deal with IDs of this size ";
+    opserr << idSize << endln;
   }
 
 
@@ -48,7 +48,7 @@ FileDatastore::sendID(int dataTag, int commitTag,
     ids[idSize] = this->openFile(fileName);    
     int loc = ids[idSize]->tellg();
     if (loc == -1) loc = 0;
-    cerr << "LOCATION: " << loc << endl;
+    opserr << "LOCATION: " << loc << endln;
     fileEnds.ids[idSize] = loc;
   }
 
@@ -97,8 +97,8 @@ FileDatastore::recvID(int dataTag, int commitTag,
   // we first check ID not too big
   int idSize = theID.Size();
   if (idSize >= maxIDsize) {
-    cerr << "FileDatastore::recvID() - the database does not deal with IDs";
-    cerr << " of this size "  << idSize << endl;
+    opserr << "FileDatastore::recvID() - the database does not deal with IDs";
+    opserr << " of this size "  << idSize << endln;
     return -1;
   }
   
@@ -133,8 +133,8 @@ FileDatastore::recvID(int dataTag, int commitTag,
   }
   
   if (found == false) {
-    cerr << "FileDatastore::recvID() - failed to find data for ID of size ";
-    cerr << idSize << endl;
+    opserr << "FileDatastore::recvID() - failed to find data for ID of size ";
+    opserr << idSize << endln;
     return -1;
   }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-01-11 06:46:01 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/ImposedMotionSP.cpp,v $
                                                                         
                                                                         
@@ -143,11 +143,11 @@ ImposedMotionSP::recvSelf(int cTag, Channel &theChannel,
 }
 
 void
-ImposedMotionSP::Print(ostream &s, int flag) 
+ImposedMotionSP::Print(OPS_Stream &s, int flag) 
 {
     s << "ImposedMotionSP: " << this->getTag();
     s << "\t Node: " << this->getNodeTag();
-    s << " DOF: " << this->getDOF_Number() << endl;
+    s << " DOF: " << this->getDOF_Number() << endln;
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-11 20:46:39 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dUniformLoad.cpp,v $
                                                                         
 
@@ -76,13 +76,13 @@ Beam2dUniformLoad::sendSelf(int commitTag, Channel &theChannel)
 
   int result = theChannel.sendVector(dbTag, commitTag, vectData);
   if (result < 0) {
-    cerr << "Beam2dUniformLoad::sendSelf - failed to send data\n";
+    opserr << "Beam2dUniformLoad::sendSelf - failed to send data\n";
     return result;
   }
 
   result = theChannel.sendID(dbTag, commitTag, theElements);
   if (result < 0) {
-    cerr << "Beam2dUniformLoad::sendSelf - failed to send element tags\n";
+    opserr << "Beam2dUniformLoad::sendSelf - failed to send element tags\n";
     return result;
   }
   
@@ -98,7 +98,7 @@ Beam2dUniformLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroke
 
   int result = theChannel.recvVector(dbTag, commitTag, vectData);
   if (result < 0) {
-    cerr << "Beam2dUniformLoad::sendSelf - failed to send data\n";
+    opserr << "Beam2dUniformLoad::sendSelf - failed to send data\n";
     return result;
   }
 
@@ -111,14 +111,14 @@ Beam2dUniformLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroke
       delete theElementTags;
     theElementTags = new ID(numEle);
     if (theElementTags == 0) {
-      cerr << "Beam2dUniformLoad::sendSelf - failed to create an ID\n";
+      opserr << "Beam2dUniformLoad::sendSelf - failed to create an ID\n";
       return -3;
     }
   }
 
   result = theChannel.recvID(dbTag, commitTag, *theElementTags);
   if (result < 0) {
-    cerr << "Beam2dUniformLoad::sendSelf - failed to send element tags\n";
+    opserr << "Beam2dUniformLoad::sendSelf - failed to send element tags\n";
     return result;
   }
   
@@ -126,10 +126,10 @@ Beam2dUniformLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroke
 }
 
 void 
-Beam2dUniformLoad::Print(ostream &s, int flag)
+Beam2dUniformLoad::Print(OPS_Stream &s, int flag)
 {
-  s << "Beam2dUniformLoad - Reference load" << endl;
-  s << "  Transverse: " << wTrans << endl;
-  s << "  Axial:      " << wAxial << endl;
+  s << "Beam2dUniformLoad - Reference load" << endln;
+  s << "  Transverse: " << wTrans << endln;
+  s << "  Axial:      " << wAxial << endln;
   s << "  Elements acted on: " << this->getElementTags();
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/PartitionedQuick2dFrame.cpp,v $
                                                                         
                                                                         
@@ -27,7 +27,7 @@
 #include <PartitionedQuick2dFrame.h>
 #include <PartitionedDomain.h>
 #include <Subdomain.h>
-#include <iostream.h>
+#include <iOPS_Stream.h>
 #include <fstream.h>
 #include <stdlib.h>
 
@@ -79,15 +79,15 @@ PartitionedQuick2dFrame::buildInterface(int numSubdomains)
   
     Domain *theDomain = this->getDomainPtr();    
     if (theDomain == 0) {
-	cerr << "FATAL:PlaneFrame::buildModel(void) -";
-	cerr << " no associated domain.\n";
+	opserr << "FATAL:PlaneFrame::buildModel(void) -";
+	opserr << " no associated domain.\n";
 	exit(-1);
 	return -1;
     }	
 
     if (numSubdomains == 0) {
-	cerr << "FATAL:PlaneFrame::buildModel(void) -";
-	cerr << " numSubdomains = 0\n";
+	opserr << "FATAL:PlaneFrame::buildModel(void) -";
+	opserr << " numSubdomains = 0\n";
 	exit(-1);
 	return -2;
     }	
@@ -130,15 +130,15 @@ PartitionedQuick2dFrame::buildInterface(int numSubdomains)
 	    if (nodePtr != 0) {
 		ok = theDomain->addNode(nodePtr);
 		if (ok < 0) {
-		    cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		    cerr << " could not add Node " << nodeNum << endl;
+		    opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		    opserr << " could not add Node " << nodeNum << endln;
 		    return -1;
 		}
 		nodeNum++;
 		CURR_x += DIV_x;
 	    } else {
-		cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		cerr << " ran out of memory creating Node " << nodeNum << endl;
+		opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		opserr << " ran out of memory creating Node " << nodeNum << endln;
 		return -1;
 	    }
 
@@ -167,13 +167,13 @@ PartitionedQuick2dFrame::buildInterface(int numSubdomains)
 	if (nodeLoadPtr != 0) {
 	    ok =  theDomain->addNodalLoad(nodeLoadPtr);
 	    if (ok < 0) {
-		cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		cerr << " could not add nodal load " << nodeNum << endl;
+		opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		opserr << " could not add nodal load " << nodeNum << endln;
 		return -1;
 	    }
 	} else {
-	    cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
-	    cerr << "memory creating Nodal Load " << nodeNum << endl;
+	    opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
+	    opserr << "memory creating Nodal Load " << nodeNum << endln;
 	    return -1;
 	}	    	
     }
@@ -265,15 +265,15 @@ PartitionedQuick2dFrame::buildSubdomain(int subdomain,
 		ok = theSubdomain.addNode(nodePtr);
 
 	      if (ok < 0) {
-		cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		cerr << " could not add Node " << nodeNum << endl;
+		opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		opserr << " could not add Node " << nodeNum << endln;
 		return -1;
 	      }
 	      nodeNum++;
 	      CURR_x += DIV_x;
 	    } else {
-		cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		cerr << " ran out of memory creating Node " << nodeNum << endl;
+		opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		opserr << " ran out of memory creating Node " << nodeNum << endln;
 		return -1;
 	    }
 	}
@@ -317,13 +317,13 @@ PartitionedQuick2dFrame::buildSubdomain(int subdomain,
 		ok = theSubdomain.addElement(elePtr);
 
 		if (ok < 0) {
-		    cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		    cerr << " could not add Element " << eleNum << endl;
+		    opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		    opserr << " could not add Element " << eleNum << endln;
 		    return -1;
 		}
 	    } else {
-		cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		cerr << " ran out of memory creating Element " << eleNum << endl;
+		opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		opserr << " ran out of memory creating Element " << eleNum << endln;
 		return -1;
 	    }	    
 	    inode++;
@@ -348,13 +348,13 @@ PartitionedQuick2dFrame::buildSubdomain(int subdomain,
 	    if (elePtr != 0) {
 		ok = theSubdomain.addElement(elePtr);
 		if (ok < 0) {
-		    cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		    cerr << " could not add Element " << eleNum << endl;
+		    opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		    opserr << " could not add Element " << eleNum << endln;
 		    return -1;
 		}
 	    } else {
-		cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		cerr << " ran out of memory creating Element " << eleNum << endl;
+		opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		opserr << " ran out of memory creating Element " << eleNum << endln;
 		return -1;
 	    }	    
 	    inode++;
@@ -383,13 +383,13 @@ PartitionedQuick2dFrame::buildSubdomain(int subdomain,
 	  if (spPtr != 0) {
 		ok = theSubdomain.addSP_Constraint(spPtr);
 		if (ok < 0) {
-		    cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		    cerr << " could not add SP_Constraint " << nodeNum << endl;
+		    opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		    opserr << " could not add SP_Constraint " << nodeNum << endln;
 		    return -1;
 		}
 	    } else {
-		cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
-		cerr << "memory creating SP_Constraint " << nodeNum << endl;
+		opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
+		opserr << "memory creating SP_Constraint " << nodeNum << endln;
 		return -1;
 	    }	    
 	}
@@ -400,13 +400,13 @@ PartitionedQuick2dFrame::buildSubdomain(int subdomain,
 	    if (spPtr != 0) {
 		ok = theSubdomain.addSP_Constraint(spPtr);
 		if (ok < 0) {
-		    cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		    cerr << " could not add SP_Constraint " << nodeNum << endl;
+		    opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		    opserr << " could not add SP_Constraint " << nodeNum << endln;
 		    return -1;
 		}
 	    } else {
-		cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
-		cerr << "memory creating SP_Constraint " << nodeNum << endl;
+		opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
+		opserr << "memory creating SP_Constraint " << nodeNum << endln;
 		return -1;
 	    }	    
 	}	
@@ -417,13 +417,13 @@ PartitionedQuick2dFrame::buildSubdomain(int subdomain,
 	    if (spPtr != 0) {
 		ok = theSubdomain.addSP_Constraint(spPtr);
 		if (ok < 0) {
-		    cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		    cerr << " could not add SP_Constraint " << nodeNum << endl;
+		    opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		    opserr << " could not add SP_Constraint " << nodeNum << endln;
 		    return -1;
 		}
 	    } else {
-		cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
-		cerr << "memory creating SP_Constraint " << nodeNum << endl;
+		opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
+		opserr << "memory creating SP_Constraint " << nodeNum << endln;
 		return -1;
 	    }	    
 	}	
@@ -454,13 +454,13 @@ PartitionedQuick2dFrame::buildSubdomain(int subdomain,
 	if (nodeLoadPtr != 0) {
 	    ok =  theSubdomain.addNodalLoad(nodeLoadPtr);
 	    if (ok < 0) {
-		cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		cerr << " could not add nodal load " << nodeNum << endl;
+		opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		opserr << " could not add nodal load " << nodeNum << endln;
 		return -1;
 	    }
 	} else {
-	    cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
-	    cerr << "memory creating Nodal Load " << nodeNum << endl;
+	    opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
+	    opserr << "memory creating Nodal Load " << nodeNum << endln;
 	    return -1;
 	}	    	
     }
@@ -471,13 +471,13 @@ PartitionedQuick2dFrame::buildSubdomain(int subdomain,
 	if (nodeLoadPtr != 0) {
 	    ok = 	theSubdomain.addNodalLoad(nodeLoadPtr);
 	    if (ok < 0) {
-		cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
-		cerr << " could not add nodal load " << nodeNum << endl;
+		opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ";
+		opserr << " could not add nodal load " << nodeNum << endln;
 		return -1;
 	    }
 	} else {
-	    cerr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
-	    cerr << "memory creating Nodal Load " << nodeNum << endl;
+	    opserr << "PartitionedQuick2dFrame::PartitionedQuick2dFrame::Input ran out of ";
+	    opserr << "memory creating Nodal Load " << nodeNum << endln;
 	    return -1;
 	}	    	
     }

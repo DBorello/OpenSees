@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:01 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -40,7 +40,7 @@
 #include <MatrixOperations.h>
 #include <NormalRV.h>
 #include <math.h>
-#include <fstream.h>
+#include <fstream>
 
 SystemAnalysis::SystemAnalysis(	ReliabilityDomain *passedReliabilityDomain)
 :ReliabilityAnalysis()
@@ -73,7 +73,7 @@ SystemAnalysis::getUpperBound(void)
 int 
 SystemAnalysis::analyze(void)
 {
-cerr << "System Reliability Analysis is running ... " << endl;
+opserr << "System Reliability Analysis is running ... " << endln;
 
 	// Initial declarations
 	double beta;

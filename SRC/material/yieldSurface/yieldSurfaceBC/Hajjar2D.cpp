@@ -67,9 +67,9 @@ double xn = num/denom;
 
 	if (coefDebug)
 	{
-		cout << " c1 = " << c1 << ", c2 = " << c2 << ", c3 = " << c3 << "\n";
-		cout << " centroidY = " << centroidY << "\n";
-		cout << " capX = " << capX << ", capY = " << capY << "\n";
+		opserr << " c1 = " << c1 << ", c2 = " << c2 << ", c3 = " << c3 << "\n";
+		opserr << " centroidY = " << centroidY << "\n";
+		opserr << " capX = " << capX << ", capY = " << capY << "\n";
 	}
 
 }
@@ -101,24 +101,24 @@ void Hajjar2D::getGradient(double &gx, double &gy, double xi, double yi)
     
     /*if(drift < -error)
     {
-        cerr << "ERROR - Hajjar2D::getGradient(double &gx, double &gy, double x, double y)\n";
-        cerr << "Point inside the yield surface\n";
-		cout << " fx = " << xi << ", fy = " << yi  << " drift = " << drift << "\n";
+        opserr << "ERROR - Hajjar2D::getGradient(double &gx, double &gy, double x, double y)\n";
+        opserr << "Point inside the yield surface\n";
+		opserr << " fx = " << xi << ", fy = " << yi  << " drift = " << drift << "\n";
         cin.get();
     }
     else if(drift > error)
     {
-        cerr << "ERROR - Hajjar2D::getGradient(double &gx, double &gy, double x, double y)\n";
-        cerr << "Point outside the yield surface\n";
-		cout << " fx = " << xi << ", fy = " << yi  << " drift = " << drift << "\n";
+        opserr << "ERROR - Hajjar2D::getGradient(double &gx, double &gy, double x, double y)\n";
+        opserr << "Point outside the yield surface\n";
+		opserr << " fx = " << xi << ", fy = " << yi  << " drift = " << drift << "\n";
         cin.get();
     }*/
     if(forceLocation(drift)!=0)
     {
-     	cerr << "ERROR - Hajjar2D::getGradient(double &gx, double &gy, double x, double y)\n";
-        cerr << "Force point not on the yield surface\n";
-		cout << " fx = " << xi << ", fy = " << yi  << " drift = " << drift << "\n";
-        cin.get();
+     	opserr << "ERROR - Hajjar2D::getGradient(double &gx, double &gy, double x, double y)\n";
+        opserr << "Force point not on the yield surface\n";
+		opserr << " fx = " << xi << ", fy = " << yi  << " drift = " << drift << "\n";
+        
     }
     else
     {
@@ -166,7 +166,7 @@ double x1, y1, xOld, yOld, x2, y2;
 
 	double xmax = sqrt(1/c1);
 
-	cout << " xmax = " << xmax << ", ymax = " << yOld << "( " << sqrt(1/c2) << ")\n";
+	opserr << " xmax = " << xmax << ", ymax = " << yOld << "( " << sqrt(1/c2) << ")\n";
 	if(fact < 1) incr = fact;
 
 	double err = 0.5*incr;
@@ -184,7 +184,7 @@ double x1, y1, xOld, yOld, x2, y2;
 		//if(x < 0.2 || x > 0.85)
 		{
 			if(displayMode==100)
-				cout << " x = " << x << ", y = " << y << "\n";
+				opserr << " x = " << x << ", y = " << y << "\n";
 
             //////////////////////// x>0, y>0
             x1 = x;
@@ -258,7 +258,7 @@ double x1, y1, xOld, yOld, x2, y2;
 }
 
 
-void Hajjar2D::Print(ostream &s, int flag)
+void Hajjar2D::Print(OPS_Stream &s, int flag)
 {
     s << "\nYield Surface No: " << this->getTag() << " type: Attalla2D\n";
 }

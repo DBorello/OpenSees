@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:57 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/ChiSquareRV.cpp,v $
 
 
@@ -33,6 +33,7 @@
 //			haukaas 06/01 (made part of official OpenSees)
 //
 
+#include <OPS_Globals.h>
 #include <ChiSquareRV.h>
 #include <GammaRV.h>
 #include <math.h>
@@ -88,7 +89,7 @@ ChiSquareRV::~ChiSquareRV()
 
 
 void
-ChiSquareRV::Print(ostream &s, int flag)
+ChiSquareRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -164,6 +165,6 @@ ChiSquareRV::getStartValue()
 }
 
 double ChiSquareRV::getParameter1()  {return nu;}
-double ChiSquareRV::getParameter2()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double ChiSquareRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double ChiSquareRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double ChiSquareRV::getParameter2()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double ChiSquareRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double ChiSquareRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}

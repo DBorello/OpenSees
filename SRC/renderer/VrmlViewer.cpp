@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/VrmlViewer.cpp,v $
                                                                         
                                                                         
@@ -37,7 +37,7 @@
 #include <VrmlViewer.h>
 #include <ColorMap.h>
 
-#include <iostream.h>
+#include <iOPS_Stream.h>
 #include <fstream.h>
 #include <string.h>
 #include <stdlib.h>
@@ -52,8 +52,8 @@ VrmlViewer::VrmlViewer(char *fileName,
     strcpy(vrmlFileName, fileName);
     vrmlFile = new fstream(vrmlFileName, ios::out);
     if (vrmlFile == 0) {
-	cerr << "FATAL - VrmlViewer::VrmlViewer() - could not open file ";
-	cerr << fileName << endl;
+	opserr << "FATAL - VrmlViewer::VrmlViewer() - could not open file ";
+	opserr << fileName << endln;
 	exit(-1);
     }
   (*vrmlFile) << "#VRML V2.0 utf8 \n";        
@@ -71,8 +71,8 @@ VrmlViewer::clearImage(void)
     // open the file again
     vrmlFile = new fstream(vrmlFileName, ios::out);
     if (vrmlFile == 0) {
-	cerr << "FATAL - VrmlViewer::clearImage() - could not open file ";
-	cerr << vrmlFileName << endl;
+	opserr << "FATAL - VrmlViewer::clearImage() - could not open file ";
+	opserr << vrmlFileName << endln;
 	return -1;
     }
   (*vrmlFile) << "#VRML V2.0 utf8 \n";    

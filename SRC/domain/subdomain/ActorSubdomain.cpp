@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
                                                                         
@@ -507,7 +507,7 @@ ActorSubdomain::run(void)
 	    break;
 
 	  default:
-	    cerr << "ActorSubdomain::invalid action " << action << "received\n";
+	    opserr << "ActorSubdomain::invalid action " << action << "received\n";
 	    msgData(0) = -1;
 	}
     }

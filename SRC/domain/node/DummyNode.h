@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/DummyNode.h,v $
                                                                         
                                                                         
@@ -86,8 +86,8 @@ class DummyNode : public Node
     void zeroUnbalancedLoad(void);
     int commitState();
 
-    void Print(ostream &s) const;
-    friend ostream &operator<<(ostream &s, const DummyNode &N);
+    void Print(OPS_Stream &s) const;
+    friend OPS_Stream &operator<<(OPS_Stream &s, const DummyNode &N);
 
     int addElementPtr(Element *);
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-11-04 19:22:34 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.h,v $
 
 // File: ~/material/EPPGapMaterial.h
@@ -75,7 +75,7 @@ class EPPGapMaterial : public UniaxialMaterial
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);    
     
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
     
   protected:
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Vertex.h,v $
                                                                         
                                                                         
@@ -65,7 +65,7 @@ class Vertex: public TaggedObject
     virtual int getDegree(void) const;
     virtual const ID &getAdjacency(void) const;
 
-    virtual  void Print(ostream &s, int flag =0);
+    virtual  void Print(OPS_Stream &s, int flag =0);
   
   protected:
     

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:58 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type1SmallestValueRV.cpp,v $
 
 
@@ -36,6 +36,7 @@
 #include <Type1SmallestValueRV.h>
 #include <math.h>
 #include <string.h>
+#include <OPS_Globals.h>
 
 Type1SmallestValueRV::Type1SmallestValueRV(int passedTag, 
 		 double passedMean,
@@ -95,7 +96,7 @@ Type1SmallestValueRV::~Type1SmallestValueRV()
 
 
 void
-Type1SmallestValueRV::Print(ostream &s, int flag)
+Type1SmallestValueRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -154,5 +155,5 @@ Type1SmallestValueRV::getStartValue()
 
 double Type1SmallestValueRV::getParameter1()  {return u;}
 double Type1SmallestValueRV::getParameter2()  {return alpha;}
-double Type1SmallestValueRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double Type1SmallestValueRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double Type1SmallestValueRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double Type1SmallestValueRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}

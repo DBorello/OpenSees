@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/RectangularSeries.cpp,v $
                                                                         
                                                                         
@@ -78,7 +78,7 @@ RectangularSeries::sendSelf(int commitTag, Channel &theChannel)
   data(2) = tFinish;
   int result = theChannel.sendVector(dbTag,commitTag, data);
   if (result < 0) {
-    cerr << "RectangularSeries::sendSelf() - channel failed to send data\n";
+    opserr << "RectangularSeries::sendSelf() - channel failed to send data\n";
     return result;
   }
   return 0;
@@ -93,7 +93,7 @@ RectangularSeries::recvSelf(int commitTag, Channel &theChannel,
   Vector data(3);
   int result = theChannel.recvVector(dbTag,commitTag, data);
   if (result < 0) {
-    cerr << "RectangularSeries::sendSelf() - channel failed to receive data\n";
+    opserr << "RectangularSeries::sendSelf() - channel failed to receive data\n";
     cFactor = 1.0;
     tStart= 0.0;
     tFinish = 0.0;
@@ -107,9 +107,9 @@ RectangularSeries::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void
-RectangularSeries::Print(ostream &s, int flag)
+RectangularSeries::Print(OPS_Stream &s, int flag)
 {
     s << "Linear Series: constant factor: " << cFactor;
-    s << "  tStart: " << tStart << "  tFinish: " << tFinish << endl;
+    s << "  tStart: " << tStart << "  tFinish: " << tFinish << endln;
 
 }

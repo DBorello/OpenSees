@@ -20,16 +20,13 @@
                                                                         
 
 
-// $Revision: 1.11 $
-// $Date: 2002-12-13 01:03:18 $
+// $Revision: 1.12 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
-// File: ~/recorder/NodeRecorder.C
-//
 // Written: fmk 
 // Created: 11/98
-// Revision: A
 //
 // Description: This file contains the class definition for NodeRecorder.
 // A NodeRecorder is used to record the specified dof responses 
@@ -46,9 +43,13 @@
 #include <Matrix.h>
 #include <FE_Datastore.h>
 
-#include <iostream.h>
-#include <fstream.h>
 #include <string.h>
+
+#include <fstream>
+using std::ifstream;
+
+#include <iomanip>
+using std::ios;
 
 NodeRecorder::NodeRecorder(const ID &dofs, 
 			   const ID &nodes, 
@@ -73,8 +74,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
       (*theDofs)[count] = dof;
       count++;
     } else {
-      cerr << "NodeRecorder::NodeRecorder - invalid dof  " << dof;
-      cerr << " will be ignored\n";
+      opserr << "NodeRecorder::NodeRecorder - invalid dof  " << dof;
+      opserr << " will be ignored\n";
     }
   }
 
@@ -86,8 +87,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     int nodeTag = nodes(i);
     Node *theNode = theDomain->getNode(nodeTag);
     if (theNode == 0) {
-      cerr << "NodeRecorder::NodeRecorder - invalid node  " << nodeTag;
-      cerr << " does not exist in domain - will be ignored\n";
+      opserr << "NodeRecorder::NodeRecorder - invalid node  " << nodeTag;
+      opserr << " does not exist in domain - will be ignored\n";
     } else {
       (*theNodes)[count++] = nodeTag;
     }
@@ -97,8 +98,9 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   int fileNameLength = strlen(theFileName) + 1;
   fileName = new char[fileNameLength];
   if (fileName == 0) {
-    g3ErrorHandler->fatal("FileNodeDispRecorder::FileNodeDispRecorder - out of memory creating string %d long\n",
-			  fileNameLength);
+    opserr << "NodeRecorder::NodeRecorder - out of memory creating string of size: " <<
+      fileNameLength << endln;
+    exit(-1);
   }
 
   // copy the strings
@@ -107,8 +109,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   // open the file
   theFile.open(fileName, ios::out);
   if (theFile.bad()) {
-    cerr << "WARNING - FileNodeDispRecorder::FileNodeDispRecorder()";
-    cerr << " - could not open file " << fileName << endl;
+    opserr << "WARNING - NodeRecorder::NodeRecorder()";
+    opserr << " - could not open file " << fileName << endln;
   }    
 
   disp.Zero();
@@ -131,8 +133,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
       dataFlag = 6;
   } else {
     dataFlag = 6;
-    cerr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
-    cerr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
+    opserr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
+    opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
   }
 
 }
@@ -162,8 +164,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
       (*theDofs)[count] = dof;
       count++;
     } else {
-      cerr << "NodeRecorder::NodeRecorder - invalid dof  " << dof;
-      cerr << " will be ignored\n";
+      opserr << "NodeRecorder::NodeRecorder - invalid dof  " << dof;
+      opserr << " will be ignored\n";
     }
   }
 
@@ -175,8 +177,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     int nodeTag = nodes(i);
     Node *theNode = theDomain->getNode(nodeTag);
     if (theNode == 0) {
-      cerr << "NodeRecorder::NodeRecorder - invalid node  " << nodeTag;
-      cerr << " does not exist in domain - will be ignored\n";
+      opserr << "NodeRecorder::NodeRecorder - invalid node  " << nodeTag;
+      opserr << " does not exist in domain - will be ignored\n";
     } else {
       (*theNodes)[count++] = nodeTag;
     }
@@ -186,8 +188,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   int fileNameLength = strlen(dbTable) + 1;
   fileName = new char[fileNameLength];
   if (fileName == 0) {
-    g3ErrorHandler->fatal("FileNodeDispRecorder::FileNodeDispRecorder - out of memory creating string %d long\n",
-			  fileNameLength);
+    opserr << "NodeRecorder::NodeRecorder - out of memory creating string of size: " << 
+      fileNameLength << endln;
   }
 
   // copy the strings
@@ -213,8 +215,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
       dataFlag = 6;
   } else {
     dataFlag = 6;
-    cerr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
-    cerr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
+    opserr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
+    opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
   }
 
   // now create the columns strings for the database
@@ -372,7 +374,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	for (int j=1; j<=numNodes*numDOF; j++)
 	  theFile << disp(j) << " ";
       
-	theFile << endl;
+	theFile << endln;
 	theFile.flush();
 
       } else {
@@ -401,8 +403,8 @@ NodeRecorder::playback(int commitTag)
   ifstream inputFile;
   inputFile.open(fileName, ios::in);
   if (inputFile.bad()) {
-    cerr << "WARNING - FileNodeDispRecorder::playback() - could not open file ";
-    cerr << fileName << endl;
+    opserr << "WARNING - NodeRecorder::playback() - could not open file ";
+    opserr << fileName << endln;
     return -1;
   }   
 
@@ -419,20 +421,20 @@ NodeRecorder::playback(int commitTag)
   // now read in our line and print out
   if (flag == 1 || flag == 2) {
       inputFile >> data;
-      cerr << data << " ";
+      opserr << data << " ";
       for (int i=0; i<numNodes*numDOF; i++) {
 	  inputFile >> data;
-	  cerr << data << " ";
+	  opserr << data << " ";
       }	
-      cerr << endl;
+      opserr << endln;
   }
   inputFile.close();
       
     // open file again for writing
     theFile.open(fileName, ios::app);
     if (theFile.bad()) {
-      cerr << "WARNING - FileNodeDispRecorder::playback() - could not open file ";
-      cerr << fileName << endl;
+      opserr << "WARNING - NodeRecorder::playback() - could not open file ";
+      opserr << fileName << endln;
       return -1;
     }    
   
@@ -446,8 +448,8 @@ NodeRecorder::restart(void)
   theFile.close();
   theFile.open(fileName, ios::out);
   if (theFile.bad()) {
-    cerr << "WARNING - FileNodeDispRecorder::restart() - could not open file ";
-    cerr << fileName << endl;
+    opserr << "WARNING - NodeRecorder::restart() - could not open file ";
+    opserr << fileName << endln;
   }
 }
 

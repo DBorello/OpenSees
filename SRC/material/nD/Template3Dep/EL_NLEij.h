@@ -32,9 +32,6 @@
 
 #include <math.h>
 
-#include <iostream.h>
-#include <iomanip.h>
-
 #include "EL_T.h"
 
 class EvolutionLaw_NL_Eij : public EvolutionLaw_T
@@ -77,7 +74,7 @@ class EvolutionLaw_NL_Eij : public EvolutionLaw_T
     // Overloaded Insertion Operator	  Zhaohui Added Aug. 13, 2000
     // prints Linear EvolutionLaw's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const EvolutionLaw_NL_Eij & LEL);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_NL_Eij & LEL);
 
     
 };

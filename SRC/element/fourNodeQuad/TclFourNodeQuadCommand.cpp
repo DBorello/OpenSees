@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-30 21:47:42 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/TclFourNodeQuadCommand.cpp,v $
                                                                         
 // File: ~/element/TclFourNodeQuadCommand.C
@@ -35,7 +35,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 #include <Domain.h>
 
 #include <FourNodeQuad.h>
@@ -62,12 +61,12 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed\n";    
+    opserr << "WARNING builder has been destroyed\n";    
     return TCL_ERROR;
   }
 
 	if (theTclBuilder->getNDM() != 2 || theTclBuilder->getNDF() != 2) {
-		cerr << "WARNING -- model dimensions and/or nodal DOF not compatible with quad element\n";
+		opserr << "WARNING -- model dimensions and/or nodal DOF not compatible with quad element\n";
 		return TCL_ERROR;
 	}
 
@@ -75,9 +74,9 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
   int argStart = 2;
 
   if ((argc-argStart) < 8) {
-    cerr << "WARNING insufficient arguments\n";
+    opserr << "WARNING insufficient arguments\n";
     printCommand(argc, argv);
-    cerr << "Want: element FourNodeQuad eleTag? iNode? jNode? kNode? lNode? thk? type? matTag? <pressure? rho? b1? b2?>\n";
+    opserr << "Want: element FourNodeQuad eleTag? iNode? jNode? kNode? lNode? thk? type? matTag? <pressure? rho? b1? b2?>\n";
     return TCL_ERROR;
   }    
 
@@ -90,66 +89,66 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
 	double b2 = 0.0;
   char *type;
   if (Tcl_GetInt(interp, argv[argStart], &FourNodeQuadId) != TCL_OK) {
-    cerr << "WARNING invalid FourNodeQuad eleTag" << endl;
+    opserr << "WARNING invalid FourNodeQuad eleTag" << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[1+argStart], &iNode) != TCL_OK) {
-    cerr << "WARNING invalid iNode\n";
-    cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+    opserr << "WARNING invalid iNode\n";
+    opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
     return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[2+argStart], &jNode) != TCL_OK) {
-     cerr << "WARNING invalid jNode\n";
-     cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+     opserr << "WARNING invalid jNode\n";
+     opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
      return TCL_ERROR;
   }
   
   if (Tcl_GetInt(interp, argv[3+argStart], &kNode) != TCL_OK) {
-     cerr << "WARNING invalid kNode\n";
-     cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+     opserr << "WARNING invalid kNode\n";
+     opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
      return TCL_ERROR;
   }  
   
   if (Tcl_GetInt(interp, argv[4+argStart], &lNode) != TCL_OK) {
-     cerr << "WARNING invalid lNode\n";
-     cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+     opserr << "WARNING invalid lNode\n";
+     opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
      return TCL_ERROR;
   }  
 
   if (Tcl_GetDouble(interp, argv[5+argStart], &thickness) != TCL_OK) {
-     cerr << "WARNING invalid thickness\n";
-     cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+     opserr << "WARNING invalid thickness\n";
+     opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
      return TCL_ERROR;
   }  
   
   type = argv[6+argStart];
   
   if (Tcl_GetInt(interp, argv[7+argStart], &matID) != TCL_OK) {
-     cerr << "WARNING invalid matID\n";
-     cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+     opserr << "WARNING invalid matID\n";
+     opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
      return TCL_ERROR;
   }
 
 	if ((argc-argStart) > 11) {
 		if (Tcl_GetDouble(interp, argv[8+argStart], &p) != TCL_OK) {
-			cerr << "WARNING invalid pressure\n";
-			cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+			opserr << "WARNING invalid pressure\n";
+			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
 			return TCL_ERROR;
 		}
 		if (Tcl_GetDouble(interp, argv[9+argStart], &r) != TCL_OK) {
-			cerr << "WARNING invalid rho\n";
-			cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+			opserr << "WARNING invalid rho\n";
+			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
 			return TCL_ERROR;
 		}
 		if (Tcl_GetDouble(interp, argv[10+argStart], &b1) != TCL_OK) {
-			cerr << "WARNING invalid b1\n";
-			cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+			opserr << "WARNING invalid b1\n";
+			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
 			return TCL_ERROR;
 		}
 		if (Tcl_GetDouble(interp, argv[11+argStart], &b2) != TCL_OK) {
-			cerr << "WARNING invalid b2\n";
-			cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+			opserr << "WARNING invalid b2\n";
+			opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
 			return TCL_ERROR;
 		}
 
@@ -158,9 +157,9 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
   NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
       
   if (theMaterial == 0) {
-      cerr << "WARNING material not found\n";
-      cerr << "Material: " << matID;
-      cerr << "\nFourNodeQuad element: " << FourNodeQuadId << endl;
+      opserr << "WARNING material not found\n";
+      opserr << "Material: " << matID;
+      opserr << "\nFourNodeQuad element: " << FourNodeQuadId << endln;
       return TCL_ERROR;
   }
   
@@ -169,14 +168,14 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
       new FourNodeQuad(FourNodeQuadId,iNode,jNode,kNode,lNode,
 		       *theMaterial, type, thickness, p, r, b1, b2);
   if (theFourNodeQuad == 0) {
-      cerr << "WARNING ran out of memory creating element\n";
-      cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+      opserr << "WARNING ran out of memory creating element\n";
+      opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
       return TCL_ERROR;
   }
 
   if (theTclDomain->addElement(theFourNodeQuad) == false) {
-      cerr << "WARNING could not add element to the domain\n";
-      cerr << "FourNodeQuad element: " << FourNodeQuadId << endl;
+      opserr << "WARNING could not add element to the domain\n";
+      opserr << "FourNodeQuad element: " << FourNodeQuadId << endln;
       delete theFourNodeQuad;
       return TCL_ERROR;
   }
@@ -202,12 +201,12 @@ TclModelBuilder_addConstantPressureVolumeQuad(ClientData clientData, Tcl_Interp 
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed\n";    
+    opserr << "WARNING builder has been destroyed\n";    
     return TCL_ERROR;
   }
 
   if (theTclBuilder->getNDM() != 2 || theTclBuilder->getNDF() != 2) {
-      cerr << "WARNING -- model dimensions and/or nodal DOF not compatible with quad element\n";
+      opserr << "WARNING -- model dimensions and/or nodal DOF not compatible with quad element\n";
       return TCL_ERROR;
   }
 
@@ -215,9 +214,9 @@ TclModelBuilder_addConstantPressureVolumeQuad(ClientData clientData, Tcl_Interp 
   int argStart = 2;
 
   if ((argc-argStart) < 6) {
-    cerr << "WARNING insufficient arguments\n";
+    opserr << "WARNING insufficient arguments\n";
     printCommand(argc, argv);
-    cerr << "Want: element ConstantPressureVolumeQuad eleTag? iNode? jNode? kNode? lNode? matTag?\n"; 
+    opserr << "Want: element ConstantPressureVolumeQuad eleTag? iNode? jNode? kNode? lNode? matTag?\n"; 
     return TCL_ERROR;
   }    
 
@@ -225,45 +224,45 @@ TclModelBuilder_addConstantPressureVolumeQuad(ClientData clientData, Tcl_Interp 
   int ConstantPressureVolumeQuadId, iNode, jNode, kNode, lNode, matID;
 
   if (Tcl_GetInt(interp, argv[argStart], &ConstantPressureVolumeQuadId) != TCL_OK) {
-    cerr << "WARNING invalid ConstantPressureVolumeQuad eleTag" << endl;
+    opserr << "WARNING invalid ConstantPressureVolumeQuad eleTag" << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[1+argStart], &iNode) != TCL_OK) {
-    cerr << "WARNING invalid iNode\n";
-    cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+    opserr << "WARNING invalid iNode\n";
+    opserr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endln;
     return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[2+argStart], &jNode) != TCL_OK) {
-     cerr << "WARNING invalid jNode\n";
-     cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+     opserr << "WARNING invalid jNode\n";
+     opserr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endln;
      return TCL_ERROR;
   }
   
   if (Tcl_GetInt(interp, argv[3+argStart], &kNode) != TCL_OK) {
-     cerr << "WARNING invalid kNode\n";
-     cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+     opserr << "WARNING invalid kNode\n";
+     opserr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endln;
      return TCL_ERROR;
   }  
   
   if (Tcl_GetInt(interp, argv[4+argStart], &lNode) != TCL_OK) {
-     cerr << "WARNING invalid lNode\n";
-     cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+     opserr << "WARNING invalid lNode\n";
+     opserr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endln;
      return TCL_ERROR;
   }  
 
   if (Tcl_GetInt(interp, argv[5+argStart], &matID) != TCL_OK) {
-     cerr << "WARNING invalid matID\n";
-     cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+     opserr << "WARNING invalid matID\n";
+     opserr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endln;
      return TCL_ERROR;
   }
 
   NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
       
   if (theMaterial == 0) {
-      cerr << "WARNING material not found\n";
-      cerr << "Material: " << matID;
-      cerr << "\nConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+      opserr << "WARNING material not found\n";
+      opserr << "Material: " << matID;
+      opserr << "\nConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endln;
       return TCL_ERROR;
   }
   
@@ -272,15 +271,15 @@ TclModelBuilder_addConstantPressureVolumeQuad(ClientData clientData, Tcl_Interp 
       new ConstantPressureVolumeQuad(ConstantPressureVolumeQuadId,iNode,jNode,kNode,lNode,
 		       *theMaterial);
   if (theConstantPressureVolumeQuad == 0) {
-      cerr << "WARNING ran out of memory creating element\n";
-      cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+      opserr << "WARNING ran out of memory creating element\n";
+      opserr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endln;
       return TCL_ERROR;
   }
 
 
   if (theTclDomain->addElement(theConstantPressureVolumeQuad) == false) {
-      cerr << "WARNING could not add element to the domain\n";
-      cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+      opserr << "WARNING could not add element to the domain\n";
+      opserr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endln;
       delete theConstantPressureVolumeQuad;
       return TCL_ERROR;
   }
@@ -304,12 +303,12 @@ TclModelBuilder_addEnhancedQuad(ClientData clientData, Tcl_Interp *interp,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed\n";    
+    opserr << "WARNING builder has been destroyed\n";    
     return TCL_ERROR;
   }
 
 	if (theTclBuilder->getNDM() != 2 || theTclBuilder->getNDF() != 2) {
-		cerr << "WARNING -- model dimensions and/or nodal DOF not compatible with quad element\n";
+		opserr << "WARNING -- model dimensions and/or nodal DOF not compatible with quad element\n";
 		return TCL_ERROR;
 	}
 
@@ -317,9 +316,9 @@ TclModelBuilder_addEnhancedQuad(ClientData clientData, Tcl_Interp *interp,
   int argStart = 2;
 
   if ((argc-argStart) < 7) {
-    cerr << "WARNING insufficient arguments\n";
+    opserr << "WARNING insufficient arguments\n";
     printCommand(argc, argv);
-    cerr << "Want: element EnhancedQuad eleTag? iNode? jNode? kNode? lNode? type? matTag? \n";
+    opserr << "Want: element EnhancedQuad eleTag? iNode? jNode? kNode? lNode? type? matTag? \n";
     return TCL_ERROR;
   }    
 
@@ -327,30 +326,30 @@ TclModelBuilder_addEnhancedQuad(ClientData clientData, Tcl_Interp *interp,
   int EnhancedQuadId, iNode, jNode, kNode, lNode, matID;
   char *type;
   if (Tcl_GetInt(interp, argv[argStart], &EnhancedQuadId) != TCL_OK) {
-    cerr << "WARNING invalid EnhancedQuad eleTag" << endl;
+    opserr << "WARNING invalid EnhancedQuad eleTag" << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[1+argStart], &iNode) != TCL_OK) {
-    cerr << "WARNING invalid iNode\n";
-    cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+    opserr << "WARNING invalid iNode\n";
+    opserr << "EnhancedQuad element: " << EnhancedQuadId << endln;
     return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[2+argStart], &jNode) != TCL_OK) {
-     cerr << "WARNING invalid jNode\n";
-     cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+     opserr << "WARNING invalid jNode\n";
+     opserr << "EnhancedQuad element: " << EnhancedQuadId << endln;
      return TCL_ERROR;
   }
   
   if (Tcl_GetInt(interp, argv[3+argStart], &kNode) != TCL_OK) {
-     cerr << "WARNING invalid kNode\n";
-     cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+     opserr << "WARNING invalid kNode\n";
+     opserr << "EnhancedQuad element: " << EnhancedQuadId << endln;
      return TCL_ERROR;
   }  
   
   if (Tcl_GetInt(interp, argv[4+argStart], &lNode) != TCL_OK) {
-     cerr << "WARNING invalid lNode\n";
-     cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+     opserr << "WARNING invalid lNode\n";
+     opserr << "EnhancedQuad element: " << EnhancedQuadId << endln;
      return TCL_ERROR;
   }  
 
@@ -359,17 +358,17 @@ TclModelBuilder_addEnhancedQuad(ClientData clientData, Tcl_Interp *interp,
 
   
   if (Tcl_GetInt(interp, argv[6+argStart], &matID) != TCL_OK) {
-     cerr << "WARNING invalid matID\n";
-     cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+     opserr << "WARNING invalid matID\n";
+     opserr << "EnhancedQuad element: " << EnhancedQuadId << endln;
      return TCL_ERROR;
   }
 
   NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
       
   if (theMaterial == 0) {
-      cerr << "WARNING material not found\n";
-      cerr << "Material: " << matID;
-      cerr << "\nEnhancedQuad element: " << EnhancedQuadId << endl;
+      opserr << "WARNING material not found\n";
+      opserr << "Material: " << matID;
+      opserr << "\nEnhancedQuad element: " << EnhancedQuadId << endln;
       return TCL_ERROR;
   }
   
@@ -378,14 +377,14 @@ TclModelBuilder_addEnhancedQuad(ClientData clientData, Tcl_Interp *interp,
       new EnhancedQuad(EnhancedQuadId,iNode,jNode,kNode,lNode,
 		       *theMaterial, type );
   if (theEnhancedQuad == 0) {
-      cerr << "WARNING ran out of memory creating element\n";
-      cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+      opserr << "WARNING ran out of memory creating element\n";
+      opserr << "EnhancedQuad element: " << EnhancedQuadId << endln;
       return TCL_ERROR;
   }
 
   if (theTclDomain->addElement(theEnhancedQuad) == false) {
-      cerr << "WARNING could not add element to the domain\n";
-      cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+      opserr << "WARNING could not add element to the domain\n";
+      opserr << "EnhancedQuad element: " << EnhancedQuadId << endln;
       delete theEnhancedQuad;
       return TCL_ERROR;
   }
@@ -412,12 +411,12 @@ TclModelBuilder_addNineNodeMixedQuad(ClientData clientData, Tcl_Interp *interp,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed\n";    
+    opserr << "WARNING builder has been destroyed\n";    
     return TCL_ERROR;
   }
 
   if (theTclBuilder->getNDM() != 2 || theTclBuilder->getNDF() != 2) {
-      cerr << "WARNING -- model dimensions and/or nodal DOF not compatible with quad element\n";
+      opserr << "WARNING -- model dimensions and/or nodal DOF not compatible with quad element\n";
       return TCL_ERROR;
   }
 
@@ -425,9 +424,9 @@ TclModelBuilder_addNineNodeMixedQuad(ClientData clientData, Tcl_Interp *interp,
   int argStart = 2;
 
   if ((argc-argStart) < 11) {
-    cerr << "WARNING insufficient arguments\n";
+    opserr << "WARNING insufficient arguments\n";
     printCommand(argc, argv);
-    cerr << "Want: element NineNodeMixedQuad  eleTag?"  
+    opserr << "Want: element NineNodeMixedQuad  eleTag?"  
          << " iNode? jNode? kNode? lNode? mNode, nNode, pNode, qNode, centerNode " 
 	 << " matTag?\n"; 
     return TCL_ERROR;
@@ -440,77 +439,77 @@ TclModelBuilder_addNineNodeMixedQuad(ClientData clientData, Tcl_Interp *interp,
   int matID;
 
   if (Tcl_GetInt(interp, argv[argStart], &NineNodeMixedQuadId) != TCL_OK) {
-    cerr << "WARNING invalid NineNodeMixedQuad eleTag" << endl;
+    opserr << "WARNING invalid NineNodeMixedQuad eleTag" << endln;
     return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[1+argStart], &iNode) != TCL_OK) {
-    cerr << "WARNING invalid iNode\n";
-    cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+    opserr << "WARNING invalid iNode\n";
+    opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
     return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[2+argStart], &jNode) != TCL_OK) {
-     cerr << "WARNING invalid jNode\n";
-     cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+     opserr << "WARNING invalid jNode\n";
+     opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
      return TCL_ERROR;
   }
   
   if (Tcl_GetInt(interp, argv[3+argStart], &kNode) != TCL_OK) {
-     cerr << "WARNING invalid kNode\n";
-     cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+     opserr << "WARNING invalid kNode\n";
+     opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
      return TCL_ERROR;
   }  
   
   if (Tcl_GetInt(interp, argv[4+argStart], &lNode) != TCL_OK) {
-     cerr << "WARNING invalid lNode\n";
-     cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+     opserr << "WARNING invalid lNode\n";
+     opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
      return TCL_ERROR;
   }  
 
   if (Tcl_GetInt(interp, argv[5+argStart], &mNode) != TCL_OK) {
-     cerr << "WARNING invalid mNode\n";
-     cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+     opserr << "WARNING invalid mNode\n";
+     opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
      return TCL_ERROR;
   }  
 
   if (Tcl_GetInt(interp, argv[6+argStart], &nNode) != TCL_OK) {
-     cerr << "WARNING invalid nNode\n";
-     cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+     opserr << "WARNING invalid nNode\n";
+     opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
      return TCL_ERROR;
   }  
 
   if (Tcl_GetInt(interp, argv[7+argStart], &pNode) != TCL_OK) {
-     cerr << "WARNING invalid pNode\n";
-     cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+     opserr << "WARNING invalid pNode\n";
+     opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
      return TCL_ERROR;
   }  
 
   if (Tcl_GetInt(interp, argv[8+argStart], &qNode) != TCL_OK) {
-     cerr << "WARNING invalid qNode\n";
-     cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+     opserr << "WARNING invalid qNode\n";
+     opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
      return TCL_ERROR;
   }  
 
   if (Tcl_GetInt(interp, argv[9+argStart], &centerNode) != TCL_OK) {
-     cerr << "WARNING invalid centerNode\n";
-     cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+     opserr << "WARNING invalid centerNode\n";
+     opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
      return TCL_ERROR;
   }  
 
 
   if (Tcl_GetInt(interp, argv[10+argStart], &matID) != TCL_OK) {
-     cerr << "WARNING invalid matID\n";
-     cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+     opserr << "WARNING invalid matID\n";
+     opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
      return TCL_ERROR;
   }
 
   NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
       
   if (theMaterial == 0) {
-      cerr << "WARNING material not found\n";
-      cerr << "Material: " << matID;
-      cerr << "\nNineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+      opserr << "WARNING material not found\n";
+      opserr << "Material: " << matID;
+      opserr << "\nNineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
       return TCL_ERROR;
   }
   
@@ -520,14 +519,14 @@ TclModelBuilder_addNineNodeMixedQuad(ClientData clientData, Tcl_Interp *interp,
 			    mNode, nNode, pNode, qNode, centerNode, *theMaterial);
 
   if (theNineNodeMixed == 0) {
-      cerr << "WARNING ran out of memory creating element\n";
-      cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+      opserr << "WARNING ran out of memory creating element\n";
+      opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
       return TCL_ERROR;
   }
 
   if (theTclDomain->addElement(theNineNodeMixed) == false) {
-      cerr << "WARNING could not add element to the domain\n";
-      cerr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endl;
+      opserr << "WARNING could not add element to the domain\n";
+      opserr << "NineNodeMixedQuad element: " << NineNodeMixedQuadId << endln;
       delete theNineNodeMixed;
       return TCL_ERROR;
   }

@@ -52,8 +52,8 @@ int
 SymSparseLinSolver::solve(void)
 { 
     if (theSOE == 0) {
-	cerr << "WARNING SymSparseLinSolver::solve(void)- ";
-	cerr << " No LinearSOE object has been set\n";
+	opserr << "WARNING SymSparseLinSolver::solve(void)- ";
+	opserr << " No LinearSOE object has been set\n";
 	return -1;
     }
 
@@ -86,7 +86,7 @@ SymSparseLinSolver::solve(void)
         int factor;
 	factor = pfsfct(neq, diag, penv, nblks, xblk, begblk, first, rowblks);
 	if (factor > 0) {
-	    cerr << "In SymSparseLinSolver: error in factorization.\n";
+	    opserr << "In SymSparseLinSolver: error in factorization.\n";
 	    return -1;
 	}
 	theSOE->factored = true;
@@ -102,8 +102,8 @@ SymSparseLinSolver::solve(void)
 
     double *tempX = new double[neq];
     if (tempX == 0) {
-        cerr << "WARNING SymSparseLinSover::SymSparseLinSolver :";
-	cerr << " ran out of memory for vectors (tempX) ";
+        opserr << "WARNING SymSparseLinSover::SymSparseLinSolver :";
+	opserr << " ran out of memory for vectors (tempX) ";
 	return -1;
     } 
 

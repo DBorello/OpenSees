@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:49:13 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlateFiberMaterial.cpp,v $
 
 //
@@ -190,7 +190,7 @@ PlateFiberMaterial::setTrialStrain(const Vector &strainFromElement)
     threeDstrain(5) = this->strain(4);
 
     if (theMaterial->setTrialStrain(threeDstrain) < 0) {
-      cerr << "PlateFiberMaterial::setTrialStrain - material failed in setTrialStrain() with strain " << threeDstrain;
+      opserr << "PlateFiberMaterial::setTrialStrain - material failed in setTrialStrain() with strain " << threeDstrain;
       return -1;
     }
 
@@ -331,7 +331,7 @@ PlateFiberMaterial::getTangent()
 const Matrix&  
 PlateFiberMaterial::getInitialTangent()
 {
-  cerr << "PlateFiberMaterial::getInitialTangent() - not yet implemented\n";
+  opserr << "PlateFiberMaterial::getInitialTangent() - not yet implemented\n";
   return this->getTangent();
 }
 
@@ -382,7 +382,7 @@ PlateFiberMaterial::indexMap(int i)
 
 //print out data
 void  
-PlateFiberMaterial::Print(ostream &s, int flag)
+PlateFiberMaterial::Print(OPS_Stream &s, int flag)
 {
   s << "General Plate Fiber Material \n";
   s << " Tag: " << this->getTag() << "\n"; 
@@ -412,7 +412,7 @@ PlateFiberMaterial::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
-    cerr << "PlateFiberMaterial::sendSelf() - failed to send id data\n";
+    opserr << "PlateFiberMaterial::sendSelf() - failed to send id data\n";
     return res;
   }
 
@@ -422,14 +422,14 @@ PlateFiberMaterial::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) {
-    cerr << "PlateFiberMaterial::sendSelf() - failed to send vector data\n";
+    opserr << "PlateFiberMaterial::sendSelf() - failed to send vector data\n";
     return res;
   }
 
   // now send the materials data
   res = theMaterial->sendSelf(commitTag, theChannel);
   if (res < 0) 
-    cerr << "PlateFiberMaterial::sendSelf() - failed to send vector material\n";
+    opserr << "PlateFiberMaterial::sendSelf() - failed to send vector material\n";
 
   return res;
 }
@@ -443,7 +443,7 @@ PlateFiberMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroke
   static ID idData(3);
   res = theChannel.sendID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
-    cerr << "BeamFiberMaterial::sendSelf() - failed to send id data\n";
+    opserr << "BeamFiberMaterial::sendSelf() - failed to send id data\n";
     return res;
   }
 
@@ -457,7 +457,7 @@ PlateFiberMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroke
       delete theMaterial;
     theMaterial = theBroker.getNewNDMaterial(matClassTag);
     if (theMaterial == 0) {
-      cerr << "BeamFiberMaterial::recvSelf() - failed to get a material of type: " << matClassTag << endl;
+      opserr << "BeamFiberMaterial::recvSelf() - failed to get a material of type: " << matClassTag << endln;
       return -1;
     }
   }
@@ -467,7 +467,7 @@ PlateFiberMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroke
   static Vector vecData(1);
   res = theChannel.recvVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) {
-    cerr << "BeamFiberMaterial::sendSelf() - failed to send vector data\n";
+    opserr << "BeamFiberMaterial::sendSelf() - failed to send vector data\n";
     return res;
   }
 
@@ -477,7 +477,7 @@ PlateFiberMaterial::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroke
   // now receive the assocaited materials data
   res = theMaterial->recvSelf(commitTag, theChannel, theBroker);
   if (res < 0) 
-    cerr << "BeamFiberMaterial::sendSelf() - failed to send vector material\n";
+    opserr << "BeamFiberMaterial::sendSelf() - failed to send vector material\n";
   
   return res;
 }

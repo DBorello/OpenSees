@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.cpp,v $
                                                                         
                                                                         
@@ -106,8 +106,8 @@ int
 UmfpackGenLinSolver::solve(void)
 {
     if (theSOE == 0) {
-	cerr << "WARNING UmfpackGenLinSolver::solve(void)- ";
-	cerr << " No LinearSOE object has been set\n";
+	opserr << "WARNING UmfpackGenLinSolver::solve(void)- ";
+	opserr << " No LinearSOE object has been set\n";
 	return -1;
     }
     
@@ -144,8 +144,8 @@ UmfpackGenLinSolver::solve(void)
 #endif      
       
       if (info[0] != 0) {	
-	cerr << "WARNING UmfpackGenLinSolver::solve(void)- ";
-	cerr << info[0] << " returned in factorization UMD2FA()\n";
+	opserr << "WARNING UmfpackGenLinSolver::solve(void)- ";
+	opserr << info[0] << " returned in factorization UMD2FA()\n";
 	return -info[0];
       }
       theSOE->factored = true;
@@ -161,8 +161,8 @@ UmfpackGenLinSolver::solve(void)
 #endif
 
     if (info[0] != 0) {	
-       cerr << "WARNING UmfpackGenLinSolver::solve(void)- ";
-       cerr << info[0] << " returned in substitution dgstrs()\n";
+       opserr << "WARNING UmfpackGenLinSolver::solve(void)- ";
+       opserr << info[0] << " returned in substitution dgstrs()\n";
        return -info[0];
     }
 

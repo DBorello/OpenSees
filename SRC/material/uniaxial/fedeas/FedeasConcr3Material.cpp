@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-26 23:00:12 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasConcr3Material.cpp,v $
                                                                       
 // Written: MHS
@@ -54,12 +54,13 @@ FedeasConcr3Material::FedeasConcr3Material(int tag, const Vector &d):
 // 2 history variables and 10 material parameters
 FedeasMaterial(tag, MAT_TAG_FedeasConcrete3, 2, 10)
 {
-	if (d.Size() != numData)
-		g3ErrorHandler->fatal("%s -- not enough input arguments",
-		"FedeasConcr3Material::FedeasConcr3Material");
-
-	for (int i = 0; i < numData; i++)
-		data[i] = d(i);
+  if (d.Size() != numData) {
+    opserr << "FedeasConcr3Material::FedeasConcr3Material -- not enough input arguments\n";
+    exit(-1);
+  }
+		
+  for (int i = 0; i < numData; i++)
+    data[i] = d(i);
 }
 
 FedeasConcr3Material::FedeasConcr3Material(void):

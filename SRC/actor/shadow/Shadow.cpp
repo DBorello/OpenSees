@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/shadow/Shadow.cpp,v $
                                                                         
                                                                         
@@ -66,8 +66,8 @@ Shadow::Shadow(char *program,
   if (startShadow == true) {
     int res = theMachineBroker.startActor(program,theChan,compDemand);
     if (res < 0) {
-	cerr << "Shadow::Shadow - could not start remote actor\n";
-	cerr << " using program " << *program << endl;
+	opserr << "Shadow::Shadow - could not start remote actor\n";
+	opserr << " using program " << *program << endln;
 	exit(-1);
     }
   }

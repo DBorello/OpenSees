@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 04:21:33 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltySP_FE.cpp,v $
                                                                         
                                                                         
@@ -59,15 +59,15 @@ PenaltySP_FE::PenaltySP_FE(Domain &theDomain,
     tang = new Matrix(1,1);
     resid = new Vector(1);
     if (tang == 0 || resid == 0 || tang->noCols() == 0 || resid->Size() == 0) {
-	cerr << "FATAL PenaltySP_FE::PenaltySP_FE() - ran out of memory\n";
+	opserr << "FATAL PenaltySP_FE::PenaltySP_FE() - ran out of memory\n";
 	exit(-1);
     }
 
     // get a pointer to the Node
     theNode = theDomain.getNode(theSP->getNodeTag());
     if (theNode == 0) {
-	cerr << "FATAL PenaltySP_FE::PenaltySP_FE() - no Node: ";
-	cerr << theSP->getNodeTag() << "in domain\n";
+	opserr << "FATAL PenaltySP_FE::PenaltySP_FE() - no Node: ";
+	opserr << theSP->getNodeTag() << "in domain\n";
 	exit(-1);
     }
 
@@ -97,21 +97,21 @@ PenaltySP_FE::setID(void)
 {
     DOF_Group *theNodesDOFs = theNode->getDOF_GroupPtr();
     if (theNodesDOFs == 0) {
-	cerr << "WARNING PenaltySP_FE::setID(void) - no DOF_Group with Node\n";
+	opserr << "WARNING PenaltySP_FE::setID(void) - no DOF_Group with Node\n";
 	return -2;
     }    
     myDOF_Groups(0) = theNodesDOFs->getTag();
     
     int restrainedDOF = theSP->getDOF_Number();
     if (restrainedDOF < 0 || restrainedDOF >= theNode->getNumberDOF()) {
-	cerr << "WARNING PenaltySP_FE::setID(void) - unknown DOF ";
-	cerr << restrainedDOF << " at Node\n";
+	opserr << "WARNING PenaltySP_FE::setID(void) - unknown DOF ";
+	opserr << restrainedDOF << " at Node\n";
 	return -3;
     }    	
     const ID &theNodesID = theNodesDOFs->getID();
     if (restrainedDOF >= theNodesID.Size()) {
-	cerr << "WARNING PenaltySP_FE::setID(void) - ";
-	cerr << " Nodes DOF_Group too small\n";
+	opserr << "WARNING PenaltySP_FE::setID(void) - ";
+	opserr << " Nodes DOF_Group too small\n";
 	return -4;
     }    		
     
@@ -136,8 +136,8 @@ PenaltySP_FE::getResidual(Integrator *theNewIntegrator)
     const Vector &nodeDisp = theNode->getTrialDisp();
 	
     if (constrainedDOF < 0 || constrainedDOF >= nodeDisp.Size()) {
-	cerr << "WARNING PenaltySP_FE::getTangForce() - ";	
-	cerr << " constrained DOF " << constrainedDOF << " outside disp\n";
+	opserr << "WARNING PenaltySP_FE::getTangForce() - ";	
+	opserr << " constrained DOF " << constrainedDOF << " outside disp\n";
 	(*resid)(0) = 0;
     }
 
@@ -157,8 +157,8 @@ PenaltySP_FE::getTangForce(const Vector &disp, double fact)
     double constraint = theSP->getValue();
     int constrainedID = myID(0);
     if (constrainedID < 0 || constrainedID >= disp.Size()) {
-	cerr << "WARNING PenaltySP_FE::getTangForce() - ";	
-	cerr << " constrained DOF " << constrainedID << " outside disp\n";
+	opserr << "WARNING PenaltySP_FE::getTangForce() - ";	
+	opserr << " constrained DOF " << constrainedID << " outside disp\n";
 	(*resid)(0) = constraint*alpha;
 	return *resid;
     }

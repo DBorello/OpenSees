@@ -17,7 +17,7 @@ sumPlasDefo(sum_plas_defo.Size()+1), Kp(kp.Size()+1)
 {
  	if(sumPlasDefo.Size() != Kp.Size())
  	{
- 		cerr << "ERROR MultiLinear() - incompatible vector sizes\n";
+ 		opserr << "ERROR MultiLinear() - incompatible vector sizes\n";
  	}
 
  	numPoints = sum_plas_defo.Size();
@@ -26,12 +26,12 @@ sumPlasDefo(sum_plas_defo.Size()+1), Kp(kp.Size()+1)
  	{
  		sumPlasDefo(i) =  sum_plas_defo(i);
  		if(sumPlasDefo(i) < 0)
- 			cerr << "ERROR MultiLinear() -  sumPlasDefo < 0\n";
+ 			opserr << "ERROR MultiLinear() -  sumPlasDefo < 0\n";
 
  		Kp(i) = kp(i);
  	}
  	if(sumPlasDefo(0) != 0)
- 		cerr << "WARNING MultiLinear() -  sumPlasDefo(0) != 0\n";
+ 		opserr << "WARNING MultiLinear() -  sumPlasDefo(0) != 0\n";
 
  	Kp(numPoints)          = Kp(numPoints -1);
  	sumPlasDefo(numPoints) = sumPlasDefo(numPoints -1)*1000;
@@ -72,7 +72,7 @@ double sumDisp = val_trial;
 				
 			if(x2 == x1)
 			{
-				cerr << "WARNING - MultiLinear::getTangent() x2 -x1 = 0 \n";
+				opserr << "WARNING - MultiLinear::getTangent() x2 -x1 = 0 \n";
 				return 0;
 			}
 			
@@ -90,11 +90,11 @@ double sumDisp = val_trial;
 }
 
 
-void MultiLinearKp::Print(ostream &s, int flag)
+void MultiLinearKp::Print(OPS_Stream &s, int flag)
 {
-	s << "MultiLinear, Tag = " << getTag() << endl;
+	s << "MultiLinear, Tag = " << getTag() << endln;
 	s << "SumPlasDefo Vector = " <<  sumPlasDefo;
-	s << "Kp Vector          = " <<  Kp << endl;
+	s << "Kp Vector          = " <<  Kp << endln;
 }
 
 PlasticHardeningMaterial *MultiLinearKp::getCopy(void)

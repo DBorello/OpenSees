@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-12 07:32:38 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/InterpolatedGroundMotion.cpp,v $
                                                                         
                                                                         
@@ -37,7 +37,6 @@
 #include <InterpolatedGroundMotion.h>
 #include <stdlib.h>
 #include <math.h>
-#include <iostream.h>
 #include <classTags.h>
 #include <Vector.h>
 #include <Channel.h>
@@ -214,7 +213,7 @@ InterpolatedGroundMotion::getDispVelAccel(double time)
 int 
 InterpolatedGroundMotion::sendSelf(int commitTag, Channel &theChannel)
 {
-  cerr << "InterpolatedGroundMotion::sendSelf() -- not yet implemented" << endl;
+  opserr << "InterpolatedGroundMotion::sendSelf() -- not yet implemented" << endln;
   return -1;
 }
 
@@ -223,7 +222,7 @@ int
 InterpolatedGroundMotion::recvSelf(int commitTag, Channel &theChannel,
 				   FEM_ObjectBroker &theBroker)
 {
-  cerr << "InterpolatedGroundMotion::recvSelf() -- not yet impelemented" << endl;
+  opserr << "InterpolatedGroundMotion::recvSelf() -- not yet impelemented" << endln;
   return -1;
 }
 

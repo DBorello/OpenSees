@@ -71,14 +71,14 @@ int EvolutionLaw_T::updateEeDm( EPState *EPS, double st_vol, double dLamda)
 //================================================================================
 void EvolutionLaw_T::print()
 {
-    cout << (*this);
+    opserr << (*this);
 }
 
 //================================================================================
 // Overloaded Insertion Operator
 // prints base Evolution Law_T's contents 
 //================================================================================
-ostream& operator<< (ostream& os, const EvolutionLaw_T & EL)
+OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_T & EL)
 {
    os << "Base of Tensorial Evolution Law's Parameters: Nothing" << endln;
    return os;

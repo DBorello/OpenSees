@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-16 21:17:48 $
+// $Revision: 1.10 $
+// $Date: 2003-02-14 23:00:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
                                                                         
                                                                         
@@ -128,7 +128,7 @@ Newmark::initialize(void)
     dofPtr->zeroTangent();
     dofPtr->addMtoTang(1.0);
     if (theLinSOE->addA(dofPtr->getTangent(this),dofPtr->getID()) <0) {
-      cerr << "TransientIntegrator::formTangent() - failed to addA:dof\n";
+      opserr << "TransientIntegrator::formTangent() - failed to addA:dof\n";
     }
   }    
     
@@ -139,7 +139,7 @@ Newmark::initialize(void)
     elePtr->zeroTangent();
     elePtr->addMtoTang(1.0);
     if (theLinSOE->addA(elePtr->getTangent(this),elePtr->getID()) < 0) {
-      cerr << "TransientIntegrator::formTangent() - failed to addA:ele\n";
+      opserr << "TransientIntegrator::formTangent() - failed to addA:ele\n";
     }
   }
 
@@ -162,8 +162,8 @@ int
 Newmark::newStep(double deltaT)
 {
   if (beta == 0 || gamma == 0 ) {
-    cerr << "Newton::newStep() - error in variable\n";
-    cerr << "gamma = " << gamma << " beta= " << beta << endl;
+    opserr << "Newton::newStep() - error in variable\n";
+    opserr << "gamma = " << gamma << " beta= " << beta << endln;
     return -1;
   }
 
@@ -173,8 +173,8 @@ Newmark::newStep(double deltaT)
 
   if (displ == true) {
     if (deltaT <= 0.0) {
-      cerr << "Newton::newStep() - error in variable\n";
-      cerr << "dT = " << deltaT << endl;
+      opserr << "Newton::newStep() - error in variable\n";
+      opserr << "dT = " << deltaT << endln;
       return -2;	
     }
     c1 = 1.0;
@@ -187,7 +187,7 @@ Newmark::newStep(double deltaT)
   }
     
   if (U == 0) {
-    cerr << "Newton::newStep() - domainChange() failed or hasn't been called\n";
+    opserr << "Newton::newStep() - domainChange() failed or hasn't been called\n";
     return -3;	
   }
 
@@ -225,7 +225,7 @@ Newmark::newStep(double deltaT)
   double time = theModel->getCurrentDomainTime();
   time +=deltaT;
   if (theModel->updateDomain(time, deltaT) < 0) {
-    cerr << "Newmark::newStep() - failed to update the domain\n";
+    opserr << "Newmark::newStep() - failed to update the domain\n";
     return -4;
   }
   
@@ -329,7 +329,7 @@ Newmark::domainChanged()
 	Udot == 0 || Udot->Size() != size ||
 	Udotdot == 0 || Udotdot->Size() != size) {
       
-      cerr << "Newmark::domainChanged - ran out of memory\n";
+      opserr << "Newmark::domainChanged - ran out of memory\n";
 
       // delete the old
       if (Ut != 0)
@@ -407,20 +407,20 @@ Newmark::update(const Vector &deltaU)
 {
   AnalysisModel *theModel = this->getAnalysisModelPtr();
   if (theModel == 0) {
-    cerr << "WARNING Newmark::update() - no AnalysisModel set\n";
+    opserr << "WARNING Newmark::update() - no AnalysisModel set\n";
     return -1;
   }	
 
   // check domainChanged() has been called, i.e. Ut will not be zero
   if (Ut == 0) {
-    cerr << "WARNING Newmark::update() - domainChange() failed or not called\n";
+    opserr << "WARNING Newmark::update() - domainChange() failed or not called\n";
     return -2;
 }	
 
   // check deltaU is of correct size
   if (deltaU.Size() != U->Size()) {
-    cerr << "WARNING Newmark::update() - Vectors of incompatable size ";
-    cerr << " expecting " << U->Size() << " obtained " << deltaU.Size() << endl;
+    opserr << "WARNING Newmark::update() - Vectors of incompatable size ";
+    opserr << " expecting " << U->Size() << " obtained " << deltaU.Size() << endln;
     return -3;
   }
     
@@ -438,7 +438,7 @@ Newmark::update(const Vector &deltaU)
   // update the responses at the DOFs
   theModel->setResponse(*U,*Udot,*Udotdot);        
   if (theModel->updateDomain() < 0) {
-    cerr << "Newmark::update() - failed to update the domain\n";
+    opserr << "Newmark::update() - failed to update the domain\n";
     return -4;
   }
 
@@ -463,7 +463,7 @@ Newmark::sendSelf(int cTag, Channel &theChannel)
     data(7) = betaKc;
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
-	cerr << "WARNING Newmark::sendSelf() - could not send data\n";
+	opserr << "WARNING Newmark::sendSelf() - could not send data\n";
 	return -1;
     }	
     return 0;
@@ -474,7 +474,7 @@ Newmark::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
     Vector data(8);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
-	cerr << "WARNING Newmark::recvSelf() - could not receive data\n";
+	opserr << "WARNING Newmark::recvSelf() - could not receive data\n";
 	gamma = 0.5; beta = 0.25; 
 	return -1;
     }
@@ -495,16 +495,16 @@ Newmark::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 }
 
 void
-Newmark::Print(ostream &s, int flag)
+Newmark::Print(OPS_Stream &s, int flag)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theModel != 0) {
 	double currentTime = theModel->getCurrentDomainTime();
 	s << "\t Newmark - currentTime: " << currentTime;
-	s << "  gamma: " << gamma << "  beta: " << beta << endl;
-	s << " c1: " << c1 << " c2: " << c2 << " c3: " << c3 << endl;
+	s << "  gamma: " << gamma << "  beta: " << beta << endln;
+	s << " c1: " << c1 << " c2: " << c2 << " c3: " << c3 << endln;
 	s << "  Rayleigh Damping - alphaM: " << alphaM;
-	s << "  betaK: " << betaK << "   betaKi: " << betaKi << endl;	    
+	s << "  betaK: " << betaK << "   betaKi: " << betaKi << endln;	    
     } else 
 	s << "\t Newmark - no associated AnalysisModel\n";
 }

@@ -38,8 +38,8 @@ otherVertexTag);  } \\
 \indent\indent {\em virtual int getNumEdge(void) const;} \\
 \indent\indent {\em virtual Vertex *removeVertex(int vertexTag, bool
 removeEdgeFlag = true );} \\
-\indent\indent {\em virtual void Print(ostream \&s, int flag = 0);} \\
-\indent\indent {\em friend ostream \&operator<<(ostream \&s, const Graph 
+\indent\indent {\em virtual void Print(OPS_Stream \&s, int flag = 0);} \\
+\indent\indent {\em friend OPS_Stream \&operator<<(OPS_Stream \&s, const Graph 
 \&G);} \\
 
 \noindent {\bf Constructors}  \\
@@ -115,10 +115,10 @@ Graph. Invokes {\em removeComponent(vertexTag)} on the vertex
 storage object and casts this to a Vertex * if not null. DOES NOT YET
 DEAL WITH {\em removeEdgeFlag}. \\
 
-{\em virtual void Print(ostream \&s, int flag =0);} \\
+{\em virtual void Print(OPS_Stream \&s, int flag =0);} \\
 A method to print the graph. Invokes {\em Print(s, flag)} on the vertex
 storage object. \\
 
-\indent {\em friend ostream \&operator<<(ostream \&s, const Graph 
+\indent {\em friend OPS_Stream \&operator<<(OPS_Stream \&s, const Graph 
 \&G);} \\
 Invokes {\em Print()} on the Graph {\em G}.

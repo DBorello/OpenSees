@@ -27,8 +27,6 @@
 #define MATPOINT3D_CPP
 
 #include "MatPoint3D.h"
-#include <G3Globals.h>
-
 
 //=============================================================================
 // Constructor
@@ -303,7 +301,7 @@ int MatPoint3D::revertToStart(void)
 void MatPoint3D::report(char *msg) const
   {
     //if ( msg ) ::printf("%s",msg);
-    if ( msg )  cout << msg;
+    if ( msg )  opserr << msg;
     
     ::printf("\n\t---Gauss point #r %d #s %d  #t %d \n",
                                  GP_number_r(), GP_number_s(), GP_number_t());
@@ -321,14 +319,14 @@ void MatPoint3D::report(char *msg) const
     //matmodel->report("material model at this Gauss-Legendre point\n");
     
     //if (gpEPS) 
-    //  cout << (*gpEPS);
+    //  opserr << (*gpEPS);
     //else
-    //  cout << "Empty EPState\n"; 
+    //  opserr << "Empty EPState\n"; 
     
     if (matmodel) 
-      cout << (*matmodel);
+      opserr << (*matmodel);
     else
-      cout << "Empty Material Model\n"; 
+      opserr << "Empty Material Model\n"; 
 
   }
 
@@ -338,7 +336,7 @@ void MatPoint3D::reportpqtheta(char *msg) const
     //if ( msg ) ::printf("%s",msg);
     //p_stress->reportshortpqtheta("");
     //p_stress->reportshortpqtheta("");
-    if ( msg )  cout << msg;
+    if ( msg )  opserr << msg;
     
     //if ( gpEPS ) {
     //   ( gpEPS->getStress() ).reportshortpqtheta("");
@@ -359,7 +357,7 @@ void MatPoint3D::reportTensor(char *msg) const
     //if ( msg ) ::printf("%s",msg);
     //p_stress->reportTensor("");
 
-    if ( msg )  cout << msg;
+    if ( msg )  opserr << msg;
     
     //if (gpEPS )
     //   ( gpEPS->getStress() ).reportTensor("");

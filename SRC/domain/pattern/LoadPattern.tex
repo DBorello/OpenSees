@@ -47,7 +47,7 @@ load factor to be applied to th load in the LoadPattern. \\
 \indent {\em  virtual int sendSelf(int commitTag, Channel \&theChannel);}\\
 \indent {\em  virtual int recvSelf(int commitTag, Channel \&theChannel,
 FEM\_ObjectBroker \&theBroker);}\\
-\indent {\em  virtual void Print(ostream \&s, int flag =0);}\\
+\indent {\em  virtual void Print(OPS_Stream \&s, int flag =0);}\\
 
 
 \noindent {\bf Constructor} \\ 
@@ -153,6 +153,6 @@ TimeSeries object. \\
 FEM\_ObjectBroker \&theBroker);}\\
 Does the mirror image of {\em sendSelf()}. \\
 
-\indent {\em  virtual void Print(ostream \&s, int flag =0);}\\
+\indent {\em  virtual void Print(OPS_Stream \&s, int flag =0);}\\
 Invokes {\em Print(s, flag)} on the TimeSeries, NodalLoads,
 ElementalLoads and SP\_Constraints. 

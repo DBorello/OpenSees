@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-10-24 00:33:54 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -67,8 +67,7 @@ ID::ID(int size)
   // create the space for the data & check space was available
   data = (int *)malloc(size*sizeof(int));
   if (data == 0) {
-    g3ErrorHandler->fatal("ID::ID(int): ran out of memory with size %d\n",
-			  size);
+    opserr << "ID::ID(int): ran out of memory with size " << size << endln;
     exit(-1);
   }
 
@@ -106,8 +105,7 @@ ID::ID(int size, int arraySz)
   // create the space
   data = (int *)malloc(arraySize*sizeof(int));
   if (data == 0) {
-    g3ErrorHandler->fatal("ID::ID(int, int): ran out of memory with arraySize %d\n",
-			  arraySize);
+    opserr << "ID::ID(int, int): ran out of memory with arraySize: " << arraySize << endln;
     exit(-1);
   }
 
@@ -119,7 +117,25 @@ ID::ID(int size, int arraySz)
 ID::ID(int *d, int size)
   :sz(size), data(d), arraySize(size), fromFree(1)
 {
+  if (d == 0) { // OOPS must have been other constructor we wanted
+    sz = 0;
+    data = 0;
+    arraySize = size;
+    fromFree = 0;
 
+    // create the space
+    if (arraySize != 0) {
+      data = (int *)malloc(arraySize*sizeof(int));
+      if (data == 0) {
+	opserr << "ID::ID(int, int): ran out of memory with arraySize " << arraySize << endln;
+	exit(-1);
+      }
+    }
+
+    // zero the data
+    for (int i=0; i<arraySize; i++)
+      data[i] = 0;
+  }
 }
 
 // ID(const ID&):
@@ -131,8 +147,7 @@ ID::ID(const ID &other)
   // create the space
   data = (int *)malloc(arraySize*sizeof(int));
   if (data == 0) {
-    g3ErrorHandler->fatal("ID::ID(ID): ran out of memory with arraySize %d\n",
-			  arraySize);
+    opserr << "ID::ID(ID): ran out of memory with arraySize " << arraySize << endln,
     exit(-1);
   }
   
@@ -162,7 +177,7 @@ ID::setData(int *newData, int size){
   fromFree = 1;
 
   if (sz <= 0) {
-    g3ErrorHandler->warning("ID::ID(int *, size) - size %d specified <= 0\n",size);
+    opserr << "ID::ID(int *, size) - size " << size << " specified <= 0\n";
     sz = 0;
   }
 
@@ -219,7 +234,7 @@ ID::operator[](int x)
   // see if quick return
   if (x < sz)
     return data[x];
-    
+
   /*
    * otherwise we have to enlarge the order of the ID
    */
@@ -259,8 +274,7 @@ ID::operator[](int x)
     }
     else {
       // we could not allocate more mem .. leave the current size
-      g3ErrorHandler->warning("ID::[]): ran out of memory with arraySize %d\n",
-			      arraySize);
+      opserr << "ID::[]): ran out of memory with arraySize " << arraySize << endln;
       return ID_NOT_VALID_ENTRY;
     }
   }
@@ -293,8 +307,8 @@ ID::operator=(const ID &V)
 		data = (int *)malloc(arraySize*sizeof(int));		
 		// check we got the memory requested
 		if (data == 0) {
-		    cerr << "WARNING ID::=(ID) - ran out of memory ";
-		    cerr << "for new array of size" << arraySize << endl;
+		    opserr << "WARNING ID::=(ID) - ran out of memory ";
+		    opserr << "for new array of size" << arraySize << endln;
 		    sz = 0;
 		    arraySize = 0;
 		}
@@ -314,22 +328,23 @@ ID::operator=(const ID &V)
 
 
 
-// friend ostream &operator<<(ostream &s, const ID &V)
-//	A function is defined to allow user to print the IDs using ostreams.
+// friend OPS_Stream &operator<<(OPS_Stream &s, const ID &V)
+//	A function is defined to allow user to print the IDs using OPS_Streams.
 
-ostream &operator<<(ostream &s, const ID &V)
+OPS_Stream &operator<<(OPS_Stream &s, const ID &V)
 {
     for (int i=0; i<V.Size(); i++) 
     {
 	s << V(i) << " ";
     }
-    return s << "\n";
+    return s << endln;
 }
 
 // friend istream &operator>>(istream &s, ID &V)
 //	A function is defined to allow user to input the data into a ID which has already
 //	been constructed with data, i.e. ID(int) or ID(const ID &) constructors.
 
+/*
 istream &operator>>(istream &s, ID &V)
 {
     for (int i=0; i<V.Size(); i++) 
@@ -337,7 +352,7 @@ istream &operator>>(istream &s, ID &V)
 
     return s;
 }
-
+*/
 
 
 

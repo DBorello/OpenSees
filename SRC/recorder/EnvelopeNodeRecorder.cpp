@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.2 $
-// $Date: 2002-12-13 01:03:18 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -41,9 +41,9 @@
 #include <Matrix.h>
 #include <FE_Datastore.h>
 
-#include <iostream.h>
-#include <fstream.h>
 #include <string.h>
+#include <iomanip>
+using std::ios;
 
 EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs, 
 			   const ID &nodes, 
@@ -69,8 +69,8 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
       (*theDofs)[count] = dof;
       count++;
     } else {
-      cerr << "NodeRecorder::NodeRecorder - invalid dof  " << dof;
-      cerr << " will be ignored\n";
+      opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - invalid dof  " << dof;
+      opserr << " will be ignored\n";
     }
   }
 
@@ -82,8 +82,8 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
     int nodeTag = nodes(i);
     Node *theNode = theDomain->getNode(nodeTag);
     if (theNode == 0) {
-      cerr << "NodeRecorder::NodeRecorder - invalid node  " << nodeTag;
-      cerr << " does not exist in domain - will be ignored\n";
+      opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - invalid node  " << nodeTag;
+      opserr << " does not exist in domain - will be ignored\n";
     } else {
       (*theNodes)[count++] = nodeTag;
     }
@@ -95,14 +95,16 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
 
   // create char array to store file name
   if (theFileName == 0) {
-    g3ErrorHandler->fatal("EnvelopeNodeRecorder::EnvelopeNodeRecorder - no file name passed\n");
+    opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - no file name passed\n";
+    exit(-1);
   }
 
   int fileNameLength = strlen(theFileName) + 1;
   fileName = new char[fileNameLength];
   if (fileName == 0) {
-    g3ErrorHandler->fatal("EnvelopeNodeRecorder::EnvelopeNodeRecorder - out of memory creating string %d long\n",
-			  fileNameLength);
+    opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - out of memory creating string " <<
+      fileNameLength << "to long\n";
+    exit(-1);
   }
 
   // copy the strings
@@ -126,8 +128,8 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
       dataFlag = 6;
   } else {
     dataFlag = 6;
-    cerr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - dataToStore " << dataToStore;
-    cerr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
+    opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - dataToStore " << dataToStore;
+    opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
   }
 
 }
@@ -158,8 +160,8 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
       (*theDofs)[count] = dof;
       count++;
     } else {
-      cerr << "NodeRecorder::NodeRecorder - invalid dof  " << dof;
-      cerr << " will be ignored\n";
+      opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - invalid dof  " << dof;
+      opserr << " will be ignored\n";
     }
   }
 
@@ -171,8 +173,8 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
     int nodeTag = nodes(i);
     Node *theNode = theDomain->getNode(nodeTag);
     if (theNode == 0) {
-      cerr << "NodeRecorder::NodeRecorder - invalid node  " << nodeTag;
-      cerr << " does not exist in domain - will be ignored\n";
+      opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - invalid node  " << nodeTag;
+      opserr << " does not exist in domain - will be ignored\n";
     } else {
       (*theNodes)[count++] = nodeTag;
     }
@@ -182,8 +184,9 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
   int fileNameLength = strlen(dbTable) + 1;
   fileName = new char[fileNameLength];
   if (fileName == 0) {
-    g3ErrorHandler->fatal("EnvelopeNodeRecorder::EnvelopeNodeRecorder - out of memory creating string %d long\n",
-			  fileNameLength);
+    opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - out of memory creating string " <<
+      fileNameLength << "too long\n";
+    exit(-1);
   }
 
   // copy the strings
@@ -207,8 +210,8 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
       dataFlag = 6;
   } else {
     dataFlag = 6;
-    cerr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - dataToStore " << dataToStore;
-    cerr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
+    opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - dataToStore " << dataToStore;
+    opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
   }
 
   // now create the columns strings for the database
@@ -387,14 +390,14 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
 	  if (fileName != 0)
 	  theFile.open(fileName, ios::out);
 	  if (theFile.bad()) {
-	    cerr << "WARNING - EnvelopeNodeRecorder::EnvelopeNodeRecorder()";
-	    cerr << " - could not open file " << fileName << endl;
+	    opserr << "WARNING - EnvelopeNodeRecorder::EnvelopeNodeRecorder()";
+	    opserr << " - could not open file " << fileName << endln;
 	  }    
 	  
 	  for (int i=0; i<3; i++) {
 	    for (int j=0; j<numNodes*numDOF; j++)
 	      theFile << (*data)(i,j) << " ";
-      	    theFile << endl;
+      	    theFile << endln;
 	  }
 	  theFile.flush();
 	  theFile.close(); 	  
@@ -414,7 +417,7 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
 int 
 EnvelopeNodeRecorder::playback(int commitTag)
 {
-  cerr << data;
+  opserr << data;
   
   // does nothing
   return 0;

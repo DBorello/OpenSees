@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:58 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type2LargestValueRV.cpp,v $
 
 
@@ -37,6 +37,7 @@
 #include <GammaRV.h>
 #include <math.h>
 #include <string.h>
+#include <OPS_Globals.h>
 
 Type2LargestValueRV::Type2LargestValueRV(int passedTag, 
 		 double passedMean,
@@ -90,7 +91,7 @@ Type2LargestValueRV::~Type2LargestValueRV()
 
 
 void
-Type2LargestValueRV::Print(ostream &s, int flag)
+Type2LargestValueRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -169,8 +170,8 @@ Type2LargestValueRV::getStartValue()
 
 double Type2LargestValueRV::getParameter1()  {return u;}
 double Type2LargestValueRV::getParameter2()  {return k;}
-double Type2LargestValueRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double Type2LargestValueRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double Type2LargestValueRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double Type2LargestValueRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
 
 
 

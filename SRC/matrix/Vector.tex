@@ -61,7 +61,7 @@ double fact = 1.0);} \\
 \indent {\em  Vector operator-(const Vector \&V);} \\
 \indent {\em  double operator { }$\hat{ }$(const Vector \&V) const;   } \\
 \indent {\em Vector operator/(const Matrix \&M) const; } \\
-\indent {\em friend ostream \&operator$<<$(ostream \&s, const
+\indent {\em friend OPS_Stream \&operator$<<$(OPS_Stream \&s, const
 Vector \&V);} \\ 
 \indent {\em friend istream \&operator$>>$(istream \&s, const
 Vector \&V);} \\ 
@@ -283,7 +283,7 @@ M} is square, or $M^tM$ if {\em M} is not square. The new Vector is
 then set equal to the result of invoking {\em Solve(*this)} on the new
 Matrix. \\ 
 
-{\em friend ostream \&operator$<<$(ostream \&s, const Vector \&V);} \\
+{\em friend OPS_Stream \&operator$<<$(OPS_Stream \&s, const Vector \&V);} \\
 A function to print out the contents of the Vector {\em V} to the
 output stream {\em s}. prints out the contents of the Vector in the
 stream and then prints the newline character. \\

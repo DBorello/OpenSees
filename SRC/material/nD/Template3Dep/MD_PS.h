@@ -55,13 +55,13 @@ class MDPotentialSurface : public PotentialSurface
     double dgoverdt(double theta, double c) const;
     tensor apqdnods(const EPState *EPS) const;
     
-    void print() { cout << *this; };
+    void print() { opserr << *this; };
 
     //================================================================================
     // Overloaded Insertion Operator
     // prints an PotentialSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const MDPotentialSurface &PS)
+    friend OPS_Stream& operator<< (OPS_Stream& os, const MDPotentialSurface &PS)
     {
        os << "Manzari-Dafalias Potential Surface Parameters: " << endln;
        return os;

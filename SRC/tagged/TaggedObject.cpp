@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tagged/TaggedObject.cpp,v $
                                                                         
                                                                         
@@ -54,7 +54,7 @@ TaggedObject::setTag(int newTag)
     theTag = newTag;
 }
 
-ostream &operator<<(ostream &s, TaggedObject &m)
+OPS_Stream &operator<<(OPS_Stream &s, TaggedObject &m)
 {
     m.Print(s);
     return s;

@@ -45,7 +45,7 @@ class CAMPotentialSurface : public PotentialSurface
     tensor dQods(const EPState *EPS) const;
     tensor d2Qods2(const EPState *EPS) const;
 
-    void print() { cout << *this; };
+    void print() { opserr << *this; };
     double getM() const;
     
 
@@ -60,7 +60,7 @@ class CAMPotentialSurface : public PotentialSurface
 //	     	          
     //================================================================================
     // Overloaded Insertion Operator
-    friend ostream& operator<< (ostream& os, const CAMPotentialSurface & YS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const CAMPotentialSurface & YS);
 
 };
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-02 20:20:12 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/quadrule/GaussQuadRule1d.cpp,v $
                                                                         
 // written: rms
@@ -217,9 +217,8 @@ GaussQuadRule1d::~GaussQuadRule1d()
 int GaussQuadRule1d::setOrder(int quadOrder)
 {
   if (quadOrder < 1 || quadOrder > maxOrder) {
-    g3ErrorHandler->fatal("%s -- Invalid quadrature order, %d",
-			  "GaussQuadRule1d::setOrder()", quadOrder);
-    return -1;
+    opserr << "GaussQuadRule1d::setOrder() -- Invalid quadrature order " << quadOrder << endln;
+    exit(-1);
   }
   
   // Nothing needs to change if this is true
@@ -280,8 +279,7 @@ int GaussQuadRule1d::setOrder(int quadOrder)
     break;
 
   default:
-    g3ErrorHandler->warning("%s -- Invalid quadrature order %d",
-			    "GaussQuadRule1d::setOrder()", order);
+    opserr << "GaussQuadRule1d::setOrder() -- Invalid quadrature order " << order << endln;
     return -1;
     break;
   }    
@@ -303,8 +301,7 @@ const Matrix &
 GaussQuadRule1d::getIntegrPointCoords (void) const
 {
   if (order < 1 || order > maxOrder)
-    g3ErrorHandler->warning("%s -- order %d is currently invalid",
-			    "GaussQuadRule1d::getIntegrPointCoords()", order);
+    opserr << "GaussQuadRule1d::getIntegrPointWeights() -- order " << order << " is currently invalid\n";
 
   return *myPts;
 }
@@ -313,8 +310,8 @@ const Vector &
 GaussQuadRule1d::getIntegrPointWeights (void) const
 {
   if (order < 1 || order > maxOrder)
-    g3ErrorHandler->warning("%s -- order %d is currently invalid",
-			    "GaussQuadRule1d::getIntegrPointWeights()", order);
+    opserr << "GaussQuadRule1d::getIntegrPointWeights() -- order " << order << " is currently invalid\n";
+			   
   return *myWts;
 }
 

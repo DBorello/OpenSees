@@ -106,7 +106,7 @@ int YieldSurface_BC::commitState(Vector &force)
 	 	capZdim = capZ_orig*hModel->getTrialIsotropicFactor(2);
 	}
 	else
-		cerr << "WARNING  YieldSurface_BC::commitState - dimension > 3 || < 1\n";
+		opserr << "WARNING  YieldSurface_BC::commitState - dimension > 3 || < 1\n";
     return 0;
 }
 
@@ -120,7 +120,7 @@ double YieldSurface_BC::getCap(int dir)
 	else if(dir == 2)
 		return capZ;
 	else
-		cerr << "YieldSurface_BC::getCap(int dir) - dir not valid\n";
+		opserr << "YieldSurface_BC::getCap(int dir) - dir not valid\n";
 
     return 1;
 }
@@ -128,38 +128,38 @@ double YieldSurface_BC::getCap(int dir)
 
 double YieldSurface_BC::getDrift(double x1)
 {
-	cerr << "YieldSurface_BC::getDrift(.) - This method should not be called\n";
+	opserr << "YieldSurface_BC::getDrift(.) - This method should not be called\n";
 	return 0;
 }
 
 double YieldSurface_BC::getDrift(double x1, double y1)
 {
-	cerr << "YieldSurface_BC::getDrift(..) - This method should not be called\n";
+	opserr << "YieldSurface_BC::getDrift(..) - This method should not be called\n";
 	return 0;
 }
 
 
 double YieldSurface_BC::getDrift(double x1, double y1, double z1)
 {
-	cerr << "YieldSurface_BC::getDrift(...) - This method should not be called\n";
+	opserr << "YieldSurface_BC::getDrift(...) - This method should not be called\n";
 	return 0;
 }
 
 
 double YieldSurface_BC::interpolate(double x1, double x2)
 {
-	cerr << "YieldSurface_BC::interpolate(..)  - This method should not be called\n";
+	opserr << "YieldSurface_BC::interpolate(..)  - This method should not be called\n";
 	return 0;
 }
 
 double YieldSurface_BC::interpolate(double x1, double y1, double x2, double y2)
 {
-	cerr << "YieldSurface_BC::interpolate(....)  - This method should not be called\n";
+	opserr << "YieldSurface_BC::interpolate(....)  - This method should not be called\n";
 	return 0;
 }
 double YieldSurface_BC::interpolate(double x1, double y1, double z1, double x2, double y2, double z2)
 {
-	cerr << "YieldSurface_BC::interpolate(......)  - This method should not be called\n";
+	opserr << "YieldSurface_BC::interpolate(......)  - This method should not be called\n";
 	return 0;
 }
 
@@ -178,8 +178,8 @@ void YieldSurface_BC::setTransformation(int xDof, int xFact)
 {
     if(T || S)
     {
-        cerr << "WARNING - YieldSurface_BC::setTransformation(int xDof)\n";
-        cerr << "Transforation already set\n";
+        opserr << "WARNING - YieldSurface_BC::setTransformation(int xDof)\n";
+        opserr << "Transforation already set\n";
         return;
     }
     T = new ID(1);
@@ -194,8 +194,8 @@ void YieldSurface_BC::setTransformation(int xDof, int yDof, int xFact, int yFact
 {
     if(T || S)
     {
-        cerr << "WARNING - YieldSurface_BC::setTransformation(int xDof, int yDof)\n";
-        cerr << "Transforation already set\n";
+        opserr << "WARNING - YieldSurface_BC::setTransformation(int xDof, int yDof)\n";
+        opserr << "Transforation already set\n";
         return;
     }
 
@@ -215,8 +215,8 @@ void YieldSurface_BC::setTransformation(int xDof, int yDof, int zDof,
 {
     if(T || S)
     {
-        cerr << "WARNING - YieldSurface_BC::setTransformation(int xDof, int yDof, int zDof)\n";
-        cerr << "Transforation already set\n";
+        opserr << "WARNING - YieldSurface_BC::setTransformation(int xDof, int yDof, int zDof)\n";
+        opserr << "Transforation already set\n";
         return;
     }
 
@@ -247,8 +247,8 @@ void YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x, bool nonDimen
 #ifdef _G3DEBUG
     if(T->Size() != 1)
     {
-        cerr << "WARNING: YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x)\n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x)\n";
+        opserr << "T size may not be correct\n";
     }
 #endif
 	if(signMult==false)
@@ -271,8 +271,8 @@ void YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x, double &y,
 #ifdef _G3DEBUG
     if(T->Size() != 2)
     {
-        cerr << "WARNING: YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x, double &y)\n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x, double &y)\n";
+        opserr << "T size may not be correct\n";
     }
 #endif
 
@@ -306,8 +306,8 @@ void YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x, double &y, do
 #ifdef _G3DEBUG
     if(T->Size() != 3)
     {
-        cerr << "WARNING: YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x, double &y, double &z)\n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x, double &y, double &z)\n";
+        opserr << "T size may not be correct\n";
     }
 #endif
 
@@ -343,13 +343,13 @@ void YieldSurface_BC::toLocalSystem (Matrix &eleMatrix, double &x, bool nonDimen
 #ifdef _G3DEBUG
     if(T->Size() != 1)
     {
-        cerr << "WARNING: YieldSurface_BC::toLocalSystem (Matrix &eleMatrix, double &x)\n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toLocalSystem (Matrix &eleMatrix, double &x)\n";
+        opserr << "T size may not be correct\n";
     }
     if(eleMatrix.noCols() !=1)
     {
-        cerr << "WARNING: YieldSurface_BC::toLocalSystem (Matrix &eleMatrix, ..)\n";
-        cerr << "Matrix columns should be = 1\n";
+        opserr << "WARNING: YieldSurface_BC::toLocalSystem (Matrix &eleMatrix, ..)\n";
+        opserr << "Matrix columns should be = 1\n";
     }
 #endif
 
@@ -379,13 +379,13 @@ void YieldSurface_BC::toLocalSystem (Matrix &eleMatrix, double &x, double &y,
 #ifdef _G3DEBUG
     if(T->Size() != 2)
     {
-        cerr << "WARNING: YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x, double &y)\n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x, double &y)\n";
+        opserr << "T size may not be correct\n";
     }
     if(eleMatrix.noCols() !=1)
     {
-        cerr << "WARNING: YieldSurface_BC::toLocalSystem (Matrix &eleMatrix, ..)\n";
-        cerr << "Matrix columns should be = 1\n";
+        opserr << "WARNING: YieldSurface_BC::toLocalSystem (Matrix &eleMatrix, ..)\n";
+        opserr << "Matrix columns should be = 1\n";
     }
 #endif
 
@@ -419,13 +419,13 @@ void YieldSurface_BC::toLocalSystem (Matrix &eleMatrix, double &x, double &y, do
 #ifdef _G3DEBUG
     if(T->Size() != 3)
     {
-        cerr << "WARNING: YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x, double &y, double &z)\n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toLocalSystem (Vector &eleVector, double &x, double &y, double &z)\n";
+        opserr << "T size may not be correct\n";
     }
     if(eleMatrix.noCols() !=1)
     {
-        cerr << "WARNING: YieldSurface_BC::toLocalSystem (Matrix &eleMatrix, ..)\n";
-        cerr << "Matrix columns should be = 1\n";
+        opserr << "WARNING: YieldSurface_BC::toLocalSystem (Matrix &eleMatrix, ..)\n";
+        opserr << "Matrix columns should be = 1\n";
     }
 #endif
 
@@ -465,8 +465,8 @@ void YieldSurface_BC::toElementSystem(Vector &eleVector, double &x, bool dimensi
 #ifdef _G3DEBUG
     if(T->Size() != 1)
     {
-        cerr << "WARNING: YieldSurface_BC::toElementSystem (Vector &eleVector, .. \n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toElementSystem (Vector &eleVector, .. \n";
+        opserr << "T size may not be correct\n";
     }
 #endif
 
@@ -496,8 +496,8 @@ void YieldSurface_BC::toElementSystem(Vector &eleVector, double &x, double &y,
 #ifdef _G3DEBUG
     if(T->Size() != 2)
     {
-        cerr << "WARNING: YieldSurface_BC::toElementSystem (Vector &eleVector, .. \n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toElementSystem (Vector &eleVector, .. \n";
+        opserr << "T size may not be correct\n";
     }
 #endif
 
@@ -532,8 +532,8 @@ void YieldSurface_BC::toElementSystem(Vector &eleVector, double &x, double &y, d
 #ifdef _G3DEBUG
     if(T->Size() != 3)
     {
-        cerr << "WARNING: YieldSurface_BC::toElementSystem (Vector &eleVector, .. \n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toElementSystem (Vector &eleVector, .. \n";
+        opserr << "T size may not be correct\n";
     }
 #endif
 
@@ -569,13 +569,13 @@ void YieldSurface_BC::toElementSystem(Matrix &eleMatrix, double &x, bool dimensi
 #ifdef _G3DEBUG
     if(T->Size() != 1)
     {
-        cerr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
+        opserr << "T size may not be correct\n";
     }
     if(eleMatrix.noCols() != 1)
     {
-        cerr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
-        cerr << "eleMatrix columns not equal to 1\n";
+        opserr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
+        opserr << "eleMatrix columns not equal to 1\n";
     }
 #endif
 
@@ -608,13 +608,13 @@ void YieldSurface_BC::toElementSystem(Matrix &eleMatrix, double &x, double &y,
 #ifdef _G3DEBUG
     if(T->Size() != 2)
     {
-        cerr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
+        opserr << "T size may not be correct\n";
     }
     if(eleMatrix.noCols() != 1)
     {
-        cerr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
-        cerr << "eleMatrix columns not equal to 1\n";
+        opserr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
+        opserr << "eleMatrix columns not equal to 1\n";
     }
 #endif
 
@@ -651,13 +651,13 @@ void YieldSurface_BC::toElementSystem(Matrix &eleMatrix, double &x, double &y, d
 #ifdef _G3DEBUG
     if(T->Size() != 3)
     {
-        cerr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
-        cerr << "T size may not be correct\n";
+        opserr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
+        opserr << "T size may not be correct\n";
     }
     if(eleMatrix.noCols() != 1)
     {
-        cerr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
-        cerr << "eleMatrix columns not equal to 1\n";
+        opserr << "WARNING: YieldSurface_BC::toElementSystem (Matrix &eleMatrix, .. \n";
+        opserr << "eleMatrix columns not equal to 1\n";
     }
 #endif
 
@@ -687,9 +687,8 @@ int YieldSurface_BC::checkT(void)
 {
     if(!T)
     {
-        cerr << "FATAL: YieldSurface_BC::checkT(void)\n";
-        cerr << "T = null, use setTransformation(..) after the YS object is created\n";
-        cin.get();
+        opserr << "FATAL: YieldSurface_BC::checkT(void)\n";
+        opserr << "T = null, use setTransformation(..) after the YS object is created\n";
         return 0;
     }
     return 1;
@@ -720,18 +719,18 @@ int YieldSurface_BC::update(int flag)
 	return 0;
 }
 
-void YieldSurface_BC::Print(ostream &s, int flag)
+void YieldSurface_BC::Print(OPS_Stream &s, int flag)
 {
-	s << "YieldSurface_BC - tag = " << this->getTag() << endl;
+	s << "YieldSurface_BC - tag = " << this->getTag() << endln;
 	s << "Element Info:\n";
-	s << "Element Tag = " << ele_Tag << "\t Location = " << ele_Location << endl;
-	s << "-----------------------------------------" << endl;
+	s << "Element Tag = " << ele_Tag << "\t Location = " << ele_Location << endln;
+	s << "-----------------------------------------" << endln;
 }
 
-// friend ostream &operator<<(ostream &s, const YieldSurface_BC &ys)
-//      A function is defined to allow user to print the vectors using ostreams.
+// friend OPS_Stream &operator<<(OPS_Stream &s, const YieldSurface_BC &ys)
+//      A function is defined to allow user to print the vectors using OPS_Streams.
 /* // Already defined in TaggedObject
-ostream &operator<<(ostream &s, const YieldSurface_BC &ys)
+OPS_Stream &operator<<(OPS_Stream &s, const YieldSurface_BC &ys)
 {
 	ys.Print(s);
   return s;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-20 00:37:23 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.cpp,v $
                                                                         
                                                                         
@@ -67,8 +67,8 @@ NodalLoad::NodalLoad(int tag, int node, const Vector &theLoad, bool isLoadConsta
     load = new Vector(theLoad);    
 
     if (load == 0) {
-	cerr << "FATAL NodalLoad::NodalLoad(int node, const Vector &theLoad) -";
-	cerr << " ran out of memory for load on Node " << node << endl;
+	opserr << "FATAL NodalLoad::NodalLoad(int node, const Vector &theLoad) -";
+	opserr << " ran out of memory for load on Node " << node << endln;
 	exit(-1);
     }
 // AddingSensitivity:BEGIN /////////////////////////////////////
@@ -111,8 +111,8 @@ NodalLoad::applyLoad(double loadFactor)
       Domain *theDomain=this->getDomain();
       if ((theDomain == 0) || 
 	  (myNodePtr = theDomain->getNode(myNode)) == 0) {
-	cerr << "WARNING NodalLoad::applyLoad() - No associated Node node " ;
-	cerr << " for NodalLoad " << *this;
+	opserr << "WARNING NodalLoad::applyLoad() - No associated Node node " ;
+	opserr << " for NodalLoad " << *this;
 	return;
       }
     }
@@ -142,14 +142,14 @@ NodalLoad::sendSelf(int cTag, Channel &theChannel)
     
     int result = theChannel.sendID(dataTag, cTag, data);
     if (result < 0) {
-	cerr << "NodalLoad::sendSelf - failed to send data\n";
+	opserr << "NodalLoad::sendSelf - failed to send data\n";
 	return result;
     }
 
     if (load != 0){
 	int result = theChannel.sendVector(dataTag, cTag, *load);
 	if (result < 0) {
-	    cerr << "NodalLoad::sendSelf - failed to Load data\n";
+	    opserr << "NodalLoad::sendSelf - failed to Load data\n";
 	    return result;
 	}
     }    
@@ -166,7 +166,7 @@ NodalLoad::recvSelf(int cTag, Channel &theChannel,
     ID data(5);
     result = theChannel.recvID(dataTag, cTag, data);
     if (result < 0) {
-      cerr << "NodalLoad::recvSelf() - failed to recv data\n";
+      opserr << "NodalLoad::recvSelf() - failed to recv data\n";
       return result;
     }    
     this->setTag(data(0));
@@ -178,7 +178,7 @@ NodalLoad::recvSelf(int cTag, Channel &theChannel,
 	load = new Vector(data(2));
 	result = theChannel.recvVector(dataTag, cTag, *load);
 	if (result < 0) {
-	  cerr << "NodalLoad::recvSelf() - failed to recv load\n";
+	  opserr << "NodalLoad::recvSelf() - failed to recv load\n";
 	  return result;
 	}    
     }
@@ -188,7 +188,7 @@ NodalLoad::recvSelf(int cTag, Channel &theChannel,
 
 
 void
-NodalLoad::Print(ostream &s, int flag)
+NodalLoad::Print(OPS_Stream &s, int flag)
 {
      s << "Nodal Load: " << myNode;
      if (load != 0)

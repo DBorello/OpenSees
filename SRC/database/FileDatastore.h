@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-06 20:26:22 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.h,v $
                                                                         
                                                                         
@@ -41,7 +41,9 @@
 // What: "@(#) FileDatastore.h, revA"
 
 #include <FE_Datastore.h>
-#include <fstream.h>
+
+#include <fstream>
+using std::fstream;
 
 class FEM_ObjectBroker;
 

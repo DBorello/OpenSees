@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-05 22:36:03 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/MP_Constraint.h,v $
                                                                         
                                                                         
@@ -46,8 +46,6 @@
 
 #include <DomainComponent.h>
 #include <bool.h>
-
-#include <iostream.h>
 
 class Matrix;
 class ID;
@@ -89,7 +87,7 @@ class MP_Constraint : public DomainComponent
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
     
-    virtual void Print(ostream &s, int flag =0);
+    virtual void Print(OPS_Stream &s, int flag =0);
 
   protected:
     

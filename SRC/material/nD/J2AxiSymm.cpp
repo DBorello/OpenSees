@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-12-06 02:13:30 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2AxiSymm.cpp,v $
 
 // Written: Ed "C++" Love
@@ -325,7 +325,7 @@ J2AxiSymm::sendSelf (int commitTag, Channel &theChannel)
 
   // send the vector object to the channel
   if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
-    cerr << "J2AxiSymm::recvSelf - failed to send vector to channel\n";
+    opserr << "J2AxiSymm::recvSelf - failed to send vector to channel\n";
     return -1;
   }
 
@@ -340,7 +340,7 @@ J2AxiSymm::recvSelf (int commitTag, Channel &theChannel,
   // recv the vector object from the channel which defines material param and state
   static Vector data(9+9);
   if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
-    cerr << "J2AxiSymm::recvSelf - failed to recv vector from channel\n";
+    opserr << "J2AxiSymm::recvSelf - failed to recv vector from channel\n";
     return -1;
   }
 

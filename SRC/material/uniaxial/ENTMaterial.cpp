@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-13 21:45:31 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.cpp,v $
                                                                         
                                                                         
@@ -124,7 +124,7 @@ ENTMaterial::sendSelf(int cTag, Channel &theChannel)
   data(1) = E;
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "ENTMaterial::sendSelf() - failed to send data\n";
+    opserr << "ENTMaterial::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -138,7 +138,7 @@ ENTMaterial::recvSelf(int cTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
-      cerr << "ENTMaterial::recvSelf() - failed to receive data\n";
+      opserr << "ENTMaterial::recvSelf() - failed to receive data\n";
       E = 0; 
       this->setTag(0);      
   }
@@ -151,10 +151,10 @@ ENTMaterial::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-ENTMaterial::Print(ostream &s, int flag)
+ENTMaterial::Print(OPS_Stream &s, int flag)
 {
-    s << "ENTMaterial, tag: " << this->getTag() << endl;
-    s << "  E: " << E << endl;
+    s << "ENTMaterial, tag: " << this->getTag() << endln;
+    s << "  E: " << E << endln;
 }
 
 int

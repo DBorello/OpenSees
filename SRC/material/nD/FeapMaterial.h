@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-10-29 20:19:38 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/FeapMaterial.h,v $
                                                                       
 // Written: MHS
@@ -60,7 +60,7 @@ class FeapMaterial : public NDMaterial
   virtual int recvSelf(int commitTag, Channel &theChannel, 
 		       FEM_ObjectBroker &theBroker);    
   
-  virtual void Print(ostream &s, int flag = 0);
+  virtual void Print(OPS_Stream &s, int flag = 0);
   
  protected:
   // Invokes the Feap subroutine

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-07-04 15:30:27 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:00:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestNormDispIncr.cpp,v $
                                                                         
                                                                         
@@ -75,7 +75,7 @@ CTestNormDispIncr::setEquiSolnAlgo(EquiSolnAlgo &theAlgo)
 {
     theSOE = theAlgo.getLinearSOEptr();
     if (theSOE == 0) {
-	cerr << "WARNING: CTestNormDisp::setEquiSolnAlgo() - no SOE\n";	
+	opserr << "WARNING: CTestNormDisp::setEquiSolnAlgo() - no SOE\n";	
 	return -1;
     }
     else
@@ -94,7 +94,7 @@ CTestNormDispIncr::test(void)
   // check to ensure the algo does invoke start() - this is needed otherwise
   // may never get convergence later on in analysis!
   if (currentIter == 0) {
-    cerr << "WARNING: CTestNormDisp::test() - start() was never invoked.\n";	
+    opserr << "WARNING: CTestNormDisp::test() - start() was never invoked.\n";	
     return -2;
   }
 
@@ -107,14 +107,15 @@ CTestNormDispIncr::test(void)
 
   // print the data if required
   if (printFlag == 1) {
-    cerr << "\t printFlag == 1 0  CTestNormDispIncr::test() - iteration: " << currentIter;
-    cerr << " current Norm: " << norm << " (max: " << tol << ")\n";
+    opserr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
+    opserr << " current Norm: " << norm << " (max: " << tol;
+    opserr << " residual Norm: " << theSOE->getB().Norm() << ")\n";
   } 
   if (printFlag == 4) {
-    cerr << "\t printFlag == 4 CTestNormDispIncr::test() - iteration: " << currentIter;
-    cerr << " current Norm: " << norm << " (max: " << tol << ")\n";
-    cerr << " Norm deltaX: " << norm << "  Norm deltaR: " << (theSOE->getB()).Norm() << endl;
-    cerr << "deltaX: " << x << "deltaR: " << theSOE->getB();
+    opserr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
+    opserr << " current Norm: " << norm << " (max: " << tol << ")\n";
+    opserr << " Norm deltaX: " << norm << "  Norm deltaR: " << (theSOE->getB()).Norm() << endln;
+    opserr << "deltaX: " << x << "deltaR: " << theSOE->getB();
   } 
 
   //
@@ -127,10 +128,11 @@ CTestNormDispIncr::test(void)
     // do some printing first
     if (printFlag != 0) {
       if (printFlag == 1) 
-	cerr << endl;
+	opserr << endln;
       else if (printFlag == 2) {
-	cerr << "\t printFlag == 1 1 CTestNormDispIncr::test() - iteration: " << currentIter;
-	cerr << " current Norm: " << norm << " (max permissable: " << tol << ")\n";
+	opserr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
+	opserr << " current Norm: " << norm << " (max: " << tol;
+	opserr << " residual Norm: " << theSOE->getB().Norm() << ")\n";
       }
     }
 
@@ -140,16 +142,16 @@ CTestNormDispIncr::test(void)
 
   // algo failed to converged after specified number of iterations - but RETURN OK
   else if (printFlag == 5 && currentIter >= maxNumIter) {
-    cerr << "WARNING: CTestDispIncr::test() - failed to converge but going on - ";
-    cerr << " current Norm: " << norm << " (max: " << tol << ")\n";
-    cerr << " Norm deltaX: " << norm << "  Norm deltaR: " << (theSOE->getB()).Norm() << endl;
+    opserr << "WARNING: CTestDispIncr::test() - failed to converge but going on - ";
+    opserr << " current Norm: " << norm << " (max: " << tol;
+    opserr << " residual Norm: " << theSOE->getB().Norm() << ")\n";
     return currentIter;
   }
 
   // algo failed to converged after specified number of iterations - return FAILURE -2
   else if (currentIter >= maxNumIter) { // failes to converge
-    cerr << "WARNING: CTestDispIncr::test() - failed to converge \n";
-    cerr << "after: " << currentIter << " iterations\n";	
+    opserr << "WARNING: CTestDispIncr::test() - failed to converge \n";
+    opserr << "after: " << currentIter << " iterations\n";	
     currentIter++;    
     return -2;
   } 
@@ -166,7 +168,7 @@ int
 CTestNormDispIncr::start(void)
 {
     if (theSOE == 0) {
-	cerr << "WARNING: CTestNormDispIncr::test() - no SOE returning true\n";
+	opserr << "WARNING: CTestNormDispIncr::test() - no SOE returning true\n";
 	return -1;
     }
 
@@ -213,7 +215,7 @@ CTestNormDispIncr::sendSelf(int cTag, Channel &theChannel)
   x(1) = maxNumIter;
   res = theChannel.sendVector(this->getDbTag(), cTag, x);
   if (res < 0) 
-    cerr << "CTestNormDispIncr::sendSelf() - failed to send data\n";
+    opserr << "CTestNormDispIncr::sendSelf() - failed to send data\n";
     
   return res;
 }
@@ -227,7 +229,7 @@ CTestNormDispIncr::recvSelf(int cTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), cTag, x);    
 
   if (res < 0) {
-      cerr << "CTestNormDispIncr::sendSelf() - failed to send data\n";
+      opserr << "CTestNormDispIncr::sendSelf() - failed to send data\n";
       tol = 1.0e-8;
       maxNumIter = 25;
   }

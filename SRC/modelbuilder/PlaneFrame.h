@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/PlaneFrame.h,v $
                                                                         
                                                                         
@@ -39,7 +39,6 @@
 #define PlaneFrame_h
 
 #include <ModelBuilder.h>
-#include <iostream.h>
 
 class Element;
 class Node;

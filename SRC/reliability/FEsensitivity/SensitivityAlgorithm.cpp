@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-09-05 17:54:54 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.cpp,v $
 
 
@@ -84,8 +84,8 @@ SensitivityAlgorithm::computeGradients(void)
 
 	// Form current tangent at converged state
 	if (theIncInt->formTangent(CURRENT_TANGENT) < 0){
-		cerr << "WARNING SensitivityAlgorithm::computeGradients() -";
-		cerr << "the Integrator failed in formTangent()\n";
+		opserr << "WARNING SensitivityAlgorithm::computeGradients() -";
+		opserr << "the Integrator failed in formTangent()\n";
 		return -1;
 	}
 
@@ -147,3 +147,4 @@ SensitivityAlgorithm::isPathDependent(void)
 {
 	return (trueIfPathDependent);
 }
+

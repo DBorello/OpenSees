@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-10-03 18:07:53 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:00:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -41,8 +41,6 @@
 #include <Matrix.h>
 #include <Node.h>
 #include <Channel.h>
-
-#include <iomanip.h>
 
 #include <LinearCrdTransf2d.h>
 
@@ -67,8 +65,8 @@ LinearCrdTransf2d::LinearCrdTransf2d(int tag,
 {
 	// check rigid joint offset for node I
 	if (&rigJntOffset1 == 0 || rigJntOffset1.Size() != 2 ) {
-		cerr << "LinearCrdTransf2d::LinearCrdTransf2d:  Invalid rigid joint offset vector for node I\n";
-		cerr << "Size must be 2\n";      
+		opserr << "LinearCrdTransf2d::LinearCrdTransf2d:  Invalid rigid joint offset vector for node I\n";
+		opserr << "Size must be 2\n";      
 	}
 	else {
 		nodeIOffset = new double[2];
@@ -78,8 +76,8 @@ LinearCrdTransf2d::LinearCrdTransf2d(int tag,
    
    // check rigid joint offset for node J
 	if (&rigJntOffset2 == 0 || rigJntOffset2.Size() != 2 ) {
-		cerr << "LinearCrdTransf2d::LinearCrdTransf2d:  Invalid rigid joint offset vector for node J\n";
-		cerr << "Size must be 2\n";      
+		opserr << "LinearCrdTransf2d::LinearCrdTransf2d:  Invalid rigid joint offset vector for node J\n";
+		opserr << "Size must be 2\n";      
 	}
 	else {
 		nodeJOffset = new double[2];
@@ -145,8 +143,8 @@ LinearCrdTransf2d::initialize(Node *nodeIPointer, Node *nodeJPointer)
 
    if ((!nodeIPtr) || (!nodeJPtr))
    {
-      cerr << "\nLinearCrdTransf2d::initialize";
-      cerr << "\ninvalid pointers to the element nodes\n";
+      opserr << "\nLinearCrdTransf2d::initialize";
+      opserr << "\ninvalid pointers to the element nodes\n";
       return -1;
    }
        
@@ -188,7 +186,7 @@ LinearCrdTransf2d::computeElemtLengthAndOrient()
 
    if (L == 0.0) 
    {
-      cerr << "\nLinearCrdTransf2d::computeElemtLengthAndOrien: 0 length\n";
+      opserr << "\nLinearCrdTransf2d::computeElemtLengthAndOrien: 0 length\n";
       return -2;  
    }
 
@@ -724,8 +722,7 @@ LinearCrdTransf2d::sendSelf(int cTag, Channel &theChannel)
   
   res += theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s - failed to send Vector",
-			    "LinearCrdTransf2d::sendSelf");
+    opserr << "LinearCrdTransf2d::sendSelf - failed to send Vector\n";
     return res;
   }
   
@@ -743,8 +740,7 @@ LinearCrdTransf2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
   
   res += theChannel.recvVector(this->getDbTag(), cTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s - failed to receive Vector",
-			    "LinearCrdTransf2d::recvSelf");
+    opserr << "LinearCrdTransf2d::recvSelf - failed to receive Vector\n";
     return res;
   }
   
@@ -848,7 +844,7 @@ LinearCrdTransf2d::getPointGlobalDisplFromBasic (double xi, const Vector &uxb)
 
 
 void
-LinearCrdTransf2d::Print(ostream &s, int flag)
+LinearCrdTransf2d::Print(OPS_Stream &s, int flag)
 {
    s << "\nCrdTransf: " << this->getTag() << " Type: LinearCrdTransf2d";
    s << "\tnodeI Offset: " << nodeIOffset;

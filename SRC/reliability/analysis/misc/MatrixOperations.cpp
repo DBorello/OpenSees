@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-08 20:22:32 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/misc/MatrixOperations.cpp,v $
 
 
@@ -110,8 +110,8 @@ Matrix
 MatrixOperations::getLowerCholesky()
 {
 	if (theLowerCholesky == 0) {
-		cerr << "MatrixOperations::getLowerCholesky() - this" << endl
-			<< " matrix has not been computed." << endl;
+		opserr << "MatrixOperations::getLowerCholesky() - this" << endln
+			<< " matrix has not been computed." << endln;
 		return (*theMatrix);
 	}
 
@@ -123,8 +123,8 @@ Matrix
 MatrixOperations::getInverseLowerCholesky()
 {
 	if (theInverseLowerCholesky == 0) {
-		cerr << "MatrixOperations::getInverseLowerCholesky() - this" << endl
-			<< " matrix has not been computed." << endl;
+		opserr << "MatrixOperations::getInverseLowerCholesky() - this" << endln
+			<< " matrix has not been computed." << endln;
 		return (*theMatrix);
 	}
 
@@ -136,8 +136,8 @@ Matrix
 MatrixOperations::getInverse()
 {
 	if (theInverse == 0) {
-		cerr << "MatrixOperations::getInverse() - this" << endl
-			<< " matrix has not been computed." << endl;
+		opserr << "MatrixOperations::getInverse() - this" << endln
+			<< " matrix has not been computed." << endln;
 		return (*theMatrix);
 	}
 	
@@ -149,8 +149,8 @@ Matrix
 MatrixOperations::getTranspose()
 {
 	if (theTranspose == 0) {
-		cerr << "MatrixOperations::getTranspose() - this" << endl
-			<< " matrix has not been computed." << endl;
+		opserr << "MatrixOperations::getTranspose() - this" << endln
+			<< " matrix has not been computed." << endln;
 		return (*theMatrix);
 	}
 	
@@ -162,8 +162,8 @@ Matrix
 MatrixOperations::getSquareRoot()
 {
 	if (theSquareRoot == 0) {
-		cerr << "MatrixOperations::getSquareRoot() - this" << endl
-			<< " matrix has not been computed." << endl;
+		opserr << "MatrixOperations::getSquareRoot() - this" << endln
+			<< " matrix has not been computed." << endln;
 		return (*theMatrix);
 	}
 	
@@ -540,8 +540,8 @@ MatrixOperations::computeTrace()
 	int numberOfRows = passedMatrix.noRows();
 	
 	if (numberOfColumns != numberOfRows) {
-		cerr << "MatrixOperations::computeTrace() - can not" << endl
-			<< " compute the trace of a non-quadratic matrix." << endl;
+		opserr << "MatrixOperations::computeTrace() - can not" << endln
+			<< " compute the trace of a non-quadratic matrix." << endln;
 		return -1;
 	}
 
@@ -570,7 +570,7 @@ MatrixOperations::vectorDotProduct(Vector vector1, Vector vector2)
 
 	if ( sizeOfVector1 != sizeOfVector2 )
 	{
-		cerr << "vectorDotProduct can not be performed" << endl;
+		opserr << "vectorDotProduct can not be performed" << endln;
 	}
 	else
 	{

@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
-#include <iostream.h>
 
 #include <Domain.h>
 #include <Node.h>
@@ -20,16 +17,16 @@ TclModelBuilder_addElastic2dGNL (ClientData clientData, Tcl_Interp *interp,
 				 int argc, char **argv,
 				 Domain *theDomain, TclModelBuilder *theBuilder)
 {
-	//cerr << "Press key to continue...\n";
+	//opserr << "Press key to continue...\n";
 	//cin.get();
 
     if(tcl_debug)
-        cout << " TclModelBuilder_addElastic2dGNL \n";
+        opserr << " TclModelBuilder_addElastic2dGNL \n";
 
 	if (argc < 8)
 	{
-		cerr << "WARNING insufficient arguments\n";
-		cerr << "element element2dGNL int tag, int Nd1, int Nd2, double A, double E, double Iz, <int linear>\n";
+		opserr << "WARNING insufficient arguments\n";
+		opserr << "element element2dGNL int tag, int Nd1, int Nd2, double A, double E, double Iz, <int linear>\n";
 
 		return TCL_ERROR;
 	}
@@ -41,44 +38,44 @@ TclModelBuilder_addElastic2dGNL (ClientData clientData, Tcl_Interp *interp,
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 	{
-		cerr << "WARNING invalid Elastic2dGNL tag" << endl;
+		opserr << "WARNING invalid Elastic2dGNL tag" << endln;
 		return TCL_ERROR;
 	}
-    if(tcl_debug) cout << "\tElement tag = " << tag << "\n";
+    if(tcl_debug) opserr << "\tElement tag = " << tag << "\n";
 
     if (Tcl_GetInt (interp, argv[3], &ndI) != TCL_OK)
 	{
-		cerr << "WARNING invalid node I\n";
-		cerr << "Elastic2dGNL: " << tag << endl;
+		opserr << "WARNING invalid node I\n";
+		opserr << "Elastic2dGNL: " << tag << endln;
 		return TCL_ERROR;
 	}
 
 	if (Tcl_GetInt (interp, argv[4], &ndJ) != TCL_OK)
 	{
-		cerr << "WARNING invalid node J\n";
-		cerr << "Elastic2dGNL: " << tag << endl;
+		opserr << "WARNING invalid node J\n";
+		opserr << "Elastic2dGNL: " << tag << endln;
 		return TCL_ERROR;
 	}
 
 
 	if (Tcl_GetDouble(interp, argv[5], &A) != TCL_OK)
 	{
-		cerr << "WARNING invalid A\n";
-		cerr << "Elastic2dGNL: " << tag << endl;
+		opserr << "WARNING invalid A\n";
+		opserr << "Elastic2dGNL: " << tag << endln;
 		return TCL_ERROR;
 	}
 
 	if (Tcl_GetDouble(interp, argv[6], &E) != TCL_OK)
 	{
-		cerr << "WARNING invalid E\n";
-		cerr << "Elastic2dGNL: " << tag << endl;
+		opserr << "WARNING invalid E\n";
+		opserr << "Elastic2dGNL: " << tag << endln;
 		return TCL_ERROR;
 	}
 
 	if (Tcl_GetDouble(interp, argv[7], &I) != TCL_OK)
 	{
-		cerr << "WARNING invalid I\n";
-		cerr << "Elastic2dGNL: " << tag << endl;
+		opserr << "WARNING invalid I\n";
+		opserr << "Elastic2dGNL: " << tag << endln;
 		return TCL_ERROR;
 	}
 	
@@ -87,8 +84,8 @@ TclModelBuilder_addElastic2dGNL (ClientData clientData, Tcl_Interp *interp,
 		int lin = 0;
 		if(Tcl_GetInt(interp, argv[8], &lin) != TCL_OK)
 		{
-			cerr << "WARNING invalid Linear Flag\n";
-			cerr << "Elastic2dGNL: " << tag << endl;
+			opserr << "WARNING invalid Linear Flag\n";
+			opserr << "Elastic2dGNL: " << tag << endln;
 			return TCL_ERROR;
 		}
 		
@@ -96,34 +93,33 @@ TclModelBuilder_addElastic2dGNL (ClientData clientData, Tcl_Interp *interp,
 			linear = true;
 		
 		if(tcl_debug)
-			cout << " 9 arguments - " << lin << endl;
+			opserr << " 9 arguments - " << lin << endln;
 	}
 	
-	// if(tcl_debug) cout << "\tAdded upto mass - input parameters\n";
+	// if(tcl_debug) opserr << "\tAdded upto mass - input parameters\n";
 
 
 	Element *theElement = new Elastic2dGNL(tag, A, E, I, ndI, ndJ, linear);//, false, massDens);
 
-	if(tcl_debug) cout << "\tElement created\n";
+	if(tcl_debug) opserr << "\tElement created\n";
 
 	// Ensure we have created the element, out of memory if got here and no element
 	if (theElement == 0)
 	{
-		cerr << "WARNING ran out of memory creating element\n";
-		cerr << "Elastic2dGNL: " << tag << endl;
-		cin.get();
+		opserr << "WARNING ran out of memory creating element\n";
+		opserr << "Elastic2dGNL: " << tag << endln;
 		return TCL_ERROR;
 	}
 
 	if (theDomain->addElement(theElement) == false)
 	{
-		cerr << "WARNING TclElmtBuilder - addElastic2dGNL - could not add element to domain ";
-		cerr << tag << endl;
-		cin.get();
+		opserr << "WARNING TclElmtBuilder - addElastic2dGNL - could not add element to domain ";
+		opserr << tag << endln;
+		delete theElement;
 		return TCL_ERROR;
 	}
 
-	if(tcl_debug) cout << "\tElement number " << tag << " added to domain - returning\n";
+	if(tcl_debug) opserr << "\tElement number " << tag << " added to domain - returning\n";
 
 	return TCL_OK;
 }

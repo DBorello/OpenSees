@@ -33,7 +33,7 @@ increment in a static analysis. \\
 \indent\indent\indent\indent\indent LinearSOE \&theSOE);} \\
 \indent\indent {\em virtual int solveCurrentStep(void) = 0;} \\ \\
 \indent\indent // Public Methods for Output \\
-\indent\indent {\em virtual void Print(ostream \&s, int flag = 0)
+\indent\indent {\em virtual void Print(OPS_Stream \&s, int flag = 0)
 =0;}\\ \\
 \indent\indent // Public Methods for Pointers - not Protected for ConvergenceTest\\
 \indent\indent {\em AnalysisModel *getAnalysisModelPtr(void) const;}
@@ -68,7 +68,7 @@ virtual function, i.e. all subclasses or their descendents must
 implement this routine. To return $0$ if algorithm succeeds, a negative
 value otherwise. \\ 
 
-\indent {\em virtual void Print(ostream \&s, int flag = 0) =0;}\\
+\indent {\em virtual void Print(OPS_Stream \&s, int flag = 0) =0;}\\
 The Integrator is to send information to the stream based on the
 integer {\em flag}. \\
 

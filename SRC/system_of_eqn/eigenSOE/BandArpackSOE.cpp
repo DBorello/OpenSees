@@ -81,9 +81,9 @@ BandArpackSOE::setSize(Graph &theGraph)
 	A = new double[newSize];
 	
         if (A == 0) {
-            cerr << "WARNING BandGenLinSOE::BandGenLinSOE :";
-	    cerr << " ran out of memory for A (size,super,sub) (";
-	    cerr << size <<", " << numSuperD << ", " << numSubD << ") \n";
+            opserr << "WARNING BandGenLinSOE::BandGenLinSOE :";
+	    opserr << " ran out of memory for A (size,super,sub) (";
+	    opserr << size <<", " << numSuperD << ", " << numSubD << ") \n";
 	    Asize = 0; size = 0; numSubD = 0; numSuperD = 0;
 	    result= -1;
         }
@@ -101,8 +101,8 @@ BandArpackSOE::setSize(Graph &theGraph)
     EigenSolver *theSolvr = this->getSolver();
     int solverOK = theSolvr->setSize();
     if (solverOK < 0) {
-	cerr << "WARNING:BandArpackSOE::setSize :";
-	cerr << " solver failed setSize()\n";
+	opserr << "WARNING:BandArpackSOE::setSize :";
+	opserr << " solver failed setSize()\n";
 	return solverOK;
     } 
    
@@ -118,7 +118,7 @@ BandArpackSOE::addA(const Matrix &m, const ID &id, double fact)
     // check that m and id are of similar size
     int idSize = id.Size();    
     if (idSize != m.noRows() && idSize != m.noCols()) {
-	cerr << "BandArpackSOE::addA()	- Matrix and ID not of similar sizes\n";
+	opserr << "BandArpackSOE::addA()	- Matrix and ID not of similar sizes\n";
 	return -1;
     }
     

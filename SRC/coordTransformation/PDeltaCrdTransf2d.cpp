@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-10-09 21:38:16 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:00:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -39,8 +39,6 @@
 #include <Matrix.h>
 #include <Node.h>
 #include <Channel.h>
-
-#include <iomanip.h>
 
 #include <PDeltaCrdTransf2d.h>
 
@@ -65,8 +63,8 @@ PDeltaCrdTransf2d::PDeltaCrdTransf2d(int tag,
 {
 	// check rigid joint offset for node I
 	if (&rigJntOffset1 == 0 || rigJntOffset1.Size() != 2 ) {
-		cerr << "PDeltaCrdTransf2d::PDeltaCrdTransf2d:  Invalid rigid joint offset vector for node I\n";
-		cerr << "Size must be 2\n";      
+		opserr << "PDeltaCrdTransf2d::PDeltaCrdTransf2d:  Invalid rigid joint offset vector for node I\n";
+		opserr << "Size must be 2\n";      
 	}
 	else {
 		nodeIOffset = new double[2];
@@ -76,8 +74,8 @@ PDeltaCrdTransf2d::PDeltaCrdTransf2d(int tag,
    
    // check rigid joint offset for node J
 	if (&rigJntOffset2 == 0 || rigJntOffset2.Size() != 2 ) {
-		cerr << "PDeltaCrdTransf2d::PDeltaCrdTransf2d:  Invalid rigid joint offset vector for node J\n";
-		cerr << "Size must be 2\n";      
+		opserr << "PDeltaCrdTransf2d::PDeltaCrdTransf2d:  Invalid rigid joint offset vector for node J\n";
+		opserr << "Size must be 2\n";      
 	}
 	else {
 		nodeJOffset = new double[2];
@@ -143,8 +141,8 @@ PDeltaCrdTransf2d::initialize(Node *nodeIPointer, Node *nodeJPointer)
 
    if ((!nodeIPtr) || (!nodeJPtr))
    {
-      cerr << "\nPDeltaCrdTransf2d::initialize";
-      cerr << "\ninvalid pointers to the element nodes\n";
+      opserr << "\nPDeltaCrdTransf2d::initialize";
+      opserr << "\ninvalid pointers to the element nodes\n";
       return -1;
    }
        
@@ -206,7 +204,7 @@ PDeltaCrdTransf2d::computeElemtLengthAndOrient()
 
    if (L == 0.0) 
    {
-      cerr << "\nPDeltaCrdTransf2d::computeElemtLengthAndOrien: 0 length\n";
+      opserr << "\nPDeltaCrdTransf2d::computeElemtLengthAndOrien: 0 length\n";
       return -2;  
    }
 
@@ -831,8 +829,7 @@ PDeltaCrdTransf2d::sendSelf(int cTag, Channel &theChannel)
   
   res += theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s - failed to send Vector",
-			    "PDeltaCrdTransf2d2d::sendSelf");
+    opserr << "PDeltaCrdTransf2d2d::sendSelf - failed to send Vector\n";
     return res;
   }
   
@@ -850,8 +847,8 @@ PDeltaCrdTransf2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
   
   res += theChannel.recvVector(this->getDbTag(), cTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s - failed to receive Vector",
-			    "PDeltaCrdTransf2d2d::recvSelf");
+    opserr << "PDeltaCrdTransf2d2d::recvSelf - failed to receive Vector\n";
+			    
     return res;
   }
   
@@ -955,7 +952,7 @@ PDeltaCrdTransf2d::getPointGlobalDisplFromBasic (double xi, const Vector &uxb)
 
 
 void
-PDeltaCrdTransf2d::Print(ostream &s, int flag)
+PDeltaCrdTransf2d::Print(OPS_Stream &s, int flag)
 {
    s << "\nCrdTransf: " << this->getTag() << " Type: PDeltaCrdTransf2d";
    s << "\tnodeI Offset: " << nodeIOffset;

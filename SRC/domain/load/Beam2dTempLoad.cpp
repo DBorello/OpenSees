@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-07-26 18:41:53 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dTempLoad.cpp,v $
                                                                         
 // Written: Scott R. Hamilton 15 July 2002
@@ -100,7 +100,7 @@ Beam2dTempLoad::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void 
-Beam2dTempLoad::Print(ostream &s, int flag)
+Beam2dTempLoad::Print(OPS_Stream &s, int flag)
 {
   s << "Beam2dTempLoad - reference load : " << Ttop1 << " change in temp at top of node 1 : " << Tbot1 << " change in temp at bottom of node 1\n";
   s <<  Ttop2 << " change in temp at top of node 2 : " << Tbot2 << " change in temp at bottom of node 2\n";

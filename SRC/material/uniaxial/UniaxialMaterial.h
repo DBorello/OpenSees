@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-10 23:04:03 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.h,v $
                                                                         
                                                                         
@@ -71,12 +71,12 @@ class UniaxialMaterial : public Material
     virtual int revertToStart (void) = 0;        
 
     virtual UniaxialMaterial *getCopy (void) = 0;
-	virtual UniaxialMaterial *getCopy(SectionForceDeformation *s);
-
+    virtual UniaxialMaterial *getCopy(SectionForceDeformation *s);
+	
     virtual Response *setResponse (char **argv, int argc, Information &matInformation);
     virtual int getResponse (int responseID, Information &matInformation);    
 // AddingSensitivity:BEGIN /////////////////////////////////////
-	virtual int gradient(bool compute, int identifier, double & gradient);
+    virtual int gradient(bool compute, int identifier, double & gradient);
 // AddingSensitivity:END ///////////////////////////////////////
 
   protected:

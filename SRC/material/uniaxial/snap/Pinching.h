@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-07-12 19:51:40 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Pinching.h,v $
 //
 //
@@ -68,7 +68,7 @@ class Pinching : public UniaxialMaterial
   int recvSelf(int commitTag, Channel &theChannel,
 	       FEM_ObjectBroker &theBroker);    
   
-  void Print(ostream &s, int flag =0);
+  void Print(OPS_Stream &s, int flag =0);
   
  protected:
   void envelPosCap(double fy, double alfaPos, double alfaCap,

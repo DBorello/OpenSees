@@ -31,9 +31,6 @@
 
 #include <math.h>
 
-#include <iostream.h>
-#include <iomanip.h>
-
 #include "EL_S.h"
 
 class EvolutionLaw_NL_Eeq : public EvolutionLaw_S
@@ -84,7 +81,7 @@ class EvolutionLaw_NL_Eeq : public EvolutionLaw_S
     // Overloaded Insertion Operator	 
     // prints nonlinear EvolutionLaw's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const EvolutionLaw_NL_Eeq & NLEL);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_NL_Eeq & NLEL);
 
     
 };

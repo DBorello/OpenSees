@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-05 22:20:40 $
+// $Revision: 1.10 $
+// $Date: 2003-02-14 23:01:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.h,v $
 
 // Ed "C++" Love
@@ -27,7 +27,6 @@
 // Constant Presssure/Volume Four Node Quadrilateral
 // Plane Strain (NOT PLANE STRESS)
 
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -84,7 +83,7 @@ class ConstantPressureVolumeQuad : public Element
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
-    void Print( ostream &s, int flag ) ;
+    void Print( OPS_Stream &s, int flag ) ;
 
   
   private : 

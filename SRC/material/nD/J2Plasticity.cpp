@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-12-05 22:49:12 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.cpp,v $
 
 // Written: Ed "C++" Love
@@ -366,27 +366,25 @@ J2Plasticity :: getCopy (const char *type)
     // Handle other cases
     else
     {
-	g3ErrorHandler->fatal("J2Plasticity::getModel failed to get model %s",
-			      type);
-
-	return 0;
+      opserr << "J2Plasticity::getModel failed to get model: " << type << endln;
+      return 0;
     }
 }
 
 //print out material data
-void J2Plasticity :: Print( ostream &s, int flag )
+void J2Plasticity :: Print( OPS_Stream &s, int flag )
 {
-  s << endl ;
+  s << endln ;
   s << "J2-Plasticity : " ; 
-  s << this->getType( ) << endl ;
-  s << "Bulk Modulus =   " << bulk        << endl ;
-  s << "Shear Modulus =  " << shear       << endl ;
-  s << "Sigma_0 =        " << sigma_0     << endl ;
-  s << "Sigma_infty =    " << sigma_infty << endl ;
-  s << "Delta =          " << delta       << endl ;
-  s << "H =              " << Hard        << endl ;
-  s << "Eta =            " << eta         << endl ;
-  s << endl ;
+  s << this->getType( ) << endln ;
+  s << "Bulk Modulus =   " << bulk        << endln ;
+  s << "Shear Modulus =  " << shear       << endln ;
+  s << "Sigma_0 =        " << sigma_0     << endln ;
+  s << "Sigma_infty =    " << sigma_infty << endln ;
+  s << "Delta =          " << delta       << endln ;
+  s << "H =              " << Hard        << endln ;
+  s << "Eta =            " << eta         << endln ;
+  s << endln ;
 }
 
 
@@ -494,8 +492,8 @@ void J2Plasticity :: plastic_integrator( )
 	iteration_counter++ ;
 
 	if ( iteration_counter > max_iterations ) {
-	    cerr << "More than " << max_iterations ;
-	    cerr << " iterations in constituive subroutine J2-plasticity \n" ;
+	    opserr << "More than " << max_iterations ;
+	    opserr << " iterations in constituive subroutine J2-plasticity \n" ;
 	    break ;
 	} //end if 
 	
@@ -685,21 +683,24 @@ return ;
 NDMaterial*
 J2Plasticity::getCopy (void)
 {
-    g3ErrorHandler->fatal("J2Plasticity::getCopy -- subclass responsibility");
-    return 0;
+  opserr << "J2Plasticity::getCopy -- subclass responsibility\n"; 
+  exit(-1);
+  return 0;
 }
 
 const char*
 J2Plasticity::getType (void) const
 {
-    g3ErrorHandler->fatal("J2Plasticity::getType -- subclass responsibility");
+    opserr << "J2Plasticity::getType -- subclass responsibility\n";
+    exit(-1);
     return 0;
 }
 
 int
 J2Plasticity::getOrder (void) const
 {
-    g3ErrorHandler->fatal("J2Plasticity::getOrder -- subclass responsibility");
+    opserr << "J2Plasticity::getOrder -- subclass responsibility\n";
+    exit(-1);
     return 0;
 }
 
@@ -747,7 +748,7 @@ J2Plasticity::sendSelf(int commitTag, Channel &theChannel)
 
   // send the vector object to the channel
   if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
-    cerr << "J2Plasticity::sendSelf - failed to send vector to channel\n";
+    opserr << "J2Plasticity::sendSelf - failed to send vector to channel\n";
     return -1;
   }
 
@@ -762,7 +763,7 @@ J2Plasticity::recvSelf (int commitTag, Channel &theChannel,
   // recv the vector object from the channel which defines material param and state
   static Vector data(9);
   if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
-    cerr << "J2Plasticity::recvSelf - failed to recv vector from channel\n";
+    opserr << "J2Plasticity::recvSelf - failed to recv vector from channel\n";
     return -1;
   }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2002-12-05 22:37:05 $
+// $Revision: 1.19 $
+// $Date: 2003-02-14 23:00:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -277,9 +277,9 @@ FEM_ObjectBroker::getPtrNewPartitionedModelBuilder(Subdomain &theSubdomain,
 	     */
 
 	default:
-	     cerr << "FEM_ObjectBroker::getPtrNewPartitionedModelBuilder - ";
-	     cerr << " - no PartitionedModelBuilder type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getPtrNewPartitionedModelBuilder - ";
+	     opserr << " - no PartitionedModelBuilder type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }    
@@ -303,9 +303,9 @@ FEM_ObjectBroker::getPtrNewGraphNumberer(int classTag)
 	     
 	     
 	default:
-	     cerr << "ObjectBroker::getPtrNewGraphNumberer - ";
-	     cerr << " - no GraphNumberer type exists for class tag " ;
-	     cerr << classTag << endl;
+	     opserr << "ObjectBroker::getPtrNewGraphNumberer - ";
+	     opserr << " - no GraphNumberer type exists for class tag " ;
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }
@@ -405,9 +405,9 @@ FEM_ObjectBroker::getNewElement(int classTag)
 		return new SimpleJoint2D();		// Arash
 
 	default:
-	     cerr << "FEM_ObjectBroker::getNewElement - ";
-	     cerr << " - no Element type exists for class tag " ;
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewElement - ";
+	     opserr << " - no Element type exists for class tag " ;
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }
@@ -422,9 +422,9 @@ FEM_ObjectBroker::getNewNode(int classTag)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewNode - ";
-	     cerr << " - no Node type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewNode - ";
+	     opserr << " - no Node type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }    
@@ -446,9 +446,9 @@ FEM_ObjectBroker::getNewMP(int classTag)
 		 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewMP - ";
-	     cerr << " - no SP_Constraint type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewMP - ";
+	     opserr << " - no SP_Constraint type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }    
@@ -464,9 +464,9 @@ FEM_ObjectBroker::getNewSP(int classTag)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewSP - ";
-	     cerr << " - no SP_Constraint type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewSP - ";
+	     opserr << " - no SP_Constraint type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }    
@@ -481,9 +481,9 @@ FEM_ObjectBroker::getNewNodalLoad(int classTag)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewNodalLoad - ";
-	     cerr << " - no NodalLoad type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewNodalLoad - ";
+	     opserr << " - no NodalLoad type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }    
@@ -511,9 +511,9 @@ FEM_ObjectBroker::getNewElementalLoad(int classTag)
       return new BrickSelfWeight();	     
 	     
   default:
-    cerr << "FEM_ObjectBroker::getNewNodalLoad - ";
-    cerr << " - no NodalLoad type exists for class tag ";
-    cerr << classTag << endl;
+    opserr << "FEM_ObjectBroker::getNewNodalLoad - ";
+    opserr << " - no NodalLoad type exists for class tag ";
+    opserr << classTag << endln;
     return 0;
     
   }    
@@ -534,9 +534,9 @@ FEM_ObjectBroker::getNewCrdTransf2d(int classTag)
 		return new CorotCrdTransf2d();
 #endif
 	default:
-		cerr << "FEM_ObjectBroker::getPtrNewCrdTransf2d - ";
-	    cerr << " - no CrdTransf2d type exists for class tag ";
-	    cerr << classTag << endl;
+		opserr << "FEM_ObjectBroker::getPtrNewCrdTransf2d - ";
+	    opserr << " - no CrdTransf2d type exists for class tag ";
+	    opserr << classTag << endln;
 	    return 0;
 	}
 
@@ -555,9 +555,9 @@ FEM_ObjectBroker::getNewCrdTransf3d(int classTag)
 		return new CorotCrdTransf3d();
 #endif
 	default:
-		cerr << "FEM_ObjectBroker::getPtrNewCrdTransf3d - ";
-	    cerr << " - no CrdTransf3d type exists for class tag ";
-	    cerr << classTag << endl;
+		opserr << "FEM_ObjectBroker::getPtrNewCrdTransf3d - ";
+	    opserr << " - no CrdTransf3d type exists for class tag ";
+	    opserr << classTag << endln;
 	    return 0;
 	}
 
@@ -669,9 +669,9 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
 	  return new MinMaxMaterial();
 
 	default:
-	     cerr << "FEM_ObjectBroker::getPtrNewUniaxialMaterial - ";
-	     cerr << " - no UniaxialMaterial type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getPtrNewUniaxialMaterial - ";
+	     opserr << " - no UniaxialMaterial type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -718,9 +718,9 @@ FEM_ObjectBroker::getNewSection(int classTag)
 		return new Bidirectional();
 
 	default:
-	     cerr << "FEM_ObjectBroker::getNewSection - ";
-	     cerr << " - no section type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewSection - ";
+	     opserr << " - no section type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -776,9 +776,9 @@ FEM_ObjectBroker::getNewNDMaterial(int classTag)
     return new PressureIndependMultiYield();
     
   default:
-    cerr << "FEM_ObjectBroker::getNewNDMaterial - ";
-    cerr << " - no NDMaterial type exists for class tag ";
-    cerr << classTag << endl;
+    opserr << "FEM_ObjectBroker::getNewNDMaterial - ";
+    opserr << " - no NDMaterial type exists for class tag ";
+    opserr << classTag << endln;
     return 0;   
   }
 }
@@ -794,9 +794,9 @@ FEM_ObjectBroker::getNewFiber(int classTag)
 		return new UniaxialFiber3d();
 
 	default:
-		cerr << "FEM_ObjectBroker::getNewFiber - ";
-		cerr << " - no Fiber type exists for class tag ";
-		cerr << classTag << endl;
+		opserr << "FEM_ObjectBroker::getNewFiber - ";
+		opserr << " - no Fiber type exists for class tag ";
+		opserr << classTag << endln;
 		return 0;
 	}
 }
@@ -816,9 +816,9 @@ FEM_ObjectBroker::getNewConvergenceTest(int classTag)
 	     	     	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getPtrNewConvergenceTest - ";
-	     cerr << " - no ConvergenceTest type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getPtrNewConvergenceTest - ";
+	     opserr << " - no ConvergenceTest type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -836,9 +836,9 @@ FEM_ObjectBroker::getNewLoadPattern(int classTag)
 	     return new UniformExcitation();
 
 	default:
-	     cerr << "FEM_ObjectBroker::getPtrLoadPattern - ";
-	     cerr << " - no Load type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getPtrLoadPattern - ";
+	     opserr << " - no Load type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -854,9 +854,9 @@ FEM_ObjectBroker::getNewGroundMotion(int classTag)
 	  return new GroundMotion(GROUND_MOTION_TAG_GroundMotion);
 
 	default:
-	     cerr << "FEM_ObjectBroker::getPtrGroundMotion - ";
-	     cerr << " - no Load type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getPtrGroundMotion - ";
+	     opserr << " - no Load type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -885,9 +885,9 @@ FEM_ObjectBroker::getNewTimeSeries(int classTag)
 	  return new TrigSeries;
 
 	default:
-	     cerr << "FEM_ObjectBroker::getPtrTimeSeries - ";
-	     cerr << " - no Load type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getPtrTimeSeries - ";
+	     opserr << " - no Load type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -901,9 +901,9 @@ FEM_ObjectBroker::getNewTimeSeriesIntegrator(int classTag)
 	  return new TrapezoidalTimeSeriesIntegrator();
 
 	default:
-	     cerr << "FEM_ObjectBroker::getPtrTimeSeriesIntegrator - ";
-	     cerr << " - no Load type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getPtrTimeSeriesIntegrator - ";
+	     opserr << " - no Load type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -919,9 +919,9 @@ FEM_ObjectBroker::getPtrNewMatrix(int classTag, int noRows, int noCols)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getPtrNewMatrix - ";
-	     cerr << " - no NodalLoad type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getPtrNewMatrix - ";
+	     opserr << " - no NodalLoad type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -937,9 +937,9 @@ FEM_ObjectBroker::getPtrNewVector(int classTag, int size)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getPtrNewVector - ";
-	     cerr << " - no Vector type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getPtrNewVector - ";
+	     opserr << " - no Vector type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -955,9 +955,9 @@ FEM_ObjectBroker::getPtrNewID(int classTag, int size)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getPtrNewID - ";
-	     cerr << " - no ID type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getPtrNewID - ";
+	     opserr << " - no ID type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -980,9 +980,9 @@ FEM_ObjectBroker::getNewConstraintHandler(int classTag)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewConstraintHandler - ";
-	     cerr << " - no ConstraintHandler type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewConstraintHandler - ";
+	     opserr << " - no ConstraintHandler type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -1002,9 +1002,9 @@ FEM_ObjectBroker::getNewNumberer(int classTag)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewConstraintHandler - ";
-	     cerr << " - no ConstraintHandler type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewConstraintHandler - ";
+	     opserr << " - no ConstraintHandler type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }
@@ -1020,9 +1020,9 @@ FEM_ObjectBroker::getNewAnalysisModel(int classTag)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewAnalysisModel - ";
-	     cerr << " - no AnalysisModel type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewAnalysisModel - ";
+	     opserr << " - no AnalysisModel type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -1046,9 +1046,9 @@ FEM_ObjectBroker::getNewEquiSolnAlgo(int classTag)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewEquiSolnAlgo - ";
-	     cerr << " - no EquiSolnAlgo type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewEquiSolnAlgo - ";
+	     opserr << " - no EquiSolnAlgo type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }        
@@ -1064,9 +1064,9 @@ FEM_ObjectBroker::getNewDomainDecompAlgo(int classTag)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewDomainDecompAlgo - ";
-	     cerr << " - no DomainDecompAlgo type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewDomainDecompAlgo - ";
+	     opserr << " - no DomainDecompAlgo type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }
@@ -1086,9 +1086,9 @@ FEM_ObjectBroker::getNewStaticIntegrator(int classTag)
 	     	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewStaticIntegrator - ";
-	     cerr << " - no StaticIntegrator type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewStaticIntegrator - ";
+	     opserr << " - no StaticIntegrator type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }
@@ -1104,9 +1104,9 @@ FEM_ObjectBroker::getNewTransientIntegrator(int classTag)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewTransientIntegrator - ";
-	     cerr << " - no TransientIntegrator type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewTransientIntegrator - ";
+	     opserr << " - no TransientIntegrator type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }
@@ -1130,9 +1130,9 @@ FEM_ObjectBroker::getNewIncrementalIntegrator(int classTag)
 	     
 	     
 	default:
-	     cerr << "FEM_ObjectBroker::getNewIncrementalIntegrator - ";
-	     cerr << " - no IncrementalIntegrator type exists for class tag ";
-	     cerr << classTag << endl;
+	     opserr << "FEM_ObjectBroker::getNewIncrementalIntegrator - ";
+	     opserr << " - no IncrementalIntegrator type exists for class tag ";
+	     opserr << classTag << endln;
 	     return 0;
 	     
 	 }
@@ -1164,9 +1164,9 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	    lastLinearSolver = theSlowSolver;
 	    return theSOE;
 	} else {
-	    cerr << "FEM_ObjectBroker::getNewLinearSOE - ";
-	    cerr << " - no SlowLinearSOESolver type exists for class tag ";
-	    cerr << classTagSolver << endl;
+	    opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	    opserr << " - no SlowLinearSOESolver type exists for class tag ";
+	    opserr << classTagSolver << endln;
 	    return 0;		 
 	}
 	
@@ -1182,9 +1182,9 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	    lastLinearSolver = theGenSolver;
 	    return theSOE;
 	} else {
-	    cerr << "FEM_ObjectBroker::getNewLinearSOE - ";
-	    cerr << " - no FullGenLinSOESolver type exists for class tag ";
-	    cerr << classTagSolver << endl;
+	    opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	    opserr << " - no FullGenLinSOESolver type exists for class tag ";
+	    opserr << classTagSolver << endln;
 	    return 0;		 
 	}	     
 	
@@ -1197,9 +1197,9 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      lastLinearSolver = theGenBandSolver;
 	      return theSOE;
 	  } else {
-	      cerr << "FEM_ObjectBroker::getNewLinearSOE - ";
-	      cerr << " - no BandGenLinSolver type exists for class tag ";
-	      cerr << classTagSolver << endl;
+	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	      opserr << " - no BandGenLinSolver type exists for class tag ";
+	      opserr << classTagSolver << endln;
 	      return 0;
 	  }		     
 	  
@@ -1212,9 +1212,9 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      lastLinearSolver = theBandSPDSolver;
 	      return theSOE;
 	  } else {
-	      cerr << "FEM_ObjectBroker::getNewLinearSOE - ";
-	      cerr << " - no BandSPDLinSOESolver type exists for class tag ";
-	      cerr << classTagSolver << endl;
+	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	      opserr << " - no BandSPDLinSOESolver type exists for class tag ";
+	      opserr << classTagSolver << endln;
 	      return 0;
 	  }	     
 	  
@@ -1233,17 +1233,17 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      return 0;		 
 	  }	
 	  else {
-	      cerr << "FEM_ObjectBroker::getNewLinearSOE - ";
-	      cerr << " - no ProfileSPD_LinSolver type exists for class tag ";
-	      cerr << classTagSolver << endl;
+	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	      opserr << " - no ProfileSPD_LinSolver type exists for class tag ";
+	      opserr << classTagSolver << endln;
 	      return 0;		 
 	  }	     
 	  
 
 	default:
-	  cerr << "FEM_ObjectBroker::getNewLinearSOE - ";
-	  cerr << " - no LinearSOE type exists for class tag ";
-	  cerr << classTagSOE << endl;
+	  opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	  opserr << " - no LinearSOE type exists for class tag ";
+	  opserr << classTagSOE << endln;
 	  return 0;
 	  
       
@@ -1275,17 +1275,17 @@ FEM_ObjectBroker::getPtrNewDDLinearSOE(int classTagSOE,
 	    return theSOE;		 
 	}
 	else {
-	    cerr << "FEM_ObjectBroker::getNewLinearSOE - ";
-	    cerr << " - no ProfileSPD Domain Solver type exists for class tag ";
-	    cerr << classTagDDSolver << endl;
+	    opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	    opserr << " - no ProfileSPD Domain Solver type exists for class tag ";
+	    opserr << classTagDDSolver << endln;
 	    return 0;		 
 	}	     
 	
 					    
       default:
-	cerr << "FEM_ObjectBroker::getNewLinearSOE - ";
-	cerr << " - no LinearSOE type exists for class tag ";
-	cerr << classTagSOE << endl;
+	opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	opserr << " - no LinearSOE type exists for class tag ";
+	opserr << classTagSOE << endln;
 	return 0;
 	
     }
@@ -1302,9 +1302,9 @@ FEM_ObjectBroker::getNewDomainDecompAnalysis(int classTag,
 	
 	
       default:
-	cerr << "ObjectBroker::getNewDomainDecompAnalysis ";
-	cerr << " - no DomainDecompAnalysis type exists for class tag " ;
-	cerr << classTag << endl;
+	opserr << "ObjectBroker::getNewDomainDecompAnalysis ";
+	opserr << " - no DomainDecompAnalysis type exists for class tag " ;
+	opserr << classTag << endln;
 	return 0;
 	
     }
@@ -1314,7 +1314,7 @@ FEM_ObjectBroker::getNewDomainDecompAnalysis(int classTag,
 Subdomain 	  *
 FEM_ObjectBroker::getSubdomainPtr(int classTag)
 {
-    cerr << "FEM_ObjectBroker: NOT IMPLEMENTED YET";
+    opserr << "FEM_ObjectBroker: NOT IMPLEMENTED YET";
     return 0;
 }
 

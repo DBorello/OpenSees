@@ -18,12 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/petsc.h,v $
                                                                         
                                                                         
-/* $Id: petsc.h,v 1.1.1.1 2000-09-15 08:23:29 fmk Exp $ */
+/* $Id: petsc.h,v 1.2 2003-02-14 23:02:02 fmk Exp $ */
 /*
    This is the main PETSc include file (for C and C++).  It is included by all
    other PETSc include files, so it almost never has to be specifically included.
@@ -209,7 +209,7 @@ extern int PetscObjectQueryFunction(PetscObject,char *,void **);
 /*
     Defines PETSc error handling.
 */
-#include "petscerror.h"
+#include "petsopserror.h"
 
 /*
     Mechanism for managing lists of objects attached (composed) with 

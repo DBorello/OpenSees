@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-12-05 22:20:43 $
+// $Revision: 1.13 $
+// $Date: 2003-02-14 23:01:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -93,8 +93,8 @@ class NLBeamColumn3d: public Element
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
 
     
-    friend ostream &operator<<(ostream &s, NLBeamColumn3d &E);        
-    void Print(ostream &s, int flag =0);    
+    friend OPS_Stream &operator<<(OPS_Stream &s, NLBeamColumn3d &E);        
+    void Print(OPS_Stream &s, int flag =0);    
 
     Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);

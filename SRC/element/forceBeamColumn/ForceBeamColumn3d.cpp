@@ -18,15 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-01-28 01:19:12 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
-#include <iomanip.h>
 
 #include <Information.h>
 #include <ForceBeamColumn3d.h>
@@ -36,7 +35,7 @@
 #include <FEM_ObjectBroker.h>
 #include <Renderer.h>
 #include <math.h>
-#include <G3Globals.h>
+
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
 
@@ -86,7 +85,7 @@ ForceBeamColumn3d::ForceBeamColumn3d():
   if (SsrSubdivide == 0)
     SsrSubdivide  = new Vector [maxNumSections];
   if (!vsSubdivide || !fsSubdivide || !SsrSubdivide) {
-    cerr << "ForceBeamColumn3d::ForceBeamColumn3d() -- failed to allocate Subdivide arrays";   
+    opserr << "ForceBeamColumn3d::ForceBeamColumn3d() -- failed to allocate Subdivide arrays";   
     exit(-1);
   }
 }
@@ -107,27 +106,31 @@ ForceBeamColumn3d::ForceBeamColumn3d (int tag, int nodeI, int nodeJ,
   kvcommit(NEBD,NEBD), Secommit(NEBD),
   fs(0), vs(0),Ssr(0), vscommit(0), sp(0), Ki(0)
 {
+  maxIters = 10;
+  tol = 1.0e-12;
+
   theNodes[0] = 0;
   theNodes[1] = 0;
 
   connectedExternalNodes(0) = nodeI;
   connectedExternalNodes(1) = nodeJ;    
-  
+
   beamIntegr = bi.getCopy();
   if (beamIntegr == 0) {
-    cerr << "Error: ForceBeamColumn3d::ForceBeamColumn3d: could not create copy of beam integration object" << endl;
-    exit(-1);
-  }
-  
-  // get copy of the transformation object   
-  crdTransf = coordTransf.getCopy(); 
-  if (crdTransf == 0) {
-    cerr << "Error: ForceBeamColumn3d::ForceBeamColumn3d: could not create copy of coordinate transformation object" << endl;
+    opserr << "Error: ForceBeamColumn3d::ForceBeamColumn3d: could not create copy of beam integration object" << endln;
     exit(-1);
   }
 
-  this->setSectionPointers(numSec, sec);
+  // get copy of the transformation object   
+  crdTransf = coordTransf.getCopy(); 
+  if (crdTransf == 0) {
+    opserr << "Error: ForceBeamColumn3d::ForceBeamColumn3d: could not create copy of coordinate transformation object" << endln;
+    exit(-1);
+  }
+
   
+  this->setSectionPointers(numSec, sec);
+
   p0[0] = 0.0;
   p0[1] = 0.0;
   p0[2] = 0.0;
@@ -147,7 +150,7 @@ ForceBeamColumn3d::ForceBeamColumn3d (int tag, int nodeI, int nodeJ,
   if (SsrSubdivide == 0)
     SsrSubdivide  = new Vector [maxNumSections];
   if (!vsSubdivide || !fsSubdivide || !SsrSubdivide) {
-    cerr << "ForceBeamColumn3d::ForceBeamColumn3d() -- failed to allocate Subdivide arrays";   
+    opserr << "ForceBeamColumn3d::ForceBeamColumn3d() -- failed to allocate Subdivide arrays";   
     exit(-1);
   }
 }
@@ -221,7 +224,7 @@ ForceBeamColumn3d::setDomain(Domain *theDomain)
     theNodes[0] = 0;
     theNodes[1] = 0;
     
-    cerr << "ForceBeamColumn3d::setDomain:  theDomain = 0 ";
+    opserr << "ForceBeamColumn3d::setDomain:  theDomain = 0 ";
     exit(0); 
   }
 
@@ -234,14 +237,14 @@ ForceBeamColumn3d::setDomain(Domain *theDomain)
   theNodes[1] = theDomain->getNode(Nd2);  
   
   if (theNodes[0] == 0) {
-    cerr << "ForceBeamColumn3d::setDomain: Nd1: ";
-    cerr << Nd1 << "does not exist in model\n";
+    opserr << "ForceBeamColumn3d::setDomain: Nd1: ";
+    opserr << Nd1 << "does not exist in model\n";
     exit(0);
   }
   
   if (theNodes[1] == 0) {
-    cerr << "ForceBeamColumn3d::setDomain: Nd2: ";
-    cerr << Nd2 << "does not exist in model\n";
+    opserr << "ForceBeamColumn3d::setDomain: Nd2: ";
+    opserr << Nd2 << "does not exist in model\n";
     exit(0);
   }
   
@@ -253,20 +256,20 @@ ForceBeamColumn3d::setDomain(Domain *theDomain)
   int dofNode2 = theNodes[1]->getNumberDOF();
   
   if ((dofNode1 != NND) || (dofNode2 != NND)) {
-    cerr << "ForceBeamColumn3d::setDomain(): Nd2 or Nd1 incorrect dof ";
+    opserr << "ForceBeamColumn3d::setDomain(): Nd2 or Nd1 incorrect dof ";
     exit(0);
   }
    
   // initialize the transformation
   if (crdTransf->initialize(theNodes[0], theNodes[1])) {
-    cerr << "ForceBeamColumn3d::setDomain(): Error initializing coordinate transformation";  
+    opserr << "ForceBeamColumn3d::setDomain(): Error initializing coordinate transformation";  
     exit(0);
   }
     
   // get element length
   double L = crdTransf->getInitialLength();
   if (L == 0.0) {
-    cerr << "ForceBeamColumn3d::setDomain(): Zero element length:" << this->getTag();  
+    opserr << "ForceBeamColumn3d::setDomain(): Zero element length:" << this->getTag();  
     exit(0);
   }
 
@@ -282,7 +285,7 @@ ForceBeamColumn3d::commitState()
 
   // call element commitState to do any base class stuff
   if ((err = this->Element::commitState()) != 0) {
-    cerr << "ForceBeamColumn3d::commitState () - failed in base class";
+    opserr << "ForceBeamColumn3d::commitState () - failed in base class";
   }    
   
   do {
@@ -395,8 +398,8 @@ ForceBeamColumn3d::getInitialStiff(void)
   // invert3by3Matrix(f, kv);
   static Matrix kvInit(NEBD, NEBD);
   if (f.Solve(I, kvInit) < 0)
-    g3ErrorHandler->warning("%s -- could not invert flexibility",
-                           "ForceBeamColumn3d::getInitialStiff()");
+    opserr << "%s -- could not invert flexibility",
+                           "ForceBeamColumn3d::getInitialStiff()\n";
 
   Ki = new Matrix(crdTransf->getInitialGlobalStiffMatrix(kvInit));
   
@@ -814,8 +817,8 @@ ForceBeamColumn3d::update()
 	  // calculate element stiffness matrix
 	  // invert3by3Matrix(f, kv);	  
 	  if (f.Solve(I, kvTrial) < 0)
-	    g3ErrorHandler->warning("%s -- could not invert flexibility",
-				    "ForceBeamColumn3d::update()");
+	    opserr << "%s -- could not invert flexibility",
+				    "ForceBeamColumn3d::update()\n";
 
 	  // dv = vin + dvTrial  - vr
 	  dv = vin;
@@ -883,9 +886,9 @@ ForceBeamColumn3d::update()
   // if fail to converge we return an error flag & print an error message
 
   if (converged == false) {
-    cerr << "WARNING - ForceBeamColumn3d::update - failed to get compatible ";
-    cerr << "element forces & deformations for element: ";
-    cerr << this->getTag() << "(dW: << " << dW << ")\n";
+    opserr << "WARNING - ForceBeamColumn3d::update - failed to get compatible ";
+    opserr << "element forces & deformations for element: ";
+    opserr << this->getTag() << "(dW: << " << dW << ")\n";
     return -1;
   }
 
@@ -1005,9 +1008,10 @@ ForceBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
   
   if (sp == 0) {
     sp = new Matrix(5,numSections);
-    if (sp == 0)
-      g3ErrorHandler->fatal("%s -- out of memory",
-			    "ForceBeamColumn3d::addLoad");
+    if (sp == 0) {
+      opserr << "ForceBeamColumn3d::addLoad -- out of memory\n";
+      exit(-1);
+    }
   }
 
   double L = crdTransf->getInitialLength();
@@ -1095,8 +1099,9 @@ ForceBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
   }
 
   else {
-    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
-			    "ForceBeamColumn3d::addLoad()", this->getTag());
+    opserr << "ForceBeamColumn3d::addLoad() -- load type unknown for element with tag: " <<
+      this->getTag() << endln;
+			    
     return -1;
   }
 
@@ -1182,16 +1187,16 @@ ForceBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   
 
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
-    g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send ID data");
+    opserr << "ForceBeamColumn3d::sendSelf() - %s\n",
+			    "failed to send ID data\n";
     return -1;
   }    
 
   // send the coordinate transformation
   
   if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
-    g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send crdTranf");
+    opserr << "ForceBeamColumn3d::sendSelf() - %s\n",
+			    "failed to send crdTranf\n";
     return -1;
   }      
 
@@ -1217,8 +1222,8 @@ ForceBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   }
 
   if (theChannel.sendID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send ID data");
+    opserr << "ForceBeamColumn3d::sendSelf() - %s\n",
+			    "failed to send ID data\n";
     return -1;
   }    
 
@@ -1228,8 +1233,8 @@ ForceBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   
   for (j = 0; j<numSections; j++) {
     if (sections[j]->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - section %d %s\n",
-			      j,"failed to send itself");
+      opserr << "ForceBeamColumn3d::sendSelf() - section " <<
+	j << "failed to send itself\n";
       return -1;
     }
   }
@@ -1267,8 +1272,8 @@ ForceBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
 	dData(loc++) = (vscommit[k])(i);
   
   if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
-     g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
-	 		     "failed to send Vector data");
+     opserr << "ForceBeamColumn3d::sendSelf() - %s\n",
+	 		     "failed to send Vector data\n";
      return -1;
   }    
 
@@ -1287,8 +1292,8 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   static ID idData(9); // one bigger than needed 
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
-    g3ErrorHandler->warning("ForceBeamColumn3d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "ForceBeamColumn3d::recvSelf() - %s\n",
+			    "failed to recv ID data\n";
     return -1;
   }    
 
@@ -1309,9 +1314,8 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
       crdTransf = theBroker.getNewCrdTransf3d(crdTransfClassTag);
 
       if (crdTransf == 0) {
-	  g3ErrorHandler->warning("ForceBeamColumn3d::recvSelf() - %s %d\n",
-				  "failed to obtain a CrdTrans object with classTag",
-				  crdTransfClassTag);
+	  opserr << "ForceBeamColumn3d::recvSelf() - failed to obtain a CrdTrans object with classTag" <<
+	    crdTransfClassTag << endln;
 	  return -2;	  
       }
   }
@@ -1321,8 +1325,8 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   // invoke recvSelf on the crdTransf obkject
   if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0)  
   {
-     g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
-	     		     "failed to recv crdTranf");
+     opserr << "ForceBeamColumn3d::sendSelf() - %s\n",
+	     		     "failed to recv crdTranf\n";
      return -3;
   }      
   
@@ -1334,8 +1338,8 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   int loc = 0;
 
   if (theChannel.recvID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("ForceBeamColumn3d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "ForceBeamColumn3d::recvSelf() - %s\n",
+			    "failed to recv ID data\n";
     return -1;
   }    
 
@@ -1366,8 +1370,8 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     // Allocate the right number
     vscommit = new Vector[numSections];
     if (vscommit == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate vscommit array",
-			      "ForceBeamColumn3d::recvSelf");
+      opserr << "%s -- failed to allocate vscommit array",
+			      "ForceBeamColumn3d::recvSelf\n";
       return -1;
     }
 
@@ -1378,8 +1382,8 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     // Allocate the right number
     fs = new Matrix[numSections];  
     if (fs == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate fs array",
-			      "ForceBeamColumn3d::recvSelf");
+      opserr << "%s -- failed to allocate fs array",
+			      "ForceBeamColumn3d::recvSelf\n";
       return -1;
     }
 
@@ -1390,8 +1394,8 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     // Allocate the right number
     vs = new Vector[numSections];  
     if (vs == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate vs array",
-			      "ForceBeamColumn3d::recvSelf");
+      opserr << "%s -- failed to allocate vs array",
+			      "ForceBeamColumn3d::recvSelf\n";
       return -1;
     }
 
@@ -1402,17 +1406,17 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     // Allocate the right number
     Ssr = new Vector[numSections];  
     if (Ssr == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate Ssr array",
-			      "ForceBeamColumn3d::recvSelf");
+      opserr << "%s -- failed to allocate Ssr array",
+			      "ForceBeamColumn3d::recvSelf\n";
       return -1;
     }
 
     // create a new array to hold pointers
     sections = new SectionForceDeformation *[idData(3)];
     if (sections == 0) {
-      g3ErrorHandler->fatal("ForceBeamColumn3d::recvSelf() - %s %d\n",
-			      "out of memory creating sections array of size",idData(3));
-      return -1;
+      opserr << "ForceBeamColumn3d::recvSelf() - out of memory creating sections array of size" <<
+	idData(3) << endln;
+      exit(-1);
     }    
 
     loc = 0;
@@ -1423,14 +1427,14 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
       loc += 2;
       sections[i] = theBroker.getNewSection(sectClassTag);
       if (sections[i] == 0) {
-	g3ErrorHandler->fatal("ForceBeamColumn3d::recvSelf() - %s %d\n",
-			      "Broker could not create Section of class type",sectClassTag);
-	return -1;
+	opserr << "ForceBeamColumn3d::recvSelf() - Broker could not create Section of class type" <<
+	  sectClassTag << endln;
+	exit(-1);
       }
       sections[i]->setDbTag(sectDbTag);
       if (sections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("ForceBeamColumn3d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "ForceBeamColumn3d::recvSelf() - section " << 
+	  i << "failed to recv itself\n";
 	return -1;
       }     
     }
@@ -1456,17 +1460,17 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 	delete sections[i];
 	sections[i] = theBroker.getNewSection(sectClassTag);
 	if (sections[i] == 0) {
-	  g3ErrorHandler->fatal("ForceBeamColumn3d::recvSelf() - %s %d\n",
-				"Broker could not create Section of class type",sectClassTag);
-	  return -1;
+	  opserr << "ForceBeamColumn3d::recvSelf() - Broker could not create Section of class type" 
+		 << sectClassTag << endln;;
+	  exit(-1);
 	}
       }
 
       // recvvSelf on it
       sections[i]->setDbTag(sectDbTag);
       if (sections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("ForceBeamColumn3d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "ForceBeamColumn3d::recvSelf() - section " <<
+	  i << "failed to recv itself\n";
 	return -1;
       }     
     }
@@ -1482,8 +1486,7 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   Vector dData(1+1+NEBD+NEBD*NEBD+secDefSize);   
   
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
-    g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send Vector data");
+    opserr << "ForceBeamColumn3d::sendSelf() - failed to send Vector data\n";
     return -1;
   }    
   
@@ -1650,12 +1653,12 @@ void ForceBeamColumn3d::compSectionDisplacements(Vector sectionCoords[], Vector 
 }
 
 void
-ForceBeamColumn3d::Print(ostream &s, int flag)
+ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
 {
   s << "\nElement: " << this->getTag() << " Type: ForceBeamColumn3d ";
   s << "\tConnected Nodes: " << connectedExternalNodes ;
   s << "\tNumber of Sections: " << numSections;
-  s << "\tMass density: " << rho << endl;
+  s << "\tMass density: " << rho << endln;
   double P  = Secommit(0);
   double MZ1 = Secommit(1);
   double MZ2 = Secommit(2);
@@ -1669,10 +1672,10 @@ ForceBeamColumn3d::Print(ostream &s, int flag)
   double T  = Secommit(5);
   s << "\tEnd 1 Forces (P MZ VY MY VZ T): "
     << -P+p0[0] << " " << MZ1 << " " <<  VY+p0[1] << " " 
-    << MY1 << " " << -VZ+p0[3] << " " << T << endl;
+    << MY1 << " " << -VZ+p0[3] << " " << T << endln;
   s << "\tEnd 2 Forces (P MZ VY MY VZ T): "
     << P        << " " << MZ2 << " " << -VY+p0[2] << " " 
-    << MY2 << " " <<  VZ+p0[4] << " " << T << endl;
+    << MY2 << " " <<  VZ+p0[4] << " " << T << endln;
   
   if (flag == 1) { 
     for (int i = 0; i < numSections; i++)
@@ -1680,7 +1683,7 @@ ForceBeamColumn3d::Print(ostream &s, int flag)
   }
 }
 
-ostream &operator<<(ostream &s, ForceBeamColumn3d &E)
+OPS_Stream &operator<<(OPS_Stream &s, ForceBeamColumn3d &E)
 {
   E.Print(s);
   return s;
@@ -1846,7 +1849,7 @@ ForceBeamColumn3d::setParameter (char **argv, int argc, Information &info)
     
     // For now, no parameters of the section itself:
     if (argc<5) {
-      cerr << "For now: cannot handle parameters of the section itself." << endl;
+      opserr << "For now: cannot handle parameters of the section itself." << endln;
       return -1;
     }
     
@@ -1862,7 +1865,7 @@ ForceBeamColumn3d::setParameter (char **argv, int argc, Information &info)
     
     // Check if the parameterID is valid
     if (parameterID < 0) {
-      cerr << "ForceBeamColumn3d::setParameter() - could not set parameter. " << endl;
+      opserr << "ForceBeamColumn3d::setParameter() - could not set parameter. " << endln;
       return -1;
     }
     else {
@@ -1902,7 +1905,7 @@ ForceBeamColumn3d::updateParameter (int parameterID, Information &info)
     }
     
     if (ok < 0) {
-      cerr << "ForceBeamColumn3d::updateParameter() - could not update parameter. " << endl;
+      opserr << "ForceBeamColumn3d::updateParameter() - could not update parameter. " << endln;
       return ok;
     }
     else {
@@ -1910,7 +1913,7 @@ ForceBeamColumn3d::updateParameter (int parameterID, Information &info)
     }
   }
   else {
-    cerr << "ForceBeamColumn3d::updateParameter() - could not update parameter. " << endl;
+    opserr << "ForceBeamColumn3d::updateParameter() - could not update parameter. " << endln;
     return -1;
   }       
 }
@@ -1919,52 +1922,52 @@ void
 ForceBeamColumn3d::setSectionPointers(int numSec, SectionForceDeformation **secPtrs)
 {
   if (numSec > maxNumSections) {
-    cerr << "Error: ForceBeamColumn3d::setSectionPointers -- max number of sections exceeded";
+    opserr << "Error: ForceBeamColumn3d::setSectionPointers -- max number of sections exceeded";
   }
   
   numSections = numSec;
   
   if (secPtrs == 0) {
-    cerr << "Error: ForceBeamColumn3d::setSectionPointers -- invalid section pointer";
+    opserr << "Error: ForceBeamColumn3d::setSectionPointers -- invalid section pointer";
   }	  
   
   sections = new SectionForceDeformation *[numSections];
   if (sections == 0) {
-    cerr << "Error: ForceBeamColumn3d::setSectionPointers -- could not allocate section pointers";
+    opserr << "Error: ForceBeamColumn3d::setSectionPointers -- could not allocate section pointers";
   }  
   
   for (int i = 0; i < numSections; i++) {
     
     if (secPtrs[i] == 0) {
-      cerr << "Error: ForceBeamColumn3d::setSectionPointers -- null section pointer " << i << endl;
+      opserr << "Error: ForceBeamColumn3d::setSectionPointers -- null section pointer " << i << endln;
     }
     
     sections[i] = secPtrs[i]->getCopy();
     
     if (sections[i] == 0) {
-      cerr << "Error: ForceBeamColumn3d::setSectionPointers -- could not create copy of section " << i << endl;
+      opserr << "Error: ForceBeamColumn3d::setSectionPointers -- could not create copy of section " << i << endln;
     }
   }
   
   // allocate section flexibility matrices and section deformation vectors
   fs  = new Matrix [numSections];
   if (fs == 0) {
-    cerr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate fs array";
+    opserr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate fs array";
   }
   
   vs = new Vector [numSections];
   if (vs == 0) {
-    cerr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate vs array";
+    opserr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate vs array";
   }
   
   Ssr  = new Vector [numSections];
   if (Ssr == 0) {
-    cerr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate Ssr array";
+    opserr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate Ssr array";
   }
   
   vscommit = new Vector [numSections];
   if (vscommit == 0) {
-    cerr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate vscommit array";   
+    opserr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate vscommit array";   
   }
   
 }

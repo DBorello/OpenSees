@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-10-03 18:52:03 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.h,v $
                                                                         
                                                                         
@@ -74,7 +74,7 @@ class ElasticSection3d: public SectionForceDeformation
     int recvSelf (int commitTag, Channel &theChannel,
 		  FEM_ObjectBroker &theBroker);
     
-    void Print (ostream &s, int flag = 0);
+    void Print (OPS_Stream &s, int flag = 0);
 
   protected:
 

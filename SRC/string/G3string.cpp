@@ -1,5 +1,5 @@
 #include <string.h>
-#include <G3string.h>
+#include "G3string.h"
 
 String::String(const char s[])
 {
@@ -62,7 +62,7 @@ const char* String::charString() const
    return info_;
 }
 
-ostream& operator<< (ostream& out, const String& s)
+OPS_Stream& operator<< (OPS_Stream& out, const String& s)
 {
    out << s.charString();
    return out;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 06:02:32 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TclTrussCommand.cpp,v $
                                                                         
                                                                         
@@ -36,7 +36,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 #include <Domain.h>
 
 #include <Truss.h>
@@ -54,16 +53,16 @@ TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed\n";    
+    opserr << "WARNING builder has been destroyed\n";    
     return TCL_ERROR;
   }
 
   // check the number of arguments is correct
   if ((argc-eleArgStart) < 5) {
-    cerr << "WARNING insufficient arguments\n";
+    opserr << "WARNING insufficient arguments\n";
     printCommand(argc, argv);
-    cerr << "Want: element truss eleTag? iNode? jNode? A? matTag?\n";
-    cerr << " -or- element truss eleTag? iNode? jNode? sectTag?" << endl;
+    opserr << "Want: element truss eleTag? iNode? jNode? A? matTag?\n";
+    opserr << " -or- element truss eleTag? iNode? jNode? sectTag?" << endln;
     return TCL_ERROR;
   }    
 
@@ -73,39 +72,39 @@ TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
   int trussId, iNode, jNode, matID;
   double A;
   if (Tcl_GetInt(interp, argv[1+eleArgStart], &trussId) != TCL_OK) {
-    cerr << "WARNING invalid truss eleTag" << endl;
+    opserr << "WARNING invalid truss eleTag" << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[2+eleArgStart], &iNode) != TCL_OK) {
-    cerr << "WARNING invalid iNode\n";
-    cerr << "truss element: " << trussId << endl;
+    opserr << "WARNING invalid iNode\n";
+    opserr << "truss element: " << trussId << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[3+eleArgStart], &jNode) != TCL_OK) {
-     cerr << "WARNING invalid jNode\n";
-     cerr << "truss element: " << trussId << endl;
+     opserr << "WARNING invalid jNode\n";
+     opserr << "truss element: " << trussId << endln;
      return TCL_ERROR;
   }
 
   if ((argc-eleArgStart) == 6) {  
       if (Tcl_GetDouble(interp, argv[4+eleArgStart], &A) != TCL_OK) {
-	  cerr << "WARNING invalid A\n";
-	  cerr << "truss element: " << trussId << endl;
+	  opserr << "WARNING invalid A\n";
+	  opserr << "truss element: " << trussId << endln;
 	  return TCL_ERROR;
       }
 
       if (Tcl_GetInt(interp, argv[5+eleArgStart], &matID) != TCL_OK) {
-	  cerr << "WARNING invalid matTag\n";
-	  cerr << "truss element: " << trussId << endl;
+	  opserr << "WARNING invalid matTag\n";
+	  opserr << "truss element: " << trussId << endln;
 	  return TCL_ERROR;
       }
       
       UniaxialMaterial *theMaterial = theTclBuilder->getUniaxialMaterial(matID);
       
       if (theMaterial == 0) {
-	  cerr << "WARNING material not found\n";
-	  cerr << "Material: " << matID;
-	  cerr << "\ntruss element: " << trussId << endl;
+	  opserr << "WARNING material not found\n";
+	  opserr << "Material: " << matID;
+	  opserr << "\ntruss element: " << trussId << endln;
 	  return TCL_ERROR;
       }
 
@@ -117,31 +116,31 @@ TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
           theTruss = new Truss(trussId,ndm,iNode,jNode,*theMaterial,A);
 
       if (theTruss == 0) {
-	  cerr << "WARNING ran out of memory creating element\n";
-	  cerr << "truss element: " << trussId << endl;
+	  opserr << "WARNING ran out of memory creating element\n";
+	  opserr << "truss element: " << trussId << endln;
 	  return TCL_ERROR;
       }
 
       if (theTclDomain->addElement(theTruss) == false) {
-	  cerr << "WARNING could not add element to the domain\n";
-	  cerr << "truss element: " << trussId << endl;
+	  opserr << "WARNING could not add element to the domain\n";
+	  opserr << "truss element: " << trussId << endln;
 	  delete theTruss;
 	  return TCL_ERROR;
       }
   } else {
       int sectID;
       if (Tcl_GetInt(interp, argv[4+eleArgStart], &sectID) != TCL_OK) {
-	  cerr << "WARNING invalid matTag\n";
-	  cerr << "truss element: " << trussId << endl;
+	  opserr << "WARNING invalid matTag\n";
+	  opserr << "truss element: " << trussId << endln;
 	  return TCL_ERROR;
       }
       
       SectionForceDeformation *theSection = theTclBuilder->getSection(sectID);
 
       if (theSection == 0) {
-	      cerr << "WARNING section not found\n";
-	      cerr << "section tag: " << sectID;
-	      cerr << "\ntruss element: " << trussId << endl;
+	      opserr << "WARNING section not found\n";
+	      opserr << "section tag: " << sectID;
+	      opserr << "\ntruss element: " << trussId << endln;
 	      return TCL_ERROR;
       }
   
@@ -153,14 +152,14 @@ TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc,
           theTruss = new TrussSection(trussId,ndm,iNode,jNode,*theSection);
       
       if (theTruss == 0) {
-	  cerr << "WARNING ran out of memory creating element\n";
-	  cerr << "truss element: " << trussId << endl;
+	  opserr << "WARNING ran out of memory creating element\n";
+	  opserr << "truss element: " << trussId << endln;
 	  return TCL_ERROR;
       }
 
       if (theTclDomain->addElement(theTruss) == false) {
-	  cerr << "WARNING could not add element to the domain\n";
-	  cerr << "truss element: " << trussId << endl;
+	  opserr << "WARNING could not add element to the domain\n";
+	  opserr << "truss element: " << trussId << endln;
 	  delete theTruss;
 	  return TCL_ERROR;
       }

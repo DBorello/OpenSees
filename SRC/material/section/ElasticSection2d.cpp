@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-10-03 18:52:03 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection2d.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,6 @@
 #include <MatrixUtil.h>
 #include <stdlib.h>
 
-#include <G3Globals.h>
 #include <classTags.h>
 
 Vector ElasticSection2d::s(2);
@@ -70,20 +69,17 @@ ElasticSection2d::ElasticSection2d
  e(2), eCommit(2)
 {
     if (E <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input E <= 0.0 ... setting E to 1.0",
-			"ElasticSection2d::ElasticSection2d");
+		opserr << "ElasticSection2d::ElasticSection2d -- Input E <= 0.0 ... setting E to 1.0\n";
 		E = 1.0;
   }
 	
     if (A <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input A <= 0.0 ... setting A to 1.0",
-			"ElasticSection2d::ElasticSection2d");
+		opserr << "ElasticSection2d::ElasticSection2d -- Input A <= 0.0 ... setting A to 1.0\n";
 		A = 1.0;
     }
     
     if (I <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input I <= 0.0 ... setting I to 1.0",
-			"ElasticSection2d::ElasticSection2d");
+		opserr << "ElasticSection2d::ElasticSection2d -- Input I <= 0.0 ... setting I to 1.0\n";
 		I = 1.0;
     }    
 	
@@ -101,14 +97,12 @@ ElasticSection2d::ElasticSection2d
  e(2), eCommit(2)
 {
     if (A <= 0.0)  {
-      g3ErrorHandler->warning("%s -- Input EA <= 0.0 ... setting EA to 1.0",
-			      "ElasticSection2d::ElasticSection2d");
+      opserr << "ElasticSection2d::ElasticSection2d -- Input EA <= 0.0 ... setting EA to 1.0\n";
       A = 1.0;
     }
 	
     if (I <= 0.0)  {
-      g3ErrorHandler->warning("%s -- Input EI <= 0.0 ... setting EI to 1.0",
-			      "ElasticSection2d::ElasticSection2d");
+      opserr << "ElasticSection2d::ElasticSection2d -- Input EI <= 0.0 ... setting EI to 1.0\n";
       I = 1.0;
     }
 	
@@ -249,8 +243,7 @@ ElasticSection2d::sendSelf(int commitTag, Channel &theChannel)
 
     res += theChannel.sendVector(dataTag, commitTag, data);
     if (res<0) {
-      g3ErrorHandler->warning("%s -- failed to send data",
-			      "ElasticSection2d::sendSelf");
+      opserr << "ElasticSection2d::sendSelf -- failed to send data\n";
       return res;
     }
     
@@ -269,9 +262,8 @@ ElasticSection2d::recvSelf(int commitTag, Channel &theChannel,
 
     res += theChannel.recvVector(dataTag, commitTag, data);
     if(res < 0) {
-		g3ErrorHandler->warning("%s -- failed to receive data",
-			"ElasticSection2d::recvSelf");
-		return res;
+      opserr << "ElasticSection2d::recvSelf -- failed to receive data\n";
+      return res;
     }
     
 	this->setTag((int)data(0));
@@ -285,11 +277,11 @@ ElasticSection2d::recvSelf(int commitTag, Channel &theChannel,
 }
  
 void
-ElasticSection2d::Print(ostream &s, int flag)
+ElasticSection2d::Print(OPS_Stream &s, int flag)
 {
-  s << "ElasticSection2d, tag: " << this->getTag() << endl;
-  s << "\tE: " << E << endl;
-  s << "\tA: " << A << endl;
-  s << "\tI: " << I << endl;
+  s << "ElasticSection2d, tag: " << this->getTag() << endln;
+  s << "\tE: " << E << endln;
+  s << "\tA: " << A << endln;
+  s << "\tI: " << I << endln;
 }
 

@@ -18,16 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-10-19 23:09:43 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.cpp,v $
                                                                         
                                                                         
-// File: ~/recorder/FilePlotter
-// 
 // Written: fmk 
 // Created: 11/99
-// Revision: A
 //
 // Description: This file contains the class implementation for FilePlotter
 // FilePlotter is a class for building a Plane Frame model in an interpreted
@@ -39,8 +36,13 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
-#include <fstream.h>
+
+#include <fstream>
+using std::ifstream;
+
+#include <iomanip>
+using std::ios;
+
 #include <ctype.h>
 #include <ID.h>
 
@@ -149,8 +151,8 @@ FilePlotter::plotFile(void)
     theFile.open(fileName, ios::in);
 
     if (theFile.bad()) {
-	cerr << "WARNING - FilePlotter::FilePlotter()";
-	cerr << " - could not open file " << fileName << endl;
+	opserr << "WARNING - FilePlotter::FilePlotter()";
+	opserr << " - could not open file " << fileName << endln;
 	return -1;
     }    
 
@@ -192,7 +194,7 @@ FilePlotter::plotFile(void)
     // check colX and colY for valid entries
     if (numLines > 0) {
       if (cols == 0) {
-	g3ErrorHandler->warning("FilePLotter::plotFile() - no valid columns have beed set\n");
+	opserr << "FilePLotter::plotFile() - no valid columns have been set\n";
 
       } else {
 
@@ -277,16 +279,18 @@ FilePlotter::plotFile(void)
       ifstream theFile1; 
       theFile1.open(fileName, ios::in);
       if (theFile1.bad()) {
-	cerr << "WARNING - FilePlotter::FilePlotter()";
-	cerr << " - could not open file " << fileName << endl;
+	opserr << "WARNING - FilePlotter::FilePlotter()";
+	opserr << " - could not open file " << fileName << endln;
 	return -1;
       }    
 
-      theFile1 >> data1;
+      for (int ii=0; ii< numLineEntries; ii++)
+	theFile1 >> data1(ii);
 
       for (int i=1; i<numLines; i++) {
 	// read the data
-	theFile1 >> data2;
+	for (int ii=0; ii< numLineEntries; ii++)
+	  theFile1 >> data2(ii);
 
 	// plot the lines
 	for (int j=0; j<cols->Size(); j+=2) {
@@ -315,15 +319,13 @@ int
 FilePlotter::setCol(const ID &theCols)
 {
   if (theCols.Size()%2 != 0) {
-    g3ErrorHandler->warning("FilePlotter::setCol() - the size of the cols ID %d is not a multiple of 2",
-			    theCols.Size());
+    opserr << "FilePlotter::setCol() - the size of the cols ID " << theCols.Size() << " is not a multiple of 2\n";
     return -1;
   }
 
   for (int i=0; i<theCols.Size(); i++) {
     if (theCols(i) < 1) {
-      g3ErrorHandler->warning("FilePlotter::FilePlotter() - a value of the cols %d is < 1",
-			      theCols(i));
+      opserr << "FilePlotter::FilePlotter() - a value of the cols " << theCols(i) << " is < 1\n";
       return -2;
     }
   }

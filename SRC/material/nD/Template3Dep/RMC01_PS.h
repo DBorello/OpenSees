@@ -52,19 +52,19 @@ class RMC01PotentialSurface : public PotentialSurface
   		  
   
   public:
-	  RMC01PotentialSurface( ){ };   // Default constructor
+    RMC01PotentialSurface( ){ };   // Default constructor
     virtual ~RMC01PotentialSurface() { }; //Not all virtual functions  redefined
     PotentialSurface *newObj(); //create a colne of itself
 
     tensor dQods(const EPState *EPS  ) const;
     tensor d2Qods2(const EPState *EPS) const;
-    void print() { cout << *this; };
+    void print() { opserr << *this; };
 
     //================================================================================
     // Overloaded Insertion Operator
     // prints an RMC01-PotentialSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const RMC01PotentialSurface &PS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const RMC01PotentialSurface &PS);
 
 };
 

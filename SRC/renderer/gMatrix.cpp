@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/gMatrix.cpp,v $
                                                                         
                                                                         
@@ -32,7 +32,7 @@ VECTOR::MakeNonHomogeneous()
 {
   if (v[3] == 0)
     {
-      cerr << "ERROR: w coordinate of vector is 0, cannot unhomogeneize" << endl;
+      opserr << "ERROR: w coordinate of vector is 0, cannot unhomogeneize" << endln;
       return 0;
     }
   v[0] = v[0]/v[3];
@@ -126,20 +126,20 @@ MATRIX::operator*(MATRIX &M)
 
 // Debugging output
 
-ostream &
-operator<<(ostream &os, VECTOR &v)
+OPS_Stream &
+operator<<(OPS_Stream &os, VECTOR &v)
 {
   os << "[ " << v[0] << ' ' << v[1] << ' ' << v[2] << ' ' << v[3] << " ]";
   return os;
 }
 
-ostream &
-operator<<(ostream &os, MATRIX &M)
+OPS_Stream &
+operator<<(OPS_Stream &os, MATRIX &M)
 {
-  os << "{ " << M.m[0][0] << ' ' << M.m[0][1] << ' ' << M.m[0][2] << ' ' << M.m[0][3] << " }" << endl;
-  os << "{ " << M.m[1][0] << ' ' << M.m[1][1] << ' ' << M.m[1][2] << ' ' << M.m[1][3] << " }" << endl;
-  os << "{ " << M.m[2][0] << ' ' << M.m[2][1] << ' ' << M.m[2][2] << ' ' << M.m[2][3] << " }" << endl;
-  os << "{ " << M.m[3][0] << ' ' << M.m[3][1] << ' ' << M.m[3][2] << ' ' << M.m[3][3] << " }" << endl;
+  os << "{ " << M.m[0][0] << ' ' << M.m[0][1] << ' ' << M.m[0][2] << ' ' << M.m[0][3] << " }" << endln;
+  os << "{ " << M.m[1][0] << ' ' << M.m[1][1] << ' ' << M.m[1][2] << ' ' << M.m[1][3] << " }" << endln;
+  os << "{ " << M.m[2][0] << ' ' << M.m[2][1] << ' ' << M.m[2][2] << ' ' << M.m[2][3] << " }" << endln;
+  os << "{ " << M.m[3][0] << ' ' << M.m[3][1] << ' ' << M.m[3][2] << ' ' << M.m[3][3] << " }" << endln;
   return os;
 }
 

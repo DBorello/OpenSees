@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-10-19 23:09:43 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/AlgorithmIncrements.cpp,v $
                                                                         
                                                                         
-// File: ~/recorder/AlgorithmIncrements
-// 
 // Written: fmk 
 // Created: 11/99
 // Revision: A
@@ -42,11 +40,15 @@
 #include <LinearSOE.h>
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
-#include <fstream.h>
 #include <ctype.h>
 #include <ID.h>
 #include <Vector.h>
+
+#include <fstream>
+using std::ifstream;
+
+#include <iomanip>
+using std::ios;
 
 #ifdef _WGL
 #include <OpenGLRenderer.h>
@@ -126,14 +128,15 @@ AlgorithmIncrements::record(int cTag, double timeStamp)
 
       theFile.open(fileName, ios::out);
       if (!theFile) {
-	cerr << "WARNING - AlgorithmIncrements::record()";
-	cerr << " - could not open file " << fileName << endl;
+	opserr << "WARNING - AlgorithmIncrements::record()";
+	opserr << " - could not open file " << fileName << endln;
       } 
     }
     if (theFile) {
       numRecord ++;
-      theFile << X;
-      theFile << B;
+      int i;
+      for (i=0; X.Size(); i++) theFile << X(i);
+      for (i=0; X.Size(); i++) theFile << B(i);
     }
   }
 
@@ -163,12 +166,13 @@ AlgorithmIncrements::playback(int cTag)
     ifstream aFile;
     aFile.open(fileName, ios::in);
     if (!aFile) {
-      cerr << "WARNING - AlgorithmIncrements::playback()";
-      cerr << " - could not open file " << fileName << endl;
+      opserr << "WARNING - AlgorithmIncrements::playback()";
+      opserr << " - could not open file " << fileName << endln;
     }
     for (int i = 0; i<numRecord; i++) {
-      aFile >> X;
-      aFile >> B;
+      int ii;
+      for (ii=0; X.Size(); ii++) theFile << X(ii);
+      for (ii=0; X.Size(); ii++) theFile << B(ii);
 
       this->plotData(X,B);
       char c = getchar();

@@ -124,7 +124,7 @@ tensor RMC01PotentialSurface::d2Qods2( const EPState *EPS ) const
 // friend ostream functions for output
 //================================================================================
 
-ostream& operator<< (ostream& os, const RMC01PotentialSurface & PS)
+OPS_Stream& operator<< (OPS_Stream& os, const RMC01PotentialSurface & PS)
 {
     os << "ROUNDED MC Potential Surface Parameters: " << endln;
     return os;

@@ -31,7 +31,7 @@ QUESTION: SHOULD THE DOMAIN/RECORDER CLASSES HAVE A shutdown() METHOD? \\
 \indent {\em virtual void warning(const char *msg, ...) =0;}\\
 \indent {\em virtual void fatal(const char *msg, ...) =0;}\\ \\
 \indent // Protected Methods  \\
-\indent {\em void outputMessage(ostream \&theStream, const char *msg, va\_list args);} \\
+\indent {\em void outputMessage(OPS_Stream \&theStream, const char *msg, va\_list args);} \\
 
 \noindent {\bf Constructor}  \\
 \indent {\em ErrorHandler();}  \\ 
@@ -62,9 +62,9 @@ terminated by this method. The arguments are the same as for the {\em
 record()} method.\\ 
 
 \noindent {\bf Protected Methods }  \\
-\indent {\em void outputMessage(ostream \&theStream, const char *msg,
+\indent {\em void outputMessage(OPS_Stream \&theStream, const char *msg,
 va\_list args);}\\ 
-Will print to the ostream {\em theStream} the error message, where
+Will print to the OPS_Stream {\em theStream} the error message, where
 {\em msg} is the format string  and {\em va\_list} is the list created
 from the varying number of arguments passed to the {\em warning()} or
 {\em fatal()} methods. It is up to the calling object to both create

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:25 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Clipping.cpp,v $
                                                                         
                                                                         
@@ -60,13 +60,13 @@ FACE &CLIP_Z(FACE &, float, float, float, float); // creates new, deletes old
 FACE &
 Clipping::transform(FACE &input)
 {
-  // cerr << "Clipping:1\n" << input;
+  // opserr << "Clipping:1\n" << input;
   FACE &clippedX = CLIP_X(input,X,Y,Zfar,Znear);
-  // cerr << "Clipping:2\n" << clippedX;
+  // opserr << "Clipping:2\n" << clippedX;
   FACE &clippedY = CLIP_Y(clippedX,X,Y,Zfar,Znear);
-  // cerr << "Clipping:3\n" << clippedY;
+  // opserr << "Clipping:3\n" << clippedY;
   FACE &clippedZ = CLIP_Z(clippedY,X,Y,Zfar,Znear);
-  // cerr << "Clipping:4\n" << clippedZ;
+  // opserr << "Clipping:4\n" << clippedZ;
   return clippedZ;
 }
 

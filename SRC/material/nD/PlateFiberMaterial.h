@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:49:13 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlateFiberMaterial.h,v $
 
 // Ed "C++" Love
@@ -28,7 +28,6 @@
 //
 
 
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -37,8 +36,6 @@
 #include <Matrix.h>
 #include <ID.h> 
 #include <NDMaterial.h>
-
-
 
 class PlateFiberMaterial: public NDMaterial{
 
@@ -93,7 +90,7 @@ class PlateFiberMaterial: public NDMaterial{
     double getRho( ) ;
 
     //print out data
-    void Print( ostream &s, int flag ) ;
+    void Print( OPS_Stream &s, int flag ) ;
 
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);

@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:49:12 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlateFiber.cpp,v $
 
 // Written: Ed "C++" Love
@@ -160,12 +160,12 @@ int J2PlateFiber :: setTrialStrain( const Vector &strain_from_element )
     
      strain(2,2) -= stress(2,2) / tangent[2][2][2][2] ;
 
-     //cerr << stress(2,2) << endl ;
+     //opserr << stress(2,2) << endln ;
 
      iteration_counter++ ;
      if ( iteration_counter > max_iterations ) {
-       cerr << "More than " << max_iterations ;
-       cerr << " iterations in setTrialStrain of J2PlateFiber \n" ;
+       opserr << "More than " << max_iterations ;
+       opserr << " iterations in setTrialStrain of J2PlateFiber \n" ;
        break ;
      }// end if 
 
@@ -399,7 +399,7 @@ J2PlateFiber::sendSelf (int commitTag, Channel &theChannel)
 
   // send the vector object to the channel
   if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
-    cerr << "J2Plasticity::recvSelf - failed to recv vector from channel\n";
+    opserr << "J2Plasticity::recvSelf - failed to recv vector from channel\n";
     return -1;
   }
 
@@ -414,7 +414,7 @@ J2PlateFiber::recvSelf (int commitTag, Channel &theChannel,
   // recv the vector object from the channel which defines material param and state
   static Vector data(10+9);
   if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
-    cerr << "J2Plasticity::recvSelf - failed to recv vector from channel\n";
+    opserr << "J2Plasticity::recvSelf - failed to recv vector from channel\n";
     return -1;
   }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-10-03 18:01:44 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:01:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.cpp,v $
                                                                         
                                                                         
@@ -53,74 +53,76 @@ SectionForceDeformation::SectionForceDeformation(int tag, int classTag)
 
 SectionForceDeformation::~SectionForceDeformation()
 {
-	if (fDefault != 0)
-		delete fDefault;
+  if (fDefault != 0)
+    delete fDefault;
 }
 
 const Matrix&
 SectionForceDeformation::getSectionFlexibility ()
 {
-	int order = this->getOrder();
+  int order = this->getOrder();
+  
+  if (fDefault == 0) {		
+    fDefault = new Matrix(order,order);
+    if (fDefault == 0) {
+      opserr << "SectionForceDeformation::getSectionFlexibility -- failed to allocate flexibility matrix\n";
+      exit(-1);
+    }
+  }
 
-	if (fDefault == 0) {		
-		fDefault = new Matrix(order,order);
-		if (fDefault == 0)
-			g3ErrorHandler->fatal("%s -- failed to allocate flexibility matrix",
-				"SectionForceDeformation::getSectionFlexibility");
-	}
+  const Matrix &k = this->getSectionTangent();
+  
+  switch(order) {
+  case 1:
+    if (k(0,0) != 0.0)
+      (*fDefault)(0,0) = 1.0/k(0,0);
+    break;
+  case 2:
+    invert2by2Matrix(k,*fDefault);
+    break;
+  case 3:
+    invert3by3Matrix(k,*fDefault);
+    break;
+  default:
+    invertMatrix(order,k,*fDefault);
+    break;
+  }
 
-	const Matrix &k = this->getSectionTangent();
-
-	switch(order) {
-	case 1:
-		if (k(0,0) != 0.0)
-			(*fDefault)(0,0) = 1.0/k(0,0);
-		break;
-	case 2:
-		invert2by2Matrix(k,*fDefault);
-		break;
-	case 3:
-		invert3by3Matrix(k,*fDefault);
-		break;
-	default:
-		invertMatrix(order,k,*fDefault);
-		break;
-	}
-
-	return *fDefault;
+  return *fDefault;
 }
 
 const Matrix&
 SectionForceDeformation::getInitialFlexibility ()
 {
-	int order = this->getOrder();
-
-	if (fDefault == 0) {		
-		fDefault = new Matrix(order,order);
-		if (fDefault == 0)
-			g3ErrorHandler->fatal("%s -- failed to allocate flexibility matrix",
-				"SectionForceDeformation::getInitialFlexibility");
-	}
-
-	const Matrix &k = this->getInitialTangent();
-
-	switch(order) {
-	case 1:
-		if (k(0,0) != 0.0)
-			(*fDefault)(0,0) = 1.0/k(0,0);
-		break;
-	case 2:
-		invert2by2Matrix(k,*fDefault);
-		break;
-	case 3:
-		invert3by3Matrix(k,*fDefault);
-		break;
-	default:
-		invertMatrix(order,k,*fDefault);
-		break;
-	}
-
-	return *fDefault;
+  int order = this->getOrder();
+  
+  if (fDefault == 0) {		
+    fDefault = new Matrix(order,order);
+    if (fDefault == 0) {
+      opserr << "SectionForceDeformation::getInitialFlexibility -- failed to allocate flexibility matrix\n";
+      exit(-1);
+    }
+  }
+  
+  const Matrix &k = this->getInitialTangent();
+  
+  switch(order) {
+  case 1:
+    if (k(0,0) != 0.0)
+      (*fDefault)(0,0) = 1.0/k(0,0);
+    break;
+  case 2:
+    invert2by2Matrix(k,*fDefault);
+    break;
+  case 3:
+    invert3by3Matrix(k,*fDefault);
+    break;
+  default:
+    invertMatrix(order,k,*fDefault);
+    break;
+  }
+  
+  return *fDefault;
 }
 
 double 
@@ -140,7 +142,7 @@ SectionForceDeformation::setResponse(char **argv, int argc, Information &sectInf
 
 	Vector *theVector = new Vector(this->getOrder());
 	if (theVector == 0) {
-	    cerr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
+	    opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
 	    return -1;
 	} 
 	sectInfo.theVector = theVector;
@@ -154,7 +156,7 @@ SectionForceDeformation::setResponse(char **argv, int argc, Information &sectInf
 
 	Vector *theVector = new Vector(this->getOrder());
 	if (theVector == 0) {
-	    cerr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
+	    opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
 	    return -1;
 	} 
 	sectInfo.theVector = theVector;
@@ -168,7 +170,7 @@ SectionForceDeformation::setResponse(char **argv, int argc, Information &sectInf
 		int order = this->getOrder();
 		Matrix *newMatrix = new Matrix(order,order);
 		if (newMatrix == 0) {
-			cerr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
+			opserr << "WARNING SectionForceDeformation::setResponse() - out of memory\n";
 			return -1;
 		} 
 		sectInfo.theMatrix = newMatrix;

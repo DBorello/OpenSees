@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-26 00:56:05 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Renderer.h,v $
                                                                         
                                                                         
@@ -39,8 +39,7 @@
 #define X11Renderer_h
 
 #include <Renderer.h>
-#include <G3Globals.h>
-#include <fstream.h>
+
 
 class View;
 class Projection;

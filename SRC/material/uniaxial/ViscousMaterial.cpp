@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-10 23:04:03 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ViscousMaterial.cpp,v $
                                                                         
 // Written: Mehrdad Sasani 
@@ -33,14 +33,15 @@
 #include <Vector.h>
 #include <Channel.h>
 
+#include <OPS_Globals.h>
+
 ViscousMaterial::ViscousMaterial(int tag, double c, double a)
 :UniaxialMaterial(tag,MAT_TAG_Viscous),
  trialRate(0.0), C(c), Alpha(a)
 {
     if (Alpha < 0.0) {
-        g3ErrorHandler->warning("%s -- Alpha < 0.0, setting to 1.0",
-            "ViscousMaterial::ViscousMaterial");
-        Alpha = 1.0;
+      opserr << "ViscousMaterial::ViscousMaterial -- Alpha < 0.0, setting to 1.0\n";
+      Alpha = 1.0;
     }
 }
 
@@ -154,7 +155,7 @@ ViscousMaterial::sendSelf(int cTag, Channel &theChannel)
   data(3) = trialRate;
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "ViscousMaterial::sendSelf() - failed to send data\n";
+    opserr << "ViscousMaterial::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -168,7 +169,7 @@ ViscousMaterial::recvSelf(int cTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
-      cerr << "ViscousMaterial::recvSelf() - failed to receive data\n";
+      opserr << "ViscousMaterial::recvSelf() - failed to receive data\n";
       C = 0; 
       this->setTag(0);      
   }
@@ -183,11 +184,11 @@ ViscousMaterial::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-ViscousMaterial::Print(ostream &s, int flag)
+ViscousMaterial::Print(OPS_Stream &s, int flag)
 {
-    s << "Viscous tag: " << this->getTag() << endl;
-    s << "  C: " << C << endl;
-    s << "  Alpha: " << Alpha << endl;
+    s << "Viscous tag: " << this->getTag() << endln;
+    s << "  C: " << C << endln;
+    s << "  Alpha: " << Alpha << endln;
 }
 
 

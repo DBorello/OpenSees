@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-12-07 01:02:09 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/InitialInterpolatedLineSearch.cpp,v $
 
 // Written: fmk 
@@ -33,7 +33,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Vector.h>
-#include <iostream.h>
 
 
 InitialInterpolatedLineSearch::InitialInterpolatedLineSearch(double tol, int mIter, double mnEta,
@@ -92,9 +91,9 @@ InitialInterpolatedLineSearch::search(double s0,
   int count = 0; //intial value of iteration counter 
 
   if (printFlag == 0) {
-    cerr << "InitialInterpolated Line Search - initial       "
+    opserr << "InitialInterpolated Line Search - initial       "
 	 << "    eta : " << eta 
-	 << " , Ratio |s/s0| = " << r0 << endl;
+	 << " , Ratio |s/s0| = " << r0 << endln;
   }    
 
 
@@ -123,14 +122,14 @@ InitialInterpolatedLineSearch::search(double s0,
     *x *= eta-etaPrev;
 	    
     if (theIntegrator.update(*x) < 0) {
-      cerr << "WARNInG InitialInterpolatedLineSearch::search() -";
-      cerr << "the Integrator failed in update()\n";	
+      opserr << "WARNInG InitialInterpolatedLineSearch::search() -";
+      opserr << "the Integrator failed in update()\n";	
       return -1;
     }
     
     if (theIntegrator.formUnbalance() < 0) {
-      cerr << "WARNInG InitialInterpolatedLineSearch::search() -";
-      cerr << "the Integrator failed in formUnbalance()\n";	
+      opserr << "WARNInG InitialInterpolatedLineSearch::search() -";
+      opserr << "the Integrator failed in formUnbalance()\n";	
       return -2;
     }	
 
@@ -144,9 +143,9 @@ InitialInterpolatedLineSearch::search(double s0,
     r = fabs( s / s0 ); 
 
     if (printFlag == 0) {
-      cerr << "InitialInterpolated Line Search - iteration: " << count 
+      opserr << "InitialInterpolated Line Search - iteration: " << count 
 	   << " , eta(j) : " << eta
-	   << " , Ratio |sj/s0| = " << r << endl;
+	   << " , Ratio |sj/s0| = " << r << endln;
     }    
 
     // reset the variables, also check not just hitting bounds over and over
@@ -182,10 +181,10 @@ InitialInterpolatedLineSearch::recvSelf(int cTag,
 
 
 void
-InitialInterpolatedLineSearch::Print(ostream &s, int flag)
+InitialInterpolatedLineSearch::Print(OPS_Stream &s, int flag)
 {
   if (flag == 0) 
-    s << "InitialInterpolatedLineSearch :: Line Search Tolerance = " << tolerance << endl; 
+    s << "InitialInterpolatedLineSearch :: Line Search Tolerance = " << tolerance << endln; 
 }
 
 

@@ -559,9 +559,8 @@ QzSimple1::revertToStart(void)
 	//
 	if(suction <= QZtolerance) suction = QZtolerance;
 	if(suction > 0.1){
-		suction = 0.1;
-		g3ErrorHandler->warning("%s -- setting suction to max value of 0.1",
-			"QzSimple1::QzSimple1");
+	  suction = 0.1;
+	  opserr << "QzSimple1::QzSimple1 -- setting suction to max value of 0.1\n";
 	}
 
 	// Only allow zero or positive dashpot values
@@ -570,9 +569,10 @@ QzSimple1::revertToStart(void)
 
 	// Do not allow zero or negative values for z50 or Qult.
 	//
-	if(Qult <= 0.0 || z50 <= 0.0)
-		g3ErrorHandler->fatal("%s -- only accepts positive nonzero Qult and z50",
-			"QzSimple1::QzSimple1");
+	if(Qult <= 0.0 || z50 <= 0.0) {
+	  opserr << "QzSimple1::QzSimple1 -- only accepts positive nonzero Qult and z50\n";
+	  exit(-1);
+	}
 
 	// Initialize variables for Near Field rigid-plastic spring
 	//
@@ -593,8 +593,8 @@ QzSimple1::revertToStart(void)
 		TFar_tang= 1.39*Qult/z50;
 	}
 	else{
-		g3ErrorHandler->fatal("%s -- only accepts QzType of 1 or 2",
-			"QzSimple1::QzSimple1");
+	  opserr << "QzSimple1::QzSimple1 -- only accepts QzType of 1 or 2\n";
+	  exit(-1);
 	}
 
 	// Far Field components: TFar_tang was set under "soil type" statements.
@@ -797,7 +797,7 @@ QzSimple1::sendSelf(int cTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "QzSimple1::sendSelf() - failed to send data\n";
+    opserr << "QzSimple1::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -813,7 +813,7 @@ QzSimple1::recvSelf(int cTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
-      cerr << "QzSimple1::recvSelf() - failed to receive data\n";
+      opserr << "QzSimple1::recvSelf() - failed to receive data\n";
       CNF_tang = 0; 
       this->setTag(0);      
   }
@@ -873,14 +873,14 @@ QzSimple1::recvSelf(int cTag, Channel &theChannel,
 
 /////////////////////////////////////////////////////////////////////
 void 
-QzSimple1::Print(ostream &s, int flag)
+QzSimple1::Print(OPS_Stream &s, int flag)
 {
-    s << "QzSimple1, tag: " << this->getTag() << endl;
-    s << "  QzType: " << QzType << endl;
-    s << "  Qult: " << Qult << endl;
-    s << "  z50: " << z50 << endl;
-    s << "  suction: " << suction << endl;
-	s << "  dashpot: " << dashpot << endl;
+    s << "QzSimple1, tag: " << this->getTag() << endln;
+    s << "  QzType: " << QzType << endln;
+    s << "  Qult: " << Qult << endln;
+    s << "  z50: " << z50 << endln;
+    s << "  suction: " << suction << endln;
+	s << "  dashpot: " << dashpot << endln;
 }
 
 /////////////////////////////////////////////////////////////////////

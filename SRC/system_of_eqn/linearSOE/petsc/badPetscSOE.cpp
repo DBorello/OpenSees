@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/badPetscSOE.cpp,v $
                                                                         
                                                                         
@@ -98,9 +98,9 @@ PetscSOE::setSize(Graph &theGraph)
     X = new double[size];
 	
     if (B == 0 || X == 0) {
-      cerr << "WARNING PetscSOE::PetscSOE :";
-      cerr << " ran out of memory for vectors (size) (";
-      cerr << size << ") \n";
+      opserr << "WARNING PetscSOE::PetscSOE :";
+      opserr << " ran out of memory for vectors (size) (";
+      opserr << size << ") \n";
       size = 0; 
       result = -1;
     }
@@ -128,8 +128,8 @@ PetscSOE::setSize(Graph &theGraph)
     // invoke setSize() on the Solver
     int solverOK = theSolver->setSize();
     if (solverOK < 0) {
-	cerr << "WARNING:PetscSOE::setSize :";
-	cerr << " solver failed setSize()\n";
+	opserr << "WARNING:PetscSOE::setSize :";
+	opserr << " solver failed setSize()\n";
 	return solverOK;
     }    
 
@@ -159,9 +159,9 @@ PetscSOE::setSizeDirectly(int newSize)
     X = new double[size];
 	
     if (B == 0 || X == 0) {
-      cerr << "WARNING PetscSOE::PetscSOE :";
-      cerr << " ran out of memory for vectors (size) (";
-      cerr << size << ") \n";
+      opserr << "WARNING PetscSOE::PetscSOE :";
+      opserr << " ran out of memory for vectors (size) (";
+      opserr << size << ") \n";
       size = 0; 
       result = -1;
     }
@@ -189,8 +189,8 @@ PetscSOE::setSizeDirectly(int newSize)
     // invoke setSize() on the Solver
     int solverOK = theSolver->setSize();
     if (solverOK < 0) {
-	cerr << "WARNING:PetscSOE::setSize :";
-	cerr << " solver failed setSize()\n";
+	opserr << "WARNING:PetscSOE::setSize :";
+	opserr << " solver failed setSize()\n";
 	return solverOK;
     }    
 
@@ -222,9 +222,9 @@ PetscSOE::setSizeParallel(int newSize, int N,
     X = new double[size];
 	
     if (B == 0 || X == 0) {
-      cerr << "WARNING PetscSOE::PetscSOE :";
-      cerr << " ran out of memory for vectors (size) (";
-      cerr << size << ") \n";
+      opserr << "WARNING PetscSOE::PetscSOE :";
+      opserr << " ran out of memory for vectors (size) (";
+      opserr << size << ") \n";
       size = 0; 
       result = -1;
     }
@@ -252,8 +252,8 @@ PetscSOE::setSizeParallel(int newSize, int N,
     // invoke setSize() on the Solver
     int solverOK = theSolver->setSize();
     if (solverOK < 0) {
-	cerr << "WARNING:PetscSOE::setSize :";
-	cerr << " solver failed setSize()\n";
+	opserr << "WARNING:PetscSOE::setSize :";
+	opserr << " solver failed setSize()\n";
 	return solverOK;
     }    
 
@@ -274,7 +274,7 @@ PetscSOE::addA(const Matrix &m, const ID &id, double fact)
     // check that m and id are of similar size
     int idSize = id.Size();    
     if (idSize != m.noRows() && idSize != m.noCols()) {
-	cerr << "PetscSOE::addA() - Matrix and ID not of similar sizes\n";
+	opserr << "PetscSOE::addA() - Matrix and ID not of similar sizes\n";
 	return -1;
     }
     
@@ -309,7 +309,7 @@ PetscSOE::addB(const Vector &v, const ID &id, double fact)
     // check that m and id are of similar size
     int idSize = id.Size();        
     if (idSize != v.Size() ) {
-	cerr << "PetscSOE::addB() - Vector and ID not of similar sizes\n";
+	opserr << "PetscSOE::addB() - Vector and ID not of similar sizes\n";
 	return -1;
     }    
     
@@ -336,7 +336,7 @@ PetscSOE::setB(const Vector &v, double fact)
 
 
     if (size != v.Size() ) {
-	cerr << "PetscSOE::addB() - Vector not of appropriate size\n";
+	opserr << "PetscSOE::addB() - Vector not of appropriate size\n";
 	return -1;
     }    
     
@@ -373,7 +373,7 @@ const Vector &
 PetscSOE::getX(void)
 {
     if (vectX == 0) {
-	cerr << "FATAL PetscSOE::getX - vectX == 0!";
+	opserr << "FATAL PetscSOE::getX - vectX == 0!";
 	exit(-1);
     }    
     double *theData =0;
@@ -391,7 +391,7 @@ const Vector &
 PetscSOE::getB(void)
 {
     if (vectB == 0) {
-	cerr << "FATAL PetscSOE::getB - vectB == 0!";
+	opserr << "FATAL PetscSOE::getB - vectB == 0!";
 	exit(-1);
     }    
     double *theData =0;
@@ -432,8 +432,8 @@ PetscSOE::setSolver(PetscSolver &newSolver)
     if (size != 0) {
 	int solverOK = newSolver.setSize();
 	if (solverOK < 0) {
-	    cerr << "WARNING:PetscSOE::setSolver :";
-	    cerr << "the new solver could not setSeize() - staying with old\n";
+	    opserr << "WARNING:PetscSOE::setSolver :";
+	    opserr << "the new solver could not setSeize() - staying with old\n";
 	    return solverOK;
 	}
     }	
@@ -446,7 +446,7 @@ int
 PetscSOE::sendSelf(Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
     if (size != 0)
-	cerr << "WARNING PetscSOE::sendSelf - does not send itself YET\n";
+	opserr << "WARNING PetscSOE::sendSelf - does not send itself YET\n";
     return 0;
 }
 

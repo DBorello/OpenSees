@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-01-25 20:27:11 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:02:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/ThreadedSuperLU.cpp,v $
                                                                         
                                                                         
@@ -79,8 +79,8 @@ int
 ThreadedSuperLU::solve(void)
 {
     if (theSOE == 0) {
-	cerr << "WARNING ThreadedSuperLU::solve(void)- ";
-	cerr << " No LinearSOE object has been set\n";
+	opserr << "WARNING ThreadedSuperLU::solve(void)- ";
+	opserr << " No LinearSOE object has been set\n";
 	return -1;
     }
     
@@ -91,8 +91,8 @@ ThreadedSuperLU::solve(void)
 	return 0;
 
     if (sizePerm == 0) {
-	cerr << "WARNING ThreadedSuperLU::solve(void)- ";
-	cerr << " size for row and col permutations 0 - has setSize() been called?\n";
+	opserr << "WARNING ThreadedSuperLU::solve(void)- ";
+	opserr << " size for row and col permutations 0 - has setSize() been called?\n";
 	return -1;
     }
 
@@ -115,8 +115,8 @@ ThreadedSuperLU::solve(void)
 	pdgstrf(&pdgstrf_options, &AC, perm_r, &L, &U, &gStat, &info);
 
 	if (info != 0) {	
-	   cerr << "WARNING ThreadedSuperLU::solve(void)- ";
-	   cerr << " Error " << info << " returned in factorization dgstrf()\n";
+	   opserr << "WARNING ThreadedSuperLU::solve(void)- ";
+	   opserr << " Error " << info << " returned in factorization dgstrf()\n";
 	   return info;
 	}
 
@@ -130,8 +130,8 @@ ThreadedSuperLU::solve(void)
     dgstrs (trans, &L, &U, perm_r, perm_c, &B, &gStat, &info);    
 
     if (info != 0) {	
-       cerr << "WARNING ThreadedSuperLU::solve(void)- ";
-       cerr << " Error " << info << " returned in substitution dgstrs()\n";
+       opserr << "WARNING ThreadedSuperLU::solve(void)- ";
+       opserr << " Error " << info << " returned in substitution dgstrs()\n";
        return info;
     }
 
@@ -164,8 +164,8 @@ ThreadedSuperLU::setSize()
 	etree = new int[n];		
 
 	if (perm_r == 0 || perm_c == 0 || etree == 0) {
-	  cerr << "WARNING ThreadedSuperLU::setSize()";
-	  cerr << " - ran out of memory\n";
+	  opserr << "WARNING ThreadedSuperLU::setSize()";
+	  opserr << " - ran out of memory\n";
 	  sizePerm = 0;
 	  return -1;
 	}		
@@ -194,8 +194,8 @@ ThreadedSuperLU::setSize()
     } else if (n == 0)
 	return 0;
     else {
-	cerr << "WARNING ThreadedSuperLU::setSize()";
-	cerr << " - order of system <  0\n";
+	opserr << "WARNING ThreadedSuperLU::setSize()";
+	opserr << " - order of system <  0\n";
 	return -1;	
     }
 	

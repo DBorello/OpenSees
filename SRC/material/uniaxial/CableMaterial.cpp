@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-10 22:57:40 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/CableMaterial.cpp,v $
                                                                         
 // Written: Charles Chadwell 
@@ -224,7 +224,7 @@ CableMaterial::sendSelf(int cTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "CableMaterial::sendSelf() - failed to send data\n";
+    opserr << "CableMaterial::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -238,7 +238,7 @@ CableMaterial::recvSelf(int cTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
-      cerr << "CableMaterial::recvSelf() - failed to receive data\n";
+      opserr << "CableMaterial::recvSelf() - failed to receive data\n";
       E = 0; 
       this->setTag(0);      
       return res;
@@ -254,10 +254,10 @@ CableMaterial::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-CableMaterial::Print(ostream &s, int flag)
+CableMaterial::Print(OPS_Stream &s, int flag)
 {
-   s << "CableMaterial tag: " << this->getTag() << endl;
-    s << "  E: " << E << " Prestress: " << Ps << endl;
+   s << "CableMaterial tag: " << this->getTag() << endln;
+    s << "  E: " << E << " Prestress: " << Ps << endln;
 }
 
 //int

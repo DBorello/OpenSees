@@ -23,8 +23,8 @@ direction(dir), defPosX(true), defPosY(true)
 {
 	if (dir < -1.0 || dir > 1.0)
 	{
-		cerr << "WARNING: PlasticHardening2D() - Dir should be between -1 and +1\n";
-		cerr << "Set to 0 \n";
+		opserr << "WARNING: PlasticHardening2D() - Dir should be between -1 and +1\n";
+		opserr << "Set to 0 \n";
 		direction = 0.0;
 	}
 
@@ -65,7 +65,7 @@ int PlasticHardening2D::commitState(int status)
 	{
 		double v0 = getIsoPlasticStiffness(0);
 		double v1 = getIsoPlasticStiffness(1);
-		cout << v0 << "\t " << v1 << endl;
+		cout << v0 << "\t " << v1 << endln;
 	}
     }*/
     
@@ -154,8 +154,8 @@ void PlasticHardening2D::setTrialPlasticStrains(double lamda, const Vector &f, c
 
 	if(strnDebug)
 	{
-		cout << "epx = " << epx << ", epy = " << epy << endl;
-		cout << "bool defPosX = " << defPosX << ", bool defPosY = " << defPosY << endl;
+		opserr << "epx = " << epx << ", epy = " << epy << endln;
+		opserr << "bool defPosX = " << defPosX << ", bool defPosY = " << defPosY << endln;
 	}
 
 }
@@ -184,7 +184,7 @@ const Vector &PlasticHardening2D::getEquiPlasticStiffness()
 
 
 	if(strnDebug)
-		cerr << "Kp " << v2;
+		opserr << "Kp " << v2;
 
 	return v2;
 }
@@ -200,13 +200,13 @@ double PlasticHardening2D::getTrialPlasticStrains(int dir)
 	else if (dir == 1 && !defPosY)
 		return kpMatYNeg->getTrialValue();
 	else
-		cerr << "PlasticHardening2D::getTrialPlasticStrains(double dir) - incorrect dir||condition \n";
+		opserr << "PlasticHardening2D::getTrialPlasticStrains(double dir) - incorrect dir||condition \n";
 	return 0;
 }
 
 double PlasticHardening2D::getCommitPlasticStrains(int dir)
 {
-	cerr << "PlasticHardening2D::getCommitPlasticStrains(double dir) - not yet implemented \n";
+	opserr << "PlasticHardening2D::getCommitPlasticStrains(double dir) - not yet implemented \n";
 	this->getTrialPlasticStrains(dir);
 	return 0;
 }
@@ -233,7 +233,7 @@ double kp =0;
 		  kp = kpMatYNeg->getTrialPlasticStiffness();
 	}
 	else
-		cerr << "WARNING: PlasticHardening2D::getPlasticStiffness(int dir) - incorrect dir\n";
+		opserr << "WARNING: PlasticHardening2D::getPlasticStiffness(int dir) - incorrect dir\n";
 	return kp;
 }
 
@@ -257,7 +257,7 @@ Vector& PlasticHardening2D::getEvolDirection(Vector &f_new)
 	return v2;
 }
 
-void PlasticHardening2D::Print(ostream &s, int flag)
+void PlasticHardening2D::Print(OPS_Stream &s, int flag)
 {
 	s << "PlasticHardening2D \n";
 	s << "iso_Ratio = " << isotropicRatio << "\n";

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 05:30:30 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/EquiSolnAlgo.h,v $
                                                                         
                                                                         
@@ -63,7 +63,7 @@ class EquiSolnAlgo: public SolutionAlgorithm
     virtual int solveCurrentStep(void) =0;
     virtual void setTest(ConvergenceTest &theNewTest) =0;    
     virtual ConvergenceTest *getTest(void);     
-    virtual void Print(ostream &s, int flag =0) =0;    
+    virtual void Print(OPS_Stream &s, int flag =0) =0;    
 
     // the following are not protected as convergence test
     // may need access to them

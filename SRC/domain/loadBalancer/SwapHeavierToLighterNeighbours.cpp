@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/loadBalancer/SwapHeavierToLighterNeighbours.cpp,v $
                                                                         
                                                                         
@@ -69,8 +69,8 @@ SwapHeavierToLighterNeighbours::balance(Graph &theWeightedGraph)
     // check to see a domain partitioner has been set
     DomainPartitioner *thePartitioner = this->getDomainPartitioner();
     if (thePartitioner == 0) {
-	cerr << "SwapHeavierToLighterNeighbours::balance";
-	cerr << "- No DomainPartitioner has been set\n"; 
+	opserr << "SwapHeavierToLighterNeighbours::balance";
+	opserr << "- No DomainPartitioner has been set\n"; 
 	return -1;
     }
 
@@ -95,9 +95,9 @@ SwapHeavierToLighterNeighbours::balance(Graph &theWeightedGraph)
 			res = thePartitioner->
 			    swapBoundary(vertexTag,otherVertexTag);
 			if (res < 0) {
-			    cerr << "WARNING SwapHeavierToLighterNeighbours";
-			    cerr << "::balance - DomainPartitioner returned ";
-			    cerr << res << endl;
+			    opserr << "WARNING SwapHeavierToLighterNeighbours";
+			    opserr << "::balance - DomainPartitioner returned ";
+			    opserr << res << endln;
 			    return res;
 			}
 		    }
@@ -106,9 +106,9 @@ SwapHeavierToLighterNeighbours::balance(Graph &theWeightedGraph)
 		    res = thePartitioner->
 			swapBoundary(vertexTag,otherVertexTag); 
 		    if (res < 0) {
-			cerr << "WARNING SwapHeavierToLighterNeighbours";
-			cerr << "::balance - DomainPartitioner returned ";
-			cerr << res << endl;
+			opserr << "WARNING SwapHeavierToLighterNeighbours";
+			opserr << "::balance - DomainPartitioner returned ";
+			opserr << res << endln;
 			return res;
 		    }
 		}

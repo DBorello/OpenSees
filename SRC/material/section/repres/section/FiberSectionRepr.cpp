@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-03-04 19:57:30 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/section/FiberSectionRepr.cpp,v $
                                                                         
                                                                         
@@ -27,7 +27,6 @@
 // Written by Remo M. de Souza
 // November 1998
 
-#include <iostream.h>
 #include <stdlib.h>
 
 #include <UniaxialMaterial.h>
@@ -58,15 +57,15 @@ FiberSectionRepr::FiberSectionRepr(int sectionID, int maxNumPatches, int maxNumR
     theFibers = new Fiber *[sizeFibers];
 
     if (theFibers == 0) {
-	g3ErrorHandler->warning("%s -- failed to allocate Fiber pointers",
-			      "FiberSectionRepr::FiberSectionRepr");
+      opserr << "FiberSectionRepr::FiberSectionRepr -- failed to allocate Fiber pointers\n";
+			      
 	sizeFibers = 0;
     }
 
    patch      = new Patch*[maxNumPatches];
    if (!patch)
    {
-      cerr << "FATAL ERROR: FiberSectionRepr - not enough memory to allocate " << maxNumPatches << " patches";
+      opserr << "FATAL ERROR: FiberSectionRepr - not enough memory to allocate " << maxNumPatches << " patches";
       exit (-1);
    }
    int i;
@@ -77,7 +76,7 @@ FiberSectionRepr::FiberSectionRepr(int sectionID, int maxNumPatches, int maxNumR
    reinfLayer = new ReinfLayer*[maxNumReinfLayers];
    if (!reinfLayer)
    {
-      cerr << "FATAL ERROR: FiberSectionRepr - not enough memory to allocate " << maxNumReinfLayers << "reinforcing layers";
+      opserr << "FATAL ERROR: FiberSectionRepr - not enough memory to allocate " << maxNumReinfLayers << "reinforcing layers";
       exit (-1);
    }
 
@@ -96,7 +95,7 @@ FiberSectionRepr::FiberSectionRepr(int sectionID)
   nPatches(0), 
   nReinfLayers(0)
 {
-   cerr << "Function FiberSectionRepr::FiberSectionRepr not implemented yet";
+   opserr << "Function FiberSectionRepr::FiberSectionRepr not implemented yet";
    exit (-1);
 }
 
@@ -113,7 +112,7 @@ FiberSectionRepr::FiberSectionRepr(int sectionID,
   nPatches(numPatches), 
   nReinfLayers(numReinfLayers)
 {
-   cerr << "Function FiberSectionRepr::FiberSectionRepr not implemented yet";
+   opserr << "Function FiberSectionRepr::FiberSectionRepr not implemented yet";
    exit (-1);
 }
 
@@ -149,13 +148,13 @@ FiberSectionRepr::~FiberSectionRepr(void)
  
 void FiberSectionRepr::setNumPatches (int numPatches)
 {
-   cerr << "Function FiberSectionRepr::setnumPatches not implemented yet";
+   opserr << "Function FiberSectionRepr::setnumPatches not implemented yet";
    exit (-1);
 }
 
 int FiberSectionRepr::setPatches (Patch **patches)
 {
-   cerr << "Function FiberSectionRepr::setPatches not implemented yet";
+   opserr << "Function FiberSectionRepr::setPatches not implemented yet";
    exit (-1);
 
    return 1;
@@ -163,13 +162,13 @@ int FiberSectionRepr::setPatches (Patch **patches)
 
 void FiberSectionRepr::setNumReinfLayers (int numReinfLayers)
 {
-   cerr << "Function FiberSectionRepr::setnumReinfLayers not implemented yet";
+   opserr << "Function FiberSectionRepr::setnumReinfLayers not implemented yet";
    exit (-1);
 }
 
 int FiberSectionRepr::setReinfLayers (ReinfLayer **reinfLayers)
 {
-   cerr << "Function FiberSectionRepr::setReinfLayers not implemented yet";
+   opserr << "Function FiberSectionRepr::setReinfLayers not implemented yet";
    exit (-1);
 
    return 1;
@@ -187,7 +186,7 @@ int FiberSectionRepr::addPatch (const Patch & aPatch)
      maxNPatches *= 2;
      Patch **patches = new Patch*[maxNPatches];     
      if (patches == 0) {
-       cerr << "FiberSectionRepr::addPatch() - out of memory\n";
+       opserr << "FiberSectionRepr::addPatch() - out of memory\n";
        return 1;
      }
      for (int i=0; i<nPatches; i++)
@@ -214,7 +213,7 @@ int FiberSectionRepr::addReinfLayer (const ReinfLayer & aReinfLayer)
      maxNReinfLayers *= 2;
      ReinfLayer **reinfLayers = new ReinfLayer*[maxNReinfLayers];     
      if (reinfLayers == 0) {
-       cerr << "FiberSectionRepr::addReinLayer() - out of memory\n";
+       opserr << "FiberSectionRepr::addReinLayer() - out of memory\n";
        return 1;
      }
      for (int i=0; i<nReinfLayers; i++)
@@ -257,7 +256,7 @@ FiberSectionRepr::getReinfLayers (void) const
 }
 
 
-void FiberSectionRepr::Print(ostream &s, int flag)
+void FiberSectionRepr::Print(OPS_Stream &s, int flag)
 {
 //   int i;
    
@@ -276,7 +275,7 @@ void FiberSectionRepr::Print(ostream &s, int flag)
 }
    
     
-ostream &operator<<(ostream &s, FiberSectionRepr &fiberSectionRepr)
+OPS_Stream &operator<<(OPS_Stream &s, FiberSectionRepr &fiberSectionRepr)
 {
    fiberSectionRepr.Print(s);
    return s;
@@ -301,8 +300,7 @@ FiberSectionRepr::addFiber(Fiber &newFiber)
 	Fiber **newArray = new Fiber *[newSize]; 
 	
 	if (newArray == 0) {
-	    g3ErrorHandler->warning("%s -- failed to allocate Fiber pointers",
-				  "FiberSection::addFiber");
+	  opserr << "FiberSection::addFiber -- failed to allocate Fiber pointers\n";
 	    return -1;
 	}
 	    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-12-07 01:02:10 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/SecantLineSearch.cpp,v $
 
 // Written: fmk 
@@ -33,7 +33,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Vector.h>
-#include <iostream.h>
 
 
 SecantLineSearch::SecantLineSearch(double tol, int mIter, double mnEta, double mxEta, int pFlag)
@@ -95,8 +94,8 @@ SecantLineSearch::search(double s0,
   const Vector &dU = theSOE.getX();
 
   if (printFlag == 0) {
-    cerr << "Secant Line Search - initial: "
-	 << "      eta(0) : " << eta << " , Ratio |s/s0| = " << r0 << endl;
+    opserr << "Secant Line Search - initial: "
+	 << "      eta(0) : " << eta << " , Ratio |s/s0| = " << r0 << endln;
   }
 
   // perform the secant iterations:
@@ -122,14 +121,14 @@ SecantLineSearch::search(double s0,
     *x *= eta-etaJ;
 	    
     if (theIntegrator.update(*x) < 0) {
-      cerr << "WARNING SecantLineSearch::search() -";
-      cerr << "the Integrator failed in update()\n";	
+      opserr << "WARNING SecantLineSearch::search() -";
+      opserr << "the Integrator failed in update()\n";	
       return -1;
     }
     
     if (theIntegrator.formUnbalance() < 0) {
-      cerr << "WARNING SecantLineSearch::search() -";
-      cerr << "the Integrator failed in formUnbalance()\n";	
+      opserr << "WARNING SecantLineSearch::search() -";
+      opserr << "the Integrator failed in formUnbalance()\n";	
       return -2;
     }	
 
@@ -143,8 +142,8 @@ SecantLineSearch::search(double s0,
     r = fabs( s / s0 ); 
 
     if (printFlag == 0) {
-      cerr << "Secant Line Search - iteration: " << count 
-	   << " , eta(j) : " << eta << " , Ratio |sj/s0| = " << r << endl;
+      opserr << "Secant Line Search - iteration: " << count 
+	   << " , eta(j) : " << eta << " , Ratio |sj/s0| = " << r << endln;
     }
 
     if (etaJ == eta)
@@ -186,12 +185,12 @@ SecantLineSearch::recvSelf(int cTag,
 
 
 void
-SecantLineSearch::Print(ostream &s, int flag)
+SecantLineSearch::Print(OPS_Stream &s, int flag)
 {
   if (flag == 0) {
-    s << "SecantLineSearch :: Line Search Tolerance = " << tolerance << endl; 
-    s << "                       max num Iterations = " << maxIter << endl;
-    s << "                         max value on eta = " << maxEta << endl;
+    s << "SecantLineSearch :: Line Search Tolerance = " << tolerance << endln; 
+    s << "                       max num Iterations = " << maxIter << endln;
+    s << "                         max value on eta = " << maxEta << endln;
   }
 }
 

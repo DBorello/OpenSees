@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-10 22:57:40 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticPPMaterial.cpp,v $
                                                                         
                                                                         
@@ -58,11 +58,11 @@ ElasticPPMaterial::ElasticPPMaterial(int tag, double e, double eyp,
  trialStress(0.0), trialTangent(E)
 {
     if (eyp < 0) {
-	cerr << "ElasticPPMaterial::ElasticPPMaterial() - eyp < 0, setting > 0\n";
+	opserr << "ElasticPPMaterial::ElasticPPMaterial() - eyp < 0, setting > 0\n";
 	eyp *= -1.;
     }
     if (eyn > 0) {
-	cerr << "ElasticPPMaterial::ElasticPPMaterial() - eyn > 0, setting < 0\n";
+	opserr << "ElasticPPMaterial::ElasticPPMaterial() - eyn > 0, setting < 0\n";
 	eyn *= -1.;
     }    
     
@@ -219,7 +219,7 @@ ElasticPPMaterial::sendSelf(int cTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "ElasticPPMaterial::sendSelf() - failed to send data\n";
+    opserr << "ElasticPPMaterial::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -232,7 +232,7 @@ ElasticPPMaterial::recvSelf(int cTag, Channel &theChannel,
   static Vector data(6);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "ElasticPPMaterial::recvSelf() - failed to recv data\n";
+    opserr << "ElasticPPMaterial::recvSelf() - failed to recv data\n";
   else {
     this->setTag(data(0));
     ep    = data(1);
@@ -246,12 +246,12 @@ ElasticPPMaterial::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-ElasticPPMaterial::Print(ostream &s, int flag)
+ElasticPPMaterial::Print(OPS_Stream &s, int flag)
 {
-    s << "ElasticPP tag: " << this->getTag() << endl;
-    s << "  E: " << E << endl;
-    s << "  ep: " << ep << endl;
-    s << "  Otress: " << trialStress << " tangent: " << trialTangent << endl;
+    s << "ElasticPP tag: " << this->getTag() << endln;
+    s << "  E: " << E << endln;
+    s << "  ep: " << ep << endln;
+    s << "  Otress: " << trialStress << " tangent: " << trialTangent << endln;
 }
 
 

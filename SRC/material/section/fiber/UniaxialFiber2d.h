@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-10 22:26:39 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber2d.h,v $
                                                                         
                                                                         
@@ -68,7 +68,7 @@ class UniaxialFiber2d : public Fiber
 
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
     
     Response *setResponse(char **argv, int argc, Information &info);
     int getResponse(int responseID, Information &info);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-18 01:03:43 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.cpp,v $
                                                                         
                                                                         
@@ -132,13 +132,13 @@ UniformExcitation::sendSelf(int commitTag, Channel &theChannel)
 
   int res = theChannel.sendVector(dbTag, commitTag, data);
   if (res < 0) {
-    cerr << "UniformExcitation::sendSelf() - channel failed to send data\n";
+    opserr << "UniformExcitation::sendSelf() - channel failed to send data\n";
     return res;
   }
       
   res = theMotion->sendSelf(commitTag, theChannel);
   if (res < 0) {
-    cerr << "UniformExcitation::sendSelf() - ground motion to send self\n";
+    opserr << "UniformExcitation::sendSelf() - ground motion to send self\n";
     return res;
   }
 
@@ -155,7 +155,7 @@ UniformExcitation::recvSelf(int commitTag, Channel &theChannel,
   static Vector data(5);
   int res = theChannel.recvVector(dbTag, commitTag, data);
   if (res < 0) {
-    cerr << "UniformExcitation::recvSelf() - channel failed to recv data\n";
+    opserr << "UniformExcitation::recvSelf() - channel failed to recv data\n";
     return res;
   }
 
@@ -170,7 +170,7 @@ UniformExcitation::recvSelf(int commitTag, Channel &theChannel,
       delete theMotion;
     theMotion = theBroker.getNewGroundMotion(motionClassTag);
     if (theMotion == 0) {
-      cerr << "UniformExcitation::recvSelf() - could not create a grond motion\n";
+      opserr << "UniformExcitation::recvSelf() - could not create a grond motion\n";
       return -3;
     }
 
@@ -184,7 +184,7 @@ UniformExcitation::recvSelf(int commitTag, Channel &theChannel,
   theMotion->setDbTag(motionDbTag);
   res = theMotion->recvSelf(commitTag, theChannel, theBroker);
   if (res < 0) {
-      cerr << "UniformExcitation::recvSelf() - motion could not receive itself \n";
+      opserr << "UniformExcitation::recvSelf() - motion could not receive itself \n";
       return res;
   }
 
@@ -193,7 +193,7 @@ UniformExcitation::recvSelf(int commitTag, Channel &theChannel,
 
 
 void 
-UniformExcitation::Print(ostream &s, int flag)
+UniformExcitation::Print(OPS_Stream &s, int flag)
 {
   s << "UniformExcitation - Need to Print the GroundMotion\n";
 }

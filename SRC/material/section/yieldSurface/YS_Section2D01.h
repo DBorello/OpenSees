@@ -17,7 +17,7 @@ class YS_Section2D01: public YieldSurfaceSection2d
 	
 	const Matrix &getInitialTangent(void);
 	SectionForceDeformation *getCopy (void);
-	void Print (ostream &s, int flag =0);
+	void Print (OPS_Stream &s, int flag =0);
 
   protected:
 	void getSectionStiffness(Matrix &Ks);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-10 23:04:00 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SeriesMaterial.cpp,v $
 
 // Written: MHS
@@ -39,6 +39,8 @@
 #include <stdlib.h>
 #include <MaterialResponse.h>
 
+#include <OPS_Globals.h>
+
 SeriesMaterial::SeriesMaterial(int tag, int num,
 			       UniaxialMaterial ** theMaterialModels,
 			       int maxIter, double tol)
@@ -52,43 +54,43 @@ SeriesMaterial::SeriesMaterial(int tag, int num,
     theModels = new UniaxialMaterial *[numMaterials];
 
     if (theModels == 0) {
-		g3ErrorHandler->fatal("%s -- failed to allocate material array",
-			"SeriesMaterial::SeriesMaterial");
+      opserr << "SeriesMaterial::SeriesMaterial -- failed to allocate material array\n";
+      exit(-1);
     }
 
-	int i;
+
+    int i;
     for (i = 0; i < numMaterials; i++) {
-		theModels[i] = theMaterialModels[i]->getCopy();
-	    if (theModels[i] == 0) {
-			g3ErrorHandler->fatal("%s -- failed to get copy of material %d",
-				"SeriesMaterial::SeriesMaterial", i);
-		}
+      theModels[i] = theMaterialModels[i]->getCopy();
+      if (theModels[i] == 0) {
+	opserr << "SeriesMaterial::SeriesMaterial -- failed to get copy of material: " << i << endln;
+	exit(-1);
+      }
     }
 
-	strain = new double [numMaterials];
-	if (strain == 0) {
-		g3ErrorHandler->fatal("%s -- failed to allocate strain array",
-			"SeriesMaterial::SeriesMaterial");
-	}
+    strain = new double [numMaterials];
+    if (strain == 0) {
+      opserr << "SeriesMaterial::SeriesMaterial -- failed to allocate strain array\n";
+      exit(-1);
+    }
+    
+    stress = new double [numMaterials];
+    if (stress == 0) {
+      opserr << "SeriesMaterial::SeriesMaterial -- failed to allocate stress array\n";
+      exit(-1);
+    }
 
-	stress = new double [numMaterials];
-	if (stress == 0) {
-		g3ErrorHandler->fatal("%s -- failed to allocate stress array",
-			"SeriesMaterial::SeriesMaterial");
-	}
+    flex = new double [numMaterials];
+    if (flex == 0) {
+      opserr << "SeriesMaterial::SeriesMaterial -- failed to allocate flex array\n";
+      exit(-1);
+    }
 
-	flex = new double [numMaterials];
-	if (flex == 0) {
-		g3ErrorHandler->fatal("%s -- failed to allocate flex array",
-			"SeriesMaterial::SeriesMaterial");
-	}
-
-	for (i = 0; i < numMaterials; i++) {
-		strain[i] = 0.0;
-		stress[i] = 0.0;
-		flex[i] = 0.0;
-	}
-
+    for (i = 0; i < numMaterials; i++) {
+      strain[i] = 0.0;
+      stress[i] = 0.0;
+      flex[i] = 0.0;
+    }
 }
 
 SeriesMaterial::SeriesMaterial()
@@ -351,8 +353,7 @@ SeriesMaterial::sendSelf(int cTag, Channel &theChannel)
   
   res = theChannel.sendVector(dataTag, cTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- failed to send data Vector",
-			    "SeriesMaterial::sendSelf");
+    opserr << "SeriesMaterial::sendSelf -- failed to send data Vector\n";
     return res;
   }
   
@@ -374,16 +375,14 @@ SeriesMaterial::sendSelf(int cTag, Channel &theChannel)
   
   res = theChannel.sendID(dataTag, cTag, classTags);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- failed to send classTags ID",
-			    "SeriesMaterial::sendSelf");
+    opserr << "SeriesMaterial::sendSelf -- failed to send classTags ID\n";
     return res;
   }
   
   for (i = 0; i < numMaterials; i++) {
     res = theModels[i]->sendSelf(cTag, theChannel);
     if (res < 0) {
-      g3ErrorHandler->warning("%s -- failed to send UniaxialMaterial %d",
-			      "SeriesMaterial::sendSelf", i);
+      opserr << "SeriesMaterial::sendSelf -- failed to send UniaxialMaterial: " << i << endln;
       return res;
     }
   }
@@ -403,8 +402,7 @@ SeriesMaterial::recvSelf(int cTag, Channel &theChannel,
 
   res = theChannel.recvVector(dataTag, cTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- failed to receive data Vector",
-			    "SeriesMaterial::recvSelf");
+    opserr << "SeriesMaterial::recvSelf -- failed to receive data Vector\n";
     return res;
   }
 
@@ -438,8 +436,7 @@ SeriesMaterial::recvSelf(int cTag, Channel &theChannel,
     numMaterials = (int)data(1);
     theModels = new UniaxialMaterial *[numMaterials];
     if (theModels == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate UniaxialMaterial array",
-			      "SeriesMaterial::recvSelf");
+      opserr << "SeriesMaterial::recvSelf -- failed to allocate UniaxialMaterial array\n";
       return -1;
     }
 
@@ -448,22 +445,19 @@ SeriesMaterial::recvSelf(int cTag, Channel &theChannel,
 
     strain = new double [numMaterials];
     if (strain == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate strain array",
-			      "SeriesMaterial::recvSelf");
+      opserr << "SeriesMaterial::recvSelf -- failed to allocate strain array\n";
       return -1;
     }
 
     stress = new double [numMaterials];
     if (stress == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate stress array",
-			      "SeriesMaterial::recvSelf");
+      opserr << "SeriesMaterial::recvSelf -- failed to allocate stress array\n";
       return -1;
     }
 
     flex = new double [numMaterials];
     if (flex== 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate flex array",
-			      "SeriesMaterial::recvSelf");
+      opserr << "SeriesMaterial::recvSelf -- failed to allocate flex array\n";
       return -1;
     }
   }
@@ -471,8 +465,7 @@ SeriesMaterial::recvSelf(int cTag, Channel &theChannel,
   ID classTags(2*numMaterials);
   res = theChannel.recvID(dataTag, cTag, classTags);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- failed to receive classTags ID",
-			    "SeriesMaterial::recvSelf");
+    opserr << "SeriesMaterial::recvSelf -- failed to receive classTags ID\n";
     return res;
   }
 
@@ -488,16 +481,14 @@ SeriesMaterial::recvSelf(int cTag, Channel &theChannel,
     }
     
     if (theModels[i] == 0) {
-      g3ErrorHandler->warning("%s -- failed to get a new UniaxialMaterial",
-			      "SeriesMaterial::recvSelf");
+      opserr << "SeriesMaterial::recvSelf -- failed to get a newUniaxialMaterial\n";
       return -1;
     }
     
     theModels[i]->setDbTag(classTags(i+numMaterials));
     res = theModels[i]->recvSelf(cTag, theChannel, theBroker);
     if (res < 0) {
-      g3ErrorHandler->warning("%s -- failed to receive UniaxialMaterial %d",
-			      "SeriesMaterial::recvSelf", i);
+      opserr << "SeriesMaterial::recvSelf -- failed to receive UniaxialMaterial: " << i << endln;
       return res;
     }
   }
@@ -506,12 +497,12 @@ SeriesMaterial::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-SeriesMaterial::Print(ostream &s, int flag)
+SeriesMaterial::Print(OPS_Stream &s, int flag)
 {
-    s << "\nSeriesMaterial, tag: " << this->getTag() << endl;
-    s << "\tUniaxial Componenets" << endl;
+    s << "\nSeriesMaterial, tag: " << this->getTag() << endln;
+    s << "\tUniaxial Componenets" << endln;
     for (int i = 0; i < numMaterials; i++)
-		s << "\t\tUniaxial Material, tag: " << theModels[i]->getTag() << endl;
+		s << "\t\tUniaxial Material, tag: " << theModels[i]->getTag() << endln;
 }
 
 Response*

@@ -65,7 +65,7 @@ InelasticYS2DGNL::InelasticYS2DGNL(int tag, // double a, double e, double i,
   
   
   if(ysEnd1==0) {
-      cout << "WARNING - InelasticYS2DGNL(): ys1 = 0" << endl;
+      opserr << "WARNING - InelasticYS2DGNL(): ys1 = 0" << endln;
   } else {
     ys1 =  ysEnd1->getCopy();
     ys1->setTransformation(2, 0, -1,  1);
@@ -75,7 +75,7 @@ InelasticYS2DGNL::InelasticYS2DGNL(int tag, // double a, double e, double i,
   }
   
   if(ysEnd2==0) {
-      cout << "WARNING - InelasticYS2DGNL(): ys2 = 0" << endl;
+      opserr << "WARNING - InelasticYS2DGNL(): ys2 = 0" << endln;
   } else {
     
     ys2 =  ysEnd2->getCopy();
@@ -107,7 +107,7 @@ int InelasticYS2DGNL::update()
     if (L == 0)
 	    return 0;
 	
-	// cout << "Update Called \n";
+	// opserr << "Update Called \n";
 	ys1->update();
 	ys2->update();		
 			
@@ -129,7 +129,7 @@ int InelasticYS2DGNL::update()
      getIncrNaturalDisp(disp);
 	 //getIncrLocalDisp(disp);   IMPORTANT - Do not change!!
 
-	 //cerr << "-> disp = " << disp;
+	 //opserr << "-> disp = " << disp;
      // Compute local incremental force
      force = Stiff*disp;
 
@@ -139,9 +139,8 @@ Vector trialForce(6);
      trialForce = eleForce_hist + force;
 
 	 // ys1->displayForcePoint(trialForce);
-	 // cin.get();
 
-	 // cout << "Trial Force = " << trialForce; cin.get();
+	 // opserr << "Trial Force = " << trialForce; cin.get();
 
 //////////////////////////////////////////////////////////////////////
 // Step 2: Check and plastify ends if required
@@ -170,12 +169,12 @@ Vector trialForce(6);
     	if(d1 == OUTSIDE)
 		{
     		ys1->setToSurface(eleForce, ys1->RadialReturn);
-		//cout <<" ys1 outside\n";
+		//opserr <<" ys1 outside\n";
 		}
     	else
 		{
     	    ys1->setToSurface(eleForce, ys1->ConstantYReturn);
-		//cout << "ys1 inside \n";
+		//opserr << "ys1 inside \n";
 		}
     }
 
@@ -185,12 +184,12 @@ Vector trialForce(6);
     	if(d2 == OUTSIDE)
 		{
     		ys2->setToSurface(eleForce, ys2->RadialReturn);
-		//cout << "ys2 outside\n";
+		//opserr << "ys2 outside\n";
 		}
     	else
 		{
     		ys2->setToSurface(eleForce, ys2->ConstantYReturn);
-		//cout << "ys2 inside\n";
+		//opserr << "ys2 inside\n";
 		}
     }
 	//cin.get();
@@ -204,7 +203,7 @@ Vector trialForce(6);
     	(eleForce(0) < 0 && eleForce_hist(0) > 0)
       )
     {
-    	cout << "NOTE: Axial force sign changed from converged state\n";
+    	opserr << "NOTE: Axial force sign changed from converged state\n";
      // nothing can be done about that
 //    	eleForce(0) =  eleForce_hist(0);
 //    	eleForce(3) =  eleForce_hist(3);
@@ -213,7 +212,7 @@ Vector trialForce(6);
     // check if the 2 force-points are on the same side in YS
     if(sign(eleForce(0)) == sign(eleForce(3))) // special case
     {
-		cout << "oops 1: element " << getTag() << " okay \n";
+		opserr << "oops 1: element " << getTag() << " okay \n";
 		// ys is already evolved
 		
 		// Stiff = Kt now
@@ -235,7 +234,7 @@ Vector trialForce(6);
         // the two P's should be same now, so Pavg should be = P's
         forceBalance(eleForce, 1); // shear
         if(sign(eleForce(0)) == sign(eleForce(3)))
-			cout << "oops 2: element " << getTag() << " not okay \n"; 
+			opserr << "oops 2: element " << getTag() << " not okay \n"; 
 	}
 
 	if(updateDebug)
@@ -252,8 +251,7 @@ Vector trialForce(6);
 	    	ys2->displayForcePoint(eleForce, 2);
 	    	
 	    	pView->doneImage();
-	    	cout << "Trial Force points plotted \n";
-	    	cin.get();
+	    	opserr << "Trial Force points plotted \n";
 		}
 	}
 	
@@ -270,7 +268,7 @@ bool	end1Drifts, end2Drifts;
 
 	if(!end1Plastify && !end2Plastify) // still elastic
 	{
-		// cout << "InelasticYS2DGNL::elasticCorrector - Trial Force Elastic" << endl;
+		// opserr << "InelasticYS2DGNL::elasticCorrector - Trial Force Elastic" << endln;
 		eleForce = trialForce;
 		return 0;
 	}
@@ -314,7 +312,7 @@ Vector totalForce(6);
 	}
 	else if(end1Plastify && end2Plastify)
 	{
-		// cout << "drift status both plastify = " << end1Drifts << " " << end2Drifts << endl; cin.get();
+		// opserr << "drift status both plastify = " << end1Drifts << " " << end2Drifts << endln; cin.get();
 	
    	   if( (end1Drifts && !end2Drifts))
      	{     		
@@ -365,7 +363,7 @@ Vector totalForce(6);
 	 	}
 	 	else
 	 	{
-	 	 	cerr << "InelasticYS2DGNL::predictor() - This condition should not happen\n";
+	 	 	opserr << "InelasticYS2DGNL::predictor() - This condition should not happen\n";
 	 	 	cin.get();
 	 	} */
 	 	
@@ -380,13 +378,11 @@ Vector totalForce(6);
 		}
 		else
 		{
-			cerr << "InelasticYS2DGNL::predictor() - didn't think of this condition\n";
-
-			cin.get();
+			opserr << "InelasticYS2DGNL::predictor() - didn't think of this condition\n";
 		}
 	}
 	
-	// cout << "RETURNING FROM PLASTIC PREDICTOR \n"; cin.get();
+	// opserr << "RETURNING FROM PLASTIC PREDICTOR \n"; cin.get();
 	
 	return 1;
 }
@@ -412,7 +408,7 @@ int driftOld;
 		{
 		 	end1drifts = false;
 		 	if(statusDebug)
-		 		cerr << "checkEndStatus(..) ["<<getTag()<<"] - End 1 shoots through\n";
+		 		opserr << "checkEndStatus(..) ["<<getTag()<<"] - End 1 shoots through\n";
 		}
 		else if(driftOld == WITHIN)
 		{
@@ -421,12 +417,12 @@ int driftOld;
     		// drifted
 		 	end1drifts = true;
 		 	if(statusDebug)
-		 		cerr << "checkEndStatus(..) ["<<getTag()<<"] - End 1 drifts\n";
+		 		opserr << "checkEndStatus(..) ["<<getTag()<<"] - End 1 drifts\n";
 		 	
 		}
 		else
 		{
-		 	cerr << "WARNING - checkEndStatus end1 force_hist outside ["<<getTag()<<"]\n";
+		 	opserr << "WARNING - checkEndStatus end1 force_hist outside ["<<getTag()<<"]\n";
 		 	//cin.get();
 			//ys1->setToSurface(eleForce, ys1->ConstantYReturn);
 		}
@@ -439,11 +435,11 @@ int driftOld;
         	if(driftOld != INSIDE)
         	{
         		double drift = ys1->getTrialDrift(trialForce);
-        		cerr << "checkEndStatus(..) ["<<getTag()<<"] - End 1 unloading "<<drift<<" \n";
+        		opserr << "checkEndStatus(..) ["<<getTag()<<"] - End 1 unloading "<<drift<<" \n";
 			// cin.get();
         	}
         	else
-        		cerr << "checkEndStatus(..) ["<<getTag()<<"] - End 1 remains elastic\n";
+        		opserr << "checkEndStatus(..) ["<<getTag()<<"] - End 1 remains elastic\n";
     	}
     }
 
@@ -459,19 +455,19 @@ int driftOld;
 		 	end2drifts = false;
 
 		 	if(statusDebug)
-		 		cerr << "checkEndStatus(..) ["<<getTag()<<"] - End 2 shoots through\n";
+		 		opserr << "checkEndStatus(..) ["<<getTag()<<"] - End 2 shoots through\n";
 		}
 		else if(driftOld == WITHIN)
 		{
 		 	end2drifts = true;
 		 	if(statusDebug)
-		 		cerr << "checkEndStatus(..) ["<<getTag()<<"] - End 2 drifts\n";
+		 		opserr << "checkEndStatus(..) ["<<getTag()<<"] - End 2 drifts\n";
 		}
 		else
 		{
 
 
-		 	cerr << "WARNING - checkEndStatus end2 force_hist outside ["<<getTag()<<"]\n";
+		 	opserr << "WARNING - checkEndStatus end2 force_hist outside ["<<getTag()<<"]\n";
 
 		 	// cin.get();
 			// this condition could happen due to force balance at
@@ -488,11 +484,11 @@ int driftOld;
     		if(driftOld != INSIDE)
     		{
     			double drift = ys2->getTrialDrift(trialForce);
-    			cerr << "checkEndStatus(..) ["<<getTag()<<"] - End 2 unloading "<<drift<<"\a \n";
+    			opserr << "checkEndStatus(..) ["<<getTag()<<"] - End 2 unloading "<<drift<<"\a \n";
 			//cin.get();
         	}
         	else
-        		cerr << "checkEndStatus(..) ["<<getTag()<<"] - End 2 remains elastic\n";
+        		opserr << "checkEndStatus(..) ["<<getTag()<<"] - End 2 remains elastic\n";
 
     	}
     }
@@ -534,7 +530,7 @@ void InelasticYS2DGNL::forceBalance(Vector &eleforce, int algo)
 			break;
 		}
 		default:
-			cerr << "InelasticYS2DGNL::forceBalance - unkown algo\n";
+			opserr << "InelasticYS2DGNL::forceBalance - unkown algo\n";
 			break;
 	}
 
@@ -561,7 +557,7 @@ void InelasticYS2DGNL::forceBalance(Vector &eleforce, int algo)
 
 const Matrix &InelasticYS2DGNL::getTangentStiff(void)
 {
-	// cout << " getTangentStiff Called \n";
+	// opserr << " getTangentStiff Called \n";
 
 	if(!init)
 	{
@@ -574,7 +570,7 @@ const Matrix &InelasticYS2DGNL::getTangentStiff(void)
 	
 	transformToGlobal(Stiff);
 	
-//	cerr << "Kt = " << Stiff;
+//	opserr << "Kt = " << Stiff;
 	
 	return Stiff;
 }
@@ -583,7 +579,7 @@ const Matrix &InelasticYS2DGNL::getTangentStiff(void)
 
 const Vector &InelasticYS2DGNL::getResistingForce(void)
 {
-	// cout << "getResistingForce Called \n";
+	// opserr << "getResistingForce Called \n";
 
 	if(!init)
 	{
@@ -623,25 +619,25 @@ const Vector &InelasticYS2DGNL::getResistingForce(void)
 
     if(pdebug)
     {
-    	cout << "Returning Force \n";
-    	cout << force;
+    	opserr << "Returning Force \n";
+    	opserr << force;
     }
 
     storage = 0;
     if(getTag()==1 || getTag() ==3)
     {
-    	// cout << "EleForce - global [" << getTag() << "]\n";
+    	// opserr << "EleForce - global [" << getTag() << "]\n";
 
     	// for(int i = 0; i<6; i++)
 
-    	// cerr << force[2] << " ";
+    	// opserr << force[2] << " ";
     	storage += force[2];
-    	//cerr << "\n";
+    	//opserr << "\n";
     }
 
-   // cerr << m_Iter << " RF = " << force; //cin.get();
+   // opserr << m_Iter << " RF = " << force; //cin.get();
 //    if(getTag()==3)
-//    	cerr << "\n" << storage;
+//    	opserr << "\n" << storage;
 	return force;
 }
 
@@ -661,10 +657,10 @@ void InelasticYS2DGNL::plastifyOneEnd(int end, YieldSurface_BC *ys,  Vector &tri
 // for 1 end plastifying G' is such that the numerator is uncoupled from
 // the other end
 
-	// cout << "InelasticYS2DGNL::plastifyOneEnd " << endl;
+	// opserr << "InelasticYS2DGNL::plastifyOneEnd " << endln;
 	if(plastkDebug)
-		cout << "----------------------------------------------------------------------"
-		     << endl;
+		opserr << "----------------------------------------------------------------------"
+		     << endln;
 
 Vector trialForce(6);
 	// copy trial_force so that it does not get modified
@@ -693,21 +689,20 @@ bool use_Kr = true;
 
 		ys->setToSurface(surfaceForce, ys->RadialReturn);  //dFReturn, ConstantYReturn, RadialReturn
 		// this part can get crazy!!
-		// cout << "    -------------- HERE? ------------ \n";
-		// cout << "surface drift = " << ys->getTrialDrift(surfaceForce) << endl; cin.get();
+		// opserr << "    -------------- HERE? ------------ \n";
+		// opserr << "surface drift = " << ys->getTrialDrift(surfaceForce) << endln; cin.get();
 
 		ys->getTrialGradient(G, surfaceForce);
 
 		if(plastkDebug)
 		{
-			cout << "Element (" << getTag() << ") plastifyEnd shoots through end: " << end << "\n";
+			opserr << "Element (" << getTag() << ") plastifyEnd shoots through end: " << end << "\n";
 		}
 	}
 	// Now we know that force point has drifted from the surface
 	else if(driftOld != WITHIN)
 	{
-	 	cerr << "WARNING: InelasticYS2DGNL::plastifyOneEnd = " << end << " - driftOld outside [" << getTag()<<"]\n";
-	 	cin.get();
+	 	opserr << "WARNING: InelasticYS2DGNL::plastifyOneEnd = " << end << " - driftOld outside [" << getTag()<<"]\n";
 	}
 	else
 	{
@@ -715,7 +710,7 @@ bool use_Kr = true;
 		surfaceForce =  eleForce_hist;
 
 		if(plastkDebug)
-			cout << "Element (" << getTag() << ") plastifyEnd (" << end << ") drifts from surface\n";
+			opserr << "Element (" << getTag() << ") plastifyEnd (" << end << ") drifts from surface\n";
 	}
 
 	/*if(driftOld==INSIDE)
@@ -723,7 +718,7 @@ bool use_Kr = true;
 		surfaceForce = trial_force;
 		ys->setToSurface(surfaceForce, ys->RadialReturn);
 		total_force = surfaceForce;
-		//cout << "returning surface force\n"; cin.get();
+		//opserr << "returning surface force\n"; cin.get();
 		return;
 	}*/
 
@@ -734,8 +729,8 @@ Vector dF_in(6);
 Matrix Ktp(6,6); //Ke(6,6); // want to leave 'K' unmodified for now
 
 	int drift_test = ys->getTrialForceLocation(surfaceForce);
-//	cout << " force_hist = " << eleForce_hist;
-//	cout << " drift_test = " << drift_test << endl;
+//	opserr << " force_hist = " << eleForce_hist;
+//	opserr << " drift_test = " << drift_test << endln;
 
 	Ktp = K; //includes Ke + Kg
 	ys->addPlasticStiffness(Ktp);
@@ -753,7 +748,7 @@ Matrix Ktp(6,6); //Ke(6,6); // want to leave 'K' unmodified for now
 
 	if(lamda < 0)
 	{
-		//cout << "lamda = " << lamda << endl;
+		//opserr << "lamda = " << lamda << endln;
 		//cin.get();
 		use_Kr = false;
 		lamda = 0.0;
@@ -796,11 +791,11 @@ Vector dF_t(6);
 
 	if(plastkDebug)
     {
-		cout << " InelasticYS2DGNL::plastifyOneEnd - tag = " << getTag() << "\n";
+		opserr << " InelasticYS2DGNL::plastifyOneEnd - tag = " << getTag() << "\n";
 
-    	cout << "lamda = " << lamda << "\n";
-		cout << " G = " << G << endl;
-		cout << "delP = " << delP <<endl;
+    	opserr << "lamda = " << lamda << "\n";
+		opserr << " G = " << G << endln;
+		opserr << "delP = " << delP <<endln;
 		// cin.get();
     }
 	
@@ -811,7 +806,7 @@ Vector dF_t(6);
 	if(split_step)
 		use_Kr = false;	
 		
-	// cerr << "Plastify One End, not using Kr\n";
+	// opserr << "Plastify One End, not using Kr\n";
 		
 	if(use_Kr)
 	{
@@ -824,7 +819,7 @@ Vector dF_t(6);
 		// cin.get();
 	}
 	// else
-	//	 cerr << "NOT USING Kr " << endl;
+	//	 opserr << "NOT USING Kr " << endln;
 
 }
 
@@ -834,7 +829,7 @@ void InelasticYS2DGNL::splitStep(int end_shoot, YieldSurface_BC *ys_shoots, Yiel
 {
 // first we need to find a factor by which to split the step
 
-//	cout << " InelasticYS2DGNL::splitStep(" << end_shoot << ")\n"; // cin.get();
+//	opserr << " InelasticYS2DGNL::splitStep(" << end_shoot << ")\n"; // cin.get();
 	
 	split_step = true;
 	
@@ -842,7 +837,7 @@ Vector F1(6);
 	F1 =  trial_force;
 	ys_shoots->setToSurface(F1, ys1->dFReturn);
 	
-	// cout << "trial force location " << ys_shoots->getTrialForceLocation(F1) << endl; cin.get();
+	// opserr << "trial force location " << ys_shoots->getTrialForceLocation(F1) << endln; cin.get();
 	
 int Pi = 0, Mi = 2;
 int p_shoot = 0, m_shoot = 2;
@@ -871,10 +866,10 @@ double t= num/denom;
 	
 	
 	
-	//cout << "Splitting step by - " << t << endl ;
-	//cout << "Original trial force = " << trial_force;
+	//opserr << "Splitting step by - " << t << endln ;
+	//opserr << "Original trial force = " << trial_force;
 	trialForce2 = eleForce_hist + t*(trial_force - eleForce_hist);
-	//cout << "Drift one end by trial force = " <<  trialForce2;
+	//opserr << "Drift one end by trial force = " <<  trialForce2;
 	
 Vector f_surface = eleForce_hist;
 int count =0;
@@ -884,15 +879,15 @@ int count =0;
     	
 
     	this->forceBalance(step_force, 1);    	
-    	// cout << "After force balance, force = " << step_force;    	
-    	// cout << "Drift both ends, trialForce = " <<  trial_force
+    	// opserr << "After force balance, force = " << step_force;    	
+    	// opserr << "Drift both ends, trialForce = " <<  trial_force
     	// << "surface force = " << step_force;
     	
     	/* Vector df =   trial_force - step_force;
-    	// cout << "df = " << df;
+    	// opserr << "df = " << df;
     	
     	double ratio =  fabs(df(m_shoot)/df(m_drift));
-    	// cout << "ratio = " << ratio << endl; // cin.get();
+    	// opserr << "ratio = " << ratio << endln; // cin.get();
     	
     	if(ratio > 0.75)
     		break;
@@ -900,22 +895,22 @@ int count =0;
     	
     	if(count > 100)
     	{
-    		cout << "WARNING: InelasticYS2DGNL::splitStep - artificial hardening not converging\n";
+    		opserr << "WARNING: InelasticYS2DGNL::splitStep - artificial hardening not converging\n";
     		break;
     	}
     	
     	f_surface = step_force;   */
 	}
 	
-//	cout << "Count = " << count << endl; // cin.get();
+//	opserr << "Count = " << count << endln; // cin.get();
 // now drift both ends by the remainder amount	
 	
 	trialForce2 = step_force + (1-t)*(trial_force - eleForce_hist);
 	
 	if(ys1->getTrialForceLocation(trialForce2) <0)
-		cerr << "oops - 1\n";
+		opserr << "oops - 1\n";
 	if(ys2->getTrialForceLocation(trialForce2) <0)
-		cerr << "oops - 2\n";	
+		opserr << "oops - 2\n";	
 	
 	// check the status first!
 //	this->driftBothEnds(trialForce2, step_force, K, total_force);
@@ -953,7 +948,7 @@ Matrix Ktp(6,6);
 
 	if(lamda < 0)
 	{
-		//cout << "lamda = " << lamda << endl;
+		//opserr << "lamda = " << lamda << endln;
 		//cin.get();
 
 		lamda = 0.0;
@@ -1028,10 +1023,10 @@ Matrix Ktp(6,6);
 	Lm(0) = G1(0,0)*dF_in(0) + G1(2,0)*dF_in(2);
 	Lm(1) = G2(3,0)*dF_in(3) + G2(5,0)*dF_in(5);	
 	
-	//cout << "dF = "  << dF_in;
-	//cout << "G  = "  << G;
-	//cout << "Lm = " << Lm;
-	//cout << "KI = " << KI;
+	//opserr << "dF = "  << dF_in;
+	//opserr << "G  = "  << G;
+	//opserr << "Lm = " << Lm;
+	//opserr << "KI = " << KI;
 	
 	double mx = max_(Lm(0), Lm(1));
 	double mn = min_(Lm(0), Lm(1));
@@ -1039,7 +1034,7 @@ Matrix Ktp(6,6);
 	
 //	 if(    fabs(mn/mx)*100 < 25)
 	{
-//		cout << "BALANCING Lm"<<endl;
+//		opserr << "BALANCING Lm"<<endln;
 //		Lm(0) = mx;
 //		Lm(1) = mx;
 		
@@ -1051,7 +1046,7 @@ Matrix Ktp(6,6);
 	
 	Lm = Lm/KI;
 	
-	//cout << " Lamda = " << Lm; //cin.get();
+	//opserr << " Lamda = " << Lm; //cin.get();
 	
 	double lamda1 = Lm(0);
 	double lamda2 = Lm(1);
@@ -1062,7 +1057,7 @@ Matrix Ktp(6,6);
 
 	if(lamda1 < 0 || lamda2 < 0)
 	{
-	 	//cout << "lamda1 = " << lamda1 << " lamda2 = " << lamda2 << endl;
+	 	//opserr << "lamda1 = " << lamda1 << " lamda2 = " << lamda2 << endln;
 	 	//cin.get();	
 	 	
 
@@ -1094,7 +1089,7 @@ Vector dF_t(6);
 	if(use_Kr)
 	{
 		Matrix Kr(6,6);
-		// cout << "  ----- USING KR -----" << endl;
+		// opserr << "  ----- USING KR -----" << endln;
 		Matrix inv(2,2);
 
 		inv(0,0) =    KI(1,1);
@@ -1136,10 +1131,10 @@ void InelasticYS2DGNL::plastifyBothEnds(Vector &trial_force, Vector &incrDisp,
 									 Matrix &K, Vector &total_force)
 {
 
-	// cerr << "InelasticYS2DGNL::plastifyBothEnds " << endl;
+	// opserr << "InelasticYS2DGNL::plastifyBothEnds " << endln;
 	if(plastkDebug)
-		cout << "----------------------------------------------------------------------"
-		     << endl;
+		opserr << "----------------------------------------------------------------------"
+		     << endln;
 
 Vector trialForce(6);
 	// copy trial_force so that it does not get modified
@@ -1177,14 +1172,13 @@ int driftOld = ys1->getCommitForceLocation();
 
 		if(plastkDebug)
 		{
-			cout << "Element (" << getTag() << ") plastifyBothEnds shoots through end: " << end << "\n";
+			opserr << "Element (" << getTag() << ") plastifyBothEnds shoots through end: " << end << "\n";
 		}
 	}
 	// Now we know that force point has drifted from the surface
 	else if(driftOld != WITHIN)
 	{
-	 	cerr << "WARNING: InelasticYS2DGNL::plastifyBothEnds = " << end << " - driftOld outside [" << getTag()<<"]\n";
-	 	cin.get();
+	 	opserr << "WARNING: InelasticYS2DGNL::plastifyBothEnds = " << end << " - driftOld outside [" << getTag()<<"]\n";
 	}
 	else
 	{
@@ -1194,7 +1188,7 @@ int driftOld = ys1->getCommitForceLocation();
 			surfaceForce(i) =  eleForce_hist(i);
 
 		if(plastkDebug)
-			cout << "Element (" << getTag() << ") plastifyBothEnds (" << end << ") drifts from surface\n";
+			opserr << "Element (" << getTag() << ") plastifyBothEnds (" << end << ") drifts from surface\n";
 	}
 // end1 stuff over	
 	
@@ -1222,21 +1216,20 @@ end = 2;
 		// this part can get crazy!!  - FIXED
 		// actually, if dF return is used, trial force in different iterations can change
 		// radial-return might be better to use		
-	     // cout << "surface drift = " << ys2->getTrialDrift(surfaceForce) << endl; cin.get();
+	     // opserr << "surface drift = " << ys2->getTrialDrift(surfaceForce) << endln; cin.get();
 
 			ys2->getTrialGradient(G2, surfaceForce);
 
 		if(plastkDebug)
 
 		{
-			cout << "Element (" << getTag() << ") plastifyBothEnds shoots through end: " << end << "\n";
+			opserr << "Element (" << getTag() << ") plastifyBothEnds shoots through end: " << end << "\n";
 		}
 	}
 	// Now we know that force point has drifted from the surface
 	else if(driftOld != WITHIN)
 	{
-	 	cerr << "WARNING: InelasticYS2DGNL::plastifyBothEnds = " << end << " - driftOld outside [" << getTag()<<"]\n";
-	 	cin.get();
+	 	opserr << "WARNING: InelasticYS2DGNL::plastifyBothEnds = " << end << " - driftOld outside [" << getTag()<<"]\n";
 	}
 	else
 	{
@@ -1246,7 +1239,7 @@ end = 2;
 			surfaceForce(i) =  eleForce_hist(i);
 
 		if(plastkDebug)
-			cout << "Element (" << getTag() << ") plastifyBothEnds (" << end << ") drifts from surface\n";
+			opserr << "Element (" << getTag() << ") plastifyBothEnds (" << end << ") drifts from surface\n";
 	}
 // end2 stuff over	
 	
@@ -1257,7 +1250,7 @@ end = 2;
 		ys1->setToSurface(surfaceForce, ys1->ConstantYReturn);
 		ys2->setToSurface(surfaceForce, ys2->ConstantYReturn);
 		total_force = surfaceForce;
-		//cout << "returning surface force\n"; cin.get();
+		//opserr << "returning surface force\n"; cin.get();
 		return;
 	}*/
 	
@@ -1269,7 +1262,7 @@ bool force_bal = false;
 	
 	if( fabs(surfaceForce(0)) != fabs(surfaceForce(3)))
 	{
-		//cout << "FORCE IMBALANCE \n";
+		//opserr << "FORCE IMBALANCE \n";
 		force_bal = true;
 
 		this->forceBalance(surfaceForce, 1);
@@ -1287,9 +1280,9 @@ bool force_bal = false;
      	G(i, 1) = G2(i,0);
     }
 	
-    //cout << "Matrix G = " << G;
-	// cout << "G1 = " << G1;
-	// cout << "G2 = " << G2;
+    //opserr << "Matrix G = " << G;
+	// opserr << "G1 = " << G1;
+	// opserr << "G2 = " << G2;
 	
 // now to make the shear term consistent
 // do axial force balancing later	
@@ -1305,9 +1298,9 @@ Vector dF_in(6);
 	
 	/*if(force_bal)
 	{
-		cout << "df_in before f_bal = " << dF_in;
+		opserr << "df_in before f_bal = " << dF_in;
 		double avg = (dF_in(2) + dF_in(5)) / 2;
-		cout << "avg = " << avg << endl;
+		opserr << "avg = " << avg << endln;
 		
 		dF_in(2) = avg;
 
@@ -1318,15 +1311,15 @@ Vector dF_in(6);
 		// this->forceBalance(dF_in,1);
 	}*/
 
-	// cout << "trialForce   = " << trialForce;
-	// cout << "surfaceForce = " << surfaceForce;
-	// cout << "dF_in        = " << dF_in << endl;
+	// opserr << "trialForce   = " << trialForce;
+	// opserr << "surfaceForce = " << surfaceForce;
+	// opserr << "dF_in        = " << dF_in << endln;
 
 Matrix Ktp(6,6); //Ke(6,6); // want to leave 'K' unmodified for now
 
 //	int drift_test = ys->getTrialForceLocation(surfaceForce);
-//	cout << " force_hist = " << eleForce_hist;
-//	cout << " drift_test = " << drift_test << endl;
+//	opserr << " force_hist = " << eleForce_hist;
+//	opserr << " drift_test = " << drift_test << endln;
 
 	Ktp = K; //includes Ke + Kg
 
@@ -1353,21 +1346,21 @@ Matrix Ktp(6,6); //Ke(6,6); // want to leave 'K' unmodified for now
 		Lm(1) = mn;
 	}*/
 	
-	//cout << "dF = " << dF_in;
-	//cout << "Lm = " << Lm;
-	//cout << "KI = " << KI;
+	//opserr << "dF = " << dF_in;
+	//opserr << "Lm = " << Lm;
+	//opserr << "KI = " << KI;
 
 	
 	Lm = Lm/KI;
 	
-	//cout << " Lamda = " << Lm;  // cin.get();
+	//opserr << " Lamda = " << Lm;  // cin.get();
 	
 	double lamda1 = Lm(0);
 	double lamda2 = Lm(1);
 	
 	
-	// cout << "KI = " << KI;
-	// cout << "lamda = " << lamda1 << " " << lamda2 << endl;
+	// opserr << "KI = " << KI;
+	// opserr << "lamda = " << lamda1 << " " << lamda2 << endln;
 
 
 	
@@ -1377,7 +1370,7 @@ Matrix Ktp(6,6); //Ke(6,6); // want to leave 'K' unmodified for now
 	// happens when one end is shooting through and other drifting
 	if(lamda1 < 0 || lamda2 < 0)
 	{
-		//~ cout << "lamda = " << lamda1 << " " << lamda2 << endl;
+		//~ opserr << "lamda = " << lamda1 << " " << lamda2 << endln;
 		// cin.get();
 		use_Kr = false;
 		
@@ -1433,10 +1426,10 @@ Vector dF_t(6);
 	
 	if(plastkDebug)
     {
-		cout << " InelasticYS2DGNL::plastifyOneEnd - tag = " << getTag() << "\n";
-    	cout << "lamda = " << lamda1 << " " << lamda2 << "\n";
-		cout << " G = " << G << endl;
-		cout << "delP = " << delP <<endl;
+		opserr << " InelasticYS2DGNL::plastifyOneEnd - tag = " << getTag() << "\n";
+    	opserr << "lamda = " << lamda1 << " " << lamda2 << "\n";
+		opserr << " G = " << G << endln;
+		opserr << "delP = " << delP <<endln;
 		// cin.get();
     }
 
@@ -1472,18 +1465,18 @@ Vector dF_t(6);
 		Matrix K1 = K*Gn1;
 		Kr = K1*(G^K);
 		//Kr = K*G*(G^K)*inv;
-		// cout << "factor = " << factor << endl; cin.get();
+		// opserr << "factor = " << factor << endln; cin.get();
 		
 		Stiff = Stiff - Kr;
 		
-		// cout << Stiff;
+		// opserr << Stiff;
 		
 		// F1 = (Stiff)*incrDisp + surfaceForce;
 		// ys->displayForcePoint(F1, 3); 
 		// cin.get();
 	}
 //	else
-//		cout << "NOT USING Kr " << endl;
+//		opserr << "NOT USING Kr " << endln;
 	
 	
 }
@@ -1495,21 +1488,21 @@ int InelasticYS2DGNL::commitState()
 {
 
 	 if(pdebug)
-		cout << " ############# commit ############ ["<< getTag() << "]\n";
+		opserr << " ############# commit ############ ["<< getTag() << "]\n";
 	//cin.get();
 	/*bool end1drifts, end2drifts;
 	this->checkEndStatus(end1drifts, end2drifts, eleForce);
 
 	if(plastkDebug)
 	{
-		cout << "End1Plastify = " << end1Plastify << ", End2Plastify = " << end2Plastify << "\n";
-		cout << "End1Drifts   = " << end1drifts   << ", End2Drifts   = " << end2drifts   << "\n";
-		cout << " ------------------------------------\n\n";
+		opserr << "End1Plastify = " << end1Plastify << ", End2Plastify = " << end2Plastify << "\n";
+		opserr << "End1Drifts   = " << end1drifts   << ", End2Drifts   = " << end2drifts   << "\n";
+		opserr << " ------------------------------------\n\n";
 	}*/
 	//cin.get();
 //	if(getTag()==3)
 //	{
-//		cout << eleForce;
+//		opserr << eleForce;
 //		cin.get();
 //	}
 
@@ -1538,9 +1531,9 @@ int InelasticYS2DGNL::commitState()
     	pView->doneImage();
 	}
 
-	// cout << "--- commit ---\n"; cin.get();
+	// opserr << "--- commit ---\n"; cin.get();
 
-	//if(getTag()==3) cerr << storage << "000000";
+	//if(getTag()==3) opserr << storage << "000000";
 
 	return 0;
 }
@@ -1555,7 +1548,7 @@ void InelasticYS2DGNL::getLocalMass(Matrix &M)
 {
 	if(massDof < 0)
     {
-		cerr << "Element2dGNL::getMass - Distributed mass not implemented\n";
+		opserr << "Element2dGNL::getMass - Distributed mass not implemented\n";
 	    M.Zero();
     }
     else if(massDof == 0)//this cond. is taken care of already
@@ -1630,7 +1623,7 @@ ys2->displaySelf(*pView, 10, 1);
 pView->doneImage();
 }
 else
-		cerr << "WARNING: InelasticYS2DGNL::createView - Renderer not available\n";
+		opserr << "WARNING: InelasticYS2DGNL::createView - Renderer not available\n";
 #endif   // Boris Jeremic added 23Oct2002 
 
 }
@@ -1645,7 +1638,7 @@ void InelasticYS2DGNL::createView(char *title, WindowManager *theWM, char displa
 	pView =	theWM->getRenderer(title, *theMap);
 	//pView = new OpenGLRenderer(title, *theMap);
 	if(!pView)
-		cerr << "WARNING: InelasticYS2DGNL::createView - Renderer not available\n";
+		opserr << "WARNING: InelasticYS2DGNL::createView - Renderer not available\n";
 	//theWM->setRenderer(*pView);	
 		
 	if(pView)
@@ -1665,7 +1658,7 @@ void InelasticYS2DGNL::createView(char *title, WindowManager *theWM, char displa
 }
 */
 
-void InelasticYS2DGNL::Print(ostream &s, int flag)
+void InelasticYS2DGNL::Print(OPS_Stream &s, int flag)
 {
     s << "\nElement No: " << this->getTag();
     s << " type: InelasticYS2DGNL  iNode: " << connectedExternalNodes(0);
@@ -1688,7 +1681,7 @@ int InelasticYS2DGNL::displaySelf(Renderer &theViewer, int displayMode, float fa
     // first determine the two end points of the element based on
     // the display factor (a measure of the distorted image)
     // store this information in 2 3d vectors v1 and v2
-    //cerr << "Inside display self mode: " << displayMode << " fact " << fact <<"\n";
+    //opserr << "Inside display self mode: " << displayMode << " fact " << fact <<"\n";
   this->UpdatedLagrangianBeam2D::displaySelf(theViewer, displayMode, fact);
 
   const Vector &end1Crd = end1Ptr->getCrds();
@@ -1813,7 +1806,7 @@ Vector trialForce(6);
 //	int driftOld = ys1->getTrialForceLocation(elasticForce);
 //    if(driftOld == OUTSIDE)
 //	{
-//	 	cerr << "WARNING: InelasticYS2DGNL::plastifyBothEnds - end1 driftOld outside\n";
+//	 	opserr << "WARNING: InelasticYS2DGNL::plastifyBothEnds - end1 driftOld outside\n";
 
 //	 	cin.get();
 //	}
@@ -1830,7 +1823,7 @@ Vector trialForce(6);
 //	driftOld = ys2->getTrialForceLocation(elasticForce);
 //    if(driftOld == OUTSIDE)
 //	{
-//	 	cerr << "WARNING: InelasticYS2DGNL::plastifyBothEnds - end2 driftOld outside\n";
+//	 	opserr << "WARNING: InelasticYS2DGNL::plastifyBothEnds - end2 driftOld outside\n";
 //	 	cin.get();
 //	}
 	//!! ys2->setToSurface(elasticForce, ys2->ConstantYReturn);

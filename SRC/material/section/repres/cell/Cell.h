@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/cell/Cell.h,v $
                                                                         
                                                                         
@@ -32,7 +32,7 @@
 #ifndef Cell_h 
 #define Cell_h 
 
-#include <iostream.h>
+#include <OPS_Globals.h>
 
 class Vector;
 
@@ -50,8 +50,8 @@ class Cell
     virtual        double getArea              (void) const = 0;
     virtual const  Vector &getCentroidPosition (void) = 0;
  
-    virtual void   Print(ostream &s, int flag =0) const = 0;   
-    friend ostream &operator<<(ostream &s, const Cell &Cell);    
+    virtual void   Print(OPS_Stream &s, int flag =0) const = 0;   
+    friend OPS_Stream &operator<<(OPS_Stream &s, const Cell &Cell);    
     
   protected:
     

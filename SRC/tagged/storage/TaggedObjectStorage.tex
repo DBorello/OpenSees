@@ -34,7 +34,7 @@ obtain access to the components. \\
 \indent {\em virtual TaggedObjectIter \&getComponents(void) =0;}\\
 \indent {\em virtual TaggedObjectStorage *getEmptyCopy(void) =0;}\\
 \indent {\em virtual void clearAll(bool invokeDestructor = true) =0;}\\
-\indent {\em virtual void Print(ostream \&s, int flag =0) =0;}\\
+\indent {\em virtual void Print(OPS_Stream \&s, int flag =0) =0;}\\
 
 \noindent {\bf Constructor} \\
 \indent {\em TaggedObjectStorage();} \\
@@ -84,7 +84,7 @@ To return an empty copy of the container. \\
 To remove all objects from the container and {\bf to invoke the
 destructor on these objects} if {\em invokeDestructor} is {\em true}. \\
 
-\indent {\em virtual void Print(ostream \&s, int flag =0) =0;}\\
+\indent {\em virtual void Print(OPS_Stream \&s, int flag =0) =0;}\\
 To invoke {\em Print(s,flag)} on all objects which have been added to
 the container. 
 

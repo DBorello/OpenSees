@@ -55,7 +55,7 @@ class RMC01YieldSurface : public YieldSurface
     YieldSurface *newObj();  //create a clone of itself
     
     RMC01YieldSurface ( ) {}    // Default constructor
-    ~RMC01YieldSurface ( );     // Destructor
+    virtual ~RMC01YieldSurface ( );     // Destructor
 
     double f(const EPState *EPS) const;
     tensor dFods(const EPState *EPS) const;
@@ -67,13 +67,13 @@ class RMC01YieldSurface : public YieldSurface
     // Redefine 1st derivative of F over tensorial internal variables
 //    tensor xi_t1(const EPState *EPS) const;
 
-    void print() { cout << *this; }; 
+    void print() { opserr << *this; }; 
   
     //================================================================================
     // Overloaded Insertion Operator
     // prints an RMC01 YieldSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const RMC01YieldSurface & YS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const RMC01YieldSurface & YS);
 
 };
 

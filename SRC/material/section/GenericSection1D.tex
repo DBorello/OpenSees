@@ -46,7 +46,7 @@ int code);} \\
 \&theChannel); }\\
 \indent {\em int recvSelf (int commitTag, Channel \&theChannel, 
 FEM\_ObjectBroker \&theBroker); }\\
-\indent {\em void Print (ostream \&s, int flag = 0);} \\
+\indent {\em void Print (OPS_Stream \&s, int flag = 0);} \\
 
 \noindent {\bf Constructor}  \\
 \indent {\em GenericSection1D (int tag, UniaxialMaterial \&m,
@@ -122,7 +122,7 @@ FILL IN. \\
 		 FEM\_ObjectBroker \&theBroker); }\\
 FILL IN. \\
 
-\indent {\em void Print (ostream \&s, int flag = 0);} \\
+\indent {\em void Print (OPS_Stream \&s, int flag = 0);} \\
 Prints to the stream {\em s} the object's {\em tag}, then invokes
 {\em Print()} on the UniaxialMaterial using the same values of {\em s}
 and {\em flag}. \\

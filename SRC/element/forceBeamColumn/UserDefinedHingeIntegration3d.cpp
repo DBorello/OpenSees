@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-12-19 21:06:24 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/UserDefinedHingeIntegration3d.cpp,v $
 
 #include <UserDefinedHingeIntegration3d.h>
@@ -48,18 +48,18 @@ UserDefinedHingeIntegration3d::UserDefinedHingeIntegration3d(int npL,
   int i;
   for (i = 0; i < npL; i++) {
     if (ptL(i) < 0.0 || ptL(i) > 1.0)
-      cerr << "UserDefinedHingeIntegration3d::UserDefinedHingeIntegration3d -- point lies outside [0,1]" << endl;
+      opserr << "UserDefinedHingeIntegration3d::UserDefinedHingeIntegration3d -- point lies outside [0,1]" << endln;
     if (wtL(i) < 0.0 || wtL(i) > 1.0)
-      cerr << "UserDefinedHingeIntegration3d::UserDefinedHingeIntegration3d -- weight lies outside [0,1]" << endl;
+      opserr << "UserDefinedHingeIntegration3d::UserDefinedHingeIntegration3d -- weight lies outside [0,1]" << endln;
     ptsL(i) = ptL(i);
     wtsL(i) = wtL(i);
   }
 
   for (i = 0; i < npR; i++) {
     if (ptR(i) < 0.0 || ptR(i) > 1.0)
-      cerr << "UserDefinedHingeIntegration3d::UserDefinedHingeIntegration3d -- point lies outside [0,1]" << endl;
+      opserr << "UserDefinedHingeIntegration3d::UserDefinedHingeIntegration3d -- point lies outside [0,1]" << endln;
     if (wtR(i) < 0.0 || wtR(i) > 1.0)
-      cerr << "UserDefinedHingeIntegration3d::UserDefinedHingeIntegration3d -- weight lies outside [0,1]" << endl;
+      opserr << "UserDefinedHingeIntegration3d::UserDefinedHingeIntegration3d -- weight lies outside [0,1]" << endln;
     ptsR(i) = ptR(i);
     wtsR(i) = wtR(i);
   }

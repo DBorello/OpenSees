@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:58 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/RayleighRV.cpp,v $
 
 
@@ -36,6 +36,7 @@
 #include <RayleighRV.h>
 #include <math.h>
 #include <string.h>
+#include <OPS_Globals.h>
 
 RayleighRV::RayleighRV(int passedTag, 
 		 double passedMean,
@@ -44,7 +45,7 @@ RayleighRV::RayleighRV(int passedTag,
 :RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
 {
 	// Note: this constructor is void.
-	cerr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endl;
+	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
 }
 RayleighRV::RayleighRV(int passedTag, 
 		 double passedParameter1,
@@ -64,7 +65,7 @@ RayleighRV::RayleighRV(int passedTag,
 :RandomVariable(passedTag, passedMean, passedStdv)
 {
 	// Note: this constructor is void.
-	cerr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endl;
+	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
 }
 RayleighRV::RayleighRV(int passedTag, 
 		 double passedParameter1,
@@ -85,7 +86,7 @@ RayleighRV::~RayleighRV()
 
 
 void
-RayleighRV::Print(ostream &s, int flag)
+RayleighRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -157,6 +158,6 @@ RayleighRV::getStartValue()
 
 
 double RayleighRV::getParameter1()  {return u;}
-double RayleighRV::getParameter2()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double RayleighRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double RayleighRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double RayleighRV::getParameter2()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double RayleighRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double RayleighRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}

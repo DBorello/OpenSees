@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:20:42 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/SimpleJoint2D.cpp,v $
 
 // Written: AAA 03/02
@@ -36,7 +36,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <G3Globals.h>
+
 #include <MP_Constraint.h>
 #include <MP_SimpleJoint2D.h>
 #include <ElasticMaterial.h>
@@ -78,8 +78,8 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
 
   TheDomain = theDomain;
   if( TheDomain==NULL ) {
-    cerr << "WARNING SimpleJoint2D(): Specified domain does not exist";
-    cerr << "Domain = 0\n";
+    opserr << "WARNING SimpleJoint2D(): Specified domain does not exist";
+    opserr << "Domain = 0\n";
     return;
   }
 
@@ -97,26 +97,26 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
   
   // check domain for existence of external nodes
   if (end1Ptr == 0) {
-    cerr << "WARNING SimpleJoint2D::setDomain(): Nd1: ";
-    cerr << nd1 << "does not exist in model for element \n" << *this;
+    opserr << "WARNING SimpleJoint2D::setDomain(): Nd1: ";
+    opserr << nd1 << "does not exist in model for element \n" << *this;
     return;
   }
     
   if (end2Ptr == 0) {
-    cerr << "WARNING SimpleJoint2D::setDomain(): Nd2: ";
-    cerr << nd2 << "does not exist in model for element\n" << *this;
+    opserr << "WARNING SimpleJoint2D::setDomain(): Nd2: ";
+    opserr << nd2 << "does not exist in model for element\n" << *this;
     return;
   }	
   
   if (end3Ptr == 0) {
-    cerr << "WARNING SimpleJoint2D::setDomain(): Nd3: ";
-    cerr << nd3 << "does not exist in model for element \n" << *this;
+    opserr << "WARNING SimpleJoint2D::setDomain(): Nd3: ";
+    opserr << nd3 << "does not exist in model for element \n" << *this;
     return;
   }
     
   if (end4Ptr == 0) {
-    cerr << "WARNING SimpleJoint2D::setDomain(): Nd4: ";
-    cerr << nd4 << "does not exist in model for element\n" << *this;
+    opserr << "WARNING SimpleJoint2D::setDomain(): Nd4: ";
+    opserr << nd4 << "does not exist in model for element\n" << *this;
     return;
   }	
 
@@ -133,8 +133,8 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
   int dimNd4 = end4Crd.Size();
 
   if (dimNd1 != 2 && dimNd2 != 2 && dimNd3 != 2 && dimNd4 != 2 ) {
-    cerr << "WARNING SimpleJoint2D::setDomain(): has incorrect space dimension \n";
-    cerr << "                                    space dimension not supported by SimpleJoint2D";
+    opserr << "WARNING SimpleJoint2D::setDomain(): has incorrect space dimension \n";
+    opserr << "                                    space dimension not supported by SimpleJoint2D";
     return;
   }
 	
@@ -145,8 +145,8 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
   int dofNd4 = end4Ptr->getNumberDOF();
 
   if (dofNd1 != 3 && dofNd2 != 3 && dofNd3 != 3 && dofNd4 != 3 ) {
-    cerr << "WARNING SimpleJoint2D::SimpleJoint2D: has incorrect degrees of freedom \n";
-    cerr << "                                    DOF not supported by SimpleJoint2D";
+    opserr << "WARNING SimpleJoint2D::SimpleJoint2D: has incorrect degrees of freedom \n";
+    opserr << "                                    DOF not supported by SimpleJoint2D";
     return;
   }
   
@@ -160,7 +160,7 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
   double L2 = Center2.Norm();
   
   if( Center1.Norm()<1e-6  || Center2.Norm()<1e-6 ) {
-    cerr << "WARNING SimpleJoint2D::(): zero length\n";
+    opserr << "WARNING SimpleJoint2D::(): zero length\n";
     return;	
   }
 	
@@ -176,7 +176,7 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
   Center3 = Center3 - Center1;
 
   if ( Center3.Norm() > 1e-6 ) {
-    cerr << "WARNING SimpleJoint2D::(): can not construct a paralelogram over external nodes\n";
+    opserr << "WARNING SimpleJoint2D::(): can not construct a paralelogram over external nodes\n";
     return;	
   }
 	
@@ -190,10 +190,11 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
   IntNodePtr = new Node ( IntNode , 4, Center1(0) , Center1(1) );
   if ( IntNodePtr == NULL ) 
     {
-      g3ErrorHandler->warning("SimpleJoint2D::SimpleJoint2D - Unable to generate new nodes , out of memory\n");
+      opserr << "SimpleJoint2D::SimpleJoint2D - Unable to generate new nodes , out of memory\n";
+      exit(-1);
     } else {
       if( TheDomain->addNode( IntNodePtr ) == false )		// add intenal nodes to domain
-	g3ErrorHandler->warning("SimpleJoint2D::SimpleJoint2D - unable to add internal nodeto domain\n");
+	opserr << "SimpleJoint2D::SimpleJoint2D - unable to add internal nodeto domain\n";
     }
   
   // Generate and add constraints to domain
@@ -204,25 +205,25 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
   
   // create MP_SimpleJoint constraint node 1
   if ( addMP_SimpleJoint( TheDomain, InternalConstraints(0), IntNode, ExternalNodes(0), 2, LrgDisp ) != 0) {
-    cerr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 1\n";
+    opserr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 1\n";
     return;
   }
 
   // create MP_SimpleJoint constraint node 2
   if ( addMP_SimpleJoint( TheDomain, InternalConstraints(1), IntNode, ExternalNodes(1), 3, LrgDisp ) != 0) {
-    cerr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 2\n";
+    opserr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 2\n";
     return;
   }
 
   // create MP_SimpleJoint constraint node 3
   if ( addMP_SimpleJoint( TheDomain, InternalConstraints(2), IntNode, ExternalNodes(2), 2, LrgDisp ) != 0) {
-    cerr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 3\n";
+    opserr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 3\n";
     return;
   }
   
   // create MP_SimpleJoint constraint node 4
   if ( addMP_SimpleJoint( TheDomain, InternalConstraints(3), IntNode, ExternalNodes(3), 3, LrgDisp ) != 0) {
-    cerr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 4\n";
+    opserr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 4\n";
     return;
   }
 
@@ -233,11 +234,11 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
   RotElemPtr = new InternalSpring(RotElemtag,IntNode,4,2,3, Spring);
   
   if ( RotElemPtr == NULL ) {
-    g3ErrorHandler->warning("SimpleJoint2D::SimpleJoint2D - failed to genrate Rotational spring , out of memory\n");
+    opserr << "SimpleJoint2D::SimpleJoint2D - failed to genrate Rotational spring , out of memory\n";
   } else {
     // add the zero length spring to the domain
     if ( theDomain->addElement( RotElemPtr ) == false) {
-      g3ErrorHandler->warning("SimpleJoint2D::SimpleJoint2D - Unable to add Rotational spring to domain\n");
+      opserr << "SimpleJoint2D::SimpleJoint2D - Unable to add Rotational spring to domain\n";
       delete RotElemPtr;
     }
   }
@@ -300,12 +301,12 @@ int SimpleJoint2D::addMP_SimpleJoint(Domain *theDomain, int mpNum,
   Temp_MP = new MP_SimpleJoint2D( theDomain, mpNum, RnodeID, CnodeID, AuxDOF, LrgDispFlag );
   
   if (Temp_MP == NULL) {
-    cerr << "SimpleJoint2D::addMP_SimpleJoint - WARNING ran out of memory for ForJoint MP_Constraint ";
+    opserr << "SimpleJoint2D::addMP_SimpleJoint - WARNING ran out of memory for ForJoint MP_Constraint ";
     return -1;
   }
   // Add the multi-point constraint to the domain
   if (theDomain->addMP_Constraint (Temp_MP) == false) {
-    cerr << "SimpleJoint2D::addMP_SimpleJoint - WARNING could not add equalDOF MP_Constraint to domain ";
+    opserr << "SimpleJoint2D::addMP_SimpleJoint - WARNING could not add equalDOF MP_Constraint to domain ";
     delete Temp_MP;
     return -2;
   }
@@ -386,7 +387,7 @@ const Matrix &SimpleJoint2D::getMass(void)
   return K;
 }
 
-void SimpleJoint2D::Print(ostream &s, int flag )
+void SimpleJoint2D::Print(OPS_Stream &s, int flag )
 {
   s << "\nElement: " << getTag() << " type: SimpleJoint2D iNode: "
     << ExternalNodes(0) << " jNode: " << ExternalNodes(1) << "\n"
@@ -585,23 +586,26 @@ int SimpleJoint2D::sendSelf(int commitTag, Channel &theChannel)
 	
 	res = theChannel.sendID(dataTag, commitTag, data);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING SimpleJoint2D::sendSelf() - %d failed to send ID\n",this->getTag());
-		return -1;
+	  opserr << "WARNING SimpleJoint2D::sendSelf() - " << this->getTag() << 
+	    " failed to send ID\n";
+	  return -1;
 	}
 	
 	// sends the tags of it's external nodes
 	res = theChannel.sendID(nodeDbTag, commitTag, ExternalNodes);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING SimpleJoint2D::sendSelf() - %d failed to send Vector\n",this->getTag());
-		return -2;
+	  opserr << "WARNING SimpleJoint2D::sendSelf() - " << this->getTag() << 
+	    " failed to send Vector\n";
+	  return -2;
 	}
 	
 	
 	// sends the tags of it's internal constraints
 	res = theChannel.sendID(dofDbTag, commitTag, InternalConstraints);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING SimpleJoint2D::sendSelf() - %d failed to send Vector\n",this->getTag());
-		return -2;
+	  opserr << "WARNING SimpleJoint2D::sendSelf() - " << this->getTag() << 
+	    " failed to send Vector\n";
+	  return -2;
 	}
 	
 	return 0;
@@ -616,8 +620,8 @@ int SimpleJoint2D::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 	static ID data(8);
 	res = theChannel.recvID(dataTag, commitTag, data);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING Truss::recvSelf() - failed to receive Vector\n");
-		return -1;
+	  opserr << "WARNING Truss::recvSelf() - failed to receive Vector\n";
+	  return -1;
 	}
 	
 	this->setTag((int)data(0));
@@ -634,16 +638,16 @@ int SimpleJoint2D::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 	// receives the tags of it's external nodes
 	res = theChannel.recvID(nodeDbTag, commitTag, ExternalNodes);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING SimpleJoint2D::recvSelf() - %d failed to receive external nodes\n", this->getTag());
-		return -2;
+	  opserr << "WARNING SimpleJoint2D::recvSelf() -  failed to receive external nodes\n";
+	  return -2;
 	}
 
 	
 	// receives the tags of it's constraint tags
 	res = theChannel.recvID(dofDbTag, commitTag, InternalConstraints);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING SimpleJoint2D::recvSelf() - %d failed to receive internal constraints\n", this->getTag());
-		return -2;
+	  opserr << "WARNING SimpleJoint2D::recvSelf() - " << this->getTag() << " failed to receive internal constraints\n";
+	  return -2;
 	}
 	
 	return 0;

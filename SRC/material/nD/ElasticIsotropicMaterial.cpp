@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $                                                              
-// $Date: 2002-12-05 22:49:09 $                                                                  
+// $Revision: 1.18 $                                                              
+// $Date: 2003-02-14 23:01:25 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -48,7 +48,7 @@
 #include <Tensor.h>
 #include <Channel.h>
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 ElasticIsotropicMaterial::ElasticIsotropicMaterial
 (int tag, int classTag, double e, double nu, double r)
@@ -174,198 +174,213 @@ ElasticIsotropicMaterial::getCopy (const char *type)
     // Handle other cases
     else
     {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getModel failed to get model %s",
-			      type);
-
-	return 0;
+      opserr << "ElasticIsotropicMaterial::getModel failed to get model: " << type << endln;
+      exit(-1);
     }
+    
+    return 0;
 }
 
 int
 ElasticIsotropicMaterial::setTrialStrain (const Vector &v)
 {
-    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility");
-
-    return 0;
+    opserr << "ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility\n";
+    exit(-1);
+    return -1;
 }
 
 int
 ElasticIsotropicMaterial::setTrialStrain (const Vector &v, const Vector &rate)
 {
-    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility");
-
-    return 0;
+    opserr << "ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility\n";
+    exit(-1);
+    return -1;
 }
 
 int
 ElasticIsotropicMaterial::setTrialStrainIncr (const Vector &v)
 {
-    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility");
-
-    return 0;
+    opserr << "ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility\n";
+    exit(-1);
+    return -1;
 }
 
 int
 ElasticIsotropicMaterial::setTrialStrainIncr (const Vector &v, const Vector &rate)
 {
-    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility");
-
-    return 0;
+    opserr << "ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility\n";
+    exit(-1);
+    return -1;
 }
 
 const Matrix&
 ElasticIsotropicMaterial::getTangent (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getTangent -- subclass responsibility");
+  opserr << "ElasticIsotropicMaterial::getTangent -- subclass responsibility\n";
+  exit(-1);
 
-	// Just to make it compile
-	Matrix *ret = new Matrix();
-	return *ret;
+  // Just to make it compile
+  Matrix *ret = new Matrix();
+  return *ret;
 }
 
 const Matrix&
 ElasticIsotropicMaterial::getInitialTangent (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getInitialTangent -- subclass responsibility");
+  opserr << "ElasticIsotropicMaterial::getInitialTangent -- subclass responsibility\n";
+  exit(-1);
 
-	// Just to make it compile
-	Matrix *ret = new Matrix();
-	return *ret;
+  // Just to make it compile
+  Matrix *ret = new Matrix();
+  return *ret;
 }
 
 const Vector&
 ElasticIsotropicMaterial::getStress (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStress -- subclass responsibility");
-
-	// Just to make it compile
-	Vector *ret = new Vector();
-	return *ret;
+  opserr << "ElasticIsotropicMaterial::getStress -- subclass responsibility\n";
+  exit(-1);
+    
+  // Just to make it compile
+  Vector *ret = new Vector();
+  return *ret;
 }
 
 const Vector&
 ElasticIsotropicMaterial::getStrain (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStrain -- subclass responsibility");
+  opserr << "ElasticIsotropicMaterial::getStrain -- subclass responsibility\n";
+  exit(-1);
 
-	// Just to make it compile
-	Vector *ret = new Vector();
-	return *ret;
+  // Just to make it compile
+  Vector *ret = new Vector();
+  return *ret;
 }
 
 int
 ElasticIsotropicMaterial::setTrialStrain (const Tensor &v)
 {
-    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility");
+    opserr << "ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility\n";
+    exit(-1);
 
-    return 0;
+    return -1;
 }
 
 int
 ElasticIsotropicMaterial::setTrialStrain (const Tensor &v, const Tensor &r)
 {
-    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility");
+    opserr << "ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility\n";
+    exit(-1);
 
-    return 0;
+    return -1;
 }
 
 int
 ElasticIsotropicMaterial::setTrialStrainIncr (const Tensor &v)
 {
-    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility");
+    opserr << "ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility\n";
+    exit(-1);
 
-    return 0;
+    return -1;
 }
 
 int
 ElasticIsotropicMaterial::setTrialStrainIncr (const Tensor &v, const Tensor &r)
 {
-    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility");
+    opserr << "ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility\n";
 
-    return 0;
+    return -1;
 }
 
 const Tensor&
 ElasticIsotropicMaterial::getTangentTensor (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getTangentTensor -- subclass responsibility");
-
-	// Just to make it compile
-	Tensor *t = new Tensor;
-	return *t;
+  opserr << "ElasticIsotropicMaterial::getTangentTensor -- subclass responsibility\n";
+  exit(-1);
+  
+  // Just to make it compile
+  Tensor *t = new Tensor;
+  return *t;
 }
 
 const stresstensor ElasticIsotropicMaterial::getStressTensor (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStressTensor -- subclass responsibility");
+  opserr << "ElasticIsotropicMaterial::getStressTensor -- subclass responsibility\n";
+  exit(-1);
 
-	// Just to make it compile
-        stresstensor t;
-	return t;
+  // Just to make it compile
+  stresstensor t;
+  return t;
 }
 
 const straintensor ElasticIsotropicMaterial::getStrainTensor (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStrainTensor -- subclass responsibility");
-	// Just to make it compile
-        straintensor t;
-        return t;
+  opserr << "ElasticIsotropicMaterial::getStrainTensor -- subclass responsibility\n";
+  exit(-1);
+
+  // Just to make it compile
+  straintensor t;
+  return t;
 }
 
 const straintensor ElasticIsotropicMaterial::getPlasticStrainTensor (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getPlasticStrainTensor -- subclass responsibility");
-	// Just to make it compile
-	straintensor t;
-        return t;
+  opserr << "ElasticIsotropicMaterial::getPlasticStrainTensor -- subclass responsibility\n";
+  exit(-1);
+	
+  // Just to make it compile
+  straintensor t;
+  return t;
 }
 
 int
 ElasticIsotropicMaterial::commitState (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::commitState -- subclass responsibility");
-
-	return 0;
+  opserr << "ElasticIsotropicMaterial::commitState -- subclass responsibility\n";
+  exit(-1);
+  return -1;
 }
 
 int
 ElasticIsotropicMaterial::revertToLastCommit (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::revertToLastCommit -- subclass responsibility");
-
-	return 0;
+  opserr << "ElasticIsotropicMaterial::revertToLastCommit -- subclass responsibility\n";
+  exit(-1);
+    
+  return -1;
 }
 
 int
 ElasticIsotropicMaterial::revertToStart (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::revertToStart -- subclass responsibility");
-
-	return 0;
+  opserr << "ElasticIsotropicMaterial::revertToStart -- subclass responsibility\n";
+  exit(-1);
+  return -1;
 }
 
 NDMaterial*
 ElasticIsotropicMaterial::getCopy (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getCopy -- subclass responsibility");
-
-	return 0;
+  opserr << "ElasticIsotropicMaterial::getCopy -- subclass responsibility\n";
+  exit(-1);
+  return 0;
 }
 
 const char*
 ElasticIsotropicMaterial::getType (void) const
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getType -- subclass responsibility");
-	
-	return 0;
+  opserr << "ElasticIsotropicMaterial::getType -- subclass responsibility\n";
+  exit(-1);	
+
+  return 0;
 }
 
 int
 ElasticIsotropicMaterial::getOrder (void) const
 {
-	 g3ErrorHandler->fatal("ElasticIsotropicMaterial::getOrder -- subclass responsibility");
-
-	return 0;
+  opserr << "ElasticIsotropicMaterial::getOrder -- subclass responsibility\n";
+  exit(-1);
+  return -1;
 }
 
 int
@@ -382,8 +397,7 @@ ElasticIsotropicMaterial::sendSelf (int commitTag, Channel &theChannel)
   
  res += theChannel.sendVector(this->getDbTag(), commitTag, data);
  if (res < 0) {
-   g3ErrorHandler->warning("%s -- could not send Vector",
-			   "ElasticIsotropicMaterial::sendSelf");
+   opserr << "ElasticIsotropicMaterial::sendSelf -- could not send Vector\n";
    return res;
  }
 
@@ -400,9 +414,8 @@ ElasticIsotropicMaterial::recvSelf (int commitTag, Channel &theChannel,
   
   res += theChannel.recvVector(this->getDbTag(), commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- could not receive Vector",
-			    "ElasticIsotropicMaterial::recvSelf");
-    return res;
+   opserr << "ElasticIsotropicMaterial::recvSelf -- could not recv Vector\n";
+   return res;
   }
     
   this->setTag((int)data(0));
@@ -414,12 +427,12 @@ ElasticIsotropicMaterial::recvSelf (int commitTag, Channel &theChannel,
 }
 
 void
-ElasticIsotropicMaterial::Print (ostream &s, int flag)
+ElasticIsotropicMaterial::Print (OPS_Stream &s, int flag)
 {
-	s << "Elastic Isotropic Material Model" << endl;
-	s << "\tE:  " << E << endl;
-	s << "\tv:  " << v << endl;
-	s << "\trho:  " << rho << endl;
+	s << "Elastic Isotropic Material Model" << endln;
+	s << "\tE:  " << E << endln;
+	s << "\tv:  " << v << endln;
+	s << "\trho:  " << rho << endln;
 
 	return;
 }

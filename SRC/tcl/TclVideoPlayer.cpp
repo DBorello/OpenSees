@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 00:57:44 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:02:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclVideoPlayer.cpp,v $
                                                                         
                                                                         
@@ -39,7 +39,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 
 #ifdef _WGL
 #include <OpenGLRenderer.h>
@@ -54,6 +53,9 @@
 #include "TclVideoPlayer.h"
 #include <Vector.h>
 
+
+#include <iomanip>
+using std::ios;
 
 //
 // some static variables used in the functions
@@ -78,15 +80,17 @@ TclVideoPlayer::TclVideoPlayer(char *title, char *fileName, char *imageName,
 
       // make room for copy of filename string and copy it
       theFileName = new char[strlen(fileName)]; 
-      if (theFileName == 0) 
-	g3ErrorHandler->fatal("FATAL TclVideoPlayer::TclVideoPlayer() - out of memory copy %s\n",
-			      fileName);
+      if (theFileName == 0) {
+	opserr << "FATAL TclVideoPlayer::TclVideoPlayer() - out of memory copy " << fileName << endln;
+	exit(-1);
+      }
+
       strcpy(theFileName, fileName);    
       // test we can open the file for when we get to play - 
       theFile.open(fileName, ios::in);
       if (!theFile) {
-	g3ErrorHandler->warning("WARNING TclVideoPlayer::TclVideoPlayer() - could not open file %s\n",
-				  fileName);	  
+	opserr << "WARNING TclVideoPlayer::TclVideoPlayer() - could not open file " << fileName << endln;
+	exit(-1);
       } else {
 
 	// read in the window properties from the file
@@ -109,7 +113,7 @@ TclVideoPlayer::TclVideoPlayer(char *title, char *fileName, char *imageName,
 	theRenderer = new X11Renderer(title, xLoc, yLoc, width, height, *theMap);
 #endif
 	if (theMap == 0 || theRenderer == 0) 
-	  g3ErrorHandler->warning("WARNING TclVideoPlayer::TclVideoPlayer() - could not create renderer\n");
+	  opserr << "WARNING TclVideoPlayer::TclVideoPlayer() - could not create renderer\n";
 
 	theFile.close();
       }
@@ -120,15 +124,15 @@ TclVideoPlayer::TclVideoPlayer(char *title, char *fileName, char *imageName,
     if (offsetFileName != 0) {
       // make copy of offset file name
       theOffsetFileName = new char[strlen(offsetFileName)]; 
-      if (theOffsetFileName == 0) 
-	g3ErrorHandler->fatal("FATAL TclVideoPlayer::TclVideoPlayer() - out of memory copy %s\n",
-			      offsetFileName);
+      if (theOffsetFileName == 0) {
+	opserr << "FATAL TclVideoPlayer::TclVideoPlayer() - out of memory copy " << offsetFileName << endln;
+	exit(-1);
+      }
       strcpy(theOffsetFileName, offsetFileName);    
 
       theOffsetFile.open(offsetFileName, ios::in);
       if (!theOffsetFile) {
-	g3ErrorHandler->warning("WARNING TclVideoPlayer::TclVideoPlayer() - could not open file %s\n",
-				offsetFileName);	  
+	opserr << "WARNING TclVideoPlayer::TclVideoPlayer() - could not open file " << offsetFileName << endln;
       }
       theOffsetFile.close();
     }
@@ -240,8 +244,8 @@ TclVideoPlayer::play(void)
 	endImage = 1;
       }
       else if (strcmp(drivel,"Line") == 0) {
-	theFile >> pt >> rgb;
-	theFile >> pt2 >> rgb2;
+	theFile >> pt(0) >> pt(1) >> pt(2) >> rgb(0) >> rgb(1) >> rgb(2);
+	theFile >> pt2(0) >> pt2(1) >> pt2(2) >> rgb2(0) >> rgb2(1) >> rgb2(2);
 
 	// add rigid body offsets
 	if (theOffsetFileName != 0) {

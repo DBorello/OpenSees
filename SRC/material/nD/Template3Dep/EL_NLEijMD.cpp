@@ -123,7 +123,7 @@ tensor EvolutionLaw_NL_EijMD::h_t( EPState *EPS, PotentialSurface *PS)
       n = r_bar *(1.0 / norm );
     }
     else {
-      g3ErrorHandler->fatal("EvolutionLaw_NL_EijMD::h_t  |n_ij| = 0, divide by zero! Program exits.");
+      opserr << "EvolutionLaw_NL_EijMD::h_t  |n_ij| = 0, divide by zero! Program exits.\n";
       exit(-1);
     }
     //cout << "nij = " << n;
@@ -135,29 +135,29 @@ tensor EvolutionLaw_NL_EijMD::h_t( EPState *EPS, PotentialSurface *PS)
     //Calculate the state parameters xi 
     double e = gete(); // Stored in MD ELT
     
-       cerr << " p: " << p;
+    opserr << " p: " << p;
     if (p < 0.0)
     {
-       //cerr << " p: " << p;
-       g3ErrorHandler->warning("EvolutionLaw_NL_EijMD::h_t   p < 0, Program exits.");
+       //opserr << " p: " << p;
+      opserr << "EvolutionLaw_NL_EijMD::h_t   p < 0, Program exits.\n";
        exit(-1);
     }
     double ec = getec_ref() - getLambda() * log( p/getp_ref() );
 
     double xi = e - ec;
-    cout << "e = " << e << " ec = " << ec << " xi = " << xi << endln;
+    opserr << "e = " << e << " ec = " << ec << " xi = " << xi << endln;
 
     //Calculating the lode angle theta
     double J2_bar = r_bar.Jinvariant2();
     double J3_bar = r_bar.Jinvariant3();
     double tempd = 3.0*pow(3.0, 0.5)/2.0*J3_bar/ pow( J2_bar, 1.5);
-    //cout << "theta -1 =" << tempd << endln;
+    //opserr << "theta -1 =" << tempd << endln;
     
     if (tempd > 1.0 ) tempd = 1.0; //bug. if tempd = 1.00000000003, acos gives NaN
     if (tempd < -1.0 ) tempd = -1.0;
     
     double theta = acos( tempd ) / 3.0;
-    //cout << "theta = " << theta << endln;
+    //opserr << "theta = " << theta << endln;
     
     //calculate the alpha_theta_b and alpha_theta_d
     double m = EPS->getScalarVar(1);
@@ -166,7 +166,7 @@ tensor EvolutionLaw_NL_EijMD::h_t( EPState *EPS, PotentialSurface *PS)
     double cd = getke_d() / getkc_d();
     //stresstensor alpha_theta_d = n("ij") * (g_WW(theta, c) * Mc + g_WW(theta, cd) * kc_d * xi - m) * pow(2.0/3.0, 0.5);
     stresstensor alpha_theta_d = n("ij") * (g_A(theta, c) * Mc + g_A(theta, cd) * kc_d * xi - m) * pow(2.0/3.0, 0.5);
-    //cout << "alpha_theta_d " << alpha_theta_d<<" g_WW(theta, c) "<< g_WW(theta, c) << endln;
+    //opserr << "alpha_theta_d " << alpha_theta_d<<" g_WW(theta, c) "<< g_WW(theta, c) << endln;
 
     double cb = getke_b() / getkc_b();
     if ( xi > 0.0 ) xi = 0.0;  // < -xi > for alpha_theta_b
@@ -190,13 +190,13 @@ tensor EvolutionLaw_NL_EijMD::h_t( EPState *EPS, PotentialSurface *PS)
     double bn = temp1.trace();
 
     double h = getho() * fabs(bn) / ( b_ref - fabs(bn) ); 
-    //cout << "ho =" << getho()  << "   h =" << h << endln;
-    //cerr << "\nbn =" << bn << endln; 
+    //opserr << "ho =" << getho()  << "   h =" << h << endln;
+    //opserr << "\nbn =" << bn << endln; 
 
     //Updating D and F---need to fine tune
     //temp1 = d("ij") * n("ij");
     //double dn = temp1.trace();
-    //cout << "bn =" << bn << "  dn =" << dn << endln; 
+    //opserr << "bn =" << bn << "  dn =" << dn << endln; 
     
     //// Calculating A
     //stresstensor F = EPS->getTensorVar( 2 );   // getting  F_ij from EPState
@@ -218,15 +218,15 @@ tensor EvolutionLaw_NL_EijMD::h_t( EPState *EPS, PotentialSurface *PS)
 //================================================================================
 void EvolutionLaw_NL_EijMD::print()
 {
-    cout << (*this);
+    opserr << (*this);
 }
     
 //================================================================================
 // prints Manzari-Dafalia EvolutionLaw's contents 
 //================================================================================
-ostream& operator<< (ostream& os, const EvolutionLaw_NL_EijMD & MDEL)
+OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_NL_EijMD & MDEL)
 {
-    os.unsetf( ios::scientific );
+  //    os.unsetf( ios::scientific );
     os.precision(5);
 
     //os.width(10);       
@@ -315,13 +315,13 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
          n = r_bar *(1.0 / norm );
        }
        else {
-         g3ErrorHandler->fatal("EvolutionLaw_L_EijMD::dFods  |n_ij| = 0, divide by zero! Program exits.");
+         opserr << "EvolutionLaw_L_EijMD::dFods  |n_ij| = 0, divide by zero! Program exits.\n";
          err += 1;
 	 exit(-1);
        }
        	         
-       cout << " alpha = " << alpha;
-       //cout << "\n **** n =     " << n;
+       opserr << " alpha = " << alpha;
+       //opserr << "\n **** n =     " << n;
 
 
        //Calculate the state parameters xi 
@@ -329,7 +329,7 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
        if (p < 0.0)
        {
           p = 0.1;
-	  g3ErrorHandler->warning("EvolutionLaw_NL_EijMD::updateEeDm   p < 0, Program exits.");
+	  opserr << "EvolutionLaw_NL_EijMD::updateEeDm   p < 0, Program exits.\n";
           //exit(-1);
        }
        
@@ -344,7 +344,7 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
        double dm = dLamda * Cm * ( 1.0 + eo ) * D;
        m = m + dm;
        EPS->setScalarVar(1, m);
-       //cout  << endln << "dm = " << dm << endln;
+       //opserr  << endln << "dm = " << dm << endln;
 
        //=========================================================================
        // Update F
@@ -359,11 +359,11 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
 
        if ( D > 0.0 ) D = 0.0;
        dF =  ( n("ij") * getFmax()  + F("ij") ) * dLamda * getCf() * (-D);
-       //cout << "dF" << dF;       
+       //opserr << "dF" << dF;       
        F = F ;//- dF;
        EPS->setTensorVar(2, F);
        this->F = F;
-       cout << " \n F =          " << F << endln;       
+       opserr << " \n F =          " << F << endln;       
 
        tensor temp_tensor = F("ij") * n("ij");
        double temp = temp_tensor.trace();
@@ -379,7 +379,7 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
        if (tempd < -1.0 ) tempd = -1.0;
        
        double theta = acos( tempd ) / 3.0;
-       cout << "theta = " << theta << endln;
+       opserr << "theta = " << theta << endln;
        
        //Calculate alpha_theta_d
        double c = getMe() / getMc();
@@ -387,19 +387,19 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
        double cd = getke_d() / getkc_d();
        
        //Testing g_WW
-       //cout << "g_A(0, c) " << g_A(0.0, 0.0167) << endln;
-       //cout << "g_A(60, c) " << g_A(1.0472, 0.0167) << endln;
+       //opserr << "g_A(0, c) " << g_A(0.0, 0.0167) << endln;
+       //opserr << "g_A(60, c) " << g_A(1.0472, 0.0167) << endln;
        double alpha_theta_dd = g_A(theta, c) * Mc + g_A(theta, cd) * kc_d * xi - m;
        stresstensor alpha_theta_d = n("ij") * alpha_theta_dd * pow(2.0/3.0, 0.5);
-       cout << " cd "<< cd << " c " << c << "alpha_theta_d_norm " << alpha_theta_dd << endln;
-       cout << "alpha_theta_d " << alpha_theta_d<<" g_A(theta, cd) "<< g_A(theta, cd) << " Mc " << Mc << endln;
+       opserr << " cd "<< cd << " c " << c << "alpha_theta_d_norm " << alpha_theta_dd << endln;
+       opserr << "alpha_theta_d " << alpha_theta_d<<" g_A(theta, cd) "<< g_A(theta, cd) << " Mc " << Mc << endln;
        		        
        stresstensor d;
        d =  alpha_theta_d - alpha;
        d.null_indices();
        EPS->setTensorVar(3, d); //d is also stored in Tensor array for 2nd derivative eval in PS 
 
-       cout << " d = "  << d << " n = "  << n << endln;    
+       opserr << " d = "  << d << " n = "  << n << endln;    
        //=========================================================================
        // Updating D --does not depend on dLamda
        tensor temp1 = d("ij") * n("ij");
@@ -413,9 +413,9 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
        double newD = dn * A;
        EPS->setScalarVar(2, newD); // D also stored in scalar array's 2nd cell for PS
        this->D = newD;
-       cout << " dn = "  << dn << " A = " << A << endln << endln;
-       cout << "   ***** D =  " << newD << endln;    
-       //cout << "alpha_theta_d " << alpha_theta_d<<" g_WW(theta, c) "<< g_WW(theta, c);
+       opserr << " dn = "  << dn << " A = " << A << endln << endln;
+       opserr << "   ***** D =  " << newD << endln;    
+       //opserr << "alpha_theta_d " << alpha_theta_d<<" g_WW(theta, c) "<< g_WW(theta, c);
     
     //}
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 05:56:44 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/section/FiberSectionRepr.h,v $
                                                                         
                                                                         
@@ -72,8 +72,8 @@ class FiberSectionRepr: public SectionRepres
     ReinfLayer **getReinfLayers    (void) const;
     Fiber     **getFibers(void) const;
     
-    void Print(ostream &s, int flag =0);
-    friend ostream &operator<<(ostream &s, FiberSectionRepr &fiberSectionRepr);    
+    void Print(OPS_Stream &s, int flag =0);
+    friend OPS_Stream &operator<<(OPS_Stream &s, FiberSectionRepr &fiberSectionRepr);    
   
 
   protected:

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:58 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/WeibullRV.cpp,v $
 
 
@@ -37,6 +37,7 @@
 #include <math.h>
 #include <string.h>
 #include <GammaRV.h>
+#include <OPS_Globals.h>
 
 WeibullRV::WeibullRV(int passedTag, 
 		 double passedMean,
@@ -90,7 +91,7 @@ WeibullRV::~WeibullRV()
 
 
 void
-WeibullRV::Print(ostream &s, int flag)
+WeibullRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -168,8 +169,8 @@ WeibullRV::getStartValue()
 
 double WeibullRV::getParameter1()  {return u;}
 double WeibullRV::getParameter2()  {return k;}
-double WeibullRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double WeibullRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double WeibullRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double WeibullRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
 
 void
 WeibullRV::setParameters(double mean, double stdv)

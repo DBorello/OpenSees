@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-04-29 00:04:52 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/TclPyTzQzMaterialCommand.cpp,v $
 
 //temp out BJ #include <Domain.h>     // RWB bringing in Domain for PyLiq
@@ -40,10 +40,10 @@
 
 static void printCommand(int argc, char **argv)
 {
-    cerr << "Input command: ";
+    opserr << "Input command: ";
     for (int i=0; i<argc; i++)
-	cerr << argv[i] << " ";
-    cerr << endl;
+	opserr << argv[i] << " ";
+    opserr << endln;
 } 
 
 UniaxialMaterial *
@@ -54,14 +54,14 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 //temp out BJ // that to make PYliq working...
 {
 	if (argc < 3) {
-		cerr << "WARNING insufficient number of arguments\n";
+		opserr << "WARNING insufficient number of arguments\n";
 		printCommand(argc, argv);
 		return 0;
 	}
 
 	int tag;
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid uniaxialMaterial tag\n";
+	    opserr << "WARNING invalid uniaxialMaterial tag\n";
 		printCommand(argc, argv);
 	    return 0;
 	}
@@ -73,9 +73,9 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 //////////////////////////////////////////////////////////////////////////////////////////////////
 	if (strcmp(argv[1],"PySimple1") == 0) {
 	if (argc < 7) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: uniaxialMaterial PySimple1 tag? soilType? pult? y50? drag? dashpot? " << endl;
+	    opserr << "Want: uniaxialMaterial PySimple1 tag? soilType? pult? y50? drag? dashpot? " << endln;
 	    return 0;
 	}
 
@@ -83,31 +83,31 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 	double pult, y50, drag, dashpot;
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid uniaxialMaterial PySimple1 tag" << endl;
+	    opserr << "WARNING invalid uniaxialMaterial PySimple1 tag" << endln;
 	    return 0;		
 	}
 
 	if (Tcl_GetInt(interp, argv[3], &soilType) != TCL_OK) {
-	    cerr << "WARNING invalid soilType\n";
-	    cerr << "uniaxialMaterial PySimple1: " << tag << endl;
+	    opserr << "WARNING invalid soilType\n";
+	    opserr << "uniaxialMaterial PySimple1: " << tag << endln;
 	    return 0;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[4], &pult) != TCL_OK) {
-	    cerr << "WARNING invalid pult\n";
-	    cerr << "uniaxialMaterial PySimple1: " << tag << endl;
+	    opserr << "WARNING invalid pult\n";
+	    opserr << "uniaxialMaterial PySimple1: " << tag << endln;
 	    return 0;
 	}
 
 	if (Tcl_GetDouble(interp, argv[5], &y50) != TCL_OK) {
-	    cerr << "WARNING invalid y50\n";
-	    cerr << "uniaxialMaterial PySimple1: " << tag << endl;
+	    opserr << "WARNING invalid y50\n";
+	    opserr << "uniaxialMaterial PySimple1: " << tag << endln;
 	    return 0;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[6], &drag) != TCL_OK) {
-	    cerr << "WARNING invalid drag\n";
-	    cerr << "uniaxialMaterial PySimple1: " << tag << endl;
+	    opserr << "WARNING invalid drag\n";
+	    opserr << "uniaxialMaterial PySimple1: " << tag << endln;
 	    return 0;	
 	}
 
@@ -115,8 +115,8 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 
 	if (argc > 7) {
 		if (Tcl_GetDouble(interp, argv[7], &dashpot) != TCL_OK) {
-			cerr << "WARNING invalid dashpot\n";
-			cerr << "uniaxialMaterial PySimple1: " << tag << endl;
+			opserr << "WARNING invalid dashpot\n";
+			opserr << "uniaxialMaterial PySimple1: " << tag << endln;
 			return 0;	
 		}
 	}
@@ -130,9 +130,9 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //temp out BJ 	else if (strcmp(argv[1],"PyLiq1") == 0) {
 //temp out BJ 	if (argc < 10) {
-//temp out BJ 	    cerr << "WARNING insufficient arguments\n";
+//temp out BJ 	    opserr << "WARNING insufficient arguments\n";
 //temp out BJ 	    printCommand(argc,argv);
-//temp out BJ 	    cerr << "Want: uniaxialMaterial PyLiq1 tag? soilType? pult? y50? drag? dashpot? solidElem1? solidElem2?" << endl;
+//temp out BJ 	    opserr << "Want: uniaxialMaterial PyLiq1 tag? soilType? pult? y50? drag? dashpot? solidElem1? solidElem2?" << endln;
 //temp out BJ 	    return 0;
 //temp out BJ 	}
 //temp out BJ 
@@ -140,49 +140,49 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 //temp out BJ 	double pult, y50, drag, dashpot;
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid uniaxialMaterial PyLiq1 tag" << endl;
+//temp out BJ 	    opserr << "WARNING invalid uniaxialMaterial PyLiq1 tag" << endln;
 //temp out BJ 	    return 0;		
 //temp out BJ 	}
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetInt(interp, argv[3], &soilType) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid soilType\n";
-//temp out BJ 	    cerr << "uniaxialMaterial PyLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid soilType\n";
+//temp out BJ 	    opserr << "uniaxialMaterial PyLiq1: " << tag << endln;
 //temp out BJ 	    return 0;	
 //temp out BJ 	}
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetDouble(interp, argv[4], &pult) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid pult\n";
-//temp out BJ 	    cerr << "uniaxialMaterial PyLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid pult\n";
+//temp out BJ 	    opserr << "uniaxialMaterial PyLiq1: " << tag << endln;
 //temp out BJ 	    return 0;
 //temp out BJ 	}
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetDouble(interp, argv[5], &y50) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid y50\n";
-//temp out BJ 	    cerr << "uniaxialMaterial PyLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid y50\n";
+//temp out BJ 	    opserr << "uniaxialMaterial PyLiq1: " << tag << endln;
 //temp out BJ 	    return 0;	
 //temp out BJ 	}
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetDouble(interp, argv[6], &drag) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid drag\n";
-//temp out BJ 	    cerr << "uniaxialMaterial PyLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid drag\n";
+//temp out BJ 	    opserr << "uniaxialMaterial PyLiq1: " << tag << endln;
 //temp out BJ 	    return 0;	
 //temp out BJ 	}
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetDouble(interp, argv[7], &dashpot) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid dashpot\n";
-//temp out BJ 	    cerr << "uniaxialMaterial PyLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid dashpot\n";
+//temp out BJ 	    opserr << "uniaxialMaterial PyLiq1: " << tag << endln;
 //temp out BJ 	    return 0;	
 //temp out BJ 	}
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetInt(interp, argv[8], &solidElem1) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid solidElem\n";
-//temp out BJ 	    cerr << "uniaxialMaterial PyLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid solidElem\n";
+//temp out BJ 	    opserr << "uniaxialMaterial PyLiq1: " << tag << endln;
 //temp out BJ 	    return 0;	
 //temp out BJ 	}
 //temp out BJ 	
 //temp out BJ 	if (Tcl_GetInt(interp, argv[9], &solidElem2) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid solidElem\n";
-//temp out BJ 	    cerr << "uniaxialMaterial PyLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid solidElem\n";
+//temp out BJ 	    opserr << "uniaxialMaterial PyLiq1: " << tag << endln;
 //temp out BJ 	    return 0;	
 //temp out BJ 	}
 //temp out BJ 
@@ -196,9 +196,9 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 
 	else if (strcmp(argv[1],"QzSimple1") == 0) {
 	if (argc < 6) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: uniaxialMaterial QzSimple1 tag? QzType? Qult? z50? suction? dashpot? " << endl;
+	    opserr << "Want: uniaxialMaterial QzSimple1 tag? QzType? Qult? z50? suction? dashpot? " << endln;
 	    return 0;
 	}
 
@@ -206,25 +206,25 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 	double Qult, z50, suction, dashpot;
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid uniaxialMaterial QzSimple1 tag" << endl;
+	    opserr << "WARNING invalid uniaxialMaterial QzSimple1 tag" << endln;
 	    return 0;		
 	}
 
 	if (Tcl_GetInt(interp, argv[3], &QzType) != TCL_OK) {
-	    cerr << "WARNING invalid QzType\n";
-	    cerr << "uniaxialMaterial QzSimple1: " << tag << endl;
+	    opserr << "WARNING invalid QzType\n";
+	    opserr << "uniaxialMaterial QzSimple1: " << tag << endln;
 	    return 0;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[4], &Qult) != TCL_OK) {
-	    cerr << "WARNING invalid Qult\n";
-	    cerr << "uniaxialMaterial QzSimple1: " << tag << endl;
+	    opserr << "WARNING invalid Qult\n";
+	    opserr << "uniaxialMaterial QzSimple1: " << tag << endln;
 	    return 0;
 	}
 
 	if (Tcl_GetDouble(interp, argv[5], &z50) != TCL_OK) {
-	    cerr << "WARNING invalid z50\n";
-	    cerr << "uniaxialMaterial QzSimple1: " << tag << endl;
+	    opserr << "WARNING invalid z50\n";
+	    opserr << "uniaxialMaterial QzSimple1: " << tag << endln;
 	    return 0;	
 	}
 
@@ -235,13 +235,13 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 
 	if (argc > 6) {
 		if (Tcl_GetDouble(interp, argv[6], &suction) != TCL_OK) {
-		    cerr << "WARNING invalid suction\n";
-			cerr << "uniaxialMaterial QzSimple1: " << tag << endl;
+		    opserr << "WARNING invalid suction\n";
+			opserr << "uniaxialMaterial QzSimple1: " << tag << endln;
 			return 0;
 		}
 		if (Tcl_GetDouble(interp, argv[7], &dashpot) != TCL_OK) {
-			cerr << "WARNING invalid dashpot\n";
-			cerr << "uniaxialMaterial QzSimple1: " << tag << endl;
+			opserr << "WARNING invalid dashpot\n";
+			opserr << "uniaxialMaterial QzSimple1: " << tag << endln;
 			return 0;	
 		}
 	}
@@ -256,9 +256,9 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 //////////////////////////////////////////////////////////////////////////////////////////////////
 	else if (strcmp(argv[1],"TzSimple1") == 0) {
 	if (argc < 6) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: uniaxialMaterial TzSimple1 tag? tzType? tult? z50? dashpot? " << endl;
+	    opserr << "Want: uniaxialMaterial TzSimple1 tag? tzType? tult? z50? dashpot? " << endln;
 	    return 0;
 	}
 
@@ -266,25 +266,25 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 	double tult, z50, dashpot;
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid uniaxialMaterial TzSimple1 tag" << endl;
+	    opserr << "WARNING invalid uniaxialMaterial TzSimple1 tag" << endln;
 	    return 0;		
 	}
 
 	if (Tcl_GetInt(interp, argv[3], &tzType) != TCL_OK) {
-	    cerr << "WARNING invalid tzType\n";
-	    cerr << "uniaxialMaterial TzSimple1: " << tag << endl;
+	    opserr << "WARNING invalid tzType\n";
+	    opserr << "uniaxialMaterial TzSimple1: " << tag << endln;
 	    return 0;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[4], &tult) != TCL_OK) {
-	    cerr << "WARNING invalid tult\n";
-	    cerr << "uniaxialMaterial TzSimple1: " << tag << endl;
+	    opserr << "WARNING invalid tult\n";
+	    opserr << "uniaxialMaterial TzSimple1: " << tag << endln;
 	    return 0;
 	}
 
 	if (Tcl_GetDouble(interp, argv[5], &z50) != TCL_OK) {
-	    cerr << "WARNING invalid z50\n";
-	    cerr << "uniaxialMaterial TzSimple1: " << tag << endl;
+	    opserr << "WARNING invalid z50\n";
+	    opserr << "uniaxialMaterial TzSimple1: " << tag << endln;
 	    return 0;	
 	}
 
@@ -292,8 +292,8 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 
 	if (argc > 6) {
 		if (Tcl_GetDouble(interp, argv[6], &dashpot) != TCL_OK) {
-			cerr << "WARNING invalid dashpot\n";
-			cerr << "uniaxialMaterial TzSimple1: " << tag << endl;
+			opserr << "WARNING invalid dashpot\n";
+			opserr << "uniaxialMaterial TzSimple1: " << tag << endln;
 			return 0;	
 		}
 	}
@@ -307,9 +307,9 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //temp out BJ 	else if (strcmp(argv[1],"TzLiq1") == 0) {
 //temp out BJ 	if (argc < 9) {
-//temp out BJ 	    cerr << "WARNING insufficient arguments\n";
+//temp out BJ 	    opserr << "WARNING insufficient arguments\n";
 //temp out BJ 	    printCommand(argc,argv);
-//temp out BJ 	    cerr << "Want: uniaxialMaterial TzLiq1 tag? tzType? tult? z50? dashpot? solidElem1? solidElem2?" << endl;
+//temp out BJ 	    opserr << "Want: uniaxialMaterial TzLiq1 tag? tzType? tult? z50? dashpot? solidElem1? solidElem2?" << endln;
 //temp out BJ 	    return 0;
 //temp out BJ 	}
 //temp out BJ 
@@ -317,43 +317,43 @@ TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int
 //temp out BJ 	double tult, z50, dashpot;
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid uniaxialMaterial TzLiq1 tag" << endl;
+//temp out BJ 	    opserr << "WARNING invalid uniaxialMaterial TzLiq1 tag" << endln;
 //temp out BJ 	    return 0;		
 //temp out BJ 	}
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetInt(interp, argv[3], &tzType) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid tzType\n";
-//temp out BJ 	    cerr << "uniaxialMaterial TzLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid tzType\n";
+//temp out BJ 	    opserr << "uniaxialMaterial TzLiq1: " << tag << endln;
 //temp out BJ 	    return 0;	
 //temp out BJ 	}
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetDouble(interp, argv[4], &tult) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid tult\n";
-//temp out BJ 	    cerr << "uniaxialMaterial TzLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid tult\n";
+//temp out BJ 	    opserr << "uniaxialMaterial TzLiq1: " << tag << endln;
 //temp out BJ 	    return 0;
 //temp out BJ 	}
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetDouble(interp, argv[5], &z50) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid z50\n";
-//temp out BJ 	    cerr << "uniaxialMaterial TzLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid z50\n";
+//temp out BJ 	    opserr << "uniaxialMaterial TzLiq1: " << tag << endln;
 //temp out BJ 	    return 0;	
 //temp out BJ 	}
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetDouble(interp, argv[6], &dashpot) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid dashpot\n";
-//temp out BJ 	    cerr << "uniaxialMaterial TzLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid dashpot\n";
+//temp out BJ 	    opserr << "uniaxialMaterial TzLiq1: " << tag << endln;
 //temp out BJ 	    return 0;	
 //temp out BJ 	}
 //temp out BJ 
 //temp out BJ 	if (Tcl_GetInt(interp, argv[7], &solidElem1) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid solidElem\n";
-//temp out BJ 	    cerr << "uniaxialMaterial TzLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid solidElem\n";
+//temp out BJ 	    opserr << "uniaxialMaterial TzLiq1: " << tag << endln;
 //temp out BJ 	    return 0;	
 //temp out BJ 	}
 //temp out BJ 	
 //temp out BJ 	if (Tcl_GetInt(interp, argv[8], &solidElem2) != TCL_OK) {
-//temp out BJ 	    cerr << "WARNING invalid solidElem\n";
-//temp out BJ 	    cerr << "uniaxialMaterial TzLiq1: " << tag << endl;
+//temp out BJ 	    opserr << "WARNING invalid solidElem\n";
+//temp out BJ 	    opserr << "uniaxialMaterial TzLiq1: " << tag << endln;
 //temp out BJ 	    return 0;	
 //temp out BJ 	}
 //temp out BJ 

@@ -43,7 +43,7 @@ MAY CHANGE. \\
 \indent {\em virtual double \&operator()(int x);} \\
 \indent {\em virtual double \&operator[](int x);} \\
 \indent {\em virtual ID \&operator=(const ID \&M);}\\
-\indent {\em friend ostream \&operator$<<$(ostream \&s, const ID
+\indent {\em friend OPS_Stream \&operator$<<$(OPS_Stream \&s, const ID
 \&id);} \\  
 \indent {\em friend istream \&operator$<<$(istream \&s, const ID
 \&id);} \\ 
@@ -134,7 +134,7 @@ memory is available, the order and {\em arraySize} of the current ID
 is set to $0$ and the ID is returned without copying the components. \\
 
 
-{\em friend ostream \&operator$<<$(ostream \&s, const ID \&id);} \\
+{\em friend OPS_Stream \&operator$<<$(OPS_Stream \&s, const ID \&id);} \\
 A function to print out the contents of the ID {\em id} to the output stream
 {\em s}. Prints out the components into the stream and then sends a
 newline character. \\

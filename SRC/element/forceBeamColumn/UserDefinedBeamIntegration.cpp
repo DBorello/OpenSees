@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-12-13 22:25:48 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/UserDefinedBeamIntegration.cpp,v $
 
 #include <UserDefinedBeamIntegration.h>
@@ -36,9 +36,9 @@ UserDefinedBeamIntegration::UserDefinedBeamIntegration(int nIP,
 {
   for (int i = 0; i < nIP; i++) {
     if (pt(i) < 0.0 || pt(i) > 1.0)
-      cerr << "UserDefinedBeamIntegration::UserDefinedBeamIntegration -- point lies outside [0,1]" << endl;
+      opserr << "UserDefinedBeamIntegration::UserDefinedBeamIntegration -- point lies outside [0,1]" << endln;
     if (wt(i) < 0.0 || wt(i) > 1.0)
-      cerr << "UserDefinedBeamIntegration::UserDefinedBeamIntegration -- weight lies outside [0,1]" << endl;
+      opserr << "UserDefinedBeamIntegration::UserDefinedBeamIntegration -- weight lies outside [0,1]" << endln;
     pts(i) = pt(i);
     wts(i) = wt(i);
   }

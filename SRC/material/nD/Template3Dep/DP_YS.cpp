@@ -141,11 +141,11 @@ tensor DPYieldSurface::xi_t1( const EPState *EPS) const {
 }
 
 //================================================================================
-ostream& operator<< (ostream& os, const DPYieldSurface & YS)
+OPS_Stream& operator<< (OPS_Stream& os, const DPYieldSurface & YS)
 {
    os << "Drucker-Prager Yield Surface Parameters: " << endln;
-   setprecision(4);
-   //os << "alfa1 = " << YS.getalfa1() << endln;
+   os.precision(4);
+   //os << "alfa1 = " << YS.getalfa1() << endlnn;
    return os;
 }
 

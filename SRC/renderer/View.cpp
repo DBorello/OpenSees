@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-09-21 20:29:11 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/View.cpp,v $
                                                                         
                                                                         
@@ -53,13 +53,13 @@ View::update(void)
   }
    
   if (n.Normalize() != 0) {
-    cerr << "View::update() - VPN cannot have zero length\n";
+    opserr << "View::update() - VPN cannot have zero length\n";
     return -1;
   }
 
   u = v % n;
   if (u.Normalize() != 0) {
-    cerr << "View::update() - VUV X VPN cannot have zero length\n";
+    opserr << "View::update() - VUV X VPN cannot have zero length\n";
     return -1;
   }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:26 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Projection.cpp,v $
                                                                         
                                                                         
@@ -112,7 +112,7 @@ Projection::transform(FACE &input)
     if (projection_mode == PERSPECTIVE_MODE) {
 	float wVal = point->p[3];
       if (wVal == 0) {
-	cerr << "Some Point in local coord sys at same level as eye\n";
+	opserr << "Some Point in local coord sys at same level as eye\n";
 	return input;
       }
       else { // we will homo x and y coord, but leave z as was befor we came in
@@ -140,7 +140,7 @@ Projection::transformP(MYPOINT *input)
 	float wVal = input->p[3];
 	if (wVal == 0) { // point at eye position ignore delete it
 	    delete input;
-	    cerr << "HELP\n";
+	    opserr << "HELP\n";
 	    return 0;
 	} else { // we will homo x and y coord, but leave z as was befor we came in
 	    input->p[0] = input->p[0]/wVal;

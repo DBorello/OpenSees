@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-06 18:24:15 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dUniformLoad.h,v $
                                                                         
 #ifndef Beam2dUniformLoad_h
@@ -43,7 +43,7 @@ class Beam2dUniformLoad : public ElementalLoad
 
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker &theBroker);
-    void Print(ostream &s, int flag =0);       
+    void Print(OPS_Stream &s, int flag =0);       
 
   protected:
 	

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-10-04 19:55:27 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/PlainHandler.cpp,v $
                                                                         
                                                                         
@@ -88,8 +88,8 @@ PlainHandler::handle(const ID *nodesLast)
     Integrator *theIntegrator = this->getIntegratorPtr();    
     
     if ((theDomain == 0) || (theModel == 0) || (theIntegrator == 0)) {
-	cerr << "WARNING PlainHandler::handle() - ";
-	cerr << " setLinks() has not been called\n";
+	opserr << "WARNING PlainHandler::handle() - ";
+	opserr << " setLinks() has not been called\n";
 	return -1;
     }
 
@@ -102,9 +102,9 @@ PlainHandler::handle(const ID *nodesLast)
 
     // create an array for the FE_elements and zero it
     if ((numFE <= 0) || ((theFEs  = new FE_Element *[numFE]) == 0)) {
-	cerr << "WARNING PlainHandler::handle() - ";
-        cerr << "ran out of memory for FE_elements"; 
-	cerr << " array of size " << numFE << endl;
+	opserr << "WARNING PlainHandler::handle() - ";
+        opserr << "ran out of memory for FE_elements"; 
+	opserr << " array of size " << numFE << endln;
 	return -2;
     }
 
@@ -112,9 +112,9 @@ PlainHandler::handle(const ID *nodesLast)
 
     // create an array for the DOF_Groups and zero it
     if ((numDOF <= 0) || ((theDOFs = new DOF_Group *[numDOF]) == 0)) {
-	cerr << "WARNING PlainHandler::handle() - ";
-	cerr << "ran out of memory for DOF_Groups";
-	cerr << " array of size " << numDOF << endl;
+	opserr << "WARNING PlainHandler::handle() - ";
+	opserr << "ran out of memory for DOF_Groups";
+	opserr << " array of size " << numDOF << endln;
 	return -3;    
     }    
     for (int j=0; j<numDOF; j++) theDOFs[j] = 0;
@@ -131,8 +131,8 @@ PlainHandler::handle(const ID *nodesLast)
     int countDOF =0;
     while ((nodPtr = theNod()) != 0) {
 	if ((dofPtr = new DOF_Group(numDofGrp, nodPtr)) == 0) {
-	    cerr << "WARNING PlainHandler::handle() - ran out of memory";
-	    cerr << " creating DOF_Group " << numDofGrp << endl;	
+	    opserr << "WARNING PlainHandler::handle() - ran out of memory";
+	    opserr << " creating DOF_Group " << numDofGrp << endln;	
 	    return -4;    		
 	}
 	// initially set all the ID value to -2
@@ -148,10 +148,10 @@ PlainHandler::handle(const ID *nodesLast)
 	while ((spPtr = theSPs()) != 0)
 	    if (spPtr->getNodeTag() == nodeID) {
 		if (spPtr->isHomogeneous() == false) {
-		    cerr << "WARNING PlainHandler::handle() - ";
-		    cerr << " non-homogeneos constraint";
-		    cerr << " for node " << spPtr->getNodeTag();
-		    cerr << " homo assumed\n";
+		    opserr << "WARNING PlainHandler::handle() - ";
+		    opserr << " non-homogeneos constraint";
+		    opserr << " for node " << spPtr->getNodeTag();
+		    opserr << " homo assumed\n";
 		}
 		const ID &id = dofPtr->getID();
 		int dof = spPtr->getDOF_Number();		
@@ -159,9 +159,9 @@ PlainHandler::handle(const ID *nodesLast)
 			dofPtr->setID(spPtr->getDOF_Number(),-1);
 			countDOF--;	
 		} else {
-		    cerr << "WARNING PlainHandler::handle() - ";
-		    cerr << " multiple single pointconstraints at DOF " << dof;
-		    cerr << " for node " << spPtr->getNodeTag() << endl;
+		    opserr << "WARNING PlainHandler::handle() - ";
+		    opserr << " multiple single pointconstraints at DOF " << dof;
+		    opserr << " for node " << spPtr->getNodeTag() << endln;
 		}
 	    }
 
@@ -173,19 +173,19 @@ PlainHandler::handle(const ID *nodesLast)
 	while ((mpPtr = theMPs()) != 0)
 	    if (mpPtr->getNodeConstrained() == nodeID) {
 		if (mpPtr->isTimeVarying() == true) {
-		    cerr << "WARNING PlainHandler::handle() - ";
-		    cerr << " time-varying constraint";
-		    cerr << " for node " << nodeID;
-		    cerr << " non-varyng assumed\n";
+		    opserr << "WARNING PlainHandler::handle() - ";
+		    opserr << " time-varying constraint";
+		    opserr << " for node " << nodeID;
+		    opserr << " non-varyng assumed\n";
 		}
 		const Matrix &C = mpPtr->getConstraint();
 		int numRows = C.noRows();
 		int numCols = C.noCols();
 		if (numRows != numCols) {
-			cerr << "WARNING PlainHandler::handle() - ";
-			cerr << " constraint matrix not diagonal, ignoring constraint";
-			cerr << " for node " << nodeID << endl;
-			cerr << " non-varyng assumed\n";
+			opserr << "WARNING PlainHandler::handle() - ";
+			opserr << " constraint matrix not diagonal, ignoring constraint";
+			opserr << " for node " << nodeID << endln;
+			opserr << " non-varyng assumed\n";
 		} else {
 			int ok = 0;
 			for (int i=0; i<numRows; i++) {
@@ -196,10 +196,10 @@ PlainHandler::handle(const ID *nodesLast)
 							ok = 1;
 			}
 			if (ok != 0) {
-				cerr << "WARNING PlainHandler::handle() - ";
-				cerr << " constraint matrix not identity, ignoring constraint";
-				cerr << " for node " << nodeID << endl;
-				cerr << " non-varyng assumed\n";
+				opserr << "WARNING PlainHandler::handle() - ";
+				opserr << " constraint matrix not identity, ignoring constraint";
+				opserr << " for node " << nodeID << endln;
+				opserr << " non-varyng assumed\n";
 			} else {
 				const ID &dofs = mpPtr->getConstrainedDOFs();
 				const ID &id = dofPtr->getID();				
@@ -209,9 +209,9 @@ PlainHandler::handle(const ID *nodesLast)
 						dofPtr->setID(dof,-4);
 						countDOF--;	
 					} else {
-		    				cerr << "WARNING PlainHandler::handle() - ";
-		    				cerr << " constraint at dof " << dof << " already specified for constrained node";
-		    				cerr << " in MP_Constraint at node " << nodeID << endl;
+		    				opserr << "WARNING PlainHandler::handle() - ";
+		    				opserr << " constraint at dof " << dof << " already specified for constrained node";
+		    				opserr << " in MP_Constraint at node " << nodeID << endln;
 					}
 					
 				}
@@ -244,9 +244,9 @@ PlainHandler::handle(const ID *nodesLast)
 			dofPtr->setID(j,-3);
 			count3++;
 		    } else {
-			cerr << "WARNING PlainHandler::handle() ";
-			cerr << " - boundary sp constraint in subdomain";
-			cerr << " this should not be - results suspect \n";
+			opserr << "WARNING PlainHandler::handle() ";
+			opserr << " - boundary sp constraint in subdomain";
+			opserr << " this should not be - results suspect \n";
 		    }
 	    }
 	}
@@ -259,8 +259,8 @@ PlainHandler::handle(const ID *nodesLast)
     FE_Element *fePtr;
     while ((elePtr = theEle()) != 0) {
 	if ((fePtr = new FE_Element(elePtr)) == 0) {
-	    cerr << "WARNING PlainHandler::handle() - ran out of memory";
-	    cerr << " creating FE_Element " << elePtr->getTag() << endl; 
+	    opserr << "WARNING PlainHandler::handle() - ran out of memory";
+	    opserr << " creating FE_Element " << elePtr->getTag() << endln; 
 	    return -5;
 	}		
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-12-07 01:02:09 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/BisectionLineSearch.cpp,v $
 
 // Written: fmk 
@@ -33,7 +33,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Vector.h>
-#include <iostream.h>
 
 
 BisectionLineSearch::BisectionLineSearch(double tol, int mIter, double mnEta, double mxEta, int pFlag)
@@ -96,8 +95,8 @@ BisectionLineSearch::search(double s0,
   const Vector &dU = theSOE.getX();
 
   if (printFlag == 0) {
-    cerr << "Bisection Line Search - initial: " 
-	 << "     eta(0) : " << eta << " , Ratio |sj/s0| = " << r0 << endl;
+    opserr << "Bisection Line Search - initial: " 
+	 << "     eta(0) : " << eta << " , Ratio |sj/s0| = " << r0 << endln;
   }
 
   // we first search for a bracket to a solution, i.e. we want sU * sL < 0.0
@@ -112,14 +111,14 @@ BisectionLineSearch::search(double s0,
     *x *= etaU-etaJ;
 	    
     if (theIntegrator.update(*x) < 0) {
-      cerr << "WARNING BisectionLineSearch::search() -";
-      cerr << "the Integrator failed in update()\n";	
+      opserr << "WARNING BisectionLineSearch::search() -";
+      opserr << "the Integrator failed in update()\n";	
       return -1;
     }
     
     if (theIntegrator.formUnbalance() < 0) {
-      cerr << "WARNING BisectionLineSearch::search() -";
-      cerr << "the Integrator failed in formUnbalance()\n";	
+      opserr << "WARNING BisectionLineSearch::search() -";
+      opserr << "the Integrator failed in formUnbalance()\n";	
       return -2;
     }	
 
@@ -135,8 +134,8 @@ BisectionLineSearch::search(double s0,
       return 0;
 
     if (printFlag == 0) {
-      cerr << "Bisection Line Search - bracketing: " << count 
-	   << " , eta(j) : " << etaU << " , Ratio |sj/s0| = " << r << endl;
+      opserr << "Bisection Line Search - bracketing: " << count 
+	   << " , eta(j) : " << etaU << " , Ratio |sj/s0| = " << r << endln;
     }
 
     etaJ = etaU;
@@ -172,14 +171,14 @@ BisectionLineSearch::search(double s0,
     *x *= eta-etaJ;
 	    
     if (theIntegrator.update(*x) < 0) {
-      cerr << "WARNING BisectionLineSearch::search() -";
-      cerr << "the Integrator failed in update()\n";	
+      opserr << "WARNING BisectionLineSearch::search() -";
+      opserr << "the Integrator failed in update()\n";	
       return -1;
     }
     
     if (theIntegrator.formUnbalance() < 0) {
-      cerr << "WARNING BisectionLineSearch::search() -";
-      cerr << "the Integrator failed in formUnbalance()\n";	
+      opserr << "WARNING BisectionLineSearch::search() -";
+      opserr << "the Integrator failed in formUnbalance()\n";	
       return -2;
     }	
 
@@ -209,8 +208,8 @@ BisectionLineSearch::search(double s0,
       count = maxIter;
 
     if (printFlag == 0) {
-      cerr << "Bisection Line Search - iteration: " << count 
-	   << " , eta(j) : " << eta << " , Ratio |sj/s0| = " << r << endl;
+      opserr << "Bisection Line Search - iteration: " << count 
+	   << " , eta(j) : " << eta << " , Ratio |sj/s0| = " << r << endln;
     }
     
   } //end while
@@ -240,12 +239,12 @@ BisectionLineSearch::recvSelf(int cTag,
 
 
 void
-BisectionLineSearch::Print(ostream &s, int flag)
+BisectionLineSearch::Print(OPS_Stream &s, int flag)
 {
   if (flag == 0) {
-    s << "BisectionLineSearch :: Line Search Tolerance = " << tolerance << endl;
-    s << "                         max num Iterations = " << maxIter << endl;
-    s << "                         max value on eta = " << maxEta << endl;
+    s << "BisectionLineSearch :: Line Search Tolerance = " << tolerance << endln;
+    s << "                         max num Iterations = " << maxIter << endln;
+    s << "                         max value on eta = " << maxEta << endln;
   }
 }
 

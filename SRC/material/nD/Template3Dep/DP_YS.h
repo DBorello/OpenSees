@@ -70,13 +70,13 @@ class DPYieldSurface : public YieldSurface
     // Redefine 1st derivative of F over tensorial internal variables
     tensor xi_t1(const EPState *EPS) const;
 
-    void print() { cout << *this; }; 
+    void print() { opserr << *this; }; 
   
     //================================================================================
     // Overloaded Insertion Operator
     // prints an DP YieldSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const DPYieldSurface & YS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const DPYieldSurface & YS);
 
 };
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-10-04 19:55:26 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/LagrangeConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -91,8 +91,8 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
     Integrator *theIntegrator = this->getIntegratorPtr();    
     
     if ((theDomain == 0) || (theModel == 0) || (theIntegrator == 0)) {
-	cerr << "WARNING LagrangeConstraintHandler::handle() - ";
-	cerr << " setLinks() has not been called\n";
+	opserr << "WARNING LagrangeConstraintHandler::handle() - ";
+	opserr << " setLinks() has not been called\n";
 	return -1;
     }
 
@@ -112,9 +112,9 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
 
     // create an array for the FE_elements and zero it
     if ((numFE <= 0) || ((theFEs  = new FE_Element *[numFE]) == 0)) {
-	cerr << "WARNING LagrangeConstraintHandler::handle() - ";
-        cerr << "ran out of memory for FE_elements"; 
-	cerr << " array of size " << numFE << endl;
+	opserr << "WARNING LagrangeConstraintHandler::handle() - ";
+        opserr << "ran out of memory for FE_elements"; 
+	opserr << " array of size " << numFE << endln;
 	return -2;
     }
     int i;
@@ -122,9 +122,9 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
 
     // create an array for the DOF_Groups and zero it
     if ((numDOF <= 0) || ((theDOFs = new DOF_Group *[numDOF]) == 0)) {
-	cerr << "WARNING LagrangeConstraintHandler::handle() - ";
-        cerr << "ran out of memory for DOF_Groups";
-	cerr << " array of size " << numDOF << endl;
+	opserr << "WARNING LagrangeConstraintHandler::handle() - ";
+        opserr << "ran out of memory for DOF_Groups";
+	opserr << " array of size " << numDOF << endln;
 	return -3;    
     }    
     for (i=0; i<numDOF; i++) theDOFs[i] = 0;
@@ -141,9 +141,9 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
     int countDOF =0;
     while ((nodPtr = theNod()) != 0) {
 	if ((dofPtr = new DOF_Group(numDofGrp, nodPtr)) == 0) {
-	    cerr << "WARNING LagrangeConstraintHandler::handle() ";
-	    cerr << "- ran out of memory";
-	    cerr << " creating DOF_Group " << i << endl;	
+	    opserr << "WARNING LagrangeConstraintHandler::handle() ";
+	    opserr << "- ran out of memory";
+	    opserr << " creating DOF_Group " << i << endln;	
 	    return -4;    		
 	}
 	// initially set all the ID value to -2
@@ -167,9 +167,9 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
     FE_Element *fePtr;
     while ((elePtr = theEle()) != 0) {
 	if ((fePtr = new FE_Element(elePtr)) == 0) {
-	    cerr << "WARNING LagrangeConstraintHandler::handle()";
-	    cerr << " - ran out of memory";
-	    cerr << " creating FE_Element " << elePtr->getTag() << endl; 
+	    opserr << "WARNING LagrangeConstraintHandler::handle()";
+	    opserr << " - ran out of memory";
+	    opserr << " creating FE_Element " << elePtr->getTag() << endln; 
 	    return -5;
 	}		
 	
@@ -189,9 +189,9 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
     SP_ConstraintIter &theSPs = theDomain->getDomainAndLoadPatternSPs();
     while ((spPtr = theSPs()) != 0) {
 	if ((dofPtr = new LagrangeDOF_Group(numDofGrp, *spPtr)) == 0) {
-	    cerr << "WARNING LagrangeConstraintHandler::handle()";
-	    cerr << " - ran out of memory";
-	    cerr << " creating LagrangeDOFGroup " << endl; 
+	    opserr << "WARNING LagrangeConstraintHandler::handle()";
+	    opserr << " - ran out of memory";
+	    opserr << " creating LagrangeDOFGroup " << endln; 
 	    return -5;
 	}		
 	const ID &id = dofPtr->getID();
@@ -205,9 +205,9 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
 	
 	if ((fePtr = new LagrangeSP_FE(*theDomain, *spPtr, 
 				       *dofPtr, alphaSP)) == 0) {
-	    cerr << "WARNING LagrangeConstraintHandler::handle()";
-	    cerr << " - ran out of memory";
-	    cerr << " creating LagrangeSP_FE " << endl; 
+	    opserr << "WARNING LagrangeConstraintHandler::handle()";
+	    opserr << " - ran out of memory";
+	    opserr << " creating LagrangeSP_FE " << endln; 
 	    return -5;
 	}		
 	theFEs[numFeEle++] = fePtr;
@@ -220,9 +220,9 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
     MP_ConstraintIter &theMPs = theDomain->getMPs();
     while ((mpPtr = theMPs()) != 0) {
 	if ((dofPtr = new LagrangeDOF_Group(numDofGrp, *mpPtr)) == 0) {
-	    cerr << "WARNING LagrangeConstraintHandler::handle()";
-	    cerr << " - ran out of memory";
-	    cerr << " creating LagrangeDOFGroup " << endl; 
+	    opserr << "WARNING LagrangeConstraintHandler::handle()";
+	    opserr << " - ran out of memory";
+	    opserr << " creating LagrangeDOFGroup " << endln; 
 	    return -5;
 	}		
 	const ID &id = dofPtr->getID();
@@ -236,9 +236,9 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
 
 	if ((fePtr = new LagrangeMP_FE(*theDomain, *mpPtr, 
 				       *dofPtr, alphaMP)) == 0) { 
-	    cerr << "WARNING LagrangeConstraintHandler::handle()";
-	    cerr << " - ran out of memory";
-	    cerr << " creating LagrangeMP_FE " << endl; 
+	    opserr << "WARNING LagrangeConstraintHandler::handle()";
+	    opserr << " - ran out of memory";
+	    opserr << " creating LagrangeMP_FE " << endln; 
 	    return -5;
 	}		
 	
@@ -265,9 +265,9 @@ LagrangeConstraintHandler::handle(const ID *nodesLast)
 			dofPtr->setID(j,-3);
 			count3++;
 		    } else {
-			cerr << "WARNING LagrangeConstraintHandler::handle() ";
-			cerr << " - boundary sp constraint in subdomain";
-			cerr << " this should not be - results suspect \n";
+			opserr << "WARNING LagrangeConstraintHandler::handle() ";
+			opserr << " - boundary sp constraint in subdomain";
+			opserr << " this should not be - results suspect \n";
 		    }
 	    }
 	}
@@ -318,7 +318,7 @@ LagrangeConstraintHandler::sendSelf(int cTag, Channel &theChannel)
   data(1) = alphaMP;
   result = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (result != 0) 
-    cerr << "LagrangeConstraintHandler::sendSelf() - error sending Vector\n";
+    opserr << "LagrangeConstraintHandler::sendSelf() - error sending Vector\n";
   return result;
 }
 
@@ -333,7 +333,7 @@ LagrangeConstraintHandler::recvSelf(int cTag,
   alphaSP = data(0);
   alphaMP = data(1);
   if (result != 0) 
-    cerr << "LagrangeConstraintHandler::recvSelf() - error receiving Vector\n";
+    opserr << "LagrangeConstraintHandler::recvSelf() - error receiving Vector\n";
   return result;
 }
 

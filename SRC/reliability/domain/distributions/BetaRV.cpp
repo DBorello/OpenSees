@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:57 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/BetaRV.cpp,v $
 
 
@@ -37,6 +37,7 @@
 #include <GammaRV.h>
 #include <math.h>
 #include <string.h>
+#include <OPS_Globals.h>
 
 BetaRV::BetaRV(int passedTag, 
 		 double passedMean,
@@ -45,7 +46,7 @@ BetaRV::BetaRV(int passedTag,
 :RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
 {
 	// Note: this constructor is void.
-	cerr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endl;
+	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
 }
 BetaRV::BetaRV(int passedTag, 
 		 double passedParameter1,
@@ -68,7 +69,7 @@ BetaRV::BetaRV(int passedTag,
 :RandomVariable(passedTag, passedMean, passedStdv)
 {
 	// Note: this constructor is void.
-	cerr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endl;
+	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
 }
 BetaRV::BetaRV(int passedTag, 
 		 double passedParameter1,
@@ -92,7 +93,7 @@ BetaRV::~BetaRV()
 
 
 void
-BetaRV::Print(ostream &s, int flag)
+BetaRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -182,7 +183,7 @@ BetaRV::getInverseCDFvalue(double probValue)
 		}
 		else {
 			if (i==100) {
-				cerr << "WARNING: Did not converge to find inverse CDF!" << endl;
+				opserr << "WARNING: Did not converge to find inverse CDF!" << endln;
 				result = 0.0;
 			}
 			else {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-09-25 20:40:52 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/TclGeomTransfCommand.cpp,v $
 
 #include <TclModelBuilder.h>
@@ -46,8 +46,8 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 {
   // Make sure there is a minimum number of arguments
   if (argc < 2) {
-    cerr << "WARNING insufficient number of geomTransf arguments\n";
-    cerr << "Want: geomTransf type? tag? <specific transf args>" << endl;
+    opserr << "WARNING insufficient number of geomTransf arguments\n";
+    opserr << "Want: geomTransf type? tag? <specific transf args>" << endln;
     return TCL_ERROR;
   }   
 	
@@ -66,13 +66,13 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
     Vector jntOffsetI(2), jntOffsetJ(2);
 	 
     if (argc < 3) {
-      interp->result = "WARNING insufficient arguments - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>"; 
+      opserr << "WARNING insufficient arguments - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>\n"; 
       return TCL_ERROR;
     }
 	    
     int argi = 2;  
     if (Tcl_GetInt(interp, argv[argi++], &crdTransfTag) != TCL_OK) {	
-      interp->result = "WARNING invalid tag - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+      opserr << "WARNING invalid tag - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>\n";
       return  TCL_ERROR;
     }
 
@@ -84,22 +84,22 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 	argi++;
 	for (i = 0; i < 2; i++) {
 	  if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetI(i)) != TCL_OK) {
-	    interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+	    opserr << "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>\n";
 	    return TCL_ERROR;
 	  }
 	}
  
 	for (i = 0; i < 2; i++) {
 	  if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetJ(i)) != TCL_OK) {
-	    interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
+	    opserr << "WARNING invalid jntOffset value - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>\n";
 	    return TCL_ERROR;
 	  }
 	}
       }
       
       else {
-	interp->result = "WARNING bad command - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>";
-	cerr << "invalid: " << argv[argi] << endl;
+	opserr << "WARNING bad command - want: geomTransf type? tag? <-jntOffset dXi? dYi? dXj? dYj?>\n";
+	opserr << "invalid: " << argv[argi] << endln;
 	return TCL_ERROR;
       }
     }
@@ -119,19 +119,19 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
       crdTransf2d = new CorotCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
 #endif
     else {
-      interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
-      cerr << argv[1] << endl;
+      opserr << "WARNING TclElmtBuilder - addGeomTransf - invalid Type\n";
+      opserr << argv[1] << endln;
       return TCL_ERROR;
     }
     
     if (crdTransf2d == 0) {
-      interp->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
+      opserr << "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object\n";
       return TCL_ERROR;
     }
     
     // add the transformation to the modelBuilder
     if (theTclModelBuilder->addCrdTransf2d(*crdTransf2d)) {
-      interp->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
+      opserr << "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder\n";
       return TCL_ERROR;
     }
   }
@@ -142,28 +142,28 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
     Vector jntOffsetI(3), jntOffsetJ(3);   // joint offsets in global coordinates
     
     if (argc < 6) {
-      interp->result = "WARNING insufficient arguments - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+      opserr << "WARNING insufficient arguments - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >\n";
       return TCL_ERROR;
     }
     
     int argi = 2;  
     if (Tcl_GetInt(interp, argv[argi++], &crdTransfTag) != TCL_OK) {	
-      interp->result = "WARNING invalid tag - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+      opserr << "WARNING invalid tag - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >\n";
       return  TCL_ERROR;
     }
     
     if (Tcl_GetDouble(interp, argv[argi++], &vecxzPlane(0)) != TCL_OK) {
-      interp->result = "WARNING invalid vecxzPlaneX - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+      opserr << "WARNING invalid vecxzPlaneX - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >\n";
       return TCL_ERROR;
     }
     
     if (Tcl_GetDouble(interp, argv[argi++], &vecxzPlane(1)) != TCL_OK) {
-      interp->result = "WARNING invalid vecxzPlaneY - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+      opserr << "WARNING invalid vecxzPlaneY - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >\n";
       return TCL_ERROR;
     }
     
     if (Tcl_GetDouble(interp, argv[argi++], &vecxzPlane(2)) != TCL_OK) {
-      interp->result = "WARNING invalid vecxzPlaneZ - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";
+      opserr << "WARNING invalid vecxzPlaneZ - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >\n";
       return TCL_ERROR;
     }
     
@@ -175,21 +175,21 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 	argi++;
 	for (i = 0; i < 3; i++) {
 	  if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetI(i)) != TCL_OK) {
-	    interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >"; 
+	    opserr << "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >\n"; 
 	    return TCL_ERROR;
 	  }
 	}
 	
 	for (i = 0; i < 3; i++) {
 	  if (argi == argc || Tcl_GetDouble(interp, argv[argi++], &jntOffsetJ(i)) != TCL_OK) {
-	    interp->result = "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >";  
+	    opserr << "WARNING invalid jntOffset value - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >\n";  
 	    return TCL_ERROR;
 	  }
 	}
       }
       else {
-	interp->result = "WARNING bad command - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? >"; 
-	cerr << "invalid: " << argv[argi] << endl;
+	opserr << "WARNING bad command - want: geomTransf type? tag? vecxzPlaneX? vecxzPlaneY? vecxzPlaneZ?  <-jntOffset dXi? dYi? dZi? dXj? dYj? dZj? > "; 
+	opserr << "invalid: " << argv[argi] << endln;
 	return TCL_ERROR;
       }
     }
@@ -210,23 +210,23 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 #endif
     
     else {
-      interp->result = "WARNING TclElmtBuilder - addGeomTransf - invalid Type";
+      opserr << "WARNING TclElmtBuilder - addGeomTransf - invalid Type\n";
       return TCL_ERROR;
     }
     
     if (crdTransf3d == 0) {
-      interp->result = "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object";
+      opserr << "WARNING TclElmtBuilder - addGeomTransf - ran out of memory to create geometric transformation object\n";
       return TCL_ERROR;
     }
     
     // add the transformation to the modelBuilder
     if (theTclModelBuilder->addCrdTransf3d(*crdTransf3d)) {
-      interp->result = "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder";
+      opserr << "WARNING TclElmtBuilder - addGeomTransf  - could not add geometric transformation to model Builder\n";
       return TCL_ERROR;
     }
   }
   else {
-    cerr << "WARNING NDM = " << NDM << " and NDF = " << NDF << "is imcompatible with available frame elements";
+    opserr << "WARNING NDM = " << NDM << " and NDF = " << NDF << "is imcompatible with available frame elements\n";
     return TCL_ERROR;
   }
   

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-18 01:03:43 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
                                                                         
@@ -48,11 +48,11 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 LoadPattern::LoadPattern(int tag, int clasTag)
 :DomainComponent(tag,clasTag),
- loadFactor(0), isConstant(1), 
+ isConstant(1), loadFactor(0),
  theSeries(0), 
  currentGeoTag(0), lastGeoSendTag(-1),
  theNodalLoads(0), theElementalLoads(0), theSPs(0),
@@ -64,7 +64,7 @@ LoadPattern::LoadPattern(int tag, int clasTag)
     theSPs = new ArrayOfTaggedObjects(32);
 
     if (theNodalLoads == 0 || theElementalLoads == 0 || theSPs == 0) {
-	cerr << " LoadPattern::LoadPattern() - ran out of memory\n";
+	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
     }    
 
@@ -73,7 +73,7 @@ LoadPattern::LoadPattern(int tag, int clasTag)
     theSpIter = new SingleDomSP_Iter(theSPs);
     
     if (theEleIter == 0 || theNodIter == 0 || theSpIter == 0) {
-	cerr << " LoadPattern::LoadPattern() - ran out of memory\n";
+	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
     }  
 // AddingSensitivity:BEGIN /////////////////////////////
@@ -84,7 +84,7 @@ LoadPattern::LoadPattern(int tag, int clasTag)
 
 LoadPattern::LoadPattern()
 :DomainComponent(0,PATTERN_TAG_LoadPattern),
- loadFactor(0), isConstant(1), 
+ isConstant(1), loadFactor(0),
  theSeries(0), 
  currentGeoTag(0), lastGeoSendTag(-1),
  dbSPs(0), dbNod(0), dbEle(0), 
@@ -96,7 +96,7 @@ LoadPattern::LoadPattern()
     theSPs = new ArrayOfTaggedObjects(32);
 
     if (theNodalLoads == 0 || theElementalLoads == 0 || theSPs == 0) {
-	cerr << " LoadPattern::LoadPattern() - ran out of memory\n";
+	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
     }    
 
@@ -105,7 +105,7 @@ LoadPattern::LoadPattern()
     theSpIter = new SingleDomSP_Iter(theSPs);
     
     if (theEleIter == 0 || theNodIter == 0 || theSpIter == 0) {
-	cerr << " LoadPattern::LoadPattern() - ran out of memory\n";
+	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
     }
 // AddingSensitivity:BEGIN /////////////////////////////
@@ -116,7 +116,7 @@ LoadPattern::LoadPattern()
 
 LoadPattern::LoadPattern(int tag)
 :DomainComponent(tag,PATTERN_TAG_LoadPattern),
- loadFactor(0), isConstant(1), 
+ isConstant(1), loadFactor(0.),
  theSeries(0), 
  currentGeoTag(0), lastGeoSendTag(-1),
  dbSPs(0), dbNod(0), dbEle(0), 
@@ -128,7 +128,7 @@ LoadPattern::LoadPattern(int tag)
     theSPs = new ArrayOfTaggedObjects(32);
 
     if (theNodalLoads == 0 || theElementalLoads == 0 || theSPs == 0) {
-	cerr << " LoadPattern::LoadPattern() - ran out of memory\n";
+	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
     }    
 
@@ -137,7 +137,7 @@ LoadPattern::LoadPattern(int tag)
     theSpIter = new SingleDomSP_Iter(theSPs);
     
     if (theEleIter == 0 || theNodIter == 0 || theSpIter == 0) {
-	cerr << " LoadPattern::LoadPattern() - ran out of memory\n";
+	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
     }
 // AddingSensitivity:BEGIN /////////////////////////////
@@ -230,7 +230,7 @@ LoadPattern::addNodalLoad(NodalLoad *load)
 	load->setLoadPatternTag(this->getTag());
 	currentGeoTag++;
     } else  
-	cerr << "WARNING: LoadPattern::addNodalLoad() - load could not be added\n";
+	opserr << "WARNING: LoadPattern::addNodalLoad() - load could not be added\n";
 
     return result;
 }
@@ -247,7 +247,7 @@ LoadPattern::addElementalLoad(ElementalLoad *load)
 	load->setLoadPatternTag(this->getTag());
 	currentGeoTag++;
     } else
-	cerr << "WARNING: LoadPattern::addElementalLoad() - load could not be added\n";	
+	opserr << "WARNING: LoadPattern::addElementalLoad() - load could not be added\n";	
     
     return result;
 }
@@ -264,7 +264,7 @@ LoadPattern::addSP_Constraint(SP_Constraint *theSp)
 	theSp->setLoadPatternTag(this->getTag());
 	currentGeoTag++;
     } else
-	cerr << "WARNING: LoadPattern::addSP_Constraint() - load could not be added\n";
+	opserr << "WARNING: LoadPattern::addSP_Constraint() - load could not be added\n";
     return result;
 }
 
@@ -416,7 +416,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   // will happen in parallel if sending the loadPattern .. not in database
 
   if (theChannel.sendID(myDbTag, cTag, lpData) < 0) {
-    g3ErrorHandler->warning("LoadPattern::sendSelf - channel failed to send the initial ID");
+    opserr << "LoadPattern::sendSelf - channel failed to send the initial ID\n";
     return -1;
   }    
   
@@ -424,7 +424,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
     Vector data(1);
     data(0) = loadFactor;
     if (theChannel.sendVector(myDbTag, cTag, data) < 0) {
-      g3ErrorHandler->warning("LoadPattern::sendSelf - channel failed to send the Vector");
+      opserr << "LoadPattern::sendSelf - channel failed to send the Vector\n";
       return -2;
     }
 
@@ -432,7 +432,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
 
   if (theSeries != 0)
     if (theSeries->sendSelf(cTag, theChannel) < 0) {
-      g3ErrorHandler->warning("LoadPattern::sendSelf - the TimeSeries failed to send");
+      opserr << "LoadPattern::sendSelf - the TimeSeries failed to send\n";
       return -3;
     }
 
@@ -472,7 +472,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
 
       // now send the ID
       if (theChannel.sendID(dbNod, currentGeoTag, nodeData) < 0) {
-	g3ErrorHandler->warning("LoadPattern::sendSelf - channel failed to send the NodalLoads ID");
+	opserr << "LoadPattern::sendSelf - channel failed to send the NodalLoads ID\n";
 	return -4;
       }
     }
@@ -501,7 +501,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
 
       // now send the ID
       if (theChannel.sendID(dbEle, currentGeoTag, elementData) < 0) {
-	g3ErrorHandler->warning("Domain::send - channel failed to send the element ID");
+	opserr << "Domain::send - channel failed to send the element ID\n";
 	return -5;
       }
     }
@@ -529,7 +529,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
       }    
 
       if (theChannel.sendID(dbSPs, currentGeoTag, spData) < 0) {
-	g3ErrorHandler->warning("LoadPAttern::sendSelf - channel failed sending SP_Constraint ID");
+	opserr << "LoadPAttern::sendSelf - channel failed sending SP_Constraint ID\n";
 	return -6;
       }
     }
@@ -545,8 +545,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   NodalLoadIter &theNodes = this->getNodalLoads();
   while ((theNode = theNodes()) != 0) {
     if (theNode->sendSelf(cTag, theChannel) < 0) {
-      g3ErrorHandler->warning("LoadPattern::sendSelf - node with tag %d failed in sendSelf",
-			      theNode->getTag());
+      opserr << "LoadPattern::sendSelf - node with tag " << theNode->getTag() << " failed in sendSelf\n";
       return -7;
     }
   }
@@ -555,8 +554,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   ElementalLoadIter &theElements = this->getElementalLoads();
   while ((theEle = theElements()) != 0) {
     if (theEle->sendSelf(cTag, theChannel) < 0) {
-      g3ErrorHandler->warning("LoadPattern::sendSelf - element with tag %d failed in sendSelf",
-			      theEle->getTag());
+      opserr << "LoadPattern::sendSelf - element with tag " << theNode->getTag() << " failed in sendSelf\n";
       return -8;
     }
   }
@@ -565,8 +563,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   SP_ConstraintIter &theSPs = this->getSPs();
   while ((theSP = theSPs()) != 0) {
     if (theSP->sendSelf(cTag, theChannel) < 0) {
-      g3ErrorHandler->warning("LoadPattern::sendSelf - SP_Constraint tagged %d failed sendSelf",
-			      theSP->getTag());
+      opserr << "LoadPattern::sendSelf - SP_Constraint tagged " << theNode->getTag() << " failed sendSelf\n";
       return -9;
     }
   }    
@@ -590,7 +587,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
   ID lpData(11);
 
   if (theChannel.recvID(myDbTag, cTag, lpData) < 0) {
-    g3ErrorHandler->warning("LoadPattern::recvSelf - channel failed to recv the initial ID");
+    opserr << "LoadPattern::recvSelf - channel failed to recv the initial ID\n";
     return -1;
   }
 
@@ -601,7 +598,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
   if (isConstant == 0) { // we must recv the load factor in a Vector
     Vector data(1);
     if (theChannel.recvVector(myDbTag, cTag, data) < 0) {
-      g3ErrorHandler->warning("LoadPattern::recvSelf - channel failed to recv the Vector");
+      opserr << "LoadPattern::recvSelf - channel failed to recv the Vector\n";
       return -2;
     }
     loadFactor = data(0);
@@ -616,14 +613,14 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
       theSeries = theBroker.getNewTimeSeries(lpData(8));
     }
     if (theSeries == 0) {
-      g3ErrorHandler->warning("LoadPattern::recvSelf - failed to create TimeSeries");
+      opserr << "LoadPattern::recvSelf - failed to create TimeSeries\n";
       return -3;
     }
   
     theSeries->setDbTag(lpData(9));
 
     if (theSeries->recvSelf(cTag, theChannel, theBroker) < 0) {
-      g3ErrorHandler->warning("LoadPattern::recvSelf - the TimeSeries failed to recv");
+      opserr << "LoadPattern::recvSelf - the TimeSeries failed to recv\n";
       return -3;
     }
   }
@@ -652,7 +649,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
 
       // now receive the ID about the nodes, class tag and dbTags
       if (theChannel.recvID(dbNod, currentGeoTag, nodeData) < 0) {
-	g3ErrorHandler->warning("LoadPAttern::recvSelf - channel failed to recv the NodalLoad ID");
+	opserr << "LoadPAttern::recvSelf - channel failed to recv the NodalLoad ID\n";
 	return -2;
       }
 
@@ -669,22 +666,19 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
 	NodalLoad *theNode = theBroker.getNewNodalLoad(classTag);
 
 	if (theNode == 0) {
-	  g3ErrorHandler->warning("LoadPattern::recv - cannot create NodalLoad with classTag %d ",
-				  classTag);
+	  opserr << "LoadPattern::recv - cannot create NodalLoad with classTag " << classTag << endln;
 	  return -2;
 	}			
 	
 	theNode->setDbTag(dbTag);
 	
 	if (theNode->recvSelf(cTag, theChannel, theBroker) < 0) {
-	  g3ErrorHandler->warning("LoadPattern::recvSelf - NodalLoad with dbTag %d failed in recvSelf",
-				  dbTag);
+	  opserr << "LoadPattern::recvSelf - NodalLoad with dbTag " << dbTag << " failed in recvSelf\n";
 	  return -2;
 	}			
 
 	if (this->addNodalLoad(theNode) == false) {
-	  g3ErrorHandler->warning("LoadPattern::recvSelf - failed adding NodalLoad tagged %d into LP!",
-				  theNode->getTag());
+	  opserr << "LoadPattern::recvSelf - failed adding NodalLoad tagged " << theNode->getTag() << " into LP!\n";
 	  return -3;
 	}			
 	  
@@ -700,7 +694,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
       ID eleData(2*numEle);
       
       if (theChannel.recvID(dbEle, currentGeoTag, eleData) < 0) {
-	g3ErrorHandler->warning("LoadPattern::recvSelf - channel failed to recv the EleLoad ID");
+	opserr << "LoadPattern::recvSelf - channel failed to recv the EleLoad ID\n";
 	return -2;
       }
 
@@ -711,22 +705,19 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
       
 	ElementalLoad *theEle = theBroker.getNewElementalLoad(classTag);
 	if (theEle == 0) {
-	  g3ErrorHandler->warning("LoadPattern::recv - cannot create ElementalLoad with classTag %d ",
-				  classTag);
+	  opserr << "LoadPattern::recv - cannot create ElementalLoad with classTag " << classTag << endln;
 	  return -2;
 	}			
 
 	theEle->setDbTag(dbTag);
 	
 	if (theEle->recvSelf(cTag, theChannel, theBroker) < 0) {
-	  g3ErrorHandler->warning("LoadPattern::recvSelf - Ele with dbTag %d failed in recvSelf",
-				  dbTag);
+	  opserr << "LoadPattern::recvSelf - Ele with dbTag " << dbTag << " failed in recvSelf\n";
 	  return -2;
 	}			
 	
 	if (this->addElementalLoad(theEle) == false) {
-	  g3ErrorHandler->warning("LoadPattern::recvSelf - could not add Ele with tag %d into LP!",
-				  theEle->getTag());
+	  opserr << "LoadPattern::recvSelf - could not add Ele with tag " << theEle->getTag() << " into LP!\n";
 	  return -3;
 	}			
 	
@@ -742,7 +733,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
       ID spData(2*numSPs);
 
       if (theChannel.recvID(dbSPs, currentGeoTag, spData) < 0) {
-	g3ErrorHandler->warning("LoadPattern::recvSelf - channel failed to recv the SP_Constraints ID");
+	opserr << "LoadPattern::recvSelf - channel failed to recv the SP_Constraints ID\n";
 	return -2;
       }
 
@@ -753,21 +744,20 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
       
 	SP_Constraint *theSP = theBroker.getNewSP(classTag);
 	if (theSP == 0) {
-	  g3ErrorHandler->warning("LoadPattern::recv - cannot create SP_Constraint with classTag %d ",
-				  classTag);
+	  opserr << "LoadPattern::recv - cannot create SP_Constraint with classTag " << classTag << endln;
 	  return -2;
 	}			
 	theSP->setDbTag(dbTag);
       
 	if (theSP->recvSelf(cTag, theChannel, theBroker) < 0) {
-	  g3ErrorHandler->warning("LoadPattern::recvSelf - SP_Constraint with dbTag %d failed in recvSelf",
-				  dbTag);
+	  opserr << "LoadPattern::recvSelf - SP_Constraint with dbTag " << dbTag << " failed in recvSelf\n";
 	  return -2;
 	}			
 	
 	if (this->addSP_Constraint(theSP) == false) {
-	  g3ErrorHandler->warning("LoadPattern::recvSelf - could not add SP_Constraint with tag %d into LP!",
-				  theSP->getTag());
+	  opserr << "LoadPattern::recvSelf - could not add SP_Constraint with tag " << theSP->getTag()
+		 << " into LP!\n";
+				  
 	  return -3;
 	}			
 	
@@ -782,7 +772,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
   } else {
     if (theSeries != 0)
       if (theSeries->recvSelf(cTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("LoadPattern::recvSelf - the TimeSeries failed to recv");
+	opserr << "LoadPattern::recvSelf - the TimeSeries failed to recv\n";
 	return -3;
       }
 
@@ -791,8 +781,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
     NodalLoadIter &theNodes = this->getNodalLoads();
     while ((theNode = theNodes()) != 0) {
       if (theNode->recvSelf(cTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("LoadPattern::recvSelf - node with tag %d failed in recvSelf",
-				theNode->getTag());
+	opserr << "LoadPattern::recvSelf - node with tag " << theNode->getTag() << " failed in recvSelf\n";
 	return -7;
       }
     }
@@ -801,8 +790,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
     ElementalLoadIter &theElements = this->getElementalLoads();
     while ((theEle = theElements()) != 0) {
       if (theEle->recvSelf(cTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("LoadPattern::recvSelf - element with tag %d failed in recvSelf",
-				theEle->getTag());
+	opserr << "LoadPattern::recvSelf - element with tag " << theEle->getTag() << " failed in recvSelf\n";
 	return -8;
       }
     }
@@ -811,8 +799,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
     SP_ConstraintIter &theSPs = this->getSPs();
     while ((theSP = theSPs()) != 0) {
       if (theSP->recvSelf(cTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("LoadPattern::recvSelf - SP_Constraint tagged %d failed recvSelf",
-				theSP->getTag());
+	opserr << "LoadPattern::recvSelf - SP_Constraint tagged " << theSP->getTag() << "  failed recvSelf\n";
 	return -9;
       }
     }    
@@ -823,16 +810,16 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
 }
 
 void
-LoadPattern::Print(ostream &s, int flag)
+LoadPattern::Print(OPS_Stream &s, int flag)
 {
     s << "Load Pattern: " << this->getTag() << "\n";
     if (theSeries != 0)
       theSeries->Print(s,flag);
-    cerr << "  Nodal Loads: \n";
+    opserr << "  Nodal Loads: \n";
     theNodalLoads->Print(s,flag);
-    cerr << "\n  Elemental Loads: \n";
+    opserr << "\n  Elemental Loads: \n";
     theElementalLoads->Print(s, flag);
-    cerr << "\n  Single Point Constraints: \n";
+    opserr << "\n  Single Point Constraints: \n";
     theSPs->Print(s, flag);
 }
 
@@ -842,7 +829,7 @@ LoadPattern::getCopy(void)
 {
   LoadPattern *theCopy = new LoadPattern(this->getTag());
   if (theCopy == 0) {
-    g3ErrorHandler->fatal("LoadPattern::getCopy() - ran out of memory\n");
+    opserr << "LoadPattern::getCopy() - ran out of memory\n";
     return theCopy; // in case fatal() does not exit
   }
   theCopy->loadFactor = loadFactor;
@@ -1038,7 +1025,7 @@ LoadPattern::gradient(bool compute, int identifier)
 				}
 			}
 			else {
-				cerr << "LoadPattern::gradient() -- error in identifier. " << endl;
+				opserr << "LoadPattern::gradient() -- error in identifier. " << endln;
 			}
 		}
 	}

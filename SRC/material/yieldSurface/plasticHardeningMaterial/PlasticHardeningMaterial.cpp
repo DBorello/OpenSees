@@ -45,7 +45,7 @@ int PlasticHardeningMaterial::commitState (void)
 {
 	val_hist = val_trial;
 	sFactor = 1.0;
-	//cerr << "------ Ep value = " <<  val_hist << endl;
+	//opserr << "------ Ep value = " <<  val_hist << endln;
 	return 0;	
 }
 
@@ -73,7 +73,7 @@ int PlasticHardeningMaterial::getResponse (int responseID, Information &matInfor
 	return -1;
 }
 
-void PlasticHardeningMaterial::Print(ostream &s, int flag)
+void PlasticHardeningMaterial::Print(OPS_Stream &s, int flag)
 {
 	return;
 }

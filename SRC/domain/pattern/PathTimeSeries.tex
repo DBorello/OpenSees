@@ -32,7 +32,7 @@ beyond the last path point a load factor of $0.0$ will be returned.\\
 \indent {\em  virtual int sendSelf(int commitTag, Channel \&theChannel);}\\
 \indent {\em  virtual int recvSelf(int commitTag, Channel \&theChannel,
 FEM\_ObjectBroker \&theBroker);}\\
-\indent {\em  virtual void Print(ostream \&s, int flag =0);}\\
+\indent {\em  virtual void Print(OPS_Stream \&s, int flag =0);}\\
 
 \noindent {\bf Constructor} \\ 
 \indent {\em PathTimeSeries(Vector \&thePath, Vector \&time; 
@@ -85,7 +85,7 @@ Channel with this newly created Vector object, and then again with the
 FEM\_ObjectBroker \&theBroker);}\\
 Does the mirror image of {\em sendSelf()}. \\
 
-\indent {\em  virtual void Print(ostream \&s, int flag =0) =0;}\\
+\indent {\em  virtual void Print(OPS_Stream \&s, int flag =0) =0;}\\
 Prints the string 'PathTimeSeries', the factor{\em cFactor}, and the time
 increment {\em dT}. If {\em flag} is equal to $1.0$ {\em
 thePath} and {\em time} Vector are also printed\\

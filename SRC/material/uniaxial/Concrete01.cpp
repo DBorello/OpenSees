@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-09-12 19:28:13 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:01:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
                                                                         
@@ -96,18 +96,21 @@ Concrete01::~Concrete01 ()
 
 int Concrete01::setTrialStrain (double strain, double strainRate)
 {
-	// Set trial strain
-	Tstrain = strain;
+  // Set trial strain
+  Tstrain = strain;
+  
+  // check for a quick return
+  if (Tstrain > 0.0) {
+    Tstress = 0;
+    Ttangent = 0;
+    return 0;
+  }
+  
+  // Determine change in strain from last converged state
+  double dStrain = Tstrain - Cstrain;
 
-	// check for a quick return
-	if (Tstrain > 0.0) {
-	  Tstress = 0;
-	  Ttangent = 0;
-	  return 0;
-	}
-
-	// Determine change in strain from last converged state
-	double dStrain = Tstrain - Cstrain;
+  // if (fabs(dStrain) < DBL_EPSILON)   
+  //  return 0;
 
 	// Calculate the trial state given the change in strain
 	// determineTrialState (dStrain);
@@ -162,6 +165,12 @@ Concrete01::setTrial (double strain, double &stress, double &tangent, double str
 
 	// Determine change in strain from last converged state
 	double dStrain = Tstrain - Cstrain;
+
+	//if (fabs(dStrain) < DBL_EPSILON) {
+	//  tangent = Ttangent;
+	//  stress = Tstress;
+	//  return 0;
+	//}
 
 	// Calculate the trial state given the change in strain
 	// determineTrialState (dStrain);
@@ -412,7 +421,7 @@ int Concrete01::sendSelf (int commitTag, Channel& theChannel)
 
    res = theChannel.sendVector(this->getDbTag(), commitTag, data);
    if (res < 0) 
-      cerr << "Concrete01::sendSelf() - failed to send data\n";
+      opserr << "Concrete01::sendSelf() - failed to send data\n";
 
    return res;
 }
@@ -425,7 +434,7 @@ int Concrete01::recvSelf (int commitTag, Channel& theChannel,
    res = theChannel.recvVector(this->getDbTag(), commitTag, data);
 
    if (res < 0) {
-      cerr << "Concrete01::recvSelf() - failed to receive data\n";
+      opserr << "Concrete01::recvSelf() - failed to receive data\n";
       this->setTag(0);      
    }
    else {
@@ -458,13 +467,13 @@ int Concrete01::recvSelf (int commitTag, Channel& theChannel,
    return res;
 }
 
-void Concrete01::Print (ostream& s, int flag)
+void Concrete01::Print (OPS_Stream& s, int flag)
 {
-   s << "Concrete01, tag: " << this->getTag() << endl;
-   s << "  fpc: " << fpc << endl;
-   s << "  epsc0: " << epsc0 << endl;
-   s << "  fpcu: " << fpcu << endl;
-   s << "  epscu: " << epscu << endl;
+   s << "Concrete01, tag: " << this->getTag() << endln;
+   s << "  fpc: " << fpc << endln;
+   s << "  epsc0: " << epsc0 << endln;
+   s << "  fpcu: " << fpcu << endln;
+   s << "  epscu: " << epscu << endln;
 }
 
 int
@@ -487,7 +496,7 @@ Concrete01::setParameter(char **argv, int argc, Information &info)
 		return 4;
 	}
 	else {
-		cerr << "WARNING: Could not set parameter in Concrete01! " << endl;
+		opserr << "WARNING: Could not set parameter in Concrete01! " << endln;
 		return -1;
 	}
 }

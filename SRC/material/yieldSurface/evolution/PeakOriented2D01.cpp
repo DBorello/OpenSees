@@ -30,13 +30,13 @@ YS_Evolution *PeakOriented2D01::getCopy(void)
 	PeakOriented2D01 *theCopy = new  PeakOriented2D01(this->getTag(), minIsoFactor, *kpMatXPos, *kpMatYPos);
 	if(theCopy==0)
 	{
-		cerr << "WARNING - PeakOriented2D, unable to get copy\n";
+		opserr << "WARNING - PeakOriented2D, unable to get copy\n";
 	}
 	
 	return theCopy;
 }
 
-void PeakOriented2D01::Print(ostream &s, int flag)
+void PeakOriented2D01::Print(OPS_Stream &s, int flag)
 {
 	s << "PeakOriented2D \n";
 	s << "iso_Ratio = " << isotropicRatio << "\n";

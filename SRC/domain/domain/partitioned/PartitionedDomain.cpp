@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:44:37 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
                                                                         
@@ -74,8 +74,8 @@ PartitionedDomain::PartitionedDomain()
 	theSubdomainIter == 0 || 
 	theEleIter == 0 || mainEleIter == 0) {
 	
-	cerr << "FATAL: PartitionedDomain::PartitionedDomain ";
-	cerr << "  - ran out of memory\n";
+	opserr << "FATAL: PartitionedDomain::PartitionedDomain ";
+	opserr << "  - ran out of memory\n";
 	exit(-1);
     }
 }
@@ -97,8 +97,8 @@ PartitionedDomain::PartitionedDomain(DomainPartitioner &thePartitioner)
 	theSubdomainIter == 0 || theDomainPartitioner == 0 ||
 	theEleIter == 0 || mainEleIter == 0) {
 	
-	cerr << "FATAL: PartitionedDomain::PartitionedDomain ";
-	cerr << "  - ran out of memory\n";
+	opserr << "FATAL: PartitionedDomain::PartitionedDomain ";
+	opserr << "  - ran out of memory\n";
 	exit(-1);
     }
 }
@@ -124,8 +124,8 @@ PartitionedDomain::PartitionedDomain(int numNodes, int numElements,
 	theSubdomainIter == 0 || 
 	theEleIter == 0 || mainEleIter == 0) {
 	
-	cerr << "FATAL: PartitionedDomain::PartitionedDomain(int ..) ";
-	cerr << "  - ran out of memory\n";
+	opserr << "FATAL: PartitionedDomain::PartitionedDomain(int ..) ";
+	opserr << "  - ran out of memory\n";
 	exit(-1);
     }
 }
@@ -173,8 +173,8 @@ PartitionedDomain::addElement(Element *elePtr)
 
 	// check ele Tag >= 0
 	if (eleTag < 0) {
-	    cerr << "Domain::addElement - Element " << eleTag;
-	    cerr << " tag must be >= 0\n";
+	    opserr << "Domain::addElement - Element " << eleTag;
+	    opserr << " tag must be >= 0\n";
 	    return false;
 	}      
 	
@@ -187,8 +187,8 @@ PartitionedDomain::addElement(Element *elePtr)
 	    int nodeTag = nodes(i);
 	    Node *nodePtr = this->getNode(nodeTag);
 	    if (nodePtr == 0) {
-		cerr << "Domain::addElement - In element " << eleTag;
-		cerr << " no node " << nodeTag << " exists in the domain\n";
+		opserr << "Domain::addElement - In element " << eleTag;
+		opserr << " no node " << nodeTag << " exists in the domain\n";
 		return false;
 	    }      	
 	}
@@ -518,7 +518,7 @@ PartitionedDomain::commit(void)
 {
     int result = this->Domain::commit();
     if (result < 0) {
-	cerr << "PartitionedDomain::commit(void) - failed in Domain::commit()\n";
+	opserr << "PartitionedDomain::commit(void) - failed in Domain::commit()\n";
 	return result;
     }
 
@@ -530,8 +530,8 @@ PartitionedDomain::commit(void)
 	    Subdomain *theSub = (Subdomain *)theObject;	    
 	    int res = theSub->commit();
 	    if (res < 0) {
-		cerr << "PartitionedDomain::commit(void)";
-		cerr << " - failed in Subdomain::commit()\n";
+		opserr << "PartitionedDomain::commit(void)";
+		opserr << " - failed in Subdomain::commit()\n";
 		return res;
 	    }	    
 	}
@@ -551,7 +551,7 @@ PartitionedDomain::revertToLastCommit(void)
 {
     int result = this->Domain::revertToLastCommit();
     if (result < 0) {
-	cerr << "PartitionedDomain::revertToLastCommit(void) - failed in Domain::revertToLastCommit()\n";
+	opserr << "PartitionedDomain::revertToLastCommit(void) - failed in Domain::revertToLastCommit()\n";
 	return result;
     }
 
@@ -563,8 +563,8 @@ PartitionedDomain::revertToLastCommit(void)
 	    Subdomain *theSub = (Subdomain *)theObject;	    
 	    int res = theSub->revertToLastCommit();
 	    if (res < 0) {
-		cerr << "PartitionedDomain::revertToLastCommit(void)";
-		cerr << " - failed in Subdomain::revertToLastCommit()\n";
+		opserr << "PartitionedDomain::revertToLastCommit(void)";
+		opserr << " - failed in Subdomain::revertToLastCommit()\n";
 		return res;
 	    }	    
 	}
@@ -578,7 +578,7 @@ PartitionedDomain::revertToStart(void)
 {
     int result = this->Domain::revertToStart();
     if (result < 0) {
-	cerr << "PartitionedDomain::revertToLastCommit(void) - failed in Domain::revertToLastCommit()\n";
+	opserr << "PartitionedDomain::revertToLastCommit(void) - failed in Domain::revertToLastCommit()\n";
 	return result;
     }
 
@@ -590,8 +590,8 @@ PartitionedDomain::revertToStart(void)
 	    Subdomain *theSub = (Subdomain *)theObject;	    
 	    int res = theSub->revertToStart();
 	    if (res < 0) {
-		cerr << "PartitionedDomain::revertToLastCommit(void)";
-		cerr << " - failed in Subdomain::revertToLastCommit()\n";
+		opserr << "PartitionedDomain::revertToLastCommit(void)";
+		opserr << " - failed in Subdomain::revertToLastCommit()\n";
 		return res;
 	    }	    
 	}
@@ -603,7 +603,7 @@ PartitionedDomain::revertToStart(void)
 
 
 void 
-PartitionedDomain::Print(ostream &s, int flag)
+PartitionedDomain::Print(OPS_Stream &s, int flag)
 {
     this->Domain::Print(s, flag);
 
@@ -636,7 +636,7 @@ PartitionedDomain::partition(int numPartitions)
 	for (int i=1; i<=numPartitions; i++) {
 	    TaggedObject *theObject = theSubdomains->getComponentPtr(i);
 	    if (theObject == 0) { // create a subdomain with appropriate tag
-		cerr << "PartitionedDomain::partition - GET A COPY\n";
+		opserr << "PartitionedDomain::partition - GET A COPY\n";
 		exit(-1);
 	    }
 	}
@@ -647,7 +647,7 @@ PartitionedDomain::partition(int numPartitions)
       thePartitioner->setPartitionedDomain(*this);
       return thePartitioner->partition(numPartitions);
     } else {
-      cerr << "PartitionedDomain::partition(int numPartitions) - no associated partitioner\n";
+      opserr << "PartitionedDomain::partition(int numPartitions) - no associated partitioner\n";
       return -1;
     }
 }   
@@ -727,8 +727,8 @@ PartitionedDomain::buildEleGraph(Graph *theEleGraph)
     theElementTagVertices = new int[maxEleNum+1];
 
     if (theElementTagVertices == 0) {
-	cerr << "WARNING Domain::buildEleGraph ";
-	cerr << " - Not Enough Memory for ElementTagVertices\n";
+	opserr << "WARNING Domain::buildEleGraph ";
+	opserr << " - Not Enough Memory for ElementTagVertices\n";
 	return -1;
     }
 
@@ -745,9 +745,9 @@ PartitionedDomain::buildEleGraph(Graph *theEleGraph)
 	Vertex *vertexPtr = new Vertex(count,ElementTag);
 
 	if (vertexPtr == 0) {
-	    cerr << "WARNING Domain::buildEleGraph";
-	    cerr << " - Not Enough Memory to create ";
-	    cerr << count << "th Vertex\n";
+	    opserr << "WARNING Domain::buildEleGraph";
+	    opserr << " - Not Enough Memory to create ";
+	    opserr << count << "th Vertex\n";
 	    delete [] theElementTagVertices;
 	    return -1;
 	}
@@ -773,8 +773,8 @@ PartitionedDomain::buildEleGraph(Graph *theEleGraph)
     theNodeTagVertices = new Vertex *[maxNodNum+1];
 
     if (theNodeTagVertices == 0) {
-	cerr << "WARNING Domain::buildEleGraph ";
-	cerr << " - Not Enough Memory for NodeTagVertices\n";
+	opserr << "WARNING Domain::buildEleGraph ";
+	opserr << " - Not Enough Memory for NodeTagVertices\n";
 	return -1;
     }
 
@@ -792,9 +792,9 @@ PartitionedDomain::buildEleGraph(Graph *theEleGraph)
 	theNodeTagVertices[nodeTag] = vertexPtr;
 
 	if (vertexPtr == 0) {
-	    cerr << "WARNING Domain::buildEleGraph";
-	    cerr << " - Not Enough Memory to create ";
-	    cerr << count << "th Node Vertex\n";
+	    opserr << "WARNING Domain::buildEleGraph";
+	    opserr << " - Not Enough Memory to create ";
+	    opserr << count << "th Node Vertex\n";
 	    delete [] theNodeTagVertices;
 	    return -1;
 	}
@@ -909,8 +909,8 @@ PartitionedDomain::getSubdomainGraph(void)
     theElementTagVertices = new int[maxEleNum+1];
 
     if (theElementTagVertices == 0) {
-	cerr << "WARNING PartitionedDomain::buildEleGraph ";
-	cerr << " - Not Enough Memory for ElementTagVertices\n";
+	opserr << "WARNING PartitionedDomain::buildEleGraph ";
+	opserr << " - Not Enough Memory for ElementTagVertices\n";
 	exit(-1);
     }
 
@@ -931,9 +931,9 @@ PartitionedDomain::getSubdomainGraph(void)
 	Vertex *vertexPtr = new Vertex(ElementTag,ElementTag,theSub->getCost()); 
 
 	if (vertexPtr == 0) {
-	    cerr << "WARNING Domain::buildEleGraph";
-	    cerr << " - Not Enough Memory to create ";
-	    cerr << ElementTag << "th Vertex\n";
+	    opserr << "WARNING Domain::buildEleGraph";
+	    opserr << " - Not Enough Memory to create ";
+	    opserr << ElementTag << "th Vertex\n";
 	    delete [] theElementTagVertices;
 	    exit(-1);
 	}
@@ -959,8 +959,8 @@ PartitionedDomain::getSubdomainGraph(void)
     theNodeTagVertices = new Vertex *[maxNodNum+1];
 
     if (theNodeTagVertices == 0) {
-	cerr << "WARNING Domain::buildEleGraph ";
-	cerr << " - Not Enough Memory for NodeTagVertices\n";
+	opserr << "WARNING Domain::buildEleGraph ";
+	opserr << " - Not Enough Memory for NodeTagVertices\n";
 	exit(-1);
     }
 
@@ -978,9 +978,9 @@ PartitionedDomain::getSubdomainGraph(void)
 	theNodeTagVertices[nodeTag] = vertexPtr;
 
 	if (vertexPtr == 0) {
-	    cerr << "WARNING Domain::buildEleGraph";
-	    cerr << " - Not Enough Memory to create ";
-	    cerr << count << "th Node Vertex\n";
+	    opserr << "WARNING Domain::buildEleGraph";
+	    opserr << " - Not Enough Memory to create ";
+	    opserr << count << "th Node Vertex\n";
 	    delete [] theNodeTagVertices;
 	    exit(-1);
 	}

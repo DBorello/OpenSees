@@ -1,5 +1,5 @@
-// $Revision: 1.25 $
-// $Date: 2002-12-05 22:49:16 $
+// $Revision: 1.26 $
+// $Date: 2003-02-14 23:01:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -9,9 +9,7 @@
 // PressureDependMultiYield.cpp
 // -------------------
 //
-#include <iostream.h>
-#include <fstream.h>
-#include <iomanip.h>
+
 #include <math.h>
 #include <stdlib.h>
 #include <PressureDependMultiYield.h>
@@ -54,75 +52,75 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
    lockStressCommitted()
 {
   if (nd !=2 && nd !=3) {
-    cerr << "FATAL:PressureDependMultiYield:: dimension error" << endl;
-    cerr << "Dimension has to be 2 or 3, you give nd= " << nd << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield:: dimension error" << endln;
+    opserr << "Dimension has to be 2 or 3, you give nd= " << nd << endln;
+   exit(-1);
   }
   if (refShearModul <= 0) {
-    cerr << "FATAL:PressureDependMultiYield:: refShearModulus <= 0" << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield:: refShearModulus <= 0" << endln;
+   exit(-1);
   }
   if (refBulkModul <= 0) {
-    cerr << "FATAL:PressureDependMultiYield:: refBulkModulus <= 0" << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield:: refBulkModulus <= 0" << endln;
+   exit(-1);
   }
   if (frictionAng <= 0.) {
-    cerr << "FATAL:PressureDependMultiYield:: frictionAngle <= 0" << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield:: frictionAngle <= 0" << endln;
+   exit(-1);
   }
   if (frictionAng >= 90.) {
-    cerr << "FATAL:PressureDependMultiYield:: frictionAngle >= 90" << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield:: frictionAngle >= 90" << endln;
+   exit(-1);
   }
   if (phaseTransformAng <= 0.) {
-    cerr << "FATAL:PressureDependMultiYield:: phaseTransformAng <= 0" << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield:: phaseTransformAng <= 0" << endln;
+   exit(-1);
   }
   if (phaseTransformAng > frictionAng) {
-    cerr << "WARNING:PressureDependMultiYield:: phaseTransformAng > frictionAng" << endl;
-    cerr << "Will set phaseTransformAng = frictionAng." <<endl;
+    opserr << "WARNING:PressureDependMultiYield:: phaseTransformAng > frictionAng" << endln;
+    opserr << "Will set phaseTransformAng = frictionAng." <<endln;
     phaseTransformAng = frictionAng;
   }
   if (cohesi < 0) {
-    cerr << "WARNING:PressureDependMultiYield:: cohesion < 0" << endl;
-    cerr << "Will reset cohesion to zero." << endl;
+    opserr << "WARNING:PressureDependMultiYield:: cohesion < 0" << endln;
+    opserr << "Will reset cohesion to zero." << endln;
     cohesi = 0.;
   } 
   if (peakShearStra <= 0) {
-    cerr << "FATAL:PressureDependMultiYield:: peakShearStra <= 0" << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield:: peakShearStra <= 0" << endln;
+   exit(-1);
   }
   if (refPress <= 0) {
-    cerr << "FATAL:PressureDependMultiYield:: refPress <= 0" << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield:: refPress <= 0" << endln;
+   exit(-1);
   }
   if (pressDependCoe < 0) {
-    cerr << "WARNING:PressureDependMultiYield:: pressDependCoe < 0" << endl;
-    cerr << "Will reset pressDependCoe to zero." << endl;
+    opserr << "WARNING:PressureDependMultiYield:: pressDependCoe < 0" << endln;
+    opserr << "Will reset pressDependCoe to zero." << endln;
     pressDependCoe = 0.;
   }
   if (numberOfYieldSurf <= 0) {
-    cerr << "WARNING:PressureDependMultiYield:: numberOfSurfaces <= 0" << endl;
-    cerr << "Will use 10 yield surfaces." << endl;
+    opserr << "WARNING:PressureDependMultiYield:: numberOfSurfaces <= 0" << endln;
+    opserr << "Will use 10 yield surfaces." << endln;
     numberOfYieldSurf = 10;
   }
   if (numberOfYieldSurf > 40) {
-    cerr << "WARNING:PressureDependMultiYield::PressureDependMultiYield: numberOfSurfaces > 40" << endl;
-    cerr << "Will use 40 yield surfaces." << endl;
+    opserr << "WARNING:PressureDependMultiYield::PressureDependMultiYield: numberOfSurfaces > 40" << endln;
+    opserr << "Will use 40 yield surfaces." << endln;
     numberOfYieldSurf = 40;
   }
   if (volLim1 < 0) {
-    cerr << "WARNING:PressureDependMultiYield:: volLim1 < 0" << endl;
-    cerr << "Will reset volLimit to 0.8" << endl;
+    opserr << "WARNING:PressureDependMultiYield:: volLim1 < 0" << endln;
+    opserr << "Will reset volLimit to 0.8" << endln;
     volLim1 = 0.8;
   }
   if (r < 0) {
-    cerr << "FATAL:PressureDependMultiYield:: rho <= 0" << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield:: rho <= 0" << endln;
+   exit(-1);
   }
   if (ei < 0) {
-    cerr << "FATAL:PressureDependMultiYield:: e <= 0" << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield:: e <= 0" << endln;
+   exit(-1);
   }
 
   ndm = nd;
@@ -265,7 +263,7 @@ void PressureDependMultiYield::elast2Plast(void)
   e2p = 1;
 
   if (currentStress.volume() > 0.) {
-    //cerr << "WARNING:PressureDependMultiYield::elast2Plast(): material in tension." << endl;
+    //opserr << "WARNING:PressureDependMultiYield::elast2Plast(): material in tension." << endln;
     currentStress.setData(currentStress.deviator(),0);
   }
 
@@ -275,7 +273,7 @@ void PressureDependMultiYield::elast2Plast(void)
   // Find active surface
   while (yieldFunc(currentStress, committedSurfaces, ++committedActiveSurf) > 0) {
     if (committedActiveSurf == numOfSurfaces) {
-      //cerr <<"WARNING:PressureDependMultiYield::elast2Plast(): stress out of failure surface"<<endl;
+      //opserr <<"WARNING:PressureDependMultiYield::elast2Plast(): stress out of failure surface"<<endln;
       deviatorScaling(currentStress, committedSurfaces, numOfSurfaces);
       initSurfaceUpdate();
       return;
@@ -300,9 +298,9 @@ int PressureDependMultiYield::setTrialStrain (const Vector &strain)
     workV6[5] = 0.0;
   }
   else {
-    cerr << "Fatal:PressureDependMultiYield:: Material dimension is: " << ndm << endl;
-    cerr << "But strain vector size is: " << strain.Size() << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "Fatal:PressureDependMultiYield:: Material dimension is: " << ndm << endln;
+    opserr << "But strain vector size is: " << strain.Size() << endln;
+   exit(-1);
   }
 
   //strainRate.setData(workV6-currentStrain.t2Vector(1),1);
@@ -332,9 +330,9 @@ int PressureDependMultiYield::setTrialStrainIncr (const Vector &strain)
     workV6[5] = 0.0;
   }
   else {
-    cerr << "Fatal:PressureDependMultiYield:: Material dimension is: " << ndm << endl;
-    cerr << "But strain vector size is: " << strain.Size() << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "Fatal:PressureDependMultiYield:: Material dimension is: " << ndm << endln;
+    opserr << "But strain vector size is: " << strain.Size() << endln;
+   exit(-1);
   }
 
   strainRate.setData(workV6,1);
@@ -642,8 +640,7 @@ int PressureDependMultiYield::sendSelf(int commitTag, Channel &theChannel)
 
   res += theChannel.sendID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- could not send Vector",
-			    "PressureDependMultiYield::sendSelf");
+    opserr << "PressureDependMultiYield::sendSelf -- could not send ID\n";
     return res;
   }
 
@@ -715,8 +712,7 @@ int PressureDependMultiYield::sendSelf(int commitTag, Channel &theChannel)
 
   res += theChannel.sendVector(this->getDbTag(), commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- could not send Vector",
-			    "PressureDependMultiYield::sendSelf");
+    opserr << "PressureDependMultiYield::sendSelf -- could not send Vector\n";
     return res;
   }
 
@@ -732,8 +728,8 @@ int PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel,
   static ID idData(4);
   res += theChannel.recvID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- could not send Vector",
-			    "PressureDependMultiYield::sendSelf");
+    opserr << "PressureDependMultiYield::recvelf -- could not recv ID\n";
+			    
     return res;
   }
 
@@ -744,8 +740,7 @@ int PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel,
   Vector data(69+idData(1)*8);
   res += theChannel.recvVector(this->getDbTag(), commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- could not send Vector",
-			    "PressureDependMultiYield::sendSelf");
+    opserr << "PressureDependMultiYield::recvSelf -- could not recv Vector\n";
     return res;
   }
 
@@ -860,8 +855,8 @@ void PressureDependMultiYield::getBackbone (Matrix & bb)
 	for (int k=0; k<bb.noCols()/2; k++) {
 		vol = bb(0,k*2);
 		if (vol<=0.) {
-			cerr <<k<< "\nNDMaterial " <<this->getTag()
-			  <<": invalid confinement for backbone recorder, " << vol << endl;
+			opserr <<k<< "\nNDMaterial " <<this->getTag()
+			  <<": invalid confinement for backbone recorder, " << vol << endln;
 			continue;
 		}
 		conHeig = vol + residualPress;
@@ -916,9 +911,9 @@ int PressureDependMultiYield::getResponse (int responseID, Information &matInfo)
 }
 
 
-void PressureDependMultiYield::Print(ostream &s, int flag )
+void PressureDependMultiYield::Print(OPS_Stream &s, int flag )
 {
-  s << "PressureDependMultiYield" << endl;
+  s << "PressureDependMultiYield" << endln;
 }
 
 
@@ -1027,15 +1022,15 @@ void PressureDependMultiYield::setUpSurfaces (double * gredu)
 
     double sinPhi = 3*Mnys /(6+Mnys);
 		if (sinPhi<0. || sinPhi>1.) {
-			cerr <<"\nNDMaterial " <<this->getTag()<<": Invalid friction angle, please modify ref. pressure or G/Gmax curve."<<endl;
-      g3ErrorHandler->fatal(" ");
+			opserr <<"\nNDMaterial " <<this->getTag()<<": Invalid friction angle, please modify ref. pressure or G/Gmax curve."<<endln;
+     exit(-1);
 		} 
 
 		frictionAngle = asin(sinPhi)*180/pi;
-		cout << "\nNDMaterial " <<this->getTag()<<": Friction angle is "<<frictionAngle<<"\n"<<endl;
+		opserr << "\nNDMaterial " <<this->getTag()<<": Friction angle is "<<frictionAngle<<"\n"<<endln;
     if (phaseTransfAngle > frictionAngle) {
-			cerr << "\nNDMaterial " <<this->getTag()<<": phase Transformation Angle > friction Angle," 
-				   << "will set phase Transformation Angle = friction Angle.\n" <<endl;
+			opserr << "\nNDMaterial " <<this->getTag()<<": phase Transformation Angle > friction Angle," 
+				   << "will set phase Transformation Angle = friction Angle.\n" <<endln;
 			phaseTransfAngle = frictionAngle;
 		}
 		double sinPhiPT = sin(phaseTransfAngle * pi/180.);
@@ -1065,20 +1060,20 @@ void PressureDependMultiYield::setUpSurfaces (double * gredu)
 					plast_modul = (2.*refShearModulus * elasto_plast_modul)/
                         (2.*refShearModulus - elasto_plast_modul);
       if (plast_modul <= 0) {
-				cout << "\nNDMaterial " <<this->getTag()<<": Surface " << i 
-					   << " has plastic modulus < 0.\n Please modify G/Gmax curve.\n"<<endl;
-        g3ErrorHandler->fatal(" ");
+				opserr << "\nNDMaterial " <<this->getTag()<<": Surface " << i 
+					   << " has plastic modulus < 0.\n Please modify G/Gmax curve.\n"<<endln;
+       exit(-1);
       }
       if (plast_modul > UP_LIMIT) plast_modul = UP_LIMIT;
 
       workV6.Zero();
-			//cerr<<size<<" "<<i<<" "<<plast_modul<<" "<<gredu[ii]<<" "<<gredu[ii+1]<<endl;
+			//opserr<<size<<" "<<i<<" "<<plast_modul<<" "<<gredu[ii]<<" "<<gredu[ii+1]<<endln;
       committedSurfaces[i] = MultiYieldSurface(workV6,size,plast_modul);
 
 			if (i==(numOfSurfaces-1)) {
 				plast_modul = 0;
 				size = ratio2;
-			  //cerr<<size<<" "<<i+1<<" "<<plast_modul<<" "<<gredu[ii+2]<<" "<<gredu[ii+3]<<endl;
+			  //opserr<<size<<" "<<i+1<<" "<<plast_modul<<" "<<gredu[ii+2]<<" "<<gredu[ii+3]<<endln;
         committedSurfaces[i+1] = MultiYieldSurface(workV6,size,plast_modul);
 			}
 		}
@@ -1538,8 +1533,8 @@ double PressureDependMultiYield::getPPZLimits(int which, const T2Vector & contac
   else if (which==2) 
     return liquefyParam4 * PPZLimit;
   else {
-    cerr << "FATAL:PressureDependMultiYield::getPPZLimits: unknown argument value" << endl;
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield::getPPZLimits: unknown argument value" << endln;
+   exit(-1);
     return 0.0;
   }
 }
@@ -1671,10 +1666,10 @@ void PressureDependMultiYield::updateActiveSurface(void)
     
     double xx1 = (t2 && t2) - 2./3.* outsize * outsize * conHeig * conHeig;
     double xx2 = (t1 && t1) - 2./3.* size * size * conHeig * conHeig;
-    cerr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in Direction of surface motion.\n" 
+    opserr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in Direction of surface motion.\n" 
 	 << "X-1= " << X-1 <<" A= "<<A<<" B= "<<B<<" C= "<<C <<" M= "<<activeSurfaceNum<<" low_limit="<<LOW_LIMIT<<"\n"
-	 << "diff1= "<<xx1 <<" diff2= "<<xx2 <<" p= "<<conHeig<<" size= "<<size<<" outs= "<<outsize<<endl; 
-    g3ErrorHandler->fatal(" ");
+	 << "diff1= "<<xx1 <<" diff2= "<<xx2 <<" p= "<<conHeig<<" size= "<<size<<" outs= "<<outsize<<endln; 
+   exit(-1);
   }
 
   //workV6 = (t1 * X + center*conHeig) * (1. - size / outsize) 
@@ -1698,9 +1693,9 @@ void PressureDependMultiYield::updateActiveSurface(void)
   C = (t1 && t1) - 2./3.* size * size * conHeig * conHeig;
   if ( fabs(C) < LOW_LIMIT || fabs(C)/(t1 && t1) < LOW_LIMIT ) return;
   if (B > 0. || C < 0.) {
-    cerr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in surface motion.\n" 
-	 << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endl; 
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in surface motion.\n" 
+	 << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endln; 
+   exit(-1);
   }
   X = secondOrderEqn(A,B,C,1);  
 

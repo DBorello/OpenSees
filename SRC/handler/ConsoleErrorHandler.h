@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/ConsoleErrorHandler.h,v $
                                                                         
                                                                         
@@ -33,7 +33,7 @@
 // Revision: A
 //
 // Description: This file contains the class interface for ConsoleErrorHandler.
-// A ConsoleErrorHandler is an object which sends the error messages to the cerr stream.
+// A ConsoleErrorHandler is an object which sends the error messages to the opserr stream.
 //
 // What: "@(#) ConsoleErrorHandler.h, revA"
 

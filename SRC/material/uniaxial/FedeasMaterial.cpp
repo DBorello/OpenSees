@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-06-26 23:00:04 $
+// $Revision: 1.13 $
+// $Date: 2003-02-14 23:01:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -33,7 +33,7 @@
 // For more information visit the FEDEAS web page:
 //    http://www.ce.berkeley.edu/~filippou/Research/fedeas.htm
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <FedeasMaterial.h>
 #include <Vector.h>
 #include <ID.h>
@@ -53,9 +53,11 @@ FedeasMaterial::FedeasMaterial(int tag, int classTag, int nhv, int ndata)
   if (numHstv > 0) {
     // Allocate history array
     hstv = new double[2*numHstv];
-    if (hstv == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate history array -- type %d",
-			    "FedeasMaterial::FedeasMaterial", this->getClassTag());
+    if (hstv == 0) {
+      opserr << "FedeasMaterial::FedeasMaterial -- failed to allocate history array -- type " << 
+	this->getClassTag() << endln;
+      exit(-1);
+    }
 
     // Initialize to zero
     for (int i = 0; i < 2*numHstv; i++)
@@ -68,9 +70,12 @@ FedeasMaterial::FedeasMaterial(int tag, int classTag, int nhv, int ndata)
   if (numData > 0) {
     // Allocate material parameter array
     data = new double[numData];
-    if (data == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate data array -- type %d",
-			    "FedeasMaterial::FedeasMaterial", this->getClassTag());
+    if (data == 0) {
+      opserr << "FedeasMaterial::FedeasMaterial -- failed to allocate data array -- type : " <<
+	this->getClassTag() << endln;
+      exit(-1);
+    }
+			    
 
     // Initialize to zero
     for (int i = 0; i < numData; i++)
@@ -199,7 +204,7 @@ FedeasMaterial::sendSelf(int commitTag, Channel &theChannel)
   
   res += theChannel.sendVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) 
-    cerr << "FedeasMaterial::sendSelf() - failed to send Vector data\n";
+    opserr << "FedeasMaterial::sendSelf() - failed to send Vector data\n";
   
   return res;
 }
@@ -214,7 +219,7 @@ FedeasMaterial::recvSelf(int commitTag, Channel &theChannel,
   
   res += theChannel.recvVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) {
-    cerr << "FedeasMaterial::recvSelf() - failed to receive Vector data\n";
+    opserr << "FedeasMaterial::recvSelf() - failed to receive Vector data\n";
     return res;
   }
   
@@ -235,45 +240,45 @@ FedeasMaterial::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void
-FedeasMaterial::Print(ostream &s, int flag)
+FedeasMaterial::Print(OPS_Stream &s, int flag)
 {
   s << "FedeasMaterial, type: ";
 	
   switch (this->getClassTag()) {
   case MAT_TAG_FedeasHardening:
-    s << "Hardening" << endl;
+    s << "Hardening" << endln;
     break;
   case MAT_TAG_FedeasBond1:
-    s << "Bond1" << endl;
+    s << "Bond1" << endln;
     break;
   case MAT_TAG_FedeasBond2:
-    s << "Bond2" << endl;
+    s << "Bond2" << endln;
     break;
   case MAT_TAG_FedeasConcrete1:
-    s << "Concrete1" << endl;
+    s << "Concrete1" << endln;
     break;
   case MAT_TAG_FedeasConcrete2:
-    s << "Concrete2" << endl;
+    s << "Concrete2" << endln;
     break;
   case MAT_TAG_FedeasConcrete3:
-    s << "Concrete3" << endl;
+    s << "Concrete3" << endln;
     break;
   case MAT_TAG_FedeasHysteretic1:
-    s << "Hysteretic1" << endl;
+    s << "Hysteretic1" << endln;
     break;
   case MAT_TAG_FedeasHysteretic2:
-    s << "Hysteretic2" << endl;
+    s << "Hysteretic2" << endln;
     break;
   case MAT_TAG_FedeasSteel1:
-    s << "Steel1" << endl;
+    s << "Steel1" << endln;
     break;
   case MAT_TAG_FedeasSteel2:
-    s << "Steel2" << endl;
+    s << "Steel2" << endln;
     break;
     // Add more cases as needed
     
   default:
-    s << "Material identifier = " << this->getClassTag() << endl;
+    s << "Material identifier = " << this->getClassTag() << endln;
     break;
   }
 }
@@ -404,8 +409,7 @@ FedeasMaterial::invokeSubroutine(int ist)
     bond_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
 	     &sigma, &tangent, &ist);
 #else
-	g3ErrorHandler->fatal("%s -- Bond1 subroutine not yet linked",
-		"FedeasMaterial::invokeSubroutine"); 
+	opserr << "FedeasMaterial::invokeSubroutine -- Bond1 subroutine not yet linked\n";
 #endif
     break;
     
@@ -414,8 +418,7 @@ FedeasMaterial::invokeSubroutine(int ist)
     bond_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
 	     &sigma, &tangent, &ist);
 #else
-	g3ErrorHandler->fatal("%s -- Bond2 subroutine not yet linked",
-		"FedeasMaterial::invokeSubroutine"); 
+	opserr << "FedeasMaterial::invokeSubroutine -- Bond2 subroutine not yet linked\n";
 #endif
     break;
     
@@ -424,19 +427,18 @@ FedeasMaterial::invokeSubroutine(int ist)
     concrete_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 		 &sigma, &tangent, &ist);
 #else
-	g3ErrorHandler->fatal("%s -- Concrete1 subroutine not yet linked",
-		"FedeasMaterial::invokeSubroutine"); 
+	opserr << "FedeasMaterial::invokeSubroutine -- Concrete1 subroutine not yet linked\n";
 #endif
     break;
     
   case MAT_TAG_FedeasConcrete2:
-#ifdef _WIN32
+    //#ifdef _WIN32
     concrete_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 		 &sigma, &tangent, &ist);
-#else
-	g3ErrorHandler->fatal("%s -- Concrete2 subroutine not yet linked",
-		"FedeasMaterial::invokeSubroutine"); 
-#endif
+    //#else
+    //opserr << "FedeasMaterial::invokeSubroutine -- Concrete2 subroutine not yet linked\n";
+    //"FedeasMaterial::invokeSubroutine"); 
+    //#endif
     break;
     
   case MAT_TAG_FedeasConcrete3:
@@ -444,8 +446,7 @@ FedeasMaterial::invokeSubroutine(int ist)
     concrete_3__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 		 &sigma, &tangent, &ist);
 #else
-	g3ErrorHandler->fatal("%s -- Concrete3 subroutine not yet linked",
-		"FedeasMaterial::invokeSubroutine"); 
+	opserr << "FedeasMaterial::invokeSubroutine -- Concrete3 subroutine not yet linked\n";
 #endif
     break;
         
@@ -454,8 +455,7 @@ FedeasMaterial::invokeSubroutine(int ist)
     hyster_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 	       &sigma, &tangent, &ist);
 #else
-	g3ErrorHandler->fatal("%s -- Hysteretic1 subroutine not yet linked",
-		"FedeasMaterial::invokeSubroutine"); 
+	opserr << "FedeasMaterial::invokeSubroutine -- Hysteretic1 subroutine not yet linked\n";
 #endif
     break;
     
@@ -464,8 +464,7 @@ FedeasMaterial::invokeSubroutine(int ist)
     hyster_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 	       &sigma, &tangent, &ist);
 #else
-	g3ErrorHandler->fatal("%s -- Hysteretic2 subroutine not yet linked",
-		"FedeasMaterial::invokeSubroutine"); 
+	opserr << "FedeasMaterial::invokeSubroutine -- Hysteretic2 subroutine not yet linked\n";
 #endif
     break;
     
@@ -474,25 +473,23 @@ FedeasMaterial::invokeSubroutine(int ist)
     steel_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 	      &sigma, &tangent, &ist);
 #else
-	g3ErrorHandler->fatal("%s -- Steel1 subroutine not yet linked",
-		"FedeasMaterial::invokeSubroutine"); 
+	opserr << "FedeasMaterial::invokeSubroutine -- Steel1 subroutine not yet linked\n";
 #endif
     break;
     
   case MAT_TAG_FedeasSteel2:
-#ifdef _WIN32
+    //#ifdef _WIN32
     steel_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 	      &sigma, &tangent, &ist);
-#else
-	g3ErrorHandler->fatal("%s -- Steel2 subroutine not yet linked",
-		"FedeasMaterial::invokeSubroutine"); 
-#endif
+    //#else
+    //opserr << "FedeasMaterial::invokeSubroutine -- Steel2 subroutine not yet linked\n";
+    //	"FedeasMaterial::invokeSubroutine"); 
+    //#endif
     break;
     
     // Add more cases as needed
   default:
-    g3ErrorHandler->fatal("%s -- unknown material type",
-			  "FedeasMaterial::invokeSubroutine");
+    opserr << "FedeasMaterial::invokeSubroutine -- unknown material type\n";
     return -1;
   }
   

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-05 00:52:29 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:02:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SuperLU.cpp,v $
                                                                         
                                                                         
@@ -89,8 +89,8 @@ int
 SuperLU::solve(void)
 {
     if (theSOE == 0) {
-	cerr << "WARNING SuperLU::solve(void)- ";
-	cerr << " No LinearSOE object has been set\n";
+	opserr << "WARNING SuperLU::solve(void)- ";
+	opserr << " No LinearSOE object has been set\n";
 	return -1;
     }
     
@@ -101,8 +101,8 @@ SuperLU::solve(void)
 	return 0;
 
     if (sizePerm == 0) {
-	cerr << "WARNING SuperLU::solve(void)- ";
-	cerr << " size for row and col permutations 0 - has setSize() been called?\n";
+	opserr << "WARNING SuperLU::solve(void)- ";
+	opserr << " size for row and col permutations 0 - has setSize() been called?\n";
 	return -1;
     }
 
@@ -119,8 +119,8 @@ SuperLU::solve(void)
 	       perm_r, perm_c, &L, &U, &info);
 
 	if (info != 0) {	
-	   cerr << "WARNING SuperLU::solve(void)- ";
-	   cerr << " Error " << info << " returned in factorization dgstrf()\n";
+	   opserr << "WARNING SuperLU::solve(void)- ";
+	   opserr << " Error " << info << " returned in factorization dgstrf()\n";
 	   return -info;
 	}
 	refact[0] = 'Y';
@@ -133,8 +133,8 @@ SuperLU::solve(void)
     dgstrs (trans, &L, &U, perm_r, perm_c, &B, &info);    
 
     if (info != 0) {	
-       cerr << "WARNING SuperLU::solve(void)- ";
-       cerr << " Error " << info << " returned in substitution dgstrs()\n";
+       opserr << "WARNING SuperLU::solve(void)- ";
+       opserr << " Error " << info << " returned in substitution dgstrs()\n";
        return -info;
     }
 
@@ -167,8 +167,8 @@ SuperLU::setSize()
 	etree = new int[n];		
 
 	if (perm_r == 0 || perm_c == 0 || etree == 0) {
-	  cerr << "WARNING SuperLU::setSize()";
-	  cerr << " - ran out of memory\n";
+	  opserr << "WARNING SuperLU::setSize()";
+	  opserr << " - ran out of memory\n";
 	  sizePerm = 0;
 	  return -1;
 	}		
@@ -198,8 +198,8 @@ SuperLU::setSize()
     } else if (n == 0)
 	return 0;
     else {
-	cerr << "WARNING SuperLU::setSize()";
-	cerr << " - order of system <  0\n";
+	opserr << "WARNING SuperLU::setSize()";
+	opserr << " - order of system <  0\n";
 	return -1;	
     }
 	

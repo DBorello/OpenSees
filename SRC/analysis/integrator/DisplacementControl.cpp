@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-10-02 21:43:45 $
+// $Revision: 1.9 $
+// $Date: 2003-02-14 23:00:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DisplacementControl.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,6 @@
 #include <LinearSOE.h>
 #include <Vector.h>
 #include <Channel.h>
-#include <iostream.h>
 #include <math.h>
 #include <Domain.h>
 #include <Node.h>
@@ -66,8 +65,8 @@ DisplacementControl::DisplacementControl(int node, int dof,
 {
   // to avoid divide-by-zero error on first update() ensure numIncr != 0
   if (numIncr == 0) {
-    cerr << "WARNING DisplacementControl::DisplacementControl() -";
-    cerr << " numIncr set to 0, 1 assumed\n";
+    opserr << "WARNING DisplacementControl::DisplacementControl() -";
+    opserr << " numIncr set to 0, 1 assumed\n";
     specNumIncrStep = 1.0;
     numIncrLastStep = 1.0;
   }
@@ -97,8 +96,8 @@ DisplacementControl::newStep(void)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING DisplacementControl::newStep() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING DisplacementControl::newStep() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }
 
@@ -126,8 +125,8 @@ DisplacementControl::newStep(void)
 
     double dUahat = dUhat(theDofID);
     if (dUahat == 0.0) {
-	cerr << "WARNING DisplacementControl::newStep() ";
-	cerr << "dUahat is zero -- zero reference displacement at control node DOF\n";
+	opserr << "WARNING DisplacementControl::newStep() ";
+	opserr << "dUahat is zero -- zero reference displacement at control node DOF\n";
 	return -1;
     }
     
@@ -136,8 +135,8 @@ DisplacementControl::newStep(void)
 
     deltaLambdaStep = dLambda;
     currentLambda += dLambda;
- //   cerr << "DisplacementControl: " << dUahat  << " " << theDofID << endl;
- //   cerr << "DisplacementControl::newStep() : " << deltaLambdaStep << endl;
+ //   opserr << "DisplacementControl: " << dUahat  << " " << theDofID << endln;
+ //   opserr << "DisplacementControl::newStep() : " << deltaLambdaStep << endln;
     // determine delta U(1) == dU
     (*deltaU) = dUhat;
     (*deltaU) *= dLambda;
@@ -147,7 +146,7 @@ DisplacementControl::newStep(void)
     theModel->incrDisp(*deltaU);    
     theModel->applyLoadDomain(currentLambda);    
     if (theModel->updateDomain() < 0) {
-      cerr << "DisplacementControl::newStep - model failed to update for new dU\n";
+      opserr << "DisplacementControl::newStep - model failed to update for new dU\n";
       return -1;
     }
 
@@ -162,8 +161,8 @@ DisplacementControl::update(const Vector &dU)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING DisplacementControl::update() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING DisplacementControl::update() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }
 
@@ -177,8 +176,8 @@ DisplacementControl::update(const Vector &dU)
 
     double dUahat = (*deltaUhat)(theDofID);
     if (dUahat == 0.0) {
-	cerr << "WARNING DisplacementControl::update() ";
-	cerr << "dUahat is zero -- zero reference displacement at control node DOF\n";
+	opserr << "WARNING DisplacementControl::update() ";
+	opserr << "dUahat is zero -- zero reference displacement at control node DOF\n";
 	return -1;
     }
     
@@ -198,7 +197,7 @@ DisplacementControl::update(const Vector &dU)
     theModel->incrDisp(*deltaU);    
     theModel->applyLoadDomain(currentLambda);    
     if (theModel->updateDomain() < 0) {
-      cerr << "DisplacementControl::update - model failed to update for new dU\n";
+      opserr << "DisplacementControl::update - model failed to update for new dU\n";
       return -1;
     }
 	
@@ -220,8 +219,8 @@ DisplacementControl::domainChanged(void)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING DisplacementControl::update() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING DisplacementControl::update() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }    
     int size = theModel->getNumEqn(); // ask model in case N+1 space
@@ -231,8 +230,8 @@ DisplacementControl::domainChanged(void)
 	    delete deltaUhat;   // delete the old
 	deltaUhat = new Vector(size);
 	if (deltaUhat == 0 || deltaUhat->Size() != size) { // check got it
-	    cerr << "FATAL DisplacementControl::domainChanged() - ran out of memory for";
-	    cerr << " deltaUhat Vector of size " << size << endl;
+	    opserr << "FATAL DisplacementControl::domainChanged() - ran out of memory for";
+	    opserr << " deltaUhat Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -242,8 +241,8 @@ DisplacementControl::domainChanged(void)
 	    delete deltaUbar;   // delete the old
 	deltaUbar = new Vector(size);
 	if (deltaUbar == 0 || deltaUbar->Size() != size) { // check got it
-	    cerr << "FATAL DisplacementControl::domainChanged() - ran out of memory for";
-	    cerr << " deltaUbar Vector of size " << size << endl;
+	    opserr << "FATAL DisplacementControl::domainChanged() - ran out of memory for";
+	    opserr << " deltaUbar Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -253,8 +252,8 @@ DisplacementControl::domainChanged(void)
 	    delete deltaU;   // delete the old
 	deltaU = new Vector(size);
 	if (deltaU == 0 || deltaU->Size() != size) { // check got it
-	    cerr << "FATAL DisplacementControl::domainChanged() - ran out of memory for";
-	    cerr << " deltaU Vector of size " << size << endl;
+	    opserr << "FATAL DisplacementControl::domainChanged() - ran out of memory for";
+	    opserr << " deltaU Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -264,8 +263,8 @@ DisplacementControl::domainChanged(void)
 	    delete deltaUstep;  
 	deltaUstep = new Vector(size);
 	if (deltaUstep == 0 || deltaUstep->Size() != size) { 
-	    cerr << "FATAL DisplacementControl::domainChanged() - ran out of memory for";
-	    cerr << " deltaUstep Vector of size " << size << endl;
+	    opserr << "FATAL DisplacementControl::domainChanged() - ran out of memory for";
+	    opserr << " deltaUstep Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -275,8 +274,8 @@ DisplacementControl::domainChanged(void)
 	    delete phat;  
 	phat = new Vector(size);
 	if (phat == 0 || phat->Size() != size) { 
-	    cerr << "FATAL DisplacementControl::domainChanged() - ran out of memory for";
-	    cerr << " phat Vector of size " << size << endl;
+	    opserr << "FATAL DisplacementControl::domainChanged() - ran out of memory for";
+	    opserr << " phat Vector of size " << size << endln;
 	    exit(-1);
 	}
     }    
@@ -302,7 +301,7 @@ DisplacementControl::domainChanged(void)
       }
 
     if (haveLoad == 0) {
-      cerr << "WARNING DisplacementControl::domainChanged() - zero reference load";
+      opserr << "WARNING DisplacementControl::domainChanged() - zero reference load";
       return -1;
     }
 
@@ -335,7 +334,7 @@ DisplacementControl::recvSelf(int cTag,
 }
 
 void
-DisplacementControl::Print(ostream &s, int flag)
+DisplacementControl::Print(OPS_Stream &s, int flag)
 {
     // TO FINISH    
 }

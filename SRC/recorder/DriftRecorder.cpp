@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2001-10-19 23:09:43 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -34,8 +34,9 @@
 #include <ID.h>
 #include <Matrix.h>
 
-#include <iostream.h>
-#include <fstream.h>
+#include <iomanip>
+using std::ios;
+
 #include <string.h>
 
 DriftRecorder::DriftRecorder(int ni, int nj, int df, int dirn,
@@ -44,17 +45,17 @@ DriftRecorder::DriftRecorder(int ni, int nj, int df, int dirn,
    theDomain(&theDom), flag(sflag)
  
 {
-  if (strlen(fileName) > MAX_FILENAMELENGTH) 
-    g3ErrorHandler->fatal("%s -- fileName too long %d max\n",
-			  "DriftRecorder::DriftRecorder",
-			  MAX_FILENAMELENGTH);
+  if (strlen(fileName) > MAX_FILENAMELENGTH) {
+    opserr << "DriftRecorder::DriftRecorder -- fileName too long " << MAX_FILENAMELENGTH << endln;
+    exit(-1);
+  }
   
   strcpy(theFileName, fileName);    
   
   theFile.open(fileName, ios::out);
   if (theFile.bad()) {
-    cerr << "WARNING - FileNodeDispRecorder::FileNodeDispRecorder()";
-    cerr << " - could not open file " << fileName << endl;
+    opserr << "WARNING - FileNodeDispRecorder::FileNodeDispRecorder()";
+    opserr << " - could not open file " << fileName << endln;
   }    
   
   Node *nodeI = theDomain->getNode(ndI);
@@ -64,8 +65,8 @@ DriftRecorder::DriftRecorder(int ni, int nj, int df, int dirn,
   const Vector &crdJ = nodeJ->getCrds();
 
   if (crdI(dirn) == crdJ(dirn)) {
-    g3ErrorHandler->warning("%s -- Nodal projection has zero component along chosen direction",
-			    "DriftRecorder::DriftRecorder");
+    opserr << "DriftRecorder::DriftRecorder-- Nodal projection has zero component along chosen direction\n";
+			    
 
     oneOverL = 0.0;
   }
@@ -97,7 +98,7 @@ DriftRecorder::record(int commitTag, double timeStamp)
   
   theFile << dx*oneOverL;
   
-  theFile << endl;
+  theFile << endln;
   theFile.flush();
   
   return 0;
@@ -106,7 +107,7 @@ DriftRecorder::record(int commitTag, double timeStamp)
 int 
 DriftRecorder::playback(int commitTag)
 {
-  cerr << "WARNING -- DriftRecorder::playback() -- not implemented" << endl;
+  opserr << "WARNING -- DriftRecorder::playback() -- not implemented" << endln;
 
   return 0;
 }
@@ -117,7 +118,7 @@ DriftRecorder::restart(void)
   theFile.close();
   theFile.open(theFileName, ios::out);
   if (theFile.bad()) {
-    cerr << "WARNING - DriftRecorder::restart() - could not open file ";
-    cerr << theFileName << endl;
+    opserr << "WARNING - DriftRecorder::restart() - could not open file ";
+    opserr << theFileName << endln;
   }
 }

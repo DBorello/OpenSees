@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tagged/storage/TaggedObjectStorage.h,v $
                                                                         
                                                                         
@@ -42,7 +42,7 @@
 class TaggedObject;
 class TaggedObjectIter;
 
-#include <iostream.h>
+#include <OPS_Globals.h>
 #include <bool.h>
 
 class TaggedObjectStorage 
@@ -64,7 +64,7 @@ class TaggedObjectStorage
     virtual  TaggedObjectStorage *getEmptyCopy(void) =0;
     virtual  void clearAll(bool invokeDestructors = true) =0;
     
-    virtual  void Print(ostream &s, int flag =0) =0;
+    virtual  void Print(OPS_Stream &s, int flag =0) =0;
     
   protected:    
     

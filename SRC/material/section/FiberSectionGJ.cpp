@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-01-28 18:23:50 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSectionGJ.cpp,v $
                                                                         
 // Written: fmk
@@ -55,16 +55,17 @@ FiberSectionGJ::FiberSectionGJ(int tag, int num, Fiber **fibers, double gj):
   if (numFibers != 0) {
     theMaterials = new UniaxialMaterial *[numFibers];
 
-    if (theMaterials == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate Material pointers",
-			    "FiberSectionGJ::FiberSectionGJ");
+    if (theMaterials == 0) {
+      opserr << "FiberSectionGJ::FiberSectionGJ -- failed to allocate Material pointers\n";
+      exit(-1);
+    }
 
     matData = new double [numFibers*3];
 
-    if (matData == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate double array for material data",
-			    "FiberSectionGJ::FiberSectionGJ");
-
+    if (matData == 0) {
+      opserr << "FiberSectionGJ::FiberSectionGJ -- failed to allocate double array for material data\n";
+      exit(-1);
+    }
     double Qz = 0.0;
     double Qy = 0.0;
     double A  = 0.0;
@@ -85,9 +86,10 @@ FiberSectionGJ::FiberSectionGJ(int tag, int num, Fiber **fibers, double gj):
       UniaxialMaterial *theMat = theFiber->getMaterial();
       theMaterials[i] = theMat->getCopy();
 
-      if (theMaterials[i] == 0)
-	g3ErrorHandler->fatal("%s -- failed to get copy of a Material",
-			      "FiberSectionGJ::FiberSectionGJ");
+      if (theMaterials[i] == 0) {
+	opserr << "FiberSectionGJ::FiberSectionGJ -- failed to get copy of a Material\n";
+	exit(-1);
+      }
     }
 
     yBar = -Qz/A;
@@ -136,8 +138,7 @@ FiberSectionGJ::addFiber(Fiber &newFiber)
   double *newMatData = new double [3 * newSize];
   
   if (newArray == 0 || newMatData == 0) {
-    g3ErrorHandler->fatal("%s -- failed to allocate Fiber pointers",
-			  "FiberSectionGJ::addFiber");
+    opserr << "FiberSectionGJ::addFiber -- failed to allocate Fiber pointers\n";
     return -1;
   }
 
@@ -160,8 +161,8 @@ FiberSectionGJ::addFiber(Fiber &newFiber)
   newArray[numFibers] = theMat->getCopy();
 
   if (newArray[numFibers] == 0) {
-    g3ErrorHandler->fatal("%s -- failed to get copy of a Material",
-			  "FiberSectionGJ::addFiber");
+    opserr << "FiberSectionGJ::addFiber -- failed to get copy of a Material\n";
+			  
 
     delete [] newArray;
     delete [] newMatData;
@@ -353,25 +354,27 @@ FiberSectionGJ::getCopy(void)
   if (numFibers != 0) {
     theCopy->theMaterials = new UniaxialMaterial *[numFibers];
 
-    if (theCopy->theMaterials == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate Material pointers",
-			    "FiberSectionGJ::FiberSectionGJ");
+    if (theCopy->theMaterials == 0) {
+      opserr << "FiberSectionGJ::FiberSectionGJ -- failed to allocate Material pointers\n";
+      exit(-1);
+    }
 
     theCopy->matData = new double [numFibers*3];
 
-    if (theCopy->matData == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate double array for material data",
-			    "FiberSectionGJ::FiberSectionGJ");
-    
+    if (theCopy->matData == 0) {
+      opserr << "FiberSectionGJ::FiberSectionGJ -- failed to allocate double array for material data\n";
+      exit(-1);
+    }    
     for (int i = 0; i < numFibers; i++) {
       theCopy->matData[i*3] = matData[i*3];
       theCopy->matData[i*3+1] = matData[i*3+1];
       theCopy->matData[i*3+2] = matData[i*3+2];
       theCopy->theMaterials[i] = theMaterials[i]->getCopy();
 
-      if (theCopy->theMaterials[i] == 0)
-	g3ErrorHandler->fatal("%s -- failed to get copy of a Material",
-			      "FiberSectionGJ::getCopy");
+      if (theCopy->theMaterials[i] == 0) {
+	opserr << "FiberSectionGJ::getCopy -- failed to get copy of a Material\n";
+	exit(-1);
+      }
     }    
   }
 
@@ -529,8 +532,7 @@ FiberSectionGJ::sendSelf(int commitTag, Channel &theChannel)
   int dbTag = this->getDbTag();
   res += theChannel.sendVector(dbTag, commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s - failed to send ID data",
-			    "FiberSection2d::sendSelf");
+    opserr << "FiberSection2d::sendSelf - failed to send ID data\n";
     return res;
   }    
 
@@ -552,8 +554,7 @@ FiberSectionGJ::sendSelf(int commitTag, Channel &theChannel)
     
     res += theChannel.sendID(dbTag, commitTag, materialData);
     if (res < 0) {
-      g3ErrorHandler->warning("%s - failed to send material data",
-			      "FiberSection2d::sendSelf");
+      opserr << "FiberSection2d::sendSelf- failed to send material data\n";
       return res;
     }    
 
@@ -561,8 +562,7 @@ FiberSectionGJ::sendSelf(int commitTag, Channel &theChannel)
     Vector fiberData(matData, 3*numFibers);
     res += theChannel.sendVector(dbTag, commitTag, fiberData);
     if (res < 0) {
-      g3ErrorHandler->warning("%s - failed to send material data",
-			      "FiberSection2d::sendSelf");
+      opserr << "FiberSection2d::sendSelf - failed to send material data\n";
       return res;
     }    
 
@@ -585,8 +585,7 @@ FiberSectionGJ::recvSelf(int commitTag, Channel &theChannel,
   int dbTag = this->getDbTag();
   res += theChannel.recvVector(dbTag, commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s - failed to recv ID data",
-			    "FiberSection2d::recvSelf");
+    opserr << "FiberSection2d::recvSelf - failed to recv ID data\n";
     return res;
   }    
   this->setTag((int)data(0));
@@ -598,8 +597,7 @@ FiberSectionGJ::recvSelf(int commitTag, Channel &theChannel,
     ID materialData(2*numFibers);
     res += theChannel.recvID(dbTag, commitTag, materialData);
     if (res < 0) {
-      g3ErrorHandler->warning("%s - failed to send material data",
-			      "FiberSection2d::recvSelf");
+      opserr << "FiberSection2d::recvSelf - failed to send material data\n";
       return res;
     }    
 
@@ -621,27 +619,29 @@ FiberSectionGJ::recvSelf(int commitTag, Channel &theChannel,
 
 	theMaterials = new UniaxialMaterial *[numFibers];
 	
-	if (theMaterials == 0)
-	  g3ErrorHandler->fatal("%s -- failed to allocate Material pointers",
-				"FiberSection2d::recvSelf");
+	if (theMaterials == 0) {
+	  opserr << "FiberSection2d::recvSelf -- failed to allocate Material pointers\n";
+	  exit(-1);
+	}
+				
 	
 	for (int j=0; j<numFibers; j++)
 	  theMaterials[j] = 0;
 
 	matData = new double [numFibers*3];
 
-	if (matData == 0)
-	  g3ErrorHandler->fatal("%s -- failed to allocate double array for material data",
-				"FiberSection2d::recvSelf");
-	
+	if (matData == 0) {
+	  opserr << "FiberSection2d::recvSelf -- failed to allocate double array for material data\n";
+	  exit(-1);
+	}
       }
     }
 
     Vector fiberData(matData, 3*numFibers);
     res += theChannel.recvVector(dbTag, commitTag, fiberData);
     if (res < 0) {
-      g3ErrorHandler->warning("%s - failed to send material data",
-			      "FiberSection2d::recvSelf");
+      opserr << "FiberSection2d::recvSelf - failed to send material data\n";
+
       return res;
     }    
 
@@ -659,10 +659,11 @@ FiberSectionGJ::recvSelf(int commitTag, Channel &theChannel,
 	theMaterials[i] = theBroker.getNewUniaxialMaterial(classTag);      
       }
 
-      if (theMaterials[i] == 0) 
-	g3ErrorHandler->fatal("%s -- failed to allocate double array for material data",
-			      "FiberSection2d::recvSelf");	
-
+      if (theMaterials[i] == 0) {
+	opserr << "FiberSection2d::recvSelf -- failed to allocate double array for material data\n";
+	exit(-1);
+      }
+			      
       theMaterials[i]->setDbTag(dbTag);
       res += theMaterials[i]->recvSelf(commitTag, theChannel, theBroker);
     }
@@ -690,19 +691,19 @@ FiberSectionGJ::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void
-FiberSectionGJ::Print(ostream &s, int flag)
+FiberSectionGJ::Print(OPS_Stream &s, int flag)
 {
-  s << "\nFiberSectionGJ, tag: " << this->getTag() << endl;
+  s << "\nFiberSectionGJ, tag: " << this->getTag() << endln;
   s << "\tSection code: " << code;
-  s << "\tNumber of Fibers: " << numFibers << endl;
-  s << "\tCentroid: (" << -yBar << ", " << zBar << ')' << endl;
-  s << "\tTorsional Stiffness: " << GJ << endl;
+  s << "\tNumber of Fibers: " << numFibers << endln;
+  s << "\tCentroid: (" << -yBar << ", " << zBar << ')' << endln;
+  s << "\tTorsional Stiffness: " << GJ << endln;
 
   if (flag == 1) {
     int loc = 0;
     for (int i = 0; i < numFibers; i++) {
       s << "\nLocation (y, z) = (" << -matData[loc++] << ", " << matData[loc++] << ")";
-      s << "\nArea = " << matData[loc++] << endl;
+      s << "\nArea = " << matData[loc++] << endln;
       theMaterials[i]->Print(s, flag);
     }
   }
@@ -785,8 +786,8 @@ FiberSectionGJ::setParameter (char **argv, int argc, Information &info)
 			}
 		}
 		if (ok<0) {
-			cerr << "FiberSectionGJ::setParameter() - could not set parameter. " << endl;
-			return -1;
+		  opserr << "FiberSectionGJ::setParameter() - could not set parameter. " << endln;
+		  return -1;
 		}
 		else {
 			return ok + 100;
@@ -817,7 +818,7 @@ FiberSectionGJ::updateParameter (int parameterID, Information &info)
 				}
 			}
 			if (ok < 0) {
-				cerr << "FiberSectionGJ::updateParameter() - could not update parameter. " << endl;
+				opserr << "FiberSectionGJ::updateParameter() - could not update parameter. " << endln;
 				return ok;
 			}
 			else {

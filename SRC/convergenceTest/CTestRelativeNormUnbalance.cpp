@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-05 23:11:23 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestRelativeNormUnbalance.cpp,v $
 
 #include <CTestRelativeNormUnbalance.h>
@@ -72,7 +72,7 @@ CTestRelativeNormUnbalance::setEquiSolnAlgo(EquiSolnAlgo &theAlgo)
 {
     theSOE = theAlgo.getLinearSOEptr();
     if (theSOE == 0) {
-	cerr << "WARNING: CTestRelativeNormUnbalance::setEquiSolnAlgo - no SOE\n";	
+	opserr << "WARNING: CTestRelativeNormUnbalance::setEquiSolnAlgo - no SOE\n";	
 	return -1;
     }
     else
@@ -91,7 +91,7 @@ CTestRelativeNormUnbalance::test(void)
   // check to ensure the algo does invoke start() - this is needed otherwise
   // may never get convergence later on in analysis!
   if (currentIter == 0) {
-    cerr << "WARNING: CTestNormDisp::test() - start() was never invoked.\n";	
+    opserr << "WARNING: CTestNormDisp::test() - start() was never invoked.\n";	
     return -2;
   }
 
@@ -109,15 +109,15 @@ CTestRelativeNormUnbalance::test(void)
 
   // print the data if required
   if (printFlag == 1) {
-    cerr << "\t CTestRelativeNormUnbalance::test() - iteration: " << currentIter;
-    cerr << " norm: " << norm*norm0 << " norm0: " << norm0 << " current ratio (|dR|/|dR0|): " << norm << " (max: " << tol << ")\n";
+    opserr << "\t CTestRelativeNormUnbalance::test() - iteration: " << currentIter;
+    opserr << " norm: " << norm*norm0 << " norm0: " << norm0 << " current ratio (|dR|/|dR0|): " << norm << " (max: " << tol << ")\n";
   }
   // print the data if required
   if (printFlag == 4) {
-    cerr << "\t CTestRelativeNormUnbalance::test() - iteration: " << currentIter;
-    cerr << " current ratio (|dR|/|dR0|): " << norm << " (max: " << tol << ")\n";
-    cerr << " Norm deltaX: " << (theSOE->getX()).Norm() << "  Norm deltaR: " << norm << endl;
-    cerr << "deltaX: " << theSOE->getX() << "deltaR: " << x;
+    opserr << "\t CTestRelativeNormUnbalance::test() - iteration: " << currentIter;
+    opserr << " current ratio (|dR|/|dR0|): " << norm << " (max: " << tol << ")\n";
+    opserr << " Norm deltaX: " << (theSOE->getX()).Norm() << "  Norm deltaR: " << norm << endln;
+    opserr << "deltaX: " << theSOE->getX() << "deltaR: " << x;
   }
 
   //
@@ -131,10 +131,10 @@ CTestRelativeNormUnbalance::test(void)
     // do some printing first
     if (printFlag != 0) {
       if (printFlag == 1) 
-	cerr << endl;
+	opserr << endln;
       else if (printFlag == 2) {
-	cerr << "\t CTestRelativeNormUnbalance::test() - iteration: " << currentIter;
-	cerr << " last ratio (|dR|/|dR0|): " << norm << " (max: " << tol << ")\n";
+	opserr << "\t CTestRelativeNormUnbalance::test() - iteration: " << currentIter;
+	opserr << " last ratio (|dR|/|dR0|): " << norm << " (max: " << tol << ")\n";
       }
     }
 
@@ -144,16 +144,16 @@ CTestRelativeNormUnbalance::test(void)
 
   // algo failed to converged after specified number of iterations - but RETURN OK
   else if (printFlag == 5 && currentIter >= maxNumIter) {
-    cerr << "WARNING: CTestUnbalanceIncr::test() - failed to converge but going on - ";
-    cerr << " current ratio (dR/dR0): " << norm << " (max: " << tol << ")\n";
-    cerr << " Norm deltaX: " << (theSOE->getX()).Norm() << "  Norm deltaR: " << x.Norm() << endl;
+    opserr << "WARNING: CTestUnbalanceIncr::test() - failed to converge but going on - ";
+    opserr << " current ratio (dR/dR0): " << norm << " (max: " << tol << ")\n";
+    opserr << " Norm deltaX: " << (theSOE->getX()).Norm() << "  Norm deltaR: " << x.Norm() << endln;
     return currentIter;
   }
 
   // algo failed to converged after specified number of iterations - return FAILURE -2
   else if (currentIter >= maxNumIter) { // the algorithm failed to converge
-    cerr << "WARNING: CTestRelativeNormUnbalance::test() - failed to converge \n";
-    cerr << "after: " << currentIter << " iterations\n";	
+    opserr << "WARNING: CTestRelativeNormUnbalance::test() - failed to converge \n";
+    opserr << "after: " << currentIter << " iterations\n";	
     currentIter++;  // we increment in case analysis does not check for convergence
     return -2;
   } 
@@ -170,7 +170,7 @@ int
 CTestRelativeNormUnbalance::start(void)
 {
     if (theSOE == 0) {
-	cerr << "WARNING: CTestRelativeNormUnbalance::test() - no SOE returning true\n";
+	opserr << "WARNING: CTestRelativeNormUnbalance::test() - no SOE returning true\n";
 	return -1;
     }
 
@@ -225,7 +225,7 @@ CTestRelativeNormUnbalance::sendSelf(int cTag, Channel &theChannel)
   x(1) = maxNumIter;  
   res = theChannel.sendVector(this->getDbTag(), cTag, x);
   if (res < 0) 
-    cerr << "CTestRelativeNormUnbalance::sendSelf() - failed to send data\n";
+    opserr << "CTestRelativeNormUnbalance::sendSelf() - failed to send data\n";
     
   return res;
 }
@@ -241,7 +241,7 @@ CTestRelativeNormUnbalance::recvSelf(int cTag, Channel &theChannel,
   if (res < 0) {
       tol = 1.0e-8;
       maxNumIter = 25;
-      cerr << "CTestRelativeNormUnbalance::sendSelf() - failed to send data\n";
+      opserr << "CTestRelativeNormUnbalance::sendSelf() - failed to send data\n";
   }
   else {
       tol = x(0);

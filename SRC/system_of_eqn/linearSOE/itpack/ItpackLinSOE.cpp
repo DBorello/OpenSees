@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-05-28 19:20:14 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/itpack/ItpackLinSOE.cpp,v $
                                                                         
                                                                         
@@ -90,7 +90,7 @@ ItpackLinSOE::setSize(Graph &theGraph)
   }
   nnz = newNNZ;
   
-  cerr << "ItpackLinSOE::setSize - n " << size << " nnz " << nnz << endl;
+  opserr << "ItpackLinSOE::setSize - n " << size << " nnz " << nnz << endln;
   
   if (nnz > Asize) { // we have to get more space for A and colA
     
@@ -103,9 +103,9 @@ ItpackLinSOE::setSize(Graph &theGraph)
     colA = new int[nnz];
     
     if (A == 0 || colA == 0) {
-      cerr << "WARNING ItpackLinSOE::ItpackLinSOE :";
-      cerr << " ran out of memory for A and colA with nnz = ";
-      cerr << newNNZ << " \n";
+      opserr << "WARNING ItpackLinSOE::ItpackLinSOE :";
+      opserr << " ran out of memory for A and colA with nnz = ";
+      opserr << newNNZ << " \n";
       size = 0; Asize = 0; nnz = 0;
       result =  -1;
     } 
@@ -130,9 +130,9 @@ ItpackLinSOE::setSize(Graph &theGraph)
     rowStartA = new int[size+1]; 
     
     if (B == 0 || X == 0 || rowStartA == 0) {
-      cerr << "WARNING ItpackLinSOE::ItpackLinSOE :";
-      cerr << " ran out of memory for vectors (size) (";
-      cerr << size << ") \n";
+      opserr << "WARNING ItpackLinSOE::ItpackLinSOE :";
+      opserr << " ran out of memory for vectors (size) (";
+      opserr << size << ") \n";
       size = 0; Bsize = 0;
       result =  -1;
     }
@@ -167,8 +167,8 @@ ItpackLinSOE::setSize(Graph &theGraph)
       
       theVertex = theGraph.getVertexPtr(a);
       if (theVertex == 0) {
-	cerr << "WARNING:ItpackLinSOE::setSize :";
-	cerr << " vertex " << a << " not in graph! - size set to 0\n";
+	opserr << "WARNING:ItpackLinSOE::setSize :";
+	opserr << " vertex " << a << " not in graph! - size set to 0\n";
 	size = 0;
 	return -1;
       }
@@ -225,8 +225,8 @@ ItpackLinSOE::setSize(Graph &theGraph)
   LinearSOESolver *the_Solver = this->getSolver();
   int solverOK = the_Solver->setSize();
   if (solverOK < 0) {
-    cerr << "WARNING:ItpackLinSOE::setSize :";
-    cerr << " solver failed setSize()\n";
+    opserr << "WARNING:ItpackLinSOE::setSize :";
+    opserr << " solver failed setSize()\n";
     return solverOK;
   }    
   return result;
@@ -243,8 +243,8 @@ ItpackLinSOE::addA(const Matrix &m, const ID &id, double fact)
   
   // check that m and id are of similar size
   if (idSize != m.noRows() && idSize != m.noCols()) {
-    cerr << "ItpackLinSOE::addA() ";
-    cerr << " - Matrix and ID not of similar sizes\n";
+    opserr << "ItpackLinSOE::addA() ";
+    opserr << " - Matrix and ID not of similar sizes\n";
     return -1;
   }
   
@@ -303,8 +303,8 @@ ItpackLinSOE::addB(const Vector &v, const ID &id, double fact)
   int idSize = id.Size();    
   // check that m and id are of similar size
   if (idSize != v.Size() ) {
-    cerr << "ItpackLinSOE::addB() ";
-    cerr << " - Vector and ID not of similar sizes\n";
+    opserr << "ItpackLinSOE::addB() ";
+    opserr << " - Vector and ID not of similar sizes\n";
     return -1;
   }    
   
@@ -337,8 +337,8 @@ int
 ItpackLinSOE::setB(const Vector &v, double fact)
 {
   if (v.Size() != size) {
-    cerr << "WARNING ItpackLinSOE::setB() -";
-    cerr << " incomptable sizes " << size << " and " << v.Size() << endl;
+    opserr << "WARNING ItpackLinSOE::setB() -";
+    opserr << " incomptable sizes " << size << " and " << v.Size() << endln;
     return -1;
   }
   
@@ -389,8 +389,8 @@ void
 ItpackLinSOE::setX(const Vector &x)
 {
   if (x.Size() != size) {
-    cerr << "WARNING ItpackLinSOE::setX() -";
-    cerr << " incomptable sizes " << size << " and " << x.Size() << endl;
+    opserr << "WARNING ItpackLinSOE::setX() -";
+    opserr << " incomptable sizes " << size << " and " << x.Size() << endln;
   }
   else {
     for (int i = 0; i < size; i++)
@@ -402,7 +402,7 @@ const Vector &
 ItpackLinSOE::getX(void)
 {
   if (vectX == 0) {
-    cerr << "FATAL ItpackLinSOE::getX - vectX == 0";
+    opserr << "FATAL ItpackLinSOE::getX - vectX == 0";
     exit(-1);
   }
   return *vectX;
@@ -412,7 +412,7 @@ const Vector &
 ItpackLinSOE::getB(void)
 {
   if (vectB == 0) {
-    cerr << "FATAL ItpackLinSOE::getB - vectB == 0";
+    opserr << "FATAL ItpackLinSOE::getB - vectB == 0";
     exit(-1);
   }        
   return *vectB;
@@ -437,8 +437,8 @@ ItpackLinSOE::setItpackLinSolver(ItpackLinSolver &newSolver)
   if (size != 0) {
     int solverOK = newSolver.setSize();
     if (solverOK < 0) {
-      cerr << "WARNING:ItpackLinSOE::setSolver :";
-      cerr << "the new solver could not setSeize() - staying with old\n";
+      opserr << "WARNING:ItpackLinSOE::setSolver :";
+      opserr << "the new solver could not setSeize() - staying with old\n";
       return -1;
     }
   }

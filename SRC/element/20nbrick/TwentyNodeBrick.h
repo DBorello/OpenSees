@@ -41,7 +41,7 @@
 
 #include <GaussQuadRule1d.h>
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 #include <Matrix.h>
 #include <Vector.h>
@@ -69,14 +69,6 @@
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
-
-#include <fstream.h>
-#include <iostream.h>
-#include <stdlib.h>
-
-
-
-
 
 class Node;
 
@@ -131,8 +123,8 @@ class TwentyNodeBrick: public Element
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);
     int displaySelf (Renderer &theViewer, int displayMode, float fact);
-    void Print(ostream &s, int flag =0);   
-    //    Do nothing with void Print (ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);   
+    //    Do nothing with void Print (OPS_Stream &s, int flag =0);
     //    use Brick3D report.  08/16/00
     Response *setResponse (char **argv, int argc, Information &eleInformation);
     int getResponse (int responseID, Information &eleInformation);

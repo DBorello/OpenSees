@@ -19,31 +19,27 @@ YS_Section2D02::YS_Section2D02
 {
     if (E <= 0.0)
     {
-		g3ErrorHandler->warning("%s -- Input E <= 0.0 ... setting E to 1.0",
-			"YS_Section2D02::YS_Section2D02");
-		E = 1.0;
-	}
+      opserr << "YS_Section2D02::YS_Section2D02s -- Input E <= 0.0 ... setting E to 1.0\n";
+      E = 1.0;
+    }
 
     if (A <= 0.0)
     {
-		g3ErrorHandler->warning("%s -- Input A <= 0.0 ... setting A to 1.0",
-			"YS_Section2D02::YS_Section2D02");
-		A = 1.0;
+      opserr << "YS_Section2D02::YS_Section2D02s -- Input A <= 0.0 ... setting A to 1.0\n";
+      A = 1.0;
     }
 
     if (I <= 0.0)
     {
-		g3ErrorHandler->warning("%s -- Input I <= 0.0 ... setting I to 1.0",
-			"YS_Section2D02::YS_Section2D02");
-		I = 1.0;
+      opserr << "YS_Section2D02::YS_Section2D02s -- Input I <= 0.0 ... setting I to 1.0\n";
+      I = 1.0;
     }
 
     if(maxPlstkRot <= 0.0)
     {
-		g3ErrorHandler->warning("%s -- Input maxPlstkRot <= 0.0 ... setting to 0.0",
-			"YS_Section2D02::YS_Section2D02");
-		maxPlstkRot = 0.0;
-	}
+      opserr << "YS_Section2D02::YS_Section2D02s -- Input maxPlstkRot <= 0.0 ... setting to 0.0\n";
+      maxPlstkRot = 0.0;
+    }
 
 }
 
@@ -67,14 +63,14 @@ int YS_Section2D02::commitState(void)
 	if(iFactor < 0.02)
 		iFactor = 0.02;
 
-	cerr << peakPlstkRot << "\t" << iFactor << endl;
+	opserr << peakPlstkRot << "\t" << iFactor << endln;
 	return this->YieldSurfaceSection2d::commitState();
 }
 
 void YS_Section2D02::getSectionStiffness(Matrix &Ks)
 {
 //	cout << "iFactor: " << iFactor << "\tpeak rotP: " <<  peakPlstkRot
-//	     << "\tmaxP: " << maxPlstkRot << endl;
+//	     << "\tmaxP: " << maxPlstkRot << endln;
 
 	Ks(0,0) = E*A; Ks(0,1) = 0.0;
 	Ks(1,0) = 0.0; Ks(1,1) = E*I*iFactor;
@@ -102,14 +98,14 @@ SectionForceDeformation* YS_Section2D02::getCopy ()
     return theCopy;
 }
 
-void YS_Section2D02::Print (ostream &s, int flag)
+void YS_Section2D02::Print (OPS_Stream &s, int flag)
 {
-    s << "YS_Section2D02, tag: " << this->getTag() << endl;
-	s << "\tE: " << E << endl;
-	s << "\tA: " << A << endl;
-	s << "\tI: " << I << endl;
-	s << "\tDegradation Factor      :" << iFactor << endl;
-	s << "\tPeak plastic-rotation   :" << peakPlstkRot << endl;
-	s << "\tMaximum plastic-rotation:" << maxPlstkRot << endl;
+    s << "YS_Section2D02, tag: " << this->getTag() << endln;
+	s << "\tE: " << E << endln;
+	s << "\tA: " << A << endln;
+	s << "\tI: " << I << endln;
+	s << "\tDegradation Factor      :" << iFactor << endln;
+	s << "\tPeak plastic-rotation   :" << peakPlstkRot << endln;
+	s << "\tMaximum plastic-rotation:" << maxPlstkRot << endln;
 	this->YieldSurfaceSection2d::Print(s, flag);
 }

@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:49:12 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.h,v $
 
 #ifndef J2Plasticity_h
@@ -47,7 +47,6 @@
 //
 
 
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -100,7 +99,7 @@ class J2Plasticity : public NDMaterial {
 		       FEM_ObjectBroker &theBroker ) ;
 
   //print out material data
-  void Print(ostream &s, int flag = 0) ;
+  void Print(OPS_Stream &s, int flag = 0) ;
 
   virtual NDMaterial *getCopy (void) ;
   virtual const char *getType (void) const ;

@@ -36,7 +36,7 @@ linear equation $\sigma = E * \epsilon$. \\
 \indent {\em int sendSelf(int commitTag, Channel \&theChannel); }\\
 \indent {\em int recvSelf(int commitTag, Channel \&theChannel, 
 FEM\_ObjectBroker \&theBroker); }\\
-\indent {\em void Print(ostream \&s, int flag =0);} \\
+\indent {\em void Print(OPS_Stream \&s, int flag =0);} \\
 
 \noindent {\bf Constructor}  \\
 \indent {\em ElasticMaterial(int tag, int classTag);}  \\
@@ -94,5 +94,5 @@ warning message is printed, {\em tag} and $E$ are set to $0.0$, and a
 negative number is returned if the Channel object fails to receive
 the Vector. \\
 
-\indent {\em    void Print(ostream \&s, int flag =0);} \\
+\indent {\em    void Print(OPS_Stream \&s, int flag =0);} \\
 Prints to the stream {\em s} the objects {\em tag} and $E$ values. \\

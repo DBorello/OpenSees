@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/ConstantSeries.cpp,v $
 
 // File: ~/domain/pattern/ConstantSeries.C
@@ -63,7 +63,7 @@ ConstantSeries::sendSelf(int commitTag, Channel &theChannel)
   data(0) = cFactor;
   int result = theChannel.sendVector(dbTag,commitTag, data);
   if (result < 0) {
-    cerr << "ConstantSeries::sendSelf() - channel failed to send data\n";
+    opserr << "ConstantSeries::sendSelf() - channel failed to send data\n";
     return result;
   }
   return 0;
@@ -78,7 +78,7 @@ ConstantSeries::recvSelf(int commitTag, Channel &theChannel,
   Vector data(1);
   int result = theChannel.recvVector(dbTag,commitTag, data);
   if (result < 0) {
-    cerr << "ConstantSeries::sendSelf() - channel failed to receive data\n";
+    opserr << "ConstantSeries::sendSelf() - channel failed to receive data\n";
     cFactor = 1.0;
     return result;
   }
@@ -89,7 +89,7 @@ ConstantSeries::recvSelf(int commitTag, Channel &theChannel,
 
 
 void
-ConstantSeries::Print(ostream &s, int flag)
+ConstantSeries::Print(OPS_Stream &s, int flag)
 {
     s << "Constant Series: factor: " << cFactor << "\n";
 

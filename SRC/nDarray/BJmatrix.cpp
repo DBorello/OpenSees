@@ -1,6 +1,6 @@
                                                                         
-// $Revision: 1.1 $                                                              
-// $Date: 2001-08-23 16:45:45 $                                                                  
+// $Revision: 1.2 $                                                              
+// $Date: 2003-02-14 23:01:48 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/BJmatrix.cpp,v $                                                                
 
                                                                         
@@ -44,7 +44,7 @@
 //  #include "nDarray.h"
 #include "BJmatrix.h"
 //#include "BJvector.h"
-#include <iostream.h>
+#include <OPS_Stream.h>
 
 #define TINY  1e-20
 void BJmatrix::error(char * msg1, char * msg2)

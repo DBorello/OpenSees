@@ -1,5 +1,5 @@
-// $Revision: 1.13 $
-// $Date: 2002-12-05 22:49:16 $
+// $Revision: 1.14 $
+// $Date: 2003-02-14 23:01:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -8,9 +8,6 @@
 // FluidSolidPorousMaterial.cpp
 // -------------------
 //
-#include <iostream.h>
-#include <fstream.h>
-#include <iomanip.h>
 #include <math.h>
 #include <stdlib.h>
 #include <FluidSolidPorousMaterial.h>
@@ -31,8 +28,8 @@ FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial 
  : NDMaterial(tag, ND_TAG_FluidSolidPorousMaterial)
 {
   if (combinedBulkModul < 0) {
-    cerr << "WARNING:FluidSolidPorousMaterial::FluidSolidPorousMaterial: combinedBulkModulus < 0" << endl;
-    cerr << "Will reset to 0." <<endl;
+    opserr << "WARNING:FluidSolidPorousMaterial::FluidSolidPorousMaterial: combinedBulkModulus < 0" << endln;
+    opserr << "Will reset to 0." <<endln;
     combinedBulkModul = 0.;
   }
   ndm = nd;
@@ -81,9 +78,9 @@ int FluidSolidPorousMaterial::setTrialStrain (const Vector &strain)
 	else if (ndm==3 && strain.Size()==6)
 		trialVolumeStrain = strain[0]+strain[1]+strain[2];
 	else {
-		cerr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endl;
-		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal(" ");
+		opserr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endln;
+		opserr << "But strain vector size is: " << strain.Size() << endln;
+		exit(-1);;
 	}
 
   return theSoilMaterial->setTrialStrain(strain);
@@ -97,9 +94,9 @@ int FluidSolidPorousMaterial::setTrialStrain (const Vector &strain, const Vector
 	else if (ndm==3 && strain.Size()==6)
 		trialVolumeStrain = strain[0]+strain[1]+strain[2];
 	else {
-		cerr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endl;
-		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal(" ");
+		opserr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endln;
+		opserr << "But strain vector size is: " << strain.Size() << endln;
+		exit(-1);;
 	}
 
   return theSoilMaterial->setTrialStrain(strain, rate);
@@ -113,9 +110,9 @@ int FluidSolidPorousMaterial::setTrialStrainIncr (const Vector &strain)
 	else if (ndm==3 && strain.Size()==6)
 		trialVolumeStrain = currentVolumeStrain + strain[0]+strain[1]+strain[2];
 	else {
-		cerr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endl;
-		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal(" ");
+		opserr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endln;
+		opserr << "But strain vector size is: " << strain.Size() << endln;
+		exit(-1);;
 	}
 
   return theSoilMaterial->setTrialStrainIncr(strain);
@@ -129,9 +126,9 @@ int FluidSolidPorousMaterial::setTrialStrainIncr (const Vector &strain, const Ve
 	else if (ndm==3 && strain.Size()==6)
 		trialVolumeStrain = currentVolumeStrain + strain[0]+strain[1]+strain[2];
 	else {
-		cerr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endl;
-		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal(" ");
+		opserr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endln;
+		opserr << "But strain vector size is: " << strain.Size() << endln;
+		exit(-1);;
 	}
 
   return theSoilMaterial->setTrialStrainIncr(strain, rate);
@@ -298,8 +295,8 @@ int FluidSolidPorousMaterial::sendSelf(int commitTag, Channel &theChannel)
 
   res += theChannel.sendVector(this->getDbTag(), commitTag, data);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send Vector",
-			"FluidSolidPorousMaterial::sendSelf");
+	  opserr << "FluidSolidPorousMaterial::sendSelf -- could not send Vector\n";
+	     
 		return res;
 	}
 
@@ -318,16 +315,16 @@ int FluidSolidPorousMaterial::sendSelf(int commitTag, Channel &theChannel)
 
 	res += theChannel.sendID(this->getDbTag(), commitTag, classTags);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING FluidSolidPorousMaterial::sendSelf() - %d failed to send ID\n",
-			this->getTag());
-		return res;
+	  opserr << "WARNING FluidSolidPorousMaterial::sendSelf() - " << this->getTag() << " failed to send ID\n";
+	  
+	  return res;
 	}
 
 	// Finally, asks the material object to send itself
 	res += theSoilMaterial->sendSelf(commitTag, theChannel);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING FluidSolidPorousMaterial::sendSelf() - %d failed to send its Material\n",this->getTag());
-		return res;
+	  opserr << "WARNING FluidSolidPorousMaterial::sendSelf() - " << this->getTag() << " failed to send its Material\n";
+	  return res;
 	}
 
 	return res;
@@ -343,9 +340,8 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 
 	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive Vector",
-			"FluidSolidPorousMaterial::recvSelf");
-		return res;
+	  opserr << "FluidSolidPorousMaterial::recvSelf -- could not receive Vector\n";
+	  return res;
 	}
     
 	this->setTag((int)data(0));
@@ -360,9 +356,8 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 
 	res += theChannel.recvID(this->getDbTag(), commitTag, classTags);
 	if (res < 0)  {
-		g3ErrorHandler->warning("FluidSolidPorousMaterial::recvSelf() - %s\n",
-			    "failed to recv ID data");
-		return res;
+	  opserr << "FluidSolidPorousMaterial::recvSelf() - failed to recv ID data\n";
+	  return res;
 	}    
 	
 	int matClassTag = classTags(0);
@@ -374,9 +369,9 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 	    delete theSoilMaterial;
 	  theSoilMaterial = theBroker.getNewNDMaterial(matClassTag);
 	  if (theSoilMaterial == 0) {
-	    g3ErrorHandler->fatal("FluidSolidPorousMaterial::recvSelf() - %s %d\n",
-				  "Broker could not create NDMaterial of class type",matClassTag);
-	    return -1;
+	    opserr << "FluidSolidPorousMaterial::recvSelf() - " <<
+	      "Broker could not create NDMaterial of class type" << matClassTag << endln;
+	    exit(-1);
 	  }
 	}
 
@@ -384,7 +379,7 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 	theSoilMaterial->setDbTag(matDbTag);
 	res += theSoilMaterial->recvSelf(commitTag, theChannel, theBroker);
 	if (res < 0) {
-	  g3ErrorHandler->warning("FluidSolidPorousMaterial::recvSelf() - material failed to recv itself");
+	  opserr << "FluidSolidPorousMaterial::recvSelf() - material failed to recv itself\n";
 	  return res;
 	}
 
@@ -439,9 +434,9 @@ int FluidSolidPorousMaterial::getResponse (int responseID, Information &matInfo)
 }
 
 
-void FluidSolidPorousMaterial::Print(ostream &s, int flag )
+void FluidSolidPorousMaterial::Print(OPS_Stream &s, int flag )
 {
-	s << "FluidSolidPorousMaterial" << endl;
+	s << "FluidSolidPorousMaterial" << endln;
 }
 
 

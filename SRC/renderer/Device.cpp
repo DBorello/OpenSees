@@ -18,13 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:25 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Device.cpp,v $
                                                                         
                                                                         
 #include "Device.h"
-#include <iostream.h>
+#include <OPS_Stream.h>
 
 Device::Device()
 {

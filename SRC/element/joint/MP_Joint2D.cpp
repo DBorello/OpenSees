@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-05 22:20:42 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint2D.cpp,v $
 
 // Written: Arash
@@ -58,85 +58,85 @@ MP_Joint2D::MP_Joint2D(Domain *theDomain, int tag, int nodeRetain, int nodeConst
 
   this->setTag(tag);
 
-	// get node pointers of constrainted and retained nodes
-	ConstrainedNode = theDomain->getNode(nodeConstrained);
-	if (ConstrainedNode == NULL)
-	{
-		cerr << "MP_Joint2D::MP_Joint2D: nodeConstrained: ";
-		cerr << nodeConstrained << "does not exist in model\n";
-		exit(0);}
+  // get node pointers of constrainted and retained nodes
+  ConstrainedNode = theDomain->getNode(nodeConstrained);
+  if (ConstrainedNode == NULL)
+    {
+      opserr << "MP_Joint2D::MP_Joint2D: nodeConstrained: ";
+      opserr << nodeConstrained << "does not exist in model\n";
+      exit(0);}
+  
+  RetainedNode = theDomain->getNode(nodeRetained);
+  if (RetainedNode == NULL)
+    {
+      opserr << "MP_Joint2D::MP_Joint2D: nodeRetained: ";
+      opserr << nodeRetained << "does not exist in model\n";
+      exit(0);}
+  
+  // check for proper degrees of freedom
+  int RnumDOF = RetainedNode->getNumberDOF();
+  int CnumDOF = ConstrainedNode->getNumberDOF();
+  if (RnumDOF != 4 || CnumDOF != 3 ){
+    opserr << "MP_Joint2D::MP_Joint2D - mismatch in numDOF\n DOF not supported by this type of constraint\n";
+    return;
+  }
+  
+  // check the main degree of freedom. It should be aone of the rotational degrees of freedom
+  if ( MainDOF != 2 && MainDOF!=3 ) {
+    opserr << "MP_Joint2D::MP_Joint2D - Wrong main degree of freedom\n";
+    return;
+  }
+  
+  
+  // check for proper dimensions of coordinate space
+  const Vector &crdR = RetainedNode->getCrds();
+  int dimR = crdR.Size();
+  const Vector &crdC = ConstrainedNode->getCrds();
+  int dimC = crdC.Size();
+  
+  if (dimR != 2 || dimC != 2 ){
+    opserr << "MP_Joint2D::MP_Joint2D - mismatch in dimnesion\n dimension not supported by this type of constraint\n";
+    return;
+  }
 
-	RetainedNode = theDomain->getNode(nodeRetained);
-	if (RetainedNode == NULL)
-	{
-		cerr << "MP_Joint2D::MP_Joint2D: nodeRetained: ";
-		cerr << nodeRetained << "does not exist in model\n";
-		exit(0);}
-
-	// check for proper degrees of freedom
-	int RnumDOF = RetainedNode->getNumberDOF();
-	int CnumDOF = ConstrainedNode->getNumberDOF();
-    if (RnumDOF != 4 || CnumDOF != 3 ){
-		g3ErrorHandler->warning("MP_Joint2D::MP_Joint2D - mismatch in numDOF\n DOF not supported by this type of constraint");
-		return;
-    }
-
-	// check the main degree of freedom. It should be aone of the rotational degrees of freedom
-	if ( MainDOF != 2 && MainDOF!=3 ) {
-			g3ErrorHandler->warning("MP_Joint2D::MP_Joint2D - Wrong main degree of freedom");
-			return;
-    }
-	
-
-	// check for proper dimensions of coordinate space
-	const Vector &crdR = RetainedNode->getCrds();
-    int dimR = crdR.Size();
-	const Vector &crdC = ConstrainedNode->getCrds();
-    int dimC = crdC.Size();
-    
-	if (dimR != 2 || dimC != 2 ){
-		g3ErrorHandler->warning("MP_Joint2D::MP_Joint2D - mismatch in dimnesion\n dimension not supported by this type of constraint");
-		return;
-    }
-
-   
-	// allocate the constranted and retained id's
+  
+  // allocate the constranted and retained id's
     constrDOF = new ID(CnumDOF-1);
     retainDOF = new ID(RnumDOF-1); 
  
-	if (constrDOF == NULL || retainDOF == NULL ) { 
-		cerr << "MP_Joint2D::MP_Joint2D - ran out of memory \ncan not generate ID for nodes\n";
-		exit(-1);
-	}
-	
-	(*constrDOF)(0) = 0;
-	(*constrDOF)(1) = 1;
-
-	(*retainDOF)(0) = 0;
-	(*retainDOF)(1) = 1;
-	(*retainDOF)(2) = MainDOF;
-
+    if (constrDOF == NULL || retainDOF == NULL ) { 
+      opserr << "MP_Joint2D::MP_Joint2D - ran out of memory \ncan not generate ID for nodes\n";
+      exit(-1);
+    }
     
-	// allocate the constraint matrix
+    (*constrDOF)(0) = 0;
+    (*constrDOF)(1) = 1;
+    
+    (*retainDOF)(0) = 0;
+    (*retainDOF)(1) = 1;
+    (*retainDOF)(2) = MainDOF;
+    
+    
+    // allocate the constraint matrix
     constraint = new Matrix( CnumDOF-1 , RnumDOF-1 );
     if (constraint == NULL ) { 
-	cerr << "MP_Joint2D::MP_Joint2D - ran out of memory 2\n";
+	opserr << "MP_Joint2D::MP_Joint2D - ran out of memory 2\n";
 	exit(-1);
     }  
 
-	// calculate constraint matrix
-	double deltaX = crdC(0) - crdR(0);
-	double deltaY = crdC(1) - crdR(1);
-
-	Length0 = sqrt( deltaX*deltaX + deltaY*deltaY );
+    // calculate constraint matrix
+    double deltaX = crdC(0) - crdR(0);
+    double deltaY = crdC(1) - crdR(1);
+    
+    Length0 = sqrt( deltaX*deltaX + deltaY*deltaY );
     if ( Length0 <= 1.0e-12 ) { 
-	cerr << "MP_Joint2D::MP_Joint2D - The constraint length is zero\n";
+      opserr << "MP_Joint2D::MP_Joint2D - The constraint length is zero\n";
     }  
-	
-	(*constraint) (0,0) = 1.0 ;
-	(*constraint) (1,1) = 1.0 ;
-	(*constraint) (0,2) = -deltaY ;
-	(*constraint) (1,2) = deltaX ;
+    
+    (*constraint) (0,0) = 1.0 ;
+    (*constraint) (1,1) = 1.0 ;
+    (*constraint) (0,2) = -deltaY ;
+    (*constraint) (1,2) = deltaX ;
 }
 
 
@@ -172,8 +172,8 @@ const ID &
 MP_Joint2D::getConstrainedDOFs(void) const
 {
     if (constrDOF == NULL) {
-	cerr << "MP_Joint2D::getConstrainedDOF - no ID was set, ";
-	cerr << "was recvSelf() ever called? or subclass incorrect?\n";	
+	opserr << "MP_Joint2D::getConstrainedDOF - no ID was set, ";
+	opserr << "was recvSelf() ever called? or subclass incorrect?\n";	
 	exit(-1);
     }
 
@@ -186,8 +186,8 @@ const ID &
 MP_Joint2D::getRetainedDOFs(void) const
 {
     if (retainDOF == NULL) {
-	cerr << "MP_Joint2D::getRetainedDOFs - no ID was set\n ";
-	cerr << "was recvSelf() ever called? or subclass incorrect?\n";		
+	opserr << "MP_Joint2D::getRetainedDOFs - no ID was set\n ";
+	opserr << "was recvSelf() ever called? or subclass incorrect?\n";		
 	exit(-1);
     }
 
@@ -251,7 +251,7 @@ int MP_Joint2D::recvSelf(int commitTag, Channel &theChannel,
 const Matrix &MP_Joint2D::getConstraint(void)
 {
     if (constraint == 0) {
-	cerr << "MP_Joint2D::getConstraint - no Matrix was set\n";
+	opserr << "MP_Joint2D::getConstraint - no Matrix was set\n";
 	exit(-1);
     }    
 
@@ -276,7 +276,7 @@ const Matrix &MP_Joint2D::getConstraint(void)
 		Direction(0) = deltaX;
 		Direction(1) = deltaY;
 		double NewLength = Direction.Norm();
-		if ( NewLength < 1e-12 ) cerr << "MP_Joint2D::applyConstraint : length of rigid link is too small or zero"; 
+		if ( NewLength < 1e-12 ) opserr << "MP_Joint2D::applyConstraint : length of rigid link is too small or zero"; 
 		Direction = Direction * (Length0/NewLength);		// correct the length
 		// find new displacements of the constrainted node
 	
@@ -293,7 +293,7 @@ const Matrix &MP_Joint2D::getConstraint(void)
     return (*constraint);
 }
     
-void MP_Joint2D::Print(ostream &s, int flag )
+void MP_Joint2D::Print(OPS_Stream &s, int flag )
 {
     s << "MP_Joint2D: " << this->getTag() << "\n";
     s << "\tNode Constrained: " << nodeConstrained;

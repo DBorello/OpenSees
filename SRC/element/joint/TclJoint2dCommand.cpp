@@ -29,7 +29,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 #include <Domain.h>
 
 #include <SimpleJoint2D.h>
@@ -47,12 +46,12 @@ TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,
 {
 	// ensure the destructor has not been called
 	if (theTclBuilder == 0) {
-		cerr << "WARNING builder has been destroyed\n";
+		opserr << "WARNING builder has been destroyed\n";
 		return TCL_ERROR;
 	}
 	
 	if (theTclBuilder->getNDM() != 2 || theTclBuilder->getNDF() != 3) {
-		cerr << "WARNING -- model dimensions and/or nodal DOF not compatible with BCconnect element\n";
+		opserr << "WARNING -- model dimensions and/or nodal DOF not compatible with BCconnect element\n";
 		return TCL_ERROR;
 	}
 	
@@ -60,60 +59,60 @@ TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,
 	int argStart = 2;
 	
 	if ((argc-argStart) < 9) {
-		cerr << "WARNING insufficient arguments\n";
+		opserr << "WARNING insufficient arguments\n";
 		printCommand(argc, argv);
-		cerr << "Want:\n";
-		cerr << "element Joint2D Tag? NodI? NodJ? NodK? NodL? NodC? MatC? RotSpringTag? LrgDsp?\n";
-		cerr << "or:\n";
-		cerr << "element Joint2D Tag? NodI? NodJ? NodK? NodL? NodC? MatI? MatJ? MatK? MatL? MatC? LrgDsp?\n";
+		opserr << "Want:\n";
+		opserr << "element Joint2D Tag? NodI? NodJ? NodK? NodL? NodC? MatC? RotSpringTag? LrgDsp?\n";
+		opserr << "or:\n";
+		opserr << "element Joint2D Tag? NodI? NodJ? NodK? NodL? NodC? MatI? MatJ? MatK? MatL? MatC? LrgDsp?\n";
 		return TCL_ERROR;
 	}
 	
 	// get the id and end nodes
 	int Joint2DId, iNode, jNode, kNode, lNode;
 	if (Tcl_GetInt(interp, argv[argStart], &Joint2DId) != TCL_OK) {
-		cerr << "WARNING invalid Joint2D eleTag" << endl;
+		opserr << "WARNING invalid Joint2D eleTag" << endln;
 		return TCL_ERROR;
 	}
 	
 	if (Tcl_GetInt(interp, argv[1+argStart], &iNode) != TCL_OK) {
-		cerr << "WARNING invalid iNode\n";
-		cerr << "Joint2D element: " << Joint2DId << endl;
+		opserr << "WARNING invalid iNode\n";
+		opserr << "Joint2D element: " << Joint2DId << endln;
 		return TCL_ERROR;
 	}
 	
 	if (Tcl_GetInt(interp, argv[2+argStart], &jNode) != TCL_OK) {
-		cerr << "WARNING invalid jNode\n";
-		cerr << "Joint2D element: " << Joint2DId << endl;
+		opserr << "WARNING invalid jNode\n";
+		opserr << "Joint2D element: " << Joint2DId << endln;
 		return TCL_ERROR;
 	}
 	
 	if (Tcl_GetInt(interp, argv[3+argStart], &kNode) != TCL_OK) {
-		cerr << "WARNING invalid kNode\n";
-		cerr << "Joint2D element: " << Joint2DId << endl;
+		opserr << "WARNING invalid kNode\n";
+		opserr << "Joint2D element: " << Joint2DId << endln;
 		return TCL_ERROR;
 	}
 	
 	if (Tcl_GetInt(interp, argv[4+argStart], &lNode) != TCL_OK) {
-		cerr << "WARNING invalid lNode\n";
-		cerr << "Joint2D element: " << Joint2DId << endl;
+		opserr << "WARNING invalid lNode\n";
+		opserr << "Joint2D element: " << Joint2DId << endln;
 		return TCL_ERROR;
 	}
 
 	// Get the center node
 	int CenterNodeTag;
 	if (Tcl_GetInt(interp, argv[5+argStart], &CenterNodeTag) != TCL_OK) {
-		cerr << "WARNING invalid tag for center node\n";
-		cerr << "Joint2D element: " << Joint2DId << endl;
+		opserr << "WARNING invalid tag for center node\n";
+		opserr << "Joint2D element: " << Joint2DId << endln;
 		return TCL_ERROR;
 	}
 		
 	// check domain for existence of internal node tag
 	Node *CenterNode = theTclDomain->getNode(CenterNodeTag);
 	if (CenterNode != 0) {
-		cerr << "WARNING node tag specified for the center node already exists.\n";
-		cerr << "Use a new node tag.\n";
-		cerr << "Joint2D element: " << Joint2DId << endl;
+		opserr << "WARNING node tag specified for the center node already exists.\n";
+		opserr << "Use a new node tag.\n";
+		opserr << "Joint2D element: " << Joint2DId << endln;
 		return TCL_ERROR;
 	}
 
@@ -124,24 +123,24 @@ TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,
 		
 		int PanelMatId;
 		if (Tcl_GetInt(interp, argv[6+argStart], &PanelMatId) != TCL_OK) {
-			cerr << "WARNING invalid matID\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING invalid matID\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 
 		int RotEleTag;
 		if (Tcl_GetInt(interp, argv[7+argStart], &RotEleTag) != TCL_OK) {
-			cerr << "WARNING invalid tag for rotational spring.\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING invalid tag for rotational spring.\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 
 		// check domain for existence of spring element tag
 		Element *RotEle = theTclDomain->getElement(RotEleTag);
 		if (RotEle != 0) {
-			cerr << "WARNING element tag specified for the rotational spring already exists.\n";
-			cerr << "Use a new element tag.\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING element tag specified for the rotational spring already exists.\n";
+			opserr << "Use a new element tag.\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 		
@@ -154,9 +153,9 @@ TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,
 		UniaxialMaterial *PanelMaterial = theTclBuilder->getUniaxialMaterial(PanelMatId);
 		
 		if ( PanelMaterial == 0 ) {
-			cerr << "WARNING material not found\n";
-			cerr << "Material: " << PanelMatId;
-			cerr << "\nJoint2D element: " << Joint2DId << endl;
+			opserr << "WARNING material not found\n";
+			opserr << "Material: " << PanelMatId;
+			opserr << "\nJoint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 		
@@ -170,14 +169,14 @@ TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,
 					LargeDisp);
 		
 		if (theSimpleJoint2D == 0) {
-			cerr << "WARNING ran out of memory creating element\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING ran out of memory creating element\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 
 		if (theTclDomain->addElement(theSimpleJoint2D) == false) {
-			cerr << "WARNING could not add element to the domain\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING could not add element to the domain\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			delete theSimpleJoint2D;
 			return TCL_ERROR;
 		}
@@ -190,76 +189,76 @@ TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,
 		// Using Joint2D constructor
 		int MatIid;
 		if (Tcl_GetInt(interp, argv[6+argStart], &MatIid) != TCL_OK) {
-			cerr << "WARNING invalid material ID for spring I\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING invalid material ID for spring I\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 		UniaxialMaterial *MatI = theTclBuilder->getUniaxialMaterial(MatIid);
 		
 		if ( MatI == 0 ) {
-			cerr << "WARNING material not found\n";
-			cerr << "Material: " << MatIid;
-			cerr << "\nJoint2D element: " << Joint2DId << endl;
+			opserr << "WARNING material not found\n";
+			opserr << "Material: " << MatIid;
+			opserr << "\nJoint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 		
 		int MatJid;
 		if (Tcl_GetInt(interp, argv[7+argStart], &MatJid) != TCL_OK) {
-			cerr << "WARNING invalid material ID for spring J\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING invalid material ID for spring J\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 		UniaxialMaterial *MatJ = theTclBuilder->getUniaxialMaterial(MatJid);
 		
 		if ( MatJ == 0 ) {
-			cerr << "WARNING material not found\n";
-			cerr << "Material: " << MatJid;
-			cerr << "\nJoint2D element: " << Joint2DId << endl;
+			opserr << "WARNING material not found\n";
+			opserr << "Material: " << MatJid;
+			opserr << "\nJoint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 
 		int MatKid;
 		if (Tcl_GetInt(interp, argv[8+argStart], &MatKid) != TCL_OK) {
-			cerr << "WARNING invalid material ID for spring K\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING invalid material ID for spring K\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 		UniaxialMaterial *MatK = theTclBuilder->getUniaxialMaterial(MatKid);
 		
 		if ( MatK == 0 ) {
-			cerr << "WARNING material not found\n";
-			cerr << "Material: " << MatKid;
-			cerr << "\nJoint2D element: " << Joint2DId << endl;
+			opserr << "WARNING material not found\n";
+			opserr << "Material: " << MatKid;
+			opserr << "\nJoint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 
 		int MatLid;
 		if (Tcl_GetInt(interp, argv[9+argStart], &MatLid) != TCL_OK) {
-			cerr << "WARNING invalid material ID for spring L\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING invalid material ID for spring L\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 		UniaxialMaterial *MatL = theTclBuilder->getUniaxialMaterial(MatLid);
 		
 		if ( MatL == 0 ) {
-			cerr << "WARNING material not found\n";
-			cerr << "Material: " << MatLid;
-			cerr << "\nJoint2D element: " << Joint2DId << endl;
+			opserr << "WARNING material not found\n";
+			opserr << "Material: " << MatLid;
+			opserr << "\nJoint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 		
 		int PanelMatId;
 		if (Tcl_GetInt(interp, argv[10+argStart], &PanelMatId) != TCL_OK) {
-			cerr << "WARNING invalid matID\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING invalid matID\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 		UniaxialMaterial *PanelMaterial = theTclBuilder->getUniaxialMaterial(PanelMatId);
 		
 		if ( PanelMaterial == 0 ) {
-			cerr << "WARNING material not found\n";
-			cerr << "Material: " << PanelMatId;
-			cerr << "\nJoint2D element: " << Joint2DId << endl;
+			opserr << "WARNING material not found\n";
+			opserr << "Material: " << PanelMatId;
+			opserr << "\nJoint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 
@@ -277,14 +276,14 @@ TclModelBuilder_addJoint2D(ClientData clientData, Tcl_Interp *interp,
 					LargeDisp);
 		
 		if (theJoint2D == 0) {
-			cerr << "WARNING ran out of memory creating element\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING ran out of memory creating element\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			return TCL_ERROR;
 		}
 
 		if (theTclDomain->addElement(theJoint2D) == false) {
-			cerr << "WARNING could not add element to the domain\n";
-			cerr << "Joint2D element: " << Joint2DId << endl;
+			opserr << "WARNING could not add element to the domain\n";
+			opserr << "Joint2D element: " << Joint2DId << endln;
 			delete theJoint2D;
 			return TCL_ERROR;
 		}

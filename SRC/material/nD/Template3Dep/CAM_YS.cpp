@@ -28,7 +28,6 @@
 #include "CAM_YS.h"
 #include <basics.h>
 
-#include <G3Globals.h>
 
 //================================================================================
 // Normal constructor
@@ -203,7 +202,7 @@ double CAMYieldSurface::getM() const
 }
 
 
-ostream& operator<< (ostream& os, const CAMYieldSurface & YS)
+OPS_Stream& operator<< (OPS_Stream& os, const CAMYieldSurface & YS)
 {
    os << "Cam Clay Yield Surface Parameters: " << endln;
    os << "M = " << YS.M << endln;

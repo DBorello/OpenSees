@@ -2,7 +2,7 @@
 #define MATRIX_H
 
 #include <math.h>
-#include <iostream.h>
+#include <OPS_Globals.h>
 
 class MATRIX;
 // Vectors need to know about matrices.
@@ -35,7 +35,7 @@ public:
       float l = this->Length();
       if (l == 0)
 	{
-	  cerr << "ERROR: Trying to normalize a zero-vector" << endl;
+	  opserr << "ERROR: Trying to normalize a zero-vector" << endln;
 	  return 0;
 	}
       v[0] = v[0] / l;
@@ -98,11 +98,6 @@ public:
   MATRIX Transpose(void);
 
 };
-
-// Debugging output
-
-extern ostream &operator<<(ostream &, VECTOR &);      
-extern ostream &operator<<(ostream &, MATRIX &);      
 
 #endif      
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:03 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/CorrelationCoefficient.cpp,v $
 
 
@@ -55,7 +55,7 @@ CorrelationCoefficient::~CorrelationCoefficient()
 
 
 void
-CorrelationCoefficient::Print(ostream &s, int flag)  
+CorrelationCoefficient::Print(OPS_Stream &s, int flag)  
 {
 }
 

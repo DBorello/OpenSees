@@ -53,7 +53,7 @@ determines if convergence has been achieved. \\
 \indent {\em int sendSelf(int commitTag, Channel \&theChannel);}\\ 
 \indent {\em int recvSelf(int commitTag, Channel \&theChannel, 
 FEM\_ObjectBroker \&theBroker);}\\ 
-\indent {\em int Print(ostream \&s, int flag =0);} \\
+\indent {\em int Print(OPS_Stream \&s, int flag =0);} \\
 
 \noindent {\bf Constructors} \\ 
 \indent {\em NewtonRaphson(int theMaxNumIter, ConvergenceTest \&theTest);}\\ 
@@ -117,5 +117,5 @@ object. Uses the data in the ID to create a ConvergenceTest object of
 appropriate type and sets its dbTag. It then invokes {\em recvSelf()}
 on this test object. \\
 
-{\em int Print(ostream \&s, int flag =0);} \\
+{\em int Print(OPS_Stream \&s, int flag =0);} \\
 Sends the string 'NewtonRaphson' to the stream if {\em flag} equals $0$.

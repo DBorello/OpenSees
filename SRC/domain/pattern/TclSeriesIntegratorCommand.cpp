@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-09-20 20:02:40 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesIntegratorCommand.cpp,v $
 
 // Written: fmk 
@@ -53,7 +53,7 @@ TclSeriesIntegratorCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 
   // split the list
   if (Tcl_SplitList(interp, arg, &argc, &argv) != TCL_OK) {
-    cerr << "WARNING could not split series integrator list " << arg << endl;
+    opserr << "WARNING could not split series integrator list " << arg << endln;
     return 0;
   }
 
@@ -65,8 +65,8 @@ TclSeriesIntegratorCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
   }
   else {
 	// type of load pattern type unknown
-    cerr << "WARNING unknown TimeSeriesINtegrator type " << argv[0] << " - ";
-    cerr << " SeriesIntegratorType <type args>\n\tvalid types: Trapezoidal\n";
+    opserr << "WARNING unknown TimeSeriesINtegrator type " << argv[0] << " - ";
+    opserr << " SeriesIntegratorType <type args>\n\tvalid types: Trapezoidal\n";
     cleanup(argv);
     return 0;
   }

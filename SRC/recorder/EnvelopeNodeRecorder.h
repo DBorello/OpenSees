@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.1 $
-// $Date: 2002-12-13 00:06:18 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.h,v $
                                                                         
 
@@ -43,7 +43,9 @@
 #include <Vector.h>
 #include <Matrix.h>
 
-#include <fstream.h>
+#include <fstream>
+using std::ofstream;
+
 class Domain;
 class FE_Datastore;
 

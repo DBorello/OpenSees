@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Viewport.cpp,v $
                                                                         
                                                                         
@@ -54,7 +54,7 @@ Viewport::update(void) {
   PRTtop     = portwindow[3];
 
   if (PRTleft < -1 || PRTright >1 || PRTtop >1 || PRTbottom <-1) {
-    cerr << "Viewport::update() -  PORTWINDOW must be in range { -1 1 -1 1}\n";
+    opserr << "Viewport::update() -  PORTWINDOW must be in range { -1 1 -1 1}\n";
     return -1;
   }
   

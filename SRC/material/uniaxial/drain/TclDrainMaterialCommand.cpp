@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2002-01-06 19:58:11 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/drain/TclDrainMaterialCommand.cpp,v $
 
 // Written: MHS
@@ -40,10 +40,10 @@
 
 static void printCommand(int argc, char **argv)
 {
-    cerr << "Input command: ";
+    opserr << "Input command: ";
     for (int i=0; i<argc; i++)
-	cerr << argv[i] << " ";
-    cerr << endl;
+	opserr << argv[i] << " ";
+    opserr << endln;
 } 
 
 UniaxialMaterial *
@@ -51,14 +51,14 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 				char **argv, TclModelBuilder *theTclBuilder)
 {
 	if (argc < 3) {
-		cerr << "WARNING insufficient number of arguments\n";
+		opserr << "WARNING insufficient number of arguments\n";
 		printCommand(argc, argv);
 		return 0;
 	}
 
 	int tag;
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid uniaxialMaterial tag\n";
+	    opserr << "WARNING invalid uniaxialMaterial tag\n";
 		printCommand(argc, argv);
 	    return 0;
 	}
@@ -67,31 +67,31 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 	if (strcmp(argv[1],"Hardening2") == 0 || strcmp(argv[1],"Hardening02") == 0) {
 		if (argc < 7) {
-			cerr << "WARNING invalid number of arguments\n";
+			opserr << "WARNING invalid number of arguments\n";
 			printCommand(argc,argv);
-			cerr << "Want: uniaxialMaterial Hardening02 tag? E? sigY? Hiso? Hkin?" << endl;
+			opserr << "Want: uniaxialMaterial Hardening02 tag? E? sigY? Hiso? Hkin?" << endln;
 			return 0;
 		}
 		
 		double E, sigY, Hiso, Hkin;
 
 		if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
-			cerr << "WARNING invalid E\n";
+			opserr << "WARNING invalid E\n";
 			printCommand(argc, argv);
 			return 0;	
 		}
 		if (Tcl_GetDouble(interp, argv[4], &sigY) != TCL_OK) {
-			cerr << "WARNING invalid sigY\n";
+			opserr << "WARNING invalid sigY\n";
 			printCommand(argc, argv);
 			return 0;	
 		}
 		if (Tcl_GetDouble(interp, argv[5], &Hiso) != TCL_OK) {
-			cerr << "WARNING invalid Hiso\n";
+			opserr << "WARNING invalid Hiso\n";
 			printCommand(argc, argv);
 			return 0;	
 		}
 		if (Tcl_GetDouble(interp, argv[6], &Hkin) != TCL_OK) {
-			cerr << "WARNING invalid Hkin\n";
+			opserr << "WARNING invalid Hkin\n";
 			printCommand(argc, argv);
 			return 0;	
 		}
@@ -101,9 +101,9 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
        
 	else if (strcmp(argv[1],"BiLinear") == 0) {
 		if (argc < 19) {
-			cerr << "WARNING insufficient arguments\n";
+			opserr << "WARNING insufficient arguments\n";
 			printCommand(argc,argv);
-			cerr << "Want: uniaxialMaterial BiLinear tag? ..." << endl;
+			opserr << "Want: uniaxialMaterial BiLinear tag? ..." << endln;
 			return 0;
 		}
 		
@@ -112,7 +112,7 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 		for (int i = 3, j = 0; j < 16; i++, j++) {
 			if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-				cerr << "WARNING invalid input, data " << i << endl;
+				opserr << "WARNING invalid input, data " << i << endln;
 				printCommand(argc, argv);
 				return 0;
 			}
@@ -124,9 +124,9 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 	else if (strcmp(argv[1],"Clough1") == 0) {
 		if (argc < 19) {
-			cerr << "WARNING insufficient arguments\n";
+			opserr << "WARNING insufficient arguments\n";
 			printCommand(argc,argv);
-			cerr << "Want: uniaxialMaterial Clough1 tag? ..." << endl;
+			opserr << "Want: uniaxialMaterial Clough1 tag? ..." << endln;
 			return 0;
 		}
 		
@@ -135,7 +135,7 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 		for (int i = 3, j = 0; j < 16; i++, j++) {
 			if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-				cerr << "WARNING invalid input, data " << i << endl;
+				opserr << "WARNING invalid input, data " << i << endln;
 				printCommand(argc, argv);
 				return 0;
 			}
@@ -147,9 +147,9 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 	else if (strcmp(argv[1],"Clough2") == 0) {
 		if (argc < 19) {
-			cerr << "WARNING insufficient arguments\n";
+			opserr << "WARNING insufficient arguments\n";
 			printCommand(argc,argv);
-			cerr << "Want: uniaxialMaterial Clough2 tag? ..." << endl;
+			opserr << "Want: uniaxialMaterial Clough2 tag? ..." << endln;
 			return 0;
 		}
 		
@@ -158,7 +158,7 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 		for (int i = 3, j = 0; j < 16; i++, j++) {
 			if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-				cerr << "WARNING invalid input, data " << i << endl;
+				opserr << "WARNING invalid input, data " << i << endln;
 				printCommand(argc, argv);
 				return 0;
 			}
@@ -170,9 +170,9 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 	else if (strcmp(argv[1],"Pinch1") == 0) {
 		if (argc < 22) {
-			cerr << "WARNING insufficient arguments\n";
+			opserr << "WARNING insufficient arguments\n";
 			printCommand(argc,argv);
-			cerr << "Want: uniaxialMaterial Pinch1 tag? ..." << endl;
+			opserr << "Want: uniaxialMaterial Pinch1 tag? ..." << endln;
 			return 0;
 		}
 		
@@ -181,7 +181,7 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 		for (int i = 3, j = 0; j < 19; i++, j++) {
 			if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-				cerr << "WARNING invalid input, data " << i << endl;
+				opserr << "WARNING invalid input, data " << i << endln;
 				printCommand(argc, argv);
 				return 0;
 			}

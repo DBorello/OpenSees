@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-08-20 00:37:26 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -35,7 +35,8 @@
 //			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
 //
 
-#include <fstream.h>
+#include <fstream>
+#include <iostream>
 
 #include <OpenSeesGFunEvaluator.h>
 #include <Vector.h>
@@ -107,8 +108,8 @@ OpenSeesGFunEvaluator::evaluate_g(Vector passed_x)
 	
 	if (waitFlag == 1.0) { // Need to wait
 		int waitIn;
-		cerr << "  FE analysis done...waitFlag is set to 1...type an integer to continue... " << endl;
-		cin >> waitIn;
+		opserr << "  FE analysis done...waitFlag is set to 1...type an integer to continue... " << endln;
+		std::cin >> waitIn;
 	}
 	else { // Don't wait
 	}
@@ -123,9 +124,9 @@ OpenSeesGFunEvaluator::evaluate_g(Vector passed_x)
 //	
 //	if (waitFlag == 1.0) { // Need to wait
 //		int waitIn;
-//		cerr << "   Waiting in case you want to edit analysis commands file." << endl;
-//		cerr << "   Type 1 to wait next time too, type 0 to NOT wait anymore. " << endl;
-//		cin >> waitIn;
+//		opserr << "   Waiting in case you want to edit analysis commands file." << endln;
+//		opserr << "   Type 1 to wait next time too, type 0 to NOT wait anymore. " << endln;
+//		std::cin >> waitIn;
 //		waitFlag = (int)waitIn;
 //	}
 //	else { // Don't wait

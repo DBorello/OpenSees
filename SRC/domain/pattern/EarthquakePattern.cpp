@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-10-18 21:01:37 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.cpp,v $
                                                                         
                                                                         
@@ -110,7 +110,7 @@ EarthquakePattern::addMotion(GroundMotion &theMotion)
   GroundMotion **newMotions = new GroundMotion *[numMotions+1];
   //  GroundMotion **newMotions = (GroundMotion **)malloc(sizeof(GroundMotion *)*(numMotions+1));
   if (newMotions == 0) {
-    cerr << "EarthquakePattern::addMotion - could not add new, out of mem\n";
+    opserr << "EarthquakePattern::addMotion - could not add new, out of mem\n";
     return -1;
   }
   
@@ -139,7 +139,7 @@ EarthquakePattern::addMotion(GroundMotion &theMotion)
   uDotDotG = new Vector(numMotions);
 
   if (uDotDotG == 0 || uDotDotG->Size() == 0 || uDotG == 0 || uDotG->Size() == 0) {
-    cerr << "EarthquakePattern::addMotion - ran out of memory creating vectors\n";
+    opserr << "EarthquakePattern::addMotion - ran out of memory creating vectors\n";
     numMotions = 0;
     return -2;
   }
@@ -150,21 +150,21 @@ EarthquakePattern::addMotion(GroundMotion &theMotion)
 bool
 EarthquakePattern::addSP_Constraint(SP_Constraint *)
 {
-  cerr << "EarthquakePattern::addSP_Constraint() - cannot add SP_Constraint to EQ pattern\n";
+  opserr << "EarthquakePattern::addSP_Constraint() - cannot add SP_Constraint to EQ pattern\n";
   return false;
 }
 
 bool
 EarthquakePattern::addNodalLoad(NodalLoad *)
 {
-  cerr << "EarthquakePattern::addNodalLoad() - cannot add NodalLoad to EQ pattern\n";  
+  opserr << "EarthquakePattern::addNodalLoad() - cannot add NodalLoad to EQ pattern\n";  
   return false;
 }
 
 bool
 EarthquakePattern::addElementalLoad(ElementalLoad *)
 {
-  cerr << "EarthquakePattern::addElementalLoad() - cannot add ElementalLoad to EQ pattern\n";    
+  opserr << "EarthquakePattern::addElementalLoad() - cannot add ElementalLoad to EQ pattern\n";    
   return false;
 }
 
@@ -309,9 +309,9 @@ EarthquakePattern::recvSelf(int commitTag, Channel &theChannel,
 ***************************************************************************************** */
 
 void 
-EarthquakePattern::Print(ostream &s, int flag)
+EarthquakePattern::Print(OPS_Stream &s, int flag)
 {
-  cerr << "EarthquakePattern::Print() - not yet implemented\n";    
+  opserr << "EarthquakePattern::Print() - not yet implemented\n";    
 }
 
 /* ****************************************************************************************

@@ -45,7 +45,7 @@ double Iy, double J, double A, double G, double alpha = 5/6.0);} \\
 \indent {\em int sendSelf (int commitTag, Channel \&theChannel); }\\
 \indent {\em int recvSelf (int commitTag, Channel \&theChannel, 
 FEM\_ObjectBroker \&theBroker); }\\
-\indent {\em void Print (ostream \&s, int flag = 0);} \\
+\indent {\em void Print (OPS_Stream \&s, int flag = 0);} \\
 
 \noindent {\bf Constructor}  \\
 \indent {\em ElasticSection3D (int tag, double E, double Iz,
@@ -212,7 +212,7 @@ Vector to set its {\em tag}, $E$, $A$, $I_z$, $I_y$, $J$, $G$, and $\alpha$.
 Returns $0$ if successful, a warning message is printed and a negative number
 is returned if the Channel object fails to receive the Vector. \\
 
-\indent {\em    void Print(ostream \&s, int flag =0);} \\
+\indent {\em    void Print(OPS_Stream \&s, int flag =0);} \\
 Prints to the stream {\em s} the object's {\em tag}, $E$, $A$, $I_z$, $I_y$, $J$, 
 $G$, and $\alpha$ values. \\
 

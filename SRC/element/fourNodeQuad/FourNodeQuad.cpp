@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2002-12-16 21:10:05 $
+// $Revision: 1.22 $
+// $Date: 2003-02-14 23:01:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -42,7 +42,6 @@
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
 
-#include <G3Globals.h>
 
 double FourNodeQuad::matrixData[64];
 Matrix FourNodeQuad::K(matrixData, 8, 8);
@@ -73,9 +72,10 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
 	wts[3] = 1.0;
 
 	if (strcmp(type,"PlaneStrain") != 0 && strcmp(type,"PlaneStress") != 0
-	    && strcmp(type,"PlaneStrain2D") != 0 && strcmp(type,"PlaneStress2D") != 0)
-	  g3ErrorHandler->fatal("%s -- improper material type %s for FourNodeQuad",
-				"FourNodeQuad::FourNodeQuad", type);
+	    && strcmp(type,"PlaneStrain2D") != 0 && strcmp(type,"PlaneStress2D") != 0) {
+	  opserr << "FourNodeQuad::FourNodeQuad -- improper material type: " << type << "for FourNodeQuad\n";
+	  exit(-1);
+	}
 
 	// Body forces
 	b[0] = b1;
@@ -84,9 +84,10 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
     // Allocate arrays of pointers to NDMaterials
     theMaterial = new NDMaterial *[4];
     
-    if (theMaterial == 0)
-      g3ErrorHandler->fatal("%s - failed allocate material model pointer",
-			"FourNodeQuad::FourNodeQuad");
+    if (theMaterial == 0) {
+      opserr << "FourNodeQuad::FourNodeQuad - failed allocate material model pointer\n";
+      exit(-1);
+    }
 
 	int i;
     for (i = 0; i < 4; i++) {
@@ -95,9 +96,10 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
       theMaterial[i] = m.getCopy(type);
 			
       // Check allocation
-      if (theMaterial[i] == 0)
-	g3ErrorHandler->fatal("%s -- failed to get a copy of material model",
-			      "FourNodeQuad::FourNodeQuad");
+      if (theMaterial[i] == 0) {
+	opserr << "FourNodeQuad::FourNodeQuad -- failed to get a copy of material model\n";
+	exit(-1);
+      }
     }
 
     // Set connected external node IDs
@@ -196,7 +198,7 @@ FourNodeQuad::setDomain(Domain *theDomain)
     theNodes[3] = theDomain->getNode(Nd4);
 
     if (theNodes[0] == 0 || theNodes[1] == 0 || theNodes[2] == 0 || theNodes[3] == 0) {
-	//g3ErrorHandler->fatal("FATAL ERROR FourNodeQuad (tag: %d), node not found in domain",
+	//opserr << "FATAL ERROR FourNodeQuad (tag: %d), node not found in domain",
 	//	this->getTag());
 	
 	return;
@@ -208,7 +210,7 @@ FourNodeQuad::setDomain(Domain *theDomain)
     int dofNd4 = theNodes[3]->getNumberDOF();
     
     if (dofNd1 != 2 || dofNd2 != 2 || dofNd3 != 2 || dofNd4 != 2) {
-	//g3ErrorHandler->fatal("FATAL ERROR FourNodeQuad (tag: %d), has differing number of DOFs at its nodes",
+	//opserr << "FATAL ERROR FourNodeQuad (tag: %d), has differing number of DOFs at its nodes",
 	//	this->getTag());
 	
 	return;
@@ -226,7 +228,7 @@ FourNodeQuad::commitState()
 
     // call element commitState to do any base class stuff
     if ((retVal = this->Element::commitState()) != 0) {
-      cerr << "FourNodeQuad::commitState () - failed in base class";
+      opserr << "FourNodeQuad::commitState () - failed in base class";
     }    
 
     // Loop over the integration points and commit the material states
@@ -469,59 +471,56 @@ FourNodeQuad::zeroLoad(void)
 int 
 FourNodeQuad::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("FourNodeQuad::addLoad - load type unknown for ele with tag: %d\n",
-			  this->getTag());
-  
+  opserr << "FourNodeQuad::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
   return -1;
 }
 
 int 
 FourNodeQuad::addInertiaLoadToUnbalance(const Vector &accel)
 {
-	int i;
-	static double rhoi[4];
-	double sum = this->rho;
-	for (i = 0; i < 4; i++) {
-	  rhoi[i] = theMaterial[i]->getRho();
-	  sum += rhoi[i];
-	}
-
-	if (sum == 0.0)
-	  return 0;
-
-	// Get R * accel from the nodes
-	const Vector &Raccel1 = theNodes[0]->getRV(accel);
-	const Vector &Raccel2 = theNodes[1]->getRV(accel);
-	const Vector &Raccel3 = theNodes[2]->getRV(accel);
-	const Vector &Raccel4 = theNodes[3]->getRV(accel);
-
-    if (2 != Raccel1.Size() || 2 != Raccel2.Size() || 2 != Raccel3.Size() ||
-		2 != Raccel4.Size()) {
-		g3ErrorHandler->warning("FourNodeQuad::addInertiaLoadToUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
-		return -1;
-    }
-
-    static double ra[8];
-
-    ra[0] = Raccel1(0);
-    ra[1] = Raccel1(1);
-    ra[2] = Raccel2(0);
-    ra[3] = Raccel2(1);
-    ra[4] = Raccel3(0);
-    ra[5] = Raccel3(1);
-    ra[6] = Raccel4(0);
-    ra[7] = Raccel4(1);
-    
-    // Compute mass matrix
-    this->getMass();
-
-    // Want to add ( - fact * M R * accel ) to unbalance
-    // Take advantage of lumped mass matrix
-    for (i = 0; i < 8; i++)
-      Q(i) += -K(i,i)*ra[i];
-
+  int i;
+  static double rhoi[4];
+  double sum = this->rho;
+  for (i = 0; i < 4; i++) {
+    rhoi[i] = theMaterial[i]->getRho();
+    sum += rhoi[i];
+  }
+  
+  if (sum == 0.0)
     return 0;
+  
+  // Get R * accel from the nodes
+  const Vector &Raccel1 = theNodes[0]->getRV(accel);
+  const Vector &Raccel2 = theNodes[1]->getRV(accel);
+  const Vector &Raccel3 = theNodes[2]->getRV(accel);
+  const Vector &Raccel4 = theNodes[3]->getRV(accel);
+  
+  if (2 != Raccel1.Size() || 2 != Raccel2.Size() || 2 != Raccel3.Size() ||
+      2 != Raccel4.Size()) {
+    opserr << "FourNodeQuad::addInertiaLoadToUnbalance matrix and vector sizes are incompatable\n";
+    return -1;
+  }
+  
+  static double ra[8];
+  
+  ra[0] = Raccel1(0);
+  ra[1] = Raccel1(1);
+  ra[2] = Raccel2(0);
+  ra[3] = Raccel2(1);
+  ra[4] = Raccel3(0);
+  ra[5] = Raccel3(1);
+  ra[6] = Raccel4(0);
+  ra[7] = Raccel4(1);
+  
+  // Compute mass matrix
+  this->getMass();
+  
+  // Want to add ( - fact * M R * accel ) to unbalance
+  // Take advantage of lumped mass matrix
+  for (i = 0; i < 8; i++)
+    Q(i) += -K(i,i)*ra[i];
+  
+  return 0;
 }
 
 const Vector&
@@ -648,7 +647,7 @@ FourNodeQuad::sendSelf(int commitTag, Channel &theChannel)
   
   res += theChannel.sendVector(dataTag, commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING FourNodeQuad::sendSelf() - %d failed to send Vector\n",this->getTag());
+    opserr << "WARNING FourNodeQuad::sendSelf() - " << this->getTag() << " failed to send Vector\n";
     return res;
   }	      
   
@@ -679,8 +678,7 @@ FourNodeQuad::sendSelf(int commitTag, Channel &theChannel)
 
   res += theChannel.sendID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING FourNodeQuad::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING FourNodeQuad::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
   }
 
@@ -688,7 +686,7 @@ FourNodeQuad::sendSelf(int commitTag, Channel &theChannel)
   for (i = 0; i < 4; i++) {
     res += theMaterial[i]->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING FourNodeQuad::sendSelf() - %d failed to send its Material\n",this->getTag());
+      opserr << "WARNING FourNodeQuad::sendSelf() - " << this->getTag() << " failed to send its Material\n";
       return res;
     }
   }
@@ -709,8 +707,8 @@ FourNodeQuad::recvSelf(int commitTag, Channel &theChannel,
   static Vector data(6);
   res += theChannel.recvVector(dataTag, commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING FourNodeQuad::recvSelf() - failed to receive Vector\n");
-	  return res;
+    opserr << "WARNING FourNodeQuad::recvSelf() - failed to receive Vector\n";
+    return res;
   }
   
   this->setTag((int)data(0));
@@ -724,7 +722,7 @@ FourNodeQuad::recvSelf(int commitTag, Channel &theChannel,
   // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING FourNodeQuad::recvSelf() - %d failed to receive ID\n", this->getTag());
+    opserr << "WARNING FourNodeQuad::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return res;
   }
 
@@ -738,8 +736,7 @@ FourNodeQuad::recvSelf(int commitTag, Channel &theChannel,
     // Allocate new materials
     theMaterial = new NDMaterial *[4];
     if (theMaterial == 0) {
-      g3ErrorHandler->warning("FourNodeQuad::recvSelf() - %s\n",
-			      "Could not allocate NDMaterial* array");
+      opserr << "FourNodeQuad::recvSelf() - Could not allocate NDMaterial* array\n";
       return -1;
     }
     for (int i = 0; i < 4; i++) {
@@ -748,16 +745,14 @@ FourNodeQuad::recvSelf(int commitTag, Channel &theChannel,
       // Allocate new material with the sent class tag
       theMaterial[i] = theBroker.getNewNDMaterial(matClassTag);
       if (theMaterial[i] == 0) {
-	g3ErrorHandler->warning("FourNodeQuad::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
+	opserr << "FourNodeQuad::recvSelf() - Broker could not create NDMaterial of class type " << matClassTag << endln;
 	return -1;
       }
       // Now receive materials into the newly allocated space
       theMaterial[i]->setDbTag(matDbTag);
       res += theMaterial[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+opserr << "NLBeamColumn3d::recvSelf() - material " << i << "failed to recv itself\n";
 	return res;
       }
     }
@@ -774,8 +769,8 @@ FourNodeQuad::recvSelf(int commitTag, Channel &theChannel,
 	delete theMaterial[i];
 	theMaterial[i] = theBroker.getNewNDMaterial(matClassTag);
 	if (theMaterial[i] == 0) {
-	  g3ErrorHandler->fatal("FourNodeQuad::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
+opserr << "NLBeamColumn3d::recvSelf() - material " << i << "failed to create\n";
+				
 	  return -1;
 	}
       }
@@ -783,8 +778,7 @@ FourNodeQuad::recvSelf(int commitTag, Channel &theChannel,
       theMaterial[i]->setDbTag(matDbTag);
       res += theMaterial[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("FourNodeQuad::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+opserr << "NLBeamColumn3d::recvSelf() - material " << i << "failed to recv itself\n";
 	return res;
       }
     }
@@ -794,16 +788,16 @@ FourNodeQuad::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void
-FourNodeQuad::Print(ostream &s, int flag)
+FourNodeQuad::Print(OPS_Stream &s, int flag)
 {
-	s << "\nFourNodeQuad, element id:  " << this->getTag() << endl;
+	s << "\nFourNodeQuad, element id:  " << this->getTag() << endln;
 	s << "\tConnected external nodes:  " << connectedExternalNodes;
-	s << "\tthickness:  " << thickness << endl;
-	s << "\tmass density:  " << rho << endl;
-	s << "\tsurface pressure:  " << pressure << endl;
-	s << "\tbody forces:  " << b[0] << " " << b[1] << endl;
+	s << "\tthickness:  " << thickness << endln;
+	s << "\tmass density:  " << rho << endln;
+	s << "\tsurface pressure:  " << pressure << endln;
+	s << "\tbody forces:  " << b[0] << " " << b[1] << endln;
 	theMaterial[0]->Print(s,flag);
-	s << "\tStress (xx yy xy)" << endl;
+	s << "\tStress (xx yy xy)" << endln;
 	for (int i = 0; i < 4; i++)
 		s << "\t\tGauss point " << i+1 << ": " << theMaterial[i]->getStress();
 }

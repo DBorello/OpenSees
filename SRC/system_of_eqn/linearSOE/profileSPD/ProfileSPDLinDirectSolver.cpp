@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-09-17 20:00:49 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:02:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectSolver.cpp,v $
                                                                         
                                                                         
@@ -63,8 +63,8 @@ ProfileSPDLinDirectSolver::setSize(void)
 {
 
     if (theSOE == 0) {
-	cerr << "ProfileSPDLinDirectSolver::setSize()";
-	cerr << " No system has been set\n";
+	opserr << "ProfileSPDLinDirectSolver::setSize()";
+	opserr << " No system has been set\n";
 	return -1;
     }
 
@@ -86,8 +86,8 @@ ProfileSPDLinDirectSolver::setSize(void)
     invD = new double[size]; 
 	
     if (RowTop == 0 || topRowPtr == 0 || invD == 0) {
-	cerr << "Warning :ProfileSPDLinDirectSolver::ProfileSPDLinDirectSolver :";
-	cerr << " ran out of memory for work areas \n";
+	opserr << "Warning :ProfileSPDLinDirectSolver::ProfileSPDLinDirectSolver :";
+	opserr << " ran out of memory for work areas \n";
 	return -1;
     }
 
@@ -117,8 +117,8 @@ ProfileSPDLinDirectSolver::solve(void)
 
     // check for quick returns
     if (theSOE == 0) {
-	cerr << "ProfileSPDLinDirectSolver::solve(void): ";
-	cerr << " - No ProfileSPDSOE has been assigned\n";
+	opserr << "ProfileSPDLinDirectSolver::solve(void): ";
+	opserr << " - No ProfileSPDSOE has been assigned\n";
 	return -1;
     }
     
@@ -137,16 +137,16 @@ ProfileSPDLinDirectSolver::solve(void)
       for (int iii=0; iii<theSize; iii++) {
       int rowiiitop = RowTop[iii];
       double *ajiptr = topRowPtr[iii];
-      cerr << "\n COLUMN " << iii << " TopRow " << rowiiitop << " -> ";
+      opserr << "\n COLUMN " << iii << " TopRow " << rowiiitop << " -> ";
       for (int jjj = rowiiitop; jjj <=iii; jjj++)
-      cerr << *ajiptr++ << " ";
+      opserr << *ajiptr++ << " ";
       }
-      cerr << endl;
+      opserr << endln;
 
       for (int iii=0; iii<theSOE->size; iii++) {
-      cerr << "COLUMN " << iii << " Biii -> " << X[iii] << endl;
+      opserr << "COLUMN " << iii << " Biii -> " << X[iii] << endln;
       }
-      cerr << endl;
+      opserr << endln;
       */
 
     
@@ -160,8 +160,8 @@ ProfileSPDLinDirectSolver::solve(void)
 
 	double a00 = theSOE->A[0];
 	if (a00 <= 0.0) {
-	  cerr << "ProfileSPDLinDirectSolver::solve() - ";
-	  cerr << " aii < 0 (i, aii): (0,0)\n"; 
+	  opserr << "ProfileSPDLinDirectSolver::solve() - ";
+	  opserr << " aii < 0 (i, aii): (0,0)\n"; 
 	  return(-2);
 	}    
 	
@@ -215,14 +215,14 @@ ProfileSPDLinDirectSolver::solve(void)
 	    
 	    // check that the diag > the tolerance specified
 	    if (aii == 0.0) {
-		cerr << "ProfileSPDLinDirectSolver::solve() - ";
-		cerr << " aii < 0 (i, aii): (" << i << ", " << aii << ")\n"; 
+		opserr << "ProfileSPDLinDirectSolver::solve() - ";
+		opserr << " aii < 0 (i, aii): (" << i << ", " << aii << ")\n"; 
 		return(-2);
 	    }
 	    if (fabs(aii) <= minDiagTol) {
-		cerr << "ProfileSPDLinDirectSolver::solve() - ";
-		cerr << " aii < minDiagTol (i, aii): (" << i;
-		cerr << ", " << aii << ")\n"; 
+		opserr << "ProfileSPDLinDirectSolver::solve() - ";
+		opserr << " aii < minDiagTol (i, aii): (" << i;
+		opserr << ", " << aii << ")\n"; 
 		return(-2);
 	    }		
 	    invD[i] = 1.0/aii; 
@@ -290,8 +290,8 @@ ProfileSPDLinDirectSolver::solve(void)
     }    
     
     /*
-    cerr << "BBBB " << theSOE->getB();
-    cerr << "XXXX " << theSOE->getX();
+    opserr << "BBBB " << theSOE->getB();
+    opserr << "XXXX " << theSOE->getX();
     */
     
     return 0;
@@ -312,8 +312,8 @@ int
 ProfileSPDLinDirectSolver::setProfileSOE(ProfileSPDLinSOE &theNewSOE)
 {
     if (theSOE != 0) {
-	cerr << "ProfileSPDLinDirectSolver::setProfileSOE() - ";
-	cerr << " has already been called \n";	
+	opserr << "ProfileSPDLinDirectSolver::setProfileSOE() - ";
+	opserr << " has already been called \n";	
 	return -1;
     }
     
@@ -328,15 +328,15 @@ ProfileSPDLinDirectSolver::factor(int n)
 
     // check for quick returns
     if (theSOE == 0) {
-	cerr << "ProfileSPDLinDirectSolver::factor: ";
-	cerr << " - No ProfileSPDSOE has been assigned\n";
+	opserr << "ProfileSPDLinDirectSolver::factor: ";
+	opserr << " - No ProfileSPDSOE has been assigned\n";
 	return -1;
     }
 
     int theSize = theSOE->size;    
     if (n > theSize) {
-	cerr << "ProfileSPDLinDirectSolver::factor: ";
-	cerr << " - n " << n << " greater than size of system" << theSize << endl;
+	opserr << "ProfileSPDLinDirectSolver::factor: ";
+	opserr << " - n " << n << " greater than size of system" << theSize << endln;
 	return -1;
     }
 
@@ -400,14 +400,14 @@ ProfileSPDLinDirectSolver::factor(int n)
 	    
 	    // check that the diag > the tolerance specified
 	    if (aii <= 0.0) {
-		cerr << "ProfileSPDLinDirectSolver::solve() - ";
-		cerr << " aii < 0 (i, aii): (" << i << ", " << aii << ")\n"; 
+		opserr << "ProfileSPDLinDirectSolver::solve() - ";
+		opserr << " aii < 0 (i, aii): (" << i << ", " << aii << ")\n"; 
 		return(-2);
 	    }
 	    if (aii <= minDiagTol) {
-		cerr << "ProfileSPDLinDirectSolver::solve() - ";
-		cerr << " aii < minDiagTol (i, aii): (" << i;
-		cerr << ", " << aii << ")\n"; 
+		opserr << "ProfileSPDLinDirectSolver::solve() - ";
+		opserr << " aii < minDiagTol (i, aii): (" << i;
+		opserr << ", " << aii << ")\n"; 
 		return(-2);
 	    }		
 	    invD[i] = 1.0/aii; 

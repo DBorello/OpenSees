@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-10-02 17:58:25 $
+// $Revision: 1.10 $
+// $Date: 2003-02-14 23:01:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -62,7 +62,7 @@ Matrix::Matrix()
     matrixWork = new double[sizeDoubleWork];
     intWork = new int[sizeIntWork];
     if (matrixWork == 0 || intWork == 0) {
-      cerr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
+      opserr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
       exit(-1);
     }
   }
@@ -78,20 +78,20 @@ Matrix::Matrix(int nRows,int nCols)
     matrixWork = new double[sizeDoubleWork];
     intWork = new int[sizeIntWork];
     if (matrixWork == 0 || intWork == 0) {
-      cerr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
+      opserr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
       exit(-1);
     }
   }
 
 #ifdef _G3DEBUG
     if (nRows < 0) {
-      cerr << "WARNING: Matrix::Matrix(int,int): tried to init matrix ";
-      cerr << "with num rows: " << nRows << " <0\n";
+      opserr << "WARNING: Matrix::Matrix(int,int): tried to init matrix ";
+      opserr << "with num rows: " << nRows << " <0\n";
       numRows = 0; numCols =0; dataSize =0; data = 0;
     }
     if (nCols < 0) {
-      cerr << "WARNING: Matrix::Matrix(int,int): tried to init matrix";
-      cerr << "with num cols: " << nCols << " <0\n";
+      opserr << "WARNING: Matrix::Matrix(int,int): tried to init matrix";
+      opserr << "with num cols: " << nCols << " <0\n";
       numRows = 0; numCols =0; dataSize =0; data = 0;
     }
 #endif
@@ -102,8 +102,8 @@ Matrix::Matrix(int nRows,int nCols)
       data = new double[dataSize];
       //data = (double *)malloc(dataSize*sizeof(double));
       if (data == 0) {
-	cerr << "WARNING:Matrix::Matrix(int,int): Ran out of memory on init ";
-	cerr << "of size " << dataSize << "\n";
+	opserr << "WARNING:Matrix::Matrix(int,int): Ran out of memory on init ";
+	opserr << "of size " << dataSize << endln;
 	numRows = 0; numCols =0; dataSize =0;
       } else {
 	// zero the data
@@ -122,20 +122,20 @@ Matrix::Matrix(double *theData, int row, int col)
     matrixWork = new double[sizeDoubleWork];
     intWork = new int[sizeIntWork];
     if (matrixWork == 0 || intWork == 0) {
-      cerr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
+      opserr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
       exit(-1);
     }
   }
 
 #ifdef _G3DEBUG
     if (row < 0) {
-      cerr << "WARNING: Matrix::Matrix(int,int): tried to init matrix with numRows: ";
-      cerr << row << " <0\n";
+      opserr << "WARNING: Matrix::Matrix(int,int): tried to init matrix with numRows: ";
+      opserr << row << " <0\n";
       numRows = 0; numCols =0; dataSize =0; data = 0;
     }
     if (col < 0) {
-      cerr << "WARNING: Matrix::Matrix(int,int): tried to init matrix with numCols: ";
-      cerr << col << " <0\n";
+      opserr << "WARNING: Matrix::Matrix(int,int): tried to init matrix with numCols: ";
+      opserr << col << " <0\n";
       numRows = 0; numCols =0; dataSize =0; data = 0;
     }    
 #endif
@@ -151,7 +151,7 @@ Matrix::Matrix(const Matrix &other)
     matrixWork = new double[sizeDoubleWork];
     intWork = new int[sizeIntWork];
     if (matrixWork == 0 || intWork == 0) {
-      cerr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
+      opserr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
       exit(-1);
     }
   }
@@ -164,8 +164,8 @@ Matrix::Matrix(const Matrix &other)
       data = new double[dataSize];
       // data = (double *)malloc(dataSize*sizeof(double));
       if (data == 0) {
-	cerr << "WARNING:Matrix::Matrix(Matrix &): ";
-	cerr << "Ran out of memory on init of size " << dataSize << "\n"; 
+	opserr << "WARNING:Matrix::Matrix(Matrix &): ";
+	opserr << "Ran out of memory on init of size " << dataSize << endln; 
 	numRows = 0; numCols =0; dataSize = 0;
       } else {
 	// copy the data
@@ -211,14 +211,14 @@ Matrix::setData(double *theData, int row, int col)
 
 #ifdef _G3DEBUG
   if (row < 0) {
-    cerr << "WARNING: Matrix::setSize(): tried to init matrix with numRows: ";
-    cerr << row << " <0\n";
+    opserr << "WARNING: Matrix::setSize(): tried to init matrix with numRows: ";
+    opserr << row << " <0\n";
     numRows = 0; numCols =0; dataSize =0; data = 0;
     return -1;
   }
   if (col < 0) {
-    cerr << "WARNING: Matrix::setSize(): tried to init matrix with numCols: ";
-    cerr << col << " <0\n";
+    opserr << "WARNING: Matrix::setSize(): tried to init matrix with numCols: ";
+    opserr << col << " <0\n";
     numRows = 0; numCols =0; dataSize =0; data = 0;
     return -1;
   }    
@@ -242,8 +242,7 @@ Matrix::resize(int rows, int cols) {
   int newSize = rows*cols;
 
   if (newSize <= 0) {
-    g3ErrorHandler->warning("Matrix::resize) - rows %d or cols %d specified <= 0\n",
-			    rows, cols); 
+    opserr << "Matrix::resize) - rows " << rows << " or cols " << cols << " specified <= 0\n";
     return -1;
   }
 
@@ -260,8 +259,7 @@ Matrix::resize(int rows, int cols) {
     data = new double[newSize];
     // data = (double *)malloc(dataSize*sizeof(double));
     if (data == 0) {
-      g3ErrorHandler->warning("Matrix::resize(%d %d) - out of memory\n",
-			      rows, cols); 
+      opserr << "Matrix::resize(" << rows << "," << cols << ") - out of memory\n";
       numRows = 0; numCols =0; dataSize = 0;
       return -2;
     }
@@ -299,8 +297,8 @@ Matrix::Assemble(const Matrix &V, const ID &rows, const ID &cols, double fact)
 	  (pos_Cols < numCols) && (i < V.numCols) && (j < V.numRows))
 	(*this)(pos_Rows,pos_Cols) += V(j,i)*fact;
       else {
-	cerr << "WARNING: Matrix::Assemble(const Matrix &V, const ID &l): ";
-	cerr << " - position (" << pos_Rows << "," << pos_Cols << ") outside bounds \n";
+	opserr << "WARNING: Matrix::Assemble(const Matrix &V, const ID &l): ";
+	opserr << " - position (" << pos_Rows << "," << pos_Cols << ") outside bounds \n";
 	res = -1;
       }
     }
@@ -312,16 +310,34 @@ Matrix::Assemble(const Matrix &V, const ID &rows, const ID &cols, double fact)
 #ifdef _WIN32
 extern "C" int _stdcall DGESV(int *N, int *NRHS, double *A, int *LDA, 
 			      int *iPiv, double *B, int *LDB, int *INFO);
-			     
+
+extern "C" int _stdcall DGETRF(int *M, int *N, double *A, int *LDA, 
+			      int *iPiv, int *INFO);
+
 extern "C" int _stdcall DGETRS(char *TRANS, unsigned int sizeT,
 			       int *N, int *NRHS, double *A, int *LDA, 
 			       int *iPiv, double *B, int *LDB, int *INFO);
+
+extern "C" int _stdcall DGETRI(int *N, double *A, int *LDA, 
+			      int *iPiv, double *Work, int *WORKL, int *INFO);
+
 #else
 extern "C" int dgesv_(int *N, int *NRHS, double *A, int *LDA, int *iPiv, 
 		      double *B, int *LDB, int *INFO);
 
 extern "C" int dgetrs_(char *TRANS, int *N, int *NRHS, double *A, int *LDA, 
 		       int *iPiv, double *B, int *LDB, int *INFO);		       
+
+extern "C" int dgetrf_(int *M, int *N, double *A, int *LDA, 
+		       int *iPiv, int *INFO);
+
+extern "C" int dgetri_(int *N, double *A, int *LDA, 
+		       int *iPiv, double *Work, int *WORKL, int *INFO);
+extern "C" int dgerfs_(char *TRANS, int *N, int *NRHS, double *A, int *LDA, 
+		       double *AF, int *LDAF, int *iPiv, double *B, int *LDB, 
+		       double *X, int *LDX, double *FERR, double *BERR, 
+		       double *WORK, int *IWORK, int *INFO);
+
 #endif
 
 int
@@ -332,9 +348,8 @@ Matrix::Solve(const Vector &b, Vector &x) const
 
 #ifdef _G3DEBUG    
     if (numRows != numCols) {
-      g3ErrorHandler->warning("Matrix::Solve(b,x) - %s [%d %d] is not square\n",
-			      "the matrix of dimensions",
-			      numRows, numCols);
+      opserr << "Matrix::Solve(b,x) - the matrix of dimensions " 
+	     << numRows << ", " << numCols << " is not square " << endln;
       return -1;
     }
 
@@ -361,7 +376,7 @@ Matrix::Solve(const Vector &b, Vector &x) const
       sizeDoubleWork = dataSize;
       
       if (matrixWork == 0) {
-	cerr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
+	opserr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
 	sizeDoubleWork = 0;      
 	return -3;
       }
@@ -377,12 +392,11 @@ Matrix::Solve(const Vector &b, Vector &x) const
       sizeIntWork = n;
       
       if (intWork == 0) {
-	cerr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
+	opserr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
 	sizeIntWork = 0;      
 	return -3;
       }
     }
-
 
     
     // copy the data
@@ -408,6 +422,7 @@ Matrix::Solve(const Vector &b, Vector &x) const
     dgesv_(&n,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);
 #endif
 
+    
 
     return 0;
 }
@@ -456,7 +471,7 @@ Matrix::Solve(const Matrix &b, Matrix &x) const
       sizeDoubleWork = dataSize;
       
       if (matrixWork == 0) {
-	cerr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
+	opserr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
 	sizeDoubleWork = 0;      
 	return -3;
       }
@@ -472,7 +487,7 @@ Matrix::Solve(const Matrix &b, Matrix &x) const
       sizeIntWork = n;
       
       if (intWork == 0) {
-	cerr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
+	opserr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
 	sizeIntWork = 0;      
 	return -3;
       }
@@ -499,6 +514,108 @@ Matrix::Solve(const Matrix &b, Matrix &x) const
     DGESV(&n,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);
 #else
     dgesv_(&n,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);
+
+    /*
+    // further correction if required
+    double Bptr[n*n];
+    for (int i=0; i<n*n; i++) Bptr[i] = b.data[i];
+    double *origData = data;
+    double Ferr[n];
+    double Berr[n];
+    double newWork[3*n];
+    int newIwork[n];
+    
+    dgerfs_("N",&n,&n,origData,&ldA,Aptr,&n,iPIV,Bptr,&ldB,Xptr,&ldB,
+	    Ferr, Berr, newWork, newIwork, &info);
+    */
+#endif
+
+    return info;
+}
+
+
+int
+Matrix::Invert(Matrix &theInverse) const
+{
+
+    int n = numRows;
+    int nrhs = theInverse.numCols;
+
+#ifdef _G3DEBUG    
+    if (numRows != numCols) {
+      g3ErrorHandler->warning("Matrix::Solve(B,X) - the matrix of dimensions [%d %d] is not square\n",
+			      numRows, numCols);
+      return -1;
+    }
+
+    if (n != theInverse.numRows) {
+      g3ErrorHandler->warning("Matrix::Solve(B,X) - #rows of X, %d, is not same as matrix %d\n",
+			      numRows, theInverse.numRows);
+      return -2;
+    }
+#endif
+
+    // check work area can hold all the data
+    if (dataSize > sizeDoubleWork) {
+
+      if (matrixWork != 0) {
+	delete [] matrixWork;
+      }
+      matrixWork = new double[dataSize];
+      sizeDoubleWork = dataSize;
+      
+      if (matrixWork == 0) {
+	opserr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
+	sizeDoubleWork = 0;      
+	return -3;
+      }
+    }
+
+    // check work area can hold all the data
+    if (n > sizeIntWork) {
+
+      if (intWork != 0) {
+	delete [] intWork;
+      }
+      intWork = new int[n];
+      sizeIntWork = n;
+      
+      if (intWork == 0) {
+	opserr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
+	sizeIntWork = 0;      
+	return -3;
+      }
+    }
+    
+    // copy the data
+    theInverse = *this;
+    
+    for (int i=0; i<dataSize; i++)
+      matrixWork[i] = data[i];
+
+    int ldA = n;
+    int ldB = n;
+    int info;
+    double *Wptr = matrixWork;
+    double *Aptr = theInverse.data;
+    int workSize = sizeDoubleWork;
+    
+    int *iPIV = intWork;
+    
+
+#ifdef _WIN32
+    DGETRF(&n,&n,Aptr,&ldA,iPIV,&info);
+    if (info != 0) 
+      return info;
+    
+    DGETRI(&n,Aptr,&ldA,iPIV,Wptr,&workSize,&info);
+#else
+    dgetrf_(&n,&n,Aptr,&ldA,iPIV,&info);
+    if (info != 0) 
+      return info;
+    
+    dgetri_(&n,Aptr,&ldA,iPIV,Wptr,&workSize,&info);
+    
 #endif
 
     return info;
@@ -835,93 +952,92 @@ Matrix::operator=(const Tensor &V)
 {
   int rank = V.rank();
   if (rank != 4) {
-      g3ErrorHandler->warning("Matrix::operator=() - tensor must be of rank 4\n");
+    opserr << "Matrix::operator=() - tensor must be of rank 4\n";
       return *this;
   }
   int dim = V.dim(1);
   if (dim != V.dim(2) != V.dim(3) != V.dim(4)) {
-      g3ErrorHandler->warning("Matrix::operator=() - tensor must have square dimensions\n");
+      opserr << "Matrix::operator=() - tensor must have square dimensions\n";
       return *this;
   }
 
   if (dim != 2 || dim != 3 || dim != 1) {
-      g3ErrorHandler->warning("Matrix::operator=() - tensor must be of dimension 2 or 3\n");
+      opserr << "Matrix::operator=() - tensor must be of dimension 2 or 3\n";
       return *this;
   }      
 
   if (dim == 1) {
-      if ((numCols != 1) || (numRows != 1)) {      
-	  g3ErrorHandler->warning("Matrix::operator=() - matrix must be %s\n",
-				  "1x1 for tensor of dimension 3\n");
-	  return *this;
-      }      	  
-      (*this)(0,0) = V.cval(1,1,1,1);
-      
+    if ((numCols != 1) || (numRows != 1)) {      
+      opserr << "Matrix::operator=() - matrix must be 1x1 for tensor of dimension 3\n";
+      return *this;
+    }      	  
+    (*this)(0,0) = V.cval(1,1,1,1);
+    
   } else if (dim == 2) {
-      if ((numCols != 3) || (numRows != 3)) {      
-	  g3ErrorHandler->warning("Matrix::operator=() - matrix must be %s\n",
-				  "1x1 for tensor of dimension 3\n");      
-	  return *this;
-      }
-      (*this)(0,0) = V.cval(1,1,1,1);
-      (*this)(0,1) = V.cval(1,1,2,2);
-      (*this)(0,2) = V.cval(1,1,1,2);      
-
-      (*this)(1,0) = V.cval(2,2,1,1);
-      (*this)(1,1) = V.cval(2,2,2,2);
-      (*this)(1,2) = V.cval(2,2,1,2);      
-
-      (*this)(2,0) = V.cval(1,2,1,1);
-      (*this)(2,1) = V.cval(1,2,2,2);
-      (*this)(2,2) = V.cval(1,2,1,2);            
-
+    if ((numCols != 3) || (numRows != 3)) {      
+      opserr << "Matrix::operator=() - matrix must be 1x1 for tensor of dimension 3\n";      
+      
+      return *this;
+    }
+    (*this)(0,0) = V.cval(1,1,1,1);
+    (*this)(0,1) = V.cval(1,1,2,2);
+    (*this)(0,2) = V.cval(1,1,1,2);      
+    
+    (*this)(1,0) = V.cval(2,2,1,1);
+    (*this)(1,1) = V.cval(2,2,2,2);
+    (*this)(1,2) = V.cval(2,2,1,2);      
+    
+    (*this)(2,0) = V.cval(1,2,1,1);
+    (*this)(2,1) = V.cval(1,2,2,2);
+    (*this)(2,2) = V.cval(1,2,1,2);            
+    
   } else {
-      if ((numCols != 6) || (numRows != 6)) {      
-	  g3ErrorHandler->warning("Matrix::operator=() - matrix must be %s\n",
-				  "1x1 for tensor of dimension 3\n");      
-	  return *this;
-      }      
-      (*this)(0,0) = V.cval(1,1,1,1);
-      (*this)(0,1) = V.cval(1,1,2,2);
-      (*this)(0,2) = V.cval(1,1,3,3);      
-      (*this)(0,3) = V.cval(1,1,1,2);
-      (*this)(0,4) = V.cval(1,1,1,3);
-      (*this)(0,5) = V.cval(1,1,2,3);      
-      
-      (*this)(1,0) = V.cval(2,2,1,1);
-      (*this)(1,1) = V.cval(2,2,2,2);
-      (*this)(1,2) = V.cval(2,2,3,3);      
-      (*this)(1,3) = V.cval(2,2,1,2);
-      (*this)(1,4) = V.cval(2,2,1,3);
-      (*this)(1,5) = V.cval(2,2,2,3);            
-      
-      (*this)(2,0) = V.cval(3,3,1,1);
-      (*this)(2,1) = V.cval(3,3,2,2);
-      (*this)(2,2) = V.cval(3,3,3,3);      
-      (*this)(2,3) = V.cval(3,3,1,2);
-      (*this)(2,4) = V.cval(3,3,1,3);
-      (*this)(2,5) = V.cval(3,3,2,3);                  
-      
-      (*this)(3,0) = V.cval(1,2,1,1);
-      (*this)(3,1) = V.cval(1,2,2,2);
-      (*this)(3,2) = V.cval(1,2,3,3);      
-      (*this)(3,3) = V.cval(1,2,1,2);
-      (*this)(3,4) = V.cval(1,2,1,3);
-      (*this)(3,5) = V.cval(1,2,2,3);                        
-      
-      (*this)(4,0) = V.cval(1,3,1,1);
-      (*this)(4,1) = V.cval(1,3,2,2);
-      (*this)(4,2) = V.cval(1,3,3,3);      
-      (*this)(4,3) = V.cval(1,3,1,2);
-      (*this)(4,4) = V.cval(1,3,1,3);
-      (*this)(4,5) = V.cval(1,3,2,3);                              
-      
-      (*this)(5,0) = V.cval(2,3,1,1);
-      (*this)(5,1) = V.cval(2,3,2,2);
-      (*this)(5,2) = V.cval(2,3,3,3);      
-      (*this)(5,3) = V.cval(2,3,1,2);
-      (*this)(5,4) = V.cval(2,3,1,3);
-      (*this)(5,5) = V.cval(2,3,2,3);                                    
+    if ((numCols != 6) || (numRows != 6)) {      
+      opserr << "Matrix::operator=() - matrix must be 1x1 for tensor of dimension 3\n";      
+	
+      return *this;
+    }      
+    (*this)(0,0) = V.cval(1,1,1,1);
+    (*this)(0,1) = V.cval(1,1,2,2);
+    (*this)(0,2) = V.cval(1,1,3,3);      
+    (*this)(0,3) = V.cval(1,1,1,2);
+    (*this)(0,4) = V.cval(1,1,1,3);
+    (*this)(0,5) = V.cval(1,1,2,3);      
+    
+    (*this)(1,0) = V.cval(2,2,1,1);
+    (*this)(1,1) = V.cval(2,2,2,2);
+    (*this)(1,2) = V.cval(2,2,3,3);      
+    (*this)(1,3) = V.cval(2,2,1,2);
+    (*this)(1,4) = V.cval(2,2,1,3);
+    (*this)(1,5) = V.cval(2,2,2,3);            
+    
+    (*this)(2,0) = V.cval(3,3,1,1);
+    (*this)(2,1) = V.cval(3,3,2,2);
+    (*this)(2,2) = V.cval(3,3,3,3);      
+    (*this)(2,3) = V.cval(3,3,1,2);
+    (*this)(2,4) = V.cval(3,3,1,3);
+    (*this)(2,5) = V.cval(3,3,2,3);                  
+    
+    (*this)(3,0) = V.cval(1,2,1,1);
+    (*this)(3,1) = V.cval(1,2,2,2);
+    (*this)(3,2) = V.cval(1,2,3,3);      
+    (*this)(3,3) = V.cval(1,2,1,2);
+    (*this)(3,4) = V.cval(1,2,1,3);
+    (*this)(3,5) = V.cval(1,2,2,3);                        
+    
+    (*this)(4,0) = V.cval(1,3,1,1);
+    (*this)(4,1) = V.cval(1,3,2,2);
+    (*this)(4,2) = V.cval(1,3,3,3);      
+    (*this)(4,3) = V.cval(1,3,1,2);
+    (*this)(4,4) = V.cval(1,3,1,3);
+    (*this)(4,5) = V.cval(1,3,2,3);                              
+    
+    (*this)(5,0) = V.cval(2,3,1,1);
+    (*this)(5,1) = V.cval(2,3,2,2);
+    (*this)(5,2) = V.cval(2,3,3,3);      
+    (*this)(5,3) = V.cval(2,3,1,2);
+    (*this)(5,4) = V.cval(2,3,1,3);
+    (*this)(5,5) = V.cval(2,3,2,3);                                    
   }
   return *this;
 }
@@ -998,8 +1114,8 @@ Matrix::operator/=(double fact)
       return *this;
     } else {
       // print out the warining message
-      cerr << "WARNING:Matrix::operator/= - 0 factor specified all values in Matrix set to ";
-      cerr << MATRIX_VERY_LARGE_VALUE << endl;
+      opserr << "WARNING:Matrix::operator/= - 0 factor specified all values in Matrix set to ";
+      opserr << MATRIX_VERY_LARGE_VALUE << endln;
 
       double *dataPtr = data;
       for (int i=0; i<dataSize; i++)
@@ -1044,7 +1160,7 @@ Matrix
 Matrix::operator/(double fact) const
 {
     if (fact == 0.0) {
-	cerr << "Matrix::operator/(const double &fact): ERROR divide-by-zero\n";
+	opserr << "Matrix::operator/(const double &fact): ERROR divide-by-zero\n";
 	exit(0);
     }
     Matrix result(*this);
@@ -1063,7 +1179,7 @@ Matrix::operator*(const Vector &V) const
     Vector result(numRows);
     
     if (V.Size() != numCols) {
-	cerr << "Matrix::operator*(Vector): incompatable sizes\n";
+	opserr << "Matrix::operator*(Vector): incompatable sizes\n";
 	return result;
     } 
     
@@ -1073,17 +1189,18 @@ Matrix::operator*(const Vector &V) const
 	result(j) += *dataPtr++ * V(i);
 
     /*
-    cerr << "HELLO: " << V;
+    opserr << "HELLO: " << V;
     for (int i=0; i<numRows; i++) {
 	double sum = 0.0;
 	for (int j=0; j<numCols; j++) {
 	    sum += (*this)(i,j) * V(j);
-	    if (i == 9) cerr << "sum: " << sum << " " << (*this)(i,j)*V(j) << " " << V(j) << endl;
+	    if (i == 9) opserr << "sum: " << sum << " " << (*this)(i,j)*V(j) << " " << V(j) << 
+;
 	}
 	result(i) += sum;
     }
-    cerr << *this;
-    cerr << "HELLO result: " << result;    
+    opserr << *this;
+    opserr << "HELLO result: " << result;    
     */
 
     return result;
@@ -1095,7 +1212,7 @@ Matrix::operator^(const Vector &V) const
     Vector result(numCols);
     
     if (V.Size() != numRows) {
-      cerr << "Matrix::operator*(Vector): incompatable sizes\n";
+      opserr << "Matrix::operator*(Vector): incompatable sizes\n";
       return result;
     } 
 
@@ -1136,7 +1253,7 @@ Matrix::operator*(const Matrix &M) const
     Matrix result(numRows,M.numCols);
     
     if (numCols != M.numRows || result.numRows != numRows) {
-	cerr << "Matrix::operator*(Matrix): incompatable sizes\n";
+	opserr << "Matrix::operator*(Matrix): incompatable sizes\n";
 	return result;
     } 
 
@@ -1177,7 +1294,7 @@ Matrix::operator^(const Matrix &M) const
   Matrix result(numCols,M.numCols);
   
   if (numRows != M.numRows || result.numRows != numCols) {
-    cerr << "Matrix::operator*(Matrix): incompatable sizes\n";
+    opserr << "Matrix::operator*(Matrix): incompatable sizes\n";
     return result;
   } 
 
@@ -1209,7 +1326,7 @@ Matrix::operator+=(const Matrix &M)
 {
 #ifdef _G3DEBUG
   if (numRows != M.numRows || numCols != M.numCols) {
-    g3ErrorHandler->warning("Matrix::operator+=(const Matrix &M) - matrices incompatable [%d %d] [%d %d]\n",
+    opserr << "Matrix::operator+=(const Matrix &M) - matrices incompatable [%d %d] [%d %d]\n",
 			    numRows, numCols, M.numRows, M.numCols);
     return *this;
   }
@@ -1228,8 +1345,9 @@ Matrix::operator-=(const Matrix &M)
 {
 #ifdef _G3DEBUG
   if (numRows != M.numRows || numCols != M.numCols) {
-    g3ErrorHandler->warning("Matrix::operator-=(const Matrix &M) - matrices incompatable [%d %d] [%d %d]\n",
-			    numRows, numCols, M.numRows, M.numCols);
+opserr << "Matrix::operator-=(const Matrix &M) - matrices incompatable [" << numRows << " " ;
+opserr << numCols << "]" << "[" << M.numRows << "]" << << M.numCols << "]\n";
+
     return *this;
   }
 #endif
@@ -1248,16 +1366,17 @@ Matrix::operator-=(const Matrix &M)
 //
 
 void 
-Matrix::Output(ostream &s) const
+Matrix::Output(OPS_Stream &s) const
 {
     for (int i=0; i<noRows(); i++) {
 	for (int j=0; j<noCols(); j++)
 	    s <<  (*this)(i,j) << " ";
-	s << "\n";
+	s << endln;
     }
 }
 
 
+/*****************
 void 
 Matrix::Input(istream &s)
 {
@@ -1265,28 +1384,28 @@ Matrix::Input(istream &s)
 	for (int j=0; j<noCols(); j++)
 	    s >> (*this)(i,j);
 }	
-
+*****************/
 
 //
 // friend stream functions for input and output
 //
 
-ostream &operator<<(ostream &s, const Matrix &V)
+OPS_Stream &operator<<(OPS_Stream &s, const Matrix &V)
 {
-    s << "\n";
+    s << endln;
     V.Output(s);
-    s << "\n";        
+    s << endln;        
     return s;
 }
 
 	
-	
+/****************	
 istream &operator>>(istream &s, Matrix &V)
 {
     V.Input(s);
     return s;
 }
-
+****************/
 
 
 
@@ -1319,8 +1438,8 @@ Matrix::Assemble(const Matrix &V, int init_row, int init_col, double fact)
   }  
   else 
   {
-     cerr << "WARNING: Matrix::Assemble(const Matrix &V, int init_row, int init_col, double fact): ";
-     cerr << "position outside bounds \n";
+     opserr << "WARNING: Matrix::Assemble(const Matrix &V, int init_row, int init_col, double fact): ";
+     opserr << "position outside bounds \n";
      res = -1;
   }
 
@@ -1357,8 +1476,8 @@ Matrix::AssembleTranspose(const Matrix &V, int init_row, int init_col, double fa
   }  
   else 
   {
-     cerr << "WARNING: Matrix::AssembleTranspose(const Matrix &V, int init_row, int init_col, double fact): ";
-     cerr << "position outside bounds \n";
+     opserr << "WARNING: Matrix::AssembleTranspose(const Matrix &V, int init_row, int init_col, double fact): ";
+     opserr << "position outside bounds \n";
      res = -1;
   }
 
@@ -1395,8 +1514,8 @@ Matrix::Extract(const Matrix &V, int init_row, int init_col, double fact)
   }  
   else 
   {
-     cerr << "WARNING: Matrix::Extract(const Matrix &V, int init_row, int init_col, double fact): ";
-     cerr << "position outside bounds \n";
+     opserr << "WARNING: Matrix::Extract(const Matrix &V, int init_row, int init_col, double fact): ";
+     opserr << "position outside bounds \n";
      res = -1;
   }
 

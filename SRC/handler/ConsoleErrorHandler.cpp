@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/ConsoleErrorHandler.cpp,v $
                                                                         
                                                                         
@@ -53,7 +53,7 @@ ConsoleErrorHandler::warning(const char *msg, ...)
 {
   va_list args;
   va_start(args, msg);
-  this->outputMessage(cerr, msg, args);
+  this->outputMessage(std::cerr, msg, args);
   va_end(args);
 }  
 
@@ -62,7 +62,7 @@ ConsoleErrorHandler::fatal(const char *msg, ...)
 {
   va_list args;
   va_start(args, msg);
-  this->outputMessage(cerr, msg, args);
+  this->outputMessage(std::cerr, msg, args);
   va_end(args);
   exit(-1);
 }

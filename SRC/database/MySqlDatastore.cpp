@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-08-01 21:00:17 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/MySqlDatastore.cpp,v $
 
 #include <MySqlDatastore.h>
@@ -46,8 +46,8 @@ MySqlDatastore::MySqlDatastore(const char *projectName,
   // connect to the server
   if (mysql_real_connect(&mysql, NULL, NULL, NULL, NULL, 0, "/var/lib/mysql/mysql.sock", 0) == NULL) {
 
-      cerr << "MySqlDatastore::MySqlDatastore() - could not connect to server\n";
-      cerr << mysql_error(&mysql) << endl;
+      opserr << "MySqlDatastore::MySqlDatastore() - could not connect to server\n";
+      opserr << mysql_error(&mysql) << endln;
       connection = false;
 
   } else {
@@ -59,8 +59,8 @@ MySqlDatastore::MySqlDatastore(const char *projectName,
       if (this->createOpenSeesDatabase(projectName) != 0) {
 	connection = false;
 	mysql_close(&mysql);
-	cerr << "MySqlDatastore::MySqlDatastore() - could not open the database\n";
-	cerr << mysql_error(&mysql) << endl;      
+	opserr << "MySqlDatastore::MySqlDatastore() - could not open the database\n";
+	opserr << mysql_error(&mysql) << endln;      
       }
     }
   }
@@ -90,7 +90,7 @@ MySqlDatastore::sendMsg(int dataTag, int commitTag,
 		       const Message &, 
 		       ChannelAddress *theAddress)
 {
-  cerr << "MySqlDatastore::sendMsg() - not yet implemented\n";
+  opserr << "MySqlDatastore::sendMsg() - not yet implemented\n";
   return -1;
 }		       
 
@@ -99,7 +99,7 @@ MySqlDatastore::recvMsg(int dataTag, int commitTag,
 		       Message &, 
 		       ChannelAddress *theAddress)
 {
-  cerr << "MySqlDatastore::recvMsg() - not yet implemented\n";
+  opserr << "MySqlDatastore::recvMsg() - not yet implemented\n";
   return -1;
 }		       
 
@@ -117,7 +117,7 @@ MySqlDatastore::sendMatrix(int dbTag, int commitTag,
   // check that the data will fit, MySQL has a limit on blob sizes
   int sizeData = theMatrix.dataSize * sizeof(double);
   if (sizeData > MAX_BLOB_SIZE) {
-      cerr << "MySqlDatastore::sendMatrix - vector too big to send to MySQL databse, enlarge BLOBS!";
+      opserr << "MySqlDatastore::sendMatrix - vector too big to send to MySQL databse, enlarge BLOBS!";
       return  -2;
   }
 
@@ -129,8 +129,8 @@ MySqlDatastore::sendMatrix(int dbTag, int commitTag,
     query = new char [sizeQuery];
 
     if (query == 0) {
-      cerr << "MySqlDatastore::sendMatrix - out of memory creating query of size";
-      cerr << sizeQuery << endl;
+      opserr << "MySqlDatastore::sendMatrix - out of memory creating query of size";
+      opserr << sizeQuery << endln;
       return -2;
     }
   }
@@ -163,8 +163,8 @@ MySqlDatastore::sendMatrix(int dbTag, int commitTag,
 
     // invoke the query on the database
     if (mysql_query(&mysql, query) != 0) {    
-      cerr << "MySqlDatastore::sendMatrix() - failed to send the Matrix to MySQL database";
-      cerr << endl << mysql_error(&mysql) << endl;          
+      opserr << "MySqlDatastore::sendMatrix() - failed to send the Matrix to MySQL database";
+      opserr << endln << mysql_error(&mysql) << endln;          
       return -3;      
     }
   }
@@ -189,8 +189,8 @@ MySqlDatastore::recvMatrix(int dbTag, int commitTag,
     sizeQuery = 2 * sizeData + 256; // 256 for the SLECECT data FROM ... blah blah
     query = new char [sizeQuery];
     if (query == 0) {
-      cerr << "MySqlDatastore::recvMatrix - out of memory creating query of size";
-      cerr << sizeQuery << endl;
+      opserr << "MySqlDatastore::recvMatrix - out of memory creating query of size";
+      opserr << sizeQuery << endln;
       return -2;
     }
   }
@@ -211,8 +211,8 @@ MySqlDatastore::recvMatrix(int dbTag, int commitTag,
 
   // execute the SELECT query
   if (mysql_query(&mysql, query) != 0) {
-    cerr << "MySqlDatastore::recvMatrix() - failed to receive vector from MySQL database";
-    cerr << endl << mysql_error(&mysql) << endl;          
+    opserr << "MySqlDatastore::recvMatrix() - failed to receive vector from MySQL database";
+    opserr << endln << mysql_error(&mysql) << endln;          
     return -3;
   } 
 
@@ -222,15 +222,15 @@ MySqlDatastore::recvMatrix(int dbTag, int commitTag,
   results = mysql_store_result(&mysql);
   if (results == NULL) {
     // no vector stored in db with these keys
-    cerr << "MySqlDatastore::recvMatrix - no data in database for Matrix with dbTag, cTag: ";
-    cerr << dbTag << ", " << commitTag << endl;
+    opserr << "MySqlDatastore::recvMatrix - no data in database for Matrix with dbTag, cTag: ";
+    opserr << dbTag << ", " << commitTag << endln;
     return -4;
   }
   row = mysql_fetch_row(results);
   if (row == NULL) {
     // no vector stored in db with these keys
-    cerr << "MySqlDatastore::recvMatrix - no data in database for Matrix with dbTag, cTag: ";
-    cerr << dbTag << ", " << commitTag << endl;
+    opserr << "MySqlDatastore::recvMatrix - no data in database for Matrix with dbTag, cTag: ";
+    opserr << dbTag << ", " << commitTag << endln;
     mysql_free_result(results);
     return -5;
   }
@@ -261,7 +261,7 @@ MySqlDatastore::sendVector(int dbTag, int commitTag,
   // check that the data will fit, MySQL has a limit on blob sizes
   int sizeData = theVector.sz * sizeof(double);
   if (sizeData > MAX_BLOB_SIZE) {
-      cerr << "MySqlDatastore::sendVector - vector too big to send to MySQL databse, enlarge BLOBS!";
+      opserr << "MySqlDatastore::sendVector - vector too big to send to MySQL databse, enlarge BLOBS!";
       return  -2;
   }
 
@@ -273,8 +273,8 @@ MySqlDatastore::sendVector(int dbTag, int commitTag,
     query = new char [sizeQuery];
 
     if (query == 0) {
-      cerr << "MySqlDatastore::sendVector - out of memory creating query of size";
-      cerr << sizeQuery << endl;
+      opserr << "MySqlDatastore::sendVector - out of memory creating query of size";
+      opserr << sizeQuery << endln;
       return -2;
     }
   }
@@ -307,8 +307,8 @@ MySqlDatastore::sendVector(int dbTag, int commitTag,
 
     // invoke the query on the database
     if (mysql_query(&mysql, query) != 0) {    
-      cerr << "MySqlDatastore::sendVector() - failed to send the Vector to MySQL database";
-      cerr << endl << mysql_error(&mysql) << endl;          
+      opserr << "MySqlDatastore::sendVector() - failed to send the Vector to MySQL database";
+      opserr << endln << mysql_error(&mysql) << endln;          
       return -3;      
     }
   }
@@ -333,8 +333,8 @@ MySqlDatastore::recvVector(int dbTag, int commitTag,
     sizeQuery = 2 * sizeData + 256; // 256 for the SLECECT data FROM ... blah blah
     query = new char [sizeQuery];
     if (query == 0) {
-      cerr << "MySqlDatastore::recvVector - out of memory creating query of size";
-      cerr << sizeQuery << endl;
+      opserr << "MySqlDatastore::recvVector - out of memory creating query of size";
+      opserr << sizeQuery << endln;
       return -2;
     }
   }
@@ -355,8 +355,8 @@ MySqlDatastore::recvVector(int dbTag, int commitTag,
 
   // execute the SELECT query
   if (mysql_query(&mysql, query) != 0) {
-    cerr << "MySqlDatastore::recvVector() - failed to receive vector from MySQL database";
-    cerr << endl << mysql_error(&mysql) << endl;          
+    opserr << "MySqlDatastore::recvVector() - failed to receive vector from MySQL database";
+    opserr << endln << mysql_error(&mysql) << endln;          
     return -3;
   } 
 
@@ -366,15 +366,15 @@ MySqlDatastore::recvVector(int dbTag, int commitTag,
   results = mysql_store_result(&mysql);
   if (results == NULL) {
     // no vector stored in db with these keys
-    cerr << "MySqlDatastore::recvVector - no data in database for Vector with dbTag, cTag: ";
-    cerr << dbTag << ", " << commitTag << endl;
+    opserr << "MySqlDatastore::recvVector - no data in database for Vector with dbTag, cTag: ";
+    opserr << dbTag << ", " << commitTag << endln;
     return -4;
   }
   row = mysql_fetch_row(results);
   if (row == NULL) {
     // no vector stored in db with these keys
-    cerr << "MySqlDatastore::recvVector - no data in database for Vector with dbTag, cTag: ";
-    cerr << dbTag << ", " << commitTag << endl;
+    opserr << "MySqlDatastore::recvVector - no data in database for Vector with dbTag, cTag: ";
+    opserr << dbTag << ", " << commitTag << endln;
     mysql_free_result(results);
     return -5;
   }
@@ -404,7 +404,7 @@ MySqlDatastore::sendID(int dbTag, int commitTag,
   // check that the data will fit, MySQL has a limit on blob sizes
   int sizeData = theID.sz * sizeof(int);
   if (sizeData > MAX_BLOB_SIZE) {
-      cerr << "MySqlDatastore::sendID - vector too big to send to MySQL databse, enlarge BLOBS!";
+      opserr << "MySqlDatastore::sendID - vector too big to send to MySQL databse, enlarge BLOBS!";
       return  -2;
   }
 
@@ -416,8 +416,8 @@ MySqlDatastore::sendID(int dbTag, int commitTag,
     query = new char [sizeQuery];
 
     if (query == 0) {
-      cerr << "MySqlDatastore::sendID - out of memory creating query of size";
-      cerr << sizeQuery << endl;
+      opserr << "MySqlDatastore::sendID - out of memory creating query of size";
+      opserr << sizeQuery << endln;
       return -2;
     }
   }
@@ -450,8 +450,8 @@ MySqlDatastore::sendID(int dbTag, int commitTag,
 
     // invoke the query on the database
     if (mysql_query(&mysql, query) != 0) {    
-      cerr << "MySqlDatastore::sendID() - failed to send the ID to MySQL database";
-      cerr << endl << mysql_error(&mysql) << endl;          
+      opserr << "MySqlDatastore::sendID() - failed to send the ID to MySQL database";
+      opserr << endln << mysql_error(&mysql) << endln;          
       return -3;      
     }
   }
@@ -476,8 +476,8 @@ MySqlDatastore::recvID(int dbTag, int commitTag,
     sizeQuery = 2 * sizeData + 256; // 256 for the SLECECT data FROM ... blah blah
     query = new char [sizeQuery];
     if (query == 0) {
-      cerr << "MySqlDatastore::recvID - out of memory creating query of size";
-      cerr << sizeQuery << endl;
+      opserr << "MySqlDatastore::recvID - out of memory creating query of size";
+      opserr << sizeQuery << endln;
       return -2;
     }
   }
@@ -498,8 +498,8 @@ MySqlDatastore::recvID(int dbTag, int commitTag,
 
   // execute the SELECT query
   if (mysql_query(&mysql, query) != 0) {
-    cerr << "MySqlDatastore::recvID() - failed to receive vector from MySQL database";
-    cerr << endl << mysql_error(&mysql) << endl;          
+    opserr << "MySqlDatastore::recvID() - failed to receive vector from MySQL database";
+    opserr << endln << mysql_error(&mysql) << endln;          
     return -3;
   } 
 
@@ -509,15 +509,15 @@ MySqlDatastore::recvID(int dbTag, int commitTag,
   results = mysql_store_result(&mysql);
   if (results == NULL) {
     // no vector stored in db with these keys
-    cerr << "MySqlDatastore::recvID - no data in database for ID with dbTag, cTag: ";
-    cerr << dbTag << ", " << commitTag << endl;
+    opserr << "MySqlDatastore::recvID - no data in database for ID with dbTag, cTag: ";
+    opserr << dbTag << ", " << commitTag << endln;
     return -4;
   }
   row = mysql_fetch_row(results);
   if (row == NULL) {
     // no vector stored in db with these keys
-    cerr << "MySqlDatastore::recvID - no data in database for ID with dbTag, cTag: ";
-    cerr << dbTag << ", " << commitTag << endl;
+    opserr << "MySqlDatastore::recvID - no data in database for ID with dbTag, cTag: ";
+    opserr << dbTag << ", " << commitTag << endln;
     mysql_free_result(results);
     return -5;
   }
@@ -577,9 +577,9 @@ MySqlDatastore::createTable(const char *tableName, int numColumns, char *columns
   // execute the query
   if (mysql_query(&mysql, query) != 0) {
     if (mysql_errno(&mysql) != ER_TABLE_EXISTS_ERROR) {
-      cerr << "MySqlDatastore::createTable() - failed to create the table in the database";
-      cerr << endl << mysql_error(&mysql) << endl;          
-      cerr << "SQL query: " << query << endl;          
+      opserr << "MySqlDatastore::createTable() - failed to create the table in the database";
+      opserr << endln << mysql_error(&mysql) << endln;          
+      opserr << "SQL query: " << query << endln;          
       return -3;
     }
   } 
@@ -602,8 +602,8 @@ MySqlDatastore::insertData(const char *tableName, char *columns[], int commitTag
     sizeQuery = sizeData; // 256 for the SLECECT data FROM ... blah blah
     query = new char [sizeQuery];
     if (query == 0) {
-      cerr << "MySqlDatastore::getData - out of memory creating query of size";
-      cerr << sizeQuery << endl;
+      opserr << "MySqlDatastore::getData - out of memory creating query of size";
+      opserr << sizeQuery << endln;
       return -2;
     }
   }
@@ -617,9 +617,9 @@ MySqlDatastore::insertData(const char *tableName, char *columns[], int commitTag
 
   // execute the query
   if (mysql_query(&mysql, query) != 0) {
-    cerr << "MySqlDatastore::insertData() - failed to insert the data";
-    cerr << endl << mysql_error(&mysql) << endl;          
-    cerr << "SQL query: " << query << endl;          
+    opserr << "MySqlDatastore::insertData() - failed to insert the data";
+    opserr << endln << mysql_error(&mysql) << endln;          
+    opserr << "SQL query: " << query << endln;          
     return -3;
   } 
 
@@ -641,8 +641,8 @@ MySqlDatastore::getData(const char *tableName, char *columns[], int commitTag, V
     sizeQuery = sizeData; // 256 for the SLECECT data FROM ... blah blah
     query = new char [sizeQuery];
     if (query == 0) {
-      cerr << "MySqlDatastore::getData - out of memory creating query of size";
-      cerr << sizeQuery << endl;
+      opserr << "MySqlDatastore::getData - out of memory creating query of size";
+      opserr << sizeQuery << endln;
       return -2;
     }
   }
@@ -662,8 +662,8 @@ MySqlDatastore::getData(const char *tableName, char *columns[], int commitTag, V
 
   // execute the SELECT query
   if (mysql_query(&mysql, query) != 0) {
-    cerr << "MySqlDatastore::getData() - failed to receive vector from MySQL database";
-    cerr << endl << mysql_error(&mysql) << endl;          
+    opserr << "MySqlDatastore::getData() - failed to receive vector from MySQL database";
+    opserr << endln << mysql_error(&mysql) << endln;          
     return -3;
   } 
 
@@ -673,15 +673,15 @@ MySqlDatastore::getData(const char *tableName, char *columns[], int commitTag, V
   results = mysql_store_result(&mysql);
   if (results == NULL) {
     // no vector stored in db with these keys
-    cerr << "MySqlDatastore::getData - no data in database for Vector with dbTag, cTag: ";
-    cerr << dbTag << ", " << commitTag << endl;
+    opserr << "MySqlDatastore::getData - no data in database for Vector with dbTag, cTag: ";
+    opserr << dbTag << ", " << commitTag << endln;
     return -4;
   }
   row = mysql_fetch_row(results);
   if (row == NULL) {
     // no vector stored in db with these keys
-    cerr << "MySqlDatastore::getData - no data in database for Vector with dbTag, cTag: ";
-    cerr << dbTag << ", " << commitTag << endl;
+    opserr << "MySqlDatastore::getData - no data in database for Vector with dbTag, cTag: ";
+    opserr << dbTag << ", " << commitTag << endln;
     mysql_free_result(results);
     return -5;
   }
@@ -725,13 +725,13 @@ MySqlDatastore::createOpenSeesDatabase(const char *projectName)
   // create the database
   sprintf(query, "CREATE DATABASE %s", projectName);
   if (this->execute(query) != 0) {
-    cerr << "MySqlDatastore::createOpenSeesDatabase() - could not create the database\n";
+    opserr << "MySqlDatastore::createOpenSeesDatabase() - could not create the database\n";
     return -1;
   }
 
   // link to the database, 
   if (mysql_select_db(&mysql, projectName) != 0) {
-    cerr << "MySqlDatastore::createOpenSeesDatabase() - could not set the database\n";
+    opserr << "MySqlDatastore::createOpenSeesDatabase() - could not set the database\n";
     return -2;
   }
 
@@ -740,7 +740,7 @@ MySqlDatastore::createOpenSeesDatabase(const char *projectName)
                                           data MEDIUMBLOB, PRIMARY KEY (dbTag, commitTag, size) )");
 
   if (this->execute(query) != 0) {
-    cerr << "MySqlDatastore::createOpenSeesDatabase() - could not create the Messagess table\n";
+    opserr << "MySqlDatastore::createOpenSeesDatabase() - could not create the Messagess table\n";
     return -3;
   }
 
@@ -748,7 +748,7 @@ MySqlDatastore::createOpenSeesDatabase(const char *projectName)
                                          data MEDIUMBLOB, PRIMARY KEY (dbTag, commitTag, size) )");
 
   if (this->execute(query) != 0) {
-    cerr << "MySqlDatastore::createOpenSeesDatabase() - could not create the Matricess table\n";
+    opserr << "MySqlDatastore::createOpenSeesDatabase() - could not create the Matricess table\n";
     return -3;
   }
 
@@ -756,7 +756,7 @@ MySqlDatastore::createOpenSeesDatabase(const char *projectName)
                                          data MEDIUMBLOB, PRIMARY KEY (dbTag, commitTag, size) )");
 
   if (this->execute(query) != 0) {
-    cerr << "MySqlDatastore::createOpenSeesDatabase() - could not create the Vectors table\n";
+    opserr << "MySqlDatastore::createOpenSeesDatabase() - could not create the Vectors table\n";
     return -3;
   }
 
@@ -764,7 +764,7 @@ MySqlDatastore::createOpenSeesDatabase(const char *projectName)
                                      data MEDIUMBLOB, PRIMARY KEY (dbTag, commitTag, size) )");
 
   if (this->execute(query) != 0) {
-    cerr << "MySqlDatastore::createOpenSeesDatabase() - could not create the ID's table\n";
+    opserr << "MySqlDatastore::createOpenSeesDatabase() - could not create the ID's table\n";
     return -3;
   }
 
@@ -778,8 +778,8 @@ MySqlDatastore::execute(const char *query)
 {
 
   if (mysql_query(&mysql, query) != 0) {
-    cerr << "MySqlDatastore::execute() - could not execute command: " << query;
-    cerr << endl << mysql_error(&mysql) << endl;          
+    opserr << "MySqlDatastore::execute() - could not execute command: " << query;
+    opserr << endln << mysql_error(&mysql) << endln;          
     return -1;
   } else 
     return 0;

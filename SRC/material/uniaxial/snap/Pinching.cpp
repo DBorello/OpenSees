@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-07-12 19:51:40 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Pinching.cpp,v $
 //
 //
@@ -50,7 +50,7 @@ Pinching::Pinching(int tag, Vector inputParam )
   :UniaxialMaterial(tag,MAT_TAG_Pinching)
 {
   if( (inputParam.Size()) < 19) 
-    cerr << "Error: Pinching(): inputParam, size <19\n" << "\a";
+    opserr << "Error: Pinching(): inputParam, size <19\n" << "\a";
   
 	/*
  	Input parameters
@@ -93,37 +93,37 @@ Pinching::Pinching(int tag, Vector inputParam )
   // Error check
   if ( ecaps < 0.0 || ecapk < 0.0 || ecapa < 0.0 || ecapd < 0.0)
     {
-      cerr << "Error: Pinching::Pinching  : All gamma values must be >= 0\n" << "\a";
+      opserr << "Error: Pinching::Pinching  : All gamma values must be >= 0\n" << "\a";
     }		
   
   if ( cs < 0.0 || ck < 0.0 || ca < 0.0 || cd < 0.0 )
     {
-      cerr << "Error: Pinching::Pinching  : All 'c' values must be >= 0\n" << "\a";
+      opserr << "Error: Pinching::Pinching  : All 'c' values must be >= 0\n" << "\a";
     }
   
   if ( capSlope > 0.0 )
     {
-      cerr << "Error: Pinching::Pinching  : CapSlope must be < 0\n" << "\a";
+      opserr << "Error: Pinching::Pinching  : CapSlope must be < 0\n" << "\a";
     }		
   
   if ( Resfac <  0.0  || Resfac > 1.0)
     {
-      cerr << "Error: Pinching::Pinching  : Residual must be > 0 and <= 1\n" << "\a";
+      opserr << "Error: Pinching::Pinching  : Residual must be > 0 and <= 1\n" << "\a";
     }		
   
   if ( a_pinch < 0.0 || a_pinch > 1.0)
     {
-      cerr << "Error: Pinching::Pinching  : kappad (dev. point)must be > 0 and <= 1\n" << "\a";
+      opserr << "Error: Pinching::Pinching  : kappad (dev. point)must be > 0 and <= 1\n" << "\a";
     }
   
   if ( alpha > 0.8 || alpha < -0.8 )
     {
-      cerr << "Error: Pinching::Pinching  : alpha must be < 0.8 and > -0.8\n" << "\a";	
+      opserr << "Error: Pinching::Pinching  : alpha must be < 0.8 and > -0.8\n" << "\a";	
     }
   
   if ( alpha == capSlope )
     {
-      cerr << "Error: Pinching::Pinching  : Error: alfa Hard. can not be equal to alfaCap\n" << "\a";	
+      opserr << "Error: Pinching::Pinching  : Error: alfa Hard. can not be equal to alfaCap\n" << "\a";	
     }
   
   
@@ -216,15 +216,15 @@ int Pinching::revertToStart()
 }
 
 
-void Pinching::Print(ostream &s, int flag)
+void Pinching::Print(OPS_Stream &s, int flag)
 {
   if ( DEBG ==1 ) fprintf( OutputFile , "Print\n" );	// debugging
-  s << "BondSlipMaterial Tag: " << this->getTag() << endl;
-  s << "D : " << hstv[15] << endl;
-  s << "EK: " << hstv[0]  << endl;
-  s << "F : " << hstv[14] << endl;
+  s << "BondSlipMaterial Tag: " << this->getTag() << endln;
+  s << "D : " << hstv[15] << endln;
+  s << "EK: " << hstv[0]  << endln;
+  s << "F : " << hstv[14] << endln;
   s << "Input Parameters:\n";
-  s << endl;
+  s << endln;
 }
 
 
@@ -636,7 +636,7 @@ int Pinching::setTrialStrain( double d, double strainRate)
 	  ( Enrgtot >= Enrgta && Enrgta != 0.0)||
 	  ( Enrgtot >= Enrgtd && Enrgtd != 0.0))  
 	{
-	  cerr << "Error: Pinching::setTrialStrain  : Total Energy greater than capacity" << "\a";
+	  opserr << "Error: Pinching::setTrialStrain  : Total Energy greater than capacity" << "\a";
 	  flgstop = 1;
 	}
       
@@ -648,7 +648,7 @@ int Pinching::setTrialStrain( double d, double strainRate)
       
       if( betas >= 1.0 || betak >= 1.0 || betaa >= 1.0 )   
 	{
-	  cerr << "Error: Pinching::setTrialStrain  : Beta greater than one" << "\a";
+	  opserr << "Error: Pinching::setTrialStrain  : Beta greater than one" << "\a";
 	  flgstop=1;
 	}
       

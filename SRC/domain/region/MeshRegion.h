@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-16 21:12:07 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/region/MeshRegion.h,v $
                                                                         
                                                                         
@@ -67,7 +67,7 @@ class MeshRegion : public DomainComponent
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
-    virtual void Print(ostream &s, int flag =0);       
+    virtual void Print(OPS_Stream &s, int flag =0);       
 
   protected:
     

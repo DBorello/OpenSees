@@ -36,7 +36,6 @@
 #include "EPState.h"
 #include "YS.h"
 
-
 class TriFCYieldSurface : public YieldSurface
 {
   // Private vars to define the TriFCYieldSurface Yield Surface
@@ -52,7 +51,7 @@ class TriFCYieldSurface : public YieldSurface
 
      
 
-    ~TriFCYieldSurface  ( );     // Destructor
+    virtual ~TriFCYieldSurface  ( );     // Destructor
 
     double f(const EPState *EPS) const;
     tensor dFods(const EPState *EPS) const;
@@ -72,13 +71,13 @@ class TriFCYieldSurface : public YieldSurface
     double getel() const;
     double get_c() const;
 
-    void print() { cout << *this; }; 
+    void print() {opserr << *this; }; 
   
     //================================================================================
     // Overloaded Insertion Operator
     // prints an XX YieldSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const TriFCYieldSurface & YS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const TriFCYieldSurface & YS);
 
 };
 

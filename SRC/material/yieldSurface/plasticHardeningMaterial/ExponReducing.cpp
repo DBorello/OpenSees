@@ -21,7 +21,7 @@ ExponReducing::ExponReducing(int tag, double kp0, double alfa, double min_fact)
 :PlasticHardeningMaterial(tag,MAT_TAG_EXPON),
   Kp0(kp0), alpha(alfa), resFactor(min_fact)
 {
-//	cout << "ResFact = " <<  res_fact << endl; cin.get();
+//	cout << "ResFact = " <<  res_fact << endln; cin.get();
 }
 
 
@@ -48,23 +48,22 @@ double ExponReducing::getTrialPlasticStiffness()
 	if(K < (Kp0*resFactor))
 		K = Kp0*resFactor;
 
-//	cout << "K = " << K << ", sFactor = " << sFactor << endl;
+//	cout << "K = " << K << ", sFactor = " << sFactor << endln;
 	
 	if(K <0.0)
 	{
-		cerr << "Ri = " << val_trial << ", Factor = " << K/Kp0 << ", res_fact = " << resFactor << endl;
-		cin.get();
+		opserr << "Ri = " << val_trial << ", Factor = " << K/Kp0 << ", res_fact = " << resFactor << endln;
 	}
 	
 	return K;
 }
 
 
-void ExponReducing::Print(ostream &s, int flag)
+void ExponReducing::Print(OPS_Stream &s, int flag)
 {
-	s << "MultiLinear, Tag = " << getTag() << endl;
-	s << "Kp0 = " << Kp0 << endl;
-	s << "Alpha = " <<  alpha << endl;
+	s << "MultiLinear, Tag = " << getTag() << endln;
+	s << "Kp0 = " << Kp0 << endln;
+	s << "Alpha = " <<  alpha << endln;
 }
 
 PlasticHardeningMaterial *ExponReducing::getCopy(void)

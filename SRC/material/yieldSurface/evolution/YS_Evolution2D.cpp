@@ -178,7 +178,7 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
     // check 1: for cross-over -> same as: |F_sur + df| > |F_sur| && Kp < 0
 	// sign change
 
-	//cout << "f_sur = " << f_sur(0) << ", f new = " << fx_new << endl;
+	//cout << "f_sur = " << f_sur(0) << ", f new = " << fx_new << endln;
 	bool ys_harden = true;
 	toOriginalCoord(fx_new, fy_new);
 	if(ys->getDrift(fx_new, fy_new) < 0)
@@ -190,11 +190,11 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 	  // need to fix this
  		dfx_iso = 0.0;
  		dfx_kin = 0.0;
-	    cerr << "Condition happened..\n";
-	    cerr << *ys;	    
+	    opserr << "Condition happened..\n";
+	    opserr << *ys;	    
 		freezeEvolution = true;
 	    
-	    //cerr << "F_Surface(0) = " << f_sur(0) << ", F_New = " << fx_new << endl;
+	    //opserr << "F_Surface(0) = " << f_sur(0) << ", F_New = " << fx_new << endln;
 	    //cin.get();
 
 		// if(!deformable) //nothing to do
@@ -231,7 +231,7 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 		toOriginalCoord(fx_new, fy_new);
 		if(ys->getDrift(fx_new, fy_new) > 0)
 		{
-			cerr << "oops: YS_Evolution2D::evolveSurface() - softens->hardens\n";
+			opserr << "oops: YS_Evolution2D::evolveSurface() - softens->hardens\n";
 			ys_harden = true;
 		}
 	}
@@ -260,13 +260,13 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 	
 	if(evolDebug)
 	{
-		cout << "F_Surface Vector: " << f_sur;
-		cout << "Fx_new = " << fx_new << ", Fy_new = " << fy_new << endl;
-		cout << "Gradient: " << gl;
-	    cout << "KpxIso = " << getIsoPlasticStiffness(0) << ", KpyIso = " <<  getIsoPlasticStiffness(1) << endl;
-	    cout << "F_surf(1) = " << f_sur(1) << ", dfy_iso = " << dfy_iso << endl;
-	    cout << "x_grow = " <<  x_grow << ", y_grow = " <<  y_grow << endl;
-	    cout << "---------------------------------------------------------" << endl;
+		opserr << "F_Surface Vector: " << f_sur;
+		opserr << "Fx_new = " << fx_new << ", Fy_new = " << fy_new << endln;
+		opserr << "Gradient: " << gl;
+	    opserr << "KpxIso = " << getIsoPlasticStiffness(0) << ", KpyIso = " <<  getIsoPlasticStiffness(1) << endln;
+	    opserr << "F_surf(1) = " << f_sur(1) << ", dfy_iso = " << dfy_iso << endln;
+	    opserr << "x_grow = " <<  x_grow << ", y_grow = " <<  y_grow << endln;
+	    opserr << "---------------------------------------------------------" << endln;
      }
 
 	Vector mgnf(2);
@@ -315,7 +315,7 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 	double fx_aim = f_sur(0) + dfx_kin;
 	double fy_aim = f_sur(1) + dfy_kin;
 
-    //cout << "YS_Evolution2D - F_Surface = " << F_Surface;
+    //opserr << "YS_Evolution2D - F_Surface = " << F_Surface;
 
 	toOriginalCoord(fx_aim, fy_aim);
 	Vector f_aim(2);

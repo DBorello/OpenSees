@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:57 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.h,v $
 
 
@@ -62,7 +62,7 @@ public:
 				double parameter3,
 				double parameter4);
 	virtual ~RandomVariable();
-	virtual void Print(ostream &s, int flag =0) =0;
+	virtual void Print(OPS_Stream &s, int flag =0) =0;
 	virtual double getPDFvalue(double rvValue) =0;
 	virtual double getCDFvalue(double rvValue) =0;
 	virtual double getInverseCDFvalue(double rvValue) =0;    

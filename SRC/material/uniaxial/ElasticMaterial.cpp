@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-11 02:13:20 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticMaterial.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,8 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <Information.h>
+
+#include <OPS_Globals.h>
 
 ElasticMaterial::ElasticMaterial(int tag, double e, double et)
 :UniaxialMaterial(tag,MAT_TAG_ElasticMaterial),
@@ -130,7 +132,7 @@ ElasticMaterial::sendSelf(int cTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "ElasticMaterial::sendSelf() - failed to send data\n";
+    opserr << "ElasticMaterial::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -144,7 +146,7 @@ ElasticMaterial::recvSelf(int cTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
-      cerr << "ElasticMaterial::recvSelf() - failed to receive data\n";
+      opserr << "ElasticMaterial::recvSelf() - failed to receive data\n";
       E = 0; 
       this->setTag(0);      
   }
@@ -158,10 +160,10 @@ ElasticMaterial::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-ElasticMaterial::Print(ostream &s, int flag)
+ElasticMaterial::Print(OPS_Stream &s, int flag)
 {
-    s << "Elastic tag: " << this->getTag() << endl;
-    s << "  E: " << E << " eta: " << eta << endl;
+    s << "Elastic tag: " << this->getTag() << endln;
+    s << "  E: " << E << " eta: " << eta << endln;
 }
 
 int

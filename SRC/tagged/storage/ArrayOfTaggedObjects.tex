@@ -36,7 +36,7 @@ location given by the tags.\\
 \indent {\em TaggedObjectIter \&getComponents(void);}\\
 \indent {\em TaggedObjectStorage *getEmptyCopy(void);}\\
 \indent {\em void clearAll(void);}\\
-\indent {\em void Print(ostream \&s, int flag);}\\
+\indent {\em void Print(OPS_Stream \&s, int flag);}\\
 
 \noindent {\bf Constructor} \\
 \indent {\em ArrayOfTaggedObjects(int sizeInitialArray);} \\
@@ -147,7 +147,7 @@ destructor on any object pointed to by a cell and then setting this
 cell to $0$. Resets the internal member data to indicate that zero
 components have been added to the container.\\
 
-\indent {\em void Print(ostream \&s, int flag =0);}\\
+\indent {\em void Print(OPS_Stream \&s, int flag =0);}\\
 Invokes {\em Print(s,flag)} on all objects which have been added to
 the container. 
 

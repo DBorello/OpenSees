@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/RigidRod.cpp,v $
                                                                         
                                                                         
@@ -30,7 +30,7 @@
 //
 // Purpose: This file contains the class implementation for RigidRod.
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <Domain.h>
 #include <Node.h>
 #include <MP_Constraint.h>
@@ -45,14 +45,12 @@ RigidRod::RigidRod(Domain &theDomain, int nR, int nC, int startMPtag) {
     // get a pointer to the retained node and constrained nodes - ensure these exist
     Node *nodeR = theDomain.getNode(nR);
     if (nodeR == 0) {
-      g3ErrorHandler->warning("RigidRod::RigidRod - %s %d %s\n",
-			      "retained Node", nR, "not in domain");
+      opserr << "RigidRod::RigidRod - retained Node" <<  nR <<  "not in domain\n";
       return;
     }
     Node *nodeC = theDomain.getNode(nC);
     if (nodeR == 0) {
-      g3ErrorHandler->warning("RigidRod::RigidRod - %s %d %s\n",
-			      "constrained Node", nC, "not in domain");
+      opserr << "RigidRod::RigidRod - constrained Node" <<  nC <<  "not in domain\n";
       return;
     }
 
@@ -62,23 +60,24 @@ RigidRod::RigidRod(Domain &theDomain, int nR, int nC, int startMPtag) {
     int dimR = crdR.Size();
     int dimC = crdC.Size();
     if (dimR != dimC) {
-      g3ErrorHandler->warning("RigidRod::RigidRod - mismatch in dimension %s %d %s %d\n",
-			      "between constrained Node", nC, "and Retained node",nR);
+      opserr << "RigidRod::RigidRod - mismatch in dimension " <<
+	"between constrained Node " <<  nC <<  " and Retained node " << nR << endln;
       return;
     }
     
     // check the number of dof at each node is the same 
     int numDOF = nodeR->getNumberDOF();
     if (numDOF != nodeC->getNumberDOF()){ 
-      g3ErrorHandler->warning("RigidRod::RigidRod - mismatch in numDOF %s %d %s %d\n",
-			      "between constrained Node", nC, "and Retained node",nR);
+      opserr << "RigidRod::RigidRod - mismatch in numDOF " <<
+	"between constrained Node " <<  nC <<  " and Retained node " << nR << endln;
       return;
     }
 
     // check the number of dof at the nodes >= dimension of problem
     if(numDOF < dimR){    
-      g3ErrorHandler->warning("RigidRod::RigidRod - numDOF at nodes %d %d %s\n",
-			      nR, nC, "must be >= dimension of problem");
+      opserr << "RigidRod::RigidRod - numDOF at nodes " << nR << " and " << nC <<
+	"must be >= dimension of problem\n";
+
       return;
     }
 
@@ -100,13 +99,12 @@ RigidRod::RigidRod(Domain &theDomain, int nR, int nC, int startMPtag) {
     MP_Constraint *newC = new MP_Constraint(startMPtag+1, nR, nC, 
 					    mat, id, id);
     if (newC == 0) {
-      g3ErrorHandler->warning("RigidRod::RigidRod - for nodes %d %d, out of memory\n",
-			      nC, nR);
+      opserr << "RigidRod::RigidRod - for nodes " << nR << " and " << nC << " out of memory\n";
+      exit(-1);
     } else {
       // add the constraint to the domain
       if (theDomain.addMP_Constraint(newC) == false) {
-	g3ErrorHandler->warning("RigidRod::RigidRod - for nodes %d %d, could not add to domain\n",
-				nC, nR);
+	opserr << "RigidRod::RigidRod - for nodes " << nC << " and " << nR << " could not add to domain\n",
 	delete newC;
       }
     }

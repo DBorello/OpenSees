@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TrigSeries.cpp,v $
                                                                         
                                                                         
@@ -48,9 +48,8 @@ TrigSeries::TrigSeries(double startTime, double finishTime,
    period(T),shift(phi),cFactor(theFactor)
 {
 	if (period == 0.0) {
-		g3ErrorHandler->warning("%s -- input period is zero, setting period to PI",
-		"TrigSeries::TrigSeries");
-		period = 2*asin(1.0);
+	  opserr << "TrigSeries::TrigSeries -- input period is zero, setting period to PI\n";
+	  period = 2*asin(1.0);
 	}
 }
 
@@ -90,7 +89,7 @@ TrigSeries::sendSelf(int commitTag, Channel &theChannel)
   data(4) = shift;
   int result = theChannel.sendVector(dbTag,commitTag, data);
   if (result < 0) {
-    cerr << "TrigSeries::sendSelf() - channel failed to send data\n";
+    opserr << "TrigSeries::sendSelf() - channel failed to send data\n";
     return result;
   }
   return 0;
@@ -105,7 +104,7 @@ TrigSeries::recvSelf(int commitTag, Channel &theChannel,
   Vector data(5);
   int result = theChannel.recvVector(dbTag,commitTag, data);
   if (result < 0) {
-    cerr << "TrigSeries::sendSelf() - channel failed to receive data\n";
+    opserr << "TrigSeries::sendSelf() - channel failed to receive data\n";
     cFactor = 1.0;
     tStart= 0.0;
     tFinish = 0.0;
@@ -123,12 +122,12 @@ TrigSeries::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void
-TrigSeries::Print(ostream &s, int flag)
+TrigSeries::Print(OPS_Stream &s, int flag)
 {
-    s << "Trig Series" << endl;
-	s << "\tFactor: " << cFactor << endl;
-	s << "\ttStart: " << tStart << endl;
-	s << "\ttFinish: " << tFinish << endl;
-	s << "\tPeriod: " << period << endl;
-	s << "\tPhase Shift: " << shift << endl;
+    s << "Trig Series" << endln;
+	s << "\tFactor: " << cFactor << endln;
+	s << "\ttStart: " << tStart << endln;
+	s << "\ttFinish: " << tFinish << endln;
+	s << "\tPeriod: " << period << endln;
+	s << "\tPhase Shift: " << shift << endln;
 }

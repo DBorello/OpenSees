@@ -51,11 +51,11 @@ class MDYieldSurface : public YieldSurface
     // Redefine 1st derivative of F over tensorial internal variables
     tensor xi_t1(const EPState *EPS) const; // dF / d alpha_ij
 
-    void print() { cout << *this; };
+    void print() { opserr << *this; };
   
     //================================================================================
     // Overloaded Insertion Operator
-    friend ostream& operator<< (ostream& os, const MDYieldSurface & YS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const MDYieldSurface & YS);
 
 };
 

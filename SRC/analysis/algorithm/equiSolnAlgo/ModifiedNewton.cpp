@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-11-16 21:52:13 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/ModifiedNewton.cpp,v $
                                                                         
                                                                         
@@ -86,30 +86,30 @@ ModifiedNewton::solveCurrentStep(void)
 
     if ((theAnalysisModel == 0) || (theIncIntegratorr == 0) || (theSOE == 0)
 	|| (theTest == 0)){
-	cerr << "WARNING ModifiedNewton::solveCurrentStep() - setLinks() has";
-	cerr << " not been called - or no ConvergenceTest has been set\n";
+	opserr << "WARNING ModifiedNewton::solveCurrentStep() - setLinks() has";
+	opserr << " not been called - or no ConvergenceTest has been set\n";
 	return -5;
     }	
 
     // we form the tangent
     
     if (theIncIntegratorr->formUnbalance() < 0) {
-	cerr << "WARNING ModifiedNewton::solveCurrentStep() -";
-	cerr << "the Integrator failed in formUnbalance()\n";	
+	opserr << "WARNING ModifiedNewton::solveCurrentStep() -";
+	opserr << "the Integrator failed in formUnbalance()\n";	
 	return -2;
     }	
 
     if (theIncIntegratorr->formTangent(tangent) < 0){
-	cerr << "WARNING ModifiedNewton::solveCurrentStep() -";
-	cerr << "the Integrator failed in formTangent()\n";
+	opserr << "WARNING ModifiedNewton::solveCurrentStep() -";
+	opserr << "the Integrator failed in formTangent()\n";
 	return -1;
     }		    
 
     // set itself as the ConvergenceTest objects EquiSolnAlgo
     theTest->setEquiSolnAlgo(*this);
     if (theTest->start() < 0) {
-      cerr << "ModifiedNewton::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in start()\n";
+      opserr << "ModifiedNewton::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in start()\n";
       return -3;
     }
 
@@ -118,20 +118,20 @@ ModifiedNewton::solveCurrentStep(void)
     int count = 0;
     do {
 	if (theSOE->solve() < 0) {
-	    cerr << "WARNING ModifiedNewton::solveCurrentStep() -";
-	    cerr << "the LinearSysOfEqn failed in solve()\n";	
+	    opserr << "WARNING ModifiedNewton::solveCurrentStep() -";
+	    opserr << "the LinearSysOfEqn failed in solve()\n";	
 	    return -3;
 	}	    
 
 	if (theIncIntegratorr->update(theSOE->getX()) < 0) {
-	    cerr << "WARNING ModifiedNewton::solveCurrentStep() -";
-	    cerr << "the Integrator failed in update()\n";	
+	    opserr << "WARNING ModifiedNewton::solveCurrentStep() -";
+	    opserr << "the Integrator failed in update()\n";	
 	    return -4;
 	}	        
 
 	if (theIncIntegratorr->formUnbalance() < 0) {
-	    cerr << "WARNING ModifiedNewton::solveCurrentStep() -";
-	    cerr << "the Integrator failed in formUnbalance()\n";	
+	    opserr << "WARNING ModifiedNewton::solveCurrentStep() -";
+	    opserr << "the Integrator failed in formUnbalance()\n";	
 	    return -2;
 	}	
 
@@ -141,8 +141,8 @@ ModifiedNewton::solveCurrentStep(void)
     } while (result == -1);
 
     if (result == -2) {
-      cerr << "ModifiedNewton::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in test()\n";
+      opserr << "ModifiedNewton::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in test()\n";
       return -3;
     }
 
@@ -165,13 +165,13 @@ ModifiedNewton::sendSelf(int cTag, Channel &theChannel)
   data(1) = theTest->getDbTag();
   result = theChannel.sendID(dataTag, cTag, data);
   if (result != 0) {
-    cerr << "ModifiedNewton::sendSelf() - failed to send ID\n";
+    opserr << "ModifiedNewton::sendSelf() - failed to send ID\n";
     return result;
   }
 
   result = theTest->sendSelf(cTag, theChannel);
   if (result != 0) {
-    cerr << "ModifiedNewton::sendSelf() - failed to send CTest object\n";
+    opserr << "ModifiedNewton::sendSelf() - failed to send CTest object\n";
     return result;
   }
   
@@ -189,7 +189,7 @@ ModifiedNewton::recvSelf(int cTag,
 
     result = theChannel.recvID(dataTag, cTag, data);    
     if (result != 0) {
-      cerr << "ModifiedNewton::recvSelf() - failed to receive ID\n";
+      opserr << "ModifiedNewton::recvSelf() - failed to receive ID\n";
       return result;
     }
     int ctType = data(0);
@@ -199,7 +199,7 @@ ModifiedNewton::recvSelf(int cTag,
     theTest->setDbTag(ctDb);
     result = theTest->recvSelf(cTag, theChannel, theBroker);
     if (result != 0) {
-      cerr << "ModifiedNewton::recvSelf() - failed to recv CTest object\n";
+      opserr << "ModifiedNewton::recvSelf() - failed to recv CTest object\n";
       return result;
     }
     
@@ -207,7 +207,7 @@ ModifiedNewton::recvSelf(int cTag,
 }
 
 void
-ModifiedNewton::Print(ostream &s, int flag)
+ModifiedNewton::Print(OPS_Stream &s, int flag)
 {
     if (flag == 0) {
 	s << "ModifiedNewton";

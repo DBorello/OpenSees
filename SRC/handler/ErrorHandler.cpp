@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-02-08 20:43:21 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/ErrorHandler.cpp,v $
                                                                         
                                                                         
@@ -35,7 +35,6 @@
 // What: "@(#) ErrorHandler.C, revA"
 
 #include "ErrorHandler.h"
-#include <iostream.h>
 
 ErrorHandler::ErrorHandler()
 {
@@ -97,5 +96,5 @@ ErrorHandler::outputMessage(ostream &theStream, const char *msg, va_list args)
      }
     pos++;
   }
-  theStream << endl;
+  theStream << std::endl;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-10 22:57:40 $: 2001/07/16 08:23:22 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:38 $: 2001/07/16 08:23:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/CableMaterial.h,v $
                                                                         
                                                                         
@@ -71,7 +71,7 @@ class CableMaterial : public UniaxialMaterial
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);    
     
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
     
     //int setParameter(char **argv, int argc, Information &info);
     //int updateParameter(int parameterID, Information &info);

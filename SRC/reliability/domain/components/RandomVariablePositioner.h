@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 22:11:38 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.h,v $
 
 
@@ -52,7 +52,7 @@ public:
 					char **argv, int argc);
 
 	~RandomVariablePositioner();
-	void Print(ostream &s, int flag =0);
+	void Print(OPS_Stream &s, int flag =0);
 
 	int getRvNumber(void);
 	int update (double newValue); 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/RigidDiaphragm.cpp,v $
                                                                         
                                                                         
@@ -30,7 +30,7 @@
 //
 // Purpose: This file contains the class implementation for RigidDiaphragm.
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <stdlib.h>
 #include <Domain.h>
 #include <Node.h>
@@ -45,35 +45,32 @@ RigidDiaphragm::RigidDiaphragm(Domain &theDomain, int nR, ID &nC,
 
     // check plane is valid, i.e. perpPlaneConstrained must be 0, 1 or 2
     if (perpPlaneConstrained < 0 || perpPlaneConstrained > 2) {
-      g3ErrorHandler->warning("RigidDiaphragm::RigidDiaphragm - %s %d %s\n",
-			      "the dirn of perpendicular to constrained plane",
-			      perpPlaneConstrained, "not valid");
+      opserr << "RigidDiaphragm::RigidDiaphragm - " << 
+	"the dirn of perpendicular to constrained plane" << perpPlaneConstrained <<  "not valid\n";
       return;
     }
 
     // check constrainedNodes ID does not contain the retained node
     if (nC.getLocation(nR) >= 0) {
-      g3ErrorHandler->warning("RigidDiaphragm::RigidDiaphragm - %s %d %s\n",
-			      "retained node", 
-			      nR, 
-			      "is in constrained node list");
+      opserr << "RigidDiaphragm::RigidDiaphragm - " << 
+	"retained node" << nR << "is in constrained node list\n";
       return;
     }	
     
     // get a pointer to the retained node and check node in 3d with 6 dof
     Node *nodeR = theDomain.getNode(nR);
     if (nodeR == 0) {
-      g3ErrorHandler->warning("RigidDiaphragm::RigidDiaphragm - %s %d %s\n",
-			      "retained Node", nR, "not in domain",nR);
+      opserr << "RigidDiaphragm::RigidDiaphragm - " << 
+	"retained Node" <<  nR <<  "not in domain\n";
       return;
     }
 
     const Vector &crdR = nodeR->getCrds();
     if ((nodeR->getNumberDOF() != 6) || (crdR.Size() != 3)){
-      g3ErrorHandler->warning("RigidDiaphragm::RigidDiaphragm - %s %d %s\n",
-			      "retained Node",
-			      nR,
-			      "not in 3d space with 6 dof");
+      opserr << "RigidDiaphragm::RigidDiaphragm - " << 
+	"retained Node" << nR << "not in 3d space with 6 dof\n";
+			      
+			      
       return;
     }	
 
@@ -130,7 +127,7 @@ RigidDiaphragm::RigidDiaphragm(Domain &theDomain, int nR, ID &nC,
 	      mat(1,2) = deltaX;
 
 	    } else 
-	      g3ErrorHandler->warning("RigidDiaphragm::RigidDiaphragm - ignoring constrained Node %d, not in xy plane\n",ndC);
+	      opserr << "RigidDiaphragm::RigidDiaphragm - ignoring constrained Node " << ndC << ", not in xy plane\n";
 
 	  // rigid diaphragm in xz plane
 	  } else if (perpPlaneConstrained == 1) { 
@@ -146,7 +143,7 @@ RigidDiaphragm::RigidDiaphragm(Domain &theDomain, int nR, ID &nC,
 	      mat(1,2) = -deltaX;
 
 	    } else
-	      g3ErrorHandler->warning("RigidDiaphragm::RigidDiaphragm - ignoring constrained Node %d, not in xz plane\n",ndC);
+	      opserr << "RigidDiaphragm::RigidDiaphragm - ignoring constrained Node " << ndC << ", not in xz plane\n";
 
 	  // rigid diaphragm in yz plane
 	  } else {	  
@@ -162,27 +159,32 @@ RigidDiaphragm::RigidDiaphragm(Domain &theDomain, int nR, ID &nC,
 	      mat(1,2) = deltaY;
 
 	    } else
-	      g3ErrorHandler->warning("RigidDiaphragm::RigidDiaphragm - ignoring constrained Node %d, not in xz plane\n",ndC);
+	      opserr << "RigidDiaphragm::RigidDiaphragm - ignoring constrained Node " << ndC << 
+		", not in xz plane\n";
 	  }
 	      
 	  // create the MP_Constraint
 	  MP_Constraint *newC = new MP_Constraint(startMPtag+i, nR, ndC, 
 						  mat, id, id);
 	  if (newC == 0) {
-	    g3ErrorHandler->warning("RigidDiaphragm::RigidDiaphragm - ignoring constrained Node %d, out of memory\n",ndC);
+	    opserr << "RigidDiaphragm::RigidDiaphragm - ignoring constrained Node " << ndC << 
+	      ", out of memory\n";
 	  } else {
 	    // add the constraint to the domain
 	    if (theDomain.addMP_Constraint(newC) == false) {
-	      g3ErrorHandler->warning("RigidDiaphragm::RigidDiaphragm - ignoring constrained Node %d, failed to add\n",ndC);
+	      opserr << "RigidDiaphragm::RigidDiaphragm - ignoring constrained Node " << ndC << 
+		", failed to add\n";
 	      delete newC;
 	    }
 	  }
 
 	} else  // node not in 3d space
-	  g3ErrorHandler->warning("RigidDiaphragm::RigidDiaphragm - ignoring constrained Node %d, not 3d node\n",ndC);
+	  opserr << "RigidDiaphragm::RigidDiaphragm - ignoring constrained Node " << ndC << 
+	    ", not 3d node\n";
 	
       } else // node does not exist
-	g3ErrorHandler->warning("RigidDiaphragm::RigidDiaphragm - ignoring constrained Node %d as no node in domain\n",ndC);
+      opserr << "RigidDiaphragm::RigidDiaphragm - ignoring constrained Node " << ndC << 
+	" as no node in domain\n";
 
     } // for each node in constrained nodes
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-18 01:03:43 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathSeries.h,v $
                                                                         
                                                                         
@@ -41,7 +41,6 @@
 // What: "@(#) PathSeries.h, revA"
 
 #include <TimeSeries.h>
-#include <iostream.h>
 
 class Vector;
 
@@ -71,7 +70,7 @@ class PathSeries : public TimeSeries
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);
 
-    void Print(ostream &s, int flag =0);    
+    void Print(OPS_Stream &s, int flag =0);    
     
   protected:
     

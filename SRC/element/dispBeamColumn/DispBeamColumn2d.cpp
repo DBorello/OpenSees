@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2002-12-19 21:31:32 $
+// $Revision: 1.17 $
+// $Date: 2003-02-14 23:01:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -43,8 +43,6 @@
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
 
-#include <G3Globals.h>
-
 Matrix DispBeamColumn2d::K(6,6);
 Vector DispBeamColumn2d::P(6);
 double DispBeamColumn2d::workArea[100];
@@ -61,9 +59,10 @@ DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
   // Allocate arrays of pointers to SectionForceDeformations
   theSections = new SectionForceDeformation *[numSections];
     
-  if (theSections == 0)
-    g3ErrorHandler->fatal("%s - failed to allocate section model pointer",
-			  "DispBeamColumn2d::DispBeamColumn2d");
+  if (theSections == 0) {
+    opserr << "DispBeamColumn2d::DispBeamColumn2d - failed to allocate section model pointer\n";
+    exit(-1);
+  }
 
   for (int i = 0; i < numSections; i++) {
     
@@ -71,16 +70,18 @@ DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
     theSections[i] = s[i]->getCopy();
     
     // Check allocation
-    if (theSections[i] == 0)
-      g3ErrorHandler->fatal("%s -- failed to get a copy of section model",
-			    "DispBeamColumn2d::DispBeamColumn2d");
+    if (theSections[i] == 0) {
+      opserr << "DispBeamColumn2d::DispBeamColumn2d -- failed to get a copy of section model\n";
+      exit(-1);
+    }
   }
   
   crdTransf = coordTransf.getCopy();
   
-  if (crdTransf == 0)
-    g3ErrorHandler->fatal("%s - failed to copy coordinate transformation",
-			  "DispBeamColumn2d::DispBeamColumn2d");
+  if (crdTransf == 0) {
+    opserr << "DispBeamColumn2d::DispBeamColumn2d - failed to copy coordinate transformation\n";
+    exit(-1);
+  }
   
   // Set connected external node IDs
   connectedExternalNodes(0) = nd1;
@@ -184,7 +185,7 @@ DispBeamColumn2d::setDomain(Domain *theDomain)
     theNodes[1] = theDomain->getNode(Nd2);
 
     if (theNodes[0] == 0 || theNodes[1] == 0) {
-	//g3ErrorHandler->fatal("FATAL ERROR DispBeamColumn2d (tag: %d), node not found in domain",
+	//opserr << "FATAL ERROR DispBeamColumn2d (tag: %d), node not found in domain",
 	//	this->getTag());
 	
 	return;
@@ -194,7 +195,7 @@ DispBeamColumn2d::setDomain(Domain *theDomain)
     int dofNd2 = theNodes[1]->getNumberDOF();
     
     if (dofNd1 != 3 || dofNd2 != 3) {
-	//g3ErrorHandler->fatal("FATAL ERROR DispBeamColumn2d (tag: %d), has differing number of DOFs at its nodes",
+	//opserr << "FATAL ERROR DispBeamColumn2d (tag: %d), has differing number of DOFs at its nodes",
 	//	this->getTag());
 	
 	return;
@@ -222,7 +223,7 @@ DispBeamColumn2d::commitState()
 
     // call element commitState to do any base class stuff
     if ((retVal = this->Element::commitState()) != 0) {
-      cerr << "DispBeamColumn2d::commitState () - failed in base class";
+      opserr << "DispBeamColumn2d::commitState () - failed in base class";
     }    
 
     // Loop over the integration points and commit the material states
@@ -568,8 +569,9 @@ DispBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
     q0[2] += M2;
   }
   else {
-    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
-			    "DispBeamColumn2d::addLoad()", this->getTag());
+    opserr << "DispBeamColumn2d::DispBeamColumn2d -- load type unknown for element with tag: "
+	   << this->getTag() << "DispBeamColumn2d::addLoad()\n"; 
+			    
     return -1;
   }
 
@@ -588,9 +590,8 @@ DispBeamColumn2d::addInertiaLoadToUnbalance(const Vector &accel)
 	const Vector &Raccel2 = theNodes[1]->getRV(accel);
 
     if (3 != Raccel1.Size() || 3 != Raccel2.Size()) {
-		g3ErrorHandler->warning("DispBeamColumn2d::addInertiaLoadToUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
-		return -1;
+      opserr << "DispBeamColumn2d::addInertiaLoadToUnbalance matrix and vector sizes are incompatable\n";
+      return -1;
     }
 
 	double L = crdTransf->getInitialLength();
@@ -725,16 +726,14 @@ DispBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   idData(5) = crdTransfDbTag;
   
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
-    g3ErrorHandler->warning("DispBeamColumn2d::sendSelf() - %s\n",
-	     		     "failed to send ID data");
+    opserr << "DispBeamColumn2d::sendSelf() - failed to send ID data\n";
      return -1;
   }    
 
   // send the coordinate transformation
   
   if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
-     g3ErrorHandler->warning("DispBeamColumn2d::sendSelf() - %s\n",
-	     		     "failed to send crdTranf");
+     opserr << "DispBeamColumn2d::sendSelf() - failed to send crdTranf\n";
      return -1;
   }      
 
@@ -760,8 +759,7 @@ DispBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   }
 
   if (theChannel.sendID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("DispBeamColumn2d::sendSelf() - %s\n",
-			    "failed to send ID data");
+    opserr << "DispBeamColumn2d::sendSelf() - failed to send ID data\n";
     return -1;
   }    
 
@@ -771,8 +769,8 @@ DispBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   
   for (j = 0; j<numSections; j++) {
     if (theSections[j]->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("DispBeamColumn2d::sendSelf() - section %d %s\n",
-			      j,"failed to send itself");
+      opserr << "DispBeamColumn2d::sendSelf() - section " << 
+	j << "failed to send itself\n";
       return -1;
     }
   }
@@ -793,8 +791,7 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
   static ID idData(7); // one bigger than needed so no clash with section ID
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
-    g3ErrorHandler->warning("DispBeamColumn2d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "DispBeamColumn2d::recvSelf() - failed to recv ID data\n";
     return -1;
   }    
 
@@ -813,9 +810,8 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
       crdTransf = theBroker.getNewCrdTransf2d(crdTransfClassTag);
 
       if (crdTransf == 0) {
-	  g3ErrorHandler->warning("DispBeamColumn2d::recvSelf() - %s %d\n",
-				  "failed to obtain a CrdTrans object with classTag",
-				  crdTransfClassTag);
+	opserr << "DispBeamColumn2d::recvSelf() - failed to obtain a CrdTrans object with classTag " <<
+	  crdTransfClassTag << endln;
 	  return -2;	  
       }
   }
@@ -824,8 +820,7 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
 
   // invoke recvSelf on the crdTransf object
   if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0) {
-    g3ErrorHandler->warning("DispBeamColumn2d::sendSelf() - %s\n",
-			    "failed to recv crdTranf");
+    opserr << "DispBeamColumn2d::sendSelf() - failed to recv crdTranf\n";
     return -3;
   }      
   
@@ -837,8 +832,7 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
   int loc = 0;
 
   if (theChannel.recvID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("DispBeamColumn2d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "DispBeamColumn2d::recvSelf() - failed to recv ID data\n";
     return -1;
   }    
 
@@ -863,8 +857,8 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
     // create a new array to hold pointers
     theSections = new SectionForceDeformation *[idData(3)];
     if (theSections == 0) {
-      g3ErrorHandler->fatal("DispBeamColumn2d::recvSelf() - %s %d\n",
-			      "out of memory creating sections array of size",idData(3));
+opserr << "DispBeamColumn2d::recvSelf() - out of memory creating sections array of size " <<
+  idData(3) << endln;
       return -1;
     }    
 
@@ -878,14 +872,13 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
       loc += 2;
       theSections[i] = theBroker.getNewSection(sectClassTag);
       if (theSections[i] == 0) {
-	g3ErrorHandler->fatal("DispBeamColumn2d::recvSelf() - %s %d\n",
-			      "Broker could not create Section of class type",sectClassTag);
-	return -1;
+	opserr << "DispBeamColumn2d::recvSelf() - Broker could not create Section of class type " <<
+	  sectClassTag << endln;
+	exit(-1);
       }
       theSections[i]->setDbTag(sectDbTag);
       if (theSections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("DispBeamColumn2d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "DispBeamColumn2d::recvSelf() - section " << i << " failed to recv itself\n";
 	return -1;
       }     
     }
@@ -909,17 +902,16 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
 	delete theSections[i];
 	theSections[i] = theBroker.getNewSection(sectClassTag);
 	if (theSections[i] == 0) {
-	  g3ErrorHandler->fatal("DispBeamColumn2d::recvSelf() - %s %d\n",
-				"Broker could not create Section of class type",sectClassTag);
-	  return -1;
+	opserr << "DispBeamColumn2d::recvSelf() - Broker could not create Section of class type " <<
+	  sectClassTag << endln;
+	exit(-1);
 	}
       }
 
       // recvSelf on it
       theSections[i]->setDbTag(sectDbTag);
       if (theSections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("DispBeamColumn2d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "DispBeamColumn2d::recvSelf() - section " << i << " failed to recv itself\n";
 	return -1;
       }     
     }
@@ -929,12 +921,12 @@ DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void
-DispBeamColumn2d::Print(ostream &s, int flag)
+DispBeamColumn2d::Print(OPS_Stream &s, int flag)
 {
-  s << "\nDispBeamColumn2d, element id:  " << this->getTag() << endl;
+  s << "\nDispBeamColumn2d, element id:  " << this->getTag() << endln;
   s << "\tConnected external nodes:  " << connectedExternalNodes;
-  s << "\tCoordTransf: " << crdTransf->getTag() << endl;
-  s << "\tmass density:  " << rho << endl;
+  s << "\tCoordTransf: " << crdTransf->getTag() << endln;
+  s << "\tmass density:  " << rho << endln;
 
   double L = crdTransf->getInitialLength();
   double P  = q(0);
@@ -942,12 +934,12 @@ DispBeamColumn2d::Print(ostream &s, int flag)
   double M2 = q(2);
   double V = (M1+M2)/L;
   s << "\tEnd 1 Forces (P V M): " << -P+p0[0]
-    << " " << V+p0[1] << " " << M1 << endl;
+    << " " << V+p0[1] << " " << M1 << endln;
   s << "\tEnd 2 Forces (P V M): " << P
-    << " " << -V+p0[2] << " " << M2 << endl;
+    << " " << -V+p0[2] << " " << M2 << endln;
 
-  for (int i = 0; i < numSections; i++)
-    theSections[i]->Print(s,flag);
+  //  for (int i = 0; i < numSections; i++)
+  // theSections[i]->Print(s,flag);
 }
 
 
@@ -996,18 +988,18 @@ DispBeamColumn2d::setResponse(char **argv, int argc, Information &eleInfo)
     
     // section response -
     else if (strcmp(argv[0],"section") ==0) {
-		if (argc <= 2)
-			return 0;
-	
-		int sectionNum = atoi(argv[1]);
-		if (sectionNum > 0 && sectionNum <= numSections)
-			return theSections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInfo);
-		else
-			return 0;
-	}
+      if (argc <= 2)
+	return 0;
+      
+      int sectionNum = atoi(argv[1]);
+      if (sectionNum > 0 && sectionNum <= numSections)
+	return theSections[sectionNum-1]->setResponse(&argv[2], argc-2, eleInfo);
+      else
+	return 0;
+    }
     
-	else
-		return 0;
+    else
+      return 0;
 }
 
 int 
@@ -1085,36 +1077,36 @@ DispBeamColumn2d::setParameter (char **argv, int argc, Information &info)
 	// If the parameter is belonging to a section or lower
 	else if (strcmp(argv[0],"section") == 0) {
 
-		// For now, no parameters of the section itself:
-		if (argc<5) {
-			cerr << "For now: cannot handle parameters of the section itself." << endl;
-			return -1;
-		}
-
-		// Get section and material tag numbers from user input
-		int paramSectionTag = atoi(argv[1]);
-
-		// Find the right section and call its setParameter method
-		for (int i=0; i<numSections; i++) {
-			if (paramSectionTag == theSections[i]->getTag()) {
-				parameterID = theSections[i]->setParameter(&argv[2], argc-2, info);
-			}
-		}
-		
-		// Check if the parameterID is valid
-		if (parameterID < 0) {
-			cerr << "DispBeamColumn2d::setParameter() - could not set parameter. " << endl;
-			return -1;
-		}
-		else {
-			// Return the parameterID value (according to the above comments)
-			return parameterID;
-		}
+	  // For now, no parameters of the section itself:
+	  if (argc<5) {
+	    opserr << "For now: cannot handle parameters of the section itself." << endln;
+	    return -1;
+	  }
+	  
+	  // Get section and material tag numbers from user input
+	  int paramSectionTag = atoi(argv[1]);
+	  
+	  // Find the right section and call its setParameter method
+	  for (int i=0; i<numSections; i++) {
+	    if (paramSectionTag == theSections[i]->getTag()) {
+	      parameterID = theSections[i]->setParameter(&argv[2], argc-2, info);
+	    }
+	  }
+	  
+	  // Check if the parameterID is valid
+	  if (parameterID < 0) {
+	    opserr << "DispBeamColumn2d::setParameter() - could not set parameter. " << endln;
+	    return -1;
+	  }
+	  else {
+	    // Return the parameterID value (according to the above comments)
+	    return parameterID;
+	  }
 	}
-    
+	
 	// Otherwise parameter is unknown for this class
 	else {
-		return -1;
+	  return -1;
 	}
 }
 
@@ -1126,33 +1118,33 @@ DispBeamColumn2d::updateParameter (int parameterID, Information &info)
 
 	if (parameterID == 1) {
 
-		this->rho = info.theDouble;
-		return 0;
-
+	  this->rho = info.theDouble;
+	  return 0;
+	  
 	}
 	else if (parameterID > 0 ) {
 
-		// Extract the section number
-		int sectionNumber = (int)( floor((double)parameterID) / (100000) );
-
-		int ok = -1;
-		for (int i=0; i<numSections; i++) {
-			if (sectionNumber == theSections[i]->getTag()) {
-				ok = theSections[i]->updateParameter(parameterID, info);
-			}
-		}
-
-		if (ok < 0) {
-			cerr << "DispBeamColumn2d::updateParameter() - could not update parameter. " << endl;
-			return ok;
-		}
-		else {
-			return ok;
-		}
+	  // Extract the section number
+	  int sectionNumber = (int)( floor((double)parameterID) / (100000) );
+	  
+	  int ok = -1;
+	  for (int i=0; i<numSections; i++) {
+	    if (sectionNumber == theSections[i]->getTag()) {
+	      ok = theSections[i]->updateParameter(parameterID, info);
+	    }
+	  }
+	  
+	  if (ok < 0) {
+	    opserr << "DispBeamColumn2d::updateParameter() - could not update parameter. " << endln;
+	    return ok;
+	  }
+	  else {
+	    return ok;
+	  }
 	}
 	else {
-		cerr << "DispBeamColumn2d::updateParameter() - could not update parameter. " << endl;
-		return -1;
+	  opserr << "DispBeamColumn2d::updateParameter() - could not update parameter. " << endln;
+	  return -1;
 	}       
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-18 01:03:43 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TrapezoidalTimeSeriesIntegrator.cpp,v $
                                                                         
                                                                         
@@ -35,7 +35,6 @@
 //
 // What: "@(#) TrapezoidalTimeSeriesIntegrator.cpp, revA"
 
-#include <iostream.h>
 #include <TrapezoidalTimeSeriesIntegrator.h>
 #include <Vector.h>
 #include <Channel.h>
@@ -57,15 +56,14 @@ TrapezoidalTimeSeriesIntegrator::integrate(TimeSeries *theSeries, double delta)
 {	
   // Check for zero time step, before dividing to get number of steps
   if (delta <= 0.0) {
-    g3ErrorHandler->warning("TrapezoidalTimeSeriesIntegrator::integrate() %s %d %s\n",
-			   "Attempting to integrate time step", delta, "<= 0");
+    opserr << "TrapezoidalTimeSeriesIntegrator::integrate() Attempting to integrate time step" <<
+      delta, "<= 0\n";
     return 0;
    }
 
   // check a TimeSeries object was passed
   if (theSeries == 0) {
-    g3ErrorHandler->warning("TrapezoidalTimeSeriesIntegrator::integrate() %s\n",
-			     "- no TimeSeries passed");
+    opserr << "TrapezoidalTimeSeriesIntegrator::integrate() - - no TimeSeries passed\n";
     return 0;
   }
 
@@ -76,8 +74,8 @@ TrapezoidalTimeSeriesIntegrator::integrate(TimeSeries *theSeries, double delta)
 
   // Check that the Vector was allocated properly
   if (theIntegratedValues == 0 || theIntegratedValues->Size() == 0) {
-    g3ErrorHandler->warning("TrapezoidalTimeSeriesIntegrator::integrate() %s %d\n",
-			    "Ran out of memory allocating Vector of size ", numSteps);
+    opserr << "TrapezoidalTimeSeriesIntegrator::integrate() Ran out of memory allocating Vector of size " <<
+      numSteps << endln;
 
     if (theIntegratedValues != 0)
       delete theIntegratedValues;
@@ -121,8 +119,7 @@ TrapezoidalTimeSeriesIntegrator::integrate(TimeSeries *theSeries, double delta)
   PathSeries *returnSeries = new PathSeries (*theIntegratedValues, delta);
 
   if (returnSeries == 0) {
-    g3ErrorHandler->warning("TrapezoidalTimeSeriesIntegrator::integrate() %s\n",
-			    "Ran out of memory creating PathSeries");
+    opserr << "TrapezoidalTimeSeriesIntegrator::integrate() Ran out of memory creating PathSeries\n";
 
     return 0;
    }
@@ -144,7 +141,7 @@ TrapezoidalTimeSeriesIntegrator::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void
-TrapezoidalTimeSeriesIntegrator::Print(ostream &s, int flag)
+TrapezoidalTimeSeriesIntegrator::Print(OPS_Stream &s, int flag)
 {
    // Need to implement, return for now
    return;

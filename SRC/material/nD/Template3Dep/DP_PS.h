@@ -59,13 +59,13 @@ class DPPotentialSurface : public PotentialSurface
 
     tensor dQods(const EPState *EPS) const;
     tensor d2Qods2(const EPState *EPS) const;
-    void print() { cout << *this; };
+    void print() { opserr << *this; };
 
     //================================================================================
     // Overloaded Insertion Operator
     // prints an DP-PotentialSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const DPPotentialSurface &PS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const DPPotentialSurface &PS);
 
 };
 

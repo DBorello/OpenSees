@@ -18,7 +18,7 @@ public:
 	virtual YieldSurface_BC *getCopy(void);
 	virtual int		displaySelf(Renderer &theViewer, int displayMode, float fact);
 
-	virtual void	Print(ostream &s, int flag =0);
+	virtual void	Print(OPS_Stream &s, int flag =0);
 
 //protected:
 //  For the following 2 methods, x, y already non-dimensionalized

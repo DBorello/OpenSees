@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2003-02-14 18:15:53 $
+// $Revision: 1.23 $
+// $Date: 2003-02-14 23:01:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -37,7 +37,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
+#include <OPS_Stream.h>
 #include <Domain.h>
 
 #include <ElasticBeam2d.h>
@@ -192,15 +192,15 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed\n";    
+    opserr << "WARNING builder has been destroyed\n";    
     return TCL_ERROR;
   }
 
   // check at least two arguments so don't segemnt fault on strcmp  
   if (argc < 2) {
-    cerr << "WARNING need to specify an element type\n";
-    cerr << "Want: element eleType <specific element args>\n";
-    cerr << "Valid types: truss, elasticBeamColumn, nonlinearBeamColumn\n";
+    opserr << "WARNING need to specify an element type\n";
+    opserr << "Want: element eleType <specific element args>\n";
+    opserr << "Valid types: truss, elasticBeamColumn, nonlinearBeamColumn\n";
     return TCL_ERROR;
   }
 
@@ -258,7 +258,10 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 						      theTclDomain, 
 						      theTclBuilder);
     return result;
-  } else if ((strcmp(argv[1],"shell") == 0) || (strcmp(argv[1],"shellMITC4") == 0)) {
+  } else if ((strcmp(argv[1],"shell") == 0) || (strcmp(argv[1],"shellMITC4") == 0) ||
+	     (strcmp(argv[1],"Shell") == 0) || (strcmp(argv[1],"ShellMITC4") == 0)) {
+
+
     int eleArgStart = 1;
     int result = TclModelBuilder_addShellMITC4(clientData, interp, 
 					       argc, argv,
@@ -338,8 +341,8 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 					       theTclDomain, theTclBuilder);
     return result;
   } else if (strcmp(argv[1],"zeroLengthND") == 0) {
-    cerr << "element zeroLengthND is no longer available, please use "
-	 << "the zeroLengthSection element instead" << endl;
+    opserr << "element zeroLengthND is no longer available, please use "
+	 << "the zeroLengthSection element instead" << endln;
     return TCL_ERROR;
   } else if ((strcmp(argv[1],"Joint2D") == 0) ||
 	     (strcmp(argv[1],"Joint2D") == 0)) {
@@ -362,8 +365,8 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     return result;
   } else {
     // element type not recognized
-    cerr << "WARNING unknown element type: " <<  argv[1];
-    cerr << "Valid types: truss, elasticBeamColumn, nonlinearBeamColumn, " << endl
+    opserr << "WARNING unknown element type: " <<  argv[1];
+    opserr << "Valid types: truss, elasticBeamColumn, nonlinearBeamColumn, " << endln
 	 << "beamWithHinges, zeroLength, quad, brick, shellMITC4\n";
     return TCL_ERROR;
   }

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:03 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.h,v $
 
 
@@ -38,16 +38,17 @@
 
 #include <ReliabilityDomainComponent.h>
 #include <Vector.h>
-#include <fstream.h>
+#include <fstream>
+using std::ofstream;
 
 class LimitStateFunction : public ReliabilityDomainComponent
 {
 
 public:
 	LimitStateFunction(	int tag, 
-						char *expression);
+				char *expression);
 	~LimitStateFunction();
-	void Print(ostream &s, int flag =0);
+	void Print(OPS_Stream &s, int flag =0);
 	char *getExpression();
 	void printResults(ofstream &outputFile);
 	void printSummaryOfResults(ofstream &outputFile);

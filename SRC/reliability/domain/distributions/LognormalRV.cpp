@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:57 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/LognormalRV.cpp,v $
 
 
@@ -37,6 +37,7 @@
 #include <NormalRV.h>
 #include <math.h>
 #include <string.h>
+#include <OPS_Globals.h>
 
 LognormalRV::LognormalRV(int passedTag, 
 		 double passedMean,
@@ -92,7 +93,7 @@ LognormalRV::~LognormalRV()
 
 
 void
-LognormalRV::Print(ostream &s, int flag)
+LognormalRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -133,7 +134,7 @@ double
 LognormalRV::getInverseCDFvalue(double probValue)
 {
 	if ( probValue > 1.0 || probValue < 0.0) {
-		cerr << "Invalid probability value input to inverse CDF function" << endl;
+		opserr << "Invalid probability value input to inverse CDF function" << endln;
 		return 0.0;
 	}
 	else {
@@ -177,5 +178,5 @@ LognormalRV::getStartValue()
 
 double LognormalRV::getParameter1()  {return lambda;}
 double LognormalRV::getParameter2()  {return zeta;}
-double LognormalRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double LognormalRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double LognormalRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double LognormalRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/loadBalancer/ShedHeaviest.cpp,v $
                                                                         
                                                                         
@@ -65,7 +65,7 @@ ShedHeaviest::balance(Graph &theWeightedGraph)
     // check to see a domain partitioner has been set
     DomainPartitioner *thePartitioner = this->getDomainPartitioner();
     if (thePartitioner == 0) {
-	cerr << "ShedHeaviest::balance - No DomainPartitioner has been set\n";
+	opserr << "ShedHeaviest::balance - No DomainPartitioner has been set\n";
 	return -1;
     }
 
@@ -88,9 +88,9 @@ ShedHeaviest::balance(Graph &theWeightedGraph)
 			    true,factorGreater);  
 	
 	if (res < 0) {
-	    cerr << "WARNING ShedHeaviest::balance() ";
-	    cerr << " - DomainPartitioner::releaseBoundary returned ";
-	    cerr << res << endl;
+	    opserr << "WARNING ShedHeaviest::balance() ";
+	    opserr << " - DomainPartitioner::releaseBoundary returned ";
+	    opserr << res << endln;
 	    j = numReleases;
 	}
     }

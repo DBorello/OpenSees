@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-20 00:37:25 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -165,16 +165,16 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 	// Transform starting point into standard normal space
 	int result = theXuTransformation->set_x(x);
 	if (result < 0) {
-		cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-			<< " could not set x in the xu-transformation." << endl;
+		opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+			<< " could not set x in the xu-transformation." << endln;
 		return -1;
 	}
 
 
 	result = theXuTransformation->transform_x_to_u();
 	if (result < 0) {
-		cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-			<< " could not transform from x to u." << endl;
+		opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+			<< " could not transform from x to u." << endln;
 		return -1;
 	}
 	u = theXuTransformation->get_u();
@@ -188,15 +188,15 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 		// Transform from u to x space
 		result = theXuTransformation->set_u(u);
 		if (result < 0) {
-			cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-				<< " could not set u in the xu-transformation." << endl;
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " could not set u in the xu-transformation." << endln;
 			return -1;
 		}
 
 		result = theXuTransformation->transform_u_to_x_andComputeJacobian();
 		if (result < 0) {
-			cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-				<< " could not transform from u to x and compute Jacobian." << endl;
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " could not transform from u to x and compute Jacobian." << endln;
 			return -1;
 		}
 		x = theXuTransformation->get_x();
@@ -208,8 +208,8 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 		if (possibleNewGFunValue == gFunctionValue || i==1) {
 			result = theGFunEvaluator->evaluate_g(x);
 			if (result < 0) {
-				cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-					<< " could not evaluate limit-state function. " << endl;
+				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+					<< " could not evaluate limit-state function. " << endln;
 				return -1;
 			}
 			gFunctionValue = theGFunEvaluator->get_g();
@@ -221,17 +221,17 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 
 		// Provide user with information about the limit-state function value
 		// (only in step one)
-		cerr << " ITERATION #" << i;
+		opserr << " ITERATION #" << i;
 		if (i==1) {
-			cerr << ", limit-state function value: " << gFunctionValue << endl;
+			opserr << ", limit-state function value: " << gFunctionValue << endln;
 		}
 
 
 		// Gradient in original space
 		result = theSensitivityEvaluator->evaluate_grad_g(gFunctionValue,x);
 		if (result < 0) {
-			cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-				<< " could not compute gradients of the limit-state function. " << endl;
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " could not compute gradients of the limit-state function. " << endln;
 			return -1;
 		}
 		gradientOfgFunction = theSensitivityEvaluator->get_grad_g();
@@ -245,8 +245,8 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 			}
 		}
 		if (zeroFlag == 0) {
-			cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-				<< " all components of the gradient vector is zero. " << endl;
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " all components of the gradient vector is zero. " << endln;
 			return -1;
 		}
 
@@ -268,8 +268,8 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 
 		// Check that the norm is not zero
 		if (normOfGradient == 0.0) {
-			cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-				<< " the norm of the gradient is zero. " << endl;
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " the norm of the gradient is zero. " << endln;
 			return -1;
 		}
 
@@ -288,7 +288,7 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 
 		// Inform user about convergence status 
 		if (i != 1) {
-			cerr << ", convergence checks: (" << criterion1 << ") (" << criterion2 << ")" << endl;
+			opserr << ", convergence checks: (" << criterion1 << ") (" << criterion2 << ")" << endln;
 		}
 
 
@@ -302,8 +302,8 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 
 			result = theMatrixOperations.computeTranspose();
 			if (result < 0) {
-				cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-					<< " could not compute transpose of jacobian matrix. " << endl;
+				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+					<< " could not compute transpose of jacobian matrix. " << endln;
 				return -1;
 			}
 			Matrix transposeOfJacobian_x_u = theMatrixOperations.getTranspose();
@@ -315,8 +315,8 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 			theMatrixOperations.setMatrix(jacobianProduct);
 			result = theMatrixOperations.computeSquareRoot();
 			if (result < 0) {
-				cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-					<< " could not compute square root of matrix elements. " << endl;
+				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+					<< " could not compute square root of matrix elements. " << endln;
 				return -1;
 			}
 			Matrix squareRootOfJacobianProduct = theMatrixOperations.getSquareRoot();
@@ -347,8 +347,8 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 		result = theSearchDirection->computeSearchDirection(
 			u, gFunctionValue, gradientInStandardNormalSpace );
 		if (result < 0) {
-			cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-				<< " could not compute search direction. " << endl;
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " could not compute search direction. " << endln;
 			return -1;
 		}
 		searchDirection = theSearchDirection->getSearchDirection();
@@ -358,8 +358,8 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 		result = theStepSizeRule->computeStepSize(
 			u, gradientInStandardNormalSpace, gFunctionValue, searchDirection);
 		if (result < 0) {
-			cerr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endl
-				<< " could not compute step size. " << endl;
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " could not compute step size. " << endln;
 			return -1;
 		}
 		stepSize = theStepSizeRule->getStepSize();
@@ -386,7 +386,7 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 
 
 	// Print a message if max number of iterations was reached
-	cerr << "Maximum number of iterations was reached before convergence." << endl;
+	opserr << "Maximum number of iterations was reached before convergence." << endln;
 
 	return 0;
 }

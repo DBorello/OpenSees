@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/cg/ConjugateGradientSolver.cpp,v $
                                                                         
                                                                         
@@ -31,7 +31,7 @@
 
 #include "ConjugateGradientSolver.h"
 #include <Vector.h>
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <LinearSOE.h>
 
 ConjugateGradientSolver::ConjugateGradientSolver(int classtag, 
@@ -63,7 +63,7 @@ ConjugateGradientSolver::setSize(void)
 {
     int n = theLinearSOE->getNumEqn();
     if (n <= 0) {
-	cerr << "ConjugateGradientSolver::setSize() - n < 0 \n";
+	opserr << "ConjugateGradientSolver::setSize() - n < 0 \n";
 	return -1;
     }
 
@@ -88,7 +88,7 @@ ConjugateGradientSolver::setSize(void)
 	Ap = new Vector(n);
 	x = new Vector(n);	
 	if (r == 0 || p == 0 || Ap == 0 || x == 0) {
-	    cerr << "ConjugateGradientSolver::setSize() - out of memory\n";
+	    opserr << "ConjugateGradientSolver::setSize() - out of memory\n";
 	    if (r != 0)
 		delete r;
 	    if (p != 0)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-06-07 17:39:22 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam3dPointLoad.h,v $
                                                                         
 #ifndef Beam3dPointLoad_h
@@ -43,7 +43,7 @@ class Beam3dPointLoad : public ElementalLoad
 
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker &theBroker);
-    void Print(ostream &s, int flag =0);       
+    void Print(OPS_Stream &s, int flag =0);       
 
   protected:
 	

@@ -27,7 +27,6 @@
 #include "CAM_PS.h"
 #include <basics.h>
 
-#include <G3Globals.h>
 
 //================================================================================
 // Normal constructor
@@ -398,7 +397,7 @@ double CAMPotentialSurface::getM() const
 }
 
 
-ostream& operator<< (ostream& os, const CAMPotentialSurface & YS)
+OPS_Stream& operator<< (OPS_Stream& os, const CAMPotentialSurface & YS)
 {
    os << "Cam Clay Potential Surface Parameters: " << endln;
    os << "M = " << YS.M << endln;

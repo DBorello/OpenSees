@@ -18,23 +18,20 @@ YS_Section2D01::YS_Section2D01
 {
     if (E <= 0.0)
     {
-		g3ErrorHandler->warning("%s -- Input E <= 0.0 ... setting E to 1.0",
-			"YS_Section2D01::YS_Section2D01");
-		E = 1.0;
-	}
+      opserr << "YS_Section2D01::YS_Section2D01 -- Input E <= 0.0 ... setting E to 1.0\n";
+      E = 1.0;
+    }
 
     if (A <= 0.0)
     {
-		g3ErrorHandler->warning("%s -- Input A <= 0.0 ... setting A to 1.0",
-			"YS_Section2D01::YS_Section2D01");
-		A = 1.0;
+      opserr << "YS_Section2D01::YS_Section2D01 -- Input A <= 0.0 ... setting A to 1.0\n";
+      A = 1.0;
     }
 
     if (I <= 0.0)
     {
-		g3ErrorHandler->warning("%s -- Input I <= 0.0 ... setting I to 1.0",
-			"YS_Section2D01::YS_Section2D01");
-		I = 1.0;
+      opserr << "YS_Section2D01::YS_Section2D01 -- Input I <= 0.0 ... setting I to 1.0",
+	I = 1.0;
     }
 
 }
@@ -71,11 +68,11 @@ SectionForceDeformation* YS_Section2D01::getCopy ()
     return theCopy;
 }
 
-void YS_Section2D01::Print (ostream &s, int flag)
+void YS_Section2D01::Print (OPS_Stream &s, int flag)
 {
-    s << "YS_Section2D01, tag: " << this->getTag() << endl;
-	s << "\tE: " << E << endl;
-	s << "\tA: " << A << endl;
-	s << "\tI: " << I << endl;
+    s << "YS_Section2D01, tag: " << this->getTag() << endln;
+	s << "\tE: " << E << endln;
+	s << "\tA: " << A << endln;
+	s << "\tI: " << I << endln;
 	this->YieldSurfaceSection2d::Print(s, flag);
 }

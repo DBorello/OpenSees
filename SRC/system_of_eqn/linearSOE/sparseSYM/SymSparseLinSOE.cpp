@@ -14,7 +14,6 @@
 // What: "@(#) SymSparseLinSOE.C, revA"
 
 
-#include <fstream.h>
 #include <stdlib.h>
 
 #include <SymSparseLinSOE.h>
@@ -148,9 +147,9 @@ int SymSparseLinSOE::setSize(Graph &theGraph)
  
     colA = new int[newNNZ];	
     if (colA == 0) {
-        cerr << "WARNING SymSparseLinSOE::SymSparseLinSOE :";
-	cerr << " ran out of memory for colA with nnz = ";
-      	cerr << newNNZ << " \n";
+        opserr << "WARNING SymSparseLinSOE::SymSparseLinSOE :";
+	opserr << " ran out of memory for colA with nnz = ";
+      	opserr << newNNZ << " \n";
        	size = 0; nnz = 0;
        	result =  -1;
     } 
@@ -170,9 +169,9 @@ int SymSparseLinSOE::setSize(Graph &theGraph)
 	rowStartA = new int[size+1]; 
 	
 	if (B == 0 || X == 0 || rowStartA == 0) {
-            cerr << "WARNING SymSparseLinSOE::SymSparseLinSOE :";
-	    cerr << " ran out of memory for vectors (size) (";
-	    cerr << size << ") \n";
+            opserr << "WARNING SymSparseLinSOE::SymSparseLinSOE :";
+	    opserr << " ran out of memory for vectors (size) (";
+	    opserr << size << ") \n";
 	    size = 0; Bsize = 0;
 	    result =  -1;
 	} else {
@@ -207,8 +206,8 @@ int SymSparseLinSOE::setSize(Graph &theGraph)
 	for (int a=0; a<size; a++) {
 	   theVertex = theGraph.getVertexPtr(a);
 	   if (theVertex == 0) {
-	        cerr << "WARNING:SymSparseLinSOE::setSize :";
-	        cerr << " vertex " << a << " not in graph! - size set to 0\n";
+	        opserr << "WARNING:SymSparseLinSOE::setSize :";
+	        opserr << " vertex " << a << " not in graph! - size set to 0\n";
 	        size = 0;
 	        return -1;
 	   }
@@ -263,8 +262,8 @@ int SymSparseLinSOE::addA(const Matrix &in_m, const ID &in_id, double fact)
 
    // check that m and id are of similar size
    if (idSize != in_m.noRows() && idSize != in_m.noCols()) {
-       cerr << "SymSparseLinSOE::addA() ";
-       cerr << " - Matrix and ID not of similar sizes\n";
+       opserr << "SymSparseLinSOE::addA() ";
+       opserr << " - Matrix and ID not of similar sizes\n";
        return -1;
    }
 
@@ -304,8 +303,8 @@ int SymSparseLinSOE::addA(const Matrix &in_m, const ID &in_id, double fact)
    int *newID = new int[idSize];
    int *isort = new int[idSize];
    if (newID == 0 || isort ==0) {
-       cerr << "WARNING SymSparseLinSOE::SymSparseLinSOE :";
-       cerr << " ran out of memory for vectors (newID, isort)";
+       opserr << "WARNING SymSparseLinSOE::SymSparseLinSOE :";
+       opserr << " ran out of memory for vectors (newID, isort)";
        return -1;
    }
 
@@ -419,8 +418,8 @@ int SymSparseLinSOE::addB(const Vector &in_v, const ID &in_id, double fact)
     int idSize = in_id.Size();    
     // check that m and id are of similar size
     if (idSize != in_v.Size() ) {
-	cerr << "SymSparseLinSOE::addB() ";
-	cerr << " - Vector and ID not of similar sizes\n";
+	opserr << "SymSparseLinSOE::addB() ";
+	opserr << " - Vector and ID not of similar sizes\n";
 	return -1;
     } 
 
@@ -442,8 +441,8 @@ int SymSparseLinSOE::addB(const Vector &in_v, const ID &in_id, double fact)
 
     int *newID = new int[idSize];
     if (newID == 0) {
-       cerr << "WARNING SymSparseLinSOE::SymSparseLinSOE :";
-       cerr << " ran out of memory for vectors (newID)";
+       opserr << "WARNING SymSparseLinSOE::SymSparseLinSOE :";
+       opserr << " ran out of memory for vectors (newID)";
         return -1;
     }
 
@@ -488,8 +487,8 @@ SymSparseLinSOE::setB(const Vector &v, double fact)
     if (fact == 0.0)  return 0;
 
     if (v.Size() != size) {
-	cerr << "WARNING SymSparseLinSOE::setB() -";
-	cerr << " incomptable sizes " << size << " and " << v.Size() << endl;
+	opserr << "WARNING SymSparseLinSOE::setB() -";
+	opserr << " incomptable sizes " << size << " and " << v.Size() << endln;
 	return -1;
     }
     
@@ -562,7 +561,7 @@ const Vector &
 SymSparseLinSOE::getX(void)
 {
     if (vectX == 0) {
-	cerr << "FATAL SymSparseLinSOE::getX - vectX == 0";
+	opserr << "FATAL SymSparseLinSOE::getX - vectX == 0";
 	exit(-1);
     }
     return *vectX;
@@ -572,7 +571,7 @@ const Vector &
 SymSparseLinSOE::getB(void)
 {
     if (vectB == 0) {
-	cerr << "FATAL SymSparseLinSOE::getB - vectB == 0";
+	opserr << "FATAL SymSparseLinSOE::getB - vectB == 0";
 	exit(-1);
     }        
     return *vectB;
@@ -599,8 +598,8 @@ int SymSparseLinSOE::setSymSparseLinSolver(SymSparseLinSolver &newSolver)
     if (size != 0) {
         int solverOK = newSolver.setSize();
 	if (solverOK < 0) {
-	    cerr << "WARNING:SymSparseLinSOE::setSolver :";
-	    cerr << "the new solver could not setSeize() - staying with old\n";
+	    opserr << "WARNING:SymSparseLinSOE::setSolver :";
+	    opserr << "the new solver could not setSeize() - staying with old\n";
 	    return -1;
 	}
     }

@@ -103,8 +103,8 @@ int numEleLoads, int numSPs, int numMPs);}  \\
 \indent // Public Methods for Output \\
 \indent {\em virtual  int  addRecorder(Recorder \&theRecorder);}\\
 \indent {\em virtual  int  playback(int cTag);}\\
-\indent {\em virtual  void Print(ostream \&s, int flag =0);}\\
-\indent {\em friend ostream \&operator<<(ostream \&s, Domain \&M); }\\  
+\indent {\em virtual  void Print(OPS_Stream \&s, int flag =0);}\\
+\indent {\em friend OPS_Stream \&operator<<(OPS_Stream \&s, Domain \&M); }\\  
 \indent // Protected Member Functions  \\
 \indent {\em virtual void domainChange(void) }\\
 \indent {\em virtual int buildEleGraph(Graph \&theEleGraph)} \\
@@ -514,12 +514,12 @@ invocation of this method.\\
 The domain will invoke {\em playback(commitTag)} on all recorder
 objects which have been added to the domain.\\
 
-\indent {\em virtual void Print(ostream \&s, int flag =0);}\\
+\indent {\em virtual void Print(OPS_Stream \&s, int flag =0);}\\
 To print the state of the domain. The domain invokes {\em Print(s,flag)} on
 all it's container objects. \\
 
 
-\indent {\em friend ostream \&operator$<<$(ostream \&s, Domain \&M); }\\  
+\indent {\em friend OPS_Stream \&operator$<<$(OPS_Stream \&s, Domain \&M); }\\  
 This function allows domain objects to be printed to streams. The
 function invokes $M.Print(s)$ before returning $s$. \\
 
@@ -534,13 +534,13 @@ domain. \\
 A method which will cause the domain to discard the current element
 graph and build a new one based on the element connectivity. Returns
 $0$ if successful otherwise $-1$ is returned along with an error
-message to cerr. \\
+message to opserr. \\
 
 {\em virtual int buildNodeGraph(Graph \&theNodeGraph)} \\
 A method which will cause the domain to discard the current node
 graph and build a new one based on the node connectivity. Returns
 $0$ if successful otherwise $-1$ is returned along with an error
-message to cerr. \\
+message to opserr. \\
 
 
 

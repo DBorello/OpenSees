@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/patch/CircPatch.cpp,v $
                                                                         
                                                                         
@@ -139,7 +139,7 @@ CircPatch::getCells (void) const
    {
       numCells  = this->getNumCells();
 
-      //cerr << "\nnumCells: " << numCells;
+      //opserr << "\nnumCells: " << numCells;
 
       cells = new Cell* [numCells];
       
@@ -152,7 +152,7 @@ CircPatch::getCells (void) const
       deltaRad   = (extRad - intRad) / nDivRad;
       deltaTheta = (finalAngRadians - initAngRadians) / nDivCirc;
 
-      //cerr << "\ndeltaRad: " << deltaRad;
+      //opserr << "\ndeltaRad: " << deltaRad;
 
       k = 0;
       for (j = 0; j < nDivRad; j++)
@@ -167,7 +167,7 @@ CircPatch::getCells (void) const
             theta_i  = initAngRadians + deltaTheta*i;
             theta_i1 = theta_i + deltaTheta;
 
-            //cerr << "\n theta_i: "<< theta_i;
+            //opserr << "\n theta_i: "<< theta_i;
 
             cellVertCoord(0,0) = centerPosit(0) + rad_j  * cos(theta_i1);
             cellVertCoord(0,1) = centerPosit(1) + rad_j  * sin(theta_i1);
@@ -179,7 +179,7 @@ CircPatch::getCells (void) const
             cellVertCoord(3,1) = centerPosit(1) + rad_j1 * sin(theta_i1);
 
             cells[k] = new QuadCell(cellVertCoord); 
-            //cerr << "\ncreating cells Cell " << k << " :" << cells[k];
+            //opserr << "\ncreating cells Cell " << k << " :" << cells[k];
             k++; 
          }
       }
@@ -200,7 +200,7 @@ CircPatch::getCopy (void) const
    return theCopy;
 }
  
-void CircPatch::Print(ostream &s, int flag) const
+void CircPatch::Print(OPS_Stream &s, int flag) const
 {
    s << "\nPatch Type: CircPatch";
    s << "\nMaterial Id: " << matID;
@@ -212,7 +212,7 @@ void CircPatch::Print(ostream &s, int flag) const
 }
 
 
-ostream &operator<<(ostream &s, CircPatch &CircPatch)
+OPS_Stream &operator<<(OPS_Stream &s, CircPatch &CircPatch)
 {
    CircPatch.Print(s);
    return s;

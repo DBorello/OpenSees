@@ -115,7 +115,7 @@ tensor EvolutionLaw_L_Eij::h_t( EPState *EPS, PotentialSurface *PS){
 //================================================================================
 void EvolutionLaw_L_Eij::print()
 {
-    cout << (*this);
+    opserr << (*this);
 }
 
 
@@ -126,14 +126,14 @@ double EvolutionLaw_L_Eij::geta() const
 }
 
 //================================================================================
-ostream& operator<< (ostream& os, const EvolutionLaw_L_Eij & LEL)
+OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_L_Eij & LEL)
 {
-    os.unsetf( ios::scientific );
-    os.precision(5);
+  //    os.unsetf( ios::scientific );
+  os.precision(5);
 
-    os.width(10);       
-    os << endln << "Linear Tensorial Evolution Law's parameters:" << endln;
-    os << "a = " << LEL.geta() << "; " << endln;
+  os.width(10);       
+  os << endln << "Linear Tensorial Evolution Law's parameters:" << endln;
+  os << "a = " << LEL.geta() << "; " << endln;
            
     return os;
 }  

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-16 21:17:48 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT1.h,v $
                                                                         
                                                                         
@@ -65,7 +65,7 @@ class HHT1 : public TransientIntegrator
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
 
-    void Print(ostream &s, int flag =0);        
+    void Print(OPS_Stream &s, int flag =0);        
     
   protected:
     

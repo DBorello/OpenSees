@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/ArrayGraph.h,v $
                                                                         
                                                                         
@@ -56,8 +56,8 @@ class ArrayGraph: public Graph
     int getNumVertex(void) const;
     int getNumEdge(void) const;
 
-    virtual void Print(ostream &s) const;
-    friend ostream &operator<<(ostream &s, const ArrayGraph &M);    
+    virtual void Print(OPS_Stream &s) const;
+    friend OPS_Stream &operator<<(OPS_Stream &s, const ArrayGraph &M);    
     
     friend class ArrayVertexIter;    
     

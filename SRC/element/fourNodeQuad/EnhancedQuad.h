@@ -18,11 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-12-05 22:20:40 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.h,v $
                                                                         
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -70,7 +69,7 @@ class EnhancedQuad : public Element {
     int update(void);
 
     //print out element data
-    void Print( ostream &s, int flag ) ;
+    void Print( OPS_Stream &s, int flag ) ;
 	
     //return stiffness matrix 
     const Matrix &getTangentStiff();

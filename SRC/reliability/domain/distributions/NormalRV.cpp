@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:57 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/NormalRV.cpp,v $
 
 
@@ -36,6 +36,7 @@
 #include <NormalRV.h>
 #include <math.h>
 #include <string.h>
+#include <OPS_Globals.h>
 
 NormalRV::NormalRV(int passedTag, 
 		 double passedMean,
@@ -91,7 +92,7 @@ NormalRV::~NormalRV()
 
 
 void
-NormalRV::Print(ostream &s, int flag)
+NormalRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -150,8 +151,8 @@ NormalRV::getStartValue()
 
 double NormalRV::getParameter1()  {return mju;}
 double NormalRV::getParameter2()  {return sigma;}
-double NormalRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double NormalRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double NormalRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double NormalRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
 
 
 double 

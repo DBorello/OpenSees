@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-10-02 21:43:46 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/MinUnbalDispNorm.cpp,v $
                                                                         
                                                                         
@@ -37,7 +37,6 @@
 #include <LinearSOE.h>
 #include <Vector.h>
 #include <Channel.h>
-#include <iostream.h>
 #include <math.h>
 
 MinUnbalDispNorm::MinUnbalDispNorm(double lambda1, int specNumIter,
@@ -52,7 +51,7 @@ MinUnbalDispNorm::MinUnbalDispNorm(double lambda1, int specNumIter,
 {
   // to avoid divide-by-zero error on first update() ensure numIncr != 0
   if (specNumIncrStep == 0) {
-    cerr << "WARNING LoadControl::LoadControl() - numIncr set to 0, 1 assumed\n";
+    opserr << "WARNING LoadControl::LoadControl() - numIncr set to 0, 1 assumed\n";
     specNumIncrStep = 1.0;
     numIncrLastStep = 1.0;
   }
@@ -80,8 +79,8 @@ MinUnbalDispNorm::newStep(void)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING MinUnbalDispNorm::newStep() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING MinUnbalDispNorm::newStep() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }
 
@@ -150,7 +149,7 @@ MinUnbalDispNorm::newStep(void)
     theModel->incrDisp(*deltaU);    
     theModel->applyLoadDomain(currentLambda);    
     if (theModel->updateDomain() < 0) {
-      cerr << "MinUnbalDispNorm::newStep - model failed to update for new dU\n";
+      opserr << "MinUnbalDispNorm::newStep - model failed to update for new dU\n";
       return -1;
     }
 
@@ -163,8 +162,8 @@ MinUnbalDispNorm::update(const Vector &dU)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING MinUnbalDispNorm::update() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING MinUnbalDispNorm::update() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }
 
@@ -179,7 +178,7 @@ MinUnbalDispNorm::update(const Vector &dU)
     double a = (*deltaUhat)^(*deltaUbar);
     double b = (*deltaUhat)^(*deltaUhat);
     if (b == 0) {
-      cerr << "MinUnbalDispNorm::update() - zero denominator\n";
+      opserr << "MinUnbalDispNorm::update() - zero denominator\n";
       return -1;
     }
 
@@ -199,7 +198,7 @@ MinUnbalDispNorm::update(const Vector &dU)
     theModel->applyLoadDomain(currentLambda);    
 
     if (theModel->updateDomain() < 0) {
-      cerr << "MinUnbalDispNorm::update - model failed to update for new dU\n";
+      opserr << "MinUnbalDispNorm::update - model failed to update for new dU\n";
       return -1;
     }
     
@@ -219,8 +218,8 @@ MinUnbalDispNorm::domainChanged(void)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING MinUnbalDispNorm::update() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING MinUnbalDispNorm::update() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }    
     int size = theModel->getNumEqn(); // ask model in case N+1 space
@@ -230,8 +229,8 @@ MinUnbalDispNorm::domainChanged(void)
 	    delete deltaUhat;   // delete the old
 	deltaUhat = new Vector(size);
 	if (deltaUhat == 0 || deltaUhat->Size() != size) { // check got it
-	    cerr << "FATAL MinUnbalDispNorm::domainChanged() - ran out of memory for";
-	    cerr << " deltaUhat Vector of size " << size << endl;
+	    opserr << "FATAL MinUnbalDispNorm::domainChanged() - ran out of memory for";
+	    opserr << " deltaUhat Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -241,8 +240,8 @@ MinUnbalDispNorm::domainChanged(void)
 	    delete deltaUbar;   // delete the old
 	deltaUbar = new Vector(size);
 	if (deltaUbar == 0 || deltaUbar->Size() != size) { // check got it
-	    cerr << "FATAL MinUnbalDispNorm::domainChanged() - ran out of memory for";
-	    cerr << " deltaUbar Vector of size " << size << endl;
+	    opserr << "FATAL MinUnbalDispNorm::domainChanged() - ran out of memory for";
+	    opserr << " deltaUbar Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -253,8 +252,8 @@ MinUnbalDispNorm::domainChanged(void)
 	    delete deltaU;   // delete the old
 	deltaU = new Vector(size);
 	if (deltaU == 0 || deltaU->Size() != size) { // check got it
-	    cerr << "FATAL MinUnbalDispNorm::domainChanged() - ran out of memory for";
-	    cerr << " deltaU Vector of size " << size << endl;
+	    opserr << "FATAL MinUnbalDispNorm::domainChanged() - ran out of memory for";
+	    opserr << " deltaU Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -264,8 +263,8 @@ MinUnbalDispNorm::domainChanged(void)
 	    delete deltaUstep;  
 	deltaUstep = new Vector(size);
 	if (deltaUstep == 0 || deltaUstep->Size() != size) { 
-	    cerr << "FATAL MinUnbalDispNorm::domainChanged() - ran out of memory for";
-	    cerr << " deltaUstep Vector of size " << size << endl;
+	    opserr << "FATAL MinUnbalDispNorm::domainChanged() - ran out of memory for";
+	    opserr << " deltaUstep Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -275,8 +274,8 @@ MinUnbalDispNorm::domainChanged(void)
 	    delete phat;  
 	phat = new Vector(size);
 	if (phat == 0 || phat->Size() != size) { 
-	    cerr << "FATAL MinUnbalDispNorm::domainChanged() - ran out of memory for";
-	    cerr << " phat Vector of size " << size << endl;
+	    opserr << "FATAL MinUnbalDispNorm::domainChanged() - ran out of memory for";
+	    opserr << " phat Vector of size " << size << endln;
 	    exit(-1);
 	}
     }    
@@ -302,7 +301,7 @@ MinUnbalDispNorm::domainChanged(void)
       }
 
     if (haveLoad == 0) {
-      cerr << "WARNING ArcLength::domainChanged() - zero reference load";
+      opserr << "WARNING ArcLength::domainChanged() - zero reference load";
       return -1;
     }
 
@@ -328,7 +327,7 @@ MinUnbalDispNorm::sendSelf(int cTag,
   data(7) = dLambda1max;
 
   if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
-      cerr << "MinUnbalDispNorm::sendSelf() - failed to send the data\n";
+      opserr << "MinUnbalDispNorm::sendSelf() - failed to send the data\n";
       return -1;
   }
   return 0;
@@ -341,7 +340,7 @@ MinUnbalDispNorm::recvSelf(int cTag,
 {
   Vector data(8);
   if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
-      cerr << "MinUnbalDispNorm::sendSelf() - failed to send the data\n";
+      opserr << "MinUnbalDispNorm::sendSelf() - failed to send the data\n";
       return -1;
   }      
 
@@ -363,7 +362,7 @@ MinUnbalDispNorm::recvSelf(int cTag,
 }
 
 void
-MinUnbalDispNorm::Print(ostream &s, int flag)
+MinUnbalDispNorm::Print(OPS_Stream &s, int flag)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theModel != 0) {

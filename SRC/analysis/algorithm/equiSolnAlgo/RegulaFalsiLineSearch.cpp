@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-12-07 01:02:10 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/RegulaFalsiLineSearch.cpp,v $
 
 // Written: fmk 
@@ -33,7 +33,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Vector.h>
-#include <iostream.h>
 
 RegulaFalsiLineSearch::RegulaFalsiLineSearch(double tol, int mIter, double mnEta, double mxEta, int pFlag)
 :LineSearch(LINESEARCH_TAGS_RegulaFalsiLineSearch),
@@ -96,8 +95,8 @@ RegulaFalsiLineSearch::search(double s0,
   const Vector &dU = theSOE.getX();
 
   if (printFlag == 0) {
-    cerr << "RegulaFalsi Line Search - initial: "
-	 << "      eta(0) : " << eta << " , Ratio |s/s0| = " << r0 << endl;
+    opserr << "RegulaFalsi Line Search - initial: "
+	 << "      eta(0) : " << eta << " , Ratio |s/s0| = " << r0 << endln;
   }
 
   // perform the secant iterations:
@@ -125,14 +124,14 @@ RegulaFalsiLineSearch::search(double s0,
     *x *= eta-etaJ;
 	    
     if (theIntegrator.update(*x) < 0) {
-      cerr << "WARNING RegulaFalsiLineSearch::search() -";
-      cerr << "the Integrator failed in update()\n";	
+      opserr << "WARNING RegulaFalsiLineSearch::search() -";
+      opserr << "the Integrator failed in update()\n";	
       return -1;
     }
     
     if (theIntegrator.formUnbalance() < 0) {
-      cerr << "WARNING RegulaFalsiLineSearch::search() -";
-      cerr << "the Integrator failed in formUnbalance()\n";	
+      opserr << "WARNING RegulaFalsiLineSearch::search() -";
+      opserr << "the Integrator failed in formUnbalance()\n";	
       return -2;
     }	
 
@@ -147,8 +146,8 @@ RegulaFalsiLineSearch::search(double s0,
 
 
     if (printFlag == 0) {
-      cerr << "RegulaFalsi Line Search - iteration: " << count 
-	   << " , eta(j) : " << eta << " , Ratio |sj/s0| = " << r << endl;
+      opserr << "RegulaFalsi Line Search - iteration: " << count 
+	   << " , eta(j) : " << eta << " , Ratio |sj/s0| = " << r << endln;
     }
     
 
@@ -198,12 +197,12 @@ RegulaFalsiLineSearch::recvSelf(int cTag,
 
 
 void
-RegulaFalsiLineSearch::Print(ostream &s, int flag)
+RegulaFalsiLineSearch::Print(OPS_Stream &s, int flag)
 {
   if (flag == 0) {
-    s << "RegulaFalsiLineSearch :: Line Search Tolerance = " << tolerance << endl; 
-    s << "                         max num Iterations = " << maxIter << endl;
-    s << "                         max value on eta = " << maxEta << endl;
+    s << "RegulaFalsiLineSearch :: Line Search Tolerance = " << tolerance << endln; 
+    s << "                         max num Iterations = " << maxIter << endln;
+    s << "                         max value on eta = " << maxEta << endln;
   }
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-16 21:10:00 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d03.cpp,v $
                                                                         
                                                                         
@@ -132,13 +132,13 @@ beam2d03::setDomain(Domain *theDomain)
     theNodes[0] = theDomain->getNode(Nd1);
     theNodes[1] = theDomain->getNode(Nd2);	
     if (theNodes[0] == 0) {
-	cerr << "WARNING beam2d02::setDomain(): Nd1: ";
-	cerr << Nd1 << "does not exist in model for beam \n" << *this;
+	opserr << "WARNING beam2d02::setDomain(): Nd1: ";
+	opserr << Nd1 << "does not exist in model for beam \n" << *this;
 	return;
     }
     if (theNodes[1] == 0) {
-	cerr << "WARNING beam2d02::setDomain(): Nd2: ";
-	cerr << Nd2 << "does not exist in model for beam\n" << *this;
+	opserr << "WARNING beam2d02::setDomain(): Nd2: ";
+	opserr << Nd2 << "does not exist in model for beam\n" << *this;
 	return;
     }	
     
@@ -146,9 +146,9 @@ beam2d03::setDomain(Domain *theDomain)
     int dofNd1 = theNodes[0]->getNumberDOF();
     int dofNd2 = theNodes[1]->getNumberDOF();	
     if (dofNd1 != 3 && dofNd2 != 3) {
-	cerr << "WARNING beam2d02::setDomain(): node " << Nd1;
-	cerr << " and/or node " << Nd2 << " have/has incorrect number ";
-	cerr << "of dof's at end for beam\n " << *this;
+	opserr << "WARNING beam2d02::setDomain(): node " << Nd1;
+	opserr << " and/or node " << Nd2 << " have/has incorrect number ";
+	opserr << "of dof's at end for beam\n " << *this;
 	return;
     }	
 
@@ -166,8 +166,8 @@ beam2d03::setDomain(Domain *theDomain)
     double L2 = L*L;
     double L3 = L*L*L;
     if (L == 0.0) {
-      cerr << "Element: " << this->getTag();
-      cerr << " beam2d03::getStiff: 0 length\n";
+      opserr << "Element: " << this->getTag();
+      opserr << " beam2d03::getStiff: 0 length\n";
     }
     
     cs = dx/L;
@@ -269,8 +269,7 @@ int
 beam2d03::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
 
-  g3ErrorHandler->warning("beam2d03::addLoad() - beam %d,load type unknown\n", 
-			    this->getTag());
+  opserr << "beam2d03::addLoad() - beam " << this->getTag() << "load type unknown\n";
   return -1;
     
   return 0;
@@ -326,13 +325,13 @@ beam2d03::sendSelf(int commitTag, Channel &theChannel)
   int result = 0;
   result = theChannel.sendVector(dataTag, commitTag, data);
   if (result < 0) {
-    cerr << "beam2d03::sendSelf - failed to send data\n";
+    opserr << "beam2d03::sendSelf - failed to send data\n";
     return -1;
   }
   
   result = theChannel.sendID(dataTag, commitTag, connectedExternalNodes);
   if (result < 0) {
-    cerr << "beam2d03::sendSelf - failed to send data\n";
+    opserr << "beam2d03::sendSelf - failed to send data\n";
     return -1;
   }
     
@@ -348,7 +347,7 @@ beam2d03::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 
     result = theChannel.recvVector(dataTag, commitTag, data);
     if (result < 0) {
-	cerr << "beam2d03::recvSelf - failed to recv data\n";
+	opserr << "beam2d03::recvSelf - failed to recv data\n";
 	return -1;
     }
 
@@ -357,7 +356,7 @@ beam2d03::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 
     result = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
     if (result < 0) {
-	cerr << "beam2d03::recvSelf - failed to recv data\n";
+	opserr << "beam2d03::recvSelf - failed to recv data\n";
 	return -1;
     }
     
@@ -367,7 +366,7 @@ beam2d03::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 
 
 void
-beam2d03::Print(ostream &s, int flag)
+beam2d03::Print(OPS_Stream &s, int flag)
 {
   //    s << "\nElement: " << this->getTag() << " Type: beam2d03 ";
   //    s << "\tConnected Nodes: " << connectedExternalNodes ;

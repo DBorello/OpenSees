@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/db.cpp,v $
                                                                         
                                                                         
@@ -43,7 +43,7 @@ MYPOINT::Transform(MATRIX *M)
 }
 
 
-ostream &operator<<(ostream &os, MYPOINT &point)
+OPS_Stream &operator<<(OPS_Stream &os, MYPOINT &point)
 {
   os <<"Point  ("<<point.X()<<' '<<point.Y()<<' '<<
     point.Z()<<')';
@@ -51,13 +51,13 @@ ostream &operator<<(ostream &os, MYPOINT &point)
   return os;
 }
     
-ostream &operator<<(ostream &os, FACE &face)
+OPS_Stream &operator<<(OPS_Stream &os, FACE &face)
 {
-  os <<"Face: "<< endl;
+  os <<"Face: "<< endln;
   MYPOINT *point;
   FOR_EACH(point, face.pointList)
     {
-      os << (*point) << endl;
+      os << (*point) << endln;
     }
   return os;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/numberer/SimpleNumberer.cpp,v $
                                                                         
                                                                         
@@ -77,7 +77,7 @@ SimpleNumberer::number(Graph &theGraph, int lastVertex)
 	theRefResult = new ID(numVertex);
 
 	if (theRefResult == 0) {
-	    cerr << "ERROR:  SimpleNumberer::number - Out of Memory\n";
+	    opserr << "ERROR:  SimpleNumberer::number - Out of Memory\n";
 	    theRefResult = new ID(0);
 	    numVertex = 0;
 	    return *theRefResult;
@@ -93,8 +93,8 @@ SimpleNumberer::number(Graph &theGraph, int lastVertex)
     // Now we go through the iter and assign the numbers
 
     if (lastVertex != -1) {
-	cerr << "WARNING:  SimpleNumberer::number -";
-	cerr << " - does not deal with lastVertex";
+	opserr << "WARNING:  SimpleNumberer::number -";
+	opserr << " - does not deal with lastVertex";
     }
     
     Vertex *vertexPtr;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-16 21:10:00 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/beam3d02.h,v $
                                                                         
                                                                         
@@ -71,7 +71,7 @@ class beam3d02 : public Element
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
     
-    void Print(ostream &s, int flag =0);    
+    void Print(OPS_Stream &s, int flag =0);    
     
   private:
     const Matrix &getStiff(void);    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-11-06 00:49:26 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/message/Message.cpp,v $
                                                                         
                                                                         
@@ -27,7 +27,7 @@
 //
 
 #include "Message.h"
-#include <iostream.h>
+#include <OPS_Globals.h>
 
 #ifndef _WIN32
 #include <strings.h>
@@ -76,7 +76,7 @@ Message::putData(char *theData, int startLoc, int endLoc)
 	bcopy(theData, dataPos, theLength);
 	return 0;
     } else {
-	cerr << "Message::putData() - invalid length of data given\n";
+	opserr << "Message::putData() - invalid length of data given\n";
 	return -1;
     }
 }

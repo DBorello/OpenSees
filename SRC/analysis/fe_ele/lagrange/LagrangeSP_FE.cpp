@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/lagrange/LagrangeSP_FE.cpp,v $
                                                                         
                                                                         
@@ -60,8 +60,8 @@ LagrangeSP_FE::LagrangeSP_FE(Domain &theDomain, SP_Constraint &TheSP,
     resid = new Vector(2);
     if ((tang == 0) || (tang->noCols() == 0) || (resid == 0) ||
 	(resid->Size() == 0)) {
-	cerr << "WARNING LagrangeSP_FE::LagrangeSP_FE()";
-	cerr << "- ran out of memory\n";
+	opserr << "WARNING LagrangeSP_FE::LagrangeSP_FE()";
+	opserr << "- ran out of memory\n";
 	exit(-1);
     }
 
@@ -71,8 +71,8 @@ LagrangeSP_FE::LagrangeSP_FE(Domain &theDomain, SP_Constraint &TheSP,
 
     theNode = theDomain.getNode(theSP->getNodeTag());    
     if (theNode == 0) {
-	cerr << "WARNING LagrangeSP_FE::LagrangeSP_FE()";
-	cerr << "- no asscoiated Node\n";
+	opserr << "WARNING LagrangeSP_FE::LagrangeSP_FE()";
+	opserr << "- no asscoiated Node\n";
 	exit(-1);
     }
 
@@ -84,8 +84,8 @@ LagrangeSP_FE::LagrangeSP_FE(Domain &theDomain, SP_Constraint &TheSP,
     // DOF_Group objects
     DOF_Group *theNodesDOFs = theNode->getDOF_GroupPtr();
     if (theNodesDOFs == 0) {
-	cerr << "WARNING LagrangeSP_FE::LagrangeSP_FE()";
-	cerr << " - no DOF_Group with Constrained Node\n";
+	opserr << "WARNING LagrangeSP_FE::LagrangeSP_FE()";
+	opserr << " - no DOF_Group with Constrained Node\n";
 	exit(-1);	
     }    
 
@@ -113,8 +113,8 @@ LagrangeSP_FE::setID(void)
     // associated with the constrained node
     DOF_Group *theNodesDOFs = theNode->getDOF_GroupPtr();
     if (theNodesDOFs == 0) {
-	cerr << "WARNING LagrangeSP_FE::setID(void)";
-	cerr << " - no DOF_Group with Constrained Node\n";
+	opserr << "WARNING LagrangeSP_FE::setID(void)";
+	opserr << " - no DOF_Group with Constrained Node\n";
 	return -1;
     }    
 
@@ -122,8 +122,8 @@ LagrangeSP_FE::setID(void)
     const ID &theNodesID = theNodesDOFs->getID();
     
     if (restrainedDOF < 0 || restrainedDOF >= theNodesID.Size()) {
-	cerr << "WARNING LagrangeSP_FE::setID(void)";
-	cerr << " - restrained DOF invalid\n";
+	opserr << "WARNING LagrangeSP_FE::setID(void)";
+	opserr << " - restrained DOF invalid\n";
 	return -2;
     }    	
     
@@ -147,14 +147,14 @@ LagrangeSP_FE::getResidual(Integrator *theNewIntegrator)
     const Vector &nodeDisp = theNode->getTrialDisp();
 
     if (constrainedDOF < 0 || constrainedDOF >= nodeDisp.Size()) {
-	cerr << "LagrangeSP_FE::formResidual() -";
-	cerr << " constrained DOF " << constrainedDOF << " ouside range\n";
+	opserr << "LagrangeSP_FE::formResidual() -";
+	opserr << " constrained DOF " << constrainedDOF << " ouside range\n";
 	(*resid)(1) = 0;
     }
     
     (*resid)(1) = alpha *(constraint - nodeDisp(constrainedDOF));
-//    cerr << "LagrangeSP_FE::getResidual() " << constraint << " " << nodeDisp(constrainedDOF) << " " << constrainedDOF << nodeDisp;
-//    cerr << "LagrangeSP_FE::getResidual() " << *resid << this->getID();    
+//    opserr << "LagrangeSP_FE::getResidual() " << constraint << " " << nodeDisp(constrainedDOF) << " " << constrainedDOF << nodeDisp;
+//    opserr << "LagrangeSP_FE::getResidual() " << *resid << this->getID();    
     return *resid;
 }
 
@@ -167,8 +167,8 @@ LagrangeSP_FE::getTangForce(const Vector &disp, double fact)
     double constraint = theSP->getValue();
     int constrainedID = myID(1);
     if (constrainedID < 0 || constrainedID >= disp.Size()) {
-	cerr << "WARNING LagrangeSP_FE::getTangForce() - ";	
-	cerr << " constrained DOF " << constrainedID << " outside disp\n";
+	opserr << "WARNING LagrangeSP_FE::getTangForce() - ";	
+	opserr << " constrained DOF " << constrainedID << " outside disp\n";
 	(*resid)(1) = constraint*alpha;
 	return *resid;
     }

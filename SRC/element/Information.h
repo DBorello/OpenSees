@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-13 00:18:49 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Information.h,v $
                                                                         
                                                                         
@@ -42,8 +42,12 @@ class Matrix;
 class Vector;
 class ID;
 
-#include <iostream.h>
+#include <OPS_Globals.h>
 #include <Tensor.h>
+
+
+#include <fstream>
+using std::ofstream;
 
 enum InfoType {UnknownType, IntType, DoubleType, 
 	       IdType, VectorType, MatrixType, TensorType};
@@ -68,7 +72,8 @@ class Information
     virtual int setMatrix(const Matrix &newMatrix);
     virtual int setTensor(const Tensor &newTensor);
     
-    virtual void Print(ostream &s, int flag = 0);
+    virtual void Print(OPS_Stream &s, int flag = 0);
+    virtual void Print(ofstream &s, int flag = 0);
     virtual const Vector &getData(void);
 
 

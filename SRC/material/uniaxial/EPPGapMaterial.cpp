@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-11-04 19:22:34 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.cpp,v $
 
 // File: ~/material/EPPGapMaterial.C
@@ -40,6 +40,7 @@
 #include <math.h>
 #include <float.h>
 
+#include <OPS_Globals.h>
 
 EPPGapMaterial::EPPGapMaterial(int tag, double e, double fyl, double gap0, int accum)
 :UniaxialMaterial(tag,MAT_TAG_EPPGap),
@@ -47,25 +48,23 @@ EPPGapMaterial::EPPGapMaterial(int tag, double e, double fyl, double gap0, int a
  minElasticYieldStrain(gap0),damage(accum)
 {
 	if (E == 0.0) {
-		g3ErrorHandler->warning("%s -- E is zero, continuing with E = fy/0.002",
-			"EPPGapMaterial::EPPGapMaterial");
-		if (fy != 0.0)
-			E = fabs(fy)/0.002;
-		else
-			g3ErrorHandler->fatal("%s -- E and fy are zero",
-				"EPPGapMaterial::EPPGapMaterial");
+	  opserr << "EPPGapMaterial::EPPGapMaterial -- E is zero, continuing with E = fy/0.002\n";
+	  if (fy != 0.0)
+	    E = fabs(fy)/0.002;
+	  else {
+	    opserr << "EPPGapMaterial::EPPGapMaterial -- E and fy are zero\n";
+	    exit(-1);
+	  }
 	}
 	else
-		maxElasticYieldStrain = fy/E + gap;
+	  maxElasticYieldStrain = fy/E + gap;
 
 	if (fy*gap<0) {
-		g3ErrorHandler->warning("%s -- Alternate signs on fy and E encountered, continuing anyway",
-			"EPPGapMaterial::EPPGapMaterial");
+	  opserr << "EPPGapMaterial::EPPGapMaterial -- Alternate signs on fy and E encountered, continuing anyway\n";
 	}
         
         if ( (damage < 0) || (damage > 1) ) {
-            g3ErrorHandler->warning("%s -- damage switch must be 0 or 1",
-			"EPPGapMaterial::EPPGapMaterial");
+	  opserr << "%s -- damage switch must be 0 or 1\n";
 	}
 }
 
@@ -223,7 +222,7 @@ EPPGapMaterial::sendSelf(int cTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "EPPGapMaterial::sendSelf() - failed to send data\n";
+    opserr << "EPPGapMaterial::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -236,7 +235,7 @@ EPPGapMaterial::recvSelf(int cTag, Channel &theChannel,
   static Vector data(8);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   if (res < 0)
-    cerr << "EPPGapMaterial::recvSelf() - failed to recv data\n";
+    opserr << "EPPGapMaterial::recvSelf() - failed to recv data\n";
   else {
     this->setTag((int)data(0));
     commitStrain = data(1);
@@ -253,12 +252,12 @@ EPPGapMaterial::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-EPPGapMaterial::Print(ostream &s, int flag)
+EPPGapMaterial::Print(OPS_Stream &s, int flag)
 {
-    s << "EPPGap tag: " << this->getTag() << endl;
-    s << "  E: " << E << endl;
-    s << "  fy: " << fy << endl;
-    s << "  initial gap: " << gap << endl;
+    s << "EPPGap tag: " << this->getTag() << endln;
+    s << "  E: " << E << endln;
+    s << "  fy: " << fy << endln;
+    s << "  initial gap: " << gap << endln;
     if (damage == 1)
-        s << "  damage accumulation specified" << endl;
+        s << "  damage accumulation specified" << endln;
 }

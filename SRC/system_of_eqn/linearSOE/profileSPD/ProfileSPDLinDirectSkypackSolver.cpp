@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectSkypackSolver.cpp,v $
                                                                         
                                                                         
@@ -75,8 +75,8 @@ ProfileSPDLinDirectSkypackSolver::ProfileSPDLinDirectSkypackSolver(int Mcols, in
 
     // check we got the space requested
     if (rw == 0 || tw == 0 || index == 0) {
-	cerr << "WARNING ProfileSPDLinDirectSkypackSolver::ProfileSPDLinDirectSkypack";
-	cerr << "Solver() - ran out of memory for work areas, setting mCols and mRows = 0\n";
+	opserr << "WARNING ProfileSPDLinDirectSkypackSolver::ProfileSPDLinDirectSkypack";
+	opserr << "Solver() - ran out of memory for work areas, setting mCols and mRows = 0\n";
 	mCols = 0; mRows = 0;
     }
 }
@@ -96,8 +96,8 @@ ProfileSPDLinDirectSkypackSolver::setSize(void)
     int result = 0;
 
     if (theSOE == 0) {
-	cerr << "WARNING ProfileSPDLinDirectSkypackSolver::setSize()";
-	cerr << " No system has been set\n";
+	opserr << "WARNING ProfileSPDLinDirectSkypackSolver::setSize()";
+	opserr << " No system has been set\n";
 	return -1;
     }
 
@@ -117,8 +117,8 @@ ProfileSPDLinDirectSkypackSolver::setSize(void)
     // create the new work areas
     invD = new double[size];
     if (invD == 0) {
-      cerr << "Warning :ProfileSPDLinDirectSkypackSolver::setSize():";
-      cerr << " ran out of memory for work area invD\n";
+      opserr << "Warning :ProfileSPDLinDirectSkypackSolver::setSize():";
+      opserr << " ran out of memory for work area invD\n";
       result = -2;;
     }    
 
@@ -140,8 +140,8 @@ ProfileSPDLinDirectSkypackSolver::solve(void)
 {
     // check for quick returns
     if (theSOE == 0) {
-	cerr << "ProfileSPDLinDirectSkypackSolver::solve(void): ";
-	cerr << " - No ProfileSPDSOE has been assigned\n";
+	opserr << "ProfileSPDLinDirectSkypackSolver::solve(void): ";
+	opserr << " - No ProfileSPDSOE has been assigned\n";
 	return -1;
     }
     
@@ -151,8 +151,8 @@ ProfileSPDLinDirectSkypackSolver::solve(void)
 
     // check that work area invD has been created
     if (invD == 0) {
-	cerr << "ProfileSPDLinDirectSkypackSolver::solve(void): ";
-	cerr << " - no space for invD - has setSize() been called?\n";
+	opserr << "ProfileSPDLinDirectSkypackSolver::solve(void): ";
+	opserr << " - no space for invD - has setSize() been called?\n";
 	return -1;
     }	
 
@@ -215,8 +215,8 @@ ProfileSPDLinDirectSkypackSolver::solve(void)
       
     // return
     if (INFO < 0) {
-	cerr << "WARNING ProfileSPDLinDirectSkypackSolver::solve()";
-	cerr << " error value returned from skyss()\n";
+	opserr << "WARNING ProfileSPDLinDirectSkypackSolver::solve()";
+	opserr << " error value returned from skyss()\n";
     }    
 
     return INFO;
@@ -236,7 +236,7 @@ ProfileSPDLinDirectSkypackSolver::sendSelf(int cTag,
 					   Channel &theChannel)
 {
     if (size != 0)
-	cerr << "ProfileSPDLinDirectSkypackSolver::sendSelf - does not send itself YET\n"; 
+	opserr << "ProfileSPDLinDirectSkypackSolver::sendSelf - does not send itself YET\n"; 
     return 0;
 }
 

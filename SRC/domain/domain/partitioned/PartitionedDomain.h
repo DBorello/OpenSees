@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:44:38 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
@@ -97,7 +97,7 @@ class PartitionedDomain: public Domain
     virtual  int update(double newTime, double dT);
 
     
-    virtual  void Print(ostream &s, int flag =0);    
+    virtual  void Print(OPS_Stream &s, int flag =0);    
 
     // public member functions in addition to the standard domain
     virtual int partition(int numPartitions);

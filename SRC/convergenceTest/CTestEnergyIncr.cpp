@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-06-14 05:26:47 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestEnergyIncr.cpp,v $
                                                                         
                                                                         
@@ -83,7 +83,7 @@ CTestEnergyIncr::setEquiSolnAlgo(EquiSolnAlgo &theAlgo)
 {
     theSOE = theAlgo.getLinearSOEptr();
     if (theSOE == 0) {
-	cerr << "WARNING: CTestEnergyIncr::setEquiSolnAlgo - no SOE\n";	
+	opserr << "WARNING: CTestEnergyIncr::setEquiSolnAlgo - no SOE\n";	
 	return -1;
     }
     else
@@ -102,7 +102,7 @@ CTestEnergyIncr::test(void)
   // check to ensure the algo does invoke start() - this is needed otherwise
   // may never get convergence later on in analysis!
   if (currentIter == 0) {
-    cerr << "WARNING: CTestEnergyIncr::test() - start() was never invoked.\n";	
+    opserr << "WARNING: CTestEnergyIncr::test() - start() was never invoked.\n";	
     return -2;
   }
 
@@ -121,14 +121,14 @@ CTestEnergyIncr::test(void)
 
   // print the data if required
   if (printFlag == 1) {
-    cerr << "CTestEnergyIncr::test() - iteration: " << currentIter;
-    cerr << " current Product: " << product << " (max: " << tol << ")\n";
+    opserr << "CTestEnergyIncr::test() - iteration: " << currentIter;
+    opserr << " current Product: " << product << " (max: " << tol << ")\n";
   }
   if (printFlag == 4) {
-    cerr << "CTestEnergyIncr::test() - iteration: " << currentIter;
-    cerr << " current Product: " << product << " (max: " << tol << ")\n";
-    cerr << " Norm deltaX: " << x.Norm() << "  Norm deltaR: " << b.Norm() << endl;
-    cerr << "deltaX: " << x << " deltaR: " << b;
+    opserr << "CTestEnergyIncr::test() - iteration: " << currentIter;
+    opserr << " current Product: " << product << " (max: " << tol << ")\n";
+    opserr << " Norm deltaX: " << x.Norm() << "  Norm deltaR: " << b.Norm() << endln;
+    opserr << "deltaX: " << x << " deltaR: " << b;
   }
 
   //
@@ -141,10 +141,10 @@ CTestEnergyIncr::test(void)
     // do some printing first
     if (printFlag != 0) {
       if (printFlag == 1) 
-	cerr << endl;
+	opserr << endln;
       else if (printFlag == 2) {
-	cerr << "CTestEnergyIncr::test() - iteration: " << currentIter;
-	cerr << " last incr: " << product << " (max permissable: " << tol << ")\n";
+	opserr << "CTestEnergyIncr::test() - iteration: " << currentIter;
+	opserr << " last incr: " << product << " (max permissable: " << tol << ")\n";
       }
     }
 
@@ -154,16 +154,16 @@ CTestEnergyIncr::test(void)
 
   // algo failed to converged after specified number of iterations - but RETURN OK
   else if (printFlag == 5 && currentIter >= maxNumIter) {
-    cerr << "WARNING: CTestEnergyIncr::test() - failed to converge but goin on - ";
-    cerr << " current Product: " << product << " (max: " << tol << ")\n";
-    cerr << " Norm deltaX: " << x.Norm() << "  Norm deltaR: " << b.Norm() << endl;
+    opserr << "WARNING: CTestEnergyIncr::test() - failed to converge but goin on - ";
+    opserr << " current Product: " << product << " (max: " << tol << ")\n";
+    opserr << " Norm deltaX: " << x.Norm() << "  Norm deltaR: " << b.Norm() << endln;
     return currentIter;
   }
 
   // algo failed to converged after specified number of iterations - return FAILURE -2
   else if (currentIter >= maxNumIter) { // >= in case algorithm does not check
-    cerr << "WARNING: CTestEnergyIncr::test() - failed to converge \n";
-    cerr << "after: " << currentIter << " iterations\n";	
+    opserr << "WARNING: CTestEnergyIncr::test() - failed to converge \n";
+    opserr << "after: " << currentIter << " iterations\n";	
     currentIter++;    
     return -2;
   } 
@@ -179,7 +179,7 @@ int
 CTestEnergyIncr::start(void)
 {
     if (theSOE == 0) {
-	cerr << "WARNING: CTestEnergyIncr::test() - no SOE returning true\n";
+	opserr << "WARNING: CTestEnergyIncr::test() - no SOE returning true\n";
 	return -1;
     }
 
@@ -227,7 +227,7 @@ CTestEnergyIncr::sendSelf(int cTag, Channel &theChannel)
   
   res = theChannel.sendVector(this->getDbTag(), cTag, x);
   if (res < 0) 
-    cerr << "CTestEnergyIncr::sendSelf() - failed to send data\n";
+    opserr << "CTestEnergyIncr::sendSelf() - failed to send data\n";
     
   return res;
 }
@@ -241,7 +241,7 @@ CTestEnergyIncr::recvSelf(int cTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), cTag, x);    
 
   if (res < 0) {
-      cerr << "CTestEnergyIncr::sendSelf() - failed to send data\n";
+      opserr << "CTestEnergyIncr::sendSelf() - failed to send data\n";
       tol = 1.0e-8;
       maxNumIter = 25;
   }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2002-12-17 23:36:29 $
+// $Revision: 1.15 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -39,13 +39,9 @@
 #include <tcl.h>
 #include <tk.h>
 
-#include <iostream.h>
-#include <fstream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-
 #include <Domain.h>
 #include <EquiSolnAlgo.h>
 
@@ -63,6 +59,7 @@
 #include <Node.h>
 #include <Element.h>
 #include <MeshRegion.h>
+#include <GSA_Recorder.h>
 
 #include <EquiSolnAlgo.h>
 
@@ -74,24 +71,24 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 {
     // make sure at least one other argument to contain integrator
     if (argc < 2) {
-	interp->result = "WARNING need to specify a Recorder type "; return TCL_ERROR;
+	opserr << "WARNING need to specify a Recorder type\n"; 
+	return TCL_ERROR;
     }    
 
     //
     // check argv[1] for type of Recorder, parse in rest of arguments
     // needed for the type of Recorder, create the object and add to Domain
     //
-
     (*theRecorder) = 0;
 
     // an Element Recorder or ElementEnvelope Recorder
     if ((strcmp(argv[1],"Element") == 0) || (strcmp(argv[1],"EnvelopeElement") == 0) 
 	|| (strcmp(argv[1],"ElementEnvelope") == 0)) {
-      
+
         /* KEEP - FOR LEGACY REASONS NEED TO KEEP THE FOLLOWING UGLY STUFF */
         int eleID;
         if (argc < 4) {
-	    cerr << "WARNING recorder Element eleID1? eleID2? ...  <-time> "
+	    opserr << "WARNING recorder Element eleID1? eleID2? ...  <-time> "
 		<< "<-file fileName?> parameters";
 	    return TCL_ERROR;
 	}    
@@ -149,7 +146,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       
 	    // ensure no segmentation fault if user messes up
 	    if (argc < loc+2) {
-	      cerr << "WARNING recorder Element .. -ele tag1? .. - no ele tags specified\n";
+	      opserr << "WARNING recorder Element .. -ele tag1? .. - no ele tags specified\n";
 	      return TCL_ERROR;
 	    }
 	    
@@ -171,12 +168,12 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 		eleIDs[numEle++] = theEle->getTag();
 	      loc++;
 	    }
-	    
+
 	  } else if (strcmp(argv[loc],"-eleRange") == 0) {
 	    
 	    // ensure no segmentation fault if user messes up
 	    if (argc < loc+3) {
-	      cerr << "WARNING recorder Element .. -eleRange start? end?  .. - no ele tags specified\n";
+	      opserr << "WARNING recorder Element .. -eleRange start? end?  .. - no ele tags specified\n";
 	      return TCL_ERROR;
 	    }
 	    
@@ -186,11 +183,11 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    
 	    int start, end;
 	    if (Tcl_GetInt(interp, argv[loc+1], &start) != TCL_OK) {
-	      cerr << "WARNING recorder Element -eleRange start? end? - invalid start " << argv[loc+1] << endl;
+	      opserr << "WARNING recorder Element -eleRange start? end? - invalid start " << argv[loc+1] << endln;
 	      return TCL_ERROR;
 	    }      
 	    if (Tcl_GetInt(interp, argv[loc+2], &end) != TCL_OK) {
-	      cerr << "WARNING recorder Element -eleRange start? end? - invalid end " << argv[loc+2] << endl;
+	      opserr << "WARNING recorder Element -eleRange start? end? - invalid end " << argv[loc+2] << endln;
 	      return TCL_ERROR;
 	    }      
 	    if (start > end) {
@@ -201,6 +198,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	    for (int i=start; i<=end; i++)
 	      eleIDs[numEle++] = i;	    
+
 	    loc += 3;
 	  } 
 
@@ -208,17 +206,17 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    // allow user to specif elements via a region
 
 	    if (argc < loc+2) {
-	      cerr << "WARNING recorder Element .. -region tag?  .. - no region specified\n";
+	      opserr << "WARNING recorder Element .. -region tag?  .. - no region specified\n";
 	      return TCL_ERROR;
 	    }
 	    int tag;
 	    if (Tcl_GetInt(interp, argv[loc+1], &tag) != TCL_OK) {
-	      cerr << "WARNING recorder Element -region tag? - invalid tag " << argv[loc+1] << endl;
+	      opserr << "WARNING recorder Element -region tag? - invalid tag " << argv[loc+1] << endln;
 	      return TCL_ERROR;
 	    }      
 	    MeshRegion *theRegion = theDomain.getRegion(tag);
 	    if (theRegion == 0) {
-	      cerr << "WARNING recorder Element -region " << tag << " - region does not exist" << endl;
+	      opserr << "WARNING recorder Element -region " << tag << " - region does not exist" << endln;
 	      return TCL_OK;
 	    }      
 	    const ID &eleRegion = theRegion->getElements();
@@ -228,7 +226,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    loc += 2;
 	  } 
 
-	  else if (strcmp(argv[loc],"-time") == 0) {
+	  else if ((strcmp(argv[loc],"-time") == 0) || (strcmp(argv[loc],"-load") == 0)) { 
 	    // allow user to specify const load
 	    echoTime = true;
 	    loc++;
@@ -245,6 +243,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    // allow user to specify load pattern other than current
 	    loc++;
 	    fileName = argv[loc];
+	    opserr << *argv[loc];
 	    loc++;
 	  }
 	  else {
@@ -264,8 +263,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	}
 
 	// now construct the recorder
-	if (strcmp(argv[1],"Element") == 0)
-	
+	if (strcmp(argv[1],"Element") == 0) 
 	  (*theRecorder) = new ElementRecorder(eleIDs, theDomain, &argv[eleData], 
 					       argc-eleData, echoTime, dT, fileName);
 	else
@@ -279,8 +277,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	     || (strcmp(argv[1],"NodeEnvelope") == 0)) {	
 
       if (argc < 7) {
-	    cerr << "WARNING recorder Node ";
-	    cerr << "-node <list nodes> -dof <doflist> -file <fileName> -dT <dT> reponse";
+	    opserr << "WARNING recorder Node ";
+	    opserr << "-node <list nodes> -dof <doflist> -file <fileName> -dT <dT> reponse";
 	    return TCL_ERROR;
 	}    
 
@@ -365,7 +363,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    
 	  // ensure no segmentation fault if user messes up
 	  if (argc < pos+3) {
-	    cerr << "WARNING recorder Node .. -nodeRange start? end?  .. - no ele tags specified\n";
+	    opserr << "WARNING recorder Node .. -nodeRange start? end?  .. - no ele tags specified\n";
 	    return TCL_ERROR;
 	  }
 	  
@@ -375,11 +373,11 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    
 	  int start, end;
 	  if (Tcl_GetInt(interp, argv[pos+1], &start) != TCL_OK) {
-	    cerr << "WARNING recorder Node -nodeRange start? end? - invalid start " << argv[pos+1] << endl;
+	    opserr << "WARNING recorder Node -nodeRange start? end? - invalid start " << argv[pos+1] << endln;
 	    return TCL_ERROR;
 	  }      
 	  if (Tcl_GetInt(interp, argv[pos+2], &end) != TCL_OK) {
-	    cerr << "WARNING recorder Node -nodeRange start? end? - invalid end " << argv[pos+2] << endl;
+	    opserr << "WARNING recorder Node -nodeRange start? end? - invalid end " << argv[pos+2] << endln;
 	    return TCL_ERROR;
 	  }      
 	  if (start > end) {
@@ -397,17 +395,17 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  // allow user to specif elements via a region
 	  
 	  if (argc < pos+2) {
-	    cerr << "WARNING recorder Node .. -region tag?  .. - no region specified\n";
+	    opserr << "WARNING recorder Node .. -region tag?  .. - no region specified\n";
 	    return TCL_ERROR;
 	  }
 	  int tag;
 	  if (Tcl_GetInt(interp, argv[pos+1], &tag) != TCL_OK) {
-	    cerr << "WARNING recorder Node -region tag? - invalid tag " << argv[pos+1] << endl;
+	    opserr << "WARNING recorder Node -region tag? - invalid tag " << argv[pos+1] << endln;
 	    return TCL_ERROR;
 	  }      
 	  MeshRegion *theRegion = theDomain.getRegion(tag);
 	  if (theRegion == 0) {
-	    cerr << "WARNING recorder Node -region " << tag << " - region does not exist" << endl;
+	    opserr << "WARNING recorder Node -region " << tag << " - region does not exist" << endln;
 	    return TCL_OK;
 	  }      
 	  const ID &nodeRegion = theRegion->getNodes();
@@ -463,8 +461,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
     // Create a recorder to write nodal drifts to a file
     else if (strcmp(argv[1],"Drift") == 0) {
       if (argc < 7) {
-	cerr << "WARNING recorder Drift filename? <startFlag> ";
-	cerr << "node1? node2? dof? perpDirn?";
+	opserr << "WARNING recorder Drift filename? <startFlag> ";
+	opserr << "node1? node2? dof? perpDirn?";
 	return TCL_ERROR;
       }    
       
@@ -502,7 +500,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	int xLoc, yLoc, width, height;
 
 	if (argc < 7) {
-	    cerr << "WARNING recorder display title xLoc yLoc pixelsX pixelsY <-file fileName?>";
+	    opserr << "WARNING recorder display title xLoc yLoc pixelsX pixelsY <-file fileName?>";
 	    return TCL_ERROR;
 	}    
 	if (Tcl_GetInt(interp, argv[3], &xLoc) != TCL_OK)	
@@ -531,7 +529,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	int xLoc, yLoc, width, height;
 	if (argc < 9) {
-	    cerr << "WARNING recorder display fileName? windowTitle? xLoc yLoc pixelsX pixelsY -columns colX1 colY1 -columns colX2 ...";
+	    opserr << "WARNING recorder display fileName? windowTitle? xLoc yLoc pixelsX pixelsY -columns colX1 colY1 -columns colX2 ...";
 	    return TCL_ERROR;
 	}    
 	if (Tcl_GetInt(interp, argv[4], &xLoc) != TCL_OK)	
@@ -588,11 +586,11 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	int xLoc, yLoc, width, height;
 	
 	if (theAlgorithm == 0) {
-	    cerr << "WARNING recorder increments - only allowed as algorithmRecorder";
+	    opserr << "WARNING recorder increments - only allowed as algorithmRecorder";
 	    return TCL_ERROR;
 	}
 	if (argc < 7) {
-	    cerr << "WARNING recorder display windowTitle? xLoc yLoc pixelsX pixelsY ";
+	    opserr << "WARNING recorder display windowTitle? xLoc yLoc pixelsX pixelsY ";
 	    return TCL_ERROR;
 	}    
 	if (Tcl_GetInt(interp, argv[3], &xLoc) != TCL_OK)	
@@ -632,27 +630,49 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
     }
 
+    else if (strcmp(argv[1],"GSA") == 0) {
+	if (argc < 3) {
+	  opserr << argc;
+	  opserr << "WARNING recorder GSA -file fileName? -dT deltaT? - not enough arguments\n";
+	  return TCL_ERROR;
+	}    
+	char *fileName = 0;
+	double dT = 0.0;
+	int loc = 2;
+
+	while (loc < argc) {
+	  if ((strcmp(argv[loc],"-file") == 0) ||
+	      (strcmp(argv[loc],"-file") == 0)) {
+	    fileName = argv[loc+1];
+	    loc += 2;
+	  }
+	  else if (strcmp(argv[loc],"-dT") == 0) {
+	    if (Tcl_GetDouble(interp, argv[loc+1], &dT) != TCL_OK)	
+	      return TCL_ERROR;	      
+	    loc += 2;
+	  }
+	  else
+	    loc++;
+	}
+
+	GSA_Recorder *theR = new GSA_Recorder(theDomain, fileName, dT);
+	(*theRecorder) = theR;
+    }
+
     // no recorder type specified yet exists
     else {
-	cerr << "WARNING No recorder type exists ";
-	cerr << "for recorder of type:" << argv[1];
+	opserr << "WARNING No recorder type exists ";
+	opserr << "for recorder of type:" << argv[1];
     
 	return TCL_ERROR;
     }    
 
     // check we instantiated a recorder .. if not ran out of memory
     if ((*theRecorder) == 0) {
-	cerr << "WARNING ran out of memory - recorder " << argv[1]<< endl;
+	opserr << "WARNING ran out of memory - recorder " << argv[1]<< endln;
 	return TCL_ERROR;
     } 
-	/*
-    // add the recorder to the domain
-    if (theDomain.addRecorder(*theRecorder) < 0) {
-	cerr << "WARNING could not add to domain - recorder " << argv[1]<< endl;
-	delete theRecorder;
-	return TCL_ERROR;
-    } 
-	*/
+
     // operation successfull
     return TCL_OK;
 }
@@ -664,11 +684,11 @@ TclAddRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 {
 	Recorder *theRecorder;
 	TclCreateRecorder(clientData, interp, argc, argv, theDomain, &theRecorder);
-
+	
 	if ((theRecorder == 0) || (theDomain.addRecorder(*theRecorder)) < 0) {
-		cerr << "WARNING could not add to domain - recorder " << argv[1]<< endl;
+		opserr << "WARNING could not add to domain - recorder " << argv[1]<< endln;
 		if (theRecorder == 0) 
-			cerr << "could not create recorder\n";
+			opserr << "could not create recorder\n";
 		else
 			delete theRecorder;
 		return TCL_ERROR;
@@ -692,7 +712,7 @@ TclAddAlgorithmRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 		// NOTE: will not be called with theALgo == 0
 		// see ~/g3/SRC/tcl/commands.C file
 		if (theRecorder == 0 || theAlgo->addRecorder(*theRecorder) < 0) {
-			cerr << "WARNING could not add to algorithm - recorder " << argv[1]<< endl;
+			opserr << "WARNING could not add to algorithm - recorder " << argv[1]<< endln;
 			delete theRecorder;
 			return TCL_ERROR;
 		} 

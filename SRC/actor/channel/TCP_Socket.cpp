@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
                                                                         
                                                                         
@@ -64,12 +64,12 @@ TCP_Socket::TCP_Socket()
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
- 	cerr << "TCP_Socket::TCP_Socket - could not open socket\n";
+ 	opserr << "TCP_Socket::TCP_Socket - could not open socket\n";
     }
 
     // bind local address to it
     if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
-	cerr << "TCP_Socket::TCP_Socket - could not bind local address\n";
+	opserr << "TCP_Socket::TCP_Socket - could not bind local address\n";
     }
     
     // get my_address info
@@ -105,13 +105,13 @@ TCP_Socket::TCP_Socket(unsigned int port)
     // open a socket
 
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-	cerr << "TCP_Socket::TCP_Socket - could not open socket\n";
+	opserr << "TCP_Socket::TCP_Socket - could not open socket\n";
     }
     
     // bind local address to it
 
     if (bind(sockfd,(struct sockaddr *)&my_Addr,sizeof(my_Addr)) < 0) {
-	cerr << "TCP_Socket::TCP_Socket - could not bind local address\n";
+	opserr << "TCP_Socket::TCP_Socket - could not bind local address\n";
     }    
 
     // get my_address info
@@ -144,12 +144,12 @@ TCP_Socket::TCP_Socket(unsigned int other_Port, char *other_InetAddr)
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
- 	cerr << "TCP_Socket::TCP_Socket - could not open socket\n";
+ 	opserr << "TCP_Socket::TCP_Socket - could not open socket\n";
     }
 
     // bind local address to it
     if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
-	cerr << "TCP_Socket::TCP_Socket - could not bind local address\n";
+	opserr << "TCP_Socket::TCP_Socket - could not bind local address\n";
     }
     myPort = ntohs(my_Addr.sin_port);    
 }    
@@ -172,7 +172,7 @@ TCP_Socket::setUpActor(void)
     if (connect(sockfd, (struct sockaddr *) &other_Addr, 
 		sizeof(other_Addr))< 0) {
 	
-	cerr << "TCP_Socket::TCP_Socket - could not connect\n";
+	opserr << "TCP_Socket::TCP_Socket - could not connect\n";
 	return -1;
     }
     // get my_address info
@@ -185,16 +185,16 @@ TCP_Socket::setUpActor(void)
     optlen = 1;
     if ((setsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
 		    (char *) &optlen, sizeof(int))) < 0) { 
-	cerr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
+	opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
     }	  
     */
     /*
     int flag=sizeof(int);
     if ((getsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
 		    (char *) &optlen, &flag)) < 0) { 
-	cerr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
+	opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
     }	        
-    cerr << "TCP_Socket::TCP_Socket - " << optlen << " flag " << flag <<  endl;
+    opserr << "TCP_Socket::TCP_Socket - " << optlen << " flag " << flag <<  endln;
     */
     
     return 0;
@@ -211,7 +211,7 @@ TCP_Socket::setUpShadow(void)
     newsockfd = accept(sockfd, (struct sockaddr *) &other_Addr, &addrLength);
 
     if (newsockfd < 0) {
-	cerr << "TCP_Socket::TCP_Socket - could not accept connection\n";
+	opserr << "TCP_Socket::TCP_Socket - could not accept connection\n";
 	return -1;
     }    
     
@@ -230,16 +230,16 @@ TCP_Socket::setUpShadow(void)
     optlen = 1;
     if ((setsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
 		    (char *) &optlen, sizeof(int))) < 0) { 
-	cerr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
+	opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
     }	  
     */
     /*
     int flag=sizeof(int);
     if ((getsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
 		    (char *) &optlen, &flag)) < 0) { 
-	cerr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
+	opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
     }	        
-    cerr << "TCP_Socket::TCP_Socket - " << optlen << " flag " << flag <<  endl;
+    opserr << "TCP_Socket::TCP_Socket - " << optlen << " flag " << flag <<  endln;
     */
     
     return 0;
@@ -258,15 +258,15 @@ TCP_Socket::setNextAddress(const ChannelAddress &theAddress)
 	    if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 		     theSocketAddress->addrLength) != 0) {
 		
-		cerr << "TCP_Socket::recvMsg() - a TCP_Socket ";
-		cerr << "can only communicate with one other TCP_Socket\n"; 
+		opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
+		opserr << "can only communicate with one other TCP_Socket\n"; 
 		return -1;
 	    }
 	}
     else {
-	cerr << "TCP_Socket::setNextAddress() - a TCP_Socket ";
-	cerr << "can only communicate with a TCP_Socket";
-	cerr << " address given is not of type SocketAddress\n"; 
+	opserr << "TCP_Socket::setNextAddress() - a TCP_Socket ";
+	opserr << "can only communicate with a TCP_Socket";
+	opserr << " address given is not of type SocketAddress\n"; 
 	return -1;	    
     }		    	
 	
@@ -286,18 +286,18 @@ TCP_Socket::sendObj(int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_Socket::sendObj() - a TCP_Socket ";
-	    cerr << "can only communicate with a TCP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with a TCP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
 	    
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 		 theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_Socket::sendObj() - a TCP_Socket ";
-	    cerr << "can only communicate with one other TCP_Socket";
-	    cerr << " address given is not that address\n"; 
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with one other TCP_Socket";
+	    opserr << " address given is not that address\n"; 
 	    return -1;	    
 	}	
     }    
@@ -316,16 +316,16 @@ TCP_Socket::recvObj(int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_Socket::sendObj() - a TCP_Socket ";
-	    cerr << "can only communicate with a TCP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with a TCP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_Socket::recvMsg() - a TCP_Socket ";
-	    cerr << "can only communicate with one other TCP_Socket\n"; 
+	    opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
+	    opserr << "can only communicate with one other TCP_Socket\n"; 
 	    return -1;
 	}
     }
@@ -346,16 +346,16 @@ TCP_Socket::recvMsg(int dbTag, int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_Socket::sendObj() - a TCP_Socket ";
-	    cerr << "can only communicate with a TCP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with a TCP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_Socket::recvMsg() - a TCP_Socket ";
-	    cerr << "can only communicate with one other TCP_Socket\n"; 
+	    opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
+	    opserr << "can only communicate with one other TCP_Socket\n"; 
 	    return -1;
 	}
     }
@@ -389,16 +389,16 @@ TCP_Socket::sendMsg(int dbTag, int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_Socket::sendObj() - a TCP_Socket ";
-	    cerr << "can only communicate with a TCP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with a TCP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_Socket::recvMsg() - a TCP_Socket ";
-	    cerr << "can only communicate with one other TCP_Socket\n"; 
+	    opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
+	    opserr << "can only communicate with one other TCP_Socket\n"; 
 	    return -1;
 	}
     }
@@ -432,16 +432,16 @@ TCP_Socket::recvMatrix(int dbTag, int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_Socket::sendObj() - a TCP_Socket ";
-	    cerr << "can only communicate with a TCP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with a TCP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_Socket::recvMatrix() - a TCP_Socket ";
-	    cerr << "can only communicate with one other TCP_Socket\n"; 
+	    opserr << "TCP_Socket::recvMatrix() - a TCP_Socket ";
+	    opserr << "can only communicate with one other TCP_Socket\n"; 
 	    return -1;
 	}
     }
@@ -475,17 +475,17 @@ TCP_Socket::sendMatrix(int dbTag, int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_Socket::sendObj() - a TCP_Socket ";
-	    cerr << "can only communicate with a TCP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with a TCP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		        SocketAddress *theSocketAddress = 0;
 
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_Socket::recvMatrix() - a TCP_Socket ";
-	    cerr << "can only communicate with one other TCP_Socket\n"; 
+	    opserr << "TCP_Socket::recvMatrix() - a TCP_Socket ";
+	    opserr << "can only communicate with one other TCP_Socket\n"; 
 	    return -1;
 	}
     }
@@ -524,16 +524,16 @@ TCP_Socket::recvVector(int dbTag, int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_Socket::sendObj() - a TCP_Socket ";
-	    cerr << "can only communicate with a TCP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with a TCP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_Socket::recvVector() - a TCP_Socket ";
-	    cerr << "can only communicate with one other TCP_Socket\n"; 
+	    opserr << "TCP_Socket::recvVector() - a TCP_Socket ";
+	    opserr << "can only communicate with one other TCP_Socket\n"; 
 	    return -1;
 	}
     }
@@ -567,16 +567,16 @@ TCP_Socket::sendVector(int dbTag, int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_Socket::sendObj() - a TCP_Socket ";
-	    cerr << "can only communicate with a TCP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with a TCP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_Socket::recvVector() - a TCP_Socket ";
-	    cerr << "can only communicate with one other TCP_Socket\n"; 
+	    opserr << "TCP_Socket::recvVector() - a TCP_Socket ";
+	    opserr << "can only communicate with one other TCP_Socket\n"; 
 	    return -1;
 	}
     }
@@ -610,16 +610,16 @@ TCP_Socket::recvID(int dbTag, int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_Socket::sendObj() - a TCP_Socket ";
-	    cerr << "can only communicate with a TCP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with a TCP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_Socket::recvID() - a TCP_Socket ";
-	    cerr << "can only communicate with one other TCP_Socket\n"; 
+	    opserr << "TCP_Socket::recvID() - a TCP_Socket ";
+	    opserr << "can only communicate with one other TCP_Socket\n"; 
 	    return -1;
 	}
     }
@@ -653,16 +653,16 @@ TCP_Socket::sendID(int dbTag, int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) 
 	    theSocketAddress = (SocketAddress *)theAddress;
 	else {
-	    cerr << "TCP_Socket::sendObj() - a TCP_Socket ";
-	    cerr << "can only communicate with a TCP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
+	    opserr << "can only communicate with a TCP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
 	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
 	     theSocketAddress->addrLength) != 0) {
 
-	    cerr << "TCP_Socket::recvID() - a TCP_Socket ";
-	    cerr << "can only communicate with one other TCP_Socket\n"; 
+	    opserr << "TCP_Socket::recvID() - a TCP_Socket ";
+	    opserr << "can only communicate with one other TCP_Socket\n"; 
 	    return -1;
 	}
     }

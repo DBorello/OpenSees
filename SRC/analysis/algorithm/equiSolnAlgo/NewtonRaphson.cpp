@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-05-03 22:10:08 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:00:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonRaphson.cpp,v $
                                                                         
                                                                         
@@ -47,9 +47,6 @@
 #include <FEM_ObjectBroker.h>
 #include <ConvergenceTest.h>
 #include <ID.h>
-
-
-#include <fstream.h>
 
 // Constructor
 NewtonRaphson::NewtonRaphson(int theTangentToUse)
@@ -93,15 +90,15 @@ NewtonRaphson::solveCurrentStep(void)
 
     if ((theAnaModel == 0) || (theIntegrator == 0) || (theSOE == 0)
 	|| (theTest == 0)){
-	cerr << "WARNING NewtonRaphson::solveCurrentStep() - setLinks() has";
-	cerr << " not been called - or no ConvergenceTest has been set\n";
+	opserr << "WARNING NewtonRaphson::solveCurrentStep() - setLinks() has";
+	opserr << " not been called - or no ConvergenceTest has been set\n";
 	return -5;
     }	
 
 
     if (theIntegrator->formUnbalance() < 0) {
-      cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
-      cerr << "the Integrator failed in formUnbalance()\n";	
+      opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
+      opserr << "the Integrator failed in formUnbalance()\n";	
       return -2;
     }	    
 
@@ -109,8 +106,8 @@ NewtonRaphson::solveCurrentStep(void)
     // set itself as the ConvergenceTest objects EquiSolnAlgo
     theTest->setEquiSolnAlgo(*this);
     if (theTest->start() < 0) {
-      cerr << "NewtnRaphson::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in start()\n";
+      opserr << "NewtnRaphson::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in start()\n";
       return -3;
     }
 
@@ -121,41 +118,41 @@ NewtonRaphson::solveCurrentStep(void)
       if (tangent == INITIAL_THEN_CURRENT_TANGENT) {
 	if (count == 0) {
 	  if (theIntegrator->formTangent(INITIAL_TANGENT) < 0){
-	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
-	    cerr << "the Integrator failed in formTangent()\n";
+	    opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
+	    opserr << "the Integrator failed in formTangent()\n";
 	    return -1;
 	  } 
 	} else {
 	  if (theIntegrator->formTangent(CURRENT_TANGENT) < 0){
-	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
-	    cerr << "the Integrator failed in formTangent()\n";
+	    opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
+	    opserr << "the Integrator failed in formTangent()\n";
 	    return -1;
 	  } 
 	}	  
       } else {
 	if (theIntegrator->formTangent(tangent) < 0){
-	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
-	    cerr << "the Integrator failed in formTangent()\n";
+	    opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
+	    opserr << "the Integrator failed in formTangent()\n";
 	    return -1;
 	}		    
       }
 	
 	if (theSOE->solve() < 0) {
-	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
-	    cerr << "the LinearSysOfEqn failed in solve()\n";	
+	    opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
+	    opserr << "the LinearSysOfEqn failed in solve()\n";	
 	    return -3;
 	}	    
 
 
 	if (theIntegrator->update(theSOE->getX()) < 0) {
-	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
-	    cerr << "the Integrator failed in update()\n";	
+	    opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
+	    opserr << "the Integrator failed in update()\n";	
 	    return -4;
 	}	        
 
 	if (theIntegrator->formUnbalance() < 0) {
-	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
-	    cerr << "the Integrator failed in formUnbalance()\n";	
+	    opserr << "WARNING NewtonRaphson::solveCurrentStep() -";
+	    opserr << "the Integrator failed in formUnbalance()\n";	
 	    return -2;
 	}	
 
@@ -165,8 +162,8 @@ NewtonRaphson::solveCurrentStep(void)
     } while (result == -1);
 
     if (result == -2) {
-      cerr << "NewtnRaphson::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in test()\n";
+      opserr << "NewtnRaphson::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in test()\n";
       return -3;
     }
 
@@ -191,13 +188,13 @@ NewtonRaphson::sendSelf(int cTag, Channel &theChannel)
   data(1) = theTest->getDbTag();
   result = theChannel.sendID(dataTag, cTag, data);
   if (result != 0) {
-    cerr << "NewtonRaphson::sendSelf() - failed to send ID\n";
+    opserr << "NewtonRaphson::sendSelf() - failed to send ID\n";
     return result;
   }
 
   result = theTest->sendSelf(cTag, theChannel);
   if (result != 0) {
-    cerr << "NewtonRaphson::sendSelf() - failed to send CTest object\n";
+    opserr << "NewtonRaphson::sendSelf() - failed to send CTest object\n";
     return result;
   }
   
@@ -215,7 +212,7 @@ NewtonRaphson::recvSelf(int cTag,
 
     result = theChannel.recvID(dataTag, cTag, data);    
     if (result != 0) {
-      cerr << "NewtonRaphson::recvSelf() - failed to receive ID\n";
+      opserr << "NewtonRaphson::recvSelf() - failed to receive ID\n";
       return result;
     }
     int ctType = data(0);
@@ -225,7 +222,7 @@ NewtonRaphson::recvSelf(int cTag,
     theTest->setDbTag(ctDb);
     result = theTest->recvSelf(cTag, theChannel, theBroker);
     if (result != 0) {
-      cerr << "NewtonRaphson::recvSelf() - failed to recv CTest object\n";
+      opserr << "NewtonRaphson::recvSelf() - failed to recv CTest object\n";
       return result;
     }
     
@@ -234,10 +231,10 @@ NewtonRaphson::recvSelf(int cTag,
 
 
 void
-NewtonRaphson::Print(ostream &s, int flag)
+NewtonRaphson::Print(OPS_Stream &s, int flag)
 {
   if (flag == 0) {
-    s << "NewtonRaphson" << endl;
+    s << "NewtonRaphson" << endln;
   }
 }
 

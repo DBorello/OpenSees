@@ -57,13 +57,13 @@ class MDPotentialSurface01 : public PotentialSurface
     double dgoverdt(double theta, double c) const;
     tensor apqdnods(const EPState *EPS) const;
     
-    void print() { cout << *this; };
+    void print() { opserr << *this; };
 
     //================================================================================
     // Overloaded Insertion Operator
     // prints an PotentialSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const MDPotentialSurface01 &PS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const MDPotentialSurface01 &PS);
 
 };
 

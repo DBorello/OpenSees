@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:02 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/SensitivityByFiniteDifference.cpp,v $
 
 
@@ -40,7 +40,7 @@
 #include <LimitStateFunction.h>
 #include <GFunEvaluator.h>
 #include <RandomVariable.h>
-#include <fstream.h>
+#include <fstream>
 
 
 SensitivityByFiniteDifference::SensitivityByFiniteDifference(
@@ -111,8 +111,8 @@ SensitivityByFiniteDifference::evaluate_grad_g(double gFunValue, Vector passed_x
 		// Evaluate limit-state function
 		double result = theGFunEvaluator->evaluate_g(perturbed_x);
 		if (result < 0) {
-			cerr << "SensitivityByFiniteDifference::evaluate_grad_g() - " << endl
-				<< " could not evaluate limit-state function. " << endl;
+			opserr << "SensitivityByFiniteDifference::evaluate_grad_g() - " << endln
+				<< " could not evaluate limit-state function. " << endln;
 			return -1;
 		}
 		gFunValueAStepAhead = theGFunEvaluator->get_g();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-11 21:54:41 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/TclBrickCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -29,7 +29,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 #include <Domain.h>
 
 #include <Brick.h>
@@ -45,15 +44,15 @@ TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,  int argc,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed\n";    
+    opserr << "WARNING builder has been destroyed\n";    
     return TCL_ERROR;
   }
 
   // check the number of arguments is correct
   if ((argc-eleArgStart) < 11) {
-    cerr << "WARNING insufficient arguments\n";
+    opserr << "WARNING insufficient arguments\n";
     printCommand(argc, argv);
-    cerr << "Want: element Brick eleTag? Node1? Node2? Node3? Node4? Node5? Node6? Node7? Node 8? matTag?\n";
+    opserr << "Want: element Brick eleTag? Node1? Node2? Node3? Node4? Node5? Node6? Node7? Node 8? matTag?\n";
     return TCL_ERROR;
   }    
 
@@ -62,65 +61,65 @@ TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,  int argc,
   int          Node5, Node6, Node7, Node8 ;
 
   if (Tcl_GetInt(interp, argv[1+eleArgStart], &BrickId) != TCL_OK) {
-    cerr << "WARNING invalid Brick eleTag" << endl;
+    opserr << "WARNING invalid Brick eleTag" << endln;
     return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[2+eleArgStart], &Node1) != TCL_OK) {
-    cerr << "WARNING invalid Node1\n";
-    cerr << "Brick element: " << BrickId << endl;
+    opserr << "WARNING invalid Node1\n";
+    opserr << "Brick element: " << BrickId << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[3+eleArgStart], &Node2) != TCL_OK) {
-     cerr << "WARNING invalid Node2\n";
-     cerr << "Brick element: " << BrickId << endl;
+     opserr << "WARNING invalid Node2\n";
+     opserr << "Brick element: " << BrickId << endln;
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[4+eleArgStart], &Node3) != TCL_OK) {
-     cerr << "WARNING invalid Node3\n";
-     cerr << "Brick element: " << BrickId << endl;
+     opserr << "WARNING invalid Node3\n";
+     opserr << "Brick element: " << BrickId << endln;
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[5+eleArgStart], &Node4) != TCL_OK) {
-     cerr << "WARNING invalid Node4\n";
-     cerr << "Brick element: " << BrickId << endl;
+     opserr << "WARNING invalid Node4\n";
+     opserr << "Brick element: " << BrickId << endln;
      return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[6+eleArgStart], &Node5) != TCL_OK) {
-    cerr << "WARNING invalid Node5\n";
-    cerr << "Brick element: " << BrickId << endl;
+    opserr << "WARNING invalid Node5\n";
+    opserr << "Brick element: " << BrickId << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[7+eleArgStart], &Node6) != TCL_OK) {
-     cerr << "WARNING invalid Node6\n";
-     cerr << "Brick element: " << BrickId << endl;
+     opserr << "WARNING invalid Node6\n";
+     opserr << "Brick element: " << BrickId << endln;
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[8+eleArgStart], &Node7) != TCL_OK) {
-     cerr << "WARNING invalid Node7\n";
-     cerr << "Brick element: " << BrickId << endl;
+     opserr << "WARNING invalid Node7\n";
+     opserr << "Brick element: " << BrickId << endln;
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[9+eleArgStart], &Node8) != TCL_OK) {
-     cerr << "WARNING invalid Node8\n";
-     cerr << "Brick element: " << BrickId << endl;
+     opserr << "WARNING invalid Node8\n";
+     opserr << "Brick element: " << BrickId << endln;
      return TCL_ERROR;
   }
 
 
   if (Tcl_GetInt(interp, argv[10+eleArgStart], &matID) != TCL_OK) {
-    cerr << "WARNING invalid matTag\n";
-    cerr << "Brick element: " << BrickId << endl;
+    opserr << "WARNING invalid matTag\n";
+    opserr << "Brick element: " << BrickId << endln;
     return TCL_ERROR;
   }
 
    NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);      
       
   if (theMaterial== 0) {
-    cerr << "WARNING material not found\n";
-    cerr << "material tag: " << matID;
-    cerr << "\nBrick element: " << BrickId << endl;
+    opserr << "WARNING material not found\n";
+    opserr << "material tag: " << matID;
+    opserr << "\nBrick element: " << BrickId << endln;
     return TCL_ERROR;
   }
   
@@ -129,14 +128,14 @@ TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,  int argc,
 			      Node5, Node6, Node7, Node8, *theMaterial);
 
   if (theBrick == 0) {
-    cerr << "WARNING ran out of memory creating element\n";
-    cerr << "Brick element: " << BrickId << endl;
+    opserr << "WARNING ran out of memory creating element\n";
+    opserr << "Brick element: " << BrickId << endln;
     return TCL_ERROR;
   }
 
   if (theTclDomain->addElement(theBrick) == false) {
-    cerr << "WARNING could not add element to the domain\n";
-    cerr << "Brick element: " << BrickId << endl;
+    opserr << "WARNING could not add element to the domain\n";
+    opserr << "Brick element: " << BrickId << endln;
     delete theBrick;
     return TCL_ERROR;
   }
@@ -153,15 +152,15 @@ TclModelBuilder_addBBarBrick(ClientData clientData, Tcl_Interp *interp,  int arg
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed\n";    
+    opserr << "WARNING builder has been destroyed\n";    
     return TCL_ERROR;
   }
 
   // check the number of arguments is correct
   if ((argc-eleArgStart) < 11) {
-    cerr << "WARNING insufficient arguments\n";
+    opserr << "WARNING insufficient arguments\n";
     printCommand(argc, argv);
-    cerr << "Want: element BbarBrick eleTag? Node1? Node2? Node3? Node4? Node5? Node6? Node7? Node 8? matTag?\n";
+    opserr << "Want: element BbarBrick eleTag? Node1? Node2? Node3? Node4? Node5? Node6? Node7? Node 8? matTag?\n";
     return TCL_ERROR;
   }    
 
@@ -170,65 +169,65 @@ TclModelBuilder_addBBarBrick(ClientData clientData, Tcl_Interp *interp,  int arg
   int          Node5, Node6, Node7, Node8 ;
 
   if (Tcl_GetInt(interp, argv[1+eleArgStart], &BbarBrickId) != TCL_OK) {
-    cerr << "WARNING invalid BbarBrick eleTag" << endl;
+    opserr << "WARNING invalid BbarBrick eleTag" << endln;
     return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[2+eleArgStart], &Node1) != TCL_OK) {
-    cerr << "WARNING invalid Node1\n";
-    cerr << "BbarBrick element: " << BbarBrickId << endl;
+    opserr << "WARNING invalid Node1\n";
+    opserr << "BbarBrick element: " << BbarBrickId << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[3+eleArgStart], &Node2) != TCL_OK) {
-     cerr << "WARNING invalid Node2\n";
-     cerr << "BbarBrick element: " << BbarBrickId << endl;
+     opserr << "WARNING invalid Node2\n";
+     opserr << "BbarBrick element: " << BbarBrickId << endln;
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[4+eleArgStart], &Node3) != TCL_OK) {
-     cerr << "WARNING invalid Node3\n";
-     cerr << "BbarBrick element: " << BbarBrickId << endl;
+     opserr << "WARNING invalid Node3\n";
+     opserr << "BbarBrick element: " << BbarBrickId << endln;
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[5+eleArgStart], &Node4) != TCL_OK) {
-     cerr << "WARNING invalid Node4\n";
-     cerr << "BbarBrick element: " << BbarBrickId << endl;
+     opserr << "WARNING invalid Node4\n";
+     opserr << "BbarBrick element: " << BbarBrickId << endln;
      return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[6+eleArgStart], &Node5) != TCL_OK) {
-    cerr << "WARNING invalid Node5\n";
-    cerr << "BbarBrick element: " << BbarBrickId << endl;
+    opserr << "WARNING invalid Node5\n";
+    opserr << "BbarBrick element: " << BbarBrickId << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[7+eleArgStart], &Node6) != TCL_OK) {
-     cerr << "WARNING invalid Node6\n";
-     cerr << "BbarBrick element: " << BbarBrickId << endl;
+     opserr << "WARNING invalid Node6\n";
+     opserr << "BbarBrick element: " << BbarBrickId << endln;
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[8+eleArgStart], &Node7) != TCL_OK) {
-     cerr << "WARNING invalid Node7\n";
-     cerr << "BbarBrick element: " << BbarBrickId << endl;
+     opserr << "WARNING invalid Node7\n";
+     opserr << "BbarBrick element: " << BbarBrickId << endln;
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[9+eleArgStart], &Node8) != TCL_OK) {
-     cerr << "WARNING invalid Node8\n";
-     cerr << "BbarBrick element: " << BbarBrickId << endl;
+     opserr << "WARNING invalid Node8\n";
+     opserr << "BbarBrick element: " << BbarBrickId << endln;
      return TCL_ERROR;
   }
 
 
   if (Tcl_GetInt(interp, argv[10+eleArgStart], &matID) != TCL_OK) {
-    cerr << "WARNING invalid matTag\n";
-    cerr << "BbarBrick element: " << BbarBrickId << endl;
+    opserr << "WARNING invalid matTag\n";
+    opserr << "BbarBrick element: " << BbarBrickId << endln;
     return TCL_ERROR;
   }
 
    NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);      
       
   if (theMaterial== 0) {
-    cerr << "WARNING material not found\n";
-    cerr << "material tag: " << matID;
-    cerr << "\nBbarBrick element: " << BbarBrickId << endl;
+    opserr << "WARNING material not found\n";
+    opserr << "material tag: " << matID;
+    opserr << "\nBbarBrick element: " << BbarBrickId << endln;
     return TCL_ERROR;
   }
   
@@ -237,14 +236,14 @@ TclModelBuilder_addBBarBrick(ClientData clientData, Tcl_Interp *interp,  int arg
 			      Node5, Node6, Node7, Node8, *theMaterial);
 
   if (theBbarBrick == 0) {
-    cerr << "WARNING ran out of memory creating element\n";
-    cerr << "BbarBrick element: " << BbarBrickId << endl;
+    opserr << "WARNING ran out of memory creating element\n";
+    opserr << "BbarBrick element: " << BbarBrickId << endln;
     return TCL_ERROR;
   }
 
   if (theTclDomain->addElement(theBbarBrick) == false) {
-    cerr << "WARNING could not add element to the domain\n";
-    cerr << "BbarBrick element: " << BbarBrickId << endl;
+    opserr << "WARNING could not add element to the domain\n";
+    opserr << "BbarBrick element: " << BbarBrickId << endln;
     delete theBbarBrick;
     return TCL_ERROR;
   }

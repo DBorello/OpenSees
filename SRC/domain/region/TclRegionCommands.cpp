@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-16 21:12:07 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/region/TclRegionCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -33,8 +33,6 @@
 #include <tcl.h>
 #include <tk.h>
 
-#include <iostream.h>
-#include <fstream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,12 +60,12 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
 
   // first get tag for region
   if (argc < 2) {
-    cerr << "WARNING region tag? - no tag specified\n";
+    opserr << "WARNING region tag? - no tag specified\n";
     return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[loc], &tag) != TCL_OK) {
-    cerr << "WARNING region tag? .. - invalid tag " << argv[loc] << endl;
+    opserr << "WARNING region tag? .. - invalid tag " << argv[loc] << endln;
     return TCL_ERROR;
   }
 
@@ -80,7 +78,7 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
       
       // ensure no segmentation fault if user messes up
       if (argc < loc+2) {
-	cerr << "WARNING region tag? .. -ele tag1? .. - no ele tags specified\n";
+	opserr << "WARNING region tag? .. -ele tag1? .. - no ele tags specified\n";
 	return TCL_ERROR;
       }
 
@@ -102,7 +100,7 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
 
       // ensure no segmentation fault if user messes up
       if (argc < loc+3) {
-	cerr << "WARNING region tag? .. -eleRange start? end?  .. - no ele tags specified\n";
+	opserr << "WARNING region tag? .. -eleRange start? end?  .. - no ele tags specified\n";
 	return TCL_ERROR;
       }
 
@@ -112,11 +110,11 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
 
       int start, end;
       if (Tcl_GetInt(interp, argv[loc+1], &start) != TCL_OK) {
-	cerr << "WARNING region tag? -eleRange start? end? - invalid start " << argv[loc+1] << endl;
+	opserr << "WARNING region tag? -eleRange start? end? - invalid start " << argv[loc+1] << endln;
 	return TCL_ERROR;
       }      
       if (Tcl_GetInt(interp, argv[loc+2], &end) != TCL_OK) {
-	cerr << "WARNING region tag? -eleRange start? end? - invalid end " << argv[loc+2] << endl;
+	opserr << "WARNING region tag? -eleRange start? end? - invalid end " << argv[loc+2] << endln;
 	return TCL_ERROR;
       }      
       if (start > end) {
@@ -137,7 +135,7 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
 
       // ensure no segmentation fault if user messes up
       if (argc < loc+2) {
-	cerr << "WARNING region tag? .. -node tag1? .. - no node tags specified\n";
+	opserr << "WARNING region tag? .. -node tag1? .. - no node tags specified\n";
 	return TCL_ERROR;
       }
 
@@ -158,18 +156,18 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
 
       // ensure no segmentation fault if user messes up
       if (argc < loc+3) {
-	cerr << "WARNING region tag? .. -nodeRange start? end?  .. - no node tags specified\n";
+	opserr << "WARNING region tag? .. -nodeRange start? end?  .. - no node tags specified\n";
 	return TCL_ERROR;
       }
 
       // read in start and end ele tags
       int start, end;
       if (Tcl_GetInt(interp, argv[loc+1], &start) != TCL_OK) {
-	cerr << "WARNING region tag? -eleRange start? end? - invalid start " << argv[loc+1] << endl;
+	opserr << "WARNING region tag? -eleRange start? end? - invalid start " << argv[loc+1] << endln;
 	return TCL_ERROR;
       }      
       if (Tcl_GetInt(interp, argv[loc+2], &end) != TCL_OK) {
-	cerr << "WARNING region tag? -eleRange start? end? - invalid end " << argv[loc+1] << endl;
+	opserr << "WARNING region tag? -eleRange start? end? - invalid end " << argv[loc+1] << endln;
 	return TCL_ERROR;
       }      
       if (start > end) {
@@ -190,25 +188,25 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
 
       // ensure no segmentation fault if user messes up
       if (argc < loc+5) {
-	cerr << "WARNING region tag? .. -rayleigh aM? bK? bK0?  .. - not enough factors\n";
+	opserr << "WARNING region tag? .. -rayleigh aM? bK? bK0?  .. - not enough factors\n";
 	return TCL_ERROR;
       }
 
       // read in rayleigh damping factors
       if (Tcl_GetDouble(interp, argv[loc+1], &alphaM) != TCL_OK) {
-	cerr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid aM " << argv[loc+1] << endl;
+	opserr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid aM " << argv[loc+1] << endln;
 	return TCL_ERROR;
       }      
       if (Tcl_GetDouble(interp, argv[loc+2], &betaK) != TCL_OK) {
-	cerr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid bK " << argv[loc+2] << endl;
+	opserr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid bK " << argv[loc+2] << endln;
 	return TCL_ERROR;
       }      
       if (Tcl_GetDouble(interp, argv[loc+3], &betaK0) != TCL_OK) {
-	cerr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid bK0 " << argv[loc+3] << endl;
+	opserr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid bK0 " << argv[loc+3] << endln;
 	return TCL_ERROR;
       }      
       if (Tcl_GetDouble(interp, argv[loc+4], &betaKc) != TCL_OK) {
-	cerr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid bKc " << argv[loc+4] << endl;
+	opserr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid bKc " << argv[loc+4] << endln;
 	return TCL_ERROR;
       }      
       loc += 5;
@@ -221,9 +219,9 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
   MeshRegion *theRegion = new MeshRegion(tag);
 
   if ((theRegion == 0) || (theDomain.addRegion(*theRegion)) < 0) {
-    cerr << "WARNING could not add to domain - region " << tag << endl;
+    opserr << "WARNING could not add to domain - region " << tag << endln;
     if (theRegion == 0) 
-      cerr << "could not create region\n";
+      opserr << "could not create region\n";
     else
       delete theRegion;
     return TCL_ERROR;
@@ -237,7 +235,7 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
     if (theElements == 0)
       theRegion->setNodes(*theNodes);  
     else
-      cerr << "WARNING region - both elements & nodes set, ONLY set using elements\n";
+      opserr << "WARNING region - both elements & nodes set, ONLY set using elements\n";
   }
 
   // if damping has been specified set the damping factors

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-12-16 21:10:10 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -38,8 +38,6 @@
 #include <SectionForceDeformation.h>
 #include <Renderer.h>
 #include <ElementResponse.h>
-
-#include <G3Globals.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -67,9 +65,10 @@ theSection(0), order(0)
 	// Obtain copy of section model
 	theSection = sec.getCopy();
 	
-	if (theSection == 0)
-		g3ErrorHandler->fatal("%s -- failed to get copy of section",
-			"ZeroLengthSection::ZeroLengthSection");
+	if (theSection == 0) {
+	  opserr << "ZeroLengthSection::ZeroLengthSection -- failed to get copy of section\n";
+	  exit(-1);
+	}
 
 	// Get the section order
 	order = theSection->getOrder();
@@ -149,17 +148,14 @@ ZeroLengthSection::setDomain(Domain *theDomain)
 
     // if can't find both - send a warning message
     if (theNodes[0] == 0 || theNodes[1] == 0) {
-		if (theNodes[0] == 0) 
-			g3ErrorHandler->warning("%s -- Nd1: %d does not exist in ",
-				"ZeroLengthSection::setDomain()", Nd1);
-		else
-			g3ErrorHandler->warning("%s -- Nd2: %d does not exist in ",
-				"ZeroLengthSection::setDomain()", Nd2);
-
-		g3ErrorHandler->warning("model for ZeroLengthSection with id %d",
-			this->getTag());
-
-		return;
+      if (theNodes[0] == 0) 
+	opserr << "ZeroLengthSection::setDomain() -- Nd2: " << Nd2 << " does not exist in ";
+      else
+	opserr << "ZeroLengthSection::setDomain() -- Nd2: " << Nd2 << " does not exist in ";
+		
+      opserr << "model for ZeroLengthSection with id " << this->getTag() << endln;
+		
+      return;
     }
 
     // now determine the number of dof and the dimension    
@@ -168,29 +164,26 @@ ZeroLengthSection::setDomain(Domain *theDomain)
 
     // if differing dof at the ends - print a warning message
     if (dofNd1 != dofNd2) {
-		g3ErrorHandler->warning("%s -- nodes %d and %d %s %d\n",Nd1, Nd2,
-			"ZeroLengthSection::setDomain()",
-			"have differing dof at ends for ZeroLengthSection ",
-			this->getTag());
-		return;
+      opserr << "ZeroLengthSection::setDomain() -- nodes " << Nd1 << " and " << Nd2 << 
+	"have differing dof at ends for ZeroLengthSection " << this->getTag() << endln;
+      return;
     }	
 
-	numDOF = 2*dofNd1;
+    numDOF = 2*dofNd1;
 
-	if (numDOF != 6 && numDOF != 12)
-		g3ErrorHandler->warning("%s -- element only works for 3 (2d) or 6 (3d) dof per node"
-			      "ZeroLengthSection::setDomain()");
-
-	// Set pointers to class wide objects
-	if (numDOF == 6) {
-		P = &P6;
-		K = &K6;
-	}
-	else {
-		P = &P12;
-		K = &K12;
-	}
-
+    if (numDOF != 6 && numDOF != 12)
+      opserr << "ZeroLengthSection::setDomain() -- element only works for 3 (2d) or 6 (3d) dof per node\n";
+    
+    // Set pointers to class wide objects
+    if (numDOF == 6) {
+      P = &P6;
+      K = &K6;
+    }
+    else {
+      P = &P12;
+      K = &K12;
+    }
+    
     // Check that length is zero within tolerance
     const Vector &end1Crd = theNodes[0]->getCrds();
     const Vector &end2Crd = theNodes[1]->getCrds();	
@@ -203,13 +196,14 @@ ZeroLengthSection::setDomain(Domain *theDomain)
     vm = (v1<v2) ? v2 : v1;
     
     if (L > LENTOL*vm)
-		g3ErrorHandler->warning("%s -- Element %d has L=%e, which is greater than the tolerance",
-			"ZeroLengthSection::setDomain()", this->getTag(), L);
-        
-    // call the base class method
-    this->DomainComponent::setDomain(theDomain);
-    
-	// Set up the A matrix
+      opserr << "ZeroLengthSection::setDomain() -- Element " << this->getTag() << 
+	"has L= " << L << ", which is greater than the tolerance\n";
+	
+
+// call the base class method
+this->DomainComponent::setDomain(theDomain);
+
+// Set up the A matrix
 	this->setTransformation();
 }   	 
 
@@ -220,7 +214,7 @@ ZeroLengthSection::commitState()
 
     // call element commitState to do any base class stuff
     if ((retVal = this->Element::commitState()) != 0) {
-      cerr << "ZeroLength::commitState () - failed in base class";
+      opserr << "ZeroLength::commitState () - failed in base class\n";
     }    
   // Commit the section
   retVal += theSection->commitState();
@@ -230,15 +224,15 @@ ZeroLengthSection::commitState()
 int
 ZeroLengthSection::revertToLastCommit()
 {
-	// Revert the section
-	return theSection->revertToLastCommit();
+  // Revert the section
+  return theSection->revertToLastCommit();
 }
 
 int
 ZeroLengthSection::revertToStart()
 {
-	// Revert the section to start
-	return theSection->revertToStart();
+  // Revert the section to start
+  return theSection->revertToStart();
 }
 
 const Matrix &
@@ -280,9 +274,7 @@ ZeroLengthSection::zeroLoad(void)
 int 
 ZeroLengthSection::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("ZeroLengthSection::addLoad - load type unknown for truss with tag: %d",
-			  this->getTag());
-  
+  opserr << "ZeroLengthSection::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
   return -1;
 }
 
@@ -358,8 +350,8 @@ ZeroLengthSection::sendSelf(int commitTag, Channel &theChannel)
 
 	res += theChannel.sendID(dataTag, commitTag, idData);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send ID data",
-			"ZeroLengthSection::sendSelf");
+	  opserr << "ZeroLengthSection::sendSelf -- failed to send ID data\n";
+			
 		return res;
 	}
 
@@ -367,17 +359,15 @@ ZeroLengthSection::sendSelf(int commitTag, Channel &theChannel)
 	// in the constructor and not setDomain()
 	res += theChannel.sendMatrix(dataTag, commitTag, transformation);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send transformation Matrix",
-			"ZeroLengthSection::sendSelf");
-		return res;
+	  opserr << "ZeroLengthSection::sendSelf -- failed to send transformation Matrix\n";
+	  return res;
 	}
 
 	// Send the section
 	res += theSection->sendSelf(commitTag, theChannel);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send Section",
-			"ZeroLengthSection::sendSelf");
-		return res;
+	  opserr << "ZeroLengthSection::sendSelf -- failed to send Section\n";
+	  return res;
 	}
 
 	return res;
@@ -397,16 +387,14 @@ ZeroLengthSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 
 	res += theChannel.recvID(dataTag, commitTag, idData);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to receive ID data",
-			"ZeroLengthSection::recvSelf");
-		return res;
+	  opserr << "ZeroLengthSection::recvSelf -- failed to receive ID data\n";
+	  return res;
 	}
 
 	res += theChannel.recvMatrix(dataTag, commitTag, transformation);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to receive transformation Matrix",
-			"ZeroLengthSection::recvSelf");
-		return res;
+	  opserr << "ZeroLengthSection::recvSelf -- failed to receive transformation Matrix\n";
+	  return res;
 	}
 
 	this->setTag(idData(0));
@@ -426,9 +414,10 @@ ZeroLengthSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 
 		A = new Matrix(order, numDOF);
 
-		if (A == 0)
-			g3ErrorHandler->fatal("%s -- failed to allocate transformation Matrix",
-				"ZeroLengthSection::recvSelf");
+		if (A == 0) {
+		  opserr << "ZeroLengthSection::recvSelf -- failed to allocate transformation Matrix\n";
+		  exit(-1);
+		}
 
 		// Allocate section deformation vector
 		if (v != 0)
@@ -436,9 +425,10 @@ ZeroLengthSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 
 		v = new Vector(order);
 
-		if (v == 0)
-			g3ErrorHandler->fatal("%s -- failed to allocate deformation Vector",
-				"ZeroLengthSection::recvSelf");
+		if (v == 0) {
+		  opserr << "ZeroLengthSection::recvSelf -- failed to allocate deformation Vector\n";
+		  exit(-1);
+		}
 
 		if (numDOF == 6) {
 			P = &P6;
@@ -464,18 +454,16 @@ ZeroLengthSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 
 	// Check if either allocation failed from broker
 	if (theSection == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate new Section",
-			"ZeroLengthSection::recvSelf");
-		return -1;
+	  opserr << "ZeroLengthSection::recvSelf -- failed to allocate new Section\n";
+	  return -1;
 	}
 
 	// Receive the section
 	theSection->setDbTag(idData(7));
 	res += theSection->recvSelf(commitTag, theChannel, theBroker);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to receive Section",
-			"ZeroLengthSection::recvSelf");
-		return res;
+	  opserr << "ZeroLengthSection::recvSelf -- failed to receive Section\n";
+	  return res;
 	}
 
 	return res;
@@ -511,11 +499,11 @@ ZeroLengthSection::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 void
-ZeroLengthSection::Print(ostream &s, int flag)
+ZeroLengthSection::Print(OPS_Stream &s, int flag)
 {
-	s << "ZeroLengthSection, tag: " << this->getTag() << endl;
-	s << "\tConnected Nodes: " << connectedExternalNodes << endl;
-	s << "\tSection, tag: " << theSection->getTag() << endl;
+	s << "ZeroLengthSection, tag: " << this->getTag() << endln;
+	s << "\tConnected Nodes: " << connectedExternalNodes << endln;
+	s << "\tSection, tag: " << theSection->getTag() << endln;
 }
 
 Response*
@@ -569,9 +557,10 @@ void
 ZeroLengthSection::setUp(int Nd1, int Nd2, const Vector &x, const Vector &yp)
 { 
     // ensure the connectedExternalNode ID is of correct size & set values
-    if (connectedExternalNodes.Size() != 2)
-		g3ErrorHandler->fatal("%s -- failed to create an ID of correct size",
-			"ZeroLengthSection::setUp");
+  if (connectedExternalNodes.Size() != 2) {
+    opserr << "ZeroLengthSection::setUp -- failed to create an ID of correct size\n";
+    exit(-1);
+  }
     
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;
@@ -582,8 +571,8 @@ ZeroLengthSection::setUp(int Nd1, int Nd2, const Vector &x, const Vector &yp)
 
     // check that vectors for orientation are correct size
     if ( x.Size() != 3 || yp.Size() != 3 )
-		g3ErrorHandler->fatal("%s -- incorrect dimension of orientation vectors",
-			"ZeroLengthSection::setUp");
+      opserr << "ZeroLengthSection::setUp -- incorrect dimension of orientation vectors\n";
+			
 
     // establish orientation of element for the tranformation matrix
     // z = x cross yp
@@ -605,8 +594,7 @@ ZeroLengthSection::setUp(int Nd1, int Nd2, const Vector &x, const Vector &yp)
 
     // check valid x and y vectors, i.e. not parallel and of zero length
     if (xn == 0 || yn == 0 || zn == 0)
-		g3ErrorHandler->fatal("%s -- invalid vectors to constructor",
-			"ZeroLengthSection::setUp");
+      opserr << "ZeroLengthSection::setUp -- invalid vectors to constructor\n";
     
     // create transformation matrix of direction cosines
     for (i = 0; i < 3; i++) {
@@ -627,8 +615,8 @@ ZeroLengthSection::setTransformation(void)
 	A = new Matrix(order, numDOF);
 
 	if (A == 0)
-		g3ErrorHandler->fatal("%s -- failed to allocate transformation Matrix",
-			"ZeroLengthSection::setTransformation");
+	  opserr << "ZeroLengthSection::setTransformation -- failed to allocate transformation Matrix\n";
+			
 
 	// Allocate section deformation vector
 	if (v != 0)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-09-20 20:03:13 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/Template3Dep/TclTemplateNDMaterialCommand.cpp,v $
                                                                         
 
@@ -29,7 +29,7 @@
 #include <tcl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
+#include <iOPS_Stream.h>
 #include <ErrorHandler.h>
 
 // includes for Drucker-Prager and von Mises yield surface and potential surface classes

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-16 21:10:00 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d04.cpp,v $
                                                                         
                                                                         
@@ -131,13 +131,13 @@ beam2d04::formVar(void)
 	theNodes[1] = end2Ptr;
 
 	if (end1Ptr == 0) {
-	    cerr << "beam2d04::formVar: Nd1: ";
-	    cerr << Nd1 << "does not exist in model\n";
+	    opserr << "beam2d04::formVar: Nd1: ";
+	    opserr << Nd1 << "does not exist in model\n";
 	    exit(0);
 	}
 	if (end2Ptr == 0) {
-	    cerr << "beam2d04::formVar: Nd2: ";
-	    cerr << Nd2 << "does not exist in model\n";
+	    opserr << "beam2d04::formVar: Nd2: ";
+	    opserr << Nd2 << "does not exist in model\n";
 	    exit(0);
 	}
 
@@ -152,8 +152,8 @@ beam2d04::formVar(void)
 	double L2 = L*L;
 	double L3 = L*L*L;
 	if (L == 0.0) {
-	    cerr << "Element: " << this->getTag();
-	    cerr << " beam2d04::formVar: 0 length\n";
+	    opserr << "Element: " << this->getTag();
+	    opserr << " beam2d04::formVar: 0 length\n";
 	    exit(-1);
 	}
 	
@@ -288,7 +288,7 @@ beam2d04::getStiff(void)
 	k(5,5) = fourEI;
     }
     else {
-	cerr << "beam2d04::getStiff - more WORK \n";
+	opserr << "beam2d04::getStiff - more WORK \n";
 	exit(0);
     }
 
@@ -306,8 +306,7 @@ beam2d04::zeroLoad(void)
 int 
 beam2d04::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("beam2d04::addLoad() - beam %d,load type unknown\n", 
-			    this->getTag());
+  opserr << "beam2d04::addLoad() - beam " << this->getTag() << ",load type unknown\n"; 
   return -1;
 }
 
@@ -372,13 +371,13 @@ beam2d04::sendSelf(int commitTag, Channel &theChannel)
   int result = 0;
   result = theChannel.sendVector(dataTag, commitTag, data);
   if (result < 0) {
-    cerr << "beam2d04::sendSelf - failed to send data\n";
+    opserr << "beam2d04::sendSelf - failed to send data\n";
     return -1;
   }
   
   result = theChannel.sendID(dataTag, commitTag, connectedExternalNodes);
   if (result < 0) {
-    cerr << "beam2d04::sendSelf - failed to send data\n";
+    opserr << "beam2d04::sendSelf - failed to send data\n";
     return -1;
   }
     
@@ -394,7 +393,7 @@ beam2d04::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 
     result = theChannel.recvVector(dataTag, commitTag, data);
     if (result < 0) {
-	cerr << "beam2d04::recvSelf - failed to recv data\n";
+	opserr << "beam2d04::recvSelf - failed to recv data\n";
 	return -1;
     }
 
@@ -403,7 +402,7 @@ beam2d04::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 
     result = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
     if (result < 0) {
-	cerr << "beam2d04::recvSelf - failed to recv data\n";
+	opserr << "beam2d04::recvSelf - failed to recv data\n";
 	return -1;
     }
     
@@ -411,7 +410,7 @@ beam2d04::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 }
 
 void
-beam2d04::Print(ostream &s, int flag)
+beam2d04::Print(OPS_Stream &s, int flag)
 {
     s << "\nElement: " << this->getTag() << " Type: beam2d04 ";
     s << "\tConnected Nodes: " << connectedExternalNodes ;

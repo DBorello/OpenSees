@@ -27,7 +27,7 @@ class PlasticHardeningMaterial : public Material
 
     virtual Response *setResponse (char **argv, int argc, Information &matInformation);
     virtual int getResponse (int responseID, Information &matInformation);
-	virtual void Print(ostream &s, int flag =0);
+	virtual void Print(OPS_Stream &s, int flag =0);
 
 	virtual int  sendSelf(int commitTag, Channel &theChannel){return -1;}
     virtual int  recvSelf(int commitTag, Channel &theChannel,

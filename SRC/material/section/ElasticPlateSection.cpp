@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-19 18:20:45 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticPlateSection.cpp,v $
 
 // Ed "C++" Love
@@ -220,12 +220,12 @@ const Matrix& ElasticPlateSection::getInitialTangent( )
 }
 
 //print out data
-void  ElasticPlateSection::Print( ostream &s, int flag )
+void  ElasticPlateSection::Print( OPS_Stream &s, int flag )
 {
   s << "ElasticPlateSection: \n " ;
-  s <<  "  Young's Modulus E  = "  <<  E  <<  endl ;
-  s <<  "  Poisson's Ratio nu = " <<  nu <<  endl ;
-  s <<  "  Thickness h = "        <<  h  <<  endl ;
+  s <<  "  Young's Modulus E  = "  <<  E  <<  endln ;
+  s <<  "  Poisson's Ratio nu = " <<  nu <<  endln ;
+  s <<  "  Thickness h = "        <<  h  <<  endln ;
 
   return ;
 }
@@ -243,7 +243,7 @@ ElasticPlateSection::sendSelf(int cTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "ElasticPlateSection::sendSelf() - failed to send data\n";
+    opserr << "ElasticPlateSection::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -256,7 +256,7 @@ ElasticPlateSection::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &t
   static Vector data(4);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "ElasticPlateSection::recvSelf() - failed to recv data\n";
+    opserr << "ElasticPlateSection::recvSelf() - failed to recv data\n";
   else {
     this->setTag(data(0));
     E    = data(1);

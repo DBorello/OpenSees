@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:57 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/ParetoRV.cpp,v $
 
 
@@ -32,7 +32,7 @@
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
 //
-
+#include <OPS_Globals.h>
 #include <ParetoRV.h>
 #include <math.h>
 #include <string.h>
@@ -46,7 +46,7 @@ ParetoRV::ParetoRV(int passedTag,
 	tag = passedTag ;
 //	k = 
 //	u = 
-	cerr << "Currently the Pareto distribution must be specified in terms of parameters" << endl;
+	opserr << "Currently the Pareto distribution must be specified in terms of parameters" << endln;
 	startValue = passedStartValue;
 }
 ParetoRV::ParetoRV(int passedTag, 
@@ -70,7 +70,7 @@ ParetoRV::ParetoRV(int passedTag,
 	tag = passedTag ;
 //	k = 
 //	u = 
-	cerr << "Currently the Pareto distribution must be specified in terms of parameters" << endl;
+	opserr << "Currently the Pareto distribution must be specified in terms of parameters" << endln;
 //	startValue = passedStartValue;
 }
 ParetoRV::ParetoRV(int passedTag, 
@@ -93,7 +93,7 @@ ParetoRV::~ParetoRV()
 
 
 void
-ParetoRV::Print(ostream &s, int flag)
+ParetoRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -163,6 +163,6 @@ ParetoRV::getStartValue()
 
 double ParetoRV::getParameter1()  {return k;}
 double ParetoRV::getParameter2()  {return u;}
-double ParetoRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double ParetoRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double ParetoRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double ParetoRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
 

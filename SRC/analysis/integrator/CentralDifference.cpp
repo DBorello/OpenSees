@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:49:46 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/CentralDifference.cpp,v $
                                                                         
                                                                         
@@ -74,8 +74,8 @@ CentralDifference::newStep(double _deltaT)
   deltaT = _deltaT;
 
   if (deltaT <= 0.0) {
-    cerr << "Newton::newStep() - error in variable\n";
-    cerr << "dT = " << deltaT << endl;
+    opserr << "Newton::newStep() - error in variable\n";
+    opserr << "dT = " << deltaT << endln;
     return -2;	
   }
 
@@ -84,7 +84,7 @@ CentralDifference::newStep(double _deltaT)
   c3 = 1.0/(deltaT*deltaT);
     
   if (U == 0) {
-    cerr << "Newton::newStep() - domainChange() failed or hasn't been called\n";
+    opserr << "Newton::newStep() - domainChange() failed or hasn't been called\n";
     return -3;	
   }
 
@@ -168,7 +168,7 @@ CentralDifference::domainChanged()
 	Udot == 0 || Udot->Size() != size ||
 	Udotdot == 0 || Udotdot->Size() != size) {
       
-      cerr << "CentralDifference::domainChanged - ran out of memory\n";
+      opserr << "CentralDifference::domainChanged - ran out of memory\n";
 
       // delete the old
       if (Ut != 0)
@@ -204,7 +204,7 @@ CentralDifference::domainChanged()
       }
     }
     // also need displacements at t-delta t
-    cerr << "CentralDifference::update() - NEED disp at t-delta t\n";
+    opserr << "CentralDifference::update() - NEED disp at t-delta t\n";
   }    
   
   return 0;
@@ -216,20 +216,20 @@ CentralDifference::update(const Vector &deltaU)
 {
   AnalysisModel *theModel = this->getAnalysisModelPtr();
   if (theModel == 0) {
-    cerr << "WARNING CentralDifference::update() - no AnalysisModel set\n";
+    opserr << "WARNING CentralDifference::update() - no AnalysisModel set\n";
     return -1;
   }	
   
   // check domainChanged() has been called, i.e. Ut will not be zero
   if (Ut == 0) {
-    cerr << "WARNING CentralDifference::update() - domainChange() failed or not called\n";
+    opserr << "WARNING CentralDifference::update() - domainChange() failed or not called\n";
     return -2;
   }	
 
   // check deltaU is of correct size
   if (deltaU.Size() != U->Size()) {
-    cerr << "WARNING CentralDifference::update() - Vectors of incompatable size ";
-    cerr << " expecting " << U->Size() << " obtained " << deltaU.Size() << endl;
+    opserr << "WARNING CentralDifference::update() - Vectors of incompatable size ";
+    opserr << " expecting " << U->Size() << " obtained " << deltaU.Size() << endln;
     return -3;
   }
 
@@ -250,7 +250,7 @@ CentralDifference::commit(void)
 {
   AnalysisModel *theModel = this->getAnalysisModelPtr();
   if (theModel == 0) {
-    cerr << "WARNING CentralDifference::commit() - no AnalysisModel set\n";
+    opserr << "WARNING CentralDifference::commit() - no AnalysisModel set\n";
     return -1;
   }	  
   
@@ -276,7 +276,7 @@ CentralDifference::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
 }
 
 void
-CentralDifference::Print(ostream &s, int flag)
+CentralDifference::Print(OPS_Stream &s, int flag)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theModel != 0) {

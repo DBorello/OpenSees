@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-02 20:20:12 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/quadrule/GaussQuadRule1d01.cpp,v $
                                                                         
                                                                         
@@ -223,8 +223,7 @@ GaussQuadRule1d01::~GaussQuadRule1d01()
 int GaussQuadRule1d01::setOrder(int quadOrder)
 {
   if (quadOrder < 1 || quadOrder > maxOrder) {
-    g3ErrorHandler->fatal("%s -- Invalid quadrature order, %d",
-			  "GaussQuadRule1d01::setOrder()", quadOrder);
+    opserr << "GaussQuadRule1d01::setOrder() -- Invalid quadrature order, " << quadOrder << endln;
     return -1;
   }
   
@@ -286,8 +285,7 @@ int GaussQuadRule1d01::setOrder(int quadOrder)
     break;
 
   default:
-    g3ErrorHandler->warning("%s -- Invalid quadrature order %d",
-			    "GaussQuadRule1d01::setOrder()", order);
+    opserr <<"GaussQuadRule1d01::setOrder() -- Invalid quadrature order " << order << endln;
     return -1;
     break;
   }    
@@ -309,8 +307,8 @@ const Matrix &
 GaussQuadRule1d01::getIntegrPointCoords (void) const
 {
   if (order < 1 || order > maxOrder)
-    g3ErrorHandler->warning("%s -- order %d is currently invalid",
-			    "GaussQuadRule1d01::getIntegrPointCoords()", order);
+    opserr << "GaussQuadRule1d01::getIntegrPointWeights() -- order " << order << " is currently invalid\n";
+
   return *myPts;
 }
 
@@ -318,8 +316,8 @@ const Vector &
 GaussQuadRule1d01::getIntegrPointWeights (void) const
 {
   if (order < 1 || order > maxOrder)
-    g3ErrorHandler->warning("%s -- order %d is currently invalid",
-			    "GaussQuadRule1d01::getIntegrPointWeights()", order);
+    opserr << "GaussQuadRule1d01::getIntegrPointWeights() -- order " << order << " is currently invalid\n";
+			    
   return *myWts;
 }
 

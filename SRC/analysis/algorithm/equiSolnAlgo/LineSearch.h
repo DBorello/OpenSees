@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-01-06 19:17:50 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/LineSearch.h,v $
                                                                         
 #ifndef LineSearch_h
@@ -37,12 +37,12 @@
 // What: "@(#)LineSearch.h, revA"
 
 #include <MovableObject.h>
-#include <iostream.h> //Jeremic@ucdavis.edu added!
+#include <OPS_Globals.h>
 
 class SolutionAlgorithm;
 class IncrementalIntegrator;
 class LinearSOE;
-//class ostream; //Jeremic@ucdavis.edu taken out since there is an include<iostream.h> in LineSearch.h 
+//class OPS_Stream; //Jeremic@ucdavis.edu taken out since there is an include<iOPS_Stream.h> in LineSearch.h 
 
 class LineSearch: public MovableObject
 {
@@ -56,7 +56,7 @@ class LineSearch: public MovableObject
 		       double s1, 
 		       LinearSOE &theSOE, 
 		       IncrementalIntegrator &theIntegrator) =0;
-    virtual void Print(ostream &s, int flag =0) =0;
+    virtual void Print(OPS_Stream &s, int flag =0) =0;
   protected:
     
   private:

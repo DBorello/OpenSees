@@ -41,7 +41,11 @@
 
 #include <PBowlLoading.h>
 
+#include <iomanip>
+using std::ios;
 
+#include <fstream>
+using std::ifstream;
 
 PBowlLoading::PBowlLoading()
 :LoadPattern(0, PATTERN_TAG_PBowlLoading),
@@ -93,8 +97,8 @@ PBowlLoading::PBowlLoading(int tag,
     theFile.open(DispfName);
     if (theFile.bad())
       {
-        cerr << "WARNING - PBowlLoading::PBowlLoading()";
-        cerr << " - could not open file " << DispfName << endl;
+        opserr << "WARNING - PBowlLoading::PBowlLoading()";
+        opserr << " - could not open file " << DispfName << endln;
         exit(1);
       }
     else
@@ -110,8 +114,8 @@ PBowlLoading::PBowlLoading(int tag,
     thetimeSteps = timeSteps1;
     if ( timeSteps1 == 0)
       {
-        cerr << "WARNING - PBowlLoading::PBowlLoading()";
-        cerr << " - Time steps for displacement equal to zero... " << AccefName << endl;
+        opserr << "WARNING - PBowlLoading::PBowlLoading()";
+        opserr << " - Time steps for displacement equal to zero... " << AccefName << endln;
         exit(0);
       }
 
@@ -121,22 +125,22 @@ PBowlLoading::PBowlLoading(int tag,
     // first open the file
     theFile.open(DispfName, ios::in);
     if (theFile.bad()) {
-      cerr << "WARNING - PBowlLoading::PBowlLoading()";
-      cerr << " - could not open file " << DispfName << endl;
+      opserr << "WARNING - PBowlLoading::PBowlLoading()";
+      opserr << " - could not open file " << DispfName << endln;
      } else {
 
       // now create the vector
       if ( numDataPoints - thetimeSteps*(numDataPoints/thetimeSteps) != 0 ) {
-         cerr << "WARNING - PBowlLoading::PBowlLoading()";
-         cerr << " - Input data not sufficient...Patched with zeros " << DispfName << endl;
+         opserr << "WARNING - PBowlLoading::PBowlLoading()";
+         opserr << " - Input data not sufficient...Patched with zeros " << DispfName << endln;
       }
       int cols = numDataPoints/thetimeSteps;
       U = new Matrix(cols, thetimeSteps);
 
       // ensure we did not run out of memory
       if (U == 0 || U->noRows() == 0 || U->noCols() == 0) {
-         cerr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
-         cerr << " a Matrix of size (cols*rows): " << cols << " * " << thetimeSteps << endl;
+         opserr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
+         opserr << " a Matrix of size (cols*rows): " << cols << " * " << thetimeSteps << endln;
 
       if (U != 0)
          delete U;
@@ -165,8 +169,8 @@ PBowlLoading::PBowlLoading(int tag,
   numDataPoints = 0;
 
   if (theFile.bad()) {
-    cerr << "WARNING - PBowlLoading::PBowlLoading()";
-    cerr << " - could not open file " << AccefName << endl;
+    opserr << "WARNING - PBowlLoading::PBowlLoading()";
+    opserr << " - could not open file " << AccefName << endln;
     exit(2);
   } else {
     //Input the number of time steps first
@@ -178,8 +182,8 @@ PBowlLoading::PBowlLoading(int tag,
   theFile.close();
   UddnumDataPoints = numDataPoints;
   if ( timeSteps1 !=  timeSteps2) {
-    cerr << "WARNING - PBowlLoading::PBowlLoading()";
-    cerr << " - Time steps for displacement not equal to that for acceleration... " << AccefName << endl;
+    opserr << "WARNING - PBowlLoading::PBowlLoading()";
+    opserr << " - Time steps for displacement not equal to that for acceleration... " << AccefName << endln;
   }
 
 
@@ -189,22 +193,22 @@ PBowlLoading::PBowlLoading(int tag,
     // first open the file
     theFile.open(AccefName, ios::in);
     if (theFile.bad()) {
-      cerr << "WARNING - PBowlLoading::PBowlLoading()";
-      cerr << " - could not open file " << AccefName << endl;
+      opserr << "WARNING - PBowlLoading::PBowlLoading()";
+      opserr << " - could not open file " << AccefName << endln;
     } else {
 
       // now create the vector
       if ( numDataPoints - thetimeSteps*(numDataPoints/thetimeSteps) != 0 ) {
-         cerr << "WARNING - PBowlLoading::PBowlLoading()";
-         cerr << " - Input data not sufficient...Patched with zeros " << AccefName << endl;
+         opserr << "WARNING - PBowlLoading::PBowlLoading()";
+         opserr << " - Input data not sufficient...Patched with zeros " << AccefName << endln;
       }
       int cols = numDataPoints/thetimeSteps;
       Udd = new Matrix(cols, thetimeSteps);
 
       // ensure we did not run out of memory
       if (Udd == 0 || Udd->noRows() == 0 || Udd->noCols() == 0) {
-         cerr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
-         cerr << " a Matrix of size (cols*rows): " << cols << " * " << thetimeSteps << endl;
+         opserr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
+         opserr << " a Matrix of size (cols*rows): " << cols << " * " << thetimeSteps << endln;
 
       if (Udd != 0)
         delete Udd;
@@ -236,8 +240,8 @@ PBowlLoading::PBowlLoading(int tag,
   int numPBE = 0;
 
   if (theFile.bad()) {
-    cerr << "WARNING - PBowlLoading::PBowlLoading()";
-    cerr << " - could not open file " << PBEfName << endl;
+    opserr << "WARNING - PBowlLoading::PBowlLoading()";
+    opserr << " - could not open file " << PBEfName << endln;
     exit(2);
   } else {
     //Input the number of Plastic Bowl elements
@@ -248,8 +252,8 @@ PBowlLoading::PBowlLoading(int tag,
   }
   theFile.close();
   if ( numPBE !=  numDataPoints) {
-    cerr << "WARNING - PBowlLoading::PBowlLoading()";
-    cerr << " - Number of plastic bowl elements not equal to the number of elements provided... " << numDataPoints << numPBE << PBEfName << endl;
+    opserr << "WARNING - PBowlLoading::PBowlLoading()";
+    opserr << " - Number of plastic bowl elements not equal to the number of elements provided... " << numDataPoints << numPBE << PBEfName << endln;
     exit(3);
   }
 
@@ -260,8 +264,8 @@ PBowlLoading::PBowlLoading(int tag,
     // first open the file
     theFile.open(PBEfName, ios::in);
     if (theFile.bad()) {
-      cerr << "WARNING - PBowlLoading::PBowlLoading()";
-      cerr << " - could not open file " << AccefName << endl;
+      opserr << "WARNING - PBowlLoading::PBowlLoading()";
+      opserr << " - could not open file " << AccefName << endln;
     } else {
 
       // now create the vector
@@ -269,8 +273,8 @@ PBowlLoading::PBowlLoading(int tag,
 
       // ensure we did not run out of memory
       if (PBowlElements == 0 || PBowlElements->Size() == 0 ) {
-         cerr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
-         cerr << " a ID of size: " << PBowlElements->Size()<< endl;
+         opserr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
+         opserr << " a ID of size: " << PBowlElements->Size()<< endln;
 
          if (PBowlElements != 0)
           delete PBowlElements;
@@ -291,7 +295,7 @@ PBowlLoading::PBowlLoading(int tag,
       theFile.close();
 
       //Check if read in correctly
-//test      cout << "# of plastic bowl element: " << numPBE << endl;
+//test      cout << "# of plastic bowl element: " << numPBE << endln;
 //test      cout <<  (*PBowlElements);
     }
   }
@@ -391,7 +395,7 @@ PBowlLoading::applyLoad(double time)
 int
 PBowlLoading::sendSelf(int commitTag, Channel &theChannel)
 {
-  cerr << "PBowlLoading::sendSelf() - not yet implemented\n";
+  opserr << "PBowlLoading::sendSelf() - not yet implemented\n";
   return 0;
 }
 
@@ -399,7 +403,7 @@ int
 PBowlLoading::recvSelf(int commitTag, Channel &theChannel,
        FEM_ObjectBroker &theBroker)
 {
-  cerr << "PBowlLoading::recvSelf() - not yet implemented\n";
+  opserr << "PBowlLoading::recvSelf() - not yet implemented\n";
   return 0;
 }
 
@@ -543,9 +547,9 @@ PBowlLoading::recvSelf(int commitTag, Channel &theChannel,
 ***************************************************************************************** */
 
 void
-PBowlLoading::Print(ostream &s, int flag)
+PBowlLoading::Print(OPS_Stream &s, int flag)
 {
-  cerr << "PBowlLoading::Print() - not yet implemented\n";
+  opserr << "PBowlLoading::Print() - not yet implemented\n";
 }
 
 
@@ -555,7 +559,7 @@ LoadPattern *
 PBowlLoading::getCopy(void)
 {
 
-  cerr << "PBowlLoading::getCopy() - not yet implemented\n";
+  opserr << "PBowlLoading::getCopy() - not yet implemented\n";
   return 0;
 }
 
@@ -582,8 +586,8 @@ PBowlLoading::getCopy(void)
 //   PBowlElements = new ID(PBEle);
 //   // ensure we did not run out of memory
 //   if (PBowlElements == 0 || PBowlElements->Size() == 0) {
-//     cerr << "PBowlLoading::addPBElements() - ran out of memory constructing";
-//     cerr << " a Vector of size: " <<  PBowlElements->Size() << endl;
+//     opserr << "PBowlLoading::addPBElements() - ran out of memory constructing";
+//     opserr << " a Vector of size: " <<  PBowlElements->Size() << endln;
 //     if (PBowlElements != 0)
 //       delete PBowlElements;
 //     PBowlElements = 0;
@@ -627,7 +631,7 @@ PBowlLoading::CompPBLoads()
       {
         for (k = 0; k< no_bnode; k++) {
            if ( Temp(j) == (*Bowl_node)(k) )
-           //cout << Temp(j) << "  " << Bowl_node(k) << endl;
+           //cout << Temp(j) << "  " << Bowl_node(k) << endln;
            break;
         } //endofIF
 
@@ -646,13 +650,13 @@ PBowlLoading::CompPBLoads()
   //test cout << "\nCheck all plastic bowl nodes...\n";
   //test for (int bi=0;bi<no_bnode;bi++)
   //test    cout<< (*Bowl_node)(bi) <<"  ";
-  //test cout<< endl << "# of pbowl nodes = " << no_bnode<<endl;
-  //test //cout<<"finish inputting  and organizing the Bowl_node array"<<endl;
+  //test cout<< endln << "# of pbowl nodes = " << no_bnode<<endln;
+  //test //cout<<"finish inputting  and organizing the Bowl_node array"<<endln;
 
 
   //Find all nodes on the boundary Joey Yang & Boris Jeremic 11/06/02
   if ( (BoundaryNodes == 0) && ( (xPlus == xMinus) || (yPlus == yMinus) || (zPlus == zMinus) ) ) {
-    cerr << "PBowlLoading::CompPBLoads() - Boundary node specification not correct..." << endl;
+    opserr << "PBowlLoading::CompPBLoads() - Boundary node specification not correct..." << endln;
     exit(1);
   }
 
@@ -697,8 +701,8 @@ PBowlLoading::CompPBLoads()
   BoundaryNodes = new ID(no_boundarynodes);
 
   if (BoundaryNodes == 0 || BoundaryNodes->Size() == 0) {
-    cerr << "PBowlLoading::CompPBLoads() - ran out of memory constructing";
-    cerr << " a Vector of size: " <<  BoundaryNodes->Size() << endl;
+    opserr << "PBowlLoading::CompPBLoads() - ran out of memory constructing";
+    opserr << " a Vector of size: " <<  BoundaryNodes->Size() << endln;
     if (BoundaryNodes != 0)
       delete BoundaryNodes;
     BoundaryNodes = 0;
@@ -720,8 +724,8 @@ PBowlLoading::CompPBLoads()
   //Adding all exterior nodes on the plastic bowl
   ExteriorNodes = new ID(no_exteriornodes);
   if (ExteriorNodes == 0 || ExteriorNodes->Size() == 0) {
-    cerr << "PBowlLoading::CompPBLoads() - ran out of memory constructing";
-    cerr << " a Vector of size: " <<  ExteriorNodes->Size() << endl;
+    opserr << "PBowlLoading::CompPBLoads() - ran out of memory constructing";
+    opserr << " a Vector of size: " <<  ExteriorNodes->Size() << endln;
     if (ExteriorNodes != 0)
       delete ExteriorNodes;
     ExteriorNodes = 0;
@@ -739,15 +743,15 @@ PBowlLoading::CompPBLoads()
   //test cout << "\nCheck all boundary bowl nodes...\n";
   //test for (int bi = 0; bi < no_boundarynodes; bi++)
   //test      cout << (*BoundaryNodes)(bi) <<"  ";
-  //test cout<< endl << "# of boundary bowl nodes = " << no_boundarynodes << endl;
+  //test cout<< endln << "# of boundary bowl nodes = " << no_boundarynodes << endln;
   //test
   //test //check the exterior bowl nodes
   //test cout << "\nCheck all exterior bowl nodes...\n";
   //test for (int bi = 0; bi < no_exteriornodes; bi++)
   //test      cout << (*ExteriorNodes)(bi) <<"  ";
-  //test cout<< endl << "# of exterior bowl nodes = " << no_exteriornodes << endl;
+  //test cout<< endln << "# of exterior bowl nodes = " << no_exteriornodes << endln;
   //test
-  //test cout<<"finish inputting  and organizing the Bowl_node array"<<endl;
+  //test cout<<"finish inputting  and organizing the Bowl_node array"<<endln;
 
 
   //===========================================================
@@ -845,7 +849,7 @@ PBowlLoading::CompPBLoads()
    //   get the u and u_dotdot for this element
    for ( int t=0;t<thetimeSteps; t++)
    {
-     //cout << "element: " << i << "" << " Time step: " << t << endl;
+     //cout << "element: " << i << "" << " Time step: " << t << endln;
      for (int j=0;j<NIE;j++)  //BJ make it into # of nodes per element (2D or 3D...)
      {
        for (int d=0;d<NDOF;d++)
@@ -871,11 +875,11 @@ PBowlLoading::CompPBLoads()
 
   // ensure we did not run out of memory
   if (PBowlLoads->noRows() == 0 || PBowlLoads->noCols() == 0 ) {
-    cerr << "PBowlLoading::PBowlLoads() - ran out of memory";
-    cerr << " a Matrix of size: " <<  PBowlLoads->noRows() << " * " << PBowlLoads->noCols() << endl;
+    opserr << "PBowlLoading::PBowlLoads() - ran out of memory";
+    opserr << " a Matrix of size: " <<  PBowlLoads->noRows() << " * " << PBowlLoads->noCols() << endln;
   }
 
-//test  cout<<"\nFinish calculating the forces..." << endl << endl;
+//test  cout<<"\nFinish calculating the forces..." << endln << endln;
   LoadComputed = true;
 
   delete Fm;
@@ -895,7 +899,7 @@ PBowlLoading::getNodalLoad(int nodeTag, double time)
   Domain *theDomain = this->getDomain();
   Node *theNode = theDomain->getNode(nodeTag);
   if (theNode == 0) {
-     cerr << "PBowlLoading::getNodalLoad() - no nodes associtated to the nodeTag " << nodeTag << "\n";
+     opserr << "PBowlLoading::getNodalLoad() - no nodes associtated to the nodeTag " << nodeTag << "\n";
      return ( *dummy );
   }
 
@@ -926,7 +930,7 @@ PBowlLoading::getNodalLoad(int nodeTag, double time)
   //If beyond time step, return 0 loads
   else if (incr2 > thetimeSteps ) {
       //test if ( nodeTag == 109)
-      //test    cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad) << endl;
+      //test    cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad) << endln;
       return (*nodalLoad);
   }
 
@@ -940,7 +944,7 @@ PBowlLoading::getNodalLoad(int nodeTag, double time)
   }
 
   //test if ( nodeTag == 109) {
-  //test    cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad) << endl;
+  //test    cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad) << endln;
   //test }
 
   return (*nodalLoad);

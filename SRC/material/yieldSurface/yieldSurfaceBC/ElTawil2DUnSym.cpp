@@ -29,7 +29,7 @@ ElTawil2DUnSym::ElTawil2DUnSym
 
 // This tight coupling with base-class can be a diaster to debug!
 	if(yPosBal < 0 || yNegBal < 0)
-		cerr << "WARNING - ElTawil2DUnSym() - yBalance < 0" << endl;
+		opserr << "WARNING - ElTawil2DUnSym() - yBalance < 0" << endln;
 		
 	//capY = yPosCap;
 	yBal = yPosBal;
@@ -37,8 +37,8 @@ ElTawil2DUnSym::ElTawil2DUnSym
 	if(yNegBal < yBal)
 		yBal = yNegBal;
 
-//    cerr << "yBal= " << yBal << ", yPosBal= " << yPosBal
-//	     << ", yNegBal= " << yNegBal << endl << endl;
+//    opserr << "yBal= " << yBal << ", yPosBal= " << yPosBal
+//	     << ", yNegBal= " << yNegBal << endln << endln;
 
 	capY    = yPosCap - yBal;
 
@@ -51,8 +51,8 @@ ElTawil2DUnSym::ElTawil2DUnSym
 	yPosBal -= yBal;
 	yNegBal -= yBal;
 	
-	cerr << "yBal= " << yBal << ", yPosBal= " << yPosBal
-	     << ", yNegBal= " << yNegBal << endl;
+	opserr << "yBal= " << yBal << ", yPosBal= " << yPosBal
+	     << ", yNegBal= " << yNegBal << endln;
 
 	// set translation
 	double transY   = yBal/capY;
@@ -109,8 +109,8 @@ double yVal3 = ytNeg*capY - yNegBal;
 /*
 char c = ' ';
 
-       cerr << "yVals = " << yVal1 << c << yVal2 << c
-                          << yVal3 << c << yVal4 << endl;
+       opserr << "yVals = " << yVal1 << c << yVal2 << c
+                          << yVal3 << c << yVal4 << endln;
 
 */
 double	xt1 = xPosBal*(1 - pow((yVal1/(yPosCap - yPosBal)) , czPos));
@@ -125,10 +125,10 @@ double	xt3 = xNegBal*(1 - pow( fabs(yVal3/(yNegCap - yNegBal)) , tyNeg));
 	xt4 = xt4/capX;
 
 /*
-	cerr << "xPos = " << xPos << ", xNeg = " << xNeg << endl
-	     << "ytPos = " << ytPos << ", ytNeg = " << ytNeg << endl
-	     << "xt1   = " << xt1 << ", xt2 = " << xt2  << endl
-		 << "xt3   = " << xt3 << ", xt4 = " << xt4 << endl;
+	opserr << "xPos = " << xPos << ", xNeg = " << xNeg << endln
+	     << "ytPos = " << ytPos << ", ytNeg = " << ytNeg << endln
+	     << "xt1   = " << xt1 << ", xt2 = " << xt2  << endln
+		 << "xt3   = " << xt3 << ", xt4 = " << xt4 << endln;
 */
 }
 
@@ -141,13 +141,12 @@ void ElTawil2DUnSym::getGradient(double &gx, double &gy, double x, double y)
     double capx = capXdim;
     double capy = capYdim;
     
-	// cout << "ElTawil2DUnSym::getGradient drift:" << this->YieldSurface_BC2D::getDrift(x, y) << endl;
+	// cout << "ElTawil2DUnSym::getGradient drift:" << this->YieldSurface_BC2D::getDrift(x, y) << endln;
 
     if(loc != 0)
     {
-     	cout << "ERROR - ElTawil2D::getGradient(double &gx, double &gy, double x, double y)\n";
-        cout << "Force point not on yield surface, drift = " << drift << " loc = " << loc <<"\n";
-        cin.get();
+     	opserr << "ERROR - ElTawil2D::getGradient(double &gx, double &gy, double x, double y)\n";
+        opserr << "Force point not on yield surface, drift = " << drift << " loc = " << loc <<"\n";
     }
     else
     {
@@ -191,8 +190,8 @@ void ElTawil2DUnSym::getGradient(double &gx, double &gy, double x, double y)
 			}
 			else
 			{
-				cerr << "Eltawil2DUnsym - condition not possible" << endl;
-				cin.get();
+				opserr << "Eltawil2DUnsym - condition not possible" << endln;
+				
 			}
 
 			/* gx = 1/xBal;
@@ -207,8 +206,8 @@ void ElTawil2DUnSym::getGradient(double &gx, double &gy, double x, double y)
 		}
 	}
 
-//	cout << "gx = " << gx << "gy = " << gy << "\n";
-//	cin.get();
+//	opserr << "gx = " << gx << "gy = " << gy << "\n";
+//	
 }
 
 double ElTawil2DUnSym::getSurfaceDrift(double x, double y)
@@ -254,10 +253,9 @@ double a = 5;//10.277; //3.043;//4.29293; --> effects convergence
 		}
 		else
 		{
-			cerr << "ElTawil2DUnSym::getSurfaceDrift(..) - cond not possible\n";
-			cerr << "x=" << x << ", y=" << y << ", capx=" << capx << ", capy=" << capy << endl;
-			cerr << "xVal = " << xVal << ", yVal = " << yVal << endl;
-			cin.get();
+			opserr << "ElTawil2DUnSym::getSurfaceDrift(..) - cond not possible\n";
+			opserr << "x=" << x << ", y=" << y << ", capx=" << capx << ", capy=" << capy << endln;
+			opserr << "xVal = " << xVal << ", yVal = " << yVal << endln;
 		}
 		/*	
 		if(y < 0)
@@ -319,7 +317,7 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
 	if(displayMode == this->SurfOnly)
 	{
 		rgb(0) = 0.7; rgb(1) = 0.7; rgb(2) = 1.0;
-		//cout << "Displaying self" << endl;
+		//opserr << "Displaying self" << endln;
 	}
 
 
@@ -338,7 +336,7 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
     //int iter = 0;
     //while(1)
 	{
-		//cout << "incr = " << incr;
+		//opserr << "incr = " << incr;
 		/*switch (iter)
 		{
 			case 0:{yc = yNegCap/capY; break;}
@@ -375,11 +373,11 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
 		double x = xVal/capX;
 
 		if(displayMode==100)
-			cout << "(undeformed) x = " << x << ", y = " << y;
+			opserr << "(undeformed) x = " << x << ", y = " << y;
 
         hModel->toDeformedCoord(x, y);
 		if(displayMode==100)
-			cout << " (deformed) x = " << x << ", y = " << y << endl;
+			opserr << " (deformed) x = " << x << ", y = " << y << endln;
  		
 		pCurr(0) = x;
 		pCurr(1) = y;
@@ -396,7 +394,7 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
  	yOld = yNegCap/capY;
  	hModel->toDeformedCoord(xOld, yOld);
 
-//	cerr << "Plotting negative side\n";
+//	opserr << "Plotting negative side\n";
 	// xNegBal itself is < 0
 	// quad 2 and 3
 	//iter = 0;
@@ -436,11 +434,11 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
 		double x = xVal/capX;
 
 		if(displayMode==100)
-			cout << "(undeformed) x = " << x << ", y = " << y;
+			opserr << "(undeformed) x = " << x << ", y = " << y;
 
         hModel->toDeformedCoord(x, y);
 		if(displayMode==100)
-			cout << " (deformed) x = " << x << ", y = " << y << endl;
+			opserr << " (deformed) x = " << x << ", y = " << y << endln;
  		
 		pCurr(0) = x;
 		pCurr(1) = y;
@@ -457,7 +455,7 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
 	return 0;
 }
 
-void ElTawil2DUnSym::Print(ostream &s, int flag)
+void ElTawil2DUnSym::Print(OPS_Stream &s, int flag)
 {
     s << "\nYield Surface No: " << this->getTag() << " type: ElTawil2DUnSym\n";
 }
@@ -505,8 +503,8 @@ double t;
             hModel->toDeformedCoord(x1, y1);
 			if(displayMode==100)
 			{
-				cout << " x = " << x << ", y = " << y << " ";
-				cout << " x1 = " << x1 << ", y1 = " << y1 << "\n";
+				opserr << " x = " << x << ", y = " << y << " ";
+				opserr << " x1 = " << x1 << ", y1 = " << y1 << "\n";
 			}
             pCurr(0) = x1;
             pCurr(1) = y1;
@@ -517,7 +515,7 @@ double t;
             pOld(0) = x2;
             pOld(1) = y2;
             theViewer.drawLine(pOld, pCurr, rgb, rgb);
-			//cout << "pOld = " << pOld << " pCurr = " << pCurr << "\n";
+			//opserr << "pOld = " << pOld << " pCurr = " << pCurr << "\n";
 
             ///////////////////////// x<0, y>0
             x1 = -1*x;

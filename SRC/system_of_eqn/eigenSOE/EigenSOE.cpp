@@ -38,7 +38,7 @@ EigenSOE::solve(int numModes)
 int 
 EigenSOE::solve(void)
 {
-    cerr << "ERROR EigenSOE::solve(void) - need to specify numModes\n";
+    opserr << "ERROR EigenSOE::solve(void) - need to specify numModes\n";
     return -1;
 }
 

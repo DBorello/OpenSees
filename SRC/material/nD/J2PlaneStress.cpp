@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:49:11 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlaneStress.cpp,v $
 
 // Written: Ed "C++" Love
@@ -151,8 +151,8 @@ int J2PlaneStress :: setTrialStrain( const Vector &strain_from_element )
 
      iteration_counter++ ;
      if ( iteration_counter > max_iterations ) {
-       cerr << "More than " << max_iterations ;
-       cerr << " iterations in setTrialStrain of J2PlaneStress \n" ;
+       opserr << "More than " << max_iterations ;
+       opserr << " iterations in setTrialStrain of J2PlaneStress \n" ;
        break ;
      }// end if 
 
@@ -370,7 +370,7 @@ J2PlaneStress::sendSelf(int commitTag, Channel &theChannel)
 
   // send the vector object to the channel
   if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
-    cerr << "J2PlaneStress::sendSelf - failed to send vector to channel\n";
+    opserr << "J2PlaneStress::sendSelf - failed to send vector to channel\n";
     return -1;
   }
 
@@ -385,7 +385,7 @@ J2PlaneStress::recvSelf (int commitTag, Channel &theChannel,
   // recv the vector object from the channel which defines material param and state
   static Vector data(10+9);
   if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
-    cerr << "J2PlaneStress::recvSelf - failed to recv vector from channel\n";
+    opserr << "J2PlaneStress::recvSelf - failed to recv vector from channel\n";
     return -1;
   }
 

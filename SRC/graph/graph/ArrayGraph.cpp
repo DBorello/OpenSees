@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/ArrayGraph.cpp,v $
                                                                         
                                                                         
@@ -49,8 +49,8 @@ ArrayGraph::ArrayGraph(int arraySize)
     // we now try and get an array of size arraySize
     theVertices = new Vertex *[arraySize];
     if (theVertices == 0)  {
-	cerr << "Warning ArrayGraph::ArrayGraph";
-	cerr << " - no contiguous memory block big enough available\n";
+	opserr << "Warning ArrayGraph::ArrayGraph";
+	opserr << " - no contiguous memory block big enough available\n";
 	sizeVertices = 0;
     }
     
@@ -85,7 +85,7 @@ ArrayGraph::~ArrayGraph()
 // delete()} on the old array. It now tries to add the vertex in the
 // array at location {\em vertexTag}. If this fails it adds at the first
 // empty location it comes to. Returns a 0 if successfull addition, a
-// $-1$ otherwise and a message to cerr explaining the problem. \\ 
+// $-1$ otherwise and a message to opserr explaining the problem. \\ 
 
 
 bool
@@ -93,8 +93,8 @@ ArrayGraph::addVertex(Vertex *vertexPtr)
 {
     // check the vertex * and its adjacency list
     if (vertexPtr == 0) {
-	cerr << "WARNING ArrayGraph::addVertex";
-	cerr << " - attempting to add a NULL vertex*\n";
+	opserr << "WARNING ArrayGraph::addVertex";
+	opserr << " - attempting to add a NULL vertex*\n";
 	return false;
     }
     
@@ -104,8 +104,8 @@ ArrayGraph::addVertex(Vertex *vertexPtr)
 	for (int i=0; i<size; i++) {
 	    Vertex *other = this->getVertexPtr(adjacency(i));
 	    if (other == 0) {
-		cerr << "WARNING ArrayGraph::addVertex";
-		cerr << " - vertex with adjacent vertex not in graph\n";
+		opserr << "WARNING ArrayGraph::addVertex";
+		opserr << " - vertex with adjacent vertex not in graph\n";
 		return false;
 	    }		
 	}
@@ -118,8 +118,8 @@ ArrayGraph::addVertex(Vertex *vertexPtr)
 	Vertex **newVertices = new Vertex *[newSize];
 	
 	if (newVertices == 0) {
-	    cerr << "WARNING ArrayGraph::addVertex";
-	    cerr << " - out of contiguous memory could not create a new array";
+	    opserr << "WARNING ArrayGraph::addVertex";
+	    opserr << " - out of contiguous memory could not create a new array";
 	    delete vertexPtr;
 	    return false;
 	}
@@ -259,9 +259,9 @@ ArrayGraph::getArraySize(void) const
 
 
 void 
-ArrayGraph::Print(ostream &s) const
+ArrayGraph::Print(OPS_Stream &s) const
 {
-    s << numVertex << " " << numEdge << endl;
+    s << numVertex << " " << numEdge << endln;
     
     Vertex *vertexPtr;
     
@@ -274,7 +274,7 @@ ArrayGraph::Print(ostream &s) const
     }
 }
 
-ostream &operator<<(ostream &s, const ArrayGraph &M)
+OPS_Stream &operator<<(OPS_Stream &s, const ArrayGraph &M)
 {
   M.Print(s);
   return s;

@@ -27,8 +27,8 @@ BkStressLimSurface2D::BkStressLimSurface2D(int tag, int classTag, double min_iso
 {
 	if (dir < -1.0 || dir > 1.0)
 	{
-		cerr << "WARNING: BkStressLimSurface2D() - Dir should be between -1 and +1\n";
-		cerr << "Set to 0 \n";
+		opserr << "WARNING: BkStressLimSurface2D() - Dir should be between -1 and +1\n";
+		opserr << "Set to 0 \n";
 		direction = 0.0;
 	}
 		
@@ -200,8 +200,8 @@ int resType = resAlgo;
 	
 	default:
 	{
-		cerr << "WARNING - Unknown residual algo\n";
-		cerr << *this;
+		opserr << "WARNING - Unknown residual algo\n";
+		opserr << *this;
 		if(drift >= 0.0)
 			dR = 0.0;
 	}
@@ -273,14 +273,14 @@ double BkStressLimSurface2D::getTrialPlasticStrains(int dir)
 	else if (dir == 1 && !defPosY)
 		return isoMatYNeg->getTrialValue();
 	else
-		cerr << "BkStressLimSurface2D::getTrialPlasticStrains(double dir) - incorrect dir||condition \n";
+		opserr << "BkStressLimSurface2D::getTrialPlasticStrains(double dir) - incorrect dir||condition \n";
 	return 0;
 }
 
 double BkStressLimSurface2D::getCommitPlasticStrains(int dir)
 {
-	cerr << "WARNING: BkStressLimSurface2D::getCommitPlasticStrains(.) "
-		  << " not yet implemented" << endl;
+	opserr << "WARNING: BkStressLimSurface2D::getCommitPlasticStrains(.) "
+		  << " not yet implemented" << endln;
 	return this->getTrialPlasticStrains(dir);
 }
 
@@ -296,7 +296,7 @@ double BkStressLimSurface2D::getIsoPlasticStiffness(int dir)
 	else if (dir == 1 && !defPosY)
 		return isoMatYNeg->getTrialPlasticStiffness();
 	else
-		cerr << "BkStressLimSurface2D::getIsoPlasticStiffness(double dir) - incorrect dir/condition \n";
+		opserr << "BkStressLimSurface2D::getIsoPlasticStiffness(double dir) - incorrect dir/condition \n";
 	return 0;	
 }
 
@@ -307,7 +307,7 @@ double BkStressLimSurface2D::getKinPlasticStiffness(int dir)
 	else if (dir == 1)
 		return kinMatY->getTrialPlasticStiffness();
 	else
-		cerr << "BkStressLimSurface2D::getKinPlasticStiffness(double dir) - incorrect dir\n";
+		opserr << "BkStressLimSurface2D::getKinPlasticStiffness(double dir) - incorrect dir\n";
 	return 0;
 
 }
@@ -333,7 +333,7 @@ int BkStressLimSurface2D::displaySelf(Renderer &theViewer, int displayMode, floa
 	return  0;
 }
 
-void BkStressLimSurface2D::Print(ostream &s, int flag)
+void BkStressLimSurface2D::Print(OPS_Stream &s, int flag)
 {
 	s << "BkStressLimSurface2D \n";
 	s << "iso_Ratio = " << isotropicRatio << "\n";

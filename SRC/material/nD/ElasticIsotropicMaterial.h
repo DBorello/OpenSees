@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-05 22:49:09 $
+// $Revision: 1.10 $
+// $Date: 2003-02-14 23:01:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.h,v $
                                                                         
                                                                         
@@ -106,7 +106,7 @@ class ElasticIsotropicMaterial : public NDMaterial
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);    
     
-    void Print(ostream &s, int flag = 0);
+    void Print(OPS_Stream &s, int flag = 0);
 
     virtual int setParameter(char **argv, int argc, Information &info);
     virtual int updateParameter(int parameterID, Information &info);

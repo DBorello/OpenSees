@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:49:11 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlaneStrain.cpp,v $
 
 // Written: Ed "C++" Love
@@ -326,7 +326,7 @@ J2PlaneStrain::sendSelf (int commitTag, Channel &theChannel)
 
   // send the vector object to the channel
   if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
-    cerr << "J2PlaneStrain::sendSelf - failed to send vector to channel\n";
+    opserr << "J2PlaneStrain::sendSelf - failed to send vector to channel\n";
     return -1;
   }
   return 0;
@@ -340,7 +340,7 @@ J2PlaneStrain::recvSelf (int commitTag, Channel &theChannel,
   // recv the vector object from the channel which defines material param and state
   static Vector data(18);
   if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
-    cerr << "J2PlaneStrain::recvSelf - failed to sned vectorto channel\n";
+    opserr << "J2PlaneStrain::recvSelf - failed to sned vectorto channel\n";
     return -1;
   }
 

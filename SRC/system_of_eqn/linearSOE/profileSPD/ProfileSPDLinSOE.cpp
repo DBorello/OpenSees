@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:17:53 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:02:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSOE.cpp,v $
                                                                         
                                                                         
@@ -67,9 +67,9 @@ ProfileSPDLinSOE::ProfileSPDLinSOE(int N, int *iLoc,
     A = new double[iLoc[N-1]];
 	
     if (A == 0) {
-	cerr << "FATAL:BandSPDLinSOE::BandSPDLinSOE :";
-	cerr << " ran out of memory for A (profileSize) (";
-	cerr << size <<", " << profileSize << ") \n";
+	opserr << "FATAL:BandSPDLinSOE::BandSPDLinSOE :";
+	opserr << " ran out of memory for A (profileSize) (";
+	opserr << size <<", " << profileSize << ") \n";
 	size = 0; profileSize = 0;
     }
     else {
@@ -83,9 +83,9 @@ ProfileSPDLinSOE::ProfileSPDLinSOE(int N, int *iLoc,
 	iDiagLoc = new int[size];
     
 	if (B == 0 || X == 0 || iDiagLoc == 0 ) {
-	    cerr << "WARNING ProfileSPDLinSOE::ProfileSPDLinSOE :";
-	    cerr << " ran out of memory for vectors (size) (";
-	    cerr << size << ") \n";
+	    opserr << "WARNING ProfileSPDLinSOE::ProfileSPDLinSOE :";
+	    opserr << " ran out of memory for vectors (size) (";
+	    opserr << size << ") \n";
 	    size = 0; Bsize = 0;
 	} else
 	    Bsize = size;
@@ -105,8 +105,8 @@ ProfileSPDLinSOE::ProfileSPDLinSOE(int N, int *iLoc,
     
     int solverOK = the_Solver.setSize();
     if (solverOK < 0) {
-	cerr << "WARNING ProfileSPDLinSOE::ProfileSPDLinSOE :";
-	cerr << " solver failed setSize() in constructor\n";
+	opserr << "WARNING ProfileSPDLinSOE::ProfileSPDLinSOE :";
+	opserr << " solver failed setSize() in constructor\n";
     }
 }
 
@@ -142,8 +142,8 @@ ProfileSPDLinSOE::setSize(Graph &theGraph)
 	iDiagLoc = new int[size];
 
 	if (iDiagLoc == 0) {
-	    cerr << "WARNING ProfileSPDLinSOE::setSize() : ";
-	    cerr << " - ran out of memory for iDiagLoc\n";
+	    opserr << "WARNING ProfileSPDLinSOE::setSize() : ";
+	    opserr << " - ran out of memory for iDiagLoc\n";
 	    size = 0; Asize = 0;
 	    result = -1;
 	}
@@ -202,9 +202,9 @@ ProfileSPDLinSOE::setSize(Graph &theGraph)
 	A = new double[profileSize];
 	
         if (A == 0) {
-            cerr << "ProfileSPDLinSOE::ProfileSPDLinSOE :";
-	    cerr << " ran out of memory for A (size,Profile) (";
-	    cerr << size <<", " << profileSize << ") \n";
+            opserr << "ProfileSPDLinSOE::ProfileSPDLinSOE :";
+	    opserr << " ran out of memory for A (size,Profile) (";
+	    opserr << size <<", " << profileSize << ") \n";
 	    size = 0;  Asize = 0;  profileSize = 0;
 	    result = -1;
         }
@@ -230,9 +230,9 @@ ProfileSPDLinSOE::setSize(Graph &theGraph)
 	X = new double[size];
 	
         if (B == 0 || X == 0 ) {
-            cerr << "ProfileSPDLinSOE::ProfileSPDLinSOE :";
-	    cerr << " ran out of memory for vectors (size) (";
-	    cerr << size << ") \n";
+            opserr << "ProfileSPDLinSOE::ProfileSPDLinSOE :";
+	    opserr << " ran out of memory for vectors (size) (";
+	    opserr << size << ") \n";
 	    size = 0; Bsize = 0;
 	    result = -1;
         }
@@ -262,15 +262,17 @@ ProfileSPDLinSOE::setSize(Graph &theGraph)
     LinearSOESolver *the_Solver = this->getSolver();
     int solverOK = the_Solver->setSize();
     if (solverOK < 0) {
-	cerr << "WARNING ProfileSPDLinSOE::setSize :";
-	cerr << " solver failed setSize()\n";
+	opserr << "WARNING ProfileSPDLinSOE::setSize :";
+	opserr << " solver failed setSize()\n";
 	return solverOK;
     }    
-    
-    cerr << "ProfileSPDLINSOE::setSize(): Num Eqn: " ;
-    cerr << size << "  Profile Size: " << profileSize;
-    cerr << "  Avg Band: " << profileSize/size << endl;
-    
+
+    /*
+    opserr << "ProfileSPDLINSOE::setSize(): Num Eqn: " ;
+    opserr << size << "  Profile Size: " << profileSize;
+    opserr << "  Avg Band: " << profileSize/size << endln;
+    */
+
     return result;
 }
 
@@ -283,7 +285,7 @@ ProfileSPDLinSOE::addA(const Matrix &m, const ID &id, double fact)
     // check that m and id are of similar size
     int idSize = id.Size();    
     if (idSize != m.noRows() && idSize != m.noCols()) {
-	cerr << "FullGenLinSOE::addA()	- Matrix and ID not of similar sizes\n";
+	opserr << "FullGenLinSOE::addA()	- Matrix and ID not of similar sizes\n";
 	return -1;
     }
 
@@ -347,8 +349,8 @@ ProfileSPDLinSOE::addB(const Vector &v, const ID &id, double fact)
     // check that m and id are of similar size
     int idSize = id.Size();        
     if (idSize != v.Size() ) {
-	cerr << "ProfileSPDLinSOE::addB() -";
-	cerr << " Vector and ID not of similar sizes\n";
+	opserr << "ProfileSPDLinSOE::addB() -";
+	opserr << " Vector and ID not of similar sizes\n";
 	return -1;
     }    
     
@@ -383,8 +385,8 @@ ProfileSPDLinSOE::setB(const Vector &v, double fact)
 
 
     if (v.Size() != size) {
-	cerr << "WARNING BandGenLinSOE::setB() -";
-	cerr << " incomptable sizes " << size << " and " << v.Size() << endl;
+	opserr << "WARNING BandGenLinSOE::setB() -";
+	opserr << " incomptable sizes " << size << " and " << v.Size() << endln;
 	return -1;
     }
     
@@ -441,7 +443,7 @@ const Vector &
 ProfileSPDLinSOE::getX(void)
 {
     if (vectX == 0) {
-	cerr << "FATAL ProfileSPDLinSOE::getX - vectX == 0";
+	opserr << "FATAL ProfileSPDLinSOE::getX - vectX == 0";
 	exit(-1);
     }    
     return *vectX;
@@ -451,7 +453,7 @@ const Vector &
 ProfileSPDLinSOE::getB(void)
 {
     if (vectB == 0) {
-	cerr << "FATAL ProfileSPDLinSOE::getB - vectB == 0";
+	opserr << "FATAL ProfileSPDLinSOE::getB - vectB == 0";
 	exit(-1);
     }        
     return *vectB;
@@ -478,8 +480,8 @@ ProfileSPDLinSOE::setProfileSPDSolver(ProfileSPDLinSolver &newSolver)
     if (size != 0) {
 	int solverOK = newSolver.setSize();
 	if (solverOK < 0) {
-	    cerr << "WARNING:ProfileSPDLinSOE::setSolver :";
-	    cerr << "the new solver could not setSeize() - staying with old\n";
+	    opserr << "WARNING:ProfileSPDLinSOE::setSolver :";
+	    opserr << "the new solver could not setSeize() - staying with old\n";
 	    return -1;
 	}
     }

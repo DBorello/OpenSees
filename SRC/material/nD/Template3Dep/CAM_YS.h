@@ -51,7 +51,7 @@ class CAMYieldSurface : public YieldSurface
     // Redefine 1st derivative of F over tensorial internal variables
 
     double getM() const;
-    void print() { cout << *this; };
+    void print() { opserr << *this; };
     
 // moved to stresstensor
 //   private:
@@ -61,7 +61,7 @@ class CAMYieldSurface : public YieldSurface
 		         
     //================================================================================
     // Overloaded Insertion Operator
-    friend ostream& operator<< (ostream& os, const CAMYieldSurface & YS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const CAMYieldSurface & YS);
 
 };
 

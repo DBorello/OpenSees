@@ -327,7 +327,7 @@ class HardeningMaterial : public UniaxialMaterial
       int recvSelf(int commitTag, Channel &theChannel, 
                    FEM_ObjectBroker &theBroker);    
     
-      void Print(ostream &s, int flag = 0);
+      void Print(OPS_Stream &s, int flag = 0);
     
    protected:
     
@@ -584,7 +584,7 @@ HardeningMaterial::sendSelf(int cTag, Channel &theChannel)
   
    int res = theChannel.sendVector(this->getDbTag(), cTag, data);
    if (res < 0) 
-      cerr << "HardeningMaterial::sendSelf() - failed to send data\n";
+      opserr << "HardeningMaterial::sendSelf() - failed to send data\n";
 
    return res;
 }
@@ -598,7 +598,7 @@ HardeningMaterial::recvSelf(int cTag, Channel &theChannel,
    int res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
    if (res < 0) {
-      cerr << "HardeningMaterial::recvSelf() - failed to receive data\n";
+      opserr << "HardeningMaterial::recvSelf() - failed to receive data\n";
       this->setTag(0);      
    }
    else {
@@ -627,13 +627,13 @@ inherited from TaggedObject.
 {\sf\small
 \begin{verbatim}
 void 
-HardeningMaterial::Print(ostream &s, int flag)
+HardeningMaterial::Print(OPS_Stream &s, int flag)
 {
-   s << "HardeningMaterial, tag: " << this->getTag() << endl;
-   s << "  E: " << E << endl;
-   s << "  sigmaY: " << sigmaY << endl;
-   s << "  Hiso: " << Hiso << endl;
-   s << "  Hkin: " << Hkin << endl;
+   s << "HardeningMaterial, tag: " << this->getTag() << endln;
+   s << "  E: " << E << endln;
+   s << "  sigmaY: " << sigmaY << endln;
+   s << "  Hiso: " << Hiso << endln;
+   s << "  Hkin: " << Hkin << endln;
 }
 \end{verbatim}
 }
@@ -711,9 +711,9 @@ TclModelBuilderUniaxialMaterialCommand(ClientData clienData, Tcl_Interp *interp,
 
    else if (strcmp(argv[1],"Hardening") == 0) {
       if (argc < 7) {
-         cerr << "WARNING insufficient arguments\n";
+         opserr << "WARNING insufficient arguments\n";
          printCommand(argc,argv);
-         cerr << "Want: uniaxialMaterial Hardening tag E sigmaY Hiso Hkin" << endl;
+         opserr << "Want: uniaxialMaterial Hardening tag E sigmaY Hiso Hkin" << endln;
          return TCL_ERROR;
       }
 
@@ -721,31 +721,31 @@ TclModelBuilderUniaxialMaterialCommand(ClientData clienData, Tcl_Interp *interp,
       double E, sigmaY, Hiso, Hkin;
 
       if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-         cerr << "WARNING invalid uniaxialMaterial Hardening tag" << endl;
+         opserr << "WARNING invalid uniaxialMaterial Hardening tag" << endln;
          return TCL_ERROR;		
       }
 
       if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
-         cerr << "WARNING invalid E\n";
-         cerr << "uniaxialMaterial Hardening: " << tag << endl;
+         opserr << "WARNING invalid E\n";
+         opserr << "uniaxialMaterial Hardening: " << tag << endln;
          return TCL_ERROR;	
       }
 
       if (Tcl_GetDouble(interp, argv[4], &sigmaY) != TCL_OK) {
-         cerr << "WARNING invalid sigmaY\n";
-         cerr << "uniaxialMaterial Hardening: " << tag << endl;
+         opserr << "WARNING invalid sigmaY\n";
+         opserr << "uniaxialMaterial Hardening: " << tag << endln;
          return TCL_ERROR;
       }
 
       if (Tcl_GetDouble(interp, argv[5], &Hiso) != TCL_OK) {
-         cerr << "WARNING invalid Hiso\n";
-         cerr << "uniaxialMaterial Hardening: " << tag << endl;
+         opserr << "WARNING invalid Hiso\n";
+         opserr << "uniaxialMaterial Hardening: " << tag << endln;
          return TCL_ERROR;	
       }
 
       if (Tcl_GetDouble(interp, argv[6], &Hkin) != TCL_OK) {
-         cerr << "WARNING invalid Hkin\n";
-         cerr << "uniaxialMaterial Hardening: " << tag << endl;
+         opserr << "WARNING invalid Hkin\n";
+         opserr << "uniaxialMaterial Hardening: " << tag << endln;
          return TCL_ERROR;	
       }
 
@@ -759,8 +759,8 @@ TclModelBuilderUniaxialMaterialCommand(ClientData clienData, Tcl_Interp *interp,
 
    // Now add the material to the modelBuilder
    if (theTclBuilder->addUniaxialMaterial(*theMaterial) < 0) {
-      cerr << "WARNING could not add uniaxialMaterial to the model builder\n";
-      cerr << *theMaterial << endl;
+      opserr << "WARNING could not add uniaxialMaterial to the model builder\n";
+      opserr << *theMaterial << endln;
       delete theMaterial; // invoke the material objects destructor,
                           // otherwise memory leak
       return TCL_ERROR;
@@ -795,9 +795,9 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
    //
 
    default:
-      cerr << "FEM_ObjectBroker::getPtrNewUniaxialMaterial - ";
-      cerr << " - no UniaxialMaterial type exists for class tag ";
-      cerr << classTag << endl;
+      opserr << "FEM_ObjectBroker::getPtrNewUniaxialMaterial - ";
+      opserr << " - no UniaxialMaterial type exists for class tag ";
+      opserr << classTag << endln;
       return 0;
    }        
 }
@@ -898,7 +898,7 @@ class FedeasMaterial : public UniaxialMaterial
       virtual int recvSelf(int commitTag, Channel &theChannel, 
                           FEM_ObjectBroker &theBroker);    
      
-      virtual void Print(ostream &s, int flag = 0);
+      virtual void Print(OPS_Stream &s, int flag = 0);
      
    protected:
       // Invokes the FORTRAN subroutine
@@ -1136,7 +1136,7 @@ FedeasMaterial::sendSelf(int commitTag, Channel &theChannel)
      
    res += theChannel.sendID(this->getDbTag(), commitTag, idData);
    if (res < 0) 
-      cerr << "FedeasMaterial::sendSelf() - failed to send ID data\n";
+      opserr << "FedeasMaterial::sendSelf() - failed to send ID data\n";
      
    Vector vecData(numHstv+numData+2);
      
@@ -1154,7 +1154,7 @@ FedeasMaterial::sendSelf(int commitTag, Channel &theChannel)
      
    res += theChannel.sendVector(this->getDbTag(), commitTag, vecData);
    if (res < 0) 
-      cerr << "FedeasMaterial::sendSelf() - failed to send Vector data\n";
+      opserr << "FedeasMaterial::sendSelf() - failed to send Vector data\n";
      
    return res;
 }
@@ -1169,7 +1169,7 @@ FedeasMaterial::recvSelf(int commitTag, Channel &theChannel,
      
    res += theChannel.recvID(this->getDbTag(), commitTag, idData);
    if (res < 0) {
-      cerr << "FedeasMaterial::recvSelf() - failed to receive ID data\n";
+      opserr << "FedeasMaterial::recvSelf() - failed to receive ID data\n";
       return res;
    }
      
@@ -1181,7 +1181,7 @@ FedeasMaterial::recvSelf(int commitTag, Channel &theChannel,
      
    res += theChannel.recvVector(this->getDbTag(), commitTag, vecData);
    if (res < 0) {
-      cerr << "FedeasMaterial::recvSelf() - failed to receive Vector data\n";
+      opserr << "FedeasMaterial::recvSelf() - failed to receive Vector data\n";
       return res;
    }
      
@@ -1210,19 +1210,19 @@ the switch statement as additional subroutines are added.
 \begin{verbatim}
 
 void
-FedeasMaterial::Print(ostream &s, int flag)
+FedeasMaterial::Print(OPS_Stream &s, int flag)
 {
    s << "FedeasMaterial, type: ";
            
    switch (this->getClassTag()) {
    case MAT_TAG_FedeasHardening:
-      s << "Hardening" << endl;
+      s << "Hardening" << endln;
       break;
 
    // Add more cases as needed
        
    default:
-      s << "Material identifier = " << this->getClassTag() << endl;
+      s << "Material identifier = " << this->getClassTag() << endln;
       break;
    }
 }
@@ -1558,9 +1558,9 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
    //
 
    default:
-      cerr << "FEM_ObjectBroker::getPtrNewUniaxialMaterial - ";
-      cerr << " - no UniaxialMaterial type exists for class tag ";
-      cerr << classTag << endl;
+      opserr << "FEM_ObjectBroker::getPtrNewUniaxialMaterial - ";
+      opserr << " - no UniaxialMaterial type exists for class tag ";
+      opserr << classTag << endln;
       return 0;
    }        
 }

@@ -40,7 +40,7 @@ class YieldSurfaceSection2d: public SectionForceDeformation
   int recvSelf (int commitTag, Channel &theChannel,
 		FEM_ObjectBroker &theBroker);
   
-  virtual void Print (ostream &s, int flag =0);
+  virtual void Print (OPS_Stream &s, int flag =0);
   
   virtual SectionForceDeformation *getCopy (void)=0;
   

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:00 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SORMAnalysis.cpp,v $
 
 
@@ -61,7 +61,7 @@ int
 SORMAnalysis::analyze(void)
 {
 	// Alert the user that the SORM analysis has started
-	cerr << "SORM Analysis is running ... " << endl;
+	opserr << "SORM Analysis is running ... " << endln;
 
 
 	// Declare variables used in this method
@@ -81,7 +81,7 @@ SORMAnalysis::analyze(void)
 
 	// Check if computer ran out of memory
 	if (aStdNormRV==0) {
-		cerr << "SORMAnalysis::analyze() - out of memory while instantiating internal objects." << endl;
+		opserr << "SORMAnalysis::analyze() - out of memory while instantiating internal objects." << endln;
 		return -1;
 	}
 
@@ -95,7 +95,7 @@ SORMAnalysis::analyze(void)
 
 
 		// Inform the user which limit-state function is being evaluated
-		cerr << "Limit-state function number: " << lsf << endl;
+		opserr << "Limit-state function number: " << lsf << endln;
 
 
 		// Set tag of "active" limit-state function
@@ -107,16 +107,16 @@ SORMAnalysis::analyze(void)
 		lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 		theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 		if (theLimitStateFunction == 0) {
-			cerr << "SORMAnalysis::analyze() - could not find" << endl
-				<< " limit-state function with tag #" << lsf << "." << endl;
+			opserr << "SORMAnalysis::analyze() - could not find" << endln
+				<< " limit-state function with tag #" << lsf << "." << endln;
 			return -1;
 		}
 
 
 		// Compute curvature(s)
 		if (theCurvaturesAlgorithm->computeCurvatures(theReliabilityDomain) < 0){
-			cerr << "SORMAnalysis::analyze() - failed while finding " << endl
-				<< " curvatures for limit-state function number " << lsf << "." << endl;
+			opserr << "SORMAnalysis::analyze() - failed while finding " << endln
+				<< " curvatures for limit-state function number " << lsf << "." << endln;
 			return -1;
 		}
 
@@ -134,8 +134,8 @@ SORMAnalysis::analyze(void)
 		// Compute failure probability by "Breitung"
 		double denominator = aStdNormRV->getCDFvalue(-beta);
 		if (denominator == 0.0) {
-			cerr << "SORMAnalysis::analyze() - denominator zero " << endl
-				<< " due to too large reliability index value." << endl;
+			opserr << "SORMAnalysis::analyze() - denominator zero " << endln
+				<< " due to too large reliability index value." << endln;
 			return -1;
 		}
 		psi_beta = aStdNormRV->getPDFvalue(beta)/denominator;

@@ -53,8 +53,7 @@
 #include <Channel.h>
 #include <ErrorHandler.h>
 
-#include <fstream.h>
-#include <iostream.h>
+#include <OPS_Globals.h>
 
 class Vector;
 class Matrix;
@@ -80,7 +79,7 @@ class PBowlLoading : public LoadPattern
 
     void setDomain(Domain *theDomain);
     void applyLoad(double time);
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
 
     // methods for o/p
     int sendSelf(int commitTag, Channel &theChannel);

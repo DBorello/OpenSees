@@ -163,7 +163,7 @@ EightNodeBrick::EightNodeBrick(int element_number,
 		//if (strcmp( Globalmmodel->getType(), "Template3Dep" ) == 0)
  		//   NMD = 0;
 
-                //cout << "where = " << where << endln;
+                //opserr << "where = " << where << endlnn;
 		matpoint[where] = new MatPoint3D(GP_c_r,
                                          GP_c_s,
                                          GP_c_t,
@@ -554,8 +554,8 @@ void EightNodeBrick::incremental_Update()
 		//  mmodel->setEPS( *tmp_eps );
 		
 		if ( ! ( (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)) )
-               	   g3ErrorHandler->warning("EightNodeBrick::incremental_Update (tag: %d), not converged",
-		 		 this->getTag());
+		  opserr << "EightNodeBrick::incremental_Update (tag: " << this->getTag() << "), not converged\n";
+		 		 
 		//matpoint[where].setEPS( mmodel->getEPS() );
 		//}
 		
@@ -796,7 +796,7 @@ tensor EightNodeBrick::getStiffnessTensor(void)
     
     // tensor of incremental displacements taken from node objects
     //incremental_displacements = incr_disp();
-    //cout << "\n=======" << getTag() << "===========\n";
+    //opserr << "\n=======" << getTag() << "===========\n";
     //incremental_displacements.print("incr_disp");
 
     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
@@ -922,7 +922,7 @@ tensor EightNodeBrick::getStiffnessTensor(void)
 		
 		//int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
 		//if ( err)
-               	//   g3ErrorHandler->warning("EightNodeBrick::getStiffnessTensor (tag: %d), not converged",
+               	//   opserr << "EightNodeBrick::getStiffnessTensor (tag: %d), not converged",
 		//    		 this->getTag());
 		
 		Constitutive = (matpoint[where]->matmodel)->getTangentTensor();
@@ -1336,23 +1336,23 @@ tensor EightNodeBrick::incr_disp(void)
 
     //if ( getTag() == 486 || getTag() == 566 || getTag() == 956)
     //{
-    //cerr <<" \n\n element " << getTag() << endln;
-    //cerr<<"\n tot node " << theNodes[0]->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2);
+    //opserr <<" \n\n element " << getTag() << endlnn;
+    //opserr<<"\n tot node " << theNodes[0]->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2);
     //
-    //cerr<<"\n incr node " << theNodes[0]->getTag() <<" x "<< incrdelDis1(0) <<" y "<< incrdelDis1(1) << " z "<< incrdelDis1(2);
+    //opserr<<"\n incr node " << theNodes[0]->getTag() <<" x "<< incrdelDis1(0) <<" y "<< incrdelDis1(1) << " z "<< incrdelDis1(2);
     //
-    //cerr << "\nincr del node " << theNodes[0]->getTag() << " x " << IncrDis1(0) <<" y "<< IncrDis1(1) << " z "<< IncrDis1(2) << endln;
+    //opserr << "\nincr del node " << theNodes[0]->getTag() << " x " << IncrDis1(0) <<" y "<< IncrDis1(1) << " z "<< IncrDis1(2) << endlnn;
     //
-    //cerr << " incr del node " << theNodes[1]->getTag() << " x " << IncrDis2(0) <<" y "<< IncrDis2(1) << " z "<< IncrDis2(2) << endln;
+    //opserr << " incr del node " << theNodes[1]->getTag() << " x " << IncrDis2(0) <<" y "<< IncrDis2(1) << " z "<< IncrDis2(2) << endlnn;
     //
-    //cerr << " incr del node " << theNodes[2]->getTag() << " x " << IncrDis3(0) <<" y "<< IncrDis3(1) << " z "<< IncrDis3(2) << endln;
+    //opserr << " incr del node " << theNodes[2]->getTag() << " x " << IncrDis3(0) <<" y "<< IncrDis3(1) << " z "<< IncrDis3(2) << endlnn;
     //
-    //cerr << " incr del node " << theNodes[3]->getTag() << " x " << IncrDis4(0) <<" y "<< IncrDis4(1) << " z "<< IncrDis4(2) << endln;
+    //opserr << " incr del node " << theNodes[3]->getTag() << " x " << IncrDis4(0) <<" y "<< IncrDis4(1) << " z "<< IncrDis4(2) << endlnn;
     //
-    //cerr << " incr del node " << theNodes[4]->getTag() << " x " << IncrDis5(0) <<" y "<< IncrDis5(1) << " z "<< IncrDis5(2) << endln;
-    //cerr << " incr del node " << theNodes[5]->getTag() << " x " << IncrDis6(0) <<" y "<< IncrDis6(1) << " z "<< IncrDis6(2) << endln;
-    //cerr << " incr del node " << theNodes[6]->getTag() << " x " << IncrDis7(0) <<" y "<< IncrDis7(1) << " z "<< IncrDis7(2) << endln;
-    //cerr << " incr del node " << theNodes[7]->getTag() << " x " << IncrDis8(0) <<" y "<< IncrDis8(1) << " z "<< IncrDis8(2) << endln;
+    //opserr << " incr del node " << theNodes[4]->getTag() << " x " << IncrDis5(0) <<" y "<< IncrDis5(1) << " z "<< IncrDis5(2) << endlnn;
+    //opserr << " incr del node " << theNodes[5]->getTag() << " x " << IncrDis6(0) <<" y "<< IncrDis6(1) << " z "<< IncrDis6(2) << endlnn;
+    //opserr << " incr del node " << theNodes[6]->getTag() << " x " << IncrDis7(0) <<" y "<< IncrDis7(1) << " z "<< IncrDis7(2) << endlnn;
+    //opserr << " incr del node " << theNodes[7]->getTag() << " x " << IncrDis8(0) <<" y "<< IncrDis8(1) << " z "<< IncrDis8(2) << endlnn;
     //}
 
     increment_disp.val(1,1)=IncrDis1(0); increment_disp.val(1,2)=IncrDis1(1);increment_disp.val(1,3)=IncrDis1(2);
@@ -1375,21 +1375,21 @@ tensor EightNodeBrick::total_disp(void)
       
     //Zhaohui using node pointers, which come from the Domain
     const Vector &TotDis1 = theNodes[0]->getTrialDisp();
-    cout<<"\ntot node " << theNodes[0]->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2) << endln;
+    opserr<<"\ntot node " << theNodes[0]->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2) << endln;
     const Vector &TotDis2 = theNodes[1]->getTrialDisp();			    		          
-    cout << "tot node " << theNodes[1]->getTag() << " x " << TotDis2(0) <<" y "<< TotDis2(1) << " z "<< TotDis2(2) << endln;
+    opserr << "tot node " << theNodes[1]->getTag() << " x " << TotDis2(0) <<" y "<< TotDis2(1) << " z "<< TotDis2(2) << endln;
     const Vector &TotDis3 = theNodes[2]->getTrialDisp();			    		          
-    cout << "tot node " << theNodes[2]->getTag() << " x " << TotDis3(0) <<" y "<< TotDis3(1) << " z "<< TotDis3(2) << endln;
+    opserr << "tot node " << theNodes[2]->getTag() << " x " << TotDis3(0) <<" y "<< TotDis3(1) << " z "<< TotDis3(2) << endln;
     const Vector &TotDis4 = theNodes[3]->getTrialDisp();			    		          
-    cout << "tot node " << theNodes[3]->getTag() << " x " << TotDis4(0) <<" y "<< TotDis4(1) << " z "<< TotDis4(2) << endln;
+    opserr << "tot node " << theNodes[3]->getTag() << " x " << TotDis4(0) <<" y "<< TotDis4(1) << " z "<< TotDis4(2) << endln;
     const Vector &TotDis5 = theNodes[4]->getTrialDisp();			    		          
-    cout << "tot node " << theNodes[4]->getTag() << " x " << TotDis5(0) <<" y "<< TotDis5(1) << " z "<< TotDis5(2) << endln;
+    opserr << "tot node " << theNodes[4]->getTag() << " x " << TotDis5(0) <<" y "<< TotDis5(1) << " z "<< TotDis5(2) << endln;
     const Vector &TotDis6 = theNodes[5]->getTrialDisp();			    		          
-    cout << "tot node " << theNodes[5]->getTag() << " x " << TotDis6(0) <<" y "<< TotDis6(1) << " z "<< TotDis6(2) << endln;
+    opserr << "tot node " << theNodes[5]->getTag() << " x " << TotDis6(0) <<" y "<< TotDis6(1) << " z "<< TotDis6(2) << endln;
     const Vector &TotDis7 = theNodes[6]->getTrialDisp();			    		          
-    cout << "tot node " << theNodes[6]->getTag() << " x " << TotDis7(0) <<" y "<< TotDis7(1) << " z "<< TotDis7(2) << endln;
+    opserr << "tot node " << theNodes[6]->getTag() << " x " << TotDis7(0) <<" y "<< TotDis7(1) << " z "<< TotDis7(2) << endln;
     const Vector &TotDis8 = theNodes[7]->getTrialDisp();			    		          
-    cout << "tot node " << theNodes[7]->getTag() << " x " << TotDis8(0) <<" y "<< TotDis8(1) << " z "<< TotDis8(2) << endln;
+    opserr << "tot node " << theNodes[7]->getTag() << " x " << TotDis8(0) <<" y "<< TotDis8(1) << " z "<< TotDis8(2) << endln;
     
     total_disp.val(1,1)=TotDis1(0); total_disp.val(1,2)=TotDis1(1);total_disp.val(1,3)=TotDis1(2);
     total_disp.val(2,1)=TotDis2(0); total_disp.val(2,2)=TotDis2(1);total_disp.val(2,3)=TotDis2(2);
@@ -1549,7 +1549,7 @@ tensor EightNodeBrick::nodal_forces(void)
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
-		//cout << " UCD det_of_Jacobian "<< det_of_Jacobian << endln;
+		//opserr << " UCD det_of_Jacobian "<< det_of_Jacobian << endln;
                 //..::printf("\n\nIN THE nodal forces ----**************** where = %d \n", where);
                 //..::printf("                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
                 //..                           GP_c_r,GP_c_s,GP_c_t);
@@ -1594,7 +1594,7 @@ tensor EightNodeBrick::nodal_forces(void)
 
 	        //EPState *tmp_eps = (matpoint[where]->matmodel)->getEPS();
 		//stress_at_GP = tmp_eps->getStress();
-		//cout << "tmp_eps" << (*tmp_eps);
+		//opserr << "tmp_eps" << (*tmp_eps);
 
 	        //NDMaterial *tmp_ndm = (matpoint[where]).getNDMat();
 		
@@ -1610,15 +1610,13 @@ tensor EightNodeBrick::nodal_forces(void)
 		incremental_strain =
                      (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
 //		if (where == 0)
-//   		//cout << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
-////		cout << " el tag = "<< getTag();
+//   		//opserr << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
+////		opserr << " el tag = "<< getTag();
 //		
 		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
 		if ( err)
-               	   g3ErrorHandler->warning("EightNodeBrick::getStiffnessTensor (tag: %d), not converged",
-		    		 this->getTag());
-
-
+		  opserr << "EightNodeBrick::getStiffnessTensor (tag: " << this->getTag() << "), not converged\n";
+		     
 
 		//char *test = matpoint[where]->matmodel->getType();
 		// fmk - changing if so if into else block must be Template3Dep
@@ -1639,11 +1637,11 @@ tensor EightNodeBrick::nodal_forces(void)
            	//double  p = stress_at_GP.p_hydrostatic();
                 //if ( p < 0.0 ) 
 	        //{
-	        //  cerr << getTag();
-	        //  cerr << " ***p  =    " << p << endln;
+	        //  opserr << getTag();
+	        //  opserr << " ***p  =    " << p << endln;
 	        //}
 
-		//cerr << " nodal_force ::: stress_at_GP " << stress_at_GP << endln;
+		//opserr << " nodal_force ::: stress_at_GP " << stress_at_GP << endln;
 		
 		//}
 		//else if ( tmp_ndm ) { //Elastic case
@@ -1665,7 +1663,7 @@ tensor EightNodeBrick::nodal_forces(void)
           }
       }
 
-    //cout << "\n element no. " << getTag() << endln;
+    //opserr << "\n element no. " << getTag() << endln;
     //nodal_forces.print("nf","\n Nodal Forces \n");
     return nodal_forces;
 
@@ -1961,8 +1959,8 @@ tensor EightNodeBrick::linearized_nodal_forces(void)
 		//if ( tmp_eps ) {     //Elasto-plastic case
 		//    mmodel->setEPS( *tmp_eps );
 		if ( ! (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)  )
-               	   g3ErrorHandler->warning("EightNodeBrick::linearized_nodal_forces (tag: %d), not converged",
-		    		 this->getTag());
+		  opserr << "EightNodeBrick::linearized_nodal_forces (tag: " << this->getTag() << "), not converged\n";
+
 		Constitutive = (matpoint[where]->matmodel)->getTangentTensor();
       		//    matpoint[where].setEPS( mmodel->getEPS() ); //Set the new EPState back
 		//}
@@ -2031,16 +2029,16 @@ void EightNodeBrick::report(char * msg)
            //for ( int in=0 ; in<8 ; in++ )
            //             (nodes[G_N_numbs[in]]).report("nodes from within element (first 8)\n");
            //Xiaoyan changed .report to . Print in above line 09/27/00
-	   //  (nodes[G_N_numbs[in]]).Print(cout);
+	   //  (nodes[G_N_numbs[in]]).Print(opserr);
 
-	   theNodes[0]->Print(cout);
-	   theNodes[1]->Print(cout);
-	   theNodes[2]->Print(cout);
-	   theNodes[3]->Print(cout);
-	   theNodes[4]->Print(cout);
-	   theNodes[5]->Print(cout);
-           theNodes[6]->Print(cout);
-	   theNodes[7]->Print(cout);
+	   theNodes[0]->Print(opserr);
+	   theNodes[1]->Print(opserr);
+	   theNodes[2]->Print(opserr);
+	   theNodes[3]->Print(opserr);
+	   theNodes[4]->Print(opserr);
+	   theNodes[5]->Print(opserr);
+           theNodes[6]->Print(opserr);
+	   theNodes[7]->Print(opserr);
 
 	   //           for ( int jn=8 ; jn<20 ; jn++ )
            //             (nodes[G_N_numbs[jn]]).report("nodes from within element (last 12)\n");
@@ -2440,10 +2438,8 @@ void EightNodeBrick::setDomain (Domain *theDomain)
           theNodes[4] == 0 || theNodes[5] == 0 || theNodes[6] == 0 || theNodes[7] == 0 ) { 
       	//Xiaoyan added 5-8  07/06/00
       
-      	g3ErrorHandler->fatal("FATAL ERROR EightNodeBrick (tag: %d), node not found in domain",
-      		this->getTag());
-      	
-      	return;
+      	opserr << "FATAL ERROR EightNodeBrick (tag: " << this->getTag() << "), node not found in domain\n";
+      	exit(-1);
       }
       
       int dofNd1 = theNodes[0]->getNumberDOF();
@@ -2459,10 +2455,8 @@ void EightNodeBrick::setDomain (Domain *theDomain)
       								      
       if (dofNd1 != 3 || dofNd2 != 3 || dofNd3 != 3 || dofNd4 != 3 ||  // Changed 2 to 3 Xiaoyan
           dofNd5 != 3 || dofNd6 != 3 || dofNd7 != 3 || dofNd8 != 3 ) {
-      	g3ErrorHandler->fatal("FATAL ERROR EightNodeBrick (tag: %d), has differing number of DOFs at its nodes",
-      		this->getTag());
-      	
-      	return;
+      	opserr << "FATAL ERROR EightNodeBrick (tag: " << this->getTag() << "), has differing number of DOFs at its nodes\n";
+	exit(-1);
       }
       this->DomainComponent::setDomain(theDomain);
     }   
@@ -2475,7 +2469,7 @@ int EightNodeBrick::commitState ()
 
     // call element commitState to do any base class stuff
     if ((retVal = this->Element::commitState()) != 0) {
-      cerr << "EightNodeBrick::commitState () - failed in base class";
+      opserr << "EightNodeBrick::commitState () - failed in base class";
     }    
 
     // int order = theQuadRule->getOrder();     // Commented by Xiaoyan
@@ -2522,21 +2516,21 @@ int EightNodeBrick::commitState ()
          stn = matpoint[i]->getStrainTensor();
        	 stnprin = stn.principal();
          /*
-	 cerr << "\nGauss Point: " << i << endln;
-	 cerr << "sigma11: "<< st.cval(1, 1) << " "<< st.cval(1, 2) << " " << st.cval(1, 3) << endln; 
-	 cerr << "sigma21: "<< st.cval(2, 1) << " "<< st.cval(2, 2) << " " << st.cval(2, 3) << endln; 
- 	 cerr << "sigma31: "<< st.cval(3, 1) << " "<< st.cval(3, 2) << " " << st.cval(3, 3) << endln << endln; 
+	 opserr << "\nGauss Point: " << i << endln;
+	 opserr << "sigma11: "<< st.cval(1, 1) << " "<< st.cval(1, 2) << " " << st.cval(1, 3) << endln; 
+	 opserr << "sigma21: "<< st.cval(2, 1) << " "<< st.cval(2, 2) << " " << st.cval(2, 3) << endln; 
+ 	 opserr << "sigma31: "<< st.cval(3, 1) << " "<< st.cval(3, 2) << " " << st.cval(3, 3) << endln << endln; 
 	 */     	  
-	 //cerr << "strain11: "<< stn.cval(1, 1) << " "<< stn.cval(1, 2) << " " << stn.cval(1, 3) << endln; 
-	 //cerr << "strain21: "<< stn.cval(2, 1) << " "<< stn.cval(2, 2) << " " << stn.cval(2, 3) << endln; 
- 	 //cerr << "strain31: "<< stn.cval(3, 1) << " "<< stn.cval(3, 2) << " " << stn.cval(3, 3) << endln; 
+	 //opserr << "strain11: "<< stn.cval(1, 1) << " "<< stn.cval(1, 2) << " " << stn.cval(1, 3) << endln; 
+	 //opserr << "strain21: "<< stn.cval(2, 1) << " "<< stn.cval(2, 2) << " " << stn.cval(2, 3) << endln; 
+ 	 //opserr << "strain31: "<< stn.cval(3, 1) << " "<< stn.cval(3, 2) << " " << stn.cval(3, 3) << endln; 
 	 
 	 //double  p = -1*( prin.cval(1, 1)+ prin.cval(2, 2) +prin.cval(3, 3) )/3.0;
 	 //double  ev = -1*( stnprin.cval(1, 1)+ stnprin.cval(2, 2) + stnprin.cval(3, 3) )/3.0;
-	 //cerr << "   " << p;
+	 //opserr << "   " << p;
 
 	 //if (p < 0)
-	 //  cout  << "gs pnt:" << i << "  p="<< p;
+	 //  opserr  << "gs pnt:" << i << "  p="<< p;
 
       	 
 	 double q;
@@ -2544,17 +2538,17 @@ int EightNodeBrick::commitState ()
       	 if ( fabs(prin.cval(1, 1) - prin.cval(2, 2) ) <=  0.001 )
       	 {
       	     q = prin.cval(1, 1) - prin.cval(3, 3);
-      	     //cerr << "1 = 2"; 
+      	     //opserr << "1 = 2"; 
       	 }
       	 else
       	     q = prin.cval(3, 3) - prin.cval(1, 1);
       	 
 	 //Triaxial compr.  fabs
-      	 //cerr << "     " << st.cval(2, 3); //tau_yz
-	 //cerr << "     " << q;      	 
-	 ////----cerr << "     " << fabs(q);
+      	 //opserr << "     " << st.cval(2, 3); //tau_yz
+	 //opserr << "     " << q;      	 
+	 ////----opserr << "     " << fabs(q);
 
-      	 //cerr << "     " << ev << endln;
+      	 //opserr << "     " << ev << endln;
 
 //out22Jan2001	 if (strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
 //out22Jan2001          {
@@ -2570,9 +2564,9 @@ int EightNodeBrick::commitState ()
       
 	  //double  p = st.p_hydrostatic();
 	  //double  p = -1*( prin.cval(1, 1)+ prin.cval(2, 2) +prin.cval(3, 3) )/3.0;
-      	  //cerr << "\n " << prin.cval(1, 1) << "   " << prin.cval(2, 2) << "  " <<  prin.cval(3, 3) << endln;
+      	  //opserr << "\n " << prin.cval(1, 1) << "   " << prin.cval(2, 2) << "  " <<  prin.cval(3, 3) << endln;
           //if ( getTag() == 960) 
-          //cerr << " El= " << getTag() << " , p    " << p << endln;
+          //opserr << " El= " << getTag() << " , p    " << p << endln;
           
 	  //printf(stderr, " Gauss Point i = %d ", (i+1));
 	  //printf(stderr, " Gauss Point i = %d ", (i+1));
@@ -2580,34 +2574,34 @@ int EightNodeBrick::commitState ()
 
           //if ( p < 0 ) 
 	  //{
-	  //  cerr << getTag();
-	  //  cerr << " ***p  =    " << p << endln;
+	  //  opserr << getTag();
+	  //  opserr << " ***p  =    " << p << endln;
 	  //}		             	  
       	  //J2D
-      	  //cerr << "        " << st.q_deviatoric();
+      	  //opserr << "        " << st.q_deviatoric();
             
       	  //double q;	  
       	  //if ( fabs(prin.cval(1, 1) - prin.cval(2, 2) ) <=  0.0001 )
       	  //{
       	  //    q = prin.cval(1, 1) - prin.cval(3, 3);
-      	  //    //cerr << "1 = 2"; 
+      	  //    //opserr << "1 = 2"; 
       	  //}
       	  //else
       	  //    q = prin.cval(3, 3) - prin.cval(1, 1);
       
       	  //Triaxial compr.
-      	  //cerr << "        " << q;
+      	  //opserr << "        " << q;
          //}
       }
         
-      //cerr << this->getTag() << " " << plastify << endln;
+      //opserr << this->getTag() << " " << plastify << endln;
          
 
-      //cout << " at elements " << this->getTag() << endln;    
+      //opserr << " at elements " << this->getTag() << endln;    
 
 
       //output nodal force
-      //cerr << "    " << pp(2) << endln;    
+      //opserr << "    " << pp(2) << endln;    
     //} 
     return retVal;
 }
@@ -2683,8 +2677,8 @@ const Matrix &EightNodeBrick::getTangentStiff ()
         }
      }
 
-     //cout << " K " << K << endln;
-     //K.Output(cout);
+     //opserr << " K " << K << endln;
+     //K.Output(opserr);
      return K;
 }
 
@@ -2695,8 +2689,8 @@ const Matrix &EightNodeBrick::getInitialStiff ()
     Ki = new Matrix(this->getTangentStiff());
 
   if (Ki == 0) {
-    cerr << "FATAL fElement::getInitialStiff() -";
-    cerr << "ran out of memory\n";
+    opserr << "FATAL fElement::getInitialStiff() -";
+    opserr << "ran out of memory\n";
     exit(-1);
   }  
     
@@ -2735,9 +2729,9 @@ const Matrix &EightNodeBrick::getConsMass ()
 
      }
 
-     //cerr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
-     //cerr << "" << M.Output(cout);
-     //cerr << " M " << M;
+     //opserr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
+     //opserr << "" << M.Output(opserr);
+     //opserr << " M " << M;
      
      return M;
 }
@@ -2772,9 +2766,9 @@ const Matrix &EightNodeBrick::getMass ()
 
      }
 
-     //cerr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
-     //cerr << "" << M.Output(cout);
-     //cerr << " M " << M;
+     //opserr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
+     //opserr << "" << M.Output(opserr);
+     //opserr << " M " << M;
      
      return M;
 }
@@ -2790,7 +2784,7 @@ void EightNodeBrick::zeroLoad(void)
 int 
 EightNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
 {  
-  //g3ErrorHandler->warning("EightNodeBrick::addLoad - load type unknown for ele with tag: %d\n",
+  //opserr << "EightNodeBrick::addLoad - load type unknown for ele with tag: %d\n",
   //			  this->getTag());
   int type;
   const Vector &data = theLoad->getData(type, loadFactor);
@@ -2799,7 +2793,7 @@ EightNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
   
     Vector bforce(24);  
     // Check for a quick return
-    //cerr << "rho " << rho << endln;
+    //opserr << "rho " << rho << endln;
     if (rho == 0.0)
     	return 0;
   
@@ -2838,8 +2832,7 @@ EightNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
     bforce.addMatrixVector(0.0, M, ba, 1.0);
     Q.addVector(1.0, bforce, 1.0);       
   } else  {
-    g3ErrorHandler->warning("EightNodeBrick::addLoad() - 8NodeBrick %d,load type %d unknown\n", 
-  			    this->getTag(), type);
+    opserr << "EightNodeBrick::addLoad() - 8NodeBrick " << this->getTag() << ",load type " << type << "unknown\n";
     return -1;
   }
   return 0;
@@ -2868,9 +2861,8 @@ int EightNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
        	3 != Raccel4.Size() || 3 != Raccel5.Size() || 3 != Raccel6.Size() || 
 	3 != Raccel7.Size() || 3 != Raccel8.Size()  ){	
 	// Xiaoyan changed 2 to 3 and added Racce15-18  09/27/00
-		g3ErrorHandler->warning("EightNodeBrick::addInertiaLoadToUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
-		return -1;
+      opserr << "EightNodeBrick::addInertiaLoadToUnbalance matrix and vector sizes are incompatable\n";
+      return -1;
     }
 
 	static Vector ra(24);  // Changed form 8 to 24(3*8)  Xiaoyan 09/27/00
@@ -2911,7 +2903,7 @@ int EightNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
     //   column_mass += M(1,i);
     //column_mass = column_mass/3.0;
 
-    //cerr << " addInerti... column_mass " << column_mass << endln;
+    //opserr << " addInerti... column_mass " << column_mass << endln;
 
     //for (int i = 0; i < 24; i++)   
     //		Q(i) += -M(i,i)*ra(i);
@@ -2926,7 +2918,7 @@ const Vector EightNodeBrick::FormEquiBodyForce(void)
     Vector bforce(24);  
 
     // Check for a quick return
-    //cerr << "rho " << rho << endln;
+    //opserr << "rho " << rho << endln;
     if (rho == 0.0)
     	return bforce;
 
@@ -2959,10 +2951,10 @@ const Vector EightNodeBrick::FormEquiBodyForce(void)
 
     //Form equivalent body force
     bforce.addMatrixVector(0.0, M, ba, 1.0);
-    //cerr << " ba " << ba;
-    //cerr << " M " << M;
+    //opserr << " ba " << ba;
+    //opserr << " M " << M;
     //if (getTag() == 886)
-    //cerr << " @@@@@ FormEquiBodyForce  " << bforce;
+    //opserr << " @@@@@ FormEquiBodyForce  " << bforce;
     
     return bforce;
 
@@ -2983,13 +2975,13 @@ const Vector &EightNodeBrick::getResistingForce ()
       for (int j = 0; j < 3; j++)
 	P(i *3 + j) = nodalforces.cval(i+1, j+1);
 
-    //cerr << "P" << P;
-    //cerr << "Q" << Q;
+    //opserr << "P" << P;
+    //opserr << "Q" << Q;
 
     //P = P - Q;
     P.addVector(1.0, Q, -1.0);
 
-    //cerr << "P-Q" << P;
+    //opserr << "P-Q" << P;
     return P;
 }
 
@@ -3142,10 +3134,10 @@ int EightNodeBrick::displaySelf (Renderer &theViewer, int displayMode, float fac
 }     
 
 //=============================================================================
-void EightNodeBrick::Print(ostream &s, int flag)
+void EightNodeBrick::Print(OPS_Stream &s, int flag)
 {
     //report(" EightNodeBrick ");
-    s << "EightNodeBrick, element id:  " << this->getTag() << endl;
+    s << "EightNodeBrick, element id:  " << this->getTag() << endln;
     s << "Connected external nodes:  " << connectedExternalNodes;
 
     int total_number_of_Gauss_points = r_integration_order*
@@ -3153,17 +3145,17 @@ void EightNodeBrick::Print(ostream &s, int flag)
                                        t_integration_order;
     if ( total_number_of_Gauss_points != 0 )
       {
-	   theNodes[0]->Print(cout);
-	   theNodes[1]->Print(cout);
-	   theNodes[2]->Print(cout);
-	   theNodes[3]->Print(cout);
-	   theNodes[4]->Print(cout);
-	   theNodes[5]->Print(cout);
-           theNodes[6]->Print(cout);
-	   theNodes[7]->Print(cout);
+	   theNodes[0]->Print(s);
+	   theNodes[1]->Print(s);
+	   theNodes[2]->Print(s);
+	   theNodes[3]->Print(s);
+	   theNodes[4]->Print(s);
+	   theNodes[5]->Print(s);
+           theNodes[6]->Print(s);
+	   theNodes[7]->Print(s);
     }
-    s << "Element mass density:  " << rho << endl << endl;
-    s << "Material model:  " << endl;
+    s << "Element mass density:  " << rho << endln << endln;
+    s << "Material model:  " << endln;
 
     for( int GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
     {
@@ -3264,10 +3256,10 @@ int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
        	      {
 		//checking if element plastified
        	        int count  = r_integration_order* s_integration_order * t_integration_order;
-		//cout << count << endln;
+		//opserr << count << endln;
        	        //Vector Gsc(FixedOrder*FixedOrder*FixedOrder*3+1);  // 8*3 + count
 		computeGaussPoint();
-		//cout << count << endln;
+		//opserr << count << endln;
 
 		//Vector Info(109); // count * 4 +1
 		InfoP(0) = Gsc8(0); //Number of Gauss point
@@ -3597,13 +3589,13 @@ int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
 //
 //
 //void
-//EightNodeBrick::Print (ostream &s, int flag)
+//EightNodeBrick::Print (OPS_Stream &s, int flag)
 //{
-//	s << "EightNodeBrick, element id:  " << this->getTag() << endl;
+//	s << "EightNodeBrick, element id:  " << this->getTag() << endln;
 //	s << "Connected external nodes:  " << connectedExternalNodes;
-//	s << "Material model:  " << theMaterial[0][0]->getType() << endl;
-//	s << "Element thickness:  " << thickness << endl;
-//	s << "Element mass density:  " << rho << endl << endl;
+//	s << "Material model:  " << theMaterial[0][0]->getType() << endln;
+//	s << "Element thickness:  " << thickness << endln;
+//	s << "Element mass density:  " << rho << endln << endln;
 //}
 //
 //

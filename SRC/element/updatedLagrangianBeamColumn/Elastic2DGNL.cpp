@@ -55,7 +55,7 @@ void Elastic2dGNL::getLocalMass(Matrix &M)
 {
     if(massDof < 0)
     {
-            cerr << "Elastic2dGNL::getMass - Distributed mass not implemented\n";
+            opserr << "Elastic2dGNL::getMass - Distributed mass not implemented\n";
 	    M.Zero();
     }
     else if(massDof == 0)//this cond. is taken care of already
@@ -96,7 +96,7 @@ void Elastic2dGNL::getLocalStiff(Matrix &K)
 
 
 
-void Elastic2dGNL::Print(ostream &s, int flag)
+void Elastic2dGNL::Print(OPS_Stream &s, int flag)
 {
     s << "\nElement No: " << this->getTag();
     s << " type: Elastic2dGNL  iNode: " << connectedExternalNodes(0);
@@ -107,15 +107,15 @@ void Elastic2dGNL::Print(ostream &s, int flag)
 
 int Elastic2dGNL::sendSelf(int commitTag, Channel &theChannel)
 {
-	cerr << "WARNING (W_C_10) - Elastic2dGNL::sendSelf(..) [" << getTag() <<"]\n";
-	cerr << "method not implemented\n";
+	opserr << "WARNING (W_C_10) - Elastic2dGNL::sendSelf(..) [" << getTag() <<"]\n";
+	opserr << "method not implemented\n";
 	return -1;
 }
 
 int Elastic2dGNL::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-        cerr << "WARNING (W_C_20) - Elastic2dGNL::recvSelf(..) [" << getTag() <<"]\n";
-        cerr << "method not implemented\n";
+        opserr << "WARNING (W_C_20) - Elastic2dGNL::recvSelf(..) [" << getTag() <<"]\n";
+        opserr << "method not implemented\n";
 	return -1;
 }
 

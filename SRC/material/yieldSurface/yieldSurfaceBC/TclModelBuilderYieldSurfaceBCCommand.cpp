@@ -12,10 +12,10 @@
 
 static void printCommand(int argc, char **argv)
 {
-    cerr << "Input command: ";
+    opserr << "Input command: ";
     for (int i=0; i<argc; i++)
-	cerr << argv[i] << " ";
-    cerr << endl;
+	opserr << argv[i] << " ";
+    opserr << endln;
 }
 
 int
@@ -24,8 +24,8 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 {
     // Make sure there is a minimum number of arguments
     if (argc < 3) {
-	cerr << "WARNING insufficient number of uniaxial material arguments\n";
-	cerr << "Want: yieldSurfaceBC type? tag? <specific material args>" << endl;
+	opserr << "WARNING insufficient number of uniaxial material arguments\n";
+	opserr << "Want: yieldSurfaceBC type? tag? <specific material args>" << endln;
 	return TCL_ERROR;
     }
 
@@ -37,10 +37,10 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 	{
 		if (argc < 6)
 		{
-			cerr << "WARNING invalid number of arguments\n";
+			opserr << "WARNING invalid number of arguments\n";
 			printCommand(argc,argv);
 			// Orbison2D(int tag, double xmax, double ymax, YS_HardeningModel &model);
-			cerr << "Want: yieldSurfaceBC Orbison2D tag? xCap? yCap? ys_model_tag?" << endl;
+			opserr << "Want: yieldSurfaceBC Orbison2D tag? xCap? yCap? ys_model_tag?" << endln;
 			return TCL_ERROR;
 		}
 
@@ -52,34 +52,34 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 
 		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 		{
-			cerr << "WARNING invalid yieldSurfaceBC Orbison2D tag" << endl;
+			opserr << "WARNING invalid yieldSurfaceBC Orbison2D tag" << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[3], &xCap) != TCL_OK)
 		{
-			cerr << "WARNING invalid xCap\n";
-			cerr << "yieldSurfaceBC Orbison2D tag: " << tag << endl;
+			opserr << "WARNING invalid xCap\n";
+			opserr << "yieldSurfaceBC Orbison2D tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[4], &yCap) != TCL_OK)
 		{
-			cerr << "WARNING invalid yCap\n";
-			cerr << "yieldSurfaceBC Orbison2D tag: " << tag << endl;
+			opserr << "WARNING invalid yCap\n";
+			opserr << "yieldSurfaceBC Orbison2D tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetInt(interp, argv[5], &modelID) != TCL_OK)
 		{
-			cerr << "WARNING invalid yieldSurfaceBC Orbison2D matID1" << modelID << endl;
+			opserr << "WARNING invalid yieldSurfaceBC Orbison2D matID1" << modelID << endln;
 			return TCL_ERROR;
 		}
 
 		YS_Evolution *theModel = theBuilder->getYS_EvolutionModel(modelID);
 		if(theModel == 0)
 		{
-			cerr << "WARNING yieldSurfaceBC Orbison2D no ys_model exixts with tag: " << modelID << endl;
+			opserr << "WARNING yieldSurfaceBC Orbison2D no ys_model exixts with tag: " << modelID << endln;
 			return TCL_ERROR;
 		}
 
@@ -91,10 +91,10 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 	{
 		if (argc < 7)
 		{
-			cerr << "WARNING invalid number of arguments\n";
+			opserr << "WARNING invalid number of arguments\n";
 			printCommand(argc,argv);
 			// Orbison2D(int tag, double xmax, double ymax, YS_HardeningModel &model);
-			cerr << "Want: yieldSurfaceBC ElTawil2D tag? xCap? yCap? ys_model_tag?" << endl;
+			opserr << "Want: yieldSurfaceBC ElTawil2D tag? xCap? yCap? ys_model_tag?" << endln;
 			return TCL_ERROR;
 		}
 
@@ -106,49 +106,49 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 
 		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 		{
-			cerr << "WARNING invalid yieldSurfaceBC ElTawil2D tag" << endl;
+			opserr << "WARNING invalid yieldSurfaceBC ElTawil2D tag" << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[3], &xBal) != TCL_OK)
 		{
-			cerr << "WARNING invalid xBal\n";
-			cerr << "yieldSurfaceBC ElTawil2D tag: " << tag << endl;
+			opserr << "WARNING invalid xBal\n";
+			opserr << "yieldSurfaceBC ElTawil2D tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[4], &yBal) != TCL_OK)
 		{
-			cerr << "WARNING invalid yBal\n";
-			cerr << "yieldSurfaceBC ElTawil2D tag: " << tag << endl;
+			opserr << "WARNING invalid yBal\n";
+			opserr << "yieldSurfaceBC ElTawil2D tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 		
 		if (Tcl_GetDouble(interp, argv[5], &yPos) != TCL_OK)
 		{
-			cerr << "WARNING invalid xPos\n";
-			cerr << "yieldSurfaceBC ElTawil2D tag: " << tag << endl;
+			opserr << "WARNING invalid xPos\n";
+			opserr << "yieldSurfaceBC ElTawil2D tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[6], &yNeg) != TCL_OK)
 		{
-			cerr << "WARNING invalid yNeg\n";
-			cerr << "yieldSurfaceBC ElTawil2D tag: " << tag << endl;
+			opserr << "WARNING invalid yNeg\n";
+			opserr << "yieldSurfaceBC ElTawil2D tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 		
 
 		if (Tcl_GetInt(interp, argv[7], &modelID) != TCL_OK)
 		{
-			cerr << "WARNING invalid yieldSurfaceBC ElTawil2D matID1" << modelID << endl;
+			opserr << "WARNING invalid yieldSurfaceBC ElTawil2D matID1" << modelID << endln;
 			return TCL_ERROR;
 		}
 
 		YS_Evolution *theModel = theBuilder->getYS_EvolutionModel(modelID);
 		if(theModel == 0)
 		{
-			cerr << "WARNING yieldSurfaceBC ElTawil2D no ys_model exixts with tag: " << modelID << endl;
+			opserr << "WARNING yieldSurfaceBC ElTawil2D no ys_model exixts with tag: " << modelID << endln;
 			return TCL_ERROR;
 		}
 
@@ -160,11 +160,11 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 	{
 		if (argc < 9)
 		{
-			cerr << "WARNING invalid number of arguments\n";
+			opserr << "WARNING invalid number of arguments\n";
 			printCommand(argc,argv);
 			// Orbison2D(int tag, double xmax, double ymax, YS_HardeningModel &model);
-			cerr << "Want: yieldSurfaceBC ElTawil2DUnSym tag? xPosBal? yPosBal? "
-			     << "xNegBal? yPos? yNeg? ys_model_tag?" << endl;
+			opserr << "Want: yieldSurfaceBC ElTawil2DUnSym tag? xPosBal? yPosBal? "
+			     << "xNegBal? yPos? yNeg? ys_model_tag?" << endln;
 			return TCL_ERROR;
 		}
 
@@ -177,63 +177,63 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 
 		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 		{
-			cerr << "WARNING invalid yieldSurfaceBC ElTawil2DUnSym tag" << endl;
+			opserr << "WARNING invalid yieldSurfaceBC ElTawil2DUnSym tag" << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[3], &xPosBal) != TCL_OK)
 		{
-			cerr << "WARNING invalid xPosBal\n";
-			cerr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endl;
+			opserr << "WARNING invalid xPosBal\n";
+			opserr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[4], &yPosBal) != TCL_OK)
 		{
-			cerr << "WARNING invalid yPosBal\n";
-			cerr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endl;
+			opserr << "WARNING invalid yPosBal\n";
+			opserr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 		if (Tcl_GetDouble(interp, argv[5], &xNegBal) != TCL_OK)
 		{
-			cerr << "WARNING invalid xNegBal\n";
-			cerr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endl;
+			opserr << "WARNING invalid xNegBal\n";
+			opserr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[6], &yNegBal) != TCL_OK)
 		{
-			cerr << "WARNING invalid yNegBal\n";
-			cerr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endl;
+			opserr << "WARNING invalid yNegBal\n";
+			opserr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 		
 		if (Tcl_GetDouble(interp, argv[7], &yPos) != TCL_OK)
 		{
-			cerr << "WARNING invalid xPos\n";
-			cerr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endl;
+			opserr << "WARNING invalid xPos\n";
+			opserr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[8], &yNeg) != TCL_OK)
 		{
-			cerr << "WARNING invalid yNeg\n";
-			cerr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endl;
+			opserr << "WARNING invalid yNeg\n";
+			opserr << "yieldSurfaceBC ElTawil2DUnSym tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 		
 
 		if (Tcl_GetInt(interp, argv[9], &modelID) != TCL_OK)
 		{
-			cerr << "WARNING invalid yieldSurfaceBC ElTawil2DUnSym matID1" 
-			     << modelID << endl;
+			opserr << "WARNING invalid yieldSurfaceBC ElTawil2DUnSym matID1" 
+			     << modelID << endln;
 			return TCL_ERROR;
 		}
 
 		YS_Evolution *theModel = theBuilder->getYS_EvolutionModel(modelID);
 		if(theModel == 0)
 		{
-			cerr << "WARNING yieldSurfaceBC ElTawil2D no ys_model exixts with tag: " << modelID << endl;
+			opserr << "WARNING yieldSurfaceBC ElTawil2D no ys_model exixts with tag: " << modelID << endln;
 			return TCL_ERROR;
 		}
 
@@ -250,9 +250,9 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 
 		if (argc < 6 || argc > 14)
 		{
-			cerr << "WARNING invalid number of arguments\n";
+			opserr << "WARNING invalid number of arguments\n";
 			printCommand(argc,argv);
-			cerr << "Want: yieldSurfaceBC Attalla2D tag? xCap? yCap? matXTag? maxYTag? isoRatio? <..>" << endl;
+			opserr << "Want: yieldSurfaceBC Attalla2D tag? xCap? yCap? matXTag? maxYTag? isoRatio? <..>" << endln;
 			return TCL_ERROR;
 		}
 
@@ -274,34 +274,34 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 
 		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 		{
-			cerr << "WARNING invalid yieldSurfaceBC Attalla2D tag" << endl;
+			opserr << "WARNING invalid yieldSurfaceBC Attalla2D tag" << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[3], &xCap) != TCL_OK)
 		{
-			cerr << "WARNING invalid xCap\n";
-			cerr << "yieldSurfaceBC Attalla2D tag: " << tag << endl;
+			opserr << "WARNING invalid xCap\n";
+			opserr << "yieldSurfaceBC Attalla2D tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[4], &yCap) != TCL_OK)
 		{
-			cerr << "WARNING invalid yCap\n";
-			cerr << "yieldSurfaceBC Attalla2D tag: " << tag << endl;
+			opserr << "WARNING invalid yCap\n";
+			opserr << "yieldSurfaceBC Attalla2D tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetInt(interp, argv[5], &modelID) != TCL_OK)
 		{
-			cerr << "WARNING invalid yieldSurfaceBC Attalla2D modelID" << modelID << endl;
+			opserr << "WARNING invalid yieldSurfaceBC Attalla2D modelID" << modelID << endln;
 			return TCL_ERROR;
 		}
 		
 		YS_Evolution *theModel = theBuilder->getYS_EvolutionModel(modelID);
 		if(theModel == 0)
 		{
-			cerr << "WARNING yieldSurfaceBC Orbison2D no ys_model exixts with tag: " << modelID << endl;
+			opserr << "WARNING yieldSurfaceBC Orbison2D no ys_model exixts with tag: " << modelID << endln;
 			return TCL_ERROR;
 		}
 
@@ -316,8 +316,8 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 			{
 				if (Tcl_GetDouble(interp, argv[count], &temp) != TCL_OK)
 				{
-					cerr << "WARNING invalid parameter " << i+1 << "\n";
-					cerr << "yieldSurfaceBC Attalla2D tag: " << tag << endl;
+					opserr << "WARNING invalid parameter " << i+1 << "\n";
+					opserr << "yieldSurfaceBC Attalla2D tag: " << tag << endln;
 					return TCL_ERROR;
 				}
 				param(i) = temp;
@@ -336,9 +336,9 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 	{
 		if (argc < 9)
 		{
-			cerr << "WARNING invalid number of arguments\n";
+			opserr << "WARNING invalid number of arguments\n";
 			printCommand(argc,argv);
-			cerr << "Want: yieldSurfaceBC Hajjar2D tag? ysModelTag? D? b? t? fc? fy?" << endl;
+			opserr << "Want: yieldSurfaceBC Hajjar2D tag? ysModelTag? D? b? t? fc? fy?" << endln;
 			return TCL_ERROR;
 		}
 
@@ -350,55 +350,55 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 
 		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 		{
-			cerr << "WARNING invalid yieldSurfaceBC Hajjar2D  tag" << endl;
+			opserr << "WARNING invalid yieldSurfaceBC Hajjar2D  tag" << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetInt(interp, argv[3], &modelID) != TCL_OK)
 		{
-			cerr << "WARNING invalid yieldSurfaceBC Hajjar2D  matID1" << modelID << endl;
+			opserr << "WARNING invalid yieldSurfaceBC Hajjar2D  matID1" << modelID << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[4], &D) != TCL_OK)
 		{
-			cerr << "WARNING invalid D \n";
-			cerr << "yieldSurfaceBC Hajjar2D  tag: " << tag << endl;
+			opserr << "WARNING invalid D \n";
+			opserr << "yieldSurfaceBC Hajjar2D  tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[5], &b) != TCL_OK)
 		{
-			cerr << "WARNING invalid b \n";
-			cerr << "yieldSurfaceBC Hajjar2D  tag: " << tag << endl;
+			opserr << "WARNING invalid b \n";
+			opserr << "yieldSurfaceBC Hajjar2D  tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[6], &t) != TCL_OK)
 		{
-			cerr << "WARNING invalid t \n";
-			cerr << "yieldSurfaceBC Hajjar2D  tag: " << tag << endl;
+			opserr << "WARNING invalid t \n";
+			opserr << "yieldSurfaceBC Hajjar2D  tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[7], &fc) != TCL_OK)
 		{
-			cerr << "WARNING invalid fc \n";
-			cerr << "yieldSurfaceBC Hajjar2D  tag: " << tag << endl;
+			opserr << "WARNING invalid fc \n";
+			opserr << "yieldSurfaceBC Hajjar2D  tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 
 		if (Tcl_GetDouble(interp, argv[8], &fy) != TCL_OK)
 		{
-			cerr << "WARNING invalid fy \n";
-			cerr << "yieldSurfaceBC Hajjar2D  tag: " << tag << endl;
+			opserr << "WARNING invalid fy \n";
+			opserr << "yieldSurfaceBC Hajjar2D  tag: " << tag << endln;
 			return TCL_ERROR;
 		}
 		
 		YS_Evolution *theModel = theBuilder->getYS_EvolutionModel(modelID);
 		if(theModel == 0)
 		{
-			cerr << "WARNING yieldSurfaceBC Orbison2D no ys_model exixts with tag: " << modelID << endl;
+			opserr << "WARNING yieldSurfaceBC Orbison2D no ys_model exixts with tag: " << modelID << endln;
 			return TCL_ERROR;
 		}
 
@@ -408,7 +408,7 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 
 	else
 	{
-		cerr << "Warning - unknown yield surface type \n";
+		opserr << "Warning - unknown yield surface type \n";
 		printCommand(argc,argv);
 	}
 
@@ -418,8 +418,8 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
 
 	if (theBuilder->addYieldSurface_BC(*theYS) < 0)
 	{
-		cerr << "WARNING could not add YieldSurfaceBC to the domain\n";
-		cerr << *theYS << endl;
+		opserr << "WARNING could not add YieldSurfaceBC to the domain\n";
+		opserr << *theYS << endln;
 		delete theYS; // invoke the material objects destructor, otherwise mem leak
 		return TCL_ERROR;
 	}

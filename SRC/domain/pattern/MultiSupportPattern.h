@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-12 07:44:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/MultiSupportPattern.h,v $
                                                                         
 #ifndef MultiSupportPattern_h
@@ -52,7 +52,7 @@ class MultiSupportPattern : public LoadPattern
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
-    virtual void Print(ostream &s, int flag =0);        
+    virtual void Print(OPS_Stream &s, int flag =0);        
 
     // method to obtain a blank copy of the LoadPattern
     virtual LoadPattern *getCopy(void);

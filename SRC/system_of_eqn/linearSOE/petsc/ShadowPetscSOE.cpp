@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/ShadowPetscSOE.cpp,v $
                                                                         
                                                                         
@@ -53,7 +53,7 @@ ShadowPetscSOE::ShadowPetscSOE(PetscSolver &theSOESolver, int bs)
   MPI_Comm_size(PETSC_COMM_WORLD, &numProcessors);
   // MPI_Comm_dup(PETSC_COMM_WORLD, &theComm);
   if (myRank != 0) {
-    cerr << " ShadowPetscSOE::ShadowPetscSOE - must be rank 0\n";
+    opserr << " ShadowPetscSOE::ShadowPetscSOE - must be rank 0\n";
   }
   sendBuffer = (void *)(&sendData[0]);
   MPI_Barrier(PETSC_COMM_WORLD);
@@ -89,7 +89,7 @@ ShadowPetscSOE::ShadowPetscSOE(PetscSolver &theSOESolver, int bs)
   else if (strcmp(method, KSPPREONLY) == 0)
     petscMethod = 11;
   else {
-    cerr << "ShadowPetscSOE::ShadowPetscSOE - unknown KSP method\n";
+    opserr << "ShadowPetscSOE::ShadowPetscSOE - unknown KSP method\n";
     petscMethod = 12;
   }
 
@@ -118,7 +118,7 @@ ShadowPetscSOE::ShadowPetscSOE(PetscSolver &theSOESolver, int bs)
   else if (strcmp(preconditioner,PCLU) == 0)
     petscPre = 12;
   else {
-    cerr << "ActorPetscSOE::ActorPetscSOE - unknown PC method\n";
+    opserr << "ActorPetscSOE::ActorPetscSOE - unknown PC method\n";
     petscPre = 13;
   }
 
@@ -188,8 +188,8 @@ ShadowPetscSOE::setSize(Graph &theGraph)
 
       theVertex = theGraph.getVertexPtr(a);
       if (theVertex == 0) {
-	cerr << "WARNING:SparseGenLinSOE::setSize :";
-	cerr << " vertex " << a << " not in graph! - size set to 0\n";
+	opserr << "WARNING:SparseGenLinSOE::setSize :";
+	opserr << " vertex " << a << " not in graph! - size set to 0\n";
 	size = 0;
 	return -1;
       }
@@ -356,7 +356,7 @@ ShadowPetscSOE::getX(void)
   int ierr = VecGetOwnershipRange(theSOE.x, &low, &high);CHKERRA(ierr);       
 
   ierr = VecGetArray(theSOE.x, &theData); CHKERRA(ierr);       
-  cerr << "ShadowPetscSOE::getX - low:high " << low << " " << high << endl;
+  opserr << "ShadowPetscSOE::getX - low:high " << low << " " << high << endln;
   for (int i=low; i<=high; i++)
     X[i] = theData[i-low];
   ierr = VecRestoreArray(theSOE.x, &theData); CHKERRA(ierr);             
@@ -369,7 +369,7 @@ ShadowPetscSOE::getX(void)
     MPI_Recv(sendBuffer, 3, MPI_INT, i, tag, PETSC_COMM_WORLD, &status);
     low = sendData[0];
     high = sendData[1];
-  cerr << "ShadowPetscSOE::getX - low:high " << low << " " << high << endl;
+  opserr << "ShadowPetscSOE::getX - low:high " << low << " " << high << endln;
     double *dataBuf = &X[low];
     void *buffer = (void *)dataBuf;
     MPI_Recv(buffer, high-low, MPI_DOUBLE, i, tag, PETSC_COMM_WORLD, &status);
@@ -414,7 +414,7 @@ ShadowPetscSOE::setX(int loc, double value)
 int
 ShadowPetscSOE::setSolver(PetscSolver &newSolver)
 {
-  cerr << "ShadowPetscSOE::setSolver - not yet working\n";
+  opserr << "ShadowPetscSOE::setSolver - not yet working\n";
   return -1;
 }
 
@@ -422,7 +422,7 @@ ShadowPetscSOE::setSolver(PetscSolver &newSolver)
 int 
 ShadowPetscSOE::sendSelf(int cTag, Channel &theChannel)
 {
-  cerr << "WARNING ShadowPetscSOE::sendSelf - does not send itself YET\n";
+  opserr << "WARNING ShadowPetscSOE::sendSelf - does not send itself YET\n";
   return 0;
 }
 
@@ -431,7 +431,7 @@ int
 ShadowPetscSOE::recvSelf(int cTag, 
 			 Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-  cerr << "WARNING ShadowPetscSOE::sendSelf - does not receive itself YET\n";
+  opserr << "WARNING ShadowPetscSOE::sendSelf - does not receive itself YET\n";
   return 0;
 }
 

@@ -26,7 +26,7 @@ class InelasticYS2DGNL : public UpdatedLagrangianBeam2D
   virtual int		commitState(void);
   virtual int		update(void);
   virtual int displaySelf(Renderer &theViewer, int displayMode, float fact);
-  void Print(ostream &s, int flag =0);
+  void Print(OPS_Stream &s, int flag =0);
   int sendSelf(int commitTag, Channel &theChannel);
   int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
   //    void createView(char *title, WindowManager *theWM, char displaytype);

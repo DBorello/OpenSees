@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2003-01-28 01:19:13 $
+// $Revision: 1.31 $
+// $Date: 2003-02-14 23:01:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -46,7 +46,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
-#include <iomanip.h>
 
 #include <Information.h>
 #include <NLBeamColumn2d.h>
@@ -56,11 +55,8 @@
 #include <FEM_ObjectBroker.h>
 #include <Renderer.h>
 #include <math.h>
-#include <G3Globals.h>
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
-#include <iostream.h>
-#include <fstream.h>
 
 #define  NDM   2         // dimension of the problem (2d)
 #define  NND   3         // number of nodal dof's
@@ -123,14 +119,14 @@ fs(0), vs(0),Ssr(0), vscommit(0), sp(0), Ki(0), maxSubdivisions(maxSub)
    
    if (!sectionPtrs)
    {
-       cerr << "Error: NLBeamColumn2d::NLBeamColumn2d:  invalid section pointer ";
+       opserr << "Error: NLBeamColumn2d::NLBeamColumn2d:  invalid section pointer ";
        exit(-1);
    }	  
    
    sections = new SectionForceDeformation *[nSections];
    if (!sections)
    {
-       cerr << "Error: NLBeamColumn2d::NLBeamColumn2d: could not alocate section pointer";
+       opserr << "Error: NLBeamColumn2d::NLBeamColumn2d: could not alocate section pointer";
        exit(-1);
    }  
    
@@ -138,14 +134,14 @@ fs(0), vs(0),Ssr(0), vscommit(0), sp(0), Ki(0), maxSubdivisions(maxSub)
    {
       if (!sectionPtrs[i])
       {
-	  cerr << "Error: NLBeamColumn2d::NLBeamColumn2d: section pointer " << i << endl;
+	  opserr << "Error: NLBeamColumn2d::NLBeamColumn2d: section pointer " << i << endln;
           exit(-1);
       }  
        
       sections[i] = sectionPtrs[i]->getCopy();
       if (!sections[i])
       {
-	  cerr << "Error: NLBeamColumn2d::NLBeamColumn2d: could not create copy of section " << i << endl;
+	  opserr << "Error: NLBeamColumn2d::NLBeamColumn2d: could not create copy of section " << i << endln;
           exit(-1);
       }
    }
@@ -155,7 +151,7 @@ fs(0), vs(0),Ssr(0), vscommit(0), sp(0), Ki(0), maxSubdivisions(maxSub)
    crdTransf = coordTransf.getCopy(); 
    if (!crdTransf)
    {
-      cerr << "Error: NLBeamColumn2d::NLBeamColumn2d: could not create copy of coordinate transformation object" << endl;
+      opserr << "Error: NLBeamColumn2d::NLBeamColumn2d: could not create copy of coordinate transformation object" << endln;
       exit(-1);
    }
 
@@ -163,28 +159,28 @@ fs(0), vs(0),Ssr(0), vscommit(0), sp(0), Ki(0), maxSubdivisions(maxSub)
    fs  = new Matrix [nSections];
    if (!fs)
    {
-       cerr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate fs array";
+       opserr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate fs array";
        exit(-1);
    }
    
    vs = new Vector [nSections];
    if (!vs)
    {
-       cerr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate vs array";
+       opserr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate vs array";
        exit(-1);
    }
 
    Ssr  = new Vector [nSections];
    if (!Ssr)
    {
-       cerr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate Ssr array";
+       opserr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate Ssr array";
        exit(-1);
    }
    
    vscommit = new Vector [nSections];
    if (!vscommit)
    {
-       cerr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate vscommit array";   
+       opserr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate vscommit array";   
        exit(-1);
    }
 
@@ -204,7 +200,7 @@ fs(0), vs(0),Ssr(0), vscommit(0), sp(0), Ki(0), maxSubdivisions(maxSub)
       delete [] SsrSubdivide;
     SsrSubdivide  = new Vector [nSections];
     if (!vsSubdivide || !fsSubdivide || !SsrSubdivide) {
-       cerr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate Subdivide arrays";   
+       opserr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate Subdivide arrays";   
        exit(-1);
    }
   }
@@ -284,7 +280,7 @@ NLBeamColumn2d::setDomain(Domain *theDomain)
       theNodes[0] = 0;
       theNodes[1] = 0;
         
-      cerr << "NLBeamColumn2d::setDomain:  theDomain = 0 ";
+      opserr << "NLBeamColumn2d::setDomain:  theDomain = 0 ";
       exit(0); 
    }
 
@@ -298,15 +294,15 @@ NLBeamColumn2d::setDomain(Domain *theDomain)
 
    if (theNodes[0] == 0)
    {
-      cerr << "NLBeamColumn2d::setDomain: Nd1: ";
-      cerr << Nd1 << "does not exist in model\n";
+      opserr << "NLBeamColumn2d::setDomain: Nd1: ";
+      opserr << Nd1 << "does not exist in model\n";
       exit(0);
    }
 
    if (theNodes[1] == 0) 
    {
-      cerr << "NLBeamColumn2d::setDomain: Nd2: ";
-      cerr << Nd2 << "does not exist in model\n";
+      opserr << "NLBeamColumn2d::setDomain: Nd2: ";
+      opserr << Nd2 << "does not exist in model\n";
       exit(0);
    }
 
@@ -319,14 +315,14 @@ NLBeamColumn2d::setDomain(Domain *theDomain)
    
    if ((dofNode1 !=3 ) || (dofNode2 != 3))
    {
-      cerr << "NLBeamColumn2d::setDomain(): Nd2 or Nd1 incorrect dof ";
+      opserr << "NLBeamColumn2d::setDomain(): Nd2 or Nd1 incorrect dof ";
       exit(0);
    }
    
    // initialize the transformation
    if (crdTransf->initialize(theNodes[0], theNodes[1]))
    {
-      cerr << "NLBeamColumn2d::setDomain(): Error initializing coordinate transformation";  
+      opserr << "NLBeamColumn2d::setDomain(): Error initializing coordinate transformation";  
       exit(0);
    }
     
@@ -334,7 +330,7 @@ NLBeamColumn2d::setDomain(Domain *theDomain)
    double L = crdTransf->getInitialLength();
    if (L == 0.0)
    {
-      cerr << "NLBeamColumn2d::setDomain(): Zero element length:" << this->getTag();  
+      opserr << "NLBeamColumn2d::setDomain(): Zero element length:" << this->getTag();  
       exit(0);
    }
 
@@ -352,7 +348,7 @@ NLBeamColumn2d::commitState()
 
    // call element commitState to do any base class stuff
    if ((err = this->Element::commitState()) != 0) {
-     cerr << "NLBeamColumn2d::commitState () - failed in base class";
+     opserr << "NLBeamColumn2d::commitState () - failed in base class";
      return err;
    }    
 
@@ -376,9 +372,9 @@ NLBeamColumn2d::commitState()
    /***
    if (this->getTag() == 75) {
     for (int i=0; i<nSections; i++) {
-      cerr << "stress: " << sections[i]->getStressResultant();
-      cerr << "strain: " << sections[i]->getSectionDeformation();
-      cerr << "flexibility: " << sections[i]->getSectionFlexibility();
+      opserr << "stress: " << sections[i]->getStressResultant();
+      opserr << "strain: " << sections[i]->getSectionDeformation();
+      opserr << "flexibility: " << sections[i]->getSectionFlexibility();
     }
    }
    ***/
@@ -569,8 +565,8 @@ NLBeamColumn2d::getInitialStiff(void)
   // invert3by3Matrix(f, kv);
   static Matrix kvInit(NEBD, NEBD);
   if (f.Solve(I, kvInit) < 0)
-    g3ErrorHandler->warning("%s -- could not invert flexibility",
-			    "NLBeamColumn2d::getInitialStiff()");
+    opserr << "NLBeamColumn2d::getInitialStiff() -- could not invert flexibility\n";
+			    
 
   Ki = new Matrix(crdTransf->getInitialGlobalStiffMatrix(kvInit));
   
@@ -906,8 +902,8 @@ int NLBeamColumn2d::update()
 	  // invert3by3Matrix(f, kv);
 	  
 	  if (f.Solve(I, kvTrial) < 0)
-	    g3ErrorHandler->warning("%s -- could not invert flexibility",
-				    "NLBeamColumn2d::update()");
+	    opserr << "NLBeamColumn2d::update() -- could not invert flexibility\n";
+				    
 
 	  // dv = vin + dvTrial  - vr
 	  dv = vin;
@@ -975,9 +971,9 @@ int NLBeamColumn2d::update()
   // if fail to converge we return an error flag & print an error message
 
   if (converged == false) {
-    cerr << "WARNING - NLBeamColumn2d::update - failed to get compatable ";
-    cerr << "element forces & deformations for element: ";
-    cerr << this->getTag() << "(dW: << " << dW << ")\n";
+    opserr << "WARNING - NLBeamColumn2d::update - failed to get compatable ";
+    opserr << "element forces & deformations for element: ";
+    opserr << this->getTag() << "(dW: << " << dW << ")\n";
     return -1;
   }
 
@@ -1105,9 +1101,10 @@ NLBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
   
   if (sp == 0) {
     sp = new Matrix(3,nSections);
-    if (sp == 0)
-      g3ErrorHandler->fatal("%s -- out of memory",
-			    "NLBeamColumn2d::addLoad");
+    if (sp == 0) {
+      opserr << "NLBeamColumn2d::addLoad -- out of memory\n";
+      exit(-1);
+    }
   }
 
   const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
@@ -1168,11 +1165,10 @@ NLBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
   }
 
   else {
-    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
-			    "NLBeamColumn2d::addLoad()", this->getTag());
+    opserr << "NLBeamColumn2d::addLoad() -- load type unknown for element with tag: " << this->getTag() << endln;
     return -1;
   }
-
+  
   return 0;
 }
 
@@ -1267,16 +1263,14 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   
 
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
-    g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-			    "failed to send ID data");
+    opserr << "NLBeamColumn2d::sendSelf() - failed to send ID data\n";
     return -1;
   }    
 
   // send the coordinate transformation
   
   if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
-    g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-			    "failed to send crdTranf");
+    opserr << "NLBeamColumn2d::sendSelf() - failed to send crdTranf\n";
     return -1;
   }      
 
@@ -1302,8 +1296,8 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   }
 
   if (theChannel.sendID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-			    "failed to send ID data");
+    opserr << "NLBeamColumn2d::sendSelf() - failed to send ID data\n";
+			    
     return -1;
   }    
 
@@ -1313,8 +1307,7 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   
   for (j = 0; j<nSections; j++) {
     if (sections[j]->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - section %d %s\n",
-			      j,"failed to send itself");
+      opserr << "NLBeamColumn2d::sendSelf() - section: " << j << " failed to send itself\n";
       return -1;
     }
   }
@@ -1352,8 +1345,8 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
 	dData(loc++) = (vscommit[k])(i);
   
   if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
-     g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-	 		     "failed to send Vector data");
+     opserr << "NLBeamColumn2d::sendSelf() - failed to send Vector data\n";
+	 		     
      return -1;
   }    
 
@@ -1373,8 +1366,7 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   static ID idData(9); // one bigger than needed 
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
-    g3ErrorHandler->warning("NLBeamColumn2d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "NLBeamColumn2d::recvSelf() - failed to recv ID data\n";
     return -1;
   }    
 
@@ -1395,10 +1387,9 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
       crdTransf = theBroker.getNewCrdTransf2d(crdTransfClassTag);
 
       if (crdTransf == 0) {
-	  g3ErrorHandler->warning("NLBeamColumn2d::recvSelf() - %s %d\n",
-				  "failed to obtain a CrdTrans object with classTag",
-				  crdTransfClassTag);
-	  return -2;	  
+	opserr << "NLBeamColumn2d::recvSelf() - failed to obtain a CrdTrans object with classTag " << 
+	  crdTransfClassTag << endln;
+	return -2;	  
       }
   }
 
@@ -1407,8 +1398,7 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   // invoke recvSelf on the crdTransf obkject
   if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0)  
   {
-     g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-	     		     "failed to recv crdTranf");
+     opserr << "NLBeamColumn2d::sendSelf() - failed to recv crdTranf\n";
      return -3;
   }      
   
@@ -1420,8 +1410,7 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   int loc = 0;
 
   if (theChannel.recvID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("NLBeamColumn2d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "NLBeamColumn2d::recvSelf() - failed to recv ID data\n";
     return -1;
   }    
 
@@ -1453,8 +1442,7 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     // Allocate the right number
     vscommit = new Vector[nSections];
     if (vscommit == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate vscommit array",
-			      "NLBeamColumn2d::recvSelf");
+      opserr << "NLBeamColumn2d::recvSelf -- failed to allocate vscommit array\n";
       return -1;
     }
 
@@ -1465,8 +1453,7 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     // Allocate the right number
     fs = new Matrix[nSections];  
     if (fs == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate fs array",
-			      "NLBeamColumn2d::recvSelf");
+      opserr << "NLBeamColumn2d::recvSelf -- failed to allocate fs array\n";
       return -1;
     }
 
@@ -1477,8 +1464,7 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     // Allocate the right number
     vs = new Vector[nSections];  
     if (vs == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate vs array",
-			      "NLBeamColumn2d::recvSelf");
+      opserr << "NLBeamColumn2d::recvSelf -- failed to allocate vs array\n";
       return -1;
     }
 
@@ -1489,17 +1475,16 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     // Allocate the right number
     Ssr = new Vector[nSections];  
     if (Ssr == 0) {
-      g3ErrorHandler->warning("%s -- failed to allocate Ssr array",
-			      "NLBeamColumn2d::recvSelf");
+      opserr << "NLBeamColumn2d::recvSelf -- failed to allocate Ssr array\n";
       return -1;
     }
 
     // create a new array to hold pointers
     sections = new SectionForceDeformation *[idData(3)];
     if (sections == 0) {
-      g3ErrorHandler->fatal("NLBeamColumn2d::recvSelf() - %s %d\n",
-			      "out of memory creating sections array of size",idData(3));
-      return -1;
+      opserr << "NLBeamColumn2d::recvSelf() - " <<
+	"out of memory creating sections array of size" << idData(3) << endln;
+      exit(-1);
     }    
 
     loc = 0;
@@ -1510,14 +1495,13 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
       loc += 2;
       sections[i] = theBroker.getNewSection(sectClassTag);
       if (sections[i] == 0) {
-	g3ErrorHandler->fatal("NLBeamColumn2d::recvSelf() - %s %d\n",
-			      "Broker could not create Section of class type",sectClassTag);
-	return -1;
+	opserr << "NLBeamColumn2d::recvSelf() - " <<
+	  "Broker could not create Section of class type" << sectClassTag << endln;
+	exit(-1);
       }
       sections[i]->setDbTag(sectDbTag);
       if (sections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("NLBeamColumn2d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn2d::recvSelf() - section " << i << "failed to recv itself\n";
 	return -1;
       }     
     }
@@ -1543,17 +1527,17 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	delete sections[i];
 	sections[i] = theBroker.getNewSection(sectClassTag);
 	if (sections[i] == 0) {
-	  g3ErrorHandler->fatal("NLBeamColumn2d::recvSelf() - %s %d\n",
-				"Broker could not create Section of class type",sectClassTag);
-	  return -1;
+	  opserr << "NLBeamColumn2d::recvSelf() - " << 
+	    "Broker could not create Section of class type" <<sectClassTag << endln;
+	  exit(-1);
 	}
       }
 
       // recvvSelf on it
       sections[i]->setDbTag(sectDbTag);
       if (sections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("NLBeamColumn2d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn2d::recvSelf() - section " << 
+	  i << "failed to recv itself\n";
 	return -1;
       }     
     }
@@ -1569,8 +1553,8 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   Vector dData(1+1+NEBD+NEBD*NEBD+secDefSize);   
   
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
-    g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-			    "failed to send Vector data");
+    opserr << "NLBeamColumn2d::sendSelf() - failed to send Vector data\n";
+			    
     return -1;
   }    
   
@@ -1652,15 +1636,17 @@ void NLBeamColumn2d::compSectionDisplacements(Vector sectionCoords[], Vector sec
 	       break;
 	   }
 
-       if (ii == code.Size())
-	   g3ErrorHandler->fatal("FATAL NLBeamColumn2d::compSectionDispls - section does not provide Mz response\n");
+       if (ii == code.Size()) {
+	 opserr << "FATAL NLBeamColumn2d::compSectionDispls - section does not provide Mz response\n";
+	 exit(-1);
+       }
 			
        // get section deformations
        vs = sections[i]->getSectionDeformation();
        kappa(i) = vs(sectionKey);
    }
 
-       //cerr << "kappa: " << kappa;   
+       //opserr << "kappa: " << kappa;   
 
    Vector w(nSections);
    static Vector xl(NDM), uxb(NDM);
@@ -1693,23 +1679,30 @@ void NLBeamColumn2d::compSectionDisplacements(Vector sectionCoords[], Vector sec
 
 
 void
-NLBeamColumn2d::Print(ostream &s, int flag)
+NLBeamColumn2d::Print(OPS_Stream &s, int flag)
 {
-   if (flag == 1)
-   { 
+   if (flag == -1) { 
+    int eleTag = this->getTag();
+    s << "NL_BEAM\t" << eleTag << "\t";
+    s << sections[0]->getTag() << "\t" << sections[nSections-1]->getTag();
+    s  << "\t" << connectedExternalNodes(0) << "\t" << connectedExternalNodes(1);
+    s << "0\t0.0000000\n";
+   } 
+
+   else if (flag == 1) { 
       s << "\nElement: " << this->getTag() << " Type: NLBeamColumn2d ";
       s << "\tConnected Nodes: " << connectedExternalNodes ;
       s << "\tNumber of Sections: " << nSections;
       s << "\tMass density: " << rho;
       for (int i = 0; i < nSections; i++)
          s << "\nSection "<<i<<" :" << *sections[i];
-    }
-   else
-   {
+   } 
+   
+   else {
       s << "\nElement: " << this->getTag() << " Type: NLBeamColumn2d ";
       s << "\tConnected Nodes: " << connectedExternalNodes ;
       s << "\tNumber of Sections: " << nSections;
-      s << "\tMass density: " << rho << endl;
+      s << "\tMass density: " << rho << endln;
       double P  = Secommit(0);
       double M1 = Secommit(1);
       double M2 = Secommit(2);
@@ -1718,14 +1711,14 @@ NLBeamColumn2d::Print(ostream &s, int flag)
       theVector(1) = V;
       theVector(4) = -V;
       s << "\tEnd 1 Forces (P V M): " << -P+p0[0] << " "
-	<< V+p0[1] << " " << M1 << endl;
+	<< V+p0[1] << " " << M1 << endln;
       s << "\tEnd 2 Forces (P V M): " << P << " "
-	<< -V+p0[2] << " " << M2 << endl;
+	<< -V+p0[2] << " " << M2 << endln;
    }
 }
 
 
-ostream &operator<<(ostream &s, NLBeamColumn2d &E)
+OPS_Stream &operator<<(OPS_Stream &s, NLBeamColumn2d &E)
 {
     E.Print(s);
     return s;
@@ -1780,7 +1773,7 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
      
        if (!coords)
        {
-	   cerr << "NLBeamColumn2d::displaySelf() -- failed to allocate coords array";   
+	   opserr << "NLBeamColumn2d::displaySelf() -- failed to allocate coords array";   
 	   exit(-1);
        }
        
@@ -1791,7 +1784,7 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
      
        if (!displs)
        {
-	   cerr << "NLBeamColumn2d::displaySelf() -- failed to allocate coords array";   
+	   opserr << "NLBeamColumn2d::displaySelf() -- failed to allocate coords array";   
 	   exit(-1);
        }
 
@@ -1805,7 +1798,7 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
        v1(0) = node1Crd(0) + node1Disp(0)*fact;
        v1(1) = node1Crd(1) + node1Disp(1)*fact;
  
-       ///cerr << "v1: " << v1;
+       ///opserr << "v1: " << v1;
 
        // get global displacements and coordinates of each section          
 
@@ -1867,63 +1860,61 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
        // get section curvatures
        Vector kappa(nSections); // curvature
        Vector vs; // section deformations 
-	   int i;
-       	for (i=0; i<nSections; i++)
-		{
-			// THIS IS VERY INEFFICIENT ... CAN CHANGE IF RUNS TOO SLOW
-			int sectionKey = 0;
-			const ID &code = sections[i]->getType();
-			int ii;
-			for (ii = 0; ii < code.Size(); ii++)
-				if (code(ii) == SECTION_RESPONSE_MZ)
-				{
-					sectionKey = ii;
-					break;
-				}
-
-			if (ii == code.Size())
-				g3ErrorHandler->fatal("FATAL NLBeamColumn2d::displaySelf - section does not provide Mz response\n");
-			
-			// get section deformations
-			vs = sections[i]->getSectionDeformation();
-			kappa(i) = vs(sectionKey);
-		}
-
+       int i;
+       for (i=0; i<nSections; i++) {
+	 // THIS IS VERY INEFFICIENT ... CAN CHANGE IF RUNS TOO SLOW
+	 int sectionKey = 0;
+	 const ID &code = sections[i]->getType();
+	 int ii;
+	 for (ii = 0; ii < code.Size(); ii++)
+	   if (code(ii) == SECTION_RESPONSE_MZ) {
+	     sectionKey = ii;
+	     break;
+	   }
+	 
+	 if (ii == code.Size()) {
+	   opserr << "FATAL NLBeamColumn2d::displaySelf - section does not provide Mz response\n";
+	   exit(-1);
+	 }
+	 // get section deformations
+	 vs = sections[i]->getSectionDeformation();
+	 kappa(i) = vs(sectionKey);
+       }
+       
        double xl_xi, yl_xi, xg_xi, yg_xi;
        int error;
-     
+       
        double L = crdTransf->getInitialLength();
-       for (i = 0; i< nSections; i++)
-       {
- 	       xi = xi_pt(i,0);
-	       
-	       // determine displaced local coordinates of the point xi
-	       xl_xi = L * xi;
-	       yl_xi = kappa(i) * fact;
-    
-	       // rotate to global coordinates
-	       xg_xi = cosTheta * xl_xi - sinTheta * yl_xi;
-	       yg_xi = sinTheta * xl_xi + cosTheta * yl_xi;
-	       
-	       // translate to global coordinates
-	       xg_xi = xg_xi + x_i;
-	       yg_xi = yg_xi + y_i;
-      
-	       // draw the displaced position of this line segment
-	       v1(0) = xg_xi0;
-	       v1(1) = yg_xi0;
-	       
-	       v2(0) = xg_xi;
-	       v2(1) = yg_xi;
-
-	       error =  theViewer.drawLine(v1, v2, 1.0, 1.0);	
-	       
-	       if (error)
-		   return error;
-	       
-	       xg_xi0 = xg_xi;
-	       yg_xi0 = yg_xi;
-      }
+       for (i = 0; i< nSections; i++) {
+	 xi = xi_pt(i,0);
+	 
+	 // determine displaced local coordinates of the point xi
+	 xl_xi = L * xi;
+	 yl_xi = kappa(i) * fact;
+	 
+	 // rotate to global coordinates
+	 xg_xi = cosTheta * xl_xi - sinTheta * yl_xi;
+	 yg_xi = sinTheta * xl_xi + cosTheta * yl_xi;
+	 
+	 // translate to global coordinates
+	 xg_xi = xg_xi + x_i;
+	 yg_xi = yg_xi + y_i;
+	
+	 // draw the displaced position of this line segment
+	 v1(0) = xg_xi0;
+	 v1(1) = yg_xi0;
+	 
+	 v2(0) = xg_xi;
+	 v2(1) = yg_xi;
+	 
+	 error =  theViewer.drawLine(v1, v2, 1.0, 1.0);	
+	 
+	 if (error)
+	   return error;
+	 
+	 xg_xi0 = xg_xi;
+	 yg_xi0 = yg_xi;
+       }
 
       v1(0) = xg_xi0;
       v1(1) = yg_xi0;
@@ -2030,7 +2021,7 @@ NLBeamColumn2d::setParameter (char **argv, int argc, Information &info)
 
 		// For now, no parameters of the section itself:
 		if (argc<5) {
-			cerr << "For now: cannot handle parameters of the section itself." << endl;
+			opserr << "For now: cannot handle parameters of the section itself." << endln;
 			return -1;
 		}
 
@@ -2046,7 +2037,7 @@ NLBeamColumn2d::setParameter (char **argv, int argc, Information &info)
 		
 		// Check if the parameterID is valid
 		if (parameterID < 0) {
-			cerr << "NLBeamColumn2d::setParameter() - could not set parameter. " << endl;
+			opserr << "NLBeamColumn2d::setParameter() - could not set parameter. " << endln;
 			return -1;
 		}
 		else {
@@ -2086,7 +2077,7 @@ NLBeamColumn2d::updateParameter (int parameterID, Information &info)
 		}
 
 		if (ok < 0) {
-			cerr << "NLBeamColumn2d::updateParameter() - could not update parameter. " << endl;
+			opserr << "NLBeamColumn2d::updateParameter() - could not update parameter. " << endln;
 			return ok;
 		}
 		else {
@@ -2094,7 +2085,7 @@ NLBeamColumn2d::updateParameter (int parameterID, Information &info)
 		}
 	}
 	else {
-		cerr << "NLBeamColumn2d::updateParameter() - could not update parameter. " << endl;
+		opserr << "NLBeamColumn2d::updateParameter() - could not update parameter. " << endln;
 		return -1;
 	}       
 }

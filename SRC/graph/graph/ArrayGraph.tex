@@ -41,7 +41,7 @@ instance.} \\
 \indent\indent {\em virtual VertexIter \&getVertices(void);} \\
 \indent\indent {\em virtual int getNumVertex(void) const;} \\
 \indent\indent {\em virtual int getNumEdge(void) const;} \\
-\indent\indent {\em virtual void Print(ostream \&s) const =0;} \\ \\
+\indent\indent {\em virtual void Print(OPS_Stream \&s) const =0;} \\ \\
 \indent\indent // Protected Methods \\
 \indent\indent {\em virtual int getArraySize(void) const;} \\
 
@@ -74,7 +74,7 @@ and copies the pointers to the vertices, before invoking {\em
 delete()} on the old array. It now tries to add the vertex in the
 array at location {\em vertexTag}. If this fails it adds at the first
 empty location it comes to. Returns a 0 if successfull addition, a
-$-1$ otherwise and a message to cerr explaining the problem. \\ 
+$-1$ otherwise and a message to opserr explaining the problem. \\ 
 
 {\em virtual int addEdge(int vertexTag, int otherVertexTag); } \\
 Causes the Graph to add an edge {\em (vertexTag,otherVertexTag)} to
@@ -104,7 +104,7 @@ A method to return the number of vertices in the graph, returns numVertex. \\
 A method to return the number of edges in the graph, returns numEdge. \\
 
 
-{\em virtual void Print(ostream \&s) const =0;} \\
+{\em virtual void Print(OPS_Stream \&s) const =0;} \\
 A method to print the graph. It first prints out numVertex and numEdge
 and then on each newline prints the vertexTag and the edges for that
 vertex. It does this by going through theVertices array and invoking

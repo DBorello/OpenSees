@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/mainTriangle.cpp,v $
                                                                         
                                                                         
@@ -42,7 +42,7 @@
 // #define PETSC_EXISTS 1
 
 #include <stdlib.h>
-#include <iostream.h>
+#include <iOPS_Stream.h>
 
 #include <Timer.h>
 #include <TrianglePlaneStress.h>
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
     // 
 
     int numReps;
-    cerr << "Enter Number of Iterations: ";
+    opserr << "Enter Number of Iterations: ";
     cin >> numReps;
     
 #ifdef PETSC_EXISTS
@@ -314,29 +314,29 @@ int main(int argc, char **argv)
 	timer.start();
 	theAnalysis.analyze();    
 	timer.pause();
-	theSolnAlgo->Print(cerr);
+	theSolnAlgo->Print(opserr);
         timer1.pause();
 	cout << "Main::Time To Analyse Rep: " << 
 	  j+1 << "  real:  " << timer.getReal();
         cout << "  cpu: " << timer.getCPU() << 
-	  "  page: " << timer.getNumPageFaults() << endl; 
+	  "  page: " << timer.getNumPageFaults() << endln; 
 	cout << "Main::Time Since Start: " 
 	     << j+1 << "  real:  " << timer1.getReal();
         cout << "  cpu: " << timer1.getCPU() 
-	  << "  page: " << timer1.getNumPageFaults() << endl; 
+	  << "  page: " << timer1.getNumPageFaults() << endln; 
 
     }
 
     // done
-    //    cerr << *theDomain;
+    //    opserr << *theDomain;
     
     Node *theNode = theDomain->getNode(2);
     if (theNode != 0) {
-	cerr << *theNode;
+	opserr << *theNode;
     }
 
     //const Vector &theResult = theSOE->getX();
-    //cerr << "x(0): " << theResult(0) << endl;
+    //opserr << "x(0): " << theResult(0) << endln;
 
     DofColorMap theMap(theSOE->getNumEqn(),numP);
     WindowRenderer *theViewer = new X11Renderer(600,600,*theDomain, theMap);

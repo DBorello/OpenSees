@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-11 20:46:39 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dPointLoad.cpp,v $
                                                                         
 // Written: fmk 
@@ -78,13 +78,13 @@ Beam2dPointLoad::sendSelf(int commitTag, Channel &theChannel)
 
   int result = theChannel.sendVector(dbTag, commitTag, vectData);
   if (result < 0) {
-    cerr << "Beam2dPointLoad::sendSelf - failed to send data\n";
+    opserr << "Beam2dPointLoad::sendSelf - failed to send data\n";
     return result;
   }
 
   result = theChannel.sendID(dbTag, commitTag, theElements);
   if (result < 0) {
-    cerr << "Beam2dPointLoad::sendSelf - failed to send element tags\n";
+    opserr << "Beam2dPointLoad::sendSelf - failed to send element tags\n";
     return result;
   }
   
@@ -100,7 +100,7 @@ Beam2dPointLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker 
 
   int result = theChannel.recvVector(dbTag, commitTag, vectData);
   if (result < 0) {
-    cerr << "Beam2dPointLoad::sendSelf - failed to send data\n";
+    opserr << "Beam2dPointLoad::sendSelf - failed to send data\n";
     return result;
   }
 
@@ -115,14 +115,14 @@ Beam2dPointLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker 
       delete theElementTags;
     theElementTags = new ID(numEle);
     if (theElementTags == 0) {
-      cerr << "Beam2dPointLoad::sendSelf - failed to create an ID\n";
+      opserr << "Beam2dPointLoad::sendSelf - failed to create an ID\n";
       return -3;
     }
   }
 
   result = theChannel.recvID(dbTag, commitTag, *theElementTags);
   if (result < 0) {
-    cerr << "Beam2dPointLoad::sendSelf - failed to send element tags\n";
+    opserr << "Beam2dPointLoad::sendSelf - failed to send element tags\n";
     return result;
   }
   
@@ -130,7 +130,7 @@ Beam2dPointLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker 
 }
 
 void 
-Beam2dPointLoad::Print(ostream &s, int flag)
+Beam2dPointLoad::Print(OPS_Stream &s, int flag)
 {
   s << "Beam2dPointLoad - reference load : (" << Ptrans
     << ", " << Paxial << ") acting at : " << x << " relative to length\n";

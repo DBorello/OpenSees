@@ -46,13 +46,13 @@ class VMPotentialSurface : public PotentialSurface
     tensor dQods(const EPState *EPS) const;
     tensor d2Qods2(const EPState *EPS) const;
 
-    void print() { cout << *this; }; 
+    void print() { opserr << *this; }; 
   
     //================================================================================
     // Overloaded Insertion Operator
     // prints an VM PotentialSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const VMPotentialSurface & YS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const VMPotentialSurface & YS);
 
 };
 

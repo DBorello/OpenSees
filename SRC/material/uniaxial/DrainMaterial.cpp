@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-10 22:57:40 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/DrainMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -36,7 +36,7 @@
 //    UCB/EERC-88/06, Berkeley: Earthquake Engineering Research Center,
 //    University of California, Mar. 1988, 1 vol.
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <DrainMaterial.h>
 #include <Vector.h>
 #include <ID.h>
@@ -56,9 +56,12 @@ epsilon(0.0), epsilonDot(0.0), sigma(0.0), tangent(0.0)
   if (numHstv > 0) {
     // Allocate history array
     hstv = new double[2*numHstv];
-    if (hstv == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate history array -- type %d",
-			    "DrainMaterial::DrainMaterial", this->getClassTag());
+    if (hstv == 0) {
+      opserr << "DrainMaterial::DrainMaterial -- failed to allocate history array -- type : " <<
+	this->getClassTag() << endln;
+      exit(-1);
+    }
+			    
     
     // Initialize to zero
     for (int i = 0; i < 2*numHstv; i++)
@@ -71,9 +74,11 @@ epsilon(0.0), epsilonDot(0.0), sigma(0.0), tangent(0.0)
   if (numData > 0) {
     // Allocate material parameter array
     data = new double[numData];
-    if (data == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate data array -- type %d",
-			    "DrainMaterial::DrainMaterial", this->getClassTag());
+    if (data == 0) {
+      opserr << "DrainMaterial::DrainMaterial -- failed to allocate data array -- type: " <<
+	this->getClassTag() << endln;
+      exit(-1);
+    }
     
     // Initialize to zero
     for (int i = 0; i < numData; i++)
@@ -247,7 +252,7 @@ DrainMaterial::sendSelf(int commitTag, Channel &theChannel)
 
 	res += theChannel.sendVector(this->getDbTag(), commitTag, vecData);
 	if (res < 0) 
-		cerr << "DrainMaterial::sendSelf() - failed to send Vector data\n";
+		opserr << "DrainMaterial::sendSelf() - failed to send Vector data\n";
 
 	return res;
 }
@@ -262,7 +267,7 @@ DrainMaterial::recvSelf(int commitTag, Channel &theChannel,
 
 	res += theChannel.recvVector(this->getDbTag(), commitTag, vecData);
 	if (res < 0) {
-		cerr << "DrainMaterial::recvSelf() - failed to receive Vector data\n";
+		opserr << "DrainMaterial::recvSelf() - failed to receive Vector data\n";
 		return res;
 	}
 
@@ -292,30 +297,30 @@ DrainMaterial::recvSelf(int commitTag, Channel &theChannel,
 }
     
 void
-DrainMaterial::Print(ostream &s, int flag)
+DrainMaterial::Print(OPS_Stream &s, int flag)
 {
 	s << "DrainMaterial, type: ";
 	
 	switch (this->getClassTag()) {
 	case MAT_TAG_DrainHardening:
-		s << "Hardening" << endl;
+		s << "Hardening" << endln;
 		break;
 	case MAT_TAG_DrainBilinear:
-		s << "Bilinear" << endl;
+		s << "Bilinear" << endln;
 		break;
 	case MAT_TAG_DrainClough1:
-		s << "Clough1" << endl;
+		s << "Clough1" << endln;
 		break;
 	case MAT_TAG_DrainClough2:
-		s << "Clough2" << endl;
+		s << "Clough2" << endln;
 		break;
 	case MAT_TAG_DrainPinch1:
-		s << "Pinch1" << endl;
+		s << "Pinch1" << endln;
 		break;
 	// Add more cases as needed
 
 	default:
-		s << "Material identifier = " << this->getClassTag() << endl;
+		s << "Material identifier = " << this->getClassTag() << endln;
 		break;
 	}
 }
@@ -544,8 +549,8 @@ DrainMaterial::invokeSubroutine(void)
 
 	case MAT_TAG_DrainBilinear:
 		// I don't know which subroutines to call, so fill in the XX for Bilinear later -- MHS
-		g3ErrorHandler->fatal("%s -- Bilinear subroutine not yet linked",
-			"DrainMaterial::invokeSubroutine"); 
+		opserr << "DrainMaterial::invokeSubroutine -- Bilinear subroutine not yet linked\n"; exit(-1);
+
 
 		//fillXX_(data, hstv, stateP);
 		//respXX_(&kresis, &ksave, &kgem, &kstep, &ndof, &kst, &kenr,
@@ -556,8 +561,7 @@ DrainMaterial::invokeSubroutine(void)
 
 	case MAT_TAG_DrainClough1:
 		// I don't know which subroutines to call, so fill in the XX for Clough1 later -- MHS
-		g3ErrorHandler->fatal("%s -- Clough1 subroutine not yet linked",
-			"DrainMaterial::invokeSubroutine"); 
+		opserr << "DrainMaterial::invokeSubroutine -- Clough1 subroutine not yet linked\n"; exit(-1);
 
 		//fillXX_(data, hstv, stateP);
 		//respXX_(&kresis, &ksave, &kgem, &kstep, &ndof, &kst, &kenr,
@@ -568,9 +572,8 @@ DrainMaterial::invokeSubroutine(void)
 
 	case MAT_TAG_DrainClough2:
 		// I don't know which subroutines to call, so fill in the XX for Clough2 later -- MHS
-		g3ErrorHandler->fatal("%s -- Clough2 subroutine not yet linked",
-			"DrainMaterial::invokeSubroutine"); 
-		
+		opserr << "DrainMaterial::invokeSubroutine -- Clough2 subroutine not yet linked\n"; exit(-1);
+			  
 		//fillXX_(data, hstv, stateP);
 		//respXX_(&kresis, &ksave, &kgem, &kstep, &ndof, &kst, &kenr,
 		//	&ener, &ened, &enso, &beto, relas, rdamp, rinit, ddise, dise, vele);
@@ -580,8 +583,7 @@ DrainMaterial::invokeSubroutine(void)
 
 	case MAT_TAG_DrainPinch1:
 		// I don't know which subroutines to call, so fill in the XX for Pinch1 later -- MHS
-		g3ErrorHandler->fatal("%s -- Pinch1 subroutine not yet linked",
-			"DrainMaterial::invokeSubroutine"); 
+		opserr << "DrainMaterial::invokeSubroutine -- Pinch1 subroutine not yet linked\n"; exit(-1);
 		
 		//fillXX_(data, hstv, stateP);
 		//respXX_(&kresis, &ksave, &kgem, &kstep, &ndof, &kst, &kenr,
@@ -593,8 +595,7 @@ DrainMaterial::invokeSubroutine(void)
 	// Add more cases as needed
 
 	default:
-		g3ErrorHandler->fatal("%s -- unknown material type",
-			"DrainMaterial::invokeSubroutine");
+		opserr << "DrainMaterial::invokeSubroutine -- unknown material type\n"; exit(-1);
 		return -1;
 	}
 

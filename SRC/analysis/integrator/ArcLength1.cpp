@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-12-07 00:50:52 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/ArcLength1.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,6 @@
 #include <LinearSOE.h>
 #include <Vector.h>
 #include <Channel.h>
-#include <iostream.h>
 #include <math.h>
 
 ArcLength1::ArcLength1(double arcLength, double alpha)
@@ -79,8 +78,8 @@ ArcLength1::newStep(void)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING ArcLength1::newStep() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING ArcLength1::newStep() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }
 
@@ -125,8 +124,8 @@ ArcLength1::update(const Vector &dU)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING ArcLength1::update() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING ArcLength1::update() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }
 
@@ -141,8 +140,8 @@ ArcLength1::update(const Vector &dU)
     double a = (*deltaUstep)^(*deltaUbar);
     double b = (*deltaUstep)^(*deltaUhat) + alpha2*deltaLambdaStep;
     if (b == 0) {
-      cerr << "ArcLength1::update() - zero denominator,";
-      cerr << " alpha was set to 0.0 and zero reference load\n";
+      opserr << "ArcLength1::update() - zero denominator,";
+      opserr << " alpha was set to 0.0 and zero reference load\n";
       return -1;
     }
     double dLambda = -a/b;
@@ -176,8 +175,8 @@ ArcLength1::domainChanged(void)
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
     if (theModel == 0 || theLinSOE == 0) {
-	cerr << "WARNING ArcLength1::update() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING ArcLength1::update() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }    
     int size = theModel->getNumEqn(); // ask model in case N+1 space
@@ -187,8 +186,8 @@ ArcLength1::domainChanged(void)
 	    delete deltaUhat;   // delete the old
 	deltaUhat = new Vector(size);
 	if (deltaUhat == 0 || deltaUhat->Size() != size) { // check got it
-	    cerr << "FATAL ArcLength1::domainChanged() - ran out of memory for";
-	    cerr << " deltaUhat Vector of size " << size << endl;
+	    opserr << "FATAL ArcLength1::domainChanged() - ran out of memory for";
+	    opserr << " deltaUhat Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -198,8 +197,8 @@ ArcLength1::domainChanged(void)
 	    delete deltaUbar;   // delete the old
 	deltaUbar = new Vector(size);
 	if (deltaUbar == 0 || deltaUbar->Size() != size) { // check got it
-	    cerr << "FATAL ArcLength1::domainChanged() - ran out of memory for";
-	    cerr << " deltaUbar Vector of size " << size << endl;
+	    opserr << "FATAL ArcLength1::domainChanged() - ran out of memory for";
+	    opserr << " deltaUbar Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -210,8 +209,8 @@ ArcLength1::domainChanged(void)
 	    delete deltaU;   // delete the old
 	deltaU = new Vector(size);
 	if (deltaU == 0 || deltaU->Size() != size) { // check got it
-	    cerr << "FATAL ArcLength1::domainChanged() - ran out of memory for";
-	    cerr << " deltaU Vector of size " << size << endl;
+	    opserr << "FATAL ArcLength1::domainChanged() - ran out of memory for";
+	    opserr << " deltaU Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -221,8 +220,8 @@ ArcLength1::domainChanged(void)
 	    delete deltaUstep;  
 	deltaUstep = new Vector(size);
 	if (deltaUstep == 0 || deltaUstep->Size() != size) { 
-	    cerr << "FATAL ArcLength1::domainChanged() - ran out of memory for";
-	    cerr << " deltaUstep Vector of size " << size << endl;
+	    opserr << "FATAL ArcLength1::domainChanged() - ran out of memory for";
+	    opserr << " deltaUstep Vector of size " << size << endln;
 	    exit(-1);
 	}
     }
@@ -232,8 +231,8 @@ ArcLength1::domainChanged(void)
 	    delete phat;  
 	phat = new Vector(size);
 	if (phat == 0 || phat->Size() != size) { 
-	    cerr << "FATAL ArcLength1::domainChanged() - ran out of memory for";
-	    cerr << " phat Vector of size " << size << endl;
+	    opserr << "FATAL ArcLength1::domainChanged() - ran out of memory for";
+	    opserr << " phat Vector of size " << size << endln;
 	    exit(-1);
 	}
     }    
@@ -264,7 +263,7 @@ ArcLength1::sendSelf(int cTag,
   data(4)  = signLastDeltaLambdaStep;
 
   if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
-      cerr << "ArcLength1::sendSelf() - failed to send the data\n";
+      opserr << "ArcLength1::sendSelf() - failed to send the data\n";
       return -1;
   }
   return 0;
@@ -277,7 +276,7 @@ ArcLength1::recvSelf(int cTag,
 {
   Vector data(5);
   if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
-      cerr << "ArcLength1::sendSelf() - failed to send the data\n";
+      opserr << "ArcLength1::sendSelf() - failed to send the data\n";
       return -1;
   }      
 
@@ -291,14 +290,14 @@ ArcLength1::recvSelf(int cTag,
 }
 
 void
-ArcLength1::Print(ostream &s, int flag)
+ArcLength1::Print(OPS_Stream &s, int flag)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theModel != 0) {
 	double cLambda = theModel->getCurrentDomainTime();
 	s << "\t ArcLength1 - currentLambda: " << cLambda;
 	s << "  ArcLength1: " << sqrt(arcLength2) <<  "  alpha: ";
-	s << sqrt(alpha2) << endl;
+	s << sqrt(alpha2) << endln;
     } else 
 	s << "\t ArcLength1 - no associated AnalysisModel\n";
 }

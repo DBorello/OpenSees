@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-04-02 20:05:16 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/TclDatabaseCommands.cpp,v $
                                                                         
                                                                         
@@ -38,8 +38,7 @@
 #include <tcl.h>
 #include <tk.h>
 
-#include <iostream.h>
-#include <fstream.h>
+#include <OPS_Globals.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -87,7 +86,7 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv,
 
   // make sure at least one other argument to contain integrator
   if (argc < 2) {
-    interp->result = "WARNING need to specify a Database type; valid type File, MySQL, BerkeleyDB ";
+    opserr << "WARNING need to specify a Database type; valid type File, MySQL, BerkeleyDB \n";
     return TCL_ERROR;
   }    
 
@@ -99,7 +98,7 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv,
   // a File Database
   if (strcmp(argv[1],"File") == 0) {
     if (argc < 3) {
-      cerr << "WARNING database File fileName? ";
+      opserr << "WARNING database File fileName? ";
       return TCL_ERROR;
     }    
 
@@ -114,7 +113,7 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv,
   // a MySQL Database
   else if (strcmp(argv[1],"MySQL") == 0) {
     if (argc < 3) {
-      cerr << "WARNING database MySql fileName? ";
+      opserr << "WARNING database MySql fileName? ";
       return TCL_ERROR;
     }    
 
@@ -130,7 +129,7 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv,
   // a BerkeleyDB database
   else  if (strcmp(argv[1],"BerkeleyDB") == 0) {
     if (argc < 3) {
-      cerr << "WARNING database BerkeleyDB fileName? ";
+      opserr << "WARNING database BerkeleyDB fileName? ";
       return TCL_ERROR;
     }    
 
@@ -145,14 +144,14 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv,
 
   // no recorder type specified yet exists
   else {
-    cerr << "WARNING No database type exists ";
-    cerr << "for database of type:" << argv[1] << "valid database types File, BerkeleyDB and MySQL\n";
+    opserr << "WARNING No database type exists ";
+    opserr << "for database of type:" << argv[1] << "valid database types File, BerkeleyDB and MySQL\n";
     return TCL_ERROR;
   }    
 
   // check we instantiated a database .. if not ran out of memory
   if (theDatabase == 0) {
-    cerr << "WARNING ran out of memory - database " << argv[1]<< endl;
+    opserr << "WARNING ran out of memory - database " << argv[1]<< endln;
     return TCL_ERROR;
   } 
 
@@ -169,25 +168,25 @@ save(ClientData clientData, Tcl_Interp *interp, int argc,
 {
 
   if (theDatabase == 0) {
-    cerr << "WARNING: save - no database has been constructed\n";
+    opserr << "WARNING: save - no database has been constructed\n";
     return TCL_OK;
   }
 
      // make sure at least one other argument to contain type of system
     if (argc < 2) {
-      cerr << "WARNING save no commit tag - want save commitTag?";
+      opserr << "WARNING save no commit tag - want save commitTag?";
       return TCL_OK;
     }    
 
     // check argv[1] for commitTag
     int commitTag;
     if (Tcl_GetInt(interp, argv[1], &commitTag) != TCL_OK) {
-      cerr << "WARNING - save could not read commitTag " << argv[1] << endl;
+      opserr << "WARNING - save could not read commitTag " << argv[1] << endln;
       return TCL_OK;	
     }	
 
     if (theDatabase->commitState(commitTag) < 0) {
-      cerr << "WARNING - database failed to commitState \n";
+      opserr << "WARNING - database failed to commitState \n";
       return TCL_ERROR;
     }
     
@@ -201,25 +200,25 @@ restore(ClientData clientData, Tcl_Interp *interp, int argc,
 {
 
   if (theDatabase == 0) {
-    cerr << "WARNING: restore - no database has been constructed\n";
+    opserr << "WARNING: restore - no database has been constructed\n";
     return TCL_OK;
   }
 
      // make sure at least one other argument to contain type of system
     if (argc < 2) {
-      cerr << "WARNING restore no commit tag - want restore commitTag?";
+      opserr << "WARNING restore no commit tag - want restore commitTag?";
       return TCL_OK;
     }    
 
     // check argv[1] for commitTag
     int commitTag;
     if (Tcl_GetInt(interp, argv[1], &commitTag) != TCL_OK) {
-      cerr << "WARNING - restore could not read commitTag " << argv[1] << endl;
+      opserr << "WARNING - restore could not read commitTag " << argv[1] << endln;
       return TCL_OK;	
     }	
 
     if (theDatabase->restoreState(commitTag) < 0) {
-      cerr << "WARNING - database failed to restoreState \n";
+      opserr << "WARNING - database failed to restoreState \n";
       return TCL_ERROR;
     }
     

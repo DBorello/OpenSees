@@ -17,7 +17,7 @@ public:
 	
 	double getTrialPlasticStiffness();
     PlasticHardeningMaterial *getCopy(void);
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
 
   private:
   double Kp0;

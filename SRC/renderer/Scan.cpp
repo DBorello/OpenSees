@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/Scan.cpp,v $
                                                                         
                                                                         
@@ -76,7 +76,7 @@ ScanLineConverter::update(void)
 	     delete [] zBuffer;
 	 zBuffer = new float[size];
        if (zBuffer == 0) {
-	 cerr << "ScanLineConverter::update() - out of memory\n";
+	 opserr << "ScanLineConverter::update() - out of memory\n";
 	 return -1;
        }
        sizeBuffer = size;

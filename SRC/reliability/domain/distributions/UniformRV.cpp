@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:58 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/UniformRV.cpp,v $
 
 
@@ -33,6 +33,7 @@
 //			haukaas 06/01 (made part of official OpenSees)
 //
 
+#include <OPS_Globals.h>
 #include <UniformRV.h>
 #include <math.h>
 
@@ -99,7 +100,7 @@ UniformRV::~UniformRV()
 
 
 void
-UniformRV::Print(ostream &s, int flag)
+UniformRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -173,5 +174,5 @@ UniformRV::getStartValue()
 
 double UniformRV::getParameter1()  {return a;}
 double UniformRV::getParameter2()  {return b;}
-double UniformRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double UniformRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double UniformRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double UniformRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}

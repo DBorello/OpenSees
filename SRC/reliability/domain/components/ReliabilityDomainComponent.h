@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:03 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomainComponent.h,v $
 
 
@@ -47,7 +47,7 @@ public:
     virtual ~ReliabilityDomainComponent();
 	virtual void setReliabilityDomain(ReliabilityDomain *theReliabilityDomain);
     virtual ReliabilityDomain *getReliabilityDomain(void) const;
-    virtual void Print(ostream &s, int flag =0) =0;       
+    virtual void Print(OPS_Stream &s, int flag =0) =0;       
 
 protected:
     ReliabilityDomainComponent(int tag, int classTag);

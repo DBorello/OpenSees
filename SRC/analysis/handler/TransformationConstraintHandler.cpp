@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-10-04 19:55:27 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -89,8 +89,8 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
     Integrator *theIntegrator = this->getIntegratorPtr();    
     
     if ((theDomain == 0) || (theModel == 0) || (theIntegrator == 0)) {
-	cerr << "WARNING TransformationConstraintHandler::handle() - ";
-	cerr << " setLinks() has not been called\n";
+	opserr << "WARNING TransformationConstraintHandler::handle() - ";
+	opserr << " setLinks() has not been called\n";
 	return -1;
     }
     
@@ -111,9 +111,9 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 
     // create an array for the FE_elements and zero it
     if ((numFE <= 0) || ((theFEs  = new FE_Element *[numFE]) == 0)) {
-	cerr << "WARNING TransformationConstraintHandler::handle() - ";
-        cerr << "ran out of memory for FE_elements"; 
-	cerr << " array of size " << numFE << endl;
+	opserr << "WARNING TransformationConstraintHandler::handle() - ";
+        opserr << "ran out of memory for FE_elements"; 
+	opserr << " array of size " << numFE << endln;
 	return -2;
     }
     int i;
@@ -121,9 +121,9 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 
     // create an array for the DOF_Groups and zero it
     if ((numDOF <= 0) || ((theDOFs = new DOF_Group *[numDOF]) == 0)) {
-	cerr << "WARNING TransformationConstraintHandler::handle() - ";
-        cerr << "ran out of memory for DOF_Groups";
-	cerr << " array of size " << numDOF << endl;
+	opserr << "WARNING TransformationConstraintHandler::handle() - ";
+        opserr << "ran out of memory for DOF_Groups";
+	opserr << " array of size " << numDOF << endln;
 	return -3;    
     }    
     for (i=0; i<numDOF; i++) theDOFs[i] = 0;
@@ -135,9 +135,9 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	constrainedNodesMP = new ID(numMPConstraints);
 	mps = new MP_Constraint *[numMPConstraints];
 	if (mps == 0) {
-	    cerr << "WARNING TransformationConstraintHandler::handle() - ";
-	    cerr << "ran out of memory for MP_Constraints"; 
-	    cerr << " array of size " << numMPConstraints << endl;
+	    opserr << "WARNING TransformationConstraintHandler::handle() - ";
+	    opserr << "ran out of memory for MP_Constraints"; 
+	    opserr << " array of size " << numMPConstraints << endln;
 	    if (constrainedNodesMP != 0) delete constrainedNodesMP;
 	    return -3;	    
 	}
@@ -158,9 +158,9 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	constrainedNodesSP = new ID(numSPConstraints);
 	sps = new SP_Constraint *[numSPConstraints];
 	if (sps == 0) {
-	    cerr << "WARNING TransformationConstraintHandler::handle() - ";
-	    cerr << "ran out of memory for SP_Constraints"; 
-	    cerr << " array of size " << numSPConstraints << endl;
+	    opserr << "WARNING TransformationConstraintHandler::handle() - ";
+	    opserr << "ran out of memory for SP_Constraints"; 
+	    opserr << " array of size " << numSPConstraints << endln;
 	    if (constrainedNodesMP != 0) delete constrainedNodesMP;
 	    if (constrainedNodesSP != 0) delete constrainedNodesSP;
 	    if (mps != 0) delete [] mps;
@@ -253,9 +253,9 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	// create an ordinary DOF_Group object if no dof constrained
 	if (createdDOF == 0) {
 	    if ((dofPtr = new DOF_Group(numDofGrp++, nodPtr)) == 0) {
-		cerr << "WARNING TransformationConstraintHandler::handle() ";
-		cerr << "- ran out of memory";
-		cerr << " creating DOF_Group " << i << endl;	
+		opserr << "WARNING TransformationConstraintHandler::handle() ";
+		opserr << "- ran out of memory";
+		opserr << " creating DOF_Group " << i << endln;	
 		if (constrainedNodesMP != 0) delete constrainedNodesMP;
 		if (constrainedNodesSP != 0) delete constrainedNodesSP;
 		if (mps != 0) delete [] mps;
@@ -268,7 +268,7 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	}
 	
 	if (dofPtr == 0) 
-	  cerr << "TransformationConstraintHandler::handle() - error in logic\n";
+	  opserr << "TransformationConstraintHandler::handle() - error in logic\n";
 	    
 	nodPtr->setDOF_GroupPtr(dofPtr);
 	theModel->addDOF_Group(dofPtr);
@@ -307,9 +307,9 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	// if constrained Transformation otherwise normal FE_Element
 	if (isConstrainedNode == 0) {
 	    if ((fePtr = new FE_Element(elePtr)) == 0) {
-		cerr << "WARNING TransformationConstraintHandler::handle()";
-		cerr << " - ran out of memory";
-		cerr << " creating FE_Element " << elePtr->getTag() << endl; 
+		opserr << "WARNING TransformationConstraintHandler::handle()";
+		opserr << " - ran out of memory";
+		opserr << " creating FE_Element " << elePtr->getTag() << endln; 
 		if (constrainedNodesMP != 0) delete constrainedNodesMP;
 		if (constrainedNodesSP != 0) delete constrainedNodesSP;
 		if (mps != 0) delete [] mps;
@@ -318,9 +318,9 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 	    }		
 	} else {
 	    if ((fePtr = new TransformationFE(elePtr, *this)) == 0) {		
-		cerr << "WARNING TransformationConstraintHandler::handle()";
-		cerr << " - ran out of memory";
-		cerr << " creating TransformationFE " << elePtr->getTag() << endl; 
+		opserr << "WARNING TransformationConstraintHandler::handle()";
+		opserr << " - ran out of memory";
+		opserr << " creating TransformationFE " << elePtr->getTag() << endln; 
 		if (constrainedNodesMP != 0) delete constrainedNodesMP;
 		if (constrainedNodesSP != 0) delete constrainedNodesSP;
 		if (mps != 0) delete [] mps;
@@ -357,9 +357,9 @@ TransformationConstraintHandler::handle(const ID *nodesLast)
 			dofPtr->setID(j,-3);
 			count3++;
 		    } else {
-			cerr << "WARNING TransformationConstraintHandler::handle() ";
-			cerr << " - boundary sp constraint in subdomain";
-			cerr << " this should not be - results suspect \n";
+			opserr << "WARNING TransformationConstraintHandler::handle() ";
+			opserr << " - boundary sp constraint in subdomain";
+			opserr << " this should not be - results suspect \n";
 			if (constrainedNodesMP != 0) delete constrainedNodesMP;
 			if (constrainedNodesSP != 0) delete constrainedNodesSP;
 			if (mps != 0) delete [] mps;

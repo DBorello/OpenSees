@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/RigidBeam.cpp,v $
                                                                         
                                                                         
@@ -30,7 +30,7 @@
 //
 // Purpose: This file contains the class implementation for RigidBeam.
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <Domain.h>
 #include <Node.h>
 #include <MP_Constraint.h>
@@ -45,14 +45,12 @@ RigidBeam::RigidBeam(Domain &theDomain, int nR, int nC, int startMPtag) {
     // get a pointer to the retained and constrained nodes - make sure they exist
     Node *nodeR = theDomain.getNode(nR);
     if (nodeR == 0) {
-      g3ErrorHandler->warning("RigidBeam::RigidBeam - %s %d %s\n",
-			      "retained Node", nR, "not in domain");
+      opserr << "RigidBeam::RigidBeam - retained Node" <<  nR <<  "not in domain\n";
       return;
     }
     Node *nodeC = theDomain.getNode(nC);
     if (nodeR == 0) {
-      g3ErrorHandler->warning("RigidBeam::RigidBeam - %s %d %s\n",
-			      "constrained Node", nC, "not in domain");
+      opserr << "RigidBeam::RigidBeam - constrained Node" <<  nC <<  "not in domain\n";
       return;
     }
 
@@ -62,23 +60,23 @@ RigidBeam::RigidBeam(Domain &theDomain, int nR, int nC, int startMPtag) {
     int dimR = crdR.Size();
     int dimC = crdC.Size();
     if (dimR != dimC) {
-      g3ErrorHandler->warning("RigidBeam::RigidBeam - mismatch in dimension %s %d %s %d\n",
-			      "between constrained Node", nC, "and Retained node",nR);
+      opserr << "RigidBeam::RigidBeam - mismatch in dimension "  <<
+	"between constrained Node " <<  nC <<  " and Retained node" << nR << endln;
       return;
     }
     
     // check the number of dof at each node is the same
     int numDOF = nodeR->getNumberDOF();
     if (numDOF != nodeC->getNumberDOF()){ 
-      g3ErrorHandler->warning("RigidBeam::RigidBeam - mismatch in numDOF %s %d %s %d\n",
-			      "between constrained Node", nC, "and Retained node",nR);
+      opserr << "RigidBeam::RigidBeam - mismatch in numDOF "  <<
+	"between constrained Node " <<  nC <<  " and Retained node" << nR << endln;
       return;
     }
 
     // check the number of dof at the nodes >= dimension of problem
     if(numDOF < dimR){    
-      g3ErrorHandler->warning("RigidBeam::RigidBeam - numDOF at nodes %d %d %s\n",
-			      nR, nC, "must be >= dimension of problem");
+      opserr << "RigidBeam::RigidBeam - numDOF at nodes " << 
+	nR << " and " <<  nC <<  "must be >= dimension of problem\n";
       return;
     }
 
@@ -119,8 +117,8 @@ RigidBeam::RigidBeam(Domain &theDomain, int nR, int nC, int startMPtag) {
 	mat(1,3) = -deltaZ;
 	mat(2,3) = deltaY;
       } else { // not valid
-	g3ErrorHandler->warning("RigidBeam::RigidBeam -  for nodes %d %d %s\n",
-				nR, nC, "nodes do not have valid numDOF for their dimension");
+	opserr << "RigidBeam::RigidBeam -  for nodes " << 
+	  nR << "and " << nC <<  "nodes do not have valid numDOF for their dimension\n";
 	return;
       }
 	
@@ -130,13 +128,11 @@ RigidBeam::RigidBeam(Domain &theDomain, int nR, int nC, int startMPtag) {
     MP_Constraint *newC = new MP_Constraint(startMPtag+1, nR, nC, 
 					    mat, id, id);
     if (newC == 0) {
-      g3ErrorHandler->warning("RigidBeam::RigidBeam - for nodes %d %d, out of memory\n",
-			      nC, nR);
+      opserr << "RigidBeam::RigidBeam - for nodes " << nC << " and " << nR << ", out of memory\n";
     } else {
       // add the constraint to the domain
       if (theDomain.addMP_Constraint(newC) == false) {
-	g3ErrorHandler->warning("RigidBeam::RigidBeam - for nodes %d %d, could not add to domain\n",
-				nC, nR);
+	opserr << "RigidBeam::RigidBeam - for nodes " << nC << " and " << nR << ", could not add to domain\n";
 	delete newC;
       }
     }

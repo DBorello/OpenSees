@@ -47,7 +47,7 @@ response quantities are chosen as approximate solution quantities. \\
 \indent\indent {\em int sendSelf(int commitTag, Channel \&theChannel);}\\
 \indent\indent {\em int recvSelf(int commitTag, Channel \&theChannel, 
 FEM\_ObjectBroker \&theBroker);}\\ 
-\indent\indent {\em int Print(ostream \&s, int flag =0);} \\
+\indent\indent {\em int Print(OPS_Stream \&s, int flag =0);} \\
 
 
 \noindent {\bf Constructor} \\ 
@@ -88,5 +88,5 @@ Does  nothing. Returns 0. \\
 \&theBroker);}\\ 
 Does nothing. Returns 0. \\
 
-{\em int Print(ostream \&s, int flag =0);} \\
+{\em int Print(OPS_Stream \&s, int flag =0);} \\
 Sends the string 'Linear Algorithm' to the stream.

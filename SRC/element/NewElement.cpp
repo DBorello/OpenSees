@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-16 21:09:58 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/NewElement.cpp,v $
                                                                         
 // Written: fmk 
@@ -38,7 +38,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Renderer.h>
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 
 static int NUM_NODE =2;
@@ -108,7 +108,7 @@ NewElement::commitState()
   // call the base class method
   retVal = this->Element::commitState();
   if (retVal < 0) {
-    cerr << "NewElement::commitState() - failed in base class\n";
+    opserr << "NewElement::commitState() - failed in base class\n";
     return retVal;
   }
 
@@ -199,7 +199,7 @@ NewElement::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
 void
-NewElement::Print(ostream &s, int flag)
+NewElement::Print(OPS_Stream &s, int flag)
 {
   return;
 }

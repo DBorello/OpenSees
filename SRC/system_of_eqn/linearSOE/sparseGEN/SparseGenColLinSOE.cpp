@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-12-07 00:17:53 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:02:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.cpp,v $
                                                                         
                                                                         
@@ -30,8 +30,6 @@
 // Revision: A
 //
 // Description: This file contains the implementation for SparseGenColLinSOE
-
-#include <fstream.h>
 
 #include <SparseGenColLinSOE.h>
 #include <SparseGenColLinSolver.h>
@@ -68,9 +66,9 @@ SparseGenColLinSOE::SparseGenColLinSOE(int N, int NNZ, int *ColStartA, int *RowA
     A = new double[NNZ];
 	
     if (A == 0) {
-	cerr << "WARNING :SparseGenColLinSOE::SparseGenColLinSOE :";
-	cerr << " ran out of memory for A (NNZ) (";
-	cerr << NNZ << ") \n";
+	opserr << "WARNING :SparseGenColLinSOE::SparseGenColLinSOE :";
+	opserr << " ran out of memory for A (NNZ) (";
+	opserr << NNZ << ") \n";
 	size = 0; nnz = 0;
     } else {
 	// zero the matrix
@@ -82,9 +80,9 @@ SparseGenColLinSOE::SparseGenColLinSOE(int N, int NNZ, int *ColStartA, int *RowA
 	X = new double[size];
 	
 	if (B == 0 || X == 0) {
-	    cerr << "WARNING :SparseGenColLinSOE::SparseGenColLinSOE :";
-	    cerr << " ran out of memory for vectors (size) (";
-	    cerr << size << ") \n";
+	    opserr << "WARNING :SparseGenColLinSOE::SparseGenColLinSOE :";
+	    opserr << " ran out of memory for vectors (size) (";
+	    opserr << size << ") \n";
 	    size = 0; Bsize = 0; NNZ = 0;
 	} else {
 	    Bsize = size;
@@ -103,8 +101,8 @@ SparseGenColLinSOE::SparseGenColLinSOE(int N, int NNZ, int *ColStartA, int *RowA
     
     // invoke setSize() on the Solver        
     if (the_Solver.setSize() < 0) {
-	cerr << "WARNING :SparseGenColLinSOE::SparseGenColLinSOE :";
-	cerr << " solver failed setSize() in constructor\n";
+	opserr << "WARNING :SparseGenColLinSOE::SparseGenColLinSOE :";
+	opserr << " solver failed setSize() in constructor\n";
     }    
 }
 
@@ -155,9 +153,9 @@ SparseGenColLinSOE::setSize(Graph &theGraph)
 	rowA = new int[newNNZ];
 	
         if (A == 0 || rowA == 0) {
-            cerr << "WARNING SparseGenColLinSOE::SparseGenColLinSOE :";
-	    cerr << " ran out of memory for A and rowA with nnz = ";
-	    cerr << newNNZ << " \n";
+            opserr << "WARNING SparseGenColLinSOE::SparseGenColLinSOE :";
+	    opserr << " ran out of memory for A and rowA with nnz = ";
+	    opserr << newNNZ << " \n";
 	    size = 0; Asize = 0; nnz = 0;
 	    result =  -1;
         } 
@@ -184,9 +182,9 @@ SparseGenColLinSOE::setSize(Graph &theGraph)
 	colStartA = new int[size+1]; 
 	
         if (B == 0 || X == 0 || colStartA == 0) {
-            cerr << "WARNING SparseGenColLinSOE::SparseGenColLinSOE :";
-	    cerr << " ran out of memory for vectors (size) (";
-	    cerr << size << ") \n";
+            opserr << "WARNING SparseGenColLinSOE::SparseGenColLinSOE :";
+	    opserr << " ran out of memory for vectors (size) (";
+	    opserr << size << ") \n";
 	    size = 0; Bsize = 0;
 	    result =  -1;
         }
@@ -221,8 +219,8 @@ SparseGenColLinSOE::setSize(Graph &theGraph)
 
 	theVertex = theGraph.getVertexPtr(a);
 	if (theVertex == 0) {
-	  cerr << "WARNING:SparseGenColLinSOE::setSize :";
-	  cerr << " vertex " << a << " not in graph! - size set to 0\n";
+	  opserr << "WARNING:SparseGenColLinSOE::setSize :";
+	  opserr << " vertex " << a << " not in graph! - size set to 0\n";
 	  size = 0;
 	  return -1;
 	}
@@ -260,8 +258,8 @@ SparseGenColLinSOE::setSize(Graph &theGraph)
     
 
     /**************** FOR DISPLAYING SPARSITY IN MATLAB
-    cerr << "SparseGenColLinSOE::setSize size: " << size;
-    cerr << " nnz: " << nnz << endl;
+    opserr << "SparseGenColLinSOE::setSize size: " << size;
+    opserr << " nnz: " << nnz << endln;
 
     ofstream idata("i.dat");
     ofstream jdata("j.dat");
@@ -269,8 +267,8 @@ SparseGenColLinSOE::setSize(Graph &theGraph)
       int colStart = colStartA[ii];
       int colEnd = colStartA[ii+1] - 1;
       for (int jj=colStart; jj<=colEnd; jj++) {
-	idata << rowA[jj]+1 << endl;
-	jdata << ii+1 << endl;
+	idata << rowA[jj]+1 << endln;
+	jdata << ii+1 << endln;
       }
     }
     *****************************************************/
@@ -280,8 +278,8 @@ SparseGenColLinSOE::setSize(Graph &theGraph)
     LinearSOESolver *the_Solver = this->getSolver();
     int solverOK = the_Solver->setSize();
     if (solverOK < 0) {
-	cerr << "WARNING:SparseGenColLinSOE::setSize :";
-	cerr << " solver failed setSize()\n";
+	opserr << "WARNING:SparseGenColLinSOE::setSize :";
+	opserr << " solver failed setSize()\n";
 	return solverOK;
     }    
     return result;
@@ -298,8 +296,8 @@ SparseGenColLinSOE::addA(const Matrix &m, const ID &id, double fact)
     
     // check that m and id are of similar size
     if (idSize != m.noRows() && idSize != m.noCols()) {
-	cerr << "SparseGenColLinSOE::addA() ";
-	cerr << " - Matrix and ID not of similar sizes\n";
+	opserr << "SparseGenColLinSOE::addA() ";
+	opserr << " - Matrix and ID not of similar sizes\n";
 	return -1;
     }
     
@@ -355,8 +353,8 @@ SparseGenColLinSOE::addB(const Vector &v, const ID &id, double fact)
     int idSize = id.Size();    
     // check that m and id are of similar size
     if (idSize != v.Size() ) {
-	cerr << "SparseGenColLinSOE::addB() ";
-	cerr << " - Vector and ID not of similar sizes\n";
+	opserr << "SparseGenColLinSOE::addB() ";
+	opserr << " - Vector and ID not of similar sizes\n";
 	return -1;
     }    
 
@@ -392,8 +390,8 @@ SparseGenColLinSOE::setB(const Vector &v, double fact)
 
 
     if (v.Size() != size) {
-	cerr << "WARNING BandGenLinSOE::setB() -";
-	cerr << " incomptable sizes " << size << " and " << v.Size() << endl;
+	opserr << "WARNING BandGenLinSOE::setB() -";
+	opserr << " incomptable sizes " << size << " and " << v.Size() << endln;
 	return -1;
     }
     
@@ -449,7 +447,7 @@ const Vector &
 SparseGenColLinSOE::getX(void)
 {
     if (vectX == 0) {
-	cerr << "FATAL SparseGenColLinSOE::getX - vectX == 0";
+	opserr << "FATAL SparseGenColLinSOE::getX - vectX == 0";
 	exit(-1);
     }
     return *vectX;
@@ -459,7 +457,7 @@ const Vector &
 SparseGenColLinSOE::getB(void)
 {
     if (vectB == 0) {
-	cerr << "FATAL SparseGenColLinSOE::getB - vectB == 0";
+	opserr << "FATAL SparseGenColLinSOE::getB - vectB == 0";
 	exit(-1);
     }        
     return *vectB;
@@ -486,8 +484,8 @@ SparseGenColLinSOE::setSparseGenColSolver(SparseGenColLinSolver &newSolver)
     if (size != 0) {
 	int solverOK = newSolver.setSize();
 	if (solverOK < 0) {
-	    cerr << "WARNING:SparseGenColLinSOE::setSolver :";
-	    cerr << "the new solver could not setSeize() - staying with old\n";
+	    opserr << "WARNING:SparseGenColLinSOE::setSolver :";
+	    opserr << "the new solver could not setSeize() - staying with old\n";
 	    return -1;
 	}
     }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-12 21:54:58 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/matrixutil/MatrixUtil.cpp,v $
                                                                         
                                                                         
@@ -30,22 +30,28 @@
 
 double invert2by2Matrix(const Matrix &a, Matrix &b)
 {
-   double det = a(0,0)*a(1,1)-a(0,1)*a(1,0);
+  return a.Invert(b);
 
-   if (det != 0.0) {
-      b(0,0) =  a(1,1)/det;
-      b(1,1) =  a(0,0)/det;
-      b(1,0) = -a(0,1)/det;
-      b(0,1) = -a(1,0)/det;
-   }
-        
-   return det;
+  /*
+    double det = a(0,0)*a(1,1)-a(0,1)*a(1,0);
+    
+    if (det != 0.0) {
+    b(0,0) =  a(1,1)/det;
+    b(1,1) =  a(0,0)/det;
+    b(1,0) = -a(0,1)/det;
+    b(0,1) = -a(1,0)/det;
+    }
+    return det;
+  */
 }
 
 
 
 double invert3by3Matrix(const Matrix &a, Matrix &b)
 {
+  return a.Invert(b);
+
+    /*
    double a00, a01, a02, a11, a12, a22;
    double a01a01, a02a02, a12a12, a00a11, a01a02;
    double det;
@@ -76,6 +82,7 @@ double invert3by3Matrix(const Matrix &a, Matrix &b)
       b(2,2) = (a00a11  - a01a01 )/det;
    }
    return det;
+    */
 }
       
 
@@ -83,27 +90,7 @@ double invert3by3Matrix(const Matrix &a, Matrix &b)
       
 void invertMatrix(int n, const Matrix &a, Matrix &b)
 {
-
-   Matrix I(n,n);
-   for (int i=0; i<n; i++) I(i,i) = 1.0;
-   a.Solve(I,b);
-   
-   /*
-   int i, j;      
-   Vector IColumn(n);
-   Vector bColumn(n);
- 
-   for (i = 0; i < n; i++)
-   {
-      IColumn.Zero();
-      IColumn(i) = 1;
- 
-      bColumn = IColumn/a;
-
-      for (j = 0; j < n; j++)
-         b(j,i) = bColumn(j);
-   }
-   */
+  a.Invert(b);
 }
 
 
@@ -134,7 +121,7 @@ void getCBDIinfluenceMatrix(int nIntegrPts, const Matrix &xi_pt, double L, Matri
 
    //invertMatrix(nIntegrPts, G, Ginv);
    if (G.Solve(I,Ginv) < 0)
-      g3ErrorHandler->warning("LargeDispBeamCol3d::getCBDIinfluenceMatrix() - could not invert G\n");
+     opserr << "LargeDispBeamCol3d::getCBDIinfluenceMatrix() - could not invert G\n";
       
    // ls = l * Ginv * (L*L);
    ls.addMatrixProduct(0.0, l, Ginv, L*L);

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-20 00:37:26 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoRule.cpp,v $
 
 
@@ -87,8 +87,8 @@ ArmijoRule::computeStepSize(Vector u,
 	// Check that the norm of the gradient is not zero
 	double gradNorm = grad_G.Norm();
 	if (gradNorm == 0.0) {
-		cerr << "ArmijoRule::computeStepSize() - the norm " << endl
-			<< " of the gradient is zero. " << endl;
+		opserr << "ArmijoRule::computeStepSize() - the norm " << endln
+			<< " of the gradient is zero. " << endln;
 		return -1;
 	}
 
@@ -111,14 +111,14 @@ ArmijoRule::computeStepSize(Vector u,
 	// Transform the trial point into original space
 	double result = theXuTransformation->set_u(trial_u);
 	if (result < 0) {
-		cerr << "ArmijoRule::computeStepSize() - could not set " << endl
-			<< " vector u in the xu-transformation. " << endl;
+		opserr << "ArmijoRule::computeStepSize() - could not set " << endln
+			<< " vector u in the xu-transformation. " << endln;
 		return -1;
 	}
 	result = theXuTransformation->transform_u_to_x();
 	if (result < 0) {
-		cerr << "ArmijoRule::computeStepSize() - could not  " << endl
-			<< " transform u to x. " << endl;
+		opserr << "ArmijoRule::computeStepSize() - could not  " << endln
+			<< " transform u to x. " << endln;
 		return -1;
 	}
 	Vector trial_x = theXuTransformation->get_x();
@@ -127,8 +127,8 @@ ArmijoRule::computeStepSize(Vector u,
 	// Evaluate the limit-state function
 	result = theGFunEvaluator->evaluate_g(trial_x);
 	if (result < 0) {
-		cerr << "ArmijoRule::computeStepSize() - could not  " << endl
-			<< " evaluate the limit-state function. " << endl;
+		opserr << "ArmijoRule::computeStepSize() - could not  " << endln
+			<< " evaluate the limit-state function. " << endln;
 		return -1;
 	}
 	double trial_G = theGFunEvaluator->get_g();
@@ -145,7 +145,7 @@ ArmijoRule::computeStepSize(Vector u,
 
 		
 		// Notify user that step sizes are being reduced
-		cerr << "... the step size is being reduced by the Armijo rule ..." << endl;
+		opserr << "... the step size is being reduced by the Armijo rule ..." << endln;
 
 		// Update merit function value
 		merit = merit_new;
@@ -159,14 +159,14 @@ ArmijoRule::computeStepSize(Vector u,
 		// Transform the trial point into original space
 		double result = theXuTransformation->set_u(trial_u);
 		if (result < 0) {
-			cerr << "ArmijoRule::computeStepSize() - could not set " << endl
-				<< " vector u in the xu-transformation. " << endl;
+			opserr << "ArmijoRule::computeStepSize() - could not set " << endln
+				<< " vector u in the xu-transformation. " << endln;
 			return -1;
 		}
 		result = theXuTransformation->transform_u_to_x();
 		if (result < 0) {
-			cerr << "ArmijoRule::computeStepSize() - could not  " << endl
-				<< " transform u to x. " << endl;
+			opserr << "ArmijoRule::computeStepSize() - could not  " << endln
+				<< " transform u to x. " << endln;
 			return -1;
 		}
 		Vector trial_x = theXuTransformation->get_x();
@@ -175,8 +175,8 @@ ArmijoRule::computeStepSize(Vector u,
 		// Evaluate the limit-state function
 		result = theGFunEvaluator->evaluate_g(trial_x);
 		if (result < 0) {
-			cerr << "ArmijoRule::computeStepSize() - could not  " << endl
-				<< " evaluate the limit-state function. " << endl;
+			opserr << "ArmijoRule::computeStepSize() - could not  " << endln
+				<< " evaluate the limit-state function. " << endln;
 			return -1;
 		}
 		double trial_G = theGFunEvaluator->get_g();
@@ -188,8 +188,8 @@ ArmijoRule::computeStepSize(Vector u,
 
 		// Report to user if the step reduction was not successful
 		if ( (i==5) && (merit_new > merit) ) {
-			cerr << "... tried to half step size " << maxNumReductions 
-				<< " times before continuing ..." << endl;
+			opserr << "... tried to half step size " << maxNumReductions 
+				<< " times before continuing ..." << endln;
 		}
 
 		

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-09-05 22:50:18 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/partitioner/DomainPartitioner.cpp,v $
                                                                         
                                                                         
@@ -72,8 +72,8 @@ DomainPartitioner::DomainPartitioner(GraphPartitioner &theGraphPartitioner)
     primes(1) = 2; primes(2) = 3; primes(3) = 5; primes(4) = 7; primes(5) = 11;
     primes(6) = 13; primes(7) = 17; primes(8) = 23; primes(9) = 31;
 
-    cerr << "DomainPartitioner::DomainPartitioner - ";
-    cerr << "does not deal with ele loads or mp_constraints yet\n";
+    opserr << "DomainPartitioner::DomainPartitioner - ";
+    opserr << "does not deal with ele loads or mp_constraints yet\n";
 }    
 
 DomainPartitioner::DomainPartitioner(GraphPartitioner &theGraphPartitioner,
@@ -112,8 +112,8 @@ DomainPartitioner::partition(int numParts)
     for (int i=1; i<=numParts; i++) {
 	Subdomain *subdomainPtr = myDomain->getSubdomainPtr(i);
 	if (subdomainPtr == 0) {
-	    cerr << "DomainPartitioner::partition - No Subdomain: ";
-	    cerr << i << " exists\n";
+	    opserr << "DomainPartitioner::partition - No Subdomain: ";
+	    opserr << i << " exists\n";
 	    return -1;
 	}
     }
@@ -124,17 +124,17 @@ DomainPartitioner::partition(int numParts)
     // we get the ele graph from the domain and partition it
     Graph &theEleGraph = myDomain->getElementGraph();
     
-    //    timer.pause(); cerr << "partition:get eleGraph " << timer.getReal() << timer.getCPU() << endl;
+    //    timer.pause(); opserr << "partition:get eleGraph " << timer.getReal() << timer.getCPU() << endln;
     
     int theError = thePartitioner.partition(theEleGraph,numParts);
     if (theError < 0) {
-	cerr << "DomainPartitioner::partition";
-	cerr << " - the graph partioner failed to partition the ";
-	cerr << "element graph\n";
+	opserr << "DomainPartitioner::partition";
+	opserr << " - the graph partioner failed to partition the ";
+	opserr << "element graph\n";
 	return -10+theError;
     }
 
-    //    timer.pause(); cerr << "partition:partition " << timer.getReal() << timer.getCPU() << endl;
+    //    timer.pause(); opserr << "partition:partition " << timer.getReal() << timer.getCPU() << endln;
     
     // we create empty graphs for the numParts subdomains,
     // in the graphs we place the vertices for the elements on the boundaries
@@ -147,8 +147,8 @@ DomainPartitioner::partition(int numParts)
 
     theBoundaryElements = new Graph * [numParts];
     if (theBoundaryElements == 0) {
-	cerr << "DomainPartitioner::partition(int numParts)";
-	cerr << " - ran out of memory\n";
+	opserr << "DomainPartitioner::partition(int numParts)";
+	opserr << " - ran out of memory\n";
 	numPartitions = 0;	
 	return -1;
     }
@@ -157,8 +157,8 @@ DomainPartitioner::partition(int numParts)
       theBoundaryElements[l] = new Graph(2048); // graphs can grow larger; just an estimate
 
 	if (theBoundaryElements[l] == 0) {
-	    cerr << "DomainPartitioner::partition(int numParts)";
-	    cerr << " - ran out of memory\n";
+	    opserr << "DomainPartitioner::partition(int numParts)";
+	    opserr << " - ran out of memory\n";
 	    numPartitions = 0;
 	    return -1;
 	}
@@ -171,8 +171,8 @@ DomainPartitioner::partition(int numParts)
     // will be added to and whether or not the node is a boundary node.
 
     if (numParts+1 >= primes.Size()) { // colors 1 through numParts 
-	cerr << "DomainPartitioner::partition(int numParts)";
-	cerr << " - primes is  not yet big enough and function not yet written\n";
+	opserr << "DomainPartitioner::partition(int numParts)";
+	opserr << " - primes is  not yet big enough and function not yet written\n";
 	return -1;
     }
     // we now iterate through the nodes to first determine 
@@ -190,8 +190,8 @@ DomainPartitioner::partition(int numParts)
     }
 
     if (minNodeTag < 0) {
-	    cerr << "DomainPartitioner::partition(int numParts)";
-	    cerr << " - minNodeTag < 0 \n";
+	    opserr << "DomainPartitioner::partition(int numParts)";
+	    opserr << " - minNodeTag < 0 \n";
 	    numPartitions = 0;
 	    return -1;	
     }
@@ -201,8 +201,8 @@ DomainPartitioner::partition(int numParts)
     
     nodePlace = new ID(maxNodeTag+1);
     if (nodePlace == 0 || nodePlace->Size() < maxNodeTag+1) {
-	cerr << "DomainPartitioner::partition(int numParts)";
-	cerr << " - ran out of memory\n";
+	opserr << "DomainPartitioner::partition(int numParts)";
+	opserr << " - ran out of memory\n";
 	numPartitions = 0;
 	return -1;
     }
@@ -263,7 +263,7 @@ DomainPartitioner::partition(int numParts)
         }
     }
 
-    //    timer.pause(); cerr << "partition:figure out nodes " << timer.getReal() << timer.getCPU() << endl;
+    //    timer.pause(); opserr << "partition:figure out nodes " << timer.getReal() << timer.getCPU() << endln;
     
     // we now add the nodes, by iterating through the nodes and for
     // each node determining if it is an internal or external node
@@ -324,7 +324,7 @@ DomainPartitioner::partition(int numParts)
 	if (loadPatternCopy == 0) {
 	  LoadPattern *newLoadPattern = theLoadPattern->getCopy();
 	  if (newLoadPattern == 0) {
-	    cerr << "DomaiPartitioner::partition - out of memory creating LoadPatterns\n";
+	    opserr << "DomaiPartitioner::partition - out of memory creating LoadPatterns\n";
 	    return -1;
 	  }
 	  theSubdomain->addLoadPattern(newLoadPattern);
@@ -396,7 +396,7 @@ DomainPartitioner::partition(int numParts)
     }
       
 
-    //    timer.pause(); cerr << "partition:add nodes " << timer.getReal() << timer.getCPU() << endl;
+    //    timer.pause(); opserr << "partition:add nodes " << timer.getReal() << timer.getCPU() << endln;
     
     // we now move the elements and any elemental Loads in the loadPatterns
     VertexIter &theVertices = theEleGraph.getVertices();
@@ -416,7 +416,7 @@ DomainPartitioner::partition(int numParts)
 	ElementalLoadIter &theLoads = theLoadPattern->getElementalLoads();
 	ElementalLoad *theLoad;
 	while ((theLoad = theLoads()) != 0) {
-	  cerr << "DomainPArtitioner::partition - REMOVE ELEMENTAL LOADS\n";
+	  opserr << "DomainPArtitioner::partition - REMOVE ELEMENTAL LOADS\n";
 	  /*
 	  if (theLoad->getElementTag() == eleTag)
 	    theLoadPattern->removeElementalLoad(theLoad->getTag());
@@ -426,7 +426,7 @@ DomainPartitioner::partition(int numParts)
       }
     }
     
-    // timer.pause(); cerr << "partition:add elements " << timer.getReal() << timer.getCPU() << endl;
+    // timer.pause(); opserr << "partition:add elements " << timer.getReal() << timer.getCPU() << endln;
 
     // add the single point constraints, only added if for an internal node in a subdomain
 
@@ -509,7 +509,7 @@ DomainPartitioner::partition(int numParts)
 	myDomain->invokeChangeOnAnalysis();
     ****************************************************************/
 
-    //    timer.pause(); cerr << "partition:domain change " << timer.getReal() << timer.getCPU() << endl;
+    //    timer.pause(); opserr << "partition:domain change " << timer.getReal() << timer.getCPU() << endln;
 
     // we are done
     partitionFlag = true;
@@ -526,8 +526,8 @@ DomainPartitioner::balance(Graph &theWeightedPGraph)
 
     // check that the object did the partitioning
     if (partitionFlag == false) {
-	cerr << "DomainPartitioner::balance(const Vector &load)";
-	cerr << " - not partitioned or DomainPartitioner did not partition\n";
+	opserr << "DomainPartitioner::balance(const Vector &load)";
+	opserr << " - not partitioned or DomainPartitioner did not partition\n";
 	return -1;
     }
 
@@ -539,7 +539,7 @@ DomainPartitioner::balance(Graph &theWeightedPGraph)
 	// call on the LoadBalancer to partition		
 	res = theBalancer->balance(theWeightedPGraph);
 	theTimer.pause();
-	cerr << "DomainPartitioner::balance 1 real: " << theTimer.getReal() << endl;
+	opserr << "DomainPartitioner::balance 1 real: " << theTimer.getReal() << endln;
 	    
 	// now invoke domainChanged on Subdomains and PartitionedDomain
 	SubdomainIter &theSubDomains = myDomain->getSubdomains();
@@ -549,7 +549,7 @@ DomainPartitioner::balance(Graph &theWeightedPGraph)
 		theSubDomain->invokeChangeOnAnalysis();
 
 	theTimer.pause();
-	cerr << "DomainPartitioner::balance 1 real: " << theTimer.getReal() << endl;
+	opserr << "DomainPartitioner::balance 1 real: " << theTimer.getReal() << endln;
 
 	/************ up to analysis to determine if domain has changed
 	// we invoke change on the PartitionedDomain
@@ -557,7 +557,7 @@ DomainPartitioner::balance(Graph &theWeightedPGraph)
 	    myDomain->invokeChangeOnAnalysis();	    
 	    ******************/
 	theTimer.pause();
-	cerr << "DomainPartitioner::balance real: " << theTimer.getReal() << endl;
+	opserr << "DomainPartitioner::balance real: " << theTimer.getReal() << endln;
     }
 
     return res;
@@ -578,8 +578,8 @@ Graph &
 DomainPartitioner::getPartitionGraph(void)
 {
     if (myDomain == 0) {
-	cerr << "ERROR: DomainPartitioner::getPartitionGraph(void)";
-	cerr << " - No domain has been set";
+	opserr << "ERROR: DomainPartitioner::getPartitionGraph(void)";
+	opserr << " - No domain has been set";
 	exit(-1);
     }
     return myDomain->getSubdomainGraph();
@@ -589,8 +589,8 @@ Graph &
 DomainPartitioner::getColoredGraph(void)
 {
     if (myDomain == 0) {
-	cerr << "ERROR: DomainPartitioner::getPartitionGraph(void)";
-	cerr << " - No domain has been set";
+	opserr << "ERROR: DomainPartitioner::getPartitionGraph(void)";
+	opserr << " - No domain has been set";
 	exit(0);
     }
     
@@ -605,22 +605,22 @@ DomainPartitioner::swapVertex(int from, int to, int vertexTag,
   /**********************************************************************
     // check that the object did the partitioning
     if (partitionFlag == false) {
-	cerr << "DomainPartitioner::balance(const Vector &load)";
-	cerr << " - not partitioned or DomainPartitioner did not partition\n";
+	opserr << "DomainPartitioner::balance(const Vector &load)";
+	opserr << " - not partitioned or DomainPartitioner did not partition\n";
 	return -1;
     }
     
     // check that the subdomain exist in partitioned domain
     Subdomain *fromSubdomain = myDomain->getSubdomainPtr(from);
     if (fromSubdomain == 0) {
-	cerr << "DomainPartitioner::swapVertex - No from Subdomain: ";
-	cerr << from << " exists\n";
+	opserr << "DomainPartitioner::swapVertex - No from Subdomain: ";
+	opserr << from << " exists\n";
 	return -2;
     }
     Subdomain *toSubdomain = myDomain->getSubdomainPtr(to);
     if (toSubdomain == 0) {
-	cerr << "DomainPartitioner::swapVertex - No to Subdomain: ";
-	cerr << to << " exists\n";
+	opserr << "DomainPartitioner::swapVertex - No to Subdomain: ";
+	opserr << to << " exists\n";
 	return -3;
     }    
 
@@ -700,7 +700,7 @@ DomainPartitioner::swapVertex(int from, int to, int vertexTag,
 
 	(*nodePlace)(nodeTag) /= primeFrom;
 	nodesArray[i] = nodePtr;
-        // cerr << "DomainPartitioner::swapVertex -NODE " << *nodePtr;
+        // opserr << "DomainPartitioner::swapVertex -NODE " << *nodePtr;
 	// add back as external if still needed
 	if ((*nodePlace)(nodeTag)%primeFrom == 0)
 	    fromSubdomain->addExternalNode(nodePtr);
@@ -935,29 +935,29 @@ DomainPartitioner::swapBoundary(int from, int to, bool adjacentVertexNotInOther)
 			    
 {
   /***********************************************************************************
-    cerr << "DomainPartitioner::swapBoundary from " << from << "  to " << to << endl;
+    opserr << "DomainPartitioner::swapBoundary from " << from << "  to " << to << endln;
     Timer timer;
     timer.start();
 
     // check that the object did the partitioning
     if (partitionFlag == false) {
-	cerr << "DomainPartitioner::balance(const Vector &load)";
-	cerr << " - not partitioned or DomainPartitioner did not partition\n";
+	opserr << "DomainPartitioner::balance(const Vector &load)";
+	opserr << " - not partitioned or DomainPartitioner did not partition\n";
 	return -1;
     }
 
     // check that the subdomains exist in partitioned domain
     Subdomain *fromSubdomain = myDomain->getSubdomainPtr(from);
     if (fromSubdomain == 0) {
-	cerr << "DomainPartitioner::swapBoundary - No from Subdomain: ";
-	cerr << from << " exists\n";
+	opserr << "DomainPartitioner::swapBoundary - No from Subdomain: ";
+	opserr << from << " exists\n";
 	return -2;
     }
 
     Subdomain *toSubdomain = myDomain->getSubdomainPtr(to);
     if (toSubdomain == 0) {
-	cerr << "DomainPartitioner::swapBoundary - No to Subdomain: ";
-	cerr << to << " exists\n";
+	opserr << "DomainPartitioner::swapBoundary - No to Subdomain: ";
+	opserr << to << " exists\n";
 	return -3;
     }    
 
@@ -1303,7 +1303,7 @@ DomainPartitioner::swapBoundary(int from, int to, bool adjacentVertexNotInOther)
     delete swapVertices;
 
     timer.pause();
-    cerr << "DomainPartitioner::swapBoundary DONE" << timer.getReal() << endl;
+    opserr << "DomainPartitioner::swapBoundary DONE" << timer.getReal() << endln;
 
   ***************************************************************************/
     return 0;
@@ -1323,8 +1323,8 @@ DomainPartitioner::releaseVertex(int from,
 {
     // check that the object did the partitioning
     if (partitionFlag == false) {
-	cerr << "DomainPartitioner::balance(const Vector &load)";
-	cerr << " - not partitioned or DomainPartitioner did not partition\n";
+	opserr << "DomainPartitioner::balance(const Vector &load)";
+	opserr << " - not partitioned or DomainPartitioner did not partition\n";
 	return -1;
     }
 
@@ -1332,8 +1332,8 @@ DomainPartitioner::releaseVertex(int from,
     // we first check the vertex is on the fromBoundary
     Subdomain *fromSubdomain = myDomain->getSubdomainPtr(from);
     if (fromSubdomain == 0) {
-	cerr << "DomainPartitioner::swapVertex - No from Subdomain: ";
-	cerr << from << " exists\n";
+	opserr << "DomainPartitioner::swapVertex - No from Subdomain: ";
+	opserr << from << " exists\n";
 	return -1;
     }
 
@@ -1404,23 +1404,23 @@ DomainPartitioner::releaseBoundary(int from,
 				   double factorGreater,
 				   bool adjacentVertexNotInOther)
 {
-    cerr << "DomainPartitioner::releaseBoundary from " << from << endl;
+    opserr << "DomainPartitioner::releaseBoundary from " << from << endln;
     Timer timer;
     timer.start();
 
     
     // check that the object did the partitioning
     if (partitionFlag == false) {
-	cerr << "DomainPartitioner::balance(const Vector &load)";
-	cerr << " - not partitioned or DomainPartitioner did not partition\n";
+	opserr << "DomainPartitioner::balance(const Vector &load)";
+	opserr << " - not partitioned or DomainPartitioner did not partition\n";
 	return -1;
     }
 
     // we first get a pointer to fromSubdomain & the fromBoundary
     Subdomain *fromSubdomain = myDomain->getSubdomainPtr(from);
     if (fromSubdomain == 0) {
-	cerr << "DomainPartitioner::swapVertex - No from Subdomain: ";
-	cerr << from << " exists\n";
+	opserr << "DomainPartitioner::swapVertex - No from Subdomain: ";
+	opserr << from << " exists\n";
 	return -1;
     }
 
@@ -1452,7 +1452,7 @@ DomainPartitioner::releaseBoundary(int from,
     delete swapVertices;    
 
     timer.pause();
-    cerr << "DomainPartitioner::releaseBoundary DONE" << timer.getReal() << endl;    
+    opserr << "DomainPartitioner::releaseBoundary DONE" << timer.getReal() << endln;    
 
     return 0;
 }

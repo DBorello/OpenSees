@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-10-24 22:26:14 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/PeriodicNewton.cpp,v $
 
 // Written: MHS
@@ -80,30 +80,30 @@ PeriodicNewton::solveCurrentStep(void)
 
     if ((theAnalysisModel == 0) || (theIncIntegratorr == 0) || (theSOE == 0)
 	|| (theTest == 0)){
-	cerr << "WARNING PeriodicNewton::solveCurrentStep() - setLinks() has";
-	cerr << " not been called - or no ConvergenceTest has been set\n";
+	opserr << "WARNING PeriodicNewton::solveCurrentStep() - setLinks() has";
+	opserr << " not been called - or no ConvergenceTest has been set\n";
 	return -5;
     }	
 
     // we form the tangent
     
     if (theIncIntegratorr->formUnbalance() < 0) {
-	cerr << "WARNING PeriodicNewton::solveCurrentStep() -";
-	cerr << "the Integrator failed in formUnbalance()\n";	
+	opserr << "WARNING PeriodicNewton::solveCurrentStep() -";
+	opserr << "the Integrator failed in formUnbalance()\n";	
 	return -2;
     }	
 
     if (theIncIntegratorr->formTangent(tangent) < 0){
-	cerr << "WARNING PeriodicNewton::solveCurrentStep() -";
-	cerr << "the Integrator failed in formTangent()\n";
+	opserr << "WARNING PeriodicNewton::solveCurrentStep() -";
+	opserr << "the Integrator failed in formTangent()\n";
 	return -1;
     }		    
 
     // set itself as the ConvergenceTest objects EquiSolnAlgo
     theTest->setEquiSolnAlgo(*this);
     if (theTest->start() < 0) {
-      cerr << "PeriodicNewton::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in start()\n";
+      opserr << "PeriodicNewton::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in start()\n";
       return -3;
     }
 
@@ -113,20 +113,20 @@ PeriodicNewton::solveCurrentStep(void)
 	int iter = 0;
     do {
 	if (theSOE->solve() < 0) {
-	    cerr << "WARNING PeriodicNewton::solveCurrentStep() -";
-	    cerr << "the LinearSysOfEqn failed in solve()\n";	
+	    opserr << "WARNING PeriodicNewton::solveCurrentStep() -";
+	    opserr << "the LinearSysOfEqn failed in solve()\n";	
 	    return -3;
 	}	    
 
 	if (theIncIntegratorr->update(theSOE->getX()) < 0) {
-	    cerr << "WARNING PeriodicNewton::solveCurrentStep() -";
-	    cerr << "the Integrator failed in update()\n";	
+	    opserr << "WARNING PeriodicNewton::solveCurrentStep() -";
+	    opserr << "the Integrator failed in update()\n";	
 	    return -4;
 	}	        
 
 	if (theIncIntegratorr->formUnbalance() < 0) {
-	    cerr << "WARNING PeriodicNewton::solveCurrentStep() -";
-	    cerr << "the Integrator failed in formUnbalance()\n";	
+	    opserr << "WARNING PeriodicNewton::solveCurrentStep() -";
+	    opserr << "the Integrator failed in formUnbalance()\n";	
 	    return -2;
 	}	
 
@@ -136,8 +136,8 @@ PeriodicNewton::solveCurrentStep(void)
 	iter++;
 	if (iter > maxCount) {
 		if (theIncIntegratorr->formTangent(tangent) < 0){
-		cerr << "WARNING PeriodicNewton::solveCurrentStep() -";
-		cerr << "the Integrator failed in formTangent()\n";
+		opserr << "WARNING PeriodicNewton::solveCurrentStep() -";
+		opserr << "the Integrator failed in formTangent()\n";
 		return -1;
 		}
 		iter = 0;
@@ -146,8 +146,8 @@ PeriodicNewton::solveCurrentStep(void)
     } while (result == -1);
 
     if (result == -2) {
-      cerr << "PeriodicNewton::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in test()\n";
+      opserr << "PeriodicNewton::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in test()\n";
       return -3;
     }
 
@@ -172,13 +172,13 @@ PeriodicNewton::sendSelf(int cTag, Channel &theChannel)
 
   result = theChannel.sendID(dataTag, cTag, data);
   if (result != 0) {
-    cerr << "PeriodicNewton::sendSelf() - failed to send ID\n";
+    opserr << "PeriodicNewton::sendSelf() - failed to send ID\n";
     return result;
   }
 
   result = theTest->sendSelf(cTag, theChannel);
   if (result != 0) {
-    cerr << "PeriodicNewton::sendSelf() - failed to send CTest object\n";
+    opserr << "PeriodicNewton::sendSelf() - failed to send CTest object\n";
     return result;
   }
   
@@ -196,7 +196,7 @@ PeriodicNewton::recvSelf(int cTag,
 
     result = theChannel.recvID(dataTag, cTag, data);    
     if (result != 0) {
-      cerr << "PeriodicNewton::recvSelf() - failed to receive ID\n";
+      opserr << "PeriodicNewton::recvSelf() - failed to receive ID\n";
       return result;
     }
     int ctType = data(0);
@@ -207,7 +207,7 @@ PeriodicNewton::recvSelf(int cTag,
     theTest->setDbTag(ctDb);
     result = theTest->recvSelf(cTag, theChannel, theBroker);
     if (result != 0) {
-      cerr << "PeriodicNewton::recvSelf() - failed to recv CTest object\n";
+      opserr << "PeriodicNewton::recvSelf() - failed to recv CTest object\n";
       return result;
     }
     
@@ -215,10 +215,10 @@ PeriodicNewton::recvSelf(int cTag,
 }
 
 void
-PeriodicNewton::Print(ostream &s, int flag)
+PeriodicNewton::Print(OPS_Stream &s, int flag)
 {
     if (flag == 0) {
-	s << "PeriodicNewton" << endl;
-	s << "Max count: " << maxCount << endl;
+	s << "PeriodicNewton" << endln;
+	s << "Max count: " << maxCount << endln;
     }
 }

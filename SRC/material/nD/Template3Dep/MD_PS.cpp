@@ -29,8 +29,6 @@
 #include <basics.h>
 #include <math.h>
 
-#include <G3Globals.h>
-
 //================================================================================
 // Normal constructor
 //================================================================================
@@ -77,7 +75,7 @@ tensor MDPotentialSurface::dQods(const EPState *EPS) const {
     n = temp_f1 * (1.0 / temp_f3 );
   }
   else {
-    g3ErrorHandler->fatal("MDPotentialSurface::dQods  |n_ij| = 0, divide by zero! Program exits.");
+    opserr << "MDPotentialSurface::dQods  |n_ij| = 0, divide by zero! Program exits.\n";
     exit(-1);
     //::printf(" \n\n n_ij not defined!!!! Program exits\n");
     //exit(1);
@@ -120,7 +118,7 @@ tensor MDPotentialSurface::d2Qods2(const EPState *EPS) const
     n = temp_f1 * (1.0 / temp_f3 );
   }
   else {
-    g3ErrorHandler->fatal("MDPotentialSurface::dQods  |n_ij| = 0, divide by zero! Program exits.");
+    opserr << "MDPotentialSurface::dQods  |n_ij| = 0, divide by zero! Program exits.\n";
     exit(-1);
     //::printf(" \n\n n_ij not defined!!!! Program exits\n");
     //exit(1);
@@ -135,7 +133,7 @@ tensor MDPotentialSurface::d2Qods2(const EPState *EPS) const
   //double m = EPS->getScalarVar( 1 );
   if (p < 0.0)
   {
-     g3ErrorHandler->fatal("MDPotentialSurface::d2Qods2  p < 0, Program exits.");
+     opserr << "MDPotentialSurface::d2Qods2  p < 0, Program exits.\n";
      exit(-1);
   }
 

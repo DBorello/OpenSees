@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/reinfBar/ReinfBar.h,v $
                                                                         
                                                                         
@@ -32,7 +32,7 @@
 #ifndef ReinfBar_h 
 #define ReinfBar_h 
 
-#include <iostream.h>
+#include <OPS_Globals.h>
 
 class Vector;
 
@@ -60,8 +60,8 @@ class ReinfBar
 
     const Vector & getPosition (void) const;
 
-    virtual void Print(ostream &s, int flag =0) const;   
-    friend ostream &operator<<(ostream &s, const ReinfBar &reinfBar);    
+    virtual void Print(OPS_Stream &s, int flag =0) const;   
+    friend OPS_Stream &operator<<(OPS_Stream &s, const ReinfBar &reinfBar);    
     
   protected:
     

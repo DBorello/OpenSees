@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2002-10-14 19:30:55 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.cpp,v $
 
 // Written: MHS
@@ -44,8 +44,6 @@
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
-
-#include <fstream.h>
 
 // Constructor
 KrylovNewton::KrylovNewton(int theTangentToUse, int maxDim)
@@ -110,8 +108,8 @@ KrylovNewton::solveCurrentStep(void)
   
   if ((theAnaModel == 0) || (theIntegrator == 0) || (theSOE == 0)
       || (theTest == 0)){
-    cerr << "WARNING KrylovNewton::solveCurrentStep() - setLinks() has";
-    cerr << " not been called - or no ConvergenceTest has been set\n";
+    opserr << "WARNING KrylovNewton::solveCurrentStep() - setLinks() has";
+    opserr << " not been called - or no ConvergenceTest has been set\n";
     return -5;
   }	
 
@@ -152,22 +150,22 @@ KrylovNewton::solveCurrentStep(void)
   // set itself as the ConvergenceTest objects EquiSolnAlgo
   theTest->setEquiSolnAlgo(*this);
   if (theTest->start() < 0) {
-    cerr << "KrylovNewton::solveCurrentStep() -";
-    cerr << "the ConvergenceTest object failed in start()\n";
+    opserr << "KrylovNewton::solveCurrentStep() -";
+    opserr << "the ConvergenceTest object failed in start()\n";
     return -3;
   }
   
   // Evaluate system residual R(y_0)
   if (theIntegrator->formUnbalance() < 0) {
-    cerr << "WARNING KrylovNewton::solveCurrentStep() -";
-    cerr << "the Integrator failed in formUnbalance()\n";	
+    opserr << "WARNING KrylovNewton::solveCurrentStep() -";
+    opserr << "the Integrator failed in formUnbalance()\n";	
     return -2;
   }
   
   // Evaluate system Jacobian J = R'(y)|y_0
   if (theIntegrator->formTangent(tangent) < 0){
-    cerr << "WARNING KrylovNewton::solveCurrentStep() -";
-    cerr << "the Integrator failed in formTangent()\n";
+    opserr << "WARNING KrylovNewton::solveCurrentStep() -";
+    opserr << "the Integrator failed in formTangent()\n";
     return -1;
   }    
 
@@ -185,37 +183,37 @@ KrylovNewton::solveCurrentStep(void)
     if (dim > maxDimension) {
       dim = 0;
       if (theIntegrator->formTangent(tangent) < 0){
-	cerr << "WARNING KrylovNewton::solveCurrentStep() -";
-	cerr << "the Integrator failed to produce new formTangent()\n";
+	opserr << "WARNING KrylovNewton::solveCurrentStep() -";
+	opserr << "the Integrator failed to produce new formTangent()\n";
 	return -1;
       }
     }
 
     // Solve for residual f(y_k) = J^{-1} R(y_k)
     if (theSOE->solve() < 0) {
-      cerr << "WARNING KrylovNewton::solveCurrentStep() -";
-      cerr << "the LinearSysOfEqn failed in solve()\n";	
+      opserr << "WARNING KrylovNewton::solveCurrentStep() -";
+      opserr << "the LinearSysOfEqn failed in solve()\n";	
       return -3;
     }
 
     // Solve least squares A w_{k+1} = r_k
     if (this->leastSquares(dim) < 0) {
-      cerr << "WARNING KrylovNewton::solveCurrentStep() -";
-      cerr << "the Integrator failed in leastSquares()\n";
+      opserr << "WARNING KrylovNewton::solveCurrentStep() -";
+      opserr << "the Integrator failed in leastSquares()\n";
       return -1;
     }		    
 
     // Update system with v_k
     if (theIntegrator->update(*(v[dim])) < 0) {
-      cerr << "WARNING KrylovNewton::solveCurrentStep() -";
-      cerr << "the Integrator failed in update()\n";	
+      opserr << "WARNING KrylovNewton::solveCurrentStep() -";
+      opserr << "the Integrator failed in update()\n";	
       return -4;
     }	
 
     // Evaluate system residual R(y_k)
     if (theIntegrator->formUnbalance() < 0) {
-      cerr << "WARNING KrylovNewton::solveCurrentStep() -";
-      cerr << "the Integrator failed in formUnbalance()\n";	
+      opserr << "WARNING KrylovNewton::solveCurrentStep() -";
+      opserr << "the Integrator failed in formUnbalance()\n";	
       return -2;
     }
 
@@ -228,8 +226,8 @@ KrylovNewton::solveCurrentStep(void)
   } while (result == -1);
   
   if (result == -2) {
-    cerr << "KrylovNewton::solveCurrentStep() -";
-    cerr << "the ConvergenceTest object failed in test()\n";
+    opserr << "KrylovNewton::solveCurrentStep() -";
+    opserr << "the ConvergenceTest object failed in test()\n";
     return -3;
   }
   
@@ -258,11 +256,11 @@ KrylovNewton::recvSelf(int cTag, Channel &theChannel,
 }
 
 void
-KrylovNewton::Print(ostream &s, int flag)
+KrylovNewton::Print(OPS_Stream &s, int flag)
 {
   s << "KrylovNewton";
   s << "\n\tMax subspace dimension: " << maxDimension;
-  s << "\n\tNumber of equations: " << numEqns << endl;
+  s << "\n\tNumber of equations: " << numEqns << endln;
 }
 
 #ifdef _WIN32
@@ -332,8 +330,8 @@ KrylovNewton::leastSquares(int k)
 
   // Check for error returned by subroutine
   if (info < 0) {
-    cerr << "WARNING KrylovNewton::leastSquares() - \n";
-    cerr << "error code " << info << " returned by LAPACK dgels\n";
+    opserr << "WARNING KrylovNewton::leastSquares() - \n";
+    opserr << "error code " << info << " returned by LAPACK dgels\n";
     return info;
   }
   

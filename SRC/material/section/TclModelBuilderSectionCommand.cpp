@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2003-01-28 18:23:50 $
+// $Revision: 1.20 $
+// $Date: 2003-02-14 23:01:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -64,14 +64,18 @@
 #include <Bidirectional.h>
 
 #include <string.h>
-#include <fstream.h>
+#include <fstream>
+using std::ifstream;
+
+#include <iostream>
+using std::ios;
 
 static void printCommand(int argc, char **argv)
 {
-    cerr << "Input command: ";
+    opserr << "Input command: \n";
     for (int i=0; i<argc; i++)
-	cerr << argv[i] << " ";
-    cerr << endl;
+	opserr << argv[i] << " \n";
+    opserr << endln;
 } 
 
 int
@@ -97,10 +101,10 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     // Check argv[1] for section type
     if (strcmp(argv[1],"Elastic") == 0) {
 	if (argc < 5) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    //cerr << "Want: section Elastic tag? EA? EIz? <EIy? GJ?>" << endl;
-		cerr << "Want: section Elastic tag? E? A? Iz? <Iy? G? J?>" << endl;
+	    //opserr << "Want: section Elastic tag? EA? EIz? <EIy? GJ?>" << endln;
+		opserr << "Want: section Elastic tag? E? A? Iz? <Iy? G? J?>" << endln;
 	    return TCL_ERROR;
 	}
 	
@@ -108,44 +112,44 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	double E, A, Iz, Iy, G, J;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid section Elastic tag" << endl;
+	    opserr << "WARNING invalid section Elastic tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	if (Tcl_GetDouble (interp, argv[3], &E) != TCL_OK) {
-	    cerr << "WARNING invalid E" << endl;
-	    cerr << "Elastic section: " << tag << endl;	    
+	    opserr << "WARNING invalid E" << endln;
+	    opserr << "Elastic section: " << tag << endln;	    
 	    return TCL_ERROR;
 	}	
 
 	if (Tcl_GetDouble (interp, argv[4], &A) != TCL_OK) {
-	    cerr << "WARNING invalid A" << endl;
-	    cerr << "Elastic section: " << tag << endl;	    
+	    opserr << "WARNING invalid A" << endln;
+	    opserr << "Elastic section: " << tag << endln;	    
 	    return TCL_ERROR;
 	}	
 	
 	if (Tcl_GetDouble (interp, argv[5], &Iz) != TCL_OK) {
-	    cerr << "WARNING invalid Iz" << endl;
-	    cerr << "Elastic section: " << tag << endl;	    	    
+	    opserr << "WARNING invalid Iz" << endln;
+	    opserr << "Elastic section: " << tag << endln;	    	    
 	    return TCL_ERROR;
 	}	
 	
 	if (argc > 8) {
 	    if (Tcl_GetDouble (interp, argv[6], &Iy) != TCL_OK) {
-		cerr << "WARNING invalid EIy" << endl;
-		cerr << "Elastic section: " << tag << endl;	    		
+		opserr << "WARNING invalid EIy" << endln;
+		opserr << "Elastic section: " << tag << endln;	    		
 		return TCL_ERROR;
 	    }
 		
 	    if (Tcl_GetDouble (interp, argv[7], &G) != TCL_OK) {
-		cerr << "WARNING invalid G" << endl;
-		cerr << "Elastic section: " << tag << endl;	    
+		opserr << "WARNING invalid G" << endln;
+		opserr << "Elastic section: " << tag << endln;	    
 		return TCL_ERROR;
 	    }
 
 		if (Tcl_GetDouble (interp, argv[8], &J) != TCL_OK) {
-		cerr << "WARNING invalid J" << endl;
-		cerr << "Elastic section: " << tag << endl;	    
+		opserr << "WARNING invalid J" << endln;
+		opserr << "Elastic section: " << tag << endln;	    
 		return TCL_ERROR;
 	    }
 		
@@ -161,22 +165,22 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	     strcmp(argv[1],"Generic1d") == 0 ||
 	     strcmp(argv[1],"Uniaxial") == 0) {
 	if (argc < 5) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: section Uniaxial tag? 1DTag? code?" << endl;
+	    opserr << "Want: section Uniaxial tag? 1DTag? code?" << endln;
 	    return TCL_ERROR;
 	}
 
 	int tag, uniTag, code;
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid section Uniaxial tag" << endl;
+	    opserr << "WARNING invalid section Uniaxial tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	if (Tcl_GetInt(interp, argv[3], &uniTag) != TCL_OK) {
-	    cerr << "WARNING invalid 1DTag" << endl;
-	    cerr << "Uniaxial section: " << tag << endl;	    
+	    opserr << "WARNING invalid 1DTag" << endln;
+	    opserr << "Uniaxial section: " << tag << endln;	    
 	    return TCL_ERROR;		
 	}
 
@@ -193,8 +197,8 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	else if (strcmp(argv[4],"T") == 0)
 	    code = SECTION_RESPONSE_T;
 	else {
-	    cerr << "WARNING invalid code" << endl;
-	    cerr << "Uniaxial section: " << tag << endl;
+	    opserr << "WARNING invalid code" << endln;
+	    opserr << "Uniaxial section: " << tag << endln;
 	    return TCL_ERROR;		
 	}
 		
@@ -202,9 +206,9 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	UniaxialMaterial *theMat = theTclBuilder->getUniaxialMaterial(uniTag);
 	
 	if (theMat == 0) {
-	    cerr << "WARNING uniaxial material does not exist\n";
-	    cerr << "uniaxial material: " << uniTag; 
-	    cerr << "\nUniaxial section: " << tag << endl;
+	    opserr << "WARNING uniaxial material does not exist\n";
+	    opserr << "uniaxial material: " << uniTag; 
+	    opserr << "\nUniaxial section: " << tag << endln;
 	    return TCL_ERROR;
 	}
 	
@@ -213,27 +217,27 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     }
 
     else if (strcmp(argv[1],"GenericND") == 0 || strcmp(argv[1],"GenericNd") == 0) {
-      cerr << "section GenericND is no longer available" << endl;
+      opserr << "section GenericND is no longer available" << endln;
       return TCL_ERROR;
 
       /*
 	if (argc < 5) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: section GenericNd tag? NDTag? code?" << endl;
+	    opserr << "Want: section GenericNd tag? NDTag? code?" << endln;
 	    return TCL_ERROR;
 	}
 	
 	int tag, NDTag;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid section GenericNd tag" << endl;
+	    opserr << "WARNING invalid section GenericNd tag" << endln;
 	    return TCL_ERROR;		
 	}
 	
 	if (Tcl_GetInt(interp, argv[3], &NDTag) != TCL_OK) {
-	    cerr << "WARNING invalid NDTag" << endl;
-	    cerr << "GenericNd section: " << tag << endl;	    
+	    opserr << "WARNING invalid NDTag" << endln;
+	    opserr << "GenericNd section: " << tag << endln;	    
 	    return TCL_ERROR;		
 	}
 	
@@ -256,8 +260,8 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    else if (strcmp(argv[i],"T") == 0)
 		code(j) = SECTION_RESPONSE_T;
 	    else {
-		cerr << "WARNING invalid GenericND code" << endl;
-		cerr << "\nGenericND section: " << tag << endl;
+		opserr << "WARNING invalid GenericND code" << endln;
+		opserr << "\nGenericND section: " << tag << endln;
 		return TCL_ERROR;		
 	    }
 	}
@@ -266,9 +270,9 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	NDMaterial *theMat = theTclBuilder->getNDMaterial(NDTag);
 	
 	if (theMat == 0) {
-	    cerr << "WARNING nD material does not exist\n";
-	    cerr << "nD material: " << NDTag; 
-	    cerr << "\nGenericNd section: " << tag << endl;
+	    opserr << "WARNING nD material does not exist\n";
+	    opserr << "nD material: " << NDTag; 
+	    opserr << "\nGenericNd section: " << tag << endln;
 	    return TCL_ERROR;
 	}
 	
@@ -280,9 +284,9 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 
     else if (strcmp(argv[1],"AddDeformation") == 0 || strcmp(argv[1],"Aggregator") == 0) {
 	if (argc < 5) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: section Aggregator tag? uniTag1? code1? ... <-section secTag?>" << endl;
+	    opserr << "Want: section Aggregator tag? uniTag1? code1? ... <-section secTag?>" << endln;
 	    return TCL_ERROR;
 	}
 	    
@@ -291,7 +295,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	SectionForceDeformation *theSec = 0;
 	    
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid Aggregator tag" << endl;
+	    opserr << "WARNING invalid Aggregator tag" << endln;
 	    return TCL_ERROR;		
 	}
 
@@ -300,16 +304,16 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	for (int ii = 5; ii < argc; ii++) {
 	    if (strcmp(argv[ii],"-section") == 0 && ++ii < argc) {
 		if (Tcl_GetInt(interp, argv[ii], &secTag) != TCL_OK) {
-		    cerr << "WARNING invalid Aggregator tag" << endl;
+		    opserr << "WARNING invalid Aggregator tag" << endln;
 		    return TCL_ERROR;		
 		}
 		
 		theSec = theTclBuilder->getSection(secTag);
 		
 		if (theSec == 0) {
-		    cerr << "WARNING section does not exist\n";
-		    cerr << "section: " << secTag; 
-		    cerr << "\nsection Aggregator: " << tag << endl;
+		    opserr << "WARNING section does not exist\n";
+		    opserr << "section: " << secTag; 
+		    opserr << "\nsection Aggregator: " << tag << endln;
 		    return TCL_ERROR;
 		}
 		
@@ -320,7 +324,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	int nMats = nArgs / 2;
 	
 	if (nArgs%2 != 0) {
-	    cerr << "WARNING improper number of arguments for Aggregator" << endl;
+	    opserr << "WARNING improper number of arguments for Aggregator" << endln;
 	    return TCL_ERROR;
 	}
 	
@@ -330,7 +334,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	theMats = new UniaxialMaterial *[nMats];
 	
 	if (theMats == 0) {
-	    cerr << "TclModelBuilderSection (Aggregator) -- unable to create uniaxial array" << endl;
+	    opserr << "TclModelBuilderSection (Aggregator) -- unable to create uniaxial array" << endln;
 	    return TCL_ERROR;
 	}	
 	
@@ -339,16 +343,16 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	
 	for (i = 3, j = 0; j < nMats; i++, j++) {
 	    if (Tcl_GetInt(interp, argv[i], &tagI) != TCL_OK) {
-		cerr << "WARNING invalid Aggregator matTag" << endl;
+		opserr << "WARNING invalid Aggregator matTag" << endln;
 		return TCL_ERROR;		
 	    }
 	    
 	    theMats[j] = theTclBuilder->getUniaxialMaterial(tagI);
 	    
 	    if (theMats[j] == 0) {
-		cerr << "WARNING uniaxial material does not exist\n";
-		cerr << "uniaxial material: " << tagI; 
-		cerr << "\nsection Aggregator: " << tag << endl;
+		opserr << "WARNING uniaxial material does not exist\n";
+		opserr << "uniaxial material: " << tagI; 
+		opserr << "\nsection Aggregator: " << tag << endln;
 		return TCL_ERROR;
 	    }
 	    
@@ -367,8 +371,8 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    else if (strcmp(argv[i],"T") == 0)
 		codes(j) = SECTION_RESPONSE_T;
 	    else {
-		cerr << "WARNING invalid code" << endl;
-		cerr << "\nsection Aggregator: " << tag << endl;
+		opserr << "WARNING invalid code" << endln;
+		opserr << "\nsection Aggregator: " << tag << endln;
 		return TCL_ERROR;		
 	    }
 	}
@@ -391,9 +395,9 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 
     else if (strcmp(argv[1],"ElasticPlateSection") == 0) {
 	if (argc < 5) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: section ElasticPlateSection tag? E? nu? h? " << endl;
+	    opserr << "Want: section ElasticPlateSection tag? E? nu? h? " << endln;
 	    return TCL_ERROR;
 	}
 	
@@ -401,25 +405,25 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	double E, nu, h;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid section ElasticPlateSection tag" << endl;
+	    opserr << "WARNING invalid section ElasticPlateSection tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	if (Tcl_GetDouble (interp, argv[3], &E) != TCL_OK) {
-	    cerr << "WARNING invalid E" << endl;
-	    cerr << "ElasticPlateSection section: " << tag << endl;	    
+	    opserr << "WARNING invalid E" << endln;
+	    opserr << "ElasticPlateSection section: " << tag << endln;	    
 	    return TCL_ERROR;
 	}	
 
 	if (Tcl_GetDouble (interp, argv[4], &nu) != TCL_OK) {
-	    cerr << "WARNING invalid nu" << endl;
-	    cerr << "ElasticPlateSection section: " << tag << endl;	    
+	    opserr << "WARNING invalid nu" << endln;
+	    opserr << "ElasticPlateSection section: " << tag << endln;	    
 	    return TCL_ERROR;
 	}	
 	
 	if (Tcl_GetDouble (interp, argv[5], &h) != TCL_OK) {
-	    cerr << "WARNING invalid h" << endl;
-	    cerr << "ElasticPlateSection section: " << tag << endl;	    	    
+	    opserr << "WARNING invalid h" << endln;
+	    opserr << "ElasticPlateSection section: " << tag << endln;	    	    
 	    return TCL_ERROR;
 	}	
 
@@ -428,9 +432,9 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 
     else if (strcmp(argv[1],"ElasticMembranePlateSection") == 0) {
 	if (argc < 5) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: section ElasticMembranePlateSection tag? E? nu? h? <rho?>" << endl;
+	    opserr << "Want: section ElasticMembranePlateSection tag? E? nu? h? <rho?>" << endln;
 	    return TCL_ERROR;
 	}
 	
@@ -439,31 +443,31 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	double rho = 0.0;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid section ElasticMembranePlateSection tag" << endl;
+	    opserr << "WARNING invalid section ElasticMembranePlateSection tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	if (Tcl_GetDouble (interp, argv[3], &E) != TCL_OK) {
-	    cerr << "WARNING invalid E" << endl;
-	    cerr << "ElasticMembranePlateSection section: " << tag << endl;	    
+	    opserr << "WARNING invalid E" << endln;
+	    opserr << "ElasticMembranePlateSection section: " << tag << endln;	    
 	    return TCL_ERROR;
 	}	
 
 	if (Tcl_GetDouble (interp, argv[4], &nu) != TCL_OK) {
-	    cerr << "WARNING invalid nu" << endl;
-	    cerr << "ElasticMembranePlateSection section: " << tag << endl;	    
+	    opserr << "WARNING invalid nu" << endln;
+	    opserr << "ElasticMembranePlateSection section: " << tag << endln;	    
 	    return TCL_ERROR;
 	}	
 	
 	if (Tcl_GetDouble (interp, argv[5], &h) != TCL_OK) {
-	    cerr << "WARNING invalid h" << endl;
-	    cerr << "ElasticMembranePlateSection section: " << tag << endl;	    	    
+	    opserr << "WARNING invalid h" << endln;
+	    opserr << "ElasticMembranePlateSection section: " << tag << endln;	    	    
 	    return TCL_ERROR;
 	}	
 
 	if (argc > 6 && Tcl_GetDouble (interp, argv[6], &rho) != TCL_OK) {
-	    cerr << "WARNING invalid rho" << endl;
-	    cerr << "ElasticMembranePlateSection section: " << tag << endl;	    	    
+	    opserr << "WARNING invalid rho" << endln;
+	    opserr << "ElasticMembranePlateSection section: " << tag << endln;	    	    
 	    return TCL_ERROR;
 	}
 
@@ -472,9 +476,9 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 
     else if (strcmp(argv[1],"PlateFiber") == 0) {
 	if (argc < 5) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: section PlateFiber tag? matTag? h? " << endl;
+	    opserr << "Want: section PlateFiber tag? matTag? h? " << endln;
 	    return TCL_ERROR;
 	}
 	
@@ -482,27 +486,27 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	double  h;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid section PlateFiber tag" << endl;
+	    opserr << "WARNING invalid section PlateFiber tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	if (Tcl_GetInt (interp, argv[3], &matTag) != TCL_OK) {
-	    cerr << "WARNING invalid matTag" << endl;
-	    cerr << "PlateFiber section: " << matTag << endl;	    	    
+	    opserr << "WARNING invalid matTag" << endln;
+	    opserr << "PlateFiber section: " << matTag << endln;	    	    
 	    return TCL_ERROR;
 	}	
 
 	if (Tcl_GetDouble (interp, argv[4], &h) != TCL_OK) {
-	    cerr << "WARNING invalid h" << endl;
-	    cerr << "PlateFiber section: " << tag << endl;	    	    
+	    opserr << "WARNING invalid h" << endln;
+	    opserr << "PlateFiber section: " << tag << endln;	    	    
 	    return TCL_ERROR;
 	}	
 
 	NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matTag);
 	if (theMaterial == 0) {
-	    cerr << "WARNING nD material does not exist\n";
-	    cerr << "nD material: " << matTag; 
-	    cerr << "\nPlateFiber section: " << tag << endl;
+	    opserr << "WARNING nD material does not exist\n";
+	    opserr << "nD material: " << matTag; 
+	    opserr << "\nPlateFiber section: " << tag << endln;
 	    return TCL_ERROR;
 	}
 
@@ -511,9 +515,9 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     
         else if (strcmp(argv[1],"Bidirectional") == 0) {
 	if (argc < 7) {
-	    cerr << "WARNING insufficient arguments\n";
+	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: section Bidirectional tag? E? sigY? Hiso? Hkin?" << endl;
+	    opserr << "Want: section Bidirectional tag? E? sigY? Hiso? Hkin?" << endln;
 	    return TCL_ERROR;
 	}    
 
@@ -521,31 +525,31 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	double E, sigY, Hi, Hk;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid Bidirectional tag" << endl;
+	    opserr << "WARNING invalid Bidirectional tag" << endln;
 	    return TCL_ERROR;		
 	}
 
 	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
-	    cerr << "WARNING invalid E\n";
-	    cerr << "section Bidirectional: " << tag << endl;
+	    opserr << "WARNING invalid E\n";
+	    opserr << "section Bidirectional: " << tag << endln;
 	    return TCL_ERROR;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[4], &sigY) != TCL_OK) {
-	    cerr << "WARNING invalid sigY\n";
-	    cerr << "section Bidirectional: " << tag << endl;
+	    opserr << "WARNING invalid sigY\n";
+	    opserr << "section Bidirectional: " << tag << endln;
 	    return TCL_ERROR;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[5], &Hi) != TCL_OK) {
-	    cerr << "WARNING invalid Hiso\n";
-	    cerr << "section Bidirectional: " << tag << endl;
+	    opserr << "WARNING invalid Hiso\n";
+	    opserr << "section Bidirectional: " << tag << endln;
 	    return TCL_ERROR;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[6], &Hk) != TCL_OK) {
-	    cerr << "WARNING invalid Hkin\n";
-	    cerr << "section Bidirectional: " << tag << endl;
+	    opserr << "WARNING invalid Hkin\n";
+	    opserr << "section Bidirectional: " << tag << endln;
 	    return TCL_ERROR;	
 	}
 
@@ -559,14 +563,14 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     
     // Ensure we have created the Material, out of memory if got here and no section
     if (theSection == 0) {
-      cerr << "WARNING could not create section " << argv[1] << endl;
+      opserr << "WARNING could not create section " << argv[1] << endln;
       return TCL_ERROR;
     }
     
     // Now add the material to the modelBuilder
     if (theTclBuilder->addSection(*theSection) < 0) {
-	cerr << "WARNING could not add section to the domain\n";
-	cerr << *theSection << endl;
+	opserr << "WARNING could not add section to the domain\n";
+	opserr << *theSection << endln;
 	delete theSection; // invoke the material objects destructor, otherwise mem leak
 	return TCL_ERROR;
     }
@@ -592,7 +596,7 @@ TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int 
 	return TCL_ERROR;
     
     if (Tcl_GetInt(interp, argv[2], &secTag) != TCL_OK) {
-	interp->result = "WARNING bad command - want: \nsection fiberSec secTag { \n\tpatch <patch arguments> \n\tlayer <layer arguments> \n}";
+      opserr <<  "WARNING bad command - want: \nsection fiberSec secTag { \n\tpatch <patch arguments> \n\tlayer <layer arguments> \n}\n";
 	return TCL_ERROR;
     }
     
@@ -604,12 +608,12 @@ TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int 
 	new FiberSectionRepr(secTag, maxNumPatches, maxNumReinfLayers);  
 
     if (fiberSectionRepr == 0) {
-	interp->result = "WARNING - ran out of memory to create section representation";
+      opserr <<  "WARNING - ran out of memory to create section representation\n";
 	return TCL_ERROR;
     }
 
     if (theTclModelBuilder->addSectionRepres(*fiberSectionRepr) < 0) {
-	interp->result = "WARNING - cannot add section representation";
+	opserr <<  "WARNING - cannot add section representation\n";
 	return TCL_ERROR;
     }	
 
@@ -627,13 +631,13 @@ TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int 
 
     // parse the information inside the braces (patches and reinforcing layers)
     if (Tcl_Eval(interp, argv[brace]) != TCL_OK) {
-	cerr << "WARNING - error reading information in { } ";
+	opserr << "WARNING - error reading information in { } \n";
 	return TCL_ERROR;
     }
 
     // build the fiber section (for analysis)
     if (buildSection(interp, theTclModelBuilder, secTag, isTorsion, GJ) != TCL_OK) {
-	cerr << "WARNING - error constructing the section ";
+	opserr << "WARNING - error constructing the section\n";
 	return TCL_ERROR;
     }
     
@@ -652,13 +656,13 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
 {
     // check if a section is being processed
     if (currentSectionTag == 0) {
-	interp->result = "WARNING subcommand 'patch' is only valid inside a 'section' command";
+	opserr <<  "WARNING subcommand 'patch' is only valid inside a 'section' command\n";
 	return TCL_ERROR;
     }	   
     
     // make sure at least one other argument to contain patch type
     if (argc < 2) {
-	interp->result = "WARNING need to specify a patch type ";
+	opserr <<  "WARNING need to specify a patch type \n";
 	return TCL_ERROR;
     }    
 
@@ -670,7 +674,7 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
 	int j, argi;
 
 	if (argc < 13) {
-	    interp->result = "WARNING invalid number of parameters: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+	    opserr <<  "WARNING invalid number of parameters: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL\n";
 	    return TCL_ERROR;
 	}
   
@@ -678,41 +682,41 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
       
       if (Tcl_GetInt(interp, argv[argi++], &matTag) != TCL_OK)
       {
-         interp->result = "WARNING invalid matTag: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+         opserr <<  "WARNING invalid matTag: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tmatTag: " << matTag;
+      //opserr << "\n\tmatTag: " << matTag;
 
       if (Tcl_GetInt(interp, argv[argi++], &numSubdivIJ) != TCL_OK)
       {
-         interp->result = "WARNING invalid numSubdivIJ: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+         opserr <<  "WARNING invalid numSubdivIJ: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tnumSubdivIJ: " << numSubdivIJ;
+      //opserr << "\n\tnumSubdivIJ: " << numSubdivIJ;
  
       if (Tcl_GetInt(interp, argv[argi++], &numSubdivJK) != TCL_OK)
       {
-         interp->result = "WARNING invalid numSubdivJK: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+         opserr <<  "WARNING invalid numSubdivJK: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tnumSubdivJK: " << numSubdivJK;
+      //opserr << "\n\tnumSubdivJK: " << numSubdivJK;
 
       for (j=0; j < 4; j++)
       {
-         //cerr << "\n\tVertexCoord: " << j;
+         //opserr << "\n\tVertexCoord: " << j;
          if (Tcl_GetDouble(interp, argv[argi++], &vertexCoordY) != TCL_OK)
          {
-            interp->result = "WARNING invalid Coordinate y: ...yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+            opserr <<  "WARNING invalid Coordinate y: ...yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL\n";
             return TCL_ERROR;
          }
-         //cerr << "\n\t\tvertexCoordY: " << vertexCoordY; 
+         //opserr << "\n\t\tvertexCoordY: " << vertexCoordY; 
 
          if (Tcl_GetDouble(interp, argv[argi++], &vertexCoordZ) != TCL_OK)
          {
-            interp->result = "WARNING invalid Coordinate z: ...yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+            opserr <<  "WARNING invalid Coordinate z: ...yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL\n";
             return TCL_ERROR;
          }
-         //cerr << "\n\t\tvertexCoordZ: " << vertexCoordZ; 
+         //opserr << "\n\t\tvertexCoordZ: " << vertexCoordZ; 
 
          vertexCoords(j,0) = vertexCoordY;
          vertexCoords(j,1) = vertexCoordZ;
@@ -724,13 +728,13 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
       SectionRepres *sectionRepres = theTclModelBuilder->getSectionRepres(secTag);
       if (sectionRepres == 0) 
       {
-         interp->result = "WARNING cannot retrieve section";
+         opserr <<  "WARNING cannot retrieve section\n";
          return TCL_ERROR;
       }    
      
       if (sectionRepres->getType() != SEC_TAG_FiberSection)
       {
-         interp->result = "WARNING section invalid: patch can only be added to fiber sections";
+         opserr <<  "WARNING section invalid: patch can only be added to fiber sections\n";
          return TCL_ERROR;
       }
 
@@ -741,11 +745,11 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
       QuadPatch *patch = new QuadPatch(matTag, numSubdivIJ, numSubdivJK, vertexCoords);
       if (!patch)
       {
-         interp->result = "WARNING cannot alocate patch";
+         opserr <<  "WARNING cannot alocate patch\n";
          return TCL_ERROR;
       }
 
-      //cerr << "\n\tpatch: " << *patch;
+      //opserr << "\n\tpatch: " << *patch;
       
       // add patch to section representation
 
@@ -754,7 +758,7 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
       
       if (error)
       {
-         interp->result = "WARNING cannot add patch to section";
+         opserr <<  "WARNING cannot add patch to section\n";
          return TCL_ERROR;
       }  
   }
@@ -770,35 +774,35 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
 	int j, argi;
 
 	if (argc < 9) {
-	    interp->result = "WARNING invalid number of parameters: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertK zVertK";
+	    opserr <<  "WARNING invalid number of parameters: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertK zVertK\n";
 	    return TCL_ERROR;
 	}
   
 	argi = 2;
       
 	if (Tcl_GetInt(interp, argv[argi++], &matTag) != TCL_OK) {
-	    interp->result = "WARNING invalid matTag: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+	    opserr <<  "WARNING invalid matTag: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL\n";
 	    return TCL_ERROR;
 	}
 
 	if (Tcl_GetInt(interp, argv[argi++], &numSubdivIJ) != TCL_OK) {
-	    interp->result = "WARNING invalid numSubdivIJ: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+	    opserr <<  "WARNING invalid numSubdivIJ: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL\n";
 	    return TCL_ERROR;
 	}
  
 	if (Tcl_GetInt(interp, argv[argi++], &numSubdivJK) != TCL_OK) {
-	    interp->result = "WARNING invalid numSubdivJK: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+	    opserr <<  "WARNING invalid numSubdivJK: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL\n";
 	    return TCL_ERROR;
 	}
 
 	for (j=0; j < 2; j++) {
 	    if (Tcl_GetDouble(interp, argv[argi++], &vertexCoordY) != TCL_OK) {
-		interp->result = "WARNING invalid Coordinate y: ...yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+		opserr <<  "WARNING invalid Coordinate y: ...yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL\n";
 		return TCL_ERROR;
 	    }
 
 	    if (Tcl_GetDouble(interp, argv[argi++], &vertexCoordZ) != TCL_OK) {
-		interp->result = "WARNING invalid Coordinate z: ...yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+		opserr <<  "WARNING invalid Coordinate z: ...yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL\n";
 		return TCL_ERROR;
 	    }
 
@@ -816,12 +820,12 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
       
       SectionRepres *sectionRepres = theTclModelBuilder->getSectionRepres(secTag);
       if (sectionRepres == 0) {
-         interp->result = "WARNING cannot retrieve section";
+         opserr <<  "WARNING cannot retrieve section\n";
          return TCL_ERROR;
       }    
      
       if (sectionRepres->getType() != SEC_TAG_FiberSection) {
-         interp->result = "WARNING section invalid: patch can only be added to fiber sections";
+         opserr <<  "WARNING section invalid: patch can only be added to fiber sections\n";
          return TCL_ERROR;
       }
 
@@ -832,11 +836,11 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
       QuadPatch *patch = new QuadPatch(matTag, numSubdivIJ, numSubdivJK, vertexCoords);
       if (!patch)
       {
-         interp->result = "WARNING cannot alocate patch";
+         opserr <<  "WARNING cannot alocate patch\n";
          return TCL_ERROR;
       }
 
-      //cerr << "\n\tpatch: " << *patch;
+      //opserr << "\n\tpatch: " << *patch;
       
       // add patch to section representation
 
@@ -845,7 +849,7 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
       
       if (error)
       {
-         interp->result = "WARNING cannot add patch to section";
+         opserr <<  "WARNING cannot add patch to section\n";
          return TCL_ERROR;
       }  
   }    
@@ -865,72 +869,72 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
       argi = 2;
       if (argc < 11)
       {
-         interp->result = "WARNING invalid number of parameters: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng";
+         opserr <<  "WARNING invalid number of parameters: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng\n";
          return TCL_ERROR;
       }
   
       if (Tcl_GetInt(interp, argv[argi++], &matTag) != TCL_OK)
       {
-         interp->result = "WARNING invalid matTag: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng";
+         opserr <<  "WARNING invalid matTag: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tmatTag: " << matTag;
+      //opserr << "\n\tmatTag: " << matTag;
 
       if (Tcl_GetInt(interp, argv[argi++], &numSubdivCirc) != TCL_OK)
       {
-         interp->result = "WARNING invalid numSubdivCirc: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng";
+         opserr <<  "WARNING invalid numSubdivCirc: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tnumSubdivCirc: " << numSubdivCirc;
+      //opserr << "\n\tnumSubdivCirc: " << numSubdivCirc;
 
       if (Tcl_GetInt(interp, argv[argi++], &numSubdivRad) != TCL_OK)
       {
-         interp->result = "WARNING invalid numSubdivRad: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng";
+         opserr <<  "WARNING invalid numSubdivRad: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tnumSubdivRad: " << numSubdivRad;
+      //opserr << "\n\tnumSubdivRad: " << numSubdivRad;
 
       if (Tcl_GetDouble(interp, argv[argi++], &yCenter) != TCL_OK)
       {
-         interp->result = "WARNING invalid yCenter: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng";
+         opserr <<  "WARNING invalid yCenter: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tyCenter: " << yCenter;
+      //opserr << "\n\tyCenter: " << yCenter;
 
       if (Tcl_GetDouble(interp, argv[argi++], &zCenter) != TCL_OK)
       {
-         interp->result = "WARNING invalid zCenter: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng";
+         opserr <<  "WARNING invalid zCenter: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tzCenter: " << zCenter;
+      //opserr << "\n\tzCenter: " << zCenter;
 
       if (Tcl_GetDouble(interp, argv[argi++], &intRad) != TCL_OK)
       {
-         interp->result = "WARNING invalid intRad: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng";
+         opserr <<  "WARNING invalid intRad: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tintRad: " << intRad;
+      //opserr << "\n\tintRad: " << intRad;
 
       if (Tcl_GetDouble(interp, argv[argi++], &extRad) != TCL_OK)
       {
-         interp->result = "WARNING invalid extRad: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng";
+         opserr <<  "WARNING invalid extRad: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\textRad: " << extRad;
+      //opserr << "\n\textRad: " << extRad;
 
       if (Tcl_GetDouble(interp, argv[argi++], &startAng) != TCL_OK)
       {
-         interp->result = "WARNING invalid startAng: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng";
+         opserr <<  "WARNING invalid startAng: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tstartAngle: " << startAng;
+      //opserr << "\n\tstartAngle: " << startAng;
 
       if (Tcl_GetDouble(interp, argv[argi++], &endAng) != TCL_OK)
       {
-         interp->result = "WARNING invalid endAng: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng";
+         opserr <<  "WARNING invalid endAng: patch circ matTag numSubdivCirc numSubdivRad yCenter zCenter intRad extRad startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tendAng: " << endAng;
+      //opserr << "\n\tendAng: " << endAng;
 
 
       // get section 
@@ -939,13 +943,13 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
       SectionRepres *sectionRepres = theTclModelBuilder->getSectionRepres(secTag);
       if (sectionRepres == 0) 
       {
-         interp->result = "WARNING cannot retrieve section";
+         opserr <<  "WARNING cannot retrieve section\n";
          return TCL_ERROR;
       }    
      
       if (sectionRepres->getType() != SEC_TAG_FiberSection)
       {
-         interp->result = "WARNING section invalid: patch can only be added to fiber sections";
+         opserr <<  "WARNING section invalid: patch can only be added to fiber sections\n";
          return TCL_ERROR;
       }
 
@@ -961,11 +965,11 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
                                        startAng, endAng);
       if (!patch)
       {
-         interp->result = "WARNING cannot alocate patch";
+         opserr <<  "WARNING cannot alocate patch\n";
          return TCL_ERROR;
       }
 
-      //cerr << "\n\tpatch: " << *patch;
+      //opserr << "\n\tpatch: " << *patch;
       
       // add patch to section
 
@@ -974,14 +978,14 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
       
       if (error)
       {
-         interp->result = "WARNING cannot add patch to section";
+         opserr <<  "WARNING cannot add patch to section\n";
          return TCL_ERROR;
       }
    }
 
    else
    {
-      interp->result = "WARNING patch type is not available";
+      opserr <<  "WARNING patch type is not available\n";
       return TCL_ERROR;
    }
   
@@ -997,13 +1001,13 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
 {
     // check if a section is being processed
     if (currentSectionTag == 0) {
-	interp->result = "WARNING subcommand 'fiber' is only valid inside a 'section' command";
+	opserr <<  "WARNING subcommand 'fiber' is only valid inside a 'section' command\n";
 	return TCL_ERROR;
     }	   
     
     // make sure at least one other argument to contain patch type
     if (argc < 5) {
-	interp->result = "WARNING invalid num args: fiber yLoc zLoc area matTag";
+	opserr <<  "WARNING invalid num args: fiber yLoc zLoc area matTag\n";
 	return TCL_ERROR;
     }    
 
@@ -1011,12 +1015,12 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
 	theTclModelBuilder->getSectionRepres(currentSectionTag);
     
     if (sectionRepres == 0) {
-	interp->result = "WARNING cannot retrieve section";
+	opserr <<  "WARNING cannot retrieve section\n";
 	return TCL_ERROR;
     }    
 	
     if (sectionRepres->getType() != SEC_TAG_FiberSection) {
-	interp->result = "WARNING section invalid: patch can only be added to fiber sections";
+	opserr <<  "WARNING section invalid: patch can only be added to fiber sections\n";
 	return TCL_ERROR;
     }
 
@@ -1032,20 +1036,20 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
 
     
     if (Tcl_GetDouble(interp, argv[1], &yLoc) != TCL_OK) {
-         interp->result = "WARNING invalid yLoc: fiber yLoc zLoc area matTag";
+         opserr <<  "WARNING invalid yLoc: fiber yLoc zLoc area matTag\n";
          return TCL_ERROR;
      }    
     if (Tcl_GetDouble(interp, argv[2], &zLoc) != TCL_OK) {
-         interp->result = "WARNING invalid zLoc: fiber yLoc zLoc area matTag";
+         opserr <<  "WARNING invalid zLoc: fiber yLoc zLoc area matTag\n";
          return TCL_ERROR;
      }        
     if (Tcl_GetDouble(interp, argv[3], &area) != TCL_OK) {
-         interp->result = "WARNING invalid area: fiber yLoc zLoc area matTag";
+         opserr <<  "WARNING invalid area: fiber yLoc zLoc area matTag\n";
          return TCL_ERROR;
      }            
     
     if (Tcl_GetInt(interp, argv[4], &matTag) != TCL_OK) {
-         interp->result = "WARNING invalid matTag: fiber yLoc zLoc area matTag";
+         opserr <<  "WARNING invalid matTag: fiber yLoc zLoc area matTag\n";
          return TCL_ERROR;
      }                
     
@@ -1055,13 +1059,13 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
     if (NDM == 2) {
 
 	if (material == 0) {
-	    interp->result = "WARNING invalid material ID for patch";
+	    opserr <<  "WARNING invalid material ID for patch\n";
 	    return TCL_ERROR;
 	}   
 
 	theFiber = new UniaxialFiber2d(numFibers, *material, area, yLoc);
 	if (theFiber == 0) {
-	    interp->result = "WARNING unable to allocate fiber ";
+	    opserr <<  "WARNING unable to allocate fiber \n";
 	    return TCL_ERROR;
 	}    
     }
@@ -1074,13 +1078,13 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
 	    
 	theFiber = new UniaxialFiber3d(numFibers, *material, area, fiberPosition);
 	if (theFiber == 0) {
-	    interp->result = "WARNING unable to allocate fiber ";
+	    opserr <<  "WARNING unable to allocate fiber \n";
 	    return TCL_ERROR;
 	}    
     }
 
     else {
-	interp->result = "WARNING fiber command for FiberSection only fo 2 or 3d ";
+	opserr <<  "WARNING fiber command for FiberSection only fo 2 or 3d \n";
 	return TCL_ERROR;
     }    
 	
@@ -1088,7 +1092,7 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
     int error = fiberSectionRepr->addFiber(*theFiber);
 
     if (error) {
-	interp->result = "WARNING cannot add patch to section";
+	opserr <<  "WARNING cannot add patch to section\n";
 	return TCL_ERROR;
     }  
 
@@ -1104,19 +1108,19 @@ int
 TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int argc, 
 				  char **argv, TclModelBuilder *theTclModelBuilder)
 {
-   //cerr << "\nreading layer:";
+   //opserr << "\nreading layer:\n";
 
    // check if a section is being processed
    if (currentSectionTag == 0)
    {
-      interp->result = "WARNING subcommand 'patch' is only valid inside a 'section' command";
+      opserr <<  "WARNING subcommand 'patch' is only valid inside a 'section' command\n";
       return TCL_ERROR;
    }	   
 
    // make sure at least one other argument to contain layer type
    if (argc < 2) 
    {
-      interp->result = "WARNING need to specify a layer type ";
+      opserr <<  "WARNING need to specify a layer type \n";
       return TCL_ERROR;
    }    
 
@@ -1125,7 +1129,7 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
    {
       if (argc < 9)
       {
-         interp->result = "WARNING invalid number of parameters: layer straight matTag numReinfBars reinfBarArea yStartPt zStartPt yEndPt zEndPt";
+         opserr <<  "WARNING invalid number of parameters: layer straight matTag numReinfBars reinfBarArea yStartPt zStartPt yEndPt zEndPt\n";
          return TCL_ERROR;
       }
 
@@ -1139,53 +1143,53 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
       
       if (Tcl_GetInt(interp, argv[argi++], &matTag) != TCL_OK)
       {
-         interp->result = "WARNING invalid matTag: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt";
+         opserr <<  "WARNING invalid matTag: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tmatTag: " << matTag;
+      //opserr << "\n\tmatTag: " << matTag;
 
       if (Tcl_GetInt(interp, argv[argi++], &numReinfBars) != TCL_OK)
       {
-         interp->result = "WARNING invalid numReinfBars: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt";
+         opserr <<  "WARNING invalid numReinfBars: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tnumReinfBars: " << numReinfBars;
+      //opserr << "\n\tnumReinfBars: " << numReinfBars;
 
       if (Tcl_GetDouble(interp, argv[argi++], &reinfBarArea) != TCL_OK)
       {
-         interp->result = "WARNING invalid reinfBarArea: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt";
+         opserr <<  "WARNING invalid reinfBarArea: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\treinfBarArea: " << reinfBarArea;
+      //opserr << "\n\treinfBarArea: " << reinfBarArea;
 
       if (Tcl_GetDouble(interp, argv[argi++], &yStartPt) != TCL_OK)
       {
-         interp->result = "WARNING invalid yStartPt: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt";
+         opserr <<  "WARNING invalid yStartPt: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tyStartPt: " << yStartPt;
+      //opserr << "\n\tyStartPt: " << yStartPt;
     
       if (Tcl_GetDouble(interp, argv[argi++], &zStartPt) != TCL_OK)
       {
-         interp->result = "WARNING invalid zStartPt: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt";
+         opserr <<  "WARNING invalid zStartPt: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tzStartPt: " << zStartPt;
+      //opserr << "\n\tzStartPt: " << zStartPt;
        
       if (Tcl_GetDouble(interp, argv[argi++], &yEndPt) != TCL_OK)
       {
-         interp->result = "WARNING invalid yEndPt: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt";
+         opserr <<  "WARNING invalid yEndPt: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tyEndPt: " << yEndPt;
+      //opserr << "\n\tyEndPt: " << yEndPt;
     
       if (Tcl_GetDouble(interp, argv[argi++], &zEndPt) != TCL_OK)
       {
-         interp->result = "WARNING invalid zEndPt: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt";
+         opserr <<  "WARNING invalid zEndPt: layer straight matTag numReinfBars reinfBarArea  yStartPt zStartPt yEndPt zEndPt\n";
          return TCL_ERROR;
       }
       
-      //cerr << "\n\tzEndPt: " << zEndPt;
+      //opserr << "\n\tzEndPt: " << zEndPt;
       
       // get section 
       secTag = currentSectionTag;
@@ -1193,13 +1197,13 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
       SectionRepres *sectionRepres = theTclModelBuilder->getSectionRepres(secTag);
       if (sectionRepres == 0) 
       {
-         interp->result = "WARNING cannot retrieve section";
+         opserr <<  "WARNING cannot retrieve section\n";
          return TCL_ERROR;
       }    
      
       if (sectionRepres->getType() != SEC_TAG_FiberSection)
       {
-         interp->result = "WARNING section invalid: patch can only be added to fiber sections";
+         opserr <<  "WARNING section invalid: patch can only be added to fiber sections\n";
          return TCL_ERROR;
       }
 
@@ -1220,10 +1224,10 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
                                                    startPt, endPt);
       if (!reinfLayer)
       {
-         interp->result = "WARNING cannot alocate reinfLayer";
+         opserr <<  "WARNING cannot alocate reinfLayer\n";
          return TCL_ERROR;
       }
-      //cerr << "\nStraigthReinfLayer: " << *reinfLayer;
+      //opserr << "\nStraigthReinfLayer: " << *reinfLayer;
 
       // add reinfLayer to section
       int error = fiberSectionRepr->addReinfLayer(*reinfLayer);
@@ -1231,7 +1235,7 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
       
       if (error)
       {
-         interp->result = "WARNING cannot add reinforcing layer to section";
+         opserr <<  "WARNING cannot add reinforcing layer to section\n";
          return TCL_ERROR;
       }
       
@@ -1240,7 +1244,7 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
    {
       if (argc < 8)
       {
-         interp->result = "WARNING invalid number of parameters: layer circ matTag numReinfBars reinfBarArea yCenter zCenter arcRadius <startAng endAng>";
+         opserr <<  "WARNING invalid number of parameters: layer circ matTag numReinfBars reinfBarArea yCenter zCenter arcRadius <startAng endAng>\n";
          return TCL_ERROR;
       }
 
@@ -1254,62 +1258,62 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
       
       if (Tcl_GetInt(interp, argv[argi++], &matTag) != TCL_OK)
       {
-         interp->result = "WARNING invalid matTag: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
+         opserr <<  "WARNING invalid matTag: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tmatTag: " << matTag;
+      //opserr << "\n\tmatTag: " << matTag;
 
       if (Tcl_GetInt(interp, argv[argi++], &numReinfBars) != TCL_OK)
       {
-         interp->result = "WARNING invalid numReinfBars: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
+         opserr <<  "WARNING invalid numReinfBars: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tnumReinfBars: " << numReinfBars;
+      //opserr << "\n\tnumReinfBars: " << numReinfBars;
 
       if (Tcl_GetDouble(interp, argv[argi++], &reinfBarArea) != TCL_OK)
       {
-         interp->result = "WARNING invalid reinfBarArea: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
+         opserr <<  "WARNING invalid reinfBarArea: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\treinfBarArea: " << reinfBarArea;
+      //opserr << "\n\treinfBarArea: " << reinfBarArea;
 
       if (Tcl_GetDouble(interp, argv[argi++], &yCenter) != TCL_OK)
       {
-         interp->result = "WARNING invalid yCenter: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
+         opserr <<  "WARNING invalid yCenter: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tyCenter: " << yCenter;
+      //opserr << "\n\tyCenter: " << yCenter;
     
       if (Tcl_GetDouble(interp, argv[argi++], &zCenter) != TCL_OK)
       {
-         interp->result = "WARNING invalid zCenter: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
+         opserr <<  "WARNING invalid zCenter: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tzCenter: " << zCenter;
+      //opserr << "\n\tzCenter: " << zCenter;
        
       if (Tcl_GetDouble(interp, argv[argi++], &radius) != TCL_OK)
       {
-         interp->result = "WARNING invalid radius: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
+         opserr <<  "WARNING invalid radius: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng\n";
          return TCL_ERROR;
       }
-      //cerr << "\n\tradius: " << radius;
+      //opserr << "\n\tradius: " << radius;
     
 	  bool anglesSpecified = false;
 
       if (argc > 9) {
 		  if (Tcl_GetDouble(interp, argv[argi++], &startAng) != TCL_OK)
 		  {
-			 interp->result = "WARNING invalid startAng: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
+			 opserr <<  "WARNING invalid startAng: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng\n";
 			 return TCL_ERROR;
 		  }
-		  //cerr << "\n\tstartAng: " << startAng;
+		  //opserr << "\n\tstartAng: " << startAng;
 
 		  if (Tcl_GetDouble(interp, argv[argi++], &endAng) != TCL_OK)
 		  {
-			 interp->result = "WARNING invalid endAng: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng";
+			 opserr <<  "WARNING invalid endAng: layer circ matTag numReinfBars reinfBarArea yCenter zCenter radius startAng endAng\n";
 			 return TCL_ERROR;
 		  }
-		  //cerr << "\n\tendAng: " << endAng;
+		  //opserr << "\n\tendAng: " << endAng;
 
 		  anglesSpecified = true;
 	  }
@@ -1320,13 +1324,13 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
       SectionRepres *sectionRepres = theTclModelBuilder->getSectionRepres(secTag);
       if (sectionRepres == 0) 
       {
-         interp->result = "WARNING cannot retrieve section";
+         opserr <<  "WARNING cannot retrieve section\n";
          return TCL_ERROR;
       }    
      
       if (sectionRepres->getType() != SEC_TAG_FiberSection)
       {
-         interp->result = "WARNING section invalid: patch can only be added to fiber sections";
+         opserr <<  "WARNING section invalid: patch can only be added to fiber sections\n";
          return TCL_ERROR;
       }
 
@@ -1351,10 +1355,10 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
 
       if (!reinfLayer)
       {
-         interp->result = "WARNING cannot alocate reinfLayer";
+         opserr <<  "WARNING cannot alocate reinfLayer\n";
          return TCL_ERROR;
       }
-      //cerr << "\nCircReinfLayer: " << *reinfLayer;
+      //opserr << "\nCircReinfLayer: " << *reinfLayer;
 
       // add reinfLayer to section
       int error = fiberSectionRepr->addReinfLayer(*reinfLayer);
@@ -1362,14 +1366,14 @@ TclModelBuilder_addReinfLayer(ClientData clientData, Tcl_Interp *interp, int arg
       
       if (error)
       {
-         interp->result = "WARNING cannot add reinforcing layer to section";
+         opserr <<  "WARNING cannot add reinforcing layer to section\n";
          return TCL_ERROR;
       }
       
    }
    else
    {
-      interp->result = "WARNING reinforcing layer type is not available";
+      opserr <<  "WARNING reinforcing layer type is not available\n";
       return TCL_ERROR;
    }
   
@@ -1386,7 +1390,7 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
    SectionRepres *sectionRepres = theTclModelBuilder->getSectionRepres(secTag);
    if (sectionRepres == 0) 
    {
-      interp->result = "WARNING cannot retrieve section";
+      opserr <<  "WARNING cannot retrieve section\n";
       return TCL_ERROR;
    }    
      
@@ -1420,7 +1424,7 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
       for (i = 0; i < numReinfLayers; i++)
          numFibers += reinfLayer[i]->getNumReinfBars();
       
-      //cerr << "\nnumFibers: " << numFibers;
+      //opserr << "\nnumFibers: " << numFibers;
       
       static Vector fiberPosition(2);
       int    matTag;
@@ -1435,22 +1439,22 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
       k = 0;
       for (i = 0; i < numPatches; i++)
       {
-         //cerr << "\nPatch :" << i;
+         //opserr << "\nPatch :" << i;
       
          numCells   = patch[i]->getNumCells();
          matTag = patch[i]->getMaterialID();
 
-         //cerr << "\nmatTag: " << matTag(k);
+         //opserr << "\nmatTag: " << matTag(k);
 
          cell = patch[i]->getCells();
 
          if (cell == 0)
          {
-            interp->result = "WARNING out of run to create fibers";
+            opserr <<  "WARNING out of run to create fibers\n";
             return TCL_ERROR;
          }    
          
-         //cerr << "\n\tnumCells :" << numCells;
+         //opserr << "\n\tnumCells :" << numCells;
       
          for (j = 0; j < numCells; j++)
          {
@@ -1500,7 +1504,7 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 
       Fiber **fiber = new Fiber *[numFibers];
       if (fiber == 0) {
-	  interp->result = "WARNING unable to allocate fibers ";
+	  opserr <<  "WARNING unable to allocate fibers \n";
 	  return TCL_ERROR;
       }          
       
@@ -1519,18 +1523,18 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
             material = theTclModelBuilder->getUniaxialMaterial(fibersMaterial(k));
             if (material == 0)
             {
-               interp->result = "WARNING invalid material ID for patch";
+               opserr <<  "WARNING invalid material ID for patch\n";
                return TCL_ERROR;
             }   
 	    
 	    fiber[i] = new UniaxialFiber2d(k, *material, fibersArea(k), fibersPosition(0,k));
             if (!fiber[i]) 
             {
-               interp->result = "WARNING unable to allocate fiber ";
+               opserr <<  "WARNING unable to allocate fiber \n";
                return TCL_ERROR;
             }    
    
-            //cerr << *fiber[k];
+            //opserr << *fiber[k];
 	    k++;
 	 }
 	
@@ -1543,17 +1547,17 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 
          if (section == 0)
          {
-            interp->result = "WARNING - cannot construct section";
+            opserr <<  "WARNING - cannot construct section\n";
             return TCL_ERROR;
          }
        
          if (theTclModelBuilder->addSection (*section) < 0)
          {
-            interp->result = "WARNING - cannot add section";
+            opserr <<  "WARNING - cannot add section\n";
             return TCL_ERROR;
          }
 
-        //cerr << "section: " << *section;
+        //opserr << "section: " << *section;
      
       }
       else if (NDM == 3)     
@@ -1566,7 +1570,7 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
             material = theTclModelBuilder->getUniaxialMaterial(fibersMaterial(k));
             if (material == 0)
             {
-               interp->result = "WARNING invalid material ID for patch";
+               opserr <<  "WARNING invalid material ID for patch\n";
                return TCL_ERROR;
             }   
 	    
@@ -1574,14 +1578,14 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 	    fiberPosition(1) = fibersPosition(1,k);
 	    
 	    fiber[i] = new UniaxialFiber3d(k, *material, fibersArea(k), fiberPosition);
-	    if (fibersArea(k) < 0) cerr << "ERROR: " << fiberPosition(0) << " " << fiberPosition(1) << endl;
+	    if (fibersArea(k) < 0) opserr << "ERROR: " << fiberPosition(0) << " " << fiberPosition(1) << endln;
             if (!fiber[k]) 
             {
-               interp->result = "WARNING unable to allocate fiber ";
+               opserr <<  "WARNING unable to allocate fiber \n";
                return TCL_ERROR;
             }    
 	    k++;
-            //cerr << *fiber[k];
+            //opserr << *fiber[k];
 	 }
 	
 	 //SectionForceDeformation *section = new FiberSection(secTag, numFibers, fiber);
@@ -1597,22 +1601,22 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
 
          if (section == 0)
          {
-            interp->result = "WARNING - cannot construct section";
+            opserr <<  "WARNING - cannot construct section\n";
             return TCL_ERROR;
          }
        
          if (theTclModelBuilder->addSection (*section) < 0)
          {
-            interp->result = "WARNING - cannot add section";
+            opserr <<  "WARNING - cannot add section\n";
             return TCL_ERROR;
          }
 
-        //cerr << "section: " << *section;
+        //opserr << "section: " << *section;
        
       }
       else
       {
-         cerr << "WARNING NDM = " << NDM << " is imcompatible with available frame elements";
+         opserr << "WARNING NDM = " << NDM << " is imcompatible with available frame elements\n";
          return TCL_ERROR;
       }
 
@@ -1622,7 +1626,7 @@ buildSection(Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder,
    }
    else 
    {
-      interp->result = "WARNING section invalid: can only build fiber sections";
+      opserr <<  "WARNING section invalid: can only build fiber sections\n";
       return TCL_ERROR;
    }    
 
@@ -1642,7 +1646,7 @@ TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, in
 	return TCL_ERROR;
     
     if (Tcl_GetInt(interp, argv[2], &secTag) != TCL_OK) {
-      interp->result = "could not read section tag\n";
+      opserr <<  "could not read section tag\n";
       return TCL_ERROR;
     }
 
@@ -1678,7 +1682,7 @@ TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, in
     ifstream theFile;
     theFile.open(fileName, ios::in);
     if (!theFile) {
-      cerr << "section UCFiber - could not open file named " << fileName;
+      opserr << "section UCFiber - could not open file named " << fileName;
       return TCL_ERROR;
     } else {
       int foundStart = 0;
@@ -1703,7 +1707,7 @@ TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, in
 
 	UniaxialMaterial *theMaterial = theTclModelBuilder->getUniaxialMaterial(matTag);
 	if (theMaterial == 0) {
-	  cerr << "section UCFiber - no material exists with tag << " << matTag << endl;
+	  opserr << "section UCFiber - no material exists with tag << " << matTag << endln;
 	  return TCL_ERROR;
 	}
 	
@@ -1731,7 +1735,7 @@ TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, in
 
     // finally add the section to our modelbuilder
     if (theTclModelBuilder->addSection (*section) < 0) {
-      interp->result = "WARNING - cannot add section";
+      opserr <<  "WARNING - cannot add section\n";
       return TCL_ERROR;
     }
 

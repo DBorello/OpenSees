@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:57 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/LaplaceRV.cpp,v $
 
 
@@ -33,6 +33,7 @@
 //			haukaas 06/01 (made part of official OpenSees)
 //
 
+#include <OPS_Globals.h>
 #include <LaplaceRV.h>
 #include <math.h>
 #include <string.h>
@@ -91,7 +92,7 @@ LaplaceRV::~LaplaceRV()
 
 
 void
-LaplaceRV::Print(ostream &s, int flag)
+LaplaceRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -154,5 +155,5 @@ LaplaceRV::getStartValue()
 
 double LaplaceRV::getParameter1()  {return alpha;}
 double LaplaceRV::getParameter2()  {return beta;}
-double LaplaceRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double LaplaceRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double LaplaceRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double LaplaceRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}

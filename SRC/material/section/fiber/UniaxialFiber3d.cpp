@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-10 22:26:39 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber3d.cpp,v $
                                                                         
                                                                         
@@ -77,10 +77,11 @@ UniaxialFiber3d::UniaxialFiber3d(int tag,
 {
 	theMaterial = theMat.getCopy();  // get a copy of the MaterialModel
 
-	if (theMaterial == 0)
-		g3ErrorHandler->fatal("%s -- failed to get copy of UniaxialMaterial",
-			"UniaxialFiber3d::UniaxialFiber2d");
-
+	if (theMaterial == 0) {
+	  opserr << "UniaxialFiber3d::UniaxialFiber2d -- failed to get copy of UniaxialMaterial\n";
+	  exit(-1);
+	}
+	
    	if (code(0) != SECTION_RESPONSE_P) {
 		code(0) = SECTION_RESPONSE_P;
 		code(1) = SECTION_RESPONSE_MZ;
@@ -107,9 +108,8 @@ UniaxialFiber3d::setTrialFiberStrain(const Vector &vs)
   if (theMaterial != 0)
       return theMaterial->setTrialStrain(strain);
   else {
-      g3ErrorHandler->fatal("UniaxialFiber3d::setTrialFiberStrain() - %s\n",
-			    "recvSelf() has not been invoked");
-      return -1; // in case fatal does not exit
+    opserr << "UniaxialFiber3d::setTrialFiberStrain() - no material!\n";
+    return -1; // in case fatal does not exit
   }
 }
 
@@ -226,8 +226,7 @@ UniaxialFiber3d::sendSelf(int commitTag, Channel &theChannel)
     idData(2) = matDbTag;
     
     if (theChannel.sendID(dbTag, commitTag, idData) < 0)  {
-	g3ErrorHandler->warning("UniaxialFiber3d::sendSelf() - %s\n",
-			      "failed to send ID data");
+	opserr << "UniaxialFiber3d::sendSelf() -  failed to send ID data\n";
 	return -1;
     }    
     
@@ -240,16 +239,14 @@ UniaxialFiber3d::sendSelf(int commitTag, Channel &theChannel)
     dData(1) = as[0];
     dData(2) = as[1];
     if (theChannel.sendVector(dbTag, commitTag, dData) < 0)  {
-	g3ErrorHandler->warning("UniaxialFiber3d::sendSelf() - %s\n",
-				"failed to send Vector data");
-	return -2;
+      opserr << "UniaxialFiber3d::sendSelf() -  failed to send Vector data\n";
+      return -2;
     }    
 
     // now invoke sendSelf on the material
     if (theMaterial->sendSelf(commitTag, theChannel) < 0) {
-	g3ErrorHandler->warning("UniaxialFiber3d::sendSelf() - %s\n",
-				"the material failed in sendSelf()");
-	return -3;
+      opserr << "UniaxialFiber3d::sendSelf() -  the material failed in sendSelf()\n";
+      return -3;
     }    	
     
     return 0;
@@ -268,8 +265,7 @@ UniaxialFiber3d::recvSelf(int commitTag, Channel &theChannel,
     int dbTag = this->getDbTag();
     
     if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
-	g3ErrorHandler->warning("UniaxialFiber3d::recvSelf() - %s\n",
-			      "failed to recv ID data");
+	opserr << "UniaxialFiber3d::recvSelf() -  failed to recv ID data\n";
 	return -1;
     }    
 
@@ -281,8 +277,7 @@ UniaxialFiber3d::recvSelf(int commitTag, Channel &theChannel,
     
     static Vector dData(3);
     if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
-	g3ErrorHandler->warning("UniaxialFiber3d::recvSelf() - %s\n",
-				"failed to recv Vector data");
+      opserr << "UniaxialFiber3d::recvSelf() -  failed to recv Vector data\n";
 	return -2;
     }        
     area = dData(0);
@@ -308,9 +303,8 @@ UniaxialFiber3d::recvSelf(int commitTag, Channel &theChannel,
     if (theMaterial == 0) {
 	theMaterial = theBroker.getNewUniaxialMaterial(matClassTag);
 	if (theMaterial == 0) {
-	    g3ErrorHandler->warning("UniaxialFiber3d::recvSelf() - %s %d\n",
-				    "failed to get a UniaxialMaterial of type",
-				    matClassTag);
+	  opserr << "UniaxialFiber3d::recvSelf() - " << 
+	    "failed to get a UniaxialMaterial of type "<< matClassTag << endln;
 	    return -3;
 	}
     }
@@ -320,8 +314,7 @@ UniaxialFiber3d::recvSelf(int commitTag, Channel &theChannel,
 
     // now invoke recvSelf on the material
     if (theMaterial->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("UniaxialFiber3d::recvSelf() - %s\n",
-				"the material failed in recvSelf()");
+      opserr << "UniaxialFiber3d::recvSelf() -  the material failed in recvSelf()\n";
 	return -4;
     }    	
 
@@ -329,12 +322,12 @@ UniaxialFiber3d::recvSelf(int commitTag, Channel &theChannel,
 }
 
 
-void UniaxialFiber3d::Print(ostream &s, int flag)
+void UniaxialFiber3d::Print(OPS_Stream &s, int flag)
 {
-    s << "\nUniaxialFiber3d, tag: " << this->getTag() << endl;
-    s << "\tArea: " << area << endl; 
-    s << "\tMatrix as: " << 1.0 << " " << as[0] << " " << as[1] << endl; 
-    s << "\tMaterial, tag: " << theMaterial->getTag() << endl;
+    s << "\nUniaxialFiber3d, tag: " << this->getTag() << endln;
+    s << "\tArea: " << area << endln; 
+    s << "\tMatrix as: " << 1.0 << " " << as[0] << " " << as[1] << endln; 
+    s << "\tMaterial, tag: " << theMaterial->getTag() << endln;
 }
 
 Response*

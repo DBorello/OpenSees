@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/EigenIntegrator.cpp,v $
                                                                         
                                                                         
@@ -108,8 +108,8 @@ int
 EigenIntegrator::formK()
 {
     if (theAnalysisModel == 0 || theSOE == 0) {
-	cerr << "WARNING EigenIntegrator::formK -";
-	cerr << " no AnalysisModel or EigenSOE has been set\n";
+	opserr << "WARNING EigenIntegrator::formK -";
+	opserr << " no AnalysisModel or EigenSOE has been set\n";
 	return -1;
     }
     
@@ -132,8 +132,8 @@ EigenIntegrator::formK()
     FE_EleIter &theEles2 = theAnalysisModel->getFEs();    
     while((elePtr = theEles2()) != 0) {
         if (theSOE->addA(elePtr->getTangent(this), elePtr->getID()) < 0) {
-	    cerr << "WARNING EigenIntegrator::formK -";
-	    cerr << " failed in addA for ID " << elePtr->getID();	    
+	    opserr << "WARNING EigenIntegrator::formK -";
+	    opserr << " failed in addA for ID " << elePtr->getID();	    
 	    result = -2;
 	}
     }
@@ -146,8 +146,8 @@ int
 EigenIntegrator::formM()
 {
     if (theAnalysisModel == 0 || theSOE == 0) {
-	cerr << "WARNING EigenIntegrator::formK -";
-	cerr << " no AnalysisModel or EigenSOE has been set\n";
+	opserr << "WARNING EigenIntegrator::formK -";
+	opserr << " no AnalysisModel or EigenSOE has been set\n";
 	return -1;
     }
     
@@ -169,8 +169,8 @@ EigenIntegrator::formM()
     FE_EleIter &theEles2 = theAnalysisModel->getFEs();    
     while((elePtr = theEles2()) != 0) {     
 	if (theSOE->addM(elePtr->getTangent(this), elePtr->getID()) < 0) {
-	    cerr << "WARNING EigenIntegrator::formK -";
-	    cerr << " failed in addA for ID " << elePtr->getID();	    
+	    opserr << "WARNING EigenIntegrator::formK -";
+	    opserr << " failed in addA for ID " << elePtr->getID();	    
 	    result = -2;
 	}
     }
@@ -180,8 +180,8 @@ EigenIntegrator::formM()
     while((dofPtr = theDofs()) != 0) {
 	//   	dofPtr->formTangent(this);
 	if (theSOE->addM(dofPtr->getTangent(this),dofPtr->getID()) < 0) {
-	    cerr << "WARNING EigenIntegrator::formM -";
-	    cerr << " failed in addM for ID " << dofPtr->getID();	    
+	    opserr << "WARNING EigenIntegrator::formM -";
+	    opserr << " failed in addM for ID " << dofPtr->getID();	    
 	    result = -3;
 	}
     }
@@ -245,7 +245,7 @@ EigenIntegrator::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void 
-EigenIntegrator::Print(ostream &s, int flag)
+EigenIntegrator::Print(OPS_Stream &s, int flag)
 {
     s << "\t EigenIntegrator: \n";
 }

@@ -78,9 +78,9 @@ set $-2$ is returned. If the {\em currentNumIter} $>=$ {\em
 maxNumIter} an error message is printed and $-2$ is returned. If none
 of these conditions is met, the {\em currentnumIter} is incremented 
 and $-1$ is returned. If the print flag is $0$ nothing is printed to
-cerr during the method, if $1$ the current iteration and norm are
-printed to cerr, and if $2$ the norm and number of iterations to convergence
-are printed to cerr. \\ 
+opserr during the method, if $1$ the current iteration and norm are
+printed to opserr, and if $2$ the norm and number of iterations to convergence
+are printed to opserr. \\ 
 
 
 \indent {\em int sendSelf(int commitTag, Channel \&theChannel);}\\ 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-12 07:44:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/MultiSupportPattern.cpp,v $
                                                                         
 // Written: fmk 11/00
@@ -82,7 +82,7 @@ MultiSupportPattern::addMotion(GroundMotion &theMotion, int tag)
 {
   // ensure no motion with given tag already added
   if (theMotionTags.getLocation(tag) >= 0) {
-    cerr << "MultiSupportPattern::addMotion - could not add new, motion wih same tag exists\n";
+    opserr << "MultiSupportPattern::addMotion - could not add new, motion wih same tag exists\n";
     return -1;
   }    
 
@@ -90,7 +90,7 @@ MultiSupportPattern::addMotion(GroundMotion &theMotion, int tag)
   GroundMotion **newMotions = new GroundMotion *[numMotions+1];
   //  GroundMotion **newMotions = (GroundMotion **)malloc(sizeof(GroundMotion *)*(numMotions+1));
   if (newMotions == 0) {
-    cerr << "MultiSupportPattern::addMotion - could not add new, out of mem\n";
+    opserr << "MultiSupportPattern::addMotion - could not add new, out of mem\n";
     return -1;
   }
   
@@ -130,14 +130,14 @@ MultiSupportPattern::getMotion(int tag)
 bool
 MultiSupportPattern::addNodalLoad(NodalLoad *)
 {
-  cerr << "MultiSupportPattern::addNodalLoad() - cannot add NodalLoad to EQ pattern\n";  
+  opserr << "MultiSupportPattern::addNodalLoad() - cannot add NodalLoad to EQ pattern\n";  
   return false;
 }
 
 bool
 MultiSupportPattern::addElementalLoad(ElementalLoad *)
 {
-  cerr << "MultiSupportPattern::addElementalLoad() - cannot add ElementalLoad to EQ pattern\n";    
+  opserr << "MultiSupportPattern::addElementalLoad() - cannot add ElementalLoad to EQ pattern\n";    
   return false;
 }
 
@@ -157,9 +157,9 @@ MultiSupportPattern::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void 
-MultiSupportPattern::Print(ostream &s, int flag)
+MultiSupportPattern::Print(OPS_Stream &s, int flag)
 {
-  s << "MultiSupportPattern  tag: " << this->getTag() << endl;
+  s << "MultiSupportPattern  tag: " << this->getTag() << endln;
   SP_Constraint *sp;
   SP_ConstraintIter &theIter = this->getSPs();
   while ((sp = theIter()) != 0)

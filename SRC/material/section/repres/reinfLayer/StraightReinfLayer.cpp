@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-10 18:00:38 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/reinfLayer/StraightReinfLayer.cpp,v $
                                                                         
                                                                         
@@ -180,7 +180,7 @@ StraightReinfLayer::getCopy (void) const
 
 
 
-void StraightReinfLayer::Print(ostream &s, int flag) const
+void StraightReinfLayer::Print(OPS_Stream &s, int flag) const
 {
    s << "\nReinforcing Layer type:  Straight";
    s << "\nMaterial ID: " << matID;
@@ -191,7 +191,7 @@ void StraightReinfLayer::Print(ostream &s, int flag) const
 }
 
 
-ostream &operator<<(ostream &s, const StraightReinfLayer &straightReinfLayer)
+OPS_Stream &operator<<(OPS_Stream &s, const StraightReinfLayer &straightReinfLayer)
 {  
    straightReinfLayer.Print(s);
    return s;

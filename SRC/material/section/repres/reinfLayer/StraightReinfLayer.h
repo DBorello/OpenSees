@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-10 18:00:38 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/reinfLayer/StraightReinfLayer.h,v $
                                                                         
                                                                         
@@ -69,8 +69,8 @@ class StraightReinfLayer : public ReinfLayer
     const Vector &getInitialPosition  (void) const;
     const Vector &getFinalPosition    (void) const;
 
-    void Print(ostream &s, int flag =0) const;   
-    friend ostream &operator<<(ostream &s, const StraightReinfLayer &straightReinfLayer);    
+    void Print(OPS_Stream &s, int flag =0) const;   
+    friend OPS_Stream &operator<<(OPS_Stream &s, const StraightReinfLayer &straightReinfLayer);    
     
   protected:
     

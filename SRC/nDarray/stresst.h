@@ -30,8 +30,7 @@
 #ifndef STRESSTENSOR_H
 #define STRESSTENSOR_H
 
-#include <iostream.h>
-#include <iomanip.h>
+#include <OPS_Globals.h>
 #include "BJtensor.h"
 
 class stresstensor : public BJtensor
@@ -119,7 +118,7 @@ class stresstensor : public BJtensor
     // Overloaded Insertion Operator	  ZHaohui Added Aug. 13, 2000
     // prints an stresstensor's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const stresstensor & rhs);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const stresstensor & rhs);
 
     //  // routine used by root finder, takes an alfa and returns the
     //  // yield function value for that alfa

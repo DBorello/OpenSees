@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:57 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/GammaRV.cpp,v $
 
 
@@ -92,7 +92,7 @@ GammaRV::~GammaRV()
 
 
 void
-GammaRV::Print(ostream &s, int flag)
+GammaRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -161,7 +161,7 @@ GammaRV::getInverseCDFvalue(double probValue)
 		}
 		else {
 			if (i==100) {
-				cerr << "WARNING: Did not converge to find inverse CDF!" << endl;
+				opserr << "WARNING: Did not converge to find inverse CDF!" << endln;
 				result = 0.0;
 			}
 			else {
@@ -205,8 +205,8 @@ GammaRV::getStartValue()
 
 double GammaRV::getParameter1()  {return k;}
 double GammaRV::getParameter2()  {return lambda;}
-double GammaRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double GammaRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double GammaRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double GammaRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
 
 
 
@@ -218,7 +218,7 @@ GammaRV::gammaFunction(double x)
 	double res;
 
 	if (x==0 || ( x < 0.0 && floor(x)==x ) )  {
-		cerr << "Invalid input to the gamma function" << endl;
+		opserr << "Invalid input to the gamma function" << endln;
 	}
 	else {
 		Vector p(9);

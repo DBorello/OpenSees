@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -39,7 +39,7 @@
 #include <ObjectBroker.h>
 #include <RCM.h>
 #include <SimpleNumberer.h>
-#include <iostream.h>
+#include <OPS_Stream.h>
 
 
 ObjectBroker::ObjectBroker()

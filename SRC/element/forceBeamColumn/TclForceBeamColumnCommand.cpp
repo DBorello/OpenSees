@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-19 21:06:24 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -30,7 +30,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 #include <Domain.h>
 
 #include <TclModelBuilder.h>
@@ -59,7 +58,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed\n";    
+    opserr << "WARNING builder has been destroyed\n";    
     return TCL_ERROR;
   }
   
@@ -73,55 +72,155 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     ok = 1;
   
   if (ok == 0) {
-    cerr << "WARNING -- NDM = " << ndm << " and NDF = " << ndf
-	 << " not compatible with forceBeamColumn element" << endl;
+    opserr << "WARNING -- NDM = " << ndm << " and NDF = " << ndf
+	 << " not compatible with forceBeamColumn element" << endln;
     return TCL_ERROR;
   }
   
+
   if (argc < 6) {
-    cerr << "WARNING insufficient arguments\n";
+    opserr << "WARNING insufficient arguments\n";
     printCommand(argc, argv);
-    cerr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? ...\n";
+    opserr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? ...\n";
     return TCL_ERROR;
   }
-  
-  // get the id and end nodes 
+
   int eleTag, iNode, jNode, transfTag;
-  
+  CrdTransf2d *theTransf2d = 0;
+  CrdTransf3d *theTransf3d = 0;
+  Element *theElement = 0;
+
+
   if (Tcl_GetInt(interp, argv[2], &eleTag) != TCL_OK) {
-    cerr << "WARNING invalid forceBeamColumn eleTag" << endl;
+    opserr << "WARNING invalid forceBeamColumn eleTag" << endln;
     return TCL_ERROR;
   }
   
   if (Tcl_GetInt(interp, argv[3], &iNode) != TCL_OK) {
-    cerr << "WARNING invalid iNode\n";
-    cerr << "forceBeamColumn element: " << eleTag << endl;
+    opserr << "WARNING invalid iNode\n";
+    opserr << "forceBeamColumn element: " << eleTag << endln;
     return TCL_ERROR;
   }
   
   if (Tcl_GetInt(interp, argv[4], &jNode) != TCL_OK) {
-    cerr << "WARNING invalid jNode\n";
-    cerr << "forceBeamColumn element: " << eleTag << endl;
+    opserr << "WARNING invalid jNode\n";
+    opserr << "forceBeamColumn element: " << eleTag << endln;
     return TCL_ERROR;
   }
+
+
+  //
+  // fmk UNDOCUMENTED FEATURE - 
+  // all to take similar command to nonlinearBeamColumn & dispBeamColumn 
+  // 
+
+  if ((strcmp(argv[6],"Lobatto") != 0) && (strcmp(argv[6],"HingeMidpoint") != 0) &&
+      (strcmp(argv[6],"HingeRadau") != 0) && (strcmp(argv[6],"UserDefined") != 0) &&
+      (strcmp(argv[6],"UserHinge") != 0)) {
+
+    int nIP, secTag;
+
+    if (Tcl_GetInt(interp, argv[5], &nIP) != TCL_OK) {
+      opserr << "WARNING invalid nIP\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+
+    if (Tcl_GetInt(interp, argv[6], &secTag) != TCL_OK) {
+      opserr << "WARNING invalid secTag\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+
+    SectionForceDeformation *theSection = theTclBuilder->getSection(secTag);
+    if (theSection == 0) {
+      opserr << "WARNING section not found\n";
+      opserr << "Section: " << secTag;
+      opserr << "\nforceBeamColumn element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+
+    if (Tcl_GetInt(interp, argv[7], &transfTag) != TCL_OK) {
+      opserr << "WARNING invalid transfTag\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (ndm == 2) {
+      
+      theTransf2d = theTclBuilder->getCrdTransf2d(transfTag);
+      
+      if (theTransf2d == 0) {
+	opserr << "WARNING transformation not found\n";
+	opserr << "transformation: " << transfTag;
+	opserr << "\nforceBeamColumn element: " << eleTag << endln;
+	return TCL_ERROR;
+      }
+    }
+    
+    if (ndm == 3) {
+      
+      theTransf3d = theTclBuilder->getCrdTransf3d(transfTag);
+      
+      if (theTransf3d == 0) {
+	opserr << "WARNING transformation not found\n";
+	opserr << "transformation: " << transfTag;
+	opserr << "\nforceBeamColumn element: " << eleTag << endln;
+	return TCL_ERROR;
+      }
+  }
+
+    
+    SectionForceDeformation **sections = new SectionForceDeformation *[nIP];
+    for (int i = 0; i < nIP; i++)
+      sections[i] = theSection;
+
+    LobattoBeamIntegration beamIntegr;
+
+
+    if (ndm == 2)
+      theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
+					 beamIntegr, *theTransf2d);
+    else
+      theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
+					 beamIntegr, *theTransf3d);
+
+    delete [] sections;    
+    if (theElement == 0) {
+      opserr << "WARNING ran out of memory creating element\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
+      return TCL_ERROR;
+    }
+    
+    if (theTclDomain->addElement(theElement) == false) {
+      opserr << "WARNING could not add element to the domain\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
+      delete theElement;
+      return TCL_ERROR;
+    }
+
+    return TCL_OK;
+  } 
+
   
+  //
+  // otherwise use correct format of command as found in current documentation
+  //
+
   if (Tcl_GetInt(interp, argv[5], &transfTag) != TCL_OK) {
-    cerr << "WARNING invalid transfTag\n";
-    cerr << "forceBeamColumn element: " << eleTag << endl;
+    opserr << "WARNING invalid transfTag\n";
+    opserr << "forceBeamColumn element: " << eleTag << endln;
     return TCL_ERROR;
   }
-  
-  CrdTransf2d *theTransf2d = 0;
-  CrdTransf3d *theTransf3d = 0;
   
   if (ndm == 2) {
     
     theTransf2d = theTclBuilder->getCrdTransf2d(transfTag);
     
     if (theTransf2d == 0) {
-      cerr << "WARNING transformation not found\n";
-      cerr << "transformation: " << transfTag;
-      cerr << "\nforceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING transformation not found\n";
+      opserr << "transformation: " << transfTag;
+      opserr << "\nforceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
   }
@@ -131,41 +230,39 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     theTransf3d = theTclBuilder->getCrdTransf3d(transfTag);
     
     if (theTransf3d == 0) {
-      cerr << "WARNING transformation not found\n";
-      cerr << "transformation: " << transfTag;
-      cerr << "\nforceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING transformation not found\n";
+      opserr << "transformation: " << transfTag;
+      opserr << "\nforceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
   }
-  
-  Element *theElement = 0;
   
   if (strcmp(argv[6],"Lobatto") == 0) {
     int secTag, nIP;
     
     if (argc < 9) {
-      cerr << "WARNING insufficient arguments\n";
+      opserr << "WARNING insufficient arguments\n";
       printCommand(argc, argv);
-      cerr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? Lobatto secTag? nIP?\n";
+      opserr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? Lobatto secTag? nIP?\n";
       return TCL_ERROR;
     }
 
     if (Tcl_GetInt(interp, argv[7], &secTag) != TCL_OK) {
-      cerr << "WARNING invalid secTag\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid secTag\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetInt(interp, argv[8], &nIP) != TCL_OK) {
-      cerr << "WARNING invalid nIP\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid nIP\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     
     SectionForceDeformation *theSection = theTclBuilder->getSection(secTag);
     if (theSection == 0) {
-      cerr << "WARNING section not found\n";
-      cerr << "Section: " << secTag;
-      cerr << "\nforceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING section not found\n";
+      opserr << "Section: " << secTag;
+      opserr << "\nforceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     
@@ -174,6 +271,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       sections[i] = theSection;
     
     LobattoBeamIntegration beamIntegr;
+    Element *theElement = 0;
 
     if (ndm == 2)
       theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
@@ -181,7 +279,6 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     else
       theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
 					 beamIntegr, *theTransf3d);
-
     delete [] sections;
   }
 
@@ -189,9 +286,9 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	   strcmp(argv[6],"HingeRadau") == 0) {
     
     if (argc < 14) {
-      cerr << "WARNING insufficient arguments\n";
+      opserr << "WARNING insufficient arguments\n";
       printCommand(argc, argv);
-      cerr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? type secTagI? lpI? secTagJ? lpJ? E? A? Iz? <Iy? G? J?>\n";
+      opserr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? type secTagI? lpI? secTagJ? lpJ? E? A? Iz? <Iy? G? J?>\n";
       return TCL_ERROR;
     }
 
@@ -200,71 +297,71 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     double E, A, Iz, Iy, G, J;
     
     if (Tcl_GetInt(interp, argv[7], &secTagI) != TCL_OK) {
-      cerr << "WARNING invalid secTagI\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid secTagI\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetDouble(interp, argv[8], &lpI) != TCL_OK) {
-      cerr << "WARNING invalid lpI\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid lpI\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetInt(interp, argv[9], &secTagJ) != TCL_OK) {
-      cerr << "WARNING invalid secTagJ\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid secTagJ\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetDouble(interp, argv[10], &lpJ) != TCL_OK) {
-      cerr << "WARNING invalid lpJ\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid lpJ\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetDouble(interp, argv[11], &E) != TCL_OK) {
-      cerr << "WARNING invalid E\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid E\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetDouble(interp, argv[12], &A) != TCL_OK) {
-      cerr << "WARNING invalid A\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid A\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetDouble(interp, argv[13], &Iz) != TCL_OK) {
-      cerr << "WARNING invalid I\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid I\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     
     if (ndm == 3 && argc > 16) {
       if (Tcl_GetDouble(interp, argv[14], &Iy) != TCL_OK) {
-	cerr << "WARNING invalid Iy\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid Iy\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       if (Tcl_GetDouble(interp, argv[15], &G) != TCL_OK) {
-	cerr << "WARNING invalid G\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid G\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       if (Tcl_GetDouble(interp, argv[16], &J) != TCL_OK) {
-	cerr << "WARNING invalid J\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid J\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
     }
 
     SectionForceDeformation *sectionI = theTclBuilder->getSection(secTagI);
     if (sectionI == 0) {
-      cerr << "WARNING section not found\n";
-      cerr << "Section: " << secTagI;
-      cerr << "\nforceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING section not found\n";
+      opserr << "Section: " << secTagI;
+      opserr << "\nforceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     SectionForceDeformation *sectionJ = theTclBuilder->getSection(secTagJ);
     if (sectionJ == 0) {
-      cerr << "WARNING section not found\n";
-      cerr << "Section: " << secTagJ;
-      cerr << "\nforceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING section not found\n";
+      opserr << "Section: " << secTagJ;
+      opserr << "\nforceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     
@@ -301,17 +398,17 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
   else if (strcmp(argv[6],"UserDefined") == 0) {
 
     if (argc < 9) {
-      cerr << "WARNING insufficient arguments\n";
+      opserr << "WARNING insufficient arguments\n";
       printCommand(argc, argv);
-      cerr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? UserDefined nIP? secTag1? ... pt1? ... wt1? ...\n";
+      opserr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? UserDefined nIP? secTag1? ... pt1? ... wt1? ...\n";
       return TCL_ERROR;
     }
 
     int nIP;
     
     if (Tcl_GetInt(interp, argv[7], &nIP) != TCL_OK) {
-      cerr << "WARNING invalid nIP\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid nIP\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     
@@ -324,18 +421,18 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       int sec;
       double pt, wt;
       if (Tcl_GetInt(interp, argv[j], &sec) != TCL_OK) {
-	cerr << "WARNING invalid sec\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid sec\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       if (Tcl_GetDouble(interp, argv[j+nIP], &pt) != TCL_OK) {
-	cerr << "WARNING invalid pt\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid pt\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       if (Tcl_GetDouble(interp, argv[j+2*nIP], &wt) != TCL_OK) {
-	cerr << "WARNING invalid wt\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid wt\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       secs(i) = sec;
@@ -347,9 +444,9 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     for (i = 0; i < nIP; i++) {
       SectionForceDeformation *theSection = theTclBuilder->getSection(secs(i));
       if (theSection == 0) {
-	cerr << "WARNING section not found\n";
-	cerr << "Section: " << secs(i);
-	cerr << "\nforceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING section not found\n";
+	opserr << "Section: " << secs(i);
+	opserr << "\nforceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       sections[i] = theSection;
@@ -370,45 +467,45 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
   else if (strcmp(argv[6],"UserHinge") == 0) {
 
     if (argc < 9) {
-      cerr << "WARNING insufficient arguments\n";
+      opserr << "WARNING insufficient arguments\n";
       printCommand(argc, argv);
-      cerr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? UserHinge E? A? Iz? <Iy? G? J?> npL? secTagL1? ... ptL1? ... wtL1? ... npR? secTagR1? ... ptR1? ... wtR1? ...\n";
+      opserr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? UserHinge E? A? Iz? <Iy? G? J?> npL? secTagL1? ... ptL1? ... wtL1? ... npR? secTagR1? ... ptR1? ... wtR1? ...\n";
       return TCL_ERROR;
     }
 
     double E, A, Iz, Iy, G, J;
     
     if (Tcl_GetDouble(interp, argv[7], &E) != TCL_OK) {
-      cerr << "WARNING invalid E\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid E\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetDouble(interp, argv[8], &A) != TCL_OK) {
-      cerr << "WARNING invalid A\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid A\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetDouble(interp, argv[9], &Iz) != TCL_OK) {
-      cerr << "WARNING invalid I\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid I\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
 
     int argStart = 10;
     if (ndm == 3) {
       if (Tcl_GetDouble(interp, argv[10], &Iy) != TCL_OK) {
-	cerr << "WARNING invalid I\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid I\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       if (Tcl_GetDouble(interp, argv[11], &G) != TCL_OK) {
-	cerr << "WARNING invalid G\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid G\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       if (Tcl_GetDouble(interp, argv[12], &J) != TCL_OK) {
-	cerr << "WARNING invalid J\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid J\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       argStart = 13;
@@ -417,13 +514,13 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     int npL, npR;
       
     if (Tcl_GetInt(interp, argv[argStart], &npL) != TCL_OK) {
-      cerr << "WARNING invalid npL\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid npL\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetInt(interp, argv[argStart+3*npL+1], &npR) != TCL_OK) {
-      cerr << "WARNING invalid npR\n";
-      cerr << "forceBeamColumn element: " << eleTag << endl;
+      opserr << "WARNING invalid npR\n";
+      opserr << "forceBeamColumn element: " << eleTag << endln;
       return TCL_ERROR;
     }
 
@@ -440,18 +537,18 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       int sec;
       double pt, wt;
       if (Tcl_GetInt(interp, argv[j], &sec) != TCL_OK) {
-	cerr << "WARNING invalid sec\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid sec\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       if (Tcl_GetDouble(interp, argv[j+npL], &pt) != TCL_OK) {
-	cerr << "WARNING invalid pt\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid pt\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       if (Tcl_GetDouble(interp, argv[j+2*npL], &wt) != TCL_OK) {
-	cerr << "WARNING invalid wt\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid wt\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       secs(i) = sec;
@@ -462,18 +559,18 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       int sec;
       double pt, wt;
       if (Tcl_GetInt(interp, argv[j], &sec) != TCL_OK) {
-	cerr << "WARNING invalid sec\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid sec\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       if (Tcl_GetDouble(interp, argv[j+npR], &pt) != TCL_OK) {
-	cerr << "WARNING invalid pt\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid pt\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       if (Tcl_GetDouble(interp, argv[j+2*npR], &wt) != TCL_OK) {
-	cerr << "WARNING invalid wt\n";
-	cerr << "forceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING invalid wt\n";
+	opserr << "forceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       secs(i+npL) = sec;
@@ -485,9 +582,9 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     for (i = 0; i < nIP; i++) {
       SectionForceDeformation *theSection = theTclBuilder->getSection(secs(i));
       if (theSection == 0) {
-	cerr << "WARNING section not found\n";
-	cerr << "Section: " << secs(i);
-	cerr << "\nforceBeamColumn element: " << eleTag << endl;
+	opserr << "WARNING section not found\n";
+	opserr << "Section: " << secs(i);
+	opserr << "\nforceBeamColumn element: " << eleTag << endln;
 	return TCL_ERROR;
       }
       sections[i] = theSection;
@@ -514,20 +611,20 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
   }
 
   else {
-    cerr << "Unknown integration type: " << argv[6] << endl;
-    cerr << "forceBeamColumn element: " << eleTag << endl;
+    opserr << "Unknown integration type: " << argv[6] << endln;
+    opserr << "forceBeamColumn element: " << eleTag << endln;
     return TCL_ERROR;
   }
   
   if (theElement == 0) {
-    cerr << "WARNING ran out of memory creating element\n";
-    cerr << "forceBeamColumn element: " << eleTag << endl;
+    opserr << "WARNING ran out of memory creating element\n";
+    opserr << "forceBeamColumn element: " << eleTag << endln;
     return TCL_ERROR;
   }
   
   if (theTclDomain->addElement(theElement) == false) {
-    cerr << "WARNING could not add element to the domain\n";
-    cerr << "forceBeamColumn element: " << eleTag << endl;
+    opserr << "WARNING could not add element to the domain\n";
+    opserr << "forceBeamColumn element: " << eleTag << endln;
     delete theElement;
     return TCL_ERROR;
   }

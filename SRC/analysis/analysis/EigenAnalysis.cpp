@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/EigenAnalysis.cpp,v $
                                                                         
                                                                         
@@ -110,20 +110,20 @@ EigenAnalysis::analyze(int numModes)
 	domainStamp = stamp;
 	result = this->domainChanged();
 	if (result < 0) {
-	    cerr << "EigenAnalysis::analyze() - domainChanged failed\n";
+	    opserr << "EigenAnalysis::analyze() - domainChanged failed\n";
 	    return -1;
 	}	
     }
 
     result = theIntegrator->newStep();
     if (result < 0) {
-        cerr << "EigenAnalysis::analyze() - integrator failed\n";
+        opserr << "EigenAnalysis::analyze() - integrator failed\n";
 	return -2;
     }
 
     result = theAlgorithm->solveCurrentStep(numModes);
     if (result < 0) {
-        cerr << "EigenAnalysis::analyze() - algorithm failed\n";
+        opserr << "EigenAnalysis::analyze() - algorithm failed\n";
 	return -3;
     }
     
@@ -151,21 +151,21 @@ EigenAnalysis::domainChanged()
 int 
 EigenAnalysis::setAlgorithm(EigenAlgorithm &theAlgo)
 {
-    cerr << "EigenAnalysis::setAlgorithm() - does nothing yet\n";
+    opserr << "EigenAnalysis::setAlgorithm() - does nothing yet\n";
     return 0;
 }
 
 int 
 EigenAnalysis::setIntegrator(EigenIntegrator &theIntegrator)
 {
-    cerr << "EigenAnalysis::setIntegrator() - does nothing yet\n";    
+    opserr << "EigenAnalysis::setIntegrator() - does nothing yet\n";    
     return 0;
 }
 
 int 
 EigenAnalysis::setEigenSOE(EigenSOE &theSOE)
 {
-    cerr << "EigenAnalysis::setEigenSOE() - does nothing yet\n";    
+    opserr << "EigenAnalysis::setEigenSOE() - does nothing yet\n";    
     return 0;
 }
 

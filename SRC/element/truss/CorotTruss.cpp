@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-12-16 21:10:08 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:01:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -36,8 +36,6 @@
 #include <FEM_ObjectBroker.h>
 #include <UniaxialMaterial.h>
 #include <Renderer.h>
-
-#include <G3Globals.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -71,15 +69,18 @@ CorotTruss::CorotTruss(int tag, int dim,
 {
   // get a copy of the material and check we obtained a valid copy
   theMaterial = theMat.getCopy();
-  if (theMaterial == 0) 
-    g3ErrorHandler->fatal("FATAL CorotTruss::CorotTruss - %d %s %d\n", tag,
-			  "failed to get a copy of material with tag ",
-			  theMat.getTag());
+  if (theMaterial == 0) {
+    opserr << "FATAL CorotTruss::CorotTruss - " <<  tag <<
+      "failed to get a copy of material with tag " << theMat.getTag() << endln;
+    exit(-1);
+  }
   
   // ensure the connectedExternalNode ID is of correct size & set values
-  if (connectedExternalNodes.Size() != 2)
-    g3ErrorHandler->fatal("FATAL CorotTruss::CorotTruss - %d %s\n", tag,
-			  "failed to create an ID of size 2");
+  if (connectedExternalNodes.Size() != 2) {
+    opserr << "FATAL CorotTruss::CorotTruss - " <<  tag <<
+      "failed to create an ID of size 2\n";
+    exit(-1);
+  }
   
   connectedExternalNodes(0) = Nd1;
   connectedExternalNodes(1) = Nd2;        
@@ -97,9 +98,10 @@ CorotTruss::CorotTruss()
   theMatrix(0), theVector(0)
 {
   // ensure the connectedExternalNode ID is of correct size 
-  if (connectedExternalNodes.Size() != 2)
-    g3ErrorHandler->fatal("FATAL CorotTruss::CorotTruss - %s\n",
-			  "failed to create an ID of size 2");
+  if (connectedExternalNodes.Size() != 2) {
+    opserr << "FATAL CorotTruss::CorotTruss - failed to create an ID of size 2\n";
+    exit(-1);
+  }
 }
 
 //  destructor
@@ -163,9 +165,8 @@ CorotTruss::setDomain(Domain *theDomain)
   
   // if can't find both - send a warning message
   if ((theNodes[0] == 0) || (theNodes[2] == 0)) {
-    g3ErrorHandler->warning("CorotTruss::setDomain() - CorotTruss %d node %d %s\n",
-			    this->getTag(), Nd1,
-			    "does not exist in the model");
+    opserr << "CorotTruss::setDomain() - CorotTruss " << this->getTag() << " node " <<
+      Nd1 << "does not exist in the model \n";
     
     // fill this in so don't segment fault later
     numDOF = 6;    
@@ -179,8 +180,8 @@ CorotTruss::setDomain(Domain *theDomain)
   
   // if differing dof at the ends - print a warning message
   if (dofNd1 != dofNd2) {
-    g3ErrorHandler->warning("WARNING CorotTruss::setDomain(): nodes %d and %d %s %d\n",Nd1, Nd2,
-			    "have differing dof at ends for CorotTruss",this->getTag());
+    opserr << "WARNING CorotTruss::setDomain(): nodes " << Nd1 <<
+      " and " << Nd2 << "have differing dof at ends for CorotTruss " << this->getTag() << endln;
     
     // fill this in so don't segment fault later
     numDOF = 6;    
@@ -214,8 +215,7 @@ CorotTruss::setDomain(Domain *theDomain)
     theVector = &V12;
   }
   else {
-    g3ErrorHandler->warning("%s -- nodal DOF %d not compatible with element",
-			    "CorotTruss::setDomain", dofNd1);
+    opserr << " CorotTruss::setDomain -- nodal DOF " << dofNd1 << " not compatible with element\n";
     
     // fill this in so don't segment fault later
     numDOF = 6;    
@@ -298,7 +298,7 @@ CorotTruss::commitState()
   int retVal = 0;
   // call element commitState to do any base class stuff
   if ((retVal = this->Element::commitState()) != 0) {
-    cerr << "CorotTruss::commitState () - failed in base class";
+    opserr << "CorotTruss::commitState () - failed in base class\n";
   }    
   retVal = theMaterial->commitState();
   return retVal;
@@ -453,8 +453,7 @@ CorotTruss::zeroLoad(void)
 int 
 CorotTruss::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("CorotTruss::addLoad - load type unknown for truss with tag: %d\n",
-			  this->getTag());
+  opserr << "CorotTruss::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
   
   return -1;
 }
@@ -560,7 +559,7 @@ CorotTruss::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendVector(dataTag, commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::sendSelf() - %d failed to send Vector\n",this->getTag());
+    opserr << "WARNING Truss::sendSelf() - " << this->getTag() << " failed to send Vector\n";
     return -1;
   }	      
 
@@ -568,14 +567,14 @@ CorotTruss::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendID(dataTag, commitTag, connectedExternalNodes);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::sendSelf() - %d failed to send Vector\n",this->getTag());
+    opserr << "WARNING Truss::sendSelf() - " << this->getTag() << " failed to send Vector\n";
     return -2;
   }
 
   // finally truss asks it's material object to send itself
   res = theMaterial->sendSelf(commitTag, theChannel);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::sendSelf() - %d failed to send its Material\n",this->getTag());
+    opserr << "WARNING Truss::sendSelf() - " << this->getTag() << " failed to send its Material\n";
     return -3;
   }
 
@@ -594,7 +593,7 @@ CorotTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
   static Vector data(7);
   res = theChannel.recvVector(dataTag, commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::recvSelf() - failed to receive Vector\n");
+    opserr << "WARNING Truss::recvSelf() - failed to receive Vector\n";
     return -1;
   }	      
 
@@ -607,7 +606,7 @@ CorotTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
   // truss now receives the tags of it's two external nodes
   res = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::recvSelf() - %d failed to receive ID\n", this->getTag());
+    opserr << "WARNING Truss::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return -2;
   }
 
@@ -627,8 +626,8 @@ CorotTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
     // create a new material object
     theMaterial = theBroker.getNewUniaxialMaterial(matClass);
     if (theMaterial == 0) {
-      g3ErrorHandler->warning("WARNING Truss::recvSelf() - %d failed to get a blank Material of type %d\n", 
-			      this->getTag(), matClass);
+      opserr << "WARNING Truss::recvSelf() - " << this->getTag() << 
+	"failed to get a blank Material of type: " << matClass << endln;
       return -3;
     }
   }
@@ -636,7 +635,7 @@ CorotTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
   theMaterial->setDbTag(matDb); // note: we set the dbTag before we receive the material
   res = theMaterial->recvSelf(commitTag, theChannel, theBroker);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::recvSelf() - %d failed to receive its Material\n", this->getTag());
+    opserr << "WARNING Truss::recvSelf() - " << this->getTag() << " failed to receive its Material\n";
     return -3;    
   }
 
@@ -669,18 +668,18 @@ CorotTruss::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 void
-CorotTruss::Print(ostream &s, int flag)
+CorotTruss::Print(OPS_Stream &s, int flag)
 {
-	s << "\nCorotTruss, tag: " << this->getTag() << endl;
+	s << "\nCorotTruss, tag: " << this->getTag() << endln;
 	s << "\tConnected Nodes: " << connectedExternalNodes;
-	s << "\tSection Area: " << A << endl;
-	s << "\tUndeformed Length: " << Lo << endl;
-	s << "\tCurrent Length: " << Ln << endl;
-	s << "\tRotation matrix: " << endl;
+	s << "\tSection Area: " << A << endln;
+	s << "\tUndeformed Length: " << Lo << endln;
+	s << "\tCurrent Length: " << Ln << endln;
+	s << "\tRotation matrix: " << endln;
 
 	if (theMaterial) {
-		s << "\tAxial Force: " << A*theMaterial->getStress() << endl;
-		s << "\tUniaxialMaterial, tag: " << theMaterial->getTag() << endl;
+		s << "\tAxial Force: " << A*theMaterial->getStress() << endln;
+		s << "\tUniaxialMaterial, tag: " << theMaterial->getTag() << endln;
 		theMaterial->Print(s,flag);
 	}
 }

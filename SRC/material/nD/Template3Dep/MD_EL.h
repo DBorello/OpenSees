@@ -30,7 +30,7 @@
 
 #include <math.h>
 
-#include <iostream.h>
+#include <iOPS_Stream.h>
 #include <iomanip.h>
 
 #include "EL.h"
@@ -136,13 +136,13 @@ class MDEvolutionLaw : public EvolutionLaw
     // Overloaded Insertion Operator	  Zhaohui Added Aug. 13, 2000
     // prints Manzari-Dafalia EvolutionLaw's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const MDEvolutionLaw & MDEL)
+    friend OPS_Stream& operator<< (OPS_Stream& os, const MDEvolutionLaw & MDEL)
     {
         os.unsetf( ios::scientific );
         os.precision(5);
 
         //os.width(10);       
-        os << endln << "Manzari-Dafalias Evolution Law's parameters:" << endln;
+        os << endlnn << "Manzari-Dafalias Evolution Law's parameters:" << endlnn;
 	os << "Mc = " << MDEL.getMc() << "; ";
         //os.width(10);       
 	os << "Me = "  << MDEL.getMe() << "; ";
@@ -151,7 +151,7 @@ class MDEvolutionLaw : public EvolutionLaw
         //os.width(10);       
 	os << "ec_ref = " << MDEL.getec_ref() << "; ";
         //os.width(10);       
-	os << "p_ref = " << MDEL.getp_ref() << "kPa"  << "; " << endln;
+	os << "p_ref = " << MDEL.getp_ref() << "kPa"  << "; " << endlnn;
 
         //os.width(10);       
         os << "kc_b = " << MDEL.getkc_b() << "; ";
@@ -160,14 +160,14 @@ class MDEvolutionLaw : public EvolutionLaw
         //os.width(10);       
 	os << "ke_b = " << MDEL.getke_b() << "; ";
         //os.width(10);       
-	os << "ke_d = " << MDEL.getke_d() << "; " << endln;
+	os << "ke_d = " << MDEL.getke_d() << "; " << endlnn;
 
         //os.width(10);       
         //os << "h = " << MDEL.h << "; ";
         //os.width(10);       
 	os << "ho = " << MDEL.getho() << "; ";
         //os.width(10);       
-	os << "Cm = " << MDEL.getCm() << "; " << "eo = " << MDEL.geteo() << endln;
+	os << "Cm = " << MDEL.getCm() << "; " << "eo = " << MDEL.geteo() << endlnn;
 
         //os.width(10);       
         //os << "D = " << MDEL.getD() << "; ";
@@ -176,7 +176,7 @@ class MDEvolutionLaw : public EvolutionLaw
         //os.width(10);       
 	os << "Fmax = " << MDEL.getFmax() << "; ";
         //os.width(10);       
-	os << "Cf = " << MDEL.getCf() << "; " << endln << endln; 
+	os << "Cf = " << MDEL.getCf() << "; " << endlnn << endlnn; 
                
         return os;
     }  

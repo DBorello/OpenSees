@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-04-12 22:57:14 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.h,v $
                                                                         
                                                                         
@@ -55,7 +55,7 @@ class NodalLoad : public Load
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
     
-    virtual void Print(ostream &s, int flag =0);   
+    virtual void Print(OPS_Stream &s, int flag =0);   
     
     int setParameter (char **argv, int argc, Information &info);
     int updateParameter (int parameterID, Information &info);

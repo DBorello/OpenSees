@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-10-19 23:47:25 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.cpp,v $
                                                                         
                                                                         
@@ -36,7 +36,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 
 #include <Domain.h>
 #include <Element.h>
@@ -278,8 +277,8 @@ TclFeViewer::record(int cTag, double timeStamp)
       while ((theEle = theElements()) != 0) {
 	  res = theEle->displaySelf(*theRenderer, theEleMode, theDisplayFact);
 	  if (res < 0) {
-	      cerr << "Renderer::displayModel() - Element: ";
-	      cerr << theEle->getTag() << " failed to display itself\n";
+	      opserr << "Renderer::displayModel() - Element: \n";
+	      opserr << theEle->getTag() << " failed to display itself\n";
 	  }
       }
   }
@@ -290,8 +289,8 @@ TclFeViewer::record(int cTag, double timeStamp)
       while ((theNode = theNodes()) != 0) {
 	  res = theNode->displaySelf(*theRenderer, theNodeMode, theDisplayFact);
 	  if (res < 0) {
-	      cerr << "Renderer::displayModel() - Node: ";
-	      cerr << theNode->getTag() << " failed to display itself\n";
+	      opserr << "Renderer::displayModel() - Node: ";
+	      opserr << theNode->getTag() << " failed to display itself\n";
 	  }
       }
   }  
@@ -412,22 +411,22 @@ TclFeViewer_setVRP(ClientData clientData, Tcl_Interp *interp, int argc,
   
   // ensure corrcet num arguments
   if (argc < 4) {
-      interp->result = "WARNING args incorrect - vrp xloc yloc zloc ";
+      opserr << "WARNING args incorrect - vrp xloc yloc zloc \n";
       return TCL_ERROR;
   }    
 
   // get the xLoc, yLoc and zLoc
   double xLoc, yLoc, zLoc;
   if (Tcl_GetDouble(interp, argv[1], &xLoc) != TCL_OK) {
-      interp->result = "WARNING invalid x_loc - vrp x_loc y_loc z_loc";
+      opserr << "WARNING invalid x_loc - vrp x_loc y_loc z_loc\n";
       return TCL_ERROR;
   }
   if (Tcl_GetDouble(interp, argv[2], &yLoc) != TCL_OK) {
-      interp->result = "WARNING invalid y_loc - vrp x_loc y_loc z_loc";
+      opserr << "WARNING invalid y_loc - vrp x_loc y_loc z_loc\n";
       return TCL_ERROR;
   }  
   if (Tcl_GetDouble(interp, argv[3], &zLoc) != TCL_OK) {
-      interp->result = "WARNING invalid z_loc - vrp x_loc y_loc z_loc";
+      opserr << "WARNING invalid z_loc - vrp x_loc y_loc z_loc\n";
       return TCL_ERROR;
   }    
   
@@ -445,22 +444,22 @@ TclFeViewer_setVPN(ClientData clientData, Tcl_Interp *interp, int argc,
   
   // make sure at least one other argument to contain type of system
   if (argc < 4) {
-      interp->result = "WARNING args incorrect - vpn xdirn ydirn zdirn ";
+      opserr << "WARNING args incorrect - vpn xdirn ydirn zdirn \n";
       return TCL_ERROR;
   }    
 
   // get the id, x_dirn and y_dirn
   double xDirn, yDirn, zDirn;
   if (Tcl_GetDouble(interp, argv[1], &xDirn) != TCL_OK) {
-      interp->result = "WARNING invalid x_dirn - vpn x_dirn y_dirn z_dirn";
+      opserr << "WARNING invalid x_dirn - vpn x_dirn y_dirn z_dirn\n";
       return TCL_ERROR;
   }
   if (Tcl_GetDouble(interp, argv[2], &yDirn) != TCL_OK) {
-      interp->result = "WARNING invalid y_dirn - vpn x_dirn y_dirn z_dirn";
+      opserr << "WARNING invalid y_dirn - vpn x_dirn y_dirn z_dirn\n";
       return TCL_ERROR;
   }  
   if (Tcl_GetDouble(interp, argv[3], &zDirn) != TCL_OK) {
-      interp->result = "WARNING invalid z_dirn - vpn x_dirn y_dirn z_dirn";
+      opserr << "WARNING invalid z_dirn - vpn x_dirn y_dirn z_dirn\n";
       return TCL_ERROR;
   }    
   
@@ -478,22 +477,22 @@ TclFeViewer_setVUP(ClientData clientData, Tcl_Interp *interp, int argc,
   
   // make sure at least one other argument to contain type of system
   if (argc < 4) {
-      interp->result = "WARNING args incorrect - vup xdirn ydirn zdirn ";
+      opserr << "WARNING args incorrect - vup xdirn ydirn zdirn \n";
       return TCL_ERROR;
   }    
 
   // get the id, x_dirn and y_dirn
   double xDirn, yDirn, zDirn;
   if (Tcl_GetDouble(interp, argv[1], &xDirn) != TCL_OK) {
-      interp->result = "WARNING invalid x_dirn - vup x_dirn y_dirn z_dirn";
+      opserr << "WARNING invalid x_dirn - vup x_dirn y_dirn z_dirn\n";
       return TCL_ERROR;
   }
   if (Tcl_GetDouble(interp, argv[2], &yDirn) != TCL_OK) {
-      interp->result = "WARNING invalid y_dirn - vup x_dirn y_dirn z_dirn";
+      opserr << "WARNING invalid y_dirn - vup x_dirn y_dirn z_dirn\n";
       return TCL_ERROR;
   }  
   if (Tcl_GetDouble(interp, argv[3], &zDirn) != TCL_OK) {
-      interp->result = "WARNING invalid z_dirn - vup x_dirn y_dirn z_dirn";
+      opserr << "WARNING invalid z_dirn - vup x_dirn y_dirn z_dirn\n";
       return TCL_ERROR;
   }    
   
@@ -511,25 +510,25 @@ TclFeViewer_setViewWindow(ClientData clientData, Tcl_Interp *interp, int argc,
   
   // check num args
   if (argc < 5) {
-      interp->result = "WARNING args incorrect - prp uMin uMax vMin vMax ";
+      opserr << "WARNING args incorrect - prp uMin uMax vMin vMax \n";
       return TCL_ERROR;
   }    
 
   double uMin, uMax, vMin, vMax;
   if (Tcl_GetDouble(interp, argv[1], &uMin) != TCL_OK) {
-      interp->result = "WARNING invalid uMin - vup uMin uMax vMin vMax";
+      opserr << "WARNING invalid uMin - vup uMin uMax vMin vMax\n";
       return TCL_ERROR;
   }
   if (Tcl_GetDouble(interp, argv[2], &uMax) != TCL_OK) {
-      interp->result = "WARNING invalid uMax - vup uMin uMax vMin vMax";
+      opserr << "WARNING invalid uMax - vup uMin uMax vMin vMax\n";
       return TCL_ERROR;
   }  
   if (Tcl_GetDouble(interp, argv[3], &vMin) != TCL_OK) {
-      interp->result = "WARNING invalid vMin - vup uMin uMax vMin vMax";
+      opserr << "WARNING invalid vMin - vup uMin uMax vMin vMax\n";
       return TCL_ERROR;
   }    
   if (Tcl_GetDouble(interp, argv[4], &vMax) != TCL_OK) {
-      interp->result = "WARNING invalid vMin - vup uMin uMax vMin vMax";
+      opserr << "WARNING invalid vMin - vup uMin uMax vMin vMax\n";
       return TCL_ERROR;
   }      
   
@@ -546,17 +545,17 @@ TclFeViewer_setPlaneDist(ClientData clientData, Tcl_Interp *interp, int argc,
   
   // check num args
   if (argc < 3) {
-      interp->result = "WARNING args incorrect - dist near far ";
+      opserr << "WARNING args incorrect - dist near far \n";
       return TCL_ERROR;
   }    
   // get distnces to near view and far planes
   double anear, afar;
   if (Tcl_GetDouble(interp, argv[1], &anear) != TCL_OK) {
-      interp->result = "WARNING invalid near - vup near far";
+      opserr << "WARNING invalid near - vup near far\n";
       return TCL_ERROR;
   }
   if (Tcl_GetDouble(interp, argv[2], &afar) != TCL_OK) {
-      interp->result = "WARNING invalid far - vup near far";
+      opserr << "WARNING invalid far - vup near far\n";
       return TCL_ERROR;
   }  
 
@@ -574,7 +573,7 @@ TclFeViewer_setProjectionMode(ClientData clientData, Tcl_Interp *interp, int arg
   
   // ensure corrcet num arguments
   if (argc < 2) {
-      interp->result = "WARNING args incorrect - projection modeID ";
+      opserr << "WARNING args incorrect - projection modeID \n";
       return TCL_ERROR;
   }    
 
@@ -593,7 +592,7 @@ TclFeViewer_setFillMode(ClientData clientData, Tcl_Interp *interp, int argc,
   
   // ensure corrcet num arguments
   if (argc < 2) {
-      interp->result = "WARNING args incorrect - fill modeID ";
+      opserr << "WARNING args incorrect - fill modeID \n";
       return TCL_ERROR;
   }    
 
@@ -612,22 +611,22 @@ TclFeViewer_setPRP(ClientData clientData, Tcl_Interp *interp, int argc,
   
   // ensure corrcet num arguments
   if (argc < 4) {
-      interp->result = "WARNING args incorrect - cop xloc yloc zloc ";
+      opserr << "WARNING args incorrect - cop xloc yloc zloc \n";
       return TCL_ERROR;
   }    
 
   // get the xLoc, yLoc and zLoc
   double xLoc, yLoc, zLoc;
   if (Tcl_GetDouble(interp, argv[1], &xLoc) != TCL_OK) {
-      interp->result = "WARNING invalid x_loc - cop x_loc y_loc z_loc";
+      opserr << "WARNING invalid x_loc - cop x_loc y_loc z_loc\n";
       return TCL_ERROR;
   }
   if (Tcl_GetDouble(interp, argv[2], &yLoc) != TCL_OK) {
-      interp->result = "WARNING invalid y_loc - cop x_loc y_loc z_loc";
+      opserr << "WARNING invalid y_loc - cop x_loc y_loc z_loc\n";
       return TCL_ERROR;
   }  
   if (Tcl_GetDouble(interp, argv[3], &zLoc) != TCL_OK) {
-      interp->result = "WARNING invalid z_loc - cop x_loc y_loc z_loc";
+      opserr << "WARNING invalid z_loc - cop x_loc y_loc z_loc\n";
       return TCL_ERROR;
   }    
   
@@ -645,25 +644,25 @@ TclFeViewer_setPortWindow(ClientData clientData, Tcl_Interp *interp, int argc,
   
   // check num args  
   if (argc < 5) {
-      interp->result = "WARNING args incorrect - prp uMin uMax vMin vMax ";
+      opserr << "WARNING args incorrect - prp uMin uMax vMin vMax \n";
       return TCL_ERROR;
   }    
 
   double uMin, uMax, vMin, vMax;
   if (Tcl_GetDouble(interp, argv[1], &uMin) != TCL_OK) {
-      interp->result = "WARNING invalid uMin - vup uMin uMax vMin vMax";
+      opserr << "WARNING invalid uMin - vup uMin uMax vMin vMax\n";
       return TCL_ERROR;
   }
   if (Tcl_GetDouble(interp, argv[2], &uMax) != TCL_OK) {
-      interp->result = "WARNING invalid uMax - vup uMin uMax vMin vMax";
+      opserr << "WARNING invalid uMax - vup uMin uMax vMin vMax\n";
       return TCL_ERROR;
   }  
   if (Tcl_GetDouble(interp, argv[3], &vMin) != TCL_OK) {
-      interp->result = "WARNING invalid vMin - vup uMin uMax vMin vMax";
+      opserr << "WARNING invalid vMin - vup uMin uMax vMin vMax\n";
       return TCL_ERROR;
   }    
   if (Tcl_GetDouble(interp, argv[4], &vMax) != TCL_OK) {
-      interp->result = "WARNING invalid vMin - vup uMin uMax vMin vMax";
+      opserr << "WARNING invalid vMin - vup uMin uMax vMin vMax\n";
       return TCL_ERROR;
   }      
 
@@ -681,7 +680,7 @@ TclFeViewer_displayModel(ClientData clientData, Tcl_Interp *interp, int argc,
   
   // check number of args  
   if (argc != 3 && argc != 4) {
-      interp->result = "WARNING args incorrect - display eleMode <nodeMode> fact";
+      opserr << "WARNING args incorrect - display eleMode <nodeMode> fact\n";
       return TCL_ERROR;
   }    
 
@@ -689,11 +688,11 @@ TclFeViewer_displayModel(ClientData clientData, Tcl_Interp *interp, int argc,
       int displayMode;
       double displayFact;
       if (Tcl_GetInt(interp, argv[1], &displayMode) != TCL_OK) {
-	  interp->result = "WARNING invalid displayMode - display displayMode displayFact";
+	  opserr << "WARNING invalid displayMode - display displayMode displayFact\n";
 	  return TCL_ERROR;
 	      }
       if (Tcl_GetDouble(interp, argv[2], &displayFact) != TCL_OK) {
-	  interp->result = "WARNING invalid displayFact - display displayMode displayFact";
+	  opserr << "WARNING invalid displayFact - display displayMode displayFact\n";
 	  return TCL_ERROR;
       }  
 
@@ -704,15 +703,15 @@ TclFeViewer_displayModel(ClientData clientData, Tcl_Interp *interp, int argc,
       int eleFlag, nodeFlag;
       double displayFact;
       if (Tcl_GetInt(interp, argv[1], &eleFlag) != TCL_OK) {
-	  interp->result = "WARNING invalid displayMode - display eleFlag nodeFlag displayFact";
+	  opserr << "WARNING invalid displayMode - display eleFlag nodeFlag displayFact\n";
 	  return TCL_ERROR;
 	      }
       if (Tcl_GetInt(interp, argv[2], &nodeFlag) != TCL_OK) {
-	  interp->result = "WARNING invalid displayMode - display eleFlag nodeFlahg displayFact";
+	  opserr << "WARNING invalid displayMode - display eleFlag nodeFlahg displayFact\n";
 	  return TCL_ERROR;
 	      }      
       if (Tcl_GetDouble(interp, argv[3], &displayFact) != TCL_OK) {
-	  interp->result = "WARNING invalid displayMode - display eleFlag nodeFlahg displayFact";
+	  opserr << "WARNING invalid displayMode - display eleFlag nodeFlahg displayFact\n";
 	  return TCL_ERROR;
       }  
 

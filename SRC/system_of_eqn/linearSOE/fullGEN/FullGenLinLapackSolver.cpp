@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/fullGEN/FullGenLinLapackSolver.cpp,v $
                                                                         
                                                                         
@@ -73,8 +73,8 @@ int
 FullGenLinLapackSolver::solve(void)
 {
     if (theSOE == 0) {
-	cerr << "WARNING FullGenLinLapackSolver::solve(void)- ";
-	cerr << " No LinearSOE object has been set\n";
+	opserr << "WARNING FullGenLinLapackSolver::solve(void)- ";
+	opserr << " No LinearSOE object has been set\n";
 	return -1;
     }
     
@@ -86,8 +86,8 @@ FullGenLinLapackSolver::solve(void)
     
     // check iPiv is large enough
     if (sizeIpiv < n) {
-	cerr << "WARNING FullGenLinLapackSolver::solve(void)- ";
-	cerr << " iPiv not large enough - has setSize() been called?\n";
+	opserr << "WARNING FullGenLinLapackSolver::solve(void)- ";
+	opserr << " iPiv not large enough - has setSize() been called?\n";
 	return -1;
     }	
 	
@@ -126,8 +126,8 @@ FullGenLinLapackSolver::solve(void)
     
     // check if successfull
     if (info != 0) {
-	cerr << "WARNING FullGenLinLapackSolver::solve()";
-	cerr << " - lapack solver failed - " << info << " returned\n";
+	opserr << "WARNING FullGenLinLapackSolver::solve()";
+	opserr << " - lapack solver failed - " << info << " returned\n";
 	return -info;
     }
 
@@ -147,8 +147,8 @@ FullGenLinLapackSolver::setSize()
 		delete [] iPiv;
 	    iPiv = new int[n];		
 	    if (iPiv == 0) {
-		cerr << "WARNING FullGenLinLapackSolver::setSize()";
-		cerr << " - ran out of memory\n";
+		opserr << "WARNING FullGenLinLapackSolver::setSize()";
+		opserr << " - ran out of memory\n";
 		return -1;
 	    }		
 	    sizeIpiv = n;
@@ -156,8 +156,8 @@ FullGenLinLapackSolver::setSize()
     } else if (n == 0)
 	return 0;
     else {
-	cerr << "WARNING FullGenLinLapackSolver::setSize()";
-	cerr << " - ran out of memory\n";
+	opserr << "WARNING FullGenLinLapackSolver::setSize()";
+	opserr << " - ran out of memory\n";
 	return -1;	
     }
 	

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-12-16 21:10:02 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/feap/fElement.cpp,v $
                                                                         
                                                                         
@@ -85,15 +85,15 @@ fElement::fElement(int tag,
 	    delete [] work;
 	  work = new double[sizeH];
 	  if (work == 0) {
-	    cerr << "FATAL: fElement::fElement() - eleTag: " << tag;
-	    cerr << " ran out of memory creating h of size " << 2*nh1+nh3 << endl;
+	    opserr << "FATAL: fElement::fElement() - eleTag: " << tag;
+	    opserr << " ran out of memory creating h of size " << 2*nh1+nh3 << endln;
 	    exit(-1);
 	  }	    
 	  sizeWork = sizeH;
 	}
 	if (h == 0 || work == 0) {
-	    cerr << "FATAL: fElement::fElement() - eleTag: " << tag;
-	    cerr << " ran out of memory creating h of size " << 2*nh1+nh3 << endl;
+	    opserr << "FATAL: fElement::fElement() - eleTag: " << tag;
+	    opserr << " ran out of memory creating h of size " << 2*nh1+nh3 << endln;
 	    exit(-1);
 	}	    
 
@@ -121,8 +121,8 @@ fElement::fElement(int tag,
 	if (fElementM == 0 || fElementV == 0 || ix == 0 ||
 	    r == 0 || s == 0 || ul == 0 || xl == 0 || tl == 0) {
 
-	    cerr << "FATAL: fElement::fElement() - eleTag: " << tag;
-	    cerr << " ran out of memory initialising static stuff\n";
+	    opserr << "FATAL: fElement::fElement() - eleTag: " << tag;
+	    opserr << " ran out of memory initialising static stuff\n";
 	    exit(-1);	    
 	}
 	
@@ -152,8 +152,8 @@ fElement::fElement(int tag,
     d = new double[sizeD];
     data = new Vector(d, sizeD);
     if (d == 0 || data == 0) {
-	cerr << "FATAL: fElement::fElement() - eleTag: " << tag;
-	cerr << " ran out of memory creating d of size " << sizeD << endl;
+	opserr << "FATAL: fElement::fElement() - eleTag: " << tag;
+	opserr << " ran out of memory creating d of size " << sizeD << endln;
 	exit(-1);
     }	    
     for (int i=0; i<sizeD; i++) d[i] = 0.0;    
@@ -173,15 +173,15 @@ fElement::fElement(int tag,
 	    delete [] work;
 	  work = new double[sizeH];
 	  if (work == 0) {
-	    cerr << "FATAL: fElement::fElement() - eleTag: " << tag;
-	    cerr << " ran out of memory creating h of size " << 2*nh1+nh3 << endl;
+	    opserr << "FATAL: fElement::fElement() - eleTag: " << tag;
+	    opserr << " ran out of memory creating h of size " << 2*nh1+nh3 << endln;
 	    exit(-1);
 	  }	    
 	  sizeWork = sizeH;
 	}
 	if (h == 0 || work == 0) {
-	    cerr << "FATAL: fElement::fElement() - eleTag: " << this->getTag();
-	    cerr << " ran out of memory creating h of size " << sizeH << endl;
+	    opserr << "FATAL: fElement::fElement() - eleTag: " << this->getTag();
+	    opserr << " ran out of memory creating h of size " << sizeH << endln;
 	    exit(-1);
 	}	    
 	else
@@ -203,8 +203,8 @@ fElement::fElement(int tag,
 	if (fElementM == 0 || fElementV == 0 || ix == 0 ||
 	    r == 0 || s == 0 || ul == 0 || xl == 0 || tl == 0) {
 
-	    cerr << "FATAL: fElement::fElement() - eleTag: " << tag;
-	    cerr << " ran out of memory initialising static stuff\n";
+	    opserr << "FATAL: fElement::fElement() - eleTag: " << tag;
+	    opserr << " ran out of memory initialising static stuff\n";
 	    exit(-1);	    
 	}
 	
@@ -323,8 +323,8 @@ fElement::setDomain(Domain *theDomain)
     for (int i=0; i<numNodes; i++) {
 	Node *theNode = theDomain->getNode(theNodeTags(i));
 	if (theNode == 0) {
-	    cerr << "WARNING fElement::setDomain(Domain *theDomain) - node: ";
-	    cerr << theNodeTags(i) << " does not exist in domain for ele " << *this;
+	    opserr << "WARNING fElement::setDomain(Domain *theDomain) - node: ";
+	    opserr << theNodeTags(i) << " does not exist in domain for ele " << *this;
 	    ndm = 0; nen = 0; ndf = 0;
 	    return;
 	}
@@ -341,14 +341,14 @@ fElement::setDomain(Domain *theDomain)
 	} else {
 	    const Vector &crds = theNode->getCrds();	
 	    if (ndm != crds.Size()) {
-		cerr << "WARNING fElement::setDomain(Domain *theDomain) - node: ";
-		cerr << theNodeTags(i) << " not in correct dimension " << *this;
+		opserr << "WARNING fElement::setDomain(Domain *theDomain) - node: ";
+		opserr << theNodeTags(i) << " not in correct dimension " << *this;
 		ndm = 0; nen = 0; ndf = 0;
 		return;		
 	    }
 	    if (ndf != theNode->getNumberDOF()) {
-		cerr << "WARNING fElement::setDomain(Domain *theDomain) - node: ";
-		cerr << theNodeTags(i) << " does not have correct #DOF " << *this;
+		opserr << "WARNING fElement::setDomain(Domain *theDomain) - node: ";
+		opserr << theNodeTags(i) << " does not have correct #DOF " << *this;
 		ndm = 0; nen = 0; ndf = 0;
 		return;		
 	    }
@@ -366,8 +366,8 @@ fElement::setDomain(Domain *theDomain)
     int nst = ndf*nen;    
     u = new double[nst]; 
     if (u == 0) {
-	cerr << "WARNING fElement::setDomain(Domain *theDomain) -  ";
-	cerr << " ran out of memory creating u of size: " << nen*ndf << *this;
+	opserr << "WARNING fElement::setDomain(Domain *theDomain) -  ";
+	opserr << " ran out of memory creating u of size: " << nen*ndf << *this;
 	ndm = 0; nen = 0; ndf = 0;
 	return;			
     }
@@ -378,11 +378,9 @@ fElement::setDomain(Domain *theDomain)
 
     theLoad = new Vector(nst);
     if (theLoad == 0) {
-	g3ErrorHandler->fatal("Truss::setDomain - truss %d %s %d\n",
-			      this->getTag(), 
-			      "out of memory creating vector of size",
-			      nst);	
-      return;
+      opserr << "Truss::setDomain - truss " << this->getTag() << 
+	"out of memory creating vector of size" << nst << endln;
+      exit(-1);
     }          
 
     // allocate the Matrix and Vector objects if none yet for this size nst
@@ -391,8 +389,8 @@ fElement::setDomain(Domain *theDomain)
        fElementV[nst] = new Vector(r,nst);       
 
        if ((fElementM[nst] == 0) || (fElementV[nst] == 0)) {
-	   cerr << "WARNING fElement::setDomain(Domain *theDomain) -  ";
-	   cerr << " ran out of memory creating Matrix and Vector for " << *this;
+	   opserr << "WARNING fElement::setDomain(Domain *theDomain) -  ";
+	   opserr << " ran out of memory creating Matrix and Vector for " << *this;
 	   ndm = 0; nen = 0; ndf = 0;
 	   return;			
        }
@@ -406,7 +404,7 @@ fElement::commitState()
   int retVal = 0;
   // call element commitState to do any base class stuff
   if ((retVal = this->Element::commitState()) != 0) {
-    cerr << "fElement::commitState () - failed in base class";
+    opserr << "fElement::commitState () - failed in base class";
   }    
 
   if (nh1 != 0) 
@@ -465,8 +463,8 @@ fElement::getTangentStiff(void)
     
     // check nst is as determined in readyfRoutine()
     if (nstI != nstR) {
-	cerr << "FATAL fElement::getTangentStiff() problems with incompatable nst";
-	cerr << " ready: " << nstR << " invoke: " << nstI << endl;
+	opserr << "FATAL fElement::getTangentStiff() problems with incompatable nst";
+	opserr << " ready: " << nstR << " invoke: " << nstI << endln;
 	exit(-1);
     }
 
@@ -508,8 +506,8 @@ fElement::getDamp(void)
     
     // check nst is as determined in readyfRoutine()
     if (nstI != nstR) {
-	cerr << "FATAL fElement::getTangentStiff() problems with incompatable nst";
-	cerr << " ready: " << nstR << " invoke: " << nstI << endl;
+	opserr << "FATAL fElement::getTangentStiff() problems with incompatable nst";
+	opserr << " ready: " << nstR << " invoke: " << nstI << endln;
 	exit(-1);
     }
     
@@ -548,8 +546,8 @@ fElement::getMass(void)
     
     // check nst is as determined in readyfRoutine()
     if (nstI != nstR) {
-	cerr << "FATAL fElement::getTangentStiff() problems with incompatable nst";
-	cerr << " ready: " << nstR << " invoke: " << nstI << endl;
+	opserr << "FATAL fElement::getTangentStiff() problems with incompatable nst";
+	opserr << " ready: " << nstR << " invoke: " << nstI << endln;
 	exit(-1);
     }
     
@@ -570,9 +568,7 @@ fElement::zeroLoad(void)
 int
 fElement::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("fElement::addLoad - load type unknown for truss with tag: %d",
-			  this->getTag());
-  
+  opserr <<"fElement::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
   return -1;
 }
 
@@ -635,8 +631,8 @@ fElement::getResistingForce()
     
     // check nst is as determined in readyfRoutine()
     if (nstI != nstR) {
-	cerr << "FATAL fElement::getTangentStiff() problems with incompatable nst";
-	cerr << " ready: " << nstR << " invoke: " << nstI << endl;
+	opserr << "FATAL fElement::getTangentStiff() problems with incompatable nst";
+	opserr << " ready: " << nstR << " invoke: " << nstI << endln;
 	exit(-1);
     }
 
@@ -680,8 +676,8 @@ fElement::getResistingForceIncInertia()
     
     // check nst is as determined in readyfRoutine()
     if (nstI != nstR) {
-	cerr << "FATAL fElement::getTangentStiff() problems with incompatable nst";
-	cerr << " ready: " << nstR << " invoke: " << nstI << endl;
+	opserr << "FATAL fElement::getTangentStiff() problems with incompatable nst";
+	opserr << " ready: " << nstR << " invoke: " << nstI << endln;
 	exit(-1);
     }
 
@@ -696,14 +692,14 @@ fElement::getResistingForceIncInertia()
 int
 fElement::sendSelf(int commitTag, Channel &theChannel)
 {
-  cerr << "fElement::sendSelf() - not yet implemented\n";
+  opserr << "fElement::sendSelf() - not yet implemented\n";
   return -1;
 }
 
 int
 fElement::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-  cerr << "fElement::recvSelf() - not yet implemented\n";
+  opserr << "fElement::recvSelf() - not yet implemented\n";
   return -1;
 }
 
@@ -716,15 +712,13 @@ fElement::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
 void
-fElement::Print(ostream &s, int flag)
+fElement::Print(OPS_Stream &s, int flag)
 {
     int ior = 0; int iow = 1;    
-    if (s == cerr || s == cout)
-	ior = -1;
-    else  {
-	s << "fElement::Print() - can only print to cerr or cout at present\n";
-	ior = -1;
-    }
+    ior = -1;
+
+    s << "fElement::Print() - can only print to cerr at present\n";
+    ior = -1;
 
     // get the current load factor
     Domain *theDomain=this->getDomain();
@@ -858,8 +852,8 @@ fElement::invokefRoutine(int ior, int iow, double *ctan, int isw)
 	else if (eleType == 5) 
 	    elmt05_(d,ul,xl,ix,tl,s,r,&ndf,&NDM,&nst,&isw);	    
 	else {
-	    cerr << "fElement::invokefRoutine() unknown element type ";
-	    cerr << eleType << endl;
+	    opserr << "fElement::invokefRoutine() unknown element type ";
+	    opserr << eleType << endln;
 	}
 	
 	// now copy the stuff from common block to h array
@@ -908,13 +902,13 @@ fElement::invokefInit(int isw, int iow)
 	else if (eleType == 5)
 	    elmt05_(d,ul,xl,ix,tl,s,r,&NDF,&NDM,&nst,&isw);	    
 	else {
-	    cerr << "fElement::invokefRoutine() unknown element type ";
-	    cerr << eleType << endl;
+	    opserr << "fElement::invokefRoutine() unknown element type ";
+	    opserr << eleType << endln;
 	}
 
 	if (nst < 0) {
-	    cerr << "FATAL: fElement::fElement() - eleTag: " << this->getTag();
-	    cerr << " ran out of memory creating h of size " << nst << endl;
+	    opserr << "FATAL: fElement::fElement() - eleTag: " << this->getTag();
+	    opserr << " ran out of memory creating h of size " << nst << endln;
 	    exit(-1);
 	}
     }
@@ -992,8 +986,8 @@ fElement::readyfRoutine(bool incInertia)
     	fElementV[nst] = new Vector(r,nst);
     
 	if (fElementM[nst] == 0 || fElementV[nst] == 0) {
-	    cerr << "FATAL fElement::getTangentStiff() nst: " << nst;
-	    cerr << "ran out of memory\n";
+	    opserr << "FATAL fElement::getTangentStiff() nst: " << nst;
+	    opserr << "ran out of memory\n";
 	    exit(-1);
 	}  
     }
@@ -1022,8 +1016,8 @@ fElement::getInitialStiff(void)
     Ki = new Matrix(this->getTangentStiff());
 
   if (Ki == 0) {
-    cerr << "FATAL fElement::getInitialStiff() -";
-    cerr << "ran out of memory\n";
+    opserr << "FATAL fElement::getInitialStiff() -";
+    opserr << "ran out of memory\n";
     exit(-1);
   }  
     

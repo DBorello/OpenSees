@@ -20,14 +20,14 @@ int TclMultiLinearCommand (ClientData clienData, Tcl_Interp *interp, int argc,
 
 		if(numPoints < 2)
 		{
-		 	cerr << "WARNING invalid uniaxialMaterial MultilinearUniaxial tag" << endl;
-		 	cerr << "Minimum of 2 points are required\n";
+		 	opserr << "WARNING invalid uniaxialMaterial MultilinearUniaxial tag" << endln;
+		 	opserr << "Minimum of 2 points are required\n";
 			return TCL_ERROR;
 		}
 		
 		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 		{
-	    	cerr << "WARNING invalid uniaxialMaterial MultilinearUniaxial tag" << endl;
+	    	opserr << "WARNING invalid uniaxialMaterial MultilinearUniaxial tag" << endln;
 	    	return TCL_ERROR;
 		}
 
@@ -41,8 +41,8 @@ int TclMultiLinearCommand (ClientData clienData, Tcl_Interp *interp, int argc,
         {
 			if (Tcl_GetDouble(interp, argv[indx], &temp) != TCL_OK)
 			{
-				cerr << "WARNING invalid input, data " << temp << '\n';
-				cerr << "MultilinearUniaxial material: " << tag << endl;
+				opserr << "WARNING invalid input, data " << temp << '\n';
+				opserr << "MultilinearUniaxial material: " << tag << endln;
 				return TCL_ERROR;
 			}
 			
@@ -54,8 +54,8 @@ int TclMultiLinearCommand (ClientData clienData, Tcl_Interp *interp, int argc,
         {
 			if (Tcl_GetDouble(interp, argv[indx], &temp) != TCL_OK)
 			{
-				cerr << "WARNING invalid input, data " << temp << '\n';
-				cerr << "MultilinearUniaxial material: " << tag << endl;
+				opserr << "WARNING invalid input, data " << temp << '\n';
+				opserr << "MultilinearUniaxial material: " << tag << endln;
 				return TCL_ERROR;
 			}
 			
@@ -70,16 +70,16 @@ int TclMultiLinearCommand (ClientData clienData, Tcl_Interp *interp, int argc,
 
     // Ensure we have created the Material, out of memory if got here and no material
     if (theMaterial == 0) {
-	cerr << "WARNING: ran out of memory creating uniaxialMaterial\n";
-	cerr << argv[1] << endl;
+	opserr << "WARNING: ran out of memory creating uniaxialMaterial\n";
+	opserr << argv[1] << endln;
 	return TCL_ERROR;
     }
 
     // Now add the material to the modelBuilder
     if (theTclBuilder->addPlasticMaterial(*theMaterial) < 0)
 	{
-		cerr << "WARNING could not add uniaxialMaterial to the domain\n";
-		cerr << *theMaterial << endl;
+		opserr << "WARNING could not add uniaxialMaterial to the domain\n";
+		opserr << *theMaterial << endln;
 		delete theMaterial; // invoke the material objects destructor, otherwise mem leak
 		return TCL_ERROR;
     }
@@ -102,25 +102,25 @@ int TclQuadrReducingCommand(ClientData clienData, Tcl_Interp *interp, int argc,
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 	{
-	    	cerr << "WARNING invalid  PlaticHardening quadrReducing tag" << endl;
+	    	opserr << "WARNING invalid  PlaticHardening quadrReducing tag" << endln;
 	    	return TCL_ERROR;
 	}
 	if (Tcl_GetDouble(interp, argv[3], &kp_0) != TCL_OK)
 	{
-	    	cerr << "WARNING invalid  PlaticHardening quadrReducing kp_0" << endl;
+	    	opserr << "WARNING invalid  PlaticHardening quadrReducing kp_0" << endln;
 	    	return TCL_ERROR;
 	}
 	if (Tcl_GetDouble(interp, argv[4], &kp_half) != TCL_OK)
 	{
-	    	cerr << "WARNING invalid  PlaticHardening quadrReducing kp_half" << endl;
+	    	opserr << "WARNING invalid  PlaticHardening quadrReducing kp_half" << endln;
 	    	return TCL_ERROR;
 	}
 
 	theMaterial = new QuadrReducing(tag, kp_0, kp_half);
     if (theTclBuilder->addPlasticMaterial(*theMaterial) < 0)
 	{
-		cerr << "WARNING could not add uniaxialMaterial to the domain\n";
-		cerr << *theMaterial << endl;
+		opserr << "WARNING could not add uniaxialMaterial to the domain\n";
+		opserr << *theMaterial << endln;
 		delete theMaterial; // invoke the material objects destructor, otherwise mem leak
 		return TCL_ERROR;
     }
@@ -134,7 +134,7 @@ int TclExponReducingCommand(ClientData clienData, Tcl_Interp *interp, int argc,
 {
 	if(argc < 5)
 	{
-		cerr << "TclExponReducingCommand - argc != 5 \n";
+		opserr << "TclExponReducingCommand - argc != 5 \n";
 		return TCL_ERROR;
 	}
 	
@@ -148,19 +148,19 @@ double arg1, arg2, arg3;
 //plasticMaterial exponReducing (int tag, double kp0, double x0, double tol); //6
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 	{
-	    	cerr << "WARNING invalid  PlaticHardening exponReducing tag" << endl;
+	    	opserr << "WARNING invalid  PlaticHardening exponReducing tag" << endln;
 	    	return TCL_ERROR;
 	}
 	
 	if (Tcl_GetDouble(interp, argv[3], &arg1) != TCL_OK)
 	{
-	    	cerr << "WARNING invalid double PlaticHardening exponReducing" << endl;
+	    	opserr << "WARNING invalid double PlaticHardening exponReducing" << endln;
 	    	return TCL_ERROR;
 	}
 
 	if (Tcl_GetDouble(interp, argv[4], &arg2) != TCL_OK)
 	{
-	    	cerr << "WARNING invalid double PlaticHardening exponReducing" << endl;
+	    	opserr << "WARNING invalid double PlaticHardening exponReducing" << endln;
 	    	return TCL_ERROR;
 	}
 
@@ -168,20 +168,20 @@ double arg1, arg2, arg3;
 	{
 		if (Tcl_GetDouble(interp, argv[5], &arg3) != TCL_OK)
 		{
-				cerr << "WARNING invalid double PlaticHardening exponReducing" << endl;
+				opserr << "WARNING invalid double PlaticHardening exponReducing" << endln;
 				return TCL_ERROR;
 		}
 
 		theMaterial = new ExponReducing(tag, arg1, arg2, arg3);
-//		cout << "factor = " << arg3 << endl;
+//		cout << "factor = " << arg3 << endln;
 	}
 	else
 		theMaterial = new ExponReducing(tag, arg1, arg2);
 	
 	if (theTclBuilder->addPlasticMaterial(*theMaterial) < 0)
 	{
-		cerr << "WARNING could not add uniaxialMaterial to the domain\n";
-		cerr << *theMaterial << endl;
+		opserr << "WARNING could not add uniaxialMaterial to the domain\n";
+		opserr << *theMaterial << endln;
 		delete theMaterial; // invoke the material objects destructor, otherwise mem leak
 		return TCL_ERROR;
     }
@@ -200,15 +200,15 @@ int TclNullPlasticMaterialCommand(ClientData clienData, Tcl_Interp *interp, int 
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
 	{
-	    	cerr << "WARNING invalid  PlaticHardening quadrReducing tag" << endl;
+	    	opserr << "WARNING invalid  PlaticHardening quadrReducing tag" << endln;
 	    	return TCL_ERROR;
 	}
 
 	theMaterial = new NullPlasticMaterial(tag);
     if (theTclBuilder->addPlasticMaterial(*theMaterial) < 0)
 	{
-		cerr << "WARNING could not add uniaxialMaterial to the domain\n";
-		cerr << *theMaterial << endl;
+		opserr << "WARNING could not add uniaxialMaterial to the domain\n";
+		opserr << *theMaterial << endln;
 		delete theMaterial; // invoke the material objects destructor, otherwise mem leak
 		return TCL_ERROR;
     }
@@ -245,7 +245,7 @@ TclModelBuilderPlasticMaterialCommand (ClientData clientData, Tcl_Interp *interp
 	}
 	else
 	{
-		cerr << "Unknown PlasticMaterial: \nValid types: null, multiLinearKp, "
+		opserr << "Unknown PlasticMaterial: \nValid types: null, multiLinearKp, "
 		<< "quadrReducing, exponReducing \n";
 
 		return TCL_ERROR;

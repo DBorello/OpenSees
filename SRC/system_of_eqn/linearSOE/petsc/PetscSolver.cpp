@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSolver.cpp,v $
                                                                         
                                                                         
@@ -108,9 +108,9 @@ PetscSolver::solve(void)
 
  timer.pause();
 
- cerr << "PetscSolver::solve -real  " << timer.getReal() << "  cpu: " << timer.getCPU() << "  page: " << timer.getNumPageFaults() << endl; 
+ opserr << "PetscSolver::solve -real  " << timer.getReal() << "  cpu: " << timer.getCPU() << "  page: " << timer.getNumPageFaults() << endln; 
 
- cerr << "PetscSolver::solve(void) - number of iterations: " << its << endl;
+ opserr << "PetscSolver::solve(void) - number of iterations: " << its << endln;
 
  return ierr;
 }

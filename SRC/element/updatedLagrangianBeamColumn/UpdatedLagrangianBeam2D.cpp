@@ -29,7 +29,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <G3Globals.h>
 
 #include "UpdatedLagrangianBeam2D.h"
 
@@ -105,13 +104,13 @@ void UpdatedLagrangianBeam2D::setDomain(Domain *theDomain)
     end1Ptr = theDomain->getNode(Nd1);
     end2Ptr = theDomain->getNode(Nd2);	
     if (end1Ptr == 0) {
-	cerr << "WARNING (W_C_10) - UpdatedLagrangianBeam2D::setDomain(..) [" << getTag() << "]\n";
-	cerr << Nd1 << "Nd1 does not exist in model for element \n" <<" Tag = " << getTag();
+	opserr << "WARNING (W_C_10) - UpdatedLagrangianBeam2D::setDomain(..) [" << getTag() << "]\n";
+	opserr << Nd1 << "Nd1 does not exist in model for element \n" <<" Tag = " << getTag();
 	return;
     }
     if (end2Ptr == 0) {
-	cerr << "WARNING (W_C_20) - UpdatedLagrangianBeam2D::setDomain(..) [" << getTag() << "]\n";
-	cerr << Nd2 << "Nd2 does not exist in model for element\n" << " Tag = " << getTag();
+	opserr << "WARNING (W_C_20) - UpdatedLagrangianBeam2D::setDomain(..) [" << getTag() << "]\n";
+	opserr << Nd2 << "Nd2 does not exist in model for element\n" << " Tag = " << getTag();
 	return;
     }
 
@@ -119,9 +118,9 @@ void UpdatedLagrangianBeam2D::setDomain(Domain *theDomain)
     int dofNd1 = end1Ptr->getNumberDOF();
     int dofNd2 = end2Ptr->getNumberDOF();
     if (dofNd1 != 3 && dofNd2 != 3) {
-	cerr << "WARNING (W_C_30) - UpdatedLagrangianBeam2D::setDomain() [" << getTag() <<"]\n";
-	cerr << "node and/or node " << Nd1 << Nd2 << " have/has incorrect number ";
-	cerr << "of dof's at end for element\n " << *this;
+	opserr << "WARNING (W_C_30) - UpdatedLagrangianBeam2D::setDomain() [" << getTag() <<"]\n";
+	opserr << "node and/or node " << Nd1 << Nd2 << " have/has incorrect number ";
+	opserr << "of dof's at end for element\n " << *this;
 	return;
     }
 
@@ -142,7 +141,7 @@ void UpdatedLagrangianBeam2D::setDomain(Domain *theDomain)
 
 		if(L==0)
 		{
-			cerr << "WARNING UpdatedLagrangianBeam2D::setDomain(): zero length\n";
+			opserr << "WARNING UpdatedLagrangianBeam2D::setDomain(): zero length\n";
 			return;	
 		}
 		cs = dx/L;
@@ -167,7 +166,7 @@ int UpdatedLagrangianBeam2D::commitState()
 
   // call element commitState to do any base class stuff
   if ((success = this->Element::commitState()) != 0) {
-    cerr << "UpdatedLagrangianBeam2D::commitState () - failed in base class";
+    opserr << "UpdatedLagrangianBeam2D::commitState () - failed in base class";
   }    
 
 #ifdef _G3DEBUG
@@ -177,7 +176,7 @@ int UpdatedLagrangianBeam2D::commitState()
 	
 	if(_debug || _Kdebug)
 	{
-	    cerr << "\n Beam N0: "<< this->getTag()
+	    opserr << "\n Beam N0: "<< this->getTag()
 	    << " ----- Inside Commit State -----\n";
 	    //cin.get();
 	}
@@ -218,8 +217,8 @@ void UpdatedLagrangianBeam2D::updateState()
 	L = sqrt(dx*dx + dy*dy);
 	if(L==0 )
 	{
-		cerr << "WARNING (W_B_40) - UpdatedLagrangianBeam2D::updateState() [" << getTag() << "\n";
-		cerr << "L = 0\n";
+		opserr << "WARNING (W_B_40) - UpdatedLagrangianBeam2D::updateState() [" << getTag() << "\n";
+		opserr << "L = 0\n";
 		return;
 	}
 	cs = dx/L;
@@ -363,9 +362,8 @@ const Matrix &UpdatedLagrangianBeam2D::getTangentStiff(void)
     addExternalGeomStiff(Kt);
 
 	if(_Kdebug){
-	    cerr << "UpdatedLagrangianBeam2D::getTangentStiff(void) tag = " << getTag() << "\n";
-	    cerr << Kt;
-	    cin.get();
+	    opserr << "UpdatedLagrangianBeam2D::getTangentStiff(void) tag = " << getTag() << "\n";
+	    opserr << Kt;
 	}
 
     //Kt = T^(Kt*T);
@@ -377,8 +375,8 @@ const Matrix &UpdatedLagrangianBeam2D::getTangentStiff(void)
 		double aii = Kt(i, i);
 		if(aii < 1e-6)
 		{
-			cerr << " WARNING (W_B_50) - UpdatedLagrangianBeam2D::getTangentStiff(..) [" << getTag() << "]\n";
-			cerr << " aii = " << aii << ", i = " << i << "\n";
+			opserr << " WARNING (W_B_50) - UpdatedLagrangianBeam2D::getTangentStiff(..) [" << getTag() << "]\n";
+			opserr << " aii = " << aii << ", i = " << i << "\n";
 		}
 	}
 #endif
@@ -429,8 +427,8 @@ void UpdatedLagrangianBeam2D::zeroLoad(void)
 int UpdatedLagrangianBeam2D::addLoad(const Vector &moreLoad)
 {
     if (moreLoad.Size() != numDof) {
-	cerr << "WARNING (W_C_80) - UpdatedLagrangianBeam2D::addLoad(..) [" << getTag() << "]\n";
-	cerr << "vector not of correct size\n";
+	opserr << "WARNING (W_C_80) - UpdatedLagrangianBeam2D::addLoad(..) [" << getTag() << "]\n";
+	opserr << "vector not of correct size\n";
 	return -1;
     }
     load += moreLoad;
@@ -452,7 +450,7 @@ void UpdatedLagrangianBeam2D::getTrialLocalForce(Vector &lforce)
 	else
 		getIncrNaturalDisp(disp);
 	
-	//~ cout << disp << endl;
+	//~ cout << disp << endln;
 /* 
 //////////////////////////////////////////
 // using the natural deformation approach
@@ -538,7 +536,8 @@ double f5 = eleForce(5);
     force(5) =  eleForce(5);
 
     if(_debug)
-      { cerr << "Global forces:\n " << force; cin.get();}
+      { opserr << "Global forces:\n " << force; 
+      }
 
     return force;
 }
@@ -806,9 +805,9 @@ int UpdatedLagrangianBeam2D::displaySelf(Renderer &theViewer, int displayMode, f
 	v2(2) = 0;
 	//v2(2) = end2Disp(2)*fact;
 	
-	//cerr << v1 << v2;
+	//opserr << v1 << v2;
 	if (displayMode == 1) theViewer.drawLine(v1, v2, rgb, rgb);	
-	// cout << "line drawn << " << getTag() << endl;
+	// cout << "line drawn << " << getTag() << endln;
 	// cin.get();
 	return 0;
     
@@ -867,8 +866,8 @@ Response* UpdatedLagrangianBeam2D::setResponse(char **argv, int argc, Informatio
     // otherwise response quantity is unknown for the UpdatedLagrangianBeam2D class
     else
     {
-    	cerr << "WARNING (W_C_90) - UpdatedLagrangianBeam2D::setResponse(..) [" << getTag() << "]\n";
-		cerr << "unknown response quantity\n";
+    	opserr << "WARNING (W_C_90) - UpdatedLagrangianBeam2D::setResponse(..) [" << getTag() << "]\n";
+		opserr << "unknown response quantity\n";
 		return 0;
 	}
 	

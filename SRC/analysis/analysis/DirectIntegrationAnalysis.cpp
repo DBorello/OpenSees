@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-03 06:15:34 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -114,12 +114,12 @@ DirectIntegrationAnalysis::initialize(void)
     if (stamp != domainStamp) {
       domainStamp = stamp;	
       if (this->domainChanged() < 0) {
-	cerr << "DirectIntegrationAnalysis::initialize() - domainChanged() failed\n";
+	opserr << "DirectIntegrationAnalysis::initialize() - domainChanged() failed\n";
 	return -1;
       }	
     }
     if (theIntegrator->initialize() < 0) {
-	cerr << "DirectIntegrationAnalysis::initialize() - integrator initialize() failed\n";
+	opserr << "DirectIntegrationAnalysis::initialize() - integrator initialize() failed\n";
 	return -2;
     } else
       theIntegrator->commit();
@@ -139,22 +139,22 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 	if (stamp != domainStamp) {
 	    domainStamp = stamp;	
 	    if (this->domainChanged() < 0) {
-		cerr << "DirectIntegrationAnalysis::analyze() - domainChanged() failed\n";
+		opserr << "DirectIntegrationAnalysis::analyze() - domainChanged() failed\n";
 		return -1;
 	    }	
 	}
 
 	if (theIntegrator->newStep(dT) < 0) {
-	    cerr << "DirectIntegrationAnalysis::analyze() - the Integrator failed";
-	    cerr << " at time " << the_Domain->getCurrentTime() << endl;
+	    opserr << "DirectIntegrationAnalysis::analyze() - the Integrator failed";
+	    opserr << " at time " << the_Domain->getCurrentTime() << endln;
 	    the_Domain->revertToLastCommit();
 	    return -2;
 	}
 
 	result = theAlgorithm->solveCurrentStep();
 	if (result < 0) {
-	    cerr << "DirectIntegrationAnalysis::analyze() - the Algorithm failed";
-	    cerr << " at time " << the_Domain->getCurrentTime() << endl;
+	    opserr << "DirectIntegrationAnalysis::analyze() - the Algorithm failed";
+	    opserr << " at time " << the_Domain->getCurrentTime() << endln;
 	    the_Domain->revertToLastCommit();	    
 	    theIntegrator->revertToLastStep();
 	    return -3;
@@ -162,15 +162,15 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 
 	result = theIntegrator->commit();
 	if (result < 0) {
-	    cerr << "DirectIntegrationAnalysis::analyze() - ";
-	    cerr << "the Integrator failed to commit";
-	    cerr << " at time " << the_Domain->getCurrentTime() << endl;
+	    opserr << "DirectIntegrationAnalysis::analyze() - ";
+	    opserr << "the Integrator failed to commit";
+	    opserr << " at time " << the_Domain->getCurrentTime() << endln;
 	    the_Domain->revertToLastCommit();	    
 	    theIntegrator->revertToLastStep();
 	    return -4;
 	} 
    
-	// cerr << "DirectIntegrationAnalysis - time: " << the_Domain->getCurrentTime() << endl;
+	// opserr << "DirectIntegrationAnalysis - time: " << the_Domain->getCurrentTime() << endln;
 	}    
     return result;
 }
@@ -192,30 +192,30 @@ DirectIntegrationAnalysis::domainChanged(void)
     // equation numbers to be assigned to all the DOFs in the
     // AnalysisModel.
 
-    // cerr << theAnalysisModel->getDOFGroupGraph();
+    // opserr << theAnalysisModel->getDOFGroupGraph();
 
     /*
     DOF_GrpIter &theDOFs = theAnalysisModel->getDOFs();
     DOF_Group *dofPtr;
     while ((dofPtr = theDOFs()) != 0) 
-      cerr << dofPtr->getID();
+      opserr << dofPtr->getID();
     */
 
     theDOF_Numberer->numberDOF();
 
-    // cerr << theAnalysisModel->getDOFGraph();
+    // opserr << theAnalysisModel->getDOFGraph();
 
 
     /*
     DOF_GrpIter &theDOFs1 = theAnalysisModel->getDOFs();
     while ((dofPtr = theDOFs1()) != 0) 
-      cerr << dofPtr->getID();
+      opserr << dofPtr->getID();
 
 
     FE_EleIter &theEles = theAnalysisModel->getFEs();    
     FE_Element *elePtr;
     while((elePtr = theEles()) != 0)     
-       cerr << elePtr->getID();
+       opserr << elePtr->getID();
     */
 
     // we invoke setGraph() on the LinearSOE which
@@ -251,14 +251,14 @@ DirectIntegrationAnalysis::setAlgorithm(EquiSolnAlgo &theNewAlgorithm)
     if (stamp != domainStamp) {
 	domainStamp = stamp;	    
 	if (this->domainChanged() < 0) {
-	    cerr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	    cerr << "domainChanged failed";
+	    opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
+	    opserr << "domainChanged failed";
 	    return -1;
 	}	
     } else {
 	if (theAlgorithm->domainChanged() < 0) {
-	    cerr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	    cerr << "algorithm::domainChanged() failed";
+	    opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
+	    opserr << "algorithm::domainChanged() failed";
 	    return -2;
 	}
     }
@@ -282,15 +282,15 @@ DirectIntegrationAnalysis::setIntegrator(TransientIntegrator &theNewIntegrator)
     if (stamp != domainStamp) {
 	domainStamp = stamp;	    
 	if (this->domainChanged() < 0) {
-	  cerr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	  cerr << "domainChanged failed";
+	  opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
+	  opserr << "domainChanged failed";
 	  return -1;
       }	
   }
   else {
       if (theIntegrator->domainChanged() < 0) {
-	  cerr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	  cerr << "Integrator::domainChanged failed";
+	  opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
+	  opserr << "Integrator::domainChanged failed";
 	  return -1;
       }	
   }
@@ -315,15 +315,15 @@ DirectIntegrationAnalysis::setLinearSOE(LinearSOE &theNewSOE)
   if (stamp != domainStamp) {
       domainStamp = stamp;	    
       if (this->domainChanged() < 0) {
-	  cerr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	  cerr << "domainChanged failed";
+	  opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
+	  opserr << "domainChanged failed";
 	  return -1;
       }	
   } else {
       Graph &theGraph = theAnalysisModel->getDOFGraph();
       if (theSOE->setSize(theGraph) < 0) {
-	  cerr << "DirectIntegrationAnalysis::setAlgorithm() - ";
-	  cerr << "LinearSOE::setSize() failed";
+	  opserr << "DirectIntegrationAnalysis::setAlgorithm() - ";
+	  opserr << "LinearSOE::setSize() failed";
 	  return -2;	
       }
   }
@@ -343,7 +343,7 @@ DirectIntegrationAnalysis::checkDomainChange(void)
   if (stamp != domainStamp) {
     domainStamp = stamp;	
     if (this->domainChanged() < 0) {
-      cerr << "DirectIntegrationAnalysis::initialize() - domainChanged() failed\n";
+      opserr << "DirectIntegrationAnalysis::initialize() - domainChanged() failed\n";
       return -1;
     }	
   }

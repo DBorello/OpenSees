@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:02 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/randomNumber/CStdLibRandGenerator.cpp,v $
 
 
@@ -68,8 +68,8 @@ CStdLibRandGenerator::generate_nIndependentStdNormalNumbers(int n)
 
 	// Check if computer ran out of memory
 	if (aStdNormRV==0) {
-		cerr << "CStdLibRandGenerator::generate_nIndependentStdNormalNumbers() - " << endl
-			<< " out of memory while instantiating internal objects." << endl;
+		opserr << "CStdLibRandGenerator::generate_nIndependentStdNormalNumbers() - " << endln
+			<< " out of memory while instantiating internal objects." << endln;
 		return -1;
 	}
 

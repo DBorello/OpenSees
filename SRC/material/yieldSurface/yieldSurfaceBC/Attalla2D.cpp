@@ -50,9 +50,8 @@ void Attalla2D::getGradient(double &gx, double &gy, double x, double y)
 
     if(loc != 0)
     {
-     	cerr << "ERROR - Attalla2D::getGradient(double &gx, double &gy, double x, double y)\n";
-        cerr << "Force point not on yield surface, drift = " << drift << " loc = " << loc <<"\n";
-        cin.get();
+     	opserr << "ERROR - Attalla2D::getGradient(double &gx, double &gy, double x, double y)\n";
+        opserr << "Force point not on yield surface, drift = " << drift << " loc = " << loc <<"\n";
     }
     else
     {
@@ -167,8 +166,8 @@ double t;
             hModel->toDeformedCoord(x1, y1);
 			if(displayMode==100)
 			{
-				cout << " x = " << x << ", y = " << y << " ";
-				cout << " x1 = " << x1 << ", y1 = " << y1 << "\n";
+				opserr << " x = " << x << ", y = " << y << " ";
+				opserr << " x1 = " << x1 << ", y1 = " << y1 << "\n";
 			}
             pCurr(0) = x1;
             pCurr(1) = y1;
@@ -179,7 +178,7 @@ double t;
             pOld(0) = x2;
             pOld(1) = y2;
             theViewer.drawLine(pOld, pCurr, rgb, rgb);
-			//cout << "pOld = " << pOld << " pCurr = " << pCurr << "\n";
+			//opserr << "pOld = " << pOld << " pCurr = " << pCurr << "\n";
 
             ///////////////////////// x<0, y>0
             x1 = -1*x;
@@ -237,7 +236,7 @@ double t;
 	return 0;
 }
 
-void Attalla2D::Print(ostream &s, int flag)
+void Attalla2D::Print(OPS_Stream &s, int flag)
 {
     s << "\nYield Surface No: " << this->getTag() << " type: Attalla2D\n";
 }

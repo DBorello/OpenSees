@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $                                                              
-// $Date: 2002-06-20 19:32:15 $                                                                  
+// $Revision: 1.10 $                                                              
+// $Date: 2003-02-14 23:01:25 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -34,7 +34,7 @@
 
 #include <NDMaterial.h>
 #include <Information.h>
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <stresst.h>
@@ -99,102 +99,102 @@ NDMaterial::getCommittedStrain(void)
 int 
 NDMaterial::setTrialStrain(const Vector &v)
 {
-   g3ErrorHandler->fatal("NDMaterial::setTrialStrain -- subclass responsibility");
-   return 0;    
+   opserr << "NDMaterial::setTrialStrain -- subclass responsibility\n";
+   return -1;    
 }
 
 int 
 NDMaterial::setTrialStrain(const Vector &v, const Vector &r)
 {
-   g3ErrorHandler->fatal("NDMaterial::setTrialStrain -- subclass responsibility");
-   return 0;    
+   opserr << "NDMaterial::setTrialStrain -- subclass responsibility\n";
+   return -1;    
 }
 
 int 
 NDMaterial::setTrialStrainIncr(const Vector &v)
 {
-   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
-   return 0;    
+   opserr << "NDMaterial::setTrialStrainIncr -- subclass responsibility\n";
+   return -1;    
 }
 
 int 
 NDMaterial::setTrialStrainIncr(const Vector &v, const Vector &r)
 {
-   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
-   return 0;    
+   opserr << "NDMaterial::setTrialStrainIncr -- subclass responsibility\n";
+   return -1;    
 }
 
 const Matrix &
 NDMaterial::getTangent(void)
 {
-   g3ErrorHandler->fatal("NDMaterial::getTangent -- subclass responsibility");
+   opserr << "NDMaterial::getTangent -- subclass responsibility\n";
    return errMatrix;    
 }
 
 const Vector &
 NDMaterial::getStress(void)
 {
-   g3ErrorHandler->fatal("NDMaterial::getStress -- subclass responsibility");
+   opserr << "NDMaterial::getStress -- subclass responsibility\n";
    return errVector;    
 }
 
 const Vector &
 NDMaterial::getStrain(void)
 {
-   g3ErrorHandler->fatal("NDMaterial::getStrain -- subclass responsibility");
+   opserr << "NDMaterial::getStrain -- subclass responsibility\n";
    return errVector;    
 }
 
 int 
 NDMaterial::setTrialStrain(const Tensor &v)
 {
-   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
-   return 0;    
+   opserr << "NDMaterial::setTrialStrainIncr -- subclass responsibility\n";
+   return -1;    
 }
 
 int 
 NDMaterial::setTrialStrain(const Tensor &v, const Tensor &r)    
 {
-   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
-   return 0;    
+   opserr << "NDMaterial::setTrialStrainIncr -- subclass responsibility\n";
+   return -1;    
 }
 
 int 
 NDMaterial::setTrialStrainIncr(const Tensor &v)
 {
-   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
-   return 0;    
+   opserr << "NDMaterial::setTrialStrainIncr -- subclass responsibility\n";
+   return -1;    
 }
 
 int 
 NDMaterial::setTrialStrainIncr(const Tensor &v, const Tensor &r)
 {
-   g3ErrorHandler->fatal("NDMaterial::setTrialStrainIncr -- subclass responsibility");
-   return 0;    
+   opserr << "NDMaterial::setTrialStrainIncr -- subclass responsibility\n";
+   return -1;    
 }
 
 const Tensor &
 NDMaterial::getTangentTensor(void)
 {
-   g3ErrorHandler->fatal("NDMaterial::getTangentTensor -- subclass responsibility");
+   opserr << "NDMaterial::getTangentTensor -- subclass responsibility\n";
    return errTensor;    
 }
 
 const stresstensor NDMaterial::getStressTensor(void)
 {
-   g3ErrorHandler->fatal("NDMaterial::getStressTensor -- subclass responsibility");
+   opserr << "NDMaterial::getStressTensor -- subclass responsibility\n";
    return errstresstensor;    
 }
 
 const straintensor NDMaterial::getStrainTensor(void)
 {
-   g3ErrorHandler->fatal("NDMaterial::getStrainTensor -- subclass responsibility");
+   opserr << "NDMaterial::getStrainTensor -- subclass responsibility\n";
    return errstraintensor;    
 }
 
 const straintensor NDMaterial::getPlasticStrainTensor(void)
 {
-   g3ErrorHandler->fatal("NDMaterial::getPlasticStrainTensor -- subclass responsibility");
+   opserr << "NDMaterial::getPlasticStrainTensor -- subclass responsibility\n";
    return errstraintensor;    
 }
 
@@ -202,7 +202,7 @@ const straintensor NDMaterial::getPlasticStrainTensor(void)
 //const Tensor &
 //NDMaterial::getStrainTensor(void)
 //{
-//   g3ErrorHandler->fatal("NDMaterial::getStrainTensor -- subclass responsibility");
+//   opserr << "NDMaterial::getStrainTensor -- subclass responsibility\n";
 //   return errTensor;    
 //}
 
@@ -215,11 +215,11 @@ NDMaterial::setResponse (char **argv, int argc, Information &matInfo)
     else if (strcmp(argv[0],"strain") == 0 || strcmp(argv[0],"strains") == 0)
 		return new MaterialResponse(this, 2, this->getStrain());
     
-	else if (strcmp(argv[0],"tangent") == 0)
-		return new MaterialResponse(this, 3, this->getTangent());
+    else if (strcmp(argv[0],"tangent") == 0)
+      return new MaterialResponse(this, 3, this->getTangent());
     
-	else
-		return 0;
+    else
+      return 0;
 }
 
 int 

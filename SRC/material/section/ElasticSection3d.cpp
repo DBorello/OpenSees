@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-10-03 18:52:03 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.cpp,v $
                                                                         
                                                                         
@@ -68,39 +68,33 @@ ElasticSection3d::ElasticSection3d
  e(4), eCommit(4)
 {
     if (E <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input E <= 0.0 ... setting E to 1.0",
-			"ElasticSection3d::ElasticSection3d");
-		E = 1.0;
+      opserr << "ElasticSection3d::ElasticSection3d -- Input E <= 0.0 ... setting E to 1.0\n";
+      E = 1.0;
     }
     
     if (A <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input A <= 0.0 ... setting A to 1.0",
-			"ElasticSection3d::ElasticSection3d");
-		A = 1.0;
+      opserr << "ElasticSection3d::ElasticSection3d -- Input A <= 0.0 ... setting A to 1.0\n";
+      A = 1.0;
     }
 
     if (Iz <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input Iz <= 0.0 ... setting Iz to 1.0",
-			"ElasticSection3d::ElasticSection3d");
-		Iz = 1.0;
+      opserr << "ElasticSection3d::ElasticSection3d -- Input Iz <= 0.0 ... setting Iz to 1.0\n";
+      Iz = 1.0;
     }
     
     if (Iy <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input Iy <= 0.0 ... setting Iy to 1.0",
-			"ElasticSection3d::ElasticSection3d");
-		Iy = 1.0;
+      opserr << "ElasticSection3d::ElasticSection3d -- Input Iy <= 0.0 ... setting Iy to 1.0\n";
+      Iy = 1.0;
     }
 
     if (G <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input G <= 0.0 ... setting G to 1.0",
-			"ElasticSection3d::ElasticSection3d");
-		G = 1.0;
+      opserr << "ElasticSection3d::ElasticSection3d -- Input G <= 0.0 ... setting G to 1.0\n";
+      G = 1.0;
     }
     
     if (J <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input J <= 0.0 ... setting J to 1.0",
-			"ElasticSection3d::ElasticSection3d");
-		J = 1.0;
+      opserr << "ElasticSection3d::ElasticSection3d -- Input J <= 0.0 ... setting J to 1.0\n";
+      J = 1.0;
     }
     
     if (code(0) != SECTION_RESPONSE_P)
@@ -119,27 +113,23 @@ ElasticSection3d::ElasticSection3d
  e(4), eCommit(4)
 {
     if (A <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input EA <= 0.0 ... setting EA to 1.0",
-			"ElasticSection3d::ElasticSection3d");
-		A = 1.0;
+      opserr << "ElasticSection3d::ElasticSection3d -- Input EA <= 0.0 ... setting EA to 1.0\n";
+      A = 1.0;
     }
 
     if (Iz <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input EIz <= 0.0 ... setting EIz to 1.0",
-			"ElasticSection3d::ElasticSection3d");
-		Iz = 1.0;
+      opserr << "ElasticSection3d::ElasticSection3d -- Input EIz <= 0.0 ... setting EIz to 1.0\n";
+      Iz = 1.0;
     }
     
     if (Iy <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input EIy <= 0.0 ... setting EIy to 1.0",
-			"ElasticSection3d::ElasticSection3d");
-		Iy = 1.0;
+      opserr << "ElasticSection3d::ElasticSection3d -- Input EIy <= 0.0 ... setting EIy to 1.0\n";
+      Iy = 1.0;
     }
 
     if (J <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input GJ <= 0.0 ... setting GJ to 1.0",
-			"ElasticSection3d::ElasticSection3d");
-		J = 1.0;
+      opserr << "ElasticSection3d::ElasticSection3d -- Input GJ <= 0.0 ... setting GJ to 1.0\n";
+      J = 1.0;
     }
     
     if (code(0) != SECTION_RESPONSE_P)
@@ -296,9 +286,8 @@ ElasticSection3d::sendSelf(int commitTag, Channel &theChannel)
     
     res += theChannel.sendVector(dataTag, commitTag, data);
     if(res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send data",
-			"ElasticSection3d::sendSelf");
-		return res;
+      opserr << "ElasticSection3d::sendSelf -- failed to send data\n";
+      return res;
     }
     
     return res;
@@ -316,9 +305,8 @@ ElasticSection3d::recvSelf(int commitTag, Channel &theChannel,
 
     res += theChannel.recvVector(dataTag, commitTag, data);
     if(res < 0) {
-		g3ErrorHandler->warning("%s -- failed to receive data",
-			"ElasticSection3d::recvSelf");
-		return res;
+      opserr << "ElasticSection3d::recvSelf -- failed to receive data\n";
+      return res;
     }
 
 	this->setTag((int)data(0));
@@ -337,13 +325,13 @@ ElasticSection3d::recvSelf(int commitTag, Channel &theChannel,
 }
  
 void
-ElasticSection3d::Print(ostream &s, int flag)
+ElasticSection3d::Print(OPS_Stream &s, int flag)
 {
-  s << "ElasticSection3d, tag: " << this->getTag() << endl;
-  s << "\t E: " << E << endl;
-  s << "\t A: " << A << endl;
-  s << "\tIz: " << Iz << endl;
-  s << "\tIy: " << Iy << endl;
-  s << "\t G: " << G << endl;
-  s << "\t J: " << J << endl;
+  s << "ElasticSection3d, tag: " << this->getTag() << endln;
+  s << "\t E: " << E << endln;
+  s << "\t A: " << A << endln;
+  s << "\tIz: " << Iz << endln;
+  s << "\tIy: " << Iy << endln;
+  s << "\t G: " << G << endln;
+  s << "\t J: " << J << endln;
 }

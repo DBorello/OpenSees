@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-10 22:26:39 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber2d.cpp,v $
                                                                         
                                                                         
@@ -61,9 +61,10 @@ UniaxialFiber2d::UniaxialFiber2d(int tag,
 {
    theMaterial = theMat.getCopy();  // get a copy of the MaterialModel
 
-   if (theMaterial == 0)
-	   g3ErrorHandler->fatal("%s -- failed to get copy of UniaxialMaterial",
-		   "UniaxialFiber2d::UniaxialFiber2d");
+   if (theMaterial == 0) {
+     opserr <<"UniaxialFiber2d::UniaxialFiber2d  -- failed to get copy of UniaxialMaterial\n";
+     exit(-1);
+   }
 
    if (code(0) != SECTION_RESPONSE_P) {
 	   code(0) = SECTION_RESPONSE_P;
@@ -185,55 +186,52 @@ UniaxialFiber2d::sendSelf(int commitTag, Channel &theChannel)
     // 
     // store tag and material info in an ID and send it
     //
-	int res = 0;
-	
-	int dbTag = this->getDbTag();
-    
-	static ID idData(3);
-    
-    idData(0) = this->getTag();
-    idData(1) = theMaterial->getClassTag();
-    
-	int matDbTag = theMaterial->getDbTag();
-    if (matDbTag == 0) {
-		matDbTag = theChannel.getDbTag();
-		if (matDbTag != 0)
-			theMaterial->setDbTag(matDbTag);
-	}
-    
-	idData(2) = matDbTag;
-    
-    res += theChannel.sendID(dbTag, commitTag, idData);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s - failed to send ID data",
-			"UniaxialFiber2d::sendSelf");
-		return res;
-    }    
-    
-    // 
-    // store area and position data in a vector and send it
-    //
-    static Vector dData(2);
-
-    dData(0) = area;
-	dData(1) = y;
-    
-	res += theChannel.sendVector(dbTag, commitTag, dData);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s - failed to send Vector data",
-			"UniaxialFiber2d::sendSelf");
-		return res;
-    }    
-
-    // now invoke sendSelf on the material
-    res += theMaterial->sendSelf(commitTag, theChannel);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s - failed to send UniaxialMaterial",
-			"UniaxialFiber2d::sendSelf");
-		return res;
-    }
-    
+  int res = 0;
+  
+  int dbTag = this->getDbTag();
+  
+  static ID idData(3);
+  
+  idData(0) = this->getTag();
+  idData(1) = theMaterial->getClassTag();
+  
+  int matDbTag = theMaterial->getDbTag();
+  if (matDbTag == 0) {
+    matDbTag = theChannel.getDbTag();
+    if (matDbTag != 0)
+      theMaterial->setDbTag(matDbTag);
+  }
+  
+  idData(2) = matDbTag;
+  
+  res += theChannel.sendID(dbTag, commitTag, idData);
+  if (res < 0) {
+    opserr << "UniaxialFiber2d::sendSelf - failed to send ID data\n";
     return res;
+  }    
+  
+  // 
+  // store area and position data in a vector and send it
+  //
+  static Vector dData(2);
+  
+  dData(0) = area;
+  dData(1) = y;
+  
+  res += theChannel.sendVector(dbTag, commitTag, dData);
+  if (res < 0) {
+    opserr << "UniaxialFiber2d::sendSelf - failed to send Vector data\n";
+    return res;
+  }    
+
+  // now invoke sendSelf on the material
+  res += theMaterial->sendSelf(commitTag, theChannel);
+  if (res < 0) {
+    opserr << "UniaxialFiber2d::sendSelf - failed to send UniaxialMaterial\n";
+      return res;
+  }
+    
+  return res;
 }
 
 
@@ -251,10 +249,9 @@ UniaxialFiber2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &
     static ID idData(3);
     
     res += theChannel.recvID(dbTag, commitTag, idData);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s - failed to receive ID data",
-		      "UniaxialFiber2d::recvSelf");
-		return res;
+    if (res < 0) {
+      opserr << "UniaxialFiber2d::rcvSelf - failed to receive ID data\n";
+    return res;
     }    
 
     this->setTag(idData(0));
@@ -266,14 +263,13 @@ UniaxialFiber2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &
     static Vector dData(2);
 
     res += theChannel.recvVector(dbTag, commitTag, dData);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s - failed to receive Vector data",
-		      "UniaxialFiber2d::recvSelf");
-		return res;
+    if (res < 0) {
+      opserr << "UniaxialFiber2d::recvSelf - failed to receive Vector data\n";
+	return res;
     }
 
     area = dData(0);
-	y = dData(1);
+    y = dData(1);
 
     //
     // now we do the material stuff
@@ -283,21 +279,21 @@ UniaxialFiber2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &
     
     // if we have a material, check it is of correct type
     if (theMaterial != 0) {
-		if (matClassTag != theMaterial->getClassTag()) {
-			delete theMaterial;
-			theMaterial = 0;
-		}
+      if (matClassTag != theMaterial->getClassTag()) {
+	delete theMaterial;
+	theMaterial = 0;
+      }
     }
 
     // if no material we need to get one,
     // NOTE: not an else if in case deleted in if above
     if (theMaterial == 0) {
-		theMaterial = theBroker.getNewUniaxialMaterial(matClassTag);
-		if (theMaterial == 0) {
-			g3ErrorHandler->warning("UniaxialFiber2d::recvSelf() - %s %d\n",
-			    "failed to get a UniaxialMaterial of type", matClassTag);
-		    return -1;
-		}
+      theMaterial = theBroker.getNewUniaxialMaterial(matClassTag);
+      if (theMaterial == 0) {
+	opserr << "UniaxialFiber2d::recvSelf() - " <<
+	  "failed to get a UniaxialMaterial of type " << matClassTag << endln;
+	return -1;
+      }
     }
 
     // set the materials dbTag and invoke recvSelf on the material
@@ -306,21 +302,20 @@ UniaxialFiber2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &
     // now invoke recvSelf on the material
     res += theMaterial->recvSelf(commitTag, theChannel, theBroker);
 	if (res < 0) {
-		g3ErrorHandler->warning("UniaxialFiber2d::recvSelf() - %s\n",
-			"the material failed in recvSelf()");
-		return res;
+	  opserr << "UniaxialFiber2d::recvSelf() - the material failed in recvSelf()\n";
+	  return res;
     }    	
 
 	return res;
 }
 
 
-void UniaxialFiber2d::Print(ostream &s, int flag)
+void UniaxialFiber2d::Print(OPS_Stream &s, int flag)
 {
-    s << "\nUniaxialFiber2d, tag: " << this->getTag() << endl;
-    s << "\tArea: " << area << endl; 
-    s << "\tMatrix as: " << 1.0 << " " << y << endl; 
-    s << "\tMaterial, tag: " << theMaterial->getTag() << endl;
+    s << "\nUniaxialFiber2d, tag: " << this->getTag() << endln;
+    s << "\tArea: " << area << endln; 
+    s << "\tMatrix as: " << 1.0 << " " << y << endln; 
+    s << "\tMaterial, tag: " << theMaterial->getTag() << endln;
 }
 
 Response*

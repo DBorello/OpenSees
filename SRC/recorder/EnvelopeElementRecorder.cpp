@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-12-13 00:06:13 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -40,6 +40,9 @@
 #include <FE_Datastore.h>
 #include <Information.h>
 
+#include <iomanip>
+using std::ios;
+
 EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom, 
 						 char **argv, int argc,
 						 double dT, char *theFileName)
@@ -57,8 +60,8 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
   for (int i=0; i<numEle; i++) {
     Element *theEle = theDom.getElement(eleID(i));
     if (theEle == 0) {
-      cerr << "WARNING EnvelopeElementRecorder::EnvelopeElementRecorder() -";
-      cerr << " no element with tag: " << eleID(i) << " exists in Domain\n";
+      opserr << "WARNING EnvelopeElementRecorder::EnvelopeElementRecorder() -";
+      opserr << " no element with tag: " << eleID(i) << " exists in Domain\n";
       theResponses[i] = 0;
     } else {
       theResponses[i] = theEle->setResponse(argv, argc, eleInfo);
@@ -72,7 +75,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
   data = new Matrix(3, numDbColumns);
   currentData = new Vector(numDbColumns);
   if (data == 0 || currentData == 0) {
-    cerr << "EnvelopeElementRecorder::EnvelopeElementRecorder() - out of memory\n";
+    opserr << "EnvelopeElementRecorder::EnvelopeElementRecorder() - out of memory\n";
     exit(-1);
   }
   
@@ -83,8 +86,9 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
     int fileNameLength = strlen(theFileName) + 1;
     fileName = new char[fileNameLength];
     if (fileName == 0) {
-      g3ErrorHandler->fatal("FileNodeDispRecorder::FileNodeDispRecorder - out of memory creating string %d long\n",
-			    fileNameLength);
+      opserr << "EnvelopeElementRecorder::EnvelopeElementRecorder - out of memory creating string " <<
+	fileNameLength << endln;
+      exit(-1);
     }
 
     // copy file name string
@@ -108,8 +112,8 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
   for (i=0; i<numEle; i++) {
     Element *theEle = theDom.getElement(eleID(i));
     if (theEle == 0) {
-      cerr << "WARNING EnvelopeElementRecorder::EnvelopeElementRecorder() -";
-      cerr << " no element with tag: " << eleID(i) << " exists in Domain\n";
+      opserr << "WARNING EnvelopeElementRecorder::EnvelopeElementRecorder() -";
+      opserr << " no element with tag: " << eleID(i) << " exists in Domain\n";
       theResponses[i] = 0;
     } else {
       theResponses[i] = theEle->setResponse(argv, argc, eleInfo);
@@ -127,7 +131,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
   data = new Matrix(3, numDbColumns);
   currentData = new Vector(numDbColumns);
   if (data == 0 || currentData == 0) {
-    cerr << "EnvelopeElementRecorder::EnvelopeElementRecorder() - out of memory\n";
+    opserr << "EnvelopeElementRecorder::EnvelopeElementRecorder() - out of memory\n";
     exit(-1);
   }
 
@@ -135,8 +139,8 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
   int fileNameLength = strlen(tableName) + 1;
   fileName = new char[fileNameLength];
   if (fileName == 0) {
-    g3ErrorHandler->fatal("FileNodeDispRecorder::FileNodeDispRecorder - out of memory creating string %d long\n",
-			  fileNameLength);
+    opserr << "EnvelopeElementRecorder::EnvelopeElementRecorder - out of memory creating string " << fileNameLength << endln;
+    exit(-1);
   }
 
   // copy the strings
@@ -263,14 +267,14 @@ EnvelopeElementRecorder::record(int commitTag, double timeStamp)
 	if (fileName != 0)
 	  theFile.open(fileName, ios::out);
 	if (theFile.bad()) {
-	  cerr << "WARNING - EnvelopeNodeRecorder::EnvelopeNodeRecorder()";
-	  cerr << " - could not open file " << fileName << endl;
+	  opserr << "WARNING - EnvelopeNodeRecorder::EnvelopeNodeRecorder()";
+	  opserr << " - could not open file " << fileName << endln;
 	}    
 	
 	for (int i=0; i<3; i++) {
 	  for (int j=0; j<numDbColumns; j++) 
 	    theFile << (*data)(i,j) << " ";
-	  theFile << endl;
+	  theFile << endln;
 	}
 	theFile.close(); 	  
       } else {
@@ -291,7 +295,7 @@ EnvelopeElementRecorder::record(int commitTag, double timeStamp)
 int 
 EnvelopeElementRecorder::playback(int commitTag)
 {
-  cerr << data;
+  opserr << data;
   return 0;
 }
 

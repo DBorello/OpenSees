@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-18 01:03:43 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.h,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@ class UniformExcitation : public EarthquakePattern
 
     void setDomain(Domain *theDomain);    
     void applyLoad(double time);
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
 
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, 

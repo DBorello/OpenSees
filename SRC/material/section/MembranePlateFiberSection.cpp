@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-10 22:32:12 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/MembranePlateFiberSection.cpp,v $
 
 // Ed "C++" Love
@@ -458,10 +458,10 @@ const Matrix&  MembranePlateFiberSection::getSectionTangent( )
 
 
 //print out data
-void  MembranePlateFiberSection::Print( ostream &s, int flag )
+void  MembranePlateFiberSection::Print( OPS_Stream &s, int flag )
 {
   s << "MembranePlateFiberSection: \n " ;
-  s <<  "  Thickness h = "        <<  h  <<  endl ;
+  s <<  "  Thickness h = "        <<  h  <<  endln ;
 
   theFibers[0]->Print( s, flag ) ;
 
@@ -502,8 +502,8 @@ MembranePlateFiberSection::sendSelf(int commitTag, Channel &theChannel)
 
   res += theChannel.sendID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING MembranePlateFiberSection::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING MembranePlateFiberSection::sendSelf() - " << this->getTag() << " failed to send ID\n";
+			    
     return res;
   }
 
@@ -511,7 +511,7 @@ MembranePlateFiberSection::sendSelf(int commitTag, Channel &theChannel)
   for (i = 0; i < 5; i++) {
     res += theFibers[i]->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING MembranePlateFiberSection::sendSelf() - %d failed to send its Material\n",this->getTag());
+      opserr << "WARNING MembranePlateFiberSection::sendSelf() - " << this->getTag() << " failed to send its Material\n";
       return res;
     }
   }
@@ -531,7 +531,7 @@ MembranePlateFiberSection::recvSelf(int commitTag, Channel &theChannel, FEM_Obje
   // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING MembranePlateFiberSection::recvSelf() - %d failed to receive ID\n", this->getTag());
+    opserr << "WARNING MembranePlateFiberSection::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return res;
   }
 
@@ -546,16 +546,16 @@ MembranePlateFiberSection::recvSelf(int commitTag, Channel &theChannel, FEM_Obje
       // Allocate new material with the sent class tag
       theFibers[i] = theBroker.getNewNDMaterial(matClassTag);
       if (theFibers[i] == 0) {
-	g3ErrorHandler->warning("MembranePlateFiberSection::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
+	opserr << "MembranePlateFiberSection::recvSelf() - " <<
+	  "Broker could not create NDMaterial of class type " << matClassTag << endln;
 	return -1;
       }
       // Now receive materials into the newly allocated space
       theFibers[i]->setDbTag(matDbTag);
       res += theFibers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn3d::recvSelf() - material " << 
+	  i << "failed to recv itself\n";
 	return res;
       }
     }
@@ -571,17 +571,17 @@ MembranePlateFiberSection::recvSelf(int commitTag, Channel &theChannel, FEM_Obje
 	delete theFibers[i];
 	theFibers[i] = theBroker.getNewNDMaterial(matClassTag);
 	if (theFibers[i] == 0) {
-	  g3ErrorHandler->fatal("MembranePlateFiberSection::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
-	  return -1;
+	  opserr << "MembranePlateFiberSection::recvSelf() - " << 
+	    "Broker could not create NDMaterial of class type" << matClassTag << endln;
+	  exit(-1);
 	}
       }
       // Receive the material
       theFibers[i]->setDbTag(matDbTag);
       res += theFibers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("MembranePlateFiberSection::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "MembranePlateFiberSection::recvSelf() - material " << 
+	  i << ", failed to recv itself\n";
 	return res;
       }
     }

@@ -27,7 +27,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 #include <Domain.h>
 
 #include <ErrorHandler.h>
@@ -43,7 +42,7 @@ TclModelBuilder_addEightNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inter
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-      g3ErrorHandler->warning("command: element Brick8_u_p_U - no modelbuilder");
+      opserr << "command: element Brick8_u_p_U - no modelbuilder\n";
       return TCL_ERROR;
   }
 
@@ -58,11 +57,11 @@ TclModelBuilder_addEightNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inter
   // Xiaoyan added this comments. 01/07/2002
 
   if ((argc-eleArgStart) < 23) {
-      g3ErrorHandler->warning("command: element Brick8_u_p_U - insufficient args - want %s",
+      opserr << "command: element Brick8_u_p_U - insufficient args - want %s",
           "element Brick8_u_p_U eleTag? node1? node2? ... node8? matTag? bforce1? bforce2? bforce3? \n"
 	  " porosity? alpha? solidDensity? fluidDensity? \n"
  	  "permeability_in_x_dir? permeability_in_y_dir? permeability_in_z_dir?"
-	  "solid_bulk_modulus? fluid_bulk_modulus? pressure?\n");
+	  "solid_bulk_modulus? fluid_bulk_modulus? pressure?\n";
       return TCL_ERROR;
   }    
 
@@ -75,8 +74,8 @@ TclModelBuilder_addEightNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inter
   
   // read the eleTag
   if (Tcl_GetInt(interp, argv[1+eleArgStart], &eleID) != TCL_OK) {
-      g3ErrorHandler->warning("command: element Brick8_u_p_U - invalid integer tag %s",      
-			      argv[1+eleArgStart]);
+      opserr << "command: element Brick8_u_p_U - invalid integer tag " <<      
+	argv[1+eleArgStart] << endln;
 
       return TCL_ERROR;
   }
@@ -84,118 +83,117 @@ TclModelBuilder_addEightNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inter
   // read the 8 node tags
   int i;
   for (i=0; i<8; i++) {
-      if (Tcl_GetInt(interp, argv[2+i+eleArgStart], &nodes[i]) != TCL_OK) {
-	  g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid integer tag %s",      
-				  eleID, argv[2+i+eleArgStart]);
-	  return TCL_ERROR;
-      }
+    if (Tcl_GetInt(interp, argv[2+i+eleArgStart], &nodes[i]) != TCL_OK) {
+      opserr << "command: element Brick8_u_p_U " << eleID << " - invalid integer tag " <<      
+	argv[2+i+eleArgStart] << endln;
+      return TCL_ERROR;
+    }
   }
-
+  
   // read in material tag & check the material exists in the model builder
   if (Tcl_GetInt(interp, argv[10+eleArgStart], &matID) != TCL_OK) {
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid matID tag %s",      
-			      eleID, argv[10+eleArgStart]);      
-      return TCL_ERROR;
+    opserr << "command: element Brick8_u_p_U " << eleID << " - invalid matID tag " <<      
+      argv[10+eleArgStart] << endln;      
+    return TCL_ERROR;
   }
-
+  
   NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
   
   if (theMaterial == 0) {
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - no NDMaterial with tag %s exists",
-			      eleID, argv[10+eleArgStart]);      
-      return TCL_ERROR;      
+    opserr << "command: element Brick8_u_p_U " << eleID << " - no NDMaterial with tag %s exists" <<
+      argv[10+eleArgStart] << endln;      
+    return TCL_ERROR;      
   }
   
   //type = argv[11+eleArgStart];
-
+  
   // read the 3 bodyforce accel's 
   for (i=0; i<3; i++) {
-      if (Tcl_GetDouble(interp, argv[11+i+eleArgStart], &bodyforces[i]) != TCL_OK) {
-	  g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bodyforces tag %s",      
-				  eleID, argv[11+i+eleArgStart]);
-	  return TCL_ERROR;
-      }
+    if (Tcl_GetDouble(interp, argv[11+i+eleArgStart], &bodyforces[i]) != TCL_OK) {
+      opserr << "command: element Brick8_u_p_U " << eleID << " - invalid bodyforces tag " <<      
+	argv[11+i+eleArgStart] << endln;
+      return TCL_ERROR;
+    }
   }
-
+  
   // now get the porosity
   if (Tcl_GetDouble(interp, argv[14+eleArgStart], &porosity) != TCL_OK) {	       // wxy added 01/07/2002
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid porosity %s",      
-    			  eleID, argv[14+eleArgStart]);      
-      return TCL_ERROR;
+    opserr << "command: element Brick8_u_p_U " << eleID << " - invalid porosity " <<      
+      argv[14+eleArgStart] << endln;      
+    return TCL_ERROR;
   }  
-
+  
   // now get the alpha
-    if (Tcl_GetDouble(interp, argv[15+eleArgStart], &alpha) != TCL_OK) {	      // wxy added 01/07/2002
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid alpha %s",      
-    			  eleID, argv[15+eleArgStart]);      
-      return TCL_ERROR;
+  if (Tcl_GetDouble(interp, argv[15+eleArgStart], &alpha) != TCL_OK) {	      // wxy added 01/07/2002
+    opserr << "command: element Brick8_u_p_U " << eleID << " - invalid alpha " <<      
+      argv[15+eleArgStart] << endln;      
+    return TCL_ERROR;
   }  
-
+  
   // now get the soldDensity
-
+  
   if (Tcl_GetDouble(interp, argv[16+eleArgStart], &solidDensity) != TCL_OK) {	      // wxy added 01/07/2002
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid solidDensity %s",      
-    			  eleID, argv[16+eleArgStart]);      
-      return TCL_ERROR;
+    opserr << "command: element Brick8_u_p_U " << eleID << " - invalid solidDensity " <<      
+      argv[16+eleArgStart] << endln;      
+    return TCL_ERROR;
   }    
   
   // now get the fludiDensity
-     if (Tcl_GetDouble(interp, argv[17+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid fluidDensity %s",      
-    			  eleID, argv[17+eleArgStart]);      
-      return TCL_ERROR;
+  if (Tcl_GetDouble(interp, argv[17+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+    opserr << "command: element Brick8_u_p_U " << eleID << " - invalid fluidDensity " <<      
+      argv[17+eleArgStart] << endln;      
+    return TCL_ERROR;
   }  
-
+  
   
   // now get the permeability in x direction
-     if (Tcl_GetDouble(interp, argv[18+eleArgStart], &perm_x) != TCL_OK) {        // wxy added 01/07/2002
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid permeability in x direction %s",      
-    			  eleID, argv[18+eleArgStart]);      
-      return TCL_ERROR;
+  if (Tcl_GetDouble(interp, argv[18+eleArgStart], &perm_x) != TCL_OK) {        // wxy added 01/07/2002
+    opserr << "command: element Brick8_u_p_U " << eleID << " - invalid permeability in x direction " <<      
+      argv[18+eleArgStart] << endln;      
+    return TCL_ERROR;
   }  
   // now get the permeability in y direction
-     if (Tcl_GetDouble(interp, argv[19+eleArgStart], &perm_y) != TCL_OK) {        // wxy added 01/07/2002
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid permeability in y direction %s",      
-    			  eleID, argv[19+eleArgStart]);      
-      return TCL_ERROR;
+  if (Tcl_GetDouble(interp, argv[19+eleArgStart], &perm_y) != TCL_OK) {        // wxy added 01/07/2002
+    opserr << "command: element Brick8_u_p_U " << eleID << " - invalid permeability in y direction " <<      
+      argv[19+eleArgStart] << endln;      
+    return TCL_ERROR;
   }  
   // now get the permeability in z direction
-     if (Tcl_GetDouble(interp, argv[20+eleArgStart], &perm_z) != TCL_OK) {        // wxy added 01/07/2002
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid permeability in z direction %s",      
-    			  eleID, argv[20+eleArgStart]);      
-      return TCL_ERROR;
+  if (Tcl_GetDouble(interp, argv[20+eleArgStart], &perm_z) != TCL_OK) {        // wxy added 01/07/2002
+    opserr << "command: element Brick8_u_p_U " << eleID << " - invalid permeability in z direction " <<      
+      argv[20+eleArgStart] << endln;      
+    return TCL_ERROR;
   }  
- 
+  
   // now get the bulk modulus of solid
-     if (Tcl_GetDouble(interp, argv[21+eleArgStart], &kks) != TCL_OK) {        // wxy added 01/07/2002
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of solid %s",      
-    			  eleID, argv[21+eleArgStart]);      
-      return TCL_ERROR;
+  if (Tcl_GetDouble(interp, argv[21+eleArgStart], &kks) != TCL_OK) {        // wxy added 01/07/2002
+    opserr << "command: element Brick8_u_p_U " << eleID << " - invalid bulk modulus of solid " <<      
+      argv[21+eleArgStart] << endln;      
+    return TCL_ERROR;
   }  
-
+  
   // now get the bulk modulus of fluid
-     if (Tcl_GetDouble(interp, argv[22+eleArgStart], &kkf) != TCL_OK) {        // wxy added 01/07/2002
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of fluid %s",      
-    			  eleID, argv[21+eleArgStart]);      
-      return TCL_ERROR;
+  if (Tcl_GetDouble(interp, argv[22+eleArgStart], &kkf) != TCL_OK) {        // wxy added 01/07/2002
+    opserr << "command: element Brick8_u_p_U " << eleID << " - invalid bulk modulus of fluid " <<      
+      argv[21+eleArgStart] << endln;      
+    return TCL_ERROR;
   }  
   // now create the EightNodeBrick and add it to the Domain
   EightNodeBrick_u_p_U *theEle = new EightNodeBrick_u_p_U(eleID,nodes[0], nodes[1], nodes[2], nodes[3], nodes[4],
-                                              nodes[5],nodes[6], nodes[7], theMaterial, 
-					      bodyforces[0], bodyforces[1], bodyforces[2], 
-					      porosity, alpha, solidDensity, fluidDensity, 
-					      perm_x, perm_y, perm_z, kks, kkf,0.0);
-					      
+							  nodes[5],nodes[6], nodes[7], theMaterial, 
+							  bodyforces[0], bodyforces[1], bodyforces[2], 
+							  porosity, alpha, solidDensity, fluidDensity, 
+							  perm_x, perm_y, perm_z, kks, kkf,0.0);
+  
   if (theEle == 0) {
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - out of memory", eleID);      
-      return TCL_ERROR;
+    opserr << "command: element Brick8_u_p_U " << eleID << " - out of memory\n";
+    return TCL_ERROR;
   }
-
+  
   if (theTclDomain->addElement(theEle) == false) {
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - could not add ele to domain", 
-			      eleID);      
-      delete theEle;
-      return TCL_ERROR;
+    opserr << "command: element Brick8_u_p_U " << eleID << " - could not add ele to domain\n";
+    delete theEle;
+    return TCL_ERROR;
   }
 
   // if get here we have sucessfully created the node and added it to the domain

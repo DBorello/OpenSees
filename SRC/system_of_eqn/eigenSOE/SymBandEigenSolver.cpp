@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-20 02:45:38 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:02:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/SymBandEigenSolver.cpp,v $
 
 // Written: MHS
@@ -80,8 +80,7 @@ int
 SymBandEigenSolver::solve(int nModes)
 {
   if (theSOE == 0) {
-    g3ErrorHandler->warning("%s -- no EigenSOE has been set yet",
-			    "SymBandEigenSolver::solve()");
+    opserr << "SymBandEigenSolver::solve() -- no EigenSOE has been set yet\n";
     return -1;
   }
   
@@ -181,20 +180,19 @@ SymBandEigenSolver::solve(int nModes)
   delete [] ifail;
 
   if (info < 0) {
-    g3ErrorHandler->warning("%s -- invalid argument number %d passed to LAPACK dsbevx",
-			    "SymBandEigenSolver::solve()", -info);
+    opserr << "SymBandEigenSolver::solve() -- invalid argument number " << -info << " passed to LAPACK dsbevx\n";
     return info;
   }
 
   if (info > 0) {
-    g3ErrorHandler->warning("%s -- LAPACK dsbevx returned error code %d",
-			    "SymBandEigenSolver::solve()", info);
+    opserr << "SymBandEigenSolver::solve() -- LAPACK dsbevx returned error code " << info << endln;
     return -info;
   }
 
   if (m < numModes) {
-    g3ErrorHandler->warning("%s -- LAPACK dsbevx only computed %d eigenvalues, %d were requested",
-			    "SymBandEigenSolver::solve()", m, numModes);
+    opserr << "SymBandEigenSolver::solve() -- LAPACK dsbevx only computed " << m << " eigenvalues, " <<
+      numModes << "were requested\n";
+
     numModes = m;
   }
 
@@ -215,8 +213,9 @@ const Vector &
 SymBandEigenSolver::getEigenvector(int mode)
 {
   if (mode < 1 || mode > numModes) {
-    g3ErrorHandler->warning("%s -- mode %d is out of range (1 - %d)",
-			    "SymBandEigenSolver::getEigenvector()", mode, numModes);
+    opserr << "SymBandEigenSolver::getEigenVector() -- mode " << mode << " is out of range (1 - "
+	   << numModes << ")\n";
+
     eigenV->Zero();
     return *eigenV;  
   }
@@ -232,8 +231,7 @@ SymBandEigenSolver::getEigenvector(int mode)
     }	
   }
   else {
-    g3ErrorHandler->warning("%s -- eigenvectors not yet computed",
-			    "SymBandEigenSolver::getEigenvector()");
+    opserr << "SymBandEigenSolver::getEigenVector() -- eigenvectors not yet computed\n";
     eigenV->Zero();
   }      
   
@@ -244,16 +242,16 @@ double
 SymBandEigenSolver::getEigenvalue(int mode)
 {
   if (mode < 1 || mode > numModes) {
-    g3ErrorHandler->warning("%s -- mode %d is out of range (1 - %d)",
-			    "SymBandEigenSolver::getEigenvalue()", mode, numModes);
+    opserr << "SymBandEigenSolver::getEigenvalue() -- mode " << mode << " is out of range (1 - "
+	   << numModes << ")\n";
+
     return 0.0;
   }
   
   if (eigenvalue != 0)
     return eigenvalue[mode-1];
   else {
-    g3ErrorHandler->warning("%s -- eigenvalues not yet computed",
-			    "SymBandEigenSolver::getEigenvalue()");
+    opserr << "SymBandEigenSolver::getEigenvalue() -- eigenvalues not yet computed\n";
     return 0.0;
   }      
 }
@@ -269,8 +267,7 @@ SymBandEigenSolver::setSize()
     
     eigenV = new Vector(size);
     if (eigenV == 0 || eigenV->Size() != size) {
-      g3ErrorHandler->warning("%s -- ran out of memory for eigenvector of size %d",
-			      "SymBandEigenSolver::setSize()", size);
+      opserr << "SymBandEigenSolver::ssetSize() -- ran out of memory for eigenvector of size " << size << endln;
       return -2;	    
     }
   }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-09-12 19:28:13 $
+// $Revision: 1.9 $
+// $Date: 2003-02-14 23:01:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -33,7 +33,7 @@
 // is a modified implementation of Hyster2.f90 by Filippou.
 
 #include <HystereticMaterial.h>
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <math.h>
 #include <float.h>
 #include <Channel.h>
@@ -69,9 +69,10 @@ mom1n(m1n), rot1n(r1n), mom2n(m2n), rot2n(r2n), mom3n(m3n), rot3n(r3n)
 	if (rot3n >= rot2n)
 		error = true;
 	
-	if (error)
-		g3ErrorHandler->fatal("%s -- input backbone is not unique (one-to-one)",
-		"HystereticMaterial::HystereticMaterial");
+	if (error) {
+	  opserr << "HystereticMaterial::HystereticMaterial -- input backbone is not unique (one-to-one)\n";
+	  exit(-1);
+	}		
 
 	energyA = 0.5 * (rot1p*mom1p + (rot2p-rot1p)*(mom2p+mom1p) + (rot3p-rot2p)*(mom3p+mom2p) +
 		rot1n*mom1n + (rot2n-rot1n)*(mom2n+mom1n) * (rot3n-rot2n)*(mom3n+mom2n));
@@ -109,9 +110,12 @@ mom1n(m1n), rot1n(r1n), mom3n(m2n), rot3n(r2n)
 	if (rot3n >= rot1n)
 		error = true;
 
-	if (error)
-		g3ErrorHandler->fatal("%s -- input backbone is not unique (one-to-one)",
-		"HystereticMaterial::HystereticMaterial");
+	if (error) {
+	  opserr << "HystereticMaterial::HystereticMaterial -- input backbone is not unique (one-to-one)\n";
+	  exit(-1);
+	}
+
+				      
 
 	energyA = 0.5 * (rot1p*mom1p + (rot3p-rot1p)*(mom3p+mom1p) +
 		rot1n*mom1n + (rot3n-rot1n)*(mom3n+mom1n));
@@ -479,7 +483,7 @@ HystereticMaterial::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), commitTag, data);
   if (res < 0) 
-    cerr << "HystereticMaterial::sendSelf() - failed to send data\n";
+    opserr << "HystereticMaterial::sendSelf() - failed to send data\n";
 
 
   return res;
@@ -495,7 +499,7 @@ HystereticMaterial::recvSelf(int commitTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), commitTag, data);
   
   if (res < 0) {
-      cerr << "HystereticMaterial::recvSelf() - failed to receive data\n";
+      opserr << "HystereticMaterial::recvSelf() - failed to receive data\n";
       return res;
   }
   else {
@@ -543,35 +547,35 @@ HystereticMaterial::recvSelf(int commitTag, Channel &theChannel,
 }
     
 void
-HystereticMaterial::Print(ostream &s, int flag)
+HystereticMaterial::Print(OPS_Stream &s, int flag)
 {
-	s << "Hysteretic Material, tag: " << this->getTag() << endl;
-	s << "mom1p: " << mom1p << endl;
-	s << "rot1p: " << rot1p << endl;
-	s << "E1p: " << E1p << endl;
-	s << "mom2p: " << mom2p << endl;
-	s << "rot2p: " << rot2p << endl;
-	s << "E2p: " << E2p << endl;
-	s << "mom3p: " << mom3p << endl;
-	s << "rot3p: " << rot3p << endl;
-	s << "E3p: " << E3p << endl;
+	s << "Hysteretic Material, tag: " << this->getTag() << endln;
+	s << "mom1p: " << mom1p << endln;
+	s << "rot1p: " << rot1p << endln;
+	s << "E1p: " << E1p << endln;
+	s << "mom2p: " << mom2p << endln;
+	s << "rot2p: " << rot2p << endln;
+	s << "E2p: " << E2p << endln;
+	s << "mom3p: " << mom3p << endln;
+	s << "rot3p: " << rot3p << endln;
+	s << "E3p: " << E3p << endln;
 
-	s << "mom1n: " << mom1n << endl;
-	s << "rot1n: " << rot1n << endl;
-	s << "E1n: " << E1n << endl;
-	s << "mom2n: " << mom2n << endl;
-	s << "rot2n: " << rot2n << endl;
-	s << "E2n: " << E2n << endl;
-	s << "mom3n: " << mom3n << endl;
-	s << "rot3n: " << rot3n << endl;
-	s << "E3n: " << E3n << endl;
+	s << "mom1n: " << mom1n << endln;
+	s << "rot1n: " << rot1n << endln;
+	s << "E1n: " << E1n << endln;
+	s << "mom2n: " << mom2n << endln;
+	s << "rot2n: " << rot2n << endln;
+	s << "E2n: " << E2n << endln;
+	s << "mom3n: " << mom3n << endln;
+	s << "rot3n: " << rot3n << endln;
+	s << "E3n: " << E3n << endln;
 
-	s << "pinchX: " << pinchX << endl;
-	s << "pinchY: " << pinchY << endl;
-	s << "damfc1: " << damfc1 << endl;
-	s << "damfc2: " << damfc2 << endl;
-	s << "energyA: " << energyA << endl;
-	s << "beta: " << beta << endl;
+	s << "pinchX: " << pinchX << endln;
+	s << "pinchY: " << pinchY << endln;
+	s << "damfc1: " << damfc1 << endln;
+	s << "damfc2: " << damfc2 << endln;
+	s << "energyA: " << energyA << endln;
+	s << "beta: " << beta << endln;
 }
 
 void

@@ -1,5 +1,5 @@
-// $Revision: 1.7 $
-// $Date: 2002-06-21 00:28:35 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/MultiYieldSurface.cpp,v $
                                                                         
 // Written: ZHY
@@ -8,9 +8,7 @@
 // MultiYieldSurface.cpp
 // ---------------------
 //
-#include <iostream.h>
-#include <fstream.h>
-#include <iomanip.h>
+
 #include <math.h>
 #include <stdlib.h>
 
@@ -47,19 +45,20 @@ void MultiYieldSurface::setData(const Vector & theCenter_init,
 void MultiYieldSurface::setCenter(const Vector & newCenter)
 {
   if (newCenter.Size() != 6) {
-	cerr << "FATAL:MultiYieldSurface::setCenter(Vector &): vector size not equal 6" << endl;
-	g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:MultiYieldSurface::setCenter(Vector &): vector size not equal 6" << endln;
+    exit(-1);
   }
 
   theCenter = newCenter;
 }
 
 
+/**********************************************
 ostream & operator<< (ostream & os, const MultiYieldSurface & a)
 {
-  os << "  theSize = " << a.theSize << endl 
-     << "  theCenter = " << a.theCenter << endl
-     << "  plastShearModulus = " << a.plastShearModulus << endl;
+  os << "  theSize = " << a.theSize << endln 
+     << "  theCenter = " << a.theCenter << endln
+     << "  plastShearModulus = " << a.plastShearModulus << endln;
   
   return os;
 }
@@ -71,21 +70,21 @@ istream & operator>> (istream & is, MultiYieldSurface & a)
 
   return is;
 }
-
+*********************************************/
 
 double secondOrderEqn(double A, double B, double C, int i)
 {
   if(A == 0){
-    cerr << "FATAL:second_order_eqn: A=0." << endl;
-    if(i==0) cerr << " when finding reference point on outer surface." <<endl;
-    else cerr << " when moving active surface." <<endl;
-    g3ErrorHandler->fatal(" ");   
+    opserr << "FATAL:second_order_eqn: A=0." << endln;
+    if(i==0) opserr << " when finding reference point on outer surface." <<endln;
+    else opserr << " when moving active surface." <<endln;
+    exit(-1);   
   }
   if(C == 0) return 0;
   if(B == 0){
     if(C/A > 0){
-      cerr << "FATAL:second_order_eqn: Complex roots.\n";
-      g3ErrorHandler->fatal(" ");
+      opserr << "FATAL:second_order_eqn: Complex roots.\n";
+      exit(-1);
     } 
     return sqrt(-C/A);
   }
@@ -93,11 +92,11 @@ double secondOrderEqn(double A, double B, double C, int i)
 	double determ, val1, val2, val;
   determ = B*B - 4.*A*C; 
   if(determ < 0){
-    cerr << "FATAL:second_order_eqn: Complex roots.\n";
-    if(i==0) cerr << " when finding reference point on outer surface." <<endl;
-    else cerr << " when moving active surface." <<endl;
-    cerr << "B2=" << B*B << " 4AC=" << 4.*A*C <<endl; 
-    g3ErrorHandler->fatal(" ");
+    opserr << "FATAL:second_order_eqn: Complex roots.\n";
+    if(i==0) opserr << " when finding reference point on outer surface." <<endln;
+    else opserr << " when moving active surface." <<endln;
+    opserr << "B2=" << B*B << " 4AC=" << 4.*A*C <<endln; 
+    exit(-1);
   }
   
   if (B > 0) val1 = (-B - sqrt(determ)) / (2.*A);
@@ -110,12 +109,12 @@ double secondOrderEqn(double A, double B, double C, int i)
 	}
 
   if (val1 < 0 && val2 < 0){
-    cerr << "FATAL:second_order_eqn: Negative roots.\n";
-    if(i==0) cerr << " when finding reference point on outer surface." <<endl;
-    else cerr << " when moving active surface." <<endl;
-		cerr << "A=" << A << " B=" << B << " C=" << C << " det=" << determ << 
-			" x1=" << val1 << " x2=" << val2 << endl;  
-    g3ErrorHandler->fatal(" ");   
+    opserr << "FATAL:second_order_eqn: Negative roots.\n";
+    if(i==0) opserr << " when finding reference point on outer surface." <<endln;
+    else opserr << " when moving active surface." <<endln;
+		opserr << "A=" << A << " B=" << B << " C=" << C << " det=" << determ << 
+			" x1=" << val1 << " x2=" << val2 << endln;  
+    exit(-1);   
   }
   
   if (val1 < 0) return  val2;

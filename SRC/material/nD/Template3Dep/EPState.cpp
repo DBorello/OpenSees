@@ -29,7 +29,6 @@
 #define EPState_CPP
 
 #include "EPState.h"
-#include <G3Globals.h>
 
 stresstensor EPState::TensorVar[ 4 ];
 stresstensor EPState::TensorVar_commit[ 4 ];
@@ -86,12 +85,12 @@ EPState::EPState(double               Eod,
       //ScalarVar = new double[ NScalarVar ]; 
       //if ( !ScalarVar ) {
       if ( ( !Scalarp ) && (NScalarVar != 0) ) {
-         g3ErrorHandler->warning("EPState::EPState   No initial values for scalar hardening vars, set to aero");
+	opserr << "EPState::EPState   No initial values for scalar hardening vars, set to aero\n";
          //::exit(1);  
       }
       else {
          for (int i = 0; i < NScalarVar; i++) {
-            //cout << Scalarp[i] << endln; 
+            //cout << Scalarp[i] << endlnn; 
         	 ScalarVar[i] = Scalarp[i];
         	 ScalarVar_commit[i] = Scalar_commitp[i];
         	 ScalarVar_init[i] = Scalar_initp[i];
@@ -108,7 +107,7 @@ EPState::EPState(double               Eod,
       if ( (!Tensorp ) && ( NTensorVar)) {
          //ScalarVar = new double[ NScalarVar ]; 
          //if ( !ScalarVar ) {
-         g3ErrorHandler->warning("EPState::EPState   No initial values for tensorial hardening vars, set to zero");
+	opserr << "EPState::EPState   No initial values for tensorial hardening vars, set to zero\n";
          //::exit(1);  
       }
       else {      
@@ -166,12 +165,12 @@ EPState::EPState(double             Eod,
       //ScalarVar = new double[ NScalarVar ]; 
       //if ( !ScalarVar ) {
       if ( ( !Scalarp ) && (NScalarVar != 0) ) {
-         g3ErrorHandler->warning("EPState::EPState   No initial values for scalar hardening vars, set to zero");
+	opserr << "EPState::EPState   No initial values for scalar hardening vars, set to zero\n";
          //::exit(1);  
       }
       else {
          for (int i = 0; i < NScalarVar; i++) {
-            //cout << Scalarp[i] << endln; 
+            //cout << Scalarp[i] << endlnn; 
        	 ScalarVar[i] = Scalarp[i];
        	 ScalarVar_commit[i] = Scalarp[i];
        	 ScalarVar_init[i] = Scalarp[i];
@@ -189,17 +188,17 @@ EPState::EPState(double             Eod,
       if ( ( !Tensorp ) && ( NTensorVar != 0 ) ) {
          //ScalarVar = new double[ NScalarVar ]; 
          //if ( !ScalarVar ) {
-         g3ErrorHandler->warning("EPState::EPState   No initial values for tensorial hardening vars, set to zero");
+	opserr << "EPState::EPState   No initial values for tensorial hardening vars, set to zero\n";
          //::exit(1);  
       }	      
       else {       
          for (int i = 0; i < NTensorVar; i++) {
-       	 //cout << Tensorp[i] << endln;
-       	 //cout << TensorVar[i] << endln;
+       	 //cout << Tensorp[i] << endlnn;
+       	 //cout << TensorVar[i] << endlnn;
        	 TensorVar[i] = Tensorp[i];
        	 TensorVar_commit[i] = Tensorp[i];
        	 TensorVar_init[i] = Tensorp[i];
-       	 //cout << TensorVar[i] << endln;
+       	 //cout << TensorVar[i] << endlnn;
        	 //TensorVar[i].null_indices();
          }   
      }
@@ -245,12 +244,12 @@ EPState::EPState(double             Eod,
       //   ::exit(1);  
       //}
       if ( (!Scalarp) && (NScalarVar != 0) ) {
-         g3ErrorHandler->warning("EPState::EPState   No initial values for scalar hardening vars, set to zero");
+	opserr << "EPState::EPState   No initial values for scalar hardening vars, set to zero\n";
          //::exit(1);  
       }
       else {
          for (int i = 0; i < NScalarVar; i++) {
-            //cout << Scalarp[i] << endln; 
+            //cout << Scalarp[i] << endlnn; 
         	 ScalarVar[i] = Scalarp[i];
         	 ScalarVar_commit[i] = Scalarp[i];
         	 ScalarVar_init[i] = Scalarp[i];
@@ -264,7 +263,7 @@ EPState::EPState(double             Eod,
       //   ::exit(1);  
       //}
       if ( (!Scalarp) && ( NTensorVar != 0 )) {
-         g3ErrorHandler->warning("EPState::EPState   No initial values for tensorial hardening vars, set to zero");
+         opserr << "EPState::EPState   No initial values for tensorial hardening vars, set to zero\n";
          //::exit(1);  
       }
       else {
@@ -729,7 +728,7 @@ double EPState::getScalarVar( int WhichOne) const {
          return ScalarVar[ WhichOne - 1 ]; 
       else 
       {
-         g3ErrorHandler->fatal("EPState::getScalarVar Out of ScalarVar's range %d!", getNScalarVar() );
+	opserr << "EPState::getScalarVar Out of ScalarVar's range: " <<  getNScalarVar()  << endln;
          return 0.0;
 	 exit(1);
       }
@@ -750,7 +749,8 @@ stresstensor EPState::getTensorVar(int WhichOne) const {
          return TensorVar[ WhichOne - 1 ]; 
       else 
       {
-         g3ErrorHandler->fatal("EPState::getTensorVar No. %d: Out of Tensortial Var's range %d out of %d !", WhichOne, getNTensorVar() );
+	opserr << "EPState::getTensorVar No. %d: Out of Tensortial Var's range " << WhichOne << 
+	  " out of " <<  getNTensorVar() << endln;
 	 exit(1);
       }
 
@@ -856,7 +856,7 @@ void EPState::setScalarVar(int WhichOne, double rval) {
          ScalarVar[ WhichOne - 1 ] = rval; 
       else 
       {
-         g3ErrorHandler->fatal("EPState::setScalarVar Out of ScalarVar's range %d!", getNScalarVar() );
+	opserr << "EPState::setScalarVar Out of ScalarVar's range " << getNScalarVar() << endln;
          //cout << " Out of ScalarVar's range!";	  
 	 exit(1);
       }
@@ -867,7 +867,7 @@ void EPState::setScalarVar_commit(int WhichOne, double rval) {
          ScalarVar_commit[ WhichOne - 1 ] = rval; 
       else 
       {
-         g3ErrorHandler->fatal("EPState::setScalarVar Out of ScalarVar's range %d!", getNScalarVar() );
+	opserr << "EPState::setScalarVar Out of ScalarVar's range " <<  getNScalarVar() << endln;
          //cout << " Out of ScalarVar's range!";	  
 	 exit(1);
       }
@@ -879,7 +879,7 @@ void EPState::setScalarVar_init(int WhichOne, double rval) {
          ScalarVar_init[ WhichOne - 1 ] = rval; 
       else 
       {
-         g3ErrorHandler->fatal("EPState::setScalarVar Out of ScalarVar's range %d!", getNScalarVar() );
+	opserr << "EPState::setScalarVar Out of ScalarVar's range " <<  getNScalarVar() << endln;
          //cout << " Out of ScalarVar's range!";	  
 	 exit(1);
       }
@@ -895,7 +895,7 @@ void EPState::setTensorVar(int WhichOne, const stresstensor &rval) {
          TensorVar[ WhichOne - 1 ] = rval;
       else 
       {
-         g3ErrorHandler->fatal("EPState::setTensorVar Out of Tensor Var's range %d!", getNTensorVar() );	  
+	opserr << "EPState::setTensorVar Out of Tensor Var's range " <<  getNTensorVar() << endln;;	  
 	 exit(1);
       }
 
@@ -907,7 +907,7 @@ void EPState::setTensorVar_commit(int WhichOne, const stresstensor &rval) {
          TensorVar_commit[ WhichOne - 1 ] = rval;
       else 
       {
-         g3ErrorHandler->fatal("EPState::setTensorVar Out of Tensor Var's range %d!", getNTensorVar() );	  
+	opserr << "EPState::setTensorVar Out of Tensor Var's range " <<  getNTensorVar()<< endln;	  
 	 exit(1);
       }
 
@@ -919,7 +919,7 @@ void EPState::setTensorVar_init(int WhichOne, const stresstensor &rval) {
          TensorVar_init[ WhichOne - 1 ] = rval;
       else 
       {
-         g3ErrorHandler->fatal("EPState::setTensorVar Out of Tensor Var's range %d!", getNTensorVar() );	  
+	opserr << "EPState::setTensorVar Out of Tensor Var's range " <<  getNTensorVar() << endln; 
 	 exit(1);
       }
 
@@ -932,11 +932,11 @@ void EPState::setTensorVar_init(int WhichOne, const stresstensor &rval) {
 void EPState::setScalarVar(double *rval) {
 
       if ( !rval ) {
-         g3ErrorHandler->fatal("EPState::setScalarVar No scalar vars supplied");
+	opserr << "EPState::setScalarVar No scalar vars supplied\n";
          ::exit(1);  
       }
       for (int i = 0; i < getNScalarVar(); i++) {
-         //cout << Scalarp[i] << endln; 
+         //cout << Scalarp[i] << endlnn; 
 	 ScalarVar[i] = rval[i];
       }
 
@@ -948,7 +948,7 @@ void EPState::setScalarVar(double *rval) {
 void EPState::setTensorVar(const stresstensor *rval) {
 
       if ( !rval ) {
-         g3ErrorHandler->fatal("EPState::setTensorVar No tensorial vars supplied");
+         opserr << "EPState::setTensorVar No tensorial vars supplied\n";
          ::exit(1);  
       }
       for (int i = 0; i < getNTensorVar(); i++) {
@@ -960,7 +960,7 @@ void EPState::setTensorVar(const stresstensor *rval) {
 
 //================================================================================
 void EPState::print() { 
-      cout << *this;
+      opserr << *this;
 
 }
 
@@ -1085,10 +1085,10 @@ int EPState::revertToStart () {
 // Overloaded Insertion Operator
 // prints an EPState's contents 
 //================================================================================
-ostream & operator<< (ostream& os, const EPState & EPS)
+OPS_Stream & operator<< (OPS_Stream& os, const EPState & EPS)
     {
-        os.setf( ios::showpos | ios::scientific);
-        os.precision(4);
+      //        os.setf( ios::showpos | ios::scientific);
+      os.precision(4);
         os.width(10);       
         os << endln << "Elastic plastic state parameters: "  << endln;
 
@@ -1111,7 +1111,7 @@ ostream & operator<< (ostream& os, const EPState & EPS)
 	os << "\tdPlasticStrain:" << EPS.getdPlasticStrain() << endln;
 	os << "\tEep.rank():" << EPS.getEep().rank() << endln;
 
-        os.unsetf( ios::showpos );
+	//        os.unsetf( ios::showpos );
 	int NS = EPS.getNScalarVar();
 	int NT = EPS.getNTensorVar();
 	
@@ -1125,10 +1125,10 @@ ostream & operator<< (ostream& os, const EPState & EPS)
     
         os << "\tNTensorVar = " << NT;
         for (i = 0; i < NT; i++) {
-           os.unsetf( ios::showpos);
+	  //           os.unsetf( ios::showpos);
            os << endln << "\tNo." << i+1 << " tensorial var:";
-           os.setf( ios::showpos);
-           cout << EPS.TensorVar[i];
+	   //           os.setf( ios::showpos);
+           os << EPS.TensorVar[i];
         }
 
         os << endln;           

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-10-03 18:52:03 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.cpp,v $
                                                                         
                                                                         
@@ -43,7 +43,6 @@
 #include <Vector.h>
 #include <ID.h>
 
-#include <G3Globals.h>
 #include <classTags.h>
 
 #include <string.h>
@@ -58,8 +57,8 @@ GenericSection1d::GenericSection1d(int tag, UniaxialMaterial &m, int type)
     theModel = m.getCopy();
 
     if (!theModel) {
-		g3ErrorHandler->fatal("%s -- failed to get copy of material model",
-			"GenericSection1d::GenericSection1d");
+      opserr << "GenericSection1d::GenericSection1d  -- failed to get copy of material model\n";
+      exit(-1);
     }
 }
 
@@ -203,17 +202,15 @@ GenericSection1d::sendSelf(int cTag, Channel &theChannel)
 	// Send the ID vector
 	res += theChannel.sendID(this->getDbTag(), cTag, data);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send ID",
-			"GenericSection1d::sendSelf");
-		return res;
+	  opserr << "GenericSection1d::sendSelf -- could not send ID\n";
+	  return res;
 	}
     
 	// Ask the UniaxialMaterial to send itself
 	res += theModel->sendSelf(cTag, theChannel);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send UniaxialMaterial",
-			"GenericSection1d::sendSelf");
-		return res;
+	  opserr << "GenericSection1d::sendSelf -- could not send UniaxialMaterial\n";
+	  return res;
 	}
 
     return res;
@@ -229,9 +226,8 @@ GenericSection1d::recvSelf(int cTag, Channel &theChannel,
 
     res += theChannel.recvID(this->getDbTag(), cTag, data);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive ID",
-			"GenericSection1d::recvSelf");
-		return res;
+	  opserr << "GenericSection1d::recvSelf -- could not receive ID\n";
+	  return res;
 	}
 
 	this->setTag(data(0));
@@ -251,27 +247,25 @@ GenericSection1d::recvSelf(int cTag, Channel &theChannel,
 
 	// Check if either allocation failed
 	if (theModel == 0) {
-		g3ErrorHandler->warning("%s -- could not get a UniaxialMaterial",
-			"GenericSection1d::recvSelf");
-		return -1;
+	  opserr << "GenericSection1d::recvSelf -- could not get a UniaxialMaterial\n";
+	  return -1;
 	}
 
 	// Now, receive the material
 	theModel->setDbTag(data(3));
 	res += theModel->recvSelf(cTag, theChannel, theBroker);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive UniaxialMaterial",
-			"GenericSection1d::recvSelf");
-		return res;
+	  opserr << "GenericSection1d::recvSelf -- could not receive UniaxialMaterial\n";
+	  return res;
 	}
 
     return res;
 }
 
 void
-GenericSection1d::Print (ostream &s, int flag)
+GenericSection1d::Print (OPS_Stream &s, int flag)
 {
-    s << "GenericSection1d (Uniaxial), tag: " << this->getTag() << endl;
-    s << "\tResponse code: " << code << endl;
-    s << "\tUniaxialMaterial: " << theModel->getTag() << endl;
+    s << "GenericSection1d (Uniaxial), tag: " << this->getTag() << endln;
+    s << "\tResponse code: " << code << endln;
+    s << "\tUniaxialMaterial: " << theModel->getTag() << endln;
 }

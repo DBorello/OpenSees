@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-20 00:37:27 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafXuTransformation.cpp,v $
 
 
@@ -73,17 +73,17 @@ NatafXuTransformation::NatafXuTransformation(ReliabilityDomain *passedReliabilit
 	theMatrixOperations = 0;
 	theMatrixOperations = new MatrixOperations(*correlationMatrix);
 	if (theMatrixOperations == 0) {
-		cerr << "NatafXuTransformation::NatafXuTransformation() - could " << endl
-			<< " not create the object to perform matrix operations." << endl;
+		opserr << "NatafXuTransformation::NatafXuTransformation() - could " << endln
+			<< " not create the object to perform matrix operations." << endln;
 	}
 
 
 	// Cholesky decomposition of correlation matrix
 	int result = theMatrixOperations->computeCholeskyAndItsInverse();
 	if (result < 0) {
-		cerr << "NatafXuTransformation::NatafXuTransformation() - could not" << endl
-			<< " compute the Cholesky decomposition and its inverse " << endl
-			<< " for the correlation matrix." << endl;
+		opserr << "NatafXuTransformation::NatafXuTransformation() - could not" << endln
+			<< " compute the Cholesky decomposition and its inverse " << endln
+			<< " for the correlation matrix." << endln;
 	}
 	(*lowerCholesky) = theMatrixOperations->getLowerCholesky();
 	(*inverseLowerCholesky) = theMatrixOperations->getInverseLowerCholesky();
@@ -150,16 +150,16 @@ NatafXuTransformation::transform_u_to_x_andComputeJacobian()
 
 	int result = theMatrixOperations->setMatrix((*jacobian_u_x));
 	if (result < 0) {
-		cerr << "NatafXuTransformation::transform_u_to_x() - could not set " << endl
-			<< " the matrix in the object to perform matrix operations." << endl;
+		opserr << "NatafXuTransformation::transform_u_to_x() - could not set " << endln
+			<< " the matrix in the object to perform matrix operations." << endln;
 		return -1;
 	}
 
 	
 	result = theMatrixOperations->computeInverse();
 	if (result < 0) {
-		cerr << "NatafXuTransformation::transform_u_to_x() - could not " << endl
-			<< " invert Jacobian_u_x." << endl;
+		opserr << "NatafXuTransformation::transform_u_to_x() - could not " << endln
+			<< " invert Jacobian_u_x." << endln;
 		return -1;
 	}
 	(*jacobian_x_u) = theMatrixOperations->getInverse();
@@ -224,8 +224,8 @@ NatafXuTransformation::getJacobian_z_x(Vector x, Vector z)
 		else if (strcmp(theRV->getType(),"LOGNORMAL")==0) {
 			double zeta = theRV->getParameter2();
 			if (x(i) == 0.0) {
-				cerr << "NatafXuTransformation::getJacobian_z_x() -- Error: value " << endl
-				    << "of lognormal random variable is zero in original space. " << endl;
+				opserr << "NatafXuTransformation::getJacobian_z_x() -- Error: value " << endln
+				    << "of lognormal random variable is zero in original space. " << endln;
 			}
 			jacobianMatrix_z_x(i,i) = 1.0 / ( zeta * x(i)  );
 		}
@@ -1034,7 +1034,7 @@ NatafXuTransformation::setCorrelationMatrix()
 		}
 		/////////////////////////////////////////////////////////////////////////////////
 		else {
-			cerr << "Did not find the given combination of distributions in CorrelationModifier" << endl;
+			opserr << "Did not find the given combination of distributions in CorrelationModifier" << endln;
 		}
 
 		if(newCorrelation > 1.0) {

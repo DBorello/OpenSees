@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-31 23:54:56 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:00:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -126,17 +126,17 @@ StaticAnalysis::analyze(int numSteps)
 	    domainStamp = stamp;
 	    result = this->domainChanged();
 	    if (result < 0) {
-		cerr << "StaticAnalysis::analyze() - domainChanged failed";
-		cerr << " at step " << i << " of " << numSteps << endl;
+		opserr << "StaticAnalysis::analyze() - domainChanged failed";
+		opserr << " at step " << i << " of " << numSteps << endln;
 		return -1;
 	    }	
 	}
 	
 	result = theIntegrator->newStep();
 	if (result < 0) {
-	    cerr << "StaticAnalysis::analyze() - the Integrator failed";
-	    cerr << " at iteration: " << i << " with domain at load factor ";
-	    cerr << the_Domain->getCurrentTime() << endl;
+	    opserr << "StaticAnalysis::analyze() - the Integrator failed";
+	    opserr << " at iteration: " << i << " with domain at load factor ";
+	    opserr << the_Domain->getCurrentTime() << endln;
 	    the_Domain->revertToLastCommit();
 
 	    return -2;
@@ -144,9 +144,9 @@ StaticAnalysis::analyze(int numSteps)
 
 	result = theAlgorithm->solveCurrentStep();
 	if (result < 0) {
-	    cerr << "StaticAnalysis::analyze() - the Algorithm failed";
-	    cerr << " at iteration: " << i << " with domain at load factor ";
-	    cerr << the_Domain->getCurrentTime() << endl;
+	    opserr << "StaticAnalysis::analyze() - the Algorithm failed";
+	    opserr << " at iteration: " << i << " with domain at load factor ";
+	    opserr << the_Domain->getCurrentTime() << endln;
 	    the_Domain->revertToLastCommit();	    
 	    theIntegrator->revertToLastStep();
 
@@ -158,9 +158,9 @@ StaticAnalysis::analyze(int numSteps)
 	if (theSensitivityAlgorithm != 0) {
 		result = theSensitivityAlgorithm->computeGradients();
 		if (result < 0) {
-			cerr << "StaticAnalysis::analyze() - the SensitivityAlgorithm failed";
-			cerr << " at iteration: " << i << " with domain at load factor ";
-			cerr << the_Domain->getCurrentTime() << endl;
+			opserr << "StaticAnalysis::analyze() - the SensitivityAlgorithm failed";
+			opserr << " at iteration: " << i << " with domain at load factor ";
+			opserr << the_Domain->getCurrentTime() << endln;
 			the_Domain->revertToLastCommit();	    
 			theIntegrator->revertToLastStep();
 			return -5;
@@ -171,10 +171,10 @@ StaticAnalysis::analyze(int numSteps)
 
 	result = theIntegrator->commit();
 	if (result < 0) {
-	    cerr << "StaticAnalysis::analyze() - ";
-	    cerr << "the Integrator failed to commit";
-	    cerr << " at iteration: " << i << " with domain at load factor ";
-	    cerr << the_Domain->getCurrentTime() << endl;
+	    opserr << "StaticAnalysis::analyze() - ";
+	    opserr << "the Integrator failed to commit";
+	    opserr << " at iteration: " << i << " with domain at load factor ";
+	    opserr << the_Domain->getCurrentTime() << endln;
 	    the_Domain->revertToLastCommit();	    
 	    theIntegrator->revertToLastStep();
 
@@ -196,12 +196,12 @@ StaticAnalysis::initialize(void)
     if (stamp != domainStamp) {
       domainStamp = stamp;	
       if (this->domainChanged() < 0) {
-	cerr << "DirectIntegrationAnalysis::initialize() - domainChanged() failed\n";
+	opserr << "DirectIntegrationAnalysis::initialize() - domainChanged() failed\n";
 	return -1;
       }	
     }
     if (theIntegrator->initialize() < 0) {
-	cerr << "DirectIntegrationAnalysis::initialize() - integrator initialize() failed\n";
+	opserr << "DirectIntegrationAnalysis::initialize() - integrator initialize() failed\n";
 	return -2;
     } else
       theIntegrator->commit();
@@ -221,7 +221,7 @@ StaticAnalysis::domainChanged(void)
 
      // theTimer.pause(); 
     // cout <<  "StaticAnalysis::clearAll() " << theTimer.getReal();
-    // cout << theTimer.getCPU() << endl;
+    // cout << theTimer.getCPU() << endln;
     // theTimer.start();    
 
     // now we invoke handle() on the constraint handler which
@@ -230,8 +230,8 @@ StaticAnalysis::domainChanged(void)
     
     result = theConstraintHandler->handle();
     if (result < 0) {
-	cerr << "StaticAnalysis::handle() - ";
-	cerr << "ConstraintHandler::handle() failed";
+	opserr << "StaticAnalysis::handle() - ";
+	opserr << "ConstraintHandler::handle() failed";
 	return -1;
     }	
     
@@ -241,8 +241,8 @@ StaticAnalysis::domainChanged(void)
 
     result = theDOF_Numberer->numberDOF();
     if (result < 0) {
-	cerr << "StaticAnalysis::handle() - ";
-	cerr << "DOF_Numberer::numberDOF() failed";
+	opserr << "StaticAnalysis::handle() - ";
+	opserr << "DOF_Numberer::numberDOF() failed";
 	return -2;
     }	    
     
@@ -253,8 +253,8 @@ StaticAnalysis::domainChanged(void)
 
     result = theSOE->setSize(theGraph);
     if (result < 0) {
-	cerr << "StaticAnalysis::handle() - ";
-	cerr << "LinearSOE::setSize() failed";
+	opserr << "StaticAnalysis::handle() - ";
+	opserr << "LinearSOE::setSize() failed";
 	return -3;
     }	    
 
@@ -263,15 +263,15 @@ StaticAnalysis::domainChanged(void)
 
     result = theIntegrator->domainChanged();
     if (result < 0) {
-	cerr << "StaticAnalysis::setAlgorithm() - ";
-	cerr << "Integrator::domainChanged() failed";
+	opserr << "StaticAnalysis::setAlgorithm() - ";
+	opserr << "Integrator::domainChanged() failed";
 	return -4;
     }	    
 
     result = theAlgorithm->domainChanged();
     if (result < 0) {
-	cerr << "StaticAnalysis::setAlgorithm() - ";
-	cerr << "Algorithm::domainChanged() failed";
+	opserr << "StaticAnalysis::setAlgorithm() - ";
+	opserr << "Algorithm::domainChanged() failed";
 	return -5;
     }	        
 
@@ -319,15 +319,15 @@ StaticAnalysis::setAlgorithm(EquiSolnAlgo &theNewAlgorithm)
 	domainStamp = stamp;
 	result = this->domainChanged();    
 	if (result < 0) {
-	    cerr << "StaticAnalysis::setAlgorithm() - domainChanged() failed";
+	    opserr << "StaticAnalysis::setAlgorithm() - domainChanged() failed";
 	    return -1;
 	}	
     }
     else {
 	result = theAlgorithm->domainChanged();
 	if (result < 0) {
-	    cerr << "StaticAnalysis::setAlgorithm() - ";
-	    cerr << "algorithm::domainChanged() failed";
+	    opserr << "StaticAnalysis::setAlgorithm() - ";
+	    opserr << "algorithm::domainChanged() failed";
 	    return -2;
 	}	
     }
@@ -359,15 +359,15 @@ StaticAnalysis::setIntegrator(StaticIntegrator &theNewIntegrator)
 	domainStamp = stamp;
 	result = this->domainChanged();    
 	if (result < 0) {	
-	    cerr << "StaticAnalysis::setAlgorithm() - domainChanged() failed";
+	    opserr << "StaticAnalysis::setAlgorithm() - domainChanged() failed";
 	    return -1;
 	}	
     }
     else  {
 	result = theIntegrator->domainChanged();
 	if (result < 0) {	
-	    cerr << "StaticAnalysis::setAlgorithm() - ";
-	    cerr << "Integrator::domainChanged() failed";
+	    opserr << "StaticAnalysis::setAlgorithm() - ";
+	    opserr << "Integrator::domainChanged() failed";
 	    return -2;
 	}	
     }
@@ -395,7 +395,7 @@ StaticAnalysis::setLinearSOE(LinearSOE &theNewSOE)
 	domainStamp = stamp;
 	result = this->domainChanged();
 	if (result < 0) {
-	    cerr << "StaticAnalysis::setAlgorithm() - domainChanged failed";
+	    opserr << "StaticAnalysis::setAlgorithm() - domainChanged failed";
 	    return -1;
 	}	
     }
@@ -403,8 +403,8 @@ StaticAnalysis::setLinearSOE(LinearSOE &theNewSOE)
 	Graph &theGraph = theAnalysisModel->getDOFGraph();
 	theSOE->setSize(theGraph);
 	if (result < 0) {
-	    cerr << "StaticAnalysis::setAlgorithm() - ";
-	    cerr << "LinearSOE::setSize() failed\n";
+	    opserr << "StaticAnalysis::setAlgorithm() - ";
+	    opserr << "LinearSOE::setSize() failed\n";
 	    return -2;
 	}		
     }

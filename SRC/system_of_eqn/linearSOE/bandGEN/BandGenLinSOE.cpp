@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:17:52 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:02:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/BandGenLinSOE.cpp,v $
                                                                         
                                                                         
@@ -62,9 +62,9 @@ BandGenLinSOE::BandGenLinSOE(int N, int numSuperDiag, int numSubDiag,
     A = new double[Asize];
 	
     if (A == 0) {
-	cerr << "WARNING BandGenLinSOE::BandGenLinSOE :";
-	cerr << " ran out of memory for A (size,super,sub) (";
-	cerr << size <<", " << numSuperDiag << ", " << numSubDiag << ") \n";
+	opserr << "WARNING BandGenLinSOE::BandGenLinSOE :";
+	opserr << " ran out of memory for A (size,super,sub) (";
+	opserr << size <<", " << numSuperDiag << ", " << numSubDiag << ") \n";
 	Asize = 0; size = 0; numSubD = 0; numSuperD = 0; 
     } else {
 	// zero the matrix
@@ -75,9 +75,9 @@ BandGenLinSOE::BandGenLinSOE(int N, int numSuperDiag, int numSubDiag,
 	X = new double[size];
 	
 	if (B == 0 || X == 0) {
-	    cerr << "WARNING BandGenLinSOE::BandGenLinSOE :";
-	    cerr << " ran out of memory for vectors (size) (";
-	    cerr << size << ") \n";
+	    opserr << "WARNING BandGenLinSOE::BandGenLinSOE :";
+	    opserr << " ran out of memory for vectors (size) (";
+	    opserr << size << ") \n";
 	    Bsize = 0; size = 0; numSubD = 0; numSuperD = 0;
 	} else {
 	    Bsize = size;
@@ -96,8 +96,8 @@ BandGenLinSOE::BandGenLinSOE(int N, int numSuperDiag, int numSubDiag,
     
     int solverOK = theSolvr.setSize();
     if (solverOK < 0) {
-	cerr << "WARNING BandGenLinSOE::BandGenLinSOE :";
-	cerr << " solver failed setSize() in constructor\n";
+	opserr << "WARNING BandGenLinSOE::BandGenLinSOE :";
+	opserr << " solver failed setSize() in constructor\n";
     }    
 }
 
@@ -160,9 +160,9 @@ BandGenLinSOE::setSize(Graph &theGraph)
 	A = new double[newSize];
 	
         if (A == 0) {
-            cerr << "WARNING BandGenLinSOE::BandGenLinSOE :";
-	    cerr << " ran out of memory for A (size,super,sub) (";
-	    cerr << size <<", " << numSuperD << ", " << numSubD << ") \n";
+            opserr << "WARNING BandGenLinSOE::BandGenLinSOE :";
+	    opserr << " ran out of memory for A (size,super,sub) (";
+	    opserr << size <<", " << numSuperD << ", " << numSubD << ") \n";
 	    Asize = 0; size = 0; numSubD = 0; numSuperD = 0;
 	    result= -1;
         }
@@ -187,9 +187,9 @@ BandGenLinSOE::setSize(Graph &theGraph)
 	X = new double[size];
 	
         if (B == 0 || X == 0) {
-            cerr << "WARNING BandGenLinSOE::BandGenLinSOE :";
-	    cerr << " ran out of memory for vectors (size) (";
-	    cerr << size << ") \n";
+            opserr << "WARNING BandGenLinSOE::BandGenLinSOE :";
+	    opserr << " ran out of memory for vectors (size) (";
+	    opserr << size << ") \n";
 	    Bsize = 0; size = 0; numSubD = 0; numSuperD = 0;
 	    result = -1;
         }
@@ -219,8 +219,8 @@ BandGenLinSOE::setSize(Graph &theGraph)
     LinearSOESolver *theSolvr = this->getSolver();
     int solverOK = theSolvr->setSize();
     if (solverOK < 0) {
-	cerr << "WARNING:BandGenLinSOE::setSize :";
-	cerr << " solver failed setSize()\n";
+	opserr << "WARNING:BandGenLinSOE::setSize :";
+	opserr << " solver failed setSize()\n";
 	return solverOK;
     }    
 
@@ -238,7 +238,7 @@ BandGenLinSOE::addA(const Matrix &m, const ID &id, double fact)
     // check that m and id are of similar size
     int idSize = id.Size();    
     if (idSize != m.noRows() && idSize != m.noCols()) {
-	cerr << "BandGenLinSOE::addA()	- Matrix and ID not of similar sizes\n";
+	opserr << "BandGenLinSOE::addA()	- Matrix and ID not of similar sizes\n";
 	return -1;
     }
     
@@ -311,7 +311,7 @@ BandGenLinSOE::addB(const Vector &v, const ID &id, double fact)
     // check that m and id are of similar size
     int idSize = id.Size();        
     if (idSize != v.Size() ) {
-	cerr << "BandGenLinSOE::addB()	- Vector and ID not of similar sizes\n";
+	opserr << "BandGenLinSOE::addB()	- Vector and ID not of similar sizes\n";
 	return -1;
     }    
     
@@ -346,8 +346,8 @@ BandGenLinSOE::setB(const Vector &v, double fact)
 
 
     if (v.Size() != size) {
-	cerr << "WARNING BandGenLinSOE::setB() -";
-	cerr << " incomptable sizes " << size << " and " << v.Size() << endl;
+	opserr << "WARNING BandGenLinSOE::setB() -";
+	opserr << " incomptable sizes " << size << " and " << v.Size() << endln;
 	return -1;
     }
     
@@ -392,7 +392,7 @@ const Vector &
 BandGenLinSOE::getX(void)
 {
     if (vectX == 0) {
-	cerr << "FATAL BandGenLinSOE::getX - vectX == 0!";
+	opserr << "FATAL BandGenLinSOE::getX - vectX == 0!";
 	exit(-1);
     }    
     return *vectX;
@@ -403,7 +403,7 @@ const Vector &
 BandGenLinSOE::getB(void)
 {
     if (vectB == 0) {
-	cerr << "FATAL BandGenLinSOE::getB - vectB == 0!";
+	opserr << "FATAL BandGenLinSOE::getB - vectB == 0!";
 	exit(-1);
     }    
     return *vectB;
@@ -446,8 +446,8 @@ BandGenLinSOE::setBandGenSolver(BandGenLinSolver &newSolver)
     if (size != 0) {
 	int solverOK = newSolver.setSize();
 	if (solverOK < 0) {
-	    cerr << "WARNING:BandGenLinSOE::setSolver :";
-	    cerr << "the new solver could not setSeize() - staying with old\n";
+	    opserr << "WARNING:BandGenLinSOE::setSolver :";
+	    opserr << "the new solver could not setSeize() - staying with old\n";
 	    return solverOK;
 	}
     }	

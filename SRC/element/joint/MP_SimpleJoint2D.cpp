@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-05 22:20:42 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_SimpleJoint2D.cpp,v $
 
 // Written: Arash
@@ -58,94 +58,94 @@ MP_SimpleJoint2D::MP_SimpleJoint2D(Domain *theDomain, int tag, int nodeRetain, i
 
   this->setTag(tag);
 
-	// get node pointers of constrainted and retained nodes
-	ConstrainedNode = theDomain->getNode(nodeConstrained);
-	if (ConstrainedNode == NULL)
-	{
-		cerr << "MP_SimpleJoint2D::MP_SimpleJoint2D: nodeConstrained: ";
-		cerr << nodeConstrained << "does not exist in model\n";
-		exit(0);}
-
-	RetainedNode = theDomain->getNode(nodeRetained);
-	if (RetainedNode == NULL)
-	{
-		cerr << "MP_SimpleJoint2D::MP_SimpleJoint2D: nodeRetained: ";
-		cerr << nodeRetained << "does not exist in model\n";
-		exit(0);}
-
-	// check for proper degrees of freedom
-	int RnumDOF = RetainedNode->getNumberDOF();
-	int CnumDOF = ConstrainedNode->getNumberDOF();
-    if (RnumDOF != 4 || CnumDOF != 3 ){
-		g3ErrorHandler->warning("MP_SimpleJoint2D::MP_SimpleJoint2D - mismatch in numDOF\n DOF not supported by this type of constraint");
-		return;
+  // get node pointers of constrainted and retained nodes
+  ConstrainedNode = theDomain->getNode(nodeConstrained);
+  if (ConstrainedNode == NULL)
+    {
+      opserr << "MP_SimpleJoint2D::MP_SimpleJoint2D: nodeConstrained: ";
+      opserr << nodeConstrained << "does not exist in model\n";
+      exit(0);}
+  
+  RetainedNode = theDomain->getNode(nodeRetained);
+  if (RetainedNode == NULL)
+    {
+      opserr << "MP_SimpleJoint2D::MP_SimpleJoint2D: nodeRetained: ";
+      opserr << nodeRetained << "does not exist in model\n";
+      exit(0);}
+  
+  // check for proper degrees of freedom
+  int RnumDOF = RetainedNode->getNumberDOF();
+  int CnumDOF = ConstrainedNode->getNumberDOF();
+  if (RnumDOF != 4 || CnumDOF != 3 ){
+    opserr << "MP_SimpleJoint2D::MP_SimpleJoint2D - mismatch in numDOF\n DOF not supported by this type of constraint\n";
+    return;
+  }
+  
+  // check the auxilary degree of freedom
+  if ( MainDOF == 2 ) {
+    AuxDOF = 3;
+  } else {
+    if ( MainDOF == 3 ) {
+      AuxDOF = 2;
+    } else {
+      opserr << "MP_SimpleJoint2D::MP_SimpleJoint2D - Wrong auxilary degree of freedom\n";
+      return;
     }
-
-	// check the auxilary degree of freedom
-	if ( MainDOF == 2 ) {
-		AuxDOF = 3;
-	} else {
-		if ( MainDOF == 3 ) {
-			AuxDOF = 2;
-		} else {
-			g3ErrorHandler->warning("MP_SimpleJoint2D::MP_SimpleJoint2D - Wrong auxilary degree of freedom");
-			return;
-		}
-    }
+  }
 	
-
-	// check for proper dimensions of coordinate space
-	const Vector &crdR = RetainedNode->getCrds();
-    int dimR = crdR.Size();
-	const Vector &crdC = ConstrainedNode->getCrds();
-    int dimC = crdC.Size();
-    
-	if (dimR != 2 || dimC != 2 ){
-		g3ErrorHandler->warning("MP_SimpleJoint2D::MP_SimpleJoint2D - mismatch in dimnesion\n dimension not supported by this type of constraint");
-		return;
-    }
+  
+  // check for proper dimensions of coordinate space
+  const Vector &crdR = RetainedNode->getCrds();
+  int dimR = crdR.Size();
+  const Vector &crdC = ConstrainedNode->getCrds();
+  int dimC = crdC.Size();
+  
+  if (dimR != 2 || dimC != 2 ){
+    opserr << "MP_SimpleJoint2D::MP_SimpleJoint2D - mismatch in dimnesion\n dimension not supported by this type of constraint\n";
+    return;
+  }
 
    
-	// allocate the constranted and retained id's
-    constrDOF = new ID(CnumDOF);
-    retainDOF = new ID(RnumDOF); 
- 
-	if (constrDOF == NULL || retainDOF == NULL ) { 
-		cerr << "MP_SimpleJoint2D::MP_SimpleJoint2D - ran out of memory \ncan not generate ID for nodes\n";
-		exit(-1);
-	}
-	
-	(*constrDOF)(0) = 0;
-	(*constrDOF)(1) = 1;
-	(*constrDOF)(2) = 2;
-
-	(*retainDOF)(0) = 0;
-	(*retainDOF)(1) = 1;
-	(*retainDOF)(2) = 2;
-	(*retainDOF)(3) = 3;
-
+  // allocate the constranted and retained id's
+  constrDOF = new ID(CnumDOF);
+  retainDOF = new ID(RnumDOF); 
+  
+  if (constrDOF == NULL || retainDOF == NULL ) { 
+    opserr << "MP_SimpleJoint2D::MP_SimpleJoint2D - ran out of memory \ncan not generate ID for nodes\n";
+    exit(-1);
+  }
     
-	// allocate the constraint matrix
+    (*constrDOF)(0) = 0;
+    (*constrDOF)(1) = 1;
+    (*constrDOF)(2) = 2;
+    
+    (*retainDOF)(0) = 0;
+    (*retainDOF)(1) = 1;
+    (*retainDOF)(2) = 2;
+    (*retainDOF)(3) = 3;
+    
+    
+    // allocate the constraint matrix
     constraint = new Matrix( CnumDOF , RnumDOF );
     if (constraint == NULL ) { 
-	cerr << "MP_SimpleJoint2D::MP_SimpleJoint2D - ran out of memory 2\n";
+	opserr << "MP_SimpleJoint2D::MP_SimpleJoint2D - ran out of memory 2\n";
 	exit(-1);
     }  
 
-	// calculate constraint matrix
-	double deltaX = crdC(0) - crdR(0);
-	double deltaY = crdC(1) - crdR(1);
-
-	Length0 = sqrt( deltaX*deltaX + deltaY*deltaY );
+    // calculate constraint matrix
+    double deltaX = crdC(0) - crdR(0);
+    double deltaY = crdC(1) - crdR(1);
+    
+    Length0 = sqrt( deltaX*deltaX + deltaY*deltaY );
     if ( Length0 <= 1.0e-12 ) { 
-	cerr << "MP_SimpleJoint2D::MP_SimpleJoint2D - The constraint length is zero\n";
+      opserr << "MP_SimpleJoint2D::MP_SimpleJoint2D - The constraint length is zero\n";
     }  
-	
-	(*constraint) (0,0) = 1.0 ;
-	(*constraint) (1,1) = 1.0 ;
-	(*constraint) (0,MainDOF) = -deltaY ;
-	(*constraint) (1,MainDOF) = deltaX ;
-	(*constraint) (2,AuxDOF) = 1.0 ;
+    
+    (*constraint) (0,0) = 1.0 ;
+    (*constraint) (1,1) = 1.0 ;
+    (*constraint) (0,MainDOF) = -deltaY ;
+    (*constraint) (1,MainDOF) = deltaX ;
+    (*constraint) (2,AuxDOF) = 1.0 ;
 }
 
 
@@ -181,8 +181,8 @@ const ID &
 MP_SimpleJoint2D::getConstrainedDOFs(void) const
 {
     if (constrDOF == NULL) {
-	cerr << "MP_SimpleJoint2D::getConstrainedDOF - no ID was set, ";
-	cerr << "was recvSelf() ever called? or subclass incorrect?\n";	
+	opserr << "MP_SimpleJoint2D::getConstrainedDOF - no ID was set, ";
+	opserr << "was recvSelf() ever called? or subclass incorrect?\n";	
 	exit(-1);
     }
 
@@ -195,8 +195,8 @@ const ID &
 MP_SimpleJoint2D::getRetainedDOFs(void) const
 {
     if (retainDOF == NULL) {
-	cerr << "MP_SimpleJoint2D::getRetainedDOFs - no ID was set\n ";
-	cerr << "was recvSelf() ever called? or subclass incorrect?\n";		
+	opserr << "MP_SimpleJoint2D::getRetainedDOFs - no ID was set\n ";
+	opserr << "was recvSelf() ever called? or subclass incorrect?\n";		
 	exit(-1);
     }
 
@@ -238,7 +238,7 @@ MP_SimpleJoint2D::applyConstraint(double timeStamp)
 //		Direction(0) = deltaX;
 //		Direction(1) = deltaY;
 //		double NewLength = Direction.Norm();
-//		if ( NewLength < 1e-12 ) cerr << "MP_SimpleJoint2D::applyConstraint : length of rigid link is too small or zero"; 
+//		if ( NewLength < 1e-12 ) opserr << "MP_SimpleJoint2D::applyConstraint : length of rigid link is too small or zero"; 
 //		Direction = Direction * (Length0/NewLength);		// correct the length
 //		// find new displacements of the constrainted node
 //	
@@ -294,7 +294,7 @@ int MP_SimpleJoint2D::sendSelf(int commitTag, Channel &theChannel)
 	// now send the data vector
     int result = theChannel.sendVector(dataTag, commitTag, data);
     if (result < 0) {
-		cerr << "WARNING MP_SimpleJoint2D::sendSelf - error sending ID data\n";
+		opserr << "WARNING MP_SimpleJoint2D::sendSelf - error sending ID data\n";
 		return result;  
     }    
     
@@ -302,8 +302,8 @@ int MP_SimpleJoint2D::sendSelf(int commitTag, Channel &theChannel)
     if (constrDOF != 0 && constrDOF->Size() != 0) {
 		int result = theChannel.sendID(dbTag1, commitTag, *constrDOF);
 		if (result < 0) {
-			cerr << "WARNING MP_SimpleJoint2D::sendSelf ";
-			cerr << "- error sending constrained DOF data\n";
+			opserr << "WARNING MP_SimpleJoint2D::sendSelf ";
+			opserr << "- error sending constrained DOF data\n";
 			return result;
 		}
 	}
@@ -312,8 +312,8 @@ int MP_SimpleJoint2D::sendSelf(int commitTag, Channel &theChannel)
     if (retainDOF != 0 && retainDOF->Size() != 0) {
 		int result = theChannel.sendID(dbTag2, commitTag, *retainDOF);
 		if (result < 0) {
-			cerr << "WARNING MP_SimpleJoint2D::sendSelf ";
-			cerr << "- error sending retained DOF data\n";
+			opserr << "WARNING MP_SimpleJoint2D::sendSelf ";
+			opserr << "- error sending retained DOF data\n";
 			return result;
 		}
     }
@@ -324,8 +324,8 @@ int MP_SimpleJoint2D::sendSelf(int commitTag, Channel &theChannel)
 
 	int result = theChannel.sendMatrix(dbTag3, commitTag, *constraint);
 	if (result < 0) {
-	    cerr << "WARNING MP_SimpleJoint2D::sendSelf ";
-	    cerr << "- error sending constraint Matrix data\n"; 
+	    opserr << "WARNING MP_SimpleJoint2D::sendSelf ";
+	    opserr << "- error sending constraint Matrix data\n"; 
 	    return result;  
 	}
     }
@@ -341,7 +341,7 @@ int MP_SimpleJoint2D::recvSelf(int commitTag, Channel &theChannel,
     Vector data(14);
     int result = theChannel.recvVector(dataTag, commitTag, data);
     if (result < 0) {
-	cerr << "WARNING MP_SimpleJoint2D::recvSelf - error receiving ID data\n";
+	opserr << "WARNING MP_SimpleJoint2D::recvSelf - error receiving ID data\n";
 	return result;  
     }    
 
@@ -368,8 +368,8 @@ int MP_SimpleJoint2D::recvSelf(int commitTag, Channel &theChannel,
 	constrDOF = new ID(constrDOFsize);
 	int result = theChannel.recvID(dbTag1, commitTag, *constrDOF);
 	if (result < 0) {
-	    cerr << "WARNING MP_SimpleJoint2D::recvSelf ";
-	    cerr << "- error receiving constrained data\n"; 
+	    opserr << "WARNING MP_SimpleJoint2D::recvSelf ";
+	    opserr << "- error receiving constrained data\n"; 
 	    return result;  
 	}	
     }
@@ -379,8 +379,8 @@ int MP_SimpleJoint2D::recvSelf(int commitTag, Channel &theChannel,
 	retainDOF = new ID(retainDOFsize);
 	int result = theChannel.recvID(dbTag2, commitTag, *retainDOF);
 	if (result < 0) {
-	    cerr << "WARNING MP_SimpleJoint2D::recvSelf ";
-	    cerr << "- error receiving retained data\n"; 
+	    opserr << "WARNING MP_SimpleJoint2D::recvSelf ";
+	    opserr << "- error receiving retained data\n"; 
 	    return result;  
 	}	
     }    
@@ -392,8 +392,8 @@ int MP_SimpleJoint2D::recvSelf(int commitTag, Channel &theChannel,
 		int result = theChannel.recvMatrix(dbTag3, commitTag, *constraint);
 		
 		if (result < 0) {
-			cerr << "WARNING MP_SimpleJoint2D::recvSelf ";
-			cerr << "- error receiving Matrix data\n";
+			opserr << "WARNING MP_SimpleJoint2D::recvSelf ";
+			opserr << "- error receiving Matrix data\n";
 			return result;
 		}
 	}
@@ -404,7 +404,7 @@ int MP_SimpleJoint2D::recvSelf(int commitTag, Channel &theChannel,
 const Matrix &MP_SimpleJoint2D::getConstraint(void)
 {
     if (constraint == 0) {
-	cerr << "MP_SimpleJoint2D::getConstraint - no Matrix was set\n";
+	opserr << "MP_SimpleJoint2D::getConstraint - no Matrix was set\n";
 	exit(-1);
     }    
 
@@ -429,7 +429,7 @@ const Matrix &MP_SimpleJoint2D::getConstraint(void)
 		Direction(0) = deltaX;
 		Direction(1) = deltaY;
 		double NewLength = Direction.Norm();
-		if ( NewLength < 1e-12 ) cerr << "MP_SimpleJoint2D::applyConstraint : length of rigid link is too small or zero"; 
+		if ( NewLength < 1e-12 ) opserr << "MP_SimpleJoint2D::applyConstraint : length of rigid link is too small or zero"; 
 		Direction = Direction * (Length0/NewLength);		// correct the length
 		// find new displacements of the constrainted node
 	
@@ -446,7 +446,7 @@ const Matrix &MP_SimpleJoint2D::getConstraint(void)
     return (*constraint);
 }
     
-void MP_SimpleJoint2D::Print(ostream &s, int flag )
+void MP_SimpleJoint2D::Print(OPS_Stream &s, int flag )
 {
     s << "MP_SimpleJoint2D: " << this->getTag() << "\n";
     s << "\tNode Constrained: " << nodeConstrained;

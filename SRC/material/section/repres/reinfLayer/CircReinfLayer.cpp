@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-10 18:00:38 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/reinfLayer/CircReinfLayer.cpp,v $
                                                                         
                                                                         
@@ -186,7 +186,7 @@ CircReinfLayer::getCopy (void) const
 
 
 
-void CircReinfLayer::Print(ostream &s, int flag) const
+void CircReinfLayer::Print(OPS_Stream &s, int flag) const
 {
    s << "\nReinforcing Layer type:  Circ";
    s << "\nMaterial ID: " << matID;
@@ -199,7 +199,7 @@ void CircReinfLayer::Print(ostream &s, int flag) const
 }
 
 
-ostream &operator<<(ostream &s, const CircReinfLayer &CircReinfLayer)
+OPS_Stream &operator<<(OPS_Stream &s, const CircReinfLayer &CircReinfLayer)
 {  
    CircReinfLayer.Print(s);
    return s;

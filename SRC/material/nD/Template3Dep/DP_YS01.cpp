@@ -29,8 +29,6 @@
 #include "DP_YS01.h"
 #include <basics.h>
 
-#include <G3Globals.h>
-
 //================================================================================
 // Normal constructor
 //================================================================================
@@ -72,11 +70,11 @@ double DPYieldSurface01::f(const EPState *EPS) const
 
   double p =EPS->getStress().p_hydrostatic();
   p = p - Pc;
-  cout << "p " << p;
+  opserr << "p " << p;
 
   stresstensor alpha = EPS->getTensorVar( 1 );
   //alpha.print("alpha", " alpha");
-  //cout << "alpha " << alpha;
+  //opserr << "alpha " << alpha;
   
   double m = EPS->getScalarVar(1);
 
@@ -127,14 +125,14 @@ tensor DPYieldSurface01::dFods(const EPState *EPS) const {
     stresstensor norm2 = r_bar("ij") * r_bar("ij");
     double norm = sqrt( norm2.trace() );
     
-    //cout << "d_macheps " << d_macheps() << endln;
+    //opserr << "d_macheps " << d_macheps() << endlnn;
 
     stresstensor n;
     if ( norm >= d_macheps() ){ 
       n =  r_bar*(1.0 / norm );
     }
     else {
-      g3ErrorHandler->fatal("DPYieldSurface01::dFods  |n_ij| = 0, divide by zero! Program exits.");
+      opserr << "DPYieldSurface01::dFods  |n_ij| = 0, divide by zero! Program exits.\n";
       exit(-1);
     }
     //EPS->setTensorVar( 3, n); //update n_ij//
@@ -199,7 +197,7 @@ tensor DPYieldSurface01::xi_t1( const EPState *EPS) const {
       n = r_bar *(1.0 / norm );
     }
     else {
-      g3ErrorHandler->fatal("DPYieldSurface01::dFods  |n_ij| = 0, divide by zero! Program exits.");
+      opserr << "DPYieldSurface01::dFods  |n_ij| = 0, divide by zero! Program exits.\n";
       exit(-1);
     }
       
@@ -207,7 +205,7 @@ tensor DPYieldSurface01::xi_t1( const EPState *EPS) const {
 }
 
 
-ostream& operator<< (ostream& os, const DPYieldSurface01 & YS)
+OPS_Stream& operator<< (OPS_Stream& os, const DPYieldSurface01 & YS)
 {
    os << "Drucker-Prager Yield Surface 01 Parameters: " << endln;
    os << "Pc = " << YS.Pc << endln;

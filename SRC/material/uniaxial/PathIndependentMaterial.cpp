@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-10 23:04:00 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PathIndependentMaterial.cpp,v $
 
 // Written: MHS
@@ -36,16 +36,17 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 PathIndependentMaterial::PathIndependentMaterial(int tag, UniaxialMaterial &material)
 :UniaxialMaterial(tag,MAT_TAG_PathIndependent), theMaterial(0)
 {
-	theMaterial = material.getCopy();
+  theMaterial = material.getCopy();
 
-	if (theMaterial == 0)
-		g3ErrorHandler->fatal("%s -- failed to get copy of material",
-			"PathIndependentMaterial::PathIndependentMaterial");
+  if (theMaterial == 0) {
+    opserr <<  "PathIndependentMaterial::PathIndependentMaterial -- failed to get copy of material\n";
+    exit(-1);
+  }
 }
 
 PathIndependentMaterial::PathIndependentMaterial()
@@ -154,16 +155,14 @@ PathIndependentMaterial::sendSelf(int cTag, Channel &theChannel)
 
 	res = theChannel.sendID(dbTag, cTag, classTags);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send ID",
-			"PathIndependentMaterial::sendSelf");
-		return res;
+	  opserr << "PathIndependentMaterial::sendSelf -- could not send ID\n";
+	  return res;
 	}
     
 	res = theMaterial->sendSelf(cTag, theChannel);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send UniaxialMaterial",
-			"PathIndependentMaterial::sendSelf");
-		return res;
+	  opserr << "PathIndependentMaterial::sendSelf -- could not send UniaxialMaterial\n";
+	  return res;
 	}
 
 	return res;
@@ -181,8 +180,7 @@ PathIndependentMaterial::recvSelf(int cTag, Channel &theChannel,
 
   res = theChannel.recvID(dbTag, cTag, classTags);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- could not receive ID",
-			    "PathIndependentMaterial::recvSelf");
+    opserr << "PathIndependentMaterial::recvSelf -- could not receive ID\n";
     return res;
   }
 
@@ -192,8 +190,7 @@ PathIndependentMaterial::recvSelf(int cTag, Channel &theChannel,
   if (theMaterial == 0) {
     theMaterial = theBroker.getNewUniaxialMaterial(classTags(0));
     if (theMaterial == 0) {
-      g3ErrorHandler->warning("%s -- could not get a UniaxialMaterial",
-			      "PathIndependent::recvSelf");
+      opserr << " PathIndependentMaterial::recvSelf -- could not get a UniaxialMaterial\n";
       return -1;
     }
   }
@@ -203,9 +200,8 @@ PathIndependentMaterial::recvSelf(int cTag, Channel &theChannel,
     delete theMaterial;
     theMaterial = theBroker.getNewUniaxialMaterial(classTags(0));
     if (theMaterial == 0) {
-      g3ErrorHandler->warning("%s -- could not get a UniaxialMaterial",
-			      "PathIndependentMaterial::recvSelf");
-      return -1;
+      opserr << "PathIndependentMaterial::recvSelf -- could not get a UniaxialMaterial\n";
+      exit(-1);
     }
   }
   
@@ -213,8 +209,7 @@ PathIndependentMaterial::recvSelf(int cTag, Channel &theChannel,
   theMaterial->setDbTag(classTags(1));
   res += theMaterial->recvSelf(cTag, theChannel, theBroker);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- could not receive UniaxialMaterial",
-			    "PathIndependentMaterial::recvSelf");
+    opserr << "PathIndependentMaterial::recvSelf -- could not receive UniaxialMaterial\n";
     return res;
   }
   
@@ -222,8 +217,8 @@ PathIndependentMaterial::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-PathIndependentMaterial::Print(ostream &s, int flag)
+PathIndependentMaterial::Print(OPS_Stream &s, int flag)
 {
-    s << "PathIndependentMaterial tag: " << this->getTag() << endl;
-    s << "\tmaterial: " << theMaterial->getTag() << endl;
+    s << "PathIndependentMaterial tag: " << this->getTag() << endln;
+    s << "\tmaterial: " << theMaterial->getTag() << endln;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:25 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/DofColorMap.cpp,v $
                                                                         
                                                                         
@@ -36,7 +36,7 @@
 // What: "@(#) DofColorMap.h, revA"
 
 #include <DofColorMap.h>
-#include <iostream.h>
+#include <OPS_Globals.h>
 #include <stdlib.h>
 
 
@@ -55,7 +55,7 @@ DofColorMap::DofColorMap(int _numEqn, int _numP)
   r[7] = 1; g[7] = 0; b[7] = 0;
 
   if (_numP > 8) {
-    cerr << "DofColorMap- can't handle numP > 8\n";
+    opserr << "DofColorMap- can't handle numP > 8\n";
     exit(-1);
   }
 

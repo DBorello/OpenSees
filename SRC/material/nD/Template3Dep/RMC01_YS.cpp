@@ -159,7 +159,7 @@ double RMC01YieldSurface::xi_s2( const EPState *EPS ) const {
 //}
 
 //================================================================================
-ostream& operator<< (ostream& os, const RMC01YieldSurface & YS)
+OPS_Stream& operator<< (OPS_Stream& os, const RMC01YieldSurface & YS)
 {
    os << "Rounded Mohr Coulomb Surface Parameters: " << endln;
    return os;

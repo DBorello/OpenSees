@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/DummyNode.cpp,v $
                                                                         
                                                                         
@@ -257,8 +257,8 @@ DummyNode::getColor(void) const
 int 
 DummyNode::sendSelf(Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    cerr << "DummyNode::sendSelf - should never be called\n";
-    cerr << "sending acual node\n";    
+    opserr << "DummyNode::sendSelf - should never be called\n";
+    opserr << "sending acual node\n";    
     
     return theRealNode->sendSelf(theChannel,theBroker);
 }
@@ -266,17 +266,17 @@ DummyNode::sendSelf(Channel &theChannel, FEM_ObjectBroker &theBroker)
 int 
 DummyNode::recvSelf(Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    cerr << "DummyNode::recvSelf - should never be called\n";
+    opserr << "DummyNode::recvSelf - should never be called\n";
     return 0;
 }    
 
 void
-DummyNode::Print(ostream &s) const
+DummyNode::Print(OPS_Stream &s) const
 {
     theRealNode->Print(s);
 }
   
-ostream &operator<<(ostream &s, const DummyNode &N)
+OPS_Stream &operator<<(OPS_Stream &s, const DummyNode &N)
 {
     N.Print(s);
     return s;

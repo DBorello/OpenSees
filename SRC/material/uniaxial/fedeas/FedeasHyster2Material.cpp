@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-26 23:00:13 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasHyster2Material.cpp,v $
                                                                       
 // Written: MHS
@@ -90,12 +90,13 @@ FedeasHyster2Material::FedeasHyster2Material(int tag, const Vector &d):
 // 6 history variables and 16 material parameters
 FedeasMaterial(tag, MAT_TAG_FedeasHysteretic2, 6, 16)
 {
-	if (d.Size() != numData)
-		g3ErrorHandler->fatal("%s -- not enough input arguments",
-		"FedeasHyster2Material::FedeasHyster2Material");
+  if (d.Size() != numData) {
+    opserr << "FedeasHyster2Material::FedeasHyster2Material -- not enough input arguments\n";
+    exit(-1);
+  }
 
-	for (int i = 0; i < numData; i++)
-		data[i] = d(i);
+  for (int i = 0; i < numData; i++)
+    data[i] = d(i);
 }
 
 FedeasHyster2Material::FedeasHyster2Material(void):

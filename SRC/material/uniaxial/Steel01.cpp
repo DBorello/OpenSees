@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-10 23:04:01 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
                                                                         
@@ -117,7 +117,7 @@ int Steel01::setTrialStrain (double strain, double strainRate)
    double dStrain = Tstrain - Cstrain;
 
    // Calculate the trial state given the trial strain
-   if (fabs(dStrain) > DBL_EPSILON)   
+   //   if (fabs(dStrain) > DBL_EPSILON)   
       determineTrialState (dStrain);
 
    return 0;
@@ -141,7 +141,7 @@ int Steel01::setTrial (double strain, double &stress, double &tangent, double st
    dStrain = Tstrain - Cstrain;
 
    // Calculate the trial state given the trial strain
-   if (fabs(dStrain) > DBL_EPSILON) 
+   // if (fabs(dStrain) > DBL_EPSILON) 
       determineTrialState (dStrain);
 
    stress = Tstress;
@@ -376,7 +376,7 @@ int Steel01::sendSelf (int commitTag, Channel& theChannel)
 
    res = theChannel.sendVector(this->getDbTag(), commitTag, data);
    if (res < 0) 
-      cerr << "Steel01::sendSelf() - failed to send data\n";
+      opserr << "Steel01::sendSelf() - failed to send data\n";
 
    return res;
 }
@@ -389,7 +389,7 @@ int Steel01::recvSelf (int commitTag, Channel& theChannel,
    res = theChannel.recvVector(this->getDbTag(), commitTag, data);
   
    if (res < 0) {
-      cerr << "Steel01::recvSelf() - failed to receive data\n";
+      opserr << "Steel01::recvSelf() - failed to receive data\n";
       this->setTag(0);      
    }
    else {
@@ -440,9 +440,9 @@ int Steel01::recvSelf (int commitTag, Channel& theChannel,
    return res;
 }
 
-void Steel01::Print (ostream& s, int flag)
+void Steel01::Print (OPS_Stream& s, int flag)
 {
-   s << "Steel01 tag: " << this->getTag() << endl;
+   s << "Steel01 tag: " << this->getTag() << endln;
    s << "  fy: " << fy << " ";
    s << "  E0: " << E0 << " ";
    s << "  b:  " << b << " ";
@@ -453,7 +453,7 @@ void Steel01::Print (ostream& s, int flag)
    if (epsmin != NEG_INF_STRAIN)
      s << "  epsmin: " << epsmin << " ";
    if (epsmax != POS_INF_STRAIN)
-     s << "  epsmax: " << epsmax << endl;
+     s << "  epsmax: " << epsmax << endln;
 }
 
 int
@@ -499,7 +499,7 @@ Steel01::setParameter(char **argv, int argc, Information &info)
 		return 9;
 	}
 	else
-		cerr << "WARNING: Could not set parameter in Steel01. " << endl;
+		opserr << "WARNING: Could not set parameter in Steel01. " << endln;
                 
 	return -1;
 }

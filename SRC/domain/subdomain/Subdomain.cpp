@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:27:22 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
                                                                         
@@ -84,7 +84,7 @@ Subdomain::Subdomain(int tag)
 	internalNodeIter == 0 || externalNodeIter == 0 ||
 	theNodIter == 0) {
 	
-	cerr << "Subdomain::Subdomain() - ran out of memory\n";
+	opserr << "Subdomain::Subdomain() - ran out of memory\n";
 	exit(-1);
     }
 }
@@ -118,7 +118,7 @@ Subdomain::Subdomain(int tag,
 	internalNodeIter == 0 || externalNodeIter == 0 ||
 	theNodIter == 0) {
 	
-	cerr << "Subdomain::Subdomain() - ran out of memory\n";
+	opserr << "Subdomain::Subdomain() - ran out of memory\n";
 	exit(-1);
     }    
 
@@ -255,7 +255,7 @@ Subdomain::getNodes()
 Node **
 Subdomain::getNodePtrs(void)
 {
-  cerr << "Subdomain::getNodePtrs() - should not be called\n";
+  opserr << "Subdomain::getNodePtrs() - should not be called\n";
   return 0;
 }
 Node *
@@ -330,7 +330,7 @@ Subdomain::update(void)
 }
 
 void
-Subdomain::Print(ostream &s, int flag)
+Subdomain::Print(OPS_Stream &s, int flag)
 {
   s << "Current Subdomain Information for Subdomain: ";
   s << this->getTag() << "\n";
@@ -401,8 +401,8 @@ Subdomain::getExternalNodes()
     if (extNodes == 0) {
 	extNodes = new ID(numExt);
 	if (extNodes == 0 || extNodes->Size() != numExt) {
-	    cerr << "Subdomain::getExternalNodes(): ";
-	    cerr << " - ran out of memory for size " << numExt <<endl;
+	    opserr << "Subdomain::getExternalNodes(): ";
+	    opserr << " - ran out of memory for size " << numExt <<endln;
 	    exit(-1);
 	}
     }
@@ -411,8 +411,8 @@ Subdomain::getExternalNodes()
 	delete extNodes;
 	extNodes = new ID(numExt);
 	if (extNodes == 0 || extNodes->Size() != numExt) {
-	    cerr << "Subdomain::getExternalNodes(): ";
-	    cerr << " - ran out of memory for size " << numExt <<endl;
+	    opserr << "Subdomain::getExternalNodes(): ";
+	    opserr << " - ran out of memory for size " << numExt <<endln;
 	    exit(-1);
 	}
     }
@@ -440,7 +440,7 @@ Subdomain::getNumDOF(void)
     if (theAnalysis != 0)
 	return theAnalysis->getNumExternalEqn();
     else  {
-	cerr << "Subdomain::getNumDOF() - no StaticAnalysis has been set\n";
+	opserr << "Subdomain::getNumDOF() - no StaticAnalysis has been set\n";
 	return 0;
     }
 }
@@ -454,32 +454,32 @@ Subdomain::commitState(void)
 const Matrix &
 Subdomain::getTangentStiff(void)
 {
-    cerr << "Subdomain::getTangentStiff(void)";
-    cerr << "DOES NOT DO ANYTHING";
+    opserr << "Subdomain::getTangentStiff(void)";
+    opserr << "DOES NOT DO ANYTHING";
     return badResult;
 }
 
 const Matrix &
 Subdomain::getSecantStiff(void)
 {
-    cerr << "Subdomain::getSecantStiff(void)";
-    cerr << "DOES NOT DO ANYTHING";
+    opserr << "Subdomain::getSecantStiff(void)";
+    opserr << "DOES NOT DO ANYTHING";
     return badResult;
 }
 
 const Matrix &
 Subdomain::getDamp(void)
 {
-    cerr << "Subdomain::getDamp(void)";
-    cerr << "DOES NOT DO ANYTHING";    
+    opserr << "Subdomain::getDamp(void)";
+    opserr << "DOES NOT DO ANYTHING";    
     return badResult;
 }
 
 const Matrix &
 Subdomain::getMass(void)
 {
-    cerr << "Subdomain::getMass(void)";
-    cerr << "DOES NOT DO ANYTHING";    
+    opserr << "Subdomain::getMass(void)";
+    opserr << "DOES NOT DO ANYTHING";    
     return badResult;
 }
 
@@ -489,14 +489,14 @@ Subdomain::getMass(void)
 void  
 Subdomain::zeroLoad(void)
 {
-    cerr << "Subdomain::zeroLoad() - should not be called\n";
+    opserr << "Subdomain::zeroLoad() - should not be called\n";
 }
 
 
 int	  
 Subdomain::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-    cerr << "Subdomain::addLoad() - should not be called\n";
+    opserr << "Subdomain::addLoad() - should not be called\n";
     return 0;
 }
 
@@ -511,8 +511,8 @@ const Vector &
 Subdomain::getResistingForce(void)    
 {
     if (theAnalysis == 0) {
-	cerr << "Subdomain::getResistingForce() ";
-	cerr << " - no StaticCondensationAnalysis has been set\n";
+	opserr << "Subdomain::getResistingForce() ";
+	opserr << " - no StaticCondensationAnalysis has been set\n";
 	exit(-1);
     }
     
@@ -524,7 +524,7 @@ Subdomain::getResistingForce(void)
     int numDOF = this->getNumDOF();
     for (int i=0; i<numDOF; i++)
 	(*mappedVect)(i) = anaResidual(theMap(i));
-    //cerr << "Subdomain::getResidual() : " << *mappedVect;
+    //opserr << "Subdomain::getResidual() : " << *mappedVect;
     return *mappedVect;
 }
 
@@ -532,8 +532,8 @@ Subdomain::getResistingForce(void)
 const Vector &
 Subdomain::getResistingForceIncInertia(void)    
 {
-    cerr << "Subdomain::getResistingForceWithInertia() ";
-    cerr << " - should not be called\n";
+    opserr << "Subdomain::getResistingForceWithInertia() ";
+    opserr << " - should not be called\n";
 
     return this->getResistingForce();
 }
@@ -559,8 +559,8 @@ Subdomain::computeTang(void)
 	return res;
 
     } else {
-	cerr << "Subdomain::getcomputeTang() ";
-	cerr << " - no StaticCondensationAnalysis has been set\n";
+	opserr << "Subdomain::getcomputeTang() ";
+	opserr << " - no StaticCondensationAnalysis has been set\n";
 	return 0;
     }
 }
@@ -584,8 +584,8 @@ Subdomain::computeResidual(void)
 	return res;
 
     } else {
-	cerr << "Subdomain::computeResidual() ";
-	cerr << " - no StaticCondensationAnalysis has been set\n";
+	opserr << "Subdomain::computeResidual() ";
+	opserr << " - no StaticCondensationAnalysis has been set\n";
 	return 0;
     }
 }
@@ -595,8 +595,8 @@ const Matrix &
 Subdomain::getTang(void)    
 {
     if (theAnalysis == 0) {
-	cerr << "Subdomain::getTang() ";
-	cerr << " - no StaticCondensationAnalysis has been set\n";
+	opserr << "Subdomain::getTang() ";
+	opserr << " - no StaticCondensationAnalysis has been set\n";
 	exit(-1);
     }	
 
@@ -633,9 +633,9 @@ const Vector &
 Subdomain::getLastExternalSysResponse(void)
 {
     if (theFEele == 0) {
-	cerr << "FATAL ERROR: Subdomain::getLastExternalSysResponse() :";
-	cerr << " - no FE_Element *exists for a subdomain\n";
-	cerr << " This is the responsibilty of the FE_ELement constructor\n";
+	opserr << "FATAL ERROR: Subdomain::getLastExternalSysResponse() :";
+	opserr << " - no FE_Element *exists for a subdomain\n";
+	opserr << " This is the responsibilty of the FE_ELement constructor\n";
 	exit(0);
     }
 
@@ -664,8 +664,8 @@ Subdomain::computeNodalResponse(void)
 	return res;
     }
     else {
-	cerr << "Subdomain::computeNodalResponse() ";
-	cerr << "- no StaticAnalysis has been set\n"; 
+	opserr << "Subdomain::computeNodalResponse() ";
+	opserr << "- no StaticAnalysis has been set\n"; 
 	return 0;
     }
 }
@@ -691,7 +691,7 @@ Subdomain::sendSelf(int cTag, Channel &theChannel)
 	return theAnalysis->sendSelf(cTag, theChannel);
     }
     else {
-	cerr << "Subdomain::sendSelf - no analysis set\n";
+	opserr << "Subdomain::sendSelf - no analysis set\n";
     
     }
     return -1;

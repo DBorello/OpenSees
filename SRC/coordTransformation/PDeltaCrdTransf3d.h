@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-10-03 18:07:57 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.h,v $
                                                                         
                                                                         
@@ -76,7 +76,7 @@ class PDeltaCrdTransf3d: public CrdTransf3d
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
   
     // functions used in post-processing only    
     const Vector &getPointGlobalCoordFromLocal (const Vector &localCoords);

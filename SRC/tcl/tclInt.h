@@ -11,7 +11,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclInt.h,v 1.2 2001-08-18 00:22:12 fmk Exp $
+ * RCS: @(#) $Id: tclInt.h,v 1.3 2003-02-14 23:02:11 fmk Exp $
  */
 
 #ifndef _TCLINT
@@ -1087,7 +1087,7 @@ typedef struct Interp {
      * string or object value. The interpreter's result is always in the
      * result field if that is non-empty, otherwise it is in objResultPtr.
      * The two fields are kept consistent unless some C code sets
-     * interp->result directly. Programs should not access result and
+     * blah->result directly. Programs should not access result and
      * objResultPtr directly; instead, they should always get and set the
      * result using procedures such as Tcl_SetObjResult, Tcl_GetObjResult,
      * and Tcl_GetStringResult. See the SetResult man page for details.

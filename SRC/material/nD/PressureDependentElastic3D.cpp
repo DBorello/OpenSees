@@ -161,10 +161,10 @@ int PressureDependentElastic3D::setTrialStrain (const Tensor &v, const Tensor &r
 
 int PressureDependentElastic3D::setTrialStrainIncr (const Tensor &v)
   {
-    //cerr << " before set Tri St Incr " << Strain;
-    //cerr << " Strain Incr " << v << endln;
+    //opserr << " before set Tri St Incr " << Strain;
+    //opserr << " Strain Incr " << v << endlnn;
     Strain = Strain + v;
-    //cerr << " after setTrialStrainIncr  " << Strain << endln;
+    //opserr << " after setTrialStrainIncr  " << Strain << endlnn;
     return 0;
   }
 
@@ -224,15 +224,15 @@ int PressureDependentElastic3D::commitState (void)
     Stress = this->getStressTensor();
     //Dt("ijkl") * Strain("kl");
     double p = Stress.p_hydrostatic();
-    //cerr << " p = " <<  p;
+    //opserr << " p = " <<  p;
 
     //Cut-off pressure
     if (p <= p_cutoff)
       p = p_cutoff;
 
     double Ec = E * pow(p/p_ref, exp);
-    //cerr << " Eo = " << E << " Ec = " << Ec << " Exp:" << exp<< " p_ref:" << p_ref << " po: " << po<< endl;
-    //cerr << " coef = " << Ec/E << endl;
+    //opserr << " Eo = " << E << " Ec = " << Ec << " Exp:" << exp<< " p_ref:" << p_ref << " po: " << po<< endln;
+    //opserr << " coef = " << Ec/E << endln;
 
     // Building elasticity tensor
     ret = I_ijkl*( Ec*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( Ec / (1.0 + v) );
@@ -259,7 +259,7 @@ NDMaterial* PressureDependentElastic3D::getCopy (void)
   {
     PressureDependentElastic3D *theCopy =
     new PressureDependentElastic3D (this->getTag(), E, v, rho, exp, p_ref, p_cutoff);
-    //cerr << "In Get copy" <<  *theCopy << endl;
+    //opserr << "In Get copy" <<  *theCopy << endln;
     theCopy->epsilon = this->epsilon;
     theCopy->sigma = this->sigma;
     theCopy->Strain = this->Strain;
@@ -294,8 +294,7 @@ int PressureDependentElastic3D::sendSelf(int commitTag, Channel &theChannel)
     res += theChannel.sendVector(this->getDbTag(), commitTag, data);
     if (res < 0)
       {
-        g3ErrorHandler->warning("%s -- could not send Vector",
-                                "PressureDependentElastic3D::sendSelf");
+        opserr << "PressureDependentElastic3D::sendSelf -- could not send Vector\n";
         return res;
       }
 
@@ -313,8 +312,7 @@ int PressureDependentElastic3D::recvSelf(int commitTag,
     res += theChannel.recvVector(this->getDbTag(), commitTag, data);
     if (res < 0)
       {
-        g3ErrorHandler->warning("%s -- could not receive Vector",
-                                "PressureDependentElastic3D::recvSelf");
+        opserr << "PressureDependentElastic3D::recvSelf -- could not recv Vector\n";
         return res;
       }
 
@@ -331,16 +329,16 @@ int PressureDependentElastic3D::recvSelf(int commitTag,
     return res;
   }
 
-void PressureDependentElastic3D::Print(ostream &s, int flag)
+void PressureDependentElastic3D::Print(OPS_Stream &s, int flag)
   {
-    s << "PressureDependentElastic3D" << endl;
-    s << "\ttag: " << this->getTag() << endl;
-    s << "\tE: " << E << endl;
-    s << "\tv: " << v << endl;
-    s << "\texp: " << exp << endl;
-    s << "\tp_ref: " << p_ref << endl;
-    s << "\tp_cutoff: " << p_cutoff << endl;
-    //s << "\tD: " << D << endl;
+    s << "PressureDependentElastic3D" << endln;
+    s << "\ttag: " << this->getTag() << endln;
+    s << "\tE: " << E << endln;
+    s << "\tv: " << v << endln;
+    s << "\texp: " << exp << endln;
+    s << "\tp_ref: " << p_ref << endln;
+    s << "\tp_cutoff: " << p_cutoff << endln;
+    //s << "\tD: " << D << endln;
   }
 
 
@@ -362,9 +360,9 @@ void PressureDependentElastic3D::ComputeElasticStiffness(void)
     if (p <= p_cutoff)
       p = p_cutoff;
     double Eo = E * pow(p/p_ref, exp);
-    //cerr << " p_ref = " <<  p_ref << " p = " << p << endl;
-    //cerr << " coef = " << Eo/E << endl;
-    //cerr << " E@ref = " << E << " Eo = " << Eo << endl;
+    //opserr << " p_ref = " <<  p_ref << " p = " << p << endln;
+    //opserr << " coef = " << Eo/E << endln;
+    //opserr << " E@ref = " << E << " Eo = " << Eo << endln;
 
     // Building elasticity tensor
     ret = I_ijkl*( Eo*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( Eo / (1.0 + v) );

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-02 20:20:12 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/quadrule/GaussLobattoQuadRule1d01.cpp,v $
                                                                         
                                                                         
@@ -221,9 +221,8 @@ GaussLobattoQuadRule1d01::~GaussLobattoQuadRule1d01()
 int GaussLobattoQuadRule1d01::setOrder(int quadOrder)
 {
   if (quadOrder < 2 || quadOrder > maxOrder) {
-    g3ErrorHandler->fatal("%s -- Invalid quadrature order, %d",
-			  "GaussLobattoQuadRule1d01::setOrder()", quadOrder);
-    return -1;
+    opserr << "GaussLobattoQuadRule1d01::setOrder() -- Invalid quadrature order, " << quadOrder << endln;
+    exit(-1);
   }
   
   // Nothing needs to change if this is true
@@ -279,7 +278,7 @@ int GaussLobattoQuadRule1d01::setOrder(int quadOrder)
     break;
 
   default:
-    cerr << "\n Invalid quadrature order";
+    opserr << "\n Invalid quadrature order";
     return -1;
     break;
   }    
@@ -301,8 +300,8 @@ const Matrix &
 GaussLobattoQuadRule1d01::getIntegrPointCoords (void) const
 {
   if (order < 2 || order > maxOrder)
-    g3ErrorHandler->warning("%s -- order %d is currently invalid",
-			    "GaussLobattoQuadRule1d01::getIntegrPointCoords()", order);
+    opserr << "GaussLobattoQuadRule1d01::getIntegrPointWeights() -- order " << order <<  " is currently invalid\n";
+
   return *myPts;
 }
 
@@ -310,8 +309,8 @@ const Vector &
 GaussLobattoQuadRule1d01::getIntegrPointWeights (void) const
 {
   if (order < 2 || order > maxOrder)
-    g3ErrorHandler->warning("%s -- order %d is currently invalid",
-			    "GaussLobattoQuadRule1d01::getIntegrPointWeights()", order);
+   opserr << "GaussLobattoQuadRule1d01::getIntegrPointWeights() -- order " << order <<  " is currently invalid\n";
+			    
   return *myWts;
 }
 

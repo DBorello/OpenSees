@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-12-16 21:10:02 $
+// $Revision: 1.12 $
+// $Date: 2003-02-14 23:01:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -85,8 +85,10 @@ ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i,
     
   theCoordTransf = coordTransf.getCopy();
     
-  if (!theCoordTransf)
-    g3ErrorHandler->fatal("ElasticBeam2d::ElasticBeam2d -- failed to get copy of coordinate transformation");
+  if (!theCoordTransf) {
+    opserr << "ElasticBeam2d::ElasticBeam2d -- failed to get copy of coordinate transformation\n";
+    exit(01);
+  }
 
   q0[0] = 0.0;
   q0[1] = 0.0;
@@ -134,40 +136,52 @@ ElasticBeam2d::getNumDOF(void)
 void
 ElasticBeam2d::setDomain(Domain *theDomain)
 {
-    if (theDomain == 0)
-	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Domain is null");
+  if (theDomain == 0) {
+    opserr << "ElasticBeam2d::setDomain -- Domain is null\n";
+    exit(-1);
+  }
     
     theNodes[0] = theDomain->getNode(connectedExternalNodes(0));
     theNodes[1] = theDomain->getNode(connectedExternalNodes(1));    
     
-    if (theNodes[0] == 0)
-	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Node 1: %i does not exist",
-			      connectedExternalNodes(0));
-    
-    if (theNodes[1] == 0)
-	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Node 2: %i does not exist",
-			      connectedExternalNodes(1));
- 
+    if (theNodes[0] == 0) {
+      opserr << "ElasticBeam2d::setDomain -- Node 1: " << connectedExternalNodes(0) << " does not exist\n";
+      exit(-1);
+    }
+			      
+    if (theNodes[1] == 0) {
+      opserr << "ElasticBeam2d::setDomain -- Node 2: " << connectedExternalNodes(1) << " does not exist\n";
+      exit(-1);
+    }
+
     int dofNd1 = theNodes[0]->getNumberDOF();
     int dofNd2 = theNodes[1]->getNumberDOF();    
     
-    if (dofNd1 != 3)
-	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Node 1: %i has incorrect number of DOF",
-			      connectedExternalNodes(0));
+    if (dofNd1 != 3) {
+      opserr << "ElasticBeam2d::setDomain -- Node 1: " << connectedExternalNodes(0) 
+	     << " has incorrect number of DOF\n";
+      exit(-1);
+    }
     
-    if (dofNd2 != 3)
-	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Node 2: %i has incorrect number of DOF",
-			      connectedExternalNodes(1));	
+    if (dofNd2 != 3) {
+      opserr << "ElasticBeam2d::setDomain -- Node 2: " << connectedExternalNodes(1) 
+	     << " has incorrect number of DOF\n";
+      exit(-1);
+    }
 	
     this->DomainComponent::setDomain(theDomain);
     
-    if (theCoordTransf->initialize(theNodes[0], theNodes[1]) != 0)
-	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Error initializing coordinate transformation");
+    if (theCoordTransf->initialize(theNodes[0], theNodes[1]) != 0) {
+	opserr << "ElasticBeam2d::setDomain -- Error initializing coordinate transformation\n";
+	exit(-1);
+    }
     
     double L = theCoordTransf->getInitialLength();
 
-    if (L == 0.0)
-	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Element has zero length");
+    if (L == 0.0) {
+      opserr << "ElasticBeam2d::setDomain -- Element has zero length\n";
+      exit(-1);
+    }
 }
 
 int
@@ -176,7 +190,7 @@ ElasticBeam2d::commitState()
   int retVal = 0;
   // call element commitState to do any base class stuff
   if ((retVal = this->Element::commitState()) != 0) {
-    cerr << "ElasticBeam2d::commitState () - failed in base class";
+    opserr << "ElasticBeam2d::commitState () - failed in base class";
   }    
   retVal += theCoordTransf->commitState();
   return retVal;
@@ -354,8 +368,7 @@ ElasticBeam2d::addLoad(ElementalLoad *theLoad, double loadFactor)
   }
 
   else {
-    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
-			    "ElasticBeam2d::addLoad()", this->getTag());
+    opserr << "ElasticBeam2d::addLoad()  -- load type unknown for element with tag: " << this->getTag() << endln;
     return -1;
   }
 
@@ -373,8 +386,7 @@ ElasticBeam2d::addInertiaLoadToUnbalance(const Vector &accel)
   const Vector &Raccel2 = theNodes[1]->getRV(accel);
 	
   if (3 != Raccel1.Size() || 3 != Raccel2.Size()) {
-    g3ErrorHandler->warning("ElasticBeam2d::addInertiaLoadToUnbalance %s\n",
-			    "matrix and vector sizes are incompatable");
+    opserr << "ElasticBeam2d::addInertiaLoadToUnbalance matrix and vector sizes are incompatable\n";
     return -1;
   }
     
@@ -486,19 +498,17 @@ ElasticBeam2d::sendSelf(int cTag, Channel &theChannel)
 	// Send the data vector
     res += theChannel.sendVector(this->getDbTag(), cTag, data);
     if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send data Vector",
-			"ElasticBeam2d::sendSelf");
-		return res;
+      opserr << "ElasticBeam2d::sendSelf -- could not send data Vector\n";
+      return res;
     }
 
     // Ask the CoordTransf to send itself
-	res += theCoordTransf->sendSelf(cTag, theChannel);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send CoordTransf",
-			"ElasticBeam2d::sendSelf");
-		return res;
-	}
-
+    res += theCoordTransf->sendSelf(cTag, theChannel);
+    if (res < 0) {
+      opserr << "ElasticBeam2d::sendSelf -- could not send CoordTransf\n";
+      return res;
+    }
+    
     return res;
 }
 
@@ -511,9 +521,8 @@ ElasticBeam2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 
     res += theChannel.recvVector(this->getDbTag(), cTag, data);
     if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive data Vector",
-			"ElasticBeam2d::recvSelf");
-		return res;
+      opserr << "ElasticBeam2d::recvSelf -- could not receive data Vector\n";
+      return res;
     }
 
     A = data(0);
@@ -527,60 +536,64 @@ ElasticBeam2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
     connectedExternalNodes(0) = (int)data(5);
     connectedExternalNodes(1) = (int)data(6);
 
-	// Check if the CoordTransf is null; if so, get a new one
-	int crdTag = (int)data(7);
-	if (theCoordTransf == 0) {
-		theCoordTransf = theBroker.getNewCrdTransf2d(crdTag);
-		if (theCoordTransf == 0) {
-			g3ErrorHandler->warning("%s -- could not get a CrdTransf2d",
-				"ElasticBeam2d::recvSelf");
-			return -1;
-		}
-	}
-
-	// Check that the CoordTransf is of the right type; if not, delete
-	// the current one and get a new one of the right type
-	if (theCoordTransf->getClassTag() != crdTag) {
-		delete theCoordTransf;
-		theCoordTransf = theBroker.getNewCrdTransf2d(crdTag);
-		if (theCoordTransf == 0) {
-			g3ErrorHandler->warning("%s -- could not get a CrdTransf2d",
-				"ElasticBeam2d::recvSelf");
-			return -1;
-		}
-	}
-
-	// Now, receive the CoordTransf
-	theCoordTransf->setDbTag((int)data(8));
-	res += theCoordTransf->recvSelf(cTag, theChannel, theBroker);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive CoordTransf",
-			"ElasticBeam2d::recvSelf");
-		return res;
-	}
-
-	// Revert the crdtrasf to its last committed state
-	theCoordTransf->revertToLastCommit();
-
+    // Check if the CoordTransf is null; if so, get a new one
+    int crdTag = (int)data(7);
+    if (theCoordTransf == 0) {
+      theCoordTransf = theBroker.getNewCrdTransf2d(crdTag);
+      if (theCoordTransf == 0) {
+	opserr << "ElasticBeam2d::recvSelf -- could not get a CrdTransf2d\n";
+	exit(-1);
+      }
+    }
+    
+    // Check that the CoordTransf is of the right type; if not, delete
+    // the current one and get a new one of the right type
+    if (theCoordTransf->getClassTag() != crdTag) {
+      delete theCoordTransf;
+      theCoordTransf = theBroker.getNewCrdTransf2d(crdTag);
+      if (theCoordTransf == 0) {
+	opserr << "ElasticBeam2d::recvSelf -- could not get a CrdTransf2d\n";
+	exit(-1);
+      }
+    }
+	
+    // Now, receive the CoordTransf
+    theCoordTransf->setDbTag((int)data(8));
+    res += theCoordTransf->recvSelf(cTag, theChannel, theBroker);
+    if (res < 0) {
+      opserr << "ElasticBeam2d::recvSelf -- could not receive CoordTransf\n";
+      return res;
+    }
+    
+    // Revert the crdtrasf to its last committed state
+    theCoordTransf->revertToLastCommit();
+    
     return res;
 }
 
 void
-ElasticBeam2d::Print(ostream &s, int flag)
+ElasticBeam2d::Print(OPS_Stream &s, int flag)
 {
-  s << "\nElasticBeam2d: " << this->getTag() << endl;
-  s << "\tConnected Nodes: " << connectedExternalNodes ;
-  s << "\tCoordTransf: " << theCoordTransf->getTag() << endl;
-  s << "\tmass density:  " << rho << endl;
-  double P  = q(0);
-  double M1 = q(1);
-  double M2 = q(2);
-  double L = theCoordTransf->getInitialLength();
-  double V = (M1+M2)/L;
-  s << "\tEnd 1 Forces (P V M): " << -P+p0[0]
-    << " " << V+p0[1] << " " << M1 << endl;
-  s << "\tEnd 2 Forces (P V M): " << P
-    << " " << -V+p0[2] << " " << M2 << endl;
+  if (flag == -1) {
+    int eleTag = this->getTag();
+    s << "EL_BEAM\t" << eleTag << "\t";
+    s << 0 << "\t" << 0 << "\t" << connectedExternalNodes(0) << "\t" << connectedExternalNodes(1) ;
+    s << "0\t0.0000000\n";
+  } else {
+    s << "\nElasticBeam2d: " << this->getTag() << endln;
+    s << "\tConnected Nodes: " << connectedExternalNodes ;
+    s << "\tCoordTransf: " << theCoordTransf->getTag() << endln;
+    s << "\tmass density:  " << rho << endln;
+    double P  = q(0);
+    double M1 = q(1);
+    double M2 = q(2);
+    double L = theCoordTransf->getInitialLength();
+    double V = (M1+M2)/L;
+    s << "\tEnd 1 Forces (P V M): " << -P+p0[0]
+      << " " << V+p0[1] << " " << M1 << endln;
+    s << "\tEnd 2 Forces (P V M): " << P
+      << " " << -V+p0[2] << " " << M2 << endln;
+  }
 }
 
 int
@@ -703,3 +716,4 @@ ElasticBeam2d::updateParameter (int parameterID, Information &info)
 		return -1;
 	}
 }
+

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-16 21:17:49 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/WilsonTheta.cpp,v $
                                                                         
                                                                         
@@ -95,15 +95,15 @@ int
 WilsonTheta::newStep(double _deltaT)
 {
   if (theta <= 0.0 ) {
-    cerr << "Newton::newStep() - error in variable\n";
-    cerr << "theta: " << theta << " <= 0.0\n";
+    opserr << "Newton::newStep() - error in variable\n";
+    opserr << "theta: " << theta << " <= 0.0\n";
     return -1;
   }
 
   
   if (_deltaT <= 0.0) {
-    cerr << "Newton::newStep() - error in variable\n";
-    cerr << "dT = " << deltaT << endl;
+    opserr << "Newton::newStep() - error in variable\n";
+    opserr << "dT = " << deltaT << endln;
     return -2;	
   }
 
@@ -113,7 +113,7 @@ WilsonTheta::newStep(double _deltaT)
   c3 = 2*c2/(theta*deltaT);
     
   if (U == 0) {
-    cerr << "Newton::newStep() - domainChange() failed or hasn't been called\n"; 
+    opserr << "Newton::newStep() - domainChange() failed or hasn't been called\n"; 
     return -3;	
   }
 
@@ -213,7 +213,7 @@ WilsonTheta::domainChanged()
 	Udot == 0 || Udot->Size() != size ||
 	Udotdot == 0 || Udotdot->Size() != size) {
       
-      cerr << "WilsonTheta::domainChanged - ran out of memory\n";
+      opserr << "WilsonTheta::domainChanged - ran out of memory\n";
 
       // delete the old
       if (Ut != 0)
@@ -265,20 +265,20 @@ WilsonTheta::update(const Vector &deltaU)
 {
   AnalysisModel *theModel = this->getAnalysisModelPtr();
   if (theModel == 0) {
-    cerr << "WARNING WilsonTheta::update() - no AnalysisModel set\n";
+    opserr << "WARNING WilsonTheta::update() - no AnalysisModel set\n";
     return -1;
   }	
 
   // check domainChanged() has been called, i.e. Ut will not be zero
   if (Ut == 0) {
-    cerr << "WARNING WilsonTheta::update() - domainChange() failed or not called\n";
+    opserr << "WARNING WilsonTheta::update() - domainChange() failed or not called\n";
     return -2;
   }	
   
   // check deltaU is of correct size
   if (deltaU.Size() != U->Size()) {
-    cerr << "WARNING WilsonTheta::update() - Vectors of incompatable size ";
-    cerr << " expecting " << U->Size() << " obtained " << deltaU.Size() << endl;
+    opserr << "WARNING WilsonTheta::update() - Vectors of incompatable size ";
+    opserr << " expecting " << U->Size() << " obtained " << deltaU.Size() << endln;
     return -3;
   }
 
@@ -301,7 +301,7 @@ WilsonTheta::commit(void)
 
   AnalysisModel *theModel = this->getAnalysisModelPtr();
   if (theModel == 0) {
-    cerr << "WARNING WilsonTheta::commit() - no AnalysisModel set\n";
+    opserr << "WARNING WilsonTheta::commit() - no AnalysisModel set\n";
     return -1;
   }	  
   
@@ -360,7 +360,7 @@ WilsonTheta::sendSelf(int cTag, Channel &theChannel)
     data(4) = betaKc;
 
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
-	cerr << "WilsonTheta::sendSelf() - failed to send the data\n";
+	opserr << "WilsonTheta::sendSelf() - failed to send the data\n";
 	return -1;
     }
     return 0;
@@ -371,8 +371,8 @@ WilsonTheta::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
 {
     static Vector data(5);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
-	cerr << "WilsonTheta::recvSelf() - ";
-	cerr << " failed to receive the Vector\n";
+	opserr << "WilsonTheta::recvSelf() - ";
+	opserr << " failed to receive the Vector\n";
 	return -1;
     }
 
@@ -386,15 +386,15 @@ WilsonTheta::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
 }
 
 void
-WilsonTheta::Print(ostream &s, int flag)
+WilsonTheta::Print(OPS_Stream &s, int flag)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theModel != 0) {
 	double currentTime = theModel->getCurrentDomainTime();
 	s << "\t WilsonTheta - currentTime: " << currentTime;
-	s << " theta: " << theta << endl;
+	s << " theta: " << theta << endln;
 	s << "  Rayleigh Damping - alphaM: " << alphaM;
-	s << "  betaK: " << betaK << "  betaKi: " << betaKi << endl;	    
+	s << "  betaK: " << betaK << "  betaKi: " << betaKi << endln;	    
     } else 
 	s << "\t WilsonTheta - no associated AnalysisModel\n";
 }

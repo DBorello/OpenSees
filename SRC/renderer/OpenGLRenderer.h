@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-26 01:08:46 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGLRenderer.h,v $
                                                                         
                                                                         
@@ -39,8 +39,8 @@
 #define OpenGLRenderer_h
 
 #include <Renderer.h>
-#include <G3Globals.h>
-#include <fstream.h>
+#include <fstream>
+using std::ofstream;
 #include <OpenGlDevice.h>
 
 #ifdef _GLX

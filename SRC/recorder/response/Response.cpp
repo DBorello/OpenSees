@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-13 00:14:44 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/Response.cpp,v $
                                                                         
 // Written: MHS 
@@ -70,7 +70,13 @@ Response::~Response()
 }
 
 void
-Response::Print(ostream &s, int flag)
+Response::Print(OPS_Stream &s, int flag)
+{
+	myInfo.Print(s, flag);
+}
+
+void
+Response::Print(ofstream &s, int flag)
 {
 	myInfo.Print(s, flag);
 }

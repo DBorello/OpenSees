@@ -1,6 +1,6 @@
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-10-09 20:27:15 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/f2c.h,v $
                                                                         
 /*
@@ -92,7 +92,7 @@ typedef struct
 
 /*close*/
 typedef struct
-{	flag cerr;
+{	flag opserr;
 	ftnint cunit;
 	char *csta;
 } cllist;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-18 01:03:43 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.cpp,v $
                                                                         
                                                                         
@@ -42,7 +42,11 @@
 #include <Channel.h>
 #include <math.h>
 
-#include <fstream.h>
+#include <fstream>
+using std::ifstream;
+
+#include <iomanip>
+using std::ios;
 
 PathTimeSeries::PathTimeSeries()	
   :TimeSeries(TSERIES_TAG_PathTimeSeries),
@@ -62,8 +66,8 @@ PathTimeSeries::PathTimeSeries(const Vector &theLoadPath,
 {
   // check vectors are of same size
   if (theLoadPath.Size() != theTimePath.Size()) {
-    cerr << "WARNING PathTimeSeries::PathTimeSeries() - vector containing data ";
-    cerr << "points for path and time are not of the same size\n";
+    opserr << "WARNING PathTimeSeries::PathTimeSeries() - vector containing data ";
+    opserr << "points for path and time are not of the same size\n";
   } else {
 
     // create copies of the vectors
@@ -74,7 +78,7 @@ PathTimeSeries::PathTimeSeries(const Vector &theLoadPath,
     if (thePath == 0 || thePath->Size() == 0 ||
 	time == 0 || time->Size() == 0) {
       
-      cerr << "WARNING PathTimeSeries::PathTimeSeries() - out of memory\n ";
+      opserr << "WARNING PathTimeSeries::PathTimeSeries() - out of memory\n ";
       if (thePath != 0)
 	delete thePath;
       if (time != 0)
@@ -103,8 +107,8 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
   // first open and go through file containg path
   theFile.open(filePathName, ios::in);
   if (theFile.bad()) {
-    cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
-    cerr << " - could not open file " << filePathName << endl;
+    opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
+    opserr << " - could not open file " << filePathName << endln;
   } else {
     while (theFile >> dataPoint)
       numDataPoints1++;
@@ -115,8 +119,8 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
   ifstream theFile1;
   theFile1.open(fileTimeName, ios::in);
   if (theFile1.bad()) {
-    cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
-    cerr << " - could not open file " << fileTimeName << endl;
+    opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
+    opserr << " - could not open file " << fileTimeName << endln;
   } else {
     while (theFile1 >> dataPoint)
       numDataPoints2++;
@@ -125,8 +129,8 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
 
   // check number of data entries in both are the same
   if (numDataPoints1 != numDataPoints2) {
-    cerr << "WARNING PathTimeSeries::PathTimeSeries() - files containing data ";
-    cerr << "points for path and time do not contain same number of points\n";
+    opserr << "WARNING PathTimeSeries::PathTimeSeries() - files containing data ";
+    opserr << "points for path and time do not contain same number of points\n";
   } else {
 
 
@@ -141,7 +145,7 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
       if (thePath == 0 || thePath->Size() == 0 ||
 	  time == 0 || time->Size() == 0) {
 	  
-        cerr << "WARNING PathTimeSeries::PathTimeSeries() - out of memory\n ";
+        opserr << "WARNING PathTimeSeries::PathTimeSeries() - out of memory\n ";
 	if (thePath != 0)
 	  delete thePath;
 	if (time != 0)
@@ -154,8 +158,8 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
       ifstream theFile2;
       theFile2.open(filePathName, ios::in);
       if (theFile2.bad()) {
-	cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
-	cerr << " - could not open file " << filePathName << endl;
+	opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
+	opserr << " - could not open file " << filePathName << endln;
 	delete thePath;
 	delete time;
 	thePath = 0;
@@ -174,8 +178,8 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
 	ifstream theFile3;
 	theFile3.open(fileTimeName, ios::in);
 	if (theFile3.bad()) {
-	  cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
-	  cerr << " - could not open file " << fileTimeName << endl;
+	  opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
+	  opserr << " - could not open file " << fileTimeName << endln;
 	  delete thePath;
 	  delete time;
 	  thePath = 0;
@@ -208,8 +212,8 @@ PathTimeSeries::PathTimeSeries(char *fileName,
 	// first open and go through file counting entries
 	theFile.open(fileName, ios::in);
 	if (theFile.bad()) {
-		cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
-		cerr << " - could not open file " << fileName << endl;
+		opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
+		opserr << " - could not open file " << fileName << endln;
 	}
 	else {
 		while (theFile >> dataPoint) {
@@ -229,7 +233,7 @@ PathTimeSeries::PathTimeSeries(char *fileName,
 		// ensure did not run out of memory creating copies
 		if (thePath == 0 || thePath->Size() == 0 || time == 0 || time->Size() == 0) {
 	  
-			cerr << "WARNING PathTimeSeries::PathTimeSeries() - out of memory\n ";
+			opserr << "WARNING PathTimeSeries::PathTimeSeries() - out of memory\n ";
 			if (thePath != 0)
 				delete thePath;
 			if (time != 0)
@@ -242,8 +246,8 @@ PathTimeSeries::PathTimeSeries(char *fileName,
 		ifstream theFile1;
 		theFile1.open(fileName, ios::in);
 		if (theFile1.bad()) {
-			cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
-			cerr << " - could not open file " << fileName << endl;
+			opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
+			opserr << " - could not open file " << fileName << endln;
 			delete thePath;
 			delete time;
 			thePath = 0;
@@ -339,7 +343,7 @@ PathTimeSeries::getDuration()
 {
   if (thePath == 0)
   {
-    cerr << "WARNING -- PathTimeSeries::getDuration() on empty Vector" << endl;
+    opserr << "WARNING -- PathTimeSeries::getDuration() on empty Vector" << endln;
 	return 0.0;
   }
 
@@ -352,7 +356,7 @@ PathTimeSeries::getPeakFactor()
 {
   if (thePath == 0)
   {
-    cerr << "WARNING -- PathTimeSeries::getPeakFactor() on empty Vector" << endl;
+    opserr << "WARNING -- PathTimeSeries::getPeakFactor() on empty Vector" << endln;
 	return 0.0;
   }
 
@@ -397,7 +401,7 @@ PathTimeSeries::sendSelf(int commitTag, Channel &theChannel)
   
   int result = theChannel.sendVector(dbTag,commitTag, data);
   if (result < 0) {
-    cerr << "PathTimeSeries::sendSelf() - channel failed to send data\n";
+    opserr << "PathTimeSeries::sendSelf() - channel failed to send data\n";
     return result;
   }
 
@@ -409,21 +413,22 @@ PathTimeSeries::sendSelf(int commitTag, Channel &theChannel)
     if (thePath != 0) {
       result = theChannel.sendVector(dbTag1, commitTag, *thePath);
       if (result < 0) {
-	cerr << "PathTimeSeries::sendSelf() - ";
-	cerr << "channel failed to send tha Path Vector\n";
+	opserr << "PathTimeSeries::sendSelf() - ";
+	opserr << "channel failed to send tha Path Vector\n";
 	return result;  
       }
     }
     if (time != 0) {
       result = theChannel.sendVector(dbTag2, commitTag, *time);
       if (result < 0) {
-	cerr << "PathTimeSeries::sendSelf() - ";
-	cerr << "channel failed to send tha Path Vector\n";
+	opserr << "PathTimeSeries::sendSelf() - ";
+	opserr << "channel failed to send tha Path Vector\n";
 	return result;  
       }
     }
     return 0;
   }
+  return 0;
 }
 
 
@@ -435,7 +440,7 @@ PathTimeSeries::recvSelf(int commitTag, Channel &theChannel,
   Vector data(5);
   int result = theChannel.recvVector(dbTag,commitTag, data);
   if (result < 0) {
-    cerr << "PathTimeSeries::sendSelf() - channel failed to receive data\n";
+    opserr << "PathTimeSeries::sendSelf() - channel failed to receive data\n";
     cFactor = 1.0;
     return result;
   }
@@ -452,8 +457,8 @@ PathTimeSeries::recvSelf(int commitTag, Channel &theChannel,
     if (thePath == 0 || time == 0 ||
 	thePath->Size() == 0 || time->Size() == 0) {
 
-      cerr << "PathTimeSeries::recvSelf() - ran out of memory";
-      cerr << " a Vector of size: " <<  size << endl;  
+      opserr << "PathTimeSeries::recvSelf() - ran out of memory";
+      opserr << " a Vector of size: " <<  size << endln;  
       if (thePath != 0)
 	delete thePath;
       if (time != 0)
@@ -464,14 +469,14 @@ PathTimeSeries::recvSelf(int commitTag, Channel &theChannel,
     }
     result = theChannel.recvVector(dbTag1, lastSendCommitTag, *thePath);    
     if (result < 0) {
-      cerr << "PathTimeSeries::recvSelf() - ";
-      cerr << "channel failed to receive tha Path Vector\n";
+      opserr << "PathTimeSeries::recvSelf() - ";
+      opserr << "channel failed to receive tha Path Vector\n";
       return result;  
     }
     result = theChannel.recvVector(dbTag2, lastSendCommitTag, *time);    
     if (result < 0) {
-      cerr << "PathTimeSeries::recvSelf() - ";
-      cerr << "channel failed to receive tha time Vector\n";
+      opserr << "PathTimeSeries::recvSelf() - ";
+      opserr << "channel failed to receive tha time Vector\n";
       return result;  
     }
   }
@@ -481,7 +486,7 @@ PathTimeSeries::recvSelf(int commitTag, Channel &theChannel,
 
 
 void
-PathTimeSeries::Print(ostream &s, int flag)
+PathTimeSeries::Print(OPS_Stream &s, int flag)
 {
     s << "Path Time Series: constant factor: " << cFactor;
     if (flag == 1 && thePath != 0) {

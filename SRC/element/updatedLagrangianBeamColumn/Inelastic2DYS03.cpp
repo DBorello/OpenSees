@@ -37,10 +37,9 @@ void Inelastic2DYS03::getLocalStiff(Matrix &K)
 
 	// getTrialnaturalDisp(ndisp);
 	
-    cout << ndisp;
-    // cout << ndisp_hist;
-    // cout << ndisp_inc;
-    cin.get();
+    opserr << ndisp;
+    // opserr << ndisp_hist;
+    // opserr << ndisp_inc;
 
 	if(ndisp(2)*ndisp(5) < 0  || fabs(ndisp(2)*ndisp(5)) < 1e-10) {	//if single curvature
 		L1 = L;
@@ -64,7 +63,7 @@ void Inelastic2DYS03::getLocalStiff(Matrix &K)
 		}
 	}
 
-	cout << L1 << "  " << L2 << "\n";
+	opserr << L1 << "  " << L2 << "\n";
 	
 	if(ndisp(3) < 0) //element is in compression
 		A = Acomp;
@@ -104,7 +103,7 @@ I2*I2*L1*L1*L1*L1+4*I2*L1*L1*L1*L2*I1+6*I2*L1*L1*L2*L2*I1+4*I2*L1*L2*L2*L2*I1+L2
   	K(2,5) = K(5,2) = 2*E*I2*I1*(I2*L1*L1*L1 + 3*I2*L1*L1*L2 + 3*L2*L2*I1*L1 
              + L2*L2*L2*I1)/X1;
 
-   cout << "\nInelastic2DYS03::getLocalStiff(..) = \n" << K;
+   opserr << "\nInelastic2DYS03::getLocalStiff(..) = \n" << K;
 }//getLocalStiff
 
 

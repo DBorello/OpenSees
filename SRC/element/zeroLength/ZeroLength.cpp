@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2002-12-16 21:10:10 $
+// $Revision: 1.15 $
+// $Date: 2003-02-14 23:01:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -42,8 +42,6 @@
 #include <FEM_ObjectBroker.h>
 #include <UniaxialMaterial.h>
 #include <Renderer.h>
-
-#include <G3Globals.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -82,19 +80,22 @@ ZeroLength::ZeroLength(int tag,
   theMaterial1d = new UniaxialMaterial*  [numMaterials1d];
   dir1d	  = new ID(numMaterials1d);
   
-  if ( theMaterial1d == 0 || dir1d == 0 )
-    g3ErrorHandler->fatal("FATAL ZeroLength::ZeroLength - failed to create a 1d  material or direction array\n");
-  
+  if ( theMaterial1d == 0 || dir1d == 0 ) {
+    opserr << "FATAL ZeroLength::ZeroLength - failed to create a 1d  material or direction array\n";
+    exit(-1);
+  }
+
   // initialize uniaxial materials and directions and check for valid values
   (*dir1d)(0) = direction;
   this->checkDirection( *dir1d );
   
   // get a copy of the material and check we obtained a valid copy
   theMaterial1d[0] = theMat.getCopy();
-  if (theMaterial1d[0] == 0) 
-    g3ErrorHandler->fatal("FATAL ZeroLength::ZeroLength - failed to get a copy of material %d\n",
-			  theMat.getTag());
-  
+  if (theMaterial1d[0] == 0) {
+    opserr << "FATAL ZeroLength::ZeroLength - failed to get a copy of material " << theMat.getTag() << endln;
+    exit(-1);
+  }
+
   // establish the connected nodes and set up the transformation matrix for orientation
   this->setUp( Nd1, Nd2, x, yp);
 }
@@ -119,8 +120,10 @@ ZeroLength::ZeroLength(int tag,
     theMaterial1d = new UniaxialMaterial*  [numMaterials1d];
     dir1d	  = new ID(numMaterials1d);
     
-    if ( theMaterial1d == 0 || dir1d == 0 )
-	g3ErrorHandler->fatal("FATAL ZeroLength::ZeroLength - failed to create a 1d  material or direction array\n");
+    if ( theMaterial1d == 0 || dir1d == 0 ) {
+      opserr << "FATAL ZeroLength::ZeroLength - failed to create a 1d  material or direction array\n";
+      exit(-1);
+    }
     
     // initialize uniaxial materials and directions and check for valid values
     *dir1d = direction;
@@ -128,10 +131,11 @@ ZeroLength::ZeroLength(int tag,
     
     // get a copy of the material objects and check we obtained a valid copy
     for (int i=0; i<numMaterials1d; i++) {
-	theMaterial1d[i] = theMat[i]->getCopy();
-	if (theMaterial1d[i] == 0) 
-	    g3ErrorHandler->fatal("FATAL ZeroLength::ZeroLength - failed to get a copy of material %d\n",
-			    theMat[i]->getTag());
+      theMaterial1d[i] = theMat[i]->getCopy();
+      if (theMaterial1d[i] == 0) {
+	opserr << "FATAL ZeroLength::ZeroLength - failed to get a copy of material " <<theMat[i]->getTag() << endln;
+	exit(-1);
+      }
      }
 	
     // establish the connected nodes and set up the transformation matrix for orientation
@@ -152,7 +156,7 @@ ZeroLength::ZeroLength(void)
 {
     // ensure the connectedExternalNode ID is of correct size 
     if (connectedExternalNodes.Size() != 2)
-      g3ErrorHandler->fatal("FATAL ZeroLength::ZeroLength - failed to create an ID of correct size\n");
+      opserr << "FATAL ZeroLength::ZeroLength - failed to create an ID of correct size\n";
 }
 
 
@@ -237,11 +241,11 @@ ZeroLength::setDomain(Domain *theDomain)
     // if can't find both - send a warning message
     if ( theNodes[0] == 0 || theNodes[1] == 0 ) {
       if (theNodes[0] == 0) 
-        g3ErrorHandler->warning("WARNING ZeroLength::setDomain() - Nd1: %d does not exist in ",Nd1);
+        opserr << "WARNING ZeroLength::setDomain() - Nd1: " << Nd1 << " does not exist in ";
       else
-        g3ErrorHandler->warning("WARNING ZeroLength::setDomain() - Nd2: %d does not exist in ",Nd2);
+        opserr << "WARNING ZeroLength::setDomain() - Nd2: " << Nd2 << " does not exist in ";
 
-      g3ErrorHandler->warning("model for ZeroLength with id %d\n",this->getTag());
+      opserr << "model for ZeroLength ele: " << this->getTag() << endln;
 
       return;
     }
@@ -252,8 +256,8 @@ ZeroLength::setDomain(Domain *theDomain)
 
     // if differing dof at the ends - print a warning message
     if ( dofNd1 != dofNd2 ) {
-      g3ErrorHandler->warning("WARNING ZeroLength::setDomain(): nodes %d and %d %s %d\n",Nd1, Nd2,
-			      "have differing dof at ends for ZeroLength ",this->getTag());
+      opserr << "WARNING ZeroLength::setDomain(): nodes " << Nd1 << " and " << Nd2 <<
+	"have differing dof at ends for ZeroLength " << this->getTag() << endln;
       return;
     }	
 
@@ -267,11 +271,12 @@ ZeroLength::setDomain(Domain *theDomain)
     double vm;
     
     vm = (v1<v2) ? v2 : v1;
-    
+
+
     if (L > LENTOL*vm)
-	 g3ErrorHandler->warning("WARNING ZeroLength::setDomain(): Element %d has L=%e, which is greater than the tolerance\n",this->getTag(),L);
-    
-    
+      opserr << "WARNING ZeroLength::setDomain(): Element " << this->getTag() << " has L= " << L << 
+	", which is greater than the tolerance\n";
+        
     // call the base class method
     this->DomainComponent::setDomain(theDomain);
     
@@ -307,8 +312,8 @@ ZeroLength::setDomain(Domain *theDomain)
 	elemType  = D3N12;
     }
     else {
-      g3ErrorHandler->warning("WARNING ZeroLength::setDomain cannot handle %d dofs at nodes in %d d problem\n",
-			      dimension, dofNd1);
+      opserr << "WARNING ZeroLength::setDomain cannot handle " << dimension << 
+	"dofs at nodes in " << dofNd1 << " d problem\n"; 
       return;
     }
 
@@ -326,7 +331,7 @@ ZeroLength::commitState()
 
     // call element commitState to do any base class stuff
     if ((code = this->Element::commitState()) != 0) {
-      cerr << "ZeroLength::commitState () - failed in base class";
+      opserr << "ZeroLength::commitState () - failed in base class";
     }    
 
     // commit 1d materials
@@ -516,8 +521,7 @@ ZeroLength::zeroLoad(void)
 int 
 ZeroLength::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("ZeroLength::addLoad - load type unknown for truss with tag: %d",
-			  this->getTag());
+  opserr << "ZeroLength::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
   
   return -1;
 }
@@ -589,53 +593,50 @@ ZeroLength::sendSelf(int commitTag, Channel &theChannel)
 
 	res += theChannel.sendID(dataTag, commitTag, idData);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send ID data",
-			"ZeroLength::sendSelf");
-		return res;
+	  opserr << "ZeroLength::sendSelf -- failed to send ID data\n";
+	  return res;
 	}
 
 	// Send the 3x3 direction cosine matrix, have to send it since it is only set
 	// in the constructor and not setDomain()
 	res += theChannel.sendMatrix(dataTag, commitTag, transformation);
 	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to send transformation Matrix",
-			"ZeroLength::sendSelf");
-		return res;
+	  opserr <<  "ZeroLength::sendSelf -- failed to send transformation Matrix\n";
+	  return res;
 	}
 
 	if (numMaterials1d < 1)
-		return res;
+	  return res;
 	else {
-		ID classTags(numMaterials1d*3);
+	  ID classTags(numMaterials1d*3);
+	  
+	  int i;
+	  // Loop over the materials and send them
+	  for (i = 0; i < numMaterials1d; i++) {
+	    int matDbTag = theMaterial1d[i]->getDbTag();
+	    if (matDbTag == 0) {
+	      matDbTag = theChannel.getDbTag();
+	      if (matDbTag != 0)
+		theMaterial1d[i]->setDbTag(matDbTag);
+	    }
+	    classTags(i) = matDbTag;
+	    classTags(numMaterials1d+i) = theMaterial1d[i]->getClassTag();
+	    classTags(2*numMaterials1d+i) = (*dir1d)(i);
+	  }
+	  
+	  res += theChannel.sendID(dataTag, commitTag, classTags);
+	  if (res < 0) {
+	    opserr << " ZeroLength::sendSelf -- failed to send classTags ID\n";
+	    return res;
+	  }
 	
-		int i;
-		// Loop over the materials and send them
-		for (i = 0; i < numMaterials1d; i++) {
-			int matDbTag = theMaterial1d[i]->getDbTag();
-			if (matDbTag == 0) {
-				matDbTag = theChannel.getDbTag();
-				if (matDbTag != 0)
-					theMaterial1d[i]->setDbTag(matDbTag);
-			}
-			classTags(i) = matDbTag;
-			classTags(numMaterials1d+i) = theMaterial1d[i]->getClassTag();
-			classTags(2*numMaterials1d+i) = (*dir1d)(i);
-		}
-
-		res += theChannel.sendID(dataTag, commitTag, classTags);
-		if (res < 0) {
-			g3ErrorHandler->warning("%s -- failed to send classTags ID",
-				"ZeroLength::sendSelf");
-			return res;
-		}
-
-		for (i = 0; i < numMaterials1d; i++) {
-			res += theMaterial1d[i]->sendSelf(commitTag, theChannel);
-			if (res < 0) {
-				g3ErrorHandler->warning("%s -- failed to send Material1d %d",
-					"ZeroLength::sendSelf", i);
-				return res;
-			}
+	  for (i = 0; i < numMaterials1d; i++) {
+	    res += theMaterial1d[i]->sendSelf(commitTag, theChannel);
+	    if (res < 0) {
+	      opserr << "ZeroLength::sendSelf -- failed to send Material1d " << i << endln;
+		
+	      return res;
+	  }
 		}
 	}
 
@@ -656,15 +657,15 @@ ZeroLength::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
 
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- failed to receive ID data",
-			    "ZeroLength::recvSelf");
+    opserr << "ZeroLength::recvSelf -- failed to receive ID data\n";
+			    
     return res;
   }
 
   res += theChannel.recvMatrix(dataTag, commitTag, transformation);
   if (res < 0) {
-    g3ErrorHandler->warning("%s -- failed to receive transformation Matrix",
-			    "ZeroLength::recvSelf");
+    opserr << "ZeroLength::recvSelf -- failed to receive transformation Matrix\n";
+			    
     return res;
   }
 
@@ -697,8 +698,7 @@ ZeroLength::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
       
       theMaterial1d = new UniaxialMaterial *[numMaterials1d];
       if (theMaterial1d == 0) {
-	g3ErrorHandler->warning("%s -- failed to new Material1d array",
-				"ZeroLength::recvSelf");
+	opserr << "ZeroLength::recvSelf -- failed to new Material1d array\n";
 	return -1;
       }
       
@@ -710,8 +710,8 @@ ZeroLength::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
 	delete dir1d;
       dir1d = new ID(numMaterials1d);
       if (dir1d == 0) {
-	g3ErrorHandler->warning("%s -- failed to new dir ID",
-				"ZeroLength::recvSelf");
+	opserr << "ZeroLength::recvSelf -- failed to new dir ID\n";
+				
 	return -1;
       }
     }
@@ -719,8 +719,7 @@ ZeroLength::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
     ID classTags(3*numMaterials1d);
     res += theChannel.recvID(dataTag, commitTag, classTags);
     if (res < 0) {
-      g3ErrorHandler->warning("%s -- failed to receive classTags ID",
-			      "ZeroLength::recvSelf");
+      opserr << "ZeroLength::recvSelf -- failed to receive classTags ID\n";
       return res;
     }
     
@@ -739,8 +738,7 @@ ZeroLength::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
       
       // Check if either allocation failed from broker
       if (theMaterial1d[i] == 0) {
-	g3ErrorHandler->warning("%s -- failed to allocate new Material1d %d",
-				"ZeroLength::recvSelf", i);
+	opserr << "ZeroLength::recvSelf  -- failed to allocate new Material1d " << i << endln;
 	return -1;
       }
       
@@ -748,8 +746,7 @@ ZeroLength::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
       theMaterial1d[i]->setDbTag(classTags(i));
       res += theMaterial1d[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("%s -- failed to receive Material1d %d",
-				"ZeroLength::recvSelf", i);
+	opserr << "ZeroLength::recvSelf  -- failed to receive new Material1d " << i << endln;
 	return res;
       }
       
@@ -800,7 +797,7 @@ ZeroLength::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
 void
-ZeroLength::Print(ostream &s, int flag)
+ZeroLength::Print(OPS_Stream &s, int flag)
 {
     // compute the strain and axial force in the member
     double strain=0.0;
@@ -812,10 +809,10 @@ ZeroLength::Print(ostream &s, int flag)
     if (flag == 0) { // print everything
 	s << "Element: " << this->getTag(); 
 	s << " type: ZeroLength  iNode: " << connectedExternalNodes(0);
-	s << " jNode: " << connectedExternalNodes(1) << endl;
+	s << " jNode: " << connectedExternalNodes(1) << endln;
 	for (int j = 0; j < numMaterials1d; j++) {
 		s << "\tMaterial1d, tag: " << theMaterial1d[j]->getTag() 
-			<< ", dir: " << (*dir1d)(j) << endl;
+			<< ", dir: " << (*dir1d)(j) << endln;
 		s << *(theMaterial1d[j]);
 	}
     } else if (flag == 1) {
@@ -914,7 +911,7 @@ ZeroLength::setUp( int Nd1, int Nd2,
 { 
     // ensure the connectedExternalNode ID is of correct size & set values
     if (connectedExternalNodes.Size() != 2)
-      g3ErrorHandler->fatal("FATAL ZeroLength::setUp - failed to create an ID of correct size\n");
+      opserr << "FATAL ZeroLength::setUp - failed to create an ID of correct size\n";
     
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;
@@ -925,7 +922,7 @@ ZeroLength::setUp( int Nd1, int Nd2,
 
     // check that vectors for orientation are correct size
     if ( x.Size() != 3 || yp.Size() != 3 )
-	g3ErrorHandler->fatal("FATAL ZeroLength::setUp - incorrect dimension of orientation vectors\n");
+	opserr << "FATAL ZeroLength::setUp - incorrect dimension of orientation vectors\n";
 
     // establish orientation of element for the tranformation matrix
     // z = x cross yp
@@ -947,7 +944,7 @@ ZeroLength::setUp( int Nd1, int Nd2,
 
     // check valid x and y vectors, i.e. not parallel and of zero length
     if (xn == 0 || yn == 0 || zn == 0) {
-      g3ErrorHandler->fatal("FATAL ZeroLength::setUp - invalid vectors to constructor\n");
+      opserr << "FATAL ZeroLength::setUp - invalid vectors to constructor\n";
     }
     
     // create transformation matrix of direction cosines
@@ -966,8 +963,8 @@ ZeroLength::checkDirection( ID &dir ) const
 {
     for ( int i=0; i<dir.Size(); i++)
 	if ( dir(i) < 0 || dir(i) > 5 ) {
-	    g3ErrorHandler->warning("WARNING ZeroLength::checkDirection - incorrect direction %d\n is set to 0",dir(i));
-	    dir(i) = 0;
+	  opserr << "WARNING ZeroLength::checkDirection - incorrect direction " << dir(i) << " is set to 0\n";
+	  dir(i) = 0;
 	}
 }
 
@@ -987,7 +984,7 @@ ZeroLength::setTran1d( Etype elemType,
     t1d = new Matrix(numMat,numDOF);
     
     if (t1d == 0)
-	g3ErrorHandler->fatal("FATAL ZeroLength::setTran1d - can't allocate 1d transformation matrix\n");
+	opserr << "FATAL ZeroLength::setTran1d - can't allocate 1d transformation matrix\n";
     
     // Use reference for convenience and zero matrix.
     Matrix& tran = *t1d;

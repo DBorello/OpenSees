@@ -120,7 +120,7 @@ double EvolutionLaw_L_Eeq::h_s( EPState *EPS, PotentialSurface *PS){
 //================================================================================
 void EvolutionLaw_L_Eeq::print()
 {
-    cout << (*this);
+    opserr << (*this);
 }
 
 
@@ -131,9 +131,9 @@ double EvolutionLaw_L_Eeq::geta() const
 }
 
 //================================================================================
-ostream& operator<< (ostream& os, const EvolutionLaw_L_Eeq & LEL)
+OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_L_Eeq & LEL)
 {
-    os.unsetf( ios::scientific );
+  //    os.unsetf( ios::scientific );
     os.precision(5);
 
     os.width(10);       

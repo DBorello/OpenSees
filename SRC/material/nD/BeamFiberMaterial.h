@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:49:08 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/BeamFiberMaterial.h,v $
 
 // Written: MHS
@@ -31,7 +31,6 @@
 // stress components which can then be integrated over an area to model a
 // shear flexible 3D beam.
 
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -65,7 +64,7 @@ class BeamFiberMaterial: public NDMaterial {
     const char *getType(void) const;
     int getOrder(void) const; 
 
-    void Print(ostream &s, int flag);
+    void Print(OPS_Stream &s, int flag);
 
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-03 06:18:33 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/DOF_Graph.cpp,v $
                                                                         
                                                                         
@@ -54,8 +54,8 @@ DOF_Graph::DOF_Graph(AnalysisModel &theModel)
     int numVertex = myModel.getNumEqn();
 
     if (numVertex <= 0) {
-	cerr << "WARNING DOF_Graph::DOF_Graph";
-	cerr << "  - 0 equations?\n";
+	opserr << "WARNING DOF_Graph::DOF_Graph";
+	opserr << "  - 0 equations?\n";
 	return;
     }	
 
@@ -66,14 +66,14 @@ DOF_Graph::DOF_Graph(AnalysisModel &theModel)
 	Vertex *vertexPtr = new Vertex(i+START_VERTEX_NUM,i+START_EQN_NUM);
 	
 	if (vertexPtr == 0) {
-	    cerr << "WARNING DOF_Graph::DOF_Graph";
-	    cerr << " - Not Enough Memory to create " << i+1 << "th Vertex\n";
+	    opserr << "WARNING DOF_Graph::DOF_Graph";
+	    opserr << " - Not Enough Memory to create " << i+1 << "th Vertex\n";
 	    return;
 	}
 	this->addVertex(vertexPtr,false);	
     }
 
-     // theTimer.pause(); cout <<  "DOF_Graph::one " << theTimer.getReal() << theTimer.getCPU() << endl;
+     // theTimer.pause(); cout <<  "DOF_Graph::one " << theTimer.getReal() << theTimer.getCPU() << endln;
     // theTimer.start();    
 
     // now add the edges, by looping over the FE_elements, getting their
@@ -102,7 +102,7 @@ DOF_Graph::DOF_Graph(AnalysisModel &theModel)
 	        }
 	    }
 	 }
-         // theTimer.pause(); cout <<  "DOF_Graph::two " << theTimer.getReal() << theTimer.getCPU() << endl;
+         // theTimer.pause(); cout <<  "DOF_Graph::two " << theTimer.getReal() << theTimer.getCPU() << endln;
          // theTimer.start();    
     }
 }

@@ -60,13 +60,13 @@ class VMYieldSurface : public YieldSurface
     // Redefine 1st derivative of F over first tensorial internal variable
     tensor xi_t1(const EPState *EPS) const;
 
-    void print() { cout << *this; }; 
+    void print() { opserr << *this; }; 
   
     //================================================================================
     // Overloaded Insertion Operator
     // prints an VM YieldSurface's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const VMYieldSurface & YS);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const VMYieldSurface & YS);
 
 };
 

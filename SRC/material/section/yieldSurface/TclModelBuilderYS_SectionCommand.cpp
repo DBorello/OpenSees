@@ -11,10 +11,10 @@
 
 static void printCommand(int argc, char **argv)
 {
-  cerr << "Input command: ";
+  opserr << "Input command: ";
   for (int i=0; i<argc; i++)
-    cerr << argv[i] << " ";
-  cerr << endl;
+    opserr << argv[i] << " ";
+  opserr << endln;
 } 
 
 SectionForceDeformation*
@@ -22,14 +22,14 @@ TclModelBuilderYS_SectionCommand(ClientData clienData, Tcl_Interp *interp, int a
 				 char **argv, TclModelBuilder *theBuilder)
 {
   if (argc < 3) {
-    cerr << "WARNING insufficient number of arguments\n";
+    opserr << "WARNING insufficient number of arguments\n";
     printCommand(argc, argv);
     return 0;
   }
   
   int tag;
   if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-    cerr << "WARNING invalid section tag\n";
+    opserr << "WARNING invalid section tag\n";
     printCommand(argc, argv);
     return 0;
   }
@@ -40,9 +40,9 @@ TclModelBuilderYS_SectionCommand(ClientData clienData, Tcl_Interp *interp, int a
       strcmp(argv[1],"YS_Section2d01") == 0) {
 
     if (argc < 7) {
-      cerr << "WARNING invalid number of arguments\n";
+      opserr << "WARNING invalid number of arguments\n";
       printCommand(argc,argv);
-      cerr << "Want: section YS_Section2D01 tag? E? A? Iz? ysTag? <algo?>" << endl;
+      opserr << "Want: section YS_Section2D01 tag? E? A? Iz? ysTag? <algo?>" << endln;
       return 0;
     }
 
@@ -51,43 +51,43 @@ TclModelBuilderYS_SectionCommand(ClientData clienData, Tcl_Interp *interp, int a
     int indx = 3;
   
     if (Tcl_GetDouble (interp, argv[indx++], &E) != TCL_OK) {
-      cerr << "WARNING invalid E" << endl;
-      cerr << " section: " << tag << endl;
+      opserr << "WARNING invalid E" << endln;
+      opserr << " section: " << tag << endln;
       return 0;
     }
   
     if (Tcl_GetDouble (interp, argv[indx++], &A) != TCL_OK) {
-      cerr << "WARNING invalid A" << endl;
-      cerr << " section: " << tag << endl;
+      opserr << "WARNING invalid A" << endln;
+      opserr << " section: " << tag << endln;
       return 0;
     }
   
     if (Tcl_GetDouble (interp, argv[indx++], &Iz) != TCL_OK) {
-      cerr << "WARNING invalid Iz" << endl;
-      cerr << " section: " << tag << endl;
+      opserr << "WARNING invalid Iz" << endln;
+      opserr << " section: " << tag << endln;
       return 0;
     }
 
     if (Tcl_GetInt (interp, argv[indx++], &ysTag) != TCL_OK) {
-      cerr << "WARNING invalid ysTag" << endl;
-      cerr << " section: " << tag << endl;
+      opserr << "WARNING invalid ysTag" << endln;
+      opserr << " section: " << tag << endln;
       return 0;
     }
     
     YieldSurface_BC *ys = theBuilder->getYieldSurface_BC(ysTag);
 
     if (ys == 0) {
-      cerr << "WARNING yield surface does not exist\n";
-      cerr << "yieldSurface: " << ysTag; 
-      cerr << "\nsection YieldSurface: " << tag << endl;
+      opserr << "WARNING yield surface does not exist\n";
+      opserr << "yieldSurface: " << ysTag; 
+      opserr << "\nsection YieldSurface: " << tag << endln;
       return 0;
     }
 
     bool useKr = true;
     if(argc > indx) {
       if (Tcl_GetInt(interp, argv[indx++], &algo) != TCL_OK) {
-	cerr << "WARNING invalid algo" << endl;
-	cerr << " section: " << tag << endl;
+	opserr << "WARNING invalid algo" << endln;
+	opserr << " section: " << tag << endln;
 	return 0;
       }
       if(algo == 0)
@@ -101,9 +101,9 @@ TclModelBuilderYS_SectionCommand(ClientData clienData, Tcl_Interp *interp, int a
 	   strcmp(argv[1],"YS_Section2d02") == 0) {
 
     if (argc < 8) {
-      cerr << "WARNING invalid number of arguments\n";
+      opserr << "WARNING invalid number of arguments\n";
       printCommand(argc,argv);
-      cerr << "Want: section YS_Section2D01 tag? E? A? Iz? maxPlastRot? ysTag? <algo?>" << endl;
+      opserr << "Want: section YS_Section2D01 tag? E? A? Iz? maxPlastRot? ysTag? <algo?>" << endln;
       return 0;
     }
 
@@ -112,49 +112,49 @@ TclModelBuilderYS_SectionCommand(ClientData clienData, Tcl_Interp *interp, int a
     int indx = 3;
     
     if (Tcl_GetDouble (interp, argv[indx++], &E) != TCL_OK) {
-      cerr << "WARNING invalid E" << endl;
-      cerr << " section: " << tag << endl;
+      opserr << "WARNING invalid E" << endln;
+      opserr << " section: " << tag << endln;
       return 0;
     }
     
     if (Tcl_GetDouble (interp, argv[indx++], &A) != TCL_OK) {
-      cerr << "WARNING invalid A" << endl;
-      cerr << " section: " << tag << endl;
+      opserr << "WARNING invalid A" << endln;
+      opserr << " section: " << tag << endln;
       return 0;
     }
     
     if (Tcl_GetDouble (interp, argv[indx++], &Iz) != TCL_OK) {
-      cerr << "WARNING invalid Iz" << endl;
-      cerr << " section: " << tag << endl;
+      opserr << "WARNING invalid Iz" << endln;
+      opserr << " section: " << tag << endln;
       return 0;
     }
     
     if (Tcl_GetDouble (interp, argv[indx++], &maxPlstkRot) != TCL_OK) {
-      cerr << "WARNING maxPlstkRot " << endl;
-      cerr << " section: " << tag << endl;
+      opserr << "WARNING maxPlstkRot " << endln;
+      opserr << " section: " << tag << endln;
       return 0;
     }
 
     if (Tcl_GetInt (interp, argv[indx++], &ysTag) != TCL_OK) {
-      cerr << "WARNING invalid ysTag" << endl;
-      cerr << " section: " << tag << endl;
+      opserr << "WARNING invalid ysTag" << endln;
+      opserr << " section: " << tag << endln;
       return 0;
     }
 
     YieldSurface_BC *ys = theBuilder->getYieldSurface_BC(ysTag);
 
     if (ys == 0) {
-      cerr << "WARNING yield surface does not exist\n";
-      cerr << "yieldSurface: " << ysTag; 
-      cerr << "\nsection YieldSurface: " << tag << endl;
+      opserr << "WARNING yield surface does not exist\n";
+      opserr << "yieldSurface: " << ysTag; 
+      opserr << "\nsection YieldSurface: " << tag << endln;
       return 0;
     }
 
     bool useKr = true;
     if(argc > indx) {
       if (Tcl_GetInt(interp, argv[indx++], &algo) != TCL_OK) {
-	cerr << "WARNING invalid algo" << endl;
-	cerr << " section: " << tag << endl;
+	opserr << "WARNING invalid algo" << endln;
+	opserr << " section: " << tag << endln;
 	return 0;
       }
       if(algo == 0)

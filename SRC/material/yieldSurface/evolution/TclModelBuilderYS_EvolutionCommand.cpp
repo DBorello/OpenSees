@@ -25,14 +25,14 @@ int addTclYS_Evolution(TclModelBuilder *theBuilder, YS_Evolution *theModel)
 
 	if(!theModel)
 	{
-	 	cerr << "Model not created\n";
+	 	opserr << "Model not created\n";
 	    return TCL_ERROR;
 	}
 
 	if (theBuilder->addYS_EvolutionModel(*theModel) < 0)
 	{
-		cerr << "WARNING could not add hardening model to the domain\n";
-		cerr << *theModel << endl;
+		opserr << "WARNING could not add hardening model to the domain\n";
+		opserr << *theModel << endln;
 		delete theModel; // invoke the material objects destructor, otherwise mem leak
 		return TCL_ERROR;
 	}
@@ -46,14 +46,14 @@ PlasticHardeningMaterial * getTclPlasticMaterial(Tcl_Interp *interp, char *arg, 
 int id;
 	if (Tcl_GetInt(interp, arg, &id) != TCL_OK)
 	{
-		cerr << "WARNING: TclModelYS_EvolutionCommand - Invalid plastic material tag \n";
+		opserr << "WARNING: TclModelYS_EvolutionCommand - Invalid plastic material tag \n";
 		return 0;
 	}
 
 	PlasticHardeningMaterial *theMat = theBuilder->getPlasticMaterial(id);
 	if(theMat == 0)
 	{
-		cerr << "WARNING: TclModelYS_EvolutionCommand - no PlasticHardeningMaterial with id = "
+		opserr << "WARNING: TclModelYS_EvolutionCommand - no PlasticHardeningMaterial with id = "
 			 << id << " exists\n";
 		return 0;
 	}
@@ -66,14 +66,14 @@ YieldSurface_BC * getTclYieldSurface_BC(Tcl_Interp *interp, char *arg, TclModelB
 int id;
 	if (Tcl_GetInt(interp, arg, &id) != TCL_OK)
 	{
-		cerr << "WARNING: TclModelYS_EvolutionCommand - Invalid YieldSurface_BC tag \n";
+		opserr << "WARNING: TclModelYS_EvolutionCommand - Invalid YieldSurface_BC tag \n";
 		return 0;
 	}
 
 	YieldSurface_BC *theYS = theBuilder->getYieldSurface_BC(id);
 	if(theYS == 0)
 	{
-		cerr << "WARNING: TclModelYS_EvolutionCommand - no YieldSurface_BC with id = "
+		opserr << "WARNING: TclModelYS_EvolutionCommand - no YieldSurface_BC with id = "
 			 << id << " exists\n";
 		return 0;
 	}
@@ -117,7 +117,7 @@ YS_Evolution *theModel = 0;
 			dim++;
 		}
 
-//		cout << "Dim = " << dim << endl;
+//		cout << "Dim = " << dim << endln;
 //		cin.get();
 		
 		// Parsing was successful, allocate the material
@@ -498,7 +498,7 @@ TclModelBuilderYS_EvolutionModelCommand (ClientData clientData, Tcl_Interp *inte
 	}
 	else
 	{
-		cerr << "Unkown YS_Evolution type: " << argv[1] << endl;
+		opserr << "Unkown YS_Evolution type: " << argv[1] << endln;
 		return TCL_ERROR;
 	}
 

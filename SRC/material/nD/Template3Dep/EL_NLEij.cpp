@@ -94,7 +94,7 @@ EvolutionLaw_T * EvolutionLaw_NL_Eij::newObj() {
 //    // Calculate  e_eq = sqrt( 2.0 * epsilon_ij * epsilon_ij / 3.0)
 //    straintensor pstrain =  EPS->getdPlasticStrain(); 
 //    double e_eq  = pstrain.equivalent();
-//    //cout << "e_eq = " << e_eq << endln;
+//    //cout << "e_eq = " << e_eq << endlnn;
 //
 //    double dS =  e_eq * geta();
 //    double S  = EPS->getScalarVar( WhichOne );
@@ -138,7 +138,7 @@ tensor EvolutionLaw_NL_Eij::h_t( EPState *EPS, PotentialSurface *PS){
 //================================================================================
 void EvolutionLaw_NL_Eij::print()
 {
-    cout << (*this);
+    opserr << (*this);
 }
 
 
@@ -155,9 +155,9 @@ double EvolutionLaw_NL_Eij::getCr() const
 }
 
 //================================================================================
-ostream& operator<< (ostream& os, const EvolutionLaw_NL_Eij & LEL)
+OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_NL_Eij & LEL)
 {
-    os.unsetf( ios::scientific );
+  //    os.unsetf( ios::scientific );
     os.precision(5);
 
     os.width(10);       

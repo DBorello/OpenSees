@@ -27,14 +27,14 @@ YS_Evolution::YS_Evolution(int tag, int classtag,
 {
 	if( (isotropicRatio + kinematicRatio) != 1.0 || (isotropicRatio + kinematicRatio) != 0.0)
 	{
-	 	cerr << "WARNING YS_Evolution(..) -  isotropicRatio + kinematicRatio != 1 or 0 -> "
-		  << isotropicRatio + kinematicRatio << endl;
+	 	opserr << "WARNING YS_Evolution(..) -  isotropicRatio + kinematicRatio != 1 or 0 -> "
+		  << isotropicRatio + kinematicRatio << endln;
 	}
 	translate.Zero();
 	translate_hist.Zero();
 	translate_init.Zero();
 
-//	cout << "DIM = " << dimension << endl;
+//	cout << "DIM = " << dimension << endln;
 	for(int i=0; i<dimension;i++)
 	{
 		isotropicFactor(i)=1;
@@ -50,7 +50,7 @@ void YS_Evolution::setInitTranslation(Vector &initTranslate)
 {
 	if(initTranslate.Size() > dimension)
 	{
-	 	cerr << "WARNING -  newTranslate" << initTranslate << " outside the dimensions\n";
+	 	opserr << "WARNING -  newTranslate" << initTranslate << " outside the dimensions\n";
 	}
 
 	translate = initTranslate;
@@ -87,7 +87,7 @@ void  YS_Evolution::toDeformedCoord(Vector &coord)
 {
 //	if(getTag() == 10)
 //	{
-//		cout << "DIM: " << dimension << endl;
+//		cout << "DIM: " << dimension << endln;
 //		cout << "ISO: " << isotropicFactor;
 //		cin.get();
 //		}
@@ -112,7 +112,7 @@ void  YS_Evolution::toOriginalCoord(Vector &coord)
 
 void YS_Evolution::toDeformedCoord(double &x)
 {
-//	cerr << "WARNING YS_Evolution::toDeformedCoord(.) - This method should not be called\n";
+//	opserr << "WARNING YS_Evolution::toDeformedCoord(.) - This method should not be called\n";
 	crd1(0) = x;
 	this->toDeformedCoord(crd1);
 	x = crd1(0);
@@ -120,7 +120,7 @@ void YS_Evolution::toDeformedCoord(double &x)
 
 void YS_Evolution::toDeformedCoord(double &x, double &y)
 {
-//  cerr << "WARNING YS_Evolution::toDeformedCoord(..) - This method should not be called\n";
+//  opserr << "WARNING YS_Evolution::toDeformedCoord(..) - This method should not be called\n";
 	crd2(0) = x;
 	crd2(1) = y;
 	this->toDeformedCoord(crd2);
@@ -130,7 +130,7 @@ void YS_Evolution::toDeformedCoord(double &x, double &y)
 
 void YS_Evolution::toDeformedCoord(double &x, double &y, double &z)
 {
-//	cerr << "WARNING YS_Evolution::toDeformedCoord(...) - This method should not be called\n";
+//	opserr << "WARNING YS_Evolution::toDeformedCoord(...) - This method should not be called\n";
 	crd3(0) = x;
 	crd3(1) = y;
 	crd3(2) = z;
@@ -143,7 +143,7 @@ void YS_Evolution::toDeformedCoord(double &x, double &y, double &z)
 
 void YS_Evolution::toOriginalCoord(double &x)
 {
-//	cerr << "WARNING YS_Evolution::toOriginalCoord(.) - This method should not be called\n";
+//	opserr << "WARNING YS_Evolution::toOriginalCoord(.) - This method should not be called\n";
 	crd1(0) = x;
 	this->toOriginalCoord(crd1);
 	x = crd1(0);
@@ -152,7 +152,7 @@ void YS_Evolution::toOriginalCoord(double &x)
 
 void YS_Evolution::toOriginalCoord(double &x, double &y)
 {
-//	cerr << "WARNING YS_Evolution::toOriginalCoord(..) - This method should not be called\n";
+//	opserr << "WARNING YS_Evolution::toOriginalCoord(..) - This method should not be called\n";
 	crd2(0) = x;
 	crd2(1) = y;
 	this->toOriginalCoord(crd2);
@@ -162,7 +162,7 @@ void YS_Evolution::toOriginalCoord(double &x, double &y)
 
 void YS_Evolution::toOriginalCoord(double &x, double &y, double &z)
 {
-//	cerr << "WARNING YS_Evolution::toOriginalCoord(...) - This method should not be called\n";
+//	opserr << "WARNING YS_Evolution::toOriginalCoord(...) - This method should not be called\n";
 	crd3(0) = x;
 	crd3(1) = y;
 	crd3(2) = z;
@@ -205,17 +205,17 @@ void YS_Evolution::checkDimension(int dir)
 {
 	if(dir < 0 || dir >= dimension)
 	{
-	 	cerr << "WARNING - Direction " << dir << " outside the dimensions\n";
+	 	opserr << "WARNING - Direction " << dir << " outside the dimensions\n";
 	}
 
 }
 
-void YS_Evolution::Print(ostream &s, int flag)
+void YS_Evolution::Print(OPS_Stream &s, int flag)
 {
-	cout << " YS_Evolution - tag = " << getTag() << endl;
+  s << " YS_Evolution - tag = " << getTag() << endln;
 }
 
-/*ostream &operator<<(ostream &s, const YS_Evolution &hModel)
+/*OPS_Stream &operator<<(OPS_Stream &s, const YS_Evolution &hModel)
 {
 	hModel.Print(s);
   return s;

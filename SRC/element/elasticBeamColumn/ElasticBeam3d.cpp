@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-16 21:10:02 $
+// $Revision: 1.10 $
+// $Date: 2003-02-14 23:01:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -42,7 +42,8 @@
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
 #include <Renderer.h>
-
+#include <SectionForceDeformation.h>
+#include <ID.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -75,9 +76,9 @@ ElasticBeam3d::ElasticBeam3d()
 
 ElasticBeam3d::ElasticBeam3d(int tag, double a, double e, double g, 
 			     double jx, double iy, double iz, int Nd1, int Nd2, 
-			     CrdTransf3d &coordTransf, double r)
+			     CrdTransf3d &coordTransf, double r, int sectTag)
   :Element(tag,ELE_TAG_ElasticBeam3d), 
-  A(a), E(e), G(g), Jx(jx), Iy(iy), Iz(iz), rho(r),
+   A(a), E(e), G(g), Jx(jx), Iy(iy), Iz(iz), rho(r), sectionTag(sectTag),
   Q(12), q(6), connectedExternalNodes(2), theCoordTransf(0)
 {
   connectedExternalNodes(0) = Nd1;
@@ -85,8 +86,77 @@ ElasticBeam3d::ElasticBeam3d(int tag, double a, double e, double g,
   
   theCoordTransf = coordTransf.getCopy();
   
-  if (!theCoordTransf)
-    g3ErrorHandler->fatal("ElasticBeam3d::ElasticBeam3d -- failed to get copy of coordinate transformation");
+  if (!theCoordTransf) {
+    opserr << "ElasticBeam3d::ElasticBeam3d -- failed to get copy of coordinate transformation\n";
+    exit(-1);
+  }
+
+  q0[0] = 0.0;
+  q0[1] = 0.0;
+  q0[2] = 0.0;
+  q0[3] = 0.0;
+  q0[4] = 0.0;
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
+
+  // set node pointers to NULL
+  for (int i=0; i<2; i++)
+    theNodes[i] = 0;      
+}
+
+ElasticBeam3d::ElasticBeam3d(int tag, int Nd1, int Nd2, SectionForceDeformation *section, 			     
+			     CrdTransf3d &coordTransf, double r)
+  :Element(tag,ELE_TAG_ElasticBeam3d), 
+  Q(12), q(6), connectedExternalNodes(2), theCoordTransf(0)
+{
+  if (section != 0) {
+    sectionTag = section->getTag();
+    E = 1.0;
+    G = 1.0;
+    Jx = 0.0;
+    rho = r;
+
+    const Matrix &sectTangent = section->getSectionTangent();
+    const ID &sectCode = section->getType();
+    for (int i=0; i<sectCode.Size(); i++) {
+      int code = sectCode(i);
+      switch(code) {
+      case SECTION_RESPONSE_P:
+	A = sectTangent(i,i);
+	break;
+      case SECTION_RESPONSE_MZ:
+	Iz = sectTangent(i,i);
+	break;
+      case SECTION_RESPONSE_MY:
+	Iy = sectTangent(i,i);
+	break;
+      case SECTION_RESPONSE_T:
+	Jx = sectTangent(i,i);
+	break;
+      default:
+	break;
+      }
+    }
+  }    
+  
+  if (Jx == 0.0) {
+    opserr << "ElasticBeam3d::ElasticBeam3d -- no torsion in section -- setting GJ = 1.0e10\n";
+    Jx = 1.0e10;
+  }
+
+  connectedExternalNodes(0) = Nd1;
+  connectedExternalNodes(1) = Nd2;
+  
+  theCoordTransf = coordTransf.getCopy();
+  
+  if (!theCoordTransf) {
+    opserr << "ElasticBeam3d::ElasticBeam3d -- failed to get copy of coordinate transformation\n";
+    exit(-1);
+  }
 
   q0[0] = 0.0;
   q0[1] = 0.0;
@@ -138,39 +208,53 @@ ElasticBeam3d::getNumDOF(void)
 void
 ElasticBeam3d::setDomain(Domain *theDomain)
 {
-    if (theDomain == 0)
-	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Domain is null");
+  if (theDomain == 0) {
+    opserr << "ElasticBeam3d::setDomain -- Domain is null\n";
+    exit(-1);
+  }
     
     theNodes[0] = theDomain->getNode(connectedExternalNodes(0));
     theNodes[1] = theDomain->getNode(connectedExternalNodes(1));    
     
-    if (theNodes[0] == 0)
-	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Node 1: %i does not exist",
-			      connectedExternalNodes(0));
-    
-    if (theNodes[1] == 0)
-	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Node 2: %i does not exist",
-			      connectedExternalNodes(1));
- 
+
+    if (theNodes[0] == 0) {
+      opserr << "ElasticBeam3d::setDomain -- Node 1: " << connectedExternalNodes(0) << " does not exist\n";
+      exit(-1);
+    }
+			      
+    if (theNodes[1] == 0) {
+      opserr << "ElasticBeam3d::setDomain -- Node 2: " << connectedExternalNodes(1) << " does not exist\n";
+      exit(-1);
+    }
+
     int dofNd1 = theNodes[0]->getNumberDOF();
     int dofNd2 = theNodes[1]->getNumberDOF();    
     
-    if (dofNd1 != 6)
-	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Node 1: %i has incorrect number of DOF",
-			      connectedExternalNodes(0));
+    if (dofNd1 != 6) {
+      opserr << "ElasticBeam3d::setDomain -- Node 1: " << connectedExternalNodes(0) 
+	     << " has incorrect number of DOF\n";
+      exit(-1);
+    }
     
-    if (dofNd2 != 6)
-	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Node 2: %i has incorrect number of DOF",
-			      connectedExternalNodes(1));	
+    if (dofNd2 != 6) {
+      opserr << "ElasticBeam3d::setDomain -- Node 2: " << connectedExternalNodes(1) 
+	     << " has incorrect number of DOF\n";
+      exit(-1);
+    }
 	
     this->DomainComponent::setDomain(theDomain);
     
-    if (theCoordTransf->initialize(theNodes[0], theNodes[1]) != 0)
-	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Error initializing coordinate transformation");
+    if (theCoordTransf->initialize(theNodes[0], theNodes[1]) != 0) {
+	opserr << "ElasticBeam3d::setDomain -- Error initializing coordinate transformation\n";
+	exit(-1);
+    }
     
     double L = theCoordTransf->getInitialLength();
-    if (L == 0.0)
-	g3ErrorHandler->fatal("ElasticBeam3d::setDomain -- Element has zero length");
+
+    if (L == 0.0) {
+      opserr << "ElasticBeam3d::setDomain -- Element has zero length\n";
+      exit(-1);
+    }
 }
 
 int
@@ -179,7 +263,7 @@ ElasticBeam3d::commitState()
   int retVal = 0;
   // call element commitState to do any base class stuff
   if ((retVal = this->Element::commitState()) != 0) {
-    cerr << "ElasticBeam3d::commitState () - failed in base class";
+    opserr << "ElasticBeam3d::commitState () - failed in base class";
   }    
   retVal += theCoordTransf->commitState();
   return retVal;
@@ -371,8 +455,7 @@ ElasticBeam3d::addLoad(ElementalLoad *theLoad, double loadFactor)
     q0[4] -= M2;
   }
   else {
-    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
-			    "ElasticBeam2d::addLoad()", this->getTag());
+    opserr << "ElasticBeam3d::addLoad()  -- load type unknown for element with tag: " << this->getTag() << endln;
     return -1;
   }
 
@@ -391,8 +474,7 @@ ElasticBeam3d::addInertiaLoadToUnbalance(const Vector &accel)
   const Vector &Raccel2 = theNodes[1]->getRV(accel);
 	
   if (6 != Raccel1.Size() || 6 != Raccel2.Size()) {
-    g3ErrorHandler->warning("ElasticBeam3d::addInertiaLoadToUnbalance %s\n",
-			    "matrix and vector sizes are incompatable");
+    opserr << "ElasticBeam3d::addInertiaLoadToUnbalance matrix and vector sizes are incompatable\n";
     return -1;
   }
 
@@ -476,11 +558,11 @@ ElasticBeam3d::getResistingForce()
   
   Vector p0Vec(p0, 5);
   
-  //  cerr << q;
+  //  opserr << q;
 
   P = theCoordTransf->getGlobalResistingForce(q, p0Vec);
 
-  // cerr << P;
+  // opserr << P;
   
   // P = P - Q;
   P.addVector(1.0, Q, -1.0);
@@ -520,18 +602,16 @@ ElasticBeam3d::sendSelf(int cTag, Channel &theChannel)
 	// Send the data vector
     res += theChannel.sendVector(this->getDbTag(), cTag, data);
     if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send data Vector",
-			"ElasticBeam3d::sendSelf");
-		return res;
+      opserr << "ElasticBeam3d::sendSelf -- could not send data Vector\n";
+      return res;
     }
 
     // Ask the CoordTransf to send itself
-	res += theCoordTransf->sendSelf(cTag, theChannel);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send CoordTransf",
-			"ElasticBeam3d::sendSelf");
-		return res;
-	}
+    res += theCoordTransf->sendSelf(cTag, theChannel);
+    if (res < 0) {
+      opserr << "ElasticBeam3d::sendSelf -- could not send CoordTransf\n";
+      return res;
+    }
 
     return res;
 }
@@ -545,9 +625,8 @@ ElasticBeam3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 
     res += theChannel.recvVector(this->getDbTag(), cTag, data);
     if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive data Vector",
-			"ElasticBeam3d::recvSelf");
-		return res;
+      opserr << "ElasticBeam3d::recvSelf -- could not receive data Vector\n";
+      return res;
     }
 
     A = data(0);
@@ -561,68 +640,97 @@ ElasticBeam3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
     connectedExternalNodes(0) = (int)data(8);
     connectedExternalNodes(1) = (int)data(9);
 
-	// Check if the CoordTransf is null; if so, get a new one
-	int crdTag = (int)data(10);
-	if (theCoordTransf == 0) {
-		theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
-		if (theCoordTransf == 0) {
-			g3ErrorHandler->warning("%s -- could not get a CrdTransf3d",
-				"ElasticBeam3d::recvSelf");
-			return -1;
-		}
-	}
+    // Check if the CoordTransf is null; if so, get a new one
+    int crdTag = (int)data(10);
+    if (theCoordTransf == 0) {
+      theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
+      if (theCoordTransf == 0) {
+	opserr << "ElasticBeam3d::recvSelf -- could not get a CrdTransf3d\n";
+	exit(-1);
+      }
+    }
 
-	// Check that the CoordTransf is of the right type; if not, delete
-	// the current one and get a new one of the right type
-	if (theCoordTransf->getClassTag() != crdTag) {
-		delete theCoordTransf;
-		theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
-		if (theCoordTransf == 0) {
-			g3ErrorHandler->warning("%s -- could not get a CrdTransf2d",
-				"ElasticBeam3d::recvSelf");
-			return -1;
-		}
-	}
+    // Check that the CoordTransf is of the right type; if not, delete
+    // the current one and get a new one of the right type
+    if (theCoordTransf->getClassTag() != crdTag) {
+      delete theCoordTransf;
+      theCoordTransf = theBroker.getNewCrdTransf3d(crdTag);
+      if (theCoordTransf == 0) {
+	opserr << "ElasticBeam3d::recvSelf -- could not get a CrdTransf3d\n";
+	exit(-1);
+      }
+    }
 
-	// Now, receive the CoordTransf
-	theCoordTransf->setDbTag((int)data(11));
-	res += theCoordTransf->recvSelf(cTag, theChannel, theBroker);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive CoordTransf",
-			"ElasticBeam3d::recvSelf");
-		return res;
-	}
+    // Now, receive the CoordTransf
+    theCoordTransf->setDbTag((int)data(11));
+    res += theCoordTransf->recvSelf(cTag, theChannel, theBroker);
+    if (res < 0) {
+      opserr << "ElasticBeam3d::recvSelf -- could not receive CoordTransf\n";
+      return res;
+    }
 
-	// Revert the crdtrasf to its last committed state
-	theCoordTransf->revertToLastCommit();
+    // Revert the crdtrasf to its last committed state
+    theCoordTransf->revertToLastCommit();
 
     return res;
 }
 
 void
-ElasticBeam3d::Print(ostream &s, int flag)
+ElasticBeam3d::Print(OPS_Stream &s, int flag)
 {
-  s << "\nElasticBeam3d: " << this->getTag() << endl;
-  s << "\tConnected Nodes: " << connectedExternalNodes ;
-  s << "\tCoordTransf: " << theCoordTransf->getTag() << endl;
+   if (flag == -1) { 
+    int eleTag = this->getTag();
+    s << "EL_BEAM\t" << eleTag << "\t";
+    s << sectionTag << "\t" << sectionTag; 
+    s  << "\t" << connectedExternalNodes(0) << "\t" << connectedExternalNodes(1);
+    s << "\t0\t0.0000000\n";
+   }  else if (flag < -1) {
+     int counter = (flag + 1) * -1;
+     int eleTag = this->getTag();
+     int i;
+     const Vector &force = this->getResistingForce();
+     s << "FORCE\t" << eleTag << "\t" << counter << "\t0";
+     for (i=0; i<3; i++)
+	s << "\t" << force(i);
+     s << endln;
+     s << "FORCE\t" << eleTag << "\t" << counter << "\t1";
+     for (i=0; i<3; i++)
+       s << "\t" << force(i+6);
+     s << endln;
+     s << "MOMENT\t" << eleTag << "\t" << counter << "\t0";
+     for (i=3; i<6; i++)
+       s << "\t" << force(i);
+     s << endln;
+     s << "MOMENT\t" << eleTag << "\t" << counter << "\t1";
+     for (i=3; i<6; i++)
+       s << "\t" << force(i+6);
+     s << endln;
+   }
 
-  double N, Mz1, Mz2, Vy, My1, My2, Vz, T;
-  double L = theCoordTransf->getInitialLength();
-  double oneOverL = 1.0/L;
+  else {
 
-  N   = q(0);
-  Mz1 = q(1);
-  Mz2 = q(2);
-  Vy  = (Mz1+Mz2)*oneOverL;
-  My1 = q(3);
-  My2 = q(4);
-  Vz  = -(My1+My2)*oneOverL;
-  T   = q(5);
-
-  s << "\tEnd 1 Forces (P Mz Vy My Vz T): "
-    << -N+p0[0] << ' ' << Mz1 << ' ' <<  Vy+p0[1] << ' ' << My1 << ' ' <<  Vz+p0[3] << ' ' << -T << endl;
-  s << "\tEnd 2 Forces (P Mz Vy My Vz T): "
-    <<  N << ' ' << Mz2 << ' ' << -Vy+p0[2] << ' ' << My2 << ' ' << -Vz+p0[4] << ' ' <<  T << endl;
+    s << "\nElasticBeam3d: " << this->getTag() << endln;
+    s << "\tConnected Nodes: " << connectedExternalNodes ;
+    s << "\tCoordTransf: " << theCoordTransf->getTag() << endln;
+    
+    double N, Mz1, Mz2, Vy, My1, My2, Vz, T;
+    double L = theCoordTransf->getInitialLength();
+    double oneOverL = 1.0/L;
+    
+    N   = q(0);
+    Mz1 = q(1);
+    Mz2 = q(2);
+    Vy  = (Mz1+Mz2)*oneOverL;
+    My1 = q(3);
+    My2 = q(4);
+    Vz  = -(My1+My2)*oneOverL;
+    T   = q(5);
+    
+    s << "\tEnd 1 Forces (P Mz Vy My Vz T): "
+      << -N+p0[0] << ' ' << Mz1 << ' ' <<  Vy+p0[1] << ' ' << My1 << ' ' <<  Vz+p0[3] << ' ' << -T << endln;
+    s << "\tEnd 2 Forces (P Mz Vy My Vz T): "
+      <<  N << ' ' << Mz2 << ' ' << -Vy+p0[2] << ' ' << My2 << ' ' << -Vz+p0[4] << ' ' <<  T << endln;
+  }
 }
 
 int

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/UDP_Socket.cpp,v $
                                                                         
                                                                         
@@ -60,12 +60,12 @@ UDP_Socket::UDP_Socket()
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	cerr << "UDP_Socket::UDP_Socket - could not open socket\n";
+	opserr << "UDP_Socket::UDP_Socket - could not open socket\n";
     }
     
     // bind local address to it
     if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
-	cerr << "UDP_Socket::UDP_Socket - could not bind local address\n";
+	opserr << "UDP_Socket::UDP_Socket - could not bind local address\n";
     }    
     
     INET_getsockname(sockfd, &my_Addr, &addrLength);
@@ -89,12 +89,12 @@ UDP_Socket::UDP_Socket(unsigned int port)
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	cerr << "UDP_Socket::UDP_Socket - could not open socket\n";
+	opserr << "UDP_Socket::UDP_Socket - could not open socket\n";
     }
     
     // bind local address to it
     if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
-	cerr << "UDP_Socket::UDP_Socket - could not bind local address\n";
+	opserr << "UDP_Socket::UDP_Socket - could not bind local address\n";
     }    
     INET_getsockname(sockfd, &my_Addr, &addrLength);    
     myPort = ntohs(my_Addr.sin_port);        
@@ -120,12 +120,12 @@ UDP_Socket::UDP_Socket(unsigned int other_Port, char *other_InetAddr)
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	cerr << "UDP_Socket::UDP_Socket - could not open socket\n";
+	opserr << "UDP_Socket::UDP_Socket - could not open socket\n";
     }
     
     // bind local address to it
     if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
-	cerr << "UDP_Socket::UDP_Socket - could not bind local address\n";
+	opserr << "UDP_Socket::UDP_Socket - could not bind local address\n";
     }    
     INET_getsockname(sockfd, &my_Addr, &addrLength);    
     myPort = ntohs(my_Addr.sin_port);        
@@ -147,8 +147,8 @@ int
 UDP_Socket::setUpActor(void) 
 {
     if (shadow_inetAddr == 0) {
-	cerr << "FATAL::UDP_Socket::setUpActor() -";
-	cerr << "incorrect choice of UDP_Socket constructor for actor.\n";
+	opserr << "FATAL::UDP_Socket::setUpActor() -";
+	opserr << "incorrect choice of UDP_Socket constructor for actor.\n";
 	exit(-1);
     }
 	    
@@ -193,9 +193,9 @@ UDP_Socket::setNextAddress(const ChannelAddress &theAddress)
 	return  0;	    
     }
     else {
-	cerr << "TCP_Socket::setNextAddress() - a UDP_Socket ";
-	cerr << "can only communicate with a UDP_Socket";
-	cerr << " address given is not of type SocketAddress\n"; 
+	opserr << "TCP_Socket::setNextAddress() - a UDP_Socket ";
+	opserr << "can only communicate with a UDP_Socket";
+	opserr << " address given is not of type SocketAddress\n"; 
 	return -1;	    
     }		    	
 }
@@ -218,9 +218,9 @@ UDP_Socket::sendObj(int commitTag,
 	    addrLength = theSocketAddress->addrLength;	
 	}
 	else {
-	    cerr << "UDP_Socket::sendObj() - a UDP_Socket ";
-	    cerr << "can only communicate with a UDP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "UDP_Socket::sendObj() - a UDP_Socket ";
+	    opserr << "can only communicate with a UDP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    	    
     }
@@ -251,16 +251,16 @@ UDP_Socket::recvObj(int commitTag,
 	    if (bcmp((char *) &theSocketAddress->addr, (char *) &last_Addr, 
 		     theSocketAddress->addrLength) != 0) {
 	    
-		cerr << "UDP_Socket::recvObj() - a UDP_Socket ";
-		cerr << "can only look at first incoming message\n"; 
-		cerr << "The last message did not come from write scource\n";
+		opserr << "UDP_Socket::recvObj() - a UDP_Socket ";
+		opserr << "can only look at first incoming message\n"; 
+		opserr << "The last message did not come from write scource\n";
 		return -1;
 	    }	
 	}
 	else {
-	    cerr << "UDP_Socket::recvObj() - a UDP_Socket ";
-	    cerr << "can only communicate with a UDP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "UDP_Socket::recvObj() - a UDP_Socket ";
+	    opserr << "can only communicate with a UDP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    	    	    
     }
@@ -306,16 +306,16 @@ UDP_Socket::recvMsg(int dbTag, int commitTag, Message &msg, ChannelAddress *theA
 	    if (bcmp((char *) &theSocketAddress->addr, (char *) &last_Addr, 
 		     theSocketAddress->addrLength) != 0) {
 		
-		cerr << "UDP_Socket::recvMsg() - a UDP_Socket ";
-		cerr << "can only look at first incoming message\n"; 
-		cerr << "The last message did not come from write scource\n";
+		opserr << "UDP_Socket::recvMsg() - a UDP_Socket ";
+		opserr << "can only look at first incoming message\n"; 
+		opserr << "The last message did not come from write scource\n";
 		return -1;
 	    }
 	}	
 	else {
-	    cerr << "UDP_Socket::sendObj() - a UDP_Socket ";
-	    cerr << "can only communicate with a UDP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "UDP_Socket::sendObj() - a UDP_Socket ";
+	    opserr << "can only communicate with a UDP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    	    	    
     }
@@ -338,9 +338,9 @@ UDP_Socket::sendMsg(int dbTag, int commitTag, const Message &msg, ChannelAddress
 	    addrLength = theSocketAddress->addrLength;	
 	}
 	else {
-	    cerr << "UDP_Socket::sendMsg() - a UDP_Socket ";
-	    cerr << "can only communicate with a UDP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "UDP_Socket::sendMsg() - a UDP_Socket ";
+	    opserr << "can only communicate with a UDP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    	    	    	    
     }
@@ -406,16 +406,16 @@ UDP_Socket::recvMatrix(int dbTag, int commitTag, Matrix &theMatrix, ChannelAddre
 	    if (bcmp((char *) &theSocketAddress->addr, (char *) &last_Addr, 
 		     theSocketAddress->addrLength) != 0) {
 		
-		cerr << "UDP_Socket::recvMsg() - a UDP_Socket ";
-		cerr << "can only look at first incoming message\n"; 
-		cerr << "The last message did not come from write scource\n";
+		opserr << "UDP_Socket::recvMsg() - a UDP_Socket ";
+		opserr << "can only look at first incoming message\n"; 
+		opserr << "The last message did not come from write scource\n";
 		return -1;
 	    }
 	}	
 	else {
-	    cerr << "UDP_Socket::recvMatrix() - a UDP_Socket ";
-	    cerr << "can only communicate with a UDP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "UDP_Socket::recvMatrix() - a UDP_Socket ";
+	    opserr << "can only communicate with a UDP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    	    	    
     }
@@ -440,9 +440,9 @@ UDP_Socket::sendMatrix(int dbTag, int commitTag, const Matrix &theMatrix, Channe
 	    addrLength = theSocketAddress->addrLength;	
 	}
 	else {
-	    cerr << "UDP_Socket::sendMatrix() - a UDP_Socket ";
-	    cerr << "can only communicate with a UDP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "UDP_Socket::sendMatrix() - a UDP_Socket ";
+	    opserr << "can only communicate with a UDP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    	    	    	    
     }
@@ -508,16 +508,16 @@ UDP_Socket::recvVector(int dbTag, int commitTag, Vector &theVector, ChannelAddre
 	    if (bcmp((char *) &theSocketAddress->addr, (char *) &last_Addr, 
 		     theSocketAddress->addrLength) != 0) {
 		
-		cerr << "UDP_Socket::recvMsg() - a UDP_Socket ";
-		cerr << "can only look at first incoming message\n"; 
-		cerr << "The last message did not come from write scource\n";
+		opserr << "UDP_Socket::recvMsg() - a UDP_Socket ";
+		opserr << "can only look at first incoming message\n"; 
+		opserr << "The last message did not come from write scource\n";
 		return -1;
 	    }
 	}	
 	else {
-	    cerr << "UDP_Socket::recvVector() - a UDP_Socket ";
-	    cerr << "can only communicate with a UDP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "UDP_Socket::recvVector() - a UDP_Socket ";
+	    opserr << "can only communicate with a UDP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    	    	    
     }
@@ -541,9 +541,9 @@ UDP_Socket::sendVector(int dbTag, int commitTag, const Vector &theVector, Channe
 	    addrLength = theSocketAddress->addrLength;	
 	}
 	else {
-	    cerr << "UDP_Socket::sendVector() - a UDP_Socket ";
-	    cerr << "can only communicate with a UDP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "UDP_Socket::sendVector() - a UDP_Socket ";
+	    opserr << "can only communicate with a UDP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    	    	    	    
     }
@@ -609,16 +609,16 @@ UDP_Socket::recvID(int dbTag, int commitTag, ID &theID, ChannelAddress *theAddre
 	    if (bcmp((char *) &theSocketAddress->addr, (char *) &last_Addr, 
 		     theSocketAddress->addrLength) != 0) {
 		
-		cerr << "UDP_Socket::recvMsg() - a UDP_Socket ";
-		cerr << "can only look at first incoming message\n"; 
-		cerr << "The last message did not come from write scource\n";
+		opserr << "UDP_Socket::recvMsg() - a UDP_Socket ";
+		opserr << "can only look at first incoming message\n"; 
+		opserr << "The last message did not come from write scource\n";
 		return -1;
 	    }
 	}	
 	else {
-	    cerr << "UDP_Socket::recvID() - a UDP_Socket ";
-	    cerr << "can only communicate with a UDP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "UDP_Socket::recvID() - a UDP_Socket ";
+	    opserr << "can only communicate with a UDP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    	    	    
     }
@@ -641,9 +641,9 @@ UDP_Socket::sendID(int dbTag, int commitTag, const ID &theID, ChannelAddress *th
 	    addrLength = theSocketAddress->addrLength;	
 	}
 	else {
-	    cerr << "UDP_Socket::sendID() - a UDP_Socket ";
-	    cerr << "can only communicate with a UDP_Socket";
-	    cerr << " address given is not of type SocketAddress\n"; 
+	    opserr << "UDP_Socket::sendID() - a UDP_Socket ";
+	    opserr << "can only communicate with a UDP_Socket";
+	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    	    	    	    
     }

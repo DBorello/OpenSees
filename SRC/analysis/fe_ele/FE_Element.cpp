@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-12-05 22:33:28 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:00:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -66,15 +66,15 @@ FE_Element::FE_Element(Element *ele)
 	theGradient = new Vector(numDOF);
 // AddingSensitivity:END /////////////////////////////////////
     if (numDOF <= 0) {
-	cerr << "FE_Element::FE_Element(Element *) ";
-	cerr << " element must have 1 dof " << *ele;
+	opserr << "FE_Element::FE_Element(Element *) ";
+	opserr << " element must have 1 dof " << *ele;
 	exit(-1);
     }
     
     // get elements domain & check it is valid
     Domain *theDomain = ele->getDomain();
     if (theDomain == 0) {
-	cerr << "FATAL FE_Element::FE_Element() - element has no domain "<< *ele;
+	opserr << "FATAL FE_Element::FE_Element() - element has no domain "<< *ele;
 	exit(-1);
     }
 
@@ -85,8 +85,8 @@ FE_Element::FE_Element(Element *ele)
     for (int i=0; i<numGroups; i++) {
 	Node *nodePtr =theDomain->getNode(nodes(i));
 	if (nodePtr == 0) {
-	    cerr << "FATAL FE_Element::FE_Element() - Node: ";
-	    cerr <<  nodes(i) <<  "does not exist in the Domain\n";
+	    opserr << "FATAL FE_Element::FE_Element() - Node: ";
+	    opserr <<  nodes(i) <<  "does not exist in the Domain\n";
 	    exit(-1);
 	}
 	
@@ -94,8 +94,8 @@ FE_Element::FE_Element(Element *ele)
 	if (dofGrpPtr != 0) 
 	    myDOF_Groups(i) = dofGrpPtr->getTag();	
 	else {
-	    cerr << "FATAL FE_Element::FE_Element() - Node: ";
-	    cerr <<  *nodePtr <<  " has no DOF_Group associated with it\n";
+	    opserr << "FATAL FE_Element::FE_Element() - Node: ";
+	    opserr <<  *nodePtr <<  " has no DOF_Group associated with it\n";
 	    exit(-1);
 	}
     }
@@ -108,8 +108,8 @@ FE_Element::FE_Element(Element *ele)
 	theVectors  = new Vector *[MAX_NUM_DOF+1];
 	
 	if (theMatrices == 0 || theVectors == 0) {
-	    cerr << "FE_Element::FE_Element(Element *) ";
-	    cerr << " ran out of memory";	    
+	    opserr << "FE_Element::FE_Element(Element *) ";
+	    opserr << " ran out of memory";	    
 	}
 	for (int i=0; i<MAX_NUM_DOF; i++) {
 	    theMatrices[i] = 0;
@@ -131,9 +131,9 @@ FE_Element::FE_Element(Element *ele)
 		theTangent = theMatrices[numDOF];
 		if (theResidual == 0 || theResidual->Size() != numDOF ||	
 		    theTangent == 0 || theTangent->noCols() != numDOF)	{  
-		    cerr << "FE_Element::FE_Element(Element *) ";
-		    cerr << " ran out of memory for vector/Matrix of size :";
-		    cerr << numDOF << endl;
+		    opserr << "FE_Element::FE_Element(Element *) ";
+		    opserr << " ran out of memory for vector/Matrix of size :";
+		    opserr << numDOF << endln;
 		    exit(-1);
 		}
 	    } else {
@@ -147,9 +147,9 @@ FE_Element::FE_Element(Element *ele)
 	    if (theResidual == 0 || theTangent ==0 ||
 		theTangent ==0 || theTangent->noRows() ==0) {
 	    
-		cerr << "FE_Element::FE_Element(Element *) ";
-		cerr << " ran out of memory for vector/Matrix of size :";
-		cerr << numDOF << endl;
+		opserr << "FE_Element::FE_Element(Element *) ";
+		opserr << " ran out of memory for vector/Matrix of size :";
+		opserr << numDOF << endln;
 		exit(-1);
 	    }
 	} 
@@ -186,8 +186,8 @@ FE_Element::FE_Element(int numDOF_Group, int ndof)
 	theVectors  = new Vector *[MAX_NUM_DOF+1];
 	
 	if (theMatrices == 0 || theVectors == 0) {
-	    cerr << "FE_Element::FE_Element(Element *) ";
-	    cerr << " ran out of memory";	    
+	    opserr << "FE_Element::FE_Element(Element *) ";
+	    opserr << " ran out of memory";	    
 	}
 	for (int i=0; i<MAX_NUM_DOF; i++) {
 	    theMatrices[i] = 0;
@@ -264,7 +264,7 @@ FE_Element::setID(void)
     int current = 0;
     
     if (theModel == 0) {
-	cerr << "WARNING FE_Element::setID() - no AnalysisModel set\n";
+	opserr << "WARNING FE_Element::setID() - no AnalysisModel set\n";
 	return -1;
     }
     
@@ -274,7 +274,7 @@ FE_Element::setID(void)
 
 	DOF_Group *dofPtr = theModel->getDOF_GroupPtr(tag);
 	if (dofPtr == 0) {
-	    cerr << "WARNING FE_Element::setID: 0 DOF_Group Pointer\n";
+	    opserr << "WARNING FE_Element::setID: 0 DOF_Group Pointer\n";
 	    return -2;
 	}
 	    
@@ -284,8 +284,8 @@ FE_Element::setID(void)
 	    if (current < numDOF)
 		myID(current++) = theDOFid(j);
 	    else {
-		cerr << "WARNING FE_Element::setID() - numDOF and";
-		cerr << " number of dof at the DOF_Groups\n";
+		opserr << "WARNING FE_Element::setID() - numDOF and";
+		opserr << " number of dof at the DOF_Groups\n";
 		return -3;
 	    }		
     }
@@ -299,9 +299,9 @@ FE_Element::getTangent(Integrator *theNewIntegrator)
     theIntegrator = theNewIntegrator;
     
     if (myEle == 0) {
-	cerr << "FATAL FE_Element::getTangent() - no Element *given ";
-	cerr << "- subclasses must provide implementation - ";
-	cerr << " - a 1x1 error matrix will be returned.\n";
+	opserr << "FATAL FE_Element::getTangent() - no Element *given ";
+	opserr << "- subclasses must provide implementation - ";
+	opserr << " - a 1x1 error matrix will be returned.\n";
 	exit(-1);
     }
 
@@ -325,9 +325,9 @@ FE_Element::getResidual(Integrator *theNewIntegrator)
       return *theResidual;
 
     if (myEle == 0) {
-	cerr << "FATAL FE_Element::getTangent() - no Element *given ";
-	cerr << "- subclasses must provide implementation - ";
-	cerr << " - an error Vector of order 1 will be returned.\n";
+	opserr << "FATAL FE_Element::getTangent() - no Element *given ";
+	opserr << "- subclasses must provide implementation - ";
+	opserr << " - an error Vector of order 1 will be returned.\n";
 	exit(-1);
     }    
 
@@ -350,13 +350,13 @@ FE_Element::zeroTangent(void)
 	if (myEle->isSubdomain() == false)
 	    theTangent->Zero();
 	else {
-	    cerr << "WARNING FE_Element::zeroTangent() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
+	    opserr << "WARNING FE_Element::zeroTangent() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    
     }
     else {
-	cerr << "WARNING FE_Element::zeroTangent() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
+	opserr << "WARNING FE_Element::zeroTangent() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
     }
 }
 
@@ -371,13 +371,13 @@ FE_Element::addKtToTang(double fact)
 	else if (myEle->isSubdomain() == false)	    
 	    theTangent->addMatrix(1.0, myEle->getTangentStiff(),fact);
 	else {
-	    cerr << "WARNING FE_Element::addKToTang() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
+	    opserr << "WARNING FE_Element::addKToTang() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    
     }
     else {
-	cerr << "WARNING FE_Element::addKToTang() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
+	opserr << "WARNING FE_Element::addKToTang() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
     }    	    
 }
 
@@ -392,13 +392,13 @@ FE_Element::addCtoTang(double fact)
 	else if (myEle->isSubdomain() == false)	    	    
 		theTangent->addMatrix(1.0, myEle->getDamp(),fact);
 	else {
-	    cerr << "WARNING FE_Element::addCToTang() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
+	    opserr << "WARNING FE_Element::addCToTang() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    	
     }
     else {
-	cerr << "WARNING FE_Element::addCToTang() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
+	opserr << "WARNING FE_Element::addCToTang() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
     }    	        
 }
     
@@ -413,13 +413,13 @@ FE_Element::addMtoTang(double fact)
 	else if (myEle->isSubdomain() == false)	    	    
 		theTangent->addMatrix(1.0, myEle->getMass(),fact);
 	else {
-	    cerr << "WARNING FE_Element::addMToTang() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
+	    opserr << "WARNING FE_Element::addMToTang() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    	
     }	
     else {
-	cerr << "WARNING FE_Element::addMToTang() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
+	opserr << "WARNING FE_Element::addMToTang() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
     }    	        
 }    
 
@@ -434,13 +434,13 @@ FE_Element::addKiToTang(double fact)
     else if (myEle->isSubdomain() == false)	    	    
       theTangent->addMatrix(1.0, myEle->getInitialStiff(), fact);
     else {
-	cerr << "WARNING FE_Element::addKiToTang() - ";
-	cerr << "- this should not be called on a Subdomain!\n";
+	opserr << "WARNING FE_Element::addKiToTang() - ";
+	opserr << "- this should not be called on a Subdomain!\n";
     }    	    	    	
   }	
   else {
-    cerr << "WARNING FE_Element::addKiToTang() - no Element *given ";
-    cerr << "- subclasses must provide implementation\n";
+    opserr << "WARNING FE_Element::addKiToTang() - no Element *given ";
+    opserr << "- subclasses must provide implementation\n";
   }    	        
 }    
 
@@ -452,13 +452,13 @@ FE_Element::zeroResidual(void)
 	if (myEle->isSubdomain() == false)
 	    theResidual->Zero();
 	else {
-	    cerr << "WARNING FE_Element::zeroResidual() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
+	    opserr << "WARNING FE_Element::zeroResidual() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    
     }
     else {
-	cerr << "WARNING FE_Element::zeroResidual() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
+	opserr << "WARNING FE_Element::zeroResidual() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
     }    
 }
 
@@ -474,13 +474,13 @@ FE_Element::addRtoResidual(double fact)
 	  theResidual->addVector(1.0, eleResisting, -fact);
 	}
 	else {
-	    cerr << "WARNING FE_Element::addRtoResidual() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
+	    opserr << "WARNING FE_Element::addRtoResidual() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    	
     }
     else {
-	cerr << "WARNING FE_Element::addRtoResidual() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
+	opserr << "WARNING FE_Element::addRtoResidual() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
     }    	        
 }
 
@@ -497,13 +497,13 @@ FE_Element::addRIncInertiaToResidual(double fact)
 	  theResidual->addVector(1.0, eleResisting, -fact);
 	}
 	else {
-	    cerr << "WARNING FE_Element::addRtoResidual() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
+	    opserr << "WARNING FE_Element::addRtoResidual() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    	
     }
     else {
-	cerr << "WARNING FE_Element::addRtoResidual() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
+	opserr << "WARNING FE_Element::addRtoResidual() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
     }    	        
 }
 
@@ -530,22 +530,22 @@ FE_Element::getTangForce(const Vector &disp, double fact)
 	    // form the tangent again and then add the force
 	    theIntegrator->formEleTangent(this);
 	    if (theResidual->addMatrixVector(1.0, *theTangent,tmp,fact) < 0) {
-		cerr << "WARNING FE_Element::getTangForce() - ";
-		cerr << "- addMatrixVector returned error\n";		 
+		opserr << "WARNING FE_Element::getTangForce() - ";
+		opserr << "- addMatrixVector returned error\n";		 
 	    }				
 	}
 	else {
 	    Subdomain *theSub = (Subdomain *)myEle;
 	    if (theResidual->addMatrixVector(1.0, theSub->getTang(),tmp,fact) < 0) {
-		cerr << "WARNING FE_Element::getTangForce() - ";
-		cerr << "- addMatrixVector returned error\n";		 
+		opserr << "WARNING FE_Element::getTangForce() - ";
+		opserr << "- addMatrixVector returned error\n";		 
 	    }						
 	}
 	return *theResidual;
     }
     else {
-	cerr << "WARNING FE_Element::addTangForce() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
+	opserr << "WARNING FE_Element::addTangForce() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
 	return errVector;	
     }    	            
 }
@@ -563,22 +563,22 @@ FE_Element::getLastResponse(void)
     if (myEle != 0) {
       if (theIntegrator != 0) {
 	if (theIntegrator->getLastResponse(*theResidual,myID) < 0) {
-	  cerr << "WARNING FE_Element::getLastResponse(void)";
-	  cerr << " - the Integrator had problems with getLastResponse()\n";
+	  opserr << "WARNING FE_Element::getLastResponse(void)";
+	  opserr << " - the Integrator had problems with getLastResponse()\n";
 	}
       }
       else {
 	theResidual->Zero();
-	cerr << "WARNING  FE_Element::getLastResponse()";
-	cerr << " No Integrator yet passed\n";
+	opserr << "WARNING  FE_Element::getLastResponse()";
+	opserr << " No Integrator yet passed\n";
       }
     
       Vector &result = *theResidual;
       return result;
     }
     else {
-	cerr << "WARNING  FE_Element::getLastResponse()";
-	cerr << " No Element passed in constructor\n";
+	opserr << "WARNING  FE_Element::getLastResponse()";
+	opserr << " No Element passed in constructor\n";
 	return errVector;
     }
 }
@@ -604,18 +604,18 @@ FE_Element::addM_Force(const Vector &accel, double fact)
 	    }	    
 
 	    if (theResidual->addMatrixVector(1.0, myEle->getMass(),tmp,fact) < 0){
-		cerr << "WARNING FE_Element::addM_Force() - ";
-		cerr << "- addMatrixVector returned error\n";		 
+		opserr << "WARNING FE_Element::addM_Force() - ";
+		opserr << "- addMatrixVector returned error\n";		 
 	    }		
 	}
 	else {
-	    cerr << "WARNING FE_Element::addM_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
+	    opserr << "WARNING FE_Element::addM_Force() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    				
     }
     else {
-	cerr << "WARNING FE_Element::addM_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
+	opserr << "WARNING FE_Element::addM_Force() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
     }    	            
 }
 
@@ -631,18 +631,18 @@ FE_Element::addLocalM_Force(const Vector &accel, double fact)
 	    if (theResidual->addMatrixVector(1.0, myEle->getMass(),
 						  accel, fact) < 0){
 
-		cerr << "WARNING FE_Element::addLocalM_Force() - ";
-		cerr << "- addMatrixVector returned error\n"; 
+		opserr << "WARNING FE_Element::addLocalM_Force() - ";
+		opserr << "- addMatrixVector returned error\n"; 
 	    }		
 	}
 	else {
-	    cerr << "WARNING FE_Element::addLocalM_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
+	    opserr << "WARNING FE_Element::addLocalM_Force() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    				
     }
     else {
-	cerr << "WARNING FE_Element::addLocalM_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
+	opserr << "WARNING FE_Element::addLocalM_Force() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
     }    	            
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/LagrangeDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -75,8 +75,8 @@ LagrangeDOF_Group::getTangent(Integrator *theIntegrator)
 	tangent = new Matrix(numDOF,numDOF);
 	
 	if (tangent == 0) {
-	    cerr << "FATAL LagrangeDOF_Group::getTangent() ";
-	    cerr << " ranout of memory\n";
+	    opserr << "FATAL LagrangeDOF_Group::getTangent() ";
+	    opserr << " ranout of memory\n";
 	    exit(-1);
 	}
     }

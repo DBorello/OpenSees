@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-09-05 21:59:58 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/numberer/DOF_Numberer.cpp,v $
                                                                         
                                                                         
@@ -48,7 +48,6 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
-#include <iostream.h>
 #include <Graph.h>
 
 #include <Domain.h>
@@ -106,14 +105,14 @@ DOF_Numberer::numberDOF(int lastDOF_Group)
     Domain *theDomain = 0;
     if (theAnalysisModel != 0) theDomain = theAnalysisModel->getDomainPtr();
     if ((theAnalysisModel == 0) || (theDomain == 0)) {
-	cerr << "WARNING DOF_Numberer::numberDOF - ";
-	cerr << "Pointers are not set\n";
+	opserr << "WARNING DOF_Numberer::numberDOF - ";
+	opserr << "Pointers are not set\n";
 	return -1;
     }
     
     if ((theGraphNumberer == 0)) {
-	cerr << "WARNING DOF_Numberer::numberDOF - ";
-	cerr << "subclasses must provide own implementation\n";
+	opserr << "WARNING DOF_Numberer::numberDOF - ";
+	opserr << "subclasses must provide own implementation\n";
 	return -2;
     }    
 
@@ -132,8 +131,8 @@ DOF_Numberer::numberDOF(int lastDOF_Group)
     int eqnNumber = 0;
     
     if (orderedRefs.Size() != theAnalysisModel->getNumDOF_Groups()) {
-	cerr << "WARNING DOF_Numberer::numberDOF - ";
-	cerr << "Incompatable Sizes\n";
+	opserr << "WARNING DOF_Numberer::numberDOF - ";
+	opserr << "Incompatable Sizes\n";
 	return -3;
     }
     int result = 0;
@@ -144,8 +143,8 @@ DOF_Numberer::numberDOF(int lastDOF_Group)
 	DOF_Group *dofPtr;	
 	dofPtr = theAnalysisModel->getDOF_GroupPtr(dofTag);
 	if (dofPtr == 0) {
-	    cerr << "WARNING DOF_Numberer::numberDOF - ";
-	    cerr << "DOF_Group " << dofTag << "not in AnalysisModel!\n";
+	    opserr << "WARNING DOF_Numberer::numberDOF - ";
+	    opserr << "DOF_Group " << dofTag << "not in AnalysisModel!\n";
 	    result = -4;
 	} else {
 	    const ID &theID = dofPtr->getID();
@@ -237,14 +236,14 @@ DOF_Numberer::numberDOF(ID &lastDOFs)
     	Domain *theDomain = 0;
    if (theAnalysisModel != 0) theDomain = theAnalysisModel->getDomainPtr();
    if ((theAnalysisModel == 0) || (theDomain == 0)) {
-	cerr << "WARNING DOF_Numberer::numberDOF - ";
-	cerr << "Pointers are not set\n";
+	opserr << "WARNING DOF_Numberer::numberDOF - ";
+	opserr << "Pointers are not set\n";
 	return -1;
     }
     
     if ((theGraphNumberer == 0)) {
-	cerr << "WARNING DOF_Numberer::numberDOF - ";
-	cerr << "subclasses must provide own implementation\n";
+	opserr << "WARNING DOF_Numberer::numberDOF - ";
+	opserr << "subclasses must provide own implementation\n";
 	return -2;
     }    
 
@@ -261,8 +260,8 @@ DOF_Numberer::numberDOF(ID &lastDOFs)
 
     int eqnNumber = 0;
     if (orderedRefs.Size() != theAnalysisModel->getNumDOF_Groups()) {
-	cerr << "WARNING DOF_Numberer::numberDOF - ";
-	cerr << "Incompatable Sizes\n";
+	opserr << "WARNING DOF_Numberer::numberDOF - ";
+	opserr << "Incompatable Sizes\n";
 	return -3;
     }
 
@@ -273,8 +272,8 @@ DOF_Numberer::numberDOF(ID &lastDOFs)
 	DOF_Group *dofPtr;	
 	dofPtr = theAnalysisModel->getDOF_GroupPtr(dofTag);
 	if (dofPtr == 0) {
-	    cerr << "WARNING DOF_Numberer::numberDOF - ";
-	    cerr << "DOF_Group " << dofTag << "not in AnalysisModel!\n";
+	    opserr << "WARNING DOF_Numberer::numberDOF - ";
+	    opserr << "DOF_Group " << dofTag << "not in AnalysisModel!\n";
 	    result = -4;
 	} else {
 	    const ID &theID = dofPtr->getID();
@@ -393,7 +392,7 @@ DOF_Numberer::recvSelf(int cTag, Channel &theChannel,
       theGraphNumberer->recvSelf(cTag, theChannel,theBroker);
     }
     else {
-      cerr << "DOF_Numberer::recvSelf() - failed to get GraphNumberer\n";
+      opserr << "DOF_Numberer::recvSelf() - failed to get GraphNumberer\n";
       return -1;
     }
   }

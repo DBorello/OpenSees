@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/lagrange/LagrangeMP_FE.cpp,v $
                                                                         
                                                                         
@@ -65,7 +65,7 @@ LagrangeMP_FE::LagrangeMP_FE(Domain &theDomain, MP_Constraint &TheMP,
     tang = new Matrix(size,size);
     resid = new Vector(size);
     if (tang == 0 || resid == 0 || tang->noCols() == 0 || resid->Size() == 0) {
-	cerr << "FATAL LagrangeMP_FE::LagrangeMP_FE() - out of memory\n";
+	opserr << "FATAL LagrangeMP_FE::LagrangeMP_FE() - out of memory\n";
 	exit(-1);
     }
     tang->Zero();	
@@ -75,14 +75,14 @@ LagrangeMP_FE::LagrangeMP_FE(Domain &theDomain, MP_Constraint &TheMP,
     theConstrainedNode = theDomain.getNode(theMP->getNodeConstrained());
 
     if (theRetainedNode == 0) {
-	cerr << "WARNING LagrangeMP_FE::LagrangeMP_FE()";
-	cerr << "- no asscoiated Retained Node\n";
+	opserr << "WARNING LagrangeMP_FE::LagrangeMP_FE()";
+	opserr << "- no asscoiated Retained Node\n";
 	exit(-1);
     }
     
     if (theConstrainedNode == 0) {
-	cerr << "WARNING LagrangeMP_FE::LagrangeMP_FE()";
-	cerr << "- no asscoiated Constrained Node\n";
+	opserr << "WARNING LagrangeMP_FE::LagrangeMP_FE()";
+	opserr << "- no asscoiated Constrained Node\n";
 	exit(-1);
     }
     
@@ -94,15 +94,15 @@ LagrangeMP_FE::LagrangeMP_FE(Domain &theDomain, MP_Constraint &TheMP,
     // DOF_Group objects
     DOF_Group *theConstrainedNodesDOFs = theConstrainedNode->getDOF_GroupPtr();
     if (theConstrainedNodesDOFs == 0) {
-	cerr << "WARNING LagrangeMP_FE::LagrangeMP_FE()";
-	cerr << " - no DOF_Group with Constrained Node\n";
+	opserr << "WARNING LagrangeMP_FE::LagrangeMP_FE()";
+	opserr << " - no DOF_Group with Constrained Node\n";
 	exit(-1);	
     }    
 
     DOF_Group *theRetainedNodesDOFs = theRetainedNode->getDOF_GroupPtr();
     if (theRetainedNodesDOFs == 0) {
-	cerr << "WARNING LagrangeMP_FE::LagrangeMP_FE()";
-	cerr << " - no DOF_Group with Retained Node\n";
+	opserr << "WARNING LagrangeMP_FE::LagrangeMP_FE()";
+	opserr << " - no DOF_Group with Retained Node\n";
 	exit(-1);	
     }            
     
@@ -130,14 +130,14 @@ LagrangeMP_FE::setID(void)
     // as constrained DOFs, this is obtained from the DOF_Group
     // associated with the constrained node
     if (theConstrainedNode == 0) {
-	cerr << "WARNING LagrangeMP_FE::setID(void)";
-	cerr << "- no asscoiated Constrained Node\n";
+	opserr << "WARNING LagrangeMP_FE::setID(void)";
+	opserr << "- no asscoiated Constrained Node\n";
 	return -1;
     }
     DOF_Group *theConstrainedNodesDOFs = theConstrainedNode->getDOF_GroupPtr();
     if (theConstrainedNodesDOFs == 0) {
-	cerr << "WARNING LagrangeMP_FE::setID(void)";
-	cerr << " - no DOF_Group with Constrained Node\n";
+	opserr << "WARNING LagrangeMP_FE::setID(void)";
+	opserr << " - no DOF_Group with Constrained Node\n";
 	return -2;
     }    
 
@@ -150,15 +150,15 @@ LagrangeMP_FE::setID(void)
 	if (constrained < 0 || 
 	    constrained >= theConstrainedNode->getNumberDOF()) {
 	    
-	    cerr << "WARNING LagrangeMP_FE::setID(void) - unknown DOF ";
-	    cerr << constrained << " at Node\n";
+	    opserr << "WARNING LagrangeMP_FE::setID(void) - unknown DOF ";
+	    opserr << constrained << " at Node\n";
 	    myID(i) = -1; // modify so nothing will be added to equations
 	    result = -3;
 	}    	
 	else {
 	    if (constrained >= theConstrainedNodesID.Size()) {
-		cerr << "WARNING LagrangeMP_FE::setID(void) - ";
-		cerr << " Nodes DOF_Group too small\n";
+		opserr << "WARNING LagrangeMP_FE::setID(void) - ";
+		opserr << " Nodes DOF_Group too small\n";
 		myID(i) = -1; // modify so nothing will be added to equations
 		result = -4;
 	    }
@@ -169,14 +169,14 @@ LagrangeMP_FE::setID(void)
     
     // now determine the IDs for the retained dof's
     if (theRetainedNode == 0) {
-	cerr << "WARNING LagrangeMP_FE::setID(void)";
-	cerr << "- no asscoiated Retained Node\n";
+	opserr << "WARNING LagrangeMP_FE::setID(void)";
+	opserr << "- no asscoiated Retained Node\n";
 	return -1;
     }
     DOF_Group *theRetainedNodesDOFs = theRetainedNode->getDOF_GroupPtr();
     if (theRetainedNodesDOFs == 0) {
-	cerr << "WARNING LagrangeMP_FE::setID(void)";
-	cerr << " - no DOF_Group with Retained Node\n";
+	opserr << "WARNING LagrangeMP_FE::setID(void)";
+	opserr << " - no DOF_Group with Retained Node\n";
 	return -2;
     }    
     
@@ -187,15 +187,15 @@ LagrangeMP_FE::setID(void)
     for (int j=0; j<size2; j++) {
 	int retained = RetainedDOFs(j);
 	if (retained < 0 || retained >= theRetainedNode->getNumberDOF()) {
-	    cerr << "WARNING LagrangeMP_FE::setID(void) - unknown DOF ";
-	    cerr << retained << " at Node\n";
+	    opserr << "WARNING LagrangeMP_FE::setID(void) - unknown DOF ";
+	    opserr << retained << " at Node\n";
 	    myID(j+size1) = -1; // modify so nothing will be added
 	    result = -3;
 	}    	
 	else {
 	    if (retained >= theRetainedNodesID.Size()) {
-		cerr << "WARNING LagrangeMP_FE::setID(void) - ";
-		cerr << " Nodes DOF_Group too small\n";
+		opserr << "WARNING LagrangeMP_FE::setID(void) - ";
+		opserr << " Nodes DOF_Group too small\n";
 		myID(j+size1) = -1; // modify so nothing will be added 
 		result = -4;
 	    }

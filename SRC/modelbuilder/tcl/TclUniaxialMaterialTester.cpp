@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-24 18:28:31 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclUniaxialMaterialTester.cpp,v $
                                                                         
 // File: ~/modelbuilder/tcl/TclUniaxialMaterialTester.C
@@ -33,7 +33,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 
 #include <ArrayOfTaggedObjects.h>
 #include <UniaxialMaterial.h>

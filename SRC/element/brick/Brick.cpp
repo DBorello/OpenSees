@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-12-16 21:10:01 $
+// $Revision: 1.14 $
+// $Date: 2003-02-14 23:01:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -27,7 +27,6 @@
 // Eight node Brick element
 //
 
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -110,9 +109,8 @@ connectedExternalNodes(8) , load(0), Ki(0)
       materialPointers[i] = theMaterial.getCopy("ThreeDimensional") ;
 
       if (materialPointers[i] == 0) {
-
-	  g3ErrorHandler->fatal("Brick::constructor %s",
-		"- failed to get a material of type: ThreeDimensional");
+	opserr << "Brick::constructor - failed to get a material of type: ThreeDimensional\n";
+	exit(-1);
       } //end if
       
   } //end for i 
@@ -190,7 +188,7 @@ int  Brick::commitState( )
 
   // call element commitState to do any base class stuff
   if ((success = this->Element::commitState()) != 0) {
-    cerr << "Brick::commitState () - failed in base class";
+    opserr << "Brick::commitState () - failed in base class";
   }    
 
 
@@ -228,24 +226,24 @@ int  Brick::revertToStart( )
 }
 
 //print out element data
-void  Brick::Print( ostream &s, int flag )
+void  Brick::Print( OPS_Stream &s, int flag )
 {
-  s << endl ;
+  s << endln ;
   s << "Standard Eight Node Brick \n" ;
-  s << "Element Number: " << this->getTag() << endl ;
-  s << "Node 1 : " << connectedExternalNodes(0) << endl ;
-  s << "Node 2 : " << connectedExternalNodes(1) << endl ;
-  s << "Node 3 : " << connectedExternalNodes(2) << endl ;
-  s << "Node 4 : " << connectedExternalNodes(3) << endl ;
-  s << "Node 5 : " << connectedExternalNodes(4) << endl ;
-  s << "Node 6 : " << connectedExternalNodes(5) << endl ;
-  s << "Node 7 : " << connectedExternalNodes(6) << endl ;
-  s << "Node 8 : " << connectedExternalNodes(7) << endl ;
+  s << "Element Number: " << this->getTag() << endln ;
+  s << "Node 1 : " << connectedExternalNodes(0) << endln ;
+  s << "Node 2 : " << connectedExternalNodes(1) << endln ;
+  s << "Node 3 : " << connectedExternalNodes(2) << endln ;
+  s << "Node 4 : " << connectedExternalNodes(3) << endln ;
+  s << "Node 5 : " << connectedExternalNodes(4) << endln ;
+  s << "Node 6 : " << connectedExternalNodes(5) << endln ;
+  s << "Node 7 : " << connectedExternalNodes(6) << endln ;
+  s << "Node 8 : " << connectedExternalNodes(7) << endln ;
 
   s << "Material Information : \n " ;
   materialPointers[0]->Print( s, flag ) ;
 
-  s << endl ;
+  s << endln ;
 }
 
 //return stiffness matrix 
@@ -422,9 +420,7 @@ void  Brick::zeroLoad( )
 int 
 Brick::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("Brick::addLoad - load type unknown for truss with tag: %d\n",
-			  this->getTag());
-  
+  opserr << "Brick::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
   return -1;
 }
 
@@ -985,8 +981,7 @@ int  Brick::sendSelf (int commitTag, Channel &theChannel)
 
   res += theChannel.sendID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Brick::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING Brick::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return res;
   }
 
@@ -995,7 +990,7 @@ int  Brick::sendSelf (int commitTag, Channel &theChannel)
   for (i = 0; i < 8; i++) {
     res += materialPointers[i]->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING Brick::sendSelf() - %d failed to send its Material\n",this->getTag());
+      opserr << "WARNING Brick::sendSelf() - " << this->getTag() << " failed to send its Material\n";
       return res;
     }
   }
@@ -1016,7 +1011,7 @@ int  Brick::recvSelf (int commitTag,
   // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Brick::recvSelf() - %d failed to receive ID\n", this->getTag());
+    opserr << "WARNING Brick::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return res;
   }
 
@@ -1040,16 +1035,14 @@ int  Brick::recvSelf (int commitTag,
       // Allocate new material with the sent class tag
       materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
       if (materialPointers[i] == 0) {
-	g3ErrorHandler->warning("Brick::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
+	opserr << "Brick::recvSelf() - Broker could not create NDMaterial of class type " << matClassTag << endln;
 	return -1;
       }
       // Now receive materials into the newly allocated space
       materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn3d::recvSelf() - material " << i << "failed to recv itself\n";
 	return res;
       }
     }
@@ -1065,9 +1058,9 @@ int  Brick::recvSelf (int commitTag,
 	delete materialPointers[i];
 	materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
 	if (materialPointers[i] == 0) {
-	  g3ErrorHandler->fatal("Brick::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
-	  return -1;
+	  opserr << "Brick::recvSelf() - Broker could not create NDMaterial of class type " <<
+	    matClassTag << endln;
+	  exit(-1);
 	}
       materialPointers[i]->setDbTag(matDbTag);
       }
@@ -1075,8 +1068,7 @@ int  Brick::recvSelf (int commitTag,
 
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("Brick::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "Brick::recvSelf() - material " << i << "failed to recv itself\n";
 	return res;
       }
     }

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:00 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -64,7 +64,7 @@ FORMAnalysis::analyze(void)
 {
 
 	// Alert the user that the FORM analysis has started
-	cerr << "FORM Analysis is running ... " << endl;
+	opserr << "FORM Analysis is running ... " << endln;
 
 
 	// Declare variables used in this method
@@ -91,7 +91,7 @@ FORMAnalysis::analyze(void)
 
 	// Check if computer ran out of memory
 	if (aStdNormRV==0) {
-		cerr << "FORMAnalysis::analyze() - out of memory while instantiating internal objects." << endl;
+		opserr << "FORMAnalysis::analyze() - out of memory while instantiating internal objects." << endln;
 		return -1;
 	}
 
@@ -102,8 +102,8 @@ FORMAnalysis::analyze(void)
 		aRandomVariable = 0;
 		aRandomVariable = theReliabilityDomain->getRandomVariablePtr(j);
 		if (aRandomVariable == 0) {
-			cerr << "FORMAnalysis::analyze() - could not find" << endl
-				<< " random variable with tag #" << j << "." << endl;
+			opserr << "FORMAnalysis::analyze() - could not find" << endln
+				<< " random variable with tag #" << j << "." << endln;
 			return -1;
 		}
 		startValues(j-1) = aRandomVariable->getStartValue();
@@ -115,7 +115,7 @@ FORMAnalysis::analyze(void)
 
 
 		// Inform the user which limit-state function is being evaluated
-		cerr << "Limit-state function number: " << lsf << endl;
+		opserr << "Limit-state function number: " << lsf << endln;
 
 
 		// Set tag of "active" limit-state function
@@ -127,16 +127,16 @@ FORMAnalysis::analyze(void)
 		lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 		theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 		if (theLimitStateFunction == 0) {
-			cerr << "FORMAnalysis::analyze() - could not find" << endl
-				<< " limit-state function with tag #" << lsf << "." << endl;
+			opserr << "FORMAnalysis::analyze() - could not find" << endln
+				<< " limit-state function with tag #" << lsf << "." << endln;
 			return -1;
 		}
 
 
 		// Find the design point
 		if (theFindDesignPoint->findDesignPoint(&startValues, theReliabilityDomain) < 0){
-			cerr << "FORMAnalysis::analyze() - failed while finding the" << endl
-				<< " design point for limit-state function number " << lsf << "." << endl;
+			opserr << "FORMAnalysis::analyze() - failed while finding the" << endln
+				<< " design point for limit-state function number " << lsf << "." << endln;
 			return -1;
 		}
 

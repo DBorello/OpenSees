@@ -584,10 +584,10 @@ PySimple1::revertToStart(void)
 	// Do not allow zero or negative values for y50 or pult.
 	//
 	if(pult <= 0.0 || y50 <= 0.0) {
-		cerr << "WARNING -- only accepts positive nonzero pult and y50" << endl;
-		cerr << "PyLiq1: " << endl;
-		cerr << "pult: " << pult << "   y50: " << y50 << endl;
-		g3ErrorHandler->fatal("dying");
+		opserr << "WARNING -- only accepts positive nonzero pult and y50" << endln;
+		opserr << "PyLiq1: " << endln;
+		opserr << "pult: " << pult << "   y50: " << y50 << endln;
+		exit(-1);
 	}
 
 	// Initialize variables for Near Field rigid-plastic spring
@@ -616,10 +616,10 @@ PySimple1::revertToStart(void)
 		TFar_tang   = 0.542*pult/y50;
 	}
 	else{
-		cerr << "WARNING -- only accepts soilType of 1 or 2" << endl;
-		cerr << "PyLiq1: " << endl;
-		cerr << "soilType: " << soilType << endl;
-		g3ErrorHandler->fatal("dying");
+		opserr << "WARNING -- only accepts soilType of 1 or 2" << endln;
+		opserr << "PyLiq1: " << endln;
+		opserr << "soilType: " << soilType << endln;
+		exit(-1);
 	}
 
 	// Far Field components: TFar_tang was set under "soil type" statements.
@@ -743,7 +743,7 @@ PySimple1::sendSelf(int cTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "PySimple1::sendSelf() - failed to send data\n";
+    opserr << "PySimple1::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -759,7 +759,7 @@ PySimple1::recvSelf(int cTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
-      cerr << "PySimple1::recvSelf() - failed to receive data\n";
+      opserr << "PySimple1::recvSelf() - failed to receive data\n";
       CNF_tang = 0; 
       this->setTag(0);      
   }
@@ -820,14 +820,14 @@ PySimple1::recvSelf(int cTag, Channel &theChannel,
 
 /////////////////////////////////////////////////////////////////////
 void 
-PySimple1::Print(ostream &s, int flag)
+PySimple1::Print(OPS_Stream &s, int flag)
 {
-    s << "PySimple1, tag: " << this->getTag() << endl;
-    s << "  soilType: " << soilType << endl;
-    s << "  pult: " << pult << endl;
-    s << "  y50: " << y50 << endl;
-    s << "  drag: " << drag << endl;
-	s << "  dashpot: " << dashpot << endl;
+    s << "PySimple1, tag: " << this->getTag() << endln;
+    s << "  soilType: " << soilType << endln;
+    s << "  pult: " << pult << endln;
+    s << "  y50: " << y50 << endln;
+    s << "  drag: " << drag << endln;
+	s << "  dashpot: " << dashpot << endln;
 }
 
 /////////////////////////////////////////////////////////////////////

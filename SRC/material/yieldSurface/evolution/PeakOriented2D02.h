@@ -41,7 +41,7 @@ public:
 					);
 	~PeakOriented2D02();
 	YS_Evolution * getCopy();
-	void Print(ostream & s, int flag);
+	void Print(OPS_Stream & s, int flag);
 
 private: // Private attributes
   /**  */

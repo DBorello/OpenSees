@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-07-18 21:55:32 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint2D.h,v $
                                                                         
 #ifndef MP_Joint2D_h
@@ -39,8 +39,6 @@
 #include <MP_Constraint.h>
 #include <Node.h>
 #include <Domain.h>
-
-#include <iostream.h>
 
 class Matrix;
 class ID;
@@ -72,7 +70,7 @@ class MP_Joint2D : public MP_Constraint
     int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
     
-	void Print(ostream &s, int flag =0);
+	void Print(OPS_Stream &s, int flag =0);
 
   protected:
     

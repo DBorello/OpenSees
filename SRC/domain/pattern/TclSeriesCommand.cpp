@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-09-20 20:02:40 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -61,7 +61,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 
   // split the list
   if (Tcl_SplitList(interp, arg, &argc, &argv) != TCL_OK) {
-    cerr << "WARNING could not split series list " << arg << endl;
+    opserr << "WARNING could not split series list " << arg << endln;
     return 0;
   }
 			    
@@ -78,8 +78,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
       if (endMarker == argc || 
 	  Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
 	    
-	cerr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
-	cerr << " Constant -factor cFactor\n";
+	opserr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
+	opserr << " Constant -factor cFactor\n";
 	cleanup(argv);
 	return 0;
       }
@@ -96,26 +96,26 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
     double shift = 0.0;
       
     if (argc < 4) {
-      cerr << "WARNING not enough TimeSeries args - ";
-      cerr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
+      opserr << "WARNING not enough TimeSeries args - ";
+      opserr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
       cleanup(argv);
       return 0;	
     }	
     if (Tcl_GetDouble(interp, argv[1], &tStart) != TCL_OK) {
-      cerr << "WARNING invalid tStart " << argv[1] << " - ";
-      cerr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
+      opserr << "WARNING invalid tStart " << argv[1] << " - ";
+      opserr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
       cleanup(argv);
       return 0;				
     }
     if (Tcl_GetDouble(interp, argv[2], &tFinish) != TCL_OK) {
-      cerr << "WARNING invalid tFinish " << argv[2] << " - ";
-      cerr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
+      opserr << "WARNING invalid tFinish " << argv[2] << " - ";
+      opserr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
       cleanup(argv);
       return 0;	
     }     
     if (Tcl_GetDouble(interp, argv[3], &period) != TCL_OK) {
-      cerr << "WARNING invalid period " << argv[3] << " - ";
-      cerr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
+      opserr << "WARNING invalid period " << argv[3] << " - ";
+      opserr << " Trig tStart tFinish period <-shift shift> <-factor cFactor>\n";
       cleanup(argv);
       return 0;	
     }     
@@ -129,8 +129,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	if (endMarker == argc || 
 	    Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
 	  
-	  cerr << "WARNING invalid cFactor " << argv[endMarker] << " -";
-	  cerr << " Trig  tStart tFinish period -factor cFactor\n";
+	  opserr << "WARNING invalid cFactor " << argv[endMarker] << " -";
+	  opserr << " Trig  tStart tFinish period -factor cFactor\n";
 	  cleanup(argv);
 	  return 0;
 	}
@@ -142,8 +142,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	if (endMarker == argc || 
 	    Tcl_GetDouble(interp, argv[endMarker], &shift) != TCL_OK) {
 	    
-	  cerr << "WARNING invalid phase shift " << argv[endMarker] << " - ";
-	  cerr << " Trig tStart tFinish period -shift shift\n";
+	  opserr << "WARNING invalid phase shift " << argv[endMarker] << " - ";
+	  opserr << " Trig tStart tFinish period -shift shift\n";
 	  cleanup(argv);
 	  return 0;
 	}
@@ -167,8 +167,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
       if (endMarker == argc || 
 	  Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
 	
-	cerr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
-	cerr << " Linear  -factor cFactor\n";
+	opserr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
+	opserr << " Linear  -factor cFactor\n";
 	cleanup(argv);
 	return 0;
       }	
@@ -183,20 +183,20 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
     double tStart, tFinish;
     double cFactor = 1.0;
     if (argc < 3) {
-      cerr << "WARNING not enogh args - ";
-      cerr << " Rectangular tStart tFinish <-factor cFactor>\n";
+      opserr << "WARNING not enogh args - ";
+      opserr << " Rectangular tStart tFinish <-factor cFactor>\n";
       cleanup(argv);
       return 0;	
     }	
     if (Tcl_GetDouble(interp, argv[1], &tStart) != TCL_OK) {
-      cerr << "WARNING invalid tStart " << argv[1] << " - ";
-      cerr << " Rectangular tStart tFinish <-factor factor>\n";
+      opserr << "WARNING invalid tStart " << argv[1] << " - ";
+      opserr << " Rectangular tStart tFinish <-factor factor>\n";
       cleanup(argv);
       return 0;
     }
     if (Tcl_GetDouble(interp, argv[2], &tFinish) != TCL_OK) {
-      cerr << "WARNING invalid tStart " << argv[2] << " - ";
-      cerr << " Rectangular tStart tFinish <-factor fcator>\n";
+      opserr << "WARNING invalid tStart " << argv[2] << " - ";
+      opserr << " Rectangular tStart tFinish <-factor fcator>\n";
       cleanup(argv);
       return 0;	
     }     
@@ -209,8 +209,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
       if (endMarker == argc || 
 	  Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
 	
-	cerr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
-	cerr << " Rectangular tStart tFinish -factor cFactor\n";
+	opserr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
+	opserr << " Rectangular tStart tFinish -factor cFactor\n";
 	cleanup(argv);
 	return 0;
       }
@@ -228,8 +228,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
     double cFactor = 1.0;
     if (argc < 3) {
 
-      cerr << "WARNING not enough args - ";
-      cerr << " Series -dt timeIncr -values {list of points }\n"; 
+      opserr << "WARNING not enough args - ";
+      opserr << " Series -dt timeIncr -values {list of points }\n"; 
       cleanup(argv);
       return 0;	
     }
@@ -251,8 +251,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	if (endMarker == argc || 
 	    Tcl_GetDouble(interp, argv[endMarker], &timeIncr) != TCL_OK) {
 	  
-	  cerr << "WARNING invalid dt " << argv[endMarker] << " - ";
-	  cerr << " Series -dt dt ... \n";
+	  opserr << "WARNING invalid dt " << argv[endMarker] << " - ";
+	  opserr << " Series -dt dt ... \n";
 	  cleanup(argv);
 	  return 0;
 	}
@@ -264,8 +264,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	if (endMarker == argc || 
 	    Tcl_GetDouble(interp, argv[endMarker], &cFactor) != TCL_OK) {
 	  
-	  cerr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
-	  cerr << " Series -factor ... \n";
+	  opserr << "WARNING invalid cFactor " << argv[endMarker] << " - ";
+	  opserr << " Series -factor ... \n";
 	  cleanup(argv);
 	  return 0;
 	}
@@ -305,8 +305,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	  if (Tcl_SplitList(interp, argv[endMarker], 
 			    &pathSize, &pathStrings) != TCL_OK) {
 		      
-	    cerr << "WARNING problem splitting path list " << argv[endMarker] << " - ";
-	    cerr << " Series -values {path} ... \n";
+	    opserr << "WARNING problem splitting path list " << argv[endMarker] << " - ";
+	    opserr << " Series -values {path} ... \n";
 	    cleanup(argv);
 	    return 0;
 	  }
@@ -315,8 +315,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	  for (int i=0; i<pathSize; i++) {
 	    double value;
 	    if ( Tcl_GetDouble(interp, pathStrings[i], &value) != TCL_OK) {
-	      cerr << "WARNING problem reading path data value " << pathStrings[i] << " - ";
-	      cerr << " Series -values {path} ... \n";
+	      opserr << "WARNING problem reading path data value " << pathStrings[i] << " - ";
+	      opserr << " Series -values {path} ... \n";
 	      cleanup(argv);
 	      cleanup(pathStrings);
 	      return 0;
@@ -338,8 +338,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	  if (Tcl_SplitList(interp, argv[endMarker], 
 			    &pathSize, &pathStrings) != TCL_OK) {
 			
-	    cerr << "WARNING problem spltting time path " << argv[endMarker] << " - ";
-	    cerr << " Series -time {times} ... \n";
+	    opserr << "WARNING problem spltting time path " << argv[endMarker] << " - ";
+	    opserr << " Series -time {times} ... \n";
 	    cleanup(argv);
 	    return 0;
 	  }
@@ -348,8 +348,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	  for (int i=0; i<pathSize; i++) {
 	    double value;
 	    if ( Tcl_GetDouble(interp, pathStrings[i], &value) != TCL_OK) {
-	      cerr << "WARNING problem reading time path value " << pathStrings[i] << " - ";
-	      cerr << " Series -values {path} ... \n";
+	      opserr << "WARNING problem reading time path value " << pathStrings[i] << " - ";
+	      opserr << " Series -values {path} ... \n";
 
 	      cleanup(argv);
 	      cleanup(pathStrings);
@@ -380,12 +380,12 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
       delete dataPath;      
       delete dataTime;      
     } else {
-      cerr << "WARNING choice of options for Path Series invalid - valid options for ";
-      cerr << " Path are\n";
-      cerr << " \t -fileT fileTimeName -fileP filePathName \n";
-      cerr << " \t -dt constTimeIncr -file filePathName\n";
-      cerr << " \t -dt constTimeIncr -values {list of points on path}\n";
-      cerr << " \t -time {list of time points} -values {list of points on path}\n";
+      opserr << "WARNING choice of options for Path Series invalid - valid options for ";
+      opserr << " Path are\n";
+      opserr << " \t -fileT fileTimeName -fileP filePathName \n";
+      opserr << " \t -dt constTimeIncr -file filePathName\n";
+      opserr << " \t -dt constTimeIncr -values {list of points on path}\n";
+      opserr << " \t -time {list of time points} -values {list of points on path}\n";
       cleanup(argv);
       return 0;
     }      
@@ -394,8 +394,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
 	
   else {
     // type of load pattern type unknown
-    cerr << "WARNING unknown Series type " << argv[0] << " - ";
-    cerr << " valid types: Linear, Rectangular, Path, Constant, Trig, Sine\n";
+    opserr << "WARNING unknown Series type " << argv[0] << " - ";
+    opserr << " valid types: Linear, Rectangular, Path, Constant, Trig, Sine\n";
     cleanup(argv);
     return 0;
   }

@@ -18,41 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-26 00:56:06 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/WindowDevice.cpp,v $
-                                                                        
-                                                                        
-/* ****************************************************************** **
-**              G3 - Framework for Seismic Simulation                 **
-**          Pacific Earthquake Engineering Research Center            **
-**                                                                    **
-**                                                                    **
-** (C) Copyright 1999, The Regents of the University of California    **
-** All Rights Reserved.                                               **
-**                                                                    **
-** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
-** file 'COPYRIGHT'  in main directory for information on usage and   **
-** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-**                                                                    **
-** Developed by:                                                      **
-**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-**                                                                    **
-**                                                                    **
-** Version: 0.1                                                       **
-** Tag: RED                                                           **
-** ****************************************************************** */
-                                                                        
-                                                                        
                                                                         
                                                                         
                                                                         
 #include "WindowDevice.h"
-#include <G3Globals.h>
-#include <iostream.h>
+#include <OPS_Globals.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -281,7 +254,7 @@ int oglCreateBitmap(int width, int height, HGLRC *hRC, HDC *hDC,
 
 	/*
 	if ((*bits = (GLubyte *)(calloc(width*height, 1))) == 0){
-		cerr << "BITS ZERO\n";
+		opserr << "BITS ZERO\n";
 		return -1;
 	}
 	*/
@@ -416,7 +389,7 @@ WindowDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
 				    foreground, background);
 
     if (theWindow == 0) {
-	cerr << "WindowDevice::WINOPEN() - could not open a window\n";
+	opserr << "WindowDevice::WINOPEN() - could not open a window\n";
 	exit(-1);
     }	
     
@@ -434,14 +407,14 @@ WindowDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
 	int fail = false;
 	//	XMatchVisualInfo(theDisplay, theScreen, depth, PseudoColor, &visual);
 	if (XMatchVisualInfo(theDisplay, theScreen, depth, PseudoColor, &visual) == 0) {
-	  cerr << "WindowDevice::initX11() - could not get a visual for PseudoColor\n";
-	  cerr << "Colors diplayed will be all over the place\n";
+	  opserr << "WindowDevice::initX11() - could not get a visual for PseudoColor\n";
+	  opserr << "Colors diplayed will be all over the place\n";
 	  cmap = DefaultColormap(theDisplay, theScreen);
 	  fail = true;
         } else {
-	  cerr << "WindowDevice::WINOPEN have created our own colormap, \n";
-	  cerr << "windows may change color as move mouse from one window to\n";
-	  cerr << "another - depends on your video card to use another colormap\n\n";	
+	  opserr << "WindowDevice::WINOPEN have created our own colormap, \n";
+	  opserr << "windows may change color as move mouse from one window to\n";
+	  opserr << "another - depends on your video card to use another colormap\n\n";	
 
 	  cmap = XCreateColormap(theDisplay,theWindow,
 				 visual.visual, AllocAll);
@@ -454,14 +427,14 @@ WindowDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
 	*/
 
 	if (cmap == 0) {
-	    cerr << "WindowDevice::initX11() - could not get a new color table\n";
+	    opserr << "WindowDevice::initX11() - could not get a new color table\n";
 	    exit(-1);
 	}	    
 
 	// we are going to try to allocate 256 new colors -- need 8 planes for this
 	depth = DefaultDepth(theDisplay, theScreen);
 	if (depth < 8) {
-	    cerr << "WindowDevice::initX11() - needed at least 8 planes\n";
+	    opserr << "WindowDevice::initX11() - needed at least 8 planes\n";
 	    exit(-1);
 	}	    
 	if (fail == false) {
@@ -547,8 +520,8 @@ WindowDevice::C3F(float r, float g, float b)
     
     // check range of rgb values
     if (r<0 || r>1.0 || g<0 || g>1.0 || b<0 || b>1.0) {
-	cerr << "WindowDevice::WindowDevice::C3F() rgb val out of range ";
-	cerr << r << " " << g << " " << b << endl;
+	opserr << "WindowDevice::WindowDevice::C3F() rgb val out of range ";
+	opserr << r << " " << g << " " << b << endln;
 	return;
     }
 
@@ -588,7 +561,7 @@ WindowDevice::V2F(float x, float y)
   {
     if (numPoints == MAX_NUM_POINTS_FOR_POLYGON)
       {
-	cerr << "ERROR: Maximum number of points has been exceeded" << endl;
+	opserr << "ERROR: Maximum number of points has been exceeded" << endln;
 	return;
       }
     polygonPointArray[numPoints].x = (int)x;
@@ -768,7 +741,7 @@ WindowDevice::initWindow(void) {
 #ifdef _UNIX
     theDisplay = XOpenDisplay("");	// init a display connection
     if (theDisplay == 0) {              // and check we got one
-	cerr << "WindowDevice::initX11() - could not connect to display\n";
+	opserr << "WindowDevice::initX11() - could not connect to display\n";
 	exit(-1);
     }
 
@@ -846,8 +819,8 @@ WindowDevice::initWindow(void) {
 	colorFlag = 3;
 	// lets create our own color table - 
 	// problem with this is that screen colors change as we enter
-	cerr << "WindowDevice::initWindow() - could not add any colors to the\n";
-	cerr << "existing colormap - will try to create our own colormap\n";
+	opserr << "WindowDevice::initWindow() - could not add any colors to the\n";
+	opserr << "existing colormap - will try to create our own colormap\n";
     }
 #else
 

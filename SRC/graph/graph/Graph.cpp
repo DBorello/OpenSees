@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/graph/Graph.cpp,v $
                                                                         
                                                                         
@@ -36,7 +36,6 @@
 #include <Graph.h>
 #include <Vertex.h>
 #include <VertexIter.h>
-#include <iostream.h>
 #include <ArrayOfTaggedObjects.h>
 
 Graph::Graph()
@@ -88,8 +87,8 @@ Graph::addVertex(Vertex *vertexPtr, bool checkAdjacency)
 {
     // check the vertex * and its adjacency list
     if (vertexPtr == 0) {
-	cerr << "WARNING ArrayGraph::addVertex";
-	cerr << " - attempting to add a NULL vertex*\n";
+	opserr << "WARNING ArrayGraph::addVertex";
+	opserr << " - attempting to add a NULL vertex*\n";
 	return false;
     }
 
@@ -100,8 +99,8 @@ Graph::addVertex(Vertex *vertexPtr, bool checkAdjacency)
 	    for (int i=0; i<size; i++) {
 		Vertex *other = this->getVertexPtr(adjacency(i));
 		if (other == 0) {
-		    cerr << "WARNING ArrayGraph::addVertex";
-		    cerr << " - vertex with adjacent vertex not in graph\n";
+		    opserr << "WARNING ArrayGraph::addVertex";
+		    opserr << " - vertex with adjacent vertex not in graph\n";
 		    return false;
 		}		
 	    }
@@ -110,8 +109,8 @@ Graph::addVertex(Vertex *vertexPtr, bool checkAdjacency)
 
     bool result = myVertices->addComponent(vertexPtr);
     if (result == false) {
-	cerr << "WARNING ArrayGraph::addVertex";
-	cerr << " - vertex could not be stored in TaggedObjectStorage object\n";
+	opserr << "WARNING ArrayGraph::addVertex";
+	opserr << " - vertex could not be stored in TaggedObjectStorage object\n";
     }
     return result;
 }
@@ -133,8 +132,8 @@ Graph::addEdge(int vertexTag, int otherVertexTag)
     Vertex *vertex1 = this->getVertexPtr(vertexTag);
     Vertex *vertex2 = this->getVertexPtr(otherVertexTag);
     if ((vertex1 == 0) || (vertex2 == 0)) {
-	cerr << "WARNING Graph::addEdge() - one or both of the vertices ";
-	cerr << vertexTag << " " << otherVertexTag << " not in Graph\n";
+	opserr << "WARNING Graph::addEdge() - one or both of the vertices ";
+	opserr << vertexTag << " " << otherVertexTag << " not in Graph\n";
 	return -1;
     }
 
@@ -144,9 +143,9 @@ Graph::addEdge(int vertexTag, int otherVertexTag)
 	if ((result = vertex2->addEdge(vertexTag)) == 0) 
 	    numEdge++;
 	else {
-	    cerr << "WARNING Graph::addEdge() - " << vertexTag;
-	    cerr << " has not been added to " << otherVertexTag;
-	    cerr << " adjacency - yet vica-versa ok.\n";
+	    opserr << "WARNING Graph::addEdge() - " << vertexTag;
+	    opserr << " has not been added to " << otherVertexTag;
+	    opserr << " adjacency - yet vica-versa ok.\n";
 	    return -2;
 	}
     }
@@ -194,8 +193,8 @@ Graph::removeVertex(int tag, bool flag)
     Vertex *result = (Vertex *)mc;
     
     if (flag == true) { // remove all edges associated with the vertex
-	cerr << "Graph::removeVertex(int tag, bool flag = true)";
-	cerr << " - no code to remove edges yet\n";
+	opserr << "Graph::removeVertex(int tag, bool flag = true)";
+	opserr << " - no code to remove edges yet\n";
 	return 0;
     }
     return result;
@@ -205,13 +204,13 @@ Graph::removeVertex(int tag, bool flag)
 
 
 void 
-Graph::Print(ostream &s, int flag)
+Graph::Print(OPS_Stream &s, int flag)
 {
     myVertices->Print(s, flag);
 }
 
 
-ostream &operator<<(ostream &s, Graph &M)
+OPS_Stream &operator<<(OPS_Stream &s, Graph &M)
 {
   M.Print(s);
   return s;

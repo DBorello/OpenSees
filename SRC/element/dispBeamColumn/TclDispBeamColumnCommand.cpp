@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-10 03:04:26 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/TclDispBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -30,7 +30,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 #include <Domain.h>
 
 #include <DispBeamColumn2d.h>
@@ -48,7 +47,7 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 {
 	// ensure the destructor has not been called - 
 	if (theTclBuilder == 0) {
-		cerr << "WARNING builder has been destroyed\n";    
+		opserr << "WARNING builder has been destroyed\n";    
 		return TCL_ERROR;
 	}
 
@@ -62,15 +61,15 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 		ok = 1;
 
 	if (ok == 0) {
-		cerr << "WARNING -- NDM = " << ndm << " and NDF = " << ndf
-			<< " not compatible with dispBeamColumn element" << endl;
+		opserr << "WARNING -- NDM = " << ndm << " and NDF = " << ndf
+			<< " not compatible with dispBeamColumn element" << endln;
 		return TCL_ERROR;
 	}
 
 	if (argc < 8) {
-		cerr << "WARNING insufficient arguments\n";
+		opserr << "WARNING insufficient arguments\n";
 		printCommand(argc, argv);
-		cerr << "Want: element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?\n";
+		opserr << "Want: element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?\n";
 		return TCL_ERROR;
 	}
 
@@ -80,38 +79,38 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	int argi = 2;
 
 	if (Tcl_GetInt(interp, argv[argi++], &eleTag) != TCL_OK) {
-		cerr << "WARNING invalid dispBeamColumn eleTag" << endl;
+		opserr << "WARNING invalid dispBeamColumn eleTag" << endln;
 		return TCL_ERROR;
 	}
 
 	if (Tcl_GetInt(interp, argv[argi++], &iNode) != TCL_OK) {
-		cerr << "WARNING invalid iNode\n";
-		cerr << "dispBeamColumn element: " << eleTag << endl;
+		opserr << "WARNING invalid iNode ";
+		opserr << "dispBeamColumn element: " << eleTag << endln;
 		return TCL_ERROR;
 	}
 
 	if (Tcl_GetInt(interp, argv[argi++], &jNode) != TCL_OK) {
-		cerr << "WARNING invalid jNode\n";
-		cerr << "dispBeamColumn element: " << eleTag << endl;
+		opserr << "WARNING invalid jNode ";
+		opserr << "dispBeamColumn element: " << eleTag << endln;
 		return TCL_ERROR;
 	}
   
 	if (Tcl_GetInt(interp, argv[argi++], &nIP) != TCL_OK) {
-		cerr << "WARNING invalid nIP\n";
-		cerr << "dispBeamColumn element: " << eleTag << endl;
+		opserr << "WARNING invalid nIP ";
+		opserr << "dispBeamColumn element: " << eleTag << endln;
 		return TCL_ERROR;
 	}  
   
 	if (strcmp(argv[argi], "-sections") == 0) {
 	  argi++;
 	  if (argi+nIP > argc) {
-	    interp->result = "WARNING insufficient number of section tags - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?";
+	    opserr << "WARNING insufficient number of section tags - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?\n";
 	    return TCL_ERROR;
 	  }
 	  int section;
 	  for (int i = 0; i < nIP; i++) {
 	    if (Tcl_GetInt(interp, argv[argi+i], &section) != TCL_OK) {
-	      interp->result = "WARNING invalid secTag - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?";
+	      opserr << "WARNING invalid secTag - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?\n";
 	      return TCL_ERROR;
 	    }
 	    secTag[i] = section;
@@ -122,7 +121,7 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	else {
 	  int section;
 	  if (Tcl_GetInt(interp, argv[argi++], &section) != TCL_OK) {
-	    interp->result = "WARNING invalid secTag - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?";
+	    opserr << "WARNING invalid secTag - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?\n";
 	    return TCL_ERROR;
 	  }
 	  for (int i = 0; i < nIP; i++)
@@ -130,14 +129,14 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	}
 	
 	if (argi >= argc || Tcl_GetInt(interp, argv[argi++], &transfTag) != TCL_OK) {
-	  interp->result = "WARNING invalid transfTag? - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?";
+	  opserr << "WARNING invalid transfTag? - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?\n";
 	  return TCL_ERROR;
 	}
 
 	SectionForceDeformation **sections = new SectionForceDeformation* [nIP];
 	
 	if (!sections) {
-	  interp->result = "WARNING TclElmtBuilder - addFrameElement - Insufficient memory to create sections";
+	  opserr << "WARNING TclElmtBuilder - addFrameElement - Insufficient memory to create sections\n";
 	  return TCL_ERROR;
 	}
 	
@@ -145,8 +144,8 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	  SectionForceDeformation *theSection = theTclBuilder->getSection(secTag[j]);
 	  
 	  if (theSection == 0) {
-	    cerr << "WARNING TclElmtBuilder - frameElement - no Section found with tag ";
-	    cerr << secTag[j] << endl;
+	    opserr << "WARNING TclElmtBuilder - frameElement - no Section found with tag ";
+	    opserr << secTag[j] << endln;
 	    delete [] sections;
 	    return TCL_ERROR;
 	  }
@@ -161,9 +160,9 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 		CrdTransf2d *theTransf = theTclBuilder->getCrdTransf2d(transfTag);
       
 		if (theTransf == 0) {
-			cerr << "WARNING transformation not found\n";
-			cerr << "transformation: " << transfTag;
-			cerr << "\ndispBeamColumn element: " << eleTag << endl;
+			opserr << "WARNING transformation not found\n";
+			opserr << "transformation: " << transfTag;
+			opserr << "\ndispBeamColumn element: " << eleTag << endln;
 			return TCL_ERROR;
 		}
 
@@ -178,9 +177,9 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 		CrdTransf3d *theTransf = theTclBuilder->getCrdTransf3d(transfTag);
       
 		if (theTransf == 0) {
-			cerr << "WARNING transformation not found\n";
-			cerr << "transformation: " << transfTag;
-			cerr << "\ndispBeamColumn element: " << eleTag << endl;
+			opserr << "WARNING transformation not found\n";
+			opserr << "transformation: " << transfTag;
+			opserr << "\ndispBeamColumn element: " << eleTag << endln;
 			return TCL_ERROR;
 		}
 
@@ -191,14 +190,14 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	}
 
 	if (theElement == 0) {
-		cerr << "WARNING ran out of memory creating element\n";
-		cerr << "dispBeamColumn element: " << eleTag << endl;
+		opserr << "WARNING ran out of memory creating element\n";
+		opserr << "dispBeamColumn element: " << eleTag << endln;
 		return TCL_ERROR;
 	}
 
 	if (theTclDomain->addElement(theElement) == false) {
-		cerr << "WARNING could not add element to the domain\n";
-		cerr << "dispBeamColumn element: " << eleTag << endl;
+		opserr << "WARNING could not add element to the domain\n";
+		opserr << "dispBeamColumn element: " << eleTag << endln;
 		delete theElement;
 		return TCL_ERROR;
 	}

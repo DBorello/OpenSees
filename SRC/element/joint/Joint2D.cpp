@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2002-12-16 21:10:06 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.cpp,v $
 
 // Written: AAA 03/02
@@ -36,7 +36,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <G3Globals.h>
 #include <MP_Constraint.h>
 #include <MP_Joint2D.h>
 #include <ElasticMaterial.h>
@@ -79,8 +78,8 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
 
   TheDomain = theDomain;
   if( TheDomain==NULL ) {
-    cerr << "WARNING Joint2D(): Specified domain does not exist";
-    cerr << "Domain = 0\n";
+    opserr << "WARNING Joint2D(): Specified domain does not exist";
+    opserr << "Domain = 0\n";
     return;
   }
 
@@ -99,26 +98,26 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   
   // check domain for existence of external nodes
   if (end1Ptr == 0) {
-    cerr << "WARNING Joint2D::setDomain(): Nd1: ";
-    cerr << nd1 << "does not exist in model for element \n" << *this;
+    opserr << "WARNING Joint2D::setDomain(): Nd1: ";
+    opserr << nd1 << "does not exist in model for element \n" << *this;
     return;
   }
     
   if (end2Ptr == 0) {
-    cerr << "WARNING Joint2D::setDomain(): Nd2: ";
-    cerr << nd2 << "does not exist in model for element\n" << *this;
+    opserr << "WARNING Joint2D::setDomain(): Nd2: ";
+    opserr << nd2 << "does not exist in model for element\n" << *this;
     return;
   }	
   
   if (end3Ptr == 0) {
-    cerr << "WARNING Joint2D::setDomain(): Nd3: ";
-    cerr << nd3 << "does not exist in model for element \n" << *this;
+    opserr << "WARNING Joint2D::setDomain(): Nd3: ";
+    opserr << nd3 << "does not exist in model for element \n" << *this;
     return;
   }
     
   if (end4Ptr == 0) {
-    cerr << "WARNING Joint2D::setDomain(): Nd4: ";
-    cerr << nd4 << "does not exist in model for element\n" << *this;
+    opserr << "WARNING Joint2D::setDomain(): Nd4: ";
+    opserr << nd4 << "does not exist in model for element\n" << *this;
     return;
   }	
 
@@ -134,8 +133,8 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   int dimNd4 = end4Crd.Size();
 
   if (dimNd1 != 2 && dimNd2 != 2 && dimNd3 != 2 && dimNd4 != 2 ) {
-    cerr << "WARNING Joint2D::setDomain(): has incorrect space dimension \n";
-    cerr << "                                    space dimension not supported by Joint2D";
+    opserr << "WARNING Joint2D::setDomain(): has incorrect space dimension \n";
+    opserr << "                                    space dimension not supported by Joint2D";
     return;
   }
 	
@@ -146,8 +145,8 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   int dofNd4 = end4Ptr->getNumberDOF();
 
   if (dofNd1 != 3 && dofNd2 != 3 && dofNd3 != 3 && dofNd4 != 3 ) {
-    cerr << "WARNING Joint2D::Joint2D: has incorrect degrees of freedom \n";
-    cerr << "                                    DOF not supported by Joint2D";
+    opserr << "WARNING Joint2D::Joint2D: has incorrect degrees of freedom \n";
+    opserr << "                                    DOF not supported by Joint2D";
     return;
   }
   
@@ -161,7 +160,7 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   double L2 = Center2.Norm();
   
   if( Center1.Norm()<1e-6  || Center2.Norm()<1e-6 ) {
-    cerr << "WARNING Joint2D::(): zero length\n";
+    opserr << "WARNING Joint2D::(): zero length\n";
     return;	
   }
 	
@@ -177,7 +176,7 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   Center3 = Center3 - Center1;
 
   if ( Center3.Norm() > 1e-6 ) {
-    cerr << "WARNING Joint2D::(): can not construct a paralelogram over external nodes\n";
+    opserr << "WARNING Joint2D::(): can not construct a paralelogram over external nodes\n";
     return;	
   }
 	
@@ -185,10 +184,11 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   IntNodePtr = new Node ( IntNode , 4, Center1(0) , Center1(1) );
   if ( IntNodePtr == NULL ) 
     {
-      g3ErrorHandler->warning("Joint2D::Joint2D - Unable to generate new nodes , out of memory\n");
+     opserr << "Joint2D::Joint2D - Unable to generate new nodes , out of memory\n";
+     exit(-1);
     } else {
       if( TheDomain->addNode( IntNodePtr ) == false )		// add intenal nodes to domain
-	g3ErrorHandler->warning("Joint2D::Joint2D - unable to add internal nodeto domain\n");
+	opserr << "Joint2D::Joint2D - unable to add internal nodeto domain\n";
     }
 
   // make copy of the uniaxial materials for the element
@@ -201,7 +201,7 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   
   if ( Spring1 == NULL || Spring2 == NULL || Spring3 == NULL || Spring4 == NULL || SpringC == NULL )
   {
-    cerr << "ERROR Joint2D::Joint2D(): Can not make copy of uniaxial materials, out of memory ";
+    opserr << "ERROR Joint2D::Joint2D(): Can not make copy of uniaxial materials, out of memory ";
     exit(-1);
   }
 
@@ -213,25 +213,25 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   
   // create MP_Joint constraint node 1
   if ( addMP_Joint( TheDomain, InternalConstraints(0), IntNode, ExternalNodes(0), 2, LrgDisp ) != 0) {
-    cerr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 1\n";
+    opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 1\n";
     return;
   }
 
   // create MP_Joint constraint node 2
   if ( addMP_Joint( TheDomain, InternalConstraints(1), IntNode, ExternalNodes(1), 3, LrgDisp ) != 0) {
-    cerr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 2\n";
+    opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 2\n";
     return;
   }
 
   // create MP_Joint constraint node 3
   if ( addMP_Joint( TheDomain, InternalConstraints(2), IntNode, ExternalNodes(2), 2, LrgDisp ) != 0) {
-    cerr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 3\n";
+    opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 3\n";
     return;
   }
   
   // create MP_Joint constraint node 4
   if ( addMP_Joint( TheDomain, InternalConstraints(3), IntNode, ExternalNodes(3), 3, LrgDisp ) != 0) {
-    cerr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 4\n";
+    opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 4\n";
     return;
   }
 }
@@ -274,13 +274,13 @@ int Joint2D::addMP_Joint(Domain *theDomain, int mpNum,
   
 	if (Temp_MP == NULL)
 	{
-		cerr << "Joint2D::addMP_Joint - WARNING ran out of memory for ForJoint MP_Constraint ";
+		opserr << "Joint2D::addMP_Joint - WARNING ran out of memory for ForJoint MP_Constraint ";
 		return -1;
 	}
 	// Add the multi-point constraint to the domain
 	if (theDomain->addMP_Constraint (Temp_MP) == false)
 	{
-		cerr << "Joint2D::addMP_Joint - WARNING could not add equalDOF MP_Constraint to domain ";
+		opserr << "Joint2D::addMP_Joint - WARNING could not add equalDOF MP_Constraint to domain ";
 		delete Temp_MP;
 		return -2;
 	}
@@ -302,7 +302,7 @@ int Joint2D::commitState()
 
     // call element commitState to do any base class stuff
     if ((retVal = this->Element::commitState()) != 0) {
-      cerr << "Joint2D::commitState () - failed in base class";
+      opserr << "Joint2D::commitState () - failed in base class";
     }    
 
     int CS1 = Spring1->commitState();
@@ -449,7 +449,7 @@ const Matrix &Joint2D::getInitialStiff(void)
 }
 
 
-void Joint2D::Print(ostream &s, int flag )
+void Joint2D::Print(OPS_Stream &s, int flag )
 {
   s << "\nElement: " << getTag() << " type: Joint2D iNode: "
     << ExternalNodes(0) << " jNode: " << ExternalNodes(1) << "\n"

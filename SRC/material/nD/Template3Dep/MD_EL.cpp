@@ -101,13 +101,13 @@ void MDEvolutionLaw::InitVars(EPState  *EPS) {
     //
     //if (temp < 0)   temp = 0;
     //double A = getAo() * (1.0 + temp);
-    //cout << " A = " << A << endln;
+    //cout << " A = " << A << endlnn;
     //
     ////Calculating the lode angle theta
     //double J2_bar = r_bar.Jinvariant2();
     //double J3_bar = r_bar.Jinvariant3();
     //double theta = acos( 3.0*pow(3.0, 0.5)/2.0*J3_bar/ pow( J2_bar, 1.5) ) / 3.0;
-    //cout << " theta = " << theta << endln;
+    //cout << " theta = " << theta << endlnn;
     //
     //double c = getMe() / getMc();
     //double cd = getke_d() / getkc_d();
@@ -181,7 +181,7 @@ void MDEvolutionLaw::setInitD(EPState  *EPS) {
     if (tempd < -1.0 ) tempd = -1.0;
 
     double theta = acos( tempd ) / 3.0;
-    //cout << "Theta = " << theta << endln;
+    //cout << "Theta = " << theta << endlnn;
     
     //=========================================================================
     //calculate the alpha_theta_b and alpha_theta_d
@@ -190,7 +190,7 @@ void MDEvolutionLaw::setInitD(EPState  *EPS) {
     double cd = getke_d() / getkc_d();
     double alpha_theta_dd = (g_WW(theta, c) * Mc + g_WW(theta, cd) * kc_d * xi - m);
     stresstensor alpha_theta_d = n("ij") * alpha_theta_dd * pow(2.0/3.0, 0.5);
-    //cout << "alpha_theta_b " << alpha_theta_b<<" g_WW(theta, c) "<< g_WW(theta, c) << endln;
+    //cout << "alpha_theta_b " << alpha_theta_b<<" g_WW(theta, c) "<< g_WW(theta, c) << endlnn;
 
     stresstensor d;
     d =  alpha_theta_d - alpha;
@@ -259,10 +259,10 @@ void MDEvolutionLaw::UpdateAllVars( EPState *EPS, double dlamda) {
 
     double de_p = -( 1.0 + e ) * plastic_strain_vol; // plastic change of void ratio ?? e or eo?
     double de_e = -( 1.0 + e ) * elastic_strain_vol; // elastic change of void ratio ????
-    cout << "get dPlasticStrain-vol" << plastic_strain_vol << endln;
-    cout << "get dElasticStrain-vol" << elastic_strain_vol << endln;
+    cout << "get dPlasticStrain-vol" << plastic_strain_vol << endlnn;
+    cout << "get dElasticStrain-vol" << elastic_strain_vol << endlnn;
 
-    cout << "^^^^^^^^^^^ de_e = " << de_e << " de_p = " << de_p << endln; 
+    cout << "^^^^^^^^^^^ de_e = " << de_e << " de_p = " << de_p << endlnn; 
     double new_e = e + de_p + de_e;
 
     EPS->setScalarVar( 3, new_e ); // Updating e
@@ -291,7 +291,7 @@ void MDEvolutionLaw::UpdateAllVars( EPState *EPS, double dlamda) {
     if (tempd < -1.0 ) tempd = -1.0;
 
     double theta = acos( tempd ) / 3.0;
-    //cout << "Theta = " << theta << endln;
+    //cout << "Theta = " << theta << endlnn;
     
     //=========================================================================
     //calculate the alpha_theta_b and alpha_theta_d
@@ -300,7 +300,7 @@ void MDEvolutionLaw::UpdateAllVars( EPState *EPS, double dlamda) {
     double cd = getke_d() / getkc_d();
     double alpha_theta_dd = (g_WW(theta, c) * Mc + g_WW(theta, cd) * kc_d * xi - m);
     stresstensor alpha_theta_d = n("ij") * alpha_theta_dd * pow(2.0/3.0, 0.5);
-    //cout << "alpha_theta_b " << alpha_theta_b<<" g_WW(theta, c) "<< g_WW(theta, c) << endln;
+    //cout << "alpha_theta_b " << alpha_theta_b<<" g_WW(theta, c) "<< g_WW(theta, c) << endlnn;
 
     double cb = getke_b() / getkc_b();
     if ( xi > 0 ) xi = 0.0;  // < -xi >
@@ -324,7 +324,7 @@ void MDEvolutionLaw::UpdateAllVars( EPState *EPS, double dlamda) {
 
     EPS->setScalarVar(2, D_new);  // Updating D
     //EPS->setScalarVar(2, 0.0);  // Updating D
-    //cout << "D= " << D << endln;
+    //cout << "D= " << D << endlnn;
     
     //cout << "alpha_theta_d " << alpha_theta_d<<" g_WW(theta, c) "<< g_WW(theta, c);
  
@@ -332,7 +332,7 @@ void MDEvolutionLaw::UpdateAllVars( EPState *EPS, double dlamda) {
     // Update m
     double dm = dlamda * getCm() * ( 1.0 + e ) * D;
     EPS->setScalarVar(1, m + dm); // Updating m
-    cout  << endln << "dm = " << dm << endln;
+    cout  << endlnn << "dm = " << dm << endlnn;
 
     //=========================================================================
     // Update alpha
@@ -343,20 +343,20 @@ void MDEvolutionLaw::UpdateAllVars( EPState *EPS, double dlamda) {
     
     temp1 = b("ij") * n("ij");
     double bn = temp1.trace();
-    cout << "xxxxxxxxxxxxxxxxxxx  bn " << bn << endln;
-    //cout << "alternative " << alpha_theta_bd-norm_alpha << endln;
+    cout << "xxxxxxxxxxxxxxxxxxx  bn " << bn << endlnn;
+    //cout << "alternative " << alpha_theta_bd-norm_alpha << endlnn;
 
 
     double h = getho() * fabs(bn) / ( b_ref - fabs(bn) );
     //h = h + pow(2.0/3.0, 0.5) * getCm() * ( 1.0 + geteo() ) * A * bn;
 
-    cout << " ||b|| " << (alpha_theta_bd - norm_alpha) << endln;
-    cout << " dlamda " << dlamda << " h = " << h << endln;
+    cout << " ||b|| " << (alpha_theta_bd - norm_alpha) << endlnn;
+    cout << " dlamda " << dlamda << " h = " << h << endlnn;
 
     stresstensor dalpha;
     dalpha = dlamda * h * b("ij");
     //dalpha.null_indices();
-    cout << "delta alpha =" << dalpha << endln;
+    cout << "delta alpha =" << dalpha << endlnn;
     
     //dalpha.reportshortpqtheta("\n dalpha ");
     alpha = alpha + dalpha;
@@ -417,8 +417,8 @@ double MDEvolutionLaw::getKp( EPState *EPS , double dummy) {
     double e = EPS->getScalarVar(3);
     double ec = getec_ref() - getLambda() * log( p/getp_ref() );
     double xi = e - ec;
-    //cout << "ec = " << ec << endln;
-    //cout << "xi = " << xi << endln;
+    //cout << "ec = " << ec << endlnn;
+    //cout << "xi = " << xi << endlnn;
 
     //Calculating the lode angle theta
     double J2_bar = r_bar.Jinvariant2();
@@ -428,7 +428,7 @@ double MDEvolutionLaw::getKp( EPState *EPS , double dummy) {
     if (tempd > 1.0 ) tempd = 1.0; //bug. if tempd = 1.00000000003, acos gives nan
     if (tempd < -1.0 ) tempd = -1.0;
     double theta = acos( tempd ) / 3.0;
-    //cout << "theta = " << theta << endln;
+    //cout << "theta = " << theta << endlnn;
     
     //calculate the alpha_theta_b and alpha_theta_d
     double m = EPS->getScalarVar(1);
@@ -436,7 +436,7 @@ double MDEvolutionLaw::getKp( EPState *EPS , double dummy) {
 
     double cd = getke_d() / getkc_d();
     stresstensor alpha_theta_d = n("ij") * (g_WW(theta, c) * Mc + g_WW(theta, cd) * kc_d * xi - m) * pow(2.0/3.0, 0.5);
-    //cout << "alpha_theta_d " << alpha_theta_d<<" g_WW(theta, c) "<< g_WW(theta, c) << endln;
+    //cout << "alpha_theta_d " << alpha_theta_d<<" g_WW(theta, c) "<< g_WW(theta, c) << endlnn;
 
     double cb = getke_b() / getkc_b();
     if ( xi > 0.0 ) xi = 0.0;  // < -xi >
@@ -461,8 +461,8 @@ double MDEvolutionLaw::getKp( EPState *EPS , double dummy) {
 
     temp1 = d("ij") * n("ij");
     double dn = temp1.trace();
-    //cout << "bn =" << bn << endln; 
-    //cout << "dn =" << dn << endln; 
+    //cout << "bn =" << bn << endlnn; 
+    //cout << "dn =" << dn << endlnn; 
 
 
     // Calculating A
@@ -473,10 +473,10 @@ double MDEvolutionLaw::getKp( EPState *EPS , double dummy) {
     double A = Ao*(1.0 + temp);
 
     double h = getho() * fabs(bn) / ( b_ref - fabs(bn) ); 
-    cout << "ho =" << getho()  << "   h =" << h << endln;
+    cout << "ho =" << getho()  << "   h =" << h << endlnn;
 
-    //cout << "+++++++++++p= "<< p << " +++++++++++bn= " << bn << " ++++++++++h = " << h << endln;
-    //cout << "+++++++++++b_ref= "<< b_ref << endln;
+    //cout << "+++++++++++p= "<< p << " +++++++++++bn= " << bn << " ++++++++++h = " << h << endlnn;
+    //cout << "+++++++++++b_ref= "<< b_ref << endlnn;
 
     //=========================================================================
 
@@ -525,7 +525,7 @@ double MDEvolutionLaw::g_WW(double theta, double e) {
 //================================================================================
 void MDEvolutionLaw::print()
 {
-    cout << " Manzari-Dafalias Evolution Law's Parameters" << endln;
+    cout << " Manzari-Dafalias Evolution Law's Parameters" << endlnn;
     cout << (*this);
 }
 

@@ -1,5 +1,3 @@
-// File: ~/system_of_eqn/linearSOE/LawSolver/SymArpackSOE.C
-//
 // Written: Jun Peng
 // Created: 12/98
 // Revision: A
@@ -10,9 +8,6 @@
 // solver. The user can choose three different ordering schema.
 //
 // What: "@(#) SymArpackSOE.C, revA"
-
-
-#include <fstream.h>
 
 #include "SymArpackSOE.h"
 #include "SymArpackSolver.h"
@@ -92,9 +87,9 @@ SymArpackSOE::setSize(Graph &theGraph)
 
     colA = new int[newNNZ];	
     if (colA == 0) {
-	cerr << "WARNING SymArpackSOE::SymArpackSOE :";
-	cerr << " ran out of memory for colA with nnz = ";
-      	cerr << newNNZ << " \n";
+	opserr << "WARNING SymArpackSOE::SymArpackSOE :";
+	opserr << " ran out of memory for colA with nnz = ";
+      	opserr << newNNZ << " \n";
        	size = 0; nnz = 0;
        	result =  -1;
     } 
@@ -105,7 +100,7 @@ SymArpackSOE::setSize(Graph &theGraph)
       delete [] rowStartA;
     rowStartA = new int[size+1]; 
     if (rowStartA == 0) {
-        cerr << "SymArpackSOE::ran out of memory for rowStartA." << endl;
+        opserr << "SymArpackSOE::ran out of memory for rowStartA." << endln;
         result = -1;
     }
 
@@ -118,8 +113,8 @@ SymArpackSOE::setSize(Graph &theGraph)
 	for (int a=0; a<size; a++) {
 	   theVertex = theGraph.getVertexPtr(a);
 	   if (theVertex == 0) {
-	        cerr << "WARNING:SymArpackSOE::setSize :";
-	        cerr << " vertex " << a << " not in graph! - size set to 0\n";
+	        opserr << "WARNING:SymArpackSOE::setSize :";
+	        opserr << " vertex " << a << " not in graph! - size set to 0\n";
 	        size = 0;
 	        return -1;
 	   }
@@ -168,8 +163,8 @@ SymArpackSOE::setSize(Graph &theGraph)
     EigenSolver *theSolvr = this->getSolver();
     int solverOK = theSolvr->setSize();
     if (solverOK < 0) {
-	cerr << "WARNING:BandArpackSOE::setSize :";
-	cerr << " solver failed setSize()\n";
+	opserr << "WARNING:BandArpackSOE::setSize :";
+	opserr << " solver failed setSize()\n";
 	return solverOK;
     } 
 
@@ -189,16 +184,16 @@ SymArpackSOE::addA(const Matrix &m, const ID &id, double fact)
     
     // check that m and id are of similar size
     if (idSize != m.noRows() && idSize != m.noCols()) {
-	cerr << "SymArpackSOE::addA() ";
-	cerr << " - Matrix and ID not of similar sizes\n";
+	opserr << "SymArpackSOE::addA() ";
+	opserr << " - Matrix and ID not of similar sizes\n";
 	return -1;
     }
     
     int *newID = new int [idSize];
     int *isort = new int[idSize];
     if (newID == 0 || isort ==0) {
-        cerr << "WARNING SymArpackSOE::addA() :";
-        cerr << " ran out of memory for vectors (newID, isort)";
+        opserr << "WARNING SymArpackSOE::addA() :";
+        opserr << " ran out of memory for vectors (newID, isort)";
         return -1;
     }
 

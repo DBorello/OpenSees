@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-02-13 02:01:24 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.h,v $
 
                                                                         
@@ -34,12 +34,10 @@
 //
 // What: "@(#) Vector.h, revA"
 
-
 #ifndef Vector_h
 #define Vector_h 
 
-#include <iostream.h>
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 class ID;
 
@@ -106,8 +104,8 @@ class Vector
     int  Assemble(const Vector &V, int init_row, double fact = 1.0);
     int  Extract (const Vector &V, int init_row, double fact = 1.0); 
   
-    friend ostream &operator<<(ostream &s, const Vector &V);
-    friend istream &operator>>(istream &s, Vector &V);    
+    friend OPS_Stream &operator<<(OPS_Stream &s, const Vector &V);
+    // friend istream &operator>>(istream &s, Vector &V);    
     friend Vector operator*(double a, const Vector &V);
     
     friend class Message;
@@ -126,8 +124,6 @@ class Vector
     double *theData;
     int fromFree;
 };
-
-
 
 
 /********* INLINED VECTOR FUNCTIONS ***********/

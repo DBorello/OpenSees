@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-20 00:37:26 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/FixedStepSizeRule.cpp,v $
 
 
@@ -83,3 +83,4 @@ FixedStepSizeRule::getGFunValue()
 {
 	return gFunValue;
 }
+

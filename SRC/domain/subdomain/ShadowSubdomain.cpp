@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
                                                                         
@@ -58,7 +58,6 @@
 #include <FE_Element.h>
 #include <PartitionedModelBuilder.h>
 
-#include <iostream.h>
 
 #include <remote.h>
 #include <ShadowActorSubdomain.h>
@@ -148,16 +147,16 @@ ShadowSubdomain::getRemoteData(void)
     numExternalNodes = msgData(0);
     numDOF = msgData(1);
 
-cerr << "ShadowSubdomain::getRemoteData numExtNodes " << numExternalNodes << endl;    
+opserr << "ShadowSubdomain::getRemoteData numExtNodes " << numExternalNodes << endln;    
     if (theExternalNodes.Size() != numExternalNodes)
       theExternalNodes[numExternalNodes-1] = 0; // this will resize
     if (theExternalNodes.Size() != numExternalNodes) {
-      cerr << "ShadowSubdomain::getRemoteData(void) - need to resize the ID\n";
+      opserr << "ShadowSubdomain::getRemoteData(void) - need to resize the ID\n";
       return -1;
     }
     if (numExternalNodes != 0)
       this->recvID(theExternalNodes);
-cerr << "ShadowSubdomain::getREmoteData " << theExternalNodes;    
+opserr << "ShadowSubdomain::getREmoteData " << theExternalNodes;    
   }
 
   gotRemoteData = true;
@@ -509,8 +508,8 @@ ShadowSubdomain::removeSP_Constraint(int loadTag, int loadPattern)
 ElementIter       &
 ShadowSubdomain::getElements()
 {
-    cerr << "ShadowSubdomain::getElements() ";
-    cerr << " - SHOULD NEVER BE CALLED - EXITING\n";
+    opserr << "ShadowSubdomain::getElements() ";
+    opserr << " - SHOULD NEVER BE CALLED - EXITING\n";
     exit(-1);
 
     // this will never be called - just for a strict compiler    
@@ -522,8 +521,8 @@ ShadowSubdomain::getElements()
 NodeIter          &
 ShadowSubdomain::getNodes()
 {
-    cerr << "ShadowSubdomain::getNodes() ";
-    cerr << " - SHOULD NEVER BE CALLED - EXITING\n";
+    opserr << "ShadowSubdomain::getNodes() ";
+    opserr << " - SHOULD NEVER BE CALLED - EXITING\n";
     exit(-1);
 
     // this will never be called - just for a strict compiler
@@ -535,8 +534,8 @@ ShadowSubdomain::getNodes()
 NodeIter &
 ShadowSubdomain::getInternalNodeIter(void)
 {
-    cerr << "ShadowSubdomain::getInternalNodeIter() ";
-    cerr << " - SHOULD NEVER BE CALLED - EXITING\n";
+    opserr << "ShadowSubdomain::getInternalNodeIter() ";
+    opserr << " - SHOULD NEVER BE CALLED - EXITING\n";
     exit(-1);
 
     // this will never be called - just for a strict compiler
@@ -548,8 +547,8 @@ ShadowSubdomain::getInternalNodeIter(void)
 NodeIter 	  &
 ShadowSubdomain::getExternalNodeIter(void)
 {
-    cerr << "ShadowSubdomain::getExternalNodeIter() ";
-    cerr << " - SHOULD NEVER BE CALLED - EXITING\n";
+    opserr << "ShadowSubdomain::getExternalNodeIter() ";
+    opserr << " - SHOULD NEVER BE CALLED - EXITING\n";
     exit(-1);
 
     // this will never be called - just for a strict compiler
@@ -575,8 +574,8 @@ ShadowSubdomain::getElementPtr(int tag)
     if (theEle != 0) {
 	this->recvObject(*theEle);
     }
-    cerr << "ShadowSubdomain::getElementPtr() ";
-    cerr << " - SHOULD BE AVOIDED IF POSSIBLE \n";
+    opserr << "ShadowSubdomain::getElementPtr() ";
+    opserr << " - SHOULD BE AVOIDED IF POSSIBLE \n";
     
     return theEle;
 }
@@ -597,8 +596,8 @@ ShadowSubdomain::getNodePtr(int tag)
     if (theNod != 0) {
 	this->recvObject(*theNod);
     }
-    cerr << "ShadowSubdomain::getNodPtr() ";
-    cerr << " - SHOULD BE AVOIDED IF POSSIBLE \n";
+    opserr << "ShadowSubdomain::getNodPtr() ";
+    opserr << " - SHOULD BE AVOIDED IF POSSIBLE \n";
     
     return theNod;
 }
@@ -637,8 +636,8 @@ ShadowSubdomain::getNumMPs(void) const
 Graph &
 ShadowSubdomain::getElementGraph(void)
 {
-    cerr << "ShadowSubdomain::getElementGraph() ";
-    cerr << " - NOT YET IMPLEMENTED - EXITING\n";
+    opserr << "ShadowSubdomain::getElementGraph() ";
+    opserr << " - NOT YET IMPLEMENTED - EXITING\n";
     exit(-1);
 
     // this will never be called, needed for a strict compiler
@@ -649,8 +648,8 @@ ShadowSubdomain::getElementGraph(void)
 Graph             &
 ShadowSubdomain::getNodeGraph(void)
 {
-    cerr << "ShadowSubdomain::getNodeGraph() ";
-    cerr << " - NOT YET IMPLEMENTED - EXITING\n";
+    opserr << "ShadowSubdomain::getNodeGraph() ";
+    opserr << " - NOT YET IMPLEMENTED - EXITING\n";
     exit(-1);
 
     // this will never be called, needed for a strict compiler
@@ -791,8 +790,8 @@ int
 ShadowSubdomain::getNumExternalNodes(void) const    
 {
   if (gotRemoteData == false && buildRemote == true) {    
-      cerr << "WARNING: ShadowSubdomain::getNumExternalNodes()";
-      cerr << " - not yet received the data\n";
+      opserr << "WARNING: ShadowSubdomain::getNumExternalNodes()";
+      opserr << " - not yet received the data\n";
   }
   
   return numExternalNodes;
@@ -921,8 +920,8 @@ ShadowSubdomain::computeResidual(void)
 const Vector &
 ShadowSubdomain::getLastExternalSysResponse(void)
 {
-    cerr << "ShadowSubdomain::getLastExternalSysResponse() ";
-    cerr << " SHOULD NEVER BE CALLED\n";
+    opserr << "ShadowSubdomain::getLastExternalSysResponse() ";
+    opserr << " SHOULD NEVER BE CALLED\n";
     exit(0);
 
     // this should never be called, provided for a strict compiler
@@ -939,9 +938,9 @@ ShadowSubdomain::computeNodalResponse(void)
     msgData(0) =  ShadowActorSubdomain_computeNodalResponse;
     msgData(1) = lastChange.Size();
     if (numDOF != msgData(1)) {
-	cerr << "ShadowSubdomain::update(void)";
-	cerr << " - numDOF " << numDOF << " and size of Vector ";
-	cerr << msgData(1) << "do not agree?\n";
+	opserr << "ShadowSubdomain::update(void)";
+	opserr << " - numDOF " << numDOF << " and size of Vector ";
+	opserr << msgData(1) << "do not agree?\n";
 	numDOF = msgData(1);
     }
     this->sendID(msgData);
@@ -968,8 +967,8 @@ ShadowSubdomain::getCost(void)
 int 
 ShadowSubdomain::sendSelf(int cTag, Channel &the_Channel)
 {
-    cerr << "ShadowSubdomain::sendSelf() ";
-    cerr << " - NOT YET IMPLEMENTED\n";
+    opserr << "ShadowSubdomain::sendSelf() ";
+    opserr << " - NOT YET IMPLEMENTED\n";
     return -1;
 }
 
@@ -977,33 +976,33 @@ int
 ShadowSubdomain::recvSelf(int cTag, Channel &the_Channel, 
 			  FEM_ObjectBroker &the_Broker)    
 {
-    cerr << "ShadowSubdomain::recvSelf() ";
-    cerr << " - NOT YET IMPLEMENTED\n";
+    opserr << "ShadowSubdomain::recvSelf() ";
+    opserr << " - NOT YET IMPLEMENTED\n";
     return -1;
 }
 
 
 void 
-ShadowSubdomain::Print(ostream &s, int flag)
+ShadowSubdomain::Print(OPS_Stream &s, int flag)
 {
-    cerr << "ShadowSubdomain::Print() ";
-    cerr << " - NOT YET IMPLEMENTED\n";
+    opserr << "ShadowSubdomain::Print() ";
+    opserr << " - NOT YET IMPLEMENTED\n";
 }
 
 
 int 
 ShadowSubdomain::buildEleGraph(Graph *theEleGraph)
 {
-    cerr << "ShadowSubdomain::buildEleGraph() ";
-    cerr << " - NOT YET IMPLEMENTED\n";
+    opserr << "ShadowSubdomain::buildEleGraph() ";
+    opserr << " - NOT YET IMPLEMENTED\n";
     return -1;
 }
 
 int 
 ShadowSubdomain::buildNodeGraph(Graph *theNodeGraph)
 {
-    cerr << "ShadowSubdomain::buildNodeGraph() ";
-    cerr << " - NOT YET IMPLEMENTED\n";
+    opserr << "ShadowSubdomain::buildNodeGraph() ";
+    opserr << " - NOT YET IMPLEMENTED\n";
     return -1;
 }
 

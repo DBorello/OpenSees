@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-13 00:18:49 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Information.cpp,v $
                                                                         
                                                                         
@@ -65,8 +65,7 @@ Information::Information(const ID &val)
   theID = new ID(val);
 
   if (theID == 0)
-    g3ErrorHandler->warning("%s -- failed to allocate ID",
-			    "Information::Information");
+    opserr << "Information::Information -- failed to allocate\n";
 }
 
 Information::Information(const Vector &val) 
@@ -77,8 +76,7 @@ Information::Information(const Vector &val)
   theVector = new Vector(val);
   
   if (theVector == 0)
-    g3ErrorHandler->warning("%s -- failed to allocate Vector",
-			    "Information::Information");
+    opserr << "Information::Information -- failed to allocate Vector\n";
 }
 
 Information::Information(const Matrix &val) 
@@ -89,8 +87,7 @@ Information::Information(const Matrix &val)
   theMatrix = new Matrix(val);
   
   if (theMatrix == 0)
-    g3ErrorHandler->warning("%s -- failed to allocate Matrix",
-			    "Information::Information");
+    opserr << "Information::Information -- failed to allocate Matrix\n";
 }
 
 Information::Information(const Tensor &val) 
@@ -101,8 +98,7 @@ Information::Information(const Tensor &val)
   theTensor = new Tensor(val);
   
   if (theTensor == 0)
-    g3ErrorHandler->warning("%s -- failed to allocate Tensor",
-			    "Information::Information");
+    opserr << "Information::Iformation -- failed to allocate Tensor\n";
 }
 
 Information::~Information() 
@@ -180,7 +176,7 @@ Information::setTensor(const Tensor &newTensor)
 }
 
 void 
-Information::Print(ostream &s, int flag)
+Information::Print(OPS_Stream &s, int flag)
 {
   if (theType == IntType)
     s << theInt << " ";
@@ -192,8 +188,41 @@ Information::Print(ostream &s, int flag)
   else if (theType == VectorType && theVector != 0)
     for (int i=0; i<theVector->Size(); i++)
       s << (*theVector)(i) << " ";
-  else if (theType == MatrixType && theMatrix != 0)
-    s << *theMatrix;
+  else if (theType == MatrixType && theMatrix != 0) {
+    for (int i=0; i<theMatrix->noRows(); i++) {
+      for (int j=0; j<theMatrix->noCols(); j++)
+	s <<  (*theMatrix)(i,j) << " ";
+	s << endln;
+    }
+  } else if (theType == TensorType && theTensor != 0)
+    // No overloaded << for Tensors yet!
+    //s << *theTensor;
+    s << "No Tensor output";
+  else
+    return;
+}
+
+
+void 
+Information::Print(ofstream &s, int flag)
+{
+  if (theType == IntType)
+    s << theInt << " ";
+  else if (theType == DoubleType)
+    s << theDouble << " ";
+  else if (theType == IdType && theID != 0)
+    for (int i=0; i<theID->Size(); i++)
+      s << (*theID)(i) << " ";
+  else if (theType == VectorType && theVector != 0)
+    for (int i=0; i<theVector->Size(); i++)
+      s << (*theVector)(i) << " ";
+  else if (theType == MatrixType && theMatrix != 0) {
+    for (int i=0; i<theMatrix->noRows(); i++) {
+      for (int j=0; j<theMatrix->noCols(); j++)
+	s <<  (*theMatrix)(i,j) << " ";
+	s << endln;
+    }
+  }
   else if (theType == TensorType && theTensor != 0)
     // No overloaded << for Tensors yet!
     //s << *theTensor;

@@ -285,7 +285,7 @@ from the Element class and each subclass of Element must declare them.
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
     int displaySelf(Renderer &theViewer, int displayMode, float fact);    
-    void Print(ostream &s, int flag =0);    
+    void Print(OPS_Stream &s, int flag =0);    
     Response *setResponse(char **argv, int argc, Information &eleInformation);
     int getResponse(int responseID, Information &eleInformation);
 \end{verbatim} }
@@ -810,7 +810,7 @@ anything else is passed.
 {\sf\small
 \begin{verbatim}
 void
-MyTruss::Print(ostream &s, int flag) const
+MyTruss::Print(OPS_Stream &s, int flag) const
 {
     // compute the strain and axial force in the member
     double strain, force;
@@ -836,9 +836,9 @@ MyTruss::Print(ostream &s, int flag) const
       s << " axial load: " <<  force;
       s << " \n\t unbalanced load: " << trussR;
       s << " \t Material: " << *theMaterial;
-      s << endl;
+      s << endln;
     } else if (flag == 1) { // just print ele id, strain and force
-      s << this->getTag() << "  " << strain << "  " << force << endl;
+      s << this->getTag() << "  " << strain << "  " << force << endln;
     }
 }
 \end{verbatim} }
@@ -971,7 +971,7 @@ TclModelBuilder_MyTruss(ClientData clientData, Tcl_Interp *interp,
 	                int argc, char **argv) {
   // make sure at least one other argument to contain type of system
   if (argc != 7 && argc != 8) {
-      interp->result = "WARNING bad command - myTruss eleId iNode jNode Area matID";
+      blah->result = "WARNING bad command - myTruss eleId iNode jNode Area matID";
       return TCL_ERROR;
   }    
 
@@ -979,50 +979,50 @@ TclModelBuilder_MyTruss(ClientData clientData, Tcl_Interp *interp,
   int trussId, iNode, jNode, matID;
   double A, M = 0.0;
   if (Tcl_GetInt(interp, argv[2], &trussId) != TCL_OK) {
-     interp->result = "WARNING invalid eleId- myTruss eleId iNode jNode Area matID";
+     blah->result = "WARNING invalid eleId- myTruss eleId iNode jNode Area matID";
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[3], &iNode) != TCL_OK) {
-     interp->result = "WARNING invalid iNode- myTruss eleId iNode jNode Area matID";
+     blah->result = "WARNING invalid iNode- myTruss eleId iNode jNode Area matID";
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[4], &jNode) != TCL_OK) {
-     interp->result = "WARNING invalid jNode- myTruss eleId iNode jNode Area matID";
+     blah->result = "WARNING invalid jNode- myTruss eleId iNode jNode Area matID";
      return TCL_ERROR;
   }
 
   if (Tcl_GetDouble(interp, argv[5], &A) != TCL_OK) {
-     interp->result = "WARNING invalid A- myTruss eleId iNode jNode Area matID";
+     blah->result = "WARNING invalid A- myTruss eleId iNode jNode Area matID";
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[6], &matID) != TCL_OK) {
-     interp->result = "WARNING invalid matId- myTruss eleId iNode jNode Area matID";
+     blah->result = "WARNING invalid matId- myTruss eleId iNode jNode Area matID";
       return TCL_ERROR;
   }
   if (argc == 8 && Tcl_GetDouble(interp, argv[7], &M) != TCL_OK) {
-     interp->result = "WARNING invalid matId- myTruss eleId iNode jNode Area matID";
+     blah->result = "WARNING invalid matId- myTruss eleId iNode jNode Area matID";
      return TCL_ERROR;
   }  
   
   UniaxialMaterial *theMaterial = theModelBuilder->getUniaxialMaterial(matID);
 
   if (theMaterial == 0) {
-    cerr << "WARNING TclPlaneTruss - truss - no Material found with tag ";
-    cerr << matID << endl;
+    opserr << "WARNING TclPlaneTruss - truss - no Material found with tag ";
+    opserr << matID << endln;
     return TCL_ERROR;
   }
 
   // now create the truss and add it to the Domain
   MyTruss *theTruss = new MyTruss(trussId,iNode,jNode,*theMaterial,A,M);
   if (theTruss == 0) {
-    cerr << "WARNING TclPlaneTruss - addMyTruss - ran out of memory for node ";
-    cerr << trussId << endl;
+    opserr << "WARNING TclPlaneTruss - addMyTruss - ran out of memory for node ";
+    opserr << trussId << endln;
     return TCL_ERROR;
   }
   if (theDomain->addElement(theTruss) == false) {
     delete theTruss;
-    cerr << "WARNING TclPlaneTruss - addTruss - could not add Truss to domain ";
-    cerr << trussId << endl;
+    opserr << "WARNING TclPlaneTruss - addTruss - could not add Truss to domain ";
+    opserr << trussId << endln;
     return TCL_ERROR;
   }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-04-30 21:07:53 $
+// $Revision: 1.7 $
+// $Date: 2003-02-14 23:00:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -100,8 +100,8 @@ TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node,
     if (modID == 0 || modID->Size() == 0 ||
 	Trans == 0 || Trans->noRows() == 0) {
 	
-	cerr << "FATAL TransformationDOF_Group::TransformationDOF_Group() -";
-	cerr << " ran out of memory for size: " << modNumDOF << endl;
+	opserr << "FATAL TransformationDOF_Group::TransformationDOF_Group() -";
+	opserr << " ran out of memory for size: " << modNumDOF << endln;
 	exit(-1);
     }
 
@@ -126,8 +126,8 @@ TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node,
 	modVectors  = new Vector *[MAX_NUM_DOF+1];
 	
 	if (modMatrices == 0 || modVectors == 0) {
-	    cerr << "TransformationDOF_Group::TransformationDOF_Group(Node *) ";
-	    cerr << " ran out of memory";	    
+	    opserr << "TransformationDOF_Group::TransformationDOF_Group(Node *) ";
+	    opserr << " ran out of memory";	    
 	}
 	for (int i=0; i<MAX_NUM_DOF; i++) {
 	    modMatrices[i] = 0;
@@ -146,9 +146,9 @@ TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node,
 	    modTangent = modMatrices[modNumDOF];
 	    if (modUnbalance == 0 || modUnbalance->Size() != modNumDOF ||	
 		modTangent == 0 || modTangent->noCols() != modNumDOF)	{  
-		cerr << "TransformationDOF_Group::TransformationDOF_Group(Node *) ";
-		cerr << " ran out of memory for vector/Matrix of size :";
-		cerr << modNumDOF << endl;
+		opserr << "TransformationDOF_Group::TransformationDOF_Group(Node *) ";
+		opserr << " ran out of memory for vector/Matrix of size :";
+		opserr << modNumDOF << endln;
 		exit(-1);
 	    }
 	} else {
@@ -162,9 +162,9 @@ TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node,
 	if (modUnbalance == 0 || modTangent ==0 ||
 	    modTangent ==0 || modTangent->noRows() ==0) {
 	    
-	    cerr << "TransformationDOF_Group::TransformationDOF_Group(Node *) ";
-	    cerr << " ran out of memory for vector/Matrix of size :";
-	    cerr << modNumDOF << endl;
+	    opserr << "TransformationDOF_Group::TransformationDOF_Group(Node *) ";
+	    opserr << " ran out of memory for vector/Matrix of size :";
+	    opserr << modNumDOF << endln;
 	    exit(-1);
 	}
     }
@@ -212,8 +212,8 @@ TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node)
 	modVectors  = new Vector *[MAX_NUM_DOF+1];
 	
 	if (modMatrices == 0 || modVectors == 0) {
-	    cerr << "TransformationDOF_Group::TransformationDOF_Group(Node *) ";
-	    cerr << " ran out of memory";	    
+	    opserr << "TransformationDOF_Group::TransformationDOF_Group(Node *) ";
+	    opserr << " ran out of memory";	    
 	}
 	for (int i=0; i<MAX_NUM_DOF; i++) {
 	    modMatrices[i] = 0;
@@ -726,9 +726,9 @@ TransformationDOF_Group::doneID(void)
 	    modTangent = modMatrices[modNumDOF];
 	    if (modUnbalance == 0 || modUnbalance->Size() != modNumDOF ||	
 		modTangent == 0 || modTangent->noCols() != modNumDOF)	{  
-		cerr << "DOF_Group::DOF_Group(Node *) ";
-		cerr << " ran out of memory for vector/Matrix of size :";
-		cerr << modNumDOF << endl;
+		opserr << "DOF_Group::DOF_Group(Node *) ";
+		opserr << " ran out of memory for vector/Matrix of size :";
+		opserr << modNumDOF << endln;
 		exit(-1);
 	    }
 	} else {
@@ -742,9 +742,9 @@ TransformationDOF_Group::doneID(void)
 	if (modUnbalance == 0 || modUnbalance->Size() ==0 ||
 	    modTangent ==0 || modTangent->noRows() ==0) {
 	    
-	    cerr << "DOF_Group::DOF_Group(Node *) ";
-	    cerr << " ran out of memory for vector/Matrix of size :";
-	    cerr << modNumDOF << endl;
+	    opserr << "DOF_Group::DOF_Group(Node *) ";
+	    opserr << " ran out of memory for vector/Matrix of size :";
+	    opserr << modNumDOF << endln;
 	    exit(-1);
 	}
     }    

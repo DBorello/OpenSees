@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-20 00:37:26 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesSensitivityEvaluator.cpp,v $
 
 
@@ -43,7 +43,7 @@
 #include <GFunEvaluator.h>
 #include <RandomVariable.h>
 
-#include <fstream.h>
+#include <fstream>
 #include <tcl.h>
 #include <string.h>
 

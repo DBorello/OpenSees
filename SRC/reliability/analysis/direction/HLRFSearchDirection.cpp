@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-02 18:12:19 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/HLRFSearchDirection.cpp,v $
 
 
@@ -70,8 +70,8 @@ HLRFSearchDirection::computeSearchDirection(
 
 	// Check that the norm is not zero
 	if (normOfGradient == 0.0) {
-		cerr << "HLRFSearchDirection::computeSearchDirection() - " << endl
-			<< " the norm of the gradient is zero. " << endl;
+		opserr << "HLRFSearchDirection::computeSearchDirection() - " << endln
+			<< " the norm of the gradient is zero. " << endln;
 		return -1;
 	}
 

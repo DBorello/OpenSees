@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-12-13 00:11:10 $
+// $Revision: 1.11 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -43,6 +43,11 @@
 #include <Response.h>
 #include <FE_Datastore.h>
 
+#include <OPS_Globals.h>
+
+#include <iomanip>
+using std::ios;
+
 ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom, 
 				 char **argv, int argc,
 				 bool echoTime, double dT, char *theFileName)
@@ -58,8 +63,8 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   for (int i=0; i<numEle; i++) {
     Element *theEle = theDom.getElement(eleID(i));
     if (theEle == 0) {
-      cerr << "WARNING ElementRecorder::ElementRecorder() -";
-      cerr << " no element with tag: " << eleID(i) << " exists in Domain\n";
+      opserr << "WARNING ElementRecorder::ElementRecorder() -";
+      opserr << " no element with tag: " << eleID(i) << " exists in Domain\n";
       theResponses[i] = 0;
     } else {
       theResponses[i] = theEle->setResponse(argv, argc, eleInfo);
@@ -73,8 +78,9 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
     int fileNameLength = strlen(theFileName) + 1;
     fileName = new char[fileNameLength];
     if (fileName == 0) {
-      g3ErrorHandler->fatal("FileNodeDispRecorder::FileNodeDispRecorder - out of memory creating string %d long\n",
-			    fileNameLength);
+      opserr << "ElementRecorder::ElementRecorder - out of memory creating string " <<
+	fileNameLength << " long\n";
+      exit(-1);
     }
 
     // copy file name string
@@ -83,12 +89,14 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
     // open the file
     theFile.open(fileName, ios::out);
     if (theFile.bad()) {
-      cerr << "WARNING - ElementRecorder::ElementRecorder()";
-      cerr << " - could not open file " << fileName << endl;
+      opserr << "WARNING - ElementRecorder::ElementRecorder()";
+      opserr << " - could not open file " << fileName << endln;
     }    
+
+    opserr << *fileName;
   }
   
-  // no file .. results will be sent to cerr
+  // no file .. results will be sent to opserr
   else
     fileName = 0;
 }
@@ -118,8 +126,8 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   for (i=0; i<numEle; i++) {
     Element *theEle = theDom.getElement(eleID(i));
     if (theEle == 0) {
-      cerr << "WARNING ElementRecorder::ElementRecorder() -";
-      cerr << " no element with tag: " << eleID(i) << " exists in Domain\n";
+      opserr << "WARNING ElementRecorder::ElementRecorder() -";
+      opserr << " no element with tag: " << eleID(i) << " exists in Domain\n";
       theResponses[i] = 0;
     } else {
       theResponses[i] = theEle->setResponse(argv, argc, eleInfo);
@@ -136,8 +144,9 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   int fileNameLength = strlen(tableName) + 1;
   fileName = new char[fileNameLength];
   if (fileName == 0) {
-    g3ErrorHandler->fatal("FileNodeDispRecorder::FileNodeDispRecorder - out of memory creating string %d long\n",
-			  fileNameLength);
+      opserr << "ElementRecorder::ElementRecorder - out of memory creating string " <<
+	fileNameLength << " long\n";
+      exit(-1);
   }
 
   // copy the strings
@@ -226,12 +235,12 @@ ElementRecorder::record(int commitTag, double timeStamp)
       // print out the pseudo time if requested
       if (echoTimeFlag == true) {
 	if (!theFile) 
-	  cerr << timeStamp << " ";			
+	  opserr << timeStamp << " ";			
 	else 
 	  theFile << timeStamp << " ";	
       }
       
-      // get the responses and write to file if file or cerr specified
+      // get the responses and write to file if file or opserr specified
       // for each element do a getResponse() & print the result
       for (int i=0; i< numEle; i++) {
 	if (theResponses[i] != 0) {
@@ -245,7 +254,7 @@ ElementRecorder::record(int commitTag, double timeStamp)
 	    // a file was opened
 	    
 	    if (theFile.bad())
-	      theResponses[i]->Print(cerr);	    
+	      theResponses[i]->Print(opserr);	    
 	    else {
 	      theResponses[i]->Print(theFile);
 	      theFile << "  ";  // added for OSP
@@ -254,7 +263,7 @@ ElementRecorder::record(int commitTag, double timeStamp)
 	} 
       }
       if (theFile.bad()) 
-	cerr << endl;
+	opserr << endln;
       else {
 	theFile << " \n";
 	theFile.flush();
@@ -308,7 +317,7 @@ ElementRecorder::restart(void)
   theFile.close();
   theFile.open(fileName, ios::out);
   if (!theFile) {
-    cerr << "WARNING - FileNodeDispRecorder::restart() - could not open file ";
-    cerr << fileName << endl;
+    opserr << "WARNING - ElementRecorder::restart() - could not open file ";
+    opserr << fileName << endln;
   }    
 }

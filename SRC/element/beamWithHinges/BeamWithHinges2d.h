@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-05 22:20:37 $
+// $Revision: 1.10 $
+// $Date: 2003-02-14 23:01:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.h,v $
 
 #ifndef BeamWithHinges2d_h
@@ -84,7 +84,7 @@ class BeamWithHinges2d: public Element
   int setParameter(char **argv, int argc, Information &info);
   int updateParameter(int parameterID, Information &info);
   
-  void Print(ostream &s, int flag = 0);
+  void Print(OPS_Stream &s, int flag = 0);
   int displaySelf(Renderer &theViewer, int displayMode, float fact);
   
  protected:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-12-16 21:10:01 $
+// $Revision: 1.14 $
+// $Date: 2003-02-14 23:01:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -27,7 +27,6 @@
 // Eight node BbarBrick element
 //
 
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -111,9 +110,8 @@ connectedExternalNodes(8), load(0), Ki(0)
       materialPointers[i] = theMaterial.getCopy("ThreeDimensional") ;
 
       if (materialPointers[i] == 0) {
-
-	  g3ErrorHandler->fatal("BbarBrick::constructor %s",
-		"- failed to get a material of type: ThreeDimensional");
+	  opserr <<"BbarBrick::constructor - failed to get a material of type: ThreeDimensional\n";
+	  exit(-1);
       } //end if
       
   } //end for i 
@@ -194,7 +192,7 @@ int  BbarBrick::commitState( )
 
   // call element commitState to do any base class stuff
   if ((success = this->Element::commitState()) != 0) {
-    cerr << "Brick::commitState () - failed in base class";
+    opserr << "Brick::commitState () - failed in base class";
   }    
 
   for (int i=0; i<8; i++ ) 
@@ -231,24 +229,24 @@ int  BbarBrick::revertToStart( )
 }
 
 //print out element data
-void  BbarBrick::Print( ostream &s, int flag )
+void  BbarBrick::Print( OPS_Stream &s, int flag )
 {
-  s << endl ;
+  s << endln ;
   s << "Volume/Pressure Eight Node BbarBrick \n" ;
-  s << "Element Number: " << this->getTag() << endl ;
-  s << "Node 1 : " << connectedExternalNodes(0) << endl ;
-  s << "Node 2 : " << connectedExternalNodes(1) << endl ;
-  s << "Node 3 : " << connectedExternalNodes(2) << endl ;
-  s << "Node 4 : " << connectedExternalNodes(3) << endl ;
-  s << "Node 5 : " << connectedExternalNodes(4) << endl ;
-  s << "Node 6 : " << connectedExternalNodes(5) << endl ;
-  s << "Node 7 : " << connectedExternalNodes(6) << endl ;
-  s << "Node 8 : " << connectedExternalNodes(7) << endl ;
+  s << "Element Number: " << this->getTag() << endln ;
+  s << "Node 1 : " << connectedExternalNodes(0) << endln ;
+  s << "Node 2 : " << connectedExternalNodes(1) << endln ;
+  s << "Node 3 : " << connectedExternalNodes(2) << endln ;
+  s << "Node 4 : " << connectedExternalNodes(3) << endln ;
+  s << "Node 5 : " << connectedExternalNodes(4) << endln ;
+  s << "Node 6 : " << connectedExternalNodes(5) << endln ;
+  s << "Node 7 : " << connectedExternalNodes(6) << endln ;
+  s << "Node 8 : " << connectedExternalNodes(7) << endln ;
 
   s << "Material Information : \n " ;
   materialPointers[0]->Print( s, flag ) ;
 
-  s << endl ;
+  s << endln ;
 }
 
 //return stiffness matrix 
@@ -461,9 +459,7 @@ void  BbarBrick::zeroLoad( )
 int 
 BbarBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("BbarBrick::addLoad - load type unknown for ele with tag: %d\n",
-			  this->getTag());
-  
+  opserr << "BbarBrick::addLoad - load type unknown for ele with tag: " << this->getTag() << endln;
   return -1;
 }
 
@@ -1107,8 +1103,7 @@ int  BbarBrick::sendSelf (int commitTag, Channel &theChannel)
 
   res += theChannel.sendID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING BbarBrick::sendSelf() - %d failed to send ID\n",
-			    this->getTag());
+    opserr << "WARNING BbarBrick::sendSelf() - " << this->getTag() << "failed to send ID\n";
     return res;
   }
 
@@ -1117,7 +1112,7 @@ int  BbarBrick::sendSelf (int commitTag, Channel &theChannel)
   for (i = 0; i < 8; i++) {
     res += materialPointers[i]->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      g3ErrorHandler->warning("WARNING BbarBrick::sendSelf() - %d failed to send its Material\n",this->getTag());
+      opserr << "WARNING BbarBrick::sendSelf() - " << this->getTag() << " failed to send its Material\n";
       return res;
     }
   }
@@ -1137,7 +1132,7 @@ int  BbarBrick::recvSelf (int commitTag,
   // Quad now receives the tags of its four external nodes
   res += theChannel.recvID(dataTag, commitTag, idData);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING BbarBrick::recvSelf() - %d failed to receive ID\n", this->getTag());
+    opserr << "WARNING BbarBrick::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return res;
   }
 
@@ -1160,16 +1155,16 @@ int  BbarBrick::recvSelf (int commitTag,
       // Allocate new material with the sent class tag
       materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
       if (materialPointers[i] == 0) {
-	g3ErrorHandler->warning("BbarBrick::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
-	return -1;
+	  opserr << "BbarBrick::recvSelf() - Broker could not create NDMaterial of class type" <<
+	    matClassTag << endln;
+	  exit(-1);
       }
       // Now receive materials into the newly allocated space
       materialPointers[i]->setDbTag(matDbTag);
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn3d::recvSelf() - material " << 
+	  i << "failed to recv itself\n";
 	return res;
       }
     }
@@ -1185,9 +1180,9 @@ int  BbarBrick::recvSelf (int commitTag,
 	delete materialPointers[i];
 	materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
 	if (materialPointers[i] == 0) {
-	  g3ErrorHandler->fatal("BbarBrick::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
-	  return -1;
+	  opserr << "BbarBrick::recvSelf() - Broker could not create NDMaterial of class type" <<
+	    matClassTag << endln;
+	  exit(-1);
 	}
       materialPointers[i]->setDbTag(matDbTag);
       }
@@ -1195,8 +1190,8 @@ int  BbarBrick::recvSelf (int commitTag,
 
       res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
       if (res < 0) {
-	g3ErrorHandler->warning("BbarBrick::recvSelf() - material %d, %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn3d::recvSelf() - material " << 
+	  i << "failed to recv itself\n";
 	return res;
       }
     }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-10-02 21:43:46 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/LoadControl.cpp,v $
                                                                         
                                                                         
@@ -39,7 +39,6 @@
 #include <LoadControl.h>
 #include <AnalysisModel.h>
 #include <LinearSOE.h>
-#include <iostream.h>
 #include <Vector.h>
 #include <Channel.h>
 
@@ -52,7 +51,7 @@ LoadControl::LoadControl(double dLambda, int numIncr, double min, double max)
 {
   // to avoid divide-by-zero error on first update() ensure numIncr != 0
   if (numIncr == 0) {
-    cerr << "WARNING LoadControl::LoadControl() - numIncr set to 0, 1 assumed\n";
+    opserr << "WARNING LoadControl::LoadControl() - numIncr set to 0, 1 assumed\n";
     specNumIncrStep = 1.0;
     numIncrLastStep = 1.0;
   }
@@ -69,7 +68,7 @@ LoadControl::newStep(void)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();    
     if (theModel == 0) {
-	cerr << "LoadControl::newStep() - no associated AnalysisModel\n";
+	opserr << "LoadControl::newStep() - no associated AnalysisModel\n";
 	return -1;
     }
 
@@ -98,14 +97,14 @@ LoadControl::update(const Vector &deltaU)
     AnalysisModel *myModel = this->getAnalysisModelPtr();
     LinearSOE *theSOE = this->getLinearSOEPtr();
     if (myModel == 0 || theSOE == 0) {
-	cerr << "WARNING LoadControl::update() ";
-	cerr << "No AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING LoadControl::update() ";
+	opserr << "No AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }
 
     myModel->incrDisp(deltaU);    
     if (myModel->updateDomain() < 0) {
-      cerr << "LoadControl::update - model failed to update for new dU\n";
+      opserr << "LoadControl::update - model failed to update for new dU\n";
       return -1;
     }
 
@@ -140,7 +139,7 @@ LoadControl::sendSelf(int cTag,
   data(3) = dLambdaMin;
   data(4) = dLambdaMax;
   if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
-      cerr << "LoadControl::sendSelf() - failed to send the Vector\n";
+      opserr << "LoadControl::sendSelf() - failed to send the Vector\n";
       return -1;
   }
   return 0;
@@ -153,7 +152,7 @@ LoadControl::recvSelf(int cTag,
 {
   Vector data(5);
   if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
-      cerr << "LoadControl::sendSelf() - failed to send the Vector\n";
+      opserr << "LoadControl::sendSelf() - failed to send the Vector\n";
       deltaLambda = 0;
       return -1;
   }      
@@ -168,13 +167,13 @@ LoadControl::recvSelf(int cTag,
 
 
 void
-LoadControl::Print(ostream &s, int flag)
+LoadControl::Print(OPS_Stream &s, int flag)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theModel != 0) {
 	double currentLambda = theModel->getCurrentDomainTime();
 	s << "\t LoadControl - currentLambda: " << currentLambda;
-	s << "  deltaLambda: " << deltaLambda << endl;
+	s << "  deltaLambda: " << deltaLambda << endln;
     } else 
 	s << "\t LoadControl - no associated AnalysisModel\n";
     

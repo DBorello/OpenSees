@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:47 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/ElementalLoad.cpp,v $
                                                                         
                                                                         
@@ -79,8 +79,8 @@ ElementalLoad::setDomain(Domain *theDomain)
     for (int i=0; i<size; i++) {
       theElements[i] = theDomain->getElement((*theElementTags)(i));
       if (theElements[i] == 0) {
-	cerr << "WARNING - ElementalLoad::setDomain - ele with tag ";
-	cerr << (*theElementTags)(i) << " does not exist in the domain\n";
+	opserr << "WARNING - ElementalLoad::setDomain - ele with tag ";
+	opserr << (*theElementTags)(i) << " does not exist in the domain\n";
       }
     }
   }

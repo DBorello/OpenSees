@@ -82,6 +82,9 @@
 
 #include "stresst.h"
 
+#include <iomanip>
+using std::ios;
+
 // just send appropriate arguments to the base constructor
 //##############################################################################
 stresstensor::stresstensor (int rank_of_tensor, double initval):
@@ -1073,30 +1076,32 @@ void stresstensor::reportTensor(char * msg) const
 
 
 //##############################################################################
-ostream& operator<< (ostream& os, const stresstensor & rhs)
+OPS_Stream& operator<< (OPS_Stream& os, const stresstensor & rhs)
       {
         //if ( msg ) ::printf("%s",msg);
     
-        os.setf( ios::showpos | ios::scientific);
+	//	os.setf( ios::showpos | ios::scientific);
+
         os.precision(4);
         os.width(10);
-        //os << endln;
+
+        //os << endlnn;
     	//os << rhs.cval(1,1) << "  ";
     	//os.width(10);
     	//os << rhs.cval(1,2) << "  ";
     	//os.width(10);
-    	//os << rhs.cval(1,3) << endln;
+    	//os << rhs.cval(1,3) << endlnn;
         //os << rhs.cval(2,1) << "  ";
     	//os.width(10);
     	//os << rhs.cval(2,2) << "  ";
     	//os.width(10);
-    	//os << rhs.cval(2,3) << endln;
+    	//os << rhs.cval(2,3) << endlnn;
     	//
         //os << rhs.cval(3,1) << "  ";
     	//os.width(10);
     	//os << rhs.cval(3,2) << "  ";
     	//os.width(10);
-    	//os << rhs.cval(3,3) << endln;
+    	//os << rhs.cval(3,3) << endlnn;
         
     	os.width(10);
     	//os << "p = " << rhs.p_hydrostatic();

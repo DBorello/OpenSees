@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-10-02 17:58:25 $
+// $Revision: 1.8 $
+// $Date: 2003-02-14 23:01:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.h,v $
                                                                         
                                                                         
@@ -39,9 +39,7 @@
 //
 // What: "@(#) Matrix.h, revA"
 
-#include <iomanip.h> // BJ31May2002
-#include <iostream.h>
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 class Vector;
 class ID;
@@ -72,6 +70,7 @@ class Matrix
     
     int Solve(const Vector &V, Vector &res) const;
     int Solve(const Matrix &M, Matrix &res) const;
+    int Invert(Matrix &res) const;
 
     int addMatrix(double factThis, const Matrix &other, double factOther);
     int addMatrixProduct(double factThis, const Matrix &A, const Matrix &B, double factOther); // AB
@@ -120,16 +119,16 @@ class Matrix
     Matrix &operator-=(const Matrix &M);
 
     // methods to read/write to/from the matrix
-    void Output(ostream &s) const;
-    void Input(istream &s);
+    void Output(OPS_Stream &s) const;
+    //    void Input(istream &s);
     
     // methods added by Remo
     int  Assemble(const Matrix &V, int init_row, int init_col, double fact = 1.0);
     int  AssembleTranspose(const Matrix &V, int init_row, int init_col, double fact = 1.0);
     int  Extract (const Matrix &V, int init_row, int init_col, double fact = 1.0);
 
-    friend ostream &operator<<(ostream &s, const Matrix &M);
-    friend istream &operator>>(istream &s, Matrix &M);    
+    friend OPS_Stream &operator<<(OPS_Stream &s, const Matrix &M);
+    //    friend istream &operator>>(istream &s, Matrix &M);    
     friend Matrix operator*(double a, const Matrix &M);
     
     

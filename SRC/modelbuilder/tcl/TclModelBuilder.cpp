@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2002-10-22 19:52:00 $
+// $Revision: 1.17 $
+// $Date: 2003-02-14 23:01:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -39,7 +39,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 
 #include <Matrix.h>
 #include <Vector.h>
@@ -322,6 +321,10 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   Tcl_CreateCommand(interp, "sp", TclModelBuilder_addSP,
 		    (ClientData)NULL, NULL);
   
+  Tcl_CreateCommand(interp, "imposedMotion", 
+		    TclModelBuilder_addImposedMotionSP,
+		    (ClientData)NULL, NULL);  
+
   Tcl_CreateCommand(interp, "imposedSupportMotion", 
 		    TclModelBuilder_addImposedMotionSP,
 		    (ClientData)NULL, NULL);  
@@ -457,7 +460,7 @@ TclModelBuilder::addUniaxialMaterial(UniaxialMaterial &theMaterial)
   if (result == true)
     return 0;
   else {
-    cerr << "TclModelBuilder::addUniaxialMaterial() - failed to add material: " << theMaterial;
+    opserr << "TclModelBuilder::addUniaxialMaterial() - failed to add material: " << theMaterial;
     return -1;
   }
 }
@@ -482,7 +485,7 @@ TclModelBuilder::addNDMaterial(NDMaterial &theMaterial)
   if (result == true)
     return 0;
   else {
-    cerr << "TclModelBuilder::addNDMaterial() - failed to add material: " << theMaterial;
+    opserr << "TclModelBuilder::addNDMaterial() - failed to add material: " << theMaterial;
     return -1;
   }
 }
@@ -507,7 +510,7 @@ TclModelBuilder::addSection(SectionForceDeformation &theSection)
   if (result == true)
     return 0;
   else {
-    cerr << "TclModelBuilder::addSection() - failed to add section: " << theSection;
+    opserr << "TclModelBuilder::addSection() - failed to add section: " << theSection;
     return -1;
   }
 }
@@ -533,7 +536,7 @@ TclModelBuilder::addYS_EvolutionModel(YS_Evolution &theModel)
   if (result == true)
     return 0;
   else {
-    cerr << "TclModelBuilder::addYS_EvolutionModel() - failed to add model " << theModel;
+    opserr << "TclModelBuilder::addYS_EvolutionModel() - failed to add model " << theModel;
     return -1;
   }
 }
@@ -560,7 +563,7 @@ TclModelBuilder::addYieldSurface_BC(YieldSurface_BC &theYS)
   if (result == true)
     return 0;
   else {
-    cerr << "TclModelBuilder::addYieldSurfaceBC() - failed to add YS: " << theYS;
+    opserr << "TclModelBuilder::addYieldSurfaceBC() - failed to add YS: " << theYS;
     return -1;
   }
 }
@@ -587,7 +590,7 @@ TclModelBuilder::addPlasticMaterial(PlasticHardeningMaterial &theMat)
   if (result == true)
     return 0;
   else {
-    cerr << "TclModelBuilder::addPlasticMaterial() - failed to add Material: " << theMat;
+    opserr << "TclModelBuilder::addPlasticMaterial() - failed to add Material: " << theMat;
     return -1;
   }
 }
@@ -612,7 +615,7 @@ TclModelBuilder::addSectionRepres(SectionRepres &theSectionRepres)
   if (result == true)
     return 0;
   else {
-      cerr << "TclModelBuilder::addSectionRepres() - failed to add SectionRepres\n";
+      opserr << "TclModelBuilder::addSectionRepres() - failed to add SectionRepres\n";
       return -1;
   }
 }
@@ -636,7 +639,7 @@ TclModelBuilder::addCrdTransf2d(CrdTransf2d &theCrdTransf)
   if (result == true)
     return 0;
   else {
-    cerr << "TclModelBuilder::addCrdTransf() - failed to add crdTransf: " << theCrdTransf;
+    opserr << "TclModelBuilder::addCrdTransf() - failed to add crdTransf: " << theCrdTransf;
     return -1;
   }
 }
@@ -649,7 +652,7 @@ TclModelBuilder::addCrdTransf3d(CrdTransf3d &theCrdTransf)
   if (result == true)
     return 0;
   else {
-    cerr << "TclModelBuilder::addCrdTransf() - failed to add crdTransf: " << theCrdTransf;
+    opserr << "TclModelBuilder::addCrdTransf() - failed to add crdTransf: " << theCrdTransf;
     return -1;
   }
 }
@@ -687,10 +690,10 @@ TclModelBuilder::getCrdTransf3d(int tag)
 
 void printCommand(int argc, char **argv)
 {
-  cerr << "Input command: ";
+  opserr << "Input command: ";
   for (int i=0; i<argc; i++)
-    cerr << argv[i] << " ";
-  cerr << endl;
+    opserr << argv[i] << " ";
+  opserr << endln;
 } 
 
 int
@@ -700,7 +703,7 @@ TclModelBuilder_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
 
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed" << endl;
+    opserr << "WARNING builder has been destroyed" << endln;
     return TCL_ERROR;
   }
 
@@ -709,9 +712,9 @@ TclModelBuilder_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
 
   // make sure corect number of arguments on command line
   if (argc < 2+ndm) {
-    cerr << "WARNING insufficient arguments\n";
+    opserr << "WARNING insufficient arguments\n";
     printCommand(argc, argv);
-    cerr << "Want: node nodeTag? [ndm coordinates?] <-mass [ndf values?]>\n";
+    opserr << "Want: node nodeTag? [ndm coordinates?] <-mass [ndf values?]>\n";
     return TCL_ERROR;
   }    
 
@@ -720,8 +723,8 @@ TclModelBuilder_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
   // get the nodal id
   int nodeId;
   if (Tcl_GetInt(interp, argv[1], &nodeId) != TCL_OK) {
-    cerr << "WARNING invalid nodeTag\n";
-    cerr << "Want: node nodeTag? [ndm coordinates?] <-mass [ndf values?]>\n";
+    opserr << "WARNING invalid nodeTag\n";
+    opserr << "Want: node nodeTag? [ndm coordinates?] <-mass [ndf values?]>\n";
     return TCL_ERROR;
   }
 
@@ -730,8 +733,8 @@ TclModelBuilder_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
   if (ndm == 1) { 
     // create a node in 1d space
     if (Tcl_GetDouble(interp, argv[2], &xLoc) != TCL_OK) {
-      cerr << "WARNING invalid XCoordinate\n";
-      cerr << "node: " << nodeId << endl;
+      opserr << "WARNING invalid XCoordinate\n";
+      opserr << "node: " << nodeId << endln;
       return TCL_ERROR;
     }
     theNode = new Node(nodeId,ndf,xLoc);
@@ -740,13 +743,13 @@ TclModelBuilder_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
   else if (ndm == 2) { 
     // create a node in 2d space
     if (Tcl_GetDouble(interp, argv[2], &xLoc) != TCL_OK) {
-      cerr << "WARNING invalid XCoordinate\n";
-      cerr << "node: " << nodeId << endl;
+      opserr << "WARNING invalid XCoordinate\n";
+      opserr << "node: " << nodeId << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetDouble(interp, argv[3], &yLoc) != TCL_OK) {
-      cerr << "WARNING invalid YCoordinate\n";
-      cerr << "node: " << nodeId << endl;
+      opserr << "WARNING invalid YCoordinate\n";
+      opserr << "node: " << nodeId << endln;
       return TCL_ERROR;
     }
     theNode = new Node(nodeId,ndf,xLoc,yLoc);
@@ -755,36 +758,36 @@ TclModelBuilder_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
   else if (ndm == 3) { 
     // create a node in 3d space
     if (Tcl_GetDouble(interp, argv[2], &xLoc) != TCL_OK) {
-      cerr << "WARNING invalid XCoordinate\n";
-      cerr << "node: " << nodeId << endl;
+      opserr << "WARNING invalid XCoordinate\n";
+      opserr << "node: " << nodeId << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetDouble(interp, argv[3], &yLoc) != TCL_OK) {
-      cerr << "WARNING invalid YCoordinate\n";
-      cerr << "node: " << nodeId << endl;
+      opserr << "WARNING invalid YCoordinate\n";
+      opserr << "node: " << nodeId << endln;
       return TCL_ERROR;
     }
     if (Tcl_GetDouble(interp, argv[4], &zLoc) != TCL_OK) {
-      cerr << "WARNING invalid ZCoordinate\n";
-      cerr << "node: " << nodeId << endl;
+      opserr << "WARNING invalid ZCoordinate\n";
+      opserr << "node: " << nodeId << endln;
       return TCL_ERROR;
     }
     theNode = new Node(nodeId,ndf,xLoc,yLoc,zLoc);
   } else {
-      cerr << "WARNING invalid ndm\n";
-      cerr << "node: " << nodeId << endl;;
+      opserr << "WARNING invalid ndm\n";
+      opserr << "node: " << nodeId << endln;;
       return TCL_ERROR;
   }
 
   if (theNode == 0) {
-    cerr << "WARNING ran out of memory creating node\n";
-    cerr << "node: " << nodeId << endl;
+    opserr << "WARNING ran out of memory creating node\n";
+    opserr << "node: " << nodeId << endln;
     return TCL_ERROR;
   }
 
   if (theTclDomain->addNode(theNode) == false) {
-    cerr << "WARNING failed to add node to the domain\n";
-    cerr << "node: " << nodeId << endl;
+    opserr << "WARNING failed to add node to the domain\n";
+    opserr << "node: " << nodeId << endln;
     delete theNode; // otherwise memory leak
     return TCL_ERROR;
   }
@@ -793,16 +796,16 @@ TclModelBuilder_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
   if (argc > 2+ndm) {
     if (strcmp(argv[2+ndm],"-mass") == 0) {
       if (argc < 3+ndm+ndf) {
-        cerr << "WARNING incorrect number of nodal mass terms\n";
-        cerr << "node: " << nodeId << endl;
+        opserr << "WARNING incorrect number of nodal mass terms\n";
+        opserr << "node: " << nodeId << endln;
         return TCL_ERROR;      
       }	
       Matrix mass(ndf,ndf);
       double theMass;
       for (int i=0; i<ndf; i++) {
 	if (Tcl_GetDouble(interp, argv[i+3+ndm], &theMass) != TCL_OK) {
-	  cerr << "WARNING invalid nodal mass term\n";
-	  cerr << "node: " << nodeId << ", dof: " << i+1 << endl;
+	  opserr << "WARNING invalid nodal mass term\n";
+	  opserr << "node: " << nodeId << ", dof: " << i+1 << endln;
 	  return TCL_ERROR;
 	}
 	mass(i,i) = theMass;
@@ -957,7 +960,7 @@ TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed - load \n";    
+    opserr << "WARNING builder has been destroyed - load \n";    
     return TCL_ERROR;
   }
 
@@ -967,7 +970,7 @@ TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc
   
   // make sure at least one other argument to contain type of system
   if (argc < (2 + ndf)) {
-    cerr << "WARNING bad command - want: load nodeId " << ndf << " forces\n";
+    opserr << "WARNING bad command - want: load nodeId " << ndf << " forces\n";
     printCommand(argc, argv);
     return TCL_ERROR;
   }    
@@ -975,8 +978,8 @@ TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc
   // get the id of the node
   int nodeId;
   if (Tcl_GetInt(interp, argv[1], &nodeId) != TCL_OK) {
-    cerr << "WARNING invalid nodeId: " << argv[1];
-    cerr << " - load nodeId " << ndf << " forces\n";
+    opserr << "WARNING invalid nodeId: " << argv[1];
+    opserr << " - load nodeId " << ndf << " forces\n";
     return TCL_ERROR;
   }
 
@@ -985,8 +988,8 @@ TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc
   for (int i=0; i<ndf; i++) {
     double theForce;
     if (Tcl_GetDouble(interp, argv[2+i], &theForce) != TCL_OK) {
-      cerr << "WARNING invalid force " << i+1 << " - load " << nodeId;
-      cerr << " " << ndf << " forces\n";
+      opserr << "WARNING invalid force " << i+1 << " - load " << nodeId;
+      opserr << " " << ndf << " forces\n";
       return TCL_ERROR;
     } else
       forces(i) = theForce;
@@ -1007,8 +1010,8 @@ TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc
       if (endMarker == argc || 
 	  Tcl_GetInt(interp, argv[endMarker], &loadPatternTag) != TCL_OK) {
 
-	cerr << "WARNING invalid patternTag - load " << nodeId << " ";
-	cerr << ndf << " forces pattern patterntag\n";
+	opserr << "WARNING invalid patternTag - load " << nodeId << " ";
+	opserr << ndf << " forces pattern patterntag\n";
 	return TCL_ERROR;
       }
     }
@@ -1018,8 +1021,8 @@ TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc
   // get the current pattern tag if no tag given in i/p
   if (loadPatternTag == 123456789)
     if (theTclLoadPattern == 0) {
-	cerr << "WARNING no current load pattern - load " << nodeId;
-	cerr << " " << ndf << " forces\n";
+	opserr << "WARNING no current load pattern - load " << nodeId;
+	opserr << " " << ndf << " forces\n";
 	return TCL_ERROR;
     } else 
 	loadPatternTag = theTclLoadPattern->getTag();
@@ -1027,14 +1030,14 @@ TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc
   // create the load
   theLoad = new NodalLoad(nodeLoadTag, nodeId, forces, isLoadConst);
   if (theLoad == 0) {
-    cerr << "WARNING ran out of memory for load  - load " << nodeId;
-    cerr << " " << ndf << " forces\n";
+    opserr << "WARNING ran out of memory for load  - load " << nodeId;
+    opserr << " " << ndf << " forces\n";
     return TCL_ERROR;
   }
 
   // add the load to the domain
   if (theTclDomain->addNodalLoad(theLoad, loadPatternTag) == false) {
-    cerr << "WARNING TclModelBuilder - could not add load to domain ";
+    opserr << "WARNING TclModelBuilder - could not add load to domain ";
     printCommand(argc, argv);
     delete theLoad;
     return TCL_ERROR;
@@ -1054,7 +1057,7 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING current builder has been destroyed - eleLoad\n";    
+    opserr << "WARNING current builder has been destroyed - eleLoad\n";    
     return TCL_ERROR;
   }
 
@@ -1091,12 +1094,12 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
       count ++;
       int eleStart, eleEnd;
       if (Tcl_GetInt(interp, argv[count], &eleStart) != TCL_OK) {
-	cerr << "WARNING eleLoad -range invalid eleStart " << argv[count] << "\n";
+	opserr << "WARNING eleLoad -range invalid eleStart " << argv[count] << "\n";
 	return TCL_ERROR;
       }
       count++;
       if (Tcl_GetInt(interp, argv[count], &eleEnd) != TCL_OK) {
-	cerr << "WARNING eleLoad -range invalid eleEnd " << argv[count] << "\n";	
+	opserr << "WARNING eleLoad -range invalid eleEnd " << argv[count] << "\n";	
 	return TCL_ERROR;
       }
       count++;
@@ -1109,8 +1112,8 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
 
   // we then create the load
   if (strcmp(argv[count],"-type") != 0) {
-    cerr << "WARNING eleLoad - expecting -type option but got "
-	 << argv[count] << endl;
+    opserr << "WARNING eleLoad - expecting -type option but got "
+	 << argv[count] << endln;
     return TCL_ERROR;
   } 
   count++;
@@ -1120,13 +1123,13 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
       double wt;
       double wa = 0.0;
       if (Tcl_GetDouble(interp, argv[count], &wt) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid wt " << argv[count]
+	opserr << "WARNING eleLoad - invalid wt " << argv[count]
 	     << " for -beamUniform \n";
 	return TCL_ERROR;
       }
       count++;
       if (count < argc && Tcl_GetDouble(interp, argv[count], &wa) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid wa " << argv[count]
+	opserr << "WARNING eleLoad - invalid wa " << argv[count]
 	     << " for -beamUniform \n";
 	return TCL_ERROR;
       }
@@ -1136,26 +1139,26 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
       double wy, wz;
       double wx = 0.0;
       if (Tcl_GetDouble(interp, argv[count], &wy) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid wy " << argv[count]
+	opserr << "WARNING eleLoad - invalid wy " << argv[count]
 	     << " for -beamUniform \n";
 	return TCL_ERROR;
       }
       count++;
       if (Tcl_GetDouble(interp, argv[count], &wz) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid wz " << argv[count]
+	opserr << "WARNING eleLoad - invalid wz " << argv[count]
 	     << " for -beamUniform \n";
 	return TCL_ERROR;
       }
       count++;
       if (count < argc && Tcl_GetDouble(interp, argv[count], &wx) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid wx " << argv[count]
+	opserr << "WARNING eleLoad - invalid wx " << argv[count]
 	     << " for -beamUniform \n";
 	return TCL_ERROR;
       }
       theLoad = new Beam3dUniformLoad(eleLoadTag, wy, wz, wx, theEleTags);    
     }
     else { 
-      cerr << "WARNING eleLoad -beamUniform currently only valid only for ndm=2 or 3\n";     
+      opserr << "WARNING eleLoad -beamUniform currently only valid only for ndm=2 or 3\n";     
       return TCL_ERROR;
     }
   } else if (strcmp(argv[count],"-beamPoint") == 0) {
@@ -1164,21 +1167,21 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
       double P, x;
       double N = 0.0;
       if (Tcl_GetDouble(interp, argv[count], &P) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid P " << argv[count] << " for -beamPoint\n";		
+	opserr << "WARNING eleLoad - invalid P " << argv[count] << " for -beamPoint\n";		
 	return TCL_ERROR;
       } 
       if (Tcl_GetDouble(interp, argv[count+1], &x) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid xDivL " << argv[count+1] << " for -beamPoint\n";	
+	opserr << "WARNING eleLoad - invalid xDivL " << argv[count+1] << " for -beamPoint\n";	
 	return TCL_ERROR;
       } 
       if (count+2 < argc && Tcl_GetDouble(interp, argv[count+2], &N) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid N " << argv[count+2] << " for -beamPoint\n";		
+	opserr << "WARNING eleLoad - invalid N " << argv[count+2] << " for -beamPoint\n";		
 	return TCL_ERROR;
       } 
 
       if (x < 0.0 || x > 1.0) {
-	cerr << "WARNING eleLoad - invalid xDivL of " << x;
-	cerr << " for -beamPoint (valid range [0.0, 1.0]\n";
+	opserr << "WARNING eleLoad - invalid xDivL of " << x;
+	opserr << " for -beamPoint (valid range [0.0, 1.0]\n";
 	return TCL_ERROR;
       }
 
@@ -1188,32 +1191,32 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
       double Py, Pz, x;
       double N = 0.0;
       if (Tcl_GetDouble(interp, argv[count], &Py) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid Py " << argv[count] << " for -beamPoint\n";		
+	opserr << "WARNING eleLoad - invalid Py " << argv[count] << " for -beamPoint\n";		
 	return TCL_ERROR;
       } 
       if (Tcl_GetDouble(interp, argv[count+1], &Pz) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid Pz " << argv[count] << " for -beamPoint\n";		
+	opserr << "WARNING eleLoad - invalid Pz " << argv[count] << " for -beamPoint\n";		
 	return TCL_ERROR;
       } 
       if (Tcl_GetDouble(interp, argv[count+2], &x) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid xDivL " << argv[count+2] << " for -beamPoint\n";	
+	opserr << "WARNING eleLoad - invalid xDivL " << argv[count+2] << " for -beamPoint\n";	
 	return TCL_ERROR;
       } 
       if (count+3 < argc && Tcl_GetDouble(interp, argv[count+3], &N) != TCL_OK) {
-	cerr << "WARNING eleLoad - invalid N " << argv[count+3] << " for -beamPoint\n";		
+	opserr << "WARNING eleLoad - invalid N " << argv[count+3] << " for -beamPoint\n";		
 	return TCL_ERROR;
       } 
 
       if (x < 0.0 || x > 1.0) {
-	cerr << "WARNING eleLoad - invalid xDivL of " << x;
-	cerr << " for -beamPoint (valid range [0.0, 1.0]\n";
+	opserr << "WARNING eleLoad - invalid xDivL of " << x;
+	opserr << " for -beamPoint (valid range [0.0, 1.0]\n";
 	return TCL_ERROR;
       }
 
       theLoad = new Beam3dPointLoad(eleLoadTag, Py, Pz, x, theEleTags, N);    
     }
     else {
-      cerr << "WARNING eleLoad -beamPoint type currently only valid only for ndm=2\n";
+      opserr << "WARNING eleLoad -beamPoint type currently only valid only for ndm=2\n";
       return TCL_ERROR;
     }  
   }
@@ -1231,20 +1234,20 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
       // Four temps given, Temp change at top node 1, bottom node 1, top node 2, bottom node 2.
       if (argc-count == 4){
 	if (Tcl_GetDouble(interp, argv[count], &temp1) != TCL_OK) {
-	  cerr << "WARNING eleLoad - invalid Ttop1 " << argv[count] << " for -beamTemp\n";		
+	  opserr << "WARNING eleLoad - invalid Ttop1 " << argv[count] << " for -beamTemp\n";		
 	  return TCL_ERROR;
 	} 
       
 	if (Tcl_GetDouble(interp, argv[count+1],&temp2 ) != TCL_OK) {
-	  cerr << "WARNING eleLoad - invalid Tbot1 " << argv[count+1] << " for -beamTemp\n";	
+	  opserr << "WARNING eleLoad - invalid Tbot1 " << argv[count+1] << " for -beamTemp\n";	
 	  return TCL_ERROR;
 	} 
 	if (Tcl_GetDouble(interp, argv[count+2], &temp3) != TCL_OK) {
-	  cerr << "WARNING eleLoad - invalid Ttop2 " << argv[count+1] << " for -beamTemp\n";	
+	  opserr << "WARNING eleLoad - invalid Ttop2 " << argv[count+1] << " for -beamTemp\n";	
 	  return TCL_ERROR;
 	} 
 	if (Tcl_GetDouble(interp, argv[count+3], &temp4) != TCL_OK) {
-	  cerr << "WARNING eleLoad - invalid Tbot2 " << argv[count+1] << " for -beamTemp\n";	
+	  opserr << "WARNING eleLoad - invalid Tbot2 " << argv[count+1] << " for -beamTemp\n";	
 	  return TCL_ERROR;
 	} 
 	
@@ -1254,12 +1257,12 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
       // Two temps given, temp change at top, temp at bottom of element
       else if (argc-count == 2) {
 	if (Tcl_GetDouble(interp, argv[count], &temp1) != TCL_OK) {
-	  cerr << "WARNING eleLoad - invalid Ttop " << argv[count] << " for -beamTemp\n";		
+	  opserr << "WARNING eleLoad - invalid Ttop " << argv[count] << " for -beamTemp\n";		
 	  return TCL_ERROR;
 	} 
 	
 	if (Tcl_GetDouble(interp, argv[count+1],&temp2 ) != TCL_OK) {
-	  cerr << "WARNING eleLoad - invalid Tbot " << argv[count+1] << " for -beamTemp\n";	
+	  opserr << "WARNING eleLoad - invalid Tbot " << argv[count+1] << " for -beamTemp\n";	
 	  return TCL_ERROR;
 	}
 	theLoad=0;
@@ -1268,7 +1271,7 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
       // One twmp change give, uniform temp change in element
       else if (argc-count == 1) {
 	if (Tcl_GetDouble(interp, argv[count],&temp1 ) != TCL_OK) {
-	  cerr << "WARNING eleLoad - invalid Tbot " << argv[count+1] << " for -beamTemp\n";	
+	  opserr << "WARNING eleLoad - invalid Tbot " << argv[count+1] << " for -beamTemp\n";	
 	  return TCL_ERROR;
 	}
 	theLoad=0;
@@ -1280,16 +1283,16 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
 	theLoad = new Beam2dTempLoad(eleLoadTag, theEleTags);
       }
       else {
-	cerr << "WARNING eleLoad -beamTempLoad invalid number of temperature aguments,/n looking for 0, 1, 2 or 4 arguments.\n";
+	opserr << "WARNING eleLoad -beamTempLoad invalid number of temperature aguments,/n looking for 0, 1, 2 or 4 arguments.\n";
       }
     } else {
-      cerr << "WARNING eleLoad -beamTempLoad type currently only valid only for ndm=2\n";
+      opserr << "WARNING eleLoad -beamTempLoad type currently only valid only for ndm=2\n";
       return TCL_ERROR;
     }  
   }
 
   if (theLoad == 0) {
-    cerr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+    opserr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
     return TCL_ERROR;
   }
 
@@ -1298,8 +1301,8 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
 
   // add the load to the domain
   if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
-    cerr << "WARNING eleLoad - could not add following load to domain:\n ";
-    cerr << theLoad;
+    opserr << "WARNING eleLoad - could not add following load to domain:\n ";
+    opserr << theLoad;
     delete theLoad;
     return TCL_ERROR;
   }
@@ -1317,7 +1320,7 @@ TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed - load \n";    
+    opserr << "WARNING builder has been destroyed - load \n";    
     return TCL_ERROR;
   }
 
@@ -1325,7 +1328,7 @@ TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc
 
   // make sure at least one other argument to contain type of system
   if (argc < (2 + ndf)) {
-    cerr << "WARNING bad command - want: mass nodeId " << ndf << " mass values\n";
+    opserr << "WARNING bad command - want: mass nodeId " << ndf << " mass values\n";
     printCommand(argc, argv);
     return TCL_ERROR;
   }    
@@ -1333,8 +1336,8 @@ TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc
   // get the id of the node
   int nodeId;
   if (Tcl_GetInt(interp, argv[1], &nodeId) != TCL_OK) {
-    cerr << "WARNING invalid nodeId: " << argv[1];
-    cerr << " - mass nodeId " << ndf << " forces\n";
+    opserr << "WARNING invalid nodeId: " << argv[1];
+    opserr << " - mass nodeId " << ndf << " forces\n";
     return TCL_ERROR;
   }
 
@@ -1343,8 +1346,8 @@ TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc
 
   if (theNode == 0)
   {
-    cerr << "WARNING failed to get node pointer from the domain\n";
-    cerr << "node: " << nodeId << endl;
+    opserr << "WARNING failed to get node pointer from the domain\n";
+    opserr << "node: " << nodeId << endln;
     return TCL_ERROR;
   }
 
@@ -1355,8 +1358,8 @@ TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc
   {
      if (Tcl_GetDouble(interp, argv[i+2], &theMass) != TCL_OK) 
      {
-	  cerr << "WARNING invalid nodal mass term\n";
-	  cerr << "node: " << nodeId << ", dof: " << i+1 << endl;
+	  opserr << "WARNING invalid nodal mass term\n";
+	  opserr << "node: " << nodeId << ", dof: " << i+1 << endln;
 	  return TCL_ERROR;
       }
       mass(i,i) = theMass;
@@ -1378,7 +1381,7 @@ TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int 
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed - elasticBeam \n";    
+    opserr << "WARNING builder has been destroyed - elasticBeam \n";    
     return TCL_ERROR;
   }
 
@@ -1387,7 +1390,7 @@ TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int 
 
   // check number of arguments
   if (argc < (2 + ndf)) {
-    cerr << "WARNING bad command - want: fix nodeId " << ndf << " [0,1] conditions";
+    opserr << "WARNING bad command - want: fix nodeId " << ndf << " [0,1] conditions";
     printCommand(argc, argv);
     return TCL_ERROR;
   }    
@@ -1395,7 +1398,7 @@ TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int 
   // get the id of the node
   int nodeId;
   if (Tcl_GetInt(interp, argv[1], &nodeId) != TCL_OK) {
-      cerr << "WARNING invalid nodeId - fix nodeId " << ndf << " [0,1] conditions\n";
+      opserr << "WARNING invalid nodeId - fix nodeId " << ndf << " [0,1] conditions\n";
       return TCL_ERROR;
   }
 
@@ -1403,21 +1406,21 @@ TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int 
   for (int i=0; i<ndf; i++) {
     int theFixity;
     if (Tcl_GetInt(interp, argv[2+i], &theFixity) != TCL_OK) {
-      cerr << "WARNING invalid fixity " << i+1 << " - load " << nodeId;
-      cerr << " " << ndf << " fixities\n";
+      opserr << "WARNING invalid fixity " << i+1 << " - load " << nodeId;
+      opserr << " " << ndf << " fixities\n";
       return TCL_ERROR;
     } else {
       if (theFixity != 0) {
 	// create a homogeneous constraint
 	SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
 	if (theSP == 0) {
-	  cerr << "WARNING ran out of memory for SP_Constraint ";
-	  cerr << "fix " << nodeId << " " << ndf << " [0,1] conditions\n";
+	  opserr << "WARNING ran out of memory for SP_Constraint ";
+	  opserr << "fix " << nodeId << " " << ndf << " [0,1] conditions\n";
 	  return TCL_ERROR;
 	}
 	if (theTclDomain->addSP_Constraint(theSP) == false) {
-	  cerr << "WARNING could not add SP_Constraint to domain - fix";
-	  cerr << nodeId << " " << ndf << " [0,1] conditions\n";
+	  opserr << "WARNING could not add SP_Constraint to domain - fix";
+	  opserr << nodeId << " " << ndf << " [0,1] conditions\n";
 	  delete theSP;
 	  return TCL_ERROR;
 	}
@@ -1436,7 +1439,7 @@ TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed - elasticBeam \n";    
+    opserr << "WARNING builder has been destroyed - elasticBeam \n";    
     return TCL_ERROR;
   }
 
@@ -1445,7 +1448,7 @@ TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
 
   // check number of arguments
   if (argc < (2 + ndf)) {
-    cerr << "WARNING bad command - want: fixX xLoc " << ndf << " [0,1] conditions";
+    opserr << "WARNING bad command - want: fixX xLoc " << ndf << " [0,1] conditions";
     printCommand(argc, argv);
     return TCL_ERROR;
   }    
@@ -1453,7 +1456,7 @@ TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
   // get the xCrd of nodes to be constrained
   double xLoc;
   if (Tcl_GetDouble(interp, argv[1], &xLoc) != TCL_OK) {
-      cerr << "WARNING invalid xCrd - fixX xLoc " << ndf << " [0,1] conditions\n";
+      opserr << "WARNING invalid xCrd - fixX xLoc " << ndf << " [0,1] conditions\n";
       return TCL_ERROR;
   }
 
@@ -1461,8 +1464,8 @@ TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
   ID fixity(ndf);
   for (int i=0; i<ndf; i++) {
     if (Tcl_GetInt(interp, argv[2+i], &fixity(i)) != TCL_OK) {
-      cerr << "WARNING invalid fixity " << i+1 << " - fixX " << xLoc;
-      cerr << " " << ndf << " fixities\n";
+      opserr << "WARNING invalid fixity " << i+1 << " - fixX " << xLoc;
+      opserr << " " << ndf << " fixities\n";
       return TCL_ERROR;
     } 
   }
@@ -1473,7 +1476,7 @@ TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
   if (argc >= (4 + ndf)) {
     if (strcmp(argv[2+ndf],"-tol") == 0)
     if (Tcl_GetDouble(interp, argv[3+ndf], &tol) != TCL_OK) {
-      cerr << "WARNING invalid tol specified - fixX " << xLoc << endl;
+      opserr << "WARNING invalid tol specified - fixX " << xLoc << endln;
       return TCL_ERROR;
     }       
   }
@@ -1501,13 +1504,13 @@ TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
 	  // create a homogeneous constraint
 	  SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
 	  if (theSP == 0) {
-	    cerr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
-	    cerr << " - fixX " << xLoc << " " << ndf << " [0,1] conditions\n";
+	    opserr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
+	    opserr << " - fixX " << xLoc << " " << ndf << " [0,1] conditions\n";
 	    return TCL_ERROR;
 	  }
 	  if (theTclDomain->addSP_Constraint(theSP) == false) {
-	    cerr << "WARNING could not add SP_Constraint to domain for node " << nodeId;
-	    cerr << " - fixX " << xLoc << " " << ndf << " [0,1] conditions\n";
+	    opserr << "WARNING could not add SP_Constraint to domain for node " << nodeId;
+	    opserr << " - fixX " << xLoc << " " << ndf << " [0,1] conditions\n";
 	    delete theSP;
 	    return TCL_ERROR;
 	  }
@@ -1530,7 +1533,7 @@ TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed - elasticBeam \n";    
+    opserr << "WARNING builder has been destroyed - elasticBeam \n";    
     return TCL_ERROR;
   }
 
@@ -1539,7 +1542,7 @@ TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
 
   // check number of arguments
   if (argc < (2 + ndf)) {
-    cerr << "WARNING bad command - want: fixY yLoc " << ndf << " [0,1] conditions";
+    opserr << "WARNING bad command - want: fixY yLoc " << ndf << " [0,1] conditions";
     printCommand(argc, argv);
     return TCL_ERROR;
   }    
@@ -1547,7 +1550,7 @@ TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
   // get the yCrd of nodes to be constrained
   double yLoc;
   if (Tcl_GetDouble(interp, argv[1], &yLoc) != TCL_OK) {
-      cerr << "WARNING invalid yCrd - fixY yLoc " << ndf << " [0,1] conditions\n";
+      opserr << "WARNING invalid yCrd - fixY yLoc " << ndf << " [0,1] conditions\n";
       return TCL_ERROR;
   }
 
@@ -1555,8 +1558,8 @@ TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
   ID fixity(ndf);
   for (int i=0; i<ndf; i++) {
     if (Tcl_GetInt(interp, argv[2+i], &fixity(i)) != TCL_OK) {
-      cerr << "WARNING invalid fixity " << i+1 << " - fixY " << yLoc;
-      cerr << " " << ndf << " fixities\n";
+      opserr << "WARNING invalid fixity " << i+1 << " - fixY " << yLoc;
+      opserr << " " << ndf << " fixities\n";
       return TCL_ERROR;
     } 
   }
@@ -1567,7 +1570,7 @@ TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
   if (argc >= (4 + ndf)) {
     if (strcmp(argv[2+ndf],"-tol") == 0)
     if (Tcl_GetDouble(interp, argv[3+ndf], &tol) != TCL_OK) {
-      cerr << "WARNING invalid tol specified - fixY " << yLoc << endl;
+      opserr << "WARNING invalid tol specified - fixY " << yLoc << endln;
       return TCL_ERROR;
     }       
   }
@@ -1597,13 +1600,13 @@ TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
 	    // create a homogeneous constraint
 	    SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
 	    if (theSP == 0) {
-	      cerr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
-	      cerr << " - fixY " << yLoc << " " << ndf << " [0,1] conditions\n";
+	      opserr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
+	      opserr << " - fixY " << yLoc << " " << ndf << " [0,1] conditions\n";
 	      return TCL_ERROR;
 	    }
 	    if (theTclDomain->addSP_Constraint(theSP) == false) {
-	      cerr << "WARNING could not add SP_Constraint to domain for node " << nodeId;
-	      cerr << " - fixY " << yLoc << " " << ndf << " [0,1] conditions\n";
+	      opserr << "WARNING could not add SP_Constraint to domain for node " << nodeId;
+	      opserr << " - fixY " << yLoc << " " << ndf << " [0,1] conditions\n";
 	      delete theSP;
 	      return TCL_ERROR;
 	    }
@@ -1626,7 +1629,7 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed - elasticBeam \n";    
+    opserr << "WARNING builder has been destroyed - elasticBeam \n";    
     return TCL_ERROR;
   }
 
@@ -1635,7 +1638,7 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
 
   // check number of arguments
   if (argc < (2 + ndf)) {
-    cerr << "WARNING bad command - want: fixZ zLoc " << ndf << " [0,1] conditions";
+    opserr << "WARNING bad command - want: fixZ zLoc " << ndf << " [0,1] conditions";
     printCommand(argc, argv);
     return TCL_ERROR;
   }    
@@ -1643,7 +1646,7 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
   // get the yCrd of nodes to be constrained
   double zLoc;
   if (Tcl_GetDouble(interp, argv[1], &zLoc) != TCL_OK) {
-      cerr << "WARNING invalid zCrd - fixZ zLoc " << ndf << " [0,1] conditions\n";
+      opserr << "WARNING invalid zCrd - fixZ zLoc " << ndf << " [0,1] conditions\n";
       return TCL_ERROR;
   }
 
@@ -1651,8 +1654,8 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
   ID fixity(ndf);
   for (int i=0; i<ndf; i++) {
     if (Tcl_GetInt(interp, argv[2+i], &fixity(i)) != TCL_OK) {
-      cerr << "WARNING invalid fixity " << i+1 << " - fixZ " << zLoc;
-      cerr << " " << ndf << " fixities\n";
+      opserr << "WARNING invalid fixity " << i+1 << " - fixZ " << zLoc;
+      opserr << " " << ndf << " fixities\n";
       return TCL_ERROR;
     } 
   }
@@ -1663,7 +1666,7 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
   if (argc >= (4 + ndf)) {
     if (strcmp(argv[2+ndf],"-tol") == 0)
     if (Tcl_GetDouble(interp, argv[3+ndf], &tol) != TCL_OK) {
-      cerr << "WARNING invalid tol specified - fixZ " << zLoc << endl;
+      opserr << "WARNING invalid tol specified - fixZ " << zLoc << endln;
       return TCL_ERROR;
     }       
   }
@@ -1693,13 +1696,13 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
 	    // create a homogeneous constraint
 	    SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, i, 0.0);
 	    if (theSP == 0) {
-	      cerr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
-	      cerr << " - fixZ " << zLoc << " " << ndf << " [0,1] conditions\n";
+	      opserr << "WARNING ran out of memory for SP_Constraint at node " << nodeId;
+	      opserr << " - fixZ " << zLoc << " " << ndf << " [0,1] conditions\n";
 	      return TCL_ERROR;
 	    }
 	    if (theTclDomain->addSP_Constraint(theSP) == false) {
-	      cerr << "WARNING could not add SP_Constraint to domain for node " << nodeId;
-	      cerr << " - fixZ " << zLoc << " " << ndf << " [0,1] conditions\n";
+	      opserr << "WARNING could not add SP_Constraint to domain for node " << nodeId;
+	      opserr << " - fixZ " << zLoc << " " << ndf << " [0,1] conditions\n";
 	      delete theSP;
 	      return TCL_ERROR;
 	    }
@@ -1724,7 +1727,7 @@ TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed - sp \n";    
+    opserr << "WARNING builder has been destroyed - sp \n";    
     return TCL_ERROR;
   }
 
@@ -1732,7 +1735,7 @@ TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
 
   // check number of arguments
   if (argc < 4) {
-    cerr << "WARNING bad command - want: sp nodeId dofID value";
+    opserr << "WARNING bad command - want: sp nodeId dofID value";
     printCommand(argc, argv);
     return TCL_ERROR;
   }    
@@ -1742,19 +1745,19 @@ TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
   double value;
 
   if (Tcl_GetInt(interp, argv[1], &nodeId) != TCL_OK) {
-    cerr << "WARNING invalid nodeId: " << argv[1] << " -  sp nodeId dofID value\n";
+    opserr << "WARNING invalid nodeId: " << argv[1] << " -  sp nodeId dofID value\n";
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[2], &dofId) != TCL_OK) {
-    cerr << "WARNING invalid dofId: " << argv[2] << " -  sp ";
-    cerr << nodeId << " dofID value\n";
+    opserr << "WARNING invalid dofId: " << argv[2] << " -  sp ";
+    opserr << nodeId << " dofID value\n";
       return TCL_ERROR;
   }
   dofId--; // DECREMENT THE DOF VALUE BY 1 TO GO TO OUR C++ INDEXING
 
   if (Tcl_GetDouble(interp, argv[3], &value) != TCL_OK) {
-    cerr << "WARNING invalid value: " << argv[3] << " -  sp ";
-    cerr << nodeId << " dofID value\n";
+    opserr << "WARNING invalid value: " << argv[3] << " -  sp ";
+    opserr << nodeId << " dofID value\n";
       return TCL_ERROR;
   }
 
@@ -1774,8 +1777,8 @@ TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
       if (endMarker == argc || 
 	  Tcl_GetInt(interp, argv[endMarker], &loadPatternTag) != TCL_OK) {
 
-	cerr << "WARNING invalid patternTag - load " << nodeId << " ";
-	cerr << ndf << " forces pattern patterntag\n";
+	opserr << "WARNING invalid patternTag - load " << nodeId << " ";
+	opserr << ndf << " forces pattern patterntag\n";
 	return TCL_ERROR;
       }
     }  
@@ -1785,7 +1788,7 @@ TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
   // if load pattern tag has not changed - get the pattern tag from current one
   if (loadPatternTag == 123456789) {
     if (theTclLoadPattern == 0) {
-      cerr << "WARNING no current pattern - sp " << nodeId << " dofID value\n";
+      opserr << "WARNING no current pattern - sp " << nodeId << " dofID value\n";
       return TCL_ERROR;
     } else	
       loadPatternTag = theTclLoadPattern->getTag();
@@ -1803,12 +1806,12 @@ TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
   SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, dofId, value, isSpConst);
 
   if (theSP == 0) {
-    cerr << "WARNING ran out of memory for SP_Constraint ";
-    cerr << " - sp " << nodeId << " dofID value\n";
+    opserr << "WARNING ran out of memory for SP_Constraint ";
+    opserr << " - sp " << nodeId << " dofID value\n";
     return TCL_ERROR;
   }
   if (theTclDomain->addSP_Constraint(theSP, loadPatternTag) == false) {
-    cerr << "WARNING could not add SP_Constraint to domain ";
+    opserr << "WARNING could not add SP_Constraint to domain ";
     printCommand(argc, argv);
     delete theSP;
     return TCL_ERROR;
@@ -1828,7 +1831,7 @@ TclModelBuilder_addImposedMotionSP(ClientData clientData,
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed - sp \n";    
+    opserr << "WARNING builder has been destroyed - sp \n";    
     return TCL_ERROR;
   }
 
@@ -1836,7 +1839,7 @@ TclModelBuilder_addImposedMotionSP(ClientData clientData,
 
   // check number of arguments
   if (argc < 4) {
-    cerr << "WARNING bad command - want: imposedSupportMotion nodeId dofID gMotionID\n";
+    opserr << "WARNING bad command - want: imposedMotion nodeId dofID gMotionID\n";
     printCommand(argc, argv);
     return TCL_ERROR;
   }    
@@ -1845,21 +1848,21 @@ TclModelBuilder_addImposedMotionSP(ClientData clientData,
   int nodeId, dofId, gMotionID;
 
   if (Tcl_GetInt(interp, argv[1], &nodeId) != TCL_OK) {
-    cerr << "WARNING invalid nodeId: " << argv[1];
-    cerr << " - imposedSupportMotion nodeId dofID gMotionID\n";    
+    opserr << "WARNING invalid nodeId: " << argv[1];
+    opserr << " - imposedMotion nodeId dofID gMotionID\n";    
     return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[2], &dofId) != TCL_OK) {
-    cerr << "WARNING invalid dofId: " << argv[2] << " -  imposedSupportMotion ";
-    cerr << nodeId << " dofID gMotionID\n";    
+    opserr << "WARNING invalid dofId: " << argv[2] << " -  imposedMotion ";
+    opserr << nodeId << " dofID gMotionID\n";    
       return TCL_ERROR;
   }
   dofId--; // DECREMENT THE DOF VALUE BY 1 TO GO TO OUR C++ INDEXING
 
   if (Tcl_GetInt(interp, argv[3], &gMotionID) != TCL_OK) {
-    cerr << "WARNING invalid gMotionID: " << argv[3] << " -  imposedSupportMotion ";
-    cerr << nodeId << " dofID gMotionID\n";
+    opserr << "WARNING invalid gMotionID: " << argv[3] << " -  imposedMotion ";
+    opserr << nodeId << " dofID gMotionID\n";
     return TCL_ERROR;
   }
 
@@ -1874,8 +1877,8 @@ TclModelBuilder_addImposedMotionSP(ClientData clientData,
   
   GroundMotion *theGMotion = thePattern->getMotion(gMotionID);
   if (theGMotion == 0) {
-    cerr << "WARNING no GroundMotion with tag: " << argv[3];
-    cerr << " in current MultipleSupportPattern\n";
+    opserr << "WARNING no GroundMotion with tag: " << argv[3];
+    opserr << " in current MultipleSupportPattern\n";
     return TCL_ERROR;      
   }
   
@@ -1896,13 +1899,13 @@ TclModelBuilder_addImposedMotionSP(ClientData clientData,
 				*theGMotion, false);
   }
   if (theSP == 0) {
-    cerr << "WARNING ran out of memory for ImposedMotionSP ";
-    cerr << " -  imposedSupportMotion ";
-    cerr << nodeId << " " << dofId++ << " " << gMotionID << endl;
+    opserr << "WARNING ran out of memory for ImposedMotionSP ";
+    opserr << " -  imposedMotion ";
+    opserr << nodeId << " " << dofId++ << " " << gMotionID << endln;
     return TCL_ERROR;
   }
   if (thePattern->addSP_Constraint(theSP) == false) {
-    cerr << "WARNING could not add SP_Constraint to pattern ";
+    opserr << "WARNING could not add SP_Constraint to pattern ";
     printCommand(argc, argv);
     delete theSP;
     return TCL_ERROR;
@@ -1923,13 +1926,13 @@ TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
 {
         // Ensure the destructor has not been called
         if (theTclBuilder == 0) {
-	  cerr << "WARNING builder has been destroyed - equalDOF \n";
+	  opserr << "WARNING builder has been destroyed - equalDOF \n";
 	  return TCL_ERROR;
         }
 
         // Check number of arguments
         if (argc < 4) {
-	  cerr << "WARNING bad command - want: equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
+	  opserr << "WARNING bad command - want: equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
 	  printCommand (argc, argv);
 	  return TCL_ERROR;
         }
@@ -1938,12 +1941,12 @@ TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
         int RnodeID, CnodeID, dofID;
 
         if (Tcl_GetInt (interp, argv[1], &RnodeID) != TCL_OK) {
-	  cerr << "WARNING invalid RnodeID: " << argv[1]
+	  opserr << "WARNING invalid RnodeID: " << argv[1]
 	       << " equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
 	  return TCL_ERROR;
         }
         if (Tcl_GetInt (interp, argv[2], &CnodeID) != TCL_OK) {
-	  cerr << "WARNING invalid CnodeID: " << argv[2]
+	  opserr << "WARNING invalid CnodeID: " << argv[2]
 	       << " equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
 	  return TCL_ERROR;
         }
@@ -1962,7 +1965,7 @@ TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
         // Read the degrees of freedom which are to be coupled
         for (i = 3, j = 0; i < argc; i++, j++) {
 	  if (Tcl_GetInt (interp, argv[i], &dofID) != TCL_OK) {
-	    cerr << "WARNING invalid dofID: " << argv[3]
+	    opserr << "WARNING invalid dofID: " << argv[3]
 		 << " equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
 	    return TCL_ERROR;
 	  }
@@ -1977,14 +1980,14 @@ TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
         // Create the multi-point constraint
         MP_Constraint *theMP = new MP_Constraint (numMPs, RnodeID, CnodeID, Ccr, rcDOF, rcDOF);
         if (theMP == 0) {
-	  cerr << "WARNING ran out of memory for equalDOF MP_Constraint ";
+	  opserr << "WARNING ran out of memory for equalDOF MP_Constraint ";
 	  printCommand (argc, argv);
 	  return TCL_ERROR;
         }
 
         // Add the multi-point constraint to the domain
         if (theTclDomain->addMP_Constraint (theMP) == false) {
-	  cerr << "WARNING could not add equalDOF MP_Constraint to domain ";
+	  opserr << "WARNING could not add equalDOF MP_Constraint to domain ";
 	  printCommand(argc, argv);
 	  delete theMP;
 	  return TCL_ERROR;
@@ -1999,7 +2002,7 @@ int
 TclModelBuilder_addMP(ClientData clientData, Tcl_Interp *interp, int argc,   
 			   char **argv)
 {
-  cerr << "WARNING - TclModelBuilder_addMP() not yet implemented\n";
+  opserr << "WARNING - TclModelBuilder_addMP() not yet implemented\n";
   return TCL_OK;
 }
 
@@ -2010,34 +2013,34 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
 
   int ndm = theTclBuilder->getNDM();
   if (ndm < 2) {
-    cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
-    cerr << " : model dimension (ndm) must be at leat 2 " << endl;
+    opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    opserr << " : model dimension (ndm) must be at leat 2 " << endln;
     return TCL_ERROR;
   }
 
   if (argc < 8) {
-    cerr << "WARNING incorrect numer of args :block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    opserr << "WARNING incorrect numer of args :block2D numX? numY? startNode? startEle? eleType? eleArgs?";
     return TCL_ERROR;
   }
   int numX, numY, startNodeNum, startEleNum;
   if (Tcl_GetInt (interp, argv[1], &numX) != TCL_OK) {
-    cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
-    cerr << " : invalid numX: " << argv[1] << endl;
+    opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    opserr << " : invalid numX: " << argv[1] << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt (interp, argv[2], &numY) != TCL_OK) {
-    cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
-    cerr << " : invalid numY: " << argv[2] << endl;
+    opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    opserr << " : invalid numY: " << argv[2] << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt (interp, argv[3], &startNodeNum) != TCL_OK) {
-    cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
-    cerr << " : invalid startNode: " << argv[3] << endl;
+    opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    opserr << " : invalid startNode: " << argv[3] << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt (interp, argv[4], &startEleNum) != TCL_OK) {
-    cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
-    cerr << " : invalid startEle: " << argv[4] << endl;
+    opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    opserr << " : invalid startEle: " << argv[4] << endln;
     return TCL_ERROR;
   }
 
@@ -2051,20 +2054,20 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
   if (argc == 10) {
     if (strcmp(argv[7],"-numEleNodes") == 0) 
       if (Tcl_GetInt (interp, argv[8], &numNodes) != TCL_OK) {
-	cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
-	cerr << " -numEleNodes numNodes?: invalid numNodes: " << argv[8] << endl;
+	opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+	opserr << " -numEleNodes numNodes?: invalid numNodes: " << argv[8] << endln;
 	return TCL_ERROR;
       }
     if (numNodes != 4 && numNodes != 9) {
-      cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs? ";
-      cerr << "-numEleNodes numNodes?: invalid numNodes: " << argv[8] << " 4 or 9 only\n";
+      opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs? ";
+      opserr << "-numEleNodes numNodes?: invalid numNodes: " << argv[8] << " 4 or 9 only\n";
       return TCL_ERROR;
     }
 
     if (numNodes == 9) {
       if (((numX % 2) != 0) || ((numY % 2) != 0)) {
-	cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs? ";
-	cerr << "-numEleNodes 9: numX and numY MUST BOTH BE EVEN\n";
+	opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs? ";
+	opserr << "-numEleNodes 9: numX and numY MUST BOTH BE EVEN\n";
 	return TCL_ERROR;
       }
     }
@@ -2087,29 +2090,29 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
   int count = 0;
   while (count < argcNodes) {
     if ((count + ndm + 1) >  argcNodes) {
-      cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
-      cerr << " : invalid number of node args: " << argv[7] << endl;
+      opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+      opserr << " : invalid number of node args: " << argv[7] << endln;
       Tcl_Free((char *)argvNodes);
       return TCL_ERROR; 
     }
     int nodeTag;
     double value;
     if (Tcl_GetInt (interp, argvNodes[count], &nodeTag) != TCL_OK) {
-      cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
-      cerr << " : invalid node tag: " << argvNodes[count] << endl;
+      opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+      opserr << " : invalid node tag: " << argvNodes[count] << endln;
       Tcl_Free((char *)argvNodes);
       return TCL_ERROR; 
     }
     if (nodeTag < 1 || nodeTag > 9) {
-      cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
-      cerr << " : invalid node tag out of bounds [1,9]: " << argvNodes[count] << endl;
+      opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+      opserr << " : invalid node tag out of bounds [1,9]: " << argvNodes[count] << endln;
       Tcl_Free((char *)argvNodes);
       return TCL_ERROR;
     }
     for (int i=0; i<ndm; i++) {
       if (Tcl_GetDouble(interp, argvNodes[count+1+i], &value) != TCL_OK) {
-	cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
-	cerr << " : invalid node coordinate for node: " << argvNodes[count] << endl;
+	opserr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+	opserr << " : invalid node coordinate for node: " << argvNodes[count] << endln;
 	Tcl_Free((char *)argvNodes);
 	return TCL_ERROR;
       }
@@ -2140,14 +2143,14 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
       } 
 
       if (theNode == 0) {
-	cerr << "WARNING ran out of memory creating node\n";
-	cerr << "node: " << nodeID << endl;
+	opserr << "WARNING ran out of memory creating node\n";
+	opserr << "node: " << nodeID << endln;
 	return TCL_ERROR;
       }
 
       if (theTclDomain->addNode(theNode) == false) {
-	cerr << "WARNING failed to add node to the domain\n";
-	cerr << "node: " << nodeID << endl;
+	opserr << "WARNING failed to add node to the domain\n";
+	opserr << "node: " << nodeID << endln;
 	delete theNode; // otherwise memory leak
 	return TCL_ERROR;
       }
@@ -2212,35 +2215,35 @@ TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,
 
   int ndm = theTclBuilder->getNDM();
   if (ndm < 3) {
-    cerr << "WARNING block3D numX? numY? startNode? startEle? eleType? eleArgs?";
-    cerr << " : model dimension (ndm) must be at leat 2 " << endl;
+    opserr << "WARNING block3D numX? numY? startNode? startEle? eleType? eleArgs?";
+    opserr << " : model dimension (ndm) must be at leat 2 " << endln;
     return TCL_ERROR;
   }
 
   int numX, numY, numZ, startNodeNum, startEleNum;
   if (Tcl_GetInt (interp, argv[1], &numX) != TCL_OK) {
-    cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
-    cerr << " : invalid numX: " << argv[1] << endl;
+    opserr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+    opserr << " : invalid numX: " << argv[1] << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt (interp, argv[2], &numY) != TCL_OK) {
-    cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
-    cerr << " : invalid numY: " << argv[2] << endl;
+    opserr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+    opserr << " : invalid numY: " << argv[2] << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt (interp, argv[3], &numZ) != TCL_OK) {
-    cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
-    cerr << " : invalid numZ: " << argv[3] << endl;
+    opserr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+    opserr << " : invalid numZ: " << argv[3] << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt (interp, argv[4], &startNodeNum) != TCL_OK) {
-    cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
-    cerr << " : invalid startNode: " << argv[4] << endl;
+    opserr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+    opserr << " : invalid startNode: " << argv[4] << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt (interp, argv[5], &startEleNum) != TCL_OK) {
-    cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
-    cerr << " : invalid startEle: " << argv[5] << endl;
+    opserr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+    opserr << " : invalid startEle: " << argv[5] << endln;
     return TCL_ERROR;
   }
 
@@ -2260,29 +2263,29 @@ TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,
   int count = 0;
   while (count < argcNodes) {
     if ((count + ndm + 1) > argcNodes) {
-      cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
-      cerr << " : invalid number of node args: " << argv[8] << endl;
+      opserr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+      opserr << " : invalid number of node args: " << argv[8] << endln;
       Tcl_Free((char *)argvNodes);
       return TCL_ERROR; 
     }
     int nodeTag;
     double value;
     if (Tcl_GetInt (interp, argvNodes[count], &nodeTag) != TCL_OK) {
-      cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
-      cerr << " : invalid node id in node args: " << argvNodes[count] << endl;
+      opserr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+      opserr << " : invalid node id in node args: " << argvNodes[count] << endln;
       Tcl_Free((char *)argvNodes);
       return TCL_ERROR; 
     }
     if (nodeTag < 1 || nodeTag > 27) {
-      cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
-      cerr << " : node tag out of bounds [1, 27]: " << argvNodes[count] << endl;
+      opserr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+      opserr << " : node tag out of bounds [1, 27]: " << argvNodes[count] << endln;
       Tcl_Free((char *)argvNodes);
       return TCL_ERROR;
     }
     for (int i=0; i<ndm; i++) {
       if (Tcl_GetDouble(interp, argvNodes[count+1+i], &value) != TCL_OK) {
-	cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
-	cerr << " : invalid coordinate in node args: " << argvNodes[count] << endl;
+	opserr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+	opserr << " : invalid coordinate in node args: " << argvNodes[count] << endln;
 	Tcl_Free((char *)argvNodes);
 	return TCL_ERROR;
       }
@@ -2310,14 +2313,14 @@ TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,
 	theNode = new Node(nodeID,ndf,xLoc, yLoc, zLoc);
 	
 	if (theNode == 0) {
-	  cerr << "WARNING ran out of memory creating node\n";
-	  cerr << "node: " << nodeID << endl;
+	  opserr << "WARNING ran out of memory creating node\n";
+	  opserr << "node: " << nodeID << endln;
 	  return TCL_ERROR;
 	}
 
 	if (theTclDomain->addNode(theNode) == false) {
-	  cerr << "WARNING failed to add node to the domain\n";
-	  cerr << "node: " << nodeID << endl;
+	  opserr << "WARNING failed to add node to the domain\n";
+	  opserr << "node: " << nodeID << endln;
 	  delete theNode; // otherwise memory leak
 	  return TCL_ERROR;
 	}

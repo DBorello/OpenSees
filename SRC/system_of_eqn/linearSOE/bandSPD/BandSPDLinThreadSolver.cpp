@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/BandSPDLinThreadSolver.cpp,v $
                                                                         
                                                                         
@@ -104,8 +104,8 @@ int
 BandSPDLinThreadSolver::solve(void)
 {
     if (theSOE == 0) {
-	cerr << "BandSPDLinThreadSolver::solve(void)- ";
-	cerr << " No LinearSOE object has been set\n";
+	opserr << "BandSPDLinThreadSolver::solve(void)- ";
+	opserr << " No LinearSOE object has been set\n";
 	return -1;
     }
 

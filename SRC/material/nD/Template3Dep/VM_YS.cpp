@@ -126,7 +126,7 @@ tensor VMYieldSurface::xi_t1(const EPState *EPS) const {
 }
 
 //================================================================================
-ostream& operator<< (ostream& os, const VMYieldSurface & YS)
+OPS_Stream& operator<< (OPS_Stream& os, const VMYieldSurface & YS)
 {
    os << "Von Mises Yield Surface Parameters: " << endln;
    return os;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-10-05 00:53:45 $
+// $Revision: 1.11 $
+// $Date: 2003-02-14 23:01:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -39,6 +39,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <Matrix.h>
+#include <iomanip>
+using std::ios;
 
 #ifdef _WGL
 #include <windows.h>
@@ -139,11 +141,11 @@ OpenGLRenderer::OpenGLRenderer(char *_title, int _xLoc, int _yLoc,
 
     theFile.open(outputFileName, ios::out);
     if (theFile.bad()) {
-      g3ErrorHandler->warning("WARNING - OpenGLRenderer::OpenGLRenderer() - could not open file %s\n",outputFileName);	  
+      opserr << "WARNING - OpenGLRenderer::OpenGLRenderer() - could not open file: " << outputFileName << endln;
       theOutputFileName = 0;
     } else {
-      theFile << windowTitle << endl;
-      theFile << xLoc << " " << yLoc << " " << width << " " << height << endl;
+      theFile << windowTitle << endln;
+      theFile << xLoc << " " << yLoc << " " << width << " " << height << endln;
     }
   }
 
@@ -223,7 +225,7 @@ OpenGLRenderer::startImage(void)
     }
 
     if (n.Normalize() != 0) {
-	cerr << "View::update() - VPN cannot have zero length\n";
+	opserr << "View::update() - VPN cannot have zero length\n";
 	return -1;
     }
 
@@ -233,7 +235,7 @@ OpenGLRenderer::startImage(void)
     u(2) = v(0)*n(1) - v(1)*n(0) ;
 
     if (u.Normalize() != 0) {
-	cerr << "View::update() - VUV X VPN cannot have zero length\n";
+	opserr << "View::update() - VUV X VPN cannot have zero length\n";
 	return -1;
     }
 
@@ -365,20 +367,20 @@ OpenGLRenderer::startImage(void)
     if (theOutputFileName != 0) {
 	theFile << "StartImage\n";
 	theFile << "VRP " << vrp(0) << " " << vrp(1) << " " 
-	    << vrp(2) << " " << endl;
+	    << vrp(2) << " " << endln;
 	theFile << "VPN " << vpn(0) << " " << vpn(1) << " " 
-	    << vpn(2) << " " << endl;
+	    << vpn(2) << " " << endln;
 	theFile << "VUV " << vuv(0) << " " << vuv(1) << " " 
-	    << vuv(2) << " " << endl;
+	    << vuv(2) << " " << endln;
 	theFile << "COP " << cop(0) << " " << cop(1) << " " 
-	    << cop(2) << " " << endl;
+	    << cop(2) << " " << endln;
 	
-	theFile << "PROJECTIONMODE " << projectionMode << endl;
+	theFile << "PROJECTIONMODE " << projectionMode << endln;
 	theFile << "VPWINDOW " << vpWindow(0) << " " << vpWindow(1) << " "
-	    << vpWindow(2) << " " << vpWindow(3) << " " << endl;
+	    << vpWindow(2) << " " << vpWindow(3) << " " << endln;
 	theFile << "PLANES " << clippingPlanes[0] << " " << clippingPlanes[1] << "\n";
 	theFile << "PORTWINDOW " << portWindow(0) << " " << portWindow(1) << " "
-	    << portWindow(2) << " " << portWindow(3) << " " << endl;
+	    << portWindow(2) << " " << portWindow(3) << " " << endln;
     } 
  
     // done
@@ -415,7 +417,7 @@ OpenGLRenderer::drawPoint(const Vector &pos1, float V1, int numPixels)
     
     if (theOutputFileName != 0) {
 	theFile << "Point\n" << pos1(0) << " " << pos1(1) << " " << pos1(2) 
-	    << " " << r << " " << g << " " << b << " " << endl;
+	    << " " << r << " " << g << " " << b << " " << endln;
     }
 
     glEnd();
@@ -440,7 +442,7 @@ OpenGLRenderer::drawPoint(const Vector &pos1, const Vector &rgb, int numPixels)
     
     if (theOutputFileName != 0) {
 	theFile << "Point\n" << pos1(0) << " " << pos1(1) << " " << pos1(2) 
-	    << " " << r << " " << g << " " << b << " " << endl;
+	    << " " << r << " " << g << " " << b << " " << endln;
     }
 
     glEnd();
@@ -470,7 +472,7 @@ OpenGLRenderer::drawLine(const Vector &pos1, const Vector &pos2,
     
     if (theOutputFileName != 0) {
 	theFile << "Line\n" << pos1(0) << " " << pos1(1) << " " << pos1(2) 
-	    << " " << r << " " << g << " " << b << " " << endl;
+	    << " " << r << " " << g << " " << b << " " << endln;
     }
 
     theMap->getRGB(V2, r, g, b);
@@ -481,7 +483,7 @@ OpenGLRenderer::drawLine(const Vector &pos1, const Vector &pos2,
 
     if (theOutputFileName != 0) {
 	theFile << pos2(0) << " " << pos2(1) << " " << pos2(2) << " " << r 
-	    << " " << g << " " << b << " " << endl;
+	    << " " << g << " " << b << " " << endln;
     }
 
     return 0;  
@@ -508,7 +510,7 @@ OpenGLRenderer::drawLine(const Vector &end1, const Vector &end2,
   
     if (theOutputFileName != 0) {
 	theFile << "Line\n" << end1(0) << " " << end1(1) << " " << end1(2) 
-	    << " " << r << " " << g << " " << b << " " << endl;
+	    << " " << r << " " << g << " " << b << " " << endln;
     }
     glColor3f(r,g,b);
     glVertex3f(end1(0),end1(1),end1(2));
@@ -519,7 +521,7 @@ OpenGLRenderer::drawLine(const Vector &end1, const Vector &end2,
   
     if (theOutputFileName != 0) {
 	theFile << end2(0) << " " << end2(1) << " " << end2(2) << " " << r 
-	    << " " << g << " " << b << " " << endl;
+	    << " " << g << " " << b << " " << endln;
     }
     glColor3f(r,g,b);
 
@@ -537,11 +539,11 @@ OpenGLRenderer::drawPolygon(const Matrix &pos, const Vector &data)
 {
 #ifdef _G3DEBUG
   if (pos.noCols() != 3) {
-    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix needs 3 cols\n");
+    opserr << "OpenGLRenderer::drawPolygon - matrix needs 3 cols\n";
     return -1;
   }
   if (pos.noRows() != data.Size()) {
-    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix & vector incompatable\n");
+    opserr << "OpenGLRenderer::drawPolygon - matrix & vector incompatable\n";
     return -1;
   }
 #endif
@@ -560,7 +562,7 @@ OpenGLRenderer::drawPolygon(const Matrix &pos, const Vector &data)
 
     if (theOutputFileName != 0) {
 	theFile << posX << " " << posY << " " << posZ << " " << r 
-	    << " " << g << " " << b << " " << endl;
+	    << " " << g << " " << b << " " << endln;
     }
       glColor3f(r,g,b);
       glVertex3f(posX, posY, posZ);
@@ -578,11 +580,11 @@ OpenGLRenderer::drawPolygon(const Matrix &pos, const Matrix &rgbData)
 {
 #ifdef _G3DEBUG
   if (pos.noCols() != 3 || rgbData.noCols() != 3) {
-    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix needs 3 cols\n");
+    opserr << "OpenGLRenderer::drawPolygon - matrix needs 3 cols\n";
     return -1;
   }
   if (pos.noRows() != rgbData.noRows()) {
-    g3ErrorHandler->warning("OpenGLRenderer::drawPolygon - matrix & vector incompatable\n");
+    opserr << "OpenGLRenderer::drawPolygon - matrix & vector incompatable\n";
     return -1;
   }
 #endif
@@ -602,7 +604,7 @@ OpenGLRenderer::drawPolygon(const Matrix &pos, const Matrix &rgbData)
 
     if (theOutputFileName != 0) {
 	theFile << posX << " " << posY << " " << posZ << " " << r 
-	    << " " << g << " " << b << " " << endl;
+	    << " " << g << " " << b << " " << endln;
     }
       glColor3f(r,g,b);
       glVertex3f(posX, posY, posZ);
@@ -675,8 +677,8 @@ int
 OpenGLRenderer::setViewWindow(float umin, float umax, float vmin, float vmax)
 {
   if (umin > umax || vmin > vmax) {
-      cerr << "OpenGLRenderer::setViewWindow() - invalid window ";
-      cerr << umin << " "<< umax << " "<< vmin << " "<< vmax << endl;
+      opserr << "OpenGLRenderer::setViewWindow() - invalid window ";
+      opserr << umin << " "<< umax << " "<< vmin << " "<< vmax << endln;
       return -1;
   }
 
@@ -692,8 +694,8 @@ int
 OpenGLRenderer::setPlaneDist(float anear, float afar) 
 {
   if ((anear < afar)) {
-      cerr << "OpenGLRenderer::setClippingPlanes() - invalid planes";
-      cerr << anear << " " << afar << endl;
+      opserr << "OpenGLRenderer::setClippingPlanes() - invalid planes";
+      opserr << anear << " " << afar << endln;
       return -1;
   }
 
@@ -741,8 +743,8 @@ OpenGLRenderer::setPortWindow(float left, float right,
   if (left < -1 || right > 1 || bottom < -1 || top > 1
       || left > right || bottom > top) {
       
-      cerr << "OpenGLRenderer::setPortWindow() - bounds invalid ";
-      cerr << left << " "<< right << " "<< bottom << " "<< top << endl;
+      opserr << "OpenGLRenderer::setPortWindow() - bounds invalid ";
+      opserr << left << " "<< right << " "<< bottom << " "<< top << endln;
       return -1;
   }
 

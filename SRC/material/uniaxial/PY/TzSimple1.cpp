@@ -368,10 +368,10 @@ TzSimple1::revertToStart(void)
 	// Do not allow zero or negative values for z50 or tult.
 	//
 	if(tult <= 0.0 || z50 <= 0.0){
-		cerr << "WARNING -- only accepts positive nonzero tult and z50" << endl;
-		cerr << "TzLiq1: " << endl;
-		cerr << "tzType: " << tzType << endl;
-		g3ErrorHandler->fatal("dying");
+		opserr << "WARNING -- only accepts positive nonzero tult and z50" << endln;
+		opserr << "TzLiq1: " << endln;
+		opserr << "tzType: " << tzType << endln;
+		exit(-1);
 	}
 		
 	// Initialize variables for Near Field plastic component
@@ -392,10 +392,10 @@ TzSimple1::revertToStart(void)
 		TFar_tang   = 2.0504*tult/z50;
 	}
 	else{
-		cerr << "WARNING -- only accepts tzType of 1 or 2" << endl;
-		cerr << "TzLiq1: " << endl;
-		cerr << "tzType: " << tzType << endl;
-		g3ErrorHandler->fatal("dying");
+		opserr << "WARNING -- only accepts tzType of 1 or 2" << endln;
+		opserr << "TzLiq1: " << endln;
+		opserr << "tzType: " << tzType << endln;
+		exit(-1);
 	}
 
 	// Far Field components: TFar_tang was set under "tzType" statements.
@@ -470,7 +470,7 @@ TzSimple1::sendSelf(int cTag, Channel &theChannel)
 
 	res = theChannel.sendVector(this->getDbTag(), cTag, data);
 	if (res < 0) 
-		cerr << "TzSimple1::sendSelf() - failed to send data\n";
+		opserr << "TzSimple1::sendSelf() - failed to send data\n";
 
 	return res;
 }
@@ -486,7 +486,7 @@ TzSimple1::recvSelf(int cTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
-      cerr << "TzSimple1::recvSelf() - failed to receive data\n";
+      opserr << "TzSimple1::recvSelf() - failed to receive data\n";
       this->setTag(0);      
   }
   else {
@@ -523,13 +523,13 @@ TzSimple1::recvSelf(int cTag, Channel &theChannel,
 
 /////////////////////////////////////////////////////////////////////
 void 
-TzSimple1::Print(ostream &s, int flag)
+TzSimple1::Print(OPS_Stream &s, int flag)
 {
-    s << "TzSimple1, tag: " << this->getTag() << endl;
-    s << "  tzType: " << tzType << endl;
-    s << "  tult: " << tult << endl;
-    s << "  z50: " << z50 << endl;
-    s << "  dashpot: " << dashpot << endl;
+    s << "TzSimple1, tag: " << this->getTag() << endln;
+    s << "  tzType: " << tzType << endln;
+    s << "  tult: " << tult << endln;
+    s << "  z50: " << z50 << endln;
+    s << "  dashpot: " << dashpot << endln;
 }
 
 /////////////////////////////////////////////////////////////////////

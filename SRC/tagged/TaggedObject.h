@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tagged/TaggedObject.h,v $
                                                                         
                                                                         
@@ -38,7 +38,7 @@
 //
 // What: "@(#) TaggedObject.h, revA"
 
-#include <iostream.h>
+#include <OPS_Stream.h>
 
 class Domain;
 
@@ -50,8 +50,8 @@ class TaggedObject
 
     inline int getTag(void) const;
 
-    virtual void Print(ostream &s, int flag =0) =0;       
-    friend ostream &operator<<(ostream &s, TaggedObject &m);        
+    virtual void Print(OPS_Stream &s, int flag =0) =0;       
+    friend OPS_Stream &operator<<(OPS_Stream &s, TaggedObject &m);        
 
   protected:
     void setTag(int newTag);  // CAUTION: this is a dangerous method to call

@@ -32,7 +32,7 @@ direction will be set to $1$.\\
 \indent {\em $\tilde{ }$UniformExcitation();}\\  \\
 \indent // Public Methods \\ 
 \indent {\em void applyLoad(double time);} \\ 
-\indent {\em void Print(ostream \&s, int flag);}\\
+\indent {\em void Print(OPS_Stream \&s, int flag);}\\
 \indent {\em int sendSelf(int commitTag, Channel \&theChannel);}\\
 \indent {\em int recvSelf(int commitTag, Channel \&theChannel, 
 FEM\_ObjectBroker \&theBroker);}\\
@@ -52,7 +52,7 @@ there has been a change it invokes {\em setNumColR(1)} and then
 {\em setR(theDof, 0, 1.0)} on each Node. It then invokes the base classes {\em
 applyLoad()} method. THIS SHOULD BE CHANGED TO USE LATEST domainChanged().\\
 
-\indent {\em void Print(ostream \&s, int flag);}\\
+\indent {\em void Print(OPS_Stream \&s, int flag);}\\
 Does nothing. NEEDS WORK. \\
 
 \indent {\em int sendSelf(int commitTag, Channel \&theChannel);}\\

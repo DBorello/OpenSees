@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-10-24 00:33:53 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.h,v $
                                                                         
                                                                         
@@ -40,8 +40,7 @@
 #ifndef ID_h
 #define ID_h
 
-#include <iostream.h>
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 class ID
 {
@@ -69,8 +68,8 @@ class ID
     int getLocation(int value) const;
     int removeValue(int value);
 
-    friend ostream &operator<<(ostream &s, const ID &V);
-    friend istream &operator>>(istream &s, ID &V);    
+    friend OPS_Stream &operator<<(OPS_Stream &s, const ID &V);
+    //    friend istream &operator>>(istream &s, ID &V);    
 
     friend class UDP_Socket;
     friend class TCP_Socket;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/cell/QuadCell.cpp,v $
                                                                         
                                                                         
@@ -63,7 +63,7 @@ double QuadCell::getArea (void) const
    double area;
    double x0, y0, x1, y1, x2, y2, x3, y3;
 
-//   cerr << "cell vertCoord: " << vertCoord;
+//   opserr << "cell vertCoord: " << vertCoord;
  
    x0 = vertCoord(0,0);
    y0 = vertCoord(0,1);
@@ -77,7 +77,7 @@ double QuadCell::getArea (void) const
    area = ((x2-x1)*(y0-y1) - (x0-x1)*(y2-y1) +
            (x0-x3)*(y2-y3) - (x2-x3)*(y0-y3)) / 2.0; 
 
-//   cerr << "area1=" << area;
+//   opserr << "area1=" << area;
 
    int i, i1;
    double yi, zi, yi1, zi1;
@@ -95,7 +95,7 @@ double QuadCell::getArea (void) const
    }
    area /= 2.0;
 
-//   cerr << "area2= " << area << endl;
+//   opserr << "area2= " << area << endln;
 
    return area;
                 
@@ -136,21 +136,21 @@ QuadCell::getCentroidPosition(void)
    Centroid(0) = CGy;
    Centroid(1) = CGz;
 
-//   cerr << "\narea : " << area << " centroid: " << Centroid;
+//   opserr << "\narea : " << area << " centroid: " << Centroid;
  
    return Centroid;
 }
 
 
 
-void QuadCell::Print(ostream &s, int flag) const
+void QuadCell::Print(OPS_Stream &s, int flag) const
 {
    s << "\nCell Type: QuadCell";
    s << "\nVertex Coordinates: " << vertCoord;
 }
 
 
-ostream &operator<<(ostream &s, const QuadCell &quadCell)
+OPS_Stream &operator<<(OPS_Stream &s, const QuadCell &quadCell)
 {
    quadCell.Print(s);
    return s;

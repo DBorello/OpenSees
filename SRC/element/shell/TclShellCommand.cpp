@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-07 00:15:31 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/TclShellCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -29,7 +29,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 #include <Domain.h>
 
 #include <ShellMITC4.h>
@@ -44,71 +43,71 @@ TclModelBuilder_addShellMITC4(ClientData clientData, Tcl_Interp *interp,  int ar
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-    cerr << "WARNING builder has been destroyed\n";    
+    opserr << "WARNING builder has been destroyed\n";    
     return TCL_ERROR;
   }
 
   // check the number of arguments is correct
   if ((argc-eleArgStart) < 7) {
-    cerr << "WARNING insufficient arguments\n";
+    opserr << "WARNING insufficient arguments\n";
     printCommand(argc, argv);
-    cerr << "Want: element ShellMITC4 eleTag? iNode? jNode? kNode? lNode? secTag?\n";
+    opserr << "Want: element ShellMITC4 eleTag? iNode? jNode? kNode? lNode? secTag?\n";
     return TCL_ERROR;
   }    
 
   // get the id and end nodes 
   int ShellMITC4Id, iNode, jNode, kNode, lNode, matID;
   if (Tcl_GetInt(interp, argv[1+eleArgStart], &ShellMITC4Id) != TCL_OK) {
-    cerr << "WARNING invalid ShellMITC4 eleTag" << endl;
+    opserr << "WARNING invalid ShellMITC4 eleTag" << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[2+eleArgStart], &iNode) != TCL_OK) {
-    cerr << "WARNING invalid iNode\n";
-    cerr << "ShellMITC4 element: " << ShellMITC4Id << endl;
+    opserr << "WARNING invalid iNode\n";
+    opserr << "ShellMITC4 element: " << ShellMITC4Id << endln;
     return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[3+eleArgStart], &jNode) != TCL_OK) {
-     cerr << "WARNING invalid jNode\n";
-     cerr << "ShellMITC4 element: " << ShellMITC4Id << endl;
+     opserr << "WARNING invalid jNode\n";
+     opserr << "ShellMITC4 element: " << ShellMITC4Id << endln;
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[4+eleArgStart], &kNode) != TCL_OK) {
-     cerr << "WARNING invalid jNode\n";
-     cerr << "ShellMITC4 element: " << ShellMITC4Id << endl;
+     opserr << "WARNING invalid jNode\n";
+     opserr << "ShellMITC4 element: " << ShellMITC4Id << endln;
      return TCL_ERROR;
   }
   if (Tcl_GetInt(interp, argv[5+eleArgStart], &lNode) != TCL_OK) {
-     cerr << "WARNING invalid jNode\n";
-     cerr << "ShellMITC4 element: " << ShellMITC4Id << endl;
+     opserr << "WARNING invalid jNode\n";
+     opserr << "ShellMITC4 element: " << ShellMITC4Id << endln;
      return TCL_ERROR;
   }
 
   if (Tcl_GetInt(interp, argv[6+eleArgStart], &matID) != TCL_OK) {
-    cerr << "WARNING invalid matTag\n";
-    cerr << "ShellMITC4 element: " << ShellMITC4Id << endl;
+    opserr << "WARNING invalid matTag\n";
+    opserr << "ShellMITC4 element: " << ShellMITC4Id << endln;
     return TCL_ERROR;
   }
 
   SectionForceDeformation *theSection = theTclBuilder->getSection(matID);      
 
   if (theSection == 0) {
-    cerr << "WARNING section not found\n";
-    cerr << "section tag: " << matID;
-    cerr << "\nShellMITC4 element: " << ShellMITC4Id << endl;
+    opserr << "WARNING section not found\n";
+    opserr << "section tag: " << matID;
+    opserr << "\nShellMITC4 element: " << ShellMITC4Id << endln;
     return TCL_ERROR;
   }
   
   // now create the ShellMITC4 and add it to the Domain
   ShellMITC4 *theShellMITC4 = new ShellMITC4(ShellMITC4Id,iNode,jNode,kNode,lNode,*theSection);
   if (theShellMITC4 == 0) {
-    cerr << "WARNING ran out of memory creating element\n";
-    cerr << "ShellMITC4 element: " << ShellMITC4Id << endl;
+    opserr << "WARNING ran out of memory creating element\n";
+    opserr << "ShellMITC4 element: " << ShellMITC4Id << endln;
     return TCL_ERROR;
   }
 
   if (theTclDomain->addElement(theShellMITC4) == false) {
-    cerr << "WARNING could not add element to the domain\n";
-    cerr << "ShellMITC4 element: " << ShellMITC4Id << endl;
+    opserr << "WARNING could not add element to the domain\n";
+    opserr << "ShellMITC4 element: " << ShellMITC4Id << endln;
     delete theShellMITC4;
     return TCL_ERROR;
   }

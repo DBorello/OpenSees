@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-13 01:59:23 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotion.cpp,v $
                                                                         
                                                                         
@@ -29,11 +29,10 @@
 // Created: 05/98
 // Revision: A
 
-#include <iostream.h>
 
 #include <GroundMotion.h>
 #include <TimeSeriesIntegrator.h>
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <ID.h>
@@ -92,8 +91,7 @@ GroundMotion::integrate(TimeSeries *theSeries, double delta)
   }
 
   if(theSeries == 0) {
-    g3ErrorHandler->warning("GroundMotion::integrate %s\n",
-			    "- no TimeSeries specified");
+    opserr << "GroundMotion::integrate - no TimeSeries specified\n";
     return 0;
   }
 
@@ -101,8 +99,7 @@ GroundMotion::integrate(TimeSeries *theSeries, double delta)
   TimeSeries *theNewSeries = theIntegrator->integrate(theSeries, delta);
 
   if(theNewSeries == 0) {
-    g3ErrorHandler->warning("GroundMotion::integrate %s\n",
-			    "- no TimeSeriesIntegrator failed to integrate");
+    opserr << "GroundMotion::integrate - no TimeSeriesIntegrator failed to integrate\n";
     return 0;
   }
 
@@ -320,7 +317,7 @@ GroundMotion::sendSelf(int commitTag, Channel &theChannel)
 
   int res = theChannel.sendID(dbTag, commitTag, idData);
   if (res < 0) {
-    cerr << "GroundMotionRecord::sendSelf() - channel failed to send data\n";
+    opserr << "GroundMotionRecord::sendSelf() - channel failed to send data\n";
     return res;
   }
 
@@ -328,7 +325,7 @@ GroundMotion::sendSelf(int commitTag, Channel &theChannel)
   if (theAccelSeries != 0) {
     res = theAccelSeries->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      cerr << "GroundMotionRecord::sendSelf - failed to send accel series\n";
+      opserr << "GroundMotionRecord::sendSelf - failed to send accel series\n";
       return res;
     }
   }
@@ -336,7 +333,7 @@ GroundMotion::sendSelf(int commitTag, Channel &theChannel)
   if (theVelSeries != 0) {
     res = theVelSeries->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      cerr << "GroundMotionRecord::sendSelf - failed to send velocity series\n";
+      opserr << "GroundMotionRecord::sendSelf - failed to send velocity series\n";
       return res;
     }
   }
@@ -344,7 +341,7 @@ GroundMotion::sendSelf(int commitTag, Channel &theChannel)
   if (theDispSeries != 0) {
     res = theDispSeries->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      cerr << "GroundMotionRecord::sendSelf - failed to send disp series\n";
+      opserr << "GroundMotionRecord::sendSelf - failed to send disp series\n";
       return res;
     }
   }
@@ -352,7 +349,7 @@ GroundMotion::sendSelf(int commitTag, Channel &theChannel)
   if (theIntegrator != 0) {
     res = theIntegrator->sendSelf(commitTag, theChannel);
     if (res < 0) {
-      cerr << "GroundMotionRecord::sendSelf - failed to send disp series\n";
+      opserr << "GroundMotionRecord::sendSelf - failed to send disp series\n";
       return res;
     }
   }
@@ -370,7 +367,7 @@ GroundMotion::recvSelf(int commitTag, Channel &theChannel,
   static ID idData(8);
   int res = theChannel.recvID(dbTag, commitTag, idData);
   if (res < 0) {
-    cerr << "UniformExcitation::sendSelf() - channel failed to send data\n";
+    opserr << "UniformExcitation::sendSelf() - channel failed to send data\n";
     return res;
   }
 
@@ -382,14 +379,14 @@ GroundMotion::recvSelf(int commitTag, Channel &theChannel,
 	delete theAccelSeries;
       theAccelSeries = theBroker.getNewTimeSeries(seriesClassTag);
       if (theAccelSeries == 0) {
-	cerr << "GroundMotionRecord::sendSelf - could not create a Series object\n";
+	opserr << "GroundMotionRecord::sendSelf - could not create a Series object\n";
 	return -2;
       }
     }
     theAccelSeries->setDbTag(seriesDbTag);
     res = theAccelSeries->recvSelf(commitTag, theChannel, theBroker);
     if (res < 0) {
-      cerr << "UniformExcitation::sendSelf() - accel series failed to send data\n";
+      opserr << "UniformExcitation::sendSelf() - accel series failed to send data\n";
       return res;
     }
   }
@@ -402,14 +399,14 @@ GroundMotion::recvSelf(int commitTag, Channel &theChannel,
 	delete theVelSeries;
       theVelSeries = theBroker.getNewTimeSeries(seriesClassTag);
       if (theVelSeries == 0) {
-	cerr << "GroundMotionRecord::sendSelf - could not create a Series object\n";
+	opserr << "GroundMotionRecord::sendSelf - could not create a Series object\n";
 	return -2;
       }
     }
     theVelSeries->setDbTag(seriesDbTag);
     res = theVelSeries->recvSelf(commitTag, theChannel, theBroker);
     if (res < 0) {
-      cerr << "UniformExcitation::sendSelf() - accel series failed to send data\n";
+      opserr << "UniformExcitation::sendSelf() - accel series failed to send data\n";
       return res;
     }
   }
@@ -422,14 +419,14 @@ GroundMotion::recvSelf(int commitTag, Channel &theChannel,
 	delete theDispSeries;
       theDispSeries = theBroker.getNewTimeSeries(seriesClassTag);
       if (theDispSeries == 0) {
-	cerr << "GroundMotionRecord::sendSelf - could not create a Series object\n";
+	opserr << "GroundMotionRecord::sendSelf - could not create a Series object\n";
 	return -2;
       }
     }
     theDispSeries->setDbTag(seriesDbTag);
     res = theDispSeries->recvSelf(commitTag, theChannel, theBroker);
     if (res < 0) {
-      cerr << "UniformExcitation::sendSelf() - accel series failed to send data\n";
+      opserr << "UniformExcitation::sendSelf() - accel series failed to send data\n";
       return res;
     }
   }
@@ -442,14 +439,14 @@ GroundMotion::recvSelf(int commitTag, Channel &theChannel,
 	delete theIntegrator;
       theIntegrator = theBroker.getNewTimeSeriesIntegrator(seriesClassTag);
       if (theIntegrator == 0) {
-	cerr << "GroundMotionRecord::sendSelf - could not create an Integrator object\n";
+	opserr << "GroundMotionRecord::sendSelf - could not create an Integrator object\n";
 	return -2;
       }
     }
     theIntegrator->setDbTag(seriesDbTag);
     res = theIntegrator->recvSelf(commitTag, theChannel, theBroker);
     if (res < 0) {
-      cerr << "UniformExcitation::sendSelf() - accel series failed to send data\n";
+      opserr << "UniformExcitation::sendSelf() - accel series failed to send data\n";
       return res;
     }
   }

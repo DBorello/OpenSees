@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-02 18:18:52 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -36,9 +36,12 @@
 #include <LimitStateFunction.h>
 #include <Vector.h>
 #include <string.h>
-#include <fstream.h>
-#include <iomanip.h>
-
+#include <fstream>
+#include <iomanip>
+using std::ios;
+using std::setprecision;
+using std::setiosflags;
+using std::setw;
 
 LimitStateFunction::LimitStateFunction(	int passedTag, 
 									    char *passedExpression)
@@ -63,7 +66,7 @@ LimitStateFunction::~LimitStateFunction()
 
 
 void
-LimitStateFunction::Print(ostream &s, int flag)  
+LimitStateFunction::Print(OPS_Stream &s, int flag)  
 {
 }
 
@@ -84,26 +87,26 @@ LimitStateFunction::printSummaryOfResults(ofstream &outputFile)
 	if (FORMAnalysisPerformed || SimulationAnalysisPerformed || CurvaturesFromSearchAlgorithmSORMAnalysisPerformed) {
 
 		outputFile << "#  LIMIT-STATE FUNCTION NUMBER "
-			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"                                   #" << endl;
+			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"                                   #" << endln;
 		if (FORMAnalysisPerformed) {
 		outputFile << "#   FORM Analysis:                    " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(19)<<FORMReliabilityIndexBeta 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<FORMProbabilityOfFailure_pf1 
-			<< " #" << endl;
+			<< " #" << endln;
 		}
 		if (SimulationAnalysisPerformed) {
 		outputFile << "#   Simulation Analysis:              " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(19)<<SimulationReliabilityIndexBeta 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SimulationProbabilityOfFailure_pfsim 
-			<< " #" << endl;
+			<< " #" << endln;
 		}
 		if (CurvaturesFromSearchAlgorithmSORMAnalysisPerformed) {
 		outputFile << "#   SORM(1) (Breitung)                "
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(19)<<SORMUsingSearchBetaBreitung 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SORMUsingSearchPf2Breitung 
-			<< " #" << endl;
+			<< " #" << endln;
 		}
-		outputFile << "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #" << endl;
+		outputFile << "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #" << endln;
 	}
 
 
@@ -188,38 +191,38 @@ LimitStateFunction::printResults(ofstream &outputFile)
 
 	// PRINT EvaluateLimitStateFunctionAtStartPoint RESULTS
 	if (EvaluateLimitStateFunctionAtStartPointPerformed) {
-		outputFile << "#######################################################################" << endl;
+		outputFile << "#######################################################################" << endln;
 		outputFile << "#  VALUE OF LIMIT-STATE FUNCTION "
-			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<" AT START POINT                  #" << endl;
-		outputFile << "#                                                                     #" << endl;
+			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<" AT START POINT                  #" << endln;
+		outputFile << "#                                                                     #" << endln;
 		outputFile << "#  Limit-state function value at start point: ......... " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<GFunValueAtStartPt 
-			<< "  #" << endl;
-		outputFile << "#                                                                     #" << endl;
-		outputFile << "#######################################################################" << endl << endl << endl;
+			<< "  #" << endln;
+		outputFile << "#                                                                     #" << endln;
+		outputFile << "#######################################################################" << endln << endln << endln;
 	}
 
 
 	// PRINT FORM RESULTS
 	if (FORMAnalysisPerformed) {
-		outputFile << "#######################################################################" << endl;
+		outputFile << "#######################################################################" << endln;
 		outputFile << "#  FORM ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER "
-			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"            #" << endl;
-		outputFile << "#                                                                     #" << endl;
+			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"            #" << endln;
+		outputFile << "#                                                                     #" << endln;
 		outputFile << "#  Limit-state function value at start point: ......... " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<GFunValueAtStartPt 
-			<< "  #" << endl;
+			<< "  #" << endln;
 		outputFile << "#  Number of iterations: .............................. " 
 			<<setiosflags(ios::left)<<setw(12)<<numberOfIterationsToFindDesignPoint 
-			<< "  #" << endl;
+			<< "  #" << endln;
 		outputFile << "#  Reliability index beta: ............................ " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<FORMReliabilityIndexBeta 
-			<< "  #" << endl;
+			<< "  #" << endln;
 		outputFile << "#  Estimated probability of failure pf1: .............. " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<FORMProbabilityOfFailure_pf1 
-			<< "  #" << endl;
-		outputFile << "#                                                                     #" << endl;
-		outputFile << "# rv#     x*          u*        alpha     gamma     delta     eta     #" << endl;
+			<< "  #" << endln;
+		outputFile << "#                                                                     #" << endln;
+		outputFile << "# rv#     x*          u*        alpha     gamma     delta     eta     #" << endln;
 		outputFile.setf( ios::scientific, ios::floatfield );
 		for (int i=0;  i<designPoint_x_inOriginalSpace.Size(); i++) {
 		outputFile << "#  " <<setw(3)<<(i+1)<<" ";
@@ -243,54 +246,54 @@ LimitStateFunction::printResults(ofstream &outputFile)
 		
 		outputFile<<"   -     ";
 		outputFile<<"   -     ";
-		outputFile<<"   #" << endl;
+		outputFile<<"   #" << endln;
 		}
-		outputFile << "#                                                                     #" << endl;
-		outputFile << "#######################################################################" << endl << endl << endl;
+		outputFile << "#                                                                     #" << endln;
+		outputFile << "#######################################################################" << endln << endln << endln;
 	}
 
 
 	// PRINT SIMULATION RESULTS
 	if (SimulationAnalysisPerformed) {
-		outputFile << "#######################################################################" << endl;
+		outputFile << "#######################################################################" << endln;
 		outputFile << "#  SIMULATION ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER "
-			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"      #" << endl;
-		outputFile << "#                                                                     #" << endl;
+			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"      #" << endln;
+		outputFile << "#                                                                     #" << endln;
 		outputFile << "#  Reliability index beta: ............................ " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SimulationReliabilityIndexBeta 
-			<< "  #" << endl;
+			<< "  #" << endln;
 		outputFile << "#  Estimated probability of failure pf_sim: ........... " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SimulationProbabilityOfFailure_pfsim 
-			<< "  #" << endl;
+			<< "  #" << endln;
 		outputFile << "#  Number of simulations: ............................. " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<NumberOfSimulations 
-			<< "  #" << endl;
+			<< "  #" << endln;
 		outputFile << "#  Coefficient of variation (of pf): .................. " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<CoefficientOfVariationOfPfFromSimulation 
-			<< "  #" << endl;
-		outputFile << "#                                                                     #" << endl;
-		outputFile << "#######################################################################" << endl << endl << endl;
+			<< "  #" << endln;
+		outputFile << "#                                                                     #" << endln;
+		outputFile << "#######################################################################" << endln << endln << endln;
 
 	}
 
 	// PRINT CurvaturesFromSearchAlgorithmSORMAnalysis RESULTS
 	if (CurvaturesFromSearchAlgorithmSORMAnalysisPerformed) {
-		outputFile << "#######################################################################" << endl;
+		outputFile << "#######################################################################" << endln;
 		outputFile << "#  SORM ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER "
-			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"            #" << endl;
-		outputFile << "#  (Curvatures found from search algorithm.)                          #" << endl;
-		outputFile << "#                                                                     #" << endl;
+			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"            #" << endln;
+		outputFile << "#  (Curvatures found from search algorithm.)                          #" << endln;
+		outputFile << "#                                                                     #" << endln;
 		outputFile << "#  Number of principal curvatures used: ............... " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<numberOfCurvatauresUsed
-			<< "  #" << endl;
+			<< "  #" << endln;
 		outputFile << "#  Reliability index beta (impr. Breitung's formula):.. " 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SORMUsingSearchBetaBreitung 
-			<< "  #" << endl;
+			<< "  #" << endln;
 		outputFile << "#  Corresponding estimated probability of failure pf2:.." 
 			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SORMUsingSearchPf2Breitung 
-			<< "  #" << endl;
-		outputFile << "#                                                                     #" << endl;
-		outputFile << "#######################################################################" << endl << endl << endl;
+			<< "  #" << endln;
+		outputFile << "#                                                                     #" << endln;
+		outputFile << "#######################################################################" << endln << endln << endln;
 
 	}
 

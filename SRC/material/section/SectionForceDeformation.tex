@@ -42,7 +42,7 @@ SectionForceDeformation models must implement. \\
 \&theChannel) = 0; }\\
 \indent {\em virtual int recvSelf (int commitTag, Channel \&theChannel, 
 FEM\_ObjectBroker \&theBroker) = 0; }\\
-\indent {\em virtual void Print (ostream \&s, int flag = 0) = 0;} \\
+\indent {\em virtual void Print (OPS_Stream \&s, int flag = 0) = 0;} \\
 
 \noindent {\bf Constructor}  \\
 \indent {\em SectionForceDeformation (int tag, int classTag);}  \\
@@ -120,5 +120,5 @@ FILL IN. \\
 		 FEM\_ObjectBroker \&theBroker); }\\
 FILL IN. \\
 
-\indent {\em    void Print(ostream \&s, int flag = 0) = 0;} \\
+\indent {\em    void Print(OPS_Stream \&s, int flag = 0) = 0;} \\
 To print section information to the stream {\em s} based on the value of {\em flag}. \\

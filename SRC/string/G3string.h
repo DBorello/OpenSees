@@ -1,7 +1,9 @@
 #ifndef _PLSTRING_H
 #define _PLSTRING_H
 
-#include <iostream.h>
+#include <OPS_Stream.h>
+#include <iostream>
+using std::istream;
 
 // A first class string type
 class String {
@@ -33,7 +35,7 @@ public:
    friend bool operator>  (const String& s, const String& t);
    friend bool operator>= (const String& s, const String& t);
 
-   friend ostream& operator<<(ostream& out, const String& s);
+   friend OPS_Stream& operator<<(OPS_Stream& out, const String& s);
                // Writes the C-string equivalent to out.
    friend istream& operator>> (istream& in, String & s);   
                // Reads at most 999 characters up to the next newline from 

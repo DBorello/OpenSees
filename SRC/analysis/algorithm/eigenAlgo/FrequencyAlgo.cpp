@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/eigenAlgo/FrequencyAlgo.cpp,v $
                                                                         
                                                                         
@@ -43,7 +43,6 @@
 #include <EigenAnalysis.h>
 #include <EigenIntegrator.h>
 #include <EigenSOE.h>
-#include <iostream.h>
 #include <Vector.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -68,26 +67,26 @@ FrequencyAlgo::solveCurrentStep(int numModes)
     EigenIntegrator *theIntegrator = this->getEigenIntegratorPtr();
 
     if ((theModel == 0) || (theIntegrator == 0) || (theSOE == 0)) {
-       cerr << "WARNING FrequencyAlgo::solverCurrentStep() - ";
-       cerr << "setLinks() has not been called. \n";
+       opserr << "WARNING FrequencyAlgo::solverCurrentStep() - ";
+       opserr << "setLinks() has not been called. \n";
        return -1;
     }
 
     if (theIntegrator->formK() < 0) {
-       cerr << "WARNING FrequencyAlgo::solverCurrentStep() - ";
-       cerr << "the Integrator failed in formK().\n";
+       opserr << "WARNING FrequencyAlgo::solverCurrentStep() - ";
+       opserr << "the Integrator failed in formK().\n";
        return -2;
     }
 
     if (theIntegrator->formM() < 0) {
-       cerr << "WARNING FrequencyAlgo::solverCurrentStep() - ";
-       cerr << "the Integrator failed in formK().\n";
+       opserr << "WARNING FrequencyAlgo::solverCurrentStep() - ";
+       opserr << "the Integrator failed in formK().\n";
        return -3;
     }
 
     if (theSOE->solve(numModes) < 0) {
-       cerr << "Warning FrequencyAlgo::solveCurrentStep() - ";
-       cerr << "the EigenSOE failed in solve().\n";
+       opserr << "Warning FrequencyAlgo::solveCurrentStep() - ";
+       opserr << "the EigenSOE failed in solve().\n";
        return -4;
     }
 
@@ -117,7 +116,7 @@ FrequencyAlgo::recvSelf(int cTag, Channel &theChannel,
 }
 
 void 
-FrequencyAlgo::Print(ostream &s, int flag)
+FrequencyAlgo::Print(OPS_Stream &s, int flag)
 {
     s << "\t Eigen Algorithm \n";
 }

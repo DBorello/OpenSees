@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:27:22 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.h,v $
                                                                         
                                                                         
@@ -85,7 +85,7 @@ class Subdomain: public Element, public Domain
     virtual int revertToStart(void);        
     virtual int update(void);
     
-    virtual  void Print(ostream &s, int flag =0);
+    virtual  void Print(OPS_Stream &s, int flag =0);
     
     // Domain type methods unique to a Subdomain
     virtual NodeIter &getInternalNodeIter(void);

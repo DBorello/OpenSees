@@ -38,7 +38,7 @@ public:
 	
 	~CombinedIsoKin2D02();
 	
-  void Print(ostream & s, int flag);
+  void Print(OPS_Stream & s, int flag);
   YS_Evolution * getCopy();
 
 

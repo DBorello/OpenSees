@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -134,7 +134,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
 
     virtual double getCost(void);
     
-    virtual  void Print(ostream &s, int flag =0);
+    virtual  void Print(OPS_Stream &s, int flag =0);
     
   protected:    
     virtual int buildMap(void);

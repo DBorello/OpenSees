@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-10 18:00:38 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/reinfLayer/CircReinfLayer.h,v $
                                                                         
                                                                         
@@ -78,8 +78,8 @@ class CircReinfLayer : public ReinfLayer
     double        getFinalAngle       (void) const;  
     
 
-    void Print(ostream &s, int flag =0) const;   
-    friend ostream &operator<<(ostream &s, const CircReinfLayer &CircReinfLayer);    
+    void Print(OPS_Stream &s, int flag =0) const;   
+    friend OPS_Stream &operator<<(OPS_Stream &s, const CircReinfLayer &CircReinfLayer);    
     
   protected:
     

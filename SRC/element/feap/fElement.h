@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:20:39 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/feap/fElement.h,v $
                                                                         
                                                                         
@@ -96,7 +96,7 @@ class fElement : public Element
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
     virtual int displaySelf(Renderer &theViewer, int displayMode, float fact);    
-    virtual void Print(ostream &s, int flag =0);    
+    virtual void Print(OPS_Stream &s, int flag =0);    
 
   protected:
     // protected methods 

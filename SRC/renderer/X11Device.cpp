@@ -18,13 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-26 00:56:06 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/X11Device.cpp,v $
                                                                         
                                                                         
 #include "X11Device.h"
-#include <iostream.h>
+#include <iOPS_Stream.h>
 #include <stdlib.h>
 
 
@@ -96,7 +96,7 @@ X11Device::WINOPEN(int _width, int _height)
 				    hints.width,hints.height,4,
 				    foreground, background);
     if (theWindow == 0) {
-	cerr << "X11Device::WINOPEN() - could not open a window\n";
+	opserr << "X11Device::WINOPEN() - could not open a window\n";
 	exit(-1);
     }	
     
@@ -111,14 +111,14 @@ X11Device::WINOPEN(int _width, int _height)
 	cmap = XCreateColormap(theDisplay,theWindow,
 			   DefaultVisual(theDisplay,0),AllocAll);
 	if (cmap == 0) {
-	    cerr << "X11Device::initX11() - could not get a new color table\n";
+	    opserr << "X11Device::initX11() - could not get a new color table\n";
 	    exit(-1);
 	}	    
 
 	// we are going to try to allocate 256 new colors -- need 8 planes for this
 	int depth = DefaultDepth(theDisplay, theScreen);
 	if (depth < 8) {
-	    cerr << "X11Device::initX11() - needed at least 8 planes\n";
+	    opserr << "X11Device::initX11() - needed at least 8 planes\n";
 	    exit(-1);
 	}	    
 	int cnt = 0;
@@ -161,8 +161,8 @@ X11Device::C3F(float r, float g, float b)
     int index, val;
     // check range of rgb values
     if (r<0 || r>1.0 || g<0 || g>1.0 || b<0 || b>1.0) {
-	cerr << "X11Device::X11Device::C3F() rgb val out of range ";
-	cerr << r << " " << g << " " << b << endl;
+	opserr << "X11Device::X11Device::C3F() rgb val out of range ";
+	opserr << r << " " << g << " " << b << endln;
 	return;
     }
     
@@ -193,7 +193,7 @@ X11Device::V2F(float x, float y)
   {
     if (numPoints == MAX_NUM_POINTS_FOR_POLYGON)
       {
-	cerr << "ERROR: Maximum number of points has been exceeded" << endl;
+	opserr << "ERROR: Maximum number of points has been exceeded" << endln;
 	return;
       }
     polygonPointArray[numPoints].x = (int)x;
@@ -238,7 +238,7 @@ X11Device::ENDPOLYGON()
 {
   drawingPolygon = 0;
   // Draw the polygon with the GCs color
-  cerr << " NUMPOINTS: "<< numPoints << endl;
+  opserr << " NUMPOINTS: "<< numPoints << endln;
 
   XFillPolygon(theDisplay, theWindow, theGC,		
 	       polygonPointArray, numPoints, Complex, CoordModeOrigin);
@@ -325,7 +325,7 @@ X11Device::initX11(void) {
     // set the display and screen variables
     theDisplay = XOpenDisplay("");	// init a display connection
     if (theDisplay == 0) {              // and check we got one
-	cerr << "X11Device::initX11() - could not connect to display\n";
+	opserr << "X11Device::initX11() - could not connect to display\n";
 	exit(-1);
     }
 
@@ -339,7 +339,7 @@ X11Device::initX11(void) {
     cmap = DefaultColormap(theDisplay, theScreen);
     XVisualInfo vinfo;    
     if (XMatchVisualInfo(theDisplay, theScreen, 8, PseudoColor, &vinfo) == false)
-	cerr << "X11Device::initX11 - could not get info\n";
+	opserr << "X11Device::initX11 - could not get info\n";
 
     // we now try to allocate some color cells from the colormap
     // we start by tring to obtain 256 colors, then 192, finally 64
@@ -400,9 +400,9 @@ X11Device::initX11(void) {
 	colorFlag = 3;
 	// lets create our own color table - 
 	// problem with this is that screen colors change as we enter
-	cerr << "X11Device::initX11() - could not any colors from the default\n";
-	cerr << "colormap - have to create our own for the app - windows will\n";
-	cerr << "windows will change color as move mouse from one window to another\n\n";	
+	opserr << "X11Device::initX11() - could not any colors from the default\n";
+	opserr << "colormap - have to create our own for the app - windows will\n";
+	opserr << "windows will change color as move mouse from one window to another\n\n";	
     }
 }    
 	

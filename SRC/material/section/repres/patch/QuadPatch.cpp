@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/patch/QuadPatch.cpp,v $
                                                                         
                                                                         
@@ -158,7 +158,7 @@ QuadPatch::getCells (void) const
             }  
 
             cells[k] = new QuadCell(cellVertCoord); 
-            //cerr << "\ncreating cells Cell " << k << " :" << cells[k];
+            //opserr << "\ncreating cells Cell " << k << " :" << cells[k];
             k++; 
          }
    }
@@ -176,7 +176,7 @@ QuadPatch::getCopy (void) const
    return theCopy;
 }
  
-void QuadPatch::Print(ostream &s, int flag) const
+void QuadPatch::Print(OPS_Stream &s, int flag) const
 {
    s << "\nPatch Type: QuadPatch";
    s << "\nMaterial Id: " << matID;
@@ -186,7 +186,7 @@ void QuadPatch::Print(ostream &s, int flag) const
 }
 
 
-ostream &operator<<(ostream &s, QuadPatch &quadPatch)
+OPS_Stream &operator<<(OPS_Stream &s, QuadPatch &quadPatch)
 {
    quadPatch.Print(s);
    return s;

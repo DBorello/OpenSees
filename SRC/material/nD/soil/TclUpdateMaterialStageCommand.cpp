@@ -1,5 +1,5 @@
-// $Revision: 1.4 $
-// $Date: 2001-08-27 18:11:12 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/TclUpdateMaterialStageCommand.cpp,v $
                                                                         
 // Written: ZHY
@@ -22,36 +22,36 @@ TclModelBuilderUpdateMaterialStageCommand(ClientData clientData,
 					  TclModelBuilder *theTclBuilder)
 {
   if (argc < 5) {
-      cerr << "WARNING insufficient number of UpdateMaterialStage arguments\n";
-      cerr << "Want: UpdateMaterialStage material matTag? stage value?" << endl;
+      opserr << "WARNING insufficient number of UpdateMaterialStage arguments\n";
+      opserr << "Want: UpdateMaterialStage material matTag? stage value?" << endln;
       return TCL_ERROR;
   }
 
   if (strcmp(argv[1],"-material") != 0) {
-      cerr << "WARNING UpdateMaterialStage: Only accept parameter '-material' for now" << endl;
+      opserr << "WARNING UpdateMaterialStage: Only accept parameter '-material' for now" << endln;
       return TCL_ERROR;		
   }		
 
   int tag, value; 
 
   if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-      cerr << "WARNING MYSstage: invalid material tag" << endl;
+      opserr << "WARNING MYSstage: invalid material tag" << endln;
       return TCL_ERROR;		
   }
 
   NDMaterial * a = theTclBuilder->getNDMaterial(tag);
   if (a==0) {
-      cerr << "WARNING UpdateMaterialStage: couldn't get NDmaterial tagged: " << tag << endl;
+      opserr << "WARNING UpdateMaterialStage: couldn't get NDmaterial tagged: " << tag << endln;
       return TCL_ERROR;		
   }
 
   if (strcmp(argv[3],"-stage") != 0) {
-      cerr << "WARNING UpdateMaterialStage: Only accept parameter '-stage' for now" << endl;
+      opserr << "WARNING UpdateMaterialStage: Only accept parameter '-stage' for now" << endln;
       return TCL_ERROR;		
   }		
 
   if (Tcl_GetInt(interp, argv[4], &value) != TCL_OK) {
-      cerr << "WARNING UpdateMaterialStage: invalid parameter value" << endl;
+      opserr << "WARNING UpdateMaterialStage: invalid parameter value" << endln;
       return TCL_ERROR;		
   }	
 
@@ -62,8 +62,8 @@ TclModelBuilderUpdateMaterialStageCommand(ClientData clientData,
       a->updateParameter(value,info); 
   }
   else {
-      cerr << "WARNING UpdateMaterialStage: The tagged is not a "<<endl;
-      cerr << "PressureDependMultiYield/PressureIndependMultiYield/FluidSolidPorous material. " << endl;
+      opserr << "WARNING UpdateMaterialStage: The tagged is not a "<<endln;
+      opserr << "PressureDependMultiYield/PressureIndependMultiYield/FluidSolidPorous material. " << endln;
       return TCL_ERROR;		
   }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2002-12-16 21:12:05 $
+// $Revision: 1.21 $
+// $Date: 2003-02-14 23:00:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -39,7 +39,7 @@
 
 #include <stdlib.h>
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 #include <Domain.h>
 
 #include <ElementIter.h>
@@ -103,7 +103,8 @@ Domain::Domain()
 	theMP_Iter == 0 || theSP_Iter == 0 ||
 	theLoadPatterns == 0 || theLoadPatternIter == 0) {	
 
-	g3ErrorHandler->fatal("Domain::Domain() - out of memory\n");
+      opserr << "Domain::Domain() - out of memory\n";
+      exit(-1);
     }
     
     theBounds(0) = 0;
@@ -147,7 +148,7 @@ Domain::Domain(int numNodes, int numElements, int numSPs, int numMPs,
 	theMP_Iter == 0 || theSP_Iter == 0 ||
 	theLoadPatterns == 0 || theLoadPatternIter == 0) {	
 
-	g3ErrorHandler->fatal("Domain::Domain(int, int, ...) - out of memory\n");
+	opserr << ("Domain::Domain(int, int, ...) - out of memory\n");
     }
     
     theBounds(0) = 0;
@@ -192,7 +193,7 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
 	theMPs->getNumComponents() != 0 ||
 	theLoadPatterns->getNumComponents() != 0 ) {
 
-	g3ErrorHandler->fatal("Domain::Domain(&, & ...) - out of memory\n");	
+	opserr << ("Domain::Domain(&, & ...) - out of memory\n");	
     }    	
 	
     // check that there was space to create the data structures    
@@ -202,8 +203,8 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
 	theMP_Iter == 0 || theSP_Iter == 0 ||
 	theLoadPatterns == 0 || theLoadPatternIter == 0) { 
     
-	cerr << "FATAL Domain::Domain(TaggedObjectStorage, ...) - ";
-	cerr << "Ran out of memory\n";
+	opserr << "FATAL Domain::Domain(TaggedObjectStorage, ...) - ";
+	opserr << "Ran out of memory\n";
 	exit(-1);
     }    
     
@@ -249,7 +250,7 @@ Domain::Domain(TaggedObjectStorage &theStorage)
 	theMP_Iter == 0 || theSP_Iter == 0 ||
 	theLoadPatterns == 0 || theLoadPatternIter == 0) { 
 	
-	g3ErrorHandler->fatal("Domain::Domain(ObjectStorage &) - out of memory\n");	
+	opserr << ("Domain::Domain(ObjectStorage &) - out of memory\n");	
     }
     
     theBounds(0) = 0;
@@ -356,8 +357,8 @@ Domain::addElement(Element *element)
       int nodeTag = nodes(i);
       Node *nodePtr = this->getNode(nodeTag);
       if (nodePtr == 0) {
-	  cerr << "WARNING Domain::addElement - In element " << *element;
-	  cerr << "\n no Node " << nodeTag << " exists in the domain\n";
+	  opserr << "WARNING Domain::addElement - In element " << *element;
+	  opserr << "\n no Node " << nodeTag << " exists in the domain\n";
 	  return false;
       }
       numDOF += nodePtr->getNumberDOF();
@@ -367,37 +368,30 @@ Domain::addElement(Element *element)
   // check if an Element with a similar tag already exists in the Domain
   TaggedObject *other = theElements->getComponentPtr(eleTag);
   if (other != 0) {
-      g3ErrorHandler->warning("Domain::addElement - element with tag %d %s\n",
-			      eleTag,
-			      "already exists in model"); 
-
-      return false;
+    opserr << "Domain::addElement - element with tag " << eleTag << "already exists in model\n"; 
+    return false;
   }
 
   // add the element to the container object for the elements
   bool result = theElements->addComponent(element);
   if (result == true) {
-	  element->setDomain(this);
-	  element->update();
+    element->setDomain(this);
+    element->update();
 
-      // finally check the ele has correct number of dof
+    // finally check the ele has correct number of dof
 #ifdef _G3DEBUG
-      if (numDOF != element->getNumDOF()) { 
-
-	  g3ErrorHandler->warning("Domain::addElement - element %d %s\n",
-				  eleTag,
-				  "#DOF does not match with number at nodes");
-	  theElements->removeComponent(eleTag);
-	  return false;
-      }
+    if (numDOF != element->getNumDOF()) { 
+      
+      opserr << "Domain::addElement - element " << eleTag " - #DOF does not match with number at nodes\n";
+      theElements->removeComponent(eleTag);
+      return false;
+    }
 #endif      
 
-      // mark the Domain as having been changed
-      this->domainChange();
+    // mark the Domain as having been changed
+    this->domainChange();
   } else 
-      g3ErrorHandler->warning("Domain::addElement - element %d %s\n",
-			      eleTag,
-			      "could not be added to container");      
+    opserr << "Domain::addElement - element " << eleTag << "could not be added to container\n";      
 
   return result;
 }
@@ -414,10 +408,8 @@ Domain::addNode(Node * node)
 
   TaggedObject *other = theNodes->getComponentPtr(nodTag);
   if (other != 0) {
-      g3ErrorHandler->warning("Domain::addNode - node with tag %d %s\n",
-			      nodTag,
-			      "already exists in model");       
-      return false;
+    opserr << "Domain::addNode - node with tag " << nodTag << "already exists in model\n"; 
+    return false;
   }
   
   bool result = theNodes->addComponent(node);
@@ -446,9 +438,8 @@ Domain::addNode(Node * node)
       }
       
   } else
-      g3ErrorHandler->warning("Domain::addNode - node with tag %d %s\n",
-			      nodTag,
-			      "could not be added to container");            
+    opserr << "Domain::addNode - node with tag " << nodTag << "could not be added to container\n";
+
   return result;
 }
 
@@ -465,20 +456,16 @@ Domain::addSP_Constraint(SP_Constraint *spConstraint)
     int nodeTag = spConstraint->getNodeTag();
     Node *nodePtr = this->getNode(nodeTag);
     if (nodePtr == 0) {
-	g3ErrorHandler->warning("Domain::addSP_Constraint - %s %d %s\n",
-                                "cannot add as node node with tag",
-				nodeTag,
-				"does not exist in model");       	
-	return false;
+      opserr << "Domain::addSP_Constraint - cannot add as node node with tag" <<
+	nodeTag << "does not exist in model\n";       	
+      return false;
     }
 
     // check that the DOF specified exists at the Node
     int numDOF = nodePtr->getNumberDOF();
     if (numDOF < spConstraint->getDOF_Number()) {
-	g3ErrorHandler->warning("Domain::addSP_Constraint - %s %d %s\n",
-                                "cannot add as node node with tag",
-				nodeTag,
-				"does not have associated constrained DOF"); 
+	opserr << "Domain::addSP_Constraint - cannot add as node node with tag" << 
+	  nodeTag << "does not have associated constrained DOF\n"; 
 	return false;
     }      
 #endif
@@ -487,19 +474,15 @@ Domain::addSP_Constraint(SP_Constraint *spConstraint)
   int tag = spConstraint->getTag();
   TaggedObject *other = theSPs->getComponentPtr(tag);
   if (other != 0) {
-      g3ErrorHandler->warning("Domain::addSP_Constraint - %s %d %s\n",
-			      "cannot add as constraint with tag",
-			      tag,
-			      "already exists in model");             
-      return false;
+    opserr << "Domain::addSP_Constraint - cannot add as constraint with tag" << 
+      tag << "already exists in model\n";             
+    return false;
   }
   
   bool result = theSPs->addComponent(spConstraint);
   if (result == false) {
-      g3ErrorHandler->warning("Domain::addSP_Constraint - %s %d %s\n",
-			      "cannot add constraint with tag",
-			      tag,
-			      "to the container");             
+      opserr << "Domain::addSP_Constraint - cannot add constraint with tag" << 
+	tag << "to the container\n";             
       return false;
   } 
 
@@ -522,21 +505,18 @@ Domain::addMP_Constraint(MP_Constraint *mpConstraint)
     int nodeConstrained = mpConstraint->getNodeConstrained();
     Node *nodePtr = this->getNode(nodeConstrained);
     if (nodePtr == 0) {
-	g3ErrorHandler->warning("Domain::addMP_Constraint - %s %d %s\n",
-                                "cannot add as constrained node with tag",
-				nodeConstrained,
-				"does not exist in model");       		
-	return false;
+      opserr << "Domain::addMP_Constraint -cannot add as constrained node with tag" <<
+	nodeConstrained << "does not exist in model\n";       		
+      return false;
     }
     
     int nodeRetained = mpConstraint->getNodeRetained();      
     nodePtr = this->getNode(nodeRetained);
     if (nodePtr == 0) {
-	g3ErrorHandler->warning("Domain::addMP_Constraint - %s %d %s\n",
-                                "cannot add as retained node with tag",
-				nodeRetained,
-				"does not exist in model"); 	
-	return false;
+      opserr << "Domain::addMP_Constraint - cannot add as retained node with tag" <,
+	nodeRetained << "does not exist in model\n"; 	
+      
+      return false;
     }      
     // MISSING CODE
 #endif
@@ -545,11 +525,10 @@ Domain::addMP_Constraint(MP_Constraint *mpConstraint)
   int tag = mpConstraint->getTag();
   TaggedObject *other = theMPs->getComponentPtr(tag);
   if (other != 0) {
-      g3ErrorHandler->warning("Domain::addMP_Constraint - %s %d %s\n",
-			      "cannot add as constraint with tag",
-			      tag,
-			      "already exists in model");             
-      return false;
+    opserr << "Domain::addMP_Constraint - cannot add as constraint with tag" <<
+      tag << "already exists in model";             
+			      
+    return false;
   }
   
   bool result = theMPs->addComponent(mpConstraint);
@@ -557,10 +536,9 @@ Domain::addMP_Constraint(MP_Constraint *mpConstraint)
       mpConstraint->setDomain(this);
       this->domainChange();
   } else
-      g3ErrorHandler->warning("Domain::addMP_Constraint - %s %d %s\n",
-			      "cannot add constraint with tag",
-			      tag,
-			      "to the container");                   
+    opserr << "Domain::addMP_Constraint - cannot add constraint with tag" << 
+      tag << "to the container\n";                   
+			      
   return result;
 }
 
@@ -571,11 +549,10 @@ Domain::addLoadPattern(LoadPattern *load)
     int tag = load->getTag();
     TaggedObject *other = theLoadPatterns->getComponentPtr(tag);
     if (other != 0) {
-	g3ErrorHandler->warning("Domain::addLoadPattern - %s %d %s\n",
-				"cannot add as LoadPattern with tag",
-				tag,
-				"already exists in model");             
-	return false;
+      opserr << "Domain::addLoadPattern - cannot add as LoadPattern with tag" <<
+	tag << "already exists in model\n";             
+				
+      return false;
     }    
 
     // now we add the load pattern to the container for load pattrens
@@ -585,10 +562,9 @@ Domain::addLoadPattern(LoadPattern *load)
 	this->domainChange();
     }
     else 
-      g3ErrorHandler->warning("Domain::addLoadPattern - %s %d %s\n",
-			      "cannot add LoadPattern with tag",
-			      tag,
-			      "to the container");                   	
+      opserr << "Domain::addLoadPattern - cannot add LoadPattern with tag" <<
+	tag << "to the container\n";                   	
+			      
     return result;
 }    
 
@@ -601,20 +577,18 @@ Domain::addSP_Constraint(SP_Constraint *spConstraint, int pattern)
     int nodeTag = spConstraint->getNodeTag();
     Node *nodePtr = this->getNode(nodeTag);
     if (nodePtr == 0) {
-	g3ErrorHandler->warning("Domain::addSP_Constraint - %s %d %s\n",
-                                "cannot add as node node with tag",
-				nodeTag,
-				"does not exist in model");       	
+      opserr << "Domain::addSP_Constraint - cannot add as node with tag" <<
+	nodeTag << "does not exist in model\n";
+				
 	return false;
     }
 
     // check that the DOF specified exists at the Node
     int numDOF = nodePtr->getNumberDOF();
     if (numDOF < spConstraint->getDOF_Number()) {
-	g3ErrorHandler->warning("Domain::addSP_Constraint - %s %d %s\n",
-                                "cannot add as node node with tag",
-				nodeTag,
-				"does not have associated constrained DOF"); 
+      opserr << "Domain::addSP_Constraint - cannot add as node with tag" <<
+	nodeTag << "does not have associated constrained DOF\n"; 
+
 	return false;
     }      
 #endif
@@ -622,18 +596,16 @@ Domain::addSP_Constraint(SP_Constraint *spConstraint, int pattern)
   // now add it to the pattern
   TaggedObject *thePattern = theLoadPatterns->getComponentPtr(pattern);
   if (thePattern == 0) {
-      g3ErrorHandler->warning("Domain::addSP_Constraint - %s %d %s\n",
-			      "cannot add as pattern with tag",
-			      pattern,
-			      "does not exist in domain"); 
+      opserr << "Domain::addSP_Constraint - cannot add as pattern with tag" <<
+	pattern << "does not exist in domain\n"; 
+			      
       return false;
   }
   LoadPattern *theLoadPattern = (LoadPattern *)thePattern;
   bool result = theLoadPattern->addSP_Constraint(spConstraint);
   if (result == false) {
-      g3ErrorHandler->warning("Domain::addSP_Constraint - %d %s\n",
-			      pattern,
-			      "pattern could not add the SP_Constraint"); 
+    opserr << "Domain::addSP_Constraint - " << pattern << "pattern could not add the SP_Constraint\n"; 
+			      
     return false;
   }
 
@@ -646,33 +618,28 @@ Domain::addSP_Constraint(SP_Constraint *spConstraint, int pattern)
 bool 
 Domain::addNodalLoad(NodalLoad *load, int pattern)
 {
-#ifdef _G3DEBUG
     int nodTag = load->getNodeTag();
     Node *res = this->getNode(nodTag);
     if (res == 0) {
-	g3ErrorHandler->warning("Domain::addNodalLoad() - no node with tag %d %s\n",
-				nodTag,
-				"in  the model, not adding the nodal load");
+      opserr << "Domain::addNodalLoad() - no node with tag " << nodTag << 
+	"exits in  the model, not adding the nodal load"  << *load << endln;
 	return false;
     }
-#endif
 
     // now add it to the pattern
     TaggedObject *thePattern = theLoadPatterns->getComponentPtr(pattern);
     if (thePattern == 0) {
-	g3ErrorHandler->warning("Domain::addNodalLoad() - %s %d %s\n",
-				"no pattern with tag",
-				pattern,
-				"in  the model, not adding the nodal load");	
+      opserr << "Domain::addNodalLoad() - no pattern with tag" << 
+	pattern << "in  the model, not adding the nodal load"  << *load << endln;
+      
 	return false;
     }
     LoadPattern *theLoadPattern = (LoadPattern *)thePattern;
     bool result = theLoadPattern->addNodalLoad(load);
     if (result == false) {
-	g3ErrorHandler->warning("Domain::addNodalLoad() - %s %d %s\n",
-				"pattern with tag ",
-				pattern,
-				"could not add the load");	
+      opserr << "Domain::addNodalLoad() - pattern with tag" << 
+	pattern << "could not add the load" << *load << endln;
+				
       return false;
     }
 
@@ -686,35 +653,20 @@ Domain::addNodalLoad(NodalLoad *load, int pattern)
 bool 
 Domain::addElementalLoad(ElementalLoad *load, int pattern)
 {
-#ifdef _G3DEBUG
-//    int eleTag = load->getElementTag();
-//    Element *res = this->getElement(eleTag);
-//    if (res == 0) {	
-//	g3ErrorHandler->warning("Domain::addElementalLoad() - %s %d %s\n",
-//				"no element with tag",
-//				eleTag,
-//				"in  the model, not adding the nodal load");	
-//	return false;
-//    }
-#endif
-
     // now add it to the pattern
     TaggedObject *thePattern = theLoadPatterns->getComponentPtr(pattern);
     if (thePattern == 0) {
-	g3ErrorHandler->warning("Domain::addElementalLoad() - %s %d %s\n",
-				"no pattern with tag",
-				pattern,
-				"in  the model, not adding the nodal load");
+      opserr << "Domain::addNodalLoad() - no pattern with tag " << pattern << 
+	"exits in  the model, not adding the ele load " << *load << endln;
+
 	return false;
     }
     LoadPattern *theLoadPattern = (LoadPattern *)thePattern;
     bool result = theLoadPattern->addElementalLoad(load);
     if (result == false) {
-	g3ErrorHandler->warning("Domain::addElementalLoad() - %s %d %s\n",
-				"pattern with tag ",
-				pattern,
-				"could not add the load");	
-	return false;
+      opserr << "Domain::addNodalLoad() - no pattern with tag" << 
+	pattern << "in  the model, not adding the ele load" << *load << endln;
+      return false;
     }
 
 
@@ -1145,16 +1097,17 @@ Domain::getElementGraph(void)
 	if (theElementGraph == 0) {// if still 0 try a smaller one
 	    theElementGraph = new Graph();
 	    
-	    if (theElementGraph == 0) // if still 0 out of memory
-		g3ErrorHandler->fatal("Domain::getElementGraph() - out of memory\n");
+	    if (theElementGraph == 0) { // if still 0 out of memory
+		opserr << "Domain::getElementGraph() - out of memory\n";
+		exit(-1);
+	    }
 	}
 
 	// now build the graph
 	if (this->buildEleGraph(theElementGraph) == 0)
 	    eleGraphBuiltFlag = true;
 	else
-	    g3ErrorHandler->warning("Domain::getElementGraph() - %s\n",
-				    "failed to build the element graph");	    
+	    opserr << "Domain::getElementGraph() - failed to build the element graph\n";	    
     }
     
     // return the Graph
@@ -1180,16 +1133,17 @@ Domain::getNodeGraph(void)
 	if (theNodeGraph == 0) { // if still 0 try a smaller one
 	    theNodeGraph = new Graph();
 
-	    if (theNodeGraph == 0) // if still 0 out of memory
-		g3ErrorHandler->fatal("Domain::getNodeGraph() - out of memory\n");
+	    if (theNodeGraph == 0) {// if still 0 out of memory
+		opserr << "Domain::getNodeGraph() - out of memory\n";
+		exit(-1);
+	    }
 	}
-	
-	// now build the graph
+
+       // now build the graph
 	if (this->buildNodeGraph(theNodeGraph) == 0)
 	    nodeGraphBuiltFlag = true;
 	else
-	    g3ErrorHandler->warning("Domain::getNodeGraph() - %s\n",
-				    "failed to build the node graph");
+	    opserr << "Domain::getNodeGraph() - failed to build the node graph\n";
     }
 
     // return the Graph
@@ -1414,7 +1368,7 @@ Domain::update(void)
   }
 
   if (ok != 0)
-    cerr << "Domain::update - domain failed in update\n";
+    opserr << "Domain::update - domain failed in update\n";
 
   return ok;
 }
@@ -1458,7 +1412,8 @@ Domain::getEigenvalues(void)
 {
   // ensure the eigen values were set
   if (theEigenvalues == 0) {
-    g3ErrorHandler->fatal("Domain::getEigenvalues - Eigenvalues were never set\n");
+    opserr << "Domain::getEigenvalues - Eigenvalues were never set\n";
+    exit(-1);
   }
 
   return *theEigenvalues;
@@ -1499,12 +1454,12 @@ Domain::hasDomainChanged(void)
 
 
 void
-Domain::Print(ostream &s, int flag) 
+Domain::Print(OPS_Stream &s, int flag) 
 {
 
   s << "Current Domain Information\n";
   s << "\tCurrent Time: " << currentTime;
-  s << "\ntCommitted Time: " << committedTime << endl;
+  s << "\ntCommitted Time: " << committedTime << endln;
 
   s << "\nNODE DATA: NumNodes: " << theNodes->getNumComponents() << "\n";
   theNodes->Print(s, flag);
@@ -1525,7 +1480,7 @@ Domain::Print(ostream &s, int flag)
   theLoadPatterns->Print(s, flag);
 }
 
-ostream &operator<<(ostream &s, Domain &M)
+OPS_Stream &operator<<(OPS_Stream &s, Domain &M)
 {
   M.Print(s);
   return s;
@@ -1537,8 +1492,7 @@ Domain::addRecorder(Recorder &theRecorder)
 {
     Recorder **newRecorders = new Recorder *[numRecorders + 1]; 
     if (newRecorders == 0) {
-	g3ErrorHandler->warning("Domain::addRecorder() - %s\n",
-				"could not add ran out of memory\n");
+	opserr << "Domain::addRecorder() - could not add ran out of memory\n";
 	return -1;
     }
     
@@ -1575,8 +1529,7 @@ Domain::addRegion(MeshRegion &theRegion)
 {
     MeshRegion **newRegions = new MeshRegion *[numRegions + 1]; 
     if (newRegions == 0) {
-	g3ErrorHandler->warning("Domain::addRegion() - %s\n",
-				"could not add ran out of memory\n");
+	opserr << "Domain::addRegion() - could not add ran out of memory\n";
 	return -1;
     }
     
@@ -1642,13 +1595,13 @@ Domain::buildEleGraph(Graph *theEleGraph)
     theElementTagVertices = new int[maxEleNum+1];
 
     if (theElementTagVertices == 0) {
-	cerr << "WARNING Domain::buildEleGraph ";
-	cerr << " - Not Enough Memory for ElementTagVertices\n";
+	opserr << "WARNING Domain::buildEleGraph ";
+	opserr << " - Not Enough Memory for ElementTagVertices\n";
 	return -1;
     }
 
     for (int j=0; j<=maxEleNum; j++) theElementTagVertices[j] = -1;
-cerr << "Domain::buildEleGraph numVertex maxEleNum " << numVertex << " " << maxEleNum << endl;
+    opserr << "Domain::buildEleGraph numVertex maxEleNum " << numVertex << " " << maxEleNum << endln;
     // now create the vertices with a reference equal to the element number.
     // and a tag which ranges from 0 through numVertex-1
 
@@ -1659,9 +1612,9 @@ cerr << "Domain::buildEleGraph numVertex maxEleNum " << numVertex << " " << maxE
 	Vertex *vertexPtr = new Vertex(count,ElementTag);
 
 	if (vertexPtr == 0) {
-	    cerr << "WARNING Domain::buildEleGraph";
-	    cerr << " - Not Enough Memory to create ";
-	    cerr << count << "th Vertex\n";
+	    opserr << "WARNING Domain::buildEleGraph";
+	    opserr << " - Not Enough Memory to create ";
+	    opserr << count << "th Vertex\n";
 	    delete [] theElementTagVertices;
 	    return -1;
 	}
@@ -1687,8 +1640,8 @@ cerr << "Domain::buildEleGraph numVertex maxEleNum " << numVertex << " " << maxE
     theNodeTagVertices = new Vertex *[maxNodNum+1];
 
     if (theNodeTagVertices == 0) {
-	cerr << "WARNING Domain::buildEleGraph ";
-	cerr << " - Not Enough Memory for NodeTagVertices\n";
+	opserr << "WARNING Domain::buildEleGraph ";
+	opserr << " - Not Enough Memory for NodeTagVertices\n";
 	return -1;
     }
     
@@ -1706,9 +1659,9 @@ cerr << "Domain::buildEleGraph numVertex maxEleNum " << numVertex << " " << maxE
 	theNodeTagVertices[nodeTag] = vertexPtr;
 
 	if (vertexPtr == 0) {
-	    cerr << "WARNING Domain::buildEleGraph";
-	    cerr << " - Not Enough Memory to create ";
-	    cerr << count << "th Node Vertex\n";
+	    opserr << "WARNING Domain::buildEleGraph";
+	    opserr << " - Not Enough Memory to create ";
+	    opserr << count << "th Node Vertex\n";
 	    delete [] theNodeTagVertices;
 	    return -1;
 	}
@@ -1799,8 +1752,8 @@ Domain::buildNodeGraph(Graph *theNodeGraph)
     theNodeTagVertices = new int [maxNodNum+1];
 
     if (theNodeTagVertices == 0) {
-	cerr << "WARNING Domain::buildNodeGraph ";
-	cerr << " - Not Enough Memory for NodeTagVertices\n";
+	opserr << "WARNING Domain::buildNodeGraph ";
+	opserr << " - Not Enough Memory for NodeTagVertices\n";
 	return -1;
     }
     
@@ -1817,9 +1770,9 @@ Domain::buildNodeGraph(Graph *theNodeGraph)
 	Vertex *vertexPtr = new Vertex(count,nodeTag);
 
 	if (vertexPtr == 0) {
-	    cerr << "WARNING Domain::buildNodeGraph";
-	    cerr << " - Not Enough Memory to create ";
-	    cerr << count << "th Vertex\n";
+	    opserr << "WARNING Domain::buildNodeGraph";
+	    opserr << " - Not Enough Memory to create ";
+	    opserr << count << "th Vertex\n";
 	    delete [] theNodeTagVertices;
 	    return -1;
 	}
@@ -1907,7 +1860,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   domainData(10) = dbLPs;
 
   if (theChannel.sendID(theDbTag, commitTag, domainData) < 0) {
-    g3ErrorHandler->warning("Domain::send - channel failed to send the initial ID");
+    opserr << "Domain::send - channel failed to send the initial ID\n";
     return -1;
   }    
 
@@ -1916,7 +1869,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   domainTime(0) = committedTime;
 
   if (theChannel.sendVector(theDbTag, commitTag, domainTime) < 0) {
-    g3ErrorHandler->warning("Domain::send - channel failed to send the time Vector");
+    opserr << "Domain::send - channel failed to send the time Vector\n";
     return -2;
   }    
 
@@ -1956,7 +1909,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
 
       // now send the ID
       if (theChannel.sendID(dbNod, currentGeoTag, nodeData) < 0) {
-	g3ErrorHandler->warning("Domain::send - channel failed to send the node ID");
+	opserr << "Domain::send - channel failed to send the node ID\n";
 	return -2;
       }
     }
@@ -1986,7 +1939,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
 
       // now send the ID
       if (theChannel.sendID(dbEle, currentGeoTag, elementData) < 0) {
-	g3ErrorHandler->warning("Domain::send - channel failed to send the element ID");
+	opserr << "Domain::send - channel failed to send the element ID\n";
 	return -3;
       }
     }
@@ -2015,7 +1968,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
       }    
 
       if (theChannel.sendID(dbSPs, currentGeoTag, spData) < 0) {
-	g3ErrorHandler->warning("Domain::send - channel failed to send the SP_Constraint ID");
+	opserr << "Domain::send - channel failed to send the SP_Constraint ID\n";
 	return -4;
       }
     }
@@ -2044,7 +1997,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
       }    
 
       if (theChannel.sendID(dbMPs, currentGeoTag, mpData) < 0) {
-	g3ErrorHandler->warning("Domain::send - channel failed to send the MP_Constraint ID");
+	opserr << "Domain::send - channel failed to send the MP_Constraint ID\n";
 	return -5;
       }
     }
@@ -2073,7 +2026,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
       }    
 
       if (theChannel.sendID(dbLPs, currentGeoTag, lpData) < 0) {
-	g3ErrorHandler->warning("Domain::send - channel failed to send the LoadPattern ID");
+	opserr << "Domain::send - channel failed to send the LoadPattern ID\n";
 	return -6;
       }    
     }
@@ -2093,8 +2046,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   NodeIter &theNodes = this->getNodes();
   while ((theNode = theNodes()) != 0) {
     if (theNode->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("Domain::send - node with tag %d failed in sendSelf",
-			      theNode->getTag());
+      opserr << "Domain::send - node with tag " << theNode->getTag() << " failed in sendSelf\n";
       return -7;
     }
   }
@@ -2104,8 +2056,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   ElementIter &theElements = this->getElements();
   while ((theEle = theElements()) != 0) {
     if (theEle->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("Domain::send - element with tag %d failed in sendSelf",
-			      theEle->getTag());
+      opserr << "Domain::send - element with tag " << theEle->getTag() << " failed in sendSelf\n";
       return -8;
     }
   }
@@ -2115,8 +2066,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   SP_ConstraintIter &theSPs = this->getSPs();
   while ((theSP = theSPs()) != 0) {
     if (theSP->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("Domain::send - SP_Constraint with tag %d failed in sendSelf",
-			      theSP->getTag());
+      opserr << "Domain::send - SP_Constraint with tag " << theSP->getTag() << " failed in sendSelf\n";
       return -9;
     }
   }    
@@ -2126,8 +2076,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   MP_ConstraintIter &theMPs = this->getMPs();
   while ((theMP = theMPs()) != 0) {
     if (theMP->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("Domain::send - MP_Constraint with tag %d failed in sendSelf",
-			      theMP->getTag());
+      opserr << "Domain::send - MP_Constraint with tag " << theMP->getTag() << " failed in sendSelf\n";
       return -10;
     }
   }    
@@ -2137,8 +2086,7 @@ Domain::sendSelf(int cTag, Channel &theChannel)
   LoadPatternIter &theLPs = this->getLoadPatterns();
   while ((theLP = theLPs()) != 0) {
     if (theLP->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("Domain::send - LoadPattern with tag %d failed in sendSelf",
-			      theLP->getTag());
+      opserr << "Domain::send - LoadPattern with tag " << theLP->getTag() << " failed in sendSelf\n";
       return -11;
     }
   }  
@@ -2158,14 +2106,14 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   // first we get the data about the state of the domain for this commitTag
   ID domainData(11);
   if (theChannel.recvID(theDbTag, commitTag, domainData) < 0) {
-    g3ErrorHandler->warning("Domain::recv - channel failed to recv the initial ID");
+    opserr << "Domain::recv - channel failed to recv the initial ID\n";
     return -1;
   }
 
   // recv the time information
   Vector domainTime(1);
   if (theChannel.recvVector(theDbTag, commitTag, domainTime) < 0) {
-    g3ErrorHandler->warning("Domain::send - channel failed to recv thetime Vector");
+    opserr << "Domain::send - channel failed to recv thetime Vector\n";
     return -1;
   }    
 
@@ -2207,7 +2155,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 
       // now receive the ID about the nodes, class tag and dbTags
       if (theChannel.recvID(dbNod, geoTag, nodeData) < 0) {
-	g3ErrorHandler->warning("Domain::recv - channel failed to recv the node ID");
+	opserr << "Domain::recv - channel failed to recv the node ID\n";
 	return -2;
       }
 
@@ -2222,22 +2170,19 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 	Node *theNode = theBroker.getNewNode(classTag);
 
 	if (theNode == 0) {
-	  g3ErrorHandler->warning("Domain::recv - cannot create node with classTag %d ",
-				  classTag);
+	  opserr << "Domain::recv - cannot create node with classTag " << classTag << endln;
 	  return -2;
 	}			
 
 	theNode->setDbTag(dbTag);
       
 	if (theNode->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	  g3ErrorHandler->warning("Domain::recv - node with dbTag %d failed in recvSelf",
-				  dbTag);
+	  opserr << "Domain::recv - node with dbTag " << dbTag << " failed in recvSelf\n";
 	  return -2;
 	}			
 
 	if (this->addNode(theNode) == false) {
-	  g3ErrorHandler->warning("Domain::recv - could not add node with tag %d into domain!",
-				theNode->getTag());
+	  opserr << "Domain::recv - could not add node with tag " << theNode->getTag() << " into domain\n!";
 	  return -3;
 	}			
 
@@ -2256,7 +2201,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
       ID eleData(2*numEle);
 
       if (theChannel.recvID(dbEle, geoTag, eleData) < 0) {
-	g3ErrorHandler->warning("Domain::recv - channel failed to recv the Elee ID");
+	opserr << "Domain::recv - channel failed to recv the Ele ID\n";
 	return -2;
       }
 
@@ -2267,21 +2212,18 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
       
 	Element *theEle = theBroker.getNewElement(classTag);
 	if (theEle == 0) {
-	  g3ErrorHandler->warning("Domain::recv - cannot create element with classTag %d ",
-				  classTag);
+	  opserr << "Domain::recv - cannot create element with classTag " << classTag << endln;
 	  return -2;
 	}			
 	theEle->setDbTag(dbTag);
       
 	if (theEle->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	  g3ErrorHandler->warning("Domain::recv - Ele with dbTag %d failed in recvSelf",
-				  dbTag);
+	  opserr << "Domain::recv - Ele with dbTag " << dbTag << " failed in recvSelf()\n";
 	  return -2;
 	}			
 
 	if (this->addElement(theEle) == false) {
-	  g3ErrorHandler->warning("Domain::recv - could not add Ele with tag %d into domain!",
-				  theEle->getTag());
+	  opserr << "Domain::recv - could not add Ele with tag " << theEle->getTag() << " into domain!\n";
 	  return -3;
 	}			
 
@@ -2299,7 +2241,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
       ID spData(2*numSPs);
 
       if (theChannel.recvID(dbSPs, geoTag, spData) < 0) {
-	g3ErrorHandler->warning("Domain::recv - channel failed to recv the SP_Constraints ID");
+	opserr << "Domain::recv - channel failed to recv the SP_Constraints ID\n";
 	return -2;
       }
 
@@ -2310,21 +2252,18 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
       
 	SP_Constraint *theSP = theBroker.getNewSP(classTag);
 	if (theSP == 0) {
-	  g3ErrorHandler->warning("Domain::recv - cannot create SP_Constraint with classTag %d ",
-				  classTag);
+	  opserr << "Domain::recv - cannot create SP_Constraint with classTag " << classTag << endln;
 	  return -2;
 	}			
 	theSP->setDbTag(dbTag);
       
 	if (theSP->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	  g3ErrorHandler->warning("Domain::recv - SP_Constraint with dbTag %d failed in recvSelf",
-				  dbTag);
+	  opserr << "Domain::recv - SP_Constraint with dbTag " << dbTag << " failed in recvSelf\n";
 	  return -2;
 	}			
 
 	if (this->addSP_Constraint(theSP) == false) {
-	  g3ErrorHandler->warning("Domain::recv - could not add SP_Constraint with tag %d into domain!",
-				  theSP->getTag());
+	  opserr << "Domain::recv - could not add SP_Constraint with tag " << theSP->getTag() << " into domain!\n";
 	  return -3;
 	}			
 
@@ -2344,7 +2283,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
       ID mpData(2*numMPs);
 
       if (theChannel.recvID(dbMPs, geoTag, mpData) < 0) {
-	g3ErrorHandler->warning("Domain::recv - channel failed to recv the MP_Constraints ID");
+	opserr << "Domain::recv - channel failed to recv the MP_Constraints ID\n";
 	return -2;
       }
 
@@ -2355,21 +2294,18 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
       
 	MP_Constraint *theMP = theBroker.getNewMP(classTag);
 	if (theMP == 0) {
-	  g3ErrorHandler->warning("Domain::recv - cannot create MP_Constraint with classTag %d ",
-				  classTag);
+	  opserr << "Domain::recv - cannot create MP_Constraint with classTag " << classTag << endln;
 	  return -2;
 	}			
 	theMP->setDbTag(dbTag);
       
 	if (theMP->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	  g3ErrorHandler->warning("Domain::recv - MP_Constraint with dbTag %d failed in recvSelf",
-				  dbTag);
+	  opserr << "Domain::recv - MP_Constraint with dbTag " << dbTag << " failed in recvSelf\n";
 	  return -2;
 	}			
 
 	if (this->addMP_Constraint(theMP) == false) {
-	  g3ErrorHandler->warning("Domain::recv - could not add MP_Constraint with tag %d into domain!",
-				  theMP->getTag());
+	  opserr << "Domain::recv - could not add MP_Constraint with tag " << theMP->getTag() << " into domain!\n";
 	  return -3;
 	}			
 	
@@ -2388,7 +2324,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
       ID lpData(2*numLPs);
       
       if (theChannel.recvID(dbLPs, geoTag, lpData) < 0) {
-	g3ErrorHandler->warning("Domain::recv - channel failed to recv the MP_Constraints ID");
+	opserr << "Domain::recv - channel failed to recv the MP_Constraints ID\n";
 	return -2;
       }
 
@@ -2399,21 +2335,18 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 
 	LoadPattern *theLP = theBroker.getNewLoadPattern(classTag);
 	if (theLP == 0) {
-	  g3ErrorHandler->warning("Domain::recv - cannot create MP_Constraint with classTag %d ",
-				  classTag);
+	  opserr << "Domain::recv - cannot create MP_Constraint with classTag  " << classTag << endln;
 	  return -2;
 	}			
 	theLP->setDbTag(dbTag);
       
 	if (theLP->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	  g3ErrorHandler->warning("Domain::recv - LoadPattern with dbTag %d failed in recvSelf",
-				  dbTag);
+	  opserr << "Domain::recv - LoadPattern with dbTag " << dbTag << " failed in recvSelf\n";
 	  return -2;
 	}			
 
 	if (this->addLoadPattern(theLP) == false) {
-	  g3ErrorHandler->warning("Domain::recv - could not add LoadPattern with tag %d into domain!",
-				  theLP->getTag());
+	  opserr << "Domain::recv - could not add LoadPattern with tag " << theLP->getTag() <<  " into the Domain\n";
 	  return -3;
 	}			
 
@@ -2437,8 +2370,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     NodeIter &theNodes = this->getNodes();
     while ((theNode = theNodes()) != 0) {
       if (theNode->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("Domain::recv - node with tag %d failed in recvSelf",
-				theNode->getTag());
+	opserr << "Domain::recv - node with tag " << theNode->getTag() << " failed in recvSelf\n";
 	return -7;
       }
     }
@@ -2447,8 +2379,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     ElementIter &theElements = this->getElements();
     while ((theEle = theElements()) != 0) {
       if (theEle->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("Domain::recv - element with tag %d failed in recvSelf",
-				theEle->getTag());
+	opserr << "Domain::recv - element with tag " << theEle->getTag() <<  " failed in recvSelf\n";
 	return -8;
       }
       theEle->update();
@@ -2458,8 +2389,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     SP_ConstraintIter &theSPs = this->getSPs();
     while ((theSP = theSPs()) != 0) {
       if (theSP->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("Domain::recv - SP_Constraint with tag %d failed in recvSelf",
-				theSP->getTag());
+	opserr << "Domain::recv - SP_Constraint with tag " << theSP->getTag() << " failed in recvSelf\n";
 	return -9;
       }
     }    
@@ -2468,8 +2398,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     MP_ConstraintIter &theMPs = this->getMPs();
     while ((theMP = theMPs()) != 0) {
       if (theMP->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("Domain::recv - MP_Constraint with tag %d failed in recvSelf",
-				theMP->getTag());
+	opserr << "Domain::recv - MP_Constraint with tag " << theMP->getTag() << " failed in recvSelf\n";
 	return -10;
       }
     }    
@@ -2478,8 +2407,7 @@ Domain::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     LoadPatternIter &theLPs = this->getLoadPatterns();
     while ((theLP = theLPs()) != 0) {
       if (theLP->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("Domain::recv - LoadPattern with tag %d failed in recvSelf",
-				theLP->getTag());
+	opserr << "Domain::recv - LoadPattern with tag" << theLP->getTag() << " failed in recvSelf";
 	return -11;
       }
     }  

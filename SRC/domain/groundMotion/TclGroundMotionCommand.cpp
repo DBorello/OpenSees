@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-12 07:33:24 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/TclGroundMotionCommand.cpp,v $
 
 // File: ~/domain/groundMotion/TclGroundMotionComand.C
@@ -61,14 +61,14 @@ TclGroundMotionCommand(ClientData clientData, Tcl_Interp *interp,
     
   // make sure at least one other argument to contain integrator
   if (argc < 4) {
-    cerr << "WARNING invalid command - want: groundMotion tag type <args>\n";
-    cerr << "           valid types: AccelRecord and Interpolated \n";
+    opserr << "WARNING invalid command - want: groundMotion tag type <args>\n";
+    opserr << "           valid types: AccelRecord and Interpolated \n";
     return TCL_ERROR;
   }    
 
 
   if (Tcl_GetInt(interp, argv[1], &gMotionTag) != TCL_OK) {
-    cerr << "WARNING invalid tag: groundMotion tag  type <args>\n";
+    opserr << "WARNING invalid tag: groundMotion tag  type <args>\n";
     return TCL_ERROR;		
   }
   int startArg = 2;
@@ -90,7 +90,7 @@ TclGroundMotionCommand(ClientData clientData, Tcl_Interp *interp,
 	currentArg++;
 	accelSeries = TclSeriesCommand(clientData, interp, argv[currentArg]);
 	if (accelSeries == 0) {
-	  cerr << "WARNING invalid accel series: groundMotion tag Series -accel <args>\n";
+	  opserr << "WARNING invalid accel series: groundMotion tag Series -accel <args>\n";
 	  return TCL_ERROR;		
 	}
 
@@ -103,8 +103,8 @@ TclGroundMotionCommand(ClientData clientData, Tcl_Interp *interp,
 	velSeries = TclSeriesCommand(clientData, interp, argv[currentArg]);
 	
 	if (velSeries == 0) {
-	  cerr << "WARNING invalid vel series: " << argv[currentArg];
-	  cerr << " groundMotion tag Series -vel {series}\n";
+	  opserr << "WARNING invalid vel series: " << argv[currentArg];
+	  opserr << " groundMotion tag Series -vel {series}\n";
 	  return TCL_ERROR;		
 	}
 	
@@ -117,8 +117,8 @@ TclGroundMotionCommand(ClientData clientData, Tcl_Interp *interp,
 	dispSeries = TclSeriesCommand(clientData, interp, argv[currentArg]);
 
 	if (dispSeries == 0) {
-	  cerr << "WARNING invalid vel series: " << argv[currentArg];
-	  cerr << " groundMotion tag Series -vel {series}\n";
+	  opserr << "WARNING invalid vel series: " << argv[currentArg];
+	  opserr << " groundMotion tag Series -vel {series}\n";
 	  return TCL_ERROR;		
 	}
 	  
@@ -130,8 +130,8 @@ TclGroundMotionCommand(ClientData clientData, Tcl_Interp *interp,
 	seriesIntegrator = TclSeriesIntegratorCommand(clientData, interp, 
 						      argv[currentArg]);
 	if (seriesIntegrator == 0) {
-	  cerr << "WARNING invalid series integrator: " << argv[currentArg];
-	  cerr << " - groundMotion tag Series -int {Series Integrator}\n";
+	  opserr << "WARNING invalid series integrator: " << argv[currentArg];
+	  opserr << " - groundMotion tag Series -int {Series Integrator}\n";
 	  return TCL_ERROR;		
 	}	  
 	currentArg++;
@@ -143,8 +143,8 @@ TclGroundMotionCommand(ClientData clientData, Tcl_Interp *interp,
 				 accelSeries, seriesIntegrator);
 
     if (theMotion == 0) {
-      cerr << "WARNING ran out of memory creating ground motion - pattern UniformExcitation ";
-      cerr << gMotionTag << endl;
+      opserr << "WARNING ran out of memory creating ground motion - pattern UniformExcitation ";
+      opserr << gMotionTag << endln;
       
       return TCL_ERROR;	      
     }      
@@ -170,17 +170,17 @@ TclGroundMotionCommand(ClientData clientData, Tcl_Interp *interp,
 	  thePattern->getMotion(motionID);
 	
 	if (theMotion1 == 0) {
-	  cerr << "WARNING no groundMotion with tag " << motionID <<" :";
-	  cerr << " pattern MultiSupport gMotion1? gMotion? .. ";
-	  cerr << "-fact fact1? fact2? .. \n";
+	  opserr << "WARNING no groundMotion with tag " << motionID <<" :";
+	  opserr << " pattern MultiSupport gMotion1? gMotion? .. ";
+	  opserr << "-fact fact1? fact2? .. \n";
 	  return TCL_ERROR;		    
 	} else
 	  theMotions[i-3] = theMotion1;
       }
     } else {
-      cerr << "WARNING no gMotionTags want :";
-      cerr << " pattern MultiSupport gMotion1? gMotion? .. ";
-      cerr << "-fact fact1? fact2? .. \n";
+      opserr << "WARNING no gMotionTags want :";
+      opserr << " pattern MultiSupport gMotion1? gMotion? .. ";
+      opserr << "-fact fact1? fact2? .. \n";
       return TCL_ERROR;
     }
     Vector facts(numMotions);
@@ -196,19 +196,19 @@ TclGroundMotionCommand(ClientData clientData, Tcl_Interp *interp,
   }
     
   else { 
-    cerr << "WARNING unknown pattern type " << argv[1];
-    cerr << " - want: pattern patternType " << gMotionTag ;
-    cerr << " \t valid types: Plain, UniformExcitation \n";
+    opserr << "WARNING unknown pattern type " << argv[1];
+    opserr << " - want: pattern patternType " << gMotionTag ;
+    opserr << " \t valid types: Plain, UniformExcitation \n";
     return TCL_ERROR;      
   }
 
 
   // now add the load pattern to the modelBuilder
-  cerr << *thePattern;
+  opserr << *thePattern;
   if (theMotion != 0) {
     if (thePattern->addMotion(*theMotion, gMotionTag) < 0) {
-      cerr << "WARNING could not add ground motion with tag " << gMotionTag;
-      cerr << " to pattern\n ";
+      opserr << "WARNING could not add ground motion with tag " << gMotionTag;
+      opserr << " to pattern\n ";
       delete theMotion; // free up the memory, pattern destroys the time series
       return TCL_ERROR;
     }

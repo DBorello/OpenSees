@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:53:56 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.cpp,v $
                                                                         
                                                                         
@@ -137,8 +137,8 @@ DomainDecompositionAnalysis::~DomainDecompositionAnalysis()
 int 
 DomainDecompositionAnalysis::analyze(void)
 {
-    cerr << "DomainDecompositionAnalysis::analyze(void)";
-    cerr << "does nothing and should not have been called\n";
+    opserr << "DomainDecompositionAnalysis::analyze(void)";
+    opserr << "does nothing and should not have been called\n";
     return -1;
 }
 
@@ -549,8 +549,8 @@ DomainDecompositionAnalysis::recvSelf(int commitTag,
 	theHandler->recvSelf(commitTag, theChannel,theBroker);
     }
     else {
-	cerr << "DomainDecompositionAnalysis::recvSelf";
-	cerr << " - failed to get the ConstraintHandler\n";
+	opserr << "DomainDecompositionAnalysis::recvSelf";
+	opserr << " - failed to get the ConstraintHandler\n";
 	return -1;
     }
 
@@ -562,8 +562,8 @@ DomainDecompositionAnalysis::recvSelf(int commitTag,
 	theNumberer->recvSelf(commitTag, theChannel,theBroker);
     }
     else {
-	cerr << "DomainDecompositionAnalysis::recvSelf";
-	cerr << " - failed to get the DOF Numberer\n";
+	opserr << "DomainDecompositionAnalysis::recvSelf";
+	opserr << " - failed to get the DOF Numberer\n";
 	return -1;
     }    
 
@@ -574,8 +574,8 @@ DomainDecompositionAnalysis::recvSelf(int commitTag,
 	theModel->recvSelf(commitTag, theChannel,theBroker);
     }
     else {
-	cerr << "DomainDecompositionAnalysis::recvSelf";
-	cerr << " - failed to get the AnalysisModel\n";
+	opserr << "DomainDecompositionAnalysis::recvSelf";
+	opserr << " - failed to get the AnalysisModel\n";
 	return -1;
     }        
 
@@ -588,8 +588,8 @@ DomainDecompositionAnalysis::recvSelf(int commitTag,
 	theAlgorithm->recvSelf(commitTag, theChannel,theBroker);
     }
     else {
-	cerr << "DomainDecompositionAnalysis::recvSelf";
-	cerr << " - failed to get the Domain Decomp Algo\n";
+	opserr << "DomainDecompositionAnalysis::recvSelf";
+	opserr << " - failed to get the Domain Decomp Algo\n";
 	return -1;
     }            
 
@@ -599,8 +599,8 @@ DomainDecompositionAnalysis::recvSelf(int commitTag,
 	theIntegrator->recvSelf(commitTag, theChannel,theBroker);
     }
     else {
-	cerr << "DomainDecompositionAnalysis::recvSelf";
-	cerr << " - failed to get the IncrementalIntegrator\n";
+	opserr << "DomainDecompositionAnalysis::recvSelf";
+	opserr << " - failed to get the IncrementalIntegrator\n";
 	return -1;
     }        	
 
@@ -608,8 +608,8 @@ DomainDecompositionAnalysis::recvSelf(int commitTag,
     theSolver = theBroker.getNewDomainSolver();
 
     if (theSOE == 0 || theSolver == 0) {
-	cerr << "DomainDecompositionAnalysis::recvSelf";
-	cerr << " - failed to get the LinearSOE and the DomainSolver \n";
+	opserr << "DomainDecompositionAnalysis::recvSelf";
+	opserr << " - failed to get the LinearSOE and the DomainSolver \n";
 	return -1;
     }  else {
 	theSOE->setDbTag(data(12));

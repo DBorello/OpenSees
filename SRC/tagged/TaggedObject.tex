@@ -29,8 +29,8 @@ they are provided with all compilers). \\
 \indent {\em virtual~ $\tilde{}$TaggedObject();}  \\ \\
 \indent // Public Methods  \\
 \indent {\em int getTag(void) const;} \\ 
-\indent {\em virtual void Print(ostream \&s) =0;} \\
-\indent {\em friend ostream \&operator$<<$(ostream \&s,
+\indent {\em virtual void Print(OPS_Stream \&s) =0;} \\
+\indent {\em friend OPS_Stream \&operator$<<$(OPS_Stream \&s,
 TaggedObject \&m);} \\  \\ 
 \indent // Protected Methods  \\
 \indent {\em virtual void setTag(int newTag);} \\
@@ -51,12 +51,12 @@ called. \\
 Returns the tag associated with the object. This function is inlined
 for performance.\\
 
-\indent {\em virtual void Print(ostream \&s, int flag =0) =0;} \\
+\indent {\em virtual void Print(OPS_Stream \&s, int flag =0) =0;} \\
 A pure virtual function. The component is to output itself to the output
 stream {\em s}. The integer {\em flag} can be used to select just what
 should be output, by default $0$ is passed. \\
 
-\indent {\em friend ostream \&operator$<<$(ostream \&s, TaggedObject \&m);} \\  
+\indent {\em friend OPS_Stream \&operator$<<$(OPS_Stream \&s, TaggedObject \&m);} \\  
 Invokes {\em Print(s)} on the TaggedObject {\em m}. \\
 
 \noindent {\bf Protected Member Functions}  \\

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $                                                              
-// $Date: 2002-12-17 22:18:25 $                                                                  
+// $Revision: 1.5 $                                                              
+// $Date: 2003-02-14 23:00:52 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.h,v $                                                                
                                                                         
                                                                         
@@ -72,7 +72,7 @@ class CorotCrdTransf2d: public CrdTransf2d
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
      
     // functions used in post-processing only    
     const Vector &getPointGlobalCoordFromLocal (const Vector &localCoords);

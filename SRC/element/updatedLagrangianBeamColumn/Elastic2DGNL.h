@@ -50,8 +50,8 @@ class Elastic2dGNL : public UpdatedLagrangianBeam2D
 	       bool islinear = false, double rho = 0.0);
   virtual ~Elastic2dGNL();
   
-  // Prints the element info to ostream
-  void Print(ostream &s, int flag =0);
+  // Prints the element info to OPS_Stream
+  void Print(OPS_Stream &s, int flag =0);
   
   // Methods for sending and receiving the object over a channel
   int sendSelf(int commitTag, Channel &theChannel);

@@ -118,9 +118,9 @@ tensor YieldSurface::xi_t4( const EPState *EPS ) const
 }
 
 //================================================================================
-// friend ostream functions for output
+// friend OPS_Stream functions for output
 //================================================================================
-ostream& operator<<(ostream& os, const YieldSurface & YS)
+OPS_Stream& operator<<(OPS_Stream& os, const YieldSurface & YS)
 {
        os << "Yield Surface Parameters: " << endln;
        return os;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-16 21:10:06 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/InternalSpring.cpp,v $
 
 // Written: A. Altoontash & G. Deierlein 03/02
@@ -60,7 +60,7 @@ InternalSpring::InternalSpring(int tag, int nod, int ndof, int dof1, int dof2, U
 
 	if ( Spring == NULL )
 	{
-		cerr << "ERROR InternalSpring::InternalSpring(): No uniaxial material introduced ";
+		opserr << "ERROR InternalSpring::InternalSpring(): No uniaxial material introduced ";
 		exit(-1);
 	}
 }
@@ -113,8 +113,8 @@ InternalSpring::setDomain(Domain *theDomain)
   int Nd1 = connectedExternalNodes(0);
   nodPtr = theDomain->getNode(Nd1);
   if (nodPtr == 0) {
-	    cerr << "WARNING spring2d::setDomain(): Node: ";
-	    cerr << Nd1 << "does not exist in model for spring element \n" << *this;
+	    opserr << "WARNING spring2d::setDomain(): Node: ";
+	    opserr << Nd1 << "does not exist in model for spring element \n" << *this;
 	    return;
   }
   
@@ -123,14 +123,14 @@ InternalSpring::setDomain(Domain *theDomain)
   int dofNode = nodPtr->getNumberDOF();
   
   if ( dofNode != NDOF ) {
-    cerr << "ERROR InternalSpring::setDomain(): node " << Nd1;
-    cerr << " number of degrees of freedom does not match specified value\n";
+    opserr << "ERROR InternalSpring::setDomain(): node " << Nd1;
+    opserr << " number of degrees of freedom does not match specified value\n";
     return;
   }	
   
   if ( DOF1 < 0 || DOF2 < 0 || DOF1 >= NDOF || DOF2 >= NDOF )
     {
-      cerr << "ERROR InternalSpring::setDomain(): Incorrect degrees of freedom specified.";
+      opserr << "ERROR InternalSpring::setDomain(): Incorrect degrees of freedom specified.";
       return;
     }
   
@@ -212,8 +212,7 @@ InternalSpring::zeroLoad(void)
 int 
 InternalSpring::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("InternalSpring::addLoad() - spring %d, does not handle ele loads\n", 
-			  this->getTag());
+  opserr << "InternalSpring::addLoad() - spring " << this->getTag() << ", does not handle ele loads\n"; 
   return -1;
 }
 
@@ -286,13 +285,15 @@ InternalSpring::sendSelf(int commitTag, Channel &theChannel)
 	
 	res = theChannel.sendID(dataTag, commitTag, data);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING InternalSpring::sendSelf() - %d failed to send ID\n",this->getTag());
+		opserr << "WARNING InternalSpring::sendSelf() - " << this->getTag() << 
+		  " failed to send ID\n";
 		return -1;
 	}
 	
 	res = Spring->sendSelf(commitTag, theChannel);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING InternalSpring::sendSelf() - %d failed to send its Material\n",this->getTag());
+		opserr << "WARNING InternalSpring::sendSelf() - " << this->getTag() << 
+		  " failed to send its Material\n";
 		return -3;
 	}
 	
@@ -308,7 +309,7 @@ InternalSpring::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	static ID data(7);
 	res = theChannel.recvID(dataTag, commitTag, data);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING InternalSpring::recvSelf() - failed to receive Vector\n");
+		opserr << "WARNING InternalSpring::recvSelf() - failed to receive Vector\n";
 		return -1;
 	}
 	
@@ -324,22 +325,23 @@ InternalSpring::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	
 	if ((Spring == 0) || (Spring->getClassTag() != matClassTag)) {
 		if (Spring != 0)
-			delete Spring;
+		  delete Spring;
 		
 		// create a new material object
 		Spring = theBroker.getNewUniaxialMaterial(matClassTag);
 		if (Spring == 0) {
-			g3ErrorHandler->warning("WARNING InternalSpring::recvSelf() - %d failed to get a blank Material of type %d\n",
-				this->getTag(), matClassTag);
-			return -3;
+		  opserr << "WARNING InternalSpring::recvSelf() - " << this->getTag() << 
+		    " failed to get a blank Material of type " << matClassTag << endln;
+		  return -3;
 		}
 	}
 	
 	Spring->setDbTag(matDbTag); // note: we set the dbTag before we receive the material
 	res = Spring->recvSelf(commitTag, theChannel, theBroker);
 	if (res < 0) {
-		g3ErrorHandler->warning("WARNING InternalSpring::recvSelf() - %d failed to receive its Material\n", this->getTag());
-		return -3;
+	  opserr << "WARNING InternalSpring::recvSelf() - " << this->getTag() << 
+	    " failed to receive its Material\n";
+	  return -3;
 	}
 	
 	return 0;
@@ -353,7 +355,7 @@ InternalSpring::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 void
-InternalSpring::Print(ostream &s, int flag)
+InternalSpring::Print(OPS_Stream &s, int flag)
 {
     // compute current state
     this->getResistingForce();

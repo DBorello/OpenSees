@@ -68,7 +68,7 @@ class EvolutionLaw_T
     // Overloaded Insertion Operator
     // prints an Evolution Law_T's contents 
     //================================================================================
-    friend ostream& operator<< (ostream& os, const EvolutionLaw_T & EL);
+    friend OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_T & EL);
 
 };
 

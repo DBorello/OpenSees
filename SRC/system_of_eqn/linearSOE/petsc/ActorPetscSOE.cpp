@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/ActorPetscSOE.cpp,v $
                                                                         
                                                                         
@@ -52,7 +52,7 @@ ActorPetscSOE::ActorPetscSOE(PetscSolver &theSOESolver, int blockSize)
   MPI_Comm_size(PETSC_COMM_WORLD, &numProcessors);
   //  MPI_Comm_dup(PETSC_COMM_WORLD, &theComm);
   if (myRank == 0) {
-    cerr << " ActorPetscSOE::ActorPetscSOE - must be rank 0\n";
+    opserr << " ActorPetscSOE::ActorPetscSOE - must be rank 0\n";
   }
   recvBuffer = (void *)(&recvData[0]);
   MPI_Barrier(PETSC_COMM_WORLD);
@@ -89,7 +89,7 @@ ActorPetscSOE::ActorPetscSOE(PetscSolver &theSOESolver, int blockSize)
   else if (method == 11)
     petscMethod = KSPPREONLY;
   else {
-    cerr << "ActorPetscSOE::ActorPetscSOE - unknown KSP method\n";
+    opserr << "ActorPetscSOE::ActorPetscSOE - unknown KSP method\n";
   }
 
   if (preconditioner == 1)
@@ -117,7 +117,7 @@ ActorPetscSOE::ActorPetscSOE(PetscSolver &theSOESolver, int blockSize)
   else if (preconditioner == 12)
     petscPre = PCLU;  
   else {
-    cerr << "ActorPetscSOE::ActorPetscSOE - unknown PC method\n";
+    opserr << "ActorPetscSOE::ActorPetscSOE - unknown PC method\n";
   }
 
   // construct the PetscSolver and PetscSOE
@@ -220,7 +220,7 @@ ActorPetscSOE::run(void)
       // some work here
 
     default:
-      cerr << "ActorPetscSOE::invalid action " << flag << " received\n";
+      opserr << "ActorPetscSOE::invalid action " << flag << " received\n";
     }
   }
   return 0;

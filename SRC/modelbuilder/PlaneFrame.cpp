@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/PlaneFrame.cpp,v $
                                                                         
                                                                         
@@ -36,8 +36,15 @@
 
 #include <PlaneFrame.h>
 #include <Domain.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <fstream>
+using std::ifstream;
+
+#include <iostream>
+using std::cout;
+using std::cin;
+
+#include <iomanip>
+using std::ios;
 #include <stdlib.h>
 
 #include <ElasticBeam2d.h>
@@ -73,8 +80,8 @@ PlaneFrame::buildFE_Model(void)
     int res = 0;
     Domain *theDomain = this->getDomainPtr();    
     if (theDomain == 0) {
-	cerr << "FATAL::PlaneFrame::buildModel(void) -";
-	cerr << " no associated domain !! - what have you been doing\n";
+	opserr << "FATAL::PlaneFrame::buildModel(void) -";
+	opserr << " no associated domain !! - what have you been doing\n";
 	exit(-1);
     }	
     
@@ -86,8 +93,8 @@ PlaneFrame::buildFE_Model(void)
     
     ifstream inputFile(fileName, ios::in);
     if (!inputFile) {
-	cerr << "FATAL:PlaneFrame::buildModel(void) -";
-	cerr << " could not open file: " << fileName << endl;
+	opserr << "FATAL:PlaneFrame::buildModel(void) -";
+	opserr << " could not open file: " << fileName << endln;
 	exit(-1);
     }
     
@@ -119,8 +126,8 @@ PlaneFrame::buildFE_Model(void)
 	result = theDomain->addNode(NodePtr);
         if (result == false) {
                 res =-1;
-		cerr << "PlaneFrame::buildModel(void) -";
-		cerr << " problems adding node " << tag << endl;
+		opserr << "PlaneFrame::buildModel(void) -";
+		opserr << " problems adding node " << tag << endln;
         }
     }
 
@@ -140,15 +147,15 @@ PlaneFrame::buildFE_Model(void)
 	    elePtr = new beam2d03(tag,A,E,I,nd1,nd2);
 	} else {
             res =-1;
-	    cerr << "ERROR PlaneFrame::PlaneFrame - Invalid element type: ";
-	    cerr << type << endl;
+	    opserr << "ERROR PlaneFrame::PlaneFrame - Invalid element type: ";
+	    opserr << type << endln;
 	    return -1;
 	}
 	result = theDomain->addElement(elePtr);
         if (result == false) {
                 res =-1;
-		cerr << "PlaneFrame::buildModel(void) -";
-		cerr << " problems adding element " << tag << endl;
+		opserr << "PlaneFrame::buildModel(void) -";
+		opserr << " problems adding element " << tag << endln;
         }
     }
 
@@ -158,8 +165,8 @@ PlaneFrame::buildFE_Model(void)
     theLoadPattern->setTimeSeries(theSeries);
     result = theDomain->addLoadPattern(theLoadPattern);
     if (result == false) {
-      cerr << "PlaneFrame::buildModel(void) -";
-      cerr << " problems adding load pattern " << *theLoadPattern;
+      opserr << "PlaneFrame::buildModel(void) -";
+      opserr << " problems adding load pattern " << *theLoadPattern;
       res =-1;
     }    
 
@@ -175,8 +182,8 @@ PlaneFrame::buildFE_Model(void)
 	result = theDomain->addSP_Constraint(SPPtr, 0);
         if (result == false) {
                 res =-1;
-		cerr << "PlaneFrame::buildModel(void) -";
-		cerr << " problems adding SP_Constraint on " << nd1 << endl;
+		opserr << "PlaneFrame::buildModel(void) -";
+		opserr << " problems adding SP_Constraint on " << nd1 << endln;
         }
     }    
 
@@ -190,16 +197,20 @@ PlaneFrame::buildFE_Model(void)
 	inputFile >> nd1 >> nd2 >> numDOF1 >> numDOF2;
 	ID constrainedDOF(numDOF1);
 	ID retainedDOF(numDOF2);	
-	inputFile >> constrainedDOF;
-	inputFile >> retainedDOF;
+	for (int j=0; j<numDOF1; j++)
+	  inputFile >> constrainedDOF(j);
+	for (int k=0; k<numDOF2; k++)
+	  inputFile >> retainedDOF(k);
 	Matrix Ccr(numDOF1,numDOF2);
-	inputFile >> Ccr;
+	for (int jj=0; jj<numDOF1; jj++)
+	  for (int kk=0; kk<numDOF2; kk++)
+	  inputFile >> Ccr(jj,kk);
 	MPPtr = new MP_Constraint(i,nd2,nd1,Ccr,constrainedDOF,retainedDOF);
 	result = theDomain->addMP_Constraint(MPPtr);
         if (result == false) {
                 res =-1;
-		cerr << "PlaneFrame::buildModel(void) -";
-		cerr << " problems adding MP_Constraint on " << nd1 << endl;
+		opserr << "PlaneFrame::buildModel(void) -";
+		opserr << " problems adding MP_Constraint on " << nd1 << endln;
         }
 
     }        
@@ -211,8 +222,8 @@ PlaneFrame::buildFE_Model(void)
 	nodeLoadPtr = new NodalLoad(i, tag, forces);
 	bool result = theDomain->addNodalLoad(nodeLoadPtr, 0);
 	if (result == false) {
-		cerr << "PlaneFrame::buildModel(void) -";
-		cerr << " problems adding load " << *nodeLoadPtr;
+		opserr << "PlaneFrame::buildModel(void) -";
+		opserr << " problems adding load " << *nodeLoadPtr;
                 res =-1;
         }
     }    

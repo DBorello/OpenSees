@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-19 18:20:45 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/MembranePlateFiberSection.h,v $
 
 // Ed "C++" Love
@@ -28,7 +28,6 @@
 //
 
 
-#include <iostream.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <math.h> 
@@ -96,7 +95,7 @@ class MembranePlateFiberSection : public SectionForceDeformation{
     const Matrix& getInitialTangent( ) {return this->getSectionTangent();}
 
     //print out data
-    void Print( ostream &s, int flag ) ;
+    void Print( OPS_Stream &s, int flag ) ;
 
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tagged/storage/MapOfTaggedObjects.cpp,v $
                                                                         
                                                                         
@@ -37,7 +37,7 @@
 #include <TaggedObject.h>
 #include <MapOfTaggedObjects.h>
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 // some typedefs that will be useful
 typedef map<int, TaggedObject *> MAP_TAGGED;
@@ -62,10 +62,8 @@ MapOfTaggedObjects::setSize(int newSize)
     // no setSize for map template .. can only check enough space available
     int maxSize = theMap.max_size();
     if (newSize > maxSize) {
-	g3ErrorHandler->warning("MapOfTaggedObjects::setSize - %s %d\n",
-				" failed as map stl has a max size of ",
-				maxSize);
-	return -1;
+      opserr << "MapOfTaggedObjects::setSize - failed as map stl has a max size of " << maxSize << "\n";
+      return -1;
     } 
    
     return 0;
@@ -86,20 +84,18 @@ MapOfTaggedObjects::addComponent(TaggedObject *newComponent)
 	// check if sucessfully added 
 	theEle = theMap.find(tag);
 	if (theEle == theMap.end()) {
-	    g3ErrorHandler->warning("MapOfTaggedObjects::addComponent - map %s %d\n",
-				    "STL failed to add object with tag : ",
-				    newComponent->getTag());
-	    return false;
+	  opserr << "MapOfTaggedObjects::addComponent - map STL failed to add object with tag : " << 
+	    newComponent->getTag() << "\n";
+	  return false;
 	}
     }
     
     // if ele already there map cannot add even if allowMultiple is true
     // as the map template does not allow multiple entries wih the same tag
     else {	
-	g3ErrorHandler->warning("MapOfTaggedObjects::addComponent - %s %d\n",	
-				"not adding as one with similar tag exists, tag: ",
-				newComponent->getTag());
-	return false;
+      opserr << "MapOfTaggedObjects::addComponent - not adding as one with similar tag exists, tag: " <<
+	newComponent->getTag() << "\n";
+      return false;
     }
     
     return true;  // o.k.
@@ -120,10 +116,9 @@ MapOfTaggedObjects::removeComponent(int tag)
 	removed = (*theEle).second;
 	int ok = theMap.erase(tag);
 	if (ok != 1) { // ensure the map did remove the object
-	    g3ErrorHandler->warning("MapOfTaggedObjects::removeComponent - %s %d\n",
-				    "map STL failed to remove object with tag ",
-				    tag);
-	    return 0;
+	  opserr << "MapOfTaggedObjects::removeComponent - map STL failed to remove object with tag " << 
+	    tag << "\n";
+	  return 0;
 	}
     }
 
@@ -176,7 +171,7 @@ MapOfTaggedObjects::getEmptyCopy(void)
     MapOfTaggedObjects *theCopy = new MapOfTaggedObjects();
     
     if (theCopy == 0) {
-	g3ErrorHandler->warning("MapOfTaggedObjects::getEmptyCopy-out of memory\n");
+      opserr << "MapOfTaggedObjects::getEmptyCopy-out of memory\n";
     }	
 
     return theCopy;
@@ -200,7 +195,7 @@ MapOfTaggedObjects::clearAll(bool invokeDestructor)
 }
 
 void
-MapOfTaggedObjects::Print(ostream &s, int flag)
+MapOfTaggedObjects::Print(OPS_Stream &s, int flag)
 {
     // go through the array invoking Print on non-zero entries
     MAP_TAGGED_ITERATOR p = theMap.begin();

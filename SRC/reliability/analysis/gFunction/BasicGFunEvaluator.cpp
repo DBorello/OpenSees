@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-02 18:13:29 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/BasicGFunEvaluator.cpp,v $
 
 
@@ -33,7 +33,7 @@
 //			haukaas 06/01 (made part of official OpenSees)
 //
 
-#include <fstream.h>
+#include <fstream>
 
 #include <BasicGFunEvaluator.h>
 #include <Vector.h>

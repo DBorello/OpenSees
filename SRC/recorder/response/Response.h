@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-12-13 00:14:44 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/Response.h,v $
                                                                         
 // Written: MHS 
@@ -53,7 +53,8 @@ class Response
   virtual int getResponse(void) = 0;
   virtual Information &getInformation(void);
 
-  virtual void Print(ostream &s, int flag = 0);
+  virtual void Print(OPS_Stream &s, int flag = 0);
+  virtual void Print(ofstream &s, int flag = 0);
 
  protected:
   Information myInfo;

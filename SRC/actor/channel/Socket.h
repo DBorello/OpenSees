@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Socket.h,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@ extern "C" {
 #include <arpa/inet.h>
 }
 
-#include <iostream.h>
+#include <iOPS_Stream.h>
 #include <bool.h>
 
 #define MAX_UDP_DATAGRAM 9126

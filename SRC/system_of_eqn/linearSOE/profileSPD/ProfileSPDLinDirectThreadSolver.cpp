@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectThreadSolver.cpp,v $
                                                                         
                                                                         
@@ -113,8 +113,8 @@ int
 ProfileSPDLinDirectThreadSolver::setSize(void)
 {
     if (theSOE == 0) {
-	cerr << "ProfileSPDLinDirectThreadSolver::setSize()";
-	cerr << " No system has been set\n";
+	opserr << "ProfileSPDLinDirectThreadSolver::setSize()";
+	opserr << " No system has been set\n";
 	return -1;
     }
 
@@ -136,8 +136,8 @@ ProfileSPDLinDirectThreadSolver::setSize(void)
       invD = new double[size]; 
 	
       if (RowTop == 0 || topRowPtr == 0 || invD == 0) {
-	cerr << "Warning :ProfileSPDLinDirectThreadSolver::ProfileSPDLinDirectThreadSolver :"; 
-	cerr << " ran out of memory for work areas \n";
+	opserr << "Warning :ProfileSPDLinDirectThreadSolver::ProfileSPDLinDirectThreadSolver :"; 
+	opserr << " ran out of memory for work areas \n";
 	return -1;
       }
     }
@@ -169,8 +169,8 @@ ProfileSPDLinDirectThreadSolver::solve(void)
 {
     // check for quick returns
     if (theSOE == 0) {
-	cerr << "ProfileSPDLinDirectThreadSolver::solve(void): ";
-	cerr << " - No ProfileSPDSOE has been assigned\n";
+	opserr << "ProfileSPDLinDirectThreadSolver::solve(void): ";
+	opserr << " - No ProfileSPDSOE has been assigned\n";
 	return -1;
     }
     
@@ -312,8 +312,8 @@ int
 ProfileSPDLinDirectThreadSolver::setProfileSOE(ProfileSPDLinSOE &theNewSOE)
 {
     if (theSOE != 0) {
-	cerr << "ProfileSPDLinDirectThreadSolver::setProfileSOE() - ";
-	cerr << " has already been called \n";	
+	opserr << "ProfileSPDLinDirectThreadSolver::setProfileSOE() - ";
+	opserr << " has already been called \n";	
 	return -1;
     }
     
@@ -326,7 +326,7 @@ ProfileSPDLinDirectThreadSolver::sendSelf(int cTag,
 					  Channel &theChannel)
 {
     if (size != 0)
-	cerr << "ProfileSPDLinDirectThreadSolver::sendSelf - does not send itself YET\n"; 
+	opserr << "ProfileSPDLinDirectThreadSolver::sendSelf - does not send itself YET\n"; 
     return 0;
 }
 
@@ -448,15 +448,15 @@ void *ProfileSPDLinDirectThreadSolver_Worker(void *arg)
 
 	      // check that the diag > the tolerance specified
 	      if (ajj <= 0.0) {
-		cerr << "ProfileSPDLinDirectThreadSolver::solve() - ";
-		cerr << " aii < 0 (i, aii): (" << currentRow << ", " << ajj << ")\n"; 
+		opserr << "ProfileSPDLinDirectThreadSolver::solve() - ";
+		opserr << " aii < 0 (i, aii): (" << currentRow << ", " << ajj << ")\n"; 
 		TCB_ProfileSPDDirectThreadSolver.info = -2;
 		return NULL;
 	      }
 	      if (ajj <= minDiagTol) {
-		cerr << "ProfileSPDLinDirectThreadSolver::solve() - ";
-		cerr << " aii < minDiagTol (i, aii): (" << currentRow;
-		cerr << ", " << ajj << ")\n"; 
+		opserr << "ProfileSPDLinDirectThreadSolver::solve() - ";
+		opserr << " aii < minDiagTol (i, aii): (" << currentRow;
+		opserr << ", " << ajj << ")\n"; 
 		TCB_ProfileSPDDirectThreadSolver.info = -2;
 		return NULL;
 	      }		

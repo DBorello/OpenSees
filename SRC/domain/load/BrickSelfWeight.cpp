@@ -74,7 +74,7 @@ BrickSelfWeight::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker 
 }
 
 void 
-BrickSelfWeight::Print(ostream &s, int flag)
+BrickSelfWeight::Print(OPS_Stream &s, int flag)
 {
   s << "BrickSelfWeight...";
   s << "  elements acted on: " << this->getElementTags();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-10 22:32:12 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSectionNd.cpp,v $
                                                                         
                                                                         
@@ -282,8 +282,8 @@ GenericSectionNd::recvSelf(int cTag, Channel &theChannel,
 }
 
 void
-GenericSectionNd::Print (ostream &s, int flag)
+GenericSectionNd::Print (OPS_Stream &s, int flag)
 {
-    s << "Generic Section Nd, tag: " << this->getTag() << endl;
-    s << "\tsection code: " << code << endl;
+    s << "Generic Section Nd, tag: " << this->getTag() << endln;
+    s << "\tsection code: " << code << endln;
 }

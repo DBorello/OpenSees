@@ -97,7 +97,7 @@ EvolutionLaw_S* EvolutionLaw_NL_Eeq::newObj() {
 //    straintensor pstrain =  EPS->getPlasticStrain();
 //    double e_eq  = pstrain.equivalent();
 //    double e_eq2  = e_eq * e_eq;
-//    //cout << "e_eq = " << e_eq << endln;
+//    //cout << "e_eq = " << e_eq << endlnn;
 //
 //    double upper1 = getd()*getetaResidual()*e_eq2;
 //    double upper2 = (gete()*getetaPeak()+2.0*getd()*geteeqEtaPeak()*(-getetaResidual()+getetaPeak()))*e_eq;
@@ -145,7 +145,7 @@ double EvolutionLaw_NL_Eeq::h_s( EPState *EPS, PotentialSurface *PS)
     //tensor temptx  = pstrain("ij") * pstrain("ij");
     //double tempdx = temptx.trace();
     //double e_eq  = pow( 2.0 * tempdx / 3.0, 0.5 );
-    ////cout << e_eq << endln;
+    ////cout << e_eq << endlnn;
 
     tensor temptx  = pstrain_dev("ij") * pstrain_dev("ij");
     double tempdx = temptx.trace();
@@ -186,7 +186,7 @@ double EvolutionLaw_NL_Eeq::h_s( EPState *EPS, PotentialSurface *PS)
 //================================================================================
 void EvolutionLaw_NL_Eeq::print()
 {
-    cout << (*this);
+    opserr << (*this);
 }
 
 
@@ -227,9 +227,9 @@ double EvolutionLaw_NL_Eeq::getd() const
 }
 
 //================================================================================
-ostream& operator<< (ostream& os, const EvolutionLaw_NL_Eeq & NLEL)
+OPS_Stream& operator<< (OPS_Stream& os, const EvolutionLaw_NL_Eeq & NLEL)
 {
-    os.unsetf( ios::scientific );
+  //    os.unsetf( ios::scientific );
     os.precision(5);
 
     //os.width(10);       

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-13 00:11:52 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -42,7 +42,9 @@
 #include <ID.h>
 #include <Vector.h>
 
-#include <fstream.h>
+#include <fstream>
+using std::ofstream;
+
 class Domain;
 class FE_Datastore;
 

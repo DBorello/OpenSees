@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2003-02-14 03:44:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauTwoBeamIntegration2d.cpp,v $
 
 #include <HingeRadauTwoBeamIntegration2d.h>
@@ -147,8 +147,7 @@ HingeRadauTwoBeamIntegration2d::sendSelf(int cTag, Channel &theChannel)
   int dbTag = this->getDbTag();
 
   if (theChannel.sendVector(dbTag, cTag, data) < 0) {
-    g3ErrorHandler->warning("HingeRadauTwoBeamIntegration2d::sendSelf() - %s\n",
-			    "failed to send Vector data");
+    opserr << "HingeRadauTwoBeamIntegration2d::sendSelf() - failed to send Vector data\n";
     return -1;
   }    
 
@@ -164,8 +163,7 @@ HingeRadauTwoBeamIntegration2d::recvSelf(int cTag, Channel &theChannel,
   int dbTag = this->getDbTag();
 
   if (theChannel.recvVector(dbTag, cTag, data) < 0)  {
-    g3ErrorHandler->warning("HingeRadauTwoBeamIntegration2d::recvSelf() - %s\n",
-			    "failed to receive Vector data");
+    opserr << "HingeRadauTwoBeamIntegration2d::recvSelf() - failed to receive Vector data\n";
     return -1;
   }
   

@@ -174,10 +174,10 @@ ElasticIsotropic3D::setTrialStrain (const Tensor &v, const Tensor &r)
 int
 ElasticIsotropic3D::setTrialStrainIncr (const Tensor &v)
 {
-    //cerr << " before set Tri St Incr " << Strain;
-    //cerr << " Strain Incr " << v << endln;
+    //opserr << " before set Tri St Incr " << Strain;
+    //opserr << " Strain Incr " << v << endlnn;
     Strain = Strain + v;
-    //cerr << " after setTrialStrainIncr  " << Strain << endln;
+    //opserr << " after setTrialStrainIncr  " << Strain << endlnn;
     return 0;
 }
 
@@ -238,7 +238,7 @@ ElasticIsotropic3D::getCopy (void)
 {
 	ElasticIsotropic3D *theCopy =
 		new ElasticIsotropic3D (this->getTag(), E, v, rho);
-	//cerr << "In Get copy" <<  *theCopy << endl;
+	//opserr << "In Get copy" <<  *theCopy << endln;
 	theCopy->epsilon = this->epsilon;
 //	theCopy->sigma = this->sigma;
 	theCopy->Strain = this->Strain;
@@ -261,14 +261,14 @@ ElasticIsotropic3D::getOrder (void) const
 }
 
 void
-ElasticIsotropic3D::Print(ostream &s, int flag)
+ElasticIsotropic3D::Print(OPS_Stream &s, int flag)
 {
-	s << "ElasticIsotropic3D" << endl;
-	s << "\ttag: " << this->getTag() << endl;
-	s << "\tE: " << E << endl;
-	s << "\tv: " << v << endl;
-	s << "\trho: " << rho << endl;
-	//s << "\tD: " << D << endl;
+	s << "ElasticIsotropic3D" << endln;
+	s << "\ttag: " << this->getTag() << endln;
+	s << "\tE: " << E << endln;
+	s << "\tv: " << v << endln;
+	s << "\trho: " << rho << endln;
+	//s << "\tD: " << D << endln;
 }
 
 

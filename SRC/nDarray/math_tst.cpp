@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2002-02-26 06:23:44 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/math_tst.cpp,v $
                                                                         
                                                                         
@@ -402,9 +402,9 @@ res2.print("r2","\n result");
   tensor t2( 2, def_dim_2, t2values);
   t2.print("t2","\ntensor t2 (2nd-order with values assignement)");
 
-  cerr << "rank of t2: " << t2.rank() << endl;
+  opserr << "rank of t2: " << t2.rank() << endln;
   for (int ii=1; ii<=t2.rank(); ii++) {
-    cerr << "dimension of t2 in " << ii << " is " << t2.dim(ii) << endl;
+    opserr << "dimension of t2 in " << ii << " is " << t2.dim(ii) << endln;
   }
 
 

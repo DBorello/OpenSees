@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-12-16 21:10:08 $
+// $Revision: 1.9 $
+// $Date: 2003-02-14 23:01:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -44,8 +44,6 @@
 #include <FEM_ObjectBroker.h>
 #include <SectionForceDeformation.h>
 #include <ElementResponse.h>
-
-#include <G3Globals.h>
 
 #include <Renderer.h>
 
@@ -77,24 +75,28 @@ TrussSection::TrussSection(int tag,
 {
     // get a copy of the material and check we obtained a valid copy
     theSection = theSect.getCopy();
-    if (theSection == 0) 
-      g3ErrorHandler->fatal("FATAL TrussSection::TrussSection - failed to get a copy of material %d\n",
-			    theSect.getTag());
-
-	int order = theSection->getOrder();
-	const ID &code = theSection->getType();
-	
-	int i;
-	for (i = 0; i < order; i++)
-		if (code(i) == SECTION_RESPONSE_P)
-			break;
-
-	if (i == order)
-		g3ErrorHandler->warning("TrussSection::TrussSection - section does not provide axial response");
+    if (theSection == 0) {
+      opserr << "FATAL TrussSection::TrussSection - failed to get a copy of material " << 
+	theSect.getTag() << endln;
+      exit(-1);
+    }
+    int order = theSection->getOrder();
+    const ID &code = theSection->getType();
+    
+    int i;
+    for (i = 0; i < order; i++)
+      if (code(i) == SECTION_RESPONSE_P)
+	break;
+    
+    if (i == order)
+      opserr << "TrussSection::TrussSection - section does not provide axial response\n";
 
     // ensure the connectedExternalNode ID is of correct size & set values
-    if (connectedExternalNodes.Size() != 2)
-      g3ErrorHandler->fatal("FATAL TrussSection::TrussSection - failed to create an ID of correct size\n");
+    if (connectedExternalNodes.Size() != 2) {
+      opserr << "FATAL TrussSection::TrussSection - failed to create an ID of correct size\n";
+      exit(-1);
+    }
+
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;        
 
@@ -114,8 +116,10 @@ TrussSection::TrussSection()
  L(0.0), M(0.0), theSection(0)
 {
     // ensure the connectedExternalNode ID is of correct size 
-    if (connectedExternalNodes.Size() != 2)
-      g3ErrorHandler->fatal("FATAL TrussSection::TrussSection - failed to create an ID of correct size\n");
+  if (connectedExternalNodes.Size() != 2) {
+      opserr << "FATAL TrussSection::TrussSection - failed to create an ID of correct size\n";
+      exit(-1);
+  }
 
     // set node pointers to NULL
     for (int i=0; i<2; i++)
@@ -185,11 +189,11 @@ TrussSection::setDomain(Domain *theDomain)
     // if nodes not in domain, warning message & set default numDOF as 2
     if ((theNodes[0] == 0) || (theNodes[1] == 0)){
       if (theNodes[0] == 0)
-        g3ErrorHandler->warning("TrussSection::setDomain() - Nd1: %d does not exist in ",Nd1);
+        opserr << "TrussSection::setDomain() - Nd1: " << Nd1 << " does not exist in Domain\n";
       else
-        g3ErrorHandler->warning("TrussSection::setDomain() - Nd2: %d does not exist in ",Nd2);
+        opserr << "TrussSection::setDomain() - Nd1: " << Nd2 << " does not exist in Domain\n";
 
-      g3ErrorHandler->warning("model for truss with id %d\n",this->getTag());
+      opserr << " for truss with id " << this->getTag() << endln;
 
       // fill this in so don't segment fault later
       numDOF = 2;    
@@ -204,8 +208,8 @@ TrussSection::setDomain(Domain *theDomain)
     int dofNd2 = theNodes[1]->getNumberDOF();	
 
     if (dofNd1 != dofNd2) {
-      g3ErrorHandler->warning("WARNING TrussSection::setDomain(): nodes %d and %d %s %d\n",Nd1, Nd2,
-			      "have differing dof at ends for truss",this->getTag());	
+      opserr << "WARNING TrussSection::setDomain(): nodes " << Nd1 << " and " <<
+	Nd2 << "have differing dof at ends for truss " << this->getTag() << endln;	
 
       // fill this in so don't segment fault later
       numDOF = 2;    
@@ -245,8 +249,8 @@ TrussSection::setDomain(Domain *theDomain)
 	theVector = &trussV12;			
     }
     else {
-      g3ErrorHandler->warning("WARNING TrussSection::setDomain cannot handle %d dofs at nodes in %d d problem\n",
-			      dimension,dofNd1);
+      opserr << "WARNING TrussSection::setDomain cannot handle " << dimension << 
+	" dofs at nodes in " << dofNd1 << " d problem\n"; 
 
       numDOF = 2;    
       theMatrix = &trussM2;
@@ -257,7 +261,8 @@ TrussSection::setDomain(Domain *theDomain)
     // create a transformation matrix for the element
     t = new Matrix(1,numDOF);
     if (t == 0 || (t->noCols() != numDOF)) {
-      g3ErrorHandler->fatal("FATAL TrussSection::setDomain out of memory creating T matrix (1 x %d)\n",numDOF);
+      opserr << "FATAL TrussSection::setDomain out of memory creating T matrix (1 x " << numDOF << ")\n";
+      exit(-1);
       return;
     }      
     
@@ -275,8 +280,7 @@ TrussSection::setDomain(Domain *theDomain)
 	L = sqrt(dx*dx);
 	
 	if (L == 0.0) {
-	  g3ErrorHandler->warning("WARNING TrussSection::setDomain() - truss %d has zero length\n",
-				  this->getTag());
+	  opserr << "WARNING TrussSection::setDomain() - truss " << this->getTag() << " has zero length\n";
 	  return;
 	}	
 
@@ -287,8 +291,7 @@ TrussSection::setDomain(Domain *theDomain)
 	L = sqrt(dx*dx + dy*dy);
     
 	if (L == 0.0) {
-	  g3ErrorHandler->warning("WARNING TrussSection::setDomain() - truss %d has zero length\n",
-				  this->getTag());
+	  opserr << "WARNING TrussSection::setDomain() - truss " << this->getTag() << " has zero length\n";
 	  return;
 	}
 	
@@ -318,8 +321,7 @@ TrussSection::setDomain(Domain *theDomain)
 	L = sqrt(dx*dx + dy*dy + dz*dz);
     
 	if (L == 0.0) {
-	  g3ErrorHandler->warning("WARNING TrussSection::setDomain() - truss %d has zero length\n",
-				  this->getTag());
+	  opserr << "WARNING TrussSection::setDomain() - truss " << this->getTag() << " has zero length\n";
 	  return;
 	}
 	
@@ -355,10 +357,9 @@ TrussSection::setDomain(Domain *theDomain)
     // create the load vector
     theLoad = new Vector(numDOF);
     if (theLoad == 0) {
-	g3ErrorHandler->fatal("TrussSection::setDomain - truss %d %s %d\n",
-			      this->getTag(), 
-			      "out of memory creating vector of size",
-			      numDOF);	
+      opserr << "TrussSection::setDomain - truss " << this->getTag() << 
+	"out of memory creating vector of size" << numDOF << endln;
+      exit(-1);
       return;
     }          
     
@@ -376,7 +377,7 @@ TrussSection::commitState()
   int retVal = 0;
   // call element commitState to do any base class stuff
   if ((retVal = this->Element::commitState()) != 0) {
-    cerr << "TrussSection::commitState () - failed in base class";
+    opserr << "TrussSection::commitState () - failed in base class";
   }    
   retVal = theSection->commitState();
   return retVal;
@@ -454,7 +455,7 @@ TrussSection::getTangentStiff(void)
 const Matrix &
 TrussSection::getInitialStiff(void)
 {
-  cerr << "TrussSection::getInitialStiff - not implemented, returning current tangent\n";
+  opserr << "TrussSection::getInitialStiff - not implemented, returning current tangent\n";
   return this->getTangentStiff();
 }
     
@@ -525,9 +526,7 @@ TrussSection::zeroLoad(void)
 int 
 TrussSection::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("TrussSection::addLoad - load type unknown for truss with tag: %d\n",
-			  this->getTag());
-  
+  opserr << "TrussSection::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
   return -1;
 }
 
@@ -547,9 +546,9 @@ TrussSection::addInertiaLoadToUnbalance(const Vector &accel)
     
 #ifdef _G3DEBUG    
     if (nodalDOF != Raccel1.Size() || nodalDOF != Raccel2.Size()) {
-	g3ErrorHandler->warning("TrussSection::addInertiaLoadToUnbalance %s\n",
-				"matrix and vector sizes are incompatable");
-	return -1;
+      opserr << "TrussSection::addInertiaLoadToUnbalance " <<
+	"matrix and vector sizes are incompatable\n";
+      return -1;
     }
 #endif
     
@@ -663,7 +662,7 @@ TrussSection::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendVector(dataTag, commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING TrussSection::sendSelf() - %d failed to send Vector\n",this->getTag());
+    opserr << "WARNING TrussSection::sendSelf() - " << this->getTag() << " failed to send Vector\n";
     return -1;
   }	      
 
@@ -671,7 +670,7 @@ TrussSection::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendID(dataTag, commitTag, connectedExternalNodes);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING TrussSection::sendSelf() - %d failed to send ID\n",this->getTag());
+    opserr << "WARNING TrussSection::sendSelf() - " << this->getTag() << " failed to send ID\n";
     return -2;
   }
 
@@ -679,7 +678,7 @@ TrussSection::sendSelf(int commitTag, Channel &theChannel)
 
   res = theSection->sendSelf(commitTag, theChannel);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING TrussSection::sendSelf() - %d failed to send its Section\n",this->getTag());
+    opserr << "WARNING TrussSection::sendSelf() - " << this->getTag() << " failed to send its Section\n";
     return -3;
   }
 
@@ -699,7 +698,7 @@ TrussSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
   static Vector data(6);
   res = theChannel.recvVector(dataTag, commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING TrussSection::recvSelf() - failed to receive Vector\n");
+    opserr << "WARNING TrussSection::recvSelf() - failed to receive Vector\n";
     return -1;
   }	      
 
@@ -711,7 +710,7 @@ TrussSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
   // truss now receives the tags of it's two external nodes
   res = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING TrussSection::recvSelf() - %d failed to receive ID\n", this->getTag());
+    opserr << "WARNING TrussSection::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return -2;
   }
 
@@ -732,15 +731,15 @@ TrussSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
   
   // Check if either allocation failed
   if (theSection == 0) {
-    g3ErrorHandler->warning("WARNING TrussSection::recvSelf() - %d failed to get a blank Section of type %d\n", 
-			    this->getTag(), sectClass);
+    opserr << "WARNING TrussSection::recvSelf() - " << this->getTag() << 
+      " failed to get a blank Section of type " << sectClass << endln;
     return -3;
   }
 
   theSection->setDbTag(sectDb); // note: we set the dbTag before we receive the Section
   res = theSection->recvSelf(commitTag, theChannel, theBroker);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING TrussSection::recvSelf() - %d failed to receive its Section\n", this->getTag());
+    opserr << "WARNING TrussSection::recvSelf() - " << this->getTag() << " failed to receive its Section\n";
     return -3;
   }
 
@@ -810,7 +809,7 @@ TrussSection::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
 void
-TrussSection::Print(ostream &s, int flag)
+TrussSection::Print(OPS_Stream &s, int flag)
 {
     // compute the strain and axial force in the member
     double strain, force;
@@ -854,10 +853,10 @@ TrussSection::Print(ostream &s, int flag)
 	if (theVector != 0) 
 	    s << " \n\t unbalanced load: " << *theVector;	
 	s << " \t Section: " << *theSection;
-	s << endl;
+	s << endln;
     } else if (flag == 1) {
 	s << this->getTag() << "  " << strain << "  ";
-	s << force << endl;
+	s << force << endln;
     }
 }
 
@@ -882,44 +881,44 @@ TrussSection::computeCurrentStrain(void) const
 Response*
 TrussSection::setResponse(char **argv, int argc, Information &eleInformation)
 {
-    //
-    // we compare argv[0] for known response types for the Truss
-    //
-
-    // axial force
-    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || 
-		strcmp(argv[0],"axialForce") == 0) {
-		eleInformation.theType = DoubleType;
-		return new ElementResponse(this, 1);
-    } 
-
-    else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
-		strcmp(argv[0],"deformation") == 0) {
-		eleInformation.theType = DoubleType;
-		return new ElementResponse(this, 2);
-    }     
+  //
+  // we compare argv[0] for known response types for the Truss
+  //
+  
+  // axial force
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 || 
+      strcmp(argv[0],"axialForce") == 0) {
+    eleInformation.theType = DoubleType;
+    return new ElementResponse(this, 1);
+  } 
+  
+  else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+	   strcmp(argv[0],"deformation") == 0) {
+    eleInformation.theType = DoubleType;
+    return new ElementResponse(this, 2);
+  }     
+  
+  // tangent stiffness matrix
+  else if (strcmp(argv[0],"stiff") ==0) {
+    Matrix *newMatrix = new Matrix(*theMatrix);
+    if (newMatrix == 0) {
+      opserr << "WARNING TrussSection::setResponse() - " << this->getTag() << 
+	" out of memory creating matrix\n";
+      return 0;
+    }
     
-    // tangent stiffness matrix
-    else if (strcmp(argv[0],"stiff") ==0) {
-		Matrix *newMatrix = new Matrix(*theMatrix);
-		if (newMatrix == 0) {
-			g3ErrorHandler->warning("WARNING TrussSection::setResponse() - %d out of memory creating matrix\n",
-				this->getTag());
-		return 0;
-		}
-
-		eleInformation.theMatrix = newMatrix;
-		eleInformation.theType = MatrixType;
-		return new ElementResponse(this, 3);
-    } 
-
-    // a section quantity    
-    else if (strcmp(argv[0],"section") ==0)
-		return theSection->setResponse(&argv[1], argc-1, eleInformation);
-    
-    // otherwise response quantity is unknown for the Truss class
-    else
-		return 0;
+    eleInformation.theMatrix = newMatrix;
+    eleInformation.theType = MatrixType;
+    return new ElementResponse(this, 3);
+  } 
+  
+  // a section quantity    
+  else if (strcmp(argv[0],"section") ==0)
+    return theSection->setResponse(&argv[1], argc-1, eleInformation);
+  
+  // otherwise response quantity is unknown for the Truss class
+  else
+    return 0;
 }
 
 int 

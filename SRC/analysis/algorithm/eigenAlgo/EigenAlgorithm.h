@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/eigenAlgo/EigenAlgorithm.h,v $
                                                                         
                                                                         
@@ -41,6 +41,7 @@
 #define EigenAlgorithm_h
 
 #include <SolutionAlgorithm.h>
+#include <OPS_Globals.h>
 
 class AnalysisModel;
 class EigenSOE;
@@ -59,7 +60,7 @@ class EigenAlgorithm : public SolutionAlgorithm
      
      // pure virtural functions
      virtual int solveCurrentStep(int numModes) = 0;
-     virtual void Print(ostream &s, int flag=0) = 0;
+     virtual void Print(OPS_Stream &s, int flag=0) = 0;
      
      virtual AnalysisModel *getAnalysisModelPtr() const;
      virtual EigenIntegrator *getEigenIntegratorPtr() const;

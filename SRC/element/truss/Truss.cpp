@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2002-12-16 21:10:08 $
+// $Revision: 1.15 $
+// $Date: 2003-02-14 23:01:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -42,8 +42,6 @@
 #include <FEM_ObjectBroker.h>
 #include <UniaxialMaterial.h>
 #include <Renderer.h>
-
-#include <G3Globals.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -77,15 +75,18 @@ Truss::Truss(int tag,
 {
     // get a copy of the material and check we obtained a valid copy
     theMaterial = theMat.getCopy();
-    if (theMaterial == 0) 
-      g3ErrorHandler->fatal("FATAL Truss::Truss - %d %s %d\n", tag,
-			    "failed to get a copy of material with tag ",
-			    theMat.getTag());
-
+    if (theMaterial == 0) {
+      opserr << "FATAL Truss::Truss - " << tag <<
+	"failed to get a copy of material with tag " << theMat.getTag() << endln;
+      exit(-1);
+    }
+    
     // ensure the connectedExternalNode ID is of correct size & set values
-    if (connectedExternalNodes.Size() != 2)
-      g3ErrorHandler->fatal("FATAL Truss::Truss - %d %s\n", tag,
-			    "failed to create an ID of size 2");
+    if (connectedExternalNodes.Size() != 2) {
+      opserr << "FATAL Truss::Truss - " <<  tag << "failed to create an ID of size 2\n";
+      exit(-1);
+    }
+
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;        
 
@@ -109,12 +110,13 @@ Truss::Truss()
   L(0.0), A(0.0), M(0.0)
 {
     // ensure the connectedExternalNode ID is of correct size 
-    if (connectedExternalNodes.Size() != 2)
-      g3ErrorHandler->fatal("FATAL Truss::Truss - %s\n",
-			    "failed to create an ID of size 2");
+  if (connectedExternalNodes.Size() != 2) {
+      opserr << "FATAL Truss::Truss - failed to create an ID of size 2\n";
+      exit(-1);
+  }
 
-    for (int i=0; i<2; i++)
-      theNodes[i] = 0;
+  for (int i=0; i<2; i++)
+    theNodes[i] = 0;
 
 // AddingSensitivity:BEGIN /////////////////////////////////////
 	gradientIdentifier = 0;
@@ -188,13 +190,11 @@ Truss::setDomain(Domain *theDomain)
     // if can't find both - send a warning message
     if ((theNodes[0] == 0) || (theNodes[1] == 0)) {
       if (theNodes[0] == 0)
-	g3ErrorHandler->warning("Truss::setDomain() - truss %d node %d %s\n",
-				this->getTag(), Nd1,
-				"does not exist in the model");
+	opserr <<"Truss::setDomain() - truss" << this->getTag() << " node " << Nd1 <<
+	  "does not exist in the model\n";
       else
-	g3ErrorHandler->warning("Truss::setDomain() - truss %d node %d %s\n",
-				this->getTag(), Nd2,
-				"does not exist in the model");
+	opserr <<"Truss::setDomain() - truss" << this->getTag() << " node " << Nd2 <<
+	  "does not exist in the model\n";
 
       // fill this in so don't segment fault later
       numDOF = 2;    
@@ -210,8 +210,8 @@ Truss::setDomain(Domain *theDomain)
 
     // if differing dof at the ends - print a warning message
     if (dofNd1 != dofNd2) {
-      g3ErrorHandler->warning("WARNING Truss::setDomain(): nodes %d and %d %s %d\n",Nd1, Nd2,
-			      "have differing dof at ends for truss",this->getTag());
+      opserr <<"WARNING Truss::setDomain(): nodes " << Nd1 << " and " << Nd2 <<
+	"have differing dof at ends for truss " << this->getTag() << endln;
 
       // fill this in so don't segment fault later
       numDOF = 2;    
@@ -251,8 +251,8 @@ Truss::setDomain(Domain *theDomain)
 	theVector = &trussV12;			
     }
     else {
-      g3ErrorHandler->warning("WARNING Truss::setDomain cannot handle %d dofs at nodes in %d d problem\n",
-			      dimension,dofNd1);
+      opserr <<"WARNING Truss::setDomain cannot handle " << dimension << " dofs at nodes in " << 
+	dofNd1  << " problem\n";
 
       numDOF = 2;    
       theMatrix = &trussM2;
@@ -265,19 +265,16 @@ Truss::setDomain(Domain *theDomain)
     theLoad = new Vector(numDOF);
     
     if (t == 0 || (t->noCols() != numDOF)) {
-      g3ErrorHandler->fatal("Truss::setDomain - truss %d %s %d\n",
-			    this->getTag(), 
-			    "out of memory creating T matrix of size 1 x",
-			    numDOF);	
-      
+      opserr << "Truss::setDomain - truss " << this->getTag() <<
+	"out of memory creating T matrix of size 1 x" << numDOF << endln;
+      exit(-1);
       return;
     }      
     
     if (theLoad == 0) {
-	g3ErrorHandler->fatal("Truss::setDomain - truss %d %s %d\n",
-			      this->getTag(), 
-			      "out of memory creating vector of size",
-			      numDOF);	
+      opserr << "Truss::setDomain - truss " << this->getTag() << 
+	"out of memory creating vector of size" << numDOF << endln;
+      exit(-1);
       return;
     }          
     
@@ -294,9 +291,9 @@ Truss::setDomain(Domain *theDomain)
 	double dx = end2Crd(0)-end1Crd(0);	
 	L = sqrt(dx*dx);
 	
+
 	if (L == 0.0) {
-	  g3ErrorHandler->warning("WARNING Truss::setDomain() - truss %d has zero length\n",
-				  this->getTag());
+	  opserr <<"WARNING Truss::setDomain() - truss " << this->getTag() << " has zero length\n";
 	  return;
 	}	
 
@@ -307,8 +304,7 @@ Truss::setDomain(Domain *theDomain)
 	L = sqrt(dx*dx + dy*dy);
     
 	if (L == 0.0) {
-	  g3ErrorHandler->warning("WARNING Truss::setDomain() - truss %d has zero length\n",
-				  this->getTag());
+	  opserr <<"WARNING Truss::setDomain() - truss " << this->getTag() << " has zero length\n";
 	  return;
 	}
 	
@@ -338,8 +334,7 @@ Truss::setDomain(Domain *theDomain)
 	L = sqrt(dx*dx + dy*dy + dz*dz);
     
 	if (L == 0.0) {
-	  g3ErrorHandler->warning("WARNING Truss::setDomain() - truss %d has zero length\n",
-				  this->getTag());
+	  opserr <<"WARNING Truss::setDomain() - truss " << this->getTag() << " has zero length\n";
 	  return;
 	}
 	
@@ -382,7 +377,7 @@ Truss::commitState()
   int retVal = 0;
   // call element commitState to do any base class stuff
   if ((retVal = this->Element::commitState()) != 0) {
-    cerr << "Truss::commitState () - failed in base class";
+    opserr << "Truss::commitState () - failed in base class";
   }    
   retVal = theMaterial->commitState();
   return retVal;
@@ -533,8 +528,7 @@ int
 Truss::addLoad(ElementalLoad *theLoad, double loadFactor)
 
 {  
-  g3ErrorHandler->warning("Truss::addLoad - load type unknown for truss with tag: %d\n",
-			  this->getTag());
+  opserr <<"Truss::addLoad - load type unknown for truss with tag: " << this->getTag() << endln;
   
   return -1;
 }
@@ -554,8 +548,8 @@ Truss::addInertiaLoadToUnbalance(const Vector &accel)
     
 #ifdef _G3DEBUG    
   if (nodalDOF != Raccel1.Size() || nodalDOF != Raccel2.Size()) {
-    g3ErrorHandler->warning("Truss::addInertiaLoadToUnbalance %s\n",
-			    "matrix and vector sizes are incompatable");
+    opserr <<"Truss::addInertiaLoadToUnbalance " <<
+      "matrix and vector sizes are incompatable\n";
     return -1;
   }
 #endif
@@ -658,7 +652,7 @@ Truss::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendVector(dataTag, commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::sendSelf() - %d failed to send Vector\n",this->getTag());
+    opserr <<"WARNING Truss::sendSelf() - " << this->getTag() << " failed to send Vector\n";
     return -1;
   }	      
 
@@ -666,14 +660,14 @@ Truss::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendID(dataTag, commitTag, connectedExternalNodes);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::sendSelf() - %d failed to send Vector\n",this->getTag());
+    opserr <<"WARNING Truss::sendSelf() - " << this->getTag() << " failed to send Vector\n";
     return -2;
   }
 
   // finally truss asks it's material object to send itself
   res = theMaterial->sendSelf(commitTag, theChannel);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::sendSelf() - %d failed to send its Material\n",this->getTag());
+    opserr <<"WARNING Truss::sendSelf() - " << this->getTag() << " failed to send its Material\n";
     return -3;
   }
 
@@ -693,7 +687,7 @@ Truss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   static Vector data(7);
   res = theChannel.recvVector(dataTag, commitTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::recvSelf() - failed to receive Vector\n");
+    opserr <<"WARNING Truss::recvSelf() - failed to receive Vector\n";
     return -1;
   }	      
 
@@ -706,7 +700,7 @@ Truss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   // truss now receives the tags of it's two external nodes
   res = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::recvSelf() - %d failed to receive ID\n", this->getTag());
+    opserr <<"WARNING Truss::recvSelf() - " << this->getTag() << " failed to receive ID\n";
     return -2;
   }
 
@@ -726,8 +720,8 @@ Truss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     // create a new material object
     theMaterial = theBroker.getNewUniaxialMaterial(matClass);
     if (theMaterial == 0) {
-      g3ErrorHandler->warning("WARNING Truss::recvSelf() - %d failed to get a blank Material of type %d\n", 
-			      this->getTag(), matClass);
+      opserr <<"WARNING Truss::recvSelf() - " << this->getTag() 
+	<< " failed to get a blank Material of type " << matClass << endln;
       return -3;
     }
   }
@@ -735,7 +729,7 @@ Truss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
   theMaterial->setDbTag(matDb); // note: we set the dbTag before we receive the material
   res = theMaterial->recvSelf(commitTag, theChannel, theBroker);
   if (res < 0) {
-    g3ErrorHandler->warning("WARNING Truss::recvSelf() - %d failed to receive its Material\n", this->getTag());
+    opserr <<"WARNING Truss::recvSelf() - "<< this->getTag() << "failed to receive its Material\n";
     return -3;    
   }
 
@@ -788,7 +782,7 @@ Truss::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
 void
-Truss::Print(ostream &s, int flag)
+Truss::Print(OPS_Stream &s, int flag)
 {
     // compute the strain and axial force in the member
     double strain, force;
@@ -810,10 +804,10 @@ Truss::Print(ostream &s, int flag)
 	}
 
 	s << " \t Material: " << *theMaterial;
-	s << endl;
+	s << endln;
     } else if (flag == 1) {
 	s << this->getTag() << "  " << strain << "  ";
-	s << force << endl;
+	s << force << endln;
     }
 }
 

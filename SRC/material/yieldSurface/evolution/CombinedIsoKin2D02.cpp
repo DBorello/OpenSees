@@ -53,7 +53,7 @@ YS_Evolution * CombinedIsoKin2D02::getCopy()
 }
 
 
-void CombinedIsoKin2D02::Print(ostream & s, int flag)
+void CombinedIsoKin2D02::Print(OPS_Stream & s, int flag)
 {
 	s << "CombinedIsoKin2D02 \n";
 	s << "iso_Ratio = " << isotropicRatio << "\n";

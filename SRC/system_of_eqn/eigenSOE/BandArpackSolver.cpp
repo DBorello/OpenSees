@@ -104,8 +104,8 @@ BandArpackSolver::solve(void)
 {
 
     if (theSOE == 0) {
-	cerr << "WARNING BandGenLinLapackSolver::solve(void)- ";
-	cerr << " No LinearSOE object has been set\n";
+	opserr << "WARNING BandGenLinLapackSolver::solve(void)- ";
+	opserr << " No LinearSOE object has been set\n";
 	return -1;
     }
 
@@ -113,8 +113,8 @@ BandArpackSolver::solve(void)
     
     // check iPiv is large enough
     if (iPivSize < n) {
-	cerr << "WARNING BandGenLinLapackSolver::solve(void)- ";
-	cerr << " iPiv not large enough - has setSize() been called?\n";
+	opserr << "WARNING BandGenLinLapackSolver::solve(void)- ";
+	opserr << " iPiv not large enough - has setSize() been called?\n";
 	return -1;
     }	    
 
@@ -174,7 +174,7 @@ BandArpackSolver::solve(void)
 #endif
 
     if ( ierr != 0 ) {
-       cerr << " BandArpackSolver::Error in dgbtrf_ " << endl;
+       opserr << " BandArpackSolver::Error in dgbtrf_ " << endln;
        return -1;
     }
 
@@ -205,7 +205,7 @@ BandArpackSolver::solve(void)
 #endif
 
 	  if (ierr != 0) {
-	      cerr << "BandArpackSolver::Error with dgbtrs_ 1" <<endl;
+	      opserr << "BandArpackSolver::Error with dgbtrs_ 1" <<endln;
 	      exit(0);
 	  }
 	  continue;
@@ -223,7 +223,7 @@ BandArpackSolver::solve(void)
 #endif
 
 	  if (ierr != 0) {
-	      cerr << "BandArpackSolver::Error with dgbtrs_ 2" <<endl;
+	      opserr << "BandArpackSolver::Error with dgbtrs_ 2" <<endln;
 	      exit(0);
 	  }
 	  continue;
@@ -237,57 +237,57 @@ BandArpackSolver::solve(void)
     }
 
     if (info < 0) {
-      cerr << "BandArpackSolver::Error with _saupd info = " << info << endl;
+      opserr << "BandArpackSolver::Error with _saupd info = " << info << endln;
       switch(info) {
 
          case -1: 
-	   cerr << "N must be positive.\n";
+	   opserr << "N must be positive.\n";
 	   break;
          case -2: 
-	   cerr << "NEV must be positive.\n";
+	   opserr << "NEV must be positive.\n";
 	   break;
          case -3: 
-	   cerr << "NCV must be greater than NEV and less than or equal to N.\n";
+	   opserr << "NCV must be greater than NEV and less than or equal to N.\n";
 	   break;
          case -4:
-	   cerr << "The maximum number of Arnoldi update iterations allowed";
+	   opserr << "The maximum number of Arnoldi update iterations allowed";
 	   break;
          case -5: 
-	   cerr << "WHICH must be one of 'LM', 'SM', 'LA', 'SA' or 'BE'.\n";
+	   opserr << "WHICH must be one of 'LM', 'SM', 'LA', 'SA' or 'BE'.\n";
 	   break;
          case -6: 
-	   cerr << "BMAT must be one of 'I' or 'G'.\n";
+	   opserr << "BMAT must be one of 'I' or 'G'.\n";
 	   break;
          case -7: 
-	   cerr << "Length of private work array WORKL is not sufficient.\n";
+	   opserr << "Length of private work array WORKL is not sufficient.\n";
 	   break;
          case -8: 
-	   cerr << "Error return from trid. eigenvalue calculation";
-	   cerr << "Informatinal error from LAPACK routine dsteqr.\n";
+	   opserr << "Error return from trid. eigenvalue calculation";
+	   opserr << "Informatinal error from LAPACK routine dsteqr.\n";
 	   break;
          case -9: 
-	   cerr << "Starting vector is zero.\n";
+	   opserr << "Starting vector is zero.\n";
 	   break;
          case -10: 
-	   cerr << "IPARAM(7) must be 1,2,3,4,5.\n";
+	   opserr << "IPARAM(7) must be 1,2,3,4,5.\n";
 	   break;
          case -11: 
-	   cerr << "IPARAM(7) = 1 and BMAT = 'G' are incompatable.\n";
+	   opserr << "IPARAM(7) = 1 and BMAT = 'G' are incompatable.\n";
 	   break;
          case -12: 
-	   cerr << "IPARAM(1) must be equal to 0 or 1.\n";
+	   opserr << "IPARAM(1) must be equal to 0 or 1.\n";
 	   break;
          case -13:
-	   cerr << "NEV and WHICH = 'BE' are incompatable.\n";
+	   opserr << "NEV and WHICH = 'BE' are incompatable.\n";
 	   break;
          case -9999:
-	   cerr << "Could not build an Arnoldi factorization.";
-	   cerr << "IPARAM(5) returns the size of the current Arnoldi\n";
-	   cerr << "factorization. The user is advised to check that";
-	   cerr << "enough workspace and array storage has been allocated.\n";
+	   opserr << "Could not build an Arnoldi factorization.";
+	   opserr << "IPARAM(5) returns the size of the current Arnoldi\n";
+	   opserr << "factorization. The user is advised to check that";
+	   opserr << "enough workspace and array storage has been allocated.\n";
 	   break;
          default:
-	   cerr << "unrecognised return value\n";
+	   opserr << "unrecognised return value\n";
       }
 
       // clean up the memory
@@ -307,10 +307,10 @@ BandArpackSolver::solve(void)
       return info;
     } else {
         if (info == 1) {
-	  cerr << "BandArpackSolver::Maximum number of iteration reached." << endl;
+	  opserr << "BandArpackSolver::Maximum number of iteration reached." << endln;
 	} else if (info == 3) {
-	  cerr << "BandArpackSolver::No Shifts could be applied during implicit,";
-	  cerr << "Arnoldi update, try increasing NCV." << endl;
+	  opserr << "BandArpackSolver::No Shifts could be applied during implicit,";
+	  opserr << "Arnoldi update, try increasing NCV." << endln;
 	}
 
 	double sigma = theSOE->shift;
@@ -333,51 +333,51 @@ BandArpackSolver::solve(void)
 		    workl, &lworkl, &info);
 #endif
 	    if (info != 0) {
-	        cerr << "BandArpackSolver::Error with dseupd_" << info;
+	        opserr << "BandArpackSolver::Error with dseupd_" << info;
 		switch(info) {
 
 		case -1: 
-		   cerr << " N must be positive.\n";
+		   opserr << " N must be positive.\n";
 		   break;
 		case -2: 
-		   cerr << " NEV must be positive.\n";
+		   opserr << " NEV must be positive.\n";
 		   break;
 		case -3: 
-		   cerr << " NCV must be greater than NEV and less than or equal to N.\n";
+		   opserr << " NCV must be greater than NEV and less than or equal to N.\n";
 		   break;
 		case -5: 
-		   cerr << " WHICH must be one of 'LM', 'SM', 'LA', 'SA' or 'BE'.\n";
+		   opserr << " WHICH must be one of 'LM', 'SM', 'LA', 'SA' or 'BE'.\n";
 		   break;
 		case -6: 
-                   cerr << " BMAT must be one of 'I' or 'G'.\n";
+                   opserr << " BMAT must be one of 'I' or 'G'.\n";
 		   break;
 		case -7: 
-		   cerr << " Length of private work WORKL array is not sufficient.\n";
+		   opserr << " Length of private work WORKL array is not sufficient.\n";
 		   break;
 		case -8: 
-                   cerr << " Error return from trid. eigenvalue calculation";
-		   cerr << "Information error from LAPACK routine dsteqr.\n";
+                   opserr << " Error return from trid. eigenvalue calculation";
+		   opserr << "Information error from LAPACK routine dsteqr.\n";
 		   break;
 		case -9: 
-                   cerr << " Starting vector is zero.\n";
+                   opserr << " Starting vector is zero.\n";
 		   break;
 		case -10: 
-                   cerr << " IPARAM(7) must be 1,2,3,4,5.\n";
+                   opserr << " IPARAM(7) must be 1,2,3,4,5.\n";
 		   break;
 		case -11: 
-                   cerr << " IPARAM(7) = 1 and BMAT = 'G' are incompatibl\n";
+                   opserr << " IPARAM(7) = 1 and BMAT = 'G' are incompatibl\n";
 		   break;
 		case -12: 
-		   cerr << " NEV and WHICH = 'BE' are incompatible.\n";
+		   opserr << " NEV and WHICH = 'BE' are incompatible.\n";
 		   break;
 		case -14: 
-		   cerr << " DSAUPD did not find any eigenvalues to sufficient accuracy.\n";
+		   opserr << " DSAUPD did not find any eigenvalues to sufficient accuracy.\n";
 		   break;
 		case -15: 
-		   cerr << " HOWMNY must be one of 'A' or 'S' if RVEC = .true.\n";
+		   opserr << " HOWMNY must be one of 'A' or 'S' if RVEC = .true.\n";
 		   break;
 		case -16: 
-		   cerr << " HOWMNY = 'S' not yet implemented\n";
+		   opserr << " HOWMNY = 'S' not yet implemented\n";
 		   break;
 		default:
 		  ;
@@ -495,7 +495,7 @@ const Vector &
 BandArpackSolver::getEigenvector(int mode)
 {
     if (mode <= 0 || mode > theNev) {
-        cerr << "BandArpackSOE::getEigenvector() - mode is out of range(1 - nev)";
+        opserr << "BandArpackSOE::getEigenvector() - mode is out of range(1 - nev)";
 	eigenV->Zero();
 	return *eigenV;  
     }
@@ -509,7 +509,7 @@ BandArpackSolver::getEigenvector(int mode)
       }	
     }
     else {
-        cerr << "BandArpackSOE::getEigenvalue() - eigenvectors not yet determined";
+        opserr << "BandArpackSOE::getEigenvalue() - eigenvectors not yet determined";
 	eigenV->Zero();
     }      
 
@@ -522,14 +522,14 @@ double
 BandArpackSolver::getEigenvalue(int mode)
 {
     if (mode <= 0 || mode > theNev) {
-        cerr << "BandArpackSOE::getEigenvalue() - mode is out of range(1 - nev)";
+        opserr << "BandArpackSOE::getEigenvalue() - mode is out of range(1 - nev)";
 	return -1;
     }
 
     if (value != 0)
       return value[mode-1];
     else {
-        cerr << "BandArpackSOE::getEigenvalue() - eigenvalues not yet determined";
+        opserr << "BandArpackSOE::getEigenvalue() - eigenvalues not yet determined";
 	return -2;
     }      
 }
@@ -546,9 +546,9 @@ BandArpackSolver::setSize()
 	
 	iPiv = new int[size];
 	if (iPiv == 0) {
-	    cerr << "WARNING BandGenLinLapackSolver::setSize() ";
-	    cerr << " - ran out of memory for iPiv of size ";
-	    cerr << theSOE->size << endl;
+	    opserr << "WARNING BandGenLinLapackSolver::setSize() ";
+	    opserr << " - ran out of memory for iPiv of size ";
+	    opserr << theSOE->size << endln;
 	    return -1;
 	} else
 	    iPivSize = size;
@@ -560,9 +560,9 @@ BandArpackSolver::setSize()
 
 	eigenV = new Vector(size);
 	if (eigenV == 0 || eigenV->Size() != size) {
-	    cerr << "WARNING BandGenLinLapackSolver::setSize() ";
-	    cerr << " - ran out of memory for eigenVector of size ";
-	    cerr << theSOE->size << endl;
+	    opserr << "WARNING BandGenLinLapackSolver::setSize() ";
+	    opserr << " - ran out of memory for eigenVector of size ";
+	    opserr << theSOE->size << endln;
 	    return -2;	    
 	}
     }

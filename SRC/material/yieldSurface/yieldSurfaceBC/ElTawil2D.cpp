@@ -32,7 +32,7 @@ ElTawil2D::ElTawil2D(int tag, double xbal, double ybal, double ypos, double yneg
 	t(1) = transY;
 	hModel->setInitTranslation(t);
 
-//	cout << "Translation Y = " << transY << endl;
+//	cout << "Translation Y = " << transY << endln;
 
 	//capX = xBal*(1 - pow( fabs((transY*capY)/yNegCap) , ty));
 	capX    = xBal;
@@ -70,8 +70,8 @@ double yValNeg = ytNeg*capY;
 	xtPos = xtPos/capX;
 	xtNeg = xtNeg/capX;
 
-	cout << "ytPos = " << ytPos << ", ytNeg = " << ytNeg << ", xtPos = " << xtPos
-	                            << ", xtNeg = " << xtNeg << endl;
+	opserr << "ytPos = " << ytPos << ", ytNeg = " << ytNeg << ", xtPos = " << xtPos
+	                            << ", xtNeg = " << xtNeg << endln;
 }
 
 
@@ -85,9 +85,8 @@ void ElTawil2D::getGradient(double &gx, double &gy, double x, double y)
 
     if(loc != 0)
     {
-     	cerr << "ERROR - ElTawil2D::getGradient(double &gx, double &gy, double x, double y)\n";
-        cerr << "Force point not on yield surface, drift = " << drift << " loc = " << loc <<"\n";
-        cin.get();
+     	opserr << "ERROR - ElTawil2D::getGradient(double &gx, double &gy, double x, double y)\n";
+        opserr << "Force point not on yield surface, drift = " << drift << " loc = " << loc <<"\n";
     }
     else
     {
@@ -120,7 +119,7 @@ void ElTawil2D::getGradient(double &gx, double &gy, double x, double y)
 		}
 	}
 
-//	cout << "gx = " << gx << "gy = " << gy << "\n";
+//	opserr << "gx = " << gx << "gy = " << gy << "\n";
 //	cin.get();
 }
 
@@ -151,7 +150,7 @@ double a = 5;//10.277; //3.043;//4.29293; --> effects convergence
 
 	double drift = phi - 1;
 
-//	cout << "Eltawil2D - x = " << x << ", y = " << y << ", drift = " << drift << endl;
+//	opserr << "Eltawil2D - x = " << x << ", y = " << y << ", drift = " << drift << endln;
 
 	return drift;
 }
@@ -225,7 +224,7 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
 		double x = xVal/capX;
 
 		if(displayMode==100)
-			cout << "(undeformed) x = " << x << ", y = " << y;
+			opserr << "(undeformed) x = " << x << ", y = " << y;
  		
  		double x1 = x;
 		double y1 = y;
@@ -244,7 +243,7 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
         hModel->toDeformedCoord(x2Old, y2Old);
 
 //		if(displayMode==100)
-//			cout << " (deformed) x = " << x << ", y = " << y << endl;
+//			opserr << " (deformed) x = " << x << ", y = " << y << endln;
  		
 		pCurr(0) = x1;
 		pCurr(1) = y1;
@@ -268,7 +267,7 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
 	return 0;
 }
 
-void ElTawil2D::Print(ostream &s, int flag)
+void ElTawil2D::Print(OPS_Stream &s, int flag)
 {
     s << "\nYield Surface No: " << this->getTag() << " type: ElTawil2D\n";
 	this->YieldSurface_BC::Print(s, flag);
@@ -317,8 +316,8 @@ double t;
             hModel->toDeformedCoord(x1, y1);
 			if(displayMode==100)
 			{
-				cout << " x = " << x << ", y = " << y << " ";
-				cout << " x1 = " << x1 << ", y1 = " << y1 << "\n";
+				opserr << " x = " << x << ", y = " << y << " ";
+				opserr << " x1 = " << x1 << ", y1 = " << y1 << "\n";
 			}
             pCurr(0) = x1;
             pCurr(1) = y1;
@@ -329,7 +328,7 @@ double t;
             pOld(0) = x2;
             pOld(1) = y2;
             theViewer.drawLine(pOld, pCurr, rgb, rgb);
-			//cout << "pOld = " << pOld << " pCurr = " << pCurr << "\n";
+			//opserr << "pOld = " << pOld << " pCurr = " << pCurr << "\n";
 
             ///////////////////////// x<0, y>0
             x1 = -1*x;

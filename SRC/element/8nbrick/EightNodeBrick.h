@@ -50,7 +50,7 @@
 
 #include <GaussQuadRule1d.h>
 
-#include <G3Globals.h>
+#include <OPS_Globals.h>
 
 #include <Matrix.h>
 #include <Vector.h>
@@ -133,8 +133,8 @@ class EightNodeBrick: public Element
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);
     int displaySelf (Renderer &theViewer, int displayMode, float fact);
-    void Print(ostream &s, int flag =0);   
-    //    Do nothing with void Print (ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);   
+    //    Do nothing with void Print (OPS_Stream &s, int flag =0);
     //    use Brick3D report.  08/16/00
     Response *setResponse (char **argv, int argc, Information &eleInformation);
     int getResponse (int responseID, Information &eleInformation);

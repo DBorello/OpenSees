@@ -74,7 +74,7 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     const char *getType (void) const;
     int getOrder (void) const;
 
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
     void setInitElasticStiffness(void);
 
   protected:

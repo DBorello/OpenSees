@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-10-03 18:07:55 $
+// $Revision: 1.9 $
+// $Date: 2003-02-14 23:00:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.cpp,v $
                                                                         
                                                                         
-// File: ~/crdTransf/LinearCrdTransf3d.C
-//
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
@@ -39,8 +37,6 @@
 #include <Matrix.h>
 #include <Node.h>
 #include <Channel.h>
-
-#include <iomanip.h>
 
 #include <LinearCrdTransf3d.h>
 
@@ -79,8 +75,8 @@ LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
 
 	// check rigid joint offset for node I
 	if (&rigJntOffset1 == 0 || rigJntOffset1.Size() != 3 ) {
-		cerr << "LinearCrdTransf3d::LinearCrdTransf3d:  Invalid rigid joint offset vector for node I\n";
-		cerr << "Size must be 3\n";      
+		opserr << "LinearCrdTransf3d::LinearCrdTransf3d:  Invalid rigid joint offset vector for node I\n";
+		opserr << "Size must be 3\n";      
 	}
 	else if (rigJntOffset1.Norm() > 0.0) {
 		nodeIOffset = new double[3];
@@ -91,8 +87,8 @@ LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
    
    // check rigid joint offset for node J
 	if (&rigJntOffset2 == 0 || rigJntOffset2.Size() != 3 ) {
-		cerr << "LinearCrdTransf3d::LinearCrdTransf3d:  Invalid rigid joint offset vector for node J\n";
-		cerr << "Size must be 3\n";      
+		opserr << "LinearCrdTransf3d::LinearCrdTransf3d:  Invalid rigid joint offset vector for node J\n";
+		opserr << "Size must be 3\n";      
 	}
 	else if (rigJntOffset2.Norm() > 0.0) {
 		nodeJOffset = new double[3];
@@ -160,8 +156,8 @@ LinearCrdTransf3d::initialize(Node *nodeIPointer, Node *nodeJPointer)
 
    if ((!nodeIPtr) || (!nodeJPtr))
    {
-      cerr << "\nLinearCrdTransf3d::initialize";
-      cerr << "\ninvalid pointers to the element nodes\n";
+      opserr << "\nLinearCrdTransf3d::initialize";
+      opserr << "\ninvalid pointers to the element nodes\n";
       return -1;
    }
        
@@ -208,7 +204,7 @@ LinearCrdTransf3d::computeElemtLengthAndOrient()
    L = dx.Norm();
 
    if (L == 0.0) {
-      cerr << "\nLinearCrdTransf3d::computeElemtLengthAndOrien: 0 length\n";
+      opserr << "\nLinearCrdTransf3d::computeElemtLengthAndOrien: 0 length\n";
       return -2;  
    }
 
@@ -242,8 +238,8 @@ LinearCrdTransf3d::getLocalAxes(void)
 	double ynorm = yAxis.Norm();
 
 	if (ynorm == 0) {
-		cerr << "\nLinearCrdTransf3d::getLocalAxes";
-		cerr << "\nvector v that defines plane xz is parallel to x axis\n";
+		opserr << "\nLinearCrdTransf3d::getLocalAxes";
+		opserr << "\nvector v that defines plane xz is parallel to x axis\n";
 		return -3;
 	}
 
@@ -937,8 +933,8 @@ LinearCrdTransf3d::sendSelf(int cTag, Channel &theChannel)
   
   res += theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s - failed to send Vector",
-			    "LinearCrdTransf3d::sendSelf");
+    opserr << "LinearCrdTransf3d::sendSelf - failed to send Vector\n";
+			    
     return res;
   }
   
@@ -956,8 +952,8 @@ LinearCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
   
   res += theChannel.recvVector(this->getDbTag(), cTag, data);
   if (res < 0) {
-    g3ErrorHandler->warning("%s - failed to receive Vector",
-			    "LinearCrdTransf3d::recvSelf");
+    opserr << "LinearCrdTransf3d::recvSelf - failed to receive Vector\n";
+			    
     return res;
   }
   
@@ -1078,13 +1074,13 @@ LinearCrdTransf3d::getPointGlobalDisplFromBasic (double xi, const Vector &uxb)
 
 
 void
-LinearCrdTransf3d::Print(ostream &s, int flag)
+LinearCrdTransf3d::Print(OPS_Stream &s, int flag)
 {
    s << "\nCrdTransf: " << this->getTag() << " Type: LinearCrdTransf3d";
    if (nodeIOffset)
-	   s << "\tNode I offset: " << nodeIOffset[0] << " " << nodeIOffset[1] << " "<< nodeIOffset[2] << endl;
+	   s << "\tNode I offset: " << nodeIOffset[0] << " " << nodeIOffset[1] << " "<< nodeIOffset[2] << endln;
    if (nodeJOffset)
-	   s << "\tNode J offset: " << nodeJOffset[0] << " " << nodeJOffset[1] << " "<< nodeJOffset[2] << endl;
+	   s << "\tNode J offset: " << nodeJOffset[0] << " " << nodeJOffset[1] << " "<< nodeJOffset[2] << endln;
 }
 
 

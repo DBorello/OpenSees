@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-12-07 00:50:21 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.cpp,v $
                                                                         
                                                                         
@@ -70,8 +70,8 @@ IncrementalIntegrator::formTangent(int statFlag)
     statusFlag = statFlag;
 
     if (theAnalysisModel == 0 || theSOE == 0) {
-	cerr << "WARNING IncrementalIntegrator::formTangent() -";
-	cerr << " no AnalysisModel or LinearSOE have been set\n";
+	opserr << "WARNING IncrementalIntegrator::formTangent() -";
+	opserr << " no AnalysisModel or LinearSOE have been set\n";
 	return -1;
     }
 
@@ -86,8 +86,8 @@ IncrementalIntegrator::formTangent(int statFlag)
     FE_EleIter &theEles2 = theAnalysisModel->getFEs();    
     while((elePtr = theEles2()) != 0)     
 	if (theSOE->addA(elePtr->getTangent(this),elePtr->getID()) < 0) {
-	    cerr << "WARNING IncrementalIntegrator::formTangent -";
-	    cerr << " failed in addA for ID " << elePtr->getID();	    
+	    opserr << "WARNING IncrementalIntegrator::formTangent -";
+	    opserr << " failed in addA for ID " << elePtr->getID();	    
 	    result = -3;
 	}
 
@@ -99,22 +99,22 @@ int
 IncrementalIntegrator::formUnbalance(void)
 {
     if (theAnalysisModel == 0 || theSOE == 0) {
-	cerr << "WARNING IncrementalIntegrator::formUnbalance -";
-	cerr << " no AnalysisModel or LinearSOE has been set\n";
+	opserr << "WARNING IncrementalIntegrator::formUnbalance -";
+	opserr << " no AnalysisModel or LinearSOE has been set\n";
 	return -1;
     }
     
     theSOE->zeroB();
     
     if (this->formElementResidual() < 0) {
-	cerr << "WARNING IncrementalIntegrator::formUnbalance ";
-	cerr << " - this->formElementResidual failed\n";
+	opserr << "WARNING IncrementalIntegrator::formUnbalance ";
+	opserr << " - this->formElementResidual failed\n";
 	return -1;
     }
     
     if (this->formNodalUnbalance() < 0) {
-	cerr << "WARNING IncrementalIntegrator::formUnbalance ";
-	cerr << " - this->formNodalUnbalance failed\n";
+	opserr << "WARNING IncrementalIntegrator::formUnbalance ";
+	opserr << " - this->formNodalUnbalance failed\n";
 	return -2;
     }    
 
@@ -126,8 +126,8 @@ IncrementalIntegrator::getLastResponse(Vector &result, const ID &id)
 {
   
     if (theSOE == 0) {
-	cerr << "WARNING IncrementalIntegrator::getLastResponse() -";
-	cerr << "no LineaerSOE object associated with this object\n";	
+	opserr << "WARNING IncrementalIntegrator::getLastResponse() -";
+	opserr << "no LineaerSOE object associated with this object\n";	
 	return -1;
     }
 
@@ -142,9 +142,9 @@ IncrementalIntegrator::getLastResponse(Vector &result, const ID &id)
 	  result(i) = X(loc);	
 	}
 	else {
-	    cerr << "WARNING IncrementalIntegrator::getLastResponse() -";
-	    cerr << "location " << loc << "in ID ouside bounds ";
-	    cerr << size << "\n";	
+	    opserr << "WARNING IncrementalIntegrator::getLastResponse() -";
+	    opserr << "location " << loc << "in ID ouside bounds ";
+	    opserr << size << "\n";	
 	    res = -2;
 	}
     }	    
@@ -169,8 +169,8 @@ int
 IncrementalIntegrator::commit(void) 
 {
     if (theAnalysisModel == 0) {
-	cerr << "WARNING IncrementalIntegrator::commit() -";
-	cerr << "no AnalysisModel object associated with this object\n";	
+	opserr << "WARNING IncrementalIntegrator::commit() -";
+	opserr << "no AnalysisModel object associated with this object\n";	
 	return -1;
     }    
 
@@ -206,8 +206,8 @@ IncrementalIntegrator::formNodalUnbalance(void)
     int res = 0;
     while ((dofPtr = theDOFs()) != 0) {
 	if (theSOE->addB(dofPtr->getUnbalance(this),dofPtr->getID()) <0) {
-	    cerr << "WARNING IncrementalIntegrator::formNodalUnbalance -";
-	    cerr << " failed in addB for ID " << dofPtr->getID();
+	    opserr << "WARNING IncrementalIntegrator::formNodalUnbalance -";
+	    opserr << " failed in addB for ID " << dofPtr->getID();
 	    res = -2;
 	}
     }
@@ -226,8 +226,8 @@ IncrementalIntegrator::formElementResidual(void)
     FE_EleIter &theEles2 = theAnalysisModel->getFEs();    
     while((elePtr = theEles2()) != 0) {
 	if (theSOE->addB(elePtr->getResidual(this),elePtr->getID()) <0) {
-	    cerr << "WARNING IncrementalIntegrator::formElementResidual -";
-	    cerr << " failed in addB for ID " << elePtr->getID();
+	    opserr << "WARNING IncrementalIntegrator::formElementResidual -";
+	    opserr << " failed in addB for ID " << elePtr->getID();
 	    res = -2;
 	}
     }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-01-16 18:19:02 $
+// $Revision: 1.17 $
+// $Date: 2003-02-14 23:01:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
 
 #include <BeamWithHinges3d.h>
@@ -33,7 +33,6 @@
 #include <MatrixUtil.h>
 #include <math.h>
 #include <stdlib.h>
-#include <iostream.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -95,53 +94,56 @@ BeamWithHinges3d::BeamWithHinges3d(int tag, int nodeI, int nodeJ,
    initialFlag(0), maxIter(max), tolerance(tol), sp(0)
 {
   if (E <= 0.0)  {
-    g3ErrorHandler->fatal("%s -- input parameter E is <= 0.0",
-			  "BeamWithHinges3d::BeamWithHinges3d");
+    opserr << "BeamWithHinges3d::BeamWithHinges3d -- input parameter E is <= 0.0\n";
+    exit(-1);
   }
 
   if (A <= 0.0)  {
-    g3ErrorHandler->fatal("%s -- input parameter A is <= 0.0",
-			  "BeamWithHinges3d::BeamWithHinges3d");
+    opserr << "BeamWithHinges3d::BeamWithHinges3d -- input parameter A is <= 0.0\n";
+    exit(-1);
   }
   
   if (Iz <= 0.0)  {
-    g3ErrorHandler->fatal("%s -- input parameter Iz is <= 0.0",
-			  "BeamWithHinges3d::BeamWithHinges3d");
+    opserr << "BeamWithHinges3d::BeamWithHinges3d -- input parameter Iz is <= 0.0\n";
+    exit(-1);
   }
 
   if (Iy <= 0.0)  {
-    g3ErrorHandler->fatal("%s -- input parameter Iy is <= 0.0",
-			  "BeamWithHinges3d::BeamWithHinges3d");
+    opserr << "BeamWithHinges3d::BeamWithHinges3d -- input parameter Iy is <= 0.0\n";
+    exit(-1);
   }
   
   if (G <= 0.0)  {
-    g3ErrorHandler->fatal("%s -- input parameter G is <= 0.0",
-			  "BeamWithHinges3d::BeamWithHinges3d");
+    opserr << "BeamWithHinges3d::BeamWithHinges3d -- input parameter G is <= 0.0\n";
+    exit(-1);
   }
 
   if (J <= 0.0)  {
-    g3ErrorHandler->fatal("%s -- input parameter J is <= 0.0",
-			  "BeamWithHinges3d::BeamWithHinges3d");
+    opserr << "BeamWithHinges3d::BeamWithHinges3d -- input parameter J is <= 0.0\n";
+    exit(-1);
   }
   
   // Get copies of sections
   section[0] = sectionRefI.getCopy();
   
-  if (section[0] == 0)
-    g3ErrorHandler->fatal("%s -- failed to get copy of section I",
-			  "BeamWithHinges3d::BeamWithHinges3d");
+  if (section[0] == 0) {
+    opserr << "BeamWithHinges3d::BeamWithHinges3d -- failed to get copy of section I\n";
+    exit(-1);
+  }
   
   section[1] = sectionRefJ.getCopy();
   
-  if (section[1] == 0)
-    g3ErrorHandler->fatal("%s -- failed to get copy of section J",
-			  "BeamWithHinges3d::BeamWithHinges3d");
+  if (section[1] == 0) {
+    opserr << "BeamWithHinges3d::BeamWithHinges3d -- failed to get copy of section J\n";
+    exit(-1);
+  }
   
   theCoordTransf = coordTransf.getCopy();
   
-  if (theCoordTransf == 0)
-    g3ErrorHandler->fatal("%s -- failed to get copy of coordinate transformation",
-			  "BeamWithHinges3d::BeamWithHinges3d");
+  if (theCoordTransf == 0) {
+    opserr << "BeamWithHinges3d::BeamWithHinges3d -- failed to get copy of coordinate transformation\n";
+    exit(-1);
+  }
   
   connectedExternalNodes(0) = nodeI;
   connectedExternalNodes(1) = nodeJ;
@@ -218,15 +220,17 @@ BeamWithHinges3d::setDomain(Domain *theDomain)
   // call the DomainComponent version of the function
   this->DomainComponent::setDomain(theDomain);
   
-  if (theCoordTransf->initialize(theNodes[0], theNodes[1]) != 0)
-    g3ErrorHandler->fatal("%s -- failed to initialize coordinate transformation",
-			  "BeamWithHinges3d::setDomain()");
+  if (theCoordTransf->initialize(theNodes[0], theNodes[1]) != 0) {
+    opserr << "BeamWithHinges3d::setDomain() -- failed to initialize coordinate transformation\n";
+    exit(-1);
+  }
   
   // get element length
   double L = theCoordTransf->getInitialLength();
-  if (L == 0.0)
-    g3ErrorHandler->fatal("%s -- element has zero length",
-			  "BeamWithHinges3d::setDomain()");
+  if (L == 0.0) {
+    opserr << "BeamWithHinges3d::setDomain() -- element has zero length\n";
+    exit(-1);
+  }
 
   // Set up section interpolation and hinge lengths
   this->setHinges();
@@ -244,7 +248,7 @@ BeamWithHinges3d::commitState(void)
 
   // call element commitState to do any base class stuff
   if ((err = this->Element::commitState()) != 0) {
-    cerr << "BeamWithHinges3d::commitState () - failed in base class";
+    opserr << "BeamWithHinges3d::commitState () - failed in base class\n";
   }    
   
   for (int i = 0; i < 2; i++) {
@@ -512,8 +516,7 @@ BeamWithHinges3d::getInitialStiff(void)
   // calculate element stiffness matrix
   static Matrix kbInit(6,6);
   if (f.Solve(Iden,kbInit) < 0)
-    g3ErrorHandler->warning("%s -- could not invert flexibility",
-			    "BeamWithHinges3d::getInitialStiff()");    
+    opserr << "BeamWithHinges3d::update() -- could not invert flexibility\n";
   
   return theCoordTransf->getInitialGlobalStiffMatrix(kbInit);
 }
@@ -562,8 +565,7 @@ BeamWithHinges3d::addLoad(ElementalLoad *theLoad, double loadFactor)
   if (sp == 0) {
     sp = new Matrix(5,2);
     if (sp == 0)
-      g3ErrorHandler->fatal("%s -- out of memory",
-			    "BeamWithHinges3d::addLoad");
+      opserr << "BeamWithHinges3d::addLoad() -- out of memory\n";
   }
 
   double L = theCoordTransf->getInitialLength();
@@ -803,8 +805,7 @@ BeamWithHinges3d::addLoad(ElementalLoad *theLoad, double loadFactor)
   }
 
   else {
-    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
-			    "BeamWithHinges3d::addLoad()", this->getTag());
+    opserr << "BeamWithHinges3d::addLoad() -- load type unknown for element with tag: " << this->getTag() << endln;
     return -1;
   }
 
@@ -923,16 +924,14 @@ BeamWithHinges3d::sendSelf(int commitTag, Channel &theChannel)
   }  
 
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
-    g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send ID data");
+    opserr << "NLBeamColumn3d::sendSelf() - failed to send ID data\n";
     return -1;
   }    
 
   // send the coordinate transformation
   
   if (theCoordTransf->sendSelf(commitTag, theChannel) < 0) {
-    g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send crdTranf");
+    opserr << "NLBeamColumn3d::sendSelf() - failed to send crdTranf\n";
     return -1;
   }      
 
@@ -942,8 +941,7 @@ BeamWithHinges3d::sendSelf(int commitTag, Channel &theChannel)
   
   for (j = 0; j<2; j++) {
     if (section[j]->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - section %d %s\n",
-			      j,"failed to send itself");
+      opserr << "NLBeamColumn3d::sendSelf() - section " << j << " failed to send itself\n";
       return -1;
     }
   }
@@ -985,8 +983,7 @@ BeamWithHinges3d::sendSelf(int commitTag, Channel &theChannel)
 	dData(loc++) = (eCommit[k])(i);
 
   if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
-     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-	 		     "failed to send Vector data");
+     opserr << "NLBeamColumn3d::sendSelf() - failed to send Vector data\n";
      return -1;
   }    
 
@@ -1005,8 +1002,7 @@ BeamWithHinges3d::recvSelf(int commitTag, Channel &theChannel,
   static ID idData(11);  
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
-    g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - %s\n",
-			    "failed to recv ID data");
+    opserr << "NLBeamColumn3d::recvSelf() - failed to recv ID data\n";
     return -1;
   }    
 
@@ -1028,9 +1024,8 @@ BeamWithHinges3d::recvSelf(int commitTag, Channel &theChannel,
       theCoordTransf = theBroker.getNewCrdTransf3d(crdTransfClassTag);
 
       if (theCoordTransf == 0) {
-	  g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - %s %d\n",
-				  "failed to obtain a CrdTrans object with classTag",
-				  crdTransfClassTag);
+	opserr << "NLBeamColumn3d::recvSelf() - failed to obtain a CrdTrans object with classTag " <<
+				crdTransfClassTag << endln;
 	  return -2;	  
       }
   }
@@ -1040,8 +1035,7 @@ BeamWithHinges3d::recvSelf(int commitTag, Channel &theChannel,
   // invoke recvSelf on the crdTransf obkject
   if (theCoordTransf->recvSelf(commitTag, theChannel, theBroker) < 0)  
   {
-     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-	     		     "failed to recv crdTranf");
+     opserr << "NLBeamColumn3d::sendSelf() - failed to recv crdTranf\n";
      return -3;
   }      
 
@@ -1059,14 +1053,12 @@ BeamWithHinges3d::recvSelf(int commitTag, Channel &theChannel,
       loc += 2;
       section[i] = theBroker.getNewSection(sectClassTag);
       if (section[i] == 0) {
-	g3ErrorHandler->fatal("NLBeamColumn3d::recvSelf() - %s %d\n",
-			      "Broker could not create Section of class type",sectClassTag);
-	return -1;
+	opserr << "NLBeamColumn3d::recvSelf() - Broker could not create Section of class type" << sectClassTag << endln;
+	exit(-1);
       }
       section[i]->setDbTag(sectDbTag);
       if (section[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn3d::recvSelf() - section " << i << " failed to recv itself\n";
 	return -1;
       }     
     }
@@ -1088,17 +1080,16 @@ BeamWithHinges3d::recvSelf(int commitTag, Channel &theChannel,
 	delete section[i];
 	section[i] = theBroker.getNewSection(sectClassTag);
 	if (section[i] == 0) {
-	  g3ErrorHandler->fatal("NLBeamColumn3d::recvSelf() - %s %d\n",
-				"Broker could not create Section of class type",sectClassTag);
-	  return -1;
+	  opserr << "NLBeamColumn3d::recvSelf() - Broker could not create Section of class type" << sectClassTag << endln;
+	  exit(-1);
 	}
       }
 
       // recvvSelf on it
       section[i]->setDbTag(sectDbTag);
       if (section[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - section %d %s\n",
-				i,"failed to recv itself");
+	opserr << "NLBeamColumn3d::recvSelf() - section " <<
+				i << "failed to recv itself\n";
 	return -1;
       }     
     }
@@ -1116,8 +1107,7 @@ BeamWithHinges3d::recvSelf(int commitTag, Channel &theChannel,
   loc = 0;
 
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0) {
-     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-	 		     "failed to send Vector data");
+     opserr << "NLBeamColumn3d::sendSelf() - failed to send Vector data\n";
      return -1;
   }    
 
@@ -1153,16 +1143,16 @@ BeamWithHinges3d::recvSelf(int commitTag, Channel &theChannel,
 }
 
 void 
-BeamWithHinges3d::Print(ostream &s, int flag)
+BeamWithHinges3d::Print(OPS_Stream &s, int flag)
 {
-  s << "\nBeamWithHinges3d, tag: " << this->getTag() << endl;
+  s << "\nBeamWithHinges3d, tag: " << this->getTag() << endln;
   s << "\tConnected Nodes: " << connectedExternalNodes;
-  s << "\tE:  " << E << endl;
-  s << "\tA:  " << A << endl;
-  s << "\tIz: " << Iz << endl;
-  s << "\tIy: " << Iy << endl;
-  s << "\tG:  " << G << endl;
-  s << "\tJ:  " << J << endl;
+  s << "\tE:  " << E << endln;
+  s << "\tA:  " << A << endln;
+  s << "\tIz: " << Iz << endln;
+  s << "\tIy: " << Iy << endln;
+  s << "\tG:  " << G << endln;
+  s << "\tJ:  " << J << endln;
   
   double P, Mz1, Mz2, Vy, My1, My2, Vz, T;
   double L = theCoordTransf->getInitialLength();
@@ -1178,19 +1168,19 @@ BeamWithHinges3d::Print(ostream &s, int flag)
   T   = qCommit(5);
 
   s << "\tEnd 1 Forces (P Mz Vy My Vz T): "
-    << -P+p0[0] << ' ' << Mz1 << ' ' <<  Vy+p0[1] << ' ' << My1 << ' ' <<  Vz+p0[3] << ' ' << -T << endl;
+    << -P+p0[0] << ' ' << Mz1 << ' ' <<  Vy+p0[1] << ' ' << My1 << ' ' <<  Vz+p0[3] << ' ' << -T << endln;
   s << "\tEnd 2 Forces (P Mz Vy My Vz T): "
-    <<  P << ' ' << Mz2 << ' ' << -Vy+p0[2] << ' ' << My2 << ' ' << -Vz+p0[4] << ' ' <<  T << endl;
+    <<  P << ' ' << Mz2 << ' ' << -Vy+p0[2] << ' ' << My2 << ' ' << -Vz+p0[4] << ' ' <<  T << endln;
   
   if (section[0] != 0) {
     s << "Hinge 1, section tag: " << section[0]->getTag() << 
-      ", length: " << beta1*L << endl;
+      ", length: " << beta1*L << endln;
     section[0]->Print(s,flag);
   }
   
   if (section[1] != 0) {
     s << "Hinge 2, section tag: " << section[2]->getTag() << 
-      ", length: " << beta2*L << endl;
+      ", length: " << beta2*L << endln;
     section[1]->Print(s,flag);
   }
 }
@@ -1205,21 +1195,21 @@ BeamWithHinges3d::setNodePtrs(Domain *theDomain)
   theNodes[1] = theDomain->getNode(connectedExternalNodes(1));
   
   if(theNodes[0] == 0) {
-    g3ErrorHandler->fatal("%s -- node 1 does not exist",
-			  "BeamWithHinges3d::setNodePtrs()");
+    opserr << "BeamWithHinges3d::setNodePtrs() -- node 1 does not exist\n";
+    exit(-1);
   }
   
   if(theNodes[1] == 0) {
-    g3ErrorHandler->fatal("%s -- node 2 does not exist",
-			  "BeamWithHinges3d::setNodePtrs()");
+    opserr << "BeamWithHinges3d::setNodePtrs() -- node 2 does not exist\n";
+    exit(-1);
   }
   
   // check for correct # of DOF's
   int dofNd1 = theNodes[0]->getNumberDOF();
   int dofNd2 = theNodes[1]->getNumberDOF();
   if ((dofNd1 != 6) || (dofNd2 != 6))  {
-    g3ErrorHandler->fatal("%s -- nodal dof is not three",
-			  "BeamWithHinges3d::setNodePtrs()");
+    opserr << "BeamWithHinges3d::setNodePtrs() -- nodal dof is not three\n";
+    exit(-1);	       
   }
 }
 
@@ -1558,8 +1548,8 @@ BeamWithHinges3d::update(void)
     
     // calculate element stiffness matrix
     if (f.Solve(Iden,kb) < 0)
-      g3ErrorHandler->warning("%s -- could not invert flexibility",
-			      "BeamWithHinges3d::update()");    
+      opserr << "BeamWithHinges3d::update() -- could not invert flexibility\n";
+			      
 
     // dv = v - vr;
     dv = v;

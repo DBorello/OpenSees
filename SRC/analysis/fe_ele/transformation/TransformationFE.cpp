@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:33:28 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:00:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -72,8 +72,8 @@ TransformationFE::TransformationFE(Element *ele,
     int numNodes = nodes.Size();
     theDOFs = new DOF_Group *[numNodes];
     if (theDOFs == 0) {
-	cerr << "FATAL TransformationFE::TransformationFE() - out of memory craeting ";
-	cerr << "array of size : " << numNodes << " for storage of DOF_Group\n";
+	opserr << "FATAL TransformationFE::TransformationFE() - out of memory craeting ";
+	opserr << "array of size : " << numNodes << " for storage of DOF_Group\n";
 	exit(-1);
     }
 
@@ -85,14 +85,14 @@ TransformationFE::TransformationFE(Element *ele,
     for (int i=0; i<numNodes; i++) {
 	Node *theNode = theDomain->getNode(nodes(i));
 	if (theNode == 0) {
-	    cerr << "FATAL TransformationFE::TransformationFE() - no Node with tag: ";
-	    cerr << nodes(i) << " in the domain\n";;
+	    opserr << "FATAL TransformationFE::TransformationFE() - no Node with tag: ";
+	    opserr << nodes(i) << " in the domain\n";;
 	    exit(-1);
 	}
 	DOF_Group *theDofGroup = theNode->getDOF_GroupPtr();
 	if (theDofGroup == 0) {
-	    cerr << "FATAL TransformationFE::TransformationFE() - no DOF_Group : ";
-	    cerr << " associated with node: " << nodes(i) << " in the domain\n";;
+	    opserr << "FATAL TransformationFE::TransformationFE() - no DOF_Group : ";
+	    opserr << " associated with node: " << nodes(i) << " in the domain\n";;
 	    exit(-1);
 	}	
 	theDOFs[i] = theDofGroup;
@@ -106,9 +106,9 @@ TransformationFE::TransformationFE(Element *ele,
 	
 	theTransformations = new Matrix *[numNodes];
 	if (theTransformations == 0) {
-	    cerr << "FATAL TransformationFE::TransformationFE() - out of memory ";
-	    cerr << "for array of pointers for Transformation matrices of size ";
-	    cerr << numNodes;
+	    opserr << "FATAL TransformationFE::TransformationFE() - out of memory ";
+	    opserr << "for array of pointers for Transformation matrices of size ";
+	    opserr << numNodes;
 	    exit(-1);
 	}		    
 	sizeTransformations = numNodes;
@@ -126,8 +126,8 @@ TransformationFE::TransformationFE(Element *ele,
 	
 	if (modMatrices == 0 || modVectors == 0 || dataBuffer == 0 ||
 	    localKbuffer == 0 || dofData == 0) {
-	    cerr << "TransformationFE::TransformationFE(Element *) ";
-	    cerr << " ran out of memory";	    
+	    opserr << "TransformationFE::TransformationFE(Element *) ";
+	    opserr << " ran out of memory";	    
 	}
 	for (int i=0; i<MAX_NUM_DOF; i++) {
 	    modMatrices[i] = 0;
@@ -206,7 +206,7 @@ TransformationFE::getID(void) const
 {
     // make sure that it exists
     if (modID == 0) {
-	cerr << "FATAL TransformationFE::getID() called before setID()\n";
+	opserr << "FATAL TransformationFE::getID() called before setID()\n";
 	exit(-1);
     }
     return *modID;
@@ -236,9 +236,9 @@ TransformationFE::setID(void)
     // may be different size
     modID = new ID(numTransformedDOF);
     if (modID == 0 || modID->Size() == 0) {
-	cerr << "TransformationFE::setID() ";
-	cerr << " ran out of memory for ID of size :";
-	cerr << numTransformedDOF << endl;
+	opserr << "TransformationFE::setID() ";
+	opserr << " ran out of memory for ID of size :";
+	opserr << numTransformedDOF << endln;
 	exit(-1);
     }
 
@@ -252,8 +252,8 @@ TransformationFE::setID(void)
 	    if (current < numTransformedDOF)
 		(*modID)(current++) = theDOFid(j);
 	    else {
-		cerr << "WARNING TransformationFE::setID() - numDOF and";
-		cerr << " number of dof at the DOF_Groups\n";
+		opserr << "WARNING TransformationFE::setID() - numDOF and";
+		opserr << " number of dof at the DOF_Groups\n";
 		return -3;
 	    }		
     }
@@ -268,9 +268,9 @@ TransformationFE::setID(void)
 	    modTangent = modMatrices[numTransformedDOF];
 	    if (modResidual == 0 || modResidual->Size() != numTransformedDOF ||	
 		modTangent == 0 || modTangent->noCols() != numTransformedDOF)	{  
-		cerr << "TransformationFE::setID() ";
-		cerr << " ran out of memory for vector/Matrix of size :";
-		cerr << numTransformedDOF << endl;
+		opserr << "TransformationFE::setID() ";
+		opserr << " ran out of memory for vector/Matrix of size :";
+		opserr << numTransformedDOF << endln;
 		exit(-1);
 	    }
 	} else {
@@ -284,9 +284,9 @@ TransformationFE::setID(void)
 	if (modResidual == 0 || modResidual->Size() ==0 ||
 	    modTangent ==0 || modTangent->noRows() ==0) {
 	    
-	    cerr << "TransformationFE::setID() ";
-	    cerr << " ran out of memory for vector/Matrix of size :";
-	    cerr << numTransformedDOF << endl;
+	    opserr << "TransformationFE::setID() ";
+	    opserr << " ran out of memory for vector/Matrix of size :";
+	    opserr << numTransformedDOF << endln;
 	    exit(-1);
 	}
     }     
@@ -455,7 +455,7 @@ TransformationFE::getResidual(Integrator *theNewIntegrator)
 const Vector &
 TransformationFE::getTangForce(const Vector &disp, double fact)
 {
-    cerr << "TransformationFE::getTangForce() - not yet implemented\n";
+    opserr << "TransformationFE::getTangForce() - not yet implemented\n";
     modResidual->Zero();
     return *modResidual;
 }
@@ -463,7 +463,7 @@ TransformationFE::getTangForce(const Vector &disp, double fact)
 const Vector &
 TransformationFE::getM_Force(const Vector &accel, double fact)
 {
-  cerr << "TransformationFE::getM_Force() - not yet implemented\n";
+  opserr << "TransformationFE::getM_Force() - not yet implemented\n";
   modResidual->Zero();
   return *modResidual;
 }
@@ -475,14 +475,14 @@ TransformationFE::getLastResponse(void)
     Integrator *theLastIntegrator = this->getLastIntegrator();
     if (theLastIntegrator != 0) {
 	if (theLastIntegrator->getLastResponse(*modResidual,*modID) < 0) {
-	    cerr << "WARNING TransformationFE::getLastResponse(void)";
-	    cerr << " - the Integrator had problems with getLastResponse()\n";
+	    opserr << "WARNING TransformationFE::getLastResponse(void)";
+	    opserr << " - the Integrator had problems with getLastResponse()\n";
 	}
     }
     else {
 	modResidual->Zero();
-	cerr << "WARNING  TransformationFE::getLastResponse()";
-	cerr << " No Integrator yet passed\n";
+	opserr << "WARNING  TransformationFE::getLastResponse()";
+	opserr << " No Integrator yet passed\n";
     }
     
     Vector &result = *modResidual;

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-01 18:06:58 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 23:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/ShiftedRayleighRV.cpp,v $
 
 
@@ -36,6 +36,7 @@
 #include <ShiftedRayleighRV.h>
 #include <math.h>
 #include <string.h>
+#include <OPS_Globals.h>
 
 ShiftedRayleighRV::ShiftedRayleighRV(int passedTag, 
 		 double passedMean,
@@ -93,7 +94,7 @@ ShiftedRayleighRV::~ShiftedRayleighRV()
 
 
 void
-ShiftedRayleighRV::Print(ostream &s, int flag)
+ShiftedRayleighRV::Print(OPS_Stream &s, int flag)
 {
 }
 
@@ -166,5 +167,5 @@ ShiftedRayleighRV::getStartValue()
 
 double ShiftedRayleighRV::getParameter1()  {return u;}
 double ShiftedRayleighRV::getParameter2()  {return x0;}
-double ShiftedRayleighRV::getParameter3()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
-double ShiftedRayleighRV::getParameter4()  {cerr<<"No such parameter in r.v. #"<<tag<<endl; return 0.0;}
+double ShiftedRayleighRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+double ShiftedRayleighRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-30 22:13:46 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:01:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/Block2D.h,v $
                                                                         
 // Written: Ed Love
@@ -30,7 +30,6 @@
 //
 // What: "@(#) Block2D.h, revA"
 
-#include <iostream.h>
 #include <math.h>
 #include <Vector.h>
 #include <Matrix.h>

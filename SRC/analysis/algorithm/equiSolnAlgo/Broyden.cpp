@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 05:33:51 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Broyden.cpp,v $
                                                                         
                                                                         
@@ -41,8 +41,6 @@
 #include <FEM_ObjectBroker.h>
 #include <ConvergenceTest.h>
 #include <ID.h>
-
-#include <fstream.h>
 
 // Constructor
 Broyden::Broyden(int theTangentToUse, int n )
@@ -156,16 +154,16 @@ Broyden::solveCurrentStep(void)
 
     if ((theAnaModel == 0) || (theIntegrator == 0) || (theSOE == 0)
 	|| (theTest == 0)){
-	cerr << "WARNING Broyden::solveCurrentStep() - setLinks() has";
-	cerr << " not been called - or no ConvergenceTest has been set\n";
+	opserr << "WARNING Broyden::solveCurrentStep() - setLinks() has";
+	opserr << " not been called - or no ConvergenceTest has been set\n";
 	return -5;
     }	
 
     // set itself as the ConvergenceTest objects EquiSolnAlgo
     theTest->setEquiSolnAlgo(*this);
     if (theTest->start() < 0) {
-      cerr << "Broyden::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in start()\n";
+      opserr << "Broyden::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in start()\n";
       return -3;
     }
 
@@ -175,32 +173,32 @@ Broyden::solveCurrentStep(void)
     int count = 0 ;
     do {
 
-      // cerr << "      Broyden -- Forming New Tangent" << endl ;
+      // opserr << "      Broyden -- Forming New Tangent" << endln ;
 
       //form the initial tangent
       if (theIntegrator->formTangent(tangent) < 0){
-         cerr << "WARNING Broyden::solveCurrentStep() -";
-         cerr << "the Integrator failed in formTangent()\n";
+         opserr << "WARNING Broyden::solveCurrentStep() -";
+         opserr << "the Integrator failed in formTangent()\n";
          return -1; 
       }
 
       //form the initial residual 
       if (theIntegrator->formUnbalance() < 0) {
-        cerr << "WARNING Broyden::solveCurrentStep() -";
-        cerr << "the Integrator failed in formUnbalance()\n";	
+        opserr << "WARNING Broyden::solveCurrentStep() -";
+        opserr << "the Integrator failed in formUnbalance()\n";	
       }	    
 
       //solve
       if (theSOE->solve() < 0) {
-	  cerr << "WARNING Broyden::solveCurrentStep() -";
-	  cerr << "the LinearSysOfEqn failed in solve()\n";	
+	  opserr << "WARNING Broyden::solveCurrentStep() -";
+	  opserr << "the LinearSysOfEqn failed in solve()\n";	
 	  return -3;
 	}	    
 
       //update
       if ( theIntegrator->update(theSOE->getX() ) < 0) {
-	cerr << "WARNING Broyden::solveCurrentStep() -";
-	cerr << "the Integrator failed in update()\n";	
+	opserr << "WARNING Broyden::solveCurrentStep() -";
+	opserr << "the Integrator failed in update()\n";	
 	return -4;
       }	        
 
@@ -231,8 +229,8 @@ Broyden::solveCurrentStep(void)
 
       //form the residual again
       if (theIntegrator->formUnbalance() < 0) {
-        cerr << "WARNING Broyden::solveCurrentStep() -";
-        cerr << "the Integrator failed in formUnbalance()\n";	
+        opserr << "WARNING Broyden::solveCurrentStep() -";
+        opserr << "the Integrator failed in formUnbalance()\n";	
       }	    
 
       if ( residNew == 0 ) 
@@ -258,8 +256,8 @@ Broyden::solveCurrentStep(void)
       
         //solve
         if (theSOE->solve() < 0) {
-	    cerr << "WARNING Broyden::solveCurrentStep() -";
-	    cerr << "the LinearSysOfEqn failed in solve()\n";	
+	    opserr << "WARNING Broyden::solveCurrentStep() -";
+	    opserr << "the LinearSysOfEqn failed in solve()\n";	
 	    return -3;
         }	    
 
@@ -270,15 +268,15 @@ Broyden::solveCurrentStep(void)
         BroydenUpdate( theIntegrator, theSOE, *du, nBroyden )  ;
 
         if ( theIntegrator->update( *du ) < 0 ) {
-	   cerr << "WARNING Broyden::solveCurrentStep() -";
-	   cerr << "the Integrator failed in update()\n";	
+	   opserr << "WARNING Broyden::solveCurrentStep() -";
+	   opserr << "the Integrator failed in update()\n";	
 	   return -4;
         }	        
 
 
-	/*	cerr << "        Broyden Iteration " << nBroyden 
+	/*	opserr << "        Broyden Iteration " << nBroyden 
             << " Residual Norm = " 
-            << sqrt( (*residNew) ^ (*residNew) ) << endl ;
+            << sqrt( (*residNew) ^ (*residNew) ) << endln ;
 	*/
         
         //increment broyden counter
@@ -295,8 +293,8 @@ Broyden::solveCurrentStep(void)
 
         //form the residual again
         if (theIntegrator->formUnbalance() < 0) {
-          cerr << "WARNING Broyden::solveCurrentStep() -";
-          cerr << "the Integrator failed in formUnbalance()\n";	
+          opserr << "WARNING Broyden::solveCurrentStep() -";
+          opserr << "the Integrator failed in formUnbalance()\n";	
         }	    
 	
 	result = localTest->test() ;
@@ -311,8 +309,8 @@ Broyden::solveCurrentStep(void)
 
 
     if (result == -2) {
-      cerr << "Broyden::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in test()\n";
+      opserr << "Broyden::solveCurrentStep() -";
+      opserr << "the ConvergenceTest object failed in test()\n";
       return -3;
     }
 
@@ -344,8 +342,8 @@ void  Broyden::BroydenUpdate( IncrementalIntegrator *theIntegrator,
   theSOE->setB( *temp ) ;
 
   if (theSOE->solve() < 0) {
-       cerr << "WARNING Broyden::solveCurrentStep() -";
-       cerr << "the LinearSysOfEqn failed in solve()\n";	
+       opserr << "WARNING Broyden::solveCurrentStep() -";
+       opserr << "the LinearSysOfEqn failed in solve()\n";	
    }	    
   
   if ( z[nBroyden] == 0 ) 
@@ -416,11 +414,11 @@ Broyden::recvSelf(int cTag,
 
 
 void
-Broyden::Print(ostream &s, int flag)
+Broyden::Print(OPS_Stream &s, int flag)
 {
     if (flag == 0) {
-      s << "Broyden" << endl ;
-      s << "  Number of Iterations = " << numberLoops << endl ;
+      s << "Broyden" << endln ;
+      s << "  Number of Iterations = " << numberLoops << endln ;
     }
 }
 
@@ -442,28 +440,28 @@ Broyden::Print(ostream &s, int flag)
         //first solve step
 
  	if (theIntegrator->formTangent(tangent) < 0){
-	    cerr << "WARNING Broyden::solveCurrentStep() -";
-	    cerr << "the Integrator failed in formTangent()\n";
+	    opserr << "WARNING Broyden::solveCurrentStep() -";
+	    opserr << "the Integrator failed in formTangent()\n";
 	    return -1;
 	}		    
 	
 	if (theSOE->solve() < 0) {
-	    cerr << "WARNING Broyden::solveCurrentStep() -";
-	    cerr << "the LinearSysOfEqn failed in solve()\n";	
+	    opserr << "WARNING Broyden::solveCurrentStep() -";
+	    opserr << "the LinearSysOfEqn failed in solve()\n";	
 	    return -3;
 	}	    
 
 
 	if (theIntegrator->update(theSOE->getX()) < 0) {
-	    cerr << "WARNING Broyden::solveCurrentStep() -";
-	    cerr << "the Integrator failed in update()\n";	
+	    opserr << "WARNING Broyden::solveCurrentStep() -";
+	    opserr << "the Integrator failed in update()\n";	
 	    return -4;
 	}	        
 
 
 	if (theIntegrator->formUnbalance() < 0) {
-	    cerr << "WARNING Broyden::solveCurrentStep() -";
-	    cerr << "the Integrator failed in formUnbalance()\n";	
+	    opserr << "WARNING Broyden::solveCurrentStep() -";
+	    opserr << "the Integrator failed in formUnbalance()\n";	
 	    return -2;
 	}	
 	

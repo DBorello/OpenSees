@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-30 22:13:46 $
+// $Revision: 1.4 $
+// $Date: 2003-02-14 23:01:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/Block2D.cpp,v $
                                                                         
 // Written: Ed Love
@@ -50,13 +50,13 @@ errorFlag(0)
 
   if (numNodesElement == 9) {
     if (((numx % 2) != 0) || ((numy % 2) != 0)) {
-      cerr << "ERROR: Block2D::Block2D - numX & numY for nine noded elements must be even\n";
+      opserr << "ERROR: Block2D::Block2D - numX & numY for nine noded elements must be even\n";
       errorFlag = 1;
     }
   } 
 
   if (numNodesElement != 9 && numNodesElement != 4) {
-      cerr << "ERROR: Block2D::Block2D - numNode must be either 4 or 9\n";
+      opserr << "ERROR: Block2D::Block2D - numNode must be either 4 or 9\n";
       errorFlag = 1;
   }
 
@@ -80,10 +80,10 @@ void  Block2D::setUpXl( const ID &nodeID, const Matrix &coorArray )
 
   for ( i=0; i<4; i++ ){
     if ( nodeID(i) == -1 ) {
-      cerr << "Warning : in Block2D, block node " 
+      opserr << "Warning : in Block2D, block node " 
 	   << i 
 	   << " is not defined.  No Generation will take place."
-	   << endl;
+	   << endln;
       break; 
     }//end if
   }//end for i

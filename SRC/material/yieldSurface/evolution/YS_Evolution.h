@@ -29,8 +29,8 @@ public:
 	virtual ~YS_Evolution();
 
 //  Methods inherited
-    virtual void	Print(ostream &s, int flag =0);
-//	friend ostream &operator<<(ostream &s, const YS_Evolution &hModel);
+    virtual void	Print(OPS_Stream &s, int flag =0);
+//	friend OPS_Stream &operator<<(OPS_Stream &s, const YS_Evolution &hModel);
 
 	virtual int	update(int flag=0);
 	virtual int commitState(int status);

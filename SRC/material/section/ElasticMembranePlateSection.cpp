@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-06-19 18:20:45 $
+// $Revision: 1.9 $
+// $Date: 2003-02-14 23:01:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticMembranePlateSection.cpp,v $
 
 // Ed "C++" Love
@@ -82,12 +82,9 @@ SectionForceDeformation*  ElasticMembranePlateSection::getCopy( )
 {
   ElasticMembranePlateSection *clone ;   
 
-  clone = new ElasticMembranePlateSection( ) ; //new instance of this class
+  clone = new ElasticMembranePlateSection(this->getTag(), E, nu, h, rhoH) ; //new instance of this class
 
   //    *clone = *this ; //assignment to make copy
-  clone->E = this->E;
-  clone->nu = this->nu;
-  clone->h = this->h;
   clone->rhoH = this->rhoH ;
   clone->strain = this->strain;
 
@@ -292,13 +289,13 @@ const Matrix&  ElasticMembranePlateSection::getInitialTangent( )
 
 
 //print out data
-void  ElasticMembranePlateSection::Print( ostream &s, int flag )
+void  ElasticMembranePlateSection::Print( OPS_Stream &s, int flag )
 {
   s << "ElasticMembranePlateSection: \n " ;
-  s <<  "  Young's Modulus E = "  <<  E  <<  endl ;
-  s <<  "  Poisson's Ratio nu = " <<  nu <<  endl ;
-  s <<  "  Thickness h = "        <<  h  <<  endl ;
-  s <<  "  Density rho = "        <<  (rhoH/h)  <<  endl ;
+  s <<  "  Young's Modulus E = "  <<  E  <<  endln ;
+  s <<  "  Poisson's Ratio nu = " <<  nu <<  endln ;
+  s <<  "  Thickness h = "        <<  h  <<  endln ;
+  s <<  "  Density rho = "        <<  (rhoH/h)  <<  endln ;
 
   return ;
 }
@@ -316,7 +313,7 @@ ElasticMembranePlateSection::sendSelf(int cTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "ElasticMembranePlateSection::sendSelf() - failed to send data\n";
+    opserr << "ElasticMembranePlateSection::sendSelf() - failed to send data\n";
 
   return res;
 }
@@ -330,7 +327,7 @@ ElasticMembranePlateSection::recvSelf(int cTag, Channel &theChannel,
   static Vector data(5);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   if (res < 0) 
-    cerr << "ElasticMembranePlateSection::recvSelf() - failed to recv data\n";
+    opserr << "ElasticMembranePlateSection::recvSelf() - failed to recv data\n";
   else {
     this->setTag(data(0));
     E    = data(1);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/ErrorHandler.h,v $
                                                                         
                                                                         
@@ -38,7 +38,8 @@
 //
 // What: "@(#) ErrorHandler.h, revA"
 
-#include <iostream.h>
+#include <iostream>
+using std::ostream;
 #include <stdarg.h>
 
 class ErrorHandler {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-01-28 18:23:50 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSectionGJ.h,v $
                                                                         
 // Written: fmk
@@ -66,7 +66,7 @@ class FiberSectionGJ : public SectionForceDeformation
   int sendSelf(int cTag, Channel &theChannel);
   int recvSelf(int cTag, Channel &theChannel, 
 	       FEM_ObjectBroker &theBroker);
-  void Print(ostream &s, int flag = 0);
+  void Print(OPS_Stream &s, int flag = 0);
   
   Response *setResponse(char **argv, int argc, Information &info);
   int getResponse(int responseID, Information &info);

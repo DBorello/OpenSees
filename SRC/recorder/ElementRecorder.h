@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-12-13 00:11:10 $
+// $Revision: 1.6 $
+// $Date: 2003-02-14 23:01:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
                                                                         
@@ -39,10 +39,10 @@
 // What: "@(#) ElementRecorder.h, revA"
 
 #include <Recorder.h>
-#include <fstream.h>
+#include <fstream>
+using std::ofstream;
 
 #include <Information.h>
-#include <G3Globals.h>
 #include <ID.h>
 
 

@@ -83,7 +83,7 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
     int recvSelf(int commitTag, Channel &theChannel,
     FEM_ObjectBroker &theBroker);
 
-    void Print(ostream &s, int flag =0);
+    void Print(OPS_Stream &s, int flag =0);
     void ComputeElasticStiffness(void);
 
   //Private functions

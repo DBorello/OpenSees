@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TimeSeries.h,v $
                                                                         
                                                                         
@@ -40,7 +40,7 @@
 // What: "@(#) TimeSeries.h, revA"
 
 #include <MovableObject.h>
-#include <iostream.h>
+#include <OPS_Globals.h>
 
 class TimeSeries : public MovableObject
 {
@@ -60,7 +60,7 @@ class TimeSeries : public MovableObject
     // FROM THE PREVIOUS POINT IN THE PATH UP TO 'pseudoTime', WILL
     // DECIDE ONCE GroundMotionIntegrator IS IMPLEMENTED
 
-    virtual void Print(ostream &s, int flag = 0) = 0;        
+    virtual void Print(OPS_Stream &s, int flag = 0) = 0;        
 
   protected:
 	

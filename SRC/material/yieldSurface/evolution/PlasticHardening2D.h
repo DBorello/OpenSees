@@ -22,7 +22,7 @@ public:
 	virtual int 	commitState(int status);
 	virtual int		revertToLastCommit(void);
 
-	virtual void	Print(ostream &s, int flag =0);
+	virtual void	Print(OPS_Stream &s, int flag =0);
 	virtual YS_Evolution *getCopy(void)=0;
 	virtual const Vector &getEquiPlasticStiffness(void);
 	double getTrialPlasticStrains(int dof);

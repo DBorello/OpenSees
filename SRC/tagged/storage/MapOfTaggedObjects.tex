@@ -36,7 +36,7 @@ allowMultiple = false);}\\
 \indent {\em TaggedObjectIter \&getComponents(void);}\\
 \indent {\em TaggedObjectStorage *getEmptyCopy(void)}\\
 \indent {\em void clearAll(void);}\\
-\indent {\em void Print(ostream \&s, int flag);}\\
+\indent {\em void Print(OPS_Stream \&s, int flag);}\\
 
 \noindent {\bf Constructor} \\
 \indent {\em MapOfTaggedObjects();} \\
@@ -104,7 +104,7 @@ destructor on these objects}. Goes through the container, invoking the
 destructor on any object in the map. It then invokes {\em clear()} on
 the map object to clear it. \\
 
-\indent {\em void Print(ostream \&s, int flag =0);}\\
+\indent {\em void Print(OPS_Stream \&s, int flag =0);}\\
 Invokes {\em Print(s,flag)} on all objects which have been added to
 the container. 
 

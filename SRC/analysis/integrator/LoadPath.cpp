@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/LoadPath.cpp,v $
                                                                         
                                                                         
@@ -38,7 +38,6 @@
 
 #include <LoadPath.h>
 #include <AnalysisModel.h>
-#include <iostream.h>
 #include <Vector.h>
 #include <Channel.h>
 #include <ID.h>
@@ -50,7 +49,7 @@ LoadPath::LoadPath(Vector &theLoadPath)
 {
     loadPath = new Vector(theLoadPath);
     if (loadPath == 0 || loadPath->Size() == 0) {
-	cerr << "LoadPath::LoadPath() - ran out of memory\n";
+	opserr << "LoadPath::LoadPath() - ran out of memory\n";
 	exit(-1);
     }
 }
@@ -76,12 +75,12 @@ LoadPath::newStep(void)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();    
     if (theModel == 0) {
-	cerr << "LoadPath::newStep() - no associated AnalysisModel\n";
+	opserr << "LoadPath::newStep() - no associated AnalysisModel\n";
 	return -1;
     }
     
     if (loadPath == 0) {
-	cerr << "LoadPath::newStep() - no load path associated with object\n";
+	opserr << "LoadPath::newStep() - no load path associated with object\n";
 	return -2;
     }	
 	
@@ -101,8 +100,8 @@ LoadPath::newStep(void)
     }      
     else {
 	currentLambda = 0.0;
-	cerr << "LoadPath::newStep() - reached end of specified load path";
-	cerr << " - setting lambda = 0.0 \n";
+	opserr << "LoadPath::newStep() - reached end of specified load path";
+	opserr << " - setting lambda = 0.0 \n";
     }
     
     currentStep++;
@@ -116,8 +115,8 @@ LoadPath::update(const Vector &deltaU)
 {
     AnalysisModel *myModel = this->getAnalysisModelPtr();
     if (myModel == 0) {
-	cerr << "WARNING LoadPath::update() ";
-	cerr << "No AnalysisModel has been set\n";
+	opserr << "WARNING LoadPath::update() ";
+	opserr << "No AnalysisModel has been set\n";
 	return -1;
     }
 
@@ -135,12 +134,12 @@ LoadPath::sendSelf(int cTag,
   data(0) = loadPath->Size();
   data(1) = currentStep;  
   if (theChannel.sendID(this->getDbTag(), cTag, data) < 0) {
-      cerr << "LoadPath::sendSelf() - failed to send the ID\n";
+      opserr << "LoadPath::sendSelf() - failed to send the ID\n";
       return -1;
   }
   
   if (theChannel.sendVector(this->getDbTag(), cTag, *loadPath) < 0) {
-      cerr << "LoadPath::sendSelf() - failed to send the Vector\n";
+      opserr << "LoadPath::sendSelf() - failed to send the Vector\n";
       return -1;
   }  
   
@@ -154,7 +153,7 @@ LoadPath::recvSelf(int cTag,
 {
   ID data(2);
   if (theChannel.recvID(this->getDbTag(), cTag, data) < 0) {
-      cerr << "LoadPath::sendSelf() - failed to send the ID\n";
+      opserr << "LoadPath::sendSelf() - failed to send the ID\n";
       return -1;
   }      
   int size = data(0);
@@ -162,12 +161,12 @@ LoadPath::recvSelf(int cTag,
   
   loadPath = new Vector(size);
   if (loadPath == 0 || loadPath->Size() == 0) {
-      cerr << "FATAL - LoadPath::recvSelf() - ran out of memory\n";
+      opserr << "FATAL - LoadPath::recvSelf() - ran out of memory\n";
       exit(-1);
   }
 
   if (theChannel.recvVector(this->getDbTag(), cTag, *loadPath) < 0) {
-      cerr << "LoadPath::sendSelf() - failed to send the Vector\n";
+      opserr << "LoadPath::sendSelf() - failed to send the Vector\n";
       return -1;
   }      
   
@@ -177,12 +176,12 @@ LoadPath::recvSelf(int cTag,
 
 
 void
-LoadPath::Print(ostream &s, int flag)
+LoadPath::Print(OPS_Stream &s, int flag)
 {
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theModel != 0) {
 	double currentLambda = theModel->getCurrentDomainTime();
-	s << "\t LoadPath - currentLambda: " << currentLambda << endl;
+	s << "\t LoadPath - currentLambda: " << currentLambda << endln;
     } else 
 	s << "\t LoadPath - no associated AnalysisModel\n";
     

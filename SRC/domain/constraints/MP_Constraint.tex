@@ -68,7 +68,7 @@ Matrix \&constraint, \\
 \indent\indent {\em virtual int sendSelf(int commitTag, Channel \&theChannel);} \\ 
 \indent\indent {\em virtual int recvSelf(int commitTag, Channel \&theChannel, FEM\_ObjectBroker
 \&theBroker);} \\ 
-\indent\indent {\em virtual void Print(ostream \&s, int flag = 0);} \\
+\indent\indent {\em virtual void Print(OPS_Stream \&s, int flag = 0);} \\
 
 \noindent {\bf Constructors}  \\
 \indent {\em MP\_Constraint(int tag, int nodeRetain, int nodeConstr,
@@ -148,7 +148,7 @@ and the {\em constraint} Matrix into these objects. Returns $0$ if
 successful, a negative number if the Channel object, {\em
 theChannel}, failed to receive the data.\\ 
 
-{\em virtual void Print(ostream \&s, int flag = 0);} \\
+{\em virtual void Print(OPS_Stream \&s, int flag = 0);} \\
 Prints out the MP\_Constraints tag, then the tags of the constrained
 and retained nodes, then the two ID's and finally the constraint Matrix.\\
 

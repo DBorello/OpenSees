@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:02:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/main.cpp,v $
                                                                         
                                                                         
@@ -76,10 +76,10 @@ main()
     sys.addB(x,h);
     sys.addB(x,m,-1);
 
-    cout << "INFO FLAG: " << sys.solve() << endl;
+    cout << "INFO FLAG: " << sys.solve() << endln;
     cout << sys.getX();
 
-    cout << "INFO FLAG: " << sys.solve() << endl;
+    cout << "INFO FLAG: " << sys.solve() << endln;
     cout << sys.getX();
     
     

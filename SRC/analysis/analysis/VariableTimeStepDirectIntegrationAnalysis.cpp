@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-29 00:25:18 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:00:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/VariableTimeStepDirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -83,8 +83,8 @@ VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, doub
 
     // check if domain has undergone change
     if (this->checkDomainChange() < 0) {
-      cerr << "VariableTimeStepDirectIntegrationAnalysis::analyze() - failed";
-      cerr << " failed at time " << theDom->getCurrentTime() << endl;
+      opserr << "VariableTimeStepDirectIntegrationAnalysis::analyze() - failed";
+      opserr << " failed at time " << theDom->getCurrentTime() << endln;
       return -1;
     }	
 
@@ -123,8 +123,8 @@ VariableTimeStepDirectIntegrationAnalysis::analyze(int numSteps, double dT, doub
 
       // if last dT was <= min specified the analysis FAILS - return FAILURE
       if (currentDt <= dtMin) {
-	cerr << "VariableTimeStepDirectIntegrationAnalysis::analyze() - ";
-	cerr << " failed at time " << theDom->getCurrentTime() << endl;
+	opserr << "VariableTimeStepDirectIntegrationAnalysis::analyze() - ";
+	opserr << " failed at time " << theDom->getCurrentTime() << endln;
 	return result;
       }
       

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:00:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/SolutionAlgorithm.h,v $
                                                                         
                                                                         
@@ -38,7 +38,6 @@
 //
 // What: "@(#) SolutionAlgorithm.h, revA"
 
-#include <iostream.h>
 #include <MovableObject.h>
 
 class Channel;

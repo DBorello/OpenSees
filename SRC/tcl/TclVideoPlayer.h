@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-19 07:04:23 $
+// $Revision: 1.3 $
+// $Date: 2003-02-14 23:02:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclVideoPlayer.h,v $
                                                                         
                                                                         
@@ -37,7 +37,8 @@
 #ifndef TclVideoPlayer_h
 #define TclVideoPlayer_h
 
-#include <G3Globals.h>
+#include <fstream>
+using std::ifstream;
 
 class Renderer;
 class ColorMap;

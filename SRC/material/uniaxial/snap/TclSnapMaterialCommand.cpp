@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-07-12 19:04:05 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/TclSnapMaterialCommand.cpp,v $
 
 // Written: MHS
@@ -40,10 +40,10 @@
 
 static void printCommand(int argc, char **argv)
 {
-  cerr << "Input command: ";
+  opserr << "Input command: ";
   for (int i=0; i<argc; i++)
-    cerr << argv[i] << " ";
-  cerr << endl;
+    opserr << argv[i] << " ";
+  opserr << endln;
 } 
 
 UniaxialMaterial *
@@ -51,14 +51,14 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
 				char **argv, TclModelBuilder *theTclBuilder)
 {
   if (argc < 3) {
-    cerr << "WARNING insufficient number of arguments\n";
+    opserr << "WARNING insufficient number of arguments\n";
     printCommand(argc, argv);
     return 0;
   }
   
   int tag;
   if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-    cerr << "WARNING invalid uniaxialMaterial tag\n";
+    opserr << "WARNING invalid uniaxialMaterial tag\n";
     printCommand(argc, argv);
     return 0;
   }
@@ -68,9 +68,9 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
   /*
   if (strcmp(argv[1],"Bilinear") == 0) {
     if (argc < 19) {
-      cerr << "WARNING insufficient arguments\n";
+      opserr << "WARNING insufficient arguments\n";
       printCommand(argc,argv);
-      cerr << "Want: uniaxialMaterial Bilinear tag? ..." << endl;
+      opserr << "Want: uniaxialMaterial Bilinear tag? ..." << endln;
       return 0;
     }
     
@@ -79,7 +79,7 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
     
     for (int i = 3, j = 0; j < 16; i++, j++) {
       if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-	cerr << "WARNING invalid input, data " << i << endl;
+	opserr << "WARNING invalid input, data " << i << endln;
 	printCommand(argc, argv);
 	return 0;
       }
@@ -91,9 +91,9 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
 
   if (strcmp(argv[1],"Clough") == 0) {
     if (argc < 19) {
-      cerr << "WARNING insufficient arguments\n";
+      opserr << "WARNING insufficient arguments\n";
       printCommand(argc,argv);
-      cerr << "Want: uniaxialMaterial Clough tag? ..." << endl;
+      opserr << "Want: uniaxialMaterial Clough tag? ..." << endln;
       return 0;
     }
     
@@ -102,7 +102,7 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
     
     for (int i = 3, j = 0; j < 16; i++, j++) {
       if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-	cerr << "WARNING invalid input, data " << i << endl;
+	opserr << "WARNING invalid input, data " << i << endln;
 	printCommand(argc, argv);
 	return 0;
       }
@@ -114,9 +114,9 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
 
   if (strcmp(argv[1],"Pinch") == 0) {
     if (argc < 22) {
-      cerr << "WARNING insufficient arguments\n";
+      opserr << "WARNING insufficient arguments\n";
       printCommand(argc,argv);
-      cerr << "Want: uniaxialMaterial Pinch tag? ..." << endl;
+      opserr << "Want: uniaxialMaterial Pinch tag? ..." << endln;
       return 0;
     }
     
@@ -125,7 +125,7 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
     
     for (int i = 3, j = 0; j < 19; i++, j++) {
       if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-	cerr << "WARNING invalid input, data " << i << endl;
+	opserr << "WARNING invalid input, data " << i << endln;
 	printCommand(argc, argv);
 	return 0;
       }
@@ -138,9 +138,9 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
 
   if (strcmp(argv[1],"Pinching") == 0) {
     if (argc < 22) {
-      cerr << "WARNING insufficient arguments\n";
+      opserr << "WARNING insufficient arguments\n";
       printCommand(argc,argv);
-      cerr << "Want: uniaxialMaterial Pinching tag? ..." << endl;
+      opserr << "Want: uniaxialMaterial Pinching tag? ..." << endln;
       return 0;
     }
     
@@ -149,7 +149,7 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
     
     for (int i = 3, j = 0; j < 19; i++, j++) {
       if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-	cerr << "WARNING invalid input, data " << i << endl;
+	opserr << "WARNING invalid input, data " << i << endln;
 	printCommand(argc, argv);
 	return 0;
       }

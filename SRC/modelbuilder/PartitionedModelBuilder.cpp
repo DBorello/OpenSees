@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2003-02-14 23:01:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/PartitionedModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -64,8 +64,8 @@ PartitionedModelBuilder::buildFE_Model(void)
   int result;
 
   if (thePartitionedDomain == 0) {
-    cerr << "PartitionedModelBuilder::buildFE_Model(void) -";
-    cerr << "No PartitionedDomain associated with this object\n";
+    opserr << "PartitionedModelBuilder::buildFE_Model(void) -";
+    opserr << "No PartitionedDomain associated with this object\n";
     return -1;
   }
 
@@ -73,8 +73,8 @@ PartitionedModelBuilder::buildFE_Model(void)
   int numSubdomains = thePartitionedDomain->getNumSubdomains();
   result = this->buildInterface(numSubdomains);
   if (result != 0) {
-    cerr << "PartitionedModelBuilder::buildFE_Model(void) -";
-    cerr << "buildInterface failed\n";
+    opserr << "PartitionedModelBuilder::buildFE_Model(void) -";
+    opserr << "buildInterface failed\n";
     return result;
   }
 
@@ -84,9 +84,9 @@ PartitionedModelBuilder::buildFE_Model(void)
   while ((theSubdomain = theSubs()) != 0) {
     result = theSubdomain->buildSubdomain(numSubdomains, *this);
     if (result != 0) {
-	cerr << "PartitionedModelBuilder::buildFE_Model(void) -";
-	cerr << "buildSubdomain failed for Subdomain " << theSubdomain->getTag();
-	cerr << endl;
+	opserr << "PartitionedModelBuilder::buildFE_Model(void) -";
+	opserr << "buildSubdomain failed for Subdomain " << theSubdomain->getTag();
+	opserr << endln;
 	return result;
     }
 
