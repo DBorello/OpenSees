@@ -1,4 +1,4 @@
-#  Written: fmk 
+#  Written: Boris Jeremic@ucdavis.edu
 #  Created: 10/97
 
 include ../../Makefile.def
