@@ -1,5 +1,5 @@
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2001-01-24 07:54:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/math_tst.cpp,v $
                                                                         
                                                                         
@@ -150,7 +150,7 @@ double       sqrt_d_eps       = sqrt(d_macheps());
 
   printf("determinant = %6.6f \n",m.determinant());
 
-  exit(0);
+//  exit(0);
 // matrix inversion
   BJmatrix minv = m.inverse();
   minv.print("mi","inverse of m is");
@@ -407,6 +407,7 @@ res2.print("r2","\n result");
     cerr << "dimension of t2 in " << ii << " is " << t2.dim(ii) << endl;
   }
 
+
   tensor tst( 2, def_dim_2, t2values); 
 //  t2 = t2*2.0;
 //  t2.print("t2x2","\ntensor t2 x 2.0");
@@ -418,7 +419,7 @@ res2.print("r2","\n result");
 
   tensor t2xtst = t2("ij")*tst("jk");
   t2xtst.print("t2xtst","\ntensor t2 x tst");
-  exit(0);
+//  exit(0);
   t2.print("t2","\noriginal tensor t2 ");
 
 // tensor constructor with 0.0 assignment ( order 4 ; 4D array )
@@ -480,6 +481,15 @@ res2.print("r2","\n result");
 // Kronecker delta tensor
   tensor I2("I", 2, def_dim_2);
   I2.print("I2","\ntensor I2 (2nd order unit tensor: Kronecker Delta -> d_ij)");
+
+
+
+	 tensor Ipmnq = I2("pm") * I2("nq");
+  tensor Imnpq = I2("mn") * I2("pq");
+//  tensor Apqmn = alpha("pq") * I2("mn");
+  tensor X  = (1.0/3.0) * Imnpq ;// - Apqmn * (1.0/3.0);
+	 X.print();
+
 
 // tensor multiplications 
   tensor I2I2 = I2("ij")*I2("ij");

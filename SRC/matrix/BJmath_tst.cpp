@@ -400,6 +400,16 @@ res2.print("r2","\n result");
 
   t2.print("t2","\noriginal tensor t2 ");
 
+
+  static double Tvalues[] = {   1,2,3,
+                                4,5,6,
+                                7,8,9  };
+  tensor multTest( 2, def_dim_2, t2values);
+
+	 double a = 5.0;
+
+	 double b  = a * multTest("ab"):
+
 // tensor constructor with 0.0 assignment ( order 4 ; 4D array )
   tensor ZERO(4,def_dim_4,0.0);
   ZERO.print("z","\ntensor ZERO (4-th order with value assignment)");
