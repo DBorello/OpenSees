@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-01-06 20:00:48 $
+// $Revision: 1.13 $
+// $Date: 2002-04-09 05:39:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -59,6 +59,8 @@
 
 #include <UniaxialFiber2d.h>
 #include <UniaxialFiber3d.h>
+
+#include <Bidirectional.h>
 
 #include <string.h>
 #include <fstream.h>
@@ -496,7 +498,50 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	theSection = new MembranePlateFiberSection( tag, h, *theMaterial );
     }	
     
-    else {
+        else if (strcmp(argv[1],"Bidirectional") == 0) {
+	if (argc < 7) {
+	    cerr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: section Bidirectional tag? E? sigY? Hiso? Hkin?" << endl;
+	    return TCL_ERROR;
+	}    
+
+	int tag;
+	double E, sigY, Hi, Hk;
+	
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid Bidirectional tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
+	    cerr << "WARNING invalid E\n";
+	    cerr << "section Bidirectional: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[4], &sigY) != TCL_OK) {
+	    cerr << "WARNING invalid sigY\n";
+	    cerr << "section Bidirectional: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[5], &Hi) != TCL_OK) {
+	    cerr << "WARNING invalid Hiso\n";
+	    cerr << "section Bidirectional: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[6], &Hk) != TCL_OK) {
+	    cerr << "WARNING invalid Hkin\n";
+	    cerr << "section Bidirectional: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	theSection = new Bidirectional(tag, E, sigY, Hi, Hk);
+	}
+		
+		else {
 	cerr << "WARNING unknown type of section: " << argv[2];
 	cerr << "Valid types: Elastic, Generic1d, GenericNd, Aggregator, Fiber\n";
 	return TCL_ERROR;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-04-09 05:01:55 $
+// $Revision: 1.2 $
+// $Date: 2002-04-09 05:39:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/Bidirectional.cpp,v $
 
 #include <Bidirectional.h>           
@@ -31,7 +31,7 @@ ID Bidirectional::code(2);
 
 Bidirectional::Bidirectional
 (int tag, double e, double sy, double Hi, double Hk) :
- SectionForceDeformation(tag, ND_TAG_Bidirectional),
+ SectionForceDeformation(tag, SEC_TAG_Bidirectional),
 	 E(e), sigY(sy), Hiso(Hi), Hkin(Hk)
 {
 	for (int i = 0; i < 2; i++) {
@@ -49,7 +49,7 @@ Bidirectional::Bidirectional
 }
 
 Bidirectional::Bidirectional():
- SectionForceDeformation(0, ND_TAG_Bidirectional),
+ SectionForceDeformation(0, SEC_TAG_Bidirectional),
 	 E(0.0), sigY(0.0), Hiso(0.0), Hkin(0.0)
 {
 	for (int i = 0; i < 2; i++) {
