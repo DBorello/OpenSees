@@ -38,16 +38,18 @@
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
 
-#include "TwentyNodeBrick.h"
+#include <TwentyNodeBrick.h>
+#include <ElementalLoad.h>
 #define FixedOrder 3
 
 Matrix TwentyNodeBrick::K(60, 60);      
 Matrix TwentyNodeBrick::C(60, 60);      
 Matrix TwentyNodeBrick::M(60, 60);      
 Vector TwentyNodeBrick::P(60);	       
-Vector Info(109+3);
-Vector InfoPt(109);
-Vector InfoSt(162+1); //27*6+1
+Vector Info(109+3);  //For computing moment
+Vector InfoPt(FixedOrder*FixedOrder*FixedOrder*4+1); //Plastic info
+Vector InfoSt(FixedOrder*FixedOrder*FixedOrder*6+1); //Stress info
+Vector Gsc(FixedOrder*FixedOrder*FixedOrder*3+1); //Gauss point coordinates
 //====================================================================
 // Constructor
 //====================================================================
@@ -2190,7 +2192,8 @@ void TwentyNodeBrick::reportpqtheta(int GP_numb)
 //  }
 
 //#############################################################################
-Vector TwentyNodeBrick::reportTensor(char * msg)
+//Compute Gauss Point coordinates and store it in global Gsc
+void TwentyNodeBrick::computeGaussPoint(void)
 {
     //    if ( msg ) ::printf("** %s\n",msg);
 
@@ -2198,7 +2201,7 @@ Vector TwentyNodeBrick::reportTensor(char * msg)
     // special case for 8 nodes only
     int count;
     count = FixedOrder*FixedOrder*FixedOrder;
-    Vector Gsc(count*3+1); //+1: number of Gauss point in element
+    //Vector Gsc(count*3+1); //+1: number of Gauss point in element
     Gsc(0) = count;
 
     double r  = 0.0;
@@ -2209,7 +2212,7 @@ Vector TwentyNodeBrick::reportTensor(char * msg)
 
     // special case for 8 nodes only
     static const int dim[] = {3, 20}; // static-> see ARM pp289-290
-    static const int dim27[] = {3, count}; // static-> see ARM pp289-290
+    static const int dim27[] = {3, count}; // static-> see ARM pp289-290 Joey found a bug: dimension count is integr. points dependent
     tensor NodalCoord(2, dim, 0.0);
     tensor matpointCoord(2, dim27, 0.0);
     int h_dim[] = {60,3};   
@@ -2328,7 +2331,7 @@ Vector TwentyNodeBrick::reportTensor(char * msg)
               }
           }
       }
-      return Gsc;
+      //return Gsc;
 
  }
 
@@ -2905,14 +2908,100 @@ void TwentyNodeBrick::zeroLoad(void)
 
 
 //=============================================================================
-  int 
-  TwentyNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
-  {  
-    g3ErrorHandler->warning("TwentyNodeBrick::addLoad - load type unknown for ele with tag: %d\n",
-                            this->getTag());
+int 
+TwentyNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
+{  
+    //g3ErrorHandler->warning("TwentyNodeBrick::addLoad - load type unknown for ele with tag: %d\n",
+    //                        this->getTag());
     
-    return -1;
-  }
+    int type;
+    const Vector &data = theLoad->getData(type, loadFactor);
+    if (type == LOAD_TAG_BrickSelfWeight) {
+    
+      Vector bforce(60);
+      // Check for a quick return
+      //cerr << "rho " << rho << endln;
+      if (rho == 0.0)
+      	return 0;
+    
+      Vector ba(60), bfx(3);  
+      bfx(0) = bf(0) * loadFactor;
+      bfx(1) = bf(1) * loadFactor;
+      bfx(2) = bf(2) * loadFactor;
+    
+      ba( 0) = bfx(0);
+      ba( 1) = bfx(1);
+      ba( 2) = bfx(2);
+      ba( 3) = bfx(0);
+      ba( 4) = bfx(1);
+      ba( 5) = bfx(2);
+      ba( 6) = bfx(0);
+      ba( 7) = bfx(1);
+      ba( 8) = bfx(2);
+      ba( 9) = bfx(0);
+      ba(10) = bfx(1);
+      ba(11) = bfx(2);
+      ba(15) = bfx(0);
+      ba(13) = bfx(1);
+      ba(14) = bfx(2);
+      ba(15) = bfx(0);
+      ba(16) = bfx(1);
+      ba(17) = bfx(2);
+      ba(18) = bfx(0);
+      ba(19) = bfx(1);
+      ba(20) = bfx(2);
+      ba(21) = bfx(0);
+      ba(22) = bfx(1);
+      ba(23) = bfx(2);
+      ba(24) = bfx(0);
+      ba(25) = bfx(1);
+      ba(26) = bfx(2);
+      ba(27) = bfx(0);
+      ba(28) = bfx(1);
+      ba(29) = bfx(2);
+      ba(30) = bfx(0);
+      ba(31) = bfx(1);
+      ba(32) = bfx(2);
+      ba(33) = bfx(0);
+      ba(34) = bfx(1);
+      ba(35) = bfx(2);
+      ba(36) = bfx(0);
+      ba(37) = bfx(1);
+      ba(38) = bfx(2);
+      ba(39) = bfx(0);
+      ba(40) = bfx(1);
+      ba(41) = bfx(2);
+      ba(42) = bfx(0);
+      ba(43) = bfx(1);
+      ba(44) = bfx(2);
+      ba(45) = bfx(0);
+      ba(46) = bfx(1);
+      ba(47) = bfx(2);
+      ba(48) = bfx(0);
+      ba(49) = bfx(1);
+      ba(50) = bfx(2);
+      ba(51) = bfx(0);
+      ba(52) = bfx(1);
+      ba(53) = bfx(2);
+      ba(54) = bfx(0);
+      ba(55) = bfx(1);
+      ba(56) = bfx(2);
+      ba(57) = bfx(0);
+      ba(58) = bfx(1);
+      ba(59) = bfx(2);
+    
+      //Form equivalent body force
+      this->getMass();
+      bforce.addMatrixVector(0.0, M, ba, 1.0);
+      Q.addVector(1.0, bforce, 1.0);       
+    } else  {
+      g3ErrorHandler->warning("TwentyNodeBrick::addLoad() - 20NodeBrick %d,load type %d unknown\n", 
+    			    this->getTag(), type);
+      return -1;
+    }
+
+  return 0;
+}
 
 
 ////=============================================================================
@@ -3515,7 +3604,7 @@ Response * TwentyNodeBrick::setResponse (char **argv, int argc, Information &ele
     		return new ElementResponse(this, 5, K);
 
     //========================================================
-    else if (strcmp(argv[0],"plastify") == 0 || strcmp(argv[0],"plastified") == 0)
+    else if (strcmp(argv[0],"plastic") == 0 || strcmp(argv[0],"plastified") == 0)
     {
        ////checking if element plastified
        //int count  = r_integration_order* s_integration_order * t_integration_order;
@@ -3535,7 +3624,7 @@ Response * TwentyNodeBrick::setResponse (char **argv, int argc, Information &ele
        return new ElementResponse(this, 2, InfoPt);
     } 
     //========================================================
-    //Specially designed for moment computation of solid pile elements Zhaohui Yang August 1, 2001
+    //Specially designed for moment computation of solid pile elements Zhaohui Yang UCDavis August 1, 2001
     else if (strcmp(argv[0],"PileM") == 0 || strcmp(argv[0],"PileM") == 0)
     {
        return new ElementResponse(this, 3, InfoSt);
@@ -3544,6 +3633,11 @@ Response * TwentyNodeBrick::setResponse (char **argv, int argc, Information &ele
     else if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
     {
        return new ElementResponse(this, 4, InfoSt);
+    } 
+    //========================================================
+    else if (strcmp(argv[0],"GaussPoint") == 0 || strcmp(argv[0],"gausspoint") == 0)
+    {
+       return new ElementResponse(this, 6, Gsc);
     } 
     /*else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
         int pointNum = atoi(argv[1]);
@@ -3571,8 +3665,9 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
 		//checking if element plastified
        	        int count  = r_integration_order* s_integration_order * t_integration_order;
 
-       	        Vector Gsc(81+1);  // 27*3 + count
-		Gsc = this->reportTensor("Gauss Point Coor.");
+       	        //Vector Gsc(81+1);  // 27*3 + count
+		//Gsc = this->reportGaussPoint();
+		this->computeGaussPoint();
 
 		//Vector Info(109); // count * 4 +1
 		InfoPt(0) = Gsc(0);
@@ -3606,8 +3701,8 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
 	      {
        	        int count = r_integration_order* s_integration_order * t_integration_order;
                 stresstensor sts;
-       	        Vector Gsc(81+1);  // 27*3 + count
-		Gsc = this->reportTensor("Gauss Point Coor.");
+       	        //Vector Gsc(81+1);  // 27*3 + count
+		this->computeGaussPoint();
 		Vector wt(9);
 		int i, rs;
 
@@ -3770,6 +3865,12 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
 	      }
 	   case 5:
 	   	return eleInfo.setMatrix(this->getTangentStiff());
+	   
+	   case 6:
+	   {
+		this->computeGaussPoint();
+	   	return eleInfo.setVector( Gsc );
+	   }
 	    
 	   default:
 	   	return -1;

@@ -243,7 +243,7 @@ class TwentyNodeBrick: public Element
     void reportPAK(char *);
     void reportpqtheta(int);
     //void reportLM(char *);
-    Vector reportTensor(char *);
+    void computeGaussPoint(void);
     void reportCIPIC(char *);
     void reportTensorF(FILE *);
     Vector getWeightofGP(void);
