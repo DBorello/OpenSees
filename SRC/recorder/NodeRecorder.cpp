@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2005-02-17 22:31:09 $
+// $Revision: 1.23 $
+// $Date: 2005-03-30 03:54:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -47,7 +47,7 @@ NodeRecorder::NodeRecorder()
 :Recorder(RECORDER_TAGS_NodeRecorder),
  theDofs(0), theNodalTags(0), theNodes(0), response(0), 
  theDomain(0), theHandler(0),
- flag(0), dataFlag(0), 
+ echoTimeFlag(true), dataFlag(0), 
  deltaT(0), nextTimeStampToRecord(0.0), 
  sensitivity(0),
  initializationDone(false), numValidNodes(0)
@@ -62,12 +62,12 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   Domain &theDom,
 			   DataOutputHandler &theOutputHandler,
 			   double dT,
-			   int startFlag)
+			   bool timeFlag)
 :Recorder(RECORDER_TAGS_NodeRecorder),
  theDofs(0), theNodalTags(0), theNodes(0), 
  response(1 + nodes.Size()*dofs.Size()), 
  theDomain(&theDom), theHandler(&theOutputHandler),
- flag(startFlag), dataFlag(0), 
+ echoTimeFlag(timeFlag), dataFlag(0), 
  deltaT(dT), nextTimeStampToRecord(0.0), 
  sensitivity(psensitivity), 
  initializationDone(false), numValidNodes(0)
@@ -220,11 +220,22 @@ NodeRecorder::record(int commitTag, double timeStamp)
 
 
     //
+    // add time information if requested
+    //
+
+    int timeOffset = 0;
+    if (echoTimeFlag == true) {
+      timeOffset = 1;
+      response(0) = timeStamp;
+    }
+
+
+    //
     // now we go get the responses from the nodes & place them in disp vector
     //
-    
+
     for (int i=0; i<numValidNodes; i++) {
-      int cnt = i*numDOF + 1; 
+      int cnt = i*numDOF + timeOffset; 
       Node *theNode = theNodes[i];
       if (dataFlag == 0) {
 	// AddingSensitivity:BEGIN ///////////////////////////////////
@@ -406,7 +417,6 @@ NodeRecorder::record(int commitTag, double timeStamp)
     }
     
     // insert the data into the database
-    response(0) = timeStamp;
     theHandler->write(response);
   }
     
@@ -439,8 +449,12 @@ NodeRecorder::sendSelf(int commitTag, Channel &theChannel)
   if (theHandler != 0) {
     idData(2) = theHandler->getClassTag();
   }
+  
+  if (echoTimeFlag == true)
+    idData(3) = 1;
+  else
+    idData(3) = 0;
 
-  idData(3) = flag;
   idData(4) = dataFlag;
   idData(5) = sensitivity;
 
@@ -497,7 +511,11 @@ NodeRecorder::recvSelf(int commitTag, Channel &theChannel,
   int numDOFs = idData(0);
   int numNodes = idData(1);
 
-  flag = idData(3);
+  if (idData(3) == 1)
+    echoTimeFlag = true;
+  else
+    echoTimeFlag = false;    
+
   dataFlag = idData(4);
   sensitivity = idData(5);
 
@@ -618,7 +636,12 @@ NodeRecorder::initialize(void)
   //
   // resize the response vector
   //
-  int numValidResponse = numValidNodes*theDofs->Size() +1;
+  
+  int timeOffset = 0;
+  if (echoTimeFlag == true)
+    timeOffset = 1;
+
+  int numValidResponse = numValidNodes*theDofs->Size() + timeOffset;
   response.resize(numValidResponse);
   response.Zero();
 
@@ -646,12 +669,15 @@ NodeRecorder::initialize(void)
   char **dbColumns = new char *[numDbColumns];
 
   static char aColumn[128]; // assumes a column name will not be longer than 256 characters
+
+  if (echoTimeFlag == true) {
+    char *newColumn = new char[5];
+    sprintf(newColumn, "%s","time");  
+    dbColumns[0] = newColumn;
+  }
   
-  char *newColumn = new char[5];
-  sprintf(newColumn, "%s","time");  
-  dbColumns[0] = newColumn;
-  
-  int counter = 1;
+  int counter = timeOffset;
+
   for (i=0; i<numValidNodes; i++) {
     int nodeTag = theNodes[i]->getTag();
     for (int j=0; j<theDofs->Size(); j++) {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2005-03-21 22:09:23 $
+// $Revision: 1.22 $
+// $Date: 2005-03-30 03:54:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -436,8 +436,12 @@ ElementRecorder::initialize(void)
   static char aColumn[1012]; // assumes a column name will not be longer than 256 characters
   char *newColumn = new char[5];
 
-  sprintf(newColumn, "%s","time");  
-  dbColumns[0] = newColumn;
+  int counter = 0;
+  if (echoTimeFlag == true) {
+    sprintf(newColumn, "%s","time");  
+    dbColumns[0] = newColumn;
+    counter = 1;
+  }
   
   int lengthString = 0;
   for (i=0; i<numArgs; i++)
@@ -455,7 +459,7 @@ ElementRecorder::initialize(void)
       lengthString += argLength+1;
   }
   
-  int counter = 1;
+
   for (i=0; i<eleID.Size(); i++) {
     int eleTag = eleID(i);
     int numVariables = 0;

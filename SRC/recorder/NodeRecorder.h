@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2004-11-24 22:42:25 $
+// $Revision: 1.12 $
+// $Date: 2005-03-30 03:54:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -56,7 +56,7 @@ class NodeRecorder: public Recorder
 		 Domain &theDomain,
 		 DataOutputHandler &theOutputHandler,
 		 double deltaT = 0.0,
-		 int startFlag = 0); 
+		 bool echoTimeFlag = true); 
     
     ~NodeRecorder();
 
@@ -80,10 +80,8 @@ class NodeRecorder: public Recorder
     Domain *theDomain;
     DataOutputHandler *theHandler;
 
-    int flag;   // flag indicating whether time, load factor or nothing printed
-	        // at start of each line in file
-
-    int dataFlag; // flag indicating what it is to be stored in recorder
+    bool echoTimeFlag;   // flag indicating whether time to be included in o/p
+    int dataFlag;        // flag indicating what it is to be stored in recorder
 
     double deltaT;
     double nextTimeStampToRecord;

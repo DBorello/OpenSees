@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2005-03-18 22:11:15 $
+// $Revision: 1.33 $
+// $Date: 2005-03-30 03:54:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -506,7 +506,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       } 
       /* ********************** END OF KEEP ***************************  */
 
-      int timeFlag = 0;
+      bool echoTimeFlag = false;
       int flags = 0;
       double dT = 0.0;
       int numNodes = 0;
@@ -518,12 +518,12 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       while (flags == 0 && pos < argc) {
 
 	if (strcmp(argv[pos],"-time") == 0) {
-	  timeFlag = 1;
+	  echoTimeFlag = true;
 	  pos++;
 	}
 	
 	else if (strcmp(argv[pos],"-load") == 0) {
-	  timeFlag = 2;      
+	  echoTimeFlag = true;      
 	  pos++;
 	}
 
@@ -703,7 +703,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       } else
 	theDataOutputHandler = new DataOutputStreamHandler();
 
-	
 
       if (strcmp(argv[1],"Node") == 0) {
 	(*theRecorder) = new NodeRecorder(theDofs, 
@@ -713,7 +712,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 					  theDomain, 
 					  *theDataOutputHandler, 
 					  dT, 
-					  timeFlag);
+					  echoTimeFlag);
       } else
 	  
 	(*theRecorder) = new EnvelopeNodeRecorder(theDofs, 
