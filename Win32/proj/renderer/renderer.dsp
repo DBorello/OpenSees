@@ -145,10 +145,6 @@ SOURCE=..\..\..\SRC\renderer\WindowDevice.cpp
 
 SOURCE=..\..\..\SRC\renderer\WindowRenderer.cpp
 # End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\renderer\X11Renderer.cpp
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -220,10 +216,6 @@ SOURCE=..\..\..\SRC\renderer\WindowDevice.h
 # Begin Source File
 
 SOURCE=..\..\..\SRC\renderer\WindowRenderer.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\renderer\X11Renderer.h
 # End Source File
 # End Group
 # End Target

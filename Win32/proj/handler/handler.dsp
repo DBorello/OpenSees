@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\handler\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\handler" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\obj\handler\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\..\..\src\handler" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -93,6 +93,18 @@ SOURCE=..\..\..\SRC\handler\ConsoleErrorHandler.cpp
 
 SOURCE=..\..\..\SRC\handler\ErrorHandler.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\handler\FileStream.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\handler\OPS_Stream.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\handler\StandardStream.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -104,6 +116,18 @@ SOURCE=..\..\..\SRC\handler\ConsoleErrorHandler.h
 # Begin Source File
 
 SOURCE=..\..\..\SRC\handler\ErrorHandler.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\handler\FileStream.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\handler\OPS_Stream.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\handler\StandardStream.h
 # End Source File
 # End Group
 # End Target
