@@ -205,6 +205,26 @@ SOURCE=..\..\..\SRC\domain\component\DomainComponent.h
 # Begin Group "load"
 
 # PROP Default_Filter ""
+# Begin Group "beam"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\Src\domain\load\Beam2dPointLoad.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\domain\load\Beam2dPointLoad.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\domain\load\Beam2dUniformLoad.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\domain\load\Beam2dUniformLoad.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\..\SRC\domain\load\ElementalLoadIter.cpp
