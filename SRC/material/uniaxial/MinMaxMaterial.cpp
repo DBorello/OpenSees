@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-10 23:03:58 $
+// $Revision: 1.3 $
+// $Date: 2002-07-12 18:14:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/MinMaxMaterial.cpp,v $
 
 // Written: MHS
@@ -37,71 +37,72 @@
 #include <G3Globals.h>
 
 MinMaxMaterial::MinMaxMaterial(int tag, UniaxialMaterial &material,
-							   double min, double max)
-:UniaxialMaterial(tag,MAT_TAG_MinMax), theMaterial(0),
-minStrain(min), maxStrain(max), Tfailed(false), Cfailed(false)
+			       double min, double max)
+  :UniaxialMaterial(tag,MAT_TAG_MinMax), theMaterial(0),
+   minStrain(min), maxStrain(max), Tfailed(false), Cfailed(false)
 {
-	theMaterial = material.getCopy();
+  theMaterial = material.getCopy();
 
-	if (theMaterial == 0)
-		g3ErrorHandler->fatal("%s -- failed to get copy of material",
-			"MinMaxMaterial::MinMaxMaterial");
+  if (theMaterial == 0)
+    g3ErrorHandler->fatal("%s -- failed to get copy of material",
+			  "MinMaxMaterial::MinMaxMaterial");
 }
 
 MinMaxMaterial::MinMaxMaterial()
-:UniaxialMaterial(0,MAT_TAG_MinMax), theMaterial(0),
-minStrain(0.0), maxStrain(0.0), Tfailed(false), Cfailed(false)
+  :UniaxialMaterial(0,MAT_TAG_MinMax), theMaterial(0),
+   minStrain(0.0), maxStrain(0.0), Tfailed(false), Cfailed(false)
 {
 
 }
 
 MinMaxMaterial::~MinMaxMaterial()
 {
-	if (theMaterial)
-		delete theMaterial;
+  if (theMaterial)
+    delete theMaterial;
 }
 
 int 
 MinMaxMaterial::setTrialStrain(double strain, double strainRate)
 {
-	if (Cfailed)
-		return 0;
-
-	if (strain >= maxStrain || strain <= minStrain) {
-		Tfailed = true;
-		return 0;
-	}
-	else {
-		Tfailed = false;
-		return theMaterial->setTrialStrain(strain, strainRate);
-	}
+  if (Cfailed)
+    return 0;
+  
+  if (strain >= maxStrain || strain <= minStrain) {
+    Tfailed = true;
+    return 0;
+  }
+  else {
+    Tfailed = false;
+    return theMaterial->setTrialStrain(strain, strainRate);
+  }
 }
 
 double 
 MinMaxMaterial::getStress(void)
 {
-	if (Tfailed)
-		return 0.0;
-	else
-		return theMaterial->getStress();
+  if (Tfailed)
+    return 0.0;
+  else
+    return theMaterial->getStress();
 }
 
 double 
 MinMaxMaterial::getTangent(void)
 {
-	if (Tfailed)
-		return 0.0;
-	else
-		return theMaterial->getTangent();
+  if (Tfailed)
+    //return 0.0;
+    return 1.0e-8*theMaterial->getInitialTangent();
+  else
+    return theMaterial->getTangent();
 }
 
 double 
 MinMaxMaterial::getDampTangent(void)
 {
-   	if (Tfailed)
-		return 0.0;
-	else
-		return theMaterial->getDampTangent();
+  if (Tfailed)
+    return 0.0;
+  else
+    return theMaterial->getDampTangent();
 }
 
 
@@ -109,63 +110,61 @@ MinMaxMaterial::getDampTangent(void)
 double 
 MinMaxMaterial::getStrain(void)
 {
-    return theMaterial->getStrain();
+  return theMaterial->getStrain();
 }
 
 double 
 MinMaxMaterial::getStrainRate(void)
 {
-    return theMaterial->getStrainRate();
+  return theMaterial->getStrainRate();
 }
 
 int 
 MinMaxMaterial::commitState(void)
 {	
-	Cfailed = Tfailed;
+  Cfailed = Tfailed;
 
-	// Check if failed at current step
-	if (Tfailed)
-		return 0;
-	else
-		return theMaterial->commitState();
+  // Check if failed at current step
+  if (Tfailed)
+    return 0;
+  else
+    return theMaterial->commitState();
 }
 
 int 
 MinMaxMaterial::revertToLastCommit(void)
 {
-	// Check if failed at last step
-	if (Cfailed)
-		return 0;
-	else
-		return theMaterial->revertToLastCommit();
+  // Check if failed at last step
+  if (Cfailed)
+    return 0;
+  else
+    return theMaterial->revertToLastCommit();
 }
 
 int 
 MinMaxMaterial::revertToStart(void)
 {
-	Cfailed = false;
-	Tfailed = false;
-
-	return theMaterial->revertToStart();
+  Cfailed = false;
+  Tfailed = false;
+  
+  return theMaterial->revertToStart();
 }
 
 UniaxialMaterial *
 MinMaxMaterial::getCopy(void)
 {
-    MinMaxMaterial *theCopy = 
-		new MinMaxMaterial(this->getTag(), *theMaterial, minStrain, maxStrain);
+  MinMaxMaterial *theCopy = 
+    new MinMaxMaterial(this->getTag(), *theMaterial, minStrain, maxStrain);
         
-	theCopy->Cfailed = Cfailed;
-	theCopy->Tfailed = Tfailed;
-
-	return theCopy;
+  theCopy->Cfailed = Cfailed;
+  theCopy->Tfailed = Tfailed;
+  
+  return theCopy;
 }
 
 int 
 MinMaxMaterial::sendSelf(int cTag, Channel &theChannel)
 {
-
-
   int dbTag = this->getDbTag();
 
   static ID dataID(3);
@@ -254,8 +253,8 @@ MinMaxMaterial::recvSelf(int cTag, Channel &theChannel,
 void 
 MinMaxMaterial::Print(ostream &s, int flag)
 {
-    s << "MinMaxMaterial tag: " << this->getTag() << endl;
-    s << "\tMaterial: " << theMaterial->getTag() << endl;
-	s << "\tMin strain: " << minStrain << endl;
-	s << "\tMax strain: " << maxStrain << endl;
+  s << "MinMaxMaterial tag: " << this->getTag() << endl;
+  s << "\tMaterial: " << theMaterial->getTag() << endl;
+  s << "\tMin strain: " << minStrain << endl;
+  s << "\tMax strain: " << maxStrain << endl;
 }
