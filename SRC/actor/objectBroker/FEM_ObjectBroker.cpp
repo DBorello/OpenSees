@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-06-10 22:36:20 $
+// $Revision: 1.13 $
+// $Date: 2002-06-11 20:48:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -172,6 +172,11 @@
 
 // elemental load header files
 #include <ElementalLoad.h>
+#include<Beam2dUniformLoad.h>
+#include<Beam2dPointLoad.h>
+#include<Beam3dUniformLoad.h>
+#include<Beam3dPointLoad.h>
+#include<BrickSelfWeight.h>
 
 // matrix, vector & id header files
 #include <Matrix.h>
@@ -461,8 +466,32 @@ FEM_ObjectBroker::getNewNodalLoad(int classTag)
 ElementalLoad *
 FEM_ObjectBroker::getNewElementalLoad(int classTag)
 {
-    cerr << "FEM_ObjectBroker: NOT IMPLEMENTED YET";
+  switch(classTag) {
+    
+    case LOAD_TAG_Beam2dUniformLoad:
+      return new Beam2dUniformLoad();
+    
+    case LOAD_TAG_Beam2dPointLoad:
+      return new Beam2dPointLoad();
+    
+    case LOAD_TAG_Beam3dUniformLoad:
+      return new Beam3dUniformLoad();
+    
+    case LOAD_TAG_Beam3dPointLoad:
+      return new Beam3dPointLoad();
+    
+    case LOAD_TAG_BrickSelfWeight:
+      return new BrickSelfWeight();	     
+	     
+  default:
+    cerr << "FEM_ObjectBroker::getNewNodalLoad - ";
+    cerr << " - no NodalLoad type exists for class tag ";
+    cerr << classTag << endl;
     return 0;
+    
+  }    
+  
+  return 0;
 }
 
 CrdTransf2d*
