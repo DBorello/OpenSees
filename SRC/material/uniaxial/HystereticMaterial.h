@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-05-22 05:31:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.h,v $
 
 // Written: MHS

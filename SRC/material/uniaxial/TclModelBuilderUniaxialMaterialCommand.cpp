@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 05:53:01 $
+// $Revision: 1.3 $
+// $Date: 2001-05-22 05:31:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -545,7 +545,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clienData, Tcl_Interp *interp
 	}
 
 	// Parsing was successful, allocate the material
-	theMaterial = new Concrete01(tag, fpc, epsc0, fpcu, epscu, epsmin, epsmax);
+	theMaterial = new Concrete01(tag, fpc, epsc0, fpcu, epscu);
     }
 
 	else if (strcmp(argv[1],"Hysteretic") == 0) {
