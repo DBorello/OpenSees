@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2001-11-20 01:55:18 $
+// $Revision: 1.23 $
+// $Date: 2001-11-27 23:07:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1224,8 +1224,19 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc,
 
   else if (strcmp(argv[1],"SparseSPD") == 0) {
     // now must determine the type of solver to create from rest of args
+
+    // now determine ordering scheme
+    //   1 -- MMD
+    //   2 -- ND
+    //   3 -- RCM
+    int lSparse = 1;
+    if (argc == 3) {
+      if (Tcl_GetInt(interp, argv[3], &lSparse) != TCL_OK)
+	return TCL_ERROR;
+    }
+
     SymSparseLinSolver *theSolver = new SymSparseLinSolver();
-    theSOE = new SymSparseLinSOE(*theSolver);      
+    theSOE = new SymSparseLinSOE(*theSolver, lSparse);      
   }	
   
   else if (strcmp(argv[1],"UmfPack") == 0) {
