@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-11-05 23:04:49 $
+// $Revision: 1.4 $
+// $Date: 2002-11-06 00:49:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/message/Message.cpp,v $
                                                                         
                                                                         
@@ -27,13 +27,16 @@
 //
 
 #include "Message.h"
-#include <strings.h>
 #include <iostream.h>
+
+#ifndef _WIN32
+#include <strings.h>
+#endif
 
 Message::Message()
 :length(0),data(0)
 {
-    ;
+
 }
 
 Message::Message(double *Ptr, int size)
@@ -58,6 +61,10 @@ Message::~Message()
 {
 
 }
+
+#ifdef _WIN32
+extern "C" void bcopy(const char *scource, char *dest, int length);
+#endif
 
 int
 Message::putData(char *theData, int startLoc, int endLoc)
