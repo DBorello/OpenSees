@@ -779,7 +779,7 @@ const tensor& Template3Dep::getTangentTensor(void)
 }
 
 //================================================================================
-const Tensor& Template3Dep::getStressTensor(void)
+const stresstensor  Template3Dep::getStressTensor(void)
 {
     //cout << *EPS;
     //stresstensor tmp;
@@ -788,7 +788,8 @@ const Tensor& Template3Dep::getStressTensor(void)
     
     //Something funny!!! happened here when returning EPS->getStress()
     // This function will return wrong Stress.
-    return EPS->getStress();
+			 stresstensor ret = EPS->getStress();
+    return ret;
 }
 
 //================================================================================
