@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-04-02 19:13:47 $
+// $Revision: 1.6 $
+// $Date: 2002-04-10 16:25:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.h,v $
                                                                         
                                                                         
@@ -54,7 +54,7 @@ class Vector;
 #define CURRENT_TANGENT 0
 #define INITIAL_TANGENT 1
 #define CURRENT_SECANT  2
-#define INITIAL_THEN_CURRENT_TANGENT  2
+#define INITIAL_THEN_CURRENT_TANGENT  3
 
 
 class IncrementalIntegrator : public Integrator
