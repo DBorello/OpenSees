@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2003-06-23 19:09:57 $
+// $Revision: 1.23 $
+// $Date: 2003-08-13 23:52:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -112,7 +112,7 @@ Truss::Truss(int tag,
 Truss::Truss()
 :Element(0,ELE_TAG_Truss),     
  theMaterial(0),connectedExternalNodes(2),
- dimension(0), numDOF(0),
+ dimension(0), numDOF(0), theLoad(0),
  theMatrix(0), theVector(0),
   L(0.0), A(0.0), rho(0.0)
 {
