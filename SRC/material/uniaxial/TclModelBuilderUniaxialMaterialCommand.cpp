@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-07-12 19:04:04 $
+// $Revision: 1.14 $
+// $Date: 2002-11-04 20:45:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -208,11 +208,12 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	if (argc < 6) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: uniaxialMaterial ElasticPPGap tag? E? fy? gap?" << endl;
+	    cerr << "Want: uniaxialMaterial ElasticPPGap tag? E? fy? gap? <damage>" << endl;
 	    return TCL_ERROR;
 	}
 
 	int tag;
+	int damage = 0;
 	double E, fy, gap;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
@@ -238,8 +239,11 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	    return TCL_ERROR;
 	}
 
+	if (argc > 6 && strcmp(argv[6],"damage") == 0)
+	  damage = 1;
+
 	// Parsing was successful, allocate the material
-	theMaterial = new EPPGapMaterial(tag, E, fy, gap);       
+	theMaterial = new EPPGapMaterial(tag, E, fy, gap, damage);       
     }
 
     else if (strcmp(argv[1],"Hardening") == 0) {
