@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-09-12 21:32:34 $
+// $Revision: 1.6 $
+// $Date: 2002-10-14 19:30:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.h,v $
                                                                         
 #ifndef KrylovNewton_h
@@ -42,8 +42,8 @@
 class KrylovNewton: public EquiSolnAlgo
 {
   public:
-    KrylovNewton(int tangent = CURRENT_TANGENT, int maxDim = 10);    
-    KrylovNewton(ConvergenceTest &theTest, int tangent = CURRENT_TANGENT, int maxDim = 10);
+    KrylovNewton(int tangent = CURRENT_TANGENT, int maxDim = 3);    
+    KrylovNewton(ConvergenceTest &theTest, int tangent = CURRENT_TANGENT, int maxDim = 3);
     ~KrylovNewton();
 
     int solveCurrentStep(void);    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2001-09-12 21:32:34 $
+// $Revision: 1.6 $
+// $Date: 2002-10-14 19:30:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.cpp,v $
 
 // Written: MHS
@@ -54,8 +54,8 @@ KrylovNewton::KrylovNewton(int theTangentToUse, int maxDim)
  v(0), Av(0), AvData(0), rData(0), work(0), lwork(0),
  numEqns(0), maxDimension(maxDim)
 {
-  if (maxDimension < 1)
-    maxDimension = 1;
+  if (maxDimension < 0)
+    maxDimension = 0;
 }
 
 KrylovNewton::KrylovNewton(ConvergenceTest &theT, int theTangentToUse, int maxDim)
@@ -64,8 +64,8 @@ KrylovNewton::KrylovNewton(ConvergenceTest &theT, int theTangentToUse, int maxDi
  v(0), Av(0), AvData(0), rData(0), work(0), lwork(0),
  numEqns(0), maxDimension(maxDim)
 {
-  if (maxDimension < 1)
-    maxDimension = 1;
+  if (maxDimension < 0)
+    maxDimension = 0;
 }
 
 // Destructor
@@ -78,7 +78,7 @@ KrylovNewton::~KrylovNewton()
   }
 
   if (Av != 0) {
-    for (int i = 0; i < maxDimension; i++)
+    for (int i = 0; i < maxDimension+1; i++)
       delete Av[i];
     delete [] Av;
   }
@@ -117,6 +117,8 @@ KrylovNewton::solveCurrentStep(void)
 
   // Get size information from SOE
   numEqns  = theSOE->getNumEqn();
+  if (maxDimension > numEqns)
+    maxDimension = numEqns;
 
   if (v == 0) {
     // Need to allocate an extra vector for "next" update
@@ -126,8 +128,8 @@ KrylovNewton::solveCurrentStep(void)
   }
 
   if (Av == 0) {
-    Av = new Vector*[maxDimension];
-    for (int i = 0; i < maxDimension; i++)
+    Av = new Vector*[maxDimension+1];
+    for (int i = 0; i < maxDimension+1; i++)
       Av[i] = new Vector(numEqns);
   }
 
@@ -180,7 +182,7 @@ KrylovNewton::solveCurrentStep(void)
   do {
 
     // Clear the subspace if its dimension has exceeded max
-    if (dim == maxDimension) {
+    if (dim > maxDimension) {
       dim = 0;
       if (theIntegrator->formTangent(tangent) < 0){
 	cerr << "WARNING KrylovNewton::solveCurrentStep() -";
@@ -327,7 +329,7 @@ KrylovNewton::leastSquares(int k)
 #else
   dgels_(trans, &numEqns, &k, &nrhs, AvData, &numEqns, rData, &ldb, work, &lwork, &info);
 #endif
-  
+
   // Check for error returned by subroutine
   if (info < 0) {
     cerr << "WARNING KrylovNewton::leastSquares() - \n";
@@ -345,7 +347,7 @@ KrylovNewton::leastSquares(int k)
     // Compute w_{k+1} = c_1 v_1 + ... + c_k v_k
     v[k]->addVector(1.0, *(v[j]), cj);
     
-    // Compute least squares residual q_{k+1} = r_k - c_1 Av_1 - ... - c_k Av_k
+    // Compute least squares residual q_{k+1} = r_k - (c_1 Av_1 + ... + c_k Av_k)
     v[k]->addVector(1.0, *(Av[j]), -cj);
   }
   
