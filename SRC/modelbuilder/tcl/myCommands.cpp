@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-03-29 05:51:00 $
+// $Revision: 1.3 $
+// $Date: 2001-05-19 06:59:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/myCommands.cpp,v $
                                                                         
                                                                         
@@ -144,7 +144,13 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
     }
 
     else if (strcmp(argv[1],"test") == 0 || strcmp(argv[1],"TestUniaxial") == 0) {
-      theBuilder = new TclUniaxialMaterialTester(theDomain, interp);
+      int count = 1;
+      if (argc == 3) {
+	    if (Tcl_GetInt(interp, argv[2], &count) != TCL_OK) {
+	      return TCL_ERROR;
+	    }	  
+      }
+      theBuilder = new TclUniaxialMaterialTester(theDomain, interp, count);
       if (theBuilder == 0) {
 	cerr << "WARNING ran out of memory in creating TclUniaxialMAterialTester model\n";
 	return TCL_ERROR;

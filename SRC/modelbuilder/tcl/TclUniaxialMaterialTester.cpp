@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-03-29 05:51:00 $
+// $Revision: 1.2 $
+// $Date: 2001-05-19 06:59:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclUniaxialMaterialTester.cpp,v $
                                                                         
 // File: ~/modelbuilder/tcl/TclUniaxialMaterialTester.C
@@ -67,10 +67,14 @@ int  TclUniaxialMaterialTester_getTangUniaxialMaterial(ClientData clientData, Tc
 // CLASS CONSTRUCTOR & DESTRUCTOR
 //
 
+static int count;
+static int countsTillCommit;
+				    
 // constructor: the constructor will add certain commands to the interpreter
-TclUniaxialMaterialTester::TclUniaxialMaterialTester(Domain &theDomain, Tcl_Interp *interp)
+TclUniaxialMaterialTester::TclUniaxialMaterialTester(Domain &theDomain, Tcl_Interp *interp, int cTC)
   :TclModelBuilder(theDomain, interp, 1, 1)
 {
+  countsTillCommit = cTC;
   Tcl_CreateCommand(interp, "uniaxialTest", TclUniaxialMaterialTester_setUniaxialMaterial,
 		    (ClientData)NULL, NULL);
 
@@ -100,11 +104,11 @@ TclUniaxialMaterialTester::~TclUniaxialMaterialTester()
 // THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
 
-				    
 int
 TclUniaxialMaterialTester_setUniaxialMaterial(ClientData clientData, Tcl_Interp *interp, int argc,   
 					      char **argv)
 {
+  count = 1;
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
     Tcl_SetResult(interp, "WARNING builder has been destroyed", TCL_STATIC);
@@ -170,7 +174,10 @@ TclUniaxialMaterialTester_setStrainUniaxialMaterial(ClientData clientData, Tcl_I
   // delete the old testing material
   if (theTestingUniaxialMaterial !=0) {
     theTestingUniaxialMaterial->setTrialStrain(strain);
-    theTestingUniaxialMaterial->commitState();    
+    if (count == countsTillCommit) {
+      theTestingUniaxialMaterial->commitState();    
+      count = 1;
+    } else count++;
   }
   return TCL_OK;
 }
