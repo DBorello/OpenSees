@@ -621,13 +621,13 @@ double	YieldSurface_BC2D::interpolate(double xi, double yi, double xj, double yj
 double di = getDrift(xi, yi);
 double dj = getDrift(xj, yj);
 	
-	if(di > 0 && fabs(di < 1e-7))
-		return 0;
-	if(dj < 0 && fabs(dj < 1e-7))
-		return 1;
+ if(di > 0 && fabs(di) < 1e-7)
+   return 0;
+ if(dj < 0 && fabs(dj) < 1e-7)
+   return 1;
 
-	if( di > 0)
-	{
+ if( di > 0)
+   {
 	 	opserr << "ERROR - YieldSurface_BC2D::interpolate(xi, yi, xj, yj)\n";
 		opserr << "point 1 is outside\n";
 		opserr << xi << "," << yi << "  " << xj << "," << yj << " : "<< di<<"\n";
