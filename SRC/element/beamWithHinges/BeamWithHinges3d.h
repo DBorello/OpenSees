@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-05-15 22:13:04 $
+// $Revision: 1.5 $
+// $Date: 2002-05-16 00:07:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.h,v $
 
 #ifndef BeamWithHinges3d_h
@@ -63,7 +63,6 @@ class BeamWithHinges3d: public Element
   
   int update(void);
   const Matrix &getTangentStiff(void);
-  const Matrix &getSecantStiff(void);
   const Matrix &getDamp(void);
   const Matrix &getMass(void);
   

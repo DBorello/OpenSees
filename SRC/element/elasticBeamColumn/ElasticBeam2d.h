@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:52 $
+// $Revision: 1.3 $
+// $Date: 2002-05-16 00:07:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.h,v $
                                                                         
                                                                         
@@ -63,7 +63,6 @@ class ElasticBeam2d : public Element
     int revertToStart(void);
     
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
     const Matrix &getDamp(void);    
     const Matrix &getMass(void);    
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:52 $
+// $Revision: 1.3 $
+// $Date: 2002-05-16 00:07:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -187,12 +187,6 @@ ElasticBeam3d::getTangentStiff(void)
 	kb(5,5) = GJoverL;
 
     return theCoordTransf->getGlobalStiffMatrix(kb,q);
-}
-
-const Matrix &
-ElasticBeam3d::getSecantStiff(void)
-{
-    return this->getTangentStiff();
 }
 
 const Matrix &

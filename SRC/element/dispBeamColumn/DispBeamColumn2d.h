@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-11-26 22:53:52 $
+// $Revision: 1.5 $
+// $Date: 2002-05-16 00:07:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.h,v $
 
 // Written: MHS
@@ -69,7 +69,6 @@ class DispBeamColumn2d : public Element
     // public methods to obtain stiffness, mass, damping and residual information    
     int update(void);
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);
     const Matrix &getDamp(void);
     const Matrix &getMass(void);
 

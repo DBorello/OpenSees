@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-05-14 23:37:23 $
+// $Revision: 1.10 $
+// $Date: 2002-05-16 00:07:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -77,7 +77,6 @@ class NLBeamColumn3d: public Element
     int update(void);    
     
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
     const Matrix &getDamp(void);    
     const Matrix &getMass(void);    
 

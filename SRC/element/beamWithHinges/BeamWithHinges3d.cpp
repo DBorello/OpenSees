@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-05-15 22:13:04 $
+// $Revision: 1.8 $
+// $Date: 2002-05-16 00:07:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
 
 #include <BeamWithHinges3d.h>
@@ -278,12 +278,6 @@ BeamWithHinges3d::getTangentStiff(void)
   theCoordTransf->update();
 
   return theCoordTransf->getGlobalStiffMatrix(kb, q);
-}
-
-const Matrix &
-BeamWithHinges3d::getSecantStiff(void)
-{
-  return this->getTangentStiff();
 }
 
 const Matrix &

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-01-06 19:30:54 $
+// $Revision: 1.4 $
+// $Date: 2002-05-16 00:07:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -179,12 +179,6 @@ ElasticBeam2d::getTangentStiff(void)
 	kb(2,1) = kb(1,2) = EIoverL2;
 
 	return theCoordTransf->getGlobalStiffMatrix(kb,q);
-}
-
-const Matrix &
-ElasticBeam2d::getSecantStiff(void)
-{
-    return this->getTangentStiff();
 }
 
 const Matrix &

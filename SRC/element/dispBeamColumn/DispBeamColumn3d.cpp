@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-03-22 20:47:57 $
+// $Revision: 1.7 $
+// $Date: 2002-05-16 00:07:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -381,12 +381,6 @@ DispBeamColumn3d::getTangentStiff()
 	K = crdTransf->getGlobalStiffMatrix(kb, q);
 
 	return K;
-}
-
-const Matrix&
-DispBeamColumn3d::getSecantStiff()
-{
-	return this->getTangentStiff();
 }
 
 const Matrix&

@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-05-14 23:37:23 $
+// $Revision: 1.14 $
+// $Date: 2002-05-16 00:07:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -796,13 +796,6 @@ void NLBeamColumn3d::getDistrLoadInterpolatMatrix(double xi, Matrix &bp, const I
 	    break;
       }
    }
-}
-
-
-const Matrix &
-NLBeamColumn3d::getSecantStiff(void)
-{
-    return this->getTangentStiff();
 }
 
     
