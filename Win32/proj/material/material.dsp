@@ -1087,6 +1087,14 @@ SOURCE=..\..\..\SRC\material\section\FiberSection3d.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\section\FiberSectionGJ.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\section\FiberSectionGJ.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\section\GenericSection1d.cpp
 # End Source File
 # Begin Source File
