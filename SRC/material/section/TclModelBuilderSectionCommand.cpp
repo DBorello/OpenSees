@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2002-06-08 16:47:50 $
+// $Revision: 1.16 $
+// $Date: 2002-06-10 22:32:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -1555,6 +1555,7 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
 	    fiberPosition(1) = fibersPosition(1,k);
 	    
 	    fiber[i] = new UniaxialFiber3d(k, *material, fibersArea(k), fiberPosition);
+	    if (fibersArea(k) < 0) cerr << "ERROR: " << fiberPosition(0) << " " << fiberPosition(1) << endl;
             if (!fiber[k]) 
             {
                interp->result = "WARNING unable to allocate fiber ";

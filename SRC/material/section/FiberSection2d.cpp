@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.8 $
+// $Date: 2002-06-10 22:32:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -203,6 +203,8 @@ int FiberSection2d::setTrialSectionDeformation (const Vector &deforms)
 {
   int res = 0;
 
+  //  cerr << deforms;
+
   e = deforms;
 
   kData[0] = 0.0; kData[1] = 0.0; kData[2] = 0.0; kData[3] = 0.0;
@@ -251,11 +253,6 @@ FiberSection2d::getSectionTangent(void)
   return *ks;
 }
 
-const Matrix&
-FiberSection2d::getSectionSecant(void)
-{
-  return *ks;
-}
 
 const Vector&
 FiberSection2d::getStressResultant(void)
@@ -467,7 +464,6 @@ FiberSection2d::sendSelf(int commitTag, Channel &theChannel)
 
   }
 
-  
   return res;
 }
 
@@ -570,7 +566,7 @@ FiberSection2d::Print(ostream &s, int flag)
   s << "\nFiberSection2d, tag: " << this->getTag() << endl;
   s << "\tSection code: " << code;
   s << "\tNumber of Fibers: " << numFibers << endl;
-  
+
   if (flag == 1) {
 	  int loc = 0;
 	  for (int i = 0; i < numFibers; i++) {

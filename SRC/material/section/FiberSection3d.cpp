@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.7 $
+// $Date: 2002-06-10 22:32:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -255,12 +255,6 @@ FiberSection3d::getSectionDeformation(void)
 
 const Matrix&
 FiberSection3d::getSectionTangent(void)
-{
-  return *ks;
-}
-
-const Matrix&
-FiberSection3d::getSectionSecant(void)
 {
   return *ks;
 }
@@ -550,6 +544,7 @@ FiberSection3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
       // create memory to hold material pointers and fiber data
       numFibers = data(1);
       if (numFibers != 0) {
+
 	theMaterials = new UniaxialMaterial *[numFibers];
 	
 	if (theMaterials == 0)
@@ -559,7 +554,7 @@ FiberSection3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	for (int j=0; j<numFibers; j++)
 	  theMaterials[j] = 0;
 
-	matData = new double [numFibers*2];
+	matData = new double [numFibers*3];
 
 	if (matData == 0)
 	  g3ErrorHandler->fatal("%s -- failed to allocate double array for material data",
@@ -597,7 +592,6 @@ FiberSection3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
       res += theMaterials[i]->recvSelf(commitTag, theChannel, theBroker);
     }
   }    
-
 
   return res;
 }

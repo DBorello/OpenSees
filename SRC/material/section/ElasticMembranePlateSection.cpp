@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.7 $
+// $Date: 2002-06-10 22:32:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticMembranePlateSection.cpp,v $
 
 // Ed "C++" Love
@@ -29,7 +29,8 @@
 
 
 #include <ElasticMembranePlateSection.h>
-
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
 
 //parameters
 const double ElasticMembranePlateSection::five6 = 5.0/6.0 ; //shear correction
@@ -44,7 +45,9 @@ ID      ElasticMembranePlateSection::array(8) ;
 ElasticMembranePlateSection::ElasticMembranePlateSection( ) : 
 SectionForceDeformation( 0, SEC_TAG_ElasticMembranePlateSection ), 
 strain(8) 
-{ }
+{ 
+
+}
 
 
 
@@ -81,11 +84,12 @@ SectionForceDeformation*  ElasticMembranePlateSection::getCopy( )
 
   clone = new ElasticMembranePlateSection( ) ; //new instance of this class
 
-    *clone = *this ; //assignment to make copy
-  //clone->E = this->E;
-  // clone->nu = this->nu;
-  //clone->h = this->h;
-  //clone->strain = this->strain;
+  //    *clone = *this ; //assignment to make copy
+  clone->E = this->E;
+  clone->nu = this->nu;
+  clone->h = this->h;
+  clone->rhoH = this->rhoH ;
+  clone->strain = this->strain;
 
   return clone ;
 }
@@ -253,15 +257,41 @@ void  ElasticMembranePlateSection::Print( ostream &s, int flag )
 }
 
 int 
-ElasticMembranePlateSection::sendSelf(int commitTag, Channel &theChannel) 
+ElasticMembranePlateSection::sendSelf(int cTag, Channel &theChannel) 
 {
-  return -1;
+  int res = 0;
+  static Vector data(5);
+  data(0) = this->getTag();
+  data(1) = E;
+  data(2) = nu;
+  data(3) = h;
+  data(4) = rhoH;
+
+  res = theChannel.sendVector(this->getDbTag(), cTag, data);
+  if (res < 0) 
+    cerr << "ElasticMembranePlateSection::sendSelf() - failed to send data\n";
+
+  return res;
 }
 
 
 int 
-ElasticMembranePlateSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+ElasticMembranePlateSection::recvSelf(int cTag, Channel &theChannel, 
+				      FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  int res = 0;
+  static Vector data(5);
+  res = theChannel.recvVector(this->getDbTag(), cTag, data);
+  if (res < 0) 
+    cerr << "ElasticMembranePlateSection::recvSelf() - failed to recv data\n";
+  else {
+    this->setTag(data(0));
+    E    = data(1);
+    nu   = data(2);
+    h    = data(3);
+    rhoH = data(4);
+  }
+
+  return res;
 }
  

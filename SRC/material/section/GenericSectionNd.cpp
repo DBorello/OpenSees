@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:32:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSectionNd.cpp,v $
                                                                         
                                                                         
@@ -162,7 +162,7 @@ GenericSectionNd::sendSelf(int cTag, Channel &theChannel)
 
 	// Need otherDbTag since code ID and data ID may be the same size
     if (otherDbTag == 0) 
-		otherDbTag = theChannel.getDbTag();
+      otherDbTag = theChannel.getDbTag();
 
 	static ID data(5);
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.5 $
+// $Date: 2002-06-10 22:32:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection2d.cpp,v $
                                                                         
                                                                         
@@ -220,24 +220,24 @@ ElasticSection2d::getOrder () const
 int
 ElasticSection2d::sendSelf(int commitTag, Channel &theChannel)
 {
-	int res = 0;
+    int res = 0;
 
     static Vector data(6);
     
     int dataTag = this->getDbTag();
     
-	data(0) = this->getTag();
+    data(0) = this->getTag();
     data(1) = E;
     data(2) = A;
     data(3) = I;    
     data(4) = eCommit(0);
-	data(5) = eCommit(1);
+    data(5) = eCommit(1);
 
     res += theChannel.sendVector(dataTag, commitTag, data);
     if (res<0) {
-		g3ErrorHandler->warning("%s -- failed to send data",
-			"ElasticSection2d::sendSelf");
-		return res;
+      g3ErrorHandler->warning("%s -- failed to send data",
+			      "ElasticSection2d::sendSelf");
+      return res;
     }
     
     return res;
@@ -265,7 +265,7 @@ ElasticSection2d::recvSelf(int commitTag, Channel &theChannel,
     A = data(2);
     I = data(3);
     eCommit(0) = data(4);
-	eCommit(1) = data(5);
+    eCommit(1) = data(5);
 
     return res;
 }

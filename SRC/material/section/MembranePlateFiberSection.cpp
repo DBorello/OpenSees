@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.5 $
+// $Date: 2002-06-10 22:32:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/MembranePlateFiberSection.cpp,v $
 
 // Ed "C++" Love
@@ -29,6 +29,8 @@
 
 
 #include <MembranePlateFiberSection.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
 
 
 //parameters
@@ -73,7 +75,10 @@ const double  MembranePlateFiberSection::wg[] = { 0.1,
 MembranePlateFiberSection::MembranePlateFiberSection( ) : 
 SectionForceDeformation( 0, SEC_TAG_MembranePlateFiberSection ), 
 strainResultant(8) 
-{ }
+{ 
+  for ( int i = 0; i < 5; i++ )
+      theFibers[i] = 0 ;
+}
 
 
 
@@ -466,14 +471,123 @@ void  MembranePlateFiberSection::Print( ostream &s, int flag )
 int 
 MembranePlateFiberSection::sendSelf(int commitTag, Channel &theChannel) 
 {
-  return -1;
+  int res = 0;
+
+  // note: we don't check for dataTag == 0 for Element
+  // objects as that is taken care of in a commit by the Domain
+  // object - don't want to have to do the check if sending data
+  int dataTag = this->getDbTag();
+  
+
+  // Now quad sends the ids of its materials
+  int matDbTag;
+  
+  static ID idData(11);
+  
+  int i;
+  for (i = 0; i < 5; i++) {
+    idData(i) = theFibers[i]->getClassTag();
+    matDbTag = theFibers[i]->getDbTag();
+    // NOTE: we do have to ensure that the material has a database
+    // tag if we are sending to a database channel.
+    if (matDbTag == 0) {
+      matDbTag = theChannel.getDbTag();
+			if (matDbTag != 0)
+			  theFibers[i]->setDbTag(matDbTag);
+    }
+    idData(i+5) = matDbTag;
+  }
+  
+  idData(10) = this->getTag();
+
+  res += theChannel.sendID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING MembranePlateFiberSection::sendSelf() - %d failed to send ID\n",
+			    this->getTag());
+    return res;
+  }
+
+  // Finally, quad asks its material objects to send themselves
+  for (i = 0; i < 5; i++) {
+    res += theFibers[i]->sendSelf(commitTag, theChannel);
+    if (res < 0) {
+      g3ErrorHandler->warning("WARNING MembranePlateFiberSection::sendSelf() - %d failed to send its Material\n",this->getTag());
+      return res;
+    }
+  }
+  
+  return res;
 }
 
 
 int 
 MembranePlateFiberSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  int res = 0;
+  
+  int dataTag = this->getDbTag();
+
+  static ID idData(11);
+  // Quad now receives the tags of its four external nodes
+  res += theChannel.recvID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING MembranePlateFiberSection::recvSelf() - %d failed to receive ID\n", this->getTag());
+    return res;
+  }
+
+  this->setTag(idData(11));
+
+  int i;
+
+  if (theFibers[0] == 0) {
+    for (i = 0; i < 5; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+5);
+      // Allocate new material with the sent class tag
+      theFibers[i] = theBroker.getNewNDMaterial(matClassTag);
+      if (theFibers[i] == 0) {
+	g3ErrorHandler->warning("MembranePlateFiberSection::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	return -1;
+      }
+      // Now receive materials into the newly allocated space
+      theFibers[i]->setDbTag(matDbTag);
+      res += theFibers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+  // Number of materials is the same, receive materials into current space
+  else {
+    for (i = 0; i < 5; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+5);
+      // Check that material is of the right type; if not,
+      // delete it and create a new one of the right type
+      if (theFibers[i]->getClassTag() != matClassTag) {
+	delete theFibers[i];
+	theFibers[i] = theBroker.getNewNDMaterial(matClassTag);
+	if (theFibers[i] == 0) {
+	  g3ErrorHandler->fatal("MembranePlateFiberSection::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	  return -1;
+	}
+      }
+      // Receive the material
+      theFibers[i]->setDbTag(matDbTag);
+      res += theFibers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("MembranePlateFiberSection::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+  
+  return res;
 }
  
 
