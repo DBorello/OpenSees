@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-11 21:54:41 $
+// $Revision: 1.2 $
+// $Date: 2001-08-07 21:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.h,v $
 
 // Ed "C++" Love
@@ -154,9 +154,9 @@ class BbarBrick : public Element {
     void computeBasis( ) ;
 
     //compute Bbar matrix
-    Matrix computeBbar( int node, 
-			const double shp[4][8], 
-			const double shpBar[4][8] ) ;
+    const Matrix& computeBbar( int node, 
+			       const double shp[4][8], 
+			       const double shpBar[4][8] ) ;
   
     //Matrix transpose
     Matrix transpose( int dim1, int dim2, const Matrix &M ) ;

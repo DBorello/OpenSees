@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-11 23:15:55 $
+// $Revision: 1.3 $
+// $Date: 2001-08-07 21:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -41,13 +41,9 @@
 #include <Domain.h>
 #include <ErrorHandler.h>
 #include <Brick.h>
-
+#include <shp3d.h>
 #include <Renderer.h>
 
-extern void  shp3d( const double ss[3],
-		    double &xsj,
-		    double shp[4][8],
-		    const double xl[3][8]  ) ;
 
 //static data
 double  Brick::xl[3][8] ;
@@ -144,14 +140,8 @@ void  Brick::setDomain( Domain *theDomain )
   int i ;
 
   //node pointers
-  for ( i=0; i<8; i++ ) {
+  for ( i=0; i<8; i++ ) 
      nodePointers[i] = theDomain->getNode( connectedExternalNodes(i) ) ;
-     if (nodePointers[i] == 0) {
-       
-       cerr << "Brick::setDomain - no node " << connectedExternalNodes(i);
-       cerr << " exists in the domain - segmentation fault likely\n";
-     }
-  }
 
   this->DomainComponent::setDomain(theDomain);
 
@@ -222,7 +212,8 @@ int  Brick::revertToStart( )
 void  Brick::Print( ostream &s, int flag )
 {
   s << '\n' ;
-  s << "Standard Eight Node Brick  tag: " << this->getTag() << "\n" ;
+  s << "Standard Eight Node Brick \n" ;
+  s << "Element Number: " << this->getTag() << '\n' ;
   s << "Node 1 : " << connectedExternalNodes(0) << '\n' ;
   s << "Node 2 : " << connectedExternalNodes(1) << '\n' ;
   s << "Node 3 : " << connectedExternalNodes(2) << '\n' ;
@@ -407,7 +398,11 @@ void   Brick::formInertiaTerms( int tangFlag )
     //node loop to compute acceleration
     momentum.Zero( ) ;
     for ( j = 0; j < numberNodes; j++ ) 
-      momentum += shp[massIndex][j] * ( nodePointers[j]->getTrialAccel()  ) ; 
+      //momentum += shp[massIndex][j] * ( nodePointers[j]->getTrialAccel()  ) ; 
+      momentum.addVector( 1.0,
+			  nodePointers[j]->getTrialAccel(),
+			  shp[massIndex][j] ) ;
+
 
     //density
     rho = materialPointers[i]->getRho() ;
@@ -581,7 +576,8 @@ void  Brick::formResidAndTangent( int tang_flag )
       const Vector &ul = nodePointers[j]->getTrialDisp( ) ;
 
       //compute the strain
-      strain += (BJ*ul) ; 
+      //strain += (BJ*ul) ; 
+      strain.addMatrixVector(1.0,  BJ,ul,1.0 ) ;
 
     } // end for j
   
@@ -611,11 +607,16 @@ void  Brick::formResidAndTangent( int tang_flag )
       BJ = computeB( j, shp ) ;
    
       //transpose 
-      BJtran = transpose( nstress, ndf, BJ ) ;
+      //BJtran = transpose( nstress, ndf, BJ ) ;
+      for (p=0; p<ndf; p++) {
+	for (q=0; q<nstress; q++) 
+	  BJtran(p,q) = BJ(q,p) ;
+      }//end for p
 
 
       //residual
-      residJ = BJtran * stress ;
+      //residJ = BJtran * stress ;
+      residJ.addMatrixVector(0.0,  BJtran,stress,1.0);
 
       //residual 
       for ( p = 0; p < ndf; p++ )
@@ -624,7 +625,8 @@ void  Brick::formResidAndTangent( int tang_flag )
 
       if ( tang_flag == 1 ) {
 
-         BJtranD = BJtran * dd ;
+	//BJtranD = BJtran * dd ;
+	BJtranD.addMatrixProduct(0.0,  BJtran,dd,1.0) ;
 
          kk = 0 ;
          for ( k = 0; k < numberNodes; k++ ) {
@@ -632,7 +634,8 @@ void  Brick::formResidAndTangent( int tang_flag )
             BK = computeB( k, shp ) ;
   
  
-            stiffJK =  BJtranD * BK  ;
+            //stiffJK =  BJtranD * BK  ;
+	    stiffJK.addMatrixProduct(0.0,  BJtranD,BK,1.0) ;
 
             for ( p = 0; p < ndf; p++ )  {
                for ( q = 0; q < ndf; q++ )
@@ -679,7 +682,8 @@ void   Brick::computeBasis( )
 //*************************************************************************
 //compute B
 
-Matrix   Brick::computeB( int node, const double shp[4][8] )
+const Matrix&   
+Brick::computeB( int node, const double shp[4][8] )
 {
 
   static Matrix B(6,3) ;
@@ -754,6 +758,7 @@ int  Brick::recvSelf (int commitTag,
 int
 Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
+
     const Vector &end1Crd = nodePointers[0]->getCrds();
     const Vector &end2Crd = nodePointers[1]->getCrds();	
     const Vector &end3Crd = nodePointers[2]->getCrds();	
@@ -820,6 +825,7 @@ Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
       coords(3,i) = end6Crd(i) + end6Disp(i)*fact;
     }
     error += theViewer.drawPolygon (coords, values);
+
 
     for (i = 0; i < 3; i++) {
       coords(0,i) = end1Crd(i) + end1Disp(i)*fact;

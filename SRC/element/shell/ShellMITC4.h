@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-12 00:09:18 $
+// $Revision: 1.4 $
+// $Date: 2001-08-07 21:19:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.h,v $
 
 // Ed "C++" Love
@@ -134,7 +134,10 @@ class ShellMITC4 : public Element {
     static Matrix  **GammaD1pointer ;
     static Matrix  **GammaA2pointer ;
     static Matrix  **GammaC2pointer ;
-  
+
+    //Bhat data
+    static Matrix **Bhat ;
+
     //node information
     ID connectedExternalNodes ;  //four node numbers
     Node *nodePointers[4] ;      //pointers to four nodes
@@ -146,13 +149,13 @@ class ShellMITC4 : public Element {
     SectionForceDeformation *materialPointers[4] ; //pointers to four materials
 					  
     //local nodal coordinates, two coordinates for each of four nodes
-    //    static double xl[2][4] ; 
-    static double xl[][4] ; 
+    //static double xl[][4] ; 
+    double xl[2][4] ; 
 
     //shell basis vectors
-    static Vector g1 ;
-    static Vector g2 ;
-    static Vector g3 ;
+    double g1[3] ;
+    double g2[3] ;
+    double g3[3] ;
 
     //compute local coordinates and basis
     void computeBasis( ) ;
@@ -170,25 +173,25 @@ class ShellMITC4 : public Element {
                            Matrix &JJinv ) ;
 
     //compute Bdrill matrix
-    Matrix computeBdrill( int node, const double shp[3][4] ) ;
+    double* computeBdrill( int node, const double shp[3][4] ) ;
 
     //assemble a B matrix 
-    Matrix assembleB( const Matrix &Bmembrane,
-		      const Matrix &Bbend, 
-		      const Matrix &Bshear ) ;
+    const Matrix& assembleB( const Matrix &Bmembrane,
+			     const Matrix &Bbend, 
+			     const Matrix &Bshear ) ;
   
     //compute Bmembrane matrix
-    Matrix computeBmembrane( int node, const double shp[3][4] ) ;
+    const Matrix& computeBmembrane( int node, const double shp[3][4] ) ;
   
     //compute Bbend matrix
-    Matrix computeBbend( int node, const double shp[3][4] ) ;
+    const Matrix& computeBbend( int node, const double shp[3][4] ) ;
   
     //compute standard Bshear matrix
-    Matrix  computeBshear( int node, const double shp[3][4] ) ;
+    const Matrix&  computeBshear( int node, const double shp[3][4] ) ;
 
     //compute Bbar shear matrix
-    Matrix  computeBbarShear( int node, double L1, double L2,
-			      const Matrix& Jinv ) ;
+    const Matrix&  computeBbarShear( int node, double L1, double L2,
+				     const Matrix& Jinv ) ;
   
 			     
     //compute the gamma's
@@ -203,7 +206,6 @@ class ShellMITC4 : public Element {
 		  double shp[3][4], 
 		  double &xsj ) ;
 
-    
 } ; 
 
 

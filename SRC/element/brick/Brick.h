@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-11 21:54:41 $
+// $Revision: 1.2 $
+// $Date: 2001-08-07 21:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.h,v $
 
 // Ed "C++" Love
@@ -48,15 +48,15 @@ class Brick : public Element {
   
     //full constructor
     Brick( int tag, 
-	   int node1,
-	   int node2,
-	   int node3,
-	   int node4,
-	   int node5,
-	   int node6,
-	   int node7,
-	   int node8,
-	   NDMaterial &theMaterial ) ;
+			int node1,
+			int node2,
+		        int node3,
+			int node4,
+			int node5,
+			int node6,
+			int node7,
+			int node8,
+			NDMaterial &theMaterial ) ;
 
     //destructor 
     virtual ~Brick( ) ;
@@ -154,7 +154,7 @@ class Brick : public Element {
     void computeBasis( ) ;
 
     //compute B matrix
-    Matrix computeB( int node, const double shp[4][8] ) ;
+    const Matrix& computeB( int node, const double shp[4][8] ) ;
   
     //Matrix transpose
     Matrix transpose( int dim1, int dim2, const Matrix &M ) ;

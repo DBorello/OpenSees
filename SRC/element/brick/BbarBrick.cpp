@@ -1,4 +1,4 @@
-/* ****************************************************************** **
+/* *********************************************************************
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
 **                                                                    **
@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-11 23:15:55 $
+// $Revision: 1.3 $
+// $Date: 2001-08-07 21:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -41,12 +41,10 @@
 #include <Domain.h>
 #include <ErrorHandler.h>
 #include <BbarBrick.h>
+#include <shp3d.h>
 #include <Renderer.h>
 
-extern void  shp3d( const double ss[3],
-		    double &xsj,
-		    double shp[4][8],
-		    const double xl[3][8]  ) ;
+
 //static data
 double  BbarBrick::xl[3][8] ;
 
@@ -215,6 +213,7 @@ void  BbarBrick::Print( ostream &s, int flag )
 {
   s << '\n' ;
   s << "Volume/Pressure Eight Node BbarBrick \n" ;
+  s << "Element Number: " << this->getTag() << '\n' ;
   s << "Node 1 : " << connectedExternalNodes(0) << '\n' ;
   s << "Node 2 : " << connectedExternalNodes(1) << '\n' ;
   s << "Node 3 : " << connectedExternalNodes(2) << '\n' ;
@@ -397,7 +396,11 @@ void   BbarBrick::formInertiaTerms( int tangFlag )
     //node loop to compute acceleration
     momentum.Zero( ) ;
     for ( j = 0; j < numberNodes; j++ ) 
-      momentum += shp[massIndex][j] * ( nodePointers[j]->getTrialAccel()  ) ; 
+      //momentum += shp[massIndex][j] * ( nodePointers[j]->getTrialAccel()  ) ; 
+      momentum.addVector( 1.0,
+			  nodePointers[j]->getTrialAccel(),
+			  shp[massIndex][j] ) ;
+
 
     //density
     rho = materialPointers[i]->getRho() ;
@@ -594,7 +597,8 @@ void  BbarBrick::formResidAndTangent( int tang_flag )
       const Vector &ul = nodePointers[j]->getTrialDisp( ) ;
 
       //compute the strain
-      strain += (BJ*ul) ; 
+      //strain += (BJ*ul) ; 
+      strain.addMatrixVector(1.0,  BJ,ul,1.0 ) ;
 
     } // end for j
   
@@ -624,11 +628,16 @@ void  BbarBrick::formResidAndTangent( int tang_flag )
       BJ = computeBbar( j, shp, shpBar ) ;
    
       //transpose 
-      BJtran = transpose( nstress, ndf, BJ ) ;
+      //BJtran = transpose( nstress, ndf, BJ ) ;
+      for (p=0; p<ndf; p++) {
+	for (q=0; q<nstress; q++) 
+	  BJtran(p,q) = BJ(q,p) ;
+      }//end for p
 
 
       //residual
-      residJ = BJtran * stress ;
+      //residJ = BJtran * stress ;
+      residJ.addMatrixVector(0.0,  BJtran,stress,1.0);
 
       //residual 
       for ( p = 0; p < ndf; p++ )
@@ -637,7 +646,8 @@ void  BbarBrick::formResidAndTangent( int tang_flag )
 
       if ( tang_flag == 1 ) {
 
-         BJtranD = BJtran * dd ;
+	//BJtranD = BJtran * dd ;
+	BJtranD.addMatrixProduct(0.0,  BJtran,dd,1.0);
 
          kk = 0 ;
          for ( k = 0; k < numberNodes; k++ ) {
@@ -645,7 +655,8 @@ void  BbarBrick::formResidAndTangent( int tang_flag )
             BK = computeBbar( k, shp, shpBar ) ;
   
  
-            stiffJK =  BJtranD * BK  ;
+            //stiffJK =  BJtranD * BK  ;
+	    stiffJK.addMatrixProduct(0.0,  BJtranD,BK,1.0) ;
 
             for ( p = 0; p < ndf; p++ )  {
                for ( q = 0; q < ndf; q++ )
@@ -692,16 +703,19 @@ void   BbarBrick::computeBasis( )
 //*************************************************************************
 //compute B
 
-Matrix   BbarBrick::computeBbar( int node, 
+const Matrix&   
+BbarBrick::computeBbar( int node, 
 				 const double shp[4][8], 
 				 const double shpBar[4][8] )
 {
 
   static Matrix Bbar(6,3) ;
 
-  static Matrix Bdev(3,3) ;
+  //static Matrix Bdev(3,3) ;
+  static double Bdev[3][3] ;
 
-  static Matrix BbarVol(3,3) ;
+  //static Matrix BbarVol(3,3) ;
+  static double BbarVol[3][3] ;
 
   static const double one3 = 1.0/3.0 ;
 
@@ -733,47 +747,41 @@ Matrix   BbarBrick::computeBbar( int node,
 //---------------------------------------------------------------
 
 
-  Bdev.Zero( ) ;
-  BbarVol.Zero( ) ;
   Bbar.Zero( ) ;
 
   //deviatoric
-  Bdev(0,0) = 2.0*shp[0][node] ;
-  Bdev(0,1) =    -shp[1][node] ;
-  Bdev(0,2) =    -shp[2][node] ;
+  Bdev[0][0] = 2.0*shp[0][node] ;
+  Bdev[0][1] =    -shp[1][node] ;
+  Bdev[0][2] =    -shp[2][node] ;
 
-  Bdev(1,0) =    -shp[0][node] ;
-  Bdev(1,1) = 2.0*shp[1][node] ;
-  Bdev(1,2) =    -shp[2][node] ;
+  Bdev[1][0] =    -shp[0][node] ;
+  Bdev[1][1] = 2.0*shp[1][node] ;
+  Bdev[1][2] =    -shp[2][node] ;
 
-  Bdev(2,0) =    -shp[0][node] ;
-  Bdev(2,1) =    -shp[1][node] ;
-  Bdev(2,2) = 2.0*shp[2][node] ;
-
-  Bdev *= one3 ;
-
+  Bdev[2][0] =    -shp[0][node] ;
+  Bdev[2][1] =    -shp[1][node] ;
+  Bdev[2][2] = 2.0*shp[2][node] ;
 
   //volumetric 
-  BbarVol(0,0) = shpBar[0][node] ;
-  BbarVol(0,1) = shpBar[1][node] ;
-  BbarVol(0,2) = shpBar[2][node] ;
+  BbarVol[0][0] = shpBar[0][node] ;
+  BbarVol[0][1] = shpBar[1][node] ;
+  BbarVol[0][2] = shpBar[2][node] ;
 
-  BbarVol(1,0) = shpBar[0][node] ;
-  BbarVol(1,1) = shpBar[1][node] ;
-  BbarVol(1,2) = shpBar[2][node] ;
+  BbarVol[1][0] = shpBar[0][node] ;
+  BbarVol[1][1] = shpBar[1][node] ;
+  BbarVol[1][2] = shpBar[2][node] ;
 
-  BbarVol(2,0) = shpBar[0][node] ;
-  BbarVol(2,1) = shpBar[1][node] ;
-  BbarVol(2,2) = shpBar[2][node] ;
+  BbarVol[2][0] = shpBar[0][node] ;
+  BbarVol[2][1] = shpBar[1][node] ;
+  BbarVol[2][2] = shpBar[2][node] ;
 
-  BbarVol *= one3 ;
 
 
   //extensional terms
   for ( int i=0; i<3; i++ ){
     for ( int j=0; j<3; j++ ) 
-      Bbar(i,j) = Bdev(i,j) + BbarVol(i,j) ;
-  }
+      Bbar(i,j) = one3*( Bdev[i][j] + BbarVol[i][j] ) ;
+  }//end for i
 
 
   //shear terms
