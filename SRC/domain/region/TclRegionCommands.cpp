@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-12-09 21:49:57 $
+// $Revision: 1.2 $
+// $Date: 2002-12-13 21:26:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/region/TclRegionCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -167,7 +167,7 @@ TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc,
 	cerr << "WARNING region tag? -eleRange start? end? - invalid start " << argv[loc+1] << endl;
 	return TCL_ERROR;
       }      
-      if (Tcl_GetInt(interp, argv[loc+1], &end) != TCL_OK) {
+      if (Tcl_GetInt(interp, argv[loc+2], &end) != TCL_OK) {
 	cerr << "WARNING region tag? -eleRange start? end? - invalid end " << argv[loc+1] << endl;
 	return TCL_ERROR;
       }      
