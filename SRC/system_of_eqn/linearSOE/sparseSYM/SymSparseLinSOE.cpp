@@ -272,7 +272,8 @@ int SymSparseLinSOE::addA(const Matrix &in_m, const ID &in_id, double fact)
    int newPt = 0;
    int *id = new int[idSize];
    
-   for (int ii = 0; ii < idSize; ii++) {
+   int ii;
+   for (ii = 0; ii < idSize; ii++) {
        if (in_id(ii) >= 0 && in_id(ii) < size) {
 	   id[newPt] = in_id(ii);
 	   newPt++;
@@ -284,7 +285,7 @@ int SymSparseLinSOE::addA(const Matrix &in_m, const ID &in_id, double fact)
    double *m = new double[idSize*idSize];
 
    int newII = 0;
-   for (int ii = 0; ii < in_id.Size(); ii++) {
+   for (ii = 0; ii < in_id.Size(); ii++) {
        if (in_id(ii) >= 0 && in_id(ii) < size) {
 
 	   int newJJ = 0;
@@ -308,7 +309,7 @@ int SymSparseLinSOE::addA(const Matrix &in_m, const ID &in_id, double fact)
        return -1;
    }
 
-   for (int ii=0; ii<idSize; ii++) {
+   for (ii=0; ii<idSize; ii++) {
        newID[ii] = id[ii];
        if (newID[ii] >= 0)
 	   newID[ii] = invp[newID[ii]];
