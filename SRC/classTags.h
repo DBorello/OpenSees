@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2001-07-29 22:59:23 $
+// $Revision: 1.15 $
+// $Date: 2001-08-07 22:19:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -128,6 +128,7 @@
 #define MAT_TAG_FluidSolidPorousMaterial       102
 #define ND_TAG_FeapMaterial                 1000
 #define ND_TAG_PlaneStressMaterial          2000
+#define ND_TAG_PlateFiberMaterial          2001
 
 #define FIBER_TAG_Uniaxial2d	1
 #define FIBER_TAG_Uniaxial3d	2
