@@ -351,6 +351,14 @@ SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\NewtonRaphson.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\PeriodicNewton.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\PeriodicNewton.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\analysis\algorithm\SolutionAlgorithm.cpp
 # End Source File
 # Begin Source File
