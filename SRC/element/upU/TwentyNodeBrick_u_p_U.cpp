@@ -1647,7 +1647,8 @@ void TwentyNodeBrick_u_p_U::set_stiffness_MatrixK()
     matrix G1t=G1.transpose();
     matrix G2t=G2.transpose();
 
-    for ( int i=1 ; i<=60 ; i++ )  		
+	int i;
+    for ( i=1 ; i<=60 ; i++ )  		
       {
         for ( int j=1 ; j<=60 ; j++ )
           {
@@ -1655,7 +1656,7 @@ void TwentyNodeBrick_u_p_U::set_stiffness_MatrixK()
 	  }
       }
 
-    for ( int i=1 ; i<=60 ; i++ )		
+    for ( i=1 ; i<=60 ; i++ )		
       {
         for ( int j=1 ; j<=20 ; j++ )
           {
@@ -1664,7 +1665,7 @@ void TwentyNodeBrick_u_p_U::set_stiffness_MatrixK()
 	  }
       }
 
-    for ( int i=1 ; i<=20 ; i++ )	      
+    for ( i=1 ; i<=20 ; i++ )	      
       {
         for ( int j=1 ; j<=60 ; j++ )
           {
@@ -1673,7 +1674,7 @@ void TwentyNodeBrick_u_p_U::set_stiffness_MatrixK()
 	  }
       }
 
-    for ( int i=1 ; i<=20 ; i++ )	      
+    for ( i=1 ; i<=20 ; i++ )	      
       {
         for ( int j=1 ; j<=20 ; j++ )
           {

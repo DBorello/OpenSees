@@ -1666,7 +1666,8 @@ void EightNodeBrick_u_p_U::set_stiffness_MatrixK()
     matrix G1t=G1.transpose();
     matrix G2t=G2.transpose();
 
-    for ( int i=1 ; i<=24 ; i++ )  		
+	int i;
+    for ( i=1 ; i<=24 ; i++ )  		
       {
         for ( int j=1 ; j<=24 ; j++ )
           {
@@ -1674,7 +1675,7 @@ void EightNodeBrick_u_p_U::set_stiffness_MatrixK()
 	  }
       }
 
-    for ( int i=1 ; i<=24 ; i++ )		
+    for ( i=1 ; i<=24 ; i++ )		
       {
         for ( int j=1 ; j<=8 ; j++ )
           {
@@ -1683,7 +1684,7 @@ void EightNodeBrick_u_p_U::set_stiffness_MatrixK()
 	  }
       }
 
-    for ( int i=1 ; i<=8 ; i++ )	      
+    for ( i=1 ; i<=8 ; i++ )	      
       {
         for ( int j=1 ; j<=24 ; j++ )
           {
@@ -1692,7 +1693,7 @@ void EightNodeBrick_u_p_U::set_stiffness_MatrixK()
 	  }
       }
 
-    for ( int i=1 ; i<=8 ; i++ )	      
+    for ( i=1 ; i<=8 ; i++ )	      
       {
         for ( int j=1 ; j<=8 ; j++ )
           {
