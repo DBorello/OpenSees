@@ -1,6 +1,6 @@
                                                                         
-// $Revision: 1.2 $                                                              
-// $Date: 2001-01-11 09:23:56 $                                                                  
+// $Revision: 1.3 $                                                              
+// $Date: 2001-01-23 08:32:08 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJtensor.cpp,v $                                                                
                                                                         
                                                                         
@@ -679,7 +679,7 @@ BJtensor operator-(const BJtensor & lval, const BJtensor & rval)
 // does it change A as well !!!!!!!!!!!!!!!!!!!!!!!!!!
 // TS KR!!!!
 //
-BJtensor  BJtensor::operator*( const double rval)
+BJtensor BJtensor::operator*( const double rval)
  {
 // construct BJtensor using the same control numbers as for the
 // original one.
@@ -735,6 +735,13 @@ BJtensor  BJtensor::operator*( const double rval)
     return mult;
  }
 
+//    BJtensor operator*( double lval, nDarray & rval);  // REVIEWER global
+//##############################################################################
+// scalar multiplication
+BJtensor  operator*( const double lval, BJtensor & rval)
+  {
+    return rval*lval;
+  }
 
 //##############################################################################
 //##############################################################################
