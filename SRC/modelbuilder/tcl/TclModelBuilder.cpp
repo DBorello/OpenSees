@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-08-30 22:13:46 $
+// $Revision: 1.11 $
+// $Date: 2001-11-26 23:01:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -53,6 +53,8 @@
 #include <SP_ConstraintIter.h>
 #include <MP_Constraint.h>
 #include <NodalLoad.h>
+#include <Beam2dPointLoad.h>
+#include <Beam2dUniformLoad.h>
 #include <LoadPattern.h>
 
 #include <SectionForceDeformation.h>
@@ -81,6 +83,7 @@ extern LoadPattern *theTclLoadPattern;
 extern MultiSupportPattern *theTclMultiSupportPattern;
 static int eleArgStart = 0;
 static int nodeLoadTag = 0;
+static int eleLoadTag = 0;
 // 
 // THE PROTOTYPES OF THE FUNCTIONS INVOKED BY THE INTERPRETER
 //
@@ -136,6 +139,11 @@ TclModelBuilder_addMP(ClientData clientData, Tcl_Interp *interp, int argc,
 int
 TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc,   
 			     char **argv);
+
+int
+TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,   
+				 char **argv);
+
 int
 TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc,   
 			     char **argv);
@@ -259,6 +267,9 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 		    (ClientData)NULL, NULL);
 
   Tcl_CreateCommand(interp, "load", TclModelBuilder_addNodalLoad,
+		    (ClientData)NULL, NULL);
+
+  Tcl_CreateCommand(interp, "eleLoad", TclModelBuilder_addElementalLoad,
 		    (ClientData)NULL, NULL);
 
   Tcl_CreateCommand(interp, "mass", TclModelBuilder_addNodalMass,
@@ -877,7 +888,135 @@ TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc
   }
   nodeLoadTag++;
 
-  // if get here we have sucessfully created the node and added it to the domain
+  // if get here we have sucessfully created the load and added it to the domain
+  return TCL_OK;
+}
+
+
+
+
+int
+TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int argc,   
+			 char **argv)
+{
+  // ensure the destructor has not been called - 
+  if (theTclBuilder == 0) {
+    cerr << "WARNING current builder has been destroyed - eleLoad\n";    
+    return TCL_ERROR;
+  }
+
+  int ndm = theTclBuilder->getNDM();
+  ElementalLoad *theLoad = 0;
+
+  ID theEleTags(0,16);
+
+  // we first create an ID containing the ele tags of all elements
+  // for which the load applies.
+  int count = 1;
+  int doneEle = 0;
+  int eleCount = 0;
+  while (doneEle == 0 && count < argc) {
+    if (strcmp(argv[count],"-ele") == 0) {
+      count ++;
+      int eleStart = count;
+      int eleEnd = 0;
+      int eleID;
+      while (count < argc && eleEnd == 0) {
+	if (Tcl_GetInt(interp, argv[count], &eleID) != TCL_OK)
+	  eleEnd = count;
+	else
+	  count++;
+      }
+      if (eleStart != eleEnd) {
+	for (int i=eleStart; i<eleEnd; i++) {
+	  Tcl_GetInt(interp, argv[i], &eleID);
+	  theEleTags[eleCount++] = eleID;
+	}
+      }
+    }
+    else if (strcmp(argv[count],"-range") == 0) {
+      count ++;
+      int eleStart, eleEnd;
+      if (Tcl_GetInt(interp, argv[count], &eleStart) != TCL_OK) {
+	cerr << "WARNING eleLoad -range invalid eleStart " << argv[count] << "\n";
+	return TCL_ERROR;
+      }
+      count++;
+      if (Tcl_GetInt(interp, argv[count], &eleEnd) != TCL_OK) {
+	cerr << "WARNING eleLoad -range invalid eleEnd " << argv[count] << "\n";	
+	return TCL_ERROR;
+      }
+      count++;
+      for (int i=eleStart; i<=eleEnd; i++)
+	theEleTags[eleCount++] = i;	
+    } else
+      doneEle = 1;
+  }
+
+
+  // we then create the load
+  if (strcmp(argv[count],"-type") != 0) {
+    cerr << "WARNING eleLoad - expecting -type option but got " << argv[count] << endl;
+    return TCL_ERROR;
+  } 
+  count++;
+  if (strcmp(argv[count],"-beamUniform") == 0) {
+    count++;
+    if (ndm == 2) {
+      double w;
+      if (Tcl_GetDouble(interp, argv[count], &w) != TCL_OK) {
+	cerr << "WARNING eleLoad - invalid w " << argv[count] << " for -beamUniform \n";
+	return TCL_ERROR;
+      } 
+      theLoad = new Beam2dUniformLoad(eleLoadTag, w, theEleTags);    
+    } else { 
+      cerr << "WARNING eleLoad -beamUniform currently only valid only for ndm=2\n";     
+      return TCL_ERROR;
+    }
+  } else if (strcmp(argv[count],"-beamPoint") == 0) {
+    count++;
+    if (ndm == 2) {
+      double P, x;
+      if (Tcl_GetDouble(interp, argv[count], &P) != TCL_OK) {
+	cerr << "WARNING eleLoad - invalid P " << argv[count] << " for -beamPoint\n";		
+	return TCL_ERROR;
+      } 
+      if (Tcl_GetDouble(interp, argv[count+1], &x) != TCL_OK) {
+	cerr << "WARNING eleLoad - invalid xDivL " << argv[count+1] << " for -beamPoint\n";	
+	return TCL_ERROR;
+      } 
+
+      if (x < 0.0 || x > 1.0) {
+	cerr << "WARNING eleLoad - invalid xDivL of " << x;
+	cerr << " for -beamPoint (valid range [0.0, 1.0]\n";
+	return TCL_ERROR;
+      }
+
+      theLoad = new Beam2dPointLoad(eleLoadTag, P, x, theEleTags);    
+    } else {
+      cerr << "WARNING eleLoad -beamPoint type currently only valid only for ndm=2\n";
+      return TCL_ERROR;
+    }  
+  }
+
+  if (theLoad == 0) {
+    cerr << "WARNING eleLoad - out of memory creating load of type " << argv[count] ;
+    return TCL_ERROR;
+  }
+
+  // get the current pattern tag if no tag given in i/p
+  int loadPatternTag = theTclLoadPattern->getTag();
+
+  // add the load to the domain
+  if (theTclDomain->addElementalLoad(theLoad, loadPatternTag) == false) {
+    cerr << "WARNING eleLoad - could not add following load to domain:\n ";
+    cerr << theLoad;
+    delete theLoad;
+    return TCL_ERROR;
+  }
+  eleLoadTag++;
+
+  // if get here we have sucessfully created the load and added it to the domain
   return TCL_OK;
 }
 
