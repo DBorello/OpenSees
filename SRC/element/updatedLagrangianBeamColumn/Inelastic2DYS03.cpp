@@ -112,9 +112,9 @@ int Inelastic2DYS03::commitState()
 {
 	// first let the super classes do their stuff
     this->InelasticYS2DGNL::commitState();
-	// now set the commit natural disps
-	ndisp_hist = ndisp;
-	return 0;
+    // now set the commit natural disps
+    ndisp_hist = ndisp;
+    return 0;
 
 }
 

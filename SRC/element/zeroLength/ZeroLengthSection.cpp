@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-12-06 20:26:25 $
+// $Revision: 1.7 $
+// $Date: 2002-12-16 21:10:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -216,8 +216,15 @@ ZeroLengthSection::setDomain(Domain *theDomain)
 int
 ZeroLengthSection::commitState()
 {
-	// Commit the section
-	return theSection->commitState();
+    int retVal=0;
+
+    // call element commitState to do any base class stuff
+    if ((retVal = this->Element::commitState()) != 0) {
+      cerr << "ZeroLength::commitState () - failed in base class";
+    }    
+  // Commit the section
+  retVal += theSection->commitState();
+  return retVal;
 }
 
 int
@@ -312,7 +319,7 @@ ZeroLengthSection::getResistingForceIncInertia()
     this->getResistingForce();
     
     // add the damping forces if rayleigh damping
-    if (betaK != 0.0 || betaK0 != 0.0)
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       *P += this->getRayleighDampingForces();
 
     return *P;

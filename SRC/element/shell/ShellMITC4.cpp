@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-12-05 22:20:45 $
+// $Revision: 1.11 $
+// $Date: 2002-12-16 21:10:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -379,10 +379,14 @@ int  ShellMITC4::getNumDOF( )
 //commit state
 int  ShellMITC4::commitState( )
 {
-  int i ;
   int success = 0 ;
 
-  for ( i = 0; i < 4; i++ ) 
+  // call element commitState to do any base class stuff
+  if ((success = this->Element::commitState()) != 0) {
+    cerr << "ShellMITC4::commitState () - failed in base class";
+  }    
+
+  for (int i = 0; i < 4; i++ ) 
     success += materialPointers[i]->commitState( ) ;
   
   return success ;
@@ -812,7 +816,7 @@ const Vector&  ShellMITC4::getResistingForceIncInertia( )
 
   res = resid;
   // add the damping forces if rayleigh damping
-  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
     res += this->getRayleighDampingForces();
 
   // subtract external loads 

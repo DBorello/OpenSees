@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:20:35 $
+// $Revision: 1.4 $
+// $Date: 2002-12-16 21:09:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d02.cpp,v $
                                                                         
                                                                         
@@ -178,7 +178,15 @@ beam2d02::setDomain(Domain *theDomain)
 int
 beam2d02::commitState()
 {
-    return theCoordTrans->commitState();
+  int retVal = 0;
+  
+  // call element commitState to do any base class stuff
+  if ((retVal = this->Element::commitState()) != 0) {
+    cerr << "beam2d02::commitState () - failed in base class";
+  }    
+
+  retVal = theCoordTrans->commitState();
+  return retVal;
 }
 
 int
@@ -302,13 +310,13 @@ beam2d02::getResistingForceIncInertia()
       rForce(4) += M*end2Accel(1);
 
       // add rayleigh damping forces
-      if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+      if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
 	rForce += this->getRayleighDampingForces();
 
     } else {
 
       // add rayleigh damping forces
-      if (betaK != 0.0 || betaK0 != 0.0)
+      if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
 	rForce += this->getRayleighDampingForces();
 
     }

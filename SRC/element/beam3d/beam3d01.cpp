@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:20:36 $
+// $Revision: 1.4 $
+// $Date: 2002-12-16 21:10:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/beam3d01.cpp,v $
                                                                         
                                                                         
@@ -106,13 +106,6 @@ beam3d01::getNumDOF(void) {
     return i;
 }
 
-
-int
-beam3d01::commitState()
-{
-    return 0;
-    // linear element - nothing to commit
-}
 
 int
 beam3d01::revertToLastCommit()
@@ -392,7 +385,7 @@ beam3d01::getResistingForceIncInertia()
     this->getResistingForce();
 
     // add rayleigh damping force if factors present    
-    if (betaK != 0.0 || betaK0 != 0.0)
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
 	rForce += this->getRayleighDampingForces();
 
     return rForce;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2002-12-06 20:26:24 $
+// $Revision: 1.21 $
+// $Date: 2002-12-16 21:10:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -223,6 +223,11 @@ int
 FourNodeQuad::commitState()
 {
     int retVal = 0;
+
+    // call element commitState to do any base class stuff
+    if ((retVal = this->Element::commitState()) != 0) {
+      cerr << "FourNodeQuad::commitState () - failed in base class";
+    }    
 
     // Loop over the integration points and commit the material states
     for (int i = 0; i < 4; i++)
@@ -582,7 +587,7 @@ FourNodeQuad::getResistingForceIncInertia()
 	  this->getResistingForce();
 
 	  // add the damping forces if rayleigh damping
-	  if (betaK != 0.0 || betaK0 != 0.0)
+	  if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
 	    P += this->getRayleighDampingForces();
 
 	  return P;
@@ -615,7 +620,7 @@ FourNodeQuad::getResistingForceIncInertia()
 		P(i) += K(i,i)*a[i];
 
 	// add the damping forces if rayleigh damping
-	if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+	if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
 	  P += this->getRayleighDampingForces();
 
 	return P;

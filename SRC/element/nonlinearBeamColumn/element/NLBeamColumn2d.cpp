@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2002-12-10 20:59:22 $
+// $Revision: 1.28 $
+// $Date: 2002-12-16 21:10:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -351,12 +351,17 @@ NLBeamColumn2d::commitState()
    int err = 0;
    int i = 0;
 
-   do
-   {
+   // call element commitState to do any base class stuff
+   if ((err = this->Element::commitState()) != 0) {
+     cerr << "NLBeamColumn2d::commitState () - failed in base class";
+     return err;
+   }    
+
+   do {
       vscommit[i] = vs[i];
       err = sections[i++]->commitState();
   
-   }while (err == 0 && i < nSections);
+   } while (err == 0 && i < nSections);
    
    if (err)
       return err;
@@ -1215,12 +1220,12 @@ NLBeamColumn2d::getResistingForceIncInertia()
     theVector(4) += m*accel2(1);
     
     // add the damping forces if rayleigh damping
-    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       theVector += this->getRayleighDampingForces();
 
   } else {
     // add the damping forces if rayleigh damping
-    if (betaK != 0.0 || betaK0 != 0.0)
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       theVector += this->getRayleighDampingForces();
   }
 

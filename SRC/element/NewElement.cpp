@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-05 22:20:34 $
+// $Revision: 1.3 $
+// $Date: 2002-12-16 21:09:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/NewElement.cpp,v $
                                                                         
 // Written: fmk 
@@ -103,7 +103,16 @@ NewElement::setDomain(Domain *theDomain)
 int
 NewElement::commitState()
 {
-  return 0;
+  int retVal = 0;
+
+  // call the base class method
+  retVal = this->Element::commitState();
+  if (retVal < 0) {
+    cerr << "NewElement::commitState() - failed in base class\n";
+    return retVal;
+  }
+
+  return retVal;
 }
 
 int

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-12-06 20:26:24 $
+// $Revision: 1.11 $
+// $Date: 2002-12-16 21:10:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -173,7 +173,13 @@ ElasticBeam2d::setDomain(Domain *theDomain)
 int
 ElasticBeam2d::commitState()
 {
-    return theCoordTransf->commitState();
+  int retVal = 0;
+  // call element commitState to do any base class stuff
+  if ((retVal = this->Element::commitState()) != 0) {
+    cerr << "ElasticBeam2d::commitState () - failed in base class";
+  }    
+  retVal += theCoordTransf->commitState();
+  return retVal;
 }
 
 int
@@ -392,7 +398,7 @@ ElasticBeam2d::getResistingForceIncInertia()
   P = this->getResistingForce();
 
   // add the damping forces if rayleigh damping
-  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
     P += this->getRayleighDampingForces();
     
   if (rho == 0.0)

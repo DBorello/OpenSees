@@ -163,6 +163,13 @@ int UpdatedLagrangianBeam2D::update()
 
 int UpdatedLagrangianBeam2D::commitState()
 {
+  int success = 0 ;
+
+  // call element commitState to do any base class stuff
+  if ((success = this->Element::commitState()) != 0) {
+    cerr << "UpdatedLagrangianBeam2D::commitState () - failed in base class";
+  }    
+
 #ifdef _G3DEBUG
 	cout << m_Iter << " "; // cin.get();
 #endif
@@ -185,7 +192,7 @@ int UpdatedLagrangianBeam2D::commitState()
 
 	// save the prev. step element forces
 	eleForce_hist = eleForce;
-	return 0;
+	return success;
 }
 
 void UpdatedLagrangianBeam2D::updateState()
@@ -577,11 +584,11 @@ UpdatedLagrangianBeam2D::getResistingForceIncInertia()
 	for(i=0; i<6; i++) force(i) -= f(i);
       }
 
-      if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0) 
+      if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
 	force += this->getRayleighDampingForces();
     } else {
 
-      if (betaK != 0.0 || betaK0 != 0.0) 
+      if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
 	force += this->getRayleighDampingForces();
     }    
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2002-12-05 22:20:43 $
+// $Revision: 1.20 $
+// $Date: 2002-12-16 21:10:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -335,6 +335,12 @@ NLBeamColumn3d::commitState()
 
    int err = 0;
    int i = 0;
+
+   // call element commitState to do any base class stuff
+   if ((err = this->Element::commitState()) != 0) {
+     cerr << "NLBeamColumn3d::commitState () - failed in base class";
+     return err;
+   }    
 
    do {
       vscommit[i] = vs[i];
@@ -1188,13 +1194,13 @@ NLBeamColumn3d::getResistingForceIncInertia()
     theVector(8) += m*accel2(2);
 
     // add the damping forces if rayleigh damping
-    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       theVector += this->getRayleighDampingForces();
     
   } else {
 
     // add the damping forces if rayleigh damping
-    if (betaK != 0.0 || betaK0 != 0.0)
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       theVector += this->getRayleighDampingForces();
   }
 

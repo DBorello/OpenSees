@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-05 22:20:40 $
+// $Revision: 1.10 $
+// $Date: 2002-12-16 21:10:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.cpp,v $
 
 #include <iostream.h>
@@ -188,10 +188,14 @@ int  EnhancedQuad::getNumDOF( )
 //commit state
 int  EnhancedQuad::commitState( )
 {
-  int i ;
   int success = 0 ;
 
-  for ( i = 0; i < 4; i++ ) 
+  // call element commitState to do any base class stuff
+  if ((success = this->Element::commitState()) != 0) {
+    cerr << "EnhancedQuad::commitState () - failed in base class";
+  }    
+
+  for (int i = 0; i < 4; i++ ) 
     success += materialPointers[i]->commitState( ) ;
   
   return success ;
@@ -642,7 +646,7 @@ const Vector&  EnhancedQuad::getResistingForceIncInertia( )
   res = resid;
 
   // add the damping forces if rayleigh damping
-  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
     res += this->getRayleighDampingForces();
 
   // subtract external loads 

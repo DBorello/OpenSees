@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2002-12-05 22:20:41 $
+// $Revision: 1.3 $
+// $Date: 2002-12-16 21:10:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.cpp,v $
 
 // Written: AAA 03/02
@@ -298,14 +298,22 @@ int Joint2D::update(void)
 
 int Joint2D::commitState()
 {
-	int CS1 = Spring1->commitState();
-	int CS2 = Spring2->commitState();
-	int CS3 = Spring3->commitState();
-	int CS4 = Spring4->commitState();
-	int CSC = SpringC->commitState();
+    int retVal = 0;
 
-	if ( CS1!=CS2 || CS2!=CS3 || CS3!=CS4 || CS4!=CSC ) return -1;
-	return CS1;
+    // call element commitState to do any base class stuff
+    if ((retVal = this->Element::commitState()) != 0) {
+      cerr << "Joint2D::commitState () - failed in base class";
+    }    
+
+    int CS1 = Spring1->commitState();
+    int CS2 = Spring2->commitState();
+    int CS3 = Spring3->commitState();
+    int CS4 = Spring4->commitState();
+    int CSC = SpringC->commitState();
+    
+    if ( CS1!=0 || CS2!=0 || CS3!=0 || CS4!=0 || retVal != 0 ) return -1;
+
+    return CS1;
 }
 
 int Joint2D::revertToLastCommit()
@@ -516,7 +524,7 @@ Joint2D::getResistingForceIncInertia()
   this->getResistingForce();
 
   // add rayleigh damping forces if factors have been set
-  if (betaK != 0.0 || betaK0 != 0.0) 
+  if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
     V += this->getRayleighDampingForces();
 
   return V;

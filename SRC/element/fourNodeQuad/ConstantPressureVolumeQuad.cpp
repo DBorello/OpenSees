@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-12-05 22:20:40 $
+// $Revision: 1.13 $
+// $Date: 2002-12-16 21:10:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.cpp,v $
 
 // Ed "C++" Love
@@ -188,10 +188,14 @@ int ConstantPressureVolumeQuad :: getNumDOF( )
 //commit state
 int ConstantPressureVolumeQuad :: commitState( )
 {
-  int i ;
   int success = 0 ;
 
-  for ( i = 0; i < 4; i++ ) 
+  // call element commitState to do any base class stuff
+  if ((success = this->Element::commitState()) != 0) {
+    cerr << "ConstantPressureVolumeQuad::commitState () - failed in base class";
+  }    
+
+  for (int i = 0; i < 4; i++ ) 
     success += materialPointers[i]->commitState( ) ;
   
   return success ;
@@ -745,7 +749,7 @@ const Vector& ConstantPressureVolumeQuad :: getResistingForceIncInertia( )
     res -= *load;
 
   // add the damping forces if rayleigh damping
-  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
     res += this->getRayleighDampingForces();
 
   return res ;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2002-12-06 20:26:23 $
+// $Revision: 1.18 $
+// $Date: 2002-12-16 21:10:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
 
 #include <BeamWithHinges2d.h>
@@ -216,6 +216,11 @@ int
 BeamWithHinges2d::commitState(void)
 {
   int err = 0;
+
+  // call element commitState to do any base class stuff
+  if ((err = this->Element::commitState()) != 0) {
+    cerr << "BeamWithHinges2d::commitState () - failed in base class";
+  }    
   
   for (int i = 0; i < 2; i++) {
     if (section[i] != 0)
@@ -720,13 +725,13 @@ BeamWithHinges2d::getResistingForceIncInertia(void)
     }
 
     // add the damping forces if rayleigh damping
-    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       theVector += this->getRayleighDampingForces();
 
   } else {
 
     // add the damping forces if rayleigh damping
-    if (betaK != 0.0 || betaK0 != 0.0)
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       theVector += this->getRayleighDampingForces();
   }
     

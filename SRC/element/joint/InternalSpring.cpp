@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:20:41 $
+// $Revision: 1.4 $
+// $Date: 2002-12-16 21:10:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/InternalSpring.cpp,v $
 
 // Written: A. Altoontash & G. Deierlein 03/02
@@ -252,7 +252,7 @@ InternalSpring::getResistingForceIncInertia()
 {	
     this->getResistingForce();    
     
-    if (betaK != 0.0 || betaK0 != 0.0) 
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       *rForce += this->getRayleighDampingForces();
     
     return (*rForce);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-12-13 22:25:47 $
+// $Revision: 1.2 $
+// $Date: 2002-12-16 21:10:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -272,6 +272,11 @@ ForceBeamColumn2d::commitState()
 {
   int err = 0;
   int i = 0;
+
+  // call element commitState to do any base class stuff
+  if ((err = this->Element::commitState()) != 0) {
+    cerr << "ForceBeamColumn2d::commitState () - failed in base class";
+  }    
   
   do {
     vscommit[i] = vs[i];

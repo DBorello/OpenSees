@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:20:45 $
+// $Revision: 1.4 $
+// $Date: 2002-12-16 21:10:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTrussSection.cpp,v $
                                                                         
 // Written: MHS 
@@ -302,8 +302,13 @@ CorotTrussSection::setDomain(Domain *theDomain)
 int
 CorotTrussSection::commitState()
 {
-	// Commit the material
-	return theSection->commitState();
+  int retVal = 0;
+  // call element commitState to do any base class stuff
+  if ((retVal = this->Element::commitState()) != 0) {
+    cerr << "CorotTrussSection::commitState () - failed in base class";
+  }    
+  retVal = theSection->commitState();
+  return retVal;
 }
 
 int
@@ -567,7 +572,7 @@ CorotTrussSection::getResistingForceIncInertia()
     }
 
     // add the damping forces if rayleigh damping
-    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       *theVector += this->getRayleighDampingForces();
 
     return *theVector;

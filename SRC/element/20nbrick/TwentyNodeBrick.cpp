@@ -2634,11 +2634,17 @@ void TwentyNodeBrick::setDomain (Domain *theDomain)
 //=============================================================================
 int TwentyNodeBrick::commitState ()
 {
+  int retVal = 0;
+
+  // call element commitState to do any base class stuff
+  if ((retVal = this->Element::commitState()) != 0) {
+    cerr << "TwentyNodeBrick::commitState () - failed in base class";
+  }    
+
     // int order = theQuadRule->getOrder();     // Commented by Xiaoyan
 
     int i;
     //int j, k;      // Xiaoyan added k for three dimension
-    int retVal = 0;
 
     // Loop over the integration points and commit the material states
     int count  = r_integration_order* s_integration_order * t_integration_order;
@@ -2751,6 +2757,7 @@ int TwentyNodeBrick::commitState ()
       //output nodal force
       //cerr << "    " << pp(2) << endln;
     //}
+      
     return retVal;
 }
 
@@ -3406,13 +3413,13 @@ const Vector &TwentyNodeBrick::getResistingForceIncInertia ()
     P.addMatrixVector(1.0, M, a, 1.0);
 
     // add the damping forces if rayleigh damping
-    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       P += this->getRayleighDampingForces();
 
   } else {
 
     // add the damping forces if rayleigh damping
-    if (betaK != 0.0 || betaK0 != 0.0)
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       P += this->getRayleighDampingForces();
 
   }

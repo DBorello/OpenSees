@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2002-12-10 03:04:26 $
+// $Revision: 1.15 $
+// $Date: 2002-12-16 21:10:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -219,6 +219,11 @@ int
 DispBeamColumn2d::commitState()
 {
     int retVal = 0;
+
+    // call element commitState to do any base class stuff
+    if ((retVal = this->Element::commitState()) != 0) {
+      cerr << "DispBeamColumn2d::commitState () - failed in base class";
+    }    
 
     // Loop over the integration points and commit the material states
     for (int i = 0; i < numSections; i++)
@@ -675,13 +680,13 @@ DispBeamColumn2d::getResistingForceIncInertia()
     P(4) += m*accel2(1);
     
     // add the damping forces if rayleigh damping
-    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       P += this->getRayleighDampingForces();
 
   } else {
     
     // add the damping forces if rayleigh damping
-    if (betaK != 0.0 || betaK0 != 0.0)
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       P += this->getRayleighDampingForces();
   }
 

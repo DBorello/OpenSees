@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:20:36 $
+// $Revision: 1.4 $
+// $Date: 2002-12-16 21:10:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam3d/beam3d02.h,v $
                                                                         
                                                                         
@@ -56,8 +56,6 @@ class beam3d02 : public Element
     int getNumDOF(void);
     void setDomain(Domain *theDomain);
 
-
-    int commitState(void);
     int revertToLastCommit(void);        
     
     const Matrix &getTangentStiff(void);

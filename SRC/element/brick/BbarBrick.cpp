@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-12-05 22:20:37 $
+// $Revision: 1.13 $
+// $Date: 2002-12-16 21:10:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -190,10 +190,14 @@ int  BbarBrick::getNumDOF( )
 //commit state
 int  BbarBrick::commitState( )
 {
-  int i ;
   int success = 0 ;
 
-  for ( i=0; i<8; i++ ) 
+  // call element commitState to do any base class stuff
+  if ((success = this->Element::commitState()) != 0) {
+    cerr << "Brick::commitState () - failed in base class";
+  }    
+
+  for (int i=0; i<8; i++ ) 
     success += materialPointers[i]->commitState( ) ;
   
   return success ;
@@ -534,7 +538,7 @@ const Vector&  BbarBrick::getResistingForceIncInertia( )
   res = resid;
 
   // add the damping forces if rayleigh damping
-  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       res += this->getRayleighDampingForces();
 
   if (load != 0)

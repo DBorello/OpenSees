@@ -3738,6 +3738,11 @@ int TwentyNodeBrick_u_p_U::commitState ()
     //int j, k;      // Xiaoyan added k for three dimension		       
     int retVal = 0;
 
+    // call element commitState to do any base class stuff
+    if ((retVal = this->Element::commitState()) != 0) {
+      cerr << "TwentyNodeBrick_u_p_U::commitState () - failed in base class";
+    }    
+
     // Loop over the integration points and commit the material states
     int count  = r_integration_order* s_integration_order * t_integration_order;    
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-12-06 20:26:25 $
+// $Revision: 1.14 $
+// $Date: 2002-12-16 21:10:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -323,6 +323,11 @@ int
 ZeroLength::commitState()
 {
     int code=0;
+
+    // call element commitState to do any base class stuff
+    if ((code = this->Element::commitState()) != 0) {
+      cerr << "ZeroLength::commitState () - failed in base class";
+    }    
 
     // commit 1d materials
     for (int i=0; i<numMaterials1d; i++) 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:20:36 $
+// $Revision: 1.4 $
+// $Date: 2002-12-16 21:10:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d03.cpp,v $
                                                                         
                                                                         
@@ -113,12 +113,6 @@ beam2d03::getNumDOF(void) {
     return i;
 }
 
-int
-beam2d03::commitState()
-{
-    return 0;
-    // linear element - nothing to commit
-}
 
 int
 beam2d03::revertToLastCommit()
@@ -314,7 +308,7 @@ beam2d03::getResistingForceIncInertia()
 {	
     this->getResistingForce();  
 
-    if (betaK != 0.0 || betaK0 != 0.0)
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
 	rForce += this->getRayleighDampingForces();
 
     return rForce;

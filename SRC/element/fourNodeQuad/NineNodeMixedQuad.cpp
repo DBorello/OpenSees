@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-12-05 22:20:40 $
+// $Revision: 1.9 $
+// $Date: 2002-12-16 21:10:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.cpp,v $
 
 // Ed "C++" Love
@@ -177,6 +177,11 @@ NineNodeMixedQuad::commitState( )
 {
   int i ;
   int success = 0 ;
+
+  // call element commitState to do any base class stuff
+  if ((success = this->Element::commitState()) != 0) {
+    cerr << "NineNodeMixedQuad::commitState () - failed in base class";
+  }    
 
   for ( i=0; i<9; i++ ) 
     success += materialPointers[i]->commitState( ) ;
@@ -602,7 +607,7 @@ NineNodeMixedQuad::getResistingForceIncInertia( )
   res = resid;
 
   // add the damping forces if rayleigh damping
-  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+  if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
     res += this->getRayleighDampingForces();
 
   // subtract external loads 

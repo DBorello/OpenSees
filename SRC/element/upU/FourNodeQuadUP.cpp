@@ -9,8 +9,8 @@
 // based on FourNodeQuad element by Michael Scott		  	     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:20:46 $
+// $Revision: 1.4 $
+// $Date: 2002-12-16 21:10:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/FourNodeQuadUP.cpp,v $
 
 #include <FourNodeQuadUP.h>
@@ -211,6 +211,12 @@ int
 FourNodeQuadUP::commitState()
 {
     int retVal = 0;
+
+
+    // call element commitState to do any base class stuff
+    if ((retVal = this->Element::commitState()) != 0) {
+      cerr << "FourNodeQuad_UP::commitState () - failed in base class";
+    }    
 
     // Loop over the integration points and commit the material states
     for (int i = 0; i < 4; i++)

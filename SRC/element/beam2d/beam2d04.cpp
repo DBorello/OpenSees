@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:20:36 $
+// $Revision: 1.4 $
+// $Date: 2002-12-16 21:10:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/beam2d04.cpp,v $
                                                                         
                                                                         
@@ -169,13 +169,6 @@ beam2d04::formVar(void)
     isStiffFormed = 1;
 }    
 
-
-int
-beam2d04::commitState()
-{
-    return 0;
-    // linear element - nothing to commit
-}
 
 int
 beam2d04::revertToLastCommit()
@@ -329,7 +322,7 @@ beam2d04::getResistingForceIncInertia()
 {	
     this->getResistingForce();
 
-    if (betaK != 0.0 || betaK0 != 0.0) 
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       rForce += this->getRayleighDampingForces();
     
     return rForce;

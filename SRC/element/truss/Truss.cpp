@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-12-05 22:20:45 $
+// $Revision: 1.14 $
+// $Date: 2002-12-16 21:10:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -379,7 +379,13 @@ Truss::setDomain(Domain *theDomain)
 int
 Truss::commitState()
 {
-    return theMaterial->commitState();
+  int retVal = 0;
+  // call element commitState to do any base class stuff
+  if ((retVal = this->Element::commitState()) != 0) {
+    cerr << "Truss::commitState () - failed in base class";
+  }    
+  retVal = theMaterial->commitState();
+  return retVal;
 }
 
 int

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:20:39 $
+// $Revision: 1.5 $
+// $Date: 2002-12-16 21:10:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/feap/fElement.cpp,v $
                                                                         
                                                                         
@@ -403,12 +403,18 @@ fElement::setDomain(Domain *theDomain)
 int
 fElement::commitState()
 {
-    if (nh1 != 0) 
-	for (int i=0; i<nh1; i++)
-	    h[i] = h[i+nh1];
+  int retVal = 0;
+  // call element commitState to do any base class stuff
+  if ((retVal = this->Element::commitState()) != 0) {
+    cerr << "fElement::commitState () - failed in base class";
+  }    
 
-    nrCount = 0;
-    return 0;
+  if (nh1 != 0) 
+    for (int i=0; i<nh1; i++)
+      h[i] = h[i+nh1];
+  
+  nrCount = 0;
+  return retVal;
 }
 
 int

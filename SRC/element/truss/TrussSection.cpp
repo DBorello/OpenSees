@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-12-06 20:26:24 $
+// $Revision: 1.8 $
+// $Date: 2002-12-16 21:10:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -373,7 +373,13 @@ TrussSection::setDomain(Domain *theDomain)
 int
 TrussSection::commitState()
 {
-    return theSection->commitState();
+  int retVal = 0;
+  // call element commitState to do any base class stuff
+  if ((retVal = this->Element::commitState()) != 0) {
+    cerr << "TrussSection::commitState () - failed in base class";
+  }    
+  retVal = theSection->commitState();
+  return retVal;
 }
 
 int
@@ -615,7 +621,7 @@ TrussSection::getResistingForceIncInertia()
     }    
 
     // add the damping forces if rayleigh damping
-    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0)
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
       *theVector += this->getRayleighDampingForces();
 
     return *theVector;
