@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-15 02:34:34 $
+// $Revision: 1.7 $
+// $Date: 2004-04-12 19:11:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
-// File: ~/matrix/ID.C
-//
 // Written: fmk 
-// Created: 11/96
 // Revision: A
 //
 // Description: This file contains the class implementation for ID.
@@ -65,7 +62,8 @@ ID::ID(int size)
 #endif    
 
   // create the space for the data & check space was available
-  data = (int *)malloc(size*sizeof(int));
+  //  data = (int *)malloc(size*sizeof(int));
+  data = new int[size]; 
   if (data == 0) {
     opserr << "ID::ID(int): ran out of memory with size " << size << endln;
     exit(-1);
@@ -102,7 +100,8 @@ ID::ID(int size, int arraySz)
 #endif    
 
   // create the space
-  data = (int *)malloc(arraySize*sizeof(int));
+  //  data = (int *)malloc(arraySize*sizeof(int));
+  data = new int[arraySize];
   if (data == 0) {
     opserr << "ID::ID(int, int): ran out of memory with arraySize: " << arraySize << endln;
     exit(-1);
@@ -113,7 +112,7 @@ ID::ID(int size, int arraySz)
     data[i] = 0;
 }
 
-ID::ID(int *d, int size)
+ID::ID(int *d, int size, bool cleanIt)
   :sz(size), data(d), arraySize(size), fromFree(1)
 {
   if (d == 0) { // OOPS must have been other constructor we wanted
@@ -135,6 +134,9 @@ ID::ID(int *d, int size)
     for (int i=0; i<arraySize; i++)
       data[i] = 0;
   }
+  
+  if (cleanIt == true)
+    fromFree = 0;
 }
 
 // ID(const ID&):
@@ -144,7 +146,8 @@ ID::ID(const ID &other)
   :sz(other.sz), data(0), arraySize(other.arraySize), fromFree(0)
 {
   // create the space
-  data = (int *)malloc(arraySize*sizeof(int));
+  //  data = (int *)malloc(arraySize*sizeof(int));
+  data = new int[arraySize]; 
   if (data == 0) {
     opserr << "ID::ID(ID): ran out of memory with arraySize " << arraySize << endln,
     exit(-1);
@@ -163,17 +166,23 @@ ID::ID(const ID &other)
 ID::~ID()
 {
   if (data != 0 && fromFree == 0) 
-    free((void *)data);
+    //    free((void *)data);
+    delete [] data;
 }
 
 int 
-ID::setData(int *newData, int size){
+ID::setData(int *newData, int size, bool cleanIt){
   if (data != 0 && fromFree == 0) 
-    free((void *)data);
+    //    free((void *)data);
+    delete [] data;
 
   sz = size;
   data = newData;
-  fromFree = 1;
+  
+  if (cleanIt == false)
+    fromFree = 1;
+  else
+    fromFree = 0;
 
   if (sz <= 0) {
     opserr << "ID::ID(int *, size) - size " << size << " specified <= 0\n";
@@ -253,8 +262,8 @@ ID::operator[](int x)
     int newArraySize = arraySize * 2;
     if (newArraySize < x) 
       newArraySize = x;
-    int *newData = (int *)malloc(newArraySize*sizeof(int));    
-    
+    //    int *newData = (int *)malloc(newArraySize*sizeof(int));    
+    int *newData = new int[newArraySize];
     if (newData != 0) {
       // copy the old
       for (int i=0; i<sz; i++)
@@ -265,7 +274,8 @@ ID::operator[](int x)
       
       sz = x+1;
       // release the memory held by the old
-      free((void *)data);	    
+      //      free((void *)data);	    
+      delete [] data;
       data = newData;
       arraySize = newArraySize;
       
@@ -302,8 +312,10 @@ ID::operator=(const ID &V)
 	    if (arraySize < V.sz) {
 		arraySize = V.sz;
 		if (data != 0)
-		    free((void *)data);
-		data = (int *)malloc(arraySize*sizeof(int));		
+		  //free((void *)data);
+		  delete [] data;
+		//		data = (int *)malloc(arraySize*sizeof(int));		
+		data = new int[arraySize];
 		// check we got the memory requested
 		if (data == 0) {
 		    opserr << "WARNING ID::=(ID) - ran out of memory ";
