@@ -25,7 +25,7 @@ all:
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS)\
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
-	$(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)  $(JERMANIC_LIBS)\
+	$(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)  $(JEREMIC_LIBS)\
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS)
@@ -89,7 +89,7 @@ ERRORHANDLER_LIBS = $(FE)/handler/ErrorHandler.o \
 	$(FE)/handler/ConsoleErrorHandler.o 
 
 
-JERMANIC_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o  \
+JEREMIC_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o  \
 	$(FE)/material/nD/Template3Dep/MatPoint3D.o \
 	$(FE)/element/8nbrick/EightNodeBrick.o \
 	$(FE)/element/8nbrick/TclEightNodeBrickCommand.o 
