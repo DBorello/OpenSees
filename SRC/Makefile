@@ -112,6 +112,8 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/forceBeamColumn/HingeMidpointBeamIntegration3d.o \
 	$(FE)/element/forceBeamColumn/HingeRadauBeamIntegration2d.o \
 	$(FE)/element/forceBeamColumn/HingeRadauBeamIntegration3d.o \
+	$(FE)/element/forceBeamColumn/HingeRadauTwoBeamIntegration2d.o \
+	$(FE)/element/forceBeamColumn/HingeRadauTwoBeamIntegration3d.o \
 	$(FE)/element/forceBeamColumn/UserDefinedHingeIntegration2d.o \
 	$(FE)/element/forceBeamColumn/UserDefinedHingeIntegration3d.o \
 	$(FE)/coordTransformation/CrdTransf.o \

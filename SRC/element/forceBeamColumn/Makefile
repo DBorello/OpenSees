@@ -6,6 +6,7 @@ OBJS       = ForceBeamColumn2d.o ForceBeamColumn3d.o \
 	LobattoBeamIntegration.o UserDefinedBeamIntegration.o \
 	HingeMidpointBeamIntegration2d.o HingeMidpointBeamIntegration3d.o \
 	HingeRadauBeamIntegration2d.o HingeRadauBeamIntegration3d.o \
+	HingeRadauTwoBeamIntegration2d.o HingeRadauTwoBeamIntegration3d.o \
 	UserDefinedHingeIntegration2d.o UserDefinedHingeIntegration3d.o
 
 # Compilation control

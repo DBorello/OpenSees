@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.42 $
-// $Date: 2003-01-28 18:02:27 $
+// $Revision: 1.43 $
+// $Date: 2003-02-14 03:46:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -280,10 +280,12 @@
 #define BEAM_INTEGRATION_TAG_UserDefined     2
 #define BEAM_INTEGRATION_TAG_HingeMidpoint2d 3
 #define BEAM_INTEGRATION_TAG_HingeRadau2d    4
-#define BEAM_INTEGRATION_TAG_UserHinge2d     5
-#define BEAM_INTEGRATION_TAG_HingeMidpoint3d 6
-#define BEAM_INTEGRATION_TAG_HingeRadau3d    7
-#define BEAM_INTEGRATION_TAG_UserHinge3d     8
+#define BEAM_INTEGRATION_TAG_HingeRadauTwo2d    5
+#define BEAM_INTEGRATION_TAG_UserHinge2d     6
+#define BEAM_INTEGRATION_TAG_HingeMidpoint3d 7
+#define BEAM_INTEGRATION_TAG_HingeRadau3d    8
+#define BEAM_INTEGRATION_TAG_HingeRadauTwo3d    9
+#define BEAM_INTEGRATION_TAG_UserHinge3d     10
 
 #define CRDTR_TAG_LinearCrdTransf2d 1
 #define CRDTR_TAG_PDeltaCrdTransf2d 2
