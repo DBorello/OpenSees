@@ -38,7 +38,7 @@ ElTawil2DUnSym::ElTawil2DUnSym
 		yBal = yNegBal;
 
 //    opserr << "yBal= " << yBal << ", yPosBal= " << yPosBal
-//	     << ", yNegBal= " << yNegBal << endln << endln;
+//	     << ", yNegBal= " << yNegBal << endl << endln;
 
 	capY    = yPosCap - yBal;
 
@@ -50,9 +50,10 @@ ElTawil2DUnSym::ElTawil2DUnSym
 	// the other one will be above
 	yPosBal -= yBal;
 	yNegBal -= yBal;
-	
+/*	
 	opserr << "yBal= " << yBal << ", yPosBal= " << yPosBal
 	     << ", yNegBal= " << yNegBal << endln;
+*/
 
 	// set translation
 	double transY   = yBal/capY;
@@ -125,9 +126,9 @@ double	xt3 = xNegBal*(1 - pow( fabs(yVal3/(yNegCap - yNegBal)) , tyNeg));
 	xt4 = xt4/capX;
 
 /*
-	opserr << "xPos = " << xPos << ", xNeg = " << xNeg << endln
-	     << "ytPos = " << ytPos << ", ytNeg = " << ytNeg << endln
-	     << "xt1   = " << xt1 << ", xt2 = " << xt2  << endln
+	opserr << "xPos = " << xPos << ", xNeg = " << xNeg << endl
+	     << "ytPos = " << ytPos << ", ytNeg = " << ytNeg << endl
+	     << "xt1   = " << xt1 << ", xt2 = " << xt2  << endl
 		 << "xt3   = " << xt3 << ", xt4 = " << xt4 << endln;
 */
 }
@@ -141,12 +142,13 @@ void ElTawil2DUnSym::getGradient(double &gx, double &gy, double x, double y)
     double capx = capXdim;
     double capy = capYdim;
     
-	// cout << "ElTawil2DUnSym::getGradient drift:" << this->YieldSurface_BC2D::getDrift(x, y) << endln;
+	// opserr << "ElTawil2DUnSym::getGradient drift:" << this->YieldSurface_BC2D::getDrift(x, y) << endln;
 
     if(loc != 0)
     {
      	opserr << "ERROR - ElTawil2D::getGradient(double &gx, double &gy, double x, double y)\n";
         opserr << "Force point not on yield surface, drift = " << drift << " loc = " << loc <<"\n";
+        opserr << "\a";
     }
     else
     {
@@ -191,7 +193,7 @@ void ElTawil2DUnSym::getGradient(double &gx, double &gy, double x, double y)
 			else
 			{
 				opserr << "Eltawil2DUnsym - condition not possible" << endln;
-				
+				opserr << "\a";
 			}
 
 			/* gx = 1/xBal;
@@ -207,7 +209,7 @@ void ElTawil2DUnSym::getGradient(double &gx, double &gy, double x, double y)
 	}
 
 //	opserr << "gx = " << gx << "gy = " << gy << "\n";
-//	
+//	opserr << "\a";
 }
 
 double ElTawil2DUnSym::getSurfaceDrift(double x, double y)
@@ -256,6 +258,7 @@ double a = 5;//10.277; //3.043;//4.29293; --> effects convergence
 			opserr << "ElTawil2DUnSym::getSurfaceDrift(..) - cond not possible\n";
 			opserr << "x=" << x << ", y=" << y << ", capx=" << capx << ", capy=" << capy << endln;
 			opserr << "xVal = " << xVal << ", yVal = " << yVal << endln;
+			opserr << "\a";
 		}
 		/*	
 		if(y < 0)

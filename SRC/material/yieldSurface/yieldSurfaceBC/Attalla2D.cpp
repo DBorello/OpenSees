@@ -52,6 +52,7 @@ void Attalla2D::getGradient(double &gx, double &gy, double x, double y)
     {
      	opserr << "ERROR - Attalla2D::getGradient(double &gx, double &gy, double x, double y)\n";
         opserr << "Force point not on yield surface, drift = " << drift << " loc = " << loc <<"\n";
+        opserr << "\a";
     }
     else
     {

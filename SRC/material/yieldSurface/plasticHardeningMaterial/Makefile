@@ -1,7 +1,7 @@
 include ../../../../Makefile.def
 
 OBJS       = ExponReducing.o  MultiLinearKp.o  NullPlasticMaterial.o \
-	PlasticHardeningMaterial.o  QuadrReducing.o \
+	PlasticHardeningMaterial.o \
 	TclModelBuilderYSPlasticMaterialCommand.o
 
 all:         $(OBJS)

@@ -11,7 +11,8 @@
 //////////////////////////////////////////////////////////////////////
 
 PlasticHardeningMaterial::PlasticHardeningMaterial(int tag, int classTag)
-:Material(tag, classTag), val_hist(0), val_trial(0), sFactor(1.0)
+:Material(tag, classTag), val_hist(0), val_trial(0),
+ sFactor(1.0), residual(1.0)
 {
 }
 
@@ -41,11 +42,17 @@ int PlasticHardeningMaterial::setTrialIncrValue(double dxVal)
 	return 0;	
 }
 
-int PlasticHardeningMaterial::commitState (void)
+
+void PlasticHardeningMaterial::setResidual(double res)
+{
+	residual = res;
+}
+
+int PlasticHardeningMaterial::commitState ()
 {
 	val_hist = val_trial;
 	sFactor = 1.0;
-	//opserr << "------ Ep value = " <<  val_hist << endln;
+	//cerr << "------ Ep value = " <<  val_hist << endln;
 	return 0;	
 }
 
@@ -75,6 +82,9 @@ int PlasticHardeningMaterial::getResponse (int responseID, Information &matInfor
 
 void PlasticHardeningMaterial::Print(OPS_Stream &s, int flag)
 {
+	s << "+Plastic Material: " << getTag() << endln;
+	s << "|  sFactor =  " << sFactor << endln;
+	s << "|  val_hist = " << val_hist << ", val_trial = " << val_trial << endln;
 	return;
 }
 

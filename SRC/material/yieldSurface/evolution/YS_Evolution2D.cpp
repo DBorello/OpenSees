@@ -21,7 +21,7 @@ YS_Evolution2D::YS_Evolution2D(int tag, int classtag,
 							   double min_iso_factor,
                                double iso_ratio, double kin_ratio)
   :YS_Evolution(tag, classtag, iso_ratio, kin_ratio, 2),
-   minIsoFactor(min_iso_factor), deformable(false), softening(false)
+   minIsoFactor(min_iso_factor), softening(false)
 {
 //	sumPlasticDeformX = 0;
 //	sumPlasticDeformX_hist = 0;
@@ -40,9 +40,9 @@ YS_Evolution2D::~YS_Evolution2D()
 
 }
 
-int YS_Evolution2D::commitState(int status)
+int YS_Evolution2D::commitState()
 {
-	this->YS_Evolution::commitState(status);
+	this->YS_Evolution::commitState();
 	
 //	sumPlasticDeformX_hist = sumPlasticDeformX;
 //	sumPlasticDeformY_hist = sumPlasticDeformY;
@@ -75,8 +75,8 @@ double  translateY = translate(1);
 
 	if(transDebug)
 	{
-		cout << "\nYieldSurfaceBC2D::toDeformedCoord(double &x, double &y)\n";
-		cout << "Original - fx = " << x1 << ",\tfy = " << y1 << "\n";
+		opserr << "\nYieldSurfaceBC2D::toDeformedCoord(double &x, double &y)\n";
+		opserr << "Original - fx = " << x1 << ",\tfy = " << y1 << "\n";
 	}
 
 	// isotropic
@@ -92,9 +92,9 @@ double  translateY = translate(1);
 
 	if(transDebug)
 	{
-		cout << "Deformed - fx = " << x << ",\tfy = " << y << "\n";
-		cout << "isotropicFactor =  " <<  isotropicFactor << "\n";
-		cout << "translateX       = " << translateX << ",\ttranslateY = " << translateY << "\n";
+		opserr << "Deformed - fx = " << x << ",\tfy = " << y << "\n";
+		opserr << "isotropicFactor =  " <<  isotropicFactor << "\n";
+		opserr << "translateX       = " << translateX << ",\ttranslateY = " << translateY << "\n";
 	}
 }
 */
@@ -107,10 +107,10 @@ double  translateY = translate(1);
 
   	if(transDebug)
 	{
-		cout << "\nYieldSurfaceBC2D::toOriginalCoord(double &x, double &y)\n";
-		cout << "Deformed - fx = " << x << ",\tfy = " << y << "\n";
-		cout << "isotropicFactor =  " <<  isotropicFactor << "\n";
-		cout << "translateX       = " << translateX << ",\ttranslateY = " << translateY << "\n";
+		opserr << "\nYieldSurfaceBC2D::toOriginalCoord(double &x, double &y)\n";
+		opserr << "Deformed - fx = " << x << ",\tfy = " << y << "\n";
+		opserr << "isotropicFactor =  " <<  isotropicFactor << "\n";
+		opserr << "translateX       = " << translateX << ",\ttranslateY = " << translateY << "\n";
 	}
 
 	// kinematic
@@ -123,8 +123,8 @@ double  translateY = translate(1);
 
 	if(transDebug)
 	{
-	 	cout << "Original - fx = " << x << ",\tfy = " << y << "\n";
-		cin.get();
+	 	opserr << "Original - fx = " << x << ",\tfy = " << y << "\n";
+		opserr << "\a";
 	}
 }
 */
@@ -135,8 +135,8 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 	// first and fore-most:
 	tmpYSPtr = ys;
 //	int loc = ys->ele_Location;
-//	cout << " evolve surface [" << cout << loc << "]\n";
-//	cout << *ys;
+//	opserr << " evolve surface [" << opserr << loc << "]\n";
+//	opserr << *ys;
 
 	//freezeEvolution = false; -> have set this in commitState -> don't change
 	// first save the vlues on stack
@@ -158,6 +158,8 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 	double kinY = gl(1)*getKinPlasticStiffness(1)/ys->getCap(1);
 	double isoX = gl(0)*getIsoPlasticStiffness(0)/ys->getCap(0);
 	double isoY = gl(1)*getIsoPlasticStiffness(1)/ys->getCap(1);
+
+	// opserr << "isoX = " << isoX << ", isoY = " << isoY << endln;
 	
 	// kinematic hardening
 	double lamda_kin = kinematicRatio*lamda;	
@@ -175,6 +177,9 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 	double fx_new = f_sur(0) + dfx_total;
 	double fy_new = f_sur(1) + dfy_total;
 
+	double fx_iso_new = f_sur(0) + dfx_iso;
+	double fy_iso_new = f_sur(1) + dfy_iso;
+
     // check 1: for cross-over -> same as: |F_sur + df| > |F_sur| && Kp < 0
 	// sign change
 
@@ -183,6 +188,11 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 	toOriginalCoord(fx_new, fy_new);
 	if(ys->getDrift(fx_new, fy_new) < 0)
 		ys_harden = false;
+
+	bool iso_harden = true;
+	toOriginalCoord(fx_iso_new, fy_iso_new);
+	if(ys->getDrift(fx_iso_new, fy_iso_new) < 0)
+		iso_harden = false;
 
 	
  	if(!ys_harden && (sign(f_sur(0)) != sign(fx_new))) // risky to use for fy -> P
@@ -194,7 +204,7 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 	    opserr << *ys;	    
 		freezeEvolution = true;
 	    
-	    //opserr << "F_Surface(0) = " << f_sur(0) << ", F_New = " << fx_new << endln;
+	    //cerr << "F_Surface(0) = " << f_sur(0) << ", F_New = " << fx_new << endln;
 	    //cin.get();
 
 		// if(!deformable) //nothing to do
@@ -243,7 +253,7 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 	int x_grow = 1;
 	if(fabs(f_sur(0) + dfx_iso) < fabs(f_sur(0)))
 	{
-		// cout << "Softening!\n";
+		// opserr << "Softening!\n";
 		x_grow = -1;
 	}
 	
@@ -284,7 +294,7 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 	else
 	{
 		double dR = sqrt(dfx_iso*dfx_iso + dfy_iso*dfy_iso);
-		if(!ys_harden)
+		if(!iso_harden)
 		dR = -1*dR;
 		delMag(0) = dR;
 		delMag(1) = dR;
@@ -315,7 +325,7 @@ int YS_Evolution2D::evolveSurface(YieldSurface_BC *ys, double lamda,
 	double fx_aim = f_sur(0) + dfx_kin;
 	double fy_aim = f_sur(1) + dfy_kin;
 
-    //opserr << "YS_Evolution2D - F_Surface = " << F_Surface;
+    //cout << "YS_Evolution2D - F_Surface = " << F_Surface;
 
 	toOriginalCoord(fx_aim, fy_aim);
 	Vector f_aim(2);

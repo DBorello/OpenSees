@@ -48,7 +48,7 @@ YS_Evolution * CombinedIsoKin2D02::getCopy()
 					  isotropicRatio_orig, kinematicRatio_orig,
 					  *limSurface, *kinMatX, *kinMatY,
 					  *isoMatXPos, *isoMatXNeg, *isoMatYPos, *isoMatYNeg,
-					  deformable, resAlgo, resFactor, appFactor, direction);
+					  deformable, resAlgo, resFactor, appFactor, direction_orig);
 	return theCopy;
 }
 

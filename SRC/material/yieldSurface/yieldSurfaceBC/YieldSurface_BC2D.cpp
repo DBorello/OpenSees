@@ -119,16 +119,15 @@ int YieldSurface_BC2D::commitState(Vector &force)
 	this->YieldSurface_BC::commitState(force);
 	
 	status_hist = this->getTrialForceLocation(force);
-//    cout << "YieldSurface_BC2D::commitState(..), status = " << status_hist << endln;
+//    opserr << "YieldSurface_BC2D::commitState(..), status = " << status_hist << endln;
 
-//	cout << "YieldSurface_BC2D::commitState " << getTag() <<" - force location: " << status_hist << endln;
-//	cout << " FORCE = " << force;
-
+//	opserr << "YieldSurface_BC2D::commitState " << getTag() <<" - force location: " << status_hist << endln;
+//	opserr << " FORCE = " << force;
 	if(status_hist > 0)
 	{
 		opserr << "WARNING - YieldSurface_BC2D::commitState(..) [" << getTag()<<"]\n";
 		opserr << "Can't commit with force outside the surface\n";
-		
+		opserr << "\a";
 	}
 
 	double driftOld = this->getDrift(fx_hist, fy_hist);
@@ -144,10 +143,17 @@ int YieldSurface_BC2D::commitState(Vector &force)
 			isLoading = 1;
 	}
 		
-	hModel->commitState(status_hist);
+	//hModel->commitState(status_hist);
+	hModel->commitState();
 
 	toLocalSystem(force, fx_hist, fy_hist, true);
 	hModel->toOriginalCoord(fx_hist, fy_hist);
+	
+	// opserr << "yPos = " << yPos << ", fy = " << fy_hist << endln;
+	if(fy_hist/yPos > 0.85)
+		hModel->setDeformable(true);
+	else
+		hModel->setDeformable(false); 
 
 	gx_hist = 0;
 	gy_hist = 0;
@@ -199,8 +205,8 @@ Vector& YieldSurface_BC2D::translationTo(Vector &f_new, Vector &f_dir)
 		}
 	if(fabs(hi) < 1e-12) state = 0;
 
-//	cout << "Drift New = " << hi <<endln;
-//	cout << "F new = " << f_new;
+//	opserr << "Drift New = " << hi <<endl;
+//	opserr << "F new = " << f_new;
 	
 	hi = 5*fabs(hi); //approx half to interpolate - that didn't work for all cases
 	// changed from factor of 2 to 5
@@ -239,10 +245,9 @@ Vector& YieldSurface_BC2D::translationTo(Vector &f_new, Vector &f_dir)
         T2(1) = t*(y2 - yi);
     }
 
-//	cout << "F New = " << f_new;
-//	cout << "F dir = " << f_dir;
-//	cout << "Translation vector = " << v2;
-	//
+//	opserr << "F New = " << f_new;
+//	opserr << "F dir = " << f_dir;
+//	opserr << "Translation vector = " << v2;
 	
 	return T2;
 }
@@ -396,7 +401,7 @@ int	   status = -2;
 	else
 	{
 	 	opserr << "YieldSurface_BC2D::forceLocation(double drift) - this condition not possible\n";
-	 	
+	 	opserr << "\a";
 	}
 
 	return status;
@@ -505,7 +510,6 @@ double x0, y0, R0; // intersection
 	{
 		opserr << "R_xy = " << R_xy << " (x= " << x << ", y= " << y << "), R0 = " << R0;
 		opserr << " (x0= " << x0 << ", y0= " << y0 << ")\n";
-		//
 	}
 
 	// If the R_xy < R0, then the point is inside the
@@ -515,7 +519,7 @@ double x0, y0, R0; // intersection
 		if(driftDebug)
 		{
 			opserr << " R_xy < R0, returning sdrift " << sdrift << "\n";
-			
+			opserr << "\a";
 		}
 		return sdrift;
 	}
@@ -546,7 +550,7 @@ int count = 0;
 			if(driftDebug)
 			{
 				opserr << " R_xy < Ri, returning sdrift " << sdrift << "\n";
-				
+				opserr << "\a";
 			}
 			return sdrift;
 		}
@@ -565,7 +569,7 @@ int count = 0;
 			{
 				opserr << " Set to surface at xi = " << xi << ", yi = " << yi << ", Ri = " << Ri << "\n";
 				opserr << " Returning drift " << R_xy - Ri << "\n";
-				
+				opserr << "\a";
 			}
 			return (R_xy - Ri);
 		}
@@ -576,13 +580,13 @@ int count = 0;
 		if(count > 100)
 		{
 			opserr << "ERROR: YieldSurface_BC2D::getDrift(..) - not converging\n";
-			
+			opserr << "\a";
 		}
 
 	}
 
 	opserr << "YieldSurface_BC2D::getDrift(..) - should not reach here\n";
-	
+	opserr << "\a";
 
 	return sdrift;
 }
@@ -627,7 +631,7 @@ double dj = getDrift(xj, yj);
 	 	opserr << "ERROR - YieldSurface_BC2D::interpolate(xi, yi, xj, yj)\n";
 		opserr << "point 1 is outside\n";
 		opserr << xi << "," << yi << "  " << xj << "," << yj << " : "<< di<<"\n";
-		
+		opserr << "\a";
 		return 0;
 	}
 	else if(   dj <0 )
@@ -636,7 +640,7 @@ double dj = getDrift(xj, yj);
 		opserr << "point 2 is inside\n";
 		opserr << xi << "," << yi << "  " << xj << "," << yj << " : "<< dj<<"\n";
 		hModel->Print(opserr);
-		
+		opserr << "\a";
 		return 0;
 	}
 
@@ -658,7 +662,7 @@ int count = 0;
 			opserr << "xi, yi: " << xi << ","<< yi << "\t xj, yj: " << xj << "," << yj << "\n";
 			opserr << "Drift Point j = " << dj << "\n";
 			hModel->Print(opserr);
-			
+			opserr << "\a";
 			return 1;
 		}
 
@@ -699,7 +703,7 @@ double dj = getSurfaceDrift(xj, yj);
 	 	opserr << "ERROR - YieldSurface_BC2D::interpolateClose(xi, yi, xj, yj)\n";
 		opserr << "point 1 is outside\n";
 		opserr << xi << "," << yi << "  " << xj << "," << yj << " : "<< di<<"\n";
-		
+		opserr << "\a";
 		return 0;
 	}
 	else if(   dj <0 )
@@ -708,7 +712,7 @@ double dj = getSurfaceDrift(xj, yj);
 		opserr << "point 2 is inside\n";
 		opserr << xi << "," << yi << "  " << xj << "," << yj << " : "<< dj<<"\n";
 		hModel->Print(opserr);
-		
+		opserr << "\a";
 		return 0;
 	}
 
@@ -729,7 +733,7 @@ int count = 0;
 			opserr << "\nYieldSurface_BC2D::InterpolateClose()-> Error: Unable to converge\n";
 			opserr << "xi, yi: " << xi << ","<< yi << "\t xj, yj: " << xj << "," << yj << "\n";
 			hModel->Print(opserr);
-			
+			opserr << "\a";
 			return 1;
 		}
 
@@ -872,7 +876,7 @@ double x, y;
 		{
 			this->displayForcePoint(false, x, y, color);
 			theView->doneImage();
-			
+			opserr << "\a";
 		}
 
 		hModel->toDeformedCoord(x, y);

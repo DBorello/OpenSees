@@ -207,7 +207,7 @@ void YieldSurface_BC::setTransformation(int xDof, int yDof, int xFact, int yFact
     (*S)(0) = xFact;
     (*S)(1) = yFact;
 
-//	cout << " T = " << *T << "\n, S = " << *S;
+//	opserr << " T = " << *T << "\n, S = " << *S;
 }
 
 void YieldSurface_BC::setTransformation(int xDof, int yDof, int zDof,
@@ -689,6 +689,7 @@ int YieldSurface_BC::checkT(void)
     {
         opserr << "FATAL: YieldSurface_BC::checkT(void)\n";
         opserr << "T = null, use setTransformation(..) after the YS object is created\n";
+        opserr << "\a";
         return 0;
     }
     return 1;

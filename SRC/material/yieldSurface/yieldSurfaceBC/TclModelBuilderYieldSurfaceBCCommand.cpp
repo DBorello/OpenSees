@@ -3,6 +3,7 @@
 #include <string.h>
 #include <Vector.h>
 
+#include "NullYS2D.h"
 #include "Attalla2D.h"
 #include "Orbison2D.h"
 #include "Hajjar2D.h"
@@ -32,8 +33,39 @@ TclModelBuilderYieldSurface_BCCommand (ClientData clienData, Tcl_Interp *interp,
     // Pointer to a ys that will be added to the model builder
     YieldSurface_BC *theYS = 0;
 
-    // Check argv[2] for uniaxial material type
-    if (strcmp(argv[1],"Orbison2D") == 0)
+    if(strcmp(argv[1],"null") == 0)
+    {
+		if(argc < 4)
+		{
+			opserr << "WARNING invalid number of arguments\n";
+			printCommand(argc,argv);
+			opserr << "Want: yieldSurfaceBC null tag? dimensions?" << endln;
+			return TCL_ERROR;
+		}
+		int tag, dim;
+		if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK)
+		{
+			opserr << "WARNING invalid yieldSurfaceBC null tag" << endln;
+			return TCL_ERROR;
+		}
+		if (Tcl_GetInt(interp, argv[3], &dim) != TCL_OK)
+		{
+			opserr << "WARNING invalid yieldSurfaceBC null dimensions" << endln;
+			return TCL_ERROR;
+		}
+
+		switch (dim)
+		{
+			// case 1: 1D YS
+			case 2: theYS = new NullYS2D(tag); break;
+			// case 3: 3D YS
+            default:
+				opserr << "incorrect dimension for null ys\n";
+				return TCL_ERROR;
+		}
+
+	}
+    else if (strcmp(argv[1],"Orbison2D") == 0)
 	{
 		if (argc < 6)
 		{

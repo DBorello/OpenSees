@@ -24,11 +24,12 @@ public:
 				);
 
 	virtual ~BkStressLimSurface2D();
-	virtual int 	commitState(int status);
+	virtual int 	commitState();
 	virtual int		revertToLastCommit(void);
 
 	virtual int	 displaySelf(Renderer &theViewer, int displayMode, float fact);
 	virtual void	Print(OPS_Stream &s, int flag =0);
+	        void    setResidual(double res=1.0);
 	virtual YS_Evolution *getCopy(void)=0;
 	virtual const   Vector &getEquiPlasticStiffness(void);
 	double getTrialPlasticStrains(int dof);
@@ -51,7 +52,7 @@ protected:
 	bool resHardening, resApproach;
 	int resAlgo;
 	double resFactor, appFactor;
-	double direction;
+	double direction, direction_orig;
 };
 
 #endif

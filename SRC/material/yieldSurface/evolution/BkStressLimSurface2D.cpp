@@ -23,14 +23,17 @@ BkStressLimSurface2D::BkStressLimSurface2D(int tag, int classTag, double min_iso
 						)
 :YS_Evolution2D(tag, classTag, min_iso_factor, iso_ratio, kin_ratio),
 	defPosX(true), defPosY(true), resAlgo(restype),
-	resFactor(res_Fact), appFactor(app_Fact), direction(dir)
+	resFactor(res_Fact), appFactor(app_Fact), direction(dir), direction_orig(dir)
 {
-	if (dir < -1.0 || dir > 1.0)
+	if (dir < -1.0 )
 	{
 		opserr << "WARNING: BkStressLimSurface2D() - Dir should be between -1 and +1\n";
-		opserr << "Set to 0 \n";
-		direction = 0.0;
+		opserr << "Set to variable \n";
+		direction_orig = 10;
 	}
+
+	if(direction_orig > 1)
+		direction = 0.0;
 		
 	kinMatX = kinX.getCopy();
 	kinMatY = kinY.getCopy();
@@ -70,16 +73,23 @@ BkStressLimSurface2D::~BkStressLimSurface2D()
     delete limSurface;
 }
 
-int BkStressLimSurface2D::commitState(int status)
+void BkStressLimSurface2D::setResidual(double res)
 {
-	this->YS_Evolution2D::commitState(status);
+	kinMatX->setResidual(res);
+	kinMatY->setResidual(res);
+}
+
+	        
+int BkStressLimSurface2D::commitState()
+{
+	this->YS_Evolution2D::commitState();
 
     int res  = kinMatX->commitState();
 	res += kinMatY->commitState();
 	res += isoMatXPos->commitState();
 	res += isoMatXNeg->commitState();
 	res += isoMatYPos->commitState();
-	res += isoMatYNeg->commitState();;
+	res += isoMatYNeg->commitState();
 	
 	return res;
 }
@@ -108,6 +118,10 @@ void BkStressLimSurface2D::setTrialPlasticStrains(double lamda, const Vector &f,
 	double epx = lamda*g(0);
 	double epy = lamda*g(1);
 
+//	opserr << "epx = " << epx << ", epy = " << epy << endln;
+//	opserr << "gx  = " << g(0)  << ", gy  = " << g(1)  << endln;
+//	opserr << "\a";
+
 	if(epx > 0)
 		defPosX = true;
 	else
@@ -123,19 +137,25 @@ void BkStressLimSurface2D::setTrialPlasticStrains(double lamda, const Vector &f,
 	isoMatYPos->setTrialIncrValue(epy);
 	isoMatYNeg->setTrialIncrValue(-1*epy);
 	//!! when should sumIsoEp be reset? - using same as plastic hardening
-	
+
 	double x0 = translate_hist(0);
 	double y0 = translate_hist(1);
 	double fx = f(0);
 	double fy = f(1);
 
-	limSurface->hModel->toOriginalCoord(x0, y0);	
+	limSurface->hModel->toOriginalCoord(x0, y0);
 	double drift = limSurface->getDrift(x0, y0);
+
+	if(direction_orig > 1)
+		direction = fabs(y0);
+
+	if(fabs(y0) >= 0.80)
+		direction = 1.0; // constP
 	
 int resType = resAlgo;
 	
 	double dR = fabs(drift); // in-case outside    pinching starts late
-	
+
 	switch (resType)
 	{
 	case 1:
@@ -143,45 +163,55 @@ int resType = resAlgo;
 		if(drift >= 0.0)
 		{
 			if(sign(g(0)) != sign(translate_hist(0)))
-				dR = 2.0 + drift; // approx value = 2   metal case
-			else
+				dR = 1.5 + drift; // approx value = 2   metal case
+			 else
 				dR = 0.0;
 		}
 		else     // no pinching
-		{	
-			// limSurface->hModel->toOriginalCoord(fx, fy);
-			// dR = limSurface->interpolate(x0, y0, fx, fy);
+		{
+			//old limSurface->hModel->toOriginalCoord(fx, fy);
+			//old  dR = limSurface->interpolate(x0, y0, fx, fy);
+
+
+			// y0 range -1 to +1
 			if(sign(g(0)) != sign(translate_hist(0)))
-				dR = 2.0 + drift; // drift < 0
+			{
+				  // dR = 2.0 + drift; // drift < 0
+				dR = fabs(limSurface->getDrift(0.0, y0))*2 - fabs(drift);
+//          not required
 //			else
 //				dR = fabs(drift);
+
+//			opserr << "!!drift 0, y0 = " << limSurface->getDrift(0.0, y0)
+//			     << ", drift = " << drift << endln;
+			}
 		}
 
 		break;
-	} //case 1 - Metals	
-	
+	} //case 1 - Metals
+
 	case 2:
 	{
 		if(drift >= 0.0)
 			dR = 0.0;
 		else     // pinching starts early
-		{	
+		{
 //			limSurface->hModel->toOriginalCoord(fx, fy);
 //			dR = limSurface->interpolate(x0, y0, fx, fy);
 			if(sign(g(0)) != sign(translate_hist(0)))
-				dR = 2.0 + drift; // drift < 0
+				dR = fabs(limSurface->getDrift(0.0, y0))*2 - fabs(drift);
 		}
-		
+
 		break;
 	}//case 2 - Pinching,  Kp =  Kp0 -> 0
-	
+
 	case 3:
 	{
 		if(drift >= 0.0)
 			dR = 0.0;
 		break;
-	}//case 3 - Pinching, Kp = 0 -> Kp0 -> 0	
-		
+	}//case 3 - Pinching, Kp = 0 -> Kp0 -> 0
+
 	case 4:
 	{
 		if(drift >= 0.0)
@@ -189,7 +219,7 @@ int resType = resAlgo;
 			if(sign(g(0)) == sign(translate_hist(0)))
 				dR = 0.0;
 		}
-/*		else 
+/*		else
 		{
 			if(sign(g(0)) != sign(translate_hist(0)))
 				dR = 0.0;
@@ -228,13 +258,12 @@ double sfactor = 1.0;
 
 		}
 
-//		cout << "----- Drift > 0 --- ( " << sfactor << ")\n";
+//		opserr << "----- Drift > 0 --- ( " << sfactor << ")\n";
     }
     
 	// absolute values - no need to have history 
 	kinMatX->setTrialValue(dR, sfactor);
 	kinMatY->setTrialValue(dR, sfactor);
-
 }
 
 const Vector &BkStressLimSurface2D::getEquiPlasticStiffness()
@@ -247,8 +276,11 @@ const Vector &BkStressLimSurface2D::getEquiPlasticStiffness()
 	if(!defPosX)
 		kp_iso_x =  isoMatXNeg->getTrialPlasticStiffness();
 	if(!defPosY)
-		kp_iso_y =  isoMatYNeg->getTrialPlasticStiffness();	
+		kp_iso_y =  isoMatYNeg->getTrialPlasticStiffness();
 
+//	opserr << *isoMatYPos;
+//	opserr << *isoMatXPos;
+		
 	v2(0) =isotropicRatio*kp_iso_x + kinematicRatio*kp_kin_x;
 	v2(1) =isotropicRatio*kp_iso_y + kinematicRatio*kp_kin_y;
 	

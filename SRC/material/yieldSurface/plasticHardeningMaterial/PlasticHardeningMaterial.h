@@ -14,12 +14,13 @@ class PlasticHardeningMaterial : public Material
 	// could be delta_plastic, |back-stress|, 
 	// distance between force-point on YS and conjugate
 	// point on Bounding-Surface
-    virtual int setTrialValue(double xVal, double factor);
-	virtual int setTrialIncrValue(double dxVal);
+    virtual int  setTrialValue(double xVal, double factor);
+	virtual int  setTrialIncrValue(double dxVal);
+	        void setResidual(double res=1);
 
-    virtual int commitState (void);
-    virtual int revertToLastCommit (void);
-	virtual int revertToStart (void);
+    virtual int  commitState ();
+    virtual int  revertToLastCommit (void);
+	virtual int  revertToStart (void);
 
 	virtual double getTrialPlasticStiffness()=0;
 			 double getTrialValue(void);
@@ -35,7 +36,8 @@ class PlasticHardeningMaterial : public Material
 
 
   protected:
-  double val_hist, val_trial, sFactor;
+  double val_hist, val_trial;
+  double residual, sFactor;
     
   private:
 };

@@ -32,10 +32,17 @@ ElTawil2D::ElTawil2D(int tag, double xbal, double ybal, double ypos, double yneg
 	t(1) = transY;
 	hModel->setInitTranslation(t);
 
-//	cout << "Translation Y = " << transY << endln;
+//	opserr << "Translation Y = " << transY << endln;
 
 	//capX = xBal*(1 - pow( fabs((transY*capY)/yNegCap) , ty));
 	capX    = xBal;
+
+	// bad:
+	capX_orig = capX;
+	capY_orig = capY;
+	capXdim = capX;
+	capYdim = capY;
+	
 }
 
 ElTawil2D::~ElTawil2D()
@@ -69,9 +76,10 @@ double yValNeg = ytNeg*capY;
 
 	xtPos = xtPos/capX;
 	xtNeg = xtNeg/capX;
-
+/*
 	opserr << "ytPos = " << ytPos << ", ytNeg = " << ytNeg << ", xtPos = " << xtPos
 	                            << ", xtNeg = " << xtNeg << endln;
+*/
 }
 
 
@@ -87,6 +95,9 @@ void ElTawil2D::getGradient(double &gx, double &gy, double x, double y)
     {
      	opserr << "ERROR - ElTawil2D::getGradient(double &gx, double &gy, double x, double y)\n";
         opserr << "Force point not on yield surface, drift = " << drift << " loc = " << loc <<"\n";
+        // opserr << "\a";
+        gx = 1.0;
+        gy = 1.0;
     }
     else
     {
@@ -106,7 +117,8 @@ void ElTawil2D::getGradient(double &gx, double &gy, double x, double y)
 		else
 		{
 			// double xVal = x*capx;
-			double yVal = fabs(y*capy);
+			double yVal = fabs(y*capy);  //!!
+			// double yVal = y*capy;           //!!
 
 			gx = 1/xBal;
 			if(x < 0)
@@ -119,8 +131,8 @@ void ElTawil2D::getGradient(double &gx, double &gy, double x, double y)
 		}
 	}
 
-//	opserr << "gx = " << gx << "gy = " << gy << "\n";
-//	cin.get();
+	// opserr << "gx = " << gx << ", gy = " << gy << ", capy = " << capy << "\n";
+	// opserr << "\a";
 }
 
 double ElTawil2D::getSurfaceDrift(double x, double y)

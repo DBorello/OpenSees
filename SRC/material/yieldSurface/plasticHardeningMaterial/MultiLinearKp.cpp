@@ -52,7 +52,8 @@ double sumDisp = val_trial;
 
 	if( sumDisp > sumPlasDefo(numPoints-1))
 	{
-		K = Kp(numPoints-1);
+		K = residual*Kp(numPoints-1);
+		
 		if(sFactor != 1.0)
 			K = Kp(0)*sFactor;
 		return K;
@@ -85,16 +86,22 @@ double sumDisp = val_trial;
 
 	if(sFactor != 1.0)
 		K = Kp(0)*sFactor;
-		
+	else
+		K = residual*K;
+
+	// opserr << "K = " << K << ", sFactor = " << sFactor << endln; // opserr << "\a";
 	return K;
 }
 
 
 void MultiLinearKp::Print(OPS_Stream &s, int flag)
 {
-	s << "MultiLinear, Tag = " << getTag() << endln;
-	s << "SumPlasDefo Vector = " <<  sumPlasDefo;
-	s << "Kp Vector          = " <<  Kp << endln;
+	this->PlasticHardeningMaterial::Print(s, flag);
+	
+	s << "+-MultiLinear" << endln;
+	s << "    Kp = " << this->getTrialPlasticStiffness();
+	s << "    SumPlasDefo Vector = " <<  sumPlasDefo;
+	s << "    Kp Vector          = " <<  Kp << endln;
 }
 
 PlasticHardeningMaterial *MultiLinearKp::getCopy(void)

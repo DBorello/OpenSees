@@ -31,7 +31,7 @@ public:
     virtual int 	recvSelf(int commitTag, Channel &theChannel,
 					FEM_ObjectBroker &theBroker){return -1;}
 
-	virtual int 	commitState(int status);
+	virtual int 	commitState();
 	virtual int		revertToLastCommit(void);
 	virtual const   Vector &getEquiPlasticStiffness(void)=0;
 
@@ -49,7 +49,6 @@ protected:
 //	double sumPlasticDeformX, sumPlasticDeformX_hist;
 //	double sumPlasticDeformY, sumPlasticDeformY_hist;
 	bool   softening;
-	bool   deformable;
 	static Vector v2;
 	double minIsoFactor;
 	YieldSurface_BC *tmpYSPtr;

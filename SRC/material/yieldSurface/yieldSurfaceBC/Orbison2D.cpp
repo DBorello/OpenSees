@@ -46,8 +46,8 @@ void Orbison2D::getGradient(double &gx, double &gy, double x, double y)
     {
      	opserr << "ERROR - Orbison2D::getGradient(double &gx, double &gy, double x, double y)\n";
         opserr << "Force point not on the yield surface\n";
-	opserr << " fx = " << x << ", fy = " << y  << " drift = " << drift << "\n";
-        
+		opserr << " fx = " << x << ", fy = " << y  << " drift = " << drift << "\n";
+        opserr << "\a";
     }
     else
     {
@@ -76,7 +76,7 @@ YieldSurface_BC *Orbison2D::getCopy(void)
     if(theCopy==0)
     {
      	opserr << "Orbison2D::getCopy(void) - unable to make copy\n";
-     	
+     	opserr << "\a";
     }
     //later  copy all the state variables
     return theCopy;

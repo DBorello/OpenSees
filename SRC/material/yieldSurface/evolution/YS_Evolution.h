@@ -33,7 +33,7 @@ public:
 //	friend OPS_Stream &operator<<(OPS_Stream &s, const YS_Evolution &hModel);
 
 	virtual int	update(int flag=0);
-	virtual int commitState(int status);
+	virtual int commitState();
 	virtual int	revertToLastCommit(void);
 	virtual YS_Evolution *getCopy(void) = 0;
 
@@ -50,6 +50,7 @@ public:
 	  
     virtual double getTrialPlasticStrains(int dof)=0;
     virtual double getCommitPlasticStrains(int dof)=0;
+    virtual void   setResidual(double res=1.0);
 	void	setInitTranslation(Vector &initTranslate);
     const Vector &getInitTranslation(void);
 
@@ -57,11 +58,12 @@ public:
 	double	getTrialTranslation(int dof);
 	double	getTrialIsotropicFactor(int dof);
 	double  getCommitIsotropicFactor(int dof);
-    	
+	
+	void    setDeformable(bool defo);
 
-	 void	toDeformedCoord(double &x);
-	 void	toDeformedCoord(double &x, double &y);
-	 void	toDeformedCoord(double &x, double &y, double &z);
+	void	toDeformedCoord(double &x);
+	void	toDeformedCoord(double &x, double &y);
+	void	toDeformedCoord(double &x, double &y, double &z);
 
 	 void	toOriginalCoord(double &x);
 	 void	toOriginalCoord(double &x, double &y);
@@ -77,6 +79,7 @@ private:
 	void    toOriginalCoord(Vector &coord);
 protected:
 	//double  isotropicFactor_hist, isotropicFactor; // Effective magnification
+	bool   deformable;
 	Vector  isotropicFactor_hist, isotropicFactor;
 	Vector  translate_hist,       translate;
 	Vector  translate_init;

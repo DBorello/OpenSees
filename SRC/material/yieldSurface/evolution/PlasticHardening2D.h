@@ -19,7 +19,7 @@ public:
 
 	virtual ~PlasticHardening2D();
 	
-	virtual int 	commitState(int status);
+	virtual int 	commitState();
 	virtual int		revertToLastCommit(void);
 
 	virtual void	Print(OPS_Stream &s, int flag =0);

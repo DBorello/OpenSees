@@ -21,7 +21,7 @@ ExponReducing::ExponReducing(int tag, double kp0, double alfa, double min_fact)
 :PlasticHardeningMaterial(tag,MAT_TAG_EXPON),
   Kp0(kp0), alpha(alfa), resFactor(min_fact)
 {
-//	cout << "ResFact = " <<  res_fact << endln; cin.get();
+//	opserr << "ResFact = " <<  res_fact << endln; opserr << "\a";
 }
 
 
@@ -40,7 +40,7 @@ double ExponReducing::getTrialPlasticStiffness()
 	// K = Kp0*(1.0 - exp(-alpha + alpha*val_trial));
 	
 	// for pinching type stuff
-	K = Kp0*(1 - exp(-1*alpha*val_trial));
+	K = residual*Kp0*(1 - exp(-1*alpha*val_trial));
 
 	if(sFactor != 1.0)
 		K = Kp0*sFactor;
@@ -48,11 +48,12 @@ double ExponReducing::getTrialPlasticStiffness()
 	if(K < (Kp0*resFactor))
 		K = Kp0*resFactor;
 
-//	cout << "K = " << K << ", sFactor = " << sFactor << endln;
+//	opserr << "K = " << K << ", sFactor = " << sFactor << endln;
 	
 	if(K <0.0)
 	{
 		opserr << "Ri = " << val_trial << ", Factor = " << K/Kp0 << ", res_fact = " << resFactor << endln;
+		opserr << "\a";
 	}
 	
 	return K;

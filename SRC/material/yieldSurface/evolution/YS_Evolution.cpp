@@ -19,22 +19,23 @@ YS_Evolution::YS_Evolution(int tag, int classtag,
                   :TaggedObject(tag), MovableObject(classtag),
            isotropicRatio(iso_ratio), kinematicRatio(kin_ratio),
            isotropicRatio_orig(iso_ratio), kinematicRatio_orig(kin_ratio),
-           dimension(_dimension), 
+           dimension(_dimension), deformable(false),
 			translate_hist(_dimension), translate(_dimension), translate_init(_dimension),
 			isotropicFactor(_dimension), isotropicFactor_hist(_dimension),
 			isotropicRatio_shrink(shr_iso), kinematicRatio_shrink(shr_kin),
 			freezeEvolution(false)
 {
-	if( (isotropicRatio + kinematicRatio) != 1.0 || (isotropicRatio + kinematicRatio) != 0.0)
+	/*if( (isotropicRatio + kinematicRatio) != 1.0 || (isotropicRatio + kinematicRatio) != 0.0)
 	{
 	 	opserr << "WARNING YS_Evolution(..) -  isotropicRatio + kinematicRatio != 1 or 0 -> "
 		  << isotropicRatio + kinematicRatio << endln;
-	}
+		// this always gives warning message
+	}*/
 	translate.Zero();
 	translate_hist.Zero();
 	translate_init.Zero();
 
-//	cout << "DIM = " << dimension << endln;
+//	opserr << "DIM = " << dimension << endln;
 	for(int i=0; i<dimension;i++)
 	{
 		isotropicFactor(i)=1;
@@ -66,10 +67,17 @@ const Vector &YS_Evolution::getInitTranslation(void)
 
 int YS_Evolution::update(int flag)
 {
+	// does nothing
 	return 0;
 }
 
-int YS_Evolution::commitState(int stat)
+void YS_Evolution::setResidual(double res)
+{
+	// does nothing
+}
+
+	
+int YS_Evolution::commitState()
 {
 	isotropicFactor_hist   = isotropicFactor;
 	translate_hist         = translate;
@@ -87,9 +95,9 @@ void  YS_Evolution::toDeformedCoord(Vector &coord)
 {
 //	if(getTag() == 10)
 //	{
-//		cout << "DIM: " << dimension << endln;
-//		cout << "ISO: " << isotropicFactor;
-//		cin.get();
+//		opserr << "DIM: " << dimension << endln;
+//		opserr << "ISO: " << isotropicFactor;
+//		opserr << "\a";
 //		}
 	
     // no vector multipication in opensees
@@ -210,9 +218,14 @@ void YS_Evolution::checkDimension(int dir)
 
 }
 
+void  YS_Evolution::setDeformable(bool defo)
+{
+	this->deformable = defo;
+}
+
 void YS_Evolution::Print(OPS_Stream &s, int flag)
 {
-  s << " YS_Evolution - tag = " << getTag() << endln;
+	opserr << " YS_Evolution - tag = " << getTag() << endln;
 }
 
 /*OPS_Stream &operator<<(OPS_Stream &s, const YS_Evolution &hModel)

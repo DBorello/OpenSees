@@ -50,9 +50,9 @@ PlasticHardening2D::~PlasticHardening2D()
     delete kpMatYNeg;
 }
 
-int PlasticHardening2D::commitState(int status)
+int PlasticHardening2D::commitState()
 {
-	this->YS_Evolution2D::commitState(status);
+	this->YS_Evolution2D::commitState();
 	
     int res  = kpMatXPos->commitState();
 		res += kpMatXNeg->commitState();
@@ -65,7 +65,7 @@ int PlasticHardening2D::commitState(int status)
 	{
 		double v0 = getIsoPlasticStiffness(0);
 		double v1 = getIsoPlasticStiffness(1);
-		cout << v0 << "\t " << v1 << endln;
+		opserr << v0 << "\t " << v1 << endln;
 	}
     }*/
     
@@ -89,7 +89,7 @@ int PlasticHardening2D::revertToLastCommit(void)
 void PlasticHardening2D::setTrialPlasticStrains(double lamda, const Vector &f, const Vector &g)
 {
 
-//	cout << *tmpYSPtr;
+//	opserr << *tmpYSPtr;
 	
 	double epx = lamda*g(0);
 	double epy = lamda*g(1);
@@ -110,8 +110,8 @@ void PlasticHardening2D::setTrialPlasticStrains(double lamda, const Vector &f, c
 	{
 //		if(val < -1*chk)
 //		{
-//			cout << "+Pinch [";
-//			cout << tmpYSPtr->ele_Location << "]\n";
+//			opserr << "+Pinch [";
+//			opserr << tmpYSPtr->ele_Location << "]\n";
 //			pinchX = true;
 //		}
 //		else
@@ -123,8 +123,8 @@ void PlasticHardening2D::setTrialPlasticStrains(double lamda, const Vector &f, c
 	{
 //		if(val >  chk)
 //		{
-//			cout << "-Pinch [";
-//			cout << tmpYSPtr->ele_Location << "]\n";
+//			opserr << "-Pinch [";
+//			opserr << tmpYSPtr->ele_Location << "]\n";
 //			pinchX = true;
 //		}
 //		else

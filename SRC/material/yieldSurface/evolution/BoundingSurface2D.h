@@ -17,7 +17,7 @@ public:
 				YieldSurface_BC &bound_surface);
 
 	virtual ~BoundingSurface2D();
-	virtual int 	commitState(int status);
+	virtual int 	commitState();
 	virtual int		revertToLastCommit(void);
 	virtual const   Vector &getEquiPlasticStiffness(void)=0;
 

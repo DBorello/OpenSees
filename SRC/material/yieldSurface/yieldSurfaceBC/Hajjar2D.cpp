@@ -71,6 +71,11 @@ double xn = num/denom;
 		opserr << " centroidY = " << centroidY << "\n";
 		opserr << " capX = " << capX << ", capY = " << capY << "\n";
 	}
+	// bad:
+	capX_orig = capX;
+	capY_orig = capY;
+	capXdim = capX;
+	capYdim = capY;
 
 }
 
@@ -104,21 +109,21 @@ void Hajjar2D::getGradient(double &gx, double &gy, double xi, double yi)
         opserr << "ERROR - Hajjar2D::getGradient(double &gx, double &gy, double x, double y)\n";
         opserr << "Point inside the yield surface\n";
 		opserr << " fx = " << xi << ", fy = " << yi  << " drift = " << drift << "\n";
-        cin.get();
+        opserr << "\a";
     }
     else if(drift > error)
     {
         opserr << "ERROR - Hajjar2D::getGradient(double &gx, double &gy, double x, double y)\n";
         opserr << "Point outside the yield surface\n";
 		opserr << " fx = " << xi << ", fy = " << yi  << " drift = " << drift << "\n";
-        cin.get();
+        opserr << "\a";
     }*/
     if(forceLocation(drift)!=0)
     {
      	opserr << "ERROR - Hajjar2D::getGradient(double &gx, double &gy, double x, double y)\n";
         opserr << "Force point not on the yield surface\n";
 		opserr << " fx = " << xi << ", fy = " << yi  << " drift = " << drift << "\n";
-        
+        opserr << "\a";
     }
     else
     {

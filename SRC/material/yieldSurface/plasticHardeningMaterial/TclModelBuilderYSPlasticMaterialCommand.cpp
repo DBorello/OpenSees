@@ -3,12 +3,11 @@
 #include <Vector.h>
 
 #include "MultiLinearKp.h"
-#include "QuadrReducing.h"
 #include "ExponReducing.h"
 #include "NullPlasticMaterial.h"
 
 int TclMultiLinearCommand (ClientData clienData, Tcl_Interp *interp, int argc,
-			   TCL_Char **argv, TclModelBuilder *theTclBuilder)
+					char **argv, TclModelBuilder *theTclBuilder)
 {
     // Pointer to a uniaxial material that will be added to the model builder
     PlasticHardeningMaterial *theMaterial = 0;
@@ -90,8 +89,8 @@ int TclMultiLinearCommand (ClientData clienData, Tcl_Interp *interp, int argc,
 
 
 // QuadrReducing(int tag, double kp0, double kp_half);
-int TclQuadrReducingCommand(ClientData clienData, Tcl_Interp *interp, int argc,
-			    TCL_Char **argv, TclModelBuilder *theTclBuilder)
+/*int TclQuadrReducingCommand(ClientData clienData, Tcl_Interp *interp, int argc,
+					char **argv, TclModelBuilder *theTclBuilder)
 {
     // Pointer to a uniaxial material that will be added to the model builder
     PlasticHardeningMaterial *theMaterial = 0;
@@ -127,10 +126,10 @@ int TclQuadrReducingCommand(ClientData clienData, Tcl_Interp *interp, int argc,
 
 	return TCL_OK;
 }
-
+*/
 
 int TclExponReducingCommand(ClientData clienData, Tcl_Interp *interp, int argc,
-			    TCL_Char **argv, TclModelBuilder *theTclBuilder)
+					char **argv, TclModelBuilder *theTclBuilder)
 {
 	if(argc < 5)
 	{
@@ -173,7 +172,7 @@ double arg1, arg2, arg3;
 		}
 
 		theMaterial = new ExponReducing(tag, arg1, arg2, arg3);
-//		cout << "factor = " << arg3 << endln;
+//		opserr << "factor = " << arg3 << endln;
 	}
 	else
 		theMaterial = new ExponReducing(tag, arg1, arg2);
@@ -192,7 +191,7 @@ double arg1, arg2, arg3;
 
 
 int TclNullPlasticMaterialCommand(ClientData clienData, Tcl_Interp *interp, int argc,
-				  TCL_Char **argv, TclModelBuilder *theTclBuilder)
+					char **argv, TclModelBuilder *theTclBuilder)
 {
     PlasticHardeningMaterial *theMaterial = 0;
 
@@ -224,17 +223,17 @@ int TclNullPlasticMaterialCommand(ClientData clienData, Tcl_Interp *interp, int 
 
 int
 TclModelBuilderPlasticMaterialCommand (ClientData clientData, Tcl_Interp *interp, int argc,
-				       TCL_Char **argv, TclModelBuilder *theTclBuilder)
+				 char **argv, TclModelBuilder *theTclBuilder)
 {
 
 	if (strcmp(argv[1],"multiLinearKp") == 0)
 	{
 		return TclMultiLinearCommand(clientData, interp, argc, argv, theTclBuilder);
 	}
-	else if(strcmp(argv[1],"quadrReducing") == 0)
+	/*else if(strcmp(argv[1],"quadrReducing") == 0)
 	{
 		return TclQuadrReducingCommand(clientData, interp, argc, argv, theTclBuilder);
-	}
+	}*/
 	else if(strcmp(argv[1],"exponReducing") == 0)
 	{
 		return TclExponReducingCommand(clientData, interp, argc, argv, theTclBuilder);

@@ -35,9 +35,9 @@ BoundingSurface2D::~BoundingSurface2D()
     delete boundSurface;
 }
 
-int BoundingSurface2D::commitState(int status)
+int BoundingSurface2D::commitState()
 {
-	this->YS_Evolution2D::commitState(status);
+	this->YS_Evolution2D::commitState();
 
     int res  = kpMatX->commitState();
 	    res += kpMatY->commitState();
