@@ -94,3 +94,5 @@ puts stderr "Exact elastic solution (linear geometry)"
 puts stderr "\tAxial displacement: [expr $P*$L/($E*$A)]"
 puts stderr "\tEnd displacement: [expr $H*pow($L,3)/(3*$E*$I) + $M*pow($L,2)/(2*$E*$I)]"
 puts stderr "\tEnd rotation: [expr $H*pow($L,2)/(2*$E*$I) + $M*$L/($E*$I)]"
+
+wipe

@@ -56,3 +56,5 @@ system UmfPack
 analysis Static
 
 analyze 1
+
+wipe

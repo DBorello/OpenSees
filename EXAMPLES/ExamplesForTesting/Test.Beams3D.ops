@@ -101,3 +101,5 @@ puts stderr "\tEnd displacement (Z): [expr $H*pow($L,3)/(3*$E*$I) - $M*pow($L,2)
 puts stderr "\tEnd twist: [expr $M*$L/($G*$J)]"
 puts stderr "\tEnd rotation (Y): [expr -$H*pow($L,2)/(2*$E*$I) + $M*$L/($E*$I)]"
 puts stderr "\tEnd rotation (Z): [expr  $H*pow($L,2)/(2*$E*$I) + $M*$L/($E*$I)]"
+
+wipe
