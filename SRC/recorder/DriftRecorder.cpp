@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.10 $
-// $Date: 2005-03-28 22:09:16 $
+// $Revision: 1.11 $
+// $Date: 2005-03-30 20:12:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -44,7 +44,7 @@ DriftRecorder::DriftRecorder()
   :Recorder(RECORDER_TAGS_DriftRecorder),
    ndI(0), ndJ(0), dof(0), perpDirn(0), oneOverL(0), data(0),
    theDomain(0), theHandler(0),
-   initializationDone(false), numNodes(0)
+   initializationDone(false), numNodes(0), echoTimeFlag(false)
 {
 
 }
@@ -55,11 +55,12 @@ DriftRecorder::DriftRecorder(int ni,
 			     int df, 
 			     int dirn,
 			     Domain &theDom, 
-			     DataOutputHandler &theDataOutputHandler)
+			     DataOutputHandler &theDataOutputHandler,
+			     bool timeFlag)
   :Recorder(RECORDER_TAGS_DriftRecorder),
    ndI(0), ndJ(0), dof(df), perpDirn(dirn), oneOverL(0), data(0),
    theDomain(&theDom), theHandler(&theDataOutputHandler),
-   initializationDone(false), numNodes(0)
+   initializationDone(false), numNodes(0), echoTimeFlag(timeFlag)
 {
   ndI = new ID(1);
   ndJ = new ID (1);
@@ -76,11 +77,12 @@ DriftRecorder::DriftRecorder(const ID &nI,
 			     int df, 
 			     int dirn,
 			     Domain &theDom, 
-			     DataOutputHandler &theDataOutputHandler)
+			     DataOutputHandler &theDataOutputHandler,
+			     bool timeFlag)
   :Recorder(RECORDER_TAGS_DriftRecorder),
    ndI(0), ndJ(0), dof(df), perpDirn(dirn), oneOverL(0), data(0),
    theDomain(&theDom), theHandler(&theDataOutputHandler),
-   initializationDone(false), numNodes(0)
+   initializationDone(false), numNodes(0), echoTimeFlag(timeFlag)
 {
   ndI = new ID(nI);
   ndJ = new ID (nJ);
@@ -129,7 +131,11 @@ DriftRecorder::record(int commitTag, double timeStamp)
   if (numNodes == 0 || data == 0)
     return 0;
 
-  (*data)(0) = theDomain->getCurrentTime();
+  int timeOffset = 0;
+  if (echoTimeFlag == true) {
+    (*data)(0) = theDomain->getCurrentTime();
+    timeOffset = 1;
+  }
 
   for (int i=0; i<numNodes; i++) {
     Node *nodeI = theNodes[2*i];
@@ -141,11 +147,11 @@ DriftRecorder::record(int commitTag, double timeStamp)
       
        double dx = dispJ(dof)-dispI(dof);
        
-       (*data)(i+1) =  dx* (*oneOverL)(i);
+       (*data)(i+timeOffset) =  dx* (*oneOverL)(i);
        
     }
     else
-      (*data)(i+1) = 0.0;
+      (*data)(i+timeOffset) = 0.0;
   }
 
   theHandler->write(*data);
@@ -169,7 +175,7 @@ DriftRecorder::setDomain(Domain &theDom)
 int
 DriftRecorder::sendSelf(int commitTag, Channel &theChannel)
 {
-  static ID idData(5); 
+  static ID idData(6); 
   idData.Zero();
   if (ndI != 0 && ndI->Size() != 0)
     idData(0) = ndI->Size();
@@ -180,6 +186,10 @@ DriftRecorder::sendSelf(int commitTag, Channel &theChannel)
   if (theHandler != 0) {
     idData(4) = theHandler->getClassTag();
   }
+  if (echoTimeFlag == true)
+    idData(5) = 0;
+  else
+    idData(5) = 1;    
 
   if (theChannel.sendID(0, commitTag, idData) < 0) {
     opserr << "DriftRecorder::sendSelf() - failed to send idData\n";
@@ -245,6 +255,10 @@ DriftRecorder::recvSelf(int commitTag, Channel &theChannel,
   dof = idData(2);
   perpDirn = idData(3);
 
+  if (idData(5) == 0)
+    echoTimeFlag = true;
+  else
+    echoTimeFlag = false;
 
   if (theHandler != 0)
     delete theHandler;
@@ -342,9 +356,13 @@ DriftRecorder::initialize(void)
   // allocate memory
   //
 
+  int timeOffset = 0;
+  if (echoTimeFlag == true) 
+    timeOffset = 1;
+  
   theNodes = new Node *[2*numNodes];
   oneOverL = new Vector(numNodes);
-  data = new Vector(numNodes+1); // data(0) allocated for time
+  data = new Vector(numNodes+timeOffset); // data(0) allocated for time
   if (theNodes == 0  || oneOverL == 0 || data == 0) {
     opserr << "DriftRecorder::initialize() - out of memory\n";
     return -3;
@@ -383,15 +401,17 @@ DriftRecorder::initialize(void)
   //
   // create the data description for the OutputHandler & compute length between nodes
   //
-  
-  int numDbColumns = 1 + numNodes;
+
+  int numDbColumns = timeOffset + numNodes;
   char **dbColumns = new char *[numDbColumns];
   
   static char aColumn[128]; // assumes a column name will not be longer than 256 characters
-  
-  char *newColumn = new char[5];
-  sprintf(newColumn, "%s","time");  
-  dbColumns[0] = newColumn;
+
+  if (echoTimeFlag == true) {  
+    char *newColumn = new char[5];
+    sprintf(newColumn, "%s","time");  
+    dbColumns[0] = newColumn;
+  }
   
   for (int i=0; i<numNodes; i++) {
     Node *ndI = theNodes[2*i];
@@ -403,7 +423,7 @@ DriftRecorder::initialize(void)
     int lenColumn = strlen(aColumn);
     char *newColumn = new char[lenColumn+1];
     strcpy(newColumn, aColumn);
-    dbColumns[i+1] = newColumn;
+    dbColumns[i+timeOffset] = newColumn;
   }
   
   //

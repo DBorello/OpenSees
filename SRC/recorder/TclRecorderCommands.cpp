@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2005-03-30 03:54:33 $
+// $Revision: 1.34 $
+// $Date: 2005-03-30 20:12:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -798,6 +798,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	echoMode eMode = NONE;       // enum found in DataOutputFileHandler.h
 
+	bool echoTimeFlag = false;
 	ID iNodes(0,16);
 	ID jNodes(0,16);
 	int dof = 1;
@@ -880,6 +881,12 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	      pos = argc;
 	    } 
 	    pos+=2;
+	  } 
+	  
+	  else if (strcmp(argv[pos],"-time") == 0) {
+	    echoTimeFlag = true;
+	    pos+=1;
+
 	  } else 
 	    pos++;
 	}
@@ -899,7 +906,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	
 	// Subtract one from dof and perpDirn for C indexing
 	(*theRecorder) = new DriftRecorder(iNodes, jNodes, dof-1, perpDirn-1,
-					   theDomain, *theDataOutputHandler);
+					   theDomain, *theDataOutputHandler, echoTimeFlag);
       }
     }
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2005-02-22 20:49:00 $
+// $Revision: 1.9 $
+// $Date: 2005-03-30 20:12:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.h,v $
                                                                         
 #ifndef DriftRecorder_h
@@ -45,11 +45,13 @@ class DriftRecorder: public Recorder
   DriftRecorder();
   DriftRecorder(int ndI, int ndJ, int dof, int perpDirn,
 		Domain &theDomain, 
-		DataOutputHandler &theHandler);
+		DataOutputHandler &theHandler,
+		bool echoTime = false);
 
   DriftRecorder(const ID &ndI, const ID &ndJ, int dof, int perpDirn,
 		Domain &theDomain, 
-		DataOutputHandler &theHandler);
+		DataOutputHandler &theHandler,
+		bool echoTime = false);
   
   ~DriftRecorder();
 
@@ -79,6 +81,7 @@ class DriftRecorder: public Recorder
 
   bool initializationDone;
   int numNodes;
+  bool echoTimeFlag;   // flag indicating whether time to be included in o/p
 };
 
 #endif
