@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.49 $
-// $Date: 2003-04-02 22:02:54 $
+// $Revision: 1.50 $
+// $Date: 2003-04-28 20:53:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -401,7 +401,7 @@ reliability(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
 }
 
 int 
-wipeReliability(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+wipeReliability(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   if (theReliabilityBuilder != 0) {
     delete theReliabilityBuilder;
@@ -2979,7 +2979,7 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
 int 
-nodeVel(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+nodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
     
     // make sure at least one other argument to contain type of system
