@@ -46,6 +46,7 @@ equalDOF 6 7 2
 # elastic material
 nDMaterial ElasticIsotropic3D 1 70000 0.3 1.8
 
+
 # the template material of yours
 #sset YS {DruckerPrager }
 #set PS {DruckerPrager 0.05}
@@ -61,9 +62,8 @@ nDMaterial ElasticIsotropic3D 1 70000 0.3 1.8
 #
 #nDMaterial Template 1 -YS $YS -PS $PS -EPS $EPS ......
 
-#            tag     8 nodes      matID  bforce1 bforce2 bforce3 massDensity
+#            tag     8 nodes      matID  bforce1 bforce2 bforce3 	 massdensity
 element brick  1  5 6 7 8 1 2 3 4   1      0.0     0.0    -9.81    1.8
-    
 
 set Series "Path -filePath NR228.txt -dt 0.02 -factor $g"
 
@@ -99,7 +99,7 @@ analysis Transient
 # perform the analysis
 # #################################
 
-analyze 1000 0.02
+analyze 200 0.02
 
 
 	

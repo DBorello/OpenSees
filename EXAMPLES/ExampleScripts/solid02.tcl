@@ -113,16 +113,16 @@ nDMaterial ElasticIsotropic3D 1 $Es 0.3 $rho_s
 #
 #nDMaterial Template 1 -YS $YS -PS $PS -EPS $EPS ......
 
-#            tag            8 nodes                  matID    bforce1,2&3  massDensity
-#element brick  1   5    6    7    8    1    2    3   4 1  0.0 0.0 -9.81 2.3
-element brick  1    2    5    4    1   11   14   13  10 1  0.0 0.0 [expr -$g] $rho_s
-element brick  2    3    6    5    2   12   15   14  11 1  0.0 0.0 [expr -$g] $rho_s
-element brick  3    5    8    7    4   14   17   16  13 1  0.0 0.0 [expr -$g] $rho_s
-element brick  4    6    9    8    5   15   18   17  14 1  0.0 0.0 [expr -$g] $rho_s
-element brick  5   11   14   13   10   20   23   22  19 1  0.0 0.0 [expr -$g] $rho_s
-element brick  6   12   15   14   11   21   24   23  20 1  0.0 0.0 [expr -$g] $rho_s
-element brick  7   14   17   16   13   23   26   25  22 1  0.0 0.0 [expr -$g] $rho_s
-element brick  8   15   18   17   14   24   27   26  23 1  0.0 0.0 [expr -$g] $rho_s
+#            tag            8 nodes                  matID    bforce1,2&3    	 massdensity
+#element brick  1   5    6    7    8    1    2    3   4 1  0.0 0.0 -9.81     
+element brick  1    2    5    4    1   11   14   13  10 1  0.0 0.0 [expr -$g]	 1.8
+element brick  2    3    6    5    2   12   15   14  11 1  0.0 0.0 [expr -$g]	 1.8
+element brick  3    5    8    7    4   14   17   16  13 1  0.0 0.0 [expr -$g]	 1.8
+element brick  4    6    9    8    5   15   18   17  14 1  0.0 0.0 [expr -$g]	 1.8
+element brick  5   11   14   13   10   20   23   22  19 1  0.0 0.0 [expr -$g]	 1.8
+element brick  6   12   15   14   11   21   24   23  20 1  0.0 0.0 [expr -$g]	 1.8
+element brick  7   14   17   16   13   23   26   25  22 1  0.0 0.0 [expr -$g]	 1.8
+element brick  8   15   18   17   14   24   27   26  23 1  0.0 0.0 [expr -$g]	 1.8
 
 # Elastic modulus of aluminium kPa
 set Ea 7.0e7
