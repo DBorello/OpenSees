@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2002-05-15 22:50:10 $
+// $Revision: 1.31 $
+// $Date: 2002-06-06 21:26:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -123,6 +123,11 @@
 #define MAT_TAG_DrainPinch1			2005
 #define MAT_TAG_DrainPinch2			2006
 
+#define MAT_TAG_SnapMaterial		3000
+#define MAT_TAG_SnapBilinear		3001
+#define MAT_TAG_SnapClough		3002
+#define MAT_TAG_SnapPinch		3003
+
 #define MAT_TAG_Clough1	201
 #define MAT_TAG_Clough2	202
 #define MAT_TAG_Pinch1	203
@@ -198,7 +203,9 @@
 #define LOAD_TAG_UniformExcitation        2
 #define LOAD_TAG_Beam2dUniformLoad        3
 #define LOAD_TAG_Beam2dPointLoad          4
-#define LOAD_TAG_BrickSelfWeight          5
+#define LOAD_TAG_Beam3dUniformLoad        5
+#define LOAD_TAG_Beam3dPointLoad          6
+#define LOAD_TAG_BrickSelfWeight          7
 
 
 #define MAT_TAG_IsotropicLinElastic         1001
@@ -252,6 +259,8 @@
 #define ELE_TAG_DispBeamColumn3d 9871
 #define ELE_TAG_HingedBeam2d     9872
 #define ELE_TAG_HingedBeam3d     9873
+#define ELE_TAG_TwoPointHingedBeam2d     9874
+#define ELE_TAG_TwoPointHingedBeam3d     9875
 
 #define ELE_TAG_InternalSpring   9900
 #define ELE_TAG_SimpleJoint2D    9901
@@ -311,6 +320,7 @@
 #define EquiALGORITHM_TAGS_NewtonLineSearch     8
 #define EquiALGORITHM_TAGS_RestartNewton         9
 #define EquiALGORITHM_TAGS_SecantNewton         10
+#define EquiALGORITHM_TAGS_AccelNewton          11
 
 #define ACCELERATOR_TAGS_Krylov		1
 #define ACCELERATOR_TAGS_Secant		2
@@ -346,6 +356,7 @@
 #define LinSOE_TAGS_UmfpackGenLinSOE		10
 #define LinSOE_TAGS_SymSparseLinSOE         11
 #define LinSOE_TAGS_DiagonalLinSOE         12
+#define LinSOE_TAGS_ItpackLinSOE           13
 
 #define SOLVER_TAGS_FullGenLinLapackSolver  	1
 #define SOLVER_TAGS_BandGenLinLapackSolver  	2
@@ -363,6 +374,7 @@
 #define SOLVER_TAGS_UmfpackGenLinSolver      		14
 #define SOLVER_TAGS_SymSparseLinSolver 15
 #define SOLVER_TAGS_DiagonalLinSolver 16
+#define SOLVER_TAGS_Itpack            17
 
 #define DomDecompALGORITHM_TAGS_DomainDecompAlgo 1
 
