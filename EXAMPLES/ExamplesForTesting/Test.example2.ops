@@ -3,8 +3,8 @@
 #
 # purpose: example2 in OpenSeesIntro.tex modified for TclModelBuilder
 #
-# $Revision: 1.1 $
-# $Date: 2001-08-14 00:29:27 $
+# $Revision: 1.2 $
+# $Date: 2001-08-15 21:20:52 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExamplesForTesting/Test.example2.ops,v $
 
 
@@ -54,3 +54,5 @@ analyze 10
 print node 4
 print ele
 for {set i 1} {$i <= 10} {incr i 1} {playback $i}
+
+wipe

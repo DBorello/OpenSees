@@ -21,8 +21,8 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame3.ops
 #
-# $Revision: 1.1 $
-# $Date: 2001-08-14 00:29:28 $
+# $Revision: 1.2 $
+# $Date: 2001-08-15 21:20:50 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExamplesForTesting/Test.RCFrame3.ops,v $
 
 
@@ -101,4 +101,4 @@ analyze 1
 # Get the roof displacement
 print node 3
 
-
+wipe

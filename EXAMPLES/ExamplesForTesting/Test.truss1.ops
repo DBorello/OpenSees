@@ -13,8 +13,8 @@
 #              P
 #
 #
-# $Revision: 1.1 $
-# $Date: 2001-08-14 00:29:28 $
+# $Revision: 1.2 $
+# $Date: 2001-08-15 21:20:54 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExamplesForTesting/Test.truss1.ops,v $
 
 set DISPLAY ON
@@ -129,3 +129,4 @@ if {$DISPLAY == "ON"} {
 analyze $numAnalysisSteps
 
 
+wipe

@@ -187,6 +187,5 @@ analysis Transient
 # #################################
 
 analyze 30 0.04
-
-
 	
+wipe

@@ -69,3 +69,4 @@ set numIncr 100;	# Number of analysis increments
 source MomentCurvature.ops
 MomentCurvature 1 $P [expr $Ky*$mu] $numIncr
 
+wipe

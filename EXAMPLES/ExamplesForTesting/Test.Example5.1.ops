@@ -82,7 +82,7 @@ uniaxialMaterial Steel01  3  60 30000 0.02
 set h 18.0
 
 # Source in a procedure for generating an RC fiber section
-source RCsection.ops
+source Test.RCsection.ops
 
 # Call the procedure to generate the column section
 #          id  h  b cover core cover steel nBars barArea nfCoreY nfCoreZ nfCoverY nfCoverZ
@@ -205,8 +205,8 @@ pattern Plain 1 Constant {
 # Define earthquake excitation
 # ----------------------------
 # Set up the acceleration records for Tabas fault normal and fault parallel
-set tabasFN "Path -filePath tabasFN.txt -dt 0.02 -factor $g"
-set tabasFP "Path -filePath tabasFP.txt -dt 0.02 -factor $g"
+set tabasFN "Path -filePath Test.tabasFN.txt -dt 0.02 -factor $g"
+set tabasFP "Path -filePath Test.tabasFP.txt -dt 0.02 -factor $g"
 
 # Define the excitation using the Tabas ground motion records
 #                         tag dir         accel series args
@@ -269,4 +269,6 @@ recorder Node Node51.out disp -time -node 9 14 19 -dof 1 2
 
 # Analysis duration of 2 seconds
 #       numSteps  dt
-analyze   200   0.01
+analyze   5   0.01
+
+wipe

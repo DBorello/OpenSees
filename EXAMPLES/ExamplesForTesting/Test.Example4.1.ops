@@ -302,13 +302,13 @@ if {$displayMode == "displayON"} {
 # ------------------------------
 
 # Change the integrator to take a min and max load increment
-integrator LoadControl 1.0 4 0.02 2.0
+integrator LoadControl 0.01 4 0.01 2.0
 
 # Perform the analysis
 
 # Perform the pushover analysis
 # Set some parameters
-set maxU 1.30;	        # Max displacement
+set maxU 0.1;	        # Max displacement
 set controlDisp 0.0;
 set ok 0;
 
@@ -332,12 +332,4 @@ if {$ok != 0} {
 }
 
 
-
-
-
-
-
-
-
-
-
+wipe

@@ -23,8 +23,8 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame2.ops
 #
-# $Revision: 1.1 $
-# $Date: 2001-08-14 00:29:27 $
+# $Revision: 1.2 $
+# $Date: 2001-08-15 21:20:50 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExamplesForTesting/Test.RCFrame2.ops,v $
 
 # comment out one of lines
@@ -196,7 +196,7 @@ proc runLoadControl {times initialLoadStep Jd minLoadStep maxLoadStep} {
 }
 
 
-set nSteps  100
+set nSteps  5
 set initialLoadStep 1
 set Jd 3
 set minLoadStep 0.02
@@ -204,7 +204,7 @@ set maxLoadStep 2.0
 
 runLoadControl $nSteps $initialLoadStep $Jd $minLoadStep $maxLoadStep 
 
-
+wipe
 
 
 

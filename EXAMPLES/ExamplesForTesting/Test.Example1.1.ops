@@ -121,3 +121,4 @@ analyze 1
 print node 4
 print ele
 
+wipe

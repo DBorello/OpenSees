@@ -22,8 +22,8 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame5.ops
 #
-# $Revision: 1.1 $
-# $Date: 2001-08-14 00:29:28 $
+# $Revision: 1.2 $
+# $Date: 2001-08-15 21:20:51 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExamplesForTesting/Test.RCFrame5.ops,v $
 
 model BasicBuilder -ndm 2 -ndf 3
@@ -209,11 +209,14 @@ analysis Transient
 
 
 #        numSteps   dt
-analyze    100    0.01
+analyze    5    0.01
 
 # spit out the 1'st 4 eigen values
-eigen 4
+puts "4 eigenvalues: [eigen 4]"
 
 
+print node 9
 
+
+wipe
 
