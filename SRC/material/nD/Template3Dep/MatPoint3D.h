@@ -124,7 +124,7 @@ class MatPoint3D
     //EPState *getEPS() const;
     NDMaterial* getNDMat() const;
     double getrho() const;
-    const Tensor& getStressTensor() const;
+    const stresstensor getStressTensor() const;
     
     int commitState(void) ;
     int revertToLastCommit(void) ;

@@ -235,13 +235,13 @@ NDMaterial* MatPoint3D::getNDMat() const {
 }
 
 //=============================================================================
-double MatPoint3D::getrho() const {
-
-    return (matmodel->getEPS())->getrho();
+double MatPoint3D::getrho() const 
+{
+    return matmodel->getRho(); 
 }
 
 //=============================================================================
-const Tensor &MatPoint3D::getStressTensor() const {
+const stresstensor MatPoint3D::getStressTensor() const {
 
     return matmodel->getStressTensor();
 }
