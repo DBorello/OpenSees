@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-01-31 10:40:20 $
+// $Revision: 1.6 $
+// $Date: 2001-09-04 19:59:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
                                                                         
                                                                         
@@ -365,8 +365,13 @@ BeamWithHinges2d::revertToStart(void)
     e1.Zero();
     e3.Zero();	
 
-	sr1.Zero();
-	sr3.Zero();
+    sr1.Zero();
+    sr3.Zero();
+
+    distrLoadCommit.Zero();
+    UeCommit.Zero();
+    kbCommit.Zero();
+    qCommit.Zero();
     
     prevDistrLoad.Zero();
     UePrev.Zero();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2001-08-20 00:37:24 $
+// $Revision: 1.14 $
+// $Date: 2001-09-04 20:00:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -428,6 +428,11 @@ int NLBeamColumn2d::revertToStart()
       return err;
   
    // revert the element state to start
+   distrLoadcommit.Zero();
+   Uecommit.Zero();
+   Secommit.Zero();
+   kvcommit.Zero();
+
    prevDistrLoad.Zero();
    Uepr.Zero();
    Se.Zero();
