@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-02-17 06:40:17 $
+// $Revision: 1.4 $
+// $Date: 2001-05-19 07:02:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -55,6 +55,9 @@ setLoadConst(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
 
 int 
 setTime(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+
+int 
+getTime(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
 
 int 
 buildModel(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
