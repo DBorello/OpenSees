@@ -103,13 +103,17 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/nonlinearBeamColumn/element/NLBeamColumn3d.o \
 	$(FE)/element/nonlinearBeamColumn/tcl/TclElmtBuilder.o \
 	$(FE)/element/forceBeamColumn/ForceBeamColumn2d.o \
+	$(FE)/element/forceBeamColumn/ForceBeamColumn3d.o \
 	$(FE)/element/forceBeamColumn/TclForceBeamColumnCommand.o \
 	$(FE)/element/forceBeamColumn/BeamIntegration.o \
 	$(FE)/element/forceBeamColumn/LobattoBeamIntegration.o \
 	$(FE)/element/forceBeamColumn/UserDefinedBeamIntegration.o \
 	$(FE)/element/forceBeamColumn/HingeMidpointBeamIntegration2d.o \
+	$(FE)/element/forceBeamColumn/HingeMidpointBeamIntegration3d.o \
 	$(FE)/element/forceBeamColumn/HingeRadauBeamIntegration2d.o \
+	$(FE)/element/forceBeamColumn/HingeRadauBeamIntegration3d.o \
 	$(FE)/element/forceBeamColumn/UserDefinedHingeIntegration2d.o \
+	$(FE)/element/forceBeamColumn/UserDefinedHingeIntegration3d.o \
 	$(FE)/coordTransformation/CrdTransf.o \
 	$(FE)/coordTransformation/CrdTransf2d.o \
 	$(FE)/coordTransformation/CrdTransf3d.o \
