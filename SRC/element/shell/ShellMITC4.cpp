@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-19 06:00:29 $
+// $Revision: 1.2 $
+// $Date: 2001-05-19 07:39:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -59,10 +59,10 @@ Vector  ShellMITC4::g2(3) ;
 Vector  ShellMITC4::g3(3) ;
 
 //intialize pointers to zero using intialization list 
-Matrix  **ShellMITC4::GammaB1pointer(0) ;
-Matrix  **ShellMITC4::GammaD1pointer(0) ;
-Matrix  **ShellMITC4::GammaA2pointer(0) ;
-Matrix  **ShellMITC4::GammaC2pointer(0) ; 
+Matrix  **ShellMITC4::GammaB1pointer = 0 ;
+Matrix  **ShellMITC4::GammaD1pointer = 0 ;
+Matrix  **ShellMITC4::GammaA2pointer = 0 ;
+Matrix  **ShellMITC4::GammaC2pointer = 0 ; 
     
 //quadrature data
 const double  ShellMITC4::root3 = sqrt(3.0) ;
@@ -124,7 +124,7 @@ connectedExternalNodes(4)
   //shear matrix pointers
 
   if ( GammaB1pointer == 0 ) {
-	GammaB1pointer = new (Matrix*)[4] ;    //four matrix pointers
+	GammaB1pointer = new Matrix*[4] ;    //four matrix pointers
 	GammaB1pointer[0] = new Matrix(1,3) ;  //
 	GammaB1pointer[1] = new Matrix(1,3) ;  //    four
 	GammaB1pointer[2] = new Matrix(1,3) ;  //  1x3 matrices
@@ -132,7 +132,7 @@ connectedExternalNodes(4)
   } //end if B1
 
   if ( GammaD1pointer == 0 ) {
-	GammaD1pointer = new (Matrix*)[4] ;
+	GammaD1pointer = new Matrix*[4] ;
 	GammaD1pointer[0] = new Matrix(1,3) ;
 	GammaD1pointer[1] = new Matrix(1,3) ;
 	GammaD1pointer[2] = new Matrix(1,3) ;
@@ -140,7 +140,7 @@ connectedExternalNodes(4)
   } //end if D1
 
   if ( GammaA2pointer == 0 ) {
-	GammaA2pointer = new (Matrix*)[4] ;
+	GammaA2pointer = new Matrix*[4] ;
 	GammaA2pointer[0] = new Matrix(1,3) ;
 	GammaA2pointer[1] = new Matrix(1,3) ;
 	GammaA2pointer[2] = new Matrix(1,3) ;
@@ -148,7 +148,7 @@ connectedExternalNodes(4)
   } //end if A2
 
   if ( GammaC2pointer == 0 ) {
-	GammaC2pointer = new (Matrix*)[4] ;
+	GammaC2pointer = new Matrix*[4] ;
 	GammaC2pointer[0] = new Matrix(1,3) ;
 	GammaC2pointer[1] = new Matrix(1,3) ;
 	GammaC2pointer[2] = new Matrix(1,3) ;
