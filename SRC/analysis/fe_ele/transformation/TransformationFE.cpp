@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-10-23 22:58:20 $
+// $Revision: 1.3 $
+// $Date: 2002-10-24 00:36:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -51,9 +51,9 @@ Matrix **TransformationFE::theTransformations;
 int TransformationFE::numTransFE(0);           
 int TransformationFE::transCounter(0);           
 int TransformationFE::sizeTransformations(0);          
-double *TransformationFE::dataBuffer(0);          
-double *TransformationFE::localKbuffer(0);          
-int    *TransformationFE::dofData(0);    ;          
+double *TransformationFE::dataBuffer = 0;          
+double *TransformationFE::localKbuffer = 0;          
+int    *TransformationFE::dofData = 0;    ;          
 int TransformationFE::sizeBuffer(0);            
 
 //  TransformationFE(Element *, Integrator *theIntegrator);
