@@ -6,7 +6,10 @@
 #================================================================
 
 # get proper units for everything
-source Units.tcl
 
 set PI [expr 4*atan(1.0)];
+
+source Units.tcl
+
 set g [expr -9.81*$m/pow($sec, 2)];	# gravitational constant in m/sec^2
+
