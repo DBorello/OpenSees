@@ -20,7 +20,7 @@ set g  -9.81
 set p   25.0
 set np -25.0
 set lf1 0.05
-set NN1 5
+set NN1 10
 # ################################
 # build the model
 # #################################
@@ -137,12 +137,12 @@ remove recorders
 #recorder Element 1 -file element.out pqall
 #recorder plot element.out "p vs. q" 10 500 300 300 -columns 1 2
 
-set NN2 10
-set ndz -0.0002
+set NN2 300
+set ndz -0.001
 
 system UmfPack
 constraints Penalty 1e12 1e12
-test NormDispIncr 1.0e-08 30  0
+test NormDispIncr 1.0e-08 60  1
 integrator DisplacementControl 5 3 $ndz 1 $ndz $ndz
 algorithm Newton
 numberer RCM
