@@ -154,6 +154,9 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
 	$(FE)/element/joint/Joint2D.o \
 	$(FE)/element/joint/TclJoint2dCommand.o \
+	$(FE)/element/joint/BeamColumnJoint2d.o \
+	$(FE)/element/joint/BeamColumnJoint3d.o \
+	$(FE)/element/joint/TclBeamColumnJointCommand.o \
 	$(FE)/element/updatedLagrangianBeamColumn/Elastic2DGNL.o \
 	$(FE)/element/updatedLagrangianBeamColumn/Inelastic2DYS02.o \
 	$(FE)/element/updatedLagrangianBeamColumn/InelasticYS2DGNL.o \
@@ -407,6 +410,8 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/CableMaterial.o \
 	$(FE)/material/uniaxial/ENTMaterial.o \
 	$(FE)/material/uniaxial/BoucWenMaterial.o \
+	$(FE)/material/uniaxial/Pinching4Material.o \
+	$(FE)/material/uniaxial/BarSlipMaterial.o \
 	$(FE)/material/nD/NDMaterial.o \
 	$(FE)/material/nD/J2Plasticity.o \
 	$(FE)/material/nD/J2PlaneStress.o \
