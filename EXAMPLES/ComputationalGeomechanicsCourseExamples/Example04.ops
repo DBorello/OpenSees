@@ -131,7 +131,7 @@ nDMaterial Template3Dep 1 -YS $DPys -PS $DPps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
 
 
 #____________tag_____8 nodes______matID__bforce1_bforce2_bforce3_rho
-element Brick8N  1  5 6 7 8 1 2 3 4   1      0.0     0.0    -9.81  1.8
+element Brick8N  1  5 6 7 8 1 2 3 4   1      0.0     0.0   0.0  1.8
     
 #stage 1
 #===========================================================
@@ -196,9 +196,9 @@ print node 5
 wipeAnalysis
 #loadConst
 
-equalDOF 5 6 3 3
-equalDOF 5 7 3 3
-equalDOF 5 8 3 3
+#equalDOF 5 6 3 3
+#equalDOF 5 7 3 3
+#equalDOF 5 8 3 3
        	  
 
 #set previous load constant
