@@ -44,8 +44,8 @@ set Iz [expr 1.0/12*$b*$d*$d*$d]
 set Iy [expr 1.0/12*$d*$b*$b*$b]
 set J  [expr $Iz+$Iy]
 
-set L  1.0
-set lp [expr 0.1*$L]
+set L  100.0
+set beta 0.1
 
 set nIP 3
 
@@ -104,7 +104,7 @@ for {set element 1} {$element <= $numElements} {incr element} {
 	    }
 	    4 {
 		puts "Element: BeamWithHinges"
-		element beamWithHinges 1 1 2 1 $lp 1 $lp $E $A $Iz $Iy $G $J 1
+		element beamWithHinges 1 1 2 1 $beta 1 $beta $E $A $Iz $Iy $G $J 1
 	    }
 	}
 

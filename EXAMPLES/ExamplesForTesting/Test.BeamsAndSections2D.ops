@@ -33,8 +33,8 @@ set d 12.0
 set A [expr $b*$d]
 set I [expr 1.0/12*$b*$d*$d*$d]
 
-set L  1.0
-set lp [expr 0.1*$L]
+set L  100.0
+set beta 0.1
 
 set nIP 3
 
@@ -96,7 +96,7 @@ for {set element 1} {$element <= $numElements} {incr element} {
 	    }
 	    4 {
 		puts "Element: BeamWithHinges"
-		element beamWithHinges 1 1 2 1 $lp 1 $lp $E $A $I 1
+		element beamWithHinges 1 1 2 1 $beta 1 $beta $E $A $I 1
 	    }
 	}
 
