@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-20 00:37:25 $
+// $Revision: 1.3 $
+// $Date: 2001-09-05 17:54:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.cpp,v $
 
 
@@ -78,6 +78,16 @@ SensitivityAlgorithm::computeGradients(void)
 	
 	// Get pointer to the system of equations (SOE)
 	LinearSOE *theSOE = theAlgorithm->getLinearSOEptr();
+
+	// Get pointer to incremental integrator
+	IncrementalIntegrator *theIncInt = theAlgorithm->getIncrementalIntegratorPtr();
+
+	// Form current tangent at converged state
+	if (theIncInt->formTangent(CURRENT_TANGENT) < 0){
+		cerr << "WARNING SensitivityAlgorithm::computeGradients() -";
+		cerr << "the Integrator failed in formTangent()\n";
+		return -1;
+	}
 
 	// Get number of random variables and random variable positioners
 	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
