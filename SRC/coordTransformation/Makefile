@@ -2,9 +2,10 @@ include ../../Makefile.def
 
 
 
-OBJS       = CrdTransf.o CrdTransf2d.o LinearCrdTransf2d.o PDeltaCrdTransf2d.o \
-                         CrdTransf3d.o LinearCrdTransf3d.o PDeltaCrdTransf3d.o \
-                         CorotCrdTransf2d.o CorotCrdTransf3d.o 
+OBJS       = CrdTransf.o CrdTransf2d.o CrdTransf3d.o \
+	LinearCrdTransf2d.o LinearCrdTransf3d.o \
+	PDeltaCrdTransf2d.o PDeltaCrdTransf3d.o \
+	TclGeomTransfCommand.o
 
 # Compilation control
 
@@ -22,9 +23,3 @@ spotless: clean
 wipe: spotless
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
-
-
-
-
-
