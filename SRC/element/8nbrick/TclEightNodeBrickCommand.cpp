@@ -1,35 +1,26 @@
-/* ****************************************************************** **
-**    OpenSees - Open System for Earthquake Engineering Simulation    **
-**          Pacific Earthquake Engineering Research Center            **
-**                                                                    **
-**                                                                    **
-** (C) Copyright 1999, The Regents of the University of California    **
-** All Rights Reserved.                                               **
-**                                                                    **
-** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
-** file 'COPYRIGHT'  in main directory for information on usage and   **
-** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-**                                                                    **
-** Developed by:                                                      **
-**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-**                                                                    **
-** ****************************************************************** */
-                                                                        
-// $Revision: 1.8 $
-// $Date: 2003-02-25 23:32:46 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/8nbrick/TclEightNodeBrickCommand.cpp,v $
-                                                                        
-                                                                        
-// File: ~/element/TclEightNodeBrickCommand.C
-// 
-// Written: fmk 
-// Created: 07/99
-// Modified: 01/01  Zhaohui Yang, Boris Jeremic @ucdavis
-// Revision: A
+///////////////////////////////////////////////////////////////////////////////
 //
+// COPYLEFT (C):     :-))
+//``This  source code is Copyrighted in U.S., by the The Regents of the University
+//of California, for an indefinite period, and anybody caught using it without our
+//permission,  will  be  mighty  good friends of ourn, cause we don't give a darn.
+//Hack  it.  Compile it. Debug it. Run it. Yodel it. Enjoy it. We wrote it, that's
+//all we wanted to do.'' bj
+// PROJECT:           Object Oriented Finite Element Program
+// FILE:              EightNodeBrick.h
+// CLASS:             EightNodeBrick
+// MEMBER FUNCTIONS:
+//
+// MEMBER VARIABLES
+//
+// PURPOSE:           Finite Element Class
+// RETURN:
+// VERSION:
+// LANGUAGE:          C++.ver >= 3.0
+// TARGET OS:         DOS || UNIX || . . .
+// DESIGNER:          Boris Jeremic, Zhaohui Yang and Xiaoyan Wu
+// PROGRAMMER:        Boris Jeremic, Zhaohui Yang  and Xiaoyan Wu
+// DATE:              Aug. 2000
 // Description: This file contains the implementation of the TclModelBuilder_addEightNodeBrick() 
 // command. 
 //
