@@ -10,9 +10,9 @@
 //              December 2, 2003									//
 //////////////////////////////////////////////////////////////////////
 
-$Revision: 1.2 $
-$Date: 2004-06-25 22:19:40 $
-$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/PySimple1Gen.cpp,v $
+//$Revision: 1.3 $
+//$Date: 2004-06-25 22:37:19 $
+//$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/PySimple1Gen.cpp,v $
 
 #include "PySimple1Gen.h"
 

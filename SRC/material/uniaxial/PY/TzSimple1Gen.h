@@ -1,6 +1,6 @@
-$Revision: 1.2 $
-$Date: 2004-06-25 22:19:40 $
-$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/TzSimple1Gen.h,v $
+//$Revision: 1.3 $
+//$Date: 2004-06-25 22:37:19 $
+//$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/TzSimple1Gen.h,v $
 
 #include <iostream>
 #include <fstream>
