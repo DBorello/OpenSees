@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.39 $
-// $Date: 2002-12-05 22:42:24 $
+// $Revision: 1.40 $
+// $Date: 2002-12-09 22:00:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -314,7 +314,8 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "rayleigh", &rayleighDamping, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
-
+    Tcl_CreateCommand(interp, "region", &addRegion, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
 #ifdef _RELIABILITY
     Tcl_CreateCommand(interp, "reliability", &reliability, 
@@ -2818,6 +2819,17 @@ rayleighDamping(ClientData clientData, Tcl_Interp *interp, int argc, char **argv
   
   theDomain.setRayleighDampingFactors(alphaM, betaK, betaK0);
   return TCL_OK;
+}
+
+
+extern int
+TclAddMeshRegion(ClientData clientData, Tcl_Interp *interp, int argc, 
+	     char **argv, Domain &theDomain);
+
+int 
+addRegion(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+{
+  return TclAddMeshRegion(clientData, interp, argc, argv, theDomain);
 }
 
 
