@@ -31,6 +31,7 @@
 #define ITMAX 30
 #define MAX_STEP_COUNT 20
 #define	NUM_OF_SUB_INCR 30
+#define po 100000.0 //Reference pressure Pa
 //#include <string.h>
 
 #include "Template3Dep.h"
@@ -595,9 +596,9 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
     double p = stc.p_hydrostatic();
     //cerr << " p = " <<  p;
 
-    double po = 100.0; //kPa
-    if (p <= 0.5) 
-      p = 0.5;
+    //double po = 100.0; //kPa
+    if (p <= 500.0) 
+      p = 500.0;
     Ey = Ey * pow(p/po, 0.6); //0.5
     //cerr << " Ec = " << Ey << endln;
 
@@ -632,9 +633,9 @@ tensor Template3Dep::ElasticStiffnessTensor(void) const
     double p = stc.p_hydrostatic();
     //cerr << " p = " <<  p;
 
-    double po = 100.0; //kPa
-    if (p <= 0.5) 
-      p = 0.5;
+    //double po = 100.0; //kPa
+    if (p <= 500.0) 
+      p = 500.0;
     double E = Ey * pow(p/po, 0.6);//0.5
     //cerr << " Eo = " << Ey ;
     //cerr << " Ec = " << E << endln;
@@ -757,7 +758,7 @@ int Template3Dep::setTrialStrainIncr(const Tensor &v)
     //Cascading subdividing in case that some incr_step is too big
     
     int loop = 0;
-    while ( !tmp_EPS.getConverged()  && (loop < 100) ) {
+    while ( !tmp_EPS.getConverged()  && (loop < 1) ) {
     
        setEPS( StartEPS );
        EPState startEPS( *(this->getEPS()) );
@@ -1013,7 +1014,7 @@ EPS->setConverged(rval.getConverged());
     EPS->setdPlasticStrain(rval.getdPlasticStrain());
     EPS->setNScalarVar( rval.getNScalarVar() );
 
-	int i;
+    int i;
     for (i = 0; i <rval.getNScalarVar(); i++)
       EPS->setScalarVar(i+1, rval.getScalarVar(i+1));
     
@@ -1895,7 +1896,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   //  double Ftolerance = pow(d_macheps(),(1.0/2.0))*1000000.00; //FORWARD no iterations
   //double Ftolerance = pow( d_macheps(), 0.5)*1.00;
   
-  double Ftolerance = pow( d_macheps(), 0.5)*1000.00;  //Zhaohui
+  double Ftolerance = pow( d_macheps(), 0.5)*1000000.00;  //Zhaohui UCD 10e6 for Pa, kg and m 1000 for kPa, ton and m
   //cout << Ftolerance << endln;
   //  double Ftolerance = pow(d_macheps(),(1.0/2.0))*1.0;
   //  double entry_kappa_cone = Criterion.kappa_cone_get();
