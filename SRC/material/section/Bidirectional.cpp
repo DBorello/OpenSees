@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-19 18:20:45 $
+// $Revision: 1.5 $
+// $Date: 2002-09-11 23:02:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/Bidirectional.cpp,v $
 
 #include <Bidirectional.h>           
@@ -45,7 +45,7 @@ Bidirectional::Bidirectional
 	alpha_n1 = 0.0;
 
 	code(0) = SECTION_RESPONSE_VY;
-	code(1) = SECTION_RESPONSE_VZ;
+	code(1) = SECTION_RESPONSE_P;
 }
 
 Bidirectional::Bidirectional():
@@ -63,7 +63,7 @@ Bidirectional::Bidirectional():
 	alpha_n1 = 0.0;
 
 	code(0) = SECTION_RESPONSE_VY;
-	code(1) = SECTION_RESPONSE_VZ;
+	code(1) = SECTION_RESPONSE_P;
 }
 
 Bidirectional::~Bidirectional()
