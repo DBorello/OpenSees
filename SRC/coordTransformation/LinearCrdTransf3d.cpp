@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-09-17 22:15:46 $
+// $Revision: 1.5 $
+// $Date: 2002-01-06 19:22:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.cpp,v $
                                                                         
                                                                         
@@ -896,9 +896,9 @@ LinearCrdTransf3d::Print(ostream &s, int flag)
 {
    s << "\nCrdTransf: " << this->getTag() << " Type: LinearCrdTransf3d";
    if (nodeIOffset)
-	   s << "\tNode I offset: " << nodeIOffset[0] << ' ' << nodeIOffset[1] << ' '<< nodeIOffset[2] << endl;
+	   s << "\tNode I offset: " << nodeIOffset[0] << " " << nodeIOffset[1] << " "<< nodeIOffset[2] << endl;
    if (nodeJOffset)
-	   s << "\tNode J offset: " << nodeJOffset[0] << ' ' << nodeJOffset[1] << ' '<< nodeJOffset[2] << endl;
+	   s << "\tNode J offset: " << nodeJOffset[0] << " " << nodeJOffset[1] << " "<< nodeJOffset[2] << endl;
 }
 
 
