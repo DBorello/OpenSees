@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-04-09 05:39:45 $
+// $Revision: 1.14 $
+// $Date: 2002-05-20 16:54:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -279,6 +279,11 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	int secTag;
 	SectionForceDeformation *theSec = 0;
 	    
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid Aggregator tag" << endl;
+	    return TCL_ERROR;		
+	}
+
 	int nArgs = argc-3;
 	
 	for (int ii = 5; ii < argc; ii++) {
@@ -301,11 +306,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    }
 	}
 	
-	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid Aggregator tag" << endl;
-	    return TCL_ERROR;		
-	}
-
 	int nMats = nArgs / 2;
 	
 	if (nArgs%2 != 0) {
