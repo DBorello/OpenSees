@@ -600,9 +600,10 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	  A23 = fdf->d2Fodqda(B_Mandel, *fdeps) *D_gamma;
 	}
 
+	int i;
 	// CCC: Tensor -> Matrix
 	C99 = A11.BJtensor2BJmatrix_2();
-	for (int i =1; i <=9; i++) {
+	for (i =1; i <=9; i++) {
 	  for (int j =1; j <=9; j++) {
 	    CCC.val(i,j) = C99.cval(i,j);
 	    CCC.val(10+i,10+j) = 1.0; // For non-singularity
@@ -623,7 +624,7 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 
 	if ( fdEvolutionT ) {
 	  C99 = A13.BJtensor2BJmatrix_2();
-	  for (int i =1; i <=9; i++) {
+	  for (i =1; i <=9; i++) {
 	    for (int j =1; j <=9; j++) {
 	      CCC.val(10+i,j) = C99.cval(i,j);
 	      CCC.val(j,10+i) = C99.cval(i,j);
@@ -641,7 +642,7 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	  CCC.val(19,10)=CCC.val(10,19)=A23.cval(3,3);
 
 	  C99 = A33.BJtensor2BJmatrix_2();
-	  for (int i =1; i <=9; i++) {
+	  for (i =1; i <=9; i++) {
 	    for (int j =1; j <=9; j++) {
 	      CCC.val(10+i,10+j) = C99.cval(i,j);
 	    }
@@ -654,7 +655,7 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	//CCC.print();
 
 	// CCC: Matrix -> Tensor
-	for (int i =1; i <=9; i++) {
+	for (i =1; i <=9; i++) {
 	  for (int j =1; j <=9; j++) {
 	    C99.val(i,j) = CCC.cval(i,j);
 	  }
@@ -684,14 +685,14 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	a22  = CCC.cval(10,10);
 
 	if ( fdEvolutionT ) {
-	  for (int i =1; i <=9; i++) {
+	  for (i =1; i <=9; i++) {
 	    for (int j =1; j <=9; j++) {
 	      C99.val(i,j) = CCC.cval(i,10+j);
 	    }
 	  }
 	  A13 = C99.BJmatrix2BJtensor_2();
 
-	  for (int i =1; i <=9; i++) {
+	  for (i =1; i <=9; i++) {
 	    for (int j =1; j <=9; j++) {
 	      C99.val(j,i) = CCC.cval(10+i,j);
 	    }

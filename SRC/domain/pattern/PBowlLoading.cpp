@@ -639,7 +639,7 @@ PBowlLoading::CompPBLoads()
   ID *Bound_node = new ID(max_bnode);
   ID NidesinFirstEle = theElement->getExternalNodes();
 
-  int i, j, k;
+  int i, j, k, bi;
   //Inital node list from the first plastic bowl element
   for (i = 0; i<NIE; i++)
      (*Bowl_node)(i) = NidesinFirstEle(i);
@@ -677,7 +677,7 @@ PBowlLoading::CompPBLoads()
   //BJ test
    //check the bowl nodes
    opserr << "\nCheck all plastic bowl nodes...\n";
-   for (int bi=0;bi<no_bnode;bi++)
+   for (bi=0;bi<no_bnode;bi++)
       opserr<< (*Bowl_node)(bi) <<"  ";
    opserr<< endln << "# of pbowl nodes = " << no_bnode<<endln;
    //opserr<<"finish inputting  and organizing the Bowl_node array"<<endln;
@@ -772,13 +772,13 @@ PBowlLoading::CompPBLoads()
   // BJ test
    //check the boundary bowl nodes
    opserr << "\nCheck all boundary bowl nodes...\n";
-   for (int bi = 0; bi < no_boundarynodes; bi++)
+   for (bi = 0; bi < no_boundarynodes; bi++)
         opserr << (*BoundaryNodes)(bi) <<"  ";
    opserr<< endln << "# of boundary bowl nodes = " << no_boundarynodes << endln;
   
    //check the exterior bowl nodes
    opserr << "\nCheck all exterior bowl nodes...\n";
-   for (int bi = 0; bi < no_exteriornodes; bi++)
+   for (bi = 0; bi < no_exteriornodes; bi++)
         opserr << (*ExteriorNodes)(bi) <<"  ";
    opserr<< endln << "# of exterior bowl nodes = " << no_exteriornodes << endln;
   
