@@ -37,7 +37,7 @@
 #endif
 
 #include <Element.h>
-#include <Node.h> 
+#include <Node.h>
 
 // Commented by Xiaoyan. Use  ~/fem/node.hh  08/04/00
 // Released Node.h now. Wu use Opensees's Node.09/27/00
@@ -83,9 +83,9 @@ class EightNodeBrick: public Element
                    int node_numb_1, int node_numb_2, int node_numb_3, int node_numb_4,
                    int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
                    NDMaterial * Globalmmodel, double b1, double b2, double b3,
-		   double r, double p);
-		   // int dir, double surflevel);
-		   //, EPState *InitEPS);   const char * type,
+                  double r, double p);
+   // int dir, double surflevel);
+   //, EPState *InitEPS);   const char * type,
 
     EightNodeBrick ();
     ~EightNodeBrick();
@@ -96,29 +96,29 @@ class EightNodeBrick: public Element
     //               int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
     //               NDMaterial * Globalmmodel, double b1, double b2, double b3,
     //               double p, double r);
-    //		   //, EPState * InitEPS);const char * type,
-		   
+    //             //, EPState * InitEPS);const char * type,
+
     int getNumExternalNodes () const;
     const ID &getExternalNodes ();
     Node **getNodePtrs(void);
 
-    int getNumDOF ();	
+    int getNumDOF ();
     void setDomain(Domain *theDomain);
 
-    // public methods to set the state of the element    
+    // public methods to set the state of the element
     int commitState ();
     int revertToLastCommit ();
     int revertToStart ();
 
-    // public methods to obtain stiffness, mass, damping and residual information    
-    // We haven't build the following functions. 
+    // public methods to obtain stiffness, mass, damping and residual information
+    // We haven't build the following functions.
     // All the value of K M Dmp and F are nothing. just
     // want to test the program.  Xiaoyan 08/16/00
-    const Matrix &getTangentStiff (); 
-    const Matrix &getInitialStiff(); 
-    const Matrix &getMass (); 
+    const Matrix &getTangentStiff ();
+    const Matrix &getInitialStiff();
+    const Matrix &getMass ();
 
-    const Matrix &getConsMass (); 
+    const Matrix &getConsMass ();
 
     void zeroLoad ();
     int addLoad(ElementalLoad *theLoad, double loadFactor);
@@ -130,25 +130,25 @@ class EightNodeBrick: public Element
 
     // public methods for element output
     int sendSelf (int commitTag, Channel &theChannel);
-    int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
+    int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker
 		  &theBroker);
     int displaySelf (Renderer &theViewer, int displayMode, float fact);
-    void Print(OPS_Stream &s, int flag =0);   
+    void Print(OPS_Stream &s, int flag =0);
     //    Do nothing with void Print (OPS_Stream &s, int flag =0);
     //    use Brick3D report.  08/16/00
     Response *setResponse (const char **argv, int argc, Information &eleInformation);
     int getResponse (int responseID, Information &eleInformation);
-	
+
   protected:
-    
+
   private:
     // private attributes - a copy for each object of the class
 
     //NDMaterial * **theMaterial; // pointer to the ND material objects
-    
+
     int numDOF;	    		// Number of element DOF
     ID  connectedExternalNodes; // Tags of quad nodes
-    
+
     Matrix *Ki;
     Node *theNodes[8];
 
@@ -160,7 +160,7 @@ class EightNodeBrick: public Element
     Vector bf;  	// Body forces
 
     //Vector q0;  // hold element load affects q0 and p0 in one vector
-    
+
     // double thickness;	// Element thickness
     double rho;		// Mass per unit volume
     double pressure;	// Normal surface traction (pressure) over entire element
@@ -174,49 +174,49 @@ class EightNodeBrick: public Element
 //    Matrix J;		// Jacobian of transformation
 //    Matrix L;		// Inverse of J
 //    Matrix B;		// Strain interpolation matrix
-    
-	
-    //    // static data - single copy for all objects of the class 
+
+
+    //    // static data - single copy for all objects of the class
     //    static G3Matrix N;	// Displacement interpolation matrix
-    	
+
     //    // private member functions - only objects of this class can call these
-    //    void setJacobian (double r, double s, double t);         // Xiaoyan changed 
+    //    void setJacobian (double r, double s, double t);         // Xiaoyan changed
     //    double formDetJ (double r, double s, double t);	   // xi, eta to r and s
     //    void formBMatrix (double r, double s, double t);	   // and added t
     //    static void formNMatrix (double r, double s, double t);  // 07/06/00
-    
+
   private:
     // element number (tag)
-    //unsigned int  elem_numb;      
-    
+    //unsigned int  elem_numb;
+
     double determinant_of_Jacobian;
     //int  G_N_numbs[8];     // Global node numbers for this element  Xiaoyan changed from 20 to 8
-        
-    int nodes_in_brick;      // number of nodes ( from 8-20 //8 now Zhaohui)  
-    
+
+    int nodes_in_brick;      // number of nodes ( from 8-20 //8 now Zhaohui)
+
     //Node * nodes;          // pointer to GLOBAL nodes
-    
+
     NDMaterial * mmodel;     // pointer to GLOBAL material models
-    
+
     int r_integration_order; // Gauss-Legendre integration order in r direction
     int s_integration_order; // Gauss-Legendre integration order in s direction
     int t_integration_order; // Gauss-Legendre integration order in t direction
-    
+
     // Now I want 3D array of Material points!
     // MatPoint3D[r_integration_order][s_integration_order][t_integration_order]
     // 3D array of Material points
     MatPoint3D ** matpoint;  // pointer to array of Material Points
-    
+
     // 3D array of material models for each Material points
     // NDMaterial *GPmmodel;  // pointer to array of material models for Material Points
-    // Do we need this one? 
-    
+    // Do we need this one?
+
     //..NDMaterial  *MatPoint;  // Zhaohui  10-01-2000
-    
-    
+
+
     int  LM[24]; // for 8noded x 3 = 24
   public:
-    
+
     void incremental_Update(void);
     //void iterative_Update(void);
 
@@ -230,9 +230,9 @@ class EightNodeBrick: public Element
     EightNodeBrick & operator[](int subscript);
     //Finite_Element & operator[](int subscript);
     //Finite_Element & operator[](int subscript);
-   
+
     tensor getStiffnessTensor(void);
-    //matrix stiffness_tensor(void); 
+    //matrix stiffness_tensor(void);
 
     void set_strain_stress_tensor(FILE *fp, double * u);
     tensor getMassTensor(void);
