@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.60 $
-// $Date: 2005-01-31 22:19:34 $
+// $Revision: 1.61 $
+// $Date: 2005-02-22 22:23:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -144,6 +144,7 @@ OPS_Stream &opserr = sserr;
 #include <Newmark1.h> 
 #include <EigenIntegrator.h>
 #include <CentralDifferenceAlternative.h>
+#include <CentralDifferenceNoDamping.h>
 //#include <CentralDifference.h>
 
 // analysis
@@ -2438,6 +2439,14 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 
   else if (strcmp(argv[1],"CentralDifferenceAlternative") == 0) {
     theTransientIntegrator = new CentralDifferenceAlternative();       
+
+    // if the analysis exists - we want to change the Integrator
+    if (theTransientAnalysis != 0)
+      theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }      
+
+  else if (strcmp(argv[1],"CentralDifferenceNoDamping") == 0) {
+    theTransientIntegrator = new CentralDifferenceNoDamping();       
 
     // if the analysis exists - we want to change the Integrator
     if (theTransientAnalysis != 0)
