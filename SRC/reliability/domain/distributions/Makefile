@@ -17,7 +17,8 @@ OBJS       = 	BetaRV.o \
 		GammaRV.o \
 		NormalRV.o \
 		ShiftedRayleighRV.o \
-		Type3SmallestValueRV.o
+		Type3SmallestValueRV.o \
+		UserDefinedRV.o
 
 # Compilation control
 

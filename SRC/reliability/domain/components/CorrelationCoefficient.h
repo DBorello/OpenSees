@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:44:24 $
+// $Revision: 1.5 $
+// $Date: 2003-10-27 23:04:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/CorrelationCoefficient.h,v $
 
 
@@ -46,14 +46,13 @@ public:
 	int		getRv1();
 	int		getRv2();
 	double	getCorrelation();
-
+	
 	void Print(OPS_Stream &s, int flag =0);
 
 
 protected:
 
 private:
-	int tag;
 	int rv1;
 	int rv2;
 	double correlation;

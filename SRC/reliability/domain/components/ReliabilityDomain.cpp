@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:44:25 $
+// $Revision: 1.5 $
+// $Date: 2003-10-27 23:04:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.cpp,v $
 
 
@@ -228,6 +228,23 @@ int
 ReliabilityDomain::removeRandomVariablePositioner(int tag)
 {
 	theRandomVariablePositionersPtr->removeComponent(tag);
+
+	return 0;
+}
+
+int
+ReliabilityDomain::removeRandomVariable(int tag)
+{
+	theRandomVariablesPtr->removeComponent(tag);
+
+	return 0;
+}
+
+
+int
+ReliabilityDomain::removeCorrelationCoefficient(int tag)
+{
+	theCorrelationCoefficientsPtr->removeComponent(tag);
 
 	return 0;
 }

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-04-02 22:02:48 $
+// $Revision: 1.3 $
+// $Date: 2003-10-27 23:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/StandardLinearOscillatorDisplacementFilter.cpp,v $
 
 
@@ -34,7 +34,6 @@
 #include <StandardLinearOscillatorDisplacementFilter.h>
 #include <Filter.h>
 #include <classTags.h>
-#include <math.h>
 
 
 StandardLinearOscillatorDisplacementFilter::StandardLinearOscillatorDisplacementFilter(int tag, double period, double dampingRatio)
@@ -57,8 +56,7 @@ StandardLinearOscillatorDisplacementFilter::getAmplitude(double time)
 	}
 	else {
 		double wd = wn * sqrt(1.0-pow(xi,2.0));
-		return (  sin(wd*time) * exp(-xi*wn*time)  );
-		// Should maybe include the 1/mwd factor too
+		return ( sin(wd*time) * exp(-xi*wn*time)  );
 	}
 }
 

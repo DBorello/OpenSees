@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:45 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/modulatingFunction/ConstantModulatingFunction.h,v $
 
 
@@ -41,7 +41,7 @@ class ConstantModulatingFunction : public ModulatingFunction
 {
 
 public:
-	ConstantModulatingFunction(int tag, Filter *theFilter);
+	ConstantModulatingFunction(int tag, Filter *theFilter, double amplitude);
 	~ConstantModulatingFunction();
 
 	double getAmplitude(double time);
@@ -54,6 +54,7 @@ protected:
 
 private:
 	Filter *theFilter;
+	double amplitude;
 };
 
 #endif

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:44:25 $
+// $Revision: 1.7 $
+// $Date: 2003-10-27 23:04:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.h,v $
 
 
@@ -57,8 +57,7 @@ public:
 	virtual double getParameter4() =0;
 	virtual double getStartValue() =0;
 
-
-
+	int setNewTag(int tag);
 
 protected:
 	int tag;

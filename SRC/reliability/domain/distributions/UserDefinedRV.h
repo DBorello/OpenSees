@@ -22,67 +22,48 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-27 23:04:40 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/StandardLinearOscillatorAccelerationFilter.cpp,v $
+// $Revision: 1.1 $
+// $Date: 2003-10-27 23:04:39 $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/UserDefinedRV.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
-#include <StandardLinearOscillatorAccelerationFilter.h>
-#include <Filter.h>
-#include <classTags.h>
+#ifndef UserDefinedRV_h
+#define UserDefinedRV_h
 
+#include <RandomVariable.h>
+#include <Vector.h>
 
-StandardLinearOscillatorAccelerationFilter::StandardLinearOscillatorAccelerationFilter(int tag, double period, double dampingRatio)
-:Filter(tag,FILTER_standardLinearOscillator)
+class UserDefinedRV : public RandomVariable
 {
-	double pi = 3.14159265358979;
-	wn = 2*pi/period;
-	xi = dampingRatio;
-}
 
-StandardLinearOscillatorAccelerationFilter::~StandardLinearOscillatorAccelerationFilter()
-{
-}
+public:
+	UserDefinedRV(int tag, Vector xPoints, Vector PDFpoints, double startValue);
+	UserDefinedRV(int tag, Vector xPoints, Vector PDFpoints);
+	~UserDefinedRV();
+	void Print(OPS_Stream &s, int flag =0);
+	double getPDFvalue(double rvValue);
+	double getCDFvalue(double rvValue);
+	double getInverseCDFvalue(double probValue);
+	const char * getType();
+	double getMean();
+	double getStdv();
+	double getParameter1();
+	double getParameter2();
+	double getParameter3();
+	double getParameter4();
+	double getStartValue();
 
-double
-StandardLinearOscillatorAccelerationFilter::getAmplitude(double time)
-{
-	if (time<0.0) {
-		return 0.0;
-	}
-	else {
-		double wd = wn * sqrt(1.0-pow(xi,2.0));
-		return (  ( xi*xi*wn*wn*sin(wd*time) - 2.0*xi*wn*wd*cos(wd*time) - wd*wd*sin(wd*time) ) * exp(-xi*wn*time)  );
-	}
-}
 
-double
-StandardLinearOscillatorAccelerationFilter::getMaxAmplitude()
-{
-	double wd = wn * sqrt(1.0-pow(xi,2.0));
+protected:
 
-	opserr << "ERROR: The getMaxAmplitude() method is not implemented for acceleration filter." << endln;
+private:
+	Vector *xPoints;
+	Vector *PDFpoints;
+};
 
-	double result = 0.0;
+#endif
 
-	return result;
-}
-
-double
-StandardLinearOscillatorAccelerationFilter::getTimeOfMaxAmplitude()
-{
-	double wd = wn * sqrt(1.0-pow(xi,2.0));
-
-	opserr << "ERROR: The getTimeOfMaxAmplitude() method is not implemented for acceleration filter." << endln;
-
-	return 0.0;
-}
-
-void
-StandardLinearOscillatorAccelerationFilter::Print(OPS_Stream &s, int flag)  
-{
-}

@@ -22,67 +22,74 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
+// $Revision: 1.1 $
 // $Date: 2003-10-27 23:04:40 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/StandardLinearOscillatorAccelerationFilter.cpp,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/modulatingFunction/KooModulatingFunction.cpp,v $
 
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-#include <StandardLinearOscillatorAccelerationFilter.h>
-#include <Filter.h>
+#include <KooModulatingFunction.h>
+#include <ModulatingFunction.h>
 #include <classTags.h>
 
 
-StandardLinearOscillatorAccelerationFilter::StandardLinearOscillatorAccelerationFilter(int tag, double period, double dampingRatio)
-:Filter(tag,FILTER_standardLinearOscillator)
+KooModulatingFunction::KooModulatingFunction(int tag,
+												 Filter *theFilt, 
+												 double pt1,
+												 double pt2)
+:ModulatingFunction(tag,MODULATING_FUNCTION_trapezoidal)
 {
-	double pi = 3.14159265358979;
-	wn = 2*pi/period;
-	xi = dampingRatio;
+	t1 = pt1;
+	t2 = pt2;
+
+	if (t1>t2 ) {
+		opserr << "WARNING: Inconsistent input to Koo Modulating Function" << endln;
+	}
+
+	theFilter = theFilt;
 }
 
-StandardLinearOscillatorAccelerationFilter::~StandardLinearOscillatorAccelerationFilter()
+KooModulatingFunction::~KooModulatingFunction()
 {
 }
 
 double
-StandardLinearOscillatorAccelerationFilter::getAmplitude(double time)
+KooModulatingFunction::getAmplitude(double time)
 {
-	if (time<0.0) {
-		return 0.0;
+	double amplitude;
+	if (time < 0.0) {
+		amplitude = 0.0;
+	}
+	else if (time < t1) {
+		amplitude = time*time/25.0; 
+	}
+	else if (time < t2) {
+		amplitude = 1.0;
 	}
 	else {
-		double wd = wn * sqrt(1.0-pow(xi,2.0));
-		return (  ( xi*xi*wn*wn*sin(wd*time) - 2.0*xi*wn*wd*cos(wd*time) - wd*wd*sin(wd*time) ) * exp(-xi*wn*time)  );
+		amplitude = exp(-0.5*(time-10.0));
 	}
+
+	return amplitude;
+}
+
+Filter *
+KooModulatingFunction::getFilter()
+{
+	return theFilter;
 }
 
 double
-StandardLinearOscillatorAccelerationFilter::getMaxAmplitude()
+KooModulatingFunction::getMaxAmplitude()
 {
-	double wd = wn * sqrt(1.0-pow(xi,2.0));
-
-	opserr << "ERROR: The getMaxAmplitude() method is not implemented for acceleration filter." << endln;
-
-	double result = 0.0;
-
-	return result;
-}
-
-double
-StandardLinearOscillatorAccelerationFilter::getTimeOfMaxAmplitude()
-{
-	double wd = wn * sqrt(1.0-pow(xi,2.0));
-
-	opserr << "ERROR: The getTimeOfMaxAmplitude() method is not implemented for acceleration filter." << endln;
-
-	return 0.0;
+	return 1.0;
 }
 
 void
-StandardLinearOscillatorAccelerationFilter::Print(OPS_Stream &s, int flag)  
+KooModulatingFunction::Print(OPS_Stream &s, int flag)  
 {
 }
+

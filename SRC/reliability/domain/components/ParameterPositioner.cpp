@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:24 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:04:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ParameterPositioner.cpp,v $
 
 
@@ -40,14 +40,13 @@ ParameterPositioner::ParameterPositioner (int passedTag,
 		const char **argv, int argc)
 :ReliabilityDomainComponent(passedTag, RANDOM_VARIABLE_POSITIONER)
 {
-	tag = passedTag;
 	theObject = object;
 
 	if (theObject) 
 		parameterID = theObject->setParameter (argv, argc, theInfo);
 
 	if (parameterID < 0)
-		opserr << "ParameterPositioner::ParameterPositioner "<< tag <<" -- unable to set parameter" << endln;
+		opserr << "ParameterPositioner::ParameterPositioner "<< this->getTag() <<" -- unable to set parameter" << endln;
 }
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:49 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/modulatingFunction/TrapezoidalModulatingFunction.h,v $
 
 
@@ -41,7 +41,13 @@ class TrapezoidalModulatingFunction : public ModulatingFunction
 {
 
 public:
-	TrapezoidalModulatingFunction(int tag,Filter *theFilter,double t1, double t2, double t3, double t4);
+	TrapezoidalModulatingFunction(int tag,
+		                          Filter *theFilter,
+								  double t1, 
+								  double t2, 
+								  double t3, 
+								  double t4,
+								  double amplitude);
 	~TrapezoidalModulatingFunction();
 
 	void Print(OPS_Stream &s, int flag =0);
@@ -58,6 +64,7 @@ private:
 	double t2;
 	double t3;
 	double t4;
+	double amplitude;
 };
 
 #endif

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:48 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/modulatingFunction/TrapezoidalModulatingFunction.cpp,v $
 
 
@@ -41,13 +41,15 @@ TrapezoidalModulatingFunction::TrapezoidalModulatingFunction(int tag,
 												 double pt1,
 												 double pt2,
 												 double pt3,
-												 double pt4)
+												 double pt4,
+												 double pamplitude)
 :ModulatingFunction(tag,MODULATING_FUNCTION_trapezoidal)
 {
 	t1 = pt1;
 	t2 = pt2;
 	t3 = pt3;
 	t4 = pt4;
+	amplitude = pamplitude;
 
 	if (t1>t2 || t2>t3 || t3>t4) {
 		opserr << "WARNING: Inconsistent input to Trapezoidal Modulating Function" << endln;
@@ -63,24 +65,23 @@ TrapezoidalModulatingFunction::~TrapezoidalModulatingFunction()
 double
 TrapezoidalModulatingFunction::getAmplitude(double time)
 {
-	double amplitude;
 	if (time < t1) {
-		amplitude = 0.0;
+		return 0.0;
 	}
 	else if (time < t2) {
-		amplitude = (1.0/(t1-t2)) * time; 
+		double a=amplitude/(t2-t1); 
+		return (a*(time-t1));
 	}
 	else if (time < t3) {
-		amplitude = 1.0;
+		return amplitude;
 	}
 	else if (time < t4) {
-		amplitude = 1.0 - (1.0/(t4-t3)) * time;
+		double a=-amplitude/(t4-t3);
+		return (amplitude+a*(time-t3));
 	}
 	else {
-		amplitude = 0.0;
+		return 0.0;
 	}
-
-	return amplitude;
 }
 
 Filter *
@@ -92,7 +93,7 @@ TrapezoidalModulatingFunction::getFilter()
 double
 TrapezoidalModulatingFunction::getMaxAmplitude()
 {
-	return 1.0;
+	return amplitude;
 }
 
 void

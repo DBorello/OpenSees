@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:25 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:04:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ParameterPositioner.h,v $
 
 
@@ -54,8 +54,6 @@ public:
 protected:
 
 private:
-	int tag;
-
 	Information theInfo;
 	DomainComponent *theObject;
 	int parameterID;

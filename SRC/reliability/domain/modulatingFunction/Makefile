@@ -3,7 +3,8 @@ include ../../../../Makefile.def
 OBJS       = ConstantModulatingFunction.o \
 	GammaModulatingFunction.o \
 	ModulatingFunction.o \
-	TrapezoidalModulatingFunction.o
+	TrapezoidalModulatingFunction.o \
+	KooModulatingFunction.o
 
 # Compilation control
 all:         $(OBJS)

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-04-28 20:51:28 $
+// $Revision: 1.6 $
+// $Date: 2003-10-27 23:04:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.h,v $
 
 
@@ -43,7 +43,7 @@ class LimitStateFunction : public ReliabilityDomainComponent
 
 public:
 	LimitStateFunction(	int tag, 
-						const char *expression);
+						TCL_Char *expression);
 	~LimitStateFunction();
 	void Print(OPS_Stream &s, int flag =0);
 
@@ -86,9 +86,8 @@ protected:
 
 private:
 
-	int tokenizeIt(const char *expression);
+	int tokenizeIt(TCL_Char *expression);
 
-	int tag;
 	char *originalExpression;
 	char *tokenizedExpression;
 	char *expressionWithAddition;

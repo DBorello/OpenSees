@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-04-02 22:02:49 $
+// $Revision: 1.3 $
+// $Date: 2003-10-27 23:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/spectrum/JonswapSpectrum.cpp,v $
 
 
@@ -35,7 +35,6 @@
 #include <Spectrum.h>
 #include <Vector.h>
 #include <classTags.h>
-#include <math.h>
 
 
 JonswapSpectrum::JonswapSpectrum(int tag, double min, double max,

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-04-02 22:02:49 $
+// $Revision: 1.3 $
+// $Date: 2003-10-27 23:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/modulatingFunction/GammaModulatingFunction.cpp,v $
 
 
@@ -34,15 +34,16 @@
 #include <GammaModulatingFunction.h>
 #include <ModulatingFunction.h>
 #include <classTags.h>
-#include <math.h>
 
 
 GammaModulatingFunction::GammaModulatingFunction(int tag,
-												 Filter *theFilt, 
+												 Filter *theFilt,
+												 double pa,
 												 double pb,
 												 double pc)
 :ModulatingFunction(tag,MODULATING_FUNCTION_gamma)
 {
+	a = pa;
 	b = pb;
 	c = pc;
 	theFilter = theFilt;
@@ -55,7 +56,7 @@ GammaModulatingFunction::~GammaModulatingFunction()
 double
 GammaModulatingFunction::getAmplitude(double time)
 {
-	return (  pow(time,b) * exp(-c*time)  );
+	return ( a * pow(time,b) * exp(-c*time)  );
 }
 
 Filter *
@@ -67,7 +68,7 @@ GammaModulatingFunction::getFilter()
 double
 GammaModulatingFunction::getMaxAmplitude()
 {
-	return ( pow( (b/c), b) * exp(-b) );
+	return ( a * pow( (b/c), b) * exp(-b) );
 }
 
 void

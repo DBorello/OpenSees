@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-04-28 20:51:27 $
+// $Revision: 1.7 $
+// $Date: 2003-10-27 23:04:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -37,11 +37,9 @@
 #include <classTags.h>
 
 LimitStateFunction::LimitStateFunction(	int passedTag, 
-									    const char *passedExpression)
+									    TCL_Char *passedExpression)
 :ReliabilityDomainComponent(passedTag, LIMIT_STATE_FUNCTION)
 {
-	tag = passedTag;
-	
 	originalExpression = new char[500];
 	strcpy(originalExpression,passedExpression);
 
@@ -109,7 +107,7 @@ LimitStateFunction::removeAddedExpression()
 
 
 int
-LimitStateFunction::tokenizeIt(const char *originalExpression)
+LimitStateFunction::tokenizeIt(TCL_Char *originalExpression)
 {
 	// Also store the tokenized expression (with dollar signs in front of variable names)
 	char *lsf_forTokenizing = new char[500];

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:44 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/modulatingFunction/ConstantModulatingFunction.cpp,v $
 
 
@@ -37,10 +37,12 @@
 
 
 ConstantModulatingFunction::ConstantModulatingFunction(int tag,
-												 Filter *theFilt)
+												 Filter *theFilt,
+												 double pamplitude)
 :ModulatingFunction(tag,MODULATING_FUNCTION_constant)
 {
 	theFilter = theFilt;
+	amplitude = pamplitude;
 }
 
 ConstantModulatingFunction::~ConstantModulatingFunction()
@@ -50,7 +52,7 @@ ConstantModulatingFunction::~ConstantModulatingFunction()
 double
 ConstantModulatingFunction::getAmplitude(double time)
 {
-	return 1.0;
+	return amplitude;
 }
 
 Filter *
@@ -62,7 +64,7 @@ ConstantModulatingFunction::getFilter()
 double
 ConstantModulatingFunction::getMaxAmplitude()
 {
-	return 1.0;
+	return amplitude;
 }
 
 void

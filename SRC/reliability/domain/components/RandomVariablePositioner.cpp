@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-04 00:44:25 $
+// $Revision: 1.6 $
+// $Date: 2003-10-27 23:04:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.cpp,v $
 
 
@@ -41,7 +41,6 @@ RandomVariablePositioner::RandomVariablePositioner (int passedTag,
 		const char **argv, int argc)
 :ReliabilityDomainComponent(passedTag, RANDOM_VARIABLE_POSITIONER)
 {
-	tag = passedTag;
 	rvNumber = passedRVnumber;
 	theObject = object;
 	theInfo.theInt = rvNumber; // Used by random process discretizer
@@ -50,7 +49,7 @@ RandomVariablePositioner::RandomVariablePositioner (int passedTag,
 		parameterID = theObject->setParameter (argv, argc, theInfo);
 
 	if (parameterID < 0)
-		opserr << "RandomVariablePositioner::RandomVariablePositioner "<< tag <<" -- unable to set parameter" << endln;
+		opserr << "RandomVariablePositioner::RandomVariablePositioner "<< this->getTag() <<" -- unable to set parameter" << endln;
 }
 
 
@@ -93,4 +92,20 @@ int
 RandomVariablePositioner::getRvNumber(void)
 {
 	return rvNumber;
+}
+
+
+int 
+RandomVariablePositioner::setNewTag(int newTag)
+{
+	this->setTag(newTag);
+	return 0;
+}
+
+
+int 
+RandomVariablePositioner::setRvNumber(int newRvNumber)
+{
+	rvNumber = newRvNumber;
+	return 0;
 }

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:46:01 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:05:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/NewmarkSensitivityIntegrator.cpp,v $
 
 
@@ -192,15 +192,15 @@ NewmarkSensitivityIntegrator::formEleResidual(FE_Element *theEle)
 
 		// The term -dM/dh*acc
 		theEle->addM_ForceSensitivity(gradNumber, *Udotdot, -1.0);
-		
+
 		// The term -M*(a2*v + a3*vdot + a4*vdotdot)
 		theEle->addM_Force(*massMatrixMultiplicator,-1.0);
 
-		// The term -C*(a6*v + a7*vdot + a8*vdotdot), from elemental viscosity
+		// The term -C*(a6*v + a7*vdot + a8*vdotdot)
 		theEle->addD_Force(*dampingMatrixMultiplicator,-1.0);
 
 		// The term -dC/dh*vel
-//		theEle->addD_ForceSensitivity(*dampingMatrixMultiplicator,-1.0);
+		theEle->addD_ForceSensitivity(gradNumber, *Udot,-1.0);
 		
 	}
 
@@ -231,6 +231,14 @@ NewmarkSensitivityIntegrator::formNodUnbalance(DOF_Group *theDof)
 		theDof->addM_ForceSensitivity(*Udotdot, -1.0);
 
 
+		// The term -C*(a6*v + a7*vdot + a8*vdotdot)
+		theDof->addD_Force(*dampingMatrixMultiplicator,-1.0);
+
+
+		// The term -dC/dh*vel
+		theDof->addD_ForceSensitivity(*Udot,-1.0);
+
+
 		// In case of random loads (have already been formed by 'applyLoadSensitivity')
 		theDof->addPtoUnbalance();
 
@@ -252,6 +260,7 @@ NewmarkSensitivityIntegrator::formSensitivityRHS(int passedGradNumber)
 
 	// Get pointer to the SOE
 	LinearSOE *theSOE = this->getLinearSOEPtr();
+
 
 	// Possibly set the independent part of the RHS
 	if (assemblyFlag != 0) {
@@ -282,7 +291,6 @@ NewmarkSensitivityIntegrator::formSensitivityRHS(int passedGradNumber)
 		time = theDomain->getCurrentTime();
 		loadPatternPtr->applyLoadSensitivity(time);
 	}
-
 
 
 	// Randomness in element/material contributions

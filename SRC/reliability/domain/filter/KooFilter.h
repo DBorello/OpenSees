@@ -22,67 +22,37 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
+// $Revision: 1.1 $
 // $Date: 2003-10-27 23:04:40 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/StandardLinearOscillatorAccelerationFilter.cpp,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/KooFilter.h,v $
 
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-#include <StandardLinearOscillatorAccelerationFilter.h>
+#ifndef KooFilter_h
+#define KooFilter_h
+
 #include <Filter.h>
-#include <classTags.h>
 
-
-StandardLinearOscillatorAccelerationFilter::StandardLinearOscillatorAccelerationFilter(int tag, double period, double dampingRatio)
-:Filter(tag,FILTER_standardLinearOscillator)
+class KooFilter : public Filter
 {
-	double pi = 3.14159265358979;
-	wn = 2*pi/period;
-	xi = dampingRatio;
-}
 
-StandardLinearOscillatorAccelerationFilter::~StandardLinearOscillatorAccelerationFilter()
-{
-}
+public:
+	KooFilter(int tag, double period, double dampingRatio);
+	~KooFilter();
+	double getAmplitude(double time);
+	double getMaxAmplitude();
+	double getTimeOfMaxAmplitude();
 
-double
-StandardLinearOscillatorAccelerationFilter::getAmplitude(double time)
-{
-	if (time<0.0) {
-		return 0.0;
-	}
-	else {
-		double wd = wn * sqrt(1.0-pow(xi,2.0));
-		return (  ( xi*xi*wn*wn*sin(wd*time) - 2.0*xi*wn*wd*cos(wd*time) - wd*wd*sin(wd*time) ) * exp(-xi*wn*time)  );
-	}
-}
+	void Print(OPS_Stream &s, int flag =0);
 
-double
-StandardLinearOscillatorAccelerationFilter::getMaxAmplitude()
-{
-	double wd = wn * sqrt(1.0-pow(xi,2.0));
+protected:
 
-	opserr << "ERROR: The getMaxAmplitude() method is not implemented for acceleration filter." << endln;
+private:
+	double wn;
+	double xi;
+};
 
-	double result = 0.0;
-
-	return result;
-}
-
-double
-StandardLinearOscillatorAccelerationFilter::getTimeOfMaxAmplitude()
-{
-	double wd = wn * sqrt(1.0-pow(xi,2.0));
-
-	opserr << "ERROR: The getTimeOfMaxAmplitude() method is not implemented for acceleration filter." << endln;
-
-	return 0.0;
-}
-
-void
-StandardLinearOscillatorAccelerationFilter::Print(OPS_Stream &s, int flag)  
-{
-}
+#endif

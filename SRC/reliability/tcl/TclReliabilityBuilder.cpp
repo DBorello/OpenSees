@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-04-28 20:51:28 $
+// $Revision: 1.13 $
+// $Date: 2003-10-27 23:05:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -71,6 +71,7 @@ using std::setiosflags;
 #include <ChiSquareRV.h>
 #include <GumbelRV.h>
 #include <WeibullRV.h>
+#include <UserDefinedRV.h>
 #include <LaplaceRV.h>
 #include <ParetoRV.h>
 #include <GFunEvaluator.h>
@@ -91,8 +92,8 @@ using std::setiosflags;
 #include <FiniteDifferenceGradGEvaluator.h>
 #include <SearchWithStepSizeAndStepDirection.h>
 #include <FORMAnalysis.h>
-#include <MVFOSMAnalysis.h>
-#include <FragilityAnalysis.h>
+#include <FOSMAnalysis.h>
+#include <ParametricReliabilityAnalysis.h>
 #include <GFunVisualizationAnalysis.h>
 #include <OutCrossingAnalysis.h>
 #include <SamplingAnalysis.h>
@@ -104,6 +105,7 @@ using std::setiosflags;
 #include <SORMAnalysis.h>
 #include <SystemAnalysis.h>
 #include <Filter.h>
+#include <KooFilter.h>
 #include <StandardLinearOscillatorDisplacementFilter.h>
 #include <StandardLinearOscillatorVelocityFilter.h>
 #include <StandardLinearOscillatorAccelerationFilter.h>
@@ -111,6 +113,7 @@ using std::setiosflags;
 #include <GammaModulatingFunction.h>
 #include <ConstantModulatingFunction.h>
 #include <TrapezoidalModulatingFunction.h>
+#include <KooModulatingFunction.h>
 #include <Spectrum.h>
 #include <JonswapSpectrum.h>
 #include <NarrowBandSpectrum.h>
@@ -121,7 +124,6 @@ using std::setiosflags;
 #include <OptimalityConditionReliabilityConvergenceCheck.h>
 #include <MeritFunctionCheck.h>
 #include <AdkZhangMeritFunctionCheck.h>
-#include <CriteriaReductionMeritFunctionCheck.h>
 #include <PolakHeSearchDirectionAndMeritFunction.h>
 #include <SQPsearchDirectionMeritFunctionAndHessian.h>
 #include <HessianApproximation.h>
@@ -156,8 +158,8 @@ static FindDesignPointAlgorithm *theFindDesignPointAlgorithm = 0;
 static FindCurvatures *theFindCurvatures = 0;
 static GFunVisualizationAnalysis *theGFunVisualizationAnalysis = 0;
 static FORMAnalysis *theFORMAnalysis = 0;
-static MVFOSMAnalysis *theMVFOSMAnalysis = 0;
-static FragilityAnalysis *theFragilityAnalysis = 0;
+static FOSMAnalysis *theFOSMAnalysis = 0;
+static ParametricReliabilityAnalysis *theParametricReliabilityAnalysis = 0;
 static OutCrossingAnalysis *theOutCrossingAnalysis = 0;
 static SORMAnalysis *theSORMAnalysis = 0;
 static SamplingAnalysis *theSamplingAnalysis = 0;
@@ -190,8 +192,8 @@ int TclReliabilityModelBuilder_addGradGEvaluator(ClientData clientData, Tcl_Inte
 int TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_addFindCurvatures(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runFORMAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-int TclReliabilityModelBuilder_runMVFOSMAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-int TclReliabilityModelBuilder_runFragilityAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_runFOSMAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_runParametricReliabilityAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_runSORMAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -201,6 +203,7 @@ int TclReliabilityModelBuilder_tempCommand(ClientData clientData, Tcl_Interp *in
 int TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_getMean(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 int TclReliabilityModelBuilder_getStdv(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 
 
@@ -240,8 +243,8 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "findCurvatures",	TclReliabilityModelBuilder_addFindCurvatures,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "randomNumberGenerator",TclReliabilityModelBuilder_addRandomNumberGenerator,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "runFORMAnalysis",TclReliabilityModelBuilder_runFORMAnalysis,(ClientData)NULL, NULL);
-  Tcl_CreateCommand(interp, "runMVFOSMAnalysis",TclReliabilityModelBuilder_runMVFOSMAnalysis,(ClientData)NULL, NULL);
-  Tcl_CreateCommand(interp, "runFragilityAnalysis",TclReliabilityModelBuilder_runFragilityAnalysis,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "runFOSMAnalysis",TclReliabilityModelBuilder_runFOSMAnalysis,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "runParametricReliabilityAnalysis",TclReliabilityModelBuilder_runParametricReliabilityAnalysis,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "runGFunVizAnalysis",TclReliabilityModelBuilder_runGFunVisualizationAnalysis,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "runOutCrossingAnalysis",TclReliabilityModelBuilder_runOutCrossingAnalysis,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "runSORMAnalysis",TclReliabilityModelBuilder_runSORMAnalysis,(ClientData)NULL, NULL);
@@ -251,6 +254,7 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
   Tcl_CreateCommand(interp, "inputCheck",TclReliabilityModelBuilder_inputCheck,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "getMean",TclReliabilityModelBuilder_getMean,(ClientData)NULL, NULL);
   Tcl_CreateCommand(interp, "getStdv",TclReliabilityModelBuilder_getStdv,(ClientData)NULL, NULL);
+  Tcl_CreateCommand(interp, "rvReduction",TclReliabilityModelBuilder_rvReduction,(ClientData)NULL, NULL);
 
 
   // set the static pointers in this file
@@ -265,8 +269,10 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
 	// Delete objects
 	if (theReliabilityDomain != 0)
 		delete theReliabilityDomain;
-	if (theGFunEvaluator != 0)
+	if (theGFunEvaluator != 0) {
 		delete theGFunEvaluator;
+		theGFunEvaluator = 0;
+	}
 	if (theGradGEvaluator != 0)
 		delete theGradGEvaluator;
 	if (theStepSizeRule != 0)
@@ -297,10 +303,10 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
 		delete theFindCurvatures;
 	if (theFORMAnalysis != 0)
 		delete theFORMAnalysis;
-	if (theMVFOSMAnalysis != 0)
-		delete theMVFOSMAnalysis;
-	if (theFragilityAnalysis != 0)
-		delete theFragilityAnalysis;
+	if (theFOSMAnalysis != 0)
+		delete theFOSMAnalysis;
+	if (theParametricReliabilityAnalysis != 0)
+		delete theParametricReliabilityAnalysis;
 	if (theSORMAnalysis != 0)
 		delete theSORMAnalysis;
 	if (theSamplingAnalysis != 0)
@@ -333,8 +339,8 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
 	Tcl_DeleteCommand(theInterp, "findCurvatures");
 	Tcl_DeleteCommand(theInterp, "randomNumberGenerator");
 	Tcl_DeleteCommand(theInterp, "runFORMAnalysis");
-	Tcl_DeleteCommand(theInterp, "runMVFOSMAnalysis");
-	Tcl_DeleteCommand(theInterp, "runFragilityAnalysis");
+	Tcl_DeleteCommand(theInterp, "runFOSMAnalysis");
+	Tcl_DeleteCommand(theInterp, "runParametricReliabilityAnalysis");
 	Tcl_DeleteCommand(theInterp, "runGFunVizAnalysis");
 	Tcl_DeleteCommand(theInterp, "runSORMAnalysis");
 	Tcl_DeleteCommand(theInterp, "runSystemAnalysis");
@@ -398,6 +404,7 @@ TclReliabilityModelBuilder_addRandomVariable(ClientData clientData,Tcl_Interp *i
 	  (strcmp(argv[2],"type2LargestValue")	== 0) ||
 	  (strcmp(argv[2],"type3SmallestValue") == 0) ||
 	  (strcmp(argv[2],"uniform")			== 0) ||
+	  (strcmp(argv[2],"userdefined")		== 0) ||
 	  (strcmp(argv[2],"weibull")			== 0) 
 	 ) 
   {
@@ -416,6 +423,177 @@ TclReliabilityModelBuilder_addRandomVariable(ClientData clientData,Tcl_Interp *i
 	opserr << "ERROR: invalid input: tag \n";
 	return TCL_ERROR;
   }
+
+
+  // TREAT THE USER-DEFINED RANDOM VARIABLE AS A SPECIAL CASE
+  if (strcmp(argv[2],"userdefined") == 0) {
+
+		Vector xPoints;
+		Vector PDFpoints;
+		int numPoints;
+		int i;
+
+		if (strcmp(argv[3],"-list") == 0) {
+
+			numPoints = floor((argc-4)/2.0);
+			Vector temp_xPoints(numPoints);
+			Vector temp_PDFpoints(numPoints);
+
+			double x = 0.0;
+			double pdf = 0.0;
+			double x_old;
+
+			// Read the points
+			for (i=0; i<numPoints; i++) {
+			  if (Tcl_GetDouble(interp, argv[4+2*i], &x) != TCL_OK) {
+				  opserr << "ERROR: Invalid x point to user-defined random variable." << endln;
+				  return TCL_ERROR;
+			  }
+			  if (Tcl_GetDouble(interp, argv[5+2*i], &pdf) != TCL_OK) {
+				  opserr << "ERROR: Invalid PDF value point to user-defined random variable." << endln;
+				  return TCL_ERROR;
+			  }
+			  if (i>0 && x<=x_old) {
+				  opserr << "ERROR: x-points to user-defined random variable must be consequtive!" << endln;
+				  return TCL_ERROR;
+			  }
+			  temp_xPoints(i) = x;
+			  temp_PDFpoints(i) = pdf;
+			  x_old = x;
+			}
+
+			xPoints = temp_xPoints;
+			PDFpoints = temp_PDFpoints;
+		
+		}
+		else if (strcmp(argv[3],"-file") == 0) {
+
+			// Open file where the vectors are given
+			ifstream inputFile( argv[4], ios::in );
+			if (inputFile.fail()) {
+				opserr << "File " << *argv[4] << " could not be opened. " << endln;
+				return TCL_ERROR;
+			}
+
+			// Loop through file to see how many entries there are
+			double dummy;
+			numPoints = 0;
+			while (inputFile >> dummy) {
+				inputFile >> dummy;
+				numPoints++;
+			}
+			if (numPoints == 0) {
+				opserr << "ERROR: No entries in the direction file read by " << endln
+					<< "user-defined random variable, number " << tag << endln;
+				return TCL_ERROR;
+			}
+
+			// Close the file
+			inputFile.close();
+
+			// Allocate vectors of correct size
+			Vector temp_xPoints(numPoints);
+			Vector temp_PDFpoints(numPoints);
+
+			// Open it again, now being ready to store the results in a matrix
+			ifstream inputFile2( argv[4], ios::in );
+			if (inputFile2.fail()) {
+				opserr << "File " << *argv[4] << " could not be opened. " << endln;
+				return TCL_ERROR;
+			}
+
+			// Store the vector
+			for (int i=0; i<numPoints; i++) {
+					inputFile2 >> temp_xPoints(i);
+					inputFile2 >> temp_PDFpoints(i);
+			}
+			inputFile2.close();
+
+			xPoints = temp_xPoints;
+			PDFpoints = temp_PDFpoints;
+		}
+		else {
+			opserr << "ERROR: Invalid argument to user-defined random variable, number " << tag << endln;
+			return TCL_ERROR;
+		}
+	  
+	
+	  // Normalize the PDF
+	  double sum = 0.0;
+	  for ( i=1; i<numPoints; i++ ) {
+		  sum += 0.5 * (PDFpoints(i)+PDFpoints(i-1)) * (xPoints(i)-xPoints(i-1));
+	  }
+	  double diff;
+	  if ( fabs(sum-1.0) < 1.0e-6) {
+		  // It's normalized enough...!
+	  }
+	  else if (sum < 1.0) {
+		  diff = (1.0-sum)/(xPoints(numPoints-1)-xPoints(0));
+		  opserr << "WARNING: The PDF of random variable " << tag << " is normalized by " << endln
+			     << "         uniformly increasing the PDF values by " << diff << endln;
+		  for (int i=0; i<numPoints; i++) {
+			  PDFpoints(i) = PDFpoints(i) + diff;
+		  }
+	  }
+	  else {
+		  diff = (sum-1.0)/(xPoints(numPoints-1)-xPoints(0));
+		  opserr << "WARNING: The PDF of random variable " << tag << " is normalized by " << endln
+			     << "         uniformly decreasing the PDF values by " << diff << endln;
+		  for (int i=0; i<numPoints; i++) {
+			  PDFpoints(i) = PDFpoints(i) - diff;
+		  }
+	  }
+
+	  // Check if the PDF became negative somewhere
+	  for (i=0; i<numPoints; i++) {
+		  if ( PDFpoints(i) < 0.0 ) {
+			  opserr << "ERROR: Some PDF values of random variable " << tag << endln
+				  << "became negative after normalization. " << endln;
+			  return TCL_ERROR;
+		  }
+	  }
+
+	  // Check that it has been normalized
+	  sum = 0.0;
+	  for ( i=1; i<numPoints; i++ ) {
+		  sum += 0.5 * (PDFpoints(i)+PDFpoints(i-1)) * (xPoints(i)-xPoints(i-1));
+	  }
+      if ( fabs(1.0-sum) > 1.0e-6 ) {
+		  opserr << "ERROR: Did not succeed in normalizing user-defined distribution." << endln;
+		  return TCL_ERROR;
+	  }
+
+
+//	  // Check if the user has given a start point too, and create the random variables
+//	  if ( floor((argc-4)/2.0) != (argc-4)/2.0 ) {
+//	  
+//		  double startPt = 0.0;
+//		  if (Tcl_GetDouble(interp, argv[5], &startPt) != TCL_OK) {
+//			  opserr << "ERROR: Invalid start point to user-defined random variable." << endln;
+//			  return TCL_ERROR;
+//		  }
+//
+//	  	  theRandomVariable = new UserDefinedRV(tag, xPoints, PDFpoints, startPt);
+//	  }
+//	  else {
+
+		  theRandomVariable = new UserDefinedRV(tag, xPoints, PDFpoints);
+//	  }
+
+	  // Add the random variable to the domain
+	  if (theReliabilityDomain->addRandomVariable(theRandomVariable) == false) {
+		opserr << "ERROR: failed to add random variable to the domain (wrong number of arguments?)\n";
+		opserr << "random variable: " << tag << endln;
+		delete theRandomVariable; // otherwise memory leak
+		return TCL_ERROR;
+	  }
+	  else {
+		  return TCL_OK;
+	  }
+
+  }
+
+
 
 
   // NOW START CREATING THE RANDOM VARIBLE OBJECT
@@ -1580,6 +1758,11 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 	if (strcmp(argv[argvCounter],"-createRV3") == 0) {
 		argvCounter++;
 
+		if (strcmp(argv[argvCounter],"userdefined") == 0) {
+			opserr << "ERROR: Can't create a user-defined random variable like this." << endln;
+			return TCL_ERROR;
+		}
+
 		char theTclCommand[100];
 		TCL_Char *rvType;
 		double mean,stdv;
@@ -1607,6 +1790,11 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 	}
 	else if (strcmp(argv[argvCounter],"-createRV4") == 0) {
 		argvCounter++;
+
+		if (strcmp(argv[argvCounter],"userdefined") == 0) {
+			opserr << "ERROR: Can't create a user-defined random variable like this." << endln;
+			return TCL_ERROR;
+		}
 
 		char theTclCommand[100];
 		TCL_Char *rvType;
@@ -1640,6 +1828,11 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 	}
 	else if (strcmp(argv[argvCounter],"-createRV5") == 0) {
 		argvCounter++;
+
+		if (strcmp(argv[argvCounter],"userdefined") == 0) {
+			opserr << "ERROR: Can't create a user-defined random variable like this." << endln;
+			return TCL_ERROR;
+		}
 
 		char theTclCommand[100];
 		TCL_Char *rvType;
@@ -1679,6 +1872,11 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 	}
 	else if (strcmp(argv[argvCounter],"-createRV6") == 0) {
 		argvCounter++;
+
+		if (strcmp(argv[argvCounter],"userdefined") == 0) {
+			opserr << "ERROR: Can't create a user-defined random variable like this." << endln;
+			return TCL_ERROR;
+		}
 
 		char theTclCommand[100];
 		TCL_Char *rvType;
@@ -1975,8 +2173,13 @@ TclReliabilityModelBuilder_addModulatingFunction(ClientData clientData, Tcl_Inte
 
 	if (strcmp(argv[2],"gamma") == 0) {
 
+		if (argc!=7) {
+			opserr << "ERROR: Incorrect number of arguments to gamma modulating function" << endln;
+			return TCL_ERROR;
+		}
+
 		int thisTag, filterTag;
-		double b,c;
+		double a,b,c;
 
 		// GET INPUT PARAMETER (integer)
 		if (Tcl_GetInt(interp, argv[1], &thisTag) != TCL_OK) {
@@ -1999,19 +2202,25 @@ TclReliabilityModelBuilder_addModulatingFunction(ClientData clientData, Tcl_Inte
 		}
 
 		// GET INPUT PARAMETER (double)
-		if (Tcl_GetDouble(interp, argv[4], &b) != TCL_OK) {
+		if (Tcl_GetDouble(interp, argv[4], &a) != TCL_OK) {
+			opserr << "ERROR: invalid input: a \n";
+			return TCL_ERROR;
+		}
+
+		// GET INPUT PARAMETER (double)
+		if (Tcl_GetDouble(interp, argv[5], &b) != TCL_OK) {
 			opserr << "ERROR: invalid input: b \n";
 			return TCL_ERROR;
 		}
 
 		// GET INPUT PARAMETER (double)
-		if (Tcl_GetDouble(interp, argv[5], &c) != TCL_OK) {
+		if (Tcl_GetDouble(interp, argv[6], &c) != TCL_OK) {
 			opserr << "ERROR: invalid input: c \n";
 			return TCL_ERROR;
 		}
 
 		// CREATE THE OBJECT
-		theModulatingFunction = new GammaModulatingFunction(thisTag,theFilter,b,c);
+		theModulatingFunction = new GammaModulatingFunction(thisTag,theFilter,a,b,c);
 
 		if (theModulatingFunction == 0) {
 			opserr << "ERROR: ran out of memory creating modulating function \n";
@@ -2030,6 +2239,7 @@ TclReliabilityModelBuilder_addModulatingFunction(ClientData clientData, Tcl_Inte
 	else if (strcmp(argv[2],"constant") == 0) {
 	
 		int thisTag, filterTag;
+		double amplitude=0.0;
 
 		// GET INPUT PARAMETER (integer)
 		if (Tcl_GetInt(interp, argv[1], &thisTag) != TCL_OK) {
@@ -2051,8 +2261,14 @@ TclReliabilityModelBuilder_addModulatingFunction(ClientData clientData, Tcl_Inte
 			return TCL_ERROR;
 		}
 
+		// GET INPUT PARAMETER (double)
+		if (Tcl_GetDouble(interp, argv[4], &amplitude) != TCL_OK) {
+			opserr << "ERROR: invalid input: amplitude \n";
+			return TCL_ERROR;
+		}
+
 		// CREATE THE OBJECT
-		theModulatingFunction = new ConstantModulatingFunction(thisTag,theFilter);
+		theModulatingFunction = new ConstantModulatingFunction(thisTag,theFilter,amplitude);
 
 		if (theModulatingFunction == 0) {
 			opserr << "ERROR: ran out of memory creating modulating function \n";
@@ -2092,7 +2308,7 @@ TclReliabilityModelBuilder_addModulatingFunction(ClientData clientData, Tcl_Inte
 			return TCL_ERROR;
 		}
 
-		double t1, t2, t3, t4;
+		double t1, t2, t3, t4, amplitude;
 
 		// GET INPUT PARAMETER (double)
 		if (Tcl_GetDouble(interp, argv[4], &t1) != TCL_OK) {
@@ -2118,8 +2334,69 @@ TclReliabilityModelBuilder_addModulatingFunction(ClientData clientData, Tcl_Inte
 			return TCL_ERROR;
 		}
 
+		// GET INPUT PARAMETER (double)
+		if (Tcl_GetDouble(interp, argv[8], &amplitude) != TCL_OK) {
+			opserr << "ERROR: invalid input to modulating function: amplitude \n";
+			return TCL_ERROR;
+		}
+
 		// CREATE THE OBJECT
-		theModulatingFunction = new TrapezoidalModulatingFunction(thisTag,theFilter,t1,t2,t3,t4);
+		theModulatingFunction = new TrapezoidalModulatingFunction(thisTag,theFilter,t1,t2,t3,t4,amplitude);
+
+		if (theModulatingFunction == 0) {
+			opserr << "ERROR: ran out of memory creating modulating function \n";
+			opserr << "modulating function: " << thisTag << endln;
+			return TCL_ERROR;
+		}
+
+		// ADD THE OBJECT TO THE DOMAIN
+		if (theReliabilityDomain->addModulatingFunction(theModulatingFunction) == false) {
+			opserr << "ERROR: failed to add modulating function to the domain\n";
+			opserr << "modulating function: " << thisTag << endln;
+			delete theModulatingFunction; // otherwise memory leak
+			return TCL_ERROR;
+		}
+	}	else if (strcmp(argv[2],"Koo") == 0) {
+	
+		int thisTag, filterTag;
+
+		// GET INPUT PARAMETER (integer)
+		if (Tcl_GetInt(interp, argv[1], &thisTag) != TCL_OK) {
+			opserr << "ERROR: invalid input: tag \n";
+			return TCL_ERROR;
+		}
+
+		// GET INPUT PARAMETER (integer)
+		if (Tcl_GetInt(interp, argv[3], &filterTag) != TCL_OK) {
+			opserr << "ERROR: invalid input: filterTag \n";
+			return TCL_ERROR;
+		}
+
+		// CHECK THAT THE FILTER EXISTS
+		Filter *theFilter = 0;
+		theFilter = theReliabilityDomain->getFilter(filterTag);
+		if (theFilter == 0) {
+			opserr << "ERROR: Could not find the filter with tag " << filterTag << endln;
+			return TCL_ERROR;
+		}
+
+		double t1, t2;
+
+		// GET INPUT PARAMETER (double)
+		if (Tcl_GetDouble(interp, argv[4], &t1) != TCL_OK) {
+			opserr << "ERROR: invalid input to modulating function: t1 \n";
+			return TCL_ERROR;
+		}
+
+		// GET INPUT PARAMETER (double)
+		if (Tcl_GetDouble(interp, argv[5], &t2) != TCL_OK) {
+			opserr << "ERROR: invalid input to modulating function: t2 \n";
+			return TCL_ERROR;
+		}
+
+
+		// CREATE THE OBJECT
+		theModulatingFunction = new KooModulatingFunction(thisTag,theFilter,t1,t2);
 
 		if (theModulatingFunction == 0) {
 			opserr << "ERROR: ran out of memory creating modulating function \n";
@@ -2177,9 +2454,13 @@ TclReliabilityModelBuilder_addFilter(ClientData clientData, Tcl_Interp *interp, 
 
 
 
-	if (strcmp(argv[2],"standardDisplacement") == 0) {
+	if ( (strcmp(argv[2],"standard") == 0) || (strcmp(argv[2],"standardDisplacement") == 0) ) {
 
 		theFilter = new StandardLinearOscillatorDisplacementFilter(tag,period_Tn,damping);
+	}
+	else if ( strcmp(argv[2],"Koo") == 0 ) {
+
+		theFilter = new KooFilter(tag,period_Tn,damping);
 	}
 	else if (strcmp(argv[2],"standardVelocity") == 0) {
 
@@ -2511,11 +2792,38 @@ TclReliabilityModelBuilder_addSearchDirection(ClientData clientData, Tcl_Interp 
 	}
 	else if (strcmp(argv[1],"PolakHe") == 0) {
 
-		if (argc != 2) {
-			opserr << "ERROR: Wrong number of arguments to PolakHe search direction. " << endln;
-			return TCL_ERROR;
+		double gamma = 1.0;
+		double delta = 1.0;
+
+		int argvCounter = 2;
+		while (argc > argvCounter) {
+			if (strcmp(argv[argvCounter],"-gamma") == 0) {
+				argvCounter++;
+
+				if (Tcl_GetDouble(interp, argv[argvCounter], &gamma) != TCL_OK) {
+					opserr << "ERROR: invalid input: gamma for Polak-He algorithm" << endln;
+					return TCL_ERROR;
+				}
+				argvCounter++;
+
+			}
+			else if (strcmp(argv[argvCounter],"-delta") == 0) {
+				argvCounter++;
+
+				if (Tcl_GetDouble(interp, argv[argvCounter], &delta) != TCL_OK) {
+					opserr << "ERROR: invalid input: delta for Polak-He algorithm" << endln;
+					return TCL_ERROR;
+				}
+				argvCounter++;
+			}
+			else {
+				opserr << "ERROR: Invalid input to Polak-He algorithm." << endln;
+				return TCL_ERROR;
+			}
 		}
-		thePolakHeDualPurpose = new PolakHeSearchDirectionAndMeritFunction();
+
+
+		thePolakHeDualPurpose = new PolakHeSearchDirectionAndMeritFunction(gamma,delta);
 		theSearchDirection = thePolakHeDualPurpose;
 	}
 	else if (strcmp(argv[1],"GradientProjection") == 0) {
@@ -2723,18 +3031,6 @@ TclReliabilityModelBuilder_addMeritFunctionCheck(ClientData clientData, Tcl_Inte
 
 		theMeritFunctionCheck = new AdkZhangMeritFunctionCheck(multi,add,factor);
 	}
-	else if (strcmp(argv[argvCounter],"criteriaReduction") == 0) {
-		argvCounter++;
-
-		// Check for necessary ingredients
-		if (theReliabilityConvergenceCheck == 0) {
-			opserr << "The TerjeMeritFunctionCheck needs a ReliabilityConvergenceCheck!" << endln;
-			return TCL_ERROR;
-		}
-
-		theMeritFunctionCheck = new CriteriaReductionMeritFunctionCheck(theReliabilityConvergenceCheck);
-
-	}
 	else if (strcmp(argv[argvCounter],"PolakHe") == 0) {
 		argvCounter++;
 
@@ -2840,6 +3136,7 @@ TclReliabilityModelBuilder_addReliabilityConvergenceCheck(ClientData clientData,
 
 		double e1 = 1.0e-3;
 		double e2 = 1.0e-3;
+		double scaleValue = 0.0;
 		int print=1;
 
 		while (argvCounter < argc) {
@@ -2871,18 +3168,28 @@ TclReliabilityModelBuilder_addReliabilityConvergenceCheck(ClientData clientData,
 				}
 				argvCounter++;
 			}
+			else if (strcmp(argv[argvCounter],"-scaleValue") == 0) {
+				argvCounter++;
+
+				if (Tcl_GetDouble(interp, argv[argvCounter], &scaleValue) != TCL_OK) {
+					opserr << "ERROR: invalid input: scaleValue \n";
+					return TCL_ERROR;
+				}
+				argvCounter++;
+			}
 			else {
 				opserr << "ERROR: Invalid input to standard reliability convergence check. " << endln;
 				return TCL_ERROR;
 			}
 		}
-			theReliabilityConvergenceCheck = new StandardReliabilityConvergenceCheck(e1,e2,print);
+			theReliabilityConvergenceCheck = new StandardReliabilityConvergenceCheck(e1,e2,scaleValue,print);
 	}
 	else if (strcmp(argv[argvCounter],"OptimalityCondition") == 0) {
 		argvCounter++;
 
 		double e1 = 1.0e-3;
 		double e2 = 1.0e-3;
+		double scaleValue = 0.0;
 		int print = 1;
 
 		while (argvCounter < argc) {
@@ -2914,12 +3221,21 @@ TclReliabilityModelBuilder_addReliabilityConvergenceCheck(ClientData clientData,
 				}
 				argvCounter++;
 			}
+			else if (strcmp(argv[argvCounter],"-scaleValue") == 0) {
+				argvCounter++;
+
+				if (Tcl_GetDouble(interp, argv[argvCounter], &scaleValue) != TCL_OK) {
+					opserr << "ERROR: invalid input: scaleValue \n";
+					return TCL_ERROR;
+				}
+				argvCounter++;
+			}
 			else {
 				opserr << "ERROR: Invalid input to standard reliability convergence check. " << endln;
 				return TCL_ERROR;
 			}
 		}
-		theReliabilityConvergenceCheck = new OptimalityConditionReliabilityConvergenceCheck(e1,e2,print);
+		theReliabilityConvergenceCheck = new OptimalityConditionReliabilityConvergenceCheck(e1,e2,scaleValue,print);
 	}
 	else {
 		opserr << "ERROR: unrecognized type of ReliabilityConvergenceCheck \n";
@@ -2962,10 +3278,6 @@ TclReliabilityModelBuilder_addStepSizeRule(ClientData clientData, Tcl_Interp *in
 			opserr << "Need theProbabilityTransformation before a ArmijoStepSizeRule can be created" << endln;
 			return TCL_ERROR;
 		}
-		if (theGradGEvaluator == 0 ) {
-			opserr << "Need theGradGEvaluator before a ArmijoStepSizeRule can be created" << endln;
-			return TCL_ERROR;
-		}
 		if (theMeritFunctionCheck == 0 ) {
 			opserr << "Need theMeritFunctionCheck before a ArmijoStepSizeRule can be created" << endln;
 			return TCL_ERROR;
@@ -2978,7 +3290,7 @@ TclReliabilityModelBuilder_addStepSizeRule(ClientData clientData, Tcl_Interp *in
 		double b0 = 1.0;
 		int numberOfShortSteps = 2;
 		
-		double radius = 10.0;
+		double radius = 50.0;
 		double surfaceDistance = 0.1;
 		double evolution = 0.5;
 
@@ -3057,7 +3369,6 @@ TclReliabilityModelBuilder_addStepSizeRule(ClientData clientData, Tcl_Interp *in
 		}
 
 		theStepSizeRule = new ArmijoStepSizeRule(theGFunEvaluator,
-												 theGradGEvaluator,
 												 theProbabilityTransformation,
 												 theMeritFunctionCheck,
 												 theRootFindingAlgorithm, 
@@ -3132,11 +3443,16 @@ TclReliabilityModelBuilder_addgFunEvaluator(ClientData clientData, Tcl_Interp *i
 	}
 	else if (strcmp(argv[1],"Tcl") == 0) {
 
-		if (argc != 3) {
+		if (argc != 4) {
 			opserr << "ERROR: Wrong number of arguments to Tcl g-function evaluator." << endln;
 			return TCL_ERROR;
 		}
-		theGFunEvaluator = new TclGFunEvaluator(interp, theReliabilityDomain, argv[2]);
+
+		if (strcmp(argv[2],"-file") != 0) {
+			opserr << "ERROR: Wrong input to Tcl g-function evaluator." << endln;
+			return TCL_ERROR;
+		}
+		theGFunEvaluator = new TclGFunEvaluator(interp, theReliabilityDomain, argv[3]);
 
 	}
 	else if (strcmp(argv[1],"OpenSees") == 0) {
@@ -3245,16 +3561,21 @@ TclReliabilityModelBuilder_addGradGEvaluator(ClientData clientData, Tcl_Interp *
 				return TCL_ERROR;
 			}
 
+			int counter = 2;
+
 			for (int i=1; i<=numExtras; i++) {
 
-				if (strcmp(argv[2],"-pert") == 0) {
+				if (strcmp(argv[counter],"-pert") == 0) {
+					counter ++;
 
-					if (Tcl_GetDouble(interp, argv[3], &perturbationFactor) != TCL_OK) {
+					if (Tcl_GetDouble(interp, argv[counter], &perturbationFactor) != TCL_OK) {
 						opserr << "ERROR: invalid input: perturbationFactor \n";
 						return TCL_ERROR;
 					}
+					counter++;
 				}
-				else if (strcmp(argv[2],"-check") == 0) {
+				else if (strcmp(argv[counter],"-check") == 0) {
+					counter++;
 					doGradientCheck = true;
 				}
 				else {
@@ -3264,8 +3585,7 @@ TclReliabilityModelBuilder_addGradGEvaluator(ClientData clientData, Tcl_Interp *
 			}
 		}
 
-
-		theGradGEvaluator = new FiniteDifferenceGradGEvaluator(theGFunEvaluator, theReliabilityDomain,interp, perturbationFactor,doGradientCheck);
+		theGradGEvaluator = new FiniteDifferenceGradGEvaluator(theGFunEvaluator, theReliabilityDomain,interp, perturbationFactor,doGradientCheck, false);
 	}
 	else if (strcmp(argv[1],"OpenSees") == 0) {
 
@@ -3273,10 +3593,6 @@ TclReliabilityModelBuilder_addGradGEvaluator(ClientData clientData, Tcl_Interp *
 
 		if (theSensitivityAlgorithm == 0) {
 			opserr << "Need a DDM sensitivity algorithm before a OpenSees sensitivity evaluator can be created" << endln;
-			return TCL_ERROR;
-		}
-		if (theGFunEvaluator == 0) {
-			opserr << "Need theGFunEvaluator before a OpenSees sensitivity evaluator can be created" << endln;
 			return TCL_ERROR;
 		}
 
@@ -3293,7 +3609,7 @@ TclReliabilityModelBuilder_addGradGEvaluator(ClientData clientData, Tcl_Interp *
 			return TCL_ERROR;
 		}
 
-		theGradGEvaluator = new OpenSeesGradGEvaluator(theGFunEvaluator, interp, theReliabilityDomain,doGradientCheck);
+		theGradGEvaluator = new OpenSeesGradGEvaluator(interp, theReliabilityDomain,doGradientCheck);
 	}
 	else {
 		opserr << "ERROR: unrecognized type of GradGEvaluator \n";
@@ -3398,10 +3714,10 @@ TclReliabilityModelBuilder_addFindDesignPointAlgorithm(ClientData clientData, Tc
 			opserr << "Need theProbabilityTransformation before a FindDesignPointAlgorithm can be created" << endln;
 			return TCL_ERROR;
 		}
-		if (theStartPoint == 0 ) {
-			opserr << "Need theStartPoint before a FindDesignPointAlgorithm can be created" << endln;
-			return TCL_ERROR;
-		}
+//		if (theStartPoint == 0 ) {
+//			opserr << "Need theStartPoint before a FindDesignPointAlgorithm can be created" << endln;
+//			return TCL_ERROR;
+//		}
 		if (theReliabilityConvergenceCheck == 0 ) {
 			opserr << "Need theReliabilityConvergenceCheck before a FindDesignPointAlgorithm can be created" << endln;
 			return TCL_ERROR;
@@ -3598,8 +3914,8 @@ TclReliabilityModelBuilder_addStartPoint(ClientData clientData, Tcl_Interp *inte
 
 	// Check that the vector is of correct size
 	if (theStartPoint==0) {
-		opserr << "ERROR: Could not create the start point. " << endln;
-		return TCL_ERROR;
+//		opserr << "ERROR: Could not create the start point. " << endln;
+//		return TCL_ERROR;
 	}
 	else {
 		if (theStartPoint->Size() != nrv) {
@@ -3790,12 +4106,12 @@ TclReliabilityModelBuilder_runFORMAnalysis(ClientData clientData, Tcl_Interp *in
 
 //////////////////////////////////////////////////////////////////
 int 
-TclReliabilityModelBuilder_runMVFOSMAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+TclReliabilityModelBuilder_runFOSMAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	// In case this is a replacement
-	if (theMVFOSMAnalysis != 0) {
-		delete theMVFOSMAnalysis;
-		theMVFOSMAnalysis = 0;
+	if (theFOSMAnalysis != 0) {
+		delete theFOSMAnalysis;
+		theFOSMAnalysis = 0;
 	}
 
 
@@ -3806,35 +4122,35 @@ TclReliabilityModelBuilder_runMVFOSMAnalysis(ClientData clientData, Tcl_Interp *
 
 	// Check number of arguments
 	if (argc != 2)  {
-		opserr << "ERROR: Wrong number of input parameter to MVFOSM analysis" << endln;
+		opserr << "ERROR: Wrong number of input parameter to FOSM analysis" << endln;
 		return TCL_ERROR;
 	}
 
 
 	// Check for essential ingredients
 	if (theGFunEvaluator == 0 ) {
-		opserr << "Need theGFunEvaluator before a MVFOSMAnalysis can be created" << endln;
+		opserr << "Need theGFunEvaluator before a FOSMAnalysis can be created" << endln;
 		return TCL_ERROR;
 	}
 	if (theGradGEvaluator == 0 ) {
-		opserr << "Need theGradGEvaluator before a MVFOSMAnalysis can be created" << endln;
+		opserr << "Need theGradGEvaluator before a FOSMAnalysis can be created" << endln;
 		return TCL_ERROR;
 	}
 
 
-	theMVFOSMAnalysis = new MVFOSMAnalysis( theReliabilityDomain,
+	theFOSMAnalysis = new FOSMAnalysis( theReliabilityDomain,
 											theGFunEvaluator,
 											theGradGEvaluator,
 											interp,
 											argv[1]);
 
-	if (theMVFOSMAnalysis == 0) {
-		opserr << "ERROR: could not create theMVFOSMAnalysis \n";
+	if (theFOSMAnalysis == 0) {
+		opserr << "ERROR: could not create theFOSMAnalysis \n";
 		return TCL_ERROR;
 	}
 
 	// Now run the analysis
-	theMVFOSMAnalysis->analyze();
+	theFOSMAnalysis->analyze();
 
 	return TCL_OK;
 }
@@ -3846,12 +4162,12 @@ TclReliabilityModelBuilder_runMVFOSMAnalysis(ClientData clientData, Tcl_Interp *
 
 //////////////////////////////////////////////////////////////////
 int 
-TclReliabilityModelBuilder_runFragilityAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+TclReliabilityModelBuilder_runParametricReliabilityAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
 	// In case this is a replacement
-	if (theFragilityAnalysis != 0) {
-		delete theFragilityAnalysis;
-		theFragilityAnalysis = 0;
+	if (theParametricReliabilityAnalysis != 0) {
+		delete theParametricReliabilityAnalysis;
+		theParametricReliabilityAnalysis = 0;
 	}
 
 
@@ -3869,11 +4185,11 @@ TclReliabilityModelBuilder_runFragilityAnalysis(ClientData clientData, Tcl_Inter
 
 	// Check for essential ingredients
 	if (theFindDesignPointAlgorithm == 0 ) {
-		opserr << "Need theFindDesignPointAlgorithm before a FragilityAnalysis can be created" << endln;
+		opserr << "Need theFindDesignPointAlgorithm before a ParametricReliabilityAnalysis can be created" << endln;
 		return TCL_ERROR;
 	}
 	if (theGradGEvaluator == 0 ) {
-		opserr << "Need theGradGEvaluator before a FragilityAnalysis can be created" << endln;
+		opserr << "Need theGradGEvaluator before a ParametricReliabilityAnalysis can be created" << endln;
 		return TCL_ERROR;
 	}
 
@@ -3930,7 +4246,7 @@ TclReliabilityModelBuilder_runFragilityAnalysis(ClientData clientData, Tcl_Inter
 	}
 
 	if (parGiven && rangeGiven && numIntGiven) {
-		theFragilityAnalysis = new FragilityAnalysis( theReliabilityDomain,
+		theParametricReliabilityAnalysis = new ParametricReliabilityAnalysis( theReliabilityDomain,
 												  theFindDesignPointAlgorithm,
 												  theGradGEvaluator,
 												  parameterNumber,
@@ -3941,17 +4257,17 @@ TclReliabilityModelBuilder_runFragilityAnalysis(ClientData clientData, Tcl_Inter
 												  interp);
 	}
 	else {
-		opserr << "ERROR:: some input to theFragilityAnalysis was not provided" << endln;
+		opserr << "ERROR:: some input to theParametricReliabilityAnalysis was not provided" << endln;
 		return TCL_ERROR;
 	}
 
-	if (theFragilityAnalysis == 0) {
-		opserr << "ERROR: could not create theFragilityAnalysis \n";
+	if (theParametricReliabilityAnalysis == 0) {
+		opserr << "ERROR: could not create theParametricReliabilityAnalysis \n";
 		return TCL_ERROR;
 	}
 
 	// Now run the analysis
-	theFragilityAnalysis->analyze();
+	theParametricReliabilityAnalysis->analyze();
 
 	return TCL_OK;
 }
@@ -4085,6 +4401,7 @@ TclReliabilityModelBuilder_runSamplingAnalysis(ClientData clientData, Tcl_Interp
 	//
 	//     -type  failureProbability (1)......... this is the default
 	//     -type  responseStatistics (2)
+	//     -type  saveGvalues (3)
 	//
 	//     -variance 1.0  ....................... this is the default
 	//
@@ -4119,13 +4436,19 @@ TclReliabilityModelBuilder_runSamplingAnalysis(ClientData clientData, Tcl_Interp
 
 				analysisTypeTag = 1;
 
-				if (theStartPoint == 0 ) {
-					opserr << "Need theStartPoint before a SimulationAnalyis can be created" << endln;
-					return TCL_ERROR;
-				}
+//				if (theStartPoint == 0 ) {
+//					opserr << "Need theStartPoint before a SimulationAnalyis can be created" << endln;
+//					return TCL_ERROR;
+//				}
 			}
-			else if (strcmp(argv[i+1],"responseStatistics") == 0) {
-				analysisTypeTag = 2;
+			else if ( (strcmp(argv[i+1],"responseStatistics") == 0) || (strcmp(argv[i+1],"saveGvalues") == 0) ) {
+
+				if (strcmp(argv[i+1],"responseStatistics") == 0) {
+					analysisTypeTag = 2;
+				}
+				else {
+					analysisTypeTag = 3;
+				}
 				if (samplingVariance != 1.0) {
 					opserr << "ERROR:: sampling variance must be 1.0 for " << endln
 						<< " response statistics sampling." << endln;
@@ -4147,8 +4470,7 @@ TclReliabilityModelBuilder_runSamplingAnalysis(ClientData clientData, Tcl_Interp
 					}
 					(*theStartPoint)(i-1) = aRandomVariable->getMean();
 				}
-				opserr << "NOTE: The startPoint is set to the Mean due to the choice " << endln
-					<< "      of responseStatistics as sampling analysis type." << endln;
+				opserr << "NOTE: The startPoint is set to the Mean due to the selected sampling analysis type." << endln;
 			}
 			else {
 				opserr << "ERROR: invalid input: type \n";
@@ -4256,6 +4578,8 @@ TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Int
 		return TCL_ERROR;
 	}
 
+	int stepsToStart = 0;
+	int stepsToEnd = 0;
 	int sampleFreq = 1;
 	double littleDt = 0.01;
 	int analysisType = 1;
@@ -4263,7 +4587,21 @@ TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Int
 	// Loop through arguments
 	int argvCounter = 2;
 	while (argc > argvCounter) {
-		if (strcmp(argv[argvCounter],"-resultFreq") == 0) {
+		if (strcmp(argv[argvCounter],"-results") == 0) {
+			argvCounter++;
+
+			// GET INPUT PARAMETER (integer)
+			if (Tcl_GetInt(interp, argv[argvCounter], &stepsToStart) != TCL_OK) {
+				opserr << "ERROR: invalid input stepsToStart to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
+			argvCounter++;
+
+			// GET INPUT PARAMETER (integer)
+			if (Tcl_GetInt(interp, argv[argvCounter], &stepsToEnd) != TCL_OK) {
+				opserr << "ERROR: invalid input stepsToEnd to theOutCrossingAnalysis \n";
+				return TCL_ERROR;
+			}
 			argvCounter++;
 
 			// GET INPUT PARAMETER (integer)
@@ -4293,6 +4631,7 @@ TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Int
 		}
 		else {
 			opserr << "ERROR: Invalid input to theOutCrossingAnalysis." << endln;
+			return TCL_ERROR;
 			argvCounter++;
 		}
 	}
@@ -4304,6 +4643,8 @@ TclReliabilityModelBuilder_runOutCrossingAnalysis(ClientData clientData, Tcl_Int
 				theGradGEvaluator,
 				theFindDesignPointAlgorithm,
 				analysisType,
+				stepsToStart,
+				stepsToEnd,
 				sampleFreq,
 				littleDt,
 				argv[1]);
@@ -4721,10 +5062,10 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 	
 	if (axes == 1 || axes == 2) {
 
-		if (theStartPoint == 0 ) {
-			opserr << "Need theStartPoint before this GFunVisualizationAnalysis can be created" << endln;
-			return TCL_ERROR;
-		}
+//		if (theStartPoint == 0 ) {
+//			opserr << "Need theStartPoint before this GFunVisualizationAnalysis can be created" << endln;
+//			return TCL_ERROR;
+//		}
 		
 		theGFunVisualizationAnalysis->setStartPoint(theStartPoint);
 	}
@@ -4777,6 +5118,227 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 	return TCL_OK;
 }
 
+
+
+
+
+//////////////////////////////////////////////////////////////////
+int 
+TclReliabilityModelBuilder_rvReduction(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+
+	// Check that this is not done after transformation etc has been created
+	if (theProbabilityTransformation != 0 ) {
+		opserr << "ERROR: R.v. reduction cannot be performed after the " << endln
+			<< " probability transformation has been created." << endln;
+		return TCL_ERROR;
+	}
+
+
+	// Initial declarations
+	int i, j;
+	int rvNum;
+	bool result;
+	bool isInList, rv1isInList, rv2isInList;
+	Vector keepRvs;
+
+
+
+
+
+
+	// Read user-given numbers of random variables to keep
+	int numInList;
+	if (strcmp(argv[1],"-list") == 0) {
+		numInList = argc-2;
+		Vector tempKeepRvs(numInList);
+		for (i=1; i<=numInList; i++) {
+			if (Tcl_GetInt(interp, argv[i+1], &rvNum) != TCL_OK) {
+				opserr << "ERROR: Invalid input to r.v. reduction command." << endln;
+				return TCL_ERROR;
+			}
+			tempKeepRvs(i-1) = rvNum;
+		}
+		keepRvs = tempKeepRvs;
+	}
+	else if (strcmp(argv[1],"-file") == 0) {
+
+		// Check how many entries we should read
+		if (Tcl_GetInt(interp, argv[3], &numInList) != TCL_OK) {
+			opserr << "ERROR: Invalid input to r.v. reduction command." << endln;
+			return TCL_ERROR;
+		}
+
+		// Read entries
+		Vector tempKeepRvs(numInList);
+		ifstream inputFile( argv[2], ios::in );
+		if (inputFile.fail()) {
+			opserr << "File " << *argv[2] << " could not be opened. " << endln;
+			return TCL_ERROR;
+		}
+		for (int i=0; i<numInList; i++) {
+				inputFile >> tempKeepRvs(i);
+		}
+		inputFile.close();
+		keepRvs = tempKeepRvs;
+	}
+	else {
+		opserr << "ERROR: Invalid argument to r.v. reduction. " << endln;
+		return TCL_ERROR;
+	}
+
+
+
+	// Handle re-creation of random variables
+	ArrayOfTaggedObjects aListOfRandomVariables(256);
+	int nrv = theReliabilityDomain->getNumberOfRandomVariables();
+	RandomVariable *aRandomVariable;
+	int newTag;
+	for (i=1; i<=nrv; i++) {
+		isInList = false;
+		for (j=1; j<=numInList; j++) {
+			if (keepRvs(j-1)==i) {
+				isInList = true;
+				newTag = j;
+				break;
+			}
+		}
+		aRandomVariable = theReliabilityDomain->getRandomVariablePtr(i);
+		if (!isInList) {
+			delete aRandomVariable;
+		}
+		else {
+			aRandomVariable->setNewTag(newTag);
+			result = aListOfRandomVariables.addComponent(aRandomVariable);
+		}
+		theReliabilityDomain->removeRandomVariable(i);
+	}
+	// Add the new random variables to the reliability domain
+	for (i=1; i<=numInList; i++) {
+		theReliabilityDomain->addRandomVariable((RandomVariable*)aListOfRandomVariables.getComponentPtr(i));
+	}
+
+
+
+
+
+
+
+
+	// Handle the re-creation of correlation coefficients
+	int nCorr = theReliabilityDomain->getNumberOfCorrelationCoefficients();
+	int count = 1;
+	ArrayOfTaggedObjects aListOfCorrelationCoefficients(256);
+	CorrelationCoefficient *aCorrelationCoefficient;
+	CorrelationCoefficient *aNewCorrelationCoefficient;
+	int rv1, rv2, newRv1, newRv2;
+	double rho;
+	for (i=1; i<=nCorr; i++) {
+
+		// Get correlation data
+		aCorrelationCoefficient = theReliabilityDomain->getCorrelationCoefficientPtr(i);
+		rv1 = aCorrelationCoefficient->getRv1();
+		rv2 = aCorrelationCoefficient->getRv2();
+		rho = aCorrelationCoefficient->getCorrelation();
+
+		// Get random variable numbers and possibly create a new correlation coefficient
+		rv1isInList = false;
+		rv2isInList = false;
+		for (j=1; j<=numInList; j++) {
+			if (keepRvs(j-1)==rv1) {
+				rv1isInList = true;
+				newRv1 = j;
+			}
+			if (keepRvs(j-1)==rv2) {
+				rv2isInList = true;
+				newRv2 = j;
+			}
+		}
+		if (rv1isInList && rv2isInList) {
+			aNewCorrelationCoefficient = new CorrelationCoefficient(count,newRv1,newRv2,rho);
+			aListOfCorrelationCoefficients.addComponent(aNewCorrelationCoefficient);
+			count++;
+		}
+		delete aCorrelationCoefficient;
+		theReliabilityDomain->removeCorrelationCoefficient(i);
+	}
+	// Add the new correlation coefficients to the reliability domain
+	for (i=1; i<=(count-1); i++) {
+		theReliabilityDomain->addCorrelationCoefficient((CorrelationCoefficient*)aListOfCorrelationCoefficients.getComponentPtr(i));
+	}
+
+
+
+
+
+
+	// Handle the re-creation of random variable positioners
+	int nPos = theReliabilityDomain->getNumberOfRandomVariablePositioners();
+	RandomVariablePositioner *aRvPositioner;
+	ArrayOfTaggedObjects aListOfPositioners(256);
+	count =1;
+	int newRvNum;
+	for (i=1; i<=nPos; i++) {
+		aRvPositioner = theReliabilityDomain->getRandomVariablePositionerPtr(i);
+		rvNum = aRvPositioner->getRvNumber();
+		isInList = false;
+		for (j=1; j<=numInList; j++) {
+			if (keepRvs(j-1)==rvNum) {
+				isInList = true;
+				newRvNum = j;
+				break;
+			}
+		}
+		if (!isInList) {
+			delete aRvPositioner;
+		}
+		else {
+			aRvPositioner->setNewTag(count);
+			aRvPositioner->setRvNumber(newRvNum);
+			aListOfPositioners.addComponent(aRvPositioner);
+			count++;
+		}
+		theReliabilityDomain->removeRandomVariablePositioner(i);
+	}
+	// Add the new random variable positioners to the reliability domain
+	for (i=1; i<=numInList; i++) {
+		theReliabilityDomain->addRandomVariablePositioner((RandomVariablePositioner*)aListOfPositioners.getComponentPtr(i));
+	}
+
+
+
+
+
+/*
+nrv = theReliabilityDomain->getNumberOfRandomVariables();
+RandomVariable *aRV;
+for (i=1; i<=nrv; i++) {
+	aRV = theReliabilityDomain->getRandomVariablePtr(i);
+	opserr << "Mean of rv# " << i << ": " << aRV->getMean() << endln;
+
+}
+nrv = theReliabilityDomain->getNumberOfCorrelationCoefficients();
+CorrelationCoefficient *aaRV;
+for (i=1; i<=nrv; i++) {
+	aaRV = theReliabilityDomain->getCorrelationCoefficientPtr(i);
+	opserr << "Rv1: " << aaRV->getRv1() << endln;
+	opserr << "Rv2: " << aaRV->getRv2() << endln;
+	opserr << "Corr: " << aaRV->getCorrelation() << endln;
+}
+nrv = theReliabilityDomain->getNumberOfRandomVariablePositioners();
+RandomVariablePositioner *aaaRV;
+for (i=1; i<=nrv; i++) {
+	aaaRV = theReliabilityDomain->getRandomVariablePositionerPtr(i);
+	opserr << "Rv in pos: " << aaaRV->getRvNumber() << endln;
+}
+
+while(true) {
+}
+*/
+
+
+	return TCL_OK;
+}
 
 
 
@@ -4868,8 +5430,33 @@ TclReliabilityModelBuilder_inputCheck(ClientData clientData, Tcl_Interp *interp,
 int 
 TclReliabilityModelBuilder_tempCommand(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-	opserr << "The temp command does nothing now!" << endln;
+//	opserr << "The temp command does nothing now!" << endln;
+//	return TCL_OK;
+
+
+	int tag;
+	RandomVariable *rv;
+	if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+		opserr << "ERROR: Invalid random variable number tag to inverse CDF command." << endln;
+		return TCL_ERROR;
+	}
+	rv = theReliabilityDomain->getRandomVariablePtr(tag);
+	if (rv == 0) {
+		opserr << "ERROR: Invalid tag number to inverse CDF command. " << endln;
+		return TCL_ERROR;
+	}
+
+	double x = 0.25;
+	double p = 0.25;
+
+	opserr << "PDF:    " << rv->getPDFvalue(x)        << endln;
+	opserr << "CDF:    " << rv->getCDFvalue(x)        << endln;
+	opserr << "invCDF: " << rv->getInverseCDFvalue(p) << endln;
+	
 	return TCL_OK;
+
+
+
 }
 
 

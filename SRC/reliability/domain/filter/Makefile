@@ -3,7 +3,8 @@ include ../../../../Makefile.def
 OBJS       = 	Filter.o \
 	StandardLinearOscillatorDisplacementFilter.o \
 	StandardLinearOscillatorAccelerationFilter.o \
-	StandardLinearOscillatorVelocityFilter.o
+	StandardLinearOscillatorVelocityFilter.o \
+	KooFilter.o
 
 # Compilation control
 all:         $(OBJS)

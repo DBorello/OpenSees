@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:47 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/modulatingFunction/GammaModulatingFunction.h,v $
 
 
@@ -42,7 +42,7 @@ class GammaModulatingFunction : public ModulatingFunction
 {
 
 public:
-	GammaModulatingFunction(int tag,Filter *theFilter,double b,double c);
+	GammaModulatingFunction(int tag,Filter *theFilter,double a, double b,double c);
 	~GammaModulatingFunction();
 
 	void Print(OPS_Stream &s, int flag =0);
@@ -55,6 +55,7 @@ protected:
 
 private:
 	Filter *theFilter;
+	double a;
 	double b;
 	double c;
 

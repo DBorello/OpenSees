@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:44:34 $
+// $Revision: 1.7 $
+// $Date: 2003-10-27 23:04:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/LognormalRV.cpp,v $
 
 
@@ -160,13 +160,11 @@ LognormalRV::getCDFvalue(double rvValue)
 {
 	double result;
 
+	static NormalRV aStandardNormalRV( 1, 0.0, 1.0, 0.0);
 	
 	if (isPositive) {
 		if ( 0.0 < rvValue ) {
-			RandomVariable *aStandardNormalRV;
-			aStandardNormalRV= new NormalRV( 1, 0.0, 1.0, 0.0);
-			result = aStandardNormalRV->getCDFvalue((log(rvValue)-lambda)/zeta);
-			delete aStandardNormalRV;	
+			result = aStandardNormalRV.getCDFvalue((log(rvValue)-lambda)/zeta);
 		}
 		else {
 			result = 0.0;
@@ -174,10 +172,7 @@ LognormalRV::getCDFvalue(double rvValue)
 	}
 	else {
 		if ( rvValue < 0.0 ) {
-			RandomVariable *aStandardNormalRV;
-			aStandardNormalRV= new NormalRV( 1, 0.0, 1.0, 0.0);
-			result = aStandardNormalRV->getCDFvalue((log(fabs(rvValue))-lambda)/zeta);
-			delete aStandardNormalRV;	
+			result = aStandardNormalRV.getCDFvalue((log(fabs(rvValue))-lambda)/zeta);
 			result = 1.0-result;
 		}
 		else {
@@ -232,19 +227,14 @@ LognormalRV::getInverseCDFvalue(double probValue)
 		return 0.0;
 	}
 	else {
+		static NormalRV aStandardNormalRV( 1, 0.0, 1.0, 0.0);
 
 		if (isPositive) {
-			RandomVariable *aStandardNormalRV;
-			aStandardNormalRV= new NormalRV( 1, 0.0, 1.0, 0.0);
-			double inverseNormal = aStandardNormalRV->getInverseCDFvalue(probValue);
-			delete aStandardNormalRV;
+			double inverseNormal = aStandardNormalRV.getInverseCDFvalue(probValue);
 			return exp(inverseNormal*zeta + lambda);
 		}
 		else {
-			RandomVariable *aStandardNormalRV;
-			aStandardNormalRV= new NormalRV( 1, 0.0, 1.0, 0.0);
-			double inverseNormal = aStandardNormalRV->getInverseCDFvalue(1.0-probValue);
-			delete aStandardNormalRV;
+			double inverseNormal = aStandardNormalRV.getInverseCDFvalue(1.0-probValue);
 			return (-exp(inverseNormal*zeta + lambda));
 		}
 	}

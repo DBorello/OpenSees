@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-04-02 22:02:48 $
+// $Revision: 1.3 $
+// $Date: 2003-10-27 23:04:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/StandardLinearOscillatorVelocityFilter.cpp,v $
 
 
@@ -31,7 +31,6 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-#include <math.h>
 #include <StandardLinearOscillatorVelocityFilter.h>
 #include <Filter.h>
 #include <classTags.h>

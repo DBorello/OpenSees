@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:44:25 $
+// $Revision: 1.4 $
+// $Date: 2003-10-27 23:04:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.cpp,v $
 
 
@@ -42,4 +42,13 @@ RandomVariable::RandomVariable(int tag, int classTag)
 
 RandomVariable::~RandomVariable()
 {
+}
+
+
+
+int 
+RandomVariable::setNewTag(int newTag)
+{
+	this->setTag(newTag);
+	return 0;
 }

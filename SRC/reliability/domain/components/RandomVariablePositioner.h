@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-04 00:44:25 $
+// $Revision: 1.6 $
+// $Date: 2003-10-27 23:04:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.h,v $
 
 
@@ -52,10 +52,12 @@ public:
 	int update (double newValue); 
 	int activate(bool active);
 
+	int setNewTag(int newTag);
+	int setRvNumber(int newRvNumber);
+
 protected:
 
 private:
-	int tag;
 	int rvNumber;
 
 	Information theInfo;
