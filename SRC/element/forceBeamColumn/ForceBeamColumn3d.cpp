@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-10-15 23:31:10 $
+// $Revision: 1.16 $
+// $Date: 2003-12-12 18:40:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -1796,23 +1796,26 @@ ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
     int eleTag = this->getTag();
     int counter = (flag +1) * -1;
     int i;
-    const Vector &force = this->getResistingForce();
+    double P  = Secommit(0);
+    double MZ1 = Secommit(1);
+    double MZ2 = Secommit(2);
+    double MY1 = Secommit(3);
+    double MY2 = Secommit(4);
+    double L = crdTransf->getInitialLength();
+    double VY = (MZ1+MZ2)/L;
+    theVector(1) =  VY;
+    theVector(4) = -VY;
+    double VZ = (MY1+MY2)/L;
+    double T  = Secommit(5);
+
     s << "FORCE\t" << eleTag << "\t" << counter << "\t0";
-    for (i=0; i<3; i++)
-      s << "\t" << force(i);
-    s << endln;
+    s << "\t" << -P+p0[0] << "\t"  <<  VY+p0[1] << "\t"  << -VZ+p0[3]  << endln;
     s << "FORCE\t" << eleTag << "\t" << counter << "\t1";
-    for (i=0; i<3; i++)
-      s << "\t" << force(i+6);
-    s << endln;
+    s << "\t"  << P  << ' '  << -VY+p0[2] << ' ' << VZ+p0[4] << endln;
     s << "MOMENT\t" << eleTag << "\t" << counter << "\t0";
-    for (i=3; i<6; i++)
-      s << "\t" << force(i);
-    s << endln;
+    s << "\t" << -T << "\t"  << MY1 << "\t" << MZ1 << endln;
     s << "MOMENT\t" << eleTag << "\t" << counter << "\t1";
-    for (i=3; i<6; i++)
-      s << "\t" << force(i+6);
-    s << endln;
+    s << "\t" << T << ' ' << MY2 << ' '  <<  MZ2 << endln;
   }
 
   // flag set to 2 used to print everything .. used for viewing data for UCSD renderer  
@@ -1841,7 +1844,6 @@ ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
        << " " << node2Disp(0) << " " << node2Disp(1) << " " << node2Disp(2)
        << " " << node2Disp(3) << " " << node2Disp(4) << " " << node2Disp(5) << endln;
 
-
      double P  = Secommit(0);
      double MZ1 = Secommit(1);
      double MZ2 = Secommit(2);
@@ -1865,7 +1867,7 @@ ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
      vp = crdTransf->getBasicTrialDisp();
      vp.addMatrixVector(1.0, fe, Se, -1.0);
      s << "#PLASTIC_HINGE_ROTATION " << vp[1] << " " << vp[2] << " " << vp[3] << " " << vp[4] 
-       << 0.1*L << " " << 0.1*L << endln;
+       << " " << 0.1*L << " " << 0.1*L << endln;
 
      // allocate array of vectors to store section coordinates and displacements
      static int maxNumSections = 0;
