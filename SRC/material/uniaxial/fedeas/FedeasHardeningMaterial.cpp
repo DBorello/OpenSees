@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-04-02 22:02:45 $
+// $Revision: 1.5 $
+// $Date: 2004-07-15 21:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasHardeningMaterial.cpp,v $
                                                                       
 // Written: MHS
@@ -42,6 +42,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasHardening, 3, 4)
 	data[1] = sigmaY;
 	data[2] = Hiso;
 	data[3] = Hkin;
+
+	tangentP = E;
+	tangent = tangentP;
 }
 
 FedeasHardeningMaterial::FedeasHardeningMaterial(int tag, const Vector &d):
@@ -55,6 +58,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasHardening, 3, 4)
 
   for (int i = 0; i < numData; i++)
     data[i] = d(i);
+
+  tangentP = data[0];
+  tangent = tangentP;
 }
 
 FedeasHardeningMaterial::FedeasHardeningMaterial(void):
@@ -82,6 +88,10 @@ FedeasHardeningMaterial::getCopy(void)
   theCopy->epsilonP = epsilonP;
   theCopy->sigmaP   = sigmaP;
   theCopy->tangentP = tangentP;
+
+  theCopy->epsilon = epsilonP;
+  theCopy->sigma = sigmaP;
+  theCopy->tangent = tangentP;  
   
   return theCopy;
 }

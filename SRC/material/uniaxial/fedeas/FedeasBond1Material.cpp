@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-04-02 22:02:45 $
+// $Revision: 1.5 $
+// $Date: 2004-07-15 21:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasBond1Material.cpp,v $
                                                                       
 // Written: MHS
@@ -40,19 +40,22 @@ FedeasBond1Material::FedeasBond1Material(int tag,
 // 6 history variables and 12 material parameters
 FedeasMaterial(tag, MAT_TAG_FedeasBond1, 6, 12)
 {
-	// Fill in material parameters
-	data[0]  = u1p;
-	data[1]  = q1p;
-	data[2]  = u2p;
-	data[3]  = u3p;
-	data[4]  = q3p;
-	data[5]  = u1n;
-	data[6]  = q1n;
-	data[7]  = u2n;
-	data[8]  = u3n;
-	data[9]  = q3n;
-	data[10] = s0;
-	data[11] = bb;
+  // Fill in material parameters
+  data[0]  = u1p;
+  data[1]  = q1p;
+  data[2]  = u2p;
+  data[3]  = u3p;
+  data[4]  = q3p;
+  data[5]  = u1n;
+  data[6]  = q1n;
+  data[7]  = u2n;
+  data[8]  = u3n;
+  data[9]  = q3n;
+  data[10] = s0;
+  data[11] = bb;
+  
+  tangent =  q1p/u1p;
+  tangentP = tangent;
 }
 
 FedeasBond1Material::FedeasBond1Material(int tag, const Vector &d):
@@ -66,6 +69,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasBond1, 6, 12)
 		
   for (int i = 0; i < numData; i++)
     data[i] = d(i);
+
+  tangent =  data[1]/data[0];
+  tangentP = tangent;
 }
 
 FedeasBond1Material::FedeasBond1Material(void):
@@ -93,6 +99,10 @@ FedeasBond1Material::getCopy(void)
   theCopy->epsilonP = epsilonP;
   theCopy->sigmaP   = sigmaP;
   theCopy->tangentP = tangentP;
+
+  theCopy->epsilon = epsilonP;
+  theCopy->sigma = sigmaP;
+  theCopy->tangent = tangentP;  
   
   return theCopy;
 }
@@ -100,6 +110,6 @@ FedeasBond1Material::getCopy(void)
 double
 FedeasBond1Material::getInitialTangent(void)
 {
-	//return q1p/u1p;
-	return data[1]/data[0];
+  //return q1p/u1p;
+  return data[1]/data[0];
 }

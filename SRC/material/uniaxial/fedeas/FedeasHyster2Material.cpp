@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-04-02 22:02:45 $
+// $Revision: 1.5 $
+// $Date: 2004-07-15 21:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasHyster2Material.cpp,v $
                                                                       
 // Written: MHS
@@ -58,6 +58,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasHysteretic2, 6, 16)
 	data[13] = pinchY;
 	data[14] = damfc1;
 	data[15] = damfc2;
+
+	tangentP =  data[0]/data[1];
+	tangent = tangentP;
 }
 
 FedeasHyster2Material::FedeasHyster2Material(int tag,
@@ -85,6 +88,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasHysteretic2, 6, 16)
 	data[13] = pinchY;
 	data[14] = damfc1;
 	data[15] = damfc2;
+
+	tangentP =  data[0]/data[1];
+	tangent = tangentP;
 }
 
 FedeasHyster2Material::FedeasHyster2Material(int tag, const Vector &d):
@@ -125,6 +131,10 @@ FedeasHyster2Material::getCopy(void)
   theCopy->epsilonP = epsilonP;
   theCopy->sigmaP   = sigmaP;
   theCopy->tangentP = tangentP;
+
+  theCopy->epsilon = epsilonP;
+  theCopy->sigma = sigmaP;
+  theCopy->tangent = tangentP;  
   
   return theCopy;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-04-02 22:02:45 $
+// $Revision: 1.5 $
+// $Date: 2004-07-15 21:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasConcr3Material.cpp,v $
                                                                       
 // Written: MHS
@@ -49,6 +49,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasConcrete3, 2, 10)
 	data[7]  = ft0;
 	data[8]  = beta;
 	data[9]  = epstu;
+
+	tangent =  2.0*data[0]/data[1];
+	tangentP = tangent;
 }
 
 FedeasConcr3Material::FedeasConcr3Material(int tag, const Vector &d):
@@ -62,6 +65,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasConcrete3, 2, 10)
 		
   for (int i = 0; i < numData; i++)
     data[i] = d(i);
+
+  tangent =  2.0*data[0]/data[1];
+  tangentP = tangent;
 }
 
 FedeasConcr3Material::FedeasConcr3Material(void):
@@ -89,6 +95,10 @@ FedeasConcr3Material::getCopy(void)
   theCopy->epsilonP = epsilonP;
   theCopy->sigmaP   = sigmaP;
   theCopy->tangentP = tangentP;
+
+  theCopy->epsilon = epsilonP;
+  theCopy->sigma = sigmaP;
+  theCopy->tangent = tangentP;  
   
   return theCopy;
 }

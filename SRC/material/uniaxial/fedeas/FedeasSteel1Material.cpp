@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-04-02 22:02:45 $
+// $Revision: 1.5 $
+// $Date: 2004-07-15 21:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasSteel1Material.cpp,v $
                                                                       
 // Written: MHS
@@ -45,6 +45,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasSteel1, 7, 7)
 	data[4]  = a2;
 	data[5]  = a3;
 	data[6]  = a4;
+
+	tangent = E0;
+	tangentP = E0;
 }
 
 FedeasSteel1Material::FedeasSteel1Material(int tag,
@@ -61,6 +64,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasSteel1, 7, 7)
 	data[4]  = 1.0;
 	data[5]  = 0.0;
 	data[6]  = 1.0;
+
+	tangent = E0;
+	tangentP = E0;
 }
 
 FedeasSteel1Material::FedeasSteel1Material(int tag, const Vector &d):
@@ -101,7 +107,10 @@ FedeasSteel1Material::getCopy(void)
   theCopy->epsilonP = epsilonP;
   theCopy->sigmaP   = sigmaP;
   theCopy->tangentP = tangentP;
-  
+
+  theCopy->epsilon = epsilonP;
+  theCopy->sigma = sigmaP;
+  theCopy->tangent = tangentP;    
   return theCopy;
 }
 

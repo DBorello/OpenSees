@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-04-02 22:02:45 $
+// $Revision: 1.5 $
+// $Date: 2004-07-15 21:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasConcr2Material.cpp,v $
                                                                       
 // Written: MHS
@@ -37,13 +37,16 @@ FedeasConcr2Material::FedeasConcr2Material(int tag,
 // 2 history variables and 7 material parameters
 FedeasMaterial(tag, MAT_TAG_FedeasConcrete2, 2, 7)
 {
-	data[0]  = fc;
-	data[1]  = ec;
-	data[2]  = fu;
-	data[3]  = eu;
-	data[4]  = ratio;
-	data[5]  = ft;
-	data[6]  = Ets;
+  data[0]  = fc;
+  data[1]  = ec;
+  data[2]  = fu;
+  data[3]  = eu;
+  data[4]  = ratio;
+  data[5]  = ft;
+  data[6]  = Ets;
+
+  tangent =  2.0*data[0]/data[1];
+  tangentP =  tangent;
 }
 
 FedeasConcr2Material::FedeasConcr2Material(int tag, const Vector &d):
@@ -57,6 +60,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasConcrete2, 2, 7)
 
   for (int i = 0; i < numData; i++)
     data[i] = d(i);
+
+  tangent =  2.0*data[0]/data[1];
+  tangentP =  tangent;
 }
 
 FedeasConcr2Material::FedeasConcr2Material(void):
@@ -84,13 +90,17 @@ FedeasConcr2Material::getCopy(void)
   theCopy->epsilonP = epsilonP;
   theCopy->sigmaP   = sigmaP;
   theCopy->tangentP = tangentP;
-  
+
+  theCopy->epsilon = epsilonP;
+  theCopy->sigma = sigmaP;
+  theCopy->tangent = tangentP;  
+
   return theCopy;
 }
 
 double
 FedeasConcr2Material::getInitialTangent(void)
 {
-	//return 2.0*fc/ec;
-	return 2.0*data[0]/data[1];
+  //return 2.0*fc/ec;
+  return 2.0*data[0]/data[1];
 }

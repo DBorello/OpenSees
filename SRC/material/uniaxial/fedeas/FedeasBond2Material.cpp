@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-04-02 22:02:45 $
+// $Revision: 1.6 $
+// $Date: 2004-07-15 21:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasBond2Material.cpp,v $
                                                                       
 // Written: MHS
@@ -58,6 +58,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasBond2, 27, 15)
 	double E0n = q1n*u1n/(1.0+bb) + q1n*(u2n-u1n) + 0.5*(q1n+q3n)*(u3n-u2n);
 
 	data[14] = (E0p > E0n) ? E0p : E0n;
+
+	tangent =  data[1]/data[0];
+	tangentP = tangent;
 }
 
 FedeasBond2Material::FedeasBond2Material(int tag, const Vector &d):
@@ -71,6 +74,9 @@ FedeasMaterial(tag, MAT_TAG_FedeasBond2, 27, 15)
 		
   for (int i = 0; i < numData; i++)
     data[i] = d(i);
+  
+  tangent =  data[1]/data[0];
+  tangentP = tangent;
 }
 
 FedeasBond2Material::FedeasBond2Material(void):
@@ -99,6 +105,10 @@ FedeasBond2Material::getCopy(void)
   theCopy->sigmaP   = sigmaP;
   theCopy->tangentP = tangentP;
   
+  theCopy->epsilon = epsilonP;
+  theCopy->sigma = sigmaP;
+  theCopy->tangent = tangentP;  
+
   return theCopy;
 }
 

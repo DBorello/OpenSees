@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:34:16 $
+// $Revision: 1.6 $
+// $Date: 2004-07-15 21:36:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/TclFedeasMaterialCommand.cpp,v $
 
 // Written: MHS
@@ -270,7 +270,7 @@ TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int
 		theMaterial = new FedeasBond2Material(tag, u1p, q1p, u2p, u3p, q3p,	u1n, q1n, u2n, u3n, q3n, s0, bb, alp, aln);
 	}
 
-	else if (strcmp(argv[1],"Concrete1") == 0 || strcmp(argv[1],"Concrete01") == 0) {
+	else if (strcmp(argv[1],"Concrete1") == 0 || strcmp(argv[1],"concrete01") == 0) {
 		if (argc < 7) {
 			opserr << "WARNING invalid number of arguments\n";
 			printCommand(argc,argv);
