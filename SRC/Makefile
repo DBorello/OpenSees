@@ -375,7 +375,11 @@ RECORDER_LIBS = $(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/response/ElementResponse.o \
 	$(FE)/recorder/response/MaterialResponse.o \
 	$(FE)/recorder/response/FiberResponse.o \
-	$(FE)/recorder/DamageRecorder.o 
+	$(FE)/recorder/DamageRecorder.o \
+	$(FE)/handler/DataOutputHandler.o \
+	$(FE)/handler/DataOutputDatabaseHandler.o \
+	$(FE)/handler/DataOutputStreamHandler.o \
+	$(FE)/handler/DataOutputFileHandler.o 
 
 
 
