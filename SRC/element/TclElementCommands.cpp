@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-05-23 02:43:42 $
+// $Revision: 1.5 $
+// $Date: 2001-07-11 23:08:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -40,15 +40,8 @@
 #include <iostream.h>
 #include <Domain.h>
 
-#include <fElmt02.h>
-#include <Truss.h>
-#include <TrussSection.h>
 #include <ElasticBeam2d.h>
-#include <beam2d02.h>
 #include <ElasticBeam3d.h>
-
-//Joey Yang
-#include <EightNodeBrick.h>
 
 #include <CrdTransf2d.h>
 #include <CrdTransf3d.h>
@@ -71,12 +64,37 @@ TclModelBuilder_addFeapTruss(ClientData clientData, Tcl_Interp *interp,  int arg
 
 extern int
 TclModelBuilder_addTruss(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 char **argv, Domain*, TclModelBuilder *, int argStart);		      
-		       
+			 char **argv, Domain*, TclModelBuilder *, int argStart); 
+
 int
 TclModelBuilder_addElasticBeam(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			       char **argv, Domain*, TclModelBuilder *, int argStart);	   
+			       char **argv, Domain*, TclModelBuilder *, int argStart);
 
+extern int
+TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,
+			 int argc, char **argv, Domain*, 
+			 TclModelBuilder *, int argStart);
+
+extern int
+TclModelBuilder_addBBarBrick(ClientData clientData, Tcl_Interp *interp,
+			     int argc, char **argv, Domain*, 
+			     TclModelBuilder *, int argStart);
+
+extern int
+TclModelBuilder_addShellMITC4(ClientData clientData, Tcl_Interp *interp,
+			      int argc, char **argv, Domain*, 
+			      TclModelBuilder *, int argStart);
+
+extern int 
+TclModelBuilder_addConstantPressureVolumeQuad(ClientData, Tcl_Interp *, int, char **,
+					      Domain*, TclModelBuilder *);
+
+extern int 
+TclModelBuilder_addEnhancedQuad(ClientData, Tcl_Interp *, int, char **,
+				Domain*, TclModelBuilder *);
+
+
+		       
 // GLF			       
 extern int 
 TclModelBuilder_addZeroLength(ClientData, Tcl_Interp *, int, char **,
@@ -105,12 +123,13 @@ TclModelBuilder_addBeamWithHinges(ClientData, Tcl_Interp *, int, char **,
 extern int 
 TclModelBuilder_addFourNodeQuad(ClientData, Tcl_Interp *, int, char **,
 				Domain*, TclModelBuilder *);
+/*  ELEMENTS NOT YET ADDED TO CVS
+extern int 
+TclModelBuilder_addDispBeamColumn(ClientData, Tcl_Interp *, int, char **,
+				  Domain*, TclModelBuilder *);
+*/
+		   
 
-// "C++" Love
-extern int
-TclModelBuilder_addShellMITC4(ClientData clientData, Tcl_Interp *interp,  int argc, 
-			 char **argv, Domain*theTclDomain,
-			      TclModelBuilder *theTclBuilder, int eleArgStart);
 //BJ Joey 
 extern int
 TclModelBuilder_addEightNodeBrick(ClientData , Tcl_Interp *,  int, char **,
@@ -146,7 +165,7 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     int result = TclModelBuilder_addTruss(clientData, interp, argc, argv,
 					      theTclDomain, theTclBuilder, eleArgStart);
     return result;
-  }else if (strcmp(argv[1],"elasticBeamColumn") == 0) {
+  } else if (strcmp(argv[1],"elasticBeamColumn") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addElasticBeam(clientData, interp, argc, argv,
 					      theTclDomain, theTclBuilder, eleArgStart);    
@@ -155,6 +174,14 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
           int result = TclModelBuilder_addFrameElement(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
     return result;
+
+  /* ** ELEMENT NOT YET ADDED TO CVS
+  } else if (strcmp(argv[1],"dispBeamColumn") == 0) {
+          int result = TclModelBuilder_addDispBeamColumn(clientData, interp, argc, argv,
+						 theTclDomain, theTclBuilder);
+    return result;
+  ********************************* */
+
   } else if (strcmp(argv[1],"beamWithHinges") == 0) {
 	  int result = TclModelBuilder_addBeamWithHinges(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
@@ -163,9 +190,37 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
           int result = TclModelBuilder_addFourNodeQuad(clientData, interp, argc, argv,
 						       theTclDomain, theTclBuilder);
 	  return result;
+  } else if (strcmp(argv[1],"enhancedQuad") == 0) {
+    int result = TclModelBuilder_addEnhancedQuad(clientData, interp, argc, argv,
+						 theTclDomain, theTclBuilder);
+    return result;
+  } else if ((strcmp(argv[1],"bbarQuad") == 0) || (strcmp(argv[1],"mixedQuad") == 0)) {
+    int result = TclModelBuilder_addConstantPressureVolumeQuad(clientData, interp, 
+							       argc, argv,
+							       theTclDomain, 
+							       theTclBuilder);
+    return result;
+  } else if ((strcmp(argv[1],"shell") == 0) || (strcmp(argv[1],"shellMITC4") == 0)) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addShellMITC4(clientData, interp, 
+					       argc, argv,
+					       theTclDomain, 
+					       theTclBuilder, 
+					       eleArgStart);
+    return result;
   } else if (strcmp(argv[1],"brick") == 0) {
           int eleArgStart = 1;
 	  int result = TclModelBuilder_addEightNodeBrick(clientData, interp, argc, argv,
+					       theTclDomain, theTclBuilder, eleArgStart);
+	  return result;
+  } else if (strcmp(argv[1],"stdBrick") == 0) {
+          int eleArgStart = 1;
+	  int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,
+						theTclDomain, theTclBuilder, eleArgStart);
+	  return result;
+  } else if (strcmp(argv[1],"bbarBrick") == 0) {
+          int eleArgStart = 1;
+	  int result = TclModelBuilder_addBBarBrick(clientData, interp, argc, argv,
 					       theTclDomain, theTclBuilder, eleArgStart);
 	  return result;
   } else if (strcmp(argv[1],"zeroLength") == 0) {
@@ -179,11 +234,6 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
   } else if (strcmp(argv[1],"zeroLengthND") == 0) {
     int result = TclModelBuilder_addZeroLengthND(clientData, interp, argc, argv,
 					       theTclDomain, theTclBuilder);
-    return result;
-  } else if (strcmp(argv[1],"shellMITC4") == 0 || strcmp(argv[1],"ShellMITC4") == 0) {
-    int eleArgStart = 1;
-    int result = TclModelBuilder_addShellMITC4(clientData, interp, argc, argv,
-					       theTclDomain, theTclBuilder, eleArgStart);
     return result;
   } else {
     cerr << "WARNING unknown element type: " <<  argv[1];
