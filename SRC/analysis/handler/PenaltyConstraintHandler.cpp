@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 04:24:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/PenaltyConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -111,6 +111,8 @@ PenaltyConstraintHandler::handle(const ID *nodesLast)
 	cerr << "WARNING PenaltyConstraintHandler::handle() - ";
         cerr << "ran out of memory for FE_elements"; 
 	cerr << " array of size " << numFE << endl;
+	cerr << "(if size == 0 YOU HAVE NO ELEMENTS)\n";
+	numFE = 0;
 	return -2;
     }
     int i;
@@ -121,6 +123,8 @@ PenaltyConstraintHandler::handle(const ID *nodesLast)
 	cerr << "WARNING PenaltyConstraintHandler::handle() - ";
         cerr << "ran out of memory for DOF_Groups";
 	cerr << " array of size " << numDOF << endl;
+	cerr << "(if size == 0 YOU HAVE NO NODES)\n";
+	numDOF = 0;	
 	return -3;    
     }    
     for (i=0; i<numDOF; i++) theDOFs[i] = 0;
@@ -142,14 +146,13 @@ PenaltyConstraintHandler::handle(const ID *nodesLast)
 	    cerr << " creating DOF_Group " << i << endl;	
 	    return -4;    		
 	}
+
 	// initially set all the ID value to -2
-	
 	const ID &id = dofPtr->getID();
 	for (int j=0; j < id.Size(); j++) {
 	    dofPtr->setID(j,-2);
 	    countDOF++;
 	}
-
 	nodPtr->setDOF_GroupPtr(dofPtr);
 	theDOFs[numDofGrp++] = dofPtr;
 	theModel->addDOF_Group(dofPtr);
@@ -236,7 +239,6 @@ PenaltyConstraintHandler::handle(const ID *nodesLast)
 	
 	theModel->addFE_Element(fePtr);
     }	        
-    
     
     return count3;
 }
