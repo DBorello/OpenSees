@@ -62,12 +62,11 @@ double RMC01YieldSurface::f(const EPState *EPS) const
     double theta = EPS->getStress().theta(); // theta
     double temp_phi = EPS->getScalarVar(1)*3.14159265358979/180.0; // frictional angle
     double temp_cohesive = EPS->getScalarVar(2); // cohesion
-    double a1 = sin(temp_phi);
-    double a2 = temp_cohesive*cos(temp_phi);
+    double a1 = -6*sin(temp_phi)/(3.0-sin(temp_phi));
+    double a2 = -6*temp_cohesive*cos(temp_phi)/(3.0-sin(temp_phi));
     double e = (3.0-a1)/(3.0+a1); // ratio of tensile radius to compressive radius
     double Frou = g_0(theta, e);
-    double a3 = sqrt(6.0)*a2/3.0;
-    double f = -a1*p+a3*q*Frou-a2; // yield fuction
+    double f = a1*p+q*Frou+a2; // yield fuction
     return f;
   }
 
@@ -88,15 +87,14 @@ tensor RMC01YieldSurface::dFods(const EPState *EPS) const
     tensor DpoDs = EPS->getStress().dpoverds(); // dp/ds
     tensor DqoDs = EPS->getStress().dqoverds(); // dq/ds
     tensor DthetaoDs = EPS->getStress().dthetaoverds();  // d(theta)/ds
-    double a1 = sin(temp_phi);
-    double a2 = temp_cohesive*cos(temp_phi);
+    double a1 = -6*sin(temp_phi)/(3.0-sin(temp_phi));
+//    double a2 = -6*temp_cohesive*cos(temp_phi)/(3.0-sin(temp_phi));
     double e = (3.0-a1)/(3.0+a1);
     double Frou = g_0(theta, e);
     double Frou_prime = g_prime(theta, e);
-    double a3 = sqrt(6.0)*a2/3.0;
-    double dFoverdp = -a1;
-    double dFoverdq = a3*Frou;
-    double dFoverdtheta = a3*q*Frou_prime;
+    double dFoverdp = a1;
+    double dFoverdq = Frou;
+    double dFoverdtheta = q*Frou_prime;
 
     dFoverds = DpoDs  * dFoverdp +
                DqoDs  * dFoverdq +
@@ -115,19 +113,17 @@ tensor RMC01YieldSurface::dFods(const EPState *EPS) const
 double RMC01YieldSurface::xi_s1( const EPState *EPS ) const  
   {
     double p = EPS->getStress().p_hydrostatic();
-    double q = EPS->getStress().q_deviatoric();
-    double theta = EPS->getStress().theta(); 
+//    double q = EPS->getStress().q_deviatoric();
+    double theta = EPS->getStress().theta();
     double temp_phi = EPS->getScalarVar(1)*3.14159265358979/180.0;
     double temp_cohesive = EPS->getScalarVar(2);
-    double a1 = sin(temp_phi);
-    double a2 = temp_cohesive*cos(temp_phi);
-    double e = (3.0-a1)/(3.0+a1);
-    double Frou = g_0(theta, e);
-    double root6o3 = sqrt(6.0)/3.0;
-    double temp1 = -p*cos(temp_phi);
-    double temp2 = -root6o3*temp_cohesive*a1*q*Frou;
-    double temp3 = temp_cohesive*a1;
-    double temp = (temp1+temp2+temp3)*3.14159265358979/180.0;
+//    double e = (3.0-a1)/(3.0+a1);
+//    double Frou = g_0(theta, e);
+    double temp1 = 3.0 - sin(temp_phi);
+    double temp2 = temp1 * temp1;
+    double temp3 = -18.0 * cos(temp_phi) / temp2;
+    double temp4 = -6.0 * temp_cohesive * (1.0 -3.0 * sin(temp_phi)) / temp2;
+    double temp = (temp3 * p + temp4)*3.14159265358979/180.0;
     return temp;
   }
 
@@ -138,18 +134,16 @@ double RMC01YieldSurface::xi_s1( const EPState *EPS ) const
 double RMC01YieldSurface::xi_s2( const EPState *EPS ) const 
   {
 //    double p = EPS->getStress().p_hydrostatic();
-    double q = EPS->getStress().q_deviatoric();
-    double theta = EPS->getStress().theta(); 
+//    double q = EPS->getStress().q_deviatoric();
+    double theta = EPS->getStress().theta();
     double temp_phi = EPS->getScalarVar(1)*3.14159265358979/180.0;
-    double temp_cohesive = EPS->getScalarVar(2);
-    double a1 = sin(temp_phi);
-    double a2 = temp_cohesive*cos(temp_phi);
-    double e = (3.0-a1)/(3.0+a1);
-    double Frou = g_0(theta, e);
-    double root6o3 = sqrt(6.0)/3.0;
-    double a4 = cos(temp_phi);
-    double temp1 = root6o3*a4*q*Frou;
-    double temp = temp1-a4;
+//   double temp_cohesive = EPS->getScalarVar(2);
+//   double e = (3.0-a1)/(3.0+a1);
+//    double Frou = g_0(theta, e);
+    double temp1 = 3.0 - sin(temp_phi);
+    double temp2 = cos(temp_phi);
+    double temp3 = -6 * temp2 / temp1;
+    double temp = temp3;
     return temp;
   }
 

@@ -67,15 +67,14 @@ tensor RMC01PotentialSurface::dQods(const EPState *EPS) const
   tensor DpoDs = EPS->getStress().dpoverds(); // dp/ds
   tensor DqoDs = EPS->getStress().dqoverds(); // dq/ds
   tensor DthetaoDs = EPS->getStress().dthetaoverds(); // d(theta)/ds
-  double a1 = sin(temp_phi); // sin(phi)
-  double a2 = temp_cohesive*cos(temp_phi); // C*cos(phi)
+  double a1 = -6*sin(temp_phi)/(3.0-sin(temp_phi));
+//  double a2 = -6*temp_cohesive*cos(temp_phi)/(3.0-sin(temp_phi));
   double e = (3.0-a1)/(3.0+a1);
   double Frou = g_0(theta, e); // r(theta)
   double Frou_prime = g_prime(theta, e); // r'(theta)
-  double a3 = sqrt(6.0)*a2/3.0;
-  double dQoverdp = -a1; // dQ/dp
-  double dQoverdq = a3*Frou; // dQ/dq
-  double dQoverdtheta = a3*q*Frou_prime; // dQ/d(theta)
+  double dQoverdp = a1; // dQ/dp
+  double dQoverdq = Frou; // dQ/dq
+  double dQoverdtheta = q*Frou_prime; // dQ/d(theta)
 
   dQoverds = DpoDs  * dQoverdp +
              DqoDs  * dQoverdq +
@@ -105,20 +104,18 @@ tensor RMC01PotentialSurface::d2Qods2( const EPState *EPS ) const
   tensor D2poDs2 = EPS->getStress().d2poverds2(); // d2p/ds2
   tensor D2qoDs2 = EPS->getStress().d2qoverds2(); // d2q/ds2
   tensor D2thetaoDs2 = EPS->getStress().d2thetaoverds2(); // d2(theta)/ds2
-  double a1 = sin(temp_phi);
-  double a2 = temp_cohesive*cos(temp_phi);
+  double a1 = -6*sin(temp_phi)/(3.0-sin(temp_phi));
+//  double a2 = -6*temp_cohesive*cos(temp_phi)/(3.0-sin(temp_phi));
   double e = (3.0-a1)/(3.0+a1);
   double Frou = g_0(theta, e); // r(theta)
   double Frou_prime = g_prime(theta, e); // r'(theta)
   double Frou_second = g_second(theta, e); // r"(theta)
-  double root6o3 = sqrt(6.0)/3.0;
-  double a3 = root6o3*temp_cohesive*cos(temp_phi);
-  double dQoverdp = -a1; // dQ/dp
-  double dQoverdq = a3*Frou; // dQ/dq
-  double dQoverdtheta = a3*q*Frou_prime; // dQ/d(theta)
-  double a23 = a3 * Frou_prime; // d2Q/dqd(theta)
+  double dQoverdp = a1; // dQ/dp
+  double dQoverdq = Frou; // dQ/dq
+  double dQoverdtheta = q*Frou_prime; // dQ/d(theta)
+  double a23 = Frou_prime; // d2Q/dqd(theta)
   double a32 = a23; // d2Q/d(theta)dq
-  double a33 = a3 * q * Frou_second; // d2Q/d(theta)2
+  double a33 = q * Frou_second; // d2Q/d(theta)2
   d2Qoverds2 =  DthetaoDs("mn") * DqoDs("pq")     *  a23 +
                 DqoDs("mn") * DthetaoDs("pq")     *  a32 +
                 DthetaoDs("mn") * DthetaoDs("pq") *  a33 +
