@@ -28,7 +28,7 @@ all:
 	$(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)  $(JERMANIC_LIBS)\
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) \
-	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ERRORHANDLER_LIBS)
+	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS)
 	@$(RANLIB) $(FE_LIBRARY)
 
 skypack:
@@ -90,6 +90,13 @@ ERRORHANDLER_LIBS = $(FE)/handler/ErrorHandler.o \
 
 
 JERMANIC_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o 
+
+ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
+	$(FE)/material/nD/soil/MultiYieldSurface.o \
+	$(FE)/material/nD/soil/PressureDependMultiYield.o \
+	$(FE)/material/nD/soil/TclUpdateMaterialStageCommand.o \
+	$(FE)/material/nD/soil/PressureIndependMultiYield.o \
+	$(FE)/material/nD/soil/T2Vector.o
 
 RENDERER_LIBS = $(FE)/renderer/db.o \
 	$(FE)/renderer/View.o \
