@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-04-02 18:47:50 $
+// $Revision: 1.4 $
+// $Date: 2002-08-01 21:00:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/MySqlDatastore.cpp,v $
 
 #include <MySqlDatastore.h>
@@ -125,7 +125,7 @@ MySqlDatastore::sendMatrix(int dbTag, int commitTag,
   if ((query == 0) || ((sizeData*2 + 254) > sizeQuery)) { // *2 for extra space MySQL may need
     if (query != 0)
       delete [] query;
-    sizeQuery = sizeData + 254; // 254 for the INSERT INTO Vec... blah blah
+    sizeQuery = 2 * sizeData + 254; // 254 for the INSERT INTO Vec... blah blah
     query = new char [sizeQuery];
 
     if (query == 0) {
@@ -186,7 +186,7 @@ MySqlDatastore::recvMatrix(int dbTag, int commitTag,
   if ((query == 0) || ((sizeData*2 + 256) > sizeQuery)) { // *2 for extra space mysql needs
     if (query != 0)
       delete [] query;
-    sizeQuery = sizeData + 256; // 256 for the SLECECT data FROM ... blah blah
+    sizeQuery = 2 * sizeData + 256; // 256 for the SLECECT data FROM ... blah blah
     query = new char [sizeQuery];
     if (query == 0) {
       cerr << "MySqlDatastore::recvMatrix - out of memory creating query of size";
@@ -269,7 +269,7 @@ MySqlDatastore::sendVector(int dbTag, int commitTag,
   if ((query == 0) || ((sizeData*2 + 254) > sizeQuery)) { // *2 for extra space MySQL may need
     if (query != 0)
       delete [] query;
-    sizeQuery = sizeData + 254; // 254 for the INSERT INTO Vec... blah blah
+    sizeQuery = 2 * sizeData + 254; // 254 for the INSERT INTO Vec... blah blah
     query = new char [sizeQuery];
 
     if (query == 0) {
@@ -330,7 +330,7 @@ MySqlDatastore::recvVector(int dbTag, int commitTag,
   if ((query == 0) || ((sizeData*2 + 256) > sizeQuery)) { // *2 for extra space mysql needs
     if (query != 0)
       delete [] query;
-    sizeQuery = sizeData + 256; // 256 for the SLECECT data FROM ... blah blah
+    sizeQuery = 2 * sizeData + 256; // 256 for the SLECECT data FROM ... blah blah
     query = new char [sizeQuery];
     if (query == 0) {
       cerr << "MySqlDatastore::recvVector - out of memory creating query of size";
@@ -412,7 +412,7 @@ MySqlDatastore::sendID(int dbTag, int commitTag,
   if ((query == 0) || ((sizeData*2 + 254) > sizeQuery)) { // *2 for extra space MySQL may need
     if (query != 0)
       delete [] query;
-    sizeQuery = sizeData + 254; // 254 for the INSERT INTO Vec... blah blah
+    sizeQuery = 2 * sizeData + 254; // 254 for the INSERT INTO Vec... blah blah
     query = new char [sizeQuery];
 
     if (query == 0) {
@@ -473,7 +473,7 @@ MySqlDatastore::recvID(int dbTag, int commitTag,
   if ((query == 0) || ((sizeData*2 + 256) > sizeQuery)) { // *2 for extra space mysql needs
     if (query != 0)
       delete [] query;
-    sizeQuery = sizeData + 256; // 256 for the SLECECT data FROM ... blah blah
+    sizeQuery = 2 * sizeData + 256; // 256 for the SLECECT data FROM ... blah blah
     query = new char [sizeQuery];
     if (query == 0) {
       cerr << "MySqlDatastore::recvID - out of memory creating query of size";
