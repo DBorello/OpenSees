@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.56 $
-// $Date: 2004-10-05 00:18:28 $
+// $Revision: 1.57 $
+// $Date: 2004-11-13 08:09:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -320,10 +320,6 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "database", &addDatabase, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "playback", &playbackRecorders, 
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);        
-    Tcl_CreateCommand(interp, "playbackAlgo", &playbackAlgorithmRecorders, 
-		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);        
     Tcl_CreateCommand(interp, "rigidLink", &rigidLink, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);                
     Tcl_CreateCommand(interp, "rigidDiaphragm", &rigidDiaphragm, 
@@ -2472,48 +2468,6 @@ int
 addDatabase(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
   return TclAddDatabase(clientData, interp, argc, argv, theDomain, theBroker);
-}
-
-
-int 
-playbackRecorders(ClientData clientData, Tcl_Interp *interp, int argc, 
-		  TCL_Char **argv)
-{
-  // make sure at least one other argument to contain integrator
-  if (argc < 2) {
-      opserr << "WARNING need to specify the commitTag \n";
-      return TCL_ERROR;
-  }    
-
-  // check argv[1] for type of Numberer and create the object
-  int cTag;
-  if (Tcl_GetInt(interp, argv[1], &cTag) != TCL_OK)	
-      return TCL_ERROR;	
-
-  theDomain.playback(cTag);
-  return TCL_OK;
-
-}
-
-int 
-playbackAlgorithmRecorders(ClientData clientData, Tcl_Interp *interp, int argc, 
-			   TCL_Char **argv)
-{
-  // make sure at least one other argument to contain integrator
-  if (argc < 2) {
-      opserr << "WARNING need to specify the commitTag \n";
-      return TCL_ERROR;
-  }    
-
-  // check argv[1] for type of Numberer and create the object
-  int cTag;
-  if (Tcl_GetInt(interp, argv[1], &cTag) != TCL_OK)	
-      return TCL_ERROR;	
-  if (theAlgorithm != 0)
-    theAlgorithm->playback(cTag);
-
-  return TCL_OK;
-
 }
 
 
