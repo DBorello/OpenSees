@@ -363,7 +363,8 @@ EPState::EPState( const EPState &rhs ) {
       //   g3ErrorHandler->fatal("EPState::EPState insufficient memory for Scalar hardening vars");
       //   ::exit(1);  
       //}
-      for (int i = 0; i < NScalarVar; i++) { 
+	  int i;
+      for (i = 0; i < NScalarVar; i++) { 
 	 ScalarVar[i] = rhs.ScalarVar[ i ];
 	 ScalarVar_commit[i] = rhs.ScalarVar_commit[ i ];
 	 ScalarVar_init[i] = rhs.ScalarVar_init[ i ];
@@ -374,7 +375,7 @@ EPState::EPState( const EPState &rhs ) {
       //   g3ErrorHandler->fatal("EPState::EPState insufficient memory for Tensor hardening vars");
       //   ::exit(1);  
       //}
-      for (int i = 0; i < NTensorVar; i++) {
+      for (i = 0; i < NTensorVar; i++) {
 	 TensorVar[i] = rhs.TensorVar[ i ];
 	 TensorVar_commit[i] = rhs.TensorVar_commit[ i ];
 	 TensorVar_init[i] = rhs.TensorVar_init[ i ];
@@ -444,7 +445,8 @@ const EPState & EPState::operator=(const EPState &rhs ) {
          //   g3ErrorHandler->fatal("EPState::operator= insufficient memory for Scalar hardening vars");
          //   ::exit(1);  
          //}
-         for (int i = 0; i < NScalarVar; i++) {
+		 int i;
+         for (i = 0; i < NScalarVar; i++) {
             ScalarVar[i] = rhs.ScalarVar[i];
             ScalarVar_commit[i] = rhs.ScalarVar_commit[i];
             ScalarVar_init[i] = rhs.ScalarVar_init[i];
@@ -456,7 +458,7 @@ const EPState & EPState::operator=(const EPState &rhs ) {
          //   g3ErrorHandler->fatal("EPState::operator= insufficient memory for Tensor hardening vars");
          //   ::exit(1);  
          //}
-         for (int i = 0; i < NTensorVar; i++) {
+         for (i = 0; i < NTensorVar; i++) {
              TensorVar[i] = rhs.TensorVar[i];
              TensorVar_commit[i] = rhs.TensorVar_commit[i];
              TensorVar_init[i] = rhs.TensorVar_init[i];
@@ -969,12 +971,13 @@ void EPState::setInit() {
       Strain_commit   = Strain_init;
       Eep_commit = Eep_init;
 
-      for (int i = 0; i < NScalarVar; i++) {
+	  int i;
+      for (i = 0; i < NScalarVar; i++) {
           ScalarVar[i] = ScalarVar_init[i];
           ScalarVar_commit[i] = ScalarVar_init[i];
       }
 
-      for (int i = 0; i < NTensorVar; i++) {
+      for (i = 0; i < NTensorVar; i++) {
       	 TensorVar[i] = TensorVar_init[i];
       	 TensorVar_commit[i] = TensorVar_init[i];
       }
@@ -995,12 +998,13 @@ int EPState::commitState () {
       Strain_commit   = CurrentStrain;
       Eep_commit = Eep;
 
-      for (int i = 0; i < NScalarVar; i++) {
+	  int i;
+      for (i = 0; i < NScalarVar; i++) {
           //ScalarVar[i] = ScalarVar_init[i];
           ScalarVar_commit[i] = ScalarVar[i];
       }
 
-      for (int i = 0; i < NTensorVar; i++) {
+      for (i = 0; i < NTensorVar; i++) {
       	 //TensorVar[i] = TensorVar_init[i];
       	 TensorVar_commit[i] = TensorVar[i];
       }
@@ -1017,12 +1021,13 @@ int EPState::revertToLastCommit () {
       CurrentStrain   = Strain_commit;
       Eep = Eep_commit;
 	     
-      for (int i = 0; i < NScalarVar; i++) {
+	  int i;
+      for (i = 0; i < NScalarVar; i++) {
           //ScalarVar[i] = ScalarVar_init[i];
           ScalarVar[i] = ScalarVar_commit[i];
       }
 
-      for (int i = 0; i < NTensorVar; i++) {
+      for (i = 0; i < NTensorVar; i++) {
       	 //TensorVar[i] = TensorVar_init[i];
       	 TensorVar[i] = TensorVar_commit[i];
       }
@@ -1044,12 +1049,13 @@ int EPState::revertToStart () {
       Strain_commit   = Strain_init;
       Eep_commit = Eep_init;
 
-      for (int i = 0; i < NScalarVar; i++) {
+	  int i;
+      for (i = 0; i < NScalarVar; i++) {
           ScalarVar[i] = ScalarVar_init[i];
           ScalarVar_commit[i] = ScalarVar_init[i];
       }
 
-      for (int i = 0; i < NTensorVar; i++) {
+      for (i = 0; i < NTensorVar; i++) {
       	 TensorVar[i] = TensorVar_init[i];
       	 TensorVar_commit[i] = TensorVar_init[i];
       }
@@ -1097,13 +1103,14 @@ ostream & operator<< (ostream& os, const EPState & EPS)
 	
 	os << endln << "\tNScalarVar = " << NS << endln; 
     
-        for (int i = 0; i < NS; i++) {
+	int i;
+    for (i = 0; i < NS; i++) {
             os << "\tNo." << i+1 << " " << EPS.ScalarVar[i] << "; ";
 	}
         os << endln << endln;
     
         os << "\tNTensorVar = " << NT;
-        for (int i = 0; i < NT; i++) {
+     for (i = 0; i < NT; i++) {
            os.unsetf( ios::showpos);
            os << endln << "\tNo." << i+1 << " tensorial var:";
            os.setf( ios::showpos);
