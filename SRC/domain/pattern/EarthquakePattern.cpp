@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-08-26 20:38:03 $
+// $Revision: 1.8 $
+// $Date: 2005-02-17 01:15:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.cpp,v $
                                                                         
 // Written: fmk 11/98
@@ -41,7 +41,7 @@
 #include <ErrorHandler.h>
 
 EarthquakePattern::EarthquakePattern(int tag, int _classTag)
-  :LoadPattern(tag, _classTag), theMotions(0), numMotions(0), uDotG(0), uDotDotG(0), currentTime(0.0)
+  :LoadPattern(tag, _classTag), theMotions(0), numMotions(0), uDotG(0), uDotDotG(0), currentTime(0.0), parameterID(0)
 {
 
 }
@@ -125,7 +125,7 @@ EarthquakePattern::applyLoadSensitivity(double time)
 
   bool somethingRandomInMotions = false;
   if (parameterID != 0) {
-	  somethingRandomInMotions = true;
+    somethingRandomInMotions = true;
   }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:48:12 $
+// $Revision: 1.5 $
+// $Date: 2005-02-17 01:15:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.h,v $
                                                                         
                                                                         
@@ -76,7 +76,7 @@ class EarthquakePattern : public LoadPattern
     double currentTime;
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
-	int parameterID;
+    int parameterID;
 // AddingSensitivity:END ///////////////////////////////////////////
 };
 
