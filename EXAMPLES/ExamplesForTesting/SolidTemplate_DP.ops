@@ -88,7 +88,7 @@ load 8 $np $p  $np -pattern 2
 
 #Set up recorder
 recorder Node node_iso.out disp -time -node 5 -dof 3
-recorder plot node_iso.out "disp load"  10 10 300 300 -columns 2 1
+#recorder plot node_iso.out "disp load"  10 10 300 300 -columns 2 1
 
 system UmfPack
 constraints Penalty 1e12 1e12

@@ -61,14 +61,14 @@ element Brick20N 1  5 6 7 8 1 2 3 4 13 14 15 16 9 10 11 12 17 18 19 20  1     0.
 # Lateral loading
 
 pattern Plain 2 Linear {
-   load  5 0 $p  0 
-   load  6 0 $p  0 
-   load  7 0 $p  0 
-   load  8 0 $p  0 
-   load 13 0 $np 0 
-   load 14 0 $np 0 
-   load 15 0 $np 0 
-   load 16 0 $np 0 
+   load  5 0 0  $p 
+   load  6 0 0  $p 
+   load  7 0 0  $p 
+   load  8 0 0  $p 
+   load 13 0 0  $np
+   load 14 0 0  $np
+   load 15 0 0  $np
+   load 16 0 0  $np
 }
 
 # ----------------------------
