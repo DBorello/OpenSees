@@ -226,6 +226,7 @@ MATMOD_BJ_LIBS = $(FE)/material/nD/ElasticIsotropic3D.o  \
                  $(FE)/material/nD/Template3Dep/TclTemplate3DepCommand.o \
                  $(FE)/material/nD/Template3Dep/Template3Dep.o \
                  $(FE)/material/nD/Template3Dep/EPState.o \
+                 $(FE)/material/nD/Template3Dep/PS.o \
                  $(FE)/material/nD/Template3Dep/YS.o \
                  $(FE)/material/nD/Template3Dep/MD_YS.o  \
                  $(FE)/material/nD/Template3Dep/MD_PS.o \
@@ -441,6 +442,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/BoucWenMaterial.o \
 	$(FE)/material/uniaxial/Pinching4Material.o \
 	$(FE)/material/uniaxial/BarSlipMaterial.o \
+	$(FE)/material/uniaxial/A615Reinf.o \
 	$(FE)/material/nD/NDMaterial.o \
 	$(FE)/material/nD/J2Plasticity.o \
 	$(FE)/material/nD/J2PlaneStress.o \
