@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-09-04 22:29:47 $
+// $Revision: 1.3 $
+// $Date: 2001-09-05 22:01:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ParallelMaterial.cpp,v $
                                                                         
                                                                         
@@ -49,7 +49,7 @@ ParallelMaterial::ParallelMaterial(
 				 UniaxialMaterial ** theMaterialModels,
                                  double min, double max)
 :UniaxialMaterial(tag,MAT_TAG_ParallelMaterial),
- trialStrain(0.0), numMaterials(num), otherDbTag(0), theModels(0), 
+ trialStrain(0.0), trialStrainRate(0.0), numMaterials(num), otherDbTag(0), theModels(0), 
  epsmin(min), epsmax(max), Cfailed(0), Tfailed(0)
 {
     // create an array (theModels) to store copies of the MaterialModels
@@ -75,7 +75,7 @@ ParallelMaterial::ParallelMaterial(
 // to be called on this object
 ParallelMaterial::ParallelMaterial()
 :UniaxialMaterial(0,MAT_TAG_ParallelMaterial),
- trialStrain(0.0), numMaterials(0), otherDbTag(0), theModels(0), 
+ trialStrain(0.0), trialStrainRate(0.0), numMaterials(0), otherDbTag(0), theModels(0), 
  epsmin(NEG_INF_STRAIN), epsmax(POS_INF_STRAIN), Cfailed(0), Tfailed(0)
 {
 
