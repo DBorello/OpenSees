@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.36 $
-// $Date: 2002-10-24 22:27:26 $
+// $Revision: 1.37 $
+// $Date: 2002-12-05 23:08:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -67,6 +67,8 @@
 #define GROUND_MOTION_TAG_InterpolatedGroundMotion    3
 #define GROUND_MOTION_TAG_GroundMotion                4
 
+
+#define REGION_TAG_Region      1
 
 #define TIMESERIES_INTEGRATOR_TAG_Trapezoidal 1
 
@@ -127,6 +129,7 @@
 #define MAT_TAG_SnapBilinear		3001
 #define MAT_TAG_SnapClough		3002
 #define MAT_TAG_SnapPinch		3003
+#define MAT_TAG_Pinching		3004
 
 #define MAT_TAG_Clough1	201
 #define MAT_TAG_Clough2	202
@@ -291,8 +294,8 @@
 #define CNSTRNT_TAG_MP_Constraint 	2
 #define CNSTRNT_TAG_ImposedMotionSP	3
 #define CNSTRNT_TAG_ImposedMotionSP1	4
-#define CNSTRNT_TAG_MP_Joint2D       5
-#define CNSTRNT_TAG_MP_SimpleJoint2D       5
+#define CNSTRNT_TAG_MP_Joint2D          5
+#define CNSTRNT_TAG_MP_SimpleJoint2D    6
 
 
 #define MATRIX_TAG_Matrix 	1
@@ -305,6 +308,7 @@
 #define HANDLER_TAG_LagrangeConstraintHandler   	2
 #define HANDLER_TAG_PenaltyConstraintHandler    	3
 #define HANDLER_TAG_TransformationConstraintHandler    	4
+#define HANDLER_TAG_PenaltyHandlerNoHomoSPMultipliers   5
 
 #define NUMBERER_TAG_DOF_Numberer      	1
 #define NUMBERER_TAG_PlainNumberer 	2
