@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-09-20 20:26:40 $
+// $Revision: 1.5 $
+// $Date: 2001-09-20 21:05:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclPatternCommand.cpp,v $
 
 // File: ~/domain/pattern/TclPatternComand.C
@@ -258,6 +258,9 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
 
 	    return TCL_ERROR;	      
 	}
+
+	// Added by MHS to prevent call to Tcl_Eval at end of this function
+	commandEndMarker = currentArg;
   }
 
   else if (strcmp(argv[1],"Uniform") == 0) {
