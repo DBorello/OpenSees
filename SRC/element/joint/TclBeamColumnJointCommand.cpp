@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-06-11 18:20:12 $
+// $Revision: 1.2 $
+// $Date: 2003-06-11 18:33:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/TclBeamColumnJointCommand.cpp,v $
 
 // Written: NM (nmitra@u.washington.edu)
@@ -45,12 +45,12 @@
 #include <UniaxialMaterial.h>
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+extern void printCommand(int argc, TCL_Char **argv);
 static Domain *theTclModelBuilderDomain = 0;       
 static TclModelBuilder *theTclModelBuilder =0;     
 
 int TclModelBuilder_addBeamColumnJoint(ClientData clientData, Tcl_Interp *interp, int argc,
-									char **argv, Domain* theTclDomain,
+									TCL_Char **argv, Domain* theTclDomain,
 									TclModelBuilder *theTclBuilder, int eleArgStart)
 {
 	// ensure destructor not called
