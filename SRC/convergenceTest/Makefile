@@ -1,7 +1,8 @@
 include ../../Makefile.def
 
 OBJS       = ConvergenceTest.o CTestNormUnbalance.o \
-	CTestNormDispIncr.o CTestEnergyIncr.o
+	CTestNormDispIncr.o CTestEnergyIncr.o CTestRelativeNormUnbalance.o \
+	CTestRelativeNormDispIncr.o CTestRelativeEnergyIncr.o
 
 all:            $(OBJS) 
 
