@@ -334,7 +334,10 @@ void   ConstantPressureVolumeQuad::formInertiaTerms( int tangFlag )
     //node loop to compute acceleration
     momentum.Zero( ) ;
     for ( j = 0; j < numberNodes; j++ ) 
-      momentum += shp[massIndex][j] * ( nodePointers[j]->getTrialAccel()  ) ; 
+      //momentum += shp[massIndex][j] * ( nodePointers[j]->getTrialAccel()  ) ; 
+      momentum.addVector( 1.0,
+			  nodePointers[j]->getTrialAccel(),
+			  shp[massIndex][j] ) ;
 
     //density
     rho = materialPointers[i]->getRho() ;
@@ -397,7 +400,7 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
   //
   //  same ordering for stresses but no 2 
 
-  int i,  j,  k, l ;
+  int i,  j,  k, l, p, q ;
   int jj, kk ;
   int node ;
   int success ;
@@ -446,6 +449,9 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
 
   static Matrix dd(4,4) ;  //material tangent
 
+  static Matrix ddPdev(4,4) ;
+  static Matrix PdevDD(4,4) ;
+
   static Matrix Pdev_dd_Pdev(4,4) ;
   static Matrix Pdev_dd_one(4,1) ; 
   static Matrix one_dd_Pdev(1,4) ;
@@ -470,7 +476,12 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
   oneMatrix(1,0) = 1.0 ;
   oneMatrix(2,0) = 1.0 ;
   oneMatrix(3,0) = 0.0 ;
-  oneTran = this->transpose( 4, 1, oneMatrix ) ;
+
+  //oneTran = this->transpose( 4, 1, oneMatrix ) ;
+  for (p=0; p<1; p++) {
+     for (q=0; q<4; q++) 
+        oneTran(p,q) = oneMatrix(q,p) ;
+  }//end for p
 
   //Pdev matrix
   Pdev.Zero( ) ;
@@ -546,7 +557,6 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
 
       strain(2) = 0.0 ;  // not zero for axisymmetry
 
-
     } // end for node
 
     trace  =  strain(0) + strain(1) + strain(2) ;
@@ -581,12 +591,15 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
 
     trace = strain(0) + strain(1) + strain(2) ;
 
-    strain -= (one3*trace)*one ;
-    strain += (one3*theta)*one ;
-    
+    //strain -= (one3*trace)*one ;
+    strain.addVector(1.0,  one, -one3*trace ) ;
+
+    //strain += (one3*theta)*one ;
+    strain.addVector(1.0,  one, one3*theta ) ;
+
     success = materialPointers[i]->setTrialStrain( strain ) ;
 
-    const Vector &sigBar = materialPointers[i]->getStress( ) ;
+    sigBar = materialPointers[i]->getStress( ) ;
 
     pressure +=  one3 * ( sigBar(0) + sigBar(1) + sigBar(2) ) * dvol[i] ;
 
@@ -598,15 +611,19 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
 
   for ( i = 0; i < 4; i++ ) {
 
-    const Vector &sigBar = materialPointers[i]->getStress( ) ;
-
     //stress for equilibrium
+
+    sigBar = materialPointers[i]->getStress( ) ; 
 
     trace = sigBar(0) + sigBar(1) + sigBar(2) ;
 
     sig  = sigBar ;
-    sig -= (one3*trace)*one ;
-    sig += pressure*one ;
+
+    //sig -= (one3*trace)*one ;
+    sig.addVector(1.0,  one, -one3*trace ) ;
+
+    //sig += pressure*one ;
+    sig.addVector(1.0,  one, pressure ) ;
 
     //multilply by volume elements and compute 
     // matrices for stiffness calculation
@@ -615,15 +632,23 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
 
     if ( tang_flag == 1 ) {
 
-	const Matrix &ddBar  = materialPointers[i]->getTangent( ) ;
+	dd = materialPointers[i]->getTangent( ) ;
 	
-	dd = ddBar * dvol[i] ;
+	dd *= dvol[i] ;
         
-	Pdev_dd_Pdev = Pdev * dd * Pdev ;
+	//Pdev_dd_Pdev = Pdev * dd * Pdev ;
+	Pdev_dd_Pdev.addMatrixTripleProduct(0.0,
+					    Pdev,
+					    dd,
+					    1.0 ) ;
 
-	Pdev_dd_one  = one3 * ( Pdev * dd * oneMatrix ) ;
+	//Pdev_dd_one  = one3 * ( Pdev * dd * oneMatrix ) ;
+	PdevDD.addMatrixProduct(0.0, Pdev,dd,1.0 ) ;
+	Pdev_dd_one.addMatrixProduct(0.0, PdevDD,oneMatrix,one3 ) ;
 	
-	one_dd_Pdev  = one3 * ( oneTran * dd * Pdev ) ;
+	//one_dd_Pdev  = one3 * ( oneTran * dd * Pdev ) ;
+	ddPdev.addMatrixProduct(0.0, dd,Pdev,1.0 ) ;
+	one_dd_Pdev.addMatrixProduct(0.0, oneTran,ddPdev,one3 ) ;
 
 	bulk = one9 * (   dd(0,0) + dd(0,1) + dd(0,2)  
 	                + dd(1,0) + dd(1,1) + dd(1,2) 
@@ -650,24 +675,41 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
       littleBJ(0,0) = vol_avg_shp[0][j] ;
       littleBJ(0,1) = vol_avg_shp[1][j] ;
 
-      BJtran = this->transpose( 4, 2, BJ ) ;
+      // BJtran = this->transpose( 4, 2, BJ ) ;
+      for (p=0; p<2; p++) {
+	for (q=0; q<4; q++) 
+	  BJtran(p,q) = BJ(q,p) ;
+      }//end for p
 
-      littleBJtran = this->transpose( 1, 2, littleBJ ) ;
+      //littleBJtran = this->transpose( 1, 2, littleBJ ) ;
+      for (p=0; p<2; p++) {
+	for (q=0; q<1; q++) 
+	  littleBJtran(p,q) = littleBJ(q,p) ;
+      }//end for p
 
       //compute residual 
 
-      residJ = BJtran * sig ; 
+      //residJ = BJtran * sig ; 
+      residJ.addMatrixVector(0.0,  BJtran,sig,1.0 ) ;
 
       resid( jj   ) += residJ(0) ;
       resid( jj+1 ) += residJ(1) ;
 
       if ( tang_flag == 1 ) { //stiffness matrix
 
-	  BJtranD          =  BJtran * Pdev_dd_Pdev ;
-	  BJtranDone       =  BJtran * Pdev_dd_one ;
-	  littleBJoneD     =  littleBJtran * one_dd_Pdev ;
-	  littleBJtranBulk =  bulk * littleBJtran ;
-	  
+	//BJtranD          =  BJtran * Pdev_dd_Pdev ;
+	BJtranD.addMatrixProduct(0.0,  BJtran,Pdev_dd_Pdev,1.0 ) ;
+
+        //BJtranDone       =  BJtran * Pdev_dd_one ;
+	BJtranDone.addMatrixProduct(0.0,  BJtran,Pdev_dd_one,1.0 ) ;
+
+	//littleBJoneD     =  littleBJtran * one_dd_Pdev ;
+	littleBJoneD.addMatrixProduct(0.0,  littleBJtran,one_dd_Pdev,1.0 ) ;
+	
+	//littleBJtranBulk =  bulk * littleBJtran ;
+	littleBJtranBulk = littleBJtran ;
+	littleBJtranBulk *= bulk ;
+
  	  kk = 0 ;
 	  for ( k = 0; k < 4; k++ ) {
 
@@ -686,9 +728,15 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
 
 	      //compute stiffness matrix
         
-	      stiffJK =  ( BJtranD + littleBJoneD ) * BK
-                      +  ( BJtranDone + littleBJtranBulk ) * littleBK ; 
+	      // stiffJK =  ( BJtranD + littleBJoneD ) * BK
+              //        +  ( BJtranDone + littleBJtranBulk ) * littleBK ; 
 
+	      stiffJK.addMatrixProduct(0.0, BJtranD,BK,1.0 ) ;
+	      stiffJK.addMatrixProduct(1.0, littleBJoneD,BK,1.0 ) ;
+	      stiffJK.addMatrixProduct(1.0, BJtranDone,littleBK,1.0 ) ;
+	      stiffJK.addMatrixProduct(1.0, littleBJtranBulk,littleBK,1.0 ) ;
+
+	      
 	      stiff( jj,   kk   ) += stiffJK(0,0) ;
 	      stiff( jj+1, kk   ) += stiffJK(1,0) ;
 	      stiff( jj,   kk+1 ) += stiffJK(0,1) ;

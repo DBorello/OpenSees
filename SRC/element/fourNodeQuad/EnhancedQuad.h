@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-11 23:50:54 $
+// $Revision: 1.3 $
+// $Date: 2001-08-07 21:05:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.h,v $
                                                                         
 #include <iostream.h>
@@ -156,7 +156,7 @@ class EnhancedQuad : public Element {
 		  Matrix &tangent ) ;
 
     //compute enhanced strain B-matrices
-    Matrix computeBenhanced( int node, 
+    const Matrix& computeBenhanced( int node, 
 			     double L1,
 			     double L2,
 			     double j, 
@@ -180,10 +180,10 @@ class EnhancedQuad : public Element {
                            Matrix &JJinv ) ;
 
     //compute Bbend matrix
-    Matrix computeB( int node, const double shp[3][4] ) ;
+    const Matrix& computeB( int node, const double shp[3][4] ) ;
 
-    //Matrix transpose
-    Matrix transpose( int dim1, int dim2, const Matrix &M ) ;
+    //Matrix transpose of a 3x2 matrix
+    const Matrix& transpose( const Matrix &M ) ;
 
     //shape function routine for four node quads
     void shape2d( double ss, double tt, 
