@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2002-01-06 19:34:58 $
+// $Revision: 1.16 $
+// $Date: 2002-03-07 00:44:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -788,38 +788,54 @@ Response*
 FourNodeQuad::setResponse(char **argv, int argc, Information &eleInfo)
 {
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
-		return new ElementResponse(this, 1, P);
+      return new ElementResponse(this, 1, P);
     
     else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-		return new ElementResponse(this, 2, K);
+      return new ElementResponse(this, 2, K);
 
-	else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
-		int pointNum = atoi(argv[1]);
-		if (pointNum > 0 && pointNum <= 4)
-			return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
-	    else 
-			return 0;
-	}
+    else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+      int pointNum = atoi(argv[1]);
+      if (pointNum > 0 && pointNum <= 4)
+	return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
+      else 
+	return 0;
+    } else if (strcmp(argv[0],"stresses") ==0) {
+      return new ElementResponse(this, 3, P);
+    }
  
     // otherwise response quantity is unknown for the quad class
     else
-		return 0;
+      return 0;
 }
 
 int 
 FourNodeQuad::getResponse(int responseID, Information &eleInfo)
 {
-	switch (responseID) {
-      
-		case 1:
-			return eleInfo.setVector(this->getResistingForce());
-      
-		case 2:
-			return eleInfo.setMatrix(this->getTangentStiff());
+  if (responseID == 1) {
 
-		default: 
-			return -1;
-	}
+    return eleInfo.setVector(this->getResistingForce());
+
+  } else if (responseID == 2) {
+
+    return eleInfo.setMatrix(this->getTangentStiff());
+
+  } else if (responseID == 3) {
+
+    // Loop over the integration points
+    int cnt = 0;
+    for (int i = 0; i < 4; i++) {
+
+      // Get material stress response
+      const Vector &sigma = theMaterial[i]->getStress();
+      P(cnt) = sigma(0);
+      P(cnt+1) = sigma(1);
+      cnt += 2;
+    }
+    return eleInfo.setVector(P);
+	
+  } else
+
+    return -1;
 }
 
 int
