@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-01-09 23:55:17 $
+// $Revision: 1.9 $
+// $Date: 2002-05-28 16:39:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -369,58 +369,58 @@ extern "C" int _stdcall STEEL_2(double *matpar, double *hstvP, double *hstv,
 
 // Add more declarations as needed
 
-#define bond_1_			BOND_1
-#define bond_2_			BOND_2
-#define concrete_1_		CONCRETE_1
-#define concrete_2_		CONCRETE_2
-#define concrete_3_		CONCRETE_3
+#define bond_1__	BOND_1
+#define bond_2__	BOND_2
+#define concrete_1__	CONCRETE_1
+#define concrete_2__	CONCRETE_2
+#define concrete_3__	CONCRETE_3
 #define hard_1__ 	HARD_1
-#define hyster_1_		HYSTER_1
-#define hyster_2_		HYSTER_2
-#define steel_1_		STEEL_1
-#define steel_2_		STEEL_2
+#define hyster_1__	HYSTER_1
+#define hyster_2__	HYSTER_2
+#define steel_1__	STEEL_1
+#define steel_2__	STEEL_2
 
 #else
 
-extern "C" int bond_1_(double *matpar, double *hstvP, double *hstv,
-		       double *strainP, double *stressP, double *dStrain,
-		       double *tangent, double *stress, int *ist);
+extern "C" int bond_1__(double *matpar, double *hstvP, double *hstv,
+			double *strainP, double *stressP, double *dStrain,
+			double *tangent, double *stress, int *ist);
 
-extern "C" int bond_2_(double *matpar, double *hstvP, double *hstv,
-		       double *strainP, double *stressP, double *dStrain,
-		       double *tangent, double *stress, int *ist);
+extern "C" int bond_2__(double *matpar, double *hstvP, double *hstv,
+			double *strainP, double *stressP, double *dStrain,
+			double *tangent, double *stress, int *ist);
 
-extern "C" int concrete_1_(double *matpar, double *hstvP, double *hstv,
-			   double *strainP, double *stressP, double *dStrain,
-			   double *tangent, double *stress, int *ist);
+extern "C" int concrete_1__(double *matpar, double *hstvP, double *hstv,
+			    double *strainP, double *stressP, double *dStrain,
+			    double *tangent, double *stress, int *ist);
 
-extern "C" int concrete_2_(double *matpar, double *hstvP, double *hstv,
-			   double *strainP, double *stressP, double *dStrain,
-			   double *tangent, double *stress, int *ist);
+extern "C" int concrete_2__(double *matpar, double *hstvP, double *hstv,
+			    double *strainP, double *stressP, double *dStrain,
+			    double *tangent, double *stress, int *ist);
 
-extern "C" int concrete_3_(double *matpar, double *hstvP, double *hstv,
-			   double *strainP, double *stressP, double *dStrain,
-			   double *tangent, double *stress, int *ist);
+extern "C" int concrete_3__(double *matpar, double *hstvP, double *hstv,
+			    double *strainP, double *stressP, double *dStrain,
+			    double *tangent, double *stress, int *ist);
 
 extern "C" int hard_1__(double *matpar, double *hstvP, double *hstv,
 			double *strainP, double *stressP, double *dStrain,
 			double *tangent, double *stress, int *ist);
 
-extern "C" int hyster_1_(double *matpar, double *hstvP, double *hstv,
+extern "C" int hyster_1__(double *matpar, double *hstvP, double *hstv,
+			  double *strainP, double *stressP, double *dStrain,
+			  double *tangent, double *stress, int *ist);
+
+extern "C" int hyster_2__(double *matpar, double *hstvP, double *hstv,
+			  double *strainP, double *stressP, double *dStrain,
+			  double *tangent, double *stress, int *ist);
+
+extern "C" int steel_1__(double *matpar, double *hstvP, double *hstv,
 			 double *strainP, double *stressP, double *dStrain,
 			 double *tangent, double *stress, int *ist);
 
-extern "C" int hyster_2_(double *matpar, double *hstvP, double *hstv,
+extern "C" int steel_2__(double *matpar, double *hstvP, double *hstv,
 			 double *strainP, double *stressP, double *dStrain,
 			 double *tangent, double *stress, int *ist);
-
-extern "C" int steel_1_(double *matpar, double *hstvP, double *hstv,
-			double *strainP, double *stressP, double *dStrain,
-			double *tangent, double *stress, int *ist);
-
-extern "C" int steel_2_(double *matpar, double *hstvP, double *hstv,
-			double *strainP, double *stressP, double *dStrain,
-			double *tangent, double *stress, int *ist);
 
 // Add more declarations as needed
 
@@ -436,13 +436,13 @@ FedeasMaterial::invokeSubroutine(int ist)
   switch (this->getClassTag()) {
   case MAT_TAG_FedeasHardening:
     hard_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    	&sigma, &tangent, &ist);
+	     &sigma, &tangent, &ist);
     break;
 
   case MAT_TAG_FedeasBond1:
 #ifdef _WIN32
-    bond_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
-    	&sigma, &tangent, &ist);
+    bond_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
+	     &sigma, &tangent, &ist);
 #else
 	g3ErrorHandler->fatal("%s -- Bond1 subroutine not yet linked",
 		"FedeasMaterial::invokeSubroutine"); 
@@ -451,8 +451,8 @@ FedeasMaterial::invokeSubroutine(int ist)
     
   case MAT_TAG_FedeasBond2:
 #ifdef _WIN32
-    bond_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
-    	&sigma, &tangent, &ist);
+    bond_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
+	     &sigma, &tangent, &ist);
 #else
 	g3ErrorHandler->fatal("%s -- Bond2 subroutine not yet linked",
 		"FedeasMaterial::invokeSubroutine"); 
@@ -461,8 +461,8 @@ FedeasMaterial::invokeSubroutine(int ist)
     
   case MAT_TAG_FedeasConcrete1:
 #ifdef _WIN32
-    concrete_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    	&sigma, &tangent, &ist);
+    concrete_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+		 &sigma, &tangent, &ist);
 #else
 	g3ErrorHandler->fatal("%s -- Concrete1 subroutine not yet linked",
 		"FedeasMaterial::invokeSubroutine"); 
@@ -471,8 +471,8 @@ FedeasMaterial::invokeSubroutine(int ist)
     
   case MAT_TAG_FedeasConcrete2:
 #ifdef _WIN32
-    concrete_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    	&sigma, &tangent, &ist);
+    concrete_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+		 &sigma, &tangent, &ist);
 #else
 	g3ErrorHandler->fatal("%s -- Concrete2 subroutine not yet linked",
 		"FedeasMaterial::invokeSubroutine"); 
@@ -481,8 +481,8 @@ FedeasMaterial::invokeSubroutine(int ist)
     
   case MAT_TAG_FedeasConcrete3:
 #ifdef _WIN32
-    concrete_3_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    	&sigma, &tangent, &ist);
+    concrete_3__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+		 &sigma, &tangent, &ist);
 #else
 	g3ErrorHandler->fatal("%s -- Concrete3 subroutine not yet linked",
 		"FedeasMaterial::invokeSubroutine"); 
@@ -491,8 +491,8 @@ FedeasMaterial::invokeSubroutine(int ist)
         
   case MAT_TAG_FedeasHysteretic1:
 #ifdef _WIN32
-    hyster_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    	&sigma, &tangent, &ist);
+    hyster_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+	       &sigma, &tangent, &ist);
 #else
 	g3ErrorHandler->fatal("%s -- Hysteretic1 subroutine not yet linked",
 		"FedeasMaterial::invokeSubroutine"); 
@@ -501,8 +501,8 @@ FedeasMaterial::invokeSubroutine(int ist)
     
   case MAT_TAG_FedeasHysteretic2:
 #ifdef _WIN32
-    hyster_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    	&sigma, &tangent, &ist);
+    hyster_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+	       &sigma, &tangent, &ist);
 #else
 	g3ErrorHandler->fatal("%s -- Hysteretic2 subroutine not yet linked",
 		"FedeasMaterial::invokeSubroutine"); 
@@ -511,8 +511,8 @@ FedeasMaterial::invokeSubroutine(int ist)
     
   case MAT_TAG_FedeasSteel1:
 #ifdef _WIN32
-    steel_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    	&sigma, &tangent, &ist);
+    steel_1__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+	      &sigma, &tangent, &ist);
 #else
 	g3ErrorHandler->fatal("%s -- Steel1 subroutine not yet linked",
 		"FedeasMaterial::invokeSubroutine"); 
@@ -521,8 +521,8 @@ FedeasMaterial::invokeSubroutine(int ist)
     
   case MAT_TAG_FedeasSteel2:
 #ifdef _WIN32
-    steel_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
-    	&sigma, &tangent, &ist);
+    steel_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
+	      &sigma, &tangent, &ist);
 #else
 	g3ErrorHandler->fatal("%s -- Steel2 subroutine not yet linked",
 		"FedeasMaterial::invokeSubroutine"); 
