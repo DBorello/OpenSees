@@ -34,6 +34,7 @@
 #ifndef TWENTYNODEBRICK_U_P_U_CPP
 #define TWENTYNODEBRICK_U_P_U_CPP
 
+#include <fstream.h>
 #include <TwentyNodeBrick_u_p_U.h>
 #define FixedOrder 3
 
@@ -1685,7 +1686,8 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
 //    G1t.write_standard("G1t.dat", "stiffness part of G1upU");
 //    G2t.write_standard("G2t.dat", "stiffness part of G1upU");
 
-    for ( int i=0 ; i<20 ; i++ )  		
+	int i;
+    for ( i=0 ; i<20 ; i++ )  		
       {
         for ( int j=0 ; j<20 ; j++ )
           {
@@ -1699,7 +1701,7 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
 	  }
       }
 
-    for ( int i=0 ; i<20 ; i++ )  		
+    for ( i=0 ; i<20 ; i++ )  		
       {
         for(int n=0; n<3; n++)
           {
@@ -1710,7 +1712,7 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
 	  }
       }
 
-    for ( int i=0 ; i<20 ; i++ )  		
+    for ( i=0 ; i<20 ; i++ )  		
       {
         for ( int j=0 ; j<20 ; j++ )
            {
@@ -1722,7 +1724,7 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
       }
 
 
-    for ( int i=0 ; i<20 ; i++ )  		
+    for ( i=0 ; i<20 ; i++ )  		
       {
         for ( int j=0 ; j<20 ; j++ )
 	  {
@@ -1731,7 +1733,7 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
       }
 
 
-    for ( int i=0 ; i<20 ; i++ )  		
+    for ( i=0 ; i<20 ; i++ )  		
       {
         for ( int j=0 ; j<20 ; j++ )
            {
@@ -1742,7 +1744,7 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
 	  }
       }
 
-    for ( int i=0 ; i<20 ; i++ )  		
+    for ( i=0 ; i<20 ; i++ )  		
       {
         for(int n=0; n<3; n++)
           {
@@ -1881,7 +1883,8 @@ const Matrix &TwentyNodeBrick_u_p_U::getDamp()
     matrix C2t=C2.transpose();
 //    C2t.write_standard("C2t.dat", "Damping matrix");
 
-    for ( int i=0 ; i<20 ; i++ )  		
+	int i;
+    for ( i=0 ; i<20 ; i++ )  		
       {
         for ( int j=0 ; j<20 ; j++ )
           {
@@ -1895,7 +1898,7 @@ const Matrix &TwentyNodeBrick_u_p_U::getDamp()
 	  }
       }
 
-     for ( int i=0 ; i<20 ; i++ )  		
+     for ( i=0 ; i<20 ; i++ )  		
       {
         for ( int j=0 ; j<20 ; j++ )
           {
@@ -1909,7 +1912,7 @@ const Matrix &TwentyNodeBrick_u_p_U::getDamp()
 	  }
       }
 
-    for ( int i=0 ; i<20 ; i++ )  		
+    for ( i=0 ; i<20 ; i++ )  		
       {
         for ( int j=0 ; j<20 ; j++ )
           {
@@ -1923,7 +1926,7 @@ const Matrix &TwentyNodeBrick_u_p_U::getDamp()
 	  }
       }
 
-    for ( int i=0 ; i<20 ; i++ )  		
+    for ( i=0 ; i<20 ; i++ )  		
       {
         for ( int j=0 ; j<20 ; j++ )
           {
@@ -2016,7 +2019,8 @@ const Matrix &TwentyNodeBrick_u_p_U::getMass()
 //    Ms.write_standard("Ms.dat", "Mass matrix");
 //    Mf.write_standard("Mf.dat", "Mass matrix");
 
-    for ( int i=0 ; i<20 ; i++ )  		
+	int i;
+    for ( i=0 ; i<20 ; i++ )  		
       {
         for ( int j=0 ; j<20 ; j++ )
           {
@@ -2029,7 +2033,7 @@ const Matrix &TwentyNodeBrick_u_p_U::getMass()
 	      }
 	  }
       }
-    for ( int i=0 ; i<20 ; i++ )  		
+    for ( i=0 ; i<20 ; i++ )  		
       {
         for ( int j=0 ; j<20 ; j++ )
           {
@@ -4090,7 +4094,9 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 	ra(137) = Raccel20(4);
 	ra(138) = Raccel20(5);
 	ra(139) = Raccel20(6);
-      for(int i=0; i<140; i++)
+
+	int i;
+      for(i=0; i<140; i++)
        {
          if(i%10==0)
 	   cout<<endl;
@@ -4108,7 +4114,7 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 
     //cerr << " addInerti... column_mass " << column_mass << endln;
 
-    for (int i = 0; i < nodes_in_brick*7; i++)
+    for (i = 0; i < nodes_in_brick*7; i++)
 	   {
 		Q(i)    += -M(i,i)*ra(i);
 	   }
