@@ -133,7 +133,9 @@ ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
                   $(FE)/element/20nbrick/TwentyNodeBrick.o \
                   $(FE)/element/20nbrick/TclTwentyNodeBrickCommand.o \
                   $(FE)/element/upU/EightNodeBrick_u_p_U.o \
-                  $(FE)/element/upU/TwentyNodeBrick_u_p_U.o 
+                  $(FE)/element/upU/TwentyNodeBrick_u_p_U.o \
+                  $(FE)/element/upU/TclEightNodeBrick_u_p_U.o \
+                  $(FE)/element/upU/TclTwentyNodeBrick_u_p_U.o
 
 
 ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
