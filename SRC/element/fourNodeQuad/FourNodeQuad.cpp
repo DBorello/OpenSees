@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2001-12-07 01:07:02 $
+// $Revision: 1.15 $
+// $Date: 2002-01-06 19:34:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -729,7 +729,7 @@ FourNodeQuad::Print(ostream &s, int flag)
 	s << "\tthickness:  " << thickness << endl;
 	s << "\tmass density:  " << rho << endl;
 	s << "\tsurface pressure:  " << pressure << endl;
-	s << "\tbody forces:  " << b[0] << ' ' << b[1] << endl;
+	s << "\tbody forces:  " << b[0] << " " << b[1] << endl;
 	theMaterial[0]->Print(s,flag);
 	s << "\tStress (xx yy xy)" << endl;
 	for (int i = 0; i < 4; i++)

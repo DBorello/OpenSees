@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-11-27 07:01:40 $
+// $Revision: 1.6 $
+// $Date: 2002-01-06 19:34:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.cpp,v $
 
 // Ed "C++" Love
@@ -205,18 +205,18 @@ NineNodeMixedQuad::revertToStart( )
 void 
 NineNodeMixedQuad::Print( ostream &s, int flag )
 {
-  s << '\n' ;
+  s << endl ;
   s << "Nine Node Quad -- Mixed Pressure/Volume -- Plane Strain \n" ;
-  s << "Element Number " << this->getTag() << '\n' ;
-  s << "Node 1 : " << connectedExternalNodes(0) << '\n' ;
-  s << "Node 2 : " << connectedExternalNodes(1) << '\n' ;
-  s << "Node 3 : " << connectedExternalNodes(2) << '\n' ;
-  s << "Node 4 : " << connectedExternalNodes(3) << '\n' ;
-  s << "Node 5 : " << connectedExternalNodes(4) << '\n' ;
-  s << "Node 6 : " << connectedExternalNodes(5) << '\n' ;
-  s << "Node 7 : " << connectedExternalNodes(6) << '\n' ;
-  s << "Node 8 : " << connectedExternalNodes(7) << '\n' ;
-  s << "Node 9 : " << connectedExternalNodes(8) << '\n' ;
+  s << "Element Number " << this->getTag() << endl ;
+  s << "Node 1 : " << connectedExternalNodes(0) << endl ;
+  s << "Node 2 : " << connectedExternalNodes(1) << endl ;
+  s << "Node 3 : " << connectedExternalNodes(2) << endl ;
+  s << "Node 4 : " << connectedExternalNodes(3) << endl ;
+  s << "Node 5 : " << connectedExternalNodes(4) << endl ;
+  s << "Node 6 : " << connectedExternalNodes(5) << endl ;
+  s << "Node 7 : " << connectedExternalNodes(6) << endl ;
+  s << "Node 8 : " << connectedExternalNodes(7) << endl ;
+  s << "Node 9 : " << connectedExternalNodes(8) << endl ;
 
   s << "Material Information : \n " ;
 

@@ -192,13 +192,13 @@ int ConstantPressureVolumeQuad :: revertToStart( )
 //print out element data
 void ConstantPressureVolumeQuad :: Print( ostream &s, int flag )
 {
-  s << '\n' ;
+  s << endl ;
   s << "Four Node Quad -- Mixed Pressure/Volume -- Plane Strain \n" ;
-  s << "Element Number " << this->getTag() << '\n' ;
-  s << "Node 1 : " << connectedExternalNodes(0) << '\n' ;
-  s << "Node 2 : " << connectedExternalNodes(1) << '\n' ;
-  s << "Node 3 : " << connectedExternalNodes(2) << '\n' ;
-  s << "Node 4 : " << connectedExternalNodes(3) << '\n' ;
+  s << "Element Number " << this->getTag() << endl ;
+  s << "Node 1 : " << connectedExternalNodes(0) << endl ;
+  s << "Node 2 : " << connectedExternalNodes(1) << endl ;
+  s << "Node 3 : " << connectedExternalNodes(2) << endl ;
+  s << "Node 4 : " << connectedExternalNodes(3) << endl ;
   s << "Material Information : \n " ;
 
   materialPointers[0]->Print( s, flag ) ;
