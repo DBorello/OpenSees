@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-08 06:52:13 $
+// $Revision: 1.4 $
+// $Date: 2002-06-10 22:26:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber2d.h,v $
                                                                         
                                                                         
@@ -57,7 +57,6 @@ class UniaxialFiber2d : public Fiber
     int   setTrialFiberStrain(const Vector &vs);
     Vector &getFiberStressResultants (void);
     Matrix &getFiberTangentStiffContr (void);
-    Matrix &getFiberSecantStiffContr (void);
 
     int   commitState(void);
     int   revertToLastCommit(void);    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-01-06 20:00:49 $
+// $Revision: 1.4 $
+// $Date: 2002-06-10 22:26:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber3d.cpp,v $
                                                                         
                                                                         
@@ -158,34 +158,6 @@ UniaxialFiber3d::getFiberTangentStiffContr(void)
 
     return ks;
 }
-
-
-Matrix &
-UniaxialFiber3d::getFiberSecantStiffContr (void) 
-{
-    // ks = (as^as) * area * S;
-    double value = theMaterial->getSecant() * area;
-
-    double as1 = as[0];
-    double as2 = as[1];
-    double vas1 = as1*value;
-    double vas2 = as2*value;
-
-    ks(0,0) = value;
-    ks(0,1) = vas1;
-    ks(0,2) = vas2;
-    
-    ks(1,0) = vas1;
-    ks(1,1) = vas1*as1;
-    ks(1,2) = vas1*as2;
-    
-    ks(2,0) = vas2;
-    ks(2,1) = vas2*as1;
-    ks(2,2) = vas2*as2;
- 
-    return ks;
-}
-
 
 Fiber*
 UniaxialFiber3d::getCopy (void)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-08 06:52:13 $
+// $Revision: 1.4 $
+// $Date: 2002-06-10 22:26:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/Fiber.h,v $
                                                                         
                                                                         
@@ -59,7 +59,6 @@ class Fiber : public TaggedObject, public MovableObject
     virtual int    setTrialFiberStrain(const Vector &vs)=0;
     virtual Vector &getFiberStressResultants(void) =0;
     virtual Matrix &getFiberTangentStiffContr(void) =0;
-    virtual Matrix &getFiberSecantStiffContr(void) =0;    
 	
     virtual int    commitState(void)=0;
     virtual int    revertToLastCommit(void)=0;    
