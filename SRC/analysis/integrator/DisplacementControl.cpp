@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-12-07 00:50:52 $
+// $Revision: 1.7 $
+// $Date: 2002-05-02 23:53:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DisplacementControl.cpp,v $
                                                                         
                                                                         
@@ -125,6 +125,11 @@ DisplacementControl::newStep(void)
     Vector &dUhat = *deltaUhat;
 
     double dUahat = dUhat(theDofID);
+    if (dUahat == 0.0) {
+	cerr << "WARNING DisplacementControl::newStep() ";
+	cerr << "dUahat is zero -- zero reference displacement at control node DOF\n";
+	return -1;
+    }
     
     // determine delta lambda(1) == dlambda    
     double dLambda = theIncrement/dUahat;
@@ -168,6 +173,11 @@ DisplacementControl::update(const Vector &dU)
     (*deltaUhat) = theLinSOE->getX();    
 
     double dUahat = (*deltaUhat)(theDofID);
+    if (dUahat == 0.0) {
+	cerr << "WARNING DisplacementControl::update() ";
+	cerr << "dUahat is zero -- zero reference displacement at control node DOF\n";
+	return -1;
+    }
     
     // determine delta lambda(1) == dlambda    
     double dLambda = -dUabar/dUahat;
