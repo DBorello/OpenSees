@@ -18,12 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:32:56 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 21:07:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.cpp,v $
 
-// Written: AAA 03/02
-// Revised:
+// Written: Arash & GGD
+// Created: 03/02
+// Revision: Arash
+
 // Joint2D.cpp: implementation of the Joint2D class.
 //
 //////////////////////////////////////////////////////////////////////
@@ -38,28 +40,32 @@
 #include <string.h>
 #include <MP_Constraint.h>
 #include <MP_Joint2D.h>
-#include <ElasticMaterial.h>
 #include <ElementResponse.h>
+#include <UniaxialMaterial.h>
 #include <Joint2D.h>
-#include <InternalSpring.h>
+
 
 Matrix Joint2D::K(16,16);
 Vector Joint2D::V(16);
-Node *Joint2D::theNodes[5];
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
+
 Joint2D::Joint2D()
   :Element(0, ELE_TAG_Joint2D ), 
-  ExternalNodes(5), InternalConstraints(0), 
-  Spring1(0), Spring2(0), Spring3(0), Spring4(0), SpringC(0),
-  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0),
-  IntNode(0), TheDomain(0), numDof(0), nodeRecord(0), dofRecord(0)
+  ExternalNodes(5), InternalConstraints(4), 
+  TheDomain(0), numDof(0), nodeDbTag(0), dofDbTag(0)
 {
-
+	for ( int i=0 ; i<5 ; i++ )
+	{
+		theSprings[i] = NULL;;
+		fixedEnd[i] = 1;
+		theNodes[i] = NULL;
+	}
 }
+
 
 Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
 			     UniaxialMaterial &spring1,	UniaxialMaterial &spring2,
@@ -67,10 +73,9 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
 			     UniaxialMaterial &springC, Domain *theDomain, int LrgDisp)
   :Element(tag, ELE_TAG_Joint2D ), 
   ExternalNodes(5), InternalConstraints(4), 
-  Spring1(0), Spring2(0), Spring3(0), Spring4(0), SpringC(0),
-  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0),
-  IntNode(IntNodeTag), TheDomain(0), numDof(0), nodeRecord(0), dofRecord(0)
+  TheDomain(0), numDof(0), nodeDbTag(0), dofDbTag(0)
 {
+  int i;
   numDof  = 16;
 
   K.Zero();
@@ -78,8 +83,7 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
 
   TheDomain = theDomain;
   if( TheDomain==NULL ) {
-    opserr << "WARNING Joint2D(): Specified domain does not exist";
-    opserr << "Domain = 0\n";
+    opserr << "WARNING Joint2D(): Specified domain does not exist , Domain = 0\n";
     return;
   }
 
@@ -90,67 +94,49 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   ExternalNodes(3) = nd4;
   ExternalNodes(4) = IntNodeTag;
   
-  // Set the external node pointers
-  end1Ptr = TheDomain->getNode(nd1);
-  end2Ptr = TheDomain->getNode(nd2);	
-  end3Ptr = TheDomain->getNode(nd3);
-  end4Ptr = TheDomain->getNode(nd4);
-  
-  // check domain for existence of external nodes
-  if (end1Ptr == 0) {
-    opserr << "WARNING Joint2D::setDomain(): Nd1: ";
-    opserr << nd1 << "does not exist in model for element \n" << *this;
-    return;
-  }
-    
-  if (end2Ptr == 0) {
-    opserr << "WARNING Joint2D::setDomain(): Nd2: ";
-    opserr << nd2 << "does not exist in model for element\n" << *this;
-    return;
-  }	
-  
-  if (end3Ptr == 0) {
-    opserr << "WARNING Joint2D::setDomain(): Nd3: ";
-    opserr << nd3 << "does not exist in model for element \n" << *this;
-    return;
-  }
-    
-  if (end4Ptr == 0) {
-    opserr << "WARNING Joint2D::setDomain(): Nd4: ";
-    opserr << nd4 << "does not exist in model for element\n" << *this;
-    return;
-  }	
 
+  // get  the external nodes
+  for ( i=0 ; i<4 ; i++)
+  {
+    theNodes[i] = NULL;
+    theNodes[i] = TheDomain->getNode( ExternalNodes(i) );
+    if (theNodes[i] == NULL) {
+      opserr << "WARNING Joint2D::setDomain(): Nd" <<(i+1) <<": ";
+      opserr << ExternalNodes(i) << "does not exist in model for element \n" << *this;
+      return;
+    }
+  }
+  
   // check for a two dimensional domain, since this element supports only two dimensions 
-  const Vector &end1Crd = end1Ptr->getCrds();
-  const Vector &end2Crd = end2Ptr->getCrds();	
-  const Vector &end3Crd = end3Ptr->getCrds();
-  const Vector &end4Crd = end4Ptr->getCrds();
-
+  const Vector &end1Crd = theNodes[0]->getCrds();
+  const Vector &end2Crd = theNodes[1]->getCrds();	
+  const Vector &end3Crd = theNodes[2]->getCrds();
+  const Vector &end4Crd = theNodes[3]->getCrds();
+  
   int dimNd1 = end1Crd.Size();
   int dimNd2 = end2Crd.Size();
   int dimNd3 = end3Crd.Size();
   int dimNd4 = end4Crd.Size();
 
-  if (dimNd1 != 2 && dimNd2 != 2 && dimNd3 != 2 && dimNd4 != 2 ) {
+  if (dimNd1 != 2 || dimNd2 != 2 || dimNd3 != 2 || dimNd4 != 2 ) {
     opserr << "WARNING Joint2D::setDomain(): has incorrect space dimension \n";
     opserr << "                                    space dimension not supported by Joint2D";
     return;
   }
 	
   // now verify the number of dof at node ends
-  int dofNd1 = end1Ptr->getNumberDOF();
-  int dofNd2 = end2Ptr->getNumberDOF();	
-  int dofNd3 = end3Ptr->getNumberDOF();
-  int dofNd4 = end4Ptr->getNumberDOF();
+  int dofNd1 = theNodes[0]->getNumberDOF();
+  int dofNd2 = theNodes[1]->getNumberDOF();	
+  int dofNd3 = theNodes[2]->getNumberDOF();
+  int dofNd4 = theNodes[3]->getNumberDOF();
 
-  if (dofNd1 != 3 && dofNd2 != 3 && dofNd3 != 3 && dofNd4 != 3 ) {
+  if (dofNd1 != 3 || dofNd2 != 3 || dofNd3 != 3 || dofNd4 != 3 ) {
     opserr << "WARNING Joint2D::Joint2D: has incorrect degrees of freedom \n";
     opserr << "                                    DOF not supported by Joint2D";
     return;
   }
   
-  // check if joint diagonals lengths are not zero
+  // check the joint size. The joint size must be non-zero
   Vector Center1(end1Crd);
   Vector Center2(end2Crd);
   Center1 = Center1 - end3Crd;
@@ -159,12 +145,12 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   double L1 = Center1.Norm();
   double L2 = Center2.Norm();
   
-  if( Center1.Norm()<1e-6  || Center2.Norm()<1e-6 ) {
+  if( Center1.Norm()<1e-12  || Center2.Norm()<1e-12 ) {
     opserr << "WARNING Joint2D::(): zero length\n";
     return;	
   }
 	
-  // check if nodes are not located at the same coordinate and construct
+  // check if nodes are not located on each other and they can construct
   // a parallelogram
   Center1 = end1Crd + end3Crd;
   Center2 = end2Crd + end4Crd;
@@ -181,56 +167,57 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
   }
 	
   // Generate internal node and add it up to domain
-  IntNodePtr = new Node ( IntNode , 4, Center1(0) , Center1(1) );
-  if ( IntNodePtr == NULL ) 
-    {
-     opserr << "Joint2D::Joint2D - Unable to generate new nodes , out of memory\n";
-     exit(-1);
-    } else {
-      if( TheDomain->addNode( IntNodePtr ) == false )		// add intenal nodes to domain
-	opserr << "Joint2D::Joint2D - unable to add internal nodeto domain\n";
-    }
-
-  // make copy of the uniaxial materials for the element
-
-  Spring1 = spring1.getCopy();
-  Spring2 = spring2.getCopy();
-  Spring3 = spring3.getCopy();
-  Spring4 = spring4.getCopy();
-  SpringC = springC.getCopy();
-  
-  if ( Spring1 == NULL || Spring2 == NULL || Spring3 == NULL || Spring4 == NULL || SpringC == NULL )
-  {
-    opserr << "ERROR Joint2D::Joint2D(): Can not make copy of uniaxial materials, out of memory ";
-    exit(-1);
+  theNodes[4]  = new Node ( IntNodeTag , 4, Center1(0) , Center1(1) );
+  if ( theNodes[4] == NULL ) {
+    opserr << "Joint2D::Joint2D - Unable to generate new nodes , out of memory\n" ;
+  } else {
+    if( TheDomain->addNode( theNodes[4] ) == false )		// add intenal nodes to domain
+      opserr << "Joint2D::Joint2D - unable to add internal nodeto domain\n";
   }
-
+  
+  // make copy of the uniaxial materials for the element
+  
+  if ( &spring1 == NULL )	{ fixedEnd[0] = 1;  theSprings[0] = NULL; }	else { fixedEnd[0] = 0; theSprings[0] = spring1.getCopy(); }
+  if ( &spring2 == NULL ) { fixedEnd[1] = 1;  theSprings[1] = NULL; } else { fixedEnd[1] = 0; theSprings[1] = spring2.getCopy(); }  
+  if ( &spring3 == NULL ) { fixedEnd[2] = 1;  theSprings[2] = NULL; } else { fixedEnd[2] = 0; theSprings[2] = spring3.getCopy(); }
+  if ( &spring4 == NULL ) { fixedEnd[3] = 1;  theSprings[3] = NULL; } else { fixedEnd[3] = 0; theSprings[3] = spring4.getCopy(); }
+  if ( &springC == NULL ) { opserr << "ERROR Joint2D::Joint2D(): The central node does not exist "; exit(-1); } else { fixedEnd[4] = 0; theSprings[4] = springC.getCopy(); }
+  
+  
+  for ( i=0 ; i<5 ; i++ )
+    {
+      if ( fixedEnd[i] == 0  && theSprings[i] == NULL ) {
+	opserr << "ERROR Joint2D::Joint2D(): Can not make copy of uniaxial materials, out of memory ";
+	exit(-1);
+      }
+    }
+  
   // Generate and add constraints to domain
-
+  
   // get the constraint numbers
   int startMPtag = theDomain->getNumMPs();
-  for ( int i=0 ; i<4 ; i++ ) InternalConstraints(i) = startMPtag + i ;
+  for ( i=0 ; i<4 ; i++ ) InternalConstraints(i) = startMPtag + i ;
   
   // create MP_Joint constraint node 1
-  if ( addMP_Joint( TheDomain, InternalConstraints(0), IntNode, ExternalNodes(0), 2, LrgDisp ) != 0) {
+  if ( addMP_Joint( TheDomain, InternalConstraints(0), ExternalNodes(4), ExternalNodes(0), 2, fixedEnd[0], LrgDisp ) != 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 1\n";
     return;
   }
-
+  
   // create MP_Joint constraint node 2
-  if ( addMP_Joint( TheDomain, InternalConstraints(1), IntNode, ExternalNodes(1), 3, LrgDisp ) != 0) {
+  if ( addMP_Joint( TheDomain, InternalConstraints(1), ExternalNodes(4), ExternalNodes(1), 3, fixedEnd[1], LrgDisp ) != 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 2\n";
-    return;
+		return;
   }
-
+  
   // create MP_Joint constraint node 3
-  if ( addMP_Joint( TheDomain, InternalConstraints(2), IntNode, ExternalNodes(2), 2, LrgDisp ) != 0) {
+  if ( addMP_Joint( TheDomain, InternalConstraints(2), ExternalNodes(4), ExternalNodes(2), 2, fixedEnd[2], LrgDisp ) != 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 3\n";
     return;
   }
   
   // create MP_Joint constraint node 4
-  if ( addMP_Joint( TheDomain, InternalConstraints(3), IntNode, ExternalNodes(3), 3, LrgDisp ) != 0) {
+  if ( addMP_Joint( TheDomain, InternalConstraints(3), ExternalNodes(4), ExternalNodes(3), 3, fixedEnd[3], LrgDisp ) != 0) {
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 4\n";
     return;
   }
@@ -239,38 +226,58 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
 
 Joint2D::~Joint2D()
 {
-	if ( Spring1 != NULL ) delete Spring1;
-	if ( Spring2 != NULL ) delete Spring2;
-	if ( Spring3 != NULL ) delete Spring3;
-	if ( Spring4 != NULL ) delete Spring4;
-	if ( SpringC != NULL ) delete SpringC;
+
+	if ( TheDomain != NULL)
+	{
+		MP_Constraint *Temp_MP;
+		for ( int i=0 ; i < 4 ; i++ )
+		{
+			Temp_MP = TheDomain->getMP_Constraint( InternalConstraints(i) );
+			
+			if ( Temp_MP != NULL )
+			{
+				TheDomain->removeMP_Constraint( InternalConstraints(i) );
+				delete Temp_MP;
+			}
+		}
+		if ( theNodes[4] != NULL )
+		{
+			int intnodetag = theNodes[4]->getTag();
+			TheDomain->removeNode( intnodetag );
+			delete theNodes[4];
+		}
+	}
+
+	for (int i=0 ; i<5 ; i++)
+		if ( theSprings[i] != NULL ) delete theSprings[i];
 }
 
 
 void Joint2D::setDomain(Domain *theDomain)
 {
 	//Ckeck domain not null - invoked when object removed from a domain
-	if (theDomain == 0)
-	{
-		end1Ptr = 0;
-		end2Ptr = 0;
-		end3Ptr = 0;
-		end4Ptr = 0;
+	if (theDomain == 0) {
+		for(int i=0 ; i<4 ; i++) theNodes[i] = NULL;
+	} else {
+		
+		TheDomain = theDomain;
+		this->DomainComponent::setDomain(theDomain);
+		
+		for (int i=0 ; i<5 ; i++)
+			if ( theNodes[i] ==0 )  theNodes[i] = TheDomain->getNode( ExternalNodes(i) );
 	}
-
-	this->DomainComponent::setDomain(theDomain);
 	
 }//setDomain
 
 
 int Joint2D::addMP_Joint(Domain *theDomain, int mpNum, 
 				  int RnodeID, int CnodeID, 
-				  int MainDOF, int LrgDispFlag )
+				  int MainDOF, int FixedEnd, int LrgDispFlag )
 {
 	MP_Constraint *Temp_MP;
 
 	// create MP_ForJoint constraint
-	Temp_MP = new MP_Joint2D( theDomain, mpNum, RnodeID, CnodeID, MainDOF, LrgDispFlag );
+	Temp_MP = new MP_Joint2D( theDomain, mpNum, RnodeID, CnodeID, MainDOF, FixedEnd, LrgDispFlag );
   
 	if (Temp_MP == NULL)
 	{
@@ -293,51 +300,67 @@ int Joint2D::addMP_Joint(Domain *theDomain, int mpNum,
 
 int Joint2D::update(void)
 {
-  return 0;
+	const Vector &disp1 = theNodes[0]->getTrialDisp();
+	const Vector &disp2 = theNodes[1]->getTrialDisp();
+	const Vector &disp3 = theNodes[2]->getTrialDisp();
+	const Vector &disp4 = theNodes[3]->getTrialDisp();
+	const Vector &dispC = theNodes[4]->getTrialDisp();
+
+	double Delta[5];
+	Delta[0] = disp1(2) - dispC(3);
+	Delta[1] = disp2(2) - dispC(2);
+	Delta[2] = disp3(2) - dispC(3);
+	Delta[3] = disp4(2) - dispC(2);
+	Delta[4] = dispC(3) - dispC(2);
+
+	int result = 0;
+
+	for ( int i=0 ; i<5 ; i++ )
+	{
+		if ( theSprings[i] != NULL ) result = theSprings[i]->setTrialStrain(Delta[i]);
+		if ( result != 0 ) break;
+	}
+	
+	return result;
 }
 
 int Joint2D::commitState()
 {
-    int retVal = 0;
+	int result = 0;
 
-    // call element commitState to do any base class stuff
-    if ((retVal = this->Element::commitState()) != 0) {
-      opserr << "Joint2D::commitState () - failed in base class";
-    }    
-
-    int CS1 = Spring1->commitState();
-    int CS2 = Spring2->commitState();
-    int CS3 = Spring3->commitState();
-    int CS4 = Spring4->commitState();
-    int CSC = SpringC->commitState();
-    
-    if ( CS1!=0 || CS2!=0 || CS3!=0 || CS4!=0 || retVal != 0 ) return -1;
-
-    return CS1;
+	for ( int i=0 ; i<5 ; i++ )
+	{
+		if ( theSprings[i] != NULL ) result = theSprings[i]->commitState();
+		if ( result != 0 ) break;
+	}
+	
+	return result;
 }
 
 int Joint2D::revertToLastCommit()
 {
-	int RLS1 = Spring1->revertToLastCommit();
-	int RLS2 = Spring2->revertToLastCommit();
-	int RLS3 = Spring3->revertToLastCommit();
-	int RLS4 = Spring4->revertToLastCommit();
-	int RLSC = SpringC->revertToLastCommit();
+	int result = 0;
 
-	if ( RLS1!=RLS2 || RLS2!=RLS3 || RLS3!=RLS4 || RLS4!=RLSC ) return -1;
-	return RLS1;
+	for ( int i=0 ; i<5 ; i++ )
+	{
+		if ( theSprings[i] != NULL ) result = theSprings[i]->revertToLastCommit();
+		if ( result != 0 ) break;
+	}
+	
+	return result;
 }
 
 int Joint2D::revertToStart(void)
 {
-	int RS1 = Spring1->revertToStart();
-	int RS2 = Spring2->revertToStart();
-	int RS3 = Spring3->revertToStart();
-	int RS4 = Spring4->revertToStart();
-	int RSC = SpringC->revertToStart();
+	int result = 0;
 
-	if ( RS1!=RS2 || RS2!=RS3 || RS3!=RS4 || RS4!=RSC ) return -1;
-	return RS1;
+	for ( int i=0 ; i<5 ; i++ )
+	{
+		if ( theSprings[i] != NULL ) result = theSprings[i]->revertToStart();
+		if ( result != 0 ) break;
+	}
+	
+	return result;
 }
 
 
@@ -351,16 +374,9 @@ const ID &Joint2D::getExternalNodes(void)
 	return ExternalNodes;
 }
 
-Node **
-Joint2D::getNodePtrs(void)
+Node **Joint2D::getNodePtrs(void)
 {
-  theNodes[0] = end1Ptr;
-  theNodes[1] = end2Ptr;
-  theNodes[2] = end3Ptr;
-  theNodes[3] = end4Ptr;
-  theNodes[4] = IntNodePtr;
-
-  return theNodes;
+	return theNodes;
 }
 
 int Joint2D::getNumDOF(void)
@@ -370,84 +386,79 @@ int Joint2D::getNumDOF(void)
 
 const Matrix &Joint2D::getTangentStiff(void)
 {
-	const Vector &disp1 = end1Ptr->getTrialDisp();
-	const Vector &disp2 = end2Ptr->getTrialDisp();
-	const Vector &disp3 = end3Ptr->getTrialDisp();
-	const Vector &disp4 = end4Ptr->getTrialDisp();
-	const Vector &dispC = IntNodePtr->getTrialDisp();
-
-	double Delta1 = disp1(2) - dispC(3);
-	double Delta2 = disp2(2) - dispC(2);
-	double Delta3 = disp3(2) - dispC(3);
-	double Delta4 = disp4(2) - dispC(2);
-	double DeltaC = dispC(3) - dispC(2);
-
-	int dummy;
-
-	dummy = Spring1->setTrialStrain(Delta1);
-	dummy = Spring2->setTrialStrain(Delta2);
-	dummy = Spring3->setTrialStrain(Delta3);
-	dummy = Spring4->setTrialStrain(Delta4);
-	dummy = SpringC->setTrialStrain(DeltaC);
-
-	double K1 = Spring1->getTangent();
-	double K2 = Spring2->getTangent();
-	double K3 = Spring3->getTangent();
-	double K4 = Spring4->getTangent();
-	double KC = SpringC->getTangent();
+	double Ktangent[5] ;
+	for ( int i=0 ; i<5 ; i++ ) 
+	{
+		Ktangent[i] = 0;
+		if ( theSprings[i] != NULL ) Ktangent[i] = theSprings[i]->getTangent();
+	}
 
 	K.Zero();
 
-	K(2,2)  =  K1;
-	K(2,15) = -K1;
-	K(5,5)  =  K2;
-	K(5,14) = -K2;
-	K(8,8)  =  K3;
-	K(8,15) = -K3;
-	K(11,11)=  K4;
-	K(11,14)= -K4;
-	K(14,5) = -K2;
-	K(14,11)= -K4;
-	K(14,14)=  K2 + K4 + KC;
-	K(14,15)= -KC;
-	K(15,2) = -K1;
-	K(15,8) = -K3;
-	K(15,14)= -KC;
-	K(15,15)=  K1 + K3 + KC;
+	K(2,2)  =  Ktangent[0];
+	K(2,15) = -Ktangent[0];
+	K(5,5)  =  Ktangent[1];
+	K(5,14) = -Ktangent[1];
+	K(8,8)  =  Ktangent[2];
+	K(8,15) = -Ktangent[2];
+	K(11,11)=  Ktangent[3];
+	K(11,14)= -Ktangent[3];
+	K(14,5) = -Ktangent[1];
+	K(14,11)= -Ktangent[3];
+	K(14,14)=  Ktangent[1] + Ktangent[3] + Ktangent[4];
+	K(14,15)= -Ktangent[4];
+	K(15,2) = -Ktangent[0];
+	K(15,8) = -Ktangent[2];
+	K(15,14)= -Ktangent[4];
+	K(15,15)=  Ktangent[0] + Ktangent[2] + Ktangent[4];
 
 	return K;
 }
 
+
 const Matrix &Joint2D::getInitialStiff(void)
 {
-  double K1 = Spring1->getInitialTangent();
-  double K2 = Spring2->getInitialTangent();
-  double K3 = Spring3->getInitialTangent();
-  double K4 = Spring4->getInitialTangent();
-  double KC = SpringC->getInitialTangent();
-  
-  K.Zero();
-  
-  K(2,2)  =  K1;
-  K(2,15) = -K1;
-  K(5,5)  =  K2;
-  K(5,14) = -K2;
-  K(8,8)  =  K3;
-  K(8,15) = -K3;
-  K(11,11)=  K4;
-  K(11,14)= -K4;
-  K(14,5) = -K2;
-  K(14,11)= -K4;
-  K(14,14)=  K2 + K4 + KC;
-  K(14,15)= -KC;
-  K(15,2) = -K1;
-  K(15,8) = -K3;
-  K(15,14)= -KC;
-  K(15,15)=  K1 + K3 + KC;
-  
-  return K;
+	double Kintial[5] ;
+	for ( int i=0 ; i<5 ; i++ ) 
+	{
+		Kintial[i] = 0;
+		if ( theSprings[i] != NULL ) Kintial[i] = theSprings[i]->getTangent();
+	}
+
+	K.Zero();
+
+	K(2,2)  =  Kintial[0];
+	K(2,15) = -Kintial[0];
+	K(5,5)  =  Kintial[1];
+	K(5,14) = -Kintial[1];
+	K(8,8)  =  Kintial[2];
+	K(8,15) = -Kintial[2];
+	K(11,11)=  Kintial[3];
+	K(11,14)= -Kintial[3];
+	K(14,5) = -Kintial[1];
+	K(14,11)= -Kintial[3];
+	K(14,14)=  Kintial[1] + Kintial[3] + Kintial[4];
+	K(14,15)= -Kintial[4];
+	K(15,2) = -Kintial[0];
+	K(15,8) = -Kintial[2];
+	K(15,14)= -Kintial[4];
+	K(15,15)=  Kintial[0] + Kintial[2] + Kintial[4];
+
+	return K;
 }
 
+
+const Matrix &Joint2D::getDamp(void)
+{	
+	K.Zero();
+	return K;
+}
+
+const Matrix &Joint2D::getMass(void)
+{
+	K.Zero();
+	return K;
+}
 
 void Joint2D::Print(OPS_Stream &s, int flag )
 {
@@ -480,40 +491,21 @@ int Joint2D::addInertiaLoadToUnbalance(const Vector &accel)
 
 const Vector &Joint2D::getResistingForce()
 {
-	const Vector &disp1 = end1Ptr->getTrialDisp();
-	const Vector &disp2 = end2Ptr->getTrialDisp();
-	const Vector &disp3 = end3Ptr->getTrialDisp();
-	const Vector &disp4 = end4Ptr->getTrialDisp();
-	const Vector &dispC = IntNodePtr->getTrialDisp();
-
-	double Delta1 = disp1(2) - dispC(3);
-	double Delta2 = disp2(2) - dispC(2);
-	double Delta3 = disp3(2) - dispC(3);
-	double Delta4 = disp4(2) - dispC(2);
-	double DeltaC = dispC(3) - dispC(2);
-
-	int dummy;
-
-	dummy = Spring1->setTrialStrain(Delta1);
-	dummy = Spring2->setTrialStrain(Delta2);
-	dummy = Spring3->setTrialStrain(Delta3);
-	dummy = Spring4->setTrialStrain(Delta4);
-	dummy = SpringC->setTrialStrain(DeltaC);
-
-	double F1 = Spring1->getStress();
-	double F2 = Spring2->getStress();
-	double F3 = Spring3->getStress();
-	double F4 = Spring4->getStress();
-	double FC = SpringC->getStress();
+	double Force[5] ;
+	for ( int i=0 ; i<5 ; i++ ) 
+	{
+		Force[i] = 0;
+		if ( theSprings[i] != NULL ) Force[i] = theSprings[i]->getStress();
+	}
 
 	V.Zero();
 
-	V(2) = F1;
-	V(5) = F2;
-	V(8) = F3;
-	V(11)= F4;
-	V(14)= -FC - F2 - F4;
-	V(15)= FC - F1 - F3;
+	V(2) = Force[0];
+	V(5) = Force[1];
+	V(8) = Force[2];
+	V(11)= Force[3];
+	V(14)= -Force[4] - Force[1] - Force[3];
+	V(15)= Force[4] - Force[0] - Force[2];
 
 	return V;
 }
@@ -521,13 +513,7 @@ const Vector &Joint2D::getResistingForce()
 const Vector &
 Joint2D::getResistingForceIncInertia()
 {
-  this->getResistingForce();
-
-  // add rayleigh damping forces if factors have been set
-  if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
-    V += this->getRayleighDampingForces();
-
-  return V;
+	return this->getResistingForce();
 }
 
 
@@ -538,15 +524,15 @@ int Joint2D::displaySelf(Renderer &theViewer, int displayMode, float fact)
 	// the display factor (a measure of the distorted image)
 	// store this information in 2 3d vectors v1 and v2
 
-	const Vector &node1Crd = end1Ptr->getCrds();
-	const Vector &node2Crd = end2Ptr->getCrds();	
-	const Vector &node3Crd = end3Ptr->getCrds();
-	const Vector &node4Crd = end4Ptr->getCrds();
+	const Vector &node1Crd = theNodes[0]->getCrds();
+	const Vector &node2Crd = theNodes[1]->getCrds();	
+	const Vector &node3Crd = theNodes[2]->getCrds();
+	const Vector &node4Crd = theNodes[3]->getCrds();
 
-	const Vector &node1Disp = end1Ptr->getDisp();
-	const Vector &node2Disp = end2Ptr->getDisp();    
-	const Vector &node3Disp = end3Ptr->getDisp();
-	const Vector &node4Disp = end4Ptr->getDisp();  
+	const Vector &node1Disp = theNodes[0]->getDisp();
+	const Vector &node2Disp = theNodes[1]->getDisp();    
+	const Vector &node3Disp = theNodes[2]->getDisp();
+	const Vector &node4Disp = theNodes[3]->getDisp();  
 
 	static Vector v1(3);
 	static Vector v2(3);
@@ -590,7 +576,7 @@ int Joint2D::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
 //most-probably requires to be overridden
-Response* Joint2D::setResponse(const char **argv, int argc, Information &eleInformation)
+Response* Joint2D::setResponse(char **argv, int argc, Information &eleInformation)
 {
 //
 // we compare argv[0] for known response types for the Truss
@@ -602,7 +588,8 @@ Response* Joint2D::setResponse(const char **argv, int argc, Information &eleInfo
 	else if (strcmp(argv[0],"size") == 0 || strcmp(argv[0],"jointSize") == 0 )
     return new ElementResponse(this, 2, Vector(2));
 
-	else if (strcmp(argv[0],"moment") == 0 || strcmp(argv[0],"force") == 0 )
+	else if (strcmp(argv[0],"moment") == 0 || strcmp(argv[0],"moments") == 0 
+		|| strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 )
     return new ElementResponse(this, 3, Vector(5));
 
 	else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
@@ -615,6 +602,9 @@ Response* Joint2D::setResponse(const char **argv, int argc, Information &eleInfo
 
 	else if ( strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0 )
     return new ElementResponse(this, 6, Matrix(16,16) );
+	
+	else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0)
+		return new ElementResponse(this, 7, Vector(5));
 
 	else 
 		return 0;
@@ -630,7 +620,7 @@ int Joint2D::getResponse(int responseID, Information &eleInformation)
 	case 1:
 		if(eleInformation.theVector!=0)
 		{
-			const Vector& disp = IntNodePtr->getTrialDisp();
+			const Vector& disp = theNodes[4]->getTrialDisp();
 			(*(eleInformation.theVector))(0) = disp(0);
 			(*(eleInformation.theVector))(1) = disp(1);
 			(*(eleInformation.theVector))(2) = disp(2);
@@ -641,15 +631,15 @@ int Joint2D::getResponse(int responseID, Information &eleInformation)
 	case 2:
 		if(eleInformation.theVector!=0)
 		{
-			const Vector &node1Crd = end1Ptr->getCrds();
-			const Vector &node2Crd = end2Ptr->getCrds();	
-			const Vector &node3Crd = end3Ptr->getCrds();
-			const Vector &node4Crd = end4Ptr->getCrds();
+			const Vector &node1Crd = theNodes[0]->getCrds();
+			const Vector &node2Crd = theNodes[1]->getCrds();	
+			const Vector &node3Crd = theNodes[2]->getCrds();
+			const Vector &node4Crd = theNodes[3]->getCrds();
 
-			const Vector &node1Disp = end1Ptr->getDisp();
-			const Vector &node2Disp = end2Ptr->getDisp();    
-			const Vector &node3Disp = end3Ptr->getDisp();
-			const Vector &node4Disp = end4Ptr->getDisp();  
+			const Vector &node1Disp = theNodes[0]->getDisp();
+			const Vector &node2Disp = theNodes[1]->getDisp();    
+			const Vector &node3Disp = theNodes[2]->getDisp();
+			const Vector &node4Disp = theNodes[3]->getDisp();  
 
 			Vector v1(2);
 			Vector v2(2);
@@ -676,47 +666,329 @@ int Joint2D::getResponse(int responseID, Information &eleInformation)
 		return 0;
 
 	case 3:
-		if(eleInformation.theVector!=0)
+		if( eleInformation.theVector != 0 )
 		{
-			(*(eleInformation.theVector))(0) = Spring1->getStress();
-			(*(eleInformation.theVector))(1) = Spring2->getStress();
-			(*(eleInformation.theVector))(2) = Spring3->getStress();
-			(*(eleInformation.theVector))(3) = Spring4->getStress();
-			(*(eleInformation.theVector))(4) = SpringC->getStress();
+			for ( int i =0 ; i<5 ; i++ )
+			{
+				(*(eleInformation.theVector))(i) = 0.0;
+				if ( theSprings[i] != NULL ) 
+					(*(eleInformation.theVector))(i) = theSprings[i]->getStress();
+			}
 		}
 		return 0;
 
 	case 4:
 		if(eleInformation.theVector!=0)
 		{
-			(*(eleInformation.theVector))(0) = Spring1->getStrain();
-			(*(eleInformation.theVector))(1) = Spring2->getStrain();
-			(*(eleInformation.theVector))(2) = Spring3->getStrain();
-			(*(eleInformation.theVector))(3) = Spring4->getStrain();
-			(*(eleInformation.theVector))(4) = SpringC->getStrain();
+			for ( int i =0 ; i<5 ; i++ )
+			{
+				(*(eleInformation.theVector))(i) = 0.0;
+				if ( theSprings[i] != NULL ) 
+					(*(eleInformation.theVector))(i) = theSprings[i]->getStrain();
+			}
 		}
 		return 0;
 
 	case 5:
 		if(eleInformation.theVector!=0)
 		{
-			(*(eleInformation.theVector))(0) = Spring1->getStrain();
-			(*(eleInformation.theVector))(1) = Spring1->getStress();
-			(*(eleInformation.theVector))(2) = Spring2->getStrain();
-			(*(eleInformation.theVector))(3) = Spring2->getStress();
-			(*(eleInformation.theVector))(4) = Spring3->getStrain();
-			(*(eleInformation.theVector))(5) = Spring3->getStress();
-			(*(eleInformation.theVector))(6) = Spring4->getStrain();
-			(*(eleInformation.theVector))(7) = Spring4->getStress();
-			(*(eleInformation.theVector))(8) = SpringC->getStrain();
-			(*(eleInformation.theVector))(9) = SpringC->getStress();
+			for ( int i =0 ; i<5 ; i++ )
+			{
+				(*(eleInformation.theVector))(i) = 0.0;
+				(*(eleInformation.theVector))(i+5) = 0.0;
+				if ( theSprings[i] != NULL )
+				{
+					(*(eleInformation.theVector))(i) = theSprings[i]->getStrain();
+					(*(eleInformation.theVector))(i+5) = theSprings[i]->getStress();
+				}
+			}
 		}
 		return 0;
 
 	case 6:
 		return eleInformation.setMatrix(this->getTangentStiff());
-
+	
+	case 7:
+		if(eleInformation.theVector!=0)
+		{
+			for ( int i=0 ; i<5 ; i++ )
+			{
+				(*(eleInformation.theVector))(i) = 0.0;
+				if ( theSprings[i] != NULL && theSprings[i]->getInitialTangent() != 0.0 )
+				{
+					(*(eleInformation.theVector))(i) = 
+						theSprings[i]->getStrain() - theSprings[i]->getStress()/theSprings[i]->getInitialTangent();
+				}
+				
+			}			
+		}
+		return 0;
+	
 	default:
 		return -1;
 	}
 }
+
+
+int Joint2D::sendSelf(int commitTag, Channel &theChannel)
+{
+  int res;
+  int i;
+  int dataTag = this->getDbTag();
+  
+  static ID data(19);
+  data(0) = this->getTag();
+  data(1) = numDof;
+  
+  if (ExternalNodes.Size() != 0 && nodeDbTag == 0) nodeDbTag = theChannel.getDbTag();
+  if (InternalConstraints.Size() != 0 && dofDbTag == 0) dofDbTag = theChannel.getDbTag();
+  data(2) = nodeDbTag;
+  data(3) = dofDbTag;
+  
+  // sending Sparing class and Db tags
+  for (i=0 ; i<5 ; i++) {
+    data( i+4 ) = fixedEnd[i];
+    if ( theSprings[i] != NULL )
+      {
+	data( i+9 ) = theSprings[i]->getClassTag();
+	int SpringDbTag = theSprings[i]->getDbTag();
+	if (SpringDbTag == 0) {
+	  SpringDbTag = theChannel.getDbTag();
+	  if (SpringDbTag != 0)
+	    theSprings[i]->setDbTag(SpringDbTag);
+			}
+	data(i+14) = SpringDbTag;
+      } else
+	{
+	  data( i+9 ) = 0;
+	  data( i+14 ) = 0;
+	}
+  }
+  
+  // send the ID vector
+  
+  res = theChannel.sendID(dataTag, commitTag, data);
+  if (res < 0) {
+    opserr << "WARNING Joint2D::sendSelf() - " << this->getTag() << "failed to send ID\n";
+    return -1;
+  }
+  
+  // sends the tags of it's external nodes
+  res = theChannel.sendID(nodeDbTag, commitTag, ExternalNodes);
+  if (res < 0) {
+    opserr << "WARNING Joint2D::sendSelf() - " << this->getTag()<< " failed to send Vector\n";
+    return -2;
+  }
+  
+  
+  // sends the tags of it's internal constraints
+  res = theChannel.sendID(dofDbTag, commitTag, InternalConstraints);
+  if (res < 0) {
+    opserr << "WARNING Joint2D::sendSelf() - %d failed to send Vector\n",this->getTag();
+    return -2;
+  }
+  
+  
+  // finally send the materials one by one
+  
+  for ( i=0 ; i<5 ; i++ ) {
+    if ( theSprings[i] != NULL ) {
+      res = theSprings[i]->sendSelf(commitTag, theChannel);
+      if (res < 0) {
+	opserr << "WARNING Joint2D::sendSelf() - "<< this->getTag() << " failed to send its Spring " << (i+1) << " material\n";
+	return -3;
+      }
+    }
+  }
+  
+  return 0;
+}
+
+int Joint2D::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  
+  int res;
+  int dataTag = this->getDbTag();
+  
+  static ID data(19);
+  res = theChannel.recvID(dataTag, commitTag, data);
+  if (res < 0) {
+    opserr << "WARNING Joint2D::recvSelf() - failed to receive Vector\n";
+    return -1;
+  }
+  
+  this->setTag((int)data(0));
+  numDof = data(1);
+  nodeDbTag = data(2);
+  dofDbTag = data(3);
+  
+  // Receving Springs
+  for (int i=0 ; i<5 ; i++) {
+    fixedEnd[i] = data( i+4 );
+    int SpringClass = data( i+9 );
+    int SpringDb = data( i+14 );
+    
+    if ( SpringClass != 0 && SpringDb != 0  && fixedEnd[i] == 0 )
+      {
+	// check if we have a material object already & if we do if of right type
+	if ((theSprings[i] == 0) || (theSprings[i]->getClassTag() != SpringClass)) {
+	  // if old one .. delete it
+	  if (theSprings[i] != 0)
+					delete theSprings[i];
+	  // create a new material object
+	  theSprings[i] = theBroker.getNewUniaxialMaterial(SpringClass);
+	  if (theSprings[i] == 0) {
+	    opserr << "WARNING Joint2D::recvSelf() - " << (i+1) << " failed to get a blank Material of type " << this->getTag() << " for Spring " << SpringClass << "\n";
+	    return -3;
+	  }
+	}
+	
+	theSprings[i]->setDbTag(SpringDb); // note: we set the dbTag before we receive the material
+	res = theSprings[i]->recvSelf(commitTag, theChannel, theBroker);
+	if (res < 0) {
+	  opserr << "WARNING Joint2D::recvSelf() - " << this->getTag() << " failed to receive its Material for Spring " << (i+1) << "\n";
+	  return -3;
+	}
+      }
+    else theSprings[i] = NULL;
+  }
+  
+  
+  // receives the tags of it's external nodes
+  res = theChannel.recvID(nodeDbTag, commitTag, ExternalNodes);
+  if (res < 0) {
+    opserr << "WARNING Joint2D::recvSelf() - " << this->getTag() << " failed to receive external nodes\n" ;
+    return -2;
+  }
+  
+  
+  // receives the tags of it's constraint tags
+  res = theChannel.recvID(dofDbTag, commitTag, InternalConstraints);
+  if (res < 0) {
+    opserr << "WARNING Joint2D::recvSelf() - " << this->getTag() << " failed to receive internal constraints\n";
+    return -2;
+  }
+  
+  return 0;
+}
+
+
+/**********************
+const Vector &
+Joint2D::gradient(bool compute, int identifier)
+{
+  //	The gradient method can be called with four different purposes:
+  //      1) To clear the sensitivity flag so that the object does not contribute:
+  //	     	gradient(false, 0)
+  //      2) To set the sensitivity flag so that the object contributes
+  //         (the sensitivity flag is stored as the value of parameterID):
+  //		gradient(false, parameterID)
+  //      3) To obtain the gradient vector from the object (like for the residual):
+  //		gradient(true, 0)
+  //      4) To commit unconditional sensitivities for path-dependent problems:
+  //		gradient(true, gradNumber)
+
+  // COMPUTE GRADIENTS
+  if (compute) {
+    // IF "PHASE 1" IN THE GRADIENT COMPUTATIONS (RETURN GRADIENT VECTOR)
+    if (identifier == 0) {
+      V.Zero();
+      if ( gradientIdentifier != 0 ) {
+				// Determine the current strain and set the strain at material level
+	this->update();
+
+	
+	// Compute sensitivity depending on 'parameter'
+	if( gradientIdentifier == 1 ) {
+	  double FC[5] ;
+	  for ( int i=0 ; i<5 ; i++ ) 
+	    {
+	      FC[i] = 0;
+	      if ( theSprings[i] != NULL ) FC[i] = theSprings[i]->getStress();
+	    }
+	  
+	  V.Zero();
+	  
+	  V(2) = FC[0];
+	  V(5) = FC[1];
+	  V(8) = FC[2];
+	  V(11)= FC[3];
+	  V(14)= -FC[4] - FC[1] - FC[3];
+	  V(15)= FC[4] - FC[0] - FC[2];
+	}
+	else {
+	  
+	  double MG[5] ;
+	  for ( int i=0 ; i<5 ; i++ ) 
+	    {
+	      MG[i] = 0;
+	      if ( theSprings[i] != NULL ) theSprings[i]->gradient(compute, identifier,MG[i]);
+	    }
+	  
+	  V.Zero();
+	  
+	  V(2) = MG[0];
+	  V(5) = MG[1];
+	  V(8) = MG[2];
+	  V(11)= MG[3];
+	  V(14)= -MG[4] - MG[1] - MG[3];
+	  V(15)= MG[4] - MG[0] - MG[2];
+	}
+      }
+      return V;
+    }
+    // IF "PHASE 2" IN THE GRADIENT COMPUTATIONS (COMMIT UNCONDITIONAL GRADIENT)
+    else {
+      if ( gradientIdentifier == 0 ) {
+      }
+      else if ( gradientIdentifier == 1 ) {
+	
+	// Nothing needs to be committed if the area is random
+      }
+      else {
+	// Compute strain sensitivity
+	
+	double sens1  = theNodes[0]->getGradient(3, identifier);
+	double sens2  = theNodes[1]->getGradient(3, identifier);
+	double sens3  = theNodes[2]->getGradient(3, identifier);
+	double sens4  = theNodes[3]->getGradient(3, identifier);
+	double sensC3 = theNodes[4]->getGradient(3, identifier);
+	double sensC4 = theNodes[4]->getGradient(4, identifier);
+	
+	double MG[5];
+	MG[0] = sens1 - sensC4;
+	MG[1] = sens2 - sensC3;
+	MG[2] = sens3 - sensC4;
+	MG[3] = sens4 - sensC3;
+	MG[4] = sensC4 - sensC3;
+	
+	// Pass it down to the materials
+	for ( int i=0 ; i<5 ; i++ )
+	  if ( theSprings[i] != NULL ) 	theSprings[i]->gradient(compute,identifier,MG[i]);		
+      }
+      return 0;
+    }
+  }
+  
+  // DO NOT COMPUTE GRADIENTS, JUST SET FLAG
+  else {
+    // Set gradient identifier
+    gradientIdentifier = identifier;
+    
+    // The identifier needs to be passed "downwards" also when it's zero
+    if (identifier == 0 ) {
+      double dummy=0;
+      for ( int i=0 ; i<5 ; i++ )
+	if ( theSprings[i] != NULL ) 	theSprings[i]->gradient(false, identifier,dummy);
+    }
+    
+    // If the identifier is non-zero and the parameter belongs to the material
+    else if ( identifier > 100) {
+      double dummy=0;
+      for ( int i=0 ; i<5 ; i++ )
+	if ( theSprings[i] != NULL ) 	theSprings[i]->gradient(false, identifier-100,dummy);
+    }
+    return 0;
+  }
+}
+*******************/

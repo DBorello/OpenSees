@@ -1,7 +1,8 @@
 include ../../../Makefile.def
 
-OBJS       = InternalSpring.o SimpleJoint2D.o TclJoint2dCommand.o \
-		Joint2D.o MP_Joint2D.o MP_SimpleJoint2D.o
+OBJS       = TclJoint2dCommand.o \
+	Joint2D.o \
+	MP_Joint2D.o 
 
 all:         $(OBJS)
 

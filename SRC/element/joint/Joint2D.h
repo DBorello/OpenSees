@@ -18,12 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-02-25 23:32:56 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 21:07:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.h,v $
 
-// Written: AAA 03/02
-// Revised:
+// Written: Arash & GGD
+// Created: 03/02
+// Revision: Arash
 
 // Joint2D.h: interface for the Joint2d class.
 //
@@ -33,13 +34,13 @@
 #define Joint2D_h
 
 #include <bool.h>
-#include <Node.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <Element.h>
 #include <ID.h>
 #include <Domain.h>
 
+class Node;
 class UniaxialMaterial;
 class Response;
 
@@ -49,22 +50,23 @@ public:
   Joint2D();
 
   Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
-			     UniaxialMaterial &spring1,
-				 UniaxialMaterial &spring2,
-			     UniaxialMaterial &spring3,
-				 UniaxialMaterial &spring4,
-			     UniaxialMaterial &springC,
-				 Domain *theDomain,
-				 int LrgDisp);
-	
+	  UniaxialMaterial &spring1,
+	  UniaxialMaterial &spring2,
+	  UniaxialMaterial &spring3,
+	  UniaxialMaterial &spring4,
+	  UniaxialMaterial &springC,
+	  Domain *theDomain,
+	  int LrgDisp);
+  
+  
   ~Joint2D();
-
+  
   // methods dealing with domain
   int	getNumExternalNodes(void) const;
   const	ID &getExternalNodes(void);
   Node **getNodePtrs(void);
-
   int	getNumDOF(void);
+  
   void	setDomain(Domain *theDomain);  
   bool	isSubdomain(void) { return false; } ;
 	
@@ -73,11 +75,13 @@ public:
   int commitState(void);
   int revertToLastCommit(void);
   int revertToStart(void);
-
+  
   // methods to return the current linearized stiffness,
   // damping and mass matrices
   const	Matrix &getTangentStiff(void);
-  const	Matrix &getInitialStiff(void);
+  const Matrix &getInitialStiff(void);   
+  const	Matrix &getDamp(void);
+  const	Matrix &getMass(void);
 	
   // methods for returning and applying loads
   //virtual Vector &getUVLoadVector(double q1, double q2);
@@ -92,30 +96,34 @@ public:
   int	displaySelf(Renderer &theViewer, int displayMode, float fact);  
 	
   // method for obtaining information specific to an element
-  Response* setResponse(const char **argv, int argc, Information &eleInformation);
+  Response* setResponse(char **argv, int argc, Information &eleInformation);
   int getResponse(int responseID, Information &eleInformation);
-  int sendSelf(int commitTag, Channel &theChannel) {return -1;}
-  int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker) {return -1;}
+  int sendSelf(int commitTag, Channel &theChannel);
+  int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
   void Print(OPS_Stream &s, int flag =0);
 
+  // AddingSensitivity:BEGIN //////////////////////////////////////////
+  // const Vector & gradient(bool compute, int identifier);
+  // AddingSensitivity:END ///////////////////////////////////////////
+
  protected:
-  int 	addMP_Joint(Domain *theDomain, int mpNum, int RnodeID, int CnodeID, int MainDOF, int LrgDispFlag );   
+  int 	addMP_Joint(Domain *theDomain, int mpNum, int RnodeID, int CnodeID, int MainDOF, int FixedEnd, int LrgDispFlag );   
 
  private:
-  UniaxialMaterial *Spring1; 
-  UniaxialMaterial *Spring2; 
-  UniaxialMaterial *Spring3; 
-  UniaxialMaterial *Spring4; 
-  UniaxialMaterial *SpringC; 
-  ID		ExternalNodes, InternalConstraints;	
-  Node	*end1Ptr, *end2Ptr, *end3Ptr, *end4Ptr, *IntNodePtr;
-  int		IntNode;
+  UniaxialMaterial *theSprings[5]; 
+  ID		ExternalNodes;
+  ID		InternalConstraints;
+  int       fixedEnd[5];
+  Node		*theNodes[5];
   Domain	*TheDomain;
-  int		numDof, nodeRecord, dofRecord;
+  int		numDof, nodeDbTag, dofDbTag;
   static	Matrix K;
   static	Vector V;
 
-  static Node *theNodes[5];
+  // AddingSensitivity:BEGIN //////////////////////////////////////////
+  int gradientIdentifier;
+  int gradientMaterialTag;
+  // AddingSensitivity:END ///////////////////////////////////////////
 };
 
 #endif

@@ -18,15 +18,16 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:14 $
+// $Revision: 1.3 $
+// $Date: 2003-03-04 21:07:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint2D.h,v $
                                                                         
 #ifndef MP_Joint2D_h
 #define MP_Joint2D_h
 
-// Written: Arash
+// Written: Arash & GGD
 // Created: 08/01
+// Revision: Arash
 
 // Purpose: This file contains the class definition for MP_Joint2D.
 // It is a sub class for MP_Constraint specialized to be used for simple joint 
@@ -51,7 +52,7 @@ class MP_Joint2D : public MP_Constraint
     MP_Joint2D();
 
     MP_Joint2D( Domain *theDomain, int tag, int nodeRetain, int nodeConstr,
-		int Maindof, int LrgDsp = 0 );	//LrgDsp=0 means large displacement is not enabled
+		int Maindof, int fixedend , int LrgDsp = 0 );	//LrgDsp=0 means large displacement is not enabled
 
     // destructor    
     ~MP_Joint2D();
@@ -64,6 +65,7 @@ class MP_Joint2D : public MP_Constraint
     int applyConstraint(double pseudoTime);
     bool isTimeVarying(void) const;
     const Matrix &getConstraint(void);    
+	void setDomain(Domain *theDomain);
 
     // methods for output
     int sendSelf(int commitTag, Channel &theChannel);
@@ -72,19 +74,23 @@ class MP_Joint2D : public MP_Constraint
     
 	void Print(OPS_Stream &s, int flag =0);
 
+
   protected:
     
   private:
     int nodeRetained;			// to identify the retained node
     int nodeConstrained;		// to identify  the constrained node
 	int MainDOF;				// main degree of freedom for rotation
+	int AuxDOF;					// Auxilary degree of freedom for shear
+	int FixedEnd;				// fixed rotational degree of freedom at the end 
+                                // released = 0 , fixed = 1
     
     ID *constrDOF;				// ID of constrained DOF at constrained node
     ID *retainDOF;				// ID of related DOF at retained node
     Node *RetainedNode;			// to identify the retained node
     Node *ConstrainedNode;		// to identify  the constrained node
 
-    int dbTag1, dbTag2;			// need a dbTag for the two ID's
+    int dbTag1, dbTag2, dbTag3;			// need a dbTag for the two ID's
 	int LargeDisplacement;		// flag for large displacements enabled
 	double Length0;
 	Matrix *constraint;			// pointer to the constraint matrix
