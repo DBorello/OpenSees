@@ -10,10 +10,6 @@
 //              December 2, 2003									//
 //////////////////////////////////////////////////////////////////////
 
-//$Revision: 1.4 $
-//$Date: 2004-06-30 00:27:40 $
-//$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/PySimple1Gen.cpp,v $
-
 #include "PySimple1Gen.h"
 
 using namespace std;
@@ -847,7 +843,7 @@ double PySimple1Gen::GetPult(const char *type)
 		beta = beta;
 		Ko = 0.4; // Use 0.4 like LPile
 		Ka = pow(tan(45*deg - alpha*deg),2.0);
-		pu1 = stress*(Ko*tan(phi*deg)*sin(beta*deg)/(tan(beta*deg-phi*deg)*cos(alpha*deg))+tan(beta*deg)/(tan(beta*deg-phi*deg))*(b+depth*tan(beta*deg)*tan(alpha*deg))+Ko*depth*tan(beta*deg)*(tan(phi*deg)*sin(beta*deg) - tan(alpha*deg)) - Ka*b);
+		pu1 = stress*(Ko*depth*tan(phi*deg)*sin(beta*deg)/(tan(beta*deg-phi*deg)*cos(alpha*deg))+tan(beta*deg)/(tan(beta*deg-phi*deg))*(b+depth*tan(beta*deg)*tan(alpha*deg))+Ko*depth*tan(beta*deg)*(tan(phi*deg)*sin(beta*deg) - tan(alpha*deg)) - Ka*b);
 		pu2 = Ka*b*stress*(pow(tan(beta*deg),8.0) - 1.0) + Ko*b*stress*tan(phi*deg)*pow(tan(beta*deg),4.0);
 
 /////////////////////////////////////////////////////////////////////////////
@@ -990,7 +986,7 @@ double PySimple1Gen::GetY50(const char *type)
 	
 	}
 
-	// Get y50 for pile cap (strain = yult for pile cap)
+	// Get y50 for pile cap
 	else if(strcmp(type,"py4")==0)
 		return Y50;
 
