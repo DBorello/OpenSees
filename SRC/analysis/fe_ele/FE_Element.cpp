@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-03-04 00:48:08 $
+// $Revision: 1.10 $
+// $Date: 2003-03-11 21:17:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -701,9 +701,9 @@ FE_Element::addLocalD_Force(const Vector &accel, double fact)
 
 // AddingSensitivity:BEGIN /////////////////////////////////
 void  
-FE_Element::addResistingForceSensitivity(int gradNumber)
+FE_Element::addResistingForceSensitivity(int gradNumber, double fact)
 {
-	theResidual->addVector(1.0,myEle->getResistingForceSensitivity(gradNumber),1.0);
+	theResidual->addVector(1.0,myEle->getResistingForceSensitivity(gradNumber),-fact);
 }
 
 void  
