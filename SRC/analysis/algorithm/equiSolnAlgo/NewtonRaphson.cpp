@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-09-12 21:31:28 $
+// $Revision: 1.6 $
+// $Date: 2002-04-02 19:15:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonRaphson.cpp,v $
                                                                         
                                                                         
@@ -118,11 +118,27 @@ NewtonRaphson::solveCurrentStep(void)
     int result = -1;
     int count = 0;
     do {
+      if (tangent == INITIAL_THEN_CURRENT_TANGENT) {
+	if (count == 0) {
+	  if (theIntegrator->formTangent(INITIAL_TANGENT) < 0){
+	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
+	    cerr << "the Integrator failed in formTangent()\n";
+	    return -1;
+	  } 
+	} else {
+	  if (theIntegrator->formTangent(CURRENT_TANGENT) < 0){
+	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
+	    cerr << "the Integrator failed in formTangent()\n";
+	    return -1;
+	  } 
+	}	  
+      } else {
 	if (theIntegrator->formTangent(tangent) < 0){
 	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
 	    cerr << "the Integrator failed in formTangent()\n";
 	    return -1;
 	}		    
+      }
 	
 	if (theSOE->solve() < 0) {
 	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
@@ -153,6 +169,13 @@ NewtonRaphson::solveCurrentStep(void)
       cerr << "the ConvergenceTest object failed in test()\n";
       return -3;
     }
+
+     // open file
+    ofstream theFile; 
+    theFile.open("tmp", ios::app);
+    theFile << count << endl;
+    theFile.close();
+
 
     // note - if postive result we are returning what the convergence test returned
     // which should be the number of iterations
