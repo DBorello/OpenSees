@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-12 20:10:14 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 01:06:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/BFGS.cpp,v $
                                                                         
 // Written: Ed Love
@@ -57,6 +57,8 @@ BFGS::BFGS(int theTangentToUse, int n )
   du = 0;
   b  = 0;
 
+  temp = 0;
+
   rdotz = 0;
   sdotr = 0;
 
@@ -82,6 +84,7 @@ BFGS::BFGS(ConvergenceTest &theT, int theTangentToUse, int n)
   residNew = 0;
   du = 0;
   b  = 0;
+  temp = 0;
 
   rdotz = 0;
   sdotr = 0;
