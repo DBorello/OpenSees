@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 06:19:32 $
+// $Revision: 1.3 $
+// $Date: 2001-02-17 04:22:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/ModifiedNewton.cpp,v $
                                                                         
                                                                         
@@ -115,6 +115,7 @@ ModifiedNewton::solveCurrentStep(void)
 
     // repeat until convergence is obtained or reach max num iterations
     int result = -1;
+    int count = 0;
     do {
 	if (theSOE->solve() < 0) {
 	    cerr << "WARNING ModifiedNewton::solveCurrentStep() -";
@@ -134,9 +135,7 @@ ModifiedNewton::solveCurrentStep(void)
 	    return -2;
 	}	
 
-	
-	this->record(0);
-
+	this->record(count++);
 	result = theTest->test();
 
     } while (result == -1);

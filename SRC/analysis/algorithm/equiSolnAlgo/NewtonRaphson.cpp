@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 06:19:32 $
+// $Revision: 1.3 $
+// $Date: 2001-02-17 04:22:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonRaphson.cpp,v $
                                                                         
                                                                         
@@ -48,6 +48,9 @@
 #include <ConvergenceTest.h>
 #include <ID.h>
 
+
+#include <fstream.h>
+
 // Constructor
 NewtonRaphson::NewtonRaphson()
 :EquiSolnAlgo(EquiALGORITHM_TAGS_NewtonRaphson),
@@ -75,6 +78,7 @@ NewtonRaphson::setTest(ConvergenceTest &newTest)
 {
     theTest = &newTest;
 }
+
 
 
 int 
@@ -108,6 +112,7 @@ NewtonRaphson::solveCurrentStep(void)
     }	    
 
     int result = -1;
+    int count = 0;
     do {
 	if (theIntegrator->formTangent() < 0){
 	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
@@ -121,6 +126,7 @@ NewtonRaphson::solveCurrentStep(void)
 	    return -3;
 	}	    
 
+
 	if (theIntegrator->update(theSOE->getX()) < 0) {
 	    cerr << "WARNING NewtonRaphson::solveCurrentStep() -";
 	    cerr << "the Integrator failed in update()\n";	
@@ -133,12 +139,8 @@ NewtonRaphson::solveCurrentStep(void)
 	    return -2;
 	}	
 
-//	cerr << theSOE->getX();
-//	cerr << theSOE->getB();
-	
-
-	this->record(0);
 	result = theTest->test();
+	this->record(count++);
 
     } while (result == -1);
 
