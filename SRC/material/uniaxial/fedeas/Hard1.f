@@ -58,7 +58,7 @@ c     Yield function
       f = dabs(xsi) - (sigY + Hiso*alpha)
 
 c     Inside yield surface
-      if (f <= 0.0) then
+      if (f.le.0.0) then
          tang = E
 c     Outside yield surface ... do return mapping
       else
@@ -66,7 +66,7 @@ c     Consistency parameter
          dGamma = f / (E+Hiso+Hkin)
 
 c     Normal to yield surface
-         if (xsi <= 0.d0) then
+         if (xsi.le.0.d0) then
             sgn = -1
          else
             sgn = 1
@@ -94,9 +94,9 @@ c     Update history variables
       hstv(3) = kappa
 
 c     Compute requested tangent
-      if (ist==2.and.deps/=0.d0) then
+      if (ist.eq.2.and.deps.ne.0.d0) then
       	tang = (sig-sigP)/deps
-      else if (ist==3.and.eps/=0.d0)then
+      else if (ist.eq.3.and.eps.ne.0.d0)then
       	tang = sig/eps
       else
 c     add additional cases, if needed
