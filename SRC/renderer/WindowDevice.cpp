@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:09:43 $
+// $Revision: 1.3 $
+// $Date: 2000-12-19 04:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/WindowDevice.cpp,v $
                                                                         
                                                                         
@@ -57,8 +57,6 @@
 #include <string.h>
 
 int WindowDevice::numWindowDevice(0);
-unsigned long WindowDevice::foreground(0);
-unsigned long WindowDevice::background(0);
 
 #ifdef _UNIX
 Display *WindowDevice::theDisplay;  
@@ -66,7 +64,10 @@ Colormap WindowDevice::cmap;
 int WindowDevice::theScreen;        
 unsigned long WindowDevice::pixels[X11_MAX_COLORS];
 XColor WindowDevice::colors[X11_MAX_COLORS];
-int WindowDevice::colorFlag;  
+int WindowDevice::colorFlag; 
+unsigned long WindowDevice::foreground(0);
+unsigned long WindowDevice::background(0);
+ 
 
 #else
 /* WindowProc()

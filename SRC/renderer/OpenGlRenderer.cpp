@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:11:52 $
+// $Revision: 1.3 $
+// $Date: 2000-12-19 04:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -499,6 +499,8 @@ OpenGLRenderer::drawPolygon(const Matrix &pos, const Vector &data)
   }
 #endif
 
+	double posX, posY, posZ, value;
+	float r,g,b;
 
     glBegin(GL_POLYGON);
     int numRows = pos.noRows();
@@ -516,7 +518,7 @@ OpenGLRenderer::drawPolygon(const Matrix &pos, const Vector &data)
 	    << " " << g << " " << b << " " << endl;
     }
       glColor3f(r,g,b);
-      glVertex3f(end1(0),end1(1),end1(2));
+      glVertex3f(posX, posY, posZ);
     }
 
     glEnd();

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:11:52 $
+// $Revision: 1.3 $
+// $Date: 2000-12-19 04:02:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGLRenderer.h,v $
                                                                         
                                                                         
@@ -75,7 +75,7 @@ class OpenGLRenderer : public Renderer
     virtual int drawLine(const Vector &end1, const Vector &end2, 
 			 const Vector &rgb1, const Vector &rgb2);
    
-    virtual int Polygon(const Matrix &points, const Vector &values);
+    virtual int drawPolygon(const Matrix &points, const Vector &values);
 
     // 
     // the following are for setting up the vieing system
