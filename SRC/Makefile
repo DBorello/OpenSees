@@ -113,7 +113,11 @@ RECORDER_LIBS = $(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/NodeRecorder.o \
 	$(FE)/recorder/ElementRecorder.o \
 	$(FE)/recorder/FilePlotter.o \
-	$(FE)/recorder/TclRecorderCommands.o
+	$(FE)/recorder/TclRecorderCommands.o \
+	$(FE)/recorder/response/Response.o \
+	$(FE)/recorder/response/ElementResponse.o \
+	$(FE)/recorder/response/MaterialResponse.o \
+	$(FE)/recorder/response/FiberResponse.o
 
 DATABASE_LIBS = $(FE)/database/FileDatastore.o \
 	$(FE)/database/FE_Datastore.o \
@@ -202,6 +206,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/ElasticIsotropicMaterial.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStress2D.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStrain2D.o \
+	$(FE)/material/nD/BidirectionalMaterial.o \
 	$(FE)/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.o \
 	$(FE)/material/nD/TclModelBuilderNDMaterialCommand.o 
 

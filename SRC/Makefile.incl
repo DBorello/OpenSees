@@ -21,6 +21,7 @@ FE_INCLUDES        = -I$(FE)/matrix \
 		  -I$(FE)/material/section/repres/section \
 		  -I$(FE)/material/section/fiber \
 		  -I$(FE)/recorder \
+		  -I$(FE)/recorder/response \
 		  -I$(FE)/handler \
 		  -I$(FE)/database \
 		  -I$(FE)/renderer \
