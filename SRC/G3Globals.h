@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-10 21:56:10 $
+// $Revision: 1.3 $
+// $Date: 2002-06-07 22:16:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/G3Globals.h,v $
                                                                         
                                                                         
 #ifndef G3Globals_h
 #define G3Globals_h
 
-// File: ~/G3Globals.h
-//
 // Written: fmk 
 // Created: 11/99
 //
@@ -39,7 +37,6 @@ class Domain;
 class Element;
 
 #define MAX_FILENAMELENGTH 50
-//#define _G3DEBUG 
 
 extern ErrorHandler *g3ErrorHandler;   // error handler for sending warning & fatal error messages
 extern double   ops_Dt;                // current delta T for current domain doing an update
