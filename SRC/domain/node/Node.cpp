@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-08-31 18:06:06 $
+// $Revision: 1.8 $
+// $Date: 2001-09-24 19:53:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -678,7 +678,11 @@ Node::addInertiaLoadToUnbalance(const Vector &accelG, double fact)
   }
 
   // form - fact * M*R*accelG and add it to the unbalanced load
-  (*unbalLoad) -= ((*mass) * (*R) * accelG)*fact;
+  //(*unbalLoad) -= ((*mass) * (*R) * accelG)*fact;
+
+  Matrix MR(mass->noRows(), R->noCols());
+  MR.addMatrixProduct(0.0, *mass, *R, 1.0);
+  unbalLoad->addMatrixVector(1.0, MR, accelG, -fact);
 
   return 0;
 }
