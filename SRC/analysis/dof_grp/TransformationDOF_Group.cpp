@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-02-17 06:36:13 $
+// $Revision: 1.3 $
+// $Date: 2001-05-03 06:14:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -597,6 +597,31 @@ TransformationDOF_Group::incrNodeAccel(const Vector &u)
 	myNode->incrTrialAccel(*unbalance);
     } else
 	myNode->incrTrialAccel(*modUnbalance);
+}
+
+
+void
+TransformationDOF_Group::setEigenvector(int mode, const Vector &u)
+{
+    // call base class method and return if no MP_Constraint
+    if (theMP == 0) {
+	this->DOF_Group::setNodeDisp(u);
+	return;
+    }
+	
+   const ID &theID = this->getID();
+   for (int i=0; i<modNumDOF; i++) {
+	int loc = theID(i);
+	if (loc >= 0)
+	    (*modUnbalance)(i) = u(loc);
+	// DO THE SP STUFF
+    }    
+    Matrix *T = this->getT();
+    if (T != 0) {
+	*unbalance = (*T) * (*modUnbalance);
+	myNode->setEigenvector(mode, *unbalance);
+    } else
+	myNode->setEigenvector(mode, *modUnbalance);
 }
 
 

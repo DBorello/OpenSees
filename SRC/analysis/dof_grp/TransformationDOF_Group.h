@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2001-05-03 06:14:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.h,v $
                                                                         
                                                                         
@@ -81,6 +81,8 @@ class TransformationDOF_Group: public DOF_Group
     void incrNodeDisp(const Vector &u);
     void incrNodeVel(const Vector &udot);
     void incrNodeAccel(const Vector &udotdot);
+
+    virtual void setEigenvector(int mode, const Vector &eigenvalue);
 
     int addSP_Constraint(SP_Constraint &theSP);
     int enforceSPs(void);
