@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2001-11-26 22:53:53 $
+// $Revision: 1.14 $
+// $Date: 2001-12-07 01:07:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -234,8 +234,9 @@ FourNodeQuad::revertToStart()
     return retVal;
 }
 
-const Matrix&
-FourNodeQuad::getTangentStiff()
+
+int
+FourNodeQuad::update()
 {
 	const Vector &disp1 = nd1Ptr->getTrialDisp();
 	const Vector &disp2 = nd2Ptr->getTrialDisp();
@@ -255,17 +256,13 @@ FourNodeQuad::getTangentStiff()
 
 	static Vector eps(3);
 
-	K.Zero();
-
-	double dvol;
-	double DB[3][2];
+	int ret = 0;
 
 	// Loop over the integration points
 	for (int i = 0; i < 4; i++) {
 
 		// Determine Jacobian for this integration point
-		dvol = this->shapeFunction(pts[i][0], pts[i][1]);
-		dvol *= (thickness*wts[i]);
+		this->shapeFunction(pts[i][0], pts[i][1]);
 
 		// Interpolate strains
 		//eps = B*u;
@@ -278,7 +275,28 @@ FourNodeQuad::getTangentStiff()
 		}
 
 		// Set the material strain
-		theMaterial[i]->setTrialStrain(eps);
+		ret += theMaterial[i]->setTrialStrain(eps);
+	}
+
+	return ret;
+}
+
+
+const Matrix&
+FourNodeQuad::getTangentStiff()
+{
+
+	K.Zero();
+
+	double dvol;
+	double DB[3][2];
+
+	// Loop over the integration points
+	for (int i = 0; i < 4; i++) {
+
+		// Determine Jacobian for this integration point
+		dvol = this->shapeFunction(pts[i][0], pts[i][1]);
+		dvol *= (thickness*wts[i]);
 
 		// Get the material tangent
 		const Matrix &D = theMaterial[i]->getTangent();
@@ -380,14 +398,6 @@ FourNodeQuad::addLoad(ElementalLoad *theLoad, double loadFactor)
 }
 
 int 
-FourNodeQuad::update(void)
-{
-  
-  return 0;
-}
-
-
-int 
 FourNodeQuad::addInertiaLoadToUnbalance(const Vector &accel)
 {
 	int i;
@@ -414,24 +424,24 @@ FourNodeQuad::addInertiaLoadToUnbalance(const Vector &accel)
 		return -1;
     }
 
-	double ra[8];
+    static double ra[8];
 
-	ra[0] = Raccel1(0);
-	ra[1] = Raccel1(1);
-	ra[2] = Raccel2(0);
-	ra[3] = Raccel2(1);
-	ra[4] = Raccel3(0);
-	ra[5] = Raccel3(1);
-	ra[6] = Raccel4(0);
-	ra[7] = Raccel4(1);
+    ra[0] = Raccel1(0);
+    ra[1] = Raccel1(1);
+    ra[2] = Raccel2(0);
+    ra[3] = Raccel2(1);
+    ra[4] = Raccel3(0);
+    ra[5] = Raccel3(1);
+    ra[6] = Raccel4(0);
+    ra[7] = Raccel4(1);
     
-	// Compute mass matrix
-	this->getMass();
+    // Compute mass matrix
+    this->getMass();
 
     // Want to add ( - fact * M R * accel ) to unbalance
-	// Take advantage of lumped mass matrix
+    // Take advantage of lumped mass matrix
     for (i = 0; i < 8; i++)
-		Q(i) += -K(i,i)*ra[i];
+      Q(i) += -K(i,i)*ra[i];
 
     return 0;
 }
@@ -439,24 +449,6 @@ FourNodeQuad::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector&
 FourNodeQuad::getResistingForce()
 {
-	const Vector &disp1 = nd1Ptr->getTrialDisp();
-	const Vector &disp2 = nd2Ptr->getTrialDisp();
-	const Vector &disp3 = nd3Ptr->getTrialDisp();
-	const Vector &disp4 = nd4Ptr->getTrialDisp();
-
-	double u[2][4];
-
-	u[0][0] = disp1(0);
-	u[1][0] = disp1(1);
-	u[0][1] = disp2(0);
-	u[1][1] = disp2(1);
-	u[0][2] = disp3(0);
-	u[1][2] = disp3(1);
-	u[0][3] = disp4(0);
-	u[1][3] = disp4(1);
-
-	static Vector eps(3);
-
 	P.Zero();
 
 	double dvol;
@@ -467,19 +459,6 @@ FourNodeQuad::getResistingForce()
 		// Determine Jacobian for this integration point
 		dvol = this->shapeFunction(pts[i][0], pts[i][1]);
 		dvol *= (thickness*wts[i]);
-
-		// Interpolate strains
-		//eps = B*u;
-		//eps.addMatrixVector(0.0, B, u, 1.0);
-		eps.Zero();
-		for (int beta = 0; beta < 4; beta++) {
-			eps(0) += shp[0][beta]*u[0][beta];
-			eps(1) += shp[1][beta]*u[1][beta];
-			eps(2) += shp[0][beta]*u[1][beta] + shp[1][beta]*u[0][beta];
-		}
-
-		// Set the material strain
-		theMaterial[i]->setTrialStrain(eps);
 
 		// Get material stress response
 		const Vector &sigma = theMaterial[i]->getStress();
@@ -874,9 +853,9 @@ FourNodeQuad::setParameter(char **argv, int argc, Information &info)
 			return -1;
 	}
     
-    // otherwise parameter is unknown for the Truss class
+    // otherwise parameter is unknown for the FourNodeQuad class
     else
-		return -1;
+      return -1;
 
 }
     
