@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-07-24 18:28:31 $
+// $Revision: 1.9 $
+// $Date: 2001-08-20 00:36:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -1041,7 +1041,7 @@ TclModelBuilder_addHomogeneousBC_X(ClientData clientData, Tcl_Interp *interp,
 
   // set the tolerance, the allowable difference in nodal coordinate and
   // what the value user specified to see if node is constrained or not
-  double tol = 1.0e-18;
+  double tol = 1.0e-10;
   if (argc >= (4 + ndf)) {
     if (strcmp(argv[2+ndf],"-tol") == 0)
     if (Tcl_GetDouble(interp, argv[3+ndf], &tol) != TCL_OK) {
@@ -1135,7 +1135,7 @@ TclModelBuilder_addHomogeneousBC_Y(ClientData clientData, Tcl_Interp *interp,
 
   // set the tolerance, the allowable difference in nodal coordinate and
   // what the value user specified to see if node is constrained or not
-  double tol = 1.0e-18;
+  double tol = 1.0e-10;
   if (argc >= (4 + ndf)) {
     if (strcmp(argv[2+ndf],"-tol") == 0)
     if (Tcl_GetDouble(interp, argv[3+ndf], &tol) != TCL_OK) {
@@ -1231,7 +1231,7 @@ TclModelBuilder_addHomogeneousBC_Z(ClientData clientData, Tcl_Interp *interp,
 
   // set the tolerance, the allowable difference in nodal coordinate and
   // what the value user specified to see if node is constrained or not
-  double tol = 1.0e-18;
+  double tol = 1.0e-10;
   if (argc >= (4 + ndf)) {
     if (strcmp(argv[2+ndf],"-tol") == 0)
     if (Tcl_GetDouble(interp, argv[3+ndf], &tol) != TCL_OK) {

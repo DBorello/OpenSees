@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-12 23:08:08 $
+// $Revision: 1.2 $
+// $Date: 2001-08-20 00:36:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/Block2D.cpp,v $
                                                                         
 // Written: Ed Love
@@ -99,10 +99,11 @@ void  Block2D::setUpXl( const ID &nodeID, const Matrix &coorArray )
   }//endif
 
   if ( nodeID(8) == -1 ) {
-    for ( i=0; i<3; i++ )
-      xl[i][8] = 0.25*( xl[i][0] + xl[i][1] + xl[i][2] + xl[i][3] );
+    for ( i=0; i<3; i++ ) 
+      xl[i][8]  = 0.25*( xl[i][0] + xl[i][1] + xl[i][2] + xl[i][3] ) ;
   }//endif
 
+  
   return;
 }
 
