@@ -188,6 +188,9 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/TclElementCommands.o \
 	$(FE)/element/feap/TclFeapElementCommand.o \
 	$(FE)/element/truss/TclTrussCommand.o \
+	$(FE)/element/shell/ShellMITC4.o \
+	$(FE)/element/shell/R3vectors.o \
+	$(FE)/element/shell/TclShellCommand.o \
 	$(FE)/element/beamWithHinges/TclBeamWithHingesBuilder.o \
 	$(FE)/element/beamWithHinges/BeamWithHinges2d.o \
 	$(FE)/element/beamWithHinges/BeamWithHinges3d.o \

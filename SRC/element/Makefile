@@ -13,6 +13,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/fourNodeQuad; $(MAKE);
 	@$(CD) $(FE)/element/beamWithHinges; $(MAKE);
 	@$(CD) $(FE)/element/8nbrick; $(MAKE);
+	@$(CD) $(FE)/element/shell; $(MAKE);
 
 # Miscellaneous
 tidy:	
@@ -31,6 +32,7 @@ spotless: clean
 	@$(CD) $(FE)/element/fourNodeQuad; $(MAKE) wipe;
 	@$(CD) $(FE)/element/beamWithHinges; $(MAKE) wipe;
 	@$(CD) $(FE)/element/8nbrick; $(MAKE) wipe;
+	@$(CD) $(FE)/element/shell; $(MAKE) wipe;
 
 wipe: spotless
 
