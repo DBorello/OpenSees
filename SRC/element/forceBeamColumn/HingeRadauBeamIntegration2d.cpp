@@ -18,11 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2003-05-12 23:44:32 $
+// $Revision: 1.8 $
+// $Date: 2003-06-09 21:23:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauBeamIntegration2d.cpp,v $
-#include <math.h>
 #include <HingeRadauBeamIntegration2d.h>
+#include <ElementalLoad.h>
 
 #include <Matrix.h>
 #include <Vector.h>
@@ -126,6 +126,116 @@ HingeRadauBeamIntegration2d::addElasticDeformations(ElementalLoad *theLoad,
 						    double loadFactor,
 						    double L, double *v0)
 {
+  // Length of elastic interior
+  double Le = L-lpI-lpJ;
+  if (Le == 0.0)
+    return;
+
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
+
+  double oneOverL = 1.0/L;
+
+  if (type == LOAD_TAG_Beam2dUniformLoad) {
+    double wa = data(1)*loadFactor;  // Axial
+    double wy = data(0)*loadFactor;  // Transverse
+
+    // Accumulate basic deformations due to uniform load on interior
+    // Midpoint rule for axial
+    v0[0] += wa*0.5*(L-lpI+lpJ)/(E*A)*Le;
+
+    // Two point Gauss for bending ... will not be exact when
+    // hinge lengths are not equal, but this is not a big deal!!!
+    double x1 = lpI + 0.5*Le*(1.0-1/sqrt(3));
+    double x2 = lpI + 0.5*Le*(1.0+1/sqrt(3));
+
+    double M1 = 0.5*wy*x1*(x1-L);
+    double M2 = 0.5*wy*x2*(x2-L);
+
+    double b1, b2;
+    double Le2EI = Le/(2*E*I);
+    b1 = x1*oneOverL;
+    b2 = x2*oneOverL;
+    v0[2] += Le2EI*(b1*M1+b2*M2);
+
+    b1 -= 1.0;
+    b2 -= 1.0;
+    v0[1] += Le2EI*(b1*M1+b2*M2);
+  }
+
+  else if (type == LOAD_TAG_Beam2dPointLoad) {
+    double P = data(0)*loadFactor;
+    double N = data(1)*loadFactor;
+    double aOverL = data(2);
+    double a = aOverL*L;
+
+    double V1 = P*(1.0-aOverL);
+    double V2 = P*aOverL;
+
+    // Accumulate basic deformations of interior due to point load
+    double M1, M2, M3;
+    double b1, b2, b3;
+
+    // Point load is on left hinge
+    if (a < lpI) {
+      M1 = (lpI-L)*V2;
+      M2 = -lpJ*V2;
+
+      double Le_6EI = Le/(6*E*I);
+
+      b1 = lpI*oneOverL;
+      b2 = 1.0-lpJ*oneOverL;
+      v0[2] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[1] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      // Nothing to do for axial
+      //v0[0] += 0.0;
+    }
+    // Point load is on right hinge
+    else if (a > L-lpJ) {
+      M1 = -lpI*V1;
+      M2 = (lpJ-L)*V1;
+
+      double Le_6EI = Le/(6*E*I);
+
+      b1 = lpI*oneOverL;
+      b2 = 1.0-lpJ*oneOverL;
+      v0[2] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[1] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      v0[0] += N*Le/(E*A);      
+    }
+    // Point load is on elastic interior
+    else {
+      M1 = -lpI*V1;
+      M2 = -lpJ*V2;
+      M3 = -a*V1;
+
+      double L1_6EI = (a-lpI)/(6*E*I);
+      double L2_6EI = (Le-a+lpI)/(6*E*I);
+
+      b1 = lpI*oneOverL;
+      b2 = 1.0-lpJ*oneOverL;
+      b3 = a*oneOverL;
+      v0[2] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[2] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      b3 -= 1.0;
+      v0[1] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[1] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      v0[0] += N*(a-lpI)/(E*A);
+    }
+  }
+
   return;
 }
 
