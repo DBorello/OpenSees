@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-03-29 03:56:11 $
+// $Revision: 1.9 $
+// $Date: 2001-03-30 07:21:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -350,7 +350,9 @@ NLBeamColumn2d::commitState()
    kvcommit = kv;
    Secommit = Se;
 
-   initialFlag = 0;
+   
+   //   initialFlag = 0;  fmk - commented out, see what happens to Example3.1.tcl if uncommented
+   //                         - i have not a clue why, ask remo if he ever gets in contact with us again!
 
    return err;
 }
@@ -504,11 +506,8 @@ int NLBeamColumn2d::update()
   dUe = Ue;
   dUe.addVector(1.0, Uepr,-1.0);
 
-  if (dUe.Norm() != 0.0  || initialFlag == 0) 
-  {
+  if (dUe.Norm() != 0.0  || initialFlag == 0) {
       
-    //cout<< "\nIteration: ";
-    
     // compute distributed loads and increments
     static Vector currDistrLoad(NL);
     static Vector distrLoadIncr(NL); 
@@ -631,7 +630,7 @@ int NLBeamColumn2d::update()
       // dSe = kv * dv;
       dSe.addMatrixVector(0.0, kv, dv, 1.0);
       
-      dW = dv^ dSe;
+      dW = dv ^ dSe;
       if (fabs(dW) < tol)
         break;
     }     
