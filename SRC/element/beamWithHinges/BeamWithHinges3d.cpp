@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-05-16 00:07:38 $
+// $Revision: 1.9 $
+// $Date: 2002-05-24 02:05:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
 
 #include <BeamWithHinges3d.h>
@@ -489,12 +489,12 @@ BeamWithHinges3d::update(void)
   // and their integration weights
   double lp[2];
   
-  xi[0] = 0.5*lp1;
-  xi[1] = L-0.5*lp2;
-  
-  lp[0] = lp1;
-  lp[1] = lp2;
+  lp[0] = lp1*L;
+  lp[1] = lp2*L;
 
+  xi[0] = 0.5*lp[0];
+  xi[1] = L-0.5*lp[1];
+  
   // element properties
   static Matrix f(6,6);	// element flexibility
   static Vector vr(6);	// Residual element deformations
