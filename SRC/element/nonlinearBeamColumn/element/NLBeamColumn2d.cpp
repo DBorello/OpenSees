@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-01-26 07:29:57 $
+// $Revision: 1.7 $
+// $Date: 2001-01-26 07:33:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -410,7 +410,7 @@ int NLBeamColumn2d::revertToStart()
       return err;
    
    // revert the transformation to start
-   if ((err = crdTransf->revertToStart()) == 0)
+   if ((err = crdTransf->revertToStart()) != 0)
       return err;
   
    // revert the element state to start
