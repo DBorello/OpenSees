@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-18 10:40:40 $
+// $Revision: 1.4 $
+// $Date: 2001-01-31 10:40:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
                                                                         
                                                                         
@@ -1373,13 +1373,18 @@ BeamWithHinges3d::setResponse (char **argv, int argc, Information &info)
     if (strcmp(argv[0],"rotation") == 0)
 		return new ElementResponse(this, 1, Vector(4));
 
-    // forces
-    else if (strcmp(argv[0],"force") == 0)
+    // global forces
+    else if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
+		strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
 		return new ElementResponse(this, 2, P);
     
     // stiffness
     else if (strcmp(argv[0],"stiffness") == 0)
 		return new ElementResponse(this, 3, K);
+
+	// local forces
+    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
+		return new ElementResponse(this, 4, P);
 
 	// section response
 	else if (strcmp(argv[0],"section") == 0) {
@@ -1399,20 +1404,23 @@ BeamWithHinges3d::setResponse (char **argv, int argc, Information &info)
 int
 BeamWithHinges3d::getResponse (int responseID, Information &eleInfo)
 {
+	double V;
+	static Vector rot(4);
+	static Vector force(12);
+
     switch (responseID) {
       case 1: { // hinge rotations ... flexibility formulation, so add deformations
 		int i;
-		static Vector temp(4);
-		temp.Zero();
+		rot.Zero();
 		
 		const Vector &defI = sectionI->getSectionDeformation();
 		int orderI = sectionI->getOrder();
 		const ID &codeI = sectionI->getType();
 		for (i = 0; i < orderI; i++) {
 			if (codeI(i) == SECTION_RESPONSE_MZ)
-				temp(0) += defI(i)*hingeIlen;
+				rot(0) += defI(i)*hingeIlen;
 			if (codeI(i) == SECTION_RESPONSE_MY)
-				temp(1) += defI(i)*hingeIlen;
+				rot(1) += defI(i)*hingeIlen;
 		}
 
 		const Vector &defJ = sectionJ->getSectionDeformation();
@@ -1420,19 +1428,44 @@ BeamWithHinges3d::getResponse (int responseID, Information &eleInfo)
 		const ID &codeJ = sectionJ->getType();
 		for (i = 0; i < orderJ; i++) {
 			if (codeJ(i) == SECTION_RESPONSE_MZ)
-				temp(2) += defJ(i)*hingeJlen;
+				rot(2) += defJ(i)*hingeJlen;
 			if (codeJ(i) == SECTION_RESPONSE_MY)
-				temp(3) += defJ(i)*hingeJlen;
+				rot(3) += defJ(i)*hingeJlen;
 		}
 
-		return eleInfo.setVector(temp);
+		return eleInfo.setVector(rot);
       }
 
-      case 2: // forces
+      case 2: // global forces
 		  return eleInfo.setVector(P);
 
       case 3: // stiffness
 		  return eleInfo.setMatrix(K);
+
+	  case 4: // local forces
+		// Axial
+		force(6) = q(0);
+		force(0) = -q(0);
+
+		// Torsion
+		force(11) = q(5);
+		force(5)  = -q(5);
+
+		// Moments about z and shears along y
+		force(2) = q(1);
+		force(8) = q(2);
+		V = (q(1)+q(2))/L;
+		force(1) = V;
+		force(7) = -V;
+
+		// Moments about y and shears along z
+		force(4)  = q(3);
+		force(10) = q(4);
+		V = (q(3)+q(4))/L;
+		force(3) = -V;
+		force(9) = V;
+
+		return eleInfo.setVector(force);
 
       default:
 		  return -1;
