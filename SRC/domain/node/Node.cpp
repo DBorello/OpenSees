@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-01-23 09:37:14 $
+// $Revision: 1.4 $
+// $Date: 2001-02-17 06:48:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -45,8 +45,6 @@
 #include <Renderer.h>
 #include <string.h>
 #include <G3Globals.h>
-
-void NodeItoa(int x, char *str);
 
 // for FEM_Object Broker to use
 Node::Node(int theClassTag)
@@ -1230,6 +1228,8 @@ Node::Print(ostream &s, int flag)
 	s << "\tMass : " << *mass;
     if (theEigenvectors != 0)
 	s << "\t Eigenvectors: " << *theEigenvectors;
+    if (theDOF_GroupPtr != 0)
+      s << "\tID : " << theDOF_GroupPtr->getID();
     s << "\n"; 
   }
   else if (flag == 1) { // print out: nodeId displacements
@@ -1246,8 +1246,9 @@ Node::displaySelf(Renderer &theRenderer, int displayMode, float fact)
 	for (int i=0; i<Crd->Size(); i++) 
 	    position(i) += theDisp(i)*fact;	
 	
-	char theText[20];
-	NodeItoa(this->getTag(), theText);    
+	static char theText[20];
+	sprintf(theText,"%d",this->getTag());
+	// NodeItoa(this->getTag(), theText);    
 	return theRenderer.drawGText(position, theText, strlen(theText));
     }
     
@@ -1339,32 +1340,3 @@ Node::createAccel(void)
 }
 
 
-char 
-NodeItoc(int x)
-{
- if (x == 1) return '1';
- if (x == 2) return '2';
- if (x == 3) return '3';
- if (x == 4) return '4';
- if (x == 5) return '5';
- if (x == 6) return '6';
- if (x == 7) return '7';
- if (x == 8) return '8';
- if (x == 9) return '9';
- return '0';
-}
-
-void
-NodeItoa(int x, char *str)
-{
-  int y=x;
-  while (y >= 10) 
-    y = y/10;
-  str[0] = NodeItoc(y);
-  str[1] = '\0';
-  if (x >= 10) {
-    int z = x/10;
-    z = x - 10*z;
-    NodeItoa(z,&str[1]);
-  }
-}
