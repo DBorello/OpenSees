@@ -6,11 +6,12 @@ include ../../../Makefile.def
         HystereticMaterial.o EPPGapMaterial.o \
         ViscousMaterial.o SeriesMaterial.o \
         PathIndependentMaterial.o CableMaterial.o \
-	ENTMaterial.o FedeasMaterial.o  \
+	ENTMaterial.o FedeasMaterial.o DrainMaterial.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)
 	@$(CD) $(FE)/material/uniaxial/fedeas; $(MAKE);
+	@$(CD) $(FE)/material/uniaxial/drain; $(MAKE);
 
 # Miscellaneous
 
@@ -22,6 +23,7 @@ clean: tidy
 
 spotless: clean
 	@$(CD) $(FE)/material/uniaxial/fedeas; $(MAKE) wipe;
+	@$(CD) $(FE)/material/uniaxial/drain; $(MAKE) wipe;
 
 wipe: spotless
 

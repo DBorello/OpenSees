@@ -28,7 +28,8 @@ all:
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)  $(JEREMIC_LIBS)\
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) \
-	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS)
+	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
+	$(DRAIN_LIBS)
 	@$(RANLIB) $(FE_LIBRARY)
 
 skypack:
@@ -281,6 +282,11 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHardeningMaterial.o \
 	$(FE)/material/uniaxial/fedeas/Hard1.o 
+
+DRAIN_LIBS = $(FE)/material/uniaxial/DrainMaterial.o \
+	$(FE)/material/uniaxial/drain/DrainHardeningMaterial.o \
+	$(FE)/material/uniaxial/drain/anal00.o \
+	$(FE)/material/uniaxial/drain/common00.o
 
 SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/ElasticSection2d.o \
