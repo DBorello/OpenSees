@@ -525,18 +525,6 @@ SOURCE=..\..\..\SRC\material\nD\J2ThreeDimensional.cpp
 SOURCE=..\..\..\SRC\material\nD\J2ThreeDimensional.h
 # End Source File
 # End Group
-# Begin Group "interactionModels"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\nD\BidirectionalMaterial.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\nD\BidirectionalMaterial.h
-# End Source File
-# End Group
 # Begin Group "soilModels"
 
 # PROP Default_Filter ""
@@ -953,6 +941,14 @@ SOURCE=..\..\..\SRC\material\section\fiber\UniaxialFiber3d.cpp
 SOURCE=..\..\..\SRC\material\section\fiber\UniaxialFiber3d.h
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=..\..\..\Src\material\section\Bidirectional.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\material\section\Bidirectional.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\section\ElasticMembranePlateSection.cpp

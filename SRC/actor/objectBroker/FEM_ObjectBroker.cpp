@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-04-06 20:59:22 $
+// $Revision: 1.8 $
+// $Date: 2002-04-09 05:42:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -99,6 +99,7 @@
 #include <ElasticPlateSection.h>
 #include <ElasticMembranePlateSection.h>
 #include <MembranePlateFiberSection.h>
+#include <Bidirectional.h>
 
 // NDMaterials
 #include <ElasticIsotropicPlaneStrain2D.h>
@@ -111,7 +112,6 @@
 #include <J2PlateFiber.h>
 #include <J2AxiSymm.h>
 #include <J2ThreeDimensional.h>
-#include <BidirectionalMaterial.h>
 #include <PlaneStressMaterial.h>
 #include <PlateFiberMaterial.h>
 
@@ -641,6 +641,9 @@ FEM_ObjectBroker::getNewSection(int classTag)
 	case SEC_TAG_MembranePlateFiberSection:
 		return new MembranePlateFiberSection();
 
+	case SEC_TAG_Bidirectional:
+		return new Bidirectional();
+
 	default:
 	     cerr << "FEM_ObjectBroker::getNewSection - ";
 	     cerr << " - no section type exists for class tag ";
@@ -683,9 +686,6 @@ FEM_ObjectBroker::getNewNDMaterial(int classTag)
 
 		case ND_TAG_J2ThreeDimensional:
 			return new J2ThreeDimensional();
-
-		case ND_TAG_Bidirectional:
-			return new BidirectionalMaterial();
 
 		case ND_TAG_PlaneStressMaterial:
 			return new PlaneStressMaterial();
