@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-05-17 23:12:17 $
+// $Revision: 1.6 $
+// $Date: 2002-05-20 16:38:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ParallelMaterial.cpp,v $
                                                                         
                                                                         
@@ -383,10 +383,11 @@ int
 ParallelMaterial::getResponse(int responseID, Information &info)
 {
   Vector stresses(numMaterials);
+  int i;
 
   switch (responseID) {
   case 1:
-    for (int i = 0; i < numMaterials; i++)
+    for (i = 0; i < numMaterials; i++)
       stresses(i) = theModels[i]->getStress();
     return info.setVector(stresses);
 
