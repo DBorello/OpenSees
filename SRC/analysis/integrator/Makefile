@@ -4,10 +4,11 @@ include ../../../Makefile.def
 
 OBJS       = IncrementalIntegrator.o StaticIntegrator.o TransientIntegrator.o \
 	     HHT.o WilsonTheta.o Newmark.o CentralDifference.o Integrator.o \
-	     LoadControl.o HHT1.o Newmark1.o \
+	     LoadControl.o HHT1.o Newmark1.o CentralDifferenceAlternative.o \
 	     ArcLength.o ArcLength1.o LoadPath.o DisplacementControl.o \
 	     MinUnbalDispNorm.o EigenIntegrator.o HSConstraint.o \
-	     CentralDifferenceAlternative.o 
+	     CentralDifferenceAlternative.o \
+	     CentralDifferenceNoDamping.o \
 
 all:         $(OBJS)
 
