@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 01:30:02 $
+// $Revision: 1.4 $
+// $Date: 2001-08-02 18:13:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -217,7 +217,7 @@ OpenSeesGFunEvaluator::evaluate_g(Vector passed_x)
 	double gvalue = 0.0;
 	Tcl_ExprDouble( theTclInterp, lsf_expression, &gvalue );
 
-	delete lsf_forTokenizing;
+	delete [] lsf_forTokenizing;
 
 	g = gvalue;
 

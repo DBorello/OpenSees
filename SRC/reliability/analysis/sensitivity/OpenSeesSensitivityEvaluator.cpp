@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:02 $
+// $Revision: 1.3 $
+// $Date: 2001-08-02 18:15:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesSensitivityEvaluator.cpp,v $
 
 
@@ -238,8 +238,8 @@ OpenSeesSensitivityEvaluator::evaluate_grad_g(double gFunValue, Vector passed_x)
 	temp = dudx ^ dgdu;
 	dgdx = temp + dgdxufixed;
 
-	delete lsf_copy1;
-	delete lsf_copy2;
+	delete [] lsf_copy1;
+	delete [] lsf_copy2;
 
 	(*grad_g) = dgdx;
 
