@@ -393,9 +393,9 @@ EightNodeBrick::~EightNodeBrick ()
     
     for (int i = 0; i < total_number_of_Gauss_points; i++) 
     {
-    	    // Delete the NDMaterials at each integration point
-    	    if (matpoint[i])
-    		delete matpoint[i];    	
+	// Delete the NDMaterials at each integration point
+	if (matpoint[i])
+	    delete matpoint[i];    	
     }	
     
     // Delete the array of pointers to NDMaterial pointer arrays
@@ -404,26 +404,6 @@ EightNodeBrick::~EightNodeBrick ()
 
     if (mmodel)
     	delete [] mmodel;
-
-    // Delete the quadrature rule
-    if ( nd1Ptr )
-    	delete nd1Ptr;
-    if ( nd2Ptr )
-    	delete nd2Ptr;
-    if ( nd3Ptr )
-    	delete nd3Ptr;
-    if ( nd4Ptr )
-    	delete nd4Ptr;
-    if ( nd5Ptr )
-    	delete nd5Ptr;
-    if ( nd6Ptr )
-    	delete nd6Ptr;
-    if ( nd7Ptr )
-    	delete nd7Ptr;
-    if ( nd8Ptr )
-    	delete nd8Ptr;
-    
-
 }
      // comment by Xiaoyan 07/11/00
 
