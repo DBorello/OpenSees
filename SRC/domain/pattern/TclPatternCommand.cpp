@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:49:06 $
+// $Revision: 1.3 $
+// $Date: 2000-12-14 08:41:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclPatternCommand.cpp,v $
 
 // File: ~/domain/pattern/TclPatternComand.C
@@ -227,7 +227,13 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
 	else
 	  doneSeries = true;
       }
-
+      
+      if (dispSeries == 0 && velSeries == 0 && accelSeries == 0) {
+	  cerr << "WARNING invalid series, want - pattern UniformExcitation";
+	  cerr << "-disp {dispSeries} -vel {velSeries} -accel {accelSeries} ";
+	  cerr << "-int {Series Integrator}\n";
+	  return TCL_ERROR;			  
+      }
 
       GroundMotion *theMotion = new GroundMotion(dispSeries, velSeries, 
 						 accelSeries, seriesIntegrator);
@@ -253,7 +259,6 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
 	    return TCL_ERROR;	      
 	}
   }
-
 
   else if (strcmp(argv[1],"Uniform") == 0) {
 
@@ -350,9 +355,6 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
     }
   }
 
-
-
-
   else if ((strcmp(argv[1],"MultipleSupportExcitation") == 0) ||
 	   (strcmp(argv[1],"MultipleSupport") == 0) ||
 	   (strcmp(argv[1],"MultiSupport") == 0)) {
@@ -367,7 +369,7 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
       }      
       commandEndMarker = 2;
   } 
-  
+
   else { 
       cerr << "WARNING unknown pattern type " << argv[1];
       cerr << " - want: pattern patternType " << patternID ;
