@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2003-05-27 21:20:35 $
+// $Revision: 1.20 $
+// $Date: 2003-08-28 22:47:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -75,6 +75,9 @@ connectedExternalNodes(8), load(0), Ki(0)
     materialPointers[i] = 0;
     nodePointers[i] = 0;
   }
+  b[0] = 0.0;
+  b[1] = 0.0; 
+  b[2] = 0.0;
 }
 
 
@@ -282,7 +285,7 @@ void  Brick::Print( OPS_Stream &s, int flag )
 
   } else {
 
-    s << endln ;
+    /*s << endln ;
     s << "Standard Eight Node Brick \n" ;
     s << "Element Number: " << this->getTag() << endln ;
     s << "Node 1 : " << connectedExternalNodes(0) << endln ;
@@ -297,7 +300,16 @@ void  Brick::Print( OPS_Stream &s, int flag )
     s << "Material Information : \n " ;
     materialPointers[0]->Print( s, flag ) ;
     
-    s << endln ;
+    s << endln ;*/
+    s << this->getTag() << " " <<connectedExternalNodes(0)
+      << " " <<connectedExternalNodes(1)
+	  << " " <<connectedExternalNodes(2)
+	  << " " <<connectedExternalNodes(3)
+	  << " " <<connectedExternalNodes(4)
+	  << " " <<connectedExternalNodes(5)
+	  << " " <<connectedExternalNodes(6)
+	  << " " <<connectedExternalNodes(7)
+      << endln ;
   }
 }
  
