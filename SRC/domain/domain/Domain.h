@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-04-02 19:31:28 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:24:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
                                                                         
@@ -150,6 +150,7 @@ class Domain
     virtual  void applyLoad(double pseudoTime);
     virtual  void setLoadConstant(void);    
     virtual  int  initialize(void);    
+    virtual  int  setRayleighDampingFactors(double alphaM, double betaK, double betaK0);    
     
     virtual  int  commit(void);
     virtual  int  revertToLastCommit(void);
