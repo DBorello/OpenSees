@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-04-02 18:49:50 $
+// $Revision: 1.4 $
+// $Date: 2002-12-13 00:11:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -74,8 +74,8 @@ class NodeRecorder: public Recorder
   protected:
     
   private:	
-    ID theDofs;
-    ID theNodes;
+    ID *theDofs;
+    ID *theNodes;
     Vector disp;
     Domain *theDomain;
 

@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.9 $
-// $Date: 2002-05-04 17:41:54 $
+// $Revision: 1.10 $
+// $Date: 2002-12-13 00:11:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -57,9 +57,41 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   char *dataToStore,
 			   double dT,
 			   int startFlag)
-:theDofs(dofs), theNodes(nodes), disp(1 + nodes.Size()*dofs.Size()), 
-  theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0), db(0), dbColumns(0)
+:theDofs(0), theNodes(0), disp(1 + nodes.Size()*dofs.Size()), 
+  theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0), 
+  db(0), dbColumns(0)
 {
+  // verify dof are valid 
+  int numDOF = dofs.Size();
+  theDofs = new ID(0, numDOF);
+
+  int count = 0;
+  for (int i=0; i<numDOF; i++) {
+    int dof = dofs(i);
+    if (dof >= 0) {
+      (*theDofs)[count] = dof;
+      count++;
+    } else {
+      cerr << "NodeRecorder::NodeRecorder - invalid dof  " << dof;
+      cerr << " will be ignored\n";
+    }
+  }
+
+  // verify the nodes exist 
+  count = 0;
+  int numNode = nodes.Size();
+  theNodes = new ID(1, numNode);
+  for (int i=0; i<numNode; i++) {
+    int nodeTag = nodes(i);
+    Node *theNode = theDomain->getNode(nodeTag);
+    if (theNode == 0) {
+      cerr << "NodeRecorder::NodeRecorder - invalid node  " << nodeTag;
+      cerr << " does not exist in domain - will be ignored\n";
+    } else {
+      (*theNodes)[count++] = nodeTag;
+    }
+  }
+
   // create char array to store file name
   int fileNameLength = strlen(theFileName) + 1;
   fileName = new char[fileNameLength];
@@ -101,6 +133,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     cerr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
     cerr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
   }
+
 }
 
 
@@ -112,10 +145,40 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   char *dataToStore,
 			   double dT,
 			   int startFlag)
-:theDofs(dofs), theNodes(nodes), disp(1 + nodes.Size()*dofs.Size()), 
+:theDofs(0), theNodes(0), disp(1 + nodes.Size()*dofs.Size()), 
   theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0), 
   db(database), dbColumns(0)
 {
+  // verify dof are valid 
+  int numDOF = dofs.Size();
+  theDofs = new ID(0, numDOF);
+
+  int count = 0;
+  for (int i=0; i<numDOF; i++) {
+    int dof = dofs(i);
+    if (dof >= 0) {
+      (*theDofs)[count] = dof;
+      count++;
+    } else {
+      cerr << "NodeRecorder::NodeRecorder - invalid dof  " << dof;
+      cerr << " will be ignored\n";
+    }
+  }
+
+  // verify the nodes exist 
+  count = 0;
+  int numNode = nodes.Size();
+  theNodes = new ID(1, numNode);
+  for (int i=0; i<numNode; i++) {
+    int nodeTag = nodes(i);
+    Node *theNode = theDomain->getNode(nodeTag);
+    if (theNode == 0) {
+      cerr << "NodeRecorder::NodeRecorder - invalid node  " << nodeTag;
+      cerr << " does not exist in domain - will be ignored\n";
+    } else {
+      (*theNodes)[count++] = nodeTag;
+    }
+  }
 
   // create char array to store table name
   int fileNameLength = strlen(dbTable) + 1;
@@ -163,10 +226,10 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   dbColumns[0] = newColumn;
   
   int counter = 1;
-  for (int i=0; i<nodes.Size(); i++) {
-    int nodeTag = nodes(i);
-    for (int j=0; j<dofs.Size(); j++) {
-      int dof = dofs(j);
+  for (int i=0; i<theNodes->Size(); i++) {
+    int nodeTag = (*theNodes)(i);
+    for (int j=0; j<theDofs->Size(); j++) {
+      int dof = (*theDofs)(j);
       sprintf(aColumn, "%s_%d_%d",dataToStore,nodeTag,dof);
       int lenColumn = strlen(aColumn+1);
       char *newColumn = new char[lenColumn];
@@ -183,26 +246,32 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 
 NodeRecorder::~NodeRecorder()
 {
-    if (!theFile)
-	theFile.close();
+  if (theDofs != 0)
+    delete theDofs;
+  
+  if (theNodes != 0)
+    delete theNodes;
 
-    if (fileName != 0)
-      delete [] fileName;
-
-    if (dbColumns != 0) {
-      for (int i=0; i<numDbColumns; i++)
-	delete [] dbColumns[i];
-      
-      delete [] dbColumns;
-    }
+  if (!theFile)
+    theFile.close();
+  
+  if (fileName != 0)
+    delete [] fileName;
+  
+  if (dbColumns != 0) {
+    for (int i=0; i<numDbColumns; i++)
+      delete [] dbColumns[i];
+    
+    delete [] dbColumns;
+  }
 }
 
 int 
 NodeRecorder::record(int commitTag, double timeStamp)
 {
     // now we go get the displacements from the nodes
-    int numDOF = theDofs.Size();
-    int numNodes = theNodes.Size();
+    int numDOF = theDofs->Size();
+    int numNodes = theNodes->Size();
     
     if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
       
@@ -211,12 +280,12 @@ NodeRecorder::record(int commitTag, double timeStamp)
 
       for (int i=0; i<numNodes; i++) {
 	int cnt = i*numDOF + 1;
-	Node *theNode = theDomain->getNode(theNodes(i));
+	Node *theNode = theDomain->getNode((*theNodes)(i));
 	if (theNode != 0) {
 	  if (dataFlag == 0) {
 	    const Vector &theDisp = theNode->getTrialDisp();
 	    for (int j=0; j<numDOF; j++) {
-		int dof = theDofs(j);
+		int dof = (*theDofs)(j);
 		if (theDisp.Size() > dof) {
 		    disp(cnt) = theDisp(dof);
 		}else 
@@ -227,7 +296,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	  } else if (dataFlag == 1) {
 	    const Vector &theDisp = theNode->getTrialVel();
 	    for (int j=0; j<numDOF; j++) {
-		int dof = theDofs(j);
+		int dof = (*theDofs)(j);
 		if (theDisp.Size() > dof) {
 		    disp(cnt) = theDisp(dof);
 		} else 
@@ -238,7 +307,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	  } else if (dataFlag == 2) {
 	    const Vector &theDisp = theNode->getTrialAccel();
 	    for (int j=0; j<numDOF; j++) {
-		int dof = theDofs(j);
+		int dof = (*theDofs)(j);
 		if (theDisp.Size() > dof) {
 		    disp(cnt) = theDisp(dof);
 		} else 
@@ -249,7 +318,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	  } else if (dataFlag == 3) {
 	    const Vector &theDisp = theNode->getIncrDisp();
 	    for (int j=0; j<numDOF; j++) {
-		int dof = theDofs(j);
+		int dof = (*theDofs)(j);
 		if (theDisp.Size() > dof) {
 		    disp(cnt) = theDisp(dof);
 		} else 
@@ -260,7 +329,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	  } else if (dataFlag == 4) {
 	    const Vector &theDisp = theNode->getIncrDeltaDisp();
 	    for (int j=0; j<numDOF; j++) {
-		int dof = theDofs(j);
+		int dof = (*theDofs)(j);
 		if (theDisp.Size() > dof) {
 		    disp(cnt) = theDisp(dof);
 		} else 
@@ -275,7 +344,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	    if (theEigenvectors.noCols() > column) {
 	      int noRows = theEigenvectors.noRows();
 	      for (int j=0; j<numDOF; j++) {
-		int dof = theDofs(j);
+		int dof = (*theDofs)(j);
 		if (noRows > dof) {
 		  disp(cnt) = theEigenvectors(dof,column);
 		} else 
@@ -284,7 +353,6 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	      }
 	    } else {
 	      for (int j=0; j<numDOF; j++) {
-		int dof = theDofs(j);
 		disp(cnt) = 0.0;
 	      }
 	    }
@@ -293,7 +361,6 @@ NodeRecorder::record(int commitTag, double timeStamp)
       }
 
       if (db == 0) {      
-
 	// write them to the file
 	if (flag == 1)
 	  theFile << timeStamp << " ";
@@ -307,7 +374,6 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	theFile.flush();
 
       } else {
-
 	// insert the data into the database
 	disp(0) = timeStamp;
 	db->insertData(fileName, dbColumns, commitTag, disp);
@@ -326,8 +392,8 @@ NodeRecorder::playback(int commitTag)
   // close o/p file to ensure all buffered data gets written to file
   theFile.close(); 
 
-  int numDOF = theDofs.Size();
-  int numNodes = theNodes.Size();  
+  int numDOF = theDofs->Size();
+  int numNodes = theNodes->Size();  
   
   // open a stream for reading from the file
   ifstream inputFile;
