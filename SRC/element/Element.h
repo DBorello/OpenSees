@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-10-30 22:34:23 $
+// $Revision: 1.12 $
+// $Date: 2005-02-17 22:29:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -101,10 +101,12 @@ class Element : public DomainComponent
     virtual int activateParameter(int parameterID);
     virtual const Vector & getResistingForceSensitivity(int gradNumber);
     virtual const Matrix & getInitialStiffSensitivity(int gradNumber);
-	virtual const Matrix & getDampSensitivity(int gradNumber);
+    virtual const Matrix & getDampSensitivity(int gradNumber);
     virtual const Matrix & getMassSensitivity(int gradNumber);
     virtual int   commitSensitivity(int gradNumber, int numGrads);
 // AddingSensitivity:END ///////////////////////////////////////////
+
+    virtual int addResistingForceToNodalReaction(bool inclInertia);
 
   protected:
     const Vector &getRayleighDampingForces(void);
@@ -113,7 +115,7 @@ class Element : public DomainComponent
     Matrix *Kc; // pointer to hold last committed matrix if needed for rayleigh damping
 
   private:
-    int index;
+    int index, nodeIndex;
 
     static Matrix ** theMatrices; 
     static Vector ** theVectors1; 
