@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2001-12-17 18:52:50 $
+// $Revision: 1.27 $
+// $Date: 2002-01-25 21:00:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -27,7 +27,6 @@
 // 
 // Written: fmk 
 // Created: 04/98
-// Revision: A
 //
 // Description: This file contains the functions that will be called by
 // the interpreter when the appropriate command name is specified,
@@ -139,17 +138,23 @@ extern "C" {
 #include <FullGenLinLapackSolver.h>
 #include <ProfileSPDLinSOE.h>
 #include <ProfileSPDLinDirectSolver.h>
+
 // #include <ProfileSPDLinDirectBlockSolver.h>
 // #include <ProfileSPDLinDirectThreadSolver.h>
 // #include <ProfileSPDLinDirectSkypackSolver.h>
 // #include <BandSPDLinThreadSolver.h>
+
 #include <SparseGenColLinSOE.h>
+#ifdef _THREADS
+#include <ThreadedSuperLU.h>
+#else
 #include <SuperLU.h>
+#endif
+
 #include <SymSparseLinSOE.h>
 #include <SymSparseLinSolver.h>
 
-#include <SparseGenColLinSOE.h>
-#include <SuperLU.h>
+
 #include <UmfpackGenLinSOE.h>
 #include <UmfpackGenLinSolver.h>
 
@@ -1229,16 +1234,52 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
   // SPARSE GENERAL SOE * SOLVER
-  else if (strcmp(argv[1],"SparseGeneral") == 0) {
-    // now must determine the type of solver to create from rest of args
-    SparseGenColLinSolver *theSolver;
-    if (argc == 3) {
-	if (strcmp(argv[2],"p") == 0 || strcmp(argv[2],"piv"))
-	    theSolver = new SuperLU(0,1.0); 	
-        else
-	    theSolver = new SuperLU(); 		    
-    } else 
-	theSolver = new SuperLU(); 		        
+  else if ((strcmp(argv[1],"SparseGeneral") == 0) ||
+	   (strcmp(argv[1],"SparseGEN") == 0)) {
+    
+    SparseGenColLinSolver *theSolver;    
+
+#ifdef _THREADS
+
+    int count = 2;
+    int np = 2;
+    int permSpec = 0;
+    int panelSize = 6;
+    int relax = 6;
+    double thresh = 0.0;
+
+
+    while (count < argc) {
+      if (strcmp(argv[count],"p") == 0 || strcmp(argv[count],"piv") ||
+	  strcmp(argv[count],"-piv")) {
+	thresh = 1.0;
+      }
+      if (strcmp(argv[count],"-np") == 0 || strcmp(argv[count],"np")) {
+	count++;
+	if (count < argc)
+	  if (Tcl_GetInt(interp, argv[count], &np) != TCL_OK)
+	    return TCL_ERROR;		     
+      }
+      count++;
+    }
+
+    theSolver = new ThreadedSuperLU(np, permSpec, panelSize, relax, thresh); 	
+
+#else
+
+    int count = 2;
+    double thresh = 0.0;
+    while (count < argc) {
+      if (strcmp(argv[count],"p") == 0 || strcmp(argv[count],"piv") ||
+	  strcmp(argv[count],"-piv")) {
+	thresh = 1.0;
+      }
+      count++;
+    }
+
+    theSolver = new SuperLU(0, thresh); 	
+
+#endif
 
     theSOE = new SparseGenColLinSOE(*theSolver);      
   }	
