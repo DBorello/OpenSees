@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2000-12-19 03:35:02 $
+// $Revision: 1.2 $
+// $Date: 2001-01-23 08:43:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -66,8 +66,8 @@ public:
      int setTrialStrainIncr (const Tensor &v) {return 0;}
      int setTrialStrainIncr (const Tensor &v, const Tensor &r) {return 0;}
      const Tensor &getTangentTensor (void) {Tensor * t=new Tensor; return *t;}
-     const Tensor &getStressTensor (void) {Tensor * t=new Tensor; return *t;}
-		 const Tensor &getStrainTensor(void) {Tensor * t=new Tensor; return *t;}
+//jeremic@ucdavis.edu 22jan2001	      const Tensor &getStressTensor (void) {Tensor * t=new Tensor; return *t;}
+//jeremic@ucdavis.edu 22jan2001	 		 const Tensor &getStrainTensor(void) {Tensor * t=new Tensor; return *t;}
 
      // Accepts the current trial strain values as being on the solution path, and updates 
      // all model parameters related to stress/strain states. Return 0 on success.
