@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:00:53 $
+// $Revision: 1.8 $
+// $Date: 2003-02-25 22:06:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -66,7 +66,7 @@ PDeltaCrdTransf2d::PDeltaCrdTransf2d(int tag,
 		opserr << "PDeltaCrdTransf2d::PDeltaCrdTransf2d:  Invalid rigid joint offset vector for node I\n";
 		opserr << "Size must be 2\n";      
 	}
-	else {
+	else if (rigJntOffset1.Norm() > 0.0) {
 		nodeIOffset = new double[2];
 		nodeIOffset[0] = rigJntOffset1(0);
 		nodeIOffset[1] = rigJntOffset1(1);
@@ -77,7 +77,7 @@ PDeltaCrdTransf2d::PDeltaCrdTransf2d(int tag,
 		opserr << "PDeltaCrdTransf2d::PDeltaCrdTransf2d:  Invalid rigid joint offset vector for node J\n";
 		opserr << "Size must be 2\n";      
 	}
-	else {
+	else if (rigJntOffset2.Norm() > 0.0) {
 		nodeJOffset = new double[2];
 		nodeJOffset[0] = rigJntOffset2(0);
 		nodeJOffset[1] = rigJntOffset2(1);
@@ -163,16 +163,19 @@ PDeltaCrdTransf2d::update(void)
 	double ul1;
 	double ul4;
 
-	if (nodeIOffset == 0) {
-		ul1 = -sinTheta*nodeIDisp(0) + cosTheta*nodeIDisp(1);
-		ul4 = -sinTheta*nodeJDisp(0) + cosTheta*nodeJDisp(1);
-	}
-	else {
-		double t12 = sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
-		double t45 = sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+	ul1 = -sinTheta*nodeIDisp(0) + cosTheta*nodeIDisp(1);
+	ul4 = -sinTheta*nodeJDisp(0) + cosTheta*nodeJDisp(1);
 
-		ul1 = -sinTheta*nodeIDisp(0) + cosTheta*nodeIDisp(1) + t12*nodeIDisp(2);
-		ul4 = -sinTheta*nodeJDisp(0) + cosTheta*nodeJDisp(1) + t45*nodeJDisp(2);
+	if (nodeIOffset != 0) {
+	  double t12 = sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+
+	  ul1 += t12*nodeIDisp(2);
+	}
+
+	if (nodeJOffset != 0) {
+	  double t45 = sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+	  
+	  ul4 += t45*nodeJDisp(2);
 	}
 
 	ul14 = ul1-ul4;
@@ -190,13 +193,17 @@ PDeltaCrdTransf2d::computeElemtLengthAndOrient()
    const Vector &ndICoords = nodeIPtr->getCrds();
    const Vector &ndJCoords = nodeJPtr->getCrds();
 
-   if (nodeIOffset == 0) {
-	   dx(0) = ndJCoords(0) - ndICoords(0);
-	   dx(1) = ndJCoords(1) - ndICoords(1);
+   dx(0) = ndJCoords(0) - ndICoords(0);
+   dx(1) = ndJCoords(1) - ndICoords(1);
+
+   if (nodeJOffset != 0) {
+     dx(0) += nodeJOffset[0];
+     dx(1) += nodeJOffset[1];
    }
-   else {
-	   dx(0) = ndJCoords(0) + nodeJOffset[0] - ndICoords(0) - nodeIOffset[0];
-	   dx(1) = ndJCoords(1) + nodeJOffset[1] - ndICoords(1) - nodeIOffset[1];
+
+   if (nodeIOffset != 0) {
+     dx(0) -= nodeIOffset[0];
+     dx(1) -= nodeIOffset[1];
    }
    
    // calculate the element length
@@ -253,33 +260,29 @@ PDeltaCrdTransf2d::getBasicTrialDisp (void)
 	double sl = sinTheta*oneOverL;
 	double cl = cosTheta*oneOverL;
 
-	if (nodeIOffset == 0) {
-		ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] +
-			cosTheta*ug[3] + sinTheta*ug[4];
+	ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] +
+	  cosTheta*ug[3] + sinTheta*ug[4];
 
-		ub(1) = -sl*ug[0] + cl*ug[1] + ug[2] +
-			sl*ug[3] - cl*ug[4];
+	ub(1) = -sl*ug[0] + cl*ug[1] + ug[2] +
+	  sl*ug[3] - cl*ug[4];
 
-		//ub(2) = -sl*ug[0] + cl*ug[1] +
-		//	sl*ug[3] - cl*ug[4] + ug[5];
-		ub(2) = ub(1) + ug[5] - ug[2];
+	if (nodeIOffset != 0) {
+	  double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+	  double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+
+	  ub(0) -= t02*ug[2];
+	  ub(1) += oneOverL*t12*ug[2];
 	}
-	else {
-		double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
-		double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
-		double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
-		double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
 
-		ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] - t02*ug[2] +
-			cosTheta*ug[3] + sinTheta*ug[4] + t35*ug[5];
+	if (nodeJOffset != 0) {
+	  double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+	  double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
 
-		ub(1) = -sl*ug[0] + cl*ug[1] + (1.0+oneOverL*t12)*ug[2] +
-			sl*ug[3] - cl*ug[4] - oneOverL*t45*ug[5];
-
-		//ub(2) = -sl*ug[0] + cl*ug[1] + oneOverL*t12*ug[2] +
-		//	sl*ug[3] - cl*ug[4] + (1.0-oneOverL*t45)*ug[5];
-		ub(2) = ub(1) + ug[5] - ug[2];
+	  ub(0) += t35*ug[5];
+	  ub(1) -= oneOverL*t45*ug[5];
 	}
+
+	ub(2) = ub(1) + ug[5] - ug[2];
 
 	return ub;
 }
@@ -304,33 +307,29 @@ PDeltaCrdTransf2d::getBasicIncrDisp (void)
 	double sl = sinTheta*oneOverL;
 	double cl = cosTheta*oneOverL;
 
-	if (nodeIOffset == 0) {
-		dub(0) = -cosTheta*dug[0] - sinTheta*dug[1] +
-			cosTheta*dug[3] + sinTheta*dug[4];
+	dub(0) = -cosTheta*dug[0] - sinTheta*dug[1] +
+	  cosTheta*dug[3] + sinTheta*dug[4];
 
-		dub(1) = -sl*dug[0] + cl*dug[1] + dug[2] +
-			sl*dug[3] - cl*dug[4];
+	dub(1) = -sl*dug[0] + cl*dug[1] + dug[2] +
+	  sl*dug[3] - cl*dug[4];
 
-		//dub(2) = -sl*dug[0] + cl*dug[1] +
-		//	sl*dug[3] - cl*dug[4] + dug[5];
-		dub(2) = dub(1) + dug[5] - dug[2];
+	if (nodeIOffset != 0) {
+	  double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+	  double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+
+	  dub(0) -= t02*dug[2];
+	  dub(1) += oneOverL*t12*dug[2];
 	}
-	else {
-		double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
-		double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
-		double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
-		double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
 
-		dub(0) = -cosTheta*dug[0] - sinTheta*dug[1] - t02*dug[2] +
-			cosTheta*dug[3] + sinTheta*dug[4] + t35*dug[5];
+	if (nodeJOffset != 0) {
+	  double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+	  double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
 
-		dub(1) = -sl*dug[0] + cl*dug[1] + (1.0+oneOverL*t12)*dug[2] +
-			sl*dug[3] - cl*dug[4] - oneOverL*t45*dug[5];
-
-		//dub(2) = -sl*dug[0] + cl*dug[1] + oneOverL*t12*dug[2] +
-		//	sl*dug[3] - cl*dug[4] + (1.0-oneOverL*t45)*dug[5];
-		dub(2) = dub(1) + dug[5] - dug[2];
+	  dub(0) += t35*dug[5];
+	  dub(1) -= oneOverL*t45*dug[5];
 	}
+
+	dub(2) = dub(1) + dug[5] - dug[2];
 
 	return dub;
 }
@@ -355,33 +354,29 @@ PDeltaCrdTransf2d::getBasicIncrDeltaDisp(void)
 	double sl = sinTheta*oneOverL;
 	double cl = cosTheta*oneOverL;
 
-	if (nodeIOffset == 0) {
-		Dub(0) = -cosTheta*Dug[0] - sinTheta*Dug[1] +
-			cosTheta*Dug[3] + sinTheta*Dug[4];
+	Dub(0) = -cosTheta*Dug[0] - sinTheta*Dug[1] +
+	  cosTheta*Dug[3] + sinTheta*Dug[4];
 
-		Dub(1) = -sl*Dug[0] + cl*Dug[1] + Dug[2] +
-			sl*Dug[3] - cl*Dug[4];
+	Dub(1) = -sl*Dug[0] + cl*Dug[1] + Dug[2] +
+	  sl*Dug[3] - cl*Dug[4];
 
-		//Dub(2) = -sl*Dug[0] + cl*Dug[1] +
-		//	sl*Dug[3] - cl*Dug[4] + Dug[5];
-		Dub(2) = Dub(1) + Dug[5] - Dug[2];
+	if (nodeIOffset != 0) {
+	  double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+	  double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+
+	  Dub(0) -= t02*Dug[2];
+	  Dub(1) += oneOverL*t12*Dug[2];
 	}
-	else {
-		double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
-		double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
-		double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
-		double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
 
-		Dub(0) = -cosTheta*Dug[0] - sinTheta*Dug[1] - t02*Dug[2] +
-			cosTheta*Dug[3] + sinTheta*Dug[4] + t35*Dug[5];
+	if (nodeJOffset != 0) {
+	  double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+	  double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
 
-		Dub(1) = -sl*Dug[0] + cl*Dug[1] + (1.0+oneOverL*t12)*Dug[2] +
-			sl*Dug[3] - cl*Dug[4] - oneOverL*t45*Dug[5];
-
-		//Dub(2) = -sl*Dug[0] + cl*Dug[1] + oneOverL*t12*Dug[2] +
-		//	sl*Dug[3] - cl*Dug[4] + (1.0-oneOverL*t45)*Dug[5];
-		Dub(2) = Dub(1) + Dug[5] - Dug[2];
+	  Dub(0) += t35*Dug[5];
+	  Dub(1) -= oneOverL*t45*Dug[5];
 	}
+
+	Dub(2) = Dub(1) + Dug[5] - Dug[2];
 
 	return Dub;
 }
@@ -425,19 +420,22 @@ PDeltaCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &p0)
    
 	pg(3) = cosTheta*pl[3] - sinTheta*pl[4];
 	pg(4) = sinTheta*pl[3] + cosTheta*pl[4];
-	
-	if (nodeIOffset == 0) {
-		pg(2) = pl[2];
-		pg(5) = pl[5];
-	}
-	else {
-		double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
-		double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
-		double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
-		double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
 
-		pg(2) = t02*pl[0] + t12*pl[1] + pl[2];
-		pg(5) = t35*pl[3] + t45*pl[4] + pl[5];
+	pg(2) = pl[2];
+	pg(5) = pl[5];	
+
+	if (nodeIOffset != 0) {
+	  double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+	  double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+
+	  pg(2) += t02*pl[0] + t12*pl[1];
+	}
+
+	if (nodeJOffset != 0) {
+	  double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+	  double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+
+	  pg(5) += t35*pl[3] + t45*pl[4];
 	}
 
 	return pg;
@@ -513,11 +511,14 @@ PDeltaCrdTransf2d::getGlobalStiffMatrix (const Matrix &kb, const Vector &pb)
 	double t35 = 0.0;
 	double t45 = 0.0;
 
-	if (nodeIOffset) {
-		t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
-		t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
-		t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
-		t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+	if (nodeIOffset != 0) {
+	  t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+	  t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+	}
+
+	if (nodeJOffset != 0) {
+	  t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+	  t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
 	}
 
 	// Now transform from local to global ... compute kl*T
@@ -783,14 +784,20 @@ PDeltaCrdTransf2d::getCopy(void)
 
   PDeltaCrdTransf2d *theCopy;
 
-  if (nodeIOffset) {
-	  Vector offsetI(nodeIOffset, 2);
-	  Vector offsetJ(nodeJOffset, 2);
+  Vector offsetI(2);
+  Vector offsetJ(2);
 
-	  theCopy = new PDeltaCrdTransf2d(this->getTag(), offsetI, offsetJ);
+  if (nodeIOffset != 0) {
+    offsetI(0) = nodeIOffset[0];
+    offsetI(1) = nodeIOffset[1];
   }
-  else
-	  theCopy = new PDeltaCrdTransf2d(this->getTag());
+
+  if (nodeJOffset != 0) {
+    offsetJ(0) = nodeJOffset[0];
+    offsetJ(1) = nodeJOffset[1];
+  }
+  
+  theCopy = new PDeltaCrdTransf2d(this->getTag(), offsetI, offsetJ);
 
   theCopy->nodeIPtr = nodeIPtr;
   theCopy->nodeJPtr = nodeJPtr;
@@ -915,24 +922,28 @@ PDeltaCrdTransf2d::getPointGlobalDisplFromBasic (double xi, const Vector &uxb)
    // transform global end displacements to local coordinates
    static Vector ul(6);      // total displacements
 
-	ul(0) =  cosTheta*ug(0) + sinTheta*ug(1);
-	ul(1) = -sinTheta*ug(0) + cosTheta*ug(1);
-	ul(2) =  ug(2);
-	ul(3) =  cosTheta*ug(3) + sinTheta*ug(4);
-	ul(4) = -sinTheta*ug(3) + cosTheta*ug(4);
-	ul(5) =  ug(5);
+   ul(0) =  cosTheta*ug(0) + sinTheta*ug(1);
+   ul(1) = -sinTheta*ug(0) + cosTheta*ug(1);
+   ul(2) =  ug(2);
+   ul(3) =  cosTheta*ug(3) + sinTheta*ug(4);
+   ul(4) = -sinTheta*ug(3) + cosTheta*ug(4);
+   ul(5) =  ug(5);
+   
+   if (nodeIOffset != 0) {
+     double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+     double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+     
+     ul(0) += t02*ug(2);
+     ul(1) += t12*ug(2);
+   }
 
-   	if (nodeIOffset != 0) {
-		double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
-		double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
-		double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
-		double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+   if (nodeJOffset != 0) {
+     double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+     double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
 
-		ul(0) += t02*ug(2);
-		ul(1) += t12*ug(2);
-		ul(3) += t35*ug(5);
-		ul(4) += t45*ug(5);
-	}
+     ul(3) += t35*ug(5);
+     ul(4) += t45*ug(5);
+   }
    
    // compute displacements at point xi, in local coordinates
    static Vector uxl(2),  uxg(2);
@@ -948,15 +959,14 @@ PDeltaCrdTransf2d::getPointGlobalDisplFromBasic (double xi, const Vector &uxb)
    return uxg;  
 }
 
-
-
-
 void
 PDeltaCrdTransf2d::Print(OPS_Stream &s, int flag)
 {
    s << "\nCrdTransf: " << this->getTag() << " Type: PDeltaCrdTransf2d";
-   s << "\tnodeI Offset: " << nodeIOffset;
-   s << "\tnodeJ Offset: " << nodeJOffset;
+   if (nodeIOffset != 0)
+     s << "\tnodeI Offset: " << nodeIOffset[0] << ' ' << nodeIOffset[1] << endln;
+   if (nodeJOffset != 0)
+     s << "\tnodeJ Offset: " << nodeJOffset[0] << ' ' << nodeJOffset[1] << endln;
 }
 
 

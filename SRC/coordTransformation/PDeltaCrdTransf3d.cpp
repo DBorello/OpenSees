@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:00:53 $
+// $Revision: 1.9 $
+// $Date: 2003-02-25 22:06:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.cpp,v $
                                                                         
                                                                         
@@ -234,15 +234,20 @@ PDeltaCrdTransf3d::computeElemtLengthAndOrient()
    const Vector &ndICoords = nodeIPtr->getCrds();
    const Vector &ndJCoords = nodeJPtr->getCrds();
 
-   if (nodeIOffset == 0) {
-	   dx(0) = ndJCoords(0) - ndICoords(0);
-	   dx(1) = ndJCoords(1) - ndICoords(1);
-	   dx(2) = ndJCoords(2) - ndICoords(2);
+   dx(0) = ndJCoords(0) - ndICoords(0);
+   dx(1) = ndJCoords(1) - ndICoords(1);
+   dx(2) = ndJCoords(2) - ndICoords(2);
+   
+   if (nodeJOffset != 0) {
+     dx(0) += nodeJOffset[0];
+     dx(1) += nodeJOffset[1];
+     dx(2) += nodeJOffset[2];
    }
-   else {
-	   dx(0) = ndJCoords(0) + nodeJOffset[0] - ndICoords(0) - nodeIOffset[0];
-	   dx(1) = ndJCoords(1) + nodeJOffset[1] - ndICoords(1) - nodeIOffset[1];
-	   dx(2) = ndJCoords(2) + nodeJOffset[2] - ndICoords(2) - nodeIOffset[2];
+
+   if (nodeIOffset != 0) {
+     dx(0) -= nodeIOffset[0];
+     dx(1) -= nodeIOffset[1];
+     dx(2) -= nodeIOffset[2];
    }
    
    // calculate the element length

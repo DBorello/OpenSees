@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-14 23:00:52 $
+// $Revision: 1.10 $
+// $Date: 2003-02-25 22:06:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.cpp,v $
                                                                         
                                                                         
@@ -189,17 +189,22 @@ LinearCrdTransf3d::computeElemtLengthAndOrient()
    const Vector &ndICoords = nodeIPtr->getCrds();
    const Vector &ndJCoords = nodeJPtr->getCrds();
 
-   if (nodeIOffset == 0) {
-	   dx(0) = ndJCoords(0) - ndICoords(0);
-	   dx(1) = ndJCoords(1) - ndICoords(1);
-	   dx(2) = ndJCoords(2) - ndICoords(2);
+   dx(0) = ndJCoords(0) - ndICoords(0);
+   dx(1) = ndJCoords(1) - ndICoords(1);
+   dx(2) = ndJCoords(2) - ndICoords(2);
+
+   if (nodeJOffset != 0) {
+     dx(0) += nodeJOffset[0];
+     dx(1) += nodeJOffset[1];
+     dx(2) += nodeJOffset[2];
    }
-   else {
-	   dx(0) = ndJCoords(0) + nodeJOffset[0] - ndICoords(0) - nodeIOffset[0];
-	   dx(1) = ndJCoords(1) + nodeJOffset[1] - ndICoords(1) - nodeIOffset[1];
-	   dx(2) = ndJCoords(2) + nodeJOffset[2] - ndICoords(2) - nodeIOffset[2];
+
+   if (nodeIOffset != 0) {
+     dx(0) -= nodeIOffset[0];
+     dx(1) -= nodeIOffset[1];
+     dx(2) -= nodeIOffset[2];
    }
-   
+
    // calculate the element length
    L = dx.Norm();
 
@@ -213,7 +218,7 @@ LinearCrdTransf3d::computeElemtLengthAndOrient()
    R[0][0] = dx(0)/L;
    R[0][1] = dx(1)/L;
    R[0][2] = dx(2)/L;
-   
+
    return 0;
 }
 
@@ -879,15 +884,15 @@ LinearCrdTransf3d::getCopy(void)
   Vector offsetJ(3);
 
   if (nodeIOffset) {
-	  offsetI(0) = nodeIOffset[0];
-	  offsetI(1) = nodeIOffset[1];
-	  offsetI(2) = nodeIOffset[2];
+    offsetI(0) = nodeIOffset[0];
+    offsetI(1) = nodeIOffset[1];
+    offsetI(2) = nodeIOffset[2];
   }
 
   if (nodeJOffset) {
-	  offsetJ(0) = nodeJOffset[0];
-	  offsetJ(1) = nodeJOffset[1];
-	  offsetJ(2) = nodeJOffset[2];
+    offsetJ(0) = nodeJOffset[0];
+    offsetJ(1) = nodeJOffset[1];
+    offsetJ(2) = nodeJOffset[2];
   }
   
   theCopy = new LinearCrdTransf3d(this->getTag(), xz, offsetI, offsetJ);
@@ -896,8 +901,8 @@ LinearCrdTransf3d::getCopy(void)
   theCopy->nodeJPtr = nodeJPtr;
   theCopy->L = L;
   for (int i = 0; i < 3; i++)
-	  for (int j = 0; j < 3; j++)
-		  theCopy->R[i][j] = R[i][j];
+    for (int j = 0; j < 3; j++)
+      theCopy->R[i][j] = R[i][j];
   
   return theCopy;
 }
