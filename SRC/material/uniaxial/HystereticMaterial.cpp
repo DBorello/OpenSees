@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 09:53:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -496,27 +496,31 @@ HystereticMaterial::setEnvelope(void)
 double
 HystereticMaterial::posEnvlpStress(double strain)
 {
-	if (strain <= 0.0 || strain > posEnvlpRotlim(strain))
+	if (strain <= 0.0)
 		return 0.0;
 	else if (strain <= rot1p)
 		return E1p*strain;
 	else if (strain <= rot2p)
 		return mom1p + E2p*(strain-rot1p);
-	else
+	else if (strain <= posEnvlpRotlim(strain))
 		return mom2p + E3p*(strain-rot2p);
+	else
+		return mom3p;
 }
 
 double
 HystereticMaterial::negEnvlpStress(double strain)
 {
-	if (strain >= 0.0 || strain < negEnvlpRotlim(strain))
+	if (strain >= 0.0)
 		return 0.0;
-	if (strain >= rot1n)
+	else if (strain >= rot1n)
 		return E1n*strain;
-	if (strain >= rot2n)
+	else if (strain >= rot2n)
 		return mom1n + E2n*(strain-rot1n);
-
-	return mom2n + E3n*(strain-rot2n);
+	else if (strain >= negEnvlpRotlim(strain))
+		return mom2n + E3n*(strain-rot2n);
+	else
+		return mom3n;
 }
 
 double
@@ -553,7 +557,7 @@ HystereticMaterial::posEnvlpRotlim(double strain)
 	if (strain > rot1p && strain <= rot2p && E2p < 0.0)
 		return rot1p - mom1p/E2p;
 	if (strain > rot2p && E3p < 0.0)
-		return rot2p - mom2p/E3p;
+		return rot2p - (mom2p-mom3p)/E3p;
 	
 	return POS_INF_STRAIN;
 }
@@ -566,7 +570,7 @@ HystereticMaterial::negEnvlpRotlim(double strain)
 	if (strain < rot1n && strain >= rot2n && E2n < 0.0)
 		return rot1n - mom1n/E2n;
 	if (strain < rot2n && E3n < 0.0)
-		return rot2n - mom2n/E3n;
+		return rot2n - (mom2n-mom3n)/E3n;
 	
 	return NEG_INF_STRAIN;
 }
