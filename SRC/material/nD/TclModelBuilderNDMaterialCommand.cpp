@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2002-05-16 00:29:58 $
+// $Revision: 1.20 $
+// $Date: 2002-05-17 01:08:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -378,9 +378,9 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	double param[totParam];
  	param[15] = 20;
  	param[16] = 0.6;
-	param[17] = 0.8;
-	param[18] = 0.2;
-	param[19] = 0.2;
+	param[17] = 0.9;
+	param[18] = 0.02;
+	param[19] = 0.7;
 	param[20] = 101.;
 	param[21] = .5;
 
@@ -391,8 +391,8 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 			"dilationParam1", "dilationParam2", 
 			"liquefactionParam1", "liquefactionParam2", 
 			"liquefactionParam4", "numberOfYieldSurf (=20)", 
-			"e (=0.6)", "volLimit1 (=0.8)", "volLimit2 (=0.2)", 
-			"volLimit3 (=0.2)", "Atmospheric pressure (=101)", "cohesi (=.5)"};
+			"e (=0.6)", "volLimit1 (=0.9)", "volLimit2 (=0.02)", 
+			"volLimit3 (=0.7)", "Atmospheric pressure (=101)", "cohesi (=.5)"};
 	if (argc < (3+numParam)) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
