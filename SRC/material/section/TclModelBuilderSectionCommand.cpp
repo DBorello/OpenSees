@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-01-11 06:48:39 $
+// $Revision: 1.4 $
+// $Date: 2001-05-03 06:34:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -42,8 +42,11 @@
 #include <GenericSectionNd.h>
 #include <SectionAggregator.h>
 #include <FiberSection.h>
+#include <FiberSection2d.h>
+#include <FiberSection3d.h>
 #include <FiberSectionRepr.h>
-
+#include <ElasticPlateSection.h>
+#include <ElasticMembranePlateSection.h>
 #include <QuadPatch.h>
 #include <CircPatch.h>
 #include <QuadCell.h>
@@ -55,6 +58,7 @@
 #include <UniaxialFiber3d.h>
 
 #include <string.h>
+#include <fstream.h>
 
 static void printCommand(int argc, char **argv)
 {
@@ -67,6 +71,11 @@ static void printCommand(int argc, char **argv)
 int
 TclModelBuilder_addFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
 				 char **argv, TclModelBuilder *theBuilder);
+
+int
+TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
+				   char **argv, TclModelBuilder *theBuilder);
+
 
 int
 TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int argc,
@@ -212,7 +221,6 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    return TCL_ERROR;		
 	}
 	
-	int iCode;
 	ID code(argc-4);
 	
 	int i,j;
@@ -358,6 +366,84 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
     else if (strcmp(argv[1],"Fiber") == 0 || strcmp(argv[1],"fiberSec") == 0)
 	return TclModelBuilder_addFiberSection (clientData, interp, argc, argv,
 						theTclBuilder);
+
+    else if (strcmp(argv[1],"UCFiber") == 0)
+	return TclModelBuilder_addUCFiberSection (clientData, interp, argc, argv,
+						  theTclBuilder);
+
+    else if (strcmp(argv[1],"ElasticPlateSection") == 0) {
+	if (argc < 5) {
+	    cerr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: section ElasticPlateSection tag? E? nu? h? " << endl;
+	    return TCL_ERROR;
+	}
+	
+	int tag;
+	double E, nu, h;
+	
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid section ElasticPlateSection tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	if (Tcl_GetDouble (interp, argv[3], &E) != TCL_OK) {
+	    cerr << "WARNING invalid E" << endl;
+	    cerr << "ElasticPlateSection section: " << tag << endl;	    
+	    return TCL_ERROR;
+	}	
+
+	if (Tcl_GetDouble (interp, argv[4], &nu) != TCL_OK) {
+	    cerr << "WARNING invalid nu" << endl;
+	    cerr << "ElasticPlateSection section: " << tag << endl;	    
+	    return TCL_ERROR;
+	}	
+	
+	if (Tcl_GetDouble (interp, argv[5], &h) != TCL_OK) {
+	    cerr << "WARNING invalid h" << endl;
+	    cerr << "ElasticPlateSection section: " << tag << endl;	    	    
+	    return TCL_ERROR;
+	}	
+
+	theSection = new ElasticPlateSection (tag, E, nu, h);
+    }	
+
+    else if (strcmp(argv[1],"ElasticMembranePlateSection") == 0) {
+	if (argc < 5) {
+	    cerr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: section ElasticMembranePlateSection tag? E? nu? h? " << endl;
+	    return TCL_ERROR;
+	}
+	
+	int tag;
+	double E, nu, h;
+	
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid section ElasticMembranePlateSection tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	if (Tcl_GetDouble (interp, argv[3], &E) != TCL_OK) {
+	    cerr << "WARNING invalid E" << endl;
+	    cerr << "ElasticMembranePlateSection section: " << tag << endl;	    
+	    return TCL_ERROR;
+	}	
+
+	if (Tcl_GetDouble (interp, argv[4], &nu) != TCL_OK) {
+	    cerr << "WARNING invalid nu" << endl;
+	    cerr << "ElasticMembranePlateSection section: " << tag << endl;	    
+	    return TCL_ERROR;
+	}	
+	
+	if (Tcl_GetDouble (interp, argv[5], &h) != TCL_OK) {
+	    cerr << "WARNING invalid h" << endl;
+	    cerr << "ElasticMembranePlateSection section: " << tag << endl;	    	    
+	    return TCL_ERROR;
+	}	
+
+	theSection = new ElasticMembranePlateSection (tag, E, nu, h);
+    }	
     
     else {
 	cerr << "WARNING unknown type of section: " << argv[2];
@@ -889,6 +975,8 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
 	interp->result = "WARNING cannot add patch to section";
 	return TCL_ERROR;
     }  
+
+    return TCL_OK;
 }
 
 
@@ -1314,7 +1402,8 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
 	    k++;
 	 }
 	
-	 SectionForceDeformation *section = new FiberSection(secTag, numFibers, fiber);
+	 SectionForceDeformation *section = new FiberSection2d(secTag, numFibers, fiber);
+	 //SectionForceDeformation *section = new FiberSection(secTag, numFibers, fiber);
    
          if (section == 0)
          {
@@ -1358,7 +1447,8 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
             //cerr << *fiber[k];
 	 }
 	
-         SectionForceDeformation *section = new FiberSection(secTag, numFibers, fiber);
+	 //SectionForceDeformation *section = new FiberSection(secTag, numFibers, fiber);
+	 SectionForceDeformation *section = new FiberSection3d(secTag, numFibers, fiber);
    
          if (section == 0)
          {
@@ -1388,4 +1478,108 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
    }    
 
    return TCL_OK;
+}
+
+
+
+
+int
+TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
+				 char **argv, TclModelBuilder *theTclModelBuilder)
+{
+    int secTag;
+    
+    if (argc < 4) 
+	return TCL_ERROR;
+    
+    if (Tcl_GetInt(interp, argv[2], &secTag) != TCL_OK) {
+      interp->result = "could not read section tag\n";
+      return TCL_ERROR;
+    }
+
+    currentSectionTag = secTag;
+
+    // first create an empty FiberSection
+    int NDM = theTclModelBuilder->getNDM();   // dimension of the structure (1d, 2d, or 3d)
+
+    SectionForceDeformation *section = 0;
+    FiberSection2d *section2d =0;
+    FiberSection3d *section3d =0;
+
+    if (NDM == 2) {
+      section2d = new FiberSection2d(secTag, 0, 0);
+      section = section2d;
+      //SectionForceDeformation *section = new FiberSection(secTag, 0, 0);
+    } else if (NDM == 3) {
+      section3d = new FiberSection3d(secTag, 0, 0);
+      section = section3d;
+    } 
+
+    if (section == 0) {
+      return TCL_ERROR;
+    }
+    
+    //
+    // now parse the ouput file containing the fiber data, 
+    // create fibers and add them to the section
+    //
+
+    // open the file
+    char *fileName = argv[3];
+    ifstream theFile;
+    theFile.open(fileName, ios::in);
+    if (!theFile) {
+      return TCL_ERROR;
+    } else {
+      int foundStart = 0;
+      static char garbage[100];
+
+      // parse through until find start of fiber data
+      while (foundStart == 0 && theFile >> garbage) 
+	if (strcmp(garbage, "#FIBERS") == 0) 
+	  foundStart = 1;
+
+      if (foundStart == 0) {
+	theFile.close();
+	return TCL_ERROR;
+      }
+
+      // parse the fiber data until eof, creating a fiber and adding to section as go
+      double ycoord, zcoord, area, prestrain;
+      int matTag;
+      int fiberCount = 0;
+      
+      while (theFile >> ycoord >> zcoord >> area >> prestrain >> garbage >> matTag) {
+
+	UniaxialMaterial *theMaterial = theTclModelBuilder->getUniaxialMaterial(matTag);
+	if (theMaterial == 0) {
+	  return TCL_ERROR;
+	}
+	
+	Fiber *theFiber = 0;
+	if (NDM == 2) {
+	  theFiber = new UniaxialFiber2d(fiberCount++, *theMaterial, area, zcoord);
+	  if (theFiber != 0)
+	    section2d->addFiber(*theFiber);
+	} else {
+	  static Vector pos(2);
+	  pos(0) = ycoord; pos(1) = zcoord;
+	  theFiber = new UniaxialFiber3d(fiberCount++, *theMaterial, area, pos);
+	  if (theFiber != 0)
+	    section3d->addFiber(*theFiber);
+	}   
+      }
+
+      // close the file
+      theFile.close();
+    }
+
+    // finally add the section to our modelbuilder
+    if (theTclModelBuilder->addSection (*section) < 0) {
+      interp->result = "WARNING - cannot add section";
+      return TCL_ERROR;
+    }
+
+
+    return TCL_OK;
 }
