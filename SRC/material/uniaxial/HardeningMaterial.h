@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2001-12-17 19:23:39 $
+// $Revision: 1.5 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.h,v $
 
 #ifndef HardeningMaterial_h
@@ -47,6 +47,7 @@ class HardeningMaterial : public UniaxialMaterial
     double getStrain(void);          
     double getStress(void);
     double getTangent(void);
+    double getInitialTangent(void) {return E;};
 
     int commitState(void);
     int revertToLastCommit(void);    
@@ -83,7 +84,7 @@ class HardeningMaterial : public UniaxialMaterial
     // Trial state variables
     double Tstrain;		// Trial strain
     double Tstress;		// Trial stress
-    double Ttangent;	// Trial tangent
+    double Ttangent;	        // Trial tangent
 };
 
 

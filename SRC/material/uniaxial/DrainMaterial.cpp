@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-18 21:42:35 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/DrainMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -50,44 +50,48 @@ DrainMaterial::DrainMaterial(int tag, int classTag, int nhv, int ndata, double b
 numData(ndata), numHstv(nhv), epsilonP(0.0), sigmaP(0.0), tangentP(0.0), beto(b),
 epsilon(0.0), epsilonDot(0.0), sigma(0.0), tangent(0.0)
 {
-	if (numHstv < 0)
-		numHstv = 0;
+  if (numHstv < 0)
+    numHstv = 0;
 
-	if (numHstv > 0) {
-		// Allocate history array
-		hstv = new double[2*numHstv];
-		if (hstv == 0)
-			g3ErrorHandler->fatal("%s -- failed to allocate history array -- type %d",
-				"DrainMaterial::DrainMaterial", this->getClassTag());
+  if (numHstv > 0) {
+    // Allocate history array
+    hstv = new double[2*numHstv];
+    if (hstv == 0)
+      g3ErrorHandler->fatal("%s -- failed to allocate history array -- type %d",
+			    "DrainMaterial::DrainMaterial", this->getClassTag());
+    
+    // Initialize to zero
+    for (int i = 0; i < 2*numHstv; i++)
+      hstv[i] = 0.0;
+  }
+  
+  if (numData < 0)
+    numData = 0;
+  
+  if (numData > 0) {
+    // Allocate material parameter array
+    data = new double[numData];
+    if (data == 0)
+      g3ErrorHandler->fatal("%s -- failed to allocate data array -- type %d",
+			    "DrainMaterial::DrainMaterial", this->getClassTag());
+    
+    // Initialize to zero
+    for (int i = 0; i < numData; i++)
+      data[i] = 0.0;
+  }
 
-		// Initialize to zero
-		for (int i = 0; i < 2*numHstv; i++)
-			hstv[i] = 0.0;
-	}
-
-	if (numData < 0)
-		numData = 0;
-
-	if (numData > 0) {
-		// Allocate material parameter array
-		data = new double[numData];
-		if (data == 0)
-			g3ErrorHandler->fatal("%s -- failed to allocate data array -- type %d",
-				"DrainMaterial::DrainMaterial", this->getClassTag());
-
-		// Initialize to zero
-		for (int i = 0; i < numData; i++)
-			data[i] = 0.0;
-	}
+  // determine initial tangent
+  this->invokeSubroutine();
+  initialTangent = tangent;
 }
 
 DrainMaterial::~DrainMaterial()
 {
-	if (hstv != 0)
-		delete [] hstv;
-	
-	if (data != 0)
-		delete [] data;
+  if (hstv != 0)
+    delete [] hstv;
+  
+  if (data != 0)
+    delete [] data;
 }
 
 int
@@ -142,6 +146,12 @@ DrainMaterial::getTangent(void)
 }
 
 double
+DrainMaterial::getInitialTangent(void)
+{
+	return initialTangent;
+}
+
+double
 DrainMaterial::getDampTangent(void)
 {
 	// Damping computed here using the last committed tangent
@@ -166,7 +176,7 @@ DrainMaterial::commitState(void)
 int
 DrainMaterial::revertToLastCommit(void)
 {
-	// Set trial values equal to corresponding committed values
+        // Set trial values equal to corresponding committed values
 	for (int i = 0; i < numHstv; i++)
 		hstv[i+numHstv] = hstv[i];
 
@@ -218,17 +228,7 @@ DrainMaterial::sendSelf(int commitTag, Channel &theChannel)
 {
 	int res = 0;
 
-	static ID idData(3);
-
-	idData(0) = this->getTag();
-	idData(1) = numHstv;
-	idData(2) = numData;
-
-	res += theChannel.sendID(this->getDbTag(), commitTag, idData);
-	if (res < 0) 
-		cerr << "DrainMaterial::sendSelf() - failed to send ID data\n";
-
-	Vector vecData(numHstv+numData+4);
+	Vector vecData(numHstv+numData+5);
 
 	int i, j;
 	// Copy history variables into vector
@@ -243,6 +243,7 @@ DrainMaterial::sendSelf(int commitTag, Channel &theChannel)
 	vecData(j++) = sigmaP;
 	vecData(j++) = tangentP;
 	vecData(j++) = beto;
+	vecData(j++) = this->getTag();
 
 	res += theChannel.sendVector(this->getDbTag(), commitTag, vecData);
 	if (res < 0) 
@@ -257,19 +258,7 @@ DrainMaterial::recvSelf(int commitTag, Channel &theChannel,
 {
 	int res = 0;
 
-	static ID idData(3);
-
-	res += theChannel.recvID(this->getDbTag(), commitTag, idData);
-	if (res < 0) {
-		cerr << "DrainMaterial::recvSelf() - failed to receive ID data\n";
-		return res;
-	}
-
-	this->setTag(idData(0));
-	numHstv = idData(1);
-	numData = idData(2);
-
-	Vector vecData(numHstv+numData+4);
+	Vector vecData(numHstv+numData+5);
 
 	res += theChannel.recvVector(this->getDbTag(), commitTag, vecData);
 	if (res < 0) {
@@ -279,17 +268,25 @@ DrainMaterial::recvSelf(int commitTag, Channel &theChannel,
 
 	int i, j;
 	// Copy history variables from vector
-	for (i = 0; i < numHstv; i++)
-		hstv[i] = vecData(i);
+	for (i = 0; i < numHstv; i++) {
+	  hstv[i] = vecData(i);
+	  hstv[i+numHstv] = vecData(i);
+	}
 
 	// Copy material properties from vector
 	for (i = 0, j = numHstv; i < numData; i++, j++)
-		data[i] = vecData(j);
+	  data[i] = vecData(j);
 
 	epsilonP = vecData(j++);
 	sigmaP   = vecData(j++);
 	tangentP = vecData(j++);
 	beto     = vecData(j++);
+
+	this->setTag((int)vecData(j));
+
+	epsilon = epsilonP;
+	sigma   = sigmaP;
+	tangent = tangentP;
 
 	return res;
 }

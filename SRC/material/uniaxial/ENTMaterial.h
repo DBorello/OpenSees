@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-13 21:45:31 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ENTMaterial.h,v $
                                                                         
                                                                         
@@ -46,13 +46,14 @@ class ENTMaterial : public UniaxialMaterial
 {
   public:
     ENTMaterial(int tag, double E);    
-	ENTMaterial();    
+    ENTMaterial();    
     ~ENTMaterial();
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);
     double getStress(void);
     double getTangent(void);
+    double getInitialTangent(void) {return E;};
 
     int commitState(void);
     int revertToLastCommit(void);    

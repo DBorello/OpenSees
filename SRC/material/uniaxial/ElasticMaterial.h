@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticMaterial.h,v $
                                                                         
                                                                         
@@ -47,15 +47,17 @@ class ElasticMaterial : public UniaxialMaterial
 {
   public:
     ElasticMaterial(int tag, double E, double eta = 0.0);    
-	ElasticMaterial();    
+    ElasticMaterial();    
     ~ElasticMaterial();
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
+    int setTrial(double strain, double &stress, double &tangent, double strainRate = 0.0); 
     double getStrain(void) {return trialStrain;};
     double getStrainRate(void) {return trialStrainRate;};
     double getStress(void);
     double getTangent(void) {return E;};
     double getDampTangent(void) {return eta;};
+    double getInitialTangent(void) {return E;};
 
     int commitState(void);
     int revertToLastCommit(void);    
@@ -75,8 +77,6 @@ class ElasticMaterial : public UniaxialMaterial
   protected:
     
   private:
-    double commitStrain;
-    double commitStrainRate;
     double trialStrain;
     double trialStrainRate;
     double E;

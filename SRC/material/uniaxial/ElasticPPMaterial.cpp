@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-09-04 22:29:47 $
+// $Revision: 1.5 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticPPMaterial.cpp,v $
                                                                         
                                                                         
@@ -44,16 +44,18 @@
 
 ElasticPPMaterial::ElasticPPMaterial(int tag, double e, double eyp)
 :UniaxialMaterial(tag,MAT_TAG_ElasticPPMaterial),
- ezero(0.0), E(e), trialStrain(0.0), eptrial(0.0), ep(0.0)
+ ezero(0.0), E(e), trialStrain(0.0), ep(0.0),
+ trialStress(0.0), trialTangent(E)
 {
-	fyp = E*eyp;
-	fyn = -fyp;
+  fyp = E*eyp;
+  fyn = -fyp;
 }
 
 ElasticPPMaterial::ElasticPPMaterial(int tag, double e, double eyp,
 				     double eyn, double ez )
 :UniaxialMaterial(tag,MAT_TAG_ElasticPPMaterial),
- ezero(ez), E(e), trialStrain(0.0), eptrial(0.0), ep(0.0)
+ ezero(ez), E(e), trialStrain(0.0), ep(0.0),
+ trialStress(0.0), trialTangent(E)
 {
     if (eyp < 0) {
 	cerr << "ElasticPPMaterial::ElasticPPMaterial() - eyp < 0, setting > 0\n";
@@ -70,7 +72,8 @@ ElasticPPMaterial::ElasticPPMaterial(int tag, double e, double eyp,
 
 ElasticPPMaterial::ElasticPPMaterial()
 :UniaxialMaterial(0,MAT_TAG_ElasticPPMaterial),
- fyp(0.0), fyn(0.0), ezero(0.0), E(0.0), trialStrain(0.0), eptrial(0.0), ep(0.0)
+ fyp(0.0), fyn(0.0), ezero(0.0), E(0.0), trialStrain(0.0), ep(0.0),
+ trialStress(0.0), trialTangent(0.0)
 {
 
 }
@@ -83,22 +86,74 @@ ElasticPPMaterial::~ElasticPPMaterial()
 int 
 ElasticPPMaterial::setTrialStrain(double strain, double strainRate)
 {
+  /*
+    if (fabs(trialStrain - strain) < DBL_EPSILON)
+      return 0;
+  */
     trialStrain = strain;
+
+    double sigtrial;	// trial stress
+    double f;		// yield function
+
+    // compute trial stress
+    sigtrial = E * ( trialStrain - ezero - ep );
+
+    //sigtrial  = E * trialStrain;
+    //sigtrial -= E * ezero;
+    //sigtrial -= E *  ep;
+
+    // evaluate yield function
+    if ( sigtrial >= 0.0 )
+	f =  sigtrial - fyp;
+    else
+	f = -sigtrial + fyn;
+
+    double fYieldSurface = - E * DBL_EPSILON;
+    if ( f <= fYieldSurface ) {
+
+      // elastic
+      trialStress = sigtrial;
+      trialTangent = E;
+
+    } else {
+
+      // plastic
+      if ( sigtrial > 0.0 ) {
+	trialStress = fyp;
+      } else {
+	trialStress = fyn;
+      }
+
+      trialTangent = 0.0;
+    }
+
     return 0;
 }
 
 double 
 ElasticPPMaterial::getStrain(void)
 {
-    return trialStrain;
+  return trialStrain;
 }
 
 double 
 ElasticPPMaterial::getStress(void)
 {
+  return trialStress;
+}
+
+
+double 
+ElasticPPMaterial::getTangent(void)
+{
+  return trialTangent;
+}
+
+int 
+ElasticPPMaterial::commitState(void)
+{
     double sigtrial;	// trial stress
     double f;		// yield function
-    double sig;		// stress
 
     // compute trial stress
     sigtrial = E * ( trialStrain - ezero - ep );
@@ -109,61 +164,16 @@ ElasticPPMaterial::getStress(void)
     else
 	f = -sigtrial + fyn;
 
-    if ( f <= 0.0 )
-	// elastic
-        sig = sigtrial;
-
-    else
-    {
-	// plastic
-	if ( sigtrial > 0.0 )
-	{
-	   sig = fyp;
-	   eptrial = ep + f / E;
-	}
-	else
-	{
-	   sig = fyn;
-	   eptrial = ep - f / E;
-	}
-    }
-    
-    return sig;
-}
-
-
-double 
-ElasticPPMaterial::getTangent(void)
-{
-    double sigtrial;	// trial stress
-    double f;		// yield function
-
-    // compute trial stress
-    sigtrial = E * ( trialStrain - ezero - ep );
-
-    // evaluate yield function
-    if ( sigtrial >= 0 )
-	f =  sigtrial - fyp;
-    else
-	f = -sigtrial + fyn;
-
     double fYieldSurface = - E * DBL_EPSILON;
-    return ( f < fYieldSurface) ? E : 0.0;
+    if ( f > fYieldSurface ) {
+      // plastic
+      if ( sigtrial > 0.0 ) {
+	ep += f / E;
+      } else {
+	ep -= f / E;
+      }
+    }
 
-}
-
-double ElasticPPMaterial::getSecant ()
-{
-    if (trialStrain != 0.0)
-	return this->getStress()/trialStrain;
-    else
-	return E; 
-}
-
-int 
-ElasticPPMaterial::commitState(void)
-{
-    ep = eptrial;
     return 0;
 }	
 
@@ -178,8 +188,8 @@ ElasticPPMaterial::revertToLastCommit(void)
 int 
 ElasticPPMaterial::revertToStart(void)
 {
-    trialStrain = 0.0;
     ep = 0.0;
+
     return 0;
 }
 
@@ -187,10 +197,11 @@ ElasticPPMaterial::revertToStart(void)
 UniaxialMaterial *
 ElasticPPMaterial::getCopy(void)
 {
-    ElasticPPMaterial *theCopy =
-	 new ElasticPPMaterial(this->getTag(),E,fyp/E,fyn/E,ezero);
-    theCopy->ep = 0.0;
-    return theCopy;
+  ElasticPPMaterial *theCopy =
+    new ElasticPPMaterial(this->getTag(),E,fyp/E,fyn/E,ezero);
+  theCopy->ep = this->ep;
+  
+  return theCopy;
 }
 
 
@@ -205,6 +216,7 @@ ElasticPPMaterial::sendSelf(int cTag, Channel &theChannel)
   data(3) = ezero;
   data(4) = fyp;
   data(5) = fyn;
+
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
     cerr << "ElasticPPMaterial::sendSelf() - failed to send data\n";
@@ -219,7 +231,7 @@ ElasticPPMaterial::recvSelf(int cTag, Channel &theChannel,
   int res = 0;
   static Vector data(6);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
-  if (res < 0)
+  if (res < 0) 
     cerr << "ElasticPPMaterial::recvSelf() - failed to recv data\n";
   else {
     this->setTag(data(0));
@@ -227,7 +239,7 @@ ElasticPPMaterial::recvSelf(int cTag, Channel &theChannel,
     E     = data(2);
     ezero = data(3);
     fyp   = data(4);
-    fyn   = data(5);    
+    fyn   = data(5);  
   }
 
   return res;
@@ -239,6 +251,7 @@ ElasticPPMaterial::Print(ostream &s, int flag)
     s << "ElasticPP tag: " << this->getTag() << endl;
     s << "  E: " << E << endl;
     s << "  ep: " << ep << endl;
+    s << "  Otress: " << trialStress << " tangent: " << trialTangent << endl;
 }
 
 

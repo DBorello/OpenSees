@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-05-28 16:39:07 $
+// $Revision: 1.10 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -76,6 +76,10 @@ FedeasMaterial::FedeasMaterial(int tag, int classTag, int nhv, int ndata)
     for (int i = 0; i < numData; i++)
       data[i] = 0.0;
   }
+
+  int ist = 1;
+  this->invokeSubroutine(ist);
+  initialTangent = tangent;
 }
 
 FedeasMaterial::~FedeasMaterial()
@@ -136,6 +140,12 @@ FedeasMaterial::getTangent(void)
   return tangent;
 }
 
+double
+FedeasMaterial::getInitialTangent(void)
+{
+  return initialTangent;
+}
+
 int
 FedeasMaterial::commitState(void)
 {
@@ -145,7 +155,8 @@ FedeasMaterial::commitState(void)
   
   epsilonP = epsilon;
   sigmaP = sigma;
-  
+  tangentP = tangent;
+
   return 0;
 }
 
@@ -158,7 +169,8 @@ FedeasMaterial::revertToLastCommit(void)
   
   epsilon = epsilonP;
   sigma = sigmaP;
-  
+  tangent = tangentP;
+
   return 0;
 }
 
@@ -171,7 +183,7 @@ FedeasMaterial::revertToStart(void)
   
   epsilonP = 0.0;
   sigmaP = 0.0;
-  
+
   return 0;
 }
 
@@ -202,17 +214,7 @@ FedeasMaterial::sendSelf(int commitTag, Channel &theChannel)
 {
   int res = 0;
   
-  static ID idData(3);
-  
-  idData(0) = this->getTag();
-  idData(1) = numHstv;
-  idData(2) = numData;
-  
-  res += theChannel.sendID(this->getDbTag(), commitTag, idData);
-  if (res < 0) 
-    cerr << "FedeasMaterial::sendSelf() - failed to send ID data\n";
-  
-  Vector vecData(numHstv+numData+2);
+  Vector vecData(numHstv+numData+3);
   
   int i, j;
   // Copy only the committed history variables into vector
@@ -225,6 +227,7 @@ FedeasMaterial::sendSelf(int commitTag, Channel &theChannel)
   
   vecData(j++) = epsilonP;
   vecData(j++) = sigmaP;
+  vecData(j++) = this->getTag();
   
   res += theChannel.sendVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) 
@@ -239,19 +242,7 @@ FedeasMaterial::recvSelf(int commitTag, Channel &theChannel,
 {
   int res = 0;
   
-  static ID idData(3);
-  
-  res += theChannel.recvID(this->getDbTag(), commitTag, idData);
-  if (res < 0) {
-    cerr << "FedeasMaterial::recvSelf() - failed to receive ID data\n";
-    return res;
-  }
-  
-  this->setTag(idData(0));
-  numHstv = idData(1);
-  numData = idData(2);
-  
-  Vector vecData(numHstv+numData+2);
+  Vector vecData(numHstv+numData+3);
   
   res += theChannel.recvVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) {
@@ -270,6 +261,7 @@ FedeasMaterial::recvSelf(int commitTag, Channel &theChannel,
   
   epsilonP = vecData(j++);
   sigmaP   = vecData(j++);
+  this->setTag((int)vecData(j++));
   
   return res;
 }
@@ -520,13 +512,8 @@ FedeasMaterial::invokeSubroutine(int ist)
     break;
     
   case MAT_TAG_FedeasSteel2:
-#ifdef _WIN32
     steel_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 	      &sigma, &tangent, &ist);
-#else
-	g3ErrorHandler->fatal("%s -- Steel2 subroutine not yet linked",
-		"FedeasMaterial::invokeSubroutine"); 
-#endif
     break;
     
     // Add more cases as needed

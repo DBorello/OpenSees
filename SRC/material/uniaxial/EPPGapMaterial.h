@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.h,v $
 
 // File: ~/material/EPPGapMaterial.h
@@ -54,13 +54,14 @@ class EPPGapMaterial : public UniaxialMaterial
 {
   public:
     EPPGapMaterial(int tag, double E, double fy, double gap);    
-	EPPGapMaterial();  
+    EPPGapMaterial();  
     ~EPPGapMaterial();
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);          
     double getStress(void);
     double getTangent(void);
+    double getInitialTangent(void);
 
     double getSecant (void);
 
@@ -86,6 +87,9 @@ class EPPGapMaterial : public UniaxialMaterial
     double gap;
     double maxElasticYieldStrain;
     double minElasticYieldStrain;
+
+    double trialStress;      // current trial stress
+    double trialTangent;     // current trial tangent
 };
 
 

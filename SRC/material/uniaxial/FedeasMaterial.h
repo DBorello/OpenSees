@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-18 21:45:41 $
+// $Revision: 1.4 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.h,v $
                                                                       
 // Written: MHS
@@ -49,6 +49,7 @@ class FedeasMaterial : public UniaxialMaterial
   virtual double getStrain(void);
   virtual double getStress(void);
   virtual double getTangent(void);
+  virtual double getInitialTangent(void);
   
   virtual int commitState(void);
   virtual int revertToLastCommit(void);    
@@ -76,11 +77,13 @@ class FedeasMaterial : public UniaxialMaterial
   
   double epsilonP;	// Committed strain
   double sigmaP;	// Committed stress
+  double initialTangent;
   
  private:
   double epsilon;	// Trial strain
   double sigma;		// Trial stress
   double tangent;	// Trial tangent
+  double tangentP;	// Committed tangent
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-04-11 01:55:45 $
+// $Revision: 1.5 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.cpp,v $
 
 // File: ~/material/EPPGapMaterial.C
@@ -79,8 +79,35 @@ EPPGapMaterial::~EPPGapMaterial()
 int 
 EPPGapMaterial::setTrialStrain(double strain, double strainRate)
 {
-    trialStrain = strain;
-    return 0;
+  // set the trial strain
+  trialStrain = strain;
+
+  // determine trial stress and tangent
+  if (fy >= 0) {
+    if (trialStrain > maxElasticYieldStrain) {
+      trialStress = fy;
+      trialTangent = 0;
+    } else if (trialStrain < minElasticYieldStrain) {
+      trialStress = 0;
+      trialTangent = 0;
+    } else {
+      trialStress =  E*(trialStrain-minElasticYieldStrain);
+      trialTangent = E;
+    }
+  } else {
+    if (trialStrain < maxElasticYieldStrain) {
+      trialStress =  fy;
+      trialTangent = 0;
+    } else if (trialStrain > minElasticYieldStrain) {
+      trialStress =  0;
+      trialTangent = 0;
+    } else {
+      trialStress =  E*(trialStrain-minElasticYieldStrain);
+      trialTangent = E;
+    }
+  }
+
+  return 0;
 }
 
 double 
@@ -92,43 +119,23 @@ EPPGapMaterial::getStrain(void)
 double 
 EPPGapMaterial::getStress(void)
 {
-    if (fy >= 0) {
-       if (trialStrain > maxElasticYieldStrain)
-           return fy;
-       else if (trialStrain < minElasticYieldStrain)
-           return 0;
-       else
-           return E*(trialStrain-minElasticYieldStrain);
-    }
-    else {
-       if (trialStrain < maxElasticYieldStrain)
-           return fy;
-       else if (trialStrain > minElasticYieldStrain)
-           return 0;
-       else
-           return E*(trialStrain-minElasticYieldStrain);
-    }
+  return trialStress;
+
 }
 
 double 
 EPPGapMaterial::getTangent(void)
 {
-    if (fy >= 0) {
-       if (trialStrain > maxElasticYieldStrain)
-           return 0;
-       else if (trialStrain < minElasticYieldStrain)
-           return 0;
-       else
-           return E;
-    }
-    else {
-       if (trialStrain < maxElasticYieldStrain)
-           return 0;
-       else if (trialStrain > minElasticYieldStrain)
-           return 0;
-       else
-           return E;
-    }
+  return trialTangent;
+}
+
+double 
+EPPGapMaterial::getInitialTangent(void)
+{
+  if (gap > 0.0) 
+    return 0.0; 
+  else 
+    return E;
 }
 
 double 
@@ -165,6 +172,7 @@ EPPGapMaterial::commitState(void)
     }
 
     commitStrain = trialStrain;
+
     return 0;
 }
 
@@ -173,6 +181,7 @@ int
 EPPGapMaterial::revertToLastCommit(void)
 {
     trialStrain = commitStrain;
+
     return 0;
 }
 
@@ -212,6 +221,7 @@ EPPGapMaterial::sendSelf(int cTag, Channel &theChannel)
   data(4) = gap;
   data(5) = maxElasticYieldStrain;
   data(6) = minElasticYieldStrain;
+
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
     cerr << "EPPGapMaterial::sendSelf() - failed to send data\n";

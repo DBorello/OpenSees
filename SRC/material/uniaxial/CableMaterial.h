@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-19 00:18:44 $: 2001/07/16 08:23:22 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:57:40 $: 2001/07/16 08:23:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/CableMaterial.h,v $
                                                                         
                                                                         
@@ -55,10 +55,11 @@ class CableMaterial : public UniaxialMaterial
     ~CableMaterial();
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
+    int setTrial (double strain, double &stress, double &tangent, double strainRate = 0.0);
     double getStrain(void) {return trialStrain;};
     double getStress(void);
     double getTangent(void);
-    double getDampTangent(void) {return 0;};
+    double getInitialTangent(void) {return 1.0e-8;}; 
 
     int commitState(void);
     int revertToLastCommit(void);    
@@ -84,10 +85,12 @@ class CableMaterial : public UniaxialMaterial
     double Mue;
     double L;
     double trialStrain;
-    double commitStrain;
     
     double evalStress(double stress);
     double abs(double value);
+
+    double trialStress;      // current trial stress
+    double trialTangent;     // current trial tangent
 };
 
 

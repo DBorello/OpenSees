@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-20 00:37:25 $
+// $Revision: 1.5 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
                                                                         
@@ -316,14 +316,6 @@ double Concrete01::getStrain ()
 double Concrete01::getTangent ()
 {
    return Ttangent;
-}
-
-double Concrete01::getSecant ()
-{
-	if (fabs(Tstrain) > DBL_EPSILON)
-		return Tstress/Tstrain;
-	else
-		return Ttangent;
 }
 
 

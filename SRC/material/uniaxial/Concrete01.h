@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-20 00:37:25 $
+// $Revision: 1.5 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.h,v $
                                                                         
                                                                         
@@ -55,7 +55,7 @@ class Concrete01 : public UniaxialMaterial
       double getStrain(void);      
       double getStress(void);
       double getTangent(void);
-      double getSecant (void);
+      double getInitialTangent(void) {return Ec0;};
 
       int commitState(void);
       int revertToLastCommit(void);    
@@ -69,8 +69,8 @@ class Concrete01 : public UniaxialMaterial
     
       void Print(ostream &s, int flag =0);
 
-	  int setParameter(char **argv, int argc, Information &info);
-	  int updateParameter(int parameterID, Information &info);
+      int setParameter(char **argv, int argc, Information &info);
+      int updateParameter(int parameterID, Information &info);
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
 	int gradient(bool compute, int identifier, double & gradient);

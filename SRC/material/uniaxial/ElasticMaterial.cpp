@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticMaterial.cpp,v $
                                                                         
                                                                         
@@ -41,7 +41,6 @@
 
 ElasticMaterial::ElasticMaterial(int tag, double e, double et)
 :UniaxialMaterial(tag,MAT_TAG_ElasticMaterial),
- commitStrain(0.0), commitStrainRate(0.0),
  trialStrain(0.0),  trialStrainRate(0.0),
   E(e), eta(et)
 {
@@ -50,7 +49,6 @@ ElasticMaterial::ElasticMaterial(int tag, double e, double et)
 
 ElasticMaterial::ElasticMaterial()
 :UniaxialMaterial(0,MAT_TAG_ElasticMaterial),
- commitStrain(0.0), commitStrainRate(0.0),
  trialStrain(0.0),  trialStrainRate(0.0),
   E(0.0), eta(0.0)
 {
@@ -70,33 +68,43 @@ ElasticMaterial::setTrialStrain(double strain, double strainRate)
     return 0;
 }
 
+
+int 
+ElasticMaterial::setTrial(double strain, double &stress, double &tangent, double strainRate = 0.0)
+{
+    trialStrain     = strain;
+    trialStrainRate = strainRate;
+
+    stress = E*trialStrain + eta*trialStrainRate;
+    tangent = E;
+
+    return 0;
+}
+
 double 
 ElasticMaterial::getStress(void)
 {
     return E*trialStrain + eta*trialStrainRate;
 }
 
+
 int 
 ElasticMaterial::commitState(void)
 {
-    commitStrain     = trialStrain;
-    commitStrainRate = trialStrainRate;
     return 0;
 }
+
 
 int 
 ElasticMaterial::revertToLastCommit(void)
 {
-    trialStrain     = commitStrain;
-    trialStrainRate = commitStrainRate;
     return 0;
 }
+
 
 int 
 ElasticMaterial::revertToStart(void)
 {
-    commitStrain     = 0.0;
-    commitStrainRate = 0.0;
     trialStrain      = 0.0;
     trialStrainRate  = 0.0;
     return 0;
@@ -115,12 +123,11 @@ int
 ElasticMaterial::sendSelf(int cTag, Channel &theChannel)
 {
   int res = 0;
-  static Vector data(5);
+  static Vector data(3);
   data(0) = this->getTag();
   data(1) = E;
   data(2) = eta;
-  data(3) = commitStrain;
-  data(4) = commitStrainRate;
+
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
     cerr << "ElasticMaterial::sendSelf() - failed to send data\n";
@@ -133,7 +140,7 @@ ElasticMaterial::recvSelf(int cTag, Channel &theChannel,
 			       FEM_ObjectBroker &theBroker)
 {
   int res = 0;
-  static Vector data(5);
+  static Vector data(3);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
@@ -145,10 +152,6 @@ ElasticMaterial::recvSelf(int cTag, Channel &theChannel,
     this->setTag(data(0));
     E   = data(1);
     eta = data(2);
-    commitStrain     = data(3);
-    commitStrainRate = data(4);
-    trialStrain      = commitStrain;
-    trialStrainRate  = commitStrainRate;
   }
     
   return res;

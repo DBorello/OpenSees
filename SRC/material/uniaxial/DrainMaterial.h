@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-15 15:52:13 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/DrainMaterial.h,v $
                                                                       
 // Written: MHS
@@ -48,24 +48,25 @@ class DrainMaterial : public UniaxialMaterial
     virtual ~DrainMaterial();
 
     virtual int setTrialStrain(double strain, double strainRate = 0.0);
-	virtual int setTrial(double strain, double &stress, double &tangent, double strainRate = 0.0); 
+    virtual int setTrial(double strain, double &stress, double &tangent, double strainRate = 0.0); 
     virtual double getStrain(void);
-	virtual double getStrainRate(void);
+    virtual double getStrainRate(void);
     virtual double getStress(void);
     virtual double getTangent(void);
     virtual double getDampTangent(void);
+    virtual double getInitialTangent(void);
 
     virtual int commitState(void);
     virtual int revertToLastCommit(void);    
     virtual int revertToStart(void);        
 
-	// WARNING -- if you wish to override any method in this base class, you must
-	// also override the getCopy method to return a pointer to the derived class!!!
+    // WARNING -- if you wish to override any method in this base class, you must
+    // also override the getCopy method to return a pointer to the derived class!!!
     virtual UniaxialMaterial *getCopy(void);
 
     virtual int sendSelf(int commitTag, Channel &theChannel);  
     virtual int recvSelf(int commitTag, Channel &theChannel, 
-		FEM_ObjectBroker &theBroker);    
+			 FEM_ObjectBroker &theBroker);    
     
     virtual void Print(ostream &s, int flag = 0);
 
@@ -84,6 +85,7 @@ class DrainMaterial : public UniaxialMaterial
 	double tangentP;	// Committed tangent
 
 	double beto;		// Stiffness proportional damping factor
+	double initialTangent;  // initial tangent
 
   private:
 	double epsilon;		// Trial strain

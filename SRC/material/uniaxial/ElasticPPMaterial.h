@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 05:53:01 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:57:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticPPMaterial.h,v $
                                                                         
                                                                         
@@ -54,7 +54,7 @@ class ElasticPPMaterial : public UniaxialMaterial
     double getStress(void);
     double getTangent(void);
 
-    double getSecant (void);
+    double getInitialTangent(void) {return E;};
 
     int commitState(void);
     int revertToLastCommit(void);    
@@ -75,8 +75,10 @@ class ElasticPPMaterial : public UniaxialMaterial
     double ezero;	// initial strain
     double E;		// elastic modulus
     double trialStrain;	// trial strain
-    double eptrial;	// current (trial) plastic strain
     double ep;		// plastic strain at last commit
+
+    double trialStress;      // current trial stress
+    double trialTangent;     // current trial tangent
 };
 
 
