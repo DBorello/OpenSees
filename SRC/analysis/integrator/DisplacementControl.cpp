@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2001-02-17 06:36:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DisplacementControl.cpp,v $
                                                                         
                                                                         
@@ -89,6 +89,8 @@ DisplacementControl::~DisplacementControl()
 int
 DisplacementControl::newStep(void)
 {
+
+
     // get pointers to AnalysisModel and LinearSOE
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     LinearSOE *theLinSOE = this->getLinearSOEPtr();    
@@ -115,6 +117,7 @@ DisplacementControl::newStep(void)
     // determine dUhat
     this->formTangent();
     theLinSOE->setB(*phat);
+
     theLinSOE->solve();
     (*deltaUhat) = theLinSOE->getX();
     Vector &dUhat = *deltaUhat;
@@ -271,7 +274,6 @@ DisplacementControl::domainChanged(void)
     currentLambda -= 1.0;
     theModel->setCurrentDomainTime(currentLambda);    
 
-    
     // lastly we determine the id of the nodal dof
     // EXTRA CODE TO DO SOME ERROR CHECKING REQUIRED
     

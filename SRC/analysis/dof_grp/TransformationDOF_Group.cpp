@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2001-02-17 06:36:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -747,6 +747,7 @@ TransformationDOF_Group::enforceSPs(void)
 	    trialDisp(i) = value;
 	}
     myNode->setTrialDisp(trialDisp);
+    
     return 0;
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2001-02-17 06:36:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/MinUnbalDispNorm.cpp,v $
                                                                         
                                                                         
@@ -41,14 +41,14 @@
 #include <math.h>
 
 MinUnbalDispNorm::MinUnbalDispNorm(double lambda1, int specNumIter,
-		     double min, double max)
+		     double min, double max, int signFirstStep)
 :StaticIntegrator(INTEGRATOR_TAGS_MinUnbalDispNorm),
  dLambda1LastStep(lambda1), 
  specNumIncrStep(specNumIter), numIncrLastStep(specNumIter),
  deltaUhat(0), deltaUbar(0), deltaU(0), deltaUstep(0), 
  phat(0), deltaLambdaStep(0.0), currentLambda(0.0), 
  signLastDeltaLambdaStep(1),
- dLambda1min(min), dLambda1max(max)
+ dLambda1min(min), dLambda1max(max), signLastDeterminant(1), signFirstStepMethod(signFirstStep)
 {
   // to avoid divide-by-zero error on first update() ensure numIncr != 0
   if (specNumIncrStep == 0) {
@@ -86,10 +86,6 @@ MinUnbalDispNorm::newStep(void)
     // get the current load factor
     currentLambda = theModel->getCurrentDomainTime();
 
-    if (deltaLambdaStep < 0)
-	signLastDeltaLambdaStep = -1;
-    else
-	signLastDeltaLambdaStep = +1;
 
     // determine dUhat
     this->formTangent();
@@ -109,8 +105,36 @@ MinUnbalDispNorm::newStep(void)
       dLambda = dLambda1max;
 
     dLambda1LastStep = dLambda;
-    dLambda *= signLastDeltaLambdaStep; // base sign of load change
+
+
+    if (signFirstStepMethod == SIGN_LAST_STEP) {
+      if (deltaLambdaStep < 0)
+	signLastDeltaLambdaStep = -1;
+      else
+	signLastDeltaLambdaStep = +1;
+      
+      dLambda *= signLastDeltaLambdaStep; // base sign of load change
                                         // on what was happening last step
+    } else {
+    
+      double det = theLinSOE->getDeterminant();
+      int signDeterminant = 1;
+      if (det < 0)
+	signDeterminant = -1;
+    
+      dLambda *= signDeterminant * signLastDeterminant;
+    
+      signLastDeterminant = signDeterminant;
+    }
+
+    /*
+    double work = (*phat)^(dUhat);
+    int signCurrentWork = 1;
+    if (work < 0) signCurrentWork = -1;
+
+    if (signCurrentWork != signLastDeltaStep)
+    */
+
     deltaLambdaStep = dLambda;
     currentLambda += dLambda;
     numIncrLastStep = 0;

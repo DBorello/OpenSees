@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2001-02-17 06:36:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/MinUnbalDispNorm.h,v $
                                                                         
                                                                         
@@ -45,11 +45,15 @@ class AnalysisModel;
 class FE_Element;
 class Vector;
 
+#define SIGN_LAST_STEP      1
+#define CHANGE_DETERMINANT  2
+
 class MinUnbalDispNorm : public StaticIntegrator
 {
   public:
     MinUnbalDispNorm(double lambda1, int specNumIterStep, 
-		     double dlambda1min, double dlambda1max);
+		     double dlambda1min, double dlambda1max,
+		     int signFirstStepMethod = SIGN_LAST_STEP);
 
     ~MinUnbalDispNorm();
 
@@ -75,6 +79,8 @@ class MinUnbalDispNorm : public StaticIntegrator
     double deltaLambdaStep, currentLambda; // dLambda(i) & current value of lambda  
     int signLastDeltaLambdaStep;           // sign of dLambda(i-1)
     double dLambda1min, dLambda1max;       // min & max values for dlambda1 at step (i) 
+    double signLastDeterminant;
+    int signFirstStepMethod;
 };
 
 #endif
