@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2001-05-26 06:20:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.h,v $
                                                                         
                                                                         
@@ -62,6 +62,7 @@ class DOF_Group
     virtual const ID &getID(void) const;
 
     virtual int getTag(void) const;
+    virtual int getNodeTag(void) const;
     virtual int getNumDOF(void) const;    
     virtual int getNumFreeDOF(void) const;
     virtual int getNumConstrainedDOF(void) const;

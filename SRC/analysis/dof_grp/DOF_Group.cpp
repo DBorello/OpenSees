@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 04:25:41 $
+// $Revision: 1.3 $
+// $Date: 2001-05-26 06:20:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -290,6 +290,14 @@ DOF_Group::getNumDOF(void) const
     return numDOF;
 }
 
+int
+DOF_Group::getNodeTag(void) const
+{
+    if (myNode != 0)
+    	return myNode->getTag();
+    else
+    	return -1;
+}
 
 int
 DOF_Group::getNumFreeDOF(void) const
