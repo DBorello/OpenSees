@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-09-24 19:53:30 $
+// $Revision: 1.9 $
+// $Date: 2001-10-16 22:43:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -933,7 +933,7 @@ Node::getRV(const Vector &V)
     }    
 
     // determine the product
-    (*unbalLoadWithInertia) = (*R) * V;
+    unbalLoadWithInertia->addMatrixVector(0.0, *R, V, 1.0);
     return *unbalLoadWithInertia;
 }
 
