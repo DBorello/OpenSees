@@ -987,14 +987,6 @@ SOURCE=..\..\..\SRC\material\section\ElasticSection3d.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\material\section\FiberSection.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\section\FiberSection.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\SRC\material\section\FiberSection2d.cpp
 # End Source File
 # Begin Source File
@@ -1016,14 +1008,6 @@ SOURCE=..\..\..\SRC\material\section\GenericSection1d.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\section\GenericSection1d.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\section\GenericSectionNd.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\section\GenericSectionNd.h
 # End Source File
 # Begin Source File
 
