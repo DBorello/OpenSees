@@ -104,6 +104,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
             	  -I$(FE)/system_of_eqn/linearSOE/umfGEN \
             	  -I$(FE)/system_of_eqn/linearSOE/cg \
             	  -I$(FE)/system_of_eqn/linearSOE/BJsolvers \
+            	  -I$(FE)/system_of_eqn/linearSOE/itpack \
             	  -I$(FE)/system_of_eqn/eigenSOE \
             	  -I$(FE)/graph/graph \
             	  -I$(FE)/graph/numberer \
