@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2003-08-29 09:20:58 $
+// $Revision: 1.25 $
+// $Date: 2003-10-07 22:39:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -69,8 +69,8 @@
 #include <PySimple1.h>
 #include <TzSimple1.h>
 #include <QzSimple1.h>
-//temp out BJ #include <PyLiq1.h>
-//temp out BJ #include <TzLiq1.h>
+#include <PyLiq1.h>
+#include <TzLiq1.h>
 
 
 #include <FedeasBond1Material.h>
@@ -664,14 +664,14 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
 	case MAT_TAG_PySimple1:
 		return new PySimple1();
 
-//temp out BJ	case MAT_TAG_PyLiq1:
-//temp out BJ		return new PyLiq1();
+	case MAT_TAG_PyLiq1:
+		return new PyLiq1();
 
 	case MAT_TAG_TzSimple1:
 		return new TzSimple1();
 
-//temp out BJ	case MAT_TAG_TzLiq1:
-//temp out BJ		return new TzLiq1();
+	case MAT_TAG_TzLiq1:
+		return new TzLiq1();
 
 	case MAT_TAG_QzSimple1:
 		return new QzSimple1();
