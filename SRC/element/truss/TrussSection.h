@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-03-12 19:20:46 $
+// $Revision: 1.9 $
+// $Date: 2003-03-17 19:33:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.h,v $
                                                                         
                                                                         
@@ -110,7 +110,7 @@ class TrussSection : public Element
     Matrix *theMatrix; 	// pointer to objects matrix (one of class Matrices)
     Vector *theVector;      // pointer to objects vector (one of class Vectors)
 
-    Matrix *t;        // hold the transformation matrix, could use a Vector
+    double cosX[3];     // direction cosines
 
     double L;		// length of truss based on undeformed configuration
     double rho; 		// mass density per unit length
@@ -133,7 +133,3 @@ class TrussSection : public Element
 };
 
 #endif
-
-
-
-

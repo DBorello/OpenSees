@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-03-12 19:20:46 $
+// $Revision: 1.13 $
+// $Date: 2003-03-17 19:33:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -70,7 +70,7 @@ TrussSection::TrussSection(int tag,
 :Element(tag,ELE_TAG_TrussSection),     
   connectedExternalNodes(2),
   dimension(dim), numDOF(0), theLoad(0), 
-  theMatrix(0), theVector(0), t(0),
+ theMatrix(0), theVector(0),
   L(0.0), rho(r), theSection(0)
 {
     // get a copy of the material and check we obtained a valid copy
@@ -103,6 +103,10 @@ TrussSection::TrussSection(int tag,
     // set node pointers to NULL
     for (i=0; i<2; i++)
       theNodes[i] = 0;    
+
+    cosX[0] = 0.0;
+    cosX[1] = 0.0;
+    cosX[2] = 0.0;
 }
 
 // constructor:
@@ -112,7 +116,7 @@ TrussSection::TrussSection()
 :Element(0,ELE_TAG_TrussSection),     
  connectedExternalNodes(2),
   dimension(0), numDOF(0), theLoad(0),
- theMatrix(0), theVector(0), t(0), 
+ theMatrix(0), theVector(0),
  L(0.0), rho(0.0), theSection(0)
 {
     // ensure the connectedExternalNode ID is of correct size 
@@ -124,6 +128,10 @@ TrussSection::TrussSection()
     // set node pointers to NULL
     for (int i=0; i<2; i++)
       theNodes[i] = 0;    
+
+    cosX[0] = 0.0;
+    cosX[1] = 0.0;
+    cosX[2] = 0.0;
 }
 
 //  destructor
@@ -133,8 +141,6 @@ TrussSection::~TrussSection()
 {
     if (theSection != 0)
 	delete theSection;
-    if (t != 0)
-	delete t;
 }
 
 
@@ -258,24 +264,12 @@ TrussSection::setDomain(Domain *theDomain)
       return;
     }
 
-    // create a transformation matrix for the element
-    t = new Matrix(1,numDOF);
-    if (t == 0 || (t->noCols() != numDOF)) {
-      opserr << "FATAL TrussSection::setDomain out of memory creating T matrix (1 x " << numDOF << ")\n";
-      exit(-1);
-      return;
-    }      
-    
     // now determine the length, cosines and fill in the transformation
     // NOTE t = -t(every one else uses for residual calc)
     const Vector &end1Crd = theNodes[0]->getCrds();
     const Vector &end2Crd = theNodes[1]->getCrds();	
 
     if (dimension == 1) {
-	Matrix &trans = *t;      
-	trans(0,0) = -1;
-	trans(0,1) = 1;
-
 	double dx = end2Crd(0)-end1Crd(0);	
 	L = sqrt(dx*dx);
 	
@@ -283,6 +277,8 @@ TrussSection::setDomain(Domain *theDomain)
 	  opserr << "WARNING TrussSection::setDomain() - truss " << this->getTag() << " has zero length\n";
 	  return;
 	}	
+
+	cosX[0] = 1.0;
 
     } else if (dimension == 2) {
 	double dx = end2Crd(0)-end1Crd(0);
@@ -295,23 +291,8 @@ TrussSection::setDomain(Domain *theDomain)
 	  return;
 	}
 	
-	double cs = dx/L;
-	double sn = dy/L;
-
-	Matrix &trans = *t;
-	if (numDOF == 4) {
-	    trans(0,0) = -cs;
-	    trans(0,1) = -sn;
-	    trans(0,2) = cs;
-	    trans(0,3) = sn;
-	} else { // it must be 6
-	    trans(0,0) = -cs;
-	    trans(0,1) = -sn;
-	    trans(0,2) = 0.0;
-	    trans(0,3) = cs;
-	    trans(0,4) = sn;	
-	    trans(0,5) = 0.0;
-	}     
+	cosX[0] = dx/L;
+	cosX[1] = dy/L;
 
     } else {
 	double dx = end2Crd(0)-end1Crd(0);
@@ -325,32 +306,9 @@ TrussSection::setDomain(Domain *theDomain)
 	  return;
 	}
 	
-	double cx = dx/L;
-	double cy = dy/L;
-	double cz = dz/L;	
-
-	Matrix &trans = *t;	
-	if (numDOF == 6) {
-	    trans(0,0) = -cx;
-	    trans(0,1) = -cy;
-	    trans(0,2) = -cz;
-	    trans(0,3) = cx;
-	    trans(0,4) = cy;
-	    trans(0,5) = cz;	    
-	} else { // it must be 12
-	    trans(0,0) = -cx;
-	    trans(0,1) = -cy;
-	    trans(0,2) = -cz;
-	    trans(0,3) = 0;
-	    trans(0,4) = 0;
-	    trans(0,5) = 0;	    
-	    trans(0,6) = cx;
-	    trans(0,7) = cy;
-	    trans(0,8) = cz;
-	    trans(0,9) = 0;
-	    trans(0,10) = 0;
-	    trans(0,11) = 0;	    	    
-	}     
+	cosX[0] = dx/L;
+	cosX[1] = dy/L;
+	cosX[2] = dz/L;	
     }
 
 
@@ -432,18 +390,27 @@ TrussSection::getTangentStiff(void)
 	
     const Matrix &k = theSection->getSectionTangent();
     double AE = 0.0;
-    for (int i = 0; i < order; i++) {
+    int i;
+    for (i = 0; i < order; i++) {
       if (code(i) == SECTION_RESPONSE_P)
 	AE += k(i,i);
     }
 
     // come back later and redo this if too slow
     Matrix &stiff = *theMatrix;
-    Matrix &trans = *t;
 
-    stiff = trans^trans;
-
-    stiff *= AE/L;  
+    int numDOF2 = numDOF/2;
+    double temp;
+    AE /= L;
+    for (i = 0; i < dimension; i++) {
+      for (int j = 0; j < dimension; j++) {
+	temp = cosX[i]*cosX[j]*AE;
+	stiff(i,j) = temp;
+	stiff(i+numDOF2,j) = -temp;
+	stiff(i,j+numDOF2) = -temp;
+	stiff(i+numDOF2,j+numDOF2) = temp;
+      }
+    }
 
     return *theMatrix;
 }
@@ -461,76 +428,52 @@ TrussSection::getInitialStiff(void)
 	
     const Matrix &k = theSection->getInitialTangent();
     double AE = 0.0;
-    for (int i = 0; i < order; i++) {
+    int i;
+    for (i = 0; i < order; i++) {
       if (code(i) == SECTION_RESPONSE_P)
 	AE += k(i,i);
     }
 
     // come back later and redo this if too slow
     Matrix &stiff = *theMatrix;
-    Matrix &trans = *t;
 
-    stiff = trans^trans;
-
-    stiff *= AE/L;  
+    int numDOF2 = numDOF/2;
+    double temp;
+    AE /= L;
+    for (i = 0; i < dimension; i++) {
+      for (int j = 0; j < dimension; j++) {
+	temp = cosX[i]*cosX[j]*AE;
+	stiff(i,j) = temp;
+	stiff(i+numDOF2,j) = -temp;
+	stiff(i,j+numDOF2) = -temp;
+	stiff(i+numDOF2,j+numDOF2) = temp;
+      }
+    }
 
     return *theMatrix;
 }
     
 const Matrix &
 TrussSection::getMass(void)
-{   // zero the matrix
-    theMatrix->Zero();    
+{   
+  // zero the matrix
+  Matrix &mass = *theMatrix;
+  mass.Zero();    
   
     // check for quick return
     if (L == 0.0 || rho == 0.0) { // - problem in setDomain() no further warnings
-	return *theMatrix;
+	return mass;
     }    
 
     double M = 0.5*rho*L;
-    Matrix &mass = *theMatrix;
-    if (dimension == 1 && numDOF == 2) {
-	mass(0,0) = M; 
-	mass(1,1) = M;
-    }
-    else if (dimension == 2 && numDOF == 4) {
-	mass(0,0) = M; 
-	mass(1,1) = M;
-	mass(2,2) = M; 
-	mass(3,3) = M;	
-    }
-    else if (dimension == 2 && numDOF == 6) {
-	mass(0,0) = M; 
-	mass(1,1) = M;
-	mass(2,2) = 0; 
-	mass(3,3) = M;
-	mass(4,4) = M; 
-	mass(5,5) = 0;		
-    }
-    else if (dimension == 3 && numDOF == 6) {
-	mass(0,0) = M; 
-	mass(1,1) = M;
-	mass(2,2) = M; 
-	mass(3,3) = M;
-	mass(4,4) = M; 
-	mass(5,5) = M;		
-    }
-    else if (dimension == 3 && numDOF == 12) {
-	mass(0,0) = M; 
-	mass(1,1) = M;
-	mass(2,2) = M; 
-	mass(3,3) = 0;
-	mass(4,4) = 0; 
-	mass(5,5) = 0;		
-	mass(6,6) = M; 
-	mass(7,7) = M;
-	mass(8,8) = M; 
-	mass(9,9) = 0;
-	mass(10,10) = 0; 
-	mass(11,11) = 0;			
+
+    int numDOF2 = numDOF/2;
+    for (int i = 0; i < dimension; i++) {
+      mass(i,i) = M;
+      mass(i+numDOF2,i+numDOF2) = M;
     }
     
-    return *theMatrix; // so it will compile
+    return mass;
 }
 
 
@@ -608,8 +551,13 @@ TrussSection::getResistingForce()
 	force += s(i);
     }
 
-    for (i=0; i<numDOF; i++)
-	(*theVector)(i) = (*t)(0,i)*force;
+    int numDOF2 = numDOF/2;
+    double temp;
+    for (i = 0; i < dimension; i++) {
+      temp = cosX[i]*force;
+      (*theVector)(i) = -temp;
+      (*theVector)(i+numDOF2) = temp;
+    }
 
     // add P
     (*theVector) -= *theLoad;
@@ -634,8 +582,8 @@ TrussSection::getResistingForceIncInertia()
 	int dof = dimension;
 	int start = numDOF/2;
 	for (int i=0; i<dof; i++) {
-	    (*theVector)(i) = (*theVector)(i) + M*accel1(i);
-	    (*theVector)(i+start) = (*theVector)(i+start) + M*accel2(i);
+	    (*theVector)(i) += M*accel1(i);
+	    (*theVector)(i+start) += M*accel2(i);
 	}
     }    
 
@@ -856,8 +804,13 @@ TrussSection::Print(OPS_Stream &s, int flag)
 		}
     }
     
-    for (int i=0; i<numDOF; i++)
-	(*theVector)(i) = (*t)(0,i)*force;
+    double temp;
+    int numDOF2 = numDOF/2;
+    for (int i=0; i<dimension; i++) {
+      temp = force*cosX[i];
+      (*theVector)(i) = -force;
+      (*theVector)(i+numDOF2) = force;
+    }
     
     if (flag == 0) { // print everything
 	s << "Element: " << this->getTag(); 
@@ -888,7 +841,7 @@ TrussSection::computeCurrentStrain(void) const
 
     double dLength = 0.0;
     for (int i=0; i<dimension; i++){
-	dLength -= (disp2(i)-disp1(i))* (*t)(0,i);
+	dLength += (disp2(i)-disp1(i))*cosX[i];
     }
 
     // this method should never be called with L == 0
@@ -1014,10 +967,19 @@ TrussSection::getResponse(int responseID, Information &eleInformation)
       
 	  // come back later and redo this if too slow
 	  Matrix &stiff = *theMatrix;
-	  Matrix &trans = *t;
-	  stiff = trans^trans;
-	  stiff *= AE/L;  
-	  *(eleInformation.theMatrix) = *theMatrix;      
+	  int numDOF2 = numDOF/2;
+	  double temp;
+	  AE /= L;
+	  for (i = 0; i < dimension; i++) {
+	    for (int j = 0; j < dimension; j++) {
+	      temp = cosX[i]*cosX[j]*AE;
+	      stiff(i,j) = temp;
+	      stiff(i+numDOF2,j) = -temp;
+	      stiff(i,j+numDOF2) = -temp;
+	      stiff(i+numDOF2,j+numDOF2) = temp;
+	    }
+	  }
+	  *(eleInformation.theMatrix) = stiff;      
 	  return 0;
       }
       
