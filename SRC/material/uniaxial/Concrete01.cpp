@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-05 00:53:21 $
+// $Revision: 1.11 $
+// $Date: 2004-07-15 21:34:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
                                                                         
@@ -43,6 +43,8 @@
 #include <math.h>
 #include <float.h>
 
+int count = 0;
+
 Concrete01::Concrete01
 (int tag, double FPC, double EPSC0, double FPCU, double EPSCU)
   :UniaxialMaterial(tag, MAT_TAG_Concrete01),
@@ -50,6 +52,7 @@ Concrete01::Concrete01
    CminStrain(0.0), CendStrain(0.0),
    Cstrain(0.0), Cstress(0.0) 
 {
+  count++;
 	// Make all concrete parameters negative
 	if (fpc > 0.0)
 		fpc = -fpc;
@@ -112,41 +115,41 @@ int Concrete01::setTrialStrain (double strain, double strainRate)
   // Determine change in strain from last converged state
   double dStrain = Tstrain - Cstrain;
 
-  // if (fabs(dStrain) < DBL_EPSILON)   
-  //  return 0;
-
-	// Calculate the trial state given the change in strain
-	// determineTrialState (dStrain);
-	TunloadSlope = CunloadSlope;
-
-	double tempStress = Cstress + TunloadSlope*dStrain;
-
-	// Material goes further into compression
-	if (dStrain <= 0.0) {
-	        TminStrain = CminStrain;
-	        TendStrain = CendStrain;
-		
-		reload ();
+  if (fabs(dStrain) < DBL_EPSILON)   
+    return 0;
   
-		if (tempStress > Tstress) {
-			Tstress = tempStress;
-			Ttangent = TunloadSlope;
-		}
-	}
-
-	// Material goes TOWARD tension
-	else if (tempStress <= 0.0) {
-		Tstress = tempStress;
-		Ttangent = TunloadSlope;
-	}
-
-	// Made it into tension
-	else {
-		Tstress = 0.0;
-		Ttangent = 0.0;
-	}
-
-	return 0;
+  // Calculate the trial state given the change in strain
+  // determineTrialState (dStrain);
+  TunloadSlope = CunloadSlope;
+  
+  double tempStress = Cstress + TunloadSlope*dStrain;
+  
+  // Material goes further into compression
+  if (dStrain <= 0.0) {
+    TminStrain = CminStrain;
+    TendStrain = CendStrain;
+    
+    reload ();
+    
+    if (tempStress > Tstress) {
+      Tstress = tempStress;
+      Ttangent = TunloadSlope;
+    }
+  }
+  
+  // Material goes TOWARD tension
+  else if (tempStress <= 0.0) {
+    Tstress = tempStress;
+    Ttangent = TunloadSlope;
+  }
+  
+  // Made it into tension
+  else {
+    Tstress = 0.0;
+    Ttangent = 0.0;
+  }
+  
+  return 0;
 }
 
 
@@ -154,61 +157,64 @@ int Concrete01::setTrialStrain (double strain, double strainRate)
 int 
 Concrete01::setTrial (double strain, double &stress, double &tangent, double strainRate)
 {
-	// Set trial strain
-	Tstrain = strain;
-
-	// check for a quick return
-	if (Tstrain > 0.0) {
-	  Tstress = 0;
-	  Ttangent = 0;
-	  stress = 0;
-	  tangent = 0;
-	  return 0;
-	}
-
-	// Determine change in strain from last converged state
-	double dStrain = Tstrain - Cstrain;
-
-	//if (fabs(dStrain) < DBL_EPSILON) {
-	//  tangent = Ttangent;
-	//  stress = Tstress;
-	//  return 0;
-	//}
-
-	// Calculate the trial state given the change in strain
-	// determineTrialState (dStrain);
-	TunloadSlope = CunloadSlope;
-
-	double tempStress = Cstress + TunloadSlope*dStrain;
-
-	// Material goes further into compression
-	if (dStrain <= 0.0) {
-	        TminStrain = CminStrain;
-	        TendStrain = CendStrain;
-		
-		reload ();
+  // Set trial strain
+  Tstrain = strain;
   
-		if (tempStress > Tstress) {
-			Tstress = tempStress;
-			Ttangent = TunloadSlope;
-		}
-	}
+  // check for a quick return
+  if (Tstrain > 0.0) {
+    Tstress = 0;
+    Ttangent = 0;
+    stress = 0;
+    tangent = 0;
+    return 0;
+  }
+  
+  // Determine change in strain from last converged state
+  double dStrain = Tstrain - Cstrain;
+  
+  if (fabs(dStrain) < DBL_EPSILON) {
+    tangent = Ttangent;
+    stress = Tstress;
+        return 0;
+  }
 
-	// Material goes TOWARD tension
-	else if (tempStress <= 0.0) {
-		Tstress = tempStress;
-		Ttangent = TunloadSlope;
-	}
-
-	// Made it into tension
-	else {
-		Tstress = 0.0;
-		Ttangent = 0.0;
-	}
-	stress = Tstress;
-	tangent =  Ttangent;
-
-	return 0;
+  // Calculate the trial state given the change in strain
+  // determineTrialState (dStrain);
+  TunloadSlope = CunloadSlope;
+  
+  double tempStress = Cstress + TunloadSlope*dStrain;
+  
+  // Material goes further into compression
+  if (dStrain <= 0.0) {
+    TminStrain = CminStrain;
+    TendStrain = CendStrain;
+    
+    reload ();
+    
+    if (tempStress > Tstress) {
+      Tstress = tempStress;
+      Ttangent = TunloadSlope;
+    }
+  }
+  
+  // Material goes TOWARD tension
+  else if (tempStress <= 0.0) {
+    Tstress = tempStress;
+    Ttangent = TunloadSlope;
+  }
+  
+  // Made it into tension
+  else {
+    Tstress = 0.0;
+    Ttangent = 0.0;
+  }
+  
+  //opserr << "Concrete01::setTrial() " << strain << " " << tangent << " " << strain << endln;
+  
+  stress = Tstress;
+  tangent =  Ttangent;
+  
+  return 0;
 }
 
 void Concrete01::determineTrialState (double dStrain)

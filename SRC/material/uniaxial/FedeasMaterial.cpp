@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-04-02 22:02:42 $
+// $Revision: 1.16 $
+// $Date: 2004-07-15 21:34:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -40,12 +40,14 @@
 #include <Channel.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
+#include <float.h>
 
 FedeasMaterial::FedeasMaterial(int tag, int classTag, int nhv, int ndata)
   :UniaxialMaterial(tag,classTag),
    data(0), hstv(0), numData(ndata), numHstv(nhv),
-   epsilonP(0.0), sigmaP(0.0),
-   epsilon(0.0), sigma(0.0), tangent(0.0)
+   epsilonP(0.0), sigmaP(0.0), tangentP(0),
+   epsilon(0.0), sigma(0.0), tangent(0)
 {
   if (numHstv < 0)
     numHstv = 0;
@@ -76,7 +78,6 @@ FedeasMaterial::FedeasMaterial(int tag, int classTag, int nhv, int ndata)
       exit(-1);
     }
 			    
-
     // Initialize to zero
     for (int i = 0; i < numData; i++)
       data[i] = 0.0;
@@ -95,28 +96,36 @@ FedeasMaterial::~FedeasMaterial()
 int
 FedeasMaterial::setTrialStrain(double strain, double strainRate)
 {
-  // Store the strain
-  epsilon = strain;
-  
-  // Tells subroutine to do normal operations for stress and tangent
-  int ist = 1;
-  
-  // Call the subroutine
-  return this->invokeSubroutine(ist);
+
+  if (fabs(strain-epsilon) > DBL_EPSILON) {
+    // Store the strain
+    epsilon = strain;
+    
+    // Tells subroutine to do normal operations for stress and tangent
+    int ist = 1;
+    
+    // Call the subroutine
+    return this->invokeSubroutine(ist);
+  }
+  return 0;
 }
 
 int
 FedeasMaterial::setTrial(double strain, double &stress, double &stiff, double strainRate)
 {
-  // Store the strain
-  epsilon = strain;
-  
-  // Tells subroutine to do normal operations for stress and tangent
-  int ist = 1;
-  
-  // Call the subroutine
-  int res = this->invokeSubroutine(ist);
-  
+  int res = 0;
+  if (fabs(strain-epsilon) > DBL_EPSILON) {
+
+    // Store the strain
+    epsilon = strain;
+    
+    // Tells subroutine to do normal operations for stress and tangent
+    int ist = 1;
+    
+    // Call the subroutine
+    res = this->invokeSubroutine(ist);
+  }
+    
   stress = sigma;
   stiff = tangent;
   
@@ -178,6 +187,11 @@ FedeasMaterial::revertToStart(void)
   
   epsilonP = 0.0;
   sigmaP = 0.0;
+  tangentP = this->getInitialTangent();
+
+  epsilon = 0.0;
+  sigma = 0.0;
+  tangent = tangentP;
 
   return 0;
 }
@@ -187,7 +201,7 @@ FedeasMaterial::sendSelf(int commitTag, Channel &theChannel)
 {
   int res = 0;
   
-  Vector vecData(numHstv+numData+3);
+  Vector vecData(numHstv+numData+4);
   
   int i, j;
   // Copy only the committed history variables into vector
@@ -200,6 +214,7 @@ FedeasMaterial::sendSelf(int commitTag, Channel &theChannel)
   
   vecData(j++) = epsilonP;
   vecData(j++) = sigmaP;
+  vecData(j++) = tangentP;
   vecData(j++) = this->getTag();
   
   res += theChannel.sendVector(this->getDbTag(), commitTag, vecData);
@@ -215,7 +230,7 @@ FedeasMaterial::recvSelf(int commitTag, Channel &theChannel,
 {
   int res = 0;
   
-  Vector vecData(numHstv+numData+3);
+  Vector vecData(numHstv+numData+4);
   
   res += theChannel.recvVector(this->getDbTag(), commitTag, vecData);
   if (res < 0) {
@@ -234,8 +249,13 @@ FedeasMaterial::recvSelf(int commitTag, Channel &theChannel,
   
   epsilonP = vecData(j++);
   sigmaP   = vecData(j++);
+  tangentP = vecData(j++);
   this->setTag((int)vecData(j++));
-  
+
+  tangent = tangentP;
+  sigma = sigmaP;
+  epsilon = epsilonP;
+
   return res;
 }
 
@@ -436,7 +456,7 @@ FedeasMaterial::invokeSubroutine(int ist)
     concrete_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 		 &sigma, &tangent, &ist);
 #else
-    opserr << "FedeasMaterial::invokeSubroutine -- Concrete2 subroutine not yet linked\n";
+	opserr << "FedeasMaterial::invokeSubroutine -- Concrete2 subroutine not yet linked\n";
 #endif
     break;
     
@@ -481,7 +501,7 @@ FedeasMaterial::invokeSubroutine(int ist)
     steel_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 	      &sigma, &tangent, &ist);
 #else
-    opserr << "FedeasMaterial::invokeSubroutine -- Steel2 subroutine not yet linked\n";
+	opserr << "FedeasMaterial::invokeSubroutine -- Steel2 subroutine not yet linked\n";
 #endif
     break;
     

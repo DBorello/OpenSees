@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-03-05 01:02:51 $
+// $Revision: 1.13 $
+// $Date: 2004-07-15 21:34:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
                                                                         
@@ -113,8 +113,8 @@ int Steel01::setTrialStrain (double strain, double strainRate)
    double dStrain = Tstrain - Cstrain;
 
    // Calculate the trial state given the trial strain
-   //   if (fabs(dStrain) > DBL_EPSILON)   
-      determineTrialState (dStrain);
+   if (fabs(dStrain) > DBL_EPSILON)   
+     determineTrialState (dStrain);
 
    return 0;
 }
@@ -136,8 +136,8 @@ int Steel01::setTrial (double strain, double &stress, double &tangent, double st
    dStrain = Tstrain - Cstrain;
 
    // Calculate the trial state given the trial strain
-   // if (fabs(dStrain) > DBL_EPSILON) 
-      determineTrialState (dStrain);
+   if (fabs(dStrain) > DBL_EPSILON) 
+     determineTrialState (dStrain);
 
    stress = Tstress;
    tangent = Ttangent;

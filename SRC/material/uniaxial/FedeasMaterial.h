@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:39 $
+// $Revision: 1.7 $
+// $Date: 2004-07-15 21:34:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.h,v $
                                                                       
 // Written: MHS
@@ -76,11 +76,12 @@ class FedeasMaterial : public UniaxialMaterial
   double epsilonP;	// Committed strain
   double sigmaP;	// Committed stress
   double tangentP;	// Committed tangent
-  
- private:
+
   double epsilon;	// Trial strain
   double sigma;		// Trial stress
   double tangent;	// Trial tangent
+
+ private:
 };
 
 #endif
