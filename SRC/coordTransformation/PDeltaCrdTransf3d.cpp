@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-04-04 16:53:30 $
+// $Revision: 1.11 $
+// $Date: 2004-07-21 00:06:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.cpp,v $
                                                                         
                                                                         
@@ -41,6 +41,7 @@
 #include <Channel.h>
 
 #include <PDeltaCrdTransf3d.h>
+
 
 // constructor:
 PDeltaCrdTransf3d::PDeltaCrdTransf3d(int tag, const Vector &vecInLocXZPlane):
@@ -625,6 +626,7 @@ PDeltaCrdTransf3d::getGlobalResistingForce(const Vector &pb, const Vector &p0)
 	return pg;
 }
 
+
 const Matrix &
 PDeltaCrdTransf3d::getGlobalStiffMatrix (const Matrix &KB, const Vector &pb)
 {
@@ -846,6 +848,7 @@ PDeltaCrdTransf3d::getInitialGlobalStiffMatrix (const Matrix &KB)
 	//kl[2][8] -= NoverL;
 	//kl[8][2] -= NoverL;
 
+	
 	static double RWI[3][3];
 
 	if (nodeIOffset) {
@@ -882,6 +885,7 @@ PDeltaCrdTransf3d::getInitialGlobalStiffMatrix (const Matrix &KB)
 
 	// Transform local stiffness to global system
 	// First compute kl*T_{lg}
+
 	int m;
 	for (m = 0; m < 12; m++) {
 		tmp[m][0] = kl[m][0]*R[0][0] + kl[m][1]*R[1][0]  + kl[m][2]*R[2][0];
@@ -948,8 +952,6 @@ PDeltaCrdTransf3d::getInitialGlobalStiffMatrix (const Matrix &KB)
 	return kg;
 }
   
-
-
 
 CrdTransf3d *
 PDeltaCrdTransf3d::getCopy(void)
@@ -1031,7 +1033,6 @@ PDeltaCrdTransf3d::sendSelf(int cTag, Channel &theChannel)
   return res;
 }
 
-    
 
 int 
 PDeltaCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
@@ -1073,7 +1074,6 @@ PDeltaCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
   return res;
 }
  	
-
 const Vector &
 PDeltaCrdTransf3d::getPointGlobalCoordFromLocal(const Vector &xl)
 {
@@ -1097,7 +1097,7 @@ PDeltaCrdTransf3d::getPointGlobalCoordFromLocal(const Vector &xl)
    return xg;  
 }
 
-    
+   
 const Vector &
 PDeltaCrdTransf3d::getPointGlobalDisplFromBasic (double xi, const Vector &uxb)
 {
@@ -1172,11 +1172,4 @@ PDeltaCrdTransf3d::Print(OPS_Stream &s, int flag)
    if (nodeJOffset)
 	   s << "\tNode J offset: " << nodeJOffset[0] << " " << nodeJOffset[1] << " "<< nodeJOffset[2] << endln;
 }
-
-
-
-
-
-
-
 
