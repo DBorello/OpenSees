@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-05-25 00:25:53 $
+// $Revision: 1.7 $
+// $Date: 2002-06-06 18:49:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.h,v $
 
 #ifndef BeamWithHinges2d_h
@@ -119,6 +119,10 @@ class BeamWithHinges2d: public Element
   
   int maxIter;
   double tolerance;
+
+  Matrix *sp;  // Applied section forces due to element loads, 3 x nSections
+  double p0[3]; // Reactions in the basic system due to element loads
+  double v0[3]; // Basic deformations due to element loads on the interior
   
   static Matrix theMatrix;
   static Vector theVector;

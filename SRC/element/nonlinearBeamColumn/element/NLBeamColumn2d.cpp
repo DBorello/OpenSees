@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2002-05-16 00:07:39 $
+// $Revision: 1.24 $
+// $Date: 2002-06-06 18:47:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -58,6 +58,7 @@
 #include <math.h>
 #include <G3Globals.h>
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 
 #define  NDM   2         // dimension of the problem (2d)
 #define  NL    2         // size of uniform load vector
@@ -80,8 +81,11 @@ cosTheta(0.0), sinTheta(0.0), initialFlag(0),
 node1Ptr(0), node2Ptr(0), load(NEGD), 
 kv(NEBD,NEBD), Se(NEBD),
 kvcommit(NEBD,NEBD), Secommit(NEBD),
-fs(0), vs(0), Ssr(0), vscommit(0)
+fs(0), vs(0), Ssr(0), vscommit(0), sp(0)
 {
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
 }
 
 
@@ -99,7 +103,7 @@ cosTheta(0.0), sinTheta(1.0), initialFlag(0),
 node1Ptr(0), node2Ptr(0), load(NEGD), 
 kv(NEBD,NEBD), Se(NEBD), 
 kvcommit(NEBD,NEBD), Secommit(NEBD),
-fs(0), vs(0),Ssr(0), vscommit(0)
+fs(0), vs(0),Ssr(0), vscommit(0), sp(0)
 {
    connectedExternalNodes(0) = nodeI;
    connectedExternalNodes(1) = nodeJ;    
@@ -172,6 +176,10 @@ fs(0), vs(0),Ssr(0), vscommit(0)
        cerr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate vscommit array";   
        exit(-1);
    }
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
 }
 
 
@@ -202,6 +210,9 @@ NLBeamColumn2d::~NLBeamColumn2d()
 
    if (crdTransf)
      delete crdTransf;   
+
+   if (sp != 0)
+     delete sp;
 }
 
 
@@ -405,18 +416,22 @@ int NLBeamColumn2d::revertToStart()
 const Matrix &
 NLBeamColumn2d::getTangentStiff(void)
 {
-	crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
-	return crdTransf->getGlobalStiffMatrix(kv, Se);
+  // Will remove once we clean up the corotational 2d transformation -- MHS
+  crdTransf->update();
+
+  return crdTransf->getGlobalStiffMatrix(kv, Se);
 }
     
 
 const Vector &
 NLBeamColumn2d::getResistingForce(void)
 {
-	static Vector dummy(3);
+  // Will remove once we clean up the corotational 2d transformation -- MHS
+  crdTransf->update();
 
-	crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
-	return crdTransf->getGlobalResistingForce(Se, dummy);
+  Vector p0Vec(p0, 3);
+  
+  return crdTransf->getGlobalResistingForce(Se, p0Vec);
 }
 
 
@@ -500,15 +515,37 @@ int NLBeamColumn2d::update()
 	  for (ii = 0; ii < order; ii++) {
 	    switch(code(ii)) {
 	    case SECTION_RESPONSE_P:
-	      Ss(ii) = Se(0); 
+	      Ss(ii) = Se(0);
 	      break;
 	    case SECTION_RESPONSE_MZ:
 	      Ss(ii) =  xL1*Se(1) + xL*Se(2);
 	      break;
 	    case SECTION_RESPONSE_VY:
-	      Ss(ii) = oneOverL*(Se(1)+Se(2)); break;
+	      Ss(ii) = oneOverL*(Se(1)+Se(2));
+	      break;
 	    default:
-	      Ss(ii) = 0.0; break;
+	      Ss(ii) = 0.0;
+	      break;
+	    }
+	  }
+
+	  // Add the effects of element loads, if present
+	  if (sp != 0) {
+	    const Matrix &s_p = *sp;
+	    for (ii = 0; ii < order; ii++) {
+	      switch(code(ii)) {
+	      case SECTION_RESPONSE_P:
+		Ss(ii) += s_p(0,i);
+		break;
+	      case SECTION_RESPONSE_MZ:
+		Ss(ii) += s_p(1,i);
+		break;
+	      case SECTION_RESPONSE_VY:
+		Ss(ii) += s_p(2,i);
+		break;
+	      default:
+		break;
+	      }
 	    }
 	  }
 	  
@@ -754,16 +791,94 @@ NLBeamColumn2d::getMass(void)
 void 
 NLBeamColumn2d::zeroLoad(void)
 {
-    load.Zero();
+  if (sp != 0) {
+    sp->Zero();
+
+    p0[0] = 0.0;
+    p0[1] = 0.0;
+    p0[2] = 0.0;
+  }
+
+  load.Zero();
 }
 
 int
 NLBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("NLBeamColumn2d::addLoad - load type unknown for truss with tag: %d",
-			  this->getTag());
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
   
-  return -1;
+  if (sp == 0) {
+    sp = new Matrix(3,nSections);
+    if (sp == 0)
+      g3ErrorHandler->fatal("%s -- out of memory",
+			    "NLBeamColumn2d::addLoad");
+  }
+
+  const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
+  double L = crdTransf->getInitialLength();
+
+  if (type == LOAD_TAG_Beam2dUniformLoad) {
+    double wa = data(1)*loadFactor;  // Axial
+    double wy = data(0)*loadFactor;  // Transverse
+
+    Matrix &s_p = *sp;
+
+    // Accumulate applied section forces due to element loads
+    for (int i = 0; i < nSections; i++) {
+      double x = xi_pt(i,0)*L;
+      // Axial
+      s_p(0,i) += wa*(L-x);
+      // Moment
+      s_p(1,i) += wy*0.5*x*(x-L);
+      // Shear
+      s_p(2,i) += wy*(x-0.5*L);
+    }
+
+    // Accumulate reactions in basic system
+    p0[0] -= wa*L;
+    double V = 0.5*wy*L;
+    p0[1] -= V;
+    p0[2] -= V;
+  }
+  else if (type == LOAD_TAG_Beam2dPointLoad) {
+    double P = data(0)*loadFactor;
+    double N = data(1)*loadFactor;
+    double aOverL = data(2);
+    double a = aOverL*L;
+
+    double V1 = P*(1.0-aOverL);
+    double V2 = P*aOverL;
+
+    Matrix &s_p = *sp;
+
+    // Accumulate applied section forces due to element loads
+    for (int i = 0; i < nSections; i++) {
+      double x = xi_pt(i,0)*L;
+      if (x <= a) {
+	s_p(0,i) += N;
+	s_p(1,i) -= x*V1;
+	s_p(2,i) -= V1;
+      }
+      else {
+	s_p(1,i) -= (L-x)*V2;
+	s_p(2,i) += V2;
+      }
+    }
+
+    // Accumulate reactions in basic system
+    p0[0] -= N;
+    p0[1] -= V1;
+    p0[2] -= V2;
+  }
+
+  else {
+    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
+			    "NLBeamColumn2d::addLoad()", this->getTag());
+    return -1;
+  }
+
+  return 0;
 }
 
 
@@ -1312,18 +1427,17 @@ NLBeamColumn2d::Print(ostream &s, int flag)
       s << "\tConnected Nodes: " << connectedExternalNodes ;
       s << "\tNumber of Sections: " << nSections;
       s << "\tMass density: " << rho << endl;
-      theVector(3) = Secommit(0);
-      theVector(0) = -Secommit(0);
-      theVector(2) = Secommit(1);
-      theVector(5) = Secommit(2);
+      double P  = Secommit(0);
+      double M1 = Secommit(1);
+      double M2 = Secommit(2);
       double L = crdTransf->getInitialLength();
       double V = (Secommit(1)+Secommit(2))/L;
       theVector(1) = V;
       theVector(4) = -V;
-      s << "\tEnd 1 Forces (P V M): " << theVector(0) << " "
-	<< theVector(1) << " " << theVector(2) << endl;
-      s << "\tEnd 2 Forces (P V M): " << theVector(3) << " "
-	<< theVector(4) << " " << theVector(5) << endl;
+      s << "\tEnd 1 Forces (P V M): " << -P+p0[0] << " "
+	<< V+p0[1] << " " << M1 << endl;
+      s << "\tEnd 2 Forces (P V M): " << P << " "
+	<< -V+p0[2] << " " << M2 << endl;
    }
 }
 
@@ -1585,13 +1699,13 @@ NLBeamColumn2d::getResponse(int responseID, Information &eleInfo)
       return eleInfo.setVector(this->getResistingForce());
 
     case 2:
-      theVector(3) = Se(0);
-      theVector(0) = -Se(0);
+      theVector(3) =  Se(0);
+      theVector(0) = -Se(0)+p0[0];
       theVector(2) = Se(1);
       theVector(5) = Se(2);
-      V = (Se(1)+Se(2))/crdTransf->getInitialLength();;
-      theVector(1) = V;
-      theVector(4) = -V;
+      V = (Se(1)+Se(2))/crdTransf->getInitialLength();
+      theVector(1) =  V+p0[1];
+      theVector(4) = -V+p0[2];
       return eleInfo.setVector(theVector);
       
     default: 

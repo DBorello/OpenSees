@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-05-16 00:07:38 $
+// $Revision: 1.10 $
+// $Date: 2002-06-06 18:43:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -41,6 +41,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
+#include <ElementalLoad.h>
 
 #include <G3Globals.h>
 
@@ -85,6 +86,14 @@ DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
     connectedExternalNodes(0) = nd1;
     connectedExternalNodes(1) = nd2;
 
+    q0[0] = 0.0;
+    q0[1] = 0.0;
+    q0[2] = 0.0;
+
+    p0[0] = 0.0;
+    p0[1] = 0.0;
+    p0[2] = 0.0;
+
 // AddingSensitivity:BEGIN /////////////////////////////////////
 	gradientIdentifier = 0;
 	gradientSectionTag = 0;
@@ -98,6 +107,14 @@ DispBeamColumn2d::DispBeamColumn2d()
   connectedExternalNodes(2), L(0.0), nd1Ptr(0), nd2Ptr(0),
   Q(6), q(3), rho(0.0)
 {
+    q0[0] = 0.0;
+    q0[1] = 0.0;
+    q0[2] = 0.0;
+
+    p0[0] = 0.0;
+    p0[1] = 0.0;
+    p0[2] = 0.0;
+
 // AddingSensitivity:BEGIN /////////////////////////////////////
 	gradientIdentifier = 0;
 	gradientSectionTag = 0;
@@ -274,139 +291,196 @@ DispBeamColumn2d::update(void)
 const Matrix&
 DispBeamColumn2d::getTangentStiff()
 {
-	static Matrix kb(3,3);
+  static Matrix kb(3,3);
 
-	// Zero for integral
-	kb.Zero();
-	q.Zero();
-
-	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-
-	// Assuming member is prismatic ... have to move inside
-	// the loop if it is not prismatic
-	int order = theSections[0]->getOrder();
-	const ID &code = theSections[0]->getType();
-
-	double oneOverL = 1.0/L;
-	Matrix ka(workArea, order, 3);
-
-	// Loop over the integration points
-	for (int i = 0; i < numSections; i++) {
-
-		// Get the section tangent stiffness and stress resultant
-		const Matrix &ks = theSections[i]->getSectionTangent();
-		const Vector &s = theSections[i]->getStressResultant();
-
-		double xi6 = 6.0*pts(i,0);
-		ka.Zero();
-
-		// Perform numerical integration
-		//kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
-		double wti = wts(i)*oneOverL;
-		double tmp;
-		int j, k;
-		for (j = 0; j < order; j++) {
-			switch(code(j)) {
-			case SECTION_RESPONSE_P:
-				for (k = 0; k < order; k++)
-					ka(k,0) += ks(k,j)*wti;
-				break;
-			case SECTION_RESPONSE_MZ:
-				for (k = 0; k < order; k++) {
-					tmp = ks(k,j)*wti;
-					ka(k,1) += (xi6-4.0)*tmp;
-					ka(k,2) += (xi6-2.0)*tmp;
-				}
-				break;
-			default:
-				break;
-			}
-		}
-		for (j = 0; j < order; j++) {
-			switch (code(j)) {
-			case SECTION_RESPONSE_P:
-				for (k = 0; k < 3; k++)
-					kb(0,k) += ka(j,k);
-				break;
-			case SECTION_RESPONSE_MZ:
-				for (k = 0; k < 3; k++) {
-					tmp = ka(j,k);
-					kb(1,k) += (xi6-4.0)*tmp;
-					kb(2,k) += (xi6-2.0)*tmp;
-				}
-				break;
-			default:
-				break;
-			}
-		}
-
-		//q.addMatrixTransposeVector(1.0, *B, s, wts(i));
-		double si;
-		for (j = 0; j < order; j++) {
-			si = s(j)*wts(i);
-			switch(code(j)) {
-			case SECTION_RESPONSE_P:
-				q(0) += si; break;
-			case SECTION_RESPONSE_MZ:
-				q(1) += (xi6-4.0)*si; q(2) += (xi6-2.0)*si; break;
-			default:
-				break;
-			}
-		}
-
+  // Zero for integral
+  kb.Zero();
+  q.Zero();
+  
+  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  
+  // Assuming member is prismatic ... have to move inside
+  // the loop if it is not prismatic
+  int order = theSections[0]->getOrder();
+  const ID &code = theSections[0]->getType();
+  
+  double oneOverL = 1.0/L;
+  Matrix ka(workArea, order, 3);
+  
+  // Loop over the integration points
+  for (int i = 0; i < numSections; i++) {
+    
+    // Get the section tangent stiffness and stress resultant
+    const Matrix &ks = theSections[i]->getSectionTangent();
+    const Vector &s = theSections[i]->getStressResultant();
+    
+    double xi6 = 6.0*pts(i,0);
+    ka.Zero();
+    
+    // Perform numerical integration
+    //kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
+    double wti = wts(i)*oneOverL;
+    double tmp;
+    int j, k;
+    for (j = 0; j < order; j++) {
+      switch(code(j)) {
+      case SECTION_RESPONSE_P:
+	for (k = 0; k < order; k++)
+	  ka(k,0) += ks(k,j)*wti;
+	break;
+      case SECTION_RESPONSE_MZ:
+	for (k = 0; k < order; k++) {
+	  tmp = ks(k,j)*wti;
+	  ka(k,1) += (xi6-4.0)*tmp;
+	  ka(k,2) += (xi6-2.0)*tmp;
 	}
+	break;
+      default:
+	break;
+      }
+    }
+    for (j = 0; j < order; j++) {
+      switch (code(j)) {
+      case SECTION_RESPONSE_P:
+	for (k = 0; k < 3; k++)
+	  kb(0,k) += ka(j,k);
+	break;
+      case SECTION_RESPONSE_MZ:
+	for (k = 0; k < 3; k++) {
+	  tmp = ka(j,k);
+	  kb(1,k) += (xi6-4.0)*tmp;
+	  kb(2,k) += (xi6-2.0)*tmp;
+	}
+	break;
+      default:
+	break;
+      }
+    }
+    
+    //q.addMatrixTransposeVector(1.0, *B, s, wts(i));
+    double si;
+    for (j = 0; j < order; j++) {
+      si = s(j)*wts(i);
+      switch(code(j)) {
+      case SECTION_RESPONSE_P:
+	q(0) += si; break;
+      case SECTION_RESPONSE_MZ:
+	q(1) += (xi6-4.0)*si; q(2) += (xi6-2.0)*si; break;
+      default:
+	break;
+      }
+    }
+    
+  }
+  
+  // Add effects of element loads, q = q(v) + q0
+  q(0) += q0[0];
+  q(1) += q0[1];
+  q(2) += q0[2];
 
-	// Transform to global stiffness
-	crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
-	K = crdTransf->getGlobalStiffMatrix(kb, q);
-
-	return K;
+  // Transform to global stiffness
+  crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
+  K = crdTransf->getGlobalStiffMatrix(kb, q);
+  
+  return K;
 }
 
 const Matrix&
 DispBeamColumn2d::getDamp()
 {
-	K.Zero();
+  K.Zero();
 	
-	return K;
+  return K;
 }
 
 const Matrix&
 DispBeamColumn2d::getMass()
 {
-	K.Zero();
+  K.Zero();
 
-	if (rho == 0.0)
-		return K;
-
-	double m = 0.5*rho*L;
-
-	K(0,0) = K(1,1) = K(3,3) = K(4,4) = m;
-
-	return K;
+  if (rho == 0.0)
+    return K;
+  
+  double m = 0.5*rho*L;
+  
+  K(0,0) = K(1,1) = K(3,3) = K(4,4) = m;
+  
+  return K;
 }
 
 void
 DispBeamColumn2d::zeroLoad(void)
 {
-	Q(0) = 0.0;
-	Q(1) = 0.0;
-	Q(2) = 0.0;
-	Q(3) = 0.0;
-	Q(4) = 0.0;
-	Q(5) = 0.0;
+  Q.Zero();
 
-	return;
+  q0[0] = 0.0;
+  q0[1] = 0.0;
+  q0[2] = 0.0;
+  
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  
+  return;
 }
 
 int 
 DispBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("DispBeamColumn2d::addLoad - load type unknown for truss with tag: %d\n",
-			  this->getTag());
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
+  
+  if (type == LOAD_TAG_Beam2dUniformLoad) {
+    double wt = data(0)*loadFactor;  // Transverse (+ve upward)
+    double wa = data(1)*loadFactor;  // Axial (+ve from node I to J)
 
-  return -1;
+    double V = 0.5*wt*L;
+    double M = V*L/6.0; // wt*L*L/12
+    double P = wa*L;
+
+    // Reactions in basic system
+    p0[0] -= P;
+    p0[1] -= V;
+    p0[2] -= V;
+
+    // Fixed end forces in basic system
+    q0[0] -= 0.5*P;
+    q0[1] -= M;
+    q0[2] += M;
+  }
+  else if (type == LOAD_TAG_Beam2dPointLoad) {
+    double P = data(0)*loadFactor;
+    double N = data(1)*loadFactor;
+    double aOverL = data(2);
+    double a = aOverL*L;
+    double b = L-a;
+
+    // Reactions in basic system
+    p0[0] -= N;
+    double V1 = P*(1.0-aOverL);
+    double V2 = P*aOverL;
+    p0[1] -= V1;
+    p0[2] -= V2;
+
+    double L2 = 1.0/(L*L);
+    double a2 = a*a;
+    double b2 = b*b;
+
+    // Fixed end forces in basic system
+    q0[0] -= N*aOverL;
+    double M1 = -a * b2 * P * L2;
+    double M2 = a2 * b * P * L2;
+    q0[1] += M1;
+    q0[2] += M2;
+  }
+  else {
+    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
+			    "DispBeamColumn2d::addLoad()", this->getTag());
+    return -1;
+  }
+
+  return 0;
 }
 
 int 
@@ -441,58 +515,66 @@ DispBeamColumn2d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector&
 DispBeamColumn2d::getResistingForce()
 {
-	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+  const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+  
+  // Assuming member is prismatic ... have to move inside
+  // the loop if it is not prismatic
+  int order = theSections[0]->getOrder();
+  const ID &code = theSections[0]->getType();
+  
+  // Zero for integration
+  q.Zero();
+  
+  // Loop over the integration points
+  for (int i = 0; i < numSections; i++) {
+    
+    double xi6 = 6.0*pts(i,0);
+    
+    // Get section stress resultant
+    const Vector &s = theSections[i]->getStressResultant();
+    
+    // Perform numerical integration on internal force
+    //q.addMatrixTransposeVector(1.0, *B, s, wts(i));
+    
+    double si;
+    for (int j = 0; j < order; j++) {
+      si = s(j)*wts(i);
+      switch(code(j)) {
+      case SECTION_RESPONSE_P:
+	q(0) += si; break;
+      case SECTION_RESPONSE_MZ:
+	q(1) += (xi6-4.0)*si; q(2) += (xi6-2.0)*si; break;
+      default:
+	break;
+      }
+    }
+    
+  }
+  
+  // Add effects of element loads, q = q(v) + q0
+  q(0) += q0[0];
+  q(1) += q0[1];
+  q(2) += q0[2];
 
-	// Assuming member is prismatic ... have to move inside
-	// the loop if it is not prismatic
-	int order = theSections[0]->getOrder();
-	const ID &code = theSections[0]->getType();
+  // Vector for reactions in basic system
+  Vector p0Vec(p0, 3);
 
-	// Zero for integration
-	q.Zero();
+  // Will remove once we clean up the corotational 2d transformation -- MHS
+  crdTransf->update();
 
-	// Loop over the integration points
-	for (int i = 0; i < numSections; i++) {
-
-		double xi6 = 6.0*pts(i,0);
-
-		// Get section stress resultant
-		const Vector &s = theSections[i]->getStressResultant();
-
-		// Perform numerical integration on internal force
-		//q.addMatrixTransposeVector(1.0, *B, s, wts(i));
-
-		double si;
-		for (int j = 0; j < order; j++) {
-			si = s(j)*wts(i);
-			switch(code(j)) {
-			case SECTION_RESPONSE_P:
-				q(0) += si; break;
-			case SECTION_RESPONSE_MZ:
-				q(1) += (xi6-4.0)*si; q(2) += (xi6-2.0)*si; break;
-			default:
-				break;
-			}
-		}
-
-	}
-
-	// Transform forces
-	static Vector dummy(3);		// No elemental loads
-	crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
-	P = crdTransf->getGlobalResistingForce(q,dummy);
-
-	// Subtract other external nodal loads ... P_res = P_int - P_ext
-	//P.addVector(1.0, Q, -1.0);
-	P(0) -= Q(0);
-	P(1) -= Q(1);
-	P(2) -= Q(2);
-	P(3) -= Q(3);
-	P(4) -= Q(4);
-	P(5) -= Q(5);
-
-	return P;
+  P = crdTransf->getGlobalResistingForce(q, p0Vec);
+  
+  // Subtract other external nodal loads ... P_res = P_int - P_ext
+  //P.addVector(1.0, Q, -1.0);
+  P(0) -= Q(0);
+  P(1) -= Q(1);
+  P(2) -= Q(2);
+  P(3) -= Q(3);
+  P(4) -= Q(4);
+  P(5) -= Q(5);
+  
+  return P;
 }
 
 const Vector&
@@ -521,23 +603,32 @@ DispBeamColumn2d::getResistingForceIncInertia()
 int
 DispBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
 {
-	return -1;
+  return -1;
 }
 
 int
 DispBeamColumn2d::recvSelf(int commitTag, Channel &theChannel,
-						FEM_ObjectBroker &theBroker)
+			   FEM_ObjectBroker &theBroker)
 {
-	return -1;
+  return -1;
 }
 
 void
 DispBeamColumn2d::Print(ostream &s, int flag)
 {
-	s << "\nDispBeamColumn2d, element id:  " << this->getTag() << endl;
-	s << "\tConnected external nodes:  " << connectedExternalNodes;
-	s << "\tmass density:  " << rho << endl;
-	theSections[0]->Print(s,flag);
+  s << "\nDispBeamColumn2d, element id:  " << this->getTag() << endl;
+  s << "\tConnected external nodes:  " << connectedExternalNodes;
+  s << "\tCoordTransf: " << crdTransf->getTag() << endl;
+  s << "\tmass density:  " << rho << endl;
+  theSections[0]->Print(s,flag);
+  double P  = q(0);
+  double M1 = q(1);
+  double M2 = q(2);
+  double V = (M1+M2)/L;
+  s << "\tEnd 1 Forces (P V M): " << -P+p0[0]
+    << " " << V+p0[1] << " " << M1 << endl;
+  s << "\tEnd 2 Forces (P V M): " << P
+    << " " << -V+p0[2] << " " << M2 << endl;
 }
 
 
@@ -601,13 +692,13 @@ DispBeamColumn2d::getResponse(int responseID, Information &eleInfo)
       return eleInfo.setVector(this->getResistingForce());
 
     case 2:
-      P(3) = q(0);
-      P(0) = -q(0);
+      P(3) =  q(0);
+      P(0) = -q(0)+p0[0];
       P(2) = q(1);
       P(5) = q(2);
       V = (q(1)+q(2))/L;
-      P(1) = V;
-      P(4) = -V;
+      P(1) =  V+p0[1];
+      P(4) = -V+p0[2];
       return eleInfo.setVector(P);
       
     default: 

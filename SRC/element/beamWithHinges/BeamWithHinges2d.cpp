@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-05-25 17:21:33 $
+// $Revision: 1.13 $
+// $Date: 2002-06-06 18:49:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
 
 #include <BeamWithHinges2d.h>
@@ -39,6 +39,7 @@
 
 #include <SectionForceDeformation.h>
 #include <CrdTransf2d.h>
+#include <ElementalLoad.h>
 
 #include <Information.h>
 #include <ElementResponse.h>
@@ -57,10 +58,18 @@ BeamWithHinges2d::BeamWithHinges2d(void)
    node1Ptr(0), node2Ptr(0),
    kb(3,3), q(3), load(6),
    kbCommit(3,3), qCommit(3),
-   initialFlag(0), maxIter(0), tolerance(0.0)
+   initialFlag(0), maxIter(0), tolerance(0.0), sp(0)
 {
   section[0] = 0;
   section[1] = 0;
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+
+  v0[0] = 0.0;
+  v0[1] = 0.0;
+  v0[2] = 0.0;
 }
 
 BeamWithHinges2d::BeamWithHinges2d(int tag, int nodeI, int nodeJ,
@@ -77,7 +86,7 @@ BeamWithHinges2d::BeamWithHinges2d(int tag, int nodeI, int nodeJ,
    node1Ptr(0), node2Ptr(0),
    kb(3,3), q(3), load(6),
    kbCommit(3,3), qCommit(3),
-   initialFlag(0), maxIter(max), tolerance(tol)
+   initialFlag(0), maxIter(max), tolerance(tol), sp(0)
 {
   if (E <= 0.0)  {
     g3ErrorHandler->fatal("%s -- input parameter E is <= 0.0",
@@ -115,6 +124,14 @@ BeamWithHinges2d::BeamWithHinges2d(int tag, int nodeI, int nodeJ,
   
   connectedExternalNodes(0) = nodeI;
   connectedExternalNodes(1) = nodeJ;
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+
+  v0[0] = 0.0;
+  v0[1] = 0.0;
+  v0[2] = 0.0;
 }
 
 BeamWithHinges2d::~BeamWithHinges2d(void)
@@ -125,6 +142,9 @@ BeamWithHinges2d::~BeamWithHinges2d(void)
   
   if (theCoordTransf)
     delete theCoordTransf;
+
+  if (sp != 0)
+    delete sp;
 }
 
 int 
@@ -288,16 +308,200 @@ BeamWithHinges2d::getMass(void)
 void 
 BeamWithHinges2d::zeroLoad(void)
 {
+  if (sp != 0)
+    sp->Zero();
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
+  
+  v0[0] = 0.0;
+  v0[1] = 0.0;
+  v0[2] = 0.0;
+
   load.Zero();
 }
 
 int
 BeamWithHinges2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
-  g3ErrorHandler->warning("%s -- load type unknown for ele with tag: %d",
-			  "BeamWithHinges2d::addLoad", this->getTag());
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
   
-  return -1;
+  if (sp == 0) {
+    sp = new Matrix(3,2);
+    if (sp == 0)
+      g3ErrorHandler->fatal("%s -- out of memory",
+			    "TwoPointHingedBeam2d::addLoad");
+  }
+
+  double L = theCoordTransf->getInitialLength();
+  double oneOverL = 1.0/L;
+
+  double lp1 = beta1*L;
+  double lp2 = beta2*L;
+  double Le = L-lp1-lp2;
+
+  // Section locations along element length ...
+  double xi[2];
+  xi[0] = 0.5*lp1;
+  xi[1] = L-0.5*lp2;
+
+  if (type == LOAD_TAG_Beam2dUniformLoad) {
+    double wa = data(1)*loadFactor;  // Axial
+    double wy = data(0)*loadFactor;  // Transverse
+
+    Matrix &s_p = *sp;
+
+    // Accumulate applied section forces due to uniform load
+    for (int i = 0; i < 2; i++) {
+      double x = xi[i];
+      // Axial
+      s_p(0,i) += wa*(L-x);
+      // Moment
+      s_p(1,i) += wy*0.5*x*(x-L);
+      // Shear
+      s_p(2,i) += wy*(x-0.5*L);
+    }
+
+    // Accumulate reactions in basic system
+    p0[0] -= wa*L;
+    double V = 0.5*wy*L;
+    p0[1] -= V;
+    p0[2] -= V;
+
+    // Quick return
+    if (Le == 0.0)
+      return 0;
+
+    // Accumulate basic deformations due to uniform load on interior
+    // Midpoint rule for axial
+    v0[0] += wa*0.5*(L-lp1+lp2)/(E*A)*Le;
+
+    // Two point Gauss for bending ... will not be exact when
+    // hinge lengths are not equal, but this is not a big deal!!!
+    double x1 = lp1 + 0.5*Le*(1.0-1/sqrt(3));
+    double x2 = lp1 + 0.5*Le*(1.0+1/sqrt(3));
+
+    double M1 = 0.5*wy*x1*(x1-L);
+    double M2 = 0.5*wy*x2*(x2-L);
+
+    double b1, b2;
+    double Le2EI = Le/(2*E*I);
+    b1 = x1*oneOverL;
+    b2 = x2*oneOverL;
+    v0[2] += Le2EI*(b1*M1+b2*M2);
+
+    b1 -= 1.0;
+    b2 -= 1.0;
+    v0[1] += Le2EI*(b1*M1+b2*M2);
+  }
+
+  else if (type == LOAD_TAG_Beam2dPointLoad) {
+    double P = data(0)*loadFactor;
+    double N = data(1)*loadFactor;
+    double aOverL = data(2);
+    double a = aOverL*L;
+
+    double V1 = P*(1.0-aOverL);
+    double V2 = P*aOverL;
+
+    Matrix &s_p = *sp;
+
+    // Accumulate applied section forces due to point load
+    for (int i = 0; i < 2; i++) {
+      double x = xi[i];
+      if (x <= a) {
+	s_p(0,i) += N;
+	s_p(1,i) -= x*V1;
+	s_p(2,i) -= V1;
+      }
+      else {
+	s_p(1,i) -= (L-x)*V2;
+	s_p(2,i) += V2;
+      }
+    }
+
+    // Accumulate reactions in basic system
+    p0[0] -= N;
+    p0[1] -= V1;
+    p0[2] -= V2;
+
+    // Quick return
+    if (Le == 0.0)
+      return 0;
+
+    // Accumulate basic deformations of interior due to point load
+    double M1, M2, M3;
+    double b1, b2, b3;
+
+    // Point load is on left hinge
+    if (a < lp1) {
+      M1 = (lp1-L)*V2;
+      M2 = -lp2*V2;
+
+      double Le_6EI = Le/(6*E*I);
+
+      b1 = lp1*oneOverL;
+      b2 = 1.0-lp2*oneOverL;
+      v0[2] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[1] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      // Nothing to do for axial
+      //v0[0] += 0.0;
+    }
+    // Point load is on right hinge
+    else if (a > L-lp2) {
+      M1 = -lp1*V1;
+      M2 = (lp2-L)*V1;
+
+      double Le_6EI = Le/(6*E*I);
+
+      b1 = lp1*oneOverL;
+      b2 = 1.0-lp2*oneOverL;
+      v0[2] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[1] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      v0[0] += N*Le/(E*A);      
+    }
+    // Point load is on elastic interior
+    else {
+      M1 = -lp1*V1;
+      M2 = -lp2*V2;
+      M3 = -a*V1;
+
+      double L1_6EI = (a-lp1)/(6*E*I);
+      double L2_6EI = (Le-a+lp1)/(6*E*I);
+
+      b1 = lp1*oneOverL;
+      b2 = 1.0-lp2*oneOverL;
+      b3 = a*oneOverL;
+      v0[2] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[2] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      b3 -= 1.0;
+      v0[1] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[1] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      v0[0] += N*(a-lp1)/(E*A);
+    }
+  }
+
+  else {
+    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
+			    "BeamWithHinges2d::addLoad()", this->getTag());
+    return -1;
+  }
+
+  return 0;  
 }
 
 int
@@ -324,12 +528,12 @@ BeamWithHinges2d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 BeamWithHinges2d::getResistingForce(void)
 {
-  static Vector dummy(3);
-  
   // Will remove once we clean up the corotational 2d transformation -- MHS
   theCoordTransf->update();
 
-  return theCoordTransf->getGlobalResistingForce (q, dummy);
+  Vector p0Vec(p0, 3);
+
+  return theCoordTransf->getGlobalResistingForce(q, p0Vec);
 }
 
 const Vector &
@@ -396,9 +600,9 @@ BeamWithHinges2d::Print(ostream &s, int flag)
   V = (M1+M2)/L;
 
   s << "\tEnd 1 Forces (P V M): "
-    << -P << ' ' <<  V << ' ' << M1 << endl;
+    << -P+p0[0] << ' ' <<  V+p0[1] << ' ' << M1 << endl;
   s << "\tEnd 2 Forces (P V M): "
-    <<  P << ' ' << -V << ' ' << M2 << endl;
+    <<  P << ' ' << -V+p0[2] << ' ' << M2 << endl;
   
   if (section[0] != 0) {
     s << "Hinge 1, section tag: " << section[0]->getTag() << 
@@ -518,10 +722,10 @@ BeamWithHinges2d::update(void)
     f(2,1) = fElastic(1,0);
     f(0,1) = f(1,0) = f(0,2) = f(2,0) = 0.0;
     
-    // vr = fElastic * q;
-    vr(0) = LoverEA*q(0);
-    vr(1) = fElastic(0,0)*q(1) + fElastic(0,1)*q(2);
-    vr(2) = fElastic(1,0)*q(1) + fElastic(1,1)*q(2);
+    // vr = fElastic*q + v0;
+    vr(0) = LoverEA*q(0) + v0[0];
+    vr(1) = fElastic(0,0)*q(1) + fElastic(0,1)*q(2) + v0[1];
+    vr(2) = fElastic(1,0)*q(1) + fElastic(1,1)*q(2) + v0[2];
     
     for (int i = 0; i < 2; i++) {
       
@@ -538,31 +742,52 @@ BeamWithHinges2d::update(void)
       
       Matrix fb(&workArea[3*order], order, 3);
       
-      double xL = xi[i]*oneOverL;
+      double x   = xi[i];
+      double xL  = x*oneOverL;
       double xL1 = xL-1.0;
       
       int ii;
       // Section forces
-      // s = b*q + bp*currDistrLoad;
+      // s = b*q + bp*w;
       //this->getForceInterpMatrix(b, xi[i], code);
       //s.addMatrixVector(0.0, b, q, 1.0);
       for (ii = 0; ii < order; ii++) {
 	switch(code(ii)) {
 	case SECTION_RESPONSE_P:
-	  s(ii) = q(0); break;
+	  s(ii) = q(0);
+	  break;
 	case SECTION_RESPONSE_MZ:
-	  s(ii) = xL1*q(1) + xL*q(2); break;
+	  s(ii) = xL1*q(1) + xL*q(2);
+	  break;
 	case SECTION_RESPONSE_VY:
-	  s(ii) = oneOverL*(q(1)+q(2)); break;
+	  s(ii) = oneOverL*(q(1)+q(2));
+	  break;
 	default:
-	  s(ii) = 0.0; break;
+	  s(ii) = 0.0;
+	  break;
 	}
       }
       
-      // UNCOMMENT WHEN DISTRIBUTED LOADS ARE ADDED TO INTERFACE
-      // this->getDistrLoadInterpMatrix(bp, xi[i], code);
-      // s.addMatrixVector(1.0, bp, currDistrLoad, 1.0);
-      
+      // Add the effects of element loads, if present
+      if (sp != 0) {
+	const Matrix &s_p = *sp;
+	for (ii = 0; ii < order; ii++) {
+	  switch(code(ii)) {
+	  case SECTION_RESPONSE_P:
+	    s(ii) += s_p(0,i);
+	    break;
+	  case SECTION_RESPONSE_MZ:
+	    s(ii) += s_p(1,i);
+	    break;
+	  case SECTION_RESPONSE_VY:
+	    s(ii) += s_p(2,i);
+	    break;
+	  default:
+	    break;
+	  }
+	}
+      }
+
       // Increment in section forces
       // ds = s - sr
       ds = s;
@@ -831,15 +1056,15 @@ BeamWithHinges2d::getResponse(int responseID, Information &eleInfo)
     
   case 4: // local forces
     // Axial
-    force(3) = q(0);
-    force(0) = -q(0);
+    force(3) =  q(0);
+    force(0) = -q(0)+p0[0];
     // Moment
     force(2) = q(1);
     force(5) = q(2);
     // Shear
     V = (q(1)+q(2))/L;
-    force(1) = V;
-    force(4) = -V;
+    force(1) =  V+p0[1];
+    force(4) = -V+p0[2];
     return eleInfo.setVector(force);
     
   default:

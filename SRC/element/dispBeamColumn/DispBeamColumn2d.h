@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-05-16 00:07:38 $
+// $Revision: 1.6 $
+// $Date: 2002-06-06 18:43:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.h,v $
 
 // Written: MHS
@@ -111,8 +111,10 @@ class DispBeamColumn2d : public Element
 
     static Matrix K;		// Element stiffness, damping, and mass Matrix
     static Vector P;		// Element resisting force vector
-	Vector Q;		// Applied nodal loads
-	Vector q;		// Basic force
+    Vector Q;		// Applied nodal loads
+    Vector q;		// Basic force
+    double q0[3];  // Fixed end forces in basic system
+    double p0[3];  // Reactions in basic system
     double rho;			// Mass density per unit length
 
 	static double workArea[];

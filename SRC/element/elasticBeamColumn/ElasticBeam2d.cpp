@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-05-29 22:55:05 $
+// $Revision: 1.6 $
+// $Date: 2002-06-06 18:39:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -53,8 +53,8 @@ Matrix ElasticBeam2d::kb(3,3);
 
 ElasticBeam2d::ElasticBeam2d()
   :Element(0,ELE_TAG_ElasticBeam2d), 
-  A(0), E(0), I(0), L(0.0), rho(0.0),
-  Q(6), q(3), q0(6), node1Ptr(0), node2Ptr(0),
+  A(0), E(0), I(0), rho(0.0),
+  Q(6), q(3), node1Ptr(0), node2Ptr(0),
   connectedExternalNodes(2), theCoordTransf(0)
 {
     // does nothing
@@ -64,8 +64,8 @@ ElasticBeam2d::ElasticBeam2d(int tag, double a, double e, double i,
 		     int Nd1, int Nd2, 
 		     CrdTransf2d &coordTransf, double r)
   :Element(tag,ELE_TAG_ElasticBeam2d), 
-  A(a), E(e), I(i), L(0.0), rho(r),
-  Q(6), q(3), q0(6), node1Ptr(0), node2Ptr(0),
+  A(a), E(e), I(i), rho(r),
+  Q(6), q(3), node1Ptr(0), node2Ptr(0),
   connectedExternalNodes(2), theCoordTransf(0)
 {
     connectedExternalNodes(0) = Nd1;
@@ -134,7 +134,7 @@ ElasticBeam2d::setDomain(Domain *theDomain)
     if (theCoordTransf->initialize(node1Ptr, node2Ptr) != 0)
 	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Error initializing coordinate transformation");
     
-    L = theCoordTransf->getInitialLength();
+    double L = theCoordTransf->getInitialLength();
 
     if (L == 0.0)
 	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Element has zero length");
@@ -161,57 +161,72 @@ ElasticBeam2d::revertToStart()
 const Matrix &
 ElasticBeam2d::getTangentStiff(void)
 {
-    theCoordTransf->update();
-    
-    const Vector &v = theCoordTransf->getBasicTrialDisp();
-    
-	double EoverL   = E/L;
-	double EAoverL  = A*EoverL;			// EA/L
-	double EIoverL2 = 2.0*I*EoverL;		// 2EI/L
-	double EIoverL4 = 2.0*EIoverL2;		// 4EI/L
+  theCoordTransf->update();
+  
+  const Vector &v = theCoordTransf->getBasicTrialDisp();
+  
+  double L = theCoordTransf->getInitialLength();
 
-    q(0) = EAoverL*v(0);
-    q(1) = EIoverL4*v(1) + EIoverL2*v(2);
-    q(2) = EIoverL2*v(1) + EIoverL4*v(2);
+  double EoverL   = E/L;
+  double EAoverL  = A*EoverL;			// EA/L
+  double EIoverL2 = 2.0*I*EoverL;		// 2EI/L
+  double EIoverL4 = 2.0*EIoverL2;		// 4EI/L
+  
+  // determine q = kv + q0
+  q(0) = EAoverL*v(0);
+  q(1) = EIoverL4*v(1) + EIoverL2*v(2);
+  q(2) = EIoverL2*v(1) + EIoverL4*v(2);
 
-   	kb(0,0) = EAoverL;
-	kb(1,1) = kb(2,2) = EIoverL4;
-	kb(2,1) = kb(1,2) = EIoverL2;
-
-	return theCoordTransf->getGlobalStiffMatrix(kb,q);
+  q(0) += q0[0];
+  q(1) += q0[1];
+  q(2) += q0[2];
+  
+  kb(0,0) = EAoverL;
+  kb(1,1) = kb(2,2) = EIoverL4;
+  kb(2,1) = kb(1,2) = EIoverL2;
+  
+  return theCoordTransf->getGlobalStiffMatrix(kb,q);
 }
 
 const Matrix &
 ElasticBeam2d::getDamp(void)
 {
-	K.Zero();
-
-	return K;
+  K.Zero();
+  
+  return K;
 }
 
 const Matrix &
 ElasticBeam2d::getMass(void)
 { 
-	K.Zero();
+  K.Zero();
 
-	if (rho > 0.0) {
-		double m = 0.5*rho*L;
-		
-		K(0,0) = m;
-		K(1,1) = m;
-
-		K(3,3) = m;
-		K(4,4) = m;
-	}
-
-    return K;
+  if (rho > 0.0) {
+    double L = theCoordTransf->getInitialLength();
+    double m = 0.5*rho*L;
+    
+    K(0,0) = m;
+    K(1,1) = m;
+    
+    K(3,3) = m;
+    K(4,4) = m;
+  }
+  
+  return K;
 }
 
 void 
 ElasticBeam2d::zeroLoad(void)
 {
   Q.Zero();
-  q0.Zero();
+
+  q0[0] = 0.0;
+  q0[1] = 0.0;
+  q0[2] = 0.0;
+
+  p0[0] = 0.0;
+  p0[1] = 0.0;
+  p0[2] = 0.0;
 
   return;
 }
@@ -221,44 +236,54 @@ ElasticBeam2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
   int type;
   const Vector &data = theLoad->getData(type, loadFactor);
-  
+  double L = theCoordTransf->getInitialLength();
+
   if (type == LOAD_TAG_Beam2dUniformLoad) {
-    double w = data(0) * loadFactor;
+    double wt = data(0)*loadFactor;  // Transverse (+ve upward)
+    double wa = data(1)*loadFactor;  // Axial (+ve from node I to J)
 
-    // fixed end forces
-    double V = 0.5*w*L;
-    double M = V*L/6.0; // w*l*l/12
+    double V = 0.5*wt*L;
+    double M = V*L/6.0; // wt*L*L/12
+    double P = wa*L;
 
-    q0(1) += V;
-    q0(2) += -M;
-    q0(4) += V;
-    q0(5) += M;
+    // Reactions in basic system
+    p0[0] -= P;
+    p0[1] -= V;
+    p0[2] -= V;
 
-  } else if (type == LOAD_TAG_Beam2dPointLoad) {
-    double P = data(0) * loadFactor;
-    double a = data(1) * L;
+    // Fixed end forces in basic system
+    q0[0] -= 0.5*P;
+    q0[1] -= M;
+    q0[2] += M;
+  }
+  else if (type == LOAD_TAG_Beam2dPointLoad) {
+    double P = data(0)*loadFactor;
+    double N = data(1)*loadFactor;
+    double aOverL = data(2);
+    double a = aOverL*L;
     double b = L-a;
 
-    double L2 = 1/(L*L);
-    double L3 = L2/L;
+    // Reactions in basic system
+    p0[0] -= N;
+    double V1 = P*(1.0-aOverL);
+    double V2 = P*aOverL;
+    p0[1] -= V1;
+    p0[2] -= V2;
+
+    double L2 = 1.0/(L*L);
     double a2 = a*a;
     double b2 = b*b;
 
-    // fixed end forces
+    // Fixed end forces in basic system
+    q0[0] -= N*aOverL;
     double M1 = -a * b2 * P * L2;
     double M2 = a2 * b * P * L2;
-    double V1 = (3.0*a + b) * b2 * P * L3;
-    double V2 = (3.0*b + a) * a2 * P * L3;
-
-    double M1M2divL = (M1 + M2)/L;
-    q0(1) += V1 - M1M2divL; // -.. for affect of unbalanced M on computation of V in local
-    q0(2) += M1;
-    q0(4) += V2 + M1M2divL; // +.. for affect of unbalanced M on computation of V in local
-    q0(5) += M2;
-
-  } else  {
-    g3ErrorHandler->warning("ElasticBeam2d::addLoad() - beam %d,load type %d unknown\n", 
-			    this->getTag(), type);
+    q0[1] += M1;
+    q0[2] += M2;
+  }
+  else {
+    g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
+			    "ElasticBeam2d::addLoad()", this->getTag());
     return -1;
   }
 
@@ -283,7 +308,7 @@ ElasticBeam2d::addInertiaLoadToUnbalance(const Vector &accel)
     
   // Want to add ( - fact * M R * accel ) to unbalance
   // Take advantage of lumped mass matrix
-	
+  double L = theCoordTransf->getInitialLength();
   double m = 0.5*rho*L;
 
   Q(0) -= m * Raccel1(0);
@@ -308,6 +333,7 @@ ElasticBeam2d::getResistingForceIncInertia()
     const Vector &accel1 = node1Ptr->getTrialAccel();
     const Vector &accel2 = node2Ptr->getTrialAccel();    
     
+    double L = theCoordTransf->getInitialLength();
     double m = 0.5*rho*L;
     
     P(0) += m * accel1(0);
@@ -323,37 +349,34 @@ ElasticBeam2d::getResistingForceIncInertia()
 const Vector &
 ElasticBeam2d::getResistingForce()
 {
-    theCoordTransf->update();
+  theCoordTransf->update();
+  
+  const Vector &v = theCoordTransf->getBasicTrialDisp();
+  double L = theCoordTransf->getInitialLength();
 
-    const Vector &v = theCoordTransf->getBasicTrialDisp();
-    
-    double EoverL   = E/L;
-    double EAoverL  = A*EoverL;			// EA/L
-    double EIoverL2 = 2.0*I*EoverL;		// 2EI/L
-    double EIoverL4 = 2.0*EIoverL2;		// 4EI/L
-
-    // determine q = kv + q0
-    q(0) = EAoverL*v(0);
-    q(1) = EIoverL4*v(1) + EIoverL2*v(2);
-    q(2) = EIoverL2*v(1) + EIoverL4*v(2);
-
-    // add the q0 forces (stored in q0(3, 2 & 5))
-    q(0) += q0(3);
-    q(1) += q0(2);
-    q(2) += q0(5);
-
-    // set the element reactions in basic system (stored in q0(0, 1 and 4))
-    static Vector p0(3);
-    p0(0) = q0(0);
-    p0(1) = q0(1);
-    p0(2) = q0(4);
-    
-    P = theCoordTransf->getGlobalResistingForce(q, p0);
-
-    // P = P - Q;
-    P.addVector(1.0, Q, -1.0);
-
-    return P;
+  double EoverL   = E/L;
+  double EAoverL  = A*EoverL;			// EA/L
+  double EIoverL2 = 2.0*I*EoverL;		// 2EI/L
+  double EIoverL4 = 2.0*EIoverL2;		// 4EI/L
+  
+  // determine q = kv + q0
+  q(0) = EAoverL*v(0);
+  q(1) = EIoverL4*v(1) + EIoverL2*v(2);
+  q(2) = EIoverL2*v(1) + EIoverL4*v(2);
+  
+  q(0) += q0[0];
+  q(1) += q0[1];
+  q(2) += q0[2];
+  
+  // Vector for reactions in basic system
+  Vector p0Vec(p0, 3);
+  
+  P = theCoordTransf->getGlobalResistingForce(q, p0Vec);
+  
+  // P = P - Q;
+  P.addVector(1.0, Q, -1.0);
+  
+  return P;
 }
 
 int
@@ -464,12 +487,19 @@ ElasticBeam2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBrok
 void
 ElasticBeam2d::Print(ostream &s, int flag)
 {
-    s << "\nElasticBeam2d: " << this->getTag() << endl;
-    s << "\tConnected Nodes: " << connectedExternalNodes ;
-    s << "\tCoordTransf: " << theCoordTransf->getTag() << endl;
-    double V = (q(1)+q(2))/L;
-    s << "\tEnd 1 Forces (P V M): " << -q(0)+q0(0) << " " << V + q0(1) << " " << q(1) << endl;
-    s << "\tEnd 2 Forces (P V M): " << q(0) << " " << -V+q0(4) << " " << q(2) << endl;
+  s << "\nElasticBeam2d: " << this->getTag() << endl;
+  s << "\tConnected Nodes: " << connectedExternalNodes ;
+  s << "\tCoordTransf: " << theCoordTransf->getTag() << endl;
+  s << "\tmass density:  " << rho << endl;
+  double P  = q(0);
+  double M1 = q(1);
+  double M2 = q(2);
+  double L = theCoordTransf->getInitialLength();
+  double V = (M1+M2)/L;
+  s << "\tEnd 1 Forces (P V M): " << -P+p0[0]
+    << " " << V+p0[1] << " " << M1 << endl;
+  s << "\tEnd 2 Forces (P V M): " << P
+    << " " << -V+p0[2] << " " << M2 << endl;
 }
 
 int
@@ -517,31 +547,35 @@ ElasticBeam2d::setResponse(char **argv, int argc, Information &info)
 int
 ElasticBeam2d::getResponse (int responseID, Information &eleInfo)
 {
-	double V;
+  double N, M1, M2, V;
+  double L = theCoordTransf->getInitialLength();
 
-    switch (responseID) {
-		case 1: // stiffness
-			return eleInfo.setMatrix(this->getTangentStiff());
-
-		case 2: // global forces
-			return eleInfo.setVector(this->getResistingForce());
-
-		case 3: // local forces
-			// Axial
-			P(3) = q(0);
-			P(0) = -q(0) + q0(0);
-			// Moment
-			P(2) = q(1);
-			P(5) = q(2);
-			// Shear
-			V = (q(1)+q(2))/L;
-			P(1) = V + q0(1);
-			P(4) = -V + q0(4);
-			return eleInfo.setVector(P);
-
-		default:
-			return -1;
-    }
+  switch (responseID) {
+  case 1: // stiffness
+    return eleInfo.setMatrix(this->getTangentStiff());
+    
+  case 2: // global forces
+    return eleInfo.setVector(this->getResistingForce());
+    
+  case 3: // local forces
+    // Axial
+    N = q(0);
+    P(3) =  N;
+    P(0) = -N+p0[0];
+    // Moment
+    M1 = q(1);
+    M2 = q(2);
+    P(2) = M1;
+    P(5) = M2;
+    // Shear
+    V = (M1+M2)/L;
+    P(1) =  V+p0[1];
+    P(4) = -V+p0[2];
+    return eleInfo.setVector(P);
+    
+  default:
+    return -1;
+  }
 }
 
 int

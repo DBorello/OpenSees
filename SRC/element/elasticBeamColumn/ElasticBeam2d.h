@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-05-16 00:07:39 $
+// $Revision: 1.4 $
+// $Date: 2002-06-06 18:39:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.h,v $
                                                                         
                                                                         
@@ -87,7 +87,6 @@ class ElasticBeam2d : public Element
 
   private:
     double A,E,I;
-    double L;
 
     double rho;
     
@@ -97,7 +96,8 @@ class ElasticBeam2d : public Element
     
     static Matrix kb;
     Vector q;
-    Vector q0;  // hold element load affects q0 and p0 in one vector
+    double q0[3];  // Fixed end forces in basic system
+    double p0[3];  // Reactions in basic system
     
     Node *node1Ptr, *node2Ptr;
     
