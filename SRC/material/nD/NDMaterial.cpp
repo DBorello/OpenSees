@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $                                                              
-// $Date: 2003-02-25 23:33:23 $                                                                  
+// $Revision: 1.13 $                                                              
+// $Date: 2003-10-02 15:22:22 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -178,6 +178,39 @@ NDMaterial::setTrialStrainIncr(const Tensor &v, const Tensor &r)
    opserr << "NDMaterial::setTrialStrainIncr -- subclass responsibility\n";
    return -1;    
 }
+
+//Zhao (zcheng@ucdavis.edu) 
+// added Sept 22 2003 for Large Deformation, F is the Deformation Grandient
+int
+NDMaterial::setTrialF(const Tensor &f)
+{
+   opserr << "NDMaterial::setTrialF -- subclass responsibility\n";
+   return -1;
+}
+
+int
+NDMaterial::setTrialF(const Tensor &f, const Tensor &d)
+{
+   opserr << "NDMaterial::setTrialF -- subclass responsibility\n";
+   return -1;
+}
+
+int
+NDMaterial::setTrialFIncr(const Tensor &f)
+{
+   opserr << "NDMaterial::setTrialFIncr -- subclass responsibility\n";
+   return -1;
+}
+
+int
+NDMaterial::setTrialFIncr(const Tensor &f, const Tensor &d)
+{
+   opserr << "NDMaterial::setTrialFIncr -- subclass responsibility\n";
+   return -1;
+}
+
+
+
 
 const Tensor &
 NDMaterial::getTangentTensor(void)
