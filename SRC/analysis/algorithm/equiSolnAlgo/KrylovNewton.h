@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-28 22:33:58 $
+// $Revision: 1.3 $
+// $Date: 2001-08-27 22:14:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.h,v $
                                                                         
 #ifndef KrylovNewton_h
@@ -60,12 +60,25 @@ class KrylovNewton: public EquiSolnAlgo
   private:
     ConvergenceTest *theTest;
     int tangent;
-    Vector *r;
+
+    // Storage for update vectors
     Vector **v;
+
+    // Storage for subspace vectors
     Vector **Av;
 
-    int numTests;
+    // Array data sent to LAPACK subroutine
+    double *AvData;
+    double *rData;
+    double *work;
+
+    // Size information
+    int maxTests;
     int numEqns;
+    int numVecs;
+
+    // Length of work array
+    int lwork;
 
     int leastSquares(int k);
 };

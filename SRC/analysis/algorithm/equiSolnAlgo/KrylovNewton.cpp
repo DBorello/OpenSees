@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2001-07-28 22:33:58 $
+// $Revision: 1.3 $
+// $Date: 2001-08-27 22:14:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.cpp,v $
 
 // Written: MHS
@@ -51,8 +51,8 @@
 KrylovNewton::KrylovNewton(int theTangentToUse)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_KrylovNewton),
  theTest(0), tangent(theTangentToUse),
- r(0), v(0), Av(0),
- numTests(0), numEqns(0)
+ v(0), Av(0), AvData(0), rData(0), work(0),
+ maxTests(0), numEqns(0), numVecs(0), lwork(0)
 {
 
 }
@@ -60,8 +60,8 @@ KrylovNewton::KrylovNewton(int theTangentToUse)
 KrylovNewton::KrylovNewton(ConvergenceTest &theT, int theTangentToUse)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_KrylovNewton),
  theTest(&theT), tangent(theTangentToUse),
- r(0), v(0), Av(0),
- numTests(0), numEqns(0)
+ v(0), Av(0), AvData(0), rData(0), work(0),
+ maxTests(0), numEqns(0), numVecs(0), lwork(0)
 {
 
 }
@@ -69,20 +69,26 @@ KrylovNewton::KrylovNewton(ConvergenceTest &theT, int theTangentToUse)
 // Destructor
 KrylovNewton::~KrylovNewton()
 {
-  if (r != 0)
-    delete r;
-
   if (v != 0) {
-    for (int i = 0; i < numTests; i++)
+    for (int i = 0; i < numVecs; i++)
       delete v[i];
     delete [] v;
   }
 
   if (Av != 0) {
-    for (int i = 0; i < numTests; i++)
+    for (int i = 0; i < numVecs; i++)
       delete Av[i];
     delete [] Av;
   }
+
+  if (AvData != 0)
+    delete [] AvData;
+
+  if (rData != 0)
+    delete [] rData;
+
+  if (work != 0)
+    delete [] work;
 }
 
 void 
@@ -106,24 +112,39 @@ KrylovNewton::solveCurrentStep(void)
     cerr << " not been called - or no ConvergenceTest has been set\n";
     return -5;
   }	
-  
-  numTests = 2 + theTest->getMaxNumTests();
+
+  // Get size information from convergence test and SOE
+  maxTests = theTest->getMaxNumTests();
+  numVecs  = 2 + maxTests;
   numEqns  = theSOE->getNumEqn();
-  
-  if (r == 0)
-    r = new Vector(numEqns);
 
   if (v == 0) {
-    v = new Vector*[numTests];
-    for (int i = 0; i < numTests; i++)
+    v = new Vector*[numVecs];
+    for (int i = 0; i < numVecs; i++)
       v[i] = new Vector(numEqns);
   }
 
   if (Av == 0) {
-    Av = new Vector*[numTests];
-    for (int i = 0; i < numTests; i++)
+    Av = new Vector*[numVecs];
+    for (int i = 0; i < numVecs; i++)
       Av[i] = new Vector(numEqns);
   }
+
+  if (AvData == 0)
+    AvData = new double [maxTests*numEqns];
+
+  if (rData == 0)
+    // The LAPACK least squares subroutine overwrites the RHS vector
+    // with the solution vector ... these vectors are not the same
+    // size, so we need to use the max size
+    rData = new double [(numEqns > maxTests) ? numEqns : maxTests];
+
+  // Length of work vector should be >= 2*min(numEqns,maxTests)
+  // See dgels subroutine documentation
+  lwork = 2 * ((numEqns < maxTests) ? numEqns : maxTests);
+  
+  if (work == 0)
+    work = new double [lwork];
 
   // set itself as the ConvergenceTest objects EquiSolnAlgo
   theTest->setEquiSolnAlgo(*this);
@@ -131,7 +152,7 @@ KrylovNewton::solveCurrentStep(void)
     cerr << "KrylovNewton::solveCurrentStep() -";
     cerr << "the ConvergenceTest object failed in start()\n";
     return -3;
-    }
+  }
   
   // Evaluate system residual R(y_0)
   if (theIntegrator->formUnbalance() < 0) {
@@ -154,12 +175,16 @@ KrylovNewton::solveCurrentStep(void)
     return -3;
   }
 
+  // Not using Av[0], for the subspace vectors, so
+  // use it for the residual vector
+  Vector &r = *(Av[0]);
+
   // Update y ... y_1 = y_0 + v_1 --> (y_0 is zero) --> y_1 = v_1
   // --> (v_1 = f(y_0)) --> y_1 = f(y_0)
-  *r = theSOE->getX();
+  r = theSOE->getX();
 
   // Store first update v_1 = r_0
-  *(v[1]) = *r;
+  *(v[1]) = r;
 
   int result = -1;
   int k = 1;
@@ -189,9 +214,9 @@ KrylovNewton::solveCurrentStep(void)
 
     // Compute Av_k = f(y_{k-1}) - f(y_k) = r_{k-1} - r_k
     // NOTE: Not using Av[0] so that notation follows paper
-    *(Av[k]) = *r;
-    *r = theSOE->getX();
-    Av[k]->addVector(1.0, *r, -1.0);
+    *(Av[k]) = r;
+    r = theSOE->getX();
+    Av[k]->addVector(1.0, r, -1.0);
 
     // Solve least squares A w_{k+1} = r_k
     if (this->leastSquares(k) < 0) {
@@ -229,9 +254,8 @@ KrylovNewton::sendSelf(int cTag, Channel &theChannel)
 }
 
 int
-KrylovNewton::recvSelf(int cTag, 
-		       Channel &theChannel, 
-		       FEM_ObjectBroker &theBroker)
+KrylovNewton::recvSelf(int cTag, Channel &theChannel, 
+					   FEM_ObjectBroker &theBroker)
 {
   return -1;
 }
@@ -239,60 +263,87 @@ KrylovNewton::recvSelf(int cTag,
 void
 KrylovNewton::Print(ostream &s, int flag)
 {
-  if (flag == 0)
-    s << "KrylovNewton\n";
+  s << "KrylovNewton\n";
 }
+
+#ifdef _WIN32
+
+extern "C" int _stdcall DGELS(char *T, unsigned int *SZ, int *M, int *N, int *NRHS,
+			      double *A, int *LDA, double *B, int *LDB,
+			      double *WORK, int *LWORK, int *INFO);
+
+#else
+
+extern "C" int dgels_(char *T, int *M, int *N, int *NRHS,
+		      double *A, int *LDA, double *B, int *LDB,
+		      double *WORK, int *LWORK, int *INFO);
+
+#endif
 
 int
 KrylovNewton::leastSquares(int k)
 {
-  // NOTE: Not using Av[0] so that notation follows paper
-  const int maxK = 30;
-
-  if (k > maxK) {
-    cerr << "WARNING KrylovNewton::leastSquares() -";
-    cerr << "Number of iterations exceeds matrix limits";
-    return -2;
-  }
-
-  static double workA[maxK*maxK];
-  static double workb[maxK];
-  static double workc[maxK];
-
-  Matrix A(workA,k,k);
-  Vector b(workb,k);
-  Vector c(workc,k);
-
   int i,j;
 
-  // Form normal equations (Av_i,Av_j) c_j = (Av_i,r_k)
-  for (i = 1; i <= k; i++) {
-    for (j = 1; j <= k; j++)
-      A(i-1,j-1) = *(Av[i]) ^ *(Av[j]);
-    b(i-1) = *(Av[i]) ^ *r;
+  // Put subspace vectors into AvData
+  Matrix A(AvData, numEqns, k);
+  for (i = 0; i < k; i++) {
+    Vector &Ai = *(Av[i+1]);
+    for (j = 0; j < numEqns; j++)
+      A(j,i) = Ai(j);
   }
 
-  // Solve normal equations
-  if (A.Solve(b,c) < 0) {
-    cerr << "WARNING KrylovNewton::leastSquares() -";
-    cerr << "solution of normal equations failed in Matrix::Solve()\n";
-    return -1;
-  }
+  // Reference to the residual vector
+  Vector &r = *(Av[0]);
 
+  // Put residual vector into rData (need to save r for later!)
+  Vector B(rData, numEqns);
+  B = r;
+  
+  // No transpose
+  char *trans = "N";
+
+  // The number of right hand side vectors
+  int nrhs = 1;
+
+  // Leading dimension of the right hand side vector
+  int ldb = (numEqns > k) ? numEqns : k;
+
+  // Subroutine error flag
+  int info = 0;
+
+  // Call the LAPACK least squares subroutine
+#ifdef _WIN32
+  unsigned int sizeC = 1;
+  DGELS(trans, &sizeC, &numEqns, &k, &nrhs, AvData, &numEqns, rData, &ldb, work, &lwork, &info);
+#else
+  dgels_(trans, &numEqns, &k, &nrhs, AvData, &numEqns, rData, &ldb, work, &lwork, &info);
+#endif
+  
+  // Check for error returned by subroutine
+  if (info < 0) {
+    cerr << "WARNING KrylovNewton::leastSquares() - \n";
+    cerr << "error code " << info << " returned by LAPACK dgels\n";
+    return info;
+  }
+  
   // v_{k+1} = w_{k+1} + q_{k+1}
-  *(v[k+1]) = *r;
-
+  *(v[k+1]) = r;
+  
+  // Compute the correction vector
   double cj;
   for (j = 1; j <= k; j++) {
-
-    cj = c(j-1);
-
+    
+    // Solution to least squares is written to rData
+    cj = rData[j-1];
+    
     // Compute w_{k+1} = c_1 v_1 + ... + c_k v_k
     v[k+1]->addVector(1.0, *(v[j]), cj);
-
+    
     // Compute least squares residual q_{k+1} = r_k - c_1 Av_1 - ... - c_k Av_k
     v[k+1]->addVector(1.0, *(Av[j]), -cj);
   }
-
+  
   return 0;
 }
+
