@@ -10,7 +10,7 @@
 //
 //# PROJECT:           Object Oriented Finite Element Program
 //# PURPOSE:           Finite Deformation Hyper-Elastic classes
-//# CLASS:             
+//# CLASS:
 //#
 //# VERSION:           0.6_(1803398874989) (golden section)
 //# LANGUAGE:          C++
@@ -20,7 +20,7 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:   
+//# UPDATE HISTORY:
 //#
 //#
 //===============================================================================
@@ -46,12 +46,12 @@ class MooneyRivlinWEnergy : public WEnergy
 //    MooneyRivlinWEnergy( );
     ~MooneyRivlinWEnergy( );
     WEnergy *newObj( );
-    const double wE(const double &, const Vector &) ;
-    const Vector disowOdlambda(const Vector &)  ;
-    const Vector d2isowOdlambda2(const Vector & )  ;
-//  const tensor d2isowOdlambda1dlambda2(const vector &)  ;
-//  const double dvolwOdJ( const double &)  ;
-//  const double d2volOdj2(const double &) ;
+    const double wE(const double &, const Vector &);
+    const Vector disowOdlambda(const Vector &);
+    const Vector d2isowOdlambda2(const Vector & );
+//  const tensor d2isowOdlambda1dlambda2(const vector &);
+//  const double dvolwOdJ( const double &);
+//  const double d2volOdj2(const double &);
 
 //    friend OPS_Stream& operator<< (OPS_Stream& os, const MooneyRivlinWEnergy &W);
 

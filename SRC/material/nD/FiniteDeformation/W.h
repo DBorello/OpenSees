@@ -10,7 +10,7 @@
 //
 //# PROJECT:           Object Oriented Finite Element Program
 //# PURPOSE:           Finite Deformation Hyper-Elastic classes
-//# CLASS:             
+//# CLASS:
 //#
 //# VERSION:           0.6_(1803398874989) (golden section)
 //# LANGUAGE:          C++
@@ -20,7 +20,7 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:   
+//# UPDATE HISTORY:
 //#
 //#
 //===============================================================================
@@ -61,7 +61,7 @@ class WEnergy
     virtual const Tensor d2isowOdlambda1dlambda2(const Vector &) ;
     virtual const double dvolwOdJ(const double &) ;
     virtual const double d2volwOdJ2(const double &) ;
-    
+
     protected:
 
 };
