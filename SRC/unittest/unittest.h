@@ -1,6 +1,3 @@
-
-
-
 /**
  * A very simple unit testing class.
  *
@@ -72,6 +69,61 @@ class UnitTest {
 
 };
 
+
+
+
+/** 
+ * @todo This probably needs to go into a utility
+ * header for just dealing with various types of
+ * valarrays.
+ */
+template <class T>
+bool valarray_equals(std::valarray<T> & v1, std::valarray<T> & v2) {
+
+  if (v1.size() != v2.size()) {
+    std::cout << "Error: mismatched valarray sizes.\n";
+    return false;
+  }
+
+  for (unsigned int i=0; i<v1.size(); i++) {
+    if (v1[i] != v2[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+template <class T>
+void valarray_print(std::valarray<T> & v, const char * label) {
+
+   for (unsigned int i=0; i<v.size(); i++) {
+     std::cout << label << "[" << i << "]: " << v[i] << "\n";
+   }
+}
+
+/**
+ * @brief Test whether the arrays are equals within
+ *  tolerance for the first <size> elements.
+ *
+ * @param double * a array of doubles.
+ * @param double * b array of doubles.
+ * @param int size the number of elements to traverse
+ * @param double tol tolerance within which the arrays
+ *  are assumed equal.
+ *
+ * @return bool true if equal within tolerance,
+ *  false otherwise.
+ *
+ * @warning No error checking in this function.
+ *  The user is responsible for ensuring that
+ *  the allocated sizes are within the size
+ *  parameter.
+ */
+bool   double_array_equals (const double * a,
+			    const double * b,
+			    const int size,
+			    const double tol);
 
 
 /** 
