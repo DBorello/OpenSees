@@ -168,7 +168,7 @@ SOURCE=..\..\..\SRC\element\nonlinearBeamColumn\quadrule\QuadRule1d01.h
 # End Group
 # Begin Source File
 
-SOURCE=..\..\..\SRC\element\nonlinearBeamColumn\tcl\TclElmtBuilder.cpp
+SOURCE=..\..\..\SRC\element\nonlinearBeamColumn\element\TclNLBeamColumnCommand.cpp
 # End Source File
 # End Target
 # End Project
