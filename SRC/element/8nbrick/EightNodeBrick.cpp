@@ -1,6 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// COPYRIGHT (C):     :-))
+// COPYLEFT (C):     :-))
+//``This  source code is Copyrighted in U.S., by the The Regents of the University
+//of California, for an indefinite period, and anybody caught using it without our
+//permission,  will  be  mighty  good friends of ourn, cause we don't give a darn.
+//Hack  it.  Compile it. Debug it. Run it. Yodel it. Enjoy it. We wrote it, that's
+//all we wanted to do.'' bj
 // PROJECT:           Object Oriented Finite Element Program
 // FILE:              EightNodeBrick.cpp
 // CLASS:             EightNodeBrick
@@ -18,6 +23,7 @@
 // DATE:              Aug. 2000
 // UPDATE HISTORY:			 Modified from Brick3D and FourNodeQuad.hh  07/06/00
 //																			 Sept. - Oct 2000 connected to OpenSees by Zhaohui
+//																			 Sept 2001 optimized to some extent (static tensors...)
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,7 +45,12 @@
 #include <ElementResponse.h>
 
 #include <EightNodeBrick.h>
-#define FixedOrder 3
+#define FixedOrder 2
+
+Matrix EightNodeBrick::K(24, 24);      
+Matrix EightNodeBrick::C(24, 24);      
+Matrix EightNodeBrick::M(24, 24);      
+Vector EightNodeBrick::P(24);	       
 
 //====================================================================
 //Reorganized constructor ____ Zhaohui 02-10-2000
@@ -50,16 +61,9 @@ EightNodeBrick::EightNodeBrick(int element_number,
                                int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
                                NDMaterial * Globalmmodel, double b1, double b2,double b3,
 			       double r, double p)
-
-
-
-
-
-
-
 		               
   :Element(element_number, ELE_TAG_EightNodeBrick ),
-  connectedExternalNodes(8), K(24, 24), C(24, 24), M(24, 24), P(24),Q(24), bf(3), 
+  connectedExternalNodes(8), Q(24), bf(3), 
   rho(r), pressure(p)
   {
     //elem_numb = element_number;
@@ -75,30 +79,15 @@ EightNodeBrick::EightNodeBrick(int element_number,
     r_integration_order = FixedOrder; // Gauss-Legendre integration order in r direction
     s_integration_order = FixedOrder; // Gauss-Legendre integration order in s direction
     t_integration_order = FixedOrder; // Gauss-Legendre integration order in t direction
-
     //Not needed. Right now we have one NDMaterial for each material point
     //mmodel = Globalmmodel->getCopy( type ); // One global mat model
 
     int total_number_of_Gauss_points = r_integration_order*s_integration_order*t_integration_order;
     
-    // according to ARM pp.61 default constructor will be called!!
-    //MatPoint3D * matpoint = new MatPoint3D[total_number_of_Gauss_points];
-    //prebaci sve u jednodimenzioni niz jer samo prvi stepen pointera moze da se pokriva
-    //sa onim stosom derived * ->> base * !!
 
     if ( total_number_of_Gauss_points != 0 )
       {
-        //matpoint = Globalmmodel->new_mm(total_number_of_Gauss_points);
-	
-        // Zhaohui -- All the following members are moved into gauss-point EPState: gpEPS
-	//GPstress = new stresstensor[total_number_of_Gauss_points];
-        //GPiterative_stress = new stresstensor[total_number_of_Gauss_points];
-        //GPq_ast_iterative  = new double[total_number_of_Gauss_points];
-        //GPstrain = new straintensor[total_number_of_Gauss_points];
-        //GPtangent_E = new tensor[total_number_of_Gauss_points];//default constructor called
-        
 	matpoint  = new MatPoint3D * [total_number_of_Gauss_points];
-
       }
     else
       {
@@ -190,6 +179,7 @@ EightNodeBrick::EightNodeBrick(int element_number,
       connectedExternalNodes(1) = node_numb_2;
       connectedExternalNodes(2) = node_numb_3;
       connectedExternalNodes(3) = node_numb_4;
+
       connectedExternalNodes(4) = node_numb_5;
       connectedExternalNodes(5) = node_numb_6;
       connectedExternalNodes(6) = node_numb_7;
@@ -201,7 +191,7 @@ EightNodeBrick::EightNodeBrick(int element_number,
 
 //====================================================================
 EightNodeBrick::EightNodeBrick ():Element(0, ELE_TAG_EightNodeBrick ),
-connectedExternalNodes(8), K(24, 24), C(24, 24), M(24, 24), P(24),Q(24), bf(3), rho(0.0), pressure(0.0), mmodel(0)
+connectedExternalNodes(8), Q(24), bf(3), rho(0.0), pressure(0.0), mmodel(0)
 {
      matpoint = 0;
 }   
@@ -418,28 +408,7 @@ EightNodeBrick::~EightNodeBrick ()
     
     //if (mmodel)
     //	delete [] mmodel;
-    
-    // Delete the quadrature rule
-    // Delete the node ptrs
-    /*
-    if ( nd1Ptr )
-    	delete  nd1Ptr;
-    if ( nd2Ptr )
-    	delete nd2Ptr;
-    if ( nd3Ptr )
-    	delete nd3Ptr;
-    if ( nd4Ptr )
-    	delete nd4Ptr;
-    if ( nd5Ptr )
-    	delete nd5Ptr;
-    if ( nd6Ptr )
-    	delete nd6Ptr;
-    if ( nd7Ptr )
-    	delete nd7Ptr;
-    if ( nd8Ptr )
-    	delete nd8Ptr;
-    */
-
+    	  
 }
 
 
@@ -512,6 +481,7 @@ void EightNodeBrick::incremental_Update()
                 //--                det_of_Jacobian  = Jacobian.determinant();
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                //dhGlobal = dh("ij") * JacobianINV("jk"); //Zhaohui Yang 09-02-2001
                 dhGlobal = dh("ij") * JacobianINV("kj");
                 //....                dhGlobal.print("dh","dhGlobal");
                 //weight
@@ -605,140 +575,6 @@ void EightNodeBrick::incremental_Update()
       }
   }
 
-//Zhaohui: We never need this one now for it's combined in FE(BE)EPStates 02-10-2000
-
-////#############################################################################
-//// update iterative_stresses during iterative process
-//// so that function iterative_nodal_forces can return right internal forces
-//// (iterative in this case ) !!!!
-////#############################################################################
-//void EightNodeBrick::iterative_Update()
-//  {
-//    double r  = 0.0;
-////    double rw = 0.0;
-//    double s  = 0.0;
-////    double sw = 0.0;
-//    double t  = 0.0;
-////    double tw = 0.0;
-//
-//    short where = 0;
-////,,,,,    double weight = 0.0;
-//
-//    int dh_dim[] = {8,3}; // Xiaoyan changed from {20,3} to {8,3} for 8 nodes brick
-//    tensor dh(2, dh_dim, 0.0);
-//
-////    tensor Constitutive( 4, def_dim_4, 0.0);
-//
-////    double det_of_Jacobian = 0.0;
-//
-//    static int disp_dim[] = {8,3};  // Xiaoyan changed from {20,3} to {8,3} for 8 nodes brick
-//
-//    tensor incremental_displacements(2,disp_dim,0.0);
-//
-//    straintensor incremental_strain;
-////    straintensor total_strain_at_GP;
-//
-//    tensor Jacobian;
-//    tensor JacobianINV;
-//    tensor dhGlobal;
-//
-//    int number_of_subincrements = 1;
-//    //double this_one_PP = (matpoint)->operator[](where).IS_Perfect_Plastic();
-//
-//    stresstensor final_stress_after_integration;
-//    //    stresstensor incremental_stress;
-//    // tensor of incremental displacements taken from node objects for this element !
-//    incremental_displacements = incr_disp();
-//    //incremental_displacements.print("disp","\n incremental_displacements tensor at GAUSS point in iterative_Update\n");
-//
-//    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
-//      {
-//        r = get_Gauss_p_c( r_integration_order, GP_c_r );
-//        //--        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-//        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
-//          {
-//            s = get_Gauss_p_c( s_integration_order, GP_c_s );
-//            //--            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-//            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
-//              {
-//                t = get_Gauss_p_c( t_integration_order, GP_c_t );
-//                //--                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
-//                // this short routine is supposed to calculate position of
-//                // Gauss point from 3D array of short's
-//                where =
-//                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
-//                // derivatives of local coordiantes with respect to local coordiantes
-//                dh = dh_drst_at(r,s,t);
-//                // Jacobian tensor ( matrix )
-//                Jacobian = Jacobian_3D(dh);
-//                //Jacobian.print("J");
-//                // Inverse of Jacobian tensor ( matrix )
-//                JacobianINV = Jacobian_3Dinv(dh);
-//                //JacobianINV.print("JINV");
-//                // determinant of Jacobian tensor ( matrix )
-//                //--                det_of_Jacobian  = Jacobian.determinant();
-//                //::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
-//                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-//                dhGlobal = dh("ij") * JacobianINV("kj");
-//                //....                dhGlobal.print("dh","dhGlobal");
-//                //weight
-//                //                weight = rw * sw * tw * det_of_Jacobian;
-//                //::::::   ::printf(" void EightNodeBrick::iterative_Update() \n ");
-//                //::::::   ::printf(" GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d    --->>>  where = %d \n",
-//                //::::::                      GP_c_r,GP_c_s,GP_c_t,where);
-//                //::::::   ::printf("WEIGHT = %f", weight);
-//                //::::::   ::printf("determinant of Jacobian = %f", determinant_of_Jacobian);
-//                //::::::   matpoint[where].report("Gauss Point\n");
-//                incremental_strain =
-//                   (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-//                incremental_strain.null_indices();
-//                //incremental_strain.reportshort("incremental_strain in void EightNodeBrick::iterative_Update()");
-//
-//                //..   dakle ovde posalji strain_increment jer se stari stress cuva u okviru svake
-//                //..   Gauss tacke a samo saljes strain_increment koji ce da se prenese
-//                //..   u integracionu rutinu pa ce ta da vrati krajnji napon i onda moze da
-//                //..   se pravi ConstitutiveStiffnessTensor.
-//                // here comes the final_stress calculation
-//                //(GPstress+where)->reportshortpqtheta("\n stress START GAUSS  in iterative_Update\n");
-//         
-//	        // Zhaohui commented out_____02-10-2000
-//		final_stress_after_integration =
-//                    (matpoint)->operator[](where).FinalStress(*(GPstress+where),
-//                                                     incremental_strain,
-//                                                     (matpoint)->operator[](where),
-//                                                     number_of_subincrements,
-//                                                     this_one_PP);
-//                
-//		final_stress_after_integration.reportshort("\n final_stress_after_integration in void EightNodeBrick::iterative_Update()\n");
-//                
-//		//----// intialize total strain with the strain at this Gauss point before
-//                //----// adding this increments strains!
-//                //----                total_strain_at_GP.Initialize(*(GPstrain+where));
-//                //----//total_strain_at_GP.reportshort("\n total_strain tensor at GAUSS point \n");
-//                //----// this is the addition of incremental strains to the previous strain state at
-//                //----// this Gauss point
-//                //----                total_strain_at_GP = total_strain_at_GP + incremental_strain;
-//                //----//total_strain_at_GP.reportshort("\n total_strain tensor at GAUSS point AFTER\n");
-//                // calculate the constitutive tensor
-//            
-//	        // this is update of iterative_stress state at this Gauss point
-//                GPiterative_stress[where].Initialize(final_stress_after_integration);
-//                GPq_ast_iterative[where] =
-//                  (matpoint)->operator[](where).kappa_get(final_stress_after_integration);
-//                //             GPstress[where].Initialize(final_stress_after_integration);
-//                //GPiterative_stress[where].reportshortpqtheta("\n iterative_stress at GAUSS point in iterative_Update\n");
-//                GPiterative_stress[where].reportshort("\n iterative_stress at GAUSS point in iterative_Update\n");
-//                //----    // this is update of strain state at this Gauss point
-//                //----                GPstrain[where].Initialize(total_strain_at_GP);
-//                //GPstrain[where].reportshort("\n strain at GAUSS point \n");
-//              }
-//          }
-//      }
-//  }
-
-
-
-
 //#############################################################################
 //#############################################################################
 //***************************************************************
@@ -749,115 +585,39 @@ tensor EightNodeBrick::H_3D(double r1, double r2, double r3)
                               // 3*8=24  07/12/00
     tensor H(2, dimension, 0.0);
 
-    // influence of the node number 20
-    //    H.val(58,1)=node_existance[20-1-8]*(1.0+r1)*(1.0-r2)*(1.0-r3*r3)/4.0;
-    //    H.val(59,2)=node_existance[20-1-8]*(1.0+r1)*(1.0-r2)*(1.0-r3*r3)/4.0;
-    //    H.val(60,3)=node_existance[20-1-8]*(1.0+r1)*(1.0-r2)*(1.0-r3*r3)/4.0;
-    // influence of the node number 19
-    //    H.val(55,1)=node_existance[19-1-8]*(1.0-r1)*(1.0-r2)*(1.0-r3*r3)/4.0;
-    //    H.val(56,2)=node_existance[19-1-8]*(1.0-r1)*(1.0-r2)*(1.0-r3*r3)/4.0;
-    //    H.val(57,3)=node_existance[19-1-8]*(1.0-r1)*(1.0-r2)*(1.0-r3*r3)/4.0;
-    // influence of the node number 18
-    //    H.val(52,1)=node_existance[18-1-8]*(1.0-r1)*(1.0+r2)*(1.0-r3*r3)/4.0;
-    //    H.val(53,2)=node_existance[18-1-8]*(1.0-r1)*(1.0+r2)*(1.0-r3*r3)/4.0;
-    //    H.val(54,3)=node_existance[18-1-8]*(1.0-r1)*(1.0+r2)*(1.0-r3*r3)/4.0;
-    // influence of the node number 17
-    //    H.val(49,1)=node_existance[17-1-8]*(1.0+r1)*(1.0+r2)*(1.0-r3*r3)/4.0;
-    //    H.val(50,2)=node_existance[17-1-8]*(1.0+r1)*(1.0+r2)*(1.0-r3*r3)/4.0;
-    //    H.val(51,3)=node_existance[17-1-8]*(1.0+r1)*(1.0+r2)*(1.0-r3*r3)/4.0;
-
-    // influence of the node number 16
-    //    H.val(46,1)=node_existance[16-1-8]*(1.0+r1)*(1.0-r2*r2)*(1.0-r3)/4.0;
-    //    H.val(47,2)=node_existance[16-1-8]*(1.0+r1)*(1.0-r2*r2)*(1.0-r3)/4.0;
-    //    H.val(48,3)=node_existance[16-1-8]*(1.0+r1)*(1.0-r2*r2)*(1.0-r3)/4.0;
-    // influence of the node number 15
-    //    H.val(43,1)=node_existance[15-1-8]*(1.0-r1*r1)*(1.0-r2)*(1.0-r3)/4.0;
-    //    H.val(44,2)=node_existance[15-1-8]*(1.0-r1*r1)*(1.0-r2)*(1.0-r3)/4.0;
-    //    H.val(45,3)=node_existance[15-1-8]*(1.0-r1*r1)*(1.0-r2)*(1.0-r3)/4.0;
-    // influence of the node number 14
-    //    H.val(40,1)=node_existance[14-1-8]*(1.0-r1)*(1.0-r2*r2)*(1.0-r3)/4.0;
-    //    H.val(41,2)=node_existance[14-1-8]*(1.0-r1)*(1.0-r2*r2)*(1.0-r3)/4.0;
-    //    H.val(42,3)=node_existance[14-1-8]*(1.0-r1)*(1.0-r2*r2)*(1.0-r3)/4.0;
-    // influence of the node number 13
-    //    H.val(37,1)=node_existance[13-1-8]*(1.0-r1*r1)*(1.0+r2)*(1.0-r3)/4.0;
-    //    H.val(38,2)=node_existance[13-1-8]*(1.0-r1*r1)*(1.0+r2)*(1.0-r3)/4.0;
-    //    H.val(39,3)=node_existance[13-1-8]*(1.0-r1*r1)*(1.0+r2)*(1.0-r3)/4.0;
-
-    // influence of the node number 12
-    //    H.val(34,1)=node_existance[12-1-8]*(1.0+r1)*(1.0-r2*r2)*(1.0+r3)/4.0;
-    //    H.val(35,2)=node_existance[12-1-8]*(1.0+r1)*(1.0-r2*r2)*(1.0+r3)/4.0;
-    //    H.val(36,3)=node_existance[12-1-8]*(1.0+r1)*(1.0-r2*r2)*(1.0+r3)/4.0;
-    // influence of the node number 11
-    //    H.val(31,1)=node_existance[11-1-8]*(1.0-r1*r1)*(1.0-r2)*(1.0+r3)/4.0;
-    //    H.val(32,2)=node_existance[11-1-8]*(1.0-r1*r1)*(1.0-r2)*(1.0+r3)/4.0;
-    //    H.val(33,3)=node_existance[11-1-8]*(1.0-r1*r1)*(1.0-r2)*(1.0+r3)/4.0;
-    // influence of the node number 10
-    //    H.val(28,1)=node_existance[10-1-8]*(1.0-r1)*(1.0-r2*r2)*(1.0+r3)/4.0;
-    //    H.val(29,2)=node_existance[10-1-8]*(1.0-r1)*(1.0-r2*r2)*(1.0+r3)/4.0;
-    //    H.val(30,3)=node_existance[10-1-8]*(1.0-r1)*(1.0-r2*r2)*(1.0+r3)/4.0;
-    // influence of the node number 9
-    //    H.val(25,1)=node_existance[9-1-8]*(1.0-r1*r1)*(1.0+r2)*(1.0+r3)/4.0;
-    //    H.val(26,2)=node_existance[9-1-8]*(1.0-r1*r1)*(1.0+r2)*(1.0+r3)/4.0;
-    //    H.val(27,3)=node_existance[9-1-8]*(1.0-r1*r1)*(1.0+r2)*(1.0+r3)/4.0;
-    //
-
-    // 9-20 nodes commented by Xiaoyan  07/12/00
-    
     // influence of the node number 8
-    //    H.val(22,1)=(1.0+r1)*(1.0-r2)*(1.0-r3)/8.0 - (H.val(15)+H.val(16)+H.val(20))/2.0;
-    //    H.val(23,2)=(1.0+r1)*(1.0-r2)*(1.0-r3)/8.0 - (H.val(15)+H.val(16)+H.val(20))/2.0;
-    //    H.val(24,3)=(1.0+r1)*(1.0-r2)*(1.0-r3)/8.0 - (H.val(15)+H.val(16)+H.val(20))/2.0;
-    H.val(22,1)=(1.0+r1)*(1.0-r2)*(1.0-r3)/8.0;// - (H.val(43,1)+H.val(48,3)+H.val(60,3))/2.0;
-    H.val(23,2)=(1.0+r1)*(1.0-r2)*(1.0-r3)/8.0;// - (H.val(43,1)+H.val(48,3)+H.val(60,3))/2.0;
-    H.val(24,3)=(1.0+r1)*(1.0-r2)*(1.0-r3)/8.0;// - (H.val(43,1)+H.val(48,3)+H.val(60,3))/2.0;
+    H.val(22,1)=(1.0+r1)*(1.0-r2)*(1.0-r3)*0.125;// - (H.val(43,1)+H.val(48,3)+H.val(60,3))/2.0;
+    H.val(23,2)= H.val(22,1); //(1.0+r1)*(1.0-r2)*(1.0-r3)*0.125;// - (H.val(43,1)+H.val(48,3)+H.val(60,3))/2.0;
+    H.val(24,3)= H.val(22,1); //(1.0+r1)*(1.0-r2)*(1.0-r3)*0.125;// - (H.val(43,1)+H.val(48,3)+H.val(60,3))/2.0;
     // influence of the node number 7
-    H.val(19,1)=(1.0-r1)*(1.0-r2)*(1.0-r3)/8.0;// - (H.val(42,3)+H.val(43,1)+H.val(57,3))/2.0;
-    H.val(20,2)=(1.0-r1)*(1.0-r2)*(1.0-r3)/8.0;// - (H.val(42,3)+H.val(43,1)+H.val(57,3))/2.0;
-    H.val(21,3)=(1.0-r1)*(1.0-r2)*(1.0-r3)/8.0;// - (H.val(42,3)+H.val(43,1)+H.val(57,3))/2.0;
+    H.val(19,1)=(1.0-r1)*(1.0-r2)*(1.0-r3)*0.125;// - (H.val(42,3)+H.val(43,1)+H.val(57,3))/2.0;
+    H.val(20,2)=H.val(19,1); //(1.0-r1)*(1.0-r2)*(1.0-r3)*0.125;// - (H.val(42,3)+H.val(43,1)+H.val(57,3))/2.0;
+    H.val(21,3)=H.val(19,1); //(1.0-r1)*(1.0-r2)*(1.0-r3)*0.125;// - (H.val(42,3)+H.val(43,1)+H.val(57,3))/2.0;
     // influence of the node number 6
-    H.val(16,1)=(1.0-r1)*(1.0+r2)*(1.0-r3)/8.0 ;//- (H.val(39,3)+H.val(42,3)+H.val(54,3))/2.0;
-    H.val(17,2)=(1.0-r1)*(1.0+r2)*(1.0-r3)/8.0 ;//- (H.val(39,3)+H.val(42,3)+H.val(54,3))/2.0;
-    H.val(18,3)=(1.0-r1)*(1.0+r2)*(1.0-r3)/8.0 ;//- (H.val(39,3)+H.val(42,3)+H.val(54,3))/2.0;
+    H.val(16,1)=(1.0-r1)*(1.0+r2)*(1.0-r3)*0.125;//- (H.val(39,3)+H.val(42,3)+H.val(54,3))/2.0;
+    H.val(17,2)=H.val(16,1); //(1.0-r1)*(1.0+r2)*(1.0-r3)*0.125;//- (H.val(39,3)+H.val(42,3)+H.val(54,3))/2.0;
+    H.val(18,3)=H.val(16,1); //(1.0-r1)*(1.0+r2)*(1.0-r3)*0.125;//- (H.val(39,3)+H.val(42,3)+H.val(54,3))/2.0;
     // influence of the node number 5
-    H.val(13,1)=(1.0+r1)*(1.0+r2)*(1.0-r3)/8.0 ;//- (H.val(39,3)+H.val(48,3)+H.val(51,3))/2.0;
-    H.val(14,2)=(1.0+r1)*(1.0+r2)*(1.0-r3)/8.0 ;//- (H.val(39,3)+H.val(48,3)+H.val(51,3))/2.0;
-    H.val(15,3)=(1.0+r1)*(1.0+r2)*(1.0-r3)/8.0 ;//- (H.val(39,3)+H.val(48,3)+H.val(51,3))/2.0;
+    H.val(13,1)=(1.0+r1)*(1.0+r2)*(1.0-r3)*0.125;//- (H.val(39,3)+H.val(48,3)+H.val(51,3))/2.0;
+    H.val(14,2)=H.val(13,1); //(1.0+r1)*(1.0+r2)*(1.0-r3)*0.125;//- (H.val(39,3)+H.val(48,3)+H.val(51,3))/2.0;
+    H.val(15,3)=H.val(13,1); //(1.0+r1)*(1.0+r2)*(1.0-r3)*0.125;//- (H.val(39,3)+H.val(48,3)+H.val(51,3))/2.0;
 
     // influence of the node number 4
-    H.val(10,1)=(1.0+r1)*(1.0-r2)*(1.0+r3)/8.0 ;//- (H.val(33,3)+H.val(36,3)+H.val(60,3))/2.0;
-    H.val(11,2)=(1.0+r1)*(1.0-r2)*(1.0+r3)/8.0 ;//- (H.val(33,3)+H.val(36,3)+H.val(60,3))/2.0;
-    H.val(12,3)=(1.0+r1)*(1.0-r2)*(1.0+r3)/8.0 ;//- (H.val(33,3)+H.val(36,3)+H.val(60,3))/2.0;
+    H.val(10,1)=(1.0+r1)*(1.0-r2)*(1.0+r3)*0.125;//- (H.val(33,3)+H.val(36,3)+H.val(60,3))/2.0;
+    H.val(11,2)=H.val(10,1); //(1.0+r1)*(1.0-r2)*(1.0+r3)*0.125;//- (H.val(33,3)+H.val(36,3)+H.val(60,3))/2.0;
+    H.val(12,3)=H.val(10,1); //(1.0+r1)*(1.0-r2)*(1.0+r3)*0.125;//- (H.val(33,3)+H.val(36,3)+H.val(60,3))/2.0;
     // influence of the node number 3		        
-    H.val(7,1)=(1.0-r1)*(1.0-r2)*(1.0+r3)/8.0 ;//- (H.val(30,3)+H.val(33,3)+H.val(57,3))/2.0;
-    H.val(8,2)=(1.0-r1)*(1.0-r2)*(1.0+r3)/8.0 ;//- (H.val(30,3)+H.val(33,3)+H.val(57,3))/2.0;
-    H.val(9,3)=(1.0-r1)*(1.0-r2)*(1.0+r3)/8.0 ;//- (H.val(30,3)+H.val(33,3)+H.val(57,3))/2.0;
+    H.val(7,1)=(1.0-r1)*(1.0-r2)*(1.0+r3)*0.125;//- (H.val(30,3)+H.val(33,3)+H.val(57,3))/2.0;
+    H.val(8,2)=H.val(7,1); //(1.0-r1)*(1.0-r2)*(1.0+r3)*0.125;//- (H.val(30,3)+H.val(33,3)+H.val(57,3))/2.0;
+    H.val(9,3)=H.val(7,1); //(1.0-r1)*(1.0-r2)*(1.0+r3)*0.125;//- (H.val(30,3)+H.val(33,3)+H.val(57,3))/2.0;
     // influence of the node number 2
-    H.val(4,1)=(1.0-r1)*(1.0+r2)*(1.0+r3)/8.0 ;//- (H.val(30,3)+H.val(54,3)+H.val(27,3))/2.0;
-    H.val(5,2)=(1.0-r1)*(1.0+r2)*(1.0+r3)/8.0 ;//- (H.val(30,3)+H.val(54,3)+H.val(27,3))/2.0;
-    H.val(6,3)=(1.0-r1)*(1.0+r2)*(1.0+r3)/8.0 ;//- (H.val(30,3)+H.val(54,3)+H.val(27,3))/2.0;
+    H.val(4,1)=(1.0-r1)*(1.0+r2)*(1.0+r3)*0.125;//- (H.val(30,3)+H.val(54,3)+H.val(27,3))/2.0;
+    H.val(5,2)=H.val(4,1); //(1.0-r1)*(1.0+r2)*(1.0+r3)*0.125;//- (H.val(30,3)+H.val(54,3)+H.val(27,3))/2.0;
+    H.val(6,3)=H.val(4,1); //(1.0-r1)*(1.0+r2)*(1.0+r3)*0.125;//- (H.val(30,3)+H.val(54,3)+H.val(27,3))/2.0;
     // influence of the node number 1
-    H.val(1,1)=(1.0+r1)*(1.0+r2)*(1.0+r3)/8.0 ;//- (H.val(36,3)+H.val(51,3)+H.val(27,3))/2.0;
-    H.val(2,2)=(1.0+r1)*(1.0+r2)*(1.0+r3)/8.0 ;//- (H.val(36,3)+H.val(51,3)+H.val(27,3))/2.0;
-    H.val(3,3)=(1.0+r1)*(1.0+r2)*(1.0+r3)/8.0 ;//- (H.val(36,3)+H.val(51,3)+H.val(27,3))/2.0;
-
-					       // The second part were commented by Xiaoyan
-    //         double sum = 0;
-    // 
-    // 	for (int i=1; i<=60 ; i++)
-    //           {
-    // //  	    sum+=H.cval(i,1);
-    // 	    for (int j=1; j<= 1; j++)
-    // 	       {
-    //        	          sum+=H.cval(i,1);
-    // 	          ::printf( "  %+9.2e", H.cval(i,j) );
-    // 	        }
-    //            // ::printf( "  %d \n", i);
-    // 	   }
-    // 	    ::printf( " \n sum= %+6.2e\n", sum );
-    
-
-    //    printf("r1 = %lf, r2 = %lf, r3 = %lf\n", r1, r2, r3);
-    //    H.print("h");
+    H.val(1,1)=(1.0+r1)*(1.0+r2)*(1.0+r3)*0.125;//- (H.val(36,3)+H.val(51,3)+H.val(27,3))/2.0;
+    H.val(2,2)=H.val(1,1); //(1.0+r1)*(1.0+r2)*(1.0+r3)*0.125;//- (H.val(36,3)+H.val(51,3)+H.val(27,3))/2.0;
+    H.val(3,3)=H.val(1,1); //(1.0+r1)*(1.0+r2)*(1.0+r3)*0.125;//- (H.val(36,3)+H.val(51,3)+H.val(27,3))/2.0;
 
     return H;
   }
@@ -871,34 +631,6 @@ tensor EightNodeBrick::interp_poli_at(double r1, double r2, double r3)
     tensor h(1, dimension, 0.0);
 
 
-    // influence of the node number 20
-    //    h.val(20)=node_existance[20-1-8]*(1.0+r1)*(1.0-r2)*(1.0-r3*r3)/4.0;
-    // influence of the node number 19
-    //    h.val(19)=node_existance[19-1-8]*(1.0-r1)*(1.0-r2)*(1.0-r3*r3)/4.0;
-    // influence of the node number 18
-    //    h.val(18)=node_existance[18-1-8]*(1.0-r1)*(1.0+r2)*(1.0-r3*r3)/4.0;
-    // influence of the node number 17
-    //    h.val(17)=node_existance[17-1-8]*(1.0+r1)*(1.0+r2)*(1.0-r3*r3)/4.0;
-
-    // influence of the node number 16
-    //    h.val(16)=node_existance[16-1-8]*(1.0+r1)*(1.0-r2*r2)*(1.0-r3)/4.0;
-    // influence of the node number 15
-    //    h.val(15)=node_existance[15-1-8]*(1.0-r1*r1)*(1.0-r2)*(1.0-r3)/4.0;
-    // influence of the node number 14
-    //    h.val(14)=node_existance[14-1-8]*(1.0-r1)*(1.0-r2*r2)*(1.0-r3)/4.0;
-    // influence of the node number 13
-    //    h.val(13)=node_existance[13-1-8]*(1.0-r1*r1)*(1.0+r2)*(1.0-r3)/4.0;
-
-    // influence of the node number 12
-    //    h.val(12)=node_existance[12-1-8]*(1.0+r1)*(1.0-r2*r2)*(1.0+r3)/4.0;
-    // influence of the node number 11
-    //    h.val(11)=node_existance[11-1-8]*(1.0-r1*r1)*(1.0-r2)*(1.0+r3)/4.0;
-    // influence of the node number 10
-    //    h.val(10)=node_existance[10-1-8]*(1.0-r1)*(1.0-r2*r2)*(1.0+r3)/4.0;
-    // influence of the node number 9
-    //    h.val(9)=node_existance[9-1-8]*(1.0-r1*r1)*(1.0+r2)*(1.0+r3)/4.0;
-
-    // Commented by Xiaoyan
 
     // influence of the node number 8
     h.val(8)=(1.0+r1)*(1.0-r2)*(1.0-r3)/8.0;// - (h.val(15)+h.val(16)+h.val(20))/2.0;
@@ -917,11 +649,6 @@ tensor EightNodeBrick::interp_poli_at(double r1, double r2, double r3)
     h.val(2)=(1.0-r1)*(1.0+r2)*(1.0+r3)/8.0;// - (h.val(10)+h.val(18)+h.val(9))/2.0;
     // influence of the node number 1
     h.val(1)=(1.0+r1)*(1.0+r2)*(1.0+r3)/8.0;// - (h.val(12)+h.val(17)+h.val(9))/2.0;
-					    // The second part were commented by Xiaoyan 
-					    // for 8 nodes
-
-    //    printf("r1 = %lf, r2 = %lf, r3 = %lf\n", r1, r2, r3);
-    //    h.print("h");
 
     return h;
   }
@@ -935,112 +662,42 @@ tensor EightNodeBrick::dh_drst_at(double r1, double r2, double r3)
     tensor dh(2, dimensions, 0.0);
 
 
-    // influence of the node number 20
-    //    dh.val(20,1) =   node_existance[20-1-8]*(1.0-r2)*(1.0-r3*r3)/4.0;
-    //    dh.val(20,2) = - node_existance[20-1-8]*(1.0+r1)*(1.0-r3*r3)/4.0;
-    //    dh.val(20,3) = - node_existance[20-1-8]*(1.0+r1)*(1.0-r2)*r3/2.0;
-    // influence of the node number 19
-    //    dh.val(19,1) = - node_existance[19-1-8]*(1.0-r2)*(1.0-r3*r3)/4.0;
-    //    dh.val(19,2) = - node_existance[19-1-8]*(1.0-r1)*(1.0-r3*r3)/4.0;
-    //    dh.val(19,3) = - node_existance[19-1-8]*(1.0-r1)*(1.0-r2)*r3/2.0;
-    // influence of the node number 18
-    //    dh.val(18,1) = - node_existance[18-1-8]*(1.0+r2)*(1.0-r3*r3)/4.0;
-    //    dh.val(18,2) =   node_existance[18-1-8]*(1.0-r1)*(1.0-r3*r3)/4.0;
-    //    dh.val(18,3) = - node_existance[18-1-8]*(1.0-r1)*(1.0+r2)*r3/2.0;
-    // influence of the node number 17
-    //    dh.val(17,1) =   node_existance[17-1-8]*(1.0+r2)*(1.0-r3*r3)/4.0;
-    //    dh.val(17,2) =   node_existance[17-1-8]*(1.0+r1)*(1.0-r3*r3)/4.0;
-    //    dh.val(17,3) = - node_existance[17-1-8]*(1.0+r1)*(1.0+r2)*r3/2.0;
-
-    // influence of the node number 16
-    //    dh.val(16,1) =   node_existance[16-1-8]*(1.0-r2*r2)*(1.0-r3)/4.0;
-    //    dh.val(16,2) = - node_existance[16-1-8]*(1.0+r1)*r2*(1.0-r3)/2.0;
-    //    dh.val(16,3) = - node_existance[16-1-8]*(1.0+r1)*(1.0-r2*r2)/4.0;
-    // influnce of the node number 15
-    //    dh.val(15,1) = - node_existance[15-1-8]*r1*(1.0-r2)*(1.0-r3)/2.0;
-    //    dh.val(15,2) = - node_existance[15-1-8]*(1.0-r1*r1)*(1.0-r3)/4.0;
-    //    dh.val(15,3) = - node_existance[15-1-8]*(1.0-r1*r1)*(1.0-r2)/4.0;
-    // influence of the node number 14
-    //    dh.val(14,1) = - node_existance[14-1-8]*(1.0-r2*r2)*(1.0-r3)/4.0;
-    //    dh.val(14,2) = - node_existance[14-1-8]*(1.0-r1)*r2*(1.0-r3)/2.0;
-    //    dh.val(14,3) = - node_existance[14-1-8]*(1.0-r1)*(1.0-r2*r2)/4.0;
-    // influence of the node number 13
-    //    dh.val(13,1) = - node_existance[13-1-8]*r1*(1.0+r2)*(1.0-r3)/2.0;
-    //    dh.val(13,2) =   node_existance[13-1-8]*(1.0-r1*r1)*(1.0-r3)/4.0;
-    //    dh.val(13,3) = - node_existance[13-1-8]*(1.0-r1*r1)*(1.0+r2)/4.0;
-
-    // influence of the node number 12
-    //    dh.val(12,1) =   node_existance[12-1-8]*(1.0-r2*r2)*(1.0+r3)/4.0;
-    //    dh.val(12,2) = - node_existance[12-1-8]*(1.0+r1)*r2*(1.0+r3)/2.0;
-    //    dh.val(12,3) =   node_existance[12-1-8]*(1.0+r1)*(1.0-r2*r2)/4.0;
-    // influence of the node number 11
-    //    dh.val(11,1) = - node_existance[11-1-8]*r1*(1.0-r2)*(1.0+r3)/2.0;
-    //    dh.val(11,2) = - node_existance[11-1-8]*(1.0-r1*r1)*(1.0+r3)/4.0; // bug discovered 01 aug '95 2.0 -> 4.0
-    //    dh.val(11,3) =   node_existance[11-1-8]*(1.0-r1*r1)*(1.0-r2)/4.0;
-    // influence of the node number 10
-    //    dh.val(10,1) = - node_existance[10-1-8]*(1.0-r2*r2)*(1.0+r3)/4.0;
-    //    dh.val(10,2) = - node_existance[10-1-8]*(1.0-r1)*r2*(1.0+r3)/2.0;
-    //    dh.val(10,3) =   node_existance[10-1-8]*(1.0-r1)*(1.0-r2*r2)/4.0;
-    // influence of the node number 9
-    //    dh.val(9,1) = - node_existance[9-1-8]*r1*(1.0+r2)*(1.0+r3)/2.0;
-    //    dh.val(9,2) =   node_existance[9-1-8]*(1.0-r1*r1)*(1.0+r3)/4.0;
-    //    dh.val(9,3) =   node_existance[9-1-8]*(1.0-r1*r1)*(1.0+r2)/4.0;
-
-    //   Commented by Xiaoyan for 8 nodes
-
     // influence of the node number 8
-    dh.val(8,1)= (1.0-r2)*(1.0-r3)/8.0;// - (dh.val(15,1)+dh.val(16,1)+dh.val(20,1))/2.0;
-    dh.val(8,2)=-(1.0+r1)*(1.0-r3)/8.0;// - (dh.val(15,2)+dh.val(16,2)+dh.val(20,2))/2.0;
-    dh.val(8,3)=-(1.0+r1)*(1.0-r2)/8.0;// - (dh.val(15,3)+dh.val(16,3)+dh.val(20,3))/2.0;
+    dh.val(8,1)= (1.0-r2)*(1.0-r3)*0.125; ///8.0;// - (dh.val(15,1)+dh.val(16,1)+dh.val(20,1))/2.0;
+    dh.val(8,2)=-(1.0+r1)*(1.0-r3)*0.125; ///8.0;// - (dh.val(15,2)+dh.val(16,2)+dh.val(20,2))/2.0;
+    dh.val(8,3)=-(1.0+r1)*(1.0-r2)*0.125; ///8.0;// - (dh.val(15,3)+dh.val(16,3)+dh.val(20,3))/2.0;
     // influence of the node number 7
-    dh.val(7,1)=-(1.0-r2)*(1.0-r3)/8.0;// - (dh.val(14,1)+dh.val(15,1)+dh.val(19,1))/2.0;
-    dh.val(7,2)=-(1.0-r1)*(1.0-r3)/8.0;// - (dh.val(14,2)+dh.val(15,2)+dh.val(19,2))/2.0;
-    dh.val(7,3)=-(1.0-r1)*(1.0-r2)/8.0;// - (dh.val(14,3)+dh.val(15,3)+dh.val(19,3))/2.0;
+    dh.val(7,1)=-(1.0-r2)*(1.0-r3)*0.125; ///8.0;// - (dh.val(14,1)+dh.val(15,1)+dh.val(19,1))/2.0;
+    dh.val(7,2)=-(1.0-r1)*(1.0-r3)*0.125; ///8.0;// - (dh.val(14,2)+dh.val(15,2)+dh.val(19,2))/2.0;
+    dh.val(7,3)=-(1.0-r1)*(1.0-r2)*0.125; ///8.0;// - (dh.val(14,3)+dh.val(15,3)+dh.val(19,3))/2.0;
     // influence of the node number 6
-    dh.val(6,1)=-(1.0+r2)*(1.0-r3)/8.0;// - (dh.val(13,1)+dh.val(14,1)+dh.val(18,1))/2.0;
-    dh.val(6,2)= (1.0-r1)*(1.0-r3)/8.0;// - (dh.val(13,2)+dh.val(14,2)+dh.val(18,2))/2.0;
-    dh.val(6,3)=-(1.0-r1)*(1.0+r2)/8.0;//- (dh.val(13,3)+dh.val(14,3)+dh.val(18,3))/2.0;
+    dh.val(6,1)=-(1.0+r2)*(1.0-r3)*0.125; ///8.0;// - (dh.val(13,1)+dh.val(14,1)+dh.val(18,1))/2.0;
+    dh.val(6,2)= (1.0-r1)*(1.0-r3)*0.125; ///8.0;// - (dh.val(13,2)+dh.val(14,2)+dh.val(18,2))/2.0;
+    dh.val(6,3)=-(1.0-r1)*(1.0+r2)*0.125; ///8.0;//- (dh.val(13,3)+dh.val(14,3)+dh.val(18,3))/2.0;
     // influence of the node number 5
-    dh.val(5,1)= (1.0+r2)*(1.0-r3)/8.0;// - (dh.val(13,1)+dh.val(16,1)+dh.val(17,1))/2.0;
-    dh.val(5,2)= (1.0+r1)*(1.0-r3)/8.0;// - (dh.val(13,2)+dh.val(16,2)+dh.val(17,2))/2.0;
-    dh.val(5,3)=-(1.0+r1)*(1.0+r2)/8.0;// - (dh.val(13,3)+dh.val(16,3)+dh.val(17,3))/2.0;
+    dh.val(5,1)= (1.0+r2)*(1.0-r3)*0.125; ///8.0;// - (dh.val(13,1)+dh.val(16,1)+dh.val(17,1))/2.0;
+    dh.val(5,2)= (1.0+r1)*(1.0-r3)*0.125; ///8.0;// - (dh.val(13,2)+dh.val(16,2)+dh.val(17,2))/2.0;
+    dh.val(5,3)=-(1.0+r1)*(1.0+r2)*0.125; ///8.0;// - (dh.val(13,3)+dh.val(16,3)+dh.val(17,3))/2.0;
 
     // influence of the node number 4
-    dh.val(4,1)= (1.0-r2)*(1.0+r3)/8.0;// - (dh.val(11,1)+dh.val(12,1)+dh.val(20,1))/2.0;
-    dh.val(4,2)=-(1.0+r1)*(1.0+r3)/8.0;// - (dh.val(11,2)+dh.val(12,2)+dh.val(20,2))/2.0;
-    dh.val(4,3)= (1.0+r1)*(1.0-r2)/8.0;// - (dh.val(11,3)+dh.val(12,3)+dh.val(20,3))/2.0;
+    dh.val(4,1)= (1.0-r2)*(1.0+r3)*0.125; ///8.0;// - (dh.val(11,1)+dh.val(12,1)+dh.val(20,1))/2.0;
+    dh.val(4,2)=-(1.0+r1)*(1.0+r3)*0.125; ///8.0;// - (dh.val(11,2)+dh.val(12,2)+dh.val(20,2))/2.0;
+    dh.val(4,3)= (1.0+r1)*(1.0-r2)*0.125; ///8.0;// - (dh.val(11,3)+dh.val(12,3)+dh.val(20,3))/2.0;
     // influence of the node number 3
-    dh.val(3,1)=-(1.0-r2)*(1.0+r3)/8.0;// - (dh.val(10,1)+dh.val(11,1)+dh.val(19,1))/2.0;
-    dh.val(3,2)=-(1.0-r1)*(1.0+r3)/8.0;// - (dh.val(10,2)+dh.val(11,2)+dh.val(19,2))/2.0;
-    dh.val(3,3)= (1.0-r1)*(1.0-r2)/8.0;// - (dh.val(10,3)+dh.val(11,3)+dh.val(19,3))/2.0;
+    dh.val(3,1)=-(1.0-r2)*(1.0+r3)*0.125; ///8.0;// - (dh.val(10,1)+dh.val(11,1)+dh.val(19,1))/2.0;
+    dh.val(3,2)=-(1.0-r1)*(1.0+r3)*0.125; ///8.0;// - (dh.val(10,2)+dh.val(11,2)+dh.val(19,2))/2.0;
+    dh.val(3,3)= (1.0-r1)*(1.0-r2)*0.125; ///8.0;// - (dh.val(10,3)+dh.val(11,3)+dh.val(19,3))/2.0;
     // influence of the node number 2
-    dh.val(2,1)=-(1.0+r2)*(1.0+r3)/8.0;// - (dh.val(10,1)+dh.val(18,1)+dh.val(9,1))/2.0;
-    dh.val(2,2)= (1.0-r1)*(1.0+r3)/8.0;// - (dh.val(10,2)+dh.val(18,2)+dh.val(9,2))/2.0;
-    dh.val(2,3)= (1.0-r1)*(1.0+r2)/8.0;// - (dh.val(10,3)+dh.val(18,3)+dh.val(9,3))/2.0;
+    dh.val(2,1)=-(1.0+r2)*(1.0+r3)*0.125; ///8.0;// - (dh.val(10,1)+dh.val(18,1)+dh.val(9,1))/2.0;
+    dh.val(2,2)= (1.0-r1)*(1.0+r3)*0.125; ///8.0;// - (dh.val(10,2)+dh.val(18,2)+dh.val(9,2))/2.0;
+    dh.val(2,3)= (1.0-r1)*(1.0+r2)*0.125; ///8.0;// - (dh.val(10,3)+dh.val(18,3)+dh.val(9,3))/2.0;
     // influence of the node number 1
-    dh.val(1,1)= (1.0+r2)*(1.0+r3)/8.0;// - (dh.val(12,1)+dh.val(17,1)+dh.val(9,1))/2.0;
-    dh.val(1,2)= (1.0+r1)*(1.0+r3)/8.0;// - (dh.val(12,2)+dh.val(17,2)+dh.val(9,2))/2.0;
-    dh.val(1,3)= (1.0+r1)*(1.0+r2)/8.0;//- (dh.val(12,3)+dh.val(17,3)+dh.val(9,3))/2.0;
+    dh.val(1,1)= (1.0+r2)*(1.0+r3)*0.125; ///8.0;// - (dh.val(12,1)+dh.val(17,1)+dh.val(9,1))/2.0;
+    dh.val(1,2)= (1.0+r1)*(1.0+r3)*0.125; ///8.0;// - (dh.val(12,2)+dh.val(17,2)+dh.val(9,2))/2.0;
+    dh.val(1,3)= (1.0+r1)*(1.0+r2)*0.125; ///8.0;//- (dh.val(12,3)+dh.val(17,3)+dh.val(9,3))/2.0;
 				       // Commented by Xiaoyan
     return dh;
   }
-
-//CE Dynamic Allocation for brick3d
-
-
-////#############################################################################
-//Finite_Element * EightNodeBrick::new_el(int total)
-//  {
-//    EightNodeBrick *el_p;
-//    el_p = new EightNodeBrick[total];
-//    //DB//-------------------------------------------
-//    //DB    for ( int i=0 ; i<total ; i++ )
-//    //DB      {
-//    //DB        el_p[i].report("derived EightNodeBrick\n");
-//    //DB      }
-//    //DB//-------------------------------------------
-//    return el_p;
-//  }
 
 ////#############################################################################
 EightNodeBrick & EightNodeBrick::operator[](int subscript)
@@ -1068,7 +725,7 @@ tensor EightNodeBrick::getStiffnessTensor(void)
     tensor Kkt(4,K_dim,0.0);
 
     //debugging
-//    matrix Kmat;
+    matrix Kmat;
 
     double r  = 0.0;
     double rw = 0.0;
@@ -1099,14 +756,8 @@ tensor EightNodeBrick::getStiffnessTensor(void)
     tensor JacobianINVtemp;
     tensor dhGlobal;
 
-    //int number_of_subincrements = 1;
-    //double this_one_PP = 1.0; // if set to 0.0 -> perfectly plastic
-                              // if set to 1.0 -> elasto plastic
-    //    tensor Ktemp(4,K_dim,0.0);
-    //    char * integr_type = 0;
+    double tmp= 0;
 
-//    stresstensor final_stress_after_integration;
-//    stresstensor incremental_stress;
     
     // tensor of incremental displacements taken from node objects
     //incremental_displacements = incr_disp();
@@ -1134,9 +785,18 @@ tensor EightNodeBrick::getStiffnessTensor(void)
 		//dh.print("dh");
                 // Jacobian tensor ( matrix )
                 Jacobian = Jacobian_3D(dh);
-                // Inverse of Jacobian tensor ( matrix )
-                JacobianINV = Jacobian_3Dinv(dh);
-                JacobianINVtemp = Jacobian.inverse();
+                //Jacobian.print("J");
+
+		// Inverse of Jacobian tensor ( matrix )
+                //JacobianINV = Jacobian_3Dinv(dh);
+                JacobianINV = Jacobian.inverse();
+		//JacobianINVtemp = JacobianINVtemp - JacobianINV;
+		//JacobianINV.print();
+   		//JacobianINVtemp.print();
+
+                //JacobianINV = Jacobian.inverse(); //Zhaohui 08-31-2001
+
+
                 // determinant of Jacobian tensor ( matrix )
                 det_of_Jacobian  = Jacobian.determinant();
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
@@ -1163,9 +823,10 @@ tensor EightNodeBrick::getStiffnessTensor(void)
                 // incremental straines at this Gauss point
                 //GPstress[where].reportshortpqtheta("\n stress at GAUSS point in stiffness_tensor1\n");
                 
-		incremental_strain =
-                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-                //incremental_strain.null_indices();
+		//incremental_strain =
+                //     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+                
+		//incremental_strain.null_indices();
                 //incremental_strain.report("\n incremental_strain tensor at GAUSS point\n");
                 
 		// incremental_strain.reportshort("\n incremental_strain tensor at GAUSS point\n");
@@ -1257,13 +918,16 @@ tensor EightNodeBrick::getStiffnessTensor(void)
                 //K = K + temp2;
                 
 		Kkt = dhGlobal("ib")*Constitutive("abcd");
-		Kk = Kk + Kkt("aicd")*dhGlobal("jd")*weight;
+		Kkt = Kkt("aicd")*dhGlobal("jd")*weight;
+   		Kk = Kk + Kkt;
 		
 		//Kk = Kk + dhGlobal("ib")*Constitutive("abcd")*dhGlobal("jd")*weight;
                 //....K.print("K","\n\n K tensor \n"); 
-                
-		//Kmat = this->stiffness_matrix(Kk);
-                //printf("K tensor max= %10.3e\n", Kmat.mmax());
+
+		//Kmat = this->stiffness_matrix(Kkt);
+                //Kmat.print("Kmat");
+
+		//printf("K tensor max= %10.3e\n", Kmat.mmax());
 
                 //convert constitutive and K to matrix and find min and max and print!
 
@@ -1485,105 +1149,6 @@ tensor EightNodeBrick::getMassTensor(void)
   }
 
 
-//out19Jan2001 ////#############################################################################
-//out19Jan2001 // Not for OpenSees
-//out19Jan2001 double EightNodeBrick::Potential_Energy(void)
-//out19Jan2001   {
-//out19Jan2001 //    double Potential_Energy_Estimate = 0.0;
-//out19Jan2001     double Delta_Potential_Energy_Estimate = 0.0;
-//out19Jan2001 
-//out19Jan2001     double r  = 0.0;
-//out19Jan2001     double rw = 0.0;
-//out19Jan2001     double s  = 0.0;
-//out19Jan2001     double sw = 0.0;
-//out19Jan2001     double t  = 0.0;
-//out19Jan2001     double tw = 0.0;
-//out19Jan2001 
-//out19Jan2001     short where = 0;
-//out19Jan2001     double weight = 0.0;
-//out19Jan2001 
-//out19Jan2001     int dh_dim[] = {8,3};	// Xiaoyan changed from {20,3} to {8,3}
-//out19Jan2001     tensor dh(2, dh_dim, 0.0);
-//out19Jan2001 
-//out19Jan2001     static int disp_dim[] = {8,3};	// Xiaoyan changed from {20,3} to {8,3}
-//out19Jan2001     tensor incremental_displacements(2,disp_dim,0.0); // \Delta u
-//out19Jan2001 
-//out19Jan2001     double det_of_Jacobian = 0.0;
-//out19Jan2001 
-//out19Jan2001     straintensor incremental_strain;
-//out19Jan2001 //    straintensor total_strain_at_GP;
-//out19Jan2001 
-//out19Jan2001     tensor Jacobian;
-//out19Jan2001     tensor JacobianINV;
-//out19Jan2001     tensor dhGlobal;
-//out19Jan2001 
-//out19Jan2001     stresstensor stress_sum;
-//out19Jan2001 // tensor of incremental displacements taken from node objects
-//out19Jan2001     incremental_displacements = incr_disp();
-//out19Jan2001 
-//out19Jan2001     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
-//out19Jan2001       {
-//out19Jan2001         r = get_Gauss_p_c( r_integration_order, GP_c_r );
-//out19Jan2001         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-//out19Jan2001         for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
-//out19Jan2001           {
-//out19Jan2001             s = get_Gauss_p_c( s_integration_order, GP_c_s );
-//out19Jan2001             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-//out19Jan2001             for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
-//out19Jan2001               {
-//out19Jan2001                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
-//out19Jan2001                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
-//out19Jan2001                 // this short routine is supposed to calculate position of
-//out19Jan2001                 // Gauss point from 3D array of short's
-//out19Jan2001                 where =
-//out19Jan2001                 ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
-//out19Jan2001                 // derivatives of local coordinates with respect to local coordinates
-//out19Jan2001                 dh = dh_drst_at(r,s,t);
-//out19Jan2001                 // Jacobian tensor ( matrix )
-//out19Jan2001                 Jacobian = Jacobian_3D(dh);
-//out19Jan2001                 //....                Jacobian.print("J");
-//out19Jan2001                 // Inverse of Jacobian tensor ( matrix )
-//out19Jan2001                 JacobianINV = Jacobian_3Dinv(dh);
-//out19Jan2001                 //....                JacobianINV.print("JINV");
-//out19Jan2001                 // determinant of Jacobian tensor ( matrix )
-//out19Jan2001                 det_of_Jacobian  = Jacobian.determinant();
-//out19Jan2001                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
-//out19Jan2001                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-//out19Jan2001                 dhGlobal = dh("ij") * JacobianINV("kj");
-//out19Jan2001                 //weight
-//out19Jan2001                 weight = rw * sw * tw * det_of_Jacobian;
-//out19Jan2001                 //::::::   ::printf("\n\nIN THE STIFFNESS TENSOR INTEGRATOR ----**************** where = %d \n", where);
-//out19Jan2001                 //::fprintf(stdout," Potential_Energy\n");
-//out19Jan2001                 //::fprintf(stdout,"                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
-//out19Jan2001                 //                                      GP_c_r,GP_c_s,GP_c_t);
-//out19Jan2001                 //::fprintf(stdout,"WEIGHT = %f", weight);
-//out19Jan2001                 //::fprintf(stdout,"determinant of Jacobian = %f", determinant_of_Jacobian);
-//out19Jan2001                 //::::::   matpoint[where].report("Gauss Point\n");
-//out19Jan2001                 //::::::
-//out19Jan2001                 // incremental straines at this Gauss point
-//out19Jan2001                 //----   GPstress[where].reportshortpqtheta("\n stress at GAUSS point in stiffness_tensor1\n");
-//out19Jan2001                 incremental_strain =
-//out19Jan2001                  (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-//out19Jan2001                 incremental_strain.null_indices();
-//out19Jan2001                 //GPstress[where].reportshortpqtheta("\n stress at GAUSS point in Potential_Energy\n");
-//out19Jan2001                 //GPiterative_stress[where].reportshortpqtheta("\n ITERATIVE stress at GAUSS point in Potential_Energy\n");
-//out19Jan2001 
-//out19Jan2001                 //stress_sum = GPstress[where] + GPiterative_stress[where];
-//out19Jan2001                 stress_sum = matpoint[where]->getStressTensor() 
-//out19Jan2001 		                + (matpoint[where]->matmodel->getEPS())->getStress_commit(); //????? 
-//out19Jan2001                 
-//out19Jan2001 		//stress_sum.reportshortpqtheta("\n ITERATIVE stress_SUM at GAUSS point in Potential_Energy\n");
-//out19Jan2001 
-//out19Jan2001                 Delta_Potential_Energy_Estimate += weight * (stress_sum("ij")*incremental_strain("ij")).trace();
-//out19Jan2001                 //         Potential_Energy_Estimate =
-//out19Jan2001 
-//out19Jan2001               }
-//out19Jan2001           }
-//out19Jan2001       }
-//out19Jan2001 //::fprintf(stdout,"Delta_Potential_Energy_Estimate = %.20e \n",Delta_Potential_Energy_Estimate);
-//out19Jan2001     return Delta_Potential_Energy_Estimate;
-//out19Jan2001   }
-//out19Jan2001 
 
 ////#############################################################################
 
@@ -1694,6 +1259,8 @@ tensor EightNodeBrick::Nodal_Coordinates(void)
     N_coord.val(6,1)=nd6Crds(0); N_coord.val(6,2)=nd6Crds(1); N_coord.val(6,3)=nd6Crds(2);
     N_coord.val(7,1)=nd7Crds(0); N_coord.val(7,2)=nd7Crds(1); N_coord.val(7,3)=nd7Crds(2);
     N_coord.val(8,1)=nd8Crds(0); N_coord.val(8,2)=nd8Crds(1); N_coord.val(8,3)=nd8Crds(2);
+
+    //N_coord.print();
 
     return N_coord;
   }
@@ -1870,35 +1437,6 @@ int * EightNodeBrick::get_LM(void)
     return LM;
   }
 
-//Commented out Zhaohui 09-27-2000
-
-//////#############################################################################
-//void EightNodeBrick::set_LM(Node * node)
-//  {
-////    unsigned int BrickNumber = this->get_Brick_Number();
-////    this->reportshort("");
-//// for element numbered BrickNumber create LM array (see Bathe pp984
-////    for (int LocalNodeNumber = 1 ; LocalNodeNumber<=20 ; LocalNodeNumber++ )
-//    for (int LocalNodeNumber = 1 ; LocalNodeNumber<=8 ; LocalNodeNumber++ )// for 8noded brick
-//      {
-////        unsigned int global_node_number = b3d[BrickNumber-1].get_global_number_of_node(LocalNodeNumber-1);
-//        unsigned int global_node_number = this->get_global_number_of_node(LocalNodeNumber-1);
-//        LM[3*LocalNodeNumber-3] = node[global_node_number].eqn_tx();
-//        LM[3*LocalNodeNumber-2] = node[global_node_number].eqn_ty();
-//        LM[3*LocalNodeNumber-1] = node[global_node_number].eqn_tz();
-//      }
-//
-//      // ::printf("\n\n");
-//
-////===   this->reportLM("LM"); 
-////   for (int count01=1;count01<=8;count01++)
-////     {
-////       ::printf("element %4d localNode %4d Globalnode %4d  LM   %4d   %4d   %4d\n", BrickNumber, count01,this->get_global_number_of_node(count01-1),  LM[count01*3-3], LM[count01*3-2], LM[count01*3-1] );
-////     }
-//
-//  }
-
-
 ////#############################################################################
 // returns nodal forces for given stress field in an element
 tensor EightNodeBrick::nodal_forces(void)
@@ -1976,6 +1514,7 @@ tensor EightNodeBrick::nodal_forces(void)
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
+		//cout << " UCD det_of_Jacobian "<< det_of_Jacobian << endln;
                 //..::printf("\n\nIN THE nodal forces ----**************** where = %d \n", where);
                 //..::printf("                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
                 //..                           GP_c_r,GP_c_s,GP_c_t);
@@ -2421,129 +1960,6 @@ tensor EightNodeBrick::linearized_nodal_forces(void)
 
   }
 
-//....////#############################################################################
-//....// updates Gauss point stresses and strains from given displacements
-//....void EightNodeBrick::update_stress_strain(tensor & displacementsT)
-//....  {
-//....//    int force_dim[] = {20,3};
-//....//    tensor nodal_forces(2,force_dim,0.0);
-//....
-//....    double r  = 0.0;
-//....    double rw = 0.0;
-//....    double s  = 0.0;
-//....    double sw = 0.0;
-//....    double t  = 0.0;
-//....    double tw = 0.0;
-//....
-//....    short where = 0;
-//....    double weight = 0.0;
-//....
-//....    int dh_dim[] = {20,3};
-//....    tensor dh(2, dh_dim, 0.0);
-//....
-//....    stresstensor stress_at_GP(0.0);
-//....    straintensor strain_at_GP(0.0);
-//....
-//....    double det_of_Jacobian = 0.0;
-//....
-//....    tensor Jacobian;
-//....    tensor JacobianINV;
-//....    tensor dhGlobal;
-//....
-//....    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
-//....      {
-//....        r = get_Gauss_p_c( r_integration_order, GP_c_r );
-//....        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-//....
-//....        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
-//....          {
-//....            s = get_Gauss_p_c( s_integration_order, GP_c_s );
-//....            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-//....
-//....            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
-//....              {
-//....                t = get_Gauss_p_c( t_integration_order, GP_c_t );
-//....                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
-//....
-//....// this short routine is supposed to calculate position of
-//....// Gauss point from 3D array of short's
-//....                where =
-//....                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
-//....
-//....//........................................................
-//....//........................................................
-//....// interpolation functions
-//....                tensor h = b3darray[0].interp_poli_at(r,s,t);
-//....                ::printf("\n\n r = %f, s = %f, t = %f\n", r, s, t);
-//....//  h.print("h");
-//....
-//....// displacements
-//....//....   tensor disp_at_rst = h("i")*displacementsT("ia");
-//....//....   disp_at_rst.print("disp");
-//....
-//....// derivatives of interpolation functions
-//....                dh = dh_drst_at(r,s,t);
-//....//                ::printf("\n\n r = %f, s = %f, t = %f\n", r, s, t);
-//....//  dh.print("dh");
-//....
-//....                Jacobian = b3darray[0].Jacobian_3D(dh);
-//....//                Jacobian.print("J");
-//....
-//....                JacobianINV = b3darray[0].Jacobian_3Dinv(dh);
-//....//                JacobianINV.print("JINV");
-//....
-//....//                det_of_Jacobian = Jacobian.determinant();
-//....//                ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
-//....
-//....// Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-//....                dhGlobal = dh("ij") * JacobianINV("kj");
-//....// straines
-//....//  strain = (dh("ib")*displacements("ia")).symmetrize11();
-//....                strain = (dhGlobal("ib")*displacementsT("ia")).symmetrize11();
-//....//  straintensor strain = dh("ib")*displacements("ia");
-//....                strain.reportshort("\n strain tensor\n");
-//....                strain.null_indices();
-//....
-//....//                tensor E = mmElastic.ElasticStiffness();
-//....
-//....//stresses
-//....                stress = E("ijkl") * strain("kl");
-//....                stress.reportshort("\n\n stress tensor \n");
-//....//...
-//....//........................................................
-//....//........................................................
-//....//........................................................
-//....//........................................................
-//....//........................................................
-//....//........................................................
-//....//........................................................
-//....
-//....
-//....              }
-//....          }
-//....      }
-//....
-//....  }
-
-////#############################################################################
-////#############################################################################
-//double EightNodeBrick::get_first_q_ast(void)
-//  {
-//    double ret = matpoint[0].kappa_cone_get();
-//
-//    return ret;
-//
-//  }
-////#############################################################################
-//double EightNodeBrick::get_first_etacone(void)
-//  {
-//    double ret = matpoint[0].etacone();
-//
-//    return ret;
-//
-//  }
-//
-
 //#############################################################################
 void EightNodeBrick::report(char * msg)
   {
@@ -2908,11 +2324,6 @@ void EightNodeBrick::reportTensorF(FILE * fp)
 
  }
 
-//=============================================================================
-//  The following are come from FourNodeQuad.cc	 Xiaoyan 07/06/00
-//  The following are come from FourNodeQuad.cc	 Xiaoyan 07/06/00
-//  The following are come from FourNodeQuad.cc	 Xiaoyan 07/06/00
-//=============================================================================
 
 
 //=============================================================================
@@ -3320,7 +2731,8 @@ int  EightNodeBrick::addLoad(const Vector &addLoad)
      }
 
      // Add to the external nodal loads
-     Q += addLoad;
+     //Q += addLoad;
+     Q.addVector(1.0, addLoad, 1.0);
 
      return 0;
 }
@@ -3444,53 +2856,6 @@ const Vector EightNodeBrick::FormEquiBodyForce(void)
     
     return bforce;
 }
-
-//=============================================================================
-// Setting initial E according to the initial pressure p
-//void EightNodeBrick::setInitE(void)
-//{
-//    //Get the coors of each node
-//
-//    const Vector &nd1Crds = nd1Ptr->getCrds();
-//    const Vector &nd2Crds = nd2Ptr->getCrds();
-//    const Vector &nd3Crds = nd3Ptr->getCrds();
-//    const Vector &nd4Crds = nd4Ptr->getCrds();
-//    const Vector &nd5Crds = nd5Ptr->getCrds();
-//    const Vector &nd6Crds = nd6Ptr->getCrds();
-//    const Vector &nd7Crds = nd7Ptr->getCrds();
-//    const Vector &nd8Crds = nd8Ptr->getCrds();
-//    
-//    //dir is the ID for vertial direction, e.g. 1 means x-dir is vertical...
-//    double Zavg = nd1Crds( dir-1)+
-//    		   nd2Crds( dir-1)+
-//    		   nd3Crds( dir-1)+
-//    		   nd4Crds( dir-1)+
-//    		   nd5Crds( dir-1)+
-//    		   nd6Crds( dir-1)+
-//    		   nd7Crds( dir-1)+
-//    		   nd8Crds( dir-1);
-//    Zavg = Zavg / 8;
-//    
-//    //Estimate the pressure at that depth
-//    double sigma_v = (Zavg - surflevel) * rho * 9.81; //units in SI system
-//    double ko = 0.5;
-//    double p_est = sigma_v*( 2.0*ko+1.0)/3.0;
-//    //cerr << " Initial P " << p_est << endln;
-//
-//    int i;
-//
-//    // Loop over the integration points and set the initial material state
-//    int count  = r_integration_order* s_integration_order * t_integration_order;
-//    
-//    //For elastic-isotropic material
-//    if (strcmp(matpoint[i]->matmodel->getType(),"ElasticIsotropic3D") == 0)
-//    {
-//       for (i = 0; i < count; i++)	
-//           (matpoint[i]->matmodel)->setElasticStiffness( p_est );
-//    }
-//        
-//    //return ;
-//}
 
 
 //=============================================================================

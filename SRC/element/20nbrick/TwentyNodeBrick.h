@@ -1,6 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// COPYRIGHT (C):     :-))
+// COPYLEFT (C):     :-))
+//``This  source code is Copyrighted in U.S., by the The Regents of the University
+//of California, for an indefinite period, and anybody caught using it without our
+//permission,  will  be  mighty  good friends of ourn, cause we don't give a darn.
+//Hack  it.  Compile it. Debug it. Run it. Yodel it. Enjoy it. We wrote it, that's
+//all we wanted to do.'' bj
+//
 // PROJECT:           Object Oriented Finite Element Program
 // FILE:              TwentyNodeBrick.h
 // CLASS:             TwentyNodeBrick
@@ -153,10 +159,10 @@ class TwentyNodeBrick: public Element
 
 
 
-    Matrix K;		// Element stiffness Matrix
-    Matrix C;		// Element damping matrix
-    Matrix M;		// Element mass matrix
-    Vector P;		// Element resisting force vector
+    static Matrix K;		// Element stiffness Matrix
+    static Matrix C;		// Element damping matrix
+    static Matrix M;		// Element mass matrix
+    static Vector P;		// Element resisting force vector
     Vector Q;		// Applied nodal loads
     Vector bf;  	// Body forces
     
@@ -165,9 +171,9 @@ class TwentyNodeBrick: public Element
     double pressure;	// Normal surface traction (pressure) over entire element
     int    order;  	// Order of the quadrature rule
 
-    Matrix J;		// Jacobian of transformation
-    Matrix L;		// Inverse of J
-    Matrix B;		// Strain interpolation matrix
+//    Matrix J;		// Jacobian of transformation
+//    Matrix L;		// Inverse of J
+//    Matrix B;		// Strain interpolation matrix
     
 	
   private:
