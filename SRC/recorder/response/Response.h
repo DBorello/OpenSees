@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-10-05 00:52:14 $
+// $Revision: 1.5 $
+// $Date: 2002-12-13 00:14:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/Response.h,v $
                                                                         
 // Written: MHS 
@@ -39,21 +39,27 @@ class Tensor;
 
 class Response
 {
-public:
-	Response(void);
-	Response(int val);
-	Response(double val);
-	Response(const ID &val);
-	Response(const Vector &val);
-	Response(const Matrix &val);
-	Response(const Tensor &val);
+ public:
+  Response(void);
+  Response(int val);
+  Response(double val);
+  Response(const ID &val);
+  Response(const Vector &val);
+  Response(const Matrix &val);
+  Response(const Tensor &val);
+  
+  virtual ~Response();
+  
+  virtual int getResponse(void) = 0;
+  virtual Information &getInformation(void);
 
-	virtual ~Response();
+  virtual void Print(ostream &s, int flag = 0);
 
-	virtual int getResponse(void) = 0;
-	virtual void Print(ostream &s, int flag = 0);
+ protected:
+  Information myInfo;
 
-	Information myInfo;
+ private:
+
 };
 
 

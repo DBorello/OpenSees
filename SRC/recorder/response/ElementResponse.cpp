@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 18:26:58 $
+// $Revision: 1.4 $
+// $Date: 2002-12-13 00:14:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/ElementResponse.cpp,v $
                                                                         
 // Written: MHS 
@@ -80,5 +80,5 @@ ElementResponse::~ElementResponse()
 int
 ElementResponse::getResponse(void)
 {
-	return theElement->getResponse(responseID, myInfo);
+  return theElement->getResponse(responseID, myInfo);
 }

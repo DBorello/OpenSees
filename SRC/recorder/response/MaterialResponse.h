@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 18:26:59 $
+// $Revision: 1.4 $
+// $Date: 2002-12-13 00:14:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/MaterialResponse.h,v $
                                                                         
 // Written: MHS 
@@ -42,21 +42,21 @@ class Tensor;
 
 class MaterialResponse : public Response
 {
-public:
-	MaterialResponse(Material *mat, int id);
-	MaterialResponse(Material *mat, int id, int val);
-	MaterialResponse(Material *mat, int id, double val);
-	MaterialResponse(Material *mat, int id, const ID &val);
-	MaterialResponse(Material *mat, int id, const Vector &val);
-	MaterialResponse(Material *mat, int id, const Matrix &val);
-	MaterialResponse(Material *mat, int ID, const Tensor &val);
-	~MaterialResponse();
-
-	int getResponse(void);
+ public:
+  MaterialResponse(Material *mat, int id);
+  MaterialResponse(Material *mat, int id, int val);
+  MaterialResponse(Material *mat, int id, double val);
+  MaterialResponse(Material *mat, int id, const ID &val);
+  MaterialResponse(Material *mat, int id, const Vector &val);
+  MaterialResponse(Material *mat, int id, const Matrix &val);
+  MaterialResponse(Material *mat, int ID, const Tensor &val);
+  ~MaterialResponse();
+  
+  int getResponse(void);
 
 private:
-	Material *theMaterial;
-	int responseID;
+  Material *theMaterial;
+  int responseID;
 };
 
 #endif
