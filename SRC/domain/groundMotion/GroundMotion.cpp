@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-06-25 22:25:25 $
+// $Revision: 1.8 $
+// $Date: 2004-07-06 17:58:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotion.cpp,v $
                                                                         
 // Written: fmk 
@@ -205,7 +205,7 @@ GroundMotion::getVel(double time)
   
   // if theAccel is not 0, integrate accel series to get a vel series
   else if (theAccelSeries != 0) {
-    opserr << " WARINNG: GroundMotion::getVel(double time) - we are having to integrate to get the ground velocities, are you happy with the integration scheme?\n";
+    opserr << " WARNING: GroundMotion::getVel(double time) - default integration required to get the ground velocities from the ground accelerations\n";
     theVelSeries = this->integrate(theAccelSeries, delta);
     if (theVelSeries != 0)
       return theVelSeries->getFactor(time);      
@@ -227,7 +227,7 @@ GroundMotion::getDisp(double time)
 
   // if theVel is not 0, integrate vel series to get disp series
   else if (theVelSeries != 0) {
-    opserr << " WARINNG: GroundMotion::getDisp(double time) - we are having to integrate the velocities get the ground displacements, are you happy with the integration scheme?\n";
+    opserr << " WARNING: GroundMotion::getDisp(double time) - default integration required to get the ground displacements from the ground velocities\n";
     theDispSeries = this->integrate(theVelSeries, delta);
     if (theDispSeries != 0)
       return theDispSeries->getFactor(time);      
@@ -237,7 +237,7 @@ GroundMotion::getDisp(double time)
 
   // if theAccel is not 0, integrate vel series to get disp series
   else if (theAccelSeries != 0) {    
-    opserr << " WARINNG: GroundMotion::getDisp(double time) - we are having to integrate the acceleration time series to get the velocities and then integrate these to get to get the ground displacements, are you happy with the integration scheme?\n";
+    opserr << " WARNING: GroundMotion::getDisp(double time) - default integration required to get the ground displacements from the ground velocities via the ground accelerations\n";
     theVelSeries = this->integrate(theAccelSeries, delta);
     if (theVelSeries != 0) {
       theDispSeries = this->integrate(theVelSeries, delta);
