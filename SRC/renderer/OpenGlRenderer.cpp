@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-07-26 01:08:46 $
+// $Revision: 1.8 $
+// $Date: 2001-07-26 01:36:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -311,9 +311,9 @@ OpenGLRenderer::startImage(void)
     } else { // perspective projection
 
 	double VRPn = -PRPn;  // VRP after T(-PRP)
-	float near = PRPn-F;
-	float far  = PRPn-B;
-	float zMin = near/far;
+	float near2 = PRPn-F;
+	float far2  = PRPn-B;
+	float zMin = near2/far2;
 
 	/**************** Having trouble with the following transformation ******
 	float a,b,c,e,f,g,h;
@@ -346,12 +346,12 @@ OpenGLRenderer::startImage(void)
 	gluLookAt(cop(0),cop(1),cop(2),vrp(0),vrp(1),vrp(2),vuv(0),vuv(1),vuv(2));
 
 	glMatrixMode(GL_PROJECTION);
-	float left = near*diffU/VRPn/2;
-	float bottom = near*diffV/VRPn/2;
+	float left = near2*diffU/VRPn/2;
+	float bottom = near2*diffV/VRPn/2;
 	float right = -left;
 	float top = -bottom;
 	glLoadIdentity();
-	glFrustum(left,right,bottom,top,near,far);	
+	glFrustum(left,right,bottom,top,near2,far2);	
 
     }
 

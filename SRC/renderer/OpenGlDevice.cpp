@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-26 01:08:46 $
+// $Revision: 1.4 $
+// $Date: 2001-07-26 01:36:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -565,13 +565,13 @@ OpenGlDevice::BITMAPOPEN(char *_title, int _xLoc, int _yLoc,
   wglMakeCurrent(theHDC, theHRC);
 
 
-  if (bmpFileName != 0) {
+  if (bitmapFile != 0) {
     count = 100000;
-    if (strlen(bmpFileName) > MAX_FILENAMELENGTH) 
-      g3ErrorHandler->warning("warning - OpenGlDevice::OpenGlDevice() - bmpFileName %s too long, max %d\n",
-			      bmpFileName, MAX_FILENAMELENGTH);
+    if (strlen(bitmapFile) > MAX_FILENAMELENGTH) 
+      g3ErrorHandler->warning("warning - OpenGlDevice::OpenGlDevice() - bitmapFile %s too long, max %d\n",
+			      bitmapFile, MAX_FILENAMELENGTH);
     else {
-      strcpy(theBmpFileName, bmpFileName); 
+      strcpy(bitmapFileName, bitmapFile); 
       oglCreateBitmap(width, height, &theHRC, &theHDC, &theBitmap, &info, &bits);
       
     }
@@ -799,6 +799,7 @@ OpenGlDevice::drawText(float x, float y, float z, char *text, int length,
 		       char horizontalJustify, char verticalJustify)
 {
 #ifdef _WGL
+	glColor3f(0.0,0.0,0.0);
   glRasterPos3f(x,y,z);
   glListBase(FontBase);
   glCallLists(strlen(text), GL_UNSIGNED_BYTE, text);
