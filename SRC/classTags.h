@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-01-12 03:48:28 $
+// $Revision: 1.6 $
+// $Date: 2001-05-08 05:24:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -96,6 +96,8 @@
 #define SEC_TAG_GenericNd	6
 #define SEC_TAG_Aggregator	7
 #define SEC_TAG_Fiber		8
+#define SEC_TAG_FiberSection2d		9
+#define SEC_TAG_FiberSection3d		10
 
 #define ND_TAG_ElasticIsotropic					10
 #define ND_TAG_ElasticIsotropicPlaneStrain2d	11
@@ -156,16 +158,21 @@
 #define ELE_TAG_TrussSection    4005
 #define ELE_TAG_fElmt05	           5
 #define ELE_TAG_fElmt02	           2
-// #define ELE_TAG_MyTruss    	 4002
+#define ELE_TAG_MyTruss    	 4002
 #define ELE_TAG_ZeroLength	 5000
 #define ELE_TAG_ZeroLengthSection	 5001
 #define ELE_TAG_ZeroLengthND	 5002
 #define ELE_TAG_NLBeamColumn2d	 6000
 #define ELE_TAG_NLBeamColumn3d	 6001
+#define ELE_TAG_LargeDispBeamColumn3d	 6002
 #define ELE_TAG_FourNodeQuad	 1010
 #define ELE_TAG_BeamWithHinges2d  401  
 #define ELE_TAG_BeamWithHinges3d  402
 #define ELE_TAG_EightNodeBrick   7001
+#define ELE_TAG_PlateMITC4      2023 
+#define ELE_TAG_Plate1          2022 
+
+
 
 #define CRDTR_TAG_LinearCrdTransf2d 1
 #define CRDTR_TAG_CorotCrdTransf2d  2
