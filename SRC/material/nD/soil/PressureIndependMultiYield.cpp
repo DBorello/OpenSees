@@ -1,5 +1,5 @@
-// $Revision: 1.28 $
-// $Date: 2004-06-15 18:58:01 $
+// $Revision: 1.29 $
+// $Date: 2004-08-26 20:39:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -868,7 +868,7 @@ void PressureIndependMultiYield::setUpSurfaces (double * gredu)
 		}
 
 	  else if (frictionAngle == 0.) { // cohesion = peakShearStrength
-		  peakShear = cohesion;
+		  peakShear = 2*sqrt(2.)*cohesion/3;
 		  refStrain = (peakShearStrain * peakShear) 
 			            / (refShearModulus * peakShearStrain - peakShear);
 		  residualPress = 0.;

@@ -16,17 +16,17 @@
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
-** With a lot of additions by                                         **
+** With a lot additions from                                          **
 **   Boris Jeremic    (jeremic@ucdavis.edu)                           **
 **   Zaohui Yang      (zhyang@ucdavis.edu)                            **
-**   Zhao Cheng       (zcheng@ucdavis.edu)                            **
+**                                                                    **
 **                                                                    **
 **                                                                    **
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2004-07-22 18:26:28 $
+// $Revision: 1.35 $
+// $Date: 2004-08-26 20:39:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -55,19 +55,10 @@
 #include <string.h>
 
 #include <Template3Dep.h>
-#include <FiniteDeformationElastic3D.h>
-#include <FiniteDeformationEP3D.h>
+
 
 Template3Dep *
 TclModelBuilder_addTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int argc, 
-				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
-
-FiniteDeformationElastic3D *
-TclModelBuilder_addFiniteDeformationElastic3D(ClientData clientData, Tcl_Interp *interp,  int argc, 
-				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
-
-FiniteDeformationEP3D *
-TclModelBuilder_addFiniteDeformationEP3D(ClientData clientData, Tcl_Interp *interp,  int argc, 
 				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
 
 NDMaterial *
@@ -469,7 +460,6 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	if (gredu != 0) delete [] gredu;
     }	
     
-    
     // Pressure Dependend Multi-yield, by ZHY
     else if (strcmp(argv[1],"PressureDependMultiYield") == 0) {
 	const int numParam = 15; 
@@ -568,27 +558,31 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     
     // Pressure Dependend Multi-yield, by ZHY
     else if (strcmp(argv[1],"PressureDependMultiYield02") == 0) {
-	const int numParam = 16; 
-	const int totParam = 25;
+	const int numParam = 14; 
+	const int totParam = 26;
 	int tag;  
 	double param[totParam];
  	param[numParam] = 20;
- 	param[numParam+1] = 0.6;
-	param[numParam+2] = 0.9;
-	param[numParam+3] = 0.02;
-	param[numParam+4] = 0.7;
-	param[numParam+5] = 101.;
-	param[numParam+6] = .3;
-	param[numParam+7] = 0.;
-	param[numParam+8] = 1.;
+ 	param[numParam+1] = 25;
+ 	param[numParam+2] = 1.5;
+	param[numParam+3] = 0.5;
+ 	param[numParam+4] = 0.6;
+	param[numParam+5] = 0.9;
+	param[numParam+6] = 0.02;
+	param[numParam+7] = 0.7;
+	param[numParam+8] = 101.;
+	param[numParam+9] = .3;
+	param[numParam+10] = 0.;
+	param[numParam+11] = 1.;
 
 	char * arg[] = {"nd", "rho", "refShearModul", 
 		  "refBulkModul", "frictionAng", 
 			"peakShearStra", "refPress", "pressDependCoe", 
 			"phaseTransformAngle", "contractionParam1", 			
-			"contractionParam2","dilationParam1", "dilationParam2", 
-			"liquefactionParam1", "liquefactionParam2", 
-			"liquefactionParam4", "numberOfYieldSurf (=20)", 
+			"contractionParam3","dilationParam1",  
+			"liquefactionParam1", "liquefactionParam2", "numberOfYieldSurf (=20)",
+			"contractionParam2=50000", "dilationParam2=1.5",
+			"dilationParam3=0.5",
 			"e (=0.6)", "volLimit1 (=0.9)", "volLimit2 (=0.02)", 
 			"volLimit3 (=0.7)", "Atmospheric pressure (=101)", "cohesi (=.5)",
 	        "Hv (=0)", "Pv (=1.)" };
@@ -604,7 +598,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    opserr << arg[13] << "? "<< arg[14] << "? "<< arg[15] << "? "<< "\n"; 
 	    opserr << arg[16] << "? "<< arg[17] << "? "<< arg[18] << "? "<< "\n"; 
 	    opserr << arg[19] << "? "<< arg[20] << "? "<< arg[21] << "? "<< "\n";
-		opserr << arg[22] << "? " << endln; 
+		opserr << arg[22] << "? "<< arg[23] << "? " << endln; 
 	    return TCL_ERROR;
 	}    
 
@@ -613,7 +607,8 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    return TCL_ERROR;		
 	}
 
-	for (int i=3; (i<argc && i<20); i++) 
+	int in = 18;
+	for (int i=3; (i<argc && i<in); i++) 
 	  if (Tcl_GetDouble(interp, argv[i], &param[i-3]) != TCL_OK) {
 		    opserr << "WARNING invalid " << arg[i-3] << "\n";
 		    opserr << "nDMaterial PressureDependMultiYield02: " << tag << endln;
@@ -627,7 +622,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
      gredu = new double[int(2*param[numParam])];
 
 		 for (int i=0; i<2*param[numParam]; i++) 
-	      if (Tcl_GetDouble(interp, argv[i+21], &gredu[i]) != TCL_OK) {
+	      if (Tcl_GetDouble(interp, argv[i+in], &gredu[i]) != TCL_OK) {
 		      opserr << "WARNING invalid " << arg[i-3] << "\n";
 		      opserr << "nDMaterial PressureIndependMultiYield: " << tag << endln;
 		      return TCL_ERROR;	
@@ -635,14 +630,14 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	}
   
 	if (gredu != 0) {
-	  for (int i=20+int(2*param[numParam]); i<argc; i++) 
+	  for (int i=in+int(2*param[numParam]); i<argc; i++) 
 	    if (Tcl_GetDouble(interp, argv[i], &param[i-3-int(2*param[numParam])]) != TCL_OK) {
 		      opserr << "WARNING invalid " << arg[i-3-int(2*param[numParam])] << "\n";
 		      opserr << "nDMaterial PressureDependMultiYield02: " << tag << endln;
 		      return TCL_ERROR;	
 			}
 	} else {
-	  for (int i=20; i<argc; i++) 
+	  for (int i=in; i<argc; i++) 
 	    if (Tcl_GetDouble(interp, argv[i], &param[i-3]) != TCL_OK) {
 		      opserr << "WARNING invalid " << arg[i-3-int(2*param[numParam])] << "\n";
 		      opserr << "nDMaterial PressureDependMultiYield02: " << tag << endln;
@@ -650,15 +645,16 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 		}
 	} 
 
+
 	PressureDependMultiYield02 * temp =
 	    new PressureDependMultiYield02 (tag, param[0], param[1], param[2], 
 					  param[3], param[4], param[5], 
 					  param[6], param[7], param[8], 
 					  param[9], param[10], param[11], 
-					  param[12], param[13], param[14], 
-					  param[15], param[16], gredu,  
-					  param[17], param[18], param[19], param[20], 
-					  param[21], param[22], param[23], param[24]);
+					  param[12], param[13], param[14], gredu,
+					  param[15], param[16], param[17],   
+					  param[18], param[19], param[20], param[21], 
+					  param[22], param[23], param[24], param[25]);
 					  
 	   theMaterial = temp;	
 	   if (gredu != 0) delete [] gredu;
@@ -710,24 +706,10 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 						    param[2],param[3]);
     }	    
 
-
     else if (strcmp(argv[1],"Template3Dep") == 0) {
       theMaterial = TclModelBuilder_addTemplate3Dep(clientData, interp, argc, argv, 
 						    theTclBuilder, 2);
     }
-
-    else if (strcmp(argv[1],"FiniteDeformationElastic3D") == 0 ||
-             strcmp(argv[1],"FDElastic3D" ) == 0) {
-      theMaterial = TclModelBuilder_addFiniteDeformationElastic3D(clientData, interp, argc, argv,
-						    theTclBuilder, 1);
-    }
-
-    else if (strcmp(argv[1],"FiniteDeformationEP3D") == 0 ||
-             strcmp(argv[1],"FDEP3D" ) == 0) {
-      theMaterial = TclModelBuilder_addFiniteDeformationEP3D(clientData, interp, argc, argv,
-						    theTclBuilder, 2);
-    }
-
      else if (strcmp(argv[1],"PlaneStressMaterial") == 0 ||
  	     strcmp(argv[1],"PlaneStress") == 0) {
  	if (argc < 4) {
@@ -738,7 +720,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
  	}
  	
  	int tag, matTag;
-
+ 	
  	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
  	    opserr << "WARNING invalid nDMaterial PlaneStress tag" << endln;
  	    return TCL_ERROR;		
@@ -759,7 +741,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
  	}
  
  	theMaterial = new PlaneStressMaterial( tag, *threeDMaterial );
-     }
+     }	
  
  
      else if (strcmp(argv[1],"PlateFiberMaterial") == 0 ||
@@ -838,7 +820,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
       theMaterial = TclModelBuilder_addFeapMaterial(clientData, 
 						    interp,
 						    argc, 
-						    argv,
+						    argv, 
 						    theTclBuilder);
     }
 
