@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2002-03-07 00:44:08 $
+// $Revision: 1.17 $
+// $Date: 2002-05-17 20:15:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -71,6 +71,11 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
 	wts[1] = 1.0;
 	wts[2] = 1.0;
 	wts[3] = 1.0;
+
+	if (strcmp(type,"PlaneStrain") != 0 && strcmp(type,"PlaneStress") != 0
+	    && strcmp(type,"PlaneStrain2D") != 0 && strcmp(type,"PlaneStress2D") != 0)
+	  g3ErrorHandler->fatal("%s -- improper material type %s for FourNodeQuad",
+				"FourNodeQuad::FourNodeQuad", type);
 
 	// Body forces
 	b[0] = b1;

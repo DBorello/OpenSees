@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-01-06 19:34:58 $
+// $Revision: 1.7 $
+// $Date: 2002-05-17 20:15:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.cpp,v $
 
 #include <iostream.h>
@@ -97,6 +97,11 @@ alpha(4), load(0)
   connectedExternalNodes(2) = node3 ;
   connectedExternalNodes(3) = node4 ;
 
+  if (strcmp(type,"PlaneStrain") != 0 && strcmp(type,"PlaneStress") != 0
+      && strcmp(type,"PlaneStrain2D") != 0 && strcmp(type,"PlaneStress2D") != 0)
+    g3ErrorHandler->fatal("%s -- improper material type %s for EnhancedQuad",
+			  "EnhancedQuad::EnhancedQuad", type);
+
   int i ;
   for ( i = 0 ;  i < 4; i++ ) {
 
@@ -104,8 +109,8 @@ alpha(4), load(0)
 
       if (materialPointers[i] == 0) {
 
-	  g3ErrorHandler->fatal("EnhancedQuad::constructor %s",
-		"- failed to get a material of type: ShellSection");
+	  g3ErrorHandler->fatal("%s -- failed to get a material of type %s",
+				"EnhancedQuad::EnhancedQuad", type);
       } //end if
       
   } //end for i 
