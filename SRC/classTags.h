@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.53 $
-// $Date: 2003-10-28 00:13:41 $
+// $Revision: 1.54 $
+// $Date: 2003-10-30 22:51:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -101,6 +101,10 @@
 #define MAT_TAG_Pinching4					18
 #define MAT_TAG_BarSlip					19
 #define MAT_TAG_Fatigue			20
+// Terje:
+#define MAT_TAG_SmoothSteel01			21
+#define MAT_TAG_SmoothConcrete01		22
+
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
@@ -183,6 +187,8 @@
 #define ND_TAG_PlateFiberMaterial          2001
 #define ND_TAG_BeamFiberMaterial		2002
 #define ND_TAG_CompressibleFluid		3001
+#define ND_TAG_GeneralizedPlasticity 3002
+#define ND_TAG_J2Plasticity02  3003
 #define ND_TAG_FiniteDeformationElastic3D	8002
 
 
@@ -285,6 +291,9 @@
 #define ELE_TAG_InternalSpring   9900
 #define ELE_TAG_SimpleJoint2D    9901
 #define ELE_TAG_Joint2D    9902
+
+// Terje:
+#define ELE_TAG_FourNodeQuad02  9903
 
 #define BEAM_INTEGRATION_TAG_Lobatto         1
 #define BEAM_INTEGRATION_TAG_UserDefined     2
