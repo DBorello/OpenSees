@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:32:47 $
+// $Revision: 1.2 $
+// $Date: 2003-03-06 18:13:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/GFunVisualizationAnalysis.cpp,v $
 
 
@@ -339,10 +339,14 @@ GFunVisualizationAnalysis::setAxes(Vector axesVector)
 	from1       =      axesVector(1);
 	double to1  =      axesVector(2);
 	numPts1     = (int)axesVector(3);
-	rv2         = (int)axesVector(4);
-	from2       =      axesVector(5);
-	double to2  =      axesVector(6);
-	numPts2     = (int)axesVector(7);
+
+	double to2;
+	if (axesVector.Size() > 4 ) {
+		rv2         = (int)axesVector(4);
+		from2       =      axesVector(5);
+		to2  =      axesVector(6);
+		numPts2     = (int)axesVector(7);
+	}
 
 	interval1   = (to1-from1)/(numPts1-1);
 	interval2   = (to2-from2)/(numPts2-1);
