@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-02-17 06:36:13 $
+// $Revision: 1.3 $
+// $Date: 2001-05-30 01:42:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/MinUnbalDispNorm.cpp,v $
                                                                         
                                                                         
@@ -283,6 +283,21 @@ MinUnbalDispNorm::domainChanged(void)
     (*phat) = theLinSOE->getB();
     currentLambda -= 1.0;
     theModel->setCurrentDomainTime(currentLambda);    
+
+
+    // check there is a reference load
+    int haveLoad = 0;
+    for (int i=0; i<size; i++)
+      if ( (*phat)(i) != 0.0 ) {
+	haveLoad = 1;
+	i = size;
+      }
+
+    if (haveLoad == 0) {
+      cerr << "WARNING ArcLength::domainChanged() - zero reference load";
+      return -1;
+    }
+
     
     return 0;
 }

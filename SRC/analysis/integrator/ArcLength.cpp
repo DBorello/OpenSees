@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2001-05-30 01:42:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/ArcLength.cpp,v $
                                                                         
                                                                         
@@ -280,6 +280,20 @@ ArcLength::domainChanged(void)
     currentLambda -= 1.0;
     theModel->setCurrentDomainTime(currentLambda);    
     
+
+    // check there is a reference load
+    int haveLoad = 0;
+    for (int i=0; i<size; i++)
+      if ( (*phat)(i) != 0.0 ) {
+	haveLoad = 1;
+	i = size;
+      }
+
+    if (haveLoad == 0) {
+      cerr << "WARNING ArcLength::domainChanged() - zero reference load";
+      return -1;
+    }
+
     return 0;
 }
 

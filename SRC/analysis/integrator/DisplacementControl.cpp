@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 05:23:32 $
+// $Revision: 1.4 $
+// $Date: 2001-05-30 01:42:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DisplacementControl.cpp,v $
                                                                         
                                                                         
@@ -273,6 +273,20 @@ DisplacementControl::domainChanged(void)
     (*phat) = theLinSOE->getB();
     currentLambda -= 1.0;
     theModel->setCurrentDomainTime(currentLambda);    
+
+
+    // check there is a reference load
+    int haveLoad = 0;
+    for (int i=0; i<size; i++)
+      if ( (*phat)(i) != 0.0 ) {
+	haveLoad = 1;
+	i = size;
+      }
+
+    if (haveLoad == 0) {
+      cerr << "WARNING DisplacementControl::domainChanged() - zero reference load";
+      return -1;
+    }
 
     // lastly we determine the id of the nodal dof
     // EXTRA CODE TO DO SOME ERROR CHECKING REQUIRED
