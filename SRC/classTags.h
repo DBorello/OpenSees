@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.45 $
-// $Date: 2003-03-06 18:34:14 $
+// $Revision: 1.46 $
+// $Date: 2003-03-14 23:36:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -371,6 +371,7 @@
 #define INTEGRATOR_TAGS_MinUnbalDispNorm 	11
 #define INTEGRATOR_TAGS_ArcLength1	     	12
 #define INTEGRATOR_TAGS_StaticSensitivity       13
+#define INTEGRATOR_TAGS_HSConstraint            14
 
 
 #define LinSOE_TAGS_FullGenLinSOE		1

@@ -623,6 +623,7 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/integrator/LoadControl.o \
 	$(FE)/analysis/integrator/LoadPath.o \
 	$(FE)/analysis/integrator/ArcLength.o \
+	$(FE)/analysis/integrator/HSConstraint.o \
 	$(FE)/analysis/integrator/ArcLength1.o \
 	$(FE)/analysis/integrator/MinUnbalDispNorm.o \
 	$(FE)/analysis/integrator/DisplacementControl.o \
@@ -700,6 +701,7 @@ wipe: spotless
 	@$(CD) $(FE)/reliability; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 
 
 
