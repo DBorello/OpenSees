@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2002-02-08 19:55:27 $
+// $Revision: 1.17 $
+// $Date: 2002-03-19 00:28:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -76,7 +76,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 
     // Check argv[1] for ND material type
 
-			 //Jul. 07, 2001 Boris Jeremic & ZHaohui Yang jeremic|zhyang@ucdavis.edu
+    //Jul. 07, 2001 Boris Jeremic & ZHaohui Yang jeremic|zhyang@ucdavis.edu
     // Pressure dependent elastic material
     if (strcmp(argv[1],"PressureDependentElastic3D") == 0) {
 	if (argc < 6) {
@@ -133,7 +133,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	       return TCL_ERROR;	
 	   }
      	   theMaterial = new PressureDependentElastic3D (tag, E, v, rho, expp);
-	   //cerr << "nDMaterial PressureDependentElastic3D: expp =" << expp << endl;
+	   cerr << "nDMaterial PressureDependentElastic3D: expp =" << expp << endl;
 	}
 //////////////////////////////////////////////////////////////////////////////////
 	else if (argc == 8 ) 
