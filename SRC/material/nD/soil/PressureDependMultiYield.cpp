@@ -1,5 +1,5 @@
-// $Revision: 1.12 $
-// $Date: 2001-09-20 04:21:08 $
+// $Revision: 1.13 $
+// $Date: 2001-09-21 23:58:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -1103,7 +1103,7 @@ void PressureDependMultiYield::updateActiveSurface(void)
   B = 2 * conHeig * (t1 && workV6);
 	if (fabs(B) < LOW_LIMIT) B = 0.; 
   C = (t1 && t1) - 2./3.* size * size * conHeig * conHeig;
-	if ( fabs(C) < LOW_LIMIT || fabs(C)/(t1 && t1) < LOW_LIMIT ) C = 0.;
+	if ( fabs(C) < LOW_LIMIT || fabs(C)/(t1 && t1) < LOW_LIMIT ) return;
 	if (B > 0. || C < 0.) {
     cerr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in surface motion.\n" 
 			   << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endl; 
