@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-06-14 05:17:41 $
+// $Revision: 1.2 $
+// $Date: 2001-06-14 05:33:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/Broyden.cpp,v $
                                                                         
                                                                         
@@ -49,11 +49,9 @@ Broyden::Broyden(int theTangentToUse, int n )
 :EquiSolnAlgo(EquiALGORITHM_TAGS_Broyden),
  theTest(0), tangent(theTangentToUse), numberLoops(n) 
 {
-  s  = new (Vector*)[numberLoops+3] ;
+  s  = new Vector*[numberLoops+3] ;
 
-  z  = new (Vector*)[numberLoops+3] ;
-
-  //  r  = new (Vector*)[numberLoops+3] ;
+  z  = new Vector*[numberLoops+3] ;
 
   residOld = 0 ;
   residNew = 0 ;
@@ -75,11 +73,9 @@ Broyden::Broyden(ConvergenceTest &theT, int theTangentToUse, int n)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_Broyden),
  theTest(&theT), tangent(theTangentToUse), numberLoops(n) 
 {
-  s  = new (Vector*)[numberLoops+3] ;
+  s  = new Vector*[numberLoops+3] ;
 
-  z  = new (Vector*)[numberLoops+3] ;
-
-  //  r  = new (Vector*)[numberLoops+3] ;
+  z  = new Vector*[numberLoops+3] ;
 
   residOld = 0 ;
   residNew = 0 ;
@@ -89,7 +85,6 @@ Broyden::Broyden(ConvergenceTest &theT, int theTangentToUse, int n)
   for ( int i =0; i < numberLoops+3; i++ ) {
     s[i] = 0 ;
     z[i] = 0 ;
-    //r[i] = 0 ;
   }
   
   localTest = theTest->getCopy( this->numberLoops ) ;
@@ -359,8 +354,8 @@ void  Broyden::BroydenUpdate( IncrementalIntegrator *theIntegrator,
   *z[nBroyden] = theSOE->getX() ; 
   *z[nBroyden] *= (-1.0) ;
 
-  
-  for ( int i=1; i<=(nBroyden-1); i++ ) {
+  int i;
+  for ( i=1; i<=(nBroyden-1); i++ ) {
 
     double p = - ( (*s[i]) ^ (*z[i]) ) ;
 
@@ -379,7 +374,7 @@ void  Broyden::BroydenUpdate( IncrementalIntegrator *theIntegrator,
 
 
   //broyden modifications to du
-  for ( int i=1; i<=nBroyden; i++ ) {
+  for ( i=1; i<=nBroyden; i++ ) {
 
     double p = - ( (*s[i]) ^ (*z[i]) ) ;
 
