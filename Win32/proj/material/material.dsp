@@ -836,6 +836,10 @@ SOURCE=..\..\..\SRC\material\nD\feap\FeapMaterial03.cpp
 
 SOURCE=..\..\..\SRC\material\nD\feap\FeapMaterial03.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\feap\TclFeapMaterialCommand.cpp
+# End Source File
 # End Group
 # Begin Source File
 
