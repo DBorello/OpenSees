@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2001-10-19 23:47:25 $
+// $Revision: 1.20 $
+// $Date: 2001-10-20 16:29:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -214,7 +214,7 @@ extern int myCommands(Tcl_Interp *interp);
 int g3AppInit(Tcl_Interp *interp) {
 
 #ifndef _LINUX  
-    cerr.setf(ios_base::scientific, ios_base::floatfield);
+    cerr.setf(ios::scientific, ios::floatfield);
 #endif
 
     Tcl_CreateCommand(interp, "wipe", &wipeModel,
