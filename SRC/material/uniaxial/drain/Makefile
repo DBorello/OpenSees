@@ -1,6 +1,11 @@
 include ../../../../Makefile.def
 
-OBJS       = DrainHardeningMaterial.o anal00.o common00.o
+OBJS       = DrainHardeningMaterial.o anal00.o common00.o \
+	DrainBilinearMaterial.o \
+	DrainClough1Material.o \
+	DrainClough2Material.o \
+	DrainPinch1Material.o \
+	TclDrainMaterialCommand.o
 
 all:         $(OBJS)
 

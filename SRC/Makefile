@@ -290,12 +290,18 @@ FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHyster1Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHyster2Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasSteel1Material.o \
-	$(FE)/material/uniaxial/fedeas/FedeasSteel2Material.o 
+	$(FE)/material/uniaxial/fedeas/FedeasSteel2Material.o \
+	$(FE)/material/uniaxial/fedeas/TclFedeasMaterialCommand.o
 
 DRAIN_LIBS = $(FE)/material/uniaxial/DrainMaterial.o \
 	$(FE)/material/uniaxial/drain/DrainHardeningMaterial.o \
 	$(FE)/material/uniaxial/drain/anal00.o \
-	$(FE)/material/uniaxial/drain/common00.o
+	$(FE)/material/uniaxial/drain/common00.o \
+	$(FE)/material/uniaxial/drain/DrainBilinearMaterial.o \
+	$(FE)/material/uniaxial/drain/DrainClough1Material.o \
+	$(FE)/material/uniaxial/drain/DrainClough2Material.o \
+	$(FE)/material/uniaxial/drain/DrainPinch1Material.o \
+	$(FE)/material/uniaxial/drain/TclDrainMaterialCommand.o 
 
 SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/ElasticSection2d.o \

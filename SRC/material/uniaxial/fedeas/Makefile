@@ -9,7 +9,8 @@ OBJS       = FedeasHardeningMaterial.o Hard1.o \
 	FedeasHyster1Material.o \
 	FedeasHyster2Material.o \
 	FedeasSteel1Material.o \
-	FedeasSteel2Material.o 
+	FedeasSteel2Material.o \
+	TclFedeasMaterialCommand.o
 
 all:         $(OBJS)
 
