@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2003-08-14 20:24:16 $
+// $Revision: 1.22 $
+// $Date: 2003-10-07 22:16:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -52,6 +52,12 @@
 #include <Pinching4Material.h>   // NM
 #include <BarSlipMaterial.h>     // NM
 
+#include <Domain.h>			    // RWB bringing in Domain for PyLiq
+#include <PySimple1.h>			// RWB
+#include <PyLiq1.h>			    // RWB
+#include <TzSimple1.h>			// RWB
+#include <TzLiq1.h>			    // RWB
+
 #include <Vector.h>
 #include <string.h>
 
@@ -77,11 +83,11 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
 
 UniaxialMaterial *
 TclModelBuilder_addPyTzQzMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
-				  TCL_Char **argv, TclModelBuilder *theTclBuilder);
+				  TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain);
 
 int
 TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *interp, int argc,
-					TCL_Char **argv, TclModelBuilder *theTclBuilder)
+					TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain)
 {
     // Make sure there is a minimum number of arguments
     if (argc < 3) {
@@ -1570,7 +1576,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 		
 		// Py, Tz, Qz models
 		if (theMaterial == 0)
-			theMaterial = TclModelBuilder_addPyTzQzMaterial(clientData, interp, argc, argv, theTclBuilder);
+			theMaterial = TclModelBuilder_addPyTzQzMaterial(clientData, interp, argc, argv, theTclBuilder, theDomain);
 	}
 
     if (theMaterial == 0) {
