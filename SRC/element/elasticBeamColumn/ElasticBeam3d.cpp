@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-03-11 20:42:40 $
+// $Revision: 1.13 $
+// $Date: 2003-05-08 20:17:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -713,7 +713,51 @@ ElasticBeam3d::Print(OPS_Stream &s, int flag)
      s << endln;
    }
 
-  else {
+   else if (flag == 2){
+
+     static Vector xAxis(3);
+     static Vector yAxis(3);
+     static Vector zAxis(3);
+     
+     theCoordTransf->getLocalAxes(xAxis, yAxis, zAxis);
+                        
+     s << "#ElasticBeamColumn3D\n";
+     s << "#LocalAxis " << xAxis(0) << " " << xAxis(1) << " " << xAxis(2);
+     s << " " << yAxis(0) << " " << yAxis(1) << " " << yAxis(2) << " ";
+     s << zAxis(0) << " " << zAxis(1) << " " << zAxis(2) << endln;
+
+     const Vector &node1Crd = theNodes[0]->getCrds();
+     const Vector &node2Crd = theNodes[1]->getCrds();	
+     const Vector &node1Disp = theNodes[0]->getDisp();
+     const Vector &node2Disp = theNodes[1]->getDisp();    
+     
+     s << "#NODE " << node1Crd(0) << " " << node1Crd(1) << " " << node1Crd(2)
+       << " " << node1Disp(0) << " " << node1Disp(1) << " " << node1Disp(2)
+       << " " << node1Disp(3) << " " << node1Disp(4) << " " << node1Disp(5) << endln;
+     
+     s << "#NODE " << node2Crd(0) << " " << node2Crd(1) << " " << node2Crd(2)
+       << " " << node2Disp(0) << " " << node2Disp(1) << " " << node2Disp(2)
+       << " " << node2Disp(3) << " " << node2Disp(4) << " " << node2Disp(5) << endln;
+
+    double N, Mz1, Mz2, Vy, My1, My2, Vz, T;
+    double L = theCoordTransf->getInitialLength();
+    double oneOverL = 1.0/L;
+    
+    N   = q(0);
+    Mz1 = q(1);
+    Mz2 = q(2);
+    Vy  = (Mz1+Mz2)*oneOverL;
+    My1 = q(3);
+    My2 = q(4);
+    Vz  = -(My1+My2)*oneOverL;
+    T   = q(5);
+    
+    s << "#END_FORCES " << -N+p0[0] << ' ' <<  Vy+p0[1] << ' ' << Vz+p0[3] << ' ' 
+      << -T << ' ' << My1 << ' ' <<  Mz1 << endln;
+    s << "#END_FORCES " <<  N << ' ' << -Vy+p0[2] << ' ' << -Vz+p0[4] << ' ' 
+      << T << ' ' << My2 << ' ' << Mz2 << endln;
+   }
+   else {
 
     s << "\nElasticBeam3d: " << this->getTag() << endln;
     s << "\tConnected Nodes: " << connectedExternalNodes ;
@@ -750,15 +794,15 @@ ElasticBeam3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
     const Vector &end1Disp = theNodes[0]->getDisp();
     const Vector &end2Disp = theNodes[1]->getDisp();
 
-	static Vector v1(3);
-	static Vector v2(3);
-
-	for (int i = 0; i < 3; i++) {
-		v1(i) = end1Crd(i) + end1Disp(i)*fact;
-		v2(i) = end2Crd(i) + end2Disp(i)*fact;    
-	}
-	
-	return theViewer.drawLine (v1, v2, 1.0, 1.0);
+    static Vector v1(3);
+    static Vector v2(3);
+    
+    for (int i = 0; i < 3; i++) {
+      v1(i) = end1Crd(i) + end1Disp(i)*fact;
+      v2(i) = end2Crd(i) + end2Disp(i)*fact;    
+    }
+    
+    return theViewer.drawLine (v1, v2, 1.0, 1.0);
 }
 
 Response*
