@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:24 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:03:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -40,6 +40,7 @@
 #include <Vector.h>
 #include <ID.h>
 #include <string.h>
+#include <Response.h>
 
 ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom, 
 				 char **argv, int argc,
@@ -51,6 +52,10 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   for (int ii=0; ii<numEle; ii++)
     theElements[ii] = 0;
 
+  theResponses = new Response *[numEle];
+  for (int j=0; j<numEle; j++)
+    theResponses[j] = 0;
+
   eleInfoObjects = new Information[numEle];
   for (int i=0; i<numEle; i++) {
     Element *theEle = theDom.getElement(eleID(i));
@@ -60,7 +65,8 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
       numEle = 0;
       return;
     } else {
-      responseID(i) = theEle->setResponse(argv, argc, eleInfoObjects[i]);
+		theResponses[i] = theEle->setResponse(argv, argc, eleInfoObjects[i]);
+      //responseID(i) = theEle->setResponse(argv, argc, eleInfoObjects[i]);
       theElements[i] = theEle;
     }
   }
@@ -90,6 +96,12 @@ ElementRecorder::~ElementRecorder()
     if (theElements != 0)
       delete [] theElements;
 
+    if (theResponses != 0) {
+		for (int i = 0; i < numEle; i++)
+			delete theResponses[i];
+		delete [] theResponses;
+	}
+
     if (eleInfoObjects != 0)
       delete [] eleInfoObjects;
 }
@@ -110,60 +122,27 @@ ElementRecorder::record(int commitTag)
   int result = 0;
   for (int i=0; i< numEle; i++) {
     int theID = responseID(i);
-    if (theID != -1) {
+    if (theResponses[i] != 0) {
       
       // ask the element for the reponse
       int res;
       Information &eleInfo = eleInfoObjects[i];
-      if (( res = theElements[i]->getResponse(theID, eleInfo)) < 0)
+      //if (( res = theElements[i]->getResponse(theID, eleInfo)) < 0)
+	  //	result = res;
+
+	  if (( res = theResponses[i]->getResponse()) < 0)
 	result = res;
 
       else {
 	// print results to file or stderr depending on whether
 	// a file was opened
 	
-	if (!theFile) {
-	    if (eleInfo.theType == IntType)
-		cerr << eleInfo.theInt << " ";
-	    else if (eleInfo.theType == DoubleType)
-		cerr << eleInfo.theDouble << " ";	    
-	    else if (eleInfo.theType == IdType) {
-	      if (eleInfo.theID != 0) {
-		for (int j=0; j<eleInfo.theID->Size(); j++)
-		  cerr << (*eleInfo.theID)[j] << " ";
-	      }
-	    } else if (eleInfo.theType == VectorType) {
-	        if (eleInfo.theVector != 0) {
-		  for (int j=0; j<eleInfo.theVector->Size(); j++)
-		    cerr << (*eleInfo.theVector)[j] << " ";
-	      }
-		    cerr << *(eleInfo.theVector);	    	
-	    } else if (eleInfo.theType == MatrixType) {
-		if (eleInfo.theMatrix != 0)
-		    cerr << *(eleInfo.theMatrix);
-	    }
-	    
-	} else {
-	    if (eleInfo.theType == IntType)
-		theFile << eleInfo.theInt;
-	    else if (eleInfo.theType == DoubleType)
-		theFile << eleInfo.theDouble;	    
-	    else if (eleInfo.theType == IdType) {
-	      if (eleInfo.theID != 0) {
-		for (int j=0; j<eleInfo.theID->Size(); j++)
-		  theFile << (*eleInfo.theID)[j] << " ";
-	      }
-	    } else if (eleInfo.theType == VectorType) {
-	        if (eleInfo.theVector != 0) {
-		  for (int j=0; j<eleInfo.theVector->Size(); j++)
-		    theFile << (*eleInfo.theVector)[j] << " ";
-	      }
-	    } else if (eleInfo.theType == MatrixType) {
-		if (eleInfo.theMatrix != 0)
-		    theFile << *(eleInfo.theMatrix);
-	    }
-	}
-      }
+	if (!theFile)
+		theResponses[i]->Print(cerr);	    
+	else
+		theResponses[i]->Print(theFile);
+      
+	  }
     }
     if (!theFile) 
       cerr << " ";
@@ -171,10 +150,10 @@ ElementRecorder::record(int commitTag)
       theFile << " ";
   }
 
-  if (!theFile) 
-    cerr << endl;
-  else
-    theFile << endl;
+  //if (!theFile) 
+  //  cerr << endl;
+  //else
+  //  theFile << endl;
 
 
   // succesfull completion - return 0

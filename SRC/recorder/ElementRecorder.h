@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:24 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:03:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
                                                                         
@@ -50,6 +50,7 @@ class Domain;
 class Vector;
 class Matrix;
 class Element;
+class Response;
 
 class ElementRecorder: public Recorder
 {
@@ -70,6 +71,8 @@ class ElementRecorder: public Recorder
     ID responseID;                 // integer element returns in setResponse
     Information	*eleInfoObjects;  // object into whcih element places the response
     Element **theElements;         // pointer to the elements
+
+	Response **theResponses;
 
     Domain *theDomain;
     bool echoTimeFlag;     // flag indicating if pseudo time also printed

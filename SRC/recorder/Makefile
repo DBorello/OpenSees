@@ -7,6 +7,7 @@ OBJS       = DatastoreRecorder.o MaxNodeDispRecorder.o \
 # Compilation control
 
 all:         $(OBJS)
+	@$(CD) $(FE)/recorder/response; $(MAKE);
 
 # Miscellaneous
 tidy:	
@@ -16,6 +17,7 @@ clean: tidy
 	@$(RM) $(RMFLAGS) $(OBJS) *.o
 
 spotless: clean
+	@$(CD) $(FE)/recorder/response; $(MAKE) wipe;
 
 wipe: spotless
 
