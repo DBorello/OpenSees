@@ -1258,7 +1258,7 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
         // Update E_Young and e according to current stress state before evaluate ElasticStiffnessTensor
         if ( getELT1() ) {
 	    //getELT1()->updateEeDm(&ElasticPredictorEPS, st_vol, 0.0);
-	    getELT1()->updateEeDm(&ElasticPredictorEPS, st_vol, 0.0);
+	    getELT1()->updateEeDm(&ElasticPredictorEPS, -st_vol, 0.0);
 	    }
         
         //opserr <<" strain_increment.Iinvariant1() " << strain_increment.Iinvariant1() << endlnn;
@@ -1292,9 +1292,9 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
  	    double st_vol_El_incr = El_strain_increment.Iinvariant1();
 
 	    //opserr << " FE crossing update... ";
-	    getELT1()->updateEeDm(&IntersectionEPS, st_vol_El_incr, 0.0);
+	    getELT1()->updateEeDm(&IntersectionEPS, -st_vol_El_incr, 0.0);
 	    //opserr << " FE crossing update... ";
-	    getELT1()->updateEeDm(&forwardEPS, st_vol_El_incr, 0.0);
+	    getELT1()->updateEeDm(&forwardEPS, -st_vol_El_incr, 0.0);
 	}
     
       }
@@ -1655,7 +1655,8 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
 	    //err = getELT1()->updateEeDm(&forwardEPS, st_vol_pl, Delta_lambda);
 	    //cerr << "pl_vol= " << st_vol_pl << "|update before FE \n";
 	    //opserr << " FE Pl update...";
-	    err = getELT1()->updateEeDm(&forwardEPS, -st_vol_pl, Delta_lambda);
+	    // D > 0 compressive -> Iinv > 0  -> de < 0 correct!
+	    err = getELT1()->updateEeDm(&forwardEPS, st_vol_pl, Delta_lambda);
         }
 	   
         //tensor tempx  = plastic_strain("ij") * plastic_strain("ij");
@@ -2066,7 +2067,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
       //opserr<< "Elastic:  Total strain" << tstrain << endln;
       
       if ( getELT1() ) {
-         getELT1()->updateEeDm(&ElasticPredictorEPS, st_vol, 0.0);
+         getELT1()->updateEeDm(&ElasticPredictorEPS, -st_vol, 0.0);
       }
 
       //Set Elasto-Plastic stiffness tensor
@@ -2472,7 +2473,8 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
         int err = 0;
         if ( getELT1() ) {
 	   double pl_st_vol = PlasticStrain.Iinvariant1(); //Joey 02-17-03
-           err = getELT1()->updateEeDm(&EP_PredictorEPS, - pl_st_vol, Delta_lambda);
+	   // D > 0 compressive -> Iinv > 0  -> de < 0 correct!
+           err = getELT1()->updateEeDm(&EP_PredictorEPS, pl_st_vol, Delta_lambda);
 	}
 	
 	//out07may97      while ( absFelplpredictor > Ftolerance &&
