@@ -226,6 +226,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/ElasticIsotropicMaterial.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStress2D.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStrain2D.o \
+	$(FE)/material/nD/ElasticIsotropicAxiSymm.o \
 	$(FE)/material/nD/ElasticIsotropicPlateFiber.o \
 	$(FE)/material/nD/BidirectionalMaterial.o \
 	$(FE)/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.o \

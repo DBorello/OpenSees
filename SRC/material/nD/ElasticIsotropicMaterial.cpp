@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $                                                              
-// $Date: 2001-07-16 22:19:33 $                                                                  
+// $Revision: 1.10 $                                                              
+// $Date: 2001-07-16 22:59:55 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -38,6 +38,7 @@
 #include <ElasticIsotropicMaterial.h>
 #include <ElasticIsotropicPlaneStress2D.h>
 #include <ElasticIsotropicPlaneStrain2D.h>
+#include <ElasticIsotropicAxiSymm.h>
 #include <ElasticIsotropic3D.h>
 #include <ElasticIsotropicPlateFiber.h>
 
@@ -89,6 +90,16 @@ ElasticIsotropicMaterial::getCopy (const char *type)
     {
 	ElasticIsotropicPlaneStrain2D *theModel;
 	theModel = new ElasticIsotropicPlaneStrain2D (this->getTag(), E, v, rho);
+		// DOES NOT COPY sigma, D, and epsilon ...
+		// This function should only be called during element instantiation, so
+		// no state determination is performed on the material model object
+		// prior to copying the material model (calling this function)
+	return theModel;
+    }
+    else if (strcmp(type,"AxiSymmetric2D") == 0 || strcmp(type,"AxiSymmetric") == 0)
+    {
+	ElasticIsotropicAxiSymm *theModel;
+	theModel = new ElasticIsotropicAxiSymm(this->getTag(), E, v, rho);
 		// DOES NOT COPY sigma, D, and epsilon ...
 		// This function should only be called during element instantiation, so
 		// no state determination is performed on the material model object
