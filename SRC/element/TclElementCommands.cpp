@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2003-11-20 02:23:59 $
+// $Revision: 1.34 $
+// $Date: 2003-11-25 23:49:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
-                                                                        
-// File: ~/element/TclElementCommands.C
-// 
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -95,6 +92,10 @@ TclModelBuilder_addConstantPressureVolumeQuad(ClientData, Tcl_Interp *, int, TCL
 
 extern int 
 TclModelBuilder_addJoint2D(ClientData, Tcl_Interp *, int, TCL_Char **,
+			   Domain*, TclModelBuilder *);
+
+extern int 
+TclModelBuilder_addJoint3D(ClientData, Tcl_Interp *, int, TCL_Char **,
 			   Domain*, TclModelBuilder *);
 
 extern int 
@@ -401,9 +402,14 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 	 << "the zeroLengthSection element instead" << endln;
     return TCL_ERROR;
   } else if ((strcmp(argv[1],"Joint2D") == 0) ||
-	     (strcmp(argv[1],"Joint2D") == 0)) {
+	     (strcmp(argv[1],"Joint2d") == 0)) {
     int result = TclModelBuilder_addJoint2D(clientData, interp, argc, argv,
-						  theTclDomain, theTclBuilder);
+					    theTclDomain, theTclBuilder);
+    return result;
+  } else if ((strcmp(argv[1],"Joint3D") == 0) ||
+	     (strcmp(argv[1],"Joint3d") == 0)) {
+    int result = TclModelBuilder_addJoint3D(clientData, interp, argc, argv,
+					    theTclDomain, theTclBuilder);
     return result;
   } else if ((strcmp(argv[1], "inelastic2dYS01")== 0) ||
 	     (strcmp(argv[1], "inelastic2dYS02")== 0) ||
