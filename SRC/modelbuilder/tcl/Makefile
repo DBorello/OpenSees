@@ -2,7 +2,7 @@
 
 include ../../../Makefile.def
 
-OBJS       = TclModelBuilder.o myCommands.o 
+OBJS       = TclModelBuilder.o myCommands.o TclUniaxialMaterialTester.o
 
 # Compilation control
 
@@ -15,8 +15,15 @@ tcl: myCommands.o
 	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
 	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
 
-INTERPRETER_LIBS = $(FE)/tcl/tclMain.o \
-	$(FE)/tcl/tclAppInit.o \
+tk: myCommands.o
+	@$(CD) $(FE)/tcl; $(MAKE) tk;
+	@$(LINKER) $(LINKFLAGS) myCommands.o $(INTERPRETER_LIBS) \
+	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
+	$(MACHINE_NUMERICAL_LIBS) $(TCL_LIBRARY)  \
+	$(MACHINE_SPECIFIC_LIBS) -o $(OpenSees_PROGRAM)
+
+INTERPRETER_LIBS = $(FE)/tcl/tkMain.o \
+	$(FE)/tcl/tkAppInit.o \
 	$(FE)/tcl/commands.o \
 	$(FE)/tcl/TclFeViewer.o \
 	$(FE)/tcl/TclVideoPlayer.o 
