@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2004-10-12 21:52:25 $
+// $Revision: 1.4 $
+// $Date: 2005-02-04 22:44:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.h,v $
                                                                         
                                                                         
 #ifndef TransformationDOF_Group_h
 #define TransformationDOF_Group_h
 
-// File: ~/analysis/dof_grp/TransformationDOF_Group.h
-// 
 // Written: fmk 
 // Created: 05/99
 // Revision: A
@@ -66,11 +64,11 @@ class TransformationDOF_Group: public DOF_Group
 
     // methods to form the unbalance
     const Vector &getUnbalance(Integrator *theIntegrator);
-    virtual void  addM_Force(const Vector &Udotdot, double fact = 1.0);        
+    void  addM_Force(const Vector &Udotdot, double fact = 1.0);        
 
-    virtual const Vector &getTangForce(const Vector &x, double fact = 1.0);
-    virtual const Vector &getC_Force(const Vector &x, double fact = 1.0);
-    virtual const Vector &getM_Force(const Vector &x, double fact = 1.0);
+    const Vector &getTangForce(const Vector &x, double fact = 1.0);
+    const Vector &getC_Force(const Vector &x, double fact = 1.0);
+    const Vector &getM_Force(const Vector &x, double fact = 1.0);
     
     // methods to obtain committed responses from the nodes
     const Vector & getCommittedDisp(void);
@@ -90,6 +88,17 @@ class TransformationDOF_Group: public DOF_Group
 
     int addSP_Constraint(SP_Constraint &theSP);
     int enforceSPs(void);
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
+    void addM_ForceSensitivity(const Vector &Udotdot, double fact = 1.0);        
+    void addD_ForceSensitivity(const Vector &vel, double fact = 1.0);
+    void addD_Force(const Vector &vel, double fact = 1.0);
+
+    const Vector & getDispSensitivity(int gradNumber);
+    const Vector & getVelSensitivity(int gradNumber);
+    const Vector & getAccSensitivity(int gradNumber);
+    int saveSensitivity(Vector *v,Vector *vdot,Vector *vdotdot,int gradNum,int numGrads);
+// AddingSensitivity:END //////////////////////////////////////
     
   protected:
     
