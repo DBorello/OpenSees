@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:00:44 $
+// $Revision: 1.8 $
+// $Date: 2003-04-24 20:52:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -459,9 +459,11 @@ TransformationDOF_Group::setNodeDisp(const Vector &u)
     }    
     Matrix *T = this->getT();
     if (T != 0) {
+
 	// *unbalance = (*T) * (*modUnbalance);
 	unbalance->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
 	myNode->setTrialDisp(*unbalance);
+
     } else
 	myNode->setTrialDisp(*modUnbalance);
 }
@@ -614,7 +616,7 @@ TransformationDOF_Group::setEigenvector(int mode, const Vector &u)
 {
     // call base class method and return if no MP_Constraint
     if (theMP == 0) {
-	this->DOF_Group::setNodeDisp(u);
+	this->DOF_Group::setEigenvector(mode, u);
 	return;
     }
 	
@@ -775,16 +777,28 @@ TransformationDOF_Group::addSP_Constraint(SP_Constraint &theSP)
 int 
 TransformationDOF_Group::enforceSPs(void)
 {
+  /*
     Vector trialDisp(myNode->getTrialDisp());
     int numDof = myNode->getNumberDOF();
+    int haveSPs = 0;
     for (int i=0; i<numDof; i++)
 	if (theSPs[i] != 0) {
 	    double value = theSPs[i]->getValue();
 	    trialDisp(i) = value;
+	    haveSPs = 1;
 	}
-    myNode->setTrialDisp(trialDisp);
-    
-    return 0;
+
+    if (haveSPs != 0)
+      myNode->setTrialDisp(trialDisp);
+  */    
+  int numDof = myNode->getNumberDOF();
+  for (int i=0; i<numDof; i++)
+    if (theSPs[i] != 0) {
+      double value = theSPs[i]->getValue();
+      myNode->setTrialDisp(value, i);
+    }
+  
+  return 0;
 }
 
 void
