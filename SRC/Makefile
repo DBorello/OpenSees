@@ -102,7 +102,6 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/nonlinearBeamColumn/matrixutil/MatrixUtil.o \
 	$(FE)/element/nonlinearBeamColumn/element/NLBeamColumn2d.o \
 	$(FE)/element/nonlinearBeamColumn/element/NLBeamColumn3d.o \
-	$(FE)/element/nonlinearBeamColumn/element/LargeDispBeamColumn3d.o \
 	$(FE)/element/nonlinearBeamColumn/tcl/TclElmtBuilder.o \
 	$(FE)/element/forceBeamColumn/ForceBeamColumn2d.o \
 	$(FE)/element/forceBeamColumn/ForceBeamColumn3d.o \
@@ -119,8 +118,6 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/forceBeamColumn/UserDefinedHingeIntegration2d.o \
 	$(FE)/element/forceBeamColumn/UserDefinedHingeIntegration3d.o \
 	$(FE)/coordTransformation/CrdTransf.o \
-	$(FE)/coordTransformation/CorotCrdTransf2d.o \
-	$(FE)/coordTransformation/CorotCrdTransf3d.o \
 	$(FE)/coordTransformation/CrdTransf2d.o \
 	$(FE)/coordTransformation/CrdTransf3d.o \
 	$(FE)/coordTransformation/LinearCrdTransf2d.o \
@@ -443,8 +440,6 @@ FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHyster2Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasSteel1Material.o \
 	$(FE)/material/uniaxial/fedeas/FedeasSteel2Material.o \
-	$(FE)/material/uniaxial/fedeas/Steel2.o \
-	$(FE)/material/uniaxial/fedeas/Concr2.o \
 	$(FE)/material/uniaxial/fedeas/TclFedeasMaterialCommand.o
 
 
@@ -644,7 +639,6 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/handler/ConstraintHandler.o \
 	$(FE)/analysis/handler/PlainHandler.o \
 	$(FE)/analysis/handler/PenaltyConstraintHandler.o \
-	$(FE)/analysis/handler/PenaltyHandlerNoHomoSPMultipliers.o \
 	$(FE)/analysis/handler/LagrangeConstraintHandler.o \
 	$(FE)/analysis/handler/TransformationConstraintHandler.o \
 	$(FE)/analysis/numberer/DOF_Numberer.o \
