@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-12-05 22:20:44 $
+// $Revision: 1.10 $
+// $Date: 2002-12-17 02:11:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/tcl/TclElmtBuilder.cpp,v $
                                                                                                                                  
 // File: ~/tcl/TclElmtBuilder.C
@@ -175,8 +175,8 @@ TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
 
     // allow some additional options at end of command
     double massDens = 0.0;
-    int    nMaxLocIters = 1;
-    double locToler = 1e-16;
+    int    nMaxLocIters = 10;
+    double locToler = 1e-10;
     
     while (argi != argc) {
       if (strcmp(argv[argi],"-mass") == 0) {
