@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:25 $
+// $Revision: 1.2 $
+// $Date: 2001-10-19 23:09:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -53,10 +53,11 @@ class NodeRecorder: public Recorder
 		 Domain &theDomain,
 		 char *fileName,
 		 char *dataToStore,
+		 double deltaT = 0.0,
 		 int startFlag = 0); 
     
     ~NodeRecorder();
-    int record(int commitTag);
+    int record(int commitTag, double timeStamp);
     int playback(int commitTag);
     void restart(void);    
     
@@ -72,6 +73,9 @@ class NodeRecorder: public Recorder
     char theFileName[MAX_FILENAMELENGTH];    
     ofstream theFile;     
     int dataFlag; // flag indicating what it is to be stored in recorder
+    
+    double deltaT;
+    double nextTimeStampToRecord;
 };
 
 #endif

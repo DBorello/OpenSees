@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-16 04:19:11 $
+// $Revision: 1.2 $
+// $Date: 2001-10-19 23:09:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/AlgorithmIncrements.h,v $
                                                                         
                                                                         
@@ -64,8 +64,8 @@ class AlgorithmIncrements : public Recorder
 
     int plotData(const Vector &X, const Vector &B);
 
-    int record(int cTag);
-    int playback(int cTag);
+    int record(int commitTag, double timeStamp);
+    int playback(int commitTag);
     void restart(void);    
 
   protected:

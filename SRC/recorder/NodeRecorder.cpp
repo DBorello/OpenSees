@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.4 $
-// $Date: 2001-06-30 01:24:43 $
+// $Revision: 1.5 $
+// $Date: 2001-10-19 23:09:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -54,9 +54,10 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   Domain &theDom,
 			   char *fileName,
 			   char *dataToStore,
+			   double dT,
 			   int startFlag)
 :theDofs(dofs), theNodes(nodes), disp(nodes.Size()*dofs.Size()), 
- theDomain(&theDom), flag(startFlag)
+  theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0)
 {
   if (strlen(fileName) > MAX_FILENAMELENGTH) 
     g3ErrorHandler->fatal("FileNodeDispRecorder::FileNodeDispREcorder - fileName too long %d max\n",
@@ -102,13 +103,18 @@ NodeRecorder::~NodeRecorder()
 }
 
 int 
-NodeRecorder::record(int commitTag)
+NodeRecorder::record(int commitTag, double timeStamp)
 {
     // now we go get the displacements from the nodes
     int numDOF = theDofs.Size();
     int numNodes = theNodes.Size();
 
-    for (int i=0; i<numNodes; i++) {
+    if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
+      
+      if (deltaT != 0.0) 
+	nextTimeStampToRecord = timeStamp + deltaT;
+
+      for (int i=0; i<numNodes; i++) {
 	int cnt = i*numDOF;
 	Node *theNode = theDomain->getNode(theNodes(i));
 	if (theNode != 0) {
@@ -189,21 +195,24 @@ NodeRecorder::record(int commitTag)
 	    }
 	  }
 	}
-    }
+      }
+
     
-    // now we write them to the file
-    if (flag == 1)
-	theFile << theDomain->getCurrentTime() << " ";
-    else if (flag == 2)
-	theFile << theDomain->getCurrentTime() << " ";
+      // now we write them to the file
+      if (flag == 1)
+	theFile << timeStamp << " ";
+      else if (flag == 2)
+	theFile << timeStamp << " ";
 
-
-    for (int j=0; j<numNodes*numDOF; j++)
+      
+      for (int j=0; j<numNodes*numDOF; j++)
 	theFile << disp(j) << " ";
-    
-    theFile << endl;
-    theFile.flush();
-    
+      
+      theFile << endl;
+      theFile.flush();
+
+    }    
+
     return 0;
 }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-06-30 01:24:43 $
+// $Revision: 1.5 $
+// $Date: 2001-10-19 23:09:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -44,9 +44,9 @@
 
 ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom, 
 				 char **argv, int argc,
-				 bool echoTime, char *fileName)
+				 bool echoTime, double dT, char *fileName)
 :numEle(eleID.Size()), responseID(eleID.Size()), theDomain(&theDom),
- echoTimeFlag(echoTime)
+ echoTimeFlag(echoTime), deltaT(dT), nextTimeStampToRecord(0.0)
 {
   theElements = new Element *[numEle];
   for (int ii=0; ii<numEle; ii++)
@@ -107,46 +107,53 @@ ElementRecorder::~ElementRecorder()
 
 
 int 
-ElementRecorder::record(int commitTag)
+ElementRecorder::record(int commitTag, double timeStamp)
 {
-  // print out the pseudo time if requested
-  if (echoTimeFlag == true) {
-    if (!theFile) 
-      cerr << theDomain->getCurrentTime() << " ";			
-    else 
-      theFile << theDomain->getCurrentTime() << " ";	
-  }
-
-  // for each element do a getResponse() & print the result
   int result = 0;
-  for (int i=0; i< numEle; i++) {
-    int theID = responseID(i);
-    if (theResponses[i] != 0) {
-      
-      // ask the element for the reponse
-      int res;
-      Information &eleInfo = eleInfoObjects[i];
-      if (( res = theResponses[i]->getResponse()) < 0)
-	result = res;
-      else {
-	// print results to file or stderr depending on whether
-	// a file was opened
-	
-	if (theFile.bad())
-	  theResponses[i]->Print(cerr);	    
-	else {
-	  theResponses[i]->Print(theFile);
-	  theFile << "  ";  // added for OSP
-	}
-      }
-    } 
-  }
 
-  if (theFile.bad()) 
-    cerr << endl;
-  else {
-    theFile << " \n";
-    theFile.flush();
+  if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
+      
+    if (deltaT != 0.0) 
+      nextTimeStampToRecord = timeStamp + deltaT;
+
+    // print out the pseudo time if requested
+    if (echoTimeFlag == true) {
+      if (!theFile) 
+	cerr << timeStamp << " ";			
+      else 
+	theFile << timeStamp << " ";	
+    }
+
+    // for each element do a getResponse() & print the result
+    for (int i=0; i< numEle; i++) {
+      int theID = responseID(i);
+      if (theResponses[i] != 0) {
+      
+	// ask the element for the reponse
+	int res;
+	Information &eleInfo = eleInfoObjects[i];
+	if (( res = theResponses[i]->getResponse()) < 0)
+	  result = res;
+	else {
+	  // print results to file or stderr depending on whether
+	  // a file was opened
+	
+	  if (theFile.bad())
+	    theResponses[i]->Print(cerr);	    
+	  else {
+	    theResponses[i]->Print(theFile);
+	    theFile << "  ";  // added for OSP
+	  }
+	}
+      } 
+    }
+
+    if (theFile.bad()) 
+      cerr << endl;
+    else {
+      theFile << " \n";
+      theFile.flush();
+    }
   }
 
   // succesfull completion - return 0

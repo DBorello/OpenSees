@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-16 04:19:11 $
+// $Revision: 1.3 $
+// $Date: 2001-10-19 23:09:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.h,v $
                                                                         
                                                                         
@@ -50,14 +50,14 @@ class FilePlotter : public Recorder
   public:
     FilePlotter(char *fileName,
 		char *windowTitle, 
-		int xLoc, int yLoc, int width, int height);
+		int xLoc, int yLoc, int width, int height, double dT);
     
     ~FilePlotter();    
 
     int plotFile();
 
-    int record(int cTag);
-    int playback(int cTag);
+    int record(int commitTag, double timeStamp);
+    int playback(int commitTag);
     void restart(void);    
 
     int setFile(char *newFile);
@@ -70,6 +70,9 @@ class FilePlotter : public Recorder
     Renderer *theRenderer;
     ID *cols;
     char fileName[MAX_FILENAMELENGTH];
+    
+    double deltaT;
+    double nextTimeStampToRecord;    
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:24 $
+// $Revision: 1.2 $
+// $Date: 2001-10-19 23:09:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DatastoreRecorder.h,v $
                                                                         
                                                                         
@@ -49,7 +49,7 @@ class DatastoreRecorder: public Recorder
   public:
     DatastoreRecorder(FE_Datastore &theDatastore);
     ~DatastoreRecorder();
-    int record(int commitTag);
+    int record(int commitTag, double timeStamp);
     int playback(int commitTag);
     void restart(void);
     

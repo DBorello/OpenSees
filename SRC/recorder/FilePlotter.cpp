@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-10-05 00:52:13 $
+// $Revision: 1.6 $
+// $Date: 2001-10-19 23:09:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.cpp,v $
                                                                         
                                                                         
@@ -59,8 +59,8 @@
 
 FilePlotter::FilePlotter(char *_fileName, 
 			 char *windowTitle, 
-			 int xLoc, int yLoc, int width, int height)
-  :theMap(0), theRenderer(0), cols(0)
+			 int xLoc, int yLoc, int width, int height, double dT)
+  :theMap(0), theRenderer(0), cols(0), deltaT(dT), nextTimeStampToRecord(0.0)
 {
 
   // create the window in which we plot on the screen
@@ -100,9 +100,18 @@ FilePlotter::~FilePlotter()
 }
     
 int 
-FilePlotter::record(int cTag)
+FilePlotter::record(int cTag, double timeStamp)
 {
-  return this->plotFile();
+
+  if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
+
+    if (deltaT != 0.0) 
+      nextTimeStampToRecord = timeStamp + deltaT;
+
+    return this->plotFile();
+
+  } else
+    return 0;
 }
 
 int 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-10-17 16:07:44 $
+// $Revision: 1.2 $
+// $Date: 2001-10-19 23:09:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -80,7 +80,7 @@ DriftRecorder::~DriftRecorder()
 }
 
 int 
-DriftRecorder::record(int commitTag)
+DriftRecorder::record(int commitTag, double timeStamp)
 {
   Node *nodeI = theDomain->getNode(ndI);
   Node *nodeJ = theDomain->getNode(ndJ);

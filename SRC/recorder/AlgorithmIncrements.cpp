@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-01 00:56:33 $
+// $Revision: 1.4 $
+// $Date: 2001-10-19 23:09:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/AlgorithmIncrements.cpp,v $
                                                                         
                                                                         
@@ -106,7 +106,7 @@ AlgorithmIncrements::~AlgorithmIncrements()
 }
     
 int 
-AlgorithmIncrements::record(int cTag)
+AlgorithmIncrements::record(int cTag, double timeStamp)
 {
   LinearSOE *theSOE = theAlgo->getLinearSOEptr();
   if (theSOE == 0)

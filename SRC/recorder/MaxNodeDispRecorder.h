@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:25 $
+// $Revision: 1.2 $
+// $Date: 2001-10-19 23:09:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/MaxNodeDispRecorder.h,v $
                                                                         
                                                                         
@@ -50,7 +50,7 @@ class MaxNodeDispRecorder: public Recorder
   public:
     MaxNodeDispRecorder(int dof, const ID &theNodes, Domain &theDomain);
     ~MaxNodeDispRecorder();
-    int record(int commitTag);
+    int record(int commitTag, double timeStamp);
     int playback(int commitTag);
 
     void restart(void);    
