@@ -1,7 +1,7 @@
 include ../../../Makefile.def
 
 #OBJS	=	Channel.o TCP_Socket.o UDP_Socket.o mySocket.o 
-OBJS	=	Channel.o TCP_Socket.o
+OBJS	=	Channel.o 
 
 # MPI_Channel.o
 
@@ -10,6 +10,8 @@ OBJS	=	Channel.o TCP_Socket.o
 all:       $(OBJS)
 
 mpi: MPI_Channel.o
+
+tcp: TCP_Socket.o
 
 # Miscellaneous
 tidy:
