@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2001-09-22 03:15:23 $
+// $Revision: 1.18 $
+// $Date: 2001-10-02 00:19:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -212,75 +212,75 @@ TclVideoPlayer *theTclVideoPlayer =0;
 extern int myCommands(Tcl_Interp *interp);
 
 int g3AppInit(Tcl_Interp *interp) {
-    Tcl_CreateCommand(interp, "wipe", wipeModel,
+    Tcl_CreateCommand(interp, "wipe", &wipeModel,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
-    Tcl_CreateCommand(interp, "wipeAnalysis", wipeAnalysis,
+    Tcl_CreateCommand(interp, "wipeAnalysis", &wipeAnalysis,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
-    Tcl_CreateCommand(interp, "reset", resetModel,
+    Tcl_CreateCommand(interp, "reset", &resetModel,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);        
-    Tcl_CreateCommand(interp, "initialize", initializeAnalysis,
+    Tcl_CreateCommand(interp, "initialize", &initializeAnalysis,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);        
-    Tcl_CreateCommand(interp, "loadConst", setLoadConst,
+    Tcl_CreateCommand(interp, "loadConst", &setLoadConst,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);            
-    Tcl_CreateCommand(interp, "setTime", setTime,
+    Tcl_CreateCommand(interp, "setTime", &setTime,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);     
-    Tcl_CreateCommand(interp, "getTime", getTime,
+    Tcl_CreateCommand(interp, "getTime", &getTime,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);     
-    Tcl_CreateCommand(interp, "build", buildModel,
+    Tcl_CreateCommand(interp, "build", &buildModel,
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "analyze", analyzeModel, 
+    Tcl_CreateCommand(interp, "analyze", &analyzeModel, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "print", printModel, 
+    Tcl_CreateCommand(interp, "print", &printModel, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "analysis", specifyAnalysis, 
+    Tcl_CreateCommand(interp, "analysis", &specifyAnalysis, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "system", specifySOE, 
+    Tcl_CreateCommand(interp, "system", &specifySOE, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "numberer", specifyNumberer, 
+    Tcl_CreateCommand(interp, "numberer", &specifyNumberer, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "constraints", specifyConstraintHandler, 
+    Tcl_CreateCommand(interp, "constraints", &specifyConstraintHandler, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "algorithm", specifyAlgorithm, 
+    Tcl_CreateCommand(interp, "algorithm", &specifyAlgorithm, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "test", specifyCTest, 
+    Tcl_CreateCommand(interp, "test", &specifyCTest, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);    
-    Tcl_CreateCommand(interp, "integrator", specifyIntegrator, 
+    Tcl_CreateCommand(interp, "integrator", &specifyIntegrator, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "recorder", addRecorder, 
+    Tcl_CreateCommand(interp, "recorder", &addRecorder, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "algorithmRecorder", addAlgoRecorder, 
+    Tcl_CreateCommand(interp, "algorithmRecorder", &addAlgoRecorder, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "database", addDatabase, 
+    Tcl_CreateCommand(interp, "database", &addDatabase, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateCommand(interp, "playback", playbackRecorders, 
+    Tcl_CreateCommand(interp, "playback", &playbackRecorders, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);        
-    Tcl_CreateCommand(interp, "playbackAlgo", playbackAlgorithmRecorders, 
+    Tcl_CreateCommand(interp, "playbackAlgo", &playbackAlgorithmRecorders, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);        
-    Tcl_CreateCommand(interp, "rigidLink", rigidLink, 
+    Tcl_CreateCommand(interp, "rigidLink", &rigidLink, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);                
-    Tcl_CreateCommand(interp, "rigidDiaphragm", rigidDiaphragm, 
+    Tcl_CreateCommand(interp, "rigidDiaphragm", &rigidDiaphragm, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);   
-    Tcl_CreateCommand(interp, "eigen", eigenAnalysis, 
+    Tcl_CreateCommand(interp, "eigen", &eigenAnalysis, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
-    Tcl_CreateCommand(interp, "video", videoPlayer, 
+    Tcl_CreateCommand(interp, "video", &videoPlayer, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
-    Tcl_CreateCommand(interp, "remove", removeObject, 
+    Tcl_CreateCommand(interp, "remove", &removeObject, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
-    Tcl_CreateCommand(interp, "nodeDisp", nodeDisp, 
+    Tcl_CreateCommand(interp, "nodeDisp", &nodeDisp, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
 
 #ifdef _RELIABILITY
-    Tcl_CreateCommand(interp, "reliability", reliability, 
+    Tcl_CreateCommand(interp, "reliability", &reliability, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
     theReliabilityBuilder = 0;
 // AddingSensitivity:BEGIN //////////////////////////////////
-    Tcl_CreateCommand(interp, "computeGradients", computeGradients, 
+    Tcl_CreateCommand(interp, "computeGradients", &computeGradients, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
-    Tcl_CreateCommand(interp, "sensitivityAlgorithm", sensitivityAlgorithm, 
+    Tcl_CreateCommand(interp, "sensitivityAlgorithm", &sensitivityAlgorithm, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
-    Tcl_CreateCommand(interp, "sensitivityIntegrator", sensitivityIntegrator, 
+    Tcl_CreateCommand(interp, "sensitivityIntegrator", &sensitivityIntegrator, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
-    Tcl_CreateCommand(interp, "sensNodeDisp", sensNodeDisp, 
+    Tcl_CreateCommand(interp, "sensNodeDisp", &sensNodeDisp, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
 
 	theSensitivityAlgorithm =0;
@@ -2280,11 +2280,16 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 	  // go through all elemental loads in the pattern
 	  while ((theLoad = theEleLoads()) != 0) {
 
-	    // remove & destroy elemental load if tag corresponds to element being removed
-	    if (theLoad->getElementTag() == tag) {
+	    // remove & destroy elemental from elemental load if there
+	    // note - if last element in load, remove the load and delete it
+	    
+	    /* *****************
+	    int numLoadsLeft = theLoad->removeElement(tag);
+	    if (numLoadsLeft == 0) {
 	      thePattern->removeElementalLoad(theLoad->getTag());
 	      delete theLoad;
 	    }
+	    *********************/
 	  }
 	}
 
