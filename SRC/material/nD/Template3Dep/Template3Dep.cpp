@@ -15,8 +15,8 @@
 #                                                                              #
 # DATE:              08-03-2000                                                #
 # UPDATE HISTORY:    09-12-2000						       #
-#		     May 2004, Zhao Cheng splitting the elastic part	       #
-#                                                                              #
+#		                   May 2004, Zhao Cheng splitting the elastic part	         #
+#                    Oct. 2004 Zhao Cheng, small addition for u-p-U modeling   #
 #                                                                              #
 #                                                                              #
 #                                                                              #
@@ -1043,7 +1043,8 @@ const Vector& Template3Dep::getStrain(void)
 // what is the trial strain? Initial strain?
 int Template3Dep::setTrialStrain(const Tensor &v)
 {
-    EPS->setStrain(v);
+    //EPS->setStrain(v);			      //ZC10/26/2004 
+    this->setTrialStrainIncr( v - EPS->getStrain() ); //ZC10/26/2004
     return 0;
 }
 
@@ -1051,7 +1052,8 @@ int Template3Dep::setTrialStrain(const Tensor &v)
 //================================================================================
 int Template3Dep::setTrialStrain(const Tensor &v, const Tensor &r)
 {
-    EPS->setStrain(v);
+    //EPS->setStrain(v);			      //ZC10/26/2004
+    this->setTrialStrainIncr( v - EPS->getStrain() ); //ZC10/26/2004
     return 0;
 }
 
@@ -1123,7 +1125,8 @@ int Template3Dep::setTrialStrainIncr(const Tensor &v)
 //================================================================================
 int Template3Dep::setTrialStrainIncr(const Tensor &v, const Tensor &r)
 {
-    EPS->setStrain(v + EPS->getStrain() );
+    //EPS->setStrain(v + EPS->getStrain() );  //ZC10/26/2004
+    this->setTrialStrainIncr(v);              //ZC10/26/2004
     return 0;
 }
 
