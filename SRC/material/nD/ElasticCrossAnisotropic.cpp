@@ -399,17 +399,35 @@ void ElasticCrossAnisotropic::convertD2TensorEijkl(void)
    this->setInitElasticStiffness();
 
    //Convert Matric D to 4th order Elastic constants tensor Dt;
-   Dt.val(1,1,1,1) = D(0,0); Dt.val(1,1,2,2) = D(0,1); Dt.val(1,1,3,3) = D(0,2); // --> Sigma_xx
-   Dt.val(1,2,1,2) = D(3,3); Dt.val(1,2,2,1) = D(3,3); // --> Sigma_xy
-   Dt.val(1,3,1,3) = D(4,4); Dt.val(1,3,3,1) = D(4,4); // --> Sigma_xz
+   Dt.val(1,1,1,1) = D(0,0); 
+   Dt.val(1,1,2,2) = D(0,1); 
+   Dt.val(1,1,3,3) = D(0,2); // --> Sigma_xx
 
-   Dt.val(2,1,1,2) = D(3,3); Dt.val(2,1,2,1) = D(3,3); // --> Sigma_yx
-   Dt.val(2,2,1,1) = D(1,0); Dt.val(2,2,2,2) = D(1,1); Dt.val(2,2,3,3) = D(1,2); // --> Sigma_yy
-   Dt.val(2,3,2,3) = D(5,5); Dt.val(2,3,3,2) = D(5,5); // --> Sigma_yz
+   Dt.val(1,2,1,2) = D(3,3); 
+   Dt.val(1,2,2,1) = D(3,3); // --> Sigma_xy
 
-   Dt.val(3,1,1,3) = D(4,4); Dt.val(3,1,3,1) = D(4,4); // --> Sigma_zx
-   Dt.val(3,2,2,3) = D(5,5); Dt.val(3,2,3,2) = D(5,5); // --> Sigma_zy
-   Dt.val(3,3,1,1) = D(2,0); Dt.val(3,3,2,2) = D(2,1); Dt.val(3,3,3,3) = D(2,2); // --> Sigma_zz
+   Dt.val(1,3,1,3) = D(4,4); 
+   Dt.val(1,3,3,1) = D(4,4); // --> Sigma_xz
+
+   Dt.val(2,1,1,2) = D(3,3); 
+   Dt.val(2,1,2,1) = D(3,3); // --> Sigma_yx
+
+   Dt.val(2,2,1,1) = D(1,0); 
+   Dt.val(2,2,2,2) = D(1,1); 
+   Dt.val(2,2,3,3) = D(1,2); // --> Sigma_yy
+
+   Dt.val(2,3,2,3) = D(5,5); 
+   Dt.val(2,3,3,2) = D(5,5); // --> Sigma_yz
+
+   Dt.val(3,1,1,3) = D(4,4); 
+   Dt.val(3,1,3,1) = D(4,4); // --> Sigma_zx
+
+   Dt.val(3,2,2,3) = D(5,5); 
+   Dt.val(3,2,3,2) = D(5,5); // --> Sigma_zy
+
+   Dt.val(3,3,1,1) = D(2,0); 
+   Dt.val(3,3,2,2) = D(2,1); 
+   Dt.val(3,3,3,3) = D(2,2); // --> Sigma_zz
 
    return;
 }
