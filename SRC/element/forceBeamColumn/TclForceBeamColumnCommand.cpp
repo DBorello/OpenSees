@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-12-13 23:29:56 $
+// $Revision: 1.2 $
+// $Date: 2002-12-17 22:43:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -40,9 +40,9 @@
 #include <LobattoBeamIntegration.h>
 #include <UserDefinedBeamIntegration.h>
 
-//#include <HingeMidpointBeamIntegration.h>
-//#include <HingeRadauBeamIntegration.h>
-//#include <UserDefinedHingeIntegration.h>
+#include <HingeMidpointBeamIntegration2d.h>
+#include <HingeRadauBeamIntegration2d.h>
+#include <UserDefinedHingeIntegration2d.h>
 
 extern void printCommand(int argc, char **argv);
 
@@ -66,7 +66,8 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
   if (ndm == 2 && ndf == 3)
     ok = 1;
   if (ndm == 3 && ndf == 6)
-    ok = 1;
+    //ok = 1;
+    ok = 0;
   
   if (ok == 0) {
     cerr << "WARNING -- NDM = " << ndm << " and NDF = " << ndf
@@ -172,7 +173,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     LobattoBeamIntegration beamIntegr;
 
     theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
-					 beamIntegr, *theTransf2d);
+				       beamIntegr, *theTransf2d);
 
     delete [] sections;
   }
@@ -247,16 +248,16 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     sections[1] = sectionJ;
 
     if (strcmp(argv[6],"HingeMidpoint") == 0) {
-      //HingeMidpointBeamIntegration beamIntegr(E, A, I, lpI, lpJ);
+      HingeMidpointBeamIntegration2d beamIntegr(E, A, I, lpI, lpJ);
 
-      //theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, 2, sections,
-      //				   beamIntegr, *theTransf2d);
+      theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, 2, sections,
+					 beamIntegr, *theTransf2d);
     }
     if (strcmp(argv[6],"HingeRadau") == 0) {
-      //HingeRadauBeamIntegration beamIntegr(E, A, I, lpI, lpJ);
+      HingeRadauBeamIntegration2d beamIntegr(E, A, I, lpI, lpJ);
 
-      //theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, 2, sections,
-      //				   beamIntegr, *theTransf2d);
+      theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, 2, sections,
+					 beamIntegr, *theTransf2d);
     }
   }
 
@@ -431,12 +432,12 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       sections[i] = theSection;
     }
     
-    //UserDefinedHingeIntegration beamIntegr(npL, ptsL, wtsL,
-    //				   npR, ptsR, wtsR,
-    //				   E, A, I);
+    UserDefinedHingeIntegration2d beamIntegr(npL, ptsL, wtsL,
+					     npR, ptsR, wtsR,
+					     E, A, I);
 
-    //theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
-    //				 beamIntegr, *theTransf2d);
+    theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
+				       beamIntegr, *theTransf2d);
     
     delete [] sections;
   }

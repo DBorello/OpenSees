@@ -3,7 +3,9 @@ include ../../../Makefile.def
 OBJS       = ForceBeamColumn2d.o \
 	TclForceBeamColumnCommand.o \
 	BeamIntegration.o \
-	LobattoBeamIntegration.o UserDefinedBeamIntegration.o
+	LobattoBeamIntegration.o UserDefinedBeamIntegration.o \
+	HingeMidpointBeamIntegration2d.o HingeRadauBeamIntegration2d.o \
+	UserDefinedHingeIntegration2d.o
 
 # Compilation control
 
