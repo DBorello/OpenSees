@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.60 $
-// $Date: 2004-09-01 04:04:41 $
+// $Revision: 1.61 $
+// $Date: 2004-11-24 22:34:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -380,7 +380,7 @@
 #define EquiALGORITHM_TAGS_SplitNewton 		6
 #define EquiALGORITHM_TAGS_KrylovNewton         7
 #define EquiALGORITHM_TAGS_NewtonLineSearch     8
-#define EquiALGORITHM_TAGS_PeriodicNewton         9
+#define EquiALGORITHM_TAGS_PeriodicNewton       9
 #define EquiALGORITHM_TAGS_SecantNewton         10
 #define EquiALGORITHM_TAGS_AccelNewton          11
 
@@ -407,6 +407,7 @@
 #define INTEGRATOR_TAGS_ArcLength1	     	12
 #define INTEGRATOR_TAGS_StaticSensitivity       13
 #define INTEGRATOR_TAGS_HSConstraint            14
+#define INTEGRATOR_TAGS_DistributedDisplacementControl     15
 
 
 #define LinSOE_TAGS_FullGenLinSOE		1
@@ -447,6 +448,26 @@
 #define SOLVER_TAGS_Itpack            17
 #define SOLVER_TAGS_ProfileSPDLinSolverGather  	18
 #define SOLVER_TAGS_DistributedSuperLU		      	19
+
+
+#define RECORDER_TAGS_ElementRecorder		1
+#define RECORDER_TAGS_NodeRecorder		2
+#define RECORDER_TAGS_EnvelopeNodeRecorder	3
+#define RECORDER_TAGS_EnvelopeElementRecorder	4
+#define RECORDER_TAGS_DatastoreRecorder		5
+#define RECORDER_TAGS_MaxNodeDispRecorder	6
+#define RECORDER_TAGS_FilePlotter		7
+#define RECORDER_TAGS_AlgorithmIncrements	8
+#define RECORDER_TAGS_DriftRecorder		9
+#define RECORDER_TAGS_GSA_Recorder		10
+#define RECORDER_TAGS_YsVisual                  11
+#define RECORDER_TAGS_DamageRecorder		12
+#define RECORDER_TAGS_PatternRecorder		13
+#define RECORDER_TAGS_TclFeViewer		14
+
+#define DATAHANDLER_TAGS_DataOutputStreamHandler		1
+#define DATAHANDLER_TAGS_DataOutputFileHandler		2
+#define DATAHANDLER_TAGS_DataOutputDatabaseHandler		3
 
 #define DomDecompALGORITHM_TAGS_DomainDecompAlgo 1
 
