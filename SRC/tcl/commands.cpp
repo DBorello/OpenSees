@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2001-08-20 02:00:22 $
+// $Revision: 1.13 $
+// $Date: 2001-08-20 04:57:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1001,7 +1001,7 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 					       *theStaticIntegrator);
 // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
-	if (theSensitivityAlgorithm->isPathDependent()) {
+	if (theSensitivityAlgorithm != 0 && theSensitivityAlgorithm->isPathDependent()) {
 		theStaticAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
 	}
 #endif
