@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.2 2001-08-18 00:22:12 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.3 2001-08-18 00:35:28 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
