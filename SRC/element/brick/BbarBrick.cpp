@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-11 21:54:40 $
+// $Revision: 1.2 $
+// $Date: 2001-07-11 23:15:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -862,7 +862,8 @@ BbarBrick::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
     int error = 0;
 
-    for (int i = 0; i < 3; i++) {
+    int i;
+    for (i = 0; i < 3; i++) {
       coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
       coords(1,i) = end2Crd(i) + end2Disp(i)*fact;
       coords(2,i) = end3Crd(i) + end3Disp(i)*fact;
@@ -870,7 +871,7 @@ BbarBrick::displaySelf(Renderer &theViewer, int displayMode, float fact)
     }
     error += theViewer.drawPolygon (coords, values);
 
-    for (int i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
       coords(0,i) = end5Crd(i) + end5Disp(i)*fact;
       coords(1,i) = end6Crd(i) + end6Disp(i)*fact;
       coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
@@ -878,7 +879,7 @@ BbarBrick::displaySelf(Renderer &theViewer, int displayMode, float fact)
     }
     error += theViewer.drawPolygon (coords, values);
 
-    for (int i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
       coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
       coords(1,i) = end4Crd(i) + end4Disp(i)*fact;
       coords(2,i) = end8Crd(i) + end8Disp(i)*fact;
@@ -886,7 +887,7 @@ BbarBrick::displaySelf(Renderer &theViewer, int displayMode, float fact)
     }
     error += theViewer.drawPolygon (coords, values);
 
-    for (int i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
       coords(0,i) = end2Crd(i) + end2Disp(i)*fact;
       coords(1,i) = end3Crd(i) + end3Disp(i)*fact;
       coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
@@ -895,7 +896,7 @@ BbarBrick::displaySelf(Renderer &theViewer, int displayMode, float fact)
     error += theViewer.drawPolygon (coords, values);
 
 
-    for (int i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
       coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
       coords(1,i) = end2Crd(i) + end2Disp(i)*fact;
       coords(2,i) = end6Crd(i) + end6Disp(i)*fact;
@@ -903,7 +904,7 @@ BbarBrick::displaySelf(Renderer &theViewer, int displayMode, float fact)
     }
     error += theViewer.drawPolygon (coords, values);
 
-    for (int i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
       coords(0,i) = end4Crd(i) + end4Disp(i)*fact;
       coords(1,i) = end3Crd(i) + end3Disp(i)*fact;
       coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
