@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:57 $
+// $Revision: 1.4 $
+// $Date: 2003-10-07 18:59:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dTempLoad.cpp,v $
                                                                         
 // Written: Scott R. Hamilton 15 July 2002
