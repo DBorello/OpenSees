@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2003-05-07 22:14:12 $
+// $Revision: 1.18 $
+// $Date: 2003-05-09 22:21:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -259,12 +259,12 @@ void  Brick::Print( OPS_Stream &s, int flag )
     avgStrain /= numMaterials;
 
     s << "#AVERAGE_STRESS ";
-    for (int i=0; i<nstress; i++)
+    for (i=0; i<nstress; i++)
       s << avgStress(i) << " " ;
     s << endln;
 
     s << "#AVERAGE_STRAIN ";
-    for (int i=0; i<nstress; i++)
+    for (i=0; i<nstress; i++)
       s << avgStrain(i) << " " ;
     s << endln;
 
