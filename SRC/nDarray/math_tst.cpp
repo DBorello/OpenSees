@@ -1,5 +1,5 @@
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:48 $
+// $Revision: 1.4 $
+// $Date: 2003-03-12 20:27:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/math_tst.cpp,v $
                                                                         
                                                                         
@@ -41,9 +41,9 @@
 
 
 #include <Tensor.h>
-#include <G3Globals.h>
-#include <ConsoleErrorHandler.h>
-ErrorHandler *g3ErrorHandler;
+//#include <G3Globals.h>
+//#include <ConsoleErrorHandler.h>
+//ErrorHandler *g3ErrorHandler;
 
 int main(int argc, char *argv[])
 {
@@ -402,9 +402,9 @@ res2.print("r2","\n result");
   tensor t2( 2, def_dim_2, t2values);
   t2.print("t2","\ntensor t2 (2nd-order with values assignement)");
 
-  opserr << "rank of t2: " << t2.rank() << endln;
+  fprintf(stderr,"rank of t2: %d ", t2.rank());
   for (int ii=1; ii<=t2.rank(); ii++) {
-    opserr << "dimension of t2 in " << ii << " is " << t2.dim(ii) << endln;
+   fprintf(stderr,"dimension of t2 in %d is %d ", ii, t2.dim(ii));
   }
 
 
