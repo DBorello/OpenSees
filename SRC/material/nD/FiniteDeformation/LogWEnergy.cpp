@@ -104,9 +104,9 @@ const Vector LogWEnergy::disowOdlambda(const Vector &lambda_wave_in)
 const Vector LogWEnergy::d2isowOdlambda2(const Vector &lambda_wave_in)
   {
     Vector d2isowOverdlambda2(3);
-    d2isowOverdlambda2(0) = -2.0 * G * (1.0-log(lambda_wave_in(0))) / lambda_wave_in(0) / lambda_wave_in(0);
-    d2isowOverdlambda2(1) = -2.0 * G * (1.0-log(lambda_wave_in(1))) / lambda_wave_in(1) / lambda_wave_in(1);
-    d2isowOverdlambda2(2) = -2.0 * G * (1.0-log(lambda_wave_in(2))) / lambda_wave_in(2) / lambda_wave_in(2);
+    d2isowOverdlambda2(0) = 2.0 * G * (1.0-log(lambda_wave_in(0))) / lambda_wave_in(0) / lambda_wave_in(0);
+    d2isowOverdlambda2(1) = 2.0 * G * (1.0-log(lambda_wave_in(1))) / lambda_wave_in(1) / lambda_wave_in(1);
+    d2isowOverdlambda2(2) = 2.0 * G * (1.0-log(lambda_wave_in(2))) / lambda_wave_in(2) / lambda_wave_in(2);
     return d2isowOverdlambda2;
   }
 

@@ -116,8 +116,10 @@ class FiniteDeformationElastic3D : public NDMaterial
     const Tensor FDisoStiffness(void) ;
     const Tensor FDvolStiffness(void) ;
 
+
 //    int setInitialTangentTensor(void);
     int ComputeTrials(void);
+    int getCaseIndex(void);
 
   protected:
 
