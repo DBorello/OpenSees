@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-09-25 20:31:17 $
+// $Revision: 1.3 $
+// $Date: 2001-11-16 21:48:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltyMP_FE.cpp,v $
                                                                         
                                                                         
@@ -81,6 +81,7 @@ PenaltyMP_FE::PenaltyMP_FE(Domain &theDomain,
     if (theRetainedNode == 0 || theConstrainedNode == 0) {
 	cerr << "FATAL PenaltyMP_FE::PenaltyMP_FE() - Constrained or Retained";
 	cerr << " Node does not exist in Domain\n";
+	cerr << theMP->getNodeRetained() << " " << theMP->getNodeConstrained() << endl;
 	exit(-1);
     }	
 
