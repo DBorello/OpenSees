@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $                                                              
-// $Date: 2001-08-14 22:46:16 $                                                                  
+// $Revision: 1.9 $                                                              
+// $Date: 2002-06-20 19:32:15 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -70,6 +70,18 @@ NDMaterial::getRho(void)
 {
   return 0.0;
 }
+
+// BJ added 19June2002
+double NDMaterial::getE(void) 
+  {
+    return 0.0;
+  }
+
+// BJ added 19June2002
+double NDMaterial::getnu(void)
+  {
+    return 0.0;
+  }
 
 const Vector &
 NDMaterial::getCommittedStress(void) 

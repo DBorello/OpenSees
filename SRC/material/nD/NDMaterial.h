@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $                                                              
-// $Date: 2001-08-14 22:46:16 $                                                                  
+// $Revision: 1.9 $                                                              
+// $Date: 2002-06-20 19:32:15 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $                                                                
                                                                         
                                                                         
@@ -57,6 +57,11 @@ class NDMaterial : public Material
 
     // methods to set state and retrieve state using Matrix and Vector classes
     virtual double getRho(void);
+// BJ added 19June2002
+    virtual double getE(void);
+    virtual double getnu(void);
+
+
     virtual int setTrialStrain(const Vector &v);
     virtual int setTrialStrain(const Vector &v, const Vector &r);
     virtual int setTrialStrainIncr(const Vector &v);
