@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2001-03-29 05:51:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/myCommands.cpp,v $
                                                                         
                                                                         
@@ -37,6 +37,7 @@
 
 #include <Domain.h>
 #include "TclModelBuilder.h"
+#include "TclUniaxialMaterialTester.h"
 
 #include <tcl.h>
 #include <tk.h>
@@ -141,8 +142,18 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;
       }
     }
+
+    else if (strcmp(argv[1],"test") == 0 || strcmp(argv[1],"TestUniaxial") == 0) {
+      theBuilder = new TclUniaxialMaterialTester(theDomain, interp);
+      if (theBuilder == 0) {
+	cerr << "WARNING ran out of memory in creating TclUniaxialMAterialTester model\n";
+	return TCL_ERROR;
+      }
+    }
+
     else
     {
+      Tcl_SetResult(interp, "WARNING unknown model builder type", TCL_STATIC);
       cerr << "WARNING model builder type " << argv[1]
 	   << " not supported\n";
       return TCL_ERROR;
