@@ -9,7 +9,6 @@
 set m   1.0; # meter for length
 set sec 1.0; # second for time
 set kg  1.0; # Kilogram for mass
-set N   1.0; # Newton for force
 
 #Other units
 # angle
@@ -27,6 +26,7 @@ set kip [expr 1000.0*$lbs];
 set ton [expr 1000.0*$kg]
 
 # force
+set N   [expr $kg * $m / ($sec * $sec)] ;
 set kN [expr 1000.0*$N];
 
 # pressure
