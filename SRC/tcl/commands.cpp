@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2002-09-26 22:28:33 $
+// $Revision: 1.38 $
+// $Date: 2002-10-24 22:29:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -91,6 +91,7 @@ extern "C" {
 #include <Broyden.h>
 #include <BFGS.h>
 #include <KrylovNewton.h>
+#include <PeriodicNewton.h>
 
 
 // line searches
@@ -1493,6 +1494,29 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
       theNewAlgo = new KrylovNewton(*theTest, formTangent); 
     else
       theNewAlgo = new KrylovNewton(*theTest, formTangent, maxDim); 
+  }
+
+  else if (strcmp(argv[1],"PeriodicNewton") == 0) {
+    int formTangent = CURRENT_TANGENT;
+    int maxDim = -1;
+    for (int i = 2; i < argc; i++) {
+      if (strcmp(argv[i],"-secant") == 0) {
+	formTangent = CURRENT_SECANT;
+      } else if (strcmp(argv[i],"-initial") == 0) {
+	formTangent = INITIAL_TANGENT;
+      } else if (strcmp(argv[i++],"-maxCount") == 0 && i < argc) {
+	maxDim = atoi(argv[i]);
+      }
+    }
+
+    if (theTest == 0) {
+      interp->result = "ERROR: No ConvergenceTest yet specified\n";
+      return TCL_ERROR;	  
+    }
+    if (maxDim == -1)
+      theNewAlgo = new PeriodicNewton(*theTest, formTangent); 
+    else
+      theNewAlgo = new PeriodicNewton(*theTest, formTangent, maxDim); 
   }
 
   else if (strcmp(argv[1],"Broyden") == 0) {
