@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-09-05 22:01:51 $
+// $Revision: 1.4 $
+// $Date: 2002-01-06 19:58:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ParallelMaterial.cpp,v $
                                                                         
                                                                         
@@ -344,7 +344,7 @@ ParallelMaterial::Print(ostream &s, int flag)
     if (epsmax != POS_INF_STRAIN)
       s << "  epsmax: " << epsmax << endl;
     for (int i=0; i<numMaterials; i++) {
-      s << ' ';
+      s << " ";
       theModels[i]->Print(s, flag);
     }
     

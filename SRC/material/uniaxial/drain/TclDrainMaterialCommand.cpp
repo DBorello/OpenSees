@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-08-18 21:39:06 $
+// $Revision: 1.2 $
+// $Date: 2002-01-06 19:58:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/drain/TclDrainMaterialCommand.cpp,v $
 
 // Written: MHS
@@ -112,7 +112,7 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 		for (int i = 3, j = 0; j < 16; i++, j++) {
 			if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-				cerr << "WARNING invalid input, data " << i << '\n';
+				cerr << "WARNING invalid input, data " << i << endl;
 				printCommand(argc, argv);
 				return 0;
 			}
@@ -135,7 +135,7 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 		for (int i = 3, j = 0; j < 16; i++, j++) {
 			if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-				cerr << "WARNING invalid input, data " << i << '\n';
+				cerr << "WARNING invalid input, data " << i << endl;
 				printCommand(argc, argv);
 				return 0;
 			}
@@ -158,7 +158,7 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 		for (int i = 3, j = 0; j < 16; i++, j++) {
 			if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-				cerr << "WARNING invalid input, data " << i << '\n';
+				cerr << "WARNING invalid input, data " << i << endl;
 				printCommand(argc, argv);
 				return 0;
 			}
@@ -181,7 +181,7 @@ TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int 
 
 		for (int i = 3, j = 0; j < 19; i++, j++) {
 			if (Tcl_GetDouble(interp, argv[i], &temp) != TCL_OK) {
-				cerr << "WARNING invalid input, data " << i << '\n';
+				cerr << "WARNING invalid input, data " << i << endl;
 				printCommand(argc, argv);
 				return 0;
 			}
