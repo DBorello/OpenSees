@@ -52,7 +52,7 @@
 #include <stresst.h>
 #include <straint.h>
 
-#include <FiniteDeformationElastic3D.h>
+#include <NDMaterial.h>
 
 #include <Information.h>
 #include <Channel.h>

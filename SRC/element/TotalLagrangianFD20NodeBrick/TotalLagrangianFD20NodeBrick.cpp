@@ -27,7 +27,7 @@
 #ifndef TOTALLAGRANGIANFD20NODEBRICK_CPP
 #define TOTALLAGRANGIANFD20NODEBRICK_CPP
 
-#include <FiniteDeformationElastic3D.h>
+//#include <FiniteDeformationElastic3D.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
@@ -113,7 +113,7 @@ NDMaterial &m, double b1, double b2, double b3)
 
       rho = m.getRho();
 
-      for (int i=0; i<NumNodes; i++) theNodes[i] = 0;
+      for (int j=0; j<NumNodes; j++) theNodes[j] = 0;
 
 }
 

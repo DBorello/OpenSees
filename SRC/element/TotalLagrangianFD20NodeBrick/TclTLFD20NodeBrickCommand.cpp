@@ -103,12 +103,12 @@ TclModelBuilder_addTLFD20nBrick(ClientData clientData,
   }
 
   // read the 3 bodyforce accel's
-  for (int i=0; i<NumDof; i++)
+  for (int j=0; j<NumDof; j++)
   {
-      if (Tcl_GetDouble(interp, argv[23+i+eleArgStart], &bodyforces[i]) != TCL_OK)
+      if (Tcl_GetDouble(interp, argv[23+j+eleArgStart], &bodyforces[j]) != TCL_OK)
       {
   opserr << "command: element TotalLagrangianFD20nbrick " << eleID << " - invalid bodyforces tag " <<
-    argv[23+i+eleArgStart] << endln;
+    argv[23+j+eleArgStart] << endln;
   return TCL_ERROR;
       }
   }
