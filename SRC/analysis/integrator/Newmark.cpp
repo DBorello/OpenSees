@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2000-10-15 07:33:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
                                                                         
                                                                         
@@ -49,7 +49,8 @@ Newmark::Newmark()
  displ(true), gamma(0), beta(0), 
  rayleighDamping(false), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
- Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0)
+ Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
+ determiningMass(false)
 {
     
 }
@@ -61,7 +62,8 @@ Newmark::Newmark(double theGamma, double theBeta, bool dispFlag)
  rayleighDamping(false), 
  alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
- Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0)
+ Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
+ determiningMass(false)
 {
 
 }
@@ -76,7 +78,8 @@ Newmark::Newmark(double theGamma, double theBeta,
  rayleighDamping(true), 
  alphaM(alpham), betaK(betak), betaKi(betaki), betaKc(betakc),
  c1(0.0), c2(0.0), c3(0.0), 
- Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0)
+ Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
+ determiningMass(false) 
 {
     if (alpham == 0.0 && betak == 0.0 && betaki == 0.0 && betakc == 0.0)
 	rayleighDamping = false;
