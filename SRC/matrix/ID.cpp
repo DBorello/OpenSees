@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-05-28 19:07:12 $
+// $Revision: 1.4 $
+// $Date: 2002-10-24 00:33:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -150,6 +150,23 @@ ID::~ID()
 {
   if (data != 0 && fromFree == 0) 
     free((void *)data);
+}
+
+int 
+ID::setData(int *newData, int size){
+  if (data != 0 && fromFree == 0) 
+    free((void *)data);
+
+  sz = size;
+  data = newData;
+  fromFree = 1;
+
+  if (sz <= 0) {
+    g3ErrorHandler->warning("ID::ID(int *, size) - size %d specified <= 0\n",size);
+    sz = 0;
+  }
+
+  return 0;
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-05-16 20:04:18 $
+// $Revision: 1.5 $
+// $Date: 2002-10-24 00:33:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.h,v $
                                                                         
                                                                         
@@ -57,6 +57,7 @@ class ID
     // utility methods
     int Size(void) const;
     void Zero(void);
+    int setData(int *newData, int size);
     
     // overloaded operators
     inline int &operator()(int x);
@@ -101,6 +102,7 @@ ID::operator()(int x)
   }
 #endif
 
+  
   return data[x];
 }
 
