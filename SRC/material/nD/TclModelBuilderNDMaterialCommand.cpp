@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2002-05-17 01:08:40 $
+// $Revision: 1.21 $
+// $Date: 2002-07-23 17:07:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -572,9 +572,14 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
  	theMaterial = new BeamFiberMaterial( tag, *threeDMaterial );
      }	
 	 
+    else if (strcmp(argv[1],"Bidirectional") == 0) {
+      cerr << "nDMaterial Bidirectional is now a section model, please "
+	   << "change to \'section Bidirectional\'" << endl;
+      return TCL_ERROR;
+    }
+
     else {
 	cerr << "WARNING unknown type of nDMaterial: " << argv[1];
-	cerr << "\nValid types: ElasticIsotropic, J2Plasticity, Bidirectional\n";
 	return TCL_ERROR;
     }
 
