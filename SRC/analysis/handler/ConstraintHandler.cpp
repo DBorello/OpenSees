@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2005-03-30 03:04:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/ConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,8 @@
 #include <AnalysisModel.h>
 #include <Integrator.h>
 
+#include <FE_Element.h>
+
 ConstraintHandler::ConstraintHandler(int clasTag)
 :MovableObject(clasTag),
  theDomainPtr(0),theAnalysisModelPtr(0),theIntegratorPtr(0)
@@ -48,6 +50,17 @@ ConstraintHandler::ConstraintHandler(int clasTag)
 ConstraintHandler::~ConstraintHandler()
 {
     
+}
+
+int
+ConstraintHandler::doneNumberingDOF(void)
+{
+  // iterate through the FE_Element getting them to set their IDs
+  FE_EleIter &theEle = theAnalysisModelPtr->getFEs();
+  FE_Element *elePtr;
+  while ((elePtr = theEle()) != 0)
+    elePtr->setID();
+  return 0;
 }
 
 void 

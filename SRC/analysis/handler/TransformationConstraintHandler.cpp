@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-04-15 22:28:51 $
+// $Revision: 1.8 $
+// $Date: 2005-03-30 03:04:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -445,7 +445,7 @@ TransformationConstraintHandler::enforceSPs(void)
 }
 
 int 
-TransformationConstraintHandler::doneDOFids(void)
+TransformationConstraintHandler::doneNumberingDOF(void)
 {
     for (int i=1; i<=numConstrainedNodes; i++) {
 	// upward cast - safe as i put it in this location
@@ -453,5 +453,13 @@ TransformationConstraintHandler::doneDOFids(void)
 	    (TransformationDOF_Group *)theDOFs[numDOF-i];
 	theDof->doneID();
     }
+
+    // iterate through the FE_Element getting them to set their IDs
+    AnalysisModel *theModel=this->getAnalysisModelPtr();
+    FE_EleIter &theEle = theModel->getFEs();
+    FE_Element *elePtr;
+    while ((elePtr = theEle()) != 0)
+      elePtr->setID();
+
     return 0;
 }

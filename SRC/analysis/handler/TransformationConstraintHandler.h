@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2005-03-30 03:04:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.h,v $
                                                                         
                                                                         
-// File: ~/analysis/handler/TransformationConstraintHandler.h
-// 
 // Written: fmk 
 // Created: May 1998.
 // Revision: A
@@ -56,7 +54,7 @@ class TransformationConstraintHandler : public ConstraintHandler
     int handle(const ID *nodesNumberedLast =0);
     void clearAll(void);    
     int enforceSPs(void);    
-    int doneDOFids(void);        
+    int doneNumberingDOF(void);        
 
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, 
