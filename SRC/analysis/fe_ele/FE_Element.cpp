@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:00:45 $
+// $Revision: 1.8 $
+// $Date: 2003-02-22 01:02:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
-// File: ~/analysis/FE_Element.C
-//
 // Written: fmk 
-
 // Created: 11/96
 // Revision: A
 //
@@ -603,7 +600,43 @@ FE_Element::addM_Force(const Vector &accel, double fact)
 		    tmp(i) = 0.0;		
 	    }	    
 
-	    if (theResidual->addMatrixVector(1.0, myEle->getMass(),tmp,fact) < 0){
+	    if (theResidual->addMatrixVector(1.0, myEle->getMass(), tmp, fact) < 0){
+		opserr << "WARNING FE_Element::addM_Force() - ";
+		opserr << "- addMatrixVector returned error\n";		 
+	    }		
+	}
+	else {
+	    opserr << "WARNING FE_Element::addM_Force() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
+	}    	    	    				
+    }
+    else {
+	opserr << "WARNING FE_Element::addM_Force() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
+    }    	            
+}
+
+void  
+FE_Element::addD_Force(const Vector &accel, double fact)
+{
+    if (myEle != 0) {    
+
+	// check for a quick return
+	if (fact == 0.0) 
+	    return;
+	if (myEle->isSubdomain() == false) {
+	    // get the components we need out of the vector
+	    // and place in a temporary vector
+	    Vector tmp(numDOF);
+	    for (int i=0; i<numDOF; i++) {
+		int loc = myID(i);
+		if (loc >= 0)
+		    tmp(i) = accel(loc);
+		else
+		    tmp(i) = 0.0;		
+	    }	    
+
+	    if (theResidual->addMatrixVector(1.0, myEle->getDamp(), tmp, fact) < 0){
 		opserr << "WARNING FE_Element::addM_Force() - ";
 		opserr << "- addMatrixVector returned error\n";		 
 	    }		
@@ -629,10 +662,37 @@ FE_Element::addLocalM_Force(const Vector &accel, double fact)
 	    return;
 	if (myEle->isSubdomain() == false) {
 	    if (theResidual->addMatrixVector(1.0, myEle->getMass(),
-						  accel, fact) < 0){
+					     accel, fact) < 0){
 
-		opserr << "WARNING FE_Element::addLocalM_Force() - ";
-		opserr << "- addMatrixVector returned error\n"; 
+	      opserr << "WARNING FE_Element::addLocalM_Force() - ";
+	      opserr << "- addMatrixVector returned error\n"; 
+	    }		
+	}
+	else {
+	    opserr << "WARNING FE_Element::addLocalM_Force() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
+	}    	    	    				
+    }
+    else {
+	opserr << "WARNING FE_Element::addLocalM_Force() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
+    }    	            
+}
+
+void  
+FE_Element::addLocalD_Force(const Vector &accel, double fact)
+{
+    if (myEle != 0) {    
+
+	// check for a quick return
+	if (fact == 0.0) 
+	    return;
+	if (myEle->isSubdomain() == false) {
+	    if (theResidual->addMatrixVector(1.0, myEle->getDamp(),
+					     accel, fact) < 0){
+
+	      opserr << "WARNING FE_Element::addLocalM_Force() - ";
+	      opserr << "- addMatrixVector returned error\n"; 
 	    }		
 	}
 	else {

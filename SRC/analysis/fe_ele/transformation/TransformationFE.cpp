@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:45 $
+// $Revision: 1.6 $
+// $Date: 2003-02-22 01:02:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -464,6 +464,14 @@ const Vector &
 TransformationFE::getM_Force(const Vector &accel, double fact)
 {
   opserr << "TransformationFE::getM_Force() - not yet implemented\n";
+  modResidual->Zero();
+  return *modResidual;
+}
+
+const Vector &
+TransformationFE::getD_Force(const Vector &accel, double fact)
+{
+  opserr << "TransformationFE::getD_Force() - not yet implemented\n";
   modResidual->Zero();
   return *modResidual;
 }

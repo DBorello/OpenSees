@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:33:28 $
+// $Revision: 1.5 $
+// $Date: 2003-02-22 01:02:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.h,v $
                                                                         
                                                                         
@@ -76,6 +76,7 @@ class FE_Element
     // methods for ele-by-ele strategies
     virtual const Vector &getTangForce(const Vector &x, double fact = 1.0);
     virtual void  addM_Force(const Vector &accel, double fact = 1.0);    
+    virtual void  addD_Force(const Vector &vel, double fact = 1.0);    
 
     virtual Integrator *getLastIntegrator(void);
     virtual const Vector &getLastResponse(void);
@@ -86,6 +87,7 @@ class FE_Element
     
   protected:
     void  addLocalM_Force(const Vector &accel, double fact = 1.0);    
+    void  addLocalD_Force(const Vector &vel, double fact = 1.0);    
 
     // protected variables - a copy for each object of the class        
     ID myDOF_Groups;
