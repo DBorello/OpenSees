@@ -289,6 +289,10 @@ SOURCE=..\..\..\SRC\coordTransformation\PDeltaCrdTransf3d.cpp
 
 SOURCE=..\..\..\SRC\coordTransformation\PDeltaCrdTransf3d.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\coordTransformation\TclGeomTransfCommand.cpp
+# End Source File
 # End Group
 # Begin Group "quad"
 
