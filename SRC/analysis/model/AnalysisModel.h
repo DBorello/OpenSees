@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-10-02 21:45:12 $
+// $Revision: 1.5 $
+// $Date: 2002-12-05 22:30:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.h,v $
                                                                         
                                                                         
@@ -113,6 +113,7 @@ class AnalysisModel: public MovableObject
     virtual int  revertDomainToLastCommit(void);
     virtual double getCurrentDomainTime(void);
     virtual void   setCurrentDomainTime(double newTime);    
+    virtual void   setRayleighDampingFactors(double alphaM, double betaK, double betaKi);    
     
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 

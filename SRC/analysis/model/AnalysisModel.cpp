@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-10-02 21:45:12 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:30:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -528,6 +528,20 @@ AnalysisModel::setCurrentDomainTime(double newTime)
 
     // invoke the method
     myDomain->setCurrentTime(newTime);
+}
+
+
+
+void
+AnalysisModel::setRayleighDampingFactors(double alphaM, double betaK, double betaK0)
+{
+    if (myDomain == 0) {
+	cerr << "WARNING: AnalysisModel::getCurrentDomainTime.";
+	cerr << " No Domain linked.\n";
+    }
+
+    // invoke the method
+    myDomain->setRayleighDampingFactors(alphaM, betaK, betaK0);
 }
 
 
