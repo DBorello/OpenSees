@@ -311,6 +311,14 @@ SOURCE=..\..\..\SRC\analysis\algorithm\eigenAlgo\FrequencyAlgo.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\KrylovNewton.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\KrylovNewton.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\Linear.cpp
 # End Source File
 # Begin Source File
