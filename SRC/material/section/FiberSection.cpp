@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:45:30 $
+// $Revision: 1.3 $
+// $Date: 2001-05-22 07:33:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection.cpp,v $
                                                                         
 // Written: MHS
@@ -522,8 +522,10 @@ FiberSection::Print(ostream &s, int flag)
 	s << "\nFiberSection, tag: " << this->getTag() << endl;
 	s << "\tSection code: " << *code;
 	s << "\tNumber of Fibers: " << numFibers << endl;
-	for (int i = 0; i < numFibers; i++)
-		theFibers[i]->Print(s, flag);
+	
+	if (flag == 1)
+		for (int i = 0; i < numFibers; i++)
+			theFibers[i]->Print(s, flag);
 }
 
 Response*

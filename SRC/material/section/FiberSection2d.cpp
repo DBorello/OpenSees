@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-03 06:32:07 $
+// $Revision: 1.2 $
+// $Date: 2001-05-22 07:33:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -561,21 +561,55 @@ FiberSection2d::Print(ostream &s, int flag)
   s << "\nFiberSection2d, tag: " << this->getTag() << endl;
   s << "\tSection code: " << code;
   s << "\tNumber of Fibers: " << numFibers << endl;
-  for (int i = 0; i < numFibers; i++)
-    theMaterials[i]->Print(s, flag);
+  
+  if (flag == 1)
+	  for (int i = 0; i < numFibers; i++)
+		  theMaterials[i]->Print(s, flag);
 }
 
 Response*
 FiberSection2d::setResponse(char **argv, int argc, Information &sectInfo)
 {
-  // See if the response is one of the defaults
-  Response *res = SectionForceDeformation::setResponse(argv, argc, sectInfo);
-  if (res != 0)
-    return res;
+	// See if the response is one of the defaults
+	Response *res = SectionForceDeformation::setResponse(argv, argc, sectInfo);
+	if (res != 0)
+		return res;
 
-  // otherwise response quantity is unknown for the FiberSection2d class
-  else
-    return 0;    
+	// Check if fiber response is requested
+    else if (strcmp(argv[0],"fiber") == 0) {
+        int key = 0;
+        int passarg = 2;
+
+        if (argc <= 2)          // not enough data input
+            return 0;
+        else if (argc <= 3)		// fiber number was input directly
+            key = atoi(argv[1]);
+        else {                  // fiber near-to coordinate specified
+            double yCoord = atof(argv[1]);
+			double zCoord = atof(argv[2]);
+			double ySearch = -matData[0];
+			double closestDist = fabs(ySearch-yCoord);
+			double distance;
+			for (int j = 1; j < numFibers; j++) {
+				ySearch = -matData[2*j];
+				distance = fabs(ySearch-yCoord);
+				if (distance < closestDist) {
+					closestDist = distance;
+					key = j;
+				}
+			}
+			passarg = 3;
+		}
+	
+        if (key < numFibers)
+			return theMaterials[key]->setResponse(&argv[passarg],argc-passarg,sectInfo);
+        else
+            return 0;
+    }
+			
+    // otherwise response quantity is unknown for the FiberSection class
+    else
+		return 0;
 }
 
 

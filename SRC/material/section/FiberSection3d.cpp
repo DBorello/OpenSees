@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-19 06:49:36 $
+// $Revision: 1.3 $
+// $Date: 2001-05-22 07:33:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -275,6 +275,7 @@ SectionForceDeformation*
 FiberSection3d::getCopy(void)
 {
   FiberSection3d *theCopy = new FiberSection3d ();
+  theCopy->setTag(this->getTag());
 
   theCopy->numFibers = numFibers;
 
@@ -610,21 +611,59 @@ FiberSection3d::Print(ostream &s, int flag)
   s << "\nFiberSection3d, tag: " << this->getTag() << endl;
   s << "\tSection code: " << code;
   s << "\tNumber of Fibers: " << numFibers << endl;
-  for (int i = 0; i < numFibers; i++)
-    theMaterials[i]->Print(s, flag);
+  
+  if (flag == 1)
+	  for (int i = 0; i < numFibers; i++)
+		  theMaterials[i]->Print(s, flag);
 }
 
 Response*
 FiberSection3d::setResponse(char **argv, int argc, Information &sectInfo)
 {
-  // See if the response is one of the defaults
-  Response *res = SectionForceDeformation::setResponse(argv, argc, sectInfo);
-  if (res != 0)
-    return res;
+	// See if the response is one of the defaults
+	Response *res = SectionForceDeformation::setResponse(argv, argc, sectInfo);
+	if (res != 0)
+		return res;
 
-  // otherwise response quantity is unknown for the FiberSection3d class
-  else
-    return 0;    
+	// Check if fiber response is requested
+    else if (strcmp(argv[0],"fiber") == 0) {
+        int key = 0;
+        int passarg = 2;
+
+        if (argc <= 2)          // not enough data input
+            return 0;
+        else if (argc <= 3)		// fiber number was input directly
+            key = atoi(argv[1]);
+        else {                  // fiber near-to coordinate specified
+            double yCoord = atof(argv[1]);
+			double zCoord = atof(argv[2]);
+			double ySearch = -matData[0];
+			double zSearch =  matData[1];
+			double closestDist = sqrt( pow(ySearch-yCoord,2) +
+                                 pow(zSearch-zCoord,2) );
+			double distance;
+			for (int j = 1; j < numFibers; j++) {
+				ySearch = -matData[3*j];
+				zSearch =  matData[3*j+1];
+				distance = sqrt( pow(ySearch-yCoord,2) +
+                                 pow(zSearch-zCoord,2) );
+				if (distance < closestDist) {
+					closestDist = distance;
+					key = j;
+				}
+			}
+		    passarg = 3;
+		}
+	
+        if (key < numFibers)
+			return theMaterials[key]->setResponse(&argv[passarg],argc-passarg,sectInfo);
+        else
+            return 0;
+    }
+			
+    // otherwise response quantity is unknown for the FiberSection class
+    else
+		return 0;
 }
 
 
@@ -635,13 +674,4 @@ FiberSection3d::getResponse(int responseID, Information &sectInfo)
   // this function, but keeping it here just for clarity
   return SectionForceDeformation::getResponse(responseID, sectInfo);
 }
-
-
-
-
-
-
-
-
-
 
