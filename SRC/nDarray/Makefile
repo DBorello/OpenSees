@@ -49,6 +49,11 @@ clean: tidy
 	@$(RM) $(RMFLAGS) test.\$\$\$ 
 	@$(RM) $(RMFLAGS) *.ti 
 	@$(RM) $(RMFLAGS) tca.map 
+	@$(RM) $(RMFLAGS) *.da 
+	@$(RM) $(RMFLAGS) *.gcov
+	@$(RM) $(RMFLAGS) *.bb
+	@$(RM) $(RMFLAGS) *.bbg
+	@$(RM) $(RMFLAGS) gmon.out
 	@$(RM) $(RMFLAGS) .inslog*
 
 spotless: clean
