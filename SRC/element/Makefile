@@ -17,6 +17,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/upU; $(MAKE);
 	@$(CD) $(FE)/element/shell; $(MAKE);
 	@$(CD) $(FE)/element/brick; $(MAKE);
+	@$(CD) $(FE)/element/joint; $(MAKE);
 	@$(CD) $(FE)/element/dispBeamColumn; $(MAKE);
 	@$(CD) $(FE)/element/elasticBeamColumn; $(MAKE);
 
@@ -41,6 +42,7 @@ spotless: clean
 	@$(CD) $(FE)/element/upU; $(MAKE) wipe;
 	@$(CD) $(FE)/element/shell; $(MAKE) wipe;
 	@$(CD) $(FE)/element/brick; $(MAKE) wipe;
+	@$(CD) $(FE)/element/joint; $(MAKE) wipe;
 	@$(CD) $(FE)/element/dispBeamColumn; $(MAKE) wipe;
 	@$(CD) $(FE)/element/elasticBeamColumn; $(MAKE) wipe;
 
