@@ -1,6 +1,6 @@
                                                                         
-// $Revision: 1.2 $                                                              
-// $Date: 2004-07-20 22:44:18 $                                                                  
+// $Revision: 1.3 $                                                              
+// $Date: 2004-07-26 14:26:10 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/BJtensor.cpp,v $                                                                
                                                                         
                                                                         
@@ -1079,8 +1079,8 @@ arg.rank());
 //                                     rid[4],rid[5],rid[6],rid[7]);
 
                       inerr = inerr +
-                      this->val4(lid[0],lid[1],lid[2],lid[3]) *
-                      arg.val4(rid[0],rid[1],rid[2],rid[3]);
+                      this->val(lid[0],lid[1],lid[2],lid[3]) *
+                      arg.val(rid[0],rid[1],rid[2],rid[3]);
 //::printf(" inerr = %12.4lf \n   this[%1d,%1d,%1d,%1d,%1d,%1d,%1d,%1d] = %12.4lf arg[%1d,%1d,%1d,%1d,%1d,%1d,%1d,%1d] = %12.4lf\n",
 //      inerr,lid[0],lid[1],lid[2],lid[3],lid[4],lid[5],lid[6],lid[7],
 //      this->val(lid[0],lid[1],lid[2],lid[3],lid[4],lid[5],lid[6],lid[7]),
