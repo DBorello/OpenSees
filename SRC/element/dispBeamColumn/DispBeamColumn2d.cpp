@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-24 03:58:03 $
+// $Revision: 1.4 $
+// $Date: 2001-08-24 17:56:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -180,6 +180,8 @@ DispBeamColumn2d::setDomain(Domain *theDomain)
 	}
 
     this->DomainComponent::setDomain(theDomain);
+
+	this->update();
 }
 
 int
