@@ -1,8 +1,12 @@
 include ../../../Makefile.def
 
-OBJS	=	AlphaMachineBroker.o DecMachineBroker.o MillMachineBroker.o
+OBJS = MachineBroker.o AlphaMachineBroker.o DecMachineBroker.o MillMachineBroker.o
 
 all: $(OBJS)
+
+mpi: MPI_MachineBroker.o
+
+gexec: GEXEC_MachineBroker.o
 
 # Miscellaneous
 tidy:
