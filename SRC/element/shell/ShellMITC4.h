@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-19 06:00:29 $
+// $Revision: 1.2 $
+// $Date: 2001-07-11 21:23:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.h,v $
 
 // Ed "C++" Love
@@ -159,6 +159,9 @@ class ShellMITC4 : public Element {
     //compute local coordinates and basis
     void computeBasis( ) ;
         
+    //inertia terms
+    void formInertiaTerms( int tangFlag ) ;
+
     //form residual and tangent					  
     void formResidAndTangent( int tang_flag ) ;
 

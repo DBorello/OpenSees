@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-19 07:39:05 $
+// $Revision: 1.3 $
+// $Date: 2001-07-11 21:23:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -171,6 +171,7 @@ ShellMITC4::~ShellMITC4( )
     nodePointers[i] = 0 ;
 
   } //end for i
+
 }
 
 
@@ -308,7 +309,6 @@ const Matrix&  ShellMITC4::getTangentStiff( )
   return stiff ;
 }    
 
-
 //return secant matrix 
 const Matrix&  ShellMITC4::getSecantStiff( ) 
 {
@@ -332,7 +332,10 @@ const Matrix&  ShellMITC4::getDamp( )
 //return mass matrix
 const Matrix&  ShellMITC4::getMass( ) 
 {
-  //not supported
+  int tangFlag = 1 ;
+
+  formInertiaTerms( tangFlag ) ;
+
   return mass ;
 } 
 
@@ -357,8 +360,6 @@ const Vector&  ShellMITC4::getResistingForce( )
 
   formResidAndTangent( tang_flag ) ;
 
-  //  cerr << resid ; 
-
   return resid ;   
 }
 
@@ -371,9 +372,113 @@ const Vector&  ShellMITC4::getResistingForceIncInertia( )
   //do tangent and residual here 
   formResidAndTangent( tang_flag ) ;
 
+  formInertiaTerms( tang_flag ) ;
+
   return resid ;
 }
 
+
+//*********************************************************************
+//form inertia terms
+
+void   ShellMITC4::formInertiaTerms( int tangFlag ) 
+{
+
+  //translational mass only
+  //rotational inertia terms are neglected
+
+  static const int ndm = 3 ;
+
+  static const int ndf = 6 ; 
+
+  static const int numberNodes = 4 ;
+
+  static const int numberGauss = 4 ;
+
+  static const int nShape = 3 ;
+
+  static const int massIndex = nShape - 1 ;
+
+  double xsj ;  // determinant jacaobian matrix 
+
+  double dvol ; //volume element
+
+  static double shp[nShape][numberNodes] ;  //shape functions at a gauss point
+
+  static Vector momentum(ndf) ;
+
+
+  int i, j, k, p, q ;
+  int jj, kk ;
+
+  double temp, rhoH, massJK ;
+
+
+  //zero mass 
+  mass.Zero( ) ;
+
+  //compute basis vectors and local nodal coordinates
+  computeBasis( ) ;
+
+
+  //gauss loop 
+  for ( i = 0; i < numberGauss; i++ ) {
+
+    //get shape functions    
+    shape2d( sg[i], tg[i], xl, shp, xsj ) ;
+
+    //volume element to also be saved
+    dvol = wg[i] * xsj ;  
+
+    //node loop to compute accelerations
+    momentum.Zero( ) ;
+    for ( j = 0; j < numberNodes; j++ ) 
+      momentum += ( shp[massIndex][j] * nodePointers[j]->getTrialAccel() ) ;
+
+
+    //density
+    rhoH = materialPointers[i]->getRho() ;
+
+    //multiply acceleration by density to form momentum
+    momentum *= rhoH ;
+
+
+    //residual and tangent calculations node loops
+    jj = 0 ;
+    for ( j = 0; j < numberNodes; j++ ) {
+
+      temp = shp[massIndex][j] * dvol ;
+
+      for ( p = 0; p < 3; p++ )
+        resid( jj+p ) += ( temp * momentum(p) ) ;
+
+      
+      if ( tangFlag == 1 ) {
+
+	 //multiply by density
+	 temp *= rhoH ;
+
+	 //node-node translational mass
+         kk = 0 ;
+         for ( k = 0; k < numberNodes; k++ ) {
+
+	   massJK = temp * shp[massIndex][k] ;
+
+	   for ( p = 0; p < 3; p++ ) 
+	      mass( jj+p, kk+p ) +=  massJK ;
+            
+            kk += ndf ;
+          } // end for k loop
+
+      } // end if tang_flag 
+
+      jj += ndf ;
+    } // end for j loop
+
+
+  } //end for i gauss loop 
+
+}
 
 //*********************************************************************
 
@@ -660,6 +765,7 @@ void  ShellMITC4::formResidAndTangent( int tang_flag )
           Bshear = computeBbarShear( k, sg[i], tg[i], J0inv ) ;
 
           Bshear += Bhat[k] ;
+
 
           BK = assembleB( Bmembrane, Bbend, Bshear ) ;
   
