@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2002-06-07 18:03:04 $
+// $Revision: 1.16 $
+// $Date: 2002-06-07 21:58:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -309,12 +309,9 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
       cerr << "NLBeamColumn3d::setDomain(): Zero element length:" << this->getTag();  
       exit(0);
    }
-   this->initializeSectionHistoryVariables();
 
-   if (initialFlag == 2) {
-     crdTransf->update();
-   } else
-     this->update();
+   if (initialFlag != 2) 
+     this->initializeSectionHistoryVariables();
 }
 
 
@@ -325,8 +322,7 @@ NLBeamColumn3d::commitState()
    int err = 0;
    int i = 0;
 
-   do
-   {
+   do {
       vscommit[i] = vs[i];
       err = sections[i++]->commitState();  
    } while (err == 0 && i < nSections);
@@ -352,18 +348,17 @@ NLBeamColumn3d::revertToLastCommit()
    int err;
    int i = 0;
       
-   do
-   {
-      vs[i] = vscommit[i];
-      err = sections[i]->revertToLastCommit();
+   do {
+     vs[i] = vscommit[i];
+     err = sections[i]->revertToLastCommit();
+     
+     sections[i]->setTrialSectionDeformation(vs[i]);        
+     Ssr[i] = sections[i]->getStressResultant();
+     fs[i]  = sections[i]->getSectionFlexibility();
       
-      Ssr[i] = sections[i]->getStressResultant();
-      fs[i]  = sections[i]->getSectionFlexibility();
-      
-      i++;
+     i++;
    } while (err == 0 && i < nSections);
    
-       
    if (err)
       return err;
    
@@ -376,7 +371,7 @@ NLBeamColumn3d::revertToLastCommit()
    kv   = kvcommit;
    
    initialFlag = 0;
-   this->update();
+   // return this->update();
 
    return err;
 }
@@ -389,8 +384,7 @@ NLBeamColumn3d::revertToStart()
    int err;
    int i = 0;
      
-   do
-   {
+   do {
       fs[i].Zero();
       vs[i].Zero();
       Ssr[i].Zero();
@@ -413,7 +407,7 @@ NLBeamColumn3d::revertToStart()
    kv.Zero();
 
    initialFlag = 0;
-   this->update();
+   // this->update(); 
    
    return err;
 }
@@ -462,6 +456,12 @@ NLBeamColumn3d::initializeSectionHistoryVariables (void)
 int 
 NLBeamColumn3d::update(void)
 {
+
+  // if have completed a recvSelf() - do a revertToLastCommit
+  // to get Ssr, etc. set correctly
+  if (initialFlag == 2)
+    this->revertToLastCommit();
+
     // update the transformation
     crdTransf->update();
        
@@ -496,16 +496,14 @@ NLBeamColumn3d::update(void)
     double L = crdTransf->getInitialLength();
     double oneOverL  = 1.0/L;
 
-    for (int j=0; j < maxIters; j++)
-    {
+    for (int j=0; j < maxIters; j++) {
       Se += dSe;
   
       // initialize f and vr for integration
       f.Zero();
       vr.Zero();
 
-      for (i=0; i<nSections; i++)
-      {
+      for (i=0; i<nSections; i++) {
 	int order      = sections[i]->getOrder();
 	const ID &code = sections[i]->getType();
 
@@ -1062,21 +1060,17 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   idData(7) = crdTransfDbTag;
   idData(8) = (isTorsion) ? 1 : 0;
   
-
-  if (theChannel.sendID(dbTag, commitTag, idData) < 0)  
-  {
+  if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
      g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
 	     		     "failed to send ID data");
      return -1;
   }    
   
-  if (crdTransf->sendSelf(commitTag, theChannel) < 0)  
-  {
+  if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
      g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
 	     		     "failed to send crdTranf");
      return -1;
   }      
-
   
   //
   // send an ID for the sections containing each sections dbTag and classTag
@@ -1085,12 +1079,10 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
 
   ID idSections(2*nSections);
   loc = 0;
-  for (i = 0; i<nSections; i++) 
-  {
+  for (i = 0; i<nSections; i++) {
     int sectClassTag = sections[i]->getClassTag();
     int sectDbTag = sections[i]->getDbTag();
-    if (sectDbTag == 0) 
-    {
+    if (sectDbTag == 0) {
       sectDbTag = theChannel.getDbTag();
       sections[i]->setDbTag(sectDbTag);
     }
@@ -1120,29 +1112,18 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   
   // into a vector place distrLoadCommit, rho, UeCommit, Secommit and kvcommit
   int secDefSize = 0;
-  for (i = 0; i < nSections; i++)
-  {
+  for (i = 0; i < nSections; i++) {
      int size = sections[i]->getOrder();
      secDefSize   += size;
   }
-
-  
-  
-  static Vector dData(1+1+NL+NEBD+NEBD*NEBD+secDefSize); 
+    
+  static Vector dData(2+NEBD+NEBD*NEBD+secDefSize); 
   loc = 0;
 
   // place double variables into Vector
   dData(loc++) = rho;
   dData(loc++) = tol;
   
-  // put  distrLoadCommit into the Vector
-  for (i=0; i<NL; i++) 
-  {
-    //dData(loc) = distrLoadcommit(i);
-    dData(loc) = 0.0;  // TEMP FIX -- MHS
-    loc++;
-  }
-
   // place kvcommit into vector
   for (i=0; i<NEBD; i++) 
     dData(loc++) = Secommit(i);
@@ -1156,15 +1137,12 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   for (k=0; k<nSections; k++)
      for (i=0; i<sections[k]->getOrder(); i++)
 	dData(loc++) = (vscommit[k])(i);
-
   
-  if (theChannel.sendVector(dbTag, commitTag, dData) < 0)  
-  {
+  if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
      g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
 	 		     "failed to send Vector data");
      return -1;
   }    
-
 
   return 0;
 }
@@ -1173,12 +1151,11 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
 int
 NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-   //
+  //
   // into an ID of size 9 place the integer data
   //
   int dbTag = this->getDbTag();
   int i,j,k;
-  
 
   static ID idData(9);
 
@@ -1211,16 +1188,13 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
       }
   }
   crdTransf->setDbTag(crdTransfDbTag);
-  
+
   // invoke recvSelf on the crdTransf obkject
-  if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0)  
-  {
+  if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0) {
      g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
 	     		     "failed to recv crdTranf");
      return -3;
   }      
-
-  
   
   //
   // recv an ID for the sections containing each sections dbTag and classTag
@@ -1238,9 +1212,8 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   //
   // now receive the sections
   //
-
-  
   if (nSections != idData(3)) {
+
     //
     // we do not have correct number of sections, must delete the old and create
     // new ones before can recvSelf on the sections
@@ -1261,9 +1234,57 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
       return -1;
     }    
 
-    // create a section and recvSelf on it
+    // create all those matrices and vectors
     nSections = idData(3);
     loc = 0;
+
+    // Delete the old
+    if (vscommit != 0)
+      delete [] vscommit;
+  
+    // Allocate the right number
+    vscommit = new Vector[nSections];
+    if (vscommit == 0) {
+      g3ErrorHandler->warning("%s -- failed to allocate vscommit array",
+			      "NLBeamColumn3d::recvSelf");
+      return -1;
+    }
+  
+    // Delete the old
+    if (fs != 0)
+     delete [] fs;
+    
+    // Allocate the right number
+    fs  = new Matrix[nSections];  
+    if (fs == 0) {
+     g3ErrorHandler->warning("%s -- failed to allocate fs array",
+			     "NLBeamColumn3d::recvSelf");
+     return -1;
+    } 
+    
+    // Delete the old
+    if (vs != 0)
+      delete [] vs;
+    
+    // Allocate the right number
+    vs = new Vector[nSections];  
+    if (vs == 0) {
+      g3ErrorHandler->warning("%s -- failed to allocate vs array",
+			      "NLBeamColumn3d::recvSelf");
+      return -1;
+    }
+   
+    // Delete the old
+    if (Ssr != 0)
+      delete [] Ssr;
+    
+    // Allocate the right number
+    Ssr = new Vector[nSections];  
+    if (Ssr == 0) {
+      g3ErrorHandler->warning("%s -- failed to allocate Ssr array",
+			      "NLBeamColumn3d::recvSelf");
+      return -1;
+    }
     
     for (i=0; i<nSections; i++) {
       int sectClassTag = idSections(loc);
@@ -1275,6 +1296,7 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 			      "Broker could not create Section of class type",sectClassTag);
 	return -1;
       }
+
       sections[i]->setDbTag(sectDbTag);
       if (sections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
 	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - section %d %s\n",
@@ -1282,6 +1304,10 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	return -1;
       }     
     }
+
+    // Set up section history variables 
+    this->initializeSectionHistoryVariables();
+
   } else {
 
     // 
@@ -1317,8 +1343,6 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     }
   }
   
-  
-  
   // into a vector place distrLoadCommit, rho, UeCommit, Secommit and kvcommit
   int secDefSize = 0;
   for (int ii = 0; ii < nSections; ii++)
@@ -1327,7 +1351,7 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
      secDefSize   += size;
   }
   
-  Vector dData(1+1+NL+NEBD+NEBD*NEBD+secDefSize);   
+  Vector dData(2+NEBD+NEBD*NEBD+secDefSize);   
   
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
@@ -1341,88 +1365,25 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   rho = dData(loc++);
   tol = dData(loc++);
   
-  // put  distrLoadCommit into the Vector
-  for (i=0; i<NL; i++) {
-    //distrLoadcommit(i) = dData(loc++);
-    // TEMP FIX -- MHS
-  }
-
   // place kvcommit into vector
   for (i=0; i<NEBD; i++) 
     Secommit(i) = dData(loc++);
-
+  
   // place kvcommit into vector
   for (i=0; i<NEBD; i++) 
-     for (j=0; j<NEBD; j++)
+    for (j=0; j<NEBD; j++)
         kvcommit(i,j) = dData(loc++);
+  
+  kv   = kvcommit;
+  Se   = Secommit;
 
-	kv   = kvcommit;
-	Se   = Secommit;
-
-	// Delete the old
-	if (vscommit != 0)
-		delete [] vscommit;
-
-	// Allocate the right number
-	vscommit = new Vector[nSections];
-	if (vscommit == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate vscommit array",
-			"NLBeamColumn3d::recvSelf");
-		return -1;
-	}
-
-	for (k = 0; k < nSections; k++) {
-		int order = sections[k]->getOrder();
-
-		// place vscommit into vector
-		vscommit[k] = Vector(order);
-		for (i = 0; i < order; i++)
-			(vscommit[k])(i) = dData(loc++);
-	}
-	
-	// Delete the old
-	if (fs != 0)
-		delete [] fs;
-
-	// Allocate the right number
-	fs = new Matrix[nSections];  
-	if (fs == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate fs array",
-			"NLBeamColumn3d::recvSelf");
-		return -1;
-	}
-   
-	// Delete the old
-	if (vs != 0)
-		delete [] vs;
-
-	// Allocate the right number
-	vs = new Vector[nSections];  
-	if (vs == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate vs array",
-			"NLBeamColumn3d::recvSelf");
-		return -1;
-	}
-	
-	// Delete the old
-	if (Ssr != 0)
-		delete [] Ssr;
-
-	// Allocate the right number
-	Ssr = new Vector[nSections];  
-	if (Ssr == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate Ssr array",
-			"NLBeamColumn3d::recvSelf");
-		return -1;
-	}
-
-	// Set up section history variables 
-	this->initializeSectionHistoryVariables();
-
-  if (node1Ptr != 0) {
-     static Vector currDistrLoad(NL);
-     currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
-     crdTransf->update();
+  for (k = 0; k < nSections; k++) {
+    int order = sections[k]->getOrder();
+    
+    // place vscommit into vector
+    vscommit[k] = Vector(order);
+    for (i = 0; i < order; i++)
+      (vscommit[k])(i) = dData(loc++);
   }
 
   initialFlag = 2;  
@@ -1458,8 +1419,7 @@ NLBeamColumn3d::compSectionDisplacements(Vector sectionCoords[], Vector sectionD
    Vector kappa_z(nSections);  // curvature
    static Vector vs;                // section deformations 
         
-   for (i=0; i<nSections; i++)
-   {
+   for (i=0; i<nSections; i++) {
        // THIS IS VERY INEFFICIENT ... CAN CHANGE IF RUNS TOO SLOW
        int sectionKey1 = 0;
        int sectionKey2 = 0;

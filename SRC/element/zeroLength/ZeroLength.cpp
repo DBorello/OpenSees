@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-11-26 22:53:57 $
+// $Revision: 1.10 $
+// $Date: 2002-06-07 22:01:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -370,7 +370,7 @@ ZeroLength::update(void)
     // loop over 1d materials
     
     Matrix& tran = *t1d;
-	int ret = 0;
+    int ret = 0;
     for (int mat=0; mat<numMaterials1d; mat++) {
 	// compute strain and rate; set as current trial for material
 	strain     = this->computeCurrentStrain1d(mat,diff );
@@ -378,7 +378,7 @@ ZeroLength::update(void)
 	ret += theMaterial1d[mat]->setTrialStrain(strain,strainRate);
     }
 
-	return ret;
+    return ret;
 }
 
 const Matrix &
@@ -396,23 +396,23 @@ ZeroLength::getTangentStiff(void)
     
     Matrix& tran = *t1d;;
     for (int mat=0; mat<numMaterials1d; mat++) {
-	
-	// get tangent for material
-	E = theMaterial1d[mat]->getTangent();
-	
-        // compute contribution of material to tangent matrix
-        for (int i=0; i<numDOF; i++)
-			for(int j=0; j<i+1; j++)
-				stiff(i,j) +=  tran(mat,i) * E * tran(mat,j);
-	
+      
+      // get tangent for material
+      E = theMaterial1d[mat]->getTangent();
+      
+      // compute contribution of material to tangent matrix
+      for (int i=0; i<numDOF; i++)
+	for(int j=0; j<i+1; j++)
+	  stiff(i,j) +=  tran(mat,i) * E * tran(mat,j);
+      
     }
 
- // end loop over 1d materials 
+    // end loop over 1d materials 
     
     // complete symmetric stiffness matrix
     for (int i=0; i<numDOF; i++)
-	for(int j=0; j<i; j++)
-	    stiff(j,i) = stiff(i,j);
+      for(int j=0; j<i; j++)
+	stiff(j,i) = stiff(i,j);
 
     return stiff;
 }
@@ -607,120 +607,120 @@ ZeroLength::sendSelf(int commitTag, Channel &theChannel)
 int
 ZeroLength::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-	int res = 0;
+  int res = 0;
   
-	int dataTag = this->getDbTag();
+  int dataTag = this->getDbTag();
 
-	// ZeroLength creates an ID, receives the ID and then sets the 
-	// internal data with the data in the ID
+  // ZeroLength creates an ID, receives the ID and then sets the 
+  // internal data with the data in the ID
 
-	static ID idData(6+1);
+  static ID idData(6+1);
 
-	res += theChannel.recvID(dataTag, commitTag, idData);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to receive ID data",
-			"ZeroLength::recvSelf");
-		return res;
-	}
+  res += theChannel.recvID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- failed to receive ID data",
+			    "ZeroLength::recvSelf");
+    return res;
+  }
 
-	res += theChannel.recvMatrix(dataTag, commitTag, transformation);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- failed to receive transformation Matrix",
-			"ZeroLength::recvSelf");
-		return res;
-	}
+  res += theChannel.recvMatrix(dataTag, commitTag, transformation);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- failed to receive transformation Matrix",
+			    "ZeroLength::recvSelf");
+    return res;
+  }
 
-	this->setTag(idData(0));
-	dimension = idData(1);
-	numDOF = idData(2);
-	connectedExternalNodes(0) = idData(4);
-	connectedExternalNodes(1) = idData(5);
-
-	if (idData(3) < 1) {
-		numMaterials1d = 0;
-		if (dir1d != 0) {
-			delete dir1d;
-			dir1d = 0;
-		}
-		return res;
-	}
-	else {
-		// Check that there is correct number of materials, reallocate if needed
-		if (numMaterials1d != idData(3)) {
-			int i;
-			if (theMaterial1d != 0) {
-				for (i = 0; i < numMaterials1d; i++)
-					delete theMaterial1d[i];
-				delete [] theMaterial1d;
-				theMaterial1d = 0;
-			}
-
-			numMaterials1d = idData(3);
-			
-			theMaterial1d = new UniaxialMaterial *[numMaterials1d];
-			if (theMaterial1d == 0) {
-				g3ErrorHandler->warning("%s -- failed to new Material1d array",
-					"ZeroLength::recvSelf");
-				return -1;
-			}
-
-			for (i = 0; i < numMaterials1d; i++)
-				theMaterial1d[i] = 0;
-			
-			// Allocate ID array for directions
-			if (dir1d != 0)
-				delete dir1d;
-			dir1d = new ID(numMaterials1d);
-			if (dir1d == 0) {
-				g3ErrorHandler->warning("%s -- failed to new dir ID",
-					"ZeroLength::recvSelf");
-				return -1;
-			}
-		}
-
-		ID classTags(3*numMaterials1d);
-		res += theChannel.recvID(dataTag, commitTag, classTags);
-		if (res < 0) {
-			g3ErrorHandler->warning("%s -- failed to receive classTags ID",
+  this->setTag(idData(0));
+  dimension = idData(1);
+  numDOF = idData(2);
+  connectedExternalNodes(0) = idData(4);
+  connectedExternalNodes(1) = idData(5);
+  
+  if (idData(3) < 1) {
+    numMaterials1d = 0;
+    if (dir1d != 0) {
+      delete dir1d;
+      dir1d = 0;
+    }
+    return res;
+  }
+  else {
+    // Check that there is correct number of materials, reallocate if needed
+    if (numMaterials1d != idData(3)) {
+      int i;
+      if (theMaterial1d != 0) {
+	for (i = 0; i < numMaterials1d; i++)
+	  delete theMaterial1d[i];
+	delete [] theMaterial1d;
+	theMaterial1d = 0;
+      }
+      
+      numMaterials1d = idData(3);
+      
+      theMaterial1d = new UniaxialMaterial *[numMaterials1d];
+      if (theMaterial1d == 0) {
+	g3ErrorHandler->warning("%s -- failed to new Material1d array",
 				"ZeroLength::recvSelf");
-			return res;
-		}
-
-		for (int i = 0; i < numMaterials1d; i++) {
-			int matClassTag = classTags(numMaterials1d+i);
-
-			// If null, get a new one from the broker
-			if (theMaterial1d[i] == 0)
-				theMaterial1d[i] = theBroker.getNewUniaxialMaterial(matClassTag);
-
-			// If wrong type, get a new one from the broker
-			if (theMaterial1d[i]->getClassTag() != matClassTag) {
-				delete theMaterial1d[i];
-				theMaterial1d[i] = theBroker.getNewUniaxialMaterial(matClassTag);
-			}
-
-			// Check if either allocation failed from broker
-			if (theMaterial1d[i] == 0) {
-				g3ErrorHandler->warning("%s -- failed to allocate new Material1d %d",
-					"ZeroLength::recvSelf", i);
-				return -1;
-			}
-
-			// Receive the materials
-			theMaterial1d[i]->setDbTag(classTags(i));
-			res += theMaterial1d[i]->recvSelf(commitTag, theChannel, theBroker);
-			if (res < 0) {
-				g3ErrorHandler->warning("%s -- failed to receive Material1d %d",
-					"ZeroLength::recvSelf", i);
-				return res;
-			}
-
-			// Set material directions
-			(*dir1d)(i) = classTags(2*numMaterials1d+i);
-		}
-	}
-
+	return -1;
+      }
+      
+      for (i = 0; i < numMaterials1d; i++)
+	theMaterial1d[i] = 0;
+      
+      // Allocate ID array for directions
+      if (dir1d != 0)
+	delete dir1d;
+      dir1d = new ID(numMaterials1d);
+      if (dir1d == 0) {
+	g3ErrorHandler->warning("%s -- failed to new dir ID",
+				"ZeroLength::recvSelf");
+	return -1;
+      }
+    }
+    
+    ID classTags(3*numMaterials1d);
+    res += theChannel.recvID(dataTag, commitTag, classTags);
+    if (res < 0) {
+      g3ErrorHandler->warning("%s -- failed to receive classTags ID",
+			      "ZeroLength::recvSelf");
+      return res;
+    }
+    
+    for (int i = 0; i < numMaterials1d; i++) {
+      int matClassTag = classTags(numMaterials1d+i);
+      
+      // If null, get a new one from the broker
+      if (theMaterial1d[i] == 0)
+	theMaterial1d[i] = theBroker.getNewUniaxialMaterial(matClassTag);
+      
+      // If wrong type, get a new one from the broker
+      if (theMaterial1d[i]->getClassTag() != matClassTag) {
+	delete theMaterial1d[i];
+	theMaterial1d[i] = theBroker.getNewUniaxialMaterial(matClassTag);
+      }
+      
+      // Check if either allocation failed from broker
+      if (theMaterial1d[i] == 0) {
+	g3ErrorHandler->warning("%s -- failed to allocate new Material1d %d",
+				"ZeroLength::recvSelf", i);
+	return -1;
+      }
+      
+      // Receive the materials
+      theMaterial1d[i]->setDbTag(classTags(i));
+      res += theMaterial1d[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("%s -- failed to receive Material1d %d",
+				"ZeroLength::recvSelf", i);
 	return res;
+      }
+      
+      // Set material directions
+      (*dir1d)(i) = classTags(2*numMaterials1d+i);
+    }
+  }
+
+  return res;
 }
 
 

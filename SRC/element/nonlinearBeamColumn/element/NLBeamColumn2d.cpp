@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2002-06-06 18:47:08 $
+// $Revision: 1.25 $
+// $Date: 2002-06-07 21:58:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -300,12 +300,9 @@ NLBeamColumn2d::setDomain(Domain *theDomain)
       cerr << "NLBeamColumn2d::setDomain(): Zero element length:" << this->getTag();  
       exit(0);
    }
-   this->initializeSectionHistoryVariables();
-   
-   if (initialFlag == 2) {
-     crdTransf->update();
-   } else
-     this->update();
+
+   if (initialFlag == 0) 
+     this->initializeSectionHistoryVariables();
 }
 
 
@@ -346,11 +343,11 @@ int NLBeamColumn2d::revertToLastCommit()
    int err;
    int i = 0;
    
-   do
-   {
+   do {
       vs[i] = vscommit[i];
       err = sections[i]->revertToLastCommit();
-      
+
+      sections[i]->setTrialSectionDeformation(vs[i]);      
       Ssr[i] = sections[i]->getStressResultant();
       fs[i]  = sections[i]->getSectionFlexibility();
       
@@ -370,7 +367,7 @@ int NLBeamColumn2d::revertToLastCommit()
    kv   = kvcommit;
    
    initialFlag = 0;
-   this->update();
+   // this->update();
 
    return err;
 }
@@ -382,8 +379,7 @@ int NLBeamColumn2d::revertToStart()
    int err;
    int i = 0;
      
-   do
-   {
+   do {
        fs[i].Zero();
        vs[i].Zero();
        Ssr[i].Zero();
@@ -406,7 +402,7 @@ int NLBeamColumn2d::revertToStart()
    kv.Zero();
 
    initialFlag = 0;
-   this->update();
+   // this->update();
    return err;
 }
 
@@ -416,9 +412,7 @@ int NLBeamColumn2d::revertToStart()
 const Matrix &
 NLBeamColumn2d::getTangentStiff(void)
 {
-  // Will remove once we clean up the corotational 2d transformation -- MHS
-  crdTransf->update();
-
+  crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
   return crdTransf->getGlobalStiffMatrix(kv, Se);
 }
     
@@ -453,61 +447,68 @@ NLBeamColumn2d::initializeSectionHistoryVariables (void)
 
 int NLBeamColumn2d::update()
 {
-    // update the transformation
-    crdTransf->update();
+
+  // if have completed a recvSelf() - do a revertToLastCommit
+  // to get Ssr, etc. set correctly
+  if (initialFlag == 2)
+    this->revertToLastCommit();
+
+  // update the transformation
+  crdTransf->update();
        
-    // get basic displacements and increments
-    static Vector v(NEBD);
-    static Vector dv(NEBD);
+  // get basic displacements and increments
+  static Vector v(NEBD);
+  static Vector dv(NEBD);
      
-    v = crdTransf->getBasicTrialDisp();    
-    dv = crdTransf->getBasicIncrDeltaDisp();    
+  v = crdTransf->getBasicTrialDisp();    
+  dv = crdTransf->getBasicIncrDeltaDisp();    
 
-    const Matrix &xi_pt  = quadRule.getIntegrPointCoords(nSections);
-    const Vector &weight = quadRule.getIntegrPointWeights(nSections);
-     
-    static Vector vr(NEBD);       // element residual displacements
-    static Matrix f(NEBD,NEBD);   // element flexibility matrix
-
-    static Matrix I(NEBD,NEBD);   // an identity matrix for matrix inverse
-    double dW;                    // section strain energy (work) norm 
-    int i;
-    
-    I.Zero();
-    for (i=0; i<NEBD; i++)
-      I(i,i) = 1.0;
-
-    // calculate nodal force increments and update nodal forces
-    static Vector dSe(NEBD);
-
-    // dSe = kv * dv;
-    dSe.addMatrixVector(0.0, kv, dv, 1.0);
-
-    double L = crdTransf->getInitialLength();
-    double oneOverL  = 1.0/L;
-    
-    for (int j=0; j < maxIters; j++)
-    {
-      Se += dSe;
+  const Matrix &xi_pt  = quadRule.getIntegrPointCoords(nSections);
+  const Vector &weight = quadRule.getIntegrPointWeights(nSections);
   
-      // initialize f and vr for integration
-      f.Zero();
-      vr.Zero();
+  static Vector vr(NEBD);       // element residual displacements
+  static Matrix f(NEBD,NEBD);   // element flexibility matrix
+  
+  static Matrix I(NEBD,NEBD);   // an identity matrix for matrix inverse
+  double dW;                    // section strain energy (work) norm 
+  int i;
+  
+  I.Zero();
+  for (i=0; i<NEBD; i++)
+    I(i,i) = 1.0;
+  
+  // calculate nodal force increments and update nodal forces
+  static Vector dSe(NEBD);
 
-      for (i=0; i<nSections; i++)
-      {
+  // dSe = kv * dv;
+  dSe.addMatrixVector(0.0, kv, dv, 1.0);
+
+  double L = crdTransf->getInitialLength();
+  double oneOverL  = 1.0/L;
+  
+  if (initialFlag != 2) {
+      for (int j=0; j < maxIters; j++) {
+
+	Se += dSe;
+  
+	// initialize f and vr for integration
+	f.Zero();
+	vr.Zero();
+	
+	for (i=0; i<nSections; i++) {
+	  
 	  int order      = sections[i]->getOrder();
 	  const ID &code = sections[i]->getType();
-
+	  
 	  Vector Ss(workArea, order);
 	  Vector dSs(&workArea[order], order);
 	  Vector dvs(&workArea[2*order], order);
-
+	  
 	  Matrix fb(&workArea[3*order], order, NEBD);
-
+	  
 	  double xL  = xi_pt(i,0);
 	  double xL1 = xL-1.0;
-
+	  
 	  // calculate total section forces
 	  // Ss = b*Se + bp*currDistrLoad;
 	  //Ss.addMatrixVector(0.0, b[i], Se, 1.0);
@@ -555,6 +556,7 @@ int NLBeamColumn2d::update()
 	  
 	  // compute section deformation increments
 	  //      vs += fs * dSs;     
+
 	  dvs.addMatrixVector(0.0, fs[i], dSs, 1.0);
 	      
 	  // set section deformations
@@ -565,7 +567,7 @@ int NLBeamColumn2d::update()
 	  
 	  // get section resisting forces
 	  Ssr[i] = sections[i]->getStressResultant();
-	  
+
 	  // get section flexibility matrix
           fs[i] = sections[i]->getSectionFlexibility();
 	  
@@ -668,14 +670,16 @@ int NLBeamColumn2d::update()
 
       // dSe = kv * dv;
       dSe.addMatrixVector(0.0, kv, dv, 1.0);
-      
+
       dW = dv ^ dSe;
       if (fabs(dW) < tol)
         break;
     }     
-      
+
     // determine resisting forces
     Se += dSe;
+
+  }
 
     initialFlag = 1;
 
@@ -942,7 +946,6 @@ int
 NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
 {  
   // place the integer data into an ID
-
   int dbTag = this->getDbTag();
   int i, j , k;
   int loc = 0;
@@ -957,26 +960,25 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   idData(6) = crdTransf->getClassTag();
   int crdTransfDbTag  = crdTransf->getDbTag();
   if (crdTransfDbTag  == 0) {
-      crdTransfDbTag = theChannel.getDbTag();
-      if (crdTransfDbTag  != 0) {
-	   crdTransf->setDbTag(crdTransfDbTag);
-       }
+    crdTransfDbTag = theChannel.getDbTag();
+    if (crdTransfDbTag  != 0) 
+      crdTransf->setDbTag(crdTransfDbTag);
   }
   idData(7) = crdTransfDbTag;
   
 
-  if (theChannel.sendID(dbTag, commitTag, idData) < 0)  
-  {
-     g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-	     		     "failed to send ID data");
-     return -1;
+  if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
+    g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
+			    "failed to send ID data");
+    return -1;
   }    
+
+  // send the coordinate transformation
   
-  if (crdTransf->sendSelf(commitTag, theChannel) < 0)  
-  {
-     g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
-	     		     "failed to send crdTranf");
-     return -1;
+  if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
+    g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
+			    "failed to send crdTranf");
+    return -1;
   }      
 
   
@@ -987,12 +989,10 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
 
   ID idSections(2*nSections);
   loc = 0;
-  for (i = 0; i<nSections; i++) 
-  {
+  for (i = 0; i<nSections; i++) {
     int sectClassTag = sections[i]->getClassTag();
     int sectDbTag = sections[i]->getDbTag();
-    if (sectDbTag == 0) 
-    {
+    if (sectDbTag == 0) {
       sectDbTag = theChannel.getDbTag();
       sections[i]->setDbTag(sectDbTag);
     }
@@ -1022,17 +1022,12 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   
   // into a vector place distrLoadCommit, rho, UeCommit, Secommit and kvcommit
   int secDefSize = 0;
-  int secFlexSize = 0;
-  for (i = 0; i < nSections; i++)
-  {
+  for (i = 0; i < nSections; i++) {
      int size = sections[i]->getOrder();
      secDefSize   += size;
-     secFlexSize  += size*size;
   }
 
-  
-  
-  static Vector dData(1+1+NL+NEBD+NEBD*NEBD+secDefSize+secFlexSize); 
+  Vector dData(1+1+NEBD+NEBD*NEBD+secDefSize); 
   loc = 0;
 
   // place double variables into Vector
@@ -1040,9 +1035,8 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   dData(loc++) = tol;
   
   // put  distrLoadCommit into the Vector
-  for (i=0; i<NL; i++) 
-    //dData(loc++) = distrLoadcommit(i);
-	dData(loc++) = 0.0;
+  //  for (i=0; i<NL; i++) 
+  //dData(loc++) = distrLoadcommit(i);
 
   // place kvcommit into vector
   for (i=0; i<NEBD; i++) 
@@ -1057,7 +1051,6 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   for (k=0; k<nSections; k++)
      for (i=0; i<sections[k]->getOrder(); i++)
 	dData(loc++) = (vscommit[k])(i);
-
   
   if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
      g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
@@ -1072,8 +1065,8 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
 int
 NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-   //
-  // into an ID of size 7 place the integer data
+  //
+  // receive the integer data containing tag, numSections and coord transformation info
   //
   int dbTag = this->getDbTag();
   int i,j,k;
@@ -1151,6 +1144,57 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
       delete [] sections;
     }
 
+    // create a section and recvSelf on it
+    nSections = idData(3);
+
+    // Delete the old
+    if (vscommit != 0)
+      delete [] vscommit;
+
+    // Allocate the right number
+    vscommit = new Vector[nSections];
+    if (vscommit == 0) {
+      g3ErrorHandler->warning("%s -- failed to allocate vscommit array",
+			      "NLBeamColumn2d::recvSelf");
+      return -1;
+    }
+
+    // Delete the old
+    if (fs != 0)
+      delete [] fs;
+
+    // Allocate the right number
+    fs = new Matrix[nSections];  
+    if (fs == 0) {
+      g3ErrorHandler->warning("%s -- failed to allocate fs array",
+			      "NLBeamColumn2d::recvSelf");
+      return -1;
+    }
+
+    // Delete the old
+    if (vs != 0)
+      delete [] vs;
+
+    // Allocate the right number
+    vs = new Vector[nSections];  
+    if (vs == 0) {
+      g3ErrorHandler->warning("%s -- failed to allocate vs array",
+			      "NLBeamColumn2d::recvSelf");
+      return -1;
+    }
+
+    // Delete the old
+    if (Ssr != 0)
+      delete [] Ssr;
+    
+    // Allocate the right number
+    Ssr = new Vector[nSections];  
+    if (Ssr == 0) {
+      g3ErrorHandler->warning("%s -- failed to allocate Ssr array",
+			      "NLBeamColumn2d::recvSelf");
+      return -1;
+    }
+
     // create a new array to hold pointers
     sections = new SectionForceDeformation *[idData(3)];
     if (sections == 0) {
@@ -1159,8 +1203,6 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
       return -1;
     }    
 
-    // create a section and recvSelf on it
-    nSections = idData(3);
     loc = 0;
     
     for (i=0; i<nSections; i++) {
@@ -1180,6 +1222,8 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	return -1;
       }     
     }
+
+    this->initializeSectionHistoryVariables();
 
   } else {
 
@@ -1216,18 +1260,14 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     }
   }
   
-  
   // into a vector place distrLoadCommit, rho, UeCommit, Secommit and kvcommit
   int secDefSize = 0;
-  int secFlexSize = 0;
-  for (int ii = 0; ii < nSections; ii++)
-  {
+  for (int ii = 0; ii < nSections; ii++) {
      int size = sections[ii]->getOrder();
      secDefSize   += size;
-     secFlexSize  += size*size;
   }
   
-  static Vector dData(1+1+NL+NEBD+NEBD*NEBD+secDefSize+secFlexSize);   
+  Vector dData(1+1+NEBD+NEBD*NEBD+secDefSize);   
   
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
     g3ErrorHandler->warning("NLBeamColumn2d::sendSelf() - %s\n",
@@ -1236,14 +1276,14 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   }    
   
   loc = 0;
-  
+
   // place double variables into Vector
   rho = dData(loc++);
   tol = dData(loc++);
 
   // put  distrLoadCommit into the Vector
   //for (i=0; i<NL; i++) 
-  //  distrLoadcommit(i) = dData(loc++);
+  // distrLoad(i) = dData(loc++);
 
   // place kvcommit into vector
   for (i=0; i<NEBD; i++) 
@@ -1257,18 +1297,6 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   kv   = kvcommit;
   Se   = Secommit;
 
-  // Delete the old
-  if (vscommit != 0)
-    delete [] vscommit;
-
-  // Allocate the right number
-  vscommit = new Vector[nSections];
-  if (vscommit == 0) {
-    g3ErrorHandler->warning("%s -- failed to allocate vscommit array",
-			    "NLBeamColumn2d::recvSelf");
-    return -1;
-  }
-
   for (k = 0; k < nSections; k++) {
     int order = sections[k]->getOrder();
 
@@ -1276,49 +1304,6 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     vscommit[k] = Vector(order);
     for (i = 0; i < order; i++)
       (vscommit[k])(i) = dData(loc++);
-  }
-	
-  // Delete the old
-  if (fs != 0)
-    delete [] fs;
-
-  // Allocate the right number
-  fs = new Matrix[nSections];  
-  if (fs == 0) {
-    g3ErrorHandler->warning("%s -- failed to allocate fs array",
-			    "NLBeamColumn2d::recvSelf");
-    return -1;
-  }
-   
-  // Delete the old
-  if (vs != 0)
-    delete [] vs;
-
-  // Allocate the right number
-  vs = new Vector[nSections];  
-  if (vs == 0) {
-    g3ErrorHandler->warning("%s -- failed to allocate vs array",
-			    "NLBeamColumn2d::recvSelf");
-    return -1;
-  }
-	
-  // Delete the old
-  if (Ssr != 0)
-    delete [] Ssr;
-
-  // Allocate the right number
-  Ssr = new Vector[nSections];  
-  if (Ssr == 0) {
-    g3ErrorHandler->warning("%s -- failed to allocate Ssr array",
-			    "NLBeamColumn2d::recvSelf");
-    return -1;
-  }
-
-  // Set up section history variables 
-  this->initializeSectionHistoryVariables();
-
-  if (node1Ptr != 0) {
-     crdTransf->update();
   }
 
   initialFlag = 2;  
