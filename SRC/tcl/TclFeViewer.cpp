@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2001-05-19 07:04:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.cpp,v $
                                                                         
                                                                         
@@ -105,8 +105,8 @@ TclFeViewer_clearImage(ClientData clientData, Tcl_Interp *interp, int argc,
 TclFeViewer::TclFeViewer(char *title, int xLoc, int yLoc, int width, int height,
 			 Domain &_theDomain, int WipeFlag,
 			 Tcl_Interp *interp)
-  :theMap(0),theRenderer(0), theDomain(&_theDomain), wipeFlag(WipeFlag),
-   theEleMode(-1), theNodeMode(-1), theDisplayFact(1)
+  :theMap(0),theRenderer(0), theDomain(&_theDomain), 
+  theEleMode(-1), theNodeMode(-1), theDisplayFact(1), wipeFlag(WipeFlag)
 {
 
   // set the static pointer used in the class

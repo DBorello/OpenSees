@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2001-05-19 07:04:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.h,v $
                                                                         
                                                                         
@@ -97,8 +97,8 @@ class TclFeViewer : public Recorder
     int theEleMode;
     int theNodeMode;    
     double theDisplayFact;
-	int wipeFlag;
-	int count;
+    int wipeFlag;
+    int count;
 };
 
 #endif

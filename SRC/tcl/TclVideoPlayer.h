@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2001-05-19 07:04:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclVideoPlayer.h,v $
                                                                         
                                                                         
@@ -51,7 +51,8 @@ class TclVideoPlayer
 {
   public:
     TclVideoPlayer(char *title, char *fileName, char *imageName,
-				   Tcl_Interp *interp);
+		   Tcl_Interp *interp, char *offsetFileName = 0, double factor = 1.0);
+
     ~TclVideoPlayer();    
 
     int play(void);
@@ -62,8 +63,13 @@ class TclVideoPlayer
     ColorMap *theMap;
     Renderer *theRenderer;
 
-    char *theFileName;   // file name  
-    ifstream theFile; 	 // output stream    
+    char *theFileName;   // file name conatining image commands
+    ifstream theFile; 	 // input stream for this file
+
+    char *theOffsetFileName;   // file name containing nodal offsets
+    ifstream theOffsetFile;    // input stream for this file
+
+    double factor;
 };
 
 #endif
