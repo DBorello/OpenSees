@@ -263,6 +263,14 @@ SOURCE=..\..\..\SRC\analysis\dof_grp\TransformationDOF_Group.h
 # PROP Default_Filter ".cpp; .h"
 # Begin Source File
 
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\BFGS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\BFGS.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\Broyden.cpp
 # End Source File
 # Begin Source File
