@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-01-31 10:41:02 $
+// $Revision: 1.4 $
+// $Date: 2001-06-14 05:59:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beam2d/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -136,10 +136,6 @@ ElasticBeam2d::setDomain(Domain *theDomain)
 
     if (L == 0.0)
 	g3ErrorHandler->fatal("ElasticBeam2d::setDomain -- Element has zero length");
-    
-    EAoverL = E*A/L;
-    EIoverL4 = 4*E*I/L;
-    EIoverL2 = 2*E*I/L;
 }
 
 int
@@ -167,6 +163,11 @@ ElasticBeam2d::getTangentStiff(void)
     
     const Vector &v = theCoordTransf->getBasicTrialDisp();
     
+	double EoverL   = E/L;
+	double EAoverL  = A*EoverL;			// EA/L
+	double EIoverL2 = 2.0*I*EoverL;		// 2EI/L
+	double EIoverL4 = 2.0*EIoverL2;		// 4EI/L
+
     q(0) = EAoverL*v(0);
     q(1) = EIoverL4*v(1) + EIoverL2*v(2);
     q(2) = EIoverL2*v(1) + EIoverL4*v(2);
@@ -288,6 +289,11 @@ ElasticBeam2d::getResistingForce()
 
     const Vector &v = theCoordTransf->getBasicTrialDisp();
     
+	double EoverL   = E/L;
+	double EAoverL  = A*EoverL;			// EA/L
+	double EIoverL2 = 2.0*I*EoverL;		// 2EI/L
+	double EIoverL4 = 2.0*EIoverL2;		// 4EI/L
+
     q(0) = EAoverL*v(0);
     q(1) = EIoverL4*v(1) + EIoverL2*v(2);
     q(2) = EIoverL2*v(1) + EIoverL4*v(2);
@@ -487,3 +493,47 @@ ElasticBeam2d::getResponse (int responseID, Information &eleInfo)
     }
 }
 
+int
+ElasticBeam2d::setParameter (char **argv, int argc, Information &info)
+{
+    // E of the beam interior
+    if (strcmp(argv[0],"E") == 0) {
+        info.theType = DoubleType;
+        return 1;
+    }
+
+    // A of the beam interior
+    else if (strcmp(argv[0],"A") == 0) {
+        info.theType = DoubleType;
+        return 2;
+    }
+
+    // I of the beam interior
+    else if (strcmp(argv[0],"I") == 0) {
+        info.theType = DoubleType;
+        return 3;
+    }
+
+    else
+        return -1;
+}
+
+int
+ElasticBeam2d::updateParameter (int parameterID, Information &info)
+{
+	switch (parameterID) {
+	case -1:
+		return -1;
+	case 1:
+		this->E = info.theDouble;
+		return 0;
+	case 2:
+		this->A = info.theDouble;
+		return 0;
+	case 3:
+		this->I = info.theDouble;
+		return 0;
+	default:
+		return -1;
+	}
+}
