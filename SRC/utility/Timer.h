@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-09-17 19:59:20 $
+// $Revision: 1.3 $
+// $Date: 2002-09-19 19:56:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/utility/Timer.h,v $
                                                                         
                                                                         
@@ -38,17 +38,17 @@
 #define Timer_h
 
 #ifdef _WIN32
-// fill in later
 
+#else
+#ifdef _MAC
+#include <sys/time.h>
 #else
 
 #include <time.h>
+
+#endif
 #include <sys/times.h>
 #include <sys/resource.h>
-#endif
-
-#ifdef _MAC
-#include <sys/time.h>
 #endif
 
 #include <iostream.h>
