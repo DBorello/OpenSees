@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-10-18 05:29:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.h,v $
                                                                         
                                                                         
@@ -63,6 +63,8 @@ class Matrix
     inline int noRows() const;
     inline int noCols() const;
     void Zero(void);
+    int resize(int numRow, int numCol);
+    
     int  Assemble(const Matrix &,const ID &rows, const ID &cols, 
 		  double fact = 1.0);  
     
@@ -126,7 +128,9 @@ class Matrix
 
     friend ostream &operator<<(ostream &s, const Matrix &M);
     friend istream &operator>>(istream &s, Matrix &M);    
-
+    friend Matrix operator*(double a, const Matrix &M);
+    
+    
     friend class Vector;    
     friend class Message;
     friend class TCP_Socket;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-10-18 05:29:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -143,7 +143,7 @@ Matrix::~Matrix()
 {
   if (data != 0) 
       if (fromFree == 0)
-	  delete [] data;
+	  delete [] data; 
   //  if (data != 0) free((void *) data);
 }
     
@@ -159,6 +159,52 @@ Matrix::Zero(void)
   for (int i=0; i<dataSize; i++)
     *dataPtr++ = 0;
 }
+
+
+int
+Matrix::resize(int rows, int cols) {
+
+  int newSize = rows*cols;
+
+  if (newSize <= 0) {
+    g3ErrorHandler->warning("Matrix::resize) - rows %d or cols %d specified <= 0\n",
+			    rows, cols); 
+    return -1;
+  }
+
+  else if (newSize > dataSize) {
+
+    // free the old space
+    if (data != 0) 
+      if (fromFree == 0)
+	delete [] data; 
+    //  if (data != 0) free((void *) data);
+
+    fromFree = 0;
+    // create new space
+    data = new double[newSize];
+    // data = (double *)malloc(dataSize*sizeof(double));
+    if (data == 0) {
+      g3ErrorHandler->warning("Matrix::resize(%d %d) - out of memory\n",
+			      rows, cols); 
+      numRows = 0; numCols =0; dataSize = 0;
+      return -2;
+    }
+
+  }
+
+  // just reset the cols and rows - save two memory calls at expense of holding 
+  // onto extra memory
+  else {
+    numRows = rows;
+    numCols = cols;
+  }
+
+  return 0;
+}
+
+
+
 
 
 int
@@ -1273,6 +1319,11 @@ Matrix::Extract(const Matrix &V, int init_row, int init_col, double fact)
   return res;
 }
 
+
+Matrix operator*(double a, const Matrix &V)
+{
+  return V * a;
+}
 
 
 
