@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:30:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotionRecord.h,v $
                                                                         
                                                                         
@@ -40,29 +40,31 @@
 
 #include <GroundMotion.h>
 #include <TimeSeries.h>
+#include <Vector.h>
 
 class GroundMotionRecord : public GroundMotion
 {
   public:
-    GroundMotionRecord(double fact = 1.0);
-	GroundMotionRecord(char *fileNameAccel, double timeStep,
-		double fact = 1.0);
-	GroundMotionRecord(char *fileNameAccel, char *fileNameTime,
-		double fact = 1.0);
-	// ADD CONSTRUCTORS FOR OTHER INPUT FORMATS
+    GroundMotionRecord();
+    GroundMotionRecord(char *fileNameAccel, double timeStep,
+		       double fact = 1.0, double dTintegration = 0.01);
+    GroundMotionRecord(char *fileNameAccel, char *fileNameTime,
+		       double fact = 1.0, double dTintegration = 0.01);
+    // ADD CONSTRUCTORS FOR OTHER INPUT FORMATS
 
     virtual ~GroundMotionRecord();
 
-    virtual double getDuration ();
+    virtual double getDuration();
 
-    virtual double getPeakAccel ();
-	virtual double getPeakVel ();
-	virtual double getPeakDisp ();
+    virtual double getPeakAccel();
+    virtual double getPeakVel();
+    virtual double getPeakDisp();
 
-    virtual double getAccel (double time);    
-    virtual double getVel (double time);    
-    virtual double getDisp (double time);        
-
+    virtual double getAccel(double time);    
+    virtual double getVel(double time);    
+    virtual double getDisp(double time);        
+    virtual const  Vector &getDispVelAccel(double time);
+    
     int sendSelf(int commitTag, Channel &theChannel);
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);    
@@ -70,7 +72,12 @@ class GroundMotionRecord : public GroundMotion
   protected:
 
   private:
-
+    TimeSeries *theAccelTimeSeries;  // Ground acceleration
+    TimeSeries *theVelTimeSeries;	 // Ground velocity
+    TimeSeries *theDispTimeSeries;	 // Ground displacement
+    
+    Vector data;
+    double delta;
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:30:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotionRecord.cpp,v $
                                                                         
                                                                         
@@ -44,107 +44,123 @@
 #include <Vector.h>
 #include <Channel.h>
 
-GroundMotionRecord::GroundMotionRecord(double theFactor)
-:GroundMotion(GROUND_MOTION_TAG_GroundMotionRecord)
+GroundMotionRecord::GroundMotionRecord()
+  :GroundMotion(GROUND_MOTION_TAG_GroundMotionRecord),
+   theAccelTimeSeries(0), theVelTimeSeries(0), theDispTimeSeries(0),
+   data(3), delta(0.0)
 {
-  //cerr << "GroundMotionRecord::GroundMotionRecord() -";
-  //cerr << " does not determine Vel or Disp - just returns 0.0\n";
 
-  // Probably don't need this constructor since it makes little sense
-  // not to construct a GMR without some data
-  // Will create default series for now though
-  //theAccelSeries = new PathSeries ();
-  //theVelSeries = new PathSeries ();
-  //theDispSeries = new PathSeries ();
-
-  theAccelSeries = 0;
-  theVelSeries = 0;
-  theDispSeries = 0;
 }
 
-GroundMotionRecord::GroundMotionRecord (char *fileNameAccel,
-										  double timeStep,
-										  double theFactor)
-:GroundMotion(GROUND_MOTION_TAG_GroundMotionRecord)
+GroundMotionRecord::GroundMotionRecord(char *fileNameAccel,
+				       double timeStep,
+				       double theFactor,
+				       double dT)
+  :GroundMotion(GROUND_MOTION_TAG_GroundMotionRecord),
+   theAccelTimeSeries(0), theVelTimeSeries(0), theDispTimeSeries(0),
+   data(3), delta(dT)
 {
 
-  //cerr << "GroundMotionRecord::GroundMotionRecord() -";
-  //cerr << " does not determine Vel or Disp - just returns 0.0\n";
-  
-  theAccelSeries = new PathSeries (fileNameAccel, timeStep, theFactor);
-  
-  // Integrate to get velocities and displacements
-  // Call default constructors for now, will change later
-  // theVelSeries = new PathSeries ();
-  // theDispSeries = new PathSeries ();
-  theVelSeries = 0;
-  theDispSeries = 0;
-  
-  if (theAccelSeries == 0 /* || theVelSeries == 0 || theDispSeries == 0 */)
-  {
-	cerr << "GroundMotionRecord::GroundMotionRecord() - "
-		 << "unable to create PathSeries" << endl;
-  }
+  theAccelTimeSeries = new PathSeries(fileNameAccel, timeStep, theFactor);
+
+  if (theAccelTimeSeries == 0) {
+    g3ErrorHandler->warning("GroundMotionRecord::GroundMotionRecord() - %s\n",
+			    "unable to create PathSeries");
+  }  
+
 }
 
-GroundMotionRecord::GroundMotionRecord (char *fileNameAccel,
-										  char *fileNameTime,
-										  double theFactor)
-:GroundMotion(GROUND_MOTION_TAG_GroundMotionRecord)
+GroundMotionRecord::GroundMotionRecord(char *fileNameAccel,
+				       char *fileNameTime,
+				       double theFactor,
+				       double dT)
+  :GroundMotion(GROUND_MOTION_TAG_GroundMotionRecord),
+   theAccelTimeSeries(0), theVelTimeSeries(0), theDispTimeSeries(0),
+   data(3), delta(dT)
 {
-  //cerr << "GroundMotionRecord::GroundMotionRecord() -";
-  //cerr << " does not determine Vel or Disp - just returns 0.0\n";
 
-  theAccelSeries = new PathTimeSeries (fileNameAccel, fileNameTime, theFactor);
+  theAccelTimeSeries = new PathTimeSeries(fileNameAccel, fileNameTime, theFactor);
 
-  // Integrate to get velocities and displacements
-  // Call default constructors for now, will change later
-  // theVelSeries = new PathTimeSeries ();
-  // theDispSeries = new PathTimeSeries ();
-  theVelSeries = 0;
-  theDispSeries = 0;
-
-  if (theAccelSeries == 0 /* || theVelSeries == 0 || theDispSeries == 0 */)
-  {
-	cerr << "GroundMotionRecord::GroundMotionRecord() - "
-		 << "unable to create PathTimeSeries" << endl;
+  if (theAccelTimeSeries == 0) {
+    g3ErrorHandler->warning("GroundMotionRecord::GroundMotionRecord() - %s\n",
+			    "unable to create PathSeries");
   }
 }
 
 GroundMotionRecord::~GroundMotionRecord()
 {
-  if (theAccelSeries != 0)
-    delete theAccelSeries;
-  if (theVelSeries != 0)
-    delete theVelSeries;
-  if (theDispSeries != 0)
-    delete theDispSeries;
-
+  if (theAccelTimeSeries != 0)
+    delete theAccelTimeSeries;
+  if (theVelTimeSeries != 0)
+    delete theVelTimeSeries;
+  if (theDispTimeSeries != 0)
+    delete theDispTimeSeries;
 }
 
 double 
 GroundMotionRecord::getDuration(void)
 {
-  return theAccelSeries->getDuration();
+  if (theAccelTimeSeries != 0)
+    return theAccelTimeSeries->getDuration();
+  else
+    return 0.0;
 }
 
 double 
 GroundMotionRecord::getPeakAccel(void)
 {
-  return theAccelSeries->getPeakFactor();
+  if (theAccelTimeSeries != 0)
+    return theAccelTimeSeries->getPeakFactor();
+  else
+    return 0.0;
+
 }
 
 double 
 GroundMotionRecord::getPeakVel(void)
 {
-  // return theVelSeries->getPeakFactor();
+  if (theVelTimeSeries != 0)
+    return theVelTimeSeries->getPeakFactor();
+
+  // if theAccel is not 0, integrate accel series to get a vel series
+  else if (theAccelTimeSeries != 0) {
+    theVelTimeSeries = this->integrate(theAccelTimeSeries, delta);
+    if (theVelTimeSeries != 0)
+      return theVelTimeSeries->getPeakFactor();      
+    else
+      return 0.0;
+  }
   return 0.0;
 }
 
 double 
 GroundMotionRecord::getPeakDisp(void)
 {
-  // return theDispSeries->getPeakFactor();
+  if (theDispTimeSeries != 0)
+    return theDispTimeSeries->getPeakFactor();
+
+  // if theVel is not 0, integrate vel series to get disp series
+  else if (theVelTimeSeries != 0) {
+    theDispTimeSeries = this->integrate(theVelTimeSeries, delta);
+    if (theDispTimeSeries != 0)
+      return theDispTimeSeries->getPeakFactor();      
+    else
+      return 0.0;
+  }
+
+  // if theAccel is not 0, integrate vel series to get disp series
+  else if (theAccelTimeSeries != 0) {
+    theVelTimeSeries = this->integrate(theAccelTimeSeries, delta);
+    if (theVelTimeSeries != 0) {
+      theDispTimeSeries = this->integrate(theVelTimeSeries, delta);
+      if (theDispTimeSeries != 0)
+	return theDispTimeSeries->getPeakFactor();      
+      else
+	return 0.0;
+    } else
+      return 0.0;
+  }
+
   return 0.0;
 }
 
@@ -153,28 +169,89 @@ GroundMotionRecord::getAccel(double time)
 {
   if (time < 0.0)
     return 0.0;
+  
+  if (theAccelTimeSeries != 0)
+    return theAccelTimeSeries->getFactor(time);
   else
-	return theAccelSeries->getFactor(time);
+    return 0.0;
 }     
 
 double 
 GroundMotionRecord::getVel(double time)
 {
-  //if (time < 0.0)
-  //  return 0.0;
-  //else
-  //  return theVelSeries->getFactor(time);
+  if (time < 0.0)
+    return 0.0;
+
+  if (theVelTimeSeries != 0) 
+    return theVelTimeSeries->getFactor(time);      
+  
+  // if theAccel is not 0, integrate accel series to get a vel series
+  else if (theAccelTimeSeries != 0) {
+    theVelTimeSeries = this->integrate(theAccelTimeSeries, delta);
+    if (theVelTimeSeries != 0)
+      return theVelTimeSeries->getFactor(time);      
+    else
+      return 0.0;
+  }
+
   return 0.0;
 }
 
 double 
 GroundMotionRecord::getDisp(double time)
 {
-  //if (time < 0.0)
-  //  return 0.0;
-  //else
-  //  return theDispSeries->getFactor(time);
+  if (time < 0.0)
+    return 0.0;
+
+  if (theDispTimeSeries != 0)
+    return theDispTimeSeries->getFactor(time);
+
+  // if theVel is not 0, integrate vel series to get disp series
+  else if (theVelTimeSeries != 0) {
+    theDispTimeSeries = this->integrate(theVelTimeSeries, delta);
+    if (theDispTimeSeries != 0)
+      return theDispTimeSeries->getFactor(time);      
+    else
+      return 0.0;
+  }
+
+  // if theAccel is not 0, integrate vel series to get disp series
+  else if (theAccelTimeSeries != 0) {
+    theVelTimeSeries = this->integrate(theAccelTimeSeries, delta);
+    if (theVelTimeSeries != 0) {
+      theDispTimeSeries = this->integrate(theVelTimeSeries, delta);
+      if (theDispTimeSeries != 0)
+	return theDispTimeSeries->getFactor(time);      
+      else
+	return 0.0;
+    } else
+      return 0.0;
+  }
+
   return 0.0;
+}
+
+const Vector &
+GroundMotionRecord::getDispVelAccel(double time)
+{
+  if (time < 0.0) {
+    data(0) = 0.0;
+    data(1) = 0.0;
+    data(2) = 0.0;
+    return data;
+  }
+
+  if (theAccelTimeSeries != 0 && theVelTimeSeries != 0 && theDispTimeSeries != 0) {
+    data(0) = theDispTimeSeries->getFactor(time);
+    data(1) = theVelTimeSeries->getFactor(time);
+    data(2) = theAccelTimeSeries->getFactor(time);
+  } else {
+    data(2) = this->getAccel(time);
+    data(1) = this->getVel(time);
+    data(0) = this->getDisp(time);
+  }
+
+  return data;
 }
 
 

@@ -1,7 +1,7 @@
 include ../../../Makefile.def
 
-OBJS       = GroundMotion.o GroundMotionIntegrator.o GroundMotionRecord.o \
-	TrapezoidalGroundMotionIntegrator.o 
+OBJS       = GroundMotion.o GroundMotionRecord.o InterpolatedGroundMotion.o \
+	TclGroundMotionCommand.o
 
 # Compilation control
 

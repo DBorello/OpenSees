@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:30:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotion.h,v $
                                                                         
                                                                         
@@ -41,38 +41,49 @@
 
 #include <MovableObject.h>
 #include <TimeSeries.h>
-#include <GroundMotionIntegrator.h>
-
+#include <TimeSeriesIntegrator.h>
+#include <Vector.h>
 
 class GroundMotion : public MovableObject
 {
   public:
+    GroundMotion(TimeSeries *dispSeries, 
+		 TimeSeries *velSeries, 
+		 TimeSeries *accelSeries,
+		 TimeSeriesIntegrator *theIntegrator = 0,
+		 double dTintegration = 0.01);
+    
     GroundMotion(int classTag);
     virtual ~GroundMotion();
 
-    virtual double getDuration (void) = 0;
+    virtual double getDuration(void);
 
-    virtual double getPeakAccel () = 0;
-    virtual double getPeakVel () = 0;
-    virtual double getPeakDisp () = 0;
+    virtual double getPeakAccel();
+    virtual double getPeakVel();
+    virtual double getPeakDisp();
 
-    virtual double getAccel (double time) = 0;
-    virtual double getVel (double time) = 0;
-    virtual double getDisp (double time) = 0;
+    virtual double getAccel(double time);
+    virtual double getVel(double time);
+    virtual double getDisp(double time);
+    virtual const  Vector &getDispVelAccel(double time);
+    
+    void setIntegrator(TimeSeriesIntegrator *integrator);
+    TimeSeries *integrate(TimeSeries *theSeries, double delta = 0.01); 
 
-    void setIntegrator (GroundMotionIntegrator *integrator);
-    TimeSeries *integrateAccel (double delta = 0.01); 
-    TimeSeries *integrateVel (double delta = 0.01);
+    int sendSelf(int commitTag, Channel &theChannel);
+    int recvSelf(int commitTag, Channel &theChannel, 
+		 FEM_ObjectBroker &theBroker);    
     
   protected:
+
+  private:
     TimeSeries *theAccelSeries;  // Ground acceleration
     TimeSeries *theVelSeries;	 // Ground velocity
     TimeSeries *theDispSeries;	 // Ground displacement
-
-    GroundMotionIntegrator *theIntegrator;
-
-  private:
-
+    TimeSeriesIntegrator *theIntegrator;
+    
+    Vector data;
+    double delta;
 };
 
 #endif
