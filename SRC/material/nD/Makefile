@@ -1,6 +1,6 @@
 include ../../../Makefile.def
 
-OBJS       = NDMaterial.o ElasticIsotropicMaterial.o \
+OBJS       = NDMaterial.o ElasticIsotropic3D.o ElasticIsotropicMaterial.o \
 	ElasticIsotropicPlaneStrain2D.o ElasticIsotropicPlaneStress2D.o \
 	TclModelBuilderNDMaterialCommand.o
 
