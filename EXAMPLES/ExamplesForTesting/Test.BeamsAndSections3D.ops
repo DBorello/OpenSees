@@ -46,14 +46,15 @@ set J  [expr $Iz+$Iy]
 
 set L  100.0
 set beta 0.1
+set lp [expr $beta*$L]
 
 set nIP 3
 
-set numElements 4
-set numSections 3
+set elements {1 2 3 4}
+set sections {1 2 3}
 
-for {set element 1} {$element <= $numElements} {incr element} {
-    for {set section 1} {$section <= $numSections} {incr section} {
+foreach element $elements {
+    foreach section $sections {
 	
 	model basic -ndm 3 -ndf 6
 	
@@ -92,7 +93,6 @@ for {set element 1} {$element <= $numElements} {incr element} {
 	    1 {
 		puts "Element: ElasticBeamColumn"
 		element elasticBeamColumn 1 1 2 $A $E $G $J $Iy $Iz 1
-		set section $numSections ;# To get out of loop
 	    }
 	    2 {
 		puts "Element: DispBeamColumn"
@@ -104,7 +104,7 @@ for {set element 1} {$element <= $numElements} {incr element} {
 	    }
 	    4 {
 		puts "Element: BeamWithHinges"
-		element beamWithHinges 1 1 2 1 $beta 1 $beta $E $A $Iz $Iy $G $J 1
+		element beamWithHinges 1 1 2 1 $lp 1 $lp $E $A $Iz $Iy $G $J 1
 	    }
 	}
 

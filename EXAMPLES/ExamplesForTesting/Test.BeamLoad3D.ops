@@ -23,9 +23,9 @@ set wx 2.0
 
 set nIP 3
 
-set numElements 4
+set elements {1 2 3 4}
 
-for {set element 1} {$element <= $numElements} {incr element} {
+foreach element $elements {
 	
     model basic -ndm 3 -ndf 6
 	
@@ -54,7 +54,7 @@ for {set element 1} {$element <= $numElements} {incr element} {
 	}
 	4 {
 	    puts "Element: BeamWithHinges"
-	    element beamWithHinges 1 1 2 1 $beta 1 $beta $E $A $Iz $Iy $G $J 1
+	    element beamWithHinges 1 1 2 1 $lp 1 $lp $E $A $Iz $Iy $G $J 1
 	}
     }
     

@@ -49,12 +49,14 @@ pattern Plain 1 Linear {
 
 integrator LoadControl 1 1 1 1
 test NormDispIncr 1.0e-8 10 1
-algorithm KrylovNewton 5
+algorithm KrylovNewton -maxDim 3
 numberer Plain
 constraints Penalty 1.0e12 1.0e12
 system UmfPack
 analysis Static
 
 analyze 1
+
+print algorithm
 
 wipe

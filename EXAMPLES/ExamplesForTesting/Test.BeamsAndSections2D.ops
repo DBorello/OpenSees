@@ -35,6 +35,7 @@ set I [expr 1.0/12*$b*$d*$d*$d]
 
 set L  100.0
 set beta 0.1
+set lp [expr $beta*$L]
 
 set nIP 3
 
@@ -113,7 +114,7 @@ foreach element $elements {
 	    }
 	    4 {
 		puts "Element: BeamWithHinges"
-		element beamWithHinges 1 1 2 1 $beta 1 $beta $E $A $I 1
+		element beamWithHinges 1 1 2 1 $lp 1 $lp $E $A $I 1
 	    }
 	}
 	
