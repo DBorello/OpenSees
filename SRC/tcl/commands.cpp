@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.51 $
-// $Date: 2003-04-29 18:47:25 $
+// $Revision: 1.52 $
+// $Date: 2003-06-03 17:43:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2884,6 +2884,22 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
     }
 
 
+    else if (strcmp(argv[1],"node") == 0) {
+      if (argc < 3) {
+	opserr << "WARNING want - remove node nodeTag?\n";
+	return TCL_ERROR;
+      }    
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING remove node tag? failed to read tag: " << argv[2] << endln;
+	return TCL_ERROR;
+      }      
+      Node *theNode = theDomain.removeNode(tag);
+      if (theNode != 0) {
+	delete theNode;
+      }
+    }
+
+
     else if (strcmp(argv[1],"recorders") == 0) {
       theDomain.removeRecorders();
     }
@@ -2905,6 +2921,7 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
       }
     }
     
+
 #ifdef _RELIABILITY
 // AddingSensitivity:BEGIN ///////////////////////////////////////
     else if (strcmp(argv[1],"randomVariablePositioner") == 0) {
@@ -2933,6 +2950,7 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 	}
 // AddingSensitivity:END ///////////////////////////////////////
 #endif
+
 
     else
       opserr << "WARNING remove element, loadPattern - only commands  available at the moment: " << endln;
