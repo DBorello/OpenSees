@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-10 23:30:51 $
+// $Revision: 1.3 $
+// $Date: 2003-10-15 00:31:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/UDP_Socket.h,v $
                                                                         
                                                                         
@@ -51,8 +51,7 @@ class UDP_Socket : public Channel
     
     char *addToProgram(void);
     
-    virtual int setUpShadow(void);
-    virtual int setUpActor(void);
+    virtual int setUpConnection(void);
 
     int setNextAddress(const ChannelAddress &otherChannelAddress);
 
@@ -96,7 +95,16 @@ class UDP_Socket : public Channel
     
   private:
     int sockfd;
-    struct sockaddr_in  my_Addr, last_Addr;
+    int connectType;
+    union {
+	  struct sockaddr    addr;
+	  struct sockaddr_in addr_in;
+    } my_Addr;
+    union {
+      struct sockaddr    addr;
+      struct sockaddr_in addr_in;
+    } last_Addr;
+
     socklen_t addrLength;
     char *shadow_inetAddr;
     unsigned int shadow_port;

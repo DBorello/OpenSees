@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-10-10 23:30:51 $
+// $Revision: 1.3 $
+// $Date: 2003-10-15 00:31:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.h,v $
                                                                         
                                                                         
-// File: ~/actor/channel/TCP_Socket.h
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -54,8 +52,7 @@ class TCP_Socket : public Channel
 
     char *addToProgram(void);
     
-    virtual int setUpShadow(void);
-    virtual int setUpActor(void);
+    virtual int setUpConnection(void);
 
     int setNextAddress(const ChannelAddress &otherChannelAddress);
     virtual ChannelAddress *getLastSendersAddress(void){ return 0;};
@@ -100,11 +97,21 @@ class TCP_Socket : public Channel
     
   private:
     int sockfd;
-    struct sockaddr_in  my_Addr, other_Addr;
-    struct sockaddr myAddr, otherAddr;
+
+    union {
+	  struct sockaddr    addr;
+	  struct sockaddr_in addr_in;
+    } my_Addr;
+    union {
+      struct sockaddr    addr;
+      struct sockaddr_in addr_in;
+    } other_Addr;
+
     socklen_t addrLength;
 
     unsigned int myPort;
+    int connectType;
+
     char add[40];
 };
 

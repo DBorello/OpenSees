@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:39 $
+// $Revision: 1.3 $
+// $Date: 2003-10-15 00:31:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/TCP_Socket.cpp,v $
                                                                         
                                                                         
-// File: ~/actor/channel/TCP_Socket.C
-//
 // Written: fmk
 // Created: 11/96
 // Revision: A
@@ -53,14 +51,14 @@ static void inttoa(unsigned int no, char *string, int *cnt);
 //	given by the OS. 
 
 TCP_Socket::TCP_Socket()
- :myPort(0)
+  :myPort(0), connectType(0)
 {
     // set up my_Addr 
     bzero((char *) &my_Addr, sizeof(my_Addr));    
-    my_Addr.sin_family = AF_INET;
-    my_Addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    my_Addr.sin_port = htons(0);
-    addrLength = sizeof(my_Addr);
+    my_Addr.addr_in.sin_family = AF_INET;
+    my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
+    my_Addr.addr_in.sin_port = htons(0);
+    addrLength = sizeof(my_Addr.addr_in);
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -68,14 +66,13 @@ TCP_Socket::TCP_Socket()
     }
 
     // bind local address to it
-    if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
+    if (bind(sockfd, (struct sockaddr *) &my_Addr.addr_in, sizeof(my_Addr.addr_in)) < 0) {
 	opserr << "TCP_Socket::TCP_Socket - could not bind local address\n";
     }
     
     // get my_address info
-    INET_getsockname(sockfd, &my_Addr, &addrLength);
-    myPort = ntohs(my_Addr.sin_port);
-
+    getsockname(sockfd, &my_Addr.addr, &addrLength);
+    myPort = ntohs(my_Addr.addr_in.sin_port);
 }    
 
 
@@ -86,37 +83,31 @@ TCP_Socket::TCP_Socket()
 //	constructor to open a socket with my inet_addr and with a port number port.
 
 TCP_Socket::TCP_Socket(unsigned int port) 
-:myPort(0)
+  :myPort(0), connectType(0)
 {
-    // set up my_Addr with address given by port and internet address of
+    // set up my_Addr.addr_in with address given by port and internet address of
     // machine on which the process that uses this routine is running.
 
-    char  me[20];
-    char  my_InetAddr[MAX_INET_ADDR];
-    gethostname(me,MAX_INET_ADDR);
-    GetHostAddr(me,my_InetAddr);
-
-    bzero((char *) &my_Addr, sizeof(my_Addr));
-    my_Addr.sin_family = AF_INET;
-    my_Addr.sin_addr.s_addr = inet_addr(my_InetAddr);
-    my_Addr.sin_port = htons(port);
-    addrLength = sizeof(my_Addr);
+    // set up my_Addr 
+    bzero((char *) &my_Addr.addr_in, sizeof(my_Addr.addr_in));
+    my_Addr.addr_in.sin_family = AF_INET;
+    my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
+    my_Addr.addr_in.sin_port = htons(port);
+    addrLength = sizeof(my_Addr.addr_in);
 
     // open a socket
-
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 	opserr << "TCP_Socket::TCP_Socket - could not open socket\n";
     }
     
     // bind local address to it
-
-    if (bind(sockfd,(struct sockaddr *)&my_Addr,sizeof(my_Addr)) < 0) {
+    if (bind(sockfd,&my_Addr.addr, sizeof(my_Addr.addr_in)) < 0) {
 	opserr << "TCP_Socket::TCP_Socket - could not bind local address\n";
     }    
 
     // get my_address info
-    INET_getsockname(sockfd, &my_Addr, &addrLength);
-    myPort = ntohs(my_Addr.sin_port);    
+    getsockname(sockfd, &my_Addr.addr, &addrLength);
+    myPort = ntohs(my_Addr.addr_in.sin_port);    
 }
 
 
@@ -127,20 +118,20 @@ TCP_Socket::TCP_Socket(unsigned int port)
 //	given by other_Port and other_InetAddr. 
 
 TCP_Socket::TCP_Socket(unsigned int other_Port, char *other_InetAddr)
-:myPort(0)
+  :myPort(0), connectType(1)
 {
     // set up remote address
-    bzero((char *) &other_Addr, sizeof(other_Addr));
-    other_Addr.sin_family      = AF_INET;
-    other_Addr.sin_addr.s_addr = inet_addr(other_InetAddr);
-    other_Addr.sin_port        = htons(other_Port);
+    bzero((char *) &other_Addr.addr_in, sizeof(other_Addr.addr_in));
+    other_Addr.addr_in.sin_family      = AF_INET;
+    other_Addr.addr_in.sin_addr.s_addr = inet_addr(other_InetAddr);
+    other_Addr.addr_in.sin_port        = htons(other_Port);
 
-    // set up my_Addr 
-    bzero((char *) &my_Addr, sizeof(my_Addr));    
-    my_Addr.sin_family = AF_INET;
-    my_Addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    my_Addr.sin_port = htons(0);
-    addrLength = sizeof(my_Addr);
+    // set up my_Addr.addr_in 
+    bzero((char *) &my_Addr.addr_in, sizeof(my_Addr.addr_in));    
+    my_Addr.addr_in.sin_family = AF_INET;
+    my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
+    my_Addr.addr_in.sin_port = htons(0);
+    addrLength = sizeof(my_Addr.addr_in);
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -148,10 +139,10 @@ TCP_Socket::TCP_Socket(unsigned int other_Port, char *other_InetAddr)
     }
 
     // bind local address to it
-    if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
+    if (bind(sockfd, (struct sockaddr *) &my_Addr.addr_in,sizeof(my_Addr.addr_in)) < 0) {
 	opserr << "TCP_Socket::TCP_Socket - could not bind local address\n";
     }
-    myPort = ntohs(my_Addr.sin_port);    
+    myPort = ntohs(my_Addr.addr_in.sin_port);    
 }    
 
 
@@ -160,93 +151,70 @@ TCP_Socket::TCP_Socket(unsigned int other_Port, char *other_InetAddr)
 
 TCP_Socket::~TCP_Socket()
 {
-    close(sockfd);
+  close(sockfd);
 }
 
 
 
 int 
-TCP_Socket::setUpActor(void) 
+TCP_Socket::setUpConnection(void)
 {
+  if (connectType == 1) {
+
     // now try to connect to socket with remote address.
-    if (connect(sockfd, (struct sockaddr *) &other_Addr, 
-		sizeof(other_Addr))< 0) {
-	
+    if (connect(sockfd, (struct sockaddr *) &other_Addr.addr_in, 
+		sizeof(other_Addr.addr_in))< 0) {
+      
 	opserr << "TCP_Socket::TCP_Socket - could not connect\n";
 	return -1;
     }
     // get my_address info
-    INET_getsockname(sockfd, &my_Addr, &addrLength);
-
-
-    // set socket so no delay    
-    /*
-    int optlen;
-    optlen = 1;
-    if ((setsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
-		    (char *) &optlen, sizeof(int))) < 0) { 
-	opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
-    }	  
-    */
-    /*
-    int flag=sizeof(int);
-    if ((getsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
-		    (char *) &optlen, &flag)) < 0) { 
-	opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
-    }	        
-    opserr << "TCP_Socket::TCP_Socket - " << optlen << " flag " << flag <<  endln;
-    */
+    getsockname(sockfd, &my_Addr.addr, &addrLength);
     
-    return 0;
+
+  } else {
     
-}
-
-
-int 
-TCP_Socket::setUpShadow(void) 
-{
     // wait for other process to contact me & set up connection
     int newsockfd;
     listen(sockfd, 1);    
-    newsockfd = accept(sockfd, (struct sockaddr *) &other_Addr, &addrLength);
-
+    newsockfd = accept(sockfd, (struct sockaddr *) &other_Addr.addr_in, &addrLength);
+    
     if (newsockfd < 0) {
-	opserr << "TCP_Socket::TCP_Socket - could not accept connection\n";
-	return -1;
+      opserr << "TCP_Socket::TCP_Socket - could not accept connection\n";
+      return -1;
     }    
     
     // close old socket & reset sockfd
     close(sockfd);  // we can close as we are not 
                     // going to wait for others to connect
     sockfd = newsockfd;
-
+    
     // get my_address info
-    INET_getsockname(sockfd, &my_Addr, &addrLength);
-    myPort = ntohs(my_Addr.sin_port);    
+    getsockname(sockfd, &my_Addr.addr, &addrLength);
+    myPort = ntohs(my_Addr.addr_in.sin_port);    
+  }    
 
-    /*
-    // set socket so no delay    
+  // set socket so no delay    
+  /*
     int optlen;
     optlen = 1;
     if ((setsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
-		    (char *) &optlen, sizeof(int))) < 0) { 
-	opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
+    (char *) &optlen, sizeof(int))) < 0) { 
+    opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
     }	  
-    */
-    /*
+  */
+  /*
     int flag=sizeof(int);
     if ((getsockopt(sockfd,IPPROTO_TCP, TCP_NODELAY, 
-		    (char *) &optlen, &flag)) < 0) { 
-	opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
+    (char *) &optlen, &flag)) < 0) { 
+    opserr << "TCP_Socket::TCP_Socket - could not set TCP_NODELAY\n";
     }	        
     opserr << "TCP_Socket::TCP_Socket - " << optlen << " flag " << flag <<  endln;
-    */
+  */
     
-    return 0;
+
+  return 0;
 }    
-
-
-
 
 int
 TCP_Socket::setNextAddress(const ChannelAddress &theAddress)
@@ -255,7 +223,7 @@ TCP_Socket::setNextAddress(const ChannelAddress &theAddress)
     if (theAddress.getType() == SOCKET_TYPE) {
 	    theSocketAddress = (SocketAddress *)(&theAddress);    
 	    // check address is the only address a TCP_socket can send to
-	    if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
+	    if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr, 
 		     theSocketAddress->addrLength) != 0) {
 		
 		opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
@@ -292,7 +260,7 @@ TCP_Socket::sendObj(int commitTag,
 	    return -1;	    
 	}		    
 	    
-	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
+	if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr, 
 		 theSocketAddress->addrLength) != 0) {
 
 	    opserr << "TCP_Socket::sendObj() - a TCP_Socket ";
@@ -321,7 +289,7 @@ TCP_Socket::recvObj(int commitTag,
 	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
-	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
+	if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr, 
 	     theSocketAddress->addrLength) != 0) {
 
 	    opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
@@ -334,7 +302,7 @@ TCP_Socket::recvObj(int commitTag,
 
 
 // void Recv(Message &):
-// 	Method to receive a message, also sets other_Addr to that of sender
+// 	Method to receive a message, also sets other_Addr.addr_in to that of sender
 
 int 
 TCP_Socket::recvMsg(int dbTag, int commitTag,
@@ -351,7 +319,7 @@ TCP_Socket::recvMsg(int dbTag, int commitTag,
 	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
-	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
+	if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
 	     theSocketAddress->addrLength) != 0) {
 
 	    opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
@@ -377,7 +345,7 @@ TCP_Socket::recvMsg(int dbTag, int commitTag,
 
 
 // void Send(Message &):
-// 	Method to send a message to an address given by other_Addr.
+// 	Method to send a message to an address given by other_Addr.addr_in.
 
 int 
 TCP_Socket::sendMsg(int dbTag, int commitTag,
@@ -394,7 +362,7 @@ TCP_Socket::sendMsg(int dbTag, int commitTag,
 	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
-	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
+	if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
 	     theSocketAddress->addrLength) != 0) {
 
 	    opserr << "TCP_Socket::recvMsg() - a TCP_Socket ";
@@ -437,7 +405,7 @@ TCP_Socket::recvMatrix(int dbTag, int commitTag,
 	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		    
-	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
+	if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
 	     theSocketAddress->addrLength) != 0) {
 
 	    opserr << "TCP_Socket::recvMatrix() - a TCP_Socket ";
@@ -463,7 +431,7 @@ TCP_Socket::recvMatrix(int dbTag, int commitTag,
 
 
 // void Send(Matrix &):
-// 	Method to send a Matrix to an address given by other_Addr.
+// 	Method to send a Matrix to an address given by other_Addr.addr_in.
 
 int 
 TCP_Socket::sendMatrix(int dbTag, int commitTag,
@@ -481,7 +449,7 @@ TCP_Socket::sendMatrix(int dbTag, int commitTag,
 	    return -1;	    
 	}		        SocketAddress *theSocketAddress = 0;
 
-	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
+	if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
 	     theSocketAddress->addrLength) != 0) {
 
 	    opserr << "TCP_Socket::recvMatrix() - a TCP_Socket ";
@@ -529,7 +497,7 @@ TCP_Socket::recvVector(int dbTag, int commitTag,
 	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
-	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
+	if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
 	     theSocketAddress->addrLength) != 0) {
 
 	    opserr << "TCP_Socket::recvVector() - a TCP_Socket ";
@@ -555,7 +523,7 @@ TCP_Socket::recvVector(int dbTag, int commitTag,
 
 
 // void Send(Vector &):
-// 	Method to send a Vector to an address given by other_Addr.
+// 	Method to send a Vector to an address given by other_Addr.addr_in.
 
 int 
 TCP_Socket::sendVector(int dbTag, int commitTag,
@@ -572,7 +540,7 @@ TCP_Socket::sendVector(int dbTag, int commitTag,
 	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
-	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
+	if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
 	     theSocketAddress->addrLength) != 0) {
 
 	    opserr << "TCP_Socket::recvVector() - a TCP_Socket ";
@@ -615,7 +583,7 @@ TCP_Socket::recvID(int dbTag, int commitTag,
 	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
-	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
+	if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
 	     theSocketAddress->addrLength) != 0) {
 
 	    opserr << "TCP_Socket::recvID() - a TCP_Socket ";
@@ -641,7 +609,7 @@ TCP_Socket::recvID(int dbTag, int commitTag,
 
 
 // void Send(ID &):
-// 	Method to send a ID to an address given by other_Addr.
+// 	Method to send a ID to an address given by other_Addr.addr_in.
 
 int 
 TCP_Socket::sendID(int dbTag, int commitTag,
@@ -658,7 +626,7 @@ TCP_Socket::sendID(int dbTag, int commitTag,
 	    opserr << " address given is not of type SocketAddress\n"; 
 	    return -1;	    
 	}		
-	if (bcmp((char *) &other_Addr, (char *) &theSocketAddress->addr, 
+	if (bcmp((char *) &other_Addr.addr_in, (char *) &theSocketAddress->address.addr_in, 
 	     theSocketAddress->addrLength) != 0) {
 
 	    opserr << "TCP_Socket::recvID() - a TCP_Socket ";

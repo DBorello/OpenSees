@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:39 $
+// $Revision: 1.3 $
+// $Date: 2003-10-15 00:31:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/UDP_Socket.cpp,v $
                                                                         
                                                                         
-// File: ~/actor/UDP_Socket.C
-//
 // Written: fmk 11/95
 // Revised:
 //
@@ -50,13 +48,13 @@ static void inttoa(unsigned int no, char *string, int *cnt);
 //	assigned by the OS from the available free port numbers.
 
 UDP_Socket::UDP_Socket() 
-:sockfd(0),shadow_inetAddr(0),shadow_port(0)
+  :sockfd(0), connectType(0), shadow_inetAddr(0), shadow_port(0) 
 {
     // set up my_Addr 
-    my_Addr.sin_family = AF_INET;
-    my_Addr.sin_addr.s_addr = htonl(INADDR_ANY); 
-    my_Addr.sin_port = htons(0);
-    addrLength = sizeof(my_Addr);
+    my_Addr.addr_in.sin_family = AF_INET;
+    my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY); 
+    my_Addr.addr_in.sin_port = htons(0);
+    addrLength = sizeof(my_Addr.addr_in);
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -64,12 +62,12 @@ UDP_Socket::UDP_Socket()
     }
     
     // bind local address to it
-    if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
+    if (bind(sockfd, (struct sockaddr *) &my_Addr.addr_in,sizeof(my_Addr.addr_in)) < 0) {
 	opserr << "UDP_Socket::UDP_Socket - could not bind local address\n";
     }    
     
-    INET_getsockname(sockfd, &my_Addr, &addrLength);
-    myPort = ntohs(my_Addr.sin_port);        
+    getsockname(sockfd, &my_Addr.addr, &addrLength);
+    myPort = ntohs(my_Addr.addr_in.sin_port);        
 }    
 
 
@@ -79,13 +77,13 @@ UDP_Socket::UDP_Socket()
 //	constructor to open a socket with my inet_addr and with a port number port.
 
 UDP_Socket::UDP_Socket(unsigned int port) 
-:sockfd(0),shadow_inetAddr(0),shadow_port(0)
+  :sockfd(0), connectType(0), shadow_inetAddr(0), shadow_port(0)
 {
-    // set up my_Addr 
-    my_Addr.sin_family = AF_INET;
-    my_Addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    my_Addr.sin_port = htons(port);
-    addrLength = sizeof(my_Addr);
+    // set up my_Addr.addr_in 
+    my_Addr.addr_in.sin_family = AF_INET;
+    my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
+    my_Addr.addr_in.sin_port = htons(port);
+    addrLength = sizeof(my_Addr.addr_in);
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -93,11 +91,11 @@ UDP_Socket::UDP_Socket(unsigned int port)
     }
     
     // bind local address to it
-    if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
+    if (bind(sockfd, (struct sockaddr *) &my_Addr.addr_in,sizeof(my_Addr.addr_in)) < 0) {
 	opserr << "UDP_Socket::UDP_Socket - could not bind local address\n";
     }    
-    INET_getsockname(sockfd, &my_Addr, &addrLength);    
-    myPort = ntohs(my_Addr.sin_port);        
+    getsockname(sockfd, &my_Addr.addr, &addrLength);    
+    myPort = ntohs(my_Addr.addr_in.sin_port);        
 }    
 
 
@@ -110,13 +108,13 @@ UDP_Socket::UDP_Socket(unsigned int port)
 // 	a shadow object to find address of the actor it initiatites.
 
 UDP_Socket::UDP_Socket(unsigned int other_Port, char *other_InetAddr) 
-:sockfd(0),shadow_inetAddr(other_InetAddr),shadow_port(other_Port)
+:sockfd(0), connectType(1), shadow_inetAddr(other_InetAddr), shadow_port(other_Port)
 {
-    // set up my_Addr 
-    my_Addr.sin_family = AF_INET;
-    my_Addr.sin_addr.s_addr = htonl(INADDR_ANY); 
-    my_Addr.sin_port = htons(0);
-    addrLength = sizeof(my_Addr);
+    // set up my_Addr.addr_in 
+    my_Addr.addr_in.sin_family = AF_INET;
+    my_Addr.addr_in.sin_addr.s_addr = htonl(INADDR_ANY); 
+    my_Addr.addr_in.sin_port = htons(0);
+    addrLength = sizeof(my_Addr.addr_in);
     
     // open a socket
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -124,11 +122,11 @@ UDP_Socket::UDP_Socket(unsigned int other_Port, char *other_InetAddr)
     }
     
     // bind local address to it
-    if (bind(sockfd, (struct sockaddr *) &my_Addr,sizeof(my_Addr)) < 0) {
+    if (bind(sockfd, (struct sockaddr *) &my_Addr.addr_in,sizeof(my_Addr.addr_in)) < 0) {
 	opserr << "UDP_Socket::UDP_Socket - could not bind local address\n";
     }    
-    INET_getsockname(sockfd, &my_Addr, &addrLength);    
-    myPort = ntohs(my_Addr.sin_port);        
+    getsockname(sockfd, &my_Addr.addr, &addrLength);    
+    myPort = ntohs(my_Addr.addr_in.sin_port);        
 }    
 
     
@@ -144,37 +142,35 @@ UDP_Socket::~UDP_Socket()
 
 
 int 
-UDP_Socket::setUpActor(void) 
+UDP_Socket::setUpConnection(void)
 {
+  if (connectType == 1) {
     if (shadow_inetAddr == 0) {
 	opserr << "FATAL::UDP_Socket::setUpActor() -";
 	opserr << "incorrect choice of UDP_Socket constructor for actor.\n";
 	exit(-1);
     }
-	    
+
     // send a message to address.
-    SocketAddress other(shadow_inetAddr,shadow_port);
+    SocketAddress other(shadow_inetAddr, shadow_port);
     char data = 'a';
-    INET_sendto(sockfd,&data,1,0,&other.addr,other.addrLength);    
-    bcopy((char *) &other.addr, (char *) &last_Addr, addrLength);
+    sendto(sockfd, &data, 1, 0, &other.address.addr, other.addrLength);    
+    bcopy((char *) &other.address.addr, (char *) &last_Addr, addrLength);
     
     // receive a message from other
-    INET_recvfrom(sockfd,&data,1,0,&last_Addr,&addrLength);    
-    return 0;
-}
+    recvfrom(sockfd, &data, 1, 0, &last_Addr.addr, &addrLength);    
 
+  } else {
 
-int
-UDP_Socket::setUpShadow(void) 
-{
     // wait for remote process to send message;
     char data = 'b';
-    INET_recvfrom(sockfd,&data,1,0,&last_Addr,&addrLength);    
+    recvfrom(sockfd, &data, 1, 0, &last_Addr.addr, &addrLength);    
     
     // then send a message back
-    INET_sendto(sockfd,&data,1,0,&last_Addr,addrLength);        
+    sendto(sockfd, &data, 1, 0, &last_Addr.addr, addrLength);        
+  }
 
-    return 0;    
+  return 0;    
 }    
 
 
@@ -186,7 +182,7 @@ UDP_Socket::setNextAddress(const ChannelAddress &theAddress)
 	theSocketAddress = (SocketAddress *)(&theAddress);    
 	// set up the address of the Socket to which data will be sent
 	
-	bcopy((char *) &theSocketAddress->addr, (char *) &last_Addr, 
+	bcopy((char *) &theSocketAddress->address.addr, (char *) &last_Addr, 
 	      theSocketAddress->addrLength);
 	addrLength = theSocketAddress->addrLength;	
 
@@ -213,7 +209,7 @@ UDP_Socket::sendObj(int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) {
 	    theSocketAddress = (SocketAddress *)theAddress;
 	
-	    bcopy((char *) &theSocketAddress->addr, (char *) &last_Addr, 
+	    bcopy((char *) &theSocketAddress->address.addr, (char *) &last_Addr.addr, 
 		  theSocketAddress->addrLength);
 	    addrLength = theSocketAddress->addrLength;	
 	}
@@ -248,7 +244,7 @@ UDP_Socket::recvObj(int commitTag,
 	if (theAddress->getType() == SOCKET_TYPE) {
 	    theSocketAddress = (SocketAddress *)theAddress;	
 
-	    if (bcmp((char *) &theSocketAddress->addr, (char *) &last_Addr, 
+	    if (bcmp((char *) &theSocketAddress->address.addr, (char *) &last_Addr.addr, 
 		     theSocketAddress->addrLength) != 0) {
 	    
 		opserr << "UDP_Socket::recvObj() - a UDP_Socket ";
@@ -284,15 +280,15 @@ UDP_Socket::recvMsg(int dbTag, int commitTag, Message &msg, ChannelAddress *theA
 
     while (size > 0) {
 	if (size <= MAX_UDP_DATAGRAM) {
-	    INET_recvfrom(sockfd,gMsg,size,0,&last_Addr,&addrLength);
+	    recvfrom(sockfd, gMsg, size, 0, &last_Addr.addr, &addrLength);
 	    size = 0;
 	}
 	else {
-	    INET_recvfrom(sockfd,gMsg,MAX_UDP_DATAGRAM,0,
-			  &last_Addr,&addrLength);
+	  recvfrom(sockfd, gMsg, MAX_UDP_DATAGRAM, 0, &last_Addr.addr, &addrLength);
+		   
 	    
-	    gMsg += MAX_UDP_DATAGRAM;
-	    size -= MAX_UDP_DATAGRAM;
+	  gMsg += MAX_UDP_DATAGRAM;
+	  size -= MAX_UDP_DATAGRAM;
 	}
     }
 
@@ -303,7 +299,7 @@ UDP_Socket::recvMsg(int dbTag, int commitTag, Message &msg, ChannelAddress *theA
 	if (theAddress->getType() == SOCKET_TYPE) {
 	    theSocketAddress = (SocketAddress *)theAddress;	
 	    
-	    if (bcmp((char *) &theSocketAddress->addr, (char *) &last_Addr, 
+	    if (bcmp((char *) &theSocketAddress->address.addr, (char *) &last_Addr.addr, 
 		     theSocketAddress->addrLength) != 0) {
 		
 		opserr << "UDP_Socket::recvMsg() - a UDP_Socket ";
@@ -333,7 +329,7 @@ UDP_Socket::sendMsg(int dbTag, int commitTag, const Message &msg, ChannelAddress
 	if (theAddress->getType() == SOCKET_TYPE) {
 	    theSocketAddress = (SocketAddress *)theAddress;	
 	
-	    bcopy((char *) &theSocketAddress->addr, (char *) &last_Addr, 
+	    bcopy((char *) &theSocketAddress->address.addr, (char *) &last_Addr.addr, 
 		  theSocketAddress->addrLength);
 	    addrLength = theSocketAddress->addrLength;	
 	}
@@ -353,14 +349,13 @@ UDP_Socket::sendMsg(int dbTag, int commitTag, const Message &msg, ChannelAddress
 
     while (size > 0) {
 	if (size <= MAX_UDP_DATAGRAM) {
-	    INET_sendto(sockfd,gMsg,size,0,&last_Addr,addrLength);
+	    sendto(sockfd, gMsg, size, 0, &last_Addr.addr, addrLength);
 	    size = 0;
 	}
-	else {
-	    INET_sendto(sockfd,gMsg,MAX_UDP_DATAGRAM,0,
-			&last_Addr,addrLength);
-	    gMsg += MAX_UDP_DATAGRAM;
-	    size -= MAX_UDP_DATAGRAM;
+	else {	
+	  sendto(sockfd, gMsg, MAX_UDP_DATAGRAM, 0, &last_Addr.addr, addrLength);
+	  gMsg += MAX_UDP_DATAGRAM;
+	  size -= MAX_UDP_DATAGRAM;
 	}
     }
     return 0;
@@ -384,15 +379,13 @@ UDP_Socket::recvMatrix(int dbTag, int commitTag, Matrix &theMatrix, ChannelAddre
 
     while (size > 0) {
 	if (size <= MAX_UDP_DATAGRAM) {
-	    INET_recvfrom(sockfd,gMsg,size,0,&last_Addr,&addrLength);
+	    recvfrom(sockfd, gMsg, size, 0, &last_Addr.addr, &addrLength);
 	    size = 0;
 	}
 	else {
-	    INET_recvfrom(sockfd,gMsg,MAX_UDP_DATAGRAM,0,
-			  &last_Addr,&addrLength);
-	    
-	    gMsg += MAX_UDP_DATAGRAM;
-	    size -= MAX_UDP_DATAGRAM;
+	  recvfrom(sockfd, gMsg, MAX_UDP_DATAGRAM, 0, &last_Addr.addr, &addrLength);
+	  gMsg += MAX_UDP_DATAGRAM;
+	  size -= MAX_UDP_DATAGRAM;
 	}
     }
 
@@ -403,7 +396,7 @@ UDP_Socket::recvMatrix(int dbTag, int commitTag, Matrix &theMatrix, ChannelAddre
 	if (theAddress->getType() == SOCKET_TYPE) {
 	    theSocketAddress = (SocketAddress *)theAddress;	
 	    
-	    if (bcmp((char *) &theSocketAddress->addr, (char *) &last_Addr, 
+	    if (bcmp((char *) &theSocketAddress->address.addr, (char *) &last_Addr.addr, 
 		     theSocketAddress->addrLength) != 0) {
 		
 		opserr << "UDP_Socket::recvMsg() - a UDP_Socket ";
@@ -435,7 +428,7 @@ UDP_Socket::sendMatrix(int dbTag, int commitTag, const Matrix &theMatrix, Channe
 	if (theAddress->getType() == SOCKET_TYPE) {
 	    theSocketAddress = (SocketAddress *)theAddress;	
 	
-	    bcopy((char *) &theSocketAddress->addr, (char *) &last_Addr, 
+	    bcopy((char *) &theSocketAddress->address.addr, (char *) &last_Addr.addr, 
 		  theSocketAddress->addrLength);
 	    addrLength = theSocketAddress->addrLength;	
 	}
@@ -455,12 +448,12 @@ UDP_Socket::sendMatrix(int dbTag, int commitTag, const Matrix &theMatrix, Channe
 
     while (size > 0) {
 	if (size <= MAX_UDP_DATAGRAM) {
-	    INET_sendto(sockfd,gMsg,size,0,&last_Addr,addrLength);
+	    sendto(sockfd, gMsg, size, 0, &last_Addr.addr, addrLength);
 	    size = 0;
 	}
 	else {
-	    INET_sendto(sockfd,gMsg,MAX_UDP_DATAGRAM,0,
-			&last_Addr,addrLength);
+	    sendto(sockfd, gMsg, MAX_UDP_DATAGRAM, 0, &last_Addr.addr, addrLength);
+			
 	    gMsg += MAX_UDP_DATAGRAM;
 	    size -= MAX_UDP_DATAGRAM;
 	}
@@ -486,12 +479,11 @@ UDP_Socket::recvVector(int dbTag, int commitTag, Vector &theVector, ChannelAddre
 
     while (size > 0) {
 	if (size <= MAX_UDP_DATAGRAM) {
-	    INET_recvfrom(sockfd,gMsg,size,0,&last_Addr,&addrLength);
+	    recvfrom(sockfd, gMsg, size, 0, &last_Addr.addr, &addrLength);
 	    size = 0;
 	}
 	else {
-	    INET_recvfrom(sockfd,gMsg,MAX_UDP_DATAGRAM,0,
-			  &last_Addr,&addrLength);
+	    recvfrom(sockfd, gMsg, MAX_UDP_DATAGRAM, 0, &last_Addr.addr, &addrLength);
 	    
 	    gMsg += MAX_UDP_DATAGRAM;
 	    size -= MAX_UDP_DATAGRAM;
@@ -505,7 +497,7 @@ UDP_Socket::recvVector(int dbTag, int commitTag, Vector &theVector, ChannelAddre
 	if (theAddress->getType() == SOCKET_TYPE) {
 	    theSocketAddress = (SocketAddress *)theAddress;	
 	    
-	    if (bcmp((char *) &theSocketAddress->addr, (char *) &last_Addr, 
+	    if (bcmp((char *) &theSocketAddress->address.addr, (char *) &last_Addr.addr, 
 		     theSocketAddress->addrLength) != 0) {
 		
 		opserr << "UDP_Socket::recvMsg() - a UDP_Socket ";
@@ -536,7 +528,7 @@ UDP_Socket::sendVector(int dbTag, int commitTag, const Vector &theVector, Channe
 	if (theAddress->getType() == SOCKET_TYPE) {
 	    theSocketAddress = (SocketAddress *)theAddress;	
 	
-	    bcopy((char *) &theSocketAddress->addr, (char *) &last_Addr, 
+	    bcopy((char *) &theSocketAddress->address.addr, (char *) &last_Addr.addr, 
 		  theSocketAddress->addrLength);
 	    addrLength = theSocketAddress->addrLength;	
 	}
@@ -556,12 +548,11 @@ UDP_Socket::sendVector(int dbTag, int commitTag, const Vector &theVector, Channe
 
     while (size > 0) {
 	if (size <= MAX_UDP_DATAGRAM) {
-	    INET_sendto(sockfd,gMsg,size,0,&last_Addr,addrLength);
+	    sendto(sockfd, gMsg, size, 0, &last_Addr.addr, addrLength);
 	    size = 0;
 	}
 	else {
-	    INET_sendto(sockfd,gMsg,MAX_UDP_DATAGRAM,0,
-			&last_Addr,addrLength);
+	    sendto(sockfd, gMsg, MAX_UDP_DATAGRAM, 0, &last_Addr.addr, addrLength);
 	    gMsg += MAX_UDP_DATAGRAM;
 	    size -= MAX_UDP_DATAGRAM;
 	}
@@ -587,12 +578,12 @@ UDP_Socket::recvID(int dbTag, int commitTag, ID &theID, ChannelAddress *theAddre
 
     while (size > 0) {
 	if (size <= MAX_UDP_DATAGRAM) {
-	    INET_recvfrom(sockfd,gMsg,size,0,&last_Addr,&addrLength);
+	    recvfrom(sockfd,gMsg,size,0,&last_Addr.addr,&addrLength);
 	    size = 0;
 	}
 	else {
-	    INET_recvfrom(sockfd,gMsg,MAX_UDP_DATAGRAM,0,
-			  &last_Addr,&addrLength);
+	    recvfrom(sockfd,gMsg,MAX_UDP_DATAGRAM,0, &last_Addr.addr,&addrLength);
+			  
 	    
 	    gMsg += MAX_UDP_DATAGRAM;
 	    size -= MAX_UDP_DATAGRAM;
@@ -606,7 +597,7 @@ UDP_Socket::recvID(int dbTag, int commitTag, ID &theID, ChannelAddress *theAddre
 	if (theAddress->getType() == SOCKET_TYPE) {
 	    theSocketAddress = (SocketAddress *)theAddress;	
 	    
-	    if (bcmp((char *) &theSocketAddress->addr, (char *) &last_Addr, 
+	    if (bcmp((char *) &theSocketAddress->address.addr, (char *) &last_Addr.addr, 
 		     theSocketAddress->addrLength) != 0) {
 		
 		opserr << "UDP_Socket::recvMsg() - a UDP_Socket ";
@@ -636,7 +627,7 @@ UDP_Socket::sendID(int dbTag, int commitTag, const ID &theID, ChannelAddress *th
 	if (theAddress->getType() == SOCKET_TYPE) {
 	    theSocketAddress = (SocketAddress *)theAddress;	
 	
-	    bcopy((char *) &theSocketAddress->addr, (char *) &last_Addr, 
+	    bcopy((char *) &theSocketAddress->address.addr, (char *) &last_Addr.addr, 
 		  theSocketAddress->addrLength);
 	    addrLength = theSocketAddress->addrLength;	
 	}
@@ -656,12 +647,12 @@ UDP_Socket::sendID(int dbTag, int commitTag, const ID &theID, ChannelAddress *th
 
     while (size > 0) {
 	if (size <= MAX_UDP_DATAGRAM) {
-	    INET_sendto(sockfd,gMsg,size,0,&last_Addr,addrLength);
+	    sendto(sockfd,gMsg,size,0,&last_Addr.addr,addrLength);
 	    size = 0;
 	}
 	else {
-	    INET_sendto(sockfd,gMsg,MAX_UDP_DATAGRAM,0,
-			&last_Addr,addrLength);
+	    sendto(sockfd,gMsg,MAX_UDP_DATAGRAM,0,
+			&last_Addr.addr, addrLength);
 	    gMsg += MAX_UDP_DATAGRAM;
 	    size -= MAX_UDP_DATAGRAM;
 	}
