@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.9 $
-// $Date: 2005-02-22 20:49:00 $
+// $Revision: 1.10 $
+// $Date: 2005-03-28 22:09:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -110,6 +110,7 @@ DriftRecorder::~DriftRecorder()
 int 
 DriftRecorder::record(int commitTag, double timeStamp)
 {
+
   if (theDomain == 0 || ndI == 0 || ndJ == 0) {
     return 0;
   }
@@ -125,18 +126,23 @@ DriftRecorder::record(int commitTag, double timeStamp)
       return -1;
     }
 
+  if (numNodes == 0 || data == 0)
+    return 0;
+
   (*data)(0) = theDomain->getCurrentTime();
-  
+
   for (int i=0; i<numNodes; i++) {
-    Node *nodeI = theNodes[0];
-    Node *nodeJ = theNodes[1];
+    Node *nodeI = theNodes[2*i];
+    Node *nodeJ = theNodes[2*i+1];
+
     if ((*oneOverL)(i) != 0.0) {
        const Vector &dispI = nodeI->getTrialDisp();
-      const Vector &dispJ = nodeJ->getTrialDisp();
+       const Vector &dispJ = nodeJ->getTrialDisp();
       
-      double dx = dispJ(dof)-dispI(dof);
-      
+       double dx = dispJ(dof)-dispI(dof);
+       
        (*data)(i+1) =  dx* (*oneOverL)(i);
+       
     }
     else
       (*data)(i+1) = 0.0;
@@ -261,6 +267,9 @@ DriftRecorder::recvSelf(int commitTag, Channel &theChannel,
 int
 DriftRecorder::initialize(void)
 {
+
+  initializationDone = true; // still might fail but don't want back in again
+
   //
   // clean up old memory
   //
@@ -289,6 +298,12 @@ DriftRecorder::initialize(void)
 
   int ndIsize = ndI->Size();
   int ndJsize = ndJ->Size();
+
+  if (ndIsize == 0) {
+    opserr << "DriftRecorder::initialize() - no nodal id's set\n";
+    return -1;
+  }
+
   if (ndIsize != ndJsize) {
     opserr << "DriftRecorder::initialize() - error node arrays differ in size\n";
     return -2;
@@ -297,6 +312,9 @@ DriftRecorder::initialize(void)
   //
   // lets loop through & determine number of valid nodes
   //
+
+
+  numNodes = 0;
 
   for (int i=0; i<ndIsize; i++) {
     int ni = (*ndI)(i);
@@ -315,8 +333,10 @@ DriftRecorder::initialize(void)
     }  
   }
 
-  if (numNodes == 0)
+  if (numNodes == 0) {
+    opserr << "DriftRecorder::initialize() - no valid nodes or perpendicular direction\n";
     return 0;
+  }
 
   //
   // allocate memory
@@ -355,6 +375,7 @@ DriftRecorder::initialize(void)
 	 theNodes[counterJ] = nodeJ;
 	 counterI+=2;
 	 counterJ+=2;
+	 counter++;
        }  
     }
   }
@@ -409,6 +430,5 @@ DriftRecorder::initialize(void)
   // mark as having been done & return
   //
 
-  initializationDone = true;
   return 0;
 }
