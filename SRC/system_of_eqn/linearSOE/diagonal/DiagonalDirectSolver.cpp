@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2005-01-27 22:22:50 $
+// $Revision: 1.2 $
+// $Date: 2005-02-09 19:58:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/diagonal/DiagonalDirectSolver.cpp,v $
 
 // Written: fmk 
@@ -60,6 +60,7 @@ DiagonalDirectSolver::setSize(void)
     opserr << " No system has been set!\n";
     return -1;
   }
+  return 0;
 }
 
 
@@ -150,7 +151,7 @@ DiagonalDirectSolver::sendSelf(int cTag,
 {
   static Vector data(1);
   data(0) = minDiagTol;
-  theChannel.sendVector(0, cTag, data);
+  return theChannel.sendVector(0, cTag, data);
 }
 
 
@@ -163,6 +164,7 @@ DiagonalDirectSolver::recvSelf(int cTag,
   theChannel.recvVector(0, cTag, data);
 
   minDiagTol = data(0);
+  return 0;
 }
 
 
