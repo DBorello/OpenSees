@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-10-15 16:49:02 $
+// $Revision: 1.4 $
+// $Date: 2003-10-16 00:06:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/BerkeleyDbDatastore.cpp,v $
 
 #include <BerkeleyDbDatastore.h>
@@ -114,11 +114,21 @@ BerkeleyDbDatastore::BerkeleyDbDatastore(const char *projectName,
   }
 
   // open the database files .. use DB_UNKNOWN first to see if database already exists
+#ifdef _BerkeleyDB41orGreater
+
   if ((result = dbMatrix->open(dbMatrix, NULL, "Matrices.db", NULL, type, 
 			       DB_CREATE | DB_EXCL, 0664)) != 0) {
     //type = DB_UNKNOWN;
     if ((result = dbMatrix->open(dbMatrix, NULL, "Matrices.db", NULL, type, 
 				 DB_CREATE, 0664)) != 0) {
+#else
+  if ((result = dbMatrix->open(dbMatrix, "Matrices.db", NULL, type, 
+			       DB_CREATE | DB_EXCL, 0664)) != 0) {
+    //type = DB_UNKNOWN;
+    if ((result = dbMatrix->open(dbMatrix, "Matrices.db", NULL, type, 
+				 DB_CREATE, 0664)) != 0) {
+#endif
+
       opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to open dbMatrix\n";
       opserr << db_strerror(result) << endln;
       connection = false;     
@@ -126,11 +136,24 @@ BerkeleyDbDatastore::BerkeleyDbDatastore(const char *projectName,
     } 
   }
 
+
+#ifdef _BerkeleyDB41orGreater
+
   if ((result = dbVector->open(dbVector, NULL, "Vectors.db", NULL, type, 
 			       DB_CREATE | DB_EXCL, 0664)) != 0) {
     //type = DB_UNKNOWN;
     if ((result = dbVector->open(dbVector, NULL, "Vectors.db", NULL, type, 
 				 DB_CREATE, 0664)) != 0) {
+
+#else
+
+  if ((result = dbVector->open(dbVector, "Vectors.db", NULL, type, 
+			       DB_CREATE | DB_EXCL, 0664)) != 0) {
+    //type = DB_UNKNOWN;
+    if ((result = dbVector->open(dbVector, "Vectors.db", NULL, type, 
+				 DB_CREATE, 0664)) != 0) {
+
+#endif
       opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to open dbVector\n";
       opserr << db_strerror(result) << endln;
       connection = false;     
@@ -138,14 +161,20 @@ BerkeleyDbDatastore::BerkeleyDbDatastore(const char *projectName,
     } 
   }
 
-  opserr << "ID - ZERO\n";
+#ifdef _BerkeleyDB41orGreater
   if ((result = dbID->open(dbID, NULL, "IDs.db", NULL, type, 
 			       DB_CREATE | DB_EXCL, 0664)) != 0) {
-    opserr << "ID - ONE\n";
     type = DB_UNKNOWN;
     if ((result = dbID->open(dbID, NULL, "IDs.db", NULL, type, 
 			     0, 0664)) != 0) {
-      opserr << "ID - TWO\n";
+#else
+  if ((result = dbID->open(dbID, "IDs.db", NULL, type, 
+			       DB_CREATE | DB_EXCL, 0664)) != 0) {
+    type = DB_UNKNOWN;
+    if ((result = dbID->open(dbID, "IDs.db", NULL, type, 
+			     0, 0664)) != 0) {
+#endif
+
       opserr << "BerkeleyDbDatastore::BerkeleyDbDatastore - failed to open dbID\n";
       opserr << db_strerror(result) << endln;
       connection = false;     
