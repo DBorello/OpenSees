@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2003-11-25 23:49:18 $
+// $Revision: 1.35 $
+// $Date: 2004-07-22 18:34:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
 // Written: fmk 
@@ -205,6 +205,24 @@ extern int
 TclModelBuilder_addFourNodeQuadUP(ClientData, Tcl_Interp *, int, TCL_Char **,
 				Domain*, TclModelBuilder *);
 
+// Zhaohui Yang
+extern int
+TclModelBuilder_addBrickUP(ClientData, Tcl_Interp *, int, TCL_Char **,
+				Domain*, TclModelBuilder *);
+
+// Zhaohui Yang
+extern int
+TclModelBuilder_addNineFourNodeQuadUP(ClientData, Tcl_Interp *, int, TCL_Char **,
+				Domain*, TclModelBuilder *);
+// Jinchi Lu
+extern int
+TclModelBuilder_addTwentyEightNodeBrickUP(ClientData, Tcl_Interp *, int, TCL_Char **,
+				Domain*, TclModelBuilder *);
+// Jinchi Lu
+extern int
+TclModelBuilder_addTwentyNodeBrick(ClientData, Tcl_Interp *, int, TCL_Char **,
+				Domain*, TclModelBuilder *);
+
 // Boris Jeremic and Zhao Cheng
 extern int
 TclModelBuilder_addTLFD20nBrick(ClientData, Tcl_Interp *, int, TCL_Char **,
@@ -284,6 +302,22 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     return result;
   } else if (strcmp(argv[1],"quadUP") == 0) {
           int result = TclModelBuilder_addFourNodeQuadUP(clientData, interp, argc, argv,
+						       theTclDomain, theTclBuilder);
+	  return result;
+  } else if (strcmp(argv[1],"brickUP") == 0) {
+          int result = TclModelBuilder_addBrickUP(clientData, interp, argc, argv,
+						       theTclDomain, theTclBuilder);
+	  return result;
+  } else if (strcmp(argv[1],"9_4_QuadUP") == 0) {
+          int result = TclModelBuilder_addNineFourNodeQuadUP(clientData, interp, argc, argv,
+						       theTclDomain, theTclBuilder);
+	  return result;
+  } else if (strcmp(argv[1],"20_8_BrickUP") == 0) {
+          int result = TclModelBuilder_addTwentyEightNodeBrickUP(clientData, interp, argc, argv,
+						       theTclDomain, theTclBuilder);
+	  return result;
+  } else if (strcmp(argv[1],"20NodeBrick") == 0) {
+          int result = TclModelBuilder_addTwentyNodeBrick(clientData, interp, argc, argv,
 						       theTclDomain, theTclBuilder);
 	  return result;
   } else if ((strcmp(argv[1],"shell") == 0) || (strcmp(argv[1],"shellMITC4") == 0) ||
