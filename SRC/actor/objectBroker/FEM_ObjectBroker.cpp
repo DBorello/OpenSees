@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2003-05-22 23:29:43 $
+// $Revision: 1.22 $
+// $Date: 2003-08-29 07:37:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
-// File: ~/actor/broker/FEM_ObjectBroker.C
-//
 // Written: fmk
-// Created: 10/96
 // Revision: A
 //
 // Purpose: This file contains the class definition for FEM_ObjectBroker.
@@ -38,6 +35,9 @@
 
 #include <FEM_ObjectBroker.h>
 
+// ActorTypes
+#include <ActorSubdomain.h>
+
 // Convergence tests
 #include <CTestNormUnbalance.h>
 #include <CTestNormDispIncr.h>
@@ -47,6 +47,7 @@
 #include <RCM.h>
 #include <MyRCM.h>
 #include <SimpleNumberer.h>
+
 
 // uniaxial material model header files
 #include <ElasticMaterial.h>
@@ -115,6 +116,7 @@
 #include <J2ThreeDimensional.h>
 #include <PlaneStressMaterial.h>
 #include <PlateFiberMaterial.h>
+#include <FeapMaterial03.h>
 
 #include <FluidSolidPorousMaterial.h>
 #include <PressureDependMultiYield.h>
@@ -165,6 +167,14 @@
 #include <CorotCrdTransf2d.h>
 #include <CorotCrdTransf3d.h>
 
+#include <HingeMidpointBeamIntegration2d.h>
+#include <HingeMidpointBeamIntegration3d.h>
+#include <HingeRadauBeamIntegration2d.h>
+#include <HingeRadauBeamIntegration3d.h>
+#include <HingeRadauTwoBeamIntegration2d.h>
+#include <HingeRadauTwoBeamIntegration3d.h>
+#include <LobattoBeamIntegration.h>
+
 // node header files
 #include <Node.h>
 
@@ -197,6 +207,8 @@
 // constraint handler header files
 #include <ConstraintHandler.h>
 #include <PlainHandler.h>
+#include <PenaltyConstraintHandler.h>
+#include <LagrangeConstraintHandler.h>
 
 // dof numberer header files
 #include <DOF_Numberer.h>   
@@ -226,15 +238,28 @@
 #include <FullGenLinSOE.h>
 #include <FullGenLinLapackSolver.h>
 #include <BandGenLinSOE.h>
+
 #include <BandGenLinLapackSolver.h>
 #include <BandSPDLinSOE.h>
 #include <BandSPDLinLapackSolver.h>
 #include <ProfileSPDLinSOE.h>
 #include <ProfileSPDLinDirectSolver.h>
 #include <ProfileSPDLinSubstrSolver.h>
+#include <SparseGenColLinSOE.h>
+#include <SuperLU.h>
 
+#ifdef _PARALLEL_PROCESSING
+#include <DistributedBandSPDLinSOE.h>
+#include <DistributedProfileSPDLinSOE.h>
+#include <DistributedSparseGenColLinSOE.h>
+#include <DistributedBandGenLinSOE.h>
+#include <DistributedSuperLU.h>
+#include <ParallelNumberer.h>
+#endif
 
 #include <DomainDecompositionAnalysis.h>
+#include <StaticDomainDecompositionAnalysis.h>
+#include <TransientDomainDecompositionAnalysis.h>
 
 // load patterns
 #include <LoadPattern.h>
@@ -264,6 +289,22 @@ FEM_ObjectBroker::~FEM_ObjectBroker()
 
 }
 
+
+Actor *
+FEM_ObjectBroker::getNewActor(int classTag, Channel *theChannel)
+{
+  switch(classTag) {
+
+  case ACTOR_TAGS_SUBDOMAIN:  
+    return new ActorSubdomain(*theChannel, *this);
+
+  default:
+    opserr << "FEM_ObjectBroker::getNewActor - ";
+    opserr << " - no ActorType type exists for class tag ";
+    opserr << classTag << endln;
+    return 0;
+  }
+}
 
 
 PartitionedModelBuilder          *
@@ -530,7 +571,7 @@ FEM_ObjectBroker::getNewCrdTransf2d(int classTag)
 		return new CorotCrdTransf2d();
 #endif
 	default:
-		opserr << "FEM_ObjectBroker::getPtrNewCrdTransf2d - ";
+		opserr << "FEM_ObjectBroker::getCrdTransf2d - ";
 	    opserr << " - no CrdTransf2d type exists for class tag ";
 	    opserr << classTag << endln;
 	    return 0;
@@ -551,13 +592,47 @@ FEM_ObjectBroker::getNewCrdTransf3d(int classTag)
 		return new CorotCrdTransf3d();
 #endif
 	default:
-		opserr << "FEM_ObjectBroker::getPtrNewCrdTransf3d - ";
+		opserr << "FEM_ObjectBroker::getCrdTransf3d - ";
 	    opserr << " - no CrdTransf3d type exists for class tag ";
 	    opserr << classTag << endln;
 	    return 0;
 	}
 
 }
+
+BeamIntegration *
+FEM_ObjectBroker::getNewBeamIntegration(int classTag)
+{
+  switch(classTag) {
+    case BEAM_INTEGRATION_TAG_Lobatto:        
+      return new LobattoBeamIntegration();
+
+    case BEAM_INTEGRATION_TAG_HingeMidpoint2d:
+      return new HingeMidpointBeamIntegration2d();
+
+    case BEAM_INTEGRATION_TAG_HingeRadau2d:
+      return new HingeRadauBeamIntegration2d();
+
+    case BEAM_INTEGRATION_TAG_HingeRadauTwo2d:
+      return new HingeRadauTwoBeamIntegration2d();
+
+    case BEAM_INTEGRATION_TAG_HingeMidpoint3d:
+      return new HingeMidpointBeamIntegration3d();
+
+    case BEAM_INTEGRATION_TAG_HingeRadau3d:   
+      return new HingeRadauBeamIntegration3d();
+
+    case BEAM_INTEGRATION_TAG_HingeRadauTwo3d:   
+      return new HingeRadauTwoBeamIntegration3d();
+
+    default:
+      opserr << "FEM_ObjectBroker::getBeamIntegration - ";
+      opserr << " - no BeamIntegration type exists for class tag ";
+      opserr << classTag << endln;
+      return 0;
+  }
+}
+
 
 UniaxialMaterial *
 FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
@@ -665,7 +740,7 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
 	  return new MinMaxMaterial();
 
 	default:
-	     opserr << "FEM_ObjectBroker::getPtrNewUniaxialMaterial - ";
+	     opserr << "FEM_ObjectBroker::getNewUniaxialMaterial - ";
 	     opserr << " - no UniaxialMaterial type exists for class tag ";
 	     opserr << classTag << endln;
 	     return 0;
@@ -770,6 +845,9 @@ FEM_ObjectBroker::getNewNDMaterial(int classTag)
 
   case ND_TAG_PressureIndependMultiYield:
     return new PressureIndependMultiYield();
+
+  case ND_TAG_FeapMaterial03:
+    return new FeapMaterial03();
     
   default:
     opserr << "FEM_ObjectBroker::getNewNDMaterial - ";
@@ -812,7 +890,7 @@ FEM_ObjectBroker::getNewConvergenceTest(int classTag)
 	     	     	     
 	     
 	default:
-	     opserr << "FEM_ObjectBroker::getPtrNewConvergenceTest - ";
+	     opserr << "FEM_ObjectBroker::getNewConvergenceTest - ";
 	     opserr << " - no ConvergenceTest type exists for class tag ";
 	     opserr << classTag << endln;
 	     return 0;
@@ -974,6 +1052,11 @@ FEM_ObjectBroker::getNewConstraintHandler(int classTag)
 	case HANDLER_TAG_PlainHandler:  
 	     return new PlainHandler();
 	     
+	case HANDLER_TAG_PenaltyConstraintHandler:  
+	     return new PenaltyConstraintHandler(1.0e12, 1.0e12);
+
+	case HANDLER_TAG_LagrangeConstraintHandler:  
+	     return new LagrangeConstraintHandler(1.0, 1.0);
 	     
 	default:
 	     opserr << "FEM_ObjectBroker::getNewConstraintHandler - ";
@@ -995,7 +1078,12 @@ FEM_ObjectBroker::getNewNumberer(int classTag)
 	     
 	case NUMBERER_TAG_PlainNumberer:  
 	     return new PlainNumberer();
-	     
+
+
+#ifdef _PARALLEL_PROCESSING
+	case NUMBERER_TAG_ParallelNumberer:  
+	     return new ParallelNumberer();
+#endif
 	     
 	default:
 	     opserr << "FEM_ObjectBroker::getNewConstraintHandler - ";
@@ -1057,8 +1145,7 @@ FEM_ObjectBroker::getNewDomainDecompAlgo(int classTag)
     switch(classTag) {
 	case DomDecompALGORITHM_TAGS_DomainDecompAlgo:  
 	     return new DomainDecompAlgo();
-	     
-	     
+
 	default:
 	     opserr << "FEM_ObjectBroker::getNewDomainDecompAlgo - ";
 	     opserr << " - no DomainDecompAlgo type exists for class tag ";
@@ -1143,7 +1230,7 @@ FEM_ObjectBroker::getNewLinearSolver(void)
 
 LinearSOE *
 FEM_ObjectBroker::getNewLinearSOE(int classTagSOE, 
-				     int classTagSolver)
+				  int classTagSolver)
 {
     LinearSOE *theSOE =0;
 //    SlowLinearSOESolver *theSlowSolver =0;	    
@@ -1151,6 +1238,11 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
     BandGenLinSolver *theGenBandSolver =0;
     BandSPDLinSolver *theBandSPDSolver =0;
     ProfileSPDLinSolver *theProfileSPDSolver =0;    
+    SuperLU *theSparseGenLinSolver =0;
+
+#ifdef _PARALLEL_PROCESSING
+    DistributedSuperLU *theDistributedSparseGenLinSolver =0;
+#endif    
 
     /*
       case LinSOE_TAGS_SlowLinearSOE:  
@@ -1198,8 +1290,7 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      opserr << classTagSolver << endln;
 	      return 0;
 	  }		     
-	  
-					 
+
 	case LinSOE_TAGS_BandSPDLinSOE:  
 
 	  if (classTagSolver == SOLVER_TAGS_BandSPDLinLapackSolver) {
@@ -1213,8 +1304,7 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      opserr << classTagSolver << endln;
 	      return 0;
 	  }	     
-	  
-					 
+
 	case LinSOE_TAGS_ProfileSPDLinSOE:  
 
 	  if (classTagSolver == SOLVER_TAGS_ProfileSPDLinDirectSolver) {
@@ -1234,7 +1324,92 @@ FEM_ObjectBroker::getNewLinearSOE(int classTagSOE,
 	      opserr << classTagSolver << endln;
 	      return 0;		 
 	  }	     
+
+	case LinSOE_TAGS_SparseGenColLinSOE:  
+
+	  if (classTagSolver == SOLVER_TAGS_SuperLU) {
+	      theSparseGenLinSolver = new SuperLU();
+	      theSOE = new SparseGenColLinSOE(*theSparseGenLinSolver);
+	      lastLinearSolver = theSparseGenLinSolver;
+	      return theSOE;
+	  } else {
+	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	      opserr << " - no SparseGenLinSolverSolver type exists for class tag ";
+	      opserr << classTagSolver << endln;
+	      return 0;
+	  }	     
+
+
+#ifdef _PARALLEL_PROCESSING
+      case LinSOE_TAGS_DistributedBandGenLinSOE:  
+
+	  if (classTagSolver == SOLVER_TAGS_BandGenLinLapackSolver) {
+	      theGenBandSolver = new BandGenLinLapackSolver();
+	      theSOE = new DistributedBandGenLinSOE(*theGenBandSolver);
+	      lastLinearSolver = theGenBandSolver;
+	      return theSOE;
+	  } else {
+	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	      opserr << " - no BandGenLinSolver type exists for class tag ";
+	      opserr << classTagSolver << endln;
+	      return 0;
+	  }		     
+
+        case LinSOE_TAGS_DistributedBandSPDLinSOE:  
+
+	  if (classTagSolver == SOLVER_TAGS_BandSPDLinLapackSolver) {
+	      theBandSPDSolver = new BandSPDLinLapackSolver();
+	      theSOE = new DistributedBandSPDLinSOE(*theBandSPDSolver);
+	      lastLinearSolver = theBandSPDSolver;
+	      return theSOE;
+	  } else {
+	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	      opserr << " - no BandSPDLinSolver type exists for class tag ";
+	      opserr << classTagSolver << endln;
+	      return 0;
+	  }		     
 	  
+
+	case LinSOE_TAGS_DistributedProfileSPDLinSOE:  
+
+	  if (classTagSolver == SOLVER_TAGS_ProfileSPDLinDirectSolver) {
+	      theProfileSPDSolver = new ProfileSPDLinDirectSolver();
+	      theSOE = new DistributedProfileSPDLinSOE(*theProfileSPDSolver);
+	      lastLinearSolver = theProfileSPDSolver;
+	      return theSOE;
+	  } else if (classTagSolver == SOLVER_TAGS_ProfileSPDLinSubstrSolver) {
+	      theProfileSPDSolver = new ProfileSPDLinSubstrSolver();
+	      theSOE = new DistributedProfileSPDLinSOE(*theProfileSPDSolver);
+	      lastLinearSolver = theProfileSPDSolver;
+	      return 0;		 
+	  }	
+	  else {
+	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	      opserr << " - no ProfileSPD_LinSolver type exists for class tag ";
+	      opserr << classTagSolver << endln;
+	      return 0;		 
+	  }	     
+	  
+
+	case LinSOE_TAGS_DistributedSparseGenColLinSOE:  
+	  if (classTagSolver == SOLVER_TAGS_SuperLU) {
+	      theSparseGenLinSolver = new SuperLU();
+	      theSOE = new DistributedSparseGenColLinSOE(*theSparseGenLinSolver);
+	      lastLinearSolver = theSparseGenLinSolver;
+	      return theSOE;
+	  } else if (classTagSolver == SOLVER_TAGS_DistributedSuperLU) {
+	      theDistributedSparseGenLinSolver = new DistributedSuperLU();
+	      theSOE = new DistributedSparseGenColLinSOE(*theDistributedSparseGenLinSolver);
+	      lastLinearSolver = theSparseGenLinSolver;
+	      return theSOE;
+	  } else {
+	      opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
+	      opserr << " - no DistributedSparseGenLinSolverSolver type exists for class tag ";
+	      opserr << classTagSolver << endln;
+	      return 0;
+	  }	     
+
+#endif
 
 	default:
 	  opserr << "FEM_ObjectBroker::getNewLinearSOE - ";
@@ -1295,7 +1470,12 @@ FEM_ObjectBroker::getNewDomainDecompAnalysis(int classTag,
     switch(classTag) {
       case DomDecompANALYSIS_TAGS_DomainDecompositionAnalysis:  
 	return new DomainDecompositionAnalysis(theSubdomain);
-	
+
+      case ANALYSIS_TAGS_StaticDomainDecompositionAnalysis:
+	return new StaticDomainDecompositionAnalysis(theSubdomain);      
+
+      case ANALYSIS_TAGS_TransientDomainDecompositionAnalysis:
+	return new TransientDomainDecompositionAnalysis(theSubdomain);      
 	
       default:
 	opserr << "ObjectBroker::getNewDomainDecompAnalysis ";

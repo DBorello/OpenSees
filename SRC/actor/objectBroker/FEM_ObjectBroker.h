@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-13 02:00:18 $
+// $Revision: 1.3 $
+// $Date: 2003-08-29 07:37:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
-// File: ~/actor/broker/FEM_ObjectBroker.h
-//
 // Written: fmk
-// Created: Fri Sept 20 12:27:47: 1996
 // Revision: A
 //
 // Purpose: This file contains the class definition for FEM_ObjectBroker.
@@ -72,6 +69,8 @@ class PartitionedModelBuilder;
 class CrdTransf2d;
 class CrdTransf3d;
 
+class BeamIntegration;
+
 class UniaxialMaterial;
 class SectionForceDeformation;
 class NDMaterial;
@@ -81,6 +80,8 @@ class ConvergenceTest;
 class SectionForceDeformation;
 class GroundMotion;
 
+class Actor;
+
 class FEM_ObjectBroker
 {
   public:
@@ -88,9 +89,13 @@ class FEM_ObjectBroker
     virtual ~FEM_ObjectBroker();
 
     
+
+    virtual Actor*getNewActor(int classTag, Channel *theChannel);
+
     virtual PartitionedModelBuilder *
-	getPtrNewPartitionedModelBuilder(Subdomain &theSub,
-					 int classTag);
+      getPtrNewPartitionedModelBuilder(Subdomain &theSub,
+				       int classTag);
+    
     virtual GraphNumberer *getPtrNewGraphNumberer(int classTag);
     
     // methods to get new modelling class objects
@@ -103,6 +108,8 @@ class FEM_ObjectBroker
 
     virtual CrdTransf2d *getNewCrdTransf2d(int classTag);
     virtual CrdTransf3d *getNewCrdTransf3d(int classTag);
+
+    virtual BeamIntegration *getNewBeamIntegration(int classTag);
 
     virtual UniaxialMaterial  *getNewUniaxialMaterial(int classTag);
     virtual SectionForceDeformation  *getNewSection(int classTag);    
@@ -138,7 +145,7 @@ class FEM_ObjectBroker
     virtual DomainSolver *getNewDomainSolver(void);
 
     virtual DomainDecompositionAnalysis *
-	getNewDomainDecompAnalysis(int classTag, Subdomain &theDomain);
+      getNewDomainDecompAnalysis(int classTag, Subdomain &theDomain);
 
     virtual Subdomain 	  *getSubdomainPtr(int classTag);
     
