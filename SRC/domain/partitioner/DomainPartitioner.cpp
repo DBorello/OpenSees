@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-09-05 22:50:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/partitioner/DomainPartitioner.cpp,v $
                                                                         
                                                                         
@@ -416,9 +416,12 @@ DomainPartitioner::partition(int numParts)
 	ElementalLoadIter &theLoads = theLoadPattern->getElementalLoads();
 	ElementalLoad *theLoad;
 	while ((theLoad = theLoads()) != 0) {
+	  cerr << "DomainPArtitioner::partition - REMOVE ELEMENTAL LOADS\n";
+	  /*
 	  if (theLoad->getElementTag() == eleTag)
 	    theLoadPattern->removeElementalLoad(theLoad->getTag());
 	  theSubdomain->addElementalLoad(theLoad, loadPatternTag);
+	  */
 	}
       }
     }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-09-05 22:50:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.cpp,v $
                                                                         
                                                                         
@@ -59,6 +59,12 @@ EarthquakePattern::~EarthquakePattern()
   if (theMotions != 0)
     //    free ((void *)theMotions);
     delete [] theMotions;
+
+  if (uDotG != 0)
+    delete uDotG;
+
+  if (uDotDotG != 0)
+    delete uDotDotG;
 }
 
 
