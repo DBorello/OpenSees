@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-10-06 18:37:50 $
+// $Revision: 1.15 $
+// $Date: 2003-10-15 23:31:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -1052,13 +1052,14 @@ ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   int i, j , k;
   int loc = 0;
 
-  static ID idData(9);  // one bigger than needed so no clash later
+  static ID idData(11);  // one bigger than needed so no clash later
   idData(0) = this->getTag();
   idData(1) = connectedExternalNodes(0);
   idData(2) = connectedExternalNodes(1);
   idData(3) = numSections;
   idData(4) = maxIters;
   idData(5) = initialFlag;
+
   idData(6) = crdTransf->getClassTag();
   int crdTransfDbTag  = crdTransf->getDbTag();
   if (crdTransfDbTag  == 0) {
@@ -1067,7 +1068,15 @@ ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
       crdTransf->setDbTag(crdTransfDbTag);
   }
   idData(7) = crdTransfDbTag;
-  
+
+  idData(8) = beamIntegr->getClassTag();
+  int beamIntegrDbTag  = beamIntegr->getDbTag();
+  if (beamIntegrDbTag  == 0) {
+    beamIntegrDbTag = theChannel.getDbTag();
+    if (beamIntegrDbTag  != 0) 
+      beamIntegr->setDbTag(crdTransfDbTag);
+  }
+  idData(9) = beamIntegrDbTag;
 
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
     opserr << "ForceBeamColumn2d::sendSelf() - failed to send ID data\n";
@@ -1077,7 +1086,12 @@ ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   // send the coordinate transformation
   
   if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
-    opserr << "ForceBeamColumn2d::sendSelf() - failed to send crdTranf\n";
+    opserr << "ForceBeamColumn2d::sendSelf() - failed to send crdTrans\n";
+    return -1;
+  }      
+
+  if (beamIntegr->sendSelf(commitTag, theChannel) < 0) {
+    opserr << "ForceBeamColumn2d::sendSelf() - failed to send beamIntegr\n";
     return -1;
   }      
 
@@ -1168,7 +1182,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   int dbTag = this->getDbTag();
   int i,j,k;
   
-  static ID idData(9); // one bigger than needed 
+  static ID idData(11); // one bigger than needed 
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
     opserr << "ForceBeamColumn2d::recvSelf() - failed to recv ID data\n";
@@ -1183,6 +1197,9 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   
   int crdTransfClassTag = idData(6);
   int crdTransfDbTag = idData(7);
+
+  int beamIntegrClassTag = idData(8);
+  int beamIntegrDbTag = idData(9);
 
   // create a new crdTransf object if one needed
   if (crdTransf == 0 || crdTransf->getClassTag() != crdTransfClassTag) {
@@ -1200,10 +1217,34 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 
   crdTransf->setDbTag(crdTransfDbTag);
 
-  // invoke recvSelf on the crdTransf obkject
+  // invoke recvSelf on the coordTransf object
   if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0)  
   {
      opserr << "ForceBeamColumn2d::sendSelf() - failed to recv crdTranf\n";
+	     		     
+     return -3;
+  }      
+
+  // create a new beamIntegr object if one needed
+  if (beamIntegr == 0 || beamIntegr->getClassTag() != beamIntegrClassTag) {
+      if (beamIntegr != 0)
+	  delete beamIntegr;
+
+      beamIntegr = theBroker.getNewBeamIntegration(beamIntegrClassTag);
+
+      if (beamIntegr == 0) {
+	opserr << "ForceBeamColumn2d::recvSelf() - failed to obtain the beam integration object with classTag" <<
+	  beamIntegrClassTag << endln;
+	exit(-1);
+      }
+  }
+
+  beamIntegr->setDbTag(beamIntegrDbTag);
+
+  // invoke recvSelf on the beamIntegr object
+  if (beamIntegr->recvSelf(commitTag, theChannel, theBroker) < 0)  
+  {
+     opserr << "ForceBeamColumn2d::sendSelf() - failed to recv beam integration\n";
 	     		     
      return -3;
   }      
@@ -1217,7 +1258,6 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 
   if (theChannel.recvID(dbTag, commitTag, idSections) < 0)  {
     opserr << "ForceBeamColumn2d::recvSelf() - failed to recv ID data\n";
-			    
     return -1;
   }    
 

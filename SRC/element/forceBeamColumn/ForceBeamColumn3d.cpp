@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-10-06 18:37:50 $
+// $Revision: 1.15 $
+// $Date: 2003-10-15 23:31:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -465,7 +465,6 @@ ForceBeamColumn3d::update()
   static Vector vin(NEBD);
   vin = v;
   vin -= dv;
-
   double L = crdTransf->getInitialLength();
   double oneOverL  = 1.0/L;  
 
@@ -474,7 +473,7 @@ ForceBeamColumn3d::update()
   
   double wt[maxNumSections];
   beamIntegr->getSectionWeights(numSections, L, wt);
-  
+
   static Vector vr(NEBD);       // element residual displacements
   static Matrix f(NEBD,NEBD);   // element flexibility matrix
   
@@ -889,7 +888,6 @@ ForceBeamColumn3d::update()
     } // for (int l=0; l<2; l++)
   } // while (converged == false)
 
-
   // if fail to converge we return an error flag & print an error message
 
   if (converged == false) {
@@ -1173,37 +1171,50 @@ ForceBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   int i, j , k;
   int loc = 0;
 
-  static ID idData(9);
+  static ID idData(11);  
   idData(0) = this->getTag();
   idData(1) = connectedExternalNodes(0);
   idData(2) = connectedExternalNodes(1);
   idData(3) = numSections;
   idData(4) = maxIters;
   idData(5) = initialFlag;
-  idData(6) = crdTransf->getClassTag();
+  idData(6) = (isTorsion) ? 1 : 0;
+
+  idData(7) = crdTransf->getClassTag();
   int crdTransfDbTag  = crdTransf->getDbTag();
   if (crdTransfDbTag  == 0) {
     crdTransfDbTag = theChannel.getDbTag();
     if (crdTransfDbTag  != 0) 
       crdTransf->setDbTag(crdTransfDbTag);
   }
-  idData(7) = crdTransfDbTag;
-  idData(8) = (isTorsion) ? 1 : 0;
+  idData(8) = crdTransfDbTag;
+
+
+  idData(9) = beamIntegr->getClassTag();
+  int beamIntegrDbTag  = beamIntegr->getDbTag();
+  if (beamIntegrDbTag  == 0) {
+    beamIntegrDbTag = theChannel.getDbTag();
+    if (beamIntegrDbTag  != 0) 
+      beamIntegr->setDbTag(crdTransfDbTag);
+  }
+  idData(10) = beamIntegrDbTag;
 
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
-    opserr << "ForceBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send ID data\n";
+    opserr << "ForceBeamColumn3d::sendSelf() - failed to send ID data\n";
     return -1;
   }    
 
   // send the coordinate transformation
   
   if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
-    opserr << "ForceBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send crdTranf\n";
+    opserr << "ForceBeamColumn3d::sendSelf() - failed to send crdTranf\n";
     return -1;
   }      
 
+  if (beamIntegr->sendSelf(commitTag, theChannel) < 0) {
+    opserr << "ForceBeamColumn3d::sendSelf() - failed to send beamIntegr\n";
+    return -1;
+  }      
   
   //
   // send an ID for the sections containing each sections dbTag and classTag
@@ -1226,8 +1237,7 @@ ForceBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   }
 
   if (theChannel.sendID(dbTag, commitTag, idSections) < 0)  {
-    opserr << "ForceBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send ID data\n";
+    opserr << "ForceBeamColumn3d::sendSelf() - failed to send ID data\n";
     return -1;
   }    
 
@@ -1276,8 +1286,8 @@ ForceBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
 	dData(loc++) = (vscommit[k])(i);
   
   if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
-     opserr << "ForceBeamColumn3d::sendSelf() - %s\n",
-	 		     "failed to send Vector data\n";
+     opserr << "ForceBeamColumn3d::sendSelf() - failed to send Vector data\n";
+	 		     
      return -1;
   }    
 
@@ -1293,11 +1303,11 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   int dbTag = this->getDbTag();
   int i,j,k;
   
-  static ID idData(9); // one bigger than needed 
+  static ID idData(11); // one bigger than needed 
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
-    opserr << "ForceBeamColumn3d::recvSelf() - %s\n",
-			    "failed to recv ID data\n";
+    opserr << "ForceBeamColumn3d::recvSelf() - failed to recv ID data\n";
+			    
     return -1;
   }    
 
@@ -1306,10 +1316,13 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   connectedExternalNodes(1) = idData(2);
   maxIters = idData(4);
   initialFlag = idData(5);
-  isTorsion = (idData(8) == 1) ? true : false;
+  isTorsion = (idData(6) == 1) ? true : false;
   
-  int crdTransfClassTag = idData(6);
-  int crdTransfDbTag = idData(7);
+  int crdTransfClassTag = idData(7);
+  int crdTransfDbTag = idData(8);
+
+  int beamIntegrClassTag = idData(9);
+  int beamIntegrDbTag = idData(10);
 
   // create a new crdTransf object if one needed
   if (crdTransf == 0 || crdTransf->getClassTag() != crdTransfClassTag) {
@@ -1330,8 +1343,31 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   // invoke recvSelf on the crdTransf obkject
   if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0)  
   {
-     opserr << "ForceBeamColumn3d::sendSelf() - %s\n",
-	     		     "failed to recv crdTranf\n";
+     opserr << "ForceBeamColumn3d::sendSelf() - failed to recv crdTranf\n";
+     return -3;
+  }      
+
+
+  // create a new beamIntegr object if one needed
+  if (beamIntegr == 0 || beamIntegr->getClassTag() != beamIntegrClassTag) {
+      if (beamIntegr != 0)
+	  delete beamIntegr;
+
+      beamIntegr = theBroker.getNewBeamIntegration(beamIntegrClassTag);
+
+      if (beamIntegr == 0) {opserr << "ForceBeamColumn3d::recvSelf() - failed to obtain the beam integration object with classTag" <<
+	  beamIntegrClassTag << endln;
+	exit(-1);
+      }
+  }
+
+  beamIntegr->setDbTag(beamIntegrDbTag);
+
+  // invoke recvSelf on the beamIntegr object
+  if (beamIntegr->recvSelf(commitTag, theChannel, theBroker) < 0)  
+  {
+     opserr << "ForceBeamColumn3d::sendSelf() - failed to recv beam integration\n";
+	     		     
      return -3;
   }      
   
@@ -1343,8 +1379,7 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   int loc = 0;
 
   if (theChannel.recvID(dbTag, commitTag, idSections) < 0)  {
-    opserr << "ForceBeamColumn3d::recvSelf() - %s\n",
-			    "failed to recv ID data\n";
+    opserr << "ForceBeamColumn3d::recvSelf() - failed to recv ID data\n";
     return -1;
   }    
 
@@ -1375,8 +1410,7 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     // Allocate the right number
     vscommit = new Vector[numSections];
     if (vscommit == 0) {
-      opserr << "%s -- failed to allocate vscommit array",
-			      "ForceBeamColumn3d::recvSelf\n";
+      opserr << "ForceBeamColumn3d::recvSelf -- failed to allocate vscommit array\n";
       return -1;
     }
 
@@ -1387,8 +1421,7 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     // Allocate the right number
     fs = new Matrix[numSections];  
     if (fs == 0) {
-      opserr << "%s -- failed to allocate fs array",
-			      "ForceBeamColumn3d::recvSelf\n";
+      opserr << "ForceBeamColumn3d::recvSelf -- failed to allocate fs array\n";
       return -1;
     }
 
@@ -1399,8 +1432,7 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     // Allocate the right number
     vs = new Vector[numSections];  
     if (vs == 0) {
-      opserr << "%s -- failed to allocate vs array",
-			      "ForceBeamColumn3d::recvSelf\n";
+      opserr << "ForceBeamColumn3d::recvSelf -- failed to allocate vs array\n";
       return -1;
     }
 
@@ -1411,8 +1443,8 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     // Allocate the right number
     Ssr = new Vector[numSections];  
     if (Ssr == 0) {
-      opserr << "%s -- failed to allocate Ssr array",
-			      "ForceBeamColumn3d::recvSelf\n";
+      opserr << "ForceBeamColumn3d::recvSelf -- failed to allocate Ssr array\n";
+			      
       return -1;
     }
 
@@ -1439,7 +1471,7 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
       sections[i]->setDbTag(sectDbTag);
       if (sections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
 	opserr << "ForceBeamColumn3d::recvSelf() - section " << 
-	  i << "failed to recv itself\n";
+	  i << " failed to recv itself\n";
 	return -1;
       }     
     }
@@ -1465,7 +1497,7 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 	delete sections[i];
 	sections[i] = theBroker.getNewSection(sectClassTag);
 	if (sections[i] == 0) {
-	  opserr << "ForceBeamColumn3d::recvSelf() - Broker could not create Section of class type" 
+	  opserr << "ForceBeamColumn3d::recvSelf() - Broker could not create Section of class type " 
 		 << sectClassTag << endln;;
 	  exit(-1);
 	}
@@ -1475,7 +1507,7 @@ ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
       sections[i]->setDbTag(sectDbTag);
       if (sections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
 	opserr << "ForceBeamColumn3d::recvSelf() - section " <<
-	  i << "failed to recv itself\n";
+	  i << " failed to recv itself\n";
 	return -1;
       }     
     }
