@@ -15,14 +15,18 @@
 #                                                                                #
 #                                                                                #
 # DATE:              09-13-2000                                                  #
-# UPDATE HISTORY:                                                                #
-#                                                                                #
+# UPDATE HISTORY:    18May2004 Zhao fixed equation                               #
+#                    tensor h = dQods * (2.0/3.0) * ha - alpha * Cr * temp2;     #
+#                    so it is consistent with tensor multiplication (revised)    #
 #                                                                                #
 #                                                                                #
 # SHORT EXPLANATION: This is a nonlinear evolution law for the evoltion of a     #
 #                    tensorial variable alpha which depends on plastic strain    #
 #                    i.e. dalpha_ij = 2/3*ha*dE_ij -Cr*de_eq*alpha_ij( Amstrong- #
 //                   Frederick Model)                                            #
+#                                                                                #
+#                                                                                #
+#                                                                                #
 //================================================================================
 */
 
@@ -56,8 +60,8 @@ EvolutionLaw_T * EvolutionLaw_NL_Eij::newObj() {
 }
 
 ////================================================================================
-////  Initialize some  vars in EPState				        
-////  nothing						       	        
+////  Initialize some  vars in EPState                
+////  nothing                             
 ////================================================================================
 //
 //void EvolutionLaw_L_Eij::InitVars(EPState  *EPS) {
@@ -72,10 +76,10 @@ EvolutionLaw_T * EvolutionLaw_NL_Eij::newObj() {
 
 
 //================================================================================
-//  Set initial value of D once the current stress hit the yield surface     	
-//  for L model only    						       	
-//							       		        
-//							       	                
+//  Set initial value of D once the current stress hit the yield surface       
+//  for L model only                         
+//                                 
+//                                       
 //================================================================================
 //
 //void EvolutionLaw_L_Eij::setInitD(EPState  *EPS) {
@@ -125,8 +129,8 @@ tensor EvolutionLaw_NL_Eij::h_t( EPState *EPS, PotentialSurface *PS){
     double ha = getha();
     double Cr = getCr();
     tensor alpha = EPS->getTensorVar(1);
-    		     
-    tensor h = (2.0/3.0) * ha * dQods - Cr * temp2 * alpha;
+             
+    tensor h = dQods * (2.0/3.0) * ha - alpha * Cr * temp2;
 
     return h;
 

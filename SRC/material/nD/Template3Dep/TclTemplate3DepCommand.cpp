@@ -11,7 +11,7 @@
 //#
 //#
 //# DATE:              19Feb2003
-//# UPDATE HISTORY:
+//# UPDATE HISTORY:    18May2004 ZHao fixed Armstrong-Frederick command
 //#
 //#
 //#
@@ -53,6 +53,7 @@
 
 #include <EL_T.h>
 #include <EL_LEij.h>
+#include <EL_NLEij.h>
 #include <EL_NLEijMD.h>
 
 
@@ -794,6 +795,8 @@ EvolutionLaw_T *EvaluateEvolutionLawTArgs(ClientData clientData, Tcl_Interp *int
   }
 
   EvolutionLaw_T *ELT = 0;
+  
+  // Linear Tensorial      
   if ((strcmp(argv[0],"-Linear") == 0) || (strcmp(argv[0],"-linear") == 0)) {
     double alpha = 0.0;
     if (argc > 1)
@@ -804,7 +807,28 @@ EvolutionLaw_T *EvaluateEvolutionLawTArgs(ClientData clientData, Tcl_Interp *int
       }
     ELT = new EvolutionLaw_L_Eij(alpha);
   }
+  
+  // Armstrong-Freederick Nolinear Tensorial Evolution Law 
+  else if ((strcmp(argv[0],"-NLEij") == 0) || (strcmp(argv[0],"-AF") == 0)) {
+    double had = 0.0;
+    double Crd = 0.0;    
+    
+      if (Tcl_GetDouble(interp, argv[1], &had) != TCL_OK) {
+    opserr << "nDMaterial Templated3Dep - invalid ha " << argv[1] << endln;
+    cleanup(argv);
+    return 0;
+      }
+      
+      if (Tcl_GetDouble(interp, argv[2], &Crd) != TCL_OK) {
+    opserr << "nDMaterial Templated3Dep - invalid Cr " << argv[2] << endln;
+    cleanup(argv);
+    return 0;
+      }      
+    
+    ELT = new EvolutionLaw_NL_Eij(had, Crd);
 
+  }
+  
   //Manzari-Dafalias Two Surface model
   else if ((strcmp(argv[0],"-NLEijMD") == 0) || (strcmp(argv[0],"-MD") == 0 )) {
 
