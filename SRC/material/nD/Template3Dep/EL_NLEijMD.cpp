@@ -90,10 +90,11 @@ EvolutionLaw_NL_EijMD::EvolutionLaw_NL_EijMD(const EvolutionLaw_NL_EijMD &MDE ) 
 //================================================================================
 //  Create a clone of itself 
 //================================================================================
-EvolutionLaw_NL_EijMD * EvolutionLaw_NL_EijMD::newObj() {
+//EvolutionLaw_NL_EijMD * EvolutionLaw_NL_EijMD::newObj() {
+EvolutionLaw_T * EvolutionLaw_NL_EijMD::newObj() {
     
     //EvolutionLaw_T *newEL = new EvolutionLaw_NL_EijMD( *this );
-    EvolutionLaw_NL_EijMD *newEL = new EvolutionLaw_NL_EijMD( *this );
+    EvolutionLaw_T *newEL = new EvolutionLaw_NL_EijMD( *this );
     
     return newEL;
 
@@ -354,7 +355,7 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
        //}         
 
        if ( D > 0.0 ) D = 0.0;
-       dF =  dLamda * getCf() * (-D) * ( getFmax() * n("ij") + F("ij") );
+       dF =  dLamda * getCf() * (-D) * ( n("ij") * getFmax()  + F("ij") );
        //cout << "dF" << dF;       
        F = F ;//- dF;
        EPS->setTensorVar(2, F);

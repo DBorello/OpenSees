@@ -103,7 +103,7 @@ class EvolutionLaw_NL_EijMD : public EvolutionLaw_T
     
     //create a clone of itself
     //EvolutionLaw_T *newObj();
-    EvolutionLaw_NL_EijMD *newObj();
+    EvolutionLaw_T *newObj();
     	  
     //double h( EPState *EPS,  double norm_dQods);     // Evaluating hardening function h
     tensor h_t( EPState *EPS, PotentialSurface *PS);    // Evaluating hardening function h
