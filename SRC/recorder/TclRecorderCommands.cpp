@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2004-10-11 04:42:22 $
+// $Revision: 1.28 $
+// $Date: 2004-10-19 00:35:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -64,11 +64,15 @@
 #include <YsVisual.h> //!!
 #include <TclModelBuilder.h>
 
+#include <NEESData.h>
+
 extern TclModelBuilder *theDamageTclModelBuilder;
 
 #include <EquiSolnAlgo.h>
 
 static EquiSolnAlgo *theAlgorithm =0;
+extern FE_Datastore *theDatabase;
+extern FEM_ObjectBroker theBroker;
 
 int
 TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
@@ -85,6 +89,11 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
     // needed for the type of Recorder, create the object and add to Domain
     //
     (*theRecorder) = 0;
+   (*theRecorder) = 0;
+    FE_Datastore *theRecorderDatabase = 0;
+    bool destroyDatabase = false;
+
+
 
     // an Element Recorder or ElementEnvelope Recorder
     if ((strcmp(argv[1],"Element") == 0) || (strcmp(argv[1],"EnvelopeElement") == 0)
@@ -140,6 +149,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	double dT = 0.0;
 	bool echoTime = false;
 	TCL_Char *fileName = 0;
+	TCL_Char *tableName = 0;
 	int loc = endEleIDs;
 	int flags = 0;
 	int eleData = 0;
@@ -256,6 +266,30 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    fileName = argv[loc];
 	    loc++;
 	  }
+
+	  else if (strcmp(argv[loc],"-database") == 0) {
+	    // allow user to specify load pattern other than current
+	    loc++;
+	    theRecorderDatabase = theDatabase;
+	    if (theRecorderDatabase != 0)
+	      tableName = argv[loc];
+	    else {
+	      opserr << "WARNING recorder Element .. -database <fileName> - NO CURRENT DATABASE, results to File instead\n";
+	      fileName = argv[loc];
+	    }	    
+	    loc++;
+	  }
+	  
+	  else if (strcmp(argv[loc],"-nees") == 0) {
+	    // allow user to specify load pattern other than current
+	    loc++;
+	    theRecorderDatabase = new NEESData(argv[loc], theDomain, theBroker);
+	    tableName = argv[loc];
+	    destroyDatabase = true;
+	    loc++;
+	  }	    
+
+
 	  else {
 	    // first unknown string then is assumed to start 
 	    // element response request starts
@@ -286,13 +320,23 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  data[j] = argv[i];
 
 	// now construct the recorder
-	if (strcmp(argv[1],"Element") == 0) 
-	  (*theRecorder) = new ElementRecorder(eleIDs, theDomain, data, 
-					       argc-eleData, echoTime, dT, fileName);
-	else
-
-	  (*theRecorder) = new EnvelopeElementRecorder(eleIDs, theDomain, data, 
-						       argc-eleData, dT, fileName);
+	if (tableName == 0) {
+	  if (strcmp(argv[1],"Element") == 0) 
+	    (*theRecorder) = new ElementRecorder(eleIDs, theDomain, data, 
+						 argc-eleData, echoTime, dT, fileName);
+	  else
+	    
+	    (*theRecorder) = new EnvelopeElementRecorder(eleIDs, theDomain, data, 
+							 argc-eleData, dT, fileName);
+	} else {
+	  if (strcmp(argv[1],"Element") == 0) 
+	    (*theRecorder) = new ElementRecorder(eleIDs, theDomain, data, 
+						 argc-eleData, echoTime, theRecorderDatabase, tableName, dT, destroyDatabase);
+	  else
+	    
+	    (*theRecorder) = new EnvelopeElementRecorder(eleIDs, theDomain, data, 
+							 argc-eleData, theRecorderDatabase, tableName, dT);
+	}
 
 	delete [] data;
     }
@@ -428,12 +472,14 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 // AddingSensitivity:END /////////////////////////////////////
       TCL_Char *responseID = 0;
       TCL_Char *fileName = 0;
+      TCL_Char *tableName = 0;
 
       int pos = 2;
 
       /* KEEP - FOR LEGACY REASONS NEED TO KEEP THE FOLLOWING UGLY STUFF */
       if ((strcmp(argv[pos],"-time") != 0) && (strcmp(argv[pos],"-load") != 0) &&
 	  (strcmp(argv[pos],"-dT") !=  0) && (strcmp(argv[pos],"-node") != 0) &&
+	  (strcmp(argv[pos],"-nees") !=  0) && (strcmp(argv[pos],"-database") != 0) &&
 	  (strcmp(argv[pos],"-dof") != 0) && (strcmp(argv[pos],"-file") != 0)) {
 	pos = 4;
 	responseID = argv[3];
@@ -445,6 +491,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       int flags = 0;
       double dT = 0.0;
       int numNodes = 0;
+
+      bool destroyDatabase = false;
 	
       // create ID's to contain the node tags & the dofs
       ID theNodes(0,16);
@@ -466,6 +514,25 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  fileName = argv[pos+1];
 	  pos += 2;
 	}
+
+	else if (strcmp(argv[pos],"-database") == 0) {
+	  theRecorderDatabase = theDatabase;
+	  if (theRecorderDatabase != 0)
+	    tableName = argv[pos+1];
+	  else {
+	    opserr << "WARNING recorder Node .. -database &lt;fileName&gt; - NO CURRENT DATABASE, results to File instead\n";
+	    fileName = argv[pos+1];
+	  }
+
+	  pos += 2;
+	}
+	else if (strcmp(argv[pos],"-nees") == 0) {
+	  // allow user to specify load pattern other than current
+	  theRecorderDatabase = new NEESData(argv[pos+1], theDomain, theBroker);
+	  tableName = argv[pos+1];
+	  destroyDatabase = true;
+	  pos += 2;
+	}	    
 
 	else if (strcmp(argv[pos],"-dT") == 0) {
 	  pos ++;
@@ -605,16 +672,30 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  theNodes[numNodes++] = tag;
 	}
       }
-	
+
       // construct the recorder NOTE: AddingSensitivity...
-      if (strcmp(argv[1],"Node") == 0) 
-	(*theRecorder) = new NodeRecorder(theDofs, theNodes, sensitivity,
-					  theDomain, fileName, responseID, dT, timeFlag);
-      else
-	
-	(*theRecorder) = new EnvelopeNodeRecorder(theDofs, theNodes, 
-						  theDomain,
-						  fileName, responseID, dT);
+      if (tableName == 0) {
+
+	if (strcmp(argv[1],"Node") == 0) {
+	  (*theRecorder) = new NodeRecorder(theDofs, theNodes, sensitivity,
+					    theDomain, fileName, responseID, dT, timeFlag);
+	}
+	else
+	  
+	  (*theRecorder) = new EnvelopeNodeRecorder(theDofs, theNodes, 
+						    theDomain,
+						    fileName, responseID, dT);
+      } else {
+
+	if (strcmp(argv[1],"Node") == 0) 
+	  (*theRecorder) = new NodeRecorder(theDofs, theNodes, sensitivity,
+					    theDomain, theRecorderDatabase, tableName, responseID, dT, timeFlag, destroyDatabase);
+	else
+	  
+	  (*theRecorder) = new EnvelopeNodeRecorder(theDofs, theNodes, 
+						    theDomain,
+						    theRecorderDatabase, tableName, responseID, dT);
+      }
     } 
 
     else if (strcmp(argv[1],"Pattern") == 0) {
