@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2004-01-29 23:30:29 $
+// $Revision: 1.15 $
+// $Date: 2004-02-19 01:06:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -115,8 +115,9 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
     numDbColumns = 1;  // 1 for the pseudo-time
 
   theResponses = new Response *[numEle];
-  for (int j=0; j<numEle; j++)
-    theResponses[j] = 0;
+
+  for (int jj=0; jj<numEle; jj++)
+    theResponses[jj] = 0;
 
   Information eleInfo(1.0);
   int i;
@@ -160,7 +161,7 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   dbColumns[0] = newColumn;
 
   int lengthString = 0;
-  for (int i=0; i<argc; i++)
+  for (i=0; i<argc; i++)
     lengthString += strlen(argv[i])+1;
   char *dataToStore = new char[lengthString];
   lengthString = 0;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-01-29 23:30:29 $
+// $Revision: 1.5 $
+// $Date: 2004-02-19 01:06:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -51,18 +51,13 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
  db(0), dbColumns(0), numDbColumns(0), 
  data(0), currentData(0), first(true)
 {
-  opserr << "ELE: " << eleID << endln;
-
   theResponses = new Response *[numEle];
   for (int j=0; j<numEle; j++)
     theResponses[j] = 0;
 
-  opserr << "HELLO 1\n";
-
+ 
   Information eleInfo(1.0);
-  opserr << "HELLO 2\n";
-
-
+  
   for (int i=0; i<numEle; i++) {
     Element *theEle = theDom.getElement(eleID(i));
     if (theEle == 0) {
@@ -76,8 +71,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
       numDbColumns += eleData.Size();
     }
   }
-  opserr << "HELLO 5\n";
-
+  
 
   // create the matrix & vector that holds the data
   data = new Matrix(3, numDbColumns);
@@ -86,8 +80,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
     opserr << "EnvelopeElementRecorder::EnvelopeElementRecorder() - out of memory\n";
     exit(-1);
   }
-  opserr << "HELLO 6\n";
-
+  
   
   // if file is specified, copy name and open the file
   if (theFileName != 0) {
@@ -104,7 +97,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
     // copy file name string
     strcpy(fileName, theFileName);    
   }
-  opserr << "HELLO 7\n";
+  
 
 
 }
@@ -170,7 +163,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
   dbColumns[0] = newColumn;
 
   int lengthString = 0;
-  for (int i=0; i<argc; i++)
+  for (i=0; i<argc; i++)
     lengthString += strlen(argv[i])+1;
   char *dataToStore = new char[lengthString];
   lengthString = 0;
