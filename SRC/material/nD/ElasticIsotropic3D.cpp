@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $                                                              
-// $Date: 2001-01-23 08:45:25 $                                                                  
+// $Revision: 1.5 $                                                              
+// $Date: 2001-01-23 22:10:40 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $                                                                
 
 //Boris Jeremic and Zhaohui Yang ___ 02-10-2000
@@ -156,12 +156,11 @@ ElasticIsotropic3D::getStrainTensor (void)
     return Strain;
 }
 
-int
-ElasticIsotropic3D::commitState (void)
+int ElasticIsotropic3D::commitState (void)
 {
     //Set the new Elastic constants
     tensor ret( 4, def_dim_4, 0.0 );
-    				       
+
     // Kronecker delta tensor
     tensor I2("I", 2, def_dim_2);
 
@@ -172,26 +171,26 @@ ElasticIsotropic3D::commitState (void)
     tensor I_ikjl = I_ijkl.transpose0110();
     tensor I_iljk = I_ijkl.transpose0111();
     tensor I4s = (I_ikjl+I_iljk)*0.5;
-    
-    //Update E according to 
+
+    //Update E according to
     Stress = getStressTensor();
     //Dt("ijkl") * Strain("kl");
     double p = Stress.p_hydrostatic();
     //cerr << " p = " <<  p;
 
-    if (p <= 0.5) 
+    if (p <= 0.5)
       p = 0.5;
 
-    double Ec = E * pow(p/po, 0.6);
+    double Ec = E * pow(p/p_ref, exp);
     //cerr << " Eo = " << E << " Ec = " << Ec << endln;
 
     // Building elasticity tensor
-    ret = I_ijkl*( Ec*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( Ec / (1.0 + v) );
-    
+    ret = I_ijkl*( Ec*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( Ec / (1.0 + v));
+
     //ret.print();
     Dt_commit = ret;
     Dt = ret;
-    
+
     return 0;
 
 }
