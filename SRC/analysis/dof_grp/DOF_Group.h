@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 22:11:33 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:31:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.h,v $
                                                                         
                                                                         
@@ -71,6 +71,7 @@ class DOF_Group
     virtual const Matrix &getTangent(Integrator *theIntegrator);
     virtual void  zeroTangent(void);
     virtual void  addMtoTang(double fact = 1.0);    
+    virtual void  addCtoTang(double fact = 1.0);    
 
     // methods to form the unbalance
     virtual const Vector &getUnbalance(Integrator *theIntegrator);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-04-22 23:28:59 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:31:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -343,6 +343,22 @@ DOF_Group::addMtoTang(double fact)
 {
     if (myNode != 0) {
 	if (tangent->addMatrix(1.0, myNode->getMass(), fact) < 0) {
+	    cerr << "DOF_Group::addMtoTang(void) ";
+	    cerr << " invoking addMatrix() on the tangent failed\n";	    
+	}
+    }
+    else {
+	cerr << "DOF_Group::addMtoTang(void) - no Node associated";
+	cerr << " subclass should provide the method \n";	    
+    }	
+}
+
+
+void  
+DOF_Group::addCtoTang(double fact)
+{
+    if (myNode != 0) {
+	if (tangent->addMatrix(1.0, myNode->getDamp(), fact) < 0) {
 	    cerr << "DOF_Group::addMtoTang(void) ";
 	    cerr << " invoking addMatrix() on the tangent failed\n";	    
 	}
