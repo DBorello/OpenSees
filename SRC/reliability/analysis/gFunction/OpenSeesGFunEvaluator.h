@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-04-28 20:51:27 $
+// $Revision: 1.7 $
+// $Date: 2003-10-27 23:45:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.h,v $
 
 
@@ -49,17 +49,16 @@ class OpenSeesGFunEvaluator : public GFunEvaluator
 public:
 	OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 						ReliabilityDomain *passedReliabilityDomain,
-						const char *fileName);
+						TCL_Char *fileName);
 	OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 						ReliabilityDomain *passedReliabilityDomain,
 						int nsteps, double dt);
 	~OpenSeesGFunEvaluator();
 
 	int		runGFunAnalysis(Vector x);
-	int		tokenizeSpecials(char *theExpression);
+	int		tokenizeSpecials(TCL_Char *theExpression);
 
 	void    setNsteps(int nsteps);
-	int     getNsteps();
 	double  getDt();
 
 protected:

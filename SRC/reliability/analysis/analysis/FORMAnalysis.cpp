@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-04-28 20:51:25 $
+// $Revision: 1.7 $
+// $Date: 2003-10-27 23:45:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -56,7 +56,7 @@ using std::setiosflags;
 FORMAnalysis::FORMAnalysis(ReliabilityDomain *passedReliabilityDomain,
 						   FindDesignPointAlgorithm *passedFindDesignPointAlgorithm,
 						   ProbabilityTransformation *passedProbabilityTransformation,
-						   const char *passedFileName,
+						   TCL_Char *passedFileName,
 						   int p_relSensTag)
 :ReliabilityAnalysis()
 {
@@ -90,7 +90,7 @@ FORMAnalysis::analyze(void)
 	Vector uStar;
 	Vector alpha;
 	Vector gamma;
-	double stdv;
+	double stdv,mean;
 	int i;
 	double Go, Glast;
 	Vector uSecondLast;
@@ -98,6 +98,7 @@ FORMAnalysis::analyze(void)
 	Vector lastSearchDirection;
 	double beta;
 	double pf1;
+	int numberOfEvaluations;
 	int lsf;
 	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
 	int numLsf = theReliabilityDomain->getNumberOfLimitStateFunctions();
@@ -107,6 +108,7 @@ FORMAnalysis::analyze(void)
 	aStdNormRV = new NormalRV(1,0.0,1.0,0.0);
 	Vector delta(numRV); 
 	Vector eta(numRV);
+	Vector kappa(numRV);
 
 
 	// Check if computer ran out of memory
@@ -121,9 +123,7 @@ FORMAnalysis::analyze(void)
 
 
 	// Loop over number of limit-state functions and perform FORM analysis
-	lsf = 1;     // Boris Jeremic moved this out of the loop since it is
-              // non-portable (C++ standard is violated) to change loop counter in the loop (lsf)
-	for (; lsf<=numLsf; lsf++ ) {
+	for (lsf=1; lsf<=numLsf; lsf++ ) {
 
 
 		// Inform the user which limit-state function is being evaluated
@@ -170,6 +170,7 @@ FORMAnalysis::analyze(void)
 			uSecondLast			= theFindDesignPointAlgorithm->getSecondLast_u();
 			alphaSecondLast		= theFindDesignPointAlgorithm->getSecondLast_alpha();
 			lastSearchDirection	= theFindDesignPointAlgorithm->getLastSearchDirection();
+			numberOfEvaluations	= theFindDesignPointAlgorithm->getNumberOfEvaluations();
 
 
 			// Postprocessing
@@ -192,11 +193,21 @@ FORMAnalysis::analyze(void)
 					dBetaDstdv = alpha^DuStarDstdv;
 					aRandomVariable = theReliabilityDomain->getRandomVariablePtr(j);
 					stdv = aRandomVariable->getStdv();
+					mean = aRandomVariable->getMean();
 					delta(j-1) = stdv * dBetaDmean;
 					eta(j-1) = stdv * dBetaDstdv;
+					// (Kappa is the sensitivity wrt. the coefficient of variation)
+					if (mean != 0.0) {
+						kappa(j-1) = -dBetaDmean*stdv/((stdv/mean)*(stdv/mean))+dBetaDstdv*mean;
+					}
+					else {
+						kappa(j-1) = 0.0;
+					}
 				}
-				delta = delta * (1.0/delta.Norm());
-				eta = eta * (1.0/eta.Norm());
+				// Don't scale them:
+//				delta = delta * (1.0/delta.Norm());
+//				eta = eta * (1.0/eta.Norm());
+//				kappa = kappa * (1.0/kappa.Norm());
 			}
 
 
@@ -229,10 +240,13 @@ FORMAnalysis::analyze(void)
 			outputFile << "#  Number of steps: ................................... " 
 				<<setiosflags(ios::left)<<setw(12)<<i 
 				<< "  #" << endln;
+			outputFile << "#  Number of g-function evaluations: .................. " 
+				<<setiosflags(ios::left)<<setw(12)<<numberOfEvaluations 
+				<< "  #" << endln;
 			outputFile << "#  Reliability index beta: ............................ " 
 				<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<beta 
 				<< "  #" << endln;
-			outputFile << "#  Estimated probability of failure pf1: .............. " 
+			outputFile << "#  FO approx. probability of failure, pf1: ............ " 
 				<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<pf1 
 				<< "  #" << endln;
 			outputFile << "#                                                                     #" << endln;
@@ -266,7 +280,17 @@ FORMAnalysis::analyze(void)
 				if (eta(i)<0.0) { outputFile << "-"; }
 				else { outputFile << " "; }
 				outputFile<<setprecision(5)<<setw(8)<<fabs(eta(i));		
-				}
+
+//              Printing reliability sensitivity wrt. coefficient of variation
+//				aRandomVariable = theReliabilityDomain->getRandomVariablePtr(i+1);
+//				mean = aRandomVariable->getMean();
+//				if (mean==0.0) { outputFile << "    -    "; }
+//				else {
+//					if (kappa(i)<0.0) { outputFile << "-"; }
+//					else { outputFile << " "; }
+//					outputFile<<setprecision(5)<<setw(8)<<fabs(kappa(i));		
+//				}
+			}
 			else {
 				outputFile << "    -        -    ";
 			}

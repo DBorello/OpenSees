@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:21 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/meritFunction/AdkZhangMeritFunctionCheck.cpp,v $
 
 
@@ -61,8 +61,7 @@ AdkZhangMeritFunctionCheck::check(Vector u_old,
 								  Vector grad_G_old, 
 								  double stepSize,
 								  Vector stepDirection,
-								  double g_new, 
-								  Vector grad_G_new)
+								  double g_new)
 {
 
 	// Update penalty parameter 'c' (should remain constant along the search direction)

@@ -22,69 +22,50 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-10-27 23:45:44 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/FixedStepSizeRule.cpp,v $
+// $Revision: 1.1 $
+// $Date: 2003-10-27 23:45:41 $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FOSMAnalysis.h,v $
 
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-#include <FixedStepSizeRule.h>
-#include <StepSizeRule.h>
-#include <ProbabilityTransformation.h>
-#include <math.h>
+#ifndef FOSMAnalysis_h
+#define FOSMAnalysis_h
+
+#include <ReliabilityAnalysis.h>
+#include <ReliabilityDomain.h>
+#include <GFunEvaluator.h>
+#include <GradGEvaluator.h>
+#include <Matrix.h>
 #include <Vector.h>
+#include <tcl.h>
 
+#include <fstream>
+using std::ofstream;
 
-FixedStepSizeRule::FixedStepSizeRule(double passedStepSize)
-:StepSizeRule()
+class FOSMAnalysis : public ReliabilityAnalysis
 {
-	stepSize = passedStepSize;
-	gFunValue = -1;
-}
 
-FixedStepSizeRule::~FixedStepSizeRule()
-{
-}
+public:
+	FOSMAnalysis(ReliabilityDomain *theReliabilityDomain,
+				   GFunEvaluator *theGFunEvaluator,
+				   GradGEvaluator *theGradGEvaluator,
+				   Tcl_Interp *theTclInterp,
+				   TCL_Char *fileName);
+	~FOSMAnalysis();
 
+	int analyze(void);
 
+protected:
 
-int
-FixedStepSizeRule::computeStepSize(Vector u, 
-									Vector grad_G, 
-									double G, 
-									Vector d,
-									int stepNumber)
-{
-	// This method is in fact not neccesary 
-	// for the fixed step size rule. The 
-	// user has already given the step size. 
+private:
+	ReliabilityDomain *theReliabilityDomain;
+	GFunEvaluator *theGFunEvaluator;
+	GradGEvaluator *theGradGEvaluator;
+	Tcl_Interp *theTclInterp;
+	char *fileName;
+};
 
-	return 0;  
-
-}
-
-
-double
-FixedStepSizeRule::getStepSize()
-{
-	return stepSize;
-
-}
-
-
-double
-FixedStepSizeRule::getInitialStepSize()
-{
-	return stepSize;
-
-}
-
-double
-FixedStepSizeRule::getGFunValue()
-{
-	return 0.0;
-}
-
+#endif

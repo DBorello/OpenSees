@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:39:54 $
+// $Revision: 1.5 $
+// $Date: 2003-10-27 23:45:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/StepSizeRule.h,v $
 
 
@@ -47,7 +47,6 @@ public:
 	virtual double	getStepSize() =0;
 	virtual double	getInitialStepSize() =0;
 	virtual double getGFunValue() =0;
-	virtual Vector getGradG() = 0;
 
 protected:
 

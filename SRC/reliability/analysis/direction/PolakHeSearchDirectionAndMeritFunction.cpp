@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:05 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/PolakHeSearchDirectionAndMeritFunction.cpp,v $
 
 
@@ -37,9 +37,11 @@
 #include <Vector.h>
 
 
-PolakHeSearchDirectionAndMeritFunction::PolakHeSearchDirectionAndMeritFunction()
+PolakHeSearchDirectionAndMeritFunction::PolakHeSearchDirectionAndMeritFunction(double pgamma, double pdelta)
 :SearchDirection(), MeritFunctionCheck()
 {
+	gamma = pgamma;
+	delta = pdelta;
 	alpha = 0.0;
 }
 
@@ -84,9 +86,10 @@ PolakHeSearchDirectionAndMeritFunction::computeSearchDirection(
 	}
 
 	// Compute elements of the A matrix
-	double a11 = (u ^ u);
-	double a22 = (gradientInStandardNormalSpace ^ gradientInStandardNormalSpace);
-	double a12 = (u ^ gradientInStandardNormalSpace); 
+	double oneOverDelta = 1.0/delta;
+	double a11 = oneOverDelta * (u ^ u);
+	double a22 = oneOverDelta * (gradientInStandardNormalSpace ^ gradientInStandardNormalSpace);
+	double a12 = oneOverDelta * (u ^ gradientInStandardNormalSpace); 
 
 
 	// Compute the elements of the b vector:
@@ -98,6 +101,7 @@ PolakHeSearchDirectionAndMeritFunction::computeSearchDirection(
 		b1 = gFunctionValue;
 	}
 	double b2 = b1 - gFunctionValue;
+	b1 = gamma*b1;
 
 
 	// Compute factors of second order equation
@@ -198,8 +202,7 @@ PolakHeSearchDirectionAndMeritFunction::check(Vector u_old,
 											  Vector grad_G_old, 
 											  double stepSize,
 											  Vector stepDirection,
-											  double g_new, 
-											  Vector grad_G_new)
+											  double g_new)
 {
 	// New point in standard normal space
 	Vector u_new = u_old + stepSize*stepDirection;
@@ -222,7 +225,7 @@ PolakHeSearchDirectionAndMeritFunction::check(Vector u_old,
 	
 
 	// Evaluate the 'merit' function
-	double term1 = 0.5*(u_new^u_new) - 0.5*(u_old^u_old) - g_old_plus;
+	double term1 = 0.5*(u_new^u_new) - 0.5*(u_old^u_old) - gamma * g_old_plus;
 	double term2 = g_new - g_old_plus;
 	double F;
 	if (term1 > term2) {

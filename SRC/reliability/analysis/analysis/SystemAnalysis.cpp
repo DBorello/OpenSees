@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-04-28 20:51:25 $
+// $Revision: 1.6 $
+// $Date: 2003-10-27 23:45:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.cpp,v $
 
 
@@ -52,7 +52,7 @@ using std::setprecision;
 using std::setiosflags;
 
 SystemAnalysis::SystemAnalysis(ReliabilityDomain *passedReliabilityDomain,
-							   const char *passedFileName)
+							   TCL_Char *passedFileName)
 :ReliabilityAnalysis()
 {
 	theReliabilityDomain = passedReliabilityDomain;

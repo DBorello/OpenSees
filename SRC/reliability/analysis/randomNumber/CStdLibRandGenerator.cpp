@@ -22,15 +22,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-04-02 22:02:48 $
+// $Revision: 1.6 $
+// $Date: 2003-10-27 23:45:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/randomNumber/CStdLibRandGenerator.cpp,v $
 
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
-#include <stdlib.h>
+
 #include <RandomNumberGenerator.h>
 #include <CStdLibRandGenerator.h>
 #include <NormalRV.h>

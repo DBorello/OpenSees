@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:00 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/FindDesignPointAlgorithm.h,v $
 
 
@@ -57,6 +57,7 @@ public:
 	virtual double getFirstGFunValue() =0;
 	virtual double getLastGFunValue() =0;
 	virtual Vector getGradientInStandardNormalSpace() =0;
+	virtual int getNumberOfEvaluations() = 0;
 
 protected:
 

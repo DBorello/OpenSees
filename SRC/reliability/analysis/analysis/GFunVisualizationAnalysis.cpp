@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-04-28 20:51:25 $
+// $Revision: 1.4 $
+// $Date: 2003-10-27 23:45:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/GFunVisualizationAnalysis.cpp,v $
 
 
@@ -54,8 +54,8 @@ GFunVisualizationAnalysis::GFunVisualizationAnalysis(
 					ReliabilityDomain *passedReliabilityDomain,
 					GFunEvaluator *passedGFunEvaluator,
 					ProbabilityTransformation *passedProbabilityTransformation,
-					const char *passedOutputFileName,
-					const char *passedConvFileName,
+					TCL_Char *passedOutputFileName,
+					TCL_Char *passedConvFileName,
 					int passedConvResults,
 					int passedSpace,
 					int passedFunSurf,
@@ -601,7 +601,7 @@ GFunVisualizationAnalysis::evaluateGFunction(Vector thePoint, bool isFirstPoint)
 		convFile << myString;
 
 		// Compute gradients
-		result = theGradGEvaluator->evaluateGradG(g,thePoint);
+		result = theGradGEvaluator->computeGradG(g,thePoint);
 		if (result < 0) {
 			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				<< " could not compute gradients of the limit-state function. " << endln;

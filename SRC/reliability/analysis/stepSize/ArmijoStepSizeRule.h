@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:53 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoStepSizeRule.h,v $
 
 
@@ -46,7 +46,6 @@ class ArmijoStepSizeRule : public StepSizeRule
 
 public:
 	ArmijoStepSizeRule(GFunEvaluator *passedGFunEvaluator, 
-		GradGEvaluator *theGradGEvaluator,
 		ProbabilityTransformation *theProbabilityTransformation,
 		MeritFunctionCheck *theMeritFunctionCheck,
 		RootFinding *theRootFindingAlgorithm, 
@@ -64,8 +63,7 @@ public:
 	int		computeStepSize(Vector u, Vector grad_G, double G, Vector d, int stepNumber);
 	double	getStepSize();
 	double	getInitialStepSize();
-	double getGFunValue();
-	Vector getGradG();
+	double  getGFunValue();
 
 protected:
 
@@ -77,7 +75,6 @@ private:
 	MeritFunctionCheck *theMeritFunctionCheck;
 	RootFinding *theRootFindingAlgorithm;
 	double gFunValue;
-	Vector *gradG;
 	double base;
 	int maxNumReductions;
 	double b0;

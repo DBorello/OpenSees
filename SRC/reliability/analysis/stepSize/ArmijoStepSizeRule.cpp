@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:52 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/ArmijoStepSizeRule.cpp,v $
 
 
@@ -33,7 +33,6 @@
 
 #include <ArmijoStepSizeRule.h>
 #include <GFunEvaluator.h>
-#include <GradGEvaluator.h>
 #include <StepSizeRule.h>
 #include <ProbabilityTransformation.h>
 #include <MeritFunctionCheck.h>
@@ -41,9 +40,16 @@
 #include <math.h>
 #include <Vector.h>
 
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+using std::ifstream;
+using std::ios;
+using std::setw;
+using std::setprecision;
+using std::setiosflags;
 
 ArmijoStepSizeRule::ArmijoStepSizeRule(	GFunEvaluator *passedGFunEvaluator,
-					    GradGEvaluator *passedGradGEvaluator,
 						ProbabilityTransformation *passedProbabilityTransformation,
 						MeritFunctionCheck *passedMeritFunctionCheck,
 						RootFinding *passedRootFindingAlgorithm, 
@@ -58,12 +64,10 @@ ArmijoStepSizeRule::ArmijoStepSizeRule(	GFunEvaluator *passedGFunEvaluator,
 :StepSizeRule()
 {
 	theGFunEvaluator = passedGFunEvaluator;
-	theGradGEvaluator = passedGradGEvaluator;
 	theProbabilityTransformation = passedProbabilityTransformation;
 	theMeritFunctionCheck = passedMeritFunctionCheck;
 	theRootFindingAlgorithm = passedRootFindingAlgorithm;
 	gFunValue = 0;
-	gradG = 0;
 	base = Pbase; 
 	maxNumReductions = PmaxNumReductions; 
 	b0 = Pb0; 
@@ -77,8 +81,6 @@ ArmijoStepSizeRule::ArmijoStepSizeRule(	GFunEvaluator *passedGFunEvaluator,
 
 ArmijoStepSizeRule::~ArmijoStepSizeRule()
 {
-	if (gradG != 0) 
-		delete gradG;
 }
 
 
@@ -106,13 +108,6 @@ ArmijoStepSizeRule::getGFunValue()
 }
 
 
-Vector
-ArmijoStepSizeRule::getGradG()
-{
-	return (*gradG);
-}
-
-
 int
 ArmijoStepSizeRule::computeStepSize(Vector u_old, 
 									Vector grad_G_old, 
@@ -122,16 +117,20 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 {
 
 	// Initial declarations
-	int j;
 	bool isOutsideSphere;
 	bool isSecondTime;
 	bool FEconvergence;
 	double result;
 	Vector x_new;
-	double zeroFlag;
 	Matrix jacobian_x_u;
 
 
+	// Inform user through log file
+	static ofstream logfile( "ArmijoRuleLog.txt", ios::out );
+	logfile << "Entering the Armijo rule to compute step size ..." << endln;
+	logfile.flush();
+	
+	
 	// Check that the norm of the gradient is not zero
 	double gradNorm = grad_G_old.Norm();
 	if (gradNorm == 0.0) {
@@ -164,6 +163,15 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 	Vector u_new = u_old + dir_old * lambda_new;
 
 
+	// Inform the user
+	if (printFlag != 0) {
+		opserr << "Armijo starting gFun evaluation at distance " << u_new.Norm() << "..." << endln
+			<< " .......: ";
+	}
+	logfile << "Armijo starting gFun evaluation at distance " << u_new.Norm() << "..." << endln;
+	logfile.flush();
+
+
 	double g_new;
 	Vector grad_G_new;
 	if (u_new.Norm()>radius) {
@@ -175,6 +183,16 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 		// fail in any case because it is outside the sphere. 
 		g_new = g_old;
 		grad_G_new = grad_G_old;
+
+
+		// Inform the user
+		if (printFlag != 0) {
+			opserr << "Armijo skipping gFun evaluation because of hyper sphere requirement..." << endln
+				<< " .......: ";
+		}
+		logfile << "Armijo skipping gFun evaluation because of hyper sphere requirement..." << endln;
+		logfile.flush();
+
 
 	}
 	else {
@@ -193,11 +211,6 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 			isCloseToSphere = false;
 		}
 
-
-		if (printFlag != 0) {
-			opserr << "Armijo starting gFun evaluation at distance " << u_new.Norm() << "..." << endln
-				<< " .......: ";
-		}
 
 		// Transform the trial point into original space
 		result = theProbabilityTransformation->set_u(u_new);
@@ -219,45 +232,20 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 		// Evaluate the limit-state function
 		FEconvergence = true;
 		result = theGFunEvaluator->runGFunAnalysis(x_new);
-		if (result < 0) {
+/*		if (result < 0) {
 			// In this case the FE analysis did not converge
 			// In this case; do not accept the new point!
 			FEconvergence = false;
 			opserr << "step size rejected due to non-converged FE analysis ..." << endln
 				<< " .......: ";
 		}
-		result = theGFunEvaluator->evaluateG(x_new);
+*/		result = theGFunEvaluator->evaluateG(x_new);
 		if (result < 0) {
 			opserr << "ArmijoStepSizeRule::computeStepSize() - could not  " << endln
 				<< " tokenize the limit-state function. " << endln;
 			return -1;
 		}
 		g_new = theGFunEvaluator->getG();
-
-
-		// Gradient in original space
-		result = theGradGEvaluator->evaluateGradG(g_new,x_new);
-		if (result < 0) {
-			opserr << "ArmijoStepSizeRule::computeStepSize() - " << endln
-				<< " could not compute gradients of the limit-state function. " << endln;
-			return -1;
-		}
-		grad_G_new = theGradGEvaluator->getGradG();
-		grad_G_new = jacobian_x_u ^ grad_G_new;
-
-
-		// Check if all components of the vector is zero
-		zeroFlag = 0;
-		for (j=0; j<grad_G_new.Size(); j++) {
-			if (grad_G_new[j] != 0.0) {
-				zeroFlag = 1;
-			}
-		}
-		if (zeroFlag == 0) {
-			opserr << "ArmijoStepSizeRule::computeStepSize()() - " << endln
-				<< " all components of the gradient vector is zero. " << endln;
-			return -1;
-		}
 
 	}
 
@@ -268,7 +256,7 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 	int i = 1;
 	bool mustGoOn = false;
 
-	if (theMeritFunctionCheck->check(u_old, g_old, grad_G_old, lambda_new, dir_old, g_new, grad_G_new)<0) {
+	if (theMeritFunctionCheck->check(u_old, g_old, grad_G_old, lambda_new, dir_old, g_new)<0) {
 		mustGoOn = true;
 	}
 	if (!FEconvergence) {
@@ -288,7 +276,9 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 		// Notify user that step sizes are being reduced
 		opserr << "Armijo trial point rejected; reducing step size..." << endln
 			<< " .......: ";
-
+		logfile << "Armijo trial point rejected; reducing step size..." << endln;
+		logfile.flush();
+		
 
 		// Cut the step size in half (or whichever base the user has set) and try that instead
 		if (stepNumber <= numberOfShortSteps) {
@@ -305,6 +295,13 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 
 			isOutsideSphere = true;
 
+			// Inform the user
+			if (printFlag != 0) {
+				opserr << "Armijo skipping gFun evaluation because of hyper sphere requirement..." << endln
+					<< " .......: ";
+			}
+			logfile << "Armijo skipping gFun evaluation because of hyper sphere requirement..." << endln;
+			logfile.flush();
 		}
 		else {
 
@@ -326,6 +323,7 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 				opserr << "Armijo starting gFun evaluation at distance " << u_new.Norm() << "..." << endln
 					<< " .......: ";
 			}
+			logfile << "Armijo starting gFun evaluation at distance " << u_new.Norm() << "..." << endln;
 
 			// Transform the trial point into original space
 			double result = theProbabilityTransformation->set_u(u_new);
@@ -347,14 +345,15 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 			// Evaluate the limit-state function
 			FEconvergence = true;
 			result = theGFunEvaluator->runGFunAnalysis(x_new);
-			if (result < 0) {
+/*			if (result < 0) {
 				// In this case the FE analysis did not converge
-				// In this case; do not accept the new point!
+				// May still accept the new point!
 				FEconvergence = false;
 				opserr << "step size rejected due to non-converged FE analysis ..." << endln
 					<< " .......: ";
+				logfile << "step size rejected due to non-converged FE analysis ..." << endln;
 			}
-			result = theGFunEvaluator->evaluateG(x_new);
+*/			result = theGFunEvaluator->evaluateG(x_new);
 			if (result < 0) {
 				opserr << "ArmijoStepSizeRule::computeStepSize() - could not  " << endln
 					<< " tokenize the limit-state function. " << endln;
@@ -363,34 +362,13 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 			g_new = theGFunEvaluator->getG();
 
 
-			// Gradient in original space
-			result = theGradGEvaluator->evaluateGradG(g_new,x_new);
-			if (result < 0) {
-				opserr << "ArmijoStepSizeRule::computeStepSize() - " << endln
-					<< " could not compute gradients of the limit-state function. " << endln;
-				return -1;
-			}
-			grad_G_new = theGradGEvaluator->getGradG();
-			grad_G_new = jacobian_x_u ^ grad_G_new;
-
-
-			// Check if all components of the vector is zero
-			zeroFlag = 0;
-			for (j=0; j<grad_G_new.Size(); j++) {
-				if (grad_G_new[j] != 0.0) {
-					zeroFlag = 1;
-				}
-			}
-			if (zeroFlag == 0) {
-				opserr << "ArmijoStepSizeRule::computeStepSize()() - " << endln
-					<< " all components of the gradient vector is zero. " << endln;
-				return -1;
-			}
-
-
 			// Possibly project the point onto the limit-state surface
 			// (it is assumed that the user has provided a projection object 
 			// if this is to be done)
+			// Note that this has effect on the previously computed search direction
+			// because the new values of the performance function and its gradient
+			// is being used...
+			// Q: Is the u_new point also being kept in the orchestrating algorithm?
 			if (theRootFindingAlgorithm != 0) {
 				theRootFindingAlgorithm->findLimitStateSurface(2,g_new, grad_G_old, u_new);
 			}
@@ -402,7 +380,7 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 		// Check if we need to go on
 		mustGoOn = false;
 
-		if (theMeritFunctionCheck->check(u_old, g_old, grad_G_old, lambda_new, dir_old, g_new, grad_G_new)<0) {
+		if (theMeritFunctionCheck->check(u_old, g_old, grad_G_old, lambda_new, dir_old, g_new)<0) {
 			mustGoOn = true;
 		}
 		if (!FEconvergence) {
@@ -421,14 +399,6 @@ ArmijoStepSizeRule::computeStepSize(Vector u_old,
 	stepSize = lambda_new;
 	gFunValue = g_new;
 
-
-	if (gradG == 0) {
-		gradG = new Vector(grad_G_new);
-	}
-	else {
-		(*gradG) = grad_G_new;
-	}
-
-	return 2;
+	return 1;
 
 }

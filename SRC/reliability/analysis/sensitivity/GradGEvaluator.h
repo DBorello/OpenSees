@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:37 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/GradGEvaluator.h,v $
 
 
@@ -47,8 +47,11 @@ public:
 	virtual ~GradGEvaluator();
 
 	// Methods provided by the sub-classes
-	virtual int		evaluateGradG(double gFunValue, Vector passed_x) =0;
+	virtual int		computeGradG(double gFunValue, Vector passed_x) =0;
+	virtual int		computeAllGradG(Vector gFunValues, Vector passed_x) =0;
+
 	virtual Vector	getGradG() =0;
+	virtual Matrix	getAllGradG() =0;
 
 	// Methods that are provided by sub-classes, but rather specific to FE reliability
 	virtual Matrix  getDgDdispl();

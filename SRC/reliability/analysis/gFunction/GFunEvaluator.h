@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:39:15 $
+// $Revision: 1.4 $
+// $Date: 2003-10-27 23:45:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.h,v $
 
 
@@ -49,22 +49,24 @@ public:
 	virtual ~GFunEvaluator();
 
 	// Methods provided by base class
-	int				evaluateG(Vector x);
-	double			getG();
+	int		evaluateG(Vector x);
+	double	getG();
+	int     initializeNumberOfEvaluations();
+	int     getNumberOfEvaluations();
 
 	// Methods to be implemented by specific classes
 	virtual int		runGFunAnalysis(Vector x)	=0;
-	virtual int		tokenizeSpecials(char *theExpression)	=0;
+	virtual int		tokenizeSpecials(TCL_Char *theExpression)	=0;
 
 	// Methods implemented by SOME specific classes (random vibrations stuff)
 	virtual void    setNsteps(int nsteps);
-	virtual int     getNsteps();
 	virtual double  getDt();
 	
 protected:
 	Tcl_Interp *theTclInterp;
 	ReliabilityDomain *theReliabilityDomain;
 	double g;
+	int numberOfEvaluations;
 
 private:
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:57 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.h,v $
 
 
@@ -85,7 +85,36 @@ private:
 	Vector z_to_x(Vector z);
 	Vector x_to_z(Vector x);
 
-
+	// Auxiliary member functions for manual evaluation of 
+	// the integral equation to find Nataf correlation
+	double phi2(double z_i, 
+				double z_j, 
+				double rho);
+	double integrand(int rv_i,
+				     double z_i, 
+				     double mean_i,
+				     double stdv_i, 
+				     int rv_j,
+				     double z_j,
+				     double mean_j, 
+				     double stdv_j,
+				     double rho);
+	double doubleIntegral(int rv_i,
+						  double mean_i,
+						  double stdv_i, 
+						  int rv_j,
+						  double mean_j, 
+						  double stdv_j,
+						  double rho);
+	double residualFunction(double rho_original, 
+						    double rho,
+						    double rv_i, 
+						    double mean_i, 
+						    double stdv_i, 
+						    double rv_j, 
+						    double mean_j, 
+						    double stdv_j);
+	double solveForCorrelation(int rv_i, int rv_j, double rho_original);
 };
 
 #endif

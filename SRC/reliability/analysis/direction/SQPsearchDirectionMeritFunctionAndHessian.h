@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:06 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/SQPsearchDirectionMeritFunctionAndHessian.h,v $
 
 
@@ -59,8 +59,7 @@ public:
 			  Vector grad_G_old, 
 			  double stepSize,
 			  Vector stepDirection,
-			  double g_new, 
-			  Vector grad_G_new);
+			  double g_new);
 	double getMeritFunctionValue(Vector u, double g, Vector grad_G);
 	int updateMeritParameters(Vector u, double g, Vector grad_G);
 
@@ -76,7 +75,7 @@ public:
 									   double stepSize,
 									   Vector searchDirection,
 									   double g_new,
-									   Vector gradG_new);
+									   Vector grad_G_new);
 
 protected:
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-04-28 20:51:25 $
+// $Revision: 1.4 $
+// $Date: 2003-10-27 23:45:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.cpp,v $
 
 //
@@ -57,9 +57,11 @@ OutCrossingAnalysis::OutCrossingAnalysis(
 				GradGEvaluator *theSensEval,
 				FindDesignPointAlgorithm *theFindDesPt,
 				int pAnalysisType,
+				int p_stepsToStart,
+				int p_stepsToEnd,
 				int p_sampleFreq,
 				double p_littleDeltaT,
-				const char *passedFileName)
+				TCL_Char *passedFileName)
 :ReliabilityAnalysis()
 {
 	theFindDesignPointAlgorithm = theFindDesPt;
@@ -67,6 +69,8 @@ OutCrossingAnalysis::OutCrossingAnalysis(
 	theGFunEvaluator = theGFunEval;
 	theGradGEvaluator = theSensEval;
 	analysisType = pAnalysisType;
+	stepsToStart = p_stepsToStart;
+	stepsToEnd = p_stepsToEnd;
 	sampleFreq = p_sampleFreq;
 	littleDeltaT = p_littleDeltaT;
 	fileName = new char[256];
@@ -84,7 +88,7 @@ OutCrossingAnalysis::analyze(void)
 {
 
 	// Alert the user that the analysis has started
-	opserr << "Random Vibration Analysis is running ... " << endln;
+	opserr << "Out-Crossing Analysis is running ... " << endln;
 
 	// Declare variables used in this method
 	int numRV = theReliabilityDomain->getNumberOfRandomVariables();
@@ -102,13 +106,17 @@ OutCrossingAnalysis::analyze(void)
 	double a, b, integral, h, fa, fb, sum_fx2j, sum_fx2j_1, Pmn1;
 	char string[500];
 
-	// Get max number of steps from the gfun evaluator 
-	int nsteps = theGFunEvaluator->getNsteps();
 
+	// Determine number of points
+	double nsteps = stepsToEnd-stepsToStart;
 	int numPoints = (int)floor(nsteps/sampleFreq);
+	numPoints++;
 	double dt = theGFunEvaluator->getDt();
 	double Dt = dt*sampleFreq;
 	double T = dt*sampleFreq*numPoints;
+
+
+	// Allocate reult vectors
 	Vector nu(numPoints);
 	Vector ED(numPoints);
 	Vector pf(numPoints);
@@ -130,8 +138,8 @@ OutCrossingAnalysis::analyze(void)
 
 
 		// Start printing results to the output file
-		outputFile << "#######################################################################" << endln;
-		outputFile << "#  RANDOM VIBRATIONS RESULTS, LIMIT-STATE FUNCTION NUMBER "
+		outputFile << "########################################################R##############" << endln;
+		outputFile << "#  OUT-CROSSING RESULTS, LIMIT-STATE FUNCTION NUMBER      "
 			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"        #" << endln;
 		outputFile << "#                                                                     #" << endln;
 
@@ -161,12 +169,12 @@ OutCrossingAnalysis::analyze(void)
 			DSPTfailed = false;
 
 			// Set 'nsteps' in the GFunEvaluator 
-			theGFunEvaluator->setNsteps(i*sampleFreq);
+			theGFunEvaluator->setNsteps(stepsToStart+(i-1)*sampleFreq);
 
 
 			// Inform the user
 			char printTime[10];
-			sprintf(printTime, "%5.3f", (i*sampleFreq*dt) );
+			sprintf(printTime, "%5.3f", ((stepsToStart+(i-1)*sampleFreq)*dt) );
 			if (analysisType == 1) {
 				strcpy(string,theLimitStateFunction->getExpression());
 				opserr << " ...evaluating -G1=" << string << " at time " << printTime << " ..." << endln;
@@ -275,37 +283,43 @@ OutCrossingAnalysis::analyze(void)
 					else {
 						outputFile << "#  Second limit-state function did not converge.                      #" << endln;
 					}
+				
+					// Post-processing to find parallel system probability
+					a = -(alpha ^ alpha2);	// Interval start
+					b = 0.0;				// Interval end
+					n_2 = 600;				// Half the number of intervals
+					h = b-a;
+					fa = functionToIntegrate(a,beta1,beta2);
+					fb = functionToIntegrate(b,beta1,beta2);
+					sum_fx2j = 0.0;
+					sum_fx2j_1 = 0.0;
+					for (int j=1;  j<=n_2;  j++) {
+						sum_fx2j = sum_fx2j + functionToIntegrate(   (double) (a+(j*2)*h/(2*n_2)) ,beta1, beta2  );
+						sum_fx2j_1 = sum_fx2j_1 + functionToIntegrate(   (double)(a+(j*2-1)*h/(2*n_2)) , beta1, beta2  );
+					}
+					sum_fx2j = sum_fx2j - functionToIntegrate((double)(b),beta1,beta2);
+					integral = h/(2*n_2)/3.0*(fa + 2.0*sum_fx2j + 4.0*sum_fx2j_1 + fb);
+					Pmn1 = aStdNormRV.getCDFvalue(-beta1)*aStdNormRV.getCDFvalue(-beta2) - integral;
+				
 				}
 				else {
-					// Use Hoensang's method to find new alpha and beta
+					// Use Heonsang's method to find new alpha and beta
 					beta2 = -beta1;
-					alpha2(i) = alpha(i) - littleDeltaT/Dt * ( alpha(i)-0.0 );
+					alpha2(0) = alpha(0) - littleDeltaT/Dt * ( alpha(0)-0.0 );
 					for (j=1; j<alpha.Size(); j++) {
 						alpha2(j) = alpha(j) - littleDeltaT/Dt * ( alpha(j)-alpha(j-1) );
 					}
-				}
 
-				// POST-PROCESSING TO FIND CROSSING RATES ETC. 
-
-				// Bi-variate normal distribution for all the pairs
-
+					// Post-processing to find parallel system probability
+					a = -1.0*(alpha ^ alpha2);
+					double pi = 3.14159265358979;
+					Pmn1 = 1.0/(2.0*pi) * exp(-beta2*beta2*0.5) * (asin(a)+1.570796326794897);
 				
-				a = -(alpha ^ alpha2);	// Interval start
-				b = 0.0;				// Interval end
-				n_2 = 600;				// Half the number of intervals
-				h = b-a;
-				fa = functionToIntegrate(a,beta1,beta2);
-				fb = functionToIntegrate(b,beta1,beta2);
-				sum_fx2j = 0.0;
-				sum_fx2j_1 = 0.0;
-				for (int j=1;  j<=n_2;  j++) {
-					sum_fx2j = sum_fx2j + functionToIntegrate(   (double) (a+(j*2)*h/(2*n_2)) ,beta1, beta2  );
-					sum_fx2j_1 = sum_fx2j_1 + functionToIntegrate(   (double)(a+(j*2-1)*h/(2*n_2)) , beta1, beta2  );
+				
 				}
-				sum_fx2j = sum_fx2j - functionToIntegrate((double)(b),beta1,beta2);
-				integral = h/(2*n_2)/3.0*(fa + 2.0*sum_fx2j + 4.0*sum_fx2j_1 + fb);
-				Pmn1 = aStdNormRV.getCDFvalue(-beta1)*aStdNormRV.getCDFvalue(-beta2) - integral;
 
+
+				// POST-PROCESSING
 
 				// Mean out-crossing rate
 				if (Pmn1<1.0e-10) {
@@ -327,7 +341,7 @@ OutCrossingAnalysis::analyze(void)
 				// Print the results to file right away...
 				outputFile.setf( ios::fixed, ios::floatfield );
 
-				outputFile << "#  " <<setprecision(2)<<setw(9)<<(i*sampleFreq*dt);
+				outputFile << "#  " <<setprecision(2)<<setw(9)<<((stepsToStart+(i-1)*sampleFreq)*dt);
 				
 				if (beta(i-1)<0.0) { outputFile << "-"; }
 				else { outputFile << " "; }
@@ -367,7 +381,7 @@ OutCrossingAnalysis::analyze(void)
 
 		if (!oneFailed) {
 
-			// Upper bound to probability of excursion during the interval T
+			// Upper bound to probability of excursion during the interval 
 			double Upper = 0.0;
 			for (j=0; j<nu.Size(); j++) {
 				Upper += nu(j)*Dt;
@@ -441,7 +455,7 @@ OutCrossingAnalysis::analyze(void)
 			outputFile << "#                                                                     #" << endln;
 			outputFile << "#  ACCUMULATED RESULTS:                                               #" << endln;
 			outputFile << "#                                                                     #" << endln;
-			outputFile << "#  Total time: ........................................ " 
+			outputFile << "#  Total time T: ...................................... " 
 				<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<< T << "  #" << endln;
 			
 			outputFile.setf( ios::scientific, ios::floatfield );
@@ -469,7 +483,7 @@ OutCrossingAnalysis::analyze(void)
 
 
 	// Print summary of results to screen (more here!!!)
-	opserr << "Random Vibrations Analysis completed." << endln;
+	opserr << "Out-Crossing Analysis completed." << endln;
 
 	return 0;
 }

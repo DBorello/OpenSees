@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:38 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/OpenSeesGradGEvaluator.cpp,v $
 
 
@@ -37,7 +37,6 @@
 #include <GradGEvaluator.h>
 #include <ReliabilityDomain.h>
 #include <LimitStateFunction.h>
-#include <GFunEvaluator.h>
 #include <RandomVariable.h>
 #include <tcl.h>
 #include <string.h>
@@ -53,18 +52,17 @@ using std::setiosflags;
 
 
 OpenSeesGradGEvaluator::OpenSeesGradGEvaluator(
-					GFunEvaluator *passedGFunEvaluator,
 					Tcl_Interp *passedTclInterp,
 					ReliabilityDomain *passedReliabilityDomain,
 					bool PdoGradientCheck)
 :GradGEvaluator(passedReliabilityDomain, passedTclInterp)
 {
-	theGFunEvaluator = passedGFunEvaluator;
 	theReliabilityDomain = passedReliabilityDomain;
 	doGradientCheck = PdoGradientCheck;
 
 	int nrv = passedReliabilityDomain->getNumberOfRandomVariables();
 	grad_g = new Vector(nrv);
+	grad_g_matrix = 0;
 
 	DgDdispl = 0;
 }
@@ -76,6 +74,9 @@ OpenSeesGradGEvaluator::~OpenSeesGradGEvaluator()
 
 	if (DgDdispl != 0)
 		delete DgDdispl;
+
+	if (grad_g_matrix != 0)
+		delete grad_g_matrix;
 }
 
 
@@ -88,8 +89,21 @@ OpenSeesGradGEvaluator::getGradG()
 }
 
 
+Matrix
+OpenSeesGradGEvaluator::getAllGradG()
+{
+	if (grad_g_matrix==0) {
+		Matrix dummy(1,1);
+		return dummy;
+	}
+	else {
+		return (*grad_g_matrix);
+	}
+}
+
+
 int
-OpenSeesGradGEvaluator::evaluateGradG(double g, Vector passed_x)
+OpenSeesGradGEvaluator::computeGradG(double g, Vector passed_x)
 {
 	// Zero out the previous result matrix
 	if (DgDdispl != 0) {
@@ -298,6 +312,41 @@ OpenSeesGradGEvaluator::evaluateGradG(double g, Vector passed_x)
 	return 0;
 
 }
+
+
+
+int
+OpenSeesGradGEvaluator::computeAllGradG(Vector gFunValues, Vector passed_x)
+{
+
+	// Allocate result matrix
+	Vector gradG(passed_x.Size());
+	if (grad_g_matrix == 0) {
+		grad_g_matrix = new Matrix(passed_x.Size(), gFunValues.Size());
+	}
+	else {
+		grad_g_matrix->Zero();
+	}
+
+
+	// Loop over performance functions
+	for (int j=1; j<=gFunValues.Size(); j++) {
+
+		// Set tag of active limit-state function
+		theReliabilityDomain->setTagOfActiveLimitStateFunction(j);
+
+		this->computeGradG(gFunValues(j-1),passed_x);
+		gradG = this->getGradG();
+
+		for (int i=1; i<=passed_x.Size(); i++) {
+	
+			(*grad_g_matrix)(i-1,j-1) = gradG(i-1);
+		}
+	}
+
+	return 0;
+}
+
 
 Matrix 
 OpenSeesGradGEvaluator::getDgDdispl()

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:39:15 $
+// $Revision: 1.4 $
+// $Date: 2003-10-27 23:45:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.cpp,v $
 
 
@@ -47,6 +47,7 @@ GFunEvaluator::GFunEvaluator(Tcl_Interp *passedTclInterp, ReliabilityDomain *pas
 {
 	theTclInterp = passedTclInterp;
 	theReliabilityDomain = passedReliabilityDomain;
+	numberOfEvaluations = 0;
 }
 
 GFunEvaluator::~GFunEvaluator()
@@ -60,11 +61,26 @@ GFunEvaluator::getG()
 	return g;
 }
 
+int
+GFunEvaluator::initializeNumberOfEvaluations()
+{
+	numberOfEvaluations = 0;
+	return 0;
+}
+
+int
+GFunEvaluator::getNumberOfEvaluations()
+{
+	return numberOfEvaluations;
+}
 
 
 int 
 GFunEvaluator::evaluateG(Vector x)
 {
+	numberOfEvaluations++;
+
+
 	// "Download" limit-state function from reliability domain
 	int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 	LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
@@ -91,7 +107,7 @@ GFunEvaluator::evaluateG(Vector x)
 	char *dollarSign = "$";
 	char *underscore = "_";
 
-	char *lsf_forTokenizing = new char[500];
+	char lsf_forTokenizing[500];
 	strcpy(lsf_forTokenizing,theExpression);
 
 
@@ -170,13 +186,6 @@ GFunEvaluator::setNsteps(int nsteps)
 		<< " implemented for the chosen type of GFunEvaluator." << endln;
 }
 
-int
-GFunEvaluator::getNsteps()
-{
-	opserr << "GFunEvaluator::getNsteps() -- This method is not " << endln
-		<< " implemented for the chosen type of GFunEvaluator." << endln;
-	return 0;
-}
 
 double
 GFunEvaluator::getDt()

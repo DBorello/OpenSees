@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:39:00 $
+// $Revision: 1.7 $
+// $Date: 2003-10-27 23:45:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -84,6 +84,7 @@ SearchWithStepSizeAndStepDirection::SearchWithStepSizeAndStepDirection(
 	theReliabilityConvergenceCheck  = passedReliabilityConvergenceCheck;
 	startPoint						= pStartPoint;
 	printFlag						= pprintFlag;
+	numberOfEvaluations =0;
 	fileNamePrint = new char[256];
 	if (printFlag != 0) {
 		strcpy(fileNamePrint,pFileNamePrint);
@@ -132,6 +133,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 	Matrix jacobian_x_u(numberOfRandomVariables,numberOfRandomVariables);
 	int evaluationInStepSize = 0;
 	int result;
+	theGFunEvaluator->initializeNumberOfEvaluations();
 
 	
 	// Prepare output file to store the search points
@@ -239,50 +241,37 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 			Gfirst = gFunctionValue;
 			opserr << " Limit-state function value at start point, g=" << gFunctionValue << endln;
 			opserr << " STEP #0: ";
-			if (fabs(gFunctionValue) < 1.0e-4) {
-				// (Instead of this hard-coded number; maybe it would 
-				// be better with a restart option.  The the gFun wouldn't 
-				// be evaluated in the first step at all.  However, then 
-				// the gradients and the gFun value would have to be stored
-				// from the previous step.)
-				theReliabilityConvergenceCheck->setScaleValue(1.0);
-			}
-			else {
-				theReliabilityConvergenceCheck->setScaleValue(gFunctionValue);
-			}
+			theReliabilityConvergenceCheck->setScaleValue(gFunctionValue);
 		}
 
 
 		// Gradient in original space
-		if (evaluationInStepSize != 2) {
-			
-			result = theGradGEvaluator->evaluateGradG(gFunctionValue,x);
-			if (result < 0) {
-				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-					<< " could not compute gradients of the limit-state function. " << endln;
-				return -1;
-			}
-			gradientOfgFunction = theGradGEvaluator->getGradG();
-
-
-			// Check if all components of the vector is zero
-			zeroFlag = 0;
-			for (j=0; j<gradientOfgFunction.Size(); j++) {
-				if (gradientOfgFunction[j] != 0.0) {
-					zeroFlag = 1;
-				}
-			}
-			if (zeroFlag == 0) {
-				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-					<< " all components of the gradient vector is zero. " << endln;
-				return -1;
-			}
-
-
-			// Gradient in standard normal space
-			gradientInStandardNormalSpace_old = gradientInStandardNormalSpace;
-			gradientInStandardNormalSpace = jacobian_x_u ^ gradientOfgFunction;
+		result = theGradGEvaluator->computeGradG(gFunctionValue,x);
+		if (result < 0) {
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " could not compute gradients of the limit-state function. " << endln;
+			return -1;
 		}
+		gradientOfgFunction = theGradGEvaluator->getGradG();
+
+
+		// Check if all components of the vector is zero
+		zeroFlag = 0;
+		for (j=0; j<gradientOfgFunction.Size(); j++) {
+			if (gradientOfgFunction[j] != 0.0) {
+				zeroFlag = 1;
+			}
+		}
+		if (zeroFlag == 0) {
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " all components of the gradient vector is zero. " << endln;
+			return -1;
+		}
+
+
+		// Gradient in standard normal space
+		gradientInStandardNormalSpace_old = gradientInStandardNormalSpace;
+		gradientInStandardNormalSpace = jacobian_x_u ^ gradientOfgFunction;
 
 
 		// Compute the norm of the gradient in standard normal space
@@ -307,7 +296,7 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 		
 
 			// Inform the user of the happy news!
-			opserr << "Design point was found!" << endln;
+			opserr << "Design point found!" << endln;
 
 
 			// Print the design point to file, if desired
@@ -356,23 +345,11 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 			}
 			Matrix transposeOfJacobian_x_u = theMatrixOperations.getTranspose();
 
-
 			Matrix jacobianProduct = jacobian_x_u * transposeOfJacobian_x_u;
-
-
-			theMatrixOperations.setMatrix(jacobianProduct);
-			result = theMatrixOperations.computeSquareRoot();
-			if (result < 0) {
-				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-					<< " could not compute square root of matrix elements. " << endln;
-				return -1;
-			}
-			Matrix squareRootOfJacobianProduct = theMatrixOperations.getSquareRoot();
-			
 
 			Matrix D_prime(numberOfRandomVariables,numberOfRandomVariables);
 			for (j=0; j<numberOfRandomVariables; j++) {
-				D_prime(j,j) = squareRootOfJacobianProduct(j,j);
+				D_prime(j,j) = sqrt(jacobianProduct(j,j));
 			}
 
 
@@ -383,6 +360,8 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 			gamma = D_prime ^ tempProduct;
 			
 			Glast = gFunctionValue;
+
+			numberOfEvaluations = theGFunEvaluator->getNumberOfEvaluations();
 
 			return 1;
 		}
@@ -431,17 +410,10 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 		else if (result == 0) {  // (nothing was evaluated in step size)
 			evaluationInStepSize = 0;
 		}
-		else if (result == 1) {  // (the gfun only was evaluated)
+		else if (result == 1) {  // (the gfun was evaluated)
 			evaluationInStepSize = 1;
 			gFunctionValue_old = gFunctionValue;
 			gFunctionValue = theStepSizeRule->getGFunValue();
-		}
-		else if (result == 2) {  // (both gfun and gradient was evaluated)
-			evaluationInStepSize = 2;
-			gFunctionValue_old = gFunctionValue;
-			gradientInStandardNormalSpace_old = gradientInStandardNormalSpace;
-			gFunctionValue = theStepSizeRule->getGFunValue();
-			gradientInStandardNormalSpace = theStepSizeRule->getGradG();
 		}
 		stepSize = theStepSizeRule->getStepSize();
 
@@ -450,13 +422,6 @@ SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedRel
 		u_old = u;
 		u = u_old + (searchDirection * stepSize);
 
-
-//		This would be the place to possibly do projection onto subspace 
-//		orthogonal to principal axes if a projection algorith has been provided
-//		if (theRvProjection != 0) {
-//			uNew = theRvProjection->projectOntoOrthogonalSubspace(u);
-//			u = uNew;
-//		}
 
 		// Increment the loop parameter
 		i++;
@@ -539,6 +504,14 @@ Vector
 SearchWithStepSizeAndStepDirection::getGradientInStandardNormalSpace()
 {
 	return gradientInStandardNormalSpace;
+}
+
+
+
+int
+SearchWithStepSizeAndStepDirection::getNumberOfEvaluations()
+{
+	return numberOfEvaluations;
 }
 
 

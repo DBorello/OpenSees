@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:35 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/FiniteDifferenceGradGEvaluator.h,v $
 
 
@@ -36,6 +36,7 @@
 
 #include <GradGEvaluator.h>
 #include <Vector.h>
+#include <Matrix.h>
 #include <ReliabilityDomain.h>
 #include <GFunEvaluator.h>
 #include <tcl.h>
@@ -52,11 +53,16 @@ public:
 				ReliabilityDomain *passedReliabilityDomain,
 				Tcl_Interp *passedTclInterp,
 				double perturbationFactor,
-				bool doGradientCheck);
+				bool doGradientCheck,
+				bool reComputeG);
 	~FiniteDifferenceGradGEvaluator();
 
-	int		evaluateGradG(double gFunValue, Vector passed_x);
+	int		computeGradG(double gFunValue, Vector passed_x);
+	int		computeAllGradG(Vector gFunValues, Vector passed_x);
+
 	Vector	getGradG();
+	Matrix	getAllGradG();
+
 	Matrix  getDgDdispl();
 
 protected:
@@ -65,11 +71,13 @@ private:
 //	int computeDgDsomething();
 
 	Vector *grad_g;
+	Matrix *grad_g_matrix;
 	GFunEvaluator *theGFunEvaluator;
 	Matrix *DgDdispl;
 	Matrix *DgDpar;
 	double perturbationFactor;
 	bool doGradientCheck;
+	bool reComputeG;
 };
 
 #endif

@@ -22,69 +22,41 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-10-27 23:45:44 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/FixedStepSizeRule.cpp,v $
+// $Revision: 1.1 $
+// $Date: 2003-10-27 23:45:41 $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OptimizationAnalysis.h,v $
 
 
 //
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
-#include <FixedStepSizeRule.h>
-#include <StepSizeRule.h>
-#include <ProbabilityTransformation.h>
-#include <math.h>
-#include <Vector.h>
+#ifndef OptimizationAnalysis_h
+#define OptimizationAnalysis_h
 
+#include <ReliabilityAnalysis.h>
+#include <ReliabilityDomain.h>
 
-FixedStepSizeRule::FixedStepSizeRule(double passedStepSize)
-:StepSizeRule()
+#include <fstream>
+using std::ofstream;
+
+class OptimizationAnalysis : public ReliabilityAnalysis
 {
-	stepSize = passedStepSize;
-	gFunValue = -1;
-}
 
-FixedStepSizeRule::~FixedStepSizeRule()
-{
-}
+public:
+	OptimizationAnalysis(ReliabilityDomain *passedReliabilityDomain, TCL_Char *fileName);
+	virtual ~OptimizationAnalysis();
 
+	int analyze(void);
 
+protected:
 
-int
-FixedStepSizeRule::computeStepSize(Vector u, 
-									Vector grad_G, 
-									double G, 
-									Vector d,
-									int stepNumber)
-{
-	// This method is in fact not neccesary 
-	// for the fixed step size rule. The 
-	// user has already given the step size. 
+private:
+	double f0(Vector x, double assump, double betavar);
+	Vector fjs(Vector x, double assump, double betavar, double betavarmax, double betavarmin);
 
-	return 0;  
+	ReliabilityDomain *theReliabilityDomain;
+	char *fileName;
+};
 
-}
-
-
-double
-FixedStepSizeRule::getStepSize()
-{
-	return stepSize;
-
-}
-
-
-double
-FixedStepSizeRule::getInitialStepSize()
-{
-	return stepSize;
-
-}
-
-double
-FixedStepSizeRule::getGFunValue()
-{
-	return 0.0;
-}
-
+#endif

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:39:02 $
+// $Revision: 1.4 $
+// $Date: 2003-10-27 23:45:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.h,v $
 
 
@@ -82,6 +82,7 @@ public:
 	double getFirstGFunValue();
 	double getLastGFunValue();
 	Vector getGradientInStandardNormalSpace();
+	int    getNumberOfEvaluations();
 
 protected:
 
@@ -123,6 +124,7 @@ private:
 
 	int printFlag;
 	char *fileNamePrint;
+	int numberOfEvaluations;
 };
 
 #endif

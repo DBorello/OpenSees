@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-03-06 18:11:14 $
+// $Revision: 1.3 $
+// $Date: 2003-10-27 23:45:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/sensitivity/GradGEvaluator.cpp,v $
 
 
@@ -145,6 +145,8 @@ GradGEvaluator::computeParameterDerivatives(double g)
 
 		tokenPtr = strtok( NULL, separators); 
 	}
+
+	delete [] lsf_copy;
 
 	return 0;
 }

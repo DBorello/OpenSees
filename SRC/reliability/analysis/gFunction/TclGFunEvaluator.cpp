@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-04-28 20:51:27 $
+// $Revision: 1.3 $
+// $Date: 2003-10-27 23:45:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/TclGFunEvaluator.cpp,v $
 
 
@@ -44,7 +44,7 @@
 
 TclGFunEvaluator::TclGFunEvaluator(Tcl_Interp *passedTclInterp,
 					ReliabilityDomain *passedReliabilityDomain,
-					const char *passed_fileName)
+					TCL_Char *passed_fileName)
 :GFunEvaluator(passedTclInterp, passedReliabilityDomain)
 {
 	fileName = new char[256];
@@ -61,10 +61,30 @@ TclGFunEvaluator::~TclGFunEvaluator()
 
 int
 TclGFunEvaluator::runGFunAnalysis(Vector x)
-{
+{	
 	// Initial declarations
 	char theCommand[100];
 	int i;
+
+
+////// IN CASE AN OPENSEES MODEL EXISTS ////////////////////////////////
+
+	// Zero out the response in the structural domain to make ready for next analysis
+	char theRevertToStartCommand[10] = "reset";
+	Tcl_Eval( theTclInterp, theRevertToStartCommand );
+
+
+	// Put random variables into the structural domain according to the RandomVariablePositioners
+	int numberOfRandomVariablePositioners = theReliabilityDomain->getNumberOfRandomVariablePositioners();
+	RandomVariablePositioner *theRandomVariablePositioner;
+	int rvNumber;
+	for ( i=1 ; i<=numberOfRandomVariablePositioners ; i++ )  {
+		theRandomVariablePositioner = theReliabilityDomain->getRandomVariablePositionerPtr(i);
+		rvNumber				= theRandomVariablePositioner->getRvNumber();
+		theRandomVariablePositioner->update(x(rvNumber-1));
+	}
+
+//////////////////////////////////////////////////////////////////////////
 
 
 	// Set values of random variables in the Tcl intepreter
@@ -78,6 +98,7 @@ TclGFunEvaluator::runGFunAnalysis(Vector x)
 	sprintf(theCommand,"source %s",fileName);
 	Tcl_Eval( theTclInterp, theCommand );
 
+
 	return 0;
 }
 
@@ -85,10 +106,8 @@ TclGFunEvaluator::runGFunAnalysis(Vector x)
 
 
 int
-TclGFunEvaluator::tokenizeSpecials(char *theExpression)
+TclGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
 {
-	// No specific new quantities in the performance 
-	// function is introduced here. 
 
 	return 0;
 }

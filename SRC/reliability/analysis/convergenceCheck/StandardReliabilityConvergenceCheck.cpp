@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:38:54 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/StandardReliabilityConvergenceCheck.cpp,v $
 
 
@@ -46,14 +46,17 @@ using std::setprecision;
 using std::setiosflags;
 
 
-StandardReliabilityConvergenceCheck::StandardReliabilityConvergenceCheck(double passedE1, double passedE2, int print)
+StandardReliabilityConvergenceCheck::StandardReliabilityConvergenceCheck(double passedE1, 
+																		 double passedE2, 
+																		 double pscaleValue,
+																		 int print)
 :ReliabilityConvergenceCheck()
 {
 	e1 = passedE1;
 	e2 = passedE2;
 	criterium1 = 0.0;
 	criterium2 = 0.0;
-	scaleValue = 1.0;
+	scaleValue = pscaleValue;
 	printFlag = print;
 }
 
@@ -66,7 +69,9 @@ StandardReliabilityConvergenceCheck::~StandardReliabilityConvergenceCheck()
 int	
 StandardReliabilityConvergenceCheck::setScaleValue(double passedScaleValue)
 {
-	scaleValue = passedScaleValue;
+	if (scaleValue == 0.0) {
+		scaleValue = passedScaleValue;
+	}
 
 	return 0;
 }
@@ -75,6 +80,12 @@ StandardReliabilityConvergenceCheck::setScaleValue(double passedScaleValue)
 int	
 StandardReliabilityConvergenceCheck::check(Vector u, double g, Vector gradG)
 {
+	if (scaleValue == 0.0) {
+		opserr << "StandardReliabilityConvergenceCheck::check() --" << endln
+			<< " scale value has not been set!" << endln;
+	}
+
+
 	// Alpha vector
 	Vector alpha = gradG *  ( (-1.0) / gradG.Norm() );
 
@@ -97,13 +108,14 @@ StandardReliabilityConvergenceCheck::check(Vector u, double g, Vector gradG)
 
 
 	// Inform user about convergence status 
-	static ofstream logfile( "SearchLog.out", ios::out );
+	static ofstream logfile( "ConvergenceCheckLog.txt", ios::out );
 	char outputString[100];
 	sprintf(outputString,"check1=(%11.3e), check2=(%10.3e), dist=%16.14f",criterium1,criterium2,u.Norm());
 	if (printFlag!=0) {
 		opserr << outputString << endln;
 	}
 	logfile << outputString << endln;
+	logfile.flush();
 
 
 	// Return '1' if the analysis converged ('-1' otherwise)

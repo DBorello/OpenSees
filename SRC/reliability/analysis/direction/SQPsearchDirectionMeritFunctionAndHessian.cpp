@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-04-02 22:02:47 $
+// $Revision: 1.3 $
+// $Date: 2003-10-27 23:45:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/SQPsearchDirectionMeritFunctionAndHessian.cpp,v $
 
 
@@ -31,7 +31,6 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
-#include <math.h>
 #include <SQPsearchDirectionMeritFunctionAndHessian.h>
 #include <SearchDirection.h>
 #include <MeritFunctionCheck.h>
@@ -252,8 +251,7 @@ SQPsearchDirectionMeritFunctionAndHessian::check(Vector u_old,
 										  Vector grad_G_old, 
 										  double stepSize,
 										  Vector stepDirection,
-										  double g_new, 
-										  Vector grad_G_new)
+										  double g_new)
 {
 	// Have 'c' and 'delta' and 'lambda' as history parameters
 	// and 'kappa' stored to be used in this method

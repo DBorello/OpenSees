@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:24 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/meritFunction/MeritFunctionCheck.h,v $
 
 
@@ -48,8 +48,7 @@ public:
 					  Vector grad_G_old, 
 					  double stepSize,
 					  Vector stepDirection,
-					  double g_new, 
-					  Vector grad_G_new) = 0;
+					  double g_new) = 0;
 	virtual double getMeritFunctionValue(Vector u, double g, Vector grad_G) = 0;
 	virtual int updateMeritParameters(Vector u, double g, Vector grad_G) = 0;
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-04-28 20:51:25 $
+// $Revision: 1.3 $
+// $Date: 2003-10-27 23:45:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.h,v $
 
 //
@@ -53,9 +53,11 @@ public:
 				GradGEvaluator *theSensEval,
 				FindDesignPointAlgorithm *theFindDesPt,
 				int analysisType,
-				int p_sampleFreq,
-				double p_littleDeltaT,
-				const char *fileName);
+				int stepsToStart,
+				int stepsToEnd,
+				int sampleFreq,
+				double littleDeltaT,
+				TCL_Char *fileName);
 	~OutCrossingAnalysis();
 
 	int analyze(void);
@@ -68,6 +70,8 @@ private:
 	GradGEvaluator *theGradGEvaluator;
 	FindDesignPointAlgorithm *theFindDesignPointAlgorithm;
 	int analysisType;
+	int stepsToStart;
+	int stepsToEnd;
 	int sampleFreq;
 	double littleDeltaT;
 	char *fileName;

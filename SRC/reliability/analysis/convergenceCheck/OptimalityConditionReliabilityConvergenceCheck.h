@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:38:53 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/OptimalityConditionReliabilityConvergenceCheck.h,v $
 
 
@@ -43,7 +43,7 @@ class OptimalityConditionReliabilityConvergenceCheck : public ReliabilityConverg
 {
 
 public:
-	OptimalityConditionReliabilityConvergenceCheck(double e1, double e2,int print);
+	OptimalityConditionReliabilityConvergenceCheck(double e1, double e2, double scaleValue, int print);
 	~OptimalityConditionReliabilityConvergenceCheck();
 
 	int	check(Vector u, double g, Vector gradG);

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-04-28 20:51:25 $
+// $Revision: 1.3 $
+// $Date: 2003-10-27 23:45:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.cpp,v $
 
 
@@ -66,9 +66,9 @@ SamplingAnalysis::SamplingAnalysis(	ReliabilityDomain *passedReliabilityDomain,
 										RandomNumberGenerator *passedRandomNumberGenerator,
 										int passedNumberOfSimulations,
 										double passedTargetCOV,
-										double passedSamplingVariance,
+										double passedSamplingStdv,
 										int passedPrintFlag,
-										const char *passedFileName,
+										TCL_Char *passedFileName,
 										Vector *pStartPoint,
 										int passedAnalysisTypeTag)
 :ReliabilityAnalysis()
@@ -79,7 +79,7 @@ SamplingAnalysis::SamplingAnalysis(	ReliabilityDomain *passedReliabilityDomain,
 	theRandomNumberGenerator = passedRandomNumberGenerator;
 	numberOfSimulations = passedNumberOfSimulations;
 	targetCOV = passedTargetCOV;
-	samplingVariance = passedSamplingVariance;
+	samplingStdv = passedSamplingStdv;
 	printFlag = passedPrintFlag;
 	fileName = new char[256];
 	strcpy(fileName,passedFileName);
@@ -129,6 +129,7 @@ SamplingAnalysis::analyze(void)
 	aStdNormRV = new NormalRV(1,0.0,1.0,0.0);
 	ofstream *outputFile = 0;
 	bool failureHasOccured = false;
+	char myString[50];
 
 	
 	// Check if computer ran out of memory
@@ -142,7 +143,7 @@ SamplingAnalysis::analyze(void)
 	for (i=0;  i<numRV;  i++) {
 		for (j=0;  j<numRV;  j++) {
 			if (i==j) {
-				covariance(i,j) = samplingVariance;
+				covariance(i,j) = samplingStdv*samplingStdv;
 			}
 			else
 				covariance(i,j) = 0.0;
@@ -228,7 +229,7 @@ SamplingAnalysis::analyze(void)
 					sum_q(i-1) = pfIn*k;
 					var_qbar = (CovIn*pfIn)*(CovIn*pfIn);
 					if (k<1.0e-6) {
-						opserr << "WARNING: Zero number of simulations read from restart file" << endln;
+						opserr << "WARNING: Zero number of samples read from restart file" << endln;
 					}
 					sum_q_squared(i-1) = k*( k*var_qbar + pow(sum_q(i-1)/k,2.0) );
 				}
@@ -282,12 +283,16 @@ SamplingAnalysis::analyze(void)
 	bool FEconvergence;
 
 
+	// Prepare output file
+	ofstream resultsOutputFile( fileName, ios::out );
+
+
 	bool isFirstSimulation = true;
 	while( (k<=numberOfSimulations && govCov>targetCOV || k<=2) ) {
 
 		// Keep the user posted
 		if (printFlag == 1 || printFlag == 2) {
-			opserr << "Simulation #" << k << ":" << endln;
+			opserr << "Sample #" << k << ":" << endln;
 		}
 
 		
@@ -337,7 +342,7 @@ SamplingAnalysis::analyze(void)
 			FEconvergence = false;
 		}
 
-		
+
 		// Loop over number of limit-state functions
 		for (int lsf=0; lsf<numLsf; lsf++ ) {
 
@@ -399,7 +404,7 @@ SamplingAnalysis::analyze(void)
 				}
 
 			}
-			else {
+			else if (analysisTypeTag == 2) {
 			// ESTIMATION OF RESPONSE STATISTICS
 
 				// Now q=g and q_bar=mean
@@ -439,15 +444,29 @@ SamplingAnalysis::analyze(void)
 					}
 				}
 			}
+			else if (analysisTypeTag == 3) {
+				// Store g-function values to file (one in each column)
+				sprintf(myString,"%12.6e",gFunctionValue);
+				resultsOutputFile << myString << "  ";
+				resultsOutputFile.flush();
+			}
+			else {
+				opserr << "ERROR: Invalid analysis type tag found in sampling analysis." << endln;
+			}
 
 			// Keep the user posted
-			if (printFlag == 1 || printFlag == 2) {
+			if ( (printFlag == 1 || printFlag == 2) && analysisTypeTag!=3) {
 				sprintf(string," GFun #%d, estimate:%15.10f, cov:%15.10f",lsf+1,q_bar(lsf),cov_of_q_bar(lsf));
 				opserr << string << endln;
 			}
 		}
 
 		// Now all the limit-state functions have been looped over
+
+
+		if (analysisTypeTag == 3) {
+			resultsOutputFile << endln;
+		}
 
 
 		// Possibly compute correlation coefficient
@@ -525,126 +544,129 @@ SamplingAnalysis::analyze(void)
 	}
 
 
-	// Open output file
-	ofstream resultsOutputFile( fileName, ios::out );
+	if (analysisTypeTag != 3) {
 
-
-	if (!failureHasOccured) {
-		opserr << "WARNING: Failure did not occur for any of the limit-state functions. " << endln;
-	}
-
-	
-	for (int lsf=1; lsf<=numLsf; lsf++ ) {
-
-		if ( q_bar(lsf-1) == 0.0 ) {
-
-			resultsOutputFile << "#######################################################################" << endln;
-			resultsOutputFile << "#  SAMPLING ANALYSIS RESULTS, LIMIT-STATEFUNCDTION NUMBER   "
-				<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"      #" << endln;
-			resultsOutputFile << "#                                                                     #" << endln;
-			resultsOutputFile << "#  Failure did not occur, or zero response!                           #" << endln;
-			resultsOutputFile << "#                                                                     #" << endln;
-			resultsOutputFile << "#######################################################################" << endln << endln << endln;
+		if (!failureHasOccured) {
+			opserr << "WARNING: Failure did not occur for any of the limit-state functions. " << endln;
 		}
-		else {
-
-			// Some declarations
-			double beta_sim, pf_sim, cov_sim;
-			int num_sim;
-
-
-			// Set tag of "active" limit-state function
-			theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
-
-
-			// Get the limit-state function pointer
-			theLimitStateFunction = 0;
-			//lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
-			theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
-			if (theLimitStateFunction == 0) {
-				opserr << "SamplingAnalysis::analyze() - could not find" << endln
-					<< " limit-state function with tag #" << lsf << "." << endln;
-				return -1;
-			}
 
 		
-			// Store results
-			if (analysisTypeTag == 1) {
-				beta_sim = -aStdNormRV->getInverseCDFvalue(q_bar(lsf-1));
-				pf_sim	 = q_bar(lsf-1);
-				cov_sim	 = cov_of_q_bar(lsf-1);
-				num_sim  = k;
-				theLimitStateFunction->SimulationReliabilityIndexBeta = beta_sim;
-				theLimitStateFunction->SimulationProbabilityOfFailure_pfsim = pf_sim;
-				theLimitStateFunction->CoefficientOfVariationOfPfFromSimulation = cov_sim;
-				theLimitStateFunction->NumberOfSimulations = num_sim;
-			}
+		for (int lsf=1; lsf<=numLsf; lsf++ ) {
 
+			if ( q_bar(lsf-1) == 0.0 ) {
 
-			// Print results to the output file
-			if (analysisTypeTag == 1) {
 				resultsOutputFile << "#######################################################################" << endln;
-				resultsOutputFile << "#  SAMPLING ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER   "
+				resultsOutputFile << "#  SAMPLING ANALYSIS RESULTS, LIMIT-STATEFUNCDTION NUMBER   "
 					<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"      #" << endln;
 				resultsOutputFile << "#                                                                     #" << endln;
-				resultsOutputFile << "#  Reliability index beta: ............................ " 
-					<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<beta_sim 
-					<< "  #" << endln;
-				resultsOutputFile << "#  Estimated probability of failure pf_sim: ........... " 
-					<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<pf_sim 
-					<< "  #" << endln;
-				resultsOutputFile << "#  Number of simulations: ............................. " 
-					<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<num_sim 
-					<< "  #" << endln;
-				resultsOutputFile << "#  Coefficient of variation (of pf): .................. " 
-					<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<cov_sim 
-					<< "  #" << endln;
+				resultsOutputFile << "#  Failure did not occur, or zero response!                           #" << endln;
 				resultsOutputFile << "#                                                                     #" << endln;
 				resultsOutputFile << "#######################################################################" << endln << endln << endln;
 			}
 			else {
-				resultsOutputFile << "#######################################################################" << endln;
-				resultsOutputFile << "#  SAMPLING ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER   "
-					<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"      #" << endln;
-				resultsOutputFile << "#                                                                     #" << endln;
-				resultsOutputFile << "#  Estimated mean: .................................... " 
-					<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<q_bar(lsf-1) 
-					<< "  #" << endln;
-				resultsOutputFile << "#  Estimated standard deviation: ...................... " 
-					<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<responseStdv(lsf-1) 
-					<< "  #" << endln;
-				resultsOutputFile << "#                                                                     #" << endln;
-				resultsOutputFile << "#######################################################################" << endln << endln << endln;
-			}
-		}
-	}
 
-	if (analysisTypeTag == 2) {
-		resultsOutputFile << "#######################################################################" << endln;
-		resultsOutputFile << "#  RESPONSE CORRELATION COEFFICIENTS                                  #" << endln;
-		resultsOutputFile << "#                                                                     #" << endln;
-		if (numLsf <=1) {
-			resultsOutputFile << "#  Only one limit-state function!                                     #" << endln;
-		}
-		else {
-			resultsOutputFile << "#   gFun   gFun     Correlation                                       #" << endln;
-			resultsOutputFile.setf(ios::fixed, ios::floatfield);
-			for (i=0; i<numLsf; i++) {
-				for (int j=i+1; j<numLsf; j++) {
-					resultsOutputFile << "#    " <<setw(3)<<(i+1)<<"    "<<setw(3)<<(j+1)<<"     ";
-					if (responseCorrelation(i,j)<0.0) { resultsOutputFile << "-"; }
-					else { resultsOutputFile << " "; }
-					resultsOutputFile <<setprecision(7)<<setw(11)<<fabs(responseCorrelation(i,j));
-					resultsOutputFile << "                                      #" << endln;
+				// Some declarations
+				double beta_sim, pf_sim, cov_sim;
+				int num_sim;
+
+
+				// Set tag of "active" limit-state function
+				theReliabilityDomain->setTagOfActiveLimitStateFunction(lsf);
+
+
+				// Get the limit-state function pointer
+				theLimitStateFunction = 0;
+				//lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
+				theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
+				if (theLimitStateFunction == 0) {
+					opserr << "SamplingAnalysis::analyze() - could not find" << endln
+						<< " limit-state function with tag #" << lsf << "." << endln;
+					return -1;
+				}
+
+			
+				// Store results
+				if (analysisTypeTag == 1) {
+					beta_sim = -aStdNormRV->getInverseCDFvalue(q_bar(lsf-1));
+					pf_sim	 = q_bar(lsf-1);
+					cov_sim	 = cov_of_q_bar(lsf-1);
+					num_sim  = k;
+					theLimitStateFunction->SimulationReliabilityIndexBeta = beta_sim;
+					theLimitStateFunction->SimulationProbabilityOfFailure_pfsim = pf_sim;
+					theLimitStateFunction->CoefficientOfVariationOfPfFromSimulation = cov_sim;
+					theLimitStateFunction->NumberOfSimulations = num_sim;
+				}
+
+
+				// Print results to the output file
+				if (analysisTypeTag == 1) {
+					resultsOutputFile << "#######################################################################" << endln;
+					resultsOutputFile << "#  SAMPLING ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER   "
+						<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"      #" << endln;
+					resultsOutputFile << "#                                                                     #" << endln;
+					resultsOutputFile << "#  Reliability index beta: ............................ " 
+						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<beta_sim 
+						<< "  #" << endln;
+					resultsOutputFile << "#  Estimated probability of failure pf_sim: ........... " 
+						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<pf_sim 
+						<< "  #" << endln;
+					resultsOutputFile << "#  Number of simulations: ............................. " 
+						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<num_sim 
+						<< "  #" << endln;
+					resultsOutputFile << "#  Coefficient of variation (of pf): .................. " 
+						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<cov_sim 
+						<< "  #" << endln;
+					resultsOutputFile << "#                                                                     #" << endln;
+					resultsOutputFile << "#######################################################################" << endln << endln << endln;
+				}
+				else {
+					resultsOutputFile << "#######################################################################" << endln;
+					resultsOutputFile << "#  SAMPLING ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER   "
+						<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<lsf <<"      #" << endln;
+					resultsOutputFile << "#                                                                     #" << endln;
+					resultsOutputFile << "#  Estimated mean: .................................... " 
+						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<q_bar(lsf-1) 
+						<< "  #" << endln;
+					resultsOutputFile << "#  Estimated standard deviation: ...................... " 
+						<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<responseStdv(lsf-1) 
+						<< "  #" << endln;
+					resultsOutputFile << "#                                                                     #" << endln;
+					resultsOutputFile << "#######################################################################" << endln << endln << endln;
 				}
 			}
 		}
-		resultsOutputFile << "#                                                                     #" << endln;
-		resultsOutputFile << "#######################################################################" << endln << endln << endln;
+
+		if (analysisTypeTag == 2) {
+			resultsOutputFile << "#######################################################################" << endln;
+			resultsOutputFile << "#  RESPONSE CORRELATION COEFFICIENTS                                  #" << endln;
+			resultsOutputFile << "#                                                                     #" << endln;
+			if (numLsf <=1) {
+				resultsOutputFile << "#  Only one limit-state function!                                     #" << endln;
+			}
+			else {
+				resultsOutputFile << "#   gFun   gFun     Correlation                                       #" << endln;
+				resultsOutputFile.setf(ios::fixed, ios::floatfield);
+				for (i=0; i<numLsf; i++) {
+					for (int j=i+1; j<numLsf; j++) {
+						resultsOutputFile << "#    " <<setw(3)<<(i+1)<<"    "<<setw(3)<<(j+1)<<"     ";
+						if (responseCorrelation(i,j)<0.0) { resultsOutputFile << "-"; }
+						else { resultsOutputFile << " "; }
+						resultsOutputFile <<setprecision(7)<<setw(11)<<fabs(responseCorrelation(i,j));
+						resultsOutputFile << "                                      #" << endln;
+					}
+				}
+			}
+			resultsOutputFile << "#                                                                     #" << endln;
+			resultsOutputFile << "#######################################################################" << endln << endln << endln;
+		}
+
 	}
 
 
-	// Print summary of results to screen (more here!!!)
+
+
+
+	// Print summary of results to screen 
 	opserr << "Simulation Analysis completed." << endln;
 
 	// Clean up

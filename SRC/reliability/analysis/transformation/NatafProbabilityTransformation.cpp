@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:56 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/transformation/NatafProbabilityTransformation.cpp,v $
 
 
@@ -162,11 +162,16 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(Vector &x, int rvNumber
 		double zeta = fabs(theRV->getParameter2()); // more here for negative lognormal?
 		double mean = fabs(theRV->getMean()); // more here for negative lognormal?
 		double stdv = theRV->getStdv();
-		double z = ( log ( x(rvNumber-1) ) - lambda ) / zeta;
-		double e = (stdv/mean)*(stdv/mean);
-		double d = 1 + e;
-		double f = 1.0 / (mean*d*zeta);
-		DzDmean(rvNumber-1) = f*(-d-e+e*z/zeta);
+
+		double a = mean*mean+stdv*stdv;
+		DzDmean(rvNumber-1) = 0.5*(-2.0*mean*mean*log(a)+4.0*mean*mean*log(mean)-3.0*stdv*stdv*log(a)+4.0*stdv*stdv*log(mean)+2.0*stdv*stdv*log(fabs(x(rvNumber-1))))
+			/(pow(log(a)-2.0*log(mean),1.5)*mean*a);
+		
+//		double z = ( log ( fabs(x(rvNumber-1)) ) - lambda ) / zeta; // more here for negative lognormal?
+//		double e = (stdv/mean)*(stdv/mean);
+//		double d = 1 + e;
+//		double f = 1.0 / (mean*d*zeta);
+//		DzDmean(rvNumber-1) = f*(-d-e+e*z/zeta);
 	}
 	else if (strcmp(theRV->getType(),"UNIFORM")==0) {
 		double pz = 0.39894228048*exp(-z(rvNumber-1)*z(rvNumber-1)/2.0);
@@ -182,7 +187,14 @@ NatafProbabilityTransformation::meanSensitivityOf_x_to_u(Vector &x, int rvNumber
 
 	// 4) The hardest part: DinverseLowerCholeskyDmean
 	//						DinverseLowerCholeskyDstdv
-	//    Cannot differentiate through: not invertible
+	//    This is possible, but a bit tedious
+	//    The procedure would be:
+	//             R = L * L^T
+	//            dR = dL* L^T + L * dL^T
+	//            dR = dL* L^T + dL* L^T
+	//            dR = 2 * dL* L^T
+	//            dL = 0.5 * dR * L^(-T)
+	//
 	//    For now: do this by finite difference
 	Matrix OrigInverseLowerCholesky = (*inverseLowerCholesky);
 	RandomVariable *aRandomVariable;
@@ -236,11 +248,15 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(Vector &x, int rvNumber
 		double zeta = fabs(theRV->getParameter2()); // more here for negative lognormal?
 		double mean = fabs(theRV->getMean()); // more here for negative lognormal?
 		double stdv = theRV->getStdv();
-		double z = ( log ( x(rvNumber-1) ) - lambda ) / zeta;
-		double e = (stdv/mean)*(stdv/mean);
-		double d = 1 + e;
-		double f = 1.0 / (mean*d*zeta);
-		DzDstdv(rvNumber-1) = stdv*((1.0-z/zeta)*f/mean);
+
+		double a = mean*mean+stdv*stdv;
+		DzDstdv(rvNumber-1) = 0.5*stdv*(log(a)-2.0*log(fabs(x(rvNumber-1))))/(pow(log(a)-2.0*log(mean),1.5)*a);
+		
+//		double z = ( log ( fabs(x(rvNumber-1)) ) - lambda ) / zeta; // more here for negative lognormal?
+//		double e = (stdv/mean)*(stdv/mean);
+//		double d = 1 + e;
+//		double f = 1.0 / (mean*d*zeta);
+//		DzDstdv(rvNumber-1) = stdv*((1.0-z/zeta)*f/mean);
 	}
 	else if (strcmp(theRV->getType(),"UNIFORM")==0) {
 		double pz = 0.39894228048*exp(-z(rvNumber-1)*z(rvNumber-1)/2.0);
@@ -258,7 +274,14 @@ NatafProbabilityTransformation::stdvSensitivityOf_x_to_u(Vector &x, int rvNumber
 
 	// 4) The hardest part: DinverseLowerCholeskyDmean
 	//						DinverseLowerCholeskyDstdv
-	//    Cannot differentiate through: not invertible
+	//    This is possible, but a bit tedious
+	//    The procedure would be:
+	//             R = L * L^T
+	//            dR = dL* L^T + L * dL^T
+	//            dR = dL* L^T + dL* L^T
+	//            dR = 2 * dL* L^T
+	//            dL = 0.5 * dR * L^(-T)
+	//
 	//    For now: do this by finite difference
 	Matrix OrigInverseLowerCholesky = (*inverseLowerCholesky);
 	RandomVariable *aRandomVariable;
@@ -554,12 +577,12 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 		CorrelationCoefficient *theCorrelationCoefficient = 
 			theReliabilityDomain->getCorrelationCoefficientPtr(j);
 
-		// Get value of the correlation
-		correlation = theCorrelationCoefficient->getCorrelation();
-
 		// Get tags for the two involved random variables
 		rv1 = theCorrelationCoefficient->getRv1();
 		rv2 = theCorrelationCoefficient->getRv2();
+
+		// Get value of the correlation
+		correlation = theCorrelationCoefficient->getCorrelation();
 
 		// Get pointers to the two random variables
 		rv1Ptr = theReliabilityDomain->getRandomVariablePtr(rv1);
@@ -578,18 +601,22 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 		double cov2 = rv2Ptr->getStdv() / rv2Ptr->getMean();
 
 
-		// Is this correct for negative lognormal random variables:???
+		// Handle negative lognormal random variables
+		// (is the closed form expressions correct for these?)
 		if ( strcmp(typeRv1,"LOGNORMAL") == 0 ) {
 			if (cov1 < 0.0) {
-				cov1 = -cov1;
+				cov1 = cov1;
 			}
 		}
 		if ( strcmp(typeRv2,"LOGNORMAL") == 0 ) {
 			if (cov2 < 0.0) {
-				cov2 = -cov2;
+				cov2 = cov2;
 			}
 		}
 
+		// Handle mean/stdv reliability sensitivities
+		// (used in finite difference schemes to obtain derivative
+		//  of Cholesky decomposition)
 		if (pertMeanOfThisRV !=0) {
 			if (pertMeanOfThisRV == rv1) {
 				cov1 = rv1Ptr->getStdv() / (rv1Ptr->getMean()+h);
@@ -611,7 +638,12 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 		// the type of the the two involved random variables
 
 		/////////////////////////////////////////////////////////////////////////////////
-		if ( strcmp(typeRv1,"NORMAL") == 0  &&  strcmp(typeRv2,"NORMAL") == 0  ) {
+		if ( strcmp(typeRv1,"USERDEFINED") == 0  ||  strcmp(typeRv2,"USERDEFINED") == 0  ) {
+			opserr << " ... modifying correlation rho("<<rv1<<","<<rv2<<") for user-defined random variable..." << endln;
+			newCorrelation = solveForCorrelation(rv1, rv2, correlation);
+			opserr << " ... computed correlation for Nataf standard normal variates: " << newCorrelation << endln;
+		}
+		else if ( strcmp(typeRv1,"NORMAL") == 0  &&  strcmp(typeRv2,"NORMAL") == 0  ) {
 			newCorrelation = correlation;
 		}
 		else if ( strcmp(typeRv1,"NORMAL") == 0  &&  strcmp(typeRv2,"LOGNORMAL") == 0  ) {
@@ -1294,6 +1326,7 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 			newCorrelation = -0.999999999;
 		}
 		
+		
 		// Put the coefficient into the correlation matrix
 		(*correlationMatrix)( ( rv1-1 ) , ( rv2-1 ) ) = newCorrelation;
 		(*correlationMatrix)( ( rv2-1 ) , ( rv1-1 ) ) = newCorrelation;
@@ -1304,3 +1337,295 @@ NatafProbabilityTransformation::setCorrelationMatrix(int pertMeanOfThisRV, int p
 	
 
 }
+
+
+
+
+
+
+double
+NatafProbabilityTransformation::phi2(double z_i, 
+									 double z_j,
+									 double rho)
+{
+	double par = z_i*z_i + z_j*z_j - 2.0*rho*z_i*z_j;
+
+	double theExp = exp(-par/(2.0*(1.0-rho*rho)));
+
+	double pi = 3.14159265358979;
+
+	double result = theExp/(2.0*pi*sqrt(1.0-rho*rho));
+
+	return result;
+}
+
+
+
+double
+NatafProbabilityTransformation::integrand(int rv_i,
+										  double z_i, 
+										  double mean_i,
+										  double stdv_i, 
+										  int rv_j,
+										  double z_j,
+										  double mean_j, 
+										  double stdv_j,
+										  double rho)
+{
+	RandomVariable *theRv_i = theReliabilityDomain->getRandomVariablePtr(rv_i);
+	RandomVariable *theRv_j = theReliabilityDomain->getRandomVariablePtr(rv_j);
+	NormalRV aStandardNormalRV(1,0.0,1.0,0.0); 
+
+	double x_i = theRv_i->getInverseCDFvalue(aStandardNormalRV.getCDFvalue(z_i));
+	double x_j = theRv_j->getInverseCDFvalue(aStandardNormalRV.getCDFvalue(z_j));
+
+	double thePhi2 = phi2(z_i, z_j, rho);
+
+	return ( (x_i-mean_i)/stdv_i 
+		   * (x_j-mean_j)/stdv_j 
+		   * thePhi2 );
+}
+
+
+double
+NatafProbabilityTransformation::doubleIntegral(int rv_i,
+										  double mean_i,
+										  double stdv_i, 
+										  int rv_j,
+										  double mean_j, 
+										  double stdv_j,
+										  double rho)
+{
+	// The grid of integration points:
+	// 1, 2, ..., i, ..., 2*n  in x-direction with intervals h
+	// 1, 2, ..., j, ..., 2*m  in y-direction with intervals k
+	int i, j;
+	
+
+	// Selected integration boundaries
+	double z_i0 = -5.0;
+	double z_in =  5.0;
+	double z_j0 = -5.0;
+	double z_jm =  5.0;
+
+	// Half the number of integration points
+	int n = 100;
+	int m = 100;
+	
+	// Integration point intervals
+	double h = (z_in-z_i0)/(2.0*n);
+	double k = (z_jm-z_j0)/(2.0*m);
+
+	// Grid of integration points
+	Vector z_i(2.0*n);
+	Vector z_j(2.0*m);
+	for (i=1; i<=2*n; i++) {
+		z_i(i-1) = z_i0 + (i-1)*h;
+	}
+	for (j=1; j<=2*m; j++) {
+		z_j(j-1) = z_j0 + (j-1)*k;
+	}
+
+	// Computing sums (naming terms according to p. 126 in "Numerical Methods" by Faires & Burden)
+	double term1 = 0.0;
+	double term2 = 0.0;
+	double term3 = 0.0;
+	double term4 = 0.0;
+	double term5 = 0.0;
+	double term6 = 0.0;
+	double term7 = 0.0;
+	double term8 = 0.0;
+	double term9 = 0.0;
+	double term10 = 0.0;
+	double term11 = 0.0;
+	double term12 = 0.0;
+	double term13 = 0.0;
+	double term14 = 0.0;
+	double term15 = 0.0;
+	double term16 = 0.0;
+
+	// No sum terms
+	term1 = integrand( rv_i, z_i( 0        ) , mean_i, stdv_i, 
+			           rv_j, z_j( 0        ) , mean_j, stdv_j, rho);
+	term4 = integrand( rv_i, z_i( 2*n    -1) , mean_i, stdv_i, 
+			           rv_j, z_j( 0        ) , mean_j, stdv_j, rho);
+	term13 = integrand(rv_i, z_i( 0        ) , mean_i, stdv_i, 
+			           rv_j, z_j( 2*m    -1) , mean_j, stdv_j, rho);
+	term16 = integrand(rv_i, z_i( 2*n    -1) , mean_i, stdv_i, 
+			           rv_j, z_j( 2*m    -1) , mean_j, stdv_j, rho);
+
+	// Single sum over n terms
+	for (i=1; i<=n; i++) {
+		term2 += integrand(rv_i, z_i( 2*i    -1) , mean_i, stdv_i, 
+			               rv_j, z_j( 0        ) , mean_j, stdv_j, rho);
+		term3 += integrand(rv_i, z_i( 2*i-1  -1) , mean_i, stdv_i, 
+			               rv_j, z_j( 0        ) , mean_j, stdv_j, rho);
+		term14 += integrand(rv_i, z_i( 2*i    -1) , mean_i, stdv_i, 
+			                rv_j, z_j( 2*m    -1) , mean_j, stdv_j, rho);
+		term15 += integrand(rv_i, z_i( 2*i-1    -1) , mean_i, stdv_i, 
+			                rv_j, z_j( 2*m      -1) , mean_j, stdv_j, rho);
+	}
+	term2 -= integrand(rv_i, z_i( 2*n  -1) , mean_i, stdv_i, 
+			           rv_j, z_j( 0      ) , mean_j, stdv_j, rho);
+	term14 -= integrand(rv_i, z_i( 2*n    -1) , mean_i, stdv_i, 
+		                rv_j, z_j( 2*m    -1) , mean_j, stdv_j, rho);
+
+	// Single sum over m terms
+	for (j=1; j<=m; j++) {
+		term5 += integrand(rv_i, z_i( 0        ) , mean_i, stdv_i, 
+			               rv_j, z_j( 2*j    -1) , mean_j, stdv_j, rho);
+		term8 += integrand(rv_i, z_i( 2*n    -1) , mean_i, stdv_i, 
+			               rv_j, z_j( 2*j    -1) , mean_j, stdv_j, rho);
+		term9 += integrand(rv_i, z_i( 0          ) , mean_i, stdv_i, 
+			               rv_j, z_j( 2*j-1    -1) , mean_j, stdv_j, rho);
+		term12 += integrand(rv_i, z_i( 2*n     -1) , mean_i, stdv_i, 
+			                rv_j, z_j( 2*j-1   -1) , mean_j, stdv_j, rho);
+	}
+	term8 -= integrand(rv_i, z_i( 2*n    -1) , mean_i, stdv_i, 
+		               rv_j, z_j( 2*m    -1) , mean_j, stdv_j, rho);
+	
+	// Double sum terms
+	for (j=1; j<=(m-1); j++) {
+		for (i=1; i<=(n-1); i++) {
+			term6 += integrand(rv_i, z_i( 2*i    -1) , mean_i, stdv_i, 
+							   rv_j, z_j( 2*j    -1) , mean_j, stdv_j, rho);
+		}
+	}
+	for (j=1; j<=(m-1); j++) {
+		for (i=1; i<=(n); i++) {
+			term7 += integrand(rv_i, z_i( 2*i-1    -1) , mean_i, stdv_i, 
+							   rv_j, z_j( 2*j      -1) , mean_j, stdv_j, rho);
+		}
+	}
+	for (j=1; j<=(m); j++) {
+		for (i=1; i<=(n-1); i++) {
+			term10 += integrand(rv_i, z_i( 2*i       -1) , mean_i, stdv_i, 
+							    rv_j, z_j( 2*j-1     -1) , mean_j, stdv_j, rho);
+		}
+	}
+	for (j=1; j<=(m); j++) {
+		for (i=1; i<=(n); i++) {
+			term11 += integrand(rv_i, z_i( 2*i-1     -1) , mean_i, stdv_i, 
+							    rv_j, z_j( 2*j-1     -1) , mean_j, stdv_j, rho);
+		}
+	}
+
+
+	double par1 = term1 + 2.0*term2 + 4.0*term3 + term4;
+	
+	double par2 = term5 + 2.0*term6 + 4.0*term7 + term8;
+
+	double par3 = term9 + 2.0*term10 + 4.0*term11 + term12;
+
+	double par4 = term13 + 2.0*term14 + 4.0*term15 + term16;
+
+	double result = h*k/9.0 * (par1 + 2.0*par2 + 4.0*par3 + par4);
+
+	return result;
+}
+
+
+
+double
+NatafProbabilityTransformation::residualFunction(double rho_original, 
+												 double rho,
+												 double rv_i, 
+												 double mean_i, 
+												 double stdv_i, 
+												 double rv_j, 
+												 double mean_j, 
+												 double stdv_j)
+{
+	double result = rho_original - doubleIntegral(rv_i, mean_i, stdv_i, rv_j, mean_j, stdv_j, rho);
+
+	return result;
+}
+
+
+
+
+double
+NatafProbabilityTransformation::solveForCorrelation(int rv_i, int rv_j, double rho_original)
+{
+	RandomVariable *theRv_i = theReliabilityDomain->getRandomVariablePtr(rv_i);
+	RandomVariable *theRv_j = theReliabilityDomain->getRandomVariablePtr(rv_j);
+
+	double mean_i = theRv_i->getMean();
+	double mean_j = theRv_j->getMean();
+
+	double stdv_i = theRv_i->getStdv();
+	double stdv_j = theRv_j->getStdv();
+
+	double result = 0.0;
+
+	double tol = 1.0e-6;
+	double pert = 1.0e-4;
+
+	double rho_old = rho_original;
+	double rho_new;
+	double f;
+	double df;
+	double perturbed_f;
+
+	for (int i=1;  i<=100;  i++ )  {
+
+		// Evaluate function
+		f = residualFunction(rho_original,
+			                 rho_old,
+							 rv_i, mean_i, stdv_i, 
+							 rv_j, mean_j, stdv_j);
+
+		// Evaluate perturbed function
+		perturbed_f = residualFunction(rho_original,
+									   (rho_old+pert),
+									   rv_i, mean_i, stdv_i, 
+									   rv_j, mean_j, stdv_j);
+
+		// Evaluate derivative of function
+		df = ( perturbed_f - f ) / pert;
+
+		if ( fabs(df) < 1.0e-15) {
+			opserr << "WARNING: NatafProbabilityTransformation::solveForCorrelation() -- " << endln
+				<< " zero derivative in Newton algorithm. " << endln;
+		}
+		else {
+
+			// Take a Newton step
+			rho_new = rho_old - f/df;
+			
+			// Check convergence; quit or continue
+			if (fabs(1.0-fabs(rho_old/rho_new)) < tol) {
+				result = rho_new;
+				return result;
+			}
+			else {
+				if (i==100) {
+					opserr << "WARNING: NatafProbabilityTransformation::solveForCorrelation() -- " << endln
+						<< " Newton scheme did not converge. " << endln;
+					result = 0.0;
+					return result;
+				}
+				else {
+					rho_old = rho_new;
+				}
+			
+			}
+		}
+	}
+
+	return result;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-04 00:39:13 $
+// $Revision: 1.6 $
+// $Date: 2003-10-27 23:45:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/BasicGFunEvaluator.cpp,v $
 
 
@@ -64,7 +64,7 @@ BasicGFunEvaluator::runGFunAnalysis(Vector x)
 
 
 int
-BasicGFunEvaluator::tokenizeSpecials(char *theExpression)
+BasicGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
 {
 	// No need to set additional quantities here
 	// (the basic random variables are set in the base class)

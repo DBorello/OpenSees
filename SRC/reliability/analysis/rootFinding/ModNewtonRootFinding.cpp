@@ -22,69 +22,55 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
+// $Revision: 1.1 $
 // $Date: 2003-10-27 23:45:44 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/FixedStepSizeRule.cpp,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/rootFinding/ModNewtonRootFinding.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
-#include <FixedStepSizeRule.h>
-#include <StepSizeRule.h>
+#include <ModNewtonRootFinding.h>
+#include <RootFinding.h>
+#include <GFunEvaluator.h>
 #include <ProbabilityTransformation.h>
+#include <ReliabilityDomain.h>
+#include <RandomVariable.h>
 #include <math.h>
 #include <Vector.h>
 
 
-FixedStepSizeRule::FixedStepSizeRule(double passedStepSize)
-:StepSizeRule()
+ModNewtonRootFinding::ModNewtonRootFinding(
+						ReliabilityDomain *passedReliabilityDomain,
+						ProbabilityTransformation *passedProbabilityTransformation,
+						GFunEvaluator *passedGFunEvaluator,
+						int passedMaxIter,
+						double ptol,
+						double pmaxStepLength)
+:RootFinding()
 {
-	stepSize = passedStepSize;
-	gFunValue = -1;
+	theReliabilityDomain = passedReliabilityDomain;
+	theProbabilityTransformation = passedProbabilityTransformation;
+	theGFunEvaluator = passedGFunEvaluator;
+	maxIter = passedMaxIter;
+	tol = ptol;
+	maxStepLength = pmaxStepLength;
 }
 
-FixedStepSizeRule::~FixedStepSizeRule()
+ModNewtonRootFinding::~ModNewtonRootFinding()
 {
-}
-
-
-
-int
-FixedStepSizeRule::computeStepSize(Vector u, 
-									Vector grad_G, 
-									double G, 
-									Vector d,
-									int stepNumber)
-{
-	// This method is in fact not neccesary 
-	// for the fixed step size rule. The 
-	// user has already given the step size. 
-
-	return 0;  
-
 }
 
 
-double
-FixedStepSizeRule::getStepSize()
+Vector
+ModNewtonRootFinding::findLimitStateSurface(int space, double g, Vector pDirection, Vector thePoint)
 {
-	return stepSize;
-
+	opserr << "Currently, the Modified Newton root-finding algorithm is not " << endln
+		<< "implemented. This algorithm requires the directional gradient in " << endln
+		<< "the direction of the root-finding search. For now; it is " << endln
+		<< "recommended to use the Secant Root-Finding Algorithm." << endln;
+	return thePoint;
 }
 
-
-double
-FixedStepSizeRule::getInitialStepSize()
-{
-	return stepSize;
-
-}
-
-double
-FixedStepSizeRule::getGFunValue()
-{
-	return 0.0;
-}
 

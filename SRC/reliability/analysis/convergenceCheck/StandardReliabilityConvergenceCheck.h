@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:38:54 $
+// $Revision: 1.2 $
+// $Date: 2003-10-27 23:45:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/convergenceCheck/StandardReliabilityConvergenceCheck.h,v $
 
 
@@ -43,7 +43,7 @@ class StandardReliabilityConvergenceCheck : public ReliabilityConvergenceCheck
 {
 
 public:
-	StandardReliabilityConvergenceCheck(double e1, double e2, int printFlag);
+	StandardReliabilityConvergenceCheck(double e1, double e2, double scaleValue, int printFlag);
 	~StandardReliabilityConvergenceCheck();
 
 	int	check(Vector u, double g, Vector gradG);

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-04-28 20:51:27 $
+// $Revision: 1.9 $
+// $Date: 2003-10-27 23:45:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -51,7 +51,7 @@ using std::setprecision;
 
 OpenSeesGFunEvaluator::OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 					ReliabilityDomain *passedReliabilityDomain,
-					const char *passedFileName)
+					TCL_Char *passedFileName)
 :GFunEvaluator(passedTclInterp, passedReliabilityDomain)
 {
 	fileName = new char[256];
@@ -87,7 +87,6 @@ OpenSeesGFunEvaluator::~OpenSeesGFunEvaluator()
 int
 OpenSeesGFunEvaluator::runGFunAnalysis(Vector x)
 {
-
 	// Zero out the response in the structural domain to make ready for next analysis
 	char theRevertToStartCommand[10] = "reset";
 	Tcl_Eval( theTclInterp, theRevertToStartCommand );
@@ -106,7 +105,7 @@ OpenSeesGFunEvaluator::runGFunAnalysis(Vector x)
 
 
 	// Run the structural analysis according to user specified scheme
-	double result;
+	double result = 0;
 	if (dt==0.0 && nsteps==0 && !strcmp(fileName,"0") ) {
 		// Run up to max time in fFuncs
 		opserr << "OpenSeesGFunEvaluator: The option -runToMaxTimeInGFun " << endln
@@ -141,12 +140,8 @@ OpenSeesGFunEvaluator::runGFunAnalysis(Vector x)
 
 
 int
-OpenSeesGFunEvaluator::tokenizeSpecials(char *theExpression)
+OpenSeesGFunEvaluator::tokenizeSpecials(TCL_Char *theExpression)
 {
-	// Remove possible recorders (this is done to ensure that the files are flushed)
-	removeRecorders();
-
-	
 	// Set value of OpenSees finite element response quantities 
 	// appearing in the limit-state function in the Tcl domain
 	char buf[500]="";
@@ -191,6 +186,7 @@ OpenSeesGFunEvaluator::tokenizeSpecials(char *theExpression)
 			char tclAssignment[100];
 			sprintf(tclAssignment,"set u_%d_%d [nodeDisp %d %d ]",nodeNumber,direction,nodeNumber,direction);
 			Tcl_Eval( theTclInterp, tclAssignment);
+
 		}
 		else if ( strncmp(tokenPtr, "rec",3) == 0) {
 
@@ -264,12 +260,6 @@ OpenSeesGFunEvaluator::setNsteps(int p_nsteps)
 	nsteps = p_nsteps;
 }
 
-int
-OpenSeesGFunEvaluator::getNsteps()
-{
-	return nsteps;
-}
-
 double
 OpenSeesGFunEvaluator::getDt()
 {
@@ -283,6 +273,12 @@ OpenSeesGFunEvaluator::getDt()
 int
 OpenSeesGFunEvaluator::createRecorders()
 {
+
+
+//	removeRecorders();
+
+
+
 	// Download active limit-state function
 	int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 	LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
@@ -311,6 +307,8 @@ OpenSeesGFunEvaluator::createRecorders()
 
 		tokenPtr = strtok( NULL, separators);
 	}
+
+	delete [] lsf_forTokenizing;
 
 	return 0;
 }

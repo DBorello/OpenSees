@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-04-28 20:51:25 $
+// $Revision: 1.3 $
+// $Date: 2003-10-27 23:45:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.h,v $
 
 
@@ -53,9 +53,9 @@ public:
 						RandomNumberGenerator *passedRandomNumberGenerator,
 						int passedNumberOfSimulations,
 						double passedTargetCOV,
-						double samplingVariance,
+						double samplingStdv,
 						int printFlag,
-						const char *fileName,
+						TCL_Char *fileName,
 						Vector *startPoint,
 						int analysisTypeTag);
 
@@ -72,7 +72,7 @@ private:
 	RandomNumberGenerator *theRandomNumberGenerator;
 	int numberOfSimulations;
 	double targetCOV;
-	double samplingVariance;
+	double samplingStdv;
 	int printFlag;
 	char *fileName;
 	Vector *startPoint;

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-04-28 20:51:25 $
+// $Revision: 1.5 $
+// $Date: 2003-10-27 23:45:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.h,v $
 
 
@@ -49,7 +49,7 @@ public:
 	FORMAnalysis(ReliabilityDomain *passedReliabilityDomain,
 				 FindDesignPointAlgorithm *passedFindDesignPointAlgorithm,
 				 ProbabilityTransformation *passedProbabilityTransformation,
-				 const char *fileName,
+				 TCL_Char *fileName,
 				 int relSensTag);
 	virtual ~FORMAnalysis();
 
