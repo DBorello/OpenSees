@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-11-13 00:54:20 $
+// $Revision: 1.2 $
+// $Date: 2004-11-24 22:40:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataOutputStreamHandler.cpp,v $
                                                                         
 // Written: fmk 
@@ -34,7 +34,8 @@
 #include <Vector.h>
 
 DataOutputStreamHandler::DataOutputStreamHandler(bool echoD)
-  :echoDescription(echoD), numColumns(0)
+  :DataOutputHandler(DATAHANDLER_TAGS_DataOutputStreamHandler), 
+   echoDescription(echoD), numColumns(0)
 {
 
 }
@@ -74,4 +75,15 @@ DataOutputStreamHandler::write(Vector &data)
   
   return 0;
 }
- 
+
+int 
+DataOutputStreamHandler::sendSelf(int commitTag, Channel &theChannel)
+{
+  return 0;
+}
+
+int 
+DataOutputStreamHandler::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  return 0;
+}

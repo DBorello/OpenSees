@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-11-13 00:54:20 $
+// $Revision: 1.2 $
+// $Date: 2004-11-24 22:40:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataOutputDatabaseHandler.cpp,v $
                                                                         
 // Written: fmk 
@@ -35,7 +35,8 @@
 #include <Vector.h>
 
 DataOutputDatabaseHandler::DataOutputDatabaseHandler(FE_Datastore *database, const char *tName)
-  :theDatabase(database), tableName(0), numColumns(0), columns(0), commitTag(0)
+  :DataOutputHandler(DATAHANDLER_TAGS_DataOutputDatabaseHandler),
+   theDatabase(database), tableName(0), numColumns(0), columns(0), commitTag(0)
 {
   //
   // create memory to store the dataDescription and make a copy of it
@@ -172,4 +173,18 @@ DataOutputDatabaseHandler::setDatabase(FE_Datastore &database, const char *tName
 
   theDatabase = &database;
   return 0;
+}
+
+
+int 
+DataOutputDatabaseHandler::sendSelf(int commitTag, Channel &theChannel)
+{
+  opserr << "DataOutputDatabaseHandler::sendSelf() - not yet implemented\n";
+  return -1;
+}
+int 
+DataOutputDatabaseHandler::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  opserr << "DataOutputDatabaseHandler::sendSelf() - not yet implemented\n";
+  return -1;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-11-13 00:54:20 $
+// $Revision: 1.2 $
+// $Date: 2004-11-24 22:40:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataOutputFileHandler.cpp,v $
                                                                         
 // Written: fmk 
@@ -32,11 +32,15 @@
 
 #include "DataOutputFileHandler.h"
 #include <Vector.h>
+#include <ID.h>
+#include <Channel.h>
+#include <Message.h>
 
 DataOutputFileHandler::DataOutputFileHandler(const char *theFileName, 
 					     echoMode theEMode, 
 					     openMode theOMode)
-  :fileName(0), theEchoMode(theEMode), theOpenMode(theOMode), numColumns(-1)
+  :DataOutputHandler(DATAHANDLER_TAGS_DataOutputFileHandler),
+   fileName(0), theEchoMode(theEMode), theOpenMode(theOMode), numColumns(-1)
 {
   if (theFileName != 0) {
     fileName = new char [strlen(theFileName)+1];
@@ -87,7 +91,7 @@ DataOutputFileHandler::open(char **dataDescription, int numData)
     outputFile << endln;
 
   } else if (theEchoMode == XML_FILE) {
-    
+
     // create a copy of the  file name
     int res = 0;
     const char *name = outputFile.getFileName();
@@ -157,3 +161,91 @@ DataOutputFileHandler::write(Vector &data)
   return 0;
 }
  
+int 
+DataOutputFileHandler::sendSelf(int commitTag, Channel &theChannel)
+{
+  static ID idData(3);
+  int fileNameLength = 0;
+  if (fileName != 0)
+    fileNameLength = strlen(fileName);
+
+  idData(0) = fileNameLength;
+
+  if (theOpenMode == OVERWRITE)
+    idData(1) = 0;
+  else
+    idData(1) = 1;
+
+  if (theEchoMode == NONE)
+    idData(2) = 0;
+  else if (theEchoMode == DATA_FILE)
+    idData(2) = 1;
+  else
+    idData(2) = 2;
+
+  if (theChannel.sendID(0, commitTag, idData) < 0) {
+    opserr << "DataOutputFileHandler::sendSelf() - failed to send id data\n";
+    return -1;
+  }
+
+  if (fileNameLength != 0) {
+    Message theMessage(fileName, fileNameLength);
+    if (theChannel.sendMsg(0, commitTag, theMessage) < 0) {
+      opserr << "DataOutputFileHandler::sendSelf() - failed to send message\n";
+      return -1;
+    }
+  }
+
+  return 0;
+}
+
+int 
+DataOutputFileHandler::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+  static ID idData(3);
+
+  if (theChannel.recvID(0, commitTag, idData) < 0) {
+    opserr << "DataOutputFileHandler::recvSelf() - failed to recv id data\n";
+    return -1;
+  }
+
+  int fileNameLength = idData(0);
+  if (idData(1) == 0)
+    theOpenMode = OVERWRITE;
+  else
+    theOpenMode = APPEND;
+
+
+  if (idData(2) == 0)
+    theEchoMode = NONE;
+  else if (idData(2) == 1)
+    theEchoMode = DATA_FILE;
+  else
+    theEchoMode = XML_FILE;
+
+  if (fileNameLength != 0) {
+    if (fileName != 0)
+      delete [] fileName;
+    fileName = new char[fileNameLength+5];
+    if (fileName == 0) {
+      opserr << "DataOutputFileHandler::recvSelf() - out of memory\n";
+      return -1;
+    }
+
+    Message theMessage(fileName, fileNameLength);
+    if (theChannel.recvMsg(0, commitTag, theMessage) < 0) {
+      opserr << "DataOutputFileHandler::recvSelf() - failed to recv message\n";
+      return -1;
+    }
+    sprintf(&fileName[fileNameLength],".%d",commitTag);
+
+    if (fileName != 0 && outputFile.setFile(fileName, theOpenMode) < 0) {
+      opserr << "DataOutputFileHandler::DataOutputFileHandler() - setFile() failed\n";
+      if (fileName != 0) {
+	delete [] fileName;
+	fileName = 0;
+      }
+    }
+  }
+  return 0;
+}

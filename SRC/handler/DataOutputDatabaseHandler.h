@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-11-13 00:54:20 $
+// $Revision: 1.2 $
+// $Date: 2004-11-24 22:40:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataOutputDatabaseHandler.h,v $
 
 #ifndef _DataOutputDatabaseHandler
@@ -31,14 +31,15 @@ class FE_Datastore;
 class DataOutputDatabaseHandler : public DataOutputHandler
 {
  public:
-  DataOutputDatabaseHandler(FE_Datastore *database, const char *tableName);
-  virtual ~DataOutputDatabaseHandler();
-
-  virtual int open(char **dataDescription, int numData);
-  virtual int write(Vector &data);
-
+  DataOutputDatabaseHandler(FE_Datastore *database =0, const char *tableName =0);
+  ~DataOutputDatabaseHandler();
+  
+  int open(char **dataDescription, int numData);
+  int write(Vector &data);
+  
   int setDatabase(FE_Datastore &theDatabase, const char *tableName);
-
+  int sendSelf(int commitTag, Channel &theChannel);  
+  int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
  private:
   FE_Datastore *theDatabase;
   char *tableName;

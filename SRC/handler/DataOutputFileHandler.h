@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-11-13 00:54:20 $
+// $Revision: 1.2 $
+// $Date: 2004-11-24 22:40:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataOutputFileHandler.h,v $
 
 #ifndef _DataOutputFileHandler
@@ -36,10 +36,13 @@ class DataOutputFileHandler : public DataOutputHandler
   DataOutputFileHandler(const char *fileName =0, 
 			echoMode = NONE, 
 			openMode mode = OVERWRITE);
-  virtual ~DataOutputFileHandler();
+  ~DataOutputFileHandler();
 
-  virtual int open(char **dataDescription, int numData);
-  virtual int write(Vector &data);
+  int open(char **dataDescription, int numData);
+  int write(Vector &data);
+
+  int sendSelf(int commitTag, Channel &theChannel);  
+  int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
  private:
   FileStream outputFile;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-11-13 00:54:20 $
+// $Revision: 1.2 $
+// $Date: 2004-11-24 22:40:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataOutputHandler.cpp,v $
                                                                         
 // Written: fmk 
@@ -32,7 +32,8 @@
 
 #include "DataOutputHandler.h"
 
-DataOutputHandler::DataOutputHandler()
+DataOutputHandler::DataOutputHandler(int classTag)
+  :MovableObject(classTag)
 {
 
 }
