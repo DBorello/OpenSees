@@ -1,9 +1,9 @@
 ############################################################################
 #
-#  Program:  G3
+#  Program:  OpenSees
 #
 #  Purpose:  A Top-level Makefile to create the libraries needed
-#	     to use the G3 framework.
+#	     to use the OpenSees framework.
 #
 #  Written: jeremic@ucdavis.edu; zhyang@ucdavis.edu 
 #  Created: 01/2001
@@ -16,7 +16,7 @@
 # |  SECTION 1: PROGRAM             |
 # %---------------------------------%
 #
-# Specify the location and name of the g3 interpreter program
+# Specify the location and name of the OpenSees interpreter program
 # that will be created (if this all works!)
 
 OpenSees_PROGRAM = $(HOME)/bin/OpenSees
@@ -33,13 +33,13 @@ BASE		= /usr/local
 HOME		= /home/jeremic
 FE		= $(HOME)/oofep/OpenSees/SRC
 
-#BLASdir      = $(HOME)/oofep/OpenSees/OTHER/BLAS
-#CBLASdir     = $(HOME)/oofep/OpenSees/OTHER/CBLAS
-#LAPACKdir    = $(HOME)/oofep/OpenSees/OTHER/LAPACK
-#SUPERLUdir   = $(HOME)/oofep/OpenSees/OTHER/SuperLU
-#ARPACKdir    = $(HOME)/oofep/OpenSees/OTHER/ARPACK
-#UMFPACKdir   = $(HOME)/oofep/OpenSees/OTHER/UMFPACK
-#METISdir     = $(HOME)/oofep/OpenSees/OTHER/METIS
+BLASdir      = $(HOME)/oofep/OpenSees/OTHER/BLAS
+CBLASdir     = $(HOME)/oofep/OpenSees/OTHER/CBLAS
+LAPACKdir    = $(HOME)/oofep/OpenSees/OTHER/LAPACK
+SUPERLUdir   = $(HOME)/oofep/OpenSees/OTHER/SuperLU
+ARPACKdir    = $(HOME)/oofep/OpenSees/OTHER/ARPACK
+UMFPACKdir   = $(HOME)/oofep/OpenSees/OTHER/UMFPACK
+METISdir     = $(HOME)/oofep/OpenSees/OTHER/METIS
 SRCdir       = $(HOME)/oofep/OpenSees/SRC
 
 
@@ -52,8 +52,14 @@ SRCdir       = $(HOME)/oofep/OpenSees/SRC
 #              $(METISdir)  \
 #               $(SRCdir)			 
 
- 
-DIRS        = $(SRCdir)
+DIRS        = $(SUPERLUdir)\
+              $(ARPACKdir) \
+              $(UMFPACKdir) \
+              $(METISdir) \
+              $(SUPERLUdir) \
+              $(ARPACKdir) \
+              $(UMFPACKdir) \
+              $(SRCdir)
 
 # %-------------------------------------------------------%
 # | SECTION 3: LIBRARIES                                  |
@@ -87,7 +93,14 @@ TCL_LIBRARY     = /usr/lib/libtk8.0.so \
 
 # WATCH OUT .. These libraries are removed when 'make wipe' is invoked.
 # $(FE_LIBRARY) \
-WIPE_LIBS	= $(NDARRAY_LIBRARY)  $(MAT_MOD_LIBRARY)  $(FE_LIBRARY)
+#WIPE_LIBS	= $(NDARRAY_LIBRARY)  $(MAT_MOD_LIBRARY)  $(FE_LIBRARY)
+WIPE_LIBS	= $(FE_LIBRARY) \
+		$(SUPERLU_LIBRARY) \
+		$(ARPACK_LIBRARY) \
+		$(UMFPACK_LIBRARY) \
+	 $(METIS_LIBRARY)	 \
+	 $(NDARRAY_LIBRARY) \
+  $(MATMOD_LIBRARY)
 
 # %---------------------------------------------------------%
 # | SECTION 4: COMPILERS                                    |
@@ -113,7 +126,7 @@ WIPE_LIBS	= $(NDARRAY_LIBRARY)  $(MAT_MOD_LIBRARY)  $(FE_LIBRARY)
 # CC++            =  pgCC
 # CC              =  pgcc
 # FC              =  pgf77
-# LINK            = pgCC 
+# LINKER           = pgCC 
 # 
 # C++FLAGS        =  -g -D_UNIX -Minfo=all 
 # CFLAGS          =  -g	 -Minfo=all 
@@ -133,10 +146,10 @@ WIPE_LIBS	= $(NDARRAY_LIBRARY)  $(MAT_MOD_LIBRARY)  $(FE_LIBRARY)
 # ######  KAI KAI  KAI KAI KAI KAI KAI KAI  KAI KAI KAI KAI      
 # CC++ =  KCC
 # CC =   KCC
-# LINK = KCC
+# LINKER= KCC
 # FC   =  g77
 # #FC   =  pgf90
-# LINK = KCC 
+# LINKER= KCC 
 # 
 # C++FLAGS        =  -g -D_UNIX -Wall 
 # CFLAGS          =  -g	 -Wall
@@ -156,7 +169,7 @@ WIPE_LIBS	= $(NDARRAY_LIBRARY)  $(MAT_MOD_LIBRARY)  $(FE_LIBRARY)
 ########################################    GNU
 CC++            =  g++
 CC              =  gcc
-FC              =  g77
+Fort            =  g77
 LINKER          =  g++
 																					 
 #C++FLAGS        =  -O2 -D_UNIX
@@ -172,24 +185,24 @@ LINKFLAGS       =  -g
 ##..CC++ = g++
 ##..CC   = gcc
 ##..FC	  = g77
-##..LINK = g++
+##..LINKER= g++
 
 ########################################     EGCS
 # ##..
 # ##..CC++ = egcs
-# ##..LINK = egcs
+# ##..LINKER= egcs
 #   
 ########################################    MPI CC
 
 ##CC++ = mpiCC
 ##CC   = mpicc
-##LINK = mpiCC
+##LINKER= mpiCC
 
 ##..########################################     INSURE++  CODEWIZARD
 ##..CC++            =  insure
 ##..CC              =  gcc
 ##..FC              =  g77
-##..LINK            =  g++ 
+##..LINKER           =  g++ 
 ##..
 ##..C++FLAGS        =  -g -Zvm -Zvm -Zvm -D_UNIX -Wall
 ##..CFLAGS          =  -g	 -Wall
@@ -198,17 +211,17 @@ LINKFLAGS       =  -g
 ##..
 ##..CC++ = insure
 ##..CC   = gcc
-##..LINK = insure
+##..LINKER= insure
 ##..#CC++ = codewizard
 ##..#CC   = gcc
-##..#LINK = codewizard
+##..#LINKER= codewizard
 ##..
 
 ########################################       I B M   AIX
 ##..# AIX C++   on IBM AIX
 ##..CC++ = xlC
 ##..CC   = xlc
-##..LINK = xlC
+##..LINKER= xlC
 
 
 ########################################     BORLAND
@@ -338,7 +351,7 @@ MACHINE_INCLUDES        = -I/usr/include      \
 # BJ_UCD		  -I$(MPI_INCLUDE_DIR) 
 
 
-# this file contains all the g3/SRC includes
+# this file contains all the OpenSees/SRC includes
 include $(FE)/Makefile.incl
 
 TCL_INCLUDES = 
