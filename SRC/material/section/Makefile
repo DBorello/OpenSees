@@ -5,7 +5,7 @@ OBJS       = SectionForceDeformation.o \
 	FiberSection.o \
 	GenericSection1d.o GenericSectionNd.o \
 	SectionAggregator.o ElasticPlateSection.o \
-	ElasticMembranePlateSection.o \
+	ElasticMembranePlateSection.o MembranePlateFiberSection.o \
 	TclModelBuilderSectionCommand.o FiberSection2d.o FiberSection3d.o
 
 all:         $(OBJS)
