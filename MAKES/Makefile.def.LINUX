@@ -3,7 +3,8 @@
 #  Program:  OpenSees
 #
 #  Purpose:  A Top-level Makefile to create the libraries needed
-#	     to use the OpenSees framework.
+#	     to use the OpenSees framework. Works for Linux 7.1 and 
+#            above, modified to use the OpenGl libraries.
 #
 #  Written: fmk 
 #  Created: 10/99
@@ -102,6 +103,9 @@ AR		= ar
 ARFLAGS		= cqls
 RANLIB		= ranlib
 
+GRAPHICS = UsingOpenGL
+
+
 # Compiler Flags
 #
 # NOTES:
@@ -114,7 +118,7 @@ C++FLAGS         = -Wall  -funroll-loops -fcse-follow-jumps \
 		 -fthread-jumps -fcse-skip-blocks -frerun-cse-after-loop \
 		 -felide-constructors \
 		 -fcaller-saves  -ffloat-store -fforce-addr \
-		 -fschedule-insns -fschedule-insns2 -D_LINUX -D_UNIX \
+		 -fschedule-insns -fschedule-insns2 -D_LINUX -D_UNIX -D_GLX \
 		 -fexpensive-optimizations \
 		 -fforce-addr -fforce-mem -finline-functions \
 		 -fkeep-inline-functions \
