@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2001-11-26 23:01:42 $
+// $Revision: 1.12 $
+// $Date: 2002-04-12 22:58:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -55,6 +55,7 @@
 #include <NodalLoad.h>
 #include <Beam2dPointLoad.h>
 #include <Beam2dUniformLoad.h>
+#include <BrickSelfWeight.h>
 #include <LoadPattern.h>
 
 #include <SectionForceDeformation.h>
@@ -997,6 +998,10 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
       cerr << "WARNING eleLoad -beamPoint type currently only valid only for ndm=2\n";
       return TCL_ERROR;
     }  
+  }
+  //Added Joey Yang UC Davis
+  else if (strcmp(argv[count],"-BrickW") == 0) {
+      theLoad = new BrickSelfWeight(eleLoadTag, theEleTags);
   }
 
   if (theLoad == 0) {
