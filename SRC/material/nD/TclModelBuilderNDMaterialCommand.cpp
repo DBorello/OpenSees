@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-07-21 20:13:13 $
+// $Revision: 1.10 $
+// $Date: 2001-07-25 19:58:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -73,18 +73,23 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 
     // Check argv[1] for ND material type
 
-    //Jul. 07, 2001 Boris Jeremic & ZHaohui Yang jeremic|zhyang@ucdavis.edu
+			 //Jul. 07, 2001 Boris Jeremic & ZHaohui Yang jeremic|zhyang@ucdavis.edu
     // Pressure dependent elastic material
     if (strcmp(argv[1],"PressureDependentElastic3D") == 0) {
-	if (argc < 5) {
+	if (argc < 6) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial PressureDependentElastic3D tag? E? v?" << endl;
+	    cerr << "Want: nDMaterial PressureDependentElastic3D tag? E? v? rho?" << endl;
 	    return TCL_ERROR;
 	}    
 
-	int tag;
-	double E, v, expp, prp, pop;
+	int tag = 0;
+	double E = 0.0;
+	double v = 0.0;
+	double rho = 0.0;
+	double expp = 0.0;
+	double prp = 0.0;
+	double pop = 0.0;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    cerr << "WARNING invalid PressureDependentElastic3D tag" << endl;
@@ -93,71 +98,81 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 
 	if (Tcl_GetDouble(interp, argv[3], &E) != TCL_OK) {
 	    cerr << "WARNING invalid E\n";
-	    cerr << "nDMaterial PressureDependentElastic3D: " << tag << endl;
+	    cerr << "nDMaterial PressureDependentElastic3D: E" << tag << endl;
 	    return TCL_ERROR;	
 	}
 
 	if (Tcl_GetDouble(interp, argv[4], &v) != TCL_OK) {
 	    cerr << "WARNING invalid v\n";
-	    cerr << "nDMaterial PressureDependentElastic3D: " << tag << endl;
+	    cerr << "nDMaterial PressureDependentElastic3D: v" << tag << endl;
+	    return TCL_ERROR;	
+	}
+				 
+	if (Tcl_GetDouble(interp, argv[5], &rho) != TCL_OK) {
+	    cerr << "WARNING invalid v\n";
+	    cerr << "nDMaterial PressureDependentElastic3D: rho" << tag << endl;
 	    return TCL_ERROR;	
 	}
 	
-	if( argc == 5 ) 
+//////////////////////////////////////////////////////////////////////////////////
+	if( argc == 6 ) 
 	{
-     	   theMaterial = new PressureDependentElastic3D (tag, E, v);
+     	   theMaterial = new PressureDependentElastic3D (tag, E, v, rho);
 	   //cerr << "nDMaterial PressureDependentElastic3D: expp =" << expp << endl;
 	}
-	else if( argc == 6 ) 
+//////////////////////////////////////////////////////////////////////////////////
+	else if( argc == 7 ) 
 	{
 	   //get the exponent of the pressure sensitive elastic material)
-	   if (Tcl_GetDouble(interp, argv[5], &expp) != TCL_OK) {
+	   if (Tcl_GetDouble(interp, argv[6], &expp) != TCL_OK) {
 	       cerr << "WARNING invalid v\n";
 	       cerr << "nDMaterial PressureDependentElastic3D: " << tag << endl;
 	       return TCL_ERROR;	
 	   }
-     	   theMaterial = new PressureDependentElastic3D (tag, E, v, expp);
+     	   theMaterial = new PressureDependentElastic3D (tag, E, v, rho, expp);
 	   //cerr << "nDMaterial PressureDependentElastic3D: expp =" << expp << endl;
 	}
-	else if (argc == 7 ) 
+//////////////////////////////////////////////////////////////////////////////////
+	else if (argc == 8 ) 
 	{
 	   //get the exponent pressure of the pressure sensitive elastic material)
-	   if (Tcl_GetDouble(interp, argv[5], &expp) != TCL_OK) {
+	   if (Tcl_GetDouble(interp, argv[6], &expp) != TCL_OK) {
 	       cerr << "WARNING invalid v\n";
-	       cerr << "nDMaterial ElasticIsotropic3D: " << tag << endl;
+	       cerr << "nDMaterial PressureDependentElastic3D: expp" << tag << endl;
 	       return TCL_ERROR;	
 	   } 
 	   //get the reference pressure of the pressure sensitive elastic material)
-	   if (Tcl_GetDouble(interp, argv[6], &prp) != TCL_OK) {
+	   if (Tcl_GetDouble(interp, argv[7], &prp) != TCL_OK) {
 	       cerr << "WARNING invalid v\n";
-	       cerr << "nDMaterial ElasticIsotropic3D: " << tag << endl;
+	       cerr << "nDMaterial PressureDependentElastic3D: prp " << tag << endl;
 	       return TCL_ERROR;	
 	   }
 	   //cerr << "nDMaterial ElasticIsotropic3D: prp =" << prp << endl;
-     	   theMaterial = new PressureDependentElastic3D (tag, E, v, expp, prp);
+     	   theMaterial = new PressureDependentElastic3D (tag, E, v, rho, expp, prp);
 	}
-	else if (argc >= 8 ) 
+//////////////////////////////////////////////////////////////////////////////////
+	else if (argc >= 9 ) 
 	{
 	   //get the exponent of the pressure sensitive elastic material)
-	   if (Tcl_GetDouble(interp, argv[5], &expp) != TCL_OK) {
+	   if (Tcl_GetDouble(interp, argv[6], &expp) != TCL_OK) {
 	       cerr << "WARNING invalid v\n";
-	       cerr << "nDMaterial PressureDependentElastic3D: " << tag << endl;
+	       cerr << "nDMaterial PressureDependentElastic3D: expp" << tag << endl;
 	       return TCL_ERROR;	
 	   }
 	   //get the reference pressure of the pressure sensitive elastic material)
-	   if (Tcl_GetDouble(interp, argv[6], &prp) != TCL_OK) {
+	   if (Tcl_GetDouble(interp, argv[7], &prp) != TCL_OK) {
 	       cerr << "WARNING invalid v\n";
-	       cerr << "nDMaterial PressureDependentElastic3D: " << tag << endl;
+	       cerr << "nDMaterial PressureDependentElastic3D: prp" << tag << endl;
 	       return TCL_ERROR;	
 	   }
 	   //get the cutoff pressure po of the pressure sensitive elastic material)
-	   if (Tcl_GetDouble(interp, argv[7], &pop) != TCL_OK) {
+	   if (Tcl_GetDouble(interp, argv[8], &pop) != TCL_OK) {
 	       cerr << "WARNING invalid v\n";
-	       cerr << "nDMaterial PressureDependentElastic3D: " << tag << endl;
+	       cerr << "nDMaterial PressureDependentElastic3D: pop" << tag << endl;
 	       return TCL_ERROR;	
 	   }
 	   //cerr << "nDMaterial PressureDependentElastic3D: pop =" << pop << endl;
-     	   theMaterial = new PressureDependentElastic3D (tag, E, v, expp, prp, pop);
+     	   theMaterial = new PressureDependentElastic3D (tag, E, v, rho, expp, prp, pop);
 	}
 
     }
@@ -165,15 +180,17 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     // Linear Elastic Material (non-pressure dependent)
     else if ( strcmp(argv[1],"ElasticIsotropic3D") == 0 )
     {
-	if (argc < 5) {
+	if (argc < 6) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial ElasticIsotropic3D tag? E? v? exp?" << endl;
+	    cerr << "Want: nDMaterial ElasticIsotropic3D tag? E? v? rho" << endl;
 	    return TCL_ERROR;
 	}    
 
-	int tag;
-	double E, v;
+	int tag = 0;
+	double E = 0.0;
+	double v = 0.0;
+	double rho = 0.0;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    cerr << "WARNING invalid ElasticIsotropic3D tag" << endl;
@@ -192,7 +209,15 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    return TCL_ERROR;	
 	}
 	
-	theMaterial = new ElasticIsotropic3D (tag, E, v);
+ 
+ if (argc > 5 && Tcl_GetDouble(interp, argv[5], &rho) != TCL_OK) 
+   {
+     cerr << "WARNING invalid rho\n";
+     cerr << "nDMaterial ElasticIsotropic: " << tag << endl;
+     return TCL_ERROR;   
+   }
+
+	theMaterial = new ElasticIsotropic3D (tag, E, v, rho);
 
     }
 
