@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2001-05-03 06:13:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -99,11 +99,14 @@ AnalysisModel::~AnalysisModel()
 
     if (theDOFs != 0)
 	delete [] theDOFs;
-    
-    if (myDOFGraph == 0)
-	delete myDOFGraph;
-    if (myGroupGraph == 0)
+
+    if (myGroupGraph != 0) {
 	delete myGroupGraph;    
+    }	
+
+    if (myDOFGraph != 0) {
+	delete myDOFGraph;
+    }
 }    
 
 void
@@ -206,9 +209,9 @@ void
 AnalysisModel::clearAll(void) 
 {
     // if the graphs have been constructed delete them
-    
     if (myDOFGraph != 0)
 	delete myDOFGraph;
+
     if (myGroupGraph != 0)
 	delete myGroupGraph;    
 
