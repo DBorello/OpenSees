@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-31 22:11:36 $
+// $Revision: 1.6 $
+// $Date: 2002-01-09 23:55:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
                                                                         
@@ -55,10 +55,30 @@ Steel01::Steel01
    Esh = b*E0;           // Hardening modulus
 
    // Sets all history and state variables to initial values
-   revertToStart ();
+   // History variables
+   CminStrain = 0.0;
+   CmaxStrain = 0.0;
+   CshiftP = 1.0;
+   CshiftN = 1.0;
+   Cloading = 0;
+   Cfailed = 0;
 
-   // Initial stiffness
+   TminStrain = 0.0;
+   TmaxStrain = 0.0;
+   TshiftP = 1.0;
+   TshiftN = 1.0;
+   Tloading = 0;
+   Tfailed = 0;
+
+   // State variables
+   Cstrain = 0.0;
+   Cstress = 0.0;
+   Ctangent = E0;
+
+   Tstrain = 0.0;
+   Tstress = 0.0;
    Ttangent = E0;
+
 // AddingSensitivity:BEGIN /////////////////////////////////////
 	gradientIdentifier = 0;
 // AddingSensitivity:END //////////////////////////////////////
@@ -68,6 +88,7 @@ Steel01::Steel01():UniaxialMaterial(0,MAT_TAG_Steel01),
  fy(0.0), E0(0.0), b(0.0), a1(0.0), a2(0.0), a3(0.0), a4(0.0),
  epsmin(0.0), epsmax(0.0)
 {
+
 // AddingSensitivity:BEGIN /////////////////////////////////////
 	gradientIdentifier = 0;
 // AddingSensitivity:END //////////////////////////////////////
@@ -79,20 +100,15 @@ Steel01::~Steel01 ()
    // Does nothing
 }
 
-void Steel01::setHistoryVariables ()
+int Steel01::setTrialStrain (double strain, double strainRate)
 {
+   // Reset history variables to last converged state
    TminStrain = CminStrain;
    TmaxStrain = CmaxStrain;
    TshiftP = CshiftP;
    TshiftN = CshiftN;
    Tloading = Cloading;
    Tfailed = Cfailed;
-}
-
-int Steel01::setTrialStrain (double strain, double strainRate)
-{
-   // Reset history variables to last converged state
-   setHistoryVariables ();
 
    // Set trial strain
    Tstrain = strain;
@@ -110,16 +126,22 @@ int Steel01::setTrialStrain (double strain, double strainRate)
 int Steel01::setTrial (double strain, double &stress, double &tangent, double strainRate)
 {
    // Reset history variables to last converged state
-   setHistoryVariables ();
+   TminStrain = CminStrain;
+   TmaxStrain = CmaxStrain;
+   TshiftP = CshiftP;
+   TshiftN = CshiftN;
+   Tloading = Cloading;
+   Tfailed = Cfailed;
 
    // Set trial strain
    Tstrain = strain;
 
    // Determine change in strain from last converged state
-   double dStrain = Tstrain - Cstrain;
+   double dStrain;
+   dStrain = Tstrain - Cstrain;
 
    // Calculate the trial state given the trial strain
-   if (fabs(dStrain) > DBL_EPSILON)   
+   if (fabs(dStrain) > DBL_EPSILON) 
       determineTrialState (dStrain);
 
    stress = Tstress;
@@ -130,19 +152,19 @@ int Steel01::setTrial (double strain, double &stress, double &tangent, double st
 
 void Steel01::determineTrialState (double dStrain)
 {
+
    if (Tstrain <= epsmin || Tstrain >= epsmax)
       Tfailed = 1;
 
    if (Tfailed) {
       Tstress = 0.0;
       Ttangent = 0.0;
+      return;
    } else {
 
-     double c, c1, c2, c3;
+      double c, c1, c2, c3, fyOneMinusB, c1c3, c1c2;
 
-      c = Cstress + E0*dStrain;
-
-      double fyOneMinusB = fy * (1.0 - b);
+      fyOneMinusB = fy * (1.0 - b);
 
       c1 = Esh*Tstrain;
 
@@ -150,57 +172,53 @@ void Steel01::determineTrialState (double dStrain)
 
       c3 = TshiftP*fyOneMinusB;
 
-      double c1c3 = c1+c3;
+      c1c3 = c1+c3;
+
+      c = Cstress + E0*dStrain;
 
       if (c1c3 < c) 
-         Tstress = c1c3;
+	Tstress = c1c3;
       else
 	Tstress = c;
 
-      double c1c2=c1-c2;
+      c1c2=c1-c2;
       if (c1c2 > Tstress) 
          Tstress = c1c2;
 
-      if (fabs(Tstress-c) < 1.0e-15)
-         Ttangent = E0;
+      if (fabs(Tstress-c) < DBL_EPSILON)
+	  Ttangent = E0;
       else
-         Ttangent = Esh;
-
+	  Ttangent = Esh;      
+      
+      //
       // Determine if a load reversal has occurred due to the trial strain
-      detectLoadReversal (dStrain);
+      //
 
-   }
-}
+      // Determine initial loading condition
+      if (Tloading == 0 && dStrain != 0.0) {
+	  if (dStrain > 0.0)
+	    Tloading = 1;
+	  else
+	    Tloading = -1;
+      }
 
-void Steel01::detectLoadReversal (double dStrain)
-{
-   // Determine initial loading condition
-   if (Tloading == 0 && dStrain != 0.0)
-   {
-      if (dStrain > 0.0)
-         Tloading = 1;
-      else
-         Tloading = -1;
-   }
+      // Transition from loading to unloading, i.e. positive strain increment
+      // to negative strain increment
+      if (Tloading == 1 && dStrain < 0.0) {
+	  Tloading = -1;
+	  if (Cstrain > TmaxStrain)
+	    TmaxStrain = Cstrain;
+	  TshiftN = 1 + a1*pow((TmaxStrain-TminStrain)/(2.0*a2*epsy),0.8);
+      }
 
-   // Transition from loading to unloading, i.e. positive strain increment
-   // to negative strain increment
-   if (Tloading == 1 && dStrain < 0.0)
-   {
-      Tloading = -1;
-      if (Cstrain > TmaxStrain)
-         TmaxStrain = Cstrain;
-      TshiftN = 1 + a1*pow((TmaxStrain-TminStrain)/(2.0*a2*epsy),0.8);
-   }
-
-   // Transition from unloading to loading, i.e. negative strain increment
-   // to positive strain increment
-   if (Tloading == -1 && dStrain > 0.0)
-   {
-      Tloading = 1;
-      if (Cstrain < TminStrain)
-         TminStrain = Cstrain;
-      TshiftP = 1 + a3*pow((TmaxStrain-TminStrain)/(2.0*a4*epsy),0.8);
+      // Transition from unloading to loading, i.e. negative strain increment
+      // to positive strain increment
+      if (Tloading == -1 && dStrain > 0.0) {
+	  Tloading = 1;
+	  if (Cstrain < TminStrain)
+	    TminStrain = Cstrain;
+	  TshiftP = 1 + a3*pow((TmaxStrain-TminStrain)/(2.0*a4*epsy),0.8);
+      }
    }
 }
 
@@ -248,7 +266,12 @@ int Steel01::commitState ()
 int Steel01::revertToLastCommit ()
 {
    // Reset trial history variables to last committed state
-   setHistoryVariables();
+   TminStrain = CminStrain;
+   TmaxStrain = CmaxStrain;
+   TshiftP = CshiftP;
+   TshiftN = CshiftN;
+   Tloading = Cloading;
+   Tfailed = Cfailed;
 
    // Reset trial state variables to last committed state
    Tstrain = Cstrain;
@@ -268,7 +291,12 @@ int Steel01::revertToStart ()
    Cloading = 0;
    Cfailed = 0;
 
-   setHistoryVariables ();
+   TminStrain = 0.0;
+   TmaxStrain = 0.0;
+   TshiftP = 1.0;
+   TshiftN = 1.0;
+   Tloading = 0;
+   Tfailed = 0;
 
    // State variables
    Cstrain = 0.0;
@@ -285,7 +313,7 @@ int Steel01::revertToStart ()
 UniaxialMaterial* Steel01::getCopy ()
 {
    Steel01* theCopy = new Steel01(this->getTag(), fy, E0, b,
-                                               a1, a2, a3, a4, epsmin, epsmax);
+				  a1, a2, a3, a4, epsmin, epsmax);
 
    // Calculated material properties
    theCopy->epsy = epsy;
@@ -300,7 +328,12 @@ UniaxialMaterial* Steel01::getCopy ()
    theCopy->Cfailed = Cfailed;
 
    // Trial history variables
-   theCopy->setHistoryVariables();
+   theCopy->TminStrain = CminStrain;
+   theCopy->TmaxStrain = CmaxStrain;
+   theCopy->TshiftP = CshiftP;
+   theCopy->TshiftN = CshiftN;
+   theCopy->Tloading = Cloading;
+   theCopy->Tfailed = Cfailed;
 
    // Converged state variables
    theCopy->Cstrain = Cstrain;
@@ -393,7 +426,12 @@ int Steel01::recvSelf (int commitTag, Channel& theChannel,
 
       // Copy converged history values into trial values since data is only
       // sent (received) after convergence
-      setHistoryVariables ();
+      TminStrain = CminStrain;
+      TmaxStrain = CmaxStrain;
+      TshiftP = CshiftP;
+      TshiftN = CshiftN;
+      Tloading = Cloading;
+      Tfailed = Cfailed;
 
       // State variables from last converged state
       Cstrain = data(16);
@@ -412,17 +450,17 @@ int Steel01::recvSelf (int commitTag, Channel& theChannel,
 void Steel01::Print (ostream& s, int flag)
 {
    s << "Steel01 tag: " << this->getTag() << endl;
-   s << "  fy: " << fy << endl;
-   s << "  E0: " << E0 << endl;
-   s << "  b:  " << b << endl;
-   s << "  a1: " << a1 << endl;
-   s << "  a2: " << a2 << endl;
-   s << "  a3: " << a3 << endl;
-   s << "  a4: " << a4 << endl;
+   s << "  fy: " << fy << " ";
+   s << "  E0: " << E0 << " ";
+   s << "  b:  " << b << " ";
+   s << "  a1: " << a1 << " ";
+   s << "  a2: " << a2 << " ";
+   s << "  a3: " << a3 << " ";
+   s << "  a4: " << a4 << " ";
    if (epsmin != NEG_INF_STRAIN)
-      s << "  epsmin: " << epsmin << endl;
+     s << "  epsmin: " << epsmin << " ";
    if (epsmax != POS_INF_STRAIN)
-      s << "  epsmax: " << epsmax << endl;
+     s << "  epsmax: " << epsmax << endl;
 }
 
 int

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-01-06 20:19:48 $
+// $Revision: 1.8 $
+// $Date: 2002-01-09 23:55:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -318,6 +318,13 @@ FedeasMaterial::Print(ostream &s, int flag)
   }
 }
 
+
+#ifdef _pgCC
+#define hard_1__ hard1_1_
+#endif
+
+
+
 #ifdef _WIN32
 
 extern "C" int _stdcall BOND_1(double *matpar, double *hstvP, double *hstv,
@@ -418,6 +425,7 @@ extern "C" int steel_2_(double *matpar, double *hstvP, double *hstv,
 // Add more declarations as needed
 
 #endif
+
 
 int
 FedeasMaterial::invokeSubroutine(int ist)
