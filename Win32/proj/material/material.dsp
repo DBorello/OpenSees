@@ -386,6 +386,14 @@ SOURCE=..\..\..\SRC\material\nD\ElasticIsotropicAxiSymm.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\nD\ElasticIsotropicBeamFiber.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\ElasticIsotropicBeamFiber.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\nD\ElasticIsotropicMaterial.cpp
 # End Source File
 # Begin Source File
@@ -724,6 +732,14 @@ SOURCE=..\..\..\SRC\material\nD\Template3Dep\YS.h
 # Begin Group "wrappers"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\BeamFiberMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\BeamFiberMaterial.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\nD\PlaneStressMaterial.cpp
