@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:46 $
+// $Revision: 1.6 $
+// $Date: 2003-04-17 19:52:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -427,16 +427,20 @@ TransformationConstraintHandler::recvSelf(int cTag,
 }
 
 
-
 int 
 TransformationConstraintHandler::enforceSPs(void)
 {
+    AnalysisModel *theModel = this->getAnalysisModelPtr();
+
     for (int i=1; i<=numConstrainedNodes; i++) {
 	// upward cast - safe as i put it in this location
 	TransformationDOF_Group *theDof  =
 	    (TransformationDOF_Group *)theDOFs[numDOF-i];
 	theDof->enforceSPs();
     }
+
+    theModel->updateDomain();
+
     return 0;
 }
 
