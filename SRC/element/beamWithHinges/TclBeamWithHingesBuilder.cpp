@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-04-02 22:02:36 $
+// $Revision: 1.10 $
+// $Date: 2003-06-09 20:49:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/TclBeamWithHingesBuilder.cpp,v $
                                                                         
                                                                         
@@ -51,6 +51,8 @@
 #include <HingeRadauTwoBeamIntegration3d.h>
 #include <HingeRadauBeamIntegration3d.h>
 
+#include <ElasticSection2d.h>
+#include <ElasticSection3d.h>
 
 #include <SectionForceDeformation.h>
 
@@ -157,6 +159,8 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	    return TCL_ERROR;
 	}	
 
+	bool useFour = false;
+
 	if (argc > 13) {
 	    for (int i = 13; i < argc; i++) {
 		if (strcmp(argv[i],"-mass") == 0 && ++i < argc) {
@@ -187,6 +191,8 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 			  return TCL_ERROR;
 			}
 		}
+		if (strcmp(argv[i],"-useFour") == 0)
+		  useFour = true;
 	    }
 	}	
 	
@@ -225,21 +231,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	Element *theElement = 0;
 
 	if (strcmp(argv[1],"beamWithHinges") == 0) {
-	  Node *nodeI = theDomain->getNode(ndI);
-	  Node *nodeJ = theDomain->getNode(ndJ);
-	  
-	  const Vector &crdI = nodeI->getCrds();
-	  const Vector &crdJ = nodeJ->getCrds();
-	  
-	  double dx = crdJ(0)-crdI(0);
-	  double dy = crdJ(1)-crdI(1);
-	  
-	  double L = sqrt(dx*dx+dy*dy);
-	  
-	  double lpI = L*lenI;
-	  double lpJ = L*lenJ;
-	  
-	  HingeMidpointBeamIntegration2d beamIntegr(E, A, I, lpI, lpJ);
+	  HingeMidpointBeamIntegration2d beamIntegr(E, A, I, lenI, lenJ);
 	  
 	  SectionForceDeformation *sections[2];
 	  sections[0] = sectionI;
@@ -263,15 +255,31 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 					     *theTransf, massDens, numIters, tol);
 	}
 	else {
-	  HingeRadauBeamIntegration2d beamIntegr(E, A, I, lenI, lenJ);
-	  
-	  SectionForceDeformation *sections[2];
-	  sections[0] = sectionI;
-	  sections[1] = sectionJ;
-	  
-	  theElement = new ForceBeamColumn2d(tag, ndI, ndJ, 2,
-					     sections, beamIntegr,
-					     *theTransf, massDens, numIters, tol);
+	  if (useFour) {
+	    HingeRadauTwoBeamIntegration2d beamIntegr(E, A, I, 4*lenI, 4*lenJ);
+
+	    ElasticSection2d elastic(0, E, A, I);
+	    SectionForceDeformation *sections[4];
+	    sections[0] = sectionI;
+	    sections[1] = &elastic;
+	    sections[2] = &elastic;
+	    sections[3] = sectionJ;
+	    
+	    theElement = new ForceBeamColumn2d(tag, ndI, ndJ, 4,
+					       sections, beamIntegr,
+					       *theTransf, massDens, numIters, tol);
+	  }
+	  else {
+	    HingeRadauBeamIntegration2d beamIntegr(E, A, I, lenI, lenJ);
+	    
+	    SectionForceDeformation *sections[2];
+	    sections[0] = sectionI;
+	    sections[1] = sectionJ;
+	    
+	    theElement = new ForceBeamColumn2d(tag, ndI, ndJ, 2,
+					       sections, beamIntegr,
+					       *theTransf, massDens, numIters, tol);
+	  }
 	}
 
 	// Ensure we have created the element, out of memory if got here and no element
@@ -387,6 +395,8 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	    return TCL_ERROR;
 	}	
 
+	bool useFour = false;
+
 	if (argc > 16) {
 	    for (int i = 16; i < argc; i++) {
 		if (strcmp(argv[i],"-mass") == 0 && ++i < argc) {
@@ -417,6 +427,8 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 				return TCL_ERROR;
 		    }
 	    }
+		if (strcmp(argv[i],"-useFour") == 0)
+		  useFour = true;
 	    }
 	}	
 	
@@ -452,23 +464,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	Element *theElement = 0;
 
 	if (strcmp(argv[1],"beamWithHinges") == 0) {
-	  Node *nodeI = theDomain->getNode(ndI);
-	  Node *nodeJ = theDomain->getNode(ndJ);
-	  
-	  const Vector &crdI = nodeI->getCrds();
-	  const Vector &crdJ = nodeJ->getCrds();
-	  
-	  double dx = crdJ(0)-crdI(0);
-	  double dy = crdJ(1)-crdI(1);
-	  double dz = crdJ(2)-crdI(2);
-	  
-	  double L = sqrt(dx*dx+dy*dy+dz*dz);
-	  
-	  double lpI = L*lenI;
-	  double lpJ = L*lenJ;
-	  
-	  HingeMidpointBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lpI, lpJ);
-	  
+	  HingeMidpointBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lenI, lenJ);
 	  SectionForceDeformation *sections[2];
 	  sections[0] = sectionI;
 	  sections[1] = sectionJ;
@@ -491,15 +487,32 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 					     *theTransf, massDens, numIters, tol);
 	}
 	else {
-	  HingeRadauBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lenI, lenJ);
+	  if (useFour) {
+	    HingeRadauTwoBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J,
+						      4*lenI, 4*lenJ);
 	  
-	  SectionForceDeformation *sections[2];
-	  sections[0] = sectionI;
-	  sections[1] = sectionJ;
-	  
-	  theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 2,
+	    ElasticSection3d elastic(0, E, A, Iz, Iy, G, J);
+	    SectionForceDeformation *sections[4];
+	    sections[0] = sectionI;
+	    sections[1] = &elastic;
+	    sections[2] = &elastic;
+	    sections[3] = sectionJ;
+	    
+	    theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 4,
 					     sections, beamIntegr,
 					     *theTransf, massDens, numIters, tol);
+	  }
+	  else {
+	    HingeRadauBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lenI, lenJ);
+	  
+	    SectionForceDeformation *sections[2];
+	    sections[0] = sectionI;
+	    sections[1] = sectionJ;
+	    
+	    theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 2,
+					     sections, beamIntegr,
+					     *theTransf, massDens, numIters, tol);
+	  }
 	}
 
 	// Ensure we have created the element, out of memory if got here and no element
