@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $                                                              
-// $Date: 2003-10-02 15:25:16 $                                                                  
+// $Revision: 1.15 $                                                              
+// $Date: 2003-10-30 22:43:47 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -282,3 +282,63 @@ NDMaterial::getResponse (int responseID, Information &matInfo)
 			return -1;
 	}
 }
+
+
+
+// AddingSensitivity:BEGIN ////////////////////////////////////////
+int
+NDMaterial::setParameter(const char **argv, int argc, Information &info)
+{
+    return -1;
+}
+
+int
+NDMaterial::updateParameter(int parameterID, Information &info)
+{
+    return -1;
+}
+
+int
+NDMaterial::activateParameter(int parameterID)
+{
+    return -1;
+}
+
+const Vector &
+NDMaterial::getStressSensitivity(int gradNumber, bool conditional)
+{
+	static Vector dummy(1);
+	return dummy;
+}
+
+const Vector &
+NDMaterial::getStrainSensitivity(int gradNumber)
+{
+	static Vector dummy(1);
+	return dummy;
+}
+
+double
+NDMaterial::getRhoSensitivity(int gradNumber)
+{
+	return 0.0;
+}
+
+const Matrix &
+NDMaterial::getDampTangentSensitivity(int gradNumber)
+{
+	static Matrix dummy(1,1);
+	return dummy;
+}
+const Matrix &
+NDMaterial::getTangentSensitivity(int gradNumber)
+{
+	static Matrix dummy(1,1);
+	return dummy;
+}
+int
+NDMaterial::commitSensitivity(Vector & strainSensitivity, int gradNumber, int numGrads)
+{
+	return 0;
+}
+// AddingSensitivity:END //////////////////////////////////////////

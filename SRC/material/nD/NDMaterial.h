@@ -23,8 +23,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $                                                              
-// $Date: 2003-10-02 15:25:16 $                                                                  
+// $Revision: 1.14 $                                                              
+// $Date: 2003-10-30 22:43:47 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $                                                                
                                                                         
                                                                         
@@ -114,6 +114,18 @@ class NDMaterial : public Material
 
     virtual Response *setResponse (const char **argv, int argc, Information &matInformation);
     virtual int getResponse (int responseID, Information &matInformation);
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+    virtual int            setParameter             (const char **argv, int argc, Information &info);
+    virtual int            updateParameter          (int parameterID, Information &info);
+	virtual int            activateParameter        (int parameterID);
+	virtual const Vector & getStressSensitivity     (int gradNumber, bool conditional);
+	virtual const Vector & getStrainSensitivity     (int gradNumber);
+	virtual const Matrix & getTangentSensitivity    (int gradNumber);
+	virtual const Matrix & getDampTangentSensitivity(int gradNumber);
+	virtual double         getRhoSensitivity        (int gradNumber);
+	virtual int            commitSensitivity        (Vector & strainGradient, int gradNumber, int numGrads);
+// AddingSensitivity:END ///////////////////////////////////////////
 
   protected:
     
