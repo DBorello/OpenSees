@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2004-10-05 20:46:50 $
+// $Revision: 1.27 $
+// $Date: 2004-10-11 04:42:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -277,7 +277,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  return TCL_ERROR;
 	}
 
-	opserr << eleData << " " << argc << endln;
+	//opserr << eleData << " " << argc << endln;
 
 	const char **data = new const char *[argc-eleData];
 
