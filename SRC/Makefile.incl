@@ -2,6 +2,7 @@
 
 
 FE_INCLUDES        = -I$(FE)/matrix \
+		  -I$(FE)/nDarray \
 		  -I$(FE)/tagged \
 		  -I$(FE)/tcl \
 		  -I$(FE)/material \
