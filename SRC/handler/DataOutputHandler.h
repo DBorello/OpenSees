@@ -18,19 +18,21 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-11-13 00:54:20 $
+// $Revision: 1.2 $
+// $Date: 2004-11-24 22:39:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/DataOutputHandler.h,v $
 
 #ifndef _DataOutputHandler
 #define _DataOutputHandler
 
+#include <MovableObject.h>
+
 class Vector;
 
-class DataOutputHandler
+class DataOutputHandler: public MovableObject
 {
  public:
-  DataOutputHandler();
+  DataOutputHandler(int classTag);
   virtual ~DataOutputHandler();
 
   virtual int open(char **dataDescription, int numData) =0;
