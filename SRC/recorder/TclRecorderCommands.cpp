@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2005-03-05 00:44:17 $
+// $Revision: 1.32 $
+// $Date: 2005-03-18 22:11:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -993,6 +993,65 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_OK;
 #else
 	FilePlotter *thePlotter = new FilePlotter(argv[2], argv[3], xLoc, yLoc, width, height, dT);
+	(*theRecorder) = thePlotter;    
+	thePlotter->setCol(cols);
+#endif
+    }
+
+    else if (strcmp(argv[1],"plotDifferent") == 0) {
+
+	int xLoc, yLoc, width, height;
+	if (argc < 10) {
+	    opserr << "WARNING recorder display fileName? windowTitle? xLoc yLoc pixelsX pixelsY -columns colX1 colY1 -columns colX2 ...";
+	    return TCL_ERROR;
+	}    
+	if (Tcl_GetInt(interp, argv[5], &xLoc) != TCL_OK)	
+	    return TCL_ERROR;	
+	if (Tcl_GetInt(interp, argv[6], &yLoc) != TCL_OK)	
+	    return TCL_ERROR;	      
+	if (Tcl_GetInt(interp, argv[7], &width) != TCL_OK)	
+	    return TCL_ERROR;	
+	if (Tcl_GetInt(interp, argv[8], &height) != TCL_OK)	
+	    return TCL_ERROR;	      
+
+	int loc = 9;
+
+	double dT = 0.0;
+	loc = 0;
+	ID cols(0,16);
+	int numCols = 0;
+	while (loc < argc) {
+	  if ((strcmp(argv[loc],"-columns") == 0) ||
+	      (strcmp(argv[loc],"-cols") == 0) ||
+	      (strcmp(argv[loc],"-col") == 0)) {
+	    if (argc < loc+2)
+	      return TCL_ERROR;
+
+	    int colX, colY;
+	    if (Tcl_GetInt(interp, argv[loc+1], &colX) != TCL_OK)	
+	      return TCL_ERROR;	
+
+	    if (Tcl_GetInt(interp, argv[loc+2], &colY) != TCL_OK)	
+	      return TCL_ERROR;	
+
+	    cols[numCols++] = colX;
+	    cols[numCols++] = colY;
+	    loc += 3;
+	  } 
+	  else if (strcmp(argv[loc],"-dT") == 0) {
+
+	    if (Tcl_GetDouble(interp, argv[loc+1], &dT) != TCL_OK)	
+	      return TCL_ERROR;	
+	    loc += 2;	    
+	  }
+	  else
+	    loc++;
+	}
+
+#ifdef _NOGRAPHICS
+	return TCL_OK;
+#else
+	FilePlotter *thePlotter = new FilePlotter(argv[2], argv[3], argv[4], xLoc, yLoc, width, height, dT);
 	(*theRecorder) = thePlotter;    
 	thePlotter->setCol(cols);
 #endif
