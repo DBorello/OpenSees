@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-03 06:37:59 $
+// $Revision: 1.4 $
+// $Date: 2001-06-20 04:27:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,9 @@
 #include <string.h>
 #include <Information.h>
 #include <MaterialResponse.h>
+#include <G3Globals.h>
+#include <float.h>
+#include <Vector.h>
 
 UniaxialMaterial::UniaxialMaterial(int tag, int clasTag)
 :Material(tag,clasTag)
@@ -47,7 +50,7 @@ UniaxialMaterial::UniaxialMaterial(int tag, int clasTag)
 
 UniaxialMaterial::~UniaxialMaterial()
 {
-  // does nothing
+	// does nothing
 }
 
 int
@@ -77,11 +80,17 @@ UniaxialMaterial::getDampTangent(void)
     return 0.0;
 }
 
-// default operation for secant stiffness is the tangent
+// default operation for secant stiffness
 double
 UniaxialMaterial::getSecant (void)
 {
-    return this->getTangent();
+	double strain = this->getStrain();
+	double stress = this->getStress();
+
+	if (strain != 0.0)
+		return stress/strain;
+	else
+		return this->getTangent();
 }
 
 UniaxialMaterial*
@@ -105,6 +114,10 @@ UniaxialMaterial::setResponse(char **argv, int argc, Information &matInfo)
 	else if (strcmp(argv[0],"strain") == 0)
 		return new MaterialResponse(this, 3, this->getStrain());
 
+    // strain
+	else if (strcmp(argv[0],"stressStrain") == 0)
+		return new MaterialResponse(this, 4, Vector(2));
+
     // otherwise unknown
     else
 		return 0;
@@ -113,6 +126,8 @@ UniaxialMaterial::setResponse(char **argv, int argc, Information &matInfo)
 int 
 UniaxialMaterial::getResponse(int responseID, Information &matInfo)
 {
+    static Vector stressStrain(2);
+
   // each subclass must implement its own stuff    
   switch (responseID) {
     case 1:
@@ -126,7 +141,13 @@ UniaxialMaterial::getResponse(int responseID, Information &matInfo)
     case 3:
       matInfo.setDouble(this->getStrain());
       return 0;      
-      
+    
+    case 4:
+        stressStrain(0) = this->getStrain();
+        stressStrain(1) = this->getStress();
+        matInfo.setVector(stressStrain);
+        return 0;
+
     default:      
       return -1;
   }
