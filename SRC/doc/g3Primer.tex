@@ -16,9 +16,9 @@
 \begin{center}
 {\bf \Large The OpenSees Command Language Primer} 
 
-{\bf Version 1.0 - Preliminary Draft} 
+{\bf Version 1.1 - Preliminary Draft} 
 
-{\bf  September 15, 2000} 
+{\bf  December 15, 2000} 
 
 {\bf  Frank McKenna and Gregory L. Fenves} 
 
@@ -33,14 +33,14 @@ use with OpenSees. OpenSees is an object-oriented framework under construction f
 finite element analysis. OpenSees's intended users are in the research
 community. A key feature of OpenSees is the interchangeability of components
 and the ability to integrate existing libraries and new components
-into the framework (not just new elements classes) without the need to
+into the framework (not just new element classes) without the need to
 change the existing code. Core components, that is the abstract base
 classes, define the minimal interface (minimal to make adding new
 component classes easier but large enough to ensure all that is
 required can be accommodated). 
 
 OpenSees is comprised of a set of modules to perform creation of the finite 
-element model, specification of an analysis procedure, specification 
+element model, specification of an analysis procedure, selection
 of quantities to be monitored during the analysis, and the output of
 results. In each finite element analysis, an analyst constructs 4 main
 types of objects, as shown in figure~\ref{main}:
@@ -62,11 +62,11 @@ types of objects, as shown in figure~\ref{main}:
 \item {\bf ModelBuilder}: As in any finite element analysis, the analyst's first
 step is to subdivide the body under study into elements and nodes,
 to define loads acting on the elements and nodes, and to define constraints
-acting on the nodes. The ModelBuilder object is that object in the program
+acting on the nodes. The ModelBuilder is the object in the program
 responsible for building the Element, Node, LoadPattern, TimeSeries,
-Load and Constraint objects.  
+Load and Constraint objects.
 
-\item {\bf Domain}: The Domain object is  responsible for
+\item {\bf Domain}: The Domain object is responsible for
 storing the objects created by the ModelBuilder object and for providing the
 Analysis and Recorder objects access to these objects.
 
@@ -80,8 +80,8 @@ classes consist of the following: { SolutionAlgorithm}, {
 Integrator}, { ConstraintHandler}, { DOF\_Numberer}, {
 SystemOfEqn}, { Solver}, and { AnalysisModel}. 
 
-\item {\bf Recorder}: Once the model and analysis have been defined, the
-analyst has the option of specifying what is to be
+\item {\bf Recorder}: Once the model and analysis objects have been
+defined, the analyst has the option of specifying what is to be
 monitored during the analysis. This, for example, could be the
 displacement history at a node in a transient analysis or the entire
 state of the model at each step in the solution procedure. Several
@@ -102,7 +102,7 @@ openseesTcl script is presented which performs an analysis of a simple two
 dimensional truss model. 
 
 \section {Tcl Basics}
-The basic syntax for a Tcl command is    
+The basic syntax for a Tcl command is
 
 {\sf\small
 \begin{verbatim}
@@ -124,7 +124,7 @@ any argument to be a nested command:
 interpreter will first evaluate the nested commands and will evaluate
 the outer command with the result of the nested commands.
 
-The most basic command in Tcl is the set coommand:
+The most basic command in Tcl is the set command:
 
 {\sf\small
 \begin{verbatim}
@@ -134,8 +134,8 @@ The most basic command in Tcl is the set coommand:
 
 \noindent which takes two arguments, the variables name and the value it is to
 be assigned. Value may be a string or number (in Tcl everything is
-treated as a string). To obtain the value of a variable, variable
-substitution, the $\$$ operator is used.
+treated as a string). To obtain the value of a variable the $\$$
+operator is used. 
 
 To evaluate mathematical expressions the expr command is used:
 
@@ -173,7 +173,7 @@ Procedures are defined using the command proc:
 }
 
 \noindent where name is the name of the Tcl procedure created, args is the
-procedure arguments and body the body of the procedure, for example:
+procedure arguments and body is the body of the procedure, for example:
 
 {\sf\small
 \begin{verbatim}
@@ -197,8 +197,7 @@ integer or floating point number is to be provided. Optional values
 are identified in enclosing $<$ $>$ braces. When specifying a quantity
 of x values are required, the command line contains (x values?). An
 arbitrary number of input values is indicated with the dotdotdot
-notation, i.e. value1? value2? ..., where an arbitrary number of
-values can be provided.
+notation, i.e. value1? value2? ... .
 
 
 \section{The model Command}
@@ -220,7 +219,7 @@ only one type of ModelBuilder accepted, that of type BasicBuilder.
 
 \noindent The command for constructing a BasicBuilder object contains
 additional arguments. The string -ndm followed by an integer
-defining the dimension of the problem, i.e. 1,2 or 3-d. By default the
+defining the dimension of the problem, i.e. 1, 2 or 3-d. By default the
 number of degrees-of-freedom at a node (ndf) depend on the value of
 ndm (ndm=1, ndf=1; ndm=2, ndf=3; ndm=3, ndf=6). An optional
 string -ndf followed by an integer defining the number of degrees
@@ -354,10 +353,9 @@ in the BasicBuilder object.
 }
 
 \noindent To construct a uniaxial material model with combined linear kinematic
-and isotropic hardening.
-The model contains a yield strength of fy, an initial elastic
-tangent of E, an isotropic hardening modulus of H\_iso, and a kinematic hardening
-modulus of H\_kin. The argument matTag is used to
+and isotropic hardening. The model contains a yield stress of sigmaY, an
+elastic modulus of E, an isotropic hardening modulus of H\_iso, and a
+kinematic hardening modulus of H\_kin. The argument matTag is used to 
 uniquely identify this UniaxialMaterial object among UniaxialMaterial objects
 in the BasicBuilder object.
 
@@ -369,16 +367,18 @@ in the BasicBuilder object.
 \end{verbatim}
 }
 
-\noindent To construct a uniaxial bilinear steel model with kinematic hardening and
-optional isotropic hardening described by a non-linear evolution equation.
-The model contains a yield strength of fy, an initial elastic
-tangent of E0, and a hardening ratio of b. The optional parameters a1, a2, a3,
-and a4 control the amount of isotropic hardening (default values are
-provided). Specification of minimum and maximum failure strains
+\noindent To construct a uniaxial bilinear steel model with kinematic
+hardening and optional isotropic hardening described by a non-linear
+evolution equation. The model contains a yield strength of fy, an
+initial elastic tangent of E0, and a hardening ratio of b. The
+optional parameters a1, a2, a3, and a4 control the amount of isotropic
+hardening (default values are provided for no isitropic
+hardening). Specification of minimum and maximum failure strains 
 through the -min and -max switches is optional and must appear after
-the specification of the isoptropic hardening parameters, if present. The argument 
-matTag is used to uniquely identify this UniaxialMaterial object among UniaxialMaterial 
-objects in the BasicBuilder object.
+the specification of the isoptropic hardening parameters, if
+present. The argument matTag is used to uniquely identify this
+UniaxialMaterial object among UniaxialMaterial objects in the
+BasicBuilder object. 
 
 \subsubsection{Concrete01 Material}
 {\sf\small
@@ -388,7 +388,7 @@ objects in the BasicBuilder object.
 }
 
 \noindent To construct a uniaxial Kent-Scott-Park concrete model with degraded 
-linear unloading/reloading according to the work of Karsan-Jirsa and no
+linear unloading/reloading stiffness according to the work of Karsan-Jirsa and no
 strength in tension. The model contains a compressive strength of fpc,
 a strain at the compressive strength of epsc0, a crushing strength of
 fpcu, and a strain at the crushing strength of epscu. Compressive
@@ -415,11 +415,10 @@ an optional third point for a trilinear backbone. p indicates positive backbone
 points, and n negative backbone points. Note that negative backbone points
 should be entered as negative numeric values. The pinching factors pinchX and
 pinchY indicate the amount of pinching of deformation and force, respectively,
-during reloading. Note that setting both pinchX and pinchY to zero gives Clough type 
-reloading behavior. The damage factors damage1 and damage2 are for damage due
+during reloading. The factors damage1 and damage2 are for damage due 
 to ductility, $D_1(\mu-1)$, and energy, $D_2(\frac{E_i}{E_{ult}})$, respectively. 
-The optional parameter beta is a power used to determine degraded unloading stiffness
-based on ductility, $\mu^{-\beta}$.
+The optional parameter beta is a power used to determine degraded
+unloading stiffness based on ductility, $\mu^{-\beta}$.
 
 % \subsubsection{Viscous Material}
 % {\sf\small
@@ -442,9 +441,11 @@ based on ductility, $\mu^{-\beta}$.
 
 The nDMaterial command is used to construct an NDMaterial object. NDMaterial
 objects represent stress-strain relationships at the integration points of
-continuum elements. The command has at least one argument, the material type. 
-Currently the following types are permitted: ElasticIsotropic. The commands for 
-specifying each type are as outlined below. 
+continuum and force-deformation elements. The command has at least one
+argument, the material type. Currently the following types are
+permitted: ElasticIsotropic and J2Plastciity continuum models and one
+force-deformation model Bidirectional. The commands for specifying
+each type are as outlined below.  
 
 The valid queries to any ND material when creating an ElementRecorder
 are 'strain', 'stress', and 'tangent'.
@@ -462,9 +463,44 @@ uniquely identify this NDMaterial object among NDMaterial objects
 in the BasicBuilder object.
 
 The material formulations for the ElasticIsotropic object are 'PlaneStrain2D' and
-'PlaneStress2D'.  These are the valid strings that can be passed to the quad
-element for the type parameter.  Other types will be added as more continuum elements
-become available, e.g. 'Axisymmetric'.
+'PlaneStress2D'. These are the valid strings that can be passed to the quad
+element for the type parameter. Other types will be added as more
+continuum elements become available, e.g. 'Axisymmetric'.
+
+\subsubsection{J2 Plasticity Material}
+{\sf\small
+\begin{verbatim}
+   nDMaterial J2Plasticity matTag? K? G? sig0? sigInf? delta? H?
+\end{verbatim}
+}
+
+To construct a J2Plasticity material object with a bulk modulus
+K, shear modulus G, initial yield stress sig0, final saturation yield
+stress sigInf, exponential hardening parameter delta and the linear
+hardening parameter H. The argument matTag is used to uniquely
+identify this NDMaterial object among NDMaterial objects in the
+BasicBuilder object. 
+
+The material formulations for the J2Plasticity object are 'PlaneStrain2D',
+'PlaneStress2D', 'AxiSymmetric2D' and 'ThreeDimensional'.  These are
+the valid strings that can be passed to the continuum elements for the type
+parameter. 
+
+\subsubsection{Bidirectional Material}
+{\sf\small
+\begin{verbatim}
+   nDMaterial Bidirectional matTag? E? sigY? Hiso? Hkin?
+\end{verbatim}
+}
+
+To construct a Bidirectional material object with an elastic modulus
+E, yield stress sigY, isotropic hardening modulus Hiso, and kinematic
+hardening modulus Hkin. A Bidirectional material object is the two
+dimensional generalization of a one dimensional elastoplasitc model
+with linear hardening.
+The argument matTag is used to
+uniquely identify this NDMaterial object among NDMaterial objects
+in the BasicBuilder object.
 
 \subsection{The section Command}
 {\sf\small
@@ -473,12 +509,12 @@ become available, e.g. 'Axisymmetric'.
 \end{verbatim}
 }
 
-The section command is used to construct a Section object. Section objects
-represent force-deformation relationships at beam-column sample points. The 
-command has at least one argument, the section type. Currently the
-following types are permitted: Elastic, Generic1d, GenericNd, Aggregator,
-and Fiber. The commands for specifying each type are
-as outlined below.
+The section command is used to construct a SectionSD object. SectionSD
+objects, hereto referred to as Section, represent force-deformation
+relationships at beam-column sample points. The command has at least
+one argument, the section type. Currently the following types are
+permitted: Elastic, Generic1d, GenericNd, Aggregator, and Fiber. The
+commands for specifying each type are as outlined below.
 
 The valid queries to any section when creating an ElementRecorder
 are 'force' and 'deformation'.
@@ -491,7 +527,7 @@ are 'force' and 'deformation'.
 }
 
 To construct an ElasticSection object with axial stiffness EA and 
-bending stiffness EIz about the section local z-axis.  The values 
+bending stiffness EIz about the section local z-axis. The values 
 for EIy and GJ, the bending stiffness about the section local
 y-axis and the section torsional stiffness, respectively, are optional
 as needed. The argument secTag is used to uniquely identify this 
@@ -508,7 +544,7 @@ To construct a GenericSection1d object which uses a previously defined
 UniaxialMaterial object, identifed by the argument matTag, to represent
 a single section force-deformation response quantity. The argument code indicates
 the force-deformation quantity to be modeled by this section object.
-Values for code are given in the figure below. The 
+Values for code are given in the figure 2. The 
 argument secTag is used to uniquely identify this Section object among 
 Section objects in the BasicBuilder object. 
 
@@ -536,12 +572,14 @@ Section objects in the BasicBuilder object.
 
 To construct a GenericSectionNd object which uses a previously defined
 NDMaterial object, identifed by the argument NDTag, to represent
-a multiple section force-deformation response quantities. The arguments code1, 
-code2, ... indicate the force-deformation quantities to be modeled by this section object.
-The number of code arguments must match the order of the NDMaterial object.  code1
-is mapped to the first stress-strain relation of the NDMaterial, code2 to the second, etc.
-Values for code are given in Figure~\ref{sectionCodes}. The argument secTag is used to 
-uniquely identify this Section object among Section objects in the BasicBuilder object.
+a coupled section force-deformation response quantities. The arguments code1, 
+code2, ... indicate the force-deformation quantities to be modeled by
+this section object. The number of code arguments must match the order
+of the NDMaterial object. code1 is mapped to the first stress-strain
+relation of the NDMaterial, code2 to the second, etc. Values for code
+are given in Figure~\ref{sectionCodes}. The argument secTag is used to
+uniquely identify this Section object among Section objects in the
+BasicBuilder object. 
 
 \subsubsection{Section Aggregator}
 {\sf\small
@@ -550,20 +588,24 @@ uniquely identify this Section object among Section objects in the BasicBuilder 
 \end{verbatim}
 }
 
-To construct a SectionAggregator object which groups multiple previously defined
-UniaxialMaterial objects, represented by the arguments matTag1 code1 matTag2 code2 ...,
-into a single section force-deformation model.  The optional -section switch is used
-to specify a previously defined Section object, identified by the argument sectionTag,
-to which these UniaxialMaterial objects may be added to recursively define a new Section object.
-The UniaxialMaterial objects aggregated in this Section object are uncoupled from each
-other as well as from the Section object represented by sectionTag, if present.
-Values for code are given in Figure~\ref{sectionCodes}. The argument secTag is used to 
-uniquely identify this Section object among Section objects in the BasicBuilder object.
+To construct a SectionAggregator object which groups
+previously defined UniaxialMaterial objects, represented by the
+arguments matTag1 code1 matTag2 code2 ..., into a single section
+force-deformation model. The optional -section switch is used to
+specify a previously defined Section object, identified by the
+argument sectionTag, to which these UniaxialMaterial objects may be
+added to recursively define a new Section object. The UniaxialMaterial
+objects aggregated in this Section object are uncoupled from each
+other as well as from the Section object represented by sectionTag, if
+present. Values for code are given in Figure~\ref{sectionCodes}. The
+argument secTag is used to uniquely identify this Section object among
+Section objects in the BasicBuilder object. 
 
 \subsubsection{Fiber Section}
 {\sf\small
 \begin{verbatim}
    section Fiber secTag? {
+      fiber <fiber arguments>
       patch <patch arguments>
       layer <layer arguments>
    }
@@ -578,11 +620,25 @@ section object among section objects in the BasicBuilder object. A fiber
 section has a general geometric configuration formed by subregions
 of simpler, regular shapes (e.g. quadrilateral, circular and triangular
 regions) called patches. In addition, layers of reinforcement bars 
-can also be specified. The subcommands patch and
-layer are used to define the discretization of the section into
-fibers, and are described below. 
-In these subcommands, the geometric parameters are defined
-with respect to a planar local coordinate system (y,z). 
+can also be specified. The subcommands patch and layer are used to
+define the discretization of the section into
+fibers, and are described below. In these subcommands, the geometric
+parameters are defined with respect to a planar local coordinate system (y,z). 
+See figures 3 and 7.
+
+\paragraph{The fiber Command}
+
+{\sf\small
+\begin{verbatim}
+   fiber yLoc? zLOc? area? matTag?
+\end{verbatim}
+}
+
+The fiber command is used to construct a fiber object and add it to
+the section. The arguments consist of the y,z coordinates of the fiber
+in the section, the area of the fiber and the material tag of the
+unixial fiber which is used to represent the stress-strain for the
+area of the fiber.
 
 \paragraph{The patch Command}
 
@@ -614,7 +670,7 @@ the patch is defined by four vertices I, J, K and L, as illustrated
 in figure~\ref{quadPatch}. The arguments numSubdivIJ and numSubdivJK are integers
 that specify the number of subdivisions (fibers) along the IJ and JK 
 directions, respectively. The last arguments yVertI, zVertI, yVertJ,
-zVertJ, yVertK, zVertK, yVertL, and  zVertL
+zVertJ, yVertK, zVertK, yVertL, and zVertL
 are the coordinates y and z of each of the four vertices specified in sequence
 (counter-clockwise).
  
@@ -753,7 +809,7 @@ The geomTransf command is used to construct a CrdTransf object. A CrdTransf
 object transforms beam element stiffness and resisting force from the 
 basic system to the global coordinate system. The command has at least one 
 argument, the transformation type. Currently the following types are 
-permitted: Linear and LinearWithPDelta.  The commands for specifying each 
+permitted: Linear and LinearWithPDelta. The commands for specifying each 
 type are as outlined below: 
 
 \subsubsection{The Linear Transformation}
@@ -767,22 +823,26 @@ type are as outlined below:
 
 To construct a LinearCrdTransf object which performs a linear geometric
 transformation of beam stiffness and resisting force from the basic system
-to the global coordinate system.  For the three dimensional problem, additional arguments
-need to be specified. Optional rigid joint offsets can be specified
-with the -jntOffset switch.  The joint offset values dXi, dYi, dZi and dXj, dYj, dZj 
-are absolute offsets with respect to the global coordinate system from element end 
-nodes I and J, respectively.  The rigid joint offset arguments depend on the dimension of the
-current model.  The argument transfTag is used to uniquely identify this 
-CrdTransf object among CrdTransf objects in the BasicBuilder object.
+to the global coordinate system. For the three dimensional problem,
+additional arguments need to be specified. Optional rigid joint
+offsets can be specified with the -jntOffset switch. The joint offset
+values dXi, dYi, dZi and dXj, dYj, dZj are absolute offsets with
+respect to the global coordinate system from element end nodes I and
+J, respectively. The rigid joint offset arguments depend on the
+dimension of the current model. The argument transfTag is used to
+uniquely identify this CrdTransf object among CrdTransf objects in the
+BasicBuilder object. 
 
-The element coordinate system is specified,
-according to figure~\ref{localAxis}, as follows: the x axis is the axis connecting the two
-element nodes; the y and z axis are then defined using a vector that
-lies on the local xz plane (the components of this vector,  
-vecxzX, vecxzY, vecxzZ are specified with respect to the global coordinate system X,Y,Z).
-The section is attached to the element such that the (y,z) 
-coordinate system used to specify the section corresponds to the (y,z) axes 
-of the element. 
+The element coordinate system is specified, according to
+figure~\ref{localAxis}, as follows: the x axis is the axis connecting
+the two element nodes; the y and z axis are then defined using a
+vector that lies on the local xz plane (the components of this vector,
+vecxzX, vecxzY, vecxzZ are specified with respect to the global
+coordinate system X,Y,Z). The section is attached to the element such
+that the (y,z) coordinate system used to specify the section
+corresponds to the (y,z) axes of the element. 
+
+
 
 \subsubsection{The Linear P-Delta Transformation}
 {\sf\small
@@ -795,14 +855,15 @@ of the element.
 
 To construct a LinearCrdTransf object which performs a linear geometric
 transformation of beam stiffness and resisting force from the basic system
-to the global coordinate system considering 
-second order P-Delta effects. The arguments vecxzX, vecxzY, and vecxzZ are as defined
-for the Linear transformation above. Optional rigid joint offsets can be specified
-with the -jntOffset switch.  The joint offset values dXi, dYi, dZi and dXj, dYj, dZj 
-are absolute offsets with respect to the global coordinate system from element end 
-nodes I and J, respectively.  The rigid joint offset arguments depend on the dimension of the
-current model.  The argument transfTag is used to uniquely identify this 
-CrdTransf object among CrdTransf objects in the BasicBuilder object.
+to the global coordinate system considering second order P-Delta
+effects. The arguments vecxzX, vecxzY, and vecxzZ are as defined for
+the Linear transformation above. Optional rigid joint offsets can be
+specified with the -jntOffset switch. The joint offset values dXi,
+dYi, dZi and dXj, dYj, dZj are absolute offsets with respect to the
+global coordinate system from element end  nodes I and J,
+respectively. The rigid joint offset arguments depend on the dimension
+of the current model. The argument transfTag is used to uniquely
+identify this CrdTransf object among CrdTransf objects in the BasicBuilder object.
 
 \begin{figure}[htpb]
 \begin{center}
@@ -826,8 +887,9 @@ CrdTransf object among CrdTransf objects in the BasicBuilder object.
 The element command is used to construct an Element object. The
 command has at least one argument, the element type. Currently the
 following types are permitted: truss, elasticBeamColumn,
-nonlinearBeamColumn, beamWithHinges, zeroLength, and quad.
-The commands for specifying each type are as outlined below: 
+nonlinearBeamColumn, beamWithHinges, zeroLength, zeroLengthSection,
+zeroLengthND, and quad. The commands for specifying each type are as
+outlined below:  
 
 \subsubsection{The Truss Element}
 {\sf\small
@@ -865,14 +927,15 @@ for the methods involved have been further developed.
 the dimension of the problem, ndm. For a two dimensional problem the
 analyst specifies the eleTag, the two end nodes, the section area,
 Young's modulus and second moment of section area. For the three dimensional
-problem the analyst specifies the eleTag, two end nodes, and the material and
-section properties. Note that Iz (Iy) is the second moment of area about the beam section
-local z-axis (y-axis) (Figure~\ref{localAxis}). For both two and three dimensional problems, 
-the final argument to the elasticBeamColumn command is a transfTag, which identifies a 
-previously defined CrdTransf object.
+problem the analyst specifies additional material and
+section properties G, Jx, Iy and Iz. Note that Iz (Iy) is the second
+moment of area about the beam section local z-axis (y-axis)
+(Figure~\ref{localAxis}). For both two and three dimensional problems,
+the final argument to the elasticBeamColumn command is a transfTag,
+which identifies a previously defined CrdTransf object. 
 
-The valid queries to an elastic beam column element when creating an ElementRecorder
-are 'stiffness' and 'force'.
+The valid queries to an elastic beam column element when creating an
+ElementRecorder are 'stiffness' and 'force'.
 
 \subsubsection{The Nonlinear Beam Column Element}
 {\sf\small
@@ -882,26 +945,27 @@ are 'stiffness' and 'force'.
 \end{verbatim}
 }
 
-\noindent The nonlinearBeamColumn element is based on the non-iterative flexibility
-formulation, and considers the spread of plasticity along the
-element. The arguments to construct the element are its tag, eleTag, 
-the two end nodes, iNode and jNode, the number of integration points along the element,
-numIntgrPts, the section tag, secTag (must be pre-defined), and the geometric
-transformation tag, transfTag (pre-defined).
-The integration along the element is based on Gauss-Lobatto quadrature
-rule (two integration points at the element ends).  The element
-is prismatic, i.e. the beam is represented by the section 
-model identified by secTag at each integration point.  An element mass 
-density per unit length, massDens, from which a lumped mass matrix is formed, is 
-specified via the -mass switch.  An option is also
-provided for the iterative form of the flexibility formulation by the -iter switch.
-The arguments for the iterative form are maxIters, the maximum number
-of iterations to undertake to satisfy element compatibility; and tol, the tolerance
-for satisfaction of element compatibility.  Note that the iterative form can improve 
-the rate of global convergence at the expense of more local element computation.
+\noindent The nonlinearBeamColumn element is based on the
+non-iterative force formulation, and considers the spread of
+plasticity along the element. The arguments to construct the element
+are its tag, eleTag, the two end nodes, iNode and jNode, the number of
+integration points along the element, numIntgrPts, the section tag,
+secTag (must be pre-defined), and the geometric transformation tag,
+transfTag (pre-defined). The integration along the element is based on
+Gauss-Lobatto quadrature rule (two integration points at the element
+ends). The element is prismatic, i.e. the beam is represented by the
+section  model identified by secTag at each integration point. An
+element mass density per unit length, massDens, from which a lumped
+mass matrix is formed, is specified via the -mass switch. An option is
+also provided for the iterative form of the flexibility formulation by
+the -iter switch. The arguments for the iterative form are maxIters,
+the maximum number of iterations to undertake to satisfy element
+compatibility; and tol, the tolerance for satisfaction of element
+compatibility. Note that the iterative form can improve the rate of
+global convergence at the expense of more local element computation. 
 
-The valid queries to a nonlinearBeamColumn element when creating an ElementRecorder
-are 'force', 'stiffness', or 'section secNum secArg1 secArg2 ...'.
+The valid queries to a nonlinearBeamColumn element when creating an
+ElementRecorder are 'force', 'stiffness', or 'section secNum secArg1 secArg2 ...'.
 
 \subsubsection{The Beam With Hinges Element}
 {\sf\small
@@ -915,26 +979,32 @@ are 'force', 'stiffness', or 'section secNum secArg1 secArg2 ...'.
 }
 
 \noindent The beamWithHinges element is based on the non-iterative flexibility
-formulation, and considers plasticity to be concentrated over specified hinge lengths
-at the element ends.  The remaining beam interior is considered to be linear elastic. 
-The arguments to construct the element are its tag, eleTag, 
-the two end nodes, iNode and jNode, the section at node I, secTagI (pre-defined), the 
-ratio of hinge length I to total element length, ratioI, the section at node J, secTagJ 
-(pre-defined), the ratio of hinge length J to total element length, ratioJ, elastic axial stiffness, 
-EA, elastic bending stiffness, EI, and the geometric transformation tag, transfTag (pre-defined).
-For three-dimensional problems EIz (EIy) is the bending stiffness about the section local z-axis
-(y-axis) and GJ is the torsional stiffness (Figure~\ref{localAxis}).  Note that these elastic properties are only
-integrated over the beam interior. The integration over the hinge lengths is mid-point 
-integration.  An element mass density per unit length, massDens, from which a lumped mass matrix
-is formed, is specified via the -mass switch.  An option is also provided for the 
-iterative form of the flexibility formulation by the -iter switch.
-The arguments for the iterative form are maxIters, the maximum number
-of iterations to undertake to satisfy element compatibility; and tol, the tolerance
-for satisfaction of element compatibility.  Note that the iterative form can improve 
-the rate of global convergence at the expense of more local element computation.
+formulation, and considers plasticity to be concentrated over
+specified hinge lengths at the element ends. The remaining beam
+interior is considered to be linear elastic. The arguments to
+construct the element are its tag, eleTag, the two end nodes, iNode
+and jNode, the section at node I, secTagI (pre-defined), the ratio of
+hinge length I to total element length, ratioI, the section at node J,
+secTagJ (pre-defined), the ratio of hinge length J to total element
+length, ratioJ, elastic axial stiffness, EA, elastic bending
+stiffness, EI, and the geometric transformation tag, transfTag
+(pre-defined). For three-dimensional problems EIz (EIy) is the bending
+stiffness about the section local z-axis (y-axis) and GJ is the
+torsional stiffness (Figure~\ref{localAxis}). Note that these elastic
+properties are only integrated over the beam interior. The integration
+over the hinge lengths is mid-point integration. An element mass
+density per unit length, massDens, from which a lumped mass matrix 
+is formed, is specified via the -mass switch. An option is also
+provided for the iterative form of the flexibility formulation by the
+-iter switch. The arguments for the iterative form are maxIters, the
+maximum number of iterations to undertake to satisfy element
+compatibility; and tol, the tolerance for satisfaction of element
+compatibility. Note that the iterative form can improve the rate of
+global convergence at the expense of more local element computation. 
 
-The valid queries to a beamWithHinges element when creating an ElementRecorder
-are 'force', 'stiffness', 'rotation' (hinge rotation), or 'section secNum secArg1 secArg2 ...'.
+The valid queries to a beamWithHinges element when creating an
+ElementRecorder are 'force', 'stiffness', 'rotation' (hinge rotation),
+or 'section secNum secArg1 secArg2 ...'. 
 
 \subsubsection{The Zero Length Element}
 {\sf\small
@@ -944,20 +1014,85 @@ are 'force', 'stiffness', 'rotation' (hinge rotation), or 'section secNum secArg
 \end{verbatim}
 }
 
-\noindent Constructs a zero length element defined by two nodes at the same geometric location.
-The nodes are connected by multiple UniaxialMaterial objects to represent the force-deformation 
-relationship for the element.  The zero length element is identified by its tag, eleTag, nodes 
-iNode and jNode, UniaxialMaterial objects (previously defined) identified by matTag1 matTag2 ..., 
-and material directions dir1 dir2 ... .  Two optional orientation vectors can be specified for the
-element.  The vector x defines the local x-axis for the element and the vector yp lies in the local
-x-y plane for the element.  The local z-axis is the cross product between x and yp, and the local
-y-axis is the cross product between the local z-axis and x.  If these orientation vectors are not
-specified, the local element axes coincide with the global axes.  The values for dir are 1 through 6,
-where 1,2,3 indicate translation along the local x,y,z axes respectively; while 4,5,6 indicate
-rotation about the local x,y,z axes respectively.
+\noindent Constructs a zero length element defined by two nodes at the
+same geometric location. The nodes are connected by multiple
+UniaxialMaterial objects to represent the force-deformation
+relationship for the element. The zero length element is identified
+by its tag, eleTag, nodes iNode and jNode, UniaxialMaterial objects
+(previously defined) identified by matTag1 matTag2 ..., and material
+directions dir1 dir2 ... . Two optional orientation vectors can be
+specified for the element. The vector x defines the local x-axis for
+the element and the vector yp lies in the local x-y plane for the
+element. The local z-axis is the cross product between x and yp, and
+the local y-axis is the cross product between the local z-axis and x.
+If these orientation vectors are not specified, the local element axes
+coincide with the global axes. The values for dir are 1 through 6,
+where 1,2,3 indicate translation along the local x,y,z axes
+respectively; while 4,5,6 indicate rotation about the local x,y,z axes
+respectively. 
 
 The valid queries to a zeroLength element when creating an ElementRecorder
 are 'force', 'deformation', 'stiff', or 'material matNum matArg1 matArg2 ...'.
+
+\subsubsection{The Zero Length Section Element}
+{\sf\small
+\begin{verbatim}
+   element zeroLengthSection eleTag? iNode? jNode? secTag?
+                      -dir dir1? dir2? ... <-orient x1? x2? x3? yp1? yp2? yp3?>
+\end{verbatim}
+}
+
+\noindent Constructs a ZeroLengthSection element defined by two nodes at the
+same geometric location. The nodes are connected by a single
+SectionForceDeformation object to represent the force-deformation
+relationship for the element. The ZeroLengthSection element is identified
+by its tag, eleTag, nodes iNode and jNode, and SectionForceDeformation object
+(previously defined) identified by secTag. Two optional orientation vectors can be
+specified for the element. The vector x defines the local x-axis for
+the element and the vector yp lies in the local x-y plane for the
+element. The local z-axis is the cross product between x and yp, and
+the local y-axis is the cross product between the local z-axis and x.
+If these orientation vectors are not specified, the local element axes
+coincide with the global axes. The section force-deformation response
+represented by section code P acts along the element local x-axis, and
+the response for code Vy along the local y-axis. The other modes of
+section response follow from this orientation.
+
+The valid queries to a ZeroLengthSection element when creating an ElementRecorder
+are 'force', 'deformation', 'stiff', or 'section secArg1 secArg2 ...'.
+
+\subsubsection{The Zero Length ND Element}
+{\sf\small
+\begin{verbatim}
+   element zeroLengthND eleTag? iNode? jNode? matTag? <uniTag?>
+                      -dir dir1? dir2? ... <-orient x1? x2? x3? yp1? yp2? yp3?>
+\end{verbatim}
+}
+
+\noindent Constructs a ZeroLengthND element defined by two nodes at the
+same geometric location. The nodes are connected by a single
+NDMaterial object to represent the force-deformation
+relationship for the element.
+The ZeroLengthND element is identified
+by its tag, eleTag, nodes iNode and jNode, and NDMaterial object
+(previously defined) identified by matTag. Two optional orientation vectors can be
+specified for the element. The vector x defines the local x-axis for
+the element and the vector yp lies in the local x-y plane for the
+element. The local z-axis is the cross product between x and yp, and
+the local y-axis is the cross product between the local z-axis and x.
+If these orientation vectors are not specified, the local element axes
+coincide with the global axes.
+If the NDMaterial object is of order two, the response lies in the
+element local x-y plane, and an optional UniaxialMaterial, represented
+by the argument uniTag, may be used
+to represent uncoupled behavior orthogonal to this plane, i.e., along the local
+z-axis. If the NDMaterial is order three, the response is along
+each of the element local axes. Note that the ZeroLengthND element
+only represents translational response between its nodes.
+
+
+The valid queries to a ZeroLengthND element when creating an ElementRecorder
+are 'force', 'deformation', 'stiff', or 'material matArg1 matArg2 ...'.
 
 % \subsubsection{The Damper Element}
 % {\sf\small
@@ -969,7 +1104,7 @@ are 'force', 'deformation', 'stiff', or 'material matNum matArg1 matArg2 ...'.
 % \noindent Constructs a damper element. The damper element is identified by its tag,
 % eleTag, end nodes iNode and jNode, and UniaxialMaterial object identified by matTag 
 % (previously defined). The damper element can use any UniaxialMaterial object for its
-% damping force-velocity relation. An optional total element mass can be specified.  This
+% damping force-velocity relation. An optional total element mass can be specified. This
 % input element mass is divided and lumped at each node of the damper element.
 
 % The valid queries to a damper element when creating an ElementRecorder
@@ -983,18 +1118,21 @@ are 'force', 'deformation', 'stiff', or 'material matNum matArg1 matArg2 ...'.
 \end{verbatim}
 }
 
-\noindent Constructs a FourNodeQuad element which uses the bilinear isoparametric formulation. 
-The quad element is identified by its tag,
-eleTag, the four nodes iNode, jNode, kNode, and lNode, the element thickness (constant), 
-a string representing the material behavior, type, and an NDMaterial object identified 
-by matTag (previously defined). Valid options for the parameter type depend on the NDMaterial
-object and its available material formulations.  See the NDMaterial object documentation 
-for valid types. A uniform element normal traction can be specified by the pressure
-argument. Constant body forces b1 and b2, defined in the isoparametric domain, can be specified as
-well and are optional, as is the element mass density per unit volume rho, for which
-a lumped element mass matrix is computed. Consistent nodal loads are computed for the
-pressure and body forces. The four nodes i through l must be input in counter-clockwise order 
-around the element.
+\noindent Constructs a FourNodeQuad element which uses the bilinear
+isoparametric formulation. The quad element is identified by its tag,
+eleTag, the four nodes iNode, jNode, kNode, and lNode, the element
+thickness (constant), a string representing the material behavior,
+type, and an NDMaterial object identified by matTag (previously
+defined). Valid options for the parameter type depend on the
+NDMaterial object and its available material formulations. See the
+NDMaterial object documentation for valid types. A uniform element
+normal traction can be specified by the pressure argument. Constant
+body forces b1 and b2, defined in the isoparametric domain, can be
+specified as well and are optional, as is the element mass density per
+unit volume rho, for which a lumped element mass matrix is
+computed. Consistent nodal loads are computed for the pressure and
+body forces. The four nodes i through l must be input in
+counter-clockwise order around the element.
 
 The valid queries to a quad element when creating an ElementRecorder
 are 'force', 'stiffness', or 'material matNum matArg1 matArg2 ...',  where matNum
@@ -1014,37 +1152,28 @@ values. A $1$ specified for the i'th value indicates that the dof for
 the i'th degree-of-freedom is to be constrained, a $0$ that it is to be
 left unconstrained.
 
-\subsection{The pattern Command}
-{\sf\small
-\begin{verbatim}
-   pattern patternType patternTag? <arguments for pattern type>
-\end{verbatim}
-}
 
-The pattern command is used to construct a LoadPattern object, its
-associated TimeSeries object and the Load and Constraint objects for
-the pattern. There are two valid types of patternType: Plain and
-UniformExcitation. 
+\subsection{Types of TimeSeries and Args used in other commands}
 
 {\sf\small
 \begin{verbatim}
-   pattern Plain patternTag? timeSeriesType <args for time series> { 
-        load ...
-        sp ...
-   }	
+   seriesType <arguments for series type>
 \end{verbatim}
 }
 
-\noindent The string Plain is used to construct an ordinary
-LoadPattern object with a unique tag among load patterns in the Domain
-of patternTag.  The type of TimeSeries object associated with the
-LoadPattern object depends on the timeSeriesType. At present 3 types
-are recognized: Constant, Linear, Rectangular, Sine, and Series. The last 
-argument in the command is a list of commands to create nodal load and single-point
-constraints. The arguments for creating the TimeSeries object are as
+
+While there is no timeSeries command in the language, a number of
+commands take as an argument a list of items which defines 
+the TimeSeries object to be constructed as part of the command. The
+first element of the list is a string identifying the type of
+TimeSeries object to be constructed. There are a number of of
+time series objects that can be constructed: 
+Constant, Linear, Rectangular, Sine, and Series. 
+
+The arguments for creating the TimeSeries object are as
 follows: 
 
-\paragraph{The Constant Time Series}
+\subsubsection{The Constant Time Series}
 
 {\sf\small
 \begin{verbatim}
@@ -1053,12 +1182,13 @@ follows:
 }
 
 \noindent To associate with the LoadPattern object a TimeSeries object
-of type ConstantSeries. A Constant causes a load factor
-of cFactor to be applied to the loads and constraints in the pattern, independent of the
-time in the domain. The default value of cFactor is $1.0$. The analyst
-has the option of changing this using the optional arguments -factor and cFactor.
+of type ConstantSeries. A Constant causes a load factor of cFactor to
+be applied to the loads and constraints in the pattern, independent of
+the time in the domain. The default value of cFactor is $1.0$. The
+analyst has the option of changing this using the optional arguments
+-factor and cFactor. 
 
-\paragraph{The Linear Time Series}
+\subsubsection{The Linear Time Series}
 
 {\sf\small
 \begin{verbatim}
@@ -1067,12 +1197,12 @@ has the option of changing this using the optional arguments -factor and cFactor
 }
 
 \noindent To associate with the LoadPattern object a TimeSeries object
-of type LinearSeries. A LinearSeries causes a load factor
-of cFactor * time to be applied to the loads and constraints in the pattern. The
+of type LinearSeries. A LinearSeries causes a load factor of cFactor *
+time to be applied to the loads and constraints in the pattern. The
 default value of cFactor is $1.0$. The analyst has the option of
-changing this using the optional arguments -factor and cFactor.
+changing this using the optional arguments -factor and cFactor. 
 
-\paragraph{The Rectangular Time Series}
+\subsubsection{The Rectangular Time Series}
 
 {\sf\small
 \begin{verbatim}
@@ -1082,29 +1212,29 @@ changing this using the optional arguments -factor and cFactor.
 
 \noindent To associate with the LoadPattern object a TimeSeries object
 of type RectangularSeries. A RectangularSeries causes a load factor of
-cFactor * time to be applied to the loads and constraints in the pattern when the
-value of time is between tStart and tFinish. The default value of
-cFactor is $1.0$. The analyst has the option of changing this using
-the optional arguments -factor and cFactor. 
+cFactor * time to be applied to the loads and constraints in the
+pattern when the value of time is between tStart and tFinish. The
+default value of cFactor is $1.0$. The analyst has the option of
+changing this using the optional arguments -factor and cFactor. 
 
-\paragraph{The Sine Time Series}
+\subsubsection{The Sine Time Series}
 
 {\sf\small
 \begin{verbatim}
-   Sine tStart? tFinish? T? <-shift shift?> <-factor cFactor?> 
+   Sine tStart? tFinish? period? <-shift shift?> <-factor cFactor?> 
 \end{verbatim}
 }
 
 \noindent To associate with the LoadPattern object a TimeSeries object
-of type TrigSeries. A TrigSeries is defined by a period, T, and optional
-phase shift (radians).  The TrigSeries causes a load factor of
-cFactor * $\sin(\frac{2\pi*(time-tStart)}{T} + shift)$ 
-to be applied to the loads and constraints in the pattern when the
-value of time is between tStart and tFinish. The default value of shift
-is $0.0$ and the default value of cFactor is $1.0$. The analyst has the 
-option of changing these values using the optional switches -shift and -factor.
+of type TrigSeries. A TrigSeries is defined by a period, period, and optional
+phase shift (radians). The TrigSeries causes a load factor of
+cFactor * $\sin(\frac{2\pi*(time-tStart)}{T} + shift)$ to be applied
+to the loads and constraints in the pattern when the value of time is
+between tStart and tFinish. The default value of shift is $0.0$ and
+the default value of cFactor is $1.0$. The analyst has the option of
+changing these values using the optional switches -shift and -factor. 
 
-\paragraph{The Path Time Series}
+\subsubsection{The Path Time Series}
 
 {\sf\small
 \begin{verbatim}
@@ -1115,7 +1245,6 @@ option of changing these values using the optional switches -shift and -factor.
 \end{verbatim}
 }
 
-
 \noindent To associate with the LoadPattern object a TimeSeries object
 of type PathSeries or PathTimeSeries (if time increments not
 constant). A PathSeries causes a load factor of cFactor * 
@@ -1124,31 +1253,102 @@ depends on the time and a linear interpolation between points on the
 load path. There are a number of ways to specify the load path, for a load
 path where the points are specified at constant time intervals the
 '-dt' option. Following dt is either the option '-values' indicating the
-points are in the accompanying list enclosed in braces, or '-filePath' indicating that the
-points are contained in the file given by fileName. For a load path
-where the points are specified at non-constant time intervals the
-analyst can provide the time increments and points at these intervals
-in two strings or two files (not a string and a file). The default value of
-cFactor is $1.0$. The analyst has the option of changing this
-using the optional arguments -factor and cFactor.
+points are in the accompanying list enclosed in braces, or '-filePath'
+indicating that the points are contained in the file given by
+fileName. For a load path where the points are specified at
+non-constant time intervals the analyst can provide the time
+increments and points at these intervals in two strings or two files
+(not a string and a file). The default value of cFactor is $1.0$. The
+analyst has the option of changing this using the optional arguments
+-factor and cFactor. 
 
-\paragraph{The UniformExcitation Pattern}
-
+\subsection{The pattern Command}
 {\sf\small
 \begin{verbatim}
-   pattern UniformExcitation patternTag? dir? factor? -accel fileName? dt?
+   pattern patternType patternTag? <arguments for pattern type>
 \end{verbatim}
 }
 
-\noindent A LoadPattern representing a UniformExcitation is created
-using this command.  The pattern has a tag, patternTag, unique among
-all load patterns.  A UniformExcitation is implemented through a
-PathSeries object which reads acceleration values contained in the
-file represented by fileName.  These values are assumed to be spaced
-at a constant time interval of dt and the factor is applied to each.
-The UniformExcitation associates these values to all fixed degrees of
-freedom in the direction dir (1,2, or 3) when formulating inertial loads for a
-transient analysis.
+The pattern command is used to construct a LoadPattern object, its
+associated TimeSeries object and the Load and Constraint objects for
+the pattern. There are a number of valid types of patternType: Plain,
+UniformExcitation, and MultipleSupport.
+
+{\sf\small
+\begin{verbatim}
+   pattern Plain patternTag? {TimeSeriesType and Args} {
+        load ...
+        sp ...
+   }	
+\end{verbatim}
+}
+
+\noindent The string Plain is used to construct an ordinary
+LoadPattern object with a unique tag among load patterns in the Domain
+of patternTag. The third argument is a list which is parsed to
+construct the TimeSeries object associated with the LoadPattern
+object. The last argument in the command is a list of commands to
+create nodal load and single-point constraints.
+
+
+
+\subsubsection{The UniformExcitation Pattern}
+
+
+{\sf\small
+\begin{verbatim}
+   pattern UniformExcitation patternTag? dir? <-accel {SeriesType and args}> 
+                                              <-vel0 vel0?>
+\end{verbatim}
+}
+
+\noindent To construct a UniformExcitation load pattern object with a
+tag, patternTag, unique among all load patterns. The UniformExcitation
+acts in the direction dir (1,2, or 3) when formulating the inertial loads
+for the transient analysis. The accelerations used in determining the
+inertial loads is specified using the -accel flag. The list of
+arguments after this flag identifies the TimeSeries object to be
+constructed for the acceleration record. In addition, the user has the
+option of specifying an initial velocity to be assigned to each node
+using the -vel0 flag.
+
+\subsubsection{The MultipleSupport Pattern}
+
+{\sf\small
+\begin{verbatim}
+   pattern MultipleSupport patternTag? {
+        groundMotion ...
+        imposedMotion ...
+   }	
+\end{verbatim}
+}
+
+
+\noindent To construct a MultipleSupportExcitation load pattern object
+with a tag, patternTag, unique among all load patterns. 
+The last argument in the command is a list of commands to
+create the GroundMotions and ImposedSupportSP constraint objects that
+are then added to the object to define the multiple support excitation
+that is being imposed on the model.
+
+
+% \paragraph{The Uniform Pattern}
+%
+%{\sf\small
+%\begin{verbatim}
+%   pattern Uniform patternTag? dir? factor? -accel fileName? dt?
+%\end{verbatim}
+%}
+
+%\noindent A LoadPattern representing a UniformExcitation is created
+%using this command. The pattern has a tag, patternTag, unique among
+%all load patterns. A UniformExcitation is implemented through a
+%PathSeries object which reads acceleration values contained in the
+%file represented by fileName. These values are assumed to be spaced
+%at a constant time interval of dt and the factor is applied to each.
+%The UniformExcitation associates these values to all fixed degrees of
+%freedom in the direction dir (1,2, or 3) when formulating inertial loads for a
+%transient analysis.
 
 \subsubsection{The load Command}
 {\sf\small
@@ -1174,7 +1374,7 @@ identifying the load pattern to which the load is to be added.
 \end{verbatim}
 }
 
-The sp command is used to construct a SP\_Constraint object. The first
+The sp command is used to construct an SP\_Constraint object. The first
 argument to the sp command, nodeTag, is an integer tag identifying the
 node on which the single-point constraint acts. Following this tag is 
 an integer, dofTag, identifying the degree-of-freedom at the node being
@@ -1184,10 +1384,82 @@ value, specifies the reference value of the constraint. The constraint is
 added to the LoadPattern being defined in the enclosing scope of the
 pattern command. Optional arguments are the string -const, which
 identifies the constraint being applied to the node as being independent of
-any load factor, and the string -pattern and an integer patternTag
+any load factor, and the string -pattern with an integer patternTag
 identifying the load pattern to which the constraint is to be added.
 
-\subsubsection{The equalDOF Command}
+
+\subsubsection{The groundMotion Command}
+{\sf\small
+\begin{verbatim}
+   groundMotion gMotionTag? gMotionType? <type args>
+\end{verbatim}
+}
+
+The groundMotion command is used to construct a GroundMotion object
+used by the ImposedMotionSP constraints in a MultipleSuuportExcitation
+object. The first argument to the groundMotion command, gMotionTag, is
+an integer tag which uniquely identifies the GroundMotion in the
+MultipleSupportExcitation. Folowing the tag is a type identifier,
+identifying the type of GroundMotion object to be constructed, and the
+specific arguments for each type. At present there are two valid
+strings for gMotionType: Plain and Interpolated.
+
+\paragraph{\small The Plain GroundMotion}
+
+{\sf\small
+\begin{verbatim}
+   groundMotion gMotionTag? Plain <-accel {SeriesType and Args}>
+                                  <-vel   {SeriesType and Args}>
+                                  <-disp  {SeriesType and Args}>
+                                  <-int   {IntegratorType and Args}>
+\end{verbatim}
+}
+
+This command is used to construct a plain GroundMotion object. Each
+GroundMotion object is associated with a number of TimeSeries objects,
+which define the acceleration record, the velocity record and the
+displacement record. These are specified using the -accel, -vel and
+-disp flags and the list argument to define the TimeSeries object. If
+only the acceleration record is specified, the user has the option of
+specifying the TimeSeriesIntegrator that is to be used to integrate
+the acceleration record in order to determine velocity and displacement
+records. The TimeSeriesIntegrator object is specified using the -int
+flag and the list argument specifying the TimeSeriesINtegrator object
+to be constructed.
+
+\paragraph{\small The Interpolated GroundMotion}
+
+{\sf\small
+\begin{verbatim}
+   groundMotion gMotionTag? Interpolated gmTag1? gmTag2? ... -fact fact1? fact2? ...
+\end{verbatim}
+}
+
+This command is used to construct an InterpoletdGroundMotion. The tags
+gmTag1, gmTag2, ... identify ground motions which have already been
+added to the MultipleSupportExcitation. The factors fact1, fact2,
+... identify the factors that are used in the interpolation of these
+ground motions to determine the ground motion for this
+InterpolatedGroundMotion.
+
+
+\subsubsection{The imposedMotion Command}
+{\sf\small
+\begin{verbatim}
+   imposedMotion nodeTag? dirn? gMotionTag? 
+\end{verbatim}
+}
+
+This command is used to construct an ImposedMotionSP constraint which
+is used to enforce the response of a dof, dirn, at a node, nodeTag, in
+the model. The response enforced at the node at any given time is
+obtained from the GroundMotion obejct associated with the
+constraint. This GroundMotion object is determined from the gMotionTag
+passed in the command. NOTE that the GroundMotion must be added to the
+MultipleSupportExcitation before the ImposedMotionSP. 
+
+
+\subsection{The equalDOF Command}
 {\sf\small
 \begin{verbatim}
    equalDOF rNodeTag? cNodeTag? dof1? dof2? ...
@@ -1195,13 +1467,13 @@ identifying the load pattern to which the constraint is to be added.
 }
 
 The equalDOF command is used to construct a multi-point constraint between
-the nodes identified by rNodeTag and cNodeTag.  rNodeTag is the retained, or
-master node, and cNodeTag is the constrained, or slave node.  dof1 dof2 ... 
+the nodes identified by rNodeTag and cNodeTag. rNodeTag is the retained, or
+master node, and cNodeTag is the constrained, or slave node. dof1 dof2 ... 
 represent the nodal degrees of freedom that are constrained at the cNode to
 be the same as those at the rNode. The valid range for dof1 dof2 ... is 1
 through ndf, the number of nodal degrees of freedom.
 
-\subsubsection{The rigidDiaphragm Command}
+\subsection{The rigidDiaphragm Command}
 {\sf\small
 \begin{verbatim}
    rigidDiaphragm perpDirn? masterNodeTag? slaveNodeTag1 ...
@@ -1215,10 +1487,10 @@ rigid plane with the master node. The rigid plane can be the 12, 13 or
 23 planes. The rigid plane is specified by the user providing the
 perpendicular plane direction, ie 3 for 12 plane. The constraint
 object is constructed assuming small rotations. The rigidDiaphragm
-command works only for problems in three dimesions with six
+command works only for problems in three dimensions with six
 degrees-of-freedom at the nodes. 
 
-\subsubsection{The rigidLink Command}
+\subsection{The rigidLink Command}
 {\sf\small
 \begin{verbatim}
    rigidLink -type? masterNodeTag? slaveNodeTag
@@ -1226,9 +1498,9 @@ degrees-of-freedom at the nodes.
 }
 
 The rigidLink command is used to construct a single MP\_Constraint object.
-The type can be either rod or beam. If rod is specified the
+The type can be either rod or beam. If rod is specified, the
 translational degrees-of-freedom will be constrained to be exactly the
-same as those at the master node. If beam is specified a rigid beam
+same as those at the master node. If beam is specified, a rigid beam
 constraint is imposed on the slave node, that is the translational and
 rotational degrees of freedom are constrained. The constraint object
 constructed for the beam option assumes small rotations.
@@ -1258,7 +1530,7 @@ ConstraintHandler, DOF\_Numberer, LinearSOE, and LinearSolver objects
 previously created and by the analyst. If none has been created,
 default objects are constructed and used. These defaults are a
 NewtonRaphson EquiSolnAlgo with a CTestNormUnbalance with a tolerance
-of $1.0e-6$ and a maximum of $25$ iterations, a PlainHandler
+of 1e-6 and a maximum of $25$ iterations, a PlainHandler
 ConstraintHandler, an RCM DOF\_Numberer, a LoadControl
 StaticIntegrator with a constant load increment of $1.0$, and a
 profiled symmetric positive definite LinearSOE and LinearSolver.
@@ -1277,10 +1549,30 @@ TransientIntegrator, ConstraintHandler, DOF\_Numberer, LinearSOE, and
 LinearSolver objects previously created by the analyst. If none has been  
 created, default objects are constructed and used. These defaults are
 a NewtonRaphson EquiSolnAlgo with a CTestNormUnbalance with a
-tolerance of $1.0e-6$ and a maximum of $25$ iterations, a PlainHandler
+tolerance of 1e-6 and a maximum of $25$ iterations, a PlainHandler
 ConstraintHandler, an RCM DOF\_Numberer, a Newmark
 TransientIntegrator with $\gamma = 0.5$ and $\beta = 0.25$, and a profiled
 symmetric positive definite LinearSOE and LinearSolver.
+
+
+{\sf\small
+\begin{verbatim}
+   analysis VariableTransient
+\end{verbatim}
+}
+
+To construct a VariableTimeStepDircetIntegrationAnalysis object. The
+analysis object is constructed with the component objects,
+i.e. SolutionAlgorithm, TransientIntegrator, ConstraintHandler,
+DOF\_Numberer, LinearSOE, and LinearSolver objects previously created
+by the analyst. If none has been created, default objects are
+constructed and used. These defaults are a NewtonRaphson EquiSolnAlgo
+with a CTestNormUnbalance with a tolerance of 1e-6 and a maximum
+of $25$ iterations, a PlainHandler ConstraintHandler, an RCM
+DOF\_Numberer, a Newmark TransientIntegrator with $\gamma = 0.5$ and
+$\beta = 0.25$, and a profiled symmetric positive definite LinearSOE
+and LinearSolver. 
+
 
 \section {The constraints Command}
 {\sf\small
@@ -1377,9 +1669,9 @@ analysis: Newmark, Newmark1, HHT, and HHT1
 To construct a StaticIntegrator object of type LoadControl. The third
 argument, dlambda1, is a floating-point number specifying the first
 load increment (pseudo-time step) in the next invocation of the
-analysis command. The load increment at subsequent iterations $i$ is
+analysis command. The load increment at subsequent iterations i is
 related to the load increment at (i-1), dlambda(i-1), and the number
-of iterations at $i-1$, J(i-1), by the following: dLambda(i) =
+of iterations at i-1, J(i-1), by the following: dLambda(i) =
 dlambda(i-1)*Jd/J(i-1). The floating-point arguments minLambda and
 maxLambda are used to bound the increment.
 
@@ -1398,7 +1690,7 @@ controls the solution. The fourth argument dU1, is a floating-point
 number specifying the first displacement increment (pseudo-time step)
 in the next invocation of the analysis command. The displacement
 increment at subsequent iterations $i$ is related to the displacement
-increment at (i-1), dU(i-1), and the number of iterations at $i-1$,
+increment at (i-1), dU(i-1), and the number of iterations at i-1,
 J(i-1), by the following: dU(i) = dU(i-1)*Jd/J(i-1). The
 floating-point arguments minDU and maxDU are used to bound the
 increment.
@@ -1477,7 +1769,7 @@ KlastCommit + betaKinit * Kinit.
 }
 
 The algorithm command is used to construct the Algorithm
-object. The Algorithm object determines the solution of steps taken
+object. The Algorithm object determines the sequence of steps taken
 to solve the non-linear equation. The valid strings for algorithmType
 are: Linear, Newton, ModifiedNewton. None of the present types
 require additional arguments.
@@ -1500,7 +1792,23 @@ the system of equations.
 }
 
 To construct a NewtonRaphson algorithm object which uses the Newton-Raphson
-method to advance to the next time step. The tangent is updated at each iteration.
+method to advance to the next time step. The tangent is updated at
+each iteration.
+
+
+\subsection {Newton with Line Search Algorithm}
+{\sf\small
+\begin{verbatim}
+   algorithm NewtonLineSearch ratio?
+\end{verbatim}
+}
+
+To construct a NewtonLineSearch algorithm object which uses the Newton-Raphson
+method with line search to advance to the next time step. If the
+ratio between the residuals before and after the incremental update
+is greater than that specified by ratio, which should be betweeen 0.5
+and 0.8, the line search algorithm ala Crissfield is employed to try
+to improve the convergence. 
 
 \subsection {Modified Newton Algorithm}
 {\sf\small
@@ -1585,7 +1893,7 @@ a $2$ when convergence has been achieved.
 
 The numberer command is used to construct the DOF\_Numberer
 object. The DOF\_Numberer object determines the mapping between
-equation numbers and degrees-of-freedom.  The valid strings are
+ equation numbers and degrees-of-freedom. The valid strings 
 are: Plain, RCM. None of the present types require additional
 arguments. As certain system of equation and solver objects do
 their own mapping, i.e. SuperLU, UmfPack, Kincho's specifying a
@@ -1611,9 +1919,9 @@ BandSPD, ProfileSPD, SparseGeneral, UmfPack, and SparseSPD.
 \end{verbatim}
 }
 
-\noindent To construct an un-symmetric banded system of equation object which will
-be factored and solved during the analysis using the Lapack band
-general solver.
+\noindent To construct an un-symmetric banded system of equations
+object which will be factored and solved during the analysis using the
+Lapack band general solver.
 
 \paragraph{The BandSPD SOE}
 
@@ -1623,7 +1931,7 @@ general solver.
 \end{verbatim}
 }
 
-\noindent To construct a symmetric positive definite banded system of equation
+\noindent To construct a symmetric positive definite banded system of equations
 object which will be factored and solved during the analysis using the
 lapack band spd solver.
 
@@ -1635,7 +1943,7 @@ lapack band spd solver.
 \end{verbatim}
 }
 
-\noindent To construct a symmetric positive definite profile system of equation
+\noindent To construct a symmetric positive definite profile system of equations
 object which will be factored and solved during the analysis using a
 profile solver.
 
@@ -1647,7 +1955,7 @@ profile solver.
 \end{verbatim}
 }
 
-\noindent To construct a general sparse system of equation
+\noindent To construct a general sparse system of equations
 object which will be factored and solved during the analysis using the
 SuperLU solver. By default no partial pivoting is performed. The
 analyst can change this by specifying the -piv option.
@@ -1660,7 +1968,7 @@ analyst can change this by specifying the -piv option.
 \end{verbatim}
 }
 
-\noindent To construct a general sparse system of equation
+\noindent To construct a general sparse system of equations
 object which will be factored and solved during the analysis using the
 UMFPACK solver. \\
 
@@ -1694,7 +2002,7 @@ Windows version of opensees, this will be fixed shortly.
 
 {\sf\small
 \begin{verbatim}
-   recorder MaxNodeDisp dof node1? node2? ...
+   recorder MaxNodeDisp dof? node1? node2? ...
 \end{verbatim}
 }
 
@@ -1769,19 +2077,27 @@ redisplayed at a later time.
 }
 
 \noindent To open a graphical window with the title windowTitle at location
-xLoc, yLoc which is xPixels wide by yPixels high for the plotting the contents of the
-file fileName. Unless the optional -columns flag is passed, the first column of the file
-is used as the x-axis and the second column as the y-axis.
+xLoc, yLoc which is xPixels wide by yPixels high for the plotting the
+contents of the file fileName. Unless the optional -columns flag is
+passed, the first column of the file is used as the x-axis and the
+second column as the y-axis. 
 
 \section {The analyze Command}
 {\sf\small
 \begin{verbatim}
-   analyze numIncr? <dt?>
+   analyze numIncr? <dt?> <dtMin?> <dtMax?> <Jd>
 \end{verbatim}
 }
 
-\noindent To invoke analyze(numIncr, $<$dt$>$) on the Analysis object constructed with the
-analysis command. 
+\noindent To invoke analyze(numIncr, $<$dt$>$, $<$dtMin$>$,
+$<$dtMax$>$, $<$Jd$>$) on the Analysis object constructed with the
+analysis command. Note that dt, the time step increment, is required
+if a transient analysis or variable time step transient analysis was
+specified. dtMin, dtMax and Jd (the min step, the max step and the
+number of iterations the user would like to perform at each time step)
+are required if a variable time step analysis method is specified.
+For both transient and variable time step the model will be moved from
+it's current time to a time >= numIncr * dt.
 
 
 
@@ -1824,7 +2140,7 @@ opensees interpreter to allow users to save and restore model states.
 \noindent To construct a datastore object of type FileDatastore. The
 FileDatastore object will save the data into a number of files, e.g
 fileName.id11 for all ID objects of size 11 that sendSelf() is invoked
-with.
+upon.
 
 \subsection {The save Command}
 {\sf\small
@@ -1850,7 +2166,6 @@ stored in the database. The state of the model will be the same as
 when the command save commitTag was invoked.
 
 
-
 \section {Misc. Commands}
 
 \paragraph {The playback Command}
@@ -1861,8 +2176,9 @@ when the command save commitTag was invoked.
 \end{verbatim}
 }
 
-\noindent To invoke playback on all Recorder objects constructed with the record
-command. The record() method is invoked with the integer commitTag.
+\noindent To invoke playback on all Recorder objects constructed with
+the recorder command. The record() method is invoked with the integer
+commitTag. 
 
 \paragraph {The print Command}
 
@@ -1879,8 +2195,9 @@ specified. If no string qualifier is used, the print method is
 invoked on all objects of the domain. If the string -node or -ele is provided,
 the print() method is invoked on just the nodes or elements. With
 the analyst can send the integer flag to the print() method. The
-analyst with these can also limit the element and nodes on which the
-print() method is invoked by supplying the objects tags.
+analyst can also limit the element and nodes on which the
+print() method is invoked by supplying the objects tags, ele1, ele2,
+etc. and node1, node2, etc.
 
 \paragraph {The reset Command}
 
@@ -1935,7 +2252,7 @@ is specified, the pseudo time in the domain will be set to pseudoTime.
 \end{verbatim}
 }
 
-\noindent To set the pseudo time in the domain to pseudoTime?
+\noindent To set the pseudo time in the domain to pseudoTime.
 
 \paragraph {The build Command}
 
@@ -2016,7 +2333,7 @@ fix 2 1 1
 fix 3 1 1
 
 # define a load pattern with a load
-pattern Plain 1 Linear {
+pattern Plain 1 ``Linear'' {
   # load nodeTag xForce yForce
   load 4 100 -50
 }
