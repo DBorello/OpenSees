@@ -2,8 +2,7 @@ include ../../../Makefile.def
 
 OBJS       = SectionForceDeformation.o \
 	ElasticSection2d.o ElasticSection3d.o \
-	FiberSection.o \
-	GenericSection1d.o GenericSectionNd.o \
+	GenericSection1d.o \
 	SectionAggregator.o ElasticPlateSection.o \
 	ElasticMembranePlateSection.o MembranePlateFiberSection.o \
 	TclModelBuilderSectionCommand.o FiberSection2d.o FiberSection3d.o \

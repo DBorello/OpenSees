@@ -383,12 +383,10 @@ DRAIN_LIBS = $(FE)/material/uniaxial/DrainMaterial.o \
 SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/ElasticSection2d.o \
 	$(FE)/material/section/ElasticSection3d.o \
-	$(FE)/material/section/FiberSection.o \
 	$(FE)/material/section/FiberSection2d.o \
 	$(FE)/material/section/FiberSection3d.o \
 	$(FE)/material/section/SectionAggregator.o \
 	$(FE)/material/section/GenericSection1d.o \
-	$(FE)/material/section/GenericSectionNd.o \
 	$(FE)/material/section/ElasticPlateSection.o \
 	$(FE)/material/section/ElasticMembranePlateSection.o \
 	$(FE)/material/section/MembranePlateFiberSection.o \

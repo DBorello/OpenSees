@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-06-07 23:03:51 $
+// $Revision: 1.11 $
+// $Date: 2002-06-08 16:47:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -91,9 +91,9 @@
 #include <ElasticSection2d.h>
 #include <ElasticSection3d.h>
 #include <GenericSection1d.h>
-#include <GenericSectionNd.h>
+//#include <GenericSectionNd.h>
 #include <SectionAggregator.h>
-#include <FiberSection.h>
+//#include <FiberSection.h>
 #include <FiberSection2d.h>
 #include <FiberSection3d.h>
 #include <ElasticPlateSection.h>
@@ -624,14 +624,14 @@ FEM_ObjectBroker::getNewSection(int classTag)
 	case SEC_TAG_Generic1d:
 	     return new GenericSection1d();
 	     
-	case SEC_TAG_GenericNd:
-	     return new GenericSectionNd();	     
+	     //case SEC_TAG_GenericNd:
+	     //return new GenericSectionNd();	     
 
 	case SEC_TAG_Aggregator:
 	     return new SectionAggregator();
 
-	case SEC_TAG_Fiber:
-		return new FiberSection();
+	     //case SEC_TAG_Fiber:
+	     //return new FiberSection();
 	
 	case SEC_TAG_FiberSection2d:
 		return new FiberSection2d();

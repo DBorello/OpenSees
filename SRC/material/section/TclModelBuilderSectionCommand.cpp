@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2002-05-20 16:54:11 $
+// $Revision: 1.15 $
+// $Date: 2002-06-08 16:47:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -39,9 +39,9 @@
 #include <ElasticSection2d.h>
 #include <ElasticSection3d.h>
 #include <GenericSection1d.h>
-#include <GenericSectionNd.h>
+//#include <GenericSectionNd.h>
 #include <SectionAggregator.h>
-#include <FiberSection.h>
+//#include <FiberSection.h>
 #include <FiberSection2d.h>
 #include <FiberSection3d.h>
 #include <FiberSectionRepr.h>
@@ -207,6 +207,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	theSection = new GenericSection1d (tag, *theMat, code);
     }
 
+    /*
     else if (strcmp(argv[1],"GenericND") == 0 || strcmp(argv[1],"GenericNd") == 0) {
 	if (argc < 5) {
 	    cerr << "WARNING insufficient arguments\n";
@@ -266,7 +267,8 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	// Parsing was successful, allocate the section
 	theSection = new GenericSectionNd (tag, *theMat, code);
     }	
-    
+    */
+
     else if (strcmp(argv[1],"AddDeformation") == 0 || strcmp(argv[1],"Aggregator") == 0) {
 	if (argc < 5) {
 	    cerr << "WARNING insufficient arguments\n";
@@ -543,7 +545,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 		
 		else {
 	cerr << "WARNING unknown type of section: " << argv[2];
-	cerr << "Valid types: Elastic, Generic1d, GenericNd, Aggregator, Fiber\n";
+	cerr << "Valid types: Elastic, Uniaxial, Aggregator, Fiber\n";
 	return TCL_ERROR;
     }
     
