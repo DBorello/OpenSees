@@ -4,8 +4,9 @@ OBJS       = SectionForceDeformation.o \
 	ElasticSection2d.o ElasticSection3d.o \
 	FiberSection.o \
 	GenericSection1d.o GenericSectionNd.o \
-	SectionAggregator.o \
-	TclModelBuilderSectionCommand.o
+	SectionAggregator.o ElasticPlateSection.o \
+	ElasticMembranePlateSection.o \
+	TclModelBuilderSectionCommand.o FiberSection2d.o FiberSection3d.o
 
 all:         $(OBJS)
 	@$(CD) $(FE)/material/section/repres; $(MAKE);
