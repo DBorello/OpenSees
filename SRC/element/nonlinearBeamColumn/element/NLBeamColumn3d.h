@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-11-26 22:53:54 $
+// $Revision: 1.9 $
+// $Date: 2002-05-14 23:37:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -88,8 +88,6 @@ class NLBeamColumn3d: public Element
     const Vector &getResistingForce(void);
     const Vector &getResistingForceIncInertia(void);            
     
-    bool isSubdomain(void);
-
     int sendSelf(int cTag, Channel &theChannel);
     int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
@@ -110,7 +108,6 @@ class NLBeamColumn3d: public Element
     void getForceInterpolatMatrix(double xi, Matrix &b, const ID &code);
     void getDistrLoadInterpolatMatrix(double xi, Matrix &bp, const ID &code);
     void compSectionDisplacements(Vector sectionCoords[], Vector sectionDispls[]) const;
-    void setSectionInterpolation (void);
     void initializeSectionHistoryVariables (void);
     
     
@@ -122,34 +119,22 @@ class NLBeamColumn3d: public Element
     SectionForceDeformation **sections;          // array of pointers to sections
     CrdTransf3d *crdTransf;        // pointer to coordinate tranformation object 
 	                           // (performs the transformation between the global and basic system)
+    Node   *node1Ptr, *node2Ptr;   // pointers to the nodes
+
     double rho;                    // mass density per unit length
     int    maxIters;               // maximum number of local iterations
     double tol;	                   // tolerance for relative energy norm for local iterations
 
-    double L;                      // length
     int    initialFlag;            // indicates if the element has been initialized
     bool isTorsion;
 	
-    Node   *node1Ptr, *node2Ptr;   // pointers to the nodes
-
-    Matrix K;                      // stiffness matrix
-    Matrix m;                      // mass matrix	
-    Matrix d;                      // damping matrix
-    
-    Vector P;                      // residual forces
-    Vector Pinert;                 // residual forces including inertia
     Vector load;                   // equivalent nodal loads ????
 
-    Vector prevDistrLoad;          // previous distributed loads
     Matrix kv;                     // stiffness matrix in the basic system 
     Vector Se;                     // element resisting forces in the basic system
 
-    Vector distrLoadcommit;        // commited distributed loads
     Matrix kvcommit;               // commited stiffness matrix in the basic system
     Vector Secommit;               // commited element end forces in the basic system
-
-    Matrix *b;                     // array of force interpolation matrices 
-    Matrix *bp;                    // array of force interpolation matrices that considers uniform load
 
     Matrix *fs;                    // array of section flexibility matrices
     Vector *vs;                    // array of section deformation vectors
@@ -157,7 +142,10 @@ class NLBeamColumn3d: public Element
  
     Vector *vscommit;              // array of commited section deformation vectors
 
+    static Matrix theMatrix;
+    static Vector theVector;
     static GaussLobattoQuadRule1d01 quadRule;
+    static double workArea[];
 };
 
 #endif

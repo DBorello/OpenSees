@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2001-11-26 22:53:54 $
+// $Revision: 1.13 $
+// $Date: 2002-05-14 23:37:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -65,19 +65,21 @@
 #define  NEGD 12         // number of element global dof's
 #define  NEBD  6         // number of element dof's in the basic system
 
+Matrix NLBeamColumn3d::theMatrix(12,12);
+Vector NLBeamColumn3d::theVector(12);
+double NLBeamColumn3d::workArea[200];
 GaussLobattoQuadRule1d01 NLBeamColumn3d::quadRule;
 
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
 NLBeamColumn3d::NLBeamColumn3d():
-
 Element(0,ELE_TAG_NLBeamColumn3d), connectedExternalNodes(2), 
 nSections(0), sections(0), crdTransf(0), node1Ptr(0), node2Ptr(0),
-rho(0), maxIters(0), tol(0), initialFlag(0), prevDistrLoad(NL),
-K(NEGD,NEGD), m(NEGD,NEGD), d(NEGD,NEGD), P(NEGD), Pinert(NEGD), load(NEGD),
+rho(0), maxIters(0), tol(0), initialFlag(0), isTorsion(false),
+load(NEGD),
 kv(NEBD,NEBD), Se(NEBD), 
-distrLoadcommit(NL), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0), bp(0),
-fs(0), vs(0), Ssr(0), vscommit(0), isTorsion(false)
+kvcommit(NEBD,NEBD), Secommit(NEBD),
+fs(0), vs(0), Ssr(0), vscommit(0)
 {
 
 }
@@ -89,15 +91,14 @@ NLBeamColumn3d::NLBeamColumn3d (int tag, int nodeI, int nodeJ,
                                 int numSections, SectionForceDeformation *sectionPtrs[],
                                 CrdTransf3d &coordTransf, double massDensPerUnitLength,
                                 int maxNumIters, double tolerance):
-
 Element(tag,ELE_TAG_NLBeamColumn3d), connectedExternalNodes(2), 
-nSections(numSections), node1Ptr(0), node2Ptr(0),
+nSections(numSections), sections(0), crdTransf(0), node1Ptr(0), node2Ptr(0),
 rho(massDensPerUnitLength), maxIters(maxNumIters), tol(tolerance), 
-initialFlag(0), prevDistrLoad(NL), 
-K(NEGD,NEGD), m(NEGD,NEGD), d(NEGD,NEGD), P(NEGD), Pinert(NEGD), load(NEGD), 
+initialFlag(0), isTorsion(false),
+load(NEGD), 
 kv(NEBD,NEBD), Se(NEBD),  
-distrLoadcommit(NL), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0), bp(0),
-fs(0), vs(0), Ssr(0), vscommit(0), isTorsion(false)
+kvcommit(NEBD,NEBD), Secommit(NEBD),
+fs(0), vs(0), Ssr(0), vscommit(0)
 {
    connectedExternalNodes(0) = nodeI;
    connectedExternalNodes(1) = nodeJ;    
@@ -153,22 +154,6 @@ fs(0), vs(0), Ssr(0), vscommit(0), isTorsion(false)
       exit(-1);
    }
 
-   // alocate force interpolation matrices
-   
-   b  = new Matrix [nSections];
-   if (!b)
-   {
-       cerr << "NLBeamColumn3d::NLBeamColumn3d() -- failed to allocate b array";
-       exit(-1);
-   }
-   
-   bp = new Matrix [nSections];
-   if (!bp)
-   {
-       cerr << "NLBeamColumn3d::NLBeamColumn3d() -- failed to allocate bp array";
-       exit(-1);
-   }
-
    // alocate section flexibility matrices and section deformation vectors
    fs  = new Matrix [nSections];
    if (!fs)
@@ -205,22 +190,14 @@ fs(0), vs(0), Ssr(0), vscommit(0), isTorsion(false)
 //      delete must be invoked on any objects created by the object
 NLBeamColumn3d::~NLBeamColumn3d()
 {
-   int i;
-   
    if (sections)
    {
-      for (i=0; i < nSections; i++)
+      for (int i=0; i < nSections; i++)
          if (sections[i])
             delete sections[i];
       delete [] sections;
    }  
    
-   if (b)
-     delete [] b;
-
-   if (bp)
-     delete [] bp;
-
    if (fs) 
      delete [] fs;
 
@@ -242,7 +219,7 @@ NLBeamColumn3d::~NLBeamColumn3d()
 int
 NLBeamColumn3d::getNumExternalNodes(void) const
 {
-   return connectedExternalNodes.Size();
+  return 2;
 }
 
 
@@ -266,7 +243,7 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    if (theDomain == 0) {
       node1Ptr = 0;
       node2Ptr = 0;
-	  return;
+      return;
    }
 
    // get pointers to the nodes
@@ -313,21 +290,16 @@ NLBeamColumn3d::setDomain(Domain *theDomain)
    }
     
    // get element length
-   L = crdTransf->getInitialLength();
-   if (L == 0)
+   double L = crdTransf->getInitialLength();
+   if (L == 0.0)
    {
       cerr << "NLBeamColumn3d::setDomain(): Zero element length:" << this->getTag();  
       exit(0);
    }
    this->initializeSectionHistoryVariables();
-   this->setSectionInterpolation();
 
    if (initialFlag == 2) {
-     static Vector currDistrLoad(NL);
-     currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
      crdTransf->update();
-     P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
-     K = crdTransf->getGlobalStiffMatrix(kv, Se);
    } else
      this->update();
 }
@@ -350,12 +322,10 @@ NLBeamColumn3d::commitState()
       return err;
    
    // commit the transformation between coord. systems
-   if (err = crdTransf->commitState())
+   if ((err = crdTransf->commitState()) != 0)
       return err;
       
    // commit the element variables state
-
-   distrLoadcommit = prevDistrLoad;
    kvcommit = kv;
    Secommit = Se;
 
@@ -385,19 +355,12 @@ NLBeamColumn3d::revertToLastCommit()
       return err;
    
    // revert the transformation to last commit
-   if (err = crdTransf->revertToLastCommit())
+   if ((err = crdTransf->revertToLastCommit()) != 0)
       return err;
      
    // revert the element state to last commit
-   prevDistrLoad = distrLoadcommit;
    Se   = Secommit;
    kv   = kvcommit;
-   
-   // compute global resisting forces and tangent
-   static Vector currDistrLoad(NL);
-   currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
-   P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
-   K = crdTransf->getGlobalStiffMatrix(kv, Se);
    
    initialFlag = 0;
    this->update();
@@ -426,20 +389,15 @@ NLBeamColumn3d::revertToStart()
       return err;
    
    // revert the transformation to start
-   if (err = crdTransf->revertToStart())
+   if ((err = crdTransf->revertToStart()) != 0)
       return err;
   
    // revert the element state to start
-   distrLoadcommit.Zero();
    Secommit.Zero();
    kvcommit.Zero();
 
-   prevDistrLoad.Zero();
    Se.Zero();
    kv.Zero();
-
-   P.Zero();
-   K.Zero();
 
    initialFlag = 0;
    this->update();
@@ -452,14 +410,18 @@ NLBeamColumn3d::revertToStart()
 const Matrix &
 NLBeamColumn3d::getTangentStiff(void)
 {
-   return K;
+  crdTransf->update();	// Will remove once we clean up the corotational 3d transformation -- MHS
+  return crdTransf->getGlobalStiffMatrix(kv, Se);
 }
     
 
 const Vector &
 NLBeamColumn3d::getResistingForce(void)
 {
-   return P;
+  static Vector dummy(3);
+
+  crdTransf->update();	// Will remove once we clean up the corotational 3d transformation -- MHS
+  return crdTransf->getGlobalResistingForce(Se, dummy);
 }
 
 
@@ -480,41 +442,9 @@ NLBeamColumn3d::initializeSectionHistoryVariables (void)
 
 
 
-void
-NLBeamColumn3d::setSectionInterpolation (void)
-{
-    const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);   
-
-    for (int i = 0; i < nSections; i++)
-    {
-	int order = sections[i]->getOrder();
-	const ID &code = sections[i]->getType();
-	
-	b[i] = Matrix(order,NEBD);
-	this->getForceInterpolatMatrix(xi_pt(i,0), b[i], code);
-
-	bp[i] = Matrix(order,NL);
-	this->getDistrLoadInterpolatMatrix(xi_pt(i,0), bp[i], code);
-    }
-}
-
-
-
 int 
 NLBeamColumn3d::update(void)
 {
-  // get element global end displacements
-  static Vector Ue(NEGD);
-  this->getGlobalDispls(Ue);
-
-    // compute distributed loads and increments
-    static Vector currDistrLoad(NL);
-    static Vector distrLoadIncr(NL); 
-
-    currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
-    distrLoadIncr = currDistrLoad - prevDistrLoad;
-    prevDistrLoad = currDistrLoad;
-
     // update the transformation
     crdTransf->update();
        
@@ -526,14 +456,9 @@ NLBeamColumn3d::update(void)
     dv = crdTransf->getBasicIncrDeltaDisp();    
 
     // get integration point positions and weights
-    // const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
+    const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
     const Vector &weight = quadRule.getIntegrPointWeights(nSections);
      
-    // numerical integration 
-    static Vector dSs;       // section internal force increments
-    static Vector Ss;        // section "applied" forces (in equilibrium with end forces)
-    static Vector dvs;       // section residual deformations
-    
     static Vector vr(NEBD);       // element residual displacements
     static Matrix f(NEBD,NEBD);   // element flexibility matrix
 
@@ -551,6 +476,9 @@ NLBeamColumn3d::update(void)
     // dSe = kv * dv;
     dSe.addMatrixVector(0.0, kv, dv, 1.0);
 
+    double L = crdTransf->getInitialLength();
+    double oneOverL  = 1.0/L;
+
     for (int j=0; j < maxIters; j++)
     {
       Se += dSe;
@@ -561,26 +489,50 @@ NLBeamColumn3d::update(void)
 
       for (i=0; i<nSections; i++)
       {
-	  
-          // initialize vectors with correct size  - CHANGE LATER
-	  Ss  = Ssr[i];
-	  dSs = vs[i];
-          dvs = vs[i]; 	  
-	  
-	  // calculate total section forces
-	  // Ss = b*Se + bp*currDistrLoad;
-	  Ss.addMatrixVector(0.0, b[i], Se, 1.0);
-	  Ss.addMatrixVector(1.0, bp[i], currDistrLoad, 1.0);
+	int order      = sections[i]->getOrder();
+	const ID &code = sections[i]->getType();
+
+	Vector Ss(workArea, order);
+	Vector dSs(&workArea[order], order);
+	Vector dvs(&workArea[2*order], order);
+	
+	Matrix fb(&workArea[3*order], order, NEBD);
+	
+	double xL  = xi_pt(i,0);
+	double xL1 = xL-1.0;
+
+	// calculate total section forces
+	// Ss = b*Se + bp*currDistrLoad;
+	//Ss.addMatrixVector(0.0, b[i], Se, 1.0);
+	int ii;
+	for (ii = 0; ii < order; ii++) {
+	  switch(code(ii)) {
+	  case SECTION_RESPONSE_P:
+	    Ss(ii) = Se(0); break;
+	  case SECTION_RESPONSE_MZ:
+	    Ss(ii) = xL1*Se(1) + xL*Se(2); break;
+	  case SECTION_RESPONSE_VY:
+	    Ss(ii) = oneOverL*(Se(1)+Se(2)); break;
+	  case SECTION_RESPONSE_MY:
+	    Ss(ii) = xL1*Se(3) + xL*Se(4); break;
+	  case SECTION_RESPONSE_VZ:
+	    Ss(ii) = oneOverL*(Se(3)+Se(4)); break;
+	  case SECTION_RESPONSE_T:
+	    Ss(ii) = Se(5); break;
+	  default:
+	    Ss(ii) = 0.0; break;
+	  }
+	}
 
 	  dSs = Ss;
 	  dSs.addVector(1.0, Ssr[i], -1.0);  // dSs = Ss - Ssr[i];
  
-	  // compute section deformation increments and update current deformations
+	  // compute section deformation increments
 	  //       vs += fs * dSs;     
-	  
 	  dvs.addMatrixVector(0.0, fs[i], dSs, 1.0);
 	  
-	  vs[i] += dvs;
+	  if (initialFlag != 0)
+	    vs[i] += dvs;
 	  
 	  sections[i]->setTrialSectionDeformation(vs[i]);
 	  
@@ -592,7 +544,6 @@ NLBeamColumn3d::update(void)
 	  
 	  // calculate section residual deformations
 	  // dvs = fs * (Ss - Ssr);
-	  
 	  dSs = Ss;
 	  dSs.addVector(1.0, Ssr[i], -1.0);  // dSs = Ss - Ssr[i];
             
@@ -600,25 +551,137 @@ NLBeamColumn3d::update(void)
 	      
           // integrate element flexibility matrix
 	  // f = f + (b^ fs * b) * weight(i);
-      	  f.addMatrixTripleProduct(1.0, b[i], fs[i], weight(i));
+      	  //f.addMatrixTripleProduct(1.0, b[i], fs[i], weight(i));
+	  int jj;
+	  const Matrix &fSec = fs[i];
+	  fb.Zero();
+	  double tmp;
+	  for (ii = 0; ii < order; ii++) {
+	    switch(code(ii)) {
+	    case SECTION_RESPONSE_P:
+	      for (jj = 0; jj < order; jj++)
+		fb(jj,0) += fSec(jj,ii)*weight(i);
+	      break;
+	    case SECTION_RESPONSE_MZ:
+	      for (jj = 0; jj < order; jj++) {
+		tmp = fSec(jj,ii)*weight(i);
+		fb(jj,1) += xL1*tmp;
+		fb(jj,2) += xL*tmp;
+	      }
+	      break;
+	    case SECTION_RESPONSE_VY:
+	      for (jj = 0; jj < order; jj++) {
+		tmp = oneOverL*fSec(jj,ii)*weight(i);
+		fb(jj,1) += tmp;
+		fb(jj,2) += tmp;
+	      }
+	      break;
+	    case SECTION_RESPONSE_MY:
+	      for (jj = 0; jj < order; jj++) {
+		tmp = fSec(jj,ii)*weight(i);
+		fb(jj,3) += xL1*tmp;
+		fb(jj,4) += xL*tmp;
+	      }
+	      break;
+	    case SECTION_RESPONSE_VZ:
+	      for (jj = 0; jj < order; jj++) {
+		tmp = oneOverL*fSec(jj,ii)*weight(i);
+		fb(jj,3) += tmp;
+		fb(jj,4) += tmp;
+	      }
+	      break;
+	    case SECTION_RESPONSE_T:
+	      for (jj = 0; jj < order; jj++)
+		fb(jj,5) += fSec(jj,ii)*weight(i);
+	      break;
+	    default:
+	      break;
+	    }
+	  }
+	  for (ii = 0; ii < order; ii++) {
+	    switch (code(ii)) {
+	    case SECTION_RESPONSE_P:
+	      for (jj = 0; jj < 6; jj++)
+		f(0,jj) += fb(ii,jj);
+	      break;
+	    case SECTION_RESPONSE_MZ:
+	      for (jj = 0; jj < 6; jj++) {
+		tmp = fb(ii,jj);
+		f(1,jj) += xL1*tmp;
+		f(2,jj) += xL*tmp;
+	      }
+	      break;
+	    case SECTION_RESPONSE_VY:
+	      for (jj = 0; jj < 6; jj++) {
+		tmp = oneOverL*fb(ii,jj);
+		f(1,jj) += tmp;
+		f(2,jj) += tmp;
+	      }
+	      break;
+	    case SECTION_RESPONSE_MY:
+	      for (jj = 0; jj < 6; jj++) {
+		tmp = fb(ii,jj);
+		f(3,jj) += xL1*tmp;
+		f(4,jj) += xL*tmp;
+	      }
+	      break;
+	    case SECTION_RESPONSE_VZ:
+	      for (jj = 0; jj < 6; jj++) {
+		tmp = oneOverL*fb(ii,jj);
+		f(3,jj) += tmp;
+		f(4,jj) += tmp;
+	      }
+	      break;
+	    case SECTION_RESPONSE_T:
+	      for (jj = 0; jj < 6; jj++)
+		f(5,jj) += fb(ii,jj);
+	      break;
+	    default:
+	      break;
+	    }
+	  }
 
 	  // integrate residual deformations
 	  // vr += (b^ (vs + dvs)) * weight(i);
-	  vr.addMatrixTransposeVector(1.0, b[i], vs[i] + dvs, weight(i));
+	  //vr.addMatrixTransposeVector(1.0, b[i], vs[i] + dvs, weight(i));
+	  dvs.addVector(1.0, vs[i], 1.0);
+	  double dei;
+	  for (ii = 0; ii < order; ii++) {
+	    dei = dvs(ii)*weight(i);
+	    switch(code(ii)) {
+	    case SECTION_RESPONSE_P:
+	      vr(0) += dei; break;
+	    case SECTION_RESPONSE_MZ:
+	      vr(1) += xL1*dei; vr(2) += xL*dei; break;
+	    case SECTION_RESPONSE_VY:
+	      tmp = oneOverL*dei;
+	      vr(1) += tmp; vr(2) += tmp; break;
+	    case SECTION_RESPONSE_MY:
+	      vr(3) += xL1*dei; vr(4) += xL*dei; break;
+	    case SECTION_RESPONSE_VZ:
+	      tmp = oneOverL*dei;
+	      vr(3) += tmp; vr(4) += tmp; break;
+	    case SECTION_RESPONSE_T:
+	      vr(5) += dei; break;
+	    default:
+	      break;
+	    }
+	  }
       }  
       
       f  *= L;
       vr *= L;
 
-	  if (!isTorsion)
-		  f(5,5) = 1.0e-10;
+      if (!isTorsion)
+	f(5,5) = 1.0e-10;
 
       // calculate element stiffness matrix
-      // invertMatrix(5, f, kv);
-	if (f.Solve(I,kv) < 0)
-	 g3ErrorHandler->warning("NLBeamColumn3d::updateElementState() - could not invert flexibility\n");
+      if (f.Solve(I,kv) < 0)
+	g3ErrorHandler->warning("NLBeamColumn3d::updateElementState() - could not invert flexibility\n");
 
-      dv = v - vr;
+      // dv = v - vr;
+      dv = v;
+      dv.addVector(1.0, vr, -1.0);
       
       // dSe = kv * dv;
       dSe.addMatrixVector(0.0, kv, dv, 1.0);
@@ -631,14 +694,9 @@ NLBeamColumn3d::update(void)
     // determine resisting forces
     Se += dSe;
 
-    // get resisting forces and stiffness matrix in global coordinates
-    P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
-    K = crdTransf->getGlobalStiffMatrix(kv, Se);
-
     initialFlag = 1;
 
     return 0;
-
 }
 
 
@@ -675,6 +733,7 @@ void NLBeamColumn3d::getGlobalAccels(Vector &ag) const
 void NLBeamColumn3d::getForceInterpolatMatrix(double xi, Matrix &b, const ID &code)
 {
    b.Zero();
+   double L = crdTransf->getInitialLength();
     
    for (int i = 0; i < code.Size(); i++)
    {
@@ -688,16 +747,14 @@ void NLBeamColumn3d::getForceInterpolatMatrix(double xi, Matrix &b, const ID &co
 	    b(i,0) = 1.0;
 	    break;
 	 case SECTION_RESPONSE_VY:		// Shear, Vy, interpolation
-	    b(i,1) = 1.0/L;
-	    b(i,2) = 1.0/L;
+	    b(i,1) = b(i,2) = 1.0/L;
 	    break;
 	 case SECTION_RESPONSE_MY:		// Moment, My, interpolation
 	    b(i,3) = xi - 1.0;
 	    b(i,4) = xi;
 	    break;
 	 case SECTION_RESPONSE_VZ:		// Shear, Vz, interpolation
-	    b(i,3) = 1.0/L;
-	    b(i,4) = 1.0/L;
+	    b(i,3) = b(i,4) = 1.0/L;
 	    break;
 	 case SECTION_RESPONSE_T:		// Torque, T, interpolation
 	    b(i,5) = 1.0;
@@ -712,6 +769,7 @@ void NLBeamColumn3d::getForceInterpolatMatrix(double xi, Matrix &b, const ID &co
 void NLBeamColumn3d::getDistrLoadInterpolatMatrix(double xi, Matrix &bp, const ID &code)
 {
    bp.Zero();
+   double L = crdTransf->getInitialLength();
 
    for (int i = 0; i < code.Size(); i++)
    {
@@ -751,17 +809,21 @@ NLBeamColumn3d::getSecantStiff(void)
 const Matrix &
 NLBeamColumn3d::getDamp(void)
 {
-    return d;  // zero matrix still 
+  theMatrix.Zero();
+
+  return theMatrix;
 }
 
 
 const Matrix &
 NLBeamColumn3d::getMass(void)
 { 
-    m(0,0) = m(1,1) = m(2,2) =
-    m(6,6) = m(7,7) = m(8,8) = rho * L * 0.5;
+  double L = crdTransf->getInitialLength();
+
+  theMatrix(0,0) = theMatrix(1,1) = theMatrix(2,2) =
+    theMatrix(6,6) = theMatrix(7,7) = theMatrix(8,8) = 0.5*rho*L;
   
-    return m;
+  return theMatrix;
 }
 
 
@@ -792,6 +854,7 @@ NLBeamColumn3d::addInertiaLoadToUnbalance(const Vector &accel)
   const Vector &Raccel1 = node1Ptr->getRV(accel);
   const Vector &Raccel2 = node2Ptr->getRV(accel);    
 
+  double L = crdTransf->getInitialLength();
   double m = 0.5*rho*L;
 
   load(0) -= m*Raccel1(0);
@@ -808,37 +871,27 @@ NLBeamColumn3d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 NLBeamColumn3d::getResistingForceIncInertia()
 {	
-
-    static Vector f(NEGD);
-    static Vector ag(NEGD);
-    
-    f = this->getResistingForce();
-    // this->getMass();
-    this->getGlobalAccels(ag);
-
-
-    // Pinert = f + m * ag;
-    Pinert = f;
-    //     Pinert.addMatrixVector(1.0, m, ag, 1.0);
-    double mass = rho * L * 0.5;
-    Pinert(0) += mass*ag(0);
-    Pinert(1) += mass*ag(1);
-    Pinert(2) += mass*ag(2);
-    Pinert(6) += mass*ag(6);
-    Pinert(7) += mass*ag(7);
-    Pinert(8) += mass*ag(8);    
-
-
-    return Pinert;
-}
-
-
-
-
-bool
-NLBeamColumn3d::isSubdomain(void)
-{
-    return false;
+  // Check for a quick return
+  if (rho == 0.0)
+    return this->getResistingForce();
+  
+  const Vector &accel1 = node1Ptr->getTrialAccel();
+  const Vector &accel2 = node2Ptr->getTrialAccel();
+  
+  // Compute the current resisting force
+  theVector = this->getResistingForce();
+  
+  double L = crdTransf->getInitialLength();
+  double m = 0.5*rho*L;
+  
+  theVector(0) += m*accel1(0);
+  theVector(1) += m*accel1(1);
+  theVector(2) += m*accel1(2);
+  theVector(6) += m*accel2(0);
+  theVector(7) += m*accel2(1);
+  theVector(8) += m*accel2(2);
+  
+  return theVector;
 }
 
 int
@@ -944,7 +997,8 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
   // put  distrLoadCommit into the Vector
   for (i=0; i<NL; i++) 
   {
-    dData(loc) = distrLoadcommit(i);
+    //dData(loc) = distrLoadcommit(i);
+    dData(loc) = 0.0;  // TEMP FIX -- MHS
     loc++;
   }
 
@@ -1147,8 +1201,10 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   tol = dData(loc++);
   
   // put  distrLoadCommit into the Vector
-  for (i=0; i<NL; i++) 
-    distrLoadcommit(i) = dData(loc++);
+  for (i=0; i<NL; i++) {
+    //distrLoadcommit(i) = dData(loc++);
+    // TEMP FIX -- MHS
+  }
 
   // place kvcommit into vector
   for (i=0; i<NEBD; i++) 
@@ -1159,7 +1215,6 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
      for (j=0; j<NEBD; j++)
         kvcommit(i,j) = dData(loc++);
 
-	prevDistrLoad = distrLoadcommit;
 	kv   = kvcommit;
 	Se   = Secommit;
 
@@ -1223,40 +1278,10 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
 	// Set up section history variables 
 	this->initializeSectionHistoryVariables();
 
-	// Delete the old
-	if (b != 0)
-		delete [] b;
-
-	// Allocate the right number
-	b = new Matrix[nSections];  
-	if (b == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate b array",
-			"NLBeamColumn3d::recvSelf");
-		return -1;
-	}
-
-	// Delete the old
-	if (bp != 0)
-		delete [] bp;
-
-	// Allocate the right number
-	bp = new Matrix[nSections];  
-	if (bp == 0) {
-		g3ErrorHandler->warning("%s -- failed to allocate bp array",
-			"NLBeamColumn3d::recvSelf");
-		return -1;
-	}
-
-	// Set up section force interpolation matrices
-	this->setSectionInterpolation();
-
-
   if (node1Ptr != 0) {
      static Vector currDistrLoad(NL);
      currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
      crdTransf->update();
-     P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
-     K = crdTransf->getGlobalStiffMatrix(kv, Se);
   }
 
   initialFlag = 2;  
@@ -1284,6 +1309,7 @@ NLBeamColumn3d::compSectionDisplacements(Vector sectionCoords[], Vector sectionD
  
    // get CBDI influence matrix
    Matrix ls(nSections, nSections);
+   double L = crdTransf->getInitialLength();
    getCBDIinfluenceMatrix(nSections, xi_pt, L, ls);
      
    // get section curvatures
@@ -1377,7 +1403,7 @@ NLBeamColumn3d::Print(ostream &s, int flag)
       s << "\tConnected Nodes: " << connectedExternalNodes ;
       s << "\tNumber of Sections: " << nSections << endl;
       s << "\tElement End Forces (P MZ1 MZ2 MY1 MY2 T): " << Secommit;
-      s << "\tResisting Force: " << P;
+      s << "\tResisting Force: " << this->getResistingForce();
    }
 }
 
@@ -1472,11 +1498,11 @@ NLBeamColumn3d::setResponse(char **argv, int argc, Information &eleInformation)
     // global force - 
     if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0
 	|| strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
-		return new ElementResponse(this, 1, P);
+		return new ElementResponse(this, 1, theVector);
 
     // local force -
     else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
-		return new ElementResponse(this, 2, P);
+		return new ElementResponse(this, 2, theVector);
 
     else if ((strcmp(argv[0],"defoANDforce") == 0) ||
 	     (strcmp(argv[0],"deformationANDforce") == 0) ||
@@ -1506,17 +1532,19 @@ NLBeamColumn3d::getResponse(int responseID, Information &eleInfo)
   static Vector defoAndForce(24);
   double V;
   int i;
+  double L = crdTransf->getInitialLength();
 
   switch (responseID) {      
     case 1:  // forces
-      return eleInfo.setVector(P);
+      return eleInfo.setVector(this->getResistingForce());
 
 
     case 4:
       this->getGlobalDispls(force);
+      this->getResistingForce();
       for (i = 0; i < 12; i++) {
 	defoAndForce(i) = force(i);
-	defoAndForce(i+12) = P(i);
+	defoAndForce(i+12) = theVector(i);
       }
       return eleInfo.setVector(defoAndForce);
 
