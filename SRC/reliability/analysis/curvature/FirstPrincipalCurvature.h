@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:01 $
+// $Revision: 1.3 $
+// $Date: 2001-08-02 18:11:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/FirstPrincipalCurvature.h,v $
 
 
@@ -53,7 +53,7 @@ public:
 protected:
 
 private:	
-	Vector *curvatures;
+	Vector curvatures;
 
 };
 

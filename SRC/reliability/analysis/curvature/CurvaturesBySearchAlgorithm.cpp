@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:01 $
+// $Revision: 1.3 $
+// $Date: 2001-08-02 18:11:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/CurvaturesBySearchAlgorithm.cpp,v $
 
 
@@ -43,7 +43,7 @@
 
 CurvaturesBySearchAlgorithm::CurvaturesBySearchAlgorithm(int passedNumberOfCurvatures,
 									FindDesignPoint *passedFindDesignPoint)
-:FindCurvatures()
+:FindCurvatures(), curvatures(passedNumberOfCurvatures)
 {
 	numberOfCurvatures = passedNumberOfCurvatures;
 	theFindDesignPoint = passedFindDesignPoint;
@@ -121,10 +121,10 @@ CurvaturesBySearchAlgorithm::computeCurvatures(ReliabilityDomain *theReliability
 
 		// Check sign and compute curvature
 		if (fabs(signumProduct)==(signumProduct)) {
-			(*curvatures)(i) = acos(alphaProduct) / norm_uLastMinus_u;
+			curvatures(i) = acos(alphaProduct) / norm_uLastMinus_u;
 		}
 		else {
-			(*curvatures)(i) = -acos(alphaProduct) / norm_uLastMinus_u;
+			curvatures(i) = -acos(alphaProduct) / norm_uLastMinus_u;
 		}
 
 		// Run a new search in the subspace orthogonal to previous principal directions
@@ -158,7 +158,7 @@ CurvaturesBySearchAlgorithm::computeCurvatures(ReliabilityDomain *theReliability
 Vector
 CurvaturesBySearchAlgorithm::getCurvatures()
 {
-	return (*curvatures);
+	return curvatures;
 }
 
 

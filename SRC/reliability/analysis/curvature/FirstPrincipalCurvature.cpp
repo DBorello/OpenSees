@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 22:11:37 $
+// $Revision: 1.4 $
+// $Date: 2001-08-02 18:11:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/FirstPrincipalCurvature.cpp,v $
 
 
@@ -40,15 +40,12 @@
 
 
 FirstPrincipalCurvature::FirstPrincipalCurvature()
-:FindCurvatures()
+:FindCurvatures(), curvatures(1)
 {
-	curvatures = new Vector(1);
 }
 
 FirstPrincipalCurvature::~FirstPrincipalCurvature()
 {
-	if (curvatures != 0)
-		delete curvatures;
 }
 
 
@@ -84,10 +81,10 @@ FirstPrincipalCurvature::computeCurvatures(ReliabilityDomain *theReliabilityDoma
 
 	// Check sign and compute curvature
 	if (fabs(signumProduct)==(signumProduct)) {
-		(*curvatures)(0) = acos(alphaProduct) / norm_uLastMinus_u;
+		curvatures(0) = acos(alphaProduct) / norm_uLastMinus_u;
 	}
 	else {
-		(*curvatures)(0) = -acos(alphaProduct) / norm_uLastMinus_u;
+		curvatures(0) = -acos(alphaProduct) / norm_uLastMinus_u;
 	}
 
 	return 0;
@@ -97,7 +94,7 @@ FirstPrincipalCurvature::computeCurvatures(ReliabilityDomain *theReliabilityDoma
 Vector
 FirstPrincipalCurvature::getCurvatures()
 {
-	return (*curvatures);
+	return curvatures;
 }
 
 
