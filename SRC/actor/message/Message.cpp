@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-05 00:57:12 $
+// $Revision: 1.3 $
+// $Date: 2002-11-05 23:04:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/message/Message.cpp,v $
                                                                         
                                                                         
@@ -27,6 +27,7 @@
 //
 
 #include "Message.h"
+#include <strings.h>
 #include <iostream.h>
 
 Message::Message()
@@ -57,10 +58,6 @@ Message::~Message()
 {
 
 }
-
-#ifndef _KAI
-extern "C" void bcopy(const char *scource, char *dest, int length);
-#endif
 
 int
 Message::putData(char *theData, int startLoc, int endLoc)
