@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-26 01:36:57 $
+// $Revision: 1.5 $
+// $Date: 2001-07-31 22:32:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -390,7 +390,7 @@ OpenGlDevice::WINOPEN(char *_title, int _xLoc, int _yLoc, int _width, int _heigh
   if (windowTitle != 0)
     delete [] windowTitle;
   
-  windowTitle = new char[strlen(_title+1)];
+  windowTitle = new char[strlen(_title)];
   strcpy(windowTitle, _title);
 
   width = _width;
