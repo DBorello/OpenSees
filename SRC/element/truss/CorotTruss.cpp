@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-25 23:33:02 $
+// $Revision: 1.9 $
+// $Date: 2003-03-12 03:13:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -84,6 +84,10 @@ CorotTruss::CorotTruss(int tag, int dim,
   
   connectedExternalNodes(0) = Nd1;
   connectedExternalNodes(1) = Nd2;        
+
+  // set node pointers to NULL
+  theNodes[0] = 0;
+  theNodes[1] = 0;
 }
 
 // constructor:
@@ -102,6 +106,10 @@ CorotTruss::CorotTruss()
     opserr << "FATAL CorotTruss::CorotTruss - failed to create an ID of size 2\n";
     exit(-1);
   }
+
+  // set node pointers to NULL
+  theNodes[0] = 0;
+  theNodes[1] = 0;
 }
 
 //  destructor
@@ -151,7 +159,7 @@ CorotTruss::setDomain(Domain *theDomain)
   // check Domain is not null - invoked when object removed from a domain
   if (theDomain == 0) {
     theNodes[0] = 0;
-    theNodes[2] = 0;
+    theNodes[1] = 0;
     Lo = 0.0;
     Ln = 0.0;
     return;
@@ -161,10 +169,10 @@ CorotTruss::setDomain(Domain *theDomain)
   int Nd1 = connectedExternalNodes(0);
   int Nd2 = connectedExternalNodes(1);
   theNodes[0] = theDomain->getNode(Nd1);
-  theNodes[2] = theDomain->getNode(Nd2);	
+  theNodes[1] = theDomain->getNode(Nd2);	
   
   // if can't find both - send a warning message
-  if ((theNodes[0] == 0) || (theNodes[2] == 0)) {
+  if ((theNodes[0] == 0) || (theNodes[1] == 0)) {
     opserr << "CorotTruss::setDomain() - CorotTruss " << this->getTag() << " node " <<
       Nd1 << "does not exist in the model \n";
     
@@ -176,7 +184,7 @@ CorotTruss::setDomain(Domain *theDomain)
   
   // now determine the number of dof and the dimesnion    
   int dofNd1 = theNodes[0]->getNumberDOF();
-  int dofNd2 = theNodes[2]->getNumberDOF();	
+  int dofNd2 = theNodes[1]->getNumberDOF();	
   
   // if differing dof at the ends - print a warning message
   if (dofNd1 != dofNd2) {
@@ -229,7 +237,7 @@ CorotTruss::setDomain(Domain *theDomain)
 	// now determine the length, cosines and fill in the transformation
 	// NOTE t = -t(every one else uses for residual calc)
 	const Vector &end1Crd = theNodes[0]->getCrds();
-	const Vector &end2Crd = theNodes[2]->getCrds();
+	const Vector &end2Crd = theNodes[1]->getCrds();
 
 	// Determine global offsets
     double cosX[3];
@@ -323,7 +331,7 @@ CorotTruss::update(void)
 {
   // Nodal displacements
   const Vector &end1Disp = theNodes[0]->getTrialDisp();
-  const Vector &end2Disp = theNodes[2]->getTrialDisp();    
+  const Vector &end2Disp = theNodes[1]->getTrialDisp();    
   
   // Initial offsets
   d21[0] = Lo;
@@ -598,8 +606,8 @@ CorotTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
   }	      
 
   this->setTag((int)data(0));
-  numDIM = data(1);
-  numDOF = data(2);
+  numDIM = (int)data(1);
+  numDOF = (int)data(2);
   A = data(3);
   M = data(6);
   
@@ -613,8 +621,8 @@ CorotTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBr
   // finally truss creates a material object of the correct type,
   // sets its database tag and asks this new object to recveive itself.
 
-  int matClass = data(4);
-  int matDb = data(5);
+  int matClass = (int)data(4);
+  int matDb = (int)data(5);
 
   // check if we have a material object already & if we do if of right type
   if ((theMaterial == 0) || (theMaterial->getClassTag() != matClass)) {
@@ -653,9 +661,9 @@ CorotTruss::displaySelf(Renderer &theViewer, int displayMode, float fact)
 	// the display factor (a measure of the distorted image)
 	// store this information in 2 3d vectors v1 and v2
 	const Vector &end1Crd = theNodes[0]->getCrds();
-	const Vector &end2Crd = theNodes[2]->getCrds();	
+	const Vector &end2Crd = theNodes[1]->getCrds();	
 	const Vector &end1Disp = theNodes[0]->getDisp();
-	const Vector &end2Disp = theNodes[2]->getDisp();    
+	const Vector &end2Disp = theNodes[1]->getDisp();    
 
 	static Vector v1(3);
 	static Vector v2(3);
