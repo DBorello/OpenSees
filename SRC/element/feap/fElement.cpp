@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:20 $
+// $Revision: 1.2 $
+// $Date: 2001-07-11 22:24:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/feap/fElement.cpp,v $
                                                                         
                                                                         
@@ -582,7 +582,7 @@ fElement::getResistingForce()
     
     // set ctan, ior and iow
     double ctan[3];
-    ctan[0] = 0.0; ctan[1] = 1.0; ctan[2] = 0.0;
+    ctan[0] = 0.0; ctan[1] = 0.0; ctan[2] = 0.0;
     int ior = 0; int iow = 0;
     
     // call the ready routine to set ul, xl, tl and ix, NH1, NH2 and NH3
@@ -647,6 +647,9 @@ fElement::getResistingForceIncInertia()
 	cerr << " ready: " << nstR << " invoke: " << nstI << endl;
 	exit(-1);
     }
+
+    // negate the sign of the loads -- feap elements return -ku
+    (*fElementV[nstR]) *= -1.0;
     
     // return the matrix
     return *(fElementV[nstR]);    
