@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-28 05:43:24 $
+// $Revision: 1.3 $
+// $Date: 2002-06-07 23:04:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/TclZeroLength.cpp,v $
                                                                         
                                                                         
@@ -38,7 +38,7 @@
 #include <tcl.h>
 
 #include <ZeroLength.h>
-#include <ZeroLengthND.h>
+//#include <ZeroLengthND.h>
 #include <ZeroLengthSection.h>
 #include <G3Globals.h>
 #include <TclModelBuilder.h>
@@ -457,7 +457,7 @@ TclModelBuilder_addZeroLengthSection(ClientData clientData, Tcl_Interp *interp,
     return TCL_OK;
 }
 
-
+/*
 int
 TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
 			      int argc, char **argv,
@@ -630,3 +630,4 @@ TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
 
     return TCL_OK;
 }
+*/

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2002-05-17 01:05:47 $
+// $Revision: 1.16 $
+// $Date: 2002-06-07 23:04:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -113,9 +113,9 @@ TclModelBuilder_addZeroLengthSection(ClientData, Tcl_Interp *, int, char **,
 			      Domain*, TclModelBuilder *);
 
 // MHS
-extern int 
-TclModelBuilder_addZeroLengthND(ClientData, Tcl_Interp *, int, char **,
-			      Domain*, TclModelBuilder *);
+//extern int 
+//TclModelBuilder_addZeroLengthND(ClientData, Tcl_Interp *, int, char **,
+//			      Domain*, TclModelBuilder *);
 
 
 // REMO
@@ -326,11 +326,13 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     int result = TclModelBuilder_addZeroLengthSection(clientData, interp, argc, argv,
 					       theTclDomain, theTclBuilder);
     return result;
-  } else if (strcmp(argv[1],"zeroLengthND") == 0) {
-    int result = TclModelBuilder_addZeroLengthND(clientData, interp, argc, argv,
-					       theTclDomain, theTclBuilder);
-    return result;
-  } else {
+  }
+  //else if (strcmp(argv[1],"zeroLengthND") == 0) {
+  //  int result = TclModelBuilder_addZeroLengthND(clientData, interp, argc, argv,
+  //				       theTclDomain, theTclBuilder);
+  //return result;
+  //}
+  else {
     cerr << "WARNING unknown element type: " <<  argv[1];
     cerr << "Valid types: truss, elasticBeamColumn, nonlinearBeamColumn, " << endl
 	 << "beamWithHinges, zeroLength, quad, brick, shellMITC4\n";
