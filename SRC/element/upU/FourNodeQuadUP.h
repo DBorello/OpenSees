@@ -8,8 +8,8 @@
 // based on FourNodeQuad element by Michael Scott                            //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:33:07 $
+// $Revision: 1.6 $
+// $Date: 2003-08-29 00:17:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/FourNodeQuadUP.h,v $
         
 #ifndef FourNodeQuadUP_h
@@ -34,8 +34,7 @@ class FourNodeQuadUP : public Element
     FourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
 		  NDMaterial &m, const char *type,
 		  double t, double bulk, double rhof, double perm1, double perm2,
-		   double b1 = 0.0, double b2 = 0.0, double p = 0.0,
-		   double dampM = 0.0, double dampK = 0.0);
+		   double b1 = 0.0, double b2 = 0.0, double p = 0.0);
 
     FourNodeQuadUP();
     virtual ~FourNodeQuadUP();
@@ -98,15 +97,13 @@ class FourNodeQuadUP : public Element
     Vector Q;		// Applied nodal loads
     double b[2];		// Body forces
     Vector pressureLoad;	// Pressure load at nodes
-
+ 
     double thickness;	// Element thickness
     double rho;			// Fluid mass per unit volume
     double kc;   // combined bulk modulus
     double pressure;	// Normal surface traction (pressure) over entire element
     // Note: positive for outward normal
     double perm[2];  // lateral/vertical permeability
-    double dM;
-    double dK;
     
     static double shp[3][4][4];	// Stores shape functions and derivatives (overwritten)
     static double pts[4][2];	// Stores quadrature points

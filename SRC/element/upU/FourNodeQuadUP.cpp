@@ -9,8 +9,8 @@
 // based on FourNodeQuad element by Michael Scott		  	     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:33:07 $
+// $Revision: 1.7 $
+// $Date: 2003-08-29 00:17:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/FourNodeQuadUP.cpp,v $
 
 #include <FourNodeQuadUP.h>
@@ -39,13 +39,11 @@ Node *FourNodeQuadUP::theNodes[4];
 
 FourNodeQuadUP::FourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
 	NDMaterial &m, const char *type, double t, double bulk, double r,
-		  double p1, double p2, double b1, double b2, double p, double dampM,
-			double dampK)
+		  double p1, double p2, double b1, double b2, double p)
 :Element (tag, ELE_TAG_FourNodeQuadUP), 
   theMaterial(0), connectedExternalNodes(4), 
   nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0), Ki(0),
-  Q(12), pressureLoad(12), thickness(t), kc(bulk), rho(r), pressure(p),
-  dM(dampM), dK(dampK)
+  Q(12), pressureLoad(12), thickness(t), kc(bulk), rho(r), pressure(p)
 {
 	pts[0][0] = -0.5773502691896258;
 	pts[0][1] = -0.5773502691896258;
@@ -94,13 +92,12 @@ FourNodeQuadUP::FourNodeQuadUP(int tag, int nd1, int nd2, int nd3, int nd4,
     connectedExternalNodes(2) = nd3;
     connectedExternalNodes(3) = nd4;
 }
-
+ 
 FourNodeQuadUP::FourNodeQuadUP()
 :Element (0,ELE_TAG_FourNodeQuadUP),
   theMaterial(0), connectedExternalNodes(4), 
  nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0), Ki(0),
-  Q(12), pressureLoad(12), thickness(0.0), kc(0.0), rho(0.0), pressure(0.0),
- dM(0.0), dK(0.0)
+  Q(12), pressureLoad(12), thickness(0.0), kc(0.0), rho(0.0), pressure(0.0)
 {
 	pts[0][0] = -0.577350269189626;
 	pts[0][1] = -0.577350269189626;
@@ -211,7 +208,6 @@ int
 FourNodeQuadUP::commitState()
 {
     int retVal = 0;
-
 
     // call element commitState to do any base class stuff
     if ((retVal = this->Element::commitState()) != 0) {
@@ -341,9 +337,45 @@ FourNodeQuadUP::getTangentStiff()
 
 const Matrix &FourNodeQuadUP::getInitialStiff () 
 {
-  if (Ki == 0)
-    Ki = new Matrix(this->getTangentStiff());
+  if (Ki != 0) return *Ki;
 
+  K.Zero();
+
+  double DB[3][2];
+
+  // Determine Jacobian for this integration point
+  this->shapeFunction();
+  
+  // Loop over the integration points
+  for (int i = 0; i < 4; i++) {
+    
+    // Get the material tangent
+    const Matrix &D = theMaterial[i]->getInitialTangent();
+    
+    // Perform numerical integration
+    //K = K + (B^ D * B) * intWt(i)*intWt(j) * detJ;
+    //K.addMatrixTripleProduct(1.0, B, D, intWt(i)*intWt(j)*detJ);
+    for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia += 3) {
+      
+      for (int beta = 0, ib = 0; beta < 4; beta++, ib += 3) {
+	
+	DB[0][0] = dvol[i] * (D(0,0)*shp[0][beta][i] + D(0,2)*shp[1][beta][i]);
+	DB[1][0] = dvol[i] * (D(1,0)*shp[0][beta][i] + D(1,2)*shp[1][beta][i]);
+	DB[2][0] = dvol[i] * (D(2,0)*shp[0][beta][i] + D(2,2)*shp[1][beta][i]);
+	DB[0][1] = dvol[i] * (D(0,1)*shp[1][beta][i] + D(0,2)*shp[0][beta][i]);
+	DB[1][1] = dvol[i] * (D(1,1)*shp[1][beta][i] + D(1,2)*shp[0][beta][i]);
+	DB[2][1] = dvol[i] * (D(2,1)*shp[1][beta][i] + D(2,2)*shp[0][beta][i]);
+	
+	K(ia,ib) += shp[0][alpha][i]*DB[0][0] + shp[1][alpha][i]*DB[2][0];
+	K(ia,ib+1) += shp[0][alpha][i]*DB[0][1] + shp[1][alpha][i]*DB[2][1];
+	K(ia+1,ib) += shp[1][alpha][i]*DB[1][0] + shp[0][alpha][i]*DB[2][0];
+	K(ia+1,ib+1) += shp[1][alpha][i]*DB[1][1] + shp[0][alpha][i]*DB[2][1];
+	
+      }
+    }
+  }
+
+  Ki = new Matrix(K);
   if (Ki == 0) {
     opserr << "FATAL FourNodeQuadUP::getInitialStiff() -";
     opserr << "ran out of memory\n";
@@ -356,40 +388,28 @@ const Matrix &FourNodeQuadUP::getInitialStiff ()
 const Matrix&
 FourNodeQuadUP::getDamp()
 {
-  K.Zero();
+  static Matrix Kdamp(12,12);
+  Kdamp.Zero();
   
-  if (dK != 0.0) {
-    this->getTangentStiff();
-    for (int i = 0; i < 12; i += 3) {
-      for (int j = 0; j < 12; j += 3) {
-	K(i,j) *= dK;
-	K(i,j+1) *= dK;
-	K(i+1,j) *= dK;
-	K(i+1,j+1) *= dK;
-      }
-		}
-  }
-  if (dM != 0.0) {
-    double Nrho, tmp;
-    
-    // Determine Jacobian for this integration point
-    this->shapeFunction();
-    
-    // Compute an ad hoc lumped mass matrix
-    for (int i = 0; i < 4; i++) {
-      // average material density 
-      tmp = mixtureRho(i);
-      
-      for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia += 3) {
-	Nrho = shp[2][alpha][i]*dvol[i]*tmp;
-	K(ia,ia) += dM*Nrho;
-	K(ia+1,ia+1) += dM*Nrho;
-      }
-    }
-  }
-  
+  if (betaK != 0.0)
+    Kdamp.addMatrix(1.0, this->getTangentStiff(), betaK);      
+  if (betaK0 != 0.0)
+    Kdamp.addMatrix(1.0, this->getInitialStiff(), betaK0);      
+  if (betaKc != 0.0)
+    Kdamp.addMatrix(1.0, *Kc, betaKc);      
+
   int i, j, m, i1, j1;
-  
+
+  if (alphaM != 0.0) {
+	this->getMass();
+    for (i = 0; i < 12; i += 3) {
+      for (j = 0; j < 12; j += 3) {
+        Kdamp(i,j) += K(i,j)*alphaM;
+        Kdamp(i+1,j+1) += K(i+1,j+1)*alphaM;
+	  }
+    }  
+  }
+
   // Determine Jacobian for this integration point
   this->shapeFunction();
 
@@ -399,14 +419,14 @@ FourNodeQuadUP::getDamp()
     i1 = i / 3;
     for (j = 2; j < 12; j += 3) {
       j1 = (j-2) / 3;
-      K(i,j) += -vol*shpBar[0][i1]*shpBar[2][j1];
-      K(i+1,j) += -vol*shpBar[1][i1]*shpBar[2][j1];
-      /*for (m = 0; m < 4; m++) {
-	K(i,j) += -dvol[m]*shp[0][i1][m]*shp[2][j1][m];
-	K(i+1,j) += -dvol[m]*shp[1][i1][m]*shp[2][j1][m];
-	}*/
-      K(j,i) = K(i,j);
-      K(j,i+1) = K(i+1,j);
+      //K(i,j) += -vol*shpBar[0][i1]*shpBar[2][j1];
+      //K(i+1,j) += -vol*shpBar[1][i1]*shpBar[2][j1];
+      for (m = 0; m < 4; m++) {
+	    Kdamp(i,j) += -dvol[m]*shp[0][i1][m]*shp[2][j1][m];
+	    Kdamp(i+1,j) += -dvol[m]*shp[1][i1][m]*shp[2][j1][m];
+	  }
+      Kdamp(j,i) = Kdamp(i,j);
+      Kdamp(j,i+1) = Kdamp(i+1,j);
     }
   }
   
@@ -415,16 +435,17 @@ FourNodeQuadUP::getDamp()
     int i1 = (i-2) / 3;
     for (j = 2; j < 12; j += 3) {
       int j1 = (j-2) / 3;
-      K(i,j) = - (vol*perm[0]*shpBar[0][i1]*shpBar[0][j1] + 
-		  vol*perm[1]*shpBar[1][i1]*shpBar[1][j1]);
-      /*for (m = 0; m < 4; m++) {
-	K(i,j) += - dvol[m]*(perm[0]*shp[0][i1][m]*shp[0][j1][m] +
-	perm[1]*shp[1][i1][m]*shp[1][j1][m]);
-	}*/
+      //K(i,j) = - (vol*perm[0]*shpBar[0][i1]*shpBar[0][j1] + 
+		//  vol*perm[1]*shpBar[1][i1]*shpBar[1][j1]);
+      for (m = 0; m < 4; m++) {
+	    Kdamp(i,j) += - dvol[m]*(perm[0]*shp[0][i1][m]*shp[0][j1][m] +
+	                  perm[1]*shp[1][i1][m]*shp[1][j1][m]);
+	  }
     }
   }
-  //opserr <<"D "<<K<<endln;
-	return K;
+
+  K = Kdamp;
+  return K;
 }
 
 const Matrix&
@@ -433,14 +454,14 @@ FourNodeQuadUP::getMass()
   K.Zero();
   
   int i, j, m, i1, j1;
-  double Nrho, tmp;
+  double Nrho;
   
   // Determine Jacobian for this integration point
   this->shapeFunction();
   
   
   // Compute an ad hoc lumped mass matrix
-  for (i = 0; i < 4; i++) {
+  /*for (i = 0; i < 4; i++) {
     
     // average material density 
     tmp = mixtureRho(i);
@@ -450,22 +471,18 @@ FourNodeQuadUP::getMass()
       K(ia,ia) += Nrho;
       K(ia+1,ia+1) += Nrho;
     }
-  }
-  
-  /*
+  }*/ 
+
     // Compute consistent mass matrix
-    for (i = 0, i1 = 0; i < 12; i += 3, i1++) {
+  for (i = 0, i1 = 0; i < 12; i += 3, i1++) {
     for (j = 0, j1 = 0; j < 12; j += 3, j1++) {
     for (m = 0; m < 4; m++) {
-    tmp = dvol[m]*mixtureRho(m)*shp[2][i1][m]*shp[2][j1][m];
-    K(i,j) += tmp;
-    K(i+1,j+1) += tmp;
-    }
-    K(j,i) = K(i,j);
-    K(j+1,i+1) = K(i+1,j+1);
+    Nrho = dvol[m]*mixtureRho(m)*shp[2][i1][m]*shp[2][j1][m];
+    K(i,j) += Nrho;
+    K(i+1,j+1) += Nrho;
     }
     }
-  */
+  }
   
   // Compute compressibility matrix
   double vol = dvol[0] + dvol[1] + dvol[2] + dvol[3];
@@ -475,12 +492,17 @@ FourNodeQuadUP::getMass()
     i1 = (i-2) / 3;
     for (j = 2; j < 12; j += 3) {
       j1 = (j-2) / 3;
-      K(i,j) = -vol*oneOverKc*shpBar[2][i1]*shpBar[2][j1];
-      /*for (m = 0; m < 4; m++) {
-	K(i,j) += -dvol[m]*oneOverKc*shp[2][i1][m]*shp[2][j1][m];
-	}*/
+      //K(i,j) = -vol*oneOverKc*shpBar[2][i1]*shpBar[2][j1];
+      for (m = 0; m < 4; m++) {
+	    K(i,j) += -dvol[m]*oneOverKc*shp[2][i1][m]*shp[2][j1][m];
+	  }
     }
   }
+
+  /*for (i = 2; i < 12; i += 3) {
+    i1 = (i-2) / 3;
+    K(i,i) = -vol*oneOverKc*shpBar[2][i1];
+  }*/
   return K;
 }
 
@@ -553,9 +575,10 @@ FourNodeQuadUP::getResistingForce()
   // Determine Jacobian for this integration point
   this->shapeFunction();
   double vol = dvol[0] + dvol[1] + dvol[2] + dvol[3];
-  
+
+  int i;
   // Loop over the integration points
-  for (int i = 0; i < 4; i++) {
+  for (i = 0; i < 4; i++) {
 
     // Get material stress response
     const Vector &sigma = theMaterial[i]->getStress();
@@ -581,12 +604,12 @@ FourNodeQuadUP::getResistingForce()
   
   // Subtract fluid body force
   for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia += 3) {
-    P(ia+2) += vol*rho*(perm[0]*b[0]*shpBar[0][alpha]
-			+perm[1]*b[1]*shpBar[1][alpha]);
-    /*for (i = 0; i < 4; i++) {
+    //P(ia+2) += vol*rho*(perm[0]*b[0]*shpBar[0][alpha]
+	//		+perm[1]*b[1]*shpBar[1][alpha]);
+    for (i = 0; i < 4; i++) {
       P(ia+2) += dvol[i]*rho*(perm[0]*b[0]*shp[0][alpha][i] +
       perm[1]*b[1]*shp[1][alpha][i]);
-      }*/
+    }
   }
   
   // Subtract pressure loading from resisting force
@@ -639,20 +662,16 @@ FourNodeQuadUP::getResistingForceIncInertia()
       P(i) += K(i,j)*a[j];
   }
   //opserr<<"K+M "<<P<<endln; 
-  
-  
+   
   // dynamic seepage force
-  this->shapeFunction();
-  
-  for (i = 0, k = 0; i < 4; i++, k += 3) {
+  /*for (i = 0, k = 0; i < 4; i++, k += 3) {
     // loop over integration points
     for (j = 0; j < 4; j++) {
-      P(i+2) -= rho*dvol[j]*(shp[2][i][j]*a[k]*perm[0]*shpBar[0][i]
-			     +shp[2][i][j]*a[k+1]*perm[1]*shpBar[1][i]);
+      P(i+2) -= rho*dvol[j]*(shp[2][i][j]*a[k]*perm[0]*shp[0][i][j]
+			     +shp[2][i][j]*a[k+1]*perm[1]*shp[1][i][j]);
     }
-  }
+  }*/
   //opserr<<"K+M+fb "<<P<<endln;
-  
   
   const Vector &vel1 = nd1Ptr->getTrialVel();
   const Vector &vel2 = nd2Ptr->getTrialVel();

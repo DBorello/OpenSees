@@ -1,7 +1,8 @@
 //
-// Description: This file contains the implementation of the TclModelBuilder_addFourNodeQuadUP()
-// command. 
+// Description: This file contains the implementation of the 
+// TclModelBuilder_addFourNodeQuadUP() and TclModelBuilder_addBrickUP() commands. 
 //
+// Zhaohui Yang
 
 #include <stdlib.h>
 #include <string.h>
@@ -53,8 +54,6 @@ TclModelBuilder_addFourNodeQuadUP(ClientData clientData, Tcl_Interp *interp,
 	double p = 0.0;		// uniform normal traction (pressure)
 	double b1 = 0.0;
 	double b2 = 0.0;
-	double dM = 0.0;
-	double dK = 0.0;
 
   TCL_Char *type;
   if (Tcl_GetInt(interp, argv[argStart], &FourNodeQuadUPId) != TCL_OK) {
@@ -144,20 +143,6 @@ TclModelBuilder_addFourNodeQuadUP(ClientData clientData, Tcl_Interp *interp,
 			return TCL_ERROR;
 		}
 	}
-	if ((argc-argStart) >= 16) {
-		if (Tcl_GetDouble(interp, argv[15+argStart], &dM) != TCL_OK) {
-			opserr << "WARNING invalid dM\n";
-			opserr << "FourNodeQuadUP element: " << FourNodeQuadUPId << endln;
-			return TCL_ERROR;
-		}
-	}
-	if ((argc-argStart) >= 17) {
-		if (Tcl_GetDouble(interp, argv[16+argStart], &dK) != TCL_OK) {
-			opserr << "WARNING invalid dK\n";
-			opserr << "FourNodeQuadUP element: " << FourNodeQuadUPId << endln;
-			return TCL_ERROR;
-		}
-	}
 
   NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
       
@@ -171,7 +156,7 @@ TclModelBuilder_addFourNodeQuadUP(ClientData clientData, Tcl_Interp *interp,
   // now create the FourNodeQuadUP and add it to the Domain
   FourNodeQuadUP *theFourNodeQuadUP = 
       new FourNodeQuadUP(FourNodeQuadUPId,iNode,jNode,kNode,lNode,
-		       *theMaterial, type, thickness, bk, r, perm1, perm2, b1, b2, p, dM, dK);
+		       *theMaterial, type, thickness, bk, r, perm1, perm2, b1, b2, p);
   if (theFourNodeQuadUP == 0) {
       opserr << "WARNING ran out of memory creating element\n";
       opserr << "FourNodeQuad element: " << FourNodeQuadUPId << endln;
@@ -188,5 +173,4 @@ TclModelBuilder_addFourNodeQuadUP(ClientData clientData, Tcl_Interp *interp,
   // if get here we have sucessfully created the element and added it to the domain
   return TCL_OK;
 }
-
 
