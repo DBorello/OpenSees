@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2004-11-25 00:53:12 $
+// $Revision: 1.21 $
+// $Date: 2005-02-04 18:32:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -112,6 +112,8 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   //
   // set the data flag used as a switch to get the response in a record
   //
+  
+
 
   if (dataToStore == 0 || (strcmp(dataToStore, "disp") == 0)) {
     dataFlag = 0;
@@ -131,6 +133,25 @@ NodeRecorder::NodeRecorder(const ID &dofs,
       dataFlag = 10 + mode;
     else
       dataFlag = 6;
+  } else if ((strncmp(dataToStore, "sensitivity",11) == 0)) {
+    int grad = atoi(&(dataToStore[11]));
+    if (grad > 0)
+      dataFlag = 1000 + grad;
+    else
+      dataFlag = 6;
+  } else if ((strncmp(dataToStore, "velSensitivity",14) == 0)) {
+    int grad = atoi(&(dataToStore[14]));
+    if (grad > 0)
+      dataFlag = 2000 + grad;
+    else
+      dataFlag = 6;
+  } else if ((strncmp(dataToStore, "accSensitivity",14) == 0)) {
+    int grad = atoi(&(dataToStore[14]));
+    if (grad > 0)
+      dataFlag = 3000 + grad;
+    else
+      dataFlag = 6;
+
   } else {
     dataFlag = 6;
     opserr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
@@ -152,7 +173,6 @@ NodeRecorder::~NodeRecorder()
 
   if (theNodes != 0)
     delete [] theNodes;
-
 }
 
 int 
@@ -205,9 +225,12 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	else {
 	  for (int j=0; j<numDOF; j++) {
 	    int dof = (*theDofs)(j);
+
 	    response(cnt) = theNode->getDispSensitivity(dof+1, sensitivity);
+	    cnt++;
 	  }
 	}
+
 	// AddingSensitivity:END /////////////////////////////////////
       } else if (dataFlag == 1) {
 	const Vector &theResponse = theNode->getTrialVel();
@@ -265,7 +288,8 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	  cnt++;
 	}
 
-      } else if (dataFlag > 10) {
+
+      } else if (10 <= dataFlag  && dataFlag < 1000) {
 	int mode = dataFlag - 10;
 	int column = mode - 1;
 	const Matrix &theEigenvectors = theNode->getEigenvectors();
@@ -279,10 +303,47 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	      response(cnt) = 0.0;
 	    cnt++;		
 	  }
-	} else {
-	  for (int j=0; j<numDOF; j++) {
-	    response(cnt) = 0.0;
-	  }
+	}
+
+      } else if (dataFlag  >= 1000 && dataFlag < 2000) {
+	int grad = dataFlag - 1000;
+	
+	for (int j=0; j<numDOF; j++) {
+	  int dof = (*theDofs)(j);
+	  dof += 1; // Terje uses 1 through DOF for the dof indexing; the fool then subtracts 1 
+	  // his code!!
+	  response(cnt) = theNode->getDispSensitivity(dof, grad);
+	  cnt++;
+	}
+      
+      } else if (dataFlag  >= 2000 && dataFlag < 3000) {
+	int grad = dataFlag - 2000;
+	
+	for (int j=0; j<numDOF; j++) {
+	  int dof = (*theDofs)(j);
+	  dof += 1; // Terje uses 1 through DOF for the dof indexing; the fool then subtracts 1 
+	  // his code!!
+	  response(cnt) = theNode->getVelSensitivity(dof, grad);
+	  cnt++;
+	}
+	
+	
+      } else if (dataFlag  >= 3000) {
+	int grad = dataFlag - 3000;
+	
+	for (int j=0; j<numDOF; j++) {
+	  int dof = (*theDofs)(j);
+	  dof += 1; // Terje uses 1 through DOF for the dof indexing; the fool then subtracts 1 
+	  // his code!!
+	  response(cnt) = theNode->getAccSensitivity(dof, grad);
+	  cnt++;
+	}
+      }
+      
+      else {
+	// unknown response
+	for (int j=0; j<numDOF; j++) {
+	  response(cnt) = 0.0;
 	}
       }
     }
