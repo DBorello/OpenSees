@@ -1,39 +1,29 @@
-/* ****************************************************************** **
-**    OpenSees - Open System for Earthquake Engineering Simulation    **
-**          Pacific Earthquake Engineering Research Center            **
-**                                                                    **
-**                                                                    **
-** (C) Copyright 1999, The Regents of the University of California    **
-** All Rights Reserved.                                               **
-**                                                                    **
-** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
-** file 'COPYRIGHT'  in main directory for information on usage and   **
-** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-**                                                                    **
-** Developed by:                                                      **
-**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-**                                                                    **
-** ****************************************************************** */
-                                                                        
-// $Revision: 1.4 $
-// $Date: 2002-04-12 22:48:35 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/upU/TclEightNodeBrick_u_p_U.cpp,v $
-                                                                        
-                                                                        
-// File: ~/element/upU/TclEightNodeBrick_u_p_U.cpp
-// 
-// Written: fmk 
-// Created: 07/99
-// Modified: 01/02  Xiaoyan Wu, Boris Jeremic @ucdavis
-// Revision: A
+///////////////////////////////////////////////////////////////////////////////
 //
-// Description: This file contains the implementation of the TclModelBuilder_addEightNodeBrick_u_p_U() 
-// command. 
+// COPYRIGHT (C):     :-))
+// PROJECT:           Object Oriented Finite Element Program
+// FILE:             
+// CLASS:            
+// MEMBER FUNCTIONS:
 //
-// What: "@(#) TclModelBuilder.C, revA"
+// MEMBER VARIABLES
+//
+// PURPOSE:           Finite Element Class for coupled system
+// RETURN:
+// VERSION:
+// LANGUAGE:          C++.ver >= 3.0
+// TARGET OS:         DOS || UNIX || . . .
+// DESIGNER:          Boris Jeremic, Xiaoyan Wu
+// PROGRAMMER:        Boris Jeremic, Xiaoyan Wu
+// DATE:              Sept. 2001
+//
+//  "Coupled system": Solid and fluid coexist.
+//                    u-- Solid displacement
+//                    p-- Pore pressure
+//                    U-- Absolute fluid displacement
+//
+//
+///////////////////////////////////////////////////////////////////////////////
 
 #include <stdlib.h>
 #include <string.h>
