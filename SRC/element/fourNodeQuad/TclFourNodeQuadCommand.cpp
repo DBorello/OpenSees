@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:20 $
+// $Revision: 1.2 $
+// $Date: 2001-07-11 22:59:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/TclFourNodeQuadCommand.cpp,v $
                                                                         
 // File: ~/element/TclFourNodeQuadCommand.C
@@ -39,9 +39,18 @@
 #include <Domain.h>
 
 #include <FourNodeQuad.h>
+#include <ConstantPressureVolumeQuad.h>
+#include <EnhancedQuad.h>
+
 #include <TclModelBuilder.h>
 
 extern void printCommand(int argc, char **argv);
+
+/*  *****************************************************************************
+    
+    R E G U L A R    Q U A D
+
+    ***************************************************************************** */
 
 int
 TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,  
@@ -176,4 +185,210 @@ TclModelBuilder_addFourNodeQuad(ClientData clientData, Tcl_Interp *interp,
 }
 
 
+/*  *****************************************************************************
+    
+    C O N S T A N T    P R E S S U R E    V O L U M E    Q U A D
 
+    ***************************************************************************** */
+
+
+int
+TclModelBuilder_addConstantPressureVolumeQuad(ClientData clientData, Tcl_Interp *interp,  
+				int argc, 
+				char **argv, 
+				Domain*theTclDomain,
+				TclModelBuilder *theTclBuilder)
+{
+  // ensure the destructor has not been called - 
+  if (theTclBuilder == 0) {
+    cerr << "WARNING builder has been destroyed\n";    
+    return TCL_ERROR;
+  }
+
+  if (theTclBuilder->getNDM() != 2 || theTclBuilder->getNDF() != 2) {
+      cerr << "WARNING -- model dimensions and/or nodal DOF not compatible with quad element\n";
+      return TCL_ERROR;
+  }
+
+  // check the number of arguments is correct
+  int argStart = 2;
+
+  if ((argc-argStart) < 6) {
+    cerr << "WARNING insufficient arguments\n";
+    printCommand(argc, argv);
+    cerr << "Want: element ConstantPressureVolumeQuad eleTag? iNode? jNode? kNode? lNode? matTag?\n"; 
+    return TCL_ERROR;
+  }    
+
+  // get the id and end nodes 
+  int ConstantPressureVolumeQuadId, iNode, jNode, kNode, lNode, matID;
+
+  if (Tcl_GetInt(interp, argv[argStart], &ConstantPressureVolumeQuadId) != TCL_OK) {
+    cerr << "WARNING invalid ConstantPressureVolumeQuad eleTag" << endl;
+    return TCL_ERROR;
+  }
+  if (Tcl_GetInt(interp, argv[1+argStart], &iNode) != TCL_OK) {
+    cerr << "WARNING invalid iNode\n";
+    cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+    return TCL_ERROR;
+  }
+
+  if (Tcl_GetInt(interp, argv[2+argStart], &jNode) != TCL_OK) {
+     cerr << "WARNING invalid jNode\n";
+     cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+     return TCL_ERROR;
+  }
+  
+  if (Tcl_GetInt(interp, argv[3+argStart], &kNode) != TCL_OK) {
+     cerr << "WARNING invalid kNode\n";
+     cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+     return TCL_ERROR;
+  }  
+  
+  if (Tcl_GetInt(interp, argv[4+argStart], &lNode) != TCL_OK) {
+     cerr << "WARNING invalid lNode\n";
+     cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+     return TCL_ERROR;
+  }  
+
+  if (Tcl_GetInt(interp, argv[5+argStart], &matID) != TCL_OK) {
+     cerr << "WARNING invalid matID\n";
+     cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+     return TCL_ERROR;
+  }
+
+  NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
+      
+  if (theMaterial == 0) {
+      cerr << "WARNING material not found\n";
+      cerr << "Material: " << matID;
+      cerr << "\nConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+      return TCL_ERROR;
+  }
+  
+  // now create the ConstantPressureVolumeQuad and add it to the Domain
+  ConstantPressureVolumeQuad *theConstantPressureVolumeQuad = 
+      new ConstantPressureVolumeQuad(ConstantPressureVolumeQuadId,iNode,jNode,kNode,lNode,
+		       *theMaterial);
+  if (theConstantPressureVolumeQuad == 0) {
+      cerr << "WARNING ran out of memory creating element\n";
+      cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+      return TCL_ERROR;
+  }
+
+
+  if (theTclDomain->addElement(theConstantPressureVolumeQuad) == false) {
+      cerr << "WARNING could not add element to the domain\n";
+      cerr << "ConstantPressureVolumeQuad element: " << ConstantPressureVolumeQuadId << endl;
+      delete theConstantPressureVolumeQuad;
+      return TCL_ERROR;
+  }
+
+  // if get here we have sucessfully created the element and added it to the domain
+  return TCL_OK;
+}
+
+
+/*  *****************************************************************************
+    
+    E N H A N C E D    Q U A D
+
+    ***************************************************************************** */
+int
+TclModelBuilder_addEnhancedQuad(ClientData clientData, Tcl_Interp *interp,  
+				int argc, 
+				char **argv, 
+				Domain*theTclDomain,
+				TclModelBuilder *theTclBuilder)
+{
+  // ensure the destructor has not been called - 
+  if (theTclBuilder == 0) {
+    cerr << "WARNING builder has been destroyed\n";    
+    return TCL_ERROR;
+  }
+
+	if (theTclBuilder->getNDM() != 2 || theTclBuilder->getNDF() != 2) {
+		cerr << "WARNING -- model dimensions and/or nodal DOF not compatible with quad element\n";
+		return TCL_ERROR;
+	}
+
+  // check the number of arguments is correct
+  int argStart = 2;
+
+  if ((argc-argStart) < 7) {
+    cerr << "WARNING insufficient arguments\n";
+    printCommand(argc, argv);
+    cerr << "Want: element EnhancedQuad eleTag? iNode? jNode? kNode? lNode? type? matTag? \n";
+    return TCL_ERROR;
+  }    
+
+  // get the id and end nodes 
+  int EnhancedQuadId, iNode, jNode, kNode, lNode, matID;
+  char *type;
+  if (Tcl_GetInt(interp, argv[argStart], &EnhancedQuadId) != TCL_OK) {
+    cerr << "WARNING invalid EnhancedQuad eleTag" << endl;
+    return TCL_ERROR;
+  }
+  if (Tcl_GetInt(interp, argv[1+argStart], &iNode) != TCL_OK) {
+    cerr << "WARNING invalid iNode\n";
+    cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+    return TCL_ERROR;
+  }
+
+  if (Tcl_GetInt(interp, argv[2+argStart], &jNode) != TCL_OK) {
+     cerr << "WARNING invalid jNode\n";
+     cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+     return TCL_ERROR;
+  }
+  
+  if (Tcl_GetInt(interp, argv[3+argStart], &kNode) != TCL_OK) {
+     cerr << "WARNING invalid kNode\n";
+     cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+     return TCL_ERROR;
+  }  
+  
+  if (Tcl_GetInt(interp, argv[4+argStart], &lNode) != TCL_OK) {
+     cerr << "WARNING invalid lNode\n";
+     cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+     return TCL_ERROR;
+  }  
+
+  
+  type = argv[5+argStart];
+
+  
+  if (Tcl_GetInt(interp, argv[6+argStart], &matID) != TCL_OK) {
+     cerr << "WARNING invalid matID\n";
+     cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+     return TCL_ERROR;
+  }
+
+  NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
+      
+  if (theMaterial == 0) {
+      cerr << "WARNING material not found\n";
+      cerr << "Material: " << matID;
+      cerr << "\nEnhancedQuad element: " << EnhancedQuadId << endl;
+      return TCL_ERROR;
+  }
+  
+  // now create the EnhancedQuad and add it to the Domain
+  EnhancedQuad *theEnhancedQuad = 
+      new EnhancedQuad(EnhancedQuadId,iNode,jNode,kNode,lNode,
+		       *theMaterial, type );
+  if (theEnhancedQuad == 0) {
+      cerr << "WARNING ran out of memory creating element\n";
+      cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+      return TCL_ERROR;
+  }
+
+  if (theTclDomain->addElement(theEnhancedQuad) == false) {
+      cerr << "WARNING could not add element to the domain\n";
+      cerr << "EnhancedQuad element: " << EnhancedQuadId << endl;
+      delete theEnhancedQuad;
+      return TCL_ERROR;
+  }
+
+  // if get here we have sucessfully created the element and added it to the domain
+  return TCL_OK;
+}
