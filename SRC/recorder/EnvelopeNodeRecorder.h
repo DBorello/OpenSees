@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.5 $
-// $Date: 2004-11-13 00:57:22 $
+// $Revision: 1.6 $
+// $Date: 2004-11-24 22:42:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.h,v $
                                                                         
 
@@ -46,10 +46,12 @@
 class Domain;
 class FE_Datastore;
 class DataOutputHandler;
+class Node;
 
 class EnvelopeNodeRecorder: public Recorder
 {
   public:
+  EnvelopeNodeRecorder();
     EnvelopeNodeRecorder(const ID &theDof, 
 			 const ID &theNodes, 
 			 const char *dataToStore,
@@ -60,13 +62,22 @@ class EnvelopeNodeRecorder: public Recorder
     ~EnvelopeNodeRecorder();
 
     int record(int commitTag, double timeStamp);
-    void restart(void);    
+    int restart(void);    
+
+    int setDomain(Domain &theDomain);
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, 
+		 FEM_ObjectBroker &theBroker);
     
   protected:
     
   private:	
+    int initialize(void);
+
     ID *theDofs;
-    ID *theNodes;
+    ID *theNodalTags;
+    Node **theNodes;
+
     Vector *currentData;
     Matrix *data;
 
@@ -79,6 +90,8 @@ class EnvelopeNodeRecorder: public Recorder
     double nextTimeStampToRecord;
 
     bool first;
+    bool initializationDone;
+    int numValidNodes;
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2004-11-13 00:57:22 $
+// $Revision: 1.6 $
+// $Date: 2004-11-24 22:42:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.h,v $
                                                                         
 #ifndef EnvelopeElementRecorder_h
@@ -46,6 +46,7 @@ class DataOutputHandler;
 class EnvelopeElementRecorder: public Recorder
 {
   public:
+  EnvelopeElementRecorder();
     EnvelopeElementRecorder(const ID &eleID, 
 			    const char **argv, 
 			    int argc,
@@ -57,13 +58,20 @@ class EnvelopeElementRecorder: public Recorder
     ~EnvelopeElementRecorder();
 
     int record(int commitTag, double timeStamp);
-    void restart(void);    
+    int restart(void);    
+
+    int setDomain(Domain &theDomain);
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, 
+		 FEM_ObjectBroker &theBroker);
     
   protected:
     
   private:	
+    int initialize(void);
+
     int numEle;
-    ID responseID;                 // integer element returns in setResponse
+    ID eleID;
     Response **theResponses;
 
     Domain *theDomain;
@@ -75,6 +83,10 @@ class EnvelopeElementRecorder: public Recorder
     Matrix *data;
     Vector *currentData;
     bool first;
+
+    bool initializationDone;
+    char **responseArgs;
+    int numArgs;
 };
 
 

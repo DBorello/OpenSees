@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2004-11-13 00:57:22 $
+// $Revision: 1.11 $
+// $Date: 2004-11-24 22:43:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
                                                                         
@@ -52,6 +52,7 @@ class DataOutputHandler;
 class ElementRecorder: public Recorder
 {
   public:
+    ElementRecorder();
     ElementRecorder(const ID &eleID, 
 		    const char **argv, 
 		    int argc,
@@ -63,13 +64,21 @@ class ElementRecorder: public Recorder
     ~ElementRecorder();
 
     int record(int commitTag, double timeStamp);
-    void restart(void);    
+    int restart(void);    
+
+    int setDomain(Domain &theDomain);
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, 
+		 FEM_ObjectBroker &theBroker);
     
   protected:
+
     
   private:	
+    int initialize(void);
+
     int numEle;
-    ID responseID;                 // integer element returns in setResponse
+    ID eleID;
 
     Response **theResponses;
 
@@ -82,6 +91,9 @@ class ElementRecorder: public Recorder
     double nextTimeStampToRecord;
 
     Vector *data;
+    bool initializationDone;
+    char **responseArgs;
+    int numArgs;
 };
 
 

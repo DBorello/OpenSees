@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2004-11-13 00:57:22 $
+// $Revision: 1.11 $
+// $Date: 2004-11-24 22:42:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -43,29 +43,38 @@
 class Domain;
 class FE_Datastore;
 class DataOutputHandler;
+class Node;
 
 class NodeRecorder: public Recorder
 {
   public:
-  NodeRecorder(const ID &theDof, 
-	       const ID &theNodes, 
-	       int sensitivity,
-	       const char *dataToStore,
-	       Domain &theDomain,
-	       DataOutputHandler &theOutputHandler,
-	       double deltaT = 0.0,
-	       int startFlag = 0); 
+    NodeRecorder();
+    NodeRecorder(const ID &theDof, 
+		 const ID &theNodes, 
+		 int sensitivity,
+		 const char *dataToStore,
+		 Domain &theDomain,
+		 DataOutputHandler &theOutputHandler,
+		 double deltaT = 0.0,
+		 int startFlag = 0); 
     
     ~NodeRecorder();
 
     int record(int commitTag, double timeStamp);
-    void restart(void);    
-    
+
+    int setDomain(Domain &theDomain);
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, 
+		 FEM_ObjectBroker &theBroker);
+
   protected:
-    
+
   private:	
+    int initialize(void);
+
     ID *theDofs;
-    ID *theNodes;
+    ID *theNodalTags;
+    Node **theNodes;
     Vector response;
 
     Domain *theDomain;
@@ -82,6 +91,9 @@ class NodeRecorder: public Recorder
     // AddingSensitivity:BEGIN //////////////////////////////
     int sensitivity;
     // AddingSensitivity:END ////////////////////////////////
+
+    bool initializationDone;
+    int numValidNodes;
 };
 
 #endif
