@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-19 06:00:28 $
+// $Revision: 1.2 $
+// $Date: 2002-06-07 00:15:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/R3vectors.cpp,v $
 
 // Ed "C++" Love
@@ -29,8 +29,7 @@
 #include <Matrix.h> 
 #include <math.h>
 
-#define sign(a) ( (a)>0 ? 1:-1 )
-
+//#define sign(a) ( (a)>0 ? 1:-1 )
 
 double  LovelyInnerProduct( const Vector &v, const Vector &w )
 {
@@ -68,7 +67,7 @@ Vector  LovelyCrossProduct( const Vector &v, const Vector &w )
 }
 
 
-Vector  LovelyEig( const Matrix &M ) 
+Vector LovelyEig( const Matrix &M ) 
 {
 //.... compute eigenvalues and vectors for a 3 x 3 symmetric matrix
 //
@@ -104,7 +103,6 @@ Vector  LovelyEig( const Matrix &M )
 
   static const double tol = 1.0e-08 ;
  
-
 // set v = M 
   v = M ;
 
@@ -115,7 +113,6 @@ Vector  LovelyEig( const Matrix &M )
   a(2) = v(2,0) ;
 
   for ( i = 0; i < 3; i++ ) {
-
        d(i) = v(i,i) ;
        b(i) = d(i) ;
        z(i) = 0.0 ;
@@ -127,29 +124,26 @@ Vector  LovelyEig( const Matrix &M )
 
   } //end for i
 
-
    rot = 0 ;
 
    its = 0 ;
 
    sm = fabs(a(0)) + fabs(a(1)) + fabs(a(2)) ;
 
-
    while ( sm > tol ) {
-
-//.... set convergence test and threshold
+     //.... set convergence test and threshold
 
       if ( its < 3 ) 
         thresh = 0.011*sm ;
       else
         thresh = 0.0 ;
       
-//.... perform sweeps for rotations
+      //.... perform sweeps for rotations
 
       for ( i = 0; i < 3; i++ ) {
 
-	j = ( (i+1)%3 + 1 ) - 1 ;
-	k = ( (j+1)%3 + 1 ) - 1 ;
+	j = (i+1)%3;
+	k = (j+1)%3;
 
 	aij  = a(i) ;
 	g    = 100.0 * fabs(aij) ;
@@ -164,9 +158,14 @@ Vector  LovelyEig( const Matrix &M )
 
                 if( fabs(h)+g == fabs(h) )
 		   t = aij / h ;
-                else 
-		   t = 2.0*sign(h/aij) / 
-                          ( fabs(h/aij) + sqrt(4.0+(h*h/aij/aij)) ) ;
+                else {
+		  // t = 2.0 * sign(h/aij) / ( fabs(h/aij) + sqrt(4.0+(h*h/aij/aij)));
+		  double hDIVaij = h/aij;
+		  if (hDIVaij > 0.0) 
+		    t = 2.0 / (  hDIVaij + sqrt(4.0+(hDIVaij * hDIVaij)));
+		  else
+		   t = - 2.0 / (-hDIVaij + sqrt(4.0+(hDIVaij * hDIVaij)));
+		}
 
 //.... set rotation parameters
 
@@ -210,7 +209,6 @@ Vector  LovelyEig( const Matrix &M )
       }  // end for i
 
 //.... update the diagonal terms
-
 	for ( i = 0; i < 3; i++ ) {
 	   b(i) = b(i) + z(i) ;
 	   d(i) = b(i) ;
@@ -221,9 +219,7 @@ Vector  LovelyEig( const Matrix &M )
 
       sm = fabs(a(0)) + fabs(a(1)) + fabs(a(2)) ;
 
-
    } //end while sm 
-
 
    return d ;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:55 $
+// $Revision: 1.3 $
+// $Date: 2002-06-07 00:15:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/TclShellCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -90,7 +90,7 @@ TclModelBuilder_addShellMITC4(ClientData clientData, Tcl_Interp *interp,  int ar
   }
 
   SectionForceDeformation *theSection = theTclBuilder->getSection(matID);      
-      
+
   if (theSection == 0) {
     cerr << "WARNING section not found\n";
     cerr << "section tag: " << matID;
