@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2002-04-06 20:59:22 $
+// $Revision: 1.27 $
+// $Date: 2002-04-07 18:14:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -94,6 +94,7 @@
 #define MAT_TAG_CableMaterial          13
 #define MAT_TAG_ENTMaterial				14
 #define MAT_TAG_Penalty					15
+#define MAT_TAG_MinMax					16
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
@@ -122,7 +123,7 @@
 #define MAT_TAG_DrainPinch1			2005
 #define MAT_TAG_DrainPinch2			2006
 
-#define MAT_TAG_Clough1	202
+#define MAT_TAG_Clough1	201
 #define MAT_TAG_Clough2	202
 #define MAT_TAG_Pinch1	203
 #define MAT_TAG_BiLinear	204
