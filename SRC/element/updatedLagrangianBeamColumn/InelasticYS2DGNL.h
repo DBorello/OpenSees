@@ -5,6 +5,8 @@
 #include <YieldSurface_BC.h>
 #include <Vector.h>
 
+#define DISPLAY_YS 2745
+
 /**Inelastic Element - concentrated hinge model, Fi - Fj interaction
    at each ends using yield surfaces
   *@author rkaul
@@ -32,12 +34,20 @@ class InelasticYS2DGNL : public UpdatedLagrangianBeam2D
   //    void createView(char *title, WindowManager *theWM, char displaytype);
 
   void createView(char *title, double scale, int x, int y, int cx, int cy, char displaytype = 'l');
-  
+
+	virtual Response *setResponse(const char **argv, int argc,
+									Information &eleInformation);
+	virtual int getResponse(int responseID, Information &eleInformation);
+
  protected:
   virtual void getLocalStiff(Matrix &K) = 0;
   virtual void getLocalMass(Matrix &M);
   
-private:
+protected:
+  int  computeTrueEleForce(Vector &trial_force);
+  void checkSpecialCases(void);
+ 
+private: 
   void forceBalance(Vector &force, int algo);
   void plastifyOneEnd(int end, YieldSurface_BC *ys,  Vector &trial_force,
 		      Vector &incrDisp, Matrix &K, Vector &total_force, int algo);
@@ -66,7 +76,7 @@ private:
   char displayType;
   Renderer *pView;
   ColorMap *theMap;
-  
+
   bool end1Plastify, end2Plastify;
   bool end1Plastify_hist, end2Plastify_hist;
 

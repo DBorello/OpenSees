@@ -1,6 +1,6 @@
 // Inelastic2DYS03.cpp
 //////////////////////////////////////////////////////////////////////
-#include <math.h>
+
 #include "Inelastic2DYS03.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -40,6 +40,7 @@ void Inelastic2DYS03::getLocalStiff(Matrix &K)
     opserr << ndisp;
     // opserr << ndisp_hist;
     // opserr << ndisp_inc;
+    opserr << "\a";
 
 	if(ndisp(2)*ndisp(5) < 0  || fabs(ndisp(2)*ndisp(5)) < 1e-10) {	//if single curvature
 		L1 = L;
@@ -111,9 +112,9 @@ int Inelastic2DYS03::commitState()
 {
 	// first let the super classes do their stuff
     this->InelasticYS2DGNL::commitState();
-    // now set the commit natural disps
-    ndisp_hist = ndisp;
-    return 0;
+	// now set the commit natural disps
+	ndisp_hist = ndisp;
+	return 0;
 
 }
 
