@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:02 $
+// $Revision: 1.3 $
+// $Date: 2003-08-29 07:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,10 @@
 #include <DomainDecompositionAnalysis.h>
 #include <PartitionedModelBuilder.h>
 
+#include <EquiSolnAlgo.h>
+#include <IncrementalIntegrator.h>
+#include <LinearSOE.h>
+
 #include <ArrayOfTaggedObjects.h>
 #include <ShadowActorSubdomain.h>
 
@@ -46,25 +50,32 @@ ActorSubdomain::ActorSubdomain(Channel &theChannel,
 :Subdomain(0), Actor(theChannel,theBroker,0),
  msgData(4),lastResponse(0)
 {
-    // does nothing
+  // does nothing
 }
     
 ActorSubdomain::~ActorSubdomain()
 {
     // does nothing
+    opserr << "ActorSubdomain DIED: " << endln;
+
 }
 
 
 int
 ActorSubdomain::run(void)
 {
-    Vector theVect(2);
+    Vector theVect(4);
     bool exitYet = false;
+    opserr << "ActorSubdomain running: " << endln;
+
     while (exitYet == false) {
+
   	this->recvID(msgData);
 	int action = msgData(0);
 
-	int theType, tag, dbTag, loadPatternTag;
+	//		opserr << "ACTORSUBDOMAIN: " << action << endln;
+	
+	int theType, theOtherType, tag, dbTag, loadPatternTag;
 	Element *theEle;
 	Node *theNod;
 	SP_Constraint *theSP;
@@ -76,9 +87,25 @@ ActorSubdomain::run(void)
 	const Matrix *theMatrix;
 	const Vector *theVector;
 	PartitionedModelBuilder *theBuilder;
+	IncrementalIntegrator *theIntegrator;
+	EquiSolnAlgo *theAlgorithm;
+	LinearSOE *theSOE;
+
 	const ID *theID;
 	
 	switch (action) {
+
+	  case ShadowActorSubdomain_setTag:
+	    tag = msgData(1); // subdomain tag
+	    this->setTag(tag);
+
+	    break;
+
+	  case ShadowActorSubdomain_newStep:
+	    this->recvVector(theVect);
+	    this->newStep(theVect(0));
+
+	    break;
 
 	  case ShadowActorSubdomain_buildSubdomain:
 	    theType = msgData(1);
@@ -123,6 +150,17 @@ ActorSubdomain::run(void)
 		    msgData(0) = -1;
 	    } else
 		msgData(0) = -1;
+
+	    /*
+	    this->recvID(msgData);	    
+	    opserr << "ActorSubdomain::addElement() : " << msgData;
+	    
+	    msgData(0) = 1;
+	    msgData(1) = 2;
+	    msgData(2) = 3;
+	    msgData(3) = 4;
+	    this->sendID(msgData);	    
+	    */
 
 	    break;
 
@@ -395,6 +433,13 @@ ActorSubdomain::run(void)
 
 	    break;	    	    	    	    
 
+
+	  case ShadowActorSubdomain_Print:
+	    this->Print(opserr);
+	    this->sendID(msgData);
+
+	    break;	    	    	    	    
+
 	  case ShadowActorSubdomain_applyLoad:
 	    this->recvVector(theVect);	    
 	    this->applyLoad(theVect(0));
@@ -433,6 +478,7 @@ ActorSubdomain::run(void)
 	    this->revertToStart();
 	    break;	    	    
 	    
+
 	  case ShadowActorSubdomain_setDomainDecompAnalysis:
 	    theType = msgData(1);
 	    theDDAnalysis = 
@@ -447,6 +493,42 @@ ActorSubdomain::run(void)
 	    
 	    break;
 
+	case ShadowActorSubdomain_setAnalysisAlgorithm:
+	  theType = msgData(1);
+	  theAlgorithm = theBroker->getNewEquiSolnAlgo(theType);
+	  if (theAlgorithm != 0) {
+	    this->recvObject(*theAlgorithm);
+	    this->setAnalysisAlgorithm(*theAlgorithm);
+	    msgData(0) = 0;
+	  } else
+	    msgData(0) = -1;
+	    
+	  break;
+	  
+	case ShadowActorSubdomain_setAnalysisIntegrator:
+	  theType = msgData(1);
+	  theIntegrator = theBroker->getNewIncrementalIntegrator(theType);
+	  if (theIntegrator != 0) {
+	    this->recvObject(*theAlgorithm);
+	    this->setAnalysisIntegrator(*theIntegrator);
+	    msgData(0) = 0;
+	  } else
+	    msgData(0) = -1;
+	    
+	  break;
+
+	case ShadowActorSubdomain_setAnalysisLinearSOE:
+	  theType = msgData(1);
+	  theOtherType = msgData(2);
+	  theSOE = theBroker->getNewLinearSOE(theType, theOtherType);
+	  if (theSOE != 0) {
+	    this->recvObject(*theAlgorithm);
+	    this->setAnalysisLinearSOE(*theSOE);
+	    msgData(0) = 0;
+	  } else
+	    msgData(0) = -1;
+	    
+	  break;
 	    
 	  case ShadowActorSubdomain_invokeChangeOnAnalysis:
 	    if (this->hasDomainChanged() == true)

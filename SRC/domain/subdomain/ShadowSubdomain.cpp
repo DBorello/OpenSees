@@ -18,15 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:02 $
+// $Revision: 1.3 $
+// $Date: 2003-08-29 07:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
-                                                                        
-// File: ~/domain/subdomain/ShadowSubdomain.C
-// 
 // Written: fmk 
-// Created: 11/96
 // Revision: A
 //
 // Description: This file contains the class definition for ShadowSubdomain.
@@ -58,11 +54,13 @@
 #include <FE_Element.h>
 #include <PartitionedModelBuilder.h>
 
+#include <EquiSolnAlgo.h>
+#include <IncrementalIntegrator.h>
+#include <LinearSOE.h>
 
-#include <remote.h>
+#include <FE_Element.h>
+
 #include <ShadowActorSubdomain.h>
-
-static char *Program = remoteShadowSubdomain;
 
 int ShadowSubdomain::count = 0; // MHS
 int ShadowSubdomain::numShadowSubdomains = 0;
@@ -70,24 +68,62 @@ ShadowSubdomain **ShadowSubdomain::theShadowSubdomains = 0;
 
 
 ShadowSubdomain::ShadowSubdomain(int tag, 
-		    Channel &the_Channel,
-		    MachineBroker &theMachineBroker,
-		    FEM_ObjectBroker &theObjectBroker,
-		    int compDemand,
-		    bool startShadow)
-:Shadow(Program, the_Channel,theObjectBroker,
-	theMachineBroker,compDemand, startShadow),
-	Subdomain(tag),
-	msgData(4),
-	theElements(0,128),
-	theNodes(0,128),
-	theExternalNodes(0,128), 
-	theLoadCases(0,128),
-	numDOF(0),numElements(0),numNodes(0),numExternalNodes(0),
-	numSPs(0),numMPs(0), buildRemote(false), gotRemoteData(false), 
-	theFEele(0),
-	theVector(0), theMatrix(0)
+				 MachineBroker &theMachineBroker,
+				 FEM_ObjectBroker &theObjectBroker)
+  :Shadow(ACTOR_TAGS_SUBDOMAIN, theObjectBroker, theMachineBroker, 0),
+	  
+   Subdomain(tag),
+   msgData(4),
+   theElements(0,128),
+   theNodes(0,128),
+   theExternalNodes(0,128), 
+   theLoadCases(0,128),
+   numDOF(0),numElements(0),numNodes(0),numExternalNodes(0),
+   numSPs(0),numMPs(0), buildRemote(false), gotRemoteData(false), 
+   theFEele(0),
+   theVector(0), theMatrix(0)
+
 {
+  
+  numShadowSubdomains++;
+
+  ShadowSubdomain **theCopy = new ShadowSubdomain *[numShadowSubdomains];
+
+  for (int i = 0; i < numShadowSubdomains-1; i++)
+    theCopy[i] = theShadowSubdomains[i];
+
+  if (theShadowSubdomains != 0)
+    delete [] theShadowSubdomains;
+
+  theCopy[numShadowSubdomains-1] = this;
+
+  theShadowSubdomains = theCopy;
+
+  // does nothing
+  numLoadPatterns = 0;
+
+  msgData(0) = ShadowActorSubdomain_setTag;
+  msgData(1) = tag;
+  this->sendID(msgData);
+}
+
+
+ShadowSubdomain::ShadowSubdomain(int tag, 
+				 Channel &the_Channel,
+				 FEM_ObjectBroker &theObjectBroker)
+  :Shadow(the_Channel, theObjectBroker),
+   Subdomain(tag),
+   msgData(4),
+   theElements(0,128),
+   theNodes(0,128),
+   theExternalNodes(0,128), 
+   theLoadCases(0,128),
+   numDOF(0),numElements(0),numNodes(0),numExternalNodes(0),
+   numSPs(0),numMPs(0), buildRemote(false), gotRemoteData(false), 
+   theFEele(0),
+   theVector(0), theMatrix(0)
+{
+
   numShadowSubdomains++;
 
   ShadowSubdomain **theCopy = new ShadowSubdomain *[numShadowSubdomains];
@@ -180,6 +216,16 @@ ShadowSubdomain::addElement(Element *theEle)
     theElements[numElements] = tag;
     numElements++;
     this->domainChange();
+
+    /*
+    msgData(0) = 5;
+    msgData(1) = 6;
+    msgData(2) = 7;
+    msgData(3) = 8;
+    this->sendID(msgData);  
+    this->recvID(msgData);  
+    opserr << "ShadowSubdomain::addElement() : " << msgData;
+    */
 
     delete theEle;
     
@@ -281,6 +327,7 @@ ShadowSubdomain::addLoadPattern(LoadPattern *thePattern)
     this->sendID(msgData);
     this->sendObject(*thePattern);
     this->domainChange();
+
     this->Subdomain::addLoadPattern(thePattern);
     numLoadPatterns++;
     return true;    
@@ -294,17 +341,23 @@ ShadowSubdomain::addSP_Constraint(SP_Constraint *theSP, int loadPattern)
 #ifdef _G3DEBUG
 	// do all the checking stuff
 #endif
-    msgData(0) = ShadowActorSubdomain_addSP_ConstraintToPattern;
-    msgData(1) = theSP->getClassTag();
-    msgData(2) = theSP->getDbTag();
-    msgData(3) = loadPattern;
-    this->sendID(msgData);
-    this->sendObject(*theSP);
-    numSPs++;    
-    this->domainChange();
-    
-    this->Subdomain::addSP_Constraint(theSP, loadPattern);
-    return true;    
+
+  LoadPattern *thePattern = this->Subdomain::getLoadPattern(loadPattern);
+  if ((thePattern == 0) || (thePattern->addSP_Constraint(theSP) == false)) {
+    opserr << "ShadowSubdomain::addSP_Constraint() - could not add SP_Constraint: " << *theSP;
+    return false;
+  }
+
+  msgData(0) = ShadowActorSubdomain_addSP_ConstraintToPattern;
+  msgData(1) = theSP->getClassTag();
+  msgData(2) = theSP->getDbTag();
+  msgData(3) = loadPattern;
+  this->sendID(msgData);
+  this->sendObject(*theSP);
+  numSPs++;    
+  this->domainChange();
+  
+  return true;    
 }
 
 bool 
@@ -313,16 +366,20 @@ ShadowSubdomain::addNodalLoad(NodalLoad *theLoad, int loadPattern)
 #ifdef _G3DEBUG
     // do all the checking stuff
 #endif
+  LoadPattern *thePattern = this->Subdomain::getLoadPattern(loadPattern);
+  if ((thePattern == 0) || (thePattern->addNodalLoad(theLoad) == false)) {
+    opserr << "ShadowSubdomain::addNodalLoad() - could not add the load: " << *theLoad;
+    return false;
+  }
 
-    msgData(0) = ShadowActorSubdomain_addNodalLoadToPattern;
-    msgData(1) = theLoad->getClassTag();
-    msgData(2) = theLoad->getDbTag();
-    msgData(3) = loadPattern;
-    this->sendID(msgData);
-    this->sendObject(*theLoad);
-
-    this->Subdomain::addNodalLoad(theLoad, loadPattern);
-    return true;    
+  msgData(0) = ShadowActorSubdomain_addNodalLoadToPattern;
+  msgData(1) = theLoad->getClassTag();
+  msgData(2) = theLoad->getDbTag();
+  msgData(3) = loadPattern;
+  this->sendID(msgData);
+  this->sendObject(*theLoad);
+  
+  return true;    
 }
 
 bool 
@@ -331,16 +388,19 @@ ShadowSubdomain::addElementalLoad(ElementalLoad *theLoad, int loadPattern)
 #ifdef _G3DEBUG
 	// do all the checking stuff
 #endif
+  LoadPattern *thePattern = this->Subdomain::getLoadPattern(loadPattern);
+  if ((thePattern == 0) || (thePattern->addElementalLoad(theLoad) == false)) {
+    opserr << "ShadowSubdomain::addElementalLoad() - could not add the load: " << *theLoad;
+    return false;
+  }
+  msgData(0) = ShadowActorSubdomain_addElementalLoadToPattern;
+  msgData(1) = theLoad->getClassTag();
+  msgData(2) = theLoad->getDbTag();
+  msgData(3) = loadPattern;
+  this->sendID(msgData);
+  this->sendObject(*theLoad);
 
-    msgData(0) = ShadowActorSubdomain_addElementalLoadToPattern;
-    msgData(1) = theLoad->getClassTag();
-    msgData(2) = theLoad->getDbTag();
-    msgData(3) = loadPattern;
-    this->sendID(msgData);
-    this->sendObject(*theLoad);
-
-    this->Subdomain::addElementalLoad(theLoad, loadPattern);
-    return true;    
+  return true;    
 }
 
     
@@ -661,12 +721,15 @@ ShadowSubdomain::getNodeGraph(void)
 void 
 ShadowSubdomain::applyLoad(double time)
 {
+  DomainDecompositionAnalysis *theDDA = this->getDDAnalysis();
+  if (theDDA != 0 && theDDA->doesIndependentAnalysis() != true) {
     msgData(0) = ShadowActorSubdomain_applyLoad;
-    Vector data(2);
+    Vector data(4);
     data(0) = time;
-    
+  
     this->sendID(msgData);
     this->sendVector(data);    
+  }
 }
 
 
@@ -715,33 +778,44 @@ ShadowSubdomain::setLoadConstant(void)
 int
 ShadowSubdomain::update(void)
 {
-  msgData(0) =  ShadowActorSubdomain_update;
-  this->sendID(msgData);
+  DomainDecompositionAnalysis *theDDA = this->getDDAnalysis();
+  if (theDDA != 0 && theDDA->doesIndependentAnalysis() != true) {
+    msgData(0) =  ShadowActorSubdomain_update;
+    this->sendID(msgData);
+  }
   return 0;
 }
 
 int
 ShadowSubdomain::commit(void)
 {
+  DomainDecompositionAnalysis *theDDA = this->getDDAnalysis();
+  if (theDDA != 0 && theDDA->doesIndependentAnalysis() != true) {
     msgData(0) = ShadowActorSubdomain_commit;
     this->sendID(msgData);
     return 0;
+  }
+  return 0;
 }
 
 int
 ShadowSubdomain::revertToLastCommit(void)
 {
+  DomainDecompositionAnalysis *theDDA = this->getDDAnalysis();
+  if (theDDA != 0 && theDDA->doesIndependentAnalysis() != true) {
     msgData(0) = ShadowActorSubdomain_revertToLastCommit;
     this->sendID(msgData);
     return 0;
+  }
+  return 0;
 }
 
 int
 ShadowSubdomain::revertToStart(void)
 {
-    msgData(0) = ShadowActorSubdomain_revertToStart;
-    this->sendID(msgData);
-    return 0;
+  msgData(0) = ShadowActorSubdomain_revertToStart;
+  this->sendID(msgData);
+  return 0;
 }
 
 
@@ -751,10 +825,47 @@ ShadowSubdomain::setDomainDecompAnalysis(DomainDecompositionAnalysis &theDDAnaly
 {
     msgData(0) = ShadowActorSubdomain_setDomainDecompAnalysis;
     msgData(1) = theDDAnalysis.getClassTag();
-
+    
     this->sendID(msgData);
     this->sendObject(theDDAnalysis);
+
+    this->Subdomain::setDomainDecompAnalysis(theDDAnalysis);
 }
+
+int 
+ShadowSubdomain::setAnalysisAlgorithm(EquiSolnAlgo &theAlgorithm)
+{
+    msgData(0) = ShadowActorSubdomain_setAnalysisAlgorithm;
+    msgData(1) = theAlgorithm.getClassTag();
+    
+    this->sendID(msgData);
+    this->sendObject(theAlgorithm);
+    return 0;
+}
+
+int 
+ShadowSubdomain::setAnalysisIntegrator(IncrementalIntegrator &theIntegrator)
+{
+    msgData(0) = ShadowActorSubdomain_setAnalysisIntegrator;
+    msgData(1) = theIntegrator.getClassTag();
+    
+    this->sendID(msgData);
+    this->sendObject(theIntegrator);
+    return 0;
+}
+
+int 
+ShadowSubdomain::setAnalysisLinearSOE(LinearSOE &theSOE)
+{
+    msgData(0) = ShadowActorSubdomain_setAnalysisLinearSOE;
+    msgData(1) = theSOE.getClassTag();
+    
+    this->sendID(msgData);
+    this->sendObject(theSOE);
+    return 0;
+}
+
+
 
 int
 ShadowSubdomain::invokeChangeOnAnalysis(void)
@@ -790,8 +901,8 @@ int
 ShadowSubdomain::getNumExternalNodes(void) const    
 {
   if (gotRemoteData == false && buildRemote == true) {    
-      opserr << "WARNING: ShadowSubdomain::getNumExternalNodes()";
-      opserr << " - not yet received the data\n";
+    opserr << "WARNING: ShadowSubdomain::getNumExternalNodes()";
+    opserr << " - not yet received the data\n";
   }
   
   return numExternalNodes;
@@ -932,35 +1043,58 @@ ShadowSubdomain::getLastExternalSysResponse(void)
 int 
 ShadowSubdomain::computeNodalResponse(void)    
 {
-  FE_Element *theFePtr = this->getFE_ElementPtr();
-  
-    const Vector &lastChange = theFePtr->getLastResponse();
-    msgData(0) =  ShadowActorSubdomain_computeNodalResponse;
-    msgData(1) = lastChange.Size();
-    if (numDOF != msgData(1)) {
+
+  DomainDecompositionAnalysis *theDDA = this->getDDAnalysis();
+  if (theDDA != 0 && theDDA->doesIndependentAnalysis() != true) {
+    FE_Element *theFePtr = this->getFE_ElementPtr();
+
+    if (theFePtr != 0) {
+
+      const Vector &lastChange = theFePtr->getLastResponse();
+      msgData(0) =  ShadowActorSubdomain_computeNodalResponse;
+      msgData(1) = lastChange.Size();
+      if (numDOF != msgData(1)) {
 	opserr << "ShadowSubdomain::update(void)";
 	opserr << " - numDOF " << numDOF << " and size of Vector ";
 	opserr << msgData(1) << "do not agree?\n";
 	numDOF = msgData(1);
+      }
+      this->sendID(msgData);
+      Vector theChange(lastChange);
+      this->sendVector(theChange);
     }
-    this->sendID(msgData);
-    Vector theChange(lastChange);
-    this->sendVector(theChange);
-
-    return 0;
+  }
+  
+  return 0;
 }
 
+
+int 
+ShadowSubdomain::newStep(double dT)    
+{
+  opserr << "ShadowSubdomain::newStep(double dT) -START\n";
+    msgData(0) =  ShadowActorSubdomain_newStep;
+    this->sendID(msgData);
+    static Vector timeStep(4);
+    timeStep(0) = dT;
+    this->sendVector(timeStep);
+  opserr << "ShadowSubdomain::newStep(double dT) -FINISH\n";
+    return 0;
+}
 
 
 double
 ShadowSubdomain::getCost(void)    
 {
+  /*
     msgData(0) = ShadowActorSubdomain_getCost;
     
     this->sendID(msgData);
     Vector cost(2);
     this->recvVector(cost);
     return cost(0);
+  */
+  return 0.0;
 }
 
 
@@ -985,8 +1119,10 @@ ShadowSubdomain::recvSelf(int cTag, Channel &the_Channel,
 void 
 ShadowSubdomain::Print(OPS_Stream &s, int flag)
 {
-    opserr << "ShadowSubdomain::Print() ";
-    opserr << " - NOT YET IMPLEMENTED\n";
+    msgData(0) = ShadowActorSubdomain_Print;
+    
+    this->sendID(msgData);
+    this->recvID(msgData);
 }
 
 

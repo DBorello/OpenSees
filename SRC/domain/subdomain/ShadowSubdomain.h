@@ -18,18 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:02 $
+// $Revision: 1.3 $
+// $Date: 2003-08-29 07:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
 #ifndef ShadowSubdomain_h
 #define ShadowSubdomain_h
 
-// File: ~/domain/subdomain/ShadowSubdomain.h
-// 
 // Written: fmk 
-// Created: 12/96
 // Revision: A
 //
 // Description: This file contains the class definition for ShadowSubdomain.
@@ -46,12 +43,13 @@
 class ShadowSubdomain: public Shadow, public Subdomain
 {
   public:
-    ShadowSubdomain(int tag, 
-		    Channel &theChannel,
+    ShadowSubdomain(int tag,
 		    MachineBroker &theMachineBroker,
-		    FEM_ObjectBroker &theObjectBroker,
-		    int compDemand =0,
-		    bool startShadow = true);
+		    FEM_ObjectBroker &theObjectBroker);
+
+    ShadowSubdomain(int tag, 
+		    Channel &theChannel, 
+		    FEM_ObjectBroker &theObjectBroker);
 
     virtual  ~ShadowSubdomain();    
 
@@ -112,6 +110,9 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual  int revertToStart(void);    
 
     virtual void setDomainDecompAnalysis(DomainDecompositionAnalysis &theAnalysis);
+    virtual int setAnalysisAlgorithm(EquiSolnAlgo &theAlgorithm);
+    virtual int setAnalysisIntegrator(IncrementalIntegrator &theIntegrator);
+    virtual int setAnalysisLinearSOE(LinearSOE &theSOE);
     virtual int  invokeChangeOnAnalysis(void);
     virtual void clearAnalysis(void);
     
@@ -127,6 +128,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
 
     const Vector &getLastExternalSysResponse(void);
     virtual int computeNodalResponse(void);    
+    virtual int newStep(double deltaT);
 
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 
@@ -167,7 +169,7 @@ class ShadowSubdomain: public Shadow, public Subdomain
     static char *shadowSubdomainProgram;
 
     static int count;  // MHS
-      static int numShadowSubdomains;
+    static int numShadowSubdomains;
     static ShadowSubdomain **theShadowSubdomains;
 };
 

@@ -18,18 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-08-29 07:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.h,v $
                                                                         
                                                                         
 #ifndef ActorSubdomain_h
 #define ActorSubdomain_h
 
-// File: ~/domain/subdomain/ActorSubdomain.h
-// 
 // Written: fmk 
-// Created: 11/96
 // Revision: A
 //
 // Description: This file contains the class definition for ActorSubdomain.

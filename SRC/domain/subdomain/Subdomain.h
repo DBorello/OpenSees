@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:02 $
+// $Revision: 1.5 $
+// $Date: 2003-08-29 07:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.h,v $
                                                                         
                                                                         
@@ -49,9 +49,12 @@ class ID;
 class TaggedObjectStorage;
 class DomainDecompositionAnalysis;
 class PartitionedModelBuilder;
+class EquiSolnAlgo;
+class IncrementalIntegrator;
+class LinearSOE;
+class FE_Element;
 
 #include <SubdomainNodIter.h>
-class FE_Element;
 
 class Subdomain: public Element, public Domain
 {
@@ -84,6 +87,7 @@ class Subdomain: public Element, public Domain
     virtual int revertToLastCommit(void);    
     virtual int revertToStart(void);        
     virtual int update(void);
+    virtual int update(double newTime, double dT);
     
     virtual  void Print(OPS_Stream &s, int flag =0);
     
@@ -93,6 +97,9 @@ class Subdomain: public Element, public Domain
     virtual bool addExternalNode(Node *);
 
     virtual void setDomainDecompAnalysis(DomainDecompositionAnalysis &theAnalysis);
+    virtual int setAnalysisAlgorithm(EquiSolnAlgo &theAlgorithm);
+    virtual int setAnalysisIntegrator(IncrementalIntegrator &theIntegrator);
+    virtual int setAnalysisLinearSOE(LinearSOE &theSOE);
     virtual int invokeChangeOnAnalysis(void);
     
     // Element methods which must be written
@@ -103,7 +110,7 @@ class Subdomain: public Element, public Domain
     virtual int commitState(void);    
     
     virtual const Matrix &getTangentStiff(void);
-    virtual const Matrix &getSecantStiff(void);    
+    virtual const Matrix &getInitialStiff(void);    
     virtual const Matrix &getDamp(void);    
     virtual const Matrix &getMass(void);    
 
@@ -124,6 +131,7 @@ class Subdomain: public Element, public Domain
     virtual const Vector &getLastExternalSysResponse(void);
     virtual int computeNodalResponse(void);    
     virtual int newStep(double deltaT);
+    virtual bool doesIndependentAnalysis(void);
 
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, 
@@ -142,6 +150,9 @@ class Subdomain: public Element, public Domain
     FE_Element *getFE_ElementPtr(void);
     TaggedObjectStorage  *internalNodes;
     TaggedObjectStorage  *externalNodes;    
+
+    DomainDecompositionAnalysis *getDDAnalysis(void);
+
     
   private:
     double realCost;

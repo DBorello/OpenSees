@@ -18,15 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:02 $
+// $Revision: 1.6 $
+// $Date: 2003-08-29 07:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
-                                                                        
-// File: ~/domain/subdomain/Subdomain.C
-// 
 // Written: fmk 
-// Created: 11/96
 // Revision: A
 // Revision: B 03/98 - revised to allow parallel model generation
 //
@@ -52,6 +48,12 @@
 #include <classTags.h>
 #include <PartitionedModelBuilder.h>
 #include <DOF_Group.h>
+
+#include <EquiSolnAlgo.h>
+#include <IncrementalIntegrator.h>
+#include <LinearSOE.h>
+
+#include <FE_Element.h>
 
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -329,6 +331,12 @@ Subdomain::update(void)
     return this->Domain::update();
 }
 
+int
+Subdomain::update(double newTime, double dT)
+{
+    return this->Domain::update(newTime, dT);
+}
+
 void
 Subdomain::Print(OPS_Stream &s, int flag)
 {
@@ -342,7 +350,6 @@ Subdomain::Print(OPS_Stream &s, int flag)
   s << "\nEXTERNAL NODE DATA: NumNodes: ";
   s << externalNodes->getNumComponents() << "\n"; 
   externalNodes->Print(s);
-
 
   this->Domain::Print(s);
   s << "\nEnd Subdomain Information\n";
@@ -374,6 +381,30 @@ Subdomain::setDomainDecompAnalysis(DomainDecompositionAnalysis &theNewAnalysis)
 //    this->Domain::setAnalysis(theNewAnalysis);
 }
 
+
+int 
+Subdomain::setAnalysisAlgorithm(EquiSolnAlgo &theAlgorithm)
+{
+  if (theAnalysis != 0)
+    return theAnalysis->setAlgorithm(theAlgorithm);
+  return 0;
+}
+
+int 
+Subdomain::setAnalysisIntegrator(IncrementalIntegrator &theIntegrator)
+{
+  if (theAnalysis != 0)
+    return theAnalysis->setIntegrator(theIntegrator);
+  return 0;
+}
+
+int 
+Subdomain::setAnalysisLinearSOE(LinearSOE &theSOE)
+{
+  if (theAnalysis != 0)
+    return theAnalysis->setLinearSOE(theSOE);
+  return 0;
+}
 
 int
 Subdomain::invokeChangeOnAnalysis(void)
@@ -460,7 +491,7 @@ Subdomain::getTangentStiff(void)
 }
 
 const Matrix &
-Subdomain::getSecantStiff(void)
+Subdomain::getInitialStiff(void)
 {
     opserr << "Subdomain::getSecantStiff(void)";
     opserr << "DOES NOT DO ANYTHING";
@@ -550,19 +581,19 @@ Subdomain::isSubdomain(void)
 int 
 Subdomain::computeTang(void)
 {   
-    if (theAnalysis != 0) {
-	theTimer.start();
-	
-	int res =0;
-	res = theAnalysis->formTangent();
-
-	return res;
-
-    } else {
-	opserr << "Subdomain::getcomputeTang() ";
-	opserr << " - no StaticCondensationAnalysis has been set\n";
-	return 0;
-    }
+  if (theAnalysis != 0) {
+    theTimer.start();
+    
+    int res =0;
+    res = theAnalysis->formTangent();
+    
+    return res;
+    
+  } else {
+    opserr << "Subdomain::getcomputeTang() ";
+    opserr << " - no StaticCondensationAnalysis has been set\n";
+    return 0;
+  }
 }
 
 
@@ -570,23 +601,23 @@ Subdomain::computeTang(void)
 int 
 Subdomain::computeResidual(void)
 {
-    if (theAnalysis != 0) {
-	theTimer.start();
-	
-	int res =0;
-	res = theAnalysis->formResidual();
-
-	theTimer.pause();
-	realCost += theTimer.getReal();
-	cpuCost += theTimer.getCPU();
-	pageCost += theTimer.getNumPageFaults();
-	
-	return res;
-
+  if (theAnalysis != 0) {
+    theTimer.start();
+    
+    int res =0;
+    res = theAnalysis->formResidual();
+    
+    theTimer.pause();
+    realCost += theTimer.getReal();
+    cpuCost += theTimer.getCPU();
+    pageCost += theTimer.getNumPageFaults();
+    
+    return res;
+    
     } else {
-	opserr << "Subdomain::computeResidual() ";
-	opserr << " - no StaticCondensationAnalysis has been set\n";
-	return 0;
+      opserr << "Subdomain::computeResidual() ";
+      opserr << " - no StaticCondensationAnalysis has been set\n";
+      return 0;
     }
 }
     
@@ -674,9 +705,22 @@ Subdomain::computeNodalResponse(void)
 int 
 Subdomain::newStep(double dT)
 {
-  theAnalysis->newStep(dT);
-  return -1;
+  if (theAnalysis != 0)
+    return theAnalysis->newStep(dT);
+
+  return 0;
 }
+
+
+bool
+Subdomain::doesIndependentAnalysis(void)
+{
+  if (theAnalysis != 0)
+    return theAnalysis->doesIndependentAnalysis();
+  else
+    return true;
+}
+
 
 int 
 Subdomain::sendSelf(int cTag, Channel &theChannel)
@@ -776,4 +820,8 @@ Subdomain::buildMap(void)
 }
 
 
-
+DomainDecompositionAnalysis *
+Subdomain::getDDAnalysis(void)
+{
+  return theAnalysis;
+}

@@ -18,22 +18,20 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-08-29 07:47:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowActorSubdomain.h,v $
                                                                         
                                                                         
-// File: ~/domain/subdomain/ShadowSubdomain.h
-// 
 // Written: fmk 
-// Created: 11/96
 // Revision: A
 //
 // Description: This file contains the integer codes used in ShadowSubdomain
 // and the ActorSubdomain classes.
 //
 // What: "@(#) ShadowSubdomain.h, revA"
-
+static const int ShadowActorSubdomain_setTag = 72;
+static const int ShadowActorSubdomain_newStep = 73;
 static const int ShadowActorSubdomain_buildSubdomain = 70;
 static const int ShadowActorSubdomain_getRemoteData = 71;
 static const int ShadowActorSubdomain_addElement = 1;
@@ -65,6 +63,9 @@ static const int ShadowActorSubdomain_revertToStart = 36;
 static const int ShadowActorSubdomain_setDomainDecompAnalysis = 40;
 static const int ShadowActorSubdomain_invokeChangeOnAnalysis = 41;
 static const int ShadowActorSubdomain_clearAnalysis = 42;
+static const int ShadowActorSubdomain_setAnalysisAlgorithm = 43;
+static const int ShadowActorSubdomain_setAnalysisIntegrator = 44;
+static const int ShadowActorSubdomain_setAnalysisLinearSOE = 45;
 static const int ShadowActorSubdomain_getTang = 53;
 static const int ShadowActorSubdomain_getResistingForce = 54;
 static const int ShadowActorSubdomain_computeTang = 55;
@@ -76,5 +77,6 @@ static const int ShadowActorSubdomain_setCommittedTime = 27;
 static const int ShadowActorSubdomain_DIE = 100;
 static const int ShadowActorSubdomain_getElementPtr = 90;
 static const int ShadowActorSubdomain_getNodePtr = 90;
+static const int ShadowActorSubdomain_Print = 150;
 
 
