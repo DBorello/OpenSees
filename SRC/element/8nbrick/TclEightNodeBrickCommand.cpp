@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-01-25 01:04:19 $
+// $Revision: 1.3 $
+// $Date: 2001-01-30 04:45:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/8nbrick/TclEightNodeBrickCommand.cpp,v $
                                                                         
                                                                         
@@ -122,9 +122,21 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
   }  
   
   // now create the EightNodeBrick and add it to the Domain
-  EightNodeBrick *theEle = new EightNodeBrick(eleID,nodes[0], nodes[1], nodes[2], nodes[3], nodes[4],
-                                              nodes[5],nodes[6], nodes[7], theMaterial, 
-					      bodyforces[0], bodyforces[1], bodyforces[2], massDensity, 0.0);
+  EightNodeBrick *theEle = new EightNodeBrick(eleID,
+	                                             nodes[0], 
+	                                             nodes[1], 
+																																													 nodes[2], 
+																																													 nodes[3], 
+																																													 nodes[4],
+                                              nodes[5],
+																																													 nodes[6], 
+																																													 nodes[7], 
+																																													 theMaterial, 
+                                   					      bodyforces[0], 
+																																													 bodyforces[1],
+																																													 bodyforces[2], 
+																																													 massDensity, 
+																																													 0.0);
 					      
   if (theEle == 0) {
       g3ErrorHandler->warning("command: element brick %d - out of memory", eleID);      
@@ -138,7 +150,7 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
       return TCL_ERROR;
   }
 
-  // if get here we have sucessfully created the node and added it to the domain
+  // if get here we have sucessfully created the element and added it to the domain
   return TCL_OK;
 }
 
