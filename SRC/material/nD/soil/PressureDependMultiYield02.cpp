@@ -1,5 +1,5 @@
-// $Revision: 1.3 $
-// $Date: 2004-08-26 20:39:13 $
+// $Revision: 1.4 $
+// $Date: 2004-08-27 18:31:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.cpp,v $
 
 // Written: ZHY
@@ -1136,14 +1136,14 @@ void PressureDependMultiYield02::getBackbone (Matrix & bb)
 
 		for (int i=1; i<=numOfSurfaces; i++) {
 			if (i==1) {
-				stress2 = committedSurfaces[i].size()*conHeig/sqrt(3);
+				stress2 = committedSurfaces[i].size()*conHeig/sqrt(3.0);
 				strain2 = stress2/shearModulus;
 				bb(1,k*2) = strain2; bb(1,k*2+1) = shearModulus;
 			} else {
 				stress1 = stress2; strain1 = strain2;
 				plastModulus = factor*committedSurfaces[i-1].modulus();
 				elast_plast = 2*shearModulus*plastModulus/(2*shearModulus+plastModulus);
-				stress2 = committedSurfaces[i].size()*conHeig/sqrt(3);
+				stress2 = committedSurfaces[i].size()*conHeig/sqrt(3.0);
 			    strain2 = 2*(stress2-stress1)/elast_plast + strain1;
 				gre = stress2/strain2;
                 bb(i,k*2) = strain2; bb(i,k*2+1) = gre;
@@ -1281,7 +1281,7 @@ void PressureDependMultiYield02::setUpSurfaces (double * gredu)
     double Mnys = 6.*sinPhi/(3.-sinPhi);
     double sinPhiPT = sin(phaseTransfAngle * pi/180.);
     stressRatioPT = 6.*sinPhiPT/(3.-sinPhiPT);
-		// tao = cohesion * sqrt(8)/3.
+		// tao = cohesion * sqrt(8.0)/3.
     residualPress = 2 * cohesion / Mnys;
     // a small nonzero residualPress for numerical purpose only
     if (residualPress < 0.01) residualPress = 0.01;
@@ -1355,7 +1355,7 @@ void PressureDependMultiYield02::setUpSurfaces (double * gredu)
       ratio2 = sqrt(3.) * stress2 / coneHeight;
       if (ratio1 <= stressRatioPT && ratio2 >= stressRatioPT) {
         double ratio = (ratio2 - stressRatioPT)/(ratio2 - ratio1);
-			  // gamma_oct = sqrt(6)/3*gamma12
+			  // gamma_oct = sqrt(6.0)/3*gamma12
         strainPTOcta = sqrt(6.)/3 * (strain2 - ratio * (strain2 - strain1));
 			}
 

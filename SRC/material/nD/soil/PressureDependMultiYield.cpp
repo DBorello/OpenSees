@@ -1,5 +1,5 @@
-// $Revision: 1.32 $
-// $Date: 2004-06-07 23:45:22 $
+// $Revision: 1.33 $
+// $Date: 2004-08-27 18:31:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -1243,7 +1243,7 @@ void PressureDependMultiYield::setUpSurfaces (double * gredu)
     double Mnys = 6.*sinPhi/(3.-sinPhi);
     double sinPhiPT = sin(phaseTransfAngle * pi/180.);
     stressRatioPT = 6.*sinPhiPT/(3.-sinPhiPT);
-		// tao = cohesion * sqrt(8)/3.
+		// tao = cohesion * sqrt(8.0)/3.
     residualPress = 2 * cohesion / Mnys;
     // a small nonzero residualPress for numerical purpose only
     if (residualPress < 0.01) residualPress = 0.01; 
@@ -1317,7 +1317,7 @@ void PressureDependMultiYield::setUpSurfaces (double * gredu)
       ratio2 = sqrt(3.) * stress2 / coneHeight;  
       if (ratio1 <= stressRatioPT && ratio2 >= stressRatioPT) {
         double ratio = (ratio2 - stressRatioPT)/(ratio2 - ratio1);
-			  // gamma_oct = sqrt(6)/3*gamma12
+			  // gamma_oct = sqrt(6.0)/3*gamma12
         strainPTOcta = sqrt(6.)/3 * (strain2 - ratio * (strain2 - strain1));
 			}
 
