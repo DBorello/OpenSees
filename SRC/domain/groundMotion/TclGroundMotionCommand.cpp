@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:32:41 $
+// $Revision: 1.4 $
+// $Date: 2005-04-01 20:34:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/TclGroundMotionCommand.cpp,v $
 
 // Written: fmk 
@@ -202,7 +202,6 @@ TclGroundMotionCommand(ClientData clientData, Tcl_Interp *interp,
 
 
   // now add the load pattern to the modelBuilder
-  opserr << *thePattern;
   if (theMotion != 0) {
     if (thePattern->addMotion(*theMotion, gMotionTag) < 0) {
       opserr << "WARNING could not add ground motion with tag " << gMotionTag;
