@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-07-31 01:30:02 $
+// $Revision: 1.7 $
+// $Date: 2001-08-08 20:21:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -33,6 +33,7 @@
 //			haukaas 06/01 (made part of official OpenSees)
 //			haukaas 06/22/01 ('numIter' taken away from OpenSeesGFunEvaluator)
 //			haukaas 06/22/01 (updated destructor)
+//			haukaas 08/08/01 (delete Tcl commands in destructor)
 //
 
 #include <stdlib.h>
@@ -150,6 +151,8 @@ int TclReliabilityModelBuilder_analyzeReliability(ClientData clientData, Tcl_Int
 // constructor: the constructor will add certain commands to the interpreter
 TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *interp)
 {
+  // Set the interpreter (the destructor needs it to delete commands)
+  theInterp = interp;
 
   // call Tcl_CreateCommand for class specific commands
   Tcl_CreateCommand(interp, "randomVariable",	TclReliabilityModelBuilder_addRandomVariable,
@@ -203,44 +206,52 @@ TclReliabilityBuilder::TclReliabilityBuilder(Domain &passedDomain, Tcl_Interp *i
 
 TclReliabilityBuilder::~TclReliabilityBuilder()
 {
+	// Delete objects
 	if (theReliabilityDomain != 0)
 		delete theReliabilityDomain;
-	
 	if (theGFunEvaluator != 0)
 		delete theGFunEvaluator;
-	
 	if (theSensitivityEvaluator != 0)
 		delete theSensitivityEvaluator;
-	
 	if (theStepSizeRule != 0)
 		delete theStepSizeRule;
-	
 	if (theSearchDirection != 0)
 		delete theSearchDirection;
-	
 	if (theXuTransformation != 0)
 		delete theXuTransformation;
-	
 	if (theRandomNumberGenerator != 0)
 		delete theRandomNumberGenerator;
-	
 	if (theFindDesignPoint != 0)
 		delete theFindDesignPoint;
-	
 	if (theFindCurvatures != 0)
 		delete theFindCurvatures;
-	
 	if (theFORMAnalysis != 0)
 		delete theFORMAnalysis;
-	
 	if (theSORMAnalysis != 0)
 		delete theSORMAnalysis;
-	
 	if (theSimulationAnalysis != 0)
 		delete theSimulationAnalysis;
-	
 	if (theSystemAnalysis != 0)
 		delete theSystemAnalysis;
+
+	// Delete commands
+	Tcl_DeleteCommand(theInterp, "randomVariable");
+	Tcl_DeleteCommand(theInterp, "correlate");
+	Tcl_DeleteCommand(theInterp, "limitState");
+	Tcl_DeleteCommand(theInterp, "randomVariablePositioner");
+	Tcl_DeleteCommand(theInterp, "findDesignPoint");
+	Tcl_DeleteCommand(theInterp, "gFunEvaluator");
+	Tcl_DeleteCommand(theInterp, "sensitivityEvaluator");
+	Tcl_DeleteCommand(theInterp, "stepSizeRule");
+	Tcl_DeleteCommand(theInterp, "searchDirection");
+	Tcl_DeleteCommand(theInterp, "xuTransformation");
+	Tcl_DeleteCommand(theInterp, "findCurvatures");
+	Tcl_DeleteCommand(theInterp, "randomNumberGenerator");
+	Tcl_DeleteCommand(theInterp, "addFORMAnalysis");
+	Tcl_DeleteCommand(theInterp, "addSORMAnalysis");
+	Tcl_DeleteCommand(theInterp, "addSystemAnalysis");
+	Tcl_DeleteCommand(theInterp, "addSimulationAnalysis");
+	Tcl_DeleteCommand(theInterp, "analyzeReliability");
 }
 
 
@@ -248,14 +259,6 @@ TclReliabilityBuilder::~TclReliabilityBuilder()
 // CLASS METHODS
 //
 
-/*
-int 
-TclReliabilityBuilder::buildFE_Model(void)
-{
-  // does nothing
-  return 0;
-}
-*/
 
 ReliabilityDomain *
 TclReliabilityBuilder::getReliabilityDomain()
