@@ -69,6 +69,7 @@ FE_INCLUDES  = -I$(FE)/matrix \
             	  -I$(FE)/element/upU \
             	  -I$(FE)/element/brick \
             	  -I$(FE)/element/shell \
+            	  -I$(FE)/element/joint \
             	  -I$(FE)/analysis    \
             	  -I$(FE)/analysis/analysis \
             	  -I$(FE)/analysis/handler \
