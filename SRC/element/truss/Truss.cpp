@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2003-03-04 19:04:40 $
+// $Revision: 1.19 $
+// $Date: 2003-03-11 02:56:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -1066,7 +1066,7 @@ Truss::setParameter (const char **argv, int argc, Information &info)
     }
 
     // a material parameter
-    if (strcmp(argv[0],"-material") == 0) {
+    if (strcmp(argv[0],"-material") == 0 || strcmp(argv[0],"material") == 0) {
       int ok = theMaterial->setParameter(&argv[1], argc-1, info);
       if (ok < 0)
 	return -1;
