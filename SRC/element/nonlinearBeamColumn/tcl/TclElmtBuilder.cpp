@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-11-26 22:53:54 $
+// $Revision: 1.6 $
+// $Date: 2002-06-20 22:37:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/tcl/TclElmtBuilder.cpp,v $
                                                                                                                                  
 // File: ~/tcl/TclElmtBuilder.C
@@ -49,11 +49,8 @@
 #include <LinearCrdTransf3d.h>
 #include <PDeltaCrdTransf2d.h>
 #include <PDeltaCrdTransf3d.h>
-
-#ifdef _WIN32
 #include <CorotCrdTransf2d.h>
 #include <CorotCrdTransf3d.h>
-#endif
 
 #include <GaussLobattoQuadRule1d01.h>
 #include <TclModelBuilder.h>
@@ -557,7 +554,7 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 	 else if (strcmp(argv[1],"PDelta") == 0 || strcmp(argv[1],"LinearWithPDelta") == 0)
 			crdTransf2d = new PDeltaCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
 
-#ifdef _WIN32
+#ifdef _COROTATIONAL
 	 else if (strcmp(argv[1],"Corotational") == 0)
      	    crdTransf2d = new CorotCrdTransf2d(crdTransfTag, jntOffsetI, jntOffsetJ);
 #endif
@@ -655,7 +652,7 @@ TclModelBuilder_addGeomTransf(ClientData clientData, Tcl_Interp *interp,
 		else if (strcmp(argv[1],"PDelta") == 0 || strcmp(argv[1],"LinearWithPDelta") == 0)
      	    crdTransf3d = new PDeltaCrdTransf3d(crdTransfTag, vecxzPlane, jntOffsetI, jntOffsetJ);
 
-#ifdef _WIN32
+#ifdef _COROTATIONAL
 		else if (strcmp(argv[1],"Corotational") == 0)
      	    crdTransf3d = new CorotCrdTransf3d(crdTransfTag, vecxzPlane, jntOffsetI, jntOffsetJ);
 #endif

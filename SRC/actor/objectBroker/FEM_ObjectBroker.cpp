@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2002-06-18 01:07:10 $
+// $Revision: 1.16 $
+// $Date: 2002-06-20 22:36:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -157,6 +157,8 @@
 #include <LinearCrdTransf3d.h>
 #include <PDeltaCrdTransf2d.h>
 #include <PDeltaCrdTransf3d.h>
+#include <CorotCrdTransf2d.h>
+#include <CorotCrdTransf3d.h>
 
 // node header files
 #include <Node.h>
@@ -506,8 +508,10 @@ FEM_ObjectBroker::getNewCrdTransf2d(int classTag)
 		return new LinearCrdTransf2d();
 	case CRDTR_TAG_PDeltaCrdTransf2d:
 		return new PDeltaCrdTransf2d();
-	//case CRDTR_TAG_CorotCrdTransf2d :
-	//	return new CorotCrdTransf2d();
+#ifdef _COROTATIONAL
+	case CRDTR_TAG_CorotCrdTransf2d:
+		return new CorotCrdTransf2d();
+#endif
 	default:
 		cerr << "FEM_ObjectBroker::getPtrNewCrdTransf2d - ";
 	    cerr << " - no CrdTransf2d type exists for class tag ";
@@ -525,8 +529,10 @@ FEM_ObjectBroker::getNewCrdTransf3d(int classTag)
 		return new LinearCrdTransf3d();
 	case CRDTR_TAG_PDeltaCrdTransf3d:
 		return new PDeltaCrdTransf3d();
-	//case CRDTR_TAG_CorotCrdTransf3d :
-	//	return new CorotCrdTransf3d();
+#ifdef _COROTATIONAL
+	case CRDTR_TAG_CorotCrdTransf3d:
+		return new CorotCrdTransf3d();
+#endif
 	default:
 		cerr << "FEM_ObjectBroker::getPtrNewCrdTransf3d - ";
 	    cerr << " - no CrdTransf3d type exists for class tag ";
