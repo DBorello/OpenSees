@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2001-09-04 20:00:52 $
+// $Revision: 1.15 $
+// $Date: 2001-09-20 19:54:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -67,6 +67,8 @@
 #define  NEGD  6         // number of element global dof's
 #define  NEBD  3         // number of element dof's in the basic system
 
+Matrix NLBeamColumn2d::theMatrix(6,6);
+Vector NLBeamColumn2d::theVector(6);
 
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
@@ -74,10 +76,10 @@ NLBeamColumn2d::NLBeamColumn2d():
 
 Element(0,ELE_TAG_NLBeamColumn2d), connectedExternalNodes(2), 
 nSections(0), sections(0), crdTransf(0), node1Ptr(0), node2Ptr(0),
-rho(0), maxIters(0), tol(0), initialFlag(0), prevDistrLoad(NL),
-K(NEGD,NEGD), m(NEGD,NEGD), d(NEGD,NEGD), P(NEGD), Pinert(NEGD), load(NEGD), 
+rho(0), maxIters(0), tol(0), initialFlag(0),
+load(NEGD), 
 Uepr(NEGD), kv(NEBD,NEBD), Se(NEBD),
-distrLoadcommit(NL), Uecommit(NEGD), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0), bp(0),
+Uecommit(NEGD), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0),
 fs(0), vs(0), Ssr(0), vscommit(0)
 {
 }
@@ -94,10 +96,10 @@ NLBeamColumn2d::NLBeamColumn2d (int tag, int nodeI, int nodeJ,
 Element(tag,ELE_TAG_NLBeamColumn2d), connectedExternalNodes(NL),
 nSections(numSections), sections(sectionPtrs),
 rho(massDensPerUnitLength),maxIters(maxNumIters), tol(tolerance), 
-initialFlag(0), prevDistrLoad(NL),
-K(NEGD,NEGD), m(NEGD,NEGD), d(NEGD,NEGD), P(NEGD), Pinert(NEGD), load(NEGD), 
+initialFlag(0),
+load(NEGD), 
 Uepr(NEGD), kv(NEBD,NEBD), Se(NEBD), 
-distrLoadcommit(NL), Uecommit(NEGD), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0), bp(0) ,
+Uecommit(NEGD), kvcommit(NEBD,NEBD), Secommit(NEBD), b(0),
 fs(0), vs(0),Ssr(0), vscommit(0)
 {
    connectedExternalNodes(0) = nodeI;
@@ -152,13 +154,6 @@ fs(0), vs(0),Ssr(0), vscommit(0)
        exit(-1);
    }
    
-   bp = new Matrix [nSections];
-   if (!bp)
-   {
-       cerr << "NLBeamColumn2d::NLBeamColumn2d() -- failed to allocate bp array";
-       exit(-1);
-   }
-
    // alocate section flexibility matrices and section deformation vectors
    fs  = new Matrix [nSections];
    if (!fs)
@@ -207,9 +202,6 @@ NLBeamColumn2d::~NLBeamColumn2d()
 
    if (b)
      delete [] b;
-
-   if (bp)
-     delete [] bp;
 
    if (fs) 
      delete [] fs;
@@ -316,11 +308,7 @@ NLBeamColumn2d::setDomain(Domain *theDomain)
    this->setSectionInterpolation();
    
    if (initialFlag == 2) {
-     static Vector currDistrLoad(NL);
-     currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
      crdTransf->update();
-     P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
-     K = crdTransf->getGlobalStiffMatrix(kv, Se);
    } else
      this->update();
 }
@@ -348,8 +336,6 @@ NLBeamColumn2d::commitState()
       return err;
       
    // commit the element variables state
-
-   distrLoadcommit = prevDistrLoad;
    Uecommit = Uepr;
    kvcommit = kv;
    Secommit = Se;
@@ -387,17 +373,10 @@ int NLBeamColumn2d::revertToLastCommit()
       return err;
      
    // revert the element state to last commit
-   prevDistrLoad = distrLoadcommit;
    Uepr = Uecommit;
    Se   = Secommit;
    kv   = kvcommit;
    
-   // compute global resisting forces and tangent
-   static Vector currDistrLoad(NL);
-   currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
-   P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
-   K = crdTransf->getGlobalStiffMatrix(kv, Se);
-
    initialFlag = 0;
    this->update();
 
@@ -428,18 +407,14 @@ int NLBeamColumn2d::revertToStart()
       return err;
   
    // revert the element state to start
-   distrLoadcommit.Zero();
    Uecommit.Zero();
    Secommit.Zero();
    kvcommit.Zero();
 
-   prevDistrLoad.Zero();
    Uepr.Zero();
    Se.Zero();
    kv.Zero();
 
-   P.Zero();
-   K.Zero();
    initialFlag = 0;
    this->update();
    return err;
@@ -451,14 +426,16 @@ int NLBeamColumn2d::revertToStart()
 const Matrix &
 NLBeamColumn2d::getTangentStiff(void)
 {
-   return K;
+	return crdTransf->getGlobalStiffMatrix(kv, Se);
 }
     
 
 const Vector &
 NLBeamColumn2d::getResistingForce(void)
 {
-   return P;
+	static Vector dummy(2);
+
+	return crdTransf->getGlobalResistingForce(Se, dummy);;
 }
 
 
@@ -493,9 +470,6 @@ NLBeamColumn2d::setSectionInterpolation (void)
 	
 	b[i] = Matrix(order,NEBD);
 	this->getForceInterpolatMatrix(xi_pt(i,0), b[i], code);
-	
-	bp[i] = Matrix(order,NL);
-	this->getDistrLoadInterpolatMatrix(xi_pt(i,0), bp[i], code);
     }
 }
 
@@ -516,14 +490,6 @@ int NLBeamColumn2d::update()
   dUe.addVector(1.0, Uepr,-1.0);
 
   if (dUe.Norm() != 0.0  || initialFlag == 0) {
-      
-    // compute distributed loads and increments
-    static Vector currDistrLoad(NL);
-    static Vector distrLoadIncr(NL); 
-
-    currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
-    distrLoadIncr = currDistrLoad - prevDistrLoad;
-    prevDistrLoad = currDistrLoad;
 
     // update the end displacements
     Uepr = Ue;
@@ -585,7 +551,6 @@ int NLBeamColumn2d::update()
 	  // calculate total section forces
 	  // Ss = b*Se + bp*currDistrLoad;
 	  Ss.addMatrixVector(0.0, b[i], Se, 1.0);
-	  Ss.addMatrixVector(1.0, bp[i], currDistrLoad, 1.0);
 
 	  dSs = Ss;
 	  dSs.addVector(1.0, Ssr[i], -1.0);  // dSs = Ss - Ssr[i];
@@ -646,10 +611,6 @@ int NLBeamColumn2d::update()
       
     // determine resisting forces
     Se += dSe;
-
-    // get resisting forces and stiffness matrix in global coordinates
-    P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
-    K = crdTransf->getGlobalStiffMatrix(kv, Se);
 
     initialFlag = 1;
 
@@ -753,17 +714,21 @@ NLBeamColumn2d::getSecantStiff(void)
 const Matrix &
 NLBeamColumn2d::getDamp(void)
 {
-    return d; // zero matrix still
+	theMatrix.Zero();
+
+    return theMatrix; // zero matrix still
 }
 
 
 const Matrix &
 NLBeamColumn2d::getMass(void)
 { 
-    // get element length and orientation
-    m(0,0) = m(1,1) = m(3,3) = m(4,4) = rho * L/2;
+	theMatrix.Zero();
+
+	if (rho != 0.0)
+		theMatrix(0,0) = theMatrix(1,1) = theMatrix(3,3) = theMatrix(4,4) = 0.5*L*rho;
    
-    return m;
+    return theMatrix;
 }
 
 
@@ -789,18 +754,24 @@ NLBeamColumn2d::addLoad(const Vector &moreLoad)
 const Vector &
 NLBeamColumn2d::getResistingForceIncInertia()
 {	
-    Vector f(NEGD);
-    Vector ag(NEGD);
-    
-    f = this->getResistingForce();
-    this->getMass();
-    this->getGlobalAccels(ag);
-    
-    // Pinert = f -  m * ag;
-    Pinert = f;
-    Pinert.addMatrixVector(1.0, m, ag, -1.0); 
-    
-    return Pinert;
+	// Check for a quick return
+	if (rho == 0.0)
+		return this->getResistingForce();
+
+	const Vector &accel1 = node1Ptr->getTrialAccel();
+	const Vector &accel2 = node2Ptr->getTrialAccel();
+	
+	// Compute the current resisting force
+	theVector = this->getResistingForce();
+
+	double m = 0.5*rho*L;
+
+	theVector(0) += m*accel1(0);
+	theVector(1) += m*accel1(1);
+	theVector(3) += m*accel2(0);
+	theVector(4) += m*accel2(1);
+
+	return theVector;
 }
 
 
@@ -916,7 +887,8 @@ NLBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   
   // put  distrLoadCommit into the Vector
   for (i=0; i<NL; i++) 
-    dData(loc++) = distrLoadcommit(i);
+    //dData(loc++) = distrLoadcommit(i);
+	dData(loc++) = 0.0;
 
   // place UeCommit into Vector
   for (i=0; i<NEGD; i++)
@@ -1120,8 +1092,8 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   tol = dData(loc++);
 
   // put  distrLoadCommit into the Vector
-  for (i=0; i<NL; i++) 
-    distrLoadcommit(i) = dData(loc++);
+  //for (i=0; i<NL; i++) 
+  //  distrLoadcommit(i) = dData(loc++);
 
   // place UeCommit into Vector
   for (i=0; i<NEGD; i++)
@@ -1136,7 +1108,6 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
      for (j=0; j<NEBD; j++)
         kvcommit(i,j) = dData(loc++);
 
-  prevDistrLoad = distrLoadcommit;
   Uepr = Uecommit;
   kv   = kvcommit;
   Se   = Secommit;
@@ -1213,27 +1184,11 @@ NLBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
     return -1;
   }
 
-  // Delete the old
-  if (bp != 0)
-    delete [] bp;
-
-  // Allocate the right number
-  bp = new Matrix[nSections];  
-  if (bp == 0) {
-    g3ErrorHandler->warning("%s -- failed to allocate bp array",
-			    "NLBeamColumn2d::recvSelf");
-    return -1;
-  }
-
   // Set up section force interpolation matrices
   this->setSectionInterpolation();
 
   if (node1Ptr != 0) {
-     static Vector currDistrLoad(NL);
-     currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
      crdTransf->update();
-     P = crdTransf->getGlobalResistingForce(Se, currDistrLoad);
-     K = crdTransf->getGlobalStiffMatrix(kv, Se);
   }
 
   initialFlag = 2;  
@@ -1336,29 +1291,24 @@ NLBeamColumn2d::Print(ostream &s, int flag)
     
       for (int i = 0; i < nSections; i++)
          s << "\nSection "<<i<<" :" << *sections[i];
- 
-      s << "\tStiffness Matrix:\n" << K;
-      s << "\tResisting Force: " << P;
-   }
+    }
    else
    {
       s << "\nElement: " << this->getTag() << " Type: NLBeamColumn2d ";
       s << "\tConnected Nodes: " << connectedExternalNodes ;
       s << "\tNumber of Sections: " << nSections;
       s << "\tMass density: " << rho << endl;
-      static Vector force(6);
-      force(3) = Secommit(0);
-      force(0) = -Secommit(0);
-      force(2) = Secommit(1);
-      force(5) = Secommit(2);
+      theVector(3) = Secommit(0);
+      theVector(0) = -Secommit(0);
+      theVector(2) = Secommit(1);
+      theVector(5) = Secommit(2);
       double V = (Secommit(1)+Secommit(2))/L;
-      force(1) = V;
-      force(4) = -V;
+      theVector(1) = V;
+      theVector(4) = -V;
       s << "\tEnd 1 Forces (P V M): "
-	  << force(0) << ' ' << force(1) << ' ' << force(2) << endl;
+	  << theVector(0) << ' ' << theVector(1) << ' ' << theVector(2) << endl;
       s << "\tEnd 2 Forces (P V M): "
-	  << force(3) << ' ' << force(4) << ' ' << force(5) << endl;
-      s << "\tResisting Force: " << P;
+	  << theVector(3) << ' ' << theVector(4) << ' ' << theVector(5) << endl;
    }
 }
 
@@ -1736,11 +1686,11 @@ NLBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformation)
     // global force - 
     if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0
 	|| strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
-		return new ElementResponse(this, 1, P);
+		return new ElementResponse(this, 1, theVector);
 
     // local force -
     else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
-	return new ElementResponse(this, 2, P);
+	return new ElementResponse(this, 2, theVector);
     
     // section response -
     else if (strcmp(argv[0],"section") ==0) {
@@ -1761,22 +1711,21 @@ NLBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformation)
 int 
 NLBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 {
-  static Vector force(6);
   double V;
 
   switch (responseID) {
     case 1:  // global forces
-      return eleInfo.setVector(P);
+      return eleInfo.setVector(this->getResistingForce());
 
     case 2:
-      force(3) = Se(0);
-      force(0) = -Se(0);
-      force(2) = Se(1);
-      force(5) = Se(2);
+      theVector(3) = Se(0);
+      theVector(0) = -Se(0);
+      theVector(2) = Se(1);
+      theVector(5) = Se(2);
       V = (Se(1)+Se(2))/L;
-      force(1) = V;
-      force(4) = -V;
-      return eleInfo.setVector(force);
+      theVector(1) = V;
+      theVector(4) = -V;
+      return eleInfo.setVector(theVector);
       
     default: 
 	  return -1;

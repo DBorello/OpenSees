@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-31 01:34:05 $
+// $Revision: 1.5 $
+// $Date: 2001-09-20 19:54:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.h,v $
                                                                         
                                                                         
@@ -130,26 +130,20 @@ class NLBeamColumn2d: public Element
 			       
     Node   *node1Ptr, *node2Ptr;   // pointers to the nodes
 
-    Matrix K;                      // stiffness matrix
-    Matrix m;                      // mass matrix	
-    Matrix d;                      // damping matrix
-    
-    Vector P;                      // residual forces
-    Vector Pinert;                 // residual forces including inertia
+	static Matrix theMatrix;
+	static Vector theVector;
+
     Vector load;                   // equivalent nodal loads ????
 
-    Vector prevDistrLoad;          // previous distributed loads
     Vector Uepr;                   // previous global trial displacements
     Matrix kv;                     // stiffness matrix in the basic system 
     Vector Se;                     // element resisting forces in the basic system
 
-    Vector distrLoadcommit;        // commited distributed loads
     Vector Uecommit;               // commited element global displacements
     Matrix kvcommit;               // commited stiffness matrix in the basic system
     Vector Secommit;               // commited element end forces in the basic system
 
     Matrix *b;                     // array of force interpolation matrices 
-    Matrix *bp;                    // array of force interpolation matrices that considers uniform load
 
     Matrix *fs;                    // array of section flexibility matrices
     Vector *vs;                    // array of section deformation vectors
