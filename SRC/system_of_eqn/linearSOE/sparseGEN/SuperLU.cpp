@@ -18,12 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2005-03-17 20:47:09 $
+// $Revision: 1.5 $
+// $Date: 2005-03-31 22:07:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SuperLU.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/sparseGEN/SuperLU.h
 //
 // Written: fmk 
 // Created: Tue 11/96
@@ -65,17 +64,41 @@ SuperLU::SuperLU(int perm,
 
   if (symmetric == 'Y')
     options.SymmetricMode = YES;
+  L.ncol = 0;
+  U.ncol = 0;
+  A.ncol = 0;
+  B.ncol = 0;
 }
 
 
 SuperLU::~SuperLU()
 {
+
   if (perm_r != 0)
-	delete [] perm_r;
+    delete [] perm_r;
   if (perm_c != 0)
-	delete [] perm_c;
-  if (etree != 0)
-	delete [] etree;
+    delete [] perm_c;
+  if (etree != 0) {
+    delete [] etree;
+    StatFree(&stat);
+  }
+
+  if (L.ncol != 0)
+    Destroy_SuperNode_Matrix(&L);
+  if (U.ncol != 0)
+    Destroy_CompCol_Matrix(&U);
+  if (AC.ncol != 0) {
+    NCPformat *ACstore = (NCPformat *)AC.Store;
+    SUPERLU_FREE(ACstore->colbeg);
+    SUPERLU_FREE(ACstore->colend);
+    SUPERLU_FREE(ACstore);
+  }
+  if (A.ncol != 0) {
+    SUPERLU_FREE(A.Store);
+  }
+  if (B.ncol != 0) {
+    SUPERLU_FREE(B.Store);
+  }
 }
 
 /*
@@ -88,7 +111,6 @@ extern "C" void  dgstrf (char *refact, SuperMatrix* A, double pivThresh,
 extern "C" void  dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U, 
 			 int *perm_r, int *perm_c, 
 			 SuperMatrix *B, int *info);    
-
 
 extern "C" void    StatInit(int, int);
 
@@ -136,20 +158,27 @@ SuperLU::solve(void)
 	// factor the matrix
 	int info;
 
+	if (L.ncol != 0 && symmetric == 'N') {
+	  opserr << "HI\n";
+	  Destroy_SuperNode_Matrix(&L);
+	  Destroy_CompCol_Matrix(&U);	  
+	}
+
 	dgstrf(&options, &AC, drop_tol, relax, panelSize,
 	       etree, NULL, 0, perm_c, perm_r, &L, &U, &stat, &info);
 
-	/*
-	dgstrf(refact, &AC, thresh, 0.0, relax, panelSize, etree, NULL, 0,
-	       perm_r, perm_c, &L, &U, &info);
-	*/
 
 	if (info != 0) {	
-	   opserr << "WARNING SuperLU::solve(void)- ";
-	   opserr << " Error " << info << " returned in factorization dgstrf()\n";
-	   return -info;
+	  opserr << "WARNING SuperLU::solve(void)- ";
+	  opserr << " Error " << info << " returned in factorization dgstrf()\n";
+	  return -info;
 	}
-	options.Fact = FACTORED;
+
+	if (symmetric == 'Y')
+	  options.Fact= SamePattern_SameRowPerm;
+	else
+	  options.Fact = SamePattern;
+	
 	theSOE->factored = true;
     }	
 
@@ -220,6 +249,9 @@ SuperLU::setSize()
       // set the refact variable to 'N' after first factorization with new size 
       // can set to 'Y'.
       options.Fact = DOFACT;
+
+      if (symmetric == 'Y')
+	options.SymmetricMode=YES;
 
     } else if (n == 0)
 	return 0;
