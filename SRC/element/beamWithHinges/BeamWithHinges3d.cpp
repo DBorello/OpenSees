@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:20 $
+// $Revision: 1.2 $
+// $Date: 2000-11-04 09:10:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges3d.cpp,v $
                                                                         
                                                                         
@@ -1094,17 +1094,36 @@ BeamWithHinges3d::setStiffMatrix(void)
 	    
 	    // Use special integration on the diagonal shear flexibility and shear
 		// deformation terms
-	    fs1(shearIkeyVY,shearIkeyVY) *= shearWeightIVY;
-	    e1(shearIkeyVY) *= shearWeightIVY;
-	    
-	    fs1(shearIkeyVZ,shearIkeyVZ) *= shearWeightIVZ;
-	    e1(shearIkeyVZ) *= shearWeightIVZ;
-	    
-	    fs3(shearJkeyVY,shearJkeyVY) *= shearWeightJVY;
-	    e3(shearJkeyVY) *= shearWeightJVY;
-	    
-	    fs3(shearJkeyVZ,shearJkeyVZ) *= shearWeightJVZ;
-	    e3(shearJkeyVZ) *= shearWeightJVZ;
+		int i;
+		int orderI = sectionI->getOrder();
+		const ID &codeI = sectionI->getType();
+		for (i = 0; i < orderI; i++) {
+			if (codeI(i) == SECTION_RESPONSE_VY) {
+				fs1(i,i) *= shearWeightIVY;
+				e1(i) *= shearWeightIVY;
+				de1(i) *= shearWeightIVY;
+			}
+			if (codeI(i) == SECTION_RESPONSE_VZ) {
+				fs1(i,i) *= shearWeightIVZ;
+				e1(i) *= shearWeightIVZ;
+				de1(i) *= shearWeightIVZ;
+			}
+		}
+
+		int orderJ = sectionJ->getOrder();
+		const ID &codeJ = sectionJ->getType();
+		for (i = 0; i < orderJ; i++) {
+			if (codeJ(i) == SECTION_RESPONSE_VY) {
+				fs3(i,i) *= shearWeightJVY;
+				e3(i) *= shearWeightJVY;
+				de3(i) *= shearWeightJVY;
+			}
+			if (codeJ(i) == SECTION_RESPONSE_VZ) {
+				fs3(i,i) *= shearWeightJVZ;
+				e3(i) *= shearWeightJVZ;
+				de3(i) *= shearWeightJVZ;
+			}
+		}
 	    
 		f = fElastic;
 
@@ -1129,18 +1148,32 @@ BeamWithHinges3d::setStiffMatrix(void)
 
 	    // Undo the temporary change for integrating shear terms, as
 		// e1 and e3 are history variables
-	    e1(shearIkeyVY) /= shearWeightIVY;
-	    fs1(shearIkeyVY,shearIkeyVY) /= shearWeightIVY;
-		
-		e1(shearIkeyVZ) /= shearWeightIVZ;
-	    fs1(shearIkeyVZ,shearIkeyVZ) /= shearWeightIVZ;
-		
-		e3(shearJkeyVY) /= shearWeightJVY;
-	    fs3(shearJkeyVY,shearJkeyVY) /= shearWeightJVY;
-		
-		e3(shearJkeyVZ) /= shearWeightJVZ;
-	    fs3(shearJkeyVZ,shearJkeyVZ) /= shearWeightJVZ;
+		for (i = 0; i < orderI; i++) {
+			if (codeI(i) == SECTION_RESPONSE_VY) {
+				fs1(i,i) /= shearWeightIVY;
+				e1(i) /= shearWeightIVY;
+				de1(i) /= shearWeightIVY;
+			}
+			if (codeI(i) == SECTION_RESPONSE_VZ) {
+				fs1(i,i) /= shearWeightIVZ;
+				e1(i) /= shearWeightIVZ;
+				de1(i) /= shearWeightIVZ;
+			}
+		}
 	    
+		for (i = 0; i < orderJ; i++) {
+			if (codeJ(i) == SECTION_RESPONSE_VY) {
+				fs3(i,i) /= shearWeightJVY;
+				e3(i) /= shearWeightJVY;
+				de3(i) /= shearWeightJVY;
+			}
+			if (codeJ(i) == SECTION_RESPONSE_VZ) {
+				fs3(i,i) /= shearWeightJVZ;
+				e3(i) /= shearWeightJVZ;
+				de3(i) /= shearWeightJVZ;
+			}
+		}
+
 	    // calculate element stiffness matrix
 	    if (f.Solve(I,kb) < 0)
 			g3ErrorHandler->warning("%s -- could not invert flexibility",
@@ -1156,7 +1189,7 @@ BeamWithHinges3d::setStiffMatrix(void)
 	
 	    double dW = dv^ dq;
 
-	    if (dW < tolerance)
+	    if (fabs(dW) < tolerance)
 			break;
 	}	
     
