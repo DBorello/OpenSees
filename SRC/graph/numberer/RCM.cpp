@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:23 $
+// $Revision: 1.3 $
+// $Date: 2003-10-06 20:54:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/graph/numberer/RCM.cpp,v $
                                                                         
                                                                         
-// File: ~/graph/numberer/RCM.C
-// 
 // Written: fmk 
-// Created: 11/96
 // Revision: A
 //
 // Description: This file contains the class definition for RCM.
@@ -246,17 +243,17 @@ RCM::number(Graph &theGraph, int startVertex)
 	// check to see if graph is disconneted
 	
 	if ((currentMark == nextMark) && (currentMark >= 0)) {
-	    opserr << "WARNING:  RCM::number - Disconnected graph -2 \n ";
+	  // opserr << "WARNING:  RCM::number - Disconnected graph -2 \n ";
 	    
-	    // loop over iter till we get a vertex not yet Tmped
+	  // loop over iter till we get a vertex not yet Tmped
 	    
-	    while (((vertexPtr = vertexIter4()) != 0) && 
-		   (vertexPtr->getTmp() != -1)) 
-		;
+	  while (((vertexPtr = vertexIter4()) != 0) && 
+		 (vertexPtr->getTmp() != -1)) 
+	    ;
 	    
-	    nextMark--;
-	    vertexPtr->setTmp(currentMark);
-	    (*theRefResult)(currentMark) = vertexPtr->getTag();
+	  nextMark--;
+	  vertexPtr->setTmp(currentMark);
+	  (*theRefResult)(currentMark) = vertexPtr->getTag();
 	}
 
     }
@@ -268,7 +265,7 @@ RCM::number(Graph &theGraph, int startVertex)
 	int vertexTag = (*theRefResult)(i);
 	vertexPtr = theGraph.getVertexPtr(vertexTag);
 	vertexPtr->setTmp(i+1); // 1 through numVertex
-	(*theRefResult)(i) = vertexPtr->getRef();
+	(*theRefResult)(i) = vertexPtr->getTag();
     }
 
     return *theRefResult;
@@ -456,15 +453,15 @@ RCM::number(Graph &theGraph, const ID &startVertices)
 
 	    // loop over iter till we get a vertex not yet Tmped
 	    if ((currentMark == nextMark) && (currentMark >= 0)) {
-		opserr << "WARNING:  RCM::number - Disconnected graph\n";
+	      // opserr << "WARNING:  RCM::number - Disconnected graph\n";
 		
-		while (((vertexPtr = vertexIter2()) != 0) && 
-		       (vertexPtr->getTmp() != -1)) 
-		    ;
-	    
-		nextMark--;
-		vertexPtr->setTmp(currentMark);
-		(*theRefResult)(currentMark) = vertexPtr->getTag();
+	      while (((vertexPtr = vertexIter2()) != 0) && 
+		     (vertexPtr->getTmp() != -1)) 
+		;
+	      
+	      nextMark--;
+	      vertexPtr->setTmp(currentMark);
+	      (*theRefResult)(currentMark) = vertexPtr->getTag();
 	    }
 	}	    
     }	
@@ -477,7 +474,7 @@ RCM::number(Graph &theGraph, const ID &startVertices)
 	int vertexTag = (*theRefResult)(j);
 	vertexPtr = theGraph.getVertexPtr(vertexTag);
 	vertexPtr->setTmp(j+1); // 1 through numVertex
-	(*theRefResult)(j) = vertexPtr->getRef();
+	(*theRefResult)(j) = vertexPtr->getTag();
     }	
 
     return *theRefResult;
