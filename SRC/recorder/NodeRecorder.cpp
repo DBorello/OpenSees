@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2005-02-04 18:32:35 $
+// $Revision: 1.22 $
+// $Date: 2005-02-17 22:31:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -127,6 +127,13 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     dataFlag = 4;
   } else if ((strcmp(dataToStore, "unbalance") == 0)) {
     dataFlag = 5;
+  } else if ((strcmp(dataToStore, "unbalanceInclInertia") == 0)) {
+    dataFlag = 6;
+  } else if ((strcmp(dataToStore, "reaction") == 0)) {
+    dataFlag = 7;
+  } else if (((strcmp(dataToStore, "reactionIncInertia") == 0))
+	     || ((strcmp(dataToStore, "reactionIncludingInertia") == 0))) {
+    dataFlag = 8;
   } else if ((strncmp(dataToStore, "eigen",5) == 0)) {
     int mode = atoi(&(dataToStore[5]));
     if (mode > 0)
@@ -200,10 +207,22 @@ NodeRecorder::record(int commitTag, double timeStamp)
     if (deltaT != 0.0) 
       nextTimeStampToRecord = timeStamp + deltaT;
 
+
+    //
+    // if need nodal reactions get the domain to calculate them
+    // before we iterate over the nodes
+    //
+
+    if (dataFlag == 7)
+      theDomain->calculateNodalReactions(false);
+    else if (dataFlag == 8)
+      theDomain->calculateNodalReactions(true);
+
+
     //
     // now we go get the responses from the nodes & place them in disp vector
     //
-
+    
     for (int i=0; i<numValidNodes; i++) {
       int cnt = i*numDOF + 1; 
       Node *theNode = theNodes[i];
@@ -278,6 +297,44 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	}
       } else if (dataFlag == 5) {
 	const Vector &theResponse = theNode->getUnbalancedLoad();
+	for (int j=0; j<numDOF; j++) {
+	  int dof = (*theDofs)(j);
+	  if (theResponse.Size() > dof) {
+	    response(cnt) = theResponse(dof);
+	  } else 
+	    response(cnt) = 0.0;
+	  
+	  cnt++;
+	}
+
+      } else if (dataFlag == 6) {
+	const Vector &theResponse = theNode->getUnbalancedLoadIncInertia();
+	for (int j=0; j<numDOF; j++) {
+	  int dof = (*theDofs)(j);
+	  if (theResponse.Size() > dof) {
+	    response(cnt) = theResponse(dof);
+	  } else 
+	    response(cnt) = 0.0;
+	  
+	  cnt++;
+	}
+
+
+      } else if (dataFlag == 7) {
+	const Vector &theResponse = theNode->getReaction();
+	for (int j=0; j<numDOF; j++) {
+	  int dof = (*theDofs)(j);
+	  if (theResponse.Size() > dof) {
+	    response(cnt) = theResponse(dof);
+	  } else 
+	    response(cnt) = 0.0;
+	  
+	  cnt++;
+	}
+
+
+      } else if (dataFlag == 8) {
+	const Vector &theResponse = theNode->getReaction();
 	for (int j=0; j<numDOF; j++) {
 	  int dof = (*theDofs)(j);
 	  if (theResponse.Size() > dof) {
