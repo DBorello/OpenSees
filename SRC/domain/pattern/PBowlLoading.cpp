@@ -195,48 +195,59 @@ PBowlLoading::PBowlLoading(int tag,
 
 
   // create a vector and read in the data
-  if (numDataPoints != 0) {
+  if (numDataPoints != 0) 
+    {
 
-    // first open the file
-    theFileACC.open(AccefName, ios::in);
-    if (theFileACC.bad()) {
-      opserr << "WARNING - PBowlLoading::PBowlLoading()";
-      opserr << " - could not open file " << AccefName << endln;
-    } else {
-
-      // now create the vector
-      if ( numDataPoints - thetimeSteps*(numDataPoints/thetimeSteps) != 0 ) {
-         opserr << "WARNING - PBowlLoading::PBowlLoading()";
-         opserr << " - Input data not sufficient...Patched with zeros " << AccefName << endln;
-      }
-      int cols = numDataPoints/thetimeSteps;
-      Udd = new Matrix(cols, thetimeSteps);
-
-      // ensure we did not run out of memory
-      if (Udd == 0 || Udd->noRows() == 0 || Udd->noCols() == 0) {
-         opserr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
-         opserr << " a Matrix of size (cols*rows): " << cols << " * " << thetimeSteps << endln;
-
-      if (Udd != 0)
-        delete Udd;
-        Udd = 0;
-      }
-
-      // read the data from the file
-      else {
-        theFileACC >> timeSteps2;
-        for (int t=0; t< thetimeSteps; t++)
-           for  (int j=0;j<cols; j++) {
-              theFileACC >> dataPoint;
-              (*Udd)(j, t) = dataPoint;
-           }
+      // first open the file
+      theFileACC.open(AccefName, ios::in);
+      if (theFileACC.bad()) 
+        {
+          opserr << "WARNING - PBowlLoading::PBowlLoading()";
+          opserr << " - could not open file " << AccefName << endln;
+        } 
+      else 
+        {
+      
+          // now create the vector
+          if ( numDataPoints - thetimeSteps*(numDataPoints/thetimeSteps) != 0 ) {
+             opserr << "WARNING - PBowlLoading::PBowlLoading()";
+             opserr << " - Input data not sufficient...Patched with zeros " << AccefName << endln;
+          }
+          int cols = numDataPoints/thetimeSteps;
+          Udd = new Matrix(cols, thetimeSteps);
+          
+          // ensure we did not run out of memory
+          if (Udd == 0 || Udd->noRows() == 0 || Udd->noCols() == 0) {
+             opserr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
+             opserr << " a Matrix of size (cols*rows): " << cols << " * " << thetimeSteps << endln;
+          
+          if (Udd != 0)
+            delete Udd;
+            Udd = 0;
+          }
+          
+          // read the data from the file
+          else 
+            {
+              theFileACC >> timeSteps2;
+              for (int t=0; t< thetimeSteps; t++)
+                {
+                  for  (int j=0;j<cols; j++) 
+                    {
+                      theFileACC >> dataPoint;
+                      (*Udd)(j, t) = dataPoint;
+                      fprintf(stdout, "Udd ( %d, %d ) = %12.6e \n", j, t, (*Udd)(j, t));
+                    }
+                }
+            }
         }
+
+      // finally close the file
+      theFileACC.close();
     }
 
-    // finally close the file
-    theFileACC.close();
-  }
 
+  
 
   //--------------------------------
   //Adding plastic bowl elements
@@ -302,8 +313,10 @@ PBowlLoading::PBowlLoading(int tag,
       theFileELE.close();
 
       //Check if read in correctly
-//test      cout << "# of plastic bowl element: " << numPBE << endln;
-//test      cout <<  (*PBowlElements);
+//BJ test
+      cout << "# of plastic bowl element: " << numPBE << endln;
+      cout <<  (*PBowlElements);
+//BJ test
     }
   }
 
@@ -631,34 +644,38 @@ PBowlLoading::CompPBLoads()
   ID Temp;
 
   for ( i=1; i<Bowl_elem_nb; i++)
-  {
+    {
       theElement = theDomain->getElement( (*PBowlElements)(i) );
       Temp = theElement->getExternalNodes();
       for ( j=0;j<NIE;j++)
-      {
-        for (k = 0; k< no_bnode; k++) {
-           if ( Temp(j) == (*Bowl_node)(k) )
-           //cout << Temp(j) << "  " << Bowl_node(k) << endln;
-           break;
-        } //endofIF
+        {
+          for (k = 0; k< no_bnode; k++) 
+            {
+              if ( Temp(j) == (*Bowl_node)(k) )
+              //cout << Temp(j) << "  " << Bowl_node(k) << endln;
+              break;
+            } //endofIF
 
-        //If no duplicate, add new node; otherwise, skip
-        if ( k == no_bnode) {
-          (*Bowl_node)(no_bnode) = Temp(j);
-          no_bnode ++;
-        } //end of for (k=0...)
+          //If no duplicate, add new node; otherwise, skip
+          if ( k == no_bnode) 
+            {
+              (*Bowl_node)(no_bnode) = Temp(j);
+              no_bnode ++;
+            } //end of for (k=0...)
 
-      }//end of for (j=0...)
+        }//end of for (j=0...)
 
-  }
+    }
   //--Joey------------------------------------------------
 
-  //test //check the bowl nodes
-  //test cout << "\nCheck all plastic bowl nodes...\n";
-  //test for (int bi=0;bi<no_bnode;bi++)
-  //test    cout<< (*Bowl_node)(bi) <<"  ";
-  //test cout<< endln << "# of pbowl nodes = " << no_bnode<<endln;
-  //test //cout<<"finish inputting  and organizing the Bowl_node array"<<endln;
+  //BJ test
+   //check the bowl nodes
+   cout << "\nCheck all plastic bowl nodes...\n";
+   for (int bi=0;bi<no_bnode;bi++)
+      cout<< (*Bowl_node)(bi) <<"  ";
+   cout<< endln << "# of pbowl nodes = " << no_bnode<<endln;
+   //cout<<"finish inputting  and organizing the Bowl_node array"<<endln;
+  //BJ test
 
 
   //Find all nodes on the boundary Joey Yang & Boris Jeremic 11/06/02
@@ -746,19 +763,21 @@ PBowlLoading::CompPBLoads()
     }
   }
 
-  //test //check the boundary bowl nodes
-  //test cout << "\nCheck all boundary bowl nodes...\n";
-  //test for (int bi = 0; bi < no_boundarynodes; bi++)
-  //test      cout << (*BoundaryNodes)(bi) <<"  ";
-  //test cout<< endln << "# of boundary bowl nodes = " << no_boundarynodes << endln;
-  //test
-  //test //check the exterior bowl nodes
-  //test cout << "\nCheck all exterior bowl nodes...\n";
-  //test for (int bi = 0; bi < no_exteriornodes; bi++)
-  //test      cout << (*ExteriorNodes)(bi) <<"  ";
-  //test cout<< endln << "# of exterior bowl nodes = " << no_exteriornodes << endln;
-  //test
-  //test cout<<"finish inputting  and organizing the Bowl_node array"<<endln;
+  // BJ test
+   //check the boundary bowl nodes
+   cout << "\nCheck all boundary bowl nodes...\n";
+   for (int bi = 0; bi < no_boundarynodes; bi++)
+        cout << (*BoundaryNodes)(bi) <<"  ";
+   cout<< endln << "# of boundary bowl nodes = " << no_boundarynodes << endln;
+  
+   //check the exterior bowl nodes
+   cout << "\nCheck all exterior bowl nodes...\n";
+   for (int bi = 0; bi < no_exteriornodes; bi++)
+        cout << (*ExteriorNodes)(bi) <<"  ";
+   cout<< endln << "# of exterior bowl nodes = " << no_exteriornodes << endln;
+  
+   cout<<"finish inputting  and organizing the Bowl_node array"<<endln;
+  // BJ test
 
 
   //===========================================================
@@ -827,10 +846,12 @@ PBowlLoading::CompPBLoads()
     }
    }
 
-   //test cout << "B nodes: " << nB << " " << *B_node;
-   //test cout << "E nodes: " << nE << " " << *E_node;
+   //BJ test
+    cout << "B nodes: " << nB << " " << *B_node;
+    cout << "E nodes: " << nE << " " << *E_node;
 
-   //cout << " ...Me before  " << Me;
+    cout << " ...Me before  " << Me;
+   //BJ test
    //Zero out the diagonal block of Boundary nodes
    int m;
    for (m = 0; m < nB; m++)
@@ -850,8 +871,10 @@ PBowlLoading::CompPBLoads()
           Ke( (*E_node)(m)*NDOF+d, (*E_node)(n)*NDOF+e ) = 0.0;
         }
 
-   //test cout << " ...Me after  " << Me;
-   //test cout << " ...Ke after  " << Ke;
+   //BJ test
+    cout << " ...Me after  " << Me;
+    cout << " ...Ke after  " << Ke;
+   //BJ test
 
    //   get the u and u_dotdot for this element
    for ( int t=0;t<thetimeSteps; t++)
@@ -886,7 +909,10 @@ PBowlLoading::CompPBLoads()
     opserr << " a Matrix of size: " <<  PBowlLoads->noRows() << " * " << PBowlLoads->noCols() << endln;
   }
 
-//test  cout<<"\nFinish calculating the forces..." << endln << endln;
+//BJ test
+
+ cout<<"\nFinish calculating the forces..." << endln << endln;
+//BJ test
   LoadComputed = true;
 
   delete Fm;
@@ -905,10 +931,11 @@ PBowlLoading::getNodalLoad(int nodeTag, double time)
   //Get the node
   Domain *theDomain = this->getDomain();
   Node *theNode = theDomain->getNode(nodeTag);
-  if (theNode == 0) {
-     opserr << "PBowlLoading::getNodalLoad() - no nodes associtated to the nodeTag " << nodeTag << "\n";
-     return ( *dummy );
-  }
+  if (theNode == 0) 
+    {
+       opserr << "PBowlLoading::getNodalLoad() - no nodes associtated to the nodeTag " << nodeTag << "\n";
+       return ( *dummy );
+    }
 
   delete dummy;
 
@@ -926,7 +953,9 @@ PBowlLoading::getNodalLoad(int nodeTag, double time)
   double incr = time/PBTimeIncr;
   int incr1 = (int) floor(incr)-1;
   int incr2 = incr1 + 1;
-  double value1=0, value2=0;
+
+  double value1=0;
+  double value2=0;
 
   int i;
   if ( incr2 == thetimeSteps ) {
