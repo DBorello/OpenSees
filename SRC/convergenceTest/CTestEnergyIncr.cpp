@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-16 04:21:20 $
+// $Revision: 1.4 $
+// $Date: 2001-06-14 05:26:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestEnergyIncr.cpp,v $
                                                                         
                                                                         
@@ -59,6 +59,17 @@ CTestEnergyIncr::CTestEnergyIncr(double theTol, int maxIter, int printIt)
 CTestEnergyIncr::~CTestEnergyIncr()
 {
     
+}
+
+ConvergenceTest*
+CTestEnergyIncr::getCopy( int iterations )
+{
+  CTestEnergyIncr *theCopy ;
+  theCopy = new CTestEnergyIncr( this->tol, iterations, this->printFlag ) ;
+
+  theCopy->theSOE = this->theSOE ;
+
+  return theCopy ;
 }
 
 void

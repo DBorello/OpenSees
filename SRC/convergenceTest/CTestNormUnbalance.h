@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:58:55 $
+// $Revision: 1.3 $
+// $Date: 2001-06-14 05:26:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestNormUnbalance.h,v $
                                                                         
                                                                         
@@ -50,6 +50,8 @@ class CTestNormUnbalance: public ConvergenceTest
     CTestNormUnbalance();	    	
     CTestNormUnbalance(double tol, int maxNumIter, int printFlag);
     ~CTestNormUnbalance();
+
+    ConvergenceTest  *getCopy( int interations ) ;
 
     void setTolerance(double newTol);
     int setEquiSolnAlgo(EquiSolnAlgo &theAlgo);

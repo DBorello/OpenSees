@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-16 04:21:20 $
+// $Revision: 1.4 $
+// $Date: 2001-06-14 05:26:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestNormDispIncr.cpp,v $
                                                                         
                                                                         
@@ -50,6 +50,19 @@ CTestNormDispIncr::~CTestNormDispIncr()
 {
     
 }
+
+ConvergenceTest*
+CTestNormDispIncr::getCopy( int iterations )
+{
+  CTestNormDispIncr *theCopy ;
+  theCopy = new CTestNormDispIncr( this->tol, iterations, this->printFlag ) ;
+
+  theCopy->theSOE = this->theSOE ;
+
+  return theCopy ;
+
+}
+
 
 void
 CTestNormDispIncr::setTolerance(double newTol)
