@@ -263,6 +263,14 @@ SOURCE=..\..\..\SRC\material\uniaxial\HystereticMaterial.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\uniaxial\NewUniaxialMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\NewUniaxialMaterial.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\uniaxial\ParallelMaterial.cpp
 # End Source File
 # Begin Source File
