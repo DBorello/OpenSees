@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2001-09-21 19:14:35 $
+// $Revision: 1.17 $
+// $Date: 2001-10-02 20:20:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -51,8 +51,6 @@
 #include <Information.h>
 #include <NLBeamColumn2d.h>
 #include <MatrixUtil.h>
-#include <GaussQuadRule1d01.h>
-#include <GaussLobattoQuadRule1d01.h>
 #include <Domain.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -69,6 +67,7 @@
 
 Matrix NLBeamColumn2d::theMatrix(6,6);
 Vector NLBeamColumn2d::theVector(6);
+GaussLobattoQuadRule1d01 NLBeamColumn2d::quadRule;
 
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
@@ -462,8 +461,7 @@ NLBeamColumn2d::initializeSectionHistoryVariables (void)
 void
 NLBeamColumn2d::setSectionInterpolation (void)
 {
-    GaussLobattoQuadRule1d01 quadrat(nSections);
-    Matrix xi_pt = quadrat.getIntegrPointCoords();   
+    const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);   
     
     for (int i = 0; i < nSections; i++)
     {
@@ -506,12 +504,8 @@ int NLBeamColumn2d::update()
     v = crdTransf->getBasicTrialDisp();    
     dv = crdTransf->getBasicIncrDeltaDisp();    
 
-    // get integration point positions and weights
-    int nIntegrPts = nSections;
-    // GaussQuadRule1d01 quadrat(nIntegrPts);
-    GaussLobattoQuadRule1d01 quadrat(nIntegrPts);
-    // const Matrix &xi_pt = quadrat.getIntegrPointCoords();
-    const Vector &weight = quadrat.getIntegrPointWeights();
+    // const Matrix &xi_pt = quadrat.getIntegrPointCoords(nSections);
+    const Vector &weight = quadRule.getIntegrPointWeights(nSections);
      
     // numerical integration 
     static Vector dSs;       // section internal force increments
@@ -543,7 +537,7 @@ int NLBeamColumn2d::update()
       f.Zero();
       vr.Zero();
 
-      for (i=0; i<nIntegrPts; i++)
+      for (i=0; i<nSections; i++)
       {
           // initialize vectors with correct size  - CHANGE LATER
 	  Ss  = Ssr[i];
@@ -1212,23 +1206,21 @@ void NLBeamColumn2d::compSectionDisplacements(Vector sectionCoords[], Vector sec
    ub = crdTransf->getBasicTrialDisp();    
   
    // get integration point positions and weights
-   int nIntegrPts = nSections;
-   GaussLobattoQuadRule1d01 quadrat(nIntegrPts);
-   const Matrix &xi_pt  = quadrat.getIntegrPointCoords();
+   const Matrix &xi_pt  = quadRule.getIntegrPointCoords(nSections);
 
    // setup Vandermode and CBDI influence matrices
    int i;
    double xi;
  
    // get CBDI influence matrix
-   Matrix ls(nIntegrPts, nIntegrPts);
-   getCBDIinfluenceMatrix(nIntegrPts, xi_pt, L, ls);
+   Matrix ls(nSections, nSections);
+   getCBDIinfluenceMatrix(nSections, xi_pt, L, ls);
 
    // get section curvatures
-   Vector kappa(nIntegrPts);  // curvature
+   Vector kappa(nSections);  // curvature
    Vector vs;              // section deformations 
 
-   for (i=0; i<nIntegrPts; i++)
+   for (i=0; i<nSections; i++)
    {
        // THIS IS VERY INEFFICIENT ... CAN CHANGE LATER
        int sectionKey = 0;
@@ -1251,7 +1243,7 @@ void NLBeamColumn2d::compSectionDisplacements(Vector sectionCoords[], Vector sec
 
        //cerr << "kappa: " << kappa;   
 
-   Vector w(nIntegrPts);
+   Vector w(nSections);
    static Vector xl(NDM), uxb(NDM);
    static Vector xg(NDM), uxg(NDM); 
 
@@ -1462,30 +1454,28 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
        yg_xi0 = y_i + Ue(1) * fact;
 
        // get integration point positions and weights
-       int nIntegrPts = nSections;
-       GaussLobattoQuadRule1d01 quadrat(nIntegrPts);
-       Matrix xi_pt = quadrat.getIntegrPointCoords();
-       Vector weight = quadrat.getIntegrPointWeights();
+       const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
+       const Vector &weight = quadRule.getIntegrPointWeights(nSections);
 
        // setup Vandermode and CBDI influence matrices
        int i, j, k, i0, j0;
-       Matrix G(nIntegrPts, nIntegrPts);
-       Matrix invG(nIntegrPts, nIntegrPts);
+       Matrix G(nSections, nSections);
+       Matrix invG(nSections, nSections);
     
-       for (i = 1; i <= nIntegrPts; i++)
-	   for (j = 1; j <= nIntegrPts; j++)
+       for (i = 1; i <= nSections; i++)
+	   for (j = 1; j <= nSections; j++)
 	   {
 	       i0 = i - 1;
 	       j0 = j - 1;
 	       xi = xi_pt(i0,0);
 	       G(i0,j0) =  pow(xi,j-1);
 	   }
-       invertMatrix(nIntegrPts, G, invG);
+       invertMatrix(nSections, G, invG);
         
        // get section curvatures
-       Vector kappa(nIntegrPts);  // curvature
+       Vector kappa(nSections);  // curvature
        Vector vs;              // section deformations 
-       for (i=0; i<nIntegrPts; i++)
+       for (i=0; i<nSections; i++)
        {
 	   // THIS IS VERY INEFFICIENT ... CAN CHANGE IF RUNS TOO SLOW
 	   int sectionKey = 0;
@@ -1510,8 +1500,8 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
        int ns = 20;    
 
-       Vector lbar(nIntegrPts);
-       Vector ls(nIntegrPts);
+       Vector lbar(nSections);
+       Vector ls(nSections);
        double xl_xi, yl_xi, xg_xi, yg_xi;
        double lskappa = 0;
        int error;
@@ -1521,18 +1511,18 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
            xi = ((double) i)/ns;
 	       
 	   // evaluate CBDI matrix
-           for (j = 1; j<= nIntegrPts; j++)
+           for (j = 1; j<= nSections; j++)
 	      lbar(j-1) = (pow(xi,j+1) - xi)/(j*(j+1));
 	       
-           for (k = 0; k < nIntegrPts; k++)
+           for (k = 0; k < nSections; k++)
            {
               ls(k) = 0;
-              for (j = 0; j < nIntegrPts; j++)
+              for (j = 0; j < nSections; j++)
 		 ls(k) += (L*L) * lbar(j) * invG(j,k);
            }
 
 	   lskappa = 0;
-	   for (j = 0; j < nIntegrPts; j++)
+	   for (j = 0; j < nSections; j++)
 	      lskappa += ls(j) * kappa(j);
 	      
            // calculate displacements of the point xi in local coordinates
@@ -1600,16 +1590,13 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
        yg_xi0 = y_i;
 
        // get integration point positions and weights
-       int nIntegrPts = nSections;
-       GaussLobattoQuadRule1d01 quadrat(nIntegrPts);
-       Matrix xi_pt = quadrat.getIntegrPointCoords();
-       Vector weight = quadrat.getIntegrPointWeights();
+       const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
 
        // get section curvatures
-       Vector kappa(nIntegrPts); // curvature
+       Vector kappa(nSections); // curvature
        Vector vs; // section deformations 
 	   int i;
-       	for (i=0; i<nIntegrPts; i++)
+       	for (i=0; i<nSections; i++)
 		{
 			// THIS IS VERY INEFFICIENT ... CAN CHANGE IF RUNS TOO SLOW
 			int sectionKey = 0;
@@ -1633,7 +1620,7 @@ NLBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
        double xl_xi, yl_xi, xg_xi, yg_xi;
        int error;
      
-       for (i = 0; i< nIntegrPts; i++)
+       for (i = 0; i< nSections; i++)
        {
  	       xi = xi_pt(i,0);
 	       

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-09-20 19:54:38 $
+// $Revision: 1.6 $
+// $Date: 2001-10-02 20:20:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.h,v $
                                                                         
                                                                         
@@ -53,6 +53,7 @@
 #include <Channel.h>
 #include <SectionForceDeformation.h>
 #include <CrdTransf2d.h>
+#include <GaussLobattoQuadRule1d01.h>
 
 class Response;
 
@@ -150,6 +151,8 @@ class NLBeamColumn2d: public Element
     Vector *Ssr;                   // array of section resisting force vectors
 
     Vector *vscommit;              // array of commited section deformation vectors
+
+    static GaussLobattoQuadRule1d01 quadRule;
 
 };
 

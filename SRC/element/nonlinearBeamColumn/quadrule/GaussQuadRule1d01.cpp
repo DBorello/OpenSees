@@ -18,237 +18,326 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2001-10-02 20:20:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/quadrule/GaussQuadRule1d01.cpp,v $
                                                                         
                                                                         
-// File: ~/QuadRule/GaussQuadRule1d0101.C
-//
 // written: rms
 // Created: 12/98
-// Revision: 
 //
 // Description: This file contains the implementation of 
 // GaussQuadRule1d01 (Quadrature Rule,0).
-//
-// what: "@(#,0) GaussQuadRule1d01.C, revA"
 
 #include <Vector.h>
 #include <Matrix.h>
 
 #include <GaussQuadRule1d01.h>
 
+bool GaussQuadRule1d01::dataSet = false;
 
-GaussQuadRule1d01::GaussQuadRule1d01 (int quadOrder)
+double GaussQuadRule1d01::ptsArray[maxOrder*(maxOrder+1)/2];
+double GaussQuadRule1d01::wtsArray[maxOrder*(maxOrder+1)/2];
+
+Matrix GaussQuadRule1d01::pts1 ( ptsArray,     1,  1);
+Matrix GaussQuadRule1d01::pts2 (&ptsArray[1],  2,  1);
+Matrix GaussQuadRule1d01::pts3 (&ptsArray[3],  3,  1);
+Matrix GaussQuadRule1d01::pts4 (&ptsArray[6],  4,  1);
+Matrix GaussQuadRule1d01::pts5 (&ptsArray[10], 5,  1);
+Matrix GaussQuadRule1d01::pts6 (&ptsArray[15], 6,  1);
+Matrix GaussQuadRule1d01::pts7 (&ptsArray[21], 7,  1);
+Matrix GaussQuadRule1d01::pts8 (&ptsArray[28], 8,  1);
+Matrix GaussQuadRule1d01::pts9 (&ptsArray[36], 9,  1);
+Matrix GaussQuadRule1d01::pts10(&ptsArray[45], 10, 1);
+
+Vector GaussQuadRule1d01::wts1 ( wtsArray,     1);
+Vector GaussQuadRule1d01::wts2 (&wtsArray[1],  2);
+Vector GaussQuadRule1d01::wts3 (&wtsArray[3],  3);
+Vector GaussQuadRule1d01::wts4 (&wtsArray[6],  4);
+Vector GaussQuadRule1d01::wts5 (&wtsArray[10], 5);
+Vector GaussQuadRule1d01::wts6 (&wtsArray[15], 6);
+Vector GaussQuadRule1d01::wts7 (&wtsArray[21], 7);
+Vector GaussQuadRule1d01::wts8 (&wtsArray[28], 8);
+Vector GaussQuadRule1d01::wts9 (&wtsArray[36], 9);
+Vector GaussQuadRule1d01::wts10(&wtsArray[45], 10);
+
+GaussQuadRule1d01::GaussQuadRule1d01()
+  :order(0), myPts(0), myWts(0)
 {
-   this->setOrder(quadOrder);
+  if (dataSet == false) {
+    // One point
+    ptsArray[0] = 0.0;
+    
+    wtsArray[0] = 2.0;
+
+    // Two points
+    ptsArray[1] = -0.577350269189626;
+    ptsArray[2] =  0.577350269189626;
+    
+    wtsArray[1] = 1.0;
+    wtsArray[2] = 1.0;
+
+    // Three points
+    ptsArray[3] = -0.774596669241483;
+    ptsArray[4] =  0.0;
+    ptsArray[5] =  0.774596669241483;
+    
+    wtsArray[3] = 0.555555555555556;
+    wtsArray[4] = 0.888888888888889;
+    wtsArray[5] = 0.555555555555556;
+
+    // Four points
+    ptsArray[6] = -0.861136311594053;
+    ptsArray[7] = -0.339981043584856;
+    ptsArray[8] =  0.339981043584856;
+    ptsArray[9] =  0.861136311594053;
+    
+    wtsArray[6] = 0.347854845137454;
+    wtsArray[7] = 0.652145154862546;
+    wtsArray[8] = 0.652145154862546;
+    wtsArray[9] = 0.347854845137454;
+      
+    // Five points
+    ptsArray[10] = -0.906179845938664;
+    ptsArray[11] = -0.538469310105683;
+    ptsArray[12] =  0.0;
+    ptsArray[13] =  0.538469310105683;
+    ptsArray[14] =  0.906179845938664;
+    
+    wtsArray[10] = 0.236926885056189;
+    wtsArray[11] = 0.478628670499366;
+    wtsArray[12] = 0.568888888888889;
+    wtsArray[13] = 0.478628670499366;
+    wtsArray[14] = 0.236926885056189;
+
+    // Six points
+    ptsArray[15] = -0.932469514203152;
+    ptsArray[16] = -0.661209386466265;
+    ptsArray[17] = -0.238619186083197;
+    ptsArray[18] =  0.238619186083197;
+    ptsArray[19] =  0.661209386466265;
+    ptsArray[20] =  0.932469514203152;
+    
+    wtsArray[15] = 0.171324492379170;
+    wtsArray[16] = 0.360761573048139;
+    wtsArray[17] = 0.467913934572691;
+    wtsArray[18] = 0.467913934572691;
+    wtsArray[19] = 0.360761573048139;
+    wtsArray[20] = 0.171324492379170;
+
+    // Seven points
+    ptsArray[21] = -0.949107912342759;
+    ptsArray[22] = -0.741531185599394;
+    ptsArray[23] = -0.405845151377397;
+    ptsArray[24] =  0.0;
+    ptsArray[25] =  0.405845151377397;
+    ptsArray[26] =  0.741531185599394;
+    ptsArray[27] =  0.949107912342759;
+    
+    wtsArray[21] = 0.129484966168870;
+    wtsArray[22] = 0.279705391489277;
+    wtsArray[23] = 0.381830050505119;
+    wtsArray[24] = 0.417959183673469;
+    wtsArray[25] = 0.381830050505119;
+    wtsArray[26] = 0.279705391489277;
+    wtsArray[27] = 0.129484966168870;
+
+    // Eight points
+    ptsArray[28] = -0.960289856497536;
+    ptsArray[29] = -0.796666477413627;
+    ptsArray[30] = -0.525532409916329;
+    ptsArray[31] = -0.183434642495650;
+    ptsArray[32] =  0.183434642495650;
+    ptsArray[33] =  0.525532409916329;
+    ptsArray[34] =  0.796666477413627;
+    ptsArray[35] =  0.960289856497536;
+    
+    wtsArray[28] = 0.101228536290376;
+    wtsArray[29] = 0.222381034453374;
+    wtsArray[30] = 0.313706645877887;
+    wtsArray[31] = 0.362683783378362;
+    wtsArray[32] = 0.362683783378362;
+    wtsArray[33] = 0.313706645877887;
+    wtsArray[34] = 0.222381034453374;
+    wtsArray[35] = 0.101228536290376;
+      
+    // Nine points
+    ptsArray[36] = -0.968160239507626;
+    ptsArray[37] = -0.836031107326636;
+    ptsArray[38] = -0.613371432700590;
+    ptsArray[39] = -0.324253423403809;
+    ptsArray[40] =  0.0;
+    ptsArray[41] =  0.324253423403809;
+    ptsArray[42] =  0.613371432700590;
+    ptsArray[43] =  0.836031107326636;
+    ptsArray[44] =  0.968160239507626;
+    
+    wtsArray[36] = 0.081274388361574;
+    wtsArray[37] = 0.180648160694857;
+    wtsArray[38] = 0.260610696402935;
+    wtsArray[39] = 0.312347077040003;
+    wtsArray[40] = 0.330239355001260;
+    wtsArray[41] = 0.312347077040003;
+    wtsArray[42] = 0.260610696402935;
+    wtsArray[43] = 0.180648160694857;
+    wtsArray[44] = 0.081274388361574;
+
+    // Ten points
+    ptsArray[45] = -0.973906528517172;
+    ptsArray[46] = -0.865063366688985;
+    ptsArray[47] = -0.679409568299024;
+    ptsArray[48] = -0.433395394129247;
+    ptsArray[49] = -0.148874338981631;
+    ptsArray[50] =  0.148874338981631;
+    ptsArray[51] =  0.433395394129247;
+    ptsArray[52] =  0.679409568299024;
+    ptsArray[53] =  0.865063366688985;
+    ptsArray[54] =  0.973906528517172;
+    
+    wtsArray[45] = 0.066671344308688;
+    wtsArray[46] = 0.149451349150581;
+    wtsArray[47] = 0.219086362515982;
+    wtsArray[48] = 0.269266719309996;
+    wtsArray[49] = 0.295524224714753;
+    wtsArray[50] = 0.295524224714753;
+    wtsArray[51] = 0.269266719309996;
+    wtsArray[52] = 0.219086362515982;
+    wtsArray[53] = 0.149451349150581;
+    wtsArray[54] = 0.066671344308688;
+
+    for (int i = 0; i < 55; i++) {
+      ptsArray[i]  = 0.5*(ptsArray[i] + 1.0);
+      wtsArray[i] *= 0.5;
+    }
+
+    dataSet = true;
+  }
 }
 
 GaussQuadRule1d01::~GaussQuadRule1d01()
 {
-   if (coord)
-      delete coord;
-   if (weight)
-      delete weight;
+  // Nothing to do
 }
 
 
 int GaussQuadRule1d01::setOrder(int quadOrder)
 {
-   order = quadOrder;
+  if (quadOrder < 1 || quadOrder > maxOrder) {
+    g3ErrorHandler->fatal("%s -- Invalid quadrature order, %d",
+			  "GaussQuadRule1d01::setOrder()", quadOrder);
+    return -1;
+  }
+  
+  // Nothing needs to change if this is true
+  if (order == quadOrder)
+    return 0;
+  
+  order = quadOrder;
 
-   int numIntPts = order;
+  switch (order) {
+  case 1:
+    myPts = &pts1;
+    myWts = &wts1;
+    break;
+    
+  case 2:
+    myPts = &pts2;
+    myWts = &wts2;
+    break;
+    
+  case 3:
+    myPts = &pts3;
+    myWts = &wts3;
+    break;
+    
+  case 4:
+    myPts = &pts4;
+    myWts = &wts4;
+    break;
+    
+  case 5:
+    myPts = &pts5;
+    myWts = &wts5;
+    break;
+    
+  case 6:
+    myPts = &pts6;
+    myWts = &wts6;
+    break;
+    
+  case 7:
+    myPts = &pts7;
+    myWts = &wts7;
+    break;
+    
+  case 8:
+    myPts = &pts8;
+    myWts = &wts8;
+    break;
+    
+  case 9:
+    myPts = &pts9;
+    myWts = &wts9;
+    break;
+    
+  case 10:
+    myPts = &pts10;
+    myWts = &wts10;
+    break;
 
-   coord  = new Matrix(numIntPts,1);
-   weight = new Vector(numIntPts);
+  default:
+    g3ErrorHandler->warning("%s -- Invalid quadrature order %d",
+			    "GaussQuadRule1d01::setOrder()", order);
+    return -1;
+    break;
+  }    
 
-   Matrix &xi = *coord;
-   Vector &w  = *weight;
-
-   switch (order)
-   {
-      case 1:
-         xi(0,0) =  0.0;
-
-         w(0) = 2.0;
-      break;
-
-      case 2:
-         xi(0,0) = -0.577350269189626;
-         xi(1,0) =  0.577350269189626;
-
-         w(0) = 1.0;
-         w(1) = 1.0;
-      break;
-
-      case 3:
-         xi(0,0) = -0.774596669241483;
-         xi(1,0) =  0.0;
-         xi(2,0) =  0.774596669241483;
-
-         w(0) = 0.555555555555556;
-         w(1) = 0.888888888888889;
-         w(2) = 0.555555555555556;
-      break;
-
-      case 4:
-         xi(0,0) = -0.861136311594053;
-         xi(1,0) = -0.339981043584856;
-         xi(2,0) =  0.339981043584856;
-         xi(3,0) =  0.861136311594053;
-
-         w(0) = 0.347854845137454;
-         w(1) = 0.652145154862546;
-         w(2) = 0.652145154862546;
-         w(3) = 0.347854845137454;
-
-      break;
-
-      case 5:
-         xi(0,0) = -0.906179845938664;
-         xi(1,0) = -0.538469310105683;
-         xi(2,0) =  0.0;
-         xi(3,0) =  0.538469310105683;
-         xi(4,0) =  0.906179845938664;
-
-         w(0) = 0.236926885056189;
-         w(1) = 0.478628670499366;
-         w(2) = 0.568888888888889;
-         w(3) = 0.478628670499366;
-         w(4) = 0.236926885056189;
-      break;
-         
-      case 6:
-         xi(0,0) = -0.932469514203152;
-         xi(1,0) = -0.661209386466265;
-         xi(2,0) = -0.238619186083197;
-         xi(3,0) =  0.238619186083197;
-         xi(4,0) =  0.661209386466265;
-         xi(5,0) =  0.932469514203152;
-
-         w(0) = 0.171324492379170;
-         w(1) = 0.360761573048139;
-         w(2) = 0.467913934572691;
-         w(3) = 0.467913934572691;
-         w(4) = 0.360761573048139;
-         w(5) = 0.171324492379170;
-      break;
-
-      case 7:
-         xi(0,0) = -0.949107912342759;
-         xi(1,0) = -0.741531185599394;
-         xi(2,0) = -0.405845151377397;
-         xi(3,0) =  0.0;
-         xi(4,0) =  0.405845151377397;
-         xi(5,0) =  0.741531185599394;
-         xi(6,0) =  0.949107912342759;
-
-         w(0) = 0.129484966168870;
-         w(1) = 0.279705391489277;
-         w(2) = 0.381830050505119;
-         w(3) = 0.417959183673469;
-         w(4) = 0.381830050505119;
-         w(5) = 0.279705391489277;
-         w(6) = 0.129484966168870;
-      break;
-
-      case 8:
-         xi(0,0) = -0.960289856497536;
-         xi(1,0) = -0.796666477413627;
-         xi(2,0) = -0.525532409916329;
-         xi(3,0) = -0.183434642495650;
-         xi(4,0) =  0.183434642495650;
-         xi(5,0) =  0.525532409916329;
-         xi(6,0) =  0.796666477413627;
-         xi(7,0) =  0.960289856497536;
-
-         w(0) = 0.101228536290376;
-         w(1) = 0.222381034453374;
-         w(2) = 0.313706645877887;
-         w(3) = 0.362683783378362;
-         w(4) = 0.362683783378362;
-         w(5) = 0.313706645877887;
-         w(6) = 0.222381034453374;
-         w(7) = 0.101228536290376;
-      break;
-
-      case 9:
-         xi(0,0) = -0.968160239507626;
-         xi(1,0) = -0.836031107326636;
-         xi(2,0) = -0.613371432700590;
-         xi(3,0) = -0.324253423403809;
-         xi(4,0) =  0.0;
-         xi(5,0) =  0.324253423403809;
-         xi(6,0) =  0.613371432700590;
-         xi(7,0) =  0.836031107326636;
-         xi(8,0) =  0.968160239507626;
-
-         w(0) = 0.081274388361574;
-         w(1) = 0.180648160694857;
-         w(2) = 0.260610696402935;
-         w(3) = 0.312347077040003;
-         w(4) = 0.330239355001260;
-         w(5) = 0.312347077040003;
-         w(6) = 0.260610696402935;
-         w(7) = 0.180648160694857;
-         w(8) = 0.081274388361574;
-      break;
-
-      case 10:
-         xi(0,0) = -0.973906528517172;
-         xi(1,0) = -0.865063366688985;
-         xi(2,0) = -0.679409568299024;
-         xi(3,0) = -0.433395394129247;
-         xi(4,0) = -0.148874338981631;
-         xi(5,0) =  0.148874338981631;
-         xi(6,0) =  0.433395394129247;
-         xi(7,0) =  0.679409568299024;
-         xi(8,0) =  0.865063366688985;
-         xi(9,0) =  0.973906528517172;
-
-         w(0) = 0.066671344308688;
-         w(1) = 0.149451349150581;
-         w(2) = 0.219086362515982;
-         w(3) = 0.269266719309996;
-         w(4) = 0.295524224714753;
-         w(5) = 0.295524224714753;
-         w(6) = 0.269266719309996;
-         w(7) = 0.219086362515982;
-         w(8) = 0.149451349150581;
-         w(9) = 0.066671344308688;
-      break;
-
-      default:
-         cerr << "\n Invalid quadrature order";
-         return 0;
-      break;
-   }    
-
-   xi = (xi + 1)/2;
-   w /= 2;
-
-   return 1;
+  return 0;
 }
 
 int GaussQuadRule1d01::getOrder (void) const
 {
-   return order;
+  return order;
 }
 
 int GaussQuadRule1d01::getNumIntegrPoints (void) const
 {
-   return order;
+  return order;
 }
 
 const Matrix & 
 GaussQuadRule1d01::getIntegrPointCoords (void) const
 {
-   return *coord;
+  if (order < 1 || order > maxOrder)
+    g3ErrorHandler->warning("%s -- order %d is currently invalid",
+			    "GaussQuadRule1d01::getIntegrPointCoords()", order);
+  return *myPts;
 }
 
 const Vector & 
 GaussQuadRule1d01::getIntegrPointWeights (void) const
 {
-   return *weight;
+  if (order < 1 || order > maxOrder)
+    g3ErrorHandler->warning("%s -- order %d is currently invalid",
+			    "GaussQuadRule1d01::getIntegrPointWeights()", order);
+  return *myWts;
 }
+
+const Matrix & 
+GaussQuadRule1d01::getIntegrPointCoords (int quadOrder)
+{
+  if (order != quadOrder)
+    this->setOrder(quadOrder);
+
+  return *myPts;
+}
+
+const Vector & 
+GaussQuadRule1d01::getIntegrPointWeights (int quadOrder)
+{
+  if (order != quadOrder)
+    this->setOrder(quadOrder);
+
+  return *myWts;
+}
+

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-08-28 19:07:13 $
+// $Revision: 1.10 $
+// $Date: 2001-10-02 20:20:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -778,7 +778,6 @@ Truss::displaySelf(Renderer &theViewer, int displayMode, float fact)
 void
 Truss::Print(ostream &s, int flag)
 {
-  cerr << "HO\n";
     // compute the strain and axial force in the member
     double strain, force;
     strain = theMaterial->getStrain();

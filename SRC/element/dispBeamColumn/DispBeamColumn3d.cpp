@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-24 17:56:47 $
+// $Revision: 1.4 $
+// $Date: 2001-10-02 20:20:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -30,7 +30,6 @@
 #include <DispBeamColumn3d.h>
 #include <Node.h>
 #include <SectionForceDeformation.h>
-#include <GaussQuadRule1d01.h>
 #include <CrdTransf3d.h>
 #include <Matrix.h>
 #include <Vector.h>
@@ -48,13 +47,15 @@
 Matrix DispBeamColumn3d::K(12,12);
 Vector DispBeamColumn3d::P(12);
 double DispBeamColumn3d::workArea[200];
+GaussQuadRule1d01 DispBeamColumn3d::quadRule;
 
 DispBeamColumn3d::DispBeamColumn3d(int tag, int nd1, int nd2,
 		int numSec, SectionForceDeformation &s,
 		CrdTransf3d &coordTransf, double r)
-:Element (tag, ELE_TAG_DispBeamColumn3d), rho(r),
- Q(12), q(6), connectedExternalNodes(2), L(0.0),
- numSections(numSec), theSections(0), crdTransf(0)
+:Element (tag, ELE_TAG_DispBeamColumn3d),
+numSections(numSec), theSections(0), crdTransf(0),
+connectedExternalNodes(2), L(0.0), nd1Ptr(0), nd2Ptr(0),
+Q(12), q(6), rho(r)
 {
     // Allocate arrays of pointers to SectionForceDeformations
     theSections = new SectionForceDeformation *[numSections];
@@ -86,9 +87,10 @@ DispBeamColumn3d::DispBeamColumn3d(int tag, int nd1, int nd2,
 }
 
 DispBeamColumn3d::DispBeamColumn3d()
-:Element (0, ELE_TAG_DispBeamColumn3d), rho(0.0),
- Q(12), q(6), connectedExternalNodes(2), L(0.0),
- numSections(0), theSections(0), crdTransf(0)
+:Element (0, ELE_TAG_DispBeamColumn3d),
+numSections(0), theSections(0), crdTransf(0),
+connectedExternalNodes(2), L(0.0), nd1Ptr(0), nd2Ptr(0),
+Q(12), q(6), rho(0.0)
 {
 
 }
@@ -227,9 +229,7 @@ DispBeamColumn3d::update(void)
 	v = crdTransf->getBasicTrialDisp();
 
 	double oneOverL = 1.0/L;
-	GaussQuadRule1d01 quadrat(numSections);
-	const Matrix &pts = quadrat.getIntegrPointCoords();
-	const Vector &wts = quadrat.getIntegrPointWeights();
+	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
 
 	// Assuming member is prismatic ... have to move inside
 	// the loop if it is not prismatic
@@ -274,9 +274,8 @@ DispBeamColumn3d::getTangentStiff()
 	kb.Zero();
 	q.Zero();
 
-	GaussQuadRule1d01 quadrat(numSections);
-	const Matrix &pts = quadrat.getIntegrPointCoords();
-	const Vector &wts = quadrat.getIntegrPointWeights();
+	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
 
 	// Assuming member is prismatic ... have to move inside
 	// the loop if it is not prismatic
@@ -470,9 +469,8 @@ DispBeamColumn3d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector&
 DispBeamColumn3d::getResistingForce()
 {
-	GaussQuadRule1d01 quadrat(numSections);
-	const Matrix &pts = quadrat.getIntegrPointCoords();
-	const Vector &wts = quadrat.getIntegrPointWeights();
+	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
 
 	// Assuming member is prismatic ... have to move inside
 	// the loop if it is not prismatic

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-13 21:11:27 $
+// $Revision: 1.2 $
+// $Date: 2001-10-02 20:20:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.h,v $
 
 // Written: MHS
@@ -40,6 +40,7 @@
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
+#include <GaussQuadRule1d01.h>
 
 class Node;
 class SectionForceDeformation;
@@ -108,6 +109,8 @@ class DispBeamColumn3d : public Element
     double rho;			// Mass density per unit length
 
 	static double workArea[];
+
+	static GaussQuadRule1d01 quadRule;
 };
 
 #endif

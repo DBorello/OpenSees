@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-31 01:34:05 $
+// $Revision: 1.6 $
+// $Date: 2001-10-02 20:20:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.h,v $
                                                                         
                                                                         
@@ -50,6 +50,7 @@
 #include <Channel.h>
 #include <SectionForceDeformation.h>
 #include <CrdTransf3d.h>
+#include <GaussLobattoQuadRule1d01.h>
 
 class Response;
 
@@ -155,6 +156,8 @@ class NLBeamColumn3d: public Element
     Vector *Ssr;                   // array of section resisting force vectors
  
     Vector *vscommit;              // array of commited section deformation vectors
+
+    static GaussLobattoQuadRule1d01 quadRule;
 };
 
 #endif

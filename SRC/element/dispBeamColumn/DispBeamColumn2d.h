@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-20 00:37:24 $
+// $Revision: 1.3 $
+// $Date: 2001-10-02 20:20:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.h,v $
 
 // Written: MHS
@@ -40,6 +40,7 @@
 #include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
+#include <GaussQuadRule1d01.h>
 
 class Node;
 class SectionForceDeformation;
@@ -115,6 +116,8 @@ class DispBeamColumn2d : public Element
     double rho;			// Mass density per unit length
 
 	static double workArea[];
+
+	static GaussQuadRule1d01 quadRule;
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
     int gradientIdentifier;

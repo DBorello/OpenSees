@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-09-21 19:14:33 $
+// $Revision: 1.6 $
+// $Date: 2001-10-02 20:20:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -30,7 +30,6 @@
 #include <DispBeamColumn2d.h>
 #include <Node.h>
 #include <SectionForceDeformation.h>
-#include <GaussQuadRule1d01.h>
 #include <CrdTransf2d.h>
 #include <Matrix.h>
 #include <Vector.h>
@@ -48,13 +47,15 @@
 Matrix DispBeamColumn2d::K(6,6);
 Vector DispBeamColumn2d::P(6);
 double DispBeamColumn2d::workArea[100];
+GaussQuadRule1d01 DispBeamColumn2d::quadRule;
 
 DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
 		int numSec, SectionForceDeformation &s,
 		CrdTransf2d &coordTransf, double r)
-:Element (tag, ELE_TAG_DispBeamColumn2d), rho(r),
- Q(6), q(3), connectedExternalNodes(2), L(0.0),
- numSections(numSec), theSections(0), crdTransf(0)
+:Element (tag, ELE_TAG_DispBeamColumn2d), 
+  numSections(numSec), theSections(0), crdTransf(0),
+  connectedExternalNodes(2), L(0.0), nd1Ptr(0), nd2Ptr(0),
+  Q(6), q(3), rho(r)
 {
     // Allocate arrays of pointers to SectionForceDeformations
     theSections = new SectionForceDeformation *[numSections];
@@ -92,9 +93,10 @@ DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
 }
 
 DispBeamColumn2d::DispBeamColumn2d()
-:Element (0, ELE_TAG_DispBeamColumn2d), rho(0.0),
- Q(6), q(3), connectedExternalNodes(2), L(0.0),
- numSections(0), theSections(0), crdTransf(0)
+:Element (0, ELE_TAG_DispBeamColumn2d),
+  numSections(0), theSections(0), crdTransf(0),
+  connectedExternalNodes(2), L(0.0), nd1Ptr(0), nd2Ptr(0),
+  Q(6), q(3), rho(0.0)
 {
 // AddingSensitivity:BEGIN /////////////////////////////////////
 	gradientIdentifier = 0;
@@ -237,9 +239,7 @@ DispBeamColumn2d::update(void)
 	v = crdTransf->getBasicTrialDisp();
 
 	double oneOverL = 1.0/L;
-	GaussQuadRule1d01 quadrat(numSections);
-	const Matrix &pts = quadrat.getIntegrPointCoords();
-	const Vector &wts = quadrat.getIntegrPointWeights();
+	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
 
 	// Assuming member is prismatic ... have to move inside
 	// the loop if it is not prismatic
@@ -280,9 +280,8 @@ DispBeamColumn2d::getTangentStiff()
 	kb.Zero();
 	q.Zero();
 
-	GaussQuadRule1d01 quadrat(numSections);
-	const Matrix &pts = quadrat.getIntegrPointCoords();
-	const Vector &wts = quadrat.getIntegrPointWeights();
+	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
 
 	// Assuming member is prismatic ... have to move inside
 	// the loop if it is not prismatic
@@ -460,9 +459,8 @@ DispBeamColumn2d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector&
 DispBeamColumn2d::getResistingForce()
 {
-	GaussQuadRule1d01 quadrat(numSections);
-	const Matrix &pts = quadrat.getIntegrPointCoords();
-	const Vector &wts = quadrat.getIntegrPointWeights();
+	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
 
 	// Assuming member is prismatic ... have to move inside
 	// the loop if it is not prismatic
@@ -764,9 +762,8 @@ DispBeamColumn2d::gradient(bool compute, int identifier)
 			
 			if (identifier == 0) { // "Phase 1": return gradient vector
 
-				GaussQuadRule1d01 quadrat(numSections);
-				const Matrix &pts = quadrat.getIntegrPointCoords();
-				const Vector &wts = quadrat.getIntegrPointWeights();
+				const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+				const Vector &wts = quadRule.getIntegrPointWeights(numSections);
 
 				// Assuming member is prismatic ... have to move inside
 				// the loop if it is not prismatic

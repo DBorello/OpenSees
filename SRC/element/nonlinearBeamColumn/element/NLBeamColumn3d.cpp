@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-09-04 20:00:52 $
+// $Revision: 1.10 $
+// $Date: 2001-10-02 20:20:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -52,8 +52,6 @@
 #include <Information.h>
 #include <NLBeamColumn3d.h>
 #include <MatrixUtil.h>
-#include <GaussQuadRule1d01.h>
-#include <GaussLobattoQuadRule1d01.h>
 #include <Domain.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -66,6 +64,8 @@
 #define  NND   6         // number of nodal dof's
 #define  NEGD 12         // number of element global dof's
 #define  NEBD  6         // number of element dof's in the basic system
+
+GaussLobattoQuadRule1d01 NLBeamColumn3d::quadRule;
 
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
@@ -486,8 +486,7 @@ NLBeamColumn3d::initializeSectionHistoryVariables (void)
 void
 NLBeamColumn3d::setSectionInterpolation (void)
 {
-    GaussLobattoQuadRule1d01 quadrat(nSections);
-    Matrix xi_pt = quadrat.getIntegrPointCoords();   
+    const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);   
 
     for (int i = 0; i < nSections; i++)
     {
@@ -541,11 +540,8 @@ NLBeamColumn3d::update(void)
     dv = crdTransf->getBasicIncrDeltaDisp();    
 
     // get integration point positions and weights
-    int nIntegrPts = nSections;
-    // GaussQuadRule1d01 quadrat(nIntegrPts);
-    GaussLobattoQuadRule1d01 quadrat(nIntegrPts);
-    // const Matrix &xi_pt = quadrat.getIntegrPointCoords();
-    const Vector &weight = quadrat.getIntegrPointWeights();
+    // const Matrix &xi_pt = quadRule.getIntegrPointCoords(nSections);
+    const Vector &weight = quadRule.getIntegrPointWeights(nSections);
      
     // numerical integration 
     static Vector dSs;       // section internal force increments
@@ -577,7 +573,7 @@ NLBeamColumn3d::update(void)
       f.Zero();
       vr.Zero();
 
-      for (i=0; i<nIntegrPts; i++)
+      for (i=0; i<nSections; i++)
       {
 	  
           // initialize vectors with correct size  - CHANGE LATER
@@ -1275,21 +1271,19 @@ NLBeamColumn3d::compSectionDisplacements(Vector sectionCoords[], Vector sectionD
    ub = crdTransf->getBasicTrialDisp();    
   
    // get integration point positions and weights
-   int nIntegrPts = nSections;
-   GaussLobattoQuadRule1d01 quadrat(nIntegrPts);
-   const Matrix &xi_pt  = quadrat.getIntegrPointCoords();
+   const Matrix &xi_pt  = quadRule.getIntegrPointCoords(nSections);
 
    // setup Vandermode and CBDI influence matrices
    int i;
    double xi;
  
    // get CBDI influence matrix
-   Matrix ls(nIntegrPts, nIntegrPts);
-   getCBDIinfluenceMatrix(nIntegrPts, xi_pt, L, ls);
+   Matrix ls(nSections, nSections);
+   getCBDIinfluenceMatrix(nSections, xi_pt, L, ls);
      
    // get section curvatures
-   Vector kappa_y(nIntegrPts);  // curvature
-   Vector kappa_z(nIntegrPts);  // curvature
+   Vector kappa_y(nSections);  // curvature
+   Vector kappa_z(nSections);  // curvature
    static Vector vs;                // section deformations 
         
    for (i=0; i<nSections; i++)
@@ -1321,7 +1315,7 @@ NLBeamColumn3d::compSectionDisplacements(Vector sectionCoords[], Vector sectionD
    //cout << "kappa_y: " << kappa_y;   
    //cout << "kappa_z: " << kappa_z;   
    
-   Vector v(nIntegrPts), w(nIntegrPts);
+   Vector v(nSections), w(nSections);
    static Vector xl(NDM), uxb(NDM);
    static Vector xg(NDM), uxg(NDM); 
    // double theta;                             // angle of twist of the sections
