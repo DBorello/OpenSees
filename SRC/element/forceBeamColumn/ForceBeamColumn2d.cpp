@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-11-25 00:45:07 $
+// $Revision: 1.17 $
+// $Date: 2004-10-30 00:05:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -948,6 +948,10 @@ ForceBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
     double P = data(0)*loadFactor;
     double N = data(1)*loadFactor;
     double aOverL = data(2);
+
+    if (aOverL < 0.0 || aOverL > 1.0)
+      return 0;
+
     double a = aOverL*L;
 
     double V1 = P*(1.0-aOverL);

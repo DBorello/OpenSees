@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-12-12 18:39:24 $
+// $Revision: 1.15 $
+// $Date: 2004-10-30 00:05:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -429,6 +429,10 @@ ElasticBeam3d::addLoad(ElementalLoad *theLoad, double loadFactor)
     double Pz = data(1)*loadFactor;
     double N  = data(2)*loadFactor;
     double aOverL = data(3);
+
+    if (aOverL < 0.0 || aOverL > 1.0)
+      return 0;
+
     double a = aOverL*L;
     double b = L-a;
 
