@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.31 $
-// $Date: 2003-08-29 19:57:28 $
+// $Revision: 1.32 $
+// $Date: 2003-10-31 22:00:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -46,6 +46,9 @@
 //Zhaohui Yang (UCD)
 #include <EightNodeBrick.h>
 #include <TwentyNodeBrick.h>
+//Boris Jeremic, Guanzhou Jie (UCD)
+#include <TwentySevenNodeBrick.h>
+
 
 #include <CrdTransf2d.h>
 #include <CrdTransf3d.h>
@@ -180,6 +183,16 @@ extern int TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData,
 						    TclModelBuilder *, 
 						    int);
 
+
+//Boris Jeremic & Guanzhou Jie 10/30/2003
+extern int TclModelBuilder_addTwentySevenNodeBrick(ClientData, 
+                                                   Tcl_Interp *, 
+                                                   int, 
+                                                   TCL_Char **, 
+                                                   Domain*, 
+                                                   TclModelBuilder *, 
+                                                   int);
+
 //Rohit Kraul
 extern int
 TclModelBuilder_addElastic2dGNL(ClientData, Tcl_Interp *, int, TCL_Char **,
@@ -309,6 +322,22 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 						    eleArgStart);
     return result;
   } 
+
+
+  //Boris Jeremic & Guanzhou Jie
+  else if (strcmp(argv[1],"Brick27N") == 0) 
+    {
+      int eleArgStart = 1;
+      int result = TclModelBuilder_addTwentySevenNodeBrick(clientData, 
+                                                           interp, 
+                                                           argc, 
+                                                           argv,
+                                                           theTclDomain, 
+                                                           theTclBuilder, 
+                                                           eleArgStart);
+                                                           return result;
+    }
+
 
   //Boris Jeremic & Zhaohui  
   else if (strcmp(argv[1],"Brick8N_u_p_U") == 0) {
