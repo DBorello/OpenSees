@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2001-09-13 19:12:16 $
+// $Revision: 1.3 $
+// $Date: 2002-02-26 06:22:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/nDarray.cpp,v $
                                                                         
                                                                         
@@ -962,7 +962,7 @@ nDarray& nDarray::operator+=(const nDarray & rval)
     for ( i=0 ; i<this_rank_of_nDarray ; i++ )
       if (this->pc_nDarray_rep->dim[i] != rval.pc_nDarray_rep->dim[i] )
         {
-::fprintf(stderr,"\a\nDimension discrepancy in operator+\n\
+::fprintf(stderr,"\a\nDimension discrepancy in operator+=\n\
 this->pc_nDarray_rep->dim[%d]=%d\n\
 arg.pc_nDarray_rep->dim[%d]=%d\n",
 i,this->pc_nDarray_rep->dim[i],
