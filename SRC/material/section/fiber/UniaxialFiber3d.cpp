@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:33:36 $
+// $Revision: 1.7 $
+// $Date: 2003-05-08 22:56:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber3d.cpp,v $
                                                                         
                                                                         
@@ -333,6 +333,9 @@ void UniaxialFiber3d::Print(OPS_Stream &s, int flag)
 Response*
 UniaxialFiber3d::setResponse(const char **argv, int argc, Information &info)
 {
+	if (argc == 0)
+		return 0;
+
 	if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)		
 		return new FiberResponse(this, 1, Vector(3));
 
