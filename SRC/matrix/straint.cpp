@@ -79,23 +79,23 @@ straintensor::straintensor(const nDarray & x):
 //#  }
 
 
-//.... // IT IS NOT INHERITED so must be defined in all derived classes
-//.... // See ARM page 277.
-//.... //##############################################################################
-//.... straintensor::~straintensor()
-//.... {
-//....   if (reference_count(-1) == 0)  // if reference count  goes to 0
-//....     {
-//.... // DEallocate memory of the actual nDarray
-//.... //    delete [pc_nDarray_rep->pc_nDarray_rep->total_numb] pc_nDarray_rep->pd_nDdata;
-//.... // nema potrebe za brojem clanova koji se brisu## see ELLIS & STROUSTRUP $18.3
-//.... //                                                and note on the p.65($5.3.4)
-//....     delete [] data();
-//....     delete [] dim();
-//....     delete pc_nDarray_rep;
-//....   }
-//.... }
-
+ // IT IS NOT INHERITED so must be defined in all derived classes
+ // See ARM page 277.
+ //##############################################################################
+// straintensor::~straintensor()
+// {
+//   if (reference_count(-1) == 0)  // if reference count  goes to 0
+//     {
+// // DEallocate memory of the actual nDarray
+// //    delete [pc_nDarray_rep->pc_nDarray_rep->total_numb] pc_nDarray_rep->pd_nDdata;
+// // nema potrebe za brojem clanova koji se brisu## see ELLIS & STROUSTRUP $18.3
+// //                                                and note on the p.65($5.3.4)
+//     delete [] data();
+//     delete [] dim();
+//     delete pc_nDarray_rep;
+//   }
+// }
+//
 
 // IT IS NOT INHERITED so must be defined in all derived classes
 // See ARM page 306.
@@ -303,6 +303,19 @@ double straintensor::Jinvariant3() const
   }
 
 
+
+//##############################################################################
+double straintensor::equivalent( ) const	  //Zhaohui added 09-02-2000
+{   
+    // Evaluating e_eq = sqrt( 2.0 * epsilon_ij * epsilon_ij / 3.0)
+    straintensor pstrain =  *this;
+    tensor temp  = pstrain("ij") * pstrain("ij");
+    double tempd = temp.trace();
+    double e_eq  = pow( 2.0 * tempd / 3.0, 0.5 );
+    //cout << "e_eq = " << e_eq << endln;
+    return e_eq;
+
+}
 
 
 //##############################################################################

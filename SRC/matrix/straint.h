@@ -48,8 +48,8 @@ class straintensor : public tensor
     straintensor(const tensor & x); // copy-initializer
     straintensor(const nDarray & x); // copy-initializer
 
-//....     ~straintensor( );
-
+    //~straintensor( );
+    
     straintensor operator=(const straintensor & rval); // straintensor assignment
     straintensor operator=(const tensor & rval);// tensor assignment to straintensor
     straintensor operator=(const nDarray & rval);// nDarray assignment to straintensor
@@ -71,6 +71,8 @@ class straintensor : public tensor
     double Jinvariant1( ) const;
     double Jinvariant2( ) const;
     double Jinvariant3( ) const;
+
+    double equivalent( ) const;	  //Zhaohui added 09-02-2000
 
     straintensor deviator( ) const;
     straintensor principal( ) const;
