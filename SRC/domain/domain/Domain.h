@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-12-05 22:24:32 $
+// $Revision: 1.7 $
+// $Date: 2002-12-09 21:50:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
                                                                         
@@ -66,6 +66,7 @@ class SingleDomSP_Iter;
 class SingleDomMP_Iter;
 class  SingleDomAllSP_Iter;
 
+class MeshRegion;
 class Recorder;
 class Graph;
 class NodeGraph;
@@ -74,6 +75,7 @@ class Channel;
 class FEM_ObjectBroker;
 
 class TaggedObjectStorage;
+
 
 class Domain
 {
@@ -172,6 +174,8 @@ class Domain
     virtual int  addRecorder(Recorder &theRecorder);    	
     virtual int  playback(int cTag);    	    
     virtual int  removeRecorders(void);
+    virtual int  addRegion(MeshRegion &theRegion);    	
+    virtual MeshRegion *getRegion(int region);    	
 
     virtual void Print(ostream &s, int flag =0);
     friend ostream &operator<<(ostream &s, Domain &M);    
@@ -216,6 +220,10 @@ class Domain
     
     Recorder **theRecorders;
     int numRecorders;    
+
+    MeshRegion **theRegions;
+    int numRegions;    
+
     int commitTag;
     
     Vector theBounds;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2002-12-06 20:26:23 $
+// $Revision: 1.17 $
+// $Date: 2002-12-09 21:50:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -67,6 +67,7 @@
 #include <Vertex.h>
 #include <Graph.h>
 #include <Recorder.h>
+#include <MeshRegion.h>
 #include <Analysis.h>
 #include <FE_Datastore.h>
 #include <FEM_ObjectBroker.h>
@@ -77,7 +78,7 @@ Domain::Domain()
  dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
  eleGraphBuiltFlag(false),  nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0), 
- theRecorders(0), numRecorders(0), commitTag(0),
+ theRecorders(0), numRecorders(0), theRegions(0), numRegions(0), commitTag(0),
  theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
 {
     // init the arrays for storing the domain components
@@ -121,7 +122,7 @@ Domain::Domain(int numNodes, int numElements, int numSPs, int numMPs,
  dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0),
- theRecorders(0), numRecorders(0), commitTag(0),
+ theRecorders(0), numRecorders(0), theRegions(0), numRegions(0), commitTag(0),
  theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
 {
     // init the arrays for storing the domain components
@@ -173,7 +174,7 @@ Domain::Domain(TaggedObjectStorage &theNodesStorage,
  theSPs(&theSPsStorage),
  theMPs(&theMPsStorage), 
  theLoadPatterns(&theLoadPatternsStorage),
- theRecorders(0), numRecorders(0), commitTag(0),
+ theRecorders(0), numRecorders(0), theRegions(0), numRegions(0), commitTag(0),
  theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
 {
     // init the iters    
@@ -222,7 +223,7 @@ Domain::Domain(TaggedObjectStorage &theStorage)
  dbEle(0), dbNod(0), dbSPs(0), dbMPs(0), dbLPs(0),
  eleGraphBuiltFlag(false), nodeGraphBuiltFlag(false), theNodeGraph(0), 
  theElementGraph(0), 
- theRecorders(0), numRecorders(0), commitTag(0),
+ theRecorders(0), numRecorders(0), theRegions(0), numRegions(0), commitTag(0),
  theBounds(6), theEigenvalues(0), theEigenvalueSetTime(0)
 {
     // init the arrays for storing the domain components
@@ -314,8 +315,16 @@ Domain::~Domain()
       delete theRecorders[i];
     
     if (theRecorders != 0) {
-	free((void *)theRecorders);
-	theRecorders = 0;
+      delete [] theRecorders;
+      theRecorders = 0;
+    }
+
+    for (int i=0; i<numRegions; i++)  
+      delete theRegions[i];
+    
+    if (theRegions != 0) {
+      delete [] theRegions;
+      theRegions = 0;
     }
 
     if (theNodeGraph != 0)
@@ -742,8 +751,17 @@ Domain::clearAll(void) {
     numRecorders = 0;
     
     if (theRecorders != 0) {
-	free((void *)theRecorders);    
-	theRecorders = 0;
+      delete [] theRecorders;
+      theRecorders = 0;
+    }
+
+    for (int i=0; i<numRegions; i++)
+	delete theRegions[i];
+    numRegions = 0;
+    
+    if (theRegions != 0) {
+      delete [] theRegions;
+      theRegions = 0;
     }
 
     // set the time back to 0.0
@@ -1514,7 +1532,7 @@ ostream &operator<<(ostream &s, Domain &M)
 int  
 Domain::addRecorder(Recorder &theRecorder)
 {
-    Recorder **newRecorders = (Recorder **)malloc((numRecorders+1)*sizeof(Recorder *)); 
+    Recorder **newRecorders = new Recorder *[numRecorders + 1]; 
     if (newRecorders == 0) {
 	g3ErrorHandler->warning("Domain::addRecorder() - %s\n",
 				"could not add ran out of memory\n");
@@ -1526,13 +1544,12 @@ Domain::addRecorder(Recorder &theRecorder)
     newRecorders[numRecorders] = &theRecorder;
 
     if (theRecorders != 0)
-	free((void *)theRecorders);
+      delete [] theRecorders;
     
     theRecorders = newRecorders;
     numRecorders++;
     return 0;
 }
-
 
 
 int
@@ -1542,12 +1559,43 @@ Domain::removeRecorders(void)
       delete theRecorders[i];
     
     if (theRecorders != 0) {
-	free((void *)theRecorders);
-	theRecorders = 0;
+      delete [] theRecorders;
     }
   
     theRecorders = 0;
     numRecorders = 0;
+    return 0;
+}
+
+int  
+Domain::addRegion(MeshRegion &theRegion)
+{
+    MeshRegion **newRegions = new MeshRegion *[numRegions + 1]; 
+    if (newRegions == 0) {
+	g3ErrorHandler->warning("Domain::addRegion() - %s\n",
+				"could not add ran out of memory\n");
+	return -1;
+    }
+    
+    for (int i=0; i<numRegions; i++)
+	newRegions[i] = theRegions[i];
+    newRegions[numRegions] = &theRegion;
+    theRegion.setDomain(this);
+    if (theRegions != 0)
+      delete [] theRegions;
+    
+    theRegions = newRegions;
+    numRegions++;
+    return 0;
+}
+
+MeshRegion *
+Domain::getRegion(int tag)
+{
+    for (int i=0; i<numRegions; i++)
+      if (theRegions[i]->getTag() == tag)
+	return theRegions[i];
+
     return 0;
 }
 
