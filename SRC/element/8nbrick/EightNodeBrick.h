@@ -54,7 +54,6 @@
 
 #include <Matrix.h>
 #include <Vector.h>
-#include <ID.h>
 
 // Xiaoyan added from brick3d.hh   07/11/00
 #include <basics.h>
@@ -166,6 +165,8 @@ class EightNodeBrick: public Element
     static Vector P;		// Element resisting force vector
     Vector Q;		// Applied nodal loads
     Vector bf;  	// Body forces
+
+    //Vector q0;  // hold element load affects q0 and p0 in one vector
     
     // double thickness;	// Element thickness
     double rho;		// Mass per unit volume
@@ -285,7 +286,7 @@ class EightNodeBrick: public Element
     void reportPAK(char *);
     void reportpqtheta(int);
     //void reportLM(char *);
-    Vector reportTensor(char *);
+    void computeGaussPoint(void);
     void reportCIPIC(char *);
     void reportTensorF(FILE *);
 

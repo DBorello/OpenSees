@@ -45,14 +45,16 @@
 #include <ElementResponse.h>
 
 #include <EightNodeBrick.h>
+#include <ElementalLoad.h>
 #define FixedOrder 2
 
 Matrix EightNodeBrick::K(24, 24);      
 Matrix EightNodeBrick::C(24, 24);      
 Matrix EightNodeBrick::M(24, 24);      
 Vector EightNodeBrick::P(24);	       
-Vector InfoP(33);
-Vector InfoS(49);
+Vector InfoP(FixedOrder*FixedOrder*FixedOrder*4+1); //Plastic info 32+1 2X2X2
+Vector InfoS(FixedOrder*FixedOrder*FixedOrder*6+1); //Stress 8*6+1  2X2X2
+Vector Gsc8(FixedOrder*FixedOrder*FixedOrder*3+1); //Gauss point coordinates
 
 //====================================================================
 //Reorganized constructor ____ Zhaohui 02-10-2000
@@ -778,7 +780,7 @@ tensor EightNodeBrick::getStiffnessTensor(void)
     tensor JacobianINVtemp;
     tensor dhGlobal;
 
-    double tmp= 0;
+    //double tmp= 0;
 
     
     // tensor of incremental displacements taken from node objects
@@ -2132,7 +2134,8 @@ void EightNodeBrick::reportpqtheta(int GP_numb)
 //  }
 
 //#############################################################################
-Vector EightNodeBrick::reportTensor(char * msg)
+//Compute gauss point coordinates
+void EightNodeBrick::computeGaussPoint()
   {
     //    if ( msg ) ::printf("** %s\n",msg);
     
@@ -2140,8 +2143,8 @@ Vector EightNodeBrick::reportTensor(char * msg)
     // special case for 8 nodes only
     int count;
     count = FixedOrder*FixedOrder*FixedOrder;
-    Vector Gsc(count*3+1); //+1: number of Gauss point in element
-    Gsc(0) = count;
+    //Vector Gsc(count*3+1); //+1: number of Gauss point in element
+    Gsc8(0) = count;
 
     double r  = 0.0;
     double s  = 0.0;
@@ -2151,8 +2154,9 @@ Vector EightNodeBrick::reportTensor(char * msg)
 
     // special case for 8 nodes only
     static const int dim[] = {3, 8}; // static-> see ARM pp289-290
+    static const int dimM[] = {3,  FixedOrder*FixedOrder*FixedOrder}; // found a bug: dimM depends on Order of Gauss Points Joey Yang March 02, 02
     tensor NodalCoord(2, dim, 0.0);
-    tensor matpointCoord(2, dim, 0.0);
+    tensor matpointCoord(2, dimM, 0.0);
     int h_dim[] = {24,3};   // Xiaoyan changed from {60,3} to {24,3} for 8 nodes
     tensor H(2, h_dim, 0.0);
 
@@ -2232,9 +2236,9 @@ Vector EightNodeBrick::reportTensor(char * msg)
                //                                        matpointCoord.val(2,where+1),
                //                                        matpointCoord.val(3,where+1));
 	       
-	       Gsc(where*3+1) = matpointCoord.val(1,where+1);
-	       Gsc(where*3+2) = matpointCoord.val(2,where+1);
-	       Gsc(where*3+3) = matpointCoord.val(3,where+1);
+	       Gsc8(where*3+1) = matpointCoord.val(1,where+1);
+	       Gsc8(where*3+2) = matpointCoord.val(2,where+1);
+	       Gsc8(where*3+3) = matpointCoord.val(3,where+1);
 
     //matpoint[where].reportTensor("");
 
@@ -2242,7 +2246,7 @@ Vector EightNodeBrick::reportTensor(char * msg)
               }
           }
       }
-      return Gsc;
+      //return Gsc8;
  }
 
 
@@ -2458,7 +2462,7 @@ int EightNodeBrick::commitState ()
     int retVal = 0;
 
     // Loop over the integration points and commit the material states
-    int count  = r_integration_order* s_integration_order * t_integration_order;
+    //int count  = r_integration_order* s_integration_order * t_integration_order;
     //for (i = 0; i < r_integration_order; i++)		    // Xiaoyan chaneged order to
     //  for (j = 0; j < s_integration_order; j++)	    // r_integration_order,
     //							    // s_integration_order, and
@@ -2503,8 +2507,8 @@ int EightNodeBrick::commitState ()
 	 //cerr << "strain21: "<< stn.cval(2, 1) << " "<< stn.cval(2, 2) << " " << stn.cval(2, 3) << endln; 
  	 //cerr << "strain31: "<< stn.cval(3, 1) << " "<< stn.cval(3, 2) << " " << stn.cval(3, 3) << endln; 
 	 
-	 double  p = -1*( prin.cval(1, 1)+ prin.cval(2, 2) +prin.cval(3, 3) )/3.0;
-	 double  ev = -1*( stnprin.cval(1, 1)+ stnprin.cval(2, 2) + stnprin.cval(3, 3) )/3.0;
+	 //double  p = -1*( prin.cval(1, 1)+ prin.cval(2, 2) +prin.cval(3, 3) )/3.0;
+	 //double  ev = -1*( stnprin.cval(1, 1)+ stnprin.cval(2, 2) + stnprin.cval(3, 3) )/3.0;
 	 //cerr << "   " << p;
 
 	 //if (p < 0)
@@ -2756,10 +2760,59 @@ void EightNodeBrick::zeroLoad(void)
 int 
 EightNodeBrick::addLoad(ElementalLoad *theLoad, double loadFactor)
 {  
-  g3ErrorHandler->warning("EightNodeBrick::addLoad - load type unknown for ele with tag: %d\n",
-			  this->getTag());
+  //g3ErrorHandler->warning("EightNodeBrick::addLoad - load type unknown for ele with tag: %d\n",
+  //			  this->getTag());
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
   
-  return -1;
+  if (type == LOAD_TAG_BrickSelfWeight) {
+  
+    Vector bforce(24);  
+    // Check for a quick return
+    //cerr << "rho " << rho << endln;
+    if (rho == 0.0)
+    	return 0;
+  
+    Vector ba(24), bfx(3);  
+    bfx(0) = bf(0) * loadFactor;
+    bfx(1) = bf(1) * loadFactor;
+    bfx(2) = bf(2) * loadFactor;
+  
+    ba(0) =  bfx(0);
+    ba(1) =  bfx(1);
+    ba(2) =  bfx(2);
+    ba(3) =  bfx(0);
+    ba(4) =  bfx(1);
+    ba(5) =  bfx(2);
+    ba(6) =  bfx(0);
+    ba(7) =  bfx(1);
+    ba(8) =  bfx(2);
+    ba(9) =  bfx(0);
+    ba(10) = bfx(1);
+    ba(11) = bfx(2);
+    ba(12) = bfx(0);
+    ba(13) = bfx(1);
+    ba(14) = bfx(2);
+    ba(15) = bfx(0);
+    ba(16) = bfx(1);
+    ba(17) = bfx(2);
+    ba(18) = bfx(0);
+    ba(19) = bfx(1);
+    ba(20) = bfx(2);
+    ba(21) = bfx(0);
+    ba(22) = bfx(1);
+    ba(23) = bfx(2);
+  
+    //Form equivalent body force
+    this->getMass();
+    bforce.addMatrixVector(0.0, M, ba, 1.0);
+    Q.addVector(1.0, bforce, 1.0);       
+  } else  {
+    g3ErrorHandler->warning("EightNodeBrick::addLoad() - 8NodeBrick %d,load type %d unknown\n", 
+  			    this->getTag(), type);
+    return -1;
+  }
+  return 0;
 }
 
 
@@ -2843,7 +2896,7 @@ const Vector EightNodeBrick::FormEquiBodyForce(void)
 
     // Check for a quick return
     //cerr << "rho " << rho << endln;
-    if (rho == 0.0) 
+    if (rho == 0.0)
     	return bforce;
 
     Vector ba(24);  
@@ -2881,6 +2934,8 @@ const Vector EightNodeBrick::FormEquiBodyForce(void)
     //cerr << " @@@@@ FormEquiBodyForce  " << bforce;
     
     return bforce;
+
+    
 }
 
 
@@ -2900,7 +2955,8 @@ const Vector &EightNodeBrick::getResistingForce ()
     //cerr << "P" << P;
     //cerr << "Q" << Q;
 
-    P = P - Q;
+    //P = P - Q;
+    P.addVector(1.0, Q, -1.0);
 
     //cerr << "P-Q" << P;
     return P;
@@ -3130,7 +3186,7 @@ Response * EightNodeBrick::setResponse (char **argv, int argc, Information &eleI
     		return new ElementResponse(this, 2, K);
 
     //========================================================
-    else if (strcmp(argv[0],"plastify") == 0 || strcmp(argv[0],"plastified") == 0)
+    else if (strcmp(argv[0],"plastic") == 0 || strcmp(argv[0],"plastified") == 0)
     {
        //checking if element plastified
        //int count  = r_integration_order* s_integration_order * t_integration_order;
@@ -3153,6 +3209,12 @@ Response * EightNodeBrick::setResponse (char **argv, int argc, Information &eleI
     else if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
     {
        return new ElementResponse(this, 4, InfoS);
+    } 
+
+    //========================================================
+    else if (strcmp(argv[0],"gausspoint") == 0 || strcmp(argv[0],"GaussPoint") == 0)
+    {
+       return new ElementResponse(this, 5, Gsc8);
     } 
 
     //========================================================
@@ -3183,21 +3245,22 @@ int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
        	      {
 		//checking if element plastified
        	        int count  = r_integration_order* s_integration_order * t_integration_order;
-
-       	        Vector Gsc(24+1);  // 8*3 + count
-		Gsc = this->reportTensor("Gauss Point Coor.");
+		//cout << count << endln;
+       	        //Vector Gsc(FixedOrder*FixedOrder*FixedOrder*3+1);  // 8*3 + count
+		computeGaussPoint();
+		//cout << count << endln;
 
 		//Vector Info(109); // count * 4 +1
-		InfoP(0) = Gsc(0); //Number of Gauss point
+		InfoP(0) = Gsc8(0); //Number of Gauss point
 
        	        straintensor pl_stn;
        	        
 		int plastify;
        	        for (int i = 0; i < count; i++) {
        	          plastify = 0;
-	   	  InfoP(i*4+1) = Gsc(i*3+1); //x
-	   	  InfoP(i*4+2) = Gsc(i*3+2); //y
-	   	  InfoP(i*4+3) = Gsc(i*3+3); //z
+	   	  InfoP(i*4+1) = Gsc8(i*3+1); //x
+	   	  InfoP(i*4+2) = Gsc8(i*3+2); //y
+	   	  InfoP(i*4+3) = Gsc8(i*3+3); //z
        	          pl_stn = matpoint[i]->getPlasticStrainTensor();
        	          //double  p_plastc = pl_stn.p_hydrostatic();
        	          double  q_plastc = pl_stn.q_deviatoric();
@@ -3247,9 +3310,12 @@ int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
 		}
  	   	return eleInfo.setVector( InfoS );
 	      }
-	   /*case 2:
-	   	return eleInfo.setMatrix(this->getTangentStiff());
-	    */
+	   case 5:
+	   {
+		this->computeGaussPoint();
+	   	return eleInfo.setVector(Gsc8);
+	   }
+	   
 	   default: 
 	   	return -1;
 	}
