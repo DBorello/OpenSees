@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-01-09 23:42:08 $
+// $Revision: 1.9 $
+// $Date: 2002-04-23 21:43:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -37,13 +37,12 @@
 #include <Matrix.h>
 #include <Element.h>
 #include <Node.h>
-#include <SectionForceDeformation.h>
 #include <Domain.h>
 #include <ErrorHandler.h>
 #include <BbarBrick.h>
 #include <shp3d.h>
 #include <Renderer.h>
-
+#include <ElementResponse.h>
 
 //static data
 double  BbarBrick::xl[3][8] ;
@@ -108,7 +107,7 @@ connectedExternalNodes(8), load(0)
       if (materialPointers[i] == 0) {
 
 	  g3ErrorHandler->fatal("BbarBrick::constructor %s",
-		"- failed to get a material of type: ShellSection");
+		"- failed to get a material of type: ThreeDimensional");
       } //end if
       
   } //end for i 
@@ -978,4 +977,62 @@ BbarBrick::displaySelf(Renderer &theViewer, int displayMode, float fact)
 
 
     return error;
+}
+
+Response*
+BbarBrick::setResponse(char **argv, int argc, Information &eleInfo)
+{
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
+    return new ElementResponse(this, 1, resid);
+  
+  else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
+    return new ElementResponse(this, 2, stiff);
+  
+  else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+    int pointNum = atoi(argv[1]);
+    if (pointNum > 0 && pointNum <= 8)
+      return materialPointers[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo);
+    else 
+      return 0;
+  } else if (strcmp(argv[0],"stresses") ==0) {
+    return new ElementResponse(this, 3, Vector(48));
+  }
+  
+  // otherwise response quantity is unknown for the brick class
+  else
+    return 0;
+}
+
+int 
+BbarBrick::getResponse(int responseID, Information &eleInfo)
+{
+  static Vector stresses(48);
+
+  if (responseID == 1)
+    return eleInfo.setVector(this->getResistingForce());
+
+  else if (responseID == 2)
+    return eleInfo.setMatrix(this->getTangentStiff());
+    
+  else if (responseID == 3) {
+    
+    // Loop over the integration points
+    int cnt = 0;
+    for (int i = 0; i < 8; i++) {
+      
+      // Get material stress response
+      const Vector &sigma = materialPointers[i]->getStress();
+      stresses(cnt++) = sigma(0);
+      stresses(cnt++) = sigma(1);
+      stresses(cnt++) = sigma(2);
+      stresses(cnt++) = sigma(3);
+      stresses(cnt++) = sigma(4);
+      stresses(cnt++) = sigma(5);
+    }
+    return eleInfo.setVector(stresses);
+    
+  }
+  else
+    
+    return -1;
 }

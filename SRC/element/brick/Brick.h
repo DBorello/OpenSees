@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-11-26 22:53:51 $
+// $Revision: 1.5 $
+// $Date: 2002-04-23 21:43:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.h,v $
 
 // Ed "C++" Love
@@ -112,6 +112,9 @@ class Brick : public Element {
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);
       
+    Response *setResponse(char **argv, int argc, Information &eleInformation);
+    int getResponse(int responseID, Information &eleInformation);
+
     //plotting 
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
 
