@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:58:55 $
+// $Revision: 1.3 $
+// $Date: 2001-05-16 04:21:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestEnergyIncr.cpp,v $
                                                                         
                                                                         
@@ -111,9 +111,14 @@ CTestEnergyIncr::test(void)
   // print the data if required
   if (printFlag == 1) {
     cerr << "CTestEnergyIncr::test() - iteration: " << currentIter;
-    cerr << " current Product: " << product << " (max permissable: " << tol << ")\n";
+    cerr << " current Product: " << product << " (max: " << tol << ")\n";
   }
-
+  if (printFlag == 4) {
+    cerr << "CTestEnergyIncr::test() - iteration: " << currentIter;
+    cerr << " current Product: " << product << " (max: " << tol << ")\n";
+    cerr << " Norm deltaX: " << x.Norm() << "  Norm deltaR: " << b.Norm() << endl;
+    cerr << "deltaX: " << x << " deltaR: " << b;
+  }
 
   //
   // check if the algorithm converged
@@ -138,7 +143,9 @@ CTestEnergyIncr::test(void)
 
   // algo failed to converged after specified number of iterations - but RETURN OK
   else if (printFlag == 5 && currentIter >= maxNumIter) {
-    cerr << "WARNING: CTestEnergyIncr::test() - failed to converge but GOING ON\n";
+    cerr << "WARNING: CTestEnergyIncr::test() - failed to converge but goin on - ";
+    cerr << " current Product: " << product << " (max: " << tol << ")\n";
+    cerr << " Norm deltaX: " << x.Norm() << "  Norm deltaR: " << b.Norm() << endl;
     return currentIter;
   }
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:58:55 $
+// $Revision: 1.3 $
+// $Date: 2001-05-16 04:21:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestNormDispIncr.cpp,v $
                                                                         
                                                                         
@@ -95,7 +95,13 @@ CTestNormDispIncr::test(void)
   // print the data if required
   if (printFlag == 1) {
     cerr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
-    cerr << " current Norm: " << norm << " (max permissable: " << tol << ")\n";
+    cerr << " current Norm: " << norm << " (max: " << tol << ")\n";
+  } 
+  if (printFlag == 4) {
+    cerr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
+    cerr << " current Norm: " << norm << " (max: " << tol << ")\n";
+    cerr << " Norm deltaX: " << norm << "  Norm deltaR: " << (theSOE->getB()).Norm() << endl;
+    cerr << "deltaX: " << x << "deltaR: " << theSOE->getB();
   } 
 
   //
@@ -121,7 +127,9 @@ CTestNormDispIncr::test(void)
 
   // algo failed to converged after specified number of iterations - but RETURN OK
   else if (printFlag == 5 && currentIter >= maxNumIter) {
-    cerr << "WARNING: CTestDispIncr::test() - failed to converge but GOING ON\n";
+    cerr << "WARNING: CTestDispIncr::test() - failed to converge but going on - ";
+    cerr << " current Norm: " << norm << " (max: " << tol << ")\n";
+    cerr << " Norm deltaX: " << norm << "  Norm deltaR: " << (theSOE->getB()).Norm() << endl;
     return currentIter;
   }
 
