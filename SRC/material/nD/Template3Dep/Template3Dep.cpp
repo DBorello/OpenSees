@@ -1065,9 +1065,9 @@ int Template3Dep::setTrialStrainIncr(const Tensor &v, const Tensor &r)
 //================================================================================
 const tensor& Template3Dep::getTangentTensor(void)
 {
-    Tensor Eep = EPS->getEep();
-    return Eep;
-//    return EPS->Eep;
+//    Tensor Eep = EPS->getEep();
+//    return Eep;
+    return EPS->Eep;
 }
 
 //================================================================================
