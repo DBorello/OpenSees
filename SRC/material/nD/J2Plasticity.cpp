@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-13 08:12:17 $
+// $Revision: 1.2 $
+// $Date: 2001-05-18 05:33:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.cpp,v $
 
 // Written: Ed "C++" Love
@@ -47,6 +47,7 @@
 #include <J2PlaneStress.h>
 #include <J2PlaneStrain.h>
 #include <J2AxiSymm.h>
+#include <J2PlateFiber.h>
 #include <J2ThreeDimensional.h> 
 
 //this is mike's problem
@@ -179,6 +180,14 @@ J2Plasticity :: getCopy (const char *type)
 			      sigma_infty, delta, Hard, eta) ;
 	return clone ;	
     }
+    else if ( (strcmp(type,"PlateFiber") == 0) )
+    {
+	J2PlateFiber  *clone ;
+	clone = new J2PlateFiber(this->getTag(), bulk, shear, sigma_0,
+			      sigma_infty, delta, Hard, eta) ;
+	return clone ;	
+    }
+
  
     // Handle other cases
     else
@@ -236,7 +245,7 @@ void J2Plasticity :: Print( ostream &s, int flag )
 //plasticity integration routine
 void J2Plasticity :: plastic_integrator( )
 {
-  const double tolerance = 1.0e-12 ;
+  const double tolerance = (1.0e-12)*sigma_0 ;
 
   const double dt = 1.0 ; //time step = 1 for now
 
@@ -246,9 +255,9 @@ void J2Plasticity :: plastic_integrator( )
  
   static Matrix normal(3,3) ;     //normal to yield surface
 
-  double IIdev[3][3][3][3] ; //rank 4 deviatoric 
+  static double IIdev[3][3][3][3] ; //rank 4 deviatoric 
 
-  double IbunI[3][3][3][3] ; //rank 4 I bun I 
+  static double IbunI[3][3][3][3] ; //rank 4 I bun I 
 
   double NbunN ; //normal bun normal 
 

@@ -18,10 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-01-24 07:46:15 $
+// $Revision: 1.7 $
+// $Date: 2001-05-18 05:33:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                         
+
                                                                         
 // File: ~/material/nD/TclModelBuilderNDMaterialComand.C
 // 
@@ -47,6 +48,12 @@
 #include <FluidSolidPorousMaterial.h>
 
 #include <string.h>
+
+#include <Template3Dep.h>
+
+Template3Dep *
+TclModelBuilder_addTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int argc, 
+				char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
 
 static void printCommand(int argc, char **argv)
 {
@@ -382,8 +389,12 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	theMaterial = new FluidSolidPorousMaterial (tag, param[0], soil, 
 						    param[2], param[3]);
     }	    
-    
-    
+    /*
+    else if (strcmp(argv[1],"Template3Dep") == 0) {
+      theMaterial = TclModelBuilder_addTemplate3Dep(clientData, interp, argc, argv, 
+						    theTclBuilder, 2);
+    }
+    */
     else {
 	cerr << "WARNING unknown type of nDMaterial: " << argv[1];
 	cerr << "\nValid types: ElasticIsotropic, J2Plasticity, Bidirectional\n";

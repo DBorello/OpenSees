@@ -2,9 +2,10 @@ include ../../../Makefile.def
 
 OBJS       = NDMaterial.o ElasticIsotropic3D.o ElasticIsotropicMaterial.o \
 	ElasticIsotropicPlaneStrain2D.o ElasticIsotropicPlaneStress2D.o \
+	ElasticIsotropicPlateFiber.o \
 	TclModelBuilderNDMaterialCommand.o J2PlaneStrain.o \
 	J2PlaneStress.o  J2Plasticity.o J2AxiSymm.o J2ThreeDimensional.o \
-	BidirectionalMaterial.o
+	BidirectionalMaterial.o J2PlateFiber.o 
 
 TEMPLATE_OBJS =              \
                 MatPoint3D.o         \
