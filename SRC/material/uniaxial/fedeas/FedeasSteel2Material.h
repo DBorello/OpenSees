@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-17 16:28:58 $
+// $Revision: 1.2 $
+// $Date: 2002-06-26 23:00:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasSteel2Material.h,v $
                                                                       
 // Written: MHS
@@ -52,8 +52,12 @@ class FedeasSteel2Material : public FedeasMaterial
 	FedeasSteel2Material(int tag,
 		double fy, double E0, double b);
 
+	FedeasSteel2Material(int tag, const Vector &d);
 	FedeasSteel2Material(void);
     virtual ~FedeasSteel2Material();
+
+	double getInitialTangent(void);
+	UniaxialMaterial *getCopy(void);
 
   protected:
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-06-10 23:27:54 $
+// $Revision: 1.12 $
+// $Date: 2002-06-26 23:00:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -76,10 +76,6 @@ FedeasMaterial::FedeasMaterial(int tag, int classTag, int nhv, int ndata)
     for (int i = 0; i < numData; i++)
       data[i] = 0.0;
   }
-
-  int ist = 1;
-  this->invokeSubroutine(ist);
-  initialTangent = tangent;
 }
 
 FedeasMaterial::~FedeasMaterial()
@@ -140,12 +136,6 @@ FedeasMaterial::getTangent(void)
   return tangent;
 }
 
-double
-FedeasMaterial::getInitialTangent(void)
-{
-  return initialTangent;
-}
-
 int
 FedeasMaterial::commitState(void)
 {
@@ -185,28 +175,6 @@ FedeasMaterial::revertToStart(void)
   sigmaP = 0.0;
 
   return 0;
-}
-
-// WARNING -- if you wish to override any method in this base class, you must
-// also override the getCopy method to return a pointer to the derived class!!!
-UniaxialMaterial*
-FedeasMaterial::getCopy(void)
-{
-  FedeasMaterial *theCopy = 
-    new FedeasMaterial(this->getTag(), this->getClassTag(), numHstv, numData);
-  
-  // Copy history variables
-  int i;
-  for (i = 0; i < 2*numHstv; i++)
-    theCopy->hstv[i] = hstv[i];
-  
-  for (i = 0; i < numData; i++)
-    theCopy->data[i] = data[i];
-  
-  theCopy->epsilonP = epsilonP;
-  theCopy->sigmaP = sigmaP;
-  
-  return theCopy;
 }
 
 int 

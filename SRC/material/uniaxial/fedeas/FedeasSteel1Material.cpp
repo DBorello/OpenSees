@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-17 16:28:58 $
+// $Revision: 1.2 $
+// $Date: 2002-06-26 23:00:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasSteel1Material.cpp,v $
                                                                       
 // Written: MHS
@@ -62,6 +62,18 @@ FedeasMaterial(tag, MAT_TAG_FedeasSteel1, 7, 7)
 	data[6]  = 1.0;
 }
 
+FedeasSteel1Material::FedeasSteel1Material(int tag, const Vector &d):
+// 7 history variables and 7 material parameters
+FedeasMaterial(tag, MAT_TAG_FedeasSteel1, 7, 7)
+{
+	if (d.Size() != numData)
+		g3ErrorHandler->fatal("%s -- not enough input arguments",
+		"FedeasSteel1Material::FedeasSteel1Material");
+
+	for (int i = 0; i < numData; i++)
+		data[i] = d(i);
+}
+
 FedeasSteel1Material::FedeasSteel1Material(void):
 FedeasMaterial(0, MAT_TAG_FedeasSteel1, 7, 7)
 {
@@ -71,4 +83,29 @@ FedeasMaterial(0, MAT_TAG_FedeasSteel1, 7, 7)
 FedeasSteel1Material::~FedeasSteel1Material(void)
 {
 	// Does nothing
+}
+
+UniaxialMaterial*
+FedeasSteel1Material::getCopy(void)
+{
+  Vector d(data, numData);
+
+  FedeasSteel1Material *theCopy = new FedeasSteel1Material(this->getTag(), d);
+  
+  // Copy history variables
+  for (int i = 0; i < 2*numHstv; i++)
+    theCopy->hstv[i] = hstv[i];
+  
+  theCopy->epsilonP = epsilonP;
+  theCopy->sigmaP   = sigmaP;
+  theCopy->tangentP = tangentP;
+  
+  return theCopy;
+}
+
+double
+FedeasSteel1Material::getInitialTangent(void)
+{
+	//return E;
+	return data[1];
 }

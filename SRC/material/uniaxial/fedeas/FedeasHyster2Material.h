@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-17 16:28:58 $
+// $Revision: 1.2 $
+// $Date: 2002-06-26 23:00:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasHyster2Material.h,v $
                                                                       
 // Written: MHS
@@ -46,8 +46,12 @@ class FedeasHyster2Material : public FedeasMaterial
 		double mom1p, double rot1p, double mom2p, double rot2p,
 		double mom1n, double rot1n, double mom2n, double rot2n,
 		double pinchX, double pinchY, double damfc1 = 0.0, double damfc2 = 0.0);
+	FedeasHyster2Material(int tag, const Vector &d);
 	FedeasHyster2Material(void);
     virtual ~FedeasHyster2Material();
+
+	double getInitialTangent(void);
+	UniaxialMaterial *getCopy(void);
 
   protected:
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-19 21:56:40 $
+// $Revision: 1.3 $
+// $Date: 2002-06-26 23:00:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasBond2Material.h,v $
                                                                       
 // Written: MHS
@@ -41,8 +41,12 @@ class FedeasBond2Material : public FedeasMaterial
 		double u1p, double q1p, double u2p, double u3p, double q3p,
 		double u1n, double q1n, double u2n, double u3n, double q3n,
 		double s0, double bb, double alp, double aln);
+	FedeasBond2Material(int tag, const Vector &data);
 	FedeasBond2Material(void);
     virtual ~FedeasBond2Material();
+
+	double getInitialTangent(void);
+	UniaxialMaterial *getCopy(void);
 
   protected:
 

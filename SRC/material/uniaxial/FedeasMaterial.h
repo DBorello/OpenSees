@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-10 22:57:40 $
+// $Revision: 1.5 $
+// $Date: 2002-06-26 23:00:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.h,v $
                                                                       
 // Written: MHS
@@ -49,15 +49,13 @@ class FedeasMaterial : public UniaxialMaterial
   virtual double getStrain(void);
   virtual double getStress(void);
   virtual double getTangent(void);
-  virtual double getInitialTangent(void);
+  virtual double getInitialTangent(void) = 0;
   
   virtual int commitState(void);
   virtual int revertToLastCommit(void);    
   virtual int revertToStart(void);        
   
-  // WARNING -- if you wish to override any method in this base class, you must
-  // also override the getCopy method to return a pointer to the derived class!!!
-  virtual UniaxialMaterial *getCopy(void);
+  virtual UniaxialMaterial *getCopy(void) = 0;
   
   virtual int sendSelf(int commitTag, Channel &theChannel);  
   virtual int recvSelf(int commitTag, Channel &theChannel, 
@@ -77,13 +75,12 @@ class FedeasMaterial : public UniaxialMaterial
   
   double epsilonP;	// Committed strain
   double sigmaP;	// Committed stress
-  double initialTangent;
+  double tangentP;	// Committed tangent
   
  private:
   double epsilon;	// Trial strain
   double sigma;		// Trial stress
   double tangent;	// Trial tangent
-  double tangentP;	// Committed tangent
 };
 
 #endif
