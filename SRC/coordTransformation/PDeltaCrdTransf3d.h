@@ -18,41 +18,41 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
+// $Revision: 1.1 $
 // $Date: 2001-06-05 06:01:09 $
-// $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.h,v $
                                                                         
                                                                         
-// File: ~/crdTransf/LinearCrdTransf3d.h
+// File: ~/crdTransf/PDeltaCrdTransf3d.h
 //
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
 //
 // Description: This file contains the class definition for
-// LinearCrdTransf3d.h. LinearCrdTransf3d provides the
+// PDeltaCrdTransf3d.h. PDeltaCrdTransf3d provides the
 // abstraction of a linear transformation for a spatial frame
 // between the global and basic coordinate systems
 
-// What: "@(#) LinearCrdTransf3d.h, revA"
+// What: "@(#) PDeltaCrdTransf3d.h, revA"
 
-#ifndef LinearCrdTransf3d_h
-#define LinearCrdTransf3d_h
+#ifndef PDeltaCrdTransf3d_h
+#define PDeltaCrdTransf3d_h
 
 #include <CrdTransf3d.h>
 #include <Vector.h>
 #include <Matrix.h>
 
-class LinearCrdTransf3d: public CrdTransf3d
+class PDeltaCrdTransf3d: public CrdTransf3d
 {
   public:
-    LinearCrdTransf3d (int tag, const Vector &vecInLocXZPlane);
-    LinearCrdTransf3d (int tag, const Vector &vecInLocXZPlane,
+    PDeltaCrdTransf3d (int tag, const Vector &vecInLocXZPlane);
+    PDeltaCrdTransf3d (int tag, const Vector &vecInLocXZPlane,
 		const Vector &rigJntOffsetI,
 		const Vector &rigJntOffsetJ);
     
-    LinearCrdTransf3d();
-    ~LinearCrdTransf3d();
+    PDeltaCrdTransf3d();
+    ~PDeltaCrdTransf3d();
 
     int    initialize(Node *node1Pointer, Node *node2Pointer);
     int    update(void);
@@ -94,6 +94,8 @@ class LinearCrdTransf3d: public CrdTransf3d
     double R[3][3];	// Transformation matrix
 
     double L;                // undeformed element length
+	double ul17;	// Transverse local displacement offsets of P-Delta
+	double ul28;
 };
 
 #endif

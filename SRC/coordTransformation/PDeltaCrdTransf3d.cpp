@@ -18,19 +18,19 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
+// $Revision: 1.1 $
 // $Date: 2001-06-05 06:01:09 $
-// $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.cpp,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.cpp,v $
                                                                         
                                                                         
-// File: ~/crdTransf/LinearCrdTransf3d.C
+// File: ~/crdTransf/PDeltaCrdTransf3d.C
 //
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
 // 
 // Purpose: This file contains the implementation for the 
-// LinearCrdTransf3d class. LinearCrdTransf3d is a linear
+// PDeltaCrdTransf3d class. PDeltaCrdTransf3d is a linear
 // transformation for a planar frame between the global 
 // and basic coordinate systems
 
@@ -42,13 +42,14 @@
 
 #include <iomanip.h>
 
-#include <LinearCrdTransf3d.h>
+#include <PDeltaCrdTransf3d.h>
 
 // constructor:
-LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane):
-  CrdTransf3d(tag, CRDTR_TAG_LinearCrdTransf3d),
+PDeltaCrdTransf3d::PDeltaCrdTransf3d(int tag, const Vector &vecInLocXZPlane):
+  CrdTransf3d(tag, CRDTR_TAG_PDeltaCrdTransf3d),
   nodeIPtr(0), nodeJPtr(0),
-  nodeIOffset(0), nodeJOffset(0), L(0)
+  nodeIOffset(0), nodeJOffset(0),
+  L(0), ul17(0), ul28(0)
 {
   	  R[2][0] = vecInLocXZPlane(0);
 	  R[2][1] = vecInLocXZPlane(1);
@@ -58,12 +59,13 @@ LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane):
 }
 
 // constructor:
-LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
+PDeltaCrdTransf3d::PDeltaCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
 										   const Vector &rigJntOffset1,
 										   const Vector &rigJntOffset2):
-  CrdTransf3d(tag, CRDTR_TAG_LinearCrdTransf3d),
+  CrdTransf3d(tag, CRDTR_TAG_PDeltaCrdTransf3d),
   nodeIPtr(0), nodeJPtr(0),
-  nodeIOffset(0), nodeJOffset(0), L(0)
+  nodeIOffset(0), nodeJOffset(0),
+  L(0), ul17(0), ul28(0)
 {
 	  R[2][0] = vecInLocXZPlane(0);
 	  R[2][1] = vecInLocXZPlane(1);
@@ -71,7 +73,7 @@ LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
 
 	// check rigid joint offset for node I
 	if (&rigJntOffset1 == 0 || rigJntOffset1.Size() != 3 ) {
-		cerr << "LinearCrdTransf3d::LinearCrdTransf3d:  Invalid rigid joint offset vector for node I\n";
+		cerr << "PDeltaCrdTransf3d::PDeltaCrdTransf3d:  Invalid rigid joint offset vector for node I\n";
 		cerr << "Size must be 3\n";      
 	}
 	else if (rigJntOffset1.Norm() > 0.0) {
@@ -83,7 +85,7 @@ LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
    
    // check rigid joint offset for node J
 	if (&rigJntOffset2 == 0 || rigJntOffset2.Size() != 3 ) {
-		cerr << "LinearCrdTransf3d::LinearCrdTransf3d:  Invalid rigid joint offset vector for node J\n";
+		cerr << "PDeltaCrdTransf3d::PDeltaCrdTransf3d:  Invalid rigid joint offset vector for node J\n";
 		cerr << "Size must be 3\n";      
 	}
 	else if (rigJntOffset2.Norm() > 0.0) {
@@ -99,10 +101,11 @@ LinearCrdTransf3d::LinearCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
  
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
-LinearCrdTransf3d::LinearCrdTransf3d():
-  CrdTransf3d(0, CRDTR_TAG_LinearCrdTransf3d),
+PDeltaCrdTransf3d::PDeltaCrdTransf3d():
+  CrdTransf3d(0, CRDTR_TAG_PDeltaCrdTransf3d),
   nodeIPtr(0), nodeJPtr(0),
-  nodeIOffset(0), nodeJOffset(0), L(0)
+  nodeIOffset(0), nodeJOffset(0),
+  L(0), ul17(0), ul28(0)
 {
 
 }
@@ -110,7 +113,7 @@ LinearCrdTransf3d::LinearCrdTransf3d():
 
 
 // destructor:
-LinearCrdTransf3d::~LinearCrdTransf3d() 
+PDeltaCrdTransf3d::~PDeltaCrdTransf3d() 
 {
 	if (nodeIOffset)
 		delete [] nodeIOffset;
@@ -120,28 +123,28 @@ LinearCrdTransf3d::~LinearCrdTransf3d()
 
 
 int
-LinearCrdTransf3d::commitState(void)
+PDeltaCrdTransf3d::commitState(void)
 {
    return 0;
 }
 
 
 int
-LinearCrdTransf3d::revertToLastCommit(void)
+PDeltaCrdTransf3d::revertToLastCommit(void)
 {
    return 0;
 }
 
 
 int
-LinearCrdTransf3d::revertToStart(void)
+PDeltaCrdTransf3d::revertToStart(void)
 {
    return 0;
 }
 
 
 int 
-LinearCrdTransf3d::initialize(Node *nodeIPointer, Node *nodeJPointer)
+PDeltaCrdTransf3d::initialize(Node *nodeIPointer, Node *nodeJPointer)
 {       
    int error;
 
@@ -150,7 +153,7 @@ LinearCrdTransf3d::initialize(Node *nodeIPointer, Node *nodeJPointer)
 
    if ((!nodeIPtr) || (!nodeJPtr))
    {
-      cerr << "\nLinearCrdTransf3d::initialize";
+      cerr << "\nPDeltaCrdTransf3d::initialize";
       cerr << "\ninvalid pointers to the element nodes\n";
       return -1;
    }
@@ -168,14 +171,54 @@ LinearCrdTransf3d::initialize(Node *nodeIPointer, Node *nodeJPointer)
 
 
 int
-LinearCrdTransf3d::update(void)
+PDeltaCrdTransf3d::update(void)
 {
+	const Vector &disp1 = nodeIPtr->getTrialDisp();
+	const Vector &disp2 = nodeJPtr->getTrialDisp();
+
+	static double ug[12];
+	for (int i = 0; i < 6; i++) {
+		ug[i]   = disp1(i);
+		ug[i+6] = disp2(i);
+	}
+
+	double ul1, ul7, ul2, ul8;
+
+	ul1 = R[1][0]*ug[0] + R[1][1]*ug[1] + R[1][2]*ug[2];
+	ul2 = R[2][0]*ug[0] + R[2][1]*ug[1] + R[2][2]*ug[2];
+
+	ul7 = R[1][0]*ug[6] + R[1][1]*ug[7] + R[1][2]*ug[8];
+	ul8 = R[2][0]*ug[6] + R[2][1]*ug[7] + R[2][2]*ug[8];
+
+	static double Wu[3];
+
+	if (nodeIOffset) {
+		Wu[0] =  nodeIOffset[2]*ug[4] - nodeIOffset[1]*ug[5];
+		Wu[1] = -nodeIOffset[2]*ug[3] + nodeIOffset[0]*ug[5];
+		Wu[2] =  nodeIOffset[1]*ug[3] - nodeIOffset[0]*ug[4];
+
+		ul1 += R[1][0]*Wu[0] + R[1][1]*Wu[1] + R[1][2]*Wu[2];
+		ul2 += R[2][0]*Wu[0] + R[2][1]*Wu[1] + R[2][2]*Wu[2];
+	}
+
+	if (nodeJOffset) {
+		Wu[0] =  nodeJOffset[2]*ug[10] - nodeJOffset[1]*ug[11];
+		Wu[1] = -nodeJOffset[2]*ug[9]  + nodeJOffset[0]*ug[11];
+		Wu[2] =  nodeJOffset[1]*ug[9]  - nodeJOffset[0]*ug[10];
+
+		ul7 += R[1][0]*Wu[0] + R[1][1]*Wu[1] + R[1][2]*Wu[2];
+		ul8 += R[2][0]*Wu[0] + R[2][1]*Wu[1] + R[2][2]*Wu[2];
+	}
+
+	ul17 = ul1-ul7;
+	ul28 = ul2-ul8;
+
 	return 0;
 }
 
 
 int 
-LinearCrdTransf3d::computeElemtLengthAndOrient()
+PDeltaCrdTransf3d::computeElemtLengthAndOrient()
 {
    // element projection
    static Vector dx(3);
@@ -198,7 +241,7 @@ LinearCrdTransf3d::computeElemtLengthAndOrient()
    L = dx.Norm();
 
    if (L == 0.0) {
-      cerr << "\nLinearCrdTransf3d::computeElemtLengthAndOrien: 0 length\n";
+      cerr << "\nPDeltaCrdTransf3d::computeElemtLengthAndOrien: 0 length\n";
       return -2;  
    }
 
@@ -213,7 +256,7 @@ LinearCrdTransf3d::computeElemtLengthAndOrient()
 
 
 int
-LinearCrdTransf3d::getLocalAxes(void)
+PDeltaCrdTransf3d::getLocalAxes(void)
 {
 	// Compute y = v cross x
 	// Note: v(i) is stored in R[2][i]
@@ -232,7 +275,7 @@ LinearCrdTransf3d::getLocalAxes(void)
 	double ynorm = yAxis.Norm();
 
 	if (ynorm == 0) {
-		cerr << "\nLinearCrdTransf3d::getLocalAxes";
+		cerr << "\nPDeltaCrdTransf3d::getLocalAxes";
 		cerr << "\nvector v that defines plane xz is parallel to x axis\n";
 		return -3;
 	}
@@ -261,21 +304,21 @@ LinearCrdTransf3d::getLocalAxes(void)
 
 
 double 
-LinearCrdTransf3d::getInitialLength(void)
+PDeltaCrdTransf3d::getInitialLength(void)
 {
    return L;
 }
 
 
 double 
-LinearCrdTransf3d::getDeformedLength(void)
+PDeltaCrdTransf3d::getDeformedLength(void)
 {
    return L;
 }
 
 
 const Vector &
-LinearCrdTransf3d::getBasicTrialDisp (void)
+PDeltaCrdTransf3d::getBasicTrialDisp (void)
 {
 	// determine global displacements
 	const Vector &disp1 = nodeIPtr->getTrialDisp();
@@ -345,7 +388,7 @@ LinearCrdTransf3d::getBasicTrialDisp (void)
 
 
 const Vector &
-LinearCrdTransf3d::getBasicIncrDisp (void)
+PDeltaCrdTransf3d::getBasicIncrDisp (void)
 {
 	// determine global displacements
 	const Vector &disp1 = nodeIPtr->getIncrDisp();
@@ -415,7 +458,7 @@ LinearCrdTransf3d::getBasicIncrDisp (void)
 
 
 const Vector &
-LinearCrdTransf3d::getBasicIncrDeltaDisp(void)
+PDeltaCrdTransf3d::getBasicIncrDeltaDisp(void)
 {
 	// determine global displacements
 	const Vector &disp1 = nodeIPtr->getIncrDeltaDisp();
@@ -485,7 +528,7 @@ LinearCrdTransf3d::getBasicIncrDeltaDisp(void)
 
 
 const Vector &
-LinearCrdTransf3d::getGlobalResistingForce(const Vector &pb, const Vector &unifLoad)
+PDeltaCrdTransf3d::getGlobalResistingForce(const Vector &pb, const Vector &unifLoad)
 {
 	// transform resisting forces from the basic system to local coordinates
 	static double pl[12];
@@ -523,6 +566,15 @@ LinearCrdTransf3d::getGlobalResistingForce(const Vector &pb, const Vector &unifL
 	pl[2] -= V;
 	pl[8] -= V;
 
+	// Include leaning column effects (P-Delta)
+	double NoverL;
+	NoverL = ul17*q0*oneOverL;             
+	pl[1] += NoverL;
+	pl[7] -= NoverL;
+	NoverL = ul28*q0*oneOverL;
+	pl[2] += NoverL;
+	pl[8] -= NoverL;
+
 	// transform resisting forces  from local to global coordinates
 	static Vector pg(12);
 
@@ -558,7 +610,7 @@ LinearCrdTransf3d::getGlobalResistingForce(const Vector &pb, const Vector &unifL
 }
 
 const Matrix &
-LinearCrdTransf3d::getGlobalStiffMatrix (const Matrix &KB, const Vector &pb)
+PDeltaCrdTransf3d::getGlobalStiffMatrix (const Matrix &KB, const Vector &pb)
 {
 	static Matrix kg(12,12);	// Global stiffness for return
 	static double kb[6][6];		// Basic stiffness
@@ -605,6 +657,17 @@ LinearCrdTransf3d::getGlobalStiffMatrix (const Matrix &KB, const Vector &pb)
 		kl[11][i] =  tmp[2][i];
 	}
 
+	// Include geometric stiffness effects in local system
+	double NoverL = pb(0)*oneOverL;
+	kl[1][1] += NoverL;
+	kl[2][2] += NoverL;
+	kl[7][7] += NoverL;
+	kl[8][8] += NoverL;
+	kl[1][7] -= NoverL;
+	kl[7][1] -= NoverL;
+	kl[2][8] -= NoverL;
+	kl[8][2] -= NoverL;
+	
 	static double RWI[3][3];
 
 	if (nodeIOffset) {
@@ -711,11 +774,11 @@ LinearCrdTransf3d::getGlobalStiffMatrix (const Matrix &KB, const Vector &pb)
 
 
 CrdTransf3d *
-LinearCrdTransf3d::getCopy(void)
+PDeltaCrdTransf3d::getCopy(void)
 {
-  // create a new instance of LinearCrdTransf3d 
+  // create a new instance of PDeltaCrdTransf3d 
 
-  LinearCrdTransf3d *theCopy;
+  PDeltaCrdTransf3d *theCopy;
 
   static Vector xz(3);
   xz(0) = R[2][0];
@@ -737,21 +800,24 @@ LinearCrdTransf3d::getCopy(void)
 	  offsetJ(2) = nodeJOffset[2];
   }
   
-  theCopy = new LinearCrdTransf3d(this->getTag(), xz, offsetI, offsetJ);
+  theCopy = new PDeltaCrdTransf3d(this->getTag(), xz, offsetI, offsetJ);
 
   theCopy->nodeIPtr = nodeIPtr;
   theCopy->nodeJPtr = nodeJPtr;
   theCopy->L = L;
+  theCopy->ul17 = ul17;
+  theCopy->ul28 = ul28;
   for (int i = 0; i < 3; i++)
 	  for (int j = 0; j < 3; j++)
 		  theCopy->R[i][j] = R[i][j];
+
   
   return theCopy;
 }
 
 
 int 
-LinearCrdTransf3d::sendSelf(int cTag, Channel &theChannel)
+PDeltaCrdTransf3d::sendSelf(int cTag, Channel &theChannel)
 {
 	int res = 0;
 
@@ -763,7 +829,7 @@ LinearCrdTransf3d::sendSelf(int cTag, Channel &theChannel)
 	res += theChannel.sendVector(this->getDbTag(), cTag, data);
 	if (res < 0) {
 		g3ErrorHandler->warning("%s - failed to send Vector",
-			"LinearCrdTransf3d::sendSelf");
+			"PDeltaCrdTransf3d::sendSelf");
 		return res;
 	}
 
@@ -773,7 +839,7 @@ LinearCrdTransf3d::sendSelf(int cTag, Channel &theChannel)
     
 
 int 
-LinearCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+PDeltaCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
 	int res = 0;
 
@@ -782,7 +848,7 @@ LinearCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
 	res += theChannel.recvVector(this->getDbTag(), cTag, data);
 	if (res < 0) {
 		g3ErrorHandler->warning("%s - failed to receive Vector",
-			"LinearCrdTransf3d::recvSelf");
+			"PDeltaCrdTransf3d::recvSelf");
 		return res;
 	}
 
@@ -794,7 +860,7 @@ LinearCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
  	
 
 const Vector &
-LinearCrdTransf3d::getPointGlobalCoordFromLocal(const Vector &xl)
+PDeltaCrdTransf3d::getPointGlobalCoordFromLocal(const Vector &xl)
 {
    static Vector xg(3);
 
@@ -818,7 +884,7 @@ LinearCrdTransf3d::getPointGlobalCoordFromLocal(const Vector &xl)
 
     
 const Vector &
-LinearCrdTransf3d::getPointGlobalDisplFromBasic (double xi, const Vector &uxb)
+PDeltaCrdTransf3d::getPointGlobalDisplFromBasic (double xi, const Vector &uxb)
 {
    // determine global displacements
    const Vector &disp1 = nodeIPtr->getTrialDisp();
@@ -881,15 +947,17 @@ LinearCrdTransf3d::getPointGlobalDisplFromBasic (double xi, const Vector &uxb)
 }
 
 
+
 void
-LinearCrdTransf3d::Print(ostream &s, int flag)
+PDeltaCrdTransf3d::Print(ostream &s, int flag)
 {
-   s << "\nCrdTransf: " << this->getTag() << " Type: LinearCrdTransf3d";
+   s << "\nCrdTransf: " << this->getTag() << " Type: PDeltaCrdTransf3d" << endl;
    if (nodeIOffset)
 	   s << "\tNode I offset: " << nodeIOffset[0] << ' ' << nodeIOffset[1] << ' '<< nodeIOffset[2] << endl;
    if (nodeJOffset)
 	   s << "\tNode J offset: " << nodeJOffset[0] << ' ' << nodeJOffset[1] << ' '<< nodeJOffset[2] << endl;
 }
+
 
 
 
