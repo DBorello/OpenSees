@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-06-07 17:39:21 $
+// $Revision: 1.2 $
+// $Date: 2002-06-11 20:46:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam3dPointLoad.cpp,v $
                                                                         
 // Written: fmk 
@@ -28,6 +28,8 @@
 
 #include <Beam3dPointLoad.h>
 #include <Vector.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
 
 Vector Beam3dPointLoad::data(4);
 
@@ -65,13 +67,68 @@ Beam3dPointLoad::getData(int &type, double loadFactor)
 int 
 Beam3dPointLoad::sendSelf(int commitTag, Channel &theChannel)
 {
-  return -1;
+  int dbTag = this->getDbTag();
+  const ID &theElements = this->getElementTags();
+
+  static Vector vectData(5);
+  vectData(0) = Px;
+  vectData(1) = Py;
+  vectData(2) = Pz;
+  vectData(3) = x;  
+  vectData(4) = theElements.Size();
+
+  int result = theChannel.sendVector(dbTag, commitTag, vectData);
+  if (result < 0) {
+    cerr << "Beam3dPointLoad::sendSelf - failed to send data\n";
+    return result;
+  }
+
+  result = theChannel.sendID(dbTag, commitTag, theElements);
+  if (result < 0) {
+    cerr << "Beam3dPointLoad::sendSelf - failed to send element tags\n";
+    return result;
+  }
+  
+  return 0;
 }
 
 int 
 Beam3dPointLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  int dbTag = this->getDbTag();
+
+  static Vector vectData(5);
+
+  int result = theChannel.recvVector(dbTag, commitTag, vectData);
+  if (result < 0) {
+    cerr << "Beam3dPointLoad::sendSelf - failed to send data\n";
+    return result;
+  }
+
+  Px = vectData(0);;
+  Py = vectData(1);;
+  Pz = vectData(2);;
+  x  = vectData(3);  
+  int numEle = vectData(4);
+
+
+  if (theElementTags == 0 || theElementTags->Size() != numEle) {
+    if (theElementTags != 0)
+      delete theElementTags;
+    theElementTags = new ID(numEle);
+    if (theElementTags == 0) {
+      cerr << "Beam3dPointLoad::sendSelf - failed to create an ID\n";
+      return -3;
+    }
+  }
+
+  result = theChannel.recvID(dbTag, commitTag, *theElementTags);
+  if (result < 0) {
+    cerr << "Beam3dPointLoad::sendSelf - failed to send element tags\n";
+    return result;
+  }
+  
+  return 0;
 }
 
 void 

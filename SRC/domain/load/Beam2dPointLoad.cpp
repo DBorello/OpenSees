@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-06 18:24:15 $
+// $Revision: 1.4 $
+// $Date: 2002-06-11 20:46:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dPointLoad.cpp,v $
                                                                         
 // Written: fmk 
@@ -28,6 +28,9 @@
 
 #include <Beam2dPointLoad.h>
 #include <Vector.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
+
 
 Vector Beam2dPointLoad::data(3);
 
@@ -64,13 +67,66 @@ Beam2dPointLoad::getData(int &type, double loadFactor)
 int 
 Beam2dPointLoad::sendSelf(int commitTag, Channel &theChannel)
 {
-  return -1;
+  int dbTag = this->getDbTag();
+  const ID &theElements = this->getElementTags();
+
+  static Vector vectData(4);
+  vectData(0) = Ptrans;
+  vectData(1) = Paxial;
+  vectData(2) = x;  
+  vectData(3) = theElements.Size();
+
+  int result = theChannel.sendVector(dbTag, commitTag, vectData);
+  if (result < 0) {
+    cerr << "Beam2dPointLoad::sendSelf - failed to send data\n";
+    return result;
+  }
+
+  result = theChannel.sendID(dbTag, commitTag, theElements);
+  if (result < 0) {
+    cerr << "Beam2dPointLoad::sendSelf - failed to send element tags\n";
+    return result;
+  }
+  
+  return 0;
 }
 
 int 
 Beam2dPointLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker &theBroker)
 {
-  return -1;
+  int dbTag = this->getDbTag();
+
+  static Vector vectData(4);
+
+  int result = theChannel.recvVector(dbTag, commitTag, vectData);
+  if (result < 0) {
+    cerr << "Beam2dPointLoad::sendSelf - failed to send data\n";
+    return result;
+  }
+
+  Ptrans = vectData(0);;
+  Paxial = vectData(1);;
+  x      = vectData(2);  
+  int numEle = vectData(3);
+
+
+  if (theElementTags == 0 || theElementTags->Size() != numEle) {
+    if (theElementTags != 0)
+      delete theElementTags;
+    theElementTags = new ID(numEle);
+    if (theElementTags == 0) {
+      cerr << "Beam2dPointLoad::sendSelf - failed to create an ID\n";
+      return -3;
+    }
+  }
+
+  result = theChannel.recvID(dbTag, commitTag, *theElementTags);
+  if (result < 0) {
+    cerr << "Beam2dPointLoad::sendSelf - failed to send element tags\n";
+    return result;
+  }
+  
+  return 0;
 }
 
 void 
