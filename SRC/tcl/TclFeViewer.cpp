@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-26 01:00:29 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 00:57:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.cpp,v $
                                                                         
                                                                         
@@ -48,7 +48,6 @@
 #include <OpenGLRenderer.h>
 #elif _GLX
 #include <OpenGLRenderer.h>
-#include <MesaRenderer.h>
 #else
 #include <X11Renderer.h>
 #endif
@@ -179,7 +178,6 @@ TclFeViewer::TclFeViewer(char *title, int xLoc, int yLoc, int width, int height,
   theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap, 0, fileName);
 #elif _GLX
   theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap, 0, fileName);
-  // theRenderer = new MesaRenderer(title, xLoc, yLoc, width, height, *theMap);
 #else
   theRenderer = new X11Renderer(title, xLoc, yLoc, width, height, *theMap, fileName);
 #endif

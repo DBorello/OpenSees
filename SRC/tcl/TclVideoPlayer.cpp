@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-26 01:13:17 $
+// $Revision: 1.4 $
+// $Date: 2001-08-01 00:57:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclVideoPlayer.cpp,v $
                                                                         
                                                                         
@@ -41,8 +41,10 @@
 #include <string.h>
 #include <iostream.h>
 
-#ifdef _WIN32
-#include <OPenGLRenderer.h>
+#ifdef _WGL
+#include <OpenGLRenderer.h>
+#elif _GLX
+#include <OpenGLRenderer.h>
 #else
 #include <X11Renderer.h>
 #endif
@@ -95,11 +97,14 @@ TclVideoPlayer::TclVideoPlayer(char *title, char *fileName, char *imageName,
 
 	// create the map and renderer
 	theMap = new PlainMap();
-#ifdef _WIN32
+#ifdef _WGL
 	if (imageName == 0)
 	  theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap);
 	else
 	  theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap,0,imageName);
+#elif _GLX
+
+	theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap);
 #else
 	theRenderer = new X11Renderer(title, xLoc, yLoc, width, height, *theMap);
 #endif

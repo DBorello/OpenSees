@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-26 00:57:12 $
+// $Revision: 1.3 $
+// $Date: 2001-08-01 00:56:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/AlgorithmIncrements.cpp,v $
                                                                         
                                                                         
@@ -48,7 +48,9 @@
 #include <ID.h>
 #include <Vector.h>
 
-#ifdef _WIN32
+#ifdef _WGL
+#include <OpenGLRenderer.h>
+#elif _GLX
 #include <OpenGLRenderer.h>
 #else
 #include <X11Renderer.h>
@@ -69,7 +71,9 @@ AlgorithmIncrements::AlgorithmIncrements(EquiSolnAlgo *theEquiAlgo,
 
   // create the window in which we plot on the screen
   theMap = new PlainMap();
-#ifdef _WIN32
+#ifdef _WGL
+  theRenderer = new OpenGLRenderer(windowTitle, xLoc, yLoc, width, height, *theMap);
+#elif _GLX
   theRenderer = new OpenGLRenderer(windowTitle, xLoc, yLoc, width, height, *theMap);
 #else
   theRenderer = new X11Renderer(windowTitle, xLoc, yLoc, width, height, *theMap);
