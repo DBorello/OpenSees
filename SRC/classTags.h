@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.48 $
-// $Date: 2003-06-11 17:50:10 $
+// $Revision: 1.49 $
+// $Date: 2003-08-12 23:02:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
-// File: ~classTags.h
-//
 // Written: fmk
-// Created: Fri Sept 20 12:27:47: 1996
 // Revision: A
 //
 // Purpose: This file contains the declarations of all class tags used.
@@ -101,6 +98,7 @@
 #define MAT_TAG_BoucWen					17
 #define MAT_TAG_Pinching4					18
 #define MAT_TAG_BarSlip					19
+#define MAT_TAG_Fracture			20
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
@@ -333,6 +331,7 @@
 
 #define NUMBERER_TAG_DOF_Numberer      	1
 #define NUMBERER_TAG_PlainNumberer 	2
+#define NUMBERER_TAG_ParallelNumberer 	3
 
 #define GraphNUMBERER_TAG_RCM   		1
 #define GraphNUMBERER_TAG_SimpleNumberer   	2
@@ -414,6 +413,8 @@
 #define DomDecompALGORITHM_TAGS_DomainDecompAlgo 1
 
 #define DomDecompANALYSIS_TAGS_DomainDecompositionAnalysis 1
+#define ANALYSIS_TAGS_StaticDomainDecompositionAnalysis 2
+#define ANALYSIS_TAGS_TransientDomainDecompositionAnalysis 3
 
 #define PartitionedModelBuilder_TAGS_PartitionedQuick2dFrameModel 1
 

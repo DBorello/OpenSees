@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2003-06-11 18:19:45 $
+// $Revision: 1.20 $
+// $Date: 2003-08-12 23:01:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -44,12 +44,13 @@
 #include <ViscousMaterial.h>	// Sasani
 #include <PathIndependentMaterial.h>	// MHS
 #include <MinMaxMaterial.h>	// MHS
+#include <FractureMaterial.h>	// Patxi
 #include <SeriesMaterial.h>		// MHS
 #include <ENTMaterial.h>		// MHS
 #include <CableMaterial.h>	// CC
 #include <BoucWenMaterial.h>	// Terje
 #include <Pinching4Material.h>   // NM
-#include <BarSlipMaterial.h>   // NM
+#include <BarSlipMaterial.h>     // NM
 
 #include <Vector.h>
 #include <string.h>
@@ -889,6 +890,81 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	
       // Parsing was successful, allocate the material
       theMaterial = new MinMaxMaterial(tag, *theMat, epsmin, epsmax);
+      
+    }
+
+    else if (strcmp(argv[1],"Fracture") == 0) {
+      if (argc < 4) {
+	opserr << "WARNING insufficient arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: uniaxialMaterial Fracture tag? matTag?";
+	opserr << " <-min min?> <-max max?>" << endln;
+	return TCL_ERROR;
+      }
+      
+      int tag, matTag;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid uniaxialMaterial Fracture tag" << endln;
+	return TCL_ERROR;		
+      }
+
+      if (Tcl_GetInt(interp, argv[3], &matTag) != TCL_OK) {
+	opserr << "WARNING invalid component tag\n";
+	opserr << "uniaxialMaterial Fracture: " << tag << endln;
+	return TCL_ERROR;
+      }
+
+      double Dmax = 1.0;
+      double Nf  = 0.5E6;
+      double E0  = 14.5/29000.0;
+      double FE  = -1.0/2.31;
+
+      int loc = 4;
+      while (loc < argc) {
+	if (strcmp(argv[loc],"-Dmax") == 0) {
+	  loc++;
+	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &Dmax) != TCL_OK)) {
+	    opserr << "WARNING invalid Dmax -";
+	    opserr << "uniaxialMaterial Fracture: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	} else if (strcmp(argv[loc],"-Nf") == 0) {
+	  loc++;
+	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &Nf) != TCL_OK)) {
+	    opserr << "WARNING invalid Nf -";	 
+	    opserr << "uniaxialMaterial Fracture: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	} else if (strcmp(argv[loc],"-E0") == 0) {
+	  loc++;
+	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &E0) != TCL_OK)) {
+	    opserr << "WARNING invalid E0 -"; 
+	    opserr << "uniaxialMaterial Fracture: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	} else if (strcmp(argv[loc],"-FE") == 0) {
+	  loc++;
+	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &FE) != TCL_OK)) {
+	    opserr << "WARNING invalid FE -";
+	    opserr << "uniaxialMaterial Fracture: " << tag << endln;
+	    return TCL_ERROR;
+	  }
+	} else
+	  loc++;
+      }
+	
+      UniaxialMaterial *theMat = theTclBuilder->getUniaxialMaterial(matTag);
+	    
+      if (theMat == 0) {
+	opserr << "WARNING component material does not exist\n";
+	opserr << "Component material: " << matTag; 
+	opserr << "\nuniaxialMaterial Fracture: " << tag << endln;
+	return TCL_ERROR;
+      }
+	
+      // Parsing was successful, allocate the material
+      theMaterial = new FractureMaterial(tag, *theMat, Dmax, Nf, E0, FE);
       
     }
 	else if (strcmp(argv[1],"Cable") == 0) 
