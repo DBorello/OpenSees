@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2003-07-15 21:20:28 $
+// $Revision: 1.2 $
+// $Date: 2003-10-15 16:49:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/OracleDatastore.cpp,v $
 
 
@@ -15,8 +15,8 @@
 
 
 #include "OracleDatastore.h"
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -192,7 +192,7 @@ OracleDatastore::sendMsg(int dataTag, int commitTag,
 		       const Message &, 
 		       ChannelAddress *theAddress)
 {
-  cerr << "OracleDatastore::sendMsg() - not yet implemented\n";
+  opserr << "OracleDatastore::sendMsg() - not yet implemented\n";
   return -1;
 }		       
 
@@ -201,7 +201,7 @@ OracleDatastore::recvMsg(int dataTag, int commitTag,
 		       Message &, 
 		       ChannelAddress *theAddress)
 {
-  cerr << "OracleDatastore::recvMsg() - not yet implemented\n";
+  opserr << "OracleDatastore::recvMsg() - not yet implemented\n";
   return -1;
 }		       
 

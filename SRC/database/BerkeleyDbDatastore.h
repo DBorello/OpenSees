@@ -18,15 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-02-12 20:12:38 $
+// $Revision: 1.2 $
+// $Date: 2003-10-15 16:49:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/BerkeleyDbDatastore.h,v $
 
 #ifndef BerkeleyDbDatastore_h
 #define BerkeleyDbDatastore_h
 
-// File: ~/database/BerkeleyDbDatastore.h
-//
 // Written:  fmk
 // Created:  02/02
 //

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-18 01:06:09 $
+// $Revision: 1.5 $
+// $Date: 2003-10-15 16:49:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.h,v $
                                                                         
                                                                         
@@ -52,8 +52,7 @@ class FE_Datastore: public Channel
 
     // methods defined in the Channel class interface which mean nothing for a Datastore
     char *addToProgram(void);
-    int setUpShadow(void);
-    int setUpActor(void);
+    int setUpConnection(void);
     int setNextAddress(const ChannelAddress &otherChannelAddress);
     ChannelAddress *getLastSendersAddress(void);
 

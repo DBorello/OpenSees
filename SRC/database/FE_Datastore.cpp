@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:53 $
+// $Revision: 1.6 $
+// $Date: 2003-10-15 16:49:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FE_Datastore.cpp,v $
                                                                         
-                                                                        
-// File: ~/database/FE_Datastore.C
-//
 // Written: fmk 
 // Created: 10/98
 // Revision: A
@@ -77,13 +74,7 @@ FE_Datastore::addToProgram(void)
 }
 
 int 
-FE_Datastore::setUpShadow(void)
-{
-  return 0;
-}
-
-int 
-FE_Datastore::setUpActor(void)
+FE_Datastore::setUpConnection(void)
 {
   return 0;
 }
@@ -133,7 +124,7 @@ FE_Datastore::commitState(int commitTag)
       opserr << "FE_Datastore::commitState - domain failed to sendSelf\n";
     }
   }
-    
+
   return res;
 }
 
