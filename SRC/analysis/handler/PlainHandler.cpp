@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2001-05-26 06:23:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/PlainHandler.cpp,v $
                                                                         
                                                                         
@@ -46,6 +46,8 @@
 #include <ElementIter.h>
 #include <SP_ConstraintIter.h>
 #include <SP_Constraint.h>
+#include <MP_ConstraintIter.h>
+#include <MP_Constraint.h>
 #include <Integrator.h>
 #include <ID.h>
 #include <Subdomain.h>
@@ -89,11 +91,7 @@ PlainHandler::handle(const ID *nodesLast)
 	cerr << " setLinks() has not been called\n";
 	return -1;
     }
-    
-    if (theDomain->getNumMPs() != 0) {
-	cerr << "WARNING PlainHandler::handle() - ";
-	cerr << "ignoring the Domains MP_Constraints\n"; 
-    }
+
     
     // get number ofelements and nodes in the domain 
     // and init the theFEs and theDOFs arrays
@@ -114,7 +112,7 @@ PlainHandler::handle(const ID *nodesLast)
     // create an array for the DOF_Groups and zero it
     if ((numDOF <= 0) || ((theDOFs = new DOF_Group *[numDOF]) == 0)) {
 	cerr << "WARNING PlainHandler::handle() - ";
-        cerr << "ran out of memory for DOF_Groups";
+	cerr << "ran out of memory for DOF_Groups";
 	cerr << " array of size " << numDOF << endl;
 	return -3;    
     }    
@@ -150,13 +148,75 @@ PlainHandler::handle(const ID *nodesLast)
 	    if (spPtr->getNodeTag() == nodeID) {
 		if (spPtr->isHomogeneous() == false) {
 		    cerr << "WARNING PlainHandler::handle() - ";
-		    cerr << " non-homogeneos constraint"; 
+		    cerr << " non-homogeneos constraint";
 		    cerr << " for node " << spPtr->getNodeTag();
 		    cerr << " homo assumed\n";
-		}		
-		dofPtr->setID(spPtr->getDOF_Number(),-1);
-		countDOF--;
+		}
+		const ID &id = dofPtr->getID();
+		int dof = spPtr->getDOF_Number();		
+		if (id(dof) == -2) {
+			dofPtr->setID(spPtr->getDOF_Number(),-1);
+			countDOF--;	
+		} else {
+		    cerr << "WARNING PlainHandler::handle() - ";
+		    cerr << " multiple single pointconstraints at DOF " << dof;
+		    cerr << " for node " << spPtr->getNodeTag() << endl;
+		}
 	    }
+
+    	// loop through the MP_Constraints to see if any of the
+	// DOFs are constrained, note constraint matrix must be diagonal
+	// with 1's on the diagonal
+	MP_ConstraintIter &theMPs = theDomain->getMPs();
+	MP_Constraint *mpPtr;
+	while ((mpPtr = theMPs()) != 0)
+	    if (mpPtr->getNodeConstrained() == nodeID) {
+		if (mpPtr->isTimeVarying() == true) {
+		    cerr << "WARNING PlainHandler::handle() - ";
+		    cerr << " time-varying constraint";
+		    cerr << " for node " << nodeID;
+		    cerr << " non-varyng assumed\n";
+		}
+		const Matrix &C = mpPtr->getConstraint();
+		int numRows = C.noRows();
+		int numCols = C.noCols();
+		if (numRows != numCols) {
+			cerr << "WARNING PlainHandler::handle() - ";
+			cerr << " constraint matrix not diagonal, ignoring constraint";
+			cerr << " for node " << nodeID << endl;
+			cerr << " non-varyng assumed\n";
+		} else {
+			int ok = 0;
+			for (int i=0; i<numRows; i++) {
+				if (C(i,i) != 1.0) ok = 1;
+				for (int j=0; j<numRows; j++)
+					if (i != j)
+						if (C(i,j) != 0.0)
+							ok = 1;
+			}
+			if (ok != 0) {
+				cerr << "WARNING PlainHandler::handle() - ";
+				cerr << " constraint matrix not identity, ignoring constraint";
+				cerr << " for node " << nodeID << endl;
+				cerr << " non-varyng assumed\n";
+			} else {
+				const ID &dofs = mpPtr->getConstrainedDOFs();
+				const ID &id = dofPtr->getID();				
+				for (int i=0; i<dofs.Size(); i++) {
+					int dof = dofs(i);	
+					if (id(dof) == -2) {
+						dofPtr->setID(dof,-4);
+						countDOF--;	
+					} else {
+		    				cerr << "WARNING PlainHandler::handle() - ";
+		    				cerr << " constraint at dof " << dof << " already specified for constrained node";
+		    				cerr << " in MP_Constraint at node " << nodeID << endl;
+					}
+					
+				}
+			}
+		}
+	}
 
 	nodPtr->setDOF_GroupPtr(dofPtr);
 	theDOFs[numDofGrp] = dofPtr;
@@ -214,12 +274,6 @@ PlainHandler::handle(const ID *nodesLast)
 	}
     }
 
-    if (theDomain->getNumMPs() != 0) {
-	cerr << "WARNING PlainHandler::handle() - MP_Constraints exist";
-	cerr << " in the domain - not handled by a PlainHandler\n";
-	return -6;
-    }
-    
     return count3;
 }
 
