@@ -50,13 +50,19 @@ all:
 	@$(CD) $(FE)/tcl;  $(MAKE) tcl;
 	@$(CD) $(FE)/modelbuilder/tcl;  $(MAKE) tcl;
 
+OpenSees: tcl
 
-OpenSees: doit
-
-doit:
+tcl:
 	@$(ECHO) Building OpenSees Program ..;
 	@$(CD) $(FE)/tcl;  $(MAKE) tcl;
 	@$(CD) $(FE)/modelbuilder/tcl;  $(MAKE) tcl;
+
+OpenSeesTk: tk
+
+tk:
+	@$(ECHO) Building OpenSees Program ..;
+	@$(CD) $(FE)/tcl;  $(MAKE) tk;
+	@$(CD) $(FE)/modelbuilder/tcl;  $(MAKE) tk;
 
 
 libs:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-08-28 23:34:39 $
+// $Revision: 1.9 $
+// $Date: 2001-08-30 22:02:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -97,8 +97,11 @@ extern int
 TclModelBuilder_addEnhancedQuad(ClientData, Tcl_Interp *, int, char **,
 				Domain*, TclModelBuilder *);
 
+extern int 
+TclModelBuilder_addNineNodeMixedQuad(ClientData, Tcl_Interp *, int, char **,
+				     Domain*, TclModelBuilder *);
 
-		       
+
 // GLF			       
 extern int 
 TclModelBuilder_addZeroLength(ClientData, Tcl_Interp *, int, char **,
@@ -201,6 +204,13 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 							       argc, argv,
 							       theTclDomain, 
 							       theTclBuilder);
+    return result;
+  } else if ((strcmp(argv[1],"nineNodeMixedQuad") == 0) 
+	     || (strcmp(argv[1],"nineNodeQuad") == 0)) {
+    int result = TclModelBuilder_addNineNodeMixedQuad(clientData, interp, 
+						      argc, argv,
+						      theTclDomain, 
+						      theTclBuilder);
     return result;
   } else if ((strcmp(argv[1],"shell") == 0) || (strcmp(argv[1],"shellMITC4") == 0)) {
     int eleArgStart = 1;
