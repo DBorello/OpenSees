@@ -382,6 +382,12 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/J2AxiSymm.o \
 	$(FE)/material/nD/J2ThreeDimensional.o \
 	$(FE)/material/nD/J2PlateFiber.o \
+	$(FE)/material/nD/FeapMaterial.o \
+	$(FE)/material/nD/feap/FeapMaterial03.o \
+	$(FE)/material/nD/feap/matl01.o \
+	$(FE)/material/nD/feap/matl02.o \
+	$(FE)/material/nD/feap/matl03.o \
+	$(FE)/material/nD/feap/feapCommon.o \
 	$(FE)/material/nD/ElasticIsotropicMaterial.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStress2D.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStrain2D.o \
