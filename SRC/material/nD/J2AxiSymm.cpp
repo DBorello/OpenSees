@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:49:11 $
+// $Revision: 1.5 $
+// $Date: 2002-12-06 02:13:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2AxiSymm.cpp,v $
 
 // Written: Ed "C++" Love
@@ -224,7 +224,7 @@ const Matrix& J2AxiSymm :: getInitialTangent( )
   //   2           2 2   
   //   3           0 1  ( or 1 0 )
 
-  this->doInitialTangent;
+  this->doInitialTangent();
 
   int ii, jj ;
   int i, j, k, l ;
