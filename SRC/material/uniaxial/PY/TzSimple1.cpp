@@ -26,6 +26,10 @@
 #include <Channel.h>
 #include <math.h>
 
+// Controls on internal iteration between spring components
+const int TZmaxIterations = 20;
+const double TZtolerance = 1.0e-12;
+
 /////////////////////////////////////////////////////////////////////
 //	Constructor with data
 
@@ -55,8 +59,6 @@ TzSimple1::TzSimple1()
   // should be static .. all PySimple1 materials share the same values & 
   // these values don't change
 
-  TZmaxIterations = 20;
-  TZtolerance     = 1.0e-12;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -352,8 +354,6 @@ TzSimple1::revertToLastCommit(void)
 int 
 TzSimple1::revertToStart(void)
 {
-	TZmaxIterations = 20;
-	TZtolerance     = 1.0e-12;
 
 	// If tzType = 0, then it is entering with the default constructor.
 	// To avoid division by zero, set small nonzero values for terms.
@@ -493,7 +493,7 @@ TzSimple1::recvSelf(int cTag, Channel &theChannel,
   }
   else {
     this->setTag((int)data(0));
-	tzType = data(1);
+	tzType = (int)data(1);
 	tult     = data(2);
 	z50      = data(3);
 	dashpot  = data(4);

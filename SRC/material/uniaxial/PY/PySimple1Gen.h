@@ -1,5 +1,5 @@
-//$Revision: 1.3 $
-//$Date: 2004-06-25 22:37:19 $
+//$Revision: 1.4 $
+//$Date: 2004-06-30 00:27:40 $
 //$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/PySimple1Gen.h,v $
 
 #include <fstream>
@@ -12,7 +12,7 @@ class PySimple1Gen
 	char **pTest;
 	// Variables used for reading input files:
 	int NumNodes, NumPyEle, NumPileEle, NumLayer, NumMpLoadSp, NumLoad, NumSp, NumMp, NumMat;
-	double pult, y50, b, maxz, minz, depth, cu, e50, stress, phi, sr, PULT, yult, ru;
+	double pult, y50, b, maxz, minz, depth, cu, e50, stress, phi, sr, PULT, Y50, ru;
 	int *NodeNum;								// Arrays for Nodes File
 	double *Nodey, *Nodex;
 	int *PyEleNum, *PyNode1, *PyNode2, *PyMat, *PyDir;	// Arrays for Py Elements File
@@ -20,7 +20,7 @@ class PySimple1Gen
 	int *pyType, stype;
 	double *gamma_t, *gamma_b, *z_t, *z_b, *b_t, *b_b, *Cd_t, *Cd_b, *c_t, *c_b, // Arrays for Soil Properties File
 		*cu_t, *cu_b, *e50_t, *e50_b, *phi_t, *phi_b, *Sr_t, *Sr_b, *pult_t, *pult_b,
-		*yult_t, *yult_b, *zLoad_t, *zLoad_b, *load_val_t, *load_val_b, *zSp_t, *zSp_b, *sp_val_t,
+		*y50_t, *y50_b, *zLoad_t, *zLoad_b, *load_val_t, *load_val_b, *zSp_t, *zSp_b, *sp_val_t,
 		*sp_val_b, *zMp_t, *zMp_b, *mp_val_t, *mp_val_b, *ru_t, *ru_b, tribcoord[2];
 	char **MatType, *PatternInfo;
 

@@ -25,6 +25,10 @@
 #include <Channel.h>
 #include <math.h>
 
+// Controls on internal iteration between spring components
+const int PYmaxIterations = 20;
+const double PYtolerance = 1.0e-12;
+
 int PyLiq1::loadStage = 0;
 Vector PyLiq1::stressV3(3);
 
@@ -438,11 +442,11 @@ PyLiq1::sendSelf(int cTag, Channel &theChannel)
 	data(7)  = Tru;
 	data(8)  = Cru;
 	data(9)  = Hru;
-	data(10) = solidElem1;
-	data(11) = solidElem2;
+	data(10) = (int)solidElem1;
+	data(11) = (int)solidElem2;
 	data(12) = meanConsolStress;
-	data(13) = loadStage;
-	data(14) = lastLoadStage;
+	data(13) = (int)loadStage;
+	data(14) = (int)lastLoadStage;
 	data(15) = initialTangent;
 	
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
@@ -480,11 +484,11 @@ PyLiq1::recvSelf(int cTag, Channel &theChannel,
 	Tru        = data(7);
 	Cru        = data(8);
 	Hru        = data(9);
-	solidElem1        = data(10);
-	solidElem2        = data(11);
+	solidElem1        = (int)data(10);
+	solidElem2        = (int)data(11);
 	meanConsolStress  = data(12);
-	loadStage         = data(13);
-	lastLoadStage     = data(14);
+	loadStage         = (int)data(13);
+	lastLoadStage     = (int)data(14);
 	initialTangent    = data(15);
 
 	// set the trial quantities

@@ -10,8 +10,8 @@
 //              December 2, 2003									//
 //////////////////////////////////////////////////////////////////////
 
-//$Revision: 1.3 $
-//$Date: 2004-06-25 22:37:19 $
+//$Revision: 1.4 $
+//$Date: 2004-06-30 00:27:40 $
 //$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/TzSimple1Gen.cpp,v $
 
 #include "TzSimple1Gen.h"
@@ -35,7 +35,7 @@ TzSimple1Gen::TzSimple1Gen()
 	p = 0.0;
 	zground = 0.0;
 	TULT = 0.0;
-	ZULT = 0.0;
+	Z50 = 0.0;
 	ru = 0.0;
 	ca = 0.0;
 	depth = 0.0;
@@ -64,6 +64,8 @@ TzSimple1Gen::~TzSimple1Gen()
 	delete[] gamma_b;
 	delete[] z_t;
 	delete[] z_b;
+	delete[] p_t;
+	delete[] p_b;
 	delete[] c_t;
 	delete[] c_b;
 	delete[] ca_t;
@@ -82,9 +84,18 @@ TzSimple1Gen::~TzSimple1Gen()
 	delete[] zMt_b;
 	delete[] mt_val_t;
 	delete[] mt_val_b;
+	delete[] Sa_b;
+	delete[] Sa_t;
+	delete[] ru_t;
+	delete[] ru_b;
+	delete[] z50_t;
+	delete[] z50_b;
+	delete[] tult_t;
+	delete[] tult_b;
 	for(int i=0;i<NumMat;i++)
 		delete[] MatType[i];
 	delete[] MatType;
+	delete[] tzType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +234,7 @@ void TzSimple1Gen::GetTzSimple1(const char *file1, const char *file2, const char
 						delta = linterp(z_t[j], z_b[j], delta_t[j], delta_b[j], zsub);
 						c = linterp(z_t[j], z_b[j], c_t[j], c_b[j], zsub);
 						TULT = linterp(z_t[j], z_b[j], tult_t[j], tult_b[j], zsub);
-						ZULT = linterp(z_t[j], z_b[j], zult_t[j], zult_b[j], zsub);
+						Z50 = linterp(z_t[j], z_b[j], z50_t[j], z50_b[j], zsub);
 						ru = linterp(z_t[j], z_b[j], ru_t[j], ru_b[j], zsub);
 						Sa = linterp(z_t[j], z_b[j], Sa_t[j], Sa_b[j], zsub);
 						if(strcmp(mattype,"tz1")==0)
@@ -597,8 +608,8 @@ void TzSimple1Gen::GetSoilProperties(const char *file)
 	tzType = new int[NumMat];
 	tult_t = new double[NumMat];
 	tult_b = new double[NumMat];
-	zult_t = new double[NumMat];
-	zult_b = new double[NumMat];
+	z50_t = new double[NumMat];
+	z50_b = new double[NumMat];
 
 	// Dynamically allocate memory for arrays containing information for p-multipliers
 	zMt_t = new double[NumMt];
@@ -652,7 +663,7 @@ void TzSimple1Gen::GetSoilProperties(const char *file)
 		}
 		else if(strcmp(MatType[i],"tz4")==0)
 		{
-			in1 >> tzType[i] >> tult_t[i] >> tult_b[i] >> zult_t[i] >> zult_b[i];
+			in1 >> tzType[i] >> tult_t[i] >> tult_b[i] >> z50_t[i] >> z50_b[i];
 			if(in1.peek() != '\n')
 				in1 >> c_t[i] >> c_b[i];
 		}
@@ -754,7 +765,7 @@ double TzSimple1Gen::GetTult(const char *type)
 double TzSimple1Gen::GetZ50(const char *type)
 {
 	if(strcmp(type,"tz4")==0)
-		return ZULT/8.0;
+		return Z50;
 
 	// Set z50 such that zult = 0.5% of pile diameter.  Calculate pile diameter from perimeter for a circular section.
 	else

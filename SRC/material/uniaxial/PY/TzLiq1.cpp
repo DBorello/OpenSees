@@ -25,6 +25,10 @@
 #include <Channel.h>
 #include <math.h>
 
+// Controls on internal iteration between spring components
+const int TZmaxIterations = 20;
+const double TZtolerance = 1.0e-12;
+
 int TzLiq1::loadStage = 0;
 Vector TzLiq1::stressV3(3);
 
@@ -471,11 +475,11 @@ TzLiq1::recvSelf(int cTag, Channel &theChannel,
 	Tru        = data(7);
 	Cru        = data(8);
 	Hru        = data(9);
-	solidElem1        = data(10);
-	solidElem2        = data(11);
+	solidElem1        = (int)data(10);
+	solidElem2        = (int)data(11);
 	meanConsolStress  = data(12);
-	loadStage         = data(13);
-	lastLoadStage     = data(14);
+	loadStage         = (int)data(13);
+	lastLoadStage     = (int)data(14);
 	initialTangent    = data(15);
 
 	// set the trial quantities

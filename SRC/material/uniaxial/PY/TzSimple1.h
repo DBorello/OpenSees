@@ -24,10 +24,6 @@
 
 #include <UniaxialMaterial.h>
 
-// Controls on internal iteration between spring components
-static int TZmaxIterations = 20;      
-static double TZtolerance  = 1.0e-12; 
-
 
 class TzSimple1 : public UniaxialMaterial
 {

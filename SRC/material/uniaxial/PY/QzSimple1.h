@@ -26,11 +26,6 @@
 #include <UniaxialMaterial.h>
 
 
-	// Controls on internal iteration between components
-	static int QZmaxIterations = 20;      
-	static double QZtolerance  = 1.0e-12; 
-
-
 class QzSimple1 : public UniaxialMaterial
 {
   public:

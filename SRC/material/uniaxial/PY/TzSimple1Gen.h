@@ -1,5 +1,5 @@
-//$Revision: 1.3 $
-//$Date: 2004-06-25 22:37:19 $
+//$Revision: 1.4 $
+//$Date: 2004-06-30 00:27:40 $
 //$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/TzSimple1Gen.h,v $
 
 #include <iostream>
@@ -12,7 +12,7 @@ class TzSimple1Gen
 
   // Variables used for reading input files:
   int NumNodes, NumTzEle, NumPileEle, NPile, NumLayer, NumMtLoadSp, NumLoad, NumSp, NumMt, NumMat;
-  double p, zground, TULT, ZULT, ru, ca, depth, stress, delta, b, Sa;
+  double p, zground, TULT, Z50, ru, ca, depth, stress, delta, b, Sa;
   int *NodeNum;								// Arrays for Nodes File
   double *Nodey, *Nodex;
   int *TzEleNum, *TzNode1, *TzNode2, *TzMat, *TzDir;	// Arrays for Py Elements File
@@ -21,7 +21,7 @@ class TzSimple1Gen
   double *gamma_t, *gamma_b, *z_t, *z_b, *p_t, *p_b, *c_t, *c_b, *ca_t, *ca_b, *delta_t, *delta_b,
     *zLoad_t, *zLoad_b, *load_val_t, *load_val_b, *zSp_t, *zSp_b, *sp_val_t,
     *sp_val_b, *zMt_t, *zMt_b, *mt_val_t, *mt_val_b, tribcoord[2], *Sa_b, *Sa_t, *ru_t, *ru_b,
-    *tult_t, *tult_b, *zult_t, *zult_b;
+    *tult_t, *tult_b, *z50_t, *z50_b;
   char **MatType, *PatternInfo;
   
   

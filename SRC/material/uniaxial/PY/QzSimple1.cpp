@@ -25,6 +25,10 @@
 #include <Vector.h>
 #include <Channel.h>
 
+// Controls on internal iterations between spring components
+const int QZmaxIterations = 20;
+const double QZtolerance = 1.0e-12;
+
 /////////////////////////////////////////////////////////////////////
 //	Constructor with data
 
@@ -55,8 +59,6 @@ QzSimple1::QzSimple1()
   // should be static .. all PySimple1 materials share the same values & 
   // these values don't change
 
-  QZmaxIterations = 20;
-  QZtolerance     = 1.0e-12;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -553,8 +555,6 @@ QzSimple1::revertToLastCommit(void)
 int 
 QzSimple1::revertToStart(void)
 {
-	QZmaxIterations = 20;
-	QZtolerance     = 1.0e-12;
 
 	// Reset gap "suction" if zero (or negative) or exceeds max value of 0.1
 	//
@@ -820,7 +820,7 @@ QzSimple1::recvSelf(int cTag, Channel &theChannel,
   }
   else {
     this->setTag((int)data(0));
-	QzType   = data(1);
+	QzType   = (int)data(1);
 	Qult     = data(2);
 	z50      = data(3);
 	suction  = data(4);

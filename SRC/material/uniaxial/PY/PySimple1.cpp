@@ -26,6 +26,10 @@
 #include <Vector.h>
 #include <Channel.h>
 
+// Controls on internal iteration between spring components
+const int PYmaxIterations = 20;
+const double PYtolerance = 1.0e-12;
+
 /////////////////////////////////////////////////////////////////////
 //	Constructor with data
 
@@ -47,8 +51,6 @@ PySimple1::PySimple1()
 :UniaxialMaterial(0,0),
  soilType(0), pult(0.0), y50(0.0), drag(0.0), dashpot(0.0)
 {
-  PYmaxIterations = 20;
-  PYtolerance     = 1.0e-12;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -561,8 +563,6 @@ PySimple1::revertToLastCommit(void)
 int 
 PySimple1::revertToStart(void)
 {
-	PYmaxIterations = 20;
-	PYtolerance     = 1.0e-12;
 
 	// If soilType = 0, then it is entering with the default constructor.
 	// To avoid division by zero, set small nonzero values for terms.
@@ -764,7 +764,7 @@ PySimple1::recvSelf(int cTag, Channel &theChannel,
   }
   else {
     this->setTag((int)data(0));
-	soilType = data(1);
+	soilType = (int)data(1);
 	pult     = data(2);
 	y50      = data(3);
 	drag     = data(4);

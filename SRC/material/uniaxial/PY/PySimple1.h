@@ -25,10 +25,6 @@
 
 #include <UniaxialMaterial.h>
 
-// Controls on internal iteration between spring components
-static int PYmaxIterations = 20;
-static double PYtolerance  = 1.0e-12;
-
 class PySimple1 : public UniaxialMaterial
 {
   public:

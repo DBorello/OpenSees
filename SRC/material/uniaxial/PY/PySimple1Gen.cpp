@@ -10,8 +10,8 @@
 //              December 2, 2003									//
 //////////////////////////////////////////////////////////////////////
 
-//$Revision: 1.3 $
-//$Date: 2004-06-25 22:37:19 $
+//$Revision: 1.4 $
+//$Date: 2004-06-30 00:27:40 $
 //$Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/PySimple1Gen.cpp,v $
 
 #include "PySimple1Gen.h"
@@ -42,7 +42,7 @@ PySimple1Gen::PySimple1Gen()
 	phi = 0.0;
 	sr = 0.0;
 	PULT = 0.0;
-	yult = 0.0;
+	Y50 = 0.0;
 	ru = 0.0;
 }
 
@@ -80,8 +80,8 @@ PySimple1Gen::~PySimple1Gen()
 	delete[] Sr_b;
 	delete[] pult_t;
 	delete[] pult_b;
-	delete[] yult_t;
-	delete[] yult_b;
+	delete[] y50_t;
+	delete[] y50_b;
 	delete[] zLoad_t;
 	delete[] zLoad_b;
 	delete[] load_val_t;
@@ -263,7 +263,7 @@ void PySimple1Gen::GetPySimple1(const char *file1, const char *file2, const char
 					Cd = linterp(z_t[j], z_b[j], Cd_t[j], Cd_b[j], z);
 					c = linterp(z_t[j], z_b[j], c_t[j], c_b[j], z);
 					PULT = linterp(z_t[j], z_b[j], pult_t[j], pult_b[j], z);
-					yult = linterp(z_t[j], z_b[j], yult_t[j], yult_b[j], z);
+					Y50 = linterp(z_t[j], z_b[j], y50_t[j], y50_b[j], z);
 					ru = linterp(z_t[j], z_b[j], ru_t[j], ru_b[j], z);
 
 					break;
@@ -312,7 +312,7 @@ void PySimple1Gen::GetPySimple1(const char *file1, const char *file2, const char
 						Cd = linterp(z_t[j], z_b[j], Cd_t[j], Cd_b[j], zsub);
 						c = linterp(z_t[j], z_b[j], c_t[j], c_b[j], zsub);
 						PULT = linterp(z_t[j], z_b[j], pult_t[j], pult_b[j], zsub);
-						yult = linterp(z_t[j], z_b[j], yult_t[j], yult_b[j], zsub);
+						Y50 = linterp(z_t[j], z_b[j], y50_t[j], y50_b[j], zsub);
 						ru = linterp(z_t[j], z_b[j], ru_t[j], ru_b[j], zsub);
 						break;
 					}
@@ -677,8 +677,8 @@ void PySimple1Gen::GetSoilProperties(const char *file)
 	pyType = new int[NumMat];
 	pult_t = new double[NumMat];
  	pult_b = new double[NumMat];
-	yult_t = new double[NumMat];
-	yult_b = new double[NumMat];
+	y50_t = new double[NumMat];
+	y50_b = new double[NumMat];
 	ru_t = new double[NumMat];
 	ru_b = new double[NumMat];
 
@@ -730,8 +730,8 @@ void PySimple1Gen::GetSoilProperties(const char *file)
 		pyType[i] = 0;
 		pult_t[i] = 0;
 		pult_b[i] = 0;
-		yult_t[i] = 0;
-		yult_b[i] = 0;
+		y50_t[i] = 0;
+		y50_b[i] = 0;
 		ru_t[i] = 0;
 		ru_b[i] = 0;
 
@@ -764,7 +764,7 @@ void PySimple1Gen::GetSoilProperties(const char *file)
 				
 		else if(strcmp(MatType[i],"py4")==0)
 		{
-			in1 >> pyType[i] >> pult_t[i] >> pult_b[i] >> yult_t[i] >> yult_b[i] >> Cd_t[i] >> Cd_b[i];
+			in1 >> pyType[i] >> pult_t[i] >> pult_b[i] >> y50_t[i] >> y50_b[i] >> Cd_t[i] >> Cd_b[i];
 			if(in1.peek() != '\n')
 				in1 >> c_t[i] >> c_b[i];
 		}
@@ -992,7 +992,7 @@ double PySimple1Gen::GetY50(const char *type)
 
 	// Get y50 for pile cap (strain = yult for pile cap)
 	else if(strcmp(type,"py4")==0)
-		return yult/8;
+		return Y50;
 
 	// Return error message if py type is not found
 	else
