@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-25 23:34:40 $
+// $Revision: 1.11 $
+// $Date: 2003-02-26 21:36:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
                                                                         
@@ -571,7 +571,7 @@ OpenGlDevice::BITMAPOPEN(const char *_title, int _xLoc, int _yLoc,
 	bitmapFile <<  "too long, max " << MAX_FILENAMELENGTH << endln;
 			      
     else {
-      strcpy(bitmapFileName, bitmapFile); 
+      strcpy(bitmapFile, bitmapFileName); 
       oglCreateBitmap(width, height, &theHRC, &theHDC, &theBitmap, &info, &bits);
       
     }
