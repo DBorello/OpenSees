@@ -26,6 +26,9 @@
 //#                                                                           #
 //#############################################################################
 
+//$Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $
+//$Date: 2000-12-18 10:50:41 $
+//$Revision: 1.2 $
                                                                         
 #include <ElasticIsotropic3D.h>
 #include <Channel.h>

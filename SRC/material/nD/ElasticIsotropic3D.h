@@ -25,19 +25,13 @@
 //#                                                                           #
 //#############################################################################
                                                                         
+
+//$Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $
+//$Date: 2000-12-18 10:50:41 $
+//$Revision: 1.2 $
                                                                         
 #ifndef ElasticIsotropic3D_h
 #define ElasticIsotropic3D_h
-
-// File: ~/material/ElasticIsotropic3D.h
-//
-// Written: MHS
-// Created: Feb 2000
-// Revision: A
-//
-// Description: 
-//
-// What: "@(#) ElasticIsotropic3D.h, revA"
 
 #include <ElasticIsotropicMaterial.h>
 
@@ -46,6 +40,8 @@
 #include <ID.h>
 
 #include <Tensor.h>
+#include <stresst.h>
+#include <straint.h>
 
 class ElasticIsotropic3D : public ElasticIsotropicMaterial
 {
