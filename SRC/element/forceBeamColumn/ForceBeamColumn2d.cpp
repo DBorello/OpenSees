@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-06-23 19:09:04 $
+// $Revision: 1.14 $
+// $Date: 2003-10-06 18:37:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -375,7 +375,10 @@ ForceBeamColumn2d::getInitialStiff(void)
   if (Ki != 0)
     return *Ki;
 
-  static Matrix f(NEBD,NEBD);   // element flexibility matrix  
+  else
+    Ki = new Matrix(this->getTangentStiff());
+
+  static Matrix f(NEBD, NEBD);   // element flexibility matrix  
   this->getInitialFlexibility(f);
   
   static Matrix I(NEBD,NEBD);   // an identity matrix for matrix inverse  
@@ -385,13 +388,22 @@ ForceBeamColumn2d::getInitialStiff(void)
   
   // calculate element stiffness matrix
   // invert3by3Matrix(f, kv);
+  /*
   static Matrix kvInit(NEBD, NEBD);
   if (f.Solve(I, kvInit) < 0)
     opserr << "ForceBeamColumn2d::getInitialStiff() -- could not invert flexibility\n";
-      
+  */
 
-  Ki = new Matrix(crdTransf->getInitialGlobalStiffMatrix(kvInit));
-  
+  static Matrix kvInit(NEBD, NEBD);
+  f.Invert(kvInit);
+
+  //  Ki = new Matrix(crdTransf->getInitialGlobalStiffMatrix(kvInit));
+  opserr << "ELEMENT: \n";
+  opserr << f;
+  opserr << kvInit;
+  opserr << kv;
+  opserr << *Ki;
+
   return *Ki;
 }
 
@@ -742,7 +754,6 @@ ForceBeamColumn2d::update()
 	  if (f.Solve(I, kvTrial) < 0)
 	    opserr << "ForceBeamColumn2d::update() -- could not invert flexibility\n";
 				    
-
 	  // dv = vin + dvTrial  - vr
 	  dv = vin;
 	  dv += dvTrial;
@@ -863,14 +874,6 @@ void ForceBeamColumn2d::getDistrLoadInterpolatMatrix(double xi, Matrix &bp, cons
       break;
     }
   }
-}
-
-const Matrix &
-ForceBeamColumn2d::getDamp(void)
-{
-  theMatrix.Zero();
-  
-  return theMatrix; // zero matrix still
 }
 
 const Matrix &
@@ -1485,30 +1488,180 @@ ForceBeamColumn2d::getInitialFlexibility(Matrix &fe)
 
 void ForceBeamColumn2d::compSectionDisplacements(Vector sectionCoords[], Vector sectionDispls[]) const
 {
-  return;	       
+   // get basic displacements and increments
+   static Vector ub(NEBD);
+   ub = crdTransf->getBasicTrialDisp();    
+
+   double L = crdTransf->getInitialLength();
+  
+   // get integration point positions and weights
+   //   const Matrix &xi_pt  = quadRule.getIntegrPointCoords(numSections);
+   // get integration point positions and weights
+   static double xi_pts[maxNumSections];
+   beamIntegr->getSectionLocations(numSections, L, xi_pts);
+
+   // setup Vandermode and CBDI influence matrices
+   int i;
+   double xi;
+ 
+   // get CBDI influence matrix
+   Matrix ls(numSections, numSections);
+   getCBDIinfluenceMatrix(numSections, xi_pts, L, ls);
+
+   // get section curvatures
+   Vector kappa(numSections);  // curvature
+   static Vector vs;              // section deformations 
+
+   for (i=0; i<numSections; i++)
+   {
+       // THIS IS VERY INEFFICIENT ... CAN CHANGE LATER
+       int sectionKey = 0;
+       const ID &code = sections[i]->getType();
+       int ii;
+       for (ii = 0; ii < code.Size(); ii++)
+	   if (code(ii) == SECTION_RESPONSE_MZ)
+	   {
+	       sectionKey = ii;
+	       break;
+	   }
+
+       if (ii == code.Size()) {
+	 opserr << "FATAL NLBeamColumn2d::compSectionDispls - section does not provide Mz response\n";
+	 exit(-1);
+       }
+			
+       // get section deformations
+       vs = sections[i]->getSectionDeformation();
+       kappa(i) = vs(sectionKey);
+   }
+
+   Vector w(numSections);
+   static Vector xl(NDM), uxb(NDM);
+   static Vector xg(NDM), uxg(NDM); 
+
+   // w = ls * kappa;  
+   w.addMatrixVector (0.0, ls, kappa, 1.0);
+   
+   for (i=0; i<numSections; i++)
+   {
+      xi = xi_pts[i];
+
+      xl(0) = xi * L;
+      xl(1) = 0;
+
+      // get section global coordinates
+      sectionCoords[i] = crdTransf->getPointGlobalCoordFromLocal(xl);
+
+      // compute section displacements
+      uxb(0) = xi * ub(0); // consider linear variation for axial displacement. CHANGE LATER!!!!!!!!!!
+      uxb(1) = w(i);
+             
+      // get section displacements in global system 
+      sectionDispls[i] = crdTransf->getPointGlobalDisplFromBasic(xi, uxb);
+   }	       
+   return;	       
 }
 
 void
 ForceBeamColumn2d::Print(OPS_Stream &s, int flag)
 {
-  s << "\nElement: " << this->getTag() << " Type: ForceBeamColumn2d ";
-  s << "\tConnected Nodes: " << connectedExternalNodes ;
-  s << "\tNumber of Sections: " << numSections;
-  s << "\tMass density: " << rho << endln;
-  beamIntegr->Print(s, flag);
-  double P  = Secommit(0);
-  double M1 = Secommit(1);
-  double M2 = Secommit(2);
-  double L = crdTransf->getInitialLength();
-  double V = (M1+M2)/L;
-  theVector(1) = V;
-  theVector(4) = -V;
-  s << "\tEnd 1 Forces (P V M): " << -P+p0[0] << " " << V+p0[1] << " " << M1 << endln;
-  s << "\tEnd 2 Forces (P V M): " << P << " " << -V+p0[2] << " " << M2 << endln;
-  
-  if (flag == 1) { 
-    for (int i = 0; i < numSections; i++)
-      s << "\numSections "<<i<<" :" << *sections[i];
+  if (flag == 2) {
+
+    s << "#ForceBeamColumn2D\n";
+
+    const Vector &node1Crd = theNodes[0]->getCrds();
+    const Vector &node2Crd = theNodes[1]->getCrds();	
+    const Vector &node1Disp = theNodes[0]->getDisp();
+    const Vector &node2Disp = theNodes[1]->getDisp();    
+    
+    s << "#NODE " << node1Crd(0) << " " << node1Crd(1) 
+      << " " << node1Disp(0) << " " << node1Disp(1) << " " << node1Disp(2) << endln;
+    
+    s << "#NODE " << node2Crd(0) << " " << node2Crd(1) 
+      << " " << node2Disp(0) << " " << node2Disp(1) << " " << node2Disp(2) << endln;
+
+    double P  = Secommit(0);
+    double M1 = Secommit(1);
+    double M2 = Secommit(2);
+    double L = crdTransf->getInitialLength();
+    double V = (M1+M2)/L;
+    
+    s << "#END_FORCES " << -P+p0[0] << " " << V+p0[1] << " " << M1 << endln;
+    s << "#END_FORCES " << P << " " << -V+p0[2] << " " << M2 << endln;
+
+    // plastic hinge rotation
+    static Vector vp(3);
+    static Matrix fe(3,3);
+    this->getInitialFlexibility(fe);
+    vp = crdTransf->getBasicTrialDisp();
+    vp.addMatrixVector(1.0, fe, Se, -1.0);
+    s << "#PLASTIC_HINGE_ROTATION " << vp[1] << " " << vp[2] << " " << 0.1*L << " " << 0.1*L << endln;
+
+    // allocate array of vectors to store section coordinates and displacements
+    static int maxNumSections = 0;
+    static Vector *coords = 0;
+    static Vector *displs = 0;
+    if (maxNumSections < numSections) {
+      if (coords != 0) 
+	delete [] coords;
+      if (displs != 0)
+	delete [] displs;
+      
+      coords = new Vector [numSections];
+      displs = new Vector [numSections];
+      
+      if (!coords) {
+	opserr << "NLBeamColumn3d::Print() -- failed to allocate coords array";   
+	exit(-1);
+      }
+      
+      int i;
+      for (i = 0; i < numSections; i++)
+	coords[i] = Vector(NDM);
+      
+      if (!displs) {
+	opserr << "NLBeamColumn3d::Print() -- failed to allocate coords array";   
+	exit(-1);
+      }
+      
+      for (i = 0; i < numSections; i++)
+	displs[i] = Vector(NDM);
+      
+      
+      maxNumSections = numSections;
+    }
+    
+    // compute section location & displacements
+    this->compSectionDisplacements(coords, displs);
+    
+    // spit out the section location & invoke print on the scetion
+    for (int i=0; i<numSections; i++) {
+      s << "#SECTION " << (coords[i])(0) << " " << (coords[i])(1);       
+      s << " " << (displs[i])(0) << " " << (displs[i])(1) << endln;
+      sections[i]->Print(s, flag); 
+    }
+    
+  } else {
+
+    s << "\nElement: " << this->getTag() << " Type: ForceBeamColumn2d ";
+    s << "\tConnected Nodes: " << connectedExternalNodes ;
+    s << "\tNumber of Sections: " << numSections;
+    s << "\tMass density: " << rho << endln;
+    beamIntegr->Print(s, flag);
+    double P  = Secommit(0);
+    double M1 = Secommit(1);
+    double M2 = Secommit(2);
+    double L = crdTransf->getInitialLength();
+    double V = (M1+M2)/L;
+    theVector(1) = V;
+    theVector(4) = -V;
+    s << "\tEnd 1 Forces (P V M): " << -P+p0[0] << " " << V+p0[1] << " " << M1 << endln;
+    s << "\tEnd 2 Forces (P V M): " << P << " " << -V+p0[2] << " " << M2 << endln;
+    
+    if (flag == 1) { 
+      for (int i = 0; i < numSections; i++)
+	s << "\numSections "<<i<<" :" << *sections[i];
+    }
   }
 }
 

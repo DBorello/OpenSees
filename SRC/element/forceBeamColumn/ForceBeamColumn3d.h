@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2003-06-17 23:51:20 $
+// $Revision: 1.7 $
+// $Date: 2003-10-06 18:37:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.h,v $
 
 #ifndef ForceBeamColumn3d_h
@@ -63,7 +63,6 @@ class ForceBeamColumn3d: public Element
   
   const Matrix &getTangentStiff(void);
   const Matrix &getInitialStiff(void);
-  const Matrix &getDamp(void);    
   const Matrix &getMass(void);    
   
   void zeroLoad(void);	

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-06-23 19:09:04 $
+// $Revision: 1.14 $
+// $Date: 2003-10-06 18:37:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -968,14 +968,6 @@ void ForceBeamColumn3d::getDistrLoadInterpolatMatrix(double xi, Matrix &bp, cons
 }
 
 const Matrix &
-ForceBeamColumn3d::getDamp(void)
-{
-  theMatrix.Zero();
-  
-  return theMatrix; // zero matrix still
-}
-
-const Matrix &
 ForceBeamColumn3d::getMass(void)
 { 
   theMatrix.Zero();
@@ -1761,7 +1753,7 @@ ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
   // flags with negative values are used by GSA
   if (flag == -1) { 
     int eleTag = this->getTag();
-    s << "NL_BEAM\t" << eleTag << "\t";
+    s << "EL_BEAM\t" << eleTag << "\t";
     s << sections[0]->getTag() << "\t" << sections[numSections-1]->getTag(); 
     s  << "\t" << connectedExternalNodes(0) << "\t" << connectedExternalNodes(1);
     s << "\t0\t0.0000000\n";
@@ -1833,6 +1825,15 @@ ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
        << -T << ' '  << MY1 << ' ' << MZ1 << endln;
      s << "#END_FORCES "  << P  << ' '  << -VY+p0[2] << ' ' << VZ+p0[4] << ' '  
        << T << ' ' << MY2 << ' '  <<  MZ2 << endln;
+     
+     // plastic hinge rotation
+     static Vector vp(6);
+     static Matrix fe(6,6);
+     this->getInitialFlexibility(fe);
+     vp = crdTransf->getBasicTrialDisp();
+     vp.addMatrixVector(1.0, fe, Se, -1.0);
+     s << "#PLASTIC_HINGE_ROTATION " << vp[1] << " " << vp[2] << " " << vp[3] << " " << vp[4] 
+       << 0.1*L << " " << 0.1*L << endln;
 
      // allocate array of vectors to store section coordinates and displacements
      static int maxNumSections = 0;
