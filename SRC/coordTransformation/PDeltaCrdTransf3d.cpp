@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-13 23:26:10 $
+// $Revision: 1.3 $
+// $Date: 2001-09-17 22:15:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf3d.cpp,v $
                                                                         
                                                                         
@@ -51,9 +51,13 @@ PDeltaCrdTransf3d::PDeltaCrdTransf3d(int tag, const Vector &vecInLocXZPlane):
   nodeIOffset(0), nodeJOffset(0),
   L(0), ul17(0), ul28(0)
 {
-  	  R[2][0] = vecInLocXZPlane(0);
-	  R[2][1] = vecInLocXZPlane(1);
-	  R[2][2] = vecInLocXZPlane(2);
+	for (int i = 0; i < 2; i++)
+		for (int j = 0; j < 3; j++)
+			R[i][j] = 0.0;
+
+	R[2][0] = vecInLocXZPlane(0);
+	R[2][1] = vecInLocXZPlane(1);
+	R[2][2] = vecInLocXZPlane(2);
 
 	// Does nothing
 }
@@ -67,9 +71,13 @@ PDeltaCrdTransf3d::PDeltaCrdTransf3d(int tag, const Vector &vecInLocXZPlane,
   nodeIOffset(0), nodeJOffset(0),
   L(0), ul17(0), ul28(0)
 {
-	  R[2][0] = vecInLocXZPlane(0);
-	  R[2][1] = vecInLocXZPlane(1);
-	  R[2][2] = vecInLocXZPlane(2);
+  	for (int i = 0; i < 2; i++)
+		for (int j = 0; j < 3; j++)
+			R[i][j] = 0.0;
+
+	R[2][0] = vecInLocXZPlane(0);
+	R[2][1] = vecInLocXZPlane(1);
+	R[2][2] = vecInLocXZPlane(2);
 
 	// check rigid joint offset for node I
 	if (&rigJntOffset1 == 0 || rigJntOffset1.Size() != 3 ) {
@@ -107,7 +115,9 @@ PDeltaCrdTransf3d::PDeltaCrdTransf3d():
   nodeIOffset(0), nodeJOffset(0),
   L(0), ul17(0), ul28(0)
 {
-
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			R[i][j] = 0.0;
 }
 
 
