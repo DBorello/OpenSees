@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-21 20:11:16 $
+// $Revision: 1.2 $
+// $Date: 2001-07-25 20:54:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/Template3Dep/TclTemplate3DepCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -393,7 +393,8 @@ int EvaluateStressTensor(ClientData clientData, Tcl_Interp *interp, char *tclStr
     return -1;
   }
 
-  for (int i=0; i<argc; i++) {
+  int i;
+  for (i=0; i<argc; i++) {
     if (Tcl_GetDouble(interp, argv[i], &values[i]) != TCL_OK) {
       g3ErrorHandler->warning("nDMaterial Templated3Dep -ESP stresstensor - invalid value %s",
 			      argv[i]);
@@ -406,7 +407,7 @@ int EvaluateStressTensor(ClientData clientData, Tcl_Interp *interp, char *tclStr
 
   }
 
-  for (int i=1; i<9; i++) {
+  for (i=1; i<9; i++) {
      values[i] = 0;
      if ((i == 4)|| (i==8))
         values[i] = values[0];

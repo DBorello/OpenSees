@@ -39,7 +39,7 @@
 
 // Constants
 #define MaxNScalarVar 4
-#define MaxNTensorVar 0
+#define MaxNTensorVar 4
 #define FALSE 0
 #define TRUE 1
 

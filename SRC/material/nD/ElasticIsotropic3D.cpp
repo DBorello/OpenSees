@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $                                                              
-// $Date: 2001-07-25 19:56:34 $                                                                  
+// $Revision: 1.12 $                                                              
+// $Date: 2001-07-25 20:54:07 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $                                                                
 
 //Boris Jeremic and Zhaohui Yang ___ 02-10-2000
@@ -131,7 +131,6 @@ ElasticIsotropic3D::getStress (void)
        sigma(4) = mu*epsilon(4);
        sigma(5) = mu*epsilon(5);
 
- sigma = D*epsilon;
 	return sigma;
 }
 

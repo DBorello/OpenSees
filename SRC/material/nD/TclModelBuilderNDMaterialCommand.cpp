@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-07-25 19:58:55 $
+// $Revision: 1.11 $
+// $Date: 2001-07-25 20:54:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -183,7 +183,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	if (argc < 6) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial ElasticIsotropic3D tag? E? v? rho" << endl;
+	    cerr << "Want: nDMaterial ElasticIsotropic3D tag? E? v? <rho?>" << endl;
 	    return TCL_ERROR;
 	}    
 
@@ -225,12 +225,12 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	if (argc < 5) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial ElasticIsotropic tag? E? v? <type?>" << endl;
+	    cerr << "Want: nDMaterial ElasticIsotropic tag? E? v? <rho?>" << endl;
 	    return TCL_ERROR;
 	}    
 
 	int tag;
-	double E, v;
+	double E, v, rho;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    cerr << "WARNING invalid ElasticIsotropic tag" << endl;
@@ -249,13 +249,14 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    return TCL_ERROR;	
 	}
 
-	NDMaterial *temp = new ElasticIsotropicMaterial (tag, E, v);
-	
-	// Obtain a specific copy if requested
-	if (argc > 5)
-	    theMaterial = temp->getCopy(argv[5]);
-	else
-	    theMaterial = temp;
+ if (argc > 5 && Tcl_GetDouble(interp, argv[5], &rho) != TCL_OK) 
+   {
+     cerr << "WARNING invalid rho\n";
+     cerr << "nDMaterial ElasticIsotropic: " << tag << endl;
+     return TCL_ERROR;   
+   }
+
+	theMaterial = new ElasticIsotropicMaterial (tag, E, v, rho);
 	}	
     
     else if (strcmp(argv[1],"Bidirectional") == 0) {
