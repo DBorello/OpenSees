@@ -13,8 +13,8 @@
 #              P
 #
 #
-# $Revision: 1.2 $
-# $Date: 2001-08-15 21:20:54 $
+# $Revision: 1.3 $
+# $Date: 2001-09-18 17:25:43 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExamplesForTesting/Test.truss1.ops,v $
 
 set DISPLAY ON
@@ -94,9 +94,9 @@ pattern Plain 2 Linear {
 recorder Node Node.out disp -load -node 3  -dof 2
 recorder Element 1 -time -file Element.out axialForce
 
-if {$DISPLAY == "ON"} {
-    recorder plot Node.out Node2Disp 50 350 200 200 -columns 2 1
-}
+# if {$DISPLAY == "ON"} {
+#     recorder plot Node.out Node2Disp 50 350 200 200 -columns 2 1
+# }
 
 # create the SOE, ConstraintHandler, Integrator, Algorithm and Numberer
 system SparseGeneral
