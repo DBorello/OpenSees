@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2005-02-04 22:57:00 $
+// $Revision: 1.11 $
+// $Date: 2005-03-30 03:08:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -216,15 +216,6 @@ TransformationFE::getID(void) const
 int
 TransformationFE::setID(void)
 {
-    // get the TransformationDOF_Groups to do their ID stuff
-    if (transCounter == 0) {
-	transCounter++;
-	theHandler->doneDOFids();
-    } else if (transCounter == numTransFE)
-	transCounter = 0;    
-    else
-	transCounter++;
-
     // determine number of DOF
     numTransformedDOF = 0;
     for (int ii=0; ii<numGroups; ii++) {
