@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-08-29 07:47:20 $
+// $Revision: 1.4 $
+// $Date: 2003-11-18 01:59:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ActorSubdomain.cpp,v $
                                                                         
                                                                         
@@ -530,9 +530,8 @@ ActorSubdomain::run(void)
 	    
 	  break;
 	    
-	  case ShadowActorSubdomain_invokeChangeOnAnalysis:
-	    if (this->hasDomainChanged() == true)
-		this->invokeChangeOnAnalysis();
+	  case ShadowActorSubdomain_domainChange:
+	    this->domainChange();
 
 	    tag = this->getNumDOF();
 	    if (lastResponse == 0)

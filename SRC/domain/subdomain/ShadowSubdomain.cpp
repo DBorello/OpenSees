@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-08-29 07:47:20 $
+// $Revision: 1.4 $
+// $Date: 2003-11-18 01:59:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.cpp,v $
                                                                         
 // Written: fmk 
@@ -215,7 +215,7 @@ ShadowSubdomain::addElement(Element *theEle)
     this->sendObject(*theEle);
     theElements[numElements] = tag;
     numElements++;
-    this->domainChange();
+    //    this->domainChange();
 
     /*
     msgData(0) = 5;
@@ -246,7 +246,7 @@ ShadowSubdomain::addNode(Node *theNode)
     this->sendObject(*theNode);
     theNodes[numNodes] = tag;
     numNodes++;    
-    this->domainChange();
+    // this->domainChange();
 
     delete theNode;
     
@@ -272,7 +272,7 @@ ShadowSubdomain::addExternalNode(Node *theNode)
     numExternalNodes++;        
     numDOF += theNode->getNumberDOF();
 
-    this->domainChange();
+    //    this->domainChange();
 
     return true;    
 }
@@ -290,7 +290,7 @@ ShadowSubdomain::addSP_Constraint(SP_Constraint *theSP)
     this->sendID(msgData);
     this->sendObject(*theSP);
     numSPs++;    
-    this->domainChange();
+    // this->domainChange();
     
     this->Subdomain::addSP_Constraint(theSP);
     return true;    
@@ -308,7 +308,7 @@ ShadowSubdomain::addMP_Constraint(MP_Constraint *theMP)
     this->sendID(msgData);
     this->sendObject(*theMP);
     numMPs++;    
-    this->domainChange();
+    // // this->domainChange();
     
     this->Subdomain::addMP_Constraint(theMP);
     return true;    
@@ -326,7 +326,7 @@ ShadowSubdomain::addLoadPattern(LoadPattern *thePattern)
     msgData(2) = thePattern->getDbTag();
     this->sendID(msgData);
     this->sendObject(*thePattern);
-    this->domainChange();
+    //    this->domainChange();
 
     this->Subdomain::addLoadPattern(thePattern);
     numLoadPatterns++;
@@ -355,7 +355,7 @@ ShadowSubdomain::addSP_Constraint(SP_Constraint *theSP, int loadPattern)
   this->sendID(msgData);
   this->sendObject(*theSP);
   numSPs++;    
-  this->domainChange();
+  // this->domainChange();
   
   return true;    
 }
@@ -417,7 +417,7 @@ ShadowSubdomain::removeElement(int tag)
 	this->sendID(msgData);
 
 	numElements--;
-	this->domainChange();	
+	// this->domainChange();	
 
 	// get the element from the actor
 	this->recvID(msgData);
@@ -448,7 +448,7 @@ ShadowSubdomain::removeNode(int tag)
 
 
 	numNodes--;
-	this->domainChange();	
+	// this->domainChange();	
 	// remove from external as well
 	loc = theExternalNodes.removeValue(tag);
 	if (loc >= 0)
@@ -867,10 +867,10 @@ ShadowSubdomain::setAnalysisLinearSOE(LinearSOE &theSOE)
 
 
 
-int
-ShadowSubdomain::invokeChangeOnAnalysis(void)
+void
+ShadowSubdomain::domainChange(void)
 {
-    msgData(0) = ShadowActorSubdomain_invokeChangeOnAnalysis;
+    msgData(0) = ShadowActorSubdomain_domainChange;
     this->sendID(msgData);
     
     if (theVector == 0)
@@ -886,8 +886,6 @@ ShadowSubdomain::invokeChangeOnAnalysis(void)
 	delete theMatrix;
 	theMatrix = new Matrix(numDOF,numDOF);
     }    
-    
-    return 0;
 }
 
 void 

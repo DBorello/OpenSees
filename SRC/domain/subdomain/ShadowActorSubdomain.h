@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-08-29 07:47:20 $
+// $Revision: 1.3 $
+// $Date: 2003-11-18 01:59:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowActorSubdomain.h,v $
                                                                         
                                                                         
@@ -61,7 +61,7 @@ static const int ShadowActorSubdomain_commit = 34;
 static const int ShadowActorSubdomain_revertToLastCommit = 35;
 static const int ShadowActorSubdomain_revertToStart = 36;
 static const int ShadowActorSubdomain_setDomainDecompAnalysis = 40;
-static const int ShadowActorSubdomain_invokeChangeOnAnalysis = 41;
+static const int ShadowActorSubdomain_domainChange = 41;
 static const int ShadowActorSubdomain_clearAnalysis = 42;
 static const int ShadowActorSubdomain_setAnalysisAlgorithm = 43;
 static const int ShadowActorSubdomain_setAnalysisIntegrator = 44;

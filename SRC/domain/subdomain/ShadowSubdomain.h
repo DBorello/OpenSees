@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-08-29 07:47:20 $
+// $Revision: 1.4 $
+// $Date: 2003-11-18 01:59:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/ShadowSubdomain.h,v $
                                                                         
                                                                         
@@ -113,8 +113,8 @@ class ShadowSubdomain: public Shadow, public Subdomain
     virtual int setAnalysisAlgorithm(EquiSolnAlgo &theAlgorithm);
     virtual int setAnalysisIntegrator(IncrementalIntegrator &theIntegrator);
     virtual int setAnalysisLinearSOE(LinearSOE &theSOE);
-    virtual int  invokeChangeOnAnalysis(void);
     virtual void clearAnalysis(void);
+    virtual void domainChange(void);
     
     virtual int 	getNumExternalNodes(void) const;    
     virtual const ID   &getExternalNodes(void);
