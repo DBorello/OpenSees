@@ -479,7 +479,19 @@ SOURCE=..\..\..\Src\element\upU\EightNodeBrick_u_p_U.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\Src\element\upU\FourNodeQuadUP.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\element\upU\FourNodeQuadUP.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\element\upU\TclEightNodeBrick_u_p_U.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\Src\element\upU\TclFourNodeQuadUPCommand.cpp
 # End Source File
 # Begin Source File
 
