@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $                                                              
-// $Date: 2002-10-03 18:07:53 $                                                                  
+// $Revision: 1.4 $                                                              
+// $Date: 2002-12-17 22:18:25 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf3d.h,v $                                                                
                                                                         
                                                                         
@@ -114,11 +114,13 @@ class CorotCrdTransf3d: public CrdTransf3d
 
     Vector alphaIqcommit;  // commited quaternion for node I
     Vector alphaJqcommit;  // commited quaternion for node J
-	
+    Vector alphaI;  // last trial rotations end i
+    Vector alphaJ;  // last trial rotatations end j
+
     Vector ul;            // local displacements
     Vector ulcommit;      // commited local displacements
+    Vector ulpr;   // previous local displacements
 
-    static Vector ulpr;   // previous local displacements
     static Matrix RI;     // nodal triad for node 1
     static Matrix RJ;     // nodal triad for node 2
     static Matrix Rbar;   // mean nodal triad 
@@ -126,9 +128,6 @@ class CorotCrdTransf3d: public CrdTransf3d
     static Matrix Tp;     // transformation matrix to renumber dofs
     static Matrix T;      // transformation matrix from basic to global system
     static Matrix Lr2, Lr3, A; // auxiliary matrices	
-
-    Vector alphaI;  // last trial rotations end i
-    Vector alphaJ;  // last trial rotatations end j
 
 };
 #endif
