@@ -116,10 +116,10 @@ GRAPHICS = UsingOpenGL
 #    C FLAGS used -DUSE_VENDOR_BLAS (needed in SuperLU) if UNIX in C++ FLAGS
 #
 
-#C++FLAGS        =  -D_KAI -D_UNIX -D_LINUX -D_GLX +K3 -O --display_error_number --strict_warnings
-C++FLAGS        =  -D_KAI -D_UNIX -D_LINUX -D_GLX +K3 -O --display_error_number
-CFLAGS          =  -D_KAI -D_UNIX -D_LINUX -D_GLX +K3 -O --c
-FFLAGS          =  
+#C++FLAGS        =  -D_KAI -D_UNIX -D_LINUX -D_GLX +K3 -O3 --display_error_number --strict_warnings
+C++FLAGS        =  -D_KAI -D_UNIX -D_LINUX -D_GLX +K3 -O3 --display_error_number --backend -ffloat-store
+CFLAGS          =  -D_KAI -D_UNIX -D_LINUX -D_GLX +K3 -O3 --c
+FFLAGS          =  -Wall -O
 
 # Linker
 LINKER          = $(CC++)

@@ -116,22 +116,10 @@ GRAPHICS = UsingOpenGL
 #    C FLAGS used -DUSE_VENDOR_BLAS (needed in SuperLU) if UNIX in C++ FLAGS
 #
 
-C++FLAGS         = -Wall  -funroll-loops -fcse-follow-jumps \
-		 -fthread-jumps -fcse-skip-blocks -frerun-cse-after-loop \
-		 -felide-constructors \
-		 -fcaller-saves  -ffloat-store -fforce-addr \
-		 -fschedule-insns -fschedule-insns2 -D_LINUX -D_UNIX -D_GLX \
-		 -fexpensive-optimizations \
-		 -fforce-addr -fforce-mem -finline-functions \
-		 -fkeep-inline-functions \
-              -fno-function-cse -fno-inline -fno-peephole \
-              -fomit-frame-pointer \
-              -fschedule-insns -fschedule-insns2 \
-              -fstrength-reduce -fthread-jumps 
+C++FLAGS        =  -Wall -O3 -D_UNIX -ftemplate-depth-30 -D_LINUX -D_GLX \
+			-ffloat-store
 
-# modified as optimizaton currently causing problems with Steel01 code
-#C++FLAGS        =  -Wall -O2 -D_UNIX -ftemplate-depth-30 -D_LINUX
-CFLAGS          = -Wall -O2
+CFLAGS          = -Wall -O3
 FFLAGS          = -Wall -O
 
 # Linker
