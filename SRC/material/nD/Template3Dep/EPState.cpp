@@ -68,6 +68,10 @@ EPState::EPState(double               Eod,
     	         const stresstensor * Tensor_initp,
     	         const tensor       & Eep_initp, 
                  bool                 Convergedp,
+	         int                  Elasticflagp,
+	         double 	      Evp,
+	         double               nuhvp,
+	         double               Ghvp,
 	         double               eop,
 	         double               ecp,
 	         double               Lamp,
@@ -81,8 +85,9 @@ EPState::EPState(double               Eod,
   dElasticStrain(dEstrainp), dPlasticStrain(dPstrainp), Eep(Eepp), 
   Stress_commit(Stress_commitp), Strain_commit(Strain_commitp),
   Eep_commit(Eep_commitp), Stress_init(Stress_initp), Strain_init(Strain_initp), 
-  Eep_init(Eep_initp), Converged (Convergedp), eo(eop), ec(ecp), Lambda(Lamp), 
-  po(pop), e(ep), psi(psip), a(ap)
+  Eep_init(Eep_initp), Converged (Convergedp),
+  Elasticflag(Elasticflagp),Ev(Evp),nuhv(nuhvp),Ghv(Ghvp),
+  eo(eop), ec(ecp), Lambda(Lamp), po(pop), e(ep), psi(psip), a(ap)
 {
 
       //Eo               = Eod;	        
@@ -147,6 +152,10 @@ EPState::EPState(double              Eod,
 		 const double       *Scalarp,
 	         int                 NTensorp,
 	         const stresstensor *Tensorp,
+	         int                 Elasticflagp,
+	         double 	     Evp,
+	         double              nuhvp,
+	         double              Ghvp,
      	         double              eop,
      	         double              ecp,
 	         double              Lamp,
@@ -156,8 +165,9 @@ EPState::EPState(double              Eod,
 : Eo(Eod), E_Young(Ed), nu_Poisson(nu), rho_mass_density(rho),
   CurrentStress(stressp), CurrentStrain(strainp), ElasticStrain(Estrainp), 
   PlasticStrain(Pstrainp), Stress_commit(stressp), Strain_commit(strainp), 
-  Stress_init(stressp), Strain_init(strainp), eo(eop), ec(ecp), Lambda(Lamp), 
-  po(pop), e(eop), a(ap)
+  Stress_init(stressp), Strain_init(strainp),
+  Elasticflag(Elasticflagp),Ev(Evp),nuhv(nuhvp),Ghv(Ghvp),
+  eo(eop), ec(ecp), Lambda(Lamp),po(pop), e(eop), a(ap)
 {
       //Eo               = Eod;	        
       //E_Young          = Ed;	        
@@ -236,6 +246,10 @@ EPState::EPState(double              Eod,
 	         const double       *Scalarp,
 	         int                 NTensorp,
 	         const stresstensor *Tensorp,
+	         int                 Elasticflagp,
+	         double 	     Evp,
+	         double              nuhvp,
+	         double              Ghvp,
 	         double              eop,
 	         double              ecp,
 	         double              Lamp,
@@ -243,6 +257,7 @@ EPState::EPState(double              Eod,
 	         double  	     ap
 		 ) 
 : Eo(Eod), E_Young(Ed), nu_Poisson(nu), rho_mass_density(rho),
+  Elasticflag(Elasticflagp),Ev(Evp),nuhv(nuhvp),Ghv(Ghvp),
   eo(eop), ec(ecp), Lambda(Lamp), po(pop), e(eop), a(ap)
 {
 
@@ -315,7 +330,9 @@ EPState::EPState(double              Eod,
 
 EPState::EPState( ) 
 : Eo(30000.0), E_Young(30000.0), nu_Poisson(0.3), rho_mass_density(0.0),
-  Converged(false), eo(0.85), ec(0.80), Lambda(0.025), po(100.0), e(0.85), psi(0.05), a(0.5)
+  Converged(false), 
+  Elasticflag(1),Ev(0.0),nuhv(0.0),Ghv(0.0),
+  eo(0.85), ec(0.80), Lambda(0.025), po(100.0), e(0.85), psi(0.05), a(0.5)
 {
 
       //Eo               = 30000.0;
@@ -368,6 +385,10 @@ EPState* EPState::newObj() {
       				   this->getTensorVar_init(),
       				   this->getEep_init(), 
       				   this->getConverged(),
+	                           this->getElasticflag(),
+	                           this->getEv(),
+	                           this->getnuhv(),
+	                           this->getGhv(),
       				   this->geteo(),
       				   this->getec(),
       				   this->getLam(),
@@ -436,6 +457,11 @@ EPState::EPState( const EPState &rhs ) {
       
       Converged = rhs.getConverged();
 
+      Elasticflag = rhs.getElasticflag();
+      Ev        = rhs.getEv();
+      nuhv      = rhs.getnuhv();
+      Ghv       = rhs.getGhv();
+      
       eo        = rhs.geteo();	        
       ec        = rhs.getec();
       Lambda    = rhs.getLam();
@@ -447,7 +473,7 @@ EPState::EPState( const EPState &rhs ) {
 }      				 
 
 //================================================================================
-// Copy constructor
+// Destructor
 //================================================================================
 EPState::~EPState() {          
     
@@ -526,6 +552,11 @@ const EPState & EPState::operator=(const EPState &rhs ) {
 
          Converged = rhs.getConverged();
 
+         Elasticflag = rhs.getElasticflag();
+         Ev        = rhs.getEv();
+         nuhv      = rhs.getnuhv();
+         Ghv       = rhs.getGhv();
+
          eo        = rhs.geteo();
          ec        = rhs.getec();
          Lambda    = rhs.getLam();
@@ -541,8 +572,19 @@ const EPState & EPState::operator=(const EPState &rhs ) {
 }      				 
 
 //================================================================================
+int EPState::getElasticflag(void) const {
+      return Elasticflag; 
+}
+
+//================================================================================
 double EPState::getE() const {
       return E_Young; 
+}
+
+//================================================================================
+// Ev: Young's modulus in a vertical direction -- [out-of-plane]
+double EPState::getEv() const {
+      return Ev; 
 }
 
 //================================================================================
@@ -553,6 +595,18 @@ double EPState::getEo() const {
 //================================================================================
 double EPState::getnu() const {
       return nu_Poisson; 
+}
+
+//================================================================================
+// nuhv: Poisson's ratio for strain in the vertical direction due to a horizontal direct stress -- [out-of-plane]
+double EPState::getnuhv() const {
+      return nuhv; 
+}
+
+//================================================================================
+// Ghv: Modulus for shear deformation in a vertical direction plane-- [out-of-plane]
+double EPState::getGhv() const {
+      return Ghv; 
 }
 
 //================================================================================
@@ -710,6 +764,11 @@ tensor EPState::getEep_init() const {
 
 }
 
+//================================================================================
+void EPState::setElasticflag( int efd ) { 
+      Elasticflag = efd; 
+}
+
 
 //================================================================================
 void EPState::setEo( double Eod ) { 
@@ -722,6 +781,25 @@ void EPState::setE( double Ey ) {
       E_Young = Ey; 
 }
 
+//================================================================================
+void EPState::setEv( double Evd ) { 
+      Ev = Evd; 
+}
+
+//================================================================================
+void EPState::setGhv( double Ghvd ) { 
+      Ghv = Ghvd; 
+}
+
+//================================================================================
+void EPState::setnu( double nud ) { 
+      nu_Poisson = nud; 
+}
+
+//================================================================================
+void EPState::setnuhv( double nuhvd ) { 
+      nuhv = nuhvd; 
+}
 
 //================================================================================
 void EPState::setStress(const stresstensor &newstress ) { 
@@ -1214,12 +1292,27 @@ OPS_Stream & operator<< (OPS_Stream& os, const EPState & EPS)
         os.width(10);       
         os << endln << "Elastic plastic state parameters: "  << endln;
 
-        //os.width(10);       
+	int ef = EPS.getElasticflag();
+	os << "\tElastic Flag = " << ef << ";"; 
+	if (ef == 1) 
+	   os << " pressure dependent isotropic material (default case, for soil)." << endln;
+	else if (ef == 2)
+	   os << " pressure independent isotropic material." << endln;
+	else if (ef == 3)
+	   os << " pressure independent cross-anisotropic material." << endln;
+	else if (ef == 4)
+	   os << " pressure dependent cross-anisotropic material." << endln;
+	else
+	   os << " elastic portion code not correct. Flag must be 1, 2, 3 or 4." << endln; 
+	
+
         os << "\tEo = " << EPS.getEo() << ";";
         os << " E_Young = " << EPS.getE() << ";";
         //os.width(10);       
 	os << " nu_Poisson = " << EPS.getnu() << ";";
-	//os.width(10);       
+        os << " \tE_v = " << EPS.getEv() << ";";
+        os << " nu_hv = " << EPS.getnuhv() << ";";
+	os << " G_hv = " << EPS.getGhv() << ";";
 	os << " rho = " << EPS.getrho() << endln;
 
         os << "\teo = " << EPS.geteo() << ";";

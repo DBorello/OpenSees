@@ -42,11 +42,11 @@
 
 class EPState
 {
-  // Elastic parameters
   public:
-    double Eo;	                  // Young's modulus when p = p_atmosphere  
-    double E_Young;	          // Young's modulus  			    
-    double nu_Poisson;	          // Poisson's ratio  			    
+    // Elastic parameters
+    double Eo;	                  // Young's modulus when p = p_atmosphere  -- [in-plane] in terms of cross-anisotropic material
+    double E_Young;	          // Young's modulus -- [in-plane] in terms of cross-anisotropic material
+    double nu_Poisson;	          // Poisson's ratio -- [in-plane] in terms of cross-anisotropic materi			    
     double rho_mass_density;      // Mass density     			    
     				
     // Trial state
@@ -86,13 +86,27 @@ class EPState
 
     bool Converged;      // Bool to indicate whether this is the converged EPState by current CDriver
 
+    // Flag to indicate if elastic portion is pressure dependent isotropic, pressure independent isotropic, pressure 
+    // independent cross-anisotropic or pressure dependentcross-anisotropic 
+    // 1 == pressure dependent isotropic (default case, for soil)
+    // 2 == pressure independent isotropic
+    // 3 == pressure independent cross-anisotropic
+    // 4 == pressure dependent cross-anisotropic
+
+    int Elasticflag;
+
+    //Parameters for elastic cross-anistropic material
+    double Ev; 	         // Ev: Young's modulus in a vertical direction -- [out-of-plane]
+    double nuhv;	 // nuhv: Poisson's ratio for strain in the vertical direction due to a horizontal direct stress -- [out-of-plane]
+    double Ghv;          // Ghv: Modulus of shear deformation in a vertical plane -- [out-of-plane]
+
     double eo;           // Initial void ratio Joey 02-11-03
     double ec;           // Void ratio at critical state at po Joey 02-11-03
     double Lambda;       // Slope of critical state line  Joey 02-11-03
     double po;           // Reference pressure (100 kPa by default)  Joey 02-11-03
     double e;            // Void ratio  Joey 02-11-03
     double psi;          // State parameter  Joey 02-18-03
-    double a;            // Exponent in E = Eo (p/p_atm)^a  Joey 02-11-03
+    double a;            // Exponent in E = Eo (p/p_atm)^a for nonlinear elastic model Joey 02-11-03
     
   public:
     //Normal Constructor--no parameters
@@ -126,6 +140,10 @@ class EPState
     	    const stresstensor *Tensor_initp,
     	    const tensor       &Eep_initp, 
             bool                Convergedp,
+	    int                 Elasticflagp = 1,
+	    double 		Evp   = 0.0,
+	    double              nuhvp = 0.0,
+	    double              Ghvp = 0.0,
 	    double              eop = 0.85, 
 	    double              ecp = 0.80, 
 	    double              Lam = 0.025, 
@@ -149,6 +167,10 @@ class EPState
 	    const double       *Scalarp,
 	    int                 NTensorp,
 	    const stresstensor *Tensorp, 
+	    int                 Elasticflagp = 1,
+	    double 		Evp   = 0.0,
+	    double              nuhvp = 0.0,
+	    double              Ghvp = 0.0,
 	    double              eop = 0.85,
 	    double              ecp = 0.80,
 	    double              Lam = 0.025, 
@@ -165,6 +187,10 @@ class EPState
 	    const double       *Scalarp,
 	    int                 NTensorp,
 	    const stresstensor *Tensorp,
+	    int                 Elasticflagp = 1,
+	    double 		Evp   = 0.0,
+	    double              nuhvp = 0.0,
+	    double              Ghvp = 0.0,
 	    double              eop = 0.85,
 	    double              ecp = 0.80,
 	    double              Lam = 0.025, 
@@ -176,10 +202,16 @@ class EPState
     EPState( const EPState &rhs );     // Copy constructor    
     const EPState & EPState::operator=(const EPState &rhs );  //Overloading assignment
 
+    int getElasticflag() const;
+
     double getE() const;
     double getEo() const;
+    double getEv() const;
     double getnu() const;
+    double getnuhv() const;
+    double getGhv() const;
     double getrho() const;
+
     int getNScalarVar() const;
     int getNTensorVar() const;
     bool getConverged() const;
@@ -220,8 +252,15 @@ class EPState
     stresstensor getTensorVar_init(int i);
     tensor getEep_init() const;
 
+    void setElasticflag( int efd );
     void setEo( double Eod );
     void setE( double Ey );
+    void setnu( double nud );
+
+    void setEv( double Evd );
+    void setGhv( double Ghvd );
+    void setnuhv( double nud );
+
     void setStress( const stresstensor &newstress );
     void setIterativeStress( const stresstensor &newstress );
     void setStrain( const straintensor &newstrain );

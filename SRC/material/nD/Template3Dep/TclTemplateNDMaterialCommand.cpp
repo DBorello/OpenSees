@@ -1,30 +1,25 @@
-/* ****************************************************************** **
-**    OpenSees - Open System for Earthquake Engineering Simulation    **
-**          Pacific Earthquake Engineering Research Center            **
-**                                                                    **
-**                                                                    **
-** (C) Copyright 1999, The Regents of the University of California    **
-** All Rights Reserved.                                               **
-**                                                                    **
-** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
-** file 'COPYRIGHT'  in main directory for information on usage and   **
-** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-**                                                                    **
-** Developed by:                                                      **
-**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-**                                                                    **
-** ****************************************************************** */
-                                                                        
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:28 $
-// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/Template3Dep/TclTemplateNDMaterialCommand.cpp,v $
-                                                                        
-
-// Written: fmk 
-// Created: 11/00
+/*
+################################################################################
+# COPYRIGHT (C):     :-))                                                      #
+# PROJECT:           Object Oriented Finite Element Program                    #
+# PURPOSE:           General platform for elaso-plastic constitutive model     #
+#                    implementation                                            #
+# CLASS:             Template3Dep (the base class for all material point)     #
+#                                                                              #
+# VERSION:                                                                     #
+# LANGUAGE:          C++.ver >= 2.0 ( Borland C++ ver=3.00, SUN C++ ver=2.1 )  #
+# TARGET OS:         DOS || UNIX || . . .                                      #
+# DESIGNER(S):       Boris Jeremic, Zhaohui Yang                               #
+# PROGRAMMER(S):     Boris Jeremic, Zhaohui Yang                               #
+#                                                                              #
+#                                                                              #
+# DATE:              
+# UPDATE HISTORY:    
+#                                                                              #
+#                                                                              #
+#                                                                              #
+#                                                                              #
+*/
 
 #include <tcl.h>
 #include <stdlib.h>

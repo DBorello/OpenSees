@@ -579,44 +579,91 @@ Template3Dep::~Template3Dep()
 // Routine used to generate elastic compliance tensor D for this material point
 //================================================================================
 tensor Template3Dep::ElasticComplianceTensor(void) const
-  {
+{
     tensor ret( 4, def_dim_4, 0.0 );
 
+    int eflag = (this->EPS)->getElasticflag();    
     double Ey = this->EPS->getEo();
-    //opserr << " Eo= " << Ey;
-    if (Ey == 0) {
-      opserr << endln << "Ey = 0! Can't give you D!!" << endln;
-      exit(1);
-    }
     double nuP =this->EPS->getnu();
+
+    // Pressure dependent Isotropic
+    if ( eflag == 1) {
+      //opserr << " Eo= " << Ey;
+      if (Ey == 0) {
+        opserr << endln << "Ey = 0! Can't give you D!!" << endln;
+        exit(1);
+      }
+      
+      //Update E 
+      stresstensor stc = (this->EPS)->getStress();
+      double p = stc.p_hydrostatic();
+      double po = EPS->getpo();
+      
+      //opserr << " p = " <<  p;
+      
+      //double po = 100.0; //kPa
+      if (p <= 0.5000*KK) p = 0.500*KK;
+      Ey = Ey * pow(p/po/KK, 0.5); //0.5
+      //cerr << " Ec = " << Ey << endlnn;
+      
+      // Kronecker delta tensor
+      tensor I2("I", 2, def_dim_2);
+      
+      tensor I_ijkl = I2("ij")*I2("kl");
+      //I_ijkl.null_indices();
+      tensor I_ikjl = I_ijkl.transpose0110();
+      tensor I_iljk = I_ijkl.transpose0111();
+      tensor I4s = (I_ikjl+I_iljk)*0.5;
+      
+      // Building compliance tensor
+      ret = (I_ijkl * (-nuP/Ey)) + (I4s * ((1.0+nuP)/Ey));
+    }
+
+    // Pressure dependent Anisotropic
+    else if (eflag == 3) {
+      // Form compliance matrix D
+      double E = Ey;
+      double nu = nuP;
+      double Ev = this->EPS->getEv();
+      double Ghv = this->EPS->getGhv();
+      double nuhv = this->EPS->getnuhv();
+
+      double A = 1.0/E;
+      double B = 1.0/Ev;
+      //opserr << "A " << A << " B " << B;
+
+      Matrix D(6,6);
+      D(0,0) = D(1,1) = A;
+      D(2,2) = B;
+      D(0,1) = D(1,0) = -nu*A;
+      D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
+      D(3,3) = (1.0+nu)*A;
+      D(4,4) = D(5,5) = 0.5/Ghv;
+      //opserr << " C " << D;
+
+      //Convert Matric D to 4th order Elastic constants tensor ret;
+      ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
+      ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
+      ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
+      
+      ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
+      ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
+      ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
+      
+      ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
+      ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
+      ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
+      
+    }
+    else {
+      opserr << "Template3Dep::ElasticComplianceTensor failed to create elastic compliance tensor. Eflag must be 1 or 3: " <<  eflag << endln;
+      exit(-1);
     
-    //Update E 
-    stresstensor stc = (this->EPS)->getStress();
-    double p = stc.p_hydrostatic();
-    double po = EPS->getpo();
-
-    //opserr << " p = " <<  p;
-
-    //double po = 100.0; //kPa
-    if (p <= 0.5000*KK) p = 0.500*KK;
-    Ey = Ey * pow(p/po/KK, 0.5); //0.5
-    //cerr << " Ec = " << Ey << endlnn;
-
-    // Kronecker delta tensor
-    tensor I2("I", 2, def_dim_2);
-
-    tensor I_ijkl = I2("ij")*I2("kl");
-    //I_ijkl.null_indices();
-    tensor I_ikjl = I_ijkl.transpose0110();
-    tensor I_iljk = I_ijkl.transpose0111();
-    tensor I4s = (I_ikjl+I_iljk)*0.5;
-    
-    // Building compliance tensor
-    ret = (I_ijkl * (-nuP/Ey)) + (I4s * ((1.0+nuP)/Ey));
-
+    }
+            
     return ret;
-
 }
+  
 
 //================================================================================
 // Routine used to generate elastic stiffness tensor D for this material point
@@ -625,41 +672,84 @@ tensor Template3Dep::ElasticStiffnessTensor(void) const
   {
     tensor ret( 4, def_dim_4, 0.0 );
 	         	           
+    int eflag = (this->EPS)->getElasticflag();
+    
     double Ey = this->EPS->getEo();
     double nu =this->EPS->getnu();
+
+    // Pressure dependent Isotropic
+    if ( eflag == 1) {
+       
+       //Update E 
+       stresstensor stc = (this->EPS)->getStress();
+       double p = stc.p_hydrostatic();
+       double po = EPS->getpo();
+       //cerr << " p = " <<  p;
+       
+       //double po = 100.0; //kPa
+       if (p <= 0.5000*KK) p = 0.5000*KK;
+       double E = Ey * pow(p/po/KK, 0.5);//0.5
+       //cerr << " Eo = " << Ey ;
+       //cerr << " Ec = " << E << endlnn;
+       
+       				       
+       // Kronecker delta tensor
+       tensor I2("I", 2, def_dim_2);
+       
+       tensor I_ijkl = I2("ij")*I2("kl");
+       
+       
+       //I_ijkl.null_indices();
+       tensor I_ikjl = I_ijkl.transpose0110();
+       tensor I_iljk = I_ijkl.transpose0111();
+       tensor I4s = (I_ikjl+I_iljk)*0.5;
+       
+       //double x = I4s.trace();
+       //opserr << "xxxxxx " << x << endlnn;
+       
+       //I4s.null_indices();
+       
+       // Building elasticity tensor
+       ret = I_ijkl*( E*nu / ( (1.0+nu)*(1.0 - 2.0*nu) ) ) + I4s*( E / (1.0 + nu) );
+       //ret.null_indices();
+    }
+    else if ( eflag == 3) { 
+      // Form compliance matrix D
+      double E = Ey;
+      double Ev = this->EPS->getEv();
+      double Ghv = this->EPS->getGhv();
+      double nuhv = this->EPS->getnuhv();
+
+      double A = 1.0/E;
+      double B = 1.0/Ev;
+      //opserr << "A " << A << " B " << B;
+
+      Matrix D(6,6);
+      D(0,0) = D(1,1) = A;
+      D(2,2) = B;
+      D(0,1) = D(1,0) = -nu*A;
+      D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
+      D(3,3) = (1.0+nu)*A;
+      D(4,4) = D(5,5) = 0.5/Ghv;
+      //opserr << " C " << D;
+
+      // Do invertion once to get Elastic matrix D
+      D.Invert( D );
+
+      //Convert Matric D to 4th order Elastic constants tensor ret;
+      ret.val(1,1,1,1) = D(0,0); ret.val(1,1,2,2) = D(0,1); ret.val(1,1,3,3) = D(0,2); // --> Sigma_xx
+      ret.val(1,2,1,2) = D(3,3); ret.val(1,2,2,1) = D(3,3); // --> Sigma_xy
+      ret.val(1,3,1,3) = D(4,4); ret.val(1,3,3,1) = D(4,4); // --> Sigma_xz
+      
+      ret.val(2,1,1,2) = D(3,3); ret.val(2,1,2,1) = D(3,3); // --> Sigma_yx
+      ret.val(2,2,1,1) = D(1,0); ret.val(2,2,2,2) = D(1,1); ret.val(2,2,3,3) = D(1,2); // --> Sigma_yy
+      ret.val(2,3,2,3) = D(5,5); ret.val(2,3,3,2) = D(5,5); // --> Sigma_yz
+      
+      ret.val(3,1,1,3) = D(4,4); ret.val(3,1,3,1) = D(4,4); // --> Sigma_zx
+      ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
+      ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
     
-    //Update E 
-    stresstensor stc = (this->EPS)->getStress();
-    double p = stc.p_hydrostatic();
-    double po = EPS->getpo();
-    //cerr << " p = " <<  p;
-
-    //double po = 100.0; //kPa
-    if (p <= 0.5000*KK) p = 0.5000*KK;
-    double E = Ey * pow(p/po/KK, 0.5);//0.5
-    //cerr << " Eo = " << Ey ;
-    //cerr << " Ec = " << E << endlnn;
-
-    				       
-    // Kronecker delta tensor
-    tensor I2("I", 2, def_dim_2);
-
-    tensor I_ijkl = I2("ij")*I2("kl");
-
-
-    //I_ijkl.null_indices();
-    tensor I_ikjl = I_ijkl.transpose0110();
-    tensor I_iljk = I_ijkl.transpose0111();
-    tensor I4s = (I_ikjl+I_iljk)*0.5;
-
-    //double x = I4s.trace();
-    //opserr << "xxxxxx " << x << endlnn;
-
-    //I4s.null_indices();
-
-    // Building elasticity tensor
-    ret = I_ijkl*( E*nu / ( (1.0+nu)*(1.0 - 2.0*nu) ) ) + I4s*( E / (1.0 + nu) );
-    //ret.null_indices();
+    }
 
     return ret;
 
@@ -750,18 +840,18 @@ int Template3Dep::setTrialStrainIncr(const Tensor &v)
     stresstensor start_stress = StartEPS.getStress();
     //opserr << "start_stress 0 " << start_stress;
     
-    EPState tmp_EPS = BackwardEulerEPState(v);
-    if ( tmp_EPS.getConverged() ) {
-         //setTrialEPS( tmp_EPS );
-         setEPS( tmp_EPS );
-    	 //double p = (tmp_EPS.getStress()).p_hydrostatic();
-    	 //double ec = (tmp_EPS.getec()) - (tmp_EPS.getLam()) * log( p / (tmp_EPS.getpo()) );
-    	 //double	st = (tmp_EPS.getStrain()).Iinvariant1();
-    	 //double pl_s = (tmp_EPS.getPlasticStrain()).Iinvariant1();
-    	 //double dpl_s = (tmp_EPS.getdPlasticStrain()).Iinvariant1();
-    	 //cerr << "ec " << ec << " e " << tmp_EPS.gete() << " psi " << (tmp_EPS.gete() - ec) << " strain " << st << " t_pl " << pl_s << " d_pl " << dpl_s << "\n";
-         return 0;
-    }
+    //EPState tmp_EPS = BackwardEulerEPState(v);
+    //if ( tmp_EPS.getConverged() ) {
+    //     //setTrialEPS( tmp_EPS );
+    //     setEPS( tmp_EPS );
+    //	 //double p = (tmp_EPS.getStress()).p_hydrostatic();
+    //	 //double ec = (tmp_EPS.getec()) - (tmp_EPS.getLam()) * log( p / (tmp_EPS.getpo()) );
+    //	 //double	st = (tmp_EPS.getStrain()).Iinvariant1();
+    //	 //double pl_s = (tmp_EPS.getPlasticStrain()).Iinvariant1();
+    //	 //double dpl_s = (tmp_EPS.getdPlasticStrain()).Iinvariant1();
+    //	 //cerr << "ec " << ec << " e " << tmp_EPS.gete() << " psi " << (tmp_EPS.gete() - ec) << " strain " << st << " t_pl " << pl_s << " d_pl " << dpl_s << "\n";
+    //     return 0;
+    //}
     
     //opserr << endlnn;    
     //setEPS( StartEPS );
@@ -797,11 +887,11 @@ int Template3Dep::setTrialStrainIncr(const Tensor &v)
     //   //}
     //}
        
-    ////// for testing MD model only for no BE
-    ////EPState tmp_EPS = FESubIncrementation(v, NUM_OF_SUB_INCR);
-    //EPState tmp_EPS = ForwardEulerEPState(v);
-    //setEPS( tmp_EPS );
-    ////setEPS( StartEPS );
+    //// for testing MD model only for no BE
+    //EPState tmp_EPS = FESubIncrementation(v, NUM_OF_SUB_INCR);
+    EPState tmp_EPS = ForwardEulerEPState(v);
+    setEPS( tmp_EPS );
+    //setEPS( StartEPS );
     return 0;
 }
 
@@ -1021,8 +1111,15 @@ EPS->setConverged(rval.getConverged());
 
 */   
     
+    EPS->setElasticflag(rval.getElasticflag());
+
     EPS->setEo(rval.getEo());
     EPS->setE(rval.getE());
+    EPS->setEv(rval.getEv());
+    EPS->setGhv(rval.getGhv());
+    EPS->setnu(rval.getnu());                 	 
+    EPS->setnuhv(rval.getnuhv());
+
     EPS->setStress(rval.getStress());
     EPS->setStrain(rval.getStrain());
     EPS->setElasticStrain(rval.getElasticStrain());
@@ -2026,7 +2123,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   //::fprintf(stdout,"tst##############  f_start = %.10e\n",f_start);
   // f_pred = Criterion.f(elastic_predictor_stress);
   //::fprintf(stdout,"tst##############  f_pred = %.10e\n",f_pred);
-  double f_start =  getYS()->f( &startEPS );
+  //double f_start =  getYS()->f( &startEPS );
   //opserr << "\n  ************  Enter Backward   f_star **** " << f_start;
 
   double f_pred =  getYS()->f( &ElasticPredictorEPS );
@@ -3005,15 +3102,16 @@ double Template3Dep::func(const stresstensor & start_stress,
                           double alfa )
 {
    
-   EPState *tempEPS = getEPS()->newObj();
+   //EPState *tempEPS = getEPS()->newObj();
+   EPState tempEPS( (*this->getEPS()) );
    stresstensor delta_stress = end_stress - start_stress;
    stresstensor intersection_stress = start_stress + delta_stress*alfa;
 
-   tempEPS->setStress(intersection_stress); 
+   tempEPS.setStress(intersection_stress); 
    
    //opserr << "*tempEPS" << *tempEPS;
    
-   double f = getYS()->f( tempEPS );
+   double f = getYS()->f( &tempEPS );
    return f; 
 }
 
