@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:48:03 $
+// $Revision: 1.3 $
+// $Date: 2002-02-26 06:31:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
                                                                         
@@ -170,13 +170,13 @@ bool
 Subdomain::addNode(Node * node)
 {
 #ifdef _G3DEBUG  
-  int nodTag = node->getTag();
-  // check no other node exists with same tag
-  Node *nodePtr = this->getNodePtr(nodTag);
-  if (nodePtr != 0)
-    return false;
-      
-      // MISSING CODE
+//  int nodTag = node->getTag();
+//  // check no other node exists with same tag
+//  Node *nodePtr = this->getNodePtr(nodTag);
+//  if (nodePtr != 0)
+//    return false;
+//      
+//      // MISSING CODE
 #endif
   
   bool result = internalNodes->addComponent(node);
