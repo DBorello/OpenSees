@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-11-24 22:41:22 $
+// $Revision: 1.2 $
+// $Date: 2005-01-10 21:58:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/Recorder.cpp,v $
                                                                         
 
@@ -54,7 +54,6 @@ Recorder::restart(void)
 int 
 Recorder::setDomain(Domain &theDomain)
 {
-  opserr << "Recorder::setDomain() - not yet implemented\n";
   return 0;
 }
 
