@@ -22,24 +22,23 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:53 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:44:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/CorrelationCoefficient.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #include <CorrelationCoefficient.h>
+#include <classTags.h>
 
 CorrelationCoefficient::CorrelationCoefficient(int passedTag,
 							int passedRv1,
 							int passedRv2,
 							double passedCorrelation)
-:ReliabilityDomainComponent(passedTag, 14726)
+:ReliabilityDomainComponent(passedTag, CORRELATION_COEFFICIENT)
 {
 	tag = passedTag;
 	rv1 = passedRv1;

@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:57 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:48:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotion.cpp,v $
                                                                         
-                                                                        
-// File: ~/earthquake/GroundMotion.C
-//
 // Written: fmk 
 // Created: 05/98
 // Revision: A
@@ -181,6 +178,18 @@ GroundMotion::getAccel(double time)
   
   if (theAccelSeries != 0)
     return theAccelSeries->getFactor(time);
+  else
+    return 0.0;
+}     
+
+double 
+GroundMotion::getAccelSensitivity(double time)
+{
+  if (time < 0.0)
+    return 0.0;
+  
+  if (theAccelSeries != 0)
+    return theAccelSeries->getFactorSensitivity(time);
   else
     return 0.0;
 }     
@@ -362,7 +371,7 @@ int
 GroundMotion::recvSelf(int commitTag, Channel &theChannel, 
 		       FEM_ObjectBroker &theBroker)
 {
-  int dbTag = this->getDbTag();
+	  int dbTag = this->getDbTag();
 
   static ID idData(8);
   int res = theChannel.recvID(dbTag, commitTag, idData);
@@ -454,6 +463,25 @@ GroundMotion::recvSelf(int commitTag, Channel &theChannel,
   return 0;
 }
 
+// AddingSensitivity:BEGIN ////////////////////////////////////
+int
+GroundMotion::setParameter(const char **argv, int argc, Information &info)
+{
+  return theAccelSeries->setParameter(argv, argc, info);
+}
+
+int
+GroundMotion::updateParameter(int parameterID, Information &info)
+{
+	return theAccelSeries->updateParameter(parameterID,info);
+}
+
+int
+GroundMotion::activateParameter(int pparameterID)
+{
+	return theAccelSeries->activateParameter(pparameterID);
+}
+// AddingSensitivity:END ////////////////////////////////////
 
 
 

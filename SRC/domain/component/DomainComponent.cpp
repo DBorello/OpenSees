@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:32:40 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:48:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/DomainComponent.cpp,v $
                                                                         
                                                                         
@@ -82,17 +82,14 @@ DomainComponent::setParameter(const char **argv, int argc, Information &eleInfor
 }
     
 			    
-
 int
 DomainComponent::updateParameter(int responseID, Information &eleInformation)
 {
     return -1;
 }
 
-// AddingSensitivity:BEGIN ////////////////////////////////////////
-const Vector & 
-DomainComponent::gradient(bool compute, int identifier)
+int
+DomainComponent::activateParameter(int parameterID)
 {
 	return 0;
 }
-// AddingSensitivity:END ///////////////////////////////////////////

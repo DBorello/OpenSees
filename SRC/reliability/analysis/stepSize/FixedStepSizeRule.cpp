@@ -22,21 +22,18 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:52 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:39:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/FixedStepSizeRule.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
-//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #include <FixedStepSizeRule.h>
 #include <StepSizeRule.h>
-#include <XuTransformation.h>
+#include <ProbabilityTransformation.h>
 #include <math.h>
 #include <Vector.h>
 
@@ -58,13 +55,12 @@ int
 FixedStepSizeRule::computeStepSize(Vector u, 
 									Vector grad_G, 
 									double G, 
-									Vector d)
+									Vector d,
+									int stepNumber)
 {
 	// This method is in fact not neccesary 
 	// for the fixed step size rule. The 
 	// user has already given the step size. 
-
-	gFunValue = G;
 
 	return 0;  
 
@@ -78,9 +74,23 @@ FixedStepSizeRule::getStepSize()
 
 }
 
+
+double
+FixedStepSizeRule::getInitialStepSize()
+{
+	return stepSize;
+
+}
+
 double
 FixedStepSizeRule::getGFunValue()
 {
-	return gFunValue;
+	return 0.0;
 }
 
+Vector
+FixedStepSizeRule::getGradG()
+{
+	Vector dummy(1);
+	return dummy;
+}

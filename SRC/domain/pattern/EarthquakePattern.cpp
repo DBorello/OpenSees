@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:59 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.cpp,v $
                                                                         
-                                                                        
-// File: ~/domain/pattern/EarthquakePattern.cpp
-//
 // Written: fmk 11/98
 // Revised:
 //
@@ -101,6 +98,47 @@ EarthquakePattern::applyLoad(double time)
   Element *theElement;
   while ((theElement = theElements()) != 0) 
     theElement->addInertiaLoadToUnbalance(*uDotDotG);
+}
+    
+void 
+EarthquakePattern::applyLoadSensitivity(double time)
+{
+  // see if quick return, i.e. no Ground Motions or domain set
+  if (numMotions == 0)
+    return;
+
+  Domain *theDomain = this->getDomain();
+  if (theDomain == 0)
+    return;
+
+
+  // set the vel and accel vector
+  for (int i=0; i<numMotions; i++) {
+    (*uDotG)(i) = theMotions[i]->getVel(time);
+    if (parameterID != 0) { // Something is random in the motions
+      (*uDotDotG)(i) = theMotions[i]->getAccelSensitivity(time);
+    }
+    else {
+      (*uDotDotG)(i) = theMotions[i]->getAccel(time);
+    }
+  }
+
+  bool somethingRandomInMotions = false;
+  if (parameterID != 0) {
+	  somethingRandomInMotions = true;
+  }
+
+
+  NodeIter &theNodes = theDomain->getNodes();
+  Node *theNode;
+  while ((theNode = theNodes()) != 0) 
+	theNode->addInertiaLoadSensitivityToUnbalance(*uDotDotG, 1.0,  somethingRandomInMotions);
+
+
+  ElementIter &theElements = theDomain->getElements();
+  Element *theElement;
+  while ((theElement = theElements()) != 0) 
+	theElement->addInertiaLoadSensitivityToUnbalance(*uDotDotG,  somethingRandomInMotions);
 }
     
 int
@@ -329,3 +367,33 @@ EarthquakePattern::getCopy(void)
   return 0;
 }
 ***************************************************************************************** */
+
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
+int
+EarthquakePattern::setParameter(const char **argv, int argc, Information &info)
+{
+  // This is not general, yet
+
+  if (strcmp(argv[0],"-randomProcessDiscretizer") == 0) {
+    return theMotions[0]->setParameter(&argv[1], argc-1, info);
+  }
+  else {
+    opserr << "Unknown parameter in EarthquakePattern. " << endln;
+    return -1;
+  }
+}
+
+int
+EarthquakePattern::updateParameter(int parameterID, Information &info)
+{
+  return theMotions[0]->updateParameter(parameterID,info);
+}
+
+int
+EarthquakePattern::activateParameter(int pparameterID)
+{
+  parameterID = pparameterID;
+  return theMotions[0]->activateParameter(pparameterID);
+}
+// AddingSensitivity:END ////////////////////////////////////

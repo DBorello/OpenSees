@@ -1,6 +1,7 @@
 include ../../../../Makefile.def
 
-OBJS       = 	NatafXuTransformation.o  XuTransformation.o
+OBJS       = 	NatafProbabilityTransformation.o \
+	ProbabilityTransformation.o
 
 # Compilation control
 all:         $(OBJS)

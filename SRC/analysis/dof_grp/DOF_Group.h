@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:31:50 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:48:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.h,v $
                                                                         
                                                                         
@@ -100,8 +100,13 @@ class DOF_Group
 	
     // method added for TransformationDOF_Groups
     virtual Matrix *getT(void);
+
 // AddingSensitivity:BEGIN ////////////////////////////////////
-    virtual int setGradient(const Vector &v, int gradNum, int numGrads);
+    virtual void addM_ForceSensitivity(const Vector &Udotdot, double fact = 1.0);        
+	const Vector & getDispSensitivity(int gradNumber);
+	const Vector & getVelSensitivity(int gradNumber);
+	const Vector & getAccSensitivity(int gradNumber);
+	int saveSensitivity(Vector *v,Vector *vdot,Vector *vdotdot,int gradNum,int numGrads);
 // AddingSensitivity:END //////////////////////////////////////
     
   protected:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-22 01:02:02 $
+// $Revision: 1.9 $
+// $Date: 2003-03-04 00:48:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -59,9 +59,6 @@ FE_Element::FE_Element(Element *ele)
  numDOF(ele->getNumDOF()), theModel(0), myEle(ele), 
  theResidual(0), theTangent(0), theIntegrator(0)
 {
-// AddingSensitivity:BEGIN ///////////////////////////////////
-	theGradient = new Vector(numDOF);
-// AddingSensitivity:END /////////////////////////////////////
     if (numDOF <= 0) {
 	opserr << "FE_Element::FE_Element(Element *) ";
 	opserr << " element must have 1 dof " << *ele;
@@ -169,9 +166,6 @@ FE_Element::FE_Element(int numDOF_Group, int ndof)
 :myDOF_Groups(numDOF_Group), myID(ndof), numDOF(ndof), theModel(0),
  myEle(0), theResidual(0), theTangent(0), theIntegrator(0)
 {
-// AddingSensitivity:BEGIN ///////////////////////////////////
-	theGradient = new Vector(numDOF);
-// AddingSensitivity:END /////////////////////////////////////
     // this is for a subtype, the subtype must set the myDOF_Groups ID array
     numFEs++;
 
@@ -202,9 +196,6 @@ FE_Element::FE_Element(int numDOF_Group, int ndof)
 //	destructor.
 FE_Element::~FE_Element()
 {
-// AddingSensitivity:BEGIN ////////////////////////////////
-	delete theGradient;
-// AddingSensitivity:END //////////////////////////////////
 
     // decrement number of FE_Elements
     numFEs--;
@@ -598,8 +589,8 @@ FE_Element::addM_Force(const Vector &accel, double fact)
 		    tmp(i) = accel(loc);
 		else
 		    tmp(i) = 0.0;		
-	    }	    
-
+	    }	 
+		
 	    if (theResidual->addMatrixVector(1.0, myEle->getMass(), tmp, fact) < 0){
 		opserr << "WARNING FE_Element::addM_Force() - ";
 		opserr << "- addMatrixVector returned error\n";		 
@@ -634,20 +625,20 @@ FE_Element::addD_Force(const Vector &accel, double fact)
 		    tmp(i) = accel(loc);
 		else
 		    tmp(i) = 0.0;		
-	    }	    
-
+	    }	  
+		
 	    if (theResidual->addMatrixVector(1.0, myEle->getDamp(), tmp, fact) < 0){
 		opserr << "WARNING FE_Element::addM_Force() - ";
 		opserr << "- addMatrixVector returned error\n";		 
 	    }		
 	}
 	else {
-	    opserr << "WARNING FE_Element::addM_Force() - ";
+	    opserr << "WARNING FE_Element::addD_Force() - ";
 	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    				
     }
     else {
-	opserr << "WARNING FE_Element::addM_Force() - no Element *given ";
+	opserr << "WARNING FE_Element::addD_Force() - no Element *given ";
 	opserr << "- subclasses must provide implementation\n";
     }    	            
 }
@@ -691,40 +682,85 @@ FE_Element::addLocalD_Force(const Vector &accel, double fact)
 	    if (theResidual->addMatrixVector(1.0, myEle->getDamp(),
 					     accel, fact) < 0){
 
-	      opserr << "WARNING FE_Element::addLocalM_Force() - ";
+	      opserr << "WARNING FE_Element::addLocalD_Force() - ";
 	      opserr << "- addMatrixVector returned error\n"; 
 	    }		
 	}
 	else {
-	    opserr << "WARNING FE_Element::addLocalM_Force() - ";
+	    opserr << "WARNING FE_Element::addLocalD_Force() - ";
 	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    				
     }
     else {
-	opserr << "WARNING FE_Element::addLocalM_Force() - no Element *given ";
+	opserr << "WARNING FE_Element::addLocalD_Force() - no Element *given ";
 	opserr << "- subclasses must provide implementation\n";
     }    	            
 }
 
 
-// AddingSensitivity:BEGIN /////////////////////////////////
-const Vector &
-FE_Element::gradient(int identifier)
-{
-	// The 'identifier' is set to zero in phase 1 and it is set
-	// equal to the gradient number in phase 2 (when unconditional
-	// sensitivities are to be commited). 
 
-	if ( identifier == 0 ) {
-		theGradient->Zero();
-		theGradient->addVector(1.0, myEle->gradient(true,0), 1.0);
-		return *theGradient;  
+// AddingSensitivity:BEGIN /////////////////////////////////
+void  
+FE_Element::addResistingForceSensitivity(int gradNumber)
+{
+	theResidual->addVector(1.0,myEle->getResistingForceSensitivity(gradNumber),1.0);
+}
+
+void  
+FE_Element::addM_ForceSensitivity(int gradNumber, const Vector &vect, double fact)
+{
+	// Get the components we need out of the vector
+	// and place in a temporary vector
+	Vector tmp(numDOF);
+	for (int i=0; i<numDOF; i++) {
+		int loc = myID(i);
+		if (loc >= 0) {
+			tmp(i) = vect(loc);
+		}
+		else {
+			tmp(i) = 0.0;
+		}
 	}
-	else {
-		myEle->gradient(true,identifier);
-		theGradient->Zero();
-		return *theGradient;  
+	if (theResidual->addMatrixVector(1.0, myEle->getMassSensitivity(gradNumber),tmp,fact) < 0) {
+		opserr << "WARNING FE_Element::addM_ForceSensitivity() - ";
+		opserr << "- addMatrixVector returned error\n";		 
 	}
+}
+
+void  
+FE_Element::addD_ForceSensitivity(int gradNumber, const Vector &vect, double fact)
+{
+}
+
+void  
+FE_Element::addKiForceSensitivity(int gradNumber, const Vector &vect, double fact)
+{
+	// Get the components we need out of the vector
+	// and place in a temporary vector
+	Vector tmp(numDOF);
+	for (int i=0; i<numDOF; i++) {
+		int loc = myID(i);
+		if (loc >= 0) {
+			tmp(i) = vect(loc);
+		}
+		else {
+			tmp(i) = 0.0;
+		}
+	}
+
+	if (theResidual->addMatrixVector(1.0, myEle->getKiSensitivity(gradNumber),tmp,fact) < 0) {
+		opserr << "WARNING FE_Element::addKiForceSensitivity() - ";
+		opserr << "- addMatrixVector returned error\n";		 
+	}
+
+}
+
+int  
+FE_Element::commitSensitivity(int gradNum, int numGrads)
+{
+	myEle->commitSensitivity(gradNum, numGrads);
+
+	return 0;
 }
 // AddingSensitivity:END ////////////////////////////////////
 

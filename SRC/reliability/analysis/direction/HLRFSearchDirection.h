@@ -22,15 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-02 18:12:19 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:39:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/HLRFSearchDirection.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef HLRFSearchDirection_h
@@ -46,7 +44,8 @@ public:
 	HLRFSearchDirection();
 	~HLRFSearchDirection();
 
-	int computeSearchDirection(	Vector passed_u, 
+	int computeSearchDirection(	int stepNumber,
+								Vector passed_u, 
 								double passed_gFunctionValue, 
 								Vector passedGradientInStandardNormalSpace);
 	Vector getSearchDirection();

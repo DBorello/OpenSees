@@ -22,27 +22,26 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:55 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:44:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type1LargestValueRV.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
 #include <Type1LargestValueRV.h>
 #include <math.h>
 #include <string.h>
+#include <classTags.h>
 #include <OPS_Globals.h>
 
 Type1LargestValueRV::Type1LargestValueRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv,
 		 double passedStartValue)
-:RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_type1largestvalue)
 {
 	tag = passedTag ;
 	double pi = 3.14159265358979;
@@ -57,7 +56,7 @@ Type1LargestValueRV::Type1LargestValueRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_type1largestvalue)
 {
 	tag = passedTag ;
 	u = passedParameter1;
@@ -67,7 +66,7 @@ Type1LargestValueRV::Type1LargestValueRV(int passedTag,
 Type1LargestValueRV::Type1LargestValueRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
-:RandomVariable(passedTag, passedMean, passedStdv)
+:RandomVariable(passedTag, RANDOM_VARIABLE_type1largestvalue)
 {
 	tag = passedTag ;
 	double pi = 3.14159265358979;
@@ -81,7 +80,7 @@ Type1LargestValueRV::Type1LargestValueRV(int passedTag,
 		 double passedParameter2,
 		 double passedParameter3,
 		 double passedParameter4)
-:RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
+:RandomVariable(passedTag, RANDOM_VARIABLE_type1largestvalue)
 {
 	tag = passedTag ;
 	u = passedParameter1;

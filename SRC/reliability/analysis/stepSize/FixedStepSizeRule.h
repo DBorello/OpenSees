@@ -22,16 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-20 00:37:26 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:39:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/stepSize/FixedStepSizeRule.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
-//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef FixedStepSizeRule_h
@@ -46,9 +43,11 @@ public:
 	FixedStepSizeRule(double stepSize);
 	~FixedStepSizeRule();
 
-	int		computeStepSize(Vector u, Vector grad_G, double G, Vector d);
+	int		computeStepSize(Vector u, Vector grad_G, double G, Vector d, int stepNumber);
 	double	getStepSize();
+	double	getInitialStepSize();
 	double getGFunValue();
+	Vector getGradG();
 
 protected:
 

@@ -5,7 +5,8 @@ OBJS       = 	CorrelationCoefficient.o \
 		RandomVariable.o \
 		RandomVariablePositioner.o \
 		ReliabilityDomainComponent.o \
-		ReliabilityDomain.o
+		ReliabilityDomain.o \
+		ParameterPositioner.o
 
 # Compilation control
 

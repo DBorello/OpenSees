@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-25 23:33:41 $
+// $Revision: 1.8 $
+// $Date: 2003-03-04 00:48:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.h,v $
                                                                         
                                                                         
@@ -65,6 +65,8 @@ class UniaxialMaterial : public Material
     virtual double getTangent (void) = 0;
     virtual double getInitialTangent (void) = 0;
     virtual double getDampTangent (void);
+    virtual double getSecant (void);
+	virtual double getRho(void);
 
     virtual int commitState (void) = 0;
     virtual int revertToLastCommit (void) = 0;    
@@ -75,9 +77,18 @@ class UniaxialMaterial : public Material
 	
     virtual Response *setResponse (const char **argv, int argc, Information &matInformation);
     virtual int getResponse (int responseID, Information &matInformation);    
-// AddingSensitivity:BEGIN /////////////////////////////////////
-    virtual int gradient(bool compute, int identifier, double & gradient);
-// AddingSensitivity:END ///////////////////////////////////////
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+    virtual int    setParameter             (const char **argv, int argc, Information &info);
+    virtual int    updateParameter          (int parameterID, Information &info);
+	virtual int    activateParameter        (int parameterID);
+	virtual double getStressSensitivity     (int gradNumber, bool conditional);
+	virtual double getStrainSensitivity     (int gradNumber);
+	virtual double getInitialTangentSensitivity(int gradNumber);
+	virtual double getDampTangentSensitivity(int gradNumber);
+	virtual double getRhoSensitivity        (int gradNumber);
+	virtual int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
+// AddingSensitivity:END ///////////////////////////////////////////
 
   protected:
     

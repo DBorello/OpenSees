@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:39 $
+// $Revision: 1.7 $
+// $Date: 2003-03-04 00:48:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.h,v $
 
 #ifndef HardeningMaterial_h
@@ -34,6 +34,7 @@
 // with combined isotropic and kinematic hardening.
 
 #include <UniaxialMaterial.h>
+#include <Matrix.h>
 
 class HardeningMaterial : public UniaxialMaterial
 {
@@ -61,6 +62,18 @@ class HardeningMaterial : public UniaxialMaterial
     
     void Print(OPS_Stream &s, int flag =0);
     
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+    int    setParameter             (char **argv, int argc, Information &info);
+    int    updateParameter          (int parameterID, Information &info);
+	int    activateParameter        (int parameterID);
+	double getStressSensitivity     (int gradNumber, bool conditional);
+	double getStrainSensitivity     (int gradNumber);
+	double getInitialTangentSensitivity    (int gradNumber);
+	double getDampTangentSensitivity(int gradNumber);
+	double getRhoSensitivity        (int gradNumber);
+	int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
+// AddingSensitivity:END ///////////////////////////////////////////
+
   protected:
     
   private:
@@ -84,7 +97,12 @@ class HardeningMaterial : public UniaxialMaterial
     // Trial state variables
     double Tstrain;		// Trial strain
     double Tstress;		// Trial stress
-    double Ttangent;	        // Trial tangent
+    double Ttangent;	// Trial tangent
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+    int parameterID;
+	Matrix *SHVs;
+// AddingSensitivity:END ///////////////////////////////////////////
 };
 
 

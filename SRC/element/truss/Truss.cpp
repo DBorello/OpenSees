@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-02-25 23:33:02 $
+// $Revision: 1.17 $
+// $Date: 2003-03-04 00:48:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -48,6 +48,8 @@
 #include <string.h>
 
 #include <ElementResponse.h>
+
+//#include <fstream>
 
 // initialise the class wide variables
 Matrix Truss::trussM2(2,2);
@@ -95,7 +97,8 @@ Truss::Truss(int tag,
       theNodes[i] = 0;
 
 // AddingSensitivity:BEGIN /////////////////////////////////////
-	gradientIdentifier = 0;
+	parameterID = 0;
+	theLoadSens = 0;
 // AddingSensitivity:END //////////////////////////////////////
 }
 
@@ -119,7 +122,8 @@ Truss::Truss()
     theNodes[i] = 0;
 
 // AddingSensitivity:BEGIN /////////////////////////////////////
-	gradientIdentifier = 0;
+	parameterID = 0;
+	theLoadSens = 0;
 // AddingSensitivity:END //////////////////////////////////////
 }
 
@@ -136,6 +140,8 @@ Truss::~Truss()
 	delete t;
     if (theLoad != 0)
 	delete theLoad;
+    if (theLoadSens != 0)
+	delete theLoadSens;
 }
 
 
@@ -426,6 +432,7 @@ Truss::getTangentStiff(void)
     return *theMatrix;
 }
 
+
 const Matrix &
 Truss::getInitialStiff(void)
 {
@@ -446,7 +453,30 @@ Truss::getInitialStiff(void)
 
     return *theMatrix;
 }
+/*
+const Matrix &
+Truss::getSecantStiff(void)
+{
+    if (L == 0.0) { // - problem in setDomain() no further warnings
+	theMatrix->Zero();
+	return *theMatrix;
+    }
+    
+    // get the current E from the material for this strain
+    double strain = this->computeCurrentStrain();
 
+    double stress = theMaterial->getStress();    
+    double E = stress/strain;
+
+    // come back later and redo this if too slow
+    Matrix &stiff = *theMatrix;
+    Matrix &trans = *t;
+    stiff = trans^trans;
+    stiff *= A*E/L;  
+    
+    return *theMatrix;
+}
+*/  
 const Matrix &
 Truss::getDamp(void)
 {
@@ -512,7 +542,7 @@ Truss::getMass(void)
 	mass(7,7) = M;
 	mass(8,8) = M; 
     }
-    
+
     return *theMatrix; // so it will compile
 }
 
@@ -570,6 +600,106 @@ Truss::addInertiaLoadToUnbalance(const Vector &accel)
     return 0;
 }
 
+
+int 
+Truss::addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool somethingRandomInMotions)
+{
+
+	if (theLoadSens == 0) {
+		theLoadSens = new Vector(numDOF);
+	}
+	else {
+		theLoadSens->Zero();
+	}
+
+
+	if (somethingRandomInMotions) {
+
+
+						// check for a quick return
+						if (L == 0.0 || M == 0.0) 
+						return 0;
+
+					  // get R * accel from the nodes
+					  const Vector &Raccel1 = theNodes[0]->getRV(accel);
+					  const Vector &Raccel2 = theNodes[1]->getRV(accel);    
+
+					  int nodalDOF = numDOF/2;
+    
+					#ifdef _G3DEBUG    
+					  if (nodalDOF != Raccel1.Size() || nodalDOF != Raccel2.Size()) {
+						g3ErrorHandler->warning("Truss::addInertiaLoadToUnbalance %s\n",
+									"matrix and vector sizes are incompatable");
+						return -1;
+					  }
+					#endif
+    
+						// want to add ( - fact * M R * accel ) to unbalance
+						for (int i=0; i<dimension; i++) {
+						double val1 = Raccel1(i);
+						double val2 = Raccel2(i);	
+						
+						// perform - fact * M*(R * accel) // remember M a diagonal matrix
+						val1 *= M;
+						val2 *= M;
+						
+						(*theLoadSens)(i) = val1;
+						(*theLoadSens)(i+nodalDOF) = val2;
+						}	
+	}
+	else {
+
+
+
+
+
+
+
+
+						// check for a quick return
+						if (L == 0.0 || M == 0.0) 
+						return 0;
+
+					  // get R * accel from the nodes
+					  const Vector &Raccel1 = theNodes[0]->getRV(accel);
+					  const Vector &Raccel2 = theNodes[1]->getRV(accel);    
+
+					  int nodalDOF = numDOF/2;
+    
+					#ifdef _G3DEBUG    
+					  if (nodalDOF != Raccel1.Size() || nodalDOF != Raccel2.Size()) {
+						g3ErrorHandler->warning("Truss::addInertiaLoadToUnbalance %s\n",
+									"matrix and vector sizes are incompatable");
+						return -1;
+					  }
+					#endif
+    
+						// want to add ( - fact * M R * accel ) to unbalance
+						for (int i=0; i<dimension; i++) {
+							double val1 = Raccel1(i);
+							double val2 = Raccel2(i);	
+							
+							// perform - fact * M*(R * accel) // remember M a diagonal matrix
+							
+							double massDerivative = 0.0;
+							if (parameterID == 1) {
+								double rho = M*2.0/(A*L);
+								massDerivative = rho*1.0*L/2.0;
+							}
+							else if (parameterID == 2) {
+								massDerivative = 1.0*A*L/2.0;
+							}
+							
+							val1 *= massDerivative;
+							val2 *= massDerivative;
+							
+							(*theLoadSens)(i) = val1;
+							(*theLoadSens)(i+nodalDOF) = val2;
+						}	
+	}
+    return 0;
+}
+
 const Vector &
 Truss::getResistingForce()
 {	
@@ -586,7 +716,45 @@ Truss::getResistingForce()
 
     // subtract external load:  Ku - P
     (*theVector) -= *theLoad;
+
     
+
+
+
+
+
+// ***1
+/*
+ofstream outputFile1( "tmatrix_p.out", ios::out );
+char mystring[100] = "";
+for (int iii=0; iii<t->noCols(); iii++) {
+	sprintf(mystring,"%25.16e  ",(*t)(0,iii));
+	outputFile1 << mystring << endl;
+}
+outputFile1.close();
+
+
+ofstream outputFile2( "thevector_p.out", ios::out );
+for (iii=0; iii<theVector->Size(); iii++) {
+	sprintf(mystring,"%25.16e  ",(*theVector)(iii));
+	outputFile2 << mystring << endl;
+}
+outputFile2.close();
+
+double streess = theMaterial->getStress();
+ofstream outputFile3( "stress_p.out", ios::out );
+sprintf(mystring,"%25.16e  ",streess);
+outputFile3 << mystring << endl;
+outputFile3.close();
+
+*/
+
+
+
+
+
+
+
     return *theVector;
 }
 
@@ -825,7 +993,12 @@ Truss::computeCurrentStrain(void) const
 	dLength -= (disp2(i)-disp1(i))* (*t)(0,i);
     }
 
-    // this method should never be called with L == 0
+//cerr << "disp1: " << disp1 << endl;
+//cerr << "disp2: " << disp2 << endl;
+//cerr << "strain from element: " << dLength/L << endl;
+//cerr << "***********************" << endl;
+  
+	// this method should never be called with L == 0
     return dLength/L;
 }
 
@@ -867,7 +1040,7 @@ Truss::setResponse(const char **argv, int argc, Information &eleInfo)
     return new ElementResponse(this, 3, *theMatrix);
 
   // a material quantity    
-  else if (strcmp(argv[0],"material") == 0)
+  else if (strcmp(argv[0],"-material") == 0)
     return theMaterial->setResponse(&argv[1], argc-1, eleInfo);
   
   else
@@ -892,7 +1065,7 @@ Truss::getResponse(int responseID, Information &eleInfo)
   }
 }
 
-
+// AddingSensitivity:BEGIN ///////////////////////////////////
 int
 Truss::setParameter (const char **argv, int argc, Information &info)
 {
@@ -905,8 +1078,14 @@ Truss::setParameter (const char **argv, int argc, Information &info)
         return 1;
     }
 
+    // Mass densitity (per unit volume) of the truss itself
+    if (strcmp(argv[0],"rho") == 0) {
+        info.theType = DoubleType;
+        return 2;
+    }
+
     // a material parameter
-    if (strcmp(argv[0],"material") == 0) {
+    if (strcmp(argv[0],"-material") == 0) {
       int ok = theMaterial->setParameter(&argv[1], argc-1, info);
       if (ok < 0)
 	return -1;
@@ -918,7 +1097,7 @@ Truss::setParameter (const char **argv, int argc, Information &info)
     else
       return -1;
 }
-    
+
 int
 Truss::updateParameter (int parameterID, Information &info)
 {
@@ -927,7 +1106,12 @@ Truss::updateParameter (int parameterID, Information &info)
       return -1;
       
     case 1:
+		this->M = (M*2.0/(A*L)) * info.theDouble * L/2.0;
         this->A = info.theDouble;
+        return 0;
+
+    case 2:
+        this->M = info.theDouble * A * L/2.0;
         return 0;
 
     default:
@@ -937,108 +1121,602 @@ Truss::updateParameter (int parameterID, Information &info)
 	  return -1;
   }
 }
-
-
-const Vector &
-Truss::gradient(bool compute, int identifier)
+int
+Truss::activateParameter(int passedParameterID)
 {
-/*	The gradient method can be called with four different purposes:
-	1) To clear the sensitivity flag so that the object does not contribute:
-			gradient(false, 0)
-	2) To set the sensitivity flag so that the object contributes
-	   (the sensitivity flag is stored as the value of parameterID):
-			gradient(false, parameterID)
-	3) To obtain the gradient vector from the object (like for the residual):
-			gradient(true, 0)
-	4) To commit unconditional sensitivities for path-dependent problems:
-			gradient(true, gradNumber)
-*/
+	parameterID = passedParameterID;
 
-  // COMPUTE GRADIENTS
-  if (compute) {
+	// The identifier needs to be passed "downwards" also when it's zero
+	if (passedParameterID == 0 || passedParameterID == 1 || passedParameterID == 2) {
+		theMaterial->activateParameter(0);
+	}
 
-    // IF "PHASE 1" IN THE GRADIENT COMPUTATIONS (RETURN GRADIENT VECTOR)
-    if (identifier == 0) {
-      
-      theVector->Zero();
-      
-      if ( gradientIdentifier != 0 ) {
-	// Determine the current strain
-	double strain = this->computeCurrentStrain();
+	// If the identifier is non-zero and the parameter belongs to the material
+	else if ( passedParameterID > 100) {
+		theMaterial->activateParameter(passedParameterID-100);
+	}
 
-	// Set the strain at material level
-	theMaterial->setTrialStrain(strain);
+	return 0;
+}
+/*
+const Vector &
+Truss::getResistingForceDerivativeIncInertia(int gradNumber, const Vector &vel,const Vector &acc,double a2,double a3,double a4,double a6,double a7,double a8,double alphaM,double betaK,double dAlphaMdh,double dBetaKdh)
+{
 
-	// Compute sensitivity depending on 'parameter'
-	if( gradientIdentifier == 1 ) {
-	  double sigma = theMaterial->getStress();
-	  for (int i=0; i<numDOF; i++)
-	    (*theVector)(i) = (*t)(0,i)*sigma;
+	// The term -dPint/dh|u fixed
+	// Note that this term is delivered by another method in this class
+	// which is also using "theVector".  There the minus sign is implemented.
+	Vector dPintdh = this->getResistingForceDerivative(gradNumber);
+	theVector->Zero();
+	theVector->addVector(1.0,dPintdh,1.0);
+
+
+	// The term -dM/dh*acc
+	double area = 0.0;
+	double rho = 0.0;
+	if (parameterID == 1) {
+		area = 1.0;
+		rho = M*2.0/(A*L);
+	}
+	else if (parameterID == 2) {
+		rho = 1.0;
+		area = A;
+	}
+	Matrix *dMdh = 0;
+    if (dimension == 1 && numDOF == 2) {
+		dMdh = new Matrix(2,2);
+		(*dMdh)(0,0) = rho*area*L/2.0; 
+		(*dMdh)(1,1) = rho*area*L/2.0;
+    }
+    else if (dimension == 2 && numDOF == 4) {
+		dMdh = new Matrix(4,4);
+		(*dMdh)(0,0) = rho*area*L/2.0; 
+		(*dMdh)(1,1) = rho*area*L/2.0;
+		(*dMdh)(2,2) = rho*area*L/2.0; 
+		(*dMdh)(3,3) = rho*area*L/2.0;	
+    }
+    else if (dimension == 2 && numDOF == 6) {
+		dMdh = new Matrix(6,6);
+		(*dMdh)(0,0) = rho*area*L/2.0; 
+		(*dMdh)(1,1) = rho*area*L/2.0;
+		(*dMdh)(3,3) = rho*area*L/2.0;
+		(*dMdh)(4,4) = rho*area*L/2.0; 
+    }
+    else if (dimension == 3 && numDOF == 6) {
+		dMdh = new Matrix(6,6);
+		(*dMdh)(0,0) = rho*area*L/2.0; 
+		(*dMdh)(1,1) = rho*area*L/2.0;
+		(*dMdh)(2,2) = rho*area*L/2.0; 
+		(*dMdh)(3,3) = rho*area*L/2.0;
+		(*dMdh)(4,4) = rho*area*L/2.0; 
+		(*dMdh)(5,5) = rho*area*L/2.0;		
+    }
+    else if (dimension == 3 && numDOF == 12) {
+		dMdh = new Matrix(12,12);
+		(*dMdh)(0,0) = rho*area*L/2.0; 
+		(*dMdh)(1,1) = rho*area*L/2.0;
+		(*dMdh)(2,2) = rho*area*L/2.0; 
+		(*dMdh)(6,6) = rho*area*L/2.0; 
+		(*dMdh)(7,7) = rho*area*L/2.0;
+		(*dMdh)(8,8) = rho*area*L/2.0; 
+    }
+	theVector->addVector(1.0,((*dMdh)^acc),-1.0);
+
+
+	// The term -(dAlphaMdh*M)*vel
+	theVector->addVector(1.0,(dAlphaMdh*((this->getMass())^vel)),-1.0);
+
+
+	// The term -(alphaM*dMdh)*vel
+	theVector->addVector(1.0,(alphaM*((*dMdh)^vel)),-1.0);
+
+	
+	// dMdh is used for the last time; delete it
+	if (dMdh != 0) {
+		delete dMdh;
+	}
+
+	// The term -(dBetaKdh*K)*vel
+	theVector->addVector(1.0,(dBetaKdh*((this->getTangentStiff())^vel)),-1.0);
+
+
+	// The term -(betaK*dKdh)*vel
+	Matrix &dKdh = *theMatrix;
+	if (parameterID == 1) {
+		double E = theMaterial->getTangent();
+		Matrix &trans = *t;
+		dKdh = trans^trans;
+		dKdh *= A*E/L;  
 	}
 	else {
-	  double materialGradient=0; 
-	  theMaterial->gradient(compute, identifier,materialGradient);
-	  for (int i=0; i<numDOF; i++) {
-	    (*theVector)(i) = (*t)(0,i)*A*materialGradient;
-	  }
+//		double dEdh = theMaterial->getTangentDerivative();
+double dEdh = 0.0;
+		Matrix &trans = *t;
+		dKdh = trans^trans;
+		dKdh *= A*dEdh/L;  
 	}
-      }
-      
-      return *theVector;
-    }
+	theVector->addVector(1.0,(betaK*(dKdh^vel)),-1.0);
 
-    // IF "PHASE 2" IN THE GRADIENT COMPUTATIONS (COMMIT UNCONDITIONAL GRADIENT)
-    else {
-      
-      if ( gradientIdentifier == 0 ) {
-      }
-      else if ( gradientIdentifier == 1 ) {
 
-	// Nothing needs to be committed if the area is random
-
-      }
-      else {
-	
-	// Compute strain sensitivity
-	double sens1;
-	double sens2;
-	
-	double dLength = 0.0;
-	for (int i=0; i<dimension; i++){
-	  sens1 = theNodes[0]->getGradient(i+1, identifier);
-	  sens2 = theNodes[1]->getGradient(i+1, identifier);
-	  dLength -= (sens2-sens1)* (*t)(0,i);
+	// Recover displacement sensitivity results
+	Vector v(theVector->Size());
+	int counter = 0;
+	int i;
+	for (i=0; i<dimension; i++){
+		v(counter) = end1Ptr->getDisplSensitivity(i+1, gradNumber);
+		counter++;
 	}
-	double materialGradient = dLength/L;
-	
-	// Pass it down to the material
-	theMaterial->gradient(compute,identifier,materialGradient);
-	
-      }
-      
-      return 0;
-    }
-  }
-  
-  // DO NOT COMPUTE GRADIENTS, JUST SET FLAG
-  else {
+	for (i=0; i<dimension; i++){
+		v(counter) = end2Ptr->getDisplSensitivity(i+1, gradNumber);
+		counter++;
+	}
 
-    // Set gradient identifier
-    gradientIdentifier = identifier;
-    
-    // The identifier needs to be passed "downwards" also when it's zero
-    if (identifier == 0 ) {
-      double dummy=0;
-      theMaterial->gradient(false, identifier,dummy);
-    }
-    
-    // If the identifier is non-zero and the parameter belongs to the material
-    else if ( identifier > 100) {
-      double dummy=0;
-      theMaterial->gradient(false, identifier-100,dummy);
-    }
-    
-    return 0;
-  }
+
+	// The term -M*(a2*v)
+	theVector->addVector(1.0,(((this->getMass())^v)*a2),-1.0);
+
+
+	// The term -C*(a6*v)
+	theVector->addVector(1.0,(((this->getDamp())^v)*a6),-1.0);
+
+
+	// Recover velocity sensitivity results
+	Vector vdot(theVector->Size());
+	counter = 0;
+	for (i=0; i<dimension; i++){
+		vdot(counter) = end1Ptr->getVelSensitivity(i+1, gradNumber);
+		counter++;
+	}
+	for (i=0; i<dimension; i++){
+		vdot(counter) = end2Ptr->getVelSensitivity(i+1, gradNumber);
+		counter++;
+	}
+
+
+	// The term -M*(a3*vdot)
+	theVector->addVector(1.0,(((this->getMass())^vdot)*a3),-1.0);
+
+
+	// The term -C*(a7*vdot)
+	theVector->addVector(1.0,(((this->getDamp())^vdot)*a7),-1.0);
+
+
+	// Recover acceleration sensitivity results
+	Vector vdotdot(theVector->Size());
+	counter = 0;
+	for (i=0; i<dimension; i++){
+		vdotdot(counter) = end1Ptr->getAccSensitivity(i+1, gradNumber);
+		counter++;
+	}
+	for (i=0; i<dimension; i++){
+		vdotdot(counter) = end2Ptr->getAccSensitivity(i+1, gradNumber);
+		counter++;
+	}
+
+
+	// The term -M*(a4*vdotdot)
+	theVector->addVector(1.0,(((this->getMass())^vdotdot)*a4),-1.0);
+
+
+	// The term -C*(a8*vdotdot)
+	theVector->addVector(1.0,(((this->getDamp())^vdotdot)*a8),-1.0);
+
+	return *theVector;
+}
+*/
+
+const Matrix &
+Truss::getKiSensitivity(int gradNumber)
+{
+	theMatrix->Zero();
+
+    // come back later and redo this if too slow
+    Matrix &stiff = *theMatrix;
+    Matrix &trans = *t;
+
+	if (parameterID == 0) {
+	}
+    else if (parameterID == 1) {
+		// If cross sectional area is random
+	    double E = theMaterial->getInitialTangent();
+		stiff = trans^trans;
+		stiff *= 1.0*E/L;  
+	}
+	else if (parameterID == 2) {
+		// Nothing here when 'rho' is random
+	}
+	else {
+		double Esens = theMaterial->getInitialTangentSensitivity(gradNumber);
+		stiff = trans^trans;
+	    stiff *= A*Esens/L;  
+	}
+
+	return *theMatrix;
 }
 
+const Matrix &
+Truss::getMassSensitivity(int gradNumber)
+{
+	theMatrix->Zero();
+	
+
+	double massDerivative = 0.0;
+	if (parameterID == 1) {
+		double rho = M*2.0/(A*L);
+		massDerivative = rho*1.0*L/2.0;
+	}
+	else if (parameterID == 2) {
+		massDerivative = 1.0*A*L/2.0;
+	}
+    if (dimension == 1 && numDOF == 2) {
+		(*theMatrix)(0,0) = massDerivative; 
+		(*theMatrix)(1,1) = massDerivative;
+    }
+    else if (dimension == 2 && numDOF == 4) {
+		(*theMatrix)(0,0) = massDerivative; 
+		(*theMatrix)(1,1) = massDerivative;
+		(*theMatrix)(2,2) = massDerivative; 
+		(*theMatrix)(3,3) = massDerivative;	
+    }
+    else if (dimension == 2 && numDOF == 6) {
+		(*theMatrix)(0,0) = massDerivative; 
+		(*theMatrix)(1,1) = massDerivative;
+		(*theMatrix)(3,3) = massDerivative;
+		(*theMatrix)(4,4) = massDerivative; 
+    }
+    else if (dimension == 3 && numDOF == 6) {
+		(*theMatrix)(0,0) = massDerivative; 
+		(*theMatrix)(1,1) = massDerivative;
+		(*theMatrix)(2,2) = massDerivative; 
+		(*theMatrix)(3,3) = massDerivative;
+		(*theMatrix)(4,4) = massDerivative; 
+		(*theMatrix)(5,5) = massDerivative;		
+    }
+    else if (dimension == 3 && numDOF == 12) {
+		(*theMatrix)(0,0) = massDerivative; 
+		(*theMatrix)(1,1) = massDerivative;
+		(*theMatrix)(2,2) = massDerivative; 
+		(*theMatrix)(6,6) = massDerivative; 
+		(*theMatrix)(7,7) = massDerivative;
+		(*theMatrix)(8,8) = massDerivative; 
+    }
+
+	return *theMatrix;
+}
+
+const Vector &
+Truss::getResistingForceSensitivity(int gradNumber)
+{
+	theVector->Zero();
+
+
+	// Initial declarations
+	int i;
+	double stressSensitivity, strain, temp1, temp2;
+	double coordStressSensitivity = 0.0;
+
+	// Check if a nodal coordinate is random
+	Vector nodeParameterID(2);
+	nodeParameterID(0) = (double)theNodes[0]->getCrdsSensitivity();
+	nodeParameterID(1) = (double)theNodes[1]->getCrdsSensitivity();
+	bool nodeCoordIsRandom = false;
+	if (nodeParameterID.Norm() != 0.0) {
+		nodeCoordIsRandom = true;
+	}
+
+	// Determine original geometry and elemet stretch
+	const Vector &end1Crd = theNodes[0]->getCrds();
+	const Vector &end2Crd = theNodes[1]->getCrds();	
+	const Vector &disp1 = theNodes[0]->getTrialDisp();
+	const Vector &disp2 = theNodes[1]->getTrialDisp();	
+
+	double x1 = end1Crd(0);
+	double x2 = end2Crd(0);
+	double y1 = end1Crd(1);	
+	double y2 = end2Crd(1);
+	double dx = (x2-x1);
+	double dy = (y2-y1);
+	double L = sqrt(dx*dx + dy*dy);
+
+	double dLength = 0.0;
+	for (i=0; i<dimension; i++){
+		dLength -= (disp2(i)-disp1(i))* (*t)(0,i);
+	}
+	double rate = this->computeCurrentStrainRate();
+
+
+	// Make sure the material is up to date
+	strain = dLength/L;
+	theMaterial->setTrialStrain(strain);
+
+
+	// Compute derivative of transformation matrix (assume 4 dofs)
+	Vector dtdh(4);
+	if (nodeCoordIsRandom) {
+
+		const Vector &end1Crd = theNodes[0]->getCrds();
+		const Vector &end2Crd = theNodes[1]->getCrds();	
+		double dx = end2Crd(0)-end1Crd(0);
+		double dy = end2Crd(1)-end1Crd(1);	
+		double L = sqrt(dx*dx + dy*dy);
+
+		for (i=0; i<2; i++) {
+
+
+			if (i==0) {
+
+				if ( ((int)nodeParameterID(i))==1 ) { // here x1 is random
+					temp1 = (-L+dx*dx/L)/(L*L);
+					temp2 = dx*dy/(L*L*L);
+					dtdh(0) = -temp1;
+					dtdh(1) = -temp2;
+					dtdh(2) = temp1;
+					dtdh(3) = temp2;
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) { // here y1 is random
+					temp1 = (-L+dy*dy/L)/(L*L);
+					temp2 = dx*dy/(L*L*L);
+					dtdh(0) = -temp2;
+					dtdh(1) = -temp1;
+					dtdh(2) = temp2;
+					dtdh(3) = temp1;
+				}
+			}
+			else if (i==1) {
+
+				if ( ((int)nodeParameterID(i))==1 ) { // here x2 is random
+					temp1 = (L-dx*dx/L)/(L*L);
+					temp2 = -dx*dy/(L*L*L);
+					dtdh(0) = -temp1;
+					dtdh(1) = -temp2;
+					dtdh(2) = temp1;
+					dtdh(3) = temp2;
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) { // here y2 is random
+					temp1 = (L-dy*dy/L)/(L*L);
+					temp2 = -dx*dy/(L*L*L);
+					dtdh(0) = -temp2;
+					dtdh(1) = -temp1;
+					dtdh(2) = temp2;
+					dtdh(3) = temp1;
+				}
+
+			}
+		}
+	}
+
+
+
+	// Determine stress sensitivity 
+	if (nodeCoordIsRandom) {
+
+		double strainSensitivity, materialTangent;
+		double dLengthDerivative = 0.0;
+		for (i=0; i<dimension; i++){
+			dLengthDerivative -= (disp2(i)-disp1(i))* dtdh(i);
+		}
+
+		for (i=0; i<2; i++) {
+			if (i==0) {
+				if ( ((int)nodeParameterID(i))==1 ) {		// here x1 is random
+					materialTangent = theMaterial->getTangent();
+					strainSensitivity = (dLengthDerivative*L+dLength/L*(x2-x1))/(L*L);
+					coordStressSensitivity = materialTangent * strainSensitivity;
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) {	// here y1 is random
+					materialTangent = theMaterial->getTangent();
+					strainSensitivity = (dLengthDerivative*L+dLength/L*(y2-y1))/(L*L);
+					coordStressSensitivity = materialTangent * strainSensitivity;
+				}
+			}
+			else {
+				if ( ((int)nodeParameterID(i))==1 ) {		// here x2 is random
+					materialTangent = theMaterial->getTangent();
+					strainSensitivity = (dLengthDerivative*L-dLength/L*(x2-x1))/(L*L);
+					coordStressSensitivity = materialTangent * strainSensitivity;
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) {	// here y2 is random
+					materialTangent = theMaterial->getTangent();
+					strainSensitivity = (dLengthDerivative*L-dLength/L*(y2-y1))/(L*L);
+					coordStressSensitivity = materialTangent * strainSensitivity;
+				}
+			}
+		}
+	}
+
+	stressSensitivity = coordStressSensitivity + theMaterial->getStressSensitivity(gradNumber,true);
+
+
+
+	// Compute sensitivity depending on 'parameter'
+	double stress = theMaterial->getStress();
+	if( parameterID == 1 ) {			// Cross-sectional area
+		for (i=0; i<numDOF; i++)
+			(*theVector)(i) = (-1)*(*t)(0,i)*stress +
+			(-1)*(*t)(0,i)*A*stressSensitivity;
+	}
+	else {		// Density, material parameter or nodal coordinate
+		for (i=0; i<numDOF; i++) {	
+			(*theVector)(i) = (-1)*(*t)(0,i)*A*stressSensitivity
+				            + (-1)* dtdh(i) *A*stress;
+		}
+	}
+
+
+
+	// subtract external load sensitivity
+	if (theLoadSens == 0) {
+		theLoadSens = new Vector(numDOF);
+	}
+	(*theVector) -= *theLoadSens;
+
+	return *theVector;
+}
+
+
+
+
+
+
+
+
+int
+Truss::commitSensitivity(int gradNumber, int numGrads)
+{
+	// Initial declarations
+	double dLdh = 0.0; 
+	int i; 
+	double strainSensitivity, temp1, temp2;
+
+
+	// Check if a nodal coordinate is random
+	Vector nodeParameterID(2);
+	nodeParameterID(0) = (double)theNodes[0]->getCrdsSensitivity();
+	nodeParameterID(1) = (double)theNodes[1]->getCrdsSensitivity();
+	bool nodeCoordIsRandom = false;
+	if (nodeParameterID.Norm() != 0.0) {
+		nodeCoordIsRandom = true;
+	}
+
+
+	// Displacement difference between the two ends
+	const Vector &end1Crd = theNodes[0]->getCrds();
+	const Vector &end2Crd = theNodes[1]->getCrds();	
+	const Vector &disp1 = theNodes[0]->getTrialDisp();
+	const Vector &disp2 = theNodes[1]->getTrialDisp();	
+	double dLength = 0.0;
+	for (i=0; i<dimension; i++){
+		dLength -= (disp2(i)-disp1(i))* (*t)(0,i);
+	}
+
+	// Displacement sensitivity difference between the two ends
+	double sens1;
+	double sens2;
+	double dSensitivity = 0.0;
+	for (i=0; i<dimension; i++){
+		sens1 = theNodes[0]->getDispSensitivity(i+1, gradNumber);
+		sens2 = theNodes[1]->getDispSensitivity(i+1, gradNumber);
+		dSensitivity -= (sens2-sens1)* (*t)(0,i);
+	}
+
+	double x1 = end1Crd(0);
+	double x2 = end2Crd(0);
+	double y1 = end1Crd(1);	
+	double y2 = end2Crd(1);
+	double dx = (x2-x1);
+	double dy = (y2-y1);
+	double L = sqrt(dx*dx + dy*dy);
+
+
+	// Compute derivative of transformation matrix (assume 4 dofs)
+	Vector dtdh(4);
+	if (nodeCoordIsRandom) {
+
+		const Vector &end1Crd = theNodes[0]->getCrds();
+		const Vector &end2Crd = theNodes[1]->getCrds();	
+		double dx = end2Crd(0)-end1Crd(0);
+		double dy = end2Crd(1)-end1Crd(1);	
+		double L = sqrt(dx*dx + dy*dy);
+
+		for (i=0; i<2; i++) {
+
+
+			if (i==0) {
+
+				if ( ((int)nodeParameterID(i))==1 ) { // here x1 is random
+					temp1 = (-L+dx*dx/L)/(L*L);
+					temp2 = dx*dy/(L*L*L);
+					dtdh(0) = -temp1;
+					dtdh(1) = -temp2;
+					dtdh(2) = temp1;
+					dtdh(3) = temp2;
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) { // here y1 is random
+					temp1 = (-L+dy*dy/L)/(L*L);
+					temp2 = dx*dy/(L*L*L);
+					dtdh(0) = -temp2;
+					dtdh(1) = -temp1;
+					dtdh(2) = temp2;
+					dtdh(3) = temp1;
+				}
+			}
+			else if (i==1) {
+
+				if ( ((int)nodeParameterID(i))==1 ) { // here x2 is random
+					temp1 = (L-dx*dx/L)/(L*L);
+					temp2 = -dx*dy/(L*L*L);
+					dtdh(0) = -temp1;
+					dtdh(1) = -temp2;
+					dtdh(2) = temp1;
+					dtdh(3) = temp2;
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) { // here y2 is random
+					temp1 = (L-dy*dy/L)/(L*L);
+					temp2 = -dx*dy/(L*L*L);
+					dtdh(0) = -temp2;
+					dtdh(1) = -temp1;
+					dtdh(2) = temp2;
+					dtdh(3) = temp1;
+				}
+
+			}
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+	// Determine strain sensitivity
+	if (nodeCoordIsRandom) {
+
+		double dLengthDerivative = 0.0;
+		for (i=0; i<dimension; i++){
+			dLengthDerivative -= (disp2(i)-disp1(i))* dtdh(i);
+		}
+
+		for (i=0; i<2; i++) {
+			if (i==0) {
+				if ( ((int)nodeParameterID(i))==1 ) {		// here x1 is random
+					strainSensitivity = dLength/(L*L*L)*(x2-x1)
+									  + dSensitivity/L
+									  + dLengthDerivative/L;
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) {	// here y1 is random
+					strainSensitivity = dLength/(L*L*L)*(y2-y1)
+									  + dSensitivity/L
+									  + dLengthDerivative/L;
+				}
+			}
+			else {
+				if ( ((int)nodeParameterID(i))==1 ) {		// here x2 is random
+					strainSensitivity = -dLength/(L*L*L)*(x2-x1)
+									  + dSensitivity/L
+									  + dLengthDerivative/L;
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) {	// here y2 is random
+					strainSensitivity = -dLength/(L*L*L)*(y2-y1)
+									  + dSensitivity/L
+									  + dLengthDerivative/L;
+				}
+			}
+		}
+	}
+	else {
+		strainSensitivity = dSensitivity/L;
+	}
+
+	
+	// Pass it down to the material
+	theMaterial->commitSensitivity(strainSensitivity, gradNumber, numGrads);
+
+	return 0;
+}
+
+// AddingSensitivity:END /////////////////////////////////////////////

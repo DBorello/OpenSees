@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:00:44 $
+// $Revision: 1.8 $
+// $Date: 2003-03-04 00:48:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -714,27 +714,125 @@ DOF_Group::addLocalM_Force(const Vector &accel, double fact)
 
 
 // AddingSensitivity:BEGIN ////////////////////////////////////////
-int 
-DOF_Group::setGradient(const Vector &v, int gradNum, int numGrads)
+const Vector &
+DOF_Group::getDispSensitivity(int gradNumber)
 {
-    Vector &sensitivity = *unbalance;
+    Vector &result = *unbalance;
+	for (int i=0; i<numDOF; i++) {
+		result(i) = myNode->getDispSensitivity(i+1,gradNumber);
+	}
+	return result;
+}
+	
+const Vector &
+DOF_Group::getVelSensitivity(int gradNumber)
+{
+    Vector &result = *unbalance;
+	for (int i=0; i<numDOF; i++) {
+		result(i) = myNode->getVelSensitivity(i+1,gradNumber);
+	}
+	return result;
+}
+	
+const Vector &
+DOF_Group::getAccSensitivity(int gradNumber)
+{
+    Vector &result = *unbalance;
+	for (int i=0; i<numDOF; i++) {
+		result(i) = myNode->getAccSensitivity(i+1,gradNumber);
+	}
+	return result;
+}
+	
+	
 
-    // Get sensitivity for my dof out of vector v
-    for (int i=0; i<numDOF; i++) {
+int 
+DOF_Group::saveSensitivity(Vector *v,Vector *vdot,Vector *vdotdot,int gradNum,int numGrads)
+{
+	// Initial declarations
+	int i;
+
+
+    // Get sensitivities for my dof out of vectors
+    Vector *myV = 0;
+	Vector *myVdot = 0;
+	Vector *myVdotdot = 0;
+
+
+	// Displacement sensitivities
+	myV = new Vector(numDOF);
+    for (i=0; i<numDOF; i++) {
 		int loc = myID(i);	    			
 		if (loc >= 0) {
-			sensitivity(i) = v(loc);  
+			(*myV)(i) = (*v)(loc);  
 		}
 		else {
-			sensitivity(i) = 0.0;  
+			(*myV)(i) = 0.0;  
 		}
     }
 
-    myNode->setGradient(sensitivity, gradNum, numGrads);
+
+	// Vel and Acc sensitivities only if they are being delivered
+	if ( (vdot != 0) && (vdotdot != 0) ) {
+		myVdot = new Vector(numDOF);
+		for (i=0; i<numDOF; i++) {
+			int loc = myID(i);	    			
+			if (loc >= 0) {
+				(*myVdot)(i) = (*vdot)(loc);  
+			}
+			else {
+				(*myVdot)(i) = 0.0;  
+			}
+		}
+		myVdotdot = new Vector(numDOF);
+		for (i=0; i<numDOF; i++) {
+			int loc = myID(i);	    			
+			if (loc >= 0) {
+				(*myVdotdot)(i) = (*vdotdot)(loc);  
+			}
+			else {
+				(*myVdotdot)(i) = 0.0;  
+			}
+		}
+	}
+
+    myNode->saveSensitivity(myV, myVdot, myVdotdot, gradNum, numGrads);
+
+	delete myV;
+	delete myVdot;
+	delete myVdotdot;
 
 	return 0;
-
 }
+
+void  
+DOF_Group::addM_ForceSensitivity(const Vector &Udotdot, double fact)
+{
+    if (myNode == 0) {
+	opserr << "DOF_Group::addM_Force() - no Node associated";	
+	opserr << " subclass should not call this method \n";	    
+	return;
+    }
+
+    Vector accel(numDOF);
+    // get accel for the unconstrained dof
+    for (int i=0; i<numDOF; i++) {
+	int loc = myID(i);
+	if (loc >= 0)
+	    accel(i) = Udotdot(loc); 
+	else accel(i) = 0.0;
+    }
+	
+    if (unbalance->addMatrixVector(1.0, myNode->getMassSensitivity(), accel, fact) < 0) {  
+	opserr << "DOF_Group::addM_Force() ";
+	opserr << " invoking addMatrixVector() on the unbalance failed\n";
+    }
+    else {
+
+    }		
+}
+
+
 // AddingSensitivity:END //////////////////////////////////////////
 
 

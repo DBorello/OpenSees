@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-25 23:33:37 $
+// $Revision: 1.9 $
+// $Date: 2003-03-04 00:48:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.cpp,v $
                                                                         
                                                                         
@@ -37,6 +37,7 @@
 
 #include <Concrete01.h>
 #include <Vector.h>
+#include <Matrix.h>
 #include <Channel.h>
 #include <Information.h>
 #include <math.h>
@@ -72,7 +73,8 @@ Concrete01::Concrete01
 	this->revertToLastCommit();
 
 // AddingSensitivity:BEGIN /////////////////////////////////////
-	gradientIdentifier = 0;
+	parameterID = 0;
+	SHVs = 0;
 // AddingSensitivity:END //////////////////////////////////////
 }
 
@@ -85,7 +87,8 @@ Concrete01::Concrete01():UniaxialMaterial(0, MAT_TAG_Concrete01),
 	this->revertToLastCommit();
 
 // AddingSensitivity:BEGIN /////////////////////////////////////
-	gradientIdentifier = 0;
+	parameterID = 0;
+	SHVs = 0;
 // AddingSensitivity:END //////////////////////////////////////
 }
 
@@ -327,7 +330,6 @@ double Concrete01::getTangent ()
    return Ttangent;
 }
 
-
 int Concrete01::commitState ()
 {
    // History variables
@@ -476,6 +478,10 @@ void Concrete01::Print (OPS_Stream& s, int flag)
    s << "  epscu: " << epscu << endln;
 }
 
+
+
+
+// AddingSensitivity:BEGIN ///////////////////////////////////
 int
 Concrete01::setParameter(const char **argv, int argc, Information &info)
 {
@@ -546,110 +552,483 @@ Concrete01::updateParameter(int parameterID, Information &info)
 }
 
 
-// AddingSensitivity:BEGIN ///////////////////////////////////
+
+
 int
-Concrete01::gradient(bool compute, int identifier, double & gradient)
+Concrete01::activateParameter(int passedParameterID)
 {
-/*	The gradient method can be called with four different purposes:
-	1) To clear the sensitivity flag so that the object does not contribute:
-			gradient(false, 0)
-	2) To set the sensitivity flag so that the object contributes
-	   (the sensitivity flag is stored as the value of parameterID):
-			gradient(false, parameterID)
-	3) To obtain the gradient vector from the object (like for the residual):
-			gradient(true, 0)
-	4) To commit unconditional sensitivities for path-dependent problems:
-			gradient(true, gradNumber)
-*/
-
-// COMPUTE GRADIENTS
-	if (compute) {
-
-// IF "PHASE 1" IN THE GRADIENT COMPUTATIONS (RETURN GRADIENT VECTOR)
-		if (identifier == 0) {
-
-			// For now, simply return the derivatives of these equations:
-			// sigma = E0 * epsilon                 for abs(epsilon) < fy/E0
-			// sigma = fy + (epsilon-fy/E0)*b*E0    for abs(epsilon) > fy/E0
-			// (That is, this method only works for path-independent problems for now.)
-
-			if ( gradientIdentifier == 0 ) {
-				gradient = 0.0;
-			}
-			else if (Tstrain > 0.0 ) {
-				gradient = 0.0;
-			}
-			else if (Tstrain > epsc0) {					// IN PARABOLIC AREA
-
-				if ( gradientIdentifier == 1 ) {		// d{sigma}d{fpc}
-					gradient = 2.0*Tstrain/epsc0-Tstrain*Tstrain/(epsc0*epsc0);
-				}
-				else if ( gradientIdentifier == 2  ) {	// d{sigma}d{epsc0}
-					gradient = 2.0*fpc/(epsc0*epsc0)*(Tstrain*Tstrain/epsc0-Tstrain);
-				}
-				else if ( gradientIdentifier == 3  ) {	// d{sigma}d{fpcu}
-					gradient = 0.0;
-				}
-				else if ( gradientIdentifier == 4  ) {	// d{sigma}d{epscu}
-					gradient = 0.0;
-				}
-				else {
-					gradient = 0.0;
-				}
-			}
-			else if (Tstrain > epscu) {					// IN LINEAR AREA
-
-				if ( gradientIdentifier == 1 ) {		// d{sigma}d{fpc}
-					gradient = (epscu-Tstrain)/(epscu-epsc0);
-				}
-				else if ( gradientIdentifier == 2  ) {	// d{sigma}d{epsc0}
-					gradient = (fpc-fpcu)*(epscu-Tstrain)/((epscu-epsc0)*(epscu-epsc0));
-				}
-				else if ( gradientIdentifier == 3  ) {	// d{sigma}d{fpcu}
-					gradient = (Tstrain-epsc0)/(epscu-epsc0);
-				}
-				else if ( gradientIdentifier == 4  ) {	// d{sigma}d{epscu}
-					gradient = (Tstrain-epsc0)*(fpc-fpcu)/((epsc0-epscu)*(epsc0-epscu));
-				}
-				else {
-					gradient = 0.0;
-				}
-			}
-			else {										// IN ZERO STIFFNESS AREA
-
-				if ( gradientIdentifier == 1 ) {		// d{sigma}d{fpc}
-					gradient = 0.0;
-				}
-				else if ( gradientIdentifier == 2  ) {	// d{sigma}d{epsc0}
-					gradient = 0.0;
-				}
-				else if ( gradientIdentifier == 3  ) {	// d{sigma}d{fpcu}
-					gradient = 1.0;
-				}
-				else if ( gradientIdentifier == 4  ) {	// d{sigma}d{epscu}
-					gradient = 0.0;
-				}
-				else {
-					gradient = 0.0;
-				}
-			}
-
-			gradient = (-1) * gradient;
-
-		}
-
-// IF "PHASE 2" IN THE GRADIENT COMPUTATIONS (COMMIT UNCONDITIONAL GRADIENT)
-		else {
-			// Not treated yet. 
-		}
-	}
-	
-// DO NOT COMPUTE GRADIENTS, JUST SET FLAG
-	else {
-		gradientIdentifier = identifier;
-	}
+	parameterID = passedParameterID;
 
 	return 0;
 }
 
+double
+Concrete01::getStrainSensitivity(int gradNumber)
+{
+	return 0.0; 
+}
+
+double
+Concrete01::getTangentSensitivity(int gradNumber)
+{
+	return 0.0; 
+}
+
+double
+Concrete01::getDampTangentSensitivity(int gradNumber)
+{
+	return 0.0; 
+}
+
+double
+Concrete01::getRhoSensitivity(int gradNumber)
+{
+	return 0.0; 
+}
+
+
+
+
+
+double
+Concrete01::getStressSensitivity(int gradNumber, bool conditional)
+{
+	// Initialize return value
+	double TstressSensitivity = 0.0;
+	double dktdh = 0.0;
+	double TstrainSensitivity = 0.0;
+
+
+	// Pick up sensitivity history variables
+	double CminStrainSensitivity = 0.0;
+	double CunloadSlopeSensitivity = 0.0;
+	double CendStrainSensitivity = 0.0;
+	double CstressSensitivity = 0.0;
+	double CstrainSensitivity = 0.0;
+	if (SHVs != 0) {
+		CminStrainSensitivity   = (*SHVs)(0,(gradNumber-1));
+		CunloadSlopeSensitivity = (*SHVs)(1,(gradNumber-1));
+		CendStrainSensitivity   = (*SHVs)(2,(gradNumber-1));
+		CstressSensitivity      = (*SHVs)(3,(gradNumber-1));
+		CstrainSensitivity      = (*SHVs)(4,(gradNumber-1));
+	}
+
+
+	// Assign values to parameter derivatives (depending on what's random)
+	double fpcSensitivity = 0.0;
+	double epsc0Sensitivity = 0.0;
+	double fpcuSensitivity = 0.0;
+	double epscuSensitivity = 0.0;
+
+	if (parameterID == 1) {
+		fpcSensitivity = 1.0;
+	}
+	else if (parameterID == 2) {
+		epsc0Sensitivity = 1.0;
+	}
+	else if (parameterID == 3) {
+		fpcuSensitivity = 1.0;
+	}
+	else if (parameterID == 4) {
+		epscuSensitivity = 1.0;
+	}
+
+
+	// Strain increment 
+	double dStrain = Tstrain - Cstrain;
+
+	// Evaluate stress sensitivity 
+	if (dStrain < 0.0) {					// applying more compression to the material
+
+		if (Tstrain < CminStrain) {			// loading along the backbone curve
+
+			if (Tstrain > epsc0) {			//on the parabola
+				
+				TstressSensitivity = fpcSensitivity*(2.0*Tstrain/epsc0-(Tstrain/epsc0)*(Tstrain/epsc0))
+					      + fpc*( (2.0*TstrainSensitivity*epsc0-2.0*Tstrain*epsc0Sensitivity)/(epsc0*epsc0) 
+						  - 2.0*(Tstrain/epsc0)*(TstrainSensitivity*epsc0-Tstrain*epsc0Sensitivity)/(epsc0*epsc0));
+				
+				dktdh = 2.0*((fpcSensitivity*epsc0-fpc*epsc0Sensitivity)/(epsc0*epsc0))
+					  * (1.0-Tstrain/epsc0)
+					  - 2.0*(fpc/epsc0)*(TstrainSensitivity*epsc0-Tstrain*epsc0Sensitivity)
+					  / (epsc0*epsc0);
+			}
+			else if (Tstrain > epscu) {		// on the straight inclined line
+//cerr << "ON THE STRAIGHT INCLINED LINE" << endl;
+
+				dktdh = ( (fpcSensitivity-fpcuSensitivity)
+					  * (epsc0-epscu) 
+					  - (fpc-fpcu)
+					  * (epsc0Sensitivity-epscuSensitivity) )
+					  / ((epsc0-epscu)*(epsc0-epscu));
+
+				double kt = (fpc-fpcu)/(epsc0-epscu);
+
+				TstressSensitivity = fpcSensitivity 
+					      + dktdh*(Tstrain-epsc0)
+						  + kt*(TstrainSensitivity-epsc0Sensitivity);
+			}
+			else {							// on the horizontal line
+//cerr << "ON THE HORIZONTAL LINES" << endl;
+				TstressSensitivity = fpcuSensitivity;
+				dktdh = 0.0;
+			
+			}
+		}
+		else if (Tstrain < CendStrain) {	// reloading after an unloading that didn't go all the way to zero stress
+//cerr << "RELOADING AFTER AN UNLOADING THAT DIDN'T GO ALL THE WAY DOWN" << endl;
+			TstressSensitivity = CunloadSlopeSensitivity * (Tstrain-CendStrain)
+				      + CunloadSlope * (TstrainSensitivity-CendStrainSensitivity);
+
+			dktdh = CunloadSlopeSensitivity;
+		}
+		else {
+
+			TstressSensitivity = 0.0;
+			dktdh = 0.0;
+
+		}
+	}
+	else if (Cstress+CunloadSlope*dStrain<0.0) {// unloading, but not all the way down to zero stress
+//cerr << "UNLOADING, BUT NOT ALL THE WAY DOWN" << endl;
+		TstressSensitivity = CstressSensitivity 
+			               + CunloadSlopeSensitivity*dStrain
+				           + CunloadSlope*(TstrainSensitivity-CstrainSensitivity);
+
+		dktdh = CunloadSlopeSensitivity;
+	}
+	else {									// unloading all the way down to zero stress
+//cerr << "UNLOADING ALL THE WAY DOWN" << endl;
+
+		TstressSensitivity = 0.0;
+		dktdh = 0.0;
+
+	}
+
+	return TstressSensitivity;
+}
+
+
+
+int
+Concrete01::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
+{
+
+	// Initialize unconditaional stress sensitivity
+	double TstressSensitivity = 0.0;
+	double dktdh = 0.0;
+
+
+	// Assign values to parameter derivatives (depending on what's random)
+	double fpcSensitivity = 0.0;
+	double epsc0Sensitivity = 0.0;
+	double fpcuSensitivity = 0.0;
+	double epscuSensitivity = 0.0;
+
+	if (parameterID == 1) {
+		fpcSensitivity = 1.0;
+	}
+	else if (parameterID == 2) {
+		epsc0Sensitivity = 1.0;
+	}
+	else if (parameterID == 3) {
+		fpcuSensitivity = 1.0;
+	}
+	else if (parameterID == 4) {
+		epscuSensitivity = 1.0;
+	}
+
+
+	// Pick up sensitivity history variables
+	double CminStrainSensitivity = 0.0;
+	double CunloadSlopeSensitivity = 0.0;
+	double CendStrainSensitivity = 0.0;
+	double CstressSensitivity = 0.0;
+	double CstrainSensitivity = 0.0;
+	
+	if (SHVs == 0) {
+		SHVs = new Matrix(5,numGrads);
+		CunloadSlopeSensitivity = (2.0*fpcSensitivity*epsc0-2.0*fpc*epsc0Sensitivity) / (epsc0*epsc0);
+	}
+	else {
+		CminStrainSensitivity   = (*SHVs)(0,(gradNumber-1));
+		CunloadSlopeSensitivity = (*SHVs)(1,(gradNumber-1));
+		CendStrainSensitivity   = (*SHVs)(2,(gradNumber-1));
+		CstressSensitivity      = (*SHVs)(3,(gradNumber-1));
+		CstrainSensitivity      = (*SHVs)(4,(gradNumber-1));
+	}
+
+
+	// Strain increment 
+	double dStrain = Tstrain - Cstrain;
+
+	// Evaluate stress sensitivity 
+	if (dStrain < 0.0) {					// applying more compression to the material
+
+		if (Tstrain < CminStrain) {			// loading along the backbone curve
+
+			if (Tstrain > epsc0) {			//on the parabola
+				
+				TstressSensitivity = fpcSensitivity*(2.0*Tstrain/epsc0-(Tstrain/epsc0)*(Tstrain/epsc0))
+					      + fpc*( (2.0*TstrainSensitivity*epsc0-2.0*Tstrain*epsc0Sensitivity)/(epsc0*epsc0) 
+						  - 2.0*(Tstrain/epsc0)*(TstrainSensitivity*epsc0-Tstrain*epsc0Sensitivity)/(epsc0*epsc0));
+				
+				dktdh = 2.0*((fpcSensitivity*epsc0-fpc*epsc0Sensitivity)/(epsc0*epsc0))
+					  * (1.0-Tstrain/epsc0)
+					  - 2.0*(fpc/epsc0)*(TstrainSensitivity*epsc0-Tstrain*epsc0Sensitivity)
+					  / (epsc0*epsc0);
+			}
+			else if (Tstrain > epscu) {		// on the straight inclined line
+
+				dktdh = ( (fpcSensitivity-fpcuSensitivity)
+					  * (epsc0-epscu) 
+					  - (fpc-fpcu)
+					  * (epsc0Sensitivity-epscuSensitivity) )
+					  / ((epsc0-epscu)*(epsc0-epscu));
+
+				double kt = (fpc-fpcu)/(epsc0-epscu);
+
+				TstressSensitivity = fpcSensitivity 
+					      + dktdh*(Tstrain-epsc0)
+						  + kt*(TstrainSensitivity-epsc0Sensitivity);
+			}
+			else {							// on the horizontal line
+
+				TstressSensitivity = fpcuSensitivity;
+				dktdh = 0.0;
+			
+			}
+		}
+		else if (Tstrain < CendStrain) {	// reloading after an unloading that didn't go all the way to zero stress
+
+			TstressSensitivity = CunloadSlopeSensitivity * (Tstrain-CendStrain)
+				      + CunloadSlope * (TstrainSensitivity-CendStrainSensitivity);
+
+			dktdh = CunloadSlopeSensitivity;
+		}
+		else {
+
+			TstressSensitivity = 0.0;
+			dktdh = 0.0;
+
+		}
+	}
+	else if (Cstress+CunloadSlope*dStrain<0.0) {// unloading, but not all the way down to zero stress
+	
+		TstressSensitivity = CstressSensitivity 
+			               + CunloadSlopeSensitivity*dStrain
+				           + CunloadSlope*(TstrainSensitivity-CstrainSensitivity);
+
+		dktdh = CunloadSlopeSensitivity;
+	}
+	else {									// unloading all the way down to zero stress
+
+		TstressSensitivity = 0.0;
+		dktdh = 0.0;
+
+	}
+
+	// Commit some history variables
+	(*SHVs)(3,(gradNumber-1)) = TstressSensitivity;
+	(*SHVs)(4,(gradNumber-1)) = TstrainSensitivity;
+
+
+
+
+
+	// Possibly update history variables for the three ordinary history variable derivatives
+	double epsTemp, epsTempSensitivity;
+	double eta, etaSensitivity;
+	double ratio, ratioSensitivity;
+	double temp1, temp1Sensitivity;
+	double temp2, temp2Sensitivity;
+	double TminStrainSensitivity;
+	double TunloadSlopeSensitivity;
+	double TendStrainSensitivity;
+
+	if (dStrain<0.0 && Tstrain<CminStrain) {
+
+		TminStrainSensitivity = TstrainSensitivity;
+
+		if (Tstrain < epscu) {
+
+			epsTemp = epscu; 
+
+			epsTempSensitivity = epscuSensitivity;
+
+		}
+		else {
+
+			epsTemp = Tstrain;
+
+			epsTempSensitivity = TstrainSensitivity;
+		}
+
+		eta = epsTemp/epsc0;
+
+		etaSensitivity = (epsTempSensitivity*epsc0-epsTemp*epsc0Sensitivity) / (epsc0*epsc0);
+
+		if (eta < 2.0) {
+
+			ratio = 0.145 * eta*eta + 0.13*eta;
+
+			ratioSensitivity = 0.29 * eta * etaSensitivity + 0.13 * etaSensitivity;
+
+		}
+		else {
+
+			ratio = 0.707*(eta-2.0) + 0.834;
+
+			ratioSensitivity = 0.707 * etaSensitivity;
+		}
+
+		temp1 = Tstrain - ratio * epsc0;
+
+		temp1Sensitivity = TstrainSensitivity - ratioSensitivity * epsc0
+			                                  - ratio * epsc0Sensitivity;
+
+		temp2 = Tstress * epsc0 / (2.0*fpc); 
+		
+		temp2Sensitivity = (2.0*fpc*(TstressSensitivity*epsc0+Tstress*epsc0Sensitivity)
+			-2.0*Tstress*epsc0*fpcSensitivity) / (4.0*fpc*fpc);
+
+		if (temp1 == 0.0) {
+
+			TunloadSlopeSensitivity = (2.0*fpcSensitivity*epsc0-2.0*fpc*epsc0Sensitivity) / (epsc0*epsc0);
+		}
+		else if (temp1 < temp2) {
+
+			TendStrainSensitivity = TstrainSensitivity - temp1Sensitivity;
+
+			TunloadSlopeSensitivity = (TstressSensitivity*temp1-Tstress*temp1Sensitivity) / (temp1*temp1);
+
+		}
+		else {
+
+			TendStrainSensitivity = TstrainSensitivity - temp2Sensitivity;
+
+			TunloadSlopeSensitivity = (2.0*fpcSensitivity*epsc0-2.0*fpc*epsc0Sensitivity) / (epsc0*epsc0);
+		}
+	}
+	else {
+		TminStrainSensitivity = CminStrainSensitivity;
+		TunloadSlopeSensitivity = CunloadSlopeSensitivity;
+		TendStrainSensitivity = CendStrainSensitivity;
+	}
+
+
+
+	(*SHVs)(0,(gradNumber-1)) = TminStrainSensitivity;
+	(*SHVs)(1,(gradNumber-1)) = TunloadSlopeSensitivity;
+	(*SHVs)(2,(gradNumber-1)) = TendStrainSensitivity;
+
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* THE OLD METHODS:
+double
+Concrete01::getStressSensitivity(int gradNumber, bool conditional)
+{
+	// (This method only works for path-independent problems for now.)
+
+	double gradient = 0.0;
+
+	if ( parameterID == 0 ) {
+		// Leave the gradient as zero if nothing is random here;
+	}
+	else if (Tstrain > 0.0 ) {
+		gradient = 0.0;
+	}
+	else if (Tstrain > epsc0) {					// IN PARABOLIC AREA
+
+		if ( parameterID == 1 ) {		// d{sigma}d{fpc}
+			gradient = 2.0*Tstrain/epsc0-Tstrain*Tstrain/(epsc0*epsc0);
+		}
+		else if ( parameterID == 2  ) {	// d{sigma}d{epsc0}
+			gradient = 2.0*fpc/(epsc0*epsc0)*(Tstrain*Tstrain/epsc0-Tstrain);
+		}
+		else if ( parameterID == 3  ) {	// d{sigma}d{fpcu}
+			gradient = 0.0;
+		}
+		else if ( parameterID == 4  ) {	// d{sigma}d{epscu}
+			gradient = 0.0;
+		}
+		else {
+			gradient = 0.0;
+		}
+	}
+	else if (Tstrain > epscu) {					// IN LINEAR AREA
+
+		if ( parameterID == 1 ) {		// d{sigma}d{fpc}
+			gradient = (epscu-Tstrain)/(epscu-epsc0);
+		}
+		else if ( parameterID == 2  ) {	// d{sigma}d{epsc0}
+			gradient = (fpc-fpcu)*(epscu-Tstrain)/((epscu-epsc0)*(epscu-epsc0));
+		}
+		else if ( parameterID == 3  ) {	// d{sigma}d{fpcu}
+			gradient = (Tstrain-epsc0)/(epscu-epsc0);
+		}
+		else if ( parameterID == 4  ) {	// d{sigma}d{epscu}
+			gradient = (Tstrain-epsc0)*(fpc-fpcu)/((epsc0-epscu)*(epsc0-epscu));
+		}
+		else {
+			gradient = 0.0;
+		}
+	}
+	else {										// IN ZERO STIFFNESS AREA
+
+		if ( parameterID == 1 ) {		// d{sigma}d{fpc}
+			gradient = 0.0;
+		}
+		else if ( parameterID == 2  ) {	// d{sigma}d{epsc0}
+			gradient = 0.0;
+		}
+		else if ( parameterID == 3  ) {	// d{sigma}d{fpcu}
+			gradient = 1.0;
+		}
+		else if ( parameterID == 4  ) {	// d{sigma}d{epscu}
+			gradient = 0.0;
+		}
+		else {
+			gradient = 0.0;
+		}
+	}
+
+	return gradient;
+}
+
+
+
+int
+Concrete01::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
+{
+	// Not treated yet. 
+
+	return 0;
+}
+*/
 // AddingSensitivity:END /////////////////////////////////////////////

@@ -22,15 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:53 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:44:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef LimitStateFunction_h
@@ -38,41 +36,33 @@
 
 #include <ReliabilityDomainComponent.h>
 #include <Vector.h>
-#include <fstream>
-using std::ofstream;
+//#include <fstream>
 
 class LimitStateFunction : public ReliabilityDomainComponent
 {
 
 public:
 	LimitStateFunction(	int tag, 
-				char *expression);
+						char *expression);
 	~LimitStateFunction();
 	void Print(OPS_Stream &s, int flag =0);
+
+	// Method to get/add limit-state function
 	char *getExpression();
-	void printResults(ofstream &outputFile);
-	void printSummaryOfResults(ofstream &outputFile);
-
-	
-	// Flags to check if analyses are performed
-	bool FORMAnalysisPerformed;
-	bool SimulationAnalysisPerformed;
-	bool EvaluateLimitStateFunctionAtStartPointPerformed;
-	bool PointFittingSORMAnalysisPerformed;
-	bool CurvatureFittingSORMAnalysisPerformed;
-	bool CurvaturesFromSearchAlgorithmSORMAnalysisPerformed;
-
-	// GFunValueAtStartPt analysis
-	double GFunValueAtStartPt;
+	char *getTokenizedExpression();
+	int addExpression(char *expression);
+	int removeAddedExpression();
 
 	// FORM analysis:
+	double GFunValueAtStartPt;
+	double GFunValueAtEndPt;
 	double FORMReliabilityIndexBeta;
 	double FORMProbabilityOfFailure_pf1;
 	Vector designPoint_x_inOriginalSpace;
 	Vector designPoint_u_inStdNormalSpace;
 	Vector normalizedNegativeGradientVectorAlpha;
 	Vector importanceVectorGamma;
-	int numberOfIterationsToFindDesignPoint;
+	int numberOfStepsToFindDesignPointAlgorithm;
 	
 	// From Simulation analysis:
 	double SimulationReliabilityIndexBeta;
@@ -92,14 +82,16 @@ public:
 	Vector secondLast_u;
 	Vector secondLastAlpha;
 
-
-
-
 protected:
 
 private:
+
+	int tokenizeIt(char *expression);
+
 	int tag;
-	char *expression;
+	char *originalExpression;
+	char *tokenizedExpression;
+	char *expressionWithAddition;
 
 };
 

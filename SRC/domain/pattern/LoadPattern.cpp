@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:00 $
+// $Revision: 1.7 $
+// $Date: 2003-03-04 00:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
                                                                         
@@ -76,9 +76,9 @@ LoadPattern::LoadPattern(int tag, int clasTag)
 	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
     }  
-// AddingSensitivity:BEGIN /////////////////////////////
-	randomLoads = 0;
-// AddingSensitivity:END ///////////////////////////////
+    // AddingSensitivity:BEGIN /////////////////////////////
+    randomLoads = 0;
+    // AddingSensitivity:END ///////////////////////////////
 }
 
 
@@ -108,9 +108,9 @@ LoadPattern::LoadPattern()
 	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
     }
-// AddingSensitivity:BEGIN /////////////////////////////
-	randomLoads = 0;
-// AddingSensitivity:END ///////////////////////////////
+    // AddingSensitivity:BEGIN /////////////////////////////
+    randomLoads = 0;
+    // AddingSensitivity:END ///////////////////////////////
 }
 
 
@@ -140,9 +140,9 @@ LoadPattern::LoadPattern(int tag)
 	opserr << " LoadPattern::LoadPattern() - ran out of memory\n";
 	exit(-1);
     }
-// AddingSensitivity:BEGIN /////////////////////////////
-	randomLoads = 0;
-// AddingSensitivity:END ///////////////////////////////
+    // AddingSensitivity:BEGIN /////////////////////////////
+    randomLoads = 0;
+    // AddingSensitivity:END ///////////////////////////////
 }
 
     
@@ -172,10 +172,10 @@ LoadPattern::~LoadPattern()
     if (theSpIter != 0)
       delete theSpIter;
 
-// AddingSensitivity:BEGIN /////////////////////////////
-	if (randomLoads != 0)
-		delete randomLoads;
-// AddingSensitivity:END ///////////////////////////////
+    // AddingSensitivity:BEGIN /////////////////////////////
+    if (randomLoads != 0)
+      delete randomLoads;
+    // AddingSensitivity:END ///////////////////////////////
 }
 
 
@@ -837,198 +837,261 @@ LoadPattern::getCopy(void)
   theCopy->theSeries = theSeries;
   return theCopy;
 }
-    
-    
-int
-LoadPattern::setParameter(char **argv, int argc, Information &info)
+
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
+void
+LoadPattern::applyLoadSensitivity(double pseudoTime)
 {
-	// Nodal load
-	if (strcmp(argv[0],"loadAtNode") == 0) {
+  if (theSeries != 0 && isConstant != 0) {
+    loadFactor = theSeries->getFactorSensitivity(pseudoTime);
+  }
+  
+  NodalLoad *nodLoad;
+  NodalLoadIter &theNodalIter = this->getNodalLoads();
+  while ((nodLoad = theNodalIter()) != 0)
+    nodLoad->applyLoad(loadFactor);
+  
+  
+  // Don't inlude element loads and sp constraints for now
+  /*
+    ElementalLoad *eleLoad;
+    ElementalLoadIter &theElementalIter = this->getElementalLoads();
+    while ((eleLoad = theElementalIter()) != 0)
+    eleLoad->applyLoad(loadFactor);
+    
+    SP_Constraint *sp;
+    SP_ConstraintIter &theIter = this->getSPs();
+    while ((sp = theIter()) != 0)
+    sp->applyConstraint(loadFactor);
+  */
+}
 
-		int nodeNumber = atoi(argv[1]);
-		NodalLoad *thePossibleNodalLoad;
-		NodalLoad *theNodalLoad = 0;
-		NodalLoadIter &theNodalIter = this->getNodalLoads();
+int
+LoadPattern::setParameter(const char **argv, int argc, Information &info)
+{
+    if (theSeries == 0) {
+        opserr << "set/update/activate parameter is illegaly called in LoadPattern " << endln;
+    }
 
-		while ((thePossibleNodalLoad = theNodalIter()) != 0) {
-			if ( nodeNumber == thePossibleNodalLoad->getNodeTag() ) {
-				theNodalLoad = thePossibleNodalLoad;
-			}
-		}
+    // Nodal load
+    if (strcmp(argv[0],"-loadAtNode") == 0) {
 
-		int ok = -1;
-		ok = theNodalLoad->setParameter (&argv[2], argc, info);
+        RVisRandomProcessDiscretizer = false;
 
-		if (ok > 0 )
-			return ok*1000 + nodeNumber;
-		else
-			return -1;
-	}
+        int nodeNumber = atoi(argv[1]);
+        NodalLoad *thePossibleNodalLoad;
+        NodalLoad *theNodalLoad = 0;
+        NodalLoadIter &theNodalIter = this->getNodalLoads();
 
-	// Unknown parameter
-	else
-		return -1;
+        while ((thePossibleNodalLoad = theNodalIter()) != 0) {
+            if ( nodeNumber == thePossibleNodalLoad->getNodeTag() ) {
+                theNodalLoad = thePossibleNodalLoad;
+            }
+        }
+
+        int ok = -1;
+        ok = theNodalLoad->setParameter (&argv[2], argc, info);
+
+        if (ok > 0 )
+            return ok*1000 + nodeNumber;
+        else
+            return -1;
+    }
+
+
+    else if (strcmp(argv[0],"-randomProcessDiscretizer") == 0) {
+
+        RVisRandomProcessDiscretizer = true;
+        return theSeries->setParameter(&argv[1], argc-1, info);
+    }
+
+    // Unknown parameter
+    else
+        return -1;
 }
 
 int
 LoadPattern::updateParameter(int parameterID, Information &info)
 {
-	NodalLoad *thePossibleNodalLoad = 0;
-	NodalLoad *theNodalLoad = 0;
-	NodalLoadIter &theNodalIter = this->getNodalLoads();
+  if (theSeries == 0) {
+    opserr << "set/update/activate parameter is illegaly called in LoadPattern " << endln;
+  }
+  
 
-	switch (parameterID) {
-	case 1: case -1:  // Not implemented.
-		return -1;
+  if (RVisRandomProcessDiscretizer) {
+    return theSeries->updateParameter(parameterID,info);
+  }
+  else {
+    NodalLoad *thePossibleNodalLoad = 0;
+    NodalLoad *theNodalLoad = 0;
+    NodalLoadIter &theNodalIter = this->getNodalLoads();
+    
+    switch (parameterID) {
+    case 1: case -1:  // Not implemented.
+      return -1;
     default:
-		if (parameterID > 1000  &&  parameterID < 2000)  {
-			int nodeNumber = parameterID-1000;
-			while ((thePossibleNodalLoad = theNodalIter()) != 0)  {
-				if ( nodeNumber == thePossibleNodalLoad->getNodeTag() )  {
-					theNodalLoad = thePossibleNodalLoad;
-				}
-			}
-			return theNodalLoad->updateParameter(1, info);
-		}
-        else if (parameterID > 2000  &&  parameterID < 3000)  {
-            int nodeNumber = parameterID-2000;
-            while ((thePossibleNodalLoad = theNodalIter()) != 0)  {
-                if ( nodeNumber == thePossibleNodalLoad->getNodeTag() )  {
-                    theNodalLoad = thePossibleNodalLoad;
-                }
+      if (parameterID > 1000  &&  parameterID < 2000)  {
+	int nodeNumber = parameterID-1000;
+	while ((thePossibleNodalLoad = theNodalIter()) != 0)  {
+	  if ( nodeNumber == thePossibleNodalLoad->getNodeTag() )  {
+	    theNodalLoad = thePossibleNodalLoad;
+	  }
+	}
+	return theNodalLoad->updateParameter(1, info);
+      }
+      else if (parameterID > 2000  &&  parameterID < 3000)  {
+	int nodeNumber = parameterID-2000;
+	while ((thePossibleNodalLoad = theNodalIter()) != 0)  {
+	  if ( nodeNumber == thePossibleNodalLoad->getNodeTag() )  {
+	    theNodalLoad = thePossibleNodalLoad;
+	  }
+	}
+	return theNodalLoad->updateParameter(2, info);
+      }
+      else if (parameterID > 3000  &&  parameterID < 4000)  {
+	int nodeNumber = parameterID-3000;
+	while ((thePossibleNodalLoad = theNodalIter()) != 0)  {
+	  if ( nodeNumber == thePossibleNodalLoad->getNodeTag() )  {
+	    theNodalLoad = thePossibleNodalLoad;
+	  }
+	}
+	return theNodalLoad->updateParameter(3, info);
             }
-            return theNodalLoad->updateParameter(2, info);
-        }
-        else if (parameterID > 3000  &&  parameterID < 4000)  {
-            int nodeNumber = parameterID-3000;
-            while ((thePossibleNodalLoad = theNodalIter()) != 0)  {
-                if ( nodeNumber == thePossibleNodalLoad->getNodeTag() )  {
-                        theNodalLoad = thePossibleNodalLoad;
-                }
-			}
-			return theNodalLoad->updateParameter(3, info);
-        }
-        else
-			return -1;
+      else
+	return -1;
     }
+  }
 }
 
-// AddingSensitivity:BEGIN ////////////////////////////////////
-const Vector &
-LoadPattern::gradient(bool compute, int identifier)
+
+
+
+
+int
+LoadPattern::activateParameter(int parameterID)
 {
-	// If compute==true: return the randomLoads vector, 
-	// if not: just set the gradientIdentifier of
-	// the nodal loads of this pattern. 
+  if (theSeries == 0) {
+    opserr << "set/update/activate parameter is illegaly called in LoadPattern " << endln;
+  }
+  
 
-	// For the purpose of setting flags, the identifier
-	// will either be 0 (nothing random) or parameterID. 
-	// For the purpose of computing gradients the
-	// identifier has no use. 
-
-
-	// Initial declarations
-	Vector tempRandomLoads(1);
-	int sizeRandomLoads;
-
-	// Start with a fresh return vector
-	if (randomLoads == 0) {
-		randomLoads = new Vector(1);
+  if (RVisRandomProcessDiscretizer) {
+    return theSeries->activateParameter(parameterID);
+  }
+  else {
+    
+    
+    // Don't set flag here in the load pattern itself.
+    // (Assume there always may be random loads)
+    
+    NodalLoad *theNodalLoad = 0;
+    NodalLoadIter &theNodalIter = this->getNodalLoads();
+    
+    if (parameterID == 0) {
+      
+      // Go through all nodal loads and zero out gradientIdentifier
+      // (Remember: the identifier is only zero if we are in
+      // the process of zeroing out all sensitivity flags).
+      while ((theNodalLoad = theNodalIter()) != 0)  {
+	theNodalLoad->activateParameter(parameterID);
+      }
+      
+    }
+    else {
+      
+      // Find the right nodal load and set the flag
+      if (parameterID > 1000  &&  parameterID < 2000)  {
+	int nodeNumber = parameterID-1000;
+	while ((theNodalLoad = theNodalIter()) != 0)  {
+	  if ( nodeNumber == theNodalLoad->getNodeTag() )  {
+	    theNodalLoad->activateParameter(1);
+	  }
 	}
-	else {
-		delete randomLoads;
-		randomLoads = new Vector(1);
+      }
+      else if (parameterID > 2000  &&  parameterID < 3000)  {
+	int nodeNumber = parameterID-2000;
+	while ((theNodalLoad = theNodalIter()) != 0)  {
+	  if ( nodeNumber == theNodalLoad->getNodeTag() )  {
+	    theNodalLoad->activateParameter(2);
+	  }
 	}
-	
-	// Prepare the vector identifying which loads are random. 
-	if (compute) { 
-
-		NodalLoad *theNodalLoad = 0;
-		NodalLoadIter &theNodalIter = this->getNodalLoads();
-		int i;
-
-		// Loop through the nodal loads to pick up possible contributions
-		int nodeNumber;
-		int dofNumber;
-		while ((theNodalLoad = theNodalIter()) != 0)  {
-			const Vector &gradientVector = theNodalLoad->gradient(true,0);
-			if (gradientVector(0) != 0.0 ) {
-
-				// Found a random load! Get nodeNumber and dofNumber
-				nodeNumber = theNodalLoad->getNodeTag();
-				dofNumber = (int)gradientVector(0);
-				
-				// Update the randomLoads vector
-				sizeRandomLoads = randomLoads->Size();
-				if (sizeRandomLoads == 1) {
-					delete randomLoads;
-					randomLoads = new Vector(2);
-					(*randomLoads)(0) = (double)nodeNumber;
-					(*randomLoads)(1) = (double)dofNumber;
-				}
-				else {
-					tempRandomLoads = (*randomLoads);
-					delete randomLoads;
-					randomLoads = new Vector(sizeRandomLoads+2);
-					for (i=0; i<sizeRandomLoads; i++) {
-						(*randomLoads)(i) = tempRandomLoads(i);
-					}
-					(*randomLoads)(sizeRandomLoads) = nodeNumber;
-					(*randomLoads)(sizeRandomLoads+1) = dofNumber;
-				}
-			}	
-		}
+      }
+      else if (parameterID > 3000  &&  parameterID < 4000)  {
+	int nodeNumber = parameterID-3000;
+	while ((theNodalLoad = theNodalIter()) != 0)  {
+	  if ( nodeNumber == theNodalLoad->getNodeTag() )  {
+	    theNodalLoad->activateParameter(3);
+	  }
 	}
-	else {
-		
-		// Don't set flag here in the load pattern itself.
-		// (Assume there always may be random loads)
-
-		NodalLoad *theNodalLoad = 0;
-		NodalLoadIter &theNodalIter = this->getNodalLoads();
-
-		if (identifier == 0) {
-
-			// Go through all nodal loads and zero out gradientIdentifier
-			// (Remember: the identifier is only zero if we are in 
-			// the process of zeroing out all sensitivity flags).
-			while ((theNodalLoad = theNodalIter()) != 0)  {
-				theNodalLoad->gradient(false,0);
-			}
-
-		}
-		else {
-
-			// Find the right nodal load and set the flag
-			if (identifier > 1000  &&  identifier < 2000)  {
-				int nodeNumber = identifier-1000;
-				while ((theNodalLoad = theNodalIter()) != 0)  {
-					if ( nodeNumber == theNodalLoad->getNodeTag() )  {
-						theNodalLoad->gradient(false,1);
-					}
-				}
-			}
-			else if (identifier > 2000  &&  identifier < 3000)  {
-				int nodeNumber = identifier-2000;
-				while ((theNodalLoad = theNodalIter()) != 0)  {
-					if ( nodeNumber == theNodalLoad->getNodeTag() )  {
-						theNodalLoad->gradient(false,2);
-					}
-				}
-			}
-			else if (identifier > 3000  &&  identifier < 4000)  {
-				int nodeNumber = identifier-3000;
-				while ((theNodalLoad = theNodalIter()) != 0)  {
-					if ( nodeNumber == theNodalLoad->getNodeTag() )  {
-						theNodalLoad->gradient(false,3);
-					}
-				}
-			}
-			else {
-				opserr << "LoadPattern::gradient() -- error in identifier. " << endln;
-			}
-		}
-	}
-	return (*randomLoads);
+      }
+      else {
+	opserr << "LoadPattern::gradient() -- error in identifier. " << endln;
+      }
+    }
+  }
+  return 0;
 }
+
+
+const Vector &
+LoadPattern::getExternalForceSensitivity(int gradNumber)
+{
+
+    // THIS METHOD IS CURRENTLY ONLY USED FOR THE STATIC CASE
+    // IT SHOULD BE DELETED AND REPLACED BY THE DYNAMIC CASE
+
+    // Initial declarations
+    Vector tempRandomLoads(1);
+    int sizeRandomLoads;
+
+    // Start with a fresh return vector
+    if (randomLoads == 0) {
+        randomLoads = new Vector(1);
+    }
+    else {
+        delete randomLoads;
+        randomLoads = new Vector(1);
+    }
+
+    // Prepare the vector identifying which loads are random.
+    NodalLoad *theNodalLoad = 0;
+    NodalLoadIter &theNodalIter = this->getNodalLoads();
+    int i;
+
+    // Loop through the nodal loads to pick up possible contributions
+    int nodeNumber;
+    int dofNumber;
+    while ((theNodalLoad = theNodalIter()) != 0)  {
+        const Vector &gradientVector = theNodalLoad->getExternalForceSensitivity(gradNumber);
+        if (gradientVector(0) != 0.0 ) {
+
+            // Found a random load! Get nodeNumber and dofNumber
+            nodeNumber = theNodalLoad->getNodeTag();
+            dofNumber = (int)gradientVector(0);
+
+            // Update the randomLoads vector
+            sizeRandomLoads = randomLoads->Size();
+            if (sizeRandomLoads == 1) {
+                delete randomLoads;
+                randomLoads = new Vector(2);
+                (*randomLoads)(0) = (double)nodeNumber;
+                (*randomLoads)(1) = (double)dofNumber;
+            }
+            else {
+                tempRandomLoads = (*randomLoads);
+                delete randomLoads;
+                randomLoads = new Vector(sizeRandomLoads+2);
+                for (i=0; i<sizeRandomLoads; i++) {
+                    (*randomLoads)(i) = tempRandomLoads(i);
+                }
+                (*randomLoads)(sizeRandomLoads) = nodeNumber;
+                (*randomLoads)(sizeRandomLoads+1) = dofNumber;
+            }
+        }
+    }
+
+    return (*randomLoads);
+}
+
 // AddingSensitivity:END //////////////////////////////////////

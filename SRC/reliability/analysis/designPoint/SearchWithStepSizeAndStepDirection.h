@@ -22,31 +22,34 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:01 $
+// $Revision: 1.3 $
+// $Date: 2003-03-04 00:39:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
 #ifndef SearchWithStepSizeAndStepDirection_h
 #define SearchWithStepSizeAndStepDirection_h
 
-#include <FindDesignPoint.h>
+#include <FindDesignPointAlgorithm.h>
 #include <StepSizeRule.h>
 #include <SearchDirection.h>
-#include <XuTransformation.h>
+#include <ProbabilityTransformation.h>
 #include <GFunEvaluator.h>
-#include <SensitivityEvaluator.h>
+#include <GradGEvaluator.h>
+#include <HessianApproximation.h>
+#include <ReliabilityConvergenceCheck.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <ReliabilityDomain.h>
 
-class SearchWithStepSizeAndStepDirection : public FindDesignPoint
+#include <fstream>
+using std::ofstream;
+
+class SearchWithStepSizeAndStepDirection : public FindDesignPointAlgorithm
 {
 
 public:
@@ -54,32 +57,31 @@ public:
 	// Constructor and destructor
 	SearchWithStepSizeAndStepDirection(
 					int passedMaxNumberOfIterations, 
-					double passedConvergenceCriterionE1, 
-					double passedConvergenceCriterionE2,
 					GFunEvaluator *passedGFunEvaluator,
-					SensitivityEvaluator *passedSensitivityEvaluator,
+					GradGEvaluator *passedGradGEvaluator,
 					StepSizeRule *passedStepSizeRule,
 					SearchDirection *passedSearchDirection,
-					XuTransformation *passedXuTransformation);
+					ProbabilityTransformation *passedProbabilityTransformation,
+					HessianApproximation *theHessianApproximation,
+					ReliabilityConvergenceCheck *theReliabilityConvergenceCheck,
+					int printFlag,
+					char *fileNamePrint,
+					Vector *startPoint);
 	~SearchWithStepSizeAndStepDirection();
 	
-	int findDesignPoint(Vector *startPoint, 
-						ReliabilityDomain *theReliabilityDomain);
-	int approachDesignPointThroughOrthogonalSubspace(
-						Vector *designPoint,
-						int numberOfAxesInVector,
-						Vector *principalAxes, 
-						Vector *startPoint, 
-						ReliabilityDomain *theReliabilityDomain);
+	int findDesignPoint(ReliabilityDomain *theReliabilityDomain);
+
 	Vector get_x();
 	Vector get_u();
 	Vector get_alpha();
 	Vector get_gamma();
-	int getNumberOfIterations();
+	int getNumberOfSteps();
 	Vector getSecondLast_u();
 	Vector getSecondLast_alpha();
 	Vector getLastSearchDirection();
 	double getFirstGFunValue();
+	double getLastGFunValue();
+	Vector getGradientInStandardNormalSpace();
 
 protected:
 
@@ -88,37 +90,39 @@ private:
 	// The reliability domain and tools for the analysis
 	ReliabilityDomain *theReliabilityDomain;
 	GFunEvaluator *theGFunEvaluator;
-	SensitivityEvaluator *theSensitivityEvaluator;
+	GradGEvaluator *theGradGEvaluator;
 	StepSizeRule *theStepSizeRule;
 	SearchDirection *theSearchDirection;
-	XuTransformation *theXuTransformation;
+	ProbabilityTransformation *theProbabilityTransformation;
+	HessianApproximation *theHessianApproximation;
+	ReliabilityConvergenceCheck *theReliabilityConvergenceCheck;
 
 	// Private member functions to do the job
-	int doTheActualSearch(bool doProjection);
-	int doProjection(Vector uOld, Vector uNew);
+	int doTheActualSearch(bool doRvProjection);
+	int doRvProjection(Vector uOld, Vector uNew);
 
 	// Data members set when the object is created
 	int maxNumberOfIterations;
-	double convergenceCriterionE1;
-	double convergenceCriterionE2;
 
 	// Data members where the results are to be stored
 	Vector x;
 	Vector u;
 	Vector alpha;
+	Vector gradientInStandardNormalSpace;
 	Vector gamma;
 	Vector uSecondLast;
 	Vector alphaSecondLast;
 	int i;
 	Vector searchDirection;
-	double Go;
+	double Gfirst;
+	double Glast;
 
 	// Data members set through the call when a job is to be done
 	Vector *startPoint;
 	Vector *designPoint_uStar;
-	int numberOfAxes;
-	Vector *principalAxesPtr;
 
+	int printFlag;
+	char *fileNamePrint;
 };
 
 #endif

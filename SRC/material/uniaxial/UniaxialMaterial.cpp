@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-25 23:33:40 $
+// $Revision: 1.10 $
+// $Date: 2003-03-04 00:48:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -80,6 +80,25 @@ double
 UniaxialMaterial::getDampTangent(void)
 {
     return 0.0;
+}
+
+// default operation for secant stiffness
+double
+UniaxialMaterial::getSecant (void)
+{
+	double strain = this->getStrain();
+	double stress = this->getStress();
+
+	if (strain != 0.0)
+		return stress/strain;
+	else
+		return this->getTangent();
+}
+
+double 
+UniaxialMaterial::getRho(void)
+{
+	return 0.0;
 }
 
 UniaxialMaterial*
@@ -146,12 +165,68 @@ UniaxialMaterial::getResponse(int responseID, Information &matInfo)
   }
 }
 
-// AddingSensitivity:BEGIN ////////////////////////////////////////
-int 
-UniaxialMaterial::gradient(bool compute, int identifier, double & gradient)
-{
-	gradient = 0.0;
 
-	return 0;
+// AddingSensitivity:BEGIN ////////////////////////////////////////
+int
+UniaxialMaterial::setParameter(const char **argv, int argc, Information &info)
+{
+    return -1;
 }
+
+int
+UniaxialMaterial::updateParameter(int parameterID, Information &info)
+{
+    return -1;
+}
+
+int
+UniaxialMaterial::activateParameter(int parameterID)
+{
+    return -1;
+}
+
+double
+UniaxialMaterial::getStressSensitivity(int gradNumber, bool conditional)
+{
+    return 0.0;
+}
+
+double
+UniaxialMaterial::getStrainSensitivity(int gradNumber)
+{
+    return 0.0;
+}
+
+double
+UniaxialMaterial::getInitialTangentSensitivity(int gradNumber)
+{
+    return 0.0;
+}
+
+double
+UniaxialMaterial::getRhoSensitivity(int gradNumber)
+{
+    return 0.0;
+}
+
+double
+UniaxialMaterial::getDampTangentSensitivity(int gradNumber)
+{
+    return 0.0;
+}
+
+int
+UniaxialMaterial::commitSensitivity(double strainSensitivity, int gradNumber, int numGrads)
+{
+    return -1;
+}
+
+double
+UniaxialMaterial::getInitialTangent (void)
+{
+	opserr << "UniaxialMaterial::getInitialTangent() -- this mehtod " << endln
+		<< " is not implemented for the selected material. " << endln;
+	return 0.0;
+}
+
 // AddingSensitivity:END //////////////////////////////////////////

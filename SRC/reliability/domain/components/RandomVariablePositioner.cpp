@@ -22,32 +22,31 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:53 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:44:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
-//			haukaas 07/30/01 (revised for sensitivity computations)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #include <RandomVariablePositioner.h>
+#include <classTags.h>
 
 
 RandomVariablePositioner::RandomVariablePositioner (int passedTag,
 		int passedRVnumber,
 		DomainComponent *object,
-		char **argv, int argc)
-:ReliabilityDomainComponent(passedTag, 14728)
+		const char **argv, int argc)
+:ReliabilityDomainComponent(passedTag, RANDOM_VARIABLE_POSITIONER)
 {
 	tag = passedTag;
 	rvNumber = passedRVnumber;
 	theObject = object;
+	theInfo.theInt = rvNumber; // Used by random process discretizer
 
-	if (theObject)
+	if (theObject) 
 		parameterID = theObject->setParameter (argv, argc, theInfo);
 
 	if (parameterID < 0)
@@ -55,10 +54,10 @@ RandomVariablePositioner::RandomVariablePositioner (int passedTag,
 }
 
 
-
 RandomVariablePositioner::~RandomVariablePositioner()
 {
 }
+
 
 int
 RandomVariablePositioner::update (double newValue)
@@ -72,16 +71,17 @@ RandomVariablePositioner::update (double newValue)
 }
 
 int
-RandomVariablePositioner::setSensitivityFlag (int flag)
+RandomVariablePositioner::activate(bool active)
 {
-	if (flag==0) {
-		theObject->gradient(false,0);
+	if (active) {
+		theObject->activateParameter(parameterID);
 	}
 	else {
-		theObject->gradient(false, parameterID);
+		theObject->activateParameter(0);
 	}
 	return 0;
 }
+
 
 void
 RandomVariablePositioner::Print(OPS_Stream &s, int flag)  
@@ -94,5 +94,3 @@ RandomVariablePositioner::getRvNumber(void)
 {
 	return rvNumber;
 }
-
-

@@ -22,15 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:53 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:44:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariable.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
 #ifndef RandomVariable_h
@@ -43,25 +41,9 @@ class RandomVariable : public ReliabilityDomainComponent
 {
 
 public:
-	RandomVariable(int tag, 
-				double mean,
-				double stdv,
-				double startValue);
-	RandomVariable(int tag, 
-				double parameter1,
-				double parameter2,
-				double parameter3,
-				double parameter4,
-				double startValue);
-	RandomVariable(int tag, 
-				double mean,
-				double stdv);
-	RandomVariable(int tag, 
-				double parameter1,
-				double parameter2,
-				double parameter3,
-				double parameter4);
+	RandomVariable(int tag, int classTag);
 	virtual ~RandomVariable();
+
 	virtual void Print(OPS_Stream &s, int flag =0) =0;
 	virtual double getPDFvalue(double rvValue) =0;
 	virtual double getCDFvalue(double rvValue) =0;

@@ -22,15 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:54 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:44:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/BetaRV.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
 #ifndef BetaRV_h
@@ -43,18 +41,11 @@ class BetaRV : public RandomVariable
 
 public:
 	BetaRV(int tag, 
-			 double mean,
-			 double stdv,
-			 double startValue);
-	BetaRV(int tag, 
 			 double parameter1,
 			 double parameter2,
 			 double parameter3,
 			 double parameter4,
 			 double startValue);
-	BetaRV(int tag, 
-			 double mean,
-			 double stdv);
 	BetaRV(int tag, 
 			 double parameter1,
 			 double parameter2,

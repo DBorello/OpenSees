@@ -22,38 +22,51 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-31 22:11:36 $
+// $Revision: 1.2 $
+// $Date: 2003-03-04 00:46:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/StaticSensitivityIntegrator.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu), July 2001
-// Revised: 
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef StaticSensitivityIntegrator_h
 #define StaticSensitivityIntegrator_h
 
-
-class LinearSOE;
+#include <SensitivityIntegrator.h>
+#include <StaticIntegrator.h>
 class AnalysisModel;
 
-class StaticSensitivityIntegrator : public SensitivityIntegrator
+class StaticSensitivityIntegrator : public SensitivityIntegrator,
+									public StaticIntegrator
 {
   public:
     StaticSensitivityIntegrator(AnalysisModel *theModel, LinearSOE *theLinSOE);
     ~StaticSensitivityIntegrator();
     
-	int formRightHandSide(void);
-	int saveGradient(const Vector &v, int gradNum, int numGrads);
-	int commitGradient(int gradNumber);
+
+	// Methods promised by the ordinary integrator
+    int newStep(void);    
+    int update(const Vector &deltaU);
+    int setDeltaLambda(double newDeltaLambda);
+    int sendSelf(int commitTag, Channel &theChannel);
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
+    void Print(OPS_Stream &s, int flag =0);    
+
+	// Sensitivity related methods
+	int formEleResidual(FE_Element *theEle);
+	int formSensitivityRHS(int gradNum);
+	int formIndependentSensitivityRHS();
+	int saveSensitivity(const Vector &v, int gradNum, int numGrads);
+	int commitSensitivity(int gradNum, int numGrads);
 
   protected:
     
   private:
-    LinearSOE *theSOE;
-    AnalysisModel *theAnalysisModel;
+	int gradNumber;
+	AnalysisModel *theAnalysisModel;
+	LinearSOE *theSOE;
 };
 
 #endif

@@ -22,15 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:02 $
+// $Revision: 1.3 $
+// $Date: 2003-03-04 00:39:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/randomNumber/RandomNumberGenerator.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef RandomNumberGenerator_h
@@ -45,8 +43,10 @@ public:
 	RandomNumberGenerator();
 	virtual ~RandomNumberGenerator();
 
-	virtual int		generate_nIndependentStdNormalNumbers(int n) =0;
+	virtual int		generate_nIndependentStdNormalNumbers(int n, int seed=0) =0;
+	virtual int     generate_nIndependentUniformNumbers(int n, double lower, double upper, int seed=0) =0;
 	virtual Vector	getGeneratedNumbers() =0;
+	virtual int     getSeed() =0;
 
 protected:
 

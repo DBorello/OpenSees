@@ -22,16 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:53 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:44:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
-//			haukaas 07/30/01 (revised for sensitivity computations)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef RandomVariablePositioner_h
@@ -46,17 +43,14 @@ class RandomVariablePositioner : public ReliabilityDomainComponent
 
 public:
 
-	RandomVariablePositioner(int tag,
-					int RVnumber,
-					DomainComponent *theObject,
-					char **argv, int argc);
-
+	RandomVariablePositioner(int tag, int RVnumber, DomainComponent *theObject, const char **argv, int argc);
 	~RandomVariablePositioner();
+
 	void Print(OPS_Stream &s, int flag =0);
 
 	int getRvNumber(void);
 	int update (double newValue); 
-	int setSensitivityFlag (int flag);
+	int activate(bool active);
 
 protected:
 

@@ -18,12 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-12 07:40:23 $
+// $Revision: 1.2 $
+// $Date: 2003-03-04 00:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TimeSeriesIntegrator.h,v $
                                                                         
-// File: ~/domain/pattern/TimeSeriesIntegrator.h
-// 
 // Written: MHS
 // Created: 10/99
 // Revision: A

@@ -22,27 +22,26 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:54 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:44:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/NormalRV.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
 #include <NormalRV.h>
 #include <math.h>
 #include <string.h>
+#include <classTags.h>
 #include <OPS_Globals.h>
 
 NormalRV::NormalRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv,
 		 double passedStartValue)
-:RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_normal)
 {
 	tag = passedTag ;
 	mju = passedMean;
@@ -55,7 +54,7 @@ NormalRV::NormalRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_normal)
 {
 	tag = passedTag ;
 	mju = passedParameter1;
@@ -65,7 +64,7 @@ NormalRV::NormalRV(int passedTag,
 NormalRV::NormalRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
-:RandomVariable(passedTag, passedMean, passedStdv)
+:RandomVariable(passedTag, RANDOM_VARIABLE_normal)
 {
 	tag = passedTag ;
 	mju = passedMean;
@@ -77,7 +76,7 @@ NormalRV::NormalRV(int passedTag,
 		 double passedParameter2,
 		 double passedParameter3,
 		 double passedParameter4)
-:RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
+:RandomVariable(passedTag, RANDOM_VARIABLE_normal)
 {
 	tag = passedTag ;
 	mju = passedParameter1;
@@ -116,6 +115,9 @@ NormalRV::getCDFvalue(double rvValue)
 double
 NormalRV::getInverseCDFvalue(double probValue)
 {
+	if (probValue < 0.0 || probValue > 1.0) {
+		opserr << "WARNING: Illegal probability value input to NormalRV::getInverseCDFvalue()" << endln;
+	}
 	double result = getMean() + getStdv() * sqrt(2) * inverseErrorFunction(2*probValue-1.0);
 	return result;
 }

@@ -1,6 +1,8 @@
 include ../../../../Makefile.def
 
-OBJS       = 	ArmijoRule.o  FixedStepSizeRule.o  StepSizeRule.o
+OBJS       = 	ArmijoStepSizeRule.o \
+	FixedStepSizeRule.o \
+	StepSizeRule.o
 
 # Compilation control
 all:         $(OBJS)

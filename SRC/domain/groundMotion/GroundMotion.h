@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 07:30:53 $
+// $Revision: 1.3 $
+// $Date: 2003-03-04 00:48:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotion.h,v $
                                                                         
                                                                         
@@ -74,6 +74,13 @@ class GroundMotion : public MovableObject
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);    
     
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    virtual double getAccelSensitivity(double time);
+    virtual int    setParameter(const char **argv, int argc, Information &info);
+    virtual int    updateParameter(int parameterID, Information &info);
+    virtual int    activateParameter(int parameterID);
+    // AddingSensitivity:END ///////////////////////////////////////////
+
   protected:
 
   private:

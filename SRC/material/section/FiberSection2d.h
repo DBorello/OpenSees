@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-25 23:33:34 $
+// $Revision: 1.10 $
+// $Date: 2003-03-04 00:48:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.h,v $
                                                                         
 // Written: fmk
@@ -73,12 +73,15 @@ class FiberSection2d : public SectionForceDeformation
 
     int addFiber(Fiber &theFiber);
 
-    int setParameter(const char **argv, int argc, Information &info);
-    int updateParameter(int parameterID, Information &info);
-
-// AddingSensitivity:BEGIN //////////////////////////////////////////
-    int gradient(bool compute, int identifier, Vector & gradient);
-// AddingSensitivity:END ///////////////////////////////////////////
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    int   setParameter(const char **argv, int argc, Information &info);
+    int   updateParameter(int parameterID, Information &info);
+    int   activateParameter(int parameterID);
+    const Vector & getStressResultantSensitivity(int gradNumber, bool conditional);
+    const Vector & getSectionDeformationSensitivity(int gradNumber);
+    const Matrix & getSectionTangentSensitivity(int gradNumber);
+    int   commitSensitivity(const Vector& sectionDeformationGradient, int gradNumber, int numGrads);
+    // AddingSensitivity:END ///////////////////////////////////////////
 
   protected:
     
@@ -99,8 +102,7 @@ class FiberSection2d : public SectionForceDeformation
     Matrix *ks;        // section stiffness
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
-    int gradientIdentifier;
-    int gradientMaterialTag;
+    int parameterID;
 // AddingSensitivity:END ///////////////////////////////////////////
 };
 

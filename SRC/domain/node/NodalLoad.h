@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:58 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:48:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.h,v $
                                                                         
                                                                         
 #ifndef NodalLoad_h
 #define NodalLoad_h
 
-// File: ~/domain/node/NodalLoad.h
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -57,11 +55,12 @@ class NodalLoad : public Load
     
     virtual void Print(OPS_Stream &s, int flag =0);   
     
-    int setParameter (char **argv, int argc, Information &info);
-    int updateParameter (int parameterID, Information &info);
-// AddingSensitivity:BEGIN //////////////////////////////////
-	const Vector & gradient(bool compute, int identifier);
-// AddingSensitivity:END ///////////////////////////////////
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    int            setParameter(const char **argv, int argc, Information &info);
+    int            updateParameter(int parameterID, Information &info);
+    int            activateParameter(int parameterID);
+    const Vector & getExternalForceSensitivity(int gradNumber);
+    // AddingSensitivity:END ///////////////////////////////////////////
   protected:
 
   private:
@@ -69,11 +68,10 @@ class NodalLoad : public Load
     Node *myNodePtr;    // pointer to Node object on which load acts
     Vector *load;       // the reference load - pointer to new copy or 0
     bool  konstant;     // true if load is load factor independent
-// AddingSensitivity:BEGIN /////////////////////////////////////
-	int gradientIdentifier;
-	static Vector gradientVector;
-// AddingSensitivity:END ///////////////////////////////////////
-
+    // AddingSensitivity:BEGIN /////////////////////////////////////
+    int parameterID;
+    static Vector gradientVector;
+    // AddingSensitivity:END ///////////////////////////////////////
 };
 
 #endif

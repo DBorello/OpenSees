@@ -22,22 +22,20 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:51 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:39:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/misc/MatrixOperations.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
-//			haukaas 08/08/01 (fix memory leak when 'compute' methods called more than once)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #include <MatrixOperations.h>
 #include <Vector.h>
 #include <Matrix.h>
 #include <math.h>
+#include <string.h>
 
 
 MatrixOperations::MatrixOperations(Matrix passedMatrix)
@@ -218,10 +216,18 @@ MatrixOperations::computeLowerCholesky()
 			}
 			if ( i == j )
 			{
+				if ( ( passedMatrix(i,j) - sumOfLambda_i_k_squared ) < 1.0e-8) {
+					opserr << "WARNING: MatrixOperations::computeLowerCholesky()" << endln
+						<< " ... matrix may be close to singular. " << endln;
+				}
 				lambda(i,j) = sqrt ( passedMatrix(i,j) - sumOfLambda_i_k_squared );
 			}
 			if ( i > j )
 			{
+				if ( fabs(lambda(j,j)) < 1.0e-8) {
+					opserr << "WARNING: MatrixOperations::computeLowerCholesky()" << endln
+						<< " ... matrix may be close to singular. " << endln;
+				}
 				lambda(i,j) = ( passedMatrix(i,j) - sumOfLambda_i_kLambda_j_k ) / lambda(j,j);
 			}
 			if ( i < j )
@@ -273,6 +279,10 @@ MatrixOperations::computeInverseLowerCholesky()
 			}
 			if ( i > j )
 			{
+				if ( fabs(lambda(i,i)) < 1.0e-8) {
+					opserr << "WARNING: MatrixOperations::computeInverseLowerCholesky()" << endln
+						<< " ... matrix may be close to singular. " << endln;
+				}
 				gamma(i,j) = - sumOfLambda_i_kGamma_k_j / lambda(i,i);
 			}
 			if ( i < j )
@@ -299,9 +309,9 @@ MatrixOperations::computeCholeskyAndItsInverse()
 	// Should first check that the matrix is quadratic, etc. 
 
 	int sizeOfPassedMatrix = passedMatrix.noCols();
-	double sumOfLambda_i_k_squared = 0;
-	double sumOfLambda_i_kLambda_j_k = 0;
-	double sumOfLambda_i_kGamma_k_j = 0;
+	double sumOfLambda_i_k_squared = 0.0;
+	double sumOfLambda_i_kLambda_j_k = 0.0;
+	double sumOfLambda_i_kGamma_k_j = 0.0;
 	Matrix lambda( sizeOfPassedMatrix , sizeOfPassedMatrix );
 	Matrix gamma( sizeOfPassedMatrix , sizeOfPassedMatrix );
 	int i, j, k;
@@ -311,12 +321,12 @@ MatrixOperations::computeCholeskyAndItsInverse()
 	{
 		for ( j=0 ; j<sizeOfPassedMatrix ; j++ )
 		{
-			sumOfLambda_i_k_squared = 0;
-			sumOfLambda_i_kLambda_j_k = 0;
+			sumOfLambda_i_k_squared = 0.0;
+			sumOfLambda_i_kLambda_j_k = 0.0;
 			lambda(i,j) = 0.0;
 			for ( k=0 ; k<i ; k++ )
 			{
-				sumOfLambda_i_k_squared += pow ( lambda(i,k) , 2 );
+				sumOfLambda_i_k_squared += pow ( lambda(i,k) , 2.0 );
 			}
 			for ( k=0 ; k<j ; k++ )
 			{
@@ -324,12 +334,20 @@ MatrixOperations::computeCholeskyAndItsInverse()
 			}
 			if ( i == j )
 			{
+				if ( ( passedMatrix(i,j) - sumOfLambda_i_k_squared ) < 1.0e-8) {
+					opserr << "WARNING: MatrixOperations::computeCholeskyAndItsInverse()" << endln
+						<< " ... matrix may be close to singular. " << endln;
+				}
 				lambda(i,j) = sqrt ( passedMatrix(i,j) - sumOfLambda_i_k_squared );
 			}
 			if ( i > j )
 			{
+				if ( fabs(lambda(j,j)) < 1.0e-8) {
+					opserr << "WARNING: MatrixOperations::computeCholeskyAndItsInverse()" << endln
+						<< " ... matrix may be close to singular. " << endln;
+				}
 				lambda(i,j) = ( passedMatrix(i,j) - sumOfLambda_i_kLambda_j_k ) / lambda(j,j);
-			}
+			} 
 			if ( i < j )
 			{
 				lambda(i,j) = 0.0;
@@ -354,6 +372,10 @@ MatrixOperations::computeCholeskyAndItsInverse()
 			}
 			if ( i > j )
 			{
+				if ( fabs(lambda(i,i)) < 1.0e-8) {
+					opserr << "WARNING: MatrixOperations::computeCholeskyAndItsInverse()" << endln
+						<< " ... matrix may be close to singular. " << endln;
+				}
 				gamma(i,j) = - sumOfLambda_i_kGamma_k_j / lambda(i,i);
 			}
 			if ( i < j )

@@ -22,33 +22,49 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:02 $
+// $Revision: 1.3 $
+// $Date: 2003-03-04 00:39:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/GFunEvaluator.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef GFunEvaluator_h
 #define GFunEvaluator_h
 
 #include <Vector.h>
+#include <ReliabilityDomain.h>
+#include <tcl.h>
+
+#include <fstream>
+using std::ofstream;
 
 class GFunEvaluator
 {
 
 public:
-	GFunEvaluator();
+	GFunEvaluator(Tcl_Interp *theTclInterp, ReliabilityDomain *theReliabilityDomain);
 	virtual ~GFunEvaluator();
 
-	virtual int		evaluate_g(Vector passed_x) =0;
-	virtual double	get_g() =0;
+	// Methods provided by base class
+	int				evaluateG(Vector x);
+	double			getG();
+
+	// Methods to be implemented by specific classes
+	virtual int		runGFunAnalysis(Vector x)	=0;
+	virtual int		tokenizeSpecials(char *theExpression)	=0;
+
+	// Methods implemented by SOME specific classes (random vibrations stuff)
+	virtual void    setNsteps(int nsteps);
+	virtual int     getNsteps();
+	virtual double  getDt();
 	
 protected:
+	Tcl_Interp *theTclInterp;
+	ReliabilityDomain *theReliabilityDomain;
+	double g;
 
 private:
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-25 22:06:34 $
+// $Revision: 1.9 $
+// $Date: 2003-03-04 00:48:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -223,21 +223,21 @@ LinearCrdTransf2d::getDeformedLength(void)
 const Vector &
 LinearCrdTransf2d::getBasicTrialDisp (void)
 {
-  // determine global displacements
-  const Vector &disp1 = nodeIPtr->getTrialDisp();
-  const Vector &disp2 = nodeJPtr->getTrialDisp();
-  
-  static double ug[6];
-  for (int i = 0; i < 3; i++) {
-    ug[i]   = disp1(i);
-    ug[i+3] = disp2(i);
-  }
-  
-  static Vector ub(3);
-  
-  double oneOverL = 1.0/L;
-  double sl = sinTheta*oneOverL;
-  double cl = cosTheta*oneOverL;
+	// determine global displacements
+	const Vector &disp1 = nodeIPtr->getTrialDisp();
+	const Vector &disp2 = nodeJPtr->getTrialDisp();
+
+	static double ug[6];
+	for (int i = 0; i < 3; i++) {
+		ug[i]   = disp1(i);
+		ug[i+3] = disp2(i);
+	}
+
+	static Vector ub(3);
+
+	double oneOverL = 1.0/L;
+	double sl = sinTheta*oneOverL;
+	double cl = cosTheta*oneOverL;
 
   ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] +
     cosTheta*ug[3] + sinTheta*ug[4];
@@ -262,6 +262,102 @@ LinearCrdTransf2d::getBasicTrialDisp (void)
   ub(2) = ub(1) + ug[5] - ug[2];
 
   return ub;
+}
+
+
+
+const Vector &
+LinearCrdTransf2d::getBasicTrialDispShapeSensitivity (void)
+{
+	// Want to return dAdh * u
+
+	// determine global displacements
+	const Vector &disp1 = nodeIPtr->getTrialDisp();
+	const Vector &disp2 = nodeJPtr->getTrialDisp();
+
+	static double ug[6];
+	for (int i = 0; i < 3; i++) {
+		ug[i]   = disp1(i);
+		ug[i+3] = disp2(i);
+	}
+
+	static Vector ub(3);
+	ub.Zero();
+
+	Vector nodeParameterID(2);
+	nodeParameterID(0) = (double)nodeIPtr->getCrdsSensitivity();
+	nodeParameterID(1) = (double)nodeJPtr->getCrdsSensitivity();
+	bool nodeCoordIsRandom = false;
+	if (nodeParameterID.Norm() != 0.0) {
+
+		nodeCoordIsRandom = true;
+
+
+		if (nodeIOffset == 0) {
+			if (nodeIOffset[0] != 0.0 || nodeIOffset[1] != 0.0) {
+				opserr << "ERROR: Currently a node offset cannot be used in " << endln
+					 << " conjunction with random nodal coordinates." << endln;
+			}
+		}
+	}
+
+	if (nodeCoordIsRandom) {
+	 
+		if (nodeIOffset!=0) {
+			if (nodeIOffset[0]!=0.0 || nodeIOffset[1]!=0.0) {
+				opserr << "ERROR: Cannot handle node offset with random nodal coordinate." << endln;
+			}
+		}
+
+		double dcosdh, dsindh, dsldh, dcldh;
+
+		double dx = cosTheta*L; 
+		double dy = sinTheta*L;	
+
+		for (int i=0; i<2; i++) {
+
+
+			if (i==0) {
+
+				if ( ((int)nodeParameterID(i))==1 ) { // here x1 is random
+					dcosdh = (-L+dx*dx/L)/(L*L);
+					dsindh = dx*dy/(L*L*L);
+					dcldh = (-L*L+dx*dx*2)/(L*L*L*L);
+					dsldh = 2*dx*dy/(L*L*L*L);
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) { // here y1 is random
+					dsindh = (-L+dy*dy/L)/(L*L);
+					dcosdh = dx*dy/(L*L*L);
+					dsldh = (-L*L+dy*dy*2)/(L*L*L*L);
+					dcldh = 2*dx*dy/(L*L*L*L);
+				}
+			}
+			else if (i==1) {
+
+				if ( ((int)nodeParameterID(i))==1 ) { // here x2 is random
+					dcosdh = (L-dx*dx/L)/(L*L);
+					dsindh = -dx*dy/(L*L*L);
+					dcldh = (L*L-dx*dx*2)/(L*L*L*L);
+					dsldh = -2*dx*dy/(L*L*L*L);
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) { // here y2 is random
+					dsindh = (L-dy*dy/L)/(L*L);
+					dcosdh = -dx*dy/(L*L*L);
+					dsldh = (L*L-dy*dy*2)/(L*L*L*L);
+					dcldh = -2*dx*dy/(L*L*L*L);
+				}
+
+			}
+		}
+
+		ub(0) = -dcosdh*ug[0] - dsindh*ug[1] + dcosdh*ug[3] + dsindh*ug[4];
+
+		ub(1) = -dsldh*ug[0] + dcldh*ug[1] + dsldh*ug[3] - dcldh*ug[4];
+
+		ub(2) = ub(1);
+	}
+
+	return ub;
 }
 
 
@@ -379,7 +475,7 @@ LinearCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &p0)
 	pl[0] += p0(0);
 	pl[1] += p0(1);
 	pl[4] += p0(2);
-     
+
 	// transform resisting forces  from local to global coordinates
 	static Vector pg(6);
 
@@ -388,7 +484,7 @@ LinearCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &p0)
    
 	pg(3) = cosTheta*pl[3] - sinTheta*pl[4];
 	pg(4) = sinTheta*pl[3] + cosTheta*pl[4];
-
+	
 	pg(2) = pl[2];
 	pg(5) = pl[5];	
 
@@ -404,6 +500,107 @@ LinearCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &p0)
 	  double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
 
 	  pg(5) += t35*pl[3] + t45*pl[4];
+	}
+
+	return pg;
+}
+
+
+
+const Vector &
+LinearCrdTransf2d::getGlobalResistingForceShapeSensitivity(const Vector &pb, const Vector &p0)
+{
+	// transform resisting forces from the basic system to local coordinates
+	static double pl[6];
+
+	double q0 = pb(0);
+	double q1 = pb(1);
+	double q2 = pb(2);
+
+	double oneOverL = 1.0/L;
+
+	double V = oneOverL*(q1+q2);
+	pl[0] = -q0;
+	pl[1] =  V;
+	pl[2] =  q1;
+	pl[3] =  q0;
+	pl[4] = -V;
+	pl[5] =  q2;
+
+	// add end forces due to element p0 loads
+//	pl[0] += p0(0);
+//	pl[1] += p0(1);
+//	pl[4] += p0(2);
+
+	// transform resisting forces  from local to global coordinates
+	static Vector pg(6);
+	pg.Zero();
+
+	Vector nodeParameterID(2);
+	nodeParameterID(0) = (double)nodeIPtr->getCrdsSensitivity();
+	nodeParameterID(1) = (double)nodeJPtr->getCrdsSensitivity();
+	bool nodeCoordIsRandom = false;
+	if (nodeParameterID.Norm() != 0.0) {
+
+		nodeCoordIsRandom = true;
+
+
+		if (nodeIOffset == 0) {
+			if (nodeIOffset[0] != 0.0 || nodeIOffset[1] != 0.0) {
+				opserr << "ERROR: Currently a node offset cannot be used in " << endln
+					 << " conjunction with random nodal coordinates." << endln;
+			}
+		}
+	}
+
+	if (nodeCoordIsRandom) {
+	 
+		double dcosdh, dsindh, d1oLdh;
+
+		double dx = cosTheta*L;
+		double dy = sinTheta*L;	
+
+		for (int i=0; i<2; i++) {
+
+
+			if (i==0) {
+
+				if ( ((int)nodeParameterID(i))==1 ) { // here x1 is random
+					dcosdh = (-L+dx*dx/L)/(L*L);
+					dsindh = dx*dy/(L*L*L);
+					d1oLdh = dx/(L*L*L);
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) { // here y1 is random
+					dsindh = (-L+dy*dy/L)/(L*L);
+					dcosdh = dx*dy/(L*L*L);
+					d1oLdh = dy/(L*L*L);
+				}
+			}
+			else if (i==1) {
+
+				if ( ((int)nodeParameterID(i))==1 ) { // here x2 is random
+					dcosdh = (L-dx*dx/L)/(L*L);
+					dsindh = -dx*dy/(L*L*L);
+					d1oLdh = -dx/(L*L*L);
+				}
+				else if ( ((int)nodeParameterID(i))==2 ) { // here y2 is random
+					dsindh = (L-dy*dy/L)/(L*L);
+					dcosdh = -dx*dy/(L*L*L);
+					d1oLdh = -dy/(L*L*L);
+				}
+
+			}
+		}
+
+
+		pg(0) = dcosdh*pl[0] - dsindh*pl[1] - sinTheta*d1oLdh*(q1+q2);
+		pg(1) = dsindh*pl[0] + dcosdh*pl[1] + cosTheta*d1oLdh*(q1+q2);
+   
+		pg(3) = dcosdh*pl[3] - dsindh*pl[4] + sinTheta*d1oLdh*(q1+q2);
+		pg(4) = dsindh*pl[3] + dcosdh*pl[4] - cosTheta*d1oLdh*(q1+q2);
+
+		pg(2) = 0.0;
+		pg(5) = 0.0;
 	}
 
 	return pg;
@@ -847,4 +1044,75 @@ LinearCrdTransf2d::Print(OPS_Stream &s, int flag)
      s << "\tnodeI Offset: " << nodeIOffset[0] << ' ' << nodeIOffset[1] << endln;
    if (nodeJOffset != 0)
      s << "\tnodeJ Offset: " << nodeJOffset[0] << ' ' << nodeJOffset[1] << endln;
+
 }
+
+
+// AddingSensitivity:BEGIN ///////////////////////////////
+const Vector &
+LinearCrdTransf2d::getBasicDisplSensitivity(int gradNumber)
+{
+
+	// This method is created by simply copying the 
+	// getBasicTrialDisp method. Instead of picking
+	// up the nodal displacements we just pick up 
+	// the nodal displacement sensitivities. 
+
+
+	// Initial declarations
+	int i;
+
+
+	// determine global displacement sensitivities
+	Vector disp1(3);
+	Vector disp2(3);
+	for (i = 0; i < 3; i++) {
+		disp1(i) = nodeIPtr->getDispSensitivity((i+1),gradNumber);
+		disp2(i) = nodeJPtr->getDispSensitivity((i+1),gradNumber);
+	}
+
+	// ... so from here on, everything stays the same ...
+
+	static double ug[6];
+	for (i = 0; i < 3; i++) {
+		ug[i]   = disp1(i);
+		ug[i+3] = disp2(i);
+	}
+
+	static Vector ub(3);
+
+	double oneOverL = 1.0/L;
+	double sl = sinTheta*oneOverL;
+	double cl = cosTheta*oneOverL;
+
+	if (nodeIOffset == 0) {
+		ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] +
+			cosTheta*ug[3] + sinTheta*ug[4];
+
+		ub(1) = -sl*ug[0] + cl*ug[1] + ug[2] +
+			sl*ug[3] - cl*ug[4];
+
+		//ub(2) = -sl*ug[0] + cl*ug[1] +
+		//	sl*ug[3] - cl*ug[4] + ug[5];
+		ub(2) = ub(1) + ug[5] - ug[2];
+	}
+	else {
+		double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+		double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+		double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+		double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+
+		ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] - t02*ug[2] +
+			cosTheta*ug[3] + sinTheta*ug[4] + t35*ug[5];
+
+		ub(1) = -sl*ug[0] + cl*ug[1] + (1.0+oneOverL*t12)*ug[2] +
+			sl*ug[3] - cl*ug[4] - oneOverL*t45*ug[5];
+
+		//ub(2) = -sl*ug[0] + cl*ug[1] + oneOverL*t12*ug[2] +
+		//	sl*ug[3] - cl*ug[4] + (1.0-oneOverL*t45)*ug[5];
+		ub(2) = ub(1) + ug[5] - ug[2];
+	}
+
+	return ub;
+}
+// AddingSensitivity:END /////////////////////////////////////

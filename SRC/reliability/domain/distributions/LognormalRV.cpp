@@ -22,52 +22,81 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:54 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:44:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/LognormalRV.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #include <LognormalRV.h>
 #include <NormalRV.h>
 #include <math.h>
 #include <string.h>
+#include <classTags.h>
 #include <OPS_Globals.h>
 
 LognormalRV::LognormalRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv,
 		 double passedStartValue)
-:RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_lognormal)
 {
+	if (passedMean<0.0) {
+		isPositive = false;
+		passedMean = -passedMean;
+	}
+	else {
+		isPositive = true;
+	}
+
 	tag = passedTag ;
 	zeta = sqrt(   log(   1+(passedStdv/passedMean)*(passedStdv/passedMean)   )   );
 	lambda = log(passedMean) - 0.5*zeta*zeta;
 	startValue = passedStartValue;
 }
+
+
+
 LognormalRV::LognormalRV(int passedTag, 
 		 double passedParameter1,
 		 double passedParameter2,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_lognormal)
 {
+	if (passedParameter2<0.0) {
+		isPositive = false;
+		passedParameter2 = -passedParameter2;
+	}
+	else {
+		isPositive = true;
+	}
+
 	tag = passedTag ;
 	lambda = passedParameter1;
 	zeta = passedParameter2;
 	startValue = passedStartValue;
 }
+
+
+
 LognormalRV::LognormalRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
-:RandomVariable(passedTag, passedMean, passedStdv)
+:RandomVariable(passedTag, RANDOM_VARIABLE_lognormal)
 {
+	if (passedMean<0.0) {
+		isPositive = false;
+		passedMean = -passedMean;
+	}
+	else {
+		isPositive = true;
+	}
+
 	tag = passedTag ;
 	zeta = sqrt(   log(   1+(passedStdv/passedMean)*(passedStdv/passedMean)   )   );
 	lambda = log(passedMean) - 0.5*zeta*zeta;
@@ -78,8 +107,16 @@ LognormalRV::LognormalRV(int passedTag,
 		 double passedParameter2,
 		 double passedParameter3,
 		 double passedParameter4)
-:RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
+:RandomVariable(passedTag, RANDOM_VARIABLE_lognormal)
 {
+	if (passedParameter2<0.0) {
+		isPositive = false;
+		passedParameter2 = -passedParameter2;
+	}
+	else {
+		isPositive = true;
+	}
+
 	tag = passedTag ;
 	lambda = passedParameter1;
 	zeta = passedParameter2;
@@ -101,6 +138,11 @@ LognormalRV::Print(OPS_Stream &s, int flag)
 double
 LognormalRV::getPDFvalue(double rvValue)
 {
+	if (!isPositive) {
+		// The formal answer is: f(x) = f_pos(x+2|x|), but let's do it simple here
+		rvValue = -rvValue;
+	}
+
 	double result;
 	if ( 0.0 < rvValue ) {
 		double pi = 3.14159265358979;
@@ -117,6 +159,50 @@ double
 LognormalRV::getCDFvalue(double rvValue)
 {
 	double result;
+
+	
+	if (isPositive) {
+		if ( 0.0 < rvValue ) {
+			RandomVariable *aStandardNormalRV;
+			aStandardNormalRV= new NormalRV( 1, 0.0, 1.0, 0.0);
+			result = aStandardNormalRV->getCDFvalue((log(rvValue)-lambda)/zeta);
+			delete aStandardNormalRV;	
+		}
+		else {
+			result = 0.0;
+		}
+	}
+	else {
+		if ( rvValue < 0.0 ) {
+			RandomVariable *aStandardNormalRV;
+			aStandardNormalRV= new NormalRV( 1, 0.0, 1.0, 0.0);
+			result = aStandardNormalRV->getCDFvalue((log(fabs(rvValue))-lambda)/zeta);
+			delete aStandardNormalRV;	
+			result = 1.0-result;
+		}
+		else {
+			result = 1.0;
+		}
+	}
+
+	// Return result depending on type of random variable
+	if (isPositive) {
+		return result;
+	}
+	else {
+		return 1-result;
+	}
+
+
+
+/*
+	// First, flip it around if it's a negative lognormal
+	if (!isPositive) {
+		rvValue = -rvValue;
+	}
+
+	// Compute the ordinary CDF
+	double result;
 	if ( 0.0 < rvValue ) {
 		RandomVariable *aStandardNormalRV;
 		aStandardNormalRV= new NormalRV( 1, 0.0, 1.0, 0.0);
@@ -126,7 +212,15 @@ LognormalRV::getCDFvalue(double rvValue)
 	else {
 		result = 0.0;
 	}
-	return result;
+
+	// Return result depending on type of random variable
+	if (isPositive) {
+		return result;
+	}
+	else {
+		return 1-result;
+	}
+*/
 }
 
 
@@ -138,11 +232,21 @@ LognormalRV::getInverseCDFvalue(double probValue)
 		return 0.0;
 	}
 	else {
-		RandomVariable *aStandardNormalRV;
-		aStandardNormalRV= new NormalRV( 1, 0.0, 1.0, 0.0);
-		double inverseNormal = aStandardNormalRV->getInverseCDFvalue(probValue);
-		delete aStandardNormalRV;	
-		return exp(getStdv() * inverseNormal + getMean());
+
+		if (isPositive) {
+			RandomVariable *aStandardNormalRV;
+			aStandardNormalRV= new NormalRV( 1, 0.0, 1.0, 0.0);
+			double inverseNormal = aStandardNormalRV->getInverseCDFvalue(probValue);
+			delete aStandardNormalRV;
+			return exp(inverseNormal*zeta + lambda);
+		}
+		else {
+			RandomVariable *aStandardNormalRV;
+			aStandardNormalRV= new NormalRV( 1, 0.0, 1.0, 0.0);
+			double inverseNormal = aStandardNormalRV->getInverseCDFvalue(1.0-probValue);
+			delete aStandardNormalRV;
+			return (-exp(inverseNormal*zeta + lambda));
+		}
 	}
 }
 
@@ -157,7 +261,12 @@ LognormalRV::getType()
 double 
 LognormalRV::getMean()
 {
-	return exp(lambda+0.5*zeta*zeta);
+	if (isPositive) {
+		return exp(lambda+0.5*zeta*zeta);
+	}
+	else {
+		return -exp(lambda+0.5*zeta*zeta);
+	}
 }
 
 
@@ -177,6 +286,17 @@ LognormalRV::getStartValue()
 
 
 double LognormalRV::getParameter1()  {return lambda;}
-double LognormalRV::getParameter2()  {return zeta;}
+
+double LognormalRV::getParameter2()  
+{
+	if (isPositive) {
+		return zeta;
+	}
+	else {
+		return -zeta;
+	}
+}
+
 double LognormalRV::getParameter3()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}
+
 double LognormalRV::getParameter4()  {opserr<<"No such parameter in r.v. #"<<tag<<endln; return 0.0;}

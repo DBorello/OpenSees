@@ -22,163 +22,155 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:51 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:39:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
-//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
 #include <SearchWithStepSizeAndStepDirection.h>
-#include <FindDesignPoint.h>
+#include <FindDesignPointAlgorithm.h>
 #include <StepSizeRule.h>
 #include <SearchDirection.h>
-#include <XuTransformation.h>
-#include <NatafXuTransformation.h>
+#include <ProbabilityTransformation.h>
+#include <NatafProbabilityTransformation.h>
 #include <GFunEvaluator.h>
-#include <SensitivityEvaluator.h>
+#include <GradGEvaluator.h>
 #include <RandomVariable.h>
 #include <CorrelationCoefficient.h>
 #include <MatrixOperations.h>
+#include <HessianApproximation.h>
+#include <ReliabilityConvergenceCheck.h>
 #include <Matrix.h>
 #include <Vector.h>
 #include <GammaRV.h>
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+
+using std::ifstream;
+using std::ios;
+
+using std::setw;
+using std::setprecision;
 
 
 
 SearchWithStepSizeAndStepDirection::SearchWithStepSizeAndStepDirection(
 					int passedMaxNumberOfIterations, 
-					double passedConvergenceCriterionE1, 
-					double passedConvergenceCriterionE2,
 					GFunEvaluator *passedGFunEvaluator,
-					SensitivityEvaluator *passedSensitivityEvaluator,
+					GradGEvaluator *passedGradGEvaluator,
 					StepSizeRule *passedStepSizeRule,
 					SearchDirection *passedSearchDirection,
-					XuTransformation *passedXuTransformation)
-:FindDesignPoint()
+					ProbabilityTransformation *passedProbabilityTransformation,
+					HessianApproximation *passedHessianApproximation,
+					ReliabilityConvergenceCheck *passedReliabilityConvergenceCheck,
+					int pprintFlag,
+					char *pFileNamePrint,
+					Vector *pStartPoint)
+:FindDesignPointAlgorithm()
 {
 	maxNumberOfIterations			= passedMaxNumberOfIterations;
-	convergenceCriterionE1			= passedConvergenceCriterionE1;
-	convergenceCriterionE2			= passedConvergenceCriterionE2;
 	theGFunEvaluator				= passedGFunEvaluator;
-	theSensitivityEvaluator			= passedSensitivityEvaluator;
+	theGradGEvaluator				= passedGradGEvaluator;
 	theStepSizeRule					= passedStepSizeRule;
 	theSearchDirection				= passedSearchDirection;
-	theXuTransformation				= passedXuTransformation;
+	theProbabilityTransformation	= passedProbabilityTransformation;
+	theHessianApproximation			= passedHessianApproximation;
+	theReliabilityConvergenceCheck  = passedReliabilityConvergenceCheck;
+	startPoint						= pStartPoint;
+	printFlag						= pprintFlag;
+	fileNamePrint = new char[256];
+	if (printFlag != 0) {
+		strcpy(fileNamePrint,pFileNamePrint);
+	}
+	else {
+		strcpy(fileNamePrint,"searchpoints.out");
+	}
 }
 
 
 
 SearchWithStepSizeAndStepDirection::~SearchWithStepSizeAndStepDirection()
 {
+	if (fileNamePrint!=0)
+		delete [] fileNamePrint;
 }
 
 
 int
-SearchWithStepSizeAndStepDirection::findDesignPoint(
-											Vector *passedStartPoint, 
-											ReliabilityDomain *passedReliabilityDomain)
+SearchWithStepSizeAndStepDirection::findDesignPoint(ReliabilityDomain *passedReliabilityDomain)
 {
-	// Set the start point (a data member of this class)
-	startPoint = passedStartPoint;
 
 	// Set the reliability domain (a data member of this class)
 	theReliabilityDomain = passedReliabilityDomain;
 
-	// RUN the generic algorithm
-	int result = doTheActualSearch(false);
-
-	return result;
-}
-
-
-
-int
-SearchWithStepSizeAndStepDirection::approachDesignPointThroughOrthogonalSubspace(
-											Vector *passedDesignPoint_u,
-											int passedNumberOfAxes,
-											Vector *passedPrincipalAxes, 
-											Vector *passedStartPoint, 
-											ReliabilityDomain *passedReliabilityDomain)
-{
-	// Set number of axes in the long vector
-	numberOfAxes = passedNumberOfAxes;
-
-	// Set the start point (a data member of this class)
-	startPoint = passedStartPoint;
-
-	// Set the start point (a data member of this class)
-	designPoint_uStar = passedDesignPoint_u;
-
-	// Set vector of principal axes (a data member of this class)
-	principalAxesPtr = passedPrincipalAxes;
-
-	// Set the reliability domain (a data member of this class)
-	theReliabilityDomain = passedReliabilityDomain;
-
-	// RUN the generic algorithm
-	int result = doTheActualSearch(true);
-
-	return result;
-}
-
-
-
-int
-SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthogonalSubspace)
-{
-	// Get number of random variables and correlation coefficients from reliability domain
-	int numberOfRandomVariables = theReliabilityDomain->getNumberOfRandomVariables();
-	
 	// Declaration of data used in the algorithm
+	int numberOfRandomVariables = theReliabilityDomain->getNumberOfRandomVariables();
 	int j;
 	int zeroFlag;
-	x(numberOfRandomVariables);
-	u(numberOfRandomVariables);
+	Vector dummy(numberOfRandomVariables);
+	x = dummy;
+	u = dummy;
+	Vector u_old(numberOfRandomVariables);
 	uSecondLast(numberOfRandomVariables);
 	Vector uNew(numberOfRandomVariables);
 	alpha (numberOfRandomVariables);
 	gamma (numberOfRandomVariables);
 	alphaSecondLast(numberOfRandomVariables);
-	double gFunctionValue;
+	double gFunctionValue = 1.0;
+	double gFunctionValue_old = 1.0;
 	Vector gradientOfgFunction(numberOfRandomVariables);
-	Vector gradientInStandardNormalSpace(numberOfRandomVariables);
+	gradientInStandardNormalSpace(numberOfRandomVariables);
+	Vector gradientInStandardNormalSpace_old(numberOfRandomVariables);
 	double normOfGradient =0;
 	double stepSize;
 	Matrix jacobian_x_u(numberOfRandomVariables,numberOfRandomVariables);
-	Vector u_minus_alpha_u_alpha;
-	double alpha_times_u;
-	double NormOf_u_minus_alpha_u_alpha;
-	double possibleNewGFunValue;
-	double criterion1, criterion2;
+	int evaluationInStepSize = 0;
+	int result;
 
-
-	// Get starting point
-	x = *startPoint;
-
-
-	// Transform starting point into standard normal space
-	int result = theXuTransformation->set_x(x);
-	if (result < 0) {
-		opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-			<< " could not set x in the xu-transformation." << endln;
-		return -1;
+	
+	// Prepare output file to store the search points
+	ofstream outputFile2( fileNamePrint, ios::out );
+	if (printFlag == 0) {
+		outputFile2 << "The user has not specified to store any search points." << endln;
+		outputFile2 << "This is just a dummy file. " << endln;
 	}
 
 
-	result = theXuTransformation->transform_x_to_u();
-	if (result < 0) {
-		opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-			<< " could not transform from x to u." << endln;
-		return -1;
-	}
-	u = theXuTransformation->get_u();
+	if (startPoint == 0) {
 
+		// Here we want to start at the origin in the standard normal space. 
+		// Hence, just leave 'u' as being initialized to zero. 
+		// (Note; this is slightly different from the mean point, as done earlier)
+	}
+	else {
+
+		// Get starting point
+		x = (*startPoint);
+
+
+		// Transform starting point into standard normal space
+		result = theProbabilityTransformation->set_x(x);
+		if (result < 0) {
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " could not set x in the xu-transformation." << endln;
+			return -1;
+		}
+
+
+		result = theProbabilityTransformation->transform_x_to_u();
+		if (result < 0) {
+			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+				<< " could not transform from x to u." << endln;
+			return -1;
+		}
+		u = theProbabilityTransformation->get_u();
+	}
 
 	// Loop to find design point
 	i = 1;
@@ -186,79 +178,110 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 	{
 
 		// Transform from u to x space
-		result = theXuTransformation->set_u(u);
+		result = theProbabilityTransformation->set_u(u);
 		if (result < 0) {
 			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				<< " could not set u in the xu-transformation." << endln;
 			return -1;
 		}
 
-		result = theXuTransformation->transform_u_to_x_andComputeJacobian();
+		result = theProbabilityTransformation->transform_u_to_x_andComputeJacobian();
 		if (result < 0) {
 			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				<< " could not transform from u to x and compute Jacobian." << endln;
 			return -1;
 		}
-		x = theXuTransformation->get_x();
-		jacobian_x_u = theXuTransformation->getJacobian_x_u();
+		x = theProbabilityTransformation->get_x();
+		jacobian_x_u = theProbabilityTransformation->getJacobian_x_u();
+
+
+		// Possibly print the point to output file
+		int iii;
+		if (printFlag != 0) {
+
+			if (printFlag == 1) {
+				outputFile2.setf(ios::scientific, ios::floatfield);
+				for (iii=0; iii<x.Size(); iii++) {
+					outputFile2<<setprecision(5)<<setw(15)<<x(iii)<<endln;
+				}
+			}
+			else if (printFlag == 2) {
+				outputFile2.setf(ios::scientific, ios::floatfield);
+				for (iii=0; iii<u.Size(); iii++) {
+					outputFile2<<setprecision(5)<<setw(15)<<u(iii)<<endln;
+				}
+			}
+		}
 
 
 		// Evaluate limit-state function unless it has been done in 
 		// a trial step by the "stepSizeAlgorithm"
-		if (possibleNewGFunValue == gFunctionValue || i==1) {
-			result = theGFunEvaluator->evaluate_g(x);
+		if (evaluationInStepSize == 0) {
+			result = theGFunEvaluator->runGFunAnalysis(x);
 			if (result < 0) {
 				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-					<< " could not evaluate limit-state function. " << endln;
+					<< " could not run analysis to evaluate limit-state function. " << endln;
 				return -1;
 			}
-			gFunctionValue = theGFunEvaluator->get_g();
-		}
-		else {
-			gFunctionValue = possibleNewGFunValue;
+			result = theGFunEvaluator->evaluateG(x);
+			if (result < 0) {
+				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+					<< " could not tokenize limit-state function. " << endln;
+				return -1;
+			}
+			gFunctionValue_old = gFunctionValue;
+			gFunctionValue = theGFunEvaluator->getG();
 		}
 
 
-		// Provide user with information about the limit-state function value
-		// (only in step one)
-		opserr << " ITERATION #" << i;
-		if (i==1) {
-			opserr << ", limit-state function value: " << gFunctionValue << endln;
+		// Set scale parameter
+		if (i == 1)	{
+			Gfirst = gFunctionValue;
+			opserr << " Limit-state function value at start point, g=" << gFunctionValue << endln;
+			opserr << " STEP #0: ";
+			if (fabs(gFunctionValue) < 1.0e-4) {
+				// (Instead of this hard-coded number; maybe it would 
+				// be better with a restart option.  The the gFun wouldn't 
+				// be evaluated in the first step at all.  However, then 
+				// the gradients and the gFun value would have to be stored
+				// from the previous step.)
+				theReliabilityConvergenceCheck->setScaleValue(1.0);
+			}
+			else {
+				theReliabilityConvergenceCheck->setScaleValue(gFunctionValue);
+			}
 		}
 
 
 		// Gradient in original space
-		result = theSensitivityEvaluator->evaluate_grad_g(gFunctionValue,x);
-		if (result < 0) {
-			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-				<< " could not compute gradients of the limit-state function. " << endln;
-			return -1;
-		}
-		gradientOfgFunction = theSensitivityEvaluator->get_grad_g();
-
-
-		// Check if all components of the vector is zero
-		zeroFlag = 0;
-		for (j=0; j<gradientOfgFunction.Size(); j++) {
-			if (gradientOfgFunction[j] != 0.0) {
-				zeroFlag = 1;
+		if (evaluationInStepSize != 2) {
+			
+			result = theGradGEvaluator->evaluateGradG(gFunctionValue,x);
+			if (result < 0) {
+				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+					<< " could not compute gradients of the limit-state function. " << endln;
+				return -1;
 			}
-		}
-		if (zeroFlag == 0) {
-			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
-				<< " all components of the gradient vector is zero. " << endln;
-			return -1;
-		}
+			gradientOfgFunction = theGradGEvaluator->getGradG();
 
 
-		// Gradient in standard normal space
-		gradientInStandardNormalSpace = jacobian_x_u ^ gradientOfgFunction;
+			// Check if all components of the vector is zero
+			zeroFlag = 0;
+			for (j=0; j<gradientOfgFunction.Size(); j++) {
+				if (gradientOfgFunction[j] != 0.0) {
+					zeroFlag = 1;
+				}
+			}
+			if (zeroFlag == 0) {
+				opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+					<< " all components of the gradient vector is zero. " << endln;
+				return -1;
+			}
 
 
-		// Set scale parameter
-		if (i == 1)
-		{
-			Go = gFunctionValue;
+			// Gradient in standard normal space
+			gradientInStandardNormalSpace_old = gradientInStandardNormalSpace;
+			gradientInStandardNormalSpace = jacobian_x_u ^ gradientOfgFunction;
 		}
 
 
@@ -273,32 +296,57 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 			return -1;
 		}
 
-
+		
 		// Compute alpha-vector
-		alpha = gradientInStandardNormalSpace *  ( (-1) / normOfGradient );
+		alpha = gradientInStandardNormalSpace *  ( (-1.0) / normOfGradient );
 
 
 		// Check convergence
-		alpha_times_u = alpha ^ u;
-		u_minus_alpha_u_alpha = u - alpha * alpha_times_u;
-		NormOf_u_minus_alpha_u_alpha = u_minus_alpha_u_alpha.Norm();
-		criterion1 = fabs(gFunctionValue / Go);
-		criterion2 = NormOf_u_minus_alpha_u_alpha;
+		result = theReliabilityConvergenceCheck->check(u,gFunctionValue,gradientInStandardNormalSpace);
+		if (result > 0)  {
+		
+
+			// Inform the user of the happy news!
+			opserr << "Design point was found!" << endln;
 
 
-		// Inform user about convergence status 
-		if (i != 1) {
-			opserr << ", convergence checks: (" << criterion1 << ") (" << criterion2 << ")" << endln;
-		}
+			// Print the design point to file, if desired
+			int iii;
+			if (printFlag != 0) {
+				if (printFlag == 3) {
+
+					result = theProbabilityTransformation->set_u(u);
+					if (result < 0) {
+						opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+							<< " could not set u in the xu-transformation." << endln;
+						return -1;
+					}
+
+					result = theProbabilityTransformation->transform_u_to_x();
+					if (result < 0) {
+						opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
+							<< " could not transform from u to x." << endln;
+						return -1;
+					}
+					x = theProbabilityTransformation->get_x();
+
+					outputFile2.setf(ios::scientific, ios::floatfield);
+					for (iii=0; iii<x.Size(); iii++) {
+						outputFile2<<setprecision(5)<<setw(15)<<x(iii)<<endln;
+					}
+				}
+				else if (printFlag == 4) {
+					static ofstream outputFile2( fileNamePrint, ios::out );
+					outputFile2.setf(ios::scientific, ios::floatfield);
+					for (iii=0; iii<u.Size(); iii++) {
+						outputFile2<<setprecision(5)<<setw(15)<<u(iii)<<endln;
+					}
+				}
+			}
 
 
-		// Postprocessing if the analysis converged
-		if ( ( criterion1 < convergenceCriterionE1 ) & 
-			( criterion2 < convergenceCriterionE2 ) ) 
-		{
 			// Compute the gamma vector
 			MatrixOperations theMatrixOperations(jacobian_x_u);
-
 
 			result = theMatrixOperations.computeTranspose();
 			if (result < 0) {
@@ -328,11 +376,13 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 			}
 
 
-			Matrix jacobian_u_x = theXuTransformation->getJacobian_u_x();
+			Matrix jacobian_u_x = theProbabilityTransformation->getJacobian_u_x();
 
 			Vector tempProduct = jacobian_u_x ^ alpha;
 
 			gamma = D_prime ^ tempProduct;
+			
+			Glast = gFunctionValue;
 
 			return 1;
 		}
@@ -343,8 +393,24 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 		alphaSecondLast = alpha;
 
 
+		// Let user know that we have to take a new step
+		opserr << " STEP #" << i <<": ";
+
+
+		// Update Hessian approximation, if any
+		if (  (theHessianApproximation!=0) && (i!=1)  ) {
+			theHessianApproximation->updateHessianApproximation(u_old,
+											    gFunctionValue_old,
+											    gradientInStandardNormalSpace_old,
+											    stepSize,
+											    searchDirection,
+											    gFunctionValue,
+											    gradientInStandardNormalSpace);
+		}
+
+
 		// Determine search direction
-		result = theSearchDirection->computeSearchDirection(
+		result = theSearchDirection->computeSearchDirection(i,
 			u, gFunctionValue, gradientInStandardNormalSpace );
 		if (result < 0) {
 			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
@@ -356,28 +422,41 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 
 		// Determine step size
 		result = theStepSizeRule->computeStepSize(
-			u, gradientInStandardNormalSpace, gFunctionValue, searchDirection);
-		if (result < 0) {
+			u, gradientInStandardNormalSpace, gFunctionValue, searchDirection, i);
+		if (result < 0) {  // (something went wrong)
 			opserr << "SearchWithStepSizeAndStepDirection::doTheActualSearch() - " << endln
 				<< " could not compute step size. " << endln;
 			return -1;
 		}
+		else if (result == 0) {  // (nothing was evaluated in step size)
+			evaluationInStepSize = 0;
+		}
+		else if (result == 1) {  // (the gfun only was evaluated)
+			evaluationInStepSize = 1;
+			gFunctionValue_old = gFunctionValue;
+			gFunctionValue = theStepSizeRule->getGFunValue();
+		}
+		else if (result == 2) {  // (both gfun and gradient was evaluated)
+			evaluationInStepSize = 2;
+			gFunctionValue_old = gFunctionValue;
+			gradientInStandardNormalSpace_old = gradientInStandardNormalSpace;
+			gFunctionValue = theStepSizeRule->getGFunValue();
+			gradientInStandardNormalSpace = theStepSizeRule->getGradG();
+		}
 		stepSize = theStepSizeRule->getStepSize();
 
 
-		// For efficiency: get g-function value from the step size algorithm.
-		// If it is different from the original then a trial step was actually performed. 
-		possibleNewGFunValue = theStepSizeRule->getGFunValue();
-
-
 		// Determine new iteration point (take the step)
-		u += searchDirection * stepSize;
+		u_old = u;
+		u = u_old + (searchDirection * stepSize);
 
-		// Possibly do projection to subspace
-		if (doProjectionToOrthogonalSubspace) {
-			doProjection(u, uNew);
-			u = uNew;
-		}
+
+//		This would be the place to possibly do projection onto subspace 
+//		orthogonal to principal axes if a projection algorith has been provided
+//		if (theRvProjection != 0) {
+//			uNew = theRvProjection->projectOntoOrthogonalSubspace(u);
+//			u = uNew;
+//		}
 
 		// Increment the loop parameter
 		i++;
@@ -386,59 +465,13 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 
 
 	// Print a message if max number of iterations was reached
+	// (Note: in this case the last trial point was never transformed/printed)
 	opserr << "Maximum number of iterations was reached before convergence." << endln;
 
-	return 0;
+	
+	return -1;
 }
 
-
-
-
-int
-SearchWithStepSizeAndStepDirection::doProjection(Vector uOld, Vector uNew)
-{
-
-	// THIS METHOD IS CURRENTLY UNDER DEVELOPMENT
-
-	// Initial declarations
-	double dNorm;
-	double temp;
-
-	// Number of random variables
-	int nrv = uOld.Size();
-
-	// Declaration of the 'current' orthogonality vector 'd' (and the whole vector of d's)
-	Vector d(nrv);
-	Vector principalAxes = *principalAxesPtr;
-
-	// Other auxiliary declarations
-	Vector uDifference(nrv);
-	Vector correction(nrv);
-
-	for (int i=0; i<numberOfAxes; i++) {
-
-		// Extract the current orthogonality vector
-		for (int j=0; j<nrv; j++) {
-			d(j) = principalAxes((i*nrv)+j);
-		}
-
-		// Norm of the orthogonality vector
-		temp = d.Norm();
-		dNorm = temp*temp;
-
-		// Compute the formula
-		uDifference = *designPoint_uStar - uOld;
-
-		double dotProduct = d ^ uDifference;
-
-		correction = (1.0/dNorm * dotProduct) * d;
-		
-		uNew = uOld + correction;
-		uOld = uNew;
-	}
-
-	return 0;
-}
 
 
 Vector
@@ -462,13 +495,13 @@ SearchWithStepSizeAndStepDirection::get_alpha()
 Vector
 SearchWithStepSizeAndStepDirection::get_gamma()
 {
-	return gamma;
+	return gamma*(1.0/gamma.Norm());
 }
 
 int
-SearchWithStepSizeAndStepDirection::getNumberOfIterations()
+SearchWithStepSizeAndStepDirection::getNumberOfSteps()
 {
-	return i;
+	return (i-1);
 }
 
 Vector
@@ -492,7 +525,20 @@ SearchWithStepSizeAndStepDirection::getLastSearchDirection()
 double
 SearchWithStepSizeAndStepDirection::getFirstGFunValue()
 {
-	return Go;
+	return Gfirst;
+}
+
+double
+SearchWithStepSizeAndStepDirection::getLastGFunValue()
+{
+	return Glast;
+}
+
+
+Vector
+SearchWithStepSizeAndStepDirection::getGradientInStandardNormalSpace()
+{
+	return gradientInStandardNormalSpace;
 }
 
 

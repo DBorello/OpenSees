@@ -22,16 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-20 00:37:27 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:44:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/ReliabilityDomain.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
-//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef ReliabilityDomain_h
@@ -41,6 +38,10 @@
 #include <CorrelationCoefficient.h>
 #include <LimitStateFunction.h>
 #include <RandomVariablePositioner.h>
+#include <ParameterPositioner.h>
+#include <ModulatingFunction.h>
+#include <Filter.h>
+#include <Spectrum.h>
 
 class TaggedObjectStorage;
 
@@ -56,18 +57,30 @@ public:
 	virtual bool addCorrelationCoefficient(CorrelationCoefficient *theCorrelationCoefficient);
 	virtual bool addLimitStateFunction(LimitStateFunction *theLimitStateFunction);
 	virtual bool addRandomVariablePositioner(RandomVariablePositioner *theRandomVariablePositioner);
+	virtual bool addParameterPositioner(ParameterPositioner *theParameterPositioner);
+	virtual bool addModulatingFunction(ModulatingFunction *theModulatingFunction);
+	virtual bool addFilter(Filter *theFilter);
+	virtual bool addSpectrum(Spectrum *theSpectrum);
 
 	// Member functions to get components from the domain
 	RandomVariable *getRandomVariablePtr(int tag);
 	CorrelationCoefficient *getCorrelationCoefficientPtr(int tag);
 	LimitStateFunction *getLimitStateFunctionPtr(int tag);
 	RandomVariablePositioner *getRandomVariablePositionerPtr(int tag);
+	ParameterPositioner *getParameterPositionerPtr(int tag);
+	ModulatingFunction *getModulatingFunction(int tag);
+	Filter *getFilter(int tag);
+	Spectrum *getSpectrum(int tag);
 
 	// Member functions giving information about the domain
 	int getNumberOfRandomVariables(void);
 	int getNumberOfCorrelationCoefficients(void);
 	int getNumberOfLimitStateFunctions(void);
 	int getNumberOfRandomVariablePositioners(void);
+	int getNumberOfParameterPositioners(void);
+	int getNumberOfModulatingFunctions(void);
+	int getNumberOfFilters(void);
+	int getNumberOfSpectra(void);
 
 	// Member functions to set/get active limit-state function
 	int getTagOfActiveLimitStateFunction(void);
@@ -75,6 +88,7 @@ public:
 
 	// Member functions to remove single components from the domain
 	int removeRandomVariablePositioner(int tag);
+	int removePerformanceFunction(int tag);
 
 protected:
 
@@ -83,6 +97,10 @@ private:
 	TaggedObjectStorage *theCorrelationCoefficientsPtr;
 	TaggedObjectStorage *theLimitStateFunctionsPtr;
 	TaggedObjectStorage *theRandomVariablePositionersPtr;
+	TaggedObjectStorage *theParameterPositionersPtr;
+	TaggedObjectStorage *theModulatingFunctionsPtr;
+	TaggedObjectStorage *theFiltersPtr;
+	TaggedObjectStorage *theSpectraPtr;
 	int tagOfActiveLimitStateFunction;
 
 };

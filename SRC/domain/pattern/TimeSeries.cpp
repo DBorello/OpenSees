@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2003-03-04 00:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TimeSeries.cpp,v $
                                                                         
                                                                         
-// File: ~/domain/pattern/TimeSeries.C
-//
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -48,3 +46,30 @@ TimeSeries::~TimeSeries()
 {
 
 }
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+int
+TimeSeries::setParameter(const char **argv, int argc, Information &info)
+{
+	return 0;
+}
+
+int
+TimeSeries::updateParameter(int parameterID, Information &info)
+{
+	return 0;
+}
+
+int
+TimeSeries::activateParameter(int parameterID)
+{
+	return 0;
+}
+
+double
+TimeSeries::getFactorSensitivity(double pseudoTime)
+{
+	return 0.0;
+}
+
+// AddingSensitivity:END ////////////////////////////////////////////

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-25 23:33:34 $
+// $Revision: 1.9 $
+// $Date: 2003-03-04 00:48:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.cpp,v $
                                                                         
                                                                         
@@ -237,12 +237,58 @@ SectionForceDeformation::getResponse(int responseID, Information &secInfo)
   }
 }
 
-// AddingSensitivities:BEGIN ////////////////////////////////////
-int 
-SectionForceDeformation::gradient(bool compute, int identifier, Vector & gradient)
-{
-	gradient.Zero();
 
-	return -1;
+
+
+// AddingSensitivity:BEGIN ////////////////////////////////////////
+int
+SectionForceDeformation::setParameter(const char **argv, int argc, Information &eleInformation)
+{
+    return -1;
 }
-// AddingSensitivities:END //////////////////////////////////////
+
+int
+SectionForceDeformation::updateParameter(int responseID, Information &eleInformation)
+{
+    return -1;
+}
+
+int
+SectionForceDeformation::activateParameter(int parameterID)
+{
+    return -1;
+}
+
+const Vector &
+SectionForceDeformation::getStressResultantSensitivity(int gradNumber, bool conditional)
+{
+	static Vector dummy(1);
+    return dummy;
+}
+
+const Vector &
+SectionForceDeformation::getSectionDeformationSensitivity(int gradNumber)
+{
+	static Vector dummy(1);
+    return dummy;
+}
+
+const Matrix &
+SectionForceDeformation::getSectionTangentSensitivity(int gradNumber)
+{
+	static Matrix dummy(1,1);
+    return dummy;
+}
+
+double
+SectionForceDeformation::getRhoSensitivity(int gradNumber)
+{
+	return 0.0;
+}
+
+int
+SectionForceDeformation::commitSensitivity(const Vector& defSens, int gradNumber, int numGrads)
+{
+    return -1;
+}
+// AddingSensitivity:END ///////////////////////////////////////////

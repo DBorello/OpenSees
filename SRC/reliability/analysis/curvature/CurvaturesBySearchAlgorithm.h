@@ -22,22 +22,20 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-02 18:11:11 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:38:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/CurvaturesBySearchAlgorithm.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
 #ifndef CurvaturesBySearchAlgorithm_h
 #define CurvaturesBySearchAlgorithm_h
 
 #include <FindCurvatures.h>
-#include <FindDesignPoint.h>
+#include <FindDesignPointAlgorithm.h>
 #include <Vector.h>
 #include <ReliabilityDomain.h>
 
@@ -45,7 +43,7 @@ class CurvaturesBySearchAlgorithm : public FindCurvatures
 {
 
 public:
-	CurvaturesBySearchAlgorithm(int numberOfCurvatures, FindDesignPoint *theFindDesignPoint);
+	CurvaturesBySearchAlgorithm(int numberOfCurvatures, FindDesignPointAlgorithm *theFindDesignPointAlgorithm);
 	~CurvaturesBySearchAlgorithm();
 
 	int		computeCurvatures(ReliabilityDomain *theReliabilityDomain);
@@ -56,7 +54,7 @@ protected:
 private:	
 	Vector curvatures;
 	int numberOfCurvatures;
-	FindDesignPoint *theFindDesignPoint;
+	FindDesignPointAlgorithm *theFindDesignPointAlgorithm;
 
 };
 

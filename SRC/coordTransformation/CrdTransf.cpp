@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2003-03-04 00:48:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf.cpp,v $
                                                                         
                                                                         
@@ -35,6 +35,7 @@
 // thus no objects of  it's type can be instatiated. 
 
 #include <CrdTransf.h>
+#include <Vector.h>
 
 
 // constructor:
@@ -48,3 +49,36 @@ CrdTransf::~CrdTransf()
 {
 }
 
+
+const Vector &
+CrdTransf::getBasicDisplSensitivity(int gradNumber)
+{
+  opserr << "WARNING: CrdTransf::getBasicSensitivity() -- This method " << endln
+	 << " should not be called!" << endln;
+  
+  static Vector dummy(1);
+  return dummy;
+}
+
+
+const Vector &
+CrdTransf::getGlobalResistingForceShapeSensitivity(const Vector &pb, const Vector &p0)
+{
+  opserr<< "ERROR: The getGlobalResistingForceSensitivity() method is not" << endln
+	<< " implemented for the chosen transformation." << endln;
+  
+  static Vector dummy(1);
+  return dummy;
+}
+
+
+
+const Vector &
+CrdTransf::getBasicTrialDispShapeSensitivity (void)
+{
+  opserr<< "ERROR: The getBasicTrialDispSensitivity() method is not" << endln
+	<< " implemented for the chosen transformation." << endln;
+  
+  static Vector dummy(1);
+  return dummy;
+}

@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:01 $
+// $Revision: 1.3 $
+// $Date: 2003-03-04 00:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TimeSeries.h,v $
                                                                         
                                                                         
 #ifndef TimeSeries_h
 #define TimeSeries_h
 
-// File: ~/domain/pattern/TimeSeries.h
-//
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -41,6 +39,7 @@
 
 #include <MovableObject.h>
 #include <OPS_Globals.h>
+#include <Information.h>
 
 class TimeSeries : public MovableObject
 {
@@ -61,6 +60,13 @@ class TimeSeries : public MovableObject
     // DECIDE ONCE GroundMotionIntegrator IS IMPLEMENTED
 
     virtual void Print(OPS_Stream &s, int flag = 0) = 0;        
+
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    virtual int setParameter(const char **argv, int argc, Information &info);
+    virtual int updateParameter(int parameterID, Information &info);
+    virtual int activateParameter(int parameterID);
+    virtual double getFactorSensitivity(double pseudoTime);
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
 
   protected:
 	

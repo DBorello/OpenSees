@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-31 23:54:56 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:48:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.h,v $
                                                                         
                                                                         
 #ifndef StaticAnalysis_h
 #define StaticAnalysis_h
 
-// File: ~/analysis/analysis/StaticAnalysis.h
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A

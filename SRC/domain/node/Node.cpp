@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-02-14 23:00:58 $
+// $Revision: 1.13 $
+// $Date: 2003-03-04 00:48:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
-// File: ~/domain/node/Node.C
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -44,6 +42,14 @@
 #include <DOF_Group.h>
 #include <Renderer.h>
 #include <string.h>
+#include <Information.h>
+
+// AddingSensitivity:BEGIN //////////////////////////
+#include <Domain.h>
+#include <Element.h>
+#include <ElementIter.h>
+// AddingSensitivity:END ////////////////////////////
+
 #include <OPS_Globals.h>
 
 Matrix **Node::theMatrices = 0;
@@ -59,11 +65,14 @@ Node::Node(int theClassTag)
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
  R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), index(-1)
 {
-    // for FEM_ObjectBroker, recvSelf() must be invoked on object
+  // for FEM_ObjectBroker, recvSelf() must be invoked on object
 
-// AddingSensitivity:BEGIN /////////////////////////////////////////
-	theGradients = 0;
-// AddingSensitivity:END ///////////////////////////////////////////
+  // AddingSensitivity:BEGIN /////////////////////////////////////////
+  dispSensitivity = 0;
+  velSensitivity = 0;
+  accSensitivity = 0;
+  parameterID = 0;
+  // AddingSensitivity:END ///////////////////////////////////////////
 }    
 
 
@@ -76,12 +85,15 @@ Node::Node(int tag, int theClassTag)
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
   R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), index(-1)
 {
-    // for subclasses - they must implement all the methods with
-    // their own data structures.
-
-// AddingSensitivity:BEGIN /////////////////////////////////////////
-	theGradients = 0;
-// AddingSensitivity:END ///////////////////////////////////////////
+  // for subclasses - they must implement all the methods with
+  // their own data structures.
+  
+  // AddingSensitivity:BEGIN /////////////////////////////////////////
+  dispSensitivity = 0;
+  velSensitivity = 0;
+  accSensitivity = 0;
+  parameterID = 0;
+  // AddingSensitivity:END ///////////////////////////////////////////
 }
 
 Node::Node(int tag, int ndof, double Crd1)
@@ -93,10 +105,13 @@ Node::Node(int tag, int ndof, double Crd1)
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
  R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), index(-1)
 {
-// AddingSensitivity:BEGIN /////////////////////////////////////////
-  theGradients = 0;
-// AddingSensitivity:END ///////////////////////////////////////////
-
+  // AddingSensitivity:BEGIN /////////////////////////////////////////
+  dispSensitivity = 0;
+  velSensitivity = 0;
+  accSensitivity = 0;
+  parameterID = 0;
+  // AddingSensitivity:END ///////////////////////////////////////////
+  
   Crd = new Vector(1);
   (*Crd)(0) = Crd1;
   
@@ -142,14 +157,17 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2)
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
  R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0)
 {
-// AddingSensitivity:BEGIN /////////////////////////////////////////
-	theGradients = 0;
-// AddingSensitivity:END ///////////////////////////////////////////
+  // AddingSensitivity:BEGIN /////////////////////////////////////////
+  dispSensitivity = 0;
+  velSensitivity = 0;
+  accSensitivity = 0;
+  parameterID = 0;
+  // AddingSensitivity:END ///////////////////////////////////////////
 
-    Crd = new Vector(2);
-    (*Crd)(0) = Crd1;
-    (*Crd)(1) = Crd2;
-
+  Crd = new Vector(2);
+  (*Crd)(0) = Crd1;
+  (*Crd)(1) = Crd2;
+  
   index = -1;
   if (numMatrices != 0) {
     for (int i=0; i<numMatrices; i++)
@@ -193,15 +211,18 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2, double Crd3)
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
  R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0)
 {
-// AddingSensitivity:BEGIN /////////////////////////////////////////
-	theGradients = 0;
-// AddingSensitivity:END ///////////////////////////////////////////
-
-    Crd = new Vector(3);
-    (*Crd)(0) = Crd1;
-    (*Crd)(1) = Crd2;
-    (*Crd)(2) = Crd3;    
-
+  // AddingSensitivity:BEGIN /////////////////////////////////////////
+  dispSensitivity = 0;
+  velSensitivity = 0;
+  accSensitivity = 0;
+  parameterID = 0;
+  // AddingSensitivity:END ///////////////////////////////////////////
+  
+  Crd = new Vector(3);
+  (*Crd)(0) = Crd1;
+  (*Crd)(1) = Crd2;
+  (*Crd)(2) = Crd3;    
+  
   index = -1;
   if (numMatrices != 0) {
     for (int i=0; i<numMatrices; i++)
@@ -243,18 +264,21 @@ Node::Node(const Node *otherNode)
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
  R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0)
 {
-// AddingSensitivity:BEGIN /////////////////////////////////////////
-	theGradients = 0;
-// AddingSensitivity:END ///////////////////////////////////////////
-
-    if (otherNode->Crd != 0) {
-	Crd = new Vector(*(otherNode->Crd));
-	if (Crd == 0) {
-	    opserr << " FATAL Node::Node(node *) - ran out of memory for Crd\n";
-	    exit(-1);
-	}
+  // AddingSensitivity:BEGIN /////////////////////////////////////////
+  dispSensitivity = 0;
+  velSensitivity = 0;
+  accSensitivity = 0;
+  parameterID = 0;
+  // AddingSensitivity:END ///////////////////////////////////////////
+  
+  if (otherNode->Crd != 0) {
+    Crd = new Vector(*(otherNode->Crd));
+    if (Crd == 0) {
+      opserr << " FATAL Node::Node(node *) - ran out of memory for Crd\n";
+      exit(-1);
     }
-
+  }
+  
     if (otherNode->commitDisp != 0) {
 	if (this->createDisp() < 0) {
 	    opserr << " FATAL Node::Node(node *) - ran out of memory for displacement\n";
@@ -366,11 +390,14 @@ Node::~Node()
     if (theEigenvectors != 0)
       delete theEigenvectors;
 
-// AddingSensitivity:BEGIN ///////////////////////////////////////
-    if (theGradients != 0)
-	delete theGradients;
-// AddingSensitivity:END /////////////////////////////////////////
-
+    // AddingSensitivity:BEGIN ///////////////////////////////////////
+    if (dispSensitivity != 0)
+      delete dispSensitivity;
+    if (velSensitivity != 0)
+	delete velSensitivity;
+    if (accSensitivity != 0)
+      delete accSensitivity;
+    // AddingSensitivity:END /////////////////////////////////////////
 }
 
 
@@ -781,6 +808,53 @@ Node::addInertiaLoadToUnbalance(const Vector &accelG, double fact)
 
 
 
+int
+Node::addInertiaLoadSensitivityToUnbalance(const Vector &accelG, double fact, bool somethingRandomInMotions)
+{
+  // simply return if node has no mass or R matrix
+  if (mass == 0 || R == 0)
+    return 0;
+
+  // otherwise we must determine MR accelG
+  if (accelG.Size() != R->noCols()) {
+    opserr << "Node::addInertiaLoadToUnbalance - accelG not of correct dimension";
+    return -1;
+  }
+
+  // if no load yet create it and assign
+  if (unbalLoad == 0) {
+      unbalLoad = new Vector(numberDOF); 
+      if (unbalLoad == 0 || unbalLoad->Size() != numberDOF) {
+	  opserr << "FATAL Node::addunbalLoad - ran out of memory\n";
+	  exit(-1);
+      }  
+  }
+
+  // form - fact * M*R*accelG and add it to the unbalanced load
+  //(*unbalLoad) -= ((*mass) * (*R) * accelG)*fact;
+
+
+
+	Matrix massSens(mass->noRows(),mass->noCols());
+	if (parameterID != 0) {
+		massSens(parameterID-1,parameterID-1) = 1.0;
+	}
+
+	Matrix MR(mass->noRows(), R->noCols());
+
+	if (somethingRandomInMotions) {
+		MR.addMatrixProduct(0.0, *mass, *R, 1.0);
+	}
+	else {
+		MR.addMatrixProduct(0.0, massSens, *R, 1.0);
+	}
+	unbalLoad->addMatrixVector(1.0, MR, accelG, -fact);
+
+  return 0;
+}
+
+
+
 const Vector &
 Node::getUnbalancedLoad(void) 
 {
@@ -794,6 +868,7 @@ Node::getUnbalancedLoad(void)
     }
 
     // return the unbalanced load
+
     return *unbalLoad;
 }
 
@@ -910,6 +985,22 @@ Node::revertToStart()
     if (unbalLoad != 0) 
 	(*unbalLoad) *= 0;
 
+
+
+
+// AddingSensitivity: BEGIN /////////////////////////////////
+	if (dispSensitivity != 0) 
+		dispSensitivity->Zero();
+	
+	if (velSensitivity != 0) 
+		velSensitivity->Zero();
+	
+	if (accSensitivity != 0) 
+		accSensitivity->Zero();
+// AddingSensitivity: END ///////////////////////////////////
+
+
+
     // if we get here we are done
     return 0;
 }
@@ -933,6 +1024,7 @@ Node::setRayleighDampingFactor(double alpham) {
   return 0;
 }
 
+
 const Matrix &
 Node::getDamp(void) 
 {
@@ -947,7 +1039,6 @@ Node::getDamp(void)
       return result;
     } 
 }
-
 
 
 int
@@ -1499,27 +1590,174 @@ Node::createAccel(void)
 
 
 // AddingSensitivity:BEGIN ///////////////////////////////////////
-int 
-Node::setGradient(const Vector &v, int gradNum, int numGrads)
+
+Matrix
+Node::getMassSensitivity(void)
 {
-	// If the sensitivity matrix is not already created:
-	if (theGradients == 0) {
-		theGradients = new Matrix( numberDOF, numGrads );
+	if (mass == 0) {
+		theMatrices[index]->Zero();
+		return *theMatrices[index];
+	} 
+	else {
+		Matrix massSens(mass->noRows(),mass->noCols());
+		if ( (parameterID == 1) || (parameterID == 2) || (parameterID == 3) ) {
+			massSens(parameterID-1,parameterID-1) = 1.0;
+		}
+		return massSens;
+	}
+}
+
+
+int
+Node::getCrdsSensitivity(void)
+{
+	if ( (parameterID == 4) || (parameterID == 5) || (parameterID == 6) ) {
+		return (parameterID-3);
+	}
+	else {
+		return 0;
+	}
+}
+
+
+int
+Node::setParameter(const char **argv, int argc, Information &info)
+{
+	// The following parameterID map is being used:
+	// 1: nodal mass in direction 1	
+	// 2: nodal mass in direction 2
+	// 3: nodal mass in direction 3
+	// 4: coordinate in direction 1
+	// 5: coordinate in direction 2
+	// 6: coordinate in direction 3
+
+
+
+	if (argc < 1)
+		return -1;
+
+	if (strcmp(argv[0],"-mass") == 0) {
+		info.theType = DoubleType;
+		int direction = atoi(argv[1]);
+		return direction;
+	}
+	else if (strcmp(argv[0],"-coord") == 0) {
+		info.theType = DoubleType;
+		int direction = atoi(argv[1]);
+		return (direction+3);
+	}
+	else
+		opserr << "WARNING: Could not set parameter in Node. " << endln;
+                
+	return -1;
+}
+
+
+
+int
+Node::updateParameter(int pparameterID, Information &info)
+{
+	if ( (pparameterID == 1) || (pparameterID == 2) || (pparameterID == 3) ) {
+		(*mass)(pparameterID-1,pparameterID-1) = info.theDouble;
+	}
+	else if ( (pparameterID == 4) || (pparameterID == 5) || (pparameterID == 6) ) {
+
+		if ( (*Crd)(pparameterID-4) != info.theDouble) {
+
+			// Set the new coordinate value
+			(*Crd)(pparameterID-4) = info.theDouble;
+
+			// Need to "setDomain" to make the change take effect. 
+			Domain *theDomain = this->getDomain();
+			ElementIter &theElements = theDomain->getElements();
+			Element *theElement;
+			while ((theElement = theElements()) != 0) {
+				theElement->setDomain(theDomain);
+			}
+		}
+		else {
+			// No change in nodal coordinate
+		}
+	}
+	
+	return 0;
+}
+
+
+
+
+int
+Node::activateParameter(int passedParameterID)
+{
+	parameterID = passedParameterID;
+
+	return 0;
+}
+
+
+
+int 
+Node::saveSensitivity(Vector *v,Vector *vdot,Vector *vdotdot, int gradNum, int numGrads)
+{
+	// Initial declarations
+	int i;
+
+	// If the sensitivity matrices are not already created:
+	if (dispSensitivity == 0) {
+		dispSensitivity = new Matrix( numberDOF, numGrads );
+	}
+	if ( (vdot!=0) && (vdotdot!=0) ) {
+		if (velSensitivity == 0) {
+			velSensitivity = new Matrix( numberDOF, numGrads );
+		}
+		if (accSensitivity == 0) {
+			accSensitivity = new Matrix( numberDOF, numGrads );
+		}
 	}
 
-	// Put the GRADIENT VECTOR into a COLUMN of the matrix
-	for (int i=0; i<numberDOF; i++ ) {
-		(*theGradients)(i,gradNum-1) = v(i);
+
+	// Put GRADIENT VECTORS into COLUMNS of matrices
+	for (i=0; i<numberDOF; i++ ) {
+		(*dispSensitivity)(i,gradNum-1) = (*v)(i);
+	}
+	if ( (vdot!=0) && (vdotdot!=0) ) {
+		for (i=0; i<numberDOF; i++ ) {
+			(*velSensitivity)(i,gradNum-1) = (*vdot)(i);
+		}
+		for (i=0; i<numberDOF; i++ ) {
+			(*accSensitivity)(i,gradNum-1) = (*vdotdot)(i);
+		}
 	}
 
     return 0;
 }
 
 double 
-Node::getGradient(int dof, int gradNum)
+Node::getDispSensitivity(int dof, int gradNum)
 {
-	if (theGradients != 0)
-		return (*theGradients)(dof-1,gradNum-1);
+	double result;
+	if (dispSensitivity != 0)
+		result = (*dispSensitivity)(dof-1,gradNum-1);
+	else
+		result = 0.0;
+
+	return result;
+}
+
+double 
+Node::getVelSensitivity(int dof, int gradNum)
+{
+	if (velSensitivity != 0)
+		return (*velSensitivity)(dof-1,gradNum-1);
+	else
+		return 0.0;
+}
+
+double 
+Node::getAccSensitivity(int dof, int gradNum)
+{
+	if (accSensitivity != 0)
+		return (*accSensitivity)(dof-1,gradNum-1);
 	else
 		return 0.0;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-22 01:02:02 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:48:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.h,v $
                                                                         
                                                                         
@@ -40,6 +40,7 @@
 #include <Matrix.h>
 #include <Vector.h>
 
+class TransientIntegrator;
 class Element;
 class Integrator;
 class AnalysisModel;
@@ -82,7 +83,11 @@ class FE_Element
     virtual const Vector &getLastResponse(void);
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
-	const Vector & gradient(int gradNumber);
+	virtual void addResistingForceSensitivity(int gradNumber);
+	virtual void addM_ForceSensitivity       (int gradNumber, const Vector &vect, double fact);
+	virtual void addKiForceSensitivity       (int gradNumber, const Vector &vect, double fact);
+	virtual void addD_ForceSensitivity       (int gradNumber, const Vector &vect, double fact);
+	virtual int	 commitSensitivity           (int gradNum, int numGrads);
 // AddingSensitivity:END //////////////////////////////////////
     
   protected:
@@ -102,9 +107,6 @@ class FE_Element
     Matrix *theTangent;
     Integrator *theIntegrator; // need for Subdomain
 
-// AddingSensitivity:BEGIN ////////////////////////////////////
-	Vector *theGradient;
-// AddingSensitivity:END //////////////////////////////////////
     
     // static variables - single copy for all objects of the class	
     static Matrix errMatrix;

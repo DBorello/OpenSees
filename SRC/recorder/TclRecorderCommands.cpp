@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2003-02-26 21:21:55 $
+// $Revision: 1.19 $
+// $Date: 2003-03-04 00:48:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -287,6 +287,9 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    return TCL_ERROR;
 	}    
 
+// AddingSensitivity:BEGIN ///////////////////////////////////
+	  int sensitivity = 0;
+// AddingSensitivity:END /////////////////////////////////////
       TCL_Char *responseID = 0;
       TCL_Char *fileName = 0;
 
@@ -433,7 +436,16 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	      pos++;
 	    }
 	}
-	
+// AddingSensitivity:BEGIN //////////////////////////////////////
+	else if (strcmp(argv[pos],"-sensitivity") == 0) {
+		pos++;
+		if (Tcl_GetInt(interp, argv[pos], &sensitivity) != TCL_OK) {
+			opserr << "ERROR: Invalid gradient number to node recorder." << endln;
+			return TCL_ERROR;
+		}
+		pos++;
+	}
+// AddingSensitivity:END ////////////////////////////////////////
 	else	 
 	  flags = 1;
 	}
@@ -451,11 +463,10 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	}
       }
 	
-      // construct the recorder
+      // construct the recorder NOTE: AddingSensitivity...
       if (strcmp(argv[1],"Node") == 0) 
-	(*theRecorder) = new NodeRecorder(theDofs, theNodes, 
-					  theDomain,
-					  fileName, responseID, dT, timeFlag);
+	(*theRecorder) = new NodeRecorder(theDofs, theNodes, sensitivity,
+					  theDomain, fileName, responseID, dT, timeFlag);
       else
 	
 	(*theRecorder) = new EnvelopeNodeRecorder(theDofs, theNodes, 

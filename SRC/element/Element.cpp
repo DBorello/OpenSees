@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-02-25 23:32:43 $
+// $Revision: 1.12 $
+// $Date: 2003-03-04 00:48:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -388,3 +388,56 @@ Element::getResponse(int responseID, Information &eleInformation)
 {
     return -1;
 }
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+int
+Element::setParameter     (char **argv, int argc, Information &info)
+{
+	return 0;
+}
+int
+Element::updateParameter  (int parameterID, Information &info)
+{
+	return 0;
+}
+int
+Element::activateParameter(int parameterID)
+{
+	return 0;
+}
+const Vector &
+Element::getResistingForceSensitivity(int gradNumber)
+{
+	static Vector dummy(1);
+	return dummy;
+}
+
+const Matrix &
+Element::getKiSensitivity(int gradNumber)
+{
+	static Matrix dummy(1,1);
+	return dummy;
+}
+
+const Matrix &
+Element::getMassSensitivity(int gradNumber)
+{
+	static Matrix dummy(1,1);
+	return dummy;
+}
+
+int
+Element::commitSensitivity(int gradNumber, int numGrads)
+{
+	return 0;
+}
+
+int
+Element::addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag)
+{
+	return 0;
+}
+
+
+
+// AddingSensitivity:END ///////////////////////////////////////////

@@ -1,6 +1,7 @@
 include ../../../../Makefile.def
 
-OBJS       = 	FindDesignPoint.o  SearchWithStepSizeAndStepDirection.o
+OBJS       = 	FindDesignPointAlgorithm.o \
+	SearchWithStepSizeAndStepDirection.o
 
 # Compilation control
 all:         $(OBJS)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-25 23:33:40 $
+// $Revision: 1.10 $
+// $Date: 2003-03-04 00:48:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
                                                                         
@@ -37,6 +37,7 @@
 
 #include <Steel01.h>
 #include <Vector.h>
+#include <Matrix.h>
 #include <Channel.h>
 #include <Information.h>
 #include <math.h>
@@ -80,7 +81,8 @@ Steel01::Steel01
    Ttangent = E0;
 
 // AddingSensitivity:BEGIN /////////////////////////////////////
-	gradientIdentifier = 0;
+	parameterID = 0;
+	SHVs = 0;
 // AddingSensitivity:END //////////////////////////////////////
 }
 
@@ -90,14 +92,18 @@ Steel01::Steel01():UniaxialMaterial(0,MAT_TAG_Steel01),
 {
 
 // AddingSensitivity:BEGIN /////////////////////////////////////
-	gradientIdentifier = 0;
+	parameterID = 0;
+	SHVs = 0;
 // AddingSensitivity:END //////////////////////////////////////
 
 }
 
 Steel01::~Steel01 ()
 {
-   // Does nothing
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	if (SHVs != 0) 
+		delete SHVs;
+// AddingSensitivity:END //////////////////////////////////////
 }
 
 int Steel01::setTrialStrain (double strain, double strainRate)
@@ -176,14 +182,29 @@ void Steel01::determineTrialState (double dStrain)
 
       c = Cstress + E0*dStrain;
 
-      if (c1c3 < c) 
-	Tstress = c1c3;
-      else
-	Tstress = c;
 
-      c1c2=c1-c2;
-      if (c1c2 > Tstress) 
-         Tstress = c1c2;
+
+		if (c1c3 < c) {
+			Tstress = c1c3;
+			state = 2; // positive yielding
+		}
+		else {
+			Tstress = c;
+			state = 1; // elastic 
+		}
+
+		c1c2=c1-c2;
+		if (c1c2 > Tstress) {
+			Tstress = c1c2;
+			state = 3; // negative yielding
+		}
+
+
+
+
+
+
+
 
       if (fabs(Tstress-c) < DBL_EPSILON)
 	  Ttangent = E0;
@@ -222,6 +243,38 @@ void Steel01::determineTrialState (double dStrain)
    }
 }
 
+void Steel01::detectLoadReversal (double dStrain)
+{
+   // Determine initial loading condition
+   if (Tloading == 0 && dStrain != 0.0)
+   {
+      if (dStrain > 0.0)
+         Tloading = 1;
+      else
+         Tloading = -1;
+   }
+
+   // Transition from loading to unloading, i.e. positive strain increment
+   // to negative strain increment
+   if (Tloading == 1 && dStrain < 0.0)
+   {
+      Tloading = -1;
+      if (Cstrain > TmaxStrain)
+         TmaxStrain = Cstrain;
+      TshiftN = 1 + a1*pow((TmaxStrain-TminStrain)/(2.0*a2*epsy),0.8);
+   }
+
+   // Transition from unloading to loading, i.e. negative strain increment
+   // to positive strain increment
+   if (Tloading == -1 && dStrain > 0.0)
+   {
+      Tloading = 1;
+      if (Cstrain < TminStrain)
+         TminStrain = Cstrain;
+      TshiftP = 1 + a3*pow((TmaxStrain-TminStrain)/(2.0*a4*epsy),0.8);
+   }
+}
+
 double Steel01::getStrain ()
 {
    return Tstrain;
@@ -237,6 +290,10 @@ double Steel01::getTangent ()
    return Ttangent;
 }
 
+double Steel01::getRho()
+{
+   return 0.0;
+}
 
 int Steel01::commitState ()
 {
@@ -299,6 +356,11 @@ int Steel01::revertToStart ()
    Tstrain = 0.0;
    Tstress = 0.0;
    Ttangent = E0;
+
+// AddingSensitivity:BEGIN /////////////////////////////////
+	if (SHVs != 0) 
+		SHVs->Zero();
+// AddingSensitivity:END //////////////////////////////////
 
    return 0;
 }
@@ -456,17 +518,21 @@ void Steel01::Print (OPS_Stream& s, int flag)
      s << "  epsmax: " << epsmax << endln;
 }
 
+
+
+
+// AddingSensitivity:BEGIN ///////////////////////////////////
 int
 Steel01::setParameter(const char **argv, int argc, Information &info)
 {
 	if (argc < 1)
 		return -1;
 
-	if (strcmp(argv[0],"fy") == 0) {
+	if (strcmp(argv[0],"sigmaY") == 0) {
 		info.theType = DoubleType;
 		return 1;
 	}
-	if (strcmp(argv[0],"E0") == 0) {
+	if (strcmp(argv[0],"E") == 0) {
 		info.theType = DoubleType;
 		return 2;
 	}
@@ -503,6 +569,8 @@ Steel01::setParameter(const char **argv, int argc, Information &info)
                 
 	return -1;
 }
+
+
 
 int
 Steel01::updateParameter(int parameterID, Information &info)
@@ -549,78 +617,196 @@ Steel01::updateParameter(int parameterID, Information &info)
 }
 
 
-// AddingSensitivity:BEGIN ///////////////////////////////////
+
+
 int
-Steel01::gradient(bool compute, int identifier, double & gradient)
+Steel01::activateParameter(int passedParameterID)
 {
-/*	The gradient method can be called with four different purposes:
-	1) To clear the sensitivity flag so that the object does not contribute:
-			gradient(false, 0)
-	2) To set the sensitivity flag so that the object contributes
-	   (the sensitivity flag is stored as the value of parameterID):
-			gradient(false, parameterID)
-	3) To obtain the gradient vector from the object (like for the residual):
-			gradient(true, 0)
-	4) To commit unconditional sensitivities for path-dependent problems:
-			gradient(true, gradNumber)
-*/
+	parameterID = passedParameterID;
 
-// COMPUTE GRADIENTS
-	if (compute) {
+	return 0;
+}
 
-// IF "PHASE 1" IN THE GRADIENT COMPUTATIONS (RETURN GRADIENT VECTOR)
-		if (identifier == 0) {
 
-			// For now, simply return the derivatives of these equations:
-			// sigma = E0 * epsilon                 for abs(epsilon) < fy/E0
-			// sigma = fy + (epsilon-fy/E0)*b*E0    for abs(epsilon) > fy/E0
-			// (That is, this method only works for path-independent problems for now.)
 
-			if ( gradientIdentifier == 0 ) {
-				gradient = 0.0;
-			}
-			else if ( fabs(Tstrain) < fy/E0 ) {				// below the yield limit
-				if ( gradientIdentifier == 1 ) {		// d{sigma}d{fy}
-					gradient = 0.0;
-				}
-				else if ( gradientIdentifier == 2  ) {	// d{sigma}d{E0}
-					gradient = Tstrain;
-				}
-				else if ( gradientIdentifier == 3  )	// d{sigma}d{b}
-					gradient = 0.0;
-				else
-					gradient = 0.0;
-			}
-			else {										// past the yield limit
-				if ( gradientIdentifier == 1 ) {		// d{sigma}d{fy}
-					gradient = 1.0 - b;
-				}
-				else if ( gradientIdentifier == 2  ) {	// d{sigma}d{E0}
-					gradient = Tstrain*b;
-				}
-				else if ( gradientIdentifier == 3  ) {	// d{sigma}d{b}
-					gradient = Tstrain*E0 - fy;
-				}
-				else {
-					gradient = 0.0;
-				}
-			}
+double
+Steel01::getStrainSensitivity(int gradNumber)
+{
+	return 0.0;
+}
 
-			return 0;
-		}
+double
+Steel01::getStressSensitivity(int gradNumber, bool conditional)
+{
+	// Initialize return value
+	double gradient = 0.0;
 
-// IF "PHASE 2" IN THE GRADIENT COMPUTATIONS (COMMIT UNCONDITIONAL GRADIENT)
-		else {
-			// Not treated yet. 
-		}
+
+	// Pick up sensitivity history variables
+	double CstrainSensitivity = 0.0;
+	double CstressSensitivity = 0.0;
+	if (SHVs != 0) {
+		CstrainSensitivity = (*SHVs)(0,(gradNumber-1));
+		CstressSensitivity = (*SHVs)(1,(gradNumber-1));
 	}
-	
-// DO NOT COMPUTE GRADIENTS, JUST SET FLAG
+
+
+	// Assign values to parameter derivatives (depending on what's random)
+	double fySensitivity = 0.0;
+	double E0Sensitivity = 0.0;
+	double bSensitivity = 0.0;
+	if (parameterID == 1) {
+		fySensitivity = 1.0;
+	}
+	else if (parameterID == 2) {
+		E0Sensitivity = 1.0;
+	}
+	else if (parameterID == 3) {
+		bSensitivity = 1.0;
+	}
+
+
+	// Compute min and max stress
+	double Tstress;
+	double dStrain = Tstrain-Cstrain;
+	double sigmaElastic = Cstress + E0*dStrain;
+	double fyOneMinusB = fy * (1.0 - b);
+	double c1 = Esh*Tstrain;
+	double c2 = TshiftN*fyOneMinusB;
+	double c3 = TshiftP*fyOneMinusB;
+	double sigmaMax = c1+c3;
+	double sigmaMin = c1-c2;
+
+
+	// Evaluate stress sensitivity 
+	if ( (sigmaMax < sigmaElastic) && (fabs(sigmaMax-sigmaElastic)>1e-5) ) {
+		Tstress = sigmaMax;
+		gradient = E0Sensitivity*b*Tstrain 
+				 + E0*bSensitivity*Tstrain
+				 + TshiftP*(fySensitivity*(1-b)-fy*bSensitivity);
+	}
 	else {
-		gradientIdentifier = identifier;
+		Tstress = sigmaElastic;
+		gradient = CstressSensitivity 
+			     + E0Sensitivity*(Tstrain-Cstrain)
+				 - E0*CstrainSensitivity;
 	}
+	if (sigmaMin > Tstress) {
+		gradient = E0Sensitivity*b*Tstrain
+			     + E0*bSensitivity*Tstrain
+				 - TshiftN*(fySensitivity*(1-b)-fy*bSensitivity);
+	}
+
+	return gradient;
+}
+
+
+
+
+double
+Steel01::getInitialTangentSensitivity(int gradNumber)
+{
+	// For now, assume that this is only called for initial stiffness 
+	if (parameterID == 2) {
+		return 1.0; 
+	}
+	else {
+		return 0.0;
+	}
+}
+
+
+
+double
+Steel01::getDampTangentSensitivity(int gradNumber)
+{
+	return 0.0;
+}
+
+
+
+double
+Steel01::getRhoSensitivity(int gradNumber)
+{
+	return 0.0;
+}
+
+int
+Steel01::commitSensitivity(double TstrainSensitivity, int gradNumber, int numGrads)
+{
+	if (SHVs == 0) {
+		SHVs = new Matrix(2,numGrads);
+	}
+
+
+	// Initialize unconditaional stress sensitivity
+	double gradient = 0.0;
+
+
+	// Pick up sensitivity history variables
+	double CstrainSensitivity = 0.0;
+	double CstressSensitivity	 = 0.0;
+	if (SHVs != 0) {
+		CstrainSensitivity = (*SHVs)(0,(gradNumber-1));
+		CstressSensitivity = (*SHVs)(1,(gradNumber-1));
+	}
+
+
+	// Assign values to parameter derivatives (depending on what's random)
+	double fySensitivity = 0.0;
+	double E0Sensitivity = 0.0;
+	double bSensitivity = 0.0;
+	if (parameterID == 1) {
+		fySensitivity = 1.0;
+	}
+	else if (parameterID == 2) {
+		E0Sensitivity = 1.0;
+	}
+	else if (parameterID == 3) {
+		bSensitivity = 1.0;
+	}
+
+
+	// Compute min and max stress
+	double Tstress;
+	double dStrain = Tstrain-Cstrain;
+	double sigmaElastic = Cstress + E0*dStrain;
+	double fyOneMinusB = fy * (1.0 - b);
+	double c1 = Esh*Tstrain;
+	double c2 = TshiftN*fyOneMinusB;
+	double c3 = TshiftP*fyOneMinusB;
+	double sigmaMax = c1+c3;
+	double sigmaMin = c1-c2;
+
+
+	// Evaluate stress sensitivity ('gradient')
+	if ( (sigmaMax < sigmaElastic) && (fabs(sigmaMax-sigmaElastic)>1e-5) ) {
+		Tstress = sigmaMax;
+		gradient = E0Sensitivity*b*Tstrain 
+				 + E0*bSensitivity*Tstrain
+				 + E0*b*TstrainSensitivity
+				 + TshiftP*(fySensitivity*(1-b)-fy*bSensitivity);
+	}
+	else {
+		Tstress = sigmaElastic;
+		gradient = CstressSensitivity 
+			     + E0Sensitivity*(Tstrain-Cstrain)
+				 + E0*(TstrainSensitivity-CstrainSensitivity);
+	}
+	if (sigmaMin > Tstress) {
+		gradient = E0Sensitivity*b*Tstrain
+			     + E0*bSensitivity*Tstrain
+			     + E0*b*TstrainSensitivity
+				 - TshiftN*(fySensitivity*(1-b)-fy*bSensitivity);
+	}
+
+
+	// Commit history variables
+	(*SHVs)(0,(gradNumber-1)) = TstrainSensitivity;
+	(*SHVs)(1,(gradNumber-1)) = gradient;
 
 	return 0;
 }
 
 // AddingSensitivity:END /////////////////////////////////////////////
+

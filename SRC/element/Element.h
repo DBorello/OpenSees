@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-25 23:32:43 $
+// $Revision: 1.9 $
+// $Date: 2003-03-04 00:48:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -93,7 +93,18 @@ class Element : public DomainComponent
     // method for obtaining information specific to an element
     virtual Response *setResponse(const char **argv, int argc, Information &eleInformation);
     virtual int getResponse(int responseID, Information &eleInformation);
-	
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+    virtual int addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag);
+    virtual int setParameter(char **argv, int argc, Information &info);
+    virtual int updateParameter(int parameterID, Information &info);
+    virtual int activateParameter(int parameterID);
+    virtual const Vector & getResistingForceSensitivity(int gradNumber);
+    virtual const Matrix & getKiSensitivity(int gradNumber);
+    virtual const Matrix & getMassSensitivity(int gradNumber);
+    virtual int   commitSensitivity(int gradNumber, int numGrads);
+// AddingSensitivity:END ///////////////////////////////////////////
+
   protected:
     const Vector &getRayleighDampingForces(void);
 

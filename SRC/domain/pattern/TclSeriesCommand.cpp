@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-25 23:32:42 $
+// $Revision: 1.8 $
+// $Date: 2003-03-04 00:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -43,6 +43,15 @@
 #include <PathSeries.h>
 #include <string.h>
 
+/////////////// terje //////////////////////////
+#include <DiscretizedRandomProcessSeries.h>
+#include <SimulatedRandomProcessSeries.h>
+#include <Spectrum.h>
+#include <RandomNumberGenerator.h>
+#include <ReliabilityDomain.h>
+extern ReliabilityDomain *theReliabilityDomain;
+extern RandomNumberGenerator *theRandomNumberGenerator;
+////////////////////////////////////////////////
 
 // little function to free memory after invoke Tcl_SplitList
 //   note Tcl_Split list stores the array of pointers and the strings in 
@@ -177,6 +186,115 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 
     theSeries = new LinearSeries(cFactor);       	
   }
+
+// AddingSensitivity:BEGIN ///////////////////////////////////
+
+
+	else if (strcmp(argv[0],"DiscretizedRandomProcess") == 0) {
+
+
+		double mean, maxStdv;
+		ModulatingFunction *theModFunc;
+
+		if (Tcl_GetDouble(interp, argv[1], &mean) != TCL_OK) {
+			opserr << "WARNING invalid input: random process mean \n";
+			cleanup(argv);
+			return 0;
+		}
+
+		if (Tcl_GetDouble(interp, argv[2], &maxStdv) != TCL_OK) {
+			opserr << "WARNING invalid input: random process max stdv \n";
+			cleanup(argv);
+			return 0;
+		}
+
+		// Number of modulating functions
+		int argsBeforeModList = 3;
+		int numModFuncs = argc-argsBeforeModList;
+
+		// Create an array to hold pointers to modulating functions
+		ModulatingFunction **theModFUNCS = new ModulatingFunction *[numModFuncs];
+
+		// For each modulating function, get the tag and ensure it exists
+		int tagI;
+		for (int i=0; i<numModFuncs; i++) {
+			if (Tcl_GetInt(interp, argv[i+argsBeforeModList], &tagI) != TCL_OK) {
+				opserr << "WARNING invalid modulating function tag. " << endln;
+				cleanup(argv);
+				return 0;
+			}
+
+			theModFunc = 0;
+			theModFunc = theReliabilityDomain->getModulatingFunction(tagI);
+
+			if (theModFunc == 0) {
+				opserr << "WARNING modulating function number "<< argv[i+argsBeforeModList] << "does not exist...\n";
+				delete [] theModFUNCS;
+				cleanup(argv);
+				return 0;
+			}
+			else {
+				theModFUNCS[i] = theModFunc;
+			}
+		}	
+
+		// Parsing was successful, create the random process series object
+		theSeries = new DiscretizedRandomProcessSeries(numModFuncs,theModFUNCS,mean,maxStdv);       	
+	}
+
+ 
+
+
+
+	else if (strcmp(argv[0],"SimulatedRandomProcess") == 0) {
+
+		int spectrumTag, numFreqIntervals;
+		double mean;
+
+		if (Tcl_GetInt(interp, argv[1], &spectrumTag) != TCL_OK) {
+			opserr << "WARNING invalid input to SimulatedRandomProcess: spectrumTag" << endln;
+			cleanup(argv);
+			return 0;
+		}
+
+		if (Tcl_GetDouble(interp, argv[2], &mean) != TCL_OK) {
+			opserr << "WARNING invalid input to SimulatedRandomProcess: mean" << endln;
+			cleanup(argv);
+			return 0;
+		}
+
+		if (Tcl_GetInt(interp, argv[3], &numFreqIntervals) != TCL_OK) {
+			opserr << "WARNING invalid input to SimulatedRandomProcess: numFreqIntervals" << endln;
+			cleanup(argv);
+			return 0;
+		}
+
+		// Check that the random number generator exists
+		if (theRandomNumberGenerator == 0) {
+			opserr << "WARNING: A random number generator must be instantiated before SimulatedRandomProcess." << endln;
+			cleanup(argv);
+			return 0;
+		}
+
+		// Check that the spectrum exists
+		Spectrum *theSpectrum = 0;
+		theSpectrum = theReliabilityDomain->getSpectrum(spectrumTag);
+		if (theSpectrum == 0) {
+			opserr << "WARNING: Could not find the spectrum for the SimulatedRandomProcess." << endln;
+			cleanup(argv);
+			return 0;
+		}
+
+
+		// Parsing was successful, create the random process series object
+		theSeries = new SimulatedRandomProcessSeries(theRandomNumberGenerator,theSpectrum,numFreqIntervals,mean);
+	}
+
+  
+// AddingSensitivity:END /////////////////////////////////////
+
+
+
 
   else if (strcmp(argv[0],"Rectangular") == 0) {
     // LoadPattern and RectangularSeries - read args and create RectangularSeries object

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-10-02 21:43:46 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:48:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/TransientIntegrator.h,v $
                                                                         
                                                                         
@@ -40,7 +40,7 @@
 #define TransientIntegrator_h
 
 #include <IncrementalIntegrator.h>
-
+class Information;
 class LinearSOE;
 class AnalysisModel;
 class FE_Element;
@@ -58,7 +58,11 @@ class TransientIntegrator : public IncrementalIntegrator
     virtual int formNodUnbalance(DOF_Group *theDof);    
 
     virtual int initialize(void) {return 0;};
-    
+
+// AddingSensitivity:BEGIN /////////////////////////////
+	virtual int revertToStart();
+// AddingSenstivity:END ////////////////////////////////
+
   protected:
     
   private:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-02-25 23:33:02 $
+// $Revision: 1.12 $
+// $Date: 2003-03-04 00:48:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.h,v $
                                                                         
                                                                         
@@ -73,6 +73,7 @@ class Truss : public Element
     int update(void);
     
     // public methods to obtain stiffness, mass, damping and residual information    
+    const Matrix &getKi(void);
     const Matrix &getTangentStiff(void);
     const Matrix &getInitialStiff(void);
     const Matrix &getDamp(void);    
@@ -94,9 +95,16 @@ class Truss : public Element
     Response *setResponse(const char **argv, int argc, Information &eleInfo);
     int getResponse(int responseID, Information &eleInformation);
 
-    int setParameter (const char **argv, int argc, Information &info);
-    int updateParameter (int parameterID, Information &info);
-    const Vector & gradient(bool compute, int identifier);
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    int		   addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag);
+    int            setParameter(const char **argv, int argc, Information &info);
+    int            updateParameter(int parameterID, Information &info);
+    int            activateParameter(int parameterID);
+    const Vector & getResistingForceSensitivity(int gradNumber);
+    const Matrix & getKiSensitivity(int gradNumber);
+    const Matrix & getMassSensitivity(int gradNumber);
+    int            commitSensitivity(int gradNumber, int numGrads);
+    // AddingSensitivity:END ///////////////////////////////////////////
 
   protected:
     
@@ -123,7 +131,8 @@ class Truss : public Element
     Node *theNodes[2];
 	
 // AddingSensitivity:BEGIN //////////////////////////////////////////
-    int gradientIdentifier;
+    int parameterID;
+    Vector *theLoadSens;
 // AddingSensitivity:END ///////////////////////////////////////////
 
     // static data - single copy for all objects of the class	

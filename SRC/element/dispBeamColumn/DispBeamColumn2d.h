@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-02-25 23:32:49 $
+// $Revision: 1.14 $
+// $Date: 2003-03-04 00:48:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.h,v $
 
 // Written: MHS
@@ -91,12 +91,15 @@ class DispBeamColumn2d : public Element
     Response *setResponse(const char **argv, int argc, Information &eleInfo);
     int getResponse(int responseID, Information &eleInfo);
 
-    int setParameter(const char **argv, int argc, Information &info);
-    int updateParameter(int parameterID, Information &info);
-
-// AddingSensitivity:BEGIN //////////////////////////////////////////
-    const Vector & gradient(bool compute, int identifier);
-// AddingSensitivity:END ///////////////////////////////////////////
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    int            setParameter(const char **argv, int argc, Information &info);
+    int            updateParameter(int parameterID, Information &info);
+    int            activateParameter(int parameterID);
+    const Vector & getResistingForceSensitivity(int gradNumber);
+    const Matrix & getKiSensitivity(int gradNumber);
+    const Matrix & getMassSensitivity(int gradNumber);
+    int            commitSensitivity(int gradNumber, int numGrads);
+    // AddingSensitivity:END ///////////////////////////////////////////
 
   protected:
     
@@ -125,11 +128,9 @@ class DispBeamColumn2d : public Element
 
     static GaussQuadRule1d01 quadRule;
 
-// AddingSensitivity:BEGIN //////////////////////////////////////////
-    int gradientIdentifier;
-    int gradientSectionTag;
-    int gradientMaterialTag;
-// AddingSensitivity:END ///////////////////////////////////////////
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    int parameterID;
+    // AddingSensitivity:END ///////////////////////////////////////////
 };
 
 #endif

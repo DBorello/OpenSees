@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.13 $
-// $Date: 2003-02-25 23:34:31 $
+// $Revision: 1.14 $
+// $Date: 2003-03-04 00:48:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -53,14 +53,15 @@ using std::ios;
 
 NodeRecorder::NodeRecorder(const ID &dofs, 
 			   const ID &nodes, 
+			   int psensitivity,
 			   Domain &theDom,
 			   const char *theFileName,
 			   const char *dataToStore,
 			   double dT,
 			   int startFlag)
 :theDofs(0), theNodes(0), disp(1 + nodes.Size()*dofs.Size()), 
-  theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0), 
-  db(0), dbColumns(0)
+ theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0), 
+ db(0), dbColumns(0), numDbColumns(0), sensitivity(psensitivity)
 {
   // verify dof are valid 
   int numDOF = dofs.Size();
@@ -142,6 +143,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 
 NodeRecorder::NodeRecorder(const ID &dofs, 
 			   const ID &nodes, 
+			   int psensitivity,
 			   Domain &theDom,
 			   FE_Datastore *database,
 			   const char *dbTable,
@@ -150,7 +152,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   int startFlag)
 :theDofs(0), theNodes(0), disp(1 + nodes.Size()*dofs.Size()), 
   theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0), 
-  db(database), dbColumns(0)
+ db(database), dbColumns(0), numDbColumns(0), sensitivity(psensitivity)
 {
   // verify dof are valid 
   int numDOF = dofs.Size();
@@ -287,16 +289,27 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	Node *theNode = theDomain->getNode((*theNodes)(i));
 	if (theNode != 0) {
 	  if (dataFlag == 0) {
-	    const Vector &theDisp = theNode->getTrialDisp();
-	    for (int j=0; j<numDOF; j++) {
-		int dof = (*theDofs)(j);
-		if (theDisp.Size() > dof) {
-		    disp(cnt) = theDisp(dof);
-		}else 
-		  disp(cnt) = 0.0;
-
-		cnt++;
-	    }
+// AddingSensitivity:BEGIN ///////////////////////////////////
+		  if (sensitivity==0) {
+						const Vector &theDisp = theNode->getTrialDisp();
+						for (int j=0; j<numDOF; j++) {
+							int dof = (*theDofs)(j);
+							if (theDisp.Size() > dof) {
+								disp(cnt) = theDisp(dof);
+							}
+							else {
+							  disp(cnt) = 0.0;
+							}
+						cnt++;
+						}
+		  }
+		  else {
+						for (int j=0; j<numDOF; j++) {
+						int dof = (*theDofs)(j);
+	                    disp(cnt) = theNode->getDispSensitivity(dof+1, sensitivity);
+						}
+		  }
+// AddingSensitivity:END /////////////////////////////////////
 	  } else if (dataFlag == 1) {
 	    const Vector &theDisp = theNode->getTrialVel();
 	    for (int j=0; j<numDOF; j++) {
@@ -371,12 +384,17 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	else if (flag == 2)
 	  theFile << timeStamp << " ";
 	
-	for (int j=1; j<=numNodes*numDOF; j++)
-	  theFile << disp(j) << " ";
+// AddingSensitivity:BEGIN ///////////////////////////////////////
+	for (int j=1; j<=numNodes*numDOF; j++) {
+      char outputstring[50];
+	  sprintf(outputstring,"%26.16e",disp(j));
+	  theFile << outputstring << " ";
+	}
+// AddingSensitivity:END /////////////////////////////////////////
       
 	theFile << endln;
 	theFile.flush();
-
+	  
       } else {
 	// insert the data into the database
 	disp(0) = timeStamp;

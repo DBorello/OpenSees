@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-02-25 23:33:34 $
+// $Revision: 1.16 $
+// $Date: 2003-03-04 00:48:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -105,8 +105,7 @@ FiberSection2d::FiberSection2d(int tag, int num, Fiber **fibers):
   code(1) = SECTION_RESPONSE_MZ;
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
-	gradientIdentifier = 0;
-	gradientMaterialTag = 0;
+	parameterID = 0;
 // AddingSensitivity:END //////////////////////////////////////
 
 }
@@ -132,8 +131,7 @@ FiberSection2d::FiberSection2d():
   code(1) = SECTION_RESPONSE_MZ;
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
-	gradientIdentifier = 0;
-	gradientMaterialTag = 0;
+	parameterID = 0;
 // AddingSensitivity:END //////////////////////////////////////
 }
 
@@ -732,6 +730,8 @@ FiberSection2d::getResponse(int responseID, Information &sectInfo)
 }
 
 
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
 int
 FiberSection2d::setParameter (const char **argv, int argc, Information &info)
 {
@@ -739,7 +739,7 @@ FiberSection2d::setParameter (const char **argv, int argc, Information &info)
 	int parameterID;
 
 	// Check if the parameter belongs to the material (only option for now)
-	if (strcmp(argv[0],"material") == 0) {
+	if (strcmp(argv[0],"-material") == 0) {
 
 		// Get the tag of the material
 		int materialTag = atoi(argv[1]);
@@ -803,123 +803,101 @@ FiberSection2d::updateParameter (int parameterID, Information &info)
 	}
 }
 
-
 int
-FiberSection2d::gradient(bool compute, int identifier, Vector & gradient)
+FiberSection2d::activateParameter(int passedParameterID)
 {
+	// Note that the parameteID that is stored here at the 
+	// section level contains all information about section
+	// and material tag number:
+	parameterID = passedParameterID;
 
-/*	The gradient method can be called with four different purposes:
-	1) To clear the sensitivity flag so that the object does not contribute:
-			gradient(false, 0)
-	2) To set the sensitivity flag so that the object contributes
-	   (the sensitivity flag is stored as the value of parameterID):
-			gradient(false, parameterID)
-	3) To obtain the gradient vector from the object (like for the residual):
-			gradient(true, 0)
-	4) To commit unconditional sensitivities for path-dependent problems:
-			gradient(true, gradNumber)
-*/
+	if (passedParameterID == 0 ) {
 
-
-	
-	if (compute) { // If yes: compute or commit gradients
-
-		if ( gradientIdentifier != 0 ) { // Check if this element contributes has a parameter
-			
-			if (identifier == 0) { // "Phase 1": return gradient vector
-
-				static Vector ds(2);
-    
-				ds.Zero();
-
-				double y, A, stressGradient;
-				int loc = 0;
-
-				for (int i = 0; i < numFibers; i++) {
-					y = matData[loc++] - yBar;
-					A = matData[loc++];
-
-					stressGradient = 0.0;
-					theMaterials[i]->gradient(true,identifier,stressGradient);
-					stressGradient = stressGradient * A;
-					ds(0) += stressGradient;
-					ds(1) += stressGradient * y;
-				}
-
-				gradient = ds;
-
-			}
-
-			else { // "Phase 2": commit unconditional sensitivities
-
-/*
-Do not treat this case for now. 
-Here is the code from Michael. 
-
-				int res = 0;
-				int loc = 0;
-				double depsilondh;
-
-				for (int i = 0; i < numFibers; i++) {
-					UniaxialMaterial *theMat = theMaterials[i];
-					double y = matData[loc++] - yBar;
-					loc++;
-
-					// determine material strain and set it
-					depsilondh = dedh(0) + y*dedh(1);
-
-					res += theMat->setStrainGradient(id, depsilondh);
-				}
-				return res;
-*/
-			}
-
-		}
-
-		else {
-			// Do nothing if gradientIdentifier is zero
+		// "Zero out" the identifier in all materials
+		for (int i=0; i<numFibers; i++) {
+			theMaterials[i]->activateParameter(passedParameterID);
 		}
 	}
-	
-	else { // Just set private data flags
 
-		// Set gradient flag
-		gradientIdentifier = identifier;
+	else {
 
-		if (identifier == 0 ) {
+		// Extract section and material tags
+		int activeSectionTag = (int)( floor((double)passedParameterID) / (100000) );
+		passedParameterID -= activeSectionTag*100000;
+		int activeMaterialTag = (int)( floor((double)passedParameterID) / (1000) );
+		passedParameterID -= activeMaterialTag*1000;
 
-			// "Zero out" the identifier in all materials
-			double dummy = 0.0;
-			int ok = -1;
-			for (int i=0; i<numFibers; i++) {
-				ok =theMaterials[i]->gradient(false,identifier,dummy);
+		// Go down to the sections and set appropriate flags
+		for (int i=0; i<numFibers; i++) {
+			if (activeMaterialTag == theMaterials[i]->getTag()) {
+				theMaterials[i]->activateParameter(passedParameterID);
 			}
 		}
-
-		else if (gradientIdentifier == 1) {
-			// Don't treat the 'rho' for now
-		}
-
-		else {
-
-			// Extract section and material tags
-			int gradientSectionTag = (int)( floor((double)identifier) / (100000) );
-			identifier = identifier - gradientSectionTag*100000;
-			gradientMaterialTag = (int)( floor((double)identifier) / (1000) );
-			identifier = identifier - gradientMaterialTag*1000;
-
-			// Go down to the sections and set appropriate flags
-			double dummy = 0.0;
-			int ok = -1;
-			for (int i=0; i<numFibers; i++) {
-				if (gradientMaterialTag == theMaterials[i]->getTag()) {
-					ok =theMaterials[i]->gradient(false,identifier,dummy);
-				}
-			}
-		}
-		
 	}
 
 	return 0;
 }
 
+const Vector &
+FiberSection2d::getSectionDeformationSensitivity(int gradNumber)
+{
+	static Vector dummy(2);
+	return dummy;
+}
+
+const Vector &
+FiberSection2d::getStressResultantSensitivity(int gradNumber, bool conditional)
+{
+	static Vector ds(2);
+
+	ds.Zero();
+
+	double y, A, stressGradient;
+	int loc = 0;
+
+	for (int i = 0; i < numFibers; i++) {
+		y = matData[loc++];
+		A = matData[loc++];
+
+		stressGradient = theMaterials[i]->getStressSensitivity(gradNumber,true);
+		stressGradient = stressGradient * A;
+		ds(0) += stressGradient;
+		ds(1) += stressGradient * y;
+	}
+
+	return ds;
+}
+
+const Matrix &
+FiberSection2d::getSectionTangentSensitivity(int gradNumber)
+{
+	static Matrix something(2,2);
+
+	something.Zero();
+
+	return something;
+}
+
+int
+FiberSection2d::commitSensitivity(const Vector& defSens, int gradNumber, int numGrads)
+{
+
+  int loc = 0;
+
+  double d0 = defSens(0);
+  double d1 = defSens(1);
+
+  for (int i = 0; i < numFibers; i++) {
+    UniaxialMaterial *theMat = theMaterials[i];
+    double y = matData[loc++];
+    double A = matData[loc++];
+
+    // determine material strain and set it
+    double strainSens = d0 + y*d1;
+	theMat->commitSensitivity(strainSens,gradNumber,numGrads);
+  }
+
+  return 0;
+}
+
+// AddingSensitivity:END ///////////////////////////////////

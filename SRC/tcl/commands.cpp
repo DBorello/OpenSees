@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.45 $
-// $Date: 2003-02-27 17:30:26 $
+// $Revision: 1.46 $
+// $Date: 2003-03-04 00:48:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -36,7 +36,6 @@ extern "C" {
 #include <tcl.h>
 #include <tk.h>
 }
-
 
 #include <OPS_Globals.h>
 
@@ -203,11 +202,14 @@ OPS_Stream &opserr = sserr;
 #include <SensitivityAlgorithm.h>
 #include <SensitivityIntegrator.h>
 #include <StaticSensitivityIntegrator.h>
+//#include <DynamicSensitivityIntegrator.h>
+#include <NewmarkSensitivityIntegrator.h>
 #include <RandomVariablePositioner.h>
 // AddingSensitivity:END /////////////////////////////////////////////////
 #include <TclReliabilityBuilder.h>
 static TclReliabilityBuilder *theReliabilityBuilder = 0;
 int reliability(ClientData, Tcl_Interp *, int, TCL_Char **);
+int wipeReliability(ClientData, Tcl_Interp *, int, TCL_Char **);
 #endif
 
 ModelBuilder *theBuilder =0;
@@ -224,8 +226,9 @@ static VariableTimeStepDirectIntegrationAnalysis *theVariableTimeStepTransientAn
 
 // AddingSensitivity:BEGIN /////////////////////////////////////////////
 #ifdef _RELIABILITY
-static SensitivityAlgorithm *theSensitivityAlgorithm = 0;
+SensitivityAlgorithm *theSensitivityAlgorithm = 0;
 static SensitivityIntegrator *theSensitivityIntegrator = 0;
+static NewmarkSensitivityIntegrator *theNSI = 0;
 #endif
 // AddingSensitivity:END ///////////////////////////////////////////////
 
@@ -324,6 +327,8 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "nodeDisp", &nodeDisp, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "nodeVel", &nodeVel, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "start", &startTimer, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "stop", &stopTimer, 
@@ -336,7 +341,9 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
 #ifdef _RELIABILITY
-    Tcl_CreateCommand(interp, "reliability", &reliability, 
+    Tcl_CreateCommand(interp, "wipeReliability", wipeReliability, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
+    Tcl_CreateCommand(interp, "reliability", reliability, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
     theReliabilityBuilder = 0;
 // AddingSensitivity:BEGIN //////////////////////////////////
@@ -347,6 +354,8 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "sensitivityIntegrator", &sensitivityIntegrator, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "sensNodeDisp", &sensNodeDisp, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "sensNodeVel", &sensNodeVel, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
 
 	theSensitivityAlgorithm =0;
@@ -381,23 +390,37 @@ reliability(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
 {
   if (theReliabilityBuilder == 0) {
 
-    opserr << "**********************************************************" << endln;
-    opserr << "YOU ARE USING AN OUT-DATED VERSION OF THE RELIABILITY AND " << endln;
-    opserr << "SENSITIVITY CODE IN OPENSEES.  INFORMATION ABOUT THE " << endln;
-    opserr << "UPCOMING REVISED AND EXTENDED VERSION CAN BE FOUND AT: " << endln;
-    opserr << "http://www.ce.berkeley.edu/~haukaas " << endln;
-    opserr << "**********************************************************" << endln;
-
     theReliabilityBuilder = new TclReliabilityBuilder(theDomain,interp);
     return TCL_OK;
   }
   else
     return TCL_ERROR;
 }
+
+int 
+wipeReliability(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+{
+  if (theReliabilityBuilder != 0) {
+    delete theReliabilityBuilder;
+    theReliabilityBuilder = 0;
+  }
+  return TCL_OK;
+
+}
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
 int 
 sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
+	bool withRespectToRVs = true;
+	int analysisTypeTag;  // 1: compute at each step wrt. random variables
+						  // 2: compute at each step wrt. parameters
+						  // 3: compute by command wrt. random variables
+						  // 4: compute by command wrt. parameters
+
+	if (argc < 2) {
+		opserr << "ERROR: Wrong number of parameters to sensitivity algorithm." << endln;
+		return TCL_ERROR;
+	}
 	if (theReliabilityBuilder == 0) {
 		opserr << "The command 'reliability' needs to be issued before " << endln
 		<< " the sensitivity algorithm can be created." << endln;
@@ -409,42 +432,82 @@ sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Ch
 		return TCL_ERROR;
 	}
 	else {
-		if (strcmp(argv[1],"PathDep") == 0) {
-			ReliabilityDomain *theReliabilityDomain;
-			theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
-			theSensitivityAlgorithm = new SensitivityAlgorithm(theReliabilityDomain,
-										theAlgorithm,
-										theSensitivityIntegrator,
-										true);
-		return TCL_OK;
+		if (argc == 3) {
+			if (strcmp(argv[2],"-parameters") == 0) {
+				withRespectToRVs = false;
+			}
+			else if (strcmp(argv[2],"-randomVariables") == 0) {
+				withRespectToRVs = true;
+			}
+			else {
+				opserr << "ERROR: Invalid argument in sensitivity algorithm command." << endln;
+				return TCL_ERROR;
+			}
 		}
-		else if (strcmp(argv[1],"PathIndep") == 0) {
-			ReliabilityDomain *theReliabilityDomain;
-			theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
-			theSensitivityAlgorithm = new SensitivityAlgorithm(theReliabilityDomain,
-										theAlgorithm,
-										theSensitivityIntegrator,
-										false);
-		return TCL_OK;
+		if (strcmp(argv[1],"-computeAtEachStep") == 0) {
+			if (withRespectToRVs) {
+				analysisTypeTag = 1;
+			}
+			else {
+				analysisTypeTag = 2;
+			}
+		}
+		else if (strcmp(argv[1],"-computeByCommand") == 0) {
+			if (withRespectToRVs) {
+				analysisTypeTag = 3;
+			}
+			else {
+				analysisTypeTag = 4;
+			}
 		}
 		else {
 			opserr << "WARNING: Invalid type of sensitivity algorithm." << endln;
 			return TCL_ERROR;
 		}
+		ReliabilityDomain *theReliabilityDomain;
+		theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
+		theSensitivityAlgorithm = new SensitivityAlgorithm(theReliabilityDomain,
+									theAlgorithm,
+									theSensitivityIntegrator,
+									analysisTypeTag);
+		if (theSensitivityAlgorithm == 0) {
+			opserr << "ERROR: Could not create theSensitivityAlgorithm. " << endln;
+			return TCL_ERROR;
+		}
 	}
+	return TCL_OK;
 }
 int 
 sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-	if (strcmp(argv[1],"Static") == 0) {
+	if (strcmp(argv[1],"-static") == 0) {
 
 		if (theAnalysisModel == 0) {
 			theAnalysisModel = new AnalysisModel();
 		}
-
 		theSensitivityIntegrator = new StaticSensitivityIntegrator(theAnalysisModel, theSOE);
 		return TCL_OK;
 	}
+	else if (strcmp(argv[1],"-definedAbove") == 0) {  
+
+		if (theNSI == 0) {
+			opserr << "ERROR: No sensitivity integrator has been specified. " << endln;
+			return TCL_ERROR;
+		}
+		else {
+			theSensitivityIntegrator = theNSI;
+			return TCL_OK;
+		}
+	}
+//	else if (strcmp(argv[1],"Dynamic") == 0) {  
+//
+//		if (theAnalysisModel == 0) {
+//			theAnalysisModel = new AnalysisModel();
+//		}
+//
+//		theSensitivityIntegrator = new DynamicSensitivityIntegrator(theAnalysisModel, theSOE, theTransientIntegrator);
+//		return TCL_OK;
+//	}
 	else {
 		opserr << "WARNING: Invalid type of sensitivity integrator." << endln;
 		return TCL_ERROR;
@@ -475,12 +538,7 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
       delete theTransientAnalysis;  
   }
 
-#ifdef _RELIABILITY
-  if (theReliabilityBuilder != 0) {
-    delete theReliabilityBuilder;
-    theReliabilityBuilder = 0;
-  }
-#endif
+
 
   // NOTE : DON'T do the above on theVariableTimeStepAnalysis
   // as it and theTansientAnalysis are one in the same
@@ -571,8 +629,20 @@ wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 int 
 resetModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
-  theDomain.revertToStart();
-  return TCL_OK;
+	theDomain.revertToStart();
+
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
+	// (Calling domainChanged() don't work because the ::getX()
+	// of the linear SOE is being called without the X having
+	// been instantitated.)
+	if (theTransientIntegrator != 0) {
+		theTransientIntegrator->revertToStart();
+	}
+// AddingSensitivity:END //////////////////////////////////////
+
+	
+	return TCL_OK;
 }
 
 int
@@ -725,6 +795,7 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
   }
 
   sprintf(interp->result,"%d",result);    
+
   return TCL_OK;
 
 }
@@ -1083,7 +1154,7 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 					       *theStaticIntegrator);
 // AddingSensitivity:BEGIN ///////////////////////////////
 #ifdef _RELIABILITY
-	if (theSensitivityAlgorithm != 0 && theSensitivityAlgorithm->isPathDependent()) {
+	if (theSensitivityAlgorithm != 0 && theSensitivityAlgorithm->shouldComputeAtEachStep()) {
 		theStaticAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
 	}
 #endif
@@ -1134,6 +1205,14 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 							     *theAlgorithm,
 							     *theSOE,
 							     *theTransientIntegrator);
+
+// AddingSensitivity:BEGIN ///////////////////////////////
+#ifdef _RELIABILITY
+	if (theSensitivityAlgorithm != 0 && theSensitivityAlgorithm->shouldComputeAtEachStep()) {
+		theTransientAnalysis->setSensitivityAlgorithm(theSensitivityAlgorithm);
+	}
+#endif
+// AddingSensitivity:END /////////////////////////////////
 
     } else if ((strcmp(argv[1],"VariableTimeStepTransient") == 0) ||
 	       (strcmp(argv[1],"TransientWithVariableTimeStep") == 0) ||
@@ -1826,6 +1905,10 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	numIter = 1;
       }
       theStaticIntegrator = new LoadControl(dLambda, numIter, minIncr, maxIncr);       
+
+  // if the analysis exists - we want to change the Integrator
+  if (theStaticAnalysis != 0)
+    theStaticAnalysis->setIntegrator(*theStaticIntegrator);
   }
 
   
@@ -1841,6 +1924,10 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       if (Tcl_GetDouble(interp, argv[3], &alpha) != TCL_OK)	
 	return TCL_ERROR;	
       theStaticIntegrator = new ArcLength(arcLength,alpha);       
+
+  // if the analysis exists - we want to change the Integrator
+  if (theStaticAnalysis != 0)
+    theStaticAnalysis->setIntegrator(*theStaticIntegrator);
   }
 
   else if (strcmp(argv[1],"ArcLength1") == 0) {
@@ -1855,6 +1942,10 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       if (Tcl_GetDouble(interp, argv[3], &alpha) != TCL_OK)	
 	return TCL_ERROR;	
       theStaticIntegrator = new ArcLength1(arcLength,alpha);       
+
+  // if the analysis exists - we want to change the Integrator
+  if (theStaticAnalysis != 0)
+    theStaticAnalysis->setIntegrator(*theStaticIntegrator);
   }
 
   else if (strcmp(argv[1],"MinUnbalDispNorm") == 0) {
@@ -1888,6 +1979,10 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	    signFirstStepMethod = CHANGE_DETERMINANT;	    
 
       theStaticIntegrator = new MinUnbalDispNorm(lambda11,numIter,minlambda,maxlambda,signFirstStepMethod);
+
+  // if the analysis exists - we want to change the Integrator
+  if (theStaticAnalysis != 0)
+    theStaticAnalysis->setIntegrator(*theStaticIntegrator);
   }
   
   else if (strcmp(argv[1],"DisplacementControl") == 0) {
@@ -1923,6 +2018,10 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 
       theStaticIntegrator = new DisplacementControl(node,dof-1,increment, &theDomain,
 						    numIter, minIncr, maxIncr);
+
+  // if the analysis exists - we want to change the Integrator
+  if (theStaticAnalysis != 0)
+    theStaticAnalysis->setIntegrator(*theStaticIntegrator);
   }  
   
   else if (strcmp(argv[1],"Newmark") == 0) {
@@ -1966,6 +2065,100 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  theTransientIntegrator = new Newmark(gamma,beta);       
       else
 	  theTransientIntegrator = new Newmark(gamma,beta,alphaM,betaK,betaKi,betaKc);
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
+  }  
+  
+  else if (strcmp(argv[1],"NewmarkWithSensitivity") == 0) {
+	  int assemblyFlag = 0;
+      double gamma;
+      double beta;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 4 && argc != 6 && argc != 8 && argc != 10) {
+	     interp->result = "WARNING integrator Newmark gamma beta <alphaM?  betaKcurrent?  betaKi? betaKlastCommitted?> <-assemble tag?> ";
+	     return TCL_ERROR;
+      }
+	  
+	  // Take care of argc == 4, the basic case
+      if (Tcl_GetDouble(interp, argv[2], &gamma) != TCL_OK) {
+		  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;	  
+		  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
+		  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+		  return TCL_ERROR;	
+      }
+
+	  // If only assembly flag is given extra
+	  if (argc == 6) {
+		  if (strcmp(argv[4],"-assemble") != 0) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+		  }
+		  if (Tcl_GetInt(interp, argv[5], &assemblyFlag) != TCL_OK) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+			  return TCL_ERROR;	
+		  }
+	  }
+	  // If only extra integrator (damping) parameters are given extra
+      if (argc == 8) {
+		  if (Tcl_GetDouble(interp, argv[4], &alphaM) != TCL_OK) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+			  return TCL_ERROR;	
+		  }
+		  if (Tcl_GetDouble(interp, argv[5], &betaK) != TCL_OK) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+			  return TCL_ERROR;	
+		  }
+		  if (Tcl_GetDouble(interp, argv[6], &betaKi) != TCL_OK) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+			  return TCL_ERROR;	
+		  }
+		  if (Tcl_GetDouble(interp, argv[7], &betaKc) != TCL_OK) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+			  return TCL_ERROR;	
+		  }
+      }
+	  // If everything is given extra
+	  if (argc == 10) {
+		  if (Tcl_GetDouble(interp, argv[4], &alphaM) != TCL_OK) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+			  return TCL_ERROR;	
+		  }
+		  if (Tcl_GetDouble(interp, argv[5], &betaK) != TCL_OK) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+			  return TCL_ERROR;	
+		  }
+		  if (Tcl_GetDouble(interp, argv[6], &betaKi) != TCL_OK) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+			  return TCL_ERROR;	
+		  }
+		  if (Tcl_GetDouble(interp, argv[7], &betaKc) != TCL_OK) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+			  return TCL_ERROR;	
+		  }
+		  if (strcmp(argv[8],"-assemble") != 0) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+		  }
+		  if (Tcl_GetInt(interp, argv[9], &assemblyFlag) != TCL_OK) {
+			  opserr << "WARNING: Error in input to Newmark sensitivity integrator" << endln;
+			  return TCL_ERROR;	
+		  }
+	  }
+
+      if (argc == 4 || argc == 6) {
+		theNSI = new NewmarkSensitivityIntegrator(assemblyFlag, gamma,beta);       
+	  }
+      else {
+		theNSI = new NewmarkSensitivityIntegrator(assemblyFlag, gamma,beta,alphaM,betaK,betaKi,betaKc);
+	  }
+	  theTransientIntegrator = theNSI;
+
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }  
   
   else if (strcmp(argv[1],"HHT") == 0) {
@@ -2002,6 +2195,10 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  theTransientIntegrator = new HHT(alpha);       
       else
 	  theTransientIntegrator = new HHT(alpha, alphaM, betaK, betaKi, betaKc);       
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }    
 
   else if (strcmp(argv[1],"GeneralizedHHT") == 0) {
@@ -2045,6 +2242,10 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  theTransientIntegrator = new HHT(alpha, beta, gamma);       
       else
 	  theTransientIntegrator = new HHT(alpha, beta, gamma, alphaM,betaK, betaKi, betaKc);       
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }    
 
 
@@ -2087,6 +2288,10 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  theTransientIntegrator = new Newmark1(gamma,beta);       
       else
 	  theTransientIntegrator = new Newmark1(gamma,beta,alphaM,betaK,betaKi, betaKc);
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }
 
   else if (strcmp(argv[1],"HHT1") == 0) {
@@ -2122,6 +2327,10 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  theTransientIntegrator = new HHT1(alpha);       
       else
 	  theTransientIntegrator = new HHT1(alpha,alphaM,betaK, betaKi, betaKc);       
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }    
 
   
@@ -2157,18 +2366,16 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  theTransientIntegrator = new WilsonTheta(theta);       
       else
 	  theTransientIntegrator = new WilsonTheta(theta, alphaM, betaK, betaKi, betaKc);
+
+      // if the analysis exists - we want to change the Integrator
+	  if (theTransientAnalysis != 0)
+		theTransientAnalysis->setIntegrator(*theTransientIntegrator);
   }      
 
   else {
     opserr << "WARNING No Integrator type exists \n";
     return TCL_ERROR;
   }    
-
-  // if the analysis exists - we want to change the Integrator
-  if (theStaticAnalysis != 0)
-    theStaticAnalysis->setIntegrator(*theStaticIntegrator);
-  else if (theTransientAnalysis != 0)
-    theTransientAnalysis->setIntegrator(*theTransientIntegrator);
 
   return TCL_OK;
 }
@@ -2665,6 +2872,21 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 		ReliabilityDomain *theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
 		theReliabilityDomain->removeRandomVariablePositioner(rvPosTag);
 	}
+    else if (strcmp(argv[1],"performanceFunction") == 0) {
+		int lsfTag;
+		if (Tcl_GetInt(interp, argv[2], &lsfTag) != TCL_OK) {
+			opserr << "WARNING invalid input: lsfTag \n";
+			return TCL_ERROR;
+		}
+		ReliabilityDomain *theReliabilityDomain = theReliabilityBuilder->getReliabilityDomain();
+		theReliabilityDomain->removePerformanceFunction(lsfTag);
+	}
+    else if (strcmp(argv[1],"sensitivityAlgorithm") == 0) {
+		if (theSensitivityAlgorithm != 0) {
+			theStaticAnalysis->setSensitivityAlgorithm(0);
+			theSensitivityAlgorithm = 0;
+		}
+	}
 // AddingSensitivity:END ///////////////////////////////////////
 #endif
 
@@ -2706,7 +2928,7 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
     }
     
     // now we copy the value to the tcl string that is returned
-    sprintf(interp->result,"%5.20f",value);
+    sprintf(interp->result,"%35.20f",value);
     
 	
     return TCL_OK;
@@ -2715,8 +2937,86 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
 int 
+nodeVel(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+{
+    
+    // make sure at least one other argument to contain type of system
+    if (argc < 3) {
+	interp->result = "WARNING want - nodeVel nodeTag? dof?\n";
+	return TCL_ERROR;
+   }    
+
+    int tag, dof;
+
+    if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? ";
+	return TCL_ERROR;	        
+    }    
+    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? - could not read dof? ";
+	return TCL_ERROR;	        
+    }        
+    
+    Node *theNode = theDomain.getNode(tag);
+    double value = 0.0;
+    if (theNode != 0) {
+	const Vector &vel = theNode->getTrialVel();
+	if (vel.Size() >= dof && dof > 0) {
+	    value = vel(dof-1); // -1 for OpenSees vs C indexing
+	}
+    }
+    
+    // now we copy the value to the tcl string that is returned
+    sprintf(interp->result,"%35.20f",value);
+    
+	
+    return TCL_OK;
+}
+
+
+int 
 sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 {
+
+    // make sure at least one other argument to contain type of system
+    if (argc < 4) {
+	interp->result = "WARNING want - sensNodeDisp nodeTag? dof?\n";
+	return TCL_ERROR;
+   }    
+
+    int tag, dof, gradNum;
+
+    if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? gradNum?- could not read nodeTag? ";
+	return TCL_ERROR;	        
+    }    
+    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? gradNum?- could not read dof? ";
+	return TCL_ERROR;	        
+    }        
+    if (Tcl_GetInt(interp, argv[3], &gradNum) != TCL_OK) {
+	opserr << "WARNING nodeDisp nodeTag? dof? gradNum?- could not read dof? ";
+	return TCL_ERROR;	        
+    }        
+    
+    Node *theNode = theDomain.getNode(tag);
+	double value = theNode->getDispSensitivity(dof,gradNum);
+    
+    // copy the value to the tcl string that is returned
+    sprintf(interp->result,"%35.20f",value);
+	
+    return TCL_OK;
+}
+int 
+sensNodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
+{
+
+    // make sure at least one other argument to contain type of system
+    if (argc < 4) {
+	interp->result = "WARNING want - sensNodeDisp nodeTag? dof?\n";
+	return TCL_ERROR;
+   }    
+
     int tag, dof, gradNum;
 
     if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
@@ -2733,7 +3033,7 @@ sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
     }        
     
     Node *theNode = theDomain.getNode(tag);
-	double value = theNode->getGradient(dof,gradNum);
+	double value = theNode->getVelSensitivity(dof,gradNum);
     
     // copy the value to the tcl string that is returned
     sprintf(interp->result,"%35.20f",value);
@@ -2756,11 +3056,11 @@ computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char *
 	// analysis will call this method BOTH for path dependent and independent problems. 
 
 #ifdef _RELIABILITY
-	if (theSensitivityAlgorithm->isPathDependent()) {
+	if (theSensitivityAlgorithm->shouldComputeAtEachStep()) {
 	}
 	else {
 
-		theSensitivityAlgorithm->computeGradients();
+		theSensitivityAlgorithm->computeSensitivities();
 	}
 #endif
     return TCL_OK;

@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:00 $
+// $Revision: 1.7 $
+// $Date: 2003-03-04 00:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.h,v $
                                                                         
                                                                         
 #ifndef LoadPattern_h
 #define LoadPattern_h
 
-// File: ~/domain/pattern/LoadPattern.h
-//
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -93,11 +91,14 @@ class LoadPattern : public DomainComponent
     // method to obtain a blank copy of the LoadPattern
     virtual LoadPattern *getCopy(void);
 
-    int setParameter (char **argv, int argc, Information &info);
-    int updateParameter (int parameterID, Information &info);
-// AddingSensitivity:BEGIN //////////////////////////////
-	const Vector & gradient(bool compute, int identifier);
-// AddingSensitivity:END ////////////////////////////////
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    virtual void applyLoadSensitivity(double pseudoTime = 0.0);
+    virtual int  setParameter(const char **argv, int argc, Information &info);
+    virtual int  updateParameter(int parameterID, Information &info);
+    virtual int  activateParameter(int parameterID);
+    virtual const Vector & getExternalForceSensitivity(int gradNumber);
+    // AddingSensitivity:END ///////////////////////////////////////////
+
   protected:
     int    isConstant;     // to indictae whether setConstant has been called
 	
@@ -119,9 +120,11 @@ class LoadPattern : public DomainComponent
     NodalLoadIter       *theNodIter;
     ElementalLoadIter   *theEleIter;
     SingleDomSP_Iter    *theSpIter;    
-// AddingSensitivity:BEGIN //////////////////////////////////////
-	Vector *randomLoads;
-// AddingSensitivity:END ////////////////////////////////////////
+
+    // AddingSensitivity:BEGIN //////////////////////////////////////
+    Vector *randomLoads;
+    bool RVisRandomProcessDiscretizer;
+    // AddingSensitivity:END ////////////////////////////////////////
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2003-03-04 00:48:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf2d.h,v $
                                                                         
                                                                         
@@ -48,7 +48,7 @@ class CrdTransf2d: public CrdTransf
     virtual ~CrdTransf2d();
    
     virtual CrdTransf2d *getCopy(void)=0;
- 
+
   protected:
     
   private:

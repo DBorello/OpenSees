@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:44 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:48:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
-// File: ~/analysis/analysis/DirectIntegrationAnalysis.C
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -55,6 +53,11 @@
 #include <Matrix.h>
 #include <ID.h>
 #include <Graph.h>
+// AddingSensitivity:BEGIN //////////////////////////////////
+#ifdef _RELIABILITY
+#include <SensitivityAlgorithm.h>
+#endif
+// AddingSensitivity:END ////////////////////////////////////
 
 // Constructor
 //    sets theModel and theSysOFEqn to 0 and the Algorithm to the one supplied
@@ -82,6 +85,11 @@ DirectIntegrationAnalysis::DirectIntegrationAnalysis(
     theDOF_Numberer->setLinks(theModel);
     theIntegrator->setLinks(theModel,theLinSOE);
     theAlgorithm->setLinks(theModel,theTransientIntegrator,theLinSOE);
+// AddingSensitivity:BEGIN ////////////////////////////////////
+#ifdef _RELIABILITY
+	theSensitivityAlgorithm = 0;
+#endif
+// AddingSensitivity:END //////////////////////////////////////
 }    
 
 DirectIntegrationAnalysis::~DirectIntegrationAnalysis()
@@ -99,6 +107,11 @@ DirectIntegrationAnalysis::clearAll(void)
     delete theIntegrator;
     delete theAlgorithm;
     delete theSOE;
+// AddingSensitivity:BEGIN ////////////////////////////////////
+#ifdef _RELIABILITY
+	delete theSensitivityAlgorithm;
+#endif
+// AddingSensitivity:END //////////////////////////////////////
 }    
 
 #include <NodeIter.h>
@@ -159,6 +172,22 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 	    theIntegrator->revertToLastStep();
 	    return -3;
 	}    
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
+#ifdef _RELIABILITY
+	if (theSensitivityAlgorithm != 0) {
+		result = theSensitivityAlgorithm->computeSensitivities();
+		if (result < 0) {
+			opserr << "StaticAnalysis::analyze() - the SensitivityAlgorithm failed";
+			opserr << " at iteration: " << i << " with domain at load factor ";
+			opserr << the_Domain->getCurrentTime() << endln;
+			the_Domain->revertToLastCommit();	    
+			theIntegrator->revertToLastStep();
+			return -5;
+		}    
+	}
+#endif
+// AddingSensitivity:END //////////////////////////////////////
 
 	result = theIntegrator->commit();
 	if (result < 0) {
@@ -231,6 +260,24 @@ DirectIntegrationAnalysis::domainChanged(void)
     return 0;
 }    
 
+// AddingSensitivity:BEGIN //////////////////////////////
+#ifdef _RELIABILITY
+int 
+DirectIntegrationAnalysis::setSensitivityAlgorithm(SensitivityAlgorithm *passedSensitivityAlgorithm)
+{
+    int result = 0;
+
+    // invoke the destructor on the old one
+    if (theSensitivityAlgorithm != 0) {
+		delete theSensitivityAlgorithm;
+	}
+
+	theSensitivityAlgorithm = passedSensitivityAlgorithm;
+
+	return 0;
+}
+#endif
+// AddingSensitivity:END ///////////////////////////////
 
 
 int 

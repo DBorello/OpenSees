@@ -22,46 +22,48 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:53 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:44:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #include <LimitStateFunction.h>
 #include <Vector.h>
 #include <string.h>
-#include <fstream>
-#include <iomanip>
-using std::ios;
-using std::setprecision;
-using std::setiosflags;
-using std::setw;
+#include <classTags.h>
 
 LimitStateFunction::LimitStateFunction(	int passedTag, 
 									    char *passedExpression)
-:ReliabilityDomainComponent(passedTag, 14727)
+:ReliabilityDomainComponent(passedTag, LIMIT_STATE_FUNCTION)
 {
 	tag = passedTag;
-	expression = new char[100];
-	strcpy(expression,passedExpression);
-	FORMAnalysisPerformed = false;
-	SimulationAnalysisPerformed = false;
-	EvaluateLimitStateFunctionAtStartPointPerformed = false;
-	PointFittingSORMAnalysisPerformed = false;
-	CurvatureFittingSORMAnalysisPerformed = false;
-	CurvaturesFromSearchAlgorithmSORMAnalysisPerformed = false;
+	
+	originalExpression = new char[500];
+	strcpy(originalExpression,passedExpression);
+
+	expressionWithAddition = new char[500];
+	strcpy(expressionWithAddition,passedExpression);
+
+	tokenizedExpression = new char[500];
+	tokenizeIt(passedExpression);
 }
 
 
 LimitStateFunction::~LimitStateFunction()
 {
-	delete [] expression;
+	if (originalExpression != 0) {
+		delete [] originalExpression;
+	}
+	if (expressionWithAddition != 0) {
+		delete [] expressionWithAddition;
+	}
+	if (tokenizedExpression != 0) {
+		delete [] tokenizedExpression;
+	}
 }
 
 
@@ -75,229 +77,85 @@ LimitStateFunction::Print(OPS_Stream &s, int flag)
 char *
 LimitStateFunction::getExpression()
 {
-	return expression;
+	return expressionWithAddition;
 }
 
 
-
-void
-LimitStateFunction::printSummaryOfResults(ofstream &outputFile)
+char *
+LimitStateFunction::getTokenizedExpression()
 {
-
-	if (FORMAnalysisPerformed || SimulationAnalysisPerformed || CurvaturesFromSearchAlgorithmSORMAnalysisPerformed) {
-
-		outputFile << "#  LIMIT-STATE FUNCTION NUMBER "
-			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"                                   #" << endln;
-		if (FORMAnalysisPerformed) {
-		outputFile << "#   FORM Analysis:                    " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(19)<<FORMReliabilityIndexBeta 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<FORMProbabilityOfFailure_pf1 
-			<< " #" << endln;
-		}
-		if (SimulationAnalysisPerformed) {
-		outputFile << "#   Simulation Analysis:              " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(19)<<SimulationReliabilityIndexBeta 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SimulationProbabilityOfFailure_pfsim 
-			<< " #" << endln;
-		}
-		if (CurvaturesFromSearchAlgorithmSORMAnalysisPerformed) {
-		outputFile << "#   SORM(1) (Breitung)                "
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(19)<<SORMUsingSearchBetaBreitung 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SORMUsingSearchPf2Breitung 
-			<< " #" << endln;
-		}
-		outputFile << "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #" << endln;
-	}
-
-
-
-
-
-/*  ideas for future output options
-
-#######################################################################
-#  SORM - POINT FITTING - ANALYSIS RESULTS                            #
-#                                                                     #
-#  Reliability index beta: ............................... 2.37544    #
-#  Estimated probability of failure pf2: ................. 0.00876409 #
-#                                                                     #
-#######################################################################
-
-
-#######################################################################
-#  SORM - CURVATURE FITTING - ANALYSIS RESULTS                        #
-#                                                                     #
-#  Reliability index beta: ............................... 2.37544    #
-#  Estimated probability of failure pf2: ................. 0.00876409 #
-#                                                                     #
-#######################################################################
-
-
-#######################################################################
-#  SENSITIVITY ANALYSIS RESULTS                                       #
-#                                                                     #
-#  d(beta)/d(parameter)                                               #
-#  rv#    mean      stdv      par1     par2    par3     par4          #
-#  1   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  2   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  3   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  4   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  5   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  6   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  7   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#                                                                     #
-#  d(pf1)/d(parameter)                                                #
-#  rv#    mean      stdv      par1     par2    par3     par4          #
-#  1   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  2   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  3   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  4   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  5   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  6   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#  7   109019    -1.38242  -0.581826 -0.581826 -0.581826 -0.581826    #
-#                                                                     #
-#######################################################################
-
-
-#######################################################################
-#  INPUT DETAILS                                                      #
-#                                                                     #
-# rv#     mean        stdv      startPt                               #
-#  1     200000.0    80000.0   200000.0                               #
-#  2     200000.0    80000.0   200000.0                               #
-#  3     200000.0    80000.0   200000.0                               #
-#  4     200000.0    80000.0   200000.0                               #
-#  5     200000.0    80000.0   200000.0                               #
-#  6     200000.0    80000.0   200000.0                               #
-#  7     200000.0    80000.0   200000.0                               #
-#  8     200000.0    80000.0   200000.0                               #
-#  9     200000.0    80000.0   200000.0                               #
-#                                                                     #
-#  correlation?  rvPositioners?  limitStateFunctions?                 #
-#  analysisSetUp?                                                     #
-#######################################################################
-
-
-
-*/
-
-
+	return tokenizedExpression;
 }
 
-void
-LimitStateFunction::printResults(ofstream &outputFile)
+int
+LimitStateFunction::addExpression(char *addition)
 {
+	strcat(expressionWithAddition,addition);
+
+	tokenizeIt(expressionWithAddition);
+
+	return 0;
+}
+
+int
+LimitStateFunction::removeAddedExpression()
+{
+	strcpy(expressionWithAddition,originalExpression);
+
+	tokenizeIt(expressionWithAddition);
+
+	return 0;
+}
 
 
-	// PRINT EvaluateLimitStateFunctionAtStartPoint RESULTS
-	if (EvaluateLimitStateFunctionAtStartPointPerformed) {
-		outputFile << "#######################################################################" << endln;
-		outputFile << "#  VALUE OF LIMIT-STATE FUNCTION "
-			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<" AT START POINT                  #" << endln;
-		outputFile << "#                                                                     #" << endln;
-		outputFile << "#  Limit-state function value at start point: ......... " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<GFunValueAtStartPt 
-			<< "  #" << endln;
-		outputFile << "#                                                                     #" << endln;
-		outputFile << "#######################################################################" << endln << endln << endln;
-	}
-
-
-	// PRINT FORM RESULTS
-	if (FORMAnalysisPerformed) {
-		outputFile << "#######################################################################" << endln;
-		outputFile << "#  FORM ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER "
-			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"            #" << endln;
-		outputFile << "#                                                                     #" << endln;
-		outputFile << "#  Limit-state function value at start point: ......... " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<GFunValueAtStartPt 
-			<< "  #" << endln;
-		outputFile << "#  Number of iterations: .............................. " 
-			<<setiosflags(ios::left)<<setw(12)<<numberOfIterationsToFindDesignPoint 
-			<< "  #" << endln;
-		outputFile << "#  Reliability index beta: ............................ " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<FORMReliabilityIndexBeta 
-			<< "  #" << endln;
-		outputFile << "#  Estimated probability of failure pf1: .............. " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<FORMProbabilityOfFailure_pf1 
-			<< "  #" << endln;
-		outputFile << "#                                                                     #" << endln;
-		outputFile << "# rv#     x*          u*        alpha     gamma     delta     eta     #" << endln;
-		outputFile.setf( ios::scientific, ios::floatfield );
-		for (int i=0;  i<designPoint_x_inOriginalSpace.Size(); i++) {
-		outputFile << "#  " <<setw(3)<<(i+1)<<" ";
-		outputFile.setf(ios::scientific, ios::floatfield);
-		if (designPoint_x_inOriginalSpace(i)<0.0) { outputFile << "-"; }
-		else { outputFile << " "; }
-		outputFile <<setprecision(3)<<setw(11)<<fabs(designPoint_x_inOriginalSpace(i));
-		if (designPoint_u_inStdNormalSpace(i)<0.0) { outputFile << "-"; }
-		else { outputFile << " "; }
-		outputFile <<setprecision(3)<<setw(11)<<fabs(designPoint_u_inStdNormalSpace(i));
-		outputFile.unsetf( ios::scientific );
-		outputFile.setf(ios::fixed, ios::floatfield);
-
-		if (normalizedNegativeGradientVectorAlpha(i)<0.0) { outputFile << "-"; }
-		else { outputFile << " "; }
-		outputFile<<setprecision(5)<<setw(8)<<fabs(normalizedNegativeGradientVectorAlpha(i));
-
-		if (importanceVectorGamma(i)<0.0) { outputFile << "-"; }
-		else { outputFile << " "; }
-		outputFile<<setprecision(5)<<setw(8)<<fabs(importanceVectorGamma(i));		
-		
-		outputFile<<"   -     ";
-		outputFile<<"   -     ";
-		outputFile<<"   #" << endln;
+int
+LimitStateFunction::tokenizeIt(char *originalExpression)
+{
+	// Also store the tokenized expression (with dollar signs in front of variable names)
+	char *lsf_forTokenizing = new char[500];
+	char separators[5] = "}{";
+	char *dollarSign = "$";
+	strcpy(lsf_forTokenizing,originalExpression);
+	char lsf_expression[500] = "";
+	char *tokenPtr2 = strtok( lsf_forTokenizing, separators);
+	while ( tokenPtr2 != NULL ) {
+		if (   strncmp(tokenPtr2, "a",1) == 0
+			|| strncmp(tokenPtr2, "b",1) == 0
+			|| strncmp(tokenPtr2, "c",1) == 0
+			|| strncmp(tokenPtr2, "d",1) == 0
+			|| strncmp(tokenPtr2, "e",1) == 0
+			|| strncmp(tokenPtr2, "f",1) == 0
+			|| strncmp(tokenPtr2, "g",1) == 0
+			|| strncmp(tokenPtr2, "h",1) == 0
+			|| strncmp(tokenPtr2, "i",1) == 0
+			|| strncmp(tokenPtr2, "j",1) == 0
+			|| strncmp(tokenPtr2, "k",1) == 0
+			|| strncmp(tokenPtr2, "l",1) == 0
+			|| strncmp(tokenPtr2, "m",1) == 0
+			|| strncmp(tokenPtr2, "n",1) == 0
+			|| strncmp(tokenPtr2, "o",1) == 0
+			|| strncmp(tokenPtr2, "p",1) == 0
+			|| strncmp(tokenPtr2, "q",1) == 0
+			|| strncmp(tokenPtr2, "r",1) == 0
+			|| strncmp(tokenPtr2, "s",1) == 0
+			|| strncmp(tokenPtr2, "t",1) == 0
+			|| strncmp(tokenPtr2, "u",1) == 0
+			|| strncmp(tokenPtr2, "v",1) == 0
+			|| strncmp(tokenPtr2, "w",1) == 0
+			|| strncmp(tokenPtr2, "x",1) == 0
+			|| strncmp(tokenPtr2, "y",1) == 0
+			|| strncmp(tokenPtr2, "z",1) == 0) {
+			strcat(lsf_expression, dollarSign);
+			strcat(lsf_expression, tokenPtr2);
 		}
-		outputFile << "#                                                                     #" << endln;
-		outputFile << "#######################################################################" << endln << endln << endln;
+		else {
+			strcat(lsf_expression, tokenPtr2);
+		}
+		tokenPtr2 = strtok( NULL, separators);
 	}
+	delete [] lsf_forTokenizing;
 
+	strcpy(tokenizedExpression,lsf_expression);
 
-	// PRINT SIMULATION RESULTS
-	if (SimulationAnalysisPerformed) {
-		outputFile << "#######################################################################" << endln;
-		outputFile << "#  SIMULATION ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER "
-			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"      #" << endln;
-		outputFile << "#                                                                     #" << endln;
-		outputFile << "#  Reliability index beta: ............................ " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SimulationReliabilityIndexBeta 
-			<< "  #" << endln;
-		outputFile << "#  Estimated probability of failure pf_sim: ........... " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SimulationProbabilityOfFailure_pfsim 
-			<< "  #" << endln;
-		outputFile << "#  Number of simulations: ............................. " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<NumberOfSimulations 
-			<< "  #" << endln;
-		outputFile << "#  Coefficient of variation (of pf): .................. " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<CoefficientOfVariationOfPfFromSimulation 
-			<< "  #" << endln;
-		outputFile << "#                                                                     #" << endln;
-		outputFile << "#######################################################################" << endln << endln << endln;
-
-	}
-
-	// PRINT CurvaturesFromSearchAlgorithmSORMAnalysis RESULTS
-	if (CurvaturesFromSearchAlgorithmSORMAnalysisPerformed) {
-		outputFile << "#######################################################################" << endln;
-		outputFile << "#  SORM ANALYSIS RESULTS, LIMIT-STATE FUNCTION NUMBER "
-			<<setiosflags(ios::left)<<setprecision(1)<<setw(4)<<tag <<"            #" << endln;
-		outputFile << "#  (Curvatures found from search algorithm.)                          #" << endln;
-		outputFile << "#                                                                     #" << endln;
-		outputFile << "#  Number of principal curvatures used: ............... " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<numberOfCurvatauresUsed
-			<< "  #" << endln;
-		outputFile << "#  Reliability index beta (impr. Breitung's formula):.. " 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SORMUsingSearchBetaBreitung 
-			<< "  #" << endln;
-		outputFile << "#  Corresponding estimated probability of failure pf2:.." 
-			<<setiosflags(ios::left)<<setprecision(5)<<setw(12)<<SORMUsingSearchPf2Breitung 
-			<< "  #" << endln;
-		outputFile << "#                                                                     #" << endln;
-		outputFile << "#######################################################################" << endln << endln << endln;
-
-	}
-
-
-
-
+	return 0;
 }

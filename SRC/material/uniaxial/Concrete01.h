@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-25 23:33:38 $
+// $Revision: 1.8 $
+// $Date: 2003-03-04 00:48:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Concrete01.h,v $
                                                                         
                                                                         
@@ -69,11 +69,16 @@ class Concrete01 : public UniaxialMaterial
     
       void Print(OPS_Stream &s, int flag =0);
 
-      int setParameter(const char **argv, int argc, Information &info);
-      int updateParameter(int parameterID, Information &info);
-
 // AddingSensitivity:BEGIN //////////////////////////////////////////
-	int gradient(bool compute, int identifier, double & gradient);
+    int    setParameter             (const char **argv, int argc, Information &info);
+    int    updateParameter          (int parameterID, Information &info);
+	int    activateParameter        (int parameterID);
+	double getStressSensitivity     (int gradNumber, bool conditional);
+	double getStrainSensitivity     (int gradNumber);
+	double getTangentSensitivity    (int gradNumber);
+	double getDampTangentSensitivity(int gradNumber);
+	double getRhoSensitivity        (int gradNumber);
+	int    commitSensitivity        (double strainGradient, int gradNumber, int numGrads);
 // AddingSensitivity:END ///////////////////////////////////////////
 
    protected:
@@ -115,7 +120,8 @@ class Concrete01 : public UniaxialMaterial
       void envelope();
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
-    int gradientIdentifier;
+    int parameterID;
+	Matrix *SHVs;
 // AddingSensitivity:END ///////////////////////////////////////////
 };
 

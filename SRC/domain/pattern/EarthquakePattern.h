@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:59 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.h,v $
                                                                         
                                                                         
@@ -59,6 +59,13 @@ class EarthquakePattern : public LoadPattern
     // method to obtain a blank copy of the LoadPattern
     virtual LoadPattern *getCopy(void) =0;
     
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    virtual void applyLoadSensitivity(double pseudoTime = 0.0);
+    virtual int  setParameter(const char **argv, int argc, Information &info);
+    virtual int  updateParameter(int parameterID, Information &info);
+    virtual int  activateParameter(int parameterID);
+    // AddingSensitivity:END ///////////////////////////////////////////
+    
  protected:
     int addMotion(GroundMotion &theMotion);
     GroundMotion **theMotions;
@@ -67,6 +74,10 @@ class EarthquakePattern : public LoadPattern
   private:
     Vector *uDotG, *uDotDotG;
     double currentTime;
+
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+	int parameterID;
+// AddingSensitivity:END ///////////////////////////////////////////
 };
 
 #endif

@@ -22,39 +22,29 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:54 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:44:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/BetaRV.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
 #include <BetaRV.h>
 #include <GammaRV.h>
 #include <math.h>
 #include <string.h>
+#include <classTags.h>
 #include <OPS_Globals.h>
 
-BetaRV::BetaRV(int passedTag, 
-		 double passedMean,
-		 double passedStdv,
-		 double passedStartValue)
-:RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
-{
-	// Note: this constructor is void.
-	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
-}
 BetaRV::BetaRV(int passedTag, 
 		 double passedParameter1,
 		 double passedParameter2,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_beta)
 {
 	tag = passedTag ;
 	a = passedParameter1;
@@ -64,19 +54,11 @@ BetaRV::BetaRV(int passedTag,
 	startValue = passedStartValue;
 }
 BetaRV::BetaRV(int passedTag, 
-		 double passedMean,
-		 double passedStdv)
-:RandomVariable(passedTag, passedMean, passedStdv)
-{
-	// Note: this constructor is void.
-	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
-}
-BetaRV::BetaRV(int passedTag, 
 		 double passedParameter1,
 		 double passedParameter2,
 		 double passedParameter3,
 		 double passedParameter4)
-:RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
+:RandomVariable(passedTag, RANDOM_VARIABLE_beta)
 {
 	tag = passedTag ;
 	a = passedParameter1;
@@ -119,7 +101,9 @@ BetaRV::getPDFvalue(double rvValue)
 double
 BetaRV::getCDFvalue(double rvValue)
 {
+
 	double result = 0.0;
+
 	if ( a < rvValue && rvValue < b ) {
 		// There exists no closed form expression for the Beta CDF.
 		// In this preliminary implementation of the Beta random variable,
@@ -132,11 +116,11 @@ BetaRV::getCDFvalue(double rvValue)
 		double sum_fx2j = 0.0;
 		double sum_fx2j_1 = 0.0;
 		for (int j=1;  j<=n_2;  j++) {
-			sum_fx2j = sum_fx2j + getPDFvalue((double)(j*2)*h);
-			sum_fx2j_1 = sum_fx2j_1 + getPDFvalue((double)(j*2-1)*h);
+			sum_fx2j = sum_fx2j + getPDFvalue(   (double) (a+(j*2)*h/(2*n_2))   );
+			sum_fx2j_1 = sum_fx2j_1 + getPDFvalue(   (double)(a+(j*2-1)*h/(2*n_2))   );
 		}
 		sum_fx2j = sum_fx2j - getPDFvalue((double)(rvValue));
-		result = h/3.0*(fa + 2.0*sum_fx2j + 4.0*sum_fx2j_1 + fb);
+		result = h/(2*n_2)/3.0*(fa + 2.0*sum_fx2j + 4.0*sum_fx2j_1 + fb);
 	}
 	else if (rvValue<=a) {
 		result = 0.0;
@@ -144,6 +128,7 @@ BetaRV::getCDFvalue(double rvValue)
 	else {
 		result = 1.0;
 	}
+
 	return result;
 }
 
@@ -168,29 +153,42 @@ BetaRV::getInverseCDFvalue(double probValue)
 	double h;
 	double perturbed_f;
 	for (int i=1;  i<=100;  i++ )  {
+
 		// Evaluate function
 		f = probValue - getCDFvalue(x_old);
 		// Evaluate perturbed function
 		h = getStdv()/200.0;
 		perturbed_f = probValue - getCDFvalue(x_old+h);
+
 		// Evaluate derivative of function
 		df = ( perturbed_f - f ) / h;
-		// Take a Newton step
-		x_new = x_old - f/df;
-		// Check convergence; quit or continue
-		if (fabs(1.0-fabs(x_old/x_new)) < tol) {
-			result = x_new;
+
+		if ( fabs(df) < 1.0e-15) {
+			opserr << "WARNING: BetaRV::getInverseCDFvalue() -- zero derivative " << endln
+				<< " in Newton algorithm. " << endln;
 		}
 		else {
-			if (i==100) {
-				opserr << "WARNING: Did not converge to find inverse CDF!" << endln;
-				result = 0.0;
+
+			// Take a Newton step
+			x_new = x_old - f/df;
+			
+			// Check convergence; quit or continue
+			if (fabs(1.0-fabs(x_old/x_new)) < tol) {
+				return x_new;
 			}
 			else {
-			x_old = x_new;
+				if (i==100) {
+					opserr << "WARNING: Did not converge to find inverse CDF!" << endln;
+					return 0.0;
+				}
+				else {
+					x_old = x_new;
+				}
+			
 			}
 		}
 	}
+
 	return result;
 }
 
@@ -231,13 +229,31 @@ double BetaRV::getParameter4()  {return r;}
 
 
 double 
-BetaRV::betaFunction(double passed_q, double passed_r)
+BetaRV::betaFunction(double q, double r)
 {
+/*	OLD CODE: 
 	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
 	double par1,par2,par3;
-	par1 = aGammaRV->gammaFunction(passed_q);
-	par2 = aGammaRV->gammaFunction(passed_q);
-	par3 = aGammaRV->gammaFunction(passed_q+passed_r);
+	par1 = aGammaRV->gammaFunction(q);
+	par2 = aGammaRV->gammaFunction(q);
+	par3 = aGammaRV->gammaFunction(q+r);
 	delete aGammaRV;
 	return par1*par2/par3;
+*/
+
+	// Matlab definition of the beta function:
+	//    y = exp(gammaln(q)+gammaln(r)-gammaln(q+r));
+	//    ... where gammaln(.) = ln(gamma(.))
+	// So, try this instead:
+	GammaRV *aGammaRV = new GammaRV(1, 0.0, 1.0, 0.0);
+	double gammaq,gammar,gammaqpr;
+	gammaq = aGammaRV->gammaFunction(q);
+	gammar = aGammaRV->gammaFunction(r);
+	gammaqpr = aGammaRV->gammaFunction(q+r);
+	delete aGammaRV;
+	double loggammaq,loggammar,loggammaqpr;
+	loggammaq = log(gammaq);
+	loggammar = log(gammar);
+	loggammaqpr = log(gammaqpr);
+	return exp(loggammaq+loggammar-loggammaqpr);
 }

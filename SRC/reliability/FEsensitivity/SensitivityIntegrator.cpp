@@ -22,32 +22,27 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-31 22:11:36 $
+// $Revision: 1.2 $
+// $Date: 2003-03-04 00:46:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityIntegrator.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu), July 2001
-// Revised: 
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 
 #include <SensitivityIntegrator.h>
 
+
 SensitivityIntegrator::SensitivityIntegrator()
+:theAnalysisModel()
 {
 }
 
 SensitivityIntegrator::~SensitivityIntegrator()
 {
 }
-
-
-
-
-
-
 
 
 

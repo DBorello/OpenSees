@@ -1,8 +1,11 @@
 include ../../../../Makefile.def
 
-OBJS       = 	BasicGFunEvaluator.o  GFunEvaluator.o  OpenSeesGFunEvaluator.o
+OBJS       = 	BasicGFunEvaluator.o \
+	GFunEvaluator.o \
+	OpenSeesGFunEvaluator.o \
+	TclGFunEvaluator.o
 
-# Compilation control
+# Compilation contol
 all:         $(OBJS)
 
 # Miscellaneous

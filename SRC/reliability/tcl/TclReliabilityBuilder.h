@@ -22,16 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-08 20:21:54 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:46:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
-//			haukaas 08/08/01 (delete Tcl commands in destructor)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef TclReliabilityBuilder_h
@@ -52,7 +49,6 @@ protected:
 
 private:
     Tcl_Interp *theInterp;
-
 };
 
 #endif

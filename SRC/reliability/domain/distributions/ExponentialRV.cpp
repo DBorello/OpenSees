@@ -22,27 +22,26 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:54 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:44:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/ExponentialRV.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
 #include <ExponentialRV.h>
 #include <math.h>
 #include <string.h>
+#include <classTags.h>
 #include <OPS_Globals.h>
 
 ExponentialRV::ExponentialRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv,
 		 double passedStartValue)
-:RandomVariable(passedTag, passedMean, passedStdv, passedStartValue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_exponential)
 {
 	// Note: this constructor is void.
 	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
@@ -53,7 +52,7 @@ ExponentialRV::ExponentialRV(int passedTag,
 		 double passedParameter3,
 		 double passedParameter4,
 		 double passedStartValue)
-:RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4, passedStartValue)
+:RandomVariable(passedTag, RANDOM_VARIABLE_exponential)
 {
 	tag = passedTag ;
 	lambda = passedParameter1;
@@ -62,7 +61,7 @@ ExponentialRV::ExponentialRV(int passedTag,
 ExponentialRV::ExponentialRV(int passedTag, 
 		 double passedMean,
 		 double passedStdv)
-:RandomVariable(passedTag, passedMean, passedStdv)
+:RandomVariable(passedTag, RANDOM_VARIABLE_exponential)
 {
 	// Note: this constructor is void.
 	opserr << "WARNING: This type of random variable is not uniquely defined by mean and stdv." << endln;
@@ -72,7 +71,7 @@ ExponentialRV::ExponentialRV(int passedTag,
 		 double passedParameter2,
 		 double passedParameter3,
 		 double passedParameter4)
-:RandomVariable(passedTag, passedParameter1, passedParameter2, passedParameter3, passedParameter4)
+:RandomVariable(passedTag, RANDOM_VARIABLE_exponential)
 {
 	tag = passedTag ;
 	lambda = passedParameter1;

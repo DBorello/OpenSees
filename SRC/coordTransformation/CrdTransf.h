@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-10-03 18:07:53 $
+// $Revision: 1.3 $
+// $Date: 2003-03-04 00:48:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CrdTransf.h,v $
                                                                         
                                                                         
@@ -64,6 +64,11 @@ class CrdTransf: public TaggedObject, public MovableObject
     virtual int revertToLastCommit(void) = 0;        
     virtual int revertToStart(void) = 0;
     
+// AddingSensitivity:BEGIN //////////////////////////////////
+	virtual const Vector &getBasicDisplSensitivity (int gradNumber);
+    virtual const Vector &getGlobalResistingForceShapeSensitivity (const Vector &basicForce, const Vector &uniformLoad);
+    virtual const Vector &getBasicTrialDispShapeSensitivity      (void);
+// AddingSensitivity:END //////////////////////////////////
     virtual const Vector &getBasicTrialDisp       (void) = 0;
     virtual const Vector &getBasicIncrDisp        (void) = 0;
     virtual const Vector &getBasicIncrDeltaDisp   (void) = 0;

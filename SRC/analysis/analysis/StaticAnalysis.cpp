@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:00:44 $
+// $Revision: 1.7 $
+// $Date: 2003-03-04 00:48:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -156,7 +156,7 @@ StaticAnalysis::analyze(int numSteps)
 // AddingSensitivity:BEGIN ////////////////////////////////////
 #ifdef _RELIABILITY
 	if (theSensitivityAlgorithm != 0) {
-		result = theSensitivityAlgorithm->computeGradients();
+		result = theSensitivityAlgorithm->computeSensitivities();
 		if (result < 0) {
 			opserr << "StaticAnalysis::analyze() - the SensitivityAlgorithm failed";
 			opserr << " at iteration: " << i << " with domain at load factor ";

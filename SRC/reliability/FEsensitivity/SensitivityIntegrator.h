@@ -22,14 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-31 23:37:25 $
+// $Revision: 1.3 $
+// $Date: 2003-03-04 00:46:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityIntegrator.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu), July 2001
-// Revised: 
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef SensitivityIntegrator_h
@@ -46,14 +45,15 @@ public:
     SensitivityIntegrator();
     virtual ~SensitivityIntegrator();
     
-	virtual int formRightHandSide(void) = 0;
-	virtual int saveGradient(const Vector &v, int gradNum, int numGrads) = 0;
-	virtual int commitGradient(int gradNumber) = 0;
+	virtual int formSensitivityRHS(int gradNum) = 0;
+	virtual int formIndependentSensitivityRHS() = 0;
+	virtual int saveSensitivity   (const Vector &v, int gradNum, int numGrads) = 0;
+    virtual int commitSensitivity (int gradNum, int numGrads) = 0;
 
 protected:
     
 private:
-
+	AnalysisModel *theAnalysisModel;
 };
 
 #endif

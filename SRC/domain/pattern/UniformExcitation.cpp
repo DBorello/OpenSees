@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:01 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.cpp,v $
                                                                         
                                                                         
@@ -106,6 +106,28 @@ UniformExcitation::applyLoad(double time)
 //  }
 
   this->EarthquakePattern::applyLoad(time);
+
+  return;
+}
+
+
+void
+UniformExcitation::applyLoadSensitivity(double time)
+{
+  Domain *theDomain = this->getDomain();
+  if (theDomain == 0)
+    return;
+
+//  if (numNodes != theDomain->getNumNodes()) {
+    NodeIter &theNodes = theDomain->getNodes();
+    Node *theNode;
+    while ((theNode = theNodes()) != 0) {
+      theNode->setNumColR(1);
+      theNode->setR(theDof, 0, 1.0);
+    }
+//  }
+
+  this->EarthquakePattern::applyLoadSensitivity(time);
 
   return;
 }

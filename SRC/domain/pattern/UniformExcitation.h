@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:01 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.h,v $
                                                                         
                                                                         
@@ -54,6 +54,11 @@ class UniformExcitation : public EarthquakePattern
 		 FEM_ObjectBroker &theBroker);    
 
     LoadPattern *getCopy(void);
+
+    // AddingSensitivity:BEGIN /////////////////////////////////
+    void applyLoadSensitivity(double time);
+    // AddingSensitivity:END ///////////////////////////////////
+
  protected:
 
  private:

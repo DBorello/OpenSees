@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:58 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:48:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.h,v $
                                                                         
                                                                         
 #ifndef Node_h
 #define Node_h
 
-// File: ~/domain/node/Node.h
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -125,10 +123,21 @@ class Node : public DomainComponent
 			 FEM_ObjectBroker &theBroker);
     virtual void Print(OPS_Stream &s, int flag = 0);
     virtual int displaySelf(Renderer &theRenderer, int displayMode, float fact);
-// AddingSensitivity:BEGIN ///////////////////////////////////////
-    int setGradient(const Vector &v, int gradNum, int numGrads);
-    double getGradient(int dof, int gradNum);
-// AddingSensitivity:END /////////////////////////////////////////
+
+    // AddingSensitivity:BEGIN /////////////////////////////////////////
+    int addInertiaLoadSensitivityToUnbalance(const Vector &accel, 
+					     double fact = 1.0, 
+					     bool tag=false);    
+    Matrix getMassSensitivity(void);
+    int    getCrdsSensitivity(void);
+    int	   saveSensitivity(Vector *v, Vector *vdot, Vector *vdotdot, int gradNum, int numGrads);
+    double getDispSensitivity(int dof, int gradNum);
+    double getVelSensitivity(int dof, int gradNum);
+    double getAccSensitivity(int dof, int gradNum);
+    int    setParameter(const char **argv, int argc, Information &info);
+    int    updateParameter(int parameterID, Information &info);
+    int    activateParameter(int parameterID);
+    // AddingSensitivity:END ///////////////////////////////////////////
     
   private:
     // priavte methods used to create the Vector objects 
@@ -157,9 +166,13 @@ class Node : public DomainComponent
     double alphaM;                    // rayleigh damping factor
     
     Matrix *theEigenvectors;
-// AddingSensitivity:BEGIN /////////////////////////////////////////
-    Matrix *theGradients;
-// AddingSensitivity:END ///////////////////////////////////////////
+
+    // AddingSensitivity:BEGIN /////////////////////////////////////////
+    Matrix *dispSensitivity;
+    Matrix *velSensitivity;
+    Matrix *accSensitivity;
+    int parameterID;
+    // AddingSensitivity:END ///////////////////////////////////////////
 
     static Matrix **theMatrices;
     static int numMatrices;

@@ -22,31 +22,29 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-02 18:11:11 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:38:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/CurvaturesBySearchAlgorithm.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
 #include <CurvaturesBySearchAlgorithm.h>
 #include <FindCurvatures.h>
 #include <LimitStateFunction.h>
-#include <FindDesignPoint.h>
+#include <FindDesignPointAlgorithm.h>
 #include <RandomVariable.h>
 #include <Vector.h>
 
 
 CurvaturesBySearchAlgorithm::CurvaturesBySearchAlgorithm(int passedNumberOfCurvatures,
-									FindDesignPoint *passedFindDesignPoint)
+									FindDesignPointAlgorithm *passedFindDesignPointAlgorithm)
 :FindCurvatures(), curvatures(passedNumberOfCurvatures)
 {
 	numberOfCurvatures = passedNumberOfCurvatures;
-	theFindDesignPoint = passedFindDesignPoint;
+	theFindDesignPointAlgorithm = passedFindDesignPointAlgorithm;
 }
 
 CurvaturesBySearchAlgorithm::~CurvaturesBySearchAlgorithm()
@@ -91,7 +89,6 @@ CurvaturesBySearchAlgorithm::computeCurvatures(ReliabilityDomain *theReliability
 	int i;
 	for (i=0; i<nrv; i++) {
 		aRandomVariable = theReliabilityDomain->getRandomVariablePtr(i+1);
-//		startPoint(i) = x_star(i) + 0.1 * aRandomVariable->getStdv();
 		startPoint(i) = aRandomVariable->getStartValue();
 	}
 
@@ -135,22 +132,11 @@ CurvaturesBySearchAlgorithm::computeCurvatures(ReliabilityDomain *theReliability
 				principalAxes((i*nrv)+j) = lastDirection(j);
 			}
 
-			// Do the new search
-			theFindDesignPoint->approachDesignPointThroughOrthogonalSubspace(
-				&last_u, (i+1), &principalAxes, &startPoint, theReliabilityDomain);
+			// To be completed...
 		}
 	}
 
 	return 0;
-
-
-
-/*
-// Should make a check on how many iterations is used:
-// should not be too few!
-// Also: check on the cases in the paper!
-  */
-
 }
 
 

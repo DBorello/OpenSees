@@ -18,9 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-25 23:34:47 $
+// $Revision: 1.11 $
+// $Date: 2003-03-04 00:48:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
+                                                                        
                                                                         
 // Written: fmk 
 // Created: 04/98
@@ -63,34 +64,28 @@ buildModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
 int 
 analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-	     
-int 
-printModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
+printModel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+int 
 specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-		
 int 
 specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-	   
+
 int 
 specifyNumberer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-		
 int 
 specifyConstraintHandler(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-			 
 int
 specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-		 
+
 int
 specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-	     
+
 int 
 specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-		  
 int 
 addRecorder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-	    
 int 
 addAlgoRecorder(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
@@ -99,13 +94,12 @@ addDatabase(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv
 
 int 
 playbackRecorders(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-		  
+
 int 
 playbackAlgorithmRecorders(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 groundExcitation(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
-
 int 
 rigidLink(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
@@ -126,10 +120,16 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 // AddingSensitivity:BEGIN /////////////////////////////////////////////////
 int 
+nodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
 computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
+
+int 
+sensNodeVel(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 
 int 
 sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
@@ -137,6 +137,7 @@ sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Ch
 int 
 sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);
 // AddingSensitivity:END ///////////////////////////////////////////////////
+
 
 int 
 startTimer(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv);

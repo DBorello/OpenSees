@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 04:47:09 $
+// $Revision: 1.3 $
+// $Date: 2003-03-04 00:48:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.h,v $
                                                                         
                                                                         
 #ifndef DirectIntegrationAnalysis_h
 #define DirectIntegrationAnalysis_h
 
-// File: ~/analysis/analysis/DirectIntegrationAnalysis.h
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -40,6 +38,11 @@
 // What: "@(#) DirectIntegrationAnalysis.h, revA"
 
 #include <TransientAnalysis.h>
+// AddingSensitivity:BEGIN //////////////////////////////////
+#ifdef _RELIABILITY
+#include <SensitivityAlgorithm.h>
+#endif
+// AddingSensitivity:END ////////////////////////////////////
 
 class ConstraintHandler;
 class DOF_Numberer;
@@ -74,6 +77,11 @@ class DirectIntegrationAnalysis: public TransientAnalysis
     int checkDomainChange(void);
     EquiSolnAlgo *getAlgorithm(void);
     TransientIntegrator *getIntegrator();
+// AddingSensitivity:BEGIN ///////////////////////////////
+#ifdef _RELIABILITY
+	int setSensitivityAlgorithm(SensitivityAlgorithm *theSensitivityAlgorithm);
+#endif
+// AddingSensitivity:END /////////////////////////////////
     
   protected:
     
@@ -85,6 +93,11 @@ class DirectIntegrationAnalysis: public TransientAnalysis
     LinearSOE 		*theSOE;
     TransientIntegrator *theIntegrator;
     int domainStamp;
+// AddingSensitivity:BEGIN ///////////////////////////////
+#ifdef _RELIABILITY
+	SensitivityAlgorithm *theSensitivityAlgorithm;
+#endif
+// AddingSensitivity:END ///////////////////////////////
 };
 
 #endif

@@ -1,3 +1,4 @@
+
 /* ****************************************************************** **
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
@@ -18,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2003-02-25 23:32:49 $
+// $Revision: 1.19 $
+// $Date: 2003-03-04 00:48:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -99,9 +100,7 @@ DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
   p0[2] = 0.0;
   
 // AddingSensitivity:BEGIN /////////////////////////////////////
-	gradientIdentifier = 0;
-	gradientSectionTag = 0;
-	gradientMaterialTag = 0;
+	parameterID = 0;
 // AddingSensitivity:END //////////////////////////////////////
 }
 
@@ -123,9 +122,7 @@ DispBeamColumn2d::DispBeamColumn2d()
     theNodes[1] = 0;
 
 // AddingSensitivity:BEGIN /////////////////////////////////////
-	gradientIdentifier = 0;
-	gradientSectionTag = 0;
-	gradientMaterialTag = 0;
+	parameterID = 0;
 // AddingSensitivity:END //////////////////////////////////////
 }
 
@@ -623,7 +620,7 @@ DispBeamColumn2d::getResistingForce()
     const ID &code = theSections[i]->getType();
   
     double xi6 = 6.0*pts(i,0);
-    
+
     // Get section stress resultant
     const Vector &s = theSections[i]->getStressResultant();
     
@@ -1042,7 +1039,7 @@ DispBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 }
 
 
-
+// AddingSensitivity:BEGIN ///////////////////////////////////
 int
 DispBeamColumn2d::setParameter (const char **argv, int argc, Information &info)
 {
@@ -1066,7 +1063,7 @@ DispBeamColumn2d::setParameter (const char **argv, int argc, Information &info)
 	//
 
 	// Initial declarations
-	int parameterID =0;
+	int ok;
 
 	// If the parameter belongs to the element itself
 	if (strcmp(argv[0],"rho") == 0) {
@@ -1075,38 +1072,38 @@ DispBeamColumn2d::setParameter (const char **argv, int argc, Information &info)
 	}
 
 	// If the parameter is belonging to a section or lower
-	else if (strcmp(argv[0],"section") == 0) {
+	else if (strcmp(argv[0],"-section") == 0) {
 
-	  // For now, no parameters of the section itself:
-	  if (argc<5) {
-	    opserr << "For now: cannot handle parameters of the section itself." << endln;
-	    return -1;
-	  }
-	  
-	  // Get section and material tag numbers from user input
-	  int paramSectionTag = atoi(argv[1]);
-	  
-	  // Find the right section and call its setParameter method
-	  for (int i=0; i<numSections; i++) {
-	    if (paramSectionTag == theSections[i]->getTag()) {
-	      parameterID = theSections[i]->setParameter(&argv[2], argc-2, info);
-	    }
-	  }
-	  
-	  // Check if the parameterID is valid
-	  if (parameterID < 0) {
-	    opserr << "DispBeamColumn2d::setParameter() - could not set parameter. " << endln;
-	    return -1;
-	  }
-	  else {
-	    // Return the parameterID value (according to the above comments)
-	    return parameterID;
-	  }
+		// For now, no parameters of the section itself:
+		if (argc<5) {
+			opserr << "For now: cannot handle parameters of the section itself." << endln;
+			return -1;
+		}
+
+		// Get section and material tag numbers from user input
+		int paramSectionTag = atoi(argv[1]);
+
+		// Find the right section and call its setParameter method
+		for (int i=0; i<numSections; i++) {
+			if (paramSectionTag == theSections[i]->getTag()) {
+				ok = theSections[i]->setParameter(&argv[2], argc-2, info);
+			}
+		}
+		
+		// Check if the ok is valid
+		if (ok < 0) {
+			opserr << "DispBeamColumn2d::setParameter() - could not set parameter. " << endln;
+			return -1;
+		}
+		else {
+			// Return the ok value (according to the above comments)
+			return ok;
+		}
 	}
-	
+    
 	// Otherwise parameter is unknown for this class
 	else {
-	  return -1;
+		return -1;
 	}
 }
 
@@ -1118,152 +1115,384 @@ DispBeamColumn2d::updateParameter (int parameterID, Information &info)
 
 	if (parameterID == 1) {
 
-	  this->rho = info.theDouble;
-	  return 0;
-	  
+		this->rho = info.theDouble;
+		return 0;
+
 	}
 	else if (parameterID > 0 ) {
 
-	  // Extract the section number
-	  int sectionNumber = (int)( floor((double)parameterID) / (100000) );
-	  
-	  int ok = -1;
-	  for (int i=0; i<numSections; i++) {
-	    if (sectionNumber == theSections[i]->getTag()) {
-	      ok = theSections[i]->updateParameter(parameterID, info);
-	    }
-	  }
-	  
-	  if (ok < 0) {
-	    opserr << "DispBeamColumn2d::updateParameter() - could not update parameter. " << endln;
-	    return ok;
-	  }
-	  else {
-	    return ok;
-	  }
+		// Extract the section number
+		int sectionNumber = (int)( floor((double)parameterID) / (100000) );
+
+		int ok = -1;
+		for (int i=0; i<numSections; i++) {
+			if (sectionNumber == theSections[i]->getTag()) {
+				ok = theSections[i]->updateParameter(parameterID, info);
+			}
+		}
+
+		if (ok < 0) {
+			opserr << "DispBeamColumn2d::updateParameter() - could not update parameter. " << endln;
+			return ok;
+		}
+		else {
+			return ok;
+		}
 	}
 	else {
-	  opserr << "DispBeamColumn2d::updateParameter() - could not update parameter. " << endln;
-	  return -1;
+		opserr << "DispBeamColumn2d::updateParameter() - could not update parameter. " << endln;
+		return -1;
 	}       
 }
 
-// AddingSensitivity:BEGIN ///////////////////////////////////
-const Vector &
-DispBeamColumn2d::gradient(bool compute, int identifier)
+
+
+
+int
+DispBeamColumn2d::activateParameter(int passedParameterID)
 {
-/*	The gradient method can be called with four different purposes:
-	1) To clear the sensitivity flag so that the object does not contribute:
-			gradient(false, 0)
-	2) To set the sensitivity flag so that the object contributes
-	   (the sensitivity flag is stored as the value of parameterID):
-			gradient(false, parameterID)
-	3) To obtain the gradient vector from the object (like for the residual):
-			gradient(true, 0)
-	4) To commit unconditional sensitivities for path-dependent problems:
-			gradient(true, gradNumber)
-*/
+	// Note that the parameteID that is stored here at the 
+	// element level contains all information about section
+	// and material tag number:
+	parameterID = passedParameterID;
 
-	if (compute) { // If yes: compute or commit gradients
+	if (passedParameterID == 0 ) {
 
-		if ( gradientIdentifier != 0 ) { // Check if this element contributes has a parameter
-			
-			if (identifier == 0) { // "Phase 1": return gradient vector
-
-				const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
-				const Vector &wts = quadRule.getIntegrPointWeights(numSections);
-
-				// Zero for integration
-				q.Zero();
-
-				// Loop over the integration points
-				for (int i = 0; i < numSections; i++) {
-
-				  int order = theSections[i]->getOrder();
-				  const ID &code = theSections[i]->getType();
-
-					double xi6 = 6.0*pts(i,0);
-
-					// Get section stress resultant gradient
-					Vector s(order);
-					int ok = theSections[i]->gradient(true,identifier,s);
-
-					// Perform numerical integration on internal force gradient
-					//q.addMatrixTransposeVector(1.0, *B, s, wts(i));
-
-					double si;
-					for (int j = 0; j < order; j++) {
-						si = s(j)*wts(i);
-						switch(code(j)) {
-						case SECTION_RESPONSE_P:
-							q(0) += si; break;
-						case SECTION_RESPONSE_MZ:
-							q(1) += (xi6-4.0)*si; q(2) += (xi6-2.0)*si; break;
-						default:
-							break;
-						}
-					}
-
-				}
-
-				// Transform forces
-				static Vector dummy(3);		// No distributed loads
-				P = crdTransf->getGlobalResistingForce(q,dummy);
-
-			}
-
-			else { // "Phase 2": commit unconditional sensitivities
-
-				// Path-dependent problems: Not treated here yet
-			}
-
-		}
-
-		else {
-
-			// Return zero if gradientIdentifier is zero
-			P.Zero();
-		}
+	  // "Zero out" all flags downwards through sections/materials 
+	  for (int i=0; i<numSections; i++) {
+	    theSections[i]->activateParameter(passedParameterID);
+	  }
 	}
 	
-	else { // Just set private data flags
+	else if (passedParameterID == 1) {
+	  // Don't treat the 'rho' for now
+	}
+	
+	else {
+	  
+	  // Extract section and material tags from the passedParameterID
+	  int activeSectionTag = (int)( floor((double)passedParameterID) / (100000) );
+	  
+	  // Go down to the sections and set appropriate flags
+	  for (int i=0; i<numSections; i++) {
+	    if (activeSectionTag == theSections[i]->getTag()) {
+	      theSections[i]->activateParameter(passedParameterID);
+	    }
+	  }
+	}
+	
+	return 0;
+}
 
-		// Set gradient flag
-		gradientIdentifier = identifier;
 
-		if (identifier == 0 ) {
 
-			// "Zero out" all flags downwards through sections/materials 
-			Vector dummy(2);
-			int ok = -1;
-			for (int i=0; i<numSections; i++) {
-				ok = theSections[i]->gradient(false, identifier, dummy);
-			}
-		}
+const Matrix &
+DispBeamColumn2d::getKiSensitivity(int gradNumber)
+{
+	K.Zero();
+	return K;
+}
 
-		else if (gradientIdentifier == 1) {
-			// Don't treat the 'rho' for now
-		}
+const Matrix &
+DispBeamColumn2d::getMassSensitivity(int gradNumber)
+{
+	K.Zero();
+	return K;
+}
 
-		else {
 
-			// Extract section and material tags
-			gradientSectionTag = (int)( floor((double)identifier) / (100000) );
-			int tempIdentifier = identifier - gradientSectionTag*100000;
-			gradientMaterialTag = (int)( floor((double)tempIdentifier) / (1000) );
 
-			// Go down to the sections and set appropriate flags
-			Vector dummy(2);
-			int ok = -1;
-			for (int i=0; i<numSections; i++) {
-				if (gradientSectionTag == theSections[i]->getTag()) {
-					ok = theSections[i]->gradient(false, identifier, dummy);
+const Vector &
+DispBeamColumn2d::getResistingForceSensitivity(int gradNumber)
+{
+
+	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+
+	// Assuming member is prismatic ... have to move inside
+	// the loop if it is not prismatic
+	int order = theSections[0]->getOrder();
+	const ID &code = theSections[0]->getType();
+
+	double L = crdTransf->getInitialLength();
+
+	// Zero for integration
+	q.Zero();
+	Vector qsens(q.Size());
+	qsens.Zero();
+
+	// Some extra declarations
+	Vector dAdh_u(3);
+	Vector A_u(3);
+	Matrix kbmine(3,3);
+	Matrix dkbdh(3,3);
+	Vector dqdh(3);
+	Vector dkbdh_v(3);	
+	dqdh.Zero();
+	int j, k;
+	Matrix ka(workArea, order, 3);
+	int i;
+	double d1oLdh = 0.0;
+
+
+	// Check if a nodal coordinate is random
+	bool randomNodeCoordinate = false;
+	Vector nodeParameterID(2);
+	nodeParameterID(0) = (double)theNodes[0]->getCrdsSensitivity();
+	nodeParameterID(1) = (double)theNodes[1]->getCrdsSensitivity();
+	if (nodeParameterID.Norm() != 0.0) {
+
+		randomNodeCoordinate = true;
+ 
+
+		const Vector &ndICoords = theNodes[0]->getCrds();
+		const Vector &ndJCoords = theNodes[1]->getCrds();
+
+		double dx = ndJCoords(0) - ndICoords(0);
+		double dy = ndJCoords(1) - ndICoords(1);
+
+
+		for (int ii=0; ii<2; ii++) {
+
+
+			if (ii==0) {
+
+				if ( ((int)nodeParameterID(ii))==1 ) { // here x1 is random
+					d1oLdh = dx/(L*L*L);
 				}
+				else if ( ((int)nodeParameterID(ii))==2 ) { // here y1 is random
+					d1oLdh = dy/(L*L*L);
+				}
+			}
+			else if (ii==1) {
+
+				if ( ((int)nodeParameterID(ii))==1 ) { // here x2 is random
+					d1oLdh = -dx/(L*L*L);
+				}
+				else if ( ((int)nodeParameterID(ii))==2 ) { // here y2 is random
+					d1oLdh = -dy/(L*L*L);
+				}
+
 			}
 		}
 	}
 
+
+	// Loop over the integration points
+	for (i = 0; i < numSections; i++) {
+
+		double xi6 = 6.0*pts(i,0);
+
+		// Get section stress resultant gradient
+		const Vector &s = theSections[i]->getStressResultant();
+		const Vector & sens = theSections[i]->getStressResultantSensitivity(gradNumber,true);
+		const Matrix &ks = theSections[i]->getSectionTangent();
+
+		// Perform numerical integration on internal force gradient
+		//q.addMatrixTransposeVector(1.0, *B, s, wts(i));
+
+		double si;
+		double sensi;
+		for (j = 0; j < order; j++) {
+			si = s(j)*wts(i);
+			sensi = sens(j)*wts(i);
+			switch(code(j)) {
+			case SECTION_RESPONSE_P:
+				q(0) += si;
+				qsens(0) += sensi; 
+				break;
+			case SECTION_RESPONSE_MZ:
+				q(1) += (xi6-4.0)*si; 
+				q(2) += (xi6-2.0)*si;
+				qsens(1) += (xi6-4.0)*sensi; 
+				qsens(2) += (xi6-2.0)*sensi; 
+				break;
+			default:
+				break;
+			}
+		}
+
+		if (randomNodeCoordinate) {
+
+
+			// Perform numerical integration to obtain basic stiffness matrix
+			//kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
+			double wti = wts(i);
+			double tmp;
+			ka.Zero();
+			for (j = 0; j < order; j++) {
+				switch(code(j)) {
+				case SECTION_RESPONSE_P:
+					for (k = 0; k < order; k++) {
+						ka(k,0) += ks(k,j)*wti;
+					}
+					break;
+				case SECTION_RESPONSE_MZ:
+					for (k = 0; k < order; k++) {
+						tmp = ks(k,j)*wti;
+						ka(k,1) += (xi6-4.0)*tmp;
+						ka(k,2) += (xi6-2.0)*tmp;
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			for (j = 0; j < order; j++) {
+				switch (code(j)) {
+				case SECTION_RESPONSE_P:
+					for (k = 0; k < 3; k++) {
+						kbmine(0,k) += ka(j,k);
+					}
+					break;
+				case SECTION_RESPONSE_MZ:
+					for (k = 0; k < 3; k++) {
+						tmp = ka(j,k);
+						kbmine(1,k) += (xi6-4.0)*tmp;
+						kbmine(2,k) += (xi6-2.0)*tmp;
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		}
+
+	}
+
+	dAdh_u = crdTransf->getBasicTrialDispShapeSensitivity(); // v = A u
+	dqdh = (1.0/L) * (kbmine * dAdh_u);
+
+	A_u = crdTransf->getBasicTrialDisp(); // v = A u
+	dkbdh_v = (d1oLdh) * (kbmine * A_u);
+
+
+	// Transform forces
+	static Vector dummy(3);		// No distributed loads
+
+	// Term 5
+	P = (-1)*crdTransf->getGlobalResistingForce(qsens,dummy);
+
+	if (randomNodeCoordinate) {
+
+		// Term 1
+		P += (-1)*crdTransf->getGlobalResistingForceShapeSensitivity(q,dummy);
+		
+		
+		// Term 2
+		P += (-1)*crdTransf->getGlobalResistingForce(dqdh,dummy);
+
+		
+		// Term 4
+		P += (-1)*crdTransf->getGlobalResistingForce(dkbdh_v,dummy);
+	}
 	return P;
 }
+
+
+
+// NEW METHOD
+int
+DispBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
+{
+
+    // Get basic deformation sensitivities
+    static Vector vsens(3);
+	vsens = crdTransf->getBasicDisplSensitivity(gradNumber);
+
+
+	static Vector v(3);
+	v = crdTransf->getBasicTrialDisp();
+
+	double L = crdTransf->getInitialLength();
+	double oneOverL = 1.0/L;
+	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
+	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
+
+	// Assuming member is prismatic ... have to move inside
+	// the loop if it is not prismatic
+	int order = theSections[0]->getOrder();
+	const ID &code = theSections[0]->getType();
+	Vector e(workArea, order);
+	// Some extra declarations
+	double d1oLdh=0.0;
+
+
+	// Check if a nodal coordinate is random
+	bool randomNodeCoordinate = false;
+	Vector nodeParameterID(2);
+	nodeParameterID(0) = (double)theNodes[0]->getCrdsSensitivity();
+	nodeParameterID(1) = (double)theNodes[1]->getCrdsSensitivity();
+	if (nodeParameterID.Norm() != 0.0) {
+
+		vsens += crdTransf->getBasicTrialDispShapeSensitivity();
+
+		randomNodeCoordinate = true;
+
+		const Vector &ndICoords = theNodes[0]->getCrds();
+		const Vector &ndJCoords = theNodes[1]->getCrds();
+
+		double dx = ndJCoords(0) - ndICoords(0);
+		double dy = ndJCoords(1) - ndICoords(1);
+
+		for (int ii=0; ii<2; ii++) {
+
+
+			if (ii==0) {
+
+				if ( ((int)nodeParameterID(ii))==1 ) { // here x1 is random
+					d1oLdh = dx/(L*L*L);
+				}
+				else if ( ((int)nodeParameterID(ii))==2 ) { // here y1 is random
+					d1oLdh = dy/(L*L*L);
+				}
+			}
+			else if (ii==1) {
+
+				if ( ((int)nodeParameterID(ii))==1 ) { // here x2 is random
+					d1oLdh = -dx/(L*L*L);
+				}
+				else if ( ((int)nodeParameterID(ii))==2 ) { // here y2 is random
+					d1oLdh = -dy/(L*L*L);
+				}
+
+			}
+		}
+	}
+
+
+
+
+	// Loop over the integration points
+	for (int i = 0; i < numSections; i++) {
+
+		double xi6 = 6.0*pts(i,0);
+
+		int j;
+		for (j = 0; j < order; j++) {
+			switch(code(j)) {
+			case SECTION_RESPONSE_P:
+				e(j) = oneOverL*vsens(0)
+				+ d1oLdh*v(0); 
+				break;
+			case SECTION_RESPONSE_MZ:
+				e(j) = oneOverL*((xi6-4.0)*vsens(1) + (xi6-2.0)*vsens(2))
+				+ d1oLdh*((xi6-4.0)*v(1) + (xi6-2.0)*v(2)); 
+				break;
+			default:
+				e(j) = 0.0; 
+				break;
+			}
+		}
+
+
+		// Set the section deformations
+		theSections[i]->commitSensitivity(e,gradNumber,numGrads);
+	}
+
+	return 0;
+}
+
+
 // AddingSensitivity:END /////////////////////////////////////////////
 

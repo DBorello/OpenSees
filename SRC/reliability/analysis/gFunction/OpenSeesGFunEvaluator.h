@@ -22,17 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-20 00:37:26 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:39:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
-//			haukaas 06/22/01 (analysis commands batch read from file)
-//			haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #ifndef OpenSeesGFunEvaluator_h
@@ -41,8 +37,10 @@
 #include <GFunEvaluator.h>
 #include <Vector.h>
 #include <ReliabilityDomain.h>
-
 #include <tcl.h>
+
+#include <fstream>
+using std::ofstream;
 
 
 class OpenSeesGFunEvaluator : public GFunEvaluator
@@ -52,18 +50,28 @@ public:
 	OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 						ReliabilityDomain *passedReliabilityDomain,
 						char *fileName);
+	OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
+						ReliabilityDomain *passedReliabilityDomain,
+						int nsteps, double dt);
 	~OpenSeesGFunEvaluator();
 
-	int		evaluate_g(Vector passed_x);
-	double	get_g();
+	int		runGFunAnalysis(Vector x);
+	int		tokenizeSpecials(char *theExpression);
+
+	void    setNsteps(int nsteps);
+	int     getNsteps();
+	double  getDt();
 
 protected:
 
 private:
-	double g;
-	Tcl_Interp *theTclInterp;
-	ReliabilityDomain *theReliabilityDomain;
-	char fileName[256];
+	int createRecorders();
+	int removeRecorders();
+	char *rec_node_occurrence(char tempchar[100], bool createRecorders, int &line, int &column);
+	char *rec_element_occurrence(char tempchar[100], bool createRecorders, int &line, int &column);
+	char *fileName;
+	int nsteps;
+	double dt;
 
 };
 

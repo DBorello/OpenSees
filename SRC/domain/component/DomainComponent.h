@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:32:40 $
+// $Revision: 1.4 $
+// $Date: 2003-03-04 00:48:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/DomainComponent.h,v $
                                                                         
                                                                         
 #ifndef DomainComponent_h
 #define DomainComponent_h
 
-// File: ~/domain/component/DomainComponent.h
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -63,10 +61,8 @@ class DomainComponent: public TaggedObject, public MovableObject
 
     // methods for sensitivity studies
     virtual int setParameter(const char **argv, int argc, Information &eleInformation);
-    virtual int updateParameter(int responseID, Information &eleInformation);	
-// AddingSensitivity:BEGIN //////////////////////////////////////////
-	virtual const Vector &gradient(bool compute, int identifier);
-// AddingSensitivity:END ///////////////////////////////////////////
+    virtual int updateParameter(int parameterID, Information &info);
+    virtual int activateParameter(int parameterID);
     
   protected:
     DomainComponent(int tag, int classTag);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:52 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:48:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.h,v $
                                                                         
                                                                         
@@ -64,6 +64,11 @@ class LinearCrdTransf2d: public CrdTransf2d
     int revertToLastCommit(void);        
     int revertToStart(void);
     
+// AddingSensitivity:BEGIN //////////////////////////////////
+	const Vector &getBasicDisplSensitivity (int gradNumber);
+    const Vector &getGlobalResistingForceShapeSensitivity (const Vector &basicForce, const Vector &p0);
+    const Vector &getBasicTrialDispShapeSensitivity     (void);
+// AddingSensitivity:END //////////////////////////////////
     const Vector &getBasicTrialDisp     (void);
     const Vector &getBasicIncrDisp      (void);
     const Vector &getBasicIncrDeltaDisp (void);

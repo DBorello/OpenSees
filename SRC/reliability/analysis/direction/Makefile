@@ -1,6 +1,10 @@
 include ../../../../Makefile.def
 
-OBJS       = 	HLRFSearchDirection.o  SearchDirection.o
+OBJS       = 	HLRFSearchDirection.o \
+	SearchDirection.o \
+	GradientProjectionSearchDirection.o \
+	PolakHeSearchDirectionAndMeritFunction.o \
+	SQPsearchDirectionMeritFunctionAndHessian.o
 
 # Compilation control
 all:         $(OBJS)

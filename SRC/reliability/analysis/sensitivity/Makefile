@@ -1,7 +1,8 @@
 include ../../../../Makefile.def
 
-OBJS       = 	OpenSeesSensitivityEvaluator.o  SensitivityByFiniteDifference.o \
-		SensitivityEvaluator.o
+OBJS       = 	OpenSeesGradGEvaluator.o \
+	FiniteDifferenceGradGEvaluator.o \
+	GradGEvaluator.o
 
 # Compilation control
 all:         $(OBJS)

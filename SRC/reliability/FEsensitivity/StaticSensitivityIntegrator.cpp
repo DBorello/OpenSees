@@ -22,14 +22,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-20 00:37:25 $
+// $Revision: 1.3 $
+// $Date: 2003-03-04 00:46:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/StaticSensitivityIntegrator.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu), July 2001
-// Revised: haukaas 08/19/01 (modifications for Release 1.2 of OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
 
 #include <SensitivityIntegrator.h>
@@ -46,17 +45,13 @@
 #include <Domain.h>
 #include <Node.h>
 #include <DOF_Group.h>
+#include <classTags.h>
 
 
 StaticSensitivityIntegrator::StaticSensitivityIntegrator(AnalysisModel *theModel, LinearSOE *theLinSOE)
-:SensitivityIntegrator()
+:SensitivityIntegrator(), StaticIntegrator(INTEGRATOR_TAGS_StaticSensitivity),
+theAnalysisModel(theModel),theSOE(theLinSOE)
 {
-	// The analysis model is needed to get hold of dof's, elements, etc:
-    theAnalysisModel = theModel;
-
-	// The system of equations (SOE) is needed to zero out and 
-	// assemble the right-hand side:
-    theSOE = theLinSOE;
 }
 
 
@@ -67,29 +62,40 @@ StaticSensitivityIntegrator::~StaticSensitivityIntegrator()
 
 
 
+
 int
-StaticSensitivityIntegrator::formRightHandSide(void)
+StaticSensitivityIntegrator::formEleResidual(FE_Element *theEle)
 {
-	// In a non-linear static analysis the response is found 
-	// by solving the equation:
-	//             Pint = Pext
-	// Then, the sensitivity vector 'v' is found by solving the equation:
-	//       Kt * v = dPext/dh - dPint/dh 
-	// where Kt is the tangent of the converged FE analysis. 
-	// The main task here is to assemble this right-hand side. 
+	theEle->zeroResidual();
+	theEle->addResistingForceSensitivity(gradNumber); 
+
+	return 0;
+}
 
 
-	// Zero out the old right-hand side
-    theSOE->zeroB();
 
 
-	// Loop through the FE_Elements and add dPint/dh contributions
-    FE_Element *elePtr;
-    FE_EleIter &theEles = theAnalysisModel->getFEs();    
-    while((elePtr = theEles()) != 0) {
-		theSOE->addB( (-1)*elePtr->gradient(0),  elePtr->getID());
+int 
+StaticSensitivityIntegrator::formIndependentSensitivityRHS()
+{
+	// For now everything is done each time in the static case
+	return 0;
+}
+
+
+int 
+StaticSensitivityIntegrator::formSensitivityRHS(int passedGradNumber)
+{
+	// Set a couple of data members
+	gradNumber = passedGradNumber;
+
+
+	// Loop through elements
+	FE_Element *elePtr;
+	FE_EleIter &theEles = theAnalysisModel->getFEs();    
+	while((elePtr = theEles()) != 0) {
+		theSOE->addB(  elePtr->getResidual(this),  elePtr->getID()  );
 	}
-
 
 	// Loop through the loadPatterns and add the dPext/dh contributions
 	Vector oneDimVectorWithOne(1);
@@ -98,13 +104,11 @@ StaticSensitivityIntegrator::formRightHandSide(void)
 	Node *aNode;
 	DOF_Group *aDofGroup;
 	int nodeNumber, dofNumber, relevantID, i, sizeRandomLoads, numRandomLoads;
-	/////////////////////////////////////////////////
 	LoadPattern *loadPatternPtr;
 	Domain *theDomain = theAnalysisModel->getDomainPtr();
 	LoadPatternIter &thePatterns = theDomain->getLoadPatterns();
     while((loadPatternPtr = thePatterns()) != 0) {
-
-		const Vector &randomLoads = loadPatternPtr->gradient(true,0);
+		const Vector &randomLoads = loadPatternPtr->getExternalForceSensitivity(gradNumber);
 		sizeRandomLoads = randomLoads.Size();
 		if (sizeRandomLoads == 1) {
 			// No random loads in this load pattern
@@ -127,20 +131,42 @@ StaticSensitivityIntegrator::formRightHandSide(void)
 
 	return 0;
 }
+		
 
 
 
 int
-StaticSensitivityIntegrator::saveGradient(const Vector &v, int gradNum, int numGrads)
+StaticSensitivityIntegrator::saveSensitivity(const Vector &v, int gradNum, int numGrads)
 {
+
     DOF_GrpIter &theDOFGrps = theAnalysisModel->getDOFs();
     DOF_Group 	*dofPtr;
 
+	Vector *vNewPtr = new Vector(v.Size());
+	(*vNewPtr) = v;
     while ( (dofPtr = theDOFGrps() ) != 0)  {
-		dofPtr->setGradient(v,gradNum,numGrads);
+		dofPtr->saveSensitivity(vNewPtr,0,0,gradNum,numGrads);
 	}
+
+	delete vNewPtr;
     
     return 0;
+}
+
+
+
+int 
+StaticSensitivityIntegrator::commitSensitivity(int gradNum, int numGrads)
+{
+
+	// Loop through the FE_Elements and set unconditional sensitivities
+    FE_Element *elePtr;
+    FE_EleIter &theEles = theAnalysisModel->getFEs();    
+    while((elePtr = theEles()) != 0) {
+		elePtr->commitSensitivity(gradNum, numGrads);
+	}
+
+	return 0;
 }
 
 
@@ -148,26 +174,34 @@ StaticSensitivityIntegrator::saveGradient(const Vector &v, int gradNum, int numG
 
 
 int 
-StaticSensitivityIntegrator::commitGradient(int gradNumber)
+StaticSensitivityIntegrator::newStep(void)
 {
-    
-	// Loop through the FE_Elements and set unconditional sensitivities
-    FE_Element *elePtr;
-    FE_EleIter &theEles = theAnalysisModel->getFEs();    
-    while((elePtr = theEles()) != 0) {
-		elePtr->gradient(gradNumber);
-	}
-
-    return 0;
+	return 0;
 }
-
-
-
-
-
-
-
-
+int 
+StaticSensitivityIntegrator::update(const Vector &deltaU)
+{
+	return 0;
+}
+int 
+StaticSensitivityIntegrator::setDeltaLambda(double newDeltaLambda)
+{
+	return 0;
+}
+int 
+StaticSensitivityIntegrator::sendSelf(int commitTag, Channel &theChannel)
+{
+	return 0;
+}
+int 
+StaticSensitivityIntegrator::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+{
+	return 0;
+}
+void 
+StaticSensitivityIntegrator::Print(OPS_Stream &s, int flag)  
+{
+}
 
 
 

@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:00:58 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:48:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.cpp,v $
                                                                         
                                                                         
-// File: ~/domain/node/NodalLoad.C
-//
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -46,18 +44,18 @@ NodalLoad::NodalLoad(int theClasTag)
  myNode(0), myNodePtr(0), load(0), konstant(false)
 {
     // constructor for a FEM_ObjectBroker
-// AddingSensitivity:BEGIN /////////////////////////////////////
-	gradientIdentifier = 0;
-// AddingSensitivity:END ///////////////////////////////////////
+  // AddingSensitivity:BEGIN /////////////////////////////////////
+  parameterID = 0;
+  // AddingSensitivity:END ///////////////////////////////////////
 }
 
 NodalLoad::NodalLoad(int tag, int node, int theClassTag)
 :Load(tag,theClassTag), 
  myNode(node), myNodePtr(0), load(0), konstant(false)
 {
-// AddingSensitivity:BEGIN /////////////////////////////////////
-	gradientIdentifier = 0;
-// AddingSensitivity:END ///////////////////////////////////////
+  // AddingSensitivity:BEGIN /////////////////////////////////////
+  parameterID = 0;
+  // AddingSensitivity:END ///////////////////////////////////////
 }
 
 NodalLoad::NodalLoad(int tag, int node, const Vector &theLoad, bool isLoadConstant)
@@ -71,9 +69,9 @@ NodalLoad::NodalLoad(int tag, int node, const Vector &theLoad, bool isLoadConsta
 	opserr << " ran out of memory for load on Node " << node << endln;
 	exit(-1);
     }
-// AddingSensitivity:BEGIN /////////////////////////////////////
-	gradientIdentifier = 0;
-// AddingSensitivity:END ///////////////////////////////////////
+    // AddingSensitivity:BEGIN /////////////////////////////////////
+    parameterID = 0;
+    // AddingSensitivity:END ///////////////////////////////////////
 }
 
 
@@ -122,6 +120,7 @@ NodalLoad::applyLoad(double loadFactor)
 	myNodePtr->addUnbalancedLoad(*load,loadFactor);
     else
 	myNodePtr->addUnbalancedLoad(*load,1.0);	
+
 } 
 
 
@@ -196,21 +195,22 @@ NodalLoad::Print(OPS_Stream &s, int flag)
 }
 
 
+// AddingSensitivity:BEGIN /////////////////////////////////////
 int
-NodalLoad::setParameter(char **argv, int argc, Information &info)
+NodalLoad::setParameter(const char **argv, int argc, Information &info)
 {
 	if (argc < 1)
 		return -1;
 
-	if (strcmp(argv[0],"direction1") == 0) {
+	if (strcmp(argv[0],"1") == 0) {
 		info.theType = DoubleType;
 		return 1;
 	}
-	if (strcmp(argv[0],"direction2") == 0) {
+	if (strcmp(argv[0],"2") == 0) {
 		info.theType = DoubleType;
 		return 2;
 	}
-	if (strcmp(argv[0],"direction3") == 0) {
+	if (strcmp(argv[0],"3") == 0) {
 		info.theType = DoubleType;
 		return 3;
 	}
@@ -221,7 +221,9 @@ NodalLoad::setParameter(char **argv, int argc, Information &info)
 int
 NodalLoad::updateParameter(int parameterID, Information &info)
 {
-	switch (parameterID) {
+  int nn; 
+  Domain *theDomain;
+  switch (parameterID) {
 	case -1:
 		return -1;
 	case 1:
@@ -235,27 +237,27 @@ NodalLoad::updateParameter(int parameterID, Information &info)
 		return 0;
 	default:
 		return -1;
-	}
+  }
 }
 
-// AddingSensitivity:BEGIN /////////////////////////////////////
-const Vector &
-NodalLoad::gradient(bool compute, int identifier)
+
+int
+NodalLoad::activateParameter(int passedParameterID)
 {
-	///////////////////////////////////
-	gradientVector(1) = 0.0;
-
-	///////////////////////////////////
-	if (compute) {
-
-		gradientVector(0) = (double)gradientIdentifier;
-	}
-	else {
-
-		gradientIdentifier = identifier;
-	}
-
-	return gradientVector;
+  parameterID = passedParameterID;
+  
+  return 0;
 }
+
+
+const Vector &
+NodalLoad::getExternalForceSensitivity(int gradNumber)
+{
+  gradientVector(0) = (double)parameterID;
+  
+  return gradientVector;
+}
+
+
 // AddingSensitivity:END //////////////////////////////////////
 

@@ -22,18 +22,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:51 $
+// $Revision: 1.5 $
+// $Date: 2003-03-04 00:39:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/BasicGFunEvaluator.cpp,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu)
 //
-
-#include <fstream>
 
 #include <BasicGFunEvaluator.h>
 #include <Vector.h>
@@ -47,12 +43,10 @@
 
 
 BasicGFunEvaluator::BasicGFunEvaluator(Tcl_Interp *passedTclInterp, 
-										ReliabilityDomain *passedReliabilityDomain)
+									   ReliabilityDomain *passedReliabilityDomain)
 
-:GFunEvaluator()
+:GFunEvaluator(passedTclInterp, passedReliabilityDomain)
 {
-	theTclInterp			= passedTclInterp;
-	theReliabilityDomain = passedReliabilityDomain;
 }
 
 BasicGFunEvaluator::~BasicGFunEvaluator()
@@ -61,53 +55,19 @@ BasicGFunEvaluator::~BasicGFunEvaluator()
 
 
 int
-BasicGFunEvaluator::evaluate_g(Vector passed_x)
+BasicGFunEvaluator::runGFunAnalysis(Vector x)
 {
-	// "Download" limit-state function from reliability domain
-	int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
-	LimitStateFunction *theLimitStateFunction = 
-		theReliabilityDomain->getLimitStateFunctionPtr(lsf);
-
-	// Tokenize and parse the limit-state function(s loop)
-	char *theExpression = theLimitStateFunction->getExpression();
-	char *lsf_forTokenizing = new char[100];
-	strcpy(lsf_forTokenizing,theExpression);
-	char lsf_expression[100] = "";
-	char *dollarSign = "$";
-	char *underscore = "_";
-	char *tokenPtr = strtok( lsf_forTokenizing, " _");
-	while ( tokenPtr != NULL ) {
-		// If a nodal basic random variable is detected
-		if ( strcmp(tokenPtr, "x") == 0) {
-			strcat(lsf_expression, dollarSign);
-			strcat(lsf_expression, tokenPtr);
-			strcat(lsf_expression, underscore);
-			tokenPtr = strtok( NULL, " _");
-			strcat(lsf_expression, tokenPtr);
-			int basicRandomVariableNumber = atoi( tokenPtr );
-			char tclAssignment[100];
-			sprintf(tclAssignment , "set x_%d  %15.5f", basicRandomVariableNumber, passed_x(basicRandomVariableNumber-1) );
-			Tcl_Eval( theTclInterp, tclAssignment);
-		}
-		else {
-			strcat(lsf_expression, tokenPtr);
-		}
-		tokenPtr = strtok( NULL, " _");
-	}
-	// Evaluate the limit-state function
-	double gvalue = 0.0;
-	Tcl_ExprDouble( theTclInterp, lsf_expression, &gvalue );
-
-	delete [] lsf_forTokenizing;
-
-	g = gvalue;
-
+	// Nothing to compute for this kind of gFunEvaluator
+	
 	return 0;
 }
 
 
-double
-BasicGFunEvaluator::get_g()
+int
+BasicGFunEvaluator::tokenizeSpecials(char *theExpression)
 {
-	return g;
+	// No need to set additional quantities here
+	// (the basic random variables are set in the base class)
+
+	return 0;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.43 $
-// $Date: 2003-02-14 03:46:10 $
+// $Revision: 1.44 $
+// $Date: 2003-03-04 00:48:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -79,6 +79,8 @@
 #define TSERIES_TAG_PathSeries       4
 #define TSERIES_TAG_ConstantSeries       5
 #define TSERIES_TAG_TrigSeries       6
+#define TSERIES_TAG_DiscretizedRandomProcessSeries 7
+#define TSERIES_TAG_SimulatedRandomProcessSeries 8
 
 #define MAT_TAG_ElasticMaterial			1
 #define MAT_TAG_ElasticPPMaterial		2
@@ -367,6 +369,8 @@
 #define INTEGRATOR_TAGS_HHT1 	          	10
 #define INTEGRATOR_TAGS_MinUnbalDispNorm 	11
 #define INTEGRATOR_TAGS_ArcLength1	     	12
+#define INTEGRATOR_TAGS_StaticSensitivity       13
+
 
 #define LinSOE_TAGS_FullGenLinSOE		1
 #define LinSOE_TAGS_BandGenLinSOE		2
@@ -405,6 +409,43 @@
 #define DomDecompANALYSIS_TAGS_DomainDecompositionAnalysis 1
 
 #define PartitionedModelBuilder_TAGS_PartitionedQuick2dFrameModel 1
+
+#define RANDOM_VARIABLE_beta				1
+#define RANDOM_VARIABLE_chisquare			2
+#define RANDOM_VARIABLE_exponential			3
+#define RANDOM_VARIABLE_gamma				4
+#define RANDOM_VARIABLE_gumbel				5
+#define RANDOM_VARIABLE_laplace				6
+#define RANDOM_VARIABLE_lognormal			7
+#define RANDOM_VARIABLE_normal				8
+#define RANDOM_VARIABLE_pareto				9
+#define RANDOM_VARIABLE_rayleigh			10
+#define RANDOM_VARIABLE_shiftedexponential	11
+#define RANDOM_VARIABLE_shiftedrayleigh		12
+#define RANDOM_VARIABLE_type1largestvalue	13
+#define RANDOM_VARIABLE_type1smallestvalue	14
+#define RANDOM_VARIABLE_type2largestvalue	15
+#define RANDOM_VARIABLE_type3smallestvalue	16
+#define RANDOM_VARIABLE_uniform				17
+#define RANDOM_VARIABLE_weibull				18
+
+#define RANDOM_VARIABLE_POSITIONER        1
+#define PARAMETER_POSITIONER              2
+
+#define CORRELATION_COEFFICIENT           1
+
+#define LIMIT_STATE_FUNCTION			  1
+
+#define MODULATING_FUNCTION_gamma         1
+#define MODULATING_FUNCTION_constant      2
+#define MODULATING_FUNCTION_trapezoidal   3
+
+#define FILTER_standardLinearOscillator   1
+
+#define SPECTRUM_jonswap                  1
+#define SPECTRUM_constant                 2
+#define SPECTRUM_points                   3
+
 
 #endif
 

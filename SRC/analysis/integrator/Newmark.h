@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:00:49 $
+// $Revision: 1.6 $
+// $Date: 2003-03-04 00:48:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.h,v $
                                                                         
                                                                         
@@ -72,8 +72,7 @@ class Newmark : public TransientIntegrator
     void Print(OPS_Stream &s, int flag =0);        
     
   protected:
-    
-  private:
+
     bool displ;      // a flag indicating whether displ or accel increments
     double gamma;
     double beta;
@@ -85,6 +84,9 @@ class Newmark : public TransientIntegrator
     Vector *Ut, *Utdot, *Utdotdot; // response quantities at time t
     Vector *U, *Udot, *Udotdot; // response quantities at time t+deltat
     bool determiningMass; // flag to check if just want the mass contribution
+
+  private:
+
 };
 
 #endif
