@@ -1,7 +1,7 @@
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
-// $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJvector.cpp,v $
+// $Revision: 1.2 $                                                              
+// $Date: 2000-10-20 03:51:47 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJvector.cpp,v $                                                                
                                                                         
                                                                         
 //############################################################################

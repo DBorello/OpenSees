@@ -1,7 +1,7 @@
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
-// $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJvector.h,v $
+// $Revision: 1.2 $                                                              
+// $Date: 2000-10-20 03:51:47 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJvector.h,v $                                                                
                                                                         
 //#############################################################################
 //                                                                            #
@@ -79,9 +79,9 @@ class BJvector : virtual public BJmatrix
 
 //....       ~BJvector( );
 
-      BJvector& operator=( const BJvector & x ); // BJvector assignement
-//..      BJvector& operator=( const BJmatrix & x ); // BJvector assignement
-//..      BJvector& operator=( const nDarray & x ); // BJvector assignement
+      BJvector& operator=( const BJvector & x ); // BJvector assignment
+//..      BJvector& operator=( const BJmatrix & x ); // BJvector assignment
+//..      BJvector& operator=( const nDarray & x ); // BJvector assignment
 
 //#######        BJmatrix operator*( BJvector &); // BJvector multiplication
 
