@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 05:56:44 $
+// $Revision: 1.3 $
+// $Date: 2002-03-04 19:07:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/section/FiberSectionRepr.cpp,v $
                                                                         
                                                                         
@@ -41,15 +41,18 @@
 #include <FiberSectionRepr.h>
 
 
-FiberSectionRepr::FiberSectionRepr(int sectionID, int maxNumPatches, int maxNumReinfLayers):
-                                   SectionRepres(sectionID), 
-                                   sectID(sectionID), 
-				   maxNPatches (maxNumPatches),
-				   maxNReinfLayers (maxNumReinfLayers),
-                                   nPatches(0), 
-                                   nReinfLayers(0), 
-                                   patch(0), reinfLayer(0), 
-				   numFibers(0), theFibers(0), sizeFibers(32)
+FiberSectionRepr::FiberSectionRepr(int sectionID, int maxNumPatches, int maxNumReinfLayers)
+  :SectionRepres(sectionID), 
+  sectID(sectionID), 
+  maxNPatches (maxNumPatches),
+  maxNReinfLayers (maxNumReinfLayers),
+  patch(0), 
+  reinfLayer(0), 
+  nPatches(0), 
+  nReinfLayers(0), 
+  numFibers(0), 
+  theFibers(0), 
+  sizeFibers(32)
 {
 
     theFibers = new Fiber *[sizeFibers];
@@ -84,14 +87,14 @@ FiberSectionRepr::FiberSectionRepr(int sectionID, int maxNumPatches, int maxNumR
 }
 
 
-FiberSectionRepr::FiberSectionRepr(int sectionID):
-                                   SectionRepres(sectionID), 
-                                   sectID(sectionID), 
-				   maxNPatches(0),
-				   maxNReinfLayers(0),
-                                   nPatches(0), 
-                                   nReinfLayers(0), 
-                                   patch(0), reinfLayer(0)
+FiberSectionRepr::FiberSectionRepr(int sectionID)
+  :SectionRepres(sectionID), 
+  sectID(sectionID), 
+  maxNPatches(0),
+  maxNReinfLayers(0),
+  patch(0), reinfLayer(0),
+  nPatches(0), 
+  nReinfLayers(0)
 {
    cerr << "Function FiberSectionRepr::FiberSectionRepr not implemented yet";
    exit (-1);
@@ -101,14 +104,14 @@ FiberSectionRepr::FiberSectionRepr(int sectionID):
 FiberSectionRepr::FiberSectionRepr(int sectionID, 
                                    int numPatches, Patch **patches,
                                    int numReinfLayers,
-                                   ReinfLayer **reinfLayers):
-                                   SectionRepres(sectionID), 
-                                   sectID(sectionID), 
-				   maxNPatches(numPatches),
-				   maxNReinfLayers(numReinfLayers),
-                                   nPatches(numPatches), 
-                                   nReinfLayers(numReinfLayers), 
-                                   patch(patches), reinfLayer(reinfLayers)
+                                   ReinfLayer **reinfLayers)
+ :SectionRepres(sectionID), 
+  sectID(sectionID), 
+  maxNPatches(numPatches),
+  maxNReinfLayers(numReinfLayers),
+  patch(patches), reinfLayer(reinfLayers),
+  nPatches(numPatches), 
+  nReinfLayers(numReinfLayers)
 {
    cerr << "Function FiberSectionRepr::FiberSectionRepr not implemented yet";
    exit (-1);
@@ -178,8 +181,20 @@ int FiberSectionRepr::addPatch (const Patch & aPatch)
 
    if (nPatches < maxNPatches)
       patch[nPatches++] = aPatch.getCopy();
-   else
-      error = 1;
+
+   // out of room: make a new bigger array, copy old over and then add new patch
+   else {
+     maxNPatches *= 2;
+     Patch **patches = new Patch*[maxNPatches];     
+     if (patches == 0) {
+       cerr << "FiberSectionRepr::addPatch() - out of memory\n";
+       return 1;
+     }
+     for (int i=0; i<nPatches; i++)
+       patches[i] = patch[i];
+     patch = patches;
+     patch[nPatches++] = aPatch.getCopy();
+   }
 
    return error;   
 }
@@ -190,8 +205,21 @@ int FiberSectionRepr::addReinfLayer (const ReinfLayer & aReinfLayer)
 
    if (nReinfLayers < maxNReinfLayers)
       reinfLayer[nReinfLayers++] = aReinfLayer.getCopy();
-   else
-      error = 1;
+
+
+   // out of room: make a new bigger array, copy old over and then add new patch
+   else {
+     maxNReinfLayers *= 2;
+     ReinfLayer **reinfLayers = new ReinfLayer*[maxNReinfLayers];     
+     if (reinfLayers == 0) {
+       cerr << "FiberSectionRepr::addReinLayer() - out of memory\n";
+       return 1;
+     }
+     for (int i=0; i<nReinfLayers; i++)
+       reinfLayers[i] = reinfLayer[i];
+     reinfLayer = reinfLayers;
+     reinfLayer[nReinfLayers++] = aReinfLayer.getCopy();
+   }
 
    return error;   
 }
