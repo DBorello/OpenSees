@@ -434,7 +434,10 @@ double straintensor::ro() const                        // Chen W.F. "plasticity 
 //##############################################################################
 double straintensor::p_hydrostatic() const         // Desai "Constitutive Laws
   {                                         // for Engineering Materials"
-    return( (this->Iinvariant1()) );    // page 283
+    // Joey modified to make it consistent with stress tensor
+    return( - (this->Iinvariant1())*ONEOVERTHREE );  // page 283
+    
+    //return( (this->Iinvariant1()) );    // page 283
   }
 
 

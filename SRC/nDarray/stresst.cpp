@@ -1077,6 +1077,7 @@ void stresstensor::reportTensor(char * msg) const
 
 //##############################################################################
 OPS_Stream& operator<< (OPS_Stream& os, const stresstensor & rhs)
+//ostream& operator<< (ostream& os, const stresstensor & rhs)
       {
         //if ( msg ) ::printf("%s",msg);
     
