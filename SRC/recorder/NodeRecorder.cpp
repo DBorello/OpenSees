@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.5 $
-// $Date: 2001-10-19 23:09:44 $
+// $Revision: 1.6 $
+// $Date: 2002-01-06 19:59:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -91,7 +91,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
       dataFlag = 6;
   } else {
     dataFlag = 6;
-    cerr << "NodeRecorder::NodeRecorder - dataToStore " << *dataToStore;
+    cerr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
     cerr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
   }
 }
