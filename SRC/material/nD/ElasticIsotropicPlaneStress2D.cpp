@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2001-06-16 04:41:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlaneStress2D.cpp,v $
                                                                         
                                                                         
@@ -31,8 +31,8 @@
 Vector ElasticIsotropicPlaneStress2D::sigma(3);
 
 ElasticIsotropicPlaneStress2D::ElasticIsotropicPlaneStress2D
-(int tag, double E, double nu) :
- ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropicPlaneStress2d, E, nu),
+(int tag, double E, double nu, double rho) :
+ ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropicPlaneStress2d, E, nu, rho),
  D(3,3), Tepsilon(3), Cepsilon(3)
 {
 	this->update();
@@ -135,7 +135,7 @@ NDMaterial*
 ElasticIsotropicPlaneStress2D::getCopy (void)
 {
 	ElasticIsotropicPlaneStress2D *theCopy =
-		new ElasticIsotropicPlaneStress2D (this->getTag(), E, v);
+		new ElasticIsotropicPlaneStress2D (this->getTag(), E, v, rho);
 
 	theCopy->Cepsilon = Cepsilon;
 	// D is created in the constructor call

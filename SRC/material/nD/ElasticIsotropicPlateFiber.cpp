@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-18 05:32:05 $
+// $Revision: 1.2 $
+// $Date: 2001-06-16 04:41:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlateFiber.cpp,v $
                                                                         
                                                                         
@@ -32,8 +32,8 @@ Vector ElasticIsotropicPlateFiber::sigma(5);
 Matrix ElasticIsotropicPlateFiber::D(5,5);
 
 ElasticIsotropicPlateFiber::ElasticIsotropicPlateFiber
-(int tag, double E, double nu) :
- ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropicPlateFiber, E, nu),
+(int tag, double E, double nu, double rho) :
+ ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropicPlateFiber, E, nu, rho),
  Tepsilon(5), Cepsilon(5)
 {
 	this->update();
@@ -139,7 +139,7 @@ NDMaterial*
 ElasticIsotropicPlateFiber::getCopy (void)
 {
 	ElasticIsotropicPlateFiber *theCopy =
-		new ElasticIsotropicPlateFiber (this->getTag(), E, v);
+		new ElasticIsotropicPlateFiber (this->getTag(), E, v, rho);
 
 	theCopy->Cepsilon = Cepsilon;
 	// D is created in the constructor call

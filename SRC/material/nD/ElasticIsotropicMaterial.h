@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-01-23 08:48:36 $
+// $Revision: 1.4 $
+// $Date: 2001-06-16 04:41:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.h,v $
                                                                         
                                                                         
@@ -51,15 +51,17 @@ class ElasticIsotropicMaterial : public NDMaterial
 {
   public:
     // Only called by subclasses to pass their tags to NDMaterialModel
-    ElasticIsotropicMaterial (int tag, int classTag, double E, double nu);
+    ElasticIsotropicMaterial (int tag, int classTag, double E, double nu, double rho = 0.0);
 
     // Called by clients
-    ElasticIsotropicMaterial (int tag, double E, double nu);
+    ElasticIsotropicMaterial (int tag, double E, double nu, double rho = 0.0);
 
     // For parallel processing
     ElasticIsotropicMaterial (void);
 
     virtual ~ElasticIsotropicMaterial (void);
+
+    virtual double getRho( ) ;
 
     virtual int setTrialStrain (const Vector &v);
     virtual int setTrialStrain (const Vector &v, const Vector &r);
@@ -107,6 +109,7 @@ class ElasticIsotropicMaterial : public NDMaterial
   protected:
     double E;	// Elastic modulus
     double v;	// Poisson ratio
+    double rho ; //mass per unit 3D volume
 
   private:
 };

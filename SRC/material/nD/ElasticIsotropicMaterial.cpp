@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $                                                              
-// $Date: 2001-05-26 05:33:05 $                                                                  
+// $Revision: 1.8 $                                                              
+// $Date: 2001-06-16 04:41:14 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -46,15 +46,15 @@
 #include <G3Globals.h>
 
 ElasticIsotropicMaterial::ElasticIsotropicMaterial
-(int tag, int classTag, double e, double nu)
-:NDMaterial(tag, classTag), E(e), v(nu)
+(int tag, int classTag, double e, double nu, double r)
+  :NDMaterial(tag, classTag), E(e), v(nu), rho(r)
 {
 
 }
 
 ElasticIsotropicMaterial::ElasticIsotropicMaterial
-(int tag, double e, double nu)
-:NDMaterial(tag, ND_TAG_ElasticIsotropic), E(e), v(nu)
+(int tag, double e, double nu, double r)
+  :NDMaterial(tag, ND_TAG_ElasticIsotropic), E(e), v(nu), rho(r)
 {
 
 }
@@ -64,13 +64,20 @@ ElasticIsotropicMaterial::~ElasticIsotropicMaterial()
 	
 }
 
+double
+ElasticIsotropicMaterial::getRho() 
+{ 
+  return rho ;
+}
+
+
 NDMaterial*
 ElasticIsotropicMaterial::getCopy (const char *type)
 {
     if (strcmp(type,"PlaneStress2D") == 0)
     {
 	ElasticIsotropicPlaneStress2D *theModel;
-	theModel = new ElasticIsotropicPlaneStress2D (this->getTag(), E, v);
+	theModel = new ElasticIsotropicPlaneStress2D (this->getTag(), E, v, rho);
 		// DOES NOT COPY sigma, D, and epsilon ...
 		// This function should only be called during element instantiation, so
 		// no state determination is performed on the material model object
@@ -81,7 +88,7 @@ ElasticIsotropicMaterial::getCopy (const char *type)
     else if (strcmp(type,"PlaneStrain2D") == 0)
     {
 	ElasticIsotropicPlaneStrain2D *theModel;
-	theModel = new ElasticIsotropicPlaneStrain2D (this->getTag(), E, v);
+	theModel = new ElasticIsotropicPlaneStrain2D (this->getTag(), E, v, rho);
 		// DOES NOT COPY sigma, D, and epsilon ...
 		// This function should only be called during element instantiation, so
 		// no state determination is performed on the material model object
@@ -101,7 +108,7 @@ ElasticIsotropicMaterial::getCopy (const char *type)
     else if (strcmp(type,"PlateFiber") == 0)
     {
 	ElasticIsotropicPlateFiber *theModel;
-	theModel = new ElasticIsotropicPlateFiber(this->getTag(), E, v );
+	theModel = new ElasticIsotropicPlateFiber(this->getTag(), E, v, rho);
 		// DOES NOT COPY sigma, D, and epsilon ...
 		// This function should only be called during element instantiation, so
 		// no state determination is performed on the material model object
@@ -314,6 +321,7 @@ ElasticIsotropicMaterial::Print (ostream &s, int flag)
 	s << "Elastic Isotropic Material Model" << endl;
 	s << "\tE:  " << E << endl;
 	s << "\tv:  " << v << endl;
+	s << "\trho:  " << rho << endl;
 
 	return;
 }

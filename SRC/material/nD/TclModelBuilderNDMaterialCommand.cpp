@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-05-18 05:33:38 $
+// $Revision: 1.8 $
+// $Date: 2001-06-16 04:41:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                         
 
@@ -120,23 +120,20 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 
 	//NDMaterial *temp = new ElasticIsotropic3D (tag, E, v, expp);
 	theMaterial = new ElasticIsotropic3D (tag, E, v, expp);
-	// Obtain a specific copy if requested
-	//if (argc > 5)
-	//    theMaterial = temp->getCopy(argv[5]);
-	//else
-	//    theMaterial = temp;
+
 	}	
 
     else if (strcmp(argv[1],"ElasticIsotropic") == 0) {
 	if (argc < 5) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial ElasticIsotropic tag? E? v? <type?>" << endl;
+	    cerr << "Want: nDMaterial ElasticIsotropic tag? E? v? <rho?> <type?>" << endl;
 	    return TCL_ERROR;
 	}    
 
 	int tag;
 	double E, v;
+	double rho = 0.0;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    cerr << "WARNING invalid ElasticIsotropic tag" << endl;
@@ -155,11 +152,17 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    return TCL_ERROR;	
 	}
 
-	NDMaterial *temp = new ElasticIsotropicMaterial (tag, E, v);
+	if (argc > 5 && Tcl_GetDouble(interp, argv[5], &rho) != TCL_OK) {
+	    cerr << "WARNING invalid rho\n";
+	    cerr << "nDMaterial ElasticIsotropic: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	NDMaterial *temp = new ElasticIsotropicMaterial (tag, E, v, rho);
 	
 	// Obtain a specific copy if requested
-	if (argc > 5)
-	    theMaterial = temp->getCopy(argv[5]);
+	if (argc > 6)
+	    theMaterial = temp->getCopy(argv[6]);
 	else
 	    theMaterial = temp;
 	}	

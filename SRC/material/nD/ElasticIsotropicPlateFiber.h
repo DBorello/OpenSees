@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-18 05:32:05 $
+// $Revision: 1.2 $
+// $Date: 2001-06-16 04:41:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlateFiber.h,v $
                                                                         
                                                                         
@@ -49,7 +49,7 @@
 class ElasticIsotropicPlateFiber : public ElasticIsotropicMaterial
 {
   public:
-    ElasticIsotropicPlateFiber (int tag, double E, double nu);
+    ElasticIsotropicPlateFiber (int tag, double E, double nu, double rho);
     ElasticIsotropicPlateFiber ();
     ~ElasticIsotropicPlateFiber ();
 

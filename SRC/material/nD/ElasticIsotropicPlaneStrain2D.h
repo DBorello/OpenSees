@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2001-06-16 04:41:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlaneStrain2D.h,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@
 class ElasticIsotropicPlaneStrain2D : public ElasticIsotropicMaterial
 {
   public:
-    ElasticIsotropicPlaneStrain2D (int tag, double E, double nu);
+    ElasticIsotropicPlaneStrain2D (int tag, double E, double nu, double rho);
 	ElasticIsotropicPlaneStrain2D ();
     ~ElasticIsotropicPlaneStrain2D ();
 
