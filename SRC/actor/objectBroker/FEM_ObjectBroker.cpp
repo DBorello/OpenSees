@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-05-30 07:15:40 $
+// $Revision: 1.5 $
+// $Date: 2001-07-18 22:03:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -60,6 +60,7 @@
 #include <ViscousMaterial.h>
 #include <PathIndependentMaterial.h>
 #include <SeriesMaterial.h>
+#include <CableMaterial.h>
 
 // Sections
 #include <ElasticSection2d.h>
@@ -452,6 +453,9 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
 
 	case MAT_TAG_SeriesMaterial:
 		return new SeriesMaterial();
+
+	case MAT_TAG_CableMaterial:
+		return new CableMaterial();
 	     
 	default:
 	     cerr << "FEM_ObjectBroker::getPtrNewUniaxialMaterial - ";
