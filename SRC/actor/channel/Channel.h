@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-18 01:05:39 $
+// $Revision: 1.3 $
+// $Date: 2003-10-15 00:26:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/Channel.h,v $
                                                                         
                                                                         
 #ifndef Channel_h
 #define Channel_h
 
-// File: ~/actor/channel/Channel.h
-//
 // Written: fmk
 // Created: 11/96
 // Revision: A
@@ -57,8 +55,7 @@ class Channel
 
     // methods to set up the channel in an actor space
     virtual char *addToProgram(void) =0;
-    virtual int setUpShadow(void) =0;
-    virtual int setUpActor(void) =0;
+    virtual int setUpConnection(void) =0;
     virtual int setNextAddress(const ChannelAddress &theAddress) =0;
     virtual ChannelAddress *getLastSendersAddress(void) =0;
 

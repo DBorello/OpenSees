@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-10-15 00:26:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/MPI_Channel.h,v $
                                                                         
                                                                         
-// File: ~/actor/MPI_Channel.h
-//
 // Written: fmk 11/95
 // Revised:
 //
@@ -47,8 +45,7 @@ class MPI_Channel : public Channel
 
     char *addToProgram(void);
     
-    virtual int setUpShadow(void);
-    virtual int setUpActor(void);
+    virtual int setUpConnection(void);
 
     int setNextAddress(const ChannelAddress &otherChannelAddress);
     virtual ChannelAddress *getLastSendersAddress(void);

@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:39 $
+// $Revision: 1.3 $
+// $Date: 2003-10-15 00:26:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/channel/MPI_Channel.cpp,v $
                                                                         
                                                                         
-// File: ~/actor/channel/MPI_Channel.C
-//
 // Written: fmk 11/95
 // Revised:
 //
@@ -59,17 +57,11 @@ MPI_Channel::~MPI_Channel()
 
 
 int 
-MPI_Channel::setUpActor(void) 
+MPI_Channel::setUpConnection(void)
 {
   return 0;    
 }
 
-
-int 
-MPI_Channel::setUpShadow(void) 
-{
-    return 0;
-}    
 
 ChannelAddress *
 MPI_Channel::getLastSendersAddress(void) 
