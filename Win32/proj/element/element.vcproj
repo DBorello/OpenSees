@@ -393,10 +393,19 @@
 				RelativePath="..\..\..\SRC\element\20nbrick\TclTwentyNodeBrickCommand.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\element\20nbrick\TclTwenty_Node_BrickCommand.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\element\20nbrick\TwentyNodeBrick.cpp">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\20nbrick\TwentyNodeBrick.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\20nbrick\Twenty_Node_Brick.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\20nbrick\Twenty_Node_Brick.h">
 			</File>
 		</Filter>
 		<Filter

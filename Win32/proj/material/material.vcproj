@@ -538,6 +538,12 @@
 					RelativePath="..\..\..\SRC\material\nD\soil\PressureDependMultiYield.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\material\nD\soil\PressureDependMultiYield02.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\soil\PressureDependMultiYield02.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\material\nD\soil\PressureIndependMultiYield.cpp">
 				</File>
 				<File
