@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:32:47 $
+// $Revision: 1.2 $
+// $Date: 2003-03-06 18:12:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FragilityAnalysis.cpp,v $
 
 
@@ -152,6 +152,7 @@ FragilityAnalysis::analyze(void)
 		outputFile << "#    Parameter       estimate (fragility)     densitity function      #" << endln;
 		outputFile << "#     value               (CDF)                    (PDF)              #" << endln;
 		outputFile.setf(ios::scientific, ios::floatfield);
+		outputFile.flush();
 
 
 		// Range over parameter values
@@ -251,6 +252,7 @@ FragilityAnalysis::analyze(void)
 				outputFile <<setprecision(3)<<setw(11)<<pf(counter)<<"             ";
 				outputFile <<setprecision(3)<<setw(11)<<pdf(counter)<<"           #" << endln;
 			}
+			outputFile.flush();
 
 		} // Done looping over parameter range
 
