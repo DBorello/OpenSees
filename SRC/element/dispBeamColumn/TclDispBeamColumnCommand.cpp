@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-13 21:11:27 $
+// $Revision: 1.2 $
+// $Date: 2002-12-10 03:04:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/TclDispBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -70,57 +70,90 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	if (argc < 8) {
 		cerr << "WARNING insufficient arguments\n";
 		printCommand(argc, argv);
-		cerr << "Want: element dispBeamColumn eleTag? iNode? jNode? numSec? secTag? transfTag?\n";
+		cerr << "Want: element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?\n";
 		return TCL_ERROR;
 	}
 
 	// get the id and end nodes 
-	int eleTag, iNode, jNode, numSec, secTag, transfTag;
+	int eleTag, iNode, jNode, nIP, transfTag;
+	int secTag[10]; // Max size of integration rule ... can change if needed
+	int argi = 2;
 
-	if (Tcl_GetInt(interp, argv[2], &eleTag) != TCL_OK) {
+	if (Tcl_GetInt(interp, argv[argi++], &eleTag) != TCL_OK) {
 		cerr << "WARNING invalid dispBeamColumn eleTag" << endl;
 		return TCL_ERROR;
 	}
 
-	if (Tcl_GetInt(interp, argv[3], &iNode) != TCL_OK) {
+	if (Tcl_GetInt(interp, argv[argi++], &iNode) != TCL_OK) {
 		cerr << "WARNING invalid iNode\n";
 		cerr << "dispBeamColumn element: " << eleTag << endl;
 		return TCL_ERROR;
 	}
 
-	if (Tcl_GetInt(interp, argv[4], &jNode) != TCL_OK) {
+	if (Tcl_GetInt(interp, argv[argi++], &jNode) != TCL_OK) {
 		cerr << "WARNING invalid jNode\n";
 		cerr << "dispBeamColumn element: " << eleTag << endl;
 		return TCL_ERROR;
 	}
   
-	if (Tcl_GetInt(interp, argv[5], &numSec) != TCL_OK) {
-		cerr << "WARNING invalid numSec\n";
+	if (Tcl_GetInt(interp, argv[argi++], &nIP) != TCL_OK) {
+		cerr << "WARNING invalid nIP\n";
 		cerr << "dispBeamColumn element: " << eleTag << endl;
 		return TCL_ERROR;
 	}  
   
-	if (Tcl_GetInt(interp, argv[6], &secTag) != TCL_OK) {
-		cerr << "WARNING invalid secTag\n";
-		cerr << "dispBeamColumn element: " << eleTag << endl;
-		return TCL_ERROR;
-	}  
-
-	if (Tcl_GetInt(interp, argv[7], &transfTag) != TCL_OK) {
-		cerr << "WARNING invalid transfTag\n";
-		cerr << "dispBeamColumn element: " << eleTag << endl;
-		return TCL_ERROR;
+	if (strcmp(argv[argi], "-sections") == 0) {
+	  argi++;
+	  if (argi+nIP > argc) {
+	    interp->result = "WARNING insufficient number of section tags - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?";
+	    return TCL_ERROR;
+	  }
+	  int section;
+	  for (int i = 0; i < nIP; i++) {
+	    if (Tcl_GetInt(interp, argv[argi+i], &section) != TCL_OK) {
+	      interp->result = "WARNING invalid secTag - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?";
+	      return TCL_ERROR;
+	    }
+	    secTag[i] = section;
+	  }
+	  argi += nIP;
+	}
+	
+	else {
+	  int section;
+	  if (Tcl_GetInt(interp, argv[argi++], &section) != TCL_OK) {
+	    interp->result = "WARNING invalid secTag - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?";
+	    return TCL_ERROR;
+	  }
+	  for (int i = 0; i < nIP; i++)
+	    secTag[i] = section;
+	}
+	
+	if (argi >= argc || Tcl_GetInt(interp, argv[argi++], &transfTag) != TCL_OK) {
+	  interp->result = "WARNING invalid transfTag? - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?";
+	  return TCL_ERROR;
 	}
 
-	SectionForceDeformation *theSection = theTclBuilder->getSection(secTag);
-      
-	if (theSection == 0) {
-		cerr << "WARNING section not found\n";
-		cerr << "Section: " << secTag;
-		cerr << "\ndispBeamColumn element: " << eleTag << endl;
-		return TCL_ERROR;
+	SectionForceDeformation **sections = new SectionForceDeformation* [nIP];
+	
+	if (!sections) {
+	  interp->result = "WARNING TclElmtBuilder - addFrameElement - Insufficient memory to create sections";
+	  return TCL_ERROR;
 	}
+	
+	for (int j=0; j<nIP; j++) {
+	  SectionForceDeformation *theSection = theTclBuilder->getSection(secTag[j]);
+	  
+	  if (theSection == 0) {
+	    cerr << "WARNING TclElmtBuilder - frameElement - no Section found with tag ";
+	    cerr << secTag[j] << endl;
+	    delete [] sections;
+	    return TCL_ERROR;
+	  }
 
+	  sections[j] = theSection;
+	}
+	
 	Element *theElement = 0;
 
 	if (ndm == 2) {
@@ -135,7 +168,9 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 		}
 
 		// now create the DispBeamColumn and add it to the Domain
-		theElement = new DispBeamColumn2d(eleTag,iNode,jNode,numSec,*theSection,*theTransf);
+		theElement = new DispBeamColumn2d(eleTag,iNode,jNode,nIP,sections,*theTransf);
+
+		delete [] sections;
 	}
 
 	if (ndm == 3) {
@@ -150,7 +185,9 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 		}
 
 		// now create the DispBeamColumn and add it to the Domain
-		theElement = new DispBeamColumn3d(eleTag,iNode,jNode,numSec,*theSection,*theTransf);
+		theElement = new DispBeamColumn3d(eleTag,iNode,jNode,nIP,sections,*theTransf);
+
+		delete [] sections;
 	}
 
 	if (theElement == 0) {

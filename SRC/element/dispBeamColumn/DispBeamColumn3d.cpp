@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-12-05 22:20:38 $
+// $Revision: 1.13 $
+// $Date: 2002-12-10 03:04:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.cpp,v $
 
 // Written: MHS
@@ -51,8 +51,8 @@ double DispBeamColumn3d::workArea[200];
 GaussQuadRule1d01 DispBeamColumn3d::quadRule;
 
 DispBeamColumn3d::DispBeamColumn3d(int tag, int nd1, int nd2,
-		int numSec, SectionForceDeformation &s,
-		CrdTransf3d &coordTransf, double r)
+				   int numSec, SectionForceDeformation **s,
+				   CrdTransf3d &coordTransf, double r)
 :Element (tag, ELE_TAG_DispBeamColumn3d),
 numSections(numSec), theSections(0), crdTransf(0),
 connectedExternalNodes(2), 
@@ -68,7 +68,7 @@ Q(12), q(6), rho(r)
   for (int i = 0; i < numSections; i++) {
     
     // Get copies of the material model for each integration point
-    theSections[i] = s.getCopy();
+    theSections[i] = s[i]->getCopy();
     
     // Check allocation
     if (theSections[i] == 0)
@@ -262,22 +262,20 @@ DispBeamColumn3d::update(void)
   crdTransf->update();
   
   // Get basic deformations
-  static Vector v(6);
-  v = crdTransf->getBasicTrialDisp();
+  const Vector &v = crdTransf->getBasicTrialDisp();
   
   double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
   const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
   
-  // Assuming member is prismatic ... have to move inside
-  // the loop if it is not prismatic
-  int order = theSections[0]->getOrder();
-  const ID &code = theSections[0]->getType();
-  Vector e(workArea, order);
-  
   // Loop over the integration points
   for (int i = 0; i < numSections; i++) {
-    
+
+    int order = theSections[i]->getOrder();
+    const ID &code = theSections[i]->getType();
+
+    Vector e(workArea, order);
+      
     double xi6 = 6.0*pts(i,0);
     
     int j;
@@ -320,25 +318,24 @@ DispBeamColumn3d::getTangentStiff()
   const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
   const Vector &wts = quadRule.getIntegrPointWeights(numSections);
   
-  // Assuming member is prismatic ... have to move inside
-  // the loop if it is not prismatic
-  int order = theSections[0]->getOrder();
-  const ID &code = theSections[0]->getType();
-  
   double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
-  Matrix ka(workArea, order, 6);
   
   // Loop over the integration points
   for (int i = 0; i < numSections; i++) {
     
+    int order = theSections[i]->getOrder();
+    const ID &code = theSections[i]->getType();
+
+    Matrix ka(workArea, order, 6);
+    ka.Zero();
+
+    double xi6 = 6.0*pts(i,0);
+
     // Get the section tangent stiffness and stress resultant
     const Matrix &ks = theSections[i]->getSectionTangent();
     const Vector &s = theSections[i]->getStressResultant();
-    
-    double xi6 = 6.0*pts(i,0);
-    ka.Zero();
-    
+        
     // Perform numerical integration
     //kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
     double wti = wts(i)*oneOverL;
@@ -448,23 +445,22 @@ DispBeamColumn3d::getInitialStiff()
   const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
   const Vector &wts = quadRule.getIntegrPointWeights(numSections);
   
-  // Assuming member is prismatic ... have to move inside
-  // the loop if it is not prismatic
-  int order = theSections[0]->getOrder();
-  const ID &code = theSections[0]->getType();
-  
   double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
-  Matrix ka(workArea, order, 6);
   
   // Loop over the integration points
   for (int i = 0; i < numSections; i++) {
+
+    int order = theSections[i]->getOrder();
+    const ID &code = theSections[i]->getType();
+    
+    Matrix ka(workArea, order, 6);
+    ka.Zero();
+    
+    double xi6 = 6.0*pts(i,0);
     
     // Get the section tangent stiffness and stress resultant
     const Matrix &ks = theSections[i]->getInitialTangent();
-    
-    double xi6 = 6.0*pts(i,0);
-    ka.Zero();
     
     // Perform numerical integration
     //kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
@@ -687,17 +683,15 @@ DispBeamColumn3d::getResistingForce()
   const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
   const Vector &wts = quadRule.getIntegrPointWeights(numSections);
   
-  // Assuming member is prismatic ... have to move inside
-  // the loop if it is not prismatic
-  int order = theSections[0]->getOrder();
-  const ID &code = theSections[0]->getType();
-  
   // Zero for integration
   q.Zero();
   
   // Loop over the integration points
   for (int i = 0; i < numSections; i++) {
     
+    int order = theSections[i]->getOrder();
+    const ID &code = theSections[i]->getType();
+
     double xi6 = 6.0*pts(i,0);
     
     // Get section stress resultant
@@ -1033,7 +1027,8 @@ DispBeamColumn3d::Print(ostream &s, int flag)
   s << "\tEnd 2 Forces (P Mz Vy My Vz T): "
     <<  N << ' ' << Mz2 << ' ' << -Vy+p0[2] << ' ' << My2 << ' ' << -Vz+p0[4] << ' ' <<  T << endl;
   
-  theSections[0]->Print(s,flag);
+  for (int i = 0; i < numSections; i++)
+    theSections[i]->Print(s,flag);
 }
 
 

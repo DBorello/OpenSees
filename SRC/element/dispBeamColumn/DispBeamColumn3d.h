@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-12-05 22:20:38 $
+// $Revision: 1.8 $
+// $Date: 2002-12-10 03:04:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.h,v $
 
 // Written: MHS
@@ -51,8 +51,8 @@ class DispBeamColumn3d : public Element
 {
   public:
     DispBeamColumn3d(int tag, int nd1, int nd2,
-		  int numSections, SectionForceDeformation &s,
-		  CrdTransf3d &coordTransf, double rho = 0.0);
+		     int numSections, SectionForceDeformation **s,
+		     CrdTransf3d &coordTransf, double rho = 0.0);
     DispBeamColumn3d();
     virtual ~DispBeamColumn3d();
 
