@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-04 00:48:12 $
+// $Revision: 1.6 $
+// $Date: 2003-04-24 20:49:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.h,v $
                                                                         
                                                                         
@@ -82,6 +82,7 @@ class Node : public DomainComponent
     virtual const Vector &getTrialAccel(void);    
 
     // public methods for updating the trial response quantities
+    virtual int setTrialDisp(double value, int dof);    
     virtual int setTrialDisp(const Vector &);    
     virtual int setTrialVel(const Vector &);    
     virtual int setTrialAccel(const Vector &);        

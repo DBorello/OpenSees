@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-03-04 00:48:11 $
+// $Revision: 1.14 $
+// $Date: 2003-04-24 20:49:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -561,6 +561,35 @@ Node::getIncrDeltaDisp(void)
     return *incrDeltaDisp;
 }
 
+
+int
+Node::setTrialDisp(double value, int dof)
+{
+    // check vector arg is of correct size
+    if (dof < 0 || dof >=  numberDOF) {
+      opserr << "WARNING Node::setTrialDisp() - incompatable sizes\n";
+      return -2;
+    }    
+
+    // construct memory and Vectors for trial and committed
+    // accel on first call to this method, getTrialDisp(),
+    // getDisp(), or incrTrialDisp()        
+    if (trialDisp == 0) {
+	if (this->createDisp() < 0) {
+	    opserr << "FATAL Node::setTrialDisp() - ran out of memory\n";
+	    exit(-1);
+	}    
+    }
+
+    // perform the assignment .. we dont't go through Vector interface
+    // as we are sure of size and this way is quicker
+    double tDisp = value;
+    disp[dof+2*numberDOF] = tDisp - disp[dof+numberDOF];
+    disp[dof+3*numberDOF] = tDisp - disp[dof];	
+    disp[dof] = tDisp;
+
+    return 0;
+}
 
 int
 Node::setTrialDisp(const Vector &newTrialDisp)
@@ -1456,11 +1485,11 @@ Node::Print(OPS_Stream &s, int flag)
     s << "\n Node: " << this->getTag() << endln;
     s << "\tCoordinates  : " << *Crd;
     if (commitDisp != 0)         
-	s << "\tcommitDisps: " << *commitDisp;
+	s << "\tcommitDisps: " << *trialDisp;
     if (commitVel != 0)     
-	s << "\tVelocities   : " << *commitVel;
+	s << "\tVelocities   : " << *trialVel;
     if (commitAccel != 0)         
-	s << "\tcommitAccels: " << *commitAccel;
+	s << "\tcommitAccels: " << *trialAccel;
     if (unbalLoad != 0)
       s << "\t unbalanced Load: " << *unbalLoad;
     if (mass != 0) 
