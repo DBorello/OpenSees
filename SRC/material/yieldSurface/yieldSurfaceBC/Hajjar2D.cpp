@@ -53,7 +53,7 @@ double denom = fc*(b - 2*t) + 0.5*fr*(b - 2*t) + fy*(4*t);
 
 double xn = num/denom;
 	capX  = 	  fc*(0.5*(b - 2*t)*(xn - t)*(xn - t))
-				+ 0.5*fr*(0.5*(b - 2*t)*(D - xn - t)*(D - xn - t));
+				+ 0.5*fr*(0.5*(b - 2*t)*(D - xn - t)*(D - xn - t))
 				+ fy*((2*t)*(D*D/2 + xn*xn + t*t - D*t - D*xn) + (b*t)*(D - t));
 
 	centroidY = (Ac*fc - Ac*fr)/2;
