@@ -477,6 +477,8 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/load/Load.o \
 	$(FE)/domain/load/Beam2dUniformLoad.o \
 	$(FE)/domain/load/Beam2dPointLoad.o \
+	$(FE)/domain/load/Beam3dUniformLoad.o \
+	$(FE)/domain/load/Beam3dPointLoad.o \
 	$(FE)/domain/load/BrickSelfWeight.o \
 	$(FE)/domain/pattern/LoadPattern.o \
 	$(FE)/domain/pattern/EarthquakePattern.o \
