@@ -1,6 +1,7 @@
 include ../../../Makefile.def
 
-OBJS       = Load.o ElementalLoadIter.o NodalLoadIter.o
+OBJS       = Load.o ElementalLoadIter.o NodalLoadIter.o Beam2dUniformLoad.o \
+	Beam2dPointLoad.o
 
 # Compilation control
 
