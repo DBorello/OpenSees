@@ -931,10 +931,10 @@ void stresstensor::report(char * msg) const
 
     this->print("st","stresstensor st");
 
-    ::printf("I1 = %.8e ; I2 = %.8e ; I3 = %.8e ;\n",
+    ::fprintf(stdout,"I1 = %.8e ; I2 = %.8e ; I3 = %.8e ;\n",
               Iinvariant1(),Iinvariant2(),Iinvariant3());
 
-    printf("st_trace = %.8e,  mean pressure p = %.8e\n ",
+    fprintf(stdout,"st_trace = %.8e,  mean pressure p = %.8e\n ",
              trace(),  trace()/3.0);
 
     BJtensor I2("I", 2, def_dim_2);
@@ -945,7 +945,7 @@ void stresstensor::report(char * msg) const
     stresstensor st_dev = this->deviator();   // - st_vol;
     st_dev.print("st_d","tensor st_dev (stress deviator)");
 
-    ::printf("J1 = %.8e ; J2 = %.8e ; J3 = %.8e ;\n",
+    ::fprintf(stdout,"J1 = %.8e ; J2 = %.8e ; J3 = %.8e ;\n",
               Jinvariant1(),Jinvariant2(),Jinvariant3());
 //...  stresstensor Jinv2 = st_dev("ij")*st_dev("ji")*0.5;
 
@@ -953,7 +953,7 @@ void stresstensor::report(char * msg) const
     st_principal.print("st_p","principal stress tensor");
 
 
-    ::printf("sig_oct = %.8e  , tau_oct = %.8e\n",
+    ::fprintf(stdout,"sig_oct = %.8e  , tau_oct = %.8e\n",
               sigma_octahedral(), tau_octahedral());
 
 
