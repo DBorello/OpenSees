@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-03 06:37:59 $
+// $Revision: 1.3 $
+// $Date: 2001-06-14 05:48:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.h,v $
                                                                         
                                                                         
@@ -77,6 +77,9 @@ class Steel01 : public UniaxialMaterial
     
     void Print(ostream &s, int flag =0);
     
+    int setParameter(char **argv, int argc, Information &info);
+    int updateParameter(int parameterID, Information &info);
+
   protected:
     
   private:

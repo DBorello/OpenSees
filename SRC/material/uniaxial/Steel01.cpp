@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-03 06:37:59 $
+// $Revision: 1.4 $
+// $Date: 2001-06-14 05:48:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,7 @@
 #include <Steel01.h>
 #include <Vector.h>
 #include <Channel.h>
+#include <Information.h>
 #include <math.h>
 #include <float.h>
 
@@ -418,3 +419,94 @@ void Steel01::Print (ostream& s, int flag)
       s << "  epsmax: " << epsmax << endl;
 }
 
+int
+Steel01::setParameter(char **argv, int argc, Information &info)
+{
+	if (argc < 1)
+		return -1;
+
+	if (strcmp(argv[0],"fy") == 0) {
+		info.theType = DoubleType;
+		return 1;
+	}
+	if (strcmp(argv[0],"E0") == 0) {
+		info.theType = DoubleType;
+		return 2;
+	}
+	if (strcmp(argv[0],"b") == 0) {
+		info.theType = DoubleType;
+		return 3;
+	}
+	if (strcmp(argv[0],"a1") == 0) {
+		info.theType = DoubleType;
+		return 4;
+	}
+	if (strcmp(argv[0],"a2") == 0) {
+		info.theType = DoubleType;
+		return 5;
+	}
+	if (strcmp(argv[0],"a3") == 0) {
+		info.theType = DoubleType;
+		return 6;
+	}
+	if (strcmp(argv[0],"a4") == 0) {
+		info.theType = DoubleType;
+		return 7;
+	}
+	if (strcmp(argv[0],"epsmin") == 0) {
+		info.theType = DoubleType;
+		return 8;
+	}
+	if (strcmp(argv[0],"epsmax") == 0) {
+		info.theType = DoubleType;
+		return 9;
+	}
+	else
+		cerr << "WARNING: Could not set parameter in Steel01. " << endl;
+                
+	return -1;
+}
+
+int
+Steel01::updateParameter(int parameterID, Information &info)
+{
+	switch (parameterID) {
+	case -1:
+		return -1;
+	case 1:
+		this->fy = info.theDouble;
+		break;
+	case 2:
+		this->E0 = info.theDouble;
+		break;
+	case 3:
+		this->b = info.theDouble;
+		break;
+	case 4:
+		this->a1 = info.theDouble;
+		break;
+	case 5:
+		this->a2 = info.theDouble;
+		break;
+	case 6:
+		this->a3 = info.theDouble;
+		break;
+	case 7:
+		this->a4 = info.theDouble;
+		break;
+	case 8:
+		this->epsmin = info.theDouble;
+		break;
+	case 9:
+		this->epsmax = info.theDouble;
+		break;
+	default:
+		return -1;
+	}
+
+	epsy = fy/E0;           // Yield strain
+	Esh = b*E0;             // Hardening modulus
+	Ttangent = E0;          // Initial stiffness
+
+	return 0;
+}
