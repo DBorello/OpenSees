@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-07-04 15:36:10 $
+// $Revision: 1.7 $
+// $Date: 2002-10-02 17:58:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.h,v $
                                                                         
                                                                         
@@ -61,6 +61,7 @@ class Matrix
     ~Matrix();
 
     // utility methods
+    int setData(double *newData, int nRows, int nCols);
     inline int noRows() const;
     inline int noCols() const;
     void Zero(void);
@@ -145,8 +146,11 @@ class Matrix
 
   private:
     static double MATRIX_NOT_VALID_ENTRY;
-    static double matrixWork[];
-    static int intWork[];
+    static double *matrixWork;
+    static int *intWork;
+    static int sizeDoubleWork;
+    static int sizeIntWork;
+
     int numRows;
     int numCols;
     int dataSize;

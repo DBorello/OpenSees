@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-07-04 15:36:10 $
+// $Revision: 1.9 $
+// $Date: 2002-10-02 17:58:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -42,9 +42,12 @@
 #define MATRIX_WORK_AREA 400
 #define INT_WORK_AREA 20
 
+int Matrix::sizeDoubleWork = MATRIX_WORK_AREA;
+int Matrix::sizeIntWork = INT_WORK_AREA;
 double Matrix::MATRIX_NOT_VALID_ENTRY =0.0;
-double Matrix::matrixWork[MATRIX_WORK_AREA];
-int Matrix::intWork[INT_WORK_AREA];
+double *Matrix::matrixWork = 0;
+int    *Matrix::intWork =0;
+
 //double *Matrix::matrixWork = (double *)malloc(400*sizeof(double));
 
 //
@@ -54,13 +57,32 @@ int Matrix::intWork[INT_WORK_AREA];
 Matrix::Matrix()
 :numRows(0), numCols(0), dataSize(0), data(0), fromFree(0)
 {
-    // does nothing
+  // allocate work areas if the first
+  if (matrixWork == 0) {
+    matrixWork = new double[sizeDoubleWork];
+    intWork = new int[sizeIntWork];
+    if (matrixWork == 0 || intWork == 0) {
+      cerr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
+      exit(-1);
+    }
+  }
 }
 
 
 Matrix::Matrix(int nRows,int nCols)
 :numRows(nRows), numCols(nCols), dataSize(0), data(0), fromFree(0)
 {
+
+  // allocate work areas if the first matrix
+  if (matrixWork == 0) {
+    matrixWork = new double[sizeDoubleWork];
+    intWork = new int[sizeIntWork];
+    if (matrixWork == 0 || intWork == 0) {
+      cerr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
+      exit(-1);
+    }
+  }
+
 #ifdef _G3DEBUG
     if (nRows < 0) {
       cerr << "WARNING: Matrix::Matrix(int,int): tried to init matrix ";
@@ -95,6 +117,16 @@ Matrix::Matrix(int nRows,int nCols)
 Matrix::Matrix(double *theData, int row, int col) 
 :numRows(row),numCols(col),dataSize(row*col),data(theData),fromFree(1)
 {
+  // allocate work areas if the first matrix
+  if (matrixWork == 0) {
+    matrixWork = new double[sizeDoubleWork];
+    intWork = new int[sizeIntWork];
+    if (matrixWork == 0 || intWork == 0) {
+      cerr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
+      exit(-1);
+    }
+  }
+
 #ifdef _G3DEBUG
     if (row < 0) {
       cerr << "WARNING: Matrix::Matrix(int,int): tried to init matrix with numRows: ";
@@ -114,6 +146,16 @@ Matrix::Matrix(double *theData, int row, int col)
 Matrix::Matrix(const Matrix &other)
 :numRows(0), numCols(0), dataSize(0), data(0), fromFree(0)
 {
+  // allocate work areas if the first matrix
+  if (matrixWork == 0) {
+    matrixWork = new double[sizeDoubleWork];
+    intWork = new int[sizeIntWork];
+    if (matrixWork == 0 || intWork == 0) {
+      cerr << "WARNING: Matrix::Matrix() - out of memory creating work area's\n";
+      exit(-1);
+    }
+  }
+
     numRows = other.numRows;
     numCols = other.numCols;
     dataSize = other.dataSize;
@@ -143,8 +185,8 @@ Matrix::Matrix(const Matrix &other)
 Matrix::~Matrix()
 {
   if (data != 0) 
-      if (fromFree == 0)
-	  delete [] data; 
+    if (fromFree == 0)
+      delete [] data; 
   //  if (data != 0) free((void *) data);
 }
     
@@ -152,6 +194,38 @@ Matrix::~Matrix()
 //
 // METHODS - Zero, Assemble, Solve
 //
+
+int
+Matrix::setData(double *theData, int row, int col) 
+{
+  // delete the old if allocated
+  if (data != 0) 
+    if (fromFree == 0)
+      delete [] data; 
+
+  numRows = row;
+  numCols = col;
+  dataSize = row*col;
+  data = theData;
+  fromFree = 1;
+
+#ifdef _G3DEBUG
+  if (row < 0) {
+    cerr << "WARNING: Matrix::setSize(): tried to init matrix with numRows: ";
+    cerr << row << " <0\n";
+    numRows = 0; numCols =0; dataSize =0; data = 0;
+    return -1;
+  }
+  if (col < 0) {
+    cerr << "WARNING: Matrix::setSize(): tried to init matrix with numCols: ";
+    cerr << col << " <0\n";
+    numRows = 0; numCols =0; dataSize =0; data = 0;
+    return -1;
+  }    
+#endif
+  
+  return 0;
+}
 
 void
 Matrix::Zero(void)
@@ -278,13 +352,39 @@ Matrix::Solve(const Vector &b, Vector &x) const
 #endif
     
     // check work area can hold all the data
-    if (dataSize > MATRIX_WORK_AREA) {
-       g3ErrorHandler->warning("Matrix::Solve(b,x) - matrix dimension [%d %d] %s %d\n",
-			       numRows, numCols, "larger than work area",
-			       MATRIX_WORK_AREA);
-       return -3;
+    if (dataSize > sizeDoubleWork) {
+
+      if (matrixWork != 0) {
+	delete [] matrixWork;
+      }
+      matrixWork = new double[dataSize];
+      sizeDoubleWork = dataSize;
+      
+      if (matrixWork == 0) {
+	cerr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
+	sizeDoubleWork = 0;      
+	return -3;
+      }
     }
 
+    // check work area can hold all the data
+    if (n > sizeIntWork) {
+
+      if (intWork != 0) {
+	delete [] intWork;
+      }
+      intWork = new int[n];
+      sizeIntWork = n;
+      
+      if (intWork == 0) {
+	cerr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
+	sizeIntWork = 0;      
+	return -3;
+      }
+    }
+
+
+    
     // copy the data
     int i;
     for (i=0; i<dataSize; i++)
@@ -345,14 +445,39 @@ Matrix::Solve(const Matrix &b, Matrix &x) const
       return -3;
     }
 #endif
-    
+
     // check work area can hold all the data
-    if (dataSize > MATRIX_WORK_AREA || n > INT_WORK_AREA) {
-      g3ErrorHandler->warning("Matrix::Solve(b,x) - matrix dimension [%d %d] larger than work area %d\n",
-			      numRows, numCols, MATRIX_WORK_AREA);
-      return -3;
+    if (dataSize > sizeDoubleWork) {
+
+      if (matrixWork != 0) {
+	delete [] matrixWork;
+      }
+      matrixWork = new double[dataSize];
+      sizeDoubleWork = dataSize;
+      
+      if (matrixWork == 0) {
+	cerr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
+	sizeDoubleWork = 0;      
+	return -3;
+      }
     }
 
+    // check work area can hold all the data
+    if (n > sizeIntWork) {
+
+      if (intWork != 0) {
+	delete [] intWork;
+      }
+      intWork = new int[n];
+      sizeIntWork = n;
+      
+      if (intWork == 0) {
+	cerr << "WARNING: Matrix::Solve() - out of memory creating work area's\n";
+	sizeIntWork = 0;      
+	return -3;
+      }
+    }
+    
     x = b;
 
     // copy the data
@@ -553,7 +678,7 @@ Matrix::addMatrixTripleProduct(double thisFact,
     int dimB = B.numCols;
     int sizeWork = dimB * numCols;
 
-    if (sizeWork > MATRIX_WORK_AREA) {
+    if (sizeWork > sizeDoubleWork) {
       this->addMatrix(thisFact, T^B*T, otherFact);
       return 0;
     }
@@ -671,11 +796,14 @@ Matrix::operator=(const Matrix &other)
   }
 #endif
 */
+
   if ((numCols != other.numCols) || (numRows != other.numRows)) {
 #ifdef _G3DEBUG    
       g3ErrorHandler->warning("Matrix::operator=() - matrix dimensions do not match: [%d %d] != [%d %d]\n",
 			      numRows, numCols, other.numRows, other.numCols);
+
 #endif
+
       if (this->data != 0)
 	  delete [] this->data;
       
