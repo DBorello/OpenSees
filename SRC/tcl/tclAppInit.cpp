@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 06:03:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclAppInit.cpp,v $
                                                                         
                                                                         
@@ -157,9 +157,10 @@ Tcl_AppInit(Tcl_Interp *interp)
      * they weren't already created by the init procedures called above.
      */
 
+
     if (g3AppInit(interp) < 0)
 	return TCL_ERROR;
-    
+
     /*
      * Specify a user-specific startup file to invoke if the application
      * is run interactively.  Typically the startup file is "~/.apprc"

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-13 05:12:57 $
+// $Revision: 1.3 $
+// $Date: 2000-12-12 06:03:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -67,8 +67,6 @@ extern "C" {
 #include <LoadPatternIter.h>
 #include <ElementalLoad.h>
 #include <ElementalLoadIter.h>
-#include <NodalLoad.h>
-#include <NodalLoadIter.h>
 
 
 // analysis model
@@ -82,6 +80,7 @@ extern "C" {
 // soln algorithms
 #include <Linear.h>
 #include <NewtonRaphson.h>
+#include <NewtonLineSearch.h>
 #include <ModifiedNewton.h>
 #include <FrequencyAlgo.h>
 
@@ -111,6 +110,7 @@ extern "C" {
 // analysis
 #include <StaticAnalysis.h>
 #include <DirectIntegrationAnalysis.h>
+#include <VariableTimeStepDirectIntegrationAnalysis.h>
 #include <EigenAnalysis.h>
 
 // system of eqn and solvers
@@ -165,6 +165,8 @@ static DOF_Numberer *theNumberer =0;
 static LinearSOE *theSOE =0;
 static StaticAnalysis *theStaticAnalysis = 0;
 static DirectIntegrationAnalysis *theTransientAnalysis = 0;
+static VariableTimeStepDirectIntegrationAnalysis *theVariableTimeStepTransientAnalysis = 0;
+
 static StaticIntegrator *theStaticIntegrator =0;
 static TransientIntegrator *theTransientIntegrator =0;
 static ConvergenceTest *theTest =0;
@@ -232,6 +234,8 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "remove", removeObject, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "nodeDisp", nodeDisp, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
 
     theAlgorithm =0;
     theHandler =0;
@@ -242,6 +246,7 @@ int g3AppInit(Tcl_Interp *interp) {
     theTransientIntegrator =0;
     theStaticAnalysis =0;
     theTransientAnalysis =0;    
+    theVariableTimeStepTransientAnalysis =0;    
     theTest = 0;
 
     // create an error handler
@@ -274,6 +279,10 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc,
       delete theTransientAnalysis;  
   }
 
+
+  // NOTE : DON'T do the above on theVariableTimeStepAnalysis
+  // as it and theTansientAnalysis are one in the same
+
   /*
   if (theEigenAnalysis != 0) {
     delete theEigenAnalysis;
@@ -300,6 +309,7 @@ wipeModel(ClientData clientData, Tcl_Interp *interp, int argc,
   theTransientIntegrator =0;
   theStaticAnalysis =0;
   theTransientAnalysis =0;    
+  theVariableTimeStepTransientAnalysis =0;    
   theTest = 0;
   
   // the domain deletes the record objects, 
@@ -323,6 +333,9 @@ wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
       delete theTransientAnalysis;  
   }
 
+  // NOTE : DON'T do the above on theVariableTimeStepAnalysis
+  // as it and theTansientAnalysis are one in the same
+
   if (theTest != 0)
       delete theTest;
   
@@ -335,6 +348,7 @@ wipeAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
   theTransientIntegrator =0;
   theStaticAnalysis =0;
   theTransientAnalysis =0;    
+  theVariableTimeStepTransientAnalysis =0;    
   theTest = 0;
   
   // the domain deletes the record objects, 
@@ -368,13 +382,15 @@ setLoadConst(ClientData clientData, Tcl_Interp *interp, int argc,
 {
   theDomain.setLoadConstant();
   if (argc == 3) {
-      if( strcmp(argv[1],"-time")) {
+      if( strcmp(argv[1],"-time") == 0) {
 	  double newTime;
 	  if (Tcl_GetDouble(interp, argv[2], &newTime) != TCL_OK) {
 	      cerr << "WARNING readingvalue - loadConst -time value ";
 	      return TCL_ERROR;
-	  } else
+	  } else {
+	      cerr << "Setting time in domain to be : " <<  newTime << endl;
 	      theDomain.setCurrentTime(newTime);
+	  }
       }    	  
   }
 	  
@@ -451,7 +467,27 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc,
     double dT;
     if (Tcl_GetDouble(interp, argv[2], &dT) != TCL_OK)	
       return TCL_ERROR;
-    return theTransientAnalysis->analyze(numIncr, dT);
+
+    if (argc == 6) {
+      int Jd;
+      double dtMin, dtMax;
+      if (Tcl_GetDouble(interp, argv[3], &dtMin) != TCL_OK)	
+	return TCL_ERROR;
+      if (Tcl_GetDouble(interp, argv[4], &dtMax) != TCL_OK)	
+	return TCL_ERROR;
+      if (Tcl_GetInt(interp, argv[5], &Jd) != TCL_OK)	
+	return TCL_ERROR;
+
+      if (theVariableTimeStepTransientAnalysis != 0)
+	return theVariableTimeStepTransientAnalysis->analyze(numIncr, dT, dtMin, dtMax, Jd);
+      else {
+	interp->result = "WARNING analyze - no variable time step transient analysis object constructed";
+	return TCL_ERROR;
+      }
+
+    }else {
+      return theTransientAnalysis->analyze(numIncr, dT);
+    }
 
   } else {
     interp->result = "WARNING No Analysis type has been specified ";
@@ -746,10 +782,15 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
     }    
 
     // delete the old analysis
-    if (theStaticAnalysis != 0)
+    if (theStaticAnalysis != 0) {
 	delete theStaticAnalysis;
-    if (theTransientAnalysis != 0)
+	theStaticAnalysis = 0;
+    }
+    if (theTransientAnalysis != 0) {
 	delete theTransientAnalysis;
+	theTransientAnalysis = 0;
+	theVariableTimeStepTransientAnalysis = 0;
+    }
     
     // check argv[1] for type of SOE and create it
     if (strcmp(argv[1],"Static") == 0) {
@@ -843,6 +884,58 @@ specifyAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 							     *theAlgorithm,
 							     *theSOE,
 							     *theTransientIntegrator);
+
+    } else if ((strcmp(argv[1],"VariableTimeStepTransient") == 0) ||
+	       (strcmp(argv[1],"TransientWithVariableTimeStep") == 0) ||
+	       (strcmp(argv[1],"VariableTransient") == 0)) {
+	// make sure all the components have been built,
+	// otherwise print a warning and use some defaults
+	if (theAnalysisModel == 0) 
+	    theAnalysisModel = new AnalysisModel();
+	
+	if (theAlgorithm == 0) {
+	    cerr << "WARNING analysis Transient - no Algorithm yet specified, ";
+	    cerr << " NewtonRaphson default will be used\n";	    
+
+	    if (theTest == 0) 
+		theTest = new CTestNormUnbalance(1.0e-6,25,0);       
+	    theAlgorithm = new NewtonRaphson(*theTest); 
+	}
+	if (theHandler == 0) {
+	    cerr << "WARNING analysis Transient dt tFinal - no ConstraintHandler";
+	    cerr << " yet specified, PlainHandler default will be used\n";
+	    theHandler = new PlainHandler();       
+	}
+	if (theNumberer == 0) {
+	    cerr << "WARNING analysis Transient dt tFinal - no Numberer specified, ";
+	    cerr << " RCM default will be used\n";
+	    RCM *theRCM = new RCM();	
+	    theNumberer = new DOF_Numberer(*theRCM);    	
+	}
+	if (theTransientIntegrator == 0) {
+	    cerr << "WARNING analysis Transient dt tFinal - no Integrator specified, ";
+	    cerr << " Newmark(.5,.25) default will be used\n";
+	    theTransientIntegrator = new Newmark(0.5,0.25);       
+	}
+	if (theSOE == 0) {
+	    cerr << "WARNING analysis Transient dt tFinal - no LinearSOE specified, ";
+	    cerr << " ProfileSPDLinSOE default will be used\n";
+	    ProfileSPDLinSolver *theSolver;
+	    theSolver = new ProfileSPDLinDirectSolver(); 	
+	    theSOE = new ProfileSPDLinSOE(*theSolver);      
+	}
+    
+	theVariableTimeStepTransientAnalysis = new VariableTimeStepDirectIntegrationAnalysis
+	  (theDomain,
+	   *theHandler,
+	   *theNumberer,
+	   *theAnalysisModel,
+	   *theAlgorithm,
+	   *theSOE,
+	   *theTransientIntegrator);
+
+	// set the pointer for variabble time step analysis
+	theTransientAnalysis = theVariableTimeStepTransientAnalysis;
 	
     } else {
 	interp->result = "WARNING No Analysis type exists (Static Transient only) ";
@@ -1096,8 +1189,20 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
 	  interp->result = "ERROR: No ConvergenceTest yet specified\n";
 	  return TCL_ERROR;	  
       }
+      
       theAlgorithm = new ModifiedNewton(*theTest); 
   }  
+  
+  else if (strcmp(argv[1],"NewtonLineSearch") == 0) {
+      if (theTest == 0) {
+	  interp->result = "ERROR: No ConvergenceTest yet specified\n";
+	  return TCL_ERROR;	  
+      }
+      double alpha;
+      if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK)	
+	return TCL_ERROR;	      
+      theAlgorithm = new NewtonLineSearch(*theTest, alpha); 
+  }    
 
   else {
       interp->result = "WARNING No EquiSolnAlgo type exists (Linear, Newton only) ";
@@ -1811,55 +1916,47 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
       }
     }
 
+    else
+      cerr << "WARNING remove element tag? - only command available at the moment: " << endl;
+
+    return TCL_OK;
+}
+
+
+int 
+nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+{
     
-    else if (strcmp(argv[1],"node") == 0) {
-      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	cerr << "WARNING remove node tag? failed to read tag: " << argv[2] << endl;
+    // make sure at least one other argument to contain type of system
+    if (argc < 3) {
+	interp->result = "WARNING want - nodeDisp nodeTag? dof?\n";
 	return TCL_ERROR;
-      }      
-      Node *theNode = theDomain.removeNode(tag);
-      if (theNode != 0) {
-	// we also have to remove any elemental loads from the domain
-	LoadPatternIter &theLoadPatterns = theDomain.getLoadPatterns();
-	LoadPattern *thePattern;
-	
-	// go through all load patterns
-	while ((thePattern = theLoadPatterns()) != 0) {
-	  NodalLoadIter theEleLoads = thePattern->getNodalLoads();
-	  NodalLoad *theLoad;
+   }    
 
-	  // go through all elemental loads in the pattern
-	  while ((theLoad = theEleLoads()) != 0) {
+    int tag, dof;
 
-	    // remove & destroy elemental load if tag corresponds to element being removed
-	    if (theLoad->getNodeTag() == tag) {
-	      thePattern->removeNodalLoad(theLoad->getTag());
-	      delete theLoad;
-	    }
-	  }
+    if (Tcl_GetInt(interp, argv[1], &tag) != TCL_OK) {
+	cerr << "WARNING nodeDisp nodeTag? dof? - could not read nodeTag? ";
+	return TCL_ERROR;	        
+    }    
+    if (Tcl_GetInt(interp, argv[2], &dof) != TCL_OK) {
+	cerr << "WARNING nodeDisp nodeTag? dof? - could not read dof? ";
+	return TCL_ERROR;	        
+    }        
+    
+    Node *theNode = theDomain.getNode(tag);
+    double value = 0.0;
+    if (theNode != 0) {
+	const Vector &disp = theNode->getTrialDisp();
+	if (disp.Size() >= dof && dof > 0) {
+	    value = disp(dof-1); // -1 for OpenSees vs C indexing
 	}
-
-	// finally invoke the destructor on the element
-	delete theNode;
-      }
     }
     
+    // now we copy the value to the tcl string that is returned
+    sprintf(interp->result,"%f",value);
     
-    else if (strcmp(argv[1],"loadPattern") == 0) {
-      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	cerr << "WARNING remove node tag? failed to read tag: " << argv[2] << endl;
-	return TCL_ERROR;
-      }      
-      LoadPattern *thePattern = theDomain.removeLoadPattern(tag);
-      if (thePattern != 0) {
-	delete thePattern;
-      }
-    }    
-
-    
-    else
-      cerr << "WARNING remove [element, node, loadPattern] tag? - only command available at the moment: " << endl; 
-
+	
     return TCL_OK;
 }
 
