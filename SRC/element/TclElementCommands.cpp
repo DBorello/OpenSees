@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2003-04-18 16:31:16 $
+// $Revision: 1.28 $
+// $Date: 2003-06-11 18:20:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -141,6 +141,10 @@ extern int
 TclModelBuilder_addForceBeamColumn(ClientData, Tcl_Interp *, int, TCL_Char **,
 				   Domain*, TclModelBuilder *);
 		   
+// NM
+extern int
+TclModelBuilder_addBeamColumnJoint(ClientData, Tcl_Interp *, int, TCL_Char **,
+				   Domain*, TclModelBuilder *, int);
 
 //Boris Jeremic & Zhaohui
 extern int TclModelBuilder_addEightNodeBrick(ClientData, 
@@ -362,7 +366,15 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     int result = TclModelBuilder_addElastic2dGNL(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
     return result;
-  } else {
+  }
+  else if (strcmp(argv[1],"beamColumnJoint") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addBeamColumnJoint(clientData, interp,
+						    argc, argv, theTclDomain,
+						    theTclBuilder, eleArgStart);
+    return result;
+  }
+  else {
     // element type not recognized
     opserr << "WARNING unknown element type: " <<  argv[1];
     opserr << "Valid types: truss, elasticBeamColumn, nonlinearBeamColumn, " << endln
