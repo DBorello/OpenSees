@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
-// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $
+// $Revision: 1.2 $                                                              
+// $Date: 2000-10-07 06:49:37 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
 // File: ~/material/ElasticIsotropicMaterial.C
@@ -38,9 +38,9 @@
 #include <ElasticIsotropicMaterial.h>
 #include <ElasticIsotropicPlaneStress2D.h>
 #include <ElasticIsotropicPlaneStrain2D.h>
+#include <ElasticIsotropic3D.h>
 
 #include <Tensor.h>
-#include <Information.h>
 
 #include <G3Globals.h>
 
@@ -66,7 +66,7 @@ ElasticIsotropicMaterial::~ElasticIsotropicMaterial()
 NDMaterial*
 ElasticIsotropicMaterial::getCopy (const char *type)
 {
-    if (strcmp(type,"PlaneStress2D") == 0 || strcmp(type,"PlaneStress2d") == 0)
+    if (strcmp(type,"PlaneStress2D") == 0)
     {
 	ElasticIsotropicPlaneStress2D *theModel;
 	theModel = new ElasticIsotropicPlaneStress2D (this->getTag(), E, v);
@@ -77,10 +77,20 @@ ElasticIsotropicMaterial::getCopy (const char *type)
 	return theModel;
     }
 
-    else if (strcmp(type,"PlaneStrain2D") == 0 || strcmp(type,"PlaneStrain2d") == 0)
+    else if (strcmp(type,"PlaneStrain2D") == 0)
     {
 	ElasticIsotropicPlaneStrain2D *theModel;
 	theModel = new ElasticIsotropicPlaneStrain2D (this->getTag(), E, v);
+		// DOES NOT COPY sigma, D, and epsilon ...
+		// This function should only be called during element instantiation, so
+		// no state determination is performed on the material model object
+		// prior to copying the material model (calling this function)
+	return theModel;
+    }
+    else if (strcmp(type,"ElasticIsotropic3D") == 0)
+    {
+	ElasticIsotropic3D *theModel;
+	theModel = new ElasticIsotropic3D (this->getTag(), E, v);
 		// DOES NOT COPY sigma, D, and epsilon ...
 		// This function should only be called during element instantiation, so
 		// no state determination is performed on the material model object
@@ -103,7 +113,7 @@ ElasticIsotropicMaterial::setTrialStrain (const Vector &v)
 {
     g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility");
 
-    return -1;
+    return 0;
 }
 
 int
@@ -111,7 +121,7 @@ ElasticIsotropicMaterial::setTrialStrain (const Vector &v, const Vector &rate)
 {
     g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility");
 
-    return -1;
+    return 0;
 }
 
 int
@@ -119,7 +129,7 @@ ElasticIsotropicMaterial::setTrialStrainIncr (const Vector &v)
 {
     g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility");
 
-    return -1;
+    return 0;
 }
 
 int
@@ -127,7 +137,7 @@ ElasticIsotropicMaterial::setTrialStrainIncr (const Vector &v, const Vector &rat
 {
     g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility");
 
-    return -1;
+    return 0;
 }
 
 const Matrix&
@@ -161,11 +171,73 @@ ElasticIsotropicMaterial::getStrain (void)
 }
 
 int
+ElasticIsotropicMaterial::setTrialStrain (const Tensor &v)
+{
+    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility");
+
+    return 0;
+}
+
+int
+ElasticIsotropicMaterial::setTrialStrain (const Tensor &v, const Tensor &r)
+{
+    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrain -- subclass responsibility");
+
+    return 0;
+}
+
+int
+ElasticIsotropicMaterial::setTrialStrainIncr (const Tensor &v)
+{
+    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility");
+
+    return 0;
+}
+
+int
+ElasticIsotropicMaterial::setTrialStrainIncr (const Tensor &v, const Tensor &r)
+{
+    g3ErrorHandler->fatal("ElasticIsotropicMaterial::setTrialStrainIncr -- subclass responsibility");
+
+    return 0;
+}
+
+const Tensor&
+ElasticIsotropicMaterial::getTangentTensor (void)
+{
+	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getTangent -- subclass responsibility");
+
+	// Just to make it compile
+	Tensor *t = new Tensor;
+	return *t;
+}
+
+const Tensor&
+ElasticIsotropicMaterial::getStressTensor (void)
+{
+	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStress -- subclass responsibility");
+
+	// Just to make it compile
+     Tensor *t = new Tensor;
+	 return *t;
+}
+
+const Tensor&
+ElasticIsotropicMaterial::getStrainTensor (void)
+{
+	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStrain -- subclass responsibility");
+
+	// Just to make it compile
+     Tensor *t = new Tensor;
+	 return *t;
+}
+
+int
 ElasticIsotropicMaterial::commitState (void)
 {
 	g3ErrorHandler->fatal("ElasticIsotropicMaterial::commitState -- subclass responsibility");
 
-	return -1;
+	return 0;
 }
 
 int
@@ -173,7 +245,7 @@ ElasticIsotropicMaterial::revertToLastCommit (void)
 {
 	g3ErrorHandler->fatal("ElasticIsotropicMaterial::revertToLastCommit -- subclass responsibility");
 
-	return -1;
+	return 0;
 }
 
 int
@@ -181,7 +253,7 @@ ElasticIsotropicMaterial::revertToStart (void)
 {
 	g3ErrorHandler->fatal("ElasticIsotropicMaterial::revertToStart -- subclass responsibility");
 
-	return -1;
+	return 0;
 }
 
 NDMaterial*
@@ -205,7 +277,7 @@ ElasticIsotropicMaterial::getOrder (void) const
 {
 	 g3ErrorHandler->fatal("ElasticIsotropicMaterial::getOrder -- subclass responsibility");
 
-	return -1;
+	return 0;
 }
 
 int
@@ -213,7 +285,7 @@ ElasticIsotropicMaterial::sendSelf (int commitTag, Channel &theChannel)
 {
 	g3ErrorHandler->fatal("ElasticIsotropicMaterial::sendSelf -- subclass responsibility");
 
-	return -1;
+	return 0;
 }
 
 int
@@ -222,54 +294,15 @@ ElasticIsotropicMaterial::recvSelf (int commitTag, Channel &theChannel,
 {
 	g3ErrorHandler->fatal("ElasticIsotropicMaterial::recvSelf -- subclass responsibility");
 
-	return -1;
+	return 0;
 }
 
 void
 ElasticIsotropicMaterial::Print (ostream &s, int flag)
 {
-	s << "ElasticIsotropicMaterial, tag: " << this->getTag() << endl;
-	s << "\ttype: " << this->getType() << endl;
+	s << "Elastic Isotropic Material Model" << endl;
 	s << "\tE:  " << E << endl;
 	s << "\tv:  " << v << endl;
-}
 
-int
-ElasticIsotropicMaterial::setParameter(char **argv, int argc, Information &info)
-{
-	static Vector temp(3);
-
-	if (strcmp(argv[0],"E") == 0) {
-		info.theType = DoubleType;
-		info.theDouble = E;
-		return 1;
-	}
-	else if (strcmp(argv[0],"nu") == 0) {
-		info.theType = DoubleType;
-		info.theDouble = v;
-		return 2;
-	}
-	else
-		return -1;
-}
-
-int 
-ElasticIsotropicMaterial::updateParameter(int parameterID, Information &info)
-{
-	static Vector temp(3);
-
-	switch(parameterID) {
-	case -1:
-		return -1;
-	case 1:
-		E = info.theDouble;
-		this->update();
-		return 0;
-	case 2:
-		v = info.theDouble;
-		this->update();
-		return 0;
-	default:
-		return -1;
-	}
+	return;
 }
