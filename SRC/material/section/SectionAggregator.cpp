@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-05-17 01:24:04 $
+// $Revision: 1.6 $
+// $Date: 2002-05-28 19:29:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -49,7 +49,7 @@
 
 // Assumes section order is less than or equal to maxOrder.
 // Can increase if needed!!!
-double SectionAggregator::workArea[(maxOrder+1)*maxOrder];
+double SectionAggregator::workArea[2*maxOrder*(maxOrder+1)];
 int    SectionAggregator::codeArea[maxOrder];
 
 // constructors:
@@ -58,9 +58,7 @@ SectionAggregator::SectionAggregator (int tag, SectionForceDeformation &theSec,
 				      const ID &addCodes): 
   SectionForceDeformation(tag, SEC_TAG_Aggregator), 
   theSection(0), theAdditions(0), matCodes(0), numMats(numAdds),
-  theVector(0),
-  theMatrix(0),
-  theCode(0),
+  e(0), s(0), ks(0), fs(0), theCode(0),
   otherDbTag(0)
 {
     theSection = theSec.getCopy();
@@ -93,19 +91,23 @@ SectionAggregator::SectionAggregator (int tag, SectionForceDeformation &theSec,
 				  "SectionAggregator::SectionAggregator");
     }
 
-    if (theSec.getOrder()+numAdds > maxOrder) {
+    int order = theSec.getOrder()+numAdds;
+
+    if (order > maxOrder) {
       g3ErrorHandler->fatal("%s -- order too big, need to modify the #define in SectionAggregator.cpp to %d",
-			    "SectionAggregator::SectionAggregator", theSec.getOrder()+numAdds);
+			    "SectionAggregator::SectionAggregator", order);
     }
 
-    theCode = new ID(codeArea, theSec.getOrder()+numAdds);
-    theMatrix = new Matrix(&workArea[maxOrder], theSec.getOrder()+numAdds, theSec.getOrder()+numAdds);
-    theVector = new Vector(workArea, theSec.getOrder()+numAdds);
+    theCode = new ID(codeArea, order);
+    e = new Vector(workArea, order);
+    s = new Vector(&workArea[maxOrder], order);
+    ks = new Matrix(&workArea[2*maxOrder], order, order);
+    fs = new Matrix(&workArea[maxOrder*(maxOrder+2)], order, order);
     matCodes = new ID(addCodes);
 
-    if (theCode == 0 || theMatrix == 0 || theVector == 0 || matCodes == 0)
-	g3ErrorHandler->fatal("%s -- out of memory",
-			      "SectionAggregator::SectionAggregator");
+    if (theCode == 0 || e == 0 || s == 0 || ks == 0 || fs == 0 || matCodes == 0)
+      g3ErrorHandler->fatal("%s -- out of memory",
+			    "SectionAggregator::SectionAggregator");
 }
 
 SectionAggregator::SectionAggregator (int tag, int numAdds,
@@ -113,7 +115,7 @@ SectionAggregator::SectionAggregator (int tag, int numAdds,
 				      const ID &addCodes): 
   SectionForceDeformation(tag, SEC_TAG_Aggregator), 
   theSection(0), theAdditions(0), matCodes(0), numMats(numAdds),
-  theVector(0), theMatrix(0), theCode(0),
+  e(0), s(0), ks(0), fs(0), theCode(0),
   otherDbTag(0)
 {
     if (!theAdds)
@@ -140,17 +142,21 @@ SectionAggregator::SectionAggregator (int tag, int numAdds,
 				  "SectionAggregator::SectionAggregator");
     }
 
-    if (numAdds > maxOrder) {
-      	    g3ErrorHandler->fatal("%s -- order too big, need to modify the #define in SectionAggregator.cpp to %d",
-				  "SectionAggregator::SectionAggregator", numAdds);
+    int order = numAdds;
+
+    if (order > maxOrder) {
+      g3ErrorHandler->fatal("%s -- order too big, need to modify the #define in SectionAggregator.cpp to %d",
+			    "SectionAggregator::SectionAggregator", order);
     }
 
-    theCode = new ID(codeArea, numAdds);
-    theMatrix = new Matrix(&workArea[maxOrder], numAdds, numAdds);
-    theVector = new Vector(workArea, numAdds);
+    theCode = new ID(codeArea, order);
+    e = new Vector(workArea, order);
+    s = new Vector(&workArea[maxOrder], order);
+    ks = new Matrix(&workArea[2*maxOrder], order, order);
+    fs = new Matrix(&workArea[maxOrder*(maxOrder+2)], order, order);
     matCodes = new ID(addCodes);
 
-    if (theCode == 0 || theMatrix == 0 || theVector == 0 || matCodes == 0)
+    if (theCode == 0 || e == 0 || s == 0 || ks == 0 || fs == 0 || matCodes == 0)
       g3ErrorHandler->fatal("%s -- out of memory",
 			    "SectionAggregator::SectionAggregator");
 }
@@ -159,7 +165,7 @@ SectionAggregator::SectionAggregator (int tag, SectionForceDeformation &theSec,
 				      UniaxialMaterial &theAddition, int c) :
   SectionForceDeformation(tag, SEC_TAG_Aggregator),
   theSection(0), theAdditions(0), matCodes(0), numMats(1),
-  theVector(0), theMatrix(0), theCode(0),
+  e(0), s(0), ks(0), fs(0), theCode(0),
   otherDbTag(0)
 {
     theSection = theSec.getCopy();
@@ -179,25 +185,29 @@ SectionAggregator::SectionAggregator (int tag, SectionForceDeformation &theSec,
     matCodes = new ID(1);
     (*matCodes)(0) = c;
 
-    if (theSec.getOrder()+1 > maxOrder) {
+    int order = theSec.getOrder()+1;
+
+    if (order > maxOrder) {
       g3ErrorHandler->fatal("%s -- order too big, need to modify the #define in SectionAggregator.cpp to %d",
-			    "SectionAggregator::SectionAggregator", theSec.getOrder()+1);
+			    "SectionAggregator::SectionAggregator", order);
     }
 
-    theVector = new Vector(workArea, theSec.getOrder()+1);
-    theMatrix = new Matrix(&workArea[maxOrder], theSec.getOrder()+1, theSec.getOrder()+1);
-    theCode   = new ID(codeArea, theSec.getOrder()+1);
-    
-    if (theCode == 0 || theMatrix == 0 || theVector == 0 || matCodes == 0)
-	g3ErrorHandler->fatal("%s -- out of memory",
-			      "SectionAggregator::SectionAggregator");
+    theCode = new ID(codeArea, order);
+    e = new Vector(workArea, order);
+    s = new Vector(&workArea[maxOrder], order);
+    ks = new Matrix(&workArea[2*maxOrder], order, order);
+    fs = new Matrix(&workArea[maxOrder*(maxOrder+2)], order, order);
+
+    if (theCode == 0 || e == 0 || s == 0 || ks == 0 || fs == 0 || matCodes == 0)
+      g3ErrorHandler->fatal("%s -- out of memory",
+			    "SectionAggregator::SectionAggregator");
 }
 
 // constructor for blank object that recvSelf needs to be invoked upon
 SectionAggregator::SectionAggregator():
   SectionForceDeformation(0, SEC_TAG_Aggregator),
   theSection(0), theAdditions(0), matCodes(0), numMats(0), 
-  theVector(0), theMatrix(0), theCode(0),
+  e(0), s(0), ks(0), fs(0), theCode(0),
   otherDbTag(0)
 {
 
@@ -218,11 +228,17 @@ SectionAggregator::~SectionAggregator()
    if (theAdditions)
        delete [] theAdditions;
    
-   if (theVector != 0)
-     delete theVector;
+   if (e != 0)
+     delete e;
 
-   if (theMatrix != 0)
-     delete theMatrix;
+   if (s != 0)
+     delete s;
+
+   if (ks != 0)
+     delete ks;
+
+   if (fs != 0)
+     delete fs;
 
    if (theCode != 0)
      delete theCode;
@@ -264,19 +280,19 @@ SectionAggregator::getSectionDeformation(void)
   int theSectionOrder = 0;
     
   if (theSection) {
-    const Vector &v = theSection->getSectionDeformation();
+    const Vector &eSec = theSection->getSectionDeformation();
     theSectionOrder = theSection->getOrder();
     
     for (i = 0; i < theSectionOrder; i++)
-      (*theVector)(i) = v(i);
+      (*e)(i) = eSec(i);
   }
   
   int order = theSectionOrder + numMats;
 
   for ( ; i < order; i++)
-    (*theVector)(i) = theAdditions[i-theSectionOrder]->getStrain();
+    (*e)(i) = theAdditions[i-theSectionOrder]->getStrain();
 
-  return *theVector;
+  return *e;
 }
 
 const Matrix &
@@ -287,23 +303,23 @@ SectionAggregator::getSectionTangent(void)
   int theSectionOrder = 0;
 
   // Zero before assembly
-  theMatrix->Zero();
+  ks->Zero();
 
   if (theSection) {
-    const Matrix &ks = theSection->getSectionTangent();
+    const Matrix &kSec = theSection->getSectionTangent();
     theSectionOrder = theSection->getOrder();
 
     for (i = 0; i < theSectionOrder; i++)
       for (int j = 0; j < theSectionOrder; j++)
-	(*theMatrix)(i,j) = ks(i,j);
+	(*ks)(i,j) = kSec(i,j);
   }
   
   int order = theSectionOrder + numMats;
 
   for ( ; i < order; i++)
-    (*theMatrix)(i,i) = theAdditions[i-theSectionOrder]->getTangent();
+    (*ks)(i,i) = theAdditions[i-theSectionOrder]->getTangent();
   
-  return *theMatrix;
+  return *ks;
 }
 
 const Matrix &
@@ -314,15 +330,15 @@ SectionAggregator::getSectionFlexibility(void)
   int theSectionOrder = 0;
 
   // Zero before assembly
-  theMatrix->Zero();
+  fs->Zero();
 
   if (theSection) {
-    const Matrix &fs = theSection->getSectionFlexibility();
+    const Matrix &fSec = theSection->getSectionFlexibility();
     theSectionOrder = theSection->getOrder();
 
     for (i = 0; i < theSectionOrder; i++)
       for (int j = 0; j < theSectionOrder; j++)
-	(*theMatrix)(i,j) = fs(i,j);
+	(*fs)(i,j) = fSec(i,j);
   }
   
   int order = theSectionOrder + numMats;
@@ -332,13 +348,13 @@ SectionAggregator::getSectionFlexibility(void)
     if (k == 0.0) {
       g3ErrorHandler->warning("%s -- singular section stiffness",
 			       "SectionAggregator::getSectionFlexibility");
-      (*theMatrix)(i,i) = 1.e14;
+      (*fs)(i,i) = 1.e14;
     }
     else
-      (*theMatrix)(i,i) = 1/k;
+      (*fs)(i,i) = 1/k;
   }	
   
-  return *theMatrix;
+  return *fs;
 }
 
 const Vector &
@@ -349,19 +365,19 @@ SectionAggregator::getStressResultant(void)
   int theSectionOrder = 0;
     
   if (theSection) {
-    const Vector &s = theSection->getStressResultant();
+    const Vector &sSec = theSection->getStressResultant();
     theSectionOrder = theSection->getOrder();
     
     for (i = 0; i < theSectionOrder; i++)
-      (*theVector)(i) = s(i);
+      (*s)(i) = sSec(i);
   }
   
   int order = theSectionOrder + numMats;
 
   for ( ; i < order; i++)
-    (*theVector)(i) = theAdditions[i-theSectionOrder]->getStress();
+    (*s)(i) = theAdditions[i-theSectionOrder]->getStress();
   
-  return *theVector;
+  return *s;
 }
 
 SectionForceDeformation *
@@ -587,14 +603,18 @@ SectionAggregator::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
   numMats = data(4);
 
   if (order > 0) {
-    if (theVector == 0 || theVector->Size() != order) {
-      if (theVector != 0) {
-	delete theVector;
-	delete theMatrix;
+    if (e == 0 || e->Size() != order) {
+      if (e != 0) {
+	delete e;
+	delete s;
+	delete ks;
+	delete fs;
 	delete theCode;
       }
-      theMatrix = new Matrix(&workArea[maxOrder], order,order);
-      theVector = new Vector(workArea, order);
+      e = new Vector(workArea, order);
+      s = new Vector(&workArea[maxOrder], order);
+      ks = new Matrix(&workArea[2*maxOrder], order, order);
+      fs = new Matrix(&workArea[maxOrder*(maxOrder+2)], order, order);
       theCode = new ID(codeArea, order);
     }
   }
@@ -724,44 +744,44 @@ SectionAggregator::Print(ostream &s, int flag)
 Response*
 SectionAggregator::setResponse(char **argv, int argc, Information &info)
 {
-	// See if the response is one of the defaults
-	Response *res = SectionForceDeformation::setResponse(argv, argc, info);
-	if (res != 0)
-		return res;
-
-	// If not, forward the request to the section (need to do this to get fiber response)
-	// CURRENTLY NOT SENDING ANYTHING OFF TO THE UniaxialMaterials ... Probably
-	// don't need anything more from them than stress, strain, and stiffness, 
-	// which are covered in base class method ... can change if need arises
-	else if (theSection != 0)
-		return theSection->setResponse(argv, argc, info);
-
-	else
-		return 0;
+  // See if the response is one of the defaults
+  Response *res = SectionForceDeformation::setResponse(argv, argc, info);
+  if (res != 0)
+    return res;
+  
+  // If not, forward the request to the section (need to do this to get fiber response)
+  // CURRENTLY NOT SENDING ANYTHING OFF TO THE UniaxialMaterials ... Probably
+  // don't need anything more from them than stress, strain, and stiffness, 
+  // which are covered in base class method ... can change if need arises
+  else if (theSection != 0)
+    return theSection->setResponse(argv, argc, info);
+  
+  else
+    return 0;
 }
 
 int
 SectionAggregator::getResponse(int responseID, Information &info)
 {
-	// Just call the base class method ... don't need to define
-	// this function, but keeping it here just for clarity
-	return SectionForceDeformation::getResponse(responseID, info);
+  // Just call the base class method ... don't need to define
+  // this function, but keeping it here just for clarity
+  return SectionForceDeformation::getResponse(responseID, info);
 }
 
 int
 SectionAggregator::setVariable(const char *argv)
 {
-	// Axial strain
-	if (strcmp(argv,"axialStrain") == 0)
-		return 1;
-	// Curvature about the section z-axis
-	else if (strcmp(argv,"curvatureZ") == 0)
-		return 2;
-	// Curvature about the section y-axis
-	else if (strcmp(argv,"curvatureY") == 0)
-		return 3;
-	else
-		return -1;
+  // Axial strain
+  if (strcmp(argv,"axialStrain") == 0)
+    return 1;
+  // Curvature about the section z-axis
+  else if (strcmp(argv,"curvatureZ") == 0)
+    return 2;
+  // Curvature about the section y-axis
+  else if (strcmp(argv,"curvatureY") == 0)
+    return 3;
+  else
+    return -1;
 }
 
 int

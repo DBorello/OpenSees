@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-05-17 01:24:04 $
+// $Revision: 1.6 $
+// $Date: 2002-05-28 19:29:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.h,v $
                                                                         
                                                                         
@@ -97,8 +97,10 @@ class SectionAggregator : public SectionForceDeformation
     ID *matCodes;
     int numMats;
     
-    Vector *theVector;   // Storage for section deformations and stress resultants
-    Matrix *theMatrix;   // Storage for section stiffness and flexibility
+    Vector *e;    // Storage for section deformations
+    Vector *s;    // Storage for stress resultants
+    Matrix *ks;   // Storage for section stiffness
+    Matrix *fs;   // Storage for section flexibility
     ID     *theCode;     // Storage for section type information
    
     int otherDbTag;
