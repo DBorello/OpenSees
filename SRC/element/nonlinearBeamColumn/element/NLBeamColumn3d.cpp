@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2003-02-14 23:01:16 $
+// $Revision: 1.23 $
+// $Date: 2003-02-25 01:01:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -61,6 +61,8 @@
 #define  NND   6         // number of nodal dof's
 #define  NEGD 12         // number of element global dof's
 #define  NEBD  6         // number of element dof's in the basic system
+
+#define DefaultLoverGJ 1.0e-10
 
 Matrix NLBeamColumn3d::theMatrix(12,12);
 Vector NLBeamColumn3d::theVector(12);
@@ -147,7 +149,7 @@ fs(0), vs(0), Ssr(0), vscommit(0), sp(0), Ki(0)
 
    if (!isTorsion)
      opserr << "NLBeamColumn3d::NLBeamColumn3d -- no torsion detected in sections, " <<
-       "continuing with element torsional stiffness of 1.0e10\n";
+       "continuing with element torsional stiffness GJ/L = " << 1.0/DefaultLoverGJ;
    
    // get copy of the transformation object   
    crdTransf = coordTransf.getCopy(); 
@@ -574,7 +576,7 @@ NLBeamColumn3d::getInitialStiff(void)
   f  *= L;
   
   if (!isTorsion)
-    f(5,5) = 1.0e-10;
+    f(5,5) = DefaultLoverGJ;
   
   // calculate element stiffness matrix
   static Matrix kvInit(NEBD, NEBD);
@@ -885,8 +887,10 @@ NLBeamColumn3d::update(void)
       f  *= L;
       vr *= L;
 
-      if (!isTorsion)
-	f(5,5) = 1.0e-10;
+      if (!isTorsion) {
+	f(5,5) = DefaultLoverGJ;
+	vr(5) = Se(5)*DefaultLoverGJ;
+      }
 
       // calculate element stiffness matrix
       if (f.Invert(kv) < 0)
@@ -898,7 +902,7 @@ NLBeamColumn3d::update(void)
       
       // dSe = kv * dv;
       dSe.addMatrixVector(0.0, kv, dv, 1.0);
-      
+
       dW = dv^ dSe;
       if (fabs(dW) < tol)
         break;
