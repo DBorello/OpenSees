@@ -991,8 +991,8 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
                 where =
                 ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
                 // derivatives of local coordinates with respect to local coordinates
-                // dhU = dh_drst_at(r,s,t);  // Assume  the shape function of u and U are same. Xiaoyan 09/20/01
-		hp= interp_poli_at(r,s,t); // Assume  the shape function of p is same as the u's. Xiaoyan 09/20/01
+                dhU = dh_drst_at(r,s,t);  // Assume  the shape function of u and U are same. Xiaoyan 09/20/01
+		              hp= interp_poli_at(r,s,t); // Assume  the shape function of p is same as the u's. Xiaoyan 09/20/01
                 // Jacobian tensor ( matrix )
                 Jacobian = Jacobian_3D(dhU);
                 // 		Jacobian.print("J","Jacobian");
@@ -1014,7 +1014,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
-		P = P + hp("K") * QQ * hp("L")*weight;
+		P = P + hp("K") * hp("L")*QQ*weight;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
               }
@@ -1110,7 +1110,8 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMs()  //(double rho_s, double n,)
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
-		              Ms = Ms + H("K") * I2("ij") * H("L") * ((1-N)*RHO_S *weight);
+															 static tensor temp = H("K") * I2("ij");
+		              Ms = Ms + temp("Kij") * H("L") * ((1-N)*RHO_S *weight);
 	      	//Ms.printshort("M");
               }
           }
@@ -1205,7 +1206,8 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMf()  //(double rho_s, double n,)
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
-		Mf = Mf + HU("K")* I2("ij") * HU("L")* N * RHO_F * weight;
+		static tensor temp = HU("K")* I2("ij");
+		Mf = Mf + temp("Kij") * HU("L")* N * RHO_F * weight;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
               }
@@ -1639,7 +1641,7 @@ matrix TwentyNodeBrick_u_p_U::stiffness_matrixP(const tensor P)
 // Constructing the whole system K (including Kep G1 and G2 56*56)   Wxy 09/26/2001
 //=========================================================================
 
-void TwentyNodeBrick_u_p_U::set_stiffness_MatrixK() 
+const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff() 
 						       
   {						  
     tensor tKep = getStiffnessTensorKep();
@@ -1689,7 +1691,7 @@ void TwentyNodeBrick_u_p_U::set_stiffness_MatrixK()
 	  }
       }
 
-//     return K;
+     return K;
   }
 
  	   
@@ -1798,7 +1800,7 @@ matrix TwentyNodeBrick_u_p_U::damping_matrixC3(const tensor  C3)
 // Constructing Damping matrix of the whole system C(56*56) (including C1 C2 and C3) 
 //=========================================================================
 
-void TwentyNodeBrick_u_p_U::set_damping_MatrixC() 
+const Matrix &TwentyNodeBrick_u_p_U::getDamp() 
 						       
   {						  
     tensor tC1  = getDampTensorC1();
@@ -1821,7 +1823,7 @@ void TwentyNodeBrick_u_p_U::set_damping_MatrixC()
 	  }
       }
 
-//    return C;
+    return C;
   }
 
 //=========================================================================
@@ -1891,7 +1893,7 @@ matrix TwentyNodeBrick_u_p_U::mass_matrixMf(const tensor  Mf)
 // Constructing Mass matrix of the whole system M (including Ms and Mf 56*56    
 //=========================================================================
 
-void TwentyNodeBrick_u_p_U::set_mass_MatrixM()
+const Matrix &TwentyNodeBrick_u_p_U::getMass()
  {
     tensor tMs  = getMassTensorMs();
     tensor tMf  = getMassTensorMf();
@@ -1907,7 +1909,7 @@ void TwentyNodeBrick_u_p_U::set_mass_MatrixM()
 	  }
       }
 
-//     return Mmatrix;
+     return M;
   }
 
 //#############################################################################  
@@ -2838,7 +2840,7 @@ void TwentyNodeBrick_u_p_U::setDomain (Domain *theDomain)
     }   
 }
 //=============================================================================
-const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff () 
+/*const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff () 
 { 
      cout<<"stiffness matrix\n\n";
      for (int i=0;i<60;i++)
@@ -2847,22 +2849,22 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff ()
      cout<<endl;
       
      return K;
-}
+}    wxy commented 01/15/2002  */
 //=============================================================================
 const Matrix &TwentyNodeBrick_u_p_U::getSecantStiff () 
 {
      return K;
 }
 //=============================================================================
-const Matrix &TwentyNodeBrick_u_p_U::getDamp () 
+/* const Matrix &TwentyNodeBrick_u_p_U::getDamp () 
 {    
      return C;
-}
+}      */
 //=============================================================================
-const Matrix &TwentyNodeBrick_u_p_U::getMass () 
+/*const Matrix &TwentyNodeBrick_u_p_U::getMass () 
 {
       return M;
-}
+}    */
 //=============================================================================
 void TwentyNodeBrick_u_p_U::zeroLoad()
 {

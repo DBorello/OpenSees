@@ -115,16 +115,16 @@ class TwentyNodeBrick_u_p_U: public Element
     matrix stiffness_matrixG1(const tensor  G1);
     matrix stiffness_matrixG2(const tensor  G2);
     matrix stiffness_matrixP(const tensor  P);
-    void set_stiffness_MatrixK();
+//    void set_stiffness_MatrixK();
 
     matrix damping_matrixC1(const tensor C1);
     matrix damping_matrixC2(const tensor C2);
     matrix damping_matrixC3(const tensor C3);
-    void set_damping_MatrixC();
+//    void set_damping_MatrixC();
 
     matrix mass_matrixMs(const tensor  Ms);	   // wxy added 08/27/2001
     matrix mass_matrixMf(const tensor  Mf);	   // wxy added 08/27/2001
-    void  set_mass_MatrixM();              	   // wxy added 08/27/2001
+//    void  set_mass_MatrixM();              	   // wxy added 08/27/2001
 
     tensor Jacobian_3D(tensor dh);
     tensor Jacobian_3Dinv(tensor dh);
