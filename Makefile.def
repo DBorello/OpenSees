@@ -5,10 +5,10 @@
 #  Purpose:  A Top-level Makefile to create the libraries needed
 #	     to use the OpenSees framework.
 #
-#  Written: fmk 
-#  Created: 10/99
+#  Written: jeremic@ucdavis.edu; zhyang@ucdavis.edu 
+#  Created: 01/2001
 #
-#  Send bug reports, comments or suggestions to fmckenna@ce.berkeley.edu
+#  Send bug reports, comments or suggestions to jeremic@ucdavis.edu
 #
 ############################################################################
 
@@ -26,23 +26,31 @@ OpenSees_PROGRAM = $(HOME)/bin/OpenSees
 # %---------------------------------%
 #
 # Note: if vendor supplied BLAS and LAPACK libraries or if you have
-# any of the libraries already leave the directory location blank
-# and remove the directory from DIRS.
+# any of the libraries already leave the directory location blank AND
+# remove the directory from DIRS.
 
 BASE		= /usr/local
-HOME		= /usr/users/fmk
-FE		= $(HOME)/OpenSees/SRC
+HOME		= /home/jeremic
+FE		= $(HOME)/oofep/OpenSees/SRC
 
-BLASdir      = 
-CBLASdir     = 
-LAPACKdir    = 
-SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU
-ARPACKdir    = $(HOME)/OpenSees/OTHER/ARPACK
-UMFPACKdir   = $(HOME)/OpenSees/OTHER/UMFPACK
-METISdir     = $(HOME)/OpenSees/OTHER/METIS
-SRCdir       = $(HOME)/OpenSees/SRC
+BLASdir      = $(HOME)/oofep/OpenSees/OTHER/BLAS
+CBLASdir     = $(HOME)/oofep/OpenSees/OTHER/CBLAS
+LAPACKdir    = $(HOME)/oofep/OpenSees/OTHER/LAPACK
+SUPERLUdir   = $(HOME)/oofep/OpenSees/OTHER/SuperLU
+ARPACKdir    = $(HOME)/oofep/OpenSees/OTHER/ARPACK
+UMFPACKdir   = $(HOME)/oofep/OpenSees/OTHER/UMFPACK
+METISdir     = $(HOME)/oofep/OpenSees/OTHER/METIS
+SRCdir       = $(HOME)/oofep/OpenSees/SRC
 
-DIRS        = $(SUPERLUdir) $(ARPACKdir) $(UMFPACKdir) $(METISdir) $(SRCdir)
+
+DIRS        = $(SUPERLUdir)\
+              $(ARPACKdir) \
+              $(UMFPACKdir) \
+              $(METISdir) \
+              $(SUPERLUdir) \
+              $(ARPACKdir) \
+              $(UMFPACKdir) \
+              $(SRCdir)
 
 # %-------------------------------------------------------%
 # | SECTION 3: LIBRARIES                                  |
@@ -54,24 +62,36 @@ DIRS        = $(SUPERLUdir) $(ARPACKdir) $(UMFPACKdir) $(METISdir) $(SRCdir)
 #
 # Note: if vendor supplied BLAS and LAPACK libraries leave the
 # libraries blank. You have to get your own copy of the tcl/tk 
-# library!!
-
+# library!! 
+#
+# Note: For libraries that will be created (any in DIRS above)
+# make sure the directory exsists where you want the library to go!
+			      
 FE_LIBRARY      = $(HOME)/lib/libOpenSees.a
-LAPACK_LIBRARY  = -ldxml
-BLAS_LIBRARY    = 
+NDARRAY_LIBRARY = $(HOME)/lib/libndarray.a 
+MATMOD_LIBRARY  = $(HOME)/lib/libmatmod.a  
+LAPACK_LIBRARY  = $(HOME)/lib/libLapack.a
+BLAS_LIBRARY    = $(HOME)/lib/libBlas.a
 SUPERLU_LIBRARY = $(HOME)/lib/libSuperLU.a
-CBLAS_LIBRARY   = 
+CBLAS_LIBRARY   = $(HOME)/lib/libCBlas.a
 ARPACK_LIBRARY  = $(HOME)/lib/libArpack.a
 UMFPACK_LIBRARY = $(HOME)/lib/libUmfpack.a
 METIS_LIBRARY   = $(HOME)/lib/libMetis.a
-TCL_LIBRARY     = /usr/users/fmk/lib/libtk8.2.a -lX11 /usr/users/fmk/lib/libtcl8.2.a 
+TCL_LIBRARY     = /usr/lib/libtk8.0.so \
+                  /usr/X11R6/lib/libX11.a \
+                  /usr/lib/libtcl8.0.so
+
 
 # WATCH OUT .. These libraries are removed when 'make wipe' is invoked.
+# $(FE_LIBRARY) \
+#WIPE_LIBS	= $(NDARRAY_LIBRARY)  $(MAT_MOD_LIBRARY)  $(FE_LIBRARY)
 WIPE_LIBS	= $(FE_LIBRARY) \
-		$(SUPERLU_LIBRARY) \
-		$(ARPACK_LIBRARY) \
-		$(UMFPACK_LIBRARY) \
-	        $(METIS_LIBRARY)
+		          $(SUPERLU_LIBRARY) \
+		          $(ARPACK_LIBRARY) \
+		          $(UMFPACK_LIBRARY) \
+	           $(METIS_LIBRARY)	 \
+	           $(NDARRAY_LIBRARY) \
+            $(MATMOD_LIBRARY)
 
 # %---------------------------------------------------------%
 # | SECTION 4: COMPILERS                                    |
@@ -81,10 +101,127 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 # | these are correct for your system.                      |
 # %---------------------------------------------------------%
 
-# Compilers
-CC++	= /usr/bin/cxx
-CC      = /usr/bin/cxx
-Fort	= f90
+# ################################################### 
+# # Compilers
+# ################################################### 
+# # DEFAULT
+# ################################################### 
+# CC++	  = g++
+# CC     = gcc
+# FC	    = g77
+
+
+# Boris Jeremic@ucdavis.edu
+###################################################  Portland Group
+# ########  PGI PGI  PGI PGI PGI PGI PGI PGI  PGI PGI PGI PGI      
+# CC++            =  pgCC
+# CC              =  pgcc
+# FC              =  pgf77
+# LINKER           = pgCC 
+# 
+# C++FLAGS        =  -g -D_UNIX -Minfo=all 
+# CFLAGS          =  -g	 -Minfo=all 
+# FFLAGS          =  -g
+# LINKFLAGS       =  -g
+# ####..
+# ######..CCFLAGS = -c -O2 -Munroll -Mnoframe -tp p6 -Minfo=all -Minline -Mconcur -o $*.o  ##>0.350u 29.360s 0:29.73 99.9%    0+0k 0+0io 284pf+0w
+# ######..CCFLAGS = -c -O2 -Munroll -Mnoframe -tp p6 -Minfo=all -Minline -o $*.o  ##>0.350u 29.360s 0:29.73 99.9%    0+0k 0+0io 284pf+0w
+# ######..CCFLAGS = -c -Mprof=lines -o $*.o  ##
+# ######..CCFLAGS = -c -g -o $*.o  ##>0.330u 38.820s 0:39.18 99.9%     0+0k 0+0io 283pf+0w
+# ######..CCFLAGS = -c  -Mvect  -O2 -o $*.o  ##  1.930u 6.880s 0:08.83 99.7%     0+0k 0+0io 151pf+0w
+# ##CCFLAGS = -c -g -Minfo=all -o $*.o  ## 
+######..LINKFLAGS = -Mconcur 
+##LINKFLAGS = -lm
+
+# ################################  Kuck and Associates Inc.
+# ######  KAI KAI  KAI KAI KAI KAI KAI KAI  KAI KAI KAI KAI      
+# CC++ =  KCC
+# CC =   KCC
+# LINKER= KCC
+# FC   =  g77
+# #FC   =  pgf90
+# LINKER= KCC 
+# 
+# C++FLAGS        =  -g -D_UNIX -Wall 
+# CFLAGS          =  -g	 -Wall
+# FFLAGS          =  -g
+# # ####..
+# ##..##..CCFLAGS = -c  --strict_warnings +K0 --cpfe_only --display_error_number  -o $*.o   
+# ##..##..CCFLAGS = -c  --strict_warnings +K0 --display_error_number  -o $*.o    
+# ##..##..CCFLAGS = -c  --strict_warnings  --inline_auto_space_time=1.0 -O --display_error_number -o $*.o # 60.680u 6.590s 1:12.85 92.3% 0+0k 0+0io 61184pf+0w
+# ##..##..CCFLAGS = -c  +K3  --strict_warnings  -O --abstract_pointer --abstract_float  --display_error_number -o $*.o #  1.570u 7.090s 0:08.67 99.8%     0+0k 0+0io 292pf+0w
+# ##..CCFLAGS = -c  +K2  --strict_warnings  -O --display_error_number -o $*.o 
+# ##..##..CCFLAGS = -c   --strict_warnings --inline_auto_space_time=1.0 +K3 --display_error_number -o $*.o # 196.760u 6.930s 3:26.86 98.4% 0+0k 0+0io 61538pf+0w
+# ##..##..CCFLAGS = -c   --strict_warnings --inline_auto_space_time=75.0 +K3 --display_error_number -o $*.o # 196.760u 6.930s 3:26.86 98.4% 0+0k 0+0io 61538pf+0w
+# ##..
+##..
+
+
+########################################    GNU
+CC++            =  g++
+CC              =  gcc
+FC            =  g77
+LINKER          =  g++
+																					 
+#C++FLAGS        =  -O2 -D_UNIX
+#CFLAGS          =  -O2
+#FFLAGS          =  -O2
+#LINKFLAGS       =  
+
+C++FLAGS        =  -g -D_UNIX -Wall
+CFLAGS          =  -g	 -Wall
+FFLAGS          =  -g
+LINKFLAGS       =  -g
+#####..
+##..CC++ = g++
+##..CC   = gcc
+##..FC	  = g77
+##..LINKER= g++
+
+########################################     EGCS
+# ##..
+# ##..CC++ = egcs
+# ##..LINKER= egcs
+#   
+########################################    MPI CC
+
+##CC++ = mpiCC
+##CC   = mpicc
+##LINKER= mpiCC
+
+##..########################################     INSURE++  CODEWIZARD
+##..CC++            =  insure
+##..CC              =  gcc
+##..FC              =  g77
+##..LINKER           =  g++ 
+##..
+##..C++FLAGS        =  -g -Zvm -Zvm -Zvm -D_UNIX -Wall
+##..CFLAGS          =  -g	 -Wall
+##..FFLAGS          =  -g
+##..LINKFLAGS       =  -g
+##..
+##..CC++ = insure
+##..CC   = gcc
+##..LINKER= insure
+##..#CC++ = codewizard
+##..#CC   = gcc
+##..#LINKER= codewizard
+##..
+
+########################################       I B M   AIX
+##..# AIX C++   on IBM AIX
+##..CC++ = xlC
+##..CC   = xlc
+##..LINKER= xlC
+
+
+########################################     BORLAND
+# DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS
+##..CC = bcc
+##..CCFLAGS = -c -w -rd -C -N -P -f87 -I\cmp\bc\include -L\cmp\bc\lib -i64 -mh -o $*.o
+##..
+
+
 
 AR		= ar 
 ARFLAGS		= cqls
@@ -93,22 +230,30 @@ RANLIB		= ranlib
 # Compiler Flags
 #
 # NOTES:
-#    C++ FLAGS TAKE need _UNIX or _WIN32 for preprocessor dircetives
+#    C++ FLAGS TAKE need _UNIX or _WIN32 for preprocessor directives
 #         - the _WIN32 for the Windows95/98 or NT operating system.
 #    C FLAGS used -DUSE_VENDOR_BLAS (needed in SuperLU) if UNIX in C++ FLAGS
 #
 
-#C++FLAGS        = -O5 -w0 -DXWINDOWS -D_UNIX -D_ALPHA
-C++FLAGS        =  -g -w0 -DXWINDOWS -D_UNIX -D_ALPHA -g
-CFLAGS          = -O5 -DUSE_VENDOR_BLAS -D_UNIX -D_ALPHA
-FFLAGS	        = -O
+# DEFINED ABOVE
+# C++FLAGS        = -Wall -g -D_UNIX
+# CFLAGS          = -Wall -g
+# FFLAGS          = -Wall -g
 
-# Linker
-LINKER          = $(CC)
-LINKFLAGS       = -O5
+#C++FLAGS        = -Wall -O2 -D_UNIX
+#CFLAGS          = -Wall -O2
+#FFLAGS          = -Wall -O
+
+
+# DEFINED ABOVE
+# # Linker
+# #LINKER          = $(CC++)
+# #LINKER          = g++
+# LINKER          = pgCC
+# LINKFLAGS       =  -g
 
 # Misc
-MAKE		= /usr/users/fmk/bin/make
+MAKE		          = make
 CD              = cd
 ECHO            = echo
 RM              = rm
@@ -150,7 +295,7 @@ SHELL           = /bin/sh
 	$(CC) $(CFLAGS) -c $< -o $@
 .f.o:      
 	@$(ECHO) Making $@ from $<
-	$(Fort) $(FFLAGS) -c $< -o $@
+	$(FC) $(FFLAGS) -c $< -o $@
 
 # %---------------------------------------------------------%
 # | SECTION 6: OTHER LIBRARIES                              |
@@ -160,32 +305,25 @@ SHELL           = /bin/sh
 # | platform specific and typically order does matter!!     |
 # %---------------------------------------------------------%
 MACHINE_LINKLIBS  = -L$(BASE)/lib \
-		-L/usr/users/fmk/lib \
-		-lfor \
-		-lots
+                    -L$(HOME)/lib \
+
+
+
+#MPI_LIB_DIR     = /usr/local/mpi/mpich/lib/ # BJ_UCD
 
 MACHINE_NUMERICAL_LIBS  = -lm \
-		$(ARPACK_LIBRARY) \
-		$(SUPERLU_LIBRARY) \
-		$(UMFPACK_LIBRARY) \
-	        $(LAPACK_LIBRARY) $(BLAS_LIBRARY)
+  $(ARPACK_LIBRARY) \
+  $(SUPERLU_LIBRARY) \
+  $(UMFPACK_LIBRARY) \
+  $(LAPACK_LIBRARY)  \
+  $(BLAS_LIBRARY) \
+  $(CBLAS_LIBRARY) \
+  -lg2c -ldl
+#  $(MPI_LIB_DIR) \ # BJ_UCD
 
-MACHINE_SPECIFIC_LIBS = $(FE)/machine/etime.o  \
-	$(FE)/tagged/storage/cxx_repository/NIL__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rwstd45select1s094srqr.o \
-	$(FE)/tagged/storage/cxx_repository/__distance__3stdXQ27__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rws017dgb8.o \
-	$(FE)/tagged/storage/cxx_repository/__erase__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rwstd45sele0r800ad.o \
-	$(FE)/tagged/storage/cxx_repository/__insert__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rwstd45sel0jnm3dl.o \
-	$(FE)/tagged/storage/cxx_repository/deallocate_buffers__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__0oju3aj.o \
-	$(FE)/tagged/storage/cxx_repository/equal_range__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rwstd453uhp6ho.o \
-	$(FE)/tagged/storage/cxx_repository/erase__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rwstd45select04lsjhu.o \
-	$(FE)/tagged/storage/cxx_repository/erase__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rwstd45select1crospf.o \
-	$(FE)/tagged/storage/cxx_repository/erase__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rwstd45select3gf6evp.o \
-	$(FE)/tagged/storage/cxx_repository/find__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rwstd45select12tfrv4e.o \
-	$(FE)/tagged/storage/cxx_repository/insert__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rwstd45selec34hgppu.o \
-	$(FE)/tagged/storage/cxx_repository/lower_bound__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rwstd453uhp6ho.o \
-	$(FE)/tagged/storage/cxx_repository/number_of_trees__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rws3ir3b3r.o \
-	$(FE)/tagged/storage/cxx_repository/upper_bound__Q17__rwstd150rb_tree__TiQ13std24pair__TCiP12TaggedObjectQ17__rwstd453uhp6ho.o 
 
+
+MACHINE_SPECIFIC_LIBS = 
 
 
 # %---------------------------------------------------------%
@@ -194,17 +332,25 @@ MACHINE_SPECIFIC_LIBS = $(FE)/machine/etime.o  \
 # | The following macros specify include files needed for   |
 # | compilation.                                            |
 # %---------------------------------------------------------%
-MACHINE_INCLUDES        = -I/usr/include \
-			  -I$(BASE)/include \
-			  -I/usr/include/cxx \
-			  -I$(HOME)/include
+# BJ_UCD  MPI_INCLUDE_DIR = -I/usr/local/mpi/mpich/include
+
+
+MACHINE_INCLUDES        = -I/usr/include      \
+                     			  -I$(BASE)/include   \
+              		          -I/usr/include/cxx  \
+              		          -I$(HOME)/include   \
+# BJ_UCD		  -I$(MPI_INCLUDE_DIR) 
+
 
 # this file contains all the OpenSees/SRC includes
 include $(FE)/Makefile.incl
 
-TCL_INCLUDES = -I/usr/users/fmk/include 
+TCL_INCLUDES = 
 
 INCLUDES = $(TCL_INCLUDES) $(FE_INCLUDES) $(MACHINE_INCLUDES)
+
+
+
 
 
 
