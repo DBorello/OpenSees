@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-12-05 22:33:29 $
+// $Revision: 1.5 $
+// $Date: 2002-12-16 21:17:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.h,v $
                                                                         
                                                                         
@@ -49,12 +49,12 @@ class HHT : public TransientIntegrator
   public:
     HHT();
     HHT(double alpha);
-    HHT(double alpha, double alphaM, double betaK, double betaKi);
+    HHT(double alpha, double alphaM, double betaK, double betaKi, double betaKc);
 
     //generalized alpha method
     HHT( double alpha, double beta, double gamma );
     HHT( double alpha, double beta, double gamma,
-	 double alphaM, double betaKcurrent, double betaKinit);
+	 double alphaM, double betaK, double betaK0, double betaKc);
 	 
     //destructor
     ~HHT();
@@ -89,6 +89,7 @@ class HHT : public TransientIntegrator
     double alphaM;
     double betaK;
     double betaKi;
+    double betaKc;
 
     double c1, c2, c3;  // some constants we need to keep
     Vector *Ut, *Utdot, *Utdotdot; // response quantities at time t

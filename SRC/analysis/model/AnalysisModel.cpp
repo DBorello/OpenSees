@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-12-05 22:30:16 $
+// $Revision: 1.7 $
+// $Date: 2002-12-16 21:17:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -533,7 +533,7 @@ AnalysisModel::setCurrentDomainTime(double newTime)
 
 
 void
-AnalysisModel::setRayleighDampingFactors(double alphaM, double betaK, double betaK0)
+AnalysisModel::setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc)
 {
     if (myDomain == 0) {
 	cerr << "WARNING: AnalysisModel::getCurrentDomainTime.";
@@ -541,7 +541,7 @@ AnalysisModel::setRayleighDampingFactors(double alphaM, double betaK, double bet
     }
 
     // invoke the method
-    myDomain->setRayleighDampingFactors(alphaM, betaK, betaK0);
+    myDomain->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
 }
 
 

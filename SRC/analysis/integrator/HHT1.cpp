@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-12-05 22:33:29 $
+// $Revision: 1.6 $
+// $Date: 2002-12-16 21:17:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT1.cpp,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@
 HHT1::HHT1()
 :TransientIntegrator(INTEGRATOR_TAGS_HHT1),
  alpha(0.5), gamma(1.0), beta(0), 
- alphaM(0.0), betaK(0.0), betaKi(0.0), 
+ alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  Ualpha(0),Udotalpha(0)
@@ -58,7 +58,7 @@ HHT1::HHT1()
 HHT1::HHT1(double _alpha)
 :TransientIntegrator(INTEGRATOR_TAGS_HHT1),
  alpha(_alpha), gamma(1.5-_alpha), beta((2-_alpha)*(2-_alpha)*0.25),
- alphaM(0.0), betaK(0.0), betaKi(0.0), 
+ alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  Ualpha(0),Udotalpha(0)
@@ -66,10 +66,10 @@ HHT1::HHT1(double _alpha)
 
 }
 
-HHT1::HHT1(double _alpha, double alpham, double betak, double betaki)
+HHT1::HHT1(double _alpha, double alpham, double betak, double betaki, double betakc)
 :TransientIntegrator(INTEGRATOR_TAGS_HHT1),
  alpha(_alpha), gamma(1.5-_alpha), beta((2-_alpha)*(2-_alpha)*0.25), 
- alphaM(alpham), betaK(betak), betaKi(betaki),
+ alphaM(alpham), betaK(betak), betaKi(betaki), betaKc(betakc),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  Ualpha(0),Udotalpha(0)
@@ -212,8 +212,8 @@ HHT1::domainChanged()
   int size = x.Size();
 
   // if damping factors exist set them in the ele & node of the domain
-  if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0)
-    myModel->setRayleighDampingFactors(alphaM, betaK, betaKi);
+  if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0 || betaKc != 0.0)
+    myModel->setRayleighDampingFactors(alphaM, betaK, betaKi, betaKc);
 
   // create the new Vector objects
   if (Ut == 0 || Ut->Size() != size) {
@@ -392,7 +392,7 @@ HHT1::commit(void)
 int
 HHT1::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(7);
+    Vector data(8);
     data(0) = alpha;
     data(1) = beta;
     data(2) = gamma;
@@ -400,6 +400,7 @@ HHT1::sendSelf(int cTag, Channel &theChannel)
     data(4) = alphaM;
     data(5) = betaK;
     data(6) = betaKi;
+    data(7) = betaKc;
 
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WARNING HHT1::sendSelf() - could not send data\n";
@@ -411,7 +412,7 @@ HHT1::sendSelf(int cTag, Channel &theChannel)
 int
 HHT1::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(7);
+    Vector data(8);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WARNING HHT1::recvSelf() - could not receive data\n";
 	return -1;
@@ -427,6 +428,7 @@ HHT1::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     alphaM = data(4);
     betaK = data(5);
     betaKi = data(6);
+    betaKc = data(7);
     
     return 0;
 }

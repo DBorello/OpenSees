@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-12-05 22:33:29 $
+// $Revision: 1.7 $
+// $Date: 2002-12-16 21:17:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark1.cpp,v $
                                                                         
                                                                         
@@ -57,7 +57,7 @@ Newmark1::Newmark1()
 Newmark1::Newmark1(double theGamma, double theBeta, bool dispFlag)
 :TransientIntegrator(INTEGRATOR_TAGS_Newmark1),
  gamma(theGamma), beta(theBeta), 
- alphaM(0.0), betaK(0.0), betaKi(0.0), 
+ alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
  c1(0.0), c2(0.0), c3(0.0), c4(0.0),
  Up(0), Updot(0),  U(0), Udot(0), Udotdot(0)
 {
@@ -65,10 +65,10 @@ Newmark1::Newmark1(double theGamma, double theBeta, bool dispFlag)
 }
 
 Newmark1::Newmark1(double theGamma, double theBeta, 
-		   double alpham, double betak, double betaki)
+		   double alpham, double betak, double betaki , double betakc)
 :TransientIntegrator(INTEGRATOR_TAGS_Newmark1),
  gamma(theGamma), beta(theBeta), 
- alphaM(alpham), betaK(betak), betaKi(betaki), 
+ alphaM(alpham), betaK(betak), betaKi(betaki), betaKc(betakc),
  c1(0.0), c2(0.0), c3(0.0), c4(0.0),
  Up(0), Updot(0),  U(0), Udot(0), Udotdot(0)
 {
@@ -199,8 +199,8 @@ Newmark1::domainChanged()
   int size = x.Size();
 
   // if damping factors exist set them in the ele & node of the domain
-  if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0)
-    myModel->setRayleighDampingFactors(alphaM, betaK, betaKi);
+  if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0 || betaKc != 0.0)
+    myModel->setRayleighDampingFactors(alphaM, betaK, betaKi, betaKc);
   
   // create the new Vector objects
   if (U == 0 || U ->Size() != size) {
@@ -348,13 +348,14 @@ Newmark1::update(const Vector &deltaU)
 int
 Newmark1::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(6);
+    Vector data(7);
     data(0) = gamma;
     data(1) = beta;
     data(2) = 1.0;	
     data(3) = alphaM;
     data(4) = betaK;
     data(5) = betaKi;
+    data(6) = betaKc;
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WARNING Newmark1::sendSelf() - could not send data\n";
@@ -366,7 +367,7 @@ Newmark1::sendSelf(int cTag, Channel &theChannel)
 int
 Newmark1::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(6);
+    Vector data(7);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WARNING Newmark1::recvSelf() - could not receive data\n";
 	gamma = 0.5; beta = 0.25; 
@@ -378,6 +379,7 @@ Newmark1::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     alphaM = data(3);
     betaK = data(4);
     betaKi = data(5);
+    betaKc = data(6);
       
     return 0;
     

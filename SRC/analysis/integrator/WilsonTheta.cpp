@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-05 22:33:29 $
+// $Revision: 1.3 $
+// $Date: 2002-12-16 21:17:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/WilsonTheta.cpp,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@
 WilsonTheta::WilsonTheta()
 :TransientIntegrator(INTEGRATOR_TAGS_WilsonTheta),
  theta(0), deltaT(0),
- alphaM(0.0), betaK(0.0), betaKi(0.0),
+ alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0)
 {
@@ -57,17 +57,17 @@ WilsonTheta::WilsonTheta()
 WilsonTheta::WilsonTheta(double _theta)
 :TransientIntegrator(INTEGRATOR_TAGS_WilsonTheta),
  theta(_theta), deltaT(0.0), 
- alphaM(0), betaK(0), betaKi(0.0),
+ alphaM(0), betaK(0), betaKi(0.0), betaKc(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0)
 {
     
 }
 
-WilsonTheta::WilsonTheta(double _theta, double alpham, double betak, double betaki)
+WilsonTheta::WilsonTheta(double _theta, double alpham, double betak, double betaki, double betakc)
 :TransientIntegrator(INTEGRATOR_TAGS_WilsonTheta),
  theta(_theta), deltaT(0.0), 
- alphaM(alpham), betaK(betak), betaKi(betaKi),
+ alphaM(alpham), betaK(betak), betaKi(betaKi), betaKc(betakc),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0)
 {
@@ -177,8 +177,8 @@ WilsonTheta::domainChanged()
   int size = x.Size();
 
   // if damping factors exist set them in the ele & node of the domain
-  if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0)
-    myModel->setRayleighDampingFactors(alphaM, betaK, betaKi);
+  if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0 || betaKc != 0.0)
+    myModel->setRayleighDampingFactors(alphaM, betaK, betaKi, betaKc);
   
   // create the new Vector objects
   if (Ut == 0 || Ut->Size() != size) {
@@ -352,11 +352,12 @@ WilsonTheta::commit(void)
 int
 WilsonTheta::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(4);
+    static Vector data(5);
     data(0) = theta;
     data(1) = betaKi;	
     data(2) = alphaM;
     data(3) = betaK;
+    data(4) = betaKc;
 
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WilsonTheta::sendSelf() - failed to send the data\n";
@@ -368,20 +369,20 @@ WilsonTheta::sendSelf(int cTag, Channel &theChannel)
 int
 WilsonTheta::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(1);
+    static Vector data(5);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WilsonTheta::recvSelf() - ";
 	cerr << " failed to receive the Vector\n";
 	return -1;
     }
 
-    theta = data(0);
+    theta  = data(0);
     betaKi = data(1);
     alphaM = data(2);
-    betaK = data(3);
+    betaK  = data(3);
+    betaKc = data(4);
 
     return 0;
-    
 }
 
 void

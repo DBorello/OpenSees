@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-12-05 22:33:29 $
+// $Revision: 1.9 $
+// $Date: 2002-12-16 21:17:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@
 Newmark::Newmark()
 :TransientIntegrator(INTEGRATOR_TAGS_Newmark),
  displ(true), gamma(0), beta(0), 
- alphaM(0.0), betaK(0.0), betaKi(0.0),
+ alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  determiningMass(false)
@@ -59,7 +59,7 @@ Newmark::Newmark(double theGamma, double theBeta, bool dispFlag)
 :TransientIntegrator(INTEGRATOR_TAGS_Newmark),
  displ(dispFlag),
  gamma(theGamma), beta(theBeta), 
- alphaM(0.0), betaK(0.0), betaKi(0.0), 
+ alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  determiningMass(false)
@@ -69,12 +69,12 @@ Newmark::Newmark(double theGamma, double theBeta, bool dispFlag)
 
 Newmark::Newmark(double theGamma, double theBeta, 
 		 double alpham, double betak, 
-		 double betaki,
+		 double betaki, double betakc,
 		 bool dispFlag)
 :TransientIntegrator(INTEGRATOR_TAGS_Newmark),
  displ(dispFlag),
  gamma(theGamma), beta(theBeta), 
- alphaM(alpham), betaK(betak), betaKi(betaki),
+ alphaM(alpham), betaK(betak), betaKi(betaki), betaKc(betakc),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  determiningMass(false) 
@@ -293,8 +293,8 @@ Newmark::domainChanged()
   int size = x.Size();
 
   // if damping factors exist set them in the ele & node of the domain
-  if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0)
-    myModel->setRayleighDampingFactors(alphaM, betaK, betaKi);
+  if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0 || betaKc != 0.0)
+    myModel->setRayleighDampingFactors(alphaM, betaK, betaKi, betaKc);
   
   // create the new Vector objects
   if (Ut == 0 || Ut->Size() != size) {
@@ -448,7 +448,7 @@ Newmark::update(const Vector &deltaU)
 int
 Newmark::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(7);
+    Vector data(8);
     data(0) = gamma;
     data(1) = beta;
     if (displ == true) 
@@ -460,6 +460,7 @@ Newmark::sendSelf(int cTag, Channel &theChannel)
     data(4) = alphaM;
     data(5) = betaK;
     data(6) = betaKi;
+    data(7) = betaKc;
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WARNING Newmark::sendSelf() - could not send data\n";
@@ -471,7 +472,7 @@ Newmark::sendSelf(int cTag, Channel &theChannel)
 int
 Newmark::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(7);
+    Vector data(8);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WARNING Newmark::recvSelf() - could not receive data\n";
 	gamma = 0.5; beta = 0.25; 
@@ -487,6 +488,7 @@ Newmark::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     alphaM = data(4);
     betaK = data(5);
     betaKi = data(6);
+    betaKc = data(7);
       
     return 0;
     

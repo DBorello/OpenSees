@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:33:29 $
+// $Revision: 1.4 $
+// $Date: 2002-12-16 21:17:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark1.h,v $
                                                                         
                                                                         
@@ -49,7 +49,7 @@ class Newmark1 : public TransientIntegrator
   public:
     Newmark1();
     Newmark1(double gamma, double beta, bool disp = true);
-    Newmark1(double gamma, double beta, double alphaM, double betaK, double betaKi); 
+    Newmark1(double gamma, double beta, double alphaM, double betaK, double betaKi, double betaKc); 
 
     ~Newmark1();
 
@@ -76,7 +76,7 @@ class Newmark1 : public TransientIntegrator
     double gamma;
     double beta;
 
-    double alphaM, betaK, betaKi; 
+    double alphaM, betaK, betaKi, betaKc;
     double c1, c2, c3, c4;  // some constants we need to keep
     Vector *Up, *Updot;      // predicted response quantities at time t+deltat for 1st iter 
     Vector *U, *Udot, *Udotdot; //response quantities at time t+deltat = predicted + corrected

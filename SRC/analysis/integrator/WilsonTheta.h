@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-05 22:33:30 $
+// $Revision: 1.3 $
+// $Date: 2002-12-16 21:17:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/WilsonTheta.h,v $
                                                                         
                                                                         
@@ -49,7 +49,7 @@ class WilsonTheta : public TransientIntegrator
   public:
     WilsonTheta();
     WilsonTheta(double theta);
-    WilsonTheta(double theta, double alphaM, double betaK, double betaKi);    
+    WilsonTheta(double theta, double alphaM, double betaK, double betaKi, double betaKc);    
     ~WilsonTheta();
 
     // methods which define what the FE_Element and DOF_Groups add
@@ -74,7 +74,7 @@ class WilsonTheta : public TransientIntegrator
     double theta;    
     double deltaT;
 
-    double alphaM, betaK, betaKi;  
+    double alphaM, betaK, betaKi, betaKc;
     double c1, c2, c3;  // some constants we need to keep
     Vector *Ut, *Utdot, *Utdotdot; // response quantities at time t
     Vector *U, *Udot, *Udotdot; // response quantities at time t+deltat

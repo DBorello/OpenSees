@@ -18,19 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-05 22:33:29 $
+// $Revision: 1.3 $
+// $Date: 2002-12-16 21:17:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT1.h,v $
                                                                         
                                                                         
 #ifndef HHT1_h
 #define HHT1_h
 
-// File: ~/analysis/integrator/HHT1.h
-// 
 // Written: fmk 
-// Created: 11/98
-// Revision: A
 //
 // Description: This file contains the class definition for HHT1.
 // HHT1 is an algorithmic class for performing a transient analysis
@@ -49,7 +45,7 @@ class HHT1 : public TransientIntegrator
   public:
     HHT1();
     HHT1(double alpha);
-    HHT1(double alpha, double alphaM, double betaK, double betaKi);        
+    HHT1(double alpha, double alphaM, double betaK, double betaKi, double betaKc);        
 
     ~HHT1();
 
@@ -78,7 +74,7 @@ class HHT1 : public TransientIntegrator
     double gamma;
     double beta;
 
-    double alphaM, betaK, betaKi;
+    double alphaM, betaK, betaKi, betaKc;
 
     double c1, c2, c3;  // some constants we need to keep
     Vector *Ut, *Utdot, *Utdotdot; // response quantities at time t

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-12-05 22:33:29 $
+// $Revision: 1.4 $
+// $Date: 2002-12-16 21:17:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.h,v $
                                                                         
                                                                         
@@ -50,7 +50,7 @@ class Newmark : public TransientIntegrator
     Newmark();
     Newmark(double gamma, double beta, bool disp = true);
     Newmark(double gamma, double beta, double alphaM, double betaK,
-	    double betaKi, bool disp = true);
+	    double betaKi, double betaKc, bool disp = true);
     ~Newmark();
 
     
@@ -79,7 +79,7 @@ class Newmark : public TransientIntegrator
     double beta;
 
     // rayleigh factors
-    double alphaM, betaK, betaKi; 
+    double alphaM, betaK, betaKi, betaKc;
 
     double c1, c2, c3;  // some constants we need to keep
     Vector *Ut, *Utdot, *Utdotdot; // response quantities at time t
