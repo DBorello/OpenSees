@@ -39,10 +39,10 @@ OBJS  = Template3Dep.o \
 
 ################### TARGETS ########################
 all: $(OBJS) 
-	$(AR) -rv $(MATMOD_LIBRARY) $(OBJS)
+	$(AR) $(ARFLAGS) $(MATMOD_LIBRARY) $(OBJS)
 
 libmatmod.a: $(OBJS)
-	$(AR) -rv $(MATMOD_LIBRARY) $(OBJS)
+	$(AR) $(ARFLAGS) $(MATMOD_LIBRARY) $(OBJS)
 
 
 
