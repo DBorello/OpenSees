@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2001-05-03 06:15:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.h,v $
                                                                         
                                                                         
@@ -63,6 +63,7 @@ class StaticAnalysis: public Analysis
     void clearAll(void);	    
     
     int  analyze(int numSteps);
+    int initialize(void);
     int  domainChanged(void);
 
     int setAlgorithm(EquiSolnAlgo &theAlgorithm);

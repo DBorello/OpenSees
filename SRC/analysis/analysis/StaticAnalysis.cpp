@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 04:49:55 $
+// $Revision: 1.3 $
+// $Date: 2001-05-03 06:15:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -155,6 +155,29 @@ StaticAnalysis::analyze(int numSteps)
     return 0;
 }
 
+
+int 
+StaticAnalysis::initialize(void)
+{
+    Domain *the_Domain = this->getDomainPtr();
+
+    // check if domain has undergone change
+    int stamp = the_Domain->hasDomainChanged();
+    if (stamp != domainStamp) {
+      domainStamp = stamp;	
+      if (this->domainChanged() < 0) {
+	cerr << "DirectIntegrationAnalysis::initialize() - domainChanged() failed\n";
+	return -1;
+      }	
+    }
+    if (theIntegrator->initialize() < 0) {
+	cerr << "DirectIntegrationAnalysis::initialize() - integrator initialize() failed\n";
+	return -2;
+    } else
+      theIntegrator->commit();
+    
+    return 0;
+}
 
 int
 StaticAnalysis::domainChanged(void)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 04:47:09 $
+// $Revision: 1.3 $
+// $Date: 2001-05-03 06:15:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -150,7 +150,7 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 	    the_Domain->revertToLastCommit();
 	    return -2;
 	}
-	
+
 	result = theAlgorithm->solveCurrentStep();
 	if (result < 0) {
 	    cerr << "DirectIntegrationAnalysis::analyze() - the Algorithm failed";
@@ -159,7 +159,7 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 	    theIntegrator->revertToLastStep();
 	    return -3;
 	}    
-	
+
 	result = theIntegrator->commit();
 	if (result < 0) {
 	    cerr << "DirectIntegrationAnalysis::analyze() - ";
@@ -179,7 +179,7 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 int
 DirectIntegrationAnalysis::domainChanged(void)
 {
-
+   
     theAnalysisModel->clearAll();    
     theConstraintHandler->clearAll();
     
@@ -223,11 +223,10 @@ DirectIntegrationAnalysis::domainChanged(void)
 
     theSOE->setSize(theAnalysisModel->getDOFGraph());
 
-
-
     // we invoke domainChange() on the integrator and algorithm
     theIntegrator->domainChanged();
     theAlgorithm->domainChanged();
+
 
     return 0;
 }    
