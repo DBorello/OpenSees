@@ -250,6 +250,8 @@ ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
                   $(FE)/element/8nbrick/TclEightNodeBrickCommand.o \
                   $(FE)/element/20nbrick/TwentyNodeBrick.o \
                   $(FE)/element/20nbrick/TclTwentyNodeBrickCommand.o \
+                  $(FE)/element/27nbrick/TwentySevenNodeBrick.o \
+                  $(FE)/element/27nbrick/TclTwentySevenNodeBrickCommand.o \
                   $(FE)/element/TotalLagrangianFD20NodeBrick/TotalLagrangianFD20NodeBrick.o \
                   $(FE)/element/TotalLagrangianFD20NodeBrick/TclTLFD20NodeBrickCommand.o \
                   $(FE)/element/upU/EightNodeBrick_u_p_U.o \

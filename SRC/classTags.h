@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.54 $
-// $Date: 2003-10-30 22:51:29 $
+// $Revision: 1.55 $
+// $Date: 2003-10-31 22:08:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -266,6 +266,7 @@
 #define ELE_TAG_TwentyNodeBrick_u_p_U            7004
 #define ELE_TAG_FourNodeQuadUP  7005
 #define ELE_TAG_TotalLagrangianFD20NodeBrick 7006 // ZC added
+#define ELE_TAG_TwentySevenNodeBrick   7010
 #define ELE_TAG_PlateMITC4      2023 
 #define ELE_TAG_ShellMITC4      2024 
 #define ELE_TAG_Plate1          2022 

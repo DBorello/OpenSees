@@ -76,8 +76,9 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/element/elasticBeamColumn \
                -I$(FE)/element/8nbrick \
                -I$(FE)/element/20nbrick \
-               -I$(FE)/element/TotalLagrangianFD20NodeBrick \
+               -I$(FE)/element/27nbrick \
                -I$(FE)/element/upU \
+               -I$(FE)/element/TotalLagrangianFD20NodeBrick \
                -I$(FE)/element/brick \
                -I$(FE)/element/shell \
                -I$(FE)/element/joint \
@@ -150,5 +151,6 @@ FE_INCLUDES  = -I$(FE)/matrix \
                -I$(FE)/reliability/FEsensitivity \
                -I$(FE)/reliability/tcl \
                -I$(FE) \
-               -I$(SUPERLUdir)
-
+               -I$(SUPERLUdir) 	
+               
+               
