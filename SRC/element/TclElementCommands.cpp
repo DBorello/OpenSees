@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2002-06-07 23:04:57 $
+// $Revision: 1.17 $
+// $Date: 2002-07-18 22:00:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -94,6 +94,10 @@ TclModelBuilder_addConstantPressureVolumeQuad(ClientData, Tcl_Interp *, int, cha
 					      Domain*, TclModelBuilder *);
 
 extern int 
+TclModelBuilder_addJoint2D(ClientData, Tcl_Interp *, int, char **,
+				 Domain*, TclModelBuilder *);
+
+extern int 
 TclModelBuilder_addEnhancedQuad(ClientData, Tcl_Interp *, int, char **,
 				Domain*, TclModelBuilder *);
 
@@ -113,9 +117,9 @@ TclModelBuilder_addZeroLengthSection(ClientData, Tcl_Interp *, int, char **,
 			      Domain*, TclModelBuilder *);
 
 // MHS
-//extern int 
-//TclModelBuilder_addZeroLengthND(ClientData, Tcl_Interp *, int, char **,
-//			      Domain*, TclModelBuilder *);
+extern int 
+TclModelBuilder_addZeroLengthND(ClientData, Tcl_Interp *, int, char **,
+			      Domain*, TclModelBuilder *);
 
 
 // REMO
@@ -169,10 +173,6 @@ extern int TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData,
 						    TclModelBuilder *, 
 						    int);
 
-// Zhaohui Yang
-extern int 
-TclModelBuilder_addFourNodeQuadUP(ClientData, Tcl_Interp *, int, char **,
-				Domain*, TclModelBuilder *);
 
 int
 TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
@@ -302,12 +302,6 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 							  eleArgStart);
     return result;
   } 
-  // Zhaohui Yang
-  else if (strcmp(argv[1],"quadUP") == 0) {
-    int result = TclModelBuilder_addFourNodeQuadUP(clientData, interp, argc, argv,
-						       theTclDomain, theTclBuilder);
-    return result;
-  } 
   else if (strcmp(argv[1],"stdBrick") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,
@@ -326,13 +320,12 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     int result = TclModelBuilder_addZeroLengthSection(clientData, interp, argc, argv,
 					       theTclDomain, theTclBuilder);
     return result;
-  }
-  //else if (strcmp(argv[1],"zeroLengthND") == 0) {
-  //  int result = TclModelBuilder_addZeroLengthND(clientData, interp, argc, argv,
-  //				       theTclDomain, theTclBuilder);
-  //return result;
-  //}
-  else {
+  } else if ((strcmp(argv[1],"Joint2D") == 0) ||
+	     (strcmp(argv[1],"Joint2D") == 0)) {
+    int result = TclModelBuilder_addJoint2D(clientData, interp, argc, argv,
+						  theTclDomain, theTclBuilder);
+    return result;
+  } else {
     cerr << "WARNING unknown element type: " <<  argv[1];
     cerr << "Valid types: truss, elasticBeamColumn, nonlinearBeamColumn, " << endl
 	 << "beamWithHinges, zeroLength, quad, brick, shellMITC4\n";
