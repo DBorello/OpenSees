@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2003-08-29 07:44:13 $
+// $Revision: 1.24 $
+// $Date: 2003-08-29 09:20:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -297,8 +297,10 @@ FEM_ObjectBroker::getNewActor(int classTag, Channel *theChannel)
 {
   switch(classTag) {
 
+#ifdef _PARALLEL_PROCESSING
   case ACTOR_TAGS_SUBDOMAIN:  
     return new ActorSubdomain(*theChannel, *this);
+#endif
 
   default:
     opserr << "FEM_ObjectBroker::getNewActor - ";
