@@ -30,9 +30,9 @@
 
 #include "EPState.h"
 
-stresstensor EPState::TensorVar[ 4 ];
-stresstensor EPState::TensorVar_commit[ 4 ];
-stresstensor EPState::TensorVar_init[ 4 ];
+//stresstensor EPState::TensorVar[ 4 ];
+//stresstensor EPState::TensorVar_commit[ 4 ];
+//stresstensor EPState::TensorVar_init[ 4 ];
 
 //tensor  EPState::Eep( 4, def_dim_4, 0.0 );
 //tensor  EPState::Eep_commit( 4, def_dim_4, 0.0 );
@@ -67,19 +67,28 @@ EPState::EPState(double               Eod,
     	         const double       * Scalar_initp,
     	         const stresstensor * Tensor_initp,
     	         const tensor       & Eep_initp, 
-                 bool               Convergedp) 
+                 bool                 Convergedp,
+	         double               eop,
+	         double               ecp,
+	         double               Lamp,
+	         double               pop,
+	         double               ep,
+	         double               psip,
+	         double  	      ap
+		 ) 
 : Eo(Eod), E_Young(Ed), nu_Poisson(nu), rho_mass_density(rho), CurrentStress(stressp),
   CurrentStrain(strainp), ElasticStrain(Estrainp), PlasticStrain(Pstrainp), 
   dElasticStrain(dEstrainp), dPlasticStrain(dPstrainp), Eep(Eepp), 
   Stress_commit(Stress_commitp), Strain_commit(Strain_commitp),
   Eep_commit(Eep_commitp), Stress_init(Stress_initp), Strain_init(Strain_initp), 
-  Eep_init(Eep_initp), Converged (Convergedp)  
+  Eep_init(Eep_initp), Converged (Convergedp), eo(eop), ec(ecp), Lambda(Lamp), 
+  po(pop), e(ep), psi(psip), a(ap)
 {
 
-      Eo               = Eod;	        
-      E_Young          = Ed;	        
-      nu_Poisson       = nu;	     
-      rho_mass_density = rho; 
+      //Eo               = Eod;	        
+      //E_Young          = Ed;	        
+      //nu_Poisson       = nu;	     
+      //rho_mass_density = rho; 
       
       NScalarVar = NScalarp;
       //ScalarVar = new double[ NScalarVar ]; 
@@ -90,7 +99,7 @@ EPState::EPState(double               Eod,
       }
       else {
          for (int i = 0; i < NScalarVar; i++) {
-            //cout << Scalarp[i] << endlnn; 
+            //opserr << Scalarp[i] << endlnn; 
         	 ScalarVar[i] = Scalarp[i];
         	 ScalarVar_commit[i] = Scalar_commitp[i];
         	 ScalarVar_init[i] = Scalar_initp[i];
@@ -112,11 +121,11 @@ EPState::EPState(double               Eod,
       }
       else {      
          for (int i = 0; i < NTensorVar; i++) {
-         	 //cout << Tensorp[i];
+         	 //opserr << Tensorp[i];
          	 TensorVar[i] = Tensorp[i];
          	 TensorVar_commit[i] = Tensor_commitp[i];
          	 TensorVar_init[i] = Tensor_initp[i];
-         	 //cout << TensorVar[i];
+         	 //opserr << TensorVar[i];
          	 //TensorVar[i].null_indices();
          }
       }
@@ -126,30 +135,38 @@ EPState::EPState(double               Eod,
 //Normal Constructor 11
 //================================================================================
 
-EPState::EPState(double             Eod,
-                 double             Ed,
-                 double             nu,
-                 double             rho,
-                 const stresstensor stressp,       
-                 const straintensor strainp, 
-                 const straintensor Estrainp,
-                 const straintensor Pstrainp,
-	         int                NScalarp,
-		 const double     * Scalarp,
-	         int                NTensorp,
-	         const stresstensor     * Tensorp )	  
-: CurrentStress(stressp), CurrentStrain(strainp), ElasticStrain(Estrainp), 
+EPState::EPState(double              Eod,
+                 double              Ed,
+                 double              nu,
+                 double              rho,
+                 const stresstensor  stressp,       
+                 const straintensor  strainp, 
+                 const straintensor  Estrainp,
+                 const straintensor  Pstrainp,
+	         int                 NScalarp,
+		 const double       *Scalarp,
+	         int                 NTensorp,
+	         const stresstensor *Tensorp,
+     	         double              eop,
+     	         double              ecp,
+	         double              Lamp,
+	         double              pop,
+ 	         double  	     ap
+		 )
+: Eo(Eod), E_Young(Ed), nu_Poisson(nu), rho_mass_density(rho),
+  CurrentStress(stressp), CurrentStrain(strainp), ElasticStrain(Estrainp), 
   PlasticStrain(Pstrainp), Stress_commit(stressp), Strain_commit(strainp), 
-  Stress_init(stressp), Strain_init(strainp)  
+  Stress_init(stressp), Strain_init(strainp), eo(eop), ec(ecp), Lambda(Lamp), 
+  po(pop), e(eop), a(ap)
 {
-      Eo               = Eod;	        
-      E_Young          = Ed;	        
-      nu_Poisson       = nu;
-      rho_mass_density = rho; 
+      //Eo               = Eod;	        
+      //E_Young          = Ed;	        
+      //nu_Poisson       = nu;
+      //rho_mass_density = rho; 
       
       //CurrentStress    = stressp;
       
-      //cout << "stressp " << stressp;
+      //opserr << "stressp " << stressp;
       //CurrentStress.null_indices();
       
       //CurrentStrain    =  strainp;
@@ -158,7 +175,7 @@ EPState::EPState(double             Eod,
       //Eep = Eepp;
       Eep = tensor( 4, def_dim_4, 0.0 ); // need to be initialized as 4th order tensor
       
-      //cout << "strainp " << strainp;
+      //opserr << "strainp " << strainp;
       //CurrentStrain.null_indices();
 
       NScalarVar = NScalarp;
@@ -170,7 +187,7 @@ EPState::EPState(double             Eod,
       }
       else {
          for (int i = 0; i < NScalarVar; i++) {
-            //cout << Scalarp[i] << endlnn; 
+            //opserr << Scalarp[i] << endlnn; 
        	 ScalarVar[i] = Scalarp[i];
        	 ScalarVar_commit[i] = Scalarp[i];
        	 ScalarVar_init[i] = Scalarp[i];
@@ -193,39 +210,49 @@ EPState::EPState(double             Eod,
       }	      
       else {       
          for (int i = 0; i < NTensorVar; i++) {
-       	 //cout << Tensorp[i] << endlnn;
-       	 //cout << TensorVar[i] << endlnn;
+       	 //opserr << Tensorp[i] << endlnn;
+       	 //opserr << TensorVar[i] << endlnn;
        	 TensorVar[i] = Tensorp[i];
        	 TensorVar_commit[i] = Tensorp[i];
        	 TensorVar_init[i] = Tensorp[i];
-       	 //cout << TensorVar[i] << endlnn;
+       	 //opserr << TensorVar[i] << endlnn;
        	 //TensorVar[i].null_indices();
          }   
      }
 
      Converged = false;
+     psi = e - ec;
 }
 
 //================================================================================
 //Normal Constructor 2
 //================================================================================
 
-EPState::EPState(double             Eod,
-                 double             Ed,
-                 double             nu,
-                 double             rho,
-	         int                NScalarp,
-	         const double     * Scalarp,
-	         int                NTensorp,
-	         const stresstensor * Tensorp ) {
+EPState::EPState(double              Eod,
+                 double              Ed,
+                 double              nu,
+                 double              rho,
+	         int                 NScalarp,
+	         const double       *Scalarp,
+	         int                 NTensorp,
+	         const stresstensor *Tensorp,
+	         double              eop,
+	         double              ecp,
+	         double              Lamp,
+	         double              pop,
+	         double  	     ap
+		 ) 
+: Eo(Eod), E_Young(Ed), nu_Poisson(nu), rho_mass_density(rho),
+  eo(eop), ec(ecp), Lambda(Lamp), po(pop), e(eop), a(ap)
+{
 
-      Eo               = Eod;	        
-      E_Young          = Ed;	        
-      nu_Poisson       = nu;	     
-      rho_mass_density = rho; 
+      //Eo               = Eod;	        
+      //E_Young          = Ed;	        
+      //nu_Poisson       = nu;	     
+      //rho_mass_density = rho; 
 
       //CurrentStress    = stressp;
-      //cout << "CurrentStress " << CurrentStress;
+      //opserr << "CurrentStress " << CurrentStress;
       //CurrentStress.null_indices();
       //CurrentStrain    =  strainp;
       //ElasticStrain    =  Estrainp;
@@ -234,7 +261,7 @@ EPState::EPState(double             Eod,
       //dPlasticStrain   =  dPstrainp;
       
       Eep = tensor( 4, def_dim_4, 0.0 ); // need to be initialized as 4th order tensor
-      //cout << "strainp " << strainp;
+      //opserr << "strainp " << strainp;
       //CurrentStrain.null_indices();
 
       NScalarVar  =  NScalarp;
@@ -249,7 +276,7 @@ EPState::EPState(double             Eod,
       }
       else {
          for (int i = 0; i < NScalarVar; i++) {
-            //cout << Scalarp[i] << endlnn; 
+            //opserr << Scalarp[i] << endlnn; 
         	 ScalarVar[i] = Scalarp[i];
         	 ScalarVar_commit[i] = Scalarp[i];
         	 ScalarVar_init[i] = Scalarp[i];
@@ -268,16 +295,17 @@ EPState::EPState(double             Eod,
       }
       else {
          for (int i = 0; i < NTensorVar; i++) {
-        	 //cout << Tensorp[i];
+        	 //opserr << Tensorp[i];
         	 TensorVar[i] = Tensorp[i];
         	 TensorVar_commit[i] = Tensorp[i];
         	 TensorVar_init[i] = Tensorp[i];
-        	 //cout << TensorVar[i];
+        	 //opserr << TensorVar[i];
         	 //TensorVar[i].null_indices();
          }
       }
       
       Converged = false;
+      psi = e - ec;
 }
 
 
@@ -285,12 +313,15 @@ EPState::EPState(double             Eod,
 //Normal Constructor --no parameters
 //================================================================================
 
-EPState::EPState( ) {
+EPState::EPState( ) 
+: Eo(30000.0), E_Young(30000.0), nu_Poisson(0.3), rho_mass_density(0.0),
+  Converged(false), eo(0.85), ec(0.80), Lambda(0.025), po(100.0), e(0.85), psi(0.05), a(0.5)
+{
 
-      Eo               = 30000.0;
-      E_Young          = 30000.0;
-      nu_Poisson       = 0.3;	     
-      rho_mass_density = 0.0; 
+      //Eo               = 30000.0;
+      //E_Young          = 30000.0;
+      //nu_Poisson       = 0.3;	     
+      //rho_mass_density = 0.0; 
       Eep = tensor( 4, def_dim_4, 0.0 );
 
       NScalarVar = MaxNScalarVar;
@@ -301,7 +332,7 @@ EPState::EPState( ) {
       //for (int i =0; i < NTensorVar, i++) 
       //   TensorVar[i] = stresstensor(0.0);
  
-      Converged = false;
+      //Converged = false;
 
 }
 
@@ -336,7 +367,14 @@ EPState* EPState::newObj() {
       				   this->getScalarVar_init(),
       				   this->getTensorVar_init(),
       				   this->getEep_init(), 
-      				   this->getConverged()
+      				   this->getConverged(),
+      				   this->geteo(),
+      				   this->getec(),
+      				   this->getLam(),
+      				   this->getpo(),
+      				   this->gete(),
+      				   this->getpsi(),
+      				   this->geta()
 				   );
       return eps;
 }      				 
@@ -362,12 +400,12 @@ EPState::EPState( const EPState &rhs ) {
       Strain_commit = rhs.getStrain_commit();
       Stress_init   = rhs.getStress_init();
       Strain_init   = rhs.getStrain_init();
-      //cout << Eep.rank() << " ";
+      //opserr << Eep.rank() << " ";
       //Eep.printshort("before copy con ");
       Eep = rhs.getEep();
       Eep_commit = rhs.getEep_commit();
       Eep_init = rhs.getEep_init();
-      //cout << Eep.rank() << " ";
+      //opserr << Eep.rank() << " ";
       //Eep.printshort("after copy con ");
 
       NScalarVar  =  rhs.getNScalarVar();
@@ -392,11 +430,19 @@ EPState::EPState( const EPState &rhs ) {
 	 TensorVar[i] = rhs.TensorVar[ i ];
 	 TensorVar_commit[i] = rhs.TensorVar_commit[ i ];
 	 TensorVar_init[i] = rhs.TensorVar_init[ i ];
-	 //cout << TensorVar[i];
+	 //opserr << TensorVar[i];
  	 //TensorVar[i].null_indices();
       }
       
-      Converged  =  rhs.getConverged();
+      Converged = rhs.getConverged();
+
+      eo        = rhs.geteo();	        
+      ec        = rhs.getec();
+      Lambda    = rhs.getLam();
+      po        = rhs.getpo();	        
+      e         = rhs.gete();	        
+      psi       = rhs.getpsi();
+      a         = rhs.geta();	        
      
 }      				 
 
@@ -435,9 +481,9 @@ const EPState & EPState::operator=(const EPState &rhs ) {
          rho_mass_density = rhs.getrho(); 
 
          CurrentStress    = rhs.getStress();
-         //cout << "Current stress " << CurrentStress;
+         //opserr << "Current stress " << CurrentStress;
          CurrentStrain    = rhs.getStrain();
-         //cout << "strainp " << strainp;
+         //opserr << "strainp " << strainp;
          ElasticStrain    = rhs.getElasticStrain();
          PlasticStrain    = rhs.getPlasticStrain();
          dElasticStrain   = rhs.getdElasticStrain();
@@ -479,6 +525,14 @@ const EPState & EPState::operator=(const EPState &rhs ) {
          }
 
          Converged = rhs.getConverged();
+
+         eo        = rhs.geteo();
+         ec        = rhs.getec();
+         Lambda    = rhs.getLam();
+         po        = rhs.getpo();
+         e         = rhs.gete();
+         psi       = rhs.getpsi();
+         a         = rhs.geta();
       
       }			     
       
@@ -520,7 +574,41 @@ int EPState::getNTensorVar() const {
 bool EPState::getConverged() const {
       return Converged; 
 }
-		      
+
+//================================================================================
+double EPState::geteo() const {
+      return eo; 
+}
+
+//================================================================================
+double EPState::getec() const {
+      return ec; 
+}
+
+//================================================================================
+double EPState::gete() const {
+      return e; 
+}
+
+//================================================================================
+double EPState::getpsi() const {
+      return psi; 
+}
+
+//================================================================================
+double EPState::getLam() const {
+      return Lambda; 
+}
+
+//================================================================================
+double EPState::getpo() const {
+      return po; 
+}		      
+
+//================================================================================
+double EPState::geta() const {
+      return a; 
+}		      
 
 //================================================================================
 stresstensor EPState::getStress() const {
@@ -718,6 +806,40 @@ void EPState::setConverged( bool b) {
      Converged = b;
 }
 
+//================================================================================
+void EPState::seteo( double eod ) { 
+      eo = eod; 
+}
+
+//================================================================================
+void EPState::setec( double ecd ) { 
+      ec = ecd; 
+}
+
+//================================================================================
+void EPState::setLam( double Lamd ) { 
+      Lambda = Lamd; 
+}
+
+//================================================================================
+void EPState::setpo( double pod ) { 
+      po = pod;
+}
+
+//================================================================================
+void EPState::seta( double ad ) { 
+      a = ad;
+}
+
+//================================================================================
+void EPState::sete( double ed ) { 
+      e = ed; 
+}
+
+//================================================================================
+void EPState::setpsi( double psid ) { 
+      psi = psid; 
+}
 
 //================================================================================
 // Retrun the nth Scalar Var.... Starting from 1!!
@@ -749,8 +871,7 @@ stresstensor EPState::getTensorVar(int WhichOne) const {
          return TensorVar[ WhichOne - 1 ]; 
       else 
       {
-	opserr << "EPState::getTensorVar No. %d: Out of Tensortial Var's range " << WhichOne << 
-	  " out of " <<  getNTensorVar() << endln;
+	opserr << "EPState::getTensorVar No. %d: Out of Tensortial Var's range " << WhichOne << " out of " <<  getNTensorVar() << endln;
 	 exit(1);
       }
 
@@ -857,7 +978,7 @@ void EPState::setScalarVar(int WhichOne, double rval) {
       else 
       {
 	opserr << "EPState::setScalarVar Out of ScalarVar's range " << getNScalarVar() << endln;
-         //cout << " Out of ScalarVar's range!";	  
+         //opserr << " Out of ScalarVar's range!";	  
 	 exit(1);
       }
 }
@@ -868,7 +989,7 @@ void EPState::setScalarVar_commit(int WhichOne, double rval) {
       else 
       {
 	opserr << "EPState::setScalarVar Out of ScalarVar's range " <<  getNScalarVar() << endln;
-         //cout << " Out of ScalarVar's range!";	  
+         //opserr << " Out of ScalarVar's range!";	  
 	 exit(1);
       }
 }
@@ -880,7 +1001,7 @@ void EPState::setScalarVar_init(int WhichOne, double rval) {
       else 
       {
 	opserr << "EPState::setScalarVar Out of ScalarVar's range " <<  getNScalarVar() << endln;
-         //cout << " Out of ScalarVar's range!";	  
+         //opserr << " Out of ScalarVar's range!";	  
 	 exit(1);
       }
 }
@@ -936,7 +1057,7 @@ void EPState::setScalarVar(double *rval) {
          ::exit(1);  
       }
       for (int i = 0; i < getNScalarVar(); i++) {
-         //cout << Scalarp[i] << endlnn; 
+         //opserr << Scalarp[i] << endlnn; 
 	 ScalarVar[i] = rval[i];
       }
 
@@ -1086,6 +1207,7 @@ int EPState::revertToStart () {
 // prints an EPState's contents 
 //================================================================================
 OPS_Stream & operator<< (OPS_Stream& os, const EPState & EPS)
+//ostream & operator<< (ostream& os, const EPState & EPS)
     {
       //        os.setf( ios::showpos | ios::scientific);
       os.precision(4);
@@ -1099,6 +1221,19 @@ OPS_Stream & operator<< (OPS_Stream& os, const EPState & EPS)
 	os << " nu_Poisson = " << EPS.getnu() << ";";
 	//os.width(10);       
 	os << " rho = " << EPS.getrho() << endln;
+
+        os << "\teo = " << EPS.geteo() << ";";
+        os << " ec = " << EPS.getec() << ";";
+        os << " Lambda = " << EPS.getLam() << ";";
+        os << " po = " << EPS.getpo() << ";";
+	os << " e = " << EPS.gete() << endln;
+	os << " psi = " << EPS.getpsi() << endln;
+        os << " a = " << EPS.geta() << ";";
+	     
+	if ( EPS.getConverged() )
+ 	  os << "\tConverged = ok! ";
+	else	 
+ 	  os << "\tConverged = no! " << endln;
 
         //os.width(10);       
         os << endln << "\tCurrent Stress:" << EPS.getStress() << endln;

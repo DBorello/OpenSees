@@ -58,35 +58,49 @@ class EPState
     straintensor dElasticStrain;  // Current elastic strain increment       
     straintensor dPlasticStrain;  // Current plastic strain increment       
     tensor       Eep;             // Current Elastic plastic stifness tensor
-    int NScalarVar;    	  	  //Actual Number of internal scalar vars 
-    int NTensorVar;    	  	  //Actual Number of internal tensor vars 
+    int NScalarVar;               //Actual Number of internal scalar vars 
+    int NTensorVar;               //Actual Number of internal tensor vars 
+    
     double       ScalarVar[ MaxNScalarVar ]; // scalar variable array for scalar hardening vars 
-    static stresstensor TensorVar[ MaxNTensorVar ]; // tensor variable array for tensor hardening vars 
+    //static stresstensor TensorVar[ MaxNTensorVar ]; // tensor variable array for tensor hardening vars 
+    stresstensor TensorVar[ MaxNTensorVar ]; // tensor variable array for tensor hardening vars 
     //straintensor TensorVar[ MaxNTensorVar ]; // tensor variable array for tensor hardening vars 
 
     // Commited state
-    stresstensor Stress_commit;   // Commited stress  --total               
-    straintensor Strain_commit;	  // Commited strain  --total 	            
+    stresstensor Stress_commit;   // Commited stress  --total             
+    straintensor Strain_commit;   // Commited strain  --total             
+    
     double       ScalarVar_commit[ MaxNScalarVar ]; // Commited scalar variable array for scalar hardening vars 
-    static stresstensor TensorVar_commit[ MaxNTensorVar ]; // Commited tensor variable array for tensor hardening vars 
+    //static stresstensor TensorVar_commit[ MaxNTensorVar ]; // Commited tensor variable array for tensor hardening vars     
+    stresstensor TensorVar_commit[ MaxNTensorVar ]; // Commited tensor variable array for tensor hardening vars 
     tensor       Eep_commit;      // Current Elastic plastic stifness tensor
 
     //Initial state
-    stresstensor Stress_init;     // Initial stress  --total               
-    straintensor Strain_init;	  // Initial strain  --total 	            
+    stresstensor Stress_init;     // Initial stress  --total
+    straintensor Strain_init;     // Initial strain  --total
+    
     double       ScalarVar_init[ MaxNScalarVar ]; // initial scalar variable array for scalar hardening vars 
-    static stresstensor TensorVar_init[ MaxNTensorVar ]; // initial tensor variable array for tensor hardening vars 
+    //static stresstensor TensorVar_init[ MaxNTensorVar ]; // initial tensor variable array for tensor hardening vars     
+    stresstensor TensorVar_init[ MaxNTensorVar ]; // initial tensor variable array for tensor hardening vars 
     tensor       Eep_init;             // initial Elastic plastic stifness tensor
 
     bool Converged;      // Bool to indicate whether this is the converged EPState by current CDriver
+
+    double eo;           // Initial void ratio Joey 02-11-03
+    double ec;           // Void ratio at critical state at po Joey 02-11-03
+    double Lambda;       // Slope of critical state line  Joey 02-11-03
+    double po;           // Reference pressure (100 kPa by default)  Joey 02-11-03
+    double e;            // Void ratio  Joey 02-11-03
+    double psi;          // State parameter  Joey 02-18-03
+    double a;            // Exponent in E = Eo (p/p_atm)^a  Joey 02-11-03
     
   public:
     //Normal Constructor--no parameters
-    EPState();                         
-    ~EPState();                         
+    EPState();
+    ~EPState();
     
     //Normal Constructor1
-    EPState(double              Eod,    
+    EPState(double              Eod,
             double              Ed,
             double              nu,
        	    double              rho,
@@ -111,22 +125,36 @@ class EPState
     	    const double       *Scalar_initp,
     	    const stresstensor *Tensor_initp,
     	    const tensor       &Eep_initp, 
-            bool                Convergedp      
+            bool                Convergedp,
+	    double              eop = 0.85, 
+	    double              ecp = 0.80, 
+	    double              Lam = 0.025, 
+	    double              pop = 100.0,
+	    double              ep  = 0.85, 
+	    double              psip = 0.05, 
+	    double              ap  = 0.5
 	    );
 
 
-    EPState(double             Eod,
-            double             Ed,
-            double             nu,
-            double             rho,
-            const stresstensor stressp,       
-            const straintensor strainp, 
-            const straintensor Estrainp,
-            const straintensor Pstrainp,
-	    int                NScalarp,
-	    const double     * Scalarp,
-	    int                NTensorp,
-	    const stresstensor     * Tensorp );
+    //Normal Constructor11
+    EPState(double              Eod,
+            double              Ed,
+            double              nu,
+            double              rho,
+            const stresstensor  stressp,       
+            const straintensor  strainp, 
+            const straintensor  Estrainp,
+            const straintensor  Pstrainp,
+	    int                 NScalarp,
+	    const double       *Scalarp,
+	    int                 NTensorp,
+	    const stresstensor *Tensorp, 
+	    double              eop = 0.85,
+	    double              ecp = 0.80,
+	    double              Lam = 0.025, 
+	    double              pop = 100.0,
+	    double              ap = 0.5
+	    );
 
     //Normal Constructor2
     EPState(double              Eod,    
@@ -136,7 +164,13 @@ class EPState
             int                 NScalarp,
 	    const double       *Scalarp,
 	    int                 NTensorp,
-	    const stresstensor       *Tensorp);
+	    const stresstensor *Tensorp,
+	    double              eop = 0.85,
+	    double              ecp = 0.80,
+	    double              Lam = 0.025, 
+	    double              pop = 100.0,
+	    double              ap = 0.5
+	    );
 
     EPState *newObj();                 //create a clone of itself
     EPState( const EPState &rhs );     // Copy constructor    
@@ -149,6 +183,15 @@ class EPState
     int getNScalarVar() const;
     int getNTensorVar() const;
     bool getConverged() const;
+
+    // Added Joey 02-12-03
+    double geteo() const;
+    double getec() const;
+    double getLam() const;
+    double gete() const;
+    double getpsi() const; //state parameter
+    double getpo() const;
+    double geta() const;
 
     stresstensor getStress() const;
     stresstensor getIterativeStress() const;
@@ -196,6 +239,15 @@ class EPState
     void setEep( const tensor &);
     void setConverged( bool b);
 
+    // Added Joey 02-12-03
+    void seteo( double eod );
+    void setec( double ecd );
+    void setLam( double Lamd );
+    void sete( double ed );
+    void setpsi( double psid );
+    void setpo( double pod );
+    void seta( double ad );
+
     // WhichOne starts from 1 and ends up to  NScalarVar
     double getScalarVar( int WhichOne) const;
     stresstensor getTensorVar(int WhichOne) const;
@@ -231,6 +283,7 @@ class EPState
     // prints an EPState's contents 
     //================================================================================
     friend OPS_Stream & operator<< (OPS_Stream& os, const EPState & EPS);
+    //friend ostream & operator<< (ostream& os, const EPState & EPS);
 
 };
 

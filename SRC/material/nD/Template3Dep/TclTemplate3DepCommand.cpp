@@ -36,12 +36,14 @@
 #include <VM_YS.h>
 #include <CAM_YS.h>
 #include <RMC01_YS.h>
+#include <MD_YS.h>
 
 #include <PS.h>
 #include <DP_PS.h>
 #include <VM_PS.h>
 #include <CAM_PS.h>
 #include <RMC01_PS.h>
+#include <MD_PS.h>
 
 #include <EPState.h>
 
@@ -51,6 +53,7 @@
 
 #include <EL_T.h>
 #include <EL_LEij.h>
+#include <EL_NLEijMD.h>
 
 
 
@@ -293,6 +296,10 @@ YieldSurface *EvaluateYieldSurfaceArgs(ClientData clientData, Tcl_Interp *interp
     YS = new RMC01YieldSurface();
   }
     
+  // 5. Manzari-Dafalias (conic-shaped) Yield Surface
+  if ( (strcmp(argv[0],"-MD") == 0) || (strcmp(argv[0],"-md") == 0) ) {
+    YS = new MDYieldSurface();
+  }
 
   cleanup(argv);
   return YS;
@@ -316,9 +323,9 @@ PotentialSurface *EvaluatePotentialSurfaceArgs(ClientData clientData, Tcl_Interp
     double alpha = 0.0;
     if (argc > 1)
       if (Tcl_GetDouble(interp, argv[1], &alpha) != TCL_OK) {
-  opserr << "nDMaterial Templated3Dep - invalid alpha " << argv[1] << endln;
-  cleanup(argv);
-  return 0;    
+  	opserr << "nDMaterial Templated3Dep - invalid alpha " << argv[1] << endln;
+  	cleanup(argv);
+  	return 0;    
       }
     PS = new DPPotentialSurface(alpha);
   }
@@ -335,7 +342,7 @@ PotentialSurface *EvaluatePotentialSurfaceArgs(ClientData clientData, Tcl_Interp
     if (argc == 2) {
       if (Tcl_GetDouble(interp, argv[1], &mp) != TCL_OK) {
         opserr << "nDMaterial Templated3Dep - invalid M " << argv[1] << endln;
-  return 0;    
+  	return 0;    
       }
     }
     
@@ -344,11 +351,16 @@ PotentialSurface *EvaluatePotentialSurfaceArgs(ClientData clientData, Tcl_Interp
   }
 
  //4. RMC01 Potential Surface
-  if ((strcmp(argv[0],"RMC01") == 0) || (strcmp(argv[0],"-rmc01") == 0)) 
+  if ((strcmp(argv[0],"-RMC01") == 0) || (strcmp(argv[0],"-rmc01") == 0)) 
     {
       PS = new RMC01PotentialSurface();
     }
 
+ //5. Manzari-Dafalias Potential Surface
+  if ((strcmp(argv[0],"-MD") == 0) || (strcmp(argv[0],"-md") == 0)) 
+    {
+      PS = new MDPotentialSurface();
+    }
 
   cleanup(argv);
   return PS;
@@ -366,7 +378,7 @@ int EvaluateStressTensor(ClientData clientData, Tcl_Interp *interp, char *tclStr
     return 0;
   }
     
-  //opserr << " argc " << argc << "  argv: " << *argv << endln;
+  cout << " argc " << argc << "  argv: " << *argv << endln;
   
   //Found a bug here!! Joey May 15, 2001
   //argc = 1 and only one value is passed in. 
@@ -479,8 +491,8 @@ EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, char *tc
   if (Tcl_GetDouble(interp, argv[3], &rho) != TCL_OK) {
     opserr << "nDMaterial Templated3Dep -EPS - invalid rho " << argv[1] << endln;
   }
+
   int loc = 4;
-  stresstensor stressp;
   straintensor strainp;
   straintensor Estrainp;
   straintensor Pstrainp;
@@ -489,79 +501,137 @@ EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, char *tc
   int NoD = 0;
   double *scalars = 0;
   stresstensor *tensors = 0;
+  double ed = 0.80, ecd = 0.75, lamd=0.025, p_refd= 100.0, ad=0.5;
 
   // switch on remaining args;
+  double *values_stp = new double[9];
   while (loc < argc) {
     
     if ((strcmp(argv[loc],"-stressP") == 0) || (strcmp(argv[loc],"-stressp") == 0)) {
-      if (EvaluateStressTensor(clientData, interp, argv[loc+1], stressp) < 0) {
-  opserr << "nDMaterial Templated3Dep -EPS - invalid stressp " << argv[loc+1] << endln;
-  cleanup(argv);
-  return 0;
-      }
-      loc+=2;
+      //cout << " " << argv[loc+1] << "\n";
+      int loc_i = loc;
+
+      for (int i=0; i<9; i++) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &values_stp[i]) != TCL_OK) {
+          opserr << "nDMaterial Templated3Dep -EPS - invalid stress tensor: need nine components " << argv[loc_i] << endln;
+          return 0;
+        }
+	loc++;
+        //cout << loc << " " << values_stp[i] << " " ;
+      } //end of for loop
+      loc++;
     }
     else if ((strcmp(argv[loc],"-strainP") == 0) || (strcmp(argv[loc],"-strainp") == 0)) {
       if (EvaluateStrainTensor(clientData, interp, argv[loc+1], strainp) < 0) {
-  opserr << "nDMaterial Templated3Dep -EPS - invalid strainp " << argv[loc+1] << endln;
-  cleanup(argv);
-  return 0;
+  	opserr << "nDMaterial Templated3Dep -EPS - invalid strainp " << argv[loc+1] << endln;
+  	cleanup(argv);
+  	return 0;
       }
     }    
     else if ((strcmp(argv[loc],"-EstrainP") == 0) || (strcmp(argv[loc],"-Estrainp") == 0)) {
       if (EvaluateStrainTensor(clientData, interp, argv[loc+1], Estrainp) < 0) 
-  opserr << "nDMaterial Templated3Dep -EPS - invalid Estrainp " << argv[loc+1] << endln;
-  cleanup(argv);
-  return 0;
+  	opserr << "nDMaterial Templated3Dep -EPS - invalid Estrainp " << argv[loc+1] << endln;
+  	cleanup(argv);
+  	return 0;
       loc+=2;
     }
     else if ((strcmp(argv[loc],"-PstrainP") == 0) || (strcmp(argv[loc],"-Estrainp") == 0)) {
       if (EvaluateStrainTensor(clientData, interp, argv[loc+1], Pstrainp) < 0) {
-  opserr << "nDMaterial Templated3Dep -EPS - invalid Pstrainp " << argv[loc+1] << endln;
-  cleanup(argv);
-  return 0;
+  	opserr << "nDMaterial Templated3Dep -EPS - invalid Pstrainp " << argv[loc+1] << endln;
+  	cleanup(argv);
+  	return 0;
       }
       loc+=2;
     }    
     else if ((strcmp(argv[loc],"-NOS") == 0) || (strcmp(argv[loc],"-nos") == 0)) {
       if (Tcl_GetInt(interp, argv[loc+1], &NoS) != TCL_OK) {
-  opserr << "nDMaterial Templated3Dep -EPS - invalid NOS " << argv[loc+1] << endln;
-  return 0;  
+  	opserr << "nDMaterial Templated3Dep -EPS - invalid NOS " << argv[loc+1] << endln;
+  	return 0;  
       }
-      loc+=2;
+      loc+= 2;
+      //cout << " NOS " << NoS;
 
       if (NoS > 0) {
-  scalars = new double[NoS];
-  for (int i=0; i<NoS; i++) {
-    if (Tcl_GetDouble(interp, argv[loc++], &scalars[i]) != TCL_OK) {
-      opserr << "nDMaterial Templated3Dep -EPS - invalid scalar: " << argv[loc-1] << endln;
-      return 0;      
-    }
-  }
+  	scalars = new double[NoS];
+  	for (int i=0; i<NoS; i++) {
+          if (Tcl_GetDouble(interp, argv[loc++], &scalars[i]) != TCL_OK) {
+      	    opserr << "nDMaterial Templated3Dep -EPS - invalid scalar: " << argv[loc-1] << endln;
+      	    return 0;      
+          }
+	  //cout << " in for " << loc << " " << scalars[i];
+  	} //end of for loop
       } else 
-  NoS = 0;
+  	NoS = 0;
     }
     else if ((strcmp(argv[loc],"-NOD") == 0) || (strcmp(argv[loc],"-nod") == 0)) {
       if (Tcl_GetInt(interp, argv[loc+1], &NoD) != TCL_OK) {
-  opserr << "nDMaterial Templated3Dep -EPS - invalid NOD: " << argv[loc+1] << endln;
-  return 0;
+  	opserr << "nDMaterial Templated3Dep -EPS - invalid NOD: " << argv[loc+1] << endln;
+  	return 0;
       }
-      loc+=2;
+      loc += 2;
       
       if (NoD > 0) {
-  tensors = new stresstensor[NoD];
-  if (tensors == 0) {
-    opserr << "nDMaterial Templated3Dep -EPS - invalid NOD " << argv[loc+1] << endln;
-    return 0;
-  }
-      } else 
-  NoD = 0;
-    } else
-      loc++;
-  }
+	 tensors = new stresstensor[NoD];
+  	 if (tensors == 0) {
+    	   opserr << "nDMaterial Templated3Dep -EPS - invalid NOD " << argv[loc+1] << endln;
+    	   return 0;
+  	}
+      }
+      else 
+  	NoD = 0;
+
+      //cout << " NoD " << NoD << " " << loc << "\n";
+    } 
+    else if  (strcmp(argv[loc],"-e") == 0) {
+      if (Tcl_GetDouble(interp, argv[loc+1], &ed) != TCL_OK) {
+    	opserr << "nDMaterial Templated3Dep -EPS - invalid e " << argv[loc+1] << endln;
+    	cleanup(argv);
+    	return 0;    
+      }
+      loc+=2;
+    }
+    else if  (strcmp(argv[loc],"-ec") == 0) {
+      if (Tcl_GetDouble(interp, argv[loc+1], &ecd) != TCL_OK) {
+    	opserr << "nDMaterial Templated3Dep -EPS - invalid ec " << argv[loc+1] << endln;
+    	cleanup(argv);
+    	return 0;    
+      }
+      loc+=2;
+    }
+    else if  (strcmp(argv[loc],"-lambda") == 0) {
+      if (Tcl_GetDouble(interp, argv[loc+1], &lamd) != TCL_OK) {
+    	opserr << "nDMaterial Templated3Dep -EPS - invalid lambda " << argv[loc+1] << endln;
+    	cleanup(argv);
+    	return 0;    
+      }
+      loc+=2;
+    }
+    else if  (strcmp(argv[loc],"-p_ref") == 0) {
+      if (Tcl_GetDouble(interp, argv[loc+1], &p_refd) != TCL_OK) {
+    	opserr << "nDMaterial Templated3Dep -EPS - invalid p_ref " << argv[loc+1] << endln;
+    	cleanup(argv);
+    	return 0;    
+      }
+      loc+=2;
+    }
+    else if  (strcmp(argv[loc],"-a") == 0) {
+      if (Tcl_GetDouble(interp, argv[loc+1], &ad) != TCL_OK) {
+    	opserr << "nDMaterial Templated3Dep -EPS - invalid a " << argv[loc+1] << endln;
+    	cleanup(argv);
+    	return 0;    
+      }
+      loc+=2;
+    }
+
+  } //end of while
+
+
+  stresstensor stressp(values_stp);
+  delete [] values_stp;
+  //cout << " Tcl check e " << ed << " ec " << ecd << " lambda " << lamd << " p_ref " << p_refd << " a " << ad << "\n";
 
   EPS = new EPState(Eod, Ed, nu, rho, stressp, strainp, Estrainp, Pstrainp, 
-        NoS, scalars, NoD, tensors);
+        NoS, scalars, NoD, tensors, ed, ecd, lamd, p_refd, ad);
   
   if (EPS == 0) {
     opserr << "nDMaterial Templated3Dep -EPS - out of memory\n";
@@ -653,12 +723,115 @@ EvolutionLaw_T *EvaluateEvolutionLawTArgs(ClientData clientData, Tcl_Interp *int
     double alpha = 0.0;
     if (argc > 1)
       if (Tcl_GetDouble(interp, argv[1], &alpha) != TCL_OK) {
-  opserr << "nDMaterial Templated3Dep - invalid alpha " << argv[1] << endln;
-        
-  cleanup(argv);
-  return 0;    
+  	opserr << "nDMaterial Templated3Dep - invalid alpha " << argv[1] << endln;        
+  	cleanup(argv);
+  	return 0;    
       }
     ELT = new EvolutionLaw_L_Eij(alpha);
+  }
+
+  //Manzari-Dafalias Two Surface model
+  else if ((strcmp(argv[0],"-NLEijMD") == 0) || (strcmp(argv[0],"-MD") == 0 )) {
+
+    double Mcd = 1.14, Med = 1.14, kc_bd = 3.975, kc_dd = 4.200;
+    double ke_bd = 2.000, ke_dd = 0.07, hod = 1200, Cmd = 0.00, Aod = 2.64, Fmaxd = 100, Cfd = 100;
+
+    int loc = 1;
+    // switch on remaining args;
+    while (loc < argc) {
+      
+      if  (strcmp(argv[loc],"-Mc") == 0) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &Mcd) != TCL_OK) {
+      	opserr << "nDMaterial Templated3Dep -EPS - invalid Mc " << argv[loc+1] << endln;
+      	cleanup(argv);
+      	return 0;    
+        }
+        loc+=2;
+      }
+      else if  (strcmp(argv[loc],"-Me") == 0) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &Med) != TCL_OK) {
+      	opserr << "nDMaterial Templated3Dep -EPS - invalid ec " << argv[loc+1] << endln;
+      	cleanup(argv);
+      	return 0;    
+        }
+        loc+=2;
+      }
+      else if  (strcmp(argv[loc],"-kc_b") == 0) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &kc_bd) != TCL_OK) {
+      	opserr << "nDMaterial Templated3Dep -EPS - invalid lambda " << argv[loc+1] << endln;
+      	cleanup(argv);
+      	return 0;    
+        }
+        loc+=2;
+      }
+      else if  (strcmp(argv[loc],"-kc_d") == 0) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &kc_dd) != TCL_OK) {
+      	opserr << "nDMaterial Templated3Dep -EPS - invalid p_ref " << argv[loc+1] << endln;
+      	cleanup(argv);
+      	return 0;    
+        }
+        loc+=2;
+      }
+      else if  (strcmp(argv[loc],"-ke_b") == 0) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &ke_bd) != TCL_OK) {
+      	opserr << "nDMaterial Templated3Dep -EPS - invalid lambda " << argv[loc+1] << endln;
+      	cleanup(argv);
+      	return 0;    
+        }
+        loc+=2;
+      }
+      else if  (strcmp(argv[loc],"-ke_d") == 0) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &ke_dd) != TCL_OK) {
+      	opserr << "nDMaterial Templated3Dep -EPS - invalid p_ref " << argv[loc+1] << endln;
+      	cleanup(argv);
+      	return 0;    
+        }
+        loc+=2;
+      }
+      else if  (strcmp(argv[loc],"-ho") == 0) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &hod) != TCL_OK) {
+      	opserr << "nDMaterial Templated3Dep -EPS - invalid a " << argv[loc+1] << endln;
+      	cleanup(argv);
+      	return 0;    
+        }
+        loc+=2;
+      }
+      else if  (strcmp(argv[loc],"-Cm") == 0) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &Cmd) != TCL_OK) {
+      	opserr << "nDMaterial Templated3Dep -EPS - invalid a " << argv[loc+1] << endln;
+      	cleanup(argv);
+      	return 0;    
+        }
+        loc+=2;
+      }
+      else if  (strcmp(argv[loc],"-Ao") == 0) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &Aod) != TCL_OK) {
+      	opserr << "nDMaterial Templated3Dep -EPS - invalid a " << argv[loc+1] << endln;
+      	cleanup(argv);
+      	return 0;    
+        }
+        loc+=2;
+      }
+      else if  (strcmp(argv[loc],"-Fmax") == 0) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &Fmaxd) != TCL_OK) {
+      	opserr << "nDMaterial Templated3Dep -EPS - invalid a " << argv[loc+1] << endln;
+      	cleanup(argv);
+      	return 0;    
+        }
+        loc+=2;
+      }
+      else if  (strcmp(argv[loc],"-Cf") == 0) {
+        if (Tcl_GetDouble(interp, argv[loc+1], &Cfd) != TCL_OK) {
+      	opserr << "nDMaterial Templated3Dep -EPS - invalid a " << argv[loc+1] << endln;
+      	cleanup(argv);
+      	return 0;    
+        }
+        loc+=2;
+      }
+
+    }//end of while
+    
+    ELT = new EvolutionLaw_NL_EijMD(Mcd, Med, kc_bd, kc_dd, ke_bd, ke_dd, hod, Cmd, Aod, Fmaxd, Cfd);    
   }
 
   cleanup(argv);

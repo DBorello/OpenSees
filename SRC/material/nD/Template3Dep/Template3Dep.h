@@ -43,6 +43,7 @@
 
 //#include <MD_YS.h>
 //#include <MD_PS.h>
+#include <YS.h>
 #include <EL_S.h>
 #include <EL_T.h>
 #include <EPState.h>
@@ -56,7 +57,7 @@
 
 //#include <CDriver.h>
 
-class YieldSurface;
+//class YieldSurface;
 
 class Template3Dep : public NDMaterial
 {
@@ -154,6 +155,7 @@ class Template3Dep : public NDMaterial
     const stresstensor getStressTensor(void) ;
     const straintensor getStrainTensor(void) ;
     const straintensor getPlasticStrainTensor(void); //Added Joey Aug. 13, 2001
+    double getpsi(void); //Added Joey 02-18-03
 
     EPState * getEPS() const;
     void setEPS( EPState &eps);
@@ -177,7 +179,7 @@ class Template3Dep : public NDMaterial
     void Print(OPS_Stream &s, int flag =0);
 
     //Private Utility method
-  private:
+  //private:
     
      //These are from formerly CDriver
      EPState ForwardEulerEPState( const straintensor &strain_increment);
@@ -187,11 +189,11 @@ class Template3Dep : public NDMaterial
      EPState FESubIncrementation( const straintensor &strain_increment,
                                   int number_of_subincrements);
 
-//  private:
      EPState BackwardEulerEPState( const straintensor &strain_increment);
 
      EPState BESubIncrementation( const straintensor & strain_increment,
                                   int number_of_subincrements);                                                 
+  private:
 						                                                  
     //================================================================================
     // this one is intended to shell the previous three and to decide 

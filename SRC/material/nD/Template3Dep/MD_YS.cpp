@@ -29,6 +29,8 @@
 #include "MD_YS.h"
 #include <basics.h>
 
+#define sqrt23rd 0.8165
+
 //================================================================================
 // Normal constructor
 //================================================================================
@@ -67,21 +69,35 @@ double MDYieldSurface::f(const EPState *EPS) const
   double p =EPS->getStress().p_hydrostatic();
   //cout << "p " << p;
 
+  // Get a_ij
   stresstensor alpha = EPS->getTensorVar( 1 );
   //cout << "alpha " << alpha;
   
   double m = EPS->getScalarVar(1);
 
-  stresstensor temp1 = S - alpha*p;
-  temp1.null_indices();
-  stresstensor temp2 = temp1("ij") * temp1("ij");  
+  stresstensor r = S - alpha*p;
+  r.null_indices();
+  stresstensor r2 = r("ij") * r("ij");  
+  
+  stresstensor n;
 
-  double temp3 = sqrt( temp2.trace() );
+  double norm = sqrt( r2.trace() );
 
-  temp3 = temp3 - sqrt(2.0/3.0) * m * p;        
+  ////Added on Feb. 10, 2003 by Joey
+  //if ( norm >= d_macheps() ){ 
+  //  n = r *(1.0 / norm );
+  //}
+  //else {
+  //  g3ErrorHandler->fatal("MDYieldSurface::f  |n_ij| = 0, divide by zero! Program exits.");
+  //  exit(-1);
+  //}
+  //EPS->setTensorVar( 2, n); //update n_ij//
+  
+
+  double ff = norm - sqrt23rd * m * p;        
   //printf("\n========Inside f  temp3 = %.4f x = %.4f\n ", temp3, x);
 
-  return temp3;
+  return ff;
 }
 
 
@@ -97,6 +113,8 @@ tensor MDYieldSurface::dFods(const EPState *EPS) const {
   stresstensor S = EPS->getStress().deviator();
   //S.reportshort("S");
 
+  double m = EPS->getScalarVar( 1 );
+
   double p = EPS->getStress().p_hydrostatic();
   //printf("Here we go!  p %f\n", p);
   	    
@@ -106,30 +124,33 @@ tensor MDYieldSurface::dFods(const EPState *EPS) const {
   //stresstensor n = EPS->getTensorVar( 3 );     // getting n_ij from EPState
   //n.reportshort("n");
   
-  //-------------------------------------------------
   // might be moved to Evolution Law
-    stresstensor r = S * (1.0 / p);
-    //r.reportshort("r");
-    stresstensor r_bar = r - alpha;
-    //r_bar.reportshort("r_bar"); 
-    stresstensor norm2 = r_bar("ij") * r_bar("ij");
-    double norm = sqrt( norm2.trace() );
-    
-    //cout << "d_macheps " << d_macheps() << endlnn;
-
-    stresstensor n;
-    if ( norm >= d_macheps() ){ 
-      n = r_bar *(1.0 / norm );
-    }
-    else {
-      opserr << "MDYieldSurface::dFods  |n_ij| = 0, divide by zero! Program exits.\n";
-      exit(-1);
-    }
-    //EPS->setTensorVar( 3, n); //update n_ij//
+    stresstensor n = EPS->getTensorVar( 2 );
+  //  cout << n;
   //-------------------------------------------------
+  //  //stresstensor n;
+  //  stresstensor r = S * (1.0 / p);
+  //  //r.reportshort("r");
+  //  stresstensor r_bar = r - alpha;
+  //  //r_bar.reportshort("r_bar"); 
+  //
+  //  stresstensor norm2 = r_bar("ij") * r_bar("ij");
+  //  double norm = sqrt( norm2.trace() );    
+  //  //cout << "d_macheps " << d_macheps() << endln;
+  //  if ( norm >= d_macheps() ){ 
+  //    n = r_bar *(1.0 / norm );
+  //  }
+  //  else {
+  //    g3ErrorHandler->fatal("MDYieldSurface::dFods  |n_ij| = 0, divide by zero! Program exits.");
+  //    exit(-1);
+  //  }
+  //EPS->setTensorVar( 3, n); //update n_ij//
+  ////
+  ////  //n = r_bar *(1.0 / sqrt23rd / m );
+  ////
+  //////-------------------------------------------------
+  
 
-
-  double m = EPS->getScalarVar( 1 );
 
   
   //tensorial multiplication produces 1st-order tensor
@@ -138,8 +159,9 @@ tensor MDYieldSurface::dFods(const EPState *EPS) const {
   //printf("==== n_ij*n_ij %e\n", temp1);
 
   //!!Very important:  N = n_pq * alpha_pq +sqrt(2/3)*m (always) = n_pq*r_pq(not hold when not on the yield surface)
-  tensor temp = n("ij") * alpha("ij");
-  double N = temp.trace() + sqrt(2.0/3.0)*m; 
+  tensor temp = alpha("ij") * n("ij");
+  double N = temp.trace() + sqrt23rd*m; 
+  //double N = temp.trace() + 2.0/3.0*m; 
   //printf("    N =  %e\n", N);
 
   dFoverds =  n - I2 * N*(1.0/3.0);
@@ -155,9 +177,8 @@ tensor MDYieldSurface::dFods(const EPState *EPS) const {
 
 double MDYieldSurface::xi_s1( const EPState *EPS ) const {
 
-    //double p = EPS->getStress().Iinvariant1()/3.0;
     double p = EPS->getStress().p_hydrostatic();
-    return -1.0*sqrt(2.0/3.0) * p;
+    return -1.0*sqrt23rd * p;
 
 }
 
@@ -172,22 +193,27 @@ tensor MDYieldSurface::xi_t1( const EPState *EPS) const {
   stresstensor S = EPS->getStress().deviator();
 
   double p = EPS->getStress().p_hydrostatic();
+ 
+  stresstensor n = EPS->getTensorVar( 2 );
+  //stresstensor n;
   	    
-  stresstensor alpha = EPS->getTensorVar( 1 ); // getting alpha_ij from EPState
-  
-  stresstensor r = S * (1.0 / p);
-  stresstensor r_bar = r - alpha;
-  stresstensor norm2 = r_bar("ij") * r_bar("ij");
-  double norm = sqrt( norm2.trace() );
-
-  stresstensor n;
-  if ( norm >= d_macheps() ){ 
-    n = r_bar *(1.0 / norm );
-  }
-  else {
-    opserr << "MDYieldSurface::dFods  |n_ij| = 0, divide by zero! Program exits.\n";
-    exit(-1);
-  }
+  ////-------------------------------------------------
+  //double m = EPS->getScalarVar( 1 );
+  //stresstensor alpha = EPS->getTensorVar( 1 ); // getting alpha_ij from EPState  
+  //stresstensor r = S * (1.0 / p);
+  //stresstensor r_bar = r - alpha;
+  //stresstensor norm2 = r_bar("ij") * r_bar("ij");
+  //double norm = sqrt( norm2.trace() );
+  //
+  //if ( norm >= d_macheps() ){ 
+  //  n = r_bar *(1.0 / norm );
+  //}
+  //else {
+  //  opserr->fatal("MDYieldSurface::dFods  |n_ij| = 0, divide by zero! Program exits.");
+  //  exit(-1);
+  //}
+  //n = r_bar *(1.0 / sqrt23rd / m );
+  ////-------------------------------------------------
     
   return  n  * (-1.0)* p;
 }
