@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2003-02-14 23:01:03 $
+// $Revision: 1.24 $
+// $Date: 2003-02-21 23:11:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -124,7 +124,7 @@ TclModelBuilder_addZeroLengthND(ClientData, Tcl_Interp *, int, char **,
 
 // REMO
 extern int 
-TclModelBuilder_addFrameElement(ClientData, Tcl_Interp *, int, char **,
+TclModelBuilder_addNLBeamColumn(ClientData, Tcl_Interp *, int, char **,
 				Domain*, TclModelBuilder *);
 			
 // MHS
@@ -220,7 +220,7 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 					      theTclDomain, theTclBuilder, eleArgStart);    
     return result;
   } else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
-          int result = TclModelBuilder_addFrameElement(clientData, interp, argc, argv,
+          int result = TclModelBuilder_addNLBeamColumn(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
     return result;
   } else if (strcmp(argv[1],"dispBeamColumn") == 0) {

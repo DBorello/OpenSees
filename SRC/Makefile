@@ -102,7 +102,7 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/nonlinearBeamColumn/matrixutil/MatrixUtil.o \
 	$(FE)/element/nonlinearBeamColumn/element/NLBeamColumn2d.o \
 	$(FE)/element/nonlinearBeamColumn/element/NLBeamColumn3d.o \
-	$(FE)/element/nonlinearBeamColumn/tcl/TclElmtBuilder.o \
+	$(FE)/element/nonlinearBeamColumn/element/TclNLBeamColumnCommand.o \
 	$(FE)/element/forceBeamColumn/ForceBeamColumn2d.o \
 	$(FE)/element/forceBeamColumn/ForceBeamColumn3d.o \
 	$(FE)/element/forceBeamColumn/TclForceBeamColumnCommand.o \

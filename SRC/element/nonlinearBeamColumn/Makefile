@@ -4,7 +4,6 @@ all:
 	@$(CD) element; $(MAKE);
 	@$(CD) matrixutil; $(MAKE);
 	@$(CD) quadrule; $(MAKE);
-	@$(CD) tcl; $(MAKE);
 
 # Miscellaneous
 
@@ -21,7 +20,6 @@ wipe: spotless
 	@$(CD) element; $(MAKE) wipe;
 	@$(CD) matrixutil; $(MAKE) wipe;
 	@$(CD) quadrule; $(MAKE) wipe;
-	@$(CD) tcl; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

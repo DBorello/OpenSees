@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-02-14 23:01:17 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/tcl/TclElmtBuilder.cpp,v $
+// $Revision: 1.1 $
+// $Date: 2003-02-21 23:11:29 $
+// $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/TclNLBeamColumnCommand.cpp,v $
                                                                                                                                  
 // File: ~/tcl/TclElmtBuilder.C
 // 
@@ -59,7 +59,7 @@ static TclModelBuilder *theTclModelBuilder =0;
 // to create a NL frame element and add to the domain
 //
 int
-TclModelBuilder_addFrameElement(ClientData clientData, Tcl_Interp *interp,
+TclModelBuilder_addNLBeamColumn(ClientData clientData, Tcl_Interp *interp,
 				int inArgc, char **inArgv,
 				Domain *theDomain,
 				TclModelBuilder *theBuilder)
