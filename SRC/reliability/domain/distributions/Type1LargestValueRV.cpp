@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:44:35 $
+// $Revision: 1.7 $
+// $Date: 2004-08-27 17:51:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/Type1LargestValueRV.cpp,v $
 
 
@@ -141,7 +141,7 @@ double
 Type1LargestValueRV::getStdv()
 {
 	double pi = 3.14159265358979;
-	return pi/(sqrt(6)*alpha);
+	return pi/(sqrt(6.0)*alpha);
 }
 
 

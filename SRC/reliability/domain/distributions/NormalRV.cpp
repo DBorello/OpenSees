@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:44:34 $
+// $Revision: 1.7 $
+// $Date: 2004-08-27 17:51:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/distributions/NormalRV.cpp,v $
 
 
@@ -100,14 +100,14 @@ double
 NormalRV::getPDFvalue(double rvValue)
 {
 	double pi = 3.14159265358979;
-	return 1 / sqrt ( 2 * pi ) * exp ( - 0.5 * pow ( ( ( rvValue - mju ) / sigma ), 2 ) );
+	return 1 / sqrt ( 2.0 * pi ) * exp ( - 0.5 * pow ( ( ( rvValue - mju ) / sigma ), 2.0 ) );
 }
 
 
 double
 NormalRV::getCDFvalue(double rvValue)
 {
-	double result = 0.5 + errorFunction( ((rvValue-mju)/sigma)/sqrt(2) )/2;
+	double result = 0.5 + errorFunction( ((rvValue-mju)/sigma)/sqrt(2.0) )/2.0;
 	return result;
 }
 
@@ -118,7 +118,7 @@ NormalRV::getInverseCDFvalue(double probValue)
 	if (probValue < 0.0 || probValue > 1.0) {
 		opserr << "WARNING: Illegal probability value input to NormalRV::getInverseCDFvalue()" << endln;
 	}
-	double result = getMean() + getStdv() * sqrt(2) * inverseErrorFunction(2*probValue-1.0);
+	double result = getMean() + getStdv() * sqrt(2.0) * inverseErrorFunction(2*probValue-1.0);
 	return result;
 }
 
