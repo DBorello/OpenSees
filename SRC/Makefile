@@ -506,7 +506,11 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/PlateFiberMaterial.o \
 	$(FE)/material/nD/BeamFiberMaterial.o \
 	$(FE)/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.o \
-	$(FE)/material/nD/TclModelBuilderNDMaterialCommand.o
+	$(FE)/material/nD/TclModelBuilderNDMaterialCommand.o \
+	$(FE)/material/nD/MultiaxialCyclicPlasticity.o \
+	$(FE)/material/nD/MultiaxialCyclicPlasticityPlaneStrain.o \
+	$(FE)/material/nD/MultiaxialCyclicPlasticity3D.o \
+	$(FE)/material/nD/MultiaxialCyclicPlasticityAxiSymm.o
 
 FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHardeningMaterial.o \

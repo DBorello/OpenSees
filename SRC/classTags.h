@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.61 $
-// $Date: 2004-11-24 22:34:27 $
+// $Revision: 1.62 $
+// $Date: 2005-01-18 21:38:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -201,6 +201,12 @@
 #define ND_TAG_NeoHookeanCompressible3D	        8003
 #define ND_TAG_FDdecoupledElastic3D	        8004
 #define ND_TAG_FiniteDeformationEP3D	        8005
+
+// MultiaxialCyclicPlasticity, add by Gang Wang
+#define ND_TAG_MultiaxialCyclicPlasticity             10031
+#define ND_TAG_MultiaxialCyclicPlasticity3D           10032 
+#define ND_TAG_MultiaxialCyclicPlasticityAxiSymm      10033
+#define ND_TAG_MultiaxialCyclicPlasticityPlaneStrain  10034
 
 #define FIBER_TAG_Uniaxial2d	1
 #define FIBER_TAG_Uniaxial3d	2
