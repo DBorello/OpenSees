@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2004-08-24 19:10:58 $
+// $Revision: 1.12 $
+// $Date: 2004-10-20 20:04:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -75,7 +75,7 @@ mom1n(m1n), rot1n(r1n), mom2n(m2n), rot2n(r2n), mom3n(m3n), rot3n(r3n)
 	}		
 
 	energyA = 0.5 * (rot1p*mom1p + (rot2p-rot1p)*(mom2p+mom1p) + (rot3p-rot2p)*(mom3p+mom2p) +
-		rot1n*mom1n + (rot2n-rot1n)*(mom2n+mom1n) * (rot3n-rot2n)*(mom3n+mom2n));
+		rot1n*mom1n + (rot2n-rot1n)*(mom2n+mom1n) + (rot3n-rot2n)*(mom3n+mom2n));
 
 	// Set envelope slopes
 	this->setEnvelope();
