@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-07-26 00:56:05 $
+// $Revision: 1.7 $
+// $Date: 2001-07-26 01:08:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
