@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-04-02 22:02:42 $
+// $Revision: 1.11 $
+// $Date: 2004-08-24 19:10:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -219,16 +219,13 @@ HystereticMaterial::positiveIncrement(double dStrain)
 		if (Cstress <= 0.0) {
 			TrotNu = Cstrain - Cstress/(E1n*kn);
 			double energy = CenergyD - 0.5*Cstress/(E1n*kn)*Cstress;
-			double damfc = 1.0;
+			double damfc = 0.0;
 			if (CrotMin < rot1n) {
-				damfc += damfc2*energy/energyA;
-
-				if (Cstrain == CrotMin) {
-					damfc += damfc1*(CrotMax/rot1p-1.0);
-				}
+				damfc = damfc2*energy/energyA;
+				damfc += damfc1*(CrotMin-rot1n)/rot1n;
 			}
 
-			TrotMax = CrotMax * damfc;
+			TrotMax = CrotMax*(1.0+damfc);
 		}
 	}
 
@@ -303,16 +300,13 @@ HystereticMaterial::negativeIncrement(double dStrain)
 		if (Cstress >= 0.0) {
 			TrotPu = Cstrain - Cstress/(E1p*kp);
 			double energy = CenergyD - 0.5*Cstress/(E1p*kp)*Cstress;
-			double damfc = 1.0;
+			double damfc = 0.0;
 			if (CrotMax > rot1p) {
-				damfc += damfc2*energy/energyA;
-
-				if (Cstrain == CrotMax) {
-					damfc += damfc1*(CrotMin/rot1n-1.0);
-				}
+				damfc = damfc2*energy/energyA;
+				damfc += damfc1*(CrotMax-rot1p)/rot1p;
 			}
 
-			TrotMin = CrotMin * damfc;
+			TrotMin = CrotMin*(1.0+damfc);
 		}
 	}
 
