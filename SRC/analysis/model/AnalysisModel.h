@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-12-07 00:52:21 $
+// $Revision: 1.4 $
+// $Date: 2002-10-02 21:45:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.h,v $
                                                                         
                                                                         
@@ -107,8 +107,8 @@ class AnalysisModel: public MovableObject
     virtual void setLinks(Domain &theDomain);
 	
     virtual void applyLoadDomain(double newTime);
-    virtual void updateDomain(void);
-    virtual void updateDomain(double newTime, double dT);
+    virtual int updateDomain(void);
+    virtual int updateDomain(double newTime, double dT);
     virtual int  commitDomain(void);
     virtual int  revertDomainToLastCommit(void);
     virtual double getCurrentDomainTime(void);

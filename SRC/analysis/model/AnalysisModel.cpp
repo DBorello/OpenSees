@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-12-07 00:52:21 $
+// $Revision: 1.5 $
+// $Date: 2002-10-02 21:45:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -430,34 +430,35 @@ AnalysisModel::applyLoadDomain(double pseudoTime)
     myDomain->applyLoad(pseudoTime);
 }
 
-void 
+
+int
 AnalysisModel::updateDomain(void)
 {
     // check to see there is a Domain linked to the Model
 
     if (myDomain == 0) {
 	cerr << "WARNING: AnalysisModel::updateDomain. No Domain linked.\n";
-	return;
+	return -1;
     }
 
     // invoke the method
-    myDomain->update();
+    return myDomain->update();
 
 }
 
 
-void 
+int
 AnalysisModel::updateDomain(double newTime, double dT)
 {
     // check to see there is a Domain linked to the Model
 
     if (myDomain == 0) {
 	cerr << "WARNING: AnalysisModel::updateDomain. No Domain linked.\n";
-	return;
+	return -1;
     }
 
     // invoke the method
-    myDomain->update(newTime, dT);
+    return myDomain->update(newTime, dT);
 
 }
 
