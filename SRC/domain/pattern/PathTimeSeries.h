@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-01-16 06:29:39 $
+// $Revision: 1.3 $
+// $Date: 2002-06-18 01:03:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.h,v $
                                                                         
                                                                         
@@ -83,6 +83,7 @@ class PathTimeSeries : public TimeSeries
     int currentTimeLoc;   // current location in time
     double cFactor;       // additional factor on the returned load factor
     int dbTag1, dbTag2;   // additional database tags needed for vector objects
+    int lastSendCommitTag;
 };
 
 #endif

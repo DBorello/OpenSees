@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2002-06-18 01:03:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathSeries.h,v $
                                                                         
                                                                         
@@ -80,6 +80,7 @@ class PathSeries : public TimeSeries
     double pathTimeIncr;  // specifies the time increment used in load path vector
     double cFactor;       // additional factor on the returned load factor
     int otherDbTag;       // a database tag needed for the vector object
+    int lastSendCommitTag;
 };
 
 #endif

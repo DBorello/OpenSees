@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-13 01:59:24 $
+// $Revision: 1.4 $
+// $Date: 2002-06-18 01:03:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/UniformExcitation.cpp,v $
                                                                         
                                                                         
@@ -41,9 +41,17 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 
+UniformExcitation::UniformExcitation()
+:EarthquakePattern(0, PATTERN_TAG_UniformExcitation), 
+  theMotion(0), theDof(0), vel0(0.0)
+{
+
+}
+
+
 UniformExcitation::UniformExcitation(GroundMotion &_theMotion, 
 				   int dof, int tag, double velZero)
-:EarthquakePattern(tag, LOAD_TAG_UniformExcitation), 
+:EarthquakePattern(tag, PATTERN_TAG_UniformExcitation), 
   theMotion(&_theMotion), theDof(dof), vel0(velZero)
 {
   // add the motion to the list of ground motions
@@ -165,6 +173,12 @@ UniformExcitation::recvSelf(int commitTag, Channel &theChannel,
       cerr << "UniformExcitation::recvSelf() - could not create a grond motion\n";
       return -3;
     }
+
+    // have to set the motion in EarthquakePattern base class
+    if (numMotions == 0) 
+      this->addMotion(*theMotion);
+    else
+      theMotions[0] = theMotion;
   }
 
   theMotion->setDbTag(motionDbTag);
@@ -190,3 +204,4 @@ UniformExcitation::getCopy(void)
   LoadPattern *theCopy = new UniformExcitation(*theMotion, theDof, this->getTag());
    return theCopy;
 }
+//  LocalWords:  OpenSees

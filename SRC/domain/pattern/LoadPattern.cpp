@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-07 22:05:04 $
+// $Revision: 1.5 $
+// $Date: 2002-06-18 01:03:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
                                                                         
@@ -345,6 +345,7 @@ LoadPattern::applyLoad(double pseudoTime)
 
   NodalLoad *nodLoad;
   NodalLoadIter &theNodalIter = this->getNodalLoads();
+
   while ((nodLoad = theNodalIter()) != 0)
     nodLoad->applyLoad(loadFactor);
     
@@ -375,13 +376,13 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
 
   // into an ID we place all info needed to determine state of LoadPattern
   int numNodLd, numEleLd, numSPs;
-  ID lpData(12);
+  ID lpData(11);
 
   numNodLd = theNodalLoads->getNumComponents();
   numEleLd = theElementalLoads->getNumComponents();
   numSPs = theSPs->getNumComponents();
 
-  lpData(11) = this->getTag();
+  lpData(10) = this->getTag();
   lpData(0) = currentGeoTag;
   lpData(1) = numNodLd;
   lpData(2) = numEleLd;
@@ -413,23 +414,20 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
 
   // see if we can save sending the vector containing just the load factor
   // will happen in parallel if sending the loadPattern .. not in database
-  if (loadFactor == 0.0)
-    lpData(10) = 0;
-  else
-    lpData(10) = 1;
 
   if (theChannel.sendID(myDbTag, cTag, lpData) < 0) {
     g3ErrorHandler->warning("LoadPattern::sendSelf - channel failed to send the initial ID");
     return -1;
   }    
   
-  if (loadFactor != 0.0) {
+  if (isConstant == 0) {
     Vector data(1);
     data(0) = loadFactor;
     if (theChannel.sendVector(myDbTag, cTag, data) < 0) {
       g3ErrorHandler->warning("LoadPattern::sendSelf - channel failed to send the Vector");
       return -2;
     }
+
   }
 
   if (theSeries != 0)
@@ -442,7 +440,6 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   // NOTE THIS APPROACH MAY NEED TO CHANGE FOR VERY LARGE PROBLEMS IF CHANNEL CANNOT
   // HANDLE VERY LARGE ID OBJECTS.
   if (lastGeoSendTag != currentGeoTag) {
-
 
     //
     // into an ID we are gonna place the class and db tags for each node so can rebuild
@@ -590,24 +587,24 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
 
   // into an ID we place all info needed to determine state of LoadPattern
   int numNod, numEle, numSPs;
-  ID lpData(12);
+  ID lpData(11);
 
   if (theChannel.recvID(myDbTag, cTag, lpData) < 0) {
     g3ErrorHandler->warning("LoadPattern::recvSelf - channel failed to recv the initial ID");
     return -1;
-  }    
-
-  this->setTag(lpData(11));
+  }
 
   isConstant = lpData(7);
 
-  if (lpData(10) == 1) { // we must recv the load factor in a Vector
+  this->setTag(lpData(10));
+
+  if (isConstant == 0) { // we must recv the load factor in a Vector
     Vector data(1);
-    data(0) = loadFactor;
     if (theChannel.recvVector(myDbTag, cTag, data) < 0) {
       g3ErrorHandler->warning("LoadPattern::recvSelf - channel failed to recv the Vector");
       return -2;
     }
+    loadFactor = data(0);
   }
   
   // read data about the time series

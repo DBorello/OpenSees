@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-05 00:54:53 $
+// $Revision: 1.3 $
+// $Date: 2002-06-18 01:03:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathSeries.cpp,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@
 
 PathSeries::PathSeries()	
   :TimeSeries(TSERIES_TAG_PathSeries),
-   thePath(0), pathTimeIncr(0.0), cFactor(0.0), otherDbTag(0)
+   thePath(0), pathTimeIncr(0.0), cFactor(0.0), otherDbTag(0), lastSendCommitTag(-1)
 {
   // does nothing
 }
@@ -57,7 +57,7 @@ PathSeries::PathSeries(const Vector &theLoadPath,
 		       double theTimeIncr, 
 		       double theFactor)
   :TimeSeries(TSERIES_TAG_PathSeries),
-   thePath(0), pathTimeIncr(theTimeIncr), cFactor(theFactor), otherDbTag(0)
+   thePath(0), pathTimeIncr(theTimeIncr), cFactor(theFactor), otherDbTag(0), lastSendCommitTag(-1)
 {
   // create a copy of the vector containg path points
   thePath = new Vector(theLoadPath);
@@ -77,7 +77,7 @@ PathSeries::PathSeries(char *fileName,
 		       double theTimeIncr, 
 		       double theFactor)
   :TimeSeries(TSERIES_TAG_PathSeries),
-   thePath(0), pathTimeIncr(theTimeIncr), cFactor(theFactor)
+   thePath(0), pathTimeIncr(theTimeIncr), cFactor(theFactor), otherDbTag(0), lastSendCommitTag(-1)
 {
   // determine the number of data points .. open file and count num entries
   int numDataPoints =0;
@@ -202,7 +202,8 @@ int
 PathSeries::sendSelf(int commitTag, Channel &theChannel)
 {
   int dbTag = this->getDbTag();
-  Vector data(4);
+
+  Vector data(5);
   data(0) = cFactor;
   data(1) = pathTimeIncr;
   data(2) = -1;
@@ -214,21 +215,33 @@ PathSeries::sendSelf(int commitTag, Channel &theChannel)
       otherDbTag = theChannel.getDbTag();
     data(3) = otherDbTag;
   }
-  
+
+  if ((lastSendCommitTag == -1) && (theChannel.isDatastore() == 1)) {
+    lastSendCommitTag = commitTag;
+  }
+
+  data(4) = lastSendCommitTag;
+
   int result = theChannel.sendVector(dbTag,commitTag, data);
   if (result < 0) {
     cerr << "PathSeries::sendSelf() - channel failed to send data\n";
     return result;
   }
-  
-  if (thePath != 0) {
-    result = theChannel.sendVector(otherDbTag, commitTag, *thePath);
-    if (result < 0) {
-      cerr << "PathSeries::sendSelf() - ";
-      cerr << "channel failed to send tha Path Vector\n";
-      return result;  
+
+  // we only send the vector data if this is the first time it is sent to the database
+  // or the channel is for sending the data to a remote process
+
+  if ((lastSendCommitTag == commitTag) || (theChannel.isDatastore() == 0)) {
+    if (thePath != 0) {
+      result = theChannel.sendVector(otherDbTag, commitTag, *thePath);
+      if (result < 0) {
+	cerr << "PathSeries::sendSelf() - ";
+	cerr << "channel failed to send tha Path Vector\n";
+	return result;  
+      }
     }
   }
+
   return 0;
 }
 
@@ -238,20 +251,23 @@ PathSeries::recvSelf(int commitTag, Channel &theChannel,
 		       FEM_ObjectBroker &theBroker)
 {
   int dbTag = this->getDbTag();
-  Vector data(4);
+
+  Vector data(5);
   int result = theChannel.recvVector(dbTag,commitTag, data);
   if (result < 0) {
     cerr << "PathSeries::sendSelf() - channel failed to receive data\n";
     cFactor = 1.0;
     return result;
   }
+
   cFactor = data(0);
   pathTimeIncr = data(1);
   int size = data(2);
   otherDbTag = data(3);
-
-  // get the other path vector
-  if (size > 0) {
+  lastSendCommitTag = data(4);
+  
+  // get the path vector, only receive it once as it can't change
+  if (thePath == 0 && size > 0) {
     thePath = new Vector(size);
     if (thePath == 0 || thePath->Size() == 0) {
       cerr << "PathSeries::recvSelf() - ran out of memory";
@@ -261,13 +277,15 @@ PathSeries::recvSelf(int commitTag, Channel &theChannel,
       thePath = 0;
       return -1;
     }
-    result = theChannel.recvVector(otherDbTag,commitTag, *thePath);    
+
+    result = theChannel.recvVector(otherDbTag, lastSendCommitTag, *thePath);    
     if (result < 0) {
       cerr << "PathSeries::recvSelf() - ";
       cerr << "channel failed to receive tha Path Vector\n";
       return result;  
     }
   }
+
   return 0;    
 }
 

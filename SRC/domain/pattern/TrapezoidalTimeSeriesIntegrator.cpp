@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-18 04:51:55 $
+// $Revision: 1.3 $
+// $Date: 2002-06-18 01:03:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TrapezoidalTimeSeriesIntegrator.cpp,v $
                                                                         
                                                                         
@@ -133,16 +133,14 @@ TrapezoidalTimeSeriesIntegrator::integrate(TimeSeries *theSeries, double delta)
 int
 TrapezoidalTimeSeriesIntegrator::sendSelf(int commitTag, Channel &theChannel)
 {
-   // Need to implement, return dummy value for now
-   return 1;
+  return 0;
 }
 
 int
 TrapezoidalTimeSeriesIntegrator::recvSelf(int commitTag, Channel &theChannel, 
 		           FEM_ObjectBroker &theBroker)
 {
-   // Need to implement, return dummy value for now
-   return 1;
+  return 0;
 }
 
 void
