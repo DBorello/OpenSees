@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2005-02-17 22:26:31 $
+// $Revision: 1.29 $
+// $Date: 2005-03-30 20:23:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -2462,4 +2462,5 @@ Domain::calculateNodalReactions(bool inclInertia)
   ElementIter &theElements = this->getElements();
   while ((theElement = theElements()) != 0)
     theElement->addResistingForceToNodalReaction(inclInertia);
+  return 0;
 }
