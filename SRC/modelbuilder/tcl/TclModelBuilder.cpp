@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2002-06-07 17:41:34 $
+// $Revision: 1.15 $
+// $Date: 2002-07-18 22:13:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -55,6 +55,7 @@
 #include <NodalLoad.h>
 #include <Beam2dPointLoad.h>
 #include <Beam2dUniformLoad.h>
+#include <Beam2dTempLoad.h>
 #include <Beam3dPointLoad.h>
 #include <Beam3dUniformLoad.h>
 #include <BrickSelfWeight.h>
@@ -1067,9 +1068,75 @@ TclModelBuilder_addElementalLoad(ClientData clientData, Tcl_Interp *interp, int 
       return TCL_ERROR;
     }  
   }
-  //Added Joey Yang UC Davis
+  // Added Joey Yang UC Davis
   else if (strcmp(argv[count],"-BrickW") == 0) {
       theLoad = new BrickSelfWeight(eleLoadTag, theEleTags);
+  }
+
+  // Added by Scott R. Hamilton   - Stanford
+  else if (strcmp(argv[count],"-beamTemp") == 0) {
+    count++;
+    if (ndm == 2) {
+      double temp1, temp2, temp3, temp4;
+      
+      // Four temps given, Temp change at top node 1, bottom node 1, top node 2, bottom node 2.
+      if (argc-count == 4){
+	if (Tcl_GetDouble(interp, argv[count], &temp1) != TCL_OK) {
+	  cerr << "WARNING eleLoad - invalid Ttop1 " << argv[count] << " for -beamTemp\n";		
+	  return TCL_ERROR;
+	} 
+      
+	if (Tcl_GetDouble(interp, argv[count+1],&temp2 ) != TCL_OK) {
+	  cerr << "WARNING eleLoad - invalid Tbot1 " << argv[count+1] << " for -beamTemp\n";	
+	  return TCL_ERROR;
+	} 
+	if (Tcl_GetDouble(interp, argv[count+2], &temp3) != TCL_OK) {
+	  cerr << "WARNING eleLoad - invalid Ttop2 " << argv[count+1] << " for -beamTemp\n";	
+	  return TCL_ERROR;
+	} 
+	if (Tcl_GetDouble(interp, argv[count+3], &temp4) != TCL_OK) {
+	  cerr << "WARNING eleLoad - invalid Tbot2 " << argv[count+1] << " for -beamTemp\n";	
+	  return TCL_ERROR;
+	} 
+	
+	theLoad=0;
+	theLoad = new Beam2dTempLoad(eleLoadTag, temp1, temp2, temp3, temp4, theEleTags);
+      }
+      // Two temps given, temp change at top, temp at bottom of element
+      else if (argc-count == 2) {
+	if (Tcl_GetDouble(interp, argv[count], &temp1) != TCL_OK) {
+	  cerr << "WARNING eleLoad - invalid Ttop " << argv[count] << " for -beamTemp\n";		
+	  return TCL_ERROR;
+	} 
+	
+	if (Tcl_GetDouble(interp, argv[count+1],&temp2 ) != TCL_OK) {
+	  cerr << "WARNING eleLoad - invalid Tbot " << argv[count+1] << " for -beamTemp\n";	
+	  return TCL_ERROR;
+	}
+	theLoad=0;
+	theLoad = new Beam2dTempLoad(eleLoadTag, temp1, temp2, theEleTags);
+      }
+      // One twmp change give, uniform temp change in element
+      else if (argc-count == 1) {
+	if (Tcl_GetDouble(interp, argv[count],&temp1 ) != TCL_OK) {
+	  cerr << "WARNING eleLoad - invalid Tbot " << argv[count+1] << " for -beamTemp\n";	
+	  return TCL_ERROR;
+	}
+	theLoad=0;
+	theLoad = new Beam2dTempLoad(eleLoadTag, temp1, theEleTags);
+      }
+      // No temps, no change in temp in element--not a case likely to be used
+      else if (argc-count == 0){
+	theLoad=0;
+	theLoad = new Beam2dTempLoad(eleLoadTag, theEleTags);
+      }
+      else {
+	cerr << "WARNING eleLoad -beamTempLoad invalid number of temperature aguments,/n looking for 0, 1, 2 or 4 arguments.\n";
+      }
+    } else {
+      cerr << "WARNING eleLoad -beamTempLoad type currently only valid only for ndm=2\n";
+      return TCL_ERROR;
+    }  
   }
 
   if (theLoad == 0) {
