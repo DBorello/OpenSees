@@ -116,6 +116,7 @@ METIS_LIBRARY       = $(HOME)/lib/libMetis.a
 TCL_LIBRARY         = /usr/lib/libtk8.3.so\
                       /usr/lib/libtcl8.3.so
 BLITZ_LIBRARY       = $(HOME)/lib/libblitz.a
+FEDEAS_LIBRARY       = $(HOME)/lib/libFedeas.a
 
 ifeq ($(GRAPHICS), UsingX11)
 GRAPHIC_LIBRARY = /usr/X11R6/lib/libX11.a
@@ -249,16 +250,27 @@ endif
 
 
 
-
-#C++FLAGS        =  -O2 -D_UNIX
+## optimize a bit
+#C++FLAGS        =  -O2 -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG) 
 #CFLAGS          =  -O2
 #FFLAGS          =  -O2
 #LINKFLAGS       =  
 
+## optimize a LOT
+#C++FLAGS        =  -O2 -fno-strength-reduce -m486 -malign-loops=2 -malign-jumps=2 -malign-functions=2 -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG) 
+#CFLAGS          =  -O2
+#FFLAGS          =  -O2
+#LINKFLAGS       =  
+
+
+# debug
 C++FLAGS        =  -g -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) 
 CFLAGS          =  -g -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) $(PROGRAMMING_FLAG) 
 FFLAGS          =  -Wall -O
 LINKFLAGS       =  -g
+
+
+
 #####..
 ##..CC++ = g++
 ##..CC   = gcc
@@ -355,7 +367,7 @@ SHELL           = /bin/sh
 # %---------------------------------------------------------%
 
 .SUFFIXES:
-.SUFFIXES:	.C .c .f .f90 .cpp .o .cpp
+.SUFFIXES:	.C .c .f .f90 .cpp .o .cpp .h
 
 #
 # %------------------%
@@ -418,6 +430,7 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(GRAPHIC_LIBRARY)\
   $(RELIABILITY_LIBRARY)\
   -lg2c -ldl
+#  $(FEDEAS_LIBRARY)\
 #  $(MPI_LIB_DIR) \ # BJ_UCD
 
 
