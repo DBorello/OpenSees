@@ -14,8 +14,7 @@ c .....................................................................
       integer ix(*),ndf,ndm,nst,isw,nh1,nh2,nh3,nen,n,ior,iow
       real*8  d(*), ul(ndf,nen,*), xl(ndm,*), tl(*), s(nst,*), r(*)
       
-      real*8  d(*), ul(*), xl(*), tl(*), s(*), p(*), h(*), ctan(*)
-      integer ix(*), ndf, ndm, nst, isw, nh1, nh2, nh3, iow, n
+      real*8  p(*), h(*), ctan(*)
       
       integer  i,j
       real*8  cs, sn, L, dx, dy, k, m, A, E, rho, tran(4), eps, force
