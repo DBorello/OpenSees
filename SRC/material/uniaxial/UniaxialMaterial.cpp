@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-06-20 04:27:28 $
+// $Revision: 1.5 $
+// $Date: 2001-07-18 22:05:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -115,9 +115,12 @@ UniaxialMaterial::setResponse(char **argv, int argc, Information &matInfo)
 		return new MaterialResponse(this, 3, this->getStrain());
 
     // strain
-	else if (strcmp(argv[0],"stressStrain") == 0)
+    else if ((strcmp(argv[0],"stressStrain") == 0) || 
+	     (strcmp(argv[0],"stressANDstrain") == 0)) {
+						       
 		return new MaterialResponse(this, 4, Vector(2));
 
+    }
     // otherwise unknown
     else
 		return 0;
@@ -143,8 +146,9 @@ UniaxialMaterial::getResponse(int responseID, Information &matInfo)
       return 0;      
     
     case 4:
-        stressStrain(0) = this->getStrain();
-        stressStrain(1) = this->getStress();
+        stressStrain(0) = this->getStress();
+        stressStrain(1) = this->getStrain();
+
         matInfo.setVector(stressStrain);
         return 0;
 
