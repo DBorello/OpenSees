@@ -31,7 +31,6 @@
 #define STRAINTENSOR_HH
 
 #include <OPS_Globals.h>
-#include <Channel.h>
 #include "BJtensor.h"
 
 
