@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:20 $
+// $Revision: 1.2 $
+// $Date: 2000-09-16 05:48:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
                                                                         
                                                                         
@@ -379,10 +379,7 @@ BeamWithHinges2d::getTangentStiff(void)
 {
 	// Update element state
 	this->setStiffMatrix();
-	//return K;
-
-	// Return transformed basic stiffness
-	return theCoordTransf->getGlobalStiffMatrix(kb, q);
+	return K;
 }
 
 const Matrix &
@@ -448,9 +445,6 @@ const Vector &
 BeamWithHinges2d::getResistingForce(void)
 {
 	this->setStiffMatrix();
-	//return P;
-	static Vector dum(2);
-	P = theCoordTransf->getGlobalResistingForce(q, dum);
 
 	P.addVector(1.0, load, -1.0);
 
@@ -1132,8 +1126,8 @@ BeamWithHinges2d::setStiffMatrix(void)
 	// q += dq;
 	q.addVector(1.0, dq, 1.0);
     
-	//P = theCoordTransf->getGlobalResistingForce (q, currDistrLoad);
-	//K = theCoordTransf->getGlobalStiffMatrix (kb, q);
+	P = theCoordTransf->getGlobalResistingForce (q, currDistrLoad);
+	K = theCoordTransf->getGlobalStiffMatrix (kb, q);
 
 	initialFlag = true;
     }
