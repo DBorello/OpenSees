@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2001-08-13 21:45:30 $
+// $Revision: 1.17 $
+// $Date: 2001-08-15 15:57:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -103,7 +103,13 @@
 #define MAT_TAG_FedeasSteel1       1009
 #define MAT_TAG_FedeasSteel2       1010
 
-#define MAT_TAG_DrainMaterial          2000
+#define MAT_TAG_DrainMaterial		2000
+#define MAT_TAG_DrainHardening		2001
+#define MAT_TAG_DrainBilinear		2002
+#define MAT_TAG_DrainClough1		2003
+#define MAT_TAG_DrainClough2		2004
+#define MAT_TAG_DrainPinch1			2005
+#define MAT_TAG_DrainPinch2			2006
 
 
 #define SEC_TAG_Elastic2d   3
@@ -128,6 +134,9 @@
 #define ND_TAG_J2ThreeDimensional             3009 
 #define MAT_TAG_FluidSolidPorousMaterial       102
 #define ND_TAG_FeapMaterial                 1000
+#define ND_TAG_FeapMaterial01                 1001
+#define ND_TAG_FeapMaterial02                 1002
+#define ND_TAG_FeapMaterial03                 1003
 #define ND_TAG_PlaneStressMaterial          2000
 #define ND_TAG_PlateFiberMaterial          2001
 
