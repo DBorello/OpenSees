@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 08:13:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -37,6 +37,8 @@
 #include <TclModelBuilder.h>
 
 #include <ElasticIsotropicMaterial.h>
+#include <J2PlaneStrain.h>
+#include <J2PlaneStress.h>
 
 #include <string.h>
 
@@ -98,11 +100,73 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    theMaterial = temp->getCopy(argv[5]);
 	else
 	    theMaterial = temp;
+    }
+
+    // Check argv[1] for J2PlaneStrain material type
+    else if ((strcmp(argv[1],"J2Plasticity") == 0)  ||
+	     (strcmp(argv[1],"J2") == 0)) {
+	if (argc < 10) {
+	    cerr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: nDMaterial J2Plasticity tag? K? G? sig0? sigInf? delta? H? eta?" << endl;
+	    return TCL_ERROR;
+	}    
+
+	int tag;
+	double K, G, sig0, sigInf, delta, H, eta;
+	
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid J2Plasticity tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	if (Tcl_GetDouble(interp, argv[3], &K) != TCL_OK) {
+	    cerr << "WARNING invalid K\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[4], &G) != TCL_OK) {
+	    cerr << "WARNING invalid G\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
 	}	
+
+	if (Tcl_GetDouble(interp, argv[5], &sig0) != TCL_OK) {
+	    cerr << "WARNING invalid sig0\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[6], &sigInf) != TCL_OK) {
+	    cerr << "WARNING invalid sigInf\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[7], &delta) != TCL_OK) {
+	    cerr << "WARNING invalid delta\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
+	}	
+	if (Tcl_GetDouble(interp, argv[8], &H) != TCL_OK) {
+	    cerr << "WARNING invalid H\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
+	}			
+    	if (Tcl_GetDouble(interp, argv[9], &eta) != TCL_OK) {
+	    cerr << "WARNING invalid eta\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
+	}			
+
+	theMaterial = new J2Plasticity (tag, 0, K, G, sig0, sigInf, 
+					delta, H, eta);
+    }	
     
     else {
 	cerr << "WARNING unknown type of nDMaterial: " << argv[1];
-	cerr << "\nValid types: ElasticIsotropic\n";
+	cerr << "\nValid types: ElasticIsotropic, J2Plasticity\n";
 	return TCL_ERROR;
     }
 
@@ -123,3 +187,4 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     
     return TCL_OK;
 }
+

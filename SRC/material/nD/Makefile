@@ -2,10 +2,12 @@ include ../../../Makefile.def
 
 OBJS       = NDMaterial.o ElasticIsotropic3D.o ElasticIsotropicMaterial.o \
 	ElasticIsotropicPlaneStrain2D.o ElasticIsotropicPlaneStress2D.o \
-	TclModelBuilderNDMaterialCommand.o
+	TclModelBuilderNDMaterialCommand.o J2PlaneStrain.o \
+	J2PlaneStress.o  J2Plasticity.o J2AxiSymm.o J2ThreeDimensional.o 
 
 all:	$(OBJS)
 	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE);
+	@$(CD) $(FE)/material/nD/ucsd; $(MAKE);
 
 # Miscellaneous
 
@@ -17,6 +19,7 @@ clean: tidy
 
 spotless: clean
 	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE) wipe;
+	@$(CD) $(FE)/material/nD/ucsd; $(MAKE) wipe;
 
 wipe: spotless
 
