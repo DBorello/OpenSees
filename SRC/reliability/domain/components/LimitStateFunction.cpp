@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:03 $
+// $Revision: 1.3 $
+// $Date: 2001-08-02 18:18:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/LimitStateFunction.cpp,v $
 
 
@@ -58,7 +58,7 @@ LimitStateFunction::LimitStateFunction(	int passedTag,
 
 LimitStateFunction::~LimitStateFunction()
 {
-	delete expression;
+	delete [] expression;
 }
 
 
