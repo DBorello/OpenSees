@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2002-04-09 05:38:07 $
+// $Revision: 1.19 $
+// $Date: 2002-05-16 00:29:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -132,7 +132,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	       return TCL_ERROR;	
 	   }
      	   theMaterial = new PressureDependentElastic3D (tag, E, v, rho, expp);
-	   cerr << "nDMaterial PressureDependentElastic3D: expp =" << expp << endl;
+	   //cerr << "nDMaterial PressureDependentElastic3D: expp =" << expp << endl;
 	}
 //////////////////////////////////////////////////////////////////////////////////
 	else if (argc == 8 ) 
@@ -260,8 +260,8 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
    }
 
 	theMaterial = new ElasticIsotropicMaterial (tag, E, v, rho);
-	}	
-
+    }	
+    
     // Check argv[1] for J2PlaneStrain material type
     else if ((strcmp(argv[1],"J2Plasticity") == 0)  ||
 	     (strcmp(argv[1],"J2") == 0)) {
@@ -327,14 +327,18 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     
     // Pressure Independend Multi-yield, by ZHY
     else if (strcmp(argv[1],"PressureIndependMultiYield") == 0) {
-	const int numParam = 9;
+	const int numParam = 6;
 	const int totParam = 10;
 	int tag;  double param[totParam]; 
-	param[9] = 0.0;
+	param[6] = 0.0;
+	param[7] = 100.;
+	param[8] = 0.0;
+	param[9] = 20;
 
-	char * arg[] = {"nd", "refShearModul", "refBulkModul", "frictionAng", 
-			"peakShearStra", "refPress", "cohesi", 
-			"pressDependCoe", "numberOfYieldSurf", "rho=0."};
+	char * arg[] = {"nd", "rho", "refShearModul", "refBulkModul", 
+			"cohesi", "peakShearStra", 
+			"frictionAng (=0)", "refPress (=100)", "pressDependCoe (=0.0)",
+	    "numberOfYieldSurf (=20)"};
 	if (argc < (3+numParam)) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
@@ -368,19 +372,27 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     
     // Pressure Dependend Multi-yield, by ZHY
     else if (strcmp(argv[1],"PressureDependMultiYield") == 0) {
-	const int numParam = 20; 
+	const int numParam = 15; 
 	const int totParam = 22;
 	int tag;  
 	double param[totParam];
- 	param[20] = param[21] = 0.;
+ 	param[15] = 20;
+ 	param[16] = 0.6;
+	param[17] = 0.8;
+	param[18] = 0.2;
+	param[19] = 0.2;
+	param[20] = 101.;
+	param[21] = .5;
 
-	char * arg[] = {"nd", "refShearModul", "refBulkModul", "frictionAng", 
-			"peakShearStra", "refPress", "cohesi", "pressDependCoe", 
-			"numberOfYieldSurf", "phaseTransformAngle", 
-			"contractionParam1", "contractionParam2", 
-			"dilationParam1", "dilationParam2", "volLimit",
+	char * arg[] = {"nd", "rho", "refShearModul", 
+		  "refBulkModul", "frictionAng", 
+			"peakShearStra", "refPress", "pressDependCoe", 
+			"phaseTransformAngle", "contractionParam1", 			
+			"dilationParam1", "dilationParam2", 
 			"liquefactionParam1", "liquefactionParam2", 
-			"liquefactionParam3", "liquefactionParam4", "atm", "rho=0.", "e=0."};
+			"liquefactionParam4", "numberOfYieldSurf (=20)", 
+			"e (=0.6)", "volLimit1 (=0.8)", "volLimit2 (=0.2)", 
+			"volLimit3 (=0.2)", "Atmospheric pressure (=101)", "cohesi (=.5)"};
 	if (argc < (3+numParam)) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
@@ -392,7 +404,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    cerr << arg[10] << "? "<< arg[11] << "? "<< arg[12] << "? "<< "\n";
 	    cerr << arg[13] << "? "<< arg[14] << "? "<< arg[15] << "? "<< "\n"; 
 	    cerr << arg[16] << "? "<< arg[17] << "? "<< arg[18] << "? "<< "\n"; 
-	    cerr << arg[19] << "? " << arg[20] << "? " << arg[21] << "? " << endl;
+	    cerr << arg[19] << "? "<< arg[20] << "? "<< arg[21] << "? "<< endl; 
 	    return TCL_ERROR;
 	}    
 
@@ -415,7 +427,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 					  param[9], param[10], param[11], 
 					  param[12], param[13], param[14], 
 					  param[15], param[16], param[17], 
-					  param[18], param[19], param[20], param[21]);
+						param[18], param[19], param[20], param[21]);
 					  
 	   theMaterial = temp;	
     }	
@@ -423,14 +435,14 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     // Fluid Solid Porous, by ZHY
     else if (strcmp(argv[1],"FluidSolidPorous") == 0) {
 
-	int tag;  double param[4]; 	
-	char * arg[] = {"nd", "soilMatTag", "combinedBulkModul", "atm"};
-	if (argc < 7) {
+	int tag;  double param[3]; 	
+	char * arg[] = {"nd", "soilMatTag", "combinedBulkModul"};
+	if (argc < 6) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
 	    cerr << "Want: nDMaterial FluidSolidPorous tag? "<< arg[0];
 	    cerr << "? "<< "\n";
-	    cerr << arg[1] << "? "<< arg[2] << "? "<< arg[3] << "? "<< endl;
+	    cerr << arg[1] << "? "<< arg[2] << "? "<< endl;
 	    return TCL_ERROR;
 	}    
 
@@ -439,7 +451,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    return TCL_ERROR;		
 	}
 
-	for (int i=3; i<7; i++) 
+	for (int i=3; i<6; i++) 
 	  if (Tcl_GetDouble(interp, argv[i], &param[i-3] ) != TCL_OK) {
 	      cerr << "WARNING invalid " << arg[i-3] << "\n";
 	      cerr << "nDMaterial FluidSolidPorous: " << tag << endl;
@@ -454,7 +466,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	}
 
 	theMaterial = new FluidSolidPorousMaterial (tag, param[0], *soil, 
-						    param[2], param[3]);
+						    param[2]);
     }	    
     else if (strcmp(argv[1],"Template3Dep") == 0) {
       theMaterial = TclModelBuilder_addTemplate3Dep(clientData, interp, argc, argv, 
