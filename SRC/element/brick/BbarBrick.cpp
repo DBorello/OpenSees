@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-02-25 23:32:48 $
+// $Revision: 1.16 $
+// $Date: 2003-08-28 22:42:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -76,6 +76,9 @@ connectedExternalNodes(8), load(0), Ki(0)
     materialPointers[i] = 0;
     nodePointers[i] = 0;
   }
+  b[0] = 0.0;
+  b[1] = 0.0; 
+  b[2] = 0.0;
 }
 
 
@@ -90,7 +93,8 @@ BbarBrick::BbarBrick(  int tag,
                          int node6,
                          int node7,
 			 int node8,
-			 NDMaterial &theMaterial ) :
+			 NDMaterial &theMaterial,
+			 double b1, double b2, double b3) :
 Element( tag, ELE_TAG_BbarBrick ),
 connectedExternalNodes(8), load(0), Ki(0)
 {
@@ -115,8 +119,11 @@ connectedExternalNodes(8), load(0), Ki(0)
       } //end if
       
   } //end for i 
-
-
+  
+  // Body forces
+  b[0] = b1;
+  b[1] = b2;
+  b[2] = b3;
 }
 //******************************************************************
 
@@ -875,9 +882,10 @@ void  BbarBrick::formResidAndTangent( int tang_flag )
       residJ.addMatrixVector(0.0,  BJtran,stress,1.0);
 
       //residual 
-      for ( p = 0; p < ndf; p++ )
+      for ( p = 0; p < ndf; p++ ) {
         resid( jj + p ) += residJ(p)  ;
-
+	    resid( jj + p ) -= dvol[i]*b[p]*shp[3][j];
+      }
 
       if ( tang_flag == 1 ) {
 

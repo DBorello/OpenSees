@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-25 23:32:48 $
+// $Revision: 1.9 $
+// $Date: 2003-08-28 22:42:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.h,v $
 
 // Ed "C++" Love
@@ -55,7 +55,8 @@ class BbarBrick : public Element {
 			int node6,
 			int node7,
 			int node8,
-			NDMaterial &theMaterial ) ;
+			NDMaterial &theMaterial, 
+			double b1 = 0.0, double b2 = 0.0, double b3 = 0.0 ) ;
 
     //destructor 
     virtual ~BbarBrick( ) ;
@@ -137,6 +138,8 @@ class BbarBrick : public Element {
     //local nodal coordinates, three coordinates for each of four nodes
     //    static double xl[3][8] ; 
     static double xl[][8] ; 
+
+	double b[3];		// Body forces
 
     //inertia terms
     void formInertiaTerms( int tangFlag ) ;
