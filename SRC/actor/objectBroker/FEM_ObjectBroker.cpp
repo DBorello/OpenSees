@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-06-11 20:48:52 $
+// $Revision: 1.14 $
+// $Date: 2002-06-13 02:00:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -239,6 +239,9 @@
 #include <RectangularSeries.h>
 #include <ConstantSeries.h>
 #include <TrigSeries.h>
+
+// time series integrators
+#include <TrapezoidalTimeSeriesIntegrator.h>
 
 FEM_ObjectBroker::FEM_ObjectBroker()
 :lastLinearSolver(0),lastDomainSolver(0)
@@ -841,11 +844,27 @@ FEM_ObjectBroker::getNewTimeSeries(int classTag)
         case TSERIES_TAG_ConstantSeries:
 	  return new ConstantSeries;
 
-		case TSERIES_TAG_TrigSeries:
+        case TSERIES_TAG_TrigSeries:
 	  return new TrigSeries;
 
 	default:
 	     cerr << "FEM_ObjectBroker::getPtrTimeSeries - ";
+	     cerr << " - no Load type exists for class tag ";
+	     cerr << classTag << endl;
+	     return 0;
+	     
+	 }        
+}
+
+TimeSeriesIntegrator *
+FEM_ObjectBroker::getNewTimeSeriesIntegrator(int classTag)
+{
+    switch(classTag) {
+    case TIMESERIES_INTEGRATOR_TAG_Trapezoidal:
+	  return new TrapezoidalTimeSeriesIntegrator();
+
+	default:
+	     cerr << "FEM_ObjectBroker::getPtrTimeSeriesIntegrator - ";
 	     cerr << " - no Load type exists for class tag ";
 	     cerr << classTag << endl;
 	     return 0;

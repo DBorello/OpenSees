@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2002-06-13 02:00:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.h,v $
                                                                         
                                                                         
@@ -49,6 +49,7 @@ class NodalLoad;
 class ElementalLoad;
 class LoadPattern;
 class TimeSeries;
+class TimeSeriesIntegrator;
 
 class Matrix;
 class Vector;
@@ -112,6 +113,7 @@ class FEM_ObjectBroker
     virtual LoadPattern *getNewLoadPattern(int classTag);
     virtual GroundMotion *getNewGroundMotion(int classTag);
     virtual TimeSeries  *getNewTimeSeries(int classTag);    
+    virtual TimeSeriesIntegrator  *getNewTimeSeriesIntegrator(int classTag);    
     
     // matrix vector and id objects
     virtual Matrix	  *getPtrNewMatrix(int classTag, int noRows, int noCols);
