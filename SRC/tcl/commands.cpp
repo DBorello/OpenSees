@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.24 $
-// $Date: 2001-11-28 00:33:57 $
+// $Revision: 1.25 $
+// $Date: 2001-12-10 21:56:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -87,6 +87,13 @@ extern "C" {
 #include <Broyden.h>
 #include <BFGS.h>
 #include <KrylovNewton.h>
+
+
+// line searches
+#include <BisectionLineSearch.h>
+#include <InitialInterpolatedLineSearch.h>
+#include <RegulaFalsiLineSearch.h>
+#include <SecantLineSearch.h>
 
 // constraint handlers
 #include <PlainHandler.h>
@@ -206,7 +213,12 @@ static int resDataSize = 0;
 
 static Timer *theTimer = 0;
 
+// init the global variabled defined in G3Globals.h
 ErrorHandler *g3ErrorHandler =0;
+double        ops_Dt = 0;
+Domain       *ops_TheActiveDomain = 0;
+Element      *ops_TheActiveElement = 0;
+
 TclVideoPlayer *theTclVideoPlayer =0;
 
 // g3AppInit() is the method called by tkAppInit() when the
@@ -1488,11 +1500,73 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
 	  interp->result = "ERROR: No ConvergenceTest yet specified\n";
 	  return TCL_ERROR;	  
       }
-      double alpha;
-      if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK)	
-	return TCL_ERROR;	      
-      theNewAlgo = new NewtonLineSearch(*theTest, alpha); 
-  }    
+
+      int    count = 2;
+      
+      // set some default variable
+      double tol        = 0.8;
+      int    maxIter    = 10;
+      double maxEta     = 10.0;
+      double minEta     = 0.1;
+      int    pFlag      = 1;
+      int    typeSearch = 0;
+      
+      while (count < argc) {
+	if (strcmp(argv[count], "-tol") == 0) {
+	  count++;
+	  if (Tcl_GetDouble(interp, argv[count], &tol) != TCL_OK)	
+	    return TCL_ERROR;	      	  
+	  count++;
+	} else if (strcmp(argv[count], "-maxIter") == 0) {
+	  count++;
+	  if (Tcl_GetInt(interp, argv[count], &maxIter) != TCL_OK)	
+	    return TCL_ERROR;	      	  
+	  count++;	  
+	} else if (strcmp(argv[count], "-pFlag") == 0) {
+	  count++;
+	  if (Tcl_GetInt(interp, argv[count], &pFlag) != TCL_OK)	
+	    return TCL_ERROR;	      	  
+	  count++;
+	} else if (strcmp(argv[count], "-minEta") == 0) {
+	  count++;
+	  if (Tcl_GetDouble(interp, argv[count], &minEta) != TCL_OK)	
+	    return TCL_ERROR;	      	  
+	  count++;
+	} else if (strcmp(argv[count], "-maxEta") == 0) {
+	  count++;
+	  if (Tcl_GetDouble(interp, argv[count], &maxEta) != TCL_OK)	
+	    return TCL_ERROR;	      	  
+	  count++;
+	} else if (strcmp(argv[count], "-type") == 0) {
+	  count++;
+	  if (strcmp(argv[count], "Bisection") == 0) 
+	    typeSearch = 1;
+	  else if (strcmp(argv[count], "Secant") == 0) 
+	    typeSearch = 2;
+	  else if (strcmp(argv[count], "RegulaFalsi") == 0) 
+	    typeSearch = 3;
+	  else if (strcmp(argv[count], "LinearInterpolated") == 0) 
+	    typeSearch = 3;
+	  else if (strcmp(argv[count], "InitialInterpolated") == 0) 
+	    typeSearch = 0;
+	  count++;
+	} else
+	  count++;
+      }
+      
+      LineSearch *theLineSearch = 0;      
+      if (typeSearch == 0)
+	theLineSearch = new InitialInterpolatedLineSearch(tol, maxIter, minEta, maxEta, pFlag);
+							  
+      else if (typeSearch == 1)
+	theLineSearch = new BisectionLineSearch(tol, maxIter, minEta, maxEta, pFlag);
+      else if (typeSearch == 2)
+	theLineSearch = new SecantLineSearch(tol, maxIter, minEta, maxEta, pFlag);
+      else if (typeSearch == 3)
+	theLineSearch = new RegulaFalsiLineSearch(tol, maxIter, minEta, maxEta, pFlag);
+
+      theNewAlgo = new NewtonLineSearch(*theTest, theLineSearch); 
+  }
 
   else {
       interp->result = "WARNING No EquiSolnAlgo type exists (Linear, Newton only) ";
