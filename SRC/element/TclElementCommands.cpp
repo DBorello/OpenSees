@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-28 05:50:02 $
+// $Revision: 1.3 $
+// $Date: 2001-01-24 07:44:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -46,6 +46,9 @@
 #include <ElasticBeam2d.h>
 #include <beam2d02.h>
 #include <ElasticBeam3d.h>
+
+//Joey Yang
+#include <EightNodeBrick.h>
 
 #include <CrdTransf2d.h>
 #include <CrdTransf3d.h>
@@ -103,6 +106,12 @@ extern int
 TclModelBuilder_addFourNodeQuad(ClientData, Tcl_Interp *, int, char **,
 				Domain*, TclModelBuilder *);
 		   
+//BJ Joey 
+extern int
+TclModelBuilder_addEightNodeBrick(ClientData , Tcl_Interp *,  int, char **,
+ 			          Domain*, TclModelBuilder *, int);
+
+
 int
 TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 			      int argc, char **argv, 
@@ -138,7 +147,7 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 					      theTclDomain, theTclBuilder, eleArgStart);    
     return result;
   } else if (strcmp(argv[1],"nonlinearBeamColumn") == 0) {
-    int result = TclModelBuilder_addFrameElement(clientData, interp, argc, argv,
+          int result = TclModelBuilder_addFrameElement(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
     return result;
   } else if (strcmp(argv[1],"beamWithHinges") == 0) {
@@ -146,8 +155,13 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 						 theTclDomain, theTclBuilder);
     return result;
   } else if (strcmp(argv[1],"quad") == 0) {
-	  int result = TclModelBuilder_addFourNodeQuad(clientData, interp, argc, argv,
+          int result = TclModelBuilder_addFourNodeQuad(clientData, interp, argc, argv,
 						       theTclDomain, theTclBuilder);
+	  return result;
+  } else if (strcmp(argv[1],"brick") == 0) {
+          int eleArgStart = 1;
+	  int result = TclModelBuilder_addEightNodeBrick(clientData, interp, argc, argv,
+					       theTclDomain, theTclBuilder, eleArgStart);
 	  return result;
   } else if (strcmp(argv[1],"zeroLength") == 0) {
     int result = TclModelBuilder_addZeroLength(clientData, interp, argc, argv,
