@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-05-11 00:01:26 $
+// $Revision: 1.2 $
+// $Date: 2004-07-13 23:14:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/NEESData.cpp,v $
                                                                         
 // Written: fmk 
@@ -64,7 +64,17 @@ NEESData::NEESData(const char *dataBaseName,
 
 NEESData::~NEESData() 
 {
-  // do the destructor
+  // clean up all memory allocated
+  for (int i=0; i<numTables; i++) {
+    Table *nextTable = tables->next;
+    int numColumns = tables->numColumns;
+    char **columns = tables->columns;
+    for (int j=0; j<numColumns; j++)
+      delete [] columns[j];
+    delete [] columns;
+    delete tables;
+    tables = nextTable;
+  }
 }
 
 int
@@ -181,10 +191,15 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
   Table *t = tables;
   for (int i=0; i<numTables; i++) {
     if (strcmp(t->name, tableName) == 0) {
-      opserr << "NEESData::createTable - table already exists: " << tableName << endln;
+      opserr << "WARNING: NEESData::createTable - table already exists: " << tableName << endln;
       return -1;
     } 
     t = t->next;
+  }
+
+  if (numColumns <= 0) {
+    opserr << "WARNING: NEESData::createTable - number of data columns < 0 for table name: " << tableName << endln;
+    return -1;
   }
 
   // 
@@ -252,7 +267,7 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
     delete nextTable;
     res = -1;
   }
-  for (int k=0; k<numTables; k++) {
+  for (int k=0; k<numColumns; k++) {
     nextTable->columns[k] = new char [strlen(columns[k])];
     if (nextTable->columns[k] == 0) {
       opserr << "NEESData::createData - out of memory creating Table structure for table: " << tableName << endln;
@@ -265,6 +280,7 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
   }    
   nextTable->next = tables;
   tables = nextTable;
+  numTables++;
 
   return 0;
 }
@@ -278,14 +294,20 @@ NEESData::insertData(const char *tableName, char *columns[],
   for (int i=0; i<numTables; i++) {
     if (strcmp(t->name, tableName) == 0) 
       i = numTables;
-    else
+    else 
       t = t->next;
   }
-  if ( t == NULL) {
+
+  if ( t == 0) {
     opserr << "NEESData::insertData - table: " << tableName << " has not been created\n";
     return -1;
   }      
-				    
+
+  if (t->numColumns != data.Size()) {
+    opserr << "NEESData::insertData - incorrect number of columns for table: " << tableName << "\n";
+    return -2;
+  }
+
   char *fileName = t->name;
   strcat(fileName,".out");
 
