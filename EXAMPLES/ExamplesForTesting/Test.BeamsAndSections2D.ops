@@ -1,0 +1,123 @@
+proc printEigenvalues {E A I L} {
+
+    # Compute element eigenvalues
+    set eigenValues [eigen standard 6]
+    
+    puts "Eigenvalues"
+    puts "Computed      Exact"
+    puts "[lindex $eigenValues 3]  [expr 2*$E*$A/$L]"
+    puts "[lindex $eigenValues 4]  [expr 2*$E*$I/$L]"
+    puts "[lindex $eigenValues 5]  [expr 6*$E*$I/$L + 2*12*$E*$I/($L*$L*$L)]"
+}
+
+proc printDisplacements {E A I L P H M} {
+
+    puts "Nodal Displacements"
+    puts "Computed      Exact"
+    puts "[nodeDisp 2 1]  [expr $P*$L/($E*$A)]"
+    puts "[nodeDisp 2 2]  [expr $H*pow($L,3)/(3*$E*$I) + $M*pow($L,2)/(2*$E*$I)]"
+    puts "[nodeDisp 2 3]  [expr $H*pow($L,2)/(2*$E*$I) + $M*$L/($E*$I)]"
+    puts ""
+}
+
+set E 1.0
+set b 2.0
+set d 12.0
+
+set A [expr $b*$d]
+set I [expr 1.0/12*$b*$d*$d*$d]
+
+set L  1.0
+set lp [expr 0.1*$L]
+
+set nIP 3
+
+set numElements 4
+set numSections 4
+
+for {set element 1} {$element <= $numElements} {incr element} {
+    for {set section 1} {$section <= $numSections} {incr section} {
+	
+	model basic -ndm 2 -ndf 3
+	
+	node 1 0.0 0.0
+	node 2  $L 0.0
+	
+	switch $section {
+	    1 {
+		puts "Section: Elastic"
+		section Elastic 1 $E $A $I
+	    }
+	    2 {
+		puts "Section: Fiber"
+		uniaxialMaterial Elastic 1 $E
+		section Fiber 1 {
+		    set b2 [expr $b/2]
+		    set d2 [expr $d/2]
+		    patch rect 1 10 1 $d2 $b2 -$d2 -$b2
+		}
+	    }
+	    3 {
+		puts "Section: Aggregator (two uniaxial)"
+		uniaxialMaterial Elastic 1 [expr $E*$A]
+		uniaxialMaterial Elastic 2 [expr $E*$I]
+		section Aggregator 1 1 P 2 Mz
+	    }
+	    4 {
+		puts "Section: Aggregator (uniaxial plus section)"
+		uniaxialMaterial Elastic 1 [expr $E*$A]
+		uniaxialMaterial Elastic 2 [expr $E*$I]
+		section Uniaxial 2 1 P
+		section Aggregator 1 2 Mz -section 2
+	    }
+	}
+
+	geomTransf Linear 1
+
+	switch $element {
+	    1 {
+		puts "Element: ElasticBeamColumn"
+		element elasticBeamColumn 1 1 2 $A $E $I 1
+		set section $numSections ;# To get out of loop
+	    }
+	    2 {
+		puts "Element: DispBeamColumn"
+		element dispBeamColumn 1 1 2 $nIP 1 1
+	    }
+	    3 {
+		puts "Element: NonlinearBeamColumn"
+		element nonlinearBeamColumn 1 1 2 $nIP 1 1
+	    }
+	    4 {
+		puts "Element: BeamWithHinges"
+		element beamWithHinges 1 1 2 1 $lp 1 $lp $E $A $I 1
+	    }
+	}
+
+	printEigenvalues $E $A $I $L
+
+	fix 1 1 1 1
+
+	set M 10.0      ;# End moment
+	set H 1.0       ;# Transverse load
+	set P -100.0    ;# Axial load
+	
+	pattern Plain 1 Linear {
+	    load 2 $P $H $M
+	}
+	
+	test NormUnbalance 1.0e-12 10
+	algorithm Newton
+	integrator LoadControl 1
+	constraints Plain
+	system ProfileSPD
+	numberer Plain
+	analysis Static
+	
+	analyze 1
+
+	printDisplacements $E $A $I $L $P $H $M
+
+	wipe
+    }
+}
