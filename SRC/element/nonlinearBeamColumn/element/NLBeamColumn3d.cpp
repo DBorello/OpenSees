@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2002-10-03 21:31:37 $
+// $Revision: 1.18 $
+// $Date: 2002-11-05 22:55:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -1117,7 +1117,7 @@ NLBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
      secDefSize   += size;
   }
     
-  static Vector dData(2+NEBD+NEBD*NEBD+secDefSize); 
+  Vector dData(2+NEBD+NEBD*NEBD+secDefSize); 
   loc = 0;
 
   // place double variables into Vector
@@ -1355,7 +1355,7 @@ NLBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &t
   
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
     g3ErrorHandler->warning("NLBeamColumn3d::sendSelf() - %s\n",
-			    "failed to send Vector data");
+			    "failed to recv Vector data");
     return -1;
   }    
   
