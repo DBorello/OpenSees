@@ -16,6 +16,12 @@
 #include "util.h"
 
 
+int dcopy_(int *n, double *dx, int *incx, 
+	   double *dy, int *incy);
+
+int dtrsv_(char *uplo, char *trans, char *diag, int *n, 
+	   double *a, int *lda, double *x, int *incx);
+
 /* 
  * Function prototypes 
  */
@@ -110,10 +116,10 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 	return 0;
     }
 
-    Lstore = L->Store;
-    Lval = Lstore->nzval;
-    Ustore = U->Store;
-    Uval = Ustore->nzval;
+    Lstore = (SCformat *)L->Store;
+    Lval = (double *)Lstore->nzval;
+    Ustore = (NCformat *)U->Store;
+    Uval = (double *)Ustore->nzval;
     solve_ops = 0;
 
     if ( !(work = doubleCalloc(L->nrow)) )
@@ -373,8 +379,8 @@ sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x,
     int notran;
 
     notran = lsame_(trans, "N");
-    Astore = A->Store;
-    Aval = Astore->nzval;
+    Astore = (NCformat *)A->Store;
+    Aval = (double *)Astore->nzval;
     
     /* Test the input parameters */
     info = 0;

@@ -7,6 +7,14 @@
  */
 
 
+
+void etree(int neqns, int **padj, int *perm, int *invp, int *parent, int *ancstr);
+void bntree (int neqns, int *parent, int *fchild, int *sibling);
+void zeroi(int, int *);
+void  minoni( int n, int *v );
+void postordr(int i, int *parent, int *fchild, int *sibling, int *oinvp, int *operm, 
+	      int *ninvp, int *nperm, int *list, int *rowblks);
+
 /************************************************************************
  ************  pfordr ..... profile reordering  *************************
  ************************************************************************
@@ -105,7 +113,7 @@ int pfordr(int neqns, int **padj, int *perm, int *invp, int *parent, int *fchild
  
  ***********************************************************************/
 
-etree(int neqns, int **padj, int *perm, int *invp, int *parent, int *ancstr)
+void etree(int neqns, int **padj, int *perm, int *invp, int *parent, int *ancstr)
 {  
    int  i, nbr, next, node, mone;
    int *pt ;
@@ -154,7 +162,7 @@ etree(int neqns, int **padj, int *perm, int *invp, int *parent, int *ancstr)
  
 ************************************************************************/
      
-bntree (int neqns, int *parent, int *fchild, int *sibling)
+void bntree (int neqns, int *parent, int *fchild, int *sibling)
 {
    int node, p ;
 
@@ -210,8 +218,8 @@ page 231
  static int count = 0 ;
  static int xcount = -1 ;
      
-postordr(int i, int *parent, int *fchild, int *sibling, int *oinvp, int *operm, 
-	 int *ninvp, int *nperm, int *list, int *rowblks)
+void postordr(int i, int *parent, int *fchild, int *sibling, int *oinvp, int *operm, 
+	      int *ninvp, int *nperm, int *list, int *rowblks)
 {
    int t ;
 
@@ -270,7 +278,7 @@ postordr(int i, int *parent, int *fchild, int *sibling, int *oinvp, int *operm,
  
  ************************************************************************/
      
-pfblk (int nblks, int *xblk, int *list)
+void pfblk (int nblks, int *xblk, int *list)
 { 
    int *stop ;
 

@@ -2,18 +2,21 @@ LIBDIR = $(HOME)/lib
 include ../../Makefile.def
 
 INCLUDES = -I. 
-OPTIMIZATION = -O2
+OPTIMIZATION = 
 
 DEBUGFLAGS = -DMETISLIB 
 EXTRADEFINES =  $(DEBUGFLAGS) 
-CFLAGS = $(OPTIMIZATION) $(EXTRADEFINES) $(INCLUDES)
+METIS_CFLAGS = $(CFLAGS) $(EXTRADEFINES) $(INCLUDES)
 
 MLEVEL_OBJS = util.o match.o coarsen.o memory.o fm.o  \
               GKlib.o htable.o list.o refine.o bucketlist.o stat.o \
               mlevelpart.o separator.o mlevelorder.o smbfactor.o \
               smbfct.o mincover.o initpart.o lanczos.o mmd.o balpart.o \
               kwaypart.o kwayfm.o kwaygreedy.o entrypoint.o io.o
-              
+
+.c.o:
+	@$(ECHO) Making $@ from $<
+	$(CC) $(METIS_CFLAGS) -c $< -o $@              
 
 
 all: $(MLEVEL_OBJS)

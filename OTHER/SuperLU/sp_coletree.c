@@ -5,6 +5,7 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include "util.h"
+#include "dsp_defs.h"
 
 /* 
  *  Implementation of disjoint set union routines.

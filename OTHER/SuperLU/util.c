@@ -27,10 +27,11 @@
  */
 SuperLUStat_t SuperLUStat;
 
-superlu_abort_and_exit(char* msg)
+int superlu_abort_and_exit(char* msg)
 {
     fprintf(stderr, msg);
     exit (-1);
+    return 0;
 }
 
 void *superlu_malloc(int size)
@@ -88,7 +89,7 @@ Destroy_CompCol_Permuted(SuperMatrix *A)
 void
 Destroy_Dense_Matrix(SuperMatrix *A)
 {
-    DNformat* Astore = A->Store;
+    DNformat* Astore = (DNformat *)A->Store;
     SUPERLU_FREE (Astore->nzval);
     SUPERLU_FREE ( A->Store );
 }
@@ -371,7 +372,7 @@ PrintSumm(char *type, int nfail, int nrun, int nerrs)
 }
 
 
-print_int_vec(char *what, int n, int *vec)
+int print_int_vec(char *what, int n, int *vec)
 {
     int i;
     printf("%s\n", what);
@@ -379,7 +380,7 @@ print_int_vec(char *what, int n, int *vec)
     return 0;
 }
 
-PrintInt10(char *name, int len, int *x)
+int PrintInt10(char *name, int len, int *x)
 {
     register int i;
     
@@ -389,5 +390,6 @@ PrintInt10(char *name, int len, int *x)
 	printf("%6d", x[i]);
     }
     printf("\n");
+    return 0;
 }
 

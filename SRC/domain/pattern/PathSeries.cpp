@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-10-05 00:54:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathSeries.cpp,v $
                                                                         
                                                                         
@@ -79,13 +79,14 @@ PathSeries::PathSeries(char *fileName,
   :TimeSeries(TSERIES_TAG_PathSeries),
    thePath(0), pathTimeIncr(theTimeIncr), cFactor(theFactor)
 {
-  // determine the number of data points
+  // determine the number of data points .. open file and count num entries
   int numDataPoints =0;
   double dataPoint;
+
   ifstream theFile;
   theFile.open(fileName);
 
-  if (!theFile) {
+  if (theFile.bad()) {
     cerr << "WARNING - PathSeries::PathSeries()";
     cerr << " - could not open file " << fileName << endl;
   } else {
@@ -99,8 +100,9 @@ PathSeries::PathSeries(char *fileName,
   if (numDataPoints != 0) {
 
     // first open the file
-    theFile.open(fileName, ios::in);
-    if (!theFile) {
+    ifstream theFile1;
+    theFile1.open(fileName, ios::in);
+    if (theFile1.bad()) {
       cerr << "WARNING - PathSeries::PathSeries()";
       cerr << " - could not open file " << fileName << endl;
     } else {
@@ -121,14 +123,14 @@ PathSeries::PathSeries(char *fileName,
       // read the data from the file
       else {
 	int count = 0;
-	while (theFile >> dataPoint) {
+	while (theFile1 >> dataPoint) {
 	  (*thePath)(count) = dataPoint;
 	  count++;
 	}
       }
 
       // finally close the file
-      theFile.close();
+      theFile1.close();
     }
   }
 }

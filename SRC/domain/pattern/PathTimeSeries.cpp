@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-01-16 06:29:39 $
+// $Revision: 1.3 $
+// $Date: 2001-10-05 00:54:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.cpp,v $
                                                                         
                                                                         
@@ -103,7 +103,7 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
   
   // first open and go through file containg path
   theFile.open(filePathName, ios::in);
-  if (!theFile) {
+  if (theFile.bad()) {
     cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
     cerr << " - could not open file " << filePathName << endl;
   } else {
@@ -113,15 +113,16 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
   theFile.close();
 
   // now open and go through file containg time
-  theFile.open(fileTimeName, ios::in);
-  if (!theFile) {
+  ifstream theFile1;
+  theFile1.open(fileTimeName, ios::in);
+  if (theFile1.bad()) {
     cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
     cerr << " - could not open file " << fileTimeName << endl;
   } else {
-    while (theFile >> dataPoint)
+    while (theFile1 >> dataPoint)
       numDataPoints2++;
   }   
-  theFile.close();
+  theFile1.close();
 
   // check number of data entries in both are the same
   if (numDataPoints1 != numDataPoints2) {
@@ -151,8 +152,9 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
       }
       
       // first open the path file and read in the data
-      theFile.open(filePathName, ios::in);
-      if (!theFile) {
+      ifstream theFile2;
+      theFile2.open(filePathName, ios::in);
+      if (theFile2.bad()) {
 	cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
 	cerr << " - could not open file " << filePathName << endl;
 	delete thePath;
@@ -161,17 +163,18 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
 	time =0;
       } else { // read in the path data and then do the time
 	int count = 0;
-	while (theFile >> dataPoint) {
+	while (theFile2 >> dataPoint) {
 	  (*thePath)(count) = dataPoint;
 	  count++;
 	}
 
 	// finally close the file
-	theFile.close();
+	theFile2.close();
 
 	// now open the time file and read in the data
-	theFile.open(fileTimeName, ios::in);
-	if (!theFile) {
+	ifstream theFile3;
+	theFile3.open(fileTimeName, ios::in);
+	if (theFile3.bad()) {
 	  cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
 	  cerr << " - could not open file " << fileTimeName << endl;
 	  delete thePath;
@@ -180,10 +183,11 @@ PathTimeSeries::PathTimeSeries(char *filePathName,
 	  time =0;
 	} else { // read in the data
 	  int count = 0;
-	  while (theFile >> dataPoint) {
+	  while (theFile3 >> dataPoint) {
 	    (*time)(count) = dataPoint;
 	    count++;
 	  }
+	  theFile3.close();
 	} // read in the data 
       }   // read in the path data and then do the time
     }
@@ -204,7 +208,7 @@ PathTimeSeries::PathTimeSeries(char *fileName,
   
 	// first open and go through file counting entries
 	theFile.open(fileName, ios::in);
-	if (!theFile) {
+	if (theFile.bad()) {
 		cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
 		cerr << " - could not open file " << fileName << endl;
 	}
@@ -236,8 +240,9 @@ PathTimeSeries::PathTimeSeries(char *fileName,
 		}
       
 		// first open the file and read in the data
-		theFile.open(fileName, ios::in);
-		if (!theFile) {
+		ifstream theFile1;
+		theFile1.open(fileName, ios::in);
+		if (theFile1.bad()) {
 			cerr << "WARNING - PathTimeSeries::PathTimeSeries()";
 			cerr << " - could not open file " << fileName << endl;
 			delete thePath;
@@ -247,15 +252,15 @@ PathTimeSeries::PathTimeSeries(char *fileName,
 		}
 		else { // read in the time and then read the value
 			int count = 0;
-			while (theFile >> dataPoint) {
+			while (theFile1 >> dataPoint) {
 				(*time)(count) = dataPoint;
-				theFile >> dataPoint;
+				theFile1 >> dataPoint;
 				(*thePath)(count) = dataPoint;
 				count++;
 			}
 
 			// finally close the file
-			theFile.close();
+			theFile1.close();
 		} 
 	
 	}

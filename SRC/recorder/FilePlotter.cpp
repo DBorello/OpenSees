@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-09-05 22:41:17 $
+// $Revision: 1.5 $
+// $Date: 2001-10-05 00:52:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.cpp,v $
                                                                         
                                                                         
@@ -138,8 +138,9 @@ FilePlotter::plotFile(void)
      // open file
     ifstream theFile; 
     theFile.open(fileName, ios::in);
-    if (!theFile) {
-	cerr << "WARNING - FileNodeDispRecorder::FileNodeDispRecorder()";
+
+    if (theFile.bad()) {
+	cerr << "WARNING - FilePlotter::FilePlotter()";
 	cerr << " - could not open file " << fileName << endl;
 	return -1;
     }    
@@ -172,6 +173,7 @@ FilePlotter::plotFile(void)
 	    } 
 	  }
 	}
+	
 
 	numLineEntries ++;
       }
@@ -222,7 +224,6 @@ FilePlotter::plotFile(void)
 
     if (numLines > 1) {
 
-
       static Vector pt1(3); 
       static Vector pt2(3);
       static Vector rgb(3);
@@ -250,7 +251,7 @@ FilePlotter::plotFile(void)
       pt1(0) = 0.0; pt2(0) = 0.0;
       pt1(1) = yMin;  pt2(1) = yMax;
       theRenderer->drawLine(pt1, pt2, rgb, rgb);        
-      
+
       if (yMin != 0.0 && -100 *yMin > yMax) {
 	sprintf(theText,"%.2e",yMin);
 	theRenderer->drawText(pt1, theText, strlen(theText), 'c', 't');
@@ -263,19 +264,22 @@ FilePlotter::plotFile(void)
       Vector data1(numLineEntries);
       Vector data2(numLineEntries);
 
-      // open the file
-      theFile.open(fileName, ios::in);
-      if (!theFile) {
-	cerr << "WARNING - FileNodeDispRecorder::FileNodeDispRecorder()";
+      // open the file again, read through and connect the dots
+      ifstream theFile1; 
+      theFile1.open(fileName, ios::in);
+      if (theFile1.bad()) {
+	cerr << "WARNING - FilePlotter::FilePlotter()";
 	cerr << " - could not open file " << fileName << endl;
 	return -1;
       }    
-    
-      theFile >> data1;
-      
-      for (int i=1; i<numLines; i++) {
-	theFile >> data2;
 
+      theFile1 >> data1;
+
+      for (int i=1; i<numLines; i++) {
+	// read the data
+	theFile1 >> data2;
+
+	// plot the lines
 	for (int j=0; j<cols->Size(); j+=2) {
 	  pt1(0) = data1((*cols)(j)); 
 	  pt1(1) = data1((*cols)(j+1));
@@ -283,7 +287,7 @@ FilePlotter::plotFile(void)
 	  pt2(1) = data2((*cols)(j+1));
 	  theRenderer->drawLine(pt1, pt2, rgb, rgb);
 	}
-
+	
 	data1 = data2;
 
       }
@@ -291,7 +295,7 @@ FilePlotter::plotFile(void)
       theRenderer->doneImage();
 
       // close the file
-      theFile.close();
+      theFile1.close();
 
     }
     return 0;

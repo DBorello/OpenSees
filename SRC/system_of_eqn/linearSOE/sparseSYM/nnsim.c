@@ -18,6 +18,9 @@
 #define ABS(x)     (((x) < 0) ? -(x) : (x))
 
 
+/* fmk - adding prototypes */
+void zeroi(int, int *);
+
 /***********************************************************
 ************************nodfac ******************************
 *************************************************************
@@ -167,7 +170,7 @@ int nodfac(int *perm, int *invp, int **padj, int *ancstr , int *list, int neqns,
 
 
 /************************************************************************
- ************  setenv ..... set up envelope   ***************************
+ ************  setenvlpe ..... set up envelope   ***************************
  ************************************************************************
  
     purpose - allocate space for the envelope structure
@@ -185,7 +188,7 @@ int nodfac(int *perm, int *invp, int **padj, int *ancstr , int *list, int neqns,
  
  ************************************************************************/
      
-int setenv(int neqns, double **penv, int *envlen)
+int setenvlpe(int neqns, double **penv, int *envlen)
 {
    int i, knz ;
 

@@ -5,9 +5,15 @@
  * November 15, 1997
  *
  */
+
 #include "supermatrix.h"
 #include "util.h"
+#include "dsp_defs.h"
 
+int genmmd_(int *neqns, int *xadj, int *adjncy, 
+	    int *invp, int *perm, int *delta, int *dhead, 
+	    int *qsize, int *llist, int *marker, int *maxint, 
+	    int *nofsub);
 
 void
 getata(
@@ -308,7 +314,7 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
  *
  */
 {
-    NCformat *Astore = A->Store;
+    NCformat *Astore = (NCformat *)A->Store;
     int m, n, bnz, *b_colptr, i;
     int delta, maxint, nofsub, *invp;
     int *b_rowind, *dhead, *qsize, *llist, *marker;
@@ -321,12 +327,12 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
     switch ( ispec ) {
         case 0: /* Natural ordering */
 	      for (i = 0; i < n; ++i) perm_c[i] = i;
-	      printf("Use natural column ordering.\n");
+	      /* printf("Use natural column ordering.\n"); */
 	      return;
         case 1: /* Minimum degree ordering on A'*A */
 	      getata(m, n, Astore->nnz, Astore->colptr, Astore->rowind,
 		     &bnz, &b_colptr, &b_rowind);
-	      printf("Use minimum degree ordering on A'*A.\n");
+	      /* printf("Use minimum degree ordering on A'*A.\n"); */
 	      t = SuperLU_timer_() - t;
 	      /*printf("Form A'*A time = %8.3f\n", t);*/
 	      break;
@@ -334,7 +340,7 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
 	      if ( m != n ) ABORT("Matrix is not square");
 	      a_plus_at(n, Astore->nnz, Astore->colptr, Astore->rowind,
 			&bnz, &b_colptr, &b_rowind);
-	      printf("Use minimum degree ordering on A'+A.\n");
+	      /* printf("Use minimum degree ordering on A'+A.\n"); */
 	      t = SuperLU_timer_() - t;
 	      /*printf("Form A'+A time = %8.3f\n", t);*/
 	      break;

@@ -6,6 +6,20 @@
 
 
 #include <assert.h>
+#include <stdio.h>
+
+/* fmk - adding prototypes */
+void zeroi(int, int *);
+int rcm(int root, int **padj, int *mask, int *perm, int *deg, int *work);
+int fnroot(int root, int **padj, int *mask, int *nlvl, int *xls, int *ls);
+int ndegree(int root, int **padj, int *mask, int *deg, int *ls, int *work);
+int fndsep(int root, int **padj, int *mask, int *sep, int *xls, int *ls, 
+	   int *work, int neqns);
+void revrse(int n, int *v);
+void subrcm (int neqns, int root, int **padj, int *perm, 
+	     int *mask, int *xls, int *work);
+int rootls(int root, int **padj, int *mask, int *xls, int *ls);
+
 int i_greater();
 
 #define INCLEVEL 6
@@ -363,7 +377,7 @@ int rootls(int root, int **padj, int *mask, int *xls, int *ls)
 
 *******************************************************************************/
 
-revrse(int n, int *v)
+void revrse(int n, int *v)
 {  
    int  *ve ;
    int temp ;

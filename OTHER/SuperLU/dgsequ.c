@@ -104,8 +104,8 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
 	return;
     }
 
-    Astore = A->Store;
-    Aval = Astore->nzval;
+    Astore = (NCformat *)A->Store;
+    Aval = (double *)Astore->nzval;
     
     /* Get machine constants. */
     smlnum = dlamch_("S");

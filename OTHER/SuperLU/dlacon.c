@@ -10,6 +10,9 @@
 #include <math.h>
 #include "Cnames.h"
 
+int dcopy_(int *n, double *dx, int *incx, 
+	   double *dy, int *incy);
+
 int
 dlacon_(int *n, double *v, double *x, int *isgn, double *est, int *kase)
 

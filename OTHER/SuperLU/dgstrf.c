@@ -225,8 +225,8 @@ dgstrf (char *refact, SuperMatrix *A, double diag_pivot_thresh,
     m        = A->nrow;
     n        = A->ncol;
     min_mn   = MIN(m, n);
-    Astore   = A->Store;
-    a        = Astore->nzval;
+    Astore   = (NCPformat *)A->Store;
+    a        = (double *)Astore->nzval;
     asub     = Astore->rowind;
     xa_begin = Astore->colbeg;
     xa_end   = Astore->colend;

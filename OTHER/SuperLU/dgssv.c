@@ -130,7 +130,7 @@ dgssv(SuperMatrix *A, int *perm_c, int *perm_r, SuperMatrix *L,
 
     /* Test the input parameters ... */
     *info = 0;
-    Bstore = B->Store;
+    Bstore = (DNformat *)B->Store;
     if ( A->nrow != A->ncol || A->nrow < 0 ||
 	 (A->Stype != NC && A->Stype != NR) ||
 	 A->Dtype != _D || A->Mtype != GE )
@@ -154,10 +154,10 @@ dgssv(SuperMatrix *A, int *perm_c, int *perm_r, SuperMatrix *L,
  
     /* Convert A to NC format when necessary. */
     if ( A->Stype == NR ) {
-	NRformat *Astore = A->Store;
+	NRformat *Astore = (NRformat *)A->Store;
 	AA = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
 	dCreate_CompCol_Matrix(AA, A->ncol, A->nrow, Astore->nnz, 
-			       Astore->nzval, Astore->colind, Astore->rowptr,
+			       (double *)Astore->nzval, Astore->colind, Astore->rowptr,
 			       NC, A->Dtype, A->Mtype);
 	*trans = 'T';
     } else if ( A->Stype == NC ) AA = A;

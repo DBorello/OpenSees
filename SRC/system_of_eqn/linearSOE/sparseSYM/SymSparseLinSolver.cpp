@@ -26,6 +26,8 @@ extern "C" {
 }
 
 
+
+
 SymSparseLinSolver::SymSparseLinSolver()
 :LinearSOESolver(SOLVER_TAGS_SymSparseLinSolver),
  theSOE(0), factored(false)

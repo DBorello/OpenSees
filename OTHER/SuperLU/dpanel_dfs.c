@@ -87,8 +87,8 @@ dpanel_dfs (
     int       *lsub, *xlsub;
 
     /* Initialize pointers */
-    Astore     = A->Store;
-    a          = Astore->nzval;
+    Astore     = (NCPformat *)A->Store;
+    a          = (double *)Astore->nzval;
     asub       = Astore->rowind;
     xa_begin   = Astore->colbeg;
     xa_end     = Astore->colend;

@@ -6,6 +6,13 @@
 
 #include <assert.h>
 
+/* fmk - adding prototypes */
+void zeroi(int, int *);
+int rcm(int root, int **padj, int *mask, int *perm, int *deg, int *work);
+int fnroot(int root, int **padj, int *mask, int *nlvl, int *xls, int *ls);
+int ndegree(int root, int **padj, int *mask, int *deg, int *ls, int *work);
+void revrse(int n, int *v);
+
 /*************************************************************************
 ***********************genrcm . . . general reverse cuthill mckee ********
 **************************************************************************

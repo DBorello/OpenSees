@@ -1,5 +1,6 @@
 #include "supermatrix.h"
 #include "util.h"
+#include "dsp_defs.h"
 
 void
 sp_preorder(char *refact,  SuperMatrix *A, int *perm_c, 
@@ -70,8 +71,9 @@ sp_preorder(char *refact,  SuperMatrix *A, int *perm_c,
     AC->Mtype       = A->Mtype;
     AC->nrow        = A->nrow;
     AC->ncol        = A->ncol;
-    Astore          = A->Store;
-    ACstore = AC->Store = (void *) SUPERLU_MALLOC( sizeof(NCPformat) );
+    Astore          = (NCformat *)A->Store;
+    AC->Store = (void *) SUPERLU_MALLOC( sizeof(NCPformat) );
+    ACstore = (NCPformat *)AC->Store;
     if ( !ACstore ) ABORT("SUPERLU_MALLOC fails for ACstore");
     ACstore->nnz    = Astore->nnz;
     ACstore->nzval  = Astore->nzval;

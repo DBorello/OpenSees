@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2001-10-05 00:52:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.cpp,v $
                                                                         
                                                                         
@@ -145,9 +145,7 @@ SparseGenColLinSOE::setSize(Graph &theGraph)
     }
     nnz = newNNZ;
 
-
     if (newNNZ > Asize) { // we have to get more space for A and rowA
-
 	if (A != 0) 
 	    delete [] A;
 	if (rowA != 0)

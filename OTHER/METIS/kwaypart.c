@@ -8,7 +8,7 @@
  * Started 6/6/95
  * George
  *
- * $Id: kwaypart.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: kwaypart.c,v 1.2 2001-10-05 00:51:05 fmk Exp $
  *
  */
 
@@ -42,7 +42,7 @@ int KWayPart(CoarseGraphType *graph, int nparts, int CoarsenTo, int MatchType,
   int *cpart, *ccuts, *ckpwgts;
   timer Tmr1, Tmr2;
 
-  ctrl = GKmalloc(sizeof(CtrlType), "MultilevelPart: ctrl");
+  ctrl = (CtrlType *)GKmalloc(sizeof(CtrlType), "MultilevelPart: ctrl");
 
   ctrl->CoarsenTo = CoarsenTo;
   ctrl->MatchType = MatchType;

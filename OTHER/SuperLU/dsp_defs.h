@@ -219,7 +219,7 @@ extern int     sp_dgemm (char *, char *, int, int, int, double,
 			double *, int);
 
 /* Memory-related */
-extern superlu_abort_and_exit(char*);
+extern int     superlu_abort_and_exit(char*);
 extern void    *superlu_malloc (int);
 extern void    superlu_free (void*);
 extern int     dLUMemInit (char *, void *, int, int, int, int, int,

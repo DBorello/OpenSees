@@ -23,6 +23,8 @@
 #include "dsp_defs.h"
 #include "util.h"
 
+void dlsolve ( int ldm, int ncol, double *M, double *rhs );
+void dmatvec ( int ldm, int nrow, int ncol, double *M, double *vec, double *Mxvec );
 
 /*
  * Performs numeric block updates within the relaxed snode. 

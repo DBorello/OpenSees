@@ -2,6 +2,9 @@
  * File name:		sp_ienv.c
  * History:             Modified from lapack routine ILAENV
  */
+
+extern int xerbla_(char *srname, int *info);
+
 int
 sp_ienv(int ispec)
 {
@@ -55,7 +58,7 @@ sp_ienv(int ispec)
     /* Invalid value for ISPEC */
     i = 1;
     xerbla_("sp_ienv", &i);
-    return;
+    return 0;
 
 } /* sp_ienv_ */
 

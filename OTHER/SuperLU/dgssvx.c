@@ -385,10 +385,10 @@ dgssvx(char *fact, char *trans, char *refact,
     extern double dlangs(char *, SuperMatrix *);
     extern double dlamch_(char *);
 
-    Bstore = B->Store;
-    Xstore = X->Store;
-    Bmat   = Bstore->nzval;
-    Xmat   = Xstore->nzval;
+    Bstore = (DNformat *)B->Store;
+    Xstore = (DNformat *)X->Store;
+    Bmat   = (double *)Bstore->nzval;
+    Xmat   = (double *)Xstore->nzval;
     ldb    = Bstore->lda;
     ldx    = Xstore->lda;
     nrhs   = B->ncol;
@@ -486,10 +486,10 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
     
     /* Convert A to NC format when necessary. */
     if ( A->Stype == NR ) {
-	NRformat *Astore = A->Store;
+	NRformat *Astore = (NRformat *)A->Store;
 	AA = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
 	dCreate_CompCol_Matrix(AA, A->ncol, A->nrow, Astore->nnz, 
-			       Astore->nzval, Astore->colind, Astore->rowptr,
+			       (double *)Astore->nzval, Astore->colind, Astore->rowptr,
 			       NC, A->Dtype, A->Mtype);
 	if ( notran ) { /* Reverse the transpose argument. */
 	    *trant = 'T';

@@ -61,12 +61,12 @@ dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c,
     smlnum = dlamch_("S");
     rpg = 1. / smlnum;
 
-    Astore = A->Store;
-    Lstore = L->Store;
-    Ustore = U->Store;
-    Aval = Astore->nzval;
-    Lval = Lstore->nzval;
-    Uval = Ustore->nzval;
+    Astore = (NCformat *)A->Store;
+    Lstore = (SCformat *)L->Store;
+    Ustore = (NCformat *)U->Store;
+    Aval = (double *)Astore->nzval;
+    Lval = (double *)Lstore->nzval;
+    Uval = (double *)Ustore->nzval;
     
     inv_perm_c = (int *) SUPERLU_MALLOC(A->ncol*sizeof(int));
     for (j = 0; j < A->ncol; ++j) inv_perm_c[perm_c[j]] = j;

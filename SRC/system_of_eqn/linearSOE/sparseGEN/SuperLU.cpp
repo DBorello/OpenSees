@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2001-10-05 00:52:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SuperLU.cpp,v $
                                                                         
                                                                         
@@ -182,6 +182,7 @@ SuperLU::setSize()
       dCreate_CompCol_Matrix(&A, n, n, theSOE->nnz, theSOE->A, 
 			     theSOE->rowA, theSOE->colStartA, 
 			     NC, _D, GE);
+
       // obtain and apply column permutation to give SuperMatrix AC
       get_perm_c(permSpec, &A, perm_c);
 

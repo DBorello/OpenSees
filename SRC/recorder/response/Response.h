@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 18:26:59 $
+// $Revision: 1.4 $
+// $Date: 2001-10-05 00:52:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/response/Response.h,v $
                                                                         
 // Written: MHS 
@@ -29,8 +29,6 @@
 
 #ifndef Response_h
 #define Response_h
-
-class ostream;
 
 class ID;
 class Vector;

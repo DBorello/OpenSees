@@ -11,6 +11,12 @@
 #include <stdlib.h>
 #include "dsp_defs.h"
 
+int dDumpLine(FILE *fp);
+int dParseIntFormat(char *buf, int *num, int *size);
+int dParseFloatFormat(char *buf, int *num, int *size);
+int dReadVector(FILE *fp, int n, int *where, int perline, int persize);
+int dReadValues(FILE *fp, int n, double *destination, int perline, int persize);
+
 void
 dreadhb(int *nrow, int *ncol, int *nonz,
 	double **nzval, int **rowind, int **colptr)
@@ -162,14 +168,14 @@ dreadhb(int *nrow, int *ncol, int *nonz,
 }
 
 /* Eat up the rest of the current line */
-dDumpLine(FILE *fp)
+int dDumpLine(FILE *fp)
 {
     register int c;
     while ((c = fgetc(fp)) != '\n') ;
     return 0;
 }
 
-dParseIntFormat(char *buf, int *num, int *size)
+int dParseIntFormat(char *buf, int *num, int *size)
 {
     char *tmp;
 
@@ -182,7 +188,7 @@ dParseIntFormat(char *buf, int *num, int *size)
     return 0;
 }
 
-dParseFloatFormat(char *buf, int *num, int *size)
+int dParseFloatFormat(char *buf, int *num, int *size)
 {
     char *tmp, *period;
     
@@ -200,7 +206,7 @@ dParseFloatFormat(char *buf, int *num, int *size)
     return 0;
 }
 
-dReadVector(FILE *fp, int n, int *where, int perline, int persize)
+int dReadVector(FILE *fp, int n, int *where, int perline, int persize)
 {
     register int i, j, item;
     char tmp, buf[100];
@@ -220,7 +226,7 @@ dReadVector(FILE *fp, int n, int *where, int perline, int persize)
     return 0;
 }
 
-dReadValues(FILE *fp, int n, double *destination, int perline, int persize)
+int dReadValues(FILE *fp, int n, double *destination, int perline, int persize)
 {
     register int i, j, k, s;
     char tmp, buf[100];

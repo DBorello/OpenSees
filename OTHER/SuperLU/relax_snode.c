@@ -19,6 +19,7 @@
 */
 
 #include "util.h"
+extern void ifill(int *a, int alen, int ival);
 
 void
 relax_snode (

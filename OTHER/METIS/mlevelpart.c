@@ -9,7 +9,7 @@
  * Started 10/5/94
  * George
  *
- * $Id: mlevelpart.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: mlevelpart.c,v 1.2 2001-10-05 00:51:05 fmk Exp $
  *
  */
 
@@ -40,7 +40,7 @@ int MultiLevelPart(CoarseGraphType *graph, int nparts, int CoarsenTo, int MatchT
   int totalcut;
   CtrlType *ctrl, *oldctrl;
 
-  ctrl = GKmalloc(sizeof(CtrlType), "MultilevelPart: ctrl");
+  ctrl = (CtrlType *)GKmalloc(sizeof(CtrlType), "MultilevelPart: ctrl");
 
   ctrl->CoarsenTo = CoarsenTo;
   ctrl->MatchType = MatchType;

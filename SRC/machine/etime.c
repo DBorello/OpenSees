@@ -17,11 +17,12 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+
+/*                                                                        
+// $Revision: 1.2 $
+// $Date: 2001-10-05 00:53:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/machine/etime.c,v $
-                                                                        
+*/                                                                        
                                                                         
 
 #ifdef _ALPHA

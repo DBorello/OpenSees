@@ -9,7 +9,7 @@
  * Started 10/5/94
  * George
  *
- * $Id: mlevelorder.c,v 1.1.1.1 2000-09-15 08:23:12 fmk Exp $
+ * $Id: mlevelorder.c,v 1.2 2001-10-05 00:51:05 fmk Exp $
  *
  */
 
@@ -32,7 +32,7 @@ void MultiLevelOrder(CoarseGraphType *graph, int CoarsenTo, int MatchType,
   CtrlType *ctrl, *oldctrl;
 
 
-  ctrl = GKmalloc(sizeof(CtrlType), "MultilevelPart: ctrl");
+  ctrl = (CtrlType *)GKmalloc(sizeof(CtrlType), "MultilevelPart: ctrl");
 
   ctrl->CoarsenTo = CoarsenTo;
   ctrl->MatchType = MatchType;

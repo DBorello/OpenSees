@@ -22,15 +22,13 @@ all:    double
 
 double: $(DLUSRC) $(ALLAUX) $(DZLAUX)
 	@$(RM) $(RMFLAGS) $(SUPERLU_LIBRARY)
-	@$(AR) $(ARFLAGS) $(SUPERLU_LIBRARY) $(DLUSRC) $(ALLAUX) $(DZLAUX)
+	@$(AR) $(ARFLAGS) $(SUPERLU_LIBRARY) $(ALLAUX) $(DLUSRC) $(DZLAUX)
 	@$(RANLIB) $(SUPERLU_LIBRARY)
 
 ##################################
 # Do not optimize this routine   #
 ##################################
 dlamch.o: dlamch.c ; $(CC) -c $<
-
-superlu_timer.o:  superlu_timer.c ; $(CC) -c $<
 
 clean:	
 	@$(RM) $(RMFLAGS) *.o

@@ -92,8 +92,8 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
 	return;
     }
 
-    Astore = A->Store;
-    Aval = Astore->nzval;
+    Astore = (NCformat *)A->Store;
+    Aval = (double *)Astore->nzval;
     
     /* Initialize LARGE and SMALL. */
     small = dlamch_("Safe minimum") / dlamch_("Precision");
