@@ -1,5 +1,5 @@
-// $Revision: 1.4 $
-// $Date: 2001-08-15 02:21:23 $
+// $Revision: 1.5 $
+// $Date: 2001-09-13 19:11:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.cpp,v $
                                                                         
 // Written: ZHY
@@ -13,11 +13,9 @@
 #include <fstream.h>
 #include <iomanip.h>
 #include <math.h>
+#include <float.h>
 #include <stdlib.h>
 #include <T2Vector.h>
-
-#define UP_LIMIT    10e+30
-#define LOW_LIMIT   10e-15
 
 
 Vector T2Vector::engrgStrain(6);
@@ -147,7 +145,7 @@ const Vector T2Vector::unitT2Vector() const
 {
 	if (t2VectorLength() <= LOW_LIMIT) {
 	cerr << "WARNING:T2Vector::unitT2Vector(): vector length <=" << LOW_LIMIT << endl;
-	return theT2Vector;
+	return theT2Vector/LOW_LIMIT;
   }
 
   return theT2Vector/t2VectorLength();
@@ -158,7 +156,7 @@ const Vector T2Vector::unitDeviator() const
 {
 	if (deviatorLength() <= LOW_LIMIT) {
 	cerr << "WARNING:T2Vector::unitDeviator(): vector length <=" << LOW_LIMIT << endl;
-	return theDeviator;
+	return theDeviator/LOW_LIMIT;
   }
 
   return theDeviator/deviatorLength();

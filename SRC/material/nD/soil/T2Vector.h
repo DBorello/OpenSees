@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2001-08-15 02:21:23 $
+// $Revision: 1.3 $
+// $Date: 2001-09-13 19:11:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.h,v $
                                                                         
 // Written: ZHY
@@ -15,6 +15,10 @@
 
 #include <Vector.h>
 #include <Channel.h>
+#include <float.h>
+
+#define UP_LIMIT    1.0e+30
+#define LOW_LIMIT   10.*DBL_EPSILON
 
 // global function: scalar product of two second order tensor vectors
 double operator && (const Vector &, const Vector &);

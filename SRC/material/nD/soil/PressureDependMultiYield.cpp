@@ -1,5 +1,5 @@
-// $Revision: 1.8 $
-// $Date: 2001-08-26 23:29:01 $
+// $Revision: 1.9 $
+// $Date: 2001-09-13 19:11:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -374,9 +374,13 @@ const Matrix & PressureDependMultiYield::getTangent (void)
 	else {
 	  workM(0,0) = theTangent(0,0);
 	  workM(0,1) = theTangent(0,1);
+	  workM(0,2) = 0.; //theTangent(0,3);
 	  workM(0,2) = theTangent(0,3);
 	  workM(1,0) = theTangent(1,0);
 	  workM(1,1) = theTangent(1,1);
+	  workM(1,2) = 0.; //theTangent(1,3);
+	  workM(2,0) = 0.; //theTangent(3,0);
+	  workM(2,1) = 0.; //theTangent(3,1);
 	  workM(1,2) = theTangent(1,3);
 	  workM(2,0) = theTangent(3,0);
 	  workM(2,1) = theTangent(3,1);
@@ -1077,8 +1081,8 @@ void PressureDependMultiYield::updateActiveSurface(void)
   B = 2. * (t1 && t2);
   C = (t2 && t2) - 2./3.* outsize * outsize * conHeig * conHeig;
   X = secondOrderEqn(A,B,C,0);
-  if ( fabs(X-1.) < 1.e14 ) X = 1.;
-  if (X < 1.-LOW_LIMIT){
+  if ( fabs(X-1.) < LOW_LIMIT ) X = 1.;
+  if (X < 1.){
 		t2 = trialStress.deviator() - outcenter*conHeig;
 		double xx1 = (t2 && t2) - 2./3.* outsize * outsize * conHeig * conHeig;
     double xx2 = (t1 && t1) - 2./3.* size * size * conHeig * conHeig;
@@ -1091,18 +1095,17 @@ void PressureDependMultiYield::updateActiveSurface(void)
   temp = (t1 * X + center*conHeig) * (1. - size / outsize) 
 		     - (center - outcenter * size / outsize) * conHeig;
 	direction = T2Vector(temp);
+	if (direction.deviatorLength() < LOW_LIMIT) return;
 
-	X = direction.deviatorLength();
-	if (X < LOW_LIMIT) X = LOW_LIMIT;
-  temp = direction.deviator()/X;  
-
-  A = conHeig * conHeig;
+  temp = direction.deviator();  
+  A = conHeig * conHeig * (temp && temp);
   B = 2 * conHeig * (t1 && temp);
+	if (fabs(B) < LOW_LIMIT) B = 0.; 
   C = (t1 && t1) - 2./3.* size * size * conHeig * conHeig;
-	if ( fabs(C) < 2.e-11 ) C = 0.;
-	if (C < 0.) {
+	if ( fabs(C) < LOW_LIMIT || fabs(C)/(t1 && t1) < LOW_LIMIT ) C = 0.;
+	if (B > 0. || C < 0.) {
     cerr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in surface motion.\n" 
-			   << "A= " <<A <<"B= " <<B <<"C= "<<C <<endl; 
+			   << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endl; 
     g3ErrorHandler->fatal("");
 	}
   X = secondOrderEqn(A,B,C,1);  

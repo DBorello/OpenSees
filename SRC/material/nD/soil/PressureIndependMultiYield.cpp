@@ -1,5 +1,5 @@
-// $Revision: 1.8 $
-// $Date: 2001-08-26 23:29:02 $
+// $Revision: 1.9 $
+// $Date: 2001-09-13 19:11:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -720,8 +720,8 @@ void PressureIndependMultiYield::updateActiveSurface(void)
   B = 2. * (t1 && t2);
   C = (t2 && t2) - 2./3.* outsize * outsize;
   X = secondOrderEqn(A,B,C,0);
-  if ( fabs(X-1.) < 1.e14 ) X = 1.;
-  if (X < 1. - LOW_LIMIT){
+  if ( fabs(X-1.) < LOW_LIMIT ) X = 1.;
+  if (X < 1.){
     cerr << "FATAL:PressureIndependMultiYield::updateActiveSurface(): error in Direction of surface motion." 
 			   << endl; 
     g3ErrorHandler->fatal("");
@@ -729,18 +729,17 @@ void PressureIndependMultiYield::updateActiveSurface(void)
 
   temp = (t1 * X + center) * (1. - size / outsize) - (center - outcenter * size / outsize);
 	direction = T2Vector(temp);
+	if (direction.deviatorLength() < LOW_LIMIT) return;
 
-	X = direction.deviatorLength();
-	if (X < LOW_LIMIT) X = LOW_LIMIT;
-  temp = direction.deviator()/X;
-
-  A = 1.;
+  temp = direction.deviator();  
+  A = temp && temp;
   B = - 2 * (t1 && temp);
+	if (fabs(B) < LOW_LIMIT) B = 0.; 
   C = (t1 && t1) - 2./3.* size * size;
-	if (fabs(C) < 2.e-11) C = 0.;
-	if (C < 0.) {
+	if ( fabs(C) < LOW_LIMIT || fabs(C)/(t1 && t1) < LOW_LIMIT ) C = 0.;
+	if (B > 0. || C < 0.) {
     cerr << "FATAL:PressureIndependMultiYield::updateActiveSurface(): error in surface motion.\n" 
-				 << "A= " <<A <<"B= " <<B <<"C= "<<C << endl; 
+			   << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endl; 
     g3ErrorHandler->fatal("");
 	}
   X = secondOrderEqn(A,B,C,1);  

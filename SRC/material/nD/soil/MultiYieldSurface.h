@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2001-08-07 22:31:03 $
+// $Revision: 1.3 $
+// $Date: 2001-09-13 19:11:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/MultiYieldSurface.h,v $
                                                                         
 // Written: ZHY
@@ -14,8 +14,7 @@
 
 #include <T2Vector.h>
 
-#define UP_LIMIT    1.0e+30
-#define LOW_LIMIT   1.0e-15
+
 #define LOCK_VALUE  1.0e+30
 
 // global function to find the roots of a second order equation
