@@ -125,14 +125,16 @@ class TotalLagrangianFD20NodeBrick: public Element
 //    static Matrix C;    // Element damping matrix
     static Matrix M;    // Element mass matrix
     static Vector P;    // Element resisting force vector
-    static double pts[27][3];   // Stores quadrature points
-    static double wts[27][3];     // Stores quadrature weights
+    static double pts[3];   // Stores quadrature points
+    static double wts[3];     // Stores quadrature weights
     Vector Q;    // Applied nodal loads
-    double b[3];    // Body forces
+    Vector bf;    // Body forces
 
     double rho;    // Mass per unit volume
 
     double det_of_Jacobian;
+    
+    Matrix *Ki;
 
   private:
 
@@ -142,7 +144,7 @@ class TotalLagrangianFD20NodeBrick: public Element
     tensor Jacobian_3D(tensor dh);
     tensor Jacobian_3Dinv(tensor dh);
     tensor dh_Global(tensor dh);
-    tensor getCurrentF(tensor dh);
+//    tensor getCurrentF(tensor dh);
     tensor getNodesCrds(void);
     tensor getNodesDisp(void);
 
@@ -159,7 +161,6 @@ class TotalLagrangianFD20NodeBrick: public Element
     tensor getSurfaceForce(void);
     tensor getForces(void);
 
-    void setPressureLoadAtNodes(void){};
 };
 
 

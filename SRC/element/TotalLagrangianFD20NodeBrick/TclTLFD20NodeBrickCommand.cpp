@@ -42,9 +42,9 @@ int
 TclModelBuilder_addTLFD20nBrick(ClientData clientData,
                                 Tcl_Interp *interp,
                                 int argc,
-				                            TCL_Char **argv,
+                                TCL_Char **argv,
                                 Domain*theTclDomain,
-				                            TclModelBuilder *theTclBuilder,
+                                TclModelBuilder *theTclBuilder,
                                 int eleArgStart)
 {
   // ensure the destructor has not been called -
@@ -79,9 +79,9 @@ TclModelBuilder_addTLFD20nBrick(ClientData clientData,
   {
       if (Tcl_GetInt(interp, argv[2+i+eleArgStart], &nodes[i]) != TCL_OK)
       {
-	opserr << "command: element TotalLagrangianFD20nbrick " << eleID << " - invalid integer tag " <<
-	  argv[2+i+eleArgStart] << endln;
-	return TCL_ERROR;
+  opserr << "command: element TotalLagrangianFD20nbrick " << eleID << " - invalid integer tag " <<
+    argv[2+i+eleArgStart] << endln;
+  return TCL_ERROR;
       }
   }
 
@@ -107,21 +107,21 @@ TclModelBuilder_addTLFD20nBrick(ClientData clientData,
   {
       if (Tcl_GetDouble(interp, argv[23+i+eleArgStart], &bodyforces[i]) != TCL_OK)
       {
-	opserr << "command: element TotalLagrangianFD20nbrick " << eleID << " - invalid bodyforces tag " <<
-	  argv[23+i+eleArgStart] << endln;
-	return TCL_ERROR;
+  opserr << "command: element TotalLagrangianFD20nbrick " << eleID << " - invalid bodyforces tag " <<
+    argv[23+i+eleArgStart] << endln;
+  return TCL_ERROR;
       }
   }
 
   // now create the TwentyNodeBrick and add it to the Domain
   TotalLagrangianFD20NodeBrick *theEle = new TotalLagrangianFD20NodeBrick(eleID,
                                                                           nodes[ 0],
-                                                                          nodes [1],
+                                                                          nodes[ 1],
                                                                           nodes[ 2],
                                                                           nodes[ 3],
                                                                           nodes[ 4],
                                                                           nodes[ 5],
-                                                                          nodes [6],
+                                                                          nodes[ 6],
                                                                           nodes[ 7],
                                                                           nodes[ 8],
                                                                           nodes[ 9],
@@ -135,7 +135,7 @@ TclModelBuilder_addTLFD20nBrick(ClientData clientData,
                                                                           nodes[17],
                                                                           nodes[18],
                                                                           nodes[19],
-                                        		                                *theMaterial,
+                                                                         *theMaterial,
                                                                           bodyforces[0],
                                                                           bodyforces[1],
                                                                           bodyforces[2]);

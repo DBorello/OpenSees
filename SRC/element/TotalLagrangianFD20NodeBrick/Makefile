@@ -6,10 +6,10 @@ all:         $(OBJS)
 
 # Miscellaneous
 tidy:	
-	@$(RM) $(RMFLAGS) Makefile.bak 
+	@$(RM) $(RMFLAGS) Makefile.bak
 
 clean: tidy
-	@$(RM) $(RMFLAGS) $(OBJS) 
+	@$(RM) $(RMFLAGS) $(OBJS) *.o 
 	@$(RM) $(RMFLAGS) *.o
 	@$(RM) $(RMFLAGS) .inslog*
 	@$(RM) $(RMFLAGS) tca.map
