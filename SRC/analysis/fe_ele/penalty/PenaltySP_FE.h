@@ -18,16 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2004-10-12 21:55:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltySP_FE.h,v $
                                                                         
                                                                         
 #ifndef PenaltySP_FE_h
 #define PenaltySP_FE_h
 
-// File: ~/analysis/fe_ele/penalty/PenaltySP_FE.h
-// 
 // Written: fmk 
 // Created: 11/96
 // Revision: A
@@ -61,7 +59,11 @@ class PenaltySP_FE: public FE_Element
     virtual const Matrix &getTangent(Integrator *theIntegrator);
     virtual const Vector &getResidual(Integrator *theIntegrator);
     virtual const Vector &getTangForce(const Vector &x, double fact = 1.0);
-    
+
+    virtual const Vector &getK_Force(const Vector &x, double fact = 1.0);
+    virtual const Vector &getC_Force(const Vector &x, double fact = 1.0);
+    virtual const Vector &getM_Force(const Vector &x, double fact = 1.0);    
+
   protected:
     
   private:

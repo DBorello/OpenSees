@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:00:45 $
+// $Revision: 1.4 $
+// $Date: 2004-10-12 21:55:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltySP_FE.cpp,v $
                                                                         
                                                                         
@@ -159,12 +159,36 @@ PenaltySP_FE::getTangForce(const Vector &disp, double fact)
     if (constrainedID < 0 || constrainedID >= disp.Size()) {
 	opserr << "WARNING PenaltySP_FE::getTangForce() - ";	
 	opserr << " constrained DOF " << constrainedID << " outside disp\n";
-	(*resid)(0) = constraint*alpha;
+	(*resid)(0) = 0.0;
 	return *resid;
     }
-    (*resid)(0) = alpha * constraint - alpha * disp(constrainedID);
+    (*resid)(0) = alpha * disp(constrainedID);
 
     return *resid;
+}
+
+const Vector &
+PenaltySP_FE::getK_Force(const Vector &disp, double fact)
+{
+  opserr << "WARNING PenaltySP_FE::getK_Force() - not yet implemented\n";
+  (*resid)(0) = 0.0;
+  return *resid;
+}
+
+const Vector &
+PenaltySP_FE::getC_Force(const Vector &disp, double fact)
+{
+  opserr << "WARNING PenaltySP_FE::getC_Force() - not yet implemented\n";
+  (*resid)(0) = 0.0;
+  return *resid;
+}
+
+const Vector &
+PenaltySP_FE::getM_Force(const Vector &disp, double fact)
+{
+  opserr << "WARNING PenaltySP_FE::getM_Force() - not yet implemented\n";
+  (*resid)(0) = 0.0;
+  return *resid;
 }
 
 

@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:45 $
+// $Revision: 1.3 $
+// $Date: 2004-10-12 21:55:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/lagrange/LagrangeMP_FE.cpp,v $
                                                                         
                                                                         
-// File: ~/analysis/fe_ele/lagrange/LagrangeMP_FE.C
-//
 // Written: fmk 
 // Created: 02/99
 // Revision: A
@@ -234,8 +232,29 @@ LagrangeMP_FE::getResidual(Integrator *theNewIntegrator)
 const Vector &
 LagrangeMP_FE::getTangForce(const Vector &disp, double fact)
 {
-    // does nothing , zero residual for CD = 0
-    return *resid;
+ opserr << "WARNING LagrangeSP_FE::getTangForce() - not yet implemented\n";
+ return *resid;
+}
+
+const Vector &
+LagrangeMP_FE::getK_Force(const Vector &disp, double fact)
+{
+ opserr << "WARNING LagrangeSP_FE::getK_Force() - not yet implemented\n";
+ return *resid;
+}
+
+const Vector &
+LagrangeMP_FE::getC_Force(const Vector &disp, double fact)
+{
+ opserr << "WARNING LagrangeSP_FE::getC_Force() - not yet implemented\n";
+ return *resid;
+}
+
+const Vector &
+LagrangeMP_FE::getM_Force(const Vector &disp, double fact)
+{
+ opserr << "WARNING LagrangeSP_FE::getM_Force() - not yet implemented\n";
+ return *resid;
 }
 
 void  

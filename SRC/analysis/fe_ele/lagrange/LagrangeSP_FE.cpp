@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:45 $
+// $Revision: 1.3 $
+// $Date: 2004-10-12 21:55:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/lagrange/LagrangeSP_FE.cpp,v $
                                                                         
-                                                                        
-// File: ~/analysis/fe_ele/lagrange/LagrangeSP_FE.C
-//
 // Written: fmk 
 // Created: 02/99
 // Revision: A
@@ -172,8 +169,28 @@ LagrangeSP_FE::getTangForce(const Vector &disp, double fact)
 	(*resid)(1) = constraint*alpha;
 	return *resid;
     }
-    (*resid)(1) = alpha * (constraint - disp(constrainedID));
+    (*resid)(1) = disp(constrainedID);
     return *resid;    
 }
 
+const Vector &
+LagrangeSP_FE::getK_Force(const Vector &disp, double fact)
+{
+ opserr << "WARNING PenaltySP_FE::getK_Force() - not yet implemented\n";
+ return *resid;
+}
+
+const Vector &
+LagrangeSP_FE::getC_Force(const Vector &disp, double fact)
+{
+ opserr << "WARNING PenaltySP_FE::getC_Force() - not yet implemented\n";
+ return *resid;
+}
+
+const Vector &
+LagrangeSP_FE::getM_Force(const Vector &disp, double fact)
+{
+ opserr << "WARNING PenaltySP_FE::getM_Force() - not yet implemented\n";
+ return *resid;
+}
 

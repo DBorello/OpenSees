@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2004-04-15 22:29:43 $
+// $Revision: 1.14 $
+// $Date: 2004-10-12 21:55:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -293,9 +293,9 @@ FE_Element::getTangent(Integrator *theNewIntegrator)
 	exit(-1);
     }
 
-
     if (myEle->isSubdomain() == false) {
-      theNewIntegrator->formEleTangent(this);	    	    
+      if (theNewIntegrator != 0)
+	theNewIntegrator->formEleTangent(this);	    	    
       return *theTangent;
     } else {
       Subdomain *theSub = (Subdomain *)myEle;
@@ -542,6 +542,122 @@ FE_Element::getTangForce(const Vector &disp, double fact)
 	return errVector;	
     }    	            
 }
+
+
+
+const Vector &
+FE_Element::getK_Force(const Vector &disp, double fact)
+{
+    if (myEle != 0) {    
+
+	// zero out the force vector
+	theResidual->Zero();
+
+	// check for a quick return
+	if (fact == 0.0) 
+	    return *theResidual;
+
+	// get the components we need out of the vector
+	// and place in a temporary vector
+	Vector tmp(numDOF);
+	for (int i=0; i<numDOF; i++) {
+	  int dof = myID(i);
+	  if (dof >= 0)
+	    tmp(i) = disp(myID(i));
+	  else
+	    tmp(i) = 0.0;
+	}
+
+	if (theResidual->addMatrixVector(1.0, myEle->getTangentStiff(), tmp, fact) < 0){
+	  opserr << "WARNING FE_Element::getKForce() - ";
+	  opserr << "- addMatrixVector returned error\n";		 
+	}		
+
+	return *theResidual;
+    }
+    else {
+	opserr << "WARNING FE_Element::getKForce() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
+	return errVector;	
+    }    	            
+}
+
+const Vector &
+FE_Element::getM_Force(const Vector &disp, double fact)
+{
+
+    if (myEle != 0) {    
+
+	// zero out the force vector
+	theResidual->Zero();
+
+	// check for a quick return
+	if (fact == 0.0) 
+	    return *theResidual;
+
+	// get the components we need out of the vector
+	// and place in a temporary vector
+	Vector tmp(numDOF);
+	for (int i=0; i<numDOF; i++) {
+	  int dof = myID(i);
+	  if (dof >= 0)
+	    tmp(i) = disp(myID(i));
+	  else
+	    tmp(i) = 0.0;
+	}
+
+	if (theResidual->addMatrixVector(1.0, myEle->getMass(), tmp, fact) < 0){
+	  opserr << "WARNING FE_Element::getMForce() - ";
+	  opserr << "- addMatrixVector returned error\n";		 
+	}		
+
+
+	return *theResidual;
+    }
+    else {
+	opserr << "WARNING FE_Element::getMForce() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
+	return errVector;	
+    }    	            
+}
+
+const Vector &
+FE_Element::getC_Force(const Vector &disp, double fact)
+{
+    if (myEle != 0) {    
+
+	// zero out the force vector
+	theResidual->Zero();
+
+	// check for a quick return
+	if (fact == 0.0) 
+	    return *theResidual;
+
+	// get the components we need out of the vector
+	// and place in a temporary vector
+	Vector tmp(numDOF);
+	for (int i=0; i<numDOF; i++) {
+	  int dof = myID(i);
+	  if (dof >= 0)
+	    tmp(i) = disp(myID(i));
+	  else
+	    tmp(i) = 0.0;
+	}
+
+	if (theResidual->addMatrixVector(1.0, myEle->getDamp(), tmp, fact) < 0){
+	  opserr << "WARNING FE_Element::getDForce() - ";
+	  opserr << "- addMatrixVector returned error\n";		 
+	}		
+
+	return *theResidual;
+    }
+    else {
+	opserr << "WARNING FE_Element::getDForce() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
+	return errVector;	
+    }    	            
+}
+
 
 
 Integrator *
