@@ -1,9 +1,9 @@
 //<<<<<<< PressureDependMultiYield.h
-// $Revision: 1.12 $
-// $Date: 2002-08-14 01:26:43 $
+// $Revision: 1.13 $
+// $Date: 2002-08-26 15:41:01 $
 //=======
-// $Revision: 1.12 $
-// $Date: 2002-08-14 01:26:43 $
+// $Revision: 1.13 $
+// $Date: 2002-08-26 15:41:01 $
 //>>>>>>> 1.7
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
                                                                         

@@ -1,5 +1,5 @@
-// $Revision: 1.11 $
-// $Date: 2002-08-14 01:26:42 $
+// $Revision: 1.12 $
+// $Date: 2002-08-26 15:40:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
