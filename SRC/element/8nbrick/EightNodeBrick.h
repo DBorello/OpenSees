@@ -300,7 +300,7 @@ class EightNodeBrick: public Element
 
     void set_strain_stress_tensor(FILE *fp, double * u);
     tensor getMassTensor(void);
-    double Potential_Energy(void);
+//out19Jan2001     double Potential_Energy(void);
 
     tensor Jacobian_3D(tensor dh);
     tensor Jacobian_3Dinv(tensor dh);

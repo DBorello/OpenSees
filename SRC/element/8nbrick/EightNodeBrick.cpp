@@ -445,7 +445,7 @@ void EightNodeBrick::incremental_Update()
     int dh_dim[] = {8,3};   //Xiaoyan changed from {20,3} to {8,3}  07/12/00
     tensor dh(2, dh_dim, 0.0);
 
-    tensor Constitutive( 4, def_dim_4, 0.0);
+//    tensor Constitutive( 4, def_dim_4, 0.0);
 
     //    double det_of_Jacobian = 0.0;
 
@@ -453,7 +453,7 @@ void EightNodeBrick::incremental_Update()
     tensor incremental_displacements(2,disp_dim,0.0);
 
     straintensor incremental_strain;
-    straintensor total_strain_at_GP;
+//    straintensor total_strain_at_GP;
 
     tensor Jacobian;
     tensor JacobianINV;
@@ -463,7 +463,7 @@ void EightNodeBrick::incremental_Update()
     //....    double this_one_PP = 1.0; // if set to 0.0 -> perfectly plastic
     //....                              // if set to 1.0 -> elasto plastic
 
-    stresstensor final_stress_after_integration;
+//    stresstensor final_stress_after_integration;
     
     ///    stresstensor incremental_stress;
     // tensor of incremental displacements taken from node objects
@@ -1052,7 +1052,7 @@ tensor EightNodeBrick::getStiffnessTensor(void)
     tensor Kk(4,K_dim,0.0);
 
     //debugging
-    matrix Kmat;
+//    matrix Kmat;
 
     double r  = 0.0;
     double rw = 0.0;
@@ -1076,7 +1076,7 @@ tensor EightNodeBrick::getStiffnessTensor(void)
     tensor incremental_displacements(2,disp_dim,0.0); // \Delta u
 
     straintensor incremental_strain;
-    straintensor total_strain_at_GP;
+//    straintensor total_strain_at_GP;
 
     tensor Jacobian;
     tensor JacobianINV;
@@ -1089,8 +1089,8 @@ tensor EightNodeBrick::getStiffnessTensor(void)
     //    tensor Ktemp(4,K_dim,0.0);
     //    char * integr_type = 0;
 
-    stresstensor final_stress_after_integration;
-    stresstensor incremental_stress;
+//    stresstensor final_stress_after_integration;
+//    stresstensor incremental_stress;
     
     // tensor of incremental displacements taken from node objects
     //incremental_displacements = incr_disp();
@@ -1272,7 +1272,7 @@ void EightNodeBrick::set_strain_stress_tensor(FILE *fp, double * u)
     double t  = 0.0;
     int where = 0;
 
-    double det_of_Jacobian = 0.0;
+    double det_of_Jacobian;
 
     straintensor strain;
     stresstensor stress;
@@ -1465,105 +1465,105 @@ tensor EightNodeBrick::getMassTensor(void)
   }
 
 
-////#############################################################################
-// Not for OpenSees
-double EightNodeBrick::Potential_Energy(void)
-  {
-//    double Potential_Energy_Estimate = 0.0;
-    double Delta_Potential_Energy_Estimate = 0.0;
-
-    double r  = 0.0;
-    double rw = 0.0;
-    double s  = 0.0;
-    double sw = 0.0;
-    double t  = 0.0;
-    double tw = 0.0;
-
-    short where = 0;
-    double weight = 0.0;
-
-    int dh_dim[] = {8,3};	// Xiaoyan changed from {20,3} to {8,3}
-    tensor dh(2, dh_dim, 0.0);
-
-    static int disp_dim[] = {8,3};	// Xiaoyan changed from {20,3} to {8,3}
-    tensor incremental_displacements(2,disp_dim,0.0); // \Delta u
-
-    double det_of_Jacobian = 0.0;
-
-    straintensor incremental_strain;
-//    straintensor total_strain_at_GP;
-
-    tensor Jacobian;
-    tensor JacobianINV;
-    tensor dhGlobal;
-
-    stresstensor stress_sum;
-// tensor of incremental displacements taken from node objects
-    incremental_displacements = incr_disp();
-
-    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
-      {
-        r = get_Gauss_p_c( r_integration_order, GP_c_r );
-        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
-          {
-            s = get_Gauss_p_c( s_integration_order, GP_c_s );
-            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
-              {
-                t = get_Gauss_p_c( t_integration_order, GP_c_t );
-                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
-                // this short routine is supposed to calculate position of
-                // Gauss point from 3D array of short's
-                where =
-                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
-                // derivatives of local coordinates with respect to local coordinates
-                dh = dh_drst_at(r,s,t);
-                // Jacobian tensor ( matrix )
-                Jacobian = Jacobian_3D(dh);
-                //....                Jacobian.print("J");
-                // Inverse of Jacobian tensor ( matrix )
-                JacobianINV = Jacobian_3Dinv(dh);
-                //....                JacobianINV.print("JINV");
-                // determinant of Jacobian tensor ( matrix )
-                det_of_Jacobian  = Jacobian.determinant();
-                //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
-                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
-                //weight
-                weight = rw * sw * tw * det_of_Jacobian;
-                //::::::   ::printf("\n\nIN THE STIFFNESS TENSOR INTEGRATOR ----**************** where = %d \n", where);
-                //::fprintf(stdout," Potential_Energy\n");
-                //::fprintf(stdout,"                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
-                //                                      GP_c_r,GP_c_s,GP_c_t);
-                //::fprintf(stdout,"WEIGHT = %f", weight);
-                //::fprintf(stdout,"determinant of Jacobian = %f", determinant_of_Jacobian);
-                //::::::   matpoint[where].report("Gauss Point\n");
-                //::::::
-                // incremental straines at this Gauss point
-                //----   GPstress[where].reportshortpqtheta("\n stress at GAUSS point in stiffness_tensor1\n");
-                incremental_strain =
-                 (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-                incremental_strain.null_indices();
-                //GPstress[where].reportshortpqtheta("\n stress at GAUSS point in Potential_Energy\n");
-                //GPiterative_stress[where].reportshortpqtheta("\n ITERATIVE stress at GAUSS point in Potential_Energy\n");
-
-                //stress_sum = GPstress[where] + GPiterative_stress[where];
-                stress_sum = matpoint[where]->getStressTensor() 
-		                + (matpoint[where]->matmodel->getEPS())->getStress_commit(); //????? 
-                
-		//stress_sum.reportshortpqtheta("\n ITERATIVE stress_SUM at GAUSS point in Potential_Energy\n");
-
-                Delta_Potential_Energy_Estimate += weight * (stress_sum("ij")*incremental_strain("ij")).trace();
-                //         Potential_Energy_Estimate =
-
-              }
-          }
-      }
-//::fprintf(stdout,"Delta_Potential_Energy_Estimate = %.20e \n",Delta_Potential_Energy_Estimate);
-    return Delta_Potential_Energy_Estimate;
-  }
-
+//out19Jan2001 ////#############################################################################
+//out19Jan2001 // Not for OpenSees
+//out19Jan2001 double EightNodeBrick::Potential_Energy(void)
+//out19Jan2001   {
+//out19Jan2001 //    double Potential_Energy_Estimate = 0.0;
+//out19Jan2001     double Delta_Potential_Energy_Estimate = 0.0;
+//out19Jan2001 
+//out19Jan2001     double r  = 0.0;
+//out19Jan2001     double rw = 0.0;
+//out19Jan2001     double s  = 0.0;
+//out19Jan2001     double sw = 0.0;
+//out19Jan2001     double t  = 0.0;
+//out19Jan2001     double tw = 0.0;
+//out19Jan2001 
+//out19Jan2001     short where = 0;
+//out19Jan2001     double weight = 0.0;
+//out19Jan2001 
+//out19Jan2001     int dh_dim[] = {8,3};	// Xiaoyan changed from {20,3} to {8,3}
+//out19Jan2001     tensor dh(2, dh_dim, 0.0);
+//out19Jan2001 
+//out19Jan2001     static int disp_dim[] = {8,3};	// Xiaoyan changed from {20,3} to {8,3}
+//out19Jan2001     tensor incremental_displacements(2,disp_dim,0.0); // \Delta u
+//out19Jan2001 
+//out19Jan2001     double det_of_Jacobian = 0.0;
+//out19Jan2001 
+//out19Jan2001     straintensor incremental_strain;
+//out19Jan2001 //    straintensor total_strain_at_GP;
+//out19Jan2001 
+//out19Jan2001     tensor Jacobian;
+//out19Jan2001     tensor JacobianINV;
+//out19Jan2001     tensor dhGlobal;
+//out19Jan2001 
+//out19Jan2001     stresstensor stress_sum;
+//out19Jan2001 // tensor of incremental displacements taken from node objects
+//out19Jan2001     incremental_displacements = incr_disp();
+//out19Jan2001 
+//out19Jan2001     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+//out19Jan2001       {
+//out19Jan2001         r = get_Gauss_p_c( r_integration_order, GP_c_r );
+//out19Jan2001         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
+//out19Jan2001         for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+//out19Jan2001           {
+//out19Jan2001             s = get_Gauss_p_c( s_integration_order, GP_c_s );
+//out19Jan2001             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
+//out19Jan2001             for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+//out19Jan2001               {
+//out19Jan2001                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
+//out19Jan2001                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
+//out19Jan2001                 // this short routine is supposed to calculate position of
+//out19Jan2001                 // Gauss point from 3D array of short's
+//out19Jan2001                 where =
+//out19Jan2001                 ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+//out19Jan2001                 // derivatives of local coordinates with respect to local coordinates
+//out19Jan2001                 dh = dh_drst_at(r,s,t);
+//out19Jan2001                 // Jacobian tensor ( matrix )
+//out19Jan2001                 Jacobian = Jacobian_3D(dh);
+//out19Jan2001                 //....                Jacobian.print("J");
+//out19Jan2001                 // Inverse of Jacobian tensor ( matrix )
+//out19Jan2001                 JacobianINV = Jacobian_3Dinv(dh);
+//out19Jan2001                 //....                JacobianINV.print("JINV");
+//out19Jan2001                 // determinant of Jacobian tensor ( matrix )
+//out19Jan2001                 det_of_Jacobian  = Jacobian.determinant();
+//out19Jan2001                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
+//out19Jan2001                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+//out19Jan2001                 dhGlobal = dh("ij") * JacobianINV("jk");
+//out19Jan2001                 //weight
+//out19Jan2001                 weight = rw * sw * tw * det_of_Jacobian;
+//out19Jan2001                 //::::::   ::printf("\n\nIN THE STIFFNESS TENSOR INTEGRATOR ----**************** where = %d \n", where);
+//out19Jan2001                 //::fprintf(stdout," Potential_Energy\n");
+//out19Jan2001                 //::fprintf(stdout,"                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
+//out19Jan2001                 //                                      GP_c_r,GP_c_s,GP_c_t);
+//out19Jan2001                 //::fprintf(stdout,"WEIGHT = %f", weight);
+//out19Jan2001                 //::fprintf(stdout,"determinant of Jacobian = %f", determinant_of_Jacobian);
+//out19Jan2001                 //::::::   matpoint[where].report("Gauss Point\n");
+//out19Jan2001                 //::::::
+//out19Jan2001                 // incremental straines at this Gauss point
+//out19Jan2001                 //----   GPstress[where].reportshortpqtheta("\n stress at GAUSS point in stiffness_tensor1\n");
+//out19Jan2001                 incremental_strain =
+//out19Jan2001                  (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+//out19Jan2001                 incremental_strain.null_indices();
+//out19Jan2001                 //GPstress[where].reportshortpqtheta("\n stress at GAUSS point in Potential_Energy\n");
+//out19Jan2001                 //GPiterative_stress[where].reportshortpqtheta("\n ITERATIVE stress at GAUSS point in Potential_Energy\n");
+//out19Jan2001 
+//out19Jan2001                 //stress_sum = GPstress[where] + GPiterative_stress[where];
+//out19Jan2001                 stress_sum = matpoint[where]->getStressTensor() 
+//out19Jan2001 		                + (matpoint[where]->matmodel->getEPS())->getStress_commit(); //????? 
+//out19Jan2001                 
+//out19Jan2001 		//stress_sum.reportshortpqtheta("\n ITERATIVE stress_SUM at GAUSS point in Potential_Energy\n");
+//out19Jan2001 
+//out19Jan2001                 Delta_Potential_Energy_Estimate += weight * (stress_sum("ij")*incremental_strain("ij")).trace();
+//out19Jan2001                 //         Potential_Energy_Estimate =
+//out19Jan2001 
+//out19Jan2001               }
+//out19Jan2001           }
+//out19Jan2001       }
+//out19Jan2001 //::fprintf(stdout,"Delta_Potential_Energy_Estimate = %.20e \n",Delta_Potential_Energy_Estimate);
+//out19Jan2001     return Delta_Potential_Energy_Estimate;
+//out19Jan2001   }
+//out19Jan2001 
 
 ////#############################################################################
 
@@ -2028,15 +2028,19 @@ tensor EightNodeBrick::nodal_forces(void)
 
 		//char *test = matpoint[where]->matmodel->getType();
 		// fmk - changing if so if into else block must be Template3Dep
-		if (strcmp(matpoint[where]->matmodel->getType(),"Template3Dep") != 0)
+//		if (strcmp(matpoint[where]->matmodel->getType(),"Template3Dep") != 0)
 		   stress_at_GP = matpoint[where]->getStressTensor();
-		else
-		{
-	           //Some thing funny happened when getting stress directly from matpoint[where], i have to do it this way!
-		   EPState *tmp_eps = ((Template3Dep *)(matpoint[where]->matmodel))->getEPS();
-		   stress_at_GP = tmp_eps->getStress();
-		   //delete tmp_eps;
-	       	}
+
+//				 stress_at_GP.report("PROBLEM");
+//				 getchar();
+
+//		else
+//		{
+//	           //Some thing funny happened when getting stress directly from matpoint[where], i have to do it this way!
+//		   EPState *tmp_eps = ((Template3Dep *)(matpoint[where]->matmodel))->getEPS();
+//		   stress_at_GP = tmp_eps->getStress();
+//		   //delete tmp_eps;
+//	       	}
 		
            	//double  p = stress_at_GP.p_hydrostatic();
                 //if ( p < 0.0 ) 
@@ -3006,17 +3010,23 @@ int EightNodeBrick::commitState ()
          //if (i == 4 && strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
          stresstensor st;
 	 stresstensor prin;
-	 if (strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
-         {
-      	  st = ( ((Template3Dep *)(matpoint[i]->matmodel))->getEPS())->getStress();
-      	  prin = st.principal();
-	 }
-	 else
-	 {
-       	  st = matpoint[i]->getStressTensor();
-      	  prin = st.principal();
-	 
-	 }
+
+
+
+        	  st = matpoint[i]->getStressTensor();
+
+
+//out22Jan2001	 if (strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
+//out22Jan2001          {
+//out22Jan2001       	  st = ( ((Template3Dep *)(matpoint[i]->matmodel))->getEPS())->getStress();
+//out22Jan2001       	  prin = st.principal();
+//out22Jan2001 	 }
+//out22Jan2001 	 else
+//out22Jan2001 	 {
+//out22Jan2001        	  st = matpoint[i]->getStressTensor();
+//out22Jan2001       	  prin = st.principal();
+//out22Jan2001 	 
+//out22Jan2001 	 }
       
 	  //double  p = st.p_hydrostatic();
 	  //double  p = -1*( prin.cval(1, 1)+ prin.cval(2, 2) +prin.cval(3, 3) )/3.0;
