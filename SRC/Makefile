@@ -219,7 +219,6 @@ SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/GenericSection1d.o \
 	$(FE)/material/section/GenericSectionNd.o \
 	$(FE)/material/section/fiber/Fiber.o \
-	$(FE)/material/section/fiber/UniaxialFiber.o \
 	$(FE)/material/section/fiber/UniaxialFiber2d.o \
 	$(FE)/material/section/fiber/UniaxialFiber3d.o \
 	$(FE)/material/section/repres/patch/Patch.o \
