@@ -1,5 +1,5 @@
-// $Revision: 1.8 $
-// $Date: 2002-05-16 00:07:47 $
+// $Revision: 1.9 $
+// $Date: 2002-08-14 01:26:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -31,7 +31,8 @@ public:
 				 double frictionAng = 0.,
 				 double refPress = 100, 
 				 double pressDependCoe = 0.0,
-				 int   numberOfYieldSurf = 20);
+				 int   numberOfYieldSurf = 20,
+				 double * gredu = 0);
 
      // Default constructor
      PressureIndependMultiYield ();
@@ -55,6 +56,8 @@ public:
      // Calculates current tangent stiffness.
      const Matrix &getTangent (void);
         
+     void getBackbone (Matrix &);
+
      // Calculates the corresponding stress increment (rate), for a given strain increment. 
      const Vector &getStress (void);
      const Vector &getStrain (void);
@@ -90,7 +93,8 @@ public:
      int sendSelf(int commitTag, Channel &theChannel);  
      int recvSelf(int commitTag, Channel &theChannel, 
 		  FEM_ObjectBroker &theBroker);    
-    
+
+     Response *setResponse (char **argv, int argc, Information &matInfo);
      int getResponse (int responseID, Information &matInformation);
      void Print(ostream &s, int flag =0);
 
@@ -130,7 +134,7 @@ private:
 
 	void elast2Plast(void);
 	// Called by constructor
-	void setUpSurfaces(void);  
+	void setUpSurfaces(double *);  
 
 	double yieldFunc(const T2Vector & stress, const MultiYieldSurface * surfaces, 
 			 int surface_num);

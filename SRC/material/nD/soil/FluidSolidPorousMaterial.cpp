@@ -1,5 +1,5 @@
-// $Revision: 1.10 $
-// $Date: 2002-06-10 22:22:23 $
+// $Revision: 1.11 $
+// $Date: 2002-08-14 01:26:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -392,11 +392,14 @@ FluidSolidPorousMaterial::setResponse (char **argv, int argc, Information &matIn
     else if (strcmp(argv[0],"strain") == 0 || strcmp(argv[0],"strains") == 0)
 		return new MaterialResponse(this, 2, this->getCommittedStrain());
     
-	else if (strcmp(argv[0],"tangent") == 0)
+	  else if (strcmp(argv[0],"tangent") == 0)
 		return new MaterialResponse(this, 3, this->getTangent());
 
+	  else if (strcmp(argv[0],"backbone") == 0)
+    return theSoilMaterial->setResponse(argv, argc, matInfo);
+
     else if (strcmp(argv[0],"pressure") == 0)
-		return new MaterialResponse(this, 4, this->getCommittedPressure());
+		return new MaterialResponse(this, 5, this->getCommittedPressure());
 
     else
 		return 0;
@@ -416,6 +419,9 @@ int FluidSolidPorousMaterial::getResponse (int responseID, Information &matInfo)
 			return matInfo.setMatrix(this->getTangent());
 			
 		case 4:
+			return theSoilMaterial->getResponse(responseID, matInfo);
+
+		case 5:
 			return matInfo.setVector(this->getCommittedPressure());
 
 		default:

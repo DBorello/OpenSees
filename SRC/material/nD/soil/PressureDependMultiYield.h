@@ -1,9 +1,9 @@
 //<<<<<<< PressureDependMultiYield.h
-// $Revision: 1.11 $
-// $Date: 2002-06-10 22:22:25 $
+// $Revision: 1.12 $
+// $Date: 2002-08-14 01:26:43 $
 //=======
-// $Revision: 1.11 $
-// $Date: 2002-06-10 22:22:25 $
+// $Revision: 1.12 $
+// $Date: 2002-08-14 01:26:43 $
 //>>>>>>> 1.7
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
                                                                         
@@ -45,10 +45,11 @@ public:
 			       double liquefactionParam2,
 			       double liquefactionParam4,
 			       int   numberOfYieldSurf = 20,
+						 double * gredu = 0,
 		         double e = 0.6,
-			       double volLimit1 = 0.8,
-			       double volLimit2 = 0.2,
-			       double volLimit3 = 0.2,
+			       double volLimit1 = 0.9,
+			       double volLimit2 = 0.02,
+			       double volLimit3 = 0.7,
 			       double atm = 101.,
 						 double cohesi = 0.5);
 
@@ -75,6 +76,8 @@ public:
      // Calculates current tangent stiffness.
      const Matrix &getTangent (void);
         
+     void getBackbone (Matrix &);
+
      // Calculates the corresponding stress increment (rate), for a given strain increment. 
      const Vector &getStress (void);
      const Vector &getStrain (void);
@@ -110,6 +113,7 @@ public:
      int sendSelf(int commitTag, Channel &theChannel);  
      int recvSelf(int commitTag, Channel &theChannel, 
 		  FEM_ObjectBroker &theBroker);    
+     Response *setResponse (char **argv, int argc, Information &matInfo);
      int getResponse (int responseID, Information &matInformation);
      void Print(ostream &s, int flag =0);
      //void setCurrentStress(const Vector stress) { currentStress=T2Vector(stress); }
@@ -192,7 +196,7 @@ private:
      
      void elast2Plast(void);
      // Called by constructor
-     void setUpSurfaces(void);  
+     void setUpSurfaces(double *);  
      double yieldFunc(const T2Vector & stress, const MultiYieldSurface * surfaces, 
 		      int surface_num);
      void deviatorScaling(T2Vector & stress, const MultiYieldSurface * surfaces, 
