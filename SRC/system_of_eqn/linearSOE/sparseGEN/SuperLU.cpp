@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-03-31 22:07:07 $
+// $Revision: 1.6 $
+// $Date: 2005-04-01 19:56:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SuperLU.cpp,v $
                                                                         
                                                                         
@@ -159,7 +159,6 @@ SuperLU::solve(void)
 	int info;
 
 	if (L.ncol != 0 && symmetric == 'N') {
-	  opserr << "HI\n";
 	  Destroy_SuperNode_Matrix(&L);
 	  Destroy_CompCol_Matrix(&U);	  
 	}
