@@ -155,6 +155,7 @@ class Template3Dep : public NDMaterial
     NDMaterial *getCopy(void);
     NDMaterial *getCopy(const char *code) ;
 
+
     //Template3Dep getCopy(void);  //????/
     //Template3Dep getCopy(const char *code) ;///???/
 

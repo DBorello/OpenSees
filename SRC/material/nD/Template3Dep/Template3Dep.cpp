@@ -1019,6 +1019,10 @@ EPS->setConverged(rval.getConverged());
 
 
 
+
+
+
+
 //================================================================================
 // Get the Yield Surface
 //================================================================================
@@ -1877,7 +1881,11 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
 
   double Fold = 0.0;
   tensor temp3lower;
+  tensor temp4lower;
+  tensor temp5lower;
   tensor temp5;
+  tensor Ttemp6;
+  tensor Ttemp7;
   double temp6 = 0.0;
   double upper = 0.0;
 
@@ -2216,9 +2224,12 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           //outfornow          d2Qodqast = d2Qoverdqast(elastic_plastic_predictor_stress);
           //outfornow          dQodsextended = dQods + d2Qodqast * Delta_lambda * h_;
           //outfornow          temp3lower = dFods("mn")*Tinv("ijmn")*E("ijkl")*dQodsextended("kl");
-          temp3lower = dFods("mn")*Tinv("ijmn")*E("ijkl")*dQods("kl");
-          temp3lower.null_indices();
-          lower = temp3lower.trace();	  
+//          temp3lower = dFods("mn")*Tinv("ijmn")*E("ijkl")*dQods("kl"); (fails with new g++...
+          temp3lower = dFods("mn")*Tinv("ijmn");
+          temp4lower = E("ijkl")*dQods("kl");
+          temp5lower = temp3lower("ij")* temp4lower("ij");
+          temp5lower.null_indices();
+          lower = temp5lower.trace();	  
           lower = lower - hardMod_;
 
           temp5 = (residual("ij") * Tinv("ijmn")) * dFods("mn");
@@ -2244,8 +2255,11 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           //outfornow            ((residual("ij")*Tinv("ijmn"))+
           //outfornow            ((E("ijkl")*dQodsextended("kl"))*Tinv("ijmn")*Delta_lambda) )*-1.0;
           //::printf("    Delta_lambda = %.8e\n", Delta_lambda);
-          dsigma = ( (residual("ij")*Tinv("ijmn") )+
-                   ( (E("ijkl")*dQods("kl"))*Tinv("ijmn")*delta_lambda) )*(-1.0); //*-1.0???
+//          dsigma = ( (residual("ij")*Tinv("ijmn") ) +
+//                   ( (E("ijkl")*dQods("kl"))*Tinv("ijmn")*delta_lambda) )*(-1.0); //*-1.0???
+									 Ttemp6 = 	 E("ijkl")*dQods("kl");
+									 Ttemp7 =   residual("ij")*Tinv("ijmn");
+          dsigma = ( Ttemp7 + (Ttemp6("ij")*Tinv("ijmn")*delta_lambda) )*(-1.0); //*-1.0???
 
           dsigma.null_indices();
 	  //dsigma.reportshortpqtheta("\n......dsigma ");
@@ -2489,10 +2503,15 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
     	   double lower = temp3lower.trace();
     	   lower = lower - hardMod_;  // h
     	      
-    	   tensor upper = R("pqkl")*dQods("kl")*dFods("ij")*R("ijmn");
-    	   upper.null_indices();
-    	   tensor Ep = upper*(1./lower);
+//    	   tensor upper = R("pqkl")*dQods("kl")*dFods("ij")*R("ijmn");
+//									 fprintf(stderr,"line 2507 Template3Dep.cpp\n");
+    	   temp5  = R("pqkl")*dQods("kl");
+    	   Ttemp6 = dFods("ij")*R("ijmn");
+    	   tensor Tupper = temp5("pq")*Ttemp6("mn");
+    	   Tupper.null_indices();
+    	   tensor Ep = Tupper*(1./lower);
     	   tensor Eep =  R - Ep; // elastoplastic constitutive tensor
+//									 fprintf(stderr,"line 2514 Template3Dep.cpp\n");
 
            //Set Elasto-Plastic stiffness tensor
            EP_PredictorEPS.setEep(Eep);
@@ -2927,7 +2946,6 @@ ostream& operator<< (ostream& os, const Template3Dep & MP)
     os << endln;           
     return os;
 }  
-
 
 #endif
 
