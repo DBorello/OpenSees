@@ -224,7 +224,12 @@ MATMOD_BJ_LIBS = $(FE)/material/nD/ElasticIsotropic3D.o  \
                  $(FE)/material/nD/Template3Dep/EL_NLEeq.o  \
                  $(FE)/material/nD/Template3Dep/EL_LEeq.o  \
                  $(FE)/material/nD/Template3Dep/EL_NLEij.o \
-                 $(FE)/material/nD/Template3Dep/EL_LEij.o
+                 $(FE)/material/nD/Template3Dep/EL_LEij.o \
+                 $(FE)/material/nD/Template3Dep/RMC01.o  \
+                 $(FE)/material/nD/Template3Dep/RMC01_YS.o  \
+                 $(FE)/material/nD/Template3Dep/RMC01_PS.o
+
+
 
 ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
                   $(FE)/element/8nbrick/TclEightNodeBrickCommand.o \
