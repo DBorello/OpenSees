@@ -198,6 +198,7 @@ ElasticCrossAnisotropic::setTrialStrainIncr (const Tensor &v, const Tensor &r)
 const Tensor&
 ElasticCrossAnisotropic::getTangentTensor (void)
 {
+   //Dt.print();
    return Dt;
 }
 
@@ -370,9 +371,9 @@ void ElasticCrossAnisotropic::setInitElasticStiffness(void)
 //  |Sxx|    | 1/Eh     -nuhh/Eh -nuhv/Ev     0       0     0    |
 //  |Syy|    |-nuhh/Eh    1/Eh   -nuhv/Ev     0       0     0    |
 //  |Szz|    |-nuhv/Ev  -nuhv/Ev   1/Ev       0       0     0    |
-//  |Sxy| C= |   0         0       0 2(1+nuhh)/Eh     0     0    |
-//  |Sxz|    |   0         0       0         0   1/(2Ghv)   0    |
-//  |Syz|    |   0         0       0         0        0  1/(2Ghv)|
+//  |Sxy| C= |   0         0       0  2(1+nuhh)/Eh     0     0    |
+//  |Sxz|    |   0         0       0         0     1/(Ghv)   0    |
+//  |Syz|    |   0         0       0         0         0   1/(Ghv)|
 //
    // Form compliance matrix D
    double A = 1.0/Eh;
@@ -382,8 +383,9 @@ void ElasticCrossAnisotropic::setInitElasticStiffness(void)
    D(2,2) = B;
    D(0,1) = D(1,0) = -nuhh*A;
    D(0,2) = D(2,0) = D(1,2) = D(2,1) = -nuhv*B;
-   D(3,3) = 2.0*(1.0+nuhh)*A;
-   D(4,4) = D(5,5) = 0.5/Ghv;
+   D(3,3) = 2*(1.0+nuhh)*A;
+   //D(4,4) = D(5,5) = 0.5/Ghv;
+   D(4,4) = D(5,5) = 1.0/Ghv;
    //opserr << " C " << D;
 
    // Do invertion once to get Elastic matrix D
