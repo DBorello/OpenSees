@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2002-12-16 21:10:01 $
+// $Revision: 1.16 $
+// $Date: 2002-12-19 21:31:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -402,7 +402,7 @@ DispBeamColumn2d::getTangentStiff()
 }
 
 const Matrix&
-DispBeamColumn2d::getInitialStiff()
+DispBeamColumn2d::getInitialBasicStiff()
 {
   static Matrix kb(3,3);
 
@@ -470,6 +470,14 @@ DispBeamColumn2d::getInitialStiff()
     }
     
   }
+
+  return kb;
+}
+
+const Matrix&
+DispBeamColumn2d::getInitialStiff()
+{
+  const Matrix &kb = this->getInitialBasicStiff();
 
   // Transform to global stiffness
   K = crdTransf->getInitialGlobalStiffMatrix(kb);
@@ -976,6 +984,15 @@ DispBeamColumn2d::setResponse(char **argv, int argc, Information &eleInfo)
     // local force -
     else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
 		return new ElementResponse(this, 2, P);
+
+    // chord rotation -
+    else if (strcmp(argv[0],"chordRotation") == 0 || strcmp(argv[0],"chordDeformation") == 0
+	     || strcmp(argv[0],"basicDeformation") == 0)
+      return new ElementResponse(this, 3, Vector(3));
+    
+    // plastic rotation -
+    else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0)
+      return new ElementResponse(this, 4, Vector(3));
     
     // section response -
     else if (strcmp(argv[0],"section") ==0) {
@@ -999,11 +1016,10 @@ DispBeamColumn2d::getResponse(int responseID, Information &eleInfo)
   double V;
   double L = crdTransf->getInitialLength();
 
-  switch (responseID) {
-    case 1:  // global forces
-      return eleInfo.setVector(this->getResistingForce());
+  if (responseID == 1)
+    return eleInfo.setVector(this->getResistingForce());
 
-    case 2:
+  else if (responseID == 2) {
       P(3) =  q(0);
       P(0) = -q(0)+p0[0];
       P(2) = q(1);
@@ -1012,10 +1028,25 @@ DispBeamColumn2d::getResponse(int responseID, Information &eleInfo)
       P(1) =  V+p0[1];
       P(4) = -V+p0[2];
       return eleInfo.setVector(P);
-      
-    default: 
-	  return -1;
   }
+
+  // Chord rotation
+  else if (responseID == 3)
+    return eleInfo.setVector(crdTransf->getBasicTrialDisp());
+
+  // Plastic rotation
+  else if (responseID == 4) {
+    static Vector vp(3);
+    static Vector ve(3);
+    const Matrix &kb = this->getInitialBasicStiff();
+    kb.Solve(q, ve);
+    vp = crdTransf->getBasicTrialDisp();
+    vp -= ve;
+    return eleInfo.setVector(vp);
+  }
+
+  else
+    return -1;
 }
 
 

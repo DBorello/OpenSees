@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-12-10 03:04:26 $
+// $Revision: 1.9 $
+// $Date: 2002-12-19 21:31:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn3d.h,v $
 
 // Written: MHS
@@ -94,6 +94,8 @@ class DispBeamColumn3d : public Element
   protected:
     
   private:
+    const Matrix &getInitialBasicStiff(void);
+
     int numSections;
     SectionForceDeformation **theSections; // pointer to the ND material objects
     CrdTransf3d *crdTransf;        // pointer to coordinate tranformation object 
