@@ -11,6 +11,7 @@
 # -----------------
 #  Nonlinear beam-column elements
 #  Gravity load analysis followed by pushover analysis
+#  Demonstrate scripting for the algorithmic level
 #
 # 
 # Units: kips, in, sec
@@ -61,15 +62,17 @@ for {set i 0} {$i <= $numBay} {incr i 1} {
 # CONCRETE
 # Cover concrete
 #                  tag -f'c  -epsco  -f'cu -epscu
-uniaxialMaterial Concrete01 1 -4.00  -0.002    0.0 -0.006
+# Core concrete (confined)
+uniaxialMaterial Concrete01  1  -6.0  -0.004   -5.0     -0.014
 
-# Core concrete
-uniaxialMaterial Concrete01 2 -5.20  -0.005  -4.70  -0.02
+
+# Cover concrete (unconfined)
+uniaxialMaterial Concrete01  2  -5.0   -0.002   0.0     -0.006
 
 # STEEL
 # Reinforcing steel 
 #                        tag fy   E0     b
-uniaxialMaterial Steel01  3  60 30000 0.02
+uniaxialMaterial Steel01  3  60 30000 0.015
 
 
 # Define cross-section for nonlinear columns
@@ -242,6 +245,9 @@ analysis Static
 # Perform gravity load analysis
 # ------------------------------
 
+# initialize the model, done to set initial tangent
+initialize
+
 # perform the gravity load analysis, requires 10 steps to reach the load level
 analyze 10
 
@@ -249,6 +255,8 @@ analyze 10
 # set gravity loads to be const and set pseudo time to be 0.0
 #  for start of lateral load analysis
 loadConst -time 0.0
+
+
 
 
 # ------------------------------
@@ -297,7 +305,31 @@ if {$displayMode == "displayON"} {
 integrator LoadControl 1.0 4 0.02 2.0
 
 # Perform the analysis
-analyze 200
+
+# Perform the pushover analysis
+# Set some parameters
+set maxU 10.0;	        # Max displacement
+set controlDisp 0.0;
+set ok 0;
+
+while {$controlDisp < $maxU && $ok == 0} {
+    set ok [analyze 1]
+    set controlDisp [nodeDisp 3 1]
+    if {$ok != 0} {
+	puts "... trying an initial tangent iteration"
+	test NormDispIncr 1.0e-8  4000 0
+ 	algorithm Newton -initial
+	set ok [analyze 1]
+	test NormDispIncr 1.0e-8  10 0
+	algorithm Newton
+    }
+}
+
+if {$ok != 0} {
+    puts "Pushover analysis FAILED"
+} else {
+    puts "Pushover analysis completed SUCCESSFULLY"
+}
 
 
 
