@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2004-07-15 21:34:10 $
+// $Revision: 1.17 $
+// $Date: 2005-04-03 17:14:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -452,12 +452,12 @@ FedeasMaterial::invokeSubroutine(int ist)
     break;
     
   case MAT_TAG_FedeasConcrete2:
-#ifdef _WIN32
+//BJ#ifdef _WIN32
     concrete_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 		 &sigma, &tangent, &ist);
-#else
-	opserr << "FedeasMaterial::invokeSubroutine -- Concrete2 subroutine not yet linked\n";
-#endif
+//BJ#else
+//BJ	opserr << "FedeasMaterial::invokeSubroutine -- Concrete2 subroutine not yet linked\n";
+//BJ#endif
     break;
     
   case MAT_TAG_FedeasConcrete3:
@@ -497,12 +497,12 @@ FedeasMaterial::invokeSubroutine(int ist)
     break;
     
   case MAT_TAG_FedeasSteel2:
-#ifdef _WIN32
+//BJ#ifdef _WIN32
     steel_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 	      &sigma, &tangent, &ist);
-#else
-	opserr << "FedeasMaterial::invokeSubroutine -- Steel2 subroutine not yet linked\n";
-#endif
+//BJ#else
+//BJ	opserr << "FedeasMaterial::invokeSubroutine -- Steel2 subroutine not yet linked\n";
+//BJ#endif
     break;
     
     // Add more cases as needed

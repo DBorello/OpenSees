@@ -22,7 +22,7 @@
 //# DATE:              Sept2003
 //# UPDATE HISTORY:    28May2004, Zhao put all Ks & Rs in the integration cycle and
 //#                          and use minor symmetries to make concise and efficient
-//#
+//#                    April2005 Zhao adds new output options
 //#
 //===============================================================================
 #ifndef TOTALLAGRANGIANFD20NODEBRICK_CPP
@@ -1152,6 +1152,13 @@ Response * TotalLagrangianFD20NodeBrick::setResponse (const char **argv, int arg
     else if (strcmp(argv[0],"PK2Stress") == 0 || strcmp(argv[0],"PK2stress") == 0)
       return new ElementResponse(this, 4, Vector(NumTotalGaussPts*6));
 
+    // Added ZC 01/18/2005 to output strains
+    else if (strcmp(argv[0],"EulerianStrain") == 0 || strcmp(argv[0],"strain") == 0)
+      return new ElementResponse(this, 5, Vector(NumTotalGaussPts*6));
+    
+    else if (strcmp(argv[0],"LagrangianStrain") == 0 || strcmp(argv[0],"iniStrain") == 0)
+      return new ElementResponse(this, 6, Vector(NumTotalGaussPts*6));
+
     else
       return 0;
 }
@@ -1195,6 +1202,44 @@ int TotalLagrangianFD20NodeBrick::getResponse (int responseID, Information &eleI
           P0( i*6+3 ) = sigma.val(2,3);
           P0( i*6+4 ) = sigma.val(3,1);
           P0( i*6+5 ) = sigma.val(1,2);
+        }
+        return eleInfo.setVector(P0);
+     }
+
+    // Added ZC 01/18/2005 to output strains
+     case 5: { 
+        Vector P0(NumTotalGaussPts*6);
+        tensor e;
+	tensor E;
+	tensor F;
+	tensor tI2("I", 2, def_dim_2); 
+        for (int i=0; i<NumTotalGaussPts; i++) {
+          E = theMaterial[i]->getStrainTensor();
+	  F = theMaterial[i]->getF();
+	  F = F.inverse();
+	  e = F("ki")*F("kj"); e.null_indices();
+	  e = (tI2-e) *0.5;
+          P0( i*6+0 ) = e.val(1,1);
+          P0( i*6+1 ) = e.val(2,2);
+          P0( i*6+2 ) = e.val(3,3);
+          P0( i*6+3 ) = e.val(2,3);
+          P0( i*6+4 ) = e.val(3,1);
+          P0( i*6+5 ) = e.val(1,2);
+        }
+        return eleInfo.setVector(P0);
+     }
+
+     case 6: { 
+        Vector P0(NumTotalGaussPts*6);
+        tensor E; 
+        for (int i=0; i<NumTotalGaussPts; i++) {
+          E = theMaterial[i]->getStrainTensor();
+          P0( i*6+0 ) = E.val(1,1);
+          P0( i*6+1 ) = E.val(2,2);
+          P0( i*6+2 ) = E.val(3,3);
+          P0( i*6+3 ) = E.val(2,3);
+          P0( i*6+4 ) = E.val(3,1);
+          P0( i*6+5 ) = E.val(1,2);
         }
         return eleInfo.setVector(P0);
      }

@@ -556,7 +556,7 @@ int TwentyNodeBrick_u_p_U::getResponse(int responseID, Information &eleInfo)
     GCoord = getGaussPts();
     for (i=0; i<Num_TotalGaussPts; i++) {
       for (j=0; j<Num_Dim; j++) {
-        Gpts(cnt++) = GCoord.cval(i,j);
+        Gpts(cnt++) = GCoord.cval(i+1,j+1);     //fixed '+1's, ZC 12/01/04 
       }
     }
     return eleInfo.setVector(Gpts);

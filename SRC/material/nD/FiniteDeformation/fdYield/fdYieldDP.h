@@ -33,12 +33,12 @@ class fdYieldDP : public fdYield
 {
   private:
     double FricAngle;
-    double Cohension;
+    double Cohesion;
     int ConeIndex;
     double k1;
     double k2; 
   public:
-    fdYieldDP(double FricAngle_in, double Cohension_in, int ConeIndex_in);
+    fdYieldDP(double FricAngle_in, double Cohesion_in, int ConeIndex_in = 0);
     // virtual ~fdYieldDP() {}; 
     
     fdYield *newObj();   
@@ -50,7 +50,8 @@ class fdYieldDP : public fdYield
 
     stresstensor dYods(const stresstensor &sts, const FDEPState &fdepstate ) const; 
     double dYodq(const stresstensor &sts, const FDEPState &fdepstate ) const;	    
-    
+    stresstensor dYoda(const stresstensor &sts, const FDEPState &fdepstate ) const;
+
     void print() { opserr << *this; };   
 
     friend OPS_Stream& operator<< (OPS_Stream& os, const fdYieldDP & fdydDP);

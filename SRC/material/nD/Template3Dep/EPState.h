@@ -16,6 +16,7 @@
 # DATE:              08-03-2000                                                #
 # UPDATE HISTORY:                                                              #
 #		     May 2004, Zhao Cheng spliting the elastic part	                        #
+#       MAR2005 Guanzhou adding support for  const straintensor & ElasticStrain_commitp
 #                                                                              #
 #                                                                              #
 #                                                                              #
@@ -70,7 +71,10 @@ class EPState
     // Commited state
     stresstensor Stress_commit;   // Commited stress  --total             
     straintensor Strain_commit;   // Commited strain  --total             
-    
+    straintensor ElasticStrain_commit; //GZ Mar2005
+    //straintensor PlasticStrain
+
+
     double       ScalarVar_commit[ MaxNScalarVar ]; // Commited scalar variable array for scalar hardening vars 
     //static stresstensor TensorVar_commit[ MaxNTensorVar ]; // Commited tensor variable array for tensor hardening vars     
     stresstensor TensorVar_commit[ MaxNTensorVar ]; // Commited tensor variable array for tensor hardening vars 
@@ -86,6 +90,8 @@ class EPState
     tensor       Eep_init;             // initial Elastic plastic stifness tensor
 
     bool Converged;      // Bool to indicate whether this is the converged EPState by current CDriver
+    
+    int integratorFlag; //Guanzhou Mar2005
 
 //ZC05/2004    // Flag to indicate if elastic portion is pressure dependent isotropic, pressure independent isotropic, pressure 
 //ZC05/2004    // independent cross-anisotropic or pressure dependentcross-anisotropic 
@@ -213,7 +219,8 @@ class EPState
             const tensor       &Eepp,
             const stresstensor &Stress_commitp,
             const straintensor &Strain_commitp,    
-            const double       *Scalar_commitp,
+            const straintensor & ElasticStrain_commitp,
+	    const double       *Scalar_commitp,
             const stresstensor *Tensor_commitp, 
             const tensor       &Eep_commitp,
             const stresstensor &Stress_initp,    
@@ -223,7 +230,8 @@ class EPState
             const tensor       &Eep_initp, 
             bool                Convergedp, 
 	    double              ep  = 0.85,
-	    double              psip = 0.05 );
+	    double              psip = 0.05,
+	    int flag = 0 );
 
     //Normal Constructor11
     EPState(const stresstensor  stressp,       
@@ -235,7 +243,8 @@ class EPState
             int                 NTensorp,
             const stresstensor *Tensorp, 
 	    double              ep = 0.85,
-	    double              psip = 0.05);
+	    double              psip = 0.05, 
+	    int flag = 0); //Guanzhou
 
     //Normal Constructor2
     EPState(int                 NScalarp,
@@ -267,6 +276,7 @@ class EPState
 //ZC05/2004    double getLam() const;
     double gete() const;
     double getpsi() const; //state parameter
+    int getIntegratorFlag() const; //Guanzhou Mar 2005
 //ZC05/2004    double getpo() const;
 //ZC05/2004    double geta() const;
 
@@ -282,6 +292,7 @@ class EPState
     //Get commited state vars
     stresstensor getStress_commit() const;
     straintensor getStrain_commit() const;
+    straintensor getElasticStrain_commit() const;
     double * getScalarVar_commit();
     double getScalarVar_commit(int i);
     stresstensor * getTensorVar_commit();

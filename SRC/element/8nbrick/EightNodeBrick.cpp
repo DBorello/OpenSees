@@ -25,6 +25,8 @@
 //                    Sept. - Oct 2000 connected to OpenSees by Zhaohui
 //                    Sept 2001 optimized to some extent (static tensors...)
 //                    May 2004 Guanzhou added update()
+//                    Mar2005 Guanzhou fixes EightNodeBrick::update(void)
+//
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -1336,6 +1338,7 @@ tensor EightNodeBrick::incr_disp(void)
     //const Vector &TotDis1 = theNodes[0]->getTrialDisp();
     //const Vector &incrdelDis1 = theNodes[0]->getIncrDisp();
     //Have to get IncrDeltaDisp, not IncrDisp for cumulation of incr_disp
+    
     const Vector &IncrDis1 = theNodes[0]->getIncrDeltaDisp();
     const Vector &IncrDis2 = theNodes[1]->getIncrDeltaDisp();
     const Vector &IncrDis3 = theNodes[2]->getIncrDeltaDisp();
@@ -1344,7 +1347,6 @@ tensor EightNodeBrick::incr_disp(void)
     const Vector &IncrDis6 = theNodes[5]->getIncrDeltaDisp();
     const Vector &IncrDis7 = theNodes[6]->getIncrDeltaDisp();
     const Vector &IncrDis8 = theNodes[7]->getIncrDeltaDisp();
-
 
     //if ( getTag() == 486 || getTag() == 566 || getTag() == 956)
     //{
@@ -3034,10 +3036,10 @@ const Vector &EightNodeBrick::getResistingForce ()
     //converting nodalforce tensor to vector
     for (int i = 0; i< 8; i++)
       for (int j = 0; j < 3; j++)
-  P(i *3 + j) = nodalforces.cval(i+1, j+1);
+  	P(i *3 + j) = nodalforces.cval(i+1, j+1);
 
-    //opserr << "P" << P;
-    //opserr << "Q" << Q;
+    //opserr << "P" << P << '\n';
+    //opserr << "Q" << Q << '\n';
 
     //P = P - Q;
     P.addVector(1.0, Q, -1.0);
@@ -4167,7 +4169,7 @@ double EightNodeBrick::get_Gauss_p_w(short order, short point_numb)
   }
 
 
-int EightNodeBrick::update(void) //Note: Guanzhou takes this pretty much out of incremental_Update(), Apr. 2004
+int EightNodeBrick::update(void) //Note: Guanzhou finished the algorithm consistent with global incremental calculation Mar2005
   {
 
     double r  = 0.0;
@@ -4180,16 +4182,22 @@ int EightNodeBrick::update(void) //Note: Guanzhou takes this pretty much out of 
     tensor dh(2, dh_dim, 0.0);
 
     static int disp_dim[] = {8,3};
-    tensor incr_displacements(2,disp_dim,0.0);
+    //GZ out tensor incr_displacements(2,disp_dim,0.0);
 
-    straintensor incr_strain;
+    //GZ out straintensor incr_strain;
 
     tensor Jacobian;
     tensor JacobianINV;
     tensor dhGlobal;
 
-    incr_displacements = incr_disp();//Get incrmental disp from domain
-
+    //Guanzhou out incr_displacements = incr_disp();//Get incrmental disp from domain
+    
+    tensor trial_disp(2,disp_dim,0.0);
+    trial_disp = total_disp();//Guanzhou added, get trial disp from domain
+    
+    straintensor trial_strain;
+    
+    
     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         r = get_Gauss_p_c( r_integration_order, GP_c_r );
@@ -4220,11 +4228,12 @@ int EightNodeBrick::update(void) //Note: Guanzhou takes this pretty much out of 
                 // incrmental straines at this Gauss point
                 // now in Update we know the total displacements so let's find
                 // the total strain
-                incr_strain =
-                    (dhGlobal("ib")*incr_displacements("ia")).symmetrize11();
-                incr_strain.null_indices();
+                trial_strain =
+                    (dhGlobal("ib")*trial_disp("ia")).symmetrize11();
+                trial_strain.null_indices();
 
-                if ( ( (matpoint[where]->matmodel)->setTrialStrainIncr( incr_strain)) )
+                //Guanzhou out Mar2005 if ( ( (matpoint[where]->matmodel)->setTrialStrainIncr( incr_strain)) )
+                if ( ( (matpoint[where]->matmodel)->setTrialStrain(trial_strain)) )
                   opserr << "EightNodeBrick::update (tag: " << this->getTag() << "), Update Failed\n";
 
               }
@@ -4235,5 +4244,4 @@ int EightNodeBrick::update(void) //Note: Guanzhou takes this pretty much out of 
       
   }
 
-  
 #endif

@@ -544,6 +544,7 @@ EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
   stresstensor *tensors = 0;
   double ep = 0.85;
   double psip = 0.05;
+  int integratorFlag = 0; //Guanzhou
 //ZCMay04   int     Elasticflagp = 0;
 //ZCMay04   double  Evp   = 0.0;
 //ZCMay04   double  nuhvp = 0.0;
@@ -771,6 +772,17 @@ EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
       }
       loc+=2;
     }
+    //Guanzhou Mar2005
+    else if  (strcmp(argv[loc],"-integrator") == 0) {
+      if ( strcmp(argv[loc+1], "BackwardEuler") ==0 ) integratorFlag = 1;
+      else if ( strcmp(argv[loc+1], "ForwardEuler") ==0 ) integratorFlag = 0;
+      else {
+        opserr << "nDMaterial Templated3Dep -EPS - invalid integrator " << argv[loc+1] << endln;
+        cleanup(argv);
+        return 0;
+      }
+      loc+=2;
+    }
   } //end of while
 
 
@@ -817,7 +829,8 @@ EPState *EvaluateEPStateArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char
                     NoD,            //       int                 NTensorp,
                     tensors,        //       const stresstensor *Tensorp,
 		    ep,
-		    psip);
+		    psip,
+		    integratorFlag);
   if (EPS == 0) {
     opserr << "nDMaterial Templated3Dep -EPS - out of memory\n";
   }

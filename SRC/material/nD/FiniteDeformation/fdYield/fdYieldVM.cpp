@@ -44,8 +44,8 @@ fdYield * fdYieldVM::newObj()
 
 int fdYieldVM::getNumRank()
 {
-    //return 2;
-    return 1;
+    //return 1;
+    return 2;
 }
 
 double fdYieldVM::getTolerance()

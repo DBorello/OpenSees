@@ -212,7 +212,7 @@ fdYield *EvaluatefdYield(ClientData clientData, Tcl_Interp *interp, TCL_Char *tc
         exit (-1);
       }
       if (Tcl_GetDouble(interp, argv[2], &Cohension_in) != TCL_OK) {
-        opserr << "Warning: nDMaterial FDEP3D - invalid Conhension " << argv[2] << "\n";
+        opserr << "Warning: nDMaterial FDEP3D - invalid Conhesion " << argv[2] << "\n";
         exit (-1);
       }
     }   
@@ -274,23 +274,28 @@ fdFlow *EvaluatefdFlow(ClientData clientData, Tcl_Interp *interp, TCL_Char *tclS
   //
   else if ((strcmp(argv[0],"-DP") == 0) || (strcmp(argv[0],"-dp") == 0) ) {
     double DilatedAngle_in = 0.0;
+    double Cohesion_in = 0.0;
     int ConeIndex_in = 0;
 
-    if (argc >= 2) {
+    if (argc >= 3) {
       if (Tcl_GetDouble(interp, argv[1], &DilatedAngle_in) != TCL_OK) {
         opserr << "Warning: nDMaterial FDEP3D - invalid Dilated Angle " << argv[1] << "\n";
         exit (-1);
       }
+      if (Tcl_GetDouble(interp, argv[2], &Cohesion_in) != TCL_OK) {
+        opserr << "Warning: nDMaterial FDEP3D - invalid Conhesion " << argv[2] << "\n";
+        exit (-1);
+      }
     }   
 
-    if (argc == 3) {
-      if (Tcl_GetInt(interp, argv[2], &ConeIndex_in) != TCL_OK) {
-        opserr << "Warning: nDMaterial FDEP3D - invalid Cone Index " << argv[2] << "\n";
+    if (argc == 4) {
+      if (Tcl_GetInt(interp, argv[3], &ConeIndex_in) != TCL_OK) {
+        opserr << "Warning: nDMaterial FDEP3D - invalid Cone Index " << argv[3] << "\n";
         exit (-1);
       }
     } 
 
-    fdF = new fdFlowDP(DilatedAngle_in, ConeIndex_in);
+    fdF = new fdFlowDP(DilatedAngle_in, Cohesion_in, ConeIndex_in);
   }
 
   else {

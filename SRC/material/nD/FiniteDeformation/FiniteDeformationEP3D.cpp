@@ -248,9 +248,9 @@ int FiniteDeformationEP3D::setTrialF(const straintensor &f)
 {
         F = f;
 
-	// Chosse one:
-	return ImplicitAlgorithm();
-	//return SemiImplicitAlgorithm();
+	// Choose One:
+	//return ImplicitAlgorithm();
+	return SemiImplicitAlgorithm();
 	
 }
 
@@ -453,11 +453,11 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
     straintensor Fp_n = tensorI2;       // Plastic deformation gradient at time n
     straintensor Fp_ninv = tensorI2;    // Plastic deformation gradient at time n
     straintensor Ee_n = tensorZ2;       // Ee at the incremental step n, calculated from Fp_n
-    double xi_n;			// xi at the incremental step n, known
+    double xi_n = 0.0;			// xi at the incremental step n, known
     straintensor eta_n = tensorZ2;	// eta at the incremental step n, known
         
     stresstensor Mtensor = tensorZ2;    // --> dFl/dT
-    stresstensor MCtensor = tensorZ2; // --> dFl/dS
+    stresstensor MCtensor = tensorZ2;   // --> dFl/dS
     tensor Ltensor = tensorZ4 ;         // Tangent tensor in the intermediate configuration
     tensor LATStensor = tensorZ4;	// Consistent tangent tensor in the intermediate configuration
         
@@ -480,9 +480,11 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
     double D_xi  = 0.0;
     straintensor D_eta = tensorZ2;
 
-    tensor A11 = tensorZ4;  tensor A12 = tensorZ2;  tensor A13 = tensorZ4; 		
-    tensor A21 = tensorZ2;  double a22 = 0.0;	    tensor A23 = tensorZ2;
-    tensor A31 = tensorZ4;  tensor A32 = tensorZ2;  tensor A33 = tensorZ4;   
+    tensor tensorI4 = (tensorI2("ij")*tensorI2("kl")).transpose0110();
+
+    tensor A11 = tensorI4;  tensor A12 = tensorZ2;  tensor A13 = tensorZ4; 		
+    tensor A21 = tensorZ2;  double a22 = 1.0;	    tensor A23 = tensorZ2;
+    tensor A31 = tensorZ4;  tensor A32 = tensorZ2;  tensor A33 = tensorI4;   
 
     BJmatrix C99(9, 9, 0.0);
     BJmatrix CCC(19, 19, 0.0);
@@ -505,10 +507,6 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 
     tensor LM = tensorZ4;	         // For Mandel Tangent Stiffness
     stresstensor  B_Mandel = tensorZ2;   // For Mandel stress
-
-    tensorTemp3 = tensorI2("ij")*tensorI2("kl");
-      tensorTemp3.null_indices();
-    tensor tensorI4 = tensorTemp3.transpose0110();
     
     // Read the previous incremental step history variables
     Fp = fdeps->getCommitedFpInVar();
@@ -520,9 +518,11 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
     Ee = (Ce - tensorI2) * 0.5;
     Ee_n = Ee;
 
-    xi = fdeps->getCommitedStrainLikeInVar();
-    xi_n = xi;
-    q = fdeps->getCommitedStressLikeInVar();
+    if ( fdEvolutionS ) {
+      xi = fdeps->getCommitedStrainLikeInVar();
+      xi_n = xi;
+      q = fdeps->getCommitedStressLikeInVar();
+    }
 
     if ( fdEvolutionT ) {
       eta = fdeps->getCommitedStrainLikeKiVar();
@@ -588,10 +588,10 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	  A11.null_indices();
         A11 = (A11 *D_gamma) + tensorI4;  //A11
 
-	a22 = (dnsodq *Kscalar*D_gamma) + 1.0;	 //A22
-	
-	tensorTemp1 = fdf->d2Fodsdq(B_Mandel, *fdeps); 
-        if ( !(tensorTemp1==tensorZ2) ) {
+	if ( fdEvolutionS ) {	
+	  a22 += (dnsodq *Kscalar*D_gamma);	 //A22	
+
+	  tensorTemp1 = fdf->d2Fodsdq(B_Mandel, *fdeps); 
 	  A12 = Ce("ik") * tensorTemp1("kj");
 	    A12.null_indices();
           A12 = (A12 + A12.transpose11()) * (0.5*Kscalar*D_gamma);  //A12
@@ -604,60 +604,57 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	if ( fdEvolutionT ) {
 	  A33 = dntoda("ijmn")*Ktensor("mnkl");
 	    A33.null_indices();
-    	  A33 = (A33 *D_gamma) + tensorI4;  //A33
+    	  A33 += (A33 *D_gamma);  //A33
 
 	  tensorTemp2 = fdf->d2Fodsda(B_Mandel, *fdeps);
-	  if ( !(tensorTemp2==tensorZ4) ) {
-	    A13 = Ce("ik") * tensorTemp2("kjmn");
-	      A13.null_indices();
-            A13 = (A13 + A13.transpose1100()) * (0.5*D_gamma);
-	    A13 = A13("ijmn") * Ktensor("mnkl");
-	      A13.null_indices();	    //A13
-	    A31 = tensorTemp2("ijmn") * LM("mnkl");
-	      A31.null_indices();	  	  
-	    A31 = A31 *D_gamma;	    //A31
-	  }
+	  A13 = Ce("ik") * tensorTemp2("kjmn");
+	    A13.null_indices();
+          A13 = (A13 + A13.transpose1100()) * (0.5*D_gamma);
+	  A13 = A13("ijmn") * Ktensor("mnkl");
+	    A13.null_indices();	    //A13
+	  A31 = tensorTemp2("ijmn") * LM("mnkl");
+	    A31.null_indices();	  	  
+	  A31 = A31 *D_gamma;	    //A31
+        }
 
+	if ( fdEvolutionS && fdEvolutionT ) {
 	  tensorTemp3 = fdf->d2Fodqda(B_Mandel, *fdeps);
-	  if ( !(tensorTemp3==tensorZ2) ) {
-	    A23 = tensorTemp3("ij") * Ktensor("ijkl");
-	      A23.null_indices();	    
-	    A23 = A23 *D_gamma; //A23
-	    A32 = tensorTemp2 * Kscalar *D_gamma; //A32
-	  }
+	  A23 = tensorTemp3("ij") * Ktensor("ijkl");
+	    A23.null_indices();	    
+	  A23 = A23 *D_gamma; //A23
+	  tensorTemp2 = fdf->d2Fodsda(B_Mandel, *fdeps);
+	  A32 = tensorTemp2 * (Kscalar*D_gamma); //A32
 	}
 
 	int i, j;
 	// CCC: Tensor -> Matrix
 	C99 = A11.BJtensor2BJmatrix_2();
-	for (i =1; i <=9; i++) {
-	  for (j =1; j <=9; j++) {
-	    CCC.val(i,j) = C99.cval(i,j);
-	    CCC.val(10+i,10+j) = 1.0; // For non-singularity
-	  }
-	}
+	for (i=10; i<=19; i++)
+	  CCC.val(i,i) = 1.0;
 
-	CCC.val(1,10) = A12.cval(1,1);  
-	CCC.val(2,10) = A12.cval(1,2);	
-	CCC.val(3,10) = A12.cval(1,3);
-	CCC.val(4,10) = A12.cval(2,1);  
-	CCC.val(5,10) = A12.cval(2,2);	
-	CCC.val(6,10) = A12.cval(2,3);
-	CCC.val(7,10) = A12.cval(3,1);  
-	CCC.val(8,10) = A12.cval(3,2);	
-	CCC.val(9,10) = A12.cval(3,3);
+       	if ( fdEvolutionS ) {
+	  CCC.val(1,10) = A12.cval(1,1);  
+	  CCC.val(2,10) = A12.cval(1,2);	
+	  CCC.val(3,10) = A12.cval(1,3);
+	  CCC.val(4,10) = A12.cval(2,1);  
+	  CCC.val(5,10) = A12.cval(2,2);	
+	  CCC.val(6,10) = A12.cval(2,3);
+	  CCC.val(7,10) = A12.cval(3,1);  
+	  CCC.val(8,10) = A12.cval(3,2);	
+	  CCC.val(9,10) = A12.cval(3,3);
 
-	CCC.val(10,1) = A21.cval(1,1);  
-	CCC.val(10,2) = A21.cval(1,2);	
-	CCC.val(10,3) = A21.cval(1,3);
-	CCC.val(10,4) = A21.cval(2,1);  
-	CCC.val(10,5) = A21.cval(2,2);	
-	CCC.val(10,6) = A21.cval(2,3);
-	CCC.val(10,7) = A21.cval(3,1);  
-	CCC.val(10,8) = A21.cval(3,2);	
-	CCC.val(10,9) = A21.cval(3,3);
+	  CCC.val(10,1) = A21.cval(1,1);  
+          CCC.val(10,2) = A21.cval(1,2);	
+	  CCC.val(10,3) = A21.cval(1,3);
+	  CCC.val(10,4) = A21.cval(2,1);  
+	  CCC.val(10,5) = A21.cval(2,2);	
+	  CCC.val(10,6) = A21.cval(2,3);
+	  CCC.val(10,7) = A21.cval(3,1);  
+	  CCC.val(10,8) = A21.cval(3,2);	
+	  CCC.val(10,9) = A21.cval(3,3);
 	
-	CCC.val(10,10) = a22;
+	  CCC.val(10,10) = a22;
+	}
 
 	if ( fdEvolutionT ) {
 	  C99 = A13.BJtensor2BJmatrix_2();
@@ -667,7 +664,15 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	      CCC.val(j,10+i) = C99.cval(i,j);
 	    }
 	  }
+	  C99 = A33.BJtensor2BJmatrix_2();
+	  for (i =1; i <=9; i++) {
+	    for (j =1; j <=9; j++) {
+	      CCC.val(10+i,10+j) = C99.cval(i,j);
+	    }
+	  }
+	}
 
+	if ( fdEvolutionS && fdEvolutionT ) {
 	  CCC.val(10,11) = A23.cval(1,1);  
 	  CCC.val(10,12) = A23.cval(1,2);  
 	  CCC.val(10,13) = A23.cval(1,3);
@@ -687,13 +692,6 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	  CCC.val(17,10) = A32.cval(3,1);  
 	  CCC.val(18,10) = A32.cval(3,2);  
 	  CCC.val(19,10) = A32.cval(3,3);
-
-	  C99 = A33.BJtensor2BJmatrix_2();
-	  for (i =1; i <=9; i++) {
-	    for (j =1; j <=9; j++) {
-	      CCC.val(10+i,10+j) = C99.cval(i,j);
-	    }
-	  }
 	}
 
 	// Inverse of CCC
@@ -707,6 +705,7 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	    C99.val(i,j) = CCC.cval(i,j);
 	  }
 	}
+
 	A11 = C99.BJmatrix2BJtensor_2();
 
 	A12.val(1,1)=CCC.cval(1,10); 
@@ -731,48 +730,47 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 
 	a22  = CCC.cval(10,10);
 
-	if ( fdEvolutionT ) {
-	  for (i =1; i <=9; i++) {
-	    for (j =1; j <=9; j++) {
-	      C99.val(i,j) = CCC.cval(i,10+j);
-	    }
+	for (i =1; i <=9; i++) {
+	  for (j =1; j <=9; j++) {
+	    C99.val(i,j) = CCC.cval(i,10+j);
 	  }
-	  A13 = C99.BJmatrix2BJtensor_2();
-
-	  for (i =1; i <=9; i++) {
-	    for (j =1; j <=9; j++) {
-	      C99.val(j,i) = CCC.cval(10+i,j);
-	    }
-	  }
-	  A31 = C99.BJmatrix2BJtensor_2();
-
-	  A32.val(1,1)=CCC.cval(11,10); 
-	  A32.val(1,2)=CCC.cval(12,10);  
-	  A32.val(1,3)=CCC.cval(13,10);
-	  A32.val(2,1)=CCC.cval(14,10); 
-	  A32.val(2,2)=CCC.cval(15,10);  
-	  A32.val(2,3)=CCC.cval(16,10);
-	  A32.val(3,1)=CCC.cval(17,10); 
-	  A32.val(3,2)=CCC.cval(18,10);  
-	  A32.val(3,3)=CCC.cval(19,10);
-
-	  A23.val(1,1)=CCC.cval(10,11); 
-	  A23.val(1,2)=CCC.cval(10,12); 
-	  A23.val(1,3)=CCC.cval(10,13);
-	  A23.val(2,1)=CCC.cval(10,14); 
-	  A23.val(2,2)=CCC.cval(10,15); 
-	  A23.val(2,3)=CCC.cval(10,16);
-	  A23.val(3,1)=CCC.cval(10,17); 
-	  A23.val(3,2)=CCC.cval(10,18); 
-	  A23.val(3,3)=CCC.cval(10,19);
-
-	  for (i =1; i <=9; i++) {
-	    for (j =1; j <=9; j++) {
-	      C99.val(i,j) = CCC.cval(10+i,10+j);
-	    }
-	  }
-	  A33 = C99.BJmatrix2BJtensor_2();
 	}
+	A13 = C99.BJmatrix2BJtensor_2();
+
+	for (i =1; i <=9; i++) {
+	  for (j =1; j <=9; j++) {
+	    C99.val(j,i) = CCC.cval(10+i,j);
+	  }
+	}
+	A31 = C99.BJmatrix2BJtensor_2();
+
+	A32.val(1,1)=CCC.cval(11,10); 
+	A32.val(1,2)=CCC.cval(12,10);  
+	A32.val(1,3)=CCC.cval(13,10);
+	A32.val(2,1)=CCC.cval(14,10); 
+	A32.val(2,2)=CCC.cval(15,10);  
+	A32.val(2,3)=CCC.cval(16,10);
+	A32.val(3,1)=CCC.cval(17,10); 
+	A32.val(3,2)=CCC.cval(18,10);  
+	A32.val(3,3)=CCC.cval(19,10);
+
+	A23.val(1,1)=CCC.cval(10,11); 
+	A23.val(1,2)=CCC.cval(10,12); 
+	A23.val(1,3)=CCC.cval(10,13);
+	A23.val(2,1)=CCC.cval(10,14); 
+	A23.val(2,2)=CCC.cval(10,15); 
+	A23.val(2,3)=CCC.cval(10,16);
+	A23.val(3,1)=CCC.cval(10,17); 
+	A23.val(3,2)=CCC.cval(10,18); 
+	A23.val(3,3)=CCC.cval(10,19);
+
+	for (i =1; i <=9; i++) {
+	  for (j =1; j <=9; j++) {
+	    C99.val(i,j) = CCC.cval(10+i,10+j);
+	  }
+	}
+	A33 = C99.BJmatrix2BJtensor_2();
+
 
         // Return d_gamma
 	tensorTemp6 = dyods("ij")*LM("ijkl");
@@ -786,6 +784,7 @@ int FiniteDeformationEP3D::ImplicitAlgorithm()
 	//Begin, evaluate f^{T}*C
         tensorTemp1 = tensorTemp6("kl")*A11("klmn"); 
 	  tensorTemp1.null_indices();
+
         tensorTemp2  = A21 *(dyodq *Kscalar);
 	tensorTemp4 = tensorTemp1 + tensorTemp2;
 	if ( fdEvolutionT ) {
@@ -1175,9 +1174,11 @@ int FiniteDeformationEP3D::SemiImplicitAlgorithm()
     Ee = (Ce - tensorI2) * 0.5;
     Ee_n = Ee;
 
-    xi = fdeps->getCommitedStrainLikeInVar();
-    xi_n = xi;
-    q = fdeps->getCommitedStressLikeInVar();
+    if ( fdEvolutionS ) {
+      xi = fdeps->getCommitedStrainLikeInVar();
+      xi_n = xi;
+      q = fdeps->getCommitedStressLikeInVar();
+    }
 
     if ( fdEvolutionT ) {
       eta = fdeps->getCommitedStrainLikeKiVar();
@@ -1202,12 +1203,13 @@ int FiniteDeformationEP3D::SemiImplicitAlgorithm()
       iter_counter = 0;
       
       Mtensor = fdf->dFods(B_Mandel, *fdeps);
-//      MCtensor = Ce("ik")*Mtensor("kj");
-//	MCtensor.null_indices();
-//      MCtensor = (MCtensor + MCtensor.transpose11()) * 0.5;
-      nscalar = fdf->dFodq(B_Mandel, *fdeps);	
-      if ( fdEvolutionS) 
-        nscalar = fdf->dFodq(B_Mandel, *fdeps);        
+      //MCtensor = Ce("ik")*Mtensor("kj");
+      //MCtensor.null_indices();
+      //MCtensor = (MCtensor + MCtensor.transpose11()) * 0.5;
+      if ( fdEvolutionS)      
+        nscalar = fdf->dFodq(B_Mandel, *fdeps);	
+      if ( fdEvolutionT) 
+        ntensor = fdf->dFoda(B_Mandel, *fdeps);        
         
       do {   // beginning of do - while
         MCtensor = Ce("ik")*Mtensor("kj");
@@ -1222,9 +1224,11 @@ int FiniteDeformationEP3D::SemiImplicitAlgorithm()
 	  tensorTemp2.null_indices();
         LM = tensorTemp2 + tensorTemp1.transpose0110() + tensorTemp1.transpose0111();  
         dyods = fdy->dYods(B_Mandel, *fdeps); 
-    
-	Kscalar = fdEvolutionS->HModulus(B_Mandel, *fdeps);
-	dyodq = fdy->dYodq(B_Mandel, *fdeps);
+
+	if ( fdEvolutionS) {    
+	  Kscalar = fdEvolutionS->HModulus(B_Mandel, *fdeps);
+	  dyodq = fdy->dYodq(B_Mandel, *fdeps);
+	}
 
 	if ( fdEvolutionT) {
 	  Ktensor = fdEvolutionT->HModulus(B_Mandel, *fdeps);
@@ -1238,7 +1242,8 @@ int FiniteDeformationEP3D::SemiImplicitAlgorithm()
 	  tensorTemp1.null_indices();
 	lowerPart = tensorTemp1.trace();
 	
-	lowerPart += dyodq * Kscalar * nscalar;    
+	if ( fdEvolutionS ) 
+	  lowerPart += dyodq * (Kscalar*nscalar);    
 	  
 	if ( fdEvolutionT ) {
 	  tensorTemp5 = dyoda("ij")*Ktensor("ijkl");
@@ -1256,7 +1261,8 @@ int FiniteDeformationEP3D::SemiImplicitAlgorithm()
 	
 	//Begin,  Calculate incremental variables
 	D_Ee = MCtensor * (-d_gamma);
-	D_xi = nscalar * (-d_gamma);
+	if ( fdEvolutionS )
+	  D_xi = nscalar * (-d_gamma);
 	if ( fdEvolutionT )
 	  D_eta = ntensor * (-d_gamma);
 
@@ -1270,10 +1276,12 @@ int FiniteDeformationEP3D::SemiImplicitAlgorithm()
         B_Mandel = Ce("ik")*B_PK2("kj");     // Update Mandel Stress
           B_Mandel.null_indices();
 
-	xi += D_xi;
-	q += (Kscalar * D_xi);
-	fdeps->setStrainLikeInVar(xi);
-	fdeps->setStressLikeInVar(q);
+	if ( fdEvolutionS ) {
+	  xi += D_xi;
+	  q += (Kscalar * D_xi);
+	  fdeps->setStrainLikeInVar(xi);
+	  fdeps->setStressLikeInVar(q);
+	}
 
 	if ( fdEvolutionT ) {
 	  eta += D_eta;
@@ -1295,89 +1303,89 @@ int FiniteDeformationEP3D::SemiImplicitAlgorithm()
 	  exit (-1);
 	}
 
-    } while ( yieldfun > fdy->getTolerance() ); // end of do - while
+      } while ( yieldfun > fdy->getTolerance() ); // end of do - while
 
-    // For Numerical stability
-    D_gamma *= (1.0 - tolerance);      
-    if ( D_gamma < 0.0 ) 
-      D_gamma = 0.0;
+      //// For Numerical stability
+      //D_gamma *= (1.0 - tolerance);      
+      //if ( D_gamma < 0.0 ) 
+      //  D_gamma = 0.0;
 
-    // Update Fp
-    tensorTemp2 = Mtensor("ij")*Fp_n("jk");  
-      tensorTemp2.null_indices(); 
-    Fp = Fp_n + (tensorTemp2 *D_gamma);
-    fdeps->setFpInVar(Fp);
+      // Update Fp
+      tensorTemp2 = Mtensor("ij")*Fp_n("jk");  
+        tensorTemp2.null_indices(); 
+      Fp = Fp_n + (tensorTemp2 *D_gamma);
+      fdeps->setFpInVar(Fp);
  
-    // Return iniTangent and iniPK2
-    Fpinv = Fp.inverse();       //Using the iterative FP
-    Fe = F("ij")*Fpinv("jk");   
-      Fe.null_indices();
-    Ce = Fe("ki")*Fe("kj");     
-      Ce.null_indices();
+      // Return iniTangent and iniPK2
+      Fpinv = Fp.inverse();       // Using the iterative FP
+      Fe = F("ij")*Fpinv("jk");   
+        Fe.null_indices();
+      Ce = Fe("ki")*Fe("kj");     
+        Ce.null_indices();
     
-    fde3d->setTrialC(Ce);       // Note: It is C, not F!!!
-    B_PK2 = fde3d->getStressTensor();
+      fde3d->setTrialC(Ce);       // Note: It is C, not F!!!
+      B_PK2 = fde3d->getStressTensor();
 
-    //iniPK2 = B_PK2;  
-    iniPK2 = Fpinv("ip")*Fpinv("jq")*B_PK2("pq");
-      iniPK2.null_indices();
+      //iniPK2 = B_PK2;  
+      iniPK2 = Fpinv("ip")*Fpinv("jq")*B_PK2("pq");
+        iniPK2.null_indices();
 	 	    
-    tensorTemp5 = Ltensor("ijkl") * MCtensor("kl");
-      tensorTemp5.null_indices();
+      tensorTemp5 = Ltensor("ijkl") * MCtensor("kl");
+        tensorTemp5.null_indices();
 
-    tensorTemp3 = tensorTemp5("ij") * tensorTemp4("mn");
-      tensorTemp3.null_indices();
+      tensorTemp3 = tensorTemp5("ij") * tensorTemp4("mn");
+        tensorTemp3.null_indices();
                 
-    if (lowerPart != 0.0) 
-      LATStensor = Ltensor - ( tensorTemp3 * (1.0/lowerPart) );
+      if (lowerPart != 0.0) 
+        LATStensor = Ltensor - ( tensorTemp3 * (1.0/lowerPart) );
 
-    tensorTemp1 = Mtensor("ri")*Fpinv("lj")*Fp_ninv("kr")*B_PK2("kl");
-      tensorTemp1.null_indices();
-    tensorTemp2 = Fpinv("ki")*Mtensor("rj")*Fp_ninv("lr")*B_PK2("kl");
-      tensorTemp2.null_indices();
-    tensorTemp3 = tensorTemp1 + tensorTemp2;
-    tensorTemp5 = tensorTemp3("ij") * tensorTemp4("mn");
-      tensorTemp5.null_indices();
+      tensorTemp1 = Mtensor("ri")*Fpinv("lj")*Fp_ninv("kr")*B_PK2("kl");
+        tensorTemp1.null_indices();
+      tensorTemp2 = Fpinv("ki")*Mtensor("rj")*Fp_ninv("lr")*B_PK2("kl");
+        tensorTemp2.null_indices();
+      tensorTemp3 = tensorTemp1 + tensorTemp2;
+      tensorTemp5 = tensorTemp3("ij") * tensorTemp4("mn");
+        tensorTemp5.null_indices();
      
-    tensorTemp1 = Fpinv("im") * Fpinv("jn");
-      tensorTemp1.null_indices();
-    tensorTemp3 = tensorTemp1("imjn") * LATStensor("mnrs");
-      tensorTemp3.null_indices();
+      tensorTemp1 = Fpinv("im") * Fpinv("jn");
+        tensorTemp1.null_indices();
+      tensorTemp3 = tensorTemp1("imjn") * LATStensor("mnrs");
+        tensorTemp3.null_indices();
 
-    tensorTemp3 = tensorTemp3 - ( tensorTemp5 * (1.0/lowerPart) );
+      tensorTemp3 = tensorTemp3 - ( tensorTemp5 * (1.0/lowerPart) );
 
-    tensorTemp2 = Fpinv("kr") * Fpinv("ls");
-      tensorTemp2.null_indices();
-    iniTangent = tensorTemp3("ijrs") * tensorTemp2("krls");
-      iniTangent.null_indices();                       
+      tensorTemp2 = Fpinv("kr") * Fpinv("ls");
+        tensorTemp2.null_indices();
+      iniTangent = tensorTemp3("ijrs") * tensorTemp2("krls");
+        iniTangent.null_indices();                       
     
-    }       // end of plastic part    
+    }       // end of plastic part
     else {  // start of elastic part
  
     // Return iniTangent and iniPK2
     
-    Fe = F("ij") * Fp_ninv("jk");   
-      Fe.null_indices();
-    Ce = Fe("ki") * Fe("kj");     
-      Ce.null_indices();
+      Fe = F("ij") * Fp_ninv("jk");   
+        Fe.null_indices();
+      Ce = Fe("ki") * Fe("kj");     
+        Ce.null_indices();
     
-    fde3d->setTrialC(Ce);  // Note: It is C, not F!!!
-    B_PK2 = fde3d->getStressTensor();
+      fde3d->setTrialC(Ce);  // Note: It is C, not F!!!
+      B_PK2 = fde3d->getStressTensor();
 
-    //iniPK2 = B_PK2;                   
-    iniPK2 = Fp_ninv("ip")*Fp_ninv("jq")*B_PK2("pq");
-      iniPK2.null_indices(); 
+      //iniPK2 = B_PK2;                   
+      iniPK2 = Fp_ninv("ip")*Fp_ninv("jq")*B_PK2("pq");
+        iniPK2.null_indices(); 
 	      
-    LATStensor = fde3d->getTangentTensor();      
+      LATStensor = fde3d->getTangentTensor();      
 
-    tensorTemp1 = Fp_ninv("im") * Fp_ninv("jn");
-      tensorTemp1.null_indices();
-    tensorTemp2 = Fp_ninv("kr") * Fp_ninv("ls");
-      tensorTemp2.null_indices();
-    tensorTemp3 = tensorTemp1("imjn") * LATStensor("mnrs");
-      tensorTemp3.null_indices();
-    iniTangent = tensorTemp3("ijrs") * tensorTemp2("krls");
-      iniTangent.null_indices();
+      tensorTemp1 = Fp_ninv("im") * Fp_ninv("jn");
+        tensorTemp1.null_indices();
+      tensorTemp2 = Fp_ninv("kr") * Fp_ninv("ls");
+        tensorTemp2.null_indices();
+      tensorTemp3 = tensorTemp1("imjn") * LATStensor("mnrs");
+        tensorTemp3.null_indices();
+      iniTangent = tensorTemp3("ijrs") * tensorTemp2("krls");
+        iniTangent.null_indices();
     
     }  // end of elastic part
 	

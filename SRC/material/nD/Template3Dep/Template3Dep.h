@@ -15,7 +15,7 @@
 #                                                                              #
 # DATE:              08-03-2000                                                #
 # UPDATE HISTORY:    09-12-2000                                                #
-#		     May 2004, Zhao Cheng spliting the elastic part	       #
+#       May 2004, Zhao Cheng spliting the elastic part        #
 #                                                                              #
 #                                                                              #
 # SHORT EXPLANATION: The Template3Dep class is used to hold specific           #
@@ -65,6 +65,10 @@
 //#include <CDriver.h>
 
 //class YieldSurface;
+#define ITMAX 30
+#define MAX_STEP_COUNT 30
+#define NUM_OF_SUB_INCR 30
+#define KK 1000.0  
 
 class Template3Dep : public NDMaterial
 {
@@ -73,77 +77,77 @@ class Template3Dep : public NDMaterial
   public:
     // constructor
     Template3Dep( int tag                ,
-                  NDMaterial	   &theElMat,
+                  NDMaterial    &theElMat,
                   YieldSurface     *YS_ ,        
                   PotentialSurface *PS_ ,
-              	  EPState          *EPS_,
-	       	  EvolutionLaw_S   *ELS1_ , 
-	       	  EvolutionLaw_S   *ELS2_ , 
-	       	  EvolutionLaw_S   *ELS3_ , 
-	       	  EvolutionLaw_S   *ELS4_ , 
-	       	  EvolutionLaw_T   *ELT1_ ,
-	       	  EvolutionLaw_T   *ELT2_ ,
-	       	  EvolutionLaw_T   *ELT3_ ,
-	       	  EvolutionLaw_T   *ELT4_  );
+                 EPState          *EPS_,
+           EvolutionLaw_S   *ELS1_ , 
+           EvolutionLaw_S   *ELS2_ , 
+           EvolutionLaw_S   *ELS3_ , 
+           EvolutionLaw_S   *ELS4_ , 
+           EvolutionLaw_T   *ELT1_ ,
+           EvolutionLaw_T   *ELT2_ ,
+           EvolutionLaw_T   *ELT3_ ,
+           EvolutionLaw_T   *ELT4_  );
     
     // Constructor0
     // If no evolution law is provided, then there will be no hardening or softening!
     Template3Dep(  int tag               ,
-                   NDMaterial	    &theElMat,
+                   NDMaterial     &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
-              	   EPState          *EPS_);
+                  EPState          *EPS_);
 
     // Constructor1
     // Only one scalar evolution law is provided!
     Template3Dep(  int tag               ,
-                   NDMaterial	    &theElMat,
+                   NDMaterial     &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
-              	   EPState          *EPS_,
-	       	   EvolutionLaw_S   *ELS1_ );
+                  EPState          *EPS_,
+            EvolutionLaw_S   *ELS1_ );
 
     // Constructor2
     // Only one tensorial evolution law is provided!
     Template3Dep(  int tag               ,
-                   NDMaterial	    &theElMat,
+                   NDMaterial     &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
-              	   EPState          *EPS_,
-	       	   EvolutionLaw_T   *ELT1_ );
+                  EPState          *EPS_,
+            EvolutionLaw_T   *ELT1_ );
 
     // Constructor 3
     // One scalar evolution law and one tensorial evolution law are provided!
     Template3Dep(  int tag               , 
-                   NDMaterial	    &theElMat,
+                   NDMaterial     &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
-              	   EPState          *EPS_,
-	       	   EvolutionLaw_S   *ELS1_, 
-	       	   EvolutionLaw_T   *ELT1_ );
+                  EPState          *EPS_,
+            EvolutionLaw_S   *ELS1_, 
+            EvolutionLaw_T   *ELT1_ );
     
     // Constructor 4
     // Two scalar evolution laws and one tensorial evolution law are provided!
     Template3Dep(  int tag               ,
-                   NDMaterial	    &theElMat,
+                   NDMaterial     &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
-              	   EPState          *EPS_,
-	       	   EvolutionLaw_S   *ELS1_, 
-	       	   EvolutionLaw_S   *ELS2_, 
-	       	   EvolutionLaw_T   *ELT1_ );
+                  EPState          *EPS_,
+            EvolutionLaw_S   *ELS1_, 
+            EvolutionLaw_S   *ELS2_, 
+            EvolutionLaw_T   *ELT1_ );
 
     // Constructor 5
     // Two scalar evolution laws and two tensorial evolution laws are provided!
     Template3Dep(  int tag               ,
-                   NDMaterial	    &theElMat,
+                   NDMaterial     &theElMat,
                    YieldSurface     *YS_ ,        
                    PotentialSurface *PS_ ,
-              	   EPState          *EPS_,
-	       	   EvolutionLaw_S   *ELS1_, 
-	       	   EvolutionLaw_S   *ELS2_, 
-	       	   EvolutionLaw_T   *ELT1_,
-	       	   EvolutionLaw_T   *ELT2_ );
+                  EPState          *EPS_,
+            EvolutionLaw_S   *ELS1_, 
+            EvolutionLaw_S   *ELS2_, 
+            EvolutionLaw_T   *ELT1_,
+            EvolutionLaw_T   *ELT2_ );
 
     // For parallel processing
     Template3Dep(void);
@@ -208,7 +212,7 @@ class Template3Dep : public NDMaterial
      EPState BESubIncrementation( const straintensor & strain_increment,
                                   int number_of_subincrements);                                                 
   private:
-						                                                  
+                                                        
     //================================================================================
     // this one is intended to shell the previous three and to decide 
     // ( according to the data stored in Material_Model object ) 
@@ -255,7 +259,7 @@ class Template3Dep : public NDMaterial
     //get scalar evolution laws
     EvolutionLaw_S * getELS1() const;
     EvolutionLaw_S * getELS2() const;
-    EvolutionLaw_S * getELS3() const;		  
+    EvolutionLaw_S * getELS3() const;    
     EvolutionLaw_S * getELS4() const;
 
     //get tensorial evolution laws
@@ -275,7 +279,7 @@ class Template3Dep : public NDMaterial
 
    private:
 
-    NDMaterial	 *theElasticMat;
+    NDMaterial  *theElasticMat;
 
     YieldSurface *YS;
 

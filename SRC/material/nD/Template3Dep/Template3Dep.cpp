@@ -4,7 +4,7 @@
 # PROJECT:           Object Oriented Finite Element Program                    #
 # PURPOSE:           General platform for elaso-plastic constitutive model     #
 #                    implementation                                            #
-# CLASS:             Template3Dep (the base class for all material point)     #
+# CLASS:             Template3Dep (the base class for all material point)      #
 #                                                                              #
 # VERSION:                                                                     #
 # LANGUAGE:          C++.ver >= 2.0 ( Borland C++ ver=3.00, SUN C++ ver=2.1 )  #
@@ -14,11 +14,12 @@
 #                                                                              #
 #                                                                              #
 # DATE:              08-03-2000                                                #
-# UPDATE HISTORY:    09-12-2000						       #
-#		                   May 2004, Zhao Cheng splitting the elastic part	         #
+# UPDATE HISTORY:    09-12-2000                                                #
+#       May 2004, Zhao Cheng splitting the elastic part                        #
 #                    Oct. 2004 Zhao Cheng, small addition for u-p-U modeling   #
-#                                                                              #
-#                                                                              #
+#                    Mar. 2005 Guanzhou updated constitutive driver to be      #
+#                        compatible with global Newton-Raphson iterations      #
+#                        BackwardEuler has been corrected                      #
 #                                                                              #
 # SHORT EXPLANATION: This file contains the class implementation for           #
 #                    Template3Dep.                                             #
@@ -29,10 +30,6 @@
 #ifndef Template3Dep_CPP
 #define Template3Dep_CPP
 
-#define ITMAX 30
-#define MAX_STEP_COUNT 30
-#define NUM_OF_SUB_INCR 30
-#define KK 1000.0  
 
 #include "Template3Dep.h"
 
@@ -42,7 +39,7 @@
 //================================================================================
 
 Template3Dep::Template3Dep( int tag                       ,
-                            NDMaterial	     &theElMat,
+                            NDMaterial      &theElMat,
                             YieldSurface     *YS_   ,
                             PotentialSurface *PS_   ,
                             EPState          *EPS_  ,
@@ -138,7 +135,7 @@ Template3Dep::Template3Dep( int tag                       ,
 // Constructor 0
 //================================================================================
 Template3Dep::Template3Dep( int tag                     ,
-                            NDMaterial	     &theElMat,
+                            NDMaterial      &theElMat,
                             YieldSurface     *YS_ ,
                             PotentialSurface *PS_ ,
                             EPState          *EPS_)
@@ -1043,8 +1040,8 @@ const Vector& Template3Dep::getStrain(void)
 // what is the trial strain? Initial strain?
 int Template3Dep::setTrialStrain(const Tensor &v)
 {
-    //EPS->setStrain(v);			      //ZC10/26/2004 
-    this->setTrialStrainIncr( v - EPS->getStrain() ); //ZC10/26/2004
+    //Guanzhou made it compatible with global iterations Mar2005
+    this->setTrialStrainIncr( v - EPS->getStrain_commit() ); 
     return 0;
 }
 
@@ -1052,8 +1049,8 @@ int Template3Dep::setTrialStrain(const Tensor &v)
 //================================================================================
 int Template3Dep::setTrialStrain(const Tensor &v, const Tensor &r)
 {
-    //EPS->setStrain(v);			      //ZC10/26/2004
-    this->setTrialStrainIncr( v - EPS->getStrain() ); //ZC10/26/2004
+    //Guanzhou made it compatible with global iterations Mar2005
+    this->setTrialStrainIncr( v - EPS->getStrain_commit() );
     return 0;
 }
 
@@ -1063,8 +1060,8 @@ int Template3Dep::setTrialStrainIncr(const Tensor &v)
 {
 
     //opserr << "\nBE: " << endlnn;
-    EPState StartEPS( *(this->getEPS()) );
-    stresstensor start_stress = StartEPS.getStress();
+    //EPState StartEPS( *(this->getEPS()) );
+    //stresstensor start_stress = StartEPS.getStress_commit(); //Guanzhou Mar2005
     //opserr << "start_stress 0 " << start_stress;
 
     //EPState tmp_EPS = BackwardEulerEPState(v);
@@ -1116,7 +1113,16 @@ int Template3Dep::setTrialStrainIncr(const Tensor &v)
 
     //// for testing MD model only for no BE
     //EPState tmp_EPS = FESubIncrementation(v, NUM_OF_SUB_INCR);
-    EPState tmp_EPS = ForwardEulerEPState(v);
+    EPState *thisEPState = this->getEPS();
+    EPState tmp_EPS;
+    if ( thisEPState->getIntegratorFlag() == 0 ) tmp_EPS = ForwardEulerEPState(v);
+    else if ( thisEPState->getIntegratorFlag() == 1 ) tmp_EPS = BackwardEulerEPState(v);
+    else {
+     opserr << "Template3Dep::setTrialStrainIncr, error when getting integrator flag from EPState! \n";
+ exit(1);
+    }
+
+    //EPState tmp_EPS = BackwardEulerEPState(v);
     setEPS( tmp_EPS );
     //setEPS( StartEPS );
     return 0;
@@ -1213,7 +1219,7 @@ NDMaterial * Template3Dep::getCopy(void)
 {
     NDMaterial * tmp =
             new Template3Dep( this->getTag()  ,
-	    *(this->getElMat()),
+     *(this->getElMat()),
             this->getYS()   ,
             this->getPS()   ,
             this->getEPS()  ,
@@ -1238,7 +1244,7 @@ NDMaterial * Template3Dep::getCopy(const char *code)
     {
        Template3Dep * tmp =
             new Template3Dep( this->getTag()  ,
-	    *(this->getElMat()),
+     *(this->getElMat()),
             this->getYS()   ,
             this->getPS()   ,
             this->getEPS()  ,
@@ -1554,7 +1560,7 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
     //opserr << " stress_increment: " << stress_increment << endlnn;
 
     EPState startEPS( *(getEPS()) );
-    stresstensor start_stress = startEPS.getStress();
+    stresstensor start_stress = startEPS.getStress_commit();//Guanzhou Mar2005
     start_stress.null_indices();
     //opserr << "===== start_EPS =====: " << startEPS;
 
@@ -1581,11 +1587,12 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
     stresstensor true_stress_increment = stress_increment;
     straintensor El_strain_increment;
 
-    if ( f_start <= 0 && f_pred <= 0 || f_start > f_pred )
+    //Guanzhou out Mar2005 if ( f_start <= 0 && f_pred <= 0 || f_start > f_pred )
+      if ( f_start <= 0 && f_pred <= 0 )
       {
         //Updating elastic strain increment
-        straintensor estrain = ElasticPredictorEPS.getElasticStrain();
-        straintensor tstrain = ElasticPredictorEPS.getStrain();
+        straintensor estrain = ElasticPredictorEPS.getElasticStrain_commit();
+        straintensor tstrain = ElasticPredictorEPS.getStrain_commit();
         estrain = estrain + strain_incr;
         tstrain = tstrain + strain_incr;
         ElasticPredictorEPS.setElasticStrain( estrain );
@@ -1597,9 +1604,9 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
         //material_point.EL->UpdateVar( &ElasticPredictorEPS, 1);
         // Update E_Young and e according to current stress state before evaluate ElasticStiffnessTensor
         if ( getELT1() ) {
-      //getELT1()->updateEeDm(&ElasticPredictorEPS, st_vol, 0.0);
-      getELT1()->updateEeDm(&ElasticPredictorEPS, -st_vol, 0.0);
-      }
+        //getELT1()->updateEeDm(&ElasticPredictorEPS, st_vol, 0.0);
+        getELT1()->updateEeDm(&ElasticPredictorEPS, -st_vol, 0.0);
+       }
 
         //opserr <<" strain_increment.Iinvariant1() " << strain_increment.Iinvariant1() << endlnn;
         ElasticPredictorEPS.setEep(E);
@@ -1810,10 +1817,11 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
         //opserr << "strain increment I1=" << strain_increment.Iinvariant1() << endlnn;
         //opserr << "strain increment    " << strain_increment << endlnn;
 
-        straintensor estrain = forwardEPS.getElasticStrain(); //get old elastic strain
-        straintensor pstrain = forwardEPS.getPlasticStrain(); //get old plastic strain
+        straintensor estrain = forwardEPS.getElasticStrain_commit(); //get old elastic strain
+        //straintensor pstrain = forwardEPS.getPlasticStrain(); //get old plastic strain
+ straintensor pstrain = forwardEPS.getStrain_commit() - estrain; //get old plastic strain
 
-        straintensor tstrain = forwardEPS.getStrain();        //get old total strain
+        straintensor tstrain = forwardEPS.getStrain_commit();        //get old total strain
         pstrain = pstrain + plastic_strain;
         estrain = estrain + elastic_strain;
         tstrain = tstrain + elastic_strain + plastic_strain;
@@ -1972,7 +1980,7 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
   int ii;
   for (ii = 1; ii <= NS; ii++) {
               dS = Delta_lambda * h_s[ii-1] ;       // Increment to the scalar internal var
-              S  = forwardEPS.getScalarVar(ii);     // Get the old value of the scalar internal var
+              S  = forwardEPS.getScalarVar_commit(ii); //Guanzhou Mar2005    // Get the old value of the scalar internal var
               forwardEPS.setScalarVar(ii, S + dS ); // Update internal scalar var
   }
 
@@ -1982,7 +1990,7 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
 
   for (ii = 1; ii <= NT; ii++) {
         dT = h_t[ii-1]*Delta_lambda  ;       // Increment to the tensor internal var
-              T  = forwardEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
+              T  = forwardEPS.getTensorVar_commit(ii); //Guanzhou Mar2005    // Get the old value of the tensor internal var
               new_T = T + dT;
               forwardEPS.setTensorVar(ii, new_T );
         }
@@ -2266,15 +2274,15 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   EPState backwardEPS( * (this->getEPS()) );
 
   EPState startEPS( *(this->getEPS()) );
-  stresstensor start_stress = startEPS.getStress();
+  stresstensor start_stress = startEPS.getStress_commit(); //Guanzhou Mar2005
 
   //Output for plotting
-  opserr.precision(5);
-  opserr.width(10);
+  //opserr.precision(5);
+  //opserr.width(10);
   //opserr << " strain_increment " << strain_increment << "\n";
 
-  opserr.precision(5);
-  opserr.width(10);
+  //opserr.precision(5);
+  //opserr.width(10);
   //opserr << "start_stress " <<  start_stress;
 
   // Pulling out some tensor and double definitions
@@ -2306,7 +2314,9 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   //  double Ftolerance = pow(d_macheps(),(1.0/2.0))*1000000.00; //FORWARD no iterations
   //double Ftolerance = pow( d_macheps(), 0.5)*1.00;
 
-  double Ftolerance = pow( d_macheps(), 0.5)*1000*KK;  //Zhaohui UCD 10e6 for Pa, kg and m 1000 for kPa, ton and m
+  //GZ out double Ftolerance = pow( d_macheps(), 0.5)*1000*KK;  //Zhaohui UCD 10e6 for Pa, kg and m 1000 for kPa, ton and m
+
+  double Ftolerance = 1.0e-8; //Guanzhou gives an absolute tolerance
 
   //opserr << Ftolerance << endlnn;
   //  double Ftolerance = pow(d_macheps(),(1.0/2.0))*1.0;
@@ -2331,6 +2341,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   stresstensor sigmaBack;
   straintensor dPlasticStrain; // delta plastic strain
   straintensor PlasticStrain;  // Total plastic strain
+  straintensor incrPlasticStrain;
 
   //double dq_ast = 0.0;       // iterative change in internal variable (kappa in this case)
   //double Dq_ast = 0.0;       // incremental change in internal variable (kappa in this case)
@@ -2356,8 +2367,8 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   ElasticPredictorEPS.setStress( elastic_predictor_stress );
   //  elastic_predictor_stress.reportshortpqtheta("\n . . . .  ELASTIC PREDICTOR stress");
 
-  opserr.precision(5);
-  opserr.width(10);
+  //opserr.precision(5);
+  //opserr.width(10);
   //opserr << "elastic predictor " <<  elastic_predictor_stress << endlnn;
 
   stresstensor elastic_plastic_predictor_stress;
@@ -2395,12 +2406,13 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   //    return  elastic_plastic_predictor_stress;
   //  }
 
-  if ( f_pred <= Ftolerance  )
+  //if ( f_pred <= Ftolerance  ) //GZ Mar2005
+  if ( f_pred <= 0.0  ) //Guanzhou changed
   {
 
       //Updating elastic strain increment
-      straintensor estrain = ElasticPredictorEPS.getElasticStrain();
-      straintensor tstrain = ElasticPredictorEPS.getStrain();
+      straintensor estrain = ElasticPredictorEPS.getElasticStrain_commit(); //Guanzhou
+      straintensor tstrain = ElasticPredictorEPS.getStrain_commit(); //Guanzhou
       estrain = estrain + strain_increment;
       tstrain = tstrain + strain_increment;
       ElasticPredictorEPS.setElasticStrain( estrain );
@@ -2435,30 +2447,39 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   if ( f_pred > 0.0 )
   {
 
-      //Starting point by applying one Forward Euler step
-      EP_PredictorEPS = PredictorEPState( strain_incr);
-      //EP_PredictorEPS = ElasticPredictorEPS;
-
-      //opserr << " ----------Predictor Stress" << EP_PredictorEPS.getStress();
-      //Setting the starting EPState with the starting internal vars in EPState
-
-      //MP->setEPS( EP_PredictorEPS );
-
-      Felplpredictor =  getYS()->f(&EP_PredictorEPS);
-      //opserr <<  " F_elplpredictor " << Felplpredictor << endlnn;
-
-
-      //Kai     absFelplpredictor = fabs(Felplpredictor);
-      if ( fabs(Felplpredictor) <= Ftolerance )
-      {
-   //Forward Euler will do.
-         backwardEPS = EP_PredictorEPS;
-
-         //Return_stress = elastic_plastic_predictor_stress;
-         flag = 1;
-      }
-      else {
-        aC    = getPS()->dQods( &EP_PredictorEPS );
+      //Let's put strict backwardEuler here
+      //Guanzhou out Mar2005 //Starting point by applying one Forward Euler step
+      //Guanzhou out Mar2005 EP_PredictorEPS = PredictorEPState( strain_incr);
+      //Guanzhou out Mar2005 //EP_PredictorEPS = ElasticPredictorEPS;
+      //Guanzhou out Mar2005 
+      //Guanzhou out Mar2005 //opserr << " ----------Predictor Stress" << EP_PredictorEPS.getStress();
+      //Guanzhou out Mar2005 //Setting the starting EPState with the starting internal vars in EPState
+      //Guanzhou out Mar2005 
+      //Guanzhou out Mar2005 //MP->setEPS( EP_PredictorEPS );
+      //Guanzhou out Mar2005 
+      //Guanzhou out Mar2005 Felplpredictor =  getYS()->f(&EP_PredictorEPS);
+      //Guanzhou out Mar2005 //opserr <<  " F_elplpredictor " << Felplpredictor << endlnn;
+      //Guanzhou out Mar2005 
+      //Guanzhou out Mar2005 
+      //Guanzhou out Mar2005 //Kai     absFelplpredictor = fabs(Felplpredictor);
+      //Guanzhou out Mar2005 if ( fabs(Felplpredictor) <= Ftolerance )
+      //Guanzhou out Mar2005 {
+      //Guanzhou out Mar2005 //Forward Euler will do.
+      //Guanzhou out Mar2005    backwardEPS = EP_PredictorEPS;
+      //Guanzhou out Mar2005 
+      //Guanzhou out Mar2005   return backwardEPS; //Guanzhou
+      //Guanzhou out Mar2005 
+      //Guanzhou out Mar2005    //Return_stress = elastic_plastic_predictor_stress;
+      //Guanzhou out Mar2005    //Guanzhou out flag = 1;
+      //Guanzhou out Mar2005 }
+      //Guanzhou out Mar2005 
+      //Guanzhou out Mar2005 else {
+        
+ //Guanzhou changed starting point to avoid solving intersection Mar2005
+ 
+ EP_PredictorEPS = ElasticPredictorEPS;
+  
+ aC    = getPS()->dQods( &EP_PredictorEPS );
         dFods = getYS()->dFods( &EP_PredictorEPS );
         dQods = getPS()->dQods( &EP_PredictorEPS );
 
@@ -2471,18 +2492,122 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
         temp2.null_indices();
         lower = temp2.trace();
 
-        //     Delta_lambda = f_pred/lower; //?????????
+ //Guanzhou added internal evolution Mar2005
+     hardMod_ = 0.0;
+     tensor Hh(2, def_dim_2, 0.0);
+     //Of 1st scalar internal vars
+     if ( getELS1() ) {
+         h_s[0]  = getELS1()->h_s( &EP_PredictorEPS, getPS());
+              xi_s[0] = getYS()->xi_s1( &EP_PredictorEPS );
+           hardMod_ = hardMod_ + h_s[0] * xi_s[0];
+     }
+
+     //Of 2nd scalar internal vars
+     if ( getELS2() ) {
+         h_s[1]  = getELS2()->h_s( &EP_PredictorEPS, getPS());
+              xi_s[1] = getYS()->xi_s2( &EP_PredictorEPS );
+           hardMod_ = hardMod_ + h_s[1] * xi_s[1];
+     }
+
+     //Of 3rd scalar internal vars
+     if ( getELS3() ) {
+         h_s[2]  = getELS3()->h_s( &EP_PredictorEPS, getPS());
+              xi_s[2] = getYS()->xi_s3( &EP_PredictorEPS );
+           hardMod_ = hardMod_ + h_s[2] * xi_s[2];
+     }
+
+     //Of 4th scalar internal vars
+     if ( getELS4() ) {
+         h_s[3]  = getELS4()->h_s( &EP_PredictorEPS, getPS());
+              xi_s[3] = getYS()->xi_s4( &EP_PredictorEPS );
+           hardMod_ = hardMod_ + h_s[3] * xi_s[3];
+     }
+
+     //Of tensorial internal var
+     // 1st tensorial var
+     if ( getELT1() ) {
+         h_t[0]  = getELT1()->h_t( &EP_PredictorEPS, getPS());
+         xi_t[0] = getYS()->xi_t1( &EP_PredictorEPS );
+              tensor hm = (h_t[0])("ij") * (xi_t[0])("ij");
+          hardMod_ = hardMod_ + hm.trace();
+     }
+
+     // 2nd tensorial var
+     if ( getELT2() ) {
+         h_t[1]  = getELT2()->h_t( &EP_PredictorEPS, getPS());
+         xi_t[1] = getYS()->xi_t2( &EP_PredictorEPS );
+              tensor hm = (h_t[1])("ij") * (xi_t[1])("ij");
+          hardMod_ = hardMod_ + hm.trace();
+     }
+
+     // 3rd tensorial var
+     if ( getELT3() ) {
+         h_t[2]  = getELT3()->h_t( &EP_PredictorEPS, getPS());
+         xi_t[2] = getYS()->xi_t3( &EP_PredictorEPS );
+              tensor hm = (h_t[2])("ij") * (xi_t[2])("ij");
+          hardMod_ = hardMod_ + hm.trace();
+     }
+
+     // 4th tensorial var
+     if ( getELT4() ) {
+         h_t[3]  = getELT4()->h_t( &EP_PredictorEPS, getPS());
+         xi_t[3] = getYS()->xi_t4( &EP_PredictorEPS );
+              tensor hm = (h_t[3])("ij") * (xi_t[3])("ij");
+          hardMod_ = hardMod_ + hm.trace();
+     }
+
+
+ lower = lower - hardMod_;
+
+
+        Delta_lambda = f_pred/lower; //Guanzhou Mar2005
         //::printf("  Delta_lambda = f_pred/lower = %.8e\n", Delta_lambda);
         ////     Delta_lambda = Felplpredictor/lower;
         ////::printf("  Delta_lambda = Felplpredictor/lower =%.8e \n", Delta_lambda);
 
-  // Original segment
-        //elastic_plastic_predictor_stress = elastic_predictor_stress - E("ijkl")*aC("kl")*Delta_lambda;
-        //EP_PredictorEPS.setStress( elastic_plastic_predictor_stress );
+   // Guanzhou March2005
+        elastic_plastic_predictor_stress = elastic_predictor_stress - E("ijkl")*aC("kl")*Delta_lambda;
+        elastic_plastic_predictor_stress.null_indices();
+ EP_PredictorEPS.setStress( elastic_plastic_predictor_stress );
+ incrPlasticStrain = dQods("kl")*Delta_lambda;
+ incrPlasticStrain.null_indices();
+ 
+ 
+ 
+ //EP_PredictorEPS.setStrain
+ 
+ Felplpredictor =  getYS()->f(&EP_PredictorEPS);
 
-  //Zhaohui modified, sometimes give much better convergence rate
-        elastic_plastic_predictor_stress = EP_PredictorEPS.getStress();
-  //opserr << "elastic_plastic_predictor_stress" << elastic_plastic_predictor_stress;
+ //Guanzhou, update internal
+
+ int NS = EP_PredictorEPS.getNScalarVar();
+     int NT = EP_PredictorEPS.getNTensorVar();
+
+     double dS = 0;
+       double S  = 0;
+       //double new_S = 0;
+
+       stresstensor dT;
+       stresstensor Tv;
+       stresstensor new_T;
+
+     int ii;
+     for (ii = 1; ii <= NS; ii++) {
+         dS = Delta_lambda * h_s[ii-1] ;             // Increment to the scalar internal var
+              S  = EP_PredictorEPS.getScalarVar_commit(ii);      // Get the old value of the scalar internal var
+              EP_PredictorEPS.setScalarVar(ii, S + dS );  // Update internal scalar var
+     }
+
+     for (ii = 1; ii <= NT; ii++) {
+         dT = h_t[ii-1] * Delta_lambda;            // Increment to the tensor internal var
+              Tv  = EP_PredictorEPS.getTensorVar_commit(ii);     // Get the old value of the tensor internal var
+              new_T = Tv + dT;
+              EP_PredictorEPS.setTensorVar(ii, new_T );  // Update tensorial scalar var
+      }
+
+  //Guanzhou out Mar2005 //Zhaohui modified, sometimes give much better convergence rate
+  //Guanzhou out Mar2005       elastic_plastic_predictor_stress = EP_PredictorEPS.getStress();
+  //Guanzhou out Mar2005 //opserr << "elastic_plastic_predictor_stress" << elastic_plastic_predictor_stress;
 
         //opserr.precision(5);
         //opserr.width(10);
@@ -2526,7 +2651,6 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
         //**********
         //**********
         //::printf("\nDelta_lambda  before BE = %.10e \n", Delta_lambda );
-        }
 
         //========================== main part of iteration =======================
         //      while ( absFelplpredictor > Ftolerance &&
@@ -2535,133 +2659,146 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
         //out07may97      do
         {
           //opserr << "Iteration " << step_counter << " F " << Felplpredictor;
-    BEstress = elastic_predictor_stress - E("ijkl")*aC("kl")*Delta_lambda;
+       aC = getPS()->dQods( &EP_PredictorEPS ); //Guanzhou Mar2005
+   BEstress = elastic_predictor_stress - E("ijkl")*aC("kl")*Delta_lambda;
           //BEstress.reportshort("......BEstress ");
           /////          BEstress = elastic_plastic_predictor_stress - E("ijkl")*aC("kl")*Delta_lambda;
           BEstress.null_indices();
           //          Felplpredictor = Criterion.f(BEstress);
           //          ::printf("\nF_backward_Euler BE = %.10e \n", Felplpredictor);
-          residual = elastic_plastic_predictor_stress - BEstress;
-          //residual.reportshortpqtheta("\n......residual ");
+          
+   //Guanzhou out Mar2005 residual = elastic_plastic_predictor_stress - BEstress;
+   residual = EP_PredictorEPS.getStress() - BEstress;
+          
+   //residual.reportshortpqtheta("\n......residual ");
           //          double ComplementaryEnergy = (residual("ij")*D("ijkl")*residual("ij")).trace();
           //::printf("\n Residual ComplementaryEnergy = %.16e\n", ComplementaryEnergy);
-
+   
           /////          residual = elastic_predictor_stress - BEstress;
 
-    //d2Qoverds2 = Criterion.d2Qods2(elastic_plastic_predictor_stress);
+       
+   //d2Qoverds2 = Criterion.d2Qods2(elastic_plastic_predictor_stress);
           d2Qoverds2 = getPS()->d2Qods2( &EP_PredictorEPS );
           //d2Qoverds2.print();
 
-    T = I_ikjl + E("ijkl")*d2Qoverds2("klmn")*Delta_lambda;
+       T = I_ikjl + E("ijkl")*d2Qoverds2("klmn")*Delta_lambda;
           T.null_indices();
 
           Tinv = T.inverse();
 
-    // Z Cheng add: H
-    tensor H( 2, def_dim_2, 0.0);
-    H = dQods;
+       //Guanzhou out Mar2005
+   //Guanzhou out Mar2005 //Z Cheng add: H
+       //Guanzhou out Mar2005 tensor H( 2, def_dim_2, 0.0);
+       //Guanzhou out Mar2005 H = dQods;
 
           //dFods = Criterion.dFods(elastic_plastic_predictor_stress);
           //dQods = Criterion.dQods(elastic_plastic_predictor_stress);
           dFods = getYS()->dFods( &EP_PredictorEPS );
           dQods = getPS()->dQods( &EP_PredictorEPS );
-
-          //Fold = Criterion.f(elastic_plastic_predictor_stress);
+   
+   //Guanzhou Mar2005
+   tensor H( 2, def_dim_2, 0.0);
+   H = dQods;                   
+                
+   //Fold = Criterion.f(elastic_plastic_predictor_stress);
           Fold = getYS()->f( &EP_PredictorEPS );
 
-    lower = 0.0; // this is old temp variable used here again :-)
+       lower = 0.0; // this is old temp variable used here again :-)
           //h_  = h(elastic_plastic_predictor_stress);
           //xi_ = xi(elastic_plastic_predictor_stress);
 
-    //h_s  = MP->ELS1->h_s( &EP_PredictorEPS, MP->PS );
+       //h_s  = MP->ELS1->h_s( &EP_PredictorEPS, MP->PS );
           //xi_s = MP->YS->xi_s1( &EP_PredictorEPS );
           //hardMod_ = h_s * xi_s;
 
           // Evaluating the hardening modulus: sum of  (df/dq*) * qbar
 
-    hardMod_ = 0.0;
-    tensor Hh(2, def_dim_2, 0.0);
-    //Of 1st scalar internal vars
-    if ( getELS1() ) {
-       h_s[0]  = getELS1()->h_s( &EP_PredictorEPS, getPS());
-             xi_s[0] = getYS()->xi_s1( &EP_PredictorEPS );
-          hardMod_ = hardMod_ + h_s[0] * xi_s[0];
-       Hh = Hh + getPS()->d2Qodsds1( &EP_PredictorEPS ) *h_s[0] *Delta_lambda;
-    }
+       hardMod_ = 0.0;
+          tensor Hh(2, def_dim_2, 0.0);
+       //Of 1st scalar internal vars
+     
+      if ( getELS1() ) {
+         h_s[0]  = getELS1()->h_s( &EP_PredictorEPS, getPS());
+              xi_s[0] = getYS()->xi_s1( &EP_PredictorEPS );
+           hardMod_ = hardMod_ + h_s[0] * xi_s[0];
+         Hh = Hh + getPS()->d2Qodsds1( &EP_PredictorEPS ) *h_s[0] *Delta_lambda;
+       }
 
-    //Of 2nd scalar internal vars
-    if ( getELS2() ) {
-       h_s[1]  = getELS2()->h_s( &EP_PredictorEPS, getPS());
-             xi_s[1] = getYS()->xi_s2( &EP_PredictorEPS );
-          hardMod_ = hardMod_ + h_s[1] * xi_s[1];
-       Hh = Hh + getPS()->d2Qodsds2( &EP_PredictorEPS ) *h_s[1] *Delta_lambda;
-    }
+       //Of 2nd scalar internal vars
+       if ( getELS2() ) {
+         h_s[1]  = getELS2()->h_s( &EP_PredictorEPS, getPS());
+              xi_s[1] = getYS()->xi_s2( &EP_PredictorEPS );
+           hardMod_ = hardMod_ + h_s[1] * xi_s[1];
+         Hh = Hh + getPS()->d2Qodsds2( &EP_PredictorEPS ) *h_s[1] *Delta_lambda;
+       }
 
-    //Of 3rd scalar internal vars
-    if ( getELS3() ) {
-       h_s[2]  = getELS3()->h_s( &EP_PredictorEPS, getPS());
-             xi_s[2] = getYS()->xi_s3( &EP_PredictorEPS );
-          hardMod_ = hardMod_ + h_s[2] * xi_s[2];
-       Hh = Hh + getPS()->d2Qodsds3( &EP_PredictorEPS ) *h_s[2] *Delta_lambda;
-    }
+       //Of 3rd scalar internal vars
+       if ( getELS3() ) {
+         h_s[2]  = getELS3()->h_s( &EP_PredictorEPS, getPS());
+              xi_s[2] = getYS()->xi_s3( &EP_PredictorEPS );
+           hardMod_ = hardMod_ + h_s[2] * xi_s[2];
+         Hh = Hh + getPS()->d2Qodsds3( &EP_PredictorEPS ) *h_s[2] *Delta_lambda;
+       }
 
-    //Of 4th scalar internal vars
-    if ( getELS4() ) {
-       h_s[3]  = getELS4()->h_s( &EP_PredictorEPS, getPS());
-             xi_s[3] = getYS()->xi_s4( &EP_PredictorEPS );
-          hardMod_ = hardMod_ + h_s[3] * xi_s[3];
-       Hh = Hh + getPS()->d2Qodsds4( &EP_PredictorEPS ) *h_s[3] *Delta_lambda;
-    }
+       //Of 4th scalar internal vars
+       if ( getELS4() ) {
+         h_s[3]  = getELS4()->h_s( &EP_PredictorEPS, getPS());
+              xi_s[3] = getYS()->xi_s4( &EP_PredictorEPS );
+           hardMod_ = hardMod_ + h_s[3] * xi_s[3];
+         Hh = Hh + getPS()->d2Qodsds4( &EP_PredictorEPS ) *h_s[3] *Delta_lambda;
+       }
 
-    //Of tensorial internal var
-    // 1st tensorial var
-    if ( getELT1() ) {
-       h_t[0]  = getELT1()->h_t( &EP_PredictorEPS, getPS());
-       xi_t[0] = getYS()->xi_t1( &EP_PredictorEPS );
-             tensor hm = (h_t[0])("ij") * (xi_t[0])("ij");
-         hardMod_ = hardMod_ + hm.trace();
-       Hh = Hh + (getPS()->d2Qodsdt1( &EP_PredictorEPS ))("ijmn") *(h_t[0])("mn") *Delta_lambda;
-    }
+       //Of tensorial internal var
+       // 1st tensorial var
+       if ( getELT1() ) {
+         h_t[0]  = getELT1()->h_t( &EP_PredictorEPS, getPS());
+         xi_t[0] = getYS()->xi_t1( &EP_PredictorEPS );
+              tensor hm = (h_t[0])("ij") * (xi_t[0])("ij");
+          hardMod_ = hardMod_ + hm.trace();
+         Hh = Hh + (getPS()->d2Qodsdt1( &EP_PredictorEPS ))("ijmn") *(h_t[0])("mn") *Delta_lambda;
+       }
 
-    // 2nd tensorial var
-    if ( getELT2() ) {
-       h_t[1]  = getELT2()->h_t( &EP_PredictorEPS, getPS());
-       xi_t[1] = getYS()->xi_t2( &EP_PredictorEPS );
-             tensor hm = (h_t[1])("ij") * (xi_t[1])("ij");
-         hardMod_ = hardMod_ + hm.trace();
-       Hh = Hh + (getPS()->d2Qodsdt2( &EP_PredictorEPS ))("ijmn") *(h_t[1])("mn") *Delta_lambda;
-    }
+       // 2nd tensorial var
+       if ( getELT2() ) {
+         h_t[1]  = getELT2()->h_t( &EP_PredictorEPS, getPS());
+         xi_t[1] = getYS()->xi_t2( &EP_PredictorEPS );
+              tensor hm = (h_t[1])("ij") * (xi_t[1])("ij");
+          hardMod_ = hardMod_ + hm.trace();
+         Hh = Hh + (getPS()->d2Qodsdt2( &EP_PredictorEPS ))("ijmn") *(h_t[1])("mn") *Delta_lambda;
+       }
 
-    // 3rd tensorial var
-    if ( getELT3() ) {
-       h_t[2]  = getELT3()->h_t( &EP_PredictorEPS, getPS());
-       xi_t[2] = getYS()->xi_t3( &EP_PredictorEPS );
-             tensor hm = (h_t[2])("ij") * (xi_t[2])("ij");
-         hardMod_ = hardMod_ + hm.trace();
-       Hh = Hh + (getPS()->d2Qodsdt3( &EP_PredictorEPS ))("ijmn") *(h_t[2])("mn") *Delta_lambda;
-    }
+       // 3rd tensorial var
+       if ( getELT3() ) {
+         h_t[2]  = getELT3()->h_t( &EP_PredictorEPS, getPS());
+         xi_t[2] = getYS()->xi_t3( &EP_PredictorEPS );
+              tensor hm = (h_t[2])("ij") * (xi_t[2])("ij");
+          hardMod_ = hardMod_ + hm.trace();
+         Hh = Hh + (getPS()->d2Qodsdt3( &EP_PredictorEPS ))("ijmn") *(h_t[2])("mn") *Delta_lambda;
+       }
 
-    // 4th tensorial var
-    if ( getELT4() ) {
-       h_t[3]  = getELT4()->h_t( &EP_PredictorEPS, getPS());
-       xi_t[3] = getYS()->xi_t4( &EP_PredictorEPS );
-             tensor hm = (h_t[3])("ij") * (xi_t[3])("ij");
-         hardMod_ = hardMod_ + hm.trace();
-       Hh = Hh + (getPS()->d2Qodsdt4( &EP_PredictorEPS ))("ijmn") *(h_t[3])("mn") *Delta_lambda;
-    }
+       // 4th tensorial var
+       if ( getELT4() ) {
+         h_t[3]  = getELT4()->h_t( &EP_PredictorEPS, getPS());
+         xi_t[3] = getYS()->xi_t4( &EP_PredictorEPS );
+              tensor hm = (h_t[3])("ij") * (xi_t[3])("ij");
+          hardMod_ = hardMod_ + hm.trace();
+         Hh = Hh + (getPS()->d2Qodsdt4( &EP_PredictorEPS ))("ijmn") *(h_t[3])("mn") *Delta_lambda;
+       }
 
-    // Subtract accumulated hardMod_ from lower
+       // Subtract accumulated hardMod_ from lower
           //lower = lower - hardMod_;
 
-    //hardMod_ = hardMod_ * just_this_PP;
+       //hardMod_ = hardMod_ * just_this_PP;
           //::printf("\n BackwardEulerStress ..  hardMod_ = %.10e \n", hardMod_ );
           //outfornow          d2Qodqast = d2Qoverdqast(elastic_plastic_predictor_stress);
           //outfornow          dQodsextended = dQods + d2Qodqast * Delta_lambda * h_;
           //outfornow          temp3lower = dFods("mn")*Tinv("ijmn")*E("ijkl")*dQodsextended("kl");
           // temp3lower = dFods("mn")*Tinv("ijmn")*E("ijkl")*dQods("kl"); // Bug found, Z Cheng, Jan 2004
-    Hh.null_indices();
-    H = H + Hh;
-    temp3lower = dFods("mn")*Tinv("ijmn")*E("ijkl")*H("kl");
+       Hh.null_indices();
+    
+       H = H + Hh;
+    
+          temp3lower = dFods("mn")*Tinv("ijmn")*E("ijkl")*H("kl");
           temp3lower.null_indices();
           lower = temp3lower.trace();
           lower = lower - hardMod_;
@@ -2682,7 +2819,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
 
     // Zhaohui_____10-01-2000 not sure xxxxxxxxxxxxxxxxxxx
     dPlasticStrain = dQods("kl") * delta_lambda;
-    PlasticStrain = PlasticStrain + dPlasticStrain;
+    incrPlasticStrain = incrPlasticStrain + dPlasticStrain;
 
           //::printf(" >> %d  Delta_lambda = %.8e", step_counter, Delta_lambda);
           // stari umesto dQodsextended za stari = dQods
@@ -2695,7 +2832,10 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           dsigma = ( (residual("ij")*Tinv("ijmn") )+
                    ( (E("ijkl")*H("kl"))*Tinv("ijmn")*delta_lambda) )*(-1.0);
           dsigma.null_indices();
-    //dsigma.reportshortpqtheta("\n......dsigma ");
+       
+   sigmaBack = EP_PredictorEPS.getStress() + dsigma;
+   EP_PredictorEPS.setStress(sigmaBack);
+ //dsigma.reportshortpqtheta("\n......dsigma ");
           //::printf("  .........   in NR loop   delta_lambda = %.16e\n", delta_lambda);
           //::printf("  .........   in NR loop   Delta_lambda = %.16e\n", Delta_lambda);
 
@@ -2708,31 +2848,33 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           //EP_PredictorEPS.setScalarVar(1, new_S);
 
           //Evolve the surfaces and hardening vars
-    int NS = EP_PredictorEPS.getNScalarVar();
-    int NT = EP_PredictorEPS.getNTensorVar();
+     int NS = EP_PredictorEPS.getNScalarVar();
+     int NT = EP_PredictorEPS.getNTensorVar();
 
-    double dS = 0;
-      double S  = 0;
+     double dS = 0;
+       double S  = 0;
       //double new_S = 0;
 
-      stresstensor dT;
-      stresstensor T;
-      stresstensor new_T;
+       stresstensor dT;
+       stresstensor T;
+       stresstensor new_T;
 
     //if ( delta_lambda < 0) delta_lambda = 0;
-    int ii;
-    for (ii = 1; ii <= NS; ii++) {
+     int ii;
+     for (ii = 1; ii <= NS; ii++) {
              dS = delta_lambda * h_s[ii-1] ;             // Increment to the scalar internal var
              S  = EP_PredictorEPS.getScalarVar(ii);      // Get the old value of the scalar internal var
              EP_PredictorEPS.setScalarVar(ii, S + dS );  // Update internal scalar var
-    }
+     }
 
-    for (ii = 1; ii <= NT; ii++) {
-       dT = h_t[ii-1] * delta_lambda;            // Increment to the tensor internal var
-             T  = EP_PredictorEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
-             new_T = T + dT;
-             EP_PredictorEPS.setTensorVar(ii, new_T );  // Update tensorial scalar var
-          }
+     for (ii = 1; ii <= NT; ii++) {
+         dT = h_t[ii-1] * delta_lambda;            // Increment to the tensor internal var
+              T  = EP_PredictorEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
+              new_T = T + dT;
+              EP_PredictorEPS.setTensorVar(ii, new_T );  // Update tensorial scalar var
+        }
+ 
+ Felplpredictor = getYS()->f( &EP_PredictorEPS );
 
     //=======          Dq_ast = Delta_lambda * h_ * just_this_PP;
           //q_ast = q_ast_entry + Dq_ast;
@@ -2747,37 +2889,37 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           //....          dsigma.reportshort("dsigma");
 
           //sigmaBack.reportshortpqtheta("\n before======== SigmaBack");
-    sigmaBack = elastic_plastic_predictor_stress + dsigma;
+    //Guanzhou out Mar2005 sigmaBack = elastic_plastic_predictor_stress + dsigma;
           //sigmaBack.deviator().reportshort("\n after ======== SigmaBack");
           //sigmaBack.reportshortpqtheta("\n after ======== SigmaBack");
 
-    //temp trick
-       if  (sigmaBack.p_hydrostatic() > 0)
-       {
-          //======          sigmaBack = elastic_predictor_stress + Dsigma;
-          //sigmaBack.reportshortpqtheta("BE................  NR sigmaBack   ");
-          //sigmaBack.reportAnim();
-          //::fprintf(stdout,"Anim BEpoint0%d   = {Sin[theta]*q, p, Cos[theta]*q} \n",step_counter+1);
-          ////::fprintf(stdout,"Anim BEpoint0%dP = Point[BEpoint0%d] \n",step_counter+1,step_counter+1);
-          //::fprintf(stdout,"Anim   \n");
-
-    //Criterion.kappa_set( sigmaBack, q_ast) ;
-          EP_PredictorEPS.setStress( sigmaBack );
-
-    //Felplpredictor = Criterion.f(sigmaBack);
-          //Kai          absFelplpredictor = fabs(Felplpredictor);
-          //::printf("  F_bE=%.10e (%.10e)\n", Felplpredictor,Ftolerance);
-    Felplpredictor = getYS()->f( &EP_PredictorEPS );
-          //::printf(" F_BE: step=%5d  F= %.10e (%.10e)\n", step_counter, Felplpredictor, Ftolerance);
-       }
-       else
-       {
-          sigmaBack= sigmaBack.pqtheta2stress(0.1, 0.0, 0.0);
-          Felplpredictor = 0;
-          backwardEPS.setStress(sigmaBack);
-          backwardEPS.setConverged(TRUE);
-          return backwardEPS;
-       }
+    //Guanzhou out Mar2005 //temp trick
+    //Guanzhou out Mar2005    if  (sigmaBack.p_hydrostatic() > 0)
+    //Guanzhou out Mar2005    {
+    //Guanzhou out Mar2005       //======          sigmaBack = elastic_predictor_stress + Dsigma;
+    //Guanzhou out Mar2005       //sigmaBack.reportshortpqtheta("BE................  NR sigmaBack   ");
+    //Guanzhou out Mar2005       //sigmaBack.reportAnim();
+    //Guanzhou out Mar2005       //::fprintf(stdout,"Anim BEpoint0%d   = {Sin[theta]*q, p, Cos[theta]*q} \n",step_counter+1);
+    //Guanzhou out Mar2005       ////::fprintf(stdout,"Anim BEpoint0%dP = Point[BEpoint0%d] \n",step_counter+1,step_counter+1);
+    //Guanzhou out Mar2005       //::fprintf(stdout,"Anim   \n");
+    //Guanzhou out Mar2005 
+    //Guanzhou out Mar2005 //Criterion.kappa_set( sigmaBack, q_ast) ;
+    //Guanzhou out Mar2005       EP_PredictorEPS.setStress( sigmaBack );
+    //Guanzhou out Mar2005 
+    //Guanzhou out Mar2005 //Felplpredictor = Criterion.f(sigmaBack);
+    //Guanzhou out Mar2005       //Kai          absFelplpredictor = fabs(Felplpredictor);
+    //Guanzhou out Mar2005       //::printf("  F_bE=%.10e (%.10e)\n", Felplpredictor,Ftolerance);
+    //Guanzhou out Mar2005 Felplpredictor = getYS()->f( &EP_PredictorEPS );
+    //Guanzhou out Mar2005       //::printf(" F_BE: step=%5d  F= %.10e (%.10e)\n", step_counter, Felplpredictor, Ftolerance);
+    //Guanzhou out Mar2005    }
+    //Guanzhou out Mar2005    else
+    //Guanzhou out Mar2005    {
+    //Guanzhou out Mar2005       sigmaBack= sigmaBack.pqtheta2stress(0.1, 0.0, 0.0);
+    //Guanzhou out Mar2005       Felplpredictor = 0;
+    //Guanzhou out Mar2005       backwardEPS.setStress(sigmaBack);
+    //Guanzhou out Mar2005       backwardEPS.setConverged(TRUE);
+    //Guanzhou out Mar2005       return backwardEPS;
+    //Guanzhou out Mar2005    }
 
           //double tempkappa1 = kappa_cone_get();
           //double tempdFodeta = dFoverdeta(sigmaBack);
@@ -2789,7 +2931,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           //      q_ast_entry, Dq_ast, Delta_lambda);
 
           // now prepare new step
-          elastic_plastic_predictor_stress = sigmaBack;
+          //Guanzhou out Mar2005 elastic_plastic_predictor_stress = sigmaBack;
 
     //Output for plotting
     //opserr.precision(5);
@@ -2830,12 +2972,19 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
         //opserr << " tol " << Ftolerance << " " << step_counter << endln;
 
         //// Update E_Young and e according to current stress state before evaluate ElasticStiffnessTensor
-        int err = 0;
+        
+ PlasticStrain = EP_PredictorEPS.getStrain_commit() - EP_PredictorEPS.getElasticStrain_commit();
+ 
+ PlasticStrain = PlasticStrain + incrPlasticStrain;
+
+ EP_PredictorEPS.setPlasticStrain(PlasticStrain);
+
+ int err = 0;
         if ( getELT1() ) {
-     double pl_st_vol = PlasticStrain.Iinvariant1(); //Joey 02-17-03
-     // D > 0 compressive -> Iinv > 0  -> de < 0 correct!
-           err = getELT1()->updateEeDm(&EP_PredictorEPS, pl_st_vol, Delta_lambda);
-  }
+       double pl_st_vol = PlasticStrain.Iinvariant1(); //Joey 02-17-03
+       // D > 0 compressive -> Iinv > 0  -> de < 0 correct!
+            err = getELT1()->updateEeDm(&EP_PredictorEPS, pl_st_vol, Delta_lambda);
+   }
 
   //out07may97      while ( absFelplpredictor > Ftolerance &&
         //out07may97              step_counter <= MAX_STEP_COUNT  ); // if more iterations than prescribed
@@ -2847,44 +2996,50 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
         if ( step_counter >= MAX_STEP_COUNT  )
         {
            //g3ErrorHandler->warning("Template3Dep::BackwardEulerEPState   Step_counter > MAX_STEP_COUNT %d iterations", MAX_STEP_COUNT );
-            EP_PredictorEPS.setConverged( false );
+           //Guanzhou
+    opserr << "Template3Dep::BackwardEuler(), failed to converge in " << step_counter << "steps!!!" << '\n';
+    EP_PredictorEPS.setConverged( false );
+    exit(1);
      //::exit(1);
         }
 
-        // already set everything
+       // already set everything
   // Need to genarate Eep and set strains and stresses
         //if ( ( flag !=1) && (step_counter < MAX_STEP_COUNT) )
-        if ( ( flag !=1) ) {
-
+        //Guanzhou out Mar2005 if ( ( flag !=1) ) {
+   //Guanzhou out Mar2005
+  
            //Return_stress = elastic_plastic_predictor_stress;
            //Criterion.kappa_set( Return_stress, q_ast) ;
-
+  
            // Generating Consistent Stiffness Tensor Eep
            tensor I2("I", 2, def_dim_2);
            tensor I_ijkl = I2("ij")*I2("kl");
            I_ijkl.null_indices();
            tensor I_ikjl = I_ijkl.transpose0110();
-
-
+  
+  
            dQods = getPS()->dQods( &EP_PredictorEPS ); // this is m_ij
            tensor temp2 = E("ijkl")*dQods("kl");
            temp2.null_indices();
            dFods = getYS()->dFods( &EP_PredictorEPS ); // this is n_ij
            d2Qoverds2 = getPS()->d2Qods2( &EP_PredictorEPS );
-
+  
            tensor T = I_ikjl + E("ijkl")*d2Qoverds2("klmn")*Delta_lambda;
        //tensor tt = E("ijkl")*d2Qoverds2("klmn")*Delta_lambda;
      //tt.printshort("temp tt");
      //T = I_ikjl + tt;
            T.null_indices();
            tensor Tinv = T.inverse();
-
+  
            tensor R = Tinv("ijmn")*E("ijkl");
            R.null_indices();
-
-     tensor Hh(2, def_dim_2, 0.0);
+  
+     //tensor Hh(2, def_dim_2, 0.0);
+     Hh.Reset_to(0.0);
      tensor H(2, def_dim_2, 0.0);
-
+     H =dQods;
+  
     //Of 1st scalar internal vars
     if ( getELS1() ) {
        h_s[0]  = getELS1()->h_s( &EP_PredictorEPS, getPS());
@@ -2892,7 +3047,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           hardMod_ = hardMod_ + h_s[0] * xi_s[0];
        Hh = Hh + getPS()->d2Qodsds1( &EP_PredictorEPS ) *h_s[0] *Delta_lambda;
     }
-
+  
     //Of 2nd scalar internal vars
     if ( getELS2() ) {
        h_s[1]  = getELS2()->h_s( &EP_PredictorEPS, getPS());
@@ -2900,7 +3055,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           hardMod_ = hardMod_ + h_s[1] * xi_s[1];
        Hh = Hh + getPS()->d2Qodsds2( &EP_PredictorEPS ) *h_s[1] *Delta_lambda;
     }
-
+  
     //Of 3rd scalar internal vars
     if ( getELS3() ) {
        h_s[2]  = getELS3()->h_s( &EP_PredictorEPS, getPS());
@@ -2908,7 +3063,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           hardMod_ = hardMod_ + h_s[2] * xi_s[2];
        Hh = Hh + getPS()->d2Qodsds3( &EP_PredictorEPS ) *h_s[2] *Delta_lambda;
     }
-
+  
     //Of 4th scalar internal vars
     if ( getELS4() ) {
        h_s[3]  = getELS4()->h_s( &EP_PredictorEPS, getPS());
@@ -2916,7 +3071,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           hardMod_ = hardMod_ + h_s[3] * xi_s[3];
        Hh = Hh + getPS()->d2Qodsds4( &EP_PredictorEPS ) *h_s[3] *Delta_lambda;
     }
-
+  
     //Of tensorial internal var
     // 1st tensorial var
     if ( getELT1() ) {
@@ -2926,7 +3081,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
          hardMod_ = hardMod_ + hm.trace();
        Hh = Hh + (getPS()->d2Qodsdt1( &EP_PredictorEPS ))("ijmn") *(h_t[0])("mn") *Delta_lambda;
     }
-
+  
     // 2nd tensorial var
     if ( getELT2() ) {
        h_t[1]  = getELT2()->h_t( &EP_PredictorEPS, getPS());
@@ -2935,7 +3090,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
          hardMod_ = hardMod_ + hm.trace();
        Hh = Hh + (getPS()->d2Qodsdt2( &EP_PredictorEPS ))("ijmn") *(h_t[1])("mn") *Delta_lambda;
     }
-
+  
     // 3rd tensorial var
     if ( getELT3() ) {
        h_t[2]  = getELT3()->h_t( &EP_PredictorEPS, getPS());
@@ -2944,7 +3099,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
          hardMod_ = hardMod_ + hm.trace();
        Hh = Hh + (getPS()->d2Qodsdt3( &EP_PredictorEPS ))("ijmn") *(h_t[2])("mn") *Delta_lambda;
     }
-
+  
     // 4th tensorial var
     if ( getELT4() ) {
        h_t[3]  = getELT4()->h_t( &EP_PredictorEPS, getPS());
@@ -2953,15 +3108,16 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
          hardMod_ = hardMod_ + hm.trace();
        Hh = Hh + (getPS()->d2Qodsdt4( &EP_PredictorEPS ))("ijmn") *(h_t[3])("mn") *Delta_lambda;
     }
-
+  
      H = H + Hh;
-
+  
+  
      // tensor temp3lower = dFods("ot")*R("otpq")*dQods("pq");  // Bug found, Z Cheng, Jan 2004
      tensor temp3lower = dFods("ot")*R("otpq")*H("pq");
          temp3lower.null_indices();
-
+  
          double lower = temp3lower.trace();
-
+  
          lower = lower - hardMod_;  // h
      //opserr << " 2nd hardMod_ " <<  hardMod_ << "\n";
 
@@ -2977,26 +3133,28 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
      upper.null_indices();
          tensor Ep = upper*(1./lower);
          tensor Eep =  R - Ep; // elastoplastic constitutive tensor
-
-           //Set Elasto-Plastic stiffness tensor
+  
+  //opserr << "Eep :\n" << Eep;
+         
+    //Set Elasto-Plastic stiffness tensor
            EP_PredictorEPS.setEep(Eep);
      EP_PredictorEPS.setConverged(TRUE);
 
      //set plastic strain and total strain
-           straintensor elastic_strain = strain_increment - PlasticStrain;  // elastic strain increment
-           straintensor estrain = EP_PredictorEPS.getElasticStrain(); //get old elastic strain
-           straintensor pstrain = EP_PredictorEPS.getPlasticStrain(); //get old plastic strain
+           straintensor elastic_strain = strain_increment - incrPlasticStrain;  // elastic strain increment
+           straintensor estrain = EP_PredictorEPS.getElasticStrain_commit(); //get old elastic strain
+           //Guanzhou straintensor pstrain = EP_PredictorEPS.getPlasticStrain(); //get old plastic strain
 
-           straintensor tstrain = EP_PredictorEPS.getStrain();        //get old total strain
-           pstrain = pstrain + PlasticStrain;
+           straintensor tstrain = EP_PredictorEPS.getStrain_commit();        //get old total strain
+           //Guanzhou pstrain = pstrain + PlasticStrain;
            estrain = estrain + elastic_strain;
            tstrain = tstrain + strain_increment;
            //opserr<< "Plastic:  Total strain" << tstrain <<endln;
 
            //Setting de_p, de_e, total plastic, elastic strain, and  total strain
-           EP_PredictorEPS.setdPlasticStrain( PlasticStrain );
+           EP_PredictorEPS.setdPlasticStrain( incrPlasticStrain );
            EP_PredictorEPS.setdElasticStrain( elastic_strain );
-           EP_PredictorEPS.setPlasticStrain( pstrain );
+           //EP_PredictorEPS.setPlasticStrain( pstrain );
            EP_PredictorEPS.setElasticStrain( estrain );
            EP_PredictorEPS.setStrain( tstrain );
 
@@ -3005,11 +3163,10 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
      //double f_backward =  getYS()->f( &backwardEPS );
            //opserr << "\n************  Exit Backward = " <<  f_backward << "\n";
 
-        }
-
   }
+
   //return Return_stress;
-  backwardEPS = EP_PredictorEPS;
+  //Guanzhou out backwardEPS = EP_PredictorEPS;
 
   //double p = (backwardEPS.getStress()).p_hydrostatic();
   //double ec = (backwardEPS.getec()) - (backwardEPS.getLam()) * log( p / (backwardEPS.getpo()) );
@@ -3017,7 +3174,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   //double pl_s = (backwardEPS.getPlasticStrain()).Iinvariant1();
   //double dpl_s = (backwardEPS.getdPlasticStrain()).Iinvariant1();
   //cerr << "P BE p=" << p << " ec " << ec << " e " << backwardEPS.gete() << " psi " << (backwardEPS.gete() - ec) << " strain " << st << " t_pl " << pl_s << " d_pl " << dpl_s << "\n";
-
+  //opserr << "Backward EPState: \n" << backwardEPS;
   return backwardEPS;
 }
 

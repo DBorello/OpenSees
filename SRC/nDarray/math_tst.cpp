@@ -1,5 +1,5 @@
-// $Revision: 1.5 $
-// $Date: 2003-11-25 18:46:23 $
+// $Revision: 1.6 $
+// $Date: 2005-04-03 17:14:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/math_tst.cpp,v $
                                                                         
                                                                         
@@ -59,21 +59,21 @@ int main(int argc, char *argv[])
 // defining machine epsilon for different built in data types supported by C++
 float        float_eps       = f_macheps();  // or use float.h values FLT_EPSILON
 double       double_eps      = d_macheps();  // or use float.h values DBL_EPSILON
-//long double  long_double_eps = ld_macheps(); // or use float.h values LDBL_EPSILON
+long double  long_double_eps = ld_macheps(); // or use float.h values LDBL_EPSILON
 
 ::printf("\n float macheps = %.20e \n",float_eps);
 ::printf(" double macheps = %.20e \n",double_eps);
-//::printf(" long double macheps = %.20Le \n\n\n",long_double_eps);
+::printf(" long double macheps = %.20Le \n\n\n",long_double_eps);
 
 
 // Usual tolerance is defined as square root of machine epsilon
 float        sqrt_f_eps       = sqrt(f_macheps());
 double       sqrt_d_eps       = sqrt(d_macheps());
-//long double  sqrt_ld_eps      = sqrt(ld_macheps());
+long double  sqrt_ld_eps      = sqrt(ld_macheps());
 
 ::printf("\n sqrt float macheps = %.20e \n",sqrt_f_eps);
 ::printf(" sqrt double macheps = %.20e \n",sqrt_d_eps);
-//::printf(" sqrt long double macheps = %.20Le \n",sqrt_ld_eps);
+::printf(" sqrt long double macheps = %.20Le \n",sqrt_ld_eps);
 
 
 

@@ -2,7 +2,6 @@ include ../../../../../Makefile.def
 
 OBJS       = fdYield.o \
 	     fdYieldVM.o \
-	     fdYiledDP.o \
 	     fdYieldDP.o 
 
 all: $(OBJS)

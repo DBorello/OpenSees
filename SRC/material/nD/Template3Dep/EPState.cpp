@@ -17,7 +17,7 @@
 # UPDATE HISTORY:    May 2004 Guanzhou changed Commit to be consistent           #
 #                             with theory                                        #
 #		     May 2004, Zhao Cheng splitted the elastic part	         #
-#                                                                                #
+#       MAR2005 Guanzhou adding support for  const straintensor & ElasticStrain_commitp
 #                                                                                #
 #                                                                                #
 # SHORT EXPLANATION: This class is used to hold all state parameters and internal#
@@ -61,6 +61,7 @@ EPState::EPState(
                  const tensor       & Eepp,
                  const stresstensor & Stress_commitp,
                  const straintensor & Strain_commitp,
+		 const straintensor & ElasticStrain_commitp,
                  const double       * Scalar_commitp,
                  const stresstensor * Tensor_commitp,
                  const tensor       & Eep_commitp,
@@ -79,7 +80,8 @@ EPState::EPState(
 //ZC05/2004           double               Lamp,
 //ZC05/2004           double               pop,
                  double               ep,
-                 double               psip )
+                 double               psip,
+		 int flag )
 //ZC05/2004           double          ap
 //ZC05/2004     )
 //ZC05/2004: Eo(Eod), E_Young(Ed), nu_Poisson(nu), rho_mass_density(rho), CurrentStress(stressp),
@@ -93,9 +95,9 @@ EPState::EPState(
 : CurrentStress(stressp),
   CurrentStrain(strainp), ElasticStrain(Estrainp), PlasticStrain(Pstrainp),
   dElasticStrain(dEstrainp), dPlasticStrain(dPstrainp), Eep(Eepp),
-  Stress_commit(Stress_commitp), Strain_commit(Strain_commitp),
+  Stress_commit(Stress_commitp), Strain_commit(Strain_commitp), ElasticStrain_commit(ElasticStrain_commitp),
   Eep_commit(Eep_commitp), Stress_init(Stress_initp), Strain_init(Strain_initp),
-  Eep_init(Eep_initp), Converged (Convergedp), e(ep), psi(psip)
+  Eep_init(Eep_initp), Converged (Convergedp), e(ep), psi(psip), integratorFlag(flag)
 {
 
       //Eo               = Eod;
@@ -162,7 +164,8 @@ EPState::EPState(
                  int                 NTensorp,
                  const stresstensor *Tensorp,
 		 double             ep,
-		 double             psip )
+		 double             psip,
+		 int flag )
 //ZC05/2004                 int                 Elasticflagp,
 //ZC05/2004                 double              Evp,
 //ZC05/2004                 double              nuhvp,
@@ -189,6 +192,7 @@ EPState::EPState(
 CurrentStress  = stressp;
 CurrentStrain  = strainp;
 ElasticStrain  = Estrainp;
+ElasticStrain_commit = Estrainp;//Guanzhou Mar2005
 
 PlasticStrain  = Pstrainp;
 Stress_commit  = stressp;
@@ -196,6 +200,7 @@ Strain_commit  = strainp;
 
 Stress_init  = stressp;
 Strain_init  = strainp;
+integratorFlag = flag;//Guanzhou March2005
 
 //ZC05/2004Elasticflag  = Elasticflagp;
 //ZC05/2004Ev  = Evp;
@@ -322,6 +327,7 @@ EPState::EPState(
 
       e = 0.85;    //ZC
       psi  = 0.05; //ZC
+      integratorFlag = 0;//ForwardEuler assumed
 
       //Eo               = Eod;
       //E_Young          = Ed;
@@ -404,6 +410,7 @@ EPState::EPState( )
       //nu_Poisson       = 0.3;
       //rho_mass_density = 0.0;
       Eep = tensor( 4, def_dim_4, 0.0 );
+      integratorFlag = 0;//ForwardEuler assumed
 
       NScalarVar = MaxNScalarVar;
       for (int i =0; i < NScalarVar; i++)
@@ -441,6 +448,7 @@ EPState* EPState::newObj() {
                  this->getEep(),
                  this->getStress_commit(),
                  this->getStrain_commit(),
+		 this->getElasticStrain_commit(),
                  this->getScalarVar_commit(),
                  this->getTensorVar_commit(),
                  this->getEep_commit(),
@@ -459,7 +467,8 @@ EPState* EPState::newObj() {
 //ZC05/2004                 this->getLam(),
 //ZC05/2004                 this->getpo(),
                  this->gete(),
-                 this->getpsi()
+                 this->getpsi(),
+		 this->getIntegratorFlag()
 //ZC05/2004                 this->geta()
            );
       return eps;
@@ -484,6 +493,7 @@ EPState::EPState( const EPState &rhs ) {
 
       Stress_commit = rhs.getStress_commit();
       Strain_commit = rhs.getStrain_commit();
+      ElasticStrain_commit = rhs.getElasticStrain_commit();
       Stress_init   = rhs.getStress_init();
       Strain_init   = rhs.getStrain_init();
       //opserr << Eep.rank() << " ";
@@ -533,6 +543,8 @@ EPState::EPState( const EPState &rhs ) {
 //ZC05/2004       po        = rhs.getpo();
        e         = rhs.gete();
        psi       = rhs.getpsi();
+       
+       integratorFlag = rhs.getIntegratorFlag();
 //ZC05/2004       a         = rhs.geta();
 
 }
@@ -582,6 +594,7 @@ const EPState & EPState::operator=(const EPState &rhs ) {
 
          Stress_commit = rhs.getStress_commit();
          Strain_commit = rhs.getStrain_commit();
+	 ElasticStrain_commit = rhs.getElasticStrain_commit();
          Stress_init   = rhs.getStress_init();
          Strain_init   = rhs.getStrain_init();
 
@@ -616,6 +629,7 @@ const EPState & EPState::operator=(const EPState &rhs ) {
          }
 
          Converged = rhs.getConverged();
+	 integratorFlag = rhs.getIntegratorFlag();
 
 //ZC05/2004          Elasticflag = rhs.getElasticflag();
 //ZC05/2004          Ev        = rhs.getEv();
@@ -714,6 +728,10 @@ double EPState::getpsi() const {
        return psi;
 }
 
+int EPState::getIntegratorFlag() const {
+	return integratorFlag;
+}
+
 //ZC05/2004 //================================================================================
 //ZC05/2004 double EPState::getLam() const {
 //ZC05/2004       return Lambda;
@@ -783,6 +801,13 @@ straintensor EPState::getStrain_init() const {
 straintensor EPState::getElasticStrain() const {
 
      return ElasticStrain;
+
+}
+
+//GZ Mar2005
+straintensor EPState::getElasticStrain_commit() const {
+
+     return ElasticStrain_commit;
 
 }
 
@@ -1248,6 +1273,7 @@ void EPState::setInit() {
       Stress_commit   = Stress_init;
       Strain_commit   = Strain_init;
       Eep_commit = Eep_init;
+      ElasticStrain_commit = Strain0;
 
     int i;
       for (i = 0; i < NScalarVar; i++) {
@@ -1281,6 +1307,10 @@ int EPState::commitState ()
       Strain_commit   = CurrentStrain;
       Eep_commit = Eep;
 
+
+      //GZ Mar2005
+      ElasticStrain_commit = ElasticStrain;
+
     int i;
       for (i = 0; i < NScalarVar; i++) {
           //ScalarVar[i] = ScalarVar_init[i];
@@ -1303,6 +1333,8 @@ int EPState::revertToLastCommit () {
       CurrentStress   = Stress_commit;
       CurrentStrain   = Strain_commit;
       Eep = Eep_commit;
+
+      ElasticStrain = ElasticStrain_commit;
 
     int i;
       for (i = 0; i < NScalarVar; i++) {
@@ -1331,6 +1363,7 @@ int EPState::revertToStart () {
       Stress_commit   = Stress_init;
       Strain_commit   = Strain_init;
       Eep_commit = Eep_init;
+      //ElasticStrain_commit = Strain0;
 
     int i;
       for (i = 0; i < NScalarVar; i++) {

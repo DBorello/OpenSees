@@ -162,7 +162,7 @@ PBowlLoading::PBowlLoading(int tag,
            for  (int j=0;j<cols; j++) {
                theFileDIS1 >> dataPoint;
                (*U)(j, t) = dataPoint;
-               fprintf(stdout, "U ( %d, %d ) = %12.6e \n", j, t, (*U)(j, t));
+//               fprintf(stdout, "U ( %d, %d ) = %12.6e \n", j, t, (*U)(j, t));
            }
       }
      }
@@ -241,7 +241,7 @@ PBowlLoading::PBowlLoading(int tag,
                     {
                       theFileACC1 >> dataPoint;
                       (*Udd)(j, t) = dataPoint;
-                      fprintf(stdout, "Udd ( %d, %d ) = %12.6e \n", j, t, (*Udd)(j, t));
+//                      fprintf(stdout, "Udd ( %d, %d ) = %12.6e \n", j, t, (*Udd)(j, t));
                     }
                 }
             }
@@ -790,6 +790,7 @@ PBowlLoading::CompPBLoads()
   // Computing the equivalent(effective) forces for all plastic bowl nodes
   //===========================================================
 
+  opserr<<"Computing the equivalent(effective) forces for all plastic bowl nodes"<<endln;
   int cols = Udd->noRows();
   //Matrix to hold the computed effective nodal forces for all plastic bowl DOFs and each time step
   Matrix *F = new Matrix(cols, thetimeSteps);
