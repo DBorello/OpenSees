@@ -1546,7 +1546,7 @@ EPState Template3Dep::ForwardEulerEPState( straintensor &strain_increment)
 	stresstensor new_T;
 
 	for (int ii = 1; ii <= NT; ii++) {
-	      dT = Delta_lambda * h_t[ii-1] ;       // Increment to the tensor internal var
+	      dT = h_t[ii-1]*Delta_lambda  ;       // Increment to the tensor internal var
               T  = forwardEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
               new_T = T + dT;
               forwardEPS.setTensorVar(ii, new_T );
@@ -1779,7 +1779,7 @@ EPState Template3Dep::SemiBackwardEulerEPState( const straintensor &strain_incre
 	stresstensor new_T;
 
 	for (int ii = 1; ii <= NT; ii++) {
-	      dT = Delta_lambda * h_t[ii-1] ;            // Increment to the tensor internal var
+	      dT = h_t[ii-1] * Delta_lambda;            // Increment to the tensor internal var
               T  = SemibackwardEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
               new_T = T + dT;
               SemibackwardEPS.setTensorVar(ii, new_T );
@@ -2268,7 +2268,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
 	  }
 
 	  for (int ii = 1; ii <= NT; ii++) {
-	     dT = delta_lambda * h_t[ii-1] ;            // Increment to the tensor internal var
+	     dT = h_t[ii-1] * delta_lambda;            // Increment to the tensor internal var
              T  = EP_PredictorEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
              new_T = T + dT;
              EP_PredictorEPS.setTensorVar(ii, new_T );	// Update tensorial scalar var
