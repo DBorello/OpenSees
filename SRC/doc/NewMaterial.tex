@@ -19,7 +19,7 @@
 
 {\bf Michael Scott and Gregory L. Fenves} 
 
-{\bf PEER, University of California at Berkeley}
+{\bf PEER, University of California, Berkeley}
 \end{center}
 
 %\vspace{.2in}
@@ -792,16 +792,18 @@ FEM_ObjectBroker::getNewUniaxialMaterial(int classTag)
 \section{A FORTRAN Interface for UniaxialMaterial Models}
 Subclasses of UniaxialMaterial hide their implementation details from calling
 objects, i.e., calling objects only see the public interface defined in the UniaxialMaterial
-base class. How the interface is implemented is encapsulated within each implementation
-of the UniaxialMaterial interface. Thus, a particular UniaxialMaterial implementation
+base class. How the interface is implemented is encapsulated by each subclass
+of UniaxialMaterial. Thus, a particular UniaxialMaterial implementation
 need not be written in C++ as long as the implementation conforms to the UniaxialMaterial
 interface.
+
 As an example, the FEDEAS uniaxial material library developed by F.C. Filippou
 is used as a FORTRAN interface for
 UniaxialMaterial models in OpenSees. This example is meant to demonstrate the process
 of linking OpenSees with other material libraries and is not limited to just the
 FEDEAS library. Material libraries with any well-defined interface, e.g. DRAIN, may
-be linked in a similar manner.
+be linked in a similar manner. Similar concepts carry directly over to
+implementing NDMaterial and SectionForceDeformation models in FORTRAN.
 
 \subsection{FEDEAS subroutine interface}
 The subroutine interface defined for a FEDEAS uniaxial material model named ``ML1D''
@@ -912,8 +914,7 @@ history variables are stored in the first half of the hstv array, while the tria
 are kept in the second half. The values epsilonP and sigmaP are the committed strain and
 stress, respectively, of this FedeasMaterial object, as they
 are required by the FEDEAS subroutine interface. Finally, three trial state variables,
-epsilon, sigma, and tangent are defined and returned by the methods {\em getStrain()},
-{\em getStress()}, and {\em getTangent()}, respectively.
+epsilon, sigma, and tangent are defined to store the current strain, stress, and tangent.
 
 The FedeasMaterial constructor initializes the number of history variables and number
 of material parameters with arguments passed to the constructor. The UniaxialMaterial
@@ -1215,7 +1216,7 @@ FedeasMaterial::Print(ostream &s, int flag)
 
 \noindent In order to link the FORTRAN subroutine with the OpenSees C++ libraries, the
 following external function declarations are needed. There are two syntactic styles for
-these declarations, one for Win32 and one for everything else. The preprocessor directives
+these declarations, one for Win32 and the other for everything else. The preprocessor directives
 put the proper declaration into the source code. Additional declarations may be added
 as more subroutines are included in OpenSees.
 
@@ -1276,10 +1277,13 @@ FedeasMaterial::invokeSubroutine(int ist)
 }
 
 \subsection{Example -- FedeasHardeningMaterial}
-The material data array defined in FedeasMaterial is populated by its subclass
-FedeasHardeningMaterial. This is the only functionality defined for FedeasMaterial
-subclasses. All state determination and swapping of history variables is handled
-by the methods defined in the base class FedeasMaterial, as described above.
+The material data array defined in FedeasMaterial is populated by its subclasses.
+As an example, consider the case where the uniaxial hardening material is
+coded in a FORTRAN subroutine. In order to link this subroutine with OpenSees, a
+subclass of FedeasMaterial, FedeasHardeningMaterial, must be created
+(see figure~\ref{fig:FedeasHardening}). The functionality
+of this subclass is to populate the material parameter array and to determine the
+number of history variables required for analysis.
 
 \begin{figure}[htpb]
 \begin{center}
@@ -1291,15 +1295,11 @@ by the methods defined in the base class FedeasMaterial, as described above.
 \label{fig:FedeasHardening}
 \end{figure}
 
-In this example, the FedeasHardeningMaterial constructor populates the data vector
-and invokes the FedeasMaterial constructor with the number of history variables and
-number of material parameters. The blank constructor and destructor do nothing.
-
 As additional FEDEAS subroutines are added to OpenSees, new subclasses of FedeasMaterial
 must be added in order to populate the data array. This is all that need
 be done in the derived class as the base class, FedeasMaterial, contains all the 
 computational code and keeps track of path dependent behavior. This functionality is
-inherited from the FedeasMaterial base class. However, the base class 
+inherited from the FedeasMaterial base class. However, the FedeasMaterial class 
 must be modified such that the appropriate
 subroutine is called during state determination from the method {\em invokeSubroutine()}.
 
@@ -1321,7 +1321,7 @@ c     Hiso = Isotropic hardening modulus --> matpar(3)
 c     Hkin = Kinematic hardening modulus --> matpar(4)
 c
 c I  hstvP contains committed history variables:
-c     ep    = hstvP(1) --> effective plastic strain
+c     ep    = hstvP(1) --> plastic strain
 c     alpha = hstvP(2) --> internal hardening variable
 c     kappa = hstvP(3) --> back stress for kinematic hardening
 c	 
@@ -1427,10 +1427,15 @@ c     add additional cases, if needed
 }
 
 \subsubsection{FedeasHardeningMaterial Subclass}
-An example subclass of FedeasMaterial is FedeasHardeningMaterial. The functionality
-of the FedeasHardeningMaterial class is to read in the material parameters required
-for the Hard\_1 subroutine invoked from the FedeasMaterial method {\em invokeSubroutine()}.
+As stated previously, the functionality of the FedeasHardeningMaterial class is to read
+in the material parameters required for the Hard\_1 subroutine invoked from the
+FedeasMaterial method {\em invokeSubroutine()}. In addition, the required number of
+history variables must be passed to the FedeasMaterial base class.
+
 The class interface for FedeasHardeningMaterial is shown below.
+The constructor takes the tag and material parameters as arguments. No other methods
+are declared in the FedeasHardeningMaterial interface as all functionality
+is inherited from FedeasMaterial.
 
 {\sf\small
 \begin{verbatim}
@@ -1485,7 +1490,7 @@ FedeasHardeningMaterial::~FedeasHardeningMaterial(void)
 \end{verbatim}
 }
 
-\subsubsection*{Important Polymorphic Note}
+\subsubsection{Important Polymorphic Note}
 Should any method in the FedeasMaterial class need to be overridden, e.g., if a
 subclass does not want all of its history variables set to $0.0$ in {\em revertToStart()},
 the {\em getCopy()} method must also be overridden to return a pointer to the
