@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2004-10-05 00:17:31 $
+// $Revision: 1.6 $
+// $Date: 2004-12-06 23:05:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/SymBandEigenSolver.cpp,v $
 
 // Written: MHS
@@ -235,11 +235,16 @@ SymBandEigenSolver::solve(int nModes)
   // make modifications to the eigenvectors
   //   Eij -> Mi Eij  (based on new M)
 
-  for (int j=0; j<numModes; j++) {
-    double *eigVectJptr = &eigenvector[j*ldz];
-    double *MPtr = M;
-    for (int i=0; i<size; i++) 
-      *eigVectJptr++ *= *MPtr++;
+
+  M = theSOE->M;
+  if (M != 0) {
+    
+    for (int j=0; j<numModes; j++) {
+      double *eigVectJptr = &eigenvector[j*ldz];
+      double *MPtr = M;
+      for (int i=0; i<size; i++) 
+	*eigVectJptr++ *= *MPtr++;
+    }
   }
 
   return 0;
