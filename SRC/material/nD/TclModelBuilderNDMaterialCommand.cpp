@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2001-12-17 23:38:41 $
+// $Revision: 1.16 $
+// $Date: 2002-02-08 19:55:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -372,10 +372,13 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     // Pressure Independend Multi-yield, by ZHY
     else if (strcmp(argv[1],"PressureIndependMultiYield") == 0) {
 	const int numParam = 9;
-	int tag;  double param[numParam]; 	
+	const int totParam = 10;
+	int tag;  double param[totParam]; 
+	param[9] = 0.0;
+
 	char * arg[] = {"nd", "refShearModul", "refBulkModul", "frictionAng", 
 			"peakShearStra", "refPress", "cohesi", 
-			"pressDependCoe", "numberOfYieldSurf"};
+			"pressDependCoe", "numberOfYieldSurf", "rho=0."};
 	if (argc < (3+numParam)) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
@@ -383,7 +386,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    cerr << "? "<< "\n";
 	    cerr << arg[1] << "? "<< arg[2] << "? "<< arg[3] << "? "<< "\n";
 	    cerr << arg[4] << "? "<< arg[5] << "? "<< arg[6] << "? "<< "\n";
-	    cerr << arg[7] << "? "<< arg[8] << "? "<<endl;
+	    cerr << arg[7] << "? "<< arg[8] << "? "<< arg[9] << "? "<<endl;
 	    return TCL_ERROR;
 	}    
 	
@@ -392,7 +395,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    return TCL_ERROR;		
 	}
 
-	for (int i=3; i<(3+numParam); i++) 
+	for (int i=3; i<argc; i++) 
 	    if (Tcl_GetDouble(interp, argv[i], &param[i-3]) != TCL_OK) {
 		cerr << "WARNING invalid " << arg[i-3] << "\n";
 		cerr << "nDMaterial PressureIndependMultiYield: " << tag << endl;
@@ -402,22 +405,26 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	PressureIndependMultiYield * temp = 
 	    new PressureIndependMultiYield (tag, param[0], param[1], param[2], 
 					    param[3], param[4], param[5], param[6], 
-					    param[7], param[8]);
+					    param[7], param[8], param[9]);
 	theMaterial = temp;
     }	
     
     
     // Pressure Dependend Multi-yield, by ZHY
     else if (strcmp(argv[1],"PressureDependMultiYield") == 0) {
-	const int numParam = 20;
-	int tag;  double param[numParam]; 	
+	const int numParam = 20; 
+	const int totParam = 22;
+	int tag;  
+	double param[totParam];
+ 	param[20] = param[21] = 0.;
+
 	char * arg[] = {"nd", "refShearModul", "refBulkModul", "frictionAng", 
 			"peakShearStra", "refPress", "cohesi", "pressDependCoe", 
 			"numberOfYieldSurf", "phaseTransformAngle", 
 			"contractionParam1", "contractionParam2", 
 			"dilationParam1", "dilationParam2", "volLimit",
 			"liquefactionParam1", "liquefactionParam2", 
-			"liquefactionParam3", "liquefactionParam4", "atm"};
+			"liquefactionParam3", "liquefactionParam4", "atm", "rho=0.", "e=0."};
 	if (argc < (3+numParam)) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
@@ -429,7 +436,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    cerr << arg[10] << "? "<< arg[11] << "? "<< arg[12] << "? "<< "\n";
 	    cerr << arg[13] << "? "<< arg[14] << "? "<< arg[15] << "? "<< "\n"; 
 	    cerr << arg[16] << "? "<< arg[17] << "? "<< arg[18] << "? "<< "\n"; 
-	    cerr << arg[19] << "? " <<endl;
+	    cerr << arg[19] << "? " << arg[20] << "? " << arg[21] << "? " << endl;
 	    return TCL_ERROR;
 	}    
 
@@ -438,7 +445,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    return TCL_ERROR;		
 	}
 
-	for (int i=3; i<(3+numParam); i++) 
+	for (int i=3; i<argc; i++) 
 	  if (Tcl_GetDouble(interp, argv[i], &param[i-3] ) != TCL_OK) {
 	      cerr << "WARNING invalid " << arg[i-3] << "\n";
 	      cerr << "nDMaterial PressureDependMultiYield: " << tag << endl;
@@ -452,9 +459,9 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 					  param[9], param[10], param[11], 
 					  param[12], param[13], param[14], 
 					  param[15], param[16], param[17], 
-					  param[18], param[19]);
+					  param[18], param[19], param[20], param[21]);
 					  
-	theMaterial = temp;	
+	   theMaterial = temp;	
     }	
 
     // Fluid Solid Porous, by ZHY
