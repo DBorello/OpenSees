@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-15 02:34:34 $
+// $Revision: 1.8 $
+// $Date: 2004-04-12 19:11:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.h,v $
                                                                         
                                                                         
-// File: ~/matrix/ID.h
-//
 // Written: fmk 
-// Created: 11/96
 // Revision: A
 //
 // Description: This file contains the class definition for ID.
@@ -49,14 +46,14 @@ class ID
     ID();
     ID(int);
     ID(int size, int arraySize);
-    ID(int *data, int size);
+    ID(int *data, int size, bool cleanIt = false);
     ID(const ID &);    
     ~ID();
  
     // utility methods
     int Size(void) const;
     void Zero(void);
-    int setData(int *newData, int size);
+    int setData(int *newData, int size, bool cleanIt = false);
     
     // overloaded operators
     inline int &operator()(int x);
