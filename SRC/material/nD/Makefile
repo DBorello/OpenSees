@@ -6,7 +6,7 @@ OBJS       = NDMaterial.o ElasticIsotropic3D.o ElasticIsotropicMaterial.o \
 	TclModelBuilderNDMaterialCommand.o J2PlaneStrain.o \
 	PlateFiberMaterial.o PlaneStressMaterial.o \
 	J2PlaneStress.o  J2Plasticity.o J2AxiSymm.o J2ThreeDimensional.o \
-	BidirectionalMaterial.o J2PlateFiber.o PressureDependentElastic3D.o \
+	J2PlateFiber.o PressureDependentElastic3D.o \
 	ElasticIsotropicBeamFiber.o BeamFiberMaterial.o
 
 
