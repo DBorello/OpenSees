@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-05-08 22:51:57 $
+// $Revision: 1.16 $
+// $Date: 2003-05-15 21:34:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -697,17 +697,25 @@ FiberSection3d::recvSelf(int commitTag, Channel &theChannel,
 void
 FiberSection3d::Print(OPS_Stream &s, int flag)
 {
-  s << "\nFiberSection3d, tag: " << this->getTag() << endln;
-  s << "\tSection code: " << code;
-  s << "\tNumber of Fibers: " << numFibers << endln;
-  s << "\tCentroid: (" << -yBar << ", " << zBar << ')' << endln;
-
-  if (flag == 1) {
+  if (flag == 2) {
     int loc = 0;
     for (int i = 0; i < numFibers; i++) {
-      s << "\nLocation (y, z) = (" << -matData[loc++] << ", " << matData[loc++] << ")";
-      s << "\nArea = " << matData[loc++] << endln;
+      s << -matData[loc++] << " "  << matData[loc++] << " "  << matData[loc++] << " " ;
+      s << theMaterials[i]->getStress() << " "  << theMaterials[i]->getStrain() << endln;
+    } 
+  } else {
+    s << "\nFiberSection3d, tag: " << this->getTag() << endln;
+    s << "\tSection code: " << code;
+    s << "\tNumber of Fibers: " << numFibers << endln;
+    s << "\tCentroid: (" << -yBar << ", " << zBar << ')' << endln;
+    
+    if (flag == 1) {
+      int loc = 0;
+      for (int i = 0; i < numFibers; i++) {
+	s << "\nLocation (y, z) = (" << -matData[loc++] << ", " << matData[loc++] << ")";
+	s << "\nArea = " << matData[loc++] << endln;
       theMaterials[i]->Print(s, flag);
+      }
     }
   }
 }

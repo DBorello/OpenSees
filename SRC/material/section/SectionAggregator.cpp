@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-25 23:33:34 $
+// $Revision: 1.11 $
+// $Date: 2003-05-15 21:34:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -789,15 +789,19 @@ SectionAggregator::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &the
 void
 SectionAggregator::Print(OPS_Stream &s, int flag)
 {
-  s << "\nSection Aggregator, tag: " << this->getTag() << endln;
-  if (theSection) {
-    s << "\tSection, tag: " << theSection->getTag() << endln;
-    theSection->Print(s, flag);
+  if (flag == 2) {
+      theSection->Print(s, flag);
+  } else {
+    s << "\nSection Aggregator, tag: " << this->getTag() << endln;
+    if (theSection) {
+      s << "\tSection, tag: " << theSection->getTag() << endln;
+      theSection->Print(s, flag);
+    }
+    s << "\tUniaxial Additions" << endln;
+    for (int i = 0; i < numMats; i++)
+      s << "\t\tUniaxial Material, tag: " << theAdditions[i]->getTag() << endln;
+    s << "\tUniaxial codes " << *matCodes << endln;
   }
-  s << "\tUniaxial Additions" << endln;
-  for (int i = 0; i < numMats; i++)
-    s << "\t\tUniaxial Material, tag: " << theAdditions[i]->getTag() << endln;
-  s << "\tUniaxial codes " << *matCodes << endln;
 }
 
 Response*
