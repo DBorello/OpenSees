@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 08:13:18 $
+// $Revision: 1.3 $
+// $Date: 2000-12-16 06:28:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -105,15 +105,15 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     // Check argv[1] for J2PlaneStrain material type
     else if ((strcmp(argv[1],"J2Plasticity") == 0)  ||
 	     (strcmp(argv[1],"J2") == 0)) {
-	if (argc < 10) {
+	if (argc < 9) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: nDMaterial J2Plasticity tag? K? G? sig0? sigInf? delta? H? eta?" << endl;
+	    cerr << "Want: nDMaterial J2Plasticity tag? K? G? sig0? sigInf? delta? H?" << endl;
 	    return TCL_ERROR;
 	}    
 
 	int tag;
-	double K, G, sig0, sigInf, delta, H, eta;
+	double K, G, sig0, sigInf, delta, H;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    cerr << "WARNING invalid J2Plasticity tag" << endl;
@@ -154,14 +154,9 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
 	    return TCL_ERROR;	
 	}			
-    	if (Tcl_GetDouble(interp, argv[9], &eta) != TCL_OK) {
-	    cerr << "WARNING invalid eta\n";
-	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
-	    return TCL_ERROR;	
-	}			
 
 	theMaterial = new J2Plasticity (tag, 0, K, G, sig0, sigInf, 
-					delta, H, eta);
+					delta, H);
     }	
     
     else {
