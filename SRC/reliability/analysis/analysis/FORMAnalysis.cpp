@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-04-10 17:47:53 $
+// $Revision: 1.6 $
+// $Date: 2003-04-28 20:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -56,7 +56,7 @@ using std::setiosflags;
 FORMAnalysis::FORMAnalysis(ReliabilityDomain *passedReliabilityDomain,
 						   FindDesignPointAlgorithm *passedFindDesignPointAlgorithm,
 						   ProbabilityTransformation *passedProbabilityTransformation,
-						   char *passedFileName,
+						   const char *passedFileName,
 						   int p_relSensTag)
 :ReliabilityAnalysis()
 {

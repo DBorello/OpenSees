@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:32:47 $
+// $Revision: 1.2 $
+// $Date: 2003-04-28 20:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FragilityAnalysis.h,v $
 
 
@@ -54,7 +54,7 @@ public:
 					  double first,
 					  double last,
 					  int numIntervals,
-					  char *fileName,
+					  const char *fileName,
 					  Tcl_Interp *theTclInterp);
 	virtual ~FragilityAnalysis();
 

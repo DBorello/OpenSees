@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:32:48 $
+// $Revision: 1.4 $
+// $Date: 2003-04-28 20:51:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SystemAnalysis.h,v $
 
 
@@ -45,7 +45,7 @@ class SystemAnalysis : public ReliabilityAnalysis
 
 public:
 	SystemAnalysis(ReliabilityDomain *passedReliabilityDomain,
-				   char *fileName);
+				   const char *fileName);
 	~SystemAnalysis();
 
 	int		analyze(void);

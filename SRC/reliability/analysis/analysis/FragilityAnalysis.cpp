@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-04-10 17:47:53 $
+// $Revision: 1.4 $
+// $Date: 2003-04-28 20:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FragilityAnalysis.cpp,v $
 
 
@@ -56,7 +56,7 @@ FragilityAnalysis::FragilityAnalysis(ReliabilityDomain *passedReliabilityDomain,
 									 double pFirst,
 									 double pLast,
 									 int pNumIntervals,
-									 char *passedFileName,
+									 const char *passedFileName,
 									 Tcl_Interp *passedTclInterp)
 :ReliabilityAnalysis()
 {

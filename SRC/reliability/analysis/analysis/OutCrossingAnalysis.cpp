@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-03-06 18:14:31 $
+// $Revision: 1.3 $
+// $Date: 2003-04-28 20:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/OutCrossingAnalysis.cpp,v $
 
 //
@@ -59,7 +59,7 @@ OutCrossingAnalysis::OutCrossingAnalysis(
 				int pAnalysisType,
 				int p_sampleFreq,
 				double p_littleDeltaT,
-				char *passedFileName)
+				const char *passedFileName)
 :ReliabilityAnalysis()
 {
 	theFindDesignPointAlgorithm = theFindDesPt;

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:32:48 $
+// $Revision: 1.2 $
+// $Date: 2003-04-28 20:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SamplingAnalysis.cpp,v $
 
 
@@ -68,7 +68,7 @@ SamplingAnalysis::SamplingAnalysis(	ReliabilityDomain *passedReliabilityDomain,
 										double passedTargetCOV,
 										double passedSamplingVariance,
 										int passedPrintFlag,
-										char *passedFileName,
+										const char *passedFileName,
 										Vector *pStartPoint,
 										int passedAnalysisTypeTag)
 :ReliabilityAnalysis()

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:32:47 $
+// $Revision: 1.2 $
+// $Date: 2003-04-28 20:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/MVFOSMAnalysis.h,v $
 
 
@@ -53,7 +53,7 @@ public:
 				   GFunEvaluator *theGFunEvaluator,
 				   GradGEvaluator *theGradGEvaluator,
 				   Tcl_Interp *theTclInterp,
-				   char *fileName);
+				   const char *fileName);
 	~MVFOSMAnalysis();
 
 	int analyze(void);

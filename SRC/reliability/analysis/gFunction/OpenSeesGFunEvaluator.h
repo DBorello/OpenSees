@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-04 00:39:16 $
+// $Revision: 1.6 $
+// $Date: 2003-04-28 20:51:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.h,v $
 
 
@@ -49,7 +49,7 @@ class OpenSeesGFunEvaluator : public GFunEvaluator
 public:
 	OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 						ReliabilityDomain *passedReliabilityDomain,
-						char *fileName);
+						const char *fileName);
 	OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 						ReliabilityDomain *passedReliabilityDomain,
 						int nsteps, double dt);

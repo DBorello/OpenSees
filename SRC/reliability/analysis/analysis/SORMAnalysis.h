@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 00:32:48 $
+// $Revision: 1.4 $
+// $Date: 2003-04-28 20:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/SORMAnalysis.h,v $
 
 
@@ -47,7 +47,7 @@ class SORMAnalysis : public ReliabilityAnalysis
 public:
 	SORMAnalysis(	ReliabilityDomain *passedReliabilityDomain,
 					FindCurvatures *passedCurvaturesAlgorithm,
-					char *fileName);
+					const char *fileName);
 	~SORMAnalysis();
 
 	int analyze(void);

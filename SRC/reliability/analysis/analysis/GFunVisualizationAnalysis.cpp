@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-03-06 18:13:36 $
+// $Revision: 1.3 $
+// $Date: 2003-04-28 20:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/GFunVisualizationAnalysis.cpp,v $
 
 
@@ -54,8 +54,8 @@ GFunVisualizationAnalysis::GFunVisualizationAnalysis(
 					ReliabilityDomain *passedReliabilityDomain,
 					GFunEvaluator *passedGFunEvaluator,
 					ProbabilityTransformation *passedProbabilityTransformation,
-					char *passedOutputFileName,
-					char *passedConvFileName,
+					const char *passedOutputFileName,
+					const char *passedConvFileName,
 					int passedConvResults,
 					int passedSpace,
 					int passedFunSurf,

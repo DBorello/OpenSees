@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-03-04 00:39:16 $
+// $Revision: 1.8 $
+// $Date: 2003-04-28 20:51:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/gFunction/OpenSeesGFunEvaluator.cpp,v $
 
 
@@ -51,7 +51,7 @@ using std::setprecision;
 
 OpenSeesGFunEvaluator::OpenSeesGFunEvaluator(Tcl_Interp *passedTclInterp,
 					ReliabilityDomain *passedReliabilityDomain,
-					char *passedFileName)
+					const char *passedFileName)
 :GFunEvaluator(passedTclInterp, passedReliabilityDomain)
 {
 	fileName = new char[256];

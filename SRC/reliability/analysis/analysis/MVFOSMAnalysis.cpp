@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:32:47 $
+// $Revision: 1.2 $
+// $Date: 2003-04-28 20:51:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/MVFOSMAnalysis.cpp,v $
 
 
@@ -55,7 +55,7 @@ MVFOSMAnalysis::MVFOSMAnalysis(ReliabilityDomain *passedReliabilityDomain,
 							   GFunEvaluator *passedGFunEvaluator,
 							   GradGEvaluator *passedGradGEvaluator,
 							   Tcl_Interp *passedTclInterp,
-							   char *passedFileName)
+							   const char *passedFileName)
 :ReliabilityAnalysis()
 {
 	theReliabilityDomain	= passedReliabilityDomain;
