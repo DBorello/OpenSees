@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.9 $
-// $Date: 2003-02-25 23:32:41 $
+// $Revision: 1.10 $
+// $Date: 2003-03-04 19:02:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclPatternCommand.cpp,v $
 
 // File: ~/domain/pattern/TclPatternComand.C
@@ -184,7 +184,7 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
       opserr << "WARNING invalid accel series: pattern UniformExcitation -accel <args>\n";
       return TCL_ERROR;
     }
-
+    
     currentArg++;
 
   } else if ((strcmp(argv[currentArg],"-vel") == 0) ||
@@ -238,7 +238,7 @@ TclPatternCommand(ClientData clientData, Tcl_Interp *interp,
     opserr << "-int {Series Integrator}\n";
     return TCL_ERROR;
       }
-
+      
       GroundMotion *theMotion = new GroundMotion(dispSeries, velSeries,
              accelSeries, seriesIntegrator);
 
