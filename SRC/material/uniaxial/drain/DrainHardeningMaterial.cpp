@@ -18,12 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-15 15:54:40 $
+// $Revision: 1.2 $
+// $Date: 2001-10-01 17:08:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/drain/DrainHardeningMaterial.cpp,v $
                                                                       
 // Written: MHS
-// Created: June 2Hardening1
+// Created: June 2001
 //
 // Description: This file contains the class definition for 
 // DrainHardeningMaterial.

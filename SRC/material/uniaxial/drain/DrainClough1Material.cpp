@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-08-18 21:39:05 $
+// $Revision: 1.2 $
+// $Date: 2001-10-01 17:08:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/drain/DrainClough1Material.cpp,v $
 
 // Written: MHS
