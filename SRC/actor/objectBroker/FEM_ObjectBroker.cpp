@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2003-08-29 07:37:42 $
+// $Revision: 1.23 $
+// $Date: 2003-08-29 07:44:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -248,18 +248,8 @@
 #include <SparseGenColLinSOE.h>
 #include <SuperLU.h>
 
-#ifdef _PARALLEL_PROCESSING
-#include <DistributedBandSPDLinSOE.h>
-#include <DistributedProfileSPDLinSOE.h>
-#include <DistributedSparseGenColLinSOE.h>
-#include <DistributedBandGenLinSOE.h>
-#include <DistributedSuperLU.h>
-#include <ParallelNumberer.h>
-#endif
 
 #include <DomainDecompositionAnalysis.h>
-#include <StaticDomainDecompositionAnalysis.h>
-#include <TransientDomainDecompositionAnalysis.h>
 
 // load patterns
 #include <LoadPattern.h>
@@ -276,6 +266,18 @@
 
 // time series integrators
 #include <TrapezoidalTimeSeriesIntegrator.h>
+
+#ifdef _PARALLEL_PROCESSING
+#include <DistributedBandSPDLinSOE.h>
+#include <DistributedProfileSPDLinSOE.h>
+#include <DistributedSparseGenColLinSOE.h>
+#include <DistributedBandGenLinSOE.h>
+#include <DistributedSuperLU.h>
+#include <ParallelNumberer.h>
+#include <StaticDomainDecompositionAnalysis.h>
+#include <TransientDomainDecompositionAnalysis.h>
+#endif
+
 
 FEM_ObjectBroker::FEM_ObjectBroker()
 :lastLinearSolver(0),lastDomainSolver(0)
@@ -1471,11 +1473,13 @@ FEM_ObjectBroker::getNewDomainDecompAnalysis(int classTag,
       case DomDecompANALYSIS_TAGS_DomainDecompositionAnalysis:  
 	return new DomainDecompositionAnalysis(theSubdomain);
 
+#ifdef _PARALLEL_PROCESSING
       case ANALYSIS_TAGS_StaticDomainDecompositionAnalysis:
 	return new StaticDomainDecompositionAnalysis(theSubdomain);      
 
       case ANALYSIS_TAGS_TransientDomainDecompositionAnalysis:
 	return new TransientDomainDecompositionAnalysis(theSubdomain);      
+#endif
 	
       default:
 	opserr << "ObjectBroker::getNewDomainDecompAnalysis ";
