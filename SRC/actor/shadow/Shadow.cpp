@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:40 $
+// $Revision: 1.3 $
+// $Date: 2003-08-29 07:08:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/shadow/Shadow.cpp,v $
                                                                         
-                                                                        
-// File: ~/actor/Shadow.C
-//
+
 // Written: fmk
-// Created: 11/96
 // Revision: A
 //
 // Purpose: This file contains the implementation of Shadow.
@@ -45,36 +42,39 @@
 #include <ID.h>
 #include <FEM_ObjectBroker.h>
 
-
 Shadow::Shadow(Channel &theChan, 
-	       FEM_ObjectBroker &myBroker,
-	       ChannelAddress &theAddress)
-:theChannel(&theChan),theBroker(&myBroker),theRemoteActorsAddress(&theAddress)
+	       FEM_ObjectBroker &myBroker)
+:theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(0)
 {
 
 }
 
-Shadow::Shadow(char *program,
-	       Channel &theChan, 
+
+Shadow::Shadow(Channel &theChan, 
+	       FEM_ObjectBroker &myBroker,
+	       ChannelAddress &theAddress)
+:theChannel(&theChan), theBroker(&myBroker), theRemoteActorsAddress(&theAddress)
+{
+
+}
+
+Shadow::Shadow(int actorType,
 	       FEM_ObjectBroker &myBroker,	       
 	       MachineBroker &theMachineBroker,
-	       int compDemand,
-	       bool startShadow)
-:theChannel(&theChan),theBroker(&myBroker),theRemoteActorsAddress(0)
+	       int compDemand)
+  :theBroker(&myBroker), theRemoteActorsAddress(0)
 {
-    // start the remote actor process running
-  if (startShadow == true) {
-    int res = theMachineBroker.startActor(program,theChan,compDemand);
-    if (res < 0) {
-	opserr << "Shadow::Shadow - could not start remote actor\n";
-	opserr << " using program " << *program << endln;
-	exit(-1);
-    }
+  // start the remote actor process running
+  theChannel = theMachineBroker.startActor(actorType, compDemand);
+  if (theChannel < 0) {
+    opserr << "Shadow::Shadow - could not start remote actor\n";
+    opserr << " using program " << actorType << endln;
+    exit(-1);
   }
 
   // now call setUpShadow on the channel
-  theChan.setUpShadow();
-  theRemoteActorsAddress = theChan.getLastSendersAddress();
+  theChannel->setUpShadow();
+  theRemoteActorsAddress = theChannel->getLastSendersAddress();
 }
 
 Shadow::~Shadow()
@@ -85,26 +85,26 @@ Shadow::~Shadow()
 int
 Shadow::sendObject(MovableObject &theObject)
 {
-    return theChannel->sendObj(0, theObject,theRemoteActorsAddress);
+    return theChannel->sendObj(0, theObject, theRemoteActorsAddress);
 }
 
 int
 Shadow::recvObject(MovableObject &theObject)
 {
-    return theChannel->recvObj(0, theObject,*theBroker,theRemoteActorsAddress);
+    return theChannel->recvObj(0, theObject,*theBroker, theRemoteActorsAddress);
 }
 
 
 int
 Shadow::recvMessage(Message &theMessage)
 {
-    return theChannel->recvMsg(0, 0, theMessage,theRemoteActorsAddress);
+    return theChannel->recvMsg(0, 0, theMessage, theRemoteActorsAddress);
 }
 
 int
 Shadow::sendMessage(const Message &theMessage)
 {
-    return theChannel->sendMsg(0, 0, theMessage,theRemoteActorsAddress);
+    return theChannel->sendMsg(0, 0, theMessage, theRemoteActorsAddress);
 }
 
 
@@ -112,37 +112,37 @@ Shadow::sendMessage(const Message &theMessage)
 int
 Shadow::sendMatrix(const Matrix &theMatrix)
 {
-    return theChannel->sendMatrix(0, 0, theMatrix,theRemoteActorsAddress);
+    return theChannel->sendMatrix(0, 0, theMatrix, theRemoteActorsAddress);
 }
 
 int
 Shadow::recvMatrix(Matrix &theMatrix)
 {
-    return theChannel->recvMatrix(0, 0, theMatrix,theRemoteActorsAddress);
+    return theChannel->recvMatrix(0, 0, theMatrix, theRemoteActorsAddress);
 }
 
 int
 Shadow::sendVector(const Vector &theVector)
 {
-    return theChannel->sendVector(0, 0, theVector,theRemoteActorsAddress);
+    return theChannel->sendVector(0, 0, theVector, theRemoteActorsAddress);
 }
 
 int
 Shadow::recvVector(Vector &theVector)
 {
-    return theChannel->recvVector(0, 0, theVector,theRemoteActorsAddress);
+    return theChannel->recvVector(0, 0, theVector, theRemoteActorsAddress);
 }
 
 int
 Shadow::sendID(const ID &theID)
 {
-    return theChannel->sendID(0, 0, theID,theRemoteActorsAddress);
+    return theChannel->sendID(0, 0, theID, theRemoteActorsAddress);
 }
 
 int
 Shadow::recvID(ID &theID)
 {
-    return theChannel->recvID(0, 0, theID,theRemoteActorsAddress);
+    return theChannel->recvID(0, 0, theID, theRemoteActorsAddress);
 }
 
 

@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-08-29 07:08:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/shadow/Shadow.h,v $
                                                                         
                                                                         
-// File: ~/actor/Shadow.h
-//
 // Written: fmk
-// Created: 11/96
 // Revision: A
 //
 // Purpose: This file contains the class definition for Shadow.
@@ -55,15 +52,16 @@ class Shadow
 {
   public:
     Shadow(Channel &theChannel, 
+	   FEM_ObjectBroker &theBroker); // if actor process up and running
+
+    Shadow(Channel &theChannel, 
 	   FEM_ObjectBroker &theBroker,
-	   ChannelAddress &theAddress); // if actor process up and running
+	   ChannelAddress &theAddress);  // if actor process up and running
     
-    Shadow(char *program,
-	   Channel &theChannel, 
+    Shadow(int actorType,
 	   FEM_ObjectBroker &theBroker,
 	   MachineBroker &theMachineBroker,
-	   int compDemand,
-           bool startShadow);   // to get an actor process up and running
+	   int compDemand);              // to start an actor process
 
     virtual ~Shadow();
 
@@ -79,12 +77,12 @@ class Shadow
     virtual int recvID(ID &theID);      
 
     Channel 		  *getChannelPtr(void) const;
-    FEM_ObjectBroker 	*getObjectBrokerPtr(void) const;        
-    ChannelAddress 	  *getActorAddressPtr(void) const;            
+    FEM_ObjectBroker 	  *getObjectBrokerPtr(void) const;        
+    ChannelAddress        *getActorAddressPtr(void) const;
 
   protected:
-    FEM_ObjectBroker      *theBroker;
     Channel	 	  *theChannel;    
+    FEM_ObjectBroker      *theBroker;
 
   private:
     ChannelAddress 	  *theRemoteActorsAddress;    
