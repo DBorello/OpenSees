@@ -5080,7 +5080,7 @@ tensor TwentyNodeBrick_u_p_U::nodal_forcesFU()
                 // nodal forces See Zienkievicz part 1 pp 108
                 nodal_forcesFU =
                      nodal_forcesFU + dhGlobal("ib")*stress_at_GP("ab")*weight;
-                //nodal_forces.print("nf","\n\n Nodal Forces \n");
+                //nodal_forces.print("nf","\n\n Nodal Forces FU \n");
  
               }
           }
