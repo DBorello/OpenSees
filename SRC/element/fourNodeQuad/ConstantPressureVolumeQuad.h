@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-07 00:29:00 $
+// $Revision: 1.8 $
+// $Date: 2002-11-01 01:17:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.h,v $
 
 // Ed "C++" Love
@@ -44,73 +44,49 @@ class ConstantPressureVolumeQuad : public Element
 
   public :
     
-    //null constructor
     ConstantPressureVolumeQuad( ) ;
-  
-    //full constructor
     ConstantPressureVolumeQuad( int tag, 
 			        int node1,
 			        int node2,
 			        int node3,
 			        int node4,
 			        NDMaterial &theMaterial ) ;
-
-    //destructor 
     virtual ~ConstantPressureVolumeQuad( ) ;
 
-    //set domain
+    int getNumExternalNodes( ) const ;
+    const ID &getExternalNodes( ) ;
+    int getNumDOF( ) ;
     void setDomain( Domain *theDomain ) ;
 
-    //get the number of external nodes
-    int getNumExternalNodes( ) const ;
- 
-    //return connected external nodes
-    const ID &getExternalNodes( ) ;
-
-    //return number of dofs
-    int getNumDOF( ) ;
-
-    //commit state
+    // public methods to set the state of the element    
     int commitState( ) ;
-    
-    //revert to last commit 
     int revertToLastCommit( ) ;
-    
-    //revert to start 
     int revertToStart( ) ;
+    int update(void);
 
-    //print out element data
-    void Print( ostream &s, int flag ) ;
-	
-    //return stiffness matrix 
+    // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff( ) ;
-    
-    //return secant matrix 
     const Matrix &getSecantStiff( ) ;
-    
-    //return damping matrix
+    const Matrix &getInitialTangent( ) ;
+
     const Matrix &getDamp( ) ;
-    
-    //return mass matrix
     const Matrix &getMass( ) ;
 
+    // public methods for updating ele load information
     void zeroLoad( ) ;
     int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
 
-    //get residual
     const Vector &getResistingForce( ) ;
-    
-    //get residual with inertia terms
     const Vector &getResistingForceIncInertia( ) ;
 
     // public methods for element output
     int sendSelf (int commitTag, Channel &theChannel);
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);
-
-    //plotting 
     int displaySelf(Renderer &theViewer, int displayMode, float fact);
+    void Print( ostream &s, int flag ) ;
+
   
   private : 
 
@@ -132,7 +108,6 @@ class ConstantPressureVolumeQuad : public Element
     static double sg[4] ;
     static double tg[4] ;
     static double wg[4] ;
-
     
     //node information
     ID connectedExternalNodes ;  //four node numbers
