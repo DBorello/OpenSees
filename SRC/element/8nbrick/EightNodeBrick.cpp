@@ -3142,6 +3142,14 @@ int EightNodeBrick::displaySelf (Renderer &theViewer, int displayMode, float fac
 //=============================================================================
 void EightNodeBrick::Print(OPS_Stream &s, int flag)
 {
+  if (flag == 1) {
+
+    s << "EightNodeBrick, element id:  " << this->getTag() << endln;
+    s << "Connected external nodes:  " << connectedExternalNodes;
+    s << this->getResistingForce();
+
+  } else {
+
     //report(" EightNodeBrick ");
     s << "EightNodeBrick, element id:  " << this->getTag() << endln;
     s << "Connected external nodes:  " << connectedExternalNodes;
@@ -3183,7 +3191,7 @@ void EightNodeBrick::Print(OPS_Stream &s, int flag)
         }
       }
     }	 
-
+  }
 }
 
 //=============================================================================
