@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-11-27 23:07:54 $
+// $Revision: 1.4 $
+// $Date: 2001-12-07 00:52:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -436,7 +436,7 @@ AnalysisModel::updateDomain(void)
     // check to see there is a Domain linked to the Model
 
     if (myDomain == 0) {
-	cerr << "WARNING: AnalysisModel::commitDomain. No Domain linked.\n";
+	cerr << "WARNING: AnalysisModel::updateDomain. No Domain linked.\n";
 	return;
     }
 
@@ -444,6 +444,23 @@ AnalysisModel::updateDomain(void)
     myDomain->update();
 
 }
+
+
+void 
+AnalysisModel::updateDomain(double newTime, double dT)
+{
+    // check to see there is a Domain linked to the Model
+
+    if (myDomain == 0) {
+	cerr << "WARNING: AnalysisModel::updateDomain. No Domain linked.\n";
+	return;
+    }
+
+    // invoke the method
+    myDomain->update(newTime, dT);
+
+}
+
 
 
 int
@@ -470,7 +487,7 @@ AnalysisModel::revertDomainToLastCommit(void)
     // check to see there is a Domain linked to the Model
 
     if (myDomain == 0) {
-	cerr << "WARNING: AnalysisModel::commitDomainToLastCommit.";
+	cerr << "WARNING: AnalysisModel::revertDomainToLastCommit.";
 	cerr << " No Domain linked.\n";
 	return -1;
     }
