@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.7 $
-// $Date: 2002-04-02 18:49:52 $
+// $Revision: 1.8 $
+// $Date: 2002-04-03 00:06:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -154,7 +154,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 
   // now create the columns strings for the database
   numDbColumns = 1 + nodes.Size()*dofs.Size();
-  dbColumns = new (char *)[numDbColumns];
+  dbColumns = new char *[numDbColumns];
 
   char aColumn[256]; // assumes a column name will not be longer than 256 characters
   

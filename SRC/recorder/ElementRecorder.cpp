@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-04-02 18:49:50 $
+// $Revision: 1.8 $
+// $Date: 2002-04-03 00:06:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -118,7 +118,8 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
     theResponses[j] = 0;
 
   eleInfoObjects = new Information[numEle];
-  for (int i=0; i<numEle; i++) {
+  int i;
+  for (i=0; i<numEle; i++) {
     Element *theEle = theDom.getElement(eleID(i));
     if (theEle == 0) {
       cerr << "WARNING ElementRecorder::ElementRecorder() -";
@@ -155,7 +156,7 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
 
   // now create the columns strings for the database
   // for each element do a getResponse() & print the result
-  dbColumns = new (char *)[numDbColumns];
+  dbColumns = new char *[numDbColumns];
 
   char aColumn[256]; // assumes a column name will not be longer than 256 characters
   
@@ -166,7 +167,7 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   char *dataToStore = argv[argc-1];
 
   int counter = 1;
-  for (int i=0; i<eleID.Size(); i++) {
+  for (i=0; i<eleID.Size(); i++) {
     int eleTag = eleID(i);
     int numVariables = 0;
     if (theResponses[i]!= 0) {
