@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:48:10 $
+// $Revision: 1.5 $
+// $Date: 2003-10-07 18:57:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/DomainComponent.h,v $
                                                                         
                                                                         
