@@ -265,7 +265,8 @@ FINITE_DEFORMATION_BJ_LIBS = $(FE)/material/nD/FiniteDeformation/NeoHookeanWEner
                              $(FE)/material/nD/FiniteDeformation/FiniteDeformationElastic3D.o \
                              $(FE)/material/nD/FiniteDeformation/LogWEnergy.o \
                              $(FE)/material/nD/FiniteDeformation/MooneyRivlinWEnergy.o \
-                             $(FE)/material/nD/FiniteDeformation/W.o
+                             $(FE)/material/nD/FiniteDeformation/W.o \
+                             $(FE)/material/nD/FiniteDeformation/TclFiniteDeformationElastic3DCommand.o 
 
 
 
