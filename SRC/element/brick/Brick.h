@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-05-27 21:20:35 $
+// $Revision: 1.10 $
+// $Date: 2004-04-14 18:39:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.h,v $
 
 // Ed "C++" Love
@@ -82,6 +82,9 @@ class Brick : public Element {
     
     //revert to start 
     int revertToStart( ) ;
+
+    // update
+    int update(void);
 
     //print out element data
     void Print( OPS_Stream &s, int flag ) ;
