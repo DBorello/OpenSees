@@ -114,5 +114,29 @@ SOURCE=..\..\..\SRC\convergenceTest\CTestNormUnbalance.cpp
 
 SOURCE=..\..\..\SRC\convergenceTest\CTestNormUnbalance.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\convergenceTest\CTestRelativeEnergyIncr.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\convergenceTest\CTestRelativeEnergyIncr.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\convergenceTest\CTestRelativeNormDispIncr.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\convergenceTest\CTestRelativeNormDispIncr.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\convergenceTest\CTestRelativeNormUnbalance.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\convergenceTest\CTestRelativeNormUnbalance.h
+# End Source File
 # End Target
 # End Project
