@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-09-18 00:29:38 $
+// $Revision: 1.6 $
+// $Date: 2001-12-07 00:50:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/DisplacementControl.cpp,v $
                                                                         
                                                                         
@@ -187,8 +187,7 @@ DisplacementControl::update(const Vector &dU)
     theModel->updateDomain();
     
     // set the X soln in linearSOE to be deltaU for convergence Test
-    for (int i=0; i<deltaU->Size(); i++)
-	theLinSOE->setX(i, (*deltaU)(i));
+    theLinSOE->setX(*deltaU);
 
     numIncrLastStep++;
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-09-18 00:48:31 $
+// $Revision: 1.3 $
+// $Date: 2001-12-07 00:50:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/ArcLength1.cpp,v $
                                                                         
                                                                         
@@ -162,8 +162,7 @@ ArcLength1::update(const Vector &dU)
     theModel->updateDomain();
     
     // set the X soln in linearSOE to be deltaU for convergence Test
-    for (int i=0; i<deltaU->Size(); i++)
-	theLinSOE->setX(i, (*deltaU)(i));
+    theLinSOE->setX(*deltaU);
 
     return 0;
 }

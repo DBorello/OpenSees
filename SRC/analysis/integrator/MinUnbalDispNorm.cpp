@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-09-18 00:48:31 $
+// $Revision: 1.5 $
+// $Date: 2001-12-07 00:50:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/MinUnbalDispNorm.cpp,v $
                                                                         
                                                                         
@@ -197,8 +197,7 @@ MinUnbalDispNorm::update(const Vector &dU)
     theModel->updateDomain();
     
     // set the X soln in linearSOE to be deltaU for convergence Test
-    for (int i=0; i<deltaU->Size(); i++)
-	theLinSOE->setX(i, (*deltaU)(i));
+    theLinSOE->setX(*deltaU);
 
     numIncrLastStep++;
     return 0;
