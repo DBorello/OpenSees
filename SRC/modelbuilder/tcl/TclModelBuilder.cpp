@@ -18,16 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-19 04:03:15 $
+// $Revision: 1.4 $
+// $Date: 2001-07-12 23:08:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
-// File: ~/modelbuilder/tcl/TclModelBuilder.C
-// 
 // Written: fmk 
 // Created: 07/99
-// Revision: A
 //
 // Description: This file contains the class definition for TclModelBuilder.
 // A TclModelBuilder adds the commands to create the model for the standard
@@ -38,7 +35,7 @@
 //	3) non-linear 2 and 3d fiber-beam-column elements
 
 //
-// What: "@(#) TclModelBuilder.C, revA"
+// What: "@(#) TclModelBuilder.cpp, revA"
 
 #include <stdlib.h>
 #include <string.h>
@@ -69,6 +66,9 @@
 #include <ImposedMotionSP.h>
 #include <ImposedMotionSP1.h>
 #include <MultiSupportPattern.h>
+
+#include <Block2D.h>
+#include <Block3D.h>
 
 //
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
@@ -113,7 +113,7 @@ TclModelBuilder_addSeries(ClientData clientData, Tcl_Interp *interp, int argc,
 			  char **argv);
 
 int
-TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int argc,   
+TclModelBuilder_addHomogeneousBC(ClientData clientData, Tcl_Interp *interp, int argc,
 				 char **argv);
 
 int
@@ -139,6 +139,17 @@ TclModelBuilder_addImposedMotionSP(ClientData clientData,
 				   Tcl_Interp *interp, 
 				   int argc,    
 				   char **argv);	
+
+
+
+int
+TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc, 
+			  char **argv);
+
+int
+TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc, 
+			  char **argv);
+
 
 int
 TclModelBuilder_addRemoPatch(ClientData clientData, 
@@ -262,6 +273,12 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 		    (ClientData)NULL, NULL);
 
   Tcl_CreateCommand(interp, "mp", TclModelBuilder_addMP,
+		    (ClientData)NULL, NULL);
+
+  Tcl_CreateCommand(interp, "block2D", TclModelBuilder_doBlock2D,
+		    (ClientData)NULL, NULL);
+
+  Tcl_CreateCommand(interp, "block3D", TclModelBuilder_doBlock3D,
 		    (ClientData)NULL, NULL);
 
   Tcl_CreateCommand(interp, "patch", TclModelBuilder_addRemoPatch,
@@ -1147,34 +1164,30 @@ TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
                                 int argc, char **argv)
 {
         // Ensure the destructor has not been called
-        if (theTclBuilder == 0)
-        {
-                cerr << "WARNING builder has been destroyed - equalDOF \n";
-                return TCL_ERROR;
+        if (theTclBuilder == 0) {
+	  cerr << "WARNING builder has been destroyed - equalDOF \n";
+	  return TCL_ERROR;
         }
 
         // Check number of arguments
-        if (argc < 4)
-        {
-                cerr << "WARNING bad command - want: equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
-                printCommand (argc, argv);
-                return TCL_ERROR;
+        if (argc < 4) {
+	  cerr << "WARNING bad command - want: equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
+	  printCommand (argc, argv);
+	  return TCL_ERROR;
         }
 
         // Read in the node IDs and the DOF
         int RnodeID, CnodeID, dofID;
 
-        if (Tcl_GetInt (interp, argv[1], &RnodeID) != TCL_OK)
-        {
-                cerr << "WARNING invalid RnodeID: " << argv[1]
-                         << " equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
-                return TCL_ERROR;
+        if (Tcl_GetInt (interp, argv[1], &RnodeID) != TCL_OK) {
+	  cerr << "WARNING invalid RnodeID: " << argv[1]
+	       << " equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
+	  return TCL_ERROR;
         }
-        if (Tcl_GetInt (interp, argv[2], &CnodeID) != TCL_OK)
-        {
-                cerr << "WARNING invalid CnodeID: " << argv[2]
-                         << " equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
-                return TCL_ERROR;
+        if (Tcl_GetInt (interp, argv[2], &CnodeID) != TCL_OK) {
+	  cerr << "WARNING invalid CnodeID: " << argv[2]
+	       << " equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
+	  return TCL_ERROR;
         }
 
         // The number of DOF to be coupled
@@ -1189,17 +1202,15 @@ TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
 
         int i, j;
         // Read the degrees of freedom which are to be coupled
-        for (i = 3, j = 0; i < argc; i++, j++)
-        {
-                if (Tcl_GetInt (interp, argv[i], &dofID) != TCL_OK)
-                {
-                        cerr << "WARNING invalid dofID: " << argv[3]
-                                 << " equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
-                        return TCL_ERROR;
-                }
+        for (i = 3, j = 0; i < argc; i++, j++) {
+	  if (Tcl_GetInt (interp, argv[i], &dofID) != TCL_OK) {
+	    cerr << "WARNING invalid dofID: " << argv[3]
+		 << " equalDOF RnodeID? CnodeID? DOF1? DOF2? ...";
+	    return TCL_ERROR;
+	  }
 
-                rcDOF (j) = --dofID;    // Decrement for C++ indexing
-                Ccr (j,j) = 1;
+	  rcDOF (j) = --dofID;    // Decrement for C++ indexing
+	  Ccr (j,j) = 1.0;
         }
 
         // Use this for the MP tag
@@ -1207,24 +1218,23 @@ TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
 
         // Create the multi-point constraint
         MP_Constraint *theMP = new MP_Constraint (numMPs, RnodeID, CnodeID, Ccr, rcDOF, rcDOF);
-        if (theMP == 0)
-        {
-                cerr << "WARNING ran out of memory for equalDOF MP_Constraint ";
-                printCommand (argc, argv);
-                return TCL_ERROR;
+        if (theMP == 0) {
+	  cerr << "WARNING ran out of memory for equalDOF MP_Constraint ";
+	  printCommand (argc, argv);
+	  return TCL_ERROR;
         }
 
         // Add the multi-point constraint to the domain
-        if (theTclDomain->addMP_Constraint (theMP) == false)
-        {
-                cerr << "WARNING could not add equalDOF MP_Constraint to domain ";
-                printCommand(argc, argv);
-                delete theMP;
-                return TCL_ERROR;
+        if (theTclDomain->addMP_Constraint (theMP) == false) {
+	  cerr << "WARNING could not add equalDOF MP_Constraint to domain ";
+	  printCommand(argc, argv);
+	  delete theMP;
+	  return TCL_ERROR;
         }
 
         return TCL_OK;
 }
+
 
 
 int
@@ -1234,6 +1244,328 @@ TclModelBuilder_addMP(ClientData clientData, Tcl_Interp *interp, int argc,
   cerr << "WARNING - TclModelBuilder_addMP() not yet implemented\n";
   return TCL_OK;
 }
+
+int
+TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,   
+			  char **argv)
+{
+
+  int ndm = theTclBuilder->getNDM();
+  if (ndm < 2) {
+    cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    cerr << " : model dimension (ndm) must be at leat 2 " << endl;
+    return TCL_ERROR;
+  }
+
+  int numX, numY, startNodeNum, startEleNum;
+  if (Tcl_GetInt (interp, argv[1], &numX) != TCL_OK) {
+    cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    cerr << " : invalid numX: " << argv[1] << endl;
+    return TCL_ERROR;
+  }
+  if (Tcl_GetInt (interp, argv[2], &numY) != TCL_OK) {
+    cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    cerr << " : invalid numY: " << argv[2] << endl;
+    return TCL_ERROR;
+  }
+  if (Tcl_GetInt (interp, argv[3], &startNodeNum) != TCL_OK) {
+    cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    cerr << " : invalid startNode: " << argv[3] << endl;
+    return TCL_ERROR;
+  }
+  if (Tcl_GetInt (interp, argv[4], &startEleNum) != TCL_OK) {
+    cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    cerr << " : invalid startEle: " << argv[4] << endl;
+    return TCL_ERROR;
+  }
+
+  static Matrix Coordinates(9,3);
+  static ID     haveNode(9);
+  Coordinates.Zero();
+  for (int k=0; k<9; k++) haveNode(k) = -1;
+
+  char *nodalInfo = argv[7];
+  char **argvNodes;
+  int  argcNodes;
+  
+  Tcl_SplitList(interp, nodalInfo, &argcNodes, &argvNodes);
+
+  int ndf = theTclBuilder->getNDF();
+  
+  int count = 0;
+  while (count < argcNodes) {
+    if ((count + ndm + 1) >  argcNodes) {
+      cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+      cerr << " : invalid number of node args: " << argv[7] << endl;
+      Tcl_Free((char *)argvNodes);
+      return TCL_ERROR; 
+    }
+    int nodeTag;
+    double value;
+    if (Tcl_GetInt (interp, argvNodes[count], &nodeTag) != TCL_OK) {
+      cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+      cerr << " : invalid node tag: " << argvNodes[count] << endl;
+      Tcl_Free((char *)argvNodes);
+      return TCL_ERROR; 
+    }
+    if (nodeTag < 1 || nodeTag > 9) {
+      cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+      cerr << " : invalid node tag out of bounds [1,9]: " << argvNodes[count] << endl;
+      Tcl_Free((char *)argvNodes);
+      return TCL_ERROR;
+    }
+    for (int i=0; i<ndm; i++) {
+      if (Tcl_GetDouble(interp, argvNodes[count+1+i], &value) != TCL_OK) {
+	cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+	cerr << " : invalid node coordinate for node: " << argvNodes[count] << endl;
+	Tcl_Free((char *)argvNodes);
+	return TCL_ERROR;
+      }
+      Coordinates(nodeTag-1,i) = value;
+      haveNode(nodeTag-1) = nodeTag;
+    }      
+    count += 1 + ndm;
+  }
+
+  Tcl_Free((char *)argvNodes);
+
+  Block2D  theBlock(numX, numY, haveNode, Coordinates);
+
+  // create the nodes: (numX+1)*(numY+1) nodes to be created
+  int nodeID = startNodeNum;
+  for (int jj=0; jj<=numY; jj++) {
+    for (int ii=0; ii<=numX; ii++) {
+      const Vector &nodeCoords = theBlock.getNodalCoords(ii,jj);
+      double xLoc = nodeCoords(0);
+      double yLoc = nodeCoords(1);
+      double zLoc = nodeCoords(2);
+      Node *theNode = 0;
+      if (ndm == 2) {
+	theNode = new Node(nodeID,ndf,xLoc, yLoc);
+      } else if (ndm == 3) {
+	theNode = new Node(nodeID,ndf,xLoc, yLoc, zLoc);
+      } 
+
+      if (theNode == 0) {
+	cerr << "WARNING ran out of memory creating node\n";
+	cerr << "node: " << nodeID << endl;
+	return TCL_ERROR;
+      }
+
+      if (theTclDomain->addNode(theNode) == false) {
+	cerr << "WARNING failed to add node to the domain\n";
+	cerr << "node: " << nodeID << endl;
+	delete theNode; // otherwise memory leak
+	return TCL_ERROR;
+      }
+
+      nodeID++;
+    }
+  }
+    
+  // create the elements: numX*numY elements to be created
+  char *eleType = argv[5];
+  char *additionalEleArgs = argv[6];
+  const ID &nodeTags = theBlock.getElementNodes(0,0);  
+  int numNodes = nodeTags.Size();
+
+  // assumes 15 is largest string for individual nodeTags
+  count = 10 + strlen(eleType) + strlen(additionalEleArgs) + 15 * (numNodes+1);
+  char eleCommand[count];
+  int initialCount = 8 + strlen(eleType);
+
+  int  eleID = startEleNum;  
+  for (int jj=0; jj<numY; jj++) {
+    for (int ii=0; ii<numX; ii++) {
+      count = initialCount;
+
+      const ID &nodeTags = theBlock.getElementNodes(ii,jj);
+      
+      // create the string to be evaluated
+      strcpy(eleCommand, "element ");
+      strcpy(&eleCommand[8], eleType);
+      count += sprintf(&eleCommand[count], " %d ", eleID);
+      for (int i=0; i<numNodes; i++) {
+	int nodeTag = nodeTags(i)+startNodeNum;
+	count += sprintf(&eleCommand[count], " %d ", nodeTag);
+      }
+      strcat(eleCommand, additionalEleArgs);      
+
+      // now to create the element we get the string eveluated
+      if (Tcl_Eval(interp, eleCommand) != TCL_OK) {
+	return TCL_ERROR;
+      }
+      eleID++;
+    }
+  }
+
+  return TCL_OK;
+}
+
+
+int
+TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,   
+			  char **argv)
+{
+
+  int ndm = theTclBuilder->getNDM();
+  if (ndm < 3) {
+    cerr << "WARNING block3D numX? numY? startNode? startEle? eleType? eleArgs?";
+    cerr << " : model dimension (ndm) must be at leat 2 " << endl;
+    return TCL_ERROR;
+  }
+
+  int numX, numY, numZ, startNodeNum, startEleNum;
+  if (Tcl_GetInt (interp, argv[1], &numX) != TCL_OK) {
+    cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+    cerr << " : invalid numX: " << argv[1] << endl;
+    return TCL_ERROR;
+  }
+  if (Tcl_GetInt (interp, argv[2], &numY) != TCL_OK) {
+    cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+    cerr << " : invalid numY: " << argv[2] << endl;
+    return TCL_ERROR;
+  }
+  if (Tcl_GetInt (interp, argv[3], &numZ) != TCL_OK) {
+    cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+    cerr << " : invalid numZ: " << argv[3] << endl;
+    return TCL_ERROR;
+  }
+  if (Tcl_GetInt (interp, argv[4], &startNodeNum) != TCL_OK) {
+    cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+    cerr << " : invalid startNode: " << argv[4] << endl;
+    return TCL_ERROR;
+  }
+  if (Tcl_GetInt (interp, argv[5], &startEleNum) != TCL_OK) {
+    cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+    cerr << " : invalid startEle: " << argv[5] << endl;
+    return TCL_ERROR;
+  }
+
+  static Matrix Coordinates(27,3);
+  static ID     haveNode(27);
+  Coordinates.Zero();
+  for (int k=0; k<27; k++) haveNode(k) = -1;
+
+  char *nodalInfo = argv[8];
+  char **argvNodes;
+  int  argcNodes;
+  
+  Tcl_SplitList(interp, nodalInfo, &argcNodes, &argvNodes);
+
+  int ndf = theTclBuilder->getNDF();
+  
+  int count = 0;
+  while (count < argcNodes) {
+    if ((count + ndm + 1) > argcNodes) {
+      cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+      cerr << " : invalid number of node args: " << argv[8] << endl;
+      Tcl_Free((char *)argvNodes);
+      return TCL_ERROR; 
+    }
+    int nodeTag;
+    double value;
+    if (Tcl_GetInt (interp, argvNodes[count], &nodeTag) != TCL_OK) {
+      cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+      cerr << " : invalid node id in node args: " << argvNodes[count] << endl;
+      Tcl_Free((char *)argvNodes);
+      return TCL_ERROR; 
+    }
+    if (nodeTag < 1 || nodeTag > 27) {
+      cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+      cerr << " : node tag out of bounds [1, 27]: " << argvNodes[count] << endl;
+      Tcl_Free((char *)argvNodes);
+      return TCL_ERROR;
+    }
+    for (int i=0; i<ndm; i++) {
+      if (Tcl_GetDouble(interp, argvNodes[count+1+i], &value) != TCL_OK) {
+	cerr << "WARNING block3D numX? numY? numZ? startNode? startEle? eleType? eleArgs?";
+	cerr << " : invalid coordinate in node args: " << argvNodes[count] << endl;
+	Tcl_Free((char *)argvNodes);
+	return TCL_ERROR;
+      }
+      Coordinates(nodeTag-1,i) = value;
+      haveNode(nodeTag-1) = nodeTag;
+    }      
+    count += 1 + ndm;
+  }
+
+  Tcl_Free((char *)argvNodes);
+
+  Block3D  theBlock(numX, numY, numZ, haveNode, Coordinates);
+
+  // create the nodes: (numX+1)*(numY+1) nodes to be created
+  int nodeID = startNodeNum;
+  for (int kk=0; kk<=numZ; kk++) {
+    for (int jj=0; jj<=numY; jj++) {
+      for (int ii=0; ii<=numX; ii++) {
+	const Vector &nodeCoords = theBlock.getNodalCoords(ii,jj,kk);
+	double xLoc = nodeCoords(0);
+	double yLoc = nodeCoords(1);
+	double zLoc = nodeCoords(2);
+	Node *theNode = 0;
+	theNode = new Node(nodeID,ndf,xLoc, yLoc, zLoc);
+	
+	if (theNode == 0) {
+	  cerr << "WARNING ran out of memory creating node\n";
+	  cerr << "node: " << nodeID << endl;
+	  return TCL_ERROR;
+	}
+
+	if (theTclDomain->addNode(theNode) == false) {
+	  cerr << "WARNING failed to add node to the domain\n";
+	  cerr << "node: " << nodeID << endl;
+	  delete theNode; // otherwise memory leak
+	  return TCL_ERROR;
+	}
+	
+	nodeID++;
+      }
+    }
+  }
+    
+  // create the elements: numX*numY elements to be created
+  char *eleType = argv[6];
+  char *additionalEleArgs = argv[7];
+  const ID &nodeTags = theBlock.getElementNodes(0,0,0);  
+  int numNodes = nodeTags.Size();
+
+  // assumes 15 is largest string for individual nodeTags
+  count = 10 + strlen(eleType) + strlen(additionalEleArgs) + 15 * (numNodes+1);
+  char eleCommand[count];
+  int initialCount = 8 + strlen(eleType);
+
+  int  eleID = startEleNum;  
+  for (int kk=0; kk<numZ; kk++) {
+    for (int jj=0; jj<numY; jj++) {
+      for (int ii=0; ii<numX; ii++) {
+	count = initialCount;
+
+	const ID &nodeTags = theBlock.getElementNodes(ii,jj,kk);
+      
+	// create the string to be evaluated
+	strcpy(eleCommand, "element ");
+	strcpy(&eleCommand[8], eleType);
+	count += sprintf(&eleCommand[count], " %d ", eleID);
+	for (int i=0; i<numNodes; i++) {
+	  int nodeTag = nodeTags(i)+startNodeNum;
+	  count += sprintf(&eleCommand[count], " %d ", nodeTag);
+	}
+	strcat(eleCommand, additionalEleArgs);      
+	
+	// now to create the element we get the string eveluated
+	if (Tcl_Eval(interp, eleCommand) != TCL_OK) {
+	  return TCL_ERROR;
+	}
+	eleID++;
+      }
+    }
+  }
+
+  return TCL_OK;
+}
+
+
 
 
 int

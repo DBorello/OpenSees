@@ -2,7 +2,8 @@
 
 include ../../../Makefile.def
 
-OBJS       = TclModelBuilder.o myCommands.o TclUniaxialMaterialTester.o
+OBJS       = TclModelBuilder.o myCommands.o TclUniaxialMaterialTester.o \
+	Block2D.o Block3D.o
 
 # Compilation control
 
