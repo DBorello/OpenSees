@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-07 21:51:52 $
+// $Revision: 1.8 $
+// $Date: 2002-06-08 00:18:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.h,v $
 
 // Written: MHS
@@ -104,7 +104,6 @@ class DispBeamColumn2d : public Element
     CrdTransf2d *crdTransf;        // pointer to coordinate tranformation object 
 
     ID connectedExternalNodes; // Tags of quad nodes
-    double L;
 
     Node *nd1Ptr;		// Pointers to quad nodes
     Node *nd2Ptr;

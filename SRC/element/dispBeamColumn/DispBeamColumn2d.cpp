@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-06-07 21:51:33 $
+// $Revision: 1.12 $
+// $Date: 2002-06-08 00:18:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -55,7 +55,7 @@ DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
 		CrdTransf2d &coordTransf, double r)
 :Element (tag, ELE_TAG_DispBeamColumn2d), 
   numSections(numSec), theSections(0), crdTransf(0),
-  connectedExternalNodes(2), L(0.0), nd1Ptr(0), nd2Ptr(0),
+  connectedExternalNodes(2), nd1Ptr(0), nd2Ptr(0),
   Q(6), q(3), rho(r)
 {
     // Allocate arrays of pointers to SectionForceDeformations
@@ -104,7 +104,7 @@ DispBeamColumn2d::DispBeamColumn2d(int tag, int nd1, int nd2,
 DispBeamColumn2d::DispBeamColumn2d()
 :Element (0, ELE_TAG_DispBeamColumn2d),
   numSections(0), theSections(0), crdTransf(0),
-  connectedExternalNodes(2), L(0.0), nd1Ptr(0), nd2Ptr(0),
+  connectedExternalNodes(2), nd1Ptr(0), nd2Ptr(0),
   Q(6), q(3), rho(0.0)
 {
     q0[0] = 0.0;
@@ -192,7 +192,7 @@ DispBeamColumn2d::setDomain(Domain *theDomain)
 		// Add some error check
 	}
 
-	L = crdTransf->getInitialLength();
+	double L = crdTransf->getInitialLength();
 
 	if (L == 0.0) {
 		// Add some error check
@@ -255,6 +255,7 @@ DispBeamColumn2d::update(void)
     static Vector v(3);
 	v = crdTransf->getBasicTrialDisp();
 
+	double L = crdTransf->getInitialLength();
 	double oneOverL = 1.0/L;
 	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
 
@@ -305,6 +306,7 @@ DispBeamColumn2d::getTangentStiff()
   int order = theSections[0]->getOrder();
   const ID &code = theSections[0]->getType();
   
+  double L = crdTransf->getInitialLength();
   double oneOverL = 1.0/L;
   Matrix ka(workArea, order, 3);
   
@@ -402,6 +404,7 @@ DispBeamColumn2d::getMass()
   if (rho == 0.0)
     return K;
   
+  double L = crdTransf->getInitialLength();
   double m = 0.5*rho*L;
   
   K(0,0) = K(1,1) = K(3,3) = K(4,4) = m;
@@ -430,6 +433,7 @@ DispBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
   int type;
   const Vector &data = theLoad->getData(type, loadFactor);
+  double L = crdTransf->getInitialLength();
   
   if (type == LOAD_TAG_Beam2dUniformLoad) {
     double wt = data(0)*loadFactor;  // Transverse (+ve upward)
@@ -500,6 +504,7 @@ DispBeamColumn2d::addInertiaLoadToUnbalance(const Vector &accel)
 		return -1;
     }
 
+	double L = crdTransf->getInitialLength();
 	double m = 0.5*rho*L;
 
     // Want to add ( - fact * M R * accel ) to unbalance
@@ -590,6 +595,7 @@ DispBeamColumn2d::getResistingForceIncInertia()
 	// Compute the current resisting force
 	this->getResistingForce();
 
+	double L = crdTransf->getInitialLength();
 	double m = 0.5*rho*L;
 
 	P(0) += m*accel1(0);
@@ -835,6 +841,7 @@ DispBeamColumn2d::Print(ostream &s, int flag)
   s << "\tCoordTransf: " << crdTransf->getTag() << endl;
   s << "\tmass density:  " << rho << endl;
   theSections[0]->Print(s,flag);
+  double L = crdTransf->getInitialLength();
   double P  = q(0);
   double M1 = q(1);
   double M2 = q(2);
@@ -900,6 +907,7 @@ int
 DispBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 {
   double V;
+  double L = crdTransf->getInitialLength();
 
   switch (responseID) {
     case 1:  // global forces
