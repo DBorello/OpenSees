@@ -72,8 +72,8 @@ pattern UniformExcitation  1   2  -accel $Series
 # create the recorder
 #recorder Node Node.out disp -time -node  1 2 3 4 5 6 7 8 -dof 1 2 3
 recorder Node node.out disp -time -node 5 -dof 1 2 3
-#recorder plot node.out "PEER solid01.tcl: Top_of_soil"  10 10 300 300 -columns 1 2 
-#recorder plot node.out "PEER solid01.tcl: Top_of_soil"  0 0 500 150 -columns 1 3
+recorder plot node.out "PEER solid01.tcl: Top_of_soil"  10 10 300 300 -columns 1 2 
+recorder plot node.out "PEER solid01.tcl: Top_of_soil"  0 0 500 150 -columns 1 3
 
 # ################################
 # create the analysis
