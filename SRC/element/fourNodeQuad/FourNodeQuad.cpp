@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:20 $
+// $Revision: 1.2 $
+// $Date: 2000-10-16 23:59:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
                                                                         
                                                                         
@@ -73,13 +73,6 @@ FourNodeQuad::FourNodeQuad (int tag, int nd1, int nd2, int nd3, int nd4,
 	g3ErrorHandler->fatal("FATAL ERROR FourNodeQuad - failed to get a copy of quadrature rule");
     }
     
-    // Get the material model
-    NDMaterial *theModel = m.getCopy (type);
-    
-    if (theModel == 0){
-	g3ErrorHandler->fatal("FATAL ERROR FourNodeQuad - failed acquire material model prototype");
-    }
-
     int i, j;
     
     // Allocate arrays of pointers to NDMaterials
@@ -96,7 +89,7 @@ FourNodeQuad::FourNodeQuad (int tag, int nd1, int nd2, int nd3, int nd4,
 
 	// Get copies of the material model for each integration point
 	for (j = 0; j < order; j++){
-	    theMaterial[i][j] = theModel->getCopy();
+	    theMaterial[i][j] = m.getCopy(type);
 	    
 	    // Check allocation
 	    if (theMaterial[i][j] == 0) {
