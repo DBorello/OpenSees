@@ -57,7 +57,6 @@
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
 
-#include <FiniteDeformationElastic3D.h>
 
 class TotalLagrangianFD20NodeBrick: public Element
 {
