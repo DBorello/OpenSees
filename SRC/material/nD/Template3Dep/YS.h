@@ -37,7 +37,7 @@ class YieldSurface
 {
   public:
     YieldSurface() {} ;			 //Normal Constructor
-    virtual YieldSurface *newObj() = 0;  //create a colne of itself
+    virtual YieldSurface *newObj() = 0;  //create a clone of itself
   
     virtual double f( const EPState *EPS ) const = 0;	 //pure virtual func
     virtual tensor dFods( const EPState *EPS ) const = 0;  //pure virtual func

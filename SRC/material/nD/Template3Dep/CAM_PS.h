@@ -49,14 +49,15 @@ class CAMPotentialSurface : public PotentialSurface
     double getM() const;
     
 
-  private:
-    tensor dpoverds( ) const;
-    tensor dqoverds(const EPState *EPS) const;
-    tensor dthetaoverds(const EPState *EPS) const;
-    tensor d2poverds2( void ) const;
-    tensor d2qoverds2(const EPState *EPS) const;
-    tensor d2thetaoverds2(const EPState *EPS) const;
-	     	          
+// moved to stresstensor Boris Jeremic@ucdavis.edu 21Aug2001
+//  private:
+//    tensor dpoverds( ) const;
+//    tensor dqoverds(const EPState *EPS) const;
+//    tensor dthetaoverds(const EPState *EPS) const;
+//    tensor d2poverds2( void ) const;
+//    tensor d2qoverds2(const EPState *EPS) const;
+//    tensor d2thetaoverds2(const EPState *EPS) const;
+//	     	          
     //================================================================================
     // Overloaded Insertion Operator
     friend ostream& operator<< (ostream& os, const CAMPotentialSurface & YS);

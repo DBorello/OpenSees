@@ -53,10 +53,11 @@ class CAMYieldSurface : public YieldSurface
     double getM() const;
     void print() { cout << *this; };
     
-  private:
-    tensor dpoverds( ) const;
-    tensor dqoverds(const EPState *EPS) const;
-    tensor dthetaoverds(const EPState *EPS) const;
+// moved to stresstensor
+//   private:
+//     tensor dpoverds( ) const;
+//     tensor dqoverds(const EPState *EPS) const;
+//     tensor dthetaoverds(const EPState *EPS) const;
 		         
     //================================================================================
     // Overloaded Insertion Operator
