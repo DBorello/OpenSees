@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:32:39 $
+// $Revision: 1.6 $
+// $Date: 2003-02-26 18:50:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -185,7 +185,7 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
 
   // open a file if not already opened
   if (mats[matSize] == 0) {
-    char fileName[strlen(dataBase)+21];
+    char *fileName = new char[strlen(dataBase)+21];
     char intName[10];
     strcpy(fileName, dataBase);
 	sprintf(intName,"%d",matSize);
@@ -216,6 +216,7 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
       filePos.mats[matSize] = loc;
     }
     fileEnds.mats[matSize] = loc;
+    delete [] fileName;
   }
 
   // we now found the location in the file to write the data
