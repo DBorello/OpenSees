@@ -417,8 +417,6 @@ BandArpackSolver::solve(void)
     delete [] v;
     delete [] select;
     delete [] ipntr;
-	delete [] d;
-	delete [] z;
 
     return 0;
 }
