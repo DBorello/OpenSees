@@ -39,7 +39,7 @@
 
 // Constants
 #define MaxNScalarVar 4
-#define MaxNTensorVar 4
+#define MaxNTensorVar 0
 #define FALSE 0
 #define TRUE 1
 
@@ -65,6 +65,7 @@ class EPState
     int NTensorVar;    	  	  //Actual Number of internal tensor vars 
     double       ScalarVar[ MaxNScalarVar ]; // scalar variable array for scalar hardening vars 
     stresstensor TensorVar[ MaxNTensorVar ]; // tensor variable array for tensor hardening vars 
+    //straintensor TensorVar[ MaxNTensorVar ]; // tensor variable array for tensor hardening vars 
 
     // Commited state
     stresstensor Stress_commit;   // Commited stress  --total               
@@ -121,14 +122,14 @@ class EPState
             double             Ed,
             double             nu,
             double             rho,
-            const stresstensor &stressp,       
-            const straintensor &strainp, 
-            const straintensor &Estrainp,
-            const straintensor &Pstrainp,
+            const stresstensor stressp,       
+            const straintensor strainp, 
+            const straintensor Estrainp,
+            const straintensor Pstrainp,
 	    int                NScalarp,
 	    const double     * Scalarp,
 	    int                NTensorp,
-	    const tensor     * Tensorp );
+	    const stresstensor     * Tensorp );
 
     //Normal Constructor2
     EPState(double              Eod,    
@@ -138,7 +139,7 @@ class EPState
             int                 NScalarp,
 	    const double       *Scalarp,
 	    int                 NTensorp,
-	    const tensor       *Tensorp);
+	    const stresstensor       *Tensorp);
 
     EPState *newObj();                 //create a clone of itself
     EPState( const EPState &rhs );     // Copy constructor    

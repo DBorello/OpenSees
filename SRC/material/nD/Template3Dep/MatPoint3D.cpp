@@ -81,8 +81,12 @@ MatPoint3D::MatPoint3D(short int INr_direction_point_number,
 ////=============================================================================
 MatPoint3D::~MatPoint3D() 
 {
-    //if ( matmodel )
-    //  delete matmodel;
+    if ( matmodel )
+      //delete [] matmodel; //bug found: Inconsistent delete
+      delete matmodel;
+
+    //if ( GP )
+    //  delete [] GP;
 
 }
 
@@ -245,6 +249,14 @@ const stresstensor MatPoint3D::getStressTensor() const {
 
     return matmodel->getStressTensor();
 }
+
+
+//=============================================================================
+const straintensor MatPoint3D::getStrainTensor() const {
+
+    return matmodel->getStrainTensor();
+}
+
 
 
 //================================================================================

@@ -125,6 +125,7 @@ class MatPoint3D
     NDMaterial* getNDMat() const;
     double getrho() const;
     const stresstensor getStressTensor() const;
+    const straintensor getStrainTensor() const;
     
     int commitState(void) ;
     int revertToLastCommit(void) ;

@@ -62,7 +62,7 @@ tensor VMPotentialSurface::dQods(const EPState *EPS) const {
     //s_bar.null_indices();
     
     // Tensor dQ/dsigma_ij 
-    tensor dQods = 3.0 * s_bar;
+    tensor dQods = s_bar * 3.0;
     dQods.null_indices();
     
     return dQods;
@@ -86,7 +86,7 @@ tensor VMPotentialSurface::d2Qods2(const EPState *EPS) const {
     //stresstensor s = EPS->CurrentStress.deviator();
     //s.null_indices();
     
-    tensor d2Qods2 = 3.0 * (temp1 - temp2);
+    tensor d2Qods2 = (temp1 - temp2) * 3.0;
     d2Qods2.null_indices();
     
     return d2Qods2;

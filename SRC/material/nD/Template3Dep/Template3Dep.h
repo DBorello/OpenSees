@@ -142,7 +142,8 @@ class Template3Dep : public NDMaterial
     int setTrialStrainIncr(const Tensor &v, const Tensor &r) ;
     const Tensor &getTangentTensor(void) ;
     const stresstensor getStressTensor(void) ;
-    const Tensor &getStrainTensor(void) ;
+    //const Tensor &getStrainTensor(void) ;
+    const straintensor getStrainTensor(void) ;
 
     EPState * getEPS() const;
     void setEPS( EPState &eps);

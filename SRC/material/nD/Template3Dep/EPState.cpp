@@ -16,21 +16,21 @@
 # DATE:              08-03-2000                                                  #
 # UPDATE HISTORY:                                                                #
 #                                                                                #
-#                                                                                #
-#                                                                                #
-#                                                                                #
+#                                                                                  #
+#                                                                                  #
+#                                                                                 #
 # SHORT EXPLANATION: This class is used to hold all state parameters and internal#
 #                    variables in an elasto-plastic constitutive model!          #
 #                                                                                #
 //================================================================================
 */
-
+       		   
 #ifndef EPState_CPP
 #define EPState_CPP
 
 #include "EPState.h"
 #include <G3Globals.h>
-
+		     
 //================================================================================
 //Normal Constructor 1
 //================================================================================
@@ -123,30 +123,34 @@ EPState::EPState(double             Eod,
                  double             Ed,
                  double             nu,
                  double             rho,
-                 const stresstensor &stressp,       
-                 const straintensor &strainp, 
-                 const straintensor &Estrainp,
-                 const straintensor &Pstrainp,
+                 const stresstensor stressp,       
+                 const straintensor strainp, 
+                 const straintensor Estrainp,
+                 const straintensor Pstrainp,
 	         int                NScalarp,
 		 const double     * Scalarp,
 	         int                NTensorp,
-	         const tensor     * Tensorp )	  
+	         const stresstensor     * Tensorp )	  
 : CurrentStress(stressp), CurrentStrain(strainp), ElasticStrain(Estrainp), 
   PlasticStrain(Pstrainp), Stress_commit(stressp), Strain_commit(strainp), 
   Stress_init(stressp), Strain_init(strainp)  
 {
       Eo               = Eod;	        
       E_Young          = Ed;	        
-      nu_Poisson       = nu;	     
+      nu_Poisson       = nu;
       rho_mass_density = rho; 
       
-      CurrentStress    = stressp;
+      //CurrentStress    = stressp;
+      
       //cout << "stressp " << stressp;
       //CurrentStress.null_indices();
-      CurrentStrain    =  strainp;
-      ElasticStrain    =  Estrainp;
-      PlasticStrain    =  Pstrainp;
+      
+      //CurrentStrain    =  strainp;
+      //ElasticStrain    =  Estrainp;
+      //PlasticStrain    =  Pstrainp;
       //Eep = Eepp;
+      Eep = tensor( 4, def_dim_4, 0.0 ); // need to be initialized as 4th order tensor
+      
       //cout << "strainp " << strainp;
       //CurrentStrain.null_indices();
 
@@ -165,6 +169,7 @@ EPState::EPState(double             Eod,
        	 ScalarVar_init[i] = Scalarp[i];
          }
       }
+      
 
       NTensorVar = NTensorp;
       //TensorVar = new stresstensor[ NTensorVar ];
@@ -178,16 +183,17 @@ EPState::EPState(double             Eod,
          //if ( !ScalarVar ) {
          g3ErrorHandler->warning("EPState::EPState   No initial values for tensorial hardening vars, set to zero");
          //::exit(1);  
-      }
+      }	      
       else {       
          for (int i = 0; i < NTensorVar; i++) {
-       	 //cout << Tensorp[i];
+       	 //cout << Tensorp[i] << endln;
+       	 //cout << TensorVar[i] << endln;
        	 TensorVar[i] = Tensorp[i];
        	 TensorVar_commit[i] = Tensorp[i];
        	 TensorVar_init[i] = Tensorp[i];
-       	 //cout << TensorVar[i];
+       	 //cout << TensorVar[i] << endln;
        	 //TensorVar[i].null_indices();
-         }
+         }   
      }
 
      Converged = false;
@@ -204,7 +210,7 @@ EPState::EPState(double             Eod,
 	         int                NScalarp,
 	         const double     * Scalarp,
 	         int                NTensorp,
-	         const tensor     * Tensorp ) {
+	         const stresstensor * Tensorp ) {
 
       Eo               = Eod;	        
       E_Young          = Ed;	        
@@ -274,8 +280,8 @@ EPState::EPState(double             Eod,
 
 EPState::EPState( ) {
 
-      Eo               = 3000.0;
-      E_Young          = 3000.0;
+      Eo               = 30000.0;
+      E_Young          = 30000.0;
       nu_Poisson       = 0.3;	     
       rho_mass_density = 0.0; 
       Eep = tensor( 4, def_dim_4, 0.0 );
@@ -363,8 +369,7 @@ EPState::EPState( const EPState &rhs ) {
       //   g3ErrorHandler->fatal("EPState::EPState insufficient memory for Scalar hardening vars");
       //   ::exit(1);  
       //}
-	  int i;
-      for (i = 0; i < NScalarVar; i++) { 
+      for (int i = 0; i < NScalarVar; i++) { 
 	 ScalarVar[i] = rhs.ScalarVar[ i ];
 	 ScalarVar_commit[i] = rhs.ScalarVar_commit[ i ];
 	 ScalarVar_init[i] = rhs.ScalarVar_init[ i ];
@@ -375,7 +380,7 @@ EPState::EPState( const EPState &rhs ) {
       //   g3ErrorHandler->fatal("EPState::EPState insufficient memory for Tensor hardening vars");
       //   ::exit(1);  
       //}
-      for (i = 0; i < NTensorVar; i++) {
+      for (int i = 0; i < NTensorVar; i++) {
 	 TensorVar[i] = rhs.TensorVar[ i ];
 	 TensorVar_commit[i] = rhs.TensorVar_commit[ i ];
 	 TensorVar_init[i] = rhs.TensorVar_init[ i ];
@@ -390,7 +395,7 @@ EPState::EPState( const EPState &rhs ) {
 //================================================================================
 // Copy constructor
 //================================================================================
-EPState::~EPState() {         
+EPState::~EPState() {          
     
     //if ( ScalarVar )
     //  delete [] ScalarVar;
@@ -398,12 +403,12 @@ EPState::~EPState() {
     //  delete TensorVar; 
 
     //if ( ScalarVar_commit )
-    //  delete ScalarVar_commit;
+    //  delete [] ScalarVar_commit;
     //if ( TensorVar_commit )  
     //  delete TensorVar_commit; 
 
     //if ( ScalarVar_init )
-    //  delete ScalarVar_init;
+    //  delete [] ScalarVar_init;
     //if ( TensorVar_init )
     //  delete TensorVar_init; 
 
@@ -445,8 +450,7 @@ const EPState & EPState::operator=(const EPState &rhs ) {
          //   g3ErrorHandler->fatal("EPState::operator= insufficient memory for Scalar hardening vars");
          //   ::exit(1);  
          //}
-		 int i;
-         for (i = 0; i < NScalarVar; i++) {
+         for (int i = 0; i < NScalarVar; i++) {
             ScalarVar[i] = rhs.ScalarVar[i];
             ScalarVar_commit[i] = rhs.ScalarVar_commit[i];
             ScalarVar_init[i] = rhs.ScalarVar_init[i];
@@ -458,7 +462,7 @@ const EPState & EPState::operator=(const EPState &rhs ) {
          //   g3ErrorHandler->fatal("EPState::operator= insufficient memory for Tensor hardening vars");
          //   ::exit(1);  
          //}
-         for (i = 0; i < NTensorVar; i++) {
+         for (int i = 0; i < NTensorVar; i++) {
              TensorVar[i] = rhs.TensorVar[i];
              TensorVar_commit[i] = rhs.TensorVar_commit[i];
              TensorVar_init[i] = rhs.TensorVar_init[i];
@@ -736,7 +740,7 @@ stresstensor EPState::getTensorVar(int WhichOne) const {
          return TensorVar[ WhichOne - 1 ]; 
       else 
       {
-         g3ErrorHandler->fatal("EPState::getTensorVar Out of Tensortial Var's range %d!", getNTensorVar() );
+         g3ErrorHandler->fatal("EPState::getTensorVar %d: Out of Tensortial Var's range %d!", WhichOne, getNTensorVar() );
 	 exit(1);
       }
 
@@ -971,13 +975,12 @@ void EPState::setInit() {
       Strain_commit   = Strain_init;
       Eep_commit = Eep_init;
 
-	  int i;
-      for (i = 0; i < NScalarVar; i++) {
+      for (int i = 0; i < NScalarVar; i++) {
           ScalarVar[i] = ScalarVar_init[i];
           ScalarVar_commit[i] = ScalarVar_init[i];
       }
 
-      for (i = 0; i < NTensorVar; i++) {
+      for (int i = 0; i < NTensorVar; i++) {
       	 TensorVar[i] = TensorVar_init[i];
       	 TensorVar_commit[i] = TensorVar_init[i];
       }
@@ -998,13 +1001,12 @@ int EPState::commitState () {
       Strain_commit   = CurrentStrain;
       Eep_commit = Eep;
 
-	  int i;
-      for (i = 0; i < NScalarVar; i++) {
+      for (int i = 0; i < NScalarVar; i++) {
           //ScalarVar[i] = ScalarVar_init[i];
           ScalarVar_commit[i] = ScalarVar[i];
       }
 
-      for (i = 0; i < NTensorVar; i++) {
+      for (int i = 0; i < NTensorVar; i++) {
       	 //TensorVar[i] = TensorVar_init[i];
       	 TensorVar_commit[i] = TensorVar[i];
       }
@@ -1021,13 +1023,12 @@ int EPState::revertToLastCommit () {
       CurrentStrain   = Strain_commit;
       Eep = Eep_commit;
 	     
-	  int i;
-      for (i = 0; i < NScalarVar; i++) {
+      for (int i = 0; i < NScalarVar; i++) {
           //ScalarVar[i] = ScalarVar_init[i];
           ScalarVar[i] = ScalarVar_commit[i];
       }
 
-      for (i = 0; i < NTensorVar; i++) {
+      for (int i = 0; i < NTensorVar; i++) {
       	 //TensorVar[i] = TensorVar_init[i];
       	 TensorVar[i] = TensorVar_commit[i];
       }
@@ -1049,13 +1050,12 @@ int EPState::revertToStart () {
       Strain_commit   = Strain_init;
       Eep_commit = Eep_init;
 
-	  int i;
-      for (i = 0; i < NScalarVar; i++) {
+      for (int i = 0; i < NScalarVar; i++) {
           ScalarVar[i] = ScalarVar_init[i];
           ScalarVar_commit[i] = ScalarVar_init[i];
       }
 
-      for (i = 0; i < NTensorVar; i++) {
+      for (int i = 0; i < NTensorVar; i++) {
       	 TensorVar[i] = TensorVar_init[i];
       	 TensorVar_commit[i] = TensorVar_init[i];
       }
@@ -1103,14 +1103,13 @@ ostream & operator<< (ostream& os, const EPState & EPS)
 	
 	os << endln << "\tNScalarVar = " << NS << endln; 
     
-	int i;
-    for (i = 0; i < NS; i++) {
+        for (int i = 0; i < NS; i++) {
             os << "\tNo." << i+1 << " " << EPS.ScalarVar[i] << "; ";
 	}
         os << endln << endln;
     
         os << "\tNTensorVar = " << NT;
-     for (i = 0; i < NT; i++) {
+        for (int i = 0; i < NT; i++) {
            os.unsetf( ios::showpos);
            os << endln << "\tNo." << i+1 << " tensorial var:";
            os.setf( ios::showpos);

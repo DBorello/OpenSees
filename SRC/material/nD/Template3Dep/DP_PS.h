@@ -52,6 +52,7 @@ class DPPotentialSurface : public PotentialSurface
   
   public:
     DPPotentialSurface( double a2d = 0.0 ) : alfa2(a2d) {}   // Default constructor
+    virtual ~DPPotentialSurface() { };
     DPPotentialSurface( const DPPotentialSurface &DPPS ); //Copy constructor
     PotentialSurface *newObj();              //create a colne of itself
     double getalfa2() const;

@@ -103,7 +103,7 @@ tensor EvolutionLaw_L_Eij::h_t( EPState *EPS, PotentialSurface *PS){
     //Evaluating dSodeeq
     double dSodeij = geta();
 
-    tensor h = dSodeij * de_ijodLam;
+    tensor h = de_ijodLam*dSodeij;
 
     return h;
 

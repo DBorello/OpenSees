@@ -84,7 +84,7 @@ tensor VMYieldSurface::dFods(const EPState *EPS) const {
 
     stresstensor sigma_bar = sigma - alpha;   
     stresstensor s_bar = sigma_bar.deviator();
-    tensor dFods = 3.0 * s_bar;
+    tensor dFods = s_bar * 3.0;
     
     return dFods;
 }
@@ -112,7 +112,7 @@ tensor VMYieldSurface::xi_t1(const EPState *EPS) const {
 
     stresstensor sigma_bar = sigma - alpha;   
     stresstensor s_bar = sigma_bar.deviator();
-    tensor xi = -3.0 * s_bar;
+    tensor xi = s_bar * (-3.0);
     
     return xi;
 }

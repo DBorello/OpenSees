@@ -18,11 +18,15 @@ include ../../../../Makefile.def
 
 
 OBJS  = Template3Dep.o \
-        MatPoint3D.o \
-	DP_PS.o	  \
-        DP_YS.o	  \
+	TclTemplate3DepCommand.o \
+	MatPoint3D.o \
+	CAM_PS.o  \
+        CAM_YS.o \
+	DP_PS.o  \
+        DP_YS.o \
         EL_LEeq.o \
         EL_LEij.o \
+        EL_NLEp.o\
         EL_NLEeq.o\
         EL_NLEij.o\
         EL_NLEijMD.o\
@@ -39,10 +43,10 @@ OBJS  = Template3Dep.o \
 
 ################### TARGETS ########################
 all: $(OBJS) 
-	$(AR) $(ARFLAGS) $(MATMOD_LIBRARY) $(OBJS)
+	$(AR) -rv $(MATMOD_LIBRARY) $(OBJS)
 
 libmatmod.a: $(OBJS)
-	$(AR) $(ARFLAGS) $(MATMOD_LIBRARY) $(OBJS)
+	$(AR) -rv $(MATMOD_LIBRARY) $(OBJS)
 
 
 

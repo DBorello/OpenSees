@@ -84,7 +84,7 @@ double YieldSurface::xi_s4( const EPState *EPS ) const
 tensor YieldSurface::xi_t1( const EPState *EPS ) const
 { 
      stresstensor temp;
-     cout << temp;
+  //   cout << "inside YieldSurface::xi_t1( const EPState *EPS ) const  " << temp;
      return temp;
 }
 //================================================================================
@@ -93,7 +93,7 @@ tensor YieldSurface::xi_t1( const EPState *EPS ) const
 tensor YieldSurface::xi_t2( const EPState *EPS ) const
 { 
      stresstensor temp;
-     cout << temp;
+//     cout << " inside YieldSurface::xi_t2 "   <<temp;
      return temp;
 }
 
@@ -103,7 +103,7 @@ tensor YieldSurface::xi_t2( const EPState *EPS ) const
 tensor YieldSurface::xi_t3( const EPState *EPS ) const
 { 
      stresstensor temp;
-     cout << temp;
+//     cout << "inside  YieldSurface::xi_t3 " <<temp;
      return temp;
 }
 
@@ -113,7 +113,7 @@ tensor YieldSurface::xi_t3( const EPState *EPS ) const
 tensor YieldSurface::xi_t4( const EPState *EPS ) const
 { 
      stresstensor temp;
-     cout << temp;
+    // cout << " inside YieldSurface::xi_t4 "  << temp;
      return temp;
 }
 
