@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.1 $
-// $Date: 2003-11-25 23:18:24 $
+// $Revision: 1.2 $
+// $Date: 2003-11-26 20:34:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/TclJoint3dCommand.cpp,v $
 
 // Written: Arash	Created: 04/01
@@ -39,12 +39,12 @@
 #include <Joint3D.h>
 #include <TclModelBuilder.h>
 
-extern void printCommand(int argc, char **argv);
+//extern void printCommand(int argc, TCL_Char **argv);
 
 int
 TclModelBuilder_addJoint3D(ClientData clientData, Tcl_Interp *interp,  
 			   int argc, 
-			   char **argv, 
+			   TCL_Char **argv, 
 			   Domain *theTclDomain,
 			   TclModelBuilder *theTclBuilder)
 {
@@ -64,7 +64,7 @@ TclModelBuilder_addJoint3D(ClientData clientData, Tcl_Interp *interp,
   
   if ( (argc-argStart) != 12 && (argc-argStart) != 16 ) {
     opserr << "WARNING incorrect number of arguments\n";
-    printCommand(argc, argv);
+    //printCommand(argc, argv);
     opserr << "Want:\n";
     opserr << "element Joint3D Tag? NodI? NodJ? NodK? NodL? NodM? NodN? NodC? MatX? MatY? MatZ? LrgDsp?\n";
     opserr << "or:\n";
