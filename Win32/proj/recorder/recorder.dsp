@@ -127,6 +127,10 @@ SOURCE=..\..\..\SRC\recorder\NodeRecorder.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\recorder\PatternRecorder.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\recorder\TclRecorderCommands.cpp
 # End Source File
 # Begin Source File
@@ -176,6 +180,10 @@ SOURCE=..\..\..\SRC\recorder\MaxNodeDispRecorder.h
 # Begin Source File
 
 SOURCE=..\..\..\SRC\recorder\NodeRecorder.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\recorder\PatternRecorder.h
 # End Source File
 # Begin Source File
 
