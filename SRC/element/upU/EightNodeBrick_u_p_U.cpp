@@ -36,8 +36,6 @@
 #include <EightNodeBrick_u_p_U.h>
 #define FixedOrder 2
 
-#include <fstream.h>
-
 // Changed to static data members on 01/16/2002
 
 Matrix EightNodeBrick_u_p_U::K(56, 56);      

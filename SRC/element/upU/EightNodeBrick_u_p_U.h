@@ -38,7 +38,7 @@
 #include "bool.h"
 #endif
 
-#include <fstream>	  // add for the output of stiffness matrix K  03/22/2002
+#include <fstream.h>	  // add for the output of stiffness matrix K  03/22/2002
 
 #include <Element.h>
 #include <Node.h> 
