@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-04-02 18:49:47 $
+// $Revision: 1.5 $
+// $Date: 2002-12-13 00:11:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
                                                                         
@@ -73,8 +73,6 @@ class ElementRecorder: public Recorder
   private:	
     int numEle;
     ID responseID;                 // integer element returns in setResponse
-    Information	*eleInfoObjects;   // object into whcih element places the response
-    Element **theElements;         // pointer to the elements
 
     Response **theResponses;
 

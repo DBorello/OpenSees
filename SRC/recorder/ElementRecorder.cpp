@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2002-07-29 21:03:37 $
+// $Revision: 1.10 $
+// $Date: 2002-12-13 00:11:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -50,25 +50,19 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
  echoTimeFlag(echoTime), deltaT(dT), nextTimeStampToRecord(0.0), 
  db(0), dbColumns(0), numDbColumns(0), data(0)
 {
-  theElements = new Element *[numEle];
-  for (int ii=0; ii<numEle; ii++)
-    theElements[ii] = 0;
-
   theResponses = new Response *[numEle];
   for (int j=0; j<numEle; j++)
     theResponses[j] = 0;
 
-  eleInfoObjects = new Information[numEle];
+  Information eleInfo(1.0);
   for (int i=0; i<numEle; i++) {
     Element *theEle = theDom.getElement(eleID(i));
     if (theEle == 0) {
       cerr << "WARNING ElementRecorder::ElementRecorder() -";
       cerr << " no element with tag: " << eleID(i) << " exists in Domain\n";
-      numEle = 0;
-      return;
+      theResponses[i] = 0;
     } else {
-      theResponses[i] = theEle->setResponse(argv, argc, eleInfoObjects[i]);
-      theElements[i] = theEle;
+      theResponses[i] = theEle->setResponse(argv, argc, eleInfo);
     }
   }
 
@@ -93,8 +87,10 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
       cerr << " - could not open file " << fileName << endl;
     }    
   }
+  
+  // no file .. results will be sent to cerr
   else
-	  fileName = 0;
+    fileName = 0;
 }
 
 
@@ -109,39 +105,30 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
  db(database), dbColumns(0), numDbColumns(0), data(0)
 {
 
-  int numDbColumns = 1;  // 1 for the pseudo-time
-
-  theElements = new Element *[numEle];
-  for (int ii=0; ii<numEle; ii++)
-    theElements[ii] = 0;
+  numDbColumns = 0;
+  if (echoTimeFlag == true) 
+    numDbColumns = 1;  // 1 for the pseudo-time
 
   theResponses = new Response *[numEle];
   for (int j=0; j<numEle; j++)
     theResponses[j] = 0;
 
-  eleInfoObjects = new Information[numEle];
+  Information eleInfo(1.0);
   int i;
   for (i=0; i<numEle; i++) {
     Element *theEle = theDom.getElement(eleID(i));
     if (theEle == 0) {
       cerr << "WARNING ElementRecorder::ElementRecorder() -";
       cerr << " no element with tag: " << eleID(i) << " exists in Domain\n";
-      numEle = 0;
-      return;
+      theResponses[i] = 0;
     } else {
-      theResponses[i] = theEle->setResponse(argv, argc, eleInfoObjects[i]);
+      theResponses[i] = theEle->setResponse(argv, argc, eleInfo);
       if (theResponses[i] != 0) {
-      
 	// from the response type determine no of cols for each
-	Information &eleInfo = theResponses[i]->myInfo;
-	if (eleInfo.theType == IntType || eleInfo.theType == DoubleType)
-	  numDbColumns += 1;
-	else if (eleInfo.theType == VectorType) 
-	  numDbColumns += eleInfo.theVector->Size();
-	else if (eleInfo.theType == IdType) 
-	  numDbColumns += eleInfo.theID->Size();
+	Information &eleInfo = theResponses[i]->getInformation();
+	const Vector &eleData = eleInfo.getData();
+	numDbColumns += eleData.Size();
       }
-      theElements[i] = theEle;
     }
   }
 
@@ -165,7 +152,7 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   char *newColumn = new char[10];
   sprintf(newColumn, "%s","time");  
   dbColumns[0] = newColumn;
-
+  
   char *dataToStore = argv[argc-1];
 
   int counter = 1;
@@ -173,7 +160,7 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
     int eleTag = eleID(i);
     int numVariables = 0;
     if (theResponses[i]!= 0) {
-      Information &eleInfo = theResponses[i]->myInfo;
+      const Information &eleInfo = theResponses[i]->getInformation();
       
       if (eleInfo.theType == IntType || eleInfo.theType == DoubleType) {
 	// create column heading for single data item for element
@@ -203,7 +190,10 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   }
   
   // create the table in the database
-  db->createTable(tableName, numDbColumns, dbColumns);
+  db->createTable(fileName, numDbColumns, dbColumns);
+
+  // create the vector to hold the data
+  data = new Vector(numDbColumns);
 }
   
 ElementRecorder::~ElementRecorder()
@@ -212,17 +202,11 @@ ElementRecorder::~ElementRecorder()
     if (!theFile.bad())
 	theFile.close();    
 
-    if (theElements != 0)
-      delete [] theElements;
-
     if (theResponses != 0) {
       for (int i = 0; i < numEle; i++)
 	delete theResponses[i];
       delete [] theResponses;
     }
-
-    if (eleInfoObjects != 0)
-      delete [] eleInfoObjects;
 
     if (fileName != 0)
       delete [] fileName;
@@ -238,44 +222,73 @@ ElementRecorder::record(int commitTag, double timeStamp)
     if (deltaT != 0.0) 
       nextTimeStampToRecord = timeStamp + deltaT;
 
-    // print out the pseudo time if requested
-    if (echoTimeFlag == true) {
-      if (!theFile) 
-	cerr << timeStamp << " ";			
-      else 
-	theFile << timeStamp << " ";	
-    }
-
-    // for each element do a getResponse() & print the result
-    for (int i=0; i< numEle; i++) {
-      int theID = responseID(i);
-      if (theResponses[i] != 0) {
+    if (db == 0) {
+      // print out the pseudo time if requested
+      if (echoTimeFlag == true) {
+	if (!theFile) 
+	  cerr << timeStamp << " ";			
+	else 
+	  theFile << timeStamp << " ";	
+      }
       
+      // get the responses and write to file if file or cerr specified
+      // for each element do a getResponse() & print the result
+      for (int i=0; i< numEle; i++) {
+	if (theResponses[i] != 0) {
+	  
 	// ask the element for the reponse
-	int res;
-	Information &eleInfo = eleInfoObjects[i];
-	if (( res = theResponses[i]->getResponse()) < 0)
-	  result = res;
-	else {
-	  // print results to file or stderr depending on whether
-	  // a file was opened
-	
-	  if (theFile.bad())
-	    theResponses[i]->Print(cerr);	    
+	  int res;
+	  if (( res = theResponses[i]->getResponse()) < 0)
+	    result = res;
 	  else {
-	    theResponses[i]->Print(theFile);
-	    theFile << "  ";  // added for OSP
+	    // print results to file or stderr depending on whether
+	    // a file was opened
+	    
+	    if (theFile.bad())
+	      theResponses[i]->Print(cerr);	    
+	    else {
+	      theResponses[i]->Print(theFile);
+	      theFile << "  ";  // added for OSP
+	    }
 	  }
-	}
-      } 
+	} 
+      }
+      if (theFile.bad()) 
+	cerr << endl;
+      else {
+	theFile << " \n";
+	theFile.flush();
+      }
     }
 
-    if (theFile.bad()) 
-      cerr << endl;
-    else {
-      theFile << " \n";
-      theFile.flush();
+    else {  // send the data to the database
+
+      int loc = 0;
+      if (echoTimeFlag == true) 
+	(*data)(loc++) = timeStamp;
+
+      // for each element do a getResponse() & print the result
+      for (int i=0; i< numEle; i++) {
+	if (theResponses[i] != 0) {
+	  
+	// ask the element for the reponse
+	  int res;
+	  if (( res = theResponses[i]->getResponse()) < 0)
+	    result = res;
+	  else {
+	    // print results to file or stderr depending on whether
+	    // a file was opened
+	    Information &eleInfo = theResponses[i]->getInformation();
+	    const Vector &eleData = eleInfo.getData();
+	    for (int j=0; j<eleData.Size(); j++)
+	      (*data)(loc++) = eleData(i);
+	  }
+	} 
+      }
+      
+      db->insertData(fileName, dbColumns, commitTag, *data);
     }
+
   }
 
   // succesfull completion - return 0
