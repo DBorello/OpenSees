@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-02-13 02:01:24 $
+// $Revision: 1.4 $
+// $Date: 2002-05-16 20:04:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.h,v $
                                                                         
                                                                         
@@ -49,7 +49,8 @@ class ID
     // constructors and destructor
     ID();
     ID(int);
-    ID(int size, int arraySize);    
+    ID(int size, int arraySize);
+    ID(int *data, int size);
     ID(const ID &);    
     ~ID();
  
@@ -82,6 +83,7 @@ class ID
     int sz;
     int *data;
     int arraySize;
+    int fromFree;
 };
 
 

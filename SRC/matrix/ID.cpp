@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2002-05-16 20:04:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -43,7 +43,7 @@ int ID::ID_NOT_VALID_ENTRY = 0;
 //	Standard constructor, sets size = 0;
 
 ID::ID()
-:sz(0), data(0), arraySize(0)
+  :sz(0), data(0), arraySize(0), fromFree(0)
 {
 
 }
@@ -53,7 +53,7 @@ ID::ID()
 //	Constructor used to allocate a ID of size size.
 
 ID::ID(int size)
-  :sz(size), data(0), arraySize(size)
+  :sz(size), data(0), arraySize(size), fromFree(0)
 {
 
 #ifdef _G3DEBUG
@@ -82,7 +82,7 @@ ID::ID(int size)
 //	Constructor used to allocate a ID of size size.
 
 ID::ID(int size, int arraySz)
-  :sz(size), data(0), arraySize(arraySz)
+  :sz(size), data(0), arraySize(arraySz), fromFree(0)
 {
 #ifdef _G3DEBUG
   if (sz < 0) {
@@ -116,17 +116,18 @@ ID::ID(int size, int arraySz)
     data[i] = 0;
 }
 
+ID::ID(int *d, int size)
+  :sz(size), data(d), arraySize(size), fromFree(1)
+{
 
+}
 
 // ID(const ID&):
 //	Constructor to init a ID from another.
 
 ID::ID(const ID &other)
+  :sz(other.sz), data(0), arraySize(other.arraySize), fromFree(0)
 {
-    sz = other.sz;
-    arraySize = other.arraySize;
-    data = 0;
-
   // create the space
   data = (int *)malloc(arraySize*sizeof(int));
   if (data == 0) {
@@ -147,7 +148,7 @@ ID::ID(const ID &other)
 
 ID::~ID()
 {
-  if (data != 0) 
+  if (data != 0 && fromFree == 0) 
     free((void *)data);
 }
 
