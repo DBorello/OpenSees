@@ -25,6 +25,7 @@ clean: tidy
 spotless: clean
 	@$(CD) $(FE)/material/uniaxial/fedeas; $(MAKE) wipe;
 	@$(CD) $(FE)/material/uniaxial/drain; $(MAKE) wipe;
+	@$(CD) $(FE)/material/uniaxial/PY; $(MAKE) wipe;
 
 wipe: spotless
 
