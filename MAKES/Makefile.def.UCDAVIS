@@ -257,7 +257,7 @@ endif
 #LINKFLAGS       =  
 
 ## optimize a LOT
-#C++FLAGS        =  -O2 -fno-strength-reduce -m486 -malign-loops=2 -malign-jumps=2 -malign-functions=2 -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG) 
+#C++FLAGS        =  -O2 -fomit-frame-pointer -fno-strength-reduce -Winline   -m486 -malign-loops=2 -malign-jumps=2 -malign-functions=2 -D_LINUX -D_UNIX  -Wall $(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(PROGRAMMING_FLAG) 
 #CFLAGS          =  -O2
 #FFLAGS          =  -O2
 #LINKFLAGS       =  
