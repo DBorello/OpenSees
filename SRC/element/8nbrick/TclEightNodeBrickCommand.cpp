@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-08-10 01:15:01 $
+// $Revision: 1.6 $
+// $Date: 2002-05-04 18:44:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/8nbrick/TclEightNodeBrickCommand.cpp,v $
                                                                         
                                                                         
@@ -53,14 +53,14 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
 {
   // ensure the destructor has not been called - 
   if (theTclBuilder == 0) {
-      g3ErrorHandler->warning("command: element brick - no modelbuilder");
+      g3ErrorHandler->warning("command: element Brick8N - no modelbuilder");
       return TCL_ERROR;
   }
 
   // check the number of arguments is correct
   if ((argc-eleArgStart) < 15) {
-      g3ErrorHandler->warning("command: element brick - insufficient args - want %s",
-          "element brick eleTag? node1? node2? .. node8? matTag? bforce1? bforce2? bforce3? massDensity?\n");
+      g3ErrorHandler->warning("command: element Brick8N - insufficient args - want %s",
+          "element Brick8N eleTag? node1? node2? .. node8? matTag? bforce1? bforce2? bforce3? massDensity?\n");
       return TCL_ERROR;
   }    
 
@@ -72,7 +72,7 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
   
   // read the eleTag
   if (Tcl_GetInt(interp, argv[1+eleArgStart], &eleID) != TCL_OK) {
-      g3ErrorHandler->warning("command: element brick - invalid integer tag %s",      
+      g3ErrorHandler->warning("command: element Brick8N - invalid integer tag %s",      
 			      argv[1+eleArgStart]);
 
       return TCL_ERROR;
@@ -82,7 +82,7 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
   int i;
   for (i=0; i<8; i++) {
       if (Tcl_GetInt(interp, argv[2+i+eleArgStart], &nodes[i]) != TCL_OK) {
-	  g3ErrorHandler->warning("command: element brick %d - invalid integer tag %s",      
+	  g3ErrorHandler->warning("command: element Brick8N %d - invalid integer tag %s",      
 				  eleID, argv[2+i+eleArgStart]);
 	  return TCL_ERROR;
       }
@@ -90,7 +90,7 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
 
   // read in material tag & check the material exists in the model builder
   if (Tcl_GetInt(interp, argv[10+eleArgStart], &matID) != TCL_OK) {
-      g3ErrorHandler->warning("command: element brick %d - invalid matID tag %s",      
+      g3ErrorHandler->warning("command: element Brick8N %d - invalid matID tag %s",      
 			      eleID, argv[10+eleArgStart]);      
       return TCL_ERROR;
   }
@@ -98,7 +98,7 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
   NDMaterial *theMaterial = theTclBuilder->getNDMaterial(matID);
   
   if (theMaterial == 0) {
-      g3ErrorHandler->warning("command: element brick %d - no NDMaterial with tag %s exists",
+      g3ErrorHandler->warning("command: element Brick8N %d - no NDMaterial with tag %s exists",
 			      eleID, argv[10+eleArgStart]);      
       return TCL_ERROR;      
   }
@@ -108,7 +108,7 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
   // read the 3 bodyforce accel's 
   for (i=0; i<3; i++) {
       if (Tcl_GetDouble(interp, argv[11+i+eleArgStart], &bodyforces[i]) != TCL_OK) {
-	  g3ErrorHandler->warning("command: element brick %d - invalid bodyforces tag %s",      
+	  g3ErrorHandler->warning("command: element Brick8N %d - invalid bodyforces tag %s",      
 				  eleID, argv[11+i+eleArgStart]);
 	  return TCL_ERROR;
       }
@@ -116,7 +116,7 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
 
   // now get the massDensity
   if (Tcl_GetDouble(interp, argv[14+eleArgStart], &massDensity) != TCL_OK) {
-      g3ErrorHandler->warning("command: element brick %d - invalid massDensity %s",      
+      g3ErrorHandler->warning("command: element Brick8N %d - invalid massDensity %s",      
     			  eleID, argv[14+eleArgStart]);      
       return TCL_ERROR;
   }  
@@ -127,12 +127,12 @@ TclModelBuilder_addEightNodeBrick(ClientData clientData, Tcl_Interp *interp,  in
 					      bodyforces[0], bodyforces[1], bodyforces[2], massDensity, 0.0);
 					      
   if (theEle == 0) {
-      g3ErrorHandler->warning("command: element brick %d - out of memory", eleID);      
+      g3ErrorHandler->warning("command: element Brick8N %d - out of memory", eleID);      
       return TCL_ERROR;
   }
 
   if (theTclDomain->addElement(theEle) == false) {
-      g3ErrorHandler->warning("command: element brick %d - could not add ele to domain", 
+      g3ErrorHandler->warning("command: element Brick8N %d - could not add ele to domain", 
 			      eleID);      
       delete theEle;
       return TCL_ERROR;

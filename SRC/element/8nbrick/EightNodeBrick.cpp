@@ -53,6 +53,7 @@ Matrix EightNodeBrick::C(24, 24);
 Matrix EightNodeBrick::M(24, 24);      
 Vector EightNodeBrick::P(24);	       
 Vector InfoP(FixedOrder*FixedOrder*FixedOrder*4+1); //Plastic info 32+1 2X2X2
+Vector InfoP1(FixedOrder*FixedOrder*FixedOrder+1); //Plastic info, no Gauss point coordinates
 Vector InfoS(FixedOrder*FixedOrder*FixedOrder*6+1); //Stress 8*6+1  2X2X2
 Vector Gsc8(FixedOrder*FixedOrder*FixedOrder*3+1); //Gauss point coordinates
 
@@ -3186,7 +3187,7 @@ Response * EightNodeBrick::setResponse (char **argv, int argc, Information &eleI
     		return new ElementResponse(this, 2, K);
 
     //========================================================
-    else if (strcmp(argv[0],"plastic") == 0 || strcmp(argv[0],"plastified") == 0)
+    else if (strcmp(argv[0],"plasticGPC") == 0 || strcmp(argv[0],"plastifiedGPC") == 0)
     {
        //checking if element plastified
        //int count  = r_integration_order* s_integration_order * t_integration_order;
@@ -3204,6 +3205,11 @@ Response * EightNodeBrick::setResponse (char **argv, int argc, Information &eleI
        //}
   
        return new ElementResponse(this, 3, InfoP);
+    } 
+    //========================================================
+    else if (strcmp(argv[0],"plastic") == 0 || strcmp(argv[0],"plastified") == 0)
+    {  
+       return new ElementResponse(this, 31, InfoP1);
     } 
     //========================================================
     else if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
@@ -3316,6 +3322,26 @@ int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
 	   	return eleInfo.setVector(Gsc8);
 	   }
 	   
+	   case 31:
+       	      {
+		// Output element plastic info 
+       	        int count  = r_integration_order* s_integration_order * t_integration_order;
+
+		InfoP1(0) = count; //Number of Gauss point
+
+       	        straintensor pl_stn;
+       	        
+       	        for (int i = 0; i < count; i++) {
+       	          pl_stn = matpoint[i]->getPlasticStrainTensor();
+       	          //double  p_plastc = pl_stn.p_hydrostatic();
+       	          double  q_plastc = pl_stn.q_deviatoric();
+     	          
+	   	  InfoP1(i+1) = q_plastc; //plastify; //Plastified?
+
+       	        }
+	   	return eleInfo.setVector( InfoP1 );
+	   
+	   }
 	   default: 
 	   	return -1;
 	}
