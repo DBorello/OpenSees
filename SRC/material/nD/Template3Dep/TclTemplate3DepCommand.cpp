@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-25 20:54:07 $
+// $Revision: 1.3 $
+// $Date: 2001-09-20 20:03:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/Template3Dep/TclTemplate3DepCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -77,9 +77,7 @@ EvolutionLaw_T   *EvaluateEvolutionLawTArgs(ClientData, Tcl_Interp *, char *tclS
 //   note Tcl_Split list stores the array of pointers and the strings in 
 //   one array, which is why Tcl_Free needs only be called on the array.
 static void cleanup(char **argv) {
-#ifdef TCL_Free	    
 	  Tcl_Free((char *) argv);
-#endif	    
 }
 
 Template3Dep *

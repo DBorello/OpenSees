@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-21 20:11:15 $
+// $Revision: 1.2 $
+// $Date: 2001-09-20 20:03:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/Template3Dep/TclTemplateNDMaterialCommand.cpp,v $
                                                                         
 
@@ -193,9 +193,7 @@ TcladdTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int argc,
       }
 
       if (listArgs != 0) {
-#ifdef TCL_Free
 	  Tcl_Free((char *) listArgs);
-#endif	  
       }
   }
 
