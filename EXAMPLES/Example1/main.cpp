@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-19 05:15:33 $
+// $Revision: 1.3 $
+// $Date: 2001-12-10 21:57:07 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/Example1/main.cpp,v $
 
 
@@ -67,8 +67,15 @@
 #include <BandSPDLinSOE.h>
 #include <BandSPDLinLapackSolver.h>
 
-ErrorHandler *g3ErrorHandler;
+// init the global variabled defined in G3Globals.h
+ErrorHandler *g3ErrorHandler =0;
+double        ops_Dt = 0;
+Domain       *ops_TheActiveDomain = 0;
+Element      *ops_TheActiveElement = 0;
 
+
+
+// main routine
 int main(int argc, char **argv)
 {
     //  first build our error handler
