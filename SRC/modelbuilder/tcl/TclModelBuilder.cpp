@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-13 21:22:34 $
+// $Revision: 1.6 $
+// $Date: 2001-07-13 21:29:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -1333,7 +1333,8 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
 
   // create the nodes: (numX+1)*(numY+1) nodes to be created
   int nodeID = startNodeNum;
-  for (int jj=0; jj<=numY; jj++) {
+  int jj;
+  for (jj=0; jj<=numY; jj++) {
     for (int ii=0; ii<=numX; ii++) {
       const Vector &nodeCoords = theBlock.getNodalCoords(ii,jj);
       double xLoc = nodeCoords(0);
@@ -1371,11 +1372,11 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
 
   // assumes 15 is largest string for individual nodeTags
   count = 10 + strlen(eleType) + strlen(additionalEleArgs) + 15 * (numNodes+1);
-  char eleCommand[count];
+  char *eleCommand = new char[count];
   int initialCount = 8 + strlen(eleType);
 
   int  eleID = startEleNum;  
-  for (int jj=0; jj<numY; jj++) {
+  for (jj=0; jj<numY; jj++) {
     for (int ii=0; ii<numX; ii++) {
       count = initialCount;
 
@@ -1393,12 +1394,14 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
 
       // now to create the element we get the string eveluated
       if (Tcl_Eval(interp, eleCommand) != TCL_OK) {
+          delete [] eleCommand;
 	return TCL_ERROR;
       }
       eleID++;
     }
   }
 
+  delete [] eleCommand;
   return TCL_OK;
 }
 
@@ -1496,7 +1499,8 @@ TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,
 
   // create the nodes: (numX+1)*(numY+1) nodes to be created
   int nodeID = startNodeNum;
-  for (int kk=0; kk<=numZ; kk++) {
+  int kk;
+  for (kk=0; kk<=numZ; kk++) {
     for (int jj=0; jj<=numY; jj++) {
       for (int ii=0; ii<=numX; ii++) {
 	const Vector &nodeCoords = theBlock.getNodalCoords(ii,jj,kk);
@@ -1532,11 +1536,11 @@ TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,
 
   // assumes 15 is largest string for individual nodeTags
   count = 10 + strlen(eleType) + strlen(additionalEleArgs) + 15 * (numNodes+1);
-  char eleCommand[count];
+  char *eleCommand = new char[count];
   int initialCount = 8 + strlen(eleType);
 
   int  eleID = startEleNum;  
-  for (int kk=0; kk<numZ; kk++) {
+  for (kk=0; kk<numZ; kk++) {
     for (int jj=0; jj<numY; jj++) {
       for (int ii=0; ii<numX; ii++) {
 	count = initialCount;
@@ -1555,6 +1559,7 @@ TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,
 	
 	// now to create the element we get the string eveluated
 	if (Tcl_Eval(interp, eleCommand) != TCL_OK) {
+        delete [] eleCommand;
 	  return TCL_ERROR;
 	}
 	eleID++;
@@ -1562,6 +1567,7 @@ TclModelBuilder_doBlock3D(ClientData clientData, Tcl_Interp *interp, int argc,
     }
   }
 
+  delete [] eleCommand;
   return TCL_OK;
 }
 
