@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-09-18 22:55:32 $
+// $Revision: 1.3 $
+// $Date: 2001-11-26 22:59:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -45,23 +45,23 @@
 #include <PDeltaCrdTransf2d.h>
 
 // constructor:
-PDeltaCrdTransf2d::PDeltaCrdTransf2d(int tag):
-  CrdTransf2d(tag, CRDTR_TAG_PDeltaCrdTransf2d),
-  nodeIPtr(0), nodeJPtr(0),
-  nodeIOffset(0), nodeJOffset(0),
-  cosTheta(0), sinTheta(0), L(0), ul14(0)
+PDeltaCrdTransf2d::PDeltaCrdTransf2d(int tag)
+  :CrdTransf2d(tag, CRDTR_TAG_PDeltaCrdTransf2d),
+   nodeIPtr(0), nodeJPtr(0),
+   nodeIOffset(0), nodeJOffset(0),
+   cosTheta(0), sinTheta(0), L(0), ul14(0)
 {
 	// Does nothing
 }
 
 // constructor:
 PDeltaCrdTransf2d::PDeltaCrdTransf2d(int tag,
-										   const Vector &rigJntOffset1,
-										   const Vector &rigJntOffset2):
-  CrdTransf2d(tag, CRDTR_TAG_PDeltaCrdTransf2d),
-  nodeIPtr(0), nodeJPtr(0),
-  nodeIOffset(0), nodeJOffset(0),
-  cosTheta(0), sinTheta(0), L(0), ul14(0)
+				     const Vector &rigJntOffset1,
+				     const Vector &rigJntOffset2)
+  :CrdTransf2d(tag, CRDTR_TAG_PDeltaCrdTransf2d),
+   nodeIPtr(0), nodeJPtr(0),
+   nodeIOffset(0), nodeJOffset(0),
+   cosTheta(0), sinTheta(0), L(0), ul14(0)
 {
 	// check rigid joint offset for node I
 	if (&rigJntOffset1 == 0 || rigJntOffset1.Size() != 2 ) {
@@ -91,8 +91,8 @@ PDeltaCrdTransf2d::PDeltaCrdTransf2d(int tag,
  
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
-PDeltaCrdTransf2d::PDeltaCrdTransf2d():
-  CrdTransf2d(0, CRDTR_TAG_PDeltaCrdTransf2d),
+PDeltaCrdTransf2d::PDeltaCrdTransf2d()
+ :CrdTransf2d(0, CRDTR_TAG_PDeltaCrdTransf2d),
   nodeIPtr(0), nodeJPtr(0),
   nodeIOffset(0), nodeJOffset(0),
   cosTheta(0), sinTheta(0), L(0), ul14(0)
@@ -390,7 +390,7 @@ PDeltaCrdTransf2d::getBasicIncrDeltaDisp(void)
 
 
 const Vector &
-PDeltaCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &unifLoad)
+PDeltaCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &p0)
 {
 	// transform resisting forces from the basic system to local coordinates
 	static double pl[6];
@@ -401,20 +401,18 @@ PDeltaCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &unifL
 
 	double oneOverL = 1.0/L;
 
+	double V = oneOverL*(q1+q2);
 	pl[0] = -q0;
-	pl[1] =  oneOverL*(q1+q2);
+	pl[1] =  V;
 	pl[2] =  q1;
 	pl[3] =  q0;
-	//pl[4] = -oneOverL*(q1+q2);
-	pl[4] = -pl[1];
+	pl[4] = -V;
 	pl[5] =  q2;
 
-	// add end forces due to uniform distributed
-	// loads to the system with rigid body modes
-	pl[0] -= unifLoad(0)*L;
-	double V = 0.5*unifLoad(1)*L;
-	pl[1] -= V;
-	pl[4] -= V;
+	// add end forces due to element p0 loads
+	pl[0] += p0(0);
+	pl[1] += p0(1);
+	pl[4] += p0(2);
      
 	// Include leaning column effects (P-Delta)
 	double NoverL = ul14*q0*oneOverL;             

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-30 07:14:37 $
+// $Revision: 1.3 $
+// $Date: 2001-11-26 22:59:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.h,v $
                                                                         
                                                                         
@@ -68,7 +68,7 @@ class LinearCrdTransf2d: public CrdTransf2d
     const Vector &getBasicIncrDisp      (void);
     const Vector &getBasicIncrDeltaDisp (void);
 
-    const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &uniformLoad);
+    const Vector &getGlobalResistingForce (const Vector &basicForce, const Vector &p0);
     const Matrix &getGlobalStiffMatrix    (const Matrix &basicStiff, const Vector &basicForce);
 
     CrdTransf2d *getCopy(void);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-09-18 22:55:31 $
+// $Revision: 1.4 $
+// $Date: 2001-11-26 22:59:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -372,7 +372,7 @@ LinearCrdTransf2d::getBasicIncrDeltaDisp(void)
 
 
 const Vector &
-LinearCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &unifLoad)
+LinearCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &p0)
 {
 	// transform resisting forces from the basic system to local coordinates
 	static double pl[6];
@@ -383,20 +383,18 @@ LinearCrdTransf2d::getGlobalResistingForce(const Vector &pb, const Vector &unifL
 
 	double oneOverL = 1.0/L;
 
+	double V = oneOverL*(q1+q2);
 	pl[0] = -q0;
-	pl[1] =  oneOverL*(q1+q2);
+	pl[1] =  V;
 	pl[2] =  q1;
 	pl[3] =  q0;
-	//pl[4] = -oneOverL*(q1+q2);
-	pl[4] = -pl[1];
+	pl[4] = -V;
 	pl[5] =  q2;
 
-	// add end forces due to uniform distributed
-	// loads to the system with rigid body modes
-	pl[0] -= unifLoad(0)*L;
-	double V = 0.5*unifLoad(1)*L;
-	pl[1] -= V;
-	pl[4] -= V;
+	// add end forces due to element p0 loads
+	pl[0] += p0(0);
+	pl[1] += p0(1);
+	pl[4] += p0(2);
      
 	// transform resisting forces  from local to global coordinates
 	static Vector pg(6);

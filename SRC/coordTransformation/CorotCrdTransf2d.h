@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $                                                              
-// $Date: 2001-08-20 01:11:34 $                                                                  
+// $Revision: 1.2 $                                                              
+// $Date: 2001-11-26 22:59:17 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf2d.h,v $                                                                
                                                                         
                                                                         
@@ -103,6 +103,12 @@ class CorotCrdTransf2d: public CrdTransf2d
     static Vector ubpr;    // previous basic displacements
     static Matrix Tlg;     // matrix that transforms from global to local coordinates
     static Matrix Tbl;     // matrix that transforms from local  to basic coordinates
+    static Matrix kg;     
+    static Vector uxg;     
+    static Vector pg;     
+    static Vector dub;     
+    static Vector Dub;     
+
 };
 #endif
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $                                                              
-// $Date: 2001-08-20 01:11:34 $                                                                  
+// $Revision: 1.2 $                                                              
+// $Date: 2001-11-26 22:59:17 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/CorotCrdTransf3d.h,v $                                                                
                                                                         
                                                                         
