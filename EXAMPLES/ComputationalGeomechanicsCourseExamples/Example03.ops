@@ -177,7 +177,7 @@ numberer RCM
 analysis Static
 
 
-set NN2 10
+set NN2 2
 for {set i 1} {$i <=$NN2} {incr i} {
     puts $i
     analyze 1

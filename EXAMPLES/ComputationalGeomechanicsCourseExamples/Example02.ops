@@ -129,7 +129,7 @@ integrator LoadControl $lf1
 #
 # this is needed by Newton 
 #test NormDispIncr 1.0e-6 30 1
-test NormUnbalance 1.0e-6 30 4
+test NormUnbalance 1.0e-6 30 1
 
 
 
