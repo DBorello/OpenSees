@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 05:53:01 $
+// $Revision: 1.3 $
+// $Date: 2001-03-29 05:59:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ElasticPPMaterial.cpp,v $
                                                                         
                                                                         
@@ -44,16 +44,16 @@
 
 ElasticPPMaterial::ElasticPPMaterial(int tag, double e, double eyp)
 :UniaxialMaterial(tag,MAT_TAG_ElasticPPMaterial),
- ezero(0.0), E(e), ep(0.0)
+ ezero(0.0), E(e), trialStrain(0.0), eptrial(0.0), ep(0.0)
 {
 	fyp = E*eyp;
 	fyn = -fyp;
 }
 
 ElasticPPMaterial::ElasticPPMaterial(int tag, double e, double eyp,
-	double eyn, double ez )
+				     double eyn, double ez )
 :UniaxialMaterial(tag,MAT_TAG_ElasticPPMaterial),
- ezero(ez), E(e), ep(0.0), eptrial(0.)
+ ezero(ez), E(e), trialStrain(0.0), eptrial(0.0), ep(0.0)
 {
     if (eyp < 0) {
 	cerr << "ElasticPPMaterial::ElasticPPMaterial() - eyp < 0, setting > 0\n";
@@ -70,7 +70,7 @@ ElasticPPMaterial::ElasticPPMaterial(int tag, double e, double eyp,
 
 ElasticPPMaterial::ElasticPPMaterial()
 :UniaxialMaterial(0,MAT_TAG_ElasticPPMaterial),
- fyp(0.0), fyn(0.0), ezero(0.0), E(0.0), ep(0.0), eptrial(0.)
+ fyp(0.0), fyn(0.0), ezero(0.0), E(0.0), trialStrain(0.0), eptrial(0.0), ep(0.0)
 {
 
 }
@@ -147,7 +147,8 @@ ElasticPPMaterial::getTangent(void)
     else
 	f = -sigtrial + fyn;
 
-    return ( f <= 0.0 ) ? E : 0.0;
+    double fYieldSurface = - E * DBL_EPSILON;
+    return ( f < fYieldSurface) ? E : 0.0;
 
 }
 
