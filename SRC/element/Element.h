@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-12-05 22:18:51 $
+// $Revision: 1.7 $
+// $Date: 2002-12-16 21:07:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -69,7 +69,7 @@ class Element : public DomainComponent
     virtual int getNumDOF(void) =0;
 
     // methods dealing with committed state and update
-    virtual int commitState(void) = 0;    
+    virtual int commitState(void);    
     virtual int revertToLastCommit(void) = 0;        
     virtual int revertToStart(void);                
     virtual int update(void);
@@ -86,7 +86,7 @@ class Element : public DomainComponent
     virtual void zeroLoad(void) =0;	
     virtual int addLoad(ElementalLoad *theLoad, double loadFactor) =0;
     virtual int addInertiaLoadToUnbalance(const Vector &accel) =0;
-    virtual int setRayleighDampingFactors(double alphaM, double betaK, double betaK0);
+    virtual int setRayleighDampingFactors(double alphaM, double betaK, double betaK0, double betaKc);
 
     // methods for obtaining resisting force (force includes elemental loads)
     virtual const Vector &getResistingForce(void) =0;
@@ -99,7 +99,8 @@ class Element : public DomainComponent
   protected:
     const Vector &getRayleighDampingForces(void);
 
-    double alphaM, betaK, betaK0;
+    double alphaM, betaK, betaK0, betaKc;
+    Matrix *Kc; // pointer to hold last committed matrix if needed for rayleigh damping
 
   private:
     int index;

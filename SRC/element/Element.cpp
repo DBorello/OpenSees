@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-12-06 20:26:23 $
+// $Revision: 1.9 $
+// $Date: 2002-12-16 21:07:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
-// File: ~/model/Element.C
-//
 // Written: fmk 11/95
-// Revised:
 //
 // Purpose: This file contains the class definition for Element.
 // Element is an abstract base class and thus no objects of it's type
@@ -53,8 +50,9 @@ int  Element::numMatrices(0);
 //	of external nodes for the element.
 
 Element::Element(int tag, int cTag) 
-  :DomainComponent(tag, cTag), alphaM(0), betaK(0), betaK0(0), index(-1)
-
+  :DomainComponent(tag, cTag), alphaM(0.0), 
+  betaK(0.0), betaK0(0.0), betaKc(0.0), 
+  Kc(0), index(-1)
 {
     // does nothing
 }
@@ -62,7 +60,17 @@ Element::Element(int tag, int cTag)
 
 Element::~Element() 
 {
+  if (Kc != 0)
+    delete Kc;
+}
 
+int
+Element::commitState(void)
+{
+  if (Kc != 0)
+    *Kc = this->getTangentStiff();
+  
+  return 0;
 }
 
 int
@@ -74,21 +82,23 @@ Element::update(void)
 int
 Element::revertToStart(void)
 {
-    return 0;
+  return 0;
 }
 
 
 int
-Element::setRayleighDampingFactors(double alpham, double betak, double betak0)
+Element::setRayleighDampingFactors(double alpham, double betak, double betak0, double betakc)
 {
   alphaM = alpham;
   betaK  = betak;
   betaK0 = betak0;
+  betaKc = betakc;
 
   // check that memory has been allocated to store compute/return
   // damping matrix & residual force calculations
   if (index == -1) {
     int numDOF = this->getNumDOF();
+
     for (int i=0; i<numMatrices; i++) {
       Matrix *aMatrix = theMatrices[i];
       if (aMatrix->noRows() == numDOF) {
@@ -142,6 +152,21 @@ Element::setRayleighDampingFactors(double alpham, double betak, double betak0)
     }
   }
 
+  // if need storage for Kc go get it
+  if (betaKc != 0.0) {  
+    if (Kc == 0) 
+      Kc = new Matrix(this->getTangentStiff());
+    if (Kc == 0) {
+      cerr << "WARNING - ELEMENT::setRayleighDampingFactors - out of memory\n";
+      betaKc = 0.0;
+    }
+
+    // if don't need storage for Kc & have allocated some for it, free the memory
+  } else if (Kc != 0) { 
+      delete Kc;
+      Kc = 0;
+  }
+
   return 0;
 }
 
@@ -149,7 +174,7 @@ const Matrix &
 Element::getDamp(void) 
 {
   if (index  == -1) {
-    this->setRayleighDampingFactors(0.0, 0.0, 0.0);
+    this->setRayleighDampingFactors(0.0, 0.0, 0.0, 0.0);
   }
 
   // now compute the damping matrix
@@ -161,6 +186,8 @@ Element::getDamp(void)
     theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);      
   if (betaK0 != 0.0)
     theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);      
+  if (betaKc != 0.0)
+    theMatrix->addMatrix(1.0, *Kc, betaKc);      
 
   // return the computed matrix
   return *theMatrix;
@@ -172,7 +199,7 @@ const Matrix &
 Element::getMass(void)
 {
   if (index  == -1) {
-    this->setRayleighDampingFactors(0.0, 0.0, 0.0);
+    this->setRayleighDampingFactors(0.0, 0.0, 0.0, 0.0);
   }
 
   // zero the matrix & return it
@@ -185,7 +212,7 @@ const Vector &
 Element::getResistingForceIncInertia(void) 
 {
   if (index == -1) {
-    this->setRayleighDampingFactors(0.0, 0.0, 0.0);
+    this->setRayleighDampingFactors(0.0, 0.0, 0.0, 0.0);
   }
 
   Matrix *theMatrix = theMatrices[index]; 
@@ -237,6 +264,8 @@ Element::getResistingForceIncInertia(void)
     theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);      
   if (betaK0 != 0.0)
     theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);      
+  if (betaKc != 0.0)
+    theMatrix->addMatrix(1.0, *Kc, betaKc);      
 
   // finally the D * v
   theVector->addMatrixVector(1.0, *theMatrix, *theVector2, 1.0);
@@ -250,7 +279,7 @@ Element::getRayleighDampingForces(void)
 {
 
   if (index == -1) {
-    this->setRayleighDampingFactors(0.0, 0.0, 0.0);
+    this->setRayleighDampingFactors(0.0, 0.0, 0.0, 0.0);
   }
 
   Matrix *theMatrix = theMatrices[index]; 
@@ -281,6 +310,8 @@ Element::getRayleighDampingForces(void)
     theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);      
   if (betaK0 != 0.0)
     theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);      
+  if (betaKc != 0.0)
+    theMatrix->addMatrix(1.0, *Kc, betaKc);      
 
   // finally the D * v
   theVector->addMatrixVector(0.0, *theMatrix, *theVector2, 1.0);
