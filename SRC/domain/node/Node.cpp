@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-07-31 22:11:35 $
+// $Revision: 1.7 $
+// $Date: 2001-08-31 18:06:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1397,7 +1397,10 @@ Node::setGradient(const Vector &v, int gradNum, int numGrads)
 double 
 Node::getGradient(int dof, int gradNum)
 {
-	return (*theGradients)(dof-1,gradNum-1);
+	if (theGradients != 0)
+		return (*theGradients)(dof-1,gradNum-1);
+	else
+		return 0.0;
 }
 // AddingSensitivity:END /////////////////////////////////////////
 
