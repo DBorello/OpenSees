@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.52 $
-// $Date: 2003-10-02 20:26:37 $
+// $Revision: 1.53 $
+// $Date: 2003-10-28 00:13:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -447,6 +447,7 @@
 #define RANDOM_VARIABLE_type3smallestvalue	16
 #define RANDOM_VARIABLE_uniform				17
 #define RANDOM_VARIABLE_weibull				18
+#define RANDOM_VARIABLE_userdefined             19
 
 #define RANDOM_VARIABLE_POSITIONER        1
 #define PARAMETER_POSITIONER              2
