@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2002-03-01 21:02:24 $
+// $Revision: 1.30 $
+// $Date: 2002-04-02 19:19:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -40,6 +40,7 @@ extern "C" {
 }
 
 #include <G3Globals.h>
+#include <FEM_ObjectBroker.h>
 
 #include <RigidRod.h>
 #include <RigidBeam.h>
@@ -75,6 +76,9 @@ extern "C" {
 #include <CTestNormUnbalance.h>
 #include <CTestNormDispIncr.h>
 #include <CTestEnergyIncr.h>
+#include <CTestRelativeNormUnbalance.h>
+#include <CTestRelativeNormDispIncr.h>
+#include <CTestRelativeEnergyIncr.h>
 
 // soln algorithms
 #include <Linear.h>
@@ -174,7 +178,7 @@ extern "C" {
 #include <ConsoleErrorHandler.h>
 
 #include <TclVideoPlayer.h>
-
+#include <FE_Datastore.h>
 
 
 #ifdef _RELIABILITY
@@ -192,6 +196,7 @@ int reliability(ClientData, Tcl_Interp *, int, char **);
 
 ModelBuilder *theBuilder =0;
 Domain theDomain;
+
 static AnalysisModel *theAnalysisModel =0;
 static EquiSolnAlgo *theAlgorithm =0;
 static ConstraintHandler *theHandler =0;
@@ -200,12 +205,14 @@ static LinearSOE *theSOE =0;
 static StaticAnalysis *theStaticAnalysis = 0;
 static DirectIntegrationAnalysis *theTransientAnalysis = 0;
 static VariableTimeStepDirectIntegrationAnalysis *theVariableTimeStepTransientAnalysis = 0;
+
 // AddingSensitivity:BEGIN /////////////////////////////////////////////
 #ifdef _RELIABILITY
 static SensitivityAlgorithm *theSensitivityAlgorithm = 0;
 static SensitivityIntegrator *theSensitivityIntegrator = 0;
 #endif
 // AddingSensitivity:END ///////////////////////////////////////////////
+
 static StaticIntegrator *theStaticIntegrator =0;
 static TransientIntegrator *theTransientIntegrator =0;
 static ConvergenceTest *theTest =0;
@@ -217,6 +224,10 @@ static char *resDataPtr = 0;
 static int resDataSize = 0;
 
 static Timer *theTimer = 0;
+
+FE_Datastore *theDatabase  =0;
+FEM_ObjectBroker theBroker;
+
 
 // init the global variabled defined in G3Globals.h
 ErrorHandler *g3ErrorHandler =0;
@@ -1439,6 +1450,9 @@ specifyAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc,
 	formTangent = CURRENT_SECANT;
       } else if (strcmp(argv[2],"-initial") == 0) {
 	formTangent = INITIAL_TANGENT;
+      } else if ((strcmp(argv[2],"-initialThenCurrent") == 0) || 
+		 (strcmp(argv[2],"-initialCurrent") == 0))  {
+	formTangent = INITIAL_THEN_CURRENT_TANGENT;
       }
     }
 
@@ -1680,8 +1694,15 @@ specifyCTest(ClientData clientData, Tcl_Interp *interp, int argc,
     theTest = new CTestNormDispIncr(tol,numIter,printIt);             
   else if (strcmp(argv[1],"EnergyIncr") == 0) 
     theTest = new CTestEnergyIncr(tol,numIter,printIt);             
+  else if (strcmp(argv[1],"RelativeNormUnbalance") == 0) 
+    theTest = new CTestRelativeNormUnbalance(tol,numIter,printIt);       
+  else if (strcmp(argv[1],"RelativeNormDispIncr") == 0) 
+    theTest = new CTestRelativeNormDispIncr(tol,numIter,printIt);             
+  else if (strcmp(argv[1],"RelativeEnergyIncr") == 0) 
+    theTest = new CTestRelativeEnergyIncr(tol,numIter,printIt);             
   else {
-    cerr << "WARNING No ConvergenceTest type (NormUnbalance, NormDispIncr, EnergyIncr)"; 
+    cerr << "WARNING No ConvergenceTest type (NormUnbalance, NormDispIncr, EnergyIncr, ";
+    cerr << "RelativeNormUnbalance, RelativeNormDispIncr, RelativeEnergyIncr, )"; 
     return TCL_ERROR;
   }    
 
@@ -2076,13 +2097,14 @@ addAlgoRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 
 extern int
-TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, 
-	       char **argv, Domain &theDomain);
+TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv, 
+	       Domain &theDomain, 
+	       FEM_ObjectBroker &theBroker);
 
 int 
 addDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 {
-  return TclAddDatabase(clientData, interp, argc, argv, theDomain);
+  return TclAddDatabase(clientData, interp, argc, argv, theDomain, theBroker);
 }
 
 
@@ -2679,4 +2701,6 @@ stopTimer(ClientData clientData, Tcl_Interp *interp, int argc,
   cerr << *theTimer;
   return TCL_OK;
 }
+
+
 
