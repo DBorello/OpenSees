@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2003-03-15 00:09:47 $
+// $Revision: 1.4 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/UserDefinedHingeIntegration2d.cpp,v $
 
 #include <UserDefinedHingeIntegration2d.h>
@@ -230,4 +230,17 @@ UserDefinedHingeIntegration2d::activateParameter(int parameterID)
 {
   // For Terje to do
   return 0;
+}
+
+void
+UserDefinedHingeIntegration2d::Print(OPS_Stream &s, int flag)
+{
+  s << "UserHinge2d" << endln;
+  s << " E = " << E;
+  s << " A = " << A;
+  s << " I = " << I << endln;
+  s << " Points left hinge: " << ptsL;
+  s << " Weights left hinge: " << wtsL;
+  s << " Points right hinge: " << ptsR;
+  s << " Weights right hinge: " << wtsR;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2003-03-15 00:09:48 $
+// $Revision: 1.3 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/UserDefinedHingeIntegration2d.h,v $
 
 #ifndef UserDefinedHingeIntegration2d_h
@@ -56,6 +56,8 @@ class UserDefinedHingeIntegration2d : public BeamIntegration
   int setParameter(const char **argv, int argc, Information &info);
   int updateParameter(int parameterID, Information &info);
   int activateParameter(int parameterID);
+
+  void Print(OPS_Stream &s, int flag = 0);
 
  private:
   Vector ptsL;

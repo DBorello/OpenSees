@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-05-12 23:44:33 $
+// $Revision: 1.5 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauTwoBeamIntegration3d.h,v $
 
 #ifndef HingeRadauTwoBeamIntegration3d_h
@@ -59,6 +59,8 @@ class HingeRadauTwoBeamIntegration3d : public BeamIntegration
   int setParameter(const char **argv, int argc, Information &info);
   int updateParameter(int parameterID, Information &info);
   int activateParameter(int parameterID);
+
+  void Print(OPS_Stream &s, int flag = 0);
 
  private:
   double E;

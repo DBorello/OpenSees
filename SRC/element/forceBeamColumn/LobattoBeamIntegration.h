@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-12-13 22:25:48 $
+// $Revision: 1.2 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/LobattoBeamIntegration.h,v $
 
 #ifndef LobattoBeamIntegration_h
@@ -47,7 +47,8 @@ class LobattoBeamIntegration : public BeamIntegration
   int sendSelf(int cTag, Channel &theChannel) {return 0;}
   int recvSelf(int cTag, Channel &theChannel,
 	       FEM_ObjectBroker &theBroker) {return 0;}
-  
+
+  void Print(OPS_Stream &s, int flag = 0);  
 };
 
 #endif

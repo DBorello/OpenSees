@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-05-12 23:44:32 $
+// $Revision: 1.12 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -918,6 +918,9 @@ ForceBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
   double xi[maxNumSections];
   beamIntegr->getSectionLocations(numSections, L, xi);
 
+  // Accumulate elastic deformations in basic system
+  beamIntegr->addElasticDeformations(theLoad, loadFactor, L, v0);
+
   if (type == LOAD_TAG_Beam2dUniformLoad) {
     double wa = data(1)*loadFactor;  // Axial
     double wy = data(0)*loadFactor;  // Transverse
@@ -940,9 +943,6 @@ ForceBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
     double V = 0.5*wy*L;
     p0[1] -= V;
     p0[2] -= V;
-
-    // Accumulate initial deformations in basic system
-    beamIntegr->addElasticDeformations(theLoad, loadFactor, L, v0);
   }
   else if (type == LOAD_TAG_Beam2dPointLoad) {
     double P = data(0)*loadFactor;
@@ -973,9 +973,6 @@ ForceBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
     p0[0] -= N;
     p0[1] -= V1;
     p0[2] -= V2;
-
-    // Accumulate initial deformations in basic system
-    beamIntegr->addElasticDeformations(theLoad, loadFactor, L, v0);
   }
 
   else {
@@ -1490,6 +1487,7 @@ ForceBeamColumn2d::Print(OPS_Stream &s, int flag)
   s << "\tConnected Nodes: " << connectedExternalNodes ;
   s << "\tNumber of Sections: " << numSections;
   s << "\tMass density: " << rho << endln;
+  beamIntegr->Print(s, flag);
   double P  = Secommit(0);
   double M1 = Secommit(1);
   double M2 = Secommit(2);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2003-02-21 22:27:48 $
+// $Revision: 1.3 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/LobattoBeamIntegration.cpp,v $
 
 #include <LobattoBeamIntegration.h>
@@ -223,4 +223,10 @@ LobattoBeamIntegration::getSectionWeights(int numSections, double L,
   
   for (int i = 0; i < numSections; i++)
     wt[i] *= 0.5;
+}
+
+void
+LobattoBeamIntegration::Print(OPS_Stream &s, int flag)
+{
+  s << "Lobatto" << endln;
 }

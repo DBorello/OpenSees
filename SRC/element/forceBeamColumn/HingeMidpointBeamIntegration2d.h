@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-05-12 23:44:32 $
+// $Revision: 1.5 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeMidpointBeamIntegration2d.h,v $
 
 #ifndef HingeMidpointBeamIntegration2d_h
@@ -58,6 +58,8 @@ class HingeMidpointBeamIntegration2d : public BeamIntegration
   int setParameter(const char **argv, int argc, Information &info);
   int updateParameter(int parameterID, Information &info);
   int activateParameter(int parameterID);
+
+  void Print(OPS_Stream &s, int flag = 0);
 
  private:
   double E;

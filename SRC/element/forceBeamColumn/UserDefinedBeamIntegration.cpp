@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2003-02-21 22:27:49 $
+// $Revision: 1.4 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/UserDefinedBeamIntegration.cpp,v $
 
 #include <UserDefinedBeamIntegration.h>
@@ -100,4 +100,12 @@ UserDefinedBeamIntegration::recvSelf(int cTag, Channel &theChannel,
 				     FEM_ObjectBroker &theBroker)
 {
   return -1;
+}
+
+void
+UserDefinedBeamIntegration::Print(OPS_Stream &s, int flag)
+{
+  s << "UserDefined" << endln;
+  s << " Points: " << pts;
+  s << " Weights: " << wts;
 }

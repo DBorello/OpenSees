@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-05-12 23:44:32 $
+// $Revision: 1.10 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -1019,6 +1019,9 @@ ForceBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
   double xi[maxNumSections];
   beamIntegr->getSectionLocations(numSections, L, xi);
 
+  // Accumulate elastic deformations in basic system
+  beamIntegr->addElasticDeformations(theLoad, loadFactor, L, v0);
+
   if (type == LOAD_TAG_Beam3dUniformLoad) {
     double wy = data(0)*loadFactor;  // Transverse
     double wz = data(1)*loadFactor;  // Transverse
@@ -1050,9 +1053,6 @@ ForceBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
     V = 0.5*wz*L;
     p0[3] -= V;
     p0[4] -= V;
-
-    // Accumulate initial deformations in basic system
-    beamIntegr->addElasticDeformations(theLoad, loadFactor, L, v0);
   }
   else if (type == LOAD_TAG_Beam3dPointLoad) {
     double Py = data(0)*loadFactor;
@@ -1076,13 +1076,13 @@ ForceBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
         s_p(0,i) += N;
         s_p(1,i) -= x*Vy1;
         s_p(2,i) -= Vy1;
-        s_p(3,i) -= x*Vz1;
+        s_p(3,i) += x*Vz1;
         s_p(4,i) -= Vz1;
       }
       else {
         s_p(1,i) -= (L-x)*Vy2;
         s_p(2,i) += Vy2;
-        s_p(3,i) -= (L-x)*Vz2;
+        s_p(3,i) += (L-x)*Vz2;
         s_p(4,i) += Vz2;
       }
     }
@@ -1093,9 +1093,6 @@ ForceBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
     p0[2] -= Vy2;
     p0[3] -= Vz1;
     p0[4] -= Vz2;
-
-    // Accumulate initial deformations in basic system
-    beamIntegr->addElasticDeformations(theLoad, loadFactor, L, v0);
   }
 
   else {
@@ -1865,6 +1862,7 @@ ForceBeamColumn3d::Print(OPS_Stream &s, int flag)
      s << "\tConnected Nodes: " << connectedExternalNodes ;
      s << "\tNumber of Sections: " << numSections;
      s << "\tMass density: " << rho << endln;
+     beamIntegr->Print(s, flag);
      double P  = Secommit(0);
      double MZ1 = Secommit(1);
      double MZ2 = Secommit(2);

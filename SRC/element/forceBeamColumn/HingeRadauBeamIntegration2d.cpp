@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.8 $
-// $Date: 2003-06-09 21:23:18 $
+// $Revision: 1.9 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauBeamIntegration2d.cpp,v $
 #include <HingeRadauBeamIntegration2d.h>
 #include <ElementalLoad.h>
@@ -388,4 +388,17 @@ HingeRadauBeamIntegration2d::activateParameter(int parameterID)
 {
   // For Terje to do
   return 0;
+}
+
+void
+HingeRadauBeamIntegration2d::Print(OPS_Stream &s, int flag)
+{
+  s << "HingeRadau2d" << endln;
+  s << " E = " << E;
+  s << " A = " << A;
+  s << " I = " << I << endln;
+  s << " lpI = " << lpI;
+  s << " lpJ = " << lpJ << endln;
+
+  return;
 }

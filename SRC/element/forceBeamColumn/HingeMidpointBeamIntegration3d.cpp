@@ -18,11 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2003-05-12 23:44:32 $
+// $Revision: 1.7 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeMidpointBeamIntegration3d.cpp,v $
 
 #include <HingeMidpointBeamIntegration3d.h>
+#include <ElementalLoad.h>
 
 #include <Matrix.h>
 #include <Vector.h>
@@ -135,6 +136,178 @@ HingeMidpointBeamIntegration3d::addElasticDeformations(ElementalLoad *theLoad,
 						       double loadFactor,
 						       double L, double *v0)
 {
+  // Length of elastic interior
+  double Le = L-lpI-lpJ;
+  if (Le == 0.0)
+    return;
+
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
+
+  double oneOverL = 1.0/L;
+
+  if (type == LOAD_TAG_Beam3dUniformLoad) {
+    double wy = data(0)*loadFactor;  // Transverse
+    double wz = data(1)*loadFactor;  // Transverse
+    double wx = data(2)*loadFactor;  // Axial
+
+    // Accumulate basic deformations due to uniform load on interior
+    // Midpoint rule for axial
+    v0[0] += wx*0.5*(L-lpI+lpJ)/(E*A)*Le;
+
+    // Two point Gauss for bending ... will not be exact when
+    // hinge lengths are not equal, but this is not a big deal!!!
+    double x1 = lpI + 0.5*Le*(1.0-1/sqrt(3));
+    double x2 = lpI + 0.5*Le*(1.0+1/sqrt(3));
+
+    double Mz1 = 0.5*wy*x1*(x1-L);
+    double Mz2 = 0.5*wy*x2*(x2-L);
+
+    double My1 = -0.5*wz*x1*(x1-L);
+    double My2 = -0.5*wz*x2*(x2-L);
+
+    double Le2EIz = Le/(2*E*Iz);
+    double Le2EIy = Le/(2*E*Iy);
+
+    double b1, b2;
+    b1 = x1*oneOverL;
+    b2 = x2*oneOverL;
+    v0[2] += Le2EIz*(b1*Mz1+b2*Mz2);
+    v0[4] += Le2EIy*(b1*My1+b2*My2);
+
+    b1 -= 1.0;
+    b2 -= 1.0;
+    v0[1] += Le2EIz*(b1*Mz1+b2*Mz2);
+    v0[3] += Le2EIy*(b1*My1+b2*My2);
+  }
+
+  else if (type == LOAD_TAG_Beam3dPointLoad) {
+    double Py = data(0)*loadFactor;
+    double Pz = data(1)*loadFactor;
+    double N  = data(2)*loadFactor;
+    double aOverL = data(3);
+    double a = aOverL*L;
+
+    double Vy2 = Py*aOverL;
+    double Vy1 = Py-Vy2;
+
+    double Vz2 = Pz*aOverL;
+    double Vz1 = Pz-Vz2;
+
+    // Accumulate basic deformations of interior due to point load
+    double M1, M2, M3;
+    double b1, b2, b3;
+
+    // Point load is on left hinge
+    if (a < lpI) {
+      M1 = (lpI-L)*Vy2;
+      M2 = -lpJ*Vy2;
+
+      double Le_6EI;
+      Le_6EI = Le/(6*E*Iz);
+
+      b1 = lpI*oneOverL;
+      b2 = 1.0-lpJ*oneOverL;
+      v0[2] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[1] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      M1 = (L-lpI)*Vz2;
+      M2 = lpJ*Vz2;
+
+      Le_6EI = Le/(6*E*Iy);
+
+      b1 = lpI*oneOverL;
+      b2 = 1.0-lpJ*oneOverL;
+      v0[4] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[3] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      // Nothing to do for axial
+      //v0[0] += 0.0;
+    }
+    // Point load is on right hinge
+    else if (a > L-lpJ) {
+      M1 = -lpI*Vy1;
+      M2 = (lpJ-L)*Vy1;
+
+      double Le_6EI;
+      Le_6EI = Le/(6*E*Iz);
+
+      b1 = lpI*oneOverL;
+      b2 = 1.0-lpJ*oneOverL;
+      v0[2] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[1] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      M1 = lpI*Vz1;
+      M2 = (L-lpJ)*Vz1;
+
+      Le_6EI = Le/(6*E*Iy);
+
+      b1 = lpI*oneOverL;
+      b2 = 1.0-lpJ*oneOverL;
+      v0[4] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      v0[3] += Le_6EI*(M1*(2*b1+b2)+M2*(b1+2*b2));
+
+      v0[0] += N*Le/(E*A);      
+    }
+    // Point load is on elastic interior
+    else {
+      M1 = -lpI*Vy1;
+      M2 = -lpJ*Vy2;
+      M3 = -a*Vy1;
+
+      double L1_6EI;
+      double L2_6EI;
+
+      L1_6EI = (a-lpI)/(6*E*Iz);
+      L2_6EI = (Le-a+lpI)/(6*E*Iz);
+
+      b1 = lpI*oneOverL;
+      b2 = 1.0-lpJ*oneOverL;
+      b3 = a*oneOverL;
+      v0[2] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[2] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      b3 -= 1.0;
+      v0[1] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[1] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      M1 = lpI*Vz1;
+      M2 = lpJ*Vz2;
+      M3 = a*Vz1;
+
+      L1_6EI = (a-lpI)/(6*E*Iy);
+      L2_6EI = (Le-a+lpI)/(6*E*Iy);
+
+      b1 = lpI*oneOverL;
+      b2 = 1.0-lpJ*oneOverL;
+      b3 = a*oneOverL;
+      v0[4] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[4] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      b1 -= 1.0;
+      b2 -= 1.0;
+      b3 -= 1.0;
+      v0[3] += L1_6EI*(M1*(2*b1+b3)+M3*(b1+2*b3));
+      v0[3] += L2_6EI*(M2*(2*b2+b3)+M3*(b2+2*b3));
+
+      v0[0] += N*(a-lpI)/(E*A);
+    }
+  }
+
   return;
 }
 
@@ -308,4 +481,20 @@ HingeMidpointBeamIntegration3d::activateParameter(int parameterID)
 {
   // For Terje to do
   return 0;
+}
+
+void
+HingeMidpointBeamIntegration3d::Print(OPS_Stream &s, int flag)
+{
+  s << "HingeMidpoint3d" << endln;
+  s << " E = " << E;
+  s << " A = " << A;
+  s << " Iz = " << Iz;
+  s << " Iy = " << Iy;
+  s << " G = " << G;
+  s << " J = " << J << endln;
+  s << " lpI = " << lpI;
+  s << " lpJ = " << lpJ << endln;
+
+  return;
 }

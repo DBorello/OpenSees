@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-12-13 22:25:48 $
+// $Revision: 1.2 $
+// $Date: 2003-06-10 00:36:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/UserDefinedBeamIntegration.h,v $
 
 #ifndef UserDefinedBeamIntegration_h
@@ -46,6 +46,8 @@ class UserDefinedBeamIntegration : public BeamIntegration
 
   int sendSelf(int cTag, Channel &theChannel);
   int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
+
+  void Print(OPS_Stream &s, int flag = 0);  
 
  private:
   Vector pts;
