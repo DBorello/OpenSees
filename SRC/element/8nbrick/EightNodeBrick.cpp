@@ -26,6 +26,18 @@
 #ifndef EIGHTNODEBRICK_CPP
 #define EIGHTNODEBRICK_CPP
 
+#include <NDMaterial.h>
+#include <Matrix.h>
+#include <Vector.h>
+#include <ID.h>
+#include <Renderer.h>
+#include <Domain.h>
+#include <string.h>
+#include <Information.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
+#include <ElementResponse.h>
+
 #include <EightNodeBrick.h>
 #define FixedOrder 2
 
@@ -401,6 +413,30 @@ EightNodeBrick::~EightNodeBrick ()
     // Delete the array of pointers to NDMaterial pointer arrays
     if (matpoint)
     	delete [] matpoint;
+    
+    //if (mmodel)
+    //	delete [] mmodel;
+    
+    // Delete the quadrature rule
+    // Delete the node ptrs
+    /*
+    if ( nd1Ptr )
+    	delete  nd1Ptr;
+    if ( nd2Ptr )
+    	delete nd2Ptr;
+    if ( nd3Ptr )
+    	delete nd3Ptr;
+    if ( nd4Ptr )
+    	delete nd4Ptr;
+    if ( nd5Ptr )
+    	delete nd5Ptr;
+    if ( nd6Ptr )
+    	delete nd6Ptr;
+    if ( nd7Ptr )
+    	delete nd7Ptr;
+    if ( nd8Ptr )
+    	delete nd8Ptr;
+    */
 
 }
 
@@ -1027,6 +1063,7 @@ tensor EightNodeBrick::getStiffnessTensor(void)
     int K_dim[] = {8,3,3,8};  // Xiaoyan changed from {20,3,3,20} to {8,3,3,8} 
 			      // for 8 nodes      07/12
     tensor Kk(4,K_dim,0.0);
+    tensor Kkt(4,K_dim,0.0);
 
     //debugging
 //    matrix Kmat;
@@ -1216,7 +1253,11 @@ tensor EightNodeBrick::getStiffnessTensor(void)
                 //GPstress[where].reportshortpqtheta("\n stress at GAUSS point in stiffness_tensor6\n");
 
                 //K = K + temp2;
-                Kk = Kk + dhGlobal("ib")*Constitutive("abcd")*dhGlobal("jd")*weight;
+                
+		Kkt = dhGlobal("ib")*Constitutive("abcd");
+		Kk = Kk + Kkt("aicd")*dhGlobal("jd")*weight;
+		
+		//Kk = Kk + dhGlobal("ib")*Constitutive("abcd")*dhGlobal("jd")*weight;
                 //....K.print("K","\n\n K tensor \n"); 
                 
 		//Kmat = this->stiffness_matrix(Kk);
@@ -2906,58 +2947,60 @@ void EightNodeBrick::setDomain (Domain *theDomain)
 	nd7Ptr = 0;
 	nd8Ptr = 0;
     }
-
-    int Nd1 = connectedExternalNodes(0);
-    int Nd2 = connectedExternalNodes(1);
-    int Nd3 = connectedExternalNodes(2);
-    int Nd4 = connectedExternalNodes(3);
-    //Xiaoyan added 5-8  07/06/00
-
-    int Nd5 = connectedExternalNodes(4);
-    int Nd6 = connectedExternalNodes(5);
-    int Nd7 = connectedExternalNodes(6);
-    int Nd8 = connectedExternalNodes(7);
-
-    nd1Ptr = theDomain->getNode(Nd1);
-    nd2Ptr = theDomain->getNode(Nd2);
-    nd3Ptr = theDomain->getNode(Nd3);
-    nd4Ptr = theDomain->getNode(Nd4);
-            
-    //Xiaoyan added 5-8  07/06/00
-    nd5Ptr = theDomain->getNode(Nd5);
-    nd6Ptr = theDomain->getNode(Nd6);
-    nd7Ptr = theDomain->getNode(Nd7);
-    nd8Ptr = theDomain->getNode(Nd8);
-
-    if (nd1Ptr == 0 || nd2Ptr == 0 || nd3Ptr == 0 || nd4Ptr == 0||
-        nd5Ptr == 0 || nd6Ptr == 0 || nd7Ptr == 0 || nd8Ptr == 0 ) { 
-	//Xiaoyan added 5-8  07/06/00
-
-	g3ErrorHandler->fatal("FATAL ERROR EightNodeBrick (tag: %d), node not found in domain",
-		this->getTag());
-	
-	return;
-    }
-
-    int dofNd1 = nd1Ptr->getNumberDOF();
-    int dofNd2 = nd2Ptr->getNumberDOF();
-    int dofNd3 = nd3Ptr->getNumberDOF();
-    int dofNd4 = nd4Ptr->getNumberDOF();
-    
-    //Xiaoyan added 5-8  07/06/00
-    int dofNd5 = nd5Ptr->getNumberDOF();
-    int dofNd6 = nd6Ptr->getNumberDOF();
-    int dofNd7 = nd7Ptr->getNumberDOF();
-    int dofNd8 = nd8Ptr->getNumberDOF();
-								      
-    if (dofNd1 != 3 || dofNd2 != 3 || dofNd3 != 3 || dofNd4 != 3 ||  // Changed 2 to 3 Xiaoyan
-        dofNd5 != 3 || dofNd6 != 3 || dofNd7 != 3 || dofNd8 != 3 ) {
-	g3ErrorHandler->fatal("FATAL ERROR EightNodeBrick (tag: %d), has differing number of DOFs at its nodes",
- 		this->getTag());
-	
-	return;
-    }
-    this->DomainComponent::setDomain(theDomain);
+    //Added if-else for found a bug when trying removeElement from theDomain  07-19-2001 Zhaohui
+    else { 
+      int Nd1 = connectedExternalNodes(0);
+      int Nd2 = connectedExternalNodes(1);
+      int Nd3 = connectedExternalNodes(2);
+      int Nd4 = connectedExternalNodes(3);
+      //Xiaoyan added 5-8  07/06/00
+      
+      int Nd5 = connectedExternalNodes(4);
+      int Nd6 = connectedExternalNodes(5);
+      int Nd7 = connectedExternalNodes(6);
+      int Nd8 = connectedExternalNodes(7);
+      
+      nd1Ptr = theDomain->getNode(Nd1);
+      nd2Ptr = theDomain->getNode(Nd2);
+      nd3Ptr = theDomain->getNode(Nd3);
+      nd4Ptr = theDomain->getNode(Nd4);
+              
+      //Xiaoyan added 5-8  07/06/00
+      nd5Ptr = theDomain->getNode(Nd5);
+      nd6Ptr = theDomain->getNode(Nd6);
+      nd7Ptr = theDomain->getNode(Nd7);
+      nd8Ptr = theDomain->getNode(Nd8);
+      
+      if (nd1Ptr == 0 || nd2Ptr == 0 || nd3Ptr == 0 || nd4Ptr == 0||
+          nd5Ptr == 0 || nd6Ptr == 0 || nd7Ptr == 0 || nd8Ptr == 0 ) { 
+      	//Xiaoyan added 5-8  07/06/00
+      
+      	g3ErrorHandler->fatal("FATAL ERROR EightNodeBrick (tag: %d), node not found in domain",
+      		this->getTag());
+      	
+      	return;
+      }
+      
+      int dofNd1 = nd1Ptr->getNumberDOF();
+      int dofNd2 = nd2Ptr->getNumberDOF();
+      int dofNd3 = nd3Ptr->getNumberDOF();
+      int dofNd4 = nd4Ptr->getNumberDOF();
+      
+      //Xiaoyan added 5-8  07/06/00
+      int dofNd5 = nd5Ptr->getNumberDOF();
+      int dofNd6 = nd6Ptr->getNumberDOF();
+      int dofNd7 = nd7Ptr->getNumberDOF();
+      int dofNd8 = nd8Ptr->getNumberDOF();
+      								      
+      if (dofNd1 != 3 || dofNd2 != 3 || dofNd3 != 3 || dofNd4 != 3 ||  // Changed 2 to 3 Xiaoyan
+          dofNd5 != 3 || dofNd6 != 3 || dofNd7 != 3 || dofNd8 != 3 ) {
+      	g3ErrorHandler->fatal("FATAL ERROR EightNodeBrick (tag: %d), has differing number of DOFs at its nodes",
+      		this->getTag());
+      	
+      	return;
+      }
+      this->DomainComponent::setDomain(theDomain);
+    }   
 }
 
 //=============================================================================
@@ -2981,17 +3024,54 @@ int EightNodeBrick::commitState ()
 
     //if ( this->getTag() == 1 || this->getTag() == 700)
     //{
-      for (i = 0; i < count; i++)	
+      //for (i = 0; i < count; i++)
+      for (i = 0; i < 8; i++)
       {
          retVal += matpoint[i]->commitState();
          //if (i == 4 && strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
          stresstensor st;
-	 stresstensor prin;
+	 stresstensor prin; 
+         straintensor stn;
+         straintensor stnprin;
 
+         st = matpoint[i]->getStressTensor();
+       	 prin = st.principal();
+         stn = matpoint[i]->getStrainTensor();
+       	 stnprin = stn.principal();
+         /*
+	 cerr << "\nGauss Point: " << i << endln;
+	 cerr << "sigma11: "<< st.cval(1, 1) << " "<< st.cval(1, 2) << " " << st.cval(1, 3) << endln; 
+	 cerr << "sigma21: "<< st.cval(2, 1) << " "<< st.cval(2, 2) << " " << st.cval(2, 3) << endln; 
+ 	 cerr << "sigma31: "<< st.cval(3, 1) << " "<< st.cval(3, 2) << " " << st.cval(3, 3) << endln << endln; 
+	 */     	  
+	 //cerr << "strain11: "<< stn.cval(1, 1) << " "<< stn.cval(1, 2) << " " << stn.cval(1, 3) << endln; 
+	 //cerr << "strain21: "<< stn.cval(2, 1) << " "<< stn.cval(2, 2) << " " << stn.cval(2, 3) << endln; 
+ 	 //cerr << "strain31: "<< stn.cval(3, 1) << " "<< stn.cval(3, 2) << " " << stn.cval(3, 3) << endln; 
+	 
+	 double  p = -1*( prin.cval(1, 1)+ prin.cval(2, 2) +prin.cval(3, 3) )/3.0;
+	 double  ev = -1*( stnprin.cval(1, 1)+ stnprin.cval(2, 2) + stnprin.cval(3, 3) )/3.0;
+	 //cerr << "   " << p;
 
+	 //if (p < 0)
+	 //  cout  << "gs pnt:" << i << "  p="<< p;
 
-        	  st = matpoint[i]->getStressTensor();
+      	 
+	 double q;
+	 //if ( fabs(prin.cval(1, 1) - prin.cval(2, 2) ) <=  0.0001 )
+      	 if ( fabs(prin.cval(1, 1) - prin.cval(2, 2) ) <=  0.001 )
+      	 {
+      	     q = prin.cval(1, 1) - prin.cval(3, 3);
+      	     //cerr << "1 = 2"; 
+      	 }
+      	 else
+      	     q = prin.cval(3, 3) - prin.cval(1, 1);
+      	 
+	 //Triaxial compr.  fabs
+      	 //cerr << "     " << st.cval(2, 3); //tau_yz
+	 //cerr << "     " << q;      	 
+	 ////----cerr << "     " << fabs(q);
 
+      	 //cerr << "     " << ev << endln;
 
 //out22Jan2001	 if (strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
 //out22Jan2001          {
@@ -3037,6 +3117,9 @@ int EightNodeBrick::commitState ()
          //}
       }
         
+      //cout << " at elements " << this->getTag() << endln;    
+
+
       //output nodal force
       //cerr << "    " << pp(2) << endln;    
     //} 
@@ -3631,13 +3714,40 @@ void EightNodeBrick::Print(ostream &s, int flag)
 //=============================================================================
 Response * EightNodeBrick::setResponse (char **argv, int argc, Information &eleInformation) 
 {
-     return 0;
+    if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
+		return new ElementResponse(this, 1, P);
+    
+    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
+		return new ElementResponse(this, 2, K);
+
+	/*else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+		int pointNum = atoi(argv[1]);
+		if (pointNum > 0 && pointNum <= 4)
+			return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo); 
+	    else 
+			return 0;
+	}*/
+ 
+    // otherwise response quantity is unknown for the quad class
+    else
+ 	return 0;
 }
 //=============================================================================
 
-int EightNodeBrick::getResponse (int responseID, Information &eleInformation)
+int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
 {
-     return 0;
+       switch (responseID) {
+      
+	   case 1:
+	   	return eleInfo.setVector(this->getResistingForce());
+      
+	   /*case 2:
+	   	return eleInfo.setMatrix(this->getTangentStiff());
+	    */
+	   default: 
+	   	return -1;
+	}
+     //return 0;
 }
 
 
