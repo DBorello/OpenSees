@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:24:04 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:49:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/BeamFiberMaterial.cpp,v $
 
 // Written: MHS
@@ -277,6 +277,55 @@ BeamFiberMaterial::getTangent()
   static Matrix threeDtangentCopy(6,6);
 
   const Matrix &threeDtangent = theMaterial->getTangent();
+
+  //swap matrix indices to sort out-of-plane components 
+  int i, j , ii, jj;
+  for (i=0; i<6; i++) {
+
+    ii = this->indexMap(i);
+
+    for (j=0; j<6; j++) {
+      
+      jj = this->indexMap(j);
+      
+      threeDtangentCopy(ii,jj) = threeDtangent(i,j);
+      
+    }//end for j
+       
+  }//end for i
+
+
+  for (i=0; i<3; i++) {
+    for (j=0; j<3; j++) {
+      dd11(i,j) = threeDtangentCopy(i,  j );
+      dd12(i,j) = threeDtangentCopy(i,  j+3);
+      dd21(i,j) = threeDtangentCopy(i+3,j );
+      dd22(i,j) = threeDtangentCopy(i+3,j+3);
+      
+    }
+  }
+
+  //int Solve(const Vector &V, Vector &res) const;
+  //int Solve(const Matrix &M, Matrix &res) const;
+  //condensation 
+  dd22.Solve(dd21, dd22invdd21);
+  this->tangent   = dd11; 
+  this->tangent  -= (dd12*dd22invdd21);
+
+  return this->tangent;
+}
+
+const Matrix&  
+BeamFiberMaterial::getInitialTangent()
+{
+  static Matrix dd11(3,3);
+  static Matrix dd12(3,3);
+  static Matrix dd21(3,3);
+  static Matrix dd22(3,3);
+  static Matrix dd22invdd21(3,3);
+  static Matrix threeDtangentCopy(6,6);
+
+  const Matrix &threeDtangent = theMaterial->getInitialTangent();
 
   //swap matrix indices to sort out-of-plane components 
   int i, j , ii, jj;

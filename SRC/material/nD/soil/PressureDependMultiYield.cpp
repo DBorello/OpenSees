@@ -1,5 +1,5 @@
-// $Revision: 1.24 $
-// $Date: 2002-08-26 15:40:59 $
+// $Revision: 1.25 $
+// $Date: 2002-12-05 22:49:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -412,13 +412,54 @@ const Matrix & PressureDependMultiYield::getTangent (void)
     static Matrix workM(3,3);
     workM(0,0) = theTangent(0,0);
     workM(0,1) = theTangent(0,1);
+    workM(0,2) = 0.;
+
     workM(1,0) = theTangent(1,0);
     workM(1,1) = theTangent(1,1);
-    workM(2,2) = theTangent(3,3);
-    workM(0,2) = 0.; 
     workM(1,2) = 0.; 
+
     workM(2,0) = 0.; 
     workM(2,1) = 0.; 
+    workM(2,2) = theTangent(3,3);
+
+    /* non-symmetric stiffness
+       workM(0,2) = theTangent(0,3);
+       workM(1,2) = theTangent(1,3);
+       workM(2,0) = theTangent(3,0);
+       workM(2,1) = theTangent(3,1);*/
+
+    return workM;
+  }
+}
+
+
+const Matrix & PressureDependMultiYield::getInitialTangent (void)
+{
+  
+  for (int i=0;i<6;i++) 
+    for (int j=0;j<6;j++) {
+      theTangent(i,j) = 0.;
+      if (i==j) theTangent(i,j) += refShearModulus;
+      if (i<3 && j<3 && i==j) theTangent(i,j) += refShearModulus;
+      if (i<3 && j<3) theTangent(i,j) += (refBulkModulus - 2.*refShearModulus/3.);
+    }
+
+  if (ndm==3) 
+    return theTangent;
+  else {
+    static Matrix workM(3,3);
+    workM(0,0) = theTangent(0,0);
+    workM(0,1) = theTangent(0,1);
+    workM(0,2) = 0.;
+
+    workM(1,0) = theTangent(1,0);
+    workM(1,1) = theTangent(1,1);
+    workM(1,2) = 0.; 
+
+    workM(2,0) = 0.; 
+    workM(2,1) = 0.; 
+    workM(2,2) = theTangent(3,3);
+
 /* non-symmetric stiffness
     workM(0,2) = theTangent(0,3);
     workM(1,2) = theTangent(1,3);

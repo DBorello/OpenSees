@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-10 22:24:05 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:49:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlateFiber.h,v $
                                                                         
                                                                         
@@ -56,8 +56,10 @@ class ElasticIsotropicPlateFiber : public ElasticIsotropicMaterial
     int setTrialStrainIncr (const Vector &v);
     int setTrialStrainIncr (const Vector &v, const Vector &r);
     const Matrix &getTangent (void);
+    const Matrix &getInitialTangent (void);
+
     const Vector &getStress (void);
-	const Vector &getStrain (void);
+    const Vector &getStrain (void);
         
     int commitState (void);
     int revertToLastCommit (void);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-10 22:24:08 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlateFiberMaterial.h,v $
 
 // Ed "C++" Love
@@ -87,6 +87,7 @@ class PlateFiberMaterial: public NDMaterial{
 
     //send back the tangent 
     const Matrix& getTangent( ) ;
+    const Matrix &getInitialTangent(void);
 
     //density
     double getRho( ) ;

@@ -104,7 +104,27 @@ ElasticIsotropic3D::getTangent (void)
    D(4,4) = mu;
    D(5,5) = mu;
 
-		 return D;
+   return D;
+}
+
+const Matrix&
+ElasticIsotropic3D::getInitialTangent (void)
+{
+   double mu2 = E/(1.0+v);
+   double lam = v*mu2/(1.0-2.0*v);
+   double mu  = 0.50*mu2;
+
+   mu2 += lam;
+
+   D(0,0) = D(1,1) = D(2,2) = mu2;
+   D(0,1) = D(1,0) = lam;
+   D(0,2) = D(2,0) = lam;
+   D(1,2) = D(2,1) = lam;
+   D(3,3) = mu;
+   D(4,4) = mu;
+   D(5,5) = mu;
+
+   return D;
 }
 
 const Vector&

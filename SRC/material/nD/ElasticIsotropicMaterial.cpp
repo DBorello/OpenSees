@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $                                                              
-// $Date: 2002-06-19 23:19:53 $                                                                  
+// $Revision: 1.17 $                                                              
+// $Date: 2002-12-05 22:49:09 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -217,6 +217,16 @@ const Matrix&
 ElasticIsotropicMaterial::getTangent (void)
 {
 	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getTangent -- subclass responsibility");
+
+	// Just to make it compile
+	Matrix *ret = new Matrix();
+	return *ret;
+}
+
+const Matrix&
+ElasticIsotropicMaterial::getInitialTangent (void)
+{
+	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getInitialTangent -- subclass responsibility");
 
 	// Just to make it compile
 	Matrix *ret = new Matrix();

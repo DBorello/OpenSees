@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-10 22:24:07 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:49:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlaneStress.h,v $
 
 #ifndef J2PlaneStress_h
@@ -113,6 +113,7 @@ class J2PlaneStress : public J2Plasticity {
 
   //send back the tangent 
   const Matrix& getTangent( ) ;
+  const Matrix& getInitialTangent( ) ;
 
   //this is mike's problem
   int setTrialStrain(const Tensor &v) ;

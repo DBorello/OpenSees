@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-10-29 20:19:38 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:49:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/FeapMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -137,7 +137,7 @@ FeapMaterial::setTrialStrain(const Vector &strain)
 			  "FeapMaterial::setTrialStrain");
     break;
   }
-  
+
   return 0;
 }
 
@@ -179,7 +179,7 @@ const Vector&
 FeapMaterial::getStress(void)
 {
   int isw = 3;
-  
+
   // Invoke Feap subroutine
   this->invokeSubroutine(isw);
   

@@ -1,5 +1,5 @@
-// $Revision: 1.12 $
-// $Date: 2002-08-26 15:40:59 $
+// $Revision: 1.13 $
+// $Date: 2002-12-05 22:49:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -149,6 +149,15 @@ const Matrix & FluidSolidPorousMaterial::getTangent (void)
 		  for (int j=0; j<ndm; j++) 
 			  (*workM)(i,j) = (*workM)(i,j) + combinedBulkModulus;
   }
+
+	return *workM;
+}
+
+const Matrix & FluidSolidPorousMaterial::getInitialTangent (void)
+{
+	Matrix *workM = (ndm == 2) ? &workM3 : &workM6;
+  
+	*workM = theSoilMaterial->getInitialTangent();
 
 	return *workM;
 }

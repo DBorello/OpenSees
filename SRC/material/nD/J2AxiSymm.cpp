@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-10 22:24:05 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:49:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2AxiSymm.cpp,v $
 
 // Written: Ed "C++" Love
@@ -206,6 +206,36 @@ const Matrix& J2AxiSymm :: getTangent( )
       index_map( jj, k, l ) ;
 
       tangent_matrix(ii,jj) = tangent[i][j][k][l] ;
+
+    } //end for j
+  } //end for i
+
+  return tangent_matrix ;
+} 
+
+//send back the tangent 
+const Matrix& J2AxiSymm :: getInitialTangent( ) 
+{
+  // matrix to tensor mapping
+  //  Matrix      Tensor
+  // -------     -------
+  //   0           0 0
+  //   1           1 1
+  //   2           2 2   
+  //   3           0 1  ( or 1 0 )
+
+  this->doInitialTangent;
+
+  int ii, jj ;
+  int i, j, k, l ;
+
+  for ( ii = 0; ii < 4; ii++ ) {
+    for ( jj = 0; jj < 4; jj++ ) {
+
+      index_map( ii, i, j ) ;
+      index_map( jj, k, l ) ;
+
+      tangent_matrix(ii,jj) = initialTangent[i][j][k][l] ;
 
     } //end for j
   } //end for i

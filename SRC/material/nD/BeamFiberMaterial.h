@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:24:04 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:49:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/BeamFiberMaterial.h,v $
 
 // Written: MHS
@@ -52,6 +52,8 @@ class BeamFiberMaterial: public NDMaterial {
     const Vector& getStrain(void);
     const Vector& getStress(void);
     const Matrix& getTangent(void);
+    const Matrix& getInitialTangent(void);
+
     double getRho(void);
 
     int commitState(void);

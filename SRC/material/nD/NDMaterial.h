@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $                                                              
-// $Date: 2002-06-20 19:32:15 $                                                                  
+// $Revision: 1.10 $                                                              
+// $Date: 2002-12-05 22:49:13 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $                                                                
                                                                         
                                                                         
@@ -67,6 +67,8 @@ class NDMaterial : public Material
     virtual int setTrialStrainIncr(const Vector &v);
     virtual int setTrialStrainIncr(const Vector &v, const Vector &r);
     virtual const Matrix &getTangent(void);
+    virtual const Matrix &getInitialTangent(void) {return this->getTangent();};
+
     virtual const Vector &getStress(void);
     virtual const Vector &getStrain(void);
 

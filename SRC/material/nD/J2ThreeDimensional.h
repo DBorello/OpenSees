@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-10 22:24:07 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2ThreeDimensional.h,v $
 
 // Written: Ed "C++" Love
@@ -114,6 +114,7 @@ class J2ThreeDimensional : public J2Plasticity {
 
   //send back the tangent 
   const Matrix& getTangent( ) ;
+  const Matrix& getInitialTangent( ) ;
 
   //this is mike's problem
   int setTrialStrain(const Tensor &v) ;

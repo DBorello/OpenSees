@@ -132,6 +132,8 @@ class Template3Dep : public NDMaterial
     int setTrialStrainIncr(const Vector &v) ;
     int setTrialStrainIncr(const Vector &v, const Vector &r) ;
     const Matrix &getTangent(void) ;
+    const Matrix &getInitialTangent(void) ;
+
     const Vector &getStress(void) ;
     const Vector &getStrain(void) ;
 

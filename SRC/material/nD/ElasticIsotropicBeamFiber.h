@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:24:04 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:49:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicBeamFiber.h,v $
 
 // Written: MHS
@@ -52,6 +52,7 @@ class ElasticIsotropicBeamFiber : public ElasticIsotropicMaterial
     int setTrialStrainIncr (const Vector &v);
     int setTrialStrainIncr (const Vector &v, const Vector &r);
     const Matrix &getTangent (void);
+    const Matrix &getInitialTangent (void);
     const Vector &getStress (void);
     const Vector &getStrain (void);
         

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2002-11-05 23:46:12 $
+// $Revision: 1.24 $
+// $Date: 2002-12-05 22:49:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -34,6 +34,7 @@
 #include <ElasticIsotropic3D.h>
 #include <PressureDependentElastic3D.h>
 #include <J2Plasticity.h>
+#include <FeapMaterial03.h>
 
 #include <PlaneStressMaterial.h>
 #include <PlateFiberMaterial.h>
@@ -323,6 +324,50 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 
 	theMaterial = new J2Plasticity (tag, 0, K, G, sig0, sigInf, 
 					delta, H, eta);
+    }	
+
+    // Check argv[1] for FeapJ2 material type
+    else if ((strcmp(argv[1],"FeapJ2") == 0)) {
+	if (argc < 7) {
+	    cerr << "WARNING insufficient arguments\n";
+	    printCommand(argc,argv);
+	    cerr << "Want: nDMaterial J2Plasticity tag? K? G? sigY? H?" << endl;
+	    return TCL_ERROR;
+	}    
+
+	int tag;
+	double K, G, sigY, H;
+	
+	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	    cerr << "WARNING invalid J2Plasticity tag" << endl;
+	    return TCL_ERROR;		
+	}
+
+	if (Tcl_GetDouble(interp, argv[3], &K) != TCL_OK) {
+	    cerr << "WARNING invalid K\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[4], &G) != TCL_OK) {
+	    cerr << "WARNING invalid G\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
+	}	
+
+	if (Tcl_GetDouble(interp, argv[5], &sigY) != TCL_OK) {
+	    cerr << "WARNING invalid sig0\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	if (Tcl_GetDouble(interp, argv[6], &H) != TCL_OK) {
+	    cerr << "WARNING invalid sigInf\n";
+	    cerr << "nDMaterial J2Plasticity: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
+	theMaterial = new FeapMaterial03 (tag, K, G, sigY, H);
     }	
     
     // Pressure Independend Multi-yield, by ZHY

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:24:04 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:49:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicAxiSymm.cpp,v $
                                                                  
 #include <ElasticIsotropicAxiSymm.h>                                                                        
@@ -83,6 +83,22 @@ ElasticIsotropicAxiSymm::setTrialStrainIncr (const Vector &strain, const Vector 
 
 const Matrix&
 ElasticIsotropicAxiSymm::getTangent (void)
+{
+	double mu2 = E/(1.0+v);
+	double lam = v*mu2/(1.0-2.0*v);
+	double mu = 0.50*mu2;
+
+	D(0,0) = D(1,1) = D(2,2) = mu2+lam;
+	D(0,1) = D(1,0) = lam;
+	D(0,2) = D(2,0) = lam;
+	D(1,2) = D(2,1) = lam;
+	D(3,3) = mu;
+
+	return D;
+}
+
+const Matrix&
+ElasticIsotropicAxiSymm::getInitialTangent (void)
 {
 	double mu2 = E/(1.0+v);
 	double lam = v*mu2/(1.0-2.0*v);

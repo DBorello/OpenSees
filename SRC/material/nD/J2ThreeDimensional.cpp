@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-10 22:24:07 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2ThreeDimensional.cpp,v $
 
 // Written: Ed "C++" Love
@@ -233,6 +233,38 @@ const Matrix& J2ThreeDimensional :: getTangent( )
       index_map( jj, k, l ) ;
 
       tangent_matrix(ii,jj) = tangent[i][j][k][l] ;
+
+    } //end for j
+  } //end for i
+
+  return tangent_matrix ;
+} 
+
+//send back the tangent 
+const Matrix& J2ThreeDimensional :: getInitialTangent( ) 
+{
+  // matrix to tensor mapping
+  //  Matrix      Tensor
+  // -------     -------
+  //   0           0 0
+  //   1           1 1
+  //   2           2 2   
+  //   3           0 1  ( or 1 0 )
+  //   4           1 2  ( or 2 1 )
+  //   5           2 0  ( or 0 2 ) 
+    
+  int ii, jj ;
+  int i, j, k, l ;
+
+  this->doInitialTangent();
+
+  for ( ii = 0; ii < 6; ii++ ) {
+    for ( jj = 0; jj < 6; jj++ ) {
+
+      index_map( ii, i, j ) ;
+      index_map( jj, k, l ) ;
+
+      tangent_matrix(ii,jj) = initialTangent[i][j][k][l] ;
 
     } //end for j
   } //end for i

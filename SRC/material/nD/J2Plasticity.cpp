@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-06-10 22:24:07 $
+// $Revision: 1.7 $
+// $Date: 2002-12-05 22:49:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.cpp,v $
 
 // Written: Ed "C++" Love
@@ -63,6 +63,9 @@ const double J2Plasticity :: two3   = 2.0 / 3.0 ;
 const double J2Plasticity :: four3  = 4.0 / 3.0 ;
 const double J2Plasticity :: root23 = sqrt( 2.0 / 3.0 ) ;
 
+double J2Plasticity::initialTangent[3][3][3][3] ;   //material tangent
+double J2Plasticity::IIdev[3][3][3][3] ; //rank 4 deviatoric 
+double J2Plasticity::IbunI[3][3][3][3] ; //rank 4 I bun I 
 
 //zero internal variables
 void J2Plasticity :: zero ( ) 
@@ -95,6 +98,60 @@ strain(3,3)
   eta         = 0.0 ;
 
   this->zero( ) ;     // or (*this).zero( ) 
+
+  int i, j, k, l ;
+
+  //zero rank4 IIdev and IbunI 
+  for ( i = 0; i < 3; i++ ) {
+    for ( j = 0; j < 3; j++ )  {
+      for ( k = 0; k < 3; k++ ) {
+	for ( l = 0; l < 3; l++)  { 
+
+	  IbunI[i][j][k][l] = 0.0 ;
+
+	  IIdev[i][j][k][l] = 0.0 ;
+
+	} // end for l
+      } // end for k
+    } // end for j
+  } // end for i
+
+
+  //form rank4 IbunI 
+
+  IbunI [0][0] [0][0] = 1.0 ;
+  IbunI [0][0] [1][1] = 1.0 ;
+  IbunI [0][0] [2][2] = 1.0 ;
+  IbunI [1][1] [0][0] = 1.0 ;
+  IbunI [1][1] [1][1] = 1.0 ;
+  IbunI [1][1] [2][2] = 1.0 ;
+  IbunI [2][2] [0][0] = 1.0 ;
+  IbunI [2][2] [1][1] = 1.0 ;
+  IbunI [2][2] [2][2] = 1.0 ;
+
+  //form rank4 IIdev
+
+  IIdev [0][0] [0][0] =  two3 ; // 0.666667 
+  IIdev [0][0] [1][1] = -one3 ; //-0.333333 
+  IIdev [0][0] [2][2] = -one3 ; //-0.333333 
+  IIdev [0][1] [0][1] = 0.5 ;
+  IIdev [0][1] [1][0] = 0.5 ;
+  IIdev [0][2] [0][2] = 0.5 ;
+  IIdev [0][2] [2][0] = 0.5 ;
+  IIdev [1][0] [0][1] = 0.5 ;
+  IIdev [1][0] [1][0] = 0.5 ;
+  IIdev [1][1] [0][0] = -one3 ; //-0.333333 
+  IIdev [1][1] [1][1] =  two3 ; // 0.666667 
+  IIdev [1][1] [2][2] = -one3 ; //-0.333333 
+  IIdev [1][2] [1][2] = 0.5 ;
+  IIdev [1][2] [2][1] = 0.5 ;
+  IIdev [2][0] [0][2] = 0.5 ;
+  IIdev [2][0] [2][0] = 0.5 ;
+  IIdev [2][1] [1][2] = 0.5 ;
+  IIdev [2][1] [2][1] = 0.5 ;
+  IIdev [2][2] [0][0] = -one3 ; //-0.333333 
+  IIdev [2][2] [1][1] = -one3 ; //-0.333333 
+  IIdev [2][2] [2][2] =  two3 ; // 0.666667 
 }
 
 
@@ -124,6 +181,60 @@ J2Plasticity :: J2Plasticity(int    tag,
   eta         = viscosity ;
 
   this->zero( ) ;
+
+  int i, j, k, l ;
+
+  //zero rank4 IIdev and IbunI 
+  for ( i = 0; i < 3; i++ ) {
+    for ( j = 0; j < 3; j++ )  {
+      for ( k = 0; k < 3; k++ ) {
+	for ( l = 0; l < 3; l++)  { 
+
+	  IbunI[i][j][k][l] = 0.0 ;
+
+	  IIdev[i][j][k][l] = 0.0 ;
+
+	} // end for l
+      } // end for k
+    } // end for j
+  } // end for i
+
+
+  //form rank4 IbunI 
+
+  IbunI [0][0] [0][0] = 1.0 ;
+  IbunI [0][0] [1][1] = 1.0 ;
+  IbunI [0][0] [2][2] = 1.0 ;
+  IbunI [1][1] [0][0] = 1.0 ;
+  IbunI [1][1] [1][1] = 1.0 ;
+  IbunI [1][1] [2][2] = 1.0 ;
+  IbunI [2][2] [0][0] = 1.0 ;
+  IbunI [2][2] [1][1] = 1.0 ;
+  IbunI [2][2] [2][2] = 1.0 ;
+
+  //form rank4 IIdev
+
+  IIdev [0][0] [0][0] =  two3 ; // 0.666667 
+  IIdev [0][0] [1][1] = -one3 ; //-0.333333 
+  IIdev [0][0] [2][2] = -one3 ; //-0.333333 
+  IIdev [0][1] [0][1] = 0.5 ;
+  IIdev [0][1] [1][0] = 0.5 ;
+  IIdev [0][2] [0][2] = 0.5 ;
+  IIdev [0][2] [2][0] = 0.5 ;
+  IIdev [1][0] [0][1] = 0.5 ;
+  IIdev [1][0] [1][0] = 0.5 ;
+  IIdev [1][1] [0][0] = -one3 ; //-0.333333 
+  IIdev [1][1] [1][1] =  two3 ; // 0.666667 
+  IIdev [1][1] [2][2] = -one3 ; //-0.333333 
+  IIdev [1][2] [1][2] = 0.5 ;
+  IIdev [1][2] [2][1] = 0.5 ;
+  IIdev [2][0] [0][2] = 0.5 ;
+  IIdev [2][0] [2][0] = 0.5 ;
+  IIdev [2][1] [1][2] = 0.5 ;
+  IIdev [2][1] [2][1] = 0.5 ;
+  IIdev [2][2] [0][0] = -one3 ; //-0.333333 
+  IIdev [2][2] [1][1] = -one3 ; //-0.333333 
+  IIdev [2][2] [2][2] =  two3 ; // 0.666667 
 }
 
 
@@ -148,6 +259,60 @@ strain(3,3)
   eta         = 0.0 ;
 
   this->zero( ) ;
+
+  int i, j, k, l ;
+
+  //zero rank4 IIdev and IbunI 
+  for ( i = 0; i < 3; i++ ) {
+    for ( j = 0; j < 3; j++ )  {
+      for ( k = 0; k < 3; k++ ) {
+	for ( l = 0; l < 3; l++)  { 
+
+	  IbunI[i][j][k][l] = 0.0 ;
+
+	  IIdev[i][j][k][l] = 0.0 ;
+
+	} // end for l
+      } // end for k
+    } // end for j
+  } // end for i
+
+
+  //form rank4 IbunI 
+
+  IbunI [0][0] [0][0] = 1.0 ;
+  IbunI [0][0] [1][1] = 1.0 ;
+  IbunI [0][0] [2][2] = 1.0 ;
+  IbunI [1][1] [0][0] = 1.0 ;
+  IbunI [1][1] [1][1] = 1.0 ;
+  IbunI [1][1] [2][2] = 1.0 ;
+  IbunI [2][2] [0][0] = 1.0 ;
+  IbunI [2][2] [1][1] = 1.0 ;
+  IbunI [2][2] [2][2] = 1.0 ;
+
+  //form rank4 IIdev
+
+  IIdev [0][0] [0][0] =  two3 ; // 0.666667 
+  IIdev [0][0] [1][1] = -one3 ; //-0.333333 
+  IIdev [0][0] [2][2] = -one3 ; //-0.333333 
+  IIdev [0][1] [0][1] = 0.5 ;
+  IIdev [0][1] [1][0] = 0.5 ;
+  IIdev [0][2] [0][2] = 0.5 ;
+  IIdev [0][2] [2][0] = 0.5 ;
+  IIdev [1][0] [0][1] = 0.5 ;
+  IIdev [1][0] [1][0] = 0.5 ;
+  IIdev [1][1] [0][0] = -one3 ; //-0.333333 
+  IIdev [1][1] [1][1] =  two3 ; // 0.666667 
+  IIdev [1][1] [2][2] = -one3 ; //-0.333333 
+  IIdev [1][2] [1][2] = 0.5 ;
+  IIdev [1][2] [2][1] = 0.5 ;
+  IIdev [2][0] [0][2] = 0.5 ;
+  IIdev [2][0] [2][0] = 0.5 ;
+  IIdev [2][1] [1][2] = 0.5 ;
+  IIdev [2][1] [2][1] = 0.5 ;
+  IIdev [2][2] [0][0] = -one3 ; //-0.333333 
+  IIdev [2][2] [1][1] = -one3 ; //-0.333333 
+  IIdev [2][2] [2][2] =  two3 ; // 0.666667 
 }
 
 
@@ -240,10 +405,6 @@ void J2Plasticity :: plastic_integrator( )
  
   static Matrix normal(3,3) ;     //normal to yield surface
 
-  static double IIdev[3][3][3][3] ; //rank 4 deviatoric 
-
-  static double IbunI[3][3][3][3] ; //rank 4 I bun I 
-
   double NbunN ; //normal bun normal 
 
   double norm_tau = 0.0 ;   //norm of deviatoric stress 
@@ -265,65 +426,11 @@ void J2Plasticity :: plastic_integrator( )
   double c2 = 0.0 ;
   double c3 = 0.0 ;
 
+  int i,j,k,l;
   int ii, jj ; 
-  int i, j, k, l ;
 
   int iteration_counter ;
   const int max_iterations = 25 ;
-
-  //zero rank4 IIdev and IbunI 
-  for ( i = 0; i < 3; i++ ) {
-    for ( j = 0; j < 3; j++ )  {
-      for ( k = 0; k < 3; k++ ) {
-	for ( l = 0; l < 3; l++)  { 
-
-	  IbunI[i][j][k][l] = 0.0 ;
-
-	  IIdev[i][j][k][l] = 0.0 ;
-
-	} // end for l
-      } // end for k
-    } // end for j
-  } // end for i
-
-
-  //form rank4 IbunI 
-
-  IbunI [0][0] [0][0] = 1.0 ;
-  IbunI [0][0] [1][1] = 1.0 ;
-  IbunI [0][0] [2][2] = 1.0 ;
-  IbunI [1][1] [0][0] = 1.0 ;
-  IbunI [1][1] [1][1] = 1.0 ;
-  IbunI [1][1] [2][2] = 1.0 ;
-  IbunI [2][2] [0][0] = 1.0 ;
-  IbunI [2][2] [1][1] = 1.0 ;
-  IbunI [2][2] [2][2] = 1.0 ;
-
-  //form rank4 IIdev
-
-  IIdev [0][0] [0][0] =  two3 ; // 0.666667 
-  IIdev [0][0] [1][1] = -one3 ; //-0.333333 
-  IIdev [0][0] [2][2] = -one3 ; //-0.333333 
-  IIdev [0][1] [0][1] = 0.5 ;
-  IIdev [0][1] [1][0] = 0.5 ;
-  IIdev [0][2] [0][2] = 0.5 ;
-  IIdev [0][2] [2][0] = 0.5 ;
-  IIdev [1][0] [0][1] = 0.5 ;
-  IIdev [1][0] [1][0] = 0.5 ;
-  IIdev [1][1] [0][0] = -one3 ; //-0.333333 
-  IIdev [1][1] [1][1] =  two3 ; // 0.666667 
-  IIdev [1][1] [2][2] = -one3 ; //-0.333333 
-  IIdev [1][2] [1][2] = 0.5 ;
-  IIdev [1][2] [2][1] = 0.5 ;
-  IIdev [2][0] [0][2] = 0.5 ;
-  IIdev [2][0] [2][0] = 0.5 ;
-  IIdev [2][1] [1][2] = 0.5 ;
-  IIdev [2][1] [2][1] = 0.5 ;
-  IIdev [2][2] [0][0] = -one3 ; //-0.333333 
-  IIdev [2][2] [1][1] = -one3 ; //-0.333333 
-  IIdev [2][2] [2][2] =  two3 ; // 0.666667 
-
-
 
   //compute the deviatoric strains
 
@@ -466,6 +573,37 @@ void J2Plasticity :: plastic_integrator( )
           tangent [j][i][k][l] = tangent[i][j][k][l] ;
           tangent [i][j][l][k] = tangent[i][j][k][l] ;
           tangent [j][i][l][k] = tangent[i][j][k][l] ;
+
+    } // end for jj
+  } // end for ii
+
+  return ;
+} 
+
+
+
+
+
+// set up for initial elastic
+void J2Plasticity :: doInitialTangent( )
+{
+  int ii,jj,i,j,k,l;
+
+  //compute the deviatoric strains
+  for ( ii = 0; ii < 6; ii++ ) {
+    for ( jj = 0; jj < 6; jj++ )  {
+
+          index_map( ii, i, j ) ;
+          index_map( jj, k, l ) ;
+
+          //elastic terms
+          initialTangent[i][j][k][l]  = bulk * IbunI[i][j][k][l] ;
+          initialTangent[i][j][k][l] += (2.0*shear) * IIdev[i][j][k][l] ;
+
+          //minor symmetries 
+          initialTangent [j][i][k][l] = initialTangent[i][j][k][l] ;
+          initialTangent [i][j][l][k] = initialTangent[i][j][k][l] ;
+          initialTangent [j][i][l][k] = initialTangent[i][j][k][l] ;
 
     } // end for jj
   } // end for ii

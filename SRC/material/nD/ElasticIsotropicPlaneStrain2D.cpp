@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-10 22:24:04 $
+// $Revision: 1.5 $
+// $Date: 2002-12-05 22:49:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlaneStrain2D.cpp,v $
                                                                         
                                                                         
@@ -80,6 +80,20 @@ ElasticIsotropicPlaneStrain2D::setTrialStrainIncr (const Vector &strain, const V
 
 const Matrix&
 ElasticIsotropicPlaneStrain2D::getTangent (void)
+{
+	double mu2 = E/(1.0+v);
+	double lam = v*mu2/(1.0-2.0*v);
+	double mu = 0.50*mu2;
+
+	D(0,0) = D(1,1) = mu2+lam;
+	D(0,1) = D(1,0) = lam;
+	D(2,2) = mu;
+
+	return D;
+}
+
+const Matrix&
+ElasticIsotropicPlaneStrain2D::getInitialTangent (void)
 {
 	double mu2 = E/(1.0+v);
 	double lam = v*mu2/(1.0-2.0*v);

@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-10 22:24:05 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:49:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlaneStrain.cpp,v $
 
 // Written: Ed "C++" Love
@@ -208,6 +208,36 @@ const Matrix& J2PlaneStrain :: getTangent( )
 
   tangent_matrix(1,2) = tangent [1][1] [0][1] ;
   tangent_matrix(2,1) = tangent [0][1] [1][1] ;
+
+  return tangent_matrix ;
+} 
+
+
+//send back the tangent 
+const Matrix& J2PlaneStrain :: getInitialTangent( ) 
+{
+  // matrix to tensor mapping
+  //  Matrix      Tensor
+  // -------     -------
+  //   0           0 0
+  //   1           1 1
+  //   2           0 1  ( or 1 0 ) 
+  // 
+
+  this->doInitialTangent();
+
+  tangent_matrix(0,0) = initialTangent [0][0] [0][0] ;
+  tangent_matrix(1,1) = initialTangent [1][1] [1][1] ;
+  tangent_matrix(2,2) = initialTangent [0][1] [0][1] ;
+
+  tangent_matrix(0,1) = initialTangent [0][0] [1][1] ;
+  tangent_matrix(1,0) = initialTangent [1][1] [0][0] ;
+
+  tangent_matrix(0,2) = initialTangent [0][0] [0][1] ;
+  tangent_matrix(2,0) = initialTangent [0][1] [0][0] ;
+
+  tangent_matrix(1,2) = initialTangent [1][1] [0][1] ;
+  tangent_matrix(2,1) = initialTangent [0][1] [1][1] ;
 
   return tangent_matrix ;
 } 

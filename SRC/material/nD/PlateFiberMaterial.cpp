@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-11 02:13:20 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:49:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlateFiberMaterial.cpp,v $
 
 //
@@ -327,6 +327,13 @@ PlateFiberMaterial::getTangent()
   return this->tangent;
 }
 
+
+const Matrix&  
+PlateFiberMaterial::getInitialTangent()
+{
+  cerr << "PlateFiberMaterial::getInitialTangent() - not yet implemented\n";
+  return this->getTangent();
+}
 
 
 int 

@@ -1,9 +1,9 @@
 //<<<<<<< PressureDependMultiYield.h
-// $Revision: 1.13 $
-// $Date: 2002-08-26 15:41:01 $
+// $Revision: 1.14 $
+// $Date: 2002-12-05 22:49:18 $
 //=======
-// $Revision: 1.13 $
-// $Date: 2002-08-26 15:41:01 $
+// $Revision: 1.14 $
+// $Date: 2002-12-05 22:49:18 $
 //>>>>>>> 1.7
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
                                                                         
@@ -75,6 +75,7 @@ public:
 
      // Calculates current tangent stiffness.
      const Matrix &getTangent (void);
+     const Matrix &getInitialTangent (void);
         
      void getBackbone (Matrix &);
 

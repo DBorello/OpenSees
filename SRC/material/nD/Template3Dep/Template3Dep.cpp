@@ -702,6 +702,11 @@ const Matrix& Template3Dep::getTangent(void)
     return *M;
 }
 
+const Matrix& Template3Dep::getInitialTangent(void)
+{
+  return this->getInitialTangent();
+}
+
 //================================================================================
 const Vector& Template3Dep::getStress(void)
 {

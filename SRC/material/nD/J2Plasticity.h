@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:24:07 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:49:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.h,v $
 
 #ifndef J2Plasticity_h
@@ -130,6 +130,9 @@ class J2Plasticity : public NDMaterial {
   //material response 
   Matrix stress ;                //stress tensor
   double tangent[3][3][3][3] ;   //material tangent
+  static double initialTangent[3][3][3][3] ;   //material tangent
+  static double IIdev[3][3][3][3] ; //rank 4 deviatoric 
+  static double IbunI[3][3][3][3] ; //rank 4 I bun I 
 
   //material input
   Matrix strain ;               //strain tensor
@@ -145,6 +148,8 @@ class J2Plasticity : public NDMaterial {
 
   //plasticity integration routine
   void plastic_integrator( ) ;
+
+  void doInitialTangent( ) ;
 
   //hardening function
   double q( double xi ) ;

@@ -1,5 +1,5 @@
-// $Revision: 1.6 $
-// $Date: 2002-06-10 22:22:23 $
+// $Revision: 1.7 $
+// $Date: 2002-12-05 22:49:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.h,v $
                                                                         
 // Written: ZHY
@@ -47,8 +47,9 @@ class FluidSolidPorousMaterial : public NDMaterial
 
      // Calculates current tangent stiffness.
      const Matrix &getTangent (void);
+     const Matrix &getInitialTangent (void);
 
-		 double getRho(void);
+     double getRho(void);
 
      // Calculates the corresponding stress increment (rate), for a given strain increment. 
      const Vector &getStress (void);

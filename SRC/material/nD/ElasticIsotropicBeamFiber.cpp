@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:24:04 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:49:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicBeamFiber.cpp,v $
 
 // Written: MHS
@@ -85,6 +85,20 @@ ElasticIsotropicBeamFiber::setTrialStrainIncr (const Vector &strain, const Vecto
 
 const Matrix&
 ElasticIsotropicBeamFiber::getTangent (void)
+{
+	double mu2 = E/(1.0+v);
+	double lam = v*mu2/(1.0-2.0*v);
+	double mu = 0.50*mu2;
+
+	D(0,0) = mu*(mu2+3.0*lam)/(mu+lam);
+	D(1,1) = mu;
+	D(2,2) = mu;
+
+	return D;
+}
+
+const Matrix&
+ElasticIsotropicBeamFiber::getInitialTangent (void)
 {
 	double mu2 = E/(1.0+v);
 	double lam = v*mu2/(1.0-2.0*v);
