@@ -259,7 +259,8 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(RELIABILITY_LIBRARY)\
   -lg2c -ldl -lpng 
 
-MACHINE_SPECIFIC_LIBS = -ldl  -lieee -lm -lc -lg2c -Wl,-rpath,/usr/local/lib
+MACHINE_SPECIFIC_LIBS = -ldl  -lieee -lm -lc -lg2c -Wl,-rpath,/usr/local/lib \
+	/usr/local/mysql/lib/libmysqlclient.a
 
 # %---------------------------------------------------------%
 # | SECTION 8: INCLUDE FILES                                |
