@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2001-10-19 23:10:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/SolutionAlgorithm.cpp,v $
                                                                         
                                                                         
@@ -76,7 +76,7 @@ int
 SolutionAlgorithm::record(int cTag)
 {
     for (int i=0; i<numRecorders; i++)
-	theRecorders[i]->record(cTag);
+	theRecorders[i]->record(cTag, 0.0);
     return 0;
 }
 

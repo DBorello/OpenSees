@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-09-05 22:00:57 $
+// $Revision: 1.8 $
+// $Date: 2001-10-19 23:10:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -1279,7 +1279,7 @@ Domain::commit(void)
 
     // invoke record on all recorders
     for (int i=0; i<numRecorders; i++)
-	theRecorders[i]->record(commitTag);
+	theRecorders[i]->record(commitTag, currentTime);
 
     // update the commitTag
     commitTag++;
@@ -1348,9 +1348,10 @@ Domain::update(void)
     // invoke update on all the ele's .. subdomains need this
     ElementIter &theEles = this->getElements();
     Element *theEle;
+
     while ((theEle = theEles()) != 0)
 	theEle->update();
-    
+
     return 0;
 }
 
