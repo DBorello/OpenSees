@@ -20,8 +20,8 @@
 # Specify the location and name of the OpenSees interpreter program
 # that will be created (if this all works!)
 
-OpenSees_PROGRAM = $(HOME)/bin/OpenSees
-
+#OpenSees_PROGRAM = $(HOME)/bin/OpenSees
+# this is to be specified below, depending on optimization or debuging options.
 
 
 # %---------------------------------%
@@ -267,7 +267,7 @@ OpenSees_PROGRAM = $(HOME)/bin/OpenSees.debug
 # FFLAGS          =  -O2
 # LINKFLAGS       =  
 # #OpenSees_PROGRAM = $(HOME)/bin/OpenSees.optimized.a.bit
-# OpenSees_PROGRAM = $(HOME)/bin/OpenSees
+# OpenSees_PROGRAM = $(HOME)/bin/OpenSees.opt
 
 
 # # optimize a LOT
@@ -365,6 +365,7 @@ OpenSees_PROGRAM = $(HOME)/bin/OpenSees.debug
 ##..CCFLAGS = -c -w -rd -C -N -P -f87 -I\cmp\bc\include -L\cmp\bc\lib -i64 -mh -o $*.o
 ##..
 
+																																	 # 
 
 
 AR          = ar 
