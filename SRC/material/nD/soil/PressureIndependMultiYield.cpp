@@ -1,5 +1,5 @@
-// $Revision: 1.27 $
-// $Date: 2004-06-07 23:45:22 $
+// $Revision: 1.28 $
+// $Date: 2004-06-15 18:58:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -79,15 +79,20 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd,
     opserr << "Will reset pressDependCoe to zero." << endln;
     pressDependCoe = 0.;
   }
+  if (pressDependCoe > 0 && frictionAng == 0) {
+    opserr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: pressDependCoe > 0 while frictionAngle = 0" << endln;
+    opserr << "Will reset pressDependCoe to zero." << endln;
+    pressDependCoe = 0.;
+  }
   if (numberOfYieldSurf <= 0) {
     opserr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: numberOfSurfaces <= 0" << endln;
     opserr << "Will use 10 yield surfaces." << endln;
     numberOfYieldSurf = 10;
   }
-  if (numberOfYieldSurf > 40) {
-    opserr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: numberOfSurfaces > 40" << endln;
-    opserr << "Will use 40 yield surfaces." << endln;
-    numberOfYieldSurf = 40;
+  if (numberOfYieldSurf > 100) {
+    opserr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: numberOfSurfaces > 100" << endln;
+    opserr << "Will use 100 yield surfaces." << endln;
+    numberOfYieldSurf = 100;
   }
   if (r < 0) {
     opserr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: mass density < 0" << endln;
@@ -314,12 +319,13 @@ const Matrix & PressureIndependMultiYield::getTangent (void)
 	if (i<3 && j<3 && i==j) theTangent(i,j) += refShearModulus;
 	if (i<3 && j<3) theTangent(i,j) += (refBulkModulus - 2.*refShearModulus/3.);
       }
+
   }
   else {
     double coeff;
     static Vector devia(6);
     
-    if (committedActiveSurf > 0) {
+    /*if (committedActiveSurf > 0) {
       //devia = currentStress.deviator()-committedSurfaces[committedActiveSurf].center();
       devia = currentStress.deviator();
       devia -= committedSurfaces[committedActiveSurf].center();
@@ -327,7 +333,17 @@ const Matrix & PressureIndependMultiYield::getTangent (void)
       double size = committedSurfaces[committedActiveSurf].size();
       double plastModul = committedSurfaces[committedActiveSurf].modulus();
       coeff = 6.*refShearModulus*refShearModulus/(2.*refShearModulus+plastModul)/size/size;
+    }*/
+    if (activeSurfaceNum > 0) {
+      //devia = currentStress.deviator()-committedSurfaces[committedActiveSurf].center();
+      devia = trialStress.deviator();
+      devia -= theSurfaces[activeSurfaceNum].center();
+	
+      double size = theSurfaces[activeSurfaceNum].size();
+      double plastModul = theSurfaces[activeSurfaceNum].modulus();
+      coeff = 6.*refShearModulus*refShearModulus/(2.*refShearModulus+plastModul)/size/size;
     }
+
     else coeff = 0.;
     
     for (int i=0;i<6;i++) 
@@ -429,7 +445,7 @@ const Vector & PressureIndependMultiYield::getStress (void)
     //volume stress change
     double volum = refBulkModulus*(strainRate.volume()*3.);
     volum += currentStress.volume();
-    // if (volum > 0) volum = 0.;
+     //if (volum > 0) volum = 0.;
     trialStress.setData(trialStress.deviator(),volum);
   }
 
@@ -490,8 +506,8 @@ NDMaterial * PressureIndependMultiYield::getCopy (void)
 
 NDMaterial * PressureIndependMultiYield::getCopy (const char *code)
 {
-  if (strcmp(code,"PlaneStrain") == 0 ||
-      strcmp(code,"ThreeDimensional") == 0) {
+  if (strcmp(code,"PressureIndependMultiYield") == 0 || strcmp(code,"PlaneStrain") == 0
+      || strcmp(code,"ThreeDimensional") == 0) {
     PressureIndependMultiYield * copy = new PressureIndependMultiYield(*this);
     return copy;
   }
@@ -683,10 +699,10 @@ Response*
 PressureIndependMultiYield::setResponse (const char **argv, int argc, Information &matInfo)
 {
   if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
-		return new MaterialResponse(this, 1, this->getStress());
+		return new MaterialResponse(this, 1, this->getCommittedStress());
 
   else if (strcmp(argv[0],"strain") == 0 || strcmp(argv[0],"strains") == 0)
-		return new MaterialResponse(this, 2, this->getStrain());
+		return new MaterialResponse(this, 2, this->getCommittedStrain());
     
 	else if (strcmp(argv[0],"tangent") == 0)
 		return new MaterialResponse(this, 3, this->getTangent());
@@ -753,17 +769,17 @@ void PressureIndependMultiYield::getBackbone (Matrix & bb)
 		shearModulus = factor*refShearModulus;
 		for (int i=1; i<=numOfSurfaces; i++) {
 			if (i==1) {
-				stress2 = theSurfaces[i].size()*factor/sqrt(3.0);
+				stress2 = committedSurfaces[i].size()*factor/sqrt(3);
 				strain2 = stress2/shearModulus;
 				bb(1,k*2) = strain2; bb(1,k*2+1) = shearModulus;
 			} else {
 				stress1 = stress2; strain1 = strain2;
-				plastModulus = factor*theSurfaces[i-1].modulus();
+				plastModulus = factor*committedSurfaces[i-1].modulus();
 				elast_plast = 2*shearModulus*plastModulus/(2*shearModulus+plastModulus);
-				stress2 = factor*theSurfaces[i].size()/sqrt(3.0);
+				stress2 = factor*committedSurfaces[i].size()/sqrt(3);
 			  strain2 = 2*(stress2-stress1)/elast_plast + strain1;
 				gre = stress2/strain2;
-        bb(i,k*2) = strain2; bb(i,k*2+1) = gre;
+                bb(i,k*2) = strain2; bb(i,k*2+1) = gre;
 			}
 		}
 	}
@@ -793,7 +809,7 @@ const Vector & PressureIndependMultiYield::getCommittedStress (void)
     temp7[4] = temp6[4];
     temp7[5] = temp6[5];
     temp7[6] = scale;
-		return temp7;
+	return temp7;
 	}
   else {
     static Vector temp5(5), temp6(6);
@@ -1001,7 +1017,7 @@ void PressureIndependMultiYield::deviatorScaling(T2Vector & stress, const MultiY
 
 void PressureIndependMultiYield::initSurfaceUpdate()
 {
-	if (activeSurfaceNum == 0) return; 
+	if (committedActiveSurf == 0) return; 
 
 	int numOfSurfaces = numOfSurfacesx[matN];
 
@@ -1010,13 +1026,13 @@ void PressureIndependMultiYield::initSurfaceUpdate()
 	double Ms = sqrt(3./2.*(devia && devia));
 	static Vector newCenter(6);
 
-	if (activeSurfaceNum < numOfSurfaces) { // failure surface can't move
+	if (committedActiveSurf < numOfSurfaces) { // failure surface can't move
 		//newCenter = devia * (1. - committedSurfaces[activeSurfaceNum].size() / Ms); 
-		newCenter.addVector(0.0, devia, 1.0-committedSurfaces[activeSurfaceNum].size()/Ms);
-		committedSurfaces[activeSurfaceNum].setCenter(newCenter);
+		newCenter.addVector(0.0, devia, 1.0-committedSurfaces[committedActiveSurf].size()/Ms);
+		committedSurfaces[committedActiveSurf].setCenter(newCenter);
 	}
 
-	for (int i=1; i<activeSurfaceNum; i++) {
+	for (int i=1; i<committedActiveSurf; i++) {
 	  newCenter = devia * (1. - committedSurfaces[i].size() / Ms);
 	  committedSurfaces[i].setCenter(newCenter); 
 	}
@@ -1066,7 +1082,7 @@ int PressureIndependMultiYield::setSubStrainRate(void)
 {
     int numOfSurfaces = numOfSurfacesx[matN];
 
-	if (activeSurfaceNum==numOfSurfaces) return 1;
+	//if (activeSurfaceNum==numOfSurfaces) return 1;
 
 	//if (strainRate==T2Vector()) return 0;
 	if (strainRate.isZero()) return 0;

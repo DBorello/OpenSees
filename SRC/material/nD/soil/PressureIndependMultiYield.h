@@ -1,5 +1,5 @@
-// $Revision: 1.14 $
-// $Date: 2003-07-15 20:31:59 $
+// $Revision: 1.15 $
+// $Date: 2004-06-15 18:58:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -101,6 +101,10 @@ public:
 
      //void setCurrentStress(const Vector stress) { currentStress=T2Vector(stress); }
      int updateParameter(int responseID, Information &eleInformation);	
+
+    // RWB; PyLiq1 & TzLiq1 need to see the excess pore pressure and initial stresses.
+    friend class PyLiq1;
+    friend class TzLiq1;
 
 protected:
 

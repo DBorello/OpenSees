@@ -1,5 +1,5 @@
-// $Revision: 1.18 $
-// $Date: 2004-02-24 22:25:51 $
+// $Revision: 1.19 $
+// $Date: 2004-06-15 18:58:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -72,7 +72,10 @@ FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial 
 FluidSolidPorousMaterial::FluidSolidPorousMaterial () 
  : NDMaterial(0,ND_TAG_FluidSolidPorousMaterial), theSoilMaterial(0)
 {
-  //does nothing
+  trialExcessPressure = currentExcessPressure = 0.;
+  trialVolumeStrain = currentVolumeStrain = 0.;
+  initMaxPress = 0.;
+  e2p = 0;
 }
 
 
@@ -211,7 +214,7 @@ const Vector & FluidSolidPorousMaterial::getStress (void)
 	double combinedBulkModulus = combinedBulkModulusx[matN];
 
 	Vector *workV = (ndm == 2) ? &workV3 : &workV6;
-  
+
 	*workV = theSoilMaterial->getStress();
 
 	if (loadStage != 0) { 
@@ -312,13 +315,13 @@ NDMaterial * FluidSolidPorousMaterial::getCopy (void)
 
 NDMaterial * FluidSolidPorousMaterial::getCopy (const char *code)
 {
-  if (strcmp(code,"PlaneStrain") == 0 ||
-      strcmp(code,"ThreeDimensional") == 0) {
-    FluidSolidPorousMaterial * copy = new FluidSolidPorousMaterial(*this);
-    return copy;
-  }
-  
-  return 0;
+	if (strcmp(code,"FluidSolidPorous") == 0 || strcmp(code,"PlaneStrain") == 0 ||
+		strcmp(code,"ThreeDimensional") == 0) {
+     FluidSolidPorousMaterial * copy = new FluidSolidPorousMaterial(*this);
+	   return copy;
+	}
+
+	return 0;
 }
 
 

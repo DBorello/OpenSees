@@ -1,5 +1,5 @@
-// $Revision: 1.10 $
-// $Date: 2003-12-05 20:33:40 $
+// $Revision: 1.11 $
+// $Date: 2004-06-15 18:58:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/TclUpdateMaterialStageCommand.cpp,v $
 
 // Written: ZHY 
@@ -9,6 +9,7 @@
 #include <PressureDependMultiYield.h>
 #include <FluidSolidPorousMaterial.h>
 #include <Information.h>
+#include <UniaxialMaterial.h>
 
 #include <PyLiq1.h>
 #include <TzLiq1.h>
@@ -125,8 +126,36 @@ TclModelBuilderUpdateParameterCommand(ClientData clientData,
   NDMaterial * a = theTclBuilder->getNDMaterial(tag);
 
   if (a==0) {
-      opserr << "WARNING UpdateParameter: couldn't get NDmaterial tagged: " << tag << endln;
-      return TCL_ERROR;		
+      //opserr << "WARNING UpdateParameter: couldn't get NDmaterial tagged: " << tag << endln;
+      //return TCL_ERROR;
+	  UniaxialMaterial * a = theTclBuilder->getUniaxialMaterial(tag);
+      if (a==0) {
+         opserr << "WARNING UpdateParameter: couldn't get Uniaxialmaterial tagged: " << tag << endln;
+         return TCL_ERROR;
+	  }
+      if (strcmp(argv[3],"-E") == 0) {
+        if (Tcl_GetDouble(interp, argv[4], &value) != TCL_OK) {
+          opserr << "WARNING UpdateParameter: invalid parameter value" << endln;
+          return TCL_ERROR;
+		}
+        Information info;
+        info.setDouble(value);
+        a->updateParameter(0,info); 
+	  }	
+	  else if (strcmp(argv[3],"-fy") == 0) {
+        if (Tcl_GetDouble(interp, argv[4], &value) != TCL_OK) {
+          opserr << "WARNING UpdateParameter: invalid parameter value" << endln;
+          return TCL_ERROR;
+		}
+        Information info;
+        info.setDouble(value);
+        a->updateParameter(1,info); 
+	  }	
+	  else {
+          opserr << "WARNING UpdateParameter: Only accept parameter '-E' or '-fy' for now" << endln;
+          return TCL_ERROR;		
+	  }
+	  return TCL_OK;
   }
 
   if (strcmp(argv[3],"-refG") == 0) 
