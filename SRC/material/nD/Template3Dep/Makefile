@@ -36,23 +36,10 @@ OBJS  = Template3Dep.o \
         MD_PS.o	  \
         DP_YS01.o	  \
         MD_YS.o	  \
-#        MD_EL.o   \
-#        CDriver.o \
-#        MD_EL.o	  \
-#        bmodel.o  \
-#        ldemodel.o\
-#        logarit.o \
-#        mmodelld.o\
-#        neohook.o \
-#        ogden.o	  \
-#        simopist.o\
-
-
-
-
 
 ################### TARGETS ########################
 all: $(OBJS) 
+	$(AR) -rv $(MATMOD_LIBRARY) $(OBJS)
 
 libmatmod.a: $(OBJS)
 	$(AR) -rv $(MATMOD_LIBRARY) $(OBJS)
@@ -66,7 +53,12 @@ tidy:
 
 clean: tidy
 	@$(RM) $(RMFLAGS) $(OBJS) *.o core 
-	@$(RM) $(RMFLAGS) math_tst elast_tst 
+	@$(RM) $(RMFLAGS) math_tst 
+	@$(RM) $(RMFLAGS) elast_tst 
+	@$(RM) $(RMFLAGS) .inslog*
+	@$(RM) $(RMFLAGS) tca.map
+
+
 
 spotless: clean
 
