@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-24 04:07:03 $
+// $Revision: 1.3 $
+// $Date: 2002-05-17 23:12:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SeriesMaterial.cpp,v $
 
 // Written: MHS
@@ -37,17 +37,17 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <stdlib.h>
-
+#include <MaterialResponse.h>
 
 SeriesMaterial::SeriesMaterial(int tag, int num,
-							   UniaxialMaterial ** theMaterialModels,
-							   int maxIter, double tol)
+			       UniaxialMaterial ** theMaterialModels,
+			       int maxIter, double tol)
 :UniaxialMaterial(tag,MAT_TAG_SeriesMaterial),
  Tstrain(0.0), Cstrain(0.0), Tstress(0.0), Cstress(0.0),
  Ttangent(0.0), Ctangent(0.0), 
- numMaterials(num), theModels(0),
- strain(0), stress(0), flex(0), initialFlag(false),
- maxIterations(maxIter), tolerance(tol)
+ maxIterations(maxIter), tolerance(tol),
+ stress(0), flex(0), strain(0), initialFlag(false),
+ numMaterials(num), theModels(0)
 {
     theModels = new UniaxialMaterial *[numMaterials];
 
@@ -95,9 +95,9 @@ SeriesMaterial::SeriesMaterial()
 :UniaxialMaterial(0,MAT_TAG_SeriesMaterial),
  Tstrain(0.0), Cstrain(0.0), Tstress(0.0), Cstress(0.0),
  Ttangent(0.0), Ctangent(0.0), 
- numMaterials(0), theModels(0),
- strain(0), stress(0), flex(0), initialFlag(false),
- maxIterations(0), tolerance(0.0)
+ maxIterations(0), tolerance(0.0),
+ stress(0), flex(0), strain(0), initialFlag(false),
+ numMaterials(0), theModels(0)
 {
 
 }
@@ -483,4 +483,47 @@ SeriesMaterial::Print(ostream &s, int flag)
     s << "\tUniaxial Componenets" << endl;
     for (int i = 0; i < numMaterials; i++)
 		s << "\t\tUniaxial Material, tag: " << theModels[i]->getTag() << endl;
+}
+
+Response*
+SeriesMaterial::setResponse(char **argv, int argc,
+			    Information &info)
+{
+  // See if the response is one of the defaults
+  Response *res = UniaxialMaterial::setResponse(argv, argc, info);
+  if (res != 0)
+    return res;
+
+  if (strcmp(argv[0],"strains") == 0)
+    return new MaterialResponse(this, 1, Vector(numMaterials));
+
+  else if (strcmp(argv[0],"material") == 0 ||
+	   strcmp(argv[0],"component") == 0) {
+    if (argc > 1) {
+      int matNum = atoi(argv[1]) - 1;
+      if (matNum >= 0 && matNum < numMaterials)
+	return theModels[matNum]->setResponse(&argv[2], argc-2, info);
+      else
+	return 0;
+    }
+    else
+      return 0;
+  }
+  
+  else
+    return 0;
+}
+
+int
+SeriesMaterial::getResponse(int responseID, Information &info)
+{
+  Vector strains(strain, numMaterials);
+
+  switch (responseID) {
+  case 1:
+    return info.setVector(strains);
+
+  default:
+    return -1;
+  }
 }

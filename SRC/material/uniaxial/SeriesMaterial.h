@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2002-05-17 23:12:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SeriesMaterial.h,v $
 
 #ifndef SeriesMaterial_h
@@ -60,6 +60,10 @@ class SeriesMaterial : public UniaxialMaterial
 		 FEM_ObjectBroker &theBroker);    
     
     void Print(ostream &s, int flag =0);
+
+    Response *setResponse(char **argv, int argc,
+			  Information &matInformation);
+    int getResponse(int responseID, Information &matInformation);
     
   protected:
     

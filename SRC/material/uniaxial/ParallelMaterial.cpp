@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-01-06 19:58:11 $
+// $Revision: 1.5 $
+// $Date: 2002-05-17 23:12:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ParallelMaterial.cpp,v $
                                                                         
                                                                         
@@ -41,7 +41,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <stdlib.h>
-
+#include <MaterialResponse.h>
 
 ParallelMaterial::ParallelMaterial(
 				 int tag, 
@@ -348,4 +348,49 @@ ParallelMaterial::Print(ostream &s, int flag)
       theModels[i]->Print(s, flag);
     }
     
+}
+
+Response*
+ParallelMaterial::setResponse(char **argv, int argc,
+			      Information &info)
+{
+  // See if the response is one of the defaults
+  Response *res = UniaxialMaterial::setResponse(argv, argc, info);
+  if (res != 0)
+    return res;
+
+  if (strcmp(argv[0],"stresses") == 0)
+    return new MaterialResponse(this, 1, Vector(numMaterials));
+
+  else if (strcmp(argv[0],"material") == 0 ||
+	   strcmp(argv[0],"component") == 0) {
+    if (argc > 1) {
+      int matNum = atoi(argv[1]) - 1;
+      if (matNum >= 0 && matNum < numMaterials)
+	return theModels[matNum]->setResponse(&argv[2], argc-2, info);
+      else
+	return 0;
+    }
+    else
+      return 0;
+  }
+  
+  else
+    return 0;
+}
+
+int
+ParallelMaterial::getResponse(int responseID, Information &info)
+{
+  Vector stresses(numMaterials);
+
+  switch (responseID) {
+  case 1:
+    for (int i = 0; i < numMaterials; i++)
+      stresses(i) = theModels[i]->getStress();
+    return info.setVector(stresses);
+
+  default:
+    return -1;
+  }
 }
