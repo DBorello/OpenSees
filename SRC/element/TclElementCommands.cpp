@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-07-20 01:38:39 $
+// $Revision: 1.8 $
+// $Date: 2001-08-28 23:34:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -42,6 +42,10 @@
 
 #include <ElasticBeam2d.h>
 #include <ElasticBeam3d.h>
+
+//Zhaohui Yang
+#include <EightNodeBrick.h>
+#include <TwentyNodeBrick.h>
 
 #include <CrdTransf2d.h>
 #include <CrdTransf3d.h>
@@ -128,9 +132,13 @@ TclModelBuilder_addDispBeamColumn(ClientData, Tcl_Interp *, int, char **,
 				  Domain*, TclModelBuilder *);
 		   
 
-//BJ Joey 
+//Boris Jeremic & Zhaohui
 extern int
 TclModelBuilder_addEightNodeBrick(ClientData , Tcl_Interp *,  int, char **,
+ 			          Domain*, TclModelBuilder *, int);
+//Boris Jeremic & Zhaohui
+extern int
+TclModelBuilder_addTwentyNodeBrick(ClientData , Tcl_Interp *,  int, char **,
  			          Domain*, TclModelBuilder *, int);
 
 
@@ -202,9 +210,14 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 					       theTclBuilder, 
 					       eleArgStart);
     return result;
-  } else if (strcmp(argv[1],"brick") == 0) {
+  } else if (strcmp(argv[1],"Brick8N") == 0) {  //Boris Jeremic & Zhaohui
           int eleArgStart = 1;
 	  int result = TclModelBuilder_addEightNodeBrick(clientData, interp, argc, argv,
+					       theTclDomain, theTclBuilder, eleArgStart);
+	  return result;
+  } else if (strcmp(argv[1],"Brick20N") == 0) {  //Boris Jeremic & Zhaohui
+          int eleArgStart = 1;
+	  int result = TclModelBuilder_addTwentyNodeBrick(clientData, interp, argc, argv,
 					       theTclDomain, theTclBuilder, eleArgStart);
 	  return result;
   } else if (strcmp(argv[1],"stdBrick") == 0) {
