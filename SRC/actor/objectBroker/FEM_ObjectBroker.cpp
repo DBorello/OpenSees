@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2003-03-04 21:08:23 $
+// $Revision: 1.21 $
+// $Date: 2003-05-22 23:29:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -123,7 +123,6 @@
 // Fibers
 #include <UniaxialFiber2d.h>
 #include <UniaxialFiber3d.h>
-
 // element header files
 #include <Element.h>
 #include <beam2d02.h>
@@ -148,6 +147,9 @@
 #include <BeamWithHinges3d.h>
 #include <NLBeamColumn2d.h>
 #include <NLBeamColumn3d.h>
+#include <ForceBeamColumn2d.h>
+#include <ForceBeamColumn3d.h>
+
 #include <DispBeamColumn2d.h>
 #include <DispBeamColumn3d.h>
 #include <ShellMITC4.h>
@@ -368,6 +370,12 @@ FEM_ObjectBroker::getNewElement(int classTag)
 
 	case ELE_TAG_NLBeamColumn3d:  
 	     return new NLBeamColumn3d();  
+
+	case ELE_TAG_ForceBeamColumn2d:  
+	     return new ForceBeamColumn2d();					     
+
+	case ELE_TAG_ForceBeamColumn3d:  
+	     return new ForceBeamColumn3d();  
 				
 	case ELE_TAG_DispBeamColumn2d:  
 	     return new DispBeamColumn2d();					     
