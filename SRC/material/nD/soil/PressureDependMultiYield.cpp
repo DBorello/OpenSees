@@ -1,5 +1,5 @@
-// $Revision: 1.30 $
-// $Date: 2003-08-29 00:23:40 $
+// $Revision: 1.31 $
+// $Date: 2004-02-24 22:25:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -771,8 +771,8 @@ NDMaterial * PressureDependMultiYield::getCopy (void)
 
 NDMaterial * PressureDependMultiYield::getCopy (const char *code)
 {
-  if (strcmp(code,"PressureDependMultiYield") == 0 || strcmp(code,"PlaneStrain") == 0
-      || strcmp(code,"ThreeDimensional") == 0) {
+  if (strcmp(code,"PlaneStrain") == 0 ||
+      strcmp(code,"ThreeDimensional") == 0) {
     PressureDependMultiYield * copy = new PressureDependMultiYield(*this);
     return copy;
   }
