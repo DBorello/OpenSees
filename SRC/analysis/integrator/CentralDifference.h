@@ -18,27 +18,35 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:47 $
+// $Revision: 1.3 $
+// $Date: 2005-02-28 20:39:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/CentralDifference.h,v $
                                                                         
                                                                         
 #ifndef CentralDifference_h
 #define CentralDifference_h
 
-// ???????? NEED DISPLACEMENTS AT T-dT in UPDATE ??????????
-
-// File: ~/analysis/integrator/CentralDifference.h
-// 
 // Written: fmk 
 // Created: 11/98
-// Revision: A
 //
 // Description: This file contains the class definition for CentralDifference.
-// CentralDifference is an algorithmic class for performing a transient 
-// analysis using the CentralDifference integration scheme, which is an
-// explicit direct integration scheme.
+
+// Written: fmk 
+// Created: 11/98
 //
+// Description: This file contains the implementation of the CentralDifference class.
+//
+// equi at time n expressed by:
+//   MAn + CVn + R(Un) = Rext n
+//
+// approximating Vn and An by:
+//     Vn = 1/2*dT (Un+1 -Un)
+//     An = 1/dT^2 (Un+1 - 2Un + Un-1)
+//
+// results in:
+//   [(1/dT*dT) M + (1/2*dT) C] Un+1 = Rext n - R(Un) + [(1/dT*dT)M](2Un-Un-1) + [(2/dT)C] Un-1
+
+
 // What: "@(#) CentralDifference.h, revA"
 
 #include <TransientIntegrator.h>
@@ -73,10 +81,11 @@ class CentralDifference : public TransientIntegrator
   protected:
     
   private:
-    int updateCount;    // method should only have one update per step
-    double c1, c2, c3;  // some constants we need to keep
-    Vector *Ut, *Utm1;  // response quantities at time t and t - deltaT
-    Vector *U, *Udot, *Udotdot; // response quantities at time t+deltat
+    int updateCount;            // method should only have one update per step
+    double c1, c2, c3;          // some constants we need to keep
+    Vector *Utm1;               // disp response quantity at time t - deltaT
+    Vector *U, *Udot, *Udotdot; // response quantities at time t
+    Vector *Y, *Z;              // garbage 
     double deltaT;
 };
 
