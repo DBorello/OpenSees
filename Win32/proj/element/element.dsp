@@ -451,7 +451,19 @@ SOURCE=..\..\..\SRC\element\dispBeamColumn\TclDispBeamColumnCommand.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\20nbrick\TclTwenty_Node_BrickCommand.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\element\20nbrick\TclTwentyNodeBrickCommand.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\20nbrick\Twenty_Node_Brick.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\20nbrick\Twenty_Node_Brick.h
 # End Source File
 # Begin Source File
 

@@ -642,6 +642,14 @@ SOURCE=..\..\..\SRC\material\nD\soil\PressureDependMultiYield.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\nD\soil\PressureDependMultiYield02.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\soil\PressureDependMultiYield02.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\nD\soil\PressureIndependMultiYield.cpp
 # End Source File
 # Begin Source File
