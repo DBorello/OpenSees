@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2001-09-25 20:31:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltyMP_FE.cpp,v $
                                                                         
                                                                         
@@ -241,8 +241,21 @@ PenaltyMP_FE::determineTangent(void)
     
 
     // now form the tangent: [K] = alpha * [C]^t[C]
-    *(tang) = (*C)^(*C);
-    *(tang) *= alpha;
+    // *(tang) = (*C)^(*C);
+    // *(tang) *= alpha;
+
+	// THIS IS A WORKAROUND UNTIL WE GET addMatrixTransposeProduct() IN
+	// THE Matrix CLASS OR UNROLL THIS COMPUTATION
+	int rows = C->noRows();
+	int cols = C->noCols();
+	Matrix CT(cols,rows);
+	const Matrix &Cref = *C;
+	// Fill in the transpose of C
+	for (int k = 0; k < cols; k++)
+		for (int l = 0; l < rows; l++)
+			CT(k,l) = Cref(l,k);
+	// Compute alpha*(C^*C)
+	tang->addMatrixProduct(0.0, CT, Cref, alpha);
 }
 
 
