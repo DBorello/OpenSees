@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2003-03-11 20:41:14 $
+// $Revision: 1.8 $
+// $Date: 2004-09-01 04:01:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.cpp,v $
 
 // Written: Arash & GGD
@@ -43,6 +43,7 @@
 #include <ElementResponse.h>
 #include <UniaxialMaterial.h>
 #include <Joint2D.h>
+#include <DamageModel.h>
 
 
 Matrix Joint2D::K(16,16);
@@ -73,7 +74,169 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
 			     UniaxialMaterial &springC, Domain *theDomain, int LrgDisp)
   :Element(tag, ELE_TAG_Joint2D ), 
   ExternalNodes(5), InternalConstraints(4), 
-  TheDomain(0), numDof(0), nodeDbTag(0), dofDbTag(0)
+  TheDomain(0), numDof(0), nodeDbTag(0), dofDbTag(0),theLoadSens(0)
+{
+  int i;
+  numDof  = 16;
+
+  K.Zero();
+  V.Zero();
+
+  TheDomain = theDomain;
+  if( TheDomain==NULL ) {
+    opserr << "WARNING Joint2D(): Specified domain does not exist , Domain = 0\n";
+    return;
+  }
+
+  // Save external node id's
+  ExternalNodes(0) = nd1;
+  ExternalNodes(1) = nd2;
+  ExternalNodes(2) = nd3;
+  ExternalNodes(3) = nd4;
+  ExternalNodes(4) = IntNodeTag;
+  
+
+  // get  the external nodes
+  for ( i=0 ; i<4 ; i++)
+  {
+    theNodes[i] = NULL;
+    theNodes[i] = TheDomain->getNode( ExternalNodes(i) );
+    if (theNodes[i] == NULL) {
+      opserr << "WARNING Joint2D::setDomain(): Nd" <<(i+1) <<": ";
+      opserr << ExternalNodes(i) << "does not exist in model for element \n" << *this;
+      return;
+    }
+  }
+  
+  // check for a two dimensional domain, since this element supports only two dimensions 
+  const Vector &end1Crd = theNodes[0]->getCrds();
+  const Vector &end2Crd = theNodes[1]->getCrds();	
+  const Vector &end3Crd = theNodes[2]->getCrds();
+  const Vector &end4Crd = theNodes[3]->getCrds();
+  
+  int dimNd1 = end1Crd.Size();
+  int dimNd2 = end2Crd.Size();
+  int dimNd3 = end3Crd.Size();
+  int dimNd4 = end4Crd.Size();
+
+  if (dimNd1 != 2 || dimNd2 != 2 || dimNd3 != 2 || dimNd4 != 2 ) {
+    opserr << "WARNING Joint2D::setDomain(): has incorrect space dimension \n";
+    opserr << "                                    space dimension not supported by Joint2D";
+    return;
+  }
+	
+  // now verify the number of dof at node ends
+  int dofNd1 = theNodes[0]->getNumberDOF();
+  int dofNd2 = theNodes[1]->getNumberDOF();	
+  int dofNd3 = theNodes[2]->getNumberDOF();
+  int dofNd4 = theNodes[3]->getNumberDOF();
+
+  if (dofNd1 != 3 || dofNd2 != 3 || dofNd3 != 3 || dofNd4 != 3 ) {
+    opserr << "WARNING Joint2D::Joint2D: has incorrect degrees of freedom \n";
+    opserr << "                                    DOF not supported by Joint2D";
+    return;
+  }
+  
+  // check the joint size. The joint size must be non-zero
+  Vector Center1(end1Crd);
+  Vector Center2(end2Crd);
+  Center1 = Center1 - end3Crd;
+  Center2 = Center2 - end4Crd;
+	
+  double L1 = Center1.Norm();
+  double L2 = Center2.Norm();
+  
+  if( Center1.Norm()<1e-12  || Center2.Norm()<1e-12 ) {
+    opserr << "WARNING Joint2D::(): zero length\n";
+    return;	
+  }
+	
+  // check if nodes are not located on each other and they can construct
+  // a parallelogram
+  Center1 = end1Crd + end3Crd;
+  Center2 = end2Crd + end4Crd;
+  
+  Center1 = 0.5 * Center1;
+  Center2 = 0.5 * Center2;
+  
+  Vector Center3(Center2);
+  Center3 = Center3 - Center1;
+
+  if ( Center3.Norm() > 1e-6 ) {
+    opserr << "WARNING Joint2D::(): can not construct a paralelogram over external nodes\n";
+    return;	
+  }
+	
+  // Generate internal node and add it up to domain
+  theNodes[4]  = new Node ( IntNodeTag , 4, Center1(0) , Center1(1) );
+  if ( theNodes[4] == NULL ) {
+    opserr << "Joint2D::Joint2D - Unable to generate new nodes , out of memory\n" ;
+  } else {
+    if( TheDomain->addNode( theNodes[4] ) == false )		// add intenal nodes to domain
+      opserr << "Joint2D::Joint2D - unable to add internal nodeto domain\n";
+  }
+  
+  // make copy of the uniaxial materials for the element
+  
+  if ( &spring1 == NULL ) { fixedEnd[0] = 1;  theSprings[0] = NULL; } else { fixedEnd[0] = 0; theSprings[0] = spring1.getCopy(); }
+  if ( &spring2 == NULL ) { fixedEnd[1] = 1;  theSprings[1] = NULL; } else { fixedEnd[1] = 0; theSprings[1] = spring2.getCopy(); }  
+  if ( &spring3 == NULL ) { fixedEnd[2] = 1;  theSprings[2] = NULL; } else { fixedEnd[2] = 0; theSprings[2] = spring3.getCopy(); }
+  if ( &spring4 == NULL ) { fixedEnd[3] = 1;  theSprings[3] = NULL; } else { fixedEnd[3] = 0; theSprings[3] = spring4.getCopy(); }
+  if ( &springC == NULL ) { opserr << "ERROR Joint2D::Joint2D(): The central node does not exist "; exit(-1); } else { fixedEnd[4] = 0; theSprings[4] = springC.getCopy(); }
+  
+  
+  for ( i=0 ; i<5 ; i++ )
+    {
+      if ( fixedEnd[i] == 0  && theSprings[i] == NULL ) {
+	opserr << "ERROR Joint2D::Joint2D(): Can not make copy of uniaxial materials, out of memory ";
+	exit(-1);
+      }
+    }
+  
+  // Generate and add constraints to domain
+  
+  // get the constraint numbers
+  int startMPtag = theDomain->getNumMPs();
+  for ( i=0 ; i<4 ; i++ ) InternalConstraints(i) = startMPtag + i ;
+  
+  // create MP_Joint constraint node 1
+  if ( addMP_Joint( TheDomain, InternalConstraints(0), ExternalNodes(4), ExternalNodes(0), 2, fixedEnd[0], LrgDisp ) != 0) {
+    opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 1\n";
+    return;
+  }
+  
+  // create MP_Joint constraint node 2
+  if ( addMP_Joint( TheDomain, InternalConstraints(1), ExternalNodes(4), ExternalNodes(1), 3, fixedEnd[1], LrgDisp ) != 0) {
+    opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 2\n";
+		return;
+  }
+  
+  // create MP_Joint constraint node 3
+  if ( addMP_Joint( TheDomain, InternalConstraints(2), ExternalNodes(4), ExternalNodes(2), 2, fixedEnd[2], LrgDisp ) != 0) {
+    opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 3\n";
+    return;
+  }
+  
+  // create MP_Joint constraint node 4
+  if ( addMP_Joint( TheDomain, InternalConstraints(3), ExternalNodes(4), ExternalNodes(3), 3, fixedEnd[3], LrgDisp ) != 0) {
+    opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 4\n";
+    return;
+  }
+
+  // Zero the damage models
+  for ( i = 0 ; i < 5 ; i++ ) theDamages[i] = NULL;
+}
+
+
+Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
+			     UniaxialMaterial &spring1,	UniaxialMaterial &spring2,
+			     UniaxialMaterial &spring3, UniaxialMaterial &spring4,
+			     UniaxialMaterial &springC, Domain *theDomain, int LrgDisp,
+				 DamageModel &dmg1, DamageModel &dmg2, DamageModel &dmg3,
+				 DamageModel &dmg4, DamageModel &dmgC)
+  :Element(tag, ELE_TAG_Joint2D ), 
+  ExternalNodes(5), InternalConstraints(4), 
+  TheDomain(0), numDof(0), nodeDbTag(0), dofDbTag(0),theLoadSens(0)
 {
   int i;
   numDof  = 16;
@@ -221,6 +384,15 @@ Joint2D::Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
     opserr << "WARNING Joint2D::Joint2D(): can not generate ForJoint MP at node 4\n";
     return;
   }
+  	// Handle the damage models
+	if ( &dmg1 == NULL ) { theDamages[0] = NULL; } else { theDamages[0] = dmg1.getCopy(); }
+	if ( &dmg2 == NULL ) { theDamages[1] = NULL; } else { theDamages[1] = dmg2.getCopy(); }
+	if ( &dmg3 == NULL ) { theDamages[2] = NULL; } else { theDamages[2] = dmg3.getCopy(); }
+	if ( &dmg4 == NULL ) { theDamages[3] = NULL; } else { theDamages[3] = dmg4.getCopy(); }
+	if ( &dmgC == NULL ) { theDamages[4] = NULL; } else { theDamages[4] = dmgC.getCopy(); }
+
+	for ( i = 0 ; i < 5 ; i ++ ) if ( theDamages[i] != NULL ) theDamages[i]->revertToStart();
+				
 }
 
 
@@ -248,8 +420,10 @@ Joint2D::~Joint2D()
 		}
 	}
 
-	for (int i=0 ; i<5 ; i++)
+	for (int i=0 ; i<5 ; i++) {
 		if ( theSprings[i] != NULL ) delete theSprings[i];
+		if ( theDamages[i] != NULL ) delete theDamages[i];
+	}
 }
 
 
@@ -305,14 +479,12 @@ int Joint2D::update(void)
 	const Vector &disp3 = theNodes[2]->getTrialDisp();
 	const Vector &disp4 = theNodes[3]->getTrialDisp();
 	const Vector &dispC = theNodes[4]->getTrialDisp();
-
 	double Delta[5];
 	Delta[0] = disp1(2) - dispC(3);
 	Delta[1] = disp2(2) - dispC(2);
 	Delta[2] = disp3(2) - dispC(3);
 	Delta[3] = disp4(2) - dispC(2);
 	Delta[4] = dispC(3) - dispC(2);
-
 	int result = 0;
 
 	for ( int i=0 ; i<5 ; i++ )
@@ -320,7 +492,7 @@ int Joint2D::update(void)
 		if ( theSprings[i] != NULL ) result = theSprings[i]->setTrialStrain(Delta[i]);
 		if ( result != 0 ) break;
 	}
-	
+
 	return result;
 }
 
@@ -328,10 +500,27 @@ int Joint2D::commitState()
 {
 	int result = 0;
 
+
+	// setting the trial state for the damage models
+
+	Vector InforForDamage(3);
+
+
 	for ( int i=0 ; i<5 ; i++ )
 	{
 		if ( theSprings[i] != NULL ) result = theSprings[i]->commitState();
 		if ( result != 0 ) break;
+
+		if ( theSprings[i] != NULL && theDamages[i] != NULL ) {
+			InforForDamage(0) = theSprings[i]->getStrain();
+			InforForDamage(1) = theSprings[i]->getStress();
+			InforForDamage(2) = theSprings[i]->getInitialTangent();
+				
+			theDamages[i]->setTrial(InforForDamage);
+			result = theDamages[i]->commitState();
+			if ( result != 0 ) break;
+		}
+
 	}
 	
 	return result;
@@ -345,6 +534,8 @@ int Joint2D::revertToLastCommit()
 	{
 		if ( theSprings[i] != NULL ) result = theSprings[i]->revertToLastCommit();
 		if ( result != 0 ) break;
+		if ( theDamages[i] != NULL ) result = theDamages[i]->revertToLastCommit();
+		if ( result != 0 ) break;
 	}
 	
 	return result;
@@ -357,6 +548,8 @@ int Joint2D::revertToStart(void)
 	for ( int i=0 ; i<5 ; i++ )
 	{
 		if ( theSprings[i] != NULL ) result = theSprings[i]->revertToStart();
+		if ( result != 0 ) break;
+		if ( theDamages[i] != NULL ) result = theDamages[i]->revertToStart();
 		if ( result != 0 ) break;
 	}
 	
@@ -581,15 +774,14 @@ Response* Joint2D::setResponse(const char **argv, int argc, Information &eleInfo
 //
 // we compare argv[0] for known response types for the Truss
 //
-
 	if (strcmp(argv[0],"node") == 0 || strcmp(argv[0],"internalNode") == 0 )
     return new ElementResponse(this, 1, Vector(4));
 
 	else if (strcmp(argv[0],"size") == 0 || strcmp(argv[0],"jointSize") == 0 )
     return new ElementResponse(this, 2, Vector(2));
 
-	else if (strcmp(argv[0],"moment") == 0 || strcmp(argv[0],"moments") == 0 
-		|| strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 )
+	else if (strcmp(argv[0],"moment") == 0 || strcmp(argv[0],"-moment") == 0 
+		|| strcmp(argv[0],"force") == 0 || strcmp(argv[0],"-force") == 0 )
     return new ElementResponse(this, 3, Vector(5));
 
 	else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
@@ -605,6 +797,19 @@ Response* Joint2D::setResponse(const char **argv, int argc, Information &eleInfo
 	
 	else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0)
 		return new ElementResponse(this, 7, Vector(5));
+
+	else if ( strcmp(argv[0],"damage") == 0 || strcmp(argv[0],"damages") == 0 ||
+		strcmp(argv[0],"-damage") == 0 || strcmp(argv[0],"-damages") == 0)
+		return new ElementResponse(this, 8, Vector(5));
+	// material response
+	else if ( (strcmp(argv[0],"spring")==0) || (strcmp(argv[0],"-spring") == 0) ||
+		(strcmp(argv[0],"material")==0) || (strcmp(argv[0],"-material") == 0) ) {
+		int materialNum = atoi(argv[1]) - 1;
+		
+		if (materialNum >= 0 && materialNum < 5)
+			if (theSprings[materialNum] != 0)
+				return theSprings[materialNum]->setResponse(&argv[2], argc-2, eleInformation);
+	}
 
 	else 
 		return 0;
@@ -721,6 +926,19 @@ int Joint2D::getResponse(int responseID, Information &eleInformation)
 				}
 				
 			}			
+		}
+		return 0;
+
+	case 8:
+		if(eleInformation.theVector!=0)
+		{
+			for ( int i=0 ; i<5 ; i++ )
+			{
+				(*(eleInformation.theVector))(i) = 0.0;
+				if ( theDamages[i] != NULL ) {
+					(*(eleInformation.theVector))(i) = theDamages[i]->getDamage();
+				}
+			}
 		}
 		return 0;
 	
@@ -873,122 +1091,213 @@ int Joint2D::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theB
 }
 
 
-/**********************
-const Vector &
-Joint2D::gradient(bool compute, int identifier)
+// AddingSensitivity:BEGIN ///////////////////////////////////
+int 
+Joint2D::addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool somethingRandomInMotions)
 {
-  //	The gradient method can be called with four different purposes:
-  //      1) To clear the sensitivity flag so that the object does not contribute:
-  //	     	gradient(false, 0)
-  //      2) To set the sensitivity flag so that the object contributes
-  //         (the sensitivity flag is stored as the value of parameterID):
-  //		gradient(false, parameterID)
-  //      3) To obtain the gradient vector from the object (like for the residual):
-  //		gradient(true, 0)
-  //      4) To commit unconditional sensitivities for path-dependent problems:
-  //		gradient(true, gradNumber)
 
-  // COMPUTE GRADIENTS
-  if (compute) {
-    // IF "PHASE 1" IN THE GRADIENT COMPUTATIONS (RETURN GRADIENT VECTOR)
-    if (identifier == 0) {
-      V.Zero();
-      if ( gradientIdentifier != 0 ) {
-				// Determine the current strain and set the strain at material level
-	this->update();
+  if (theLoadSens == 0) {
+    theLoadSens = new Vector(numDof);
+  }
+  else {
+    theLoadSens->Zero();
+  }
 
+  return 0;
+}
+
+
+int
+Joint2D::setParameter (const char **argv, int argc, Information &info)
+{//
+	// From the parameterID value it should be possible to extract
+	// information about:
+	//  1) Which parameter is in question. The parameter could
+	//     be at element, section, or material level. 
+	//  2) Which section and material number (tag) it belongs to. 
+	//
+	// To accomplish this the parameterID is given the following value:
+	//     parameterID = type + 1000*matrTag + 100000*sectionTag
+	// ...where 'type' is an integer in the range (1-99) and added 100
+	// for each level (from material to section to element). 
+	//
+	// Example:
+	//    If 'E0' (case 2) is random in material #3 of section #5
+	//    the value of the parameterID at this (element) level would be:
+	//    parameterID = 2 + 1000*3 + 100000*5 = 503002
+	//    As seen, all given information can be extracted from this number. 
+	//
+
+	int ok = -1;
+	if (argc < 3)
+        return ok;
+
+    // a material parameter
+    if (strcmp(argv[0],"-material") == 0 || strcmp(argv[0],"material") == 0) {
+		// Get material tag numbers from user input
+		int paramMaterialTag = atoi(argv[1]);
+		if ( paramMaterialTag<0 || paramMaterialTag>4 ) {
+			opserr << "Joint2D::setParameter() - material number out of range, must be 0 to 4." << endln;
+		return -1;
+		}
+
+		// Find the material and call its setParameter method
+		if ( theSprings[paramMaterialTag] != NULL )
+			ok = theSprings[paramMaterialTag]->setParameter(&argv[2], argc-2, info);
+		
+		// Check if the ok is valid
+		if (ok < 0) {
+			opserr << "Joint2D::setParameter() - could not set parameter. " << endln;
+			return -1;
+		}
+		else {
+			// Return the ok value (according to the above comments)
+			return 1000*paramMaterialTag + ok;
+		}
+	}		
+		 
+    // otherwise parameter is unknown for the Joint2D class
+      return -1;
+}
+
+int
+Joint2D::updateParameter (int parameterID, Information &info)
+{
+	// Extract section and material tags from the passedParameterID
+	int MaterialTag = (int)( floor( (double)parameterID / 1000.0 ) );
+	int MaterialParameterID = parameterID-1000*MaterialTag;
+	if ( MaterialTag<0 || MaterialTag>4 ) {
+		opserr << "Joint2D::updateParameter() - material number out of range, must be 0 to 4." << endln;
+		return -1;
+	}
 	
-	// Compute sensitivity depending on 'parameter'
-	if( gradientIdentifier == 1 ) {
-	  double FC[5] ;
-	  for ( int i=0 ; i<5 ; i++ ) 
-	    {
-	      FC[i] = 0;
-	      if ( theSprings[i] != NULL ) FC[i] = theSprings[i]->getStress();
-	    }
-	  
-	  V.Zero();
-	  
-	  V(2) = FC[0];
-	  V(5) = FC[1];
-	  V(8) = FC[2];
-	  V(11)= FC[3];
-	  V(14)= -FC[4] - FC[1] - FC[3];
-	  V(15)= FC[4] - FC[0] - FC[2];
+	// Go down to the material and set appropriate flags
+	if ( theSprings[MaterialTag] != NULL )
+		return theSprings[MaterialTag]->updateParameter(MaterialParameterID,info);
+	
+	return -1;
+}
+
+
+int
+Joint2D::activateParameter(int passedParameterID)
+{
+	// Note that the parameteID that is stored here at the 
+	// element level contains all information about section
+	// and material tag number:
+	parameterID = passedParameterID;
+
+	if (passedParameterID == 0 ) {
+		// "Zero out" all flags downwards through sections/materials 
+		for (int i=0; i<5; i++) {
+			if ( theSprings[i] !=0 )
+				theSprings[i]->activateParameter(passedParameterID);
+		}
 	}
 	else {
-	  
-	  double MG[5] ;
-	  for ( int i=0 ; i<5 ; i++ ) 
-	    {
-	      MG[i] = 0;
-	      if ( theSprings[i] != NULL ) theSprings[i]->gradient(compute, identifier,MG[i]);
-	    }
-	  
-	  V.Zero();
-	  
-	  V(2) = MG[0];
-	  V(5) = MG[1];
-	  V(8) = MG[2];
-	  V(11)= MG[3];
-	  V(14)= -MG[4] - MG[1] - MG[3];
-	  V(15)= MG[4] - MG[0] - MG[2];
+		
+		// Extract section and material tags from the passedParameterID
+		int activeMaterialTag = (int)( floor( (double)passedParameterID / 1000.0 ) );
+
+		if ( activeMaterialTag<0 || activeMaterialTag>4 ) {
+			opserr << "Joint2D::activateParameter() - material number out of range, must be 0 to 4." << endln;
+			return -1;
+		}
+		
+		// Go down to the material and set appropriate flags
+		if ( theSprings[activeMaterialTag] != NULL ) {
+			theSprings[activeMaterialTag]->activateParameter(passedParameterID-1000*activeMaterialTag);
+		}
 	}
-      }
-      return V;
-    }
-    // IF "PHASE 2" IN THE GRADIENT COMPUTATIONS (COMMIT UNCONDITIONAL GRADIENT)
-    else {
-      if ( gradientIdentifier == 0 ) {
-      }
-      else if ( gradientIdentifier == 1 ) {
 	
-	// Nothing needs to be committed if the area is random
-      }
-      else {
-	// Compute strain sensitivity
-	
-	double sens1  = theNodes[0]->getGradient(3, identifier);
-	double sens2  = theNodes[1]->getGradient(3, identifier);
-	double sens3  = theNodes[2]->getGradient(3, identifier);
-	double sens4  = theNodes[3]->getGradient(3, identifier);
-	double sensC3 = theNodes[4]->getGradient(3, identifier);
-	double sensC4 = theNodes[4]->getGradient(4, identifier);
-	
-	double MG[5];
-	MG[0] = sens1 - sensC4;
-	MG[1] = sens2 - sensC3;
-	MG[2] = sens3 - sensC4;
-	MG[3] = sens4 - sensC3;
-	MG[4] = sensC4 - sensC3;
-	
-	// Pass it down to the materials
-	for ( int i=0 ; i<5 ; i++ )
-	  if ( theSprings[i] != NULL ) 	theSprings[i]->gradient(compute,identifier,MG[i]);		
-      }
-      return 0;
-    }
-  }
-  
-  // DO NOT COMPUTE GRADIENTS, JUST SET FLAG
-  else {
-    // Set gradient identifier
-    gradientIdentifier = identifier;
-    
-    // The identifier needs to be passed "downwards" also when it's zero
-    if (identifier == 0 ) {
-      double dummy=0;
-      for ( int i=0 ; i<5 ; i++ )
-	if ( theSprings[i] != NULL ) 	theSprings[i]->gradient(false, identifier,dummy);
-    }
-    
-    // If the identifier is non-zero and the parameter belongs to the material
-    else if ( identifier > 100) {
-      double dummy=0;
-      for ( int i=0 ; i<5 ; i++ )
-	if ( theSprings[i] != NULL ) 	theSprings[i]->gradient(false, identifier-100,dummy);
-    }
-    return 0;
-  }
+	return 0;
 }
-*******************/
+
+
+const Matrix &
+Joint2D::getKiSensitivity(int gradNumber)
+{
+	K.Zero();
+    
+	if (parameterID == 0) {
+		// // Nothing here
+	}
+	
+	else {
+		double KtangentSensitivity[5] ;
+		for ( int i=0 ; i<5 ; i++ ) 
+		{
+			KtangentSensitivity[i] = 0;
+			if ( theSprings[i] != NULL ) 
+				KtangentSensitivity[i] = theSprings[i]->getInitialTangentSensitivity(gradNumber);
+		}
+		
+		K(2,2)  =  KtangentSensitivity[0];
+		K(2,15) = -KtangentSensitivity[0];
+		K(5,5)  =  KtangentSensitivity[1];
+		K(5,14) = -KtangentSensitivity[1];
+		K(8,8)  =  KtangentSensitivity[2];
+		K(8,15) = -KtangentSensitivity[2];
+		K(11,11)=  KtangentSensitivity[3];
+		K(11,14)= -KtangentSensitivity[3];
+		K(14,5) = -KtangentSensitivity[1];
+		K(14,11)= -KtangentSensitivity[3];
+		K(14,14)=  KtangentSensitivity[1] + KtangentSensitivity[3] + KtangentSensitivity[4];
+		K(14,15)= -KtangentSensitivity[4];
+		K(15,2) = -KtangentSensitivity[0];
+		K(15,8) = -KtangentSensitivity[2];
+		K(15,14)= -KtangentSensitivity[4];
+		K(15,15)=  KtangentSensitivity[0] + KtangentSensitivity[2] + KtangentSensitivity[4];
+	}
+	
+	return K;
+}
+
+
+const Matrix &
+Joint2D::getMassSensitivity(int gradNumber)
+{
+  	K.Zero();
+	return K;
+}
+
+
+const Vector &
+Joint2D::getResistingForceSensitivity(int gradNumber)
+{
+	this->update();
+	V.Zero();
+	
+	// Compute sensitivity depending on the material
+	double ForceSensitivity[5] ;
+	for ( int i=0 ; i<5 ; i++ ) 
+	{
+		ForceSensitivity[i] = 0;
+		if ( theSprings[i] != NULL ) ForceSensitivity[i] = theSprings[i]->getStressSensitivity(gradNumber,true);
+	}
+
+	V(2) = ForceSensitivity[0];
+	V(5) = ForceSensitivity[1];
+	V(8) = ForceSensitivity[2];
+	V(11)= ForceSensitivity[3];
+	V(14)= -ForceSensitivity[4] - ForceSensitivity[1] - ForceSensitivity[3];
+	V(15)= ForceSensitivity[4] - ForceSensitivity[0] - ForceSensitivity[2];
+
+	return V;
+}
+
+
+int
+Joint2D::commitSensitivity(int gradNumber, int numGrads)
+{
+
+	double strainSensitivity = 0.0;
+	// Pass it down to the material
+	for ( int i=0 ; i<5 ; i++ )
+		if ( theSprings[i] != NULL )
+			theSprings[i]->commitSensitivity(strainSensitivity, gradNumber, numGrads);
+
+	return 0;
+}
+
+// AddingSensitivity:END /////////////////////////////////////////////

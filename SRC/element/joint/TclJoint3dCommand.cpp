@@ -19,11 +19,11 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.2 $
-// $Date: 2003-11-26 20:34:12 $
+// $Revision: 1.3 $
+// $Date: 2004-09-01 04:01:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/TclJoint3dCommand.cpp,v $
 
-// Written: Arash	Created: 04/01
+// Written: Arash Altoontash, Gregory Deierlein,	Created: 04/01
 // Revision: 
 //				AAA		02/03
 //

@@ -18,11 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2003-11-25 23:17:58 $
+// $Revision: 1.2 $
+// $Date: 2004-09-01 04:01:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint3D.h,v $
 
-// Written: Arash & GGD
+// Written: Arash Altoontash, Gregory Deierlein
 // Created: 04/03
 // Revision: Arash
 

@@ -18,11 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-11-25 23:17:58 $
+// $Revision: 1.2 $
+// $Date: 2004-09-01 04:01:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint3D.cpp,v $
 
-// Written: Arash & GGD
+// Written: Arash Altoontash, Gregory Deierlein
 // Created: 04/03
 // Revision: Arash
 
@@ -316,7 +316,7 @@ MP_Joint3D::applyConstraint(double timeStamp)
       (*constraint) (5,6) = RotNormVect(2);
       (*constraint) (0,7) = deltaZ*DspNormVect(1) - deltaY*DspNormVect(2);
       (*constraint) (1,7) = deltaX*DspNormVect(2) - deltaZ*DspNormVect(0) ;
-      (*constraint) (1,7) = deltaY*DspNormVect(0) - deltaX*DspNormVect(1) ;
+      (*constraint) (2,7) = deltaY*DspNormVect(0) - deltaX*DspNormVect(1) ;
     }
   return 0;
 }

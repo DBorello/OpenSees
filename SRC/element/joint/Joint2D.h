@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2003-03-11 20:41:14 $
+// $Revision: 1.7 $
+// $Date: 2004-09-01 04:01:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.h,v $
 
 // Written: Arash & GGD
@@ -43,6 +43,7 @@
 class Node;
 class UniaxialMaterial;
 class Response;
+class DamageModel;
 
 class Joint2D : public Element  
 {
@@ -50,15 +51,28 @@ public:
   Joint2D();
 
   Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
-	  UniaxialMaterial &spring1,
-	  UniaxialMaterial &spring2,
-	  UniaxialMaterial &spring3,
-	  UniaxialMaterial &spring4,
-	  UniaxialMaterial &springC,
-	  Domain *theDomain,
-	  int LrgDisp);
+	UniaxialMaterial &spring1,
+	UniaxialMaterial &spring2,
+	UniaxialMaterial &spring3,
+	UniaxialMaterial &spring4,
+	UniaxialMaterial &springC,
+	Domain *theDomain,
+	int LrgDisp);
   
-  
+    Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
+	UniaxialMaterial &spring1,
+	UniaxialMaterial &spring2,
+	UniaxialMaterial &spring3,
+	UniaxialMaterial &spring4,
+	UniaxialMaterial &springC,
+	Domain *theDomain,
+	int LrgDisp,
+	DamageModel &dmg1,
+	DamageModel &dmg2,
+	DamageModel &dmg3,
+	DamageModel &dmg4,
+	DamageModel &dmgC);
+
   ~Joint2D();
   
   // methods dealing with domain
@@ -102,15 +116,23 @@ public:
   int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
   void Print(OPS_Stream &s, int flag =0);
 
-  // AddingSensitivity:BEGIN //////////////////////////////////////////
-  // const Vector & gradient(bool compute, int identifier);
-  // AddingSensitivity:END ///////////////////////////////////////////
+    // AddingSensitivity:BEGIN //////////////////////////////////////////
+    int	  addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag);
+    int   setParameter(const char **argv, int argc, Information &info);
+    int   updateParameter(int parameterID, Information &info);
+    int   activateParameter(int parameterID);
+    const Vector & getResistingForceSensitivity(int gradNumber);
+    const Matrix & getKiSensitivity(int gradNumber);
+    const Matrix & getMassSensitivity(int gradNumber);
+    int   commitSensitivity(int gradNumber, int numGrads);
+    // AddingSensitivity:END ///////////////////////////////////////////
 
  protected:
   int 	addMP_Joint(Domain *theDomain, int mpNum, int RnodeID, int CnodeID, int MainDOF, int FixedEnd, int LrgDispFlag );   
 
  private:
   UniaxialMaterial *theSprings[5]; 
+  DamageModel *theDamages[5];
   ID		ExternalNodes;
   ID		InternalConstraints;
   int       fixedEnd[5];
@@ -121,8 +143,8 @@ public:
   static	Vector V;
 
   // AddingSensitivity:BEGIN //////////////////////////////////////////
-  int gradientIdentifier;
-  int gradientMaterialTag;
+  int parameterID;
+  Vector *theLoadSens;
   // AddingSensitivity:END ///////////////////////////////////////////
 };
 

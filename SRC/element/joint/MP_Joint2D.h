@@ -18,14 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-04 21:07:18 $
+// $Revision: 1.4 $
+// $Date: 2004-09-01 04:01:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint2D.h,v $
                                                                         
 #ifndef MP_Joint2D_h
 #define MP_Joint2D_h
 
-// Written: Arash & GGD
+// Written: Arash Altoontash, Gregory Deierlein
 // Created: 08/01
 // Revision: Arash
 
