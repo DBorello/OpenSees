@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:44:30 $
+// $Revision: 1.3 $
+// $Date: 2000-12-18 11:08:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/UniaxialFiber3d.h,v $
                                                                         
                                                                         
@@ -41,8 +41,8 @@
 #ifndef UniaxialFiber3d_h
 #define UniaxialFiber3d_h
 
-#include <UniaxialFiber.h>
 #include <Matrix.h>
+#include <Fiber.h>
 
 class UniaxialMaterial;
 class Response;
