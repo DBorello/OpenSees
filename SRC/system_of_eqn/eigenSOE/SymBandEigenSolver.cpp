@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-11-19 22:44:00 $
+// $Revision: 1.2 $
+// $Date: 2001-11-20 02:45:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/SymBandEigenSolver.cpp,v $
 
 // Written: MHS
@@ -59,7 +59,8 @@ SymBandEigenSolver::~SymBandEigenSolver()
 
 #ifdef _WIN32
 
-extern "C" int _stdcall DSBEVX(char *jobz, char *range, char *uplo, int *n, int *kd,
+extern "C" int _stdcall DSBEVX(char *jobz, unsigned int *a, char *range, unsigned int *b, 
+							   char *uplo, unsigned int *c, int *n, int *kd,
 			       double *ab, int *ldab, double *q, int *ldq,
 			       double *vl, double *vu, int *il, int *iu, double *abstol,
 			       int *m, double *w, double *z, int *ldz,
