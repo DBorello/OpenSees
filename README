@@ -15,6 +15,9 @@ This directory contains the following:
 	PREINSTALLED THE TCL/TK LIBRARIES AND INCLUDE FILES. These 
 	can be found at http://dev.scriptics.com/software/tcltk.
 	If you are running LINUX you probably already have the files.
+	NOTE THAT BEFORE YOU RUN 'make', YOU NEED TO HAVE CREATED THE 
+	DIRECTORIES '$(HOME)/lib' and '$(HOME)/bin' where $(HOME) is
+	what you have defined in Makefile.def.
 
 	Makefile.def this is the one file you must edit. You need to
 	set paths, library names, your favorite compiler and compiler 
