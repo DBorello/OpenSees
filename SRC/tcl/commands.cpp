@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.34 $
-// $Date: 2002-07-17 18:27:27 $
+// $Revision: 1.35 $
+// $Date: 2002-07-17 19:26:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2371,7 +2371,7 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
     } else if (typeSolver == 1) {
       SymArpackSolver *theEigenSolver = new SymArpackSolver(numEigen); 
       theEigenSOE = new SymArpackSOE(*theEigenSolver, *theEigenModel);    
-    } else if (typeSolver == 3) {  
+    } else if (typeSolver == 2) {  
       BandArpackSolver *theEigenSolver = new BandArpackSolver(numEigen); 
       theEigenSOE = new BandArpackSOE(*theEigenSolver, *theEigenModel);    
     }      
