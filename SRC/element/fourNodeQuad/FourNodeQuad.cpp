@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2001-10-01 20:23:06 $
+// $Revision: 1.12 $
+// $Date: 2001-10-24 23:50:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -54,8 +54,9 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
 	NDMaterial &m, const char *type, double t,
 	double p, double r, double b1, double b2)
 :Element (tag, ELE_TAG_FourNodeQuad), 
- pressureLoad(8), thickness(t), rho(r),
- Q(8), pressure(p), connectedExternalNodes(4), theMaterial(0)
+  theMaterial(0), connectedExternalNodes(4), 
+  nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0),
+  Q(8), pressureLoad(8), thickness(t), rho(r), pressure(p)
 {
 	pts[0][0] = -0.5773502691896258;
 	pts[0][1] = -0.5773502691896258;
@@ -102,8 +103,9 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
 
 FourNodeQuad::FourNodeQuad()
 :Element (0,ELE_TAG_FourNodeQuad),
- pressureLoad(8), thickness(0.0), rho(0.0), Q(8), pressure(0.0),
- connectedExternalNodes(4), theMaterial(0)
+  theMaterial(0), connectedExternalNodes(4), 
+  nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0),
+  Q(8), pressureLoad(8), thickness(0.0), rho(0.0), pressure(0.0)
 {
 	pts[0][0] = -0.577350269189626;
 	pts[0][1] = -0.577350269189626;
