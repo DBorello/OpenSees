@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-27 06:55:51 $
+// $Revision: 1.3 $
+// $Date: 2002-06-06 18:24:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dPointLoad.cpp,v $
                                                                         
 // Written: fmk 
@@ -29,16 +29,19 @@
 #include <Beam2dPointLoad.h>
 #include <Vector.h>
 
-Vector Beam2dPointLoad::data(2);
+Vector Beam2dPointLoad::data(3);
 
-Beam2dPointLoad::Beam2dPointLoad(int tag, double mag, double dist, const ID &theElementTags)
-  :ElementalLoad(tag, LOAD_TAG_Beam2dPointLoad, theElementTags), P(mag), x(dist)
+Beam2dPointLoad::Beam2dPointLoad(int tag, double Pt, double dist,
+				 const ID &theElementTags, double Pa)
+  :ElementalLoad(tag, LOAD_TAG_Beam2dPointLoad, theElementTags),
+   Ptrans(Pt), Paxial(Pa), x(dist)
 {
 
 }
 
 Beam2dPointLoad::Beam2dPointLoad()
-  :ElementalLoad(LOAD_TAG_Beam2dPointLoad), P(0.0), x(0.0)
+  :ElementalLoad(LOAD_TAG_Beam2dPointLoad),
+   Ptrans(0.0), Paxial(0.0), x(0.0)
 {
 
 }
@@ -52,8 +55,9 @@ const Vector &
 Beam2dPointLoad::getData(int &type, double loadFactor)
 {
   type = LOAD_TAG_Beam2dPointLoad;
-  data(0) = P;
-  data(1) = x;
+  data(0) = Ptrans;
+  data(1) = Paxial;
+  data(2) = x;
   return data;
 }
 
@@ -72,6 +76,7 @@ Beam2dPointLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker 
 void 
 Beam2dPointLoad::Print(ostream &s, int flag)
 {
-  s << "Beam2dPointLoad - reference load : " << P << " acting at : " << x << " relative to length\n";
+  s << "Beam2dPointLoad - reference load : (" << Ptrans
+    << ", " << Paxial << ") acting at : " << x << " relative to length\n";
   s << "  elements acted on: " << this->getElementTags();
 }

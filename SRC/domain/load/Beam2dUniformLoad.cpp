@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-27 06:55:51 $
+// $Revision: 1.3 $
+// $Date: 2002-06-06 18:24:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dUniformLoad.cpp,v $
                                                                         
 
@@ -30,16 +30,18 @@
 #include <Beam2dUniformLoad.h>
 #include <Vector.h>
 
-Vector Beam2dUniformLoad::data(1);
+Vector Beam2dUniformLoad::data(2);
 
-Beam2dUniformLoad::Beam2dUniformLoad(int tag, double value, const ID &theElementTags)
-  :ElementalLoad(tag, LOAD_TAG_Beam2dUniformLoad, theElementTags), w(value)
+Beam2dUniformLoad::Beam2dUniformLoad(int tag, double wt, double wa,
+				     const ID &theElementTags)
+  :ElementalLoad(tag, LOAD_TAG_Beam2dUniformLoad, theElementTags),
+   wTrans(wt), wAxial(wa)
 {
 
 }
 
 Beam2dUniformLoad::Beam2dUniformLoad()
-  :ElementalLoad(LOAD_TAG_Beam2dUniformLoad), w(0.0)
+  :ElementalLoad(LOAD_TAG_Beam2dUniformLoad), wTrans(0.0), wAxial(0.0)
 {
 
 }
@@ -53,7 +55,8 @@ const Vector &
 Beam2dUniformLoad::getData(int &type, double loadFactor)
 {
   type = LOAD_TAG_Beam2dUniformLoad;
-  data(0) = w;
+  data(0) = wTrans;
+  data(1) = wAxial;
   return data;
 }
 
@@ -73,6 +76,8 @@ Beam2dUniformLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroke
 void 
 Beam2dUniformLoad::Print(ostream &s, int flag)
 {
-  s << "Beam2dUniformLoad - reference load : " << w << endl;
-  s << "  elements acted on: " << this->getElementTags();
+  s << "Beam2dUniformLoad - Reference load" << endl;
+  s << "  Transverse: " << wTrans << endl;
+  s << "  Axial:      " << wAxial << endl;
+  s << "  Elements acted on: " << this->getElementTags();
 }

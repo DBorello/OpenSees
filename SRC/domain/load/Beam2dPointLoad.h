@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-11-26 22:55:34 $
+// $Revision: 1.2 $
+// $Date: 2002-06-06 18:24:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dPointLoad.h,v $
                                                                         
 #ifndef Beam2dPointLoad_h
@@ -34,7 +34,8 @@
 class Beam2dPointLoad : public ElementalLoad
 {
   public:
-    Beam2dPointLoad(int tag, double P, double x, const ID &theElementTags);
+    Beam2dPointLoad(int tag, double Pt, double x,
+		    const ID &theElementTags, double Pa = 0.0);
     Beam2dPointLoad();    
     ~Beam2dPointLoad();
 
@@ -47,7 +48,8 @@ class Beam2dPointLoad : public ElementalLoad
   protected:
 	
   private:
-    double P;     // magnitude of the load
+    double Ptrans;     // magnitude of the transverse load
+    double Paxial;     // magnitude of the axial load
     double x;     // relative distance (x/L) along length from end 1 of element
     static Vector data;
 };
