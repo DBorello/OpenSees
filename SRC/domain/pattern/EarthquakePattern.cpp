@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-09-05 22:50:18 $
+// $Revision: 1.3 $
+// $Date: 2002-10-10 21:15:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.cpp,v $
                                                                         
                                                                         
@@ -76,6 +76,10 @@ EarthquakePattern::applyLoad(double time)
   if (numMotions == 0)
     return;
 
+  // check if setLoadConstant() has been called
+  if (isConstant != 0)
+    currentTime = time;
+
   Domain *theDomain = this->getDomain();
   if (theDomain == 0)
     return;
@@ -83,8 +87,8 @@ EarthquakePattern::applyLoad(double time)
 
   // set the vel and accel vector
   for (int i=0; i<numMotions; i++) {
-    (*uDotG)(i) = theMotions[i]->getVel(time);
-    (*uDotDotG)(i) = theMotions[i]->getAccel(time);
+    (*uDotG)(i) = theMotions[i]->getVel(currentTime);
+    (*uDotDotG)(i) = theMotions[i]->getAccel(currentTime);
   }
 
   NodeIter &theNodes = theDomain->getNodes();

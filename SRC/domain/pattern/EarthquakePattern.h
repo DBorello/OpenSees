@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2002-10-10 21:15:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.h,v $
                                                                         
                                                                         
@@ -66,6 +66,7 @@ class EarthquakePattern : public LoadPattern
 
   private:
     Vector *uDotG, *uDotDotG;
+    double currentTime;
 };
 
 #endif
