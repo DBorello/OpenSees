@@ -88,6 +88,11 @@ GLF_LIBS = $(FE)/element/zeroLength/ZeroLength.o \
 	$(FE)/element/zeroLength/ZeroLengthND.o \
 	$(FE)/element/zeroLength/TclZeroLength.o
 
+
+#	$(FE)/coordTransformation/CorotCrdTransf2d.o \
+#	$(FE)/coordTransformation/CorotCrdTransf3d.o \
+
+
 REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/nonlinearBeamColumn/quadrule/QuadRule1d.o \
 	$(FE)/element/nonlinearBeamColumn/quadrule/QuadRule1d01.o \
@@ -223,6 +228,10 @@ RECORDER_LIBS = $(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/response/ElementResponse.o \
 	$(FE)/recorder/response/MaterialResponse.o \
 	$(FE)/recorder/response/FiberResponse.o
+
+
+#	$(FE)/database/BerkeleyDbDatastore.o \
+#	$(FE)/database/MySqlDatastore.o \
 
 DATABASE_LIBS = $(FE)/database/FileDatastore.o \
 	$(FE)/database/FE_Datastore.o \
@@ -508,6 +517,9 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/convergenceTest/CTestNormUnbalance.o \
 	$(FE)/convergenceTest/CTestNormDispIncr.o \
 	$(FE)/convergenceTest/CTestEnergyIncr.o \
+	$(FE)/convergenceTest/CTestRelativeNormUnbalance.o \
+	$(FE)/convergenceTest/CTestRelativeNormDispIncr.o \
+	$(FE)/convergenceTest/CTestRelativeEnergyIncr.o \
 	$(FE)/analysis/algorithm/domainDecompAlgo/DomainDecompAlgo.o \
 	$(FE)/analysis/integrator/Integrator.o \
 	$(FE)/analysis/integrator/IncrementalIntegrator.o \
