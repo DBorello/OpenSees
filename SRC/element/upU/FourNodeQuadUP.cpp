@@ -9,8 +9,8 @@
 // based on FourNodeQuad element by Michael Scott		  	     //
 ///////////////////////////////////////////////////////////////////////////////
 
-// $Revision: 1.1 $
-// $Date: 2002-05-15 22:45:53 $
+// $Revision: 1.2 $
+// $Date: 2002-05-20 22:12:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/FourNodeQuadUP.cpp,v $
 
 #include <FourNodeQuadUP.h>
