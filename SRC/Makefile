@@ -348,6 +348,7 @@ RECORDER_LIBS = $(FE)/recorder/MaxNodeDispRecorder.o \
 
 DATABASE_LIBS = $(FE)/database/FileDatastore.o \
 	$(FE)/database/MySqlDatastore.o \
+	$(FE)/database/NEESData.o \
 	$(FE)/database/BerkeleyDbDatastore.o \
 	$(FE)/database/TclDatabaseCommands.o
 
