@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-13 08:12:17 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:24:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.h,v $
 
 #ifndef J2Plasticity_h
@@ -86,13 +86,18 @@ class J2Plasticity : public NDMaterial {
   virtual NDMaterial* getCopy (const char *type);
 
   //swap history variables
-  int commitState( ) ; 
+  virtual int commitState( ) ; 
 
   //revert to last saved state
-  int revertToLastCommit( ) ;
+  virtual int revertToLastCommit( ) ;
 
   //revert to start
-  int revertToStart( ) ;
+  virtual int revertToStart( ) ;
+
+  //sending and receiving
+  virtual int sendSelf(int commitTag, Channel &theChannel) ;  
+  virtual int recvSelf(int commitTag, Channel &theChannel, 
+		       FEM_ObjectBroker &theBroker ) ;
 
   //print out material data
   void Print(ostream &s, int flag = 0) ;
@@ -101,9 +106,6 @@ class J2Plasticity : public NDMaterial {
   virtual const char *getType (void) const ;
   virtual int getOrder (void) const ;
     
-  virtual int sendSelf(int commitTag, Channel &theChannel) ;  
-  virtual int recvSelf(int commitTag, Channel &theChannel, 
-		       FEM_ObjectBroker &theBroker) ;    
   protected :
 
   //this is mike's problem
@@ -137,7 +139,6 @@ class J2Plasticity : public NDMaterial {
   static const double two3 ;
   static const double four3 ;
   static const double root23 ;
-
 
   //zero internal variables
   void zero( ) ;

@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-01-23 08:46:28 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:24:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2AxiSymm.cpp,v $
 
 // Written: Ed "C++" Love
@@ -51,6 +51,8 @@
 //
 
 #include <J2AxiSymm.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
 
 //static vectors and matrices
 Vector J2AxiSymm :: strain_vec(4) ;
@@ -76,7 +78,9 @@ J2AxiSymm(   int    tag,
                  double viscosity ) : 
 J2Plasticity( tag, ND_TAG_J2AxiSymm, 
              K, G, yield0, yield_infty, d, H, viscosity )
-{ }
+{ 
+
+}
 
 
 //elastic constructor
@@ -85,7 +89,9 @@ J2AxiSymm(   int    tag,
                  double K, 
                  double G ) :
 J2Plasticity( tag, ND_TAG_J2AxiSymm, K, G )
-{ }
+{ 
+
+}
 
 
 
@@ -243,18 +249,99 @@ const Tensor& J2AxiSymm :: getTangentTensor( )
 //jeremic@ucdavis.edu 22jan2001  return rank2 ;
 //jeremic@ucdavis.edu 22jan2001}
 
-
-//this is frank's problem
-int J2AxiSymm :: sendSelf(int commitTag, Channel &theChannel)
+//swap history variables
+int J2AxiSymm :: commitState( )  
 {
-  return -1 ;
+  epsilon_p_n = epsilon_p_nplus1 ;
+  xi_n        = xi_nplus1 ;
+
+  return 0 ;
 }
 
-int J2AxiSymm :: recvSelf(int commitTag, Channel &theChannel, 
-	                      FEM_ObjectBroker &theBroker)
-{
-  return -1 ;
+
+//revert to last saved state
+int J2AxiSymm :: revertToLastCommit( )
+{ 
+  return 0 ;
+} 
+
+//revert to start
+int J2AxiSymm :: revertToStart( ) 
+
+{  
+  this->zero( ) ;
+  return 0 ;
 }
+
+int
+J2AxiSymm::sendSelf (int commitTag, Channel &theChannel)
+{
+  // we place all the data needed to define material and it's state
+  // int a vector object
+  static Vector data(9+9);
+  int cnt = 0;
+  data(cnt++) = this->getTag();
+  data(cnt++) = bulk;
+  data(cnt++) = shear;
+  data(cnt++) = sigma_0;
+  data(cnt++) = sigma_infty;
+  data(cnt++) = delta;
+  data(cnt++) = Hard;
+  data(cnt++) = eta;
+  data(cnt++) = xi_n;
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      data(cnt++) = epsilon_p_n(i,j);
+
+  // send the vector object to the channel
+  if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
+    cerr << "J2AxiSymm::recvSelf - failed to send vector to channel\n";
+    return -1;
+  }
+
+  return 0;
+}
+
+int
+J2AxiSymm::recvSelf (int commitTag, Channel &theChannel, 
+			 FEM_ObjectBroker &theBroker)
+{
+
+  // recv the vector object from the channel which defines material param and state
+  static Vector data(9+9);
+  if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
+    cerr << "J2AxiSymm::recvSelf - failed to recv vector from channel\n";
+    return -1;
+  }
+
+  // set the material parameters and state variables
+  int cnt = 0;
+  this->setTag(data(cnt++));
+  bulk = data(cnt++);
+  shear = data(cnt++);
+  sigma_0 = data(cnt++);
+  sigma_infty = data(cnt++);
+  delta = data(cnt++);
+  Hard = data(cnt++);
+  eta = data(cnt++);
+  xi_n = data(cnt++);
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++) 
+      epsilon_p_n(i,j) = data(cnt++);
+
+  epsilon_p_nplus1 = epsilon_p_n;
+  xi_nplus1        = xi_n;
+
+  return 0;
+}
+
+
+
+
+
+
+
+
 
 
 

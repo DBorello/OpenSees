@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-16 22:59:55 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:24:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicAxiSymm.h,v $
 
 #ifndef ElasticIsotropicAxiSymm_h
@@ -56,27 +56,22 @@ class ElasticIsotropicAxiSymm : public ElasticIsotropicMaterial
     int setTrialStrainIncr (const Vector &v, const Vector &r);
     const Matrix &getTangent (void);
     const Vector &getStress (void);
-	const Vector &getStrain (void);
+    const Vector &getStrain (void);
     
-	int commitState (void);
-	int revertToLastCommit (void);
+    int commitState (void);
+    int revertToLastCommit (void);
     int revertToStart (void);
     
-	NDMaterial *getCopy (void);
-	const char *getType (void) const;
-	int getOrder (void) const;
-
-	int sendSelf(int commitTag, Channel &theChannel);  
-	int recvSelf(int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker);    
+    NDMaterial *getCopy (void);
+    const char *getType (void) const;
+    int getOrder (void) const;
 
   protected:
 
   private:
   	static Vector sigma;	// Stress vector ... class-wide for returns
-	static Matrix D;		// Elastic constants
-	Vector Tepsilon;	// Trial strains
-	Vector Cepsilon;	// Committed strains
+	static Matrix D;	// Elastic constants
+	Vector epsilon;	        // Trial strains
 };
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $                                                              
-// $Date: 2001-08-14 22:46:16 $                                                                  
+// $Revision: 1.14 $                                                              
+// $Date: 2002-06-10 22:24:04 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $                                                                
 
 //Boris Jeremic and Zhaohui Yang ___ 02-10-2000
@@ -30,8 +30,8 @@
 #include <Tensor.h>
 
 
- Matrix ElasticIsotropic3D::D(6,6);			 // global for ElasticIsotropic3D only, efficiency improved 
- Vector ElasticIsotropic3D::sigma(6);	 // global for ElasticIsotropic3D only, efficiency improved  
+Matrix ElasticIsotropic3D::D(6,6);	  // global for ElasticIsotropic3D only
+Vector ElasticIsotropic3D::sigma(6);	 // global for ElasticIsotropic3D only
 
 
 ElasticIsotropic3D::ElasticIsotropic3D
@@ -43,7 +43,6 @@ ElasticIsotropic3D::ElasticIsotropic3D
 	D.Zero();
         Dt = tensor( 4, def_dim_4, 0.0 ); 
 	setInitElasticStiffness();
-
 }
 
 ElasticIsotropic3D::ElasticIsotropic3D():
@@ -137,7 +136,7 @@ ElasticIsotropic3D::getStress (void)
 const Vector&
 ElasticIsotropic3D::getStrain (void)
 {
-	return epsilon;
+  return epsilon;
 }
 
 int
@@ -159,7 +158,7 @@ ElasticIsotropic3D::setTrialStrainIncr (const Tensor &v)
 {
     //cerr << " before set Tri St Incr " << Strain;
     //cerr << " Strain Incr " << v << endln;
-			 Strain = Strain + v;
+    Strain = Strain + v;
     //cerr << " after setTrialStrainIncr  " << Strain << endln;
     return 0;
 }
@@ -174,7 +173,7 @@ ElasticIsotropic3D::setTrialStrainIncr (const Tensor &v, const Tensor &r)
 const Tensor&
 ElasticIsotropic3D::getTangentTensor (void)
 {
-    return Dt_commit;
+    return Dt;
 }
 
 const stresstensor
@@ -201,24 +200,18 @@ ElasticIsotropic3D::getPlasticStrainTensor (void)
 int
 ElasticIsotropic3D::commitState (void)
 {
-    //Pure elastic
-    Stress = Dt("ijkl") * Strain("kl");
-
     return 0;
-
 }
 
 int
 ElasticIsotropic3D::revertToLastCommit (void)
 {
-	// Nothing was previously committed
 	return 0;
 }
 
 int
 ElasticIsotropic3D::revertToStart (void)
 {
-	// Nothing was previously committed
 	return 0;
 }
 
@@ -249,55 +242,6 @@ ElasticIsotropic3D::getOrder (void) const
 	return 6;
 }
 
-int 
-ElasticIsotropic3D::sendSelf(int commitTag, Channel &theChannel)
-{
-	int res = 0;
-
-	static Vector data(4);
-
-	data(0) = this->getTag();
-	data(1) = E;
-	data(2) = v;
- data(3) = rho;
-
- res += theChannel.sendVector(this->getDbTag(), commitTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send Vector",
-			"ElasticIsotropic3D::sendSelf");
-		return res;
-	}
-
-	return res;
-}
-
-int
-ElasticIsotropic3D::recvSelf(int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker)
-{
-	int res = 0;
-
-	static Vector data(6);
-
-	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive Vector",
-			"ElasticIsotropic3D::recvSelf");
-		return res;
-	}
-    
-	this->setTag((int)data(0));
-    E = data(1);
-    v = data(2);
-    rho = data(3);
-
-	// Set up the elastic constant matrix for 3D elastic isotropic
-	D.Zero();
-	//setElasticStiffness();
-	
-	return res;
-}
-    
 void
 ElasticIsotropic3D::Print(ostream &s, int flag)
 {
@@ -331,9 +275,6 @@ void ElasticIsotropic3D::setInitElasticStiffness(void)
     
     //ret.print();
     Dt = ret;
-    Dt_commit = ret;
-
-    //D = Dt;
 
     return;
 

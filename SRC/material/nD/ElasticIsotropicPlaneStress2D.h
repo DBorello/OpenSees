@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-16 22:14:57 $
+// $Revision: 1.4 $
+// $Date: 2002-06-10 22:24:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlaneStress2D.h,v $
                                                                         
                                                                         
@@ -57,7 +57,7 @@ class ElasticIsotropicPlaneStress2D : public ElasticIsotropicMaterial
     int setTrialStrainIncr (const Vector &v, const Vector &r);
     const Matrix &getTangent (void);
     const Vector &getStress (void);
-	const Vector &getStrain (void);
+    const Vector &getStrain (void);
         
     int commitState (void);
     int revertToLastCommit (void);
@@ -67,17 +67,12 @@ class ElasticIsotropicPlaneStress2D : public ElasticIsotropicMaterial
     const char *getType (void) const;
     int getOrder (void) const;
     
-    int sendSelf(int commitTag, Channel &theChannel);  
-    int recvSelf(int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker);
-    
   protected:
 
   private:
     static Vector sigma;	// Stress vector ... class-wide for returns
     static Matrix D;		// Elastic constants
-    Vector Tepsilon;		// Trial strains
-	Vector Cepsilon;		// Committed strains
+    Vector epsilon;	        // Trial strains
 };
 
 

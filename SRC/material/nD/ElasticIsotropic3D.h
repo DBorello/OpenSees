@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $                                                              
-// $Date: 2001-08-14 22:46:16 $                                                                  
+// $Revision: 1.12 $                                                              
+// $Date: 2002-06-10 22:24:04 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $                                                                
                                                                         
                                                                         
@@ -67,25 +67,19 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     const char *getType (void) const;
     int getOrder (void) const;
 
-    int sendSelf(int commitTag, Channel &theChannel);  
-    int recvSelf(int commitTag, Channel &theChannel, 
-    FEM_ObjectBroker &theBroker);    
-    
     void Print(ostream &s, int flag =0);
     void setInitElasticStiffness(void);
 
   protected:
 
   private:
-    static Vector sigma;               // Stress vector
-    static Matrix D;                   // Elastic constantsVector sigma;		// Stress vector
+    static Vector sigma;        // Stress vector
+    static Matrix D;            // Elastic constantsVector sigma;
     Vector epsilon;		// Strain vector
 
     stresstensor Stress;	// Stress tensor    
     Tensor Dt;			// Elastic constants tensor
-    Tensor Dt_commit;		// last-step Elastic constants tensor
     straintensor Strain;	// Strain tensor    
-	     
 };
 
 

@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-01-23 08:46:28 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:24:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlaneStrain.cpp,v $
 
 // Written: Ed "C++" Love
@@ -50,6 +50,8 @@
 //
 
 #include <J2PlaneStrain.h>
+#include <Channel.h>
+#include  <FEM_ObjectBroker.h>
 
 //static vectors and matrices
 Vector J2PlaneStrain :: strain_vec(3) ;
@@ -75,7 +77,9 @@ J2PlaneStrain(   int    tag,
                  double viscosity ) : 
 J2Plasticity( tag, ND_TAG_J2PlaneStrain, 
              K, G, yield0, yield_infty, d, H, viscosity )
-{ }
+{ 
+
+}
 
 
 //elastic constructor
@@ -84,13 +88,17 @@ J2PlaneStrain(   int    tag,
                  double K, 
                  double G ) :
 J2Plasticity( tag, ND_TAG_J2PlaneStrain, K, G )
-{ }
+{ 
+
+}
 
 
 
 //destructor
 J2PlaneStrain :: ~J2PlaneStrain( ) 
-{ } 
+{ 
+
+} 
 
 
 //make a clone of this material
@@ -142,14 +150,18 @@ int J2PlaneStrain :: setTrialStrain( const Vector &v, const Vector &r )
 
 int J2PlaneStrain :: setTrialStrainIncr( const Vector &v ) 
 {
-    return -1 ;
+  static Vector newStrain(3);
+  newStrain(0) = strain(0,0) + v(0);
+  newStrain(1) = strain(1,1) + v(1);
+  newStrain(2) = 2.0 * strain(0,1) + v(2);
+
+  return this->setTrialStrain(newStrain);  
 }
 
 int J2PlaneStrain :: setTrialStrainIncr( const Vector &v, const Vector &r ) 
 {
-    return -1 ;
+    return this->setTrialStrainIncr(v);
 }
-
 
 
 //send back the strain
@@ -236,19 +248,92 @@ const Tensor& J2PlaneStrain :: getTangentTensor( )
 //jeremic@ucdavis.edu 22jan2001  return rank2 ;
 //jeremic@ucdavis.edu 22jan2001}
 
-
-//this is frank's problem
-int J2PlaneStrain :: sendSelf(int commitTag, Channel &theChannel)
+int 
+J2PlaneStrain::commitState( ) 
 {
-  return -1 ;
+  epsilon_p_n = epsilon_p_nplus1;
+  xi_n        = xi_nplus1;
+
+  return 0;
 }
 
-int J2PlaneStrain :: recvSelf(int commitTag, Channel &theChannel, 
-	                      FEM_ObjectBroker &theBroker)
-{
-  return -1 ;
+int 
+J2PlaneStrain::revertToLastCommit( ) {
+
+  return 0;
 }
 
+
+int 
+J2PlaneStrain::revertToStart( ) 
+{
+  this->zero( ) ;
+
+  return 0;
+}
+
+int
+J2PlaneStrain::sendSelf (int commitTag, Channel &theChannel)
+{
+  // we place all the data needed to define material and it's state
+  // int a vector object
+  static Vector data(18);
+  int cnt = 0;
+  data(cnt++) = this->getTag();
+  data(cnt++) = bulk;
+  data(cnt++) = shear;
+  data(cnt++) = sigma_0;
+  data(cnt++) = sigma_infty;
+  data(cnt++) = delta;
+  data(cnt++) = Hard;
+  data(cnt++) = eta;
+  data(cnt++) = xi_n;
+
+  //  data(cnt++) = commitEps22;
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      data(cnt++) = epsilon_p_n(i,j);
+
+  // send the vector object to the channel
+  if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
+    cerr << "J2PlaneStrain::sendSelf - failed to send vector to channel\n";
+    return -1;
+  }
+  return 0;
+}
+
+int
+J2PlaneStrain::recvSelf (int commitTag, Channel &theChannel, 
+			 FEM_ObjectBroker &theBroker)
+{
+
+  // recv the vector object from the channel which defines material param and state
+  static Vector data(18);
+  if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
+    cerr << "J2PlaneStrain::recvSelf - failed to sned vectorto channel\n";
+    return -1;
+  }
+
+  // set the material parameters and state variables
+  int cnt = 0;
+  this->setTag(data(cnt++));
+  bulk = data(cnt++);
+  shear = data(cnt++);
+  sigma_0 = data(cnt++);
+  sigma_infty = data(cnt++);
+  delta = data(cnt++);
+  Hard = data(cnt++);
+  eta = data(cnt++);
+  xi_n = data(cnt++);
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++) 
+      epsilon_p_n(i,j) = data(cnt++);
+
+  epsilon_p_nplus1 = epsilon_p_n;
+  xi_nplus1        = xi_n;
+
+  return 0;
+}
 
 
 

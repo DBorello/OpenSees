@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2001-10-03 18:07:50 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:24:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicBeamFiber.cpp,v $
 
 // Written: MHS
@@ -156,47 +156,3 @@ ElasticIsotropicBeamFiber::getOrder (void) const
 	return 3;
 }
 
-int 
-ElasticIsotropicBeamFiber::sendSelf(int commitTag, Channel &theChannel)
-{
-	int res = 0;
-
-	static Vector data(4);
-
-	data(0) = this->getTag();
-	data(1) = E;
-	data(2) = v;
-    data(3) = rho;
-
-    res += theChannel.sendVector(this->getDbTag(), commitTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send Vector",
-			"ElasticIsotropicBeamFiber::sendSelf");
-		return res;
-	}
-
-	return res;
-}
-
-int
-ElasticIsotropicBeamFiber::recvSelf(int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker)
-{
-	int res = 0;
-
-    static Vector data(4);
-
-	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive Vector",
-			"ElasticIsotropicBeamFiber::recvSelf");
-		return res;
-	}
-    
-	this->setTag((int)data(0));
-    E = data(1);
-	v = data(2);
-    rho = data(3);
-	
-	return res;
-}

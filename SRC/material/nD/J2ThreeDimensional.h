@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-01-23 08:46:28 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:24:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2ThreeDimensional.h,v $
 
 // Written: Ed "C++" Love
@@ -124,11 +124,6 @@ class J2ThreeDimensional : public J2Plasticity {
 //jeremic@ucdavis.edu 22jan2001  const Tensor& getStressTensor( ) ;
 //jeremic@ucdavis.edu 22jan2001  const Tensor& getStrainTensor( ) ;  
 
-  //this is frank's problem
-  int sendSelf(int commitTag, Channel &theChannel) ;  
-  int recvSelf(int commitTag, Channel &theChannel, 
-               FEM_ObjectBroker &theBroker ) ;
-  
   private :
 
   //static vectors and matrices
@@ -136,7 +131,6 @@ class J2ThreeDimensional : public J2Plasticity {
   static Vector stress_vec ;     //stress in vector notation
   static Matrix tangent_matrix ; //material tangent in matrix notation
 
- 				     
 } ; //end of J2ThreeDimensional declarations
 
 

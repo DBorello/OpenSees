@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-01-23 08:46:28 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:24:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2ThreeDimensional.cpp,v $
 
 // Written: Ed "C++" Love
@@ -54,6 +54,8 @@
 //
 
 #include <J2ThreeDimensional.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
 
 //static vectors and matrices
 Vector J2ThreeDimensional :: strain_vec(6) ;
@@ -79,7 +81,9 @@ J2ThreeDimensional(   int    tag,
                  double viscosity ) : 
 J2Plasticity( tag, ND_TAG_J2ThreeDimensional, 
              K, G, yield0, yield_infty, d, H, viscosity )
-{ }
+{ 
+
+}
 
 
 //elastic constructor
@@ -88,7 +92,9 @@ J2ThreeDimensional(   int    tag,
                  double K, 
                  double G ) :
 J2Plasticity( tag, ND_TAG_J2ThreeDimensional, K, G )
-{ }
+{ 
+
+}
 
 
 
@@ -153,12 +159,20 @@ int J2ThreeDimensional :: setTrialStrain( const Vector &v, const Vector &r )
 
 int J2ThreeDimensional :: setTrialStrainIncr( const Vector &v ) 
 {
-    return -1 ;
+  static Vector newStrain(6);
+  newStrain(0) = strain(0,0) + v(0);
+  newStrain(1) = strain(1,1) + v(1);
+  newStrain(2) = strain(2,2) + v(2);
+  newStrain(3) = 2.0*strain(0,1) + v(3);
+  newStrain(4) = 2.0*strain(1,2) + v(4);
+  newStrain(5) = 2.0*strain(2,0) + v(5);
+  
+  return this->setTrialStrain(newStrain);
 }
 
 int J2ThreeDimensional :: setTrialStrainIncr( const Vector &v, const Vector &r ) 
 {
-    return -1 ;
+  return this->setTrialStrainIncr(v);
 }
 
 
@@ -263,17 +277,6 @@ const Tensor& J2ThreeDimensional :: getTangentTensor( )
 //jeremic@ucdavis.edu 22jan2001}
 
 
-//this is frank's problem
-int J2ThreeDimensional :: sendSelf(int commitTag, Channel &theChannel)
-{
-  return -1 ;
-}
-
-int J2ThreeDimensional :: recvSelf(int commitTag, Channel &theChannel, 
-	                      FEM_ObjectBroker &theBroker)
-{
-  return -1 ;
-}
 
 
 

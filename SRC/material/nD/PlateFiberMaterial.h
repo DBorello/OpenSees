@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-07 22:17:38 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:24:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlateFiberMaterial.h,v $
 
 // Ed "C++" Love
@@ -101,7 +101,8 @@ class PlateFiberMaterial: public NDMaterial{
   private :
 
     //out of plane strain
-    double strain22 ;
+    double Tstrain22 ;
+    double Cstrain22 ;
 
     NDMaterial *theMaterial ;  //pointer to three dimensional material
 

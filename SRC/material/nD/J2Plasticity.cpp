@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-01-06 19:55:09 $
+// $Revision: 1.6 $
+// $Date: 2002-06-10 22:24:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.cpp,v $
 
 // Written: Ed "C++" Love
@@ -50,6 +50,9 @@
 #include <J2PlateFiber.h>
 #include <J2ThreeDimensional.h> 
 
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
+
 //this is mike's problem
 Tensor J2Plasticity :: rank2(2, def_dim_2, 0.0 ) ;
 Tensor J2Plasticity :: rank4(2, def_dim_2, 0.0 ) ;
@@ -69,6 +72,9 @@ void J2Plasticity :: zero ( )
   
   epsilon_p_n.Zero( ) ;
   epsilon_p_nplus1.Zero( ) ;
+
+  stress.Zero();
+  strain.Zero();
 }
 
 
@@ -87,6 +93,7 @@ strain(3,3)
   delta       = 0.0 ;
   Hard        = 0.0 ;
   eta         = 0.0 ;
+
   this->zero( ) ;     // or (*this).zero( ) 
 }
 
@@ -115,6 +122,7 @@ J2Plasticity :: J2Plasticity(int    tag,
   delta       = d ;
   Hard        = H ;
   eta         = viscosity ;
+
   this->zero( ) ;
 }
 
@@ -138,6 +146,7 @@ strain(3,3)
   delta       = 0.0 ;
   Hard        = 0.0 ;
   eta         = 0.0 ;
+
   this->zero( ) ;
 }
 
@@ -199,30 +208,6 @@ J2Plasticity :: getCopy (const char *type)
     }
 }
 
-//swap history variables
-int J2Plasticity :: commitState( )  
-{
-  epsilon_p_n = epsilon_p_nplus1 ;
-  xi_n        = xi_nplus1 ;
-
-  return 0 ;
-}
-
-
-//revert to last saved state
-int J2Plasticity :: revertToLastCommit( )
-{ 
-  return 0 ;
-} 
-
-//revert to start
-int J2Plasticity :: revertToStart( ) 
-{
-  this->zero( ) ;
-  return 0 ;
-}
-
-
 //print out material data
 void J2Plasticity :: Print( ostream &s, int flag )
 {
@@ -245,7 +230,7 @@ void J2Plasticity :: Print( ostream &s, int flag )
 //plasticity integration routine
 void J2Plasticity :: plastic_integrator( )
 {
-  const double tolerance = (1.0e-12)*sigma_0 ;
+  const double tolerance = (1.0e-8)*sigma_0 ;
 
   const double dt = ops_Dt ; //time step
 
@@ -350,7 +335,10 @@ void J2Plasticity :: plastic_integrator( )
    
   //compute the trial deviatoric stresses
 
-  dev_stress = (2.0*shear) * ( dev_strain - epsilon_p_n ) ;
+  //   dev_stress = (2.0*shear) * ( dev_strain - epsilon_p_n ) ;
+  dev_stress = dev_strain;
+  dev_stress -= epsilon_p_n;
+  dev_stress *= 2.0 * shear;
 
   //compute norm of deviatoric stress
 
@@ -374,7 +362,6 @@ void J2Plasticity :: plastic_integrator( )
   //compute trial value of yield function
 
   phi = norm_tau -  root23 * q(xi_n) ;
- 
 
   // check if phi > 0 
   
@@ -578,17 +565,83 @@ J2Plasticity::getOrder (void) const
     return 0;
 }
 
-int
-J2Plasticity::sendSelf (int commitTag, Channel &theChannel)
+
+int 
+J2Plasticity::commitState( ) 
 {
-    g3ErrorHandler->fatal("J2Plasticity::sendSelf -- subclass responsibility");
-    return 0;
+  epsilon_p_n = epsilon_p_nplus1 ;
+  xi_n        = xi_nplus1 ;
+
+  return 0;
+}
+
+int 
+J2Plasticity::revertToLastCommit( ) 
+{
+  return 0;
+}
+
+
+int 
+J2Plasticity::revertToStart( ) {
+
+  this->zero( ) ;
+
+  return 0;
+}
+
+int
+J2Plasticity::sendSelf(int commitTag, Channel &theChannel)
+{
+  // we place all the data needed to define material and it's state
+  // int a vector object
+  static Vector data(9);
+  int cnt = 0;
+  data(cnt++) = this->getTag();
+  data(cnt++) = bulk;
+  data(cnt++) = shear;
+  data(cnt++) = sigma_0;
+  data(cnt++) = sigma_infty;
+  data(cnt++) = delta;
+  data(cnt++) = Hard;
+  data(cnt++) = eta;
+  data(cnt++) = xi_n;
+
+  // send the vector object to the channel
+  if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
+    cerr << "J2Plasticity::sendSelf - failed to send vector to channel\n";
+    return -1;
+  }
+
+  return 0;
 }
 
 int
 J2Plasticity::recvSelf (int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker)
+			 FEM_ObjectBroker &theBroker)
 {
-    g3ErrorHandler->fatal("J2Plasticity::recvSelf -- subclass responsibility");
-    return 0;
+
+  // recv the vector object from the channel which defines material param and state
+  static Vector data(9);
+  if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
+    cerr << "J2Plasticity::recvSelf - failed to recv vector from channel\n";
+    return -1;
+  }
+
+  // set the material parameters and state variables
+  int cnt = 0;
+  this->setTag(data(cnt++));
+  bulk = data(cnt++);
+  shear = data(cnt++);
+  sigma_0 = data(cnt++);
+  sigma_infty = data(cnt++);
+  delta = data(cnt++);
+  Hard = data(cnt++);
+  eta = data(cnt++);
+  xi_n = data(cnt++);
+
+  epsilon_p_nplus1 = epsilon_p_n;
+  xi_nplus1        = xi_n;
+
+  return 0;
 }

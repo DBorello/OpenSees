@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-10-03 18:07:49 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:24:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/BeamFiberMaterial.h,v $
 
 // Written: MHS
@@ -60,7 +60,7 @@ class BeamFiberMaterial: public NDMaterial {
 
     NDMaterial *getCopy(void);
     NDMaterial *getCopy(const char *type);
-	const char *getType(void) const;
+    const char *getType(void) const;
     int getOrder(void) const; 
 
     void Print(ostream &s, int flag);
@@ -69,9 +69,12 @@ class BeamFiberMaterial: public NDMaterial {
     int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
   private:
-	double strain22;
-	double strain33;
-	double gamma23;
+    double Tstrain22;
+    double Tstrain33;
+    double Tgamma23;
+    double Cstrain22;
+    double Cstrain33;
+    double Cgamma23;
 
     NDMaterial *theMaterial;
 

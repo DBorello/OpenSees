@@ -1,5 +1,5 @@
-// $Revision: 1.5 $
-// $Date: 2002-05-16 00:07:45 $
+// $Revision: 1.6 $
+// $Date: 2002-06-10 22:22:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.h,v $
                                                                         
 // Written: ZHY
@@ -99,10 +99,10 @@ class FluidSolidPorousMaterial : public NDMaterial
      double trialVolumeStrain;
      double currentVolumeStrain;
 
-	   static Vector workV3;
-	   static Vector workV6;
-	   static Matrix workM3;
-	   static Matrix workM6;
+     static Vector workV3;
+     static Vector workV6;
+     static Matrix workM3;
+     static Matrix workM6;
 };
 
 #endif

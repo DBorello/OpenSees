@@ -1,5 +1,5 @@
-// $Revision: 1.20 $
-// $Date: 2002-05-16 00:07:45 $
+// $Revision: 1.21 $
+// $Date: 2002-06-10 22:22:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <PressureDependMultiYield.h>
 #include <Information.h>
+#include <ID.h>
 
 int PressureDependMultiYield::loadStage = 0;
 double PressureDependMultiYield::pAtm = 101.;
@@ -28,7 +29,7 @@ T2Vector PressureDependMultiYield::workT2V;
 const	double pi = 3.14159265358979;
 
 PressureDependMultiYield::PressureDependMultiYield (int tag, int nd, 
-								double r, double refShearModul,
+						    double r, double refShearModul,
 						    double refBulkModul, double frictionAng,
 						    double peakShearStra, double refPress, 
 						    double pressDependCoe,
@@ -41,8 +42,8 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
 						    double liquefactionParam4,
 						    int numberOfYieldSurf, 
 						    double ei,
-								double volLim1, double volLim2, double volLim3,
-								double atm, double cohesi)
+						    double volLim1, double volLim2, double volLim3,
+						    double atm, double cohesi)
  : NDMaterial(tag,ND_TAG_PressureDependMultiYield), currentStress(),
    trialStress(), currentStrain(), strainRate(),
    reversalStress(), PPZPivot(), PPZCenter(), 
@@ -169,7 +170,7 @@ PressureDependMultiYield::PressureDependMultiYield ()
   strainRate(), reversalStress(), PPZPivot(), 
   PPZCenter(), lockStress(), reversalStressCommitted(), 
   PPZPivotCommitted(), PPZCenterCommitted(),
-  lockStressCommitted()
+  lockStressCommitted(), theSurfaces(0), committedSurfaces(0)
 {
   ndm = 3;
   refShearModulus = refBulkModulus = frictionAngle = 0.;
@@ -180,8 +181,6 @@ PressureDependMultiYield::PressureDependMultiYield ()
   liquefyParam1 = liquefyParam2 = liquefyParam4 = modulusFactor = 0.;
   rho = einit = 0.;
 
-  theSurfaces = new MultiYieldSurface[1];
-  committedSurfaces = new MultiYieldSurface[1];
   activeSurfaceNum = committedActiveSurf = 0; 
 }
 
@@ -574,171 +573,205 @@ int PressureDependMultiYield::updateParameter(int responseID, Information &info)
 
 int PressureDependMultiYield::sendSelf(int commitTag, Channel &theChannel)
 {
-	int i, res = 0;
+  int i, res = 0;
 
-	static Vector data(393);
-	data(0) = this->getTag();
-	data(1) = ndm;
-	data(2) = loadStage;
-  data(3) = rho;
-  data(4) = einit;
-  data(5) = refShearModulus;
-	data(6) = refBulkModulus;
-	data(7) = frictionAngle;
-  data(8) = peakShearStrain;
-  data(9) = refPressure;
-	data(10) = cohesion;
-	data(11) = pressDependCoeff;
-	data(12) = numOfSurfaces;
-	data(13) = phaseTransfAngle;
-  data(14) = contractParam1;
-  data(15) = dilateParam1;
-  data(16) = dilateParam2;
-  data(17) = volLimit1;
-  data(18) = volLimit2;
-  data(19) = volLimit3;
-  data(20) = pAtm;
-  data(21) = liquefyParam1;
-  data(22) = liquefyParam2;
-  data(23) = liquefyParam4;
-  data(24) = residualPress;
-  data(25) = stressRatioPT;   
-  data(26) = e2p; 
-  data(27) = committedActiveSurf;
-  data(28) = strainPTOcta;
-  data(29) = pressureDCommitted;
-  data(30) = onPPZCommitted;
-  data(31) = PPZSizeCommitted;
-  data(32) = cumuDilateStrainOctaCommitted;
-  data(33) = maxCumuDilateStrainOctaCommitted;
-  data(34) = cumuTranslateStrainOctaCommitted;
-  data(35) = prePPZStrainOctaCommitted;
-  data(36) = oppoPrePPZStrainOctaCommitted;
+  static ID idData(4);
+  idData(0) = this->getTag();
+  idData(1) = numOfSurfaces;
+  idData(2) = loadStage;
+  idData(3) = ndm;
+
+  res += theChannel.sendID(this->getDbTag(), commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- could not send Vector",
+			    "PressureDependMultiYield::sendSelf");
+    return res;
+  }
+
+  Vector data(69+numOfSurfaces*8);
+  data(0) = rho;
+  data(1) = einit;
+  data(2) = refShearModulus;
+  data(3) = refBulkModulus;
+  data(4) = frictionAngle;
+  data(5) = peakShearStrain;
+  data(6) = refPressure;
+  data(7) = cohesion;
+  data(8) = pressDependCoeff;
+  data(9) = phaseTransfAngle;
+  data(10) = contractParam1;
+  data(11) = dilateParam1;
+  data(12) = dilateParam2;
+  data(13) = volLimit1;
+  data(14) = volLimit2;
+  data(15) = volLimit3;
+  data(16) = pAtm;
+  data(17) = liquefyParam1;
+  data(18) = liquefyParam2;
+  data(19) = liquefyParam4;
+  data(20) = residualPress;
+  data(21) = stressRatioPT;   
+  data(22) = e2p; 
+  data(23) = committedActiveSurf;
+  data(24) = strainPTOcta;
+  data(25) = pressureDCommitted;
+  data(26) = onPPZCommitted;
+  data(27) = PPZSizeCommitted;
+  data(28) = cumuDilateStrainOctaCommitted;
+  data(29) = maxCumuDilateStrainOctaCommitted;
+  data(30) = cumuTranslateStrainOctaCommitted;
+  data(31) = prePPZStrainOctaCommitted;
+  data(32) = oppoPrePPZStrainOctaCommitted;
 
   workV6 = currentStress.t2Vector();
-	for(i = 0; i < 6; i++) data(i+37) = workV6[i];
+  for(i = 0; i < 6; i++) data(i+33) = workV6[i];
 
   workV6 = currentStrain.t2Vector();
-	for(i = 0; i < 6; i++) data(i+43) = workV6[i];
+  for(i = 0; i < 6; i++) data(i+39) = workV6[i];
 	  
   workV6 = PPZPivotCommitted.t2Vector();
-	for(i = 0; i < 6; i++) data(i+49) = workV6[i];
+  for(i = 0; i < 6; i++) data(i+45) = workV6[i];
 
   workV6 = PPZCenterCommitted.t2Vector();
-	for(i = 0; i < 6; i++) data(i+55) = workV6[i];
+  for(i = 0; i < 6; i++) data(i+51) = workV6[i];
 
   workV6 = lockStressCommitted.t2Vector();
-	for(i = 0; i < 6; i++) data(i+61) = workV6[i];
-
+  for(i = 0; i < 6; i++) data(i+57) = workV6[i];
+	
   workV6 = reversalStressCommitted.t2Vector();
-	for(i = 0; i < 6; i++) data(i+67) = workV6[i];
-
-	for(i = 0; i < numOfSurfaces; i++) {
-		int k = 73 + i*8;
-		data(k) = committedSurfaces[i+1].size();
-		data(k+1) = committedSurfaces[i+1].modulus();
-		workV6 = committedSurfaces[i+1].center();
+  for(i = 0; i < 6; i++) data(i+63) = workV6[i];
+	
+  for(i = 0; i < numOfSurfaces; i++) {
+    int k = 69 + i*8;
+    data(k) = committedSurfaces[i+1].size();
+    data(k+1) = committedSurfaces[i+1].modulus();
+    workV6 = committedSurfaces[i+1].center();
     data(k+2) = workV6(0);
     data(k+3) = workV6(1);
     data(k+4) = workV6(2);
     data(k+5) = workV6(3);
     data(k+6) = workV6(4);
     data(k+7) = workV6(5);
-	}
+  }
 
   res += theChannel.sendVector(this->getDbTag(), commitTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send Vector",
-			"PressureDependMultiYield::sendSelf");
-		return res;
-	}
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- could not send Vector",
+			    "PressureDependMultiYield::sendSelf");
+    return res;
+  }
 
-	return res;
+  return res;
 }
 
 
 int PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel, 
 				       FEM_ObjectBroker &theBroker)    
 {
-	int i, res = 0;
+  int i, res = 0;
 
-	static Vector data(393);
+  static ID idData(4);
+  idData(0) = this->getTag();
+  idData(1) = numOfSurfaces;
+  idData(2) = loadStage;
+  idData(3) = ndm;
 
-	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive Vector",
-			"PressureDependMultiYield::recvSelf");
-		return res;
-	}
-    
-	this->setTag((int)data(0));
-	ndm = data(1);
-	loadStage = data(2);
-  rho = data(3);
-	einit = data(4);
-  refShearModulus = data(5);
-	refBulkModulus = data(6);
-	frictionAngle = data(7);
-  peakShearStrain = data(8);
-  refPressure = data(9);
-	cohesion = data(10);
-	pressDependCoeff = data(11);
-	numOfSurfaces = data(12);
-	phaseTransfAngle = data(13);
-  contractParam1 = data(14);
-  dilateParam1 = data(15);
-  dilateParam2 = data(16);
-  volLimit1 = data(17);
-  volLimit2 = data(18);
-  volLimit3 = data(19);
-  pAtm = data(20);
-  liquefyParam1 = data(21);
-  liquefyParam2 = data(22);
-  liquefyParam4 = data(23);
-  residualPress = data(24);
-  stressRatioPT = data(25);   
-  e2p = data(26); 
-  committedActiveSurf = data(27);
-  strainPTOcta = data(28);
-  pressureDCommitted = data(29);
-  onPPZCommitted = data(30);
-  PPZSizeCommitted = data(31);
-  cumuDilateStrainOctaCommitted = data(32);
-  maxCumuDilateStrainOctaCommitted = data(33);
-  cumuTranslateStrainOctaCommitted = data(34);
-  prePPZStrainOctaCommitted = data(35);
-  oppoPrePPZStrainOctaCommitted = data(36);
+  res += theChannel.recvID(this->getDbTag(), commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- could not send Vector",
+			    "PressureDependMultiYield::sendSelf");
+    return res;
+  }
 
-	for(i = 0; i < 6; i++) workV6[i] = data(i+37);
+  this->setTag((int)idData(0));
+  loadStage = idData(2);
+  ndm = idData(3);
+  
+  Vector data(69+idData(1)*8);
+  res += theChannel.recvVector(this->getDbTag(), commitTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- could not send Vector",
+			    "PressureDependMultiYield::sendSelf");
+    return res;
+  }
+
+  rho = data(0);
+  einit = data(1);
+  refShearModulus = data(2);
+  refBulkModulus = data(3);
+  frictionAngle = data(4);
+  peakShearStrain = data(5);
+  refPressure = data(6);
+  cohesion = data(7);
+  pressDependCoeff = data(8);
+  phaseTransfAngle = data(9);
+  contractParam1 = data(10);
+  dilateParam1 = data(11);
+  dilateParam2 = data(12);
+  volLimit1 = data(13);
+  volLimit2 = data(14);
+  volLimit3 = data(15);
+  pAtm = data(16);
+  liquefyParam1 = data(17);
+  liquefyParam2 = data(18);
+  liquefyParam4 = data(19);
+  residualPress = data(20);
+  stressRatioPT = data(21);   
+  e2p = data(22); 
+  committedActiveSurf = data(23);
+  strainPTOcta = data(24);
+  pressureDCommitted = data(25);
+  onPPZCommitted = data(26);
+  PPZSizeCommitted = data(27);
+  cumuDilateStrainOctaCommitted = data(28);
+  maxCumuDilateStrainOctaCommitted = data(29);
+  cumuTranslateStrainOctaCommitted = data(30);
+  prePPZStrainOctaCommitted = data(31);
+  oppoPrePPZStrainOctaCommitted = data(32);
+
+  for(i = 0; i < 6; i++) workV6[i] = data(i+33);
   currentStress.setData(workV6);
 
-	for(i = 0; i < 6; i++) workV6[i] = data(i+43);
+  for(i = 0; i < 6; i++) workV6[i] = data(i+39);
   currentStrain.setData(workV6);
-
-	for(i = 0; i < 6; i++) workV6[i] = data(i+49);
+  
+  for(i = 0; i < 6; i++) workV6[i] = data(i+45);
   PPZPivotCommitted.setData(workV6);
 
-	for(i = 0; i < 6; i++) workV6[i] = data(i+55);
+  for(i = 0; i < 6; i++) workV6[i] = data(i+51);
   PPZCenterCommitted.setData(workV6);
-
-	for(i = 0; i < 6; i++) workV6[i] = data(i+61);
+  
+  for(i = 0; i < 6; i++) workV6[i] = data(i+57);
   lockStressCommitted.setData(workV6);
-
-	for(i = 0; i < 6; i++) workV6[i] = data(i+67);
+  
+  for(i = 0; i < 6; i++) workV6[i] = data(i+63);
   reversalStressCommitted.setData(workV6);
 
-	for(i = 0; i < numOfSurfaces; i++) {
-		int k = 73 + i*8;
+
+  if (numOfSurfaces != idData(1)) {
+    if (committedSurfaces != 0) {
+      delete [] committedSurfaces;
+      delete [] theSurfaces;
+    }
+    numOfSurfaces = idData(1);
+    theSurfaces = new MultiYieldSurface[numOfSurfaces+1]; //first surface not used
+    committedSurfaces = new MultiYieldSurface[numOfSurfaces+1]; 
+    
+    this->setUpSurfaces();
+  }
+
+  for(i = 0; i < numOfSurfaces; i++) {
+    int k = 70 + i*8;
     workV6(0) = data(k+2);
     workV6(1) = data(k+3);
     workV6(2) = data(k+4);
     workV6(3) = data(k+5);
     workV6(4) = data(k+6);
     workV6(5) = data(k+7);
-		committedSurfaces[i+1].setData(workV6, data(k), data(k+1));
-	}
+    committedSurfaces[i+1].setData(workV6, data(k), data(k+1));
+  }
 
-	return res;
+  return res;
 }
 
 

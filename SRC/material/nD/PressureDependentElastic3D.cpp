@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $                                                              
-// $Date: 2001-08-14 22:46:16 $                                     
+// $Revision: 1.4 $                                                              
+// $Date: 2002-06-10 22:24:08 $                                     
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PressureDependentElastic3D.cpp,v $
 
 //Boris Jeremic and Zhaohui Yang ___ 07-07-2001
@@ -35,10 +35,9 @@ PressureDependentElastic3D::PressureDependentElastic3D
  ElasticIsotropicMaterial (tag, ND_TAG_PressureDependentElastic3D, E, nu, rhop),
  sigma(6), D(6,6), epsilon(6), exp(expp), p_ref(pr), po(pop) 
 {
-	// Set up the elastic constant matrix for 3D elastic isotropic 
-	D.Zero();
-        Dt = tensor( 4, def_dim_4, 0.0 ); 
-	setInitElasticStiffness();
+  // Set up the elastic constant matrix for 3D elastic isotropic 
+  Dt = tensor( 4, def_dim_4, 0.0 ); 
+  setInitElasticStiffness();
 
 }
 
@@ -46,7 +45,7 @@ PressureDependentElastic3D::PressureDependentElastic3D():
  ElasticIsotropicMaterial (0, ND_TAG_PressureDependentElastic3D, 0.0, 0.0, 0.0),
  sigma(6), D(6,6), epsilon(6)
 {
-       Dt = tensor( 4, def_dim_4, 0.0 );
+  Dt = tensor( 4, def_dim_4, 0.0 );
 }
 
 PressureDependentElastic3D::~PressureDependentElastic3D ()
@@ -57,52 +56,48 @@ PressureDependentElastic3D::~PressureDependentElastic3D ()
 int
 PressureDependentElastic3D::setTrialStrain (const Vector &v)
 {
-	epsilon = v;
-
-	return 0;
+  epsilon = v;
+  return 0;
 }
 
 int
 PressureDependentElastic3D::setTrialStrain (const Vector &v, const Vector &r)
 {
-	epsilon = v;
-
-	return 0;
+  epsilon = v;
+  return 0;
 }
 
 int
 PressureDependentElastic3D::setTrialStrainIncr (const Vector &v)
 {
-	epsilon += v;
-
-	return 0;
+  epsilon += v;
+  return 0;
 }
 
 int
 PressureDependentElastic3D::setTrialStrainIncr (const Vector &v, const Vector &r)
 {
-	epsilon += v;
-
-	return 0;
+  epsilon += v;
+  return 0;
 }
 
 const Matrix&
 PressureDependentElastic3D::getTangent (void)
 {
-	return D;
+  return D;
 }
 
 const Vector&
 PressureDependentElastic3D::getStress (void)
 {
-	sigma = D*epsilon;
-	return sigma;
+  sigma = D*epsilon;
+  return sigma;
 }
 
 const Vector&
 PressureDependentElastic3D::getStrain (void)
 {
-	return epsilon;
+  return epsilon;
 }
 
 int
@@ -141,7 +136,7 @@ PressureDependentElastic3D::getTangentTensor (void)
 {
     //setElasticStiffness();
     //return Dt;
-    return Dt_commit;
+    return Dt;
 }
 
 const stresstensor
@@ -200,9 +195,9 @@ PressureDependentElastic3D::commitState (void)
     ret = I_ijkl*( Ec*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( Ec / (1.0 + v) );
     
     //ret.print();
-    Dt_commit = ret;
     Dt = ret;
-    
+    D = Dt;
+
     return 0;
 
 }
@@ -253,11 +248,14 @@ PressureDependentElastic3D::sendSelf(int commitTag, Channel &theChannel)
 {
 	int res = 0;
 
-	static Vector data(3);
+	static Vector data(6);
 
 	data(0) = this->getTag();
 	data(1) = E;
 	data(2) = v;
+	data(3) = exp;
+	data(4) = p_ref;
+	data(5) = po;
 
     	res += theChannel.sendVector(this->getDbTag(), commitTag, data);
 	if (res < 0) {
@@ -287,10 +285,12 @@ PressureDependentElastic3D::recvSelf(int commitTag, Channel &theChannel,
 	this->setTag((int)data(0));
     	E = data(1);
 	v = data(2);
+	exp = data(3);
+	p_ref = data(4);
+	po = data(5);
 
 	// Set up the elastic constant matrix for 3D elastic isotropic
-	D.Zero();
-	//setElasticStiffness();
+	this->setInitElasticStiffness();
 	
 	return res;
 }
@@ -342,9 +342,7 @@ void PressureDependentElastic3D::setInitElasticStiffness(void)
     
     //ret.print();
     Dt = ret;
-    Dt_commit = ret;
-
-    //D = Dt;
+    D = Dt;
 
     return;
 

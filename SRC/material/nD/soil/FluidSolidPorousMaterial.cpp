@@ -1,5 +1,5 @@
-// $Revision: 1.9 $
-// $Date: 2002-05-16 00:07:45 $
+// $Revision: 1.10 $
+// $Date: 2002-06-10 22:22:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -27,30 +27,30 @@ Matrix FluidSolidPorousMaterial::workM3(3,3);
 Matrix FluidSolidPorousMaterial::workM6(6,6);
 
 FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial &soilMat,
-                                      double combinedBulkModul)
+						    double combinedBulkModul)
  : NDMaterial(tag, ND_TAG_FluidSolidPorousMaterial)
 {
-	if (combinedBulkModul < 0) {
-		cerr << "WARNING:FluidSolidPorousMaterial::FluidSolidPorousMaterial: combinedBulkModulus < 0" << endl;
-	  cerr << "Will reset to 0." <<endl;
+  if (combinedBulkModul < 0) {
+    cerr << "WARNING:FluidSolidPorousMaterial::FluidSolidPorousMaterial: combinedBulkModulus < 0" << endl;
+    cerr << "Will reset to 0." <<endl;
     combinedBulkModul = 0.;
   }
-	ndm = nd;
-	loadStage = 0;  //default
+  ndm = nd;
+  loadStage = 0;  //default
   theSoilMaterial = soilMat.getCopy();
   combinedBulkModulus = combinedBulkModul;
   trialExcessPressure = currentExcessPressure = 0.;
-	trialVolumeStrain = currentVolumeStrain = 0.;
+  trialVolumeStrain = currentVolumeStrain = 0.;
 }
    
 
 FluidSolidPorousMaterial::FluidSolidPorousMaterial () 
  : NDMaterial(0,ND_TAG_FluidSolidPorousMaterial), theSoilMaterial(0)
 {
-	ndm = 3; 
-	combinedBulkModulus = 0.;
+  ndm = 3; 
+  combinedBulkModulus = 0.;
   trialExcessPressure = currentExcessPressure = 0.;
-	trialVolumeStrain = currentVolumeStrain = 0.;
+  trialVolumeStrain = currentVolumeStrain = 0.;
 }
 
 
@@ -342,9 +342,9 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 	this->setTag((int)data(0));
 	ndm = data(1);
 	loadStage = data(2);
-  combinedBulkModulus = data(3);
+	combinedBulkModulus = data(3);
 	currentExcessPressure = data(4);
-  currentVolumeStrain = data(5);
+	currentVolumeStrain = data(5);
 
 	// now receives the ids of its material
 	ID classTags(2);
@@ -360,22 +360,23 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 	int matDbTag = classTags(1);
 	// Check that material is of the right type; if not,
 	// delete it and create a new one of the right type
-	if (theSoilMaterial->getClassTag() != matClassTag) {
-		delete theSoilMaterial;
-		theSoilMaterial = theBroker.getNewNDMaterial(matClassTag);
-		if (theSoilMaterial == 0) {
-			g3ErrorHandler->fatal("FluidSolidPorousMaterial::recvSelf() - %s %d\n",
-				"Broker could not create NDMaterial of class type",matClassTag);
-			return -1;
-		}
+	if (theSoilMaterial == 0 || theSoilMaterial->getClassTag() != matClassTag) {
+	  if (theSoilMaterial != 0)
+	    delete theSoilMaterial;
+	  theSoilMaterial = theBroker.getNewNDMaterial(matClassTag);
+	  if (theSoilMaterial == 0) {
+	    g3ErrorHandler->fatal("FluidSolidPorousMaterial::recvSelf() - %s %d\n",
+				  "Broker could not create NDMaterial of class type",matClassTag);
+	    return -1;
+	  }
 	}
 
 	// Receive the material
 	theSoilMaterial->setDbTag(matDbTag);
 	res += theSoilMaterial->recvSelf(commitTag, theChannel, theBroker);
 	if (res < 0) {
-		g3ErrorHandler->warning("FluidSolidPorousMaterial::recvSelf() - material failed to recv itself");
-		return res;
+	  g3ErrorHandler->warning("FluidSolidPorousMaterial::recvSelf() - material failed to recv itself");
+	  return res;
 	}
 
 	return res;

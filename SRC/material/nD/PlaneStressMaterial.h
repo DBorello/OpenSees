@@ -18,15 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-07 22:17:38 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:24:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PlaneStressMaterial.h,v $
 
 // Ed "C++" Love
 //
 // Generic Plane Stress Material
 //
-
 
 #include <iostream.h>
 #include <stdio.h> 
@@ -100,10 +99,13 @@ class PlaneStressMaterial: public NDMaterial{
 
   private :
 
-    //out of plane strains
-    double strain22 ;
-    double gamma02 ;
-    double gamma12 ; 
+    //out of plane strains .. trial and committed
+    double Tstrain22 ;
+    double Tgamma02 ;
+    double Tgamma12 ; 
+    double Cstrain22 ;
+    double Cgamma02 ;
+    double Cgamma12 ; 
 
     NDMaterial *theMaterial ;  //pointer to three dimensional material
 

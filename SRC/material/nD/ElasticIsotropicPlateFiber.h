@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-26 23:38:13 $
+// $Revision: 1.5 $
+// $Date: 2002-06-10 22:24:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicPlateFiber.h,v $
                                                                         
                                                                         
@@ -67,17 +67,12 @@ class ElasticIsotropicPlateFiber : public ElasticIsotropicMaterial
     const char *getType (void) const;
     int getOrder (void) const;
     
-    int sendSelf(int commitTag, Channel &theChannel);  
-    int recvSelf(int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker);
-    
   protected:
 
   private:
     static Vector sigma;	// Stress vector ... class-wide for returns
     static Matrix D;		// Elastic constants
-    Vector Tepsilon;		// Trial strains
-	Vector Cepsilon;		// Committed strains
+    Vector epsilon;		// Trial strains
 };
 
 

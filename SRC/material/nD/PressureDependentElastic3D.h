@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $                                                              
-// $Date: 2001-08-14 22:46:16 $                                                                  
+// $Revision: 1.4 $                                                              
+// $Date: 2002-06-10 22:24:08 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PressureDependentElastic3D.h,v $                                                                
 // Pressure dependent elastic isotropic material
                                                                         
@@ -90,9 +90,9 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
     double exp;                 // exponent usually 0.6
     double p_ref;               // Reference pressure, usually atmosphere pressure, i.e. 100kPa
     double po;                  // Cutoff pressure of this material point
+
     stresstensor Stress;	// Stress tensor    
     Tensor Dt;			// Elastic constants tensor
-    Tensor Dt_commit;		// last-step Elastic constants tensor
     straintensor Strain;	// Strain tensor    
 	     
 };

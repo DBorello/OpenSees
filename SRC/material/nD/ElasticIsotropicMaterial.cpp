@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $                                                              
-// $Date: 2001-10-03 18:07:50 $                                                                  
+// $Revision: 1.15 $                                                              
+// $Date: 2002-06-10 22:24:04 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -45,6 +45,7 @@
 #include <ElasticIsotropicBeamFiber.h>
 
 #include <Tensor.h>
+#include <Channel.h>
 
 #include <G3Globals.h>
 
@@ -345,18 +346,46 @@ ElasticIsotropicMaterial::getOrder (void) const
 int
 ElasticIsotropicMaterial::sendSelf (int commitTag, Channel &theChannel)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::sendSelf -- subclass responsibility");
+  int res = 0;
 
-	return 0;
+  static Vector data(4);
+  
+  data(0) = this->getTag();
+  data(1) = E;
+  data(2) = v;
+  data(3) = rho;
+  
+ res += theChannel.sendVector(this->getDbTag(), commitTag, data);
+ if (res < 0) {
+   g3ErrorHandler->warning("%s -- could not send Vector",
+			   "ElasticIsotropicMaterial::sendSelf");
+   return res;
+ }
+
+ return res;
 }
 
 int
 ElasticIsotropicMaterial::recvSelf (int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::recvSelf -- subclass responsibility");
-
-	return 0;
+  int res = 0;
+  
+  static Vector data(4);
+  
+  res += theChannel.recvVector(this->getDbTag(), commitTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- could not receive Vector",
+			    "ElasticIsotropicMaterial::recvSelf");
+    return res;
+  }
+    
+  this->setTag((int)data(0));
+  E = data(1);
+  v = data(2);
+  rho = data(3);
+  
+  return res;
 }
 
 void

@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-26 23:38:13 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:24:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlateFiber.h,v $
 
 #ifndef J2PlateFiber_h
@@ -123,7 +123,12 @@ class J2PlateFiber : public J2Plasticity {
 //jeremic@ucdavis.edu 22jan2001  const Tensor& getStressTensor( ) ;
 //jeremic@ucdavis.edu 22jan2001  const Tensor& getStrainTensor( ) ;  
 
-  //this is frank's problem
+  //swapping history variables
+  int commitState( ) ; 
+  int revertToLastCommit( ) ;
+  int revertToStart( ) ;
+
+  //sending and receiving
   int sendSelf(int commitTag, Channel &theChannel) ;  
   int recvSelf(int commitTag, Channel &theChannel, 
                FEM_ObjectBroker &theBroker ) ;
@@ -134,6 +139,8 @@ class J2PlateFiber : public J2Plasticity {
   static Vector strain_vec ;     //strain in vector notation
   static Vector stress_vec ;     //stress in vector notation
   static Matrix tangent_matrix ; //material tangent in matrix notation
+
+  double commitEps22;
 
   //index mapping special for plane stress because of 
   // condensation on tangent

@@ -1,5 +1,5 @@
-// $Revision: 1.17 $
-// $Date: 2002-05-16 00:07:46 $
+// $Revision: 1.18 $
+// $Date: 2002-06-10 22:22:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <PressureIndependMultiYield.h>
 #include <Information.h>
+#include <ID.h>
 
 int PressureIndependMultiYield::loadStage = 0;
 Matrix PressureIndependMultiYield::theTangent(6,6);
@@ -110,7 +111,7 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd,
 PressureIndependMultiYield::PressureIndependMultiYield () 
  : NDMaterial(0,ND_TAG_PressureIndependMultiYield), 
    currentStress(), trialStress(), currentStrain(), 
-  strainRate()
+  strainRate(), theSurfaces(0), committedSurfaces(0)
 {
   ndm = 3;
   loadStage = 0;   
@@ -126,8 +127,6 @@ PressureIndependMultiYield::PressureIndependMultiYield ()
   rho = 0.;
 
   e2p = 0;
-  theSurfaces = new MultiYieldSurface[1];
-  committedSurfaces = new MultiYieldSurface[1];
   activeSurfaceNum = committedActiveSurf = 0; 
 }
 
@@ -444,103 +443,139 @@ int PressureIndependMultiYield::updateParameter(int responseID, Information &inf
 
 int PressureIndependMultiYield::sendSelf(int commitTag, Channel &theChannel)
 {
-	int i, res = 0;
+  int i, res = 0;
 
-	static Vector data(347), temp(6);
-	data(0) = this->getTag();
-	data(1) = ndm;
-	data(2) = loadStage;
-  data(3) = rho;
-  data(4) = refShearModulus;
-	data(5) = refBulkModulus;
-	data(6) = frictionAngle;
-  data(7) = peakShearStrain;
-  data(8) = refPressure;
-	data(9) = cohesion;
-	data(10) = pressDependCoeff;
-	data(11) = numOfSurfaces;
-  data(12) = residualPress;
-  data(13) = e2p;
-	data(14) = committedActiveSurf;
+  static ID idData(4);
+  idData(0) = this->getTag();
+  idData(1) = numOfSurfaces;
+  idData(2) = loadStage;
+  idData(3) = ndm;
 
+  res += theChannel.sendID(this->getDbTag(), commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- could not send Vector",
+			    "PressureDependMultiYield::sendSelf");
+    return res;
+  }
+
+  Vector data(23+numOfSurfaces*8);
+  static Vector temp(6);
+  data(0) = rho;
+  data(1) = refShearModulus;
+  data(2) = refBulkModulus;
+  data(3) = frictionAngle;
+  data(4) = peakShearStrain;
+  data(5) = refPressure;
+  data(6) = cohesion;
+  data(7) = pressDependCoeff;
+  data(8) = residualPress;
+  data(9) = e2p;
+  data(10) = committedActiveSurf;
+	
   temp = currentStress.t2Vector();
-	for(i = 0; i < 6; i++) data(i+15) = temp[i];
-
+  for(i = 0; i < 6; i++) data(i+11) = temp[i];
+  
   temp = currentStrain.t2Vector();
-	for(i = 0; i < 6; i++) data(i+21) = temp[i];
-	  
-	for(i = 0; i < numOfSurfaces; i++) {
-		int k = 27 + i*8;
-		data(k) = committedSurfaces[i+1].size();
-		data(k+1) = committedSurfaces[i+1].modulus();
-		temp = committedSurfaces[i+1].center();
+  for(i = 0; i < 6; i++) data(i+17) = temp[i];
+  
+  for(i = 0; i < numOfSurfaces; i++) {
+    int k = 23 + i*8;
+    data(k) = committedSurfaces[i+1].size();
+    data(k+1) = committedSurfaces[i+1].modulus();
+    temp = committedSurfaces[i+1].center();
     data(k+2) = temp(0);
     data(k+3) = temp(1);
     data(k+4) = temp(2);
     data(k+5) = temp(3);
     data(k+6) = temp(4);
     data(k+7) = temp(5);
-	}
+  }
 
   res += theChannel.sendVector(this->getDbTag(), commitTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not send Vector",
-			"FluidSolidPorousMaterial::sendSelf");
-		return res;
-	}
-
-	return res;
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- could not send Vector",
+			    "FluidSolidPorousMaterial::sendSelf");
+    return res;
+  }
+  
+  return res;
 }
 
 
 int PressureIndependMultiYield::recvSelf(int commitTag, Channel &theChannel, 
 					 FEM_ObjectBroker &theBroker)    
 {
-	int i, res = 0;
+  int i, res = 0;
 
-	static Vector data(347), temp(6);
+  static ID idData(4);
+  idData(0) = this->getTag();
+  idData(1) = numOfSurfaces;
+  idData(2) = loadStage;
+  idData(3) = ndm;
 
-	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive Vector",
-			"FluidSolidPorousMaterial::recvSelf");
-		return res;
-	}
+  res += theChannel.recvID(this->getDbTag(), commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- could not send Vector",
+			    "PressureDependMultiYield::sendSelf");
+    return res;
+  }
+
+  this->setTag((int)idData(0));
+  loadStage = idData(2);
+  ndm = idData(3);
+
+  Vector data(23+idData(1)*8);
+  static Vector temp(6);
+  
+  res += theChannel.recvVector(this->getDbTag(), commitTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- could not receive Vector",
+			    "FluidSolidPorousMaterial::recvSelf");
+    return res;
+  }
     
-	this->setTag((int)data(0));
-	ndm = data(1);
-	loadStage = data(2);
-  rho = data(3);
-  refShearModulus = data(4);
-	refBulkModulus = data(5);
-	frictionAngle = data(6);
-  peakShearStrain = data(7);
-  refPressure = data(8);
-	cohesion = data(9);
-	pressDependCoeff = data(10);
-	numOfSurfaces = data(11);
-  residualPress = data(12);
-  e2p = data(13);
-	committedActiveSurf = data(14);
-
-	for(i = 0; i < 6; i++) temp[i] = data(i+15);
+  rho = data(0);
+  refShearModulus = data(1);
+  refBulkModulus = data(2);
+  frictionAngle = data(3);
+  peakShearStrain = data(4);
+  refPressure = data(5);
+  cohesion = data(6);
+  pressDependCoeff = data(7);
+  residualPress = data(8);
+  e2p = data(9);
+  committedActiveSurf = data(10);
+  
+  for(i = 0; i < 6; i++) temp[i] = data(i+11);
   currentStress.setData(temp);
-
-	for(i = 0; i < 6; i++) temp[i] = data(i+21);
+  
+  for(i = 0; i < 6; i++) temp[i] = data(i+17);
   currentStrain.setData(temp);
 
-	for(i = 0; i < numOfSurfaces; i++) {
-		int k = 27 + i*8;
+  if (numOfSurfaces != idData(1)) {
+    if (committedSurfaces != 0) {
+      delete [] committedSurfaces;
+      delete [] theSurfaces;
+    }
+    numOfSurfaces = idData(1);
+    theSurfaces = new MultiYieldSurface[numOfSurfaces+1]; //first surface not used
+    committedSurfaces = new MultiYieldSurface[numOfSurfaces+1]; 
+    
+    this->setUpSurfaces();
+  }
+  
+  for(i = 0; i < numOfSurfaces; i++) {
+    int k = 23 + i*8;
     temp(0) = data(k+2);
     temp(1) = data(k+3);
     temp(2) = data(k+4);
     temp(3) = data(k+5);
     temp(4) = data(k+6);
     temp(5) = data(k+7);
-		committedSurfaces[i+1].setData(temp, data(k), data(k+1));
-	}
-
-	return res;
+    committedSurfaces[i+1].setData(temp, data(k), data(k+1));
+  }
+  
+  return res;
 }
 
 

@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-01-23 08:46:28 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 22:24:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2AxiSymm.h,v $
 
 // Written: Ed "C++" Love
@@ -124,10 +124,16 @@ class J2AxiSymm : public J2Plasticity {
 //jeremic@ucdavis.edu 22jan2001  const Tensor& getStressTensor( ) ;
 //jeremic@ucdavis.edu 22jan2001  const Tensor& getStrainTensor( ) ;  
 
-  //this is frank's problem
+  //swap history variables
+  int commitState( ) ; 
+  int revertToLastCommit( ) ;
+  int revertToStart( ) ;
+
+  //sending and receiving
   int sendSelf(int commitTag, Channel &theChannel) ;  
   int recvSelf(int commitTag, Channel &theChannel, 
                FEM_ObjectBroker &theBroker ) ;
+
   
   private :
 
@@ -136,6 +142,10 @@ class J2AxiSymm : public J2Plasticity {
   static Vector stress_vec ;     //stress in vector notation
   static Matrix tangent_matrix ; //material tangent in matrix notation
 
+  double commitEps00;
+  double commitEps11;
+  double commitEps01;
+  double commitEps22;
  				     
 } ; //end of J2AxiSymm declarations
 

@@ -1,9 +1,9 @@
 //<<<<<<< PressureDependMultiYield.h
-// $Revision: 1.10 $
-// $Date: 2002-05-16 00:07:46 $
+// $Revision: 1.11 $
+// $Date: 2002-06-10 22:22:25 $
 //=======
-// $Revision: 1.10 $
-// $Date: 2002-05-16 00:07:46 $
+// $Revision: 1.11 $
+// $Date: 2002-06-10 22:22:25 $
 //>>>>>>> 1.7
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
                                                                         
@@ -121,7 +121,7 @@ private:
   // user supplied 
      int ndm;  //num of dimensions (2 or 3)
      static int loadStage;  //=0 if elastic; =1 or 2 if plastic
-		 double rho;  //mass density
+     double rho;  //mass density
      double refShearModulus;
      double refBulkModulus;
      double frictionAngle;
@@ -137,7 +137,7 @@ private:
      double liquefyParam1;
      double liquefyParam2;
      double liquefyParam4;
-		 double einit;    //initial void ratio
+     double einit;    //initial void ratio
      double volLimit1;
      double volLimit2;
      double volLimit3;

@@ -19,8 +19,8 @@
 ** ****************************************************************** */
                                                                         
 
-// $Revision: 1.1 $
-// $Date: 2001-10-03 18:07:50 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:24:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicBeamFiber.h,v $
 
 // Written: MHS
@@ -53,7 +53,7 @@ class ElasticIsotropicBeamFiber : public ElasticIsotropicMaterial
     int setTrialStrainIncr (const Vector &v, const Vector &r);
     const Matrix &getTangent (void);
     const Vector &getStress (void);
-	const Vector &getStrain (void);
+    const Vector &getStrain (void);
         
     int commitState (void);
     int revertToLastCommit (void);
@@ -62,10 +62,6 @@ class ElasticIsotropicBeamFiber : public ElasticIsotropicMaterial
     NDMaterial *getCopy (void);
     const char *getType (void) const;
     int getOrder (void) const;
-    
-    int sendSelf(int commitTag, Channel &theChannel);  
-    int recvSelf(int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker);
     
   protected:
 
