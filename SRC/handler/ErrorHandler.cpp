@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2002-01-06 19:48:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/handler/ErrorHandler.cpp,v $
                                                                         
                                                                         
@@ -35,6 +35,7 @@
 // What: "@(#) ErrorHandler.C, revA"
 
 #include "ErrorHandler.h"
+#include <iostream.h>
 
 ErrorHandler::ErrorHandler()
 {
@@ -69,7 +70,7 @@ va_list args)
 
     // otherwise parse string , looking for special %d and %f
     if (msg[pos] != '%')
-      theStream << msg[pos];
+      theStream << &msg[pos];
      else {
       pos++;
       switch(msg[pos]) {
