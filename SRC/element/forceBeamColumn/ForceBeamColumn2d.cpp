@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-10-15 23:31:10 $
+// $Revision: 1.16 $
+// $Date: 2003-11-25 00:45:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -375,12 +375,15 @@ ForceBeamColumn2d::getInitialStiff(void)
   if (Ki != 0)
     return *Ki;
 
+  /*
   else
     Ki = new Matrix(this->getTangentStiff());
+  */
 
   static Matrix f(NEBD, NEBD);   // element flexibility matrix  
   this->getInitialFlexibility(f);
-  
+
+  /*
   static Matrix I(NEBD,NEBD);   // an identity matrix for matrix inverse  
   I.Zero();
   for (int i=0; i<NEBD; i++)
@@ -388,7 +391,7 @@ ForceBeamColumn2d::getInitialStiff(void)
   
   // calculate element stiffness matrix
   // invert3by3Matrix(f, kv);
-  /*
+
   static Matrix kvInit(NEBD, NEBD);
   if (f.Solve(I, kvInit) < 0)
     opserr << "ForceBeamColumn2d::getInitialStiff() -- could not invert flexibility\n";
@@ -396,13 +399,7 @@ ForceBeamColumn2d::getInitialStiff(void)
 
   static Matrix kvInit(NEBD, NEBD);
   f.Invert(kvInit);
-
-  //  Ki = new Matrix(crdTransf->getInitialGlobalStiffMatrix(kvInit));
-  opserr << "ELEMENT: \n";
-  opserr << f;
-  opserr << kvInit;
-  opserr << kv;
-  opserr << *Ki;
+  Ki = new Matrix(crdTransf->getInitialGlobalStiffMatrix(kvInit));
 
   return *Ki;
 }
