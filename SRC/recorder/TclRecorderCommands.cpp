@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-10-26 18:54:12 $
+// $Revision: 1.10 $
+// $Date: 2002-03-16 00:04:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -72,8 +72,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 {
     // make sure at least one other argument to contain integrator
     if (argc < 2) {
-	interp->result = "WARNING need to specify a Recorder type ";
-	return TCL_ERROR;
+	interp->result = "WARNING need to specify a Recorder type "; return TCL_ERROR;
     }    
 
     //
@@ -231,6 +230,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	  else if (strcmp(argv[pos],"-node") == 0) {
 	    pos++;
+
 	    // read in the node tags or 'all' can be used
 	    int numNodes = 0;
 	    if (strcmp(argv[pos],"all") == 0) {
@@ -241,7 +241,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	      int loc=0;
 	      while ((theNode= theNodeIter()) != 0) {
 		int tag = theNode->getTag();
-		theNodes(loc++) = tag;
+		theNodes[loc++] = tag;
+		
 	      }
 	      pos++;
 	    } else {
@@ -274,9 +275,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  else	 
 	    flags = 1;
 	}
-
-	//cerr << theNodes;
-	//cerr << theDofs;
 
 	(*theRecorder) = new NodeRecorder(theDofs, theNodes, 
 					  theDomain,
