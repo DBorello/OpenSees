@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-01-19 16:47:59 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 23:03:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/MinMaxMaterial.h,v $
                                                       
 // Written: MHS
@@ -43,11 +43,11 @@ class MinMaxMaterial : public UniaxialMaterial
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);          
-	double getStrainRate(void);
+    double getStrainRate(void);
     double getStress(void);
     double getTangent(void);
-	double getDampTangent(void);
-    double getSecant(void);
+    double getDampTangent(void);
+    double getInitialTangent(void) {return theMaterial->getInitialTangent();}
 
     int commitState(void);
     int revertToLastCommit(void);    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-17 23:59:29 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 23:04:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/NewUniaxialMaterial.h,v $
 
 // Written: MHS
@@ -46,6 +46,7 @@ class NewUniaxialMaterial : public UniaxialMaterial
   double getStrain(void);
   double getStress(void);
   double getTangent(void);
+  double getInitialTangent(void);
   
   int commitState(void);
   int revertToLastCommit(void);    

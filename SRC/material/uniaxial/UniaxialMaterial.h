@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-31 22:11:36 $
+// $Revision: 1.5 $
+// $Date: 2002-06-10 23:04:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.h,v $
                                                                         
                                                                         
@@ -63,8 +63,8 @@ class UniaxialMaterial : public Material
     virtual double getStrainRate (void);
     virtual double getStress (void) = 0;
     virtual double getTangent (void) = 0;
+    virtual double getInitialTangent (void) = 0;
     virtual double getDampTangent (void);
-    virtual double getSecant (void);
 
     virtual int commitState (void) = 0;
     virtual int revertToLastCommit (void) = 0;    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-07-31 22:11:36 $
+// $Revision: 1.7 $
+// $Date: 2002-06-10 23:04:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -78,19 +78,6 @@ double
 UniaxialMaterial::getDampTangent(void)
 {
     return 0.0;
-}
-
-// default operation for secant stiffness
-double
-UniaxialMaterial::getSecant (void)
-{
-	double strain = this->getStrain();
-	double stress = this->getStress();
-
-	if (strain != 0.0)
-		return stress/strain;
-	else
-		return this->getTangent();
 }
 
 UniaxialMaterial*

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-01-21 17:42:24 $
+// $Revision: 1.6 $
+// $Date: 2002-06-10 23:03:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -36,6 +36,7 @@
 #include <G3Globals.h>
 #include <math.h>
 #include <float.h>
+#include <Channel.h>
 
 HystereticMaterial::HystereticMaterial(int tag,
 			double m1p, double r1p, double m2p, double r2p, double m3p, double r3p,
@@ -177,6 +178,7 @@ HystereticMaterial::setTrialStrain(double strain, double strainRate)
 	    positiveIncrement(dStrain);
 	}
 
+	cerr << dStrain << " " << Ttangent << " " << Tstress << endl;
 	TenergyD = CenergyD + 0.5*(Cstress+Tstress)*dStrain;
 
 	return 0;
@@ -381,7 +383,6 @@ HystereticMaterial::commitState(void)
 
 	Cstress = Tstress;
 	Cstrain = Tstrain;
-
 	return 0;
 }
 
@@ -414,6 +415,8 @@ HystereticMaterial::revertToStart(void)
 	Cstress = 0.0;
 	Cstrain = 0.0;
 
+	Tstrain = 0;
+	Tstress = 0;
 	Ttangent = E1p;
 
 	return 0;
@@ -435,7 +438,6 @@ HystereticMaterial::getCopy(void)
 	theCopy->CloadIndicator = CloadIndicator;
 	theCopy->Cstress = Cstress;
 	theCopy->Cstrain = Cstrain;
-
 	theCopy->Ttangent = Ttangent;
 
 	return theCopy;
@@ -444,14 +446,101 @@ HystereticMaterial::getCopy(void)
 int
 HystereticMaterial::sendSelf(int commitTag, Channel &theChannel)
 {
-	return -1;
+  int res = 0;
+  
+  static Vector data(27);
+  
+  data(0) = this->getTag();
+  data(1) = mom1p;
+  data(2) = rot1p;
+  data(3) = mom2p;
+  data(4) = rot2p;
+  data(5) = mom3p;
+  data(6) = rot3p;
+  data(7) = mom1n;
+  data(8) = rot1n;
+  data(9) = mom2n;
+  data(10) = rot2n;
+  data(11) = mom3n;
+  data(12) = rot3n;
+  data(13) = pinchX;
+  data(14) = pinchY;
+  data(15) = damfc1;
+  data(16) = damfc2;
+  data(17) = beta;
+  data(18) = CrotMax;
+  data(19) = CrotMin;
+  data(20) = CrotPu;
+  data(21) = CrotNu;
+  data(22) = CenergyD;
+  data(23) = CloadIndicator;
+  data(24) = Cstress;
+  data(25) = Cstrain;
+  data(26) = Ttangent;
+
+  res = theChannel.sendVector(this->getDbTag(), commitTag, data);
+  if (res < 0) 
+    cerr << "HysteriticMaterial::sendSelf() - failed to send data\n";
+
+
+  return res;
 }
 
 int
 HystereticMaterial::recvSelf(int commitTag, Channel &theChannel, 
 			FEM_ObjectBroker &theBroker)
 {
-	return -1;
+  int res = 0;
+  
+  static Vector data(27);
+  res = theChannel.recvVector(this->getDbTag(), commitTag, data);
+  
+  if (res < 0) {
+      cerr << "HysteriticMaterial::recvSelf() - failed to receive data\n";
+      return res;
+  }
+  else {
+    this->setTag((int)data(0));
+    mom1p = data(1);
+    rot1p = data(2);
+    mom2p = data(3);
+    rot2p = data(4);
+    mom3p = data(5);
+    rot3p = data(6);
+    mom1n = data(7);
+    rot1n = data(8);
+    mom2n = data(9);
+    rot2n = data(10);
+    mom3n = data(11);
+    rot3n = data(12);
+    pinchX = data(13);
+    pinchY = data(14);
+    damfc1 = data(15);
+    damfc2 = data(16);
+    beta = data(17);
+    CrotMax = data(18);
+    CrotMin = data(19);
+    CrotPu = data(20);
+    CrotNu = data(21);
+    CenergyD = data(22);
+    CloadIndicator = data(23);
+    Cstress = data(24);
+    Cstrain = data(25);
+    Ttangent = data(26);
+
+    // set the trial values
+    TrotMax = CrotMax;
+    TrotMin = CrotMin;
+    TrotPu = CrotPu;
+    TrotNu = CrotNu;
+    TenergyD = CenergyD;
+    TloadIndicator = CloadIndicator;
+    Tstress = Cstress;
+    Tstrain = Cstrain;
+
+  }
+
+  return 0;
 }
     
 void

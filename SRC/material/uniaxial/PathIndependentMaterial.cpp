@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-01-19 16:20:04 $
+// $Revision: 1.4 $
+// $Date: 2002-06-10 23:04:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PathIndependentMaterial.cpp,v $
 
 // Written: MHS
@@ -72,6 +72,7 @@ PathIndependentMaterial::getStress(void)
     return theMaterial->getStress();
 }
 
+
 double 
 PathIndependentMaterial::getTangent(void)
 {
@@ -85,9 +86,9 @@ PathIndependentMaterial::getDampTangent(void)
 }
 
 double 
-PathIndependentMaterial::getSecant(void)
+PathIndependentMaterial::getInitialTangent(void)
 {
-    return theMaterial->getSecant();
+    return theMaterial->getInitialTangent();
 }
 
 double 
@@ -151,14 +152,14 @@ PathIndependentMaterial::sendSelf(int cTag, Channel &theChannel)
 	classTags(1) = dbTag;
 	classTags(2) = this->getTag();
 
-	res += theChannel.sendID(dbTag, cTag, classTags);
+	res = theChannel.sendID(dbTag, cTag, classTags);
 	if (res < 0) {
 		g3ErrorHandler->warning("%s -- could not send ID",
 			"PathIndependentMaterial::sendSelf");
 		return res;
 	}
     
-	res += theMaterial->sendSelf(cTag, theChannel);
+	res = theMaterial->sendSelf(cTag, theChannel);
 	if (res < 0) {
 		g3ErrorHandler->warning("%s -- could not send UniaxialMaterial",
 			"PathIndependentMaterial::sendSelf");
@@ -172,52 +173,52 @@ int
 PathIndependentMaterial::recvSelf(int cTag, Channel &theChannel, 
 			       FEM_ObjectBroker &theBroker)
 {
-	int res = 0;
+  int res = 0;
 
-    static ID classTags(3);
+  static ID classTags(3);
 
-	int dbTag = this->getDbTag();
+  int dbTag = this->getDbTag();
 
-    res += theChannel.recvID(dbTag, cTag, classTags);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive ID",
-			"PathIndependentMaterial::recvSelf");
-		return res;
-	}
-
-	this->setTag(classTags(2));
-
-	// Check if the material is null; if so, get a new one
-	if (theMaterial == 0) {
-		theMaterial = theBroker.getNewUniaxialMaterial(classTags(0));
-		if (theMaterial == 0) {
-			g3ErrorHandler->warning("%s -- could not get a UniaxialMaterial",
-				"PathIndependent::recvSelf");
-			return -1;
-		}
-	}
-	// Check that the material is of the right type; if not, delete
-	// the current one and get a new one of the right type
-	if (theMaterial->getClassTag() != classTags(0)) {
-		delete theMaterial;
-		theMaterial = theBroker.getNewUniaxialMaterial(classTags(0));
-		if (theMaterial == 0) {
-			g3ErrorHandler->warning("%s -- could not get a UniaxialMaterial",
-				"PathIndependentMaterial::recvSelf");
-			return -1;
-		}
-	}
-
-	// Now, receive the material
-	theMaterial->setDbTag(classTags(1));
-	res += theMaterial->recvSelf(cTag, theChannel, theBroker);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s -- could not receive UniaxialMaterial",
-			"PathIndependentMaterial::recvSelf");
-		return res;
-	}
-
+  res = theChannel.recvID(dbTag, cTag, classTags);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- could not receive ID",
+			    "PathIndependentMaterial::recvSelf");
     return res;
+  }
+
+  this->setTag(int(classTags(2)));
+
+  // Check if the material is null; if so, get a new one
+  if (theMaterial == 0) {
+    theMaterial = theBroker.getNewUniaxialMaterial(classTags(0));
+    if (theMaterial == 0) {
+      g3ErrorHandler->warning("%s -- could not get a UniaxialMaterial",
+			      "PathIndependent::recvSelf");
+      return -1;
+    }
+  }
+  // Check that the material is of the right type; if not, delete
+  // the current one and get a new one of the right type
+  if (theMaterial->getClassTag() != classTags(0)) {
+    delete theMaterial;
+    theMaterial = theBroker.getNewUniaxialMaterial(classTags(0));
+    if (theMaterial == 0) {
+      g3ErrorHandler->warning("%s -- could not get a UniaxialMaterial",
+			      "PathIndependentMaterial::recvSelf");
+      return -1;
+    }
+  }
+  
+  // Now, receive the material
+  theMaterial->setDbTag(classTags(1));
+  res += theMaterial->recvSelf(cTag, theChannel, theBroker);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s -- could not receive UniaxialMaterial",
+			    "PathIndependentMaterial::recvSelf");
+    return res;
+  }
+  
+  return res;
 }
 
 void 

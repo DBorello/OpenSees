@@ -32,9 +32,10 @@ QzSimple1::QzSimple1(int tag, int qzChoice, double Q_ult, double z_50,
 :UniaxialMaterial(tag,MAT_TAG_QzSimple1),
  QzType(qzChoice), Qult(Q_ult), z50(z_50), suction(suctionRatio), dashpot(dash_pot)
 {
-	// Initialize QzSimple variables and history variables
-	//
-    this->revertToStart();
+  // Initialize QzSimple variables and history variables
+  //
+  this->revertToStart();
+  initialTangent = Ttangent;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -44,9 +45,9 @@ QzSimple1::QzSimple1()
 :UniaxialMaterial(0,MAT_TAG_QzSimple1),
  QzType(0), Qult(0.0), z50(0.0), suction(0.0), dashpot(0.0)
 {
-	// Initialize variables
-	//
-	this->revertToStart();
+  // Initialize variables
+  //
+  //	this->revertToStart();
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -415,6 +416,12 @@ QzSimple1::getTangent(void)
 }
 /////////////////////////////////////////////////////////////////////
 double 
+QzSimple1::getInitialTangent(void)
+{
+    return this->initialTangent;
+}
+/////////////////////////////////////////////////////////////////////
+double 
 QzSimple1::getDampTangent(void)
 {
 	// Damping tangent is produced only by the far field component.
@@ -744,6 +751,8 @@ QzSimple1::sendSelf(int cTag, Channel &theChannel)
   data(35) = Ctangent;
   data(36) = TzRate;
 
+  data(37) = initialTangent;
+
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
     cerr << "QzSimple1::sendSelf() - failed to send data\n";
@@ -758,7 +767,7 @@ QzSimple1::recvSelf(int cTag, Channel &theChannel,
 {
   int res = 0;
   
-  static Vector data(37);
+  static Vector data(38);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
@@ -789,7 +798,7 @@ QzSimple1::recvSelf(int cTag, Channel &theChannel,
 	CNF_tang = data(18);
 
 	CSuction_Qin  = data(19);
-    CSuction_zin  = data(20);
+	CSuction_zin  = data(20);
 	CSuction_Q    = data(21);
 	CSuction_z    = data(22);
 	CSuction_tang = data(23);
@@ -810,6 +819,8 @@ QzSimple1::recvSelf(int cTag, Channel &theChannel,
 	CQ        = data(34);
 	Ctangent  = data(35);
 	TzRate    = data(36);
+	
+	initialTangent = data(37);
   }
     
   return res;

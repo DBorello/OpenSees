@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-05-07 16:36:13 $
+// $Revision: 1.12 $
+// $Date: 2002-06-10 23:04:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -305,31 +305,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	    return TCL_ERROR;		
 	}
 
-	// Search for min and max strains
-	double epsmin = NEG_INF_STRAIN;
-	double epsmax = POS_INF_STRAIN;
 	int numMaterials = argc-3;
-	
-	for (int j = 3; j < argc; j++) {
-	    if (strcmp(argv[j],"-min") == 0) {
-		if ((j+1) >= argc || Tcl_GetDouble (interp, argv[j+1], &epsmin) != TCL_OK) {
-		    cerr << "WARNING invalid min\n";
-		    cerr << "uniaxialMaterial Parallel: " << tag << endl;
-		    return TCL_ERROR;
-		}
-		j++;
-		numMaterials -= 2;
-	    }
-	    if (strcmp(argv[j],"-max") == 0) {
-		if ((j+1) >= argc || Tcl_GetDouble (interp, argv[j+1], &epsmax) != TCL_OK) {
-		    cerr << "WARNING invalid max\n";
-		    cerr << "uniaxialMaterial Parallel: " << tag << endl;
-		    return TCL_ERROR;
-		}
-		j++;
-		numMaterials -= 2;
-	    }
-	}
 	
 	if (numMaterials == 0) {
 	    cerr << "WARNING no component material(s) provided\n";
@@ -363,7 +339,7 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	}	
 	
 	// Parsing was successful, allocate the material
-	theMaterial = new ParallelMaterial(tag, numMaterials, theMats, epsmin, epsmax);
+	theMaterial = new ParallelMaterial(tag, numMaterials, theMats);
 	
 	// Deallocate the temporary pointers
 	delete [] theMats;

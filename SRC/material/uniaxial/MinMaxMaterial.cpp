@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-01-19 16:47:59 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 23:03:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/MinMaxMaterial.cpp,v $
 
 // Written: MHS
@@ -104,14 +104,7 @@ MinMaxMaterial::getDampTangent(void)
 		return theMaterial->getDampTangent();
 }
 
-double 
-MinMaxMaterial::getSecant(void)
-{
-	if (Tfailed)
-		return 0.0;
-	else
-		return theMaterial->getSecant();
-}
+
 
 double 
 MinMaxMaterial::getStrain(void)
@@ -171,14 +164,91 @@ MinMaxMaterial::getCopy(void)
 int 
 MinMaxMaterial::sendSelf(int cTag, Channel &theChannel)
 {
-	return -1;
+
+
+  int dbTag = this->getDbTag();
+
+  static ID dataID(3);
+  dataID(0) = this->getTag();
+  dataID(1) = theMaterial->getClassTag();
+  int matDbTag = theMaterial->getDbTag();
+  if ( matDbTag == 0) {
+    matDbTag = theChannel.getDbTag();
+    theMaterial->setDbTag(matDbTag);
+  }
+  dataID(2) = matDbTag;
+  if (theChannel.sendID(dbTag, cTag, dataID) < 0) {
+    cerr << "MinMaxMaterial::sendSelf() - failed to send the ID\n";
+    return -1;
+  }
+
+  static Vector dataVec(3);
+  dataVec(0) = minStrain;
+  dataVec(1) = maxStrain;
+  if (Cfailed == true)
+    dataVec(2) = 1.0;
+  else
+    dataVec(2) = 0.0;
+
+  if (theChannel.sendVector(dbTag, cTag, dataVec) < 0) {
+    cerr << "MinMaxMaterial::sendSelf() - failed to send the Vector\n";
+    return -2;
+  }
+
+  if (theMaterial->sendSelf(cTag, theChannel) < 0) {
+    cerr << "MinMaxMaterial::sendSelf() - failed to send the Material\n";
+    return -3;
+  }
+
+  return 0;
 }
 
 int 
 MinMaxMaterial::recvSelf(int cTag, Channel &theChannel, 
-			       FEM_ObjectBroker &theBroker)
+			 FEM_ObjectBroker &theBroker)
 {
+  int dbTag = this->getDbTag();
+
+  static ID dataID(3);
+  if (theChannel.recvID(dbTag, cTag, dataID) < 0) {
+    cerr << "MinMaxMaterial::recvSelf() - failed to get the ID\n";
     return -1;
+  }
+  this->setTag(int(dataID(0)));
+
+  // as no way to change material, don't have to check classTag of the material 
+  if (theMaterial == 0) {
+    int matClassTag = int(dataID(1));
+    theMaterial = theBroker.getNewUniaxialMaterial(matClassTag);
+    if (theMaterial == 0) {
+      cerr << "MinMaxMaterial::recvSelf() - failed to create Material with classTag " 
+	   << dataID(0) << endl;
+      return -2;
+    }
+  }
+  theMaterial->setDbTag(dataID(2));
+
+  static Vector dataVec(3);
+  if (theChannel.recvVector(dbTag, cTag, dataVec) < 0) {
+    cerr << "MinMaxMaterial::recvSelf() - failed to get the Vector\n";
+    return -3;
+  }
+
+  minStrain = dataVec(0);
+  maxStrain = dataVec(1);
+  
+  if (dataVec(2) == 1.0)
+    Cfailed = true;
+  else
+    Cfailed = false;
+
+  Tfailed = Cfailed;
+
+  if (theMaterial->recvSelf(cTag, theChannel, theBroker) < 0) {
+    cerr << "MinMaxMaterial::recvSelf() - failed to get the Material\n";
+    return -4;
+  }
+  return 0;
 }
 
 void 

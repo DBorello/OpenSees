@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-05-20 16:38:30 $
+// $Revision: 1.7 $
+// $Date: 2002-06-10 23:04:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ParallelMaterial.cpp,v $
                                                                         
                                                                         
@@ -46,11 +46,9 @@
 ParallelMaterial::ParallelMaterial(
 				 int tag, 
 				 int num, 
-				 UniaxialMaterial ** theMaterialModels,
-                                 double min, double max)
+				 UniaxialMaterial ** theMaterialModels)
 :UniaxialMaterial(tag,MAT_TAG_ParallelMaterial),
- trialStrain(0.0), trialStrainRate(0.0), numMaterials(num), otherDbTag(0), theModels(0), 
- epsmin(min), epsmax(max), Cfailed(0), Tfailed(0)
+ trialStrain(0.0), trialStrainRate(0.0), numMaterials(num), theModels(0)
 {
     // create an array (theModels) to store copies of the MaterialModels
     theModels = new UniaxialMaterial *[num];
@@ -75,8 +73,7 @@ ParallelMaterial::ParallelMaterial(
 // to be called on this object
 ParallelMaterial::ParallelMaterial()
 :UniaxialMaterial(0,MAT_TAG_ParallelMaterial),
- trialStrain(0.0), trialStrainRate(0.0), numMaterials(0), otherDbTag(0), theModels(0), 
- epsmin(NEG_INF_STRAIN), epsmax(POS_INF_STRAIN), Cfailed(0), Tfailed(0)
+ trialStrain(0.0), trialStrainRate(0.0), numMaterials(0), theModels(0)
 {
 
 }
@@ -100,17 +97,11 @@ ParallelMaterial::setTrialStrain(double strain, double strainRate)
 {
     // set the trialStrain and the trialStrain in each of the
     // local MaterialModel objects 
-	Tfailed = Cfailed;
     trialStrain = strain;
-	trialStrainRate = strainRate;
+    trialStrainRate = strainRate;
 
-    if (trialStrain < epsmin || trialStrain > epsmax)
-        Tfailed = 1;
-
-    if (!Tfailed) {
-        for (int i=0; i<numMaterials; i++)
-	    theModels[i]->setTrialStrain(strain, strainRate);
-    }
+    for (int i=0; i<numMaterials; i++)
+      theModels[i]->setTrialStrain(strain, strainRate);
 
     return 0;
 }
@@ -133,10 +124,8 @@ ParallelMaterial::getStress(void)
 {
     // get the stress = sum of stress in all local MaterialModel objects
     double stress = 0.0;
-    if (!Tfailed) {
-        for (int i=0; i<numMaterials; i++)
-	    stress +=theModels[i]->getStress();
-    }
+    for (int i=0; i<numMaterials; i++)
+      stress +=theModels[i]->getStress();
 
     return stress;
 }
@@ -148,10 +137,19 @@ ParallelMaterial::getTangent(void)
 {
     // get the tangent = sum of tangents in all local MaterialModel objects    
     double E = 0.0;
-    if (!Tfailed) {
-        for (int i=0; i<numMaterials; i++)
-	    E +=theModels[i]->getTangent();    
-    }
+    for (int i=0; i<numMaterials; i++)
+      E +=theModels[i]->getTangent();    
+
+    return E;
+}
+
+double 
+ParallelMaterial::getInitialTangent(void)
+{
+    // get the tangent = sum of tangents in all local MaterialModel objects    
+    double E = 0.0;
+    for (int i=0; i<numMaterials; i++)
+      E +=theModels[i]->getInitialTangent();    
 
     return E;
 }
@@ -161,30 +159,15 @@ ParallelMaterial::getDampTangent(void)
 {
     // get the damp tangent = sum of damp tangents in all local MaterialModel objects    
     double eta = 0.0;
-    if (!Tfailed) {
-        for (int i=0; i<numMaterials; i++)
-	    eta +=theModels[i]->getDampTangent();    
-    }
+    for (int i=0; i<numMaterials; i++)
+      eta +=theModels[i]->getDampTangent();    
 
     return eta;
-}
-
-double ParallelMaterial::getSecant ()
-{
-	// get the secant = sum of secants in all local MaterialModel objects    
-    double S = 0.0;
-    if (!Tfailed) {
-        for (int i=0; i<numMaterials; i++)
-	    S +=theModels[i]->getSecant();    
-    }
-
-    return S;
 }
 
 int 
 ParallelMaterial::commitState(void)
 {
-    Cfailed = Tfailed;
 
     // invoke commitState() on each of local MaterialModel objects
     for (int i=0; i<numMaterials; i++)
@@ -200,8 +183,6 @@ ParallelMaterial::commitState(void)
 int 
 ParallelMaterial::revertToLastCommit(void)
 {
-  Tfailed = Cfailed;
-
     // invoke commitState() on each of local MaterialModel objects
     for (int i=0; i<numMaterials; i++)
 	if (theModels[i]->revertToLastCommit() != 0) {
@@ -217,8 +198,6 @@ ParallelMaterial::revertToLastCommit(void)
 int 
 ParallelMaterial::revertToStart(void)
 {
-    Cfailed = 0;
-    Tfailed = 0;
     trialStrain = 0.0;
     trialStrainRate = 0.0;
 
@@ -239,12 +218,10 @@ UniaxialMaterial *
 ParallelMaterial::getCopy(void)
 {
     ParallelMaterial *theCopy = new 
-       ParallelMaterial(this->getTag(),numMaterials,theModels,epsmin,epsmax);
+      ParallelMaterial(this->getTag(),numMaterials,theModels);
 
     theCopy->trialStrain = trialStrain;
-	theCopy->trialStrainRate = trialStrainRate;
-    theCopy->Cfailed = Cfailed;
-    theCopy->Tfailed = Tfailed;
+    theCopy->trialStrainRate = trialStrainRate;
 
     return theCopy;
 }
@@ -253,22 +230,23 @@ ParallelMaterial::getCopy(void)
 int 
 ParallelMaterial::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(6);
 
-    // check to see if we have a database tag for the other ID,
-    // the object requires two database tags as sends two ID's.
-    if (otherDbTag == 0) 
-      otherDbTag = theChannel.getDbTag();
+    int res = 0;
 
+    static ID data(3);
+
+    // send ID of size 3 so no possible conflict with classTags ID
+    int dbTag = this->getDbTag();
     data(0) = this->getTag();
     data(1) = numMaterials;
-    data(2) = otherDbTag;
-    data(3) = epsmin;
-    data(4) = epsmax;
-    data(5) = Cfailed;
+    data(2) = 0;
 
-    theChannel.sendVector(this->getDbTag(), cTag, data);
-    
+    res = theChannel.sendID(dbTag, cTag, data);
+    if (res < 0) {
+      cerr << "ParallelMaterial::sendSelf() - failed to send data\n";
+      return res;
+    }
+
     // now create an ID containing the class tags and dbTags of all
     // the MaterialModel objects in this ParallelMaterial
     // then send each of the MaterialModel objects
@@ -283,7 +261,13 @@ ParallelMaterial::sendSelf(int cTag, Channel &theChannel)
 	}
 	classTags(i+numMaterials) = matDbTag;
     }
-    theChannel.sendID(otherDbTag, cTag, classTags);
+
+    res = theChannel.sendID(dbTag, cTag, classTags);
+    if (res < 0) {
+      cerr << "ParallelMaterial::sendSelf() - failed to send data\n";
+      return res;
+    }
+
     for (int j=0; j<numMaterials; j++)
 	theModels[j]->sendSelf(cTag, theChannel);
     
@@ -294,33 +278,55 @@ int
 ParallelMaterial::recvSelf(int cTag, Channel &theChannel, 
 				FEM_ObjectBroker &theBroker)
 {
-    Vector data(6);
-    theChannel.recvVector(this->getDbTag(), cTag, data);
+    int res = 0;
+    static ID data(3);
+    int dbTag = this->getDbTag();
+
+    res = theChannel.recvID(dbTag, cTag, data);
+    if (res < 0) {
+      cerr << "ParallelMaterial::recvSelf() - failed to send data\n";
+      return res;
+    }
+
     this->setTag(int(data(0)));
-    numMaterials = int(data(1));
-    otherDbTag = int(data(2));
-    epsmin = data(3);
-    epsmax = data(4);
-    Cfailed = int(data(5));
+    int numMaterialsSent = int(data(1));
+    if (numMaterials != numMaterialsSent) { 
+      numMaterials = numMaterialsSent;
+      if (theModels != 0) {
+	for (int i=0; i<numMaterials; i++)
+	  delete theModels[i];
+
+	delete [] theModels;
+      }
+
+      theModels = new UniaxialMaterial *[numMaterials];      
+      if (theModels == 0) {
+	cerr << "FATAL ParallelMaterial::recvSelf() - ran out of memory";
+	cerr << " for array of size: " << numMaterials << "\n";
+	return -2;
+      }
+      for (int i=0; i<numMaterials; i++)
+	theModels[i] = 0;
+    }
 
     // create and receive an ID for the classTags and dbTags of the local 
     // MaterialModel objects
     ID classTags(numMaterials*2);
-    theChannel.recvID(otherDbTag, cTag, classTags);
-    theModels = new UniaxialMaterial *[numMaterials];
-
-    // create space for the objects
-    if (theModels == 0) {
-	cerr << "FATAL ParallelMaterial::recvSelf() ";
-	cerr << " ran out of memory for array of size: " << numMaterials << "\n";
-	exit(-1);
-    }    
+    res = theChannel.recvID(dbTag, cTag, classTags);
+    if (res < 0) {
+      cerr << "ParallelMaterial::recvSelf() - failed to send data\n";
+      return res;
+    }
 
     // now for each of the MaterialModel objects, create a new object
     // and invoke recvSelf() on it
     for (int i=0; i<numMaterials; i++) {
+      int matClassTag = classTags(i);
+      if (theModels[i] == 0 || theModels[i]->getClassTag() != matClassTag) {
+	if (theModels[i] == 0)
+	  delete theModels[i];
 	UniaxialMaterial *theMaterialModel = 
-	    theBroker.getNewUniaxialMaterial(classTags(i));
+	    theBroker.getNewUniaxialMaterial(matClassTag);
 	if (theMaterialModel != 0) {
 	    theModels[i] = theMaterialModel;
 	    theMaterialModel->setDbTag(classTags(i+numMaterials));
@@ -330,7 +336,8 @@ ParallelMaterial::recvSelf(int cTag, Channel &theChannel,
 	    cerr << " could not get a UniaxialMaterial \n";
 	    exit(-1);
 	}    	    
-	theMaterialModel->recvSelf(cTag, theChannel, theBroker);
+      }
+      theModels[i]->recvSelf(cTag, theChannel, theBroker);
     }
     return 0;
 }
@@ -339,10 +346,6 @@ void
 ParallelMaterial::Print(ostream &s, int flag)
 {
     s << "Parallel tag: " << this->getTag() << endl;
-    if (epsmin != NEG_INF_STRAIN)
-      s << "  epsmin: " << epsmin << endl;
-    if (epsmax != POS_INF_STRAIN)
-      s << "  epsmax: " << epsmax << endl;
     for (int i=0; i<numMaterials; i++) {
       s << " ";
       theModels[i]->Print(s, flag);

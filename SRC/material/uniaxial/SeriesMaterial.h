@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-05-17 23:12:21 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 23:04:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SeriesMaterial.h,v $
 
 #ifndef SeriesMaterial_h
@@ -48,6 +48,7 @@ class SeriesMaterial : public UniaxialMaterial
     double getStrain(void);          
     double getStress(void);
     double getTangent(void);
+    double getInitialTangent(void);
 
     int commitState(void);
     int revertToLastCommit(void);    

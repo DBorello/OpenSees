@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-11 18:22:53 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 23:04:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ViscousMaterial.cpp,v $
                                                                         
 // Written: Mehrdad Sasani 
@@ -81,10 +81,16 @@ ViscousMaterial::getTangent(void)
     return 0.0;
 }
 
+double 
+ViscousMaterial::getInitialTangent(void)
+{
+    return 0.0;
+}
+
 double
 ViscousMaterial::getDampTangent(void)
 {
-	static const double minvel = 1.e-11;
+  static const double minvel = 1.e-11;
 
     double absRate = fabs(trialRate);
 
@@ -94,11 +100,6 @@ ViscousMaterial::getDampTangent(void)
 		return Alpha*C*pow(absRate,Alpha-1.0);	
 }
 
-double 
-ViscousMaterial::getSecant(void)
-{
-    return 0.0;
-}
 
 double 
 ViscousMaterial::getStrain(void)

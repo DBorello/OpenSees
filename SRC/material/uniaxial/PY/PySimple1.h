@@ -37,8 +37,9 @@ class PySimple1 : public UniaxialMaterial
     double getStrain(void);          
     double getStress(void);
     double getTangent(void);
-	double getStrainRate(void);
-	double getDampTangent(void);
+    double getInitialTangent(void);
+    double getStrainRate(void);
+    double getDampTangent(void);
 
     int commitState(void);
     int revertToLastCommit(void);    
@@ -160,6 +161,7 @@ class PySimple1 : public UniaxialMaterial
 	double TFar_p;			//  current p
 	double TFar_tang;       //  tangent
 
+	double initialTangent;
 };
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-06-20 04:37:09 $
+// $Revision: 1.4 $
+// $Date: 2002-06-10 23:03:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.h,v $
 
 // Written: MHS
@@ -59,20 +59,21 @@ class HystereticMaterial : public UniaxialMaterial
 
 	    int setTrialStrain(double strain, double strainRate = 0.0);
 	    double getStrain(void);
-		double getStress(void);
+	    double getStress(void);
 	    double getTangent(void);
+	    double getInitialTangent(void) {return E1p;};
 
 	    int commitState(void);
-		int revertToLastCommit(void);
+	    int revertToLastCommit(void);
 	    int revertToStart(void);
 
 	    UniaxialMaterial *getCopy(void);
 		
-		int sendSelf(int commitTag, Channel &theChannel);  
-		int recvSelf(int commitTag, Channel &theChannel, 
-			FEM_ObjectBroker &theBroker);    
+	    int sendSelf(int commitTag, Channel &theChannel);  
+	    int recvSelf(int commitTag, Channel &theChannel, 
+			 FEM_ObjectBroker &theBroker);    
     
-		void Print(ostream &s, int flag =0);
+	    void Print(ostream &s, int flag =0);
 
 	protected:
 

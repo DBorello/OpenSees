@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-01-19 16:20:04 $
+// $Revision: 1.4 $
+// $Date: 2002-06-10 23:04:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PathIndependentMaterial.h,v $
                                                       
 // Written: MHS
@@ -40,16 +40,16 @@ class PathIndependentMaterial : public UniaxialMaterial
 {
   public:
     PathIndependentMaterial(int tag, UniaxialMaterial &material); 
-	PathIndependentMaterial();
+    PathIndependentMaterial();
     ~PathIndependentMaterial();
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);          
-	double getStrainRate(void);
+    double getStrainRate(void);
     double getStress(void);
     double getTangent(void);
-	double getDampTangent(void);
-    double getSecant(void);
+    double getDampTangent(void);
+    double getInitialTangent(void);
 
     int commitState(void);
     int revertToLastCommit(void);    
@@ -66,7 +66,7 @@ class PathIndependentMaterial : public UniaxialMaterial
   protected:
     
   private:
-	UniaxialMaterial *theMaterial;
+    UniaxialMaterial *theMaterial;
 };
 
 

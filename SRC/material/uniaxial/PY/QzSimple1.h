@@ -30,15 +30,16 @@ class QzSimple1 : public UniaxialMaterial
   public:
     QzSimple1(int tag, int qzType, double Qult, double z50, double suction,
 		      double dashpot);
-	QzSimple1();
+    QzSimple1();
     ~QzSimple1();
 
     int setTrialStrain(double z, double zRate); 
     double getStrain(void);          
     double getStress(void);
     double getTangent(void);
-	double getStrainRate(void);
-	double getDampTangent(void);
+    double getInitialTangent(void);
+    double getStrainRate(void);
+    double getDampTangent(void);
 
     int commitState(void);
     int revertToLastCommit(void);    
@@ -156,6 +157,7 @@ class QzSimple1 : public UniaxialMaterial
 	double TFar_Q;			//  current Q
 	double TFar_tang;       //  tangent
 
+	double initialTangent;
 };
 
 #endif

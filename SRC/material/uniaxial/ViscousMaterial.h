@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-11 18:22:53 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 23:04:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ViscousMaterial.h,v $
                                                                         
 // Written: Mehrdad Sasani 
@@ -45,12 +45,13 @@ class ViscousMaterial : public UniaxialMaterial
 
     int setTrialStrain(double velocity, double strainRate = 0.0); 
     double getStrain(void); 
-	double getStrainRate(void);
+    double getStrainRate(void);
     double getStress(void);
 
     double getTangent(void);
-	double getDampTangent(void);
-    double getSecant (void);
+    double getInitialTangent(void);
+    double getDampTangent(void);
+
 
     int commitState(void);
     int revertToLastCommit(void);    

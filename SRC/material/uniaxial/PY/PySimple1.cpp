@@ -32,9 +32,10 @@ PySimple1::PySimple1(int tag, int classtag, int soil, double p_ult, double y_50,
 :UniaxialMaterial(tag,classtag),
  soilType(soil), pult(p_ult), y50(y_50), drag(dragratio), dashpot(dash_pot)
 {
-	// Initialize PySimple variables and history variables
-	//
-    this->revertToStart();
+  // Initialize PySimple variables and history variables
+  //
+  this->revertToStart();
+  initialTangent = Ttangent;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -44,9 +45,9 @@ PySimple1::PySimple1()
 :UniaxialMaterial(0,0),
  soilType(0), pult(0.0), y50(0.0), drag(0.0), dashpot(0.0)
 {
-	// Initialize variables
-	//
-	this->revertToStart();
+  // Initialize variables
+  //
+  // this->revertToStart();
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -419,6 +420,12 @@ PySimple1::getTangent(void)
 }
 /////////////////////////////////////////////////////////////////////
 double 
+PySimple1::getInitialTangent(void)
+{
+    return this->initialTangent;
+}
+/////////////////////////////////////////////////////////////////////
+double 
 PySimple1::getDampTangent(void)
 {
 	// Damping tangent is produced only by the far field component.
@@ -577,7 +584,7 @@ PySimple1::revertToStart(void)
 	// Near Field components
 	//
 	NFkrig  = 100.0 * (0.5 * pult) / y50;
-    TNFpinr = Elast*pult;
+	TNFpinr = Elast*pult;
 	TNFpinl = -TNFpinr;
 	TNFyinr = TNFpinr / NFkrig;
 	TNFyinl = -TNFyinr;
@@ -639,7 +646,7 @@ PySimple1::sendSelf(int cTag, Channel &theChannel)
 {
   int res = 0;
   
-  static Vector data(38);
+  static Vector data(39);
   
   data(0) = this->getTag();
   data(1) = soilType;
@@ -686,6 +693,8 @@ PySimple1::sendSelf(int cTag, Channel &theChannel)
   data(36) = Ctangent;
   data(37) = TyRate;
 
+  data(38) = initialTangent;
+
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
     cerr << "PySimple1::sendSelf() - failed to send data\n";
@@ -700,7 +709,7 @@ PySimple1::recvSelf(int cTag, Channel &theChannel,
 {
   int res = 0;
   
-  static Vector data(38);
+  static Vector data(39);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
@@ -730,7 +739,7 @@ PySimple1::recvSelf(int cTag, Channel &theChannel,
 	CNF_tang = data(17);
 
 	CDrag_pin = data(18);
-    CDrag_yin = data(19);
+	CDrag_yin = data(19);
 	CDrag_p   = data(20);
 	CDrag_y   = data(21);
 	CDrag_tang= data(22);
@@ -753,6 +762,8 @@ PySimple1::recvSelf(int cTag, Channel &theChannel,
 	Cp        = data(35);
 	Ctangent  = data(36);
 	TyRate    = data(37);
+	
+	initialTangent = data(38);
   }
     
   return res;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-05-17 23:12:21 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 23:04:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ParallelMaterial.h,v $
                                                                         
                                                                         
@@ -44,20 +44,18 @@ class ParallelMaterial : public UniaxialMaterial
 {
   public:
     ParallelMaterial(int tag, 
-			  int numMaterial, 
-			  UniaxialMaterial **theMaterials,
-                          double min = NEG_INF_STRAIN,
-                          double max = POS_INF_STRAIN); 
+		     int numMaterial, 
+		     UniaxialMaterial **theMaterials);
     ParallelMaterial();
     ~ParallelMaterial();
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
     double getStrain(void);          
-	double getStrainRate(void);
+    double getStrainRate(void);
     double getStress(void);
     double getTangent(void);
-	double getDampTangent(void);
-    double getSecant (void);
+    double getDampTangent(void);
+    double getInitialTangent(void);
 
     int commitState(void);
     int revertToLastCommit(void);    
@@ -79,14 +77,9 @@ class ParallelMaterial : public UniaxialMaterial
     
   private:
     double trialStrain;
-	double trialStrainRate;
+    double trialStrainRate;
     int numMaterials;   // the number of UniaxialMaterials in the aggregation
-    int otherDbTag;  // an integer tag needed for communication with a database
     UniaxialMaterial **theModels; // an array of pointers to the UniaxialMaterials
-    double epsmin;
-    double epsmax;
-    int Cfailed;
-    int Tfailed;
 };
 
 

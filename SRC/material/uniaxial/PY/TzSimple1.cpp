@@ -31,9 +31,10 @@ TzSimple1::TzSimple1(int tag,int classtag, int tz_type,double t_ult,double z_50,
 :UniaxialMaterial(tag,classtag),
  tzType(tz_type), tult(t_ult), z50(z_50), dashpot(dash_pot)
 {
-	// Initialize TzSimple variables and history variables
-	//
-    this->revertToStart();
+  // Initialize TzSimple variables and history variables
+  //
+  this->revertToStart();
+  initialTangent = Ttangent;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -43,9 +44,9 @@ TzSimple1::TzSimple1()
 :UniaxialMaterial(0,0),
  tzType(0), tult(0.0), z50(0.0), dashpot(0.0)
 {
-	// Initialize variables
-	//
-	this->revertToStart();
+  // Initialize variables 
+  //
+  // this->revertToStart();
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -248,6 +249,12 @@ TzSimple1::getTangent(void)
 }
 /////////////////////////////////////////////////////////////////////
 double 
+TzSimple1::getInitialTangent(void)
+{
+    return this->initialTangent;
+}
+/////////////////////////////////////////////////////////////////////
+double 
 TzSimple1::getDampTangent(void)
 {
 	// Damping tangent is produced only by the far field component.
@@ -408,7 +415,7 @@ TzSimple1::sendSelf(int cTag, Channel &theChannel)
 {
 	int res = 0;
   
-	static Vector data(19);
+	static Vector data(20);
   
 	data(0) = this->getTag();
 	data(1) = tzType;
@@ -433,6 +440,8 @@ TzSimple1::sendSelf(int cTag, Channel &theChannel)
 	data(17) = Ctangent;
 	data(18) = TzRate;
 
+	data(19) = initialTangent;
+
 	res = theChannel.sendVector(this->getDbTag(), cTag, data);
 	if (res < 0) 
 		cerr << "TzSimple1::sendSelf() - failed to send data\n";
@@ -447,7 +456,7 @@ TzSimple1::recvSelf(int cTag, Channel &theChannel,
 {
   int res = 0;
   
-  static Vector data(19);
+  static Vector data(20);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
@@ -477,6 +486,8 @@ TzSimple1::recvSelf(int cTag, Channel &theChannel,
 	Ct        = data(16);
 	Ctangent  = data(17);
 	TzRate    = data(18);
+	
+	initialTangent = data(19);
   }
     
   return res;

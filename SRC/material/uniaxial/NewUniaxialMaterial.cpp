@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2001-08-20 03:45:07 $
+// $Revision: 1.3 $
+// $Date: 2002-06-10 23:03:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/NewUniaxialMaterial.cpp,v $
 
 // Written: MHS
@@ -55,6 +55,12 @@ NewUniaxialMaterial::~NewUniaxialMaterial()
 int 
 NewUniaxialMaterial::setTrialStrain(double strain, double strainRate)
 {
+  // set the trial strain
+  Tstrain = strain;
+
+  // determine trial stress and tangent
+  Tstress = 0.0;
+  Ttangent = 0.0;
   return 0;
 }
 
@@ -68,6 +74,13 @@ double
 NewUniaxialMaterial::getTangent(void)
 {
   return Ttangent;
+}
+
+double 
+NewUniaxialMaterial::getInitialTangent(void)
+{
+  // return the initial tangent
+  return 0.0;
 }
 
 double 

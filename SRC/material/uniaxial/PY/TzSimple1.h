@@ -35,8 +35,9 @@ class TzSimple1 : public UniaxialMaterial
     double getStrain(void);          
     double getStress(void);
     double getTangent(void);
-	double getStrainRate(void);
-	double getDampTangent(void);
+    double getInitialTangent(void);    
+    double getStrainRate(void);
+    double getDampTangent(void);
 
     int commitState(void);
     int revertToLastCommit(void);    
@@ -105,6 +106,8 @@ class TzSimple1 : public UniaxialMaterial
 	double TFar_z;			//  current z
 	double TFar_t;			//  current t
 	double TFar_tang;       //  tangent
+	
+	double initialTangent;
 
 };
 
