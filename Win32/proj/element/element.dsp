@@ -486,5 +486,13 @@ SOURCE=..\..\..\SRC\element\dispBeamColumn\DispBeamColumn3d.h
 SOURCE=..\..\..\SRC\element\dispBeamColumn\TclDispBeamColumnCommand.cpp
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\NewElement.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\NewElement.h
+# End Source File
 # End Target
 # End Project
