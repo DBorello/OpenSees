@@ -1,5 +1,5 @@
-// $Revision: 1.3 $
-// $Date: 2001-08-07 22:31:03 $
+// $Revision: 1.4 $
+// $Date: 2001-08-26 23:29:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -28,7 +28,7 @@ Matrix FluidSolidPorousMaterial::workM6(6,6);
 
 FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial &soilMat,
                                       double combinedBulkModul, double atm)
- : NDMaterial(tag, MAT_TAG_FluidSolidPorousMaterial)
+ : NDMaterial(tag, ND_TAG_FluidSolidPorousMaterial)
 {
 	if (combinedBulkModul < 0) {
 		cerr << "WARNING:FluidSolidPorousMaterial::FluidSolidPorousMaterial: combinedBulkModulus < 0" << endl;
@@ -46,7 +46,7 @@ FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial 
    
 
 FluidSolidPorousMaterial::FluidSolidPorousMaterial () 
- : NDMaterial(0,MAT_TAG_FluidSolidPorousMaterial), theSoilMaterial(0)
+ : NDMaterial(0,ND_TAG_FluidSolidPorousMaterial), theSoilMaterial(0)
 {
 	ndm = 3; 
 	combinedBulkModulus = 0.;
@@ -56,7 +56,7 @@ FluidSolidPorousMaterial::FluidSolidPorousMaterial ()
 
 
 FluidSolidPorousMaterial::FluidSolidPorousMaterial (const FluidSolidPorousMaterial & a)
- : NDMaterial(a.getTag(),MAT_TAG_FluidSolidPorousMaterial)
+ : NDMaterial(a.getTag(),ND_TAG_FluidSolidPorousMaterial)
 {
 	ndm = a.ndm;
 	combinedBulkModulus = a.combinedBulkModulus;

@@ -1,5 +1,5 @@
-// $Revision: 1.3 $
-// $Date: 2001-08-07 22:31:04 $
+// $Revision: 1.4 $
+// $Date: 2001-08-26 23:29:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -18,8 +18,6 @@
 #include <Matrix.h>
 #include <Tensor.h>
 #include <stresst.h>
-
-#define MAT_TAG_PressureDependMultiYield		101
 
 class PressureDependMultiYield : public NDMaterial
 {

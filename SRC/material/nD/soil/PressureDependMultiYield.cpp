@@ -1,5 +1,5 @@
-// $Revision: 1.7 $
-// $Date: 2001-08-15 02:21:22 $
+// $Revision: 1.8 $
+// $Date: 2001-08-26 23:29:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -45,7 +45,7 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
                               double liquefactionParam3,
                               double liquefactionParam4,
 															double atm)
- : NDMaterial(tag,MAT_TAG_PressureDependMultiYield), currentStress(zeroVector),
+ : NDMaterial(tag,ND_TAG_PressureDependMultiYield), currentStress(zeroVector),
    trialStress(zeroVector), currentStrain(zeroVector), strainRate(zeroVector),
    reversalStress(zeroVector), PPZPivot(zeroVector), PPZCenter(zeroVector), 
 	 lockStress(zeroVector), reversalStressCommitted(zeroVector), 
@@ -155,7 +155,7 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
    
 
 PressureDependMultiYield::PressureDependMultiYield () 
- : NDMaterial(0,MAT_TAG_PressureDependMultiYield), 
+ : NDMaterial(0,ND_TAG_PressureDependMultiYield), 
    currentStress(zeroVector), trialStress(zeroVector), currentStrain(zeroVector), 
 	 strainRate(zeroVector), reversalStress(zeroVector), PPZPivot(zeroVector), 
 	 PPZCenter(zeroVector), lockStress(zeroVector), reversalStressCommitted(zeroVector), 
@@ -177,7 +177,7 @@ PressureDependMultiYield::PressureDependMultiYield ()
 
 
 PressureDependMultiYield::PressureDependMultiYield (const PressureDependMultiYield & a)
- : NDMaterial(a.getTag(),MAT_TAG_PressureDependMultiYield), 
+ : NDMaterial(a.getTag(),ND_TAG_PressureDependMultiYield), 
    currentStress(a.currentStress), trialStress(a.trialStress), 
 	 currentStrain(a.currentStrain), strainRate(a.strainRate), 
    reversalStress(a.reversalStress), PPZPivot(a.PPZPivot), PPZCenter(a.PPZCenter), 

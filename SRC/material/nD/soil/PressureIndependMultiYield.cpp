@@ -1,5 +1,5 @@
-// $Revision: 1.7 $
-// $Date: 2001-08-15 02:21:23 $
+// $Revision: 1.8 $
+// $Date: 2001-08-26 23:29:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -30,7 +30,7 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double 
 								                  double peakShearStra, double refPress, 
 																	double cohesi, 	double pressDependCoe,
 																	int numberOfYieldSurf)
- : NDMaterial(tag,MAT_TAG_PressureIndependMultiYield), currentStress(zeroVector),
+ : NDMaterial(tag,ND_TAG_PressureIndependMultiYield), currentStress(zeroVector),
    trialStress(zeroVector), currentStrain(zeroVector), strainRate(zeroVector)
 {
 	if (nd !=2 && nd !=3) {
@@ -100,7 +100,7 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double 
    
 
 PressureIndependMultiYield::PressureIndependMultiYield () 
- : NDMaterial(0,MAT_TAG_PressureIndependMultiYield), 
+ : NDMaterial(0,ND_TAG_PressureIndependMultiYield), 
    currentStress(zeroVector), trialStress(zeroVector), currentStrain(zeroVector), 
 	 strainRate(zeroVector)
 {
@@ -124,7 +124,7 @@ PressureIndependMultiYield::PressureIndependMultiYield ()
 
 
 PressureIndependMultiYield::PressureIndependMultiYield (const PressureIndependMultiYield & a)
- : NDMaterial(a.getTag(),MAT_TAG_PressureIndependMultiYield), 
+ : NDMaterial(a.getTag(),ND_TAG_PressureIndependMultiYield), 
    currentStress(a.currentStress), trialStress(a.trialStress), 
 	 currentStrain(a.currentStrain), strainRate(a.strainRate)
 {
