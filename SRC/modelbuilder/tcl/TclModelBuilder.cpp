@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2003-05-07 20:38:20 $
+// $Revision: 1.20 $
+// $Date: 2003-08-29 00:31:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -225,6 +225,14 @@ TclModelBuilder_UpdateMaterialStage(ClientData clientData,
 				    int argc,
 				    TCL_Char **argv);
 			   
+
+/// added by ZHY			   
+int
+TclModelBuilder_UpdateParameter(ClientData clientData, 
+				    Tcl_Interp *interp,  
+				    int argc, 
+				    char **argv);
+
 // REMO
 extern int
 TclModelBuilder_addPatch (ClientData clientData, Tcl_Interp *interp,
@@ -364,6 +372,11 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 		    TclModelBuilder_UpdateMaterialStage,
 		    (ClientData)NULL, NULL);
   
+  ///new command for updating properties of soil materials, by ZHY
+  Tcl_CreateCommand(interp, "updateParameter", 
+		    TclModelBuilder_UpdateParameter,
+		    (ClientData)NULL, NULL);
+
   // set the static pointers in this file
   theTclBuilder = this;
   theTclDomain = &theDomain;
@@ -430,6 +443,7 @@ TclModelBuilder::~TclModelBuilder()
   Tcl_DeleteCommand(theInterp, "fiber");
   Tcl_DeleteCommand(theInterp, "geomTransf");
   Tcl_DeleteCommand(theInterp, "updateMaterialStage");
+  Tcl_DeleteCommand(theInterp, "updateParameter");
 }
 
 
@@ -2471,3 +2485,21 @@ TclModelBuilder_UpdateMaterialStage(ClientData clientData,
   return TclModelBuilderUpdateMaterialStageCommand(clientData, interp, 
 				       argc, argv, theTclBuilder);
 }
+
+/// added by ZHY
+extern int 
+TclModelBuilderUpdateParameterCommand(ClientData clientData, 
+					  Tcl_Interp *interp, 
+					  int argc, 
+					  char **argv, 
+					  TclModelBuilder *theTclBuilder);
+int
+TclModelBuilder_UpdateParameter(ClientData clientData, 
+				    Tcl_Interp *interp,  
+				    int argc, 
+				    char **argv)
+{
+  return TclModelBuilderUpdateParameterCommand(clientData, interp, 
+				       argc, argv, theTclBuilder);
+}
+
