@@ -234,7 +234,7 @@ SHELL           = /bin/sh
 
 .c.o:
 	@$(ECHO) Making $@ from $<
-	$(CC) $(CFLAGS) -c $< $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 .f.o:      
 	@$(ECHO) Making $@ from $<
@@ -270,7 +270,8 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(CBLAS_LIBRARY) \
   $(GRAPHIC_LIBRARY)\
   $(RELIABILITY_LIBRARY)\
-  -lg2c -ldl
+  -lg2c -ldl -lpng 
+
 
 
 ifeq ($(PROGRAMMING_MODE), THREADS)
