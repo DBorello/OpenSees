@@ -17,7 +17,7 @@ FEAP_ELE_LIBS = $(FE)/element/feap/elmt01.o \
 	$(FE)/element/feap/getCommon.o \
 	$(FE)/element/feap/dummyFeap.o \
 	$(FE)/element/feap/fElement.o \
-	$(FE)/element/feap/fElmt02.o \
+	$(FE)/element/feap/fElmt02.o 
 
 # Miscellaneous
 tidy:
