@@ -234,6 +234,81 @@ Package=<4>
 
 ###############################################################################
 
+Project: "openSeesTk"=.\proj\openSeesTk\openSeesTk.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name actor
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name analysis
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name cblas
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name convergence
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name database
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name domain
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name element
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name graph
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name handler
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name material
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name matrix
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name modelbuilder
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name nonlinearBeamColumn
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name recorder
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name reliability
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name renderer
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name string
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name superLU
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name system
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name tagged
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name utility
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "quickMain"=.\proj\quickMain\quickMain.dsp - Package Owner=<4>
 
 Package=<5>
