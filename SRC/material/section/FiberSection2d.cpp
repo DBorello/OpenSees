@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2003-03-11 03:07:48 $
+// $Revision: 1.18 $
+// $Date: 2003-03-11 21:31:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -736,7 +736,7 @@ int
 FiberSection2d::setParameter (const char **argv, int argc, Information &info)
 {
 	// Initial declarations
-	int parameterID;
+	int parameterID = -1;
 
 	// Check if the parameter belongs to the material (only option for now)
 	if (strcmp(argv[0],"-material") == 0 || strcmp(argv[0],"material") == 0) {
@@ -890,7 +890,7 @@ FiberSection2d::commitSensitivity(const Vector& defSens, int gradNumber, int num
   for (int i = 0; i < numFibers; i++) {
     UniaxialMaterial *theMat = theMaterials[i];
     double y = matData[loc++];
-    double A = matData[loc++];
+    loc++;
 
     // determine material strain and set it
     double strainSens = d0 + y*d1;
