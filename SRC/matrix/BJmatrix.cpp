@@ -1,6 +1,6 @@
                                                                         
-// $Revision: 1.2 $                                                              
-// $Date: 2001-01-11 09:23:56 $                                                                  
+// $Revision: 1.3 $                                                              
+// $Date: 2001-01-23 08:31:17 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJmatrix.cpp,v $                                                                
 
                                                                         
@@ -43,7 +43,7 @@
 //  #include "basics.h"
 //  #include "nDarray.h"
 #include "BJmatrix.h"
-#include "BJvector.h"
+//#include "BJvector.h"
 #include <iostream.h>
 
 #define TINY  1e-20

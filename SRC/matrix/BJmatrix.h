@@ -1,5 +1,5 @@
-// $Revision: 1.2 $                                                              
-// $Date: 2001-01-11 09:23:56 $                                                                  
+// $Revision: 1.3 $                                                              
+// $Date: 2001-01-23 08:31:18 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJmatrix.h,v $                                                                
 
 //#############################################################################
@@ -73,7 +73,7 @@
 
 class BJmatrix : public nDarray
   {
-    friend class vector; // explanation why this one should be a friend
+    friend class BJvector; // explanation why this one should be a friend
                          // instead of inheriting all data through protected
                          // construct -> see in J. Coplien "Advanced C++ ..."
                          // page 96.
