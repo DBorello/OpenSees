@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.50 $
-// $Date: 2003-04-28 20:53:36 $
+// $Revision: 1.51 $
+// $Date: 2003-04-29 18:47:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -244,7 +244,6 @@ static EigenAnalysis *theEigenAnalysis = 0;
 
 static char *resDataPtr = 0;
 static int resDataSize = 0;
-
 static Timer *theTimer = 0;
 
 FE_Datastore *theDatabase  =0;
@@ -1004,6 +1003,9 @@ printElement(ClientData clientData, Tcl_Interp *interp, int argc,
 
   // if 'print <filename> Element flag' 
   //     print out all the Elements in the domain with flag
+  if (flag == 2)
+    output << "#FRAME\n";
+  
   if (argc < eleArg) { 
     ElementIter &theElements = theDomain.getElements();
     Element *theElement;
