@@ -60,7 +60,7 @@ ARPACKdir    = $(HOME)/OpenSees/OTHER/ARPACK
 UMFPACKdir   = $(HOME)/OpenSees/OTHER/UMFPACK
 METISdir     = $(HOME)/OpenSees/OTHER/METIS
 SRCdir       = $(HOME)/OpenSees/SRC
-SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU
+SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_3.0/SRC
 
 DIRS        = $(BLASdir) \
               $(CBLASdir) \
