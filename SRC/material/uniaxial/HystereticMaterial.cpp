@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-06-20 04:37:09 $
+// $Revision: 1.5 $
+// $Date: 2002-01-21 17:42:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -44,12 +44,8 @@ HystereticMaterial::HystereticMaterial(int tag,
 UniaxialMaterial(tag, MAT_TAG_Hysteretic),
 mom1p(m1p), rot1p(r1p), mom2p(m2p), rot2p(r2p), mom3p(m3p), rot3p(r3p),
 mom1n(m1n), rot1n(r1n), mom2n(m2n), rot2n(r2n), mom3n(m3n), rot3n(r3n),
-pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(0.0)
+pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(b)
 {
-    if (b != 0.0)
-        g3ErrorHandler->warning("%s -- beta parameter has been temporarily disabled",
-            "HystereticMaterial::HystereticMaterial");
-
 	bool error = false;
 	
 	// Positive backbone parameters
@@ -94,12 +90,8 @@ HystereticMaterial::HystereticMaterial(int tag,
 UniaxialMaterial(tag, MAT_TAG_Hysteretic),
 mom1p(m1p), rot1p(r1p), mom3p(m2p), rot3p(r2p),
 mom1n(m1n), rot1n(r1n), mom3n(m2n), rot3n(r2n),
-pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(0.0)
+pinchX(px), pinchY(py), damfc1(d1), damfc2(d2), beta(b)
 {
-    if (b != 0.0)
-        g3ErrorHandler->warning("%s -- beta parameter has been temporarily disabled",
-            "HystereticMaterial::HystereticMaterial");
-
 	bool error = false;
 	
 	// Positive backbone parameters
@@ -148,7 +140,7 @@ pinchX(0.0), pinchY(0.0), damfc1(0.0), damfc2(0.0), beta(0.0)
 
 HystereticMaterial::~HystereticMaterial()
 {
-
+	// Nothing to do
 }
 
 int
@@ -212,14 +204,16 @@ HystereticMaterial::getTangent(void)
 void
 HystereticMaterial::positiveIncrement(double dStrain)
 {
-	double k = pow((CrotMin+1.0e-6)/rot1n,beta);
-	k = (k < 1.0) ? 1.0 : 1.0/k;
+	double kn = pow(CrotMin/rot1n,beta);
+	kn = (kn < 1.0) ? 1.0 : 1.0/kn;
+	double kp = pow(CrotMax/rot1p,beta);
+	kp = (kp < 1.0) ? 1.0 : 1.0/kp;
 
 	if (TloadIndicator == 2) {
 		TloadIndicator = 1;
 		if (Cstress <= 0.0) {
-			TrotNu = Cstrain - Cstress/(E1n*k);
-			double energy = CenergyD - 0.5*Cstress/(E1n*k)*Cstress;
+			TrotNu = Cstrain - Cstress/(E1n*kn);
+			double energy = CenergyD - 0.5*Cstress/(E1n*kn)*Cstress;
 			double damfc = 1.0;
 			if (CrotMin < rot1n) {
 				damfc += damfc2*energy/energyA;
@@ -245,14 +239,14 @@ HystereticMaterial::positiveIncrement(double dStrain)
 	  rotrel = rotlim;
 
 	double rotmp1 = rotrel + pinchY*(TrotMax-rotrel);
-	double rotmp2 = TrotMax - (1.0-pinchY)*maxmom/(E1n*k);
+	double rotmp2 = TrotMax - (1.0-pinchY)*maxmom/(E1p*kp);
 	double rotch = rotmp1 + (rotmp2-rotmp1)*pinchX;
 
 	double tmpmo1;
 	double tmpmo2;
 
 	if (Tstrain < TrotNu) {
-		Ttangent = E1n*k;
+		Ttangent = E1n*kn;
 		Tstress = Cstress + Ttangent*dStrain;
 		if (Tstress >= 0.0) {
 			Tstress = 0.0;
@@ -263,15 +257,15 @@ HystereticMaterial::positiveIncrement(double dStrain)
 	else if (Tstrain >= TrotNu && Tstrain < rotch) {
 		if (Tstrain <= rotrel) {
 			Tstress = 0.0;
-			Ttangent = E1n*1.0e-9;
+			Ttangent = E1p*1.0e-9;
 		}
 		else {
 			Ttangent = maxmom*pinchY/(rotch-rotrel);
-			tmpmo1 = Cstress + E1n*dStrain;
+			tmpmo1 = Cstress + E1p*kp*dStrain;
 			tmpmo2 = (Tstrain-rotrel)*Ttangent;
 			if (tmpmo1 < tmpmo2) {
 				Tstress = tmpmo1;
-				Ttangent = E1n;
+				Ttangent = E1p*kp;
 			}
 			else
 				Tstress = tmpmo2;
@@ -280,11 +274,11 @@ HystereticMaterial::positiveIncrement(double dStrain)
 
 	else {
 		Ttangent = (1.0-pinchY)*maxmom/(TrotMax-rotch);
-		tmpmo1 = Cstress + E1n*dStrain;
+		tmpmo1 = Cstress + E1p*kp*dStrain;
 		tmpmo2 = pinchY*maxmom + (Tstrain-rotch)*Ttangent;
 		if (tmpmo1 < tmpmo2) {
 			Tstress = tmpmo1;
-			Ttangent = E1n;
+			Ttangent = E1p*kp;
 		}
 		else
 			Tstress = tmpmo2;
@@ -294,14 +288,16 @@ HystereticMaterial::positiveIncrement(double dStrain)
 void
 HystereticMaterial::negativeIncrement(double dStrain)
 {
-	double k = pow((CrotMax-1.0e-6)/rot1p,beta);
-	k = (k < 1.0) ? 1.0 : 1.0/k;
+	double kn = pow(CrotMin/rot1n,beta);
+	kn = (kn < 1.0) ? 1.0 : 1.0/kn;
+	double kp = pow(CrotMax/rot1p,beta);
+	kp = (kp < 1.0) ? 1.0 : 1.0/kp;
 
 	if (TloadIndicator == 1) {
 		TloadIndicator = 2;
 		if (Cstress >= 0.0) {
-			TrotPu = Cstrain - Cstress/(E1p*k);
-			double energy = CenergyD - 0.5*Cstress/(E1p*k)*Cstress;
+			TrotPu = Cstrain - Cstress/(E1p*kp);
+			double energy = CenergyD - 0.5*Cstress/(E1p*kp)*Cstress;
 			double damfc = 1.0;
 			if (CrotMax > rot1p) {
 				damfc += damfc2*energy/energyA;
@@ -327,14 +323,14 @@ HystereticMaterial::negativeIncrement(double dStrain)
 	  rotrel = rotlim;
 
 	double rotmp1 = rotrel + pinchY*(TrotMin-rotrel);
-	double rotmp2 = TrotMin - (1.0-pinchY)*minmom/(E1p*k);
+	double rotmp2 = TrotMin - (1.0-pinchY)*minmom/(E1n*kn);
 	double rotch = rotmp1 + (rotmp2-rotmp1)*pinchX;
 
 	double tmpmo1;
 	double tmpmo2;
 
 	if (Tstrain > TrotPu) {
-		Ttangent = E1p*k;
+		Ttangent = E1p*kp;
 		Tstress = Cstress + Ttangent*dStrain;
 		if (Tstress <= 0.0) {
 			Tstress = 0.0;
@@ -345,15 +341,15 @@ HystereticMaterial::negativeIncrement(double dStrain)
 	else if (Tstrain <= TrotPu && Tstrain > rotch) {
 		if (Tstrain >= rotrel) {
 			Tstress = 0.0;
-			Ttangent = E1p*1.0e-9;
+			Ttangent = E1n*1.0e-9;
 		}
 		else {
 			Ttangent = minmom*pinchY/(rotch-rotrel);
-			tmpmo1 = Cstress + E1p*dStrain;
+			tmpmo1 = Cstress + E1n*kn*dStrain;
 			tmpmo2 = (Tstrain-rotrel)*Ttangent;
 			if (tmpmo1 > tmpmo2) {
 				Tstress = tmpmo1;
-				Ttangent = E1p;
+				Ttangent = E1n*kn;
 			}
 			else
 				Tstress = tmpmo2;
@@ -362,11 +358,11 @@ HystereticMaterial::negativeIncrement(double dStrain)
 
 	else {
 		Ttangent = (1.0-pinchY)*minmom/(TrotMin-rotch);
-		tmpmo1 = Cstress + E1p*dStrain;
+		tmpmo1 = Cstress + E1n*kn*dStrain;
 		tmpmo2 = pinchY*minmom + (Tstrain-rotch)*Ttangent;
 		if (tmpmo1 > tmpmo2) {
 			Tstress = tmpmo1;
-			Ttangent = E1p;
+			Ttangent = E1n*kn;
 		}
 		else
 			Tstress = tmpmo2;
