@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 04:21:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/penalty/PenaltySP_FE.cpp,v $
                                                                         
                                                                         
@@ -144,7 +144,8 @@ PenaltySP_FE::getResidual(Integrator *theNewIntegrator)
     //    (*resid)(0) = alpha * (constraint - nodeDisp(constrainedDOF));    
     // is replace with the following to remove possible problems with
     // subtracting very small numbers
-    (*resid)(0) = alpha * constraint - alpha * nodeDisp(constrainedDOF);    
+
+    (*resid)(0) = alpha * (constraint - nodeDisp(constrainedDOF));    
 
     return *resid;
 }
