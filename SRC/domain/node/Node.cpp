@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-05-25 17:15:56 $
+// $Revision: 1.11 $
+// $Date: 2002-12-05 22:23:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -46,6 +46,9 @@
 #include <string.h>
 #include <G3Globals.h>
 
+Matrix **Node::theMatrices = 0;
+int Node::numMatrices = 0;
+
 // for FEM_Object Broker to use
 Node::Node(int theClassTag)
 :DomainComponent(0,theClassTag), 
@@ -54,7 +57,7 @@ Node::Node(int theClassTag)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0), 
  incrDeltaDisp(0),
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
- R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), index(-1)
 {
     // for FEM_ObjectBroker, recvSelf() must be invoked on object
 
@@ -71,7 +74,7 @@ Node::Node(int tag, int theClassTag)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
  incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
- R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+  R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), index(-1)
 {
     // for subclasses - they must implement all the methods with
     // their own data structures.
@@ -88,14 +91,41 @@ Node::Node(int tag, int ndof, double Crd1)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
  incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
- R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), index(-1)
 {
 // AddingSensitivity:BEGIN /////////////////////////////////////////
-	theGradients = 0;
+  theGradients = 0;
 // AddingSensitivity:END ///////////////////////////////////////////
 
-	Crd = new Vector(1);
-    (*Crd)(0) = Crd1;
+  Crd = new Vector(1);
+  (*Crd)(0) = Crd1;
+  
+  index = -1;
+  if (numMatrices != 0) {
+    for (int i=0; i<numMatrices; i++)
+      if (theMatrices[i]->noRows() == ndof) {
+	index = i;
+	i = numMatrices;
+      }
+  }
+  if (index == -1) {
+    Matrix **nextMatrices = new Matrix *[numMatrices+1];
+    if (nextMatrices == 0) {
+      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+    }
+    for (int j=0; j<numMatrices; j++)
+      nextMatrices[j] = theMatrices[j];
+    Matrix *theMatrix = new Matrix(ndof, ndof);
+    if (theMatrix == 0) {
+      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+    }
+    nextMatrices[numMatrices] = theMatrix;
+    if (numMatrices != 0) 
+      delete [] theMatrices;
+    index = numMatrices;
+    numMatrices++;
+    theMatrices = nextMatrices;
+  }
 }
 
 
@@ -108,7 +138,7 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
  incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
- R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0)
 {
 // AddingSensitivity:BEGIN /////////////////////////////////////////
 	theGradients = 0;
@@ -117,6 +147,33 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2)
     Crd = new Vector(2);
     (*Crd)(0) = Crd1;
     (*Crd)(1) = Crd2;
+
+  index = -1;
+  if (numMatrices != 0) {
+    for (int i=0; i<numMatrices; i++)
+      if (theMatrices[i]->noRows() == ndof) {
+	index = i;
+	i = numMatrices;
+      }
+  }
+  if (index == -1) {
+    Matrix **nextMatrices = new Matrix *[numMatrices+1];
+    if (nextMatrices == 0) {
+      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+    }
+    for (int j=0; j<numMatrices; j++)
+      nextMatrices[j] = theMatrices[j];
+    Matrix *theMatrix = new Matrix(ndof, ndof);
+    if (theMatrix == 0) {
+      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+    }
+    nextMatrices[numMatrices] = theMatrix;
+    if (numMatrices != 0) 
+      delete [] theMatrices;
+    index = numMatrices;
+    numMatrices++;
+    theMatrices = nextMatrices;
+  }
 }
 
 
@@ -130,7 +187,7 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2, double Crd3)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
  incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
- R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0)
 {
 // AddingSensitivity:BEGIN /////////////////////////////////////////
 	theGradients = 0;
@@ -140,6 +197,33 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2, double Crd3)
     (*Crd)(0) = Crd1;
     (*Crd)(1) = Crd2;
     (*Crd)(2) = Crd3;    
+
+  index = -1;
+  if (numMatrices != 0) {
+    for (int i=0; i<numMatrices; i++)
+      if (theMatrices[i]->noRows() == ndof) {
+	index = i;
+	i = numMatrices;
+      }
+  }
+  if (index == -1) {
+    Matrix **nextMatrices = new Matrix *[numMatrices+1];
+    if (nextMatrices == 0) {
+      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+    }
+    for (int j=0; j<numMatrices; j++)
+      nextMatrices[j] = theMatrices[j];
+    Matrix *theMatrix = new Matrix(ndof, ndof);
+    if (theMatrix == 0) {
+      g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+    }
+    nextMatrices[numMatrices] = theMatrix;
+    if (numMatrices != 0) 
+      delete [] theMatrices;
+    index = numMatrices;
+    numMatrices++;
+    theMatrices = nextMatrices;
+  }
 }
 
 
@@ -151,7 +235,7 @@ Node::Node(const Node *otherNode)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
  incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
- R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0)
 {
 // AddingSensitivity:BEGIN /////////////////////////////////////////
 	theGradients = 0;
@@ -214,6 +298,8 @@ Node::Node(const Node *otherNode)
 	    exit(-1);
 	}
     }
+    
+    index = otherNode->index;
 }
 
 
@@ -723,8 +809,13 @@ Node::getUnbalancedLoadIncInertia(void)
     if (mass != 0) {
       const Vector &theAccel = this->getTrialAccel(); // in case accel not created
       unbalLoadWithInertia->addMatrixVector(1.0, *mass, theAccel, -1.0);
-    }
 
+      if (alphaM != 0.0) {
+	const Vector &theVel = this->getTrialVel(); // in case accel not created
+	unbalLoadWithInertia->addMatrixVector(1.0, *mass, theVel, -alphaM);
+      }
+    }
+    
     return *unbalLoadWithInertia;
 }
 
@@ -823,14 +914,32 @@ Node::getMass(void)
 {
     // make sure it was created before we return it
     if (mass == 0) {
-	mass = new Matrix(numberDOF,numberDOF);
-	if (mass == 0 || mass->noRows() != numberDOF) {
-	    cerr << "FATAL Node::GetMass() -- ran out of memory\n";
-	    exit(-1);
-	}
-    }
-    
-    return *mass;
+      theMatrices[index]->Zero();
+      return *theMatrices[index];
+    } else 
+      return *mass;
+}
+
+
+int 
+Node::setRayleighDampingFactor(double alpham) {
+  alphaM = alpham;
+  return 0;
+}
+
+const Matrix &
+Node::getDamp(void) 
+{
+    // make sure it was created before we return it
+    if (mass == 0 || alphaM == 0.0) {
+      theMatrices[index]->Zero();
+      return *theMatrices[index];
+    } else {
+      Matrix &result = *theMatrices[index];
+      result = *mass;
+      result *= alphaM;
+      return result;
+    } 
 }
 
 
@@ -1279,20 +1388,26 @@ Node::displaySelf(Renderer &theRenderer, int displayMode, float fact)
     return 0;
 
   const Vector &theDisp = this->getDisp();
-  Vector position(*Crd);
-  for (int i=0; i<Crd->Size(); i++) 
-    position(i) += theDisp(i)*fact;	
-	
+  static Vector position(3);
+
+  for (int i=0; i<3; i++)
+    if (i <Crd->Size())
+      position(i) = (*Crd)(i) + theDisp(i)*fact;	
+    else
+      position(i) = 0.0;	      
+  
   if (displayMode == -1) { 
     // draw a text string containing tag
     static char theText[20];
     sprintf(theText,"%d",this->getTag());
     return theRenderer.drawText(position, theText, strlen(theText));
 
-  } else if (displayMode > 0) 
+  } else if (displayMode > 0) {
     // draw a point - pixel size equals displayMode tag
     return theRenderer.drawPoint(position, 0.0, displayMode);
-  
+  }
+
+
   return 0;
 }
 

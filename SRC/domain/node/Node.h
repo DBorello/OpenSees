@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-31 22:11:35 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:23:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.h,v $
                                                                         
                                                                         
@@ -111,6 +111,9 @@ class Node : public DomainComponent
     virtual int setR(int row, int col, double Value);
     virtual const Vector &getRV(const Vector &V);        
 
+    virtual int setRayleighDampingFactor(double alphaM);
+    virtual const Matrix &getDamp(void);
+
     // public methods for eigen vector
     virtual int setNumEigenvectors(int numVectorsToStore);
     virtual int setEigenvector(int mode, const Vector &eigenVector);
@@ -123,8 +126,8 @@ class Node : public DomainComponent
     virtual void Print(ostream &s, int flag = 0);
     virtual int displaySelf(Renderer &theRenderer, int displayMode, float fact);
 // AddingSensitivity:BEGIN ///////////////////////////////////////
-	int setGradient(const Vector &v, int gradNum, int numGrads);
-	double getGradient(int dof, int gradNum);
+    int setGradient(const Vector &v, int gradNum, int numGrads);
+    double getGradient(int dof, int gradNum);
 // AddingSensitivity:END /////////////////////////////////////////
     
   private:
@@ -151,11 +154,16 @@ class Node : public DomainComponent
     Matrix *R;                          // nodal participation matrix
     Matrix *mass;                       // pointer to mass matrix
     Vector *unbalLoadWithInertia;       
+    double alphaM;                    // rayleigh damping factor
     
     Matrix *theEigenvectors;
 // AddingSensitivity:BEGIN /////////////////////////////////////////
-	Matrix *theGradients;
+    Matrix *theGradients;
 // AddingSensitivity:END ///////////////////////////////////////////
+
+    static Matrix **theMatrices;
+    static int numMatrices;
+    int index;
 };
 
 #endif
