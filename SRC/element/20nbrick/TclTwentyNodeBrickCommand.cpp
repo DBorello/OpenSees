@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-28 23:36:02 $
+// $Revision: 1.2 $
+// $Date: 2002-01-09 23:13:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/20nbrick/TclTwentyNodeBrickCommand.cpp,v $
                                                                         
                                                                         
@@ -58,7 +58,7 @@ TclModelBuilder_addTwentyNodeBrick(ClientData clientData, Tcl_Interp *interp,  i
   }
 
   // check the number of arguments is correct
-  if ((argc-eleArgStart) < 17) {
+  if ((argc-eleArgStart) < 27) {
       g3ErrorHandler->warning("command: element Brick20N - insufficient args - want %s",
           "element Brick20N eleTag? node1? node2? .. node20?  matTag? bforce1? bforce2? bforce3? massDensity?\n");
       return TCL_ERROR;
