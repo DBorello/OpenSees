@@ -18,15 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:15 $
+// $Revision: 1.2 $
+// $Date: 2003-08-29 07:10:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/Actor.cpp,v $
                                                                         
                                                                         
-// File: ~/actor/Actor.C
-//
 // Written: fmk
-// Created: 11/96
 // Revision: A
 //
 // Purpose: This file contains the implementation of Actor.

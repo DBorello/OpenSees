@@ -18,18 +18,15 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:15 $
+// $Revision: 1.2 $
+// $Date: 2003-08-29 07:10:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/actor/Actor.h,v $
                                                                         
                                                                         
 #ifndef Actor_h
 #define Actor_h
 
-// File: ~/actor/Actor.h
-//
 // Written: fmk
-// Created: 11/96
 // Revision: A
 //
 // Purpose: This file contains the class definition for Actor.
@@ -64,6 +61,8 @@ class Actor
 	  int numActorMethods);
     
     virtual ~Actor();
+    
+    virtual int  run(void) = 0;
 
     virtual int  addMethod(int tag, int (*fp)());
     virtual int  getMethod();
