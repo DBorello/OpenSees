@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.30 $
-// $Date: 2004-11-24 22:45:28 $
+// $Revision: 1.31 $
+// $Date: 2005-03-05 00:44:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -324,8 +324,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  opserr << "ERROR: No response type specified for element recorder. " << endln;
 	  return TCL_ERROR;
 	}
-
-	//opserr << eleData << " " << argc << endln;
 
 	const char **data = new const char *[argc-eleData];
 
@@ -681,11 +679,10 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	}
       
       if (pos >= argc) {
-	opserr << "ERROR: No response type (disp, vel or accel) specified for node recorder. " << endln;
-	return TCL_ERROR;
+	opserr << "WARNING: No response type specified for node recorder, will assume you meant -disp\n" << endln;
       }
       
-      if (responseID == 0) {
+      if (responseID == 0 && pos < argc) {
 	responseID  = argv[pos];
       }
 
