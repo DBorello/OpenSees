@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-02-17 06:32:38 $
+// $Revision: 1.3 $
+// $Date: 2001-07-20 22:36:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/LinearSOE.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,7 @@ LinearSOE::LinearSOE(LinearSOESolver &theLinearSOESolver, int classtag)
 
 LinearSOE::~LinearSOE()
 {
-
+  delete theSolver;
 }
 
 int 
