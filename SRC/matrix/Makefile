@@ -12,10 +12,7 @@ all: $(OBJS)
 test: $(OBJS) main.o
 	$(LINKER) main.o $(OBJS) $(MACHINE_LINKLIBS) \
 	$(MACHINE_NUMERICAL_LIBS) $(FE_LIBRARY) \
-	-o test
-
-
-ndarray: libndarray.a
+	-o matrix_tst
 
 # Miscellaneous
 tidy:	
