@@ -1184,7 +1184,7 @@ NDMaterial * Template3Dep::getCopy(const char *code)
       opserr << "Template3Dep::getCopy failed to get model: " <<  code << endln;
       exit(-1);
     }
-
+    return 0;
 }
 
 //================================================================================
@@ -3085,6 +3085,7 @@ EPState Template3Dep::BESubIncrementation( const straintensor & strain_increment
   //opserr << "f = " << MP->YS->f( &BESI_EPS ) << "  "<< endlnn;
 
   opserr << "strain increment " << strain_incr << endln;
+
   //fflush(opserr);
   break;
   //exit(1);
