@@ -95,12 +95,12 @@ RELIABILITY_LIBRARY = $(HOME)/lib/libReliability.a
 # $(FE_LIBRARY) \
 #WIPE_LIBS	= $(NDARRAY_LIBRARY)  $(MAT_MOD_LIBRARY)  $(FE_LIBRARY)
 WIPE_LIBS	= $(FE_LIBRARY) \
-		          $(SUPERLU_LIBRARY) \
-		          $(ARPACK_LIBRARY) \
-		          $(UMFPACK_LIBRARY) \
-	           $(METIS_LIBRARY)	 \
 	           $(NDARRAY_LIBRARY) \
             $(MATMOD_LIBRARY)
+#		          $(SUPERLU_LIBRARY) \
+#		          $(ARPACK_LIBRARY) \
+#		          $(UMFPACK_LIBRARY) \
+#	           $(METIS_LIBRARY)	 \
 
 # %---------------------------------------------------------%
 # | SECTION 4: COMPILERS                                    |
