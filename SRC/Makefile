@@ -101,6 +101,12 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/nonlinearBeamColumn/matrixutil/MatrixUtil.o \
 	$(FE)/element/nonlinearBeamColumn/element/NLBeamColumn2d.o \
 	$(FE)/element/nonlinearBeamColumn/element/NLBeamColumn3d.o \
+	$(FE)/element/nonlinearBeamColumn/tcl/TclElmtBuilder.o \
+	$(FE)/element/forceBeamColumn/ForceBeamColumn2d.o \
+	$(FE)/element/forceBeamColumn/TclForceBeamColumnCommand.o \
+	$(FE)/element/forceBeamColumn/BeamIntegration.o \
+	$(FE)/element/forceBeamColumn/LobattoBeamIntegration.o \
+	$(FE)/element/forceBeamColumn/UserDefinedBeamIntegration.o \
 	$(FE)/coordTransformation/CrdTransf.o \
 	$(FE)/coordTransformation/CrdTransf2d.o \
 	$(FE)/coordTransformation/CrdTransf3d.o \
@@ -108,8 +114,7 @@ REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/coordTransformation/PDeltaCrdTransf2d.o \
 	$(FE)/coordTransformation/LinearCrdTransf3d.o \
 	$(FE)/coordTransformation/PDeltaCrdTransf3d.o \
-	$(FE)/coordTransformation/TclGeomTransfCommand.o \
-	$(FE)/element/nonlinearBeamColumn/tcl/TclElmtBuilder.o
+	$(FE)/coordTransformation/TclGeomTransfCommand.o
 
 LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSolver.o \

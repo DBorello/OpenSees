@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.39 $
-// $Date: 2002-12-09 21:59:54 $
+// $Revision: 1.40 $
+// $Date: 2002-12-13 22:25:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -270,9 +270,18 @@
 #define ELE_TAG_OnePointHingedBeam2d     9876
 #define ELE_TAG_OnePointHingedBeam3d     9877
 
+#define ELE_TAG_ForceBeamColumn2d 9878
+#define ELE_TAG_ForceBeamColumn3d 9879
+
 #define ELE_TAG_InternalSpring   9900
 #define ELE_TAG_SimpleJoint2D    9901
 #define ELE_TAG_Joint2D    9902
+
+#define BEAM_INTEGRATION_TAG_Lobatto       1
+#define BEAM_INTEGRATION_TAG_HingeMidpoint 2
+#define BEAM_INTEGRATION_TAG_HingeRadau    3
+#define BEAM_INTEGRATION_TAG_UserDefined   4
+#define BEAM_INTEGRATION_TAG_UserHinge     5
 
 #define CRDTR_TAG_LinearCrdTransf2d 1
 #define CRDTR_TAG_PDeltaCrdTransf2d 2
