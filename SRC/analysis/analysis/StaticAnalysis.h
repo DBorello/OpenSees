@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-03 06:15:34 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 22:11:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.h,v $
                                                                         
                                                                         
@@ -39,7 +39,9 @@
 // What: "@(#) StaticAnalysis.h, revA"
 
 #include <Analysis.h>
-
+// AddingSensitivity:BEGIN //////////////////////////////////
+#include <SensitivityAlgorithm.h>
+// AddingSensitivity:END ////////////////////////////////////
 class ConstraintHandler;
 class DOF_Numberer;
 class AnalysisModel;
@@ -69,6 +71,9 @@ class StaticAnalysis: public Analysis
     int setAlgorithm(EquiSolnAlgo &theAlgorithm);
     int setIntegrator(StaticIntegrator &theIntegrator);
     int setLinearSOE(LinearSOE &theSOE);
+// AddingSensitivity:BEGIN ///////////////////////////////
+	int setSensitivityAlgorithm(SensitivityAlgorithm *theSensitivityAlgorithm);
+// AddingSensitivity:END /////////////////////////////////
     
   protected: 
     
@@ -80,6 +85,9 @@ class StaticAnalysis: public Analysis
     LinearSOE 		*theSOE;
     StaticIntegrator    *theIntegrator;
     int domainStamp;
+// AddingSensitivity:BEGIN ///////////////////////////////
+	SensitivityAlgorithm *theSensitivityAlgorithm;
+// AddingSensitivity:END ///////////////////////////////
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-31 14:58:49 $
+// $Revision: 1.4 $
+// $Date: 2001-07-31 22:11:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -62,6 +62,9 @@ FE_Element::FE_Element(Element *ele)
  numDOF(ele->getNumDOF()), theModel(0), myEle(ele), 
  theResidual(0), theTangent(0), theIntegrator(0), Kc(0)
 {
+// AddingSensitivity:BEGIN ///////////////////////////////////
+	theGradient = new Vector(numDOF);
+// AddingSensitivity:END /////////////////////////////////////
     if (numDOF <= 0) {
 	cerr << "FE_Element::FE_Element(Element *) ";
 	cerr << " element must have 1 dof " << *ele;
@@ -169,6 +172,9 @@ FE_Element::FE_Element(int numDOF_Group, int ndof)
 :myDOF_Groups(numDOF_Group), myID(ndof), numDOF(ndof), theModel(0),
  myEle(0), theResidual(0), theTangent(0), theIntegrator(0), Kc(0)
 {
+// AddingSensitivity:BEGIN ///////////////////////////////////
+	theGradient = new Vector(numDOF);
+// AddingSensitivity:END /////////////////////////////////////
     // this is for a subtype, the subtype must set the myDOF_Groups ID array
     numFEs++;
 
@@ -199,6 +205,10 @@ FE_Element::FE_Element(int numDOF_Group, int ndof)
 //	destructor.
 FE_Element::~FE_Element()
 {
+// AddingSensitivity:BEGIN ////////////////////////////////
+	delete theGradient;
+// AddingSensitivity:END //////////////////////////////////
+
     // decrement number of FE_Elements
     numFEs--;
 
@@ -1237,5 +1247,25 @@ FE_Element::addLocalM_Force(const Vector &accel, double fact)
     }    	            
 }
 
+// AddingSensitivity:BEGIN /////////////////////////////////
+const Vector &
+FE_Element::gradient(int identifier)
+{
+	// The 'identifier' is set to zero in phase 1 and it is set
+	// equal to the gradient number in phase 2 (when unconditional
+	// sensitivities are to be commited). 
+
+	if ( identifier == 0 ) {
+		theGradient->Zero();
+		theGradient->addVector(1.0, myEle->gradient(true,0), 1.0);
+		return *theGradient;  
+	}
+	else {
+		myEle->gradient(true,identifier);
+		theGradient->Zero();
+		return *theGradient;  
+	}
+}
+// AddingSensitivity:END ////////////////////////////////////
 
 

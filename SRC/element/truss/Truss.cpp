@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-07-13 22:42:34 $
+// $Revision: 1.7 $
+// $Date: 2001-07-31 22:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -88,6 +88,9 @@ Truss::Truss(int tag,
 			    "failed to create an ID of size 2");
     connectedExternalNodes(0) = Nd1;
     connectedExternalNodes(1) = Nd2;        
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	gradientIdentifier = 0;
+// AddingSensitivity:END //////////////////////////////////////
 }
 
 // constructor:
@@ -104,6 +107,9 @@ Truss::Truss()
     if (connectedExternalNodes.Size() != 2)
       g3ErrorHandler->fatal("FATAL Truss::Truss - %s\n",
 			    "failed to create an ID of size 2");
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	gradientIdentifier = 0;
+// AddingSensitivity:END //////////////////////////////////////
 }
 
 //  destructor
@@ -938,3 +944,98 @@ Truss::updateParameter (int parameterID, Information &info)
 	  return -1;
   }
 }
+
+// AddingSensitivity:BEGIN ///////////////////////////////////
+const Vector &
+Truss::gradient(bool compute, int identifier)
+{
+/*	The gradient method can be called with four different purposes:
+	1) To clear the sensitivity flag so that the object does not contribute:
+			gradient(false, 0)
+	2) To set the sensitivity flag so that the object contributes
+	   (the sensitivity flag is stored as the value of parameterID):
+			gradient(false, parameterID)
+	3) To obtain the gradient vector from the object (like for the residual):
+			gradient(true, 0)
+	4) To commit unconditional sensitivities for path-dependent problems:
+			gradient(true, gradNumber)
+*/
+
+// COMPUTE GRADIENTS
+	if (compute) {
+
+// IF "PHASE 1" IN THE GRADIENT COMPUTATIONS (RETURN GRADIENT VECTOR)
+		if (identifier == 0) {
+
+			theVector->Zero();
+
+			if ( gradientIdentifier != 0 ) {
+
+				// Determine the current strain
+				double strain = this->computeCurrentStrain();
+
+				// Set the strain at material level
+				theMaterial->setTrialStrain(strain);
+
+				// Compute sensitivity depending on 'parameter'
+				if( gradientIdentifier == 1 ) {
+					double sigma = theMaterial->getStress();
+					for (int i=0; i<numDOF; i++)
+						(*theVector)(i) = (*t)(0,i)*sigma;
+				}
+				else {
+					double materialGradient=0; 
+					theMaterial->gradient(compute, identifier,materialGradient);
+					for (int i=0; i<numDOF; i++) {
+						(*theVector)(i) = (*t)(0,i)*A*materialGradient;
+					}
+				}
+			}
+
+			return *theVector;
+		}
+
+// IF "PHASE 2" IN THE GRADIENT COMPUTATIONS (COMMIT UNCONDITIONAL GRADIENT)
+		else {
+
+			if ( gradientIdentifier == 0 ) {
+			}
+			else if ( gradientIdentifier == 1 ) {
+				// Nothing needs to be committed if the area is random
+			}
+			else {
+
+				// Compute strain sensitivity
+				double sens1;
+				double sens2;
+
+				double dLength = 0.0;
+				for (int i=0; i<dimension; i++){
+					sens1 = end1Ptr->getGradient(i+1, identifier);
+					sens2 = end2Ptr->getGradient(i+1, identifier);
+					dLength -= (sens2-sens1)* (*t)(0,i);
+				}
+				double materialGradient = dLength/L;
+
+				// Pass it down to the material
+				theMaterial->gradient(compute,identifier,materialGradient);
+
+			}
+
+			return 0;
+		}
+	}
+	
+// DO NOT COMPUTE GRADIENTS, JUST SET FLAG
+	else {
+		if ( (gradientIdentifier=identifier) > 100) {
+			double dummy=0;
+			theMaterial->gradient(false, identifier-100,dummy);
+		}
+
+		return 0;
+
+	}
+
+}
+// AddingSensitivity:END /////////////////////////////////////////////

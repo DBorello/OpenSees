@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2001-07-31 22:11:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/component/DomainComponent.cpp,v $
                                                                         
                                                                         
@@ -35,6 +35,9 @@
 
 #include <Domain.h>
 #include <DomainComponent.h>
+// AddingSensitivity:BEGIN //////////////////////////////////
+#include <Vector.h>
+// AddingSensitivity:END ////////////////////////////////////
 
 DomainComponent::DomainComponent(int tag, int clasTag)
   :TaggedObject(tag), MovableObject(clasTag), theDomain(0)
@@ -85,3 +88,11 @@ DomainComponent::updateParameter(int responseID, Information &eleInformation)
 {
     return -1;
 }
+
+// AddingSensitivity:BEGIN ////////////////////////////////////////
+const Vector & 
+DomainComponent::gradient(bool compute, int identifier)
+{
+	return 0;
+}
+// AddingSensitivity:END ///////////////////////////////////////////

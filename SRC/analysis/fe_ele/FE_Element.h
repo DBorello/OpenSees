@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-03-29 05:36:55 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 22:11:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.h,v $
                                                                         
                                                                         
@@ -90,6 +90,9 @@ class FE_Element
     virtual const Vector &getM_Force(const Vector &accel, double fcat = 1.0);
     virtual Integrator *getLastIntegrator(void);
     virtual const Vector &getLastResponse(void);
+// AddingSensitivity:BEGIN ////////////////////////////////////
+	const Vector & gradient(int gradNumber);
+// AddingSensitivity:END //////////////////////////////////////
     
   protected:
     void  addLocalKtForce(const Vector &disp,  double fact = 1.0);
@@ -112,6 +115,10 @@ class FE_Element
     Matrix *theTangent;
     Integrator *theIntegrator; // need for Subdomain
     Matrix *Kc;                // the committed tangent
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
+	Vector *theGradient;
+// AddingSensitivity:END //////////////////////////////////////
     
     // static variables - single copy for all objects of the class	
     static Matrix errMatrix;

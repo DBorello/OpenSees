@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-13 22:42:34 $
+// $Revision: 1.6 $
+// $Date: 2001-07-31 22:11:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.h,v $
                                                                         
                                                                         
@@ -93,6 +93,9 @@ class Truss : public Element
 
     int setParameter (char **argv, int argc, Information &info);
     int updateParameter (int parameterID, Information &info);
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+	const Vector & gradient(bool compute, int identifier);
+// AddingSensitivity:END ///////////////////////////////////////////
 
   protected:
     
@@ -117,7 +120,11 @@ class Truss : public Element
     double M; 	    // rho and M*A*L/2 after setDomain()
 
     Node *end1Ptr;  // pointer to the end1 node object
-    Node *end2Ptr;  // pointer to the end1 node object	
+    Node *end2Ptr;  // pointer to the end1 node object
+	
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+    int gradientIdentifier;
+// AddingSensitivity:END ///////////////////////////////////////////
 
     // static data - single copy for all objects of the class	
     static Matrix trussM2;   // class wide matrix for 2*2

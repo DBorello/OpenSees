@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-05-19 07:02:23 $
+// $Revision: 1.5 $
+// $Date: 2001-07-31 22:11:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -131,6 +131,16 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
 int 
 nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
 
+// AddingSensitivity:BEGIN /////////////////////////////////////////////////
+int 
+sensNodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+
+int 
+sensitivityAlgorithm(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+
+int 
+sensitivityIntegrator(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
+// AddingSensitivity:END ///////////////////////////////////////////////////
 
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-07-31 22:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.h,v $
                                                                         
                                                                         
@@ -122,6 +122,10 @@ class Node : public DomainComponent
 			 FEM_ObjectBroker &theBroker);
     virtual void Print(ostream &s, int flag = 0);
     virtual int displaySelf(Renderer &theRenderer, int displayMode, float fact);
+// AddingSensitivity:BEGIN ///////////////////////////////////////
+	int setGradient(const Vector &v, int gradNum, int numGrads);
+	double getGradient(int dof, int gradNum);
+// AddingSensitivity:END /////////////////////////////////////////
     
   private:
     // priavte methods used to create the Vector objects 
@@ -149,6 +153,9 @@ class Node : public DomainComponent
     Vector *unbalLoadWithInertia;       
     
     Matrix *theEigenvectors;
+// AddingSensitivity:BEGIN /////////////////////////////////////////
+	Matrix *theGradients;
+// AddingSensitivity:END ///////////////////////////////////////////
 };
 
 #endif

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:03 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 22:11:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.h,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//			haukaas 07/30/01 (revised for sensitivity computations)
 //
 
 #ifndef RandomVariablePositioner_h
@@ -52,21 +53,16 @@ public:
 
 	~RandomVariablePositioner();
 	void Print(ostream &s, int flag =0);
-	int getRvNumber(void);
-	int getTypeOfObject(void);
-	int getTagOfObject(void);
-	int getTypeOfParameterInObject(void);
 
+	int getRvNumber(void);
 	int update (double newValue); 
+	int setSensitivityFlag (int flag);
 
 protected:
 
 private:
 	int tag;
 	int rvNumber;
-	int typeOfObject;
-	int tagOfObject;
-	int typeOfParameterInObject;
 
 	Information theInfo;
 	DomainComponent *theObject;

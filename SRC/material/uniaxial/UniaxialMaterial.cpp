@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-18 22:05:54 $
+// $Revision: 1.6 $
+// $Date: 2001-07-31 22:11:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -156,3 +156,13 @@ UniaxialMaterial::getResponse(int responseID, Information &matInfo)
       return -1;
   }
 }
+
+// AddingSensitivity:BEGIN ////////////////////////////////////////
+int 
+UniaxialMaterial::gradient(bool compute, int identifier, double & gradient)
+{
+	gradient = 0.0;
+
+	return 0;
+}
+// AddingSensitivity:END //////////////////////////////////////////

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-06-14 05:48:28 $
+// $Revision: 1.5 $
+// $Date: 2001-07-31 22:11:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.cpp,v $
                                                                         
                                                                         
@@ -59,12 +59,18 @@ Steel01::Steel01
 
    // Initial stiffness
    Ttangent = E0;
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	gradientIdentifier = 0;
+// AddingSensitivity:END //////////////////////////////////////
 }
 
 Steel01::Steel01():UniaxialMaterial(0,MAT_TAG_Steel01),
  fy(0.0), E0(0.0), b(0.0), a1(0.0), a2(0.0), a3(0.0), a4(0.0),
  epsmin(0.0), epsmax(0.0)
 {
+// AddingSensitivity:BEGIN /////////////////////////////////////
+	gradientIdentifier = 0;
+// AddingSensitivity:END //////////////////////////////////////
 
 }
 
@@ -510,3 +516,80 @@ Steel01::updateParameter(int parameterID, Information &info)
 
 	return 0;
 }
+
+
+// AddingSensitivity:BEGIN ///////////////////////////////////
+int
+Steel01::gradient(bool compute, int identifier, double & gradient)
+{
+/*	The gradient method can be called with four different purposes:
+	1) To clear the sensitivity flag so that the object does not contribute:
+			gradient(false, 0)
+	2) To set the sensitivity flag so that the object contributes
+	   (the sensitivity flag is stored as the value of parameterID):
+			gradient(false, parameterID)
+	3) To obtain the gradient vector from the object (like for the residual):
+			gradient(true, 0)
+	4) To commit unconditional sensitivities for path-dependent problems:
+			gradient(true, gradNumber)
+*/
+
+// COMPUTE GRADIENTS
+	if (compute) {
+
+// IF "PHASE 1" IN THE GRADIENT COMPUTATIONS (RETURN GRADIENT VECTOR)
+		if (identifier == 0) {
+
+			// For now, simply return the derivatives of these equations:
+			// sigma = E0 * epsilon                 for abs(epsilon) < fy/E0
+			// sigma = fy + (epsilon-fy/E0)*b*E0    for abs(epsilon) > fy/E0
+			// (That is, this method only works for path-independent problems for now.)
+
+			if ( gradientIdentifier == 0 ) {
+				gradient = 0.0;
+			}
+			else if ( fabs(Tstrain) < fy/E0 ) {				// below the yield limit
+				if ( gradientIdentifier == 1 ) {		// d{sigma}d{fy}
+					gradient = 0.0;
+				}
+				else if ( gradientIdentifier == 2  ) {	// d{sigma}d{E0}
+					gradient = Tstrain;
+				}
+				else if ( gradientIdentifier == 3  )	// d{sigma}d{b}
+					gradient = 0.0;
+				else
+					gradient = 0.0;
+			}
+			else {										// past the yield limit
+				if ( gradientIdentifier == 1 ) {		// d{sigma}d{fy}
+					gradient = 1.0 - b;
+				}
+				else if ( gradientIdentifier == 2  ) {	// d{sigma}d{E0}
+					gradient = Tstrain*b;
+				}
+				else if ( gradientIdentifier == 3  ) {	// d{sigma}d{b}
+					gradient = Tstrain*E0 - fy;
+				}
+				else {
+					gradient = 0.0;
+				}
+			}
+
+			return 0;
+		}
+
+// IF "PHASE 2" IN THE GRADIENT COMPUTATIONS (COMMIT UNCONDITIONAL GRADIENT)
+		else {
+			// Not treated yet. 
+		}
+	}
+	
+// DO NOT COMPUTE GRADIENTS, JUST SET FLAG
+	else {
+		gradientIdentifier = identifier;
+	}
+
+	return 0;
+}
+
+// AddingSensitivity:END /////////////////////////////////////////////

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-06-14 05:48:28 $
+// $Revision: 1.4 $
+// $Date: 2001-07-31 22:11:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/Steel01.h,v $
                                                                         
                                                                         
@@ -79,6 +79,9 @@ class Steel01 : public UniaxialMaterial
     
     int setParameter(char **argv, int argc, Information &info);
     int updateParameter(int parameterID, Information &info);
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+	int gradient(bool compute, int identifier, double & gradient);
+// AddingSensitivity:END ///////////////////////////////////////////
 
   protected:
     
@@ -138,6 +141,9 @@ class Steel01 : public UniaxialMaterial
 
     // Determines if a load reversal has occurred based on the trial strain
     void detectLoadReversal (double dStrain);
+// AddingSensitivity:BEGIN //////////////////////////////////////////
+    int gradientIdentifier;
+// AddingSensitivity:END ///////////////////////////////////////////
 };
 
 #endif

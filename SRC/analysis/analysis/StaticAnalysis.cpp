@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-03 06:15:34 $
+// $Revision: 1.4 $
+// $Date: 2001-07-31 22:11:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -42,7 +42,9 @@
 #include <StaticIntegrator.h>
 #include <Domain.h>
 #include <Timer.h>
-
+// AddingSensitivity:BEGIN //////////////////////////////////
+#include <SensitivityAlgorithm.h>
+// AddingSensitivity:END ////////////////////////////////////
 #include <FE_Element.h>
 #include <DOF_Group.h>
 #include <FE_EleIter.h>
@@ -75,6 +77,9 @@ StaticAnalysis::StaticAnalysis(Domain &the_Domain,
 
     theIntegrator->setLinks(theModel,theLinSOE);
     theAlgorithm->setLinks(theModel,theStaticIntegrator,theLinSOE);
+// AddingSensitivity:BEGIN ////////////////////////////////////
+	theSensitivityAlgorithm = 0;
+// AddingSensitivity:END //////////////////////////////////////
 }    
 
 
@@ -93,6 +98,9 @@ StaticAnalysis::clearAll(void)
     delete theIntegrator;
     delete theAlgorithm;
     delete theSOE;
+// AddingSensitivity:BEGIN ////////////////////////////////////
+	delete theSensitivityAlgorithm;
+// AddingSensitivity:END //////////////////////////////////////
 }    
 
 
@@ -138,6 +146,20 @@ StaticAnalysis::analyze(int numSteps)
 
 	    return -3;
 	}    
+
+// AddingSensitivity:BEGIN ////////////////////////////////////
+	if (theSensitivityAlgorithm != 0) {
+		result = theSensitivityAlgorithm->computeGradients();
+		if (result < 0) {
+			cerr << "StaticAnalysis::analyze() - the SensitivityAlgorithm failed";
+			cerr << " at iteration: " << i << " with domain at load factor ";
+			cerr << the_Domain->getCurrentTime() << endl;
+			the_Domain->revertToLastCommit();	    
+			theIntegrator->revertToLastStep();
+			return -5;
+		}    
+	}
+// AddingSensitivity:END //////////////////////////////////////
 
 	result = theIntegrator->commit();
 	if (result < 0) {
@@ -248,6 +270,23 @@ StaticAnalysis::domainChanged(void)
     // if get here successfull
     return 0;
 }    
+
+// AddingSensitivity:BEGIN //////////////////////////////
+int 
+StaticAnalysis::setSensitivityAlgorithm(SensitivityAlgorithm *passedSensitivityAlgorithm)
+{
+    int result = 0;
+
+    // invoke the destructor on the old one
+    if (theSensitivityAlgorithm != 0) {
+		delete theSensitivityAlgorithm;
+	}
+
+	theSensitivityAlgorithm = passedSensitivityAlgorithm;
+
+	return 0;
+}
+// AddingSensitivity:END ///////////////////////////////
 
 
 int 

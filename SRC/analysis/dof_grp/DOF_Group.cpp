@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-26 06:20:26 $
+// $Revision: 1.4 $
+// $Date: 2001-07-31 22:11:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -698,6 +698,29 @@ DOF_Group::addLocalM_Force(const Vector &accel, double fact)
 }
 
 
+// AddingSensitivity:BEGIN ////////////////////////////////////////
+int 
+DOF_Group::setGradient(const Vector &v, int gradNum, int numGrads)
+{
+    Vector &sensitivity = *unbalance;
+
+    // Get sensitivity for my dof out of vector v
+    for (int i=0; i<numDOF; i++) {
+		int loc = myID(i);	    			
+		if (loc >= 0) {
+			sensitivity(i) = v(loc);  
+		}
+		else {
+			sensitivity(i) = 0.0;  
+		}
+    }
+
+    myNode->setGradient(sensitivity, gradNum, numGrads);
+
+	return 0;
+
+}
+// AddingSensitivity:END //////////////////////////////////////////
 
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:01 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 22:11:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/curvature/FirstPrincipalCurvature.cpp,v $
 
 
@@ -42,10 +42,13 @@
 FirstPrincipalCurvature::FirstPrincipalCurvature()
 :FindCurvatures()
 {
+	curvatures = new Vector(1);
 }
 
 FirstPrincipalCurvature::~FirstPrincipalCurvature()
 {
+	if (curvatures != 0)
+		delete curvatures;
 }
 
 

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:01 $
+// $Revision: 1.3 $
+// $Date: 2001-07-31 22:11:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/designPoint/SearchWithStepSizeAndStepDirection.cpp,v $
 
 
@@ -135,7 +135,7 @@ SearchWithStepSizeAndStepDirection::doTheActualSearch(	bool doProjectionToOrthog
 	int numberOfRandomVariables = theReliabilityDomain->getNumberOfRandomVariables();
 	
 	// Declaration of data used in the algorithm
-	int i, j;
+	int j;
 	int zeroFlag;
 	x(numberOfRandomVariables);
 	u(numberOfRandomVariables);

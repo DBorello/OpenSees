@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-26 00:58:59 $
+// $Revision: 1.6 $
+// $Date: 2001-07-31 22:11:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -57,6 +57,10 @@ Node::Node(int theClassTag)
  R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
 {
     // for FEM_ObjectBroker, recvSelf() must be invoked on object
+
+// AddingSensitivity:BEGIN /////////////////////////////////////////
+	theGradients = 0;
+// AddingSensitivity:END ///////////////////////////////////////////
 }    
 
 
@@ -71,6 +75,10 @@ Node::Node(int tag, int theClassTag)
 {
     // for subclasses - they must implement all the methods with
     // their own data structures.
+
+// AddingSensitivity:BEGIN /////////////////////////////////////////
+	theGradients = 0;
+// AddingSensitivity:END ///////////////////////////////////////////
 }
 
 Node::Node(int tag, int ndof, double Crd1)
@@ -82,7 +90,11 @@ Node::Node(int tag, int ndof, double Crd1)
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
  R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
 {
-    Crd = new Vector(1);
+// AddingSensitivity:BEGIN /////////////////////////////////////////
+	theGradients = 0;
+// AddingSensitivity:END ///////////////////////////////////////////
+
+	Crd = new Vector(1);
     (*Crd)(0) = Crd1;
 }
 
@@ -98,6 +110,10 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2)
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
  R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
 {
+// AddingSensitivity:BEGIN /////////////////////////////////////////
+	theGradients = 0;
+// AddingSensitivity:END ///////////////////////////////////////////
+
     Crd = new Vector(2);
     (*Crd)(0) = Crd1;
     (*Crd)(1) = Crd2;
@@ -116,6 +132,10 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2, double Crd3)
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
  R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
 {
+// AddingSensitivity:BEGIN /////////////////////////////////////////
+	theGradients = 0;
+// AddingSensitivity:END ///////////////////////////////////////////
+
     Crd = new Vector(3);
     (*Crd)(0) = Crd1;
     (*Crd)(1) = Crd2;
@@ -133,6 +153,10 @@ Node::Node(const Node *otherNode)
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
  R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
 {
+// AddingSensitivity:BEGIN /////////////////////////////////////////
+	theGradients = 0;
+// AddingSensitivity:END ///////////////////////////////////////////
+
     if (otherNode->Crd != 0) {
 	Crd = new Vector(*(otherNode->Crd));
 	if (Crd == 0) {
@@ -249,6 +273,12 @@ Node::~Node()
 
     if (theEigenvectors != 0)
       delete theEigenvectors;
+
+// AddingSensitivity:BEGIN ///////////////////////////////////////
+    if (theGradients != 0)
+	delete theGradients;
+// AddingSensitivity:END /////////////////////////////////////////
+
 }
 
 
@@ -1345,5 +1375,32 @@ Node::createAccel(void)
 
     return 0;
 }
+
+
+// AddingSensitivity:BEGIN ///////////////////////////////////////
+int 
+Node::setGradient(const Vector &v, int gradNum, int numGrads)
+{
+	// If the sensitivity matrix is not already created:
+	if (theGradients == 0) {
+		theGradients = new Matrix( numberDOF, numGrads );
+	}
+
+	// Put the GRADIENT VECTOR into a COLUMN of the matrix
+	for (int i=0; i<numberDOF; i++ ) {
+		(*theGradients)(i,gradNum-1) = v(i);
+	}
+
+    return 0;
+}
+
+double 
+Node::getGradient(int dof, int gradNum)
+{
+	return (*theGradients)(dof-1,gradNum-1);
+}
+// AddingSensitivity:END /////////////////////////////////////////
+
+
 
 

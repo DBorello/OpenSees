@@ -22,77 +22,39 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 22:11:38 $
-// $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/components/RandomVariablePositioner.cpp,v $
+// $Revision: 1.1 $
+// $Date: 2001-07-31 22:11:36 $
+// $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityIntegrator.h,v $
 
 
 //
-// Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
-// Revised: haukaas 06/00 (core code)
-//			haukaas 06/01 (made part of official OpenSees)
-//			haukaas 07/30/01 (revised for sensitivity computations)
+// Written by Terje Haukaas (haukaas@ce.berkeley.edu), July 2001
+// Revised: 
 //
 
-#include <RandomVariablePositioner.h>
+#ifndef SensitivityIntegrator_h
+#define SensitivityIntegrator_h
 
+#include <AnalysisModel.h>
+#include <LinearSOE.h>
+#include <Vector.h>
 
-RandomVariablePositioner::RandomVariablePositioner (int passedTag,
-		int passedRVnumber,
-		DomainComponent *object,
-		char **argv, int argc)
-:ReliabilityDomainComponent(passedTag, 14728)
+class SensitivityIntegrator
 {
-	tag = passedTag;
-	rvNumber = passedRVnumber;
-	theObject = object;
+public:
 
-	if (theObject)
-		parameterID = theObject->setParameter (argv, argc, theInfo);
+    SensitivityIntegrator();
+    ~SensitivityIntegrator();
+    
+	virtual int formRightHandSide(void) = 0;
+	virtual int saveGradient(const Vector &v, int gradNum, int numGrads) = 0;
+	virtual int commitGradient(int gradNumber) = 0;
 
-	if (parameterID < 0)
-		cerr << "RandomVariablePositioner::RandomVariablePositioner "<< tag <<" -- unable to set parameter" << endl;
-}
+protected:
+    
+private:
 
+};
 
-
-RandomVariablePositioner::~RandomVariablePositioner()
-{
-}
-
-int
-RandomVariablePositioner::update (double newValue)
-{
-	theInfo.theDouble = newValue;
-
-	if (parameterID >= 0)
-		return theObject->updateParameter (parameterID, theInfo);
-	else
-		return -1;
-}
-
-int
-RandomVariablePositioner::setSensitivityFlag (int flag)
-{
-	if (flag==0) {
-		theObject->gradient(false,0);
-	}
-	else {
-		theObject->gradient(false, parameterID);
-	}
-	return 0;
-}
-
-void
-RandomVariablePositioner::Print(ostream &s, int flag)  
-{
-}
-
-
-int 
-RandomVariablePositioner::getRvNumber(void)
-{
-	return rvNumber;
-}
-
+#endif
 
