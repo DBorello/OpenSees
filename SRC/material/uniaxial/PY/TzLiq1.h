@@ -101,4 +101,4 @@ class TzLiq1 : public TzSimple1
 	
 };
 
-#endif TZLIQ1_H
+#endif // TZLIQ1_H

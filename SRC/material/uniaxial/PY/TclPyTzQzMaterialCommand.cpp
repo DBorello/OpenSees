@@ -18,14 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-10-07 19:22:42 $
+// $Revision: 1.5 $
+// $Date: 2003-10-07 20:57:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PY/TclPyTzQzMaterialCommand.cpp,v $
 
 #include <TclModelBuilder.h>
 
 //PY Springs: RWBoulanger and BJeremic
-#include <domain.h>    // RWB for PyLiq1
+#include <Domain.h>    // RWB for PyLiq1
 #include <PySimple1.h> // RWB
 #include <TzSimple1.h> // RWB
 #include <QzSimple1.h> // RWB

@@ -53,9 +53,9 @@ TzLiq1::TzLiq1()
 //	Default destructor
 TzLiq1::~TzLiq1()
 {
-    // Call TzSimple1 destructor even though it does nothing.
-	//
-	TzSimple1::~TzSimple1();
+  // Call TzSimple1 destructor even though it does nothing.
+  //
+  // TzSimple1::~TzSimple1();
 }
 
 /////////////////////////////////////////////////////////////////////

@@ -54,9 +54,9 @@ PyLiq1::PyLiq1()
 //	Default destructor
 PyLiq1::~PyLiq1()
 {
-    // Call PySimple1 destructor even though it does nothing.
-	//
-	PySimple1::~PySimple1();
+  // Call PySimple1 destructor even though it does nothing.
+  //
+  // PySimple1::~PySimple1();
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -307,11 +307,11 @@ PyLiq1::getEffectiveStress(void)
 				FluidSolidPorousMaterial *theFSPM2[4];
 				int dummy = 0;
 				for (int i=0; i<4; i++) {
-					theNDM1[i] = theQuad1->theMaterial[i];
-					theNDM2[i] = theQuad2->theMaterial[i];
-					theFSPM1[i] = dynamic_cast<FluidSolidPorousMaterial*>(theNDM1[i]);
-					theFSPM2[i] = dynamic_cast<FluidSolidPorousMaterial*>(theNDM2[i]);
-					if(theFSPM1 == 0 || theFSPM2 == 0) dummy = dummy + 1;
+				  theNDM1[i] = theQuad1->theMaterial[i];
+				  theNDM2[i] = theQuad2->theMaterial[i];
+				  theFSPM1[i] = dynamic_cast<FluidSolidPorousMaterial*>(theNDM1[i]);
+				  theFSPM2[i] = dynamic_cast<FluidSolidPorousMaterial*>(theNDM2[i]);
+				  if(theFSPM1 == 0 || theFSPM2 == 0) dummy = dummy + 1;
 				}
 				if(dummy == 0) elemFlag.append("-FSPM");
 
