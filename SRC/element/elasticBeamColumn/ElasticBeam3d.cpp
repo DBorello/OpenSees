@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-05-16 00:07:39 $
+// $Revision: 1.4 $
+// $Date: 2002-05-29 22:55:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -269,13 +269,17 @@ ElasticBeam3d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 ElasticBeam3d::getResistingForceIncInertia()
 {	
-    P = this->getResistingForce();
+  P = this->getResistingForce();
     
+  if (rho == 0.0)
+    return P;
+
+  else{
     const Vector &accel1 = node1Ptr->getTrialAccel();
     const Vector &accel2 = node2Ptr->getTrialAccel();    
     
     double m = 0.5*rho*L;
-
+    
     P(0) += m * accel1(0);
     P(1) += m * accel1(1);
     P(2) += m * accel1(2);
@@ -283,8 +287,9 @@ ElasticBeam3d::getResistingForceIncInertia()
     P(6) += m * accel2(0);    
     P(7) += m * accel2(1);
     P(8) += m * accel2(2);    
-
+    
     return P;
+  }
 }
 
 const Vector &
