@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:09 $
+// $Revision: 1.2 $
+// $Date: 2003-02-19 21:49:00 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/TclPlaneTruss/TclPlaneTruss.cpp,v $
                                                                         
 // Written: fmk 
@@ -35,7 +35,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <iostream.h>
 
 #include <Domain.h>
 #include <Node.h>
@@ -225,8 +224,8 @@ TclPlaneTruss_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
   // now create the node and add it to the Domain
   Node *theNode = new Node(nodeId,2,xLoc,yLoc);
   if (theNode == 0) {
-    cerr << "WARNING TclPlaneTruss - addNode - ran out of memory for node ";
-    cerr << nodeId << endl;
+    opserr << "WARNING TclPlaneTruss - addNode - ran out of memory for node ";
+    opserr << nodeId << endln;
     return TCL_ERROR;
   }
   
@@ -250,8 +249,8 @@ TclPlaneTruss_addNode(ClientData clientData, Tcl_Interp *interp, int argc,
   
 
   if (theTclPlaneTrussDomain->addNode(theNode) == false) {
-    cerr << "WARNING TclPlaneTruss - addNode - could not add node to domain ";
-    cerr << nodeId << endl;
+    opserr << "WARNING TclPlaneTruss - addNode - could not add node to domain ";
+    opserr << nodeId << endln;
     return TCL_ERROR;
   }
 
@@ -301,21 +300,21 @@ TclPlaneTruss_addTruss(ClientData clientData, Tcl_Interp *interp, int argc,
   UniaxialMaterial *theMaterial = theTclPlaneTruss->getMaterial(matID);
 
   if (theMaterial == 0) {
-    cerr << "WARNING TclPlaneTruss - truss - no Material found with tag ";
-    cerr << matID << endl;
+    opserr << "WARNING TclPlaneTruss - truss - no Material found with tag ";
+    opserr << matID << endln;
     return TCL_ERROR;
   }
 
   // now create the truss and add it to the Domain
   Truss *theTruss = new Truss(trussId,2,iNode,jNode,*theMaterial,A);
   if (theTruss == 0) {
-    cerr << "WARNING TclPlaneTruss - addTruss - ran out of memory for node ";
-    cerr << trussId << endl;
+    opserr << "WARNING TclPlaneTruss - addTruss - ran out of memory for node ";
+    opserr << trussId << endln;
     return TCL_ERROR;
   }
   if (theTclPlaneTrussDomain->addElement(theTruss) == false) {
-    cerr << "WARNING TclPlaneTruss - addTruss - could not add Truss to domain ";
-    cerr << trussId << endl;
+    opserr << "WARNING TclPlaneTruss - addTruss - could not add Truss to domain ";
+    opserr << trussId << endln;
     return TCL_ERROR;
   }
 
@@ -369,22 +368,22 @@ TclPlaneTruss_addMyTruss(ClientData clientData, Tcl_Interp *interp, int argc,
   UniaxialMaterial *theMaterial = theTclPlaneTruss->getMaterial(matID);
 
   if (theMaterial == 0) {
-    cerr << "WARNING TclPlaneTruss - truss - no Material found with tag ";
-    cerr << matID << endl;
+    opserr << "WARNING TclPlaneTruss - truss - no Material found with tag ";
+    opserr << matID << endln;
     return TCL_ERROR;
   }
 
   // now create the truss and add it to the Domain
   MyTruss *theTruss = new MyTruss(trussId,iNode,jNode,*theMaterial,A,M);
   if (theTruss == 0) {
-    cerr << "WARNING TclPlaneTruss - addMyTruss - ran out of memory for node ";
-    cerr << trussId << endl;
+    opserr << "WARNING TclPlaneTruss - addMyTruss - ran out of memory for node ";
+    opserr << trussId << endln;
     return TCL_ERROR;
   }
   if (theTclPlaneTrussDomain->addElement(theTruss) == false) {
     delete theTruss;
-    cerr << "WARNING TclPlaneTruss - addTruss - could not add Truss to domain ";
-    cerr << trussId << endl;
+    opserr << "WARNING TclPlaneTruss - addTruss - could not add Truss to domain ";
+    opserr << trussId << endln;
     return TCL_ERROR;
   }
 
@@ -441,14 +440,14 @@ TclPlaneTruss_addfTruss(ClientData clientData, Tcl_Interp *interp, int argc,
   // now create the truss and add it to the Domain
   fElmt02 *theTruss = new fElmt02(trussId,iNode,jNode,A,E,M);
   if (theTruss == 0) {
-    cerr << "WARNING TclPlaneTruss - addMyTruss - ran out of memory for node ";
-    cerr << trussId << endl;
+    opserr << "WARNING TclPlaneTruss - addMyTruss - ran out of memory for node ";
+    opserr << trussId << endln;
     return TCL_ERROR;
   }
   if (theTclPlaneTrussDomain->addElement(theTruss) == false) {
     delete theTruss;
-    cerr << "WARNING TclPlaneTruss - addTruss - could not add Truss to domain ";
-    cerr << trussId << endl;
+    opserr << "WARNING TclPlaneTruss - addTruss - could not add Truss to domain ";
+    opserr << trussId << endln;
     return TCL_ERROR;
   }
 
@@ -609,13 +608,13 @@ TclPlaneTruss_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
   if (xFix != 0) {
     theSP = new SP_Constraint(numSPs++, nodeId, 0, 0.0);
     if (theSP == 0) {
-      cerr << "WARNING TclPlaneTruss - fix - ran out of memory for SP_Constraint ";
-      cerr << nodeId << endl;
+      opserr << "WARNING TclPlaneTruss - fix - ran out of memory for SP_Constraint ";
+      opserr << nodeId << endln;
       return TCL_ERROR;
     }
     if (theTclPlaneTrussDomain->addSP_Constraint(theSP) == false) {
-      cerr << "WARNING TclPlaneTruss - fix - could not add SP_Constraint to domain ";
-      cerr << nodeId << endl;
+      opserr << "WARNING TclPlaneTruss - fix - could not add SP_Constraint to domain ";
+      opserr << nodeId << endln;
       return TCL_ERROR;
     }
   }
@@ -623,13 +622,13 @@ TclPlaneTruss_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
   if (yFix != 0) {
     theSP = new SP_Constraint(numSPs++, nodeId, 1, 0.0);
     if (theSP == 0) {
-      cerr << "WARNING TclPlaneTruss - fix - ran out of memory for SP_Constraint ";
-      cerr << nodeId << endl;
+      opserr << "WARNING TclPlaneTruss - fix - ran out of memory for SP_Constraint ";
+      opserr << nodeId << endln;
       return TCL_ERROR;
     }
     if (theTclPlaneTrussDomain->addSP_Constraint(theSP) == false) {
-      cerr << "WARNING TclPlaneTruss - fix - could not add SP_Constraint to domain ";
-      cerr << nodeId << endl;
+      opserr << "WARNING TclPlaneTruss - fix - could not add SP_Constraint to domain ";
+      opserr << nodeId << endln;
       return TCL_ERROR;
     }
   }
@@ -689,8 +688,8 @@ TclPlaneTruss_addNodalLd(ClientData clientData, Tcl_Interp *interp, int argc,
       if (endMarker == argc || 
 	  Tcl_GetInt(interp, argv[endMarker], &loadPatternTag) != TCL_OK) {
 
-	cerr << "WARNING invalid patternTag - load " << nodeId << " ";
-	cerr << "fX fY -pattern patternTag\n";
+	opserr << "WARNING invalid patternTag - load " << nodeId << " ";
+	opserr << "fX fY -pattern patternTag\n";
 	return TCL_ERROR;
       }
     }
@@ -700,8 +699,8 @@ TclPlaneTruss_addNodalLd(ClientData clientData, Tcl_Interp *interp, int argc,
   // get the current pattern tag if no tag given in i/p
   if (loadPatternTag == 123456789)
     if (theTclLoadPattern == 0) {
-	cerr << "WARNING no current load pattern - load " << nodeId;
-	cerr << " fX fY\n";
+	opserr << "WARNING no current load pattern - load " << nodeId;
+	opserr << " fX fY\n";
 	return TCL_ERROR;
     } else	
       loadPatternTag = theTclLoadPattern->getTag();
@@ -713,8 +712,8 @@ TclPlaneTruss_addNodalLd(ClientData clientData, Tcl_Interp *interp, int argc,
   // create the load
   NodalLoad *theLoad = new NodalLoad(loadTag, nodeId, forces, isLoadConst);
   if (theLoad == 0) {
-    cerr << "WARNING ran out of memory for load  - load " << nodeId;
-    cerr << " fX fY\n";
+    opserr << "WARNING ran out of memory for load  - load " << nodeId;
+    opserr << " fX fY\n";
     return TCL_ERROR;
   }
 
@@ -722,7 +721,7 @@ TclPlaneTruss_addNodalLd(ClientData clientData, Tcl_Interp *interp, int argc,
   if (theTclPlaneTrussDomain->addNodalLoad(theLoad, loadPatternTag) 
       == false) { 
       
-    cerr << "WARNING TclModelBuilder - could not add load to domain ";
+    opserr << "WARNING TclModelBuilder - could not add load to domain ";
     delete theLoad;
     return TCL_ERROR;
   }  

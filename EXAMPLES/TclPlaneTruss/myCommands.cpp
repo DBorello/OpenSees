@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:09 $
+// $Revision: 1.2 $
+// $Date: 2003-02-19 21:49:00 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/TclPlaneTruss/myCommands.cpp,v $
                                                                         
 // File: ~/tcl/myCommands.C
@@ -34,21 +34,17 @@
 //
 // What: "@(#) myCommands.C, revA"
 
-
-
-#include "TclPlaneTruss.h"
-#include <TclModelBuilder.h>
-
-#include <tcl.h>
-#include <tk.h>
-
-#include <iostream.h>
-#include <fstream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <tcl.h>
+#include <tk.h>
 
+#include <OPS_Globals.h>
+
+#include "TclPlaneTruss.h"
+#include <TclModelBuilder.h>
 
 #include <Domain.h>
 
@@ -85,8 +81,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
       int ndf = 0;
       
       if (argc < 4) {
-	cerr << "WARNING incorrect number of command arguments\n";
-	cerr << "model modelBuilderType -ndm ndm? <-ndf ndf?> \n";
+	opserr << "WARNING incorrect number of command arguments\n";
+	opserr << "model modelBuilderType -ndm ndm? <-ndf ndf?> \n";
 	return TCL_ERROR;
       }
 
@@ -97,8 +93,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  argPos++;
 	  if (argPos < argc)
 	    if (Tcl_GetInt(interp, argv[argPos], &ndm) != TCL_OK) {
-	      cerr << "WARNING error reading ndm: " << argv[argPos];
-	      cerr << "\nmodel modelBuilderType -ndm ndm? <-ndf ndf?>\n";
+	      opserr << "WARNING error reading ndm: " << argv[argPos];
+	      opserr << "\nmodel modelBuilderType -ndm ndm? <-ndf ndf?>\n";
 	      return TCL_ERROR;
 	    }	  
 	  argPos++;
@@ -109,8 +105,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  argPos++;
 	  if (argPos < argc)
 	    if (Tcl_GetInt(interp, argv[argPos], &ndf) != TCL_OK) {
-	      cerr << "WARNING error reading ndf: " << argv[argPos];
-	      cerr << "\nmodel modelBuilderType -ndm ndm? <-ndf ndf?>\n";
+	      opserr << "WARNING error reading ndf: " << argv[argPos];
+	      opserr << "\nmodel modelBuilderType -ndm ndm? <-ndf ndf?>\n";
 	      return TCL_ERROR;
 	    }	  
 	  argPos++;
@@ -122,8 +118,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
 
       // check that ndm was specified
       if (ndm == 0) {
-	cerr << "WARNING need to specify ndm\n";
-	cerr << "model modelBuilderType -ndm ndm? <-ndf ndf?>\n";
+	opserr << "WARNING need to specify ndm\n";
+	opserr << "model modelBuilderType -ndm ndm? <-ndf ndf?>\n";
 	return TCL_ERROR;
       }
 
@@ -136,8 +132,8 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
 	else if (ndm == 3)
 	  ndf = 6;
 	else {
-	  cerr << "WARNING specified ndm, " << ndm << ", will not work\n";
-	  cerr << "with any elements in BasicBuilder\n";
+	  opserr << "WARNING specified ndm, " << ndm << ", will not work\n";
+	  opserr << "with any elements in BasicBuilder\n";
 	  return TCL_ERROR;
 	}
       }
@@ -145,7 +141,7 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
       // create the model builder
       theBuilder = new TclModelBuilder(theDomain, interp, ndm, ndf);
       if (theBuilder == 0) {
-	cerr << "WARNING ran out of memory in creating BasicBuilder model\n";
+	opserr << "WARNING ran out of memory in creating BasicBuilder model\n";
 	return TCL_ERROR;
       }
     }	

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:09 $
+// $Revision: 1.2 $
+// $Date: 2003-02-19 21:49:00 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/TclPlaneTruss/TclPlaneTruss.h,v $
 
                                                                         
@@ -47,10 +47,8 @@ class MP_Constraint;
 class UniaxialMaterial;
 class TaggedObjectStorage;
 
-
 #include <tcl.h>
 #include <tk.h>
-
 
 class TclPlaneTruss : public ModelBuilder
 {
