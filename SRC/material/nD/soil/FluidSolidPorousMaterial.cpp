@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2000-12-19 03:35:02 $
+// $Revision: 1.2 $
+// $Date: 2001-08-04 01:52:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -239,7 +239,8 @@ NDMaterial * FluidSolidPorousMaterial::getCopy (void)
 
 NDMaterial * FluidSolidPorousMaterial::getCopy (const char *code)
 {
-	if (strcmp(code,"FluidSolidPorous") == 0) {
+	if (strcmp(code,"FluidSolidPorous") == 0 || strcmp(code,"PlaneStrain") == 0 ||
+		strcmp(code,"ThreeDimensional") == 0) {
      FluidSolidPorousMaterial * copy = new FluidSolidPorousMaterial(*this);
 	   return copy;
 	}

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2001-07-25 20:54:07 $
+// $Revision: 1.12 $
+// $Date: 2001-08-04 01:52:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -230,7 +230,8 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	}    
 
 	int tag;
-	double E, v, rho;
+	double E, v;
+	double rho = 0.0;
 	
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    cerr << "WARNING invalid ElasticIsotropic tag" << endl;
