@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-11-27 16:39:30 $
+// $Revision: 1.8 $
+// $Date: 2002-01-06 19:44:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -340,13 +340,13 @@ int  ShellMITC4::revertToStart( )
 //print out element data
 void  ShellMITC4::Print( ostream &s, int flag )
 {
-  s << '\n' ;
+  s << endl ;
   s << "MITC4 Bbar Non-Locking Four Node Shell \n" ;
-  s << "Element Number: " << this->getTag() << '\n' ;
-  s << "Node 1 : " << connectedExternalNodes(0) << '\n' ;
-  s << "Node 2 : " << connectedExternalNodes(1) << '\n' ;
-  s << "Node 3 : " << connectedExternalNodes(2) << '\n' ;
-  s << "Node 4 : " << connectedExternalNodes(3) << '\n' ;
+  s << "Element Number: " << this->getTag() << endl ;
+  s << "Node 1 : " << connectedExternalNodes(0) << endl ;
+  s << "Node 2 : " << connectedExternalNodes(1) << endl ;
+  s << "Node 3 : " << connectedExternalNodes(2) << endl ;
+  s << "Node 4 : " << connectedExternalNodes(3) << endl ;
 
   s << "Material Information : \n " ;
   materialPointers[0]->Print( s, flag ) ;
