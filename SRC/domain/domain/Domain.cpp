@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2003-02-14 23:00:56 $
+// $Revision: 1.22 $
+// $Date: 2003-02-15 02:35:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -382,7 +382,7 @@ Domain::addElement(Element *element)
 #ifdef _G3DEBUG
     if (numDOF != element->getNumDOF()) { 
       
-      opserr << "Domain::addElement - element " << eleTag " - #DOF does not match with number at nodes\n";
+      opserr << "Domain::addElement - element " << eleTag << " - #DOF does not match with number at nodes\n";
       theElements->removeComponent(eleTag);
       return false;
     }
@@ -513,7 +513,7 @@ Domain::addMP_Constraint(MP_Constraint *mpConstraint)
     int nodeRetained = mpConstraint->getNodeRetained();      
     nodePtr = this->getNode(nodeRetained);
     if (nodePtr == 0) {
-      opserr << "Domain::addMP_Constraint - cannot add as retained node with tag" <,
+      opserr << "Domain::addMP_Constraint - cannot add as retained node with tag" <<
 	nodeRetained << "does not exist in model\n"; 	
       
       return false;
