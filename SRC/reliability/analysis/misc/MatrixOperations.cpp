@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:02 $
+// $Revision: 1.3 $
+// $Date: 2001-08-08 20:22:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/misc/MatrixOperations.cpp,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) during Spring 2000
 // Revised: haukaas 06/00 (core code)
 //			haukaas 06/01 (made part of official OpenSees)
+//			haukaas 08/08/01 (fix memory leak when 'compute' methods called more than once)
 //
 
 #include <MatrixOperations.h>
@@ -47,11 +48,11 @@ MatrixOperations::MatrixOperations(Matrix passedMatrix)
 	theMatrix = new Matrix(rows,cols);
 	(*theMatrix) = passedMatrix;
 
-	theLowerCholesky = 0;
-	theInverseLowerCholesky = 0;
-	theInverse = 0;
-	theTranspose = 0;
-	theSquareRoot = 0;
+	theLowerCholesky = new Matrix(rows,cols);
+	theInverseLowerCholesky = new Matrix(rows,cols);
+	theInverse = new Matrix(rows,cols);
+	theTranspose = new Matrix(rows,cols);
+	theSquareRoot = new Matrix(rows,cols);
 
 	theMatrixNorm = 0;
 	theTrace = 0; 
@@ -77,8 +78,22 @@ MatrixOperations::setMatrix(Matrix passedMatrix)
 	int rows = passedMatrix.noRows();
 	int cols = passedMatrix.noCols();
 
+	// delete
+	delete theMatrix;
+	delete theLowerCholesky;
+	delete theInverseLowerCholesky;
+	delete theInverse;
+	delete theTranspose;
+	delete theSquareRoot;
+
+	// reallocate
 	theMatrix = new Matrix(rows,cols);
 	(*theMatrix) = passedMatrix;
+	theLowerCholesky = new Matrix(rows,cols);
+	theInverseLowerCholesky = new Matrix(rows,cols);
+	theInverse = new Matrix(rows,cols);
+	theTranspose = new Matrix(rows,cols);
+	theSquareRoot = new Matrix(rows,cols);
 
 	return 0;
 }
@@ -216,7 +231,7 @@ MatrixOperations::computeLowerCholesky()
 		}
 	}
 
-	theLowerCholesky = new Matrix(lambda);
+	(*theLowerCholesky) = lambda;
 
 	return 0;
 }
@@ -267,7 +282,7 @@ MatrixOperations::computeInverseLowerCholesky()
 		}
 	}
 
-	theInverseLowerCholesky = new Matrix(gamma);
+	(*theInverseLowerCholesky) = gamma;
 
 	return 0;
 }
@@ -276,7 +291,7 @@ MatrixOperations::computeInverseLowerCholesky()
 int
 MatrixOperations::computeCholeskyAndItsInverse()
 {
-	Matrix passedMatrix = (*theMatrix);
+	Matrix &passedMatrix = (*theMatrix);
 
 	// This algorithm is more or less like given in Professor Der Kiureghians
 	// handout/brief in CE193 on Cholesky decomposition.
@@ -348,8 +363,8 @@ MatrixOperations::computeCholeskyAndItsInverse()
 		}
 	}
 
-	theLowerCholesky = new Matrix(lambda);
-	theInverseLowerCholesky = new Matrix(gamma);
+	(*theLowerCholesky) = lambda;
+	(*theInverseLowerCholesky) = gamma;
 
 	return 0;
 }
@@ -362,7 +377,7 @@ MatrixOperations::computeCholeskyAndItsInverse()
 int
 MatrixOperations::computeTranspose()
 {
-	Matrix A = (*theMatrix);
+	Matrix &A = (*theMatrix);
 
 	int sizeOfA = A.noCols();
 
@@ -374,7 +389,7 @@ MatrixOperations::computeTranspose()
 		}
 	}
 
-	theTranspose = new Matrix(B);
+	(*theTranspose) = B;
 
 	return 0;
 }
@@ -386,7 +401,7 @@ MatrixOperations::computeTranspose()
 int
 MatrixOperations::computeSquareRoot()
 {
-	Matrix A = (*theMatrix);
+	Matrix &A = (*theMatrix);
 
 	int sizeOfA = A.noCols();
 
@@ -398,7 +413,7 @@ MatrixOperations::computeSquareRoot()
 		}
 	}
 
-	theSquareRoot = new Matrix(B);
+	(*theSquareRoot) = B;
 
 	return 0;
 }
@@ -409,7 +424,7 @@ int
 MatrixOperations::computeInverse()
 {
 
-	Matrix A = (*theMatrix);
+	Matrix &A = (*theMatrix);
 
 	// Return the invers matrix B such that A*B=I
 	int sizeOfA = A.noCols();
@@ -487,8 +502,8 @@ MatrixOperations::computeInverse()
 		}
 	}
 
-	theInverse = new Matrix(B);
-
+	(*theInverse) = B;
+	
 	return 0;
 }
 
@@ -497,7 +512,7 @@ MatrixOperations::computeInverse()
 int
 MatrixOperations::computeMatrixNorm()
 {
-	Matrix passedMatrix = (*theMatrix);
+	Matrix &passedMatrix = (*theMatrix);
 
 	int numberOfColumns = passedMatrix.noCols();
 	int numberOfRows = passedMatrix.noRows();
@@ -519,7 +534,7 @@ MatrixOperations::computeMatrixNorm()
 int
 MatrixOperations::computeTrace()
 {
-	Matrix passedMatrix = (*theMatrix);
+	Matrix &passedMatrix = (*theMatrix);
 
 	int numberOfColumns = passedMatrix.noCols();
 	int numberOfRows = passedMatrix.noRows();
