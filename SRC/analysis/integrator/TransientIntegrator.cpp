@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-03-29 05:23:32 $
+// $Revision: 1.3 $
+// $Date: 2001-11-27 23:07:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/TransientIntegrator.cpp,v $
                                                                         
                                                                         
@@ -86,7 +86,7 @@ TransientIntegrator::formTangent(int statFlag)
 	    result = -1;
 	}
     }    
-    
+
     // loop through the FE_Elements getting them to add the tangent    
     FE_EleIter &theEles2 = theModel->getFEs();    
     FE_Element *elePtr;    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-03 06:13:22 $
+// $Revision: 1.3 $
+// $Date: 2001-11-27 23:07:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.cpp,v $
                                                                         
                                                                         
@@ -442,6 +442,7 @@ AnalysisModel::updateDomain(void)
 
     // invoke the method
     myDomain->update();
+
 }
 
 

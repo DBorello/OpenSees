@@ -16,9 +16,9 @@
 \begin{center}
 {\bf \Large The OpenSees Command Language Manual} 
 
-{\bf Version 1.1} 
+{\bf Version 1.2} 
 
-{\bf  January 15, 2000} 
+{\bf  August 20, 2001} 
 
 {\bf  Frank McKenna and Gregory L. Fenves} 
 
@@ -2645,6 +2645,8 @@ are required if a variable time step analysis method is specified.
 For both transient and variable time step the model will be moved from
 it's current time to a time >= numIncr * dt.
 
+RETURNS $0$ if successfull, a negative number if not.
+
 
 
 \section {The eigen Command}
@@ -2792,15 +2794,36 @@ analysis, equation solver, constraint handler, etc. are destroyed.
 have been created to this point. If the optional string -time or
 is specified, the pseudo time in the domain will be set to pseudoTime.
 
-\paragraph {The time Command}
+\paragraph {The setTime Command}
 
 {\sf\small
 \begin{verbatim}
-   time pseudoTime?
+   setTime pseudoTime?
 \end{verbatim}
 }
 
 \noindent To set the pseudo time in the domain to pseudoTime.
+
+\paragraph {The getTime Command}
+
+{\sf\small
+\begin{verbatim}
+   getTime
+\end{verbatim}
+}
+
+\noindent Returns the time in the domain.
+
+\paragraph {The getTime Command}
+
+{\sf\small
+\begin{verbatim}
+   nodeDisp nodeTag? dof?
+\end{verbatim}
+}
+
+\noindent Return the dof'th displacement at the node nodeTag.
+
 
 \paragraph {The build Command}
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-03-29 05:23:32 $
+// $Revision: 1.5 $
+// $Date: 2001-11-27 23:07:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
                                                                         
                                                                         
@@ -505,7 +505,7 @@ Newmark::update(const Vector &deltaU)
   // update the responses at the DOFs
   theModel->setResponse(*U,*Udot,*Udotdot);        
   theModel->updateDomain();
-		    
+
   return 0;
 }    
 

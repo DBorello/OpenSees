@@ -76,7 +76,6 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseSYM/utility.o \
 	$(FE)/system_of_eqn/linearSOE/sparseSYM/newordr.o \
 	$(FE)/system_of_eqn/linearSOE/sparseSYM/nnsim.o \
-	$(FE)/system_of_eqn/linearSOE/sparseSYM/tim.o \
 	$(FE)/system_of_eqn/linearSOE/sparseSYM/genmmd.o \
 	$(FE)/system_of_eqn/eigenSOE/EigenSOE.o \
 	$(FE)/system_of_eqn/eigenSOE/EigenSolver.o \
