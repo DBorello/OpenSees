@@ -2027,12 +2027,13 @@ tensor EightNodeBrick::nodal_forces(void)
 
 
 		//char *test = matpoint[where]->matmodel->getType();
-		if (strcmp(matpoint[where]->matmodel->getType(),"ElasticIsotropic3D") == 0)
+		// fmk - changing if so if into else block must be Template3Dep
+		if (strcmp(matpoint[where]->matmodel->getType(),"Template3Dep") != 0)
 		   stress_at_GP = matpoint[where]->getStressTensor();
 		else
 		{
 	           //Some thing funny happened when getting stress directly from matpoint[where], i have to do it this way!
-		   EPState *tmp_eps = (matpoint[where]->matmodel)->getEPS();
+		   EPState *tmp_eps = ((Template3Dep *)(matpoint[where]->matmodel))->getEPS();
 		   stress_at_GP = tmp_eps->getStress();
 		   //delete tmp_eps;
 	       	}
@@ -3007,7 +3008,7 @@ int EightNodeBrick::commitState ()
 	 stresstensor prin;
 	 if (strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
          {
-      	  st = ( (matpoint[i]->matmodel)->getEPS())->getStress();
+      	  st = ( ((Template3Dep *)(matpoint[i]->matmodel))->getEPS())->getStress();
       	  prin = st.principal();
 	 }
 	 else
@@ -3594,7 +3595,7 @@ int EightNodeBrick::displaySelf (Renderer &theViewer, int displayMode, float fac
 }     
 
 //=============================================================================
-void EightNodeBrick::Print(ostream &s, int flag =0)
+void EightNodeBrick::Print(ostream &s, int flag)
 {
     //report(" EightNodeBrick ");
     s << "EightNodeBrick, element id:  " << this->getTag() << endl;
@@ -3641,7 +3642,7 @@ void EightNodeBrick::Print(ostream &s, int flag =0)
 }
 
 //=============================================================================
-int EightNodeBrick::setResponse (char **argv, int argc, Information &eleInformation) 
+Response * EightNodeBrick::setResponse (char **argv, int argc, Information &eleInformation) 
 {
      return 0;
 }

@@ -129,7 +129,7 @@ class EightNodeBrick: public Element
     void Print(ostream &s, int flag =0);   
     //    Do nothing with void Print (ostream &s, int flag =0);
     //    use Brick3D report.  08/16/00
-    int setResponse (char **argv, int argc, Information &eleInformation);
+    Response *setResponse (char **argv, int argc, Information &eleInformation);
     int getResponse (int responseID, Information &eleInformation);
 	
   protected:
