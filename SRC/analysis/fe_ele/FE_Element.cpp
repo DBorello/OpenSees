@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2004-10-12 21:55:54 $
+// $Revision: 1.15 $
+// $Date: 2005-02-05 00:30:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -296,6 +296,7 @@ FE_Element::getTangent(Integrator *theNewIntegrator)
     if (myEle->isSubdomain() == false) {
       if (theNewIntegrator != 0)
 	theNewIntegrator->formEleTangent(this);	    	    
+
       return *theTangent;
     } else {
       Subdomain *theSub = (Subdomain *)myEle;
@@ -376,12 +377,12 @@ FE_Element::addCtoTang(double fact)
 	
 	// check for a quick return	
 	if (fact == 0.0) 
-	    return;
+	  return;
 	else if (myEle->isSubdomain() == false)	    	    
-		theTangent->addMatrix(1.0, myEle->getDamp(),fact);
+	  theTangent->addMatrix(1.0, myEle->getDamp(),fact);
 	else {
-	    opserr << "WARNING FE_Element::addCToTang() - ";
-	    opserr << "- this should not be called on a Subdomain!\n";
+	  opserr << "WARNING FE_Element::addCToTang() - ";
+	  opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    	
     }
     else {
@@ -397,12 +398,12 @@ FE_Element::addMtoTang(double fact)
 
 	// check for a quick return	
 	if (fact == 0.0) 
-	    return;
+	  return;
 	else if (myEle->isSubdomain() == false)	    	    
-		theTangent->addMatrix(1.0, myEle->getMass(),fact);
+	  theTangent->addMatrix(1.0, myEle->getMass(),fact);
 	else {
-	    opserr << "WARNING FE_Element::addMToTang() - ";
-	    opserr << "- this should not be called on a Subdomain!\n";
+	  opserr << "WARNING FE_Element::addMToTang() - ";
+	  opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    	
     }	
     else {
@@ -818,38 +819,71 @@ FE_Element::addLocalD_Force(const Vector &accel, double fact)
     }    	            
 }
 
-
-
 // AddingSensitivity:BEGIN /////////////////////////////////
 void  
 FE_Element::addResistingForceSensitivity(int gradNumber, double fact)
 {
-	theResidual->addVector(1.0,myEle->getResistingForceSensitivity(gradNumber),-fact);
+  theResidual->addVector(1.0, myEle->getResistingForceSensitivity(gradNumber), -fact);
 }
 
 void  
 FE_Element::addM_ForceSensitivity(int gradNumber, const Vector &vect, double fact)
 {
-	// Get the components we need out of the vector
-	// and place in a temporary vector
-	Vector tmp(numDOF);
-	for (int i=0; i<numDOF; i++) {
-		int loc = myID(i);
-		if (loc >= 0) {
-			tmp(i) = vect(loc);
-		}
-		else {
-			tmp(i) = 0.0;
-		}
-	}
-	if (theResidual->addMatrixVector(1.0, myEle->getMassSensitivity(gradNumber),tmp,fact) < 0) {
-		opserr << "WARNING FE_Element::addM_ForceSensitivity() - ";
-		opserr << "- addMatrixVector returned error\n";		 
-	}
+  // Get the components we need out of the vector
+  // and place in a temporary vector
+  Vector tmp(numDOF);
+  for (int i=0; i<numDOF; i++) {
+    int loc = myID(i);
+    if (loc >= 0) {
+      tmp(i) = vect(loc);
+    }
+    else {
+      tmp(i) = 0.0;
+    }
+  }
+  if (theResidual->addMatrixVector(1.0, myEle->getMassSensitivity(gradNumber),tmp,fact) < 0) {
+    opserr << "WARNING FE_Element::addM_ForceSensitivity() - ";
+    opserr << "- addMatrixVector returned error\n";		 
+  }
 }
 
 void  
 FE_Element::addD_ForceSensitivity(int gradNumber, const Vector &vect, double fact)
+{
+  if (myEle != 0) {    
+    
+    // check for a quick return
+    if (fact == 0.0) 
+      return;
+    if (myEle->isSubdomain() == false) {
+      // get the components we need out of the vector
+      // and place in a temporary vector
+      Vector tmp(numDOF);
+      for (int i=0; i<numDOF; i++) {
+	int loc = myID(i);
+	if (loc >= 0)
+	  tmp(i) = vect(loc);
+	else
+	  tmp(i) = 0.0;		
+      }	
+      if (theResidual->addMatrixVector(1.0, myEle->getDampSensitivity(gradNumber), tmp, fact) < 0){
+	opserr << "WARNING FE_Element::addD_ForceSensitivity() - ";
+	opserr << "- addMatrixVector returned error\n";		 
+      }		
+    }
+    else {
+      opserr << "WARNING FE_Element::addD_ForceSensitivity() - ";
+      opserr << "- this should not be called on a Subdomain!\n";
+    }    	    	    				
+  }
+  else {
+    opserr << "WARNING FE_Element::addD_ForceSensitivity() - no Element *given ";
+    opserr << "- subclasses must provide implementation\n";
+  }    	            
+}
+
+void  
+FE_Element::addLocalD_ForceSensitivity(int gradNumber, const Vector &accel, double fact)
 {
     if (myEle != 0) {    
 
@@ -857,64 +891,63 @@ FE_Element::addD_ForceSensitivity(int gradNumber, const Vector &vect, double fac
 	if (fact == 0.0) 
 	    return;
 	if (myEle->isSubdomain() == false) {
-	    // get the components we need out of the vector
-	    // and place in a temporary vector
-	    Vector tmp(numDOF);
-	    for (int i=0; i<numDOF; i++) {
-		int loc = myID(i);
-		if (loc >= 0)
-		    tmp(i) = vect(loc);
-		else
-		    tmp(i) = 0.0;		
-	    }	
-	    if (theResidual->addMatrixVector(1.0, myEle->getDampSensitivity(gradNumber), tmp, fact) < 0){
-		opserr << "WARNING FE_Element::addD_ForceSensitivity() - ";
-		opserr << "- addMatrixVector returned error\n";		 
+	    if (theResidual->addMatrixVector(1.0, myEle->getDampSensitivity(gradNumber),
+					     accel, fact) < 0){
+
+	      opserr << "WARNING FE_Element::addLocalD_ForceSensitivity() - ";
+	      opserr << "- addMatrixVector returned error\n"; 
 	    }		
 	}
 	else {
-	    opserr << "WARNING FE_Element::addD_ForceSensitivity() - ";
+	    opserr << "WARNING FE_Element::addLocalD_ForceSensitivity() - ";
 	    opserr << "- this should not be called on a Subdomain!\n";
 	}    	    	    				
     }
     else {
-	opserr << "WARNING FE_Element::addD_ForceSensitivity() - no Element *given ";
+	opserr << "WARNING FE_Element::addLocalD_ForceSensitivity() - no Element *given ";
 	opserr << "- subclasses must provide implementation\n";
     }    	            
 }
 
+void  
+FE_Element::addLocalM_ForceSensitivity(int gradNumber, const Vector &accel, double fact)
+{
+    if (myEle != 0) {    
+
+	// check for a quick return
+	if (fact == 0.0) 
+	    return;
+	if (myEle->isSubdomain() == false) {
+	    if (theResidual->addMatrixVector(1.0, myEle->getMassSensitivity(gradNumber),
+					     accel, fact) < 0){
+
+	      opserr << "WARNING FE_Element::addLocalD_ForceSensitivity() - ";
+	      opserr << "- addMatrixVector returned error\n"; 
+	    }		
+	}
+	else {
+	    opserr << "WARNING FE_Element::addLocalD_ForceSensitivity() - ";
+	    opserr << "- this should not be called on a Subdomain!\n";
+	}    	    	    				
+    }
+    else {
+	opserr << "WARNING FE_Element::addLocalD_ForceSensitivity() - no Element *given ";
+	opserr << "- subclasses must provide implementation\n";
+    }    	            
+}
+
+
+
+
+
 int  
 FE_Element::commitSensitivity(int gradNum, int numGrads)
 {
-	myEle->commitSensitivity(gradNum, numGrads);
-
-	return 0;
+  myEle->commitSensitivity(gradNum, numGrads);
+  
+  return 0;
 }
 
-/*
-void  
-FE_Element::addKiForceSensitivity(int gradNumber, const Vector &vect, double fact)
-{
-	// Get the components we need out of the vector
-	// and place in a temporary vector
-	Vector tmp(numDOF);
-	for (int i=0; i<numDOF; i++) {
-		int loc = myID(i);
-		if (loc >= 0) {
-			tmp(i) = vect(loc);
-		}
-		else {
-			tmp(i) = 0.0;
-		}
-	}
-
-	if (theResidual->addMatrixVector(1.0, myEle->getKiSensitivity(gradNumber),tmp,fact) < 0) {
-		opserr << "WARNING FE_Element::addKiForceSensitivity() - ";
-		opserr << "- addMatrixVector returned error\n";		 
-	}
-
-}
-*/
 // AddingSensitivity:END ////////////////////////////////////
 
 

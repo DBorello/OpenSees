@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2004-10-12 21:55:54 $
+// $Revision: 1.11 $
+// $Date: 2005-02-05 00:30:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.h,v $
                                                                         
                                                                         
@@ -87,17 +87,18 @@ class FE_Element
     virtual Integrator *getLastIntegrator(void);
     virtual const Vector &getLastResponse(void);
 
-// AddingSensitivity:BEGIN ////////////////////////////////////
-	virtual void addResistingForceSensitivity(int gradNumber, double fact = 1.0);
-	virtual void addM_ForceSensitivity       (int gradNumber, const Vector &vect, double fact = 1.0);
-//	virtual void addKiForceSensitivity       (int gradNumber, const Vector &vect, double fact = 1.0);
-	virtual void addD_ForceSensitivity       (int gradNumber, const Vector &vect, double fact = 1.0);
-	virtual int	 commitSensitivity           (int gradNum, int numGrads);
-// AddingSensitivity:END //////////////////////////////////////
+    // AddingSensitivity:BEGIN ////////////////////////////////////
+    virtual void addResistingForceSensitivity(int gradNumber, double fact = 1.0);
+    virtual void addM_ForceSensitivity       (int gradNumber, const Vector &vect, double fact = 1.0);
+    virtual void addD_ForceSensitivity       (int gradNumber, const Vector &vect, double fact = 1.0);
+    virtual int  commitSensitivity           (int gradNum, int numGrads);
+    // AddingSensitivity:END //////////////////////////////////////
     
   protected:
     void  addLocalM_Force(const Vector &accel, double fact = 1.0);    
     void  addLocalD_Force(const Vector &vel, double fact = 1.0);    
+    void  addLocalM_ForceSensitivity(int gradNumber, const Vector &accel, double fact = 1.0);    
+    void  addLocalD_ForceSensitivity(int gradNumber, const Vector &vel, double fact = 1.0);    
 
     // protected variables - a copy for each object of the class        
     ID myDOF_Groups;
