@@ -1,19 +1,18 @@
 include ../../Makefile.def
 
-CLIENT = client
-SERVER = server
+SERVER_PROGRAM         = serverTruss
+
+CLIENT_PROGRAM	       = example1
 
 OBJS = ActorTruss.o ShadowTruss.o ClientMain.o ServerMain.o
 
 all: $(OBJS)
-	@$(LINKER) $(LINKFLAGS) ClientMain.o \
+	@$(LINKER) $(LINKFLAGS) ClientMain.o  ShadowTruss.o \
 	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
-	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) \
-	-o $(CLIENT)
-	@$(LINKER) $(LINKFLAGS) ServerMain.o \
+	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) -o $(CLIENT_PROGRAM)
+	@$(LINKER) $(LINKFLAGS) ServerMain.o  ActorTruss.o\
 	$(FE_LIBRARY) $(MACHINE_LINKLIBS) \
-	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) \
-	-o $(SERVER)
+	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) -o $(SERVER_PROGRAM)
 
 # Miscellaneous
 tidy:
@@ -23,9 +22,9 @@ clean:  tidy
 	@$(RM) $(RMFLAGS) $(OBJS) *.o core
 
 spotless: clean
-	@$(RM) $(RMFLAGS) $(PROGRAM) fake core
+	@$(RM) $(RMFLAGS) fake core
 
 wipe: spotless
-	@$(RM) $(RMFLAGS) $(PROGRAM) fake core $(PROGRAM)
+	@$(RM) $(RMFLAGS) fake core $(CLIENT_PROGRAM) $(SERVER_PROGRAM)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
