@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-04-09 05:42:29 $
+// $Revision: 1.9 $
+// $Date: 2002-06-07 22:07:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -135,6 +135,7 @@
 #include <ZeroLengthND.h>
 #include <FourNodeQuad.h>
 #include <EnhancedQuad.h>
+#include <NineNodeMixedQuad.h>
 #include <ConstantPressureVolumeQuad.h>
 #include <ElasticBeam2d.h>
 #include <ElasticBeam3d.h>
@@ -358,11 +359,17 @@ FEM_ObjectBroker::getNewElement(int classTag)
 	case ELE_TAG_EnhancedQuad:
 		return new EnhancedQuad();
 
+        case ELE_TAG_NineNodeMixedQuad:
+		return new NineNodeMixedQuad();
+
 	case ELE_TAG_ConstantPressureVolumeQuad:
 		return new ConstantPressureVolumeQuad();
 
 	case ELE_TAG_Brick:
 		return new Brick();
+
+	case ELE_TAG_ShellMITC4:
+		return new ShellMITC4();
 
 	case ELE_TAG_BbarBrick:
 		return new BbarBrick();
