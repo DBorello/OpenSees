@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:46 $
+// $Revision: 1.6 $
+// $Date: 2003-02-15 02:34:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.cpp,v $
                                                                         
                                                                         
@@ -58,7 +58,7 @@ ID::ID(int size)
 
 #ifdef _G3DEBUG
   if (sz <= 0) {
-    g3ErrorHandler->warning("ID::ID(int) - size %d specified <= 0\n",size);
+    opserr << "ID::ID(int) - size " << size << " specified <= 0\n";
     sz = 1;
     arraySize = 1;
   }
@@ -85,19 +85,18 @@ ID::ID(int size, int arraySz)
 {
 #ifdef _G3DEBUG
   if (sz < 0) {
-    g3ErrorHandler->warning("ID::ID(size, arraySize) - size %d specified < 0\n",size);
+    opserr << "ID::ID(size, arraySize) - size " << size << " specified < 0\n";
     sz = 0;
   }
   if (arraySz <= 0) {
-    g3ErrorHandler->warning("ID::ID(size, arraySize) - arraySize %d specified < 0\n",arraySz);
+    opserr << "ID::ID(size, arraySize) - arraySize " << arraySz << " specified < 0\n";
     if (sz != 0) 
       arraySz = sz;
     else
       arraySz = 1;
   }
   if (arraySz < sz) {
-    g3ErrorHandler->warning("ID::ID(size, arraySize) - arraySize %d specified <  size\n",
-			    arraySz, size);
+    opserr << "ID::ID(size, arraySize) - arraySize " << arraySz  << " specified < " << size << endln;
     arraySz = sz;
   }
 #endif    
@@ -226,7 +225,7 @@ ID::operator[](int x)
 #ifdef _G3DEBUG
   // check if it is inside range [0,sz-1]
   if (x < 0) {
-    g3ErrorHandler->warning("ID::[] - location x %d < 0\n",x);
+    opserr << "ID::[] - location " << x << " < 0\n";
     return ID_NOT_VALID_ENTRY;
   }
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:01:46 $
+// $Revision: 1.8 $
+// $Date: 2003-02-15 02:34:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -52,15 +52,6 @@ Vector::Vector()
 }
 
 // Vector(int size):
-
-
-
-
-
-
-
-
-
 //	Constructor used to allocate a vector of size size.
 
 Vector::Vector(int size)
@@ -68,7 +59,7 @@ Vector::Vector(int size)
 {
 #ifdef _G3DEBUG
   if (sz <= 0) {
-    g3ErrorHandler->warning("Vector::Vector(int) - size %d specified <= 0\n",size);
+    opserr << "Vector::Vector(int) - size " << size << " specified <= 0\n";
     sz = 1;
   }
 #endif
@@ -95,7 +86,7 @@ Vector::Vector(double *data, int size)
 {
 #ifdef _G3DEBUG
   if (sz <= 0) {
-    g3ErrorHandler->warning("Vector::Vector(double *, size) - size %d specified <= 0\n",size);
+    opserr << "Vector::Vector(double *, size) - size " << size << " specified <= 0\n";
     sz = 0;
   }
 #endif
@@ -111,7 +102,7 @@ Vector::Vector(const Vector &other)
 {
 #ifdef _G3DEBUG
   if (sz < 0) {
-    g3ErrorHandler->warning("Vector::Vector(int) - size %d specified <= 0\n",sz);
+    opserr << "Vector::Vector(int) - size " << sz << " specified <= 0\n";
     sz = 1;
   }
 #endif
@@ -260,7 +251,7 @@ Vector::addVector(double thisFact, const Vector &other, double otherFact )
 #ifdef _G3DEBUG
   if (sz != other.sz) {
     // else sizes are incompatable, do nothing but warning
-    g3ErrorHandler->warning( "WARNING Vector::addVector() - incompatable Vector sizes\n");
+    opserr <<  "WARNING Vector::addVector() - incompatable Vector sizes\n";
     return -1;
   }
 #endif
@@ -337,9 +328,7 @@ Vector::addMatrixVector(double thisFact, const Matrix &m, const Vector &v, doubl
   // check the sizes are compatable
   if ((sz != m.noRows()) && (m.noCols() != v.sz)) {
     // otherwise incompatable sizes
-    g3ErrorHandler->warning("Vector::addMatrixVector() %s [%d] = [%d %d] [%d]\n",
-			    "- incompatable sizes",
-			    sz, m.noRows(), m.noCols(), v.sz);
+    opserr << "Vector::addMatrixVector() - incompatable sizes\n";
     return -1;    
   }
 #endif
@@ -472,9 +461,7 @@ Vector::addMatrixTransposeVector(double thisFact,
   // check the sizes are compatable
   if ((sz != m.noRows()) && (m.noRows() != v.sz)) {
     // otherwise incompatable sizes
-    g3ErrorHandler->warning("Vector::addMatrixTransposeVector() %s [%d] = [%d %d] [%d]\n",
-			    "- incompatable sizes",
-			    sz, m.noCols(), m.noRows(), v.sz);
+    opserr << "Vector::addMatrixTransposeVector() - incompatable sizes\n";
     return -1;    
   }
 #endif
@@ -627,8 +614,8 @@ Vector::operator[](int x)
 #ifdef _G3DEBUG
   // check if it is inside range [0,sz-1]
   if (x < 0 || x >= sz) {
-      g3ErrorHandler->warning("Vector::() - x %d outside range [0, %d]\n",x,sz-1);
-      return VECTOR_NOT_VALID_ENTRY;
+    opserr << "Vector::() - x " << x << " outside range 0 - << " << sz-1 << endln;
+    return VECTOR_NOT_VALID_ENTRY;
   }
 #endif
 
@@ -640,7 +627,7 @@ double Vector::operator[](int x) const
 #ifdef _G3DEBUG
   // check if it is inside range [0,sz-1]
   if (x < 0 || x >= sz) {
-    g3ErrorHandler->warning("Vector::() - x %d outside range [0, %d]\n",x,sz-1);
+    opserr << "Vector::() - x " << x << " outside range 0 - " <<  sz-1 << endln;
     return VECTOR_NOT_VALID_ENTRY;
   }
 #endif
@@ -695,14 +682,14 @@ Vector::operator=(const Vector &V)
 #ifdef _G3DEBUG
     // check size compatability, if different warning
     if (sz != V.sz) 
-      g3ErrorHandler->warning("Vector::operator=() - vectors of differing sizes\n");
+      opserr << "Vector::operator=() - vectors of differing sizes\n");
 #endif
 	  */
 
       if (sz != V.sz)  {
 
 #ifdef _G3DEBUG
-	  g3ErrorHandler->warning("Vector::operator=() - vectors of differing sizes\n");
+	  opserr << "Vector::operator=() - vectors of differing sizes\n";
 #endif
 
 	  // Check that we are not deleting an empty Vector
@@ -914,7 +901,7 @@ Vector::operator+=(const Vector &other)
 {
 #ifdef _G3DEBUG
   if (sz != other.sz) {
-    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: << "sz << " != " << other.sz << endln;
+    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: " << sz << " != " << other.sz << endln;
     return *this;
   }    
 #endif
@@ -935,7 +922,7 @@ Vector::operator-=(const Vector &other)
 {
 #ifdef _G3DEBUG
   if (sz != other.sz) {
-    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: << "sz << " != " << other.sz << endln;
+    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: " << sz << " != " << other.sz << endln;
     return *this;
   }
 #endif
@@ -956,7 +943,7 @@ Vector::operator+(const Vector &b) const
 {
 #ifdef _G3DEBUG
   if (sz != b.sz) {
-    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: << "sz << " != " << b.sz << endln;
+    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: " << sz << " != " << b.sz << endln;
     return *this;
   }
 #endif
@@ -982,7 +969,7 @@ Vector::operator-(const Vector &b) const
 {
 #ifdef _G3DEBUG
   if (sz != b.sz) {
-    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: << "sz << " != " << b.sz << endln;
+    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: " << sz << " != " << b.sz << endln;
     return *this;
   }
 #endif
@@ -1008,7 +995,7 @@ Vector::operator^(const Vector &V) const
 {
 #ifdef _G3DEBUG
   if (sz != V.sz) {
-    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: << "sz << " != " << V.sz << endln;
+    opserr << "WARNING Vector::operator+=(Vector):Vectors not of same sizes: " << sz << " != " << V.sz << endln;
     return 0.0;
   }
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:46 $
+// $Revision: 1.7 $
+// $Date: 2003-02-15 02:34:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.h,v $
                                                                         
                                                                         
@@ -96,8 +96,8 @@ ID::operator()(int x)
 #ifdef _G3DEBUG
   // check if it is inside range [0,sz-1]
   if (x < 0 || x >= sz) {
-      g3ErrorHandler->warning("ID::(loc) - loc %d outside range [0, %d]\n",x,sz-1);
-      return ID_NOT_VALID_ENTRY;
+    opserr << "ID::(loc) - loc " << x << " outside range 0 - " <<  sz-1 << endln;
+    return ID_NOT_VALID_ENTRY;
   }
 #endif
 
@@ -111,8 +111,8 @@ ID::operator()(int x) const
 #ifdef _G3DEBUG
   // check if it is inside range [0,sz-1]
   if (x < 0 || x >= sz) {
-      g3ErrorHandler->warning("ID::(loc) - loc %d outside range [0, %d]\n",x,sz-1);
-      return ID_NOT_VALID_ENTRY;
+    opserr << "ID::(loc) - loc " << x << " outside range 0 - " <<  sz-1 << endln;
+    return ID_NOT_VALID_ENTRY;
   }
 #endif
 

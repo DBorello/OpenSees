@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:01:46 $
+// $Revision: 1.9 $
+// $Date: 2003-02-15 02:34:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.h,v $
                                                                         
                                                                         
@@ -177,12 +177,10 @@ Matrix::operator()(int row, int col)
 { 
 #ifdef _G3DEBUG
   if ((row < 0) || (row >= numRows)) {
-    g3ErrorHandler->warning("Matrix::operator() - row %d our of range [0, %d]\n",
-			    row, numRows-1);
+    opserr << "Matrix::operator() - row " << row << " our of range [0, " <<  numRows-1 << endln;
     return data[0];
   } else if ((col < 0) || (col >= numCols)) {
-    g3ErrorHandler->warning("Matrix::operator() - col %d our of range [0, %d]\n",
-			    col, numCols-1);
+    opserr << "Matrix::operator() - row " << col << " our of range [0, " <<  numCols-1 << endln;
     return MATRIX_NOT_VALID_ENTRY;
   }
 #endif
@@ -195,12 +193,10 @@ Matrix::operator()(int row, int col) const
 { 
 #ifdef _G3DEBUG
   if ((row < 0) || (row >= numRows)) {
-    g3ErrorHandler->warning("Matrix::operator(row, col) - row %d our of range [0, %d]\n",
-			    row, numRows-1);
+    opserr << "Matrix::operator() - row " << row << " our of range [0, " <<  numRows-1 << endln;
     return data[0];
   } else if ((col < 0) || (col >= numCols)) {
-    g3ErrorHandler->warning("Matrix::operator(row, col) - col %d our of range [0, %d]\n",
-			    col, numCols-1);
+    opserr << "Matrix::operator() - row " << col << " our of range [0, " <<  numCols-1 << endln;
     return MATRIX_NOT_VALID_ENTRY;
   }
 #endif

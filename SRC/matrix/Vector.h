@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:46 $
+// $Revision: 1.7 $
+// $Date: 2003-02-15 02:34:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.h,v $
 
                                                                         
@@ -146,7 +146,7 @@ Vector::operator()(int x) const
 #ifdef _G3DEBUG
   // check if it is inside range [0,sz-1]
   if (x < 0 || x >= sz) {
-      g3ErrorHandler->warning("Vector::(loc) - loc %d outside range [0, %d]\n",x,sz-1);
+      opserr << "Vector::(loc) - loc " << x << " outside range [0, " << sz-1 << endln;
       return VECTOR_NOT_VALID_ENTRY;
   }
 #endif
@@ -161,7 +161,7 @@ Vector::operator()(int x)
 #ifdef _G3DEBUG
     // check if it is inside range [0,sz-1]
   if (x < 0 || x >= sz) {
-      g3ErrorHandler->warning("Vector::(loc) - loc %d outside range [0, %d]\n",x,sz-1);
+      opserr << "Vector::(loc) - loc " << x << " outside range [0, " << sz-1 << endln;
       return VECTOR_NOT_VALID_ENTRY;
   }
 #endif

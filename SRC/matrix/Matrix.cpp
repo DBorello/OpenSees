@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-14 23:01:46 $
+// $Revision: 1.11 $
+// $Date: 2003-02-15 02:34:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -354,14 +354,12 @@ Matrix::Solve(const Vector &b, Vector &x) const
     }
 
     if (n != x.Size()) {
-      g3ErrorHandler->warning("Matrix::Solve(b,x) - dimension of x, %d, %s %d\n",
-			      numRows, "is not same as matrix", x.Size());
+      opserr << "Matrix::Solve(b,x) - dimension of x, " << numRows << "is not same as matrix " <<  x.Size() << endln;
       return -2;
     }
 
     if (n != b.Size()) {
-      g3ErrorHandler->warning("Matrix::Solve(b,x) - dimension of b, %d, %s %d\n",
-			      numRows, "is not same as matrix", b.Size());
+      opserr << "Matrix::Solve(b,x) - dimension of x, " << numRows << "is not same as matrix " <<  b.Size() << endln;
       return -2;
     }
 #endif
@@ -437,26 +435,22 @@ Matrix::Solve(const Matrix &b, Matrix &x) const
 
 #ifdef _G3DEBUG    
     if (numRows != numCols) {
-      g3ErrorHandler->warning("Matrix::Solve(B,X) - the matrix of dimensions [%d %d] is not square\n",
-			      numRows, numCols);
+      opserr << "Matrix::Solve(B,X) - the matrix of dimensions [" << numRows << " " <<  numCols << "] is not square\n";
       return -1;
     }
 
     if (n != x.numRows) {
-      g3ErrorHandler->warning("Matrix::Solve(B,X) - #rows of X, %d, is not same as matrix %d\n",
-			      numRows, x.numRows);
+      opserr << "Matrix::Solve(B,X) - #rows of X, " << x.numRows << " is not same as the matrices: " << numRows << endln;
       return -2;
     }
 
     if (n != b.numRows) {
-      g3ErrorHandler->warning("Matrix::Solve(B,X) - #rows of B, %d, is not same as matrix %d\n",
-			      numRows, b.numRows);
+      opserr << "Matrix::Solve(B,X) - #rows of B, " << b.numRows << " is not same as the matrices: " << numRows << endln;
       return -2;
     }
 
     if (x.numCols != b.numCols) {
-      g3ErrorHandler->warning("Matrix::Solve(B,X) - #cols of B, %d, is not same as that of X, %d\n",
-			      b.numCols, x.numCols);
+      opserr << "Matrix::Solve(B,X) - #cols of B, " << b.numCols << " , is not same as that of X, b " <<  x.numCols << endln;
       return -3;
     }
 #endif
@@ -543,14 +537,12 @@ Matrix::Invert(Matrix &theInverse) const
 
 #ifdef _G3DEBUG    
     if (numRows != numCols) {
-      g3ErrorHandler->warning("Matrix::Solve(B,X) - the matrix of dimensions [%d %d] is not square\n",
-			      numRows, numCols);
+      opserr << "Matrix::Solve(B,X) - the matrix of dimensions [" << numRows << "," << numCols << "] is not square\n";
       return -1;
     }
 
     if (n != theInverse.numRows) {
-      g3ErrorHandler->warning("Matrix::Solve(B,X) - #rows of X, %d, is not same as matrix %d\n",
-			      numRows, theInverse.numRows);
+      opserr << "Matrix::Solve(B,X) - #rows of X, " << numRows<< ", is not same as matrix " << theInverse.numRows << endln;
       return -2;
     }
 #endif
@@ -631,8 +623,7 @@ Matrix::addMatrix(double factThis, const Matrix &other, double factOther)
 
 #ifdef _G3DEBUG
     if ((other.numRows != numRows) || (other.numCols != numCols)) {
-      g3ErrorHandler->warning("Matrix::addMatrix(): incompatable matrices, this[%d %d] other[%d %d]\n",
-			      numRows, numCols, other.numRows, other.numCols);
+      opserr << "Matrix::addMatrix(): incompatable matrices\n";
       return -1;
     }
 #endif
@@ -705,9 +696,7 @@ Matrix::addMatrixProduct(double thisFact,
       return 0;
 #ifdef _G3DEBUG
     if ((B.numRows != numRows) || (C.numCols != numCols) || (B.numCols != C.numRows)) {
-      g3ErrorHandler->warning("Matrix::addMatrixProduct():%s[%d %d] A[%d &d] B{%d %d]\n", 
-			      "incompatable matrices, this",
-			      numRows, numCols, B.numRows, B.numCols, C.numRows, C.numCols);
+      opserr << "Matrix::addMatrixProduct(): incompatable matrices, this\n";
       return -1;
     }
 #endif
@@ -784,9 +773,7 @@ Matrix::addMatrixTripleProduct(double thisFact,
 #ifdef _G3DEBUG
     if ((numCols != numRows) || (B.numCols != B.numRows) || (T.numCols != numRows) ||
 	(T.numRows != B.numCols)) {
-      g3ErrorHandler->warning("Matrix::addMatrixTripleProduct():%s[%d %d] T[%d %d] B[%d %d]\n", 
-			      "incompatable matrices, this",
-			      numRows, numCols, T.numRows, T.numCols, B.numRows, B.numCols);
+      opserr << "Matrix::addMatrixTripleProduct() - incompatable matrices\n";
       return -1;
     }
 #endif
@@ -907,7 +894,7 @@ Matrix::operator=(const Matrix &other)
 /*
 #ifdef _G3DEBUG    
   if ((numCols != other.numCols) || (numRows != other.numRows)) {
-    g3ErrorHandler->warning("Matrix::operator=() - matrix dimensions do not match: [%d %d] != [%d %d]\n",
+    opserr << "Matrix::operator=() - matrix dimensions do not match: [%d %d] != [%d %d]\n",
 			    numRows, numCols, other.numRows, other.numCols);
     return *this;
   }
@@ -916,9 +903,7 @@ Matrix::operator=(const Matrix &other)
 
   if ((numCols != other.numCols) || (numRows != other.numRows)) {
 #ifdef _G3DEBUG    
-      g3ErrorHandler->warning("Matrix::operator=() - matrix dimensions do not match: [%d %d] != [%d %d]\n",
-			      numRows, numCols, other.numRows, other.numCols);
-
+      opserr << "Matrix::operator=() - matrix dimensions do not match\n";
 #endif
 
       if (this->data != 0)
@@ -1326,8 +1311,7 @@ Matrix::operator+=(const Matrix &M)
 {
 #ifdef _G3DEBUG
   if (numRows != M.numRows || numCols != M.numCols) {
-    opserr << "Matrix::operator+=(const Matrix &M) - matrices incompatable [%d %d] [%d %d]\n",
-			    numRows, numCols, M.numRows, M.numCols);
+    opserr << "Matrix::operator+=(const Matrix &M) - matrices incompatable\n";
     return *this;
   }
 #endif
@@ -1345,8 +1329,8 @@ Matrix::operator-=(const Matrix &M)
 {
 #ifdef _G3DEBUG
   if (numRows != M.numRows || numCols != M.numCols) {
-opserr << "Matrix::operator-=(const Matrix &M) - matrices incompatable [" << numRows << " " ;
-opserr << numCols << "]" << "[" << M.numRows << "]" << << M.numCols << "]\n";
+    opserr << "Matrix::operator-=(const Matrix &M) - matrices incompatable [" << numRows << " " ;
+    opserr << numCols << "]" << "[" << M.numRows << "]" << M.numCols << "]\n";
 
     return *this;
   }
