@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $                                                              
-// $Date: 2001-08-14 22:46:16 $                                                                  
+// $Revision: 1.14 $                                                              
+// $Date: 2001-10-03 18:07:50 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -42,6 +42,7 @@
 #include <ElasticIsotropic3D.h>
 #include <PressureDependentElastic3D.h>
 #include <ElasticIsotropicPlateFiber.h>
+#include <ElasticIsotropicBeamFiber.h>
 
 #include <Tensor.h>
 
@@ -136,6 +137,16 @@ ElasticIsotropicMaterial::getCopy (const char *type)
     {
 	ElasticIsotropicPlateFiber *theModel;
 	theModel = new ElasticIsotropicPlateFiber(this->getTag(), E, v, rho);
+		// DOES NOT COPY sigma, D, and epsilon ...
+		// This function should only be called during element instantiation, so
+		// no state determination is performed on the material model object
+		// prior to copying the material model (calling this function)
+	return theModel;
+    }
+    else if (strcmp(type,"BeamFiber") == 0)
+    {
+	ElasticIsotropicBeamFiber *theModel;
+	theModel = new ElasticIsotropicBeamFiber(this->getTag(), E, v, rho);
 		// DOES NOT COPY sigma, D, and epsilon ...
 		// This function should only be called during element instantiation, so
 		// no state determination is performed on the material model object
