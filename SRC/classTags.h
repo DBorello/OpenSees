@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.44 $
-// $Date: 2003-03-04 00:48:03 $
+// $Revision: 1.45 $
+// $Date: 2003-03-06 18:34:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -98,6 +98,7 @@
 #define MAT_TAG_ENTMaterial				14
 #define MAT_TAG_Penalty					15
 #define MAT_TAG_MinMax					16
+#define MAT_TAG_BoucWen					17
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205

@@ -7,6 +7,7 @@ include ../../../Makefile.def
         ViscousMaterial.o SeriesMaterial.o MinMaxMaterial.o \
         PathIndependentMaterial.o CableMaterial.o \
 	ENTMaterial.o FedeasMaterial.o DrainMaterial.o \
+	BoucWenMaterial.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)
