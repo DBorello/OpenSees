@@ -10,9 +10,9 @@ set beta 0.2
 set lp [expr $beta*$L]
 
 # Point loads
-set Py 10.0
-set Pz 12.0
-set N  6.0
+set Py 200.0
+set Pz 250.0
+set N  150.0
 set aL 0.6
 set a  [expr $aL*$L]
 
