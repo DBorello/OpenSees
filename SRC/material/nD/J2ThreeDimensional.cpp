@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2005-03-25 00:32:11 $
+// $Revision: 1.6 $
+// $Date: 2005-03-25 00:34:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2ThreeDimensional.cpp,v $
 
 // Written: Ed "C++" Love
@@ -237,7 +237,6 @@ const Matrix& J2ThreeDimensional :: getTangent( )
     } //end for j
   } //end for i
 
-  //  opserr << "Current:\n " << tangent_matrix;
 
   return tangent_matrix ;
 } 
@@ -270,9 +269,6 @@ const Matrix& J2ThreeDimensional :: getInitialTangent( )
 
     } //end for j
   } //end for i
-
-
-  opserr << "Initial:\n " << tangent_matrix;
 
   return tangent_matrix ;
 } 
