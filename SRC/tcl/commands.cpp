@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2000-10-13 05:12:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -67,6 +67,8 @@ extern "C" {
 #include <LoadPatternIter.h>
 #include <ElementalLoad.h>
 #include <ElementalLoadIter.h>
+#include <NodalLoad.h>
+#include <NodalLoadIter.h>
 
 
 // analysis model
@@ -1809,8 +1811,54 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
       }
     }
 
+    
+    else if (strcmp(argv[1],"node") == 0) {
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	cerr << "WARNING remove node tag? failed to read tag: " << argv[2] << endl;
+	return TCL_ERROR;
+      }      
+      Node *theNode = theDomain.removeNode(tag);
+      if (theNode != 0) {
+	// we also have to remove any elemental loads from the domain
+	LoadPatternIter &theLoadPatterns = theDomain.getLoadPatterns();
+	LoadPattern *thePattern;
+	
+	// go through all load patterns
+	while ((thePattern = theLoadPatterns()) != 0) {
+	  NodalLoadIter theEleLoads = thePattern->getNodalLoads();
+	  NodalLoad *theLoad;
+
+	  // go through all elemental loads in the pattern
+	  while ((theLoad = theEleLoads()) != 0) {
+
+	    // remove & destroy elemental load if tag corresponds to element being removed
+	    if (theLoad->getNodeTag() == tag) {
+	      thePattern->removeNodalLoad(theLoad->getTag());
+	      delete theLoad;
+	    }
+	  }
+	}
+
+	// finally invoke the destructor on the element
+	delete theNode;
+      }
+    }
+    
+    
+    else if (strcmp(argv[1],"loadPattern") == 0) {
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	cerr << "WARNING remove node tag? failed to read tag: " << argv[2] << endl;
+	return TCL_ERROR;
+      }      
+      LoadPattern *thePattern = theDomain.removeLoadPattern(tag);
+      if (thePattern != 0) {
+	delete thePattern;
+      }
+    }    
+
+    
     else
-      cerr << "WARNING remove element tag? - only command available at the moment: " << endl;
+      cerr << "WARNING remove [element, node, loadPattern] tag? - only command available at the moment: " << endl; 
 
     return TCL_OK;
 }
