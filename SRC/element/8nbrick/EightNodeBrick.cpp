@@ -402,10 +402,7 @@ EightNodeBrick::~EightNodeBrick ()
     if (matpoint)
     	delete [] matpoint;
 
-    if (mmodel)
-    	delete [] mmodel;
 }
-     // comment by Xiaoyan 07/11/00
 
 
 void EightNodeBrick::incremental_Update()
