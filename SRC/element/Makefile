@@ -44,6 +44,7 @@ spotless: clean
 	@$(CD) $(FE)/element/8nbrick; $(MAKE) wipe;
 	@$(CD) $(FE)/element/20nbrick; $(MAKE) wipe;
 	@$(CD) $(FE)/element/27nbrick; $(MAKE) wipe;
+	@$(CD) $(FE)/element/TotalLagrangianFD20NodeBrick; $(MAKE);
 	@$(CD) $(FE)/element/upU; $(MAKE) wipe;
 	@$(CD) $(FE)/element/shell; $(MAKE) wipe;
 	@$(CD) $(FE)/element/brick; $(MAKE) wipe;
