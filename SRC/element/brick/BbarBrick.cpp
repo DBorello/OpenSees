@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-07 21:19:12 $
+// $Revision: 1.4 $
+// $Date: 2001-10-01 20:15:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -253,7 +253,7 @@ const Matrix&  BbarBrick::getSecantStiff( )
 }
     
 
-//return damping matrix because frank is a dumb ass 
+//return damping matrix
 const Matrix&  BbarBrick::getDamp( ) 
 {
   //not supported

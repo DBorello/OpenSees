@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-07 21:19:12 $
+// $Revision: 1.3 $
+// $Date: 2001-10-01 20:15:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.h,v $
 
 // Ed "C++" Love
@@ -61,7 +61,7 @@ class BbarBrick : public Element {
     //destructor 
     virtual ~BbarBrick( ) ;
 
-    //set domain because frank is a dumb ass 
+    //set domain 
     void setDomain( Domain *theDomain ) ;
 
     //get the number of external nodes
@@ -91,7 +91,7 @@ class BbarBrick : public Element {
     //return secant matrix 
     const Matrix &getSecantStiff( ) ;
     
-    //return damping matrix because frank is a dumb ass 
+    //return damping matrix
     const Matrix &getDamp( ) ;
     
     //return mass matrix

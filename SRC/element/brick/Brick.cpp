@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-07 21:19:12 $
+// $Revision: 1.4 $
+// $Date: 2001-10-01 20:15:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -253,7 +253,7 @@ const Matrix&  Brick::getSecantStiff( )
 }
     
 
-//return damping matrix because frank is a dumb ass 
+//return damping matrix 
 const Matrix&  Brick::getDamp( ) 
 {
   //not supported
@@ -779,6 +779,15 @@ Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
     const Vector &end7Disp = nodePointers[6]->getDisp();
     const Vector &end8Disp = nodePointers[7]->getDisp();
 
+    const Vector &stress1 = materialPointers[0]->getStress();
+    const Vector &stress2 = materialPointers[1]->getStress();
+    const Vector &stress3 = materialPointers[2]->getStress();
+    const Vector &stress4 = materialPointers[3]->getStress();
+    const Vector &stress5 = materialPointers[4]->getStress();
+    const Vector &stress6 = materialPointers[5]->getStress();
+    const Vector &stress7 = materialPointers[6]->getStress();
+    const Vector &stress8 = materialPointers[7]->getStress();
+
     static Matrix coords(4,3);
     static Vector values(4);
     static Vector P(24) ;
@@ -788,11 +797,13 @@ Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
     values(2) = 1 ;
     values(3) = 1 ;
 
-    if (displayMode < 3 && displayMode > 0)
-      P = this->getResistingForce();
+
+    // for each face of the brick we:
+    //   1) determine the coordinates of the displaced point
+    //   2) determine the value to be drawn, the stress at nearest gauss point in displayMode dirn
+    //   3) get the renderer to draw the face
 
     int error = 0;
-
     int i;
     for (i = 0; i < 3; i++) {
       coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
@@ -800,6 +811,15 @@ Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
       coords(2,i) = end3Crd(i) + end3Disp(i)*fact;    
       coords(3,i) = end4Crd(i) + end4Disp(i)*fact;
     }
+
+    if (displayMode < 3 && displayMode > 0) {
+      int index = displayMode - 1;
+      values(0) = stress1(index);
+      values(1) = stress2(index);
+      values(2) = stress3(index);
+      values(3) = stress4(index);
+    }
+
     error += theViewer.drawPolygon (coords, values);
 
     for (i = 0; i < 3; i++) {
@@ -808,6 +828,15 @@ Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
       coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
       coords(3,i) = end8Crd(i) + end8Disp(i)*fact;
     }
+
+    if (displayMode < 3 && displayMode > 0) {
+      int index = displayMode - 1;
+      values(0) = stress5(index);
+      values(1) = stress6(index);
+      values(2) = stress7(index);
+      values(3) = stress8(index);
+    }
+
     error += theViewer.drawPolygon (coords, values);
 
     for (i = 0; i < 3; i++) {
@@ -816,6 +845,15 @@ Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
       coords(2,i) = end8Crd(i) + end8Disp(i)*fact;
       coords(3,i) = end5Crd(i) + end5Disp(i)*fact;
     }
+
+    if (displayMode < 3 && displayMode > 0) {
+      int index = displayMode - 1;
+      values(0) = stress1(index);
+      values(1) = stress4(index);
+      values(2) = stress8(index);
+      values(3) = stress5(index);
+    }
+
     error += theViewer.drawPolygon (coords, values);
 
     for (i = 0; i < 3; i++) {
@@ -824,6 +862,14 @@ Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
       coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
       coords(3,i) = end6Crd(i) + end6Disp(i)*fact;
     }
+    if (displayMode < 3 && displayMode > 0) {
+      int index = displayMode - 1;
+      values(0) = stress2(index);
+      values(1) = stress3(index);
+      values(2) = stress7(index);
+      values(3) = stress6(index);
+    }
+
     error += theViewer.drawPolygon (coords, values);
 
 
@@ -833,6 +879,15 @@ Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
       coords(2,i) = end6Crd(i) + end6Disp(i)*fact;
       coords(3,i) = end5Crd(i) + end5Disp(i)*fact;
     }
+
+    if (displayMode < 3 && displayMode > 0) {
+      int index = displayMode - 1;
+      values(0) = stress1(index);
+      values(1) = stress2(index);
+      values(2) = stress6(index);
+      values(3) = stress5(index);
+    }
+
     error += theViewer.drawPolygon (coords, values);
 
     for (i = 0; i < 3; i++) {
@@ -841,6 +896,15 @@ Brick::displaySelf(Renderer &theViewer, int displayMode, float fact)
       coords(2,i) = end7Crd(i) + end7Disp(i)*fact;
       coords(3,i) = end8Crd(i) + end8Disp(i)*fact;
     }
+
+    if (displayMode < 3 && displayMode > 0) {
+      int index = displayMode - 1;
+      values(0) = stress3(index);
+      values(1) = stress4(index);
+      values(2) = stress7(index);
+      values(3) = stress8(index);
+    }
+
     error += theViewer.drawPolygon (coords, values);
 
     return error;
