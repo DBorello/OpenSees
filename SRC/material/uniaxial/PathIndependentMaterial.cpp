@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-07-29 23:55:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PathIndependentMaterial.cpp,v $
 
 // Written: MHS
@@ -39,7 +39,7 @@
 #include <G3Globals.h>
 
 PathIndependentMaterial::PathIndependentMaterial(int tag, UniaxialMaterial &material)
-:UniaxialMaterial(tag,MAT_TAG_PathIndependentMaterial),
+:UniaxialMaterial(tag,MAT_TAG_PathIndependent),
  Tstrain(0.0), theMaterial(0)
 {
 	theMaterial = material.getCopy();
@@ -50,7 +50,7 @@ PathIndependentMaterial::PathIndependentMaterial(int tag, UniaxialMaterial &mate
 }
 
 PathIndependentMaterial::PathIndependentMaterial()
-:UniaxialMaterial(0,MAT_TAG_PathIndependentMaterial),
+:UniaxialMaterial(0,MAT_TAG_PathIndependent),
  Tstrain(0.0), theMaterial(0)
 {
 

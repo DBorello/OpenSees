@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-07-29 23:55:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PathIndependentMaterial.h,v $
                                                       
 // Written: MHS
@@ -35,8 +35,6 @@
 #define PathIndependentMaterial_h
 
 #include <UniaxialMaterial.h>
-
-#define MAT_TAG_PathIndependentMaterial 1340
 
 class PathIndependentMaterial : public UniaxialMaterial
 {
