@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-01-23 09:37:45 $
+// $Revision: 1.4 $
+// $Date: 2001-01-25 08:57:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -1326,7 +1326,18 @@ NLBeamColumn2d::Print(ostream &s, int flag)
       s << "\tConnected Nodes: " << connectedExternalNodes ;
       s << "\tNumber of Sections: " << nSections;
       s << "\tMass density: " << rho << endl;
-      s << "\tElement End Forces (P M1 M2): " << Secommit;
+      static Vector force(6);
+      force(3) = Secommit(0);
+      force(0) = -Secommit(0);
+      force(2) = Secommit(1);
+      force(5) = Secommit(2);
+      double V = (Secommit(1)+Secommit(2))/L;
+      force(1) = V;
+      force(4) = -V;
+      s << "\tEnd 1 Forces (P V M): "
+	  << force(0) << ' ' << force(1) << ' ' << force(2) << endl;
+      s << "\tEnd 2 Forces (P V M): "
+	  << force(3) << ' ' << force(4) << ' ' << force(5) << endl;
       s << "\tResisting Force: " << P;
    }
 }
@@ -1681,10 +1692,15 @@ NLBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformation)
     // we compare argv[0] for known response types 
     //
 
-    // force - 
-    if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0)
+    // global force - 
+    if (strcmp(argv[0],"forces") == 0 || strcmp(argv[0],"force") == 0
+	|| strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
 		return new ElementResponse(this, 1, P);
 
+    // local force -
+    else if (strcmp(argv[0],"localForce") == 0 || strcmp(argv[0],"localForces") == 0)
+	return new ElementResponse(this, 2, P);
+    
     // section response -
     else if (strcmp(argv[0],"section") ==0) {
 		if (argc <= 2)
@@ -1705,9 +1721,20 @@ int
 NLBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 {
   switch (responseID) {
-    case 1:  // forces
-		return eleInfo.setVector(P);
+    case 1:  // global forces
+      return eleInfo.setVector(P);
 
+    case 2:
+      static Vector force(6);
+      force(3) = Se(0);
+      force(0) = -Se(0);
+      force(2) = Se(1);
+      force(5) = Se(2);
+      double V = (Se(1)+Se(2))/L;
+      force(1) = V;
+      force(4) = -V;
+      return eleInfo.setVector(force);
+      
     default: 
 	  return -1;
   }
