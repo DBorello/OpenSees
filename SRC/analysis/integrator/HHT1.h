@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:33:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT1.h,v $
                                                                         
                                                                         
@@ -49,16 +49,10 @@ class HHT1 : public TransientIntegrator
   public:
     HHT1();
     HHT1(double alpha);
-    HHT1(double alpha, double alphaM, double betaKcurrent, 
-	 double betaKinit, double betaKlastCommit);        
-
+    HHT1(double alpha, double alphaM, double betaK, double betaKi);        
 
     ~HHT1();
 
-    // Override residual calculation needed for Rayleigh damping
-    virtual int formEleResidual(FE_Element *theEle);
-    virtual int formNodUnbalance(DOF_Group *theDof);        
-    
     // methods which define what the FE_Element and DOF_Groups add
     // to the system of equation object.
     int formEleTangent(FE_Element *theEle);
@@ -83,10 +77,8 @@ class HHT1 : public TransientIntegrator
     double alpha;
     double gamma;
     double beta;
-    bool rayleighDamping; // flag indicating wheter rayleigh damping being used
 
-    // D = alphaM * M + betaK * K(current) + betaKi * Kinit + betaKc * Kcommit
-    double alphaM, betaK, betaKi, betaKc;      // raleigh factors 
+    double alphaM, betaK, betaKi;
 
     double c1, c2, c3;  // some constants we need to keep
     Vector *Ut, *Utdot, *Utdotdot; // response quantities at time t

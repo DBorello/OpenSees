@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:33:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/WilsonTheta.cpp,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@
 WilsonTheta::WilsonTheta()
 :TransientIntegrator(INTEGRATOR_TAGS_WilsonTheta),
  theta(0), deltaT(0),
- rayleighDamping(false), alphaM(0), betaK(0), 
+ alphaM(0.0), betaK(0.0), betaKi(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0)
 {
@@ -57,21 +57,21 @@ WilsonTheta::WilsonTheta()
 WilsonTheta::WilsonTheta(double _theta)
 :TransientIntegrator(INTEGRATOR_TAGS_WilsonTheta),
  theta(_theta), deltaT(0.0), 
- rayleighDamping(false), alphaM(0), betaK(0), 
+ alphaM(0), betaK(0), betaKi(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0)
 {
     
 }
 
-WilsonTheta::WilsonTheta(double _theta, double alpham, double betak)
+WilsonTheta::WilsonTheta(double _theta, double alpham, double betak, double betaki)
 :TransientIntegrator(INTEGRATOR_TAGS_WilsonTheta),
  theta(_theta), deltaT(0.0), 
- rayleighDamping(true), alphaM(alpham), betaK(betak), 
+ alphaM(alpham), betaK(betak), betaKi(betaKi),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0)
 {
-    
+
 }
 
 WilsonTheta::~WilsonTheta()
@@ -90,33 +90,6 @@ WilsonTheta::~WilsonTheta()
   if (Udotdot != 0)
     delete Udotdot;
 }
-
-int
-WilsonTheta::formEleResidual(FE_Element *theEle)
-{
-  theEle->zeroResidual();
-  if (rayleighDamping == false) {
-      theEle->addRIncInertiaToResidual();
-  } else {
-      theEle->addRIncInertiaToResidual();
-      theEle->addKtForce(*Udot,-betaK);
-      theEle->addM_Force(*Udot,-alphaM);
-  }    
-  return 0;
-}    
-
-int
-WilsonTheta::formNodUnbalance(DOF_Group *theDof)
-{
-  theDof->zeroUnbalance();
-  if (rayleighDamping == false) 
-      theDof->addPIncInertiaToUnbalance();
-  else {
-      theDof->addPIncInertiaToUnbalance();
-      theDof->addM_Force(*Udot,-alphaM);
-  }
-  return 0;
-}    
 
 int
 WilsonTheta::newStep(double _deltaT)
@@ -177,14 +150,10 @@ int
 WilsonTheta::formEleTangent(FE_Element *theEle)
 {
   theEle->zeroTangent();
-  if (rayleighDamping == false) {
-      theEle->addKtToTang(c1);
-      theEle->addCtoTang(c2);
-      theEle->addMtoTang(c3);
-  } else {
-      theEle->addKtToTang(c1 + c2*betaK);
-      theEle->addMtoTang(c3 + c2*alphaM);
-  }  
+  theEle->addKtToTang(c1);
+  theEle->addCtoTang(c2);
+  theEle->addMtoTang(c3);
+
 
   return 0;
 }    
@@ -193,10 +162,8 @@ int
 WilsonTheta::formNodTangent(DOF_Group *theDof)
 {
   theDof->zeroTangent();
-  if (rayleighDamping == false) 
-      theDof->addMtoTang(c3);
-  else
-      theDof->addMtoTang(c3 + c2*alphaM);        
+  theDof->addMtoTang(c3);
+  theDof->addCtoTang(c2);        
 
   return(0);
 }    
@@ -208,6 +175,10 @@ WilsonTheta::domainChanged()
   LinearSOE *theLinSOE = this->getLinearSOEPtr();
   const Vector &x = theLinSOE->getX();
   int size = x.Size();
+
+  // if damping factors exist set them in the ele & node of the domain
+  if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0)
+    myModel->setRayleighDampingFactors(alphaM, betaK, betaKi);
   
   // create the new Vector objects
   if (Ut == 0 || Ut->Size() != size) {
@@ -383,12 +354,9 @@ WilsonTheta::sendSelf(int cTag, Channel &theChannel)
 {
     Vector data(4);
     data(0) = theta;
-    if (rayleighDamping == true) {
-	data(1) = 1.0;	
-	data(2) = alphaM;
-	data(3) = betaK;
-    } else
-	data(1) = 0.0;	    
+    data(1) = betaKi;	
+    data(2) = alphaM;
+    data(3) = betaK;
 
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WilsonTheta::sendSelf() - failed to send the data\n";
@@ -404,17 +372,13 @@ WilsonTheta::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WilsonTheta::recvSelf() - ";
 	cerr << " failed to receive the Vector\n";
-	theta = 1.0; rayleighDamping = false;
 	return -1;
     }
 
     theta = data(0);
-    if (data(1) == 1.0) {
-	rayleighDamping = true;
-	alphaM = data(2);
-	betaK = data(3);
-    } else
-	rayleighDamping = false;	    
+    betaKi = data(1);
+    alphaM = data(2);
+    betaK = data(3);
 
     return 0;
     
@@ -428,10 +392,8 @@ WilsonTheta::Print(ostream &s, int flag)
 	double currentTime = theModel->getCurrentDomainTime();
 	s << "\t WilsonTheta - currentTime: " << currentTime;
 	s << " theta: " << theta << endl;
-	if (rayleighDamping == true) {
-	    s << "  Rayleigh Damping - alphaM: " << alphaM;
-	    s << "  betaK: " << betaK << endl;	    
-	}	
+	s << "  Rayleigh Damping - alphaM: " << alphaM;
+	s << "  betaK: " << betaK << "  betaKi: " << betaKi << endl;	    
     } else 
 	s << "\t WilsonTheta - no associated AnalysisModel\n";
 }

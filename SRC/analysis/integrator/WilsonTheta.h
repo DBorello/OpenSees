@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2002-12-05 22:33:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/WilsonTheta.h,v $
                                                                         
                                                                         
@@ -49,13 +49,9 @@ class WilsonTheta : public TransientIntegrator
   public:
     WilsonTheta();
     WilsonTheta(double theta);
-    WilsonTheta(double theta, double alphaM, double betaK);    
+    WilsonTheta(double theta, double alphaM, double betaK, double betaKi);    
     ~WilsonTheta();
 
-    // Override residual calculation needed for Rayleigh damping
-    virtual int formEleResidual(FE_Element *theEle);
-    virtual int formNodUnbalance(DOF_Group *theDof);    
-    
     // methods which define what the FE_Element and DOF_Groups add
     // to the system of equation object.
     int formEleTangent(FE_Element *theEle);
@@ -78,9 +74,7 @@ class WilsonTheta : public TransientIntegrator
     double theta;    
     double deltaT;
 
-
-    bool rayleighDamping; // flag indicating wheter rayleigh damping being used
-    double alphaM, betaK;  // raleigh factors D = alphaM * M + betaK * K    
+    double alphaM, betaK, betaKi;  
     double c1, c2, c3;  // some constants we need to keep
     Vector *Ut, *Utdot, *Utdotdot; // response quantities at time t
     Vector *U, *Udot, *Udotdot; // response quantities at time t+deltat

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-03-29 05:23:32 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:33:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/StaticIntegrator.cpp,v $
                                                                         
                                                                         
@@ -66,10 +66,7 @@ StaticIntegrator::formEleTangent(FE_Element *theEle)
   } else if (statusFlag == INITIAL_TANGENT) {
     theEle->zeroTangent();
     theEle->addKiToTang();
-  } else if (statusFlag == CURRENT_SECANT) {
-    theEle->zeroTangent();
-    theEle->addKsToTang();
-  }
+  } 
 
     return 0;
 }    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 08:27:11 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:33:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark1.h,v $
                                                                         
                                                                         
@@ -49,14 +49,10 @@ class Newmark1 : public TransientIntegrator
   public:
     Newmark1();
     Newmark1(double gamma, double beta, bool disp = true);
-    Newmark1(double gamma, double beta, double alphaM, double betaKcurrent,
-	     double betaKinit, double betaKlastCommit);    
+    Newmark1(double gamma, double beta, double alphaM, double betaK, double betaKi); 
+
     ~Newmark1();
 
-    // Override residual calculation needed for Rayleigh damping
-    virtual int formEleResidual(FE_Element *theEle);
-    virtual int formNodUnbalance(DOF_Group *theDof);    
-    
     // methods which define what the FE_Element and DOF_Groups add
     // to the system of equation object.
     int formEleTangent(FE_Element *theEle);
@@ -79,8 +75,8 @@ class Newmark1 : public TransientIntegrator
   private:
     double gamma;
     double beta;
-    bool rayleighDamping;   // flag indicating wheter rayleigh damping being used
-    double alphaM, betaK, betaKi, betaKc;      // raleigh factors 
+
+    double alphaM, betaK, betaKi; 
     double c1, c2, c3, c4;  // some constants we need to keep
     Vector *Up, *Updot;      // predicted response quantities at time t+deltat for 1st iter 
     Vector *U, *Udot, *Udotdot; //response quantities at time t+deltat = predicted + corrected

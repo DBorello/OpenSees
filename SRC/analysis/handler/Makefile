@@ -2,7 +2,7 @@ include ../../../Makefile.def
 
 OBJS       = ConstraintHandler.o PlainHandler.o \
 	PenaltyConstraintHandler.o LagrangeConstraintHandler.o \
-	TransformationConstraintHandler.o
+	TransformationConstraintHandler.o PenaltyHandlerNoHomoSPMultipliers.o
 
 # Compilation control
 all:         $(OBJS)

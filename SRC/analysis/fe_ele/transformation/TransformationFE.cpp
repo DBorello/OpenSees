@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-10-24 00:36:13 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:33:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.cpp,v $
                                                                         
 // Written: fmk 
@@ -461,43 +461,12 @@ TransformationFE::getTangForce(const Vector &disp, double fact)
 }
 
 const Vector &
-TransformationFE::getKtForce(const Vector &disp, double fact)
-{
-    cerr << "TransformationFE::getKtForce() - not yet implemented\n";
-    modResidual->Zero();
-    return *modResidual;
-}
-
-
-const Vector &
-TransformationFE::getKsForce(const Vector &disp, double fact)
-{
-    cerr << "TransformationFE::getKsForce() - not yet implemented\n";
-    modResidual->Zero();
-    return *modResidual;
-}
-
-
-
-const Vector &
-TransformationFE::getD_Force(const Vector &vel, double fact)
-{
-    cerr << "TransformationFE::getD_Force() - not yet implemented\n";
-    modResidual->Zero();
-    return *modResidual;
-}
-
-
-
-
-const Vector &
 TransformationFE::getM_Force(const Vector &accel, double fact)
 {
   cerr << "TransformationFE::getM_Force() - not yet implemented\n";
   modResidual->Zero();
   return *modResidual;
 }
-
 
 // CHANGE THE ID SENT
 const Vector &
@@ -520,129 +489,6 @@ TransformationFE::getLastResponse(void)
     return result;
 }
 
-
-void  
-TransformationFE::addKtForce(const Vector &disp,  double fact)
-{
-    if (fact == 0.0)
-	return;
-
-    static Vector response;
-    response.setData(dataBuffer, numOriginalDOF);
-
-    for (int i=0; i<numTransformedDOF; i++) {
-	int loc = (*modID)(i);
-	if (loc >= 0)
-	    (*modResidual)(i) = disp(loc);
-	else
-	    (*modResidual)(i) = 0.0;
-    }
-    transformResponse(*modResidual, response);
-    this->addLocalKtForce(response, fact);
-}   	 
-
-
-void  
-TransformationFE::addKsForce(const Vector &disp,  double fact)
-{
-    if (fact == 0.0)
-	return;
-
-    static Vector response;
-    response.setData(dataBuffer, numOriginalDOF);
-		    
-    for (int i=0; i<numTransformedDOF; i++) {
-	int loc = (*modID)(i);
-	if (loc >= 0)
-	    (*modResidual)(i) = disp(loc);
-	else
-	    (*modResidual)(i) = 0.0;
-    }
-    transformResponse(*modResidual, response);
-    this->addLocalKsForce(response, fact);
-}   	 
-
-void  
-TransformationFE::addKiForce(const Vector &disp,  double fact)
-{
-    if (fact == 0.0)
-	return;
-
-    static Vector response;
-    response.setData(dataBuffer, numOriginalDOF);
-		    
-    for (int i=0; i<numTransformedDOF; i++) {
-	int loc = (*modID)(i);
-	if (loc >= 0)
-	    (*modResidual)(i) = disp(loc);
-	else
-	    (*modResidual)(i) = 0.0;
-    }
-    transformResponse(*modResidual, response);
-    this->addLocalKiForce(response, fact);
-}   	 
-
-
-void  
-TransformationFE::addKcForce(const Vector &disp,  double fact)
-{
-    if (fact == 0.0)
-	return;
-
-    static Vector response;
-    response.setData(dataBuffer, numOriginalDOF);
-		    
-    for (int i=0; i<numTransformedDOF; i++) {
-	int loc = (*modID)(i);
-	if (loc >= 0)
-	    (*modResidual)(i) = disp(loc);
-	else
-	    (*modResidual)(i) = 0.0;
-    }
-    transformResponse(*modResidual, response);
-    this->addLocalKcForce(response, fact);
-}   	 
-
-
-void  
-TransformationFE::addD_Force(const Vector &disp,  double fact)
-{
-    if (fact == 0.0)
-	return;
-
-    static Vector response;
-    response.setData(dataBuffer, numOriginalDOF);
-		    
-    for (int i=0; i<numTransformedDOF; i++) {
-	int loc = (*modID)(i);
-	if (loc >= 0)
-	    (*modResidual)(i) = disp(loc);
-	else
-	    (*modResidual)(i) = 0.0;
-    }
-    transformResponse(*modResidual, response);
-    this->addLocalD_Force(response, fact);
-}   	 
-
-void  
-TransformationFE::addM_Force(const Vector &disp,  double fact)
-{
-    if (fact == 0.0)
-	return;
-
-    static Vector response;
-    response.setData(dataBuffer, numOriginalDOF);
-		    
-    for (int i=0; i<numTransformedDOF; i++) {
-	int loc = (*modID)(i);
-	if (loc >= 0)
-	    (*modResidual)(i) = disp(loc);
-	else
-	    (*modResidual)(i) = 0.0;
-    }
-    transformResponse(*modResidual, response);
-    this->addLocalM_Force(response, fact);
-}   	 
 
 int 
 TransformationFE::transformResponse(const Vector &modResp, 

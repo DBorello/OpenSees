@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-09-05 21:59:57 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:33:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -60,7 +60,7 @@ int FE_Element::numFEs(0);           // number of objects
 FE_Element::FE_Element(Element *ele)
 :myDOF_Groups((ele->getExternalNodes()).Size()), myID(ele->getNumDOF()), 
  numDOF(ele->getNumDOF()), theModel(0), myEle(ele), 
- theResidual(0), theTangent(0), theIntegrator(0), Kc(0)
+ theResidual(0), theTangent(0), theIntegrator(0)
 {
 // AddingSensitivity:BEGIN ///////////////////////////////////
 	theGradient = new Vector(numDOF);
@@ -170,7 +170,7 @@ FE_Element::FE_Element(Element *ele)
 
 FE_Element::FE_Element(int numDOF_Group, int ndof)
 :myDOF_Groups(numDOF_Group), myID(ndof), numDOF(ndof), theModel(0),
- myEle(0), theResidual(0), theTangent(0), theIntegrator(0), Kc(0)
+ myEle(0), theResidual(0), theTangent(0), theIntegrator(0)
 {
 // AddingSensitivity:BEGIN ///////////////////////////////////
 	theGradient = new Vector(numDOF);
@@ -217,8 +217,6 @@ FE_Element::~FE_Element()
 	if (theTangent != 0) delete theTangent;
 	if (theResidual != 0) delete theResidual;
     }
-
-    if (Kc != 0) delete Kc;
 
     // if this is the last FE_Element, clean up the
     // storage for the matrix and vector objects
@@ -384,27 +382,6 @@ FE_Element::addKtToTang(double fact)
 }
 
 void  
-FE_Element::addKsToTang(double fact)
-{
-    if (myEle != 0) {
-	
-	// check for a quick return	
-	if (fact == 0.0) 
-	    return;
-	else if (myEle->isSubdomain() == false)	    
-	    theTangent->addMatrix(1.0, myEle->getSecantStiff(),fact);
-	else {
-	    cerr << "WARNING FE_Element::addKToTang() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
-	}    	    	    
-    }
-    else {
-	cerr << "WARNING FE_Element::addKToTang() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-    }    	    
-}
-
-void  
 FE_Element::addCtoTang(double fact)
 {
     if (myEle != 0) {
@@ -446,52 +423,8 @@ FE_Element::addMtoTang(double fact)
     }    	        
 }    
 
-int
-FE_Element::setKc(void) 
-{
-  if (myEle != 0) {
-    
-    if (Kc == 0) {
-      Kc = new Matrix(myEle->getTangentStiff());
-      if (Kc == 0 || Kc->noCols() == 0) {
-	cerr << "WARNING FE_Element::setKc() - out of memory";
-	return -1;
-      }
-    } else
-      (*Kc) = myEle->getTangentStiff();
-  }
 
-  return 0;
-}
-
-void  
-FE_Element::addKcToTang(double fact)
-{
-  if (myEle != 0) {
-
-    if (Kc != 0) {
-
-      // check for a quick return	
-      if (fact == 0.0) 
-	return;
-      else if (myEle->isSubdomain() == false)	    	    {
-	theTangent->addMatrix(1.0, *Kc, fact);
-    }
-      else {
-	cerr << "WARNING FE_Element::addKcToTang() - ";
-	cerr << "- this should not be called on a Subdomain!\n";
-      }    	    	    	
-    }
-  }	
-  else {
-    cerr << "WARNING FE_Element::addKcToTang() - no Element *given ";
-    cerr << "- subclasses must provide implementation\n";
-  }    	        
-}    
-
-
-
-void  
+void
 FE_Element::addKiToTang(double fact)
 {
   if (myEle != 0) {
@@ -499,7 +432,7 @@ FE_Element::addKiToTang(double fact)
     if (fact == 0.0) 
       return;
     else if (myEle->isSubdomain() == false)	    	    
-      theTangent->addMatrix(1.0, myEle->getKi(), fact);
+      theTangent->addMatrix(1.0, myEle->getInitialStiff(), fact);
     else {
 	cerr << "WARNING FE_Element::addKiToTang() - ";
 	cerr << "- this should not be called on a Subdomain!\n";
@@ -536,8 +469,10 @@ FE_Element::addRtoResidual(double fact)
 	// check for a quick return	
 	if (fact == 0.0) 
 	    return;
-	else if (myEle->isSubdomain() == false)	    	    
-		theResidual->addVector(1.0, myEle->getResistingForce(),-fact);
+	else if (myEle->isSubdomain() == false) {
+	  const Vector &eleResisting = myEle->getResistingForce();
+	  theResidual->addVector(1.0, eleResisting, -fact);
+	}
 	else {
 	    cerr << "WARNING FE_Element::addRtoResidual() - ";
 	    cerr << "- this should not be called on a Subdomain!\n";
@@ -557,11 +492,10 @@ FE_Element::addRIncInertiaToResidual(double fact)
 	// check for a quick return	
 	if (fact == 0.0) 
 	    return;
-	else if (myEle->isSubdomain() == false)	    	    
-		theResidual->addVector(1.0, 
-				       myEle->getResistingForceIncInertia(),
-				       -fact);
-				 
+	else if (myEle->isSubdomain() == false) {
+	  const Vector &eleResisting = myEle->getResistingForceIncInertia();
+	  theResidual->addVector(1.0, eleResisting, -fact);
+	}
 	else {
 	    cerr << "WARNING FE_Element::addRtoResidual() - ";
 	    cerr << "- this should not be called on a Subdomain!\n";
@@ -571,240 +505,6 @@ FE_Element::addRIncInertiaToResidual(double fact)
 	cerr << "WARNING FE_Element::addRtoResidual() - no Element *given ";
 	cerr << "- subclasses must provide implementation\n";
     }    	        
-}
-
-
-void  
-FE_Element::addKtForce(const Vector &disp, double fact)
-{
-    if (myEle != 0) {    
-
-	// check for a quick return	
-	if (fact == 0.0) 
-	    return;
-	if (myEle->isSubdomain() == false) {
-	    // get the components we need out of the vector
-	    // and place in a temporary vector
-	    Vector tmp(numDOF);
-	    for (int i=0; i<numDOF; i++) {
-		int loc = myID(i);
-		if (loc >= 0)
-		    tmp(i) = disp(loc);
-		else
-		    tmp(i) = 0.0;
-	    }
-
-	    if (theResidual->addMatrixVector(1.0, myEle->getTangentStiff(),tmp,fact) < 0) {
-		cerr << "WARNING FE_Element::addK_Force() - ";
-		cerr << "- addMatrixVector returned error\n";		 
-	    }
-
-	}
-	else {
-	    cerr << "WARNING FE_Element::addK_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
-	}    	    	    			
-    }
-    else {
-	cerr << "WARNING FE_Element::addK_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-    }    	            
-}
-
-
-void  
-FE_Element::addKsForce(const Vector &disp, double fact)
-{
-    if (myEle != 0) {    
-
-	// check for a quick return	
-	if (fact == 0.0) 
-	    return;
-	if (myEle->isSubdomain() == false) {
-	    // get the components we need out of the vector
-	    // and place in a temporary vector
-	    Vector tmp(numDOF);
-	    for (int i=0; i<numDOF; i++) {
-		int loc = myID(i);
-		if (loc >= 0)
-		    tmp(i) = disp(loc);
-		else
-		    tmp(i) = 0.0;		
-	    }
-	
-	    if (theResidual->addMatrixVector(1.0, myEle->getSecantStiff(),tmp,fact) < 0) {
-		cerr << "WARNING FE_Element::addK_Force() - ";
-		cerr << "- addMatrixVector returned error\n";		 
-	    }
-
-	}
-	else {
-	    cerr << "WARNING FE_Element::addK_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
-	}    	    	    			
-    }
-    else {
-	cerr << "WARNING FE_Element::addK_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-    }    	            
-}
-
-
-void  
-FE_Element::addKcForce(const Vector &disp, double fact)
-{
-  // check that a subclass is not being called
-  if (myEle == 0) {    
-    cerr << "WARNING FE_Element::addKc_Force() - no Element *given ";
-    cerr << "- subclasses must provide implementation\n";
-  }
-
-  // check that the method is not being invoked for a subdomain
-  if (myEle->isSubdomain() == true) {
-    cerr << "WARNING FE_Element::addK_Force() - ";
-    cerr << "- this should not be called on a Subdomain!\n";
-  }
-
-  // check for some quick returns	    
-  if (Kc == 0) 
-    return;
-  if (fact == 0.0) 
-    return;
-
-
-  // get the components we need out of the vector
-  // and place in a temporary vector
-  Vector tmp(numDOF);
-  for (int i=0; i<numDOF; i++) {
-    int loc = myID(i);
-    if (loc >= 0)
-      tmp(i) = disp(loc);
-    else
-      tmp(i) = 0.0;		
-  }
-
-  // now do the matrix vector multiply and addition to the residual
-  if (theResidual->addMatrixVector(1.0, *Kc, tmp,fact) < 0) {
-    cerr << "WARNING FE_Element::addK_Force() - ";
-    cerr << "- addMatrixVector returned error\n";		 
-  }
-}
-
-void  
-FE_Element::addKiForce(const Vector &disp, double fact)
-{
-  // check that a subclass is not being called
-  if (myEle == 0) {    
-    cerr << "WARNING FE_Element::addKi_Force() - no Element *given ";
-    cerr << "- subclasses must provide implementation\n";
-  }
-
-  // check that the method is not being invoked for a subdomain
-  if (myEle->isSubdomain() == true) {
-    cerr << "WARNING FE_Element::addK_Force() - ";
-    cerr << "- this should not be called on a Subdomain!\n";
-  }
-
-  if (fact == 0.0) 
-    return;
-
-
-  // get the components we need out of the vector
-  // and place in a temporary vector
-  Vector tmp(numDOF);
-  for (int i=0; i<numDOF; i++) {
-    int loc = myID(i);
-    if (loc >= 0)
-      tmp(i) = disp(loc);
-    else
-      tmp(i) = 0.0;		
-  }
-
-  // now do the matrix vector multiply and addition to the residual
-  if (theResidual->addMatrixVector(1.0, myEle->getKi(), tmp,fact) < 0) {
-    cerr << "WARNING FE_Element::addK_Force() - ";
-    cerr << "- addMatrixVector returned error\n";		 
-  }
-}
-
-
-
-
-
-
-
-void  
-FE_Element::addD_Force(const Vector &vel, double fact)
-{
-    if (myEle != 0) {    
-
-	// check for a quick return
-	if (fact == 0.0) 
-	    return;
-
-	if (myEle->isSubdomain() == false) {
-	    // get the components we need out of the vector
-	    // and place in a temporary vector
-	    Vector tmp(numDOF);
-	    for (int i=0; i<numDOF; i++) {
-		int loc = myID(i);
-		if (loc >= 0)
-		    tmp(i) = vel(loc);
-		else
-		    tmp(i) = 0.0;		
-	    }	    
-	    
-	    if (theResidual->addMatrixVector(1.0, myEle->getDamp(),tmp,fact) < 0) {
-		cerr << "WARNING FE_Element::addD_Force() - ";
-		cerr << "- addMatrixVector returned error\n";		 
-	    }	    
-	}
-	else {
-	    cerr << "WARNING FE_Element::addD_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
-	}    	    	    				
-    }
-    else {
-	cerr << "WARNING FE_Element::addD_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-    }    	            
-}
-
-
-void  
-FE_Element::addM_Force(const Vector &accel, double fact)
-{
-    if (myEle != 0) {    
-
-	// check for a quick return
-	if (fact == 0.0) 
-	    return;
-	if (myEle->isSubdomain() == false) {
-	    // get the components we need out of the vector
-	    // and place in a temporary vector
-	    Vector tmp(numDOF);
-	    for (int i=0; i<numDOF; i++) {
-		int loc = myID(i);
-		if (loc >= 0)
-		    tmp(i) = accel(loc);
-		else
-		    tmp(i) = 0.0;		
-	    }	    
-
-	    if (theResidual->addMatrixVector(1.0, myEle->getMass(),tmp,fact) < 0){
-		cerr << "WARNING FE_Element::addM_Force() - ";
-		cerr << "- addMatrixVector returned error\n";		 
-	    }		
-	}
-	else {
-	    cerr << "WARNING FE_Element::addM_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
-	}    	    	    				
-    }
-    else {
-	cerr << "WARNING FE_Element::addM_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-    }    	            
 }
 
 
@@ -851,188 +551,6 @@ FE_Element::getTangForce(const Vector &disp, double fact)
 }
 
 
-
-
-const Vector &
-FE_Element::getKtForce(const Vector &disp, double fact)
-{
-    if (myEle != 0) {    
-
-	// zero out the force vector
-	theResidual->Zero();	
-
-	// check for a quick return
-	if (fact == 0.0) 
-	    return *theResidual;
-
-	// get the components we need out of the vector
-	// and place in a temporary vector
-	if (myEle->isSubdomain() == false)  {
-	   Vector tmp(numDOF);
-	   for (int i=0; i<numDOF; i++) {
-	       int loc = myID(i);
-	       if (loc >= 0)
-		   tmp(i) = disp(loc);
-	       else
-		   tmp(i) = 0.0;
-	   }	       
-	
-	   if (theResidual->addMatrixVector(1.0, myEle->getTangentStiff(),
-					    tmp,fact)) {
-	       
-		cerr << "WARNING FE_Element::getK_Force() - ";
-		cerr << "- addMatrixVector returned error\n";		 
-	    }					       
-        } 
-	else {
-	    cerr << "WARNING FE_Element::getK_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
-	}    	    	    					
-	return *theResidual;	   
-    }
-    else {
-	cerr << "WARNING FE_Element::getK_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-	return errVector;	
-    }    	            
-    
-
-}
-
-
-
-const Vector &
-FE_Element::getKsForce(const Vector &disp, double fact)
-{
-    if (myEle != 0) {    
-
-	// zero out the force vector
-	theResidual->Zero();	
-
-	// check for a quick return
-	if (fact == 0.0) 
-	    return *theResidual;
-
-	// get the components we need out of the vector
-	// and place in a temporary vector
-	if (myEle->isSubdomain() == false)  {
-	   Vector tmp(numDOF);
-	   for (int i=0; i<numDOF; i++) {
-	       int loc = myID(i);
-	       if (loc >= 0)
-		   tmp(i) = disp(loc);
-	       else
-		   tmp(i) = 0.0;
-	   }
-
-	
-	   if (theResidual->addMatrixVector(1.0, myEle->getSecantStiff(),
-					    tmp,fact)) {
-	       
-		cerr << "WARNING FE_Element::getK_Force() - ";
-		cerr << "- addMatrixVector returned error\n";		 
-	    }					       
-        } 
-	else {
-	    cerr << "WARNING FE_Element::getK_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
-	}    	    	    					
-	return *theResidual;	   
-    }
-    else {
-	cerr << "WARNING FE_Element::getK_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-	return errVector;	
-    }    	            
-    
-
-}
-
-
-
-const Vector &
-FE_Element::getD_Force(const Vector &vel, double fact)
-{
-
-    if (myEle != 0) {
-
-	// zero out the force vector
-	theResidual->Zero();	    
-
-	// check for a quick return
-	if (fact == 0.0) 
-	    return *theResidual;
-
-	// get the components we need out of the vector
-	// and place in a temporary vector
-	if (myEle->isSubdomain() == false)  {
-  	   Vector tmp(numDOF);
-	   for (int i=0; i<numDOF; i++) {
-	       int loc = myID(i);
-	       if (loc >= 0)
-		   tmp(i) = vel(loc);
-	       else
-		   tmp(i) = 0.0;
-	   }
-
-	   theResidual->addMatrixVector(1.0, myEle->getDamp(),tmp,fact);
-        }
-	else {
-	    cerr << "WARNING FE_Element::getD_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
-	}    	    	    						
-    
-	return *theResidual;
-    }
-    else {
-	cerr << "WARNING FE_Element::addPtoResidual() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-	return errVector;	
-    }    	            
-}
-
-
-
-
-const Vector &
-FE_Element::getM_Force(const Vector &accel, double fact)
-{
-    if (myEle != 0) {
-	// zero out the force vector
-	theResidual->Zero();	
-
-	// check for a quick return
-	if (fact == 0.0) 
-	    return *theResidual;
-
-	// get the components we need out of the vector
-	// and place in a temporary vector
-        if (myEle->isSubdomain() == false)  {
-	   Vector tmp(numDOF);
-	   for (int i=0; i<numDOF; i++) {
-	       int loc = myID(i);
-	       if (loc >= 0)
-		   tmp(i) = accel(loc);
-	       else
-		   tmp(i) = 0.0;
-	   }
-	       
-	   theResidual->addMatrixVector(1.0, myEle->getMass(),tmp,fact);
-        }
-	else {
-	    cerr << "WARNING FE_Element::getM_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
-	}    	    	    					
-	return *theResidual;
-    }
-    else {
-	cerr << "WARNING FE_Element::getM_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-	return errVector;
-    }    	            
-}
-
-
 Integrator *
 FE_Element::getLastIntegrator(void)
 {
@@ -1065,161 +583,41 @@ FE_Element::getLastResponse(void)
     }
 }
 
-
-
-
 void  
-FE_Element::addLocalKtForce(const Vector &disp, double fact)
-{
-    if (myEle != 0) {    
-	// check for a quick return	
-	if (fact == 0.0) 
-	    return;
-	if (myEle->isSubdomain() == false) {
-	    if (theResidual->addMatrixVector(1.0, myEle->getTangentStiff(),
-						  disp, fact) < 0) {
-
-		cerr << "WARNING FE_Element::addLocalK_Force() - ";
-		cerr << "- addMatrixVector returned error\n";  
-	    }
-
-	}
-	else {
-	    cerr << "WARNING FE_Element::addLocalK_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
-	}    	    	    			
-    }
-    else {
-	cerr << "WARNING FE_Element::addLocalK_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-    }    	            
-}
-
-
-void  
-FE_Element::addLocalKsForce(const Vector &disp, double fact)
-{
-    if (myEle != 0) {    
-
-	// check for a quick return	
-	if (fact == 0.0) 
-	    return;
-	if (myEle->isSubdomain() == false) {
-	
-	    if (theResidual->addMatrixVector(1.0, myEle->getSecantStiff(),
-						  disp, fact) < 0) {
-
-		cerr << "WARNING FE_Element::addLocalK_Force() - ";
-		cerr << "- addMatrixVector returned error\n"; 
-	    }
-	}
-	else {
-	    cerr << "WARNING FE_Element::addLocalK_Force() - ";
-	    cerr << "- this should not be called on a Subdomain!\n";
-	}    	    	    			
-    }
-    else {
-	cerr << "WARNING FE_Element::addLocalK_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-    }    	            
-}
-
-
-
-void  
-FE_Element::addLocalKcForce(const Vector &disp, double fact)
-{
-    if (myEle != 0) {    
-
-      // return if Kc has not been initialised
-      if (Kc == 0) 
-	return;
-
-      // check for a quick return	
-      if (fact == 0.0) 
-	return;
-
-      if (myEle->isSubdomain() == false) {
-	
-	if (theResidual->addMatrixVector(1.0, *Kc,
-					 disp, fact) < 0) {
-
-	  cerr << "WARNING FE_Element::addLocalK_Force() - ";
-	  cerr << "- addMatrixVector returned error\n"; 
-	}
-      }
-      else {
-	cerr << "WARNING FE_Element::addLocalK_Force() - ";
-	cerr << "- this should not be called on a Subdomain!\n";
-      }    	    	    			
-    }
-    else {
-	cerr << "WARNING FE_Element::addLocalK_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-    }    	            
-}
-
-
-void  
-FE_Element::addLocalKiForce(const Vector &disp, double fact)
-{
-    if (myEle != 0) {    
-
-      // check for a quick return	
-      if (fact == 0.0) 
-	return;
-
-      if (myEle->isSubdomain() == false) {
-	
-	if (theResidual->addMatrixVector(1.0, myEle->getKi(),
-					 disp, fact) < 0) {
-
-	  cerr << "WARNING FE_Element::addLocalK_Force() - ";
-	  cerr << "- addMatrixVector returned error\n"; 
-	}
-      }
-      else {
-	cerr << "WARNING FE_Element::addLocalK_Force() - ";
-	cerr << "- this should not be called on a Subdomain!\n";
-      }    	    	    			
-    }
-    else {
-	cerr << "WARNING FE_Element::addLocalK_Force() - no Element *given ";
-	cerr << "- subclasses must provide implementation\n";
-    }    	            
-}
-
-
-
-void  
-FE_Element::addLocalD_Force(const Vector &vel, double fact)
+FE_Element::addM_Force(const Vector &accel, double fact)
 {
     if (myEle != 0) {    
 
 	// check for a quick return
 	if (fact == 0.0) 
 	    return;
-
 	if (myEle->isSubdomain() == false) {
-	    
-	    if (theResidual->addMatrixVector(1.0, myEle->getDamp(),
-						  vel, fact) < 0) {
-
-		cerr << "WARNING FE_Element::addLocalD_Force() - ";
-		cerr << "- addMatrixVector returned error\n"; 
+	    // get the components we need out of the vector
+	    // and place in a temporary vector
+	    Vector tmp(numDOF);
+	    for (int i=0; i<numDOF; i++) {
+		int loc = myID(i);
+		if (loc >= 0)
+		    tmp(i) = accel(loc);
+		else
+		    tmp(i) = 0.0;		
 	    }	    
+
+	    if (theResidual->addMatrixVector(1.0, myEle->getMass(),tmp,fact) < 0){
+		cerr << "WARNING FE_Element::addM_Force() - ";
+		cerr << "- addMatrixVector returned error\n";		 
+	    }		
 	}
 	else {
-	    cerr << "WARNING FE_Element::addLocalD_Force() - ";
+	    cerr << "WARNING FE_Element::addM_Force() - ";
 	    cerr << "- this should not be called on a Subdomain!\n";
 	}    	    	    				
     }
     else {
-	cerr << "WARNING FE_Element::addLocalD_Force() - no Element *given ";
+	cerr << "WARNING FE_Element::addM_Force() - no Element *given ";
 	cerr << "- subclasses must provide implementation\n";
     }    	            
 }
-
 
 void  
 FE_Element::addLocalM_Force(const Vector &accel, double fact)
@@ -1247,6 +645,7 @@ FE_Element::addLocalM_Force(const Vector &accel, double fact)
 	cerr << "- subclasses must provide implementation\n";
     }    	            
 }
+
 
 // AddingSensitivity:BEGIN /////////////////////////////////
 const Vector &

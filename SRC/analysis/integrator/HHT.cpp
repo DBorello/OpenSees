@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-10-02 21:43:45 $
+// $Revision: 1.7 $
+// $Date: 2002-12-05 22:33:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.cpp,v $
                                                                         
                                                                         
@@ -55,7 +55,7 @@
 HHT::HHT()
 :TransientIntegrator(INTEGRATOR_TAGS_HHT),
  alpha(0.5), gamma(1.0), beta(0), 
- rayleighDamping(false), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+ alphaM(0.0), betaK(0.0), betaKi(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  Ualpha(0),Udotalpha(0)
@@ -66,25 +66,23 @@ HHT::HHT()
 HHT::HHT(double _alpha)
 :TransientIntegrator(INTEGRATOR_TAGS_HHT),
  alpha(_alpha), gamma(1.5-_alpha), beta((2-_alpha)*(2-_alpha)*0.25),
- rayleighDamping(false), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+ alphaM(0.0), betaK(0.0), betaKi(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  Ualpha(0),Udotalpha(0)
 {
-
+    
 }
 
-HHT::HHT(double _alpha, double alpham, double betak, double betaki, double betakc)
+HHT::HHT(double _alpha, double alpham, double betak, double betaki)
 :TransientIntegrator(INTEGRATOR_TAGS_HHT),
  alpha(_alpha), gamma(1.5-_alpha), beta((2-_alpha)*(2-_alpha)*0.25),  
- rayleighDamping(true), 
- alphaM(alpham), betaK(betak), betaKi(betaki), betaKc(betakc),
+ alphaM(alpham), betaK(betak), betaKi(betaki),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  Ualpha(0),Udotalpha(0)
 {
-    if (alpham == 0.0 && betak == 0.0 && betaki == 0.0 && betakc == 0.0)
-	rayleighDamping = false;
+
 }
 
 
@@ -92,26 +90,25 @@ HHT::HHT(double _alpha, double alpham, double betak, double betaki, double betak
 HHT::HHT(double _alpha, double _beta, double _gamma)
 :TransientIntegrator(INTEGRATOR_TAGS_HHT),
  alpha(_alpha), gamma(_gamma), beta(_beta),
- rayleighDamping(false), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+ alphaM(0.0), betaK(0.0), betaKi(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  Ualpha(0),Udotalpha(0)
 {
+
 
 }
 
 HHT::HHT(double _alpha, double _beta, double _gamma,
-	 double alpham, double betak, double betaki, double betakc)
+	 double alpham, double betak, double betaki)
 :TransientIntegrator(INTEGRATOR_TAGS_HHT),
  alpha(_alpha), gamma(_gamma), beta(_beta),
- rayleighDamping(true),
- alphaM(alpham), betaK(betak), betaKi(betaki), betaKc(betakc),
+ alphaM(alpham), betaK(betak), betaKi(betaki),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  Ualpha(0),Udotalpha(0)
 {
-  if (alpham == 0.0 && betak == 0.0 && betaki == 0.0 && betakc == 0.0)
-    rayleighDamping = false;
+
 }
 
 HHT::~HHT()
@@ -134,36 +131,6 @@ HHT::~HHT()
   if (Udotalpha != 0)
     delete Udotalpha;
 }
-
-
-int
-HHT::formEleResidual(FE_Element *theEle)
-{
-  theEle->zeroResidual();
-  if (rayleighDamping == false) {
-      theEle->addRIncInertiaToResidual();
-  } else {
-      theEle->addRIncInertiaToResidual();
-      theEle->addKtForce(*Udot,-betaK);
-      theEle->addKcForce(*Udot, -betaKc);
-      theEle->addKiForce(*Udot, -betaKi);
-      theEle->addM_Force(*Udot,-alphaM);
-  }    
-  return 0;
-}    
-
-int
-HHT::formNodUnbalance(DOF_Group *theDof)
-{
-  theDof->zeroUnbalance();
-  if (rayleighDamping == false) 
-      theDof->addPIncInertiaToUnbalance();
-  else {
-      theDof->addPIncInertiaToUnbalance();
-      theDof->addM_Force(*Udot,-alphaM);
-  }
-  return 0;
-}    
 
 
 int
@@ -195,16 +162,6 @@ HHT::newStep(double deltaT)
   c3 = 1.0/(beta*deltaT*deltaT);
 
   AnalysisModel *theModel = this->getAnalysisModelPtr();
-
-  
-  // if alphaKc is specified .. 
-  //    loop over FE_Elements getting them to do a setKc()
-  if (rayleighDamping == true && betaKc != 0.0) {
-    FE_Element *elePtr;
-    FE_EleIter &theEles = theModel->getFEs();    
-    while((elePtr = theEles()) != 0)     
-      elePtr->setKc();
-  }
 
   if (U == 0) {
     cerr << "HHT::newStep() - domainChange() failed or hasn't been called\n";
@@ -267,39 +224,14 @@ HHT::formEleTangent(FE_Element *theEle)
 {
   theEle->zeroTangent();
   if (statusFlag == CURRENT_TANGENT) {
-    if (rayleighDamping == false) {
-      theEle->addKtToTang(c1) ;
-      theEle->addCtoTang(c2);
-      theEle->addMtoTang(c3);
-    } else {
-      theEle->addKtToTang(c1 + c2*betaK);
-      theEle->addMtoTang(c3 + c2*alphaM);
-      theEle->addKiToTang(c2*betaKi);
-      theEle->addKcToTang(c2*betaKc);
-    }    
+    theEle->addKtToTang(c1) ;
+    theEle->addCtoTang(c2);
+    theEle->addMtoTang(c3);
   } else if (statusFlag == INITIAL_TANGENT) {
-    if (rayleighDamping == false) {
-      theEle->addKiToTang(c1);
-      theEle->addCtoTang(c2);
-      theEle->addMtoTang(c3);
-    } else {
-      theEle->addKtToTang(c2*betaK);
-      theEle->addMtoTang(c3 + c2*alphaM);
-      theEle->addKiToTang(c1 + c2*betaKi);
-      theEle->addKcToTang(c2*betaKc);
-    }    
-  } else if (statusFlag == CURRENT_SECANT) {
-    if (rayleighDamping == false) {
-      theEle->addKsToTang(c1);
-      theEle->addCtoTang(c2);
-      theEle->addMtoTang(c3);
-    } else {
-      theEle->addKsToTang(c1 + c2*betaK);
-      theEle->addMtoTang(c3 + c2*alphaM);
-      theEle->addKiToTang(c2*betaKi);
-      theEle->addKcToTang(c2*betaKc);
-    }    
-  }
+    theEle->addKiToTang(c1);
+    theEle->addCtoTang(c2);
+    theEle->addMtoTang(c3);
+  }    
 
   return 0;
 }    
@@ -310,10 +242,8 @@ int
 HHT::formNodTangent(DOF_Group *theDof)
 {
   theDof->zeroTangent();
-  if (rayleighDamping == false) 
-      theDof->addMtoTang(c3);
-  else
-      theDof->addMtoTang(c3 + c2*alphaM);        
+  theDof->addMtoTang(c3);
+  theDof->addCtoTang(c2);
   
   return(0);
 }    
@@ -327,6 +257,10 @@ HHT::domainChanged()
   LinearSOE *theLinSOE = this->getLinearSOEPtr();
   const Vector &x = theLinSOE->getX();
   int size = x.Size();
+
+  // if damping factors exist set them in the ele & node of the domain
+  if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0)
+    myModel->setRayleighDampingFactors(alphaM, betaK, betaKi);
 
   // create the new Vector objects
   if (Ut == 0 || Ut->Size() != size) {
@@ -507,18 +441,14 @@ HHT::commit(void)
 int
 HHT::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(8);
+    Vector data(7);
     data(0) = alpha;
     data(1) = beta;
     data(2) = gamma;
-    if (rayleighDamping == true) {
-	data(3) = 1.0;	
-	data(4) = alphaM;
-	data(5) = betaK;
-	data(6) = betaKi;
-	data(7) = betaKc;
-    } else
-	data(3) = 0.0;	
+    data(3) = 1.0;	
+    data(4) = alphaM;
+    data(5) = betaK;
+    data(6) = betaKi;
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WARNING HHT::sendSelf() - could not send data\n";
@@ -530,7 +460,7 @@ HHT::sendSelf(int cTag, Channel &theChannel)
 int
 HHT::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(8);
+    Vector data(7);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WARNING HHT::recvSelf() - could not receive data\n";
 	return -1;
@@ -540,14 +470,9 @@ HHT::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
     beta = data(1);
     gamma = data(2);
     
-    if (data(3) == 1.0) {
-	rayleighDamping = true;
-	alphaM = data(4);
-	betaK = data(5);
-	betaKi = data(6);
-	betaKc = data(7);
-    } else
-	rayleighDamping = false;	
+    alphaM = data(4);
+    betaK = data(5);
+    betaKi = data(6);
     
     return 0;
 }
@@ -562,10 +487,8 @@ HHT::Print(ostream &s, int flag)
         s << "\t alpha = " << alpha << endl ;
 	s << "\t beta  = " << beta  << endl ;
         s << "\t gamma = " << gamma << endl ;
-	if (rayleighDamping == true) {
-	    s << "  Rayleigh Damping - alphaM: " << alphaM;
-	    s << "  betaK: " << betaK << endl;	    
-	}
+	s << "  Rayleigh Damping - alphaM: " << alphaM;
+	s << "  betaK: " << betaK << "   betaKi: " << betaKi << endl;	    
     } else 
 	s << "\t HHT - no associated AnalysisModel\n";
 }

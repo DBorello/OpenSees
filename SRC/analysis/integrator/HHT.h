@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-09-10 19:30:08 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:33:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.h,v $
                                                                         
                                                                         
@@ -49,22 +49,16 @@ class HHT : public TransientIntegrator
   public:
     HHT();
     HHT(double alpha);
-    HHT(double alpha, double alphaM, double betaKcurrent, 
-	double betaKinit, double betaKlastCommit);        
+    HHT(double alpha, double alphaM, double betaK, double betaKi);
 
     //generalized alpha method
     HHT( double alpha, double beta, double gamma );
     HHT( double alpha, double beta, double gamma,
-	 double alphaM, double betaKcurrent, 
-	 double betaKinit, double betaKlastCommit );
-
+	 double alphaM, double betaKcurrent, double betaKinit);
+	 
     //destructor
     ~HHT();
 
-    // Override residual calculation needed for Rayleigh damping
-    virtual int formEleResidual(FE_Element *theEle);
-    virtual int formNodUnbalance(DOF_Group *theDof);        
-    
     // methods which define what the FE_Element and DOF_Groups add
     // to the system of equation object.
     int formEleTangent(FE_Element *theEle);
@@ -90,10 +84,11 @@ class HHT : public TransientIntegrator
     double alpha;
     double gamma;
     double beta;
-    bool rayleighDamping; // flag indicating wheter rayleigh damping being used
 
-    // D = alphaM * M + betaK * K(current) + betaKi * Kinit + betaKc * Kcommit
-    double alphaM, betaK, betaKi, betaKc;      // raleigh factors 
+    // rayleigh damping factors
+    double alphaM;
+    double betaK;
+    double betaKi;
 
     double c1, c2, c3;  // some constants we need to keep
     Vector *Ut, *Utdot, *Utdotdot; // response quantities at time t

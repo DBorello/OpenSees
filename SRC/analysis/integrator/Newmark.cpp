@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-10-02 21:43:46 $
+// $Revision: 1.8 $
+// $Date: 2002-12-05 22:33:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
                                                                         
                                                                         
@@ -47,7 +47,7 @@
 Newmark::Newmark()
 :TransientIntegrator(INTEGRATOR_TAGS_Newmark),
  displ(true), gamma(0), beta(0), 
- rayleighDamping(false), alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+ alphaM(0.0), betaK(0.0), betaKi(0.0),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  determiningMass(false)
@@ -59,8 +59,7 @@ Newmark::Newmark(double theGamma, double theBeta, bool dispFlag)
 :TransientIntegrator(INTEGRATOR_TAGS_Newmark),
  displ(dispFlag),
  gamma(theGamma), beta(theBeta), 
- rayleighDamping(false), 
- alphaM(0.0), betaK(0.0), betaKi(0.0), betaKc(0.0),
+ alphaM(0.0), betaK(0.0), betaKi(0.0), 
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  determiningMass(false)
@@ -70,19 +69,17 @@ Newmark::Newmark(double theGamma, double theBeta, bool dispFlag)
 
 Newmark::Newmark(double theGamma, double theBeta, 
 		 double alpham, double betak, 
-		 double betaki, double betakc,
+		 double betaki,
 		 bool dispFlag)
 :TransientIntegrator(INTEGRATOR_TAGS_Newmark),
  displ(dispFlag),
  gamma(theGamma), beta(theBeta), 
- rayleighDamping(true), 
- alphaM(alpham), betaK(betak), betaKi(betaki), betaKc(betakc),
+ alphaM(alpham), betaK(betak), betaKi(betaki),
  c1(0.0), c2(0.0), c3(0.0), 
  Ut(0), Utdot(0), Utdotdot(0),  U(0), Udot(0), Udotdot(0),
  determiningMass(false) 
 {
-    if (alpham == 0.0 && betak == 0.0 && betaki == 0.0 && betakc == 0.0)
-	rayleighDamping = false;
+
 }
 
 Newmark::~Newmark()
@@ -102,36 +99,6 @@ Newmark::~Newmark()
     delete Udotdot;
 }
 
-
-int
-Newmark::formEleResidual(FE_Element *theEle)
-{
-  theEle->zeroResidual();
-  if (rayleighDamping == false) {
-      theEle->addRIncInertiaToResidual();
-  } else {
-      theEle->addRIncInertiaToResidual();
-      theEle->addKtForce(*Udot, -betaK);
-      theEle->addKcForce(*Udot, -betaKc);
-      theEle->addKiForce(*Udot, -betaKi);
-      theEle->addM_Force(*Udot, -alphaM);
-  }    
-  return 0;
-}    
-
-int
-Newmark::formNodUnbalance(DOF_Group *theDof)
-{
-  theDof->zeroUnbalance();
-  if (rayleighDamping == false) 
-      theDof->addPIncInertiaToUnbalance();
-  else {
-      theDof->addPIncInertiaToUnbalance();
-      theDof->addM_Force(*Udot,-alphaM);
-  }
-  
-  return 0;
-}    
 
 int
 Newmark::initialize(void)
@@ -204,15 +171,6 @@ Newmark::newStep(double deltaT)
   // get a pointer to the AnalysisModel
   AnalysisModel *theModel = this->getAnalysisModelPtr();
 
-  // if alphaKc is specified .. 
-  //    loop over FE_Elements getting them to do a setKc()
-  if (rayleighDamping == true && betaKc != 0.0) {
-    FE_Element *elePtr;
-    FE_EleIter &theEles = theModel->getFEs();    
-    while((elePtr = theEles()) != 0)     
-      elePtr->setKc();
-  }
-  
   if (displ == true) {
     if (deltaT <= 0.0) {
       cerr << "Newton::newStep() - error in variable\n";
@@ -298,38 +256,13 @@ Newmark::formEleTangent(FE_Element *theEle)
   theEle->zeroTangent();
 
   if (statusFlag == CURRENT_TANGENT) {
-    if (rayleighDamping == false) {
-      theEle->addKtToTang(c1);
-      theEle->addCtoTang(c2);
-      theEle->addMtoTang(c3);
-    } else {
-      theEle->addKtToTang(c1 + c2*betaK);
-      theEle->addMtoTang(c3 + c2*alphaM);
-      theEle->addKiToTang(c2*betaKi);
-      theEle->addKcToTang(c2*betaKc);
-    }    
+    theEle->addKtToTang(c1);
+    theEle->addCtoTang(c2);
+    theEle->addMtoTang(c3);
   } else if (statusFlag == INITIAL_TANGENT) {
-    if (rayleighDamping == false) {
-      theEle->addKiToTang(c1);
-      theEle->addCtoTang(c2);
-      theEle->addMtoTang(c3);
-    } else {
-      theEle->addKtToTang(c2*betaK);
-      theEle->addMtoTang(c3 + c2*alphaM);
-      theEle->addKiToTang(c1 + c2*betaKi);
-      theEle->addKcToTang(c2*betaKc);
-    }    
-  } else if (statusFlag == CURRENT_SECANT) {
-    if (rayleighDamping == false) {
-      theEle->addKsToTang(c1);
-      theEle->addCtoTang(c2);
-      theEle->addMtoTang(c3);
-    } else {
-      theEle->addKsToTang(c1 + c2*betaK);
-      theEle->addMtoTang(c3 + c2*alphaM);
-      theEle->addKiToTang(c2*betaKi);
-      theEle->addKcToTang(c2*betaKc);
-    }    
+    theEle->addKiToTang(c1);
+    theEle->addCtoTang(c2);
+    theEle->addMtoTang(c3);
   }
 
   return 0;
@@ -343,10 +276,8 @@ Newmark::formNodTangent(DOF_Group *theDof)
     return 0;
 
   theDof->zeroTangent();
-  if (rayleighDamping == false) 
-      theDof->addMtoTang(c3);
-  else
-      theDof->addMtoTang(c3 + c2*alphaM);      
+  theDof->addMtoTang(c3);
+  theDof->addCtoTang(c2);      
 
   return(0);
 }    
@@ -360,6 +291,10 @@ Newmark::domainChanged()
   LinearSOE *theLinSOE = this->getLinearSOEPtr();
   const Vector &x = theLinSOE->getX();
   int size = x.Size();
+
+  // if damping factors exist set them in the ele & node of the domain
+  if (alphaM != 0.0 || betaK != 0.0 || betaKi != 0.0)
+    myModel->setRayleighDampingFactors(alphaM, betaK, betaKi);
   
   // create the new Vector objects
   if (Ut == 0 || Ut->Size() != size) {
@@ -499,7 +434,7 @@ Newmark::update(const Vector &deltaU)
     U->addVector(1.0, deltaU,c1);
     Udot->addVector(1.0, deltaU,c2);
   }
-  
+
   // update the responses at the DOFs
   theModel->setResponse(*U,*Udot,*Udotdot);        
   if (theModel->updateDomain() < 0) {
@@ -513,21 +448,18 @@ Newmark::update(const Vector &deltaU)
 int
 Newmark::sendSelf(int cTag, Channel &theChannel)
 {
-    Vector data(8);
+    Vector data(7);
     data(0) = gamma;
     data(1) = beta;
     if (displ == true) 
       data(2) = 1.0;
     else
       data(2) = 0.0;
-    if (rayleighDamping == true) {
-	data(3) = 1.0;	
-	data(4) = alphaM;
-	data(5) = betaK;
-	data(6) = betaKi;
-	data(7) = betaKc;
-    } else
-	data(3) = 0.0;	
+
+    data(3) = 1.0;	
+    data(4) = alphaM;
+    data(5) = betaK;
+    data(6) = betaKi;
     
     if (theChannel.sendVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WARNING Newmark::sendSelf() - could not send data\n";
@@ -539,10 +471,10 @@ Newmark::sendSelf(int cTag, Channel &theChannel)
 int
 Newmark::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-    Vector data(8);
+    Vector data(7);
     if (theChannel.recvVector(this->getDbTag(), cTag, data) < 0) {
 	cerr << "WARNING Newmark::recvSelf() - could not receive data\n";
-	gamma = 0.5; beta = 0.25; rayleighDamping = false;
+	gamma = 0.5; beta = 0.25; 
 	return -1;
     }
     
@@ -552,14 +484,9 @@ Newmark::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
       displ = true;
     else
       displ = false;
-    if (data(3) == 1.0) {
-	rayleighDamping = true;
-	alphaM = data(4);
-	betaK = data(5);
-	betaKi = data(6);
-	betaKc = data(7);
-    } else
-	rayleighDamping = false;	
+    alphaM = data(4);
+    betaK = data(5);
+    betaKi = data(6);
       
     return 0;
     
@@ -574,10 +501,8 @@ Newmark::Print(ostream &s, int flag)
 	s << "\t Newmark - currentTime: " << currentTime;
 	s << "  gamma: " << gamma << "  beta: " << beta << endl;
 	s << " c1: " << c1 << " c2: " << c2 << " c3: " << c3 << endl;
-	if (rayleighDamping == true) {
-	    s << "  Rayleigh Damping - alphaM: " << alphaM;
-	    s << "  betaK: " << betaK << endl;	    
-	}
+	s << "  Rayleigh Damping - alphaM: " << alphaM;
+	s << "  betaK: " << betaK << "   betaKi: " << betaKi << endl;	    
     } else 
 	s << "\t Newmark - no associated AnalysisModel\n";
 }

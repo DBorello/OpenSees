@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-10-23 22:58:20 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:33:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/transformation/TransformationFE.h,v $
                                                                         
                                                                         
@@ -59,21 +59,11 @@ class TransformationFE: public FE_Element
     // methods to form and obtain the tangent and residual
     virtual const Matrix &getTangent(Integrator *theIntegrator);
     virtual const Vector &getResidual(Integrator *theIntegrator);
-    virtual void  addKtForce(const Vector &disp,  double fact = 1.0);
-    virtual void  addKsForce(const Vector &disp,  double fact = 1.0);    
-    virtual void  addKcForce(const Vector &disp,  double fact = 1.0);        
-    virtual void  addKiForce(const Vector &disp,  double fact = 1.0);            
-    virtual void  addD_Force(const Vector &vel,   double fact = 1.0);
-    virtual void  addM_Force(const Vector &accel, double fact = 1.0);    
     
     // methods for ele-by-ele strategies
     virtual const Vector &getTangForce(const Vector &x, double fact = 1.0);
-    virtual const Vector &getKtForce(const Vector &disp, double fcat = 1.0);
-    virtual const Vector &getKsForce(const Vector &disp, double fcat = 1.0);    
-    virtual const Vector &getD_Force(const Vector &vel, double fcat = 1.0);    
     virtual const Vector &getM_Force(const Vector &accel, double fcat = 1.0);
-    virtual const Vector &getLastResponse(void);
-
+    const Vector &getLastResponse(void);
     int addSP(SP_Constraint &theSP);
     
   protected:

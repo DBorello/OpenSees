@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 22:11:34 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:33:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.h,v $
                                                                         
                                                                         
@@ -64,44 +64,29 @@ class FE_Element
     // methods to allow integrator to build tangent
     virtual void  zeroTangent(void);
     virtual void  addKtToTang(double fact = 1.0);
-    virtual void  addKsToTang(double fact = 1.0);    
+    virtual void  addKiToTang(double fact = 1.0);
     virtual void  addCtoTang(double fact = 1.0);    
     virtual void  addMtoTang(double fact = 1.0);    
-    virtual int   setKc(void);
-    virtual void  addKcToTang(double fact = 1.0);    
-    virtual void  addKiToTang(double fact = 1.0);        
     
     // methods to allow integrator to build residual    
     virtual void  zeroResidual(void);    
     virtual void  addRtoResidual(double fact = 1.0);
     virtual void  addRIncInertiaToResidual(double fact = 1.0);    
-    virtual void  addKtForce(const Vector &disp,  double fact = 1.0);
-    virtual void  addKsForce(const Vector &disp,  double fact = 1.0);    
-    virtual void  addKcForce(const Vector &disp,  double fact = 1.0);        
-    virtual void  addKiForce(const Vector &disp,  double fact = 1.0);            
-    virtual void  addD_Force(const Vector &vel,   double fact = 1.0);
-    virtual void  addM_Force(const Vector &accel, double fact = 1.0);    
 
     // methods for ele-by-ele strategies
     virtual const Vector &getTangForce(const Vector &x, double fact = 1.0);
-    virtual const Vector &getKtForce(const Vector &disp, double fcat = 1.0);
-    virtual const Vector &getKsForce(const Vector &disp, double fcat = 1.0); 
-    virtual const Vector &getD_Force(const Vector &vel, double fcat = 1.0);    
-    virtual const Vector &getM_Force(const Vector &accel, double fcat = 1.0);
+    virtual void  addM_Force(const Vector &accel, double fact = 1.0);    
+
     virtual Integrator *getLastIntegrator(void);
     virtual const Vector &getLastResponse(void);
+
 // AddingSensitivity:BEGIN ////////////////////////////////////
 	const Vector & gradient(int gradNumber);
 // AddingSensitivity:END //////////////////////////////////////
     
   protected:
-    void  addLocalKtForce(const Vector &disp,  double fact = 1.0);
-    void  addLocalKsForce(const Vector &disp,  double fact = 1.0);    
-    void  addLocalKcForce(const Vector &disp,  double fact = 1.0);        
-    void  addLocalKiForce(const Vector &disp,  double fact = 1.0);            
-    void  addLocalD_Force(const Vector &vel,   double fact = 1.0);
     void  addLocalM_Force(const Vector &accel, double fact = 1.0);    
-    
+
     // protected variables - a copy for each object of the class        
     ID myDOF_Groups;
     ID myID;
@@ -114,7 +99,6 @@ class FE_Element
     Vector *theResidual;
     Matrix *theTangent;
     Integrator *theIntegrator; // need for Subdomain
-    Matrix *Kc;                // the committed tangent
 
 // AddingSensitivity:BEGIN ////////////////////////////////////
 	Vector *theGradient;
