@@ -1,5 +1,5 @@
-// $Revision: 1.9 $
-// $Date: 2001-09-13 19:11:14 $
+// $Revision: 1.10 $
+// $Date: 2001-09-20 04:21:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -36,15 +36,15 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double 
 	if (nd !=2 && nd !=3) {
 		cerr << "FATAL:PressureIndependMultiYield:: dimension error" << endl;
     cerr << "Dimension has to be 2 or 3, you give nd= " << nd << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (refShearModul <= 0) {
 		cerr << "FATAL:PressureIndependMultiYield::PressureIndependMultiYield: refShearModulus <= 0" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (refBulkModul <= 0) {
 		cerr << "FATAL:PressureIndependMultiYield::PressureIndependMultiYield: refBulkModulus <= 0" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
   if (frictionAng < 0.) {
   	cerr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: frictionAngle < 0" << endl;
@@ -53,7 +53,7 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double 
   }
   if (frictionAng == 0. && cohesi <= 0. ) {
   	cerr << "FATAL:PressureIndependMultiYield::PressureIndependMultiYield: frictionAngle && cohesion <= 0." << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (cohesi <= 0) {
 		cerr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: cohesion <= 0" << endl;
@@ -62,11 +62,11 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double 
   }
 	if (peakShearStra <= 0) {
 		cerr << "FATAL:PressureIndependMultiYield::PressureIndependMultiYield: peakShearStra <= 0" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (refPress <= 0) {
 		cerr << "FATAL:PressureIndependMultiYield::PressureIndependMultiYield: refPress <= 0" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (pressDependCoe < 0) {
 		cerr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: pressDependCoe < 0" << endl;
@@ -202,7 +202,7 @@ int PressureIndependMultiYield::setTrialStrain (const Vector &strain)
 	else {
 		cerr << "Fatal:D2PressDepMYS:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal("");
+		g3ErrorHandler->fatal(" ");
 	}
 
   strainRate = T2Vector(temp-currentStrain.t2Vector(1),1);
@@ -230,7 +230,7 @@ int PressureIndependMultiYield::setTrialStrainIncr (const Vector &strain)
 	else {
 		cerr << "Fatal:D2PressDepMYS:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal("");
+		g3ErrorHandler->fatal(" ");
 	}
 
   strainRate = T2Vector(temp,1);
@@ -724,7 +724,7 @@ void PressureIndependMultiYield::updateActiveSurface(void)
   if (X < 1.){
     cerr << "FATAL:PressureIndependMultiYield::updateActiveSurface(): error in Direction of surface motion." 
 			   << endl; 
-    g3ErrorHandler->fatal("");
+    g3ErrorHandler->fatal(" ");
   }
 
   temp = (t1 * X + center) * (1. - size / outsize) - (center - outcenter * size / outsize);
@@ -740,7 +740,7 @@ void PressureIndependMultiYield::updateActiveSurface(void)
 	if (B > 0. || C < 0.) {
     cerr << "FATAL:PressureIndependMultiYield::updateActiveSurface(): error in surface motion.\n" 
 			   << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endl; 
-    g3ErrorHandler->fatal("");
+    g3ErrorHandler->fatal(" ");
 	}
   X = secondOrderEqn(A,B,C,1);  
 

@@ -1,5 +1,5 @@
-// $Revision: 1.4 $
-// $Date: 2001-08-26 23:29:00 $
+// $Revision: 1.5 $
+// $Date: 2001-09-20 04:21:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -84,7 +84,7 @@ int FluidSolidPorousMaterial::setTrialStrain (const Vector &strain)
 	else {
 		cerr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal("");
+		g3ErrorHandler->fatal(" ");
 	}
 
   return theSoilMaterial->setTrialStrain(strain);
@@ -100,7 +100,7 @@ int FluidSolidPorousMaterial::setTrialStrain (const Vector &strain, const Vector
 	else {
 		cerr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal("");
+		g3ErrorHandler->fatal(" ");
 	}
 
   return theSoilMaterial->setTrialStrain(strain, rate);
@@ -116,7 +116,7 @@ int FluidSolidPorousMaterial::setTrialStrainIncr (const Vector &strain)
 	else {
 		cerr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal("");
+		g3ErrorHandler->fatal(" ");
 	}
 
   return theSoilMaterial->setTrialStrainIncr(strain);
@@ -132,7 +132,7 @@ int FluidSolidPorousMaterial::setTrialStrainIncr (const Vector &strain, const Ve
 	else {
 		cerr << "Fatal:FluidSolidPorousMaterial:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal("");
+		g3ErrorHandler->fatal(" ");
 	}
 
   return theSoilMaterial->setTrialStrainIncr(strain, rate);

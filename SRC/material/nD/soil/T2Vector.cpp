@@ -1,5 +1,5 @@
-// $Revision: 1.5 $
-// $Date: 2001-09-13 19:11:14 $
+// $Revision: 1.6 $
+// $Date: 2001-09-20 04:21:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.cpp,v $
                                                                         
 // Written: ZHY
@@ -24,7 +24,7 @@ double operator && (const Vector & a, const Vector & b)
 {
 	if (a.Size() !=6 || b.Size() !=6) {
 	cerr << "FATAL:operator && (Vector &, Vector &): vector size not equal 6" << endl;
-	g3ErrorHandler->fatal("");
+	g3ErrorHandler->fatal(" ");
   }
 
   double result = 0.;  
@@ -45,7 +45,7 @@ T2Vector::T2Vector(const Vector & Vector_init, int isEngrgStrain) : theT2Vector(
 {
 	if ( Vector_init.Size() != 6) {
 	  cerr << "FATAL:T2Vector::T2Vector(Vector &): vector size not equal to 6" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
   theT2Vector = Vector_init;
 
@@ -66,7 +66,7 @@ T2Vector::T2Vector(const Vector & deviat_init, double volume_init)
 {
 	if (deviat_init.Size() != 6) {
 	  cerr << "FATAL:T2Vector::T2Vector(Vector &, double): vector size not equal 6" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 
 	//make sure the deviator has truely volume=0 
@@ -135,7 +135,7 @@ double T2Vector::deviatorRatio(double residualPress) const
 {
   if ((fabs(theVolume)+fabs(residualPress)) <= LOW_LIMIT) {
 	cerr << "FATAL:T2Vector::deviatorRatio(): volume <=" << LOW_LIMIT << endl;
-	g3ErrorHandler->fatal("");
+	g3ErrorHandler->fatal(" ");
   }
   return sqrt(3./2.* (theDeviator && theDeviator)) / (fabs(theVolume)+fabs(residualPress));
 }
@@ -167,7 +167,7 @@ double T2Vector::angleBetweenT2Vector(const T2Vector & a) const
 {
 	if (t2VectorLength() <= LOW_LIMIT || a.t2VectorLength() <= LOW_LIMIT) {
 	cerr << "FATAL:T2Vector::angleBetweenT2Vector(T2Vector &): vector length <=" << LOW_LIMIT << endl;
-	g3ErrorHandler->fatal("");
+	g3ErrorHandler->fatal(" ");
   }
 
   double angle = (theT2Vector && a.theT2Vector) / (t2VectorLength() * a.t2VectorLength());
@@ -182,7 +182,7 @@ double T2Vector::angleBetweenDeviator(const T2Vector & a) const
 {
 	if (deviatorLength() <= LOW_LIMIT || a.deviatorLength() <= LOW_LIMIT) {
 	cerr << "FATAL:T2Vector::angleBetweenDeviator(T2Vector &): vector length <=" << LOW_LIMIT << endl;
-	g3ErrorHandler->fatal("");
+	g3ErrorHandler->fatal(" ");
   }
 
   double angle = (theDeviator && a.theDeviator) / (deviatorLength() * a.deviatorLength());

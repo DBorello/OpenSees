@@ -1,5 +1,5 @@
-// $Revision: 1.11 $
-// $Date: 2001-09-17 19:42:38 $
+// $Revision: 1.12 $
+// $Date: 2001-09-20 04:21:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -57,27 +57,27 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
 	if (nd !=2 && nd !=3) {
 		cerr << "FATAL:PressureDependMultiYield:: dimension error" << endl;
     cerr << "Dimension has to be 2 or 3, you give nd= " << nd << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (refShearModul <= 0) {
 		cerr << "FATAL:PressureDependMultiYield:: refShearModulus <= 0" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (refBulkModul <= 0) {
 		cerr << "FATAL:PressureDependMultiYield:: refBulkModulus <= 0" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
   if (frictionAng <= 0.) {
   	cerr << "FATAL:PressureDependMultiYield:: frictionAngle <= 0" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (frictionAng >= 90.) {
   	cerr << "FATAL:PressureDependMultiYield:: frictionAngle >= 90" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (phaseTransformAng <= 0.) {
   	cerr << "FATAL:PressureDependMultiYield:: phaseTransformAng <= 0" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (phaseTransformAng > frictionAng) {
   	cerr << "WARNING:PressureDependMultiYield:: phaseTransformAng > frictionAng" << endl;
@@ -91,11 +91,11 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
   }
 	if (peakShearStra <= 0) {
 		cerr << "FATAL:PressureDependMultiYield:: peakShearStra <= 0" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (refPress <= 0) {
 		cerr << "FATAL:PressureDependMultiYield:: refPress <= 0" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 	if (pressDependCoe < 0) {
 		cerr << "WARNING:PressureDependMultiYield:: pressDependCoe < 0" << endl;
@@ -114,7 +114,7 @@ PressureDependMultiYield::PressureDependMultiYield (int tag, int nd,
 	}
 	if (atm <= 0) {
 		cerr << "FATAL:PressureDependMultiYield:: atm <= 0" << endl;
-	  g3ErrorHandler->fatal("");
+	  g3ErrorHandler->fatal(" ");
   }
 
 	ndm = nd;
@@ -289,7 +289,7 @@ int PressureDependMultiYield::setTrialStrain (const Vector &strain)
 	else {
 		cerr << "Fatal:PressureDependMultiYield:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal("");
+		g3ErrorHandler->fatal(" ");
 	}
 
   strainRate = T2Vector(workV6-currentStrain.t2Vector(1),1);
@@ -317,7 +317,7 @@ int PressureDependMultiYield::setTrialStrainIncr (const Vector &strain)
 	else {
 		cerr << "Fatal:PressureDependMultiYield:: Material dimension is: " << ndm << endl;
 		cerr << "But strain vector size is: " << strain.Size() << endl;
-		g3ErrorHandler->fatal("");
+		g3ErrorHandler->fatal(" ");
 	}
 
   strainRate = T2Vector(workV6,1);
@@ -994,7 +994,7 @@ double PressureDependMultiYield::getPPZLimits(int which, const T2Vector & contac
     return liquefyParam4 * PPZLimit;
   else {
     cerr << "FATAL:PressureDependMultiYield::getPPZLimits: unknown argument value" << endl;
-    g3ErrorHandler->fatal("");
+    g3ErrorHandler->fatal(" ");
     return 0.0;
   }
 }
@@ -1090,7 +1090,7 @@ void PressureDependMultiYield::updateActiveSurface(void)
     cerr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in Direction of surface motion.\n" 
 			   << "X-1= " << X-1 <<" A= "<<A<<" B= "<<B<<" C= "<<C <<" M= "<<activeSurfaceNum<<"\n"
 				 << "diff1= "<<xx1 <<" diff2= "<<xx2 <<" p= "<<conHeig<<" size= "<<size<<" outs= "<<outsize<<endl; 
-    g3ErrorHandler->fatal("");
+    g3ErrorHandler->fatal(" ");
   }
 
   workV6 = (t1 * X + center*conHeig) * (1. - size / outsize) 
@@ -1107,7 +1107,7 @@ void PressureDependMultiYield::updateActiveSurface(void)
 	if (B > 0. || C < 0.) {
     cerr << "FATAL:PressureDependMultiYield::updateActiveSurface(): error in surface motion.\n" 
 			   << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endl; 
-    g3ErrorHandler->fatal("");
+    g3ErrorHandler->fatal(" ");
 	}
   X = secondOrderEqn(A,B,C,1);  
 
