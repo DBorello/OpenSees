@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:34:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/fiber/Fiber.h,v $
                                                                         
                                                                         
@@ -46,6 +46,8 @@
 class Vector;
 class Matrix;
 class ID;
+class Information;
+class Response;
 
 class Fiber : public TaggedObject, public MovableObject
 {
@@ -64,6 +66,11 @@ class Fiber : public TaggedObject, public MovableObject
 	virtual Fiber *getCopy(void) = 0;
 	virtual int getOrder(void) = 0;
 	virtual const ID &getType(void) = 0;
+
+	virtual Response *setResponse(char **argv, int argc, Information &info);
+	virtual int getResponse(int responseID, Information &info);
+
+	virtual void getFiberLocation(double &y, double &z) = 0;
 
   protected:
     
