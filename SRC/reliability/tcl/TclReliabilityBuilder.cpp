@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-06-14 08:06:05 $
+// $Revision: 1.5 $
+// $Date: 2001-06-14 08:07:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -1158,11 +1158,7 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 
 		theObject = (DomainComponent *)theStructuralDomain->getElement(tagOfObject);
 
-		char *description[2];
-		description[0] = argv[5];
-		description[1] = argv[6];
-
-		theRandomVariablePositioner = new RandomVariablePositioner(tag,rvNumber,theObject,description,0);
+		theRandomVariablePositioner = new RandomVariablePositioner(tag,rvNumber,theObject,&argv[5],argc-5);
 	}
 
 
@@ -1175,12 +1171,7 @@ TclReliabilityModelBuilder_addRandomVariablePositioner(ClientData clientData, Tc
 		}
 		theObject = (DomainComponent *)theStructuralDomain->getLoadPattern(tagOfObject);
 
-		char *description[3];
-		description[0] = argv[5];
-		description[1] = argv[6];
-		description[2] = argv[7];
-
-		theRandomVariablePositioner = new RandomVariablePositioner(tag,rvNumber,theObject,description,0);
+		theRandomVariablePositioner = new RandomVariablePositioner(tag,rvNumber,theObject,&argv[5],argc-5);
 	}
 
 
