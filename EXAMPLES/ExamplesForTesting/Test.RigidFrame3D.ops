@@ -145,7 +145,7 @@ set Jbeam 4000
 set GJ [expr $G*$Jbeam]
 
 # Source in the procedure definition for generating an RC section
-source RCsection.ops
+source Test.RCsection.ops
 
 # Call the procedure to generate a column section
 #          id  h  b cover core cover steel nBars barArea nfCoreY nfCoreZ nfCoverY nfCoverZ
@@ -211,7 +211,7 @@ pattern UniformExcitation  3   2  -accel    $accelSeries
 recorder Node RigidFrame3D.out disp -time -node 9 14 19 -dof 1 2
 
 # Source in commands to display the structure
-source RigidFrame3Ddisplay.ops
+#source RigidFrame3Ddisplay.ops
 
 # Convergence test
 #                tol   maxIter  printFlag
