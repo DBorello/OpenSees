@@ -151,10 +151,7 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 	$(FE)/analysis/algorithm/eigenAlgo/StandardEigenAlgo.o 
 
 
-GGD_LIBS = $(FE)/element/joint/InternalSpring.o \
-	$(FE)/element/joint/MP_Joint2D.o \
-	$(FE)/element/joint/MP_SimpleJoint2D.o \
-	$(FE)/element/joint/SimpleJoint2D.o \
+GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
 	$(FE)/element/joint/Joint2D.o \
 	$(FE)/element/joint/TclJoint2dCommand.o \
 	$(FE)/element/updatedLagrangianBeamColumn/Elastic2DGNL.o \
