@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2002-06-10 22:32:12 $
+// $Revision: 1.17 $
+// $Date: 2002-07-23 17:31:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -207,8 +207,11 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	theSection = new GenericSection1d (tag, *theMat, code);
     }
 
-    /*
     else if (strcmp(argv[1],"GenericND") == 0 || strcmp(argv[1],"GenericNd") == 0) {
+      cerr << "section GenericND is no longer available" << endl;
+      return TCL_ERROR;
+
+      /*
 	if (argc < 5) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
@@ -266,8 +269,9 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	
 	// Parsing was successful, allocate the section
 	theSection = new GenericSectionNd (tag, *theMat, code);
+	*/
     }	
-    */
+
 
     else if (strcmp(argv[1],"AddDeformation") == 0 || strcmp(argv[1],"Aggregator") == 0) {
 	if (argc < 5) {
