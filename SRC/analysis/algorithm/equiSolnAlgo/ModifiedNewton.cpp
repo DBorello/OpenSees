@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-03-29 05:30:30 $
+// $Revision: 1.5 $
+// $Date: 2001-11-16 21:52:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/ModifiedNewton.cpp,v $
                                                                         
                                                                         
@@ -52,7 +52,7 @@ ModifiedNewton::ModifiedNewton(int theTangentToUse)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_ModifiedNewton),
  theTest(0), tangent(theTangentToUse)
 {
-
+  
 }
 
 
@@ -91,14 +91,6 @@ ModifiedNewton::solveCurrentStep(void)
 	return -5;
     }	
 
-    // set itself as the ConvergenceTest objects EquiSolnAlgo
-    theTest->setEquiSolnAlgo(*this);
-    if (theTest->start() < 0) {
-      cerr << "NewtnRaphson::solveCurrentStep() -";
-      cerr << "the ConvergenceTest object failed in start()\n";
-      return -3;
-    }
-    
     // we form the tangent
     
     if (theIncIntegratorr->formUnbalance() < 0) {
@@ -113,6 +105,13 @@ ModifiedNewton::solveCurrentStep(void)
 	return -1;
     }		    
 
+    // set itself as the ConvergenceTest objects EquiSolnAlgo
+    theTest->setEquiSolnAlgo(*this);
+    if (theTest->start() < 0) {
+      cerr << "ModifiedNewton::solveCurrentStep() -";
+      cerr << "the ConvergenceTest object failed in start()\n";
+      return -3;
+    }
 
     // repeat until convergence is obtained or reach max num iterations
     int result = -1;
@@ -142,7 +141,7 @@ ModifiedNewton::solveCurrentStep(void)
     } while (result == -1);
 
     if (result == -2) {
-      cerr << "NewtnRaphson::solveCurrentStep() -";
+      cerr << "ModifiedNewton::solveCurrentStep() -";
       cerr << "the ConvergenceTest object failed in test()\n";
       return -3;
     }
