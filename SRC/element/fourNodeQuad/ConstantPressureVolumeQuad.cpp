@@ -19,6 +19,7 @@
 #include <Domain.h>
 #include <ErrorHandler.h>
 #include <ConstantPressureVolumeQuad.h>
+#include <Renderer.h>
 
 //static data
 Matrix ConstantPressureVolumeQuad :: stiff(8,8)   ;
@@ -191,6 +192,7 @@ void ConstantPressureVolumeQuad :: Print( ostream &s, int flag )
 {
   s << '\n' ;
   s << "Four Node Quad -- Mixed Pressure/Volume -- Plane Strain \n" ;
+  s << "Element Number " << this->getTag() << '\n' ;
   s << "Node 1 : " << connectedExternalNodes(0) << '\n' ;
   s << "Node 2 : " << connectedExternalNodes(1) << '\n' ;
   s << "Node 3 : " << connectedExternalNodes(2) << '\n' ;
@@ -237,7 +239,10 @@ const Matrix& ConstantPressureVolumeQuad :: getDamp( )
 //return mass matrix
 const Matrix& ConstantPressureVolumeQuad :: getMass( ) 
 {
-  //not supported
+  int tangFlag = 1 ;
+
+  formInertiaTerms( tangFlag ) ;
+
   return mass ;
 } 
 
@@ -274,11 +279,110 @@ const Vector& ConstantPressureVolumeQuad :: getResistingForceIncInertia( )
   //do tangent and residual here 
   formResidAndTangent( tang_flag ) ;
 
+  //inertia terms
+  formInertiaTerms( tang_flag ) ;
+
   return resid ;
 }
 
+//*****************************************************************************
+//form inertia terms
 
-//-----------------------------------------------------------------------
+void   ConstantPressureVolumeQuad::formInertiaTerms( int tangFlag ) 
+{
+
+  static const int ndm = 2 ;
+
+  static const int ndf = 2 ; 
+
+  static const int numberNodes = 4 ;
+
+  static const int numberGauss = 4 ;
+
+  static const int nShape = 3 ;
+
+  static const int massIndex = nShape - 1 ;
+
+  double xsj ;  // determinant jacaobian matrix 
+
+  double dvol ; //volume element
+
+  static double shp[nShape][numberNodes] ;  //shape functions at a gauss point
+
+  static Vector momentum(ndf) ;
+
+  static Matrix sx(ndm,ndm) ;
+
+  int i, j, k, p ;
+  int jj, kk ;
+
+  double temp, rho, massJK ;
+
+
+  //zero mass 
+  mass.Zero( ) ;
+
+  //gauss loop 
+  for ( i = 0; i < numberGauss; i++ ) {
+
+    //get shape functions    
+    shape2d( sg[i], tg[i], xl, shp, xsj, sx ) ;
+    
+    //volume element
+    dvol = wg[i] * xsj ;
+
+    //node loop to compute acceleration
+    momentum.Zero( ) ;
+    for ( j = 0; j < numberNodes; j++ ) 
+      momentum += shp[massIndex][j] * ( nodePointers[j]->getTrialAccel()  ) ; 
+
+    //density
+    rho = materialPointers[i]->getRho() ;
+
+    //multiply acceleration by density to form momentum
+    momentum *= rho ;
+
+
+    //residual and tangent calculations node loops
+    jj = 0 ;
+    for ( j = 0; j < numberNodes; j++ ) {
+
+      temp = shp[massIndex][j] * dvol ;
+
+      for ( p = 0; p < ndf; p++ )
+        resid( jj+p ) += ( temp * momentum(p) )  ;
+
+      
+      if ( tangFlag == 1 ) {
+
+	 //multiply by density
+	 temp *= rho ;
+
+	 //node-node mass
+         kk = 0 ;
+         for ( k = 0; k < numberNodes; k++ ) {
+
+	    massJK = temp * shp[massIndex][k] ;
+
+            for ( p = 0; p < ndf; p++ )  
+	      mass( jj+p, kk+p ) += massJK ;
+            
+            kk += ndf ;
+          } // end for k loop
+
+      } // end if tang_flag 
+
+      jj += ndf ;
+    } // end for j loop
+
+
+  } //end for i gauss loop 
+
+
+
+}
+
+//*********************************************************************
 
 //form residual and tangent
 void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag ) 
@@ -294,7 +398,7 @@ void ConstantPressureVolumeQuad ::  formResidAndTangent( int tang_flag )
   //  same ordering for stresses but no 2 
 
   int i,  j,  k, l ;
-  int ii, jj, kk ;
+  int jj, kk ;
   int node ;
   int success ;
   
@@ -683,7 +787,58 @@ void ConstantPressureVolumeQuad :: shape2d( double ss, double tt,
 
   return ;
 }
-	   
+	
+//***********************************************************************
+
+int
+ConstantPressureVolumeQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
+{
+    // first determine the end points of the quad based on
+    // the display factor (a measure of the distorted image)
+    // store this information in 4 3d vectors v1 through v4
+    const Vector &end1Crd = nodePointers[0]->getCrds();
+    const Vector &end2Crd = nodePointers[1]->getCrds();	
+    const Vector &end3Crd = nodePointers[2]->getCrds();	
+    const Vector &end4Crd = nodePointers[3]->getCrds();	
+
+    const Vector &end1Disp = nodePointers[0]->getDisp();
+    const Vector &end2Disp = nodePointers[1]->getDisp();
+    const Vector &end3Disp = nodePointers[2]->getDisp();
+    const Vector &end4Disp = nodePointers[3]->getDisp();
+
+    static Matrix coords(4,3) ;
+    static Vector values(4) ;
+    static Vector P(8) ;
+
+    coords.Zero( ) ;
+
+    values(0) = 1 ;
+    values(1) = 1 ;
+    values(2) = 1 ;
+    values(3) = 1 ;
+
+    if (displayMode < 3 && displayMode > 0)
+      P = this->getResistingForce();
+
+    for (int i = 0; i < 2; i++) {
+      coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
+      coords(1,i) = end2Crd(i) + end2Disp(i)*fact;    
+      coords(2,i) = end3Crd(i) + end3Disp(i)*fact;    
+      coords(3,i) = end4Crd(i) + end4Disp(i)*fact;    
+      /*      if (displayMode < 3 && displayMode > 0)
+	values(i) = P(displayMode*2+i);
+      else
+      values(i) = 1;  */
+    }
+
+    //cerr << coords;
+    int error = 0;
+
+    error += theViewer.drawPolygon (coords, values);
+
+    return error;
+}
+   
 //-----------------------------------------------------------------------
 
 int ConstantPressureVolumeQuad :: sendSelf (int commitTag, Channel &theChannel)

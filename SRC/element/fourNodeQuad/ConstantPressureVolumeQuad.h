@@ -17,6 +17,8 @@
 #include <Node.h>
 #include <NDMaterial.h>
 
+#define ELE_TAG_ConstantPressureVolumeQuad 9831
+
 class ConstantPressureVolumeQuad : public Element 
 {
 
@@ -88,6 +90,9 @@ class ConstantPressureVolumeQuad : public Element
     int sendSelf (int commitTag, Channel &theChannel);
     int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
 		  &theBroker);
+
+    //plotting 
+    int displaySelf(Renderer &theViewer, int displayMode, float fact);
   
   private : 
 
@@ -124,6 +129,9 @@ class ConstantPressureVolumeQuad : public Element
     //form residual and tangent					  
     void formResidAndTangent( int tang_flag ) ;
 
+    //inertia terms
+    void formInertiaTerms( int tangFlag ) ;
+
     Matrix transpose( int dim1, int dim2, const Matrix &M ) ;
    
     //shape function routine for four node quads
@@ -133,5 +141,4 @@ class ConstantPressureVolumeQuad : public Element
 		  double &xsj, 
 		  Matrix &sx ) ;
 
-    
 } ; 
