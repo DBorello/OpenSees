@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-18 05:31:24 $
+// $Revision: 1.3 $
+// $Date: 2001-02-17 04:03:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.h,v $
 
                                                                         
@@ -112,6 +112,7 @@ class Vector
     
     friend class Message;
     friend class SystemOfEqn;
+    friend class Matrix;
     friend class TCP_SocketNoDelay;    
     friend class TCP_Socket;
     friend class UDP_Socket;

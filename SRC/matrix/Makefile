@@ -15,7 +15,9 @@ NDARRAY  = BJtensor.o \
 OBJS       = Vector.o ID.o Matrix.o  $(NDARRAY)
 
 ################### TARGETS ########################
-all: $(OBJS) $(NDARRAY); $(AR) $(ARFLAGS) $(NDARRAY_LIBRARY) $(NDARRAY)
+all: $(OBJS) $(NDARRAY)
+	@$(RM) $(RMFLAGS) $(NDARRAY_LIBRARY);
+	$(AR) $(ARFLAGS) $(NDARRAY_LIBRARY) $(NDARRAY)
 
 libndarray.a: $(NDARRAY)
 	$(AR) $(ARFLAGS) $(NDARRAY_LIBRARY) $(NDARRAY)

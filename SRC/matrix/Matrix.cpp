@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-12 07:14:39 $
+// $Revision: 1.4 $
+// $Date: 2001-02-17 04:03:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -40,9 +40,11 @@
 #include <stdlib.h>
 
 #define MATRIX_WORK_AREA 400
+#define INT_WORK_AREA 20
 
 double Matrix::MATRIX_NOT_VALID_ENTRY =0.0;
 double *Matrix::matrixWork = new double [MATRIX_WORK_AREA];
+int *Matrix::intWork = new int [INT_WORK_AREA];
 //double *Matrix::matrixWork = (double *)malloc(400*sizeof(double));
 
 //
@@ -234,7 +236,20 @@ Matrix::Assemble(const Matrix &V, const ID &rows, const ID &cols, double fact)
   return res;
 }
 
+#ifdef _WIN32
+extern "C" int _stdcall DGESV(int *N, int *NRHS, double *A, int *LDA, 
+			      int *iPiv, double *B, int *LDB, int *INFO);
+			     
+extern "C" int _stdcall DGETRS(char *TRANS, unsigned int sizeT,
+			       int *N, int *NRHS, double *A, int *LDA, 
+			       int *iPiv, double *B, int *LDB, int *INFO);
+#else
+extern "C" int dgesv_(int *N, int *NRHS, double *A, int *LDA, int *iPiv, 
+		      double *B, int *LDB, int *INFO);
 
+extern "C" int dgetrs_(char *TRANS, int *N, int *NRHS, double *A, int *LDA, 
+		       int *iPiv, double *B, int *LDB, int *INFO);		       
+#endif
 
 int
 Matrix::Solve(const Vector &b, Vector &x) const
@@ -279,56 +294,24 @@ Matrix::Solve(const Vector &b, Vector &x) const
     // set x equal to b
     x = b;
 
-    double aii,lji,xi;
-    for (i=0; i<n-1; i++) {
-      int j;
-      double *aiiPtr = &matrixWork[i+i*numRows];
-      aii = *aiiPtr;
-      if (aii == 0.0) {
-	g3ErrorHandler->warning("Matrix::Solve(b,x) - 0 %s %d\n",
-				"diagonal in factorization at column", i);
-				
-	return -4;
-      }
-
-      xi = x(i);	
-
-      // compute column i of L, store in A
-      // do forward substution
-      double *ajiPtr = aiiPtr+1;
-      for (j= i+1; j<n; j++) {
-	lji = *ajiPtr / aii;
-	x(j) -= lji * xi;
-	*ajiPtr++ = lji;
-      }
-	
-      // update rest of A
-      //    A(j,k) -= A(j,i)*A(i,k);
-
-      for (int k=i+1; k<n; k++) {
-	ajiPtr = aiiPtr +1;
-	double *ajkPtr = &matrixWork[i+1+k*numRows];
-	double aik = matrixWork[i + k*numRows];
-	for (j=i+1; j<n; j++) {
-	  *ajkPtr++ -= *ajiPtr++ * aik;
-	}
-      }
-	  
-
-    }
+    int nrhs = 1;
+    int ldA = n;
+    int ldB = n;
+    int info;
+    double *Aptr = matrixWork;
+    double *Xptr = x.theData;
+    int *iPIV = intWork;
     
-    // now do backward substitution
-    for (i=n-1; i>=0; i--) {
-      double *aiiPtr = &matrixWork[i+i*numRows];
-      xi = x(i) /  *aiiPtr--;
-      x(i) = xi;
-      for (int j = i-1; j>=0; j--)
-	x(j) -= *aiiPtr-- * xi;
-    }
+
+#ifdef _WIN32
+    DGESV(&n,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);
+#else
+    dgesv_(&n,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);
+#endif
+
 
     return 0;
 }
-
 
 
 int
@@ -365,68 +348,36 @@ Matrix::Solve(const Matrix &b, Matrix &x) const
 #endif
     
     // check work area can hold all the data
-    if (dataSize > MATRIX_WORK_AREA) {
+    if (dataSize > MATRIX_WORK_AREA || n > INT_WORK_AREA) {
       g3ErrorHandler->warning("Matrix::Solve(b,x) - matrix dimension [%d %d] larger than work area %d\n",
 			      numRows, numCols, MATRIX_WORK_AREA);
       return -3;
     }
+
+    x = b;
 
     // copy the data
     int i;
     for (i=0; i<dataSize; i++)
       matrixWork[i] = data[i];
 
-    // set x equal to b
-    x = b;
 
-    double aii,lji,xi;
-
-    for (i=0; i<n-1; i++) {
-      int j;
-      double *aiiPtr = &matrixWork[i+i*numRows];
-      aii = *aiiPtr;
-      if (aii == 0.0) {
-	g3ErrorHandler->warning("Matrix::Solve(b,x) - 0 diagonal in factorization at column %d\n",
-				i);
-	return -4;
-      }
-
-      // compute column i of L, store in A
-      // do forward substution
-      double *ajiPtr = aiiPtr+1;
-      for (j= i+1; j<n; j++) {
-	lji = *ajiPtr / aii;
-	for (int k=0; k<nrhs; k++)
-	  x(j,k) -= lji * x(i,k);
-	*ajiPtr++ = lji;
-      }
-	
-      // update rest of A
-      //    A(j,k) -= A(j,i)*A(i,k);
-
-      for (int k=i+1; k<n; k++) {
-	ajiPtr = aiiPtr +1;
-	double *ajkPtr = &matrixWork[i+1+k*numRows];
-	double aik = matrixWork[i + k*numRows];
-	for (j=i+1; j<n; j++) {
-	  *ajkPtr++ -= *ajiPtr++ * aik;
-	}
-      }
-    }
+    int ldA = n;
+    int ldB = n;
+    int info;
+    double *Aptr = matrixWork;
+    double *Xptr = x.data;
     
-    // now do backward substitution
-    for (i=n-1; i>=0; i--) {
-      double *aiiPtrA = &matrixWork[i+i*numRows];
-      for (int k=0; k<nrhs; k++) {
-	double *aiiPtr = aiiPtrA;
-	xi = x(i,k) /  *aiiPtr--;
-	x(i,k) = xi;
-	for (int j = i-1; j>=0; j--)
-	  x(j,k) -= *aiiPtr-- * xi;
-      }
-    }
+    int *iPIV = intWork;
+    
 
-    return 0;
+#ifdef _WIN32
+    DGESV(&n,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);
+#else
+    dgesv_(&n,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);
+#endif
+
+    return info;
 }
     
 		    
