@@ -9,6 +9,7 @@ include ../../../Makefile.def
 	ENTMaterial.o FedeasMaterial.o DrainMaterial.o \
 	BoucWenMaterial.o \
 	Pinching4Material.o BarSlipMaterial.o \
+	FatigueMaterial.o \
         TclModelBuilderUniaxialMaterialCommand.o
 
 all:         $(OBJS)

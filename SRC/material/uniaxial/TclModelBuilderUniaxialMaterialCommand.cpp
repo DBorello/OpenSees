@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2003-08-12 23:01:55 $
+// $Revision: 1.21 $
+// $Date: 2003-08-14 20:24:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -44,7 +44,7 @@
 #include <ViscousMaterial.h>	// Sasani
 #include <PathIndependentMaterial.h>	// MHS
 #include <MinMaxMaterial.h>	// MHS
-#include <FractureMaterial.h>	// Patxi
+#include <FatigueMaterial.h>	// Patxi
 #include <SeriesMaterial.h>		// MHS
 #include <ENTMaterial.h>		// MHS
 #include <CableMaterial.h>	// CC
@@ -893,11 +893,11 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       
     }
 
-    else if (strcmp(argv[1],"Fracture") == 0) {
+    else if (strcmp(argv[1],"Fatigue") == 0) {
       if (argc < 4) {
 	opserr << "WARNING insufficient arguments\n";
 	printCommand(argc,argv);
-	opserr << "Want: uniaxialMaterial Fracture tag? matTag?";
+	opserr << "Want: uniaxialMaterial Fatigue tag? matTag?";
 	opserr << " <-min min?> <-max max?>" << endln;
 	return TCL_ERROR;
       }
@@ -905,13 +905,13 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       int tag, matTag;
       
       if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	opserr << "WARNING invalid uniaxialMaterial Fracture tag" << endln;
+	opserr << "WARNING invalid uniaxialMaterial Fatigue tag" << endln;
 	return TCL_ERROR;		
       }
 
       if (Tcl_GetInt(interp, argv[3], &matTag) != TCL_OK) {
 	opserr << "WARNING invalid component tag\n";
-	opserr << "uniaxialMaterial Fracture: " << tag << endln;
+	opserr << "uniaxialMaterial Fatigue: " << tag << endln;
 	return TCL_ERROR;
       }
 
@@ -926,28 +926,28 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	  loc++;
 	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &Dmax) != TCL_OK)) {
 	    opserr << "WARNING invalid Dmax -";
-	    opserr << "uniaxialMaterial Fracture: " << tag << endln;
+	    opserr << "uniaxialMaterial Fatigue: " << tag << endln;
 	    return TCL_ERROR;
 	  }
 	} else if (strcmp(argv[loc],"-Nf") == 0) {
 	  loc++;
 	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &Nf) != TCL_OK)) {
 	    opserr << "WARNING invalid Nf -";	 
-	    opserr << "uniaxialMaterial Fracture: " << tag << endln;
+	    opserr << "uniaxialMaterial Fatigue: " << tag << endln;
 	    return TCL_ERROR;
 	  }
 	} else if (strcmp(argv[loc],"-E0") == 0) {
 	  loc++;
 	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &E0) != TCL_OK)) {
 	    opserr << "WARNING invalid E0 -"; 
-	    opserr << "uniaxialMaterial Fracture: " << tag << endln;
+	    opserr << "uniaxialMaterial Fatigue: " << tag << endln;
 	    return TCL_ERROR;
 	  }
 	} else if (strcmp(argv[loc],"-FE") == 0) {
 	  loc++;
 	  if ((loc >= argc) || (Tcl_GetDouble (interp, argv[loc], &FE) != TCL_OK)) {
 	    opserr << "WARNING invalid FE -";
-	    opserr << "uniaxialMaterial Fracture: " << tag << endln;
+	    opserr << "uniaxialMaterial Fatigue: " << tag << endln;
 	    return TCL_ERROR;
 	  }
 	} else
@@ -959,12 +959,12 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
       if (theMat == 0) {
 	opserr << "WARNING component material does not exist\n";
 	opserr << "Component material: " << matTag; 
-	opserr << "\nuniaxialMaterial Fracture: " << tag << endln;
+	opserr << "\nuniaxialMaterial Fatigue: " << tag << endln;
 	return TCL_ERROR;
       }
 	
       // Parsing was successful, allocate the material
-      theMaterial = new FractureMaterial(tag, *theMat, Dmax, Nf, E0, FE);
+      theMaterial = new FatigueMaterial(tag, *theMat, Dmax, Nf, E0, FE);
       
     }
 	else if (strcmp(argv[1],"Cable") == 0) 

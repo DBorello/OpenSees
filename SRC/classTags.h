@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.49 $
-// $Date: 2003-08-12 23:02:17 $
+// $Revision: 1.50 $
+// $Date: 2003-08-14 20:24:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -98,7 +98,7 @@
 #define MAT_TAG_BoucWen					17
 #define MAT_TAG_Pinching4					18
 #define MAT_TAG_BarSlip					19
-#define MAT_TAG_Fracture			20
+#define MAT_TAG_Fatigue			20
 
 //B Jeremic
 #define MAT_TAG_PySimple1        205
