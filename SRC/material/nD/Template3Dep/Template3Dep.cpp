@@ -587,12 +587,14 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
     double nuP =this->EPS->getnu();
 
     // Pressure dependent Isotropic
-    if ( eflag == 1) {
+    if ( eflag == 1) 
+      {
       //opserr << " Eo= " << Ey;
-      if (Ey == 0) {
-        opserr << endln << "Ey = 0! Can't give you D!!" << endln;
-        exit(1);
-      }
+        if (Ey == 0)  
+          {
+            opserr << endln << "Ey = 0! Can't give you D!!" << endln;
+            exit(1);
+          }
       
       //Update E 
       stresstensor stc = (this->EPS)->getStress();
@@ -617,10 +619,11 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
       
       // Building compliance tensor
       ret = (I_ijkl * (-nuP/Ey)) + (I4s * ((1.0+nuP)/Ey));
-    }
+      }
 
     // Pressure dependent Anisotropic
-    else if (eflag == 3) {
+    else if (eflag == 3) 
+      {
       // Form compliance matrix D
       double E = Ey;
       double nu = nuP;
@@ -654,12 +657,13 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
       ret.val(3,2,2,3) = D(5,5); ret.val(3,2,3,2) = D(5,5); // --> Sigma_zy
       ret.val(3,3,1,1) = D(2,0); ret.val(3,3,2,2) = D(2,1); ret.val(3,3,3,3) = D(2,2); // --> Sigma_zz
       
-    }
-    else {
+      }
+    else 
+      {
       opserr << "Template3Dep::ElasticComplianceTensor failed to create elastic compliance tensor. Eflag must be 1 or 3: " <<  eflag << endln;
       exit(-1);
     
-    }
+      }
             
     return ret;
 }

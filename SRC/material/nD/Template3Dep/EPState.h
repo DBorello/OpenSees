@@ -44,17 +44,17 @@ class EPState
 {
   public:
     // Elastic parameters
-    double Eo;	                  // Young's modulus when p = p_atmosphere  -- [in-plane] in terms of cross-anisotropic material
-    double E_Young;	          // Young's modulus -- [in-plane] in terms of cross-anisotropic material
-    double nu_Poisson;	          // Poisson's ratio -- [in-plane] in terms of cross-anisotropic materi			    
-    double rho_mass_density;      // Mass density     			    
-    				
+    double Eo;                    // Young's modulus when p = p_atmosphere  -- [in-plane] in terms of cross-anisotropic material
+    double E_Young;            // Young's modulus -- [in-plane] in terms of cross-anisotropic material
+    double nu_Poisson;            // Poisson's ratio -- [in-plane] in terms of cross-anisotropic materi          
+    double rho_mass_density;      // Mass density               
+            
     // Trial state
     stresstensor CurrentStress;   // Current trial stress  --total          
-    straintensor CurrentStrain;	  // Current trial strain  --total 	    
-    stresstensor IterativeStress; // Iterative Stress 			    
-    straintensor ElasticStrain;	  // Current cumulative elastic strain      
-    straintensor PlasticStrain;	  // Current cumulative plastic strain      
+    straintensor CurrentStrain;    // Current trial strain  --total       
+    stresstensor IterativeStress; // Iterative Stress           
+    straintensor ElasticStrain;    // Current cumulative elastic strain      
+    straintensor PlasticStrain;    // Current cumulative plastic strain      
     straintensor dElasticStrain;  // Current elastic strain increment       
     straintensor dPlasticStrain;  // Current plastic strain increment       
     tensor       Eep;             // Current Elastic plastic stifness tensor
@@ -96,8 +96,8 @@ class EPState
     int Elasticflag;
 
     //Parameters for elastic cross-anistropic material
-    double Ev; 	         // Ev: Young's modulus in a vertical direction -- [out-of-plane]
-    double nuhv;	 // nuhv: Poisson's ratio for strain in the vertical direction due to a horizontal direct stress -- [out-of-plane]
+    double Ev;            // Ev: Young's modulus in a vertical direction -- [out-of-plane]
+    double nuhv;   // nuhv: Poisson's ratio for strain in the vertical direction due to a horizontal direct stress -- [out-of-plane]
     double Ghv;          // Ghv: Modulus of shear deformation in a vertical plane -- [out-of-plane]
 
     double eo;           // Initial void ratio Joey 02-11-03
@@ -117,7 +117,7 @@ class EPState
     EPState(double              Eod,
             double              Ed,
             double              nu,
-       	    double              rho,
+             double              rho,
             const stresstensor &stressp,
             const straintensor &strainp,
             const straintensor &Estrainp,
@@ -125,33 +125,33 @@ class EPState
             const straintensor &dEstrainp,
             const straintensor &dPstrainp,
             int                 NScalarp,
-       	    const double       *Scalarp,
+             const double       *Scalarp,
             int                 NTensorp,
-       	    const stresstensor *Tensorp,
-       	    const tensor       &Eepp,
-    	    const stresstensor &Stress_commitp,
-    	    const straintensor &Strain_commitp,	  
-    	    const double       *Scalar_commitp,
-    	    const stresstensor *Tensor_commitp, 
-    	    const tensor       &Eep_commitp,
-    	    const stresstensor &Stress_initp,    
-    	    const straintensor &Strain_initp,	 
-    	    const double       *Scalar_initp,
-    	    const stresstensor *Tensor_initp,
-    	    const tensor       &Eep_initp, 
+             const stresstensor *Tensorp,
+             const tensor       &Eepp,
+          const stresstensor &Stress_commitp,
+          const straintensor &Strain_commitp,    
+          const double       *Scalar_commitp,
+          const stresstensor *Tensor_commitp, 
+          const tensor       &Eep_commitp,
+          const stresstensor &Stress_initp,    
+          const straintensor &Strain_initp,   
+          const double       *Scalar_initp,
+          const stresstensor *Tensor_initp,
+          const tensor       &Eep_initp, 
             bool                Convergedp,
-	    int                 Elasticflagp = 1,
-	    double 		Evp   = 0.0,
-	    double              nuhvp = 0.0,
-	    double              Ghvp = 0.0,
-	    double              eop = 0.85, 
-	    double              ecp = 0.80, 
-	    double              Lam = 0.025, 
-	    double              pop = 100.0,
-	    double              ep  = 0.85, 
-	    double              psip = 0.05, 
-	    double              ap  = 0.5
-	    );
+      int                 Elasticflagp = 1,
+      double     Evp   = 0.0,
+      double              nuhvp = 0.0,
+      double              Ghvp = 0.0,
+      double              eop = 0.85, 
+      double              ecp = 0.80, 
+      double              Lam = 0.025, 
+      double              pop = 100.0,
+      double              ep  = 0.85, 
+      double              psip = 0.05, 
+      double              ap  = 0.5
+      );
 
 
     //Normal Constructor11
@@ -163,40 +163,40 @@ class EPState
             const straintensor  strainp, 
             const straintensor  Estrainp,
             const straintensor  Pstrainp,
-	    int                 NScalarp,
-	    const double       *Scalarp,
-	    int                 NTensorp,
-	    const stresstensor *Tensorp, 
-	    int                 Elasticflagp = 1,
-	    double 		Evp   = 0.0,
-	    double              nuhvp = 0.0,
-	    double              Ghvp = 0.0,
-	    double              eop = 0.85,
-	    double              ecp = 0.80,
-	    double              Lam = 0.025, 
-	    double              pop = 100.0,
-	    double              ap = 0.5
-	    );
+      int                 NScalarp,
+      const double       *Scalarp,
+      int                 NTensorp,
+      const stresstensor *Tensorp, 
+      int                 Elasticflagp = 1,
+      double     Evp   = 0.0,
+      double              nuhvp = 0.0,
+      double              Ghvp = 0.0,
+      double              eop = 0.85,
+      double              ecp = 0.80,
+      double              Lam = 0.025, 
+      double              pop = 100.0,
+      double              ap = 0.5
+      );
 
     //Normal Constructor2
     EPState(double              Eod,    
             double              Ed,
             double              nu,
-	    double              rho,
+      double              rho,
             int                 NScalarp,
-	    const double       *Scalarp,
-	    int                 NTensorp,
-	    const stresstensor *Tensorp,
-	    int                 Elasticflagp = 1,
-	    double 		Evp   = 0.0,
-	    double              nuhvp = 0.0,
-	    double              Ghvp = 0.0,
-	    double              eop = 0.85,
-	    double              ecp = 0.80,
-	    double              Lam = 0.025, 
-	    double              pop = 100.0,
-	    double              ap = 0.5
-	    );
+      const double       *Scalarp,
+      int                 NTensorp,
+      const stresstensor *Tensorp,
+      int                 Elasticflagp = 1,
+      double     Evp   = 0.0,
+      double              nuhvp = 0.0,
+      double              Ghvp = 0.0,
+      double              eop = 0.85,
+      double              ecp = 0.80,
+      double              Lam = 0.025, 
+      double              pop = 100.0,
+      double              ap = 0.5
+      );
 
     EPState *newObj();                 //create a clone of itself
     EPState( const EPState &rhs );     // Copy constructor    
