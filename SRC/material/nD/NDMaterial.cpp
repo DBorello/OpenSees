@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $                                                              
-// $Date: 2003-11-20 02:12:25 $                                                                  
+// $Revision: 1.17 $                                                              
+// $Date: 2004-07-20 22:39:02 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -186,31 +186,37 @@ NDMaterial::setTrialStrainIncr(const Tensor &v, const Tensor &r)
 //Zhao (zcheng@ucdavis.edu) 
 // added Sept 22 2003 for Large Deformation, F is the Deformation Grandient
 int
-NDMaterial::setTrialF(const Tensor &f)
+NDMaterial::setTrialF(const straintensor &f)
 {
    opserr << "NDMaterial::setTrialF -- subclass responsibility\n";
    return -1;
 }
 
 int
-NDMaterial::setTrialF(const Tensor &f, const Tensor &d)
+NDMaterial::setTrialFIncr(const straintensor &df)
 {
    opserr << "NDMaterial::setTrialF -- subclass responsibility\n";
    return -1;
 }
 
 int
-NDMaterial::setTrialFIncr(const Tensor &f)
+NDMaterial::setTrialC(const straintensor &c)
 {
-   opserr << "NDMaterial::setTrialFIncr -- subclass responsibility\n";
+   opserr << "NDMaterial::setTrialC -- subclass responsibility\n";
    return -1;
 }
 
 int
-NDMaterial::setTrialFIncr(const Tensor &f, const Tensor &d)
+NDMaterial::setTrialCIncr(const straintensor &c)
 {
-   opserr << "NDMaterial::setTrialFIncr -- subclass responsibility\n";
+   opserr << "NDMaterial::setTrialC -- subclass responsibility\n";
    return -1;
+}
+
+const stresstensor NDMaterial::getPK1StressTensor(void)
+{
+   opserr << "NDMaterial::getPK1StressTensor -- subclass responsibility\n";
+   return errstresstensor;    
 }
 
 const stresstensor NDMaterial::getCauchyStressTensor(void)
@@ -218,6 +224,25 @@ const stresstensor NDMaterial::getCauchyStressTensor(void)
    opserr << "NDMaterial::getCauchyStressTensor -- subclass responsibility\n";
    return errstresstensor;    
 }
+
+const straintensor NDMaterial::getF(void)
+{
+   opserr << "NDMaterial::getF -- subclass responsibility\n";
+   return errstraintensor;    
+}
+
+const straintensor NDMaterial::getC(void)
+{
+   opserr << "NDMaterial::getF -- subclass responsibility\n";
+   return errstraintensor;    
+}
+
+const straintensor NDMaterial::getFp(void)
+{
+   opserr << "NDMaterial::getFp -- subclass responsibility\n";
+   return errstraintensor;    
+}
+// Only For Large Deformation, END////////////////////////////
 
 const Tensor &
 NDMaterial::getTangentTensor(void)

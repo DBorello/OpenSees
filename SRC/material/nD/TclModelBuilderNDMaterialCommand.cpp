@@ -25,8 +25,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2003-11-20 02:12:25 $
+// $Revision: 1.33 $
+// $Date: 2004-07-20 22:39:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -55,6 +55,7 @@
 
 #include <Template3Dep.h>
 #include <FiniteDeformationElastic3D.h>
+#include <FiniteDeformationEP3D.h>
 
 Template3Dep *
 TclModelBuilder_addTemplate3Dep(ClientData clientData, Tcl_Interp *interp,  int argc, 
@@ -64,6 +65,9 @@ FiniteDeformationElastic3D *
 TclModelBuilder_addFiniteDeformationElastic3D(ClientData clientData, Tcl_Interp *interp,  int argc, 
 				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
 
+FiniteDeformationEP3D *
+TclModelBuilder_addFiniteDeformationEP3D(ClientData clientData, Tcl_Interp *interp,  int argc, 
+				TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart);
 
 NDMaterial *
 TclModelBuilder_addFeapMaterial(ClientData clientData, Tcl_Interp *interp,
@@ -617,6 +621,12 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
              strcmp(argv[1],"FDElastic3D" ) == 0) {
       theMaterial = TclModelBuilder_addFiniteDeformationElastic3D(clientData, interp, argc, argv,
 						    theTclBuilder, 1);
+    }
+
+    else if (strcmp(argv[1],"FiniteDeformationEP3D") == 0 ||
+             strcmp(argv[1],"FDEP3D" ) == 0) {
+      theMaterial = TclModelBuilder_addFiniteDeformationEP3D(clientData, interp, argc, argv,
+						    theTclBuilder, 2);
     }
 
      else if (strcmp(argv[1],"PlaneStressMaterial") == 0 ||

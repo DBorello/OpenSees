@@ -23,8 +23,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.15 $
-// $Date: 2003-11-20 02:12:25 $
+// $Revision: 1.16 $
+// $Date: 2004-07-20 22:39:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $
 
 
@@ -95,11 +95,16 @@ class NDMaterial : public Material
 
 //Zhao (zcheng@ucdavis.edu)
 // added Sept 22 2003 for Large Deformation, F is the Deformation Gradient
-    virtual int setTrialF(const Tensor &f);
-    virtual int setTrialF(const Tensor &f, const Tensor &d);
-    virtual int setTrialFIncr(const Tensor &f);
-    virtual int setTrialFIncr(const Tensor &f, const Tensor &d);
+    virtual int setTrialF(const straintensor &f);
+    virtual int setTrialFIncr(const straintensor &df);
+    virtual int setTrialC(const straintensor &c);
+    virtual int setTrialCIncr(const straintensor &dc);
+    virtual const stresstensor getPK1StressTensor(void);
     virtual const stresstensor getCauchyStressTensor(void);
+    virtual const straintensor getF(void);
+    virtual const straintensor getC(void);
+    virtual const straintensor getFp(void);
+// Only For Large Deformation, END////////////////////////////////////////
 
     virtual int commitState(void) = 0;
     virtual int revertToLastCommit(void) = 0;
