@@ -1,6 +1,15 @@
 include ../../../../Makefile.def
 
-OBJS       = FedeasHardeningMaterial.o Hard1.o
+OBJS       = FedeasHardeningMaterial.o Hard1.o \
+	FedeasBond1Material.o \
+	FedeasBond2Material.o \
+	FedeasConcr1Material.o \
+	FedeasConcr2Material.o \
+	FedeasConcr3Material.o \
+	FedeasHyster1Material.o \
+	FedeasHyster2Material.o \
+	FedeasSteel1Material.o \
+	FedeasSteel2Material.o 
 
 all:         $(OBJS)
 
