@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-31 22:11:36 $
+// $Revision: 1.2 $
+// $Date: 2001-07-31 23:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityIntegrator.h,v $
 
 
@@ -44,7 +44,7 @@ class SensitivityIntegrator
 public:
 
     SensitivityIntegrator();
-    ~SensitivityIntegrator();
+    virtual ~SensitivityIntegrator();
     
 	virtual int formRightHandSide(void) = 0;
 	virtual int saveGradient(const Vector &v, int gradNum, int numGrads) = 0;

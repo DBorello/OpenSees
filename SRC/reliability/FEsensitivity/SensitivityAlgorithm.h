@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-31 22:11:36 $
+// $Revision: 1.2 $
+// $Date: 2001-07-31 23:37:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/FEsensitivity/SensitivityAlgorithm.h,v $
 
 
@@ -39,8 +39,8 @@ class SensitivityAlgorithm
 {
 public:
 
-	SensitivityAlgorithm::SensitivityAlgorithm();
-    ~SensitivityAlgorithm();
+	SensitivityAlgorithm();
+    virtual ~SensitivityAlgorithm();
 	virtual int computeGradients(void) = 0;
     
 protected:
