@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:07 $
+// $Revision: 1.4 $
+// $Date: 2003-02-20 00:45:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/TclDispBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -133,6 +133,17 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 	  return TCL_ERROR;
 	}
 
+	double massDens = 0.0;
+
+	while (argi != argc) {
+	  if (strcmp(argv[argi++],"-mass") == 0 && argi < argc) {
+	    if (Tcl_GetDouble(interp, argv[argi++], &massDens) != TCL_OK) {
+	      opserr << "WARNING invalid massDens - element dispBeamColumn eleTag? iNode? jNode? nIP? secTag? transfTag?\n";
+	      return TCL_ERROR;
+	    }
+	  }
+	}
+
 	SectionForceDeformation **sections = new SectionForceDeformation* [nIP];
 	
 	if (!sections) {
@@ -167,7 +178,7 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 		}
 
 		// now create the DispBeamColumn and add it to the Domain
-		theElement = new DispBeamColumn2d(eleTag,iNode,jNode,nIP,sections,*theTransf);
+		theElement = new DispBeamColumn2d(eleTag,iNode,jNode,nIP,sections,*theTransf,massDens);
 
 		delete [] sections;
 	}
@@ -184,7 +195,7 @@ TclModelBuilder_addDispBeamColumn(ClientData clientData, Tcl_Interp *interp,
 		}
 
 		// now create the DispBeamColumn and add it to the Domain
-		theElement = new DispBeamColumn3d(eleTag,iNode,jNode,nIP,sections,*theTransf);
+		theElement = new DispBeamColumn3d(eleTag,iNode,jNode,nIP,sections,*theTransf,massDens);
 
 		delete [] sections;
 	}
