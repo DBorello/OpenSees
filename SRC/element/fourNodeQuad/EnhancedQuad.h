@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-11-26 22:53:53 $
+// $Revision: 1.6 $
+// $Date: 2002-06-07 00:29:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.h,v $
                                                                         
 #include <iostream.h>
@@ -53,8 +53,6 @@ class EnhancedQuad : public Element {
     //destructor
     virtual ~EnhancedQuad();
 
-
-
     //set domain
     void setDomain( Domain *theDomain ) ;
 
@@ -67,14 +65,11 @@ class EnhancedQuad : public Element {
     //return number of dofs
     int getNumDOF( ) ;
 
-    //commit state
+    // methods dealing with state updates
     int commitState( ) ;
-    
-    //revert to last commit 
     int revertToLastCommit( ) ;
-    
-    //revert to start 
     int revertToStart( ) ;
+    int update(void);
 
     //print out element data
     void Print( ostream &s, int flag ) ;

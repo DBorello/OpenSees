@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-11-26 22:53:53 $
+// $Revision: 1.5 $
+// $Date: 2002-06-07 00:29:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.h,v $
                                                                         
 // Written: MHS
@@ -107,22 +107,21 @@ class FourNodeQuad : public Element
 
     static Matrix K;		// Element stiffness, damping, and mass Matrix
     static Vector P;		// Element resisting force vector
-	Vector Q;		// Applied nodal loads
-	double b[2];		// Body forces
-	Vector pressureLoad;	// Pressure load at nodes
+    Vector Q;		        // Applied nodal loads
+    double b[2];		// Body forces
+    Vector pressureLoad;	// Pressure load at nodes
 
-    double thickness;	// Element thickness
+    double thickness;	        // Element thickness
     double rho;			// Mass per unit volume
-	double pressure;	// Normal surface traction (pressure) over entire element
-						// Note: positive for outward normal
-
-	static double shp[3][4];	// Stores shape functions and derivatives (overwritten)
-	static double pts[4][2];	// Stores quadrature points
-	static double wts[4];		// Stores quadrature weights
+    double pressure;	        // Normal surface traction (pressure) over entire element
+					 // Note: positive for outward normal
+    static double shp[3][4];	// Stores shape functions and derivatives (overwritten)
+    static double pts[4][2];	// Stores quadrature points
+    static double wts[4];		// Stores quadrature weights
 
     // private member functions - only objects of this class can call these
     double shapeFunction(double xi, double eta);
-	void setPressureLoadAtNodes(void);
+    void setPressureLoadAtNodes(void);
 };
 
 #endif

@@ -1,9 +1,31 @@
+/* ****************************************************************** **
+**    OpenSees - Open System for Earthquake Engineering Simulation    **
+**          Pacific Earthquake Engineering Research Center            **
+**                                                                    **
+**                                                                    **
+** (C) Copyright 1999, The Regents of the University of California    **
+** All Rights Reserved.                                               **
+**                                                                    **
+** Commercial use of this program without express permission of the   **
+** University of California, Berkeley, is strictly prohibited.  See   **
+** file 'COPYRIGHT'  in main directory for information on usage and   **
+** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
+**                                                                    **
+** Developed by:                                                      **
+**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
+**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
+**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
+**                                                                    **
+** ****************************************************************** */
+                                                                        
+// $Revision: 1.7 $
+// $Date: 2002-06-07 00:29:00 $
+// $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.h,v $
+
 // Ed "C++" Love
-// Do not ask Prashant about this code.  He has no clue. 
 //
 // Constant Presssure/Volume Four Node Quadrilateral
 // Plane Strain (NOT PLANE STRESS)
-//
 
 #include <iostream.h>
 #include <stdio.h> 
@@ -138,5 +160,4 @@ class ConstantPressureVolumeQuad : public Element
 		  Matrix &sx ) ;
 
     Vector *load;
-
 } ; 
