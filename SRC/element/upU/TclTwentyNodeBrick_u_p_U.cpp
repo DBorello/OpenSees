@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-01-15 02:08:23 $
+// $Revision: 1.3 $
+// $Date: 2002-01-25 19:12:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/TclTwentyNodeBrick_u_p_U.cpp,v $
                                                                         
                                                                         
@@ -65,9 +65,12 @@ TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inte
   //  porosity?  alpha?  solidDensity? fluidDensity? 
   //  argv[27]  argv[28]   argv[29]	 argv[30]    
   // Xiaoyan added this comments. 01/07/2002
-  if ((argc-eleArgStart) < 30) {
+  if ((argc-eleArgStart) < 35) {
       g3ErrorHandler->warning("command: element Brick20N_u_p_U - insufficient args - want %s",
-          "element Brick20N_u_p_U eleTag? node1? node2? .. node20?  matTag? bforce1? bforce2? bforce3?\n porosity? alpha? solidDensity? fluidDensity? \n");
+          "element Brick20N_u_p_U eleTag? node1? node2? .. node20?  matTag? bforce1? bforce2? bforce3?\n" 
+	  "porosity? alpha?  solidDensity? fluidDensity? pressure?\n"
+ 	  "permeability_in_x_dir? permeability_in_y_dir? permeability_in_z_dir?"
+	  "solid_bulk_modulus? fluid_bulk_modulus? pressure?\n");
       return TCL_ERROR;
   }    
 
@@ -75,6 +78,7 @@ TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inte
   int eleID, matID;
   int nodes[20];
   double bodyforces[3], porosity, alpha, solidDensity, fluidDensity;
+  double perm_x, perm_y, perm_z, kks,kkf;
   //char *type;
   
   // read the eleTag
@@ -148,6 +152,36 @@ TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inte
     			  eleID, argv[29+eleArgStart]);      
       return TCL_ERROR;
   }  
+  // permeability in x direction
+  if (Tcl_GetDouble(interp, argv[30+eleArgStart], &perm_x) != TCL_OK) {
+      g3ErrorHandler->warning("command: element Brick20N_u_p_U %d - invalid permeability in x direction %s",      
+    			  eleID, argv[30+eleArgStart]);      
+      return TCL_ERROR;
+  }  
+  // permeability in y direction
+  if (Tcl_GetDouble(interp, argv[31+eleArgStart], &perm_y) != TCL_OK) {
+      g3ErrorHandler->warning("command: element Brick20N_u_p_U %d - invalid permeability in y direction %s",      
+    			  eleID, argv[31+eleArgStart]);      
+      return TCL_ERROR;
+  }  
+  // permeability in z direction
+  if (Tcl_GetDouble(interp, argv[32+eleArgStart], &perm_z) != TCL_OK) {
+      g3ErrorHandler->warning("command: element Brick20N_u_p_U %d - invalid permeability in z direction %s",      
+    			  eleID, argv[32+eleArgStart]);      
+      return TCL_ERROR;
+  }  
+  // now get the bulk modulus of solid
+     if (Tcl_GetDouble(interp, argv[33+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of solid %s",      
+    			  eleID, argv[33+eleArgStart]);      
+      return TCL_ERROR;
+  }  
+  // now get the bulk modulus of fluid
+     if (Tcl_GetDouble(interp, argv[34+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of fluid %s",      
+    			  eleID, argv[34+eleArgStart]);      
+      return TCL_ERROR;
+  }  
   
   // now create the EightNodeBrick and add it to the Domain
   TwentyNodeBrick_u_p_U *theEle = new TwentyNodeBrick_u_p_U(eleID, nodes[ 0], nodes [1], nodes[ 2], nodes[ 3], nodes[ 4],
@@ -155,7 +189,8 @@ TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inte
                                                       nodes[10], nodes[11], nodes[12], nodes[13], nodes[14],
                                                       nodes[15], nodes[16], nodes[17], nodes[18], nodes[19],
 					              theMaterial, bodyforces[0], bodyforces[1], bodyforces[2], 
-						      porosity, alpha, solidDensity, fluidDensity, 0.0);
+						      porosity, alpha, solidDensity, fluidDensity,
+						      perm_x, perm_y, perm_z, kks, kkf, 0.0);
 					      
   if (theEle == 0) {
       g3ErrorHandler->warning("command: element Brick20N_u_p_U %d - out of memory", eleID);      

@@ -16,8 +16,9 @@
 // DESIGNER:          Boris Jeremic, Xiaoyan Wu
 // PROGRAMMER:        Boris Jeremic, Xiaoyan Wu
 // DATE:              Aug. 2001
-// UPDATE HISTORY:    Modified from EightNodeBrick_u_p_U.h.                    
-//									       
+// UPDATE HISTORY:    Modified from EightNodeBrick_u_p_U.h.   Aug. 2001           
+//		      01/16/2002    Xiaoyan
+//		      Add the permeability tensor and ks, kf  to the constructor  Xiaoyan 
 //
 //  "Coupled system" : Solid and fluid coexist.
 //                    u-- Solid displacement
@@ -81,7 +82,9 @@ class TwentyNodeBrick_u_p_U: public Element
                    int node_numb_13, int node_numb_14, int node_numb_15, int node_numb_16,
                    int node_numb_17, int node_numb_18, int node_numb_19, int node_numb_20,
                    NDMaterial * Globalmmodel, double b1, double b2, double b3,
-		   double nn, double alf, double rs,double rf, double pp);
+		   double nn, double alf, double rs,double rf,
+		   double permb_x, double permb_y, double permb_z, 
+		   double kks, double kkf,double pp);
 		   // int dir, double surflevel);
 		   //, EPState *InitEPS);   const char * type,
 
@@ -93,7 +96,7 @@ class TwentyNodeBrick_u_p_U: public Element
     tensor dH_drst_at(double r1, double r2, double r3);	   // wxy added 08/27/2001
     tensor interp_poli_at(double r1, double r2, double r3);
     tensor dh_drst_at(double r1, double r2, double r3);
-    tensor k_at(double r1, double r2, double r3);	   // wxy added 08/27/2001
+//    tensor k_at(double r1, double r2, double r3);	   // wxy added 08/27/2001
 //    tensor HU_drst_at(double r1, double r2, double r3);	   // wxy added 08/27/2001
 //    tensor dHU_drst_at(double r1, double r2, double r3);   // wxy added 08/27/2001
 
@@ -250,22 +253,22 @@ class TwentyNodeBrick_u_p_U: public Element
     Node *nd20Ptr;
 
 
-    Matrix K;		// Element total stiffness Matrix (56*56) (including Kep, G1, G2, P)
-//    matrix Kep;		// Element stiffness Matrix (24*24) (Solid part)
+    static Matrix K;		// Element total stiffness Matrix (140*140) (including Kep, G1, G2, P)
+//    matrix Kep;		// Element stiffness Matrix (60*60) (Solid part)
 //    matrix G1;		// (24*8)
 //    matrix G2;		// (24*8)
 //    matrix P;		// Pore pressure matrix (8*8)
 
-    Matrix C;		// The total damping matrix (56*56)    // wxy added 08/27/2001
+    static Matrix C;		// The total damping matrix (140*140)    // wxy added 08/27/2001
 //    matrix C1;		//           damping matrix (24*24)    // wxy added 08/27/2001
 //    matrix C2;		//           damping matrix (24*24)    // wxy added 08/27/2001
 //    matrix C3;		//           damping matrix (24*24)    // wxy added 08/27/2001
 
-    Matrix M;		// Element total mass matrix (56*56) (including Ms and Mf) // wxy added 08/27/2001
+    static Matrix M;		// Element total mass matrix (140*140) (including Ms and Mf) // wxy added 08/27/2001
 //    matrix Ms;		// Element solid mass matrix (24*24) // wxy added 08/27/2001
 //    matrix Mf;		// Element fluid mass matrix (24*24)  // wxy added 08/27/2001
 
-    Vector p;		// Element resisting force vector (24). 
+    static Vector p;		// Element resisting force vector (60). 
                         // I changed P to p. P for the matrix. Xiaoyan 09/24/2001
     Vector Q;		// Applied nodal loads
     Vector bf;  	// Body forces
@@ -273,7 +276,7 @@ class TwentyNodeBrick_u_p_U: public Element
     tensor fs;          // Force      // wxy added 09/20/2001
     tensor fp;			      // wxy added 09/20/2001
     tensor ff;			      // wxy added 09/20/2001
-    
+    static tensor k;		// wxy added 01/16/2002
     // double thickness;	// Element thickness
     double n;          		     // prrosity                              // wxy added 08/27/2001
     double alpha;		     // coefficient for soil approximate equal 1. 
@@ -286,8 +289,7 @@ class TwentyNodeBrick_u_p_U: public Element
 //    double rho=(1-n)*rho_s+n*rho_f;  // Total density       // wxy added 08/27/2001
     double pressure;   		     // Normal surface traction (pressure) over entire element
     int    order;      		     // Order of the quadrature rule
-
-
+    
     Matrix J;		// Jacobian of transformation
     Matrix L;		// Inverse of J
     Matrix B;		// Strain interpolation matrix

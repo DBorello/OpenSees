@@ -17,7 +17,9 @@
 // PROGRAMMER:        Boris Jeremic, Xiaoyan Wu
 // DATE:              Sept. 2001
 // UPDATE HISTORY:    Modified from EightNodeBrick.h.  Reorganized a lot by Xiaoyan
-//									       
+//		      01/24/2002    Xiaoyan
+//		      Add the permeability tensor and ks, kf  to the constructor  Xiaoyan 
+						       
 //
 //  "Coupled system": Solid and fluid coexist.
 //                    u-- Solid displacement
@@ -78,7 +80,9 @@ class EightNodeBrick_u_p_U: public Element
                    int node_numb_1, int node_numb_2, int node_numb_3, int node_numb_4,
                    int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
                    NDMaterial * Globalmmodel, double b1, double b2, double b3,
-		   double nn, double alf, double rs,double rf, double pp);
+		   double nn, double alf, double rs,double rf, 
+		   double permb_x, double permb_y, double permb_z, 
+		   double kks, double kkf, double pp);
 		   // int dir, double surflevel);
 		   //, EPState *InitEPS);   const char * type,
 
@@ -90,7 +94,7 @@ class EightNodeBrick_u_p_U: public Element
     tensor dH_drst_at(double r1, double r2, double r3);	   // wxy added 08/27/2001
     tensor interp_poli_at(double r1, double r2, double r3);
     tensor dh_drst_at(double r1, double r2, double r3);
-    tensor k_at(double r1, double r2, double r3);	   // wxy added 08/27/2001
+//    tensor k_at(double r1, double r2, double r3);	   // wxy added 08/27/2001
 //    tensor HU_drst_at(double r1, double r2, double r3);	   // wxy added 08/27/2001
 //    tensor dHU_drst_at(double r1, double r2, double r3);   // wxy added 08/27/2001
 
@@ -112,16 +116,16 @@ class EightNodeBrick_u_p_U: public Element
     matrix stiffness_matrixG1(const tensor  G1);
     matrix stiffness_matrixG2(const tensor  G2);
     matrix stiffness_matrixP(const tensor  P);
-    void set_stiffness_MatrixK();
+//    void set_stiffness_MatrixK();
 
     matrix damping_matrixC1(const tensor C1);
     matrix damping_matrixC2(const tensor C2);
     matrix damping_matrixC3(const tensor C3);
-    void set_damping_MatrixC();
+//    void set_damping_MatrixC();
 
     matrix mass_matrixMs(const tensor  Ms);	   // wxy added 08/27/2001
     matrix mass_matrixMf(const tensor  Mf);	   // wxy added 08/27/2001
-    void  set_mass_MatrixM();              	   // wxy added 08/27/2001
+//    void  set_mass_MatrixM();              	   // wxy added 08/27/2001
 
     tensor Jacobian_3D(tensor dh);
     tensor Jacobian_3Dinv(tensor dh);
@@ -232,22 +236,22 @@ class EightNodeBrick_u_p_U: public Element
     Node *nd7Ptr;
     Node *nd8Ptr;
 
-    Matrix K;		// Element total stiffness Matrix (56*56) (including Kep, G1, G2, P)
+    static Matrix K;		// Element total stiffness Matrix (56*56) (including Kep, G1, G2, P)
 //    matrix Kep;		// Element stiffness Matrix (24*24) (Solid part)
 //    matrix G1;		// (24*8)
 //    matrix G2;		// (24*8)
 //    matrix P;		// Pore pressure matrix (8*8)
 
-    Matrix C;		// The total damping matrix (56*56)    // wxy added 08/27/2001
+    static Matrix C;		// The total damping matrix (56*56)    // wxy added 08/27/2001
 //    matrix C1;		//           damping matrix (24*24)    // wxy added 08/27/2001
 //    matrix C2;		//           damping matrix (24*24)    // wxy added 08/27/2001
 //    matrix C3;		//           damping matrix (24*24)    // wxy added 08/27/2001
 
-    Matrix M;		// Element total mass matrix (56*56) (including Ms and Mf) // wxy added 08/27/2001
+    static Matrix M;		// Element total mass matrix (56*56) (including Ms and Mf) // wxy added 08/27/2001
 //    matrix Ms;		// Element solid mass matrix (24*24) // wxy added 08/27/2001
 //    matrix Mf;		// Element fluid mass matrix (24*24)  // wxy added 08/27/2001
 
-    Vector p;		// Element resisting force vector (24). 
+    static Vector p;		// Element resisting force vector (24). 
                         // I changed P to p. P for the matrix. Xiaoyan 09/24/2001
     Vector Q;		// Applied nodal loads
     Vector bf;  	// Body forces
@@ -255,7 +259,8 @@ class EightNodeBrick_u_p_U: public Element
     tensor fs;          // Force      // wxy added 09/20/2001
     tensor fp;			      // wxy added 09/20/2001
     tensor ff;			      // wxy added 09/20/2001
-    
+    static tensor k;		// wxy added 01/16/2002
+ 
     // double thickness;	// Element thickness
     double n;          		     // prrosity                              // wxy added 08/27/2001
     double alpha;		     // coefficient for soil approximate equal 1. 

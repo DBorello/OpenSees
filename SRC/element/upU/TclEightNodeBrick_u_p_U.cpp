@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-01-15 02:08:23 $
+// $Revision: 1.3 $
+// $Date: 2002-01-25 19:12:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/TclEightNodeBrick_u_p_U.cpp,v $
                                                                         
                                                                         
@@ -65,16 +65,18 @@ TclModelBuilder_addEightNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inter
   //  argv[15]  argv[16]   argv[17]	 argv[18]    
   // Xiaoyan added this comments. 01/07/2002
 
-  if ((argc-eleArgStart) < 18) {
+  if ((argc-eleArgStart) < 23) {
       g3ErrorHandler->warning("command: element Brick8_u_p_U - insufficient args - want %s",
-          "element Brick8_u_p_U eleTag? node1? node2? ... node8? matTag? bforce1? bforce2? bforce3? \n  porosity? alpha? solidDensity? fluidDensity? pressure?\n");
+          "element Brick8_u_p_U eleTag? node1? node2? ... node8? matTag? bforce1? bforce2? bforce3? \n"
+	  " porosity? alpha? solidDensity? fluidDensity? fluid_bulk_modulus? solid_bulk_modulus? pressure?\n");
       return TCL_ERROR;
   }    
 
   // get the id and end nodes 
   int eleID, matID;
-  int nodes[8];
+  int nodes[8];					  
   double bodyforces[3], porosity, alpha, solidDensity, fluidDensity;
+  double perm_x, perm_y, perm_z, kks, kkf;
   //char *type;
   
   // read the eleTag
@@ -150,12 +152,44 @@ TclModelBuilder_addEightNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inter
       return TCL_ERROR;
   }  
 
+  
+  // now get the permeability in x direction
+     if (Tcl_GetDouble(interp, argv[18+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid permeability in x direction %s",      
+    			  eleID, argv[18+eleArgStart]);      
+      return TCL_ERROR;
+  }  
+  // now get the permeability in y direction
+     if (Tcl_GetDouble(interp, argv[19+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid permeability in y direction %s",      
+    			  eleID, argv[19+eleArgStart]);      
+      return TCL_ERROR;
+  }  
+  // now get the permeability in z direction
+     if (Tcl_GetDouble(interp, argv[20+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid permeability in z direction %s",      
+    			  eleID, argv[20+eleArgStart]);      
+      return TCL_ERROR;
+  }  
  
+  // now get the bulk modulus of solid
+     if (Tcl_GetDouble(interp, argv[21+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of solid %s",      
+    			  eleID, argv[21+eleArgStart]);      
+      return TCL_ERROR;
+  }  
+  // now get the bulk modulus of fluid
+     if (Tcl_GetDouble(interp, argv[22+eleArgStart], &fluidDensity) != TCL_OK) {        // wxy added 01/07/2002
+      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of fluid %s",      
+    			  eleID, argv[22+eleArgStart]);      
+      return TCL_ERROR;
+  }  
   // now create the EightNodeBrick and add it to the Domain
   EightNodeBrick_u_p_U *theEle = new EightNodeBrick_u_p_U(eleID,nodes[0], nodes[1], nodes[2], nodes[3], nodes[4],
                                               nodes[5],nodes[6], nodes[7], theMaterial, 
 					      bodyforces[0], bodyforces[1], bodyforces[2], 
-					      porosity, alpha, solidDensity, fluidDensity, 0.0);
+					      porosity, alpha, solidDensity, fluidDensity, 
+					      perm_x, perm_y, perm_z, kks, kkf,0.0);
 					      
   if (theEle == 0) {
       g3ErrorHandler->warning("command: element Brick8_u_p_U %d - out of memory", eleID);      

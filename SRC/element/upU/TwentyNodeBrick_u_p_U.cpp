@@ -16,8 +16,9 @@
 // DESIGNER:          Boris Jeremic, Xiaoyan Wu
 // PROGRAMMER:        Boris Jeremic, Xiaoyan Wu
 // DATE:              Sep. 2001
-// UPDATE HISTORY:    Modified from EightNodeBrick_u_p_U.cpp       
-//								   
+// UPDATE HISTORY:    Modified from EightNodeBrick_u_p_U.cpp Sep. 2001      
+//		      01/16/2002    Xiaoyan
+//		      Add the permeability tensor and ks, kf  to the constructor  Xiaoyan 
 //
 //
 //  "Coupled system": Solid and fluid coexist.
@@ -35,9 +36,15 @@
 #include <TwentyNodeBrick_u_p_U.h>
 #define FixedOrder 3
 
+// Changed to static data members on 01/16/2002
 
+Matrix TwentyNodeBrick_u_p_U::K(140, 140);      
+Matrix TwentyNodeBrick_u_p_U::C(140, 140);      
+Matrix TwentyNodeBrick_u_p_U::M(140, 140);      
+Vector TwentyNodeBrick_u_p_U::p(60);	   
+tensor TwentyNodeBrick_u_p_U::k(2,def_dim_2,0.0);
 //=========================================================================
-// Constructor. The dimension of K, C and M are(56,56)       Wxy 08/28/2001
+// Constructor. The dimension of K, C and M are(140,140)     Wxy 08/28/2001
 //=========================================================================
 
 TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
@@ -47,7 +54,9 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
                                int node_numb_13, int node_numb_14, int node_numb_15, int node_numb_16,
                                int node_numb_17, int node_numb_18, int node_numb_19, int node_numb_20,
                                NDMaterial * Globalmmodel, double b1, double b2,double b3,
-			       double nn, double alf, double rs, double rf, double pp)	  
+			       double nn, double alf, double rs, double rf, 
+			       double permb_x,double permb_y,double permb_z, 
+			       double kks, double kkf, double pp)	  
 			       // wxy added rs and rf for the solid and fluid density    08/28/2001
 
 			       //, EPState *InitEPS)  const char * type,
@@ -55,13 +64,19 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
 			       //tensor * IN_tangent_E,  //stresstensor * INstress, //stresstensor * INiterative_stress, //double * IN_q_ast_iterative, //straintensor * INstrain):  __ZHaohui 09-29-2000
 		               
   :Element(element_number, ELE_TAG_TwentyNodeBrick_u_p_U ),
-  connectedExternalNodes(20), K(140,140), C(140,140), M(140,140), p(60), Q(60), bf(3), 
-  n(nn), alpha(alf), rho_s(rs), rho_f(rf),pressure(pp)
+  connectedExternalNodes(20), Q(60), bf(3), 
+  n(nn), alpha(alf), rho_s(rs), rho_f(rf),ks(kks), kf(kkf), pressure(pp)
   {
     //elem_numb = element_number;
     bf(0) = b1;
     bf(1) = b2;
     bf(2) = b3;
+
+    // permeability
+    k.val(1,1)=permb_x;
+    k.val(2,2)=permb_y;
+    k.val(3,3)=permb_z;
+    k.print("k","\n test the permeability tensor k \n");
 
     determinant_of_Jacobian = 0.0;
     
@@ -165,13 +180,13 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
 }
 
 ////#############################################################################
-//=========================================================================
-// Default Constructor. The dimension of K, C and M are(56,56)       Wxy 08/28/2001
-//=========================================================================
+//=================================================================================
+// Default Constructor. The dimension of K, C and M are(140,140)     Wxy 08/28/2001
+//=================================================================================
 
 TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U ():Element(0, ELE_TAG_TwentyNodeBrick_u_p_U ),
-connectedExternalNodes(20), K(140,140), C(140,140), M(140,140), p(60), Q(60), bf(3), 
-n(0), alpha(1), rho_s(0.0),rho_f(0.0), pressure(0.0), mmodel(0)
+connectedExternalNodes(20), Q(60), bf(3), 
+n(0), alpha(1), rho_s(0.0),rho_f(0.0), ks(0.0), kf(0.0), pressure(0.0), mmodel(0)
 {
      matpoint = 0;
 }   
@@ -609,10 +624,10 @@ tensor TwentyNodeBrick_u_p_U::dh_drst_at(double r1, double r2, double r3)
 //=========================================================================
 
 // Xiaoyan added this function just want to test program. the values of k are not correct. 08/28/2001
-tensor TwentyNodeBrick_u_p_U::k_at(double r1, double r2, double r3)
+/*tensor TwentyNodeBrick_u_p_U::k_at(double r1, double r2, double r3)
   {
 
-    int k_dim[] = {3,3};  
+    int k_dim[] = {3,3};  	        
     tensor k(2, k_dim, 0.0);
     k.val(1,1)=r1;
     k.val(2,2)=r2;
@@ -620,7 +635,7 @@ tensor TwentyNodeBrick_u_p_U::k_at(double r1, double r2, double r3)
 
     return k;
   }
-
+*/
 ////#############################################################################
 //Finite_Element * TwentyNodeBrick_u_p_U::new_el(int total)
 //  {
@@ -1110,7 +1125,7 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMs()  //(double rho_s, double n,)
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
-															 static tensor temp = H("K") * I2("ij");
+			      static tensor temp = H("K") * I2("ij");
 		              Ms = Ms + temp("Kij") * H("L") * ((1-N)*RHO_S *weight);
 	      	//Ms.printshort("M");
               }
@@ -1247,8 +1262,8 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC1()  //(double rho_s, double n,)
     //int h_dim[] = {20,3};	// Xiaoyan changed from {60,3} to {24,3}
     //int h_dim[] = {20,3};
     tensor H(1, h_dim, 0.0);
-    int k_dim[]={3,3};	       // Xiaoyan added for permeability tensor 08/27/2001
-    tensor k(2,k_dim,0.0);
+//    int k_dim[]={3,3};	       // Xiaoyan added for permeability tensor 08/27/2001
+//    tensor k(2,k_dim,0.0);
 
     double det_of_Jacobian = 0.0;
 
@@ -1274,7 +1289,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC1()  //(double rho_s, double n,)
                 ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
                 // derivatives of local coordinates with respect to local coordinates
                 dh = dh_drst_at(r,s,t); 
-		k=k_at(r,s,t);    // wxy added for permeability.
+//		k=k_at(r,s,t);    // wxy added for permeability.
                 // Jacobian tensor ( matrix )
                 Jacobian = Jacobian_3D(dh);
                 // 		Jacobian.print("J","Jacobian");
@@ -1306,7 +1321,9 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC1()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		C1 = C1 + H("K")* k_inverse("ij") *H("L")*weight * N*N;
+		static tensor temp=H("K")* k_inverse("ij");
+		
+		C1 = C1 + temp("Kij")*H("L")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
               }
@@ -1346,8 +1363,8 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC2()  //(double rho_s, double n,)
     //int h_dim[] = {20,3};
     tensor H(1, h_dim, 0.0);
     tensor HU(1, h_dim, 0.0);
-   int k_dim[]={3,3};	       // Xiaoyan added for permeability tensor 08/27/2001
-    tensor k(2,k_dim,0.0);
+//   int k_dim[]={3,3};	       // Xiaoyan added for permeability tensor 08/27/2001
+//    tensor k(2,k_dim,0.0);
 
     double det_of_Jacobian = 0.0;
 
@@ -1374,7 +1391,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC2()  //(double rho_s, double n,)
                 ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
                 // derivatives of local coordinates with respect to local coordinates
                 dh = dh_drst_at(r,s,t); 
-		k=k_at(r,s,t);    // wxy added for permeability.
+//		k=k_at(r,s,t);    // wxy added for permeability.
                 // Jacobian tensor ( matrix )
                 Jacobian = Jacobian_3D(dh);
                 // 		Jacobian.print("J","Jacobian");
@@ -1407,7 +1424,8 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC2()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		C2 = C2 + H("L")* k_inverse("ij") *HU("K")*weight * N*N;
+		static tensor temp=H("L")* k_inverse("ij");
+		C2 = C2 + temp("Lij")*HU("K")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
               }
@@ -1446,8 +1464,8 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC3()  //(double rho_s, double n,)
     //int h_dim[] = {20,3};	// Xiaoyan changed from {60,3} to {24,3}
     //int h_dim[] = {20,3};
     tensor HU(1, h_dim, 0.0);
-    int k_dim[]={3,3};	       // Xiaoyan added for permeability tensor 08/27/2001
-    tensor k(2,k_dim,0.0);
+//    int k_dim[]={3,3};	       // Xiaoyan added for permeability tensor 08/27/2001
+//    tensor k(2,k_dim,0.0);
 
     double det_of_Jacobian = 0.0;
 
@@ -1474,7 +1492,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC3()  //(double rho_s, double n,)
                 ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
                 // derivatives of local coordinates with respect to local coordinates
                 dh = dh_drst_at(r,s,t); 
-		k=k_at(r,s,t);    // wxy added for permeability.
+//		k=k_at(r,s,t);    // wxy added for permeability.
                 // Jacobian tensor ( matrix )
                 Jacobian = Jacobian_3D(dh);
                 // 		Jacobian.print("J","Jacobian");
@@ -1507,7 +1525,8 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC3()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		C3 = C3 + HU("L")* k_inverse("ij") *HU("K")*weight * N*N;
+		static tensor temp= HU("L")* k_inverse("ij");
+		C3 = C3 + temp("Lij") *HU("K")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
               }
