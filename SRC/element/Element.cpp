@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-10-30 22:34:23 $
+// $Revision: 1.16 $
+// $Date: 2005-01-08 01:57:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -36,6 +36,7 @@
 #include <stdlib.h>
 
 #include "Element.h"
+#include "ElementResponse.h"
 #include <Renderer.h>
 #include <Vector.h>
 #include <Matrix.h>
@@ -382,13 +383,21 @@ Element::isSubdomain(void)
 Response*
 Element::setResponse(const char **argv, int argc, Information &eleInfo)
 {
-	return 0;
+  if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0 ||
+      strcmp(argv[0],"globalForce") == 0 || strcmp(argv[0],"globalForces") == 0)
+    return new ElementResponse(this, 1, this->getResistingForce());
+  return 0;
 }
 
 int
-Element::getResponse(int responseID, Information &eleInformation)
+Element::getResponse(int responseID, Information &eleInfo)
 {
+  switch (responseID) {
+  case 1: // global forces
+    return eleInfo.setVector(this->getResistingForce());
+  default:
     return -1;
+  }
 }
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
