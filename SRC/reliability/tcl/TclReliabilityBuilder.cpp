@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2004-08-27 17:46:00 $
+// $Revision: 1.15 $
+// $Date: 2004-08-27 18:36:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/tcl/TclReliabilityBuilder.cpp,v $
 
 
@@ -1558,7 +1558,7 @@ TclReliabilityModelBuilder_correlationStructure(ClientData clientData, Tcl_Inter
 	else if (strcmp(argv[1],"homogeneous3") == 0) {
 		for (int i=firstRV; i<=lastRV; i++) {
 			for (int j=i+1; j<=lastRV; j++) {
-				correlationValue = 1.0/(1.0*theta*pow(i-j,2.0));
+				correlationValue = 1.0/(theta*(i-j)*(i-j));
 				sprintf(theCorrelateCommand,"correlate %d %d %10.5f",i,j,correlationValue);
 				Tcl_Eval(interp, theCorrelateCommand );
 			}
@@ -4973,7 +4973,7 @@ TclReliabilityModelBuilder_runGFunVisualizationAnalysis(ClientData clientData, T
 			}
 
 			// Check that the number of points are ok
-			if (numEntries % numRVs) !=0.0) {
+			if ((numEntries % numRVs) !=0.0) {
 				opserr << "ERROR: Wrong number of entries in the the file " << argv[argvCounter] << endln;
 				return TCL_ERROR;
 			}
