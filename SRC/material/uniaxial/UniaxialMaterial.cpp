@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-04 00:48:18 $
+// $Revision: 1.11 $
+// $Date: 2003-05-08 23:03:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/UniaxialMaterial.cpp,v $
                                                                         
                                                                         
@@ -110,7 +110,10 @@ UniaxialMaterial::getCopy(SectionForceDeformation *s)
 Response* 
 UniaxialMaterial::setResponse(const char **argv, int argc, Information &matInfo)
 {
-    // stress
+	if (argc == 0) 
+		return 0;
+	
+	// stress
     if (strcmp(argv[0],"stress") == 0)
 		return new MaterialResponse(this, 1, this->getStress());
 
