@@ -117,6 +117,7 @@ private:
   FDEPState *getFDEPState() const; 
 
   int ImplicitAlgorithm();
+  int SemiImplicitAlgorithm();
 
 private:
   NDMaterial *fde3d;
