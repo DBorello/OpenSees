@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $                                                              
-// $Date: 2002-12-05 22:49:13 $                                                                  
+// $Revision: 1.11 $                                                              
+// $Date: 2003-02-25 22:45:39 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $                                                                
                                                                         
                                                                         
@@ -60,6 +60,7 @@ class NDMaterial : public Material
 // BJ added 19June2002
     virtual double getE(void);
     virtual double getnu(void);
+    virtual double getpsi(void);
 
 
     virtual int setTrialStrain(const Vector &v);

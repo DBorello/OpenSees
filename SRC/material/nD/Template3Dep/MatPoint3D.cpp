@@ -39,7 +39,7 @@ MatPoint3D::MatPoint3D(short int INr_direction_point_number,
                        double r_weight,
                        double s_weight,
                        double t_weight,
-		       NDMaterial * p_INmatmodel
+                       NDMaterial * p_INmatmodel
                        //stresstensor * p_INstress,
                        //stresstensor * p_INiterative_stress,
                        //double         IN_q_ast_iterative,
@@ -271,6 +271,11 @@ const straintensor MatPoint3D::getPlasticStrainTensor() const {
     return matmodel->getPlasticStrainTensor();
 }
 
+//=============================================================================
+double MatPoint3D::getpsi() const 
+{
+    return matmodel->getpsi();
+}
 
 
 //================================================================================

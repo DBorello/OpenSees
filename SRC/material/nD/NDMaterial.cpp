@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $                                                              
-// $Date: 2003-02-14 23:01:25 $                                                                  
+// $Revision: 1.11 $                                                              
+// $Date: 2003-02-25 22:45:39 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -79,6 +79,12 @@ double NDMaterial::getE(void)
 
 // BJ added 19June2002
 double NDMaterial::getnu(void)
+  {
+    return 0.0;
+  }
+
+// BJ added 19June2002
+double NDMaterial::getpsi(void)
   {
     return 0.0;
   }

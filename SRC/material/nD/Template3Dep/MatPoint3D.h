@@ -130,6 +130,8 @@ class MatPoint3D
     const straintensor getStrainTensor() const;
     //Added Aug. 13, 2001 Joey
     const straintensor getPlasticStrainTensor() const;
+    //Added 02-18-03 Joey
+    double getpsi() const; //state parameter
     
     int commitState(void) ;
     int revertToLastCommit(void) ;
