@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-07-13 21:12:38 $
+// $Revision: 1.11 $
+// $Date: 2001-07-19 00:17:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -84,12 +84,14 @@
 #define MAT_TAG_Backbone				10
 #define MAT_TAG_PathIndependent			11
 #define MAT_TAG_SeriesMaterial			12
+#define MAT_TAG_CableMaterial          13
 #define MAT_TAG_Clough1	202
 #define MAT_TAG_Clough2	202
 #define MAT_TAG_Pinch1	203
 #define MAT_TAG_BiLinear	204
 #define MAT_TAG_FedeasMaterial         1000
 #define MAT_TAG_DrainMaterial          2000
+
 
 #define SEC_TAG_Elastic2d   3
 #define SEC_TAG_Elastic3d   4
