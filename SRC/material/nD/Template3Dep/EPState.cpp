@@ -14,11 +14,11 @@
 #                                                                                #
 #                                                                                #
 # DATE:              08-03-2000                                                  #
-# UPDATE HISTORY:                                                                #
+# UPDATE HISTORY:    May 2004 Guanzhou changed Commit to be consistent           #
+#                             with theory                                        #
 #                                                                                #
-#                                                                                  #
-#                                                                                  #
-#                                                                                 #
+#                                                                                #
+#                                                                                #
 # SHORT EXPLANATION: This class is used to hold all state parameters and internal#
 #                    variables in an elasto-plastic constitutive model!          #
 #                                                                                #
@@ -1259,7 +1259,7 @@ void EPState::setInit() {
 }
 
 //================================================================================
-int EPState::commitState () 
+int EPState::commitState ()
   {
 
 
@@ -1268,13 +1268,13 @@ int EPState::commitState ()
 
       int err = 0;
       // commit the variables state
-      CurrentStress   = Stress_init;
-      CurrentStrain   = Strain_init;
-      Eep = Eep_init;
+//Guanzhou out 5-6-2004      CurrentStress   = Stress_init;
+//Guanzhou out 5-6-2004      CurrentStrain   = Strain_init;
+//Guanzhou out 5-6-2004      Eep = Eep_init;
 
-      //Stress_commit   = CurrentStress;
-      //Strain_commit   = CurrentStrain;
-      //Eep_commit = Eep;
+      Stress_commit   = CurrentStress;
+      Strain_commit   = CurrentStrain;
+      Eep_commit = Eep;
 
     int i;
       for (i = 0; i < NScalarVar; i++) {
