@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.18 $
-// $Date: 2003-05-09 22:21:23 $
+// $Revision: 1.19 $
+// $Date: 2003-05-27 21:20:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -89,7 +89,8 @@ Brick::Brick(  int tag,
                          int node6,
                          int node7,
 			 int node8,
-			 NDMaterial &theMaterial ) :
+			 NDMaterial &theMaterial,
+			 double b1, double b2, double b3) :
 Element( tag, ELE_TAG_Brick ),
 connectedExternalNodes(8) , load(0), Ki(0)
 {
@@ -115,7 +116,10 @@ connectedExternalNodes(8) , load(0), Ki(0)
       
   } //end for i 
 
-
+	// Body forces
+	b[0] = b1;
+	b[1] = b2;
+	b[2] = b3;
 }
 //******************************************************************
 
@@ -309,7 +313,12 @@ const Matrix&  Brick::getTangentStiff( )
   return stiff ;
 }    
 
+
+//return secant matrix 
+//const Matrix&  Brick::getSecantStiff( ) 
+
 const Matrix&  Brick::getInitialStiff( ) 
+
 {
   if (Ki != 0)
     return *Ki;
@@ -866,9 +875,10 @@ void  Brick::formResidAndTangent( int tang_flag )
       residJ.addMatrixVector(0.0,  BJtran,stress,1.0);
 
       //residual 
-      for ( p = 0; p < ndf; p++ )
+      for ( p = 0; p < ndf; p++ ) {
         resid( jj + p ) += residJ(p)  ;
-
+	    resid( jj + p ) -= dvol[i]*b[p]*shp[3][j];
+      }
 
       if ( tang_flag == 1 ) {
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:32:49 $
+// $Revision: 1.4 $
+// $Date: 2003-05-27 21:20:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/TclBrickCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -123,9 +123,35 @@ TclModelBuilder_addBrick(ClientData clientData, Tcl_Interp *interp,  int argc,
     return TCL_ERROR;
   }
   
+  double b1, b2, b3;
+  if ((argc-eleArgStart) > 11) {
+    if (Tcl_GetDouble(interp, argv[11+eleArgStart], &b1) != TCL_OK) {
+       opserr << "WARNING invalid b1\n";
+       opserr << "Brick element: " << BrickId << endln;
+       return TCL_ERROR;
+	}
+  }
+
+  if ((argc-eleArgStart) > 12) {
+    if (Tcl_GetDouble(interp, argv[12+eleArgStart], &b2) != TCL_OK) {
+       opserr << "WARNING invalid b2\n";
+       opserr << "Brick element: " << BrickId << endln;
+       return TCL_ERROR;
+	}
+  }
+
+  if ((argc-eleArgStart) > 13) {
+    if (Tcl_GetDouble(interp, argv[13+eleArgStart], &b3) != TCL_OK) {
+       opserr << "WARNING invalid b3\n";
+       opserr << "Brick element: " << BrickId << endln;
+       return TCL_ERROR;
+	}
+  }
+
   // now create the Brick and add it to the Domain
   Brick *theBrick = new Brick(BrickId,Node1,Node2,Node3,Node4,
-			      Node5, Node6, Node7, Node8, *theMaterial);
+			      Node5, Node6, Node7, Node8, *theMaterial,
+				  b1, b2, b3);
 
   if (theBrick == 0) {
     opserr << "WARNING ran out of memory creating element\n";
