@@ -2,6 +2,43 @@
 
 include ../Makefile.def
 
+ifeq ($(RELIABILITY), YES_RELIABILITY)
+
+all:
+	@$(RM) $(RMFLAGS) $(FE_LIBRARY);
+	@$(CD) $(FE)/matrix; $(MAKE);
+	@$(CD) $(FE)/nDarray; $(MAKE);
+	@$(CD) $(FE)/database; $(MAKE);
+	@$(CD) $(FE)/system_of_eqn; $(MAKE);
+	@$(CD) $(FE)/modelbuilder; $(MAKE);
+	@$(CD) $(FE)/tagged; $(MAKE);
+	@$(CD) $(FE)/material; $(MAKE);
+	@$(CD) $(FE)/analysis; $(MAKE);
+	@$(CD) $(FE)/graph; $(MAKE);
+	@$(CD) $(FE)/utility; $(MAKE);
+	@$(CD) $(FE)/convergenceTest; $(MAKE);
+	@$(CD) $(FE)/recorder; $(MAKE);
+	@$(CD) $(FE)/tcl; $(MAKE);
+	@$(CD) $(FE)/renderer; $(MAKE);
+	@$(CD) $(FE)/domain; $(MAKE);
+	@$(CD) $(FE)/handler; $(MAKE);
+	@$(CD) $(FE)/actor; $(MAKE);
+	@$(CD) $(FE)/machine; $(MAKE);
+	@$(CD) $(FE)/element; $(MAKE);
+	@$(CD) $(FE)/reliability; $(MAKE);
+	@$(CD) $(FE)/coordTransformation; $(MAKE);
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS) \
+	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
+	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
+	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) $(ELEMENT_BJ_LIBS) \
+	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
+	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) \
+	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
+	$(DRAIN_LIBS)
+	@$(RANLIB) $(FE_LIBRARY)
+
+else
+
 all:
 	@$(RM) $(RMFLAGS) $(FE_LIBRARY);
 	@$(CD) $(FE)/matrix; $(MAKE);
@@ -33,6 +70,8 @@ all:
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
 	$(DRAIN_LIBS)
 	@$(RANLIB) $(FE_LIBRARY)
+
+endif
 
 skypack:
 	@$(CD) $(HOME)/lib; rm -f $(HOME)/lib/libskypack.a;     
@@ -352,6 +391,12 @@ SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/TclModelBuilderSectionCommand.o
 
 
+ifeq ($(PROGRAMMING_MODE), THREADS)
+SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/ThreadedSuperLU.o 
+else
+SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o 
+endif
+
 SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 	$(FE)/system_of_eqn/Solver.o \
 	$(FE)/system_of_eqn/linearSOE/LinearSOE.o \
@@ -374,7 +419,7 @@ SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 	$(FE)/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinSubstrSolver.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSolver.o \
-	$(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o \
+	$(SUPER_LU_OBJ) \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.o \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.o 
 
@@ -544,6 +589,7 @@ wipe: spotless
 	@$(CD) $(FE)/machine; $(MAKE) wipe;
 	@$(CD) $(FE)/coordTransformation; $(MAKE) wipe;
 	@$(CD) $(FE)/element; $(MAKE) wipe;
+	@$(CD) $(FE)/reliability; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
