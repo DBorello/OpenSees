@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:29:13 $
+// $Revision: 1.3 $
+// $Date: 2001-10-10 18:32:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Information.cpp,v $
                                                                         
                                                                         
@@ -76,9 +76,9 @@ Information::Information(const Vector &val)
 	// Make a copy
     theVector = new Vector(val);
 
-	if (theVector == 0)
-		g3ErrorHandler->warning("%s -- failed to allocate Vector",
-			"Information::Information");
+    if (theVector == 0)
+      g3ErrorHandler->warning("%s -- failed to allocate Vector",
+			      "Information::Information");
 }
 
 Information::Information(const Matrix &val) 
@@ -184,20 +184,21 @@ void
 Information::Print(ostream &s, int flag)
 {
     if (theType == IntType)
-		s << theInt << endl;
-	else if (theType == DoubleType)
-		s << theDouble << endl;
-	else if (theType == IdType && theID != 0)
-		s << *theID;
-	else if (theType == VectorType && theVector != 0)
-		s << *theVector;
-	else if (theType == MatrixType && theMatrix != 0)
-		s << *theMatrix;
-	else if (theType == TensorType && theTensor != 0)
-		// No overloaded << for Tensors yet!
-		//s << *theTensor;
-		s << "No Tensor output";
-	else
-		return;
-
+      s << theInt << " ";
+    else if (theType == DoubleType)
+      s << theDouble << " ";
+    else if (theType == IdType && theID != 0)
+      for (int i=0; i<theID->Size(); i++)
+	s << (*theID)(i) << " ";
+    else if (theType == VectorType && theVector != 0)
+      for (int i=0; i<theVector->Size(); i++)
+	s << (*theVector)(i) << " ";
+    else if (theType == MatrixType && theMatrix != 0)
+      s << *theMatrix;
+    else if (theType == TensorType && theTensor != 0)
+      // No overloaded << for Tensors yet!
+      //s << *theTensor;
+      s << "No Tensor output";
+    else
+      return;
 }
