@@ -194,6 +194,11 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/ViscousMaterial.o \
 	$(FE)/material/uniaxial/PathIndependentMaterial.o \
 	$(FE)/material/nD/NDMaterial.o \
+	$(FE)/material/nD/J2Plasticity.o \
+	$(FE)/material/nD/J2PlaneStress.o \
+	$(FE)/material/nD/J2PlaneStrain.o \
+	$(FE)/material/nD/J2AxiSymm.o \
+	$(FE)/material/nD/J2ThreeDimensional.o \
 	$(FE)/material/nD/ElasticIsotropicMaterial.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStress2D.o \
 	$(FE)/material/nD/ElasticIsotropicPlaneStrain2D.o \
@@ -273,6 +278,8 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/node/NodalLoad.o \
 	$(FE)/domain/constraints/SP_Constraint.o \
 	$(FE)/domain/constraints/MP_Constraint.o \
+	$(FE)/domain/constraints/ImposedMotionSP.o \
+	$(FE)/domain/constraints/ImposedMotionSP1.o \
 	$(FE)/domain/constraints/RigidDiaphragm.o \
 	$(FE)/domain/constraints/RigidRod.o \
 	$(FE)/domain/constraints/RigidBeam.o \
@@ -281,6 +288,7 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/load/Load.o \
 	$(FE)/domain/pattern/LoadPattern.o \
 	$(FE)/domain/pattern/EarthquakePattern.o \
+	$(FE)/domain/pattern/MultiSupportPattern.o \
 	$(FE)/domain/pattern/UniformExcitation.o \
 	$(FE)/domain/pattern/LoadPatternIter.o \
 	$(FE)/domain/pattern/TimeSeries.o \
@@ -291,10 +299,14 @@ DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/pattern/PathSeries.o \
 	$(FE)/domain/pattern/PathTimeSeries.o \
 	$(FE)/domain/pattern/TclPatternCommand.o \
+	$(FE)/domain/pattern/TclSeriesCommand.o \
+	$(FE)/domain/pattern/TclSeriesIntegratorCommand.o \
+	$(FE)/domain/pattern/TimeSeriesIntegrator.o \
+	$(FE)/domain/pattern/TrapezoidalTimeSeriesIntegrator.o \
 	$(FE)/domain/groundMotion/GroundMotion.o \
-	$(FE)/domain/groundMotion/GroundMotionIntegrator.o \
 	$(FE)/domain/groundMotion/GroundMotionRecord.o \
-	$(FE)/domain/groundMotion/TrapezoidalGroundMotionIntegrator.o \
+	$(FE)/domain/groundMotion/InterpolatedGroundMotion.o \
+	$(FE)/domain/groundMotion/TclGroundMotionCommand.o \
 	$(FE)/domain/subdomain/Subdomain.o \
 	$(FE)/domain/subdomain/SubdomainNodIter.o \
 	$(FE)/analysis/analysis/DomainUser.o 
@@ -304,6 +316,7 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/analysis/StaticAnalysis.o \
 	$(FE)/analysis/analysis/TransientAnalysis.o \
 	$(FE)/analysis/analysis/DirectIntegrationAnalysis.o \
+	$(FE)/analysis/analysis/VariableTimeStepDirectIntegrationAnalysis.o \
 	$(FE)/analysis/analysis/DomainDecompositionAnalysis.o \
 	$(FE)/analysis/analysis/SubstructuringAnalysis.o \
 	$(FE)/analysis/algorithm/SolutionAlgorithm.o \
@@ -311,6 +324,7 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/Linear.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/NewtonRaphson.o \
 	$(FE)/analysis/algorithm/equiSolnAlgo/ModifiedNewton.o \
+	$(FE)/analysis/algorithm/equiSolnAlgo/NewtonLineSearch.o \
 	$(FE)/convergenceTest/ConvergenceTest.o \
 	$(FE)/convergenceTest/CTestNormUnbalance.o \
 	$(FE)/convergenceTest/CTestNormDispIncr.o \
