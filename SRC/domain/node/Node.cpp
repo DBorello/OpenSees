@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-01-09 03:30:51 $
+// $Revision: 1.3 $
+// $Date: 2001-01-23 09:37:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1217,7 +1217,6 @@ Node::Print(ostream &s, int flag)
 {
   if (flag == 0) { // print out everything
     s << "\n Node: " << this->getTag() << endl;
-    if (mass != 0) s << "\tMass : " << *mass;
     s << "\tCoordinates  : " << *Crd;
     if (commitDisp != 0)         
 	s << "\tcommitDisps: " << *commitDisp;
@@ -1227,9 +1226,10 @@ Node::Print(ostream &s, int flag)
 	s << "\tcommitAccels: " << *commitAccel;
     if (unbalLoad != 0)
       s << "\t unbalanced Load: " << *unbalLoad;
-
+    if (mass != 0) 
+	s << "\tMass : " << *mass;
     if (theEigenvectors != 0)
-	s << "\t Eigenvectors: \n" << *theEigenvectors;
+	s << "\t Eigenvectors: " << *theEigenvectors;
     s << "\n"; 
   }
   else if (flag == 1) { // print out: nodeId displacements

@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:40:45 $
+// $Revision: 1.3 $
+// $Date: 2001-01-23 09:37:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -1331,52 +1331,6 @@ NLBeamColumn3d::Print(ostream &s, int flag)
 {
    if (flag == 1)
    {
-/*    static Vector yAxis(3), zAxis(3);
-     
-      this->getLocalAxes(yAxis, zAxis);
-                        
-      s << "\n#ELEMENT " << xAxis(0) << " " << xAxis(1) << " " << xAxis(2)
-                  << " " << zAxis(0) << " " << zAxis(1) << " " << zAxis(2); 
-   
-      // print node coordinates
-      const Vector &node1Crd = node1Ptr->getCrds();
-      const Vector &node2Crd = node2Ptr->getCrds();
-
-      // determine global displacements
-      const Vector &node1Disp = node1Ptr->getTrialDisp();
-      const Vector &node2Disp = node2Ptr->getTrialDisp();
-
-      s << "\n#NODE " << node1Crd(0) << " " << node1Crd(1) << " " << node1Crd(2)
-               << " " << node1Disp(0) << " " << node1Disp(1) << " " << node1Disp(2)
-               << " " << node1Disp(3) << " " << node1Disp(4) << " " << node1Disp(5);
-
-      s << "\n#NODE " << node2Crd(0) << " " << node2Crd(1) << " " << node2Crd(2)
-               << " " << node2Disp(0) << " " << node2Disp(1) << " " << node2Disp(2)
-               << " " << node2Disp(3) << " " << node2Disp(4) << " " << node2Disp(5);
-      
-      this->compSectionResponse();
-
-      static Vector S(2);  // shear forces and torsion;
-      static Vector currDistrLoad(NL);
-  
-      currDistrLoad.Zero();  // SPECIFY LOAD HERE!!!!!!!!! 
-
-      for (i=0; i<nSections; i++)
-      {
-         xi = xi_pt(i,0);
- 
-         S(0) =  (Se(2)+Se(1))/L + currDistrLoad(1)*(xi - 0.5)* L;
-         S(1) = -(Se(3)+Se(4))/L + currDistrLoad(2)*(xi - 0.5)* L;
- 
-         sections[i]->setShearForces(S);
-      } 
-
-      
-      for (int i = 0; i < nSections; i++)
-         sections[i]->Print(s, flag); */
-   }
-   else
-   {
       s << "\nElement: " << this->getTag() << " Type: NLBeamColumn3d ";
       s << "\tConnected Nodes: " << connectedExternalNodes ;
       s << "\tNumber of Sections: " << nSections;
@@ -1389,7 +1343,14 @@ NLBeamColumn3d::Print(ostream &s, int flag)
        s << "\tStiffness Matrix:\n" << kv;
        s << "\tResisting Force: " << Se;
 	   sections[0]->Print(s,flag);
-
+   }
+   else
+   {
+      s << "\nElement: " << this->getTag() << " Type: NLBeamColumn3d ";
+      s << "\tConnected Nodes: " << connectedExternalNodes ;
+      s << "\tNumber of Sections: " << nSections << endl;
+      s << "\tElement End Forces (P MZ1 MZ2 MY1 MY2 T): " << Secommit;
+      s << "\tResisting Force: " << P;
    }
 }
 

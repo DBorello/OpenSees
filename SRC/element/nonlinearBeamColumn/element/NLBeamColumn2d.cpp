@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:40:45 $
+// $Revision: 1.3 $
+// $Date: 2001-01-23 09:37:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -1308,15 +1308,7 @@ void
 NLBeamColumn2d::Print(ostream &s, int flag)
 {
    if (flag == 1)
-   { /*    
-      s << "\n#ELEMENT " << cosTheta << " " << sinTheta;
-    
-      this->compSectionDispls();
-      for (int i = 0; i < nSections; i++)
-         sections[i]->Print(s, flag);  */
-   }
-   else
-   {
+   { 
       s << "\nElement: " << this->getTag() << " Type: NLBeamColumn2d ";
       s << "\tConnected Nodes: " << connectedExternalNodes ;
       s << "\tNumber of Sections: " << nSections;
@@ -1326,6 +1318,15 @@ NLBeamColumn2d::Print(ostream &s, int flag)
          s << "\nSection "<<i<<" :" << *sections[i];
  
       s << "\tStiffness Matrix:\n" << K;
+      s << "\tResisting Force: " << P;
+   }
+   else
+   {
+      s << "\nElement: " << this->getTag() << " Type: NLBeamColumn2d ";
+      s << "\tConnected Nodes: " << connectedExternalNodes ;
+      s << "\tNumber of Sections: " << nSections;
+      s << "\tMass density: " << rho << endl;
+      s << "\tElement End Forces (P M1 M2): " << Secommit;
       s << "\tResisting Force: " << P;
    }
 }
