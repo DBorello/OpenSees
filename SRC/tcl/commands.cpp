@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.38 $
-// $Date: 2002-10-24 22:29:52 $
+// $Revision: 1.39 $
+// $Date: 2002-12-05 22:42:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -103,6 +103,7 @@ extern "C" {
 // constraint handlers
 #include <PlainHandler.h>
 #include <PenaltyConstraintHandler.h>
+//#include <PenaltyHandlerNoHomoSPMultipliers.h>
 #include <LagrangeConstraintHandler.h>
 #include <TransformationConstraintHandler.h>
 
@@ -311,6 +312,10 @@ int g3AppInit(Tcl_Interp *interp) {
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
     Tcl_CreateCommand(interp, "stop", &stopTimer, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+    Tcl_CreateCommand(interp, "rayleigh", &rayleighDamping, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);       
+
+
 #ifdef _RELIABILITY
     Tcl_CreateCommand(interp, "reliability", &reliability, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
@@ -1408,7 +1413,21 @@ specifyConstraintHandler(ClientData clientData, Tcl_Interp *interp, int argc,
       return TCL_ERROR;	
     theHandler = new PenaltyConstraintHandler(alpha1, alpha2);
   }
-  
+
+  /****** adding later
+  else if (strcmp(argv[1],"PenaltyNoHomoSPMultipliers") == 0) {
+    if (argc < 4) {
+      interp->result = "WARNING: need to specify alpha: handler Penalty alpha ";
+      return TCL_ERROR;
+    }    
+    double alpha1, alpha2;
+    if (Tcl_GetDouble(interp, argv[2], &alpha1) != TCL_OK)	
+      return TCL_ERROR;	
+    if (Tcl_GetDouble(interp, argv[3], &alpha2) != TCL_OK)	
+      return TCL_ERROR;	
+    theHandler = new PenaltyHandlerNoHomoSPMultipliers(alpha1, alpha2);
+  }
+  ***********************/
   else if (strcmp(argv[1],"Lagrange") == 0) {
     double alpha1 = 1.0;
     double alpha2 = 1.0;
@@ -1891,8 +1910,8 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       double gamma;
       double beta;
       double alphaM, betaK, betaKi, betaKc;
-      if (argc != 4 && argc != 8) {
-	interp->result = "WARNING integrator Newmark gamma beta <alphaM> <betaKcurrent> <betaKi> <betaKlastCommitted>";
+      if (argc != 4 && argc != 7 && argc != 8) {
+	interp->result = "WARNING integrator Newmark gamma beta <alphaM betaK betaK0>";
 	return TCL_ERROR;
       }    
       if (Tcl_GetDouble(interp, argv[2], &gamma) != TCL_OK) {
@@ -1903,7 +1922,7 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  interp->result = "WARNING integrator Newmark gamma beta - undefined beta";
 	  return TCL_ERROR;	
       }
-      if (argc == 8) {
+      if (argc == 7 || argc == 8) {
 	  if (Tcl_GetDouble(interp, argv[4], &alphaM) != TCL_OK) {
 	      cerr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - alphaM";	  
 	      return TCL_ERROR;	
@@ -1916,29 +1935,35 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	      cerr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - betaKi";
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[7], &betaKc) != TCL_OK) {
+	  if (argc == 8) {
+	    if (Tcl_GetDouble(interp, argv[7], &betaKc) != TCL_OK) {
 	      cerr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - betaKc";
 	      return TCL_ERROR;	
+	    }
+	    if (betaKc != 0.0) {
+	      cerr << "WARNING integrator Newmark gamma beta alphaM betaK betaKi betaKc - betaKc";	    
+	      cerr << " betaKc no longer used\n";
+	    }
 	  }
       }
       if (argc == 4)
 	  theTransientIntegrator = new Newmark(gamma,beta);       
       else
-	  theTransientIntegrator = new Newmark(gamma,beta,alphaM,betaK,betaKi,betaKc);
+	  theTransientIntegrator = new Newmark(gamma,beta,alphaM,betaK,betaKi);
   }  
   
   else if (strcmp(argv[1],"HHT") == 0) {
       double alpha;
       double alphaM, betaK, betaKi, betaKc;
-      if (argc != 3 && argc != 7) {
-	interp->result = "WARNING integrator HHT alpha <alphaM betaKcurrent betaKi betaKlastCommitted>";
+      if (argc != 3 && argc != 6 && argc != 7) {
+	interp->result = "WARNING integrator HHT alpha <alphaM betaK betaK0>";
 	return TCL_ERROR;
       }    
       if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK) {
 	  interp->result = "WARNING integrator HHT alpha - undefined alpha";	  
 	  return TCL_ERROR;	
       }
-      if (argc == 7) {
+      if (argc == 6 || argc == 7) {
 	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
 	      cerr << "WARNING integrator HHT alpha alphaM betaK betaKi betaKc - alphaM";	  
 	      return TCL_ERROR;	
@@ -1951,21 +1976,28 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	      cerr << "WARNING integrator HHT alpha alphaM betaK betaKi betaKc - betaKi";
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
-	      cerr << "WARNING integrator HHT alpha alphaM betaK betaKi betaKc - betaKc";
+	  if (argc == 7) {
+	    if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+	      cerr << "WARNING integrator HHT alpha alphaM betaK betaKi betaKc - betaKi";
 	      return TCL_ERROR;	
+	    }
+	    if (betaKc != 0.0) {
+	      cerr << "WARNING integrator HHT alpha alphaM betaK betaKi betaKc - betaKc";	    
+	      cerr << " betaKc no longer used\n";
+	    }
 	  }
-      }      
+      } 
+      
       if (argc == 3)
 	  theTransientIntegrator = new HHT(alpha);       
       else
-	  theTransientIntegrator = new HHT(alpha,alphaM,betaK, betaKi, betaKc);       
+	  theTransientIntegrator = new HHT(alpha, alphaM, betaK, betaKi);       
   }    
 
   else if (strcmp(argv[1],"GeneralizedHHT") == 0) {
       double alpha, beta, gamma;
       double alphaM, betaK, betaKi, betaKc;
-      if (argc != 5 && argc != 9) {
+      if (argc != 5 && argc != 9 && argc != 8) {
 	interp->result = "WARNING integrator HHT alpha beta gamma <alphaM betaKcurrent betaKi betaKlastCommitted>";
 	return TCL_ERROR;
       }    
@@ -1981,7 +2013,7 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  interp->result = "WARNING integrator HHT alpha beta gamma - undefined gamma";	  
 	  return TCL_ERROR;	
       }
-      if (argc == 9) {
+      if (argc == 8 || argc == 9) {
 	  if (Tcl_GetDouble(interp, argv[5], &alphaM) != TCL_OK) {
 	      cerr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - alphaM";	  
 	      return TCL_ERROR;	
@@ -1994,15 +2026,21 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	      cerr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - betaKi";
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[8], &betaKc) != TCL_OK) {
+	  if (argc == 9) {
+	    if (Tcl_GetDouble(interp, argv[8], &betaKc) != TCL_OK) {
 	      cerr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - betaKc";
 	      return TCL_ERROR;	
-	  }
+	    }
+	    if (betaKc != 0.0) {
+	      cerr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - betaKc";
+	      cerr << " betaKc no longer used\n";
+	    }   
+	  }   
       }      
       if (argc == 5)
 	  theTransientIntegrator = new HHT(alpha, beta, gamma);       
       else
-	  theTransientIntegrator = new HHT(alpha, beta, gamma, alphaM,betaK, betaKi, betaKc);       
+	  theTransientIntegrator = new HHT(alpha, beta, gamma, alphaM,betaK, betaKi);       
   }    
 
 
@@ -2010,7 +2048,7 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       double gamma;
       double beta;
       double alphaM, betaK, betaKi, betaKc;
-      if (argc != 4 && argc != 8) {
+      if (argc != 4 && argc != 8 && argc != 7) {
 	interp->result = "WARNING integrator Newmark1 gamma beta <alphaM> <betaKcurrent> <betaKi> <betaKlastCommitted>";
 	return TCL_ERROR;
       }    
@@ -2022,7 +2060,8 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  interp->result = "WARNING integrator Newmark1 gamma beta - undefined beta";
 	  return TCL_ERROR;	
       }
-      if (argc == 8) {
+
+      if (argc == 8 || argc == 7) {
 	  if (Tcl_GetDouble(interp, argv[4], &alphaM) != TCL_OK) {
 	      cerr << "WARNING integrator Newmark1 gamma beta alphaM betaK betaKi betaKc - alphaM";	  
 	      return TCL_ERROR;	
@@ -2035,15 +2074,21 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	      cerr << "WARNING integrator Newmark1 gamma beta alphaM betaK betaKi betaKc - betaKi";
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[7], &betaKc) != TCL_OK) {
+	  if (argc == 8) {
+	    if (Tcl_GetDouble(interp, argv[7], &betaKc) != TCL_OK) {
 	      cerr << "WARNING integrator Newmark1 gamma beta alphaM betaK betaKi betaKc - betaKc";
 	      return TCL_ERROR;	
+	    }
+	    if (betaKc != 0.0) {
+	      cerr << "WARNING integrator Newmark1 gamma beta alphaM betaK betaKi betaKc - betaKc";
+	      cerr << " betaKc no longer used\n";
+	    }      
 	  }
       }
       if (argc == 4)
 	  theTransientIntegrator = new Newmark1(gamma,beta);       
       else
-	  theTransientIntegrator = new Newmark1(gamma,beta,alphaM,betaK,betaKi,betaKc);
+	  theTransientIntegrator = new Newmark1(gamma,beta,alphaM,betaK,betaKi);
   }
 
   else if (strcmp(argv[1],"HHT1") == 0) {
@@ -2057,34 +2102,40 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  interp->result = "WARNING integrator HHT alpha - undefined alpha";	  
 	  return TCL_ERROR;	
       }
-      if (argc == 7) {
+      if (argc == 7 || argc == 6) {
 	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
-	      cerr << "WARNING integrator HHT1 gamma beta alphaM betaK betaKi betaKc - alphaM";	  
+	      cerr << "WARNING integrator HHT1 alpha alphaM betaK betaKi betaKc - alphaM";	  
 	      return TCL_ERROR;	
 	  }
 	  if (Tcl_GetDouble(interp, argv[4], &betaK) != TCL_OK) {
-	      cerr << "WARNING integrator HHT1 gamma beta alphaM betaK betaKi betaKc - betaK";
+	      cerr << "WARNING integrator HHT1 alpha alphaM betaK betaKi betaKc - betaK";
 	      return TCL_ERROR;	
 	  }
 	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
-	      cerr << "WARNING integrator HHT1 gamma beta alphaM betaK betaKi betaKc - betaKi";
+	      cerr << "WARNING integrator HHT1 alpha alphaM betaK betaKi betaKc - betaKi";
 	      return TCL_ERROR;	
 	  }
-	  if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
-	      cerr << "WARNING integrator HHT1 gamma beta alphaM betaK betaKi betaKc - betaKc";
+	  if (argc == 7) {
+	    if (Tcl_GetDouble(interp, argv[6], &betaKc) != TCL_OK) {
+	      cerr << "WARNING integrator HHT1 alpha alphaM betaK betaKi betaKc - betaKc";
 	      return TCL_ERROR;	
+	    }
+	    if (betaKc != 0.0) {
+	      cerr << "WARNING integrator HHT1 alpha alphaM betaK betaKi betaKc - betaKc";
+	      cerr << " betaKc no longer used\n";
+	    }      
 	  }
       }      
       if (argc == 3)
 	  theTransientIntegrator = new HHT1(alpha);       
       else
-	  theTransientIntegrator = new HHT1(alpha,alphaM,betaK, betaKi, betaKc);       
+	  theTransientIntegrator = new HHT1(alpha,alphaM,betaK, betaKi);       
   }    
 
   
   else if (strcmp(argv[1],"WilsonTheta") == 0) {
-      double theta, alphaM,betaK;
-      if (argc != 3 && argc != 5) {
+      double theta, alphaM,betaK, betaKi;
+      if (argc != 3 && argc != 6) {
 	interp->result = "WARNING integrator WilsonTheta theta <alphaM> <betaK>";
 	return TCL_ERROR;
       }    
@@ -2092,7 +2143,7 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  interp->result = "WARNING integrator WilsonTheta theta - undefined theta";	  
 	  return TCL_ERROR;	
       }
-      if (argc == 5) {
+      if (argc == 6) {
 	  if (Tcl_GetDouble(interp, argv[3], &alphaM) != TCL_OK) {
 	      cerr << "WARNING integrator WilsonTheta gamma beta alphaM betaK - alphaM";	  
 	      return TCL_ERROR;	
@@ -2101,11 +2152,15 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	      cerr << "WARNING integrator WilsonTheta gamma beta alphaM betaK  - betaK";
 	      return TCL_ERROR;	
 	  }
+	  if (Tcl_GetDouble(interp, argv[5], &betaKi) != TCL_OK) {
+	      cerr << "WARNING integrator WilsonTheta gamma beta alphaM betaK  - betaK";
+	      return TCL_ERROR;	
+	  }
       }            
       if (argc == 3)
 	  theTransientIntegrator = new WilsonTheta(theta);       
       else
-	  theTransientIntegrator = new WilsonTheta(theta,alphaM,betaK);       	  
+	  theTransientIntegrator = new WilsonTheta(theta, alphaM, betaK, betaKi);       	  
   }      
 
   else {
@@ -2524,7 +2579,7 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
       }    
 
     int tag;
-    if (strcmp(argv[1],"element") == 0) {
+    if ((strcmp(argv[1],"element") == 0) || (strcmp(argv[1],"ele") == 0)) {
       if (argc < 3) {
 	interp->result = "WARNING want - remove element eleTag?\n";
 	return TCL_ERROR;
@@ -2566,7 +2621,6 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
       }
     }
 
-
     else if (strcmp(argv[1],"loadPattern") == 0) {
       if (argc < 3) {
 	interp->result = "WARNING want - remove loadPattern patternTag?\n";
@@ -2588,9 +2642,9 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
     }
 
     //Boris Jeremic and Joey Yang -- UC Davis
-    else if (strcmp(argv[1],"SPconstraint") == 0) {
+    else if ((strcmp(argv[1],"SPconstraint") == 0) || (strcmp(argv[1],"sp") == 0)) {
       if (argc < 3) {
-      	interp->result = "WARNING want - remove loadPattern patternTag?\n";
+      	interp->result = "WARNING want - remove SPconstraint spTag?\n";
       	return TCL_ERROR;
       }    
       if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
@@ -2719,8 +2773,7 @@ computeGradients(ClientData clientData, Tcl_Interp *interp, int argc, char **arg
 
 
 int 
-startTimer(ClientData clientData, Tcl_Interp *interp, int argc, 
-	   char **argv)
+startTimer(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 {
   if (theTimer == 0)
     theTimer = new Timer();
@@ -2730,8 +2783,7 @@ startTimer(ClientData clientData, Tcl_Interp *interp, int argc,
 }
 
 int 
-stopTimer(ClientData clientData, Tcl_Interp *interp, int argc, 
-	  char **argv)
+stopTimer(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 {
   if (theTimer == 0)
     return TCL_OK;
@@ -2741,5 +2793,31 @@ stopTimer(ClientData clientData, Tcl_Interp *interp, int argc,
   return TCL_OK;
 }
 
+int 
+rayleighDamping(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
+{
+  int flag = 0; // default flag sent to a nodes Print() method
+
+  if (argc < 4) { 
+    cerr << "WARNING rayleigh alphaM? betaK? betaK0? - not enough arguments to command";
+    return TCL_ERROR;
+  }
+  double alphaM, betaK, betaK0;
+  if (Tcl_GetDouble(interp, argv[1], &alphaM) != TCL_OK) {
+    cerr << "WARNING rayleigh alphaM? betaK? betaK0? - could not read alphaM? ";
+    return TCL_ERROR;	        
+  }    
+  if (Tcl_GetDouble(interp, argv[2], &betaK) != TCL_OK) {
+    cerr << "WARNING rayleigh alphaM? betaK? betaK0? - could not read betaK? ";
+    return TCL_ERROR;	        
+  }        
+  if (Tcl_GetDouble(interp, argv[3], &betaK0) != TCL_OK) {
+    cerr << "WARNING rayleigh alphaM? betaK? betaK0? - could not read betaK0? ";
+    return TCL_ERROR;	        
+  }        
+  
+  theDomain.setRayleighDampingFactors(alphaM, betaK, betaK0);
+  return TCL_OK;
+}
 
 
