@@ -1,5 +1,5 @@
-// $Revision: 1.11 $
-// $Date: 2001-09-22 01:36:57 $
+// $Revision: 1.12 $
+// $Date: 2001-10-09 00:15:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -737,14 +737,14 @@ void PressureIndependMultiYield::updateActiveSurface(void)
   temp = direction.deviator();  
   A = temp && temp;
   B = - 2 * (t1 && temp);
-	if (fabs(B) < LOW_LIMIT) B = 0.; 
+  if (fabs(B) < LOW_LIMIT) B = 0.; 
   C = (t1 && t1) - 2./3.* size * size;
-	if ( fabs(C) < LOW_LIMIT || fabs(C)/(t1 && t1) < LOW_LIMIT ) C = 0.;
-	if (B > 0. || C < 0.) {
+  if ( fabs(C) < LOW_LIMIT || fabs(C)/(t1 && t1) < LOW_LIMIT ) return;
+  if (B > 0. || C < 0.) {
     cerr << "FATAL:PressureIndependMultiYield::updateActiveSurface(): error in surface motion.\n" 
-			   << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endl; 
+	 << "A= " <<A <<" B= " <<B <<" C= "<<C <<" (t1&&t1)= "<<(t1&&t1) <<endl; 
     g3ErrorHandler->fatal(" ");
-	}
+  }
   X = secondOrderEqn(A,B,C,1);  
 
   center += temp * X;
