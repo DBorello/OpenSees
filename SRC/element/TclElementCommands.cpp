@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-07-13 21:11:24 $
+// $Revision: 1.7 $
+// $Date: 2001-07-20 01:38:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -158,7 +158,7 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
     int result = TclModelBuilder_addFeapTruss(clientData, interp, argc, argv,
 					      theTclDomain, theTclBuilder, eleArgStart);
     return result;
-  } else if (strcmp(argv[1],"truss") == 0) {
+  } else if (strcmp(argv[1],"truss") == 0 || strcmp(argv[1],"corotTruss") == 0) {
     int eleArgStart = 1;
     int result = TclModelBuilder_addTruss(clientData, interp, argc, argv,
 					      theTclDomain, theTclBuilder, eleArgStart);

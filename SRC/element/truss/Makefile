@@ -1,6 +1,7 @@
 include ../../../Makefile.def
 
-OBJS       = Truss.o TrussSection.o TclTrussCommand.o
+OBJS       = Truss.o TrussSection.o TclTrussCommand.o \
+	CorotTruss.o
 
 all:         $(OBJS)
 

@@ -177,6 +177,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/beam3d/beam3d02.o \
 	$(FE)/element/truss/Truss.o \
 	$(FE)/element/truss/TrussSection.o \
+	$(FE)/element/truss/CorotTruss.o \
 	$(FE)/element/feap/elmt01.o \
 	$(FE)/element/feap/elmt02.o \
 	$(FE)/element/feap/elmt03.o \
