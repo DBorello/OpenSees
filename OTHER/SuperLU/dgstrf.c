@@ -23,6 +23,8 @@
 #include "dsp_defs.h"
 #include "util.h"
 
+#include <stdlib.h>
+
 void
 dgstrf (char *refact, SuperMatrix *A, double diag_pivot_thresh, 
 	double drop_tol, int relax, int panel_size, int *etree, 
@@ -247,11 +249,13 @@ dgstrf (char *refact, SuperMatrix *A, double diag_pivot_thresh,
     dSetRWork(m, panel_size, dwork, &dense, &tempv);
     
     usepr = lsame_(refact, "Y");
+	
     if ( usepr ) {
 	/* Compute the inverse of perm_r */
 	iperm_r = (int *) intMalloc(m);
 	for (k = 0; k < m; ++k) iperm_r[perm_r[k]] = k;
-    }
+    } else
+		iperm_r = 0;
     iperm_c = (int *) intMalloc(n);
     for (k = 0; k < n; ++k) iperm_c[perm_c[k]] = k;
 
