@@ -39,8 +39,7 @@
 #include <ElementResponse.h>
 
 #include <EightNodeBrick.h>
-#define FixedOrder 2
-
+#define FixedOrder 3
 
 //====================================================================
 //Reorganized constructor ____ Zhaohui 02-10-2000
@@ -51,10 +50,13 @@ EightNodeBrick::EightNodeBrick(int element_number,
                                int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
                                NDMaterial * Globalmmodel, double b1, double b2,double b3,
 			       double r, double p)
-			       // int dirp, double surflevelp)
-			       //, EPState *InitEPS)  const char * type,
-                               // Set it to 3 //int r_int_order, //int s_int_order, //int t_int_order,
-			       //tensor * IN_tangent_E,  //stresstensor * INstress, //stresstensor * INiterative_stress, //double * IN_q_ast_iterative, //straintensor * INstrain):  __ZHaohui 09-29-2000
+
+
+
+
+
+
+
 		               
   :Element(element_number, ELE_TAG_EightNodeBrick ),
   connectedExternalNodes(8), K(24, 24), C(24, 24), M(24, 24), P(24),Q(24), bf(3), 
@@ -3009,6 +3011,7 @@ int EightNodeBrick::commitState ()
     // int order = theQuadRule->getOrder();     // Commented by Xiaoyan
 
     int i;
+    int plastify = 0;
     //int j, k;      // Xiaoyan added k for three dimension		       
     int retVal = 0;
 
@@ -3025,16 +3028,26 @@ int EightNodeBrick::commitState ()
     //if ( this->getTag() == 1 || this->getTag() == 700)
     //{
       //for (i = 0; i < count; i++)
-      for (i = 0; i < 8; i++)
+      for (i = 0; i < 0; i++)
       {
          retVal += matpoint[i]->commitState();
          //if (i == 4 && strcmp(matpoint[i]->matmodel->getType(),"Template3Dep") == 0)
          stresstensor st;
 	 stresstensor prin; 
          straintensor stn;
+         straintensor pl_stn;
          straintensor stnprin;
 
-         st = matpoint[i]->getStressTensor();
+         //checking if element plastified
+	 pl_stn = matpoint[i]->getPlasticStrainTensor();
+	 
+	 double  p_plastc = pl_stn.p_hydrostatic();
+	 if (  fabs(p_plastc) > 0 ) { 
+	    plastify = 1;
+	    break;
+	 }
+	 
+	 st = matpoint[i]->getStressTensor();
        	 prin = st.principal();
          stn = matpoint[i]->getStrainTensor();
        	 stnprin = stn.principal();
@@ -3117,6 +3130,9 @@ int EightNodeBrick::commitState ()
          //}
       }
         
+      //cerr << this->getTag() << " " << plastify << endln;
+         
+
       //cout << " at elements " << this->getTag() << endln;    
 
 
@@ -3714,19 +3730,43 @@ void EightNodeBrick::Print(ostream &s, int flag)
 //=============================================================================
 Response * EightNodeBrick::setResponse (char **argv, int argc, Information &eleInformation) 
 {
+    //========================================================
     if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0)
 		return new ElementResponse(this, 1, P);
     
-    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-		return new ElementResponse(this, 2, K);
+    //========================================================
+    //else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
+    //		return new ElementResponse(this, 2, K);
 
-	/*else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
-		int pointNum = atoi(argv[1]);
-		if (pointNum > 0 && pointNum <= 4)
-			return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo); 
-	    else 
-			return 0;
-	}*/
+    //========================================================
+    else if (strcmp(argv[0],"plastify") == 0 || strcmp(argv[0],"plastified") == 0)
+    {
+       //checking if element plastified
+       int count  = r_integration_order* s_integration_order * t_integration_order;
+       straintensor pl_stn;
+       int plastify = 0;
+       
+       for (int i = 0; i < count; i++) {
+         pl_stn = matpoint[i]->getPlasticStrainTensor();
+	 double  p_plastc = pl_stn.p_hydrostatic();
+	 
+	 if (  fabs(p_plastc) > 0 ) { 
+	    plastify = 1;
+	    break;
+	 }
+       }
+  
+       return new ElementResponse(this, 2, plastify);    
+    } 
+
+    //========================================================
+    /*else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
+    	int pointNum = atoi(argv[1]);
+    	if (pointNum > 0 && pointNum <= 4)
+    		return theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, eleInfo); 
+        else 
+    		return 0;
+    }*/
  
     // otherwise response quantity is unknown for the quad class
     else
@@ -3741,13 +3781,34 @@ int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
 	   case 1:
 	   	return eleInfo.setVector(this->getResistingForce());
       
+	   case 2:
+       	      {
+		//checking if element plastified
+       	        int count  = r_integration_order* s_integration_order * t_integration_order;
+       	        straintensor pl_stn;
+       	        int plastify = 0;
+       	        
+       	        for (int i = 0; i < count; i++) {
+       	          pl_stn = matpoint[i]->getPlasticStrainTensor();
+       	        	 double  p_plastc = pl_stn.p_hydrostatic();
+       	        	 
+       	        	 if (  fabs(p_plastc) > 0 ) { 
+       	        	    plastify = 1;
+       	        	    break;
+       	        	 }
+       	        }
+	   	eleInfo.setInt( plastify );
+		return plastify;
+
+	   
+	      }
 	   /*case 2:
 	   	return eleInfo.setMatrix(this->getTangentStiff());
 	    */
 	   default: 
 	   	return -1;
 	}
-     //return 0;
+     //return ;
 }
 
 

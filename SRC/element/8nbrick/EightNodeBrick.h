@@ -62,7 +62,7 @@
 //#include <fe.h>
 #include <MatPoint3D.h>
 
-//#include <NDMaterial.h>
+#include <NDMaterial.h>
 #include <Template3Dep.h>
 
 
