@@ -1,7 +1,7 @@
 include ../../../../Makefile.def
 
 OBJS       = PySimple1.o  QzSimple1.o TzSimple1.o \
-	TclPyTzQzMaterialCommand.o
+	TclPyTzQzMaterialCommand.o PyLiq1.o TzLiq1.o
 
 all:         $(OBJS)
 
