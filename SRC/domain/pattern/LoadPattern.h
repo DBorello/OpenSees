@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-06-14 06:21:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.h,v $
                                                                         
                                                                         
@@ -92,6 +92,9 @@ class LoadPattern : public DomainComponent
 
     // method to obtain a blank copy of the LoadPattern
     virtual LoadPattern *getCopy(void);
+
+    int setParameter (char **argv, int argc, Information &info);
+    int updateParameter (int parameterID, Information &info);
 
   protected:
 	

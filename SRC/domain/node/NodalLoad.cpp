@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-06-14 06:21:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/NodalLoad.cpp,v $
                                                                         
                                                                         
@@ -31,10 +31,11 @@
 //
 // Purpose: This file contains the implementation of NodalLoad
 
-#include "NodalLoad.h"
+#include <NodalLoad.h>
 #include <stdlib.h>
 #include <Domain.h>
 #include <Channel.h>
+#include <Information.h>
 
 NodalLoad::NodalLoad(int theClasTag)
 :Load(0,theClasTag), 
@@ -182,3 +183,44 @@ NodalLoad::Print(ostream &s, int flag)
 }
 
 
+int
+NodalLoad::setParameter(char **argv, int argc, Information &info)
+{
+	if (argc < 1)
+		return -1;
+
+	if (strcmp(argv[0],"direction1") == 0) {
+		info.theType = DoubleType;
+		return 1;
+	}
+	if (strcmp(argv[0],"direction2") == 0) {
+		info.theType = DoubleType;
+		return 2;
+	}
+	if (strcmp(argv[0],"direction3") == 0) {
+		info.theType = DoubleType;
+		return 3;
+	}
+	else
+		return -1;
+}
+
+int
+NodalLoad::updateParameter(int parameterID, Information &info)
+{
+	switch (parameterID) {
+	case -1:
+		return -1;
+	case 1:
+		(*load)(0) = info.theDouble;
+		return 0;
+	case 2:
+		(*load)(1) = info.theDouble;
+		return 0;
+	case 3:
+		(*load)(2) = info.theDouble;
+		return 0;
+	default:
+		return -1;
+	}
+}

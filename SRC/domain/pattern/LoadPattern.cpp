@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-06-14 06:21:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
                                                                         
@@ -837,4 +837,76 @@ LoadPattern::getCopy(void)
 }
     
     
+int
+LoadPattern::setParameter(char **argv, int argc, Information &info)
+{
+	// Nodal load
+	if (strcmp(argv[0],"loadAtNode") == 0) {
 
+		int nodeNumber = atoi(argv[1]);
+		NodalLoad *thePossibleNodalLoad;
+		NodalLoad *theNodalLoad = 0;
+		NodalLoadIter &theNodalIter = this->getNodalLoads();
+
+		while ((thePossibleNodalLoad = theNodalIter()) != 0) {
+			if ( nodeNumber == thePossibleNodalLoad->getNodeTag() ) {
+				theNodalLoad = thePossibleNodalLoad;
+			}
+		}
+
+		int ok = -1;
+		ok = theNodalLoad->setParameter (&argv[2], argc, info);
+
+		if (ok > 0 )
+			return ok*1000 + nodeNumber;
+		else
+			return -1;
+	}
+
+	// Unknown parameter
+	else
+		return -1;
+}
+
+int
+LoadPattern::updateParameter(int parameterID, Information &info)
+{
+	NodalLoad *thePossibleNodalLoad = 0;
+	NodalLoad *theNodalLoad = 0;
+	NodalLoadIter &theNodalIter = this->getNodalLoads();
+
+	switch (parameterID) {
+	case 1: case -1:  // Not implemented.
+		return -1;
+    default:
+		if (parameterID > 1000  &&  parameterID < 2000)  {
+			int nodeNumber = parameterID-1000;
+			while ((thePossibleNodalLoad = theNodalIter()) != 0)  {
+				if ( nodeNumber == thePossibleNodalLoad->getNodeTag() )  {
+					theNodalLoad = thePossibleNodalLoad;
+				}
+			}
+			return theNodalLoad->updateParameter(1, info);
+		}
+        else if (parameterID > 2000  &&  parameterID < 3000)  {
+            int nodeNumber = parameterID-2000;
+            while ((thePossibleNodalLoad = theNodalIter()) != 0)  {
+                if ( nodeNumber == thePossibleNodalLoad->getNodeTag() )  {
+                    theNodalLoad = thePossibleNodalLoad;
+                }
+            }
+            return theNodalLoad->updateParameter(2, info);
+        }
+        else if (parameterID > 3000  &&  parameterID < 4000)  {
+            int nodeNumber = parameterID-3000;
+            while ((thePossibleNodalLoad = theNodalIter()) != 0)  {
+                if ( nodeNumber == thePossibleNodalLoad->getNodeTag() )  {
+                        theNodalLoad = thePossibleNodalLoad;
+                }
+			}
+			return theNodalLoad->updateParameter(3, info);
+        }
+        else
+			return -1;
+    }
+}
