@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.14 $
-// $Date: 2003-03-04 00:48:18 $
+// $Revision: 1.15 $
+// $Date: 2003-05-15 21:37:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -61,8 +61,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   int startFlag)
 :theDofs(0), theNodes(0), disp(1 + nodes.Size()*dofs.Size()), 
  theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0), 
- db(0), dbColumns(0), numDbColumns(0), sensitivity(psensitivity)
-{
+ db(0), dbColumns(0), numDbColumns(0), sensitivity(psensitivity){
   // verify dof are valid 
   int numDOF = dofs.Size();
   theDofs = new ID(0, numDOF);
@@ -173,6 +172,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 
   // verify the nodes exist 
   count = 0;
+
   int numNode = nodes.Size();
   theNodes = new ID(1, numNode);
   for (i=0; i<numNode; i++) {
@@ -211,10 +211,12 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     dataFlag = 4;
   } else if ((strncmp(dataToStore, "eigen",5) == 0)) {
     int mode = atoi(&(dataToStore[5]));
+    opserr << "MODE: " << mode << endln;
     if (mode > 0)
       dataFlag = 10 + mode;
     else
       dataFlag = 6;
+    opserr << "DATAFLAG: " << dataFlag << endln;
   } else {
     dataFlag = 6;
     opserr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
@@ -278,7 +280,7 @@ NodeRecorder::record(int commitTag, double timeStamp)
     // now we go get the displacements from the nodes
     int numDOF = theDofs->Size();
     int numNodes = theNodes->Size();
-    
+
     if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
       
       if (deltaT != 0.0) 
@@ -290,25 +292,25 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	if (theNode != 0) {
 	  if (dataFlag == 0) {
 // AddingSensitivity:BEGIN ///////////////////////////////////
-		  if (sensitivity==0) {
-						const Vector &theDisp = theNode->getTrialDisp();
-						for (int j=0; j<numDOF; j++) {
-							int dof = (*theDofs)(j);
-							if (theDisp.Size() > dof) {
-								disp(cnt) = theDisp(dof);
-							}
-							else {
-							  disp(cnt) = 0.0;
-							}
-						cnt++;
-						}
-		  }
-		  else {
-						for (int j=0; j<numDOF; j++) {
-						int dof = (*theDofs)(j);
-	                    disp(cnt) = theNode->getDispSensitivity(dof+1, sensitivity);
-						}
-		  }
+	    if (sensitivity==0) {
+	      const Vector &theDisp = theNode->getTrialDisp();
+	      for (int j=0; j<numDOF; j++) {
+		int dof = (*theDofs)(j);
+		if (theDisp.Size() > dof) {
+		  disp(cnt) = theDisp(dof);
+		}
+		else {
+		  disp(cnt) = 0.0;
+		}
+		cnt++;
+	      }
+	    }
+	    else {
+	      for (int j=0; j<numDOF; j++) {
+		int dof = (*theDofs)(j);
+		disp(cnt) = theNode->getDispSensitivity(dof+1, sensitivity);
+	      }
+	    }
 // AddingSensitivity:END /////////////////////////////////////
 	  } else if (dataFlag == 1) {
 	    const Vector &theDisp = theNode->getTrialVel();
