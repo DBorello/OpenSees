@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:41:08 $
+// $Revision: 1.3 $
+// $Date: 2002-07-18 21:55:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/SimpleJoint2D.cpp,v $
 
 // Written: AAA 03/02
@@ -38,14 +38,13 @@
 #include <string.h>
 #include <G3Globals.h>
 #include <MP_Constraint.h>
-#include <MP_ForJoint2D.h>
+#include <MP_SimpleJoint2D.h>
 #include <ElasticMaterial.h>
 #include <ElementResponse.h>
 #include <SimpleJoint2D.h>
-#include <InternalSpring.h>
 
-Matrix SimpleJoint2D::K(12,12);
-Vector SimpleJoint2D::V(12);
+Matrix SimpleJoint2D::K(16,16);
+Vector SimpleJoint2D::V(16);
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -53,24 +52,22 @@ Vector SimpleJoint2D::V(12);
 
 SimpleJoint2D::SimpleJoint2D()
   :Element(0, ELE_TAG_SimpleJoint2D ), 
-  ExternalNodes(4), InternalConstraints(0), 
-  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0),
-  IntNode(0), TheDomain(0), RotElemtag(0), RotElemPtr(0),  
-  numDof(0), nodeRecord(0), dofRecord(0)
+  ExternalNodes(5), InternalConstraints(0), 
+  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0), SpringC(0),
+  IntNode(0), TheDomain(0), numDof(0), nodeRecord(0), dofRecord(0)
 {
 
 }
 
 SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
 			     UniaxialMaterial &Spring , Domain *theDomain, 
-			     int IntNodeTag, int RotEleTag, int LrgDisp)
+			     int IntNodeTag, int LrgDisp)
   :Element(tag, ELE_TAG_SimpleJoint2D ), 
-  ExternalNodes(4), InternalConstraints(4), 
-  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0),
-  IntNode(IntNodeTag), TheDomain(0), RotElemtag(RotEleTag), RotElemPtr(0),  
-  numDof(0), nodeRecord(0), dofRecord(0)
+  ExternalNodes(5), InternalConstraints(4), 
+  end1Ptr(0), end2Ptr(0), end3Ptr(0), end4Ptr(0),IntNodePtr(0), SpringC(0),
+  IntNode(IntNodeTag), TheDomain(0), numDof(0), nodeRecord(0), dofRecord(0)
 {
-  numDof  = 12;
+  numDof  = 16;
 
   K.Zero();
   V.Zero();
@@ -87,6 +84,7 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
   ExternalNodes(1) = nd2;
   ExternalNodes(2) = nd3;
   ExternalNodes(3) = nd4;
+  ExternalNodes(4) = IntNodeTag;
   
   // Set the external node pointers
   end1Ptr = TheDomain->getNode(nd1);
@@ -178,14 +176,9 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
     cerr << "WARNING SimpleJoint2D::(): can not construct a paralelogram over external nodes\n";
     return;	
   }
-	
-  // Get the largest node number and compare it with begining MAX_NUMS
-  //  int MaxNodeInDomain = getMaxNodeNum( TheDomain ) +1;
-  // IntNode = ( MaxNodeInDomain > MAX_NUMS ) ? MaxNodeInDomain : MAX_NUMS;
-  
+
+
   // Generate internal node
-  // I am not using the node copy for future purposes, specially when 
-  // the new node coordinates are different	
   IntNodePtr = new Node ( IntNode , 4, Center1(0) , Center1(1) );
   if ( IntNodePtr == NULL ) 
     {
@@ -195,56 +188,68 @@ SimpleJoint2D::SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
 	g3ErrorHandler->warning("SimpleJoint2D::SimpleJoint2D - unable to add internal nodeto domain\n");
     }
   
+  // Copy the uniaxial material
+  SpringC = Spring.getCopy();
+  if ( SpringC == NULL )
+  {
+    cerr << "ERROR Joint2D::Joint2D(): Can not make copy of uniaxial materials, out of memory ";
+    exit(-1);
+  }
+
   // Generate and add constraints to domain
 
   // get the constraint numbers
   int startMPtag = theDomain->getNumMPs();
   for ( int i=0 ; i<4 ; i++ ) InternalConstraints(i) = startMPtag + i ;
   
-  // create MP_ForJoint constraint node 1
-  if ( addMP_ForJoint( TheDomain, InternalConstraints(0), IntNode, ExternalNodes(0), 3, LrgDisp ) != 0) {
+  // create MP_SimpleJoint constraint node 1
+  if ( addMP_SimpleJoint( TheDomain, InternalConstraints(0), IntNode, ExternalNodes(0), 2, LrgDisp ) != 0) {
     cerr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 1\n";
     return;
   }
 
-  // create MP_ForJoint constraint node 2
-  if ( addMP_ForJoint( TheDomain, InternalConstraints(1), IntNode, ExternalNodes(1), 2, LrgDisp ) != 0) {
+  // create MP_SimpleJoint constraint node 2
+  if ( addMP_SimpleJoint( TheDomain, InternalConstraints(1), IntNode, ExternalNodes(1), 3, LrgDisp ) != 0) {
     cerr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 2\n";
     return;
   }
 
-  // create MP_ForJoint constraint node 3
-  if ( addMP_ForJoint( TheDomain, InternalConstraints(2), IntNode, ExternalNodes(2), 3, LrgDisp ) != 0) {
+  // create MP_SimpleJoint constraint node 3
+  if ( addMP_SimpleJoint( TheDomain, InternalConstraints(2), IntNode, ExternalNodes(2), 2, LrgDisp ) != 0) {
     cerr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 3\n";
     return;
   }
   
-  // create MP_ForJoint constraint node 4
-  if ( addMP_ForJoint( TheDomain, InternalConstraints(3), IntNode, ExternalNodes(3), 2, LrgDisp ) != 0) {
+  // create MP_SimpleJoint constraint node 4
+  if ( addMP_SimpleJoint( TheDomain, InternalConstraints(3), IntNode, ExternalNodes(3), 3, LrgDisp ) != 0) {
     cerr << "WARNING SimpleJoint2D::SimpleJoint2D(): can not generate ForJoint MP at node 4\n";
     return;
-  }
-
-  // add rotational spring
-  //   RotElemtag = getMaxEleNum( TheDomain ) + 1;
-  // RotElemtag = ( RotElemtag > MAX_NUMS ) ? RotElemtag : MAX_NUMS;
-  
-  RotElemPtr = new InternalSpring(RotElemtag,IntNode,4,2,3, Spring);
-  
-  if ( RotElemPtr == NULL ) {
-    g3ErrorHandler->warning("SimpleJoint2D::SimpleJoint2D - failed to genrate Rotational spring , out of memory\n");
-  } else {
-    // add the zero length spring to the domain
-    if ( theDomain->addElement( RotElemPtr ) == false) {
-      g3ErrorHandler->warning("SimpleJoint2D::SimpleJoint2D - Unable to add Rotational spring to domain\n");
-      delete RotElemPtr;
-    }
   }
 }
 
 
 SimpleJoint2D::~SimpleJoint2D()
 {
+	if ( SpringC != NULL ) delete SpringC;
+
+//	MP_Constraint *Temp_MP;
+	for ( int i=0 ; i < 4 ; i++ )
+	{
+//		Temp_MP = theDomain->getMP_Constraint( InternalConstraints(i) );
+	
+//		if ( Temp_MP != NULL )
+//		{
+//		theDomain->removeMP_Constraint( InternalConstraints(i) );
+//		delete Temp_MP;
+//		}
+	}
+
+	if ( IntNodePtr != NULL )
+	{
+		int intnodetag = IntNodePtr->getTag();
+//		theDomain->removeNode( intnodetag );
+		delete IntNodePtr;
+	}
 
 }
 
@@ -264,22 +269,22 @@ void SimpleJoint2D::setDomain(Domain *theDomain)
 }//setDomain
 
 
-int SimpleJoint2D::addMP_ForJoint(Domain *theDomain, int mpNum, 
+int SimpleJoint2D::addMP_SimpleJoint(Domain *theDomain, int mpNum, 
 				  int RnodeID, int CnodeID, 
 				  int AuxDOF, int LrgDispFlag )
 {
   MP_Constraint *Temp_MP;
 
-  // create MP_ForJoint constraint
-  Temp_MP = new MP_ForJoint2D( theDomain, mpNum, RnodeID, CnodeID, AuxDOF, LrgDispFlag );
+  // create MP_SimpleJoint constraint
+  Temp_MP = new MP_SimpleJoint2D( theDomain, mpNum, RnodeID, CnodeID, AuxDOF, LrgDispFlag );
   
   if (Temp_MP == NULL) {
-    cerr << "SimpleJoint2D::addMP_ForJoint - WARNING ran out of memory for ForJoint MP_Constraint ";
+    cerr << "SimpleJoint2D::addMP_SimpleJoint - WARNING ran out of memory for ForJoint MP_Constraint ";
     return -1;
   }
   // Add the multi-point constraint to the domain
   if (theDomain->addMP_Constraint (Temp_MP) == false) {
-    cerr << "SimpleJoint2D::addMP_ForJoint - WARNING could not add equalDOF MP_Constraint to domain ";
+    cerr << "SimpleJoint2D::addMP_SimpleJoint - WARNING could not add equalDOF MP_Constraint to domain ";
     delete Temp_MP;
     return -2;
   }
@@ -297,22 +302,22 @@ int SimpleJoint2D::update(void)
 
 int SimpleJoint2D::commitState()
 {
-  return 0;
+  return SpringC->commitState();
 }
 
 int SimpleJoint2D::revertToLastCommit()
 {
-  return 0;
+  return SpringC->revertToLastCommit();
 }
 
 int SimpleJoint2D::revertToStart(void)
 {
-  return 0;
+  return SpringC->revertToStart();
 }
 
 int SimpleJoint2D::getNumExternalNodes(void) const
 {
-  return 4;
+  return 5;
 }
 
 const ID &SimpleJoint2D::getExternalNodes(void)
@@ -327,18 +332,41 @@ int SimpleJoint2D::getNumDOF(void)
 
 const Matrix &SimpleJoint2D::getTangentStiff(void)
 {
+	const Vector &dispC = IntNodePtr->getTrialDisp();
 
-  return K;
+	double DeltaC = dispC(3) - dispC(2);
+
+	int dummy;
+
+	dummy = SpringC->setTrialStrain(DeltaC);
+
+	double KC = SpringC->getTangent();
+
+	K.Zero();
+
+	K(14,14)=  KC;
+	K(14,15)= -KC;
+	K(15,14)= -KC;
+	K(15,15)=  KC;
+
+	return K;
+}
+
+const Matrix &SimpleJoint2D::getSecantStiff(void)
+{
+  return this->getTangentStiff();
 }
 
 
 const Matrix &SimpleJoint2D::getDamp(void)
 {	
+  K.Zero();
   return K;
 }
 
 const Matrix &SimpleJoint2D::getMass(void)
 {
+  K.Zero();
   return K;
 }
 
@@ -346,7 +374,8 @@ void SimpleJoint2D::Print(ostream &s, int flag )
 {
   s << "\nElement: " << getTag() << " type: SimpleJoint2D iNode: "
     << ExternalNodes(0) << " jNode: " << ExternalNodes(1) << "\n"
-    << " kNode: " << ExternalNodes(2) << " lNode: " << ExternalNodes(3) << "\n";
+    << " kNode: " << ExternalNodes(2) << " lNode: " << ExternalNodes(3) << "\n"
+	<< " Internal node: " << ExternalNodes(4) << "\n";
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -365,20 +394,33 @@ int SimpleJoint2D::addLoad(ElementalLoad *theLoad, double loadFactor)
 
 int SimpleJoint2D::addInertiaLoadToUnbalance(const Vector &accel)
 {
-    return 0;
+  return 0;
 }
 
 
 
 const Vector &SimpleJoint2D::getResistingForce()
 {
-  return V;
+	const Vector &dispC = IntNodePtr->getTrialDisp();
+
+	double DeltaC = dispC(3) - dispC(2);
+
+	int dummy = SpringC->setTrialStrain(DeltaC);
+
+	double FC = SpringC->getStress();
+
+	V.Zero();
+
+	V(14)= -FC;
+	V(15)=  FC;
+
+	return V;
 }
 
 const Vector &
 SimpleJoint2D::getResistingForceIncInertia()
 {
-  return V;
+  return this->getResistingForce();
 }
 
 
@@ -444,8 +486,6 @@ int SimpleJoint2D::displaySelf(Renderer &theViewer, int displayMode, float fact)
 Response* SimpleJoint2D::setResponse(char **argv, int argc, Information &eleInformation)
 {
 //
-// we compare argv[0] for known response types for the Truss
-//
 
 	if (strcmp(argv[0],"node") == 0 || strcmp(argv[0],"internalNode") == 0 )
     return new ElementResponse(this, 1, Vector(4));
@@ -453,9 +493,22 @@ Response* SimpleJoint2D::setResponse(char **argv, int argc, Information &eleInfo
 	else if (strcmp(argv[0],"size") == 0 || strcmp(argv[0],"jointSize") == 0 )
     return new ElementResponse(this, 2, Vector(2));
 
+	else if (strcmp(argv[0],"moment") == 0 || strcmp(argv[0],"force") == 0 )
+    return new ElementResponse(this, 3, 0.0);
+
+	else if (strcmp(argv[0],"defo") == 0 || strcmp(argv[0],"deformations") == 0 ||
+	   strcmp(argv[0],"deformation") == 0 )
+    return new ElementResponse(this, 4, 0.0);
+
+	else if (strcmp(argv[0],"defoANDforce") == 0 || strcmp(argv[0],"deformationANDforce") == 0 ||
+	   strcmp(argv[0],"deformationsANDforces") == 0 )
+    return new ElementResponse(this, 5, Vector(2));
+
+    else if ( strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0 )
+    return new ElementResponse(this, 6, Matrix(16,16) );
+	
 	else 
-		return RotElemPtr->setResponse( argv , argc , eleInformation);
-  	
+		return 0;
 }
 
 int SimpleJoint2D::getResponse(int responseID, Information &eleInformation)
@@ -504,12 +557,27 @@ int SimpleJoint2D::getResponse(int responseID, Information &eleInformation)
 			v3 = v3 - v1;
 			v4 = v4 - v2;
 
-			v1(0) = v3.Norm();
-			v1(1) = v4.Norm();
-
-			*(eleInformation.theVector) = v1;
+			(*(eleInformation.theVector))(0) = v3.Norm();
+			(*(eleInformation.theVector))(1) = v4.Norm();
 		}
 		return 0;
+
+	case 3:
+		return eleInformation.setDouble( SpringC->getStress() );
+
+	case 4:
+		return eleInformation.setDouble( SpringC->getStrain() );
+
+	case 5:
+		if(eleInformation.theVector!=0)
+		{
+			(*(eleInformation.theVector))(0) = SpringC->getStrain();
+			(*(eleInformation.theVector))(1) = SpringC->getStress();
+		}
+		return 0;
+
+	case 6:
+		return eleInformation.setMatrix(this->getTangentStiff());
 
 	default:
 		return -1;

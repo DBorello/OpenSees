@@ -1,0 +1,62 @@
+#################################################################################
+Joint2D:element
+
+element Joint2D Tag? Nd1? Nd2? Nd3? Nd4? NdC? [Mat1?] [Mat2?] [Mat3?] [Mat4?] MatC? LrgDisp? 
+
+Tag?     - an integer tag identifying the element in the domain 
+Nd1?     - an integer tag indicating the node 1 
+Nd2?     - an integer tag indicating the node 2 
+Nd3?     - an integer tag indicating the node 3 
+Nd4?     - an integer tag indicating the node 4 
+NdC?     - an integer tag for generating the internal node (must not exist in the domain).
+[Mat1?]  - an integer tag indicating the uniaxial material for rotational spring at node 1
+[Mat2?]  - an integer tag indicating the uniaxial material for rotational spring at node 2 
+[Mat3?]  - an integer tag indicating the uniaxial material for rotational spring at node 3 
+[Mat4?]  - an integer tag indicating the uniaxial material for rotational spring at node 4 
+MatC?    - an integer tag indicating the uniaxial material for shear panel rotational spring 
+LrgDisp? - an integer indicating the flag for considering large deformations
+
+
+Joint2D is a two dimensional element, with four nodes. It generates an internal node with
+an extra degree of freedom, and connects the external nodes to this internal node via
+multi-point constraints. The tag for the internal node must be a new tag that does notbelong to any existing node. The multi-point constraints are developed specifically forjoint element and the allow the element to simulate the shear panel kinematics. Joint2D must be
+used along with 'Penalty', or 'Transformation' constraint handler to allow the multi point
+constraints work perfectly. It is possible to introduce optionalrotational springs at the
+external nodes to allow extra flexibility, by inputting uniaxialmaterials Mat1, Mat2, Mat3
+and Mat4. A uniaxial material model is used as the rotationalspring relating shear
+deformation to shear equivalent moment. The nodes should be entered in a clockwise or
+counter-clockwise order. The nodes should be located in such a way a parallelogram can be
+constructed on them.
+
+To maintain the shear panel kinematics, four multi-point constraints are automatically
+added to the domain. These constraints might be set to cover the second order deformations,
+using the LrgDisp flag. If the LrgDisp flag is set to zero, it indicates that the element
+will use a constant constraint matrix, calculated based on the initial configuration. In
+this case the element will not undergo the exact deformation for large deformations. For larger deformations we may use a non-zero value for LrgDisp. A non-zero flag indicates
+that the MP constraint matrix will be time varying and the constraint matrix is updated
+for every time step. Value 1 indicates time varying constraint without length correction.
+If value 2 is chosen, the time varying constraint will be activated along with a length
+correction procedure to maintain the initial length of the multi-point constraints.
+
+The valid queries to a Joint2D element when creating an element recorder are 'internalNode',
+'deformation', 'force', 'deformationANDforce', 'size', 'stiff'. 	   
+
+--------------------------------------------------------------------------------
+Example: element Joint2D 2 1 2 3 4 5 1 0
+
+Constructs a Joint2D element with tag 2 that is connected to nodes 1, 2, 3 and 4. The
+element will generate a center node with tag 5, and it uses the uniaxial material object
+with tag 1 as the shear panel spring. The joint element introduced here will be a joint,
+without rotational springs at external nodes. The generated multipoint constraint
+matrices will be constant and they do not include large deformations.
+
+
+Example: element Joint2D 2 1 2 3 4 5 2 2 2 2 1 2
+
+Constructs a Joint2D element with tag 2 that is connected to nodes 1, 2, 3 and 4. The
+element will generate a center node with tag 5, and it uses the uniaxial material object
+with tag 2 for four rotational springs at external nodes and a material with tag 1 as the
+shear panel spring. The generated multipoint constraint matrices will be time vaying to
+cover large deformations and if corrects the nodas positions to maintain the initial joint
+size.
+

@@ -18,19 +18,19 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2002-07-18 21:55:33 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/joint/SimpleJoint2D.h,v $
+// $Revision: 1.1 $
+// $Date: 2002-07-18 21:55:31 $
+// $Source: /usr/local/cvs/OpenSees/SRC/element/joint/Joint2D.h,v $
 
 // Written: AAA 03/02
 // Revised:
 
-// SimpleJoint2d.h: interface for the SimpleJoint2d class.
+// Joint2D.h: interface for the Joint2d class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef SimpleJoint2D_h
-#define SimpleJoint2D_h
+#ifndef Joint2D_h
+#define Joint2D_h
 
 #include <bool.h>
 #include <Node.h>
@@ -43,18 +43,21 @@
 class UniaxialMaterial;
 class Response;
 
-class SimpleJoint2D : public Element  
+class Joint2D : public Element  
 {
 public:
-  SimpleJoint2D();
+  Joint2D();
 
-  SimpleJoint2D(int tag, int nd1, int nd2, int nd3, int nd4,
-		UniaxialMaterial &Spring, 
-		Domain *theDomain,
-		int newNodeTag, 
-		int LrgDispFlag =0);
+  Joint2D(int tag, int nd1, int nd2, int nd3, int nd4, int IntNodeTag,
+			     UniaxialMaterial &spring1,
+				 UniaxialMaterial &spring2,
+			     UniaxialMaterial &spring3,
+				 UniaxialMaterial &spring4,
+			     UniaxialMaterial &springC,
+				 Domain *theDomain,
+				 int LrgDisp);
 	
-  ~SimpleJoint2D();
+  ~Joint2D();
 
   // methods dealing with domain
   int	getNumExternalNodes(void) const;
@@ -96,11 +99,15 @@ public:
   void Print(ostream &s, int flag =0);
 
  protected:
-  int 	addMP_SimpleJoint(Domain *theDomain, int mpNum, int RnodeID, int CnodeID, int AuxDOF, int LrgDispFlag );
+  int 	addMP_Joint(Domain *theDomain, int mpNum, int RnodeID, int CnodeID, int MainDOF, int LrgDispFlag );   
 
  private:
-  ID		ExternalNodes, InternalConstraints;	
+  UniaxialMaterial *Spring1; 
+  UniaxialMaterial *Spring2; 
+  UniaxialMaterial *Spring3; 
+  UniaxialMaterial *Spring4; 
   UniaxialMaterial *SpringC; 
+  ID		ExternalNodes, InternalConstraints;	
   Node	*end1Ptr, *end2Ptr, *end3Ptr, *end4Ptr, *IntNodePtr;
   int		IntNode;
   Domain	*TheDomain;

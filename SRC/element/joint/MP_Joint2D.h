@@ -19,18 +19,18 @@
 ** ****************************************************************** */
                                                                         
 // $Revision: 1.1 $
-// $Date: 2002-04-30 21:33:46 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_ForJoint2D.h,v $
+// $Date: 2002-07-18 21:55:32 $
+// $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint2D.h,v $
                                                                         
-#ifndef MP_ForJoint2D_h
-#define MP_ForJoint2D_h
+#ifndef MP_Joint2D_h
+#define MP_Joint2D_h
 
 // Written: Arash
 // Created: 08/01
 
-// Purpose: This file contains the class definition for MP_ForJoint2D.
+// Purpose: This file contains the class definition for MP_Joint2D.
 // It is a sub class for MP_Constraint specialized to be used for simple joint 
-// connection element. MP_ForJoint2D defines a nonlinear, time dependent multi 
+// connection element. MP_Joint2D defines a nonlinear, time dependent multi 
 // point constraint.
 //
 
@@ -46,17 +46,17 @@ class Matrix;
 class ID;
 
 
-class MP_ForJoint2D : public MP_Constraint
+class MP_Joint2D : public MP_Constraint
 {
   public:
     // constructors        
-    MP_ForJoint2D();
+    MP_Joint2D();
 
-    MP_ForJoint2D( Domain *theDomain, int tag, int nodeRetain, int nodeConstr,
-		int Auxdof, int LrgDsp = 0 );	//LrgDsp=0 means large displacement is not enabled
+    MP_Joint2D( Domain *theDomain, int tag, int nodeRetain, int nodeConstr,
+		int Maindof, int LrgDsp = 0 );	//LrgDsp=0 means large displacement is not enabled
 
     // destructor    
-    ~MP_ForJoint2D();
+    ~MP_Joint2D();
 
     // method to get information about the constraint
 	int getNodeRetained(void) const;
@@ -79,7 +79,6 @@ class MP_ForJoint2D : public MP_Constraint
   private:
     int nodeRetained;			// to identify the retained node
     int nodeConstrained;		// to identify  the constrained node
-	int AuxDOF;					// Auxilary degree of freedom for shear
 	int MainDOF;				// main degree of freedom for rotation
     
     ID *constrDOF;				// ID of constrained DOF at constrained node
