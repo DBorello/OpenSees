@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\material"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\obj\material"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "c:\Program Files\tcl\include" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "MHS_INSURE" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "c:\Program Files\tcl\include" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "MHS_INSURE" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -327,6 +327,162 @@ SOURCE=..\..\..\SRC\material\nD\soil\T2Vector.h
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\nD\soil\TclUpdateMaterialStageCommand.cpp
+# End Source File
+# End Group
+# Begin Group "template3dep"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\DP_PS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\DP_PS.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\DP_YS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\DP_YS.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\DP_YS01.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\DP_YS01.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_LEeq.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_LEeq.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_LEij.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_LEij.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_NLEeq.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_NLEeq.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_NLEij.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_NLEij.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_NLEijMD.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_NLEijMD.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_S.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_S.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_T.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EL_T.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EPState.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\EPState.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\MatPoint3D.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\MatPoint3D.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\MD_PS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\MD_PS.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\MD_PS01.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\MD_PS01.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\MD_YS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\MD_YS.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\Template3Dep.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\Template3Dep.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\VM_PS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\VM_PS.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\VM_YS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\VM_YS.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\YS.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\Template3Dep\YS.h
 # End Source File
 # End Group
 # Begin Source File
