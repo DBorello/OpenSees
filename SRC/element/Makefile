@@ -12,6 +12,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/nonlinearBeamColumn; $(MAKE);
 	@$(CD) $(FE)/element/fourNodeQuad; $(MAKE);
 	@$(CD) $(FE)/element/beamWithHinges; $(MAKE);
+	@$(CD) $(FE)/element/8nbrick; $(MAKE);
 
 # Miscellaneous
 tidy:	
@@ -29,6 +30,7 @@ spotless: clean
 	@$(CD) $(FE)/element/nonlinearBeamColumn; $(MAKE) wipe;
 	@$(CD) $(FE)/element/fourNodeQuad; $(MAKE) wipe;
 	@$(CD) $(FE)/element/beamWithHinges; $(MAKE) wipe;
+	@$(CD) $(FE)/element/8nbrick; $(MAKE) wipe;
 
 wipe: spotless
 
