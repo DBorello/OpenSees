@@ -26,9 +26,20 @@
 #ifndef TWENTYNODEBRICK_CPP
 #define TWENTYNODEBRICK_CPP
 
+#include <NDMaterial.h>
+#include <Matrix.h>
+#include <Vector.h>
+#include <ID.h>
+#include <Renderer.h>
+#include <Domain.h>
+#include <string.h>
+#include <Information.h>
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
+#include <ElementResponse.h>
+
 #include <TwentyNodeBrick.h>
-
-
+#include <ElementalLoad.h>
 #define FixedOrder 3
 
 Matrix TwentyNodeBrick::K(60, 60);      
@@ -389,18 +400,23 @@ tensor TwentyNodeBrick::H_3D(double r1, double r2, double r3)
     H.val(2,2) =H.val(1,1); //(1.0+r1)*(1.0+r2)*(1.0+r3)/8.0 - (H.val(36,3)+H.val(51,3)+H.val(27,3))/2.0;
     H.val(3,3) =H.val(1,1); //(1.0+r1)*(1.0+r2)*(1.0+r3)/8.0 - (H.val(36,3)+H.val(51,3)+H.val(27,3))/2.0;
 
+    //         double sum = 0;
+    //
+    // 	for (int i=1; i<=60 ; i++)
+    //           {
+    // //  	    sum+=H.cval(i,1);
+    // 	    for (int j=1; j<= 1; j++)
+    // 	       {
+    //        	          sum+=H.cval(i,1);
+    // 	          ::printf( "  %+9.2e", H.cval(i,j) );
+    // 	        }
+    //            // ::printf( "  %d \n", i);
+    // 	   }
+    // 	    ::printf( " \n sum= %+6.2e\n", sum );
 
 
-
-double sum = 0;
-    
-   for (int i=1; i<=60 ; i++)
-     {
-       sum+=H.cval(i,1);
-    	}
-   ::printf( " in TwentyNodeBrick::H_3D -> sum= %+6.2e\n", sum );
-   ::printf("r1 = %lf, r2 = %lf, r3 = %lf\n", r1, r2, r3);
-   H.print("h");
+    //    printf("r1 = %lf, r2 = %lf, r3 = %lf\n", r1, r2, r3);
+    //    H.print("h");
 
     return H;
   }
@@ -880,200 +896,101 @@ void TwentyNodeBrick::set_strain_stress_tensor(FILE *fp, double * u)
 //  tensor TwentyNodeBrick::mass_tensor(Elastic  mmodel)
 tensor TwentyNodeBrick::getMassTensor(void)
   {
-// out BJ31May2002			 // this one comes from the Ms (upU), BJ30May2002
-// out BJ31May2002 
-// out BJ31May2002     int M_dim[] = {20,3,3,20}; 
-// out BJ31May2002     tensor M(4,M_dim,0.0);
-// out BJ31May2002 
-// out BJ31May2002     tensor I2("I", 2, def_dim_2);
-// out BJ31May2002 
-// out BJ31May2002     double r  = 0.0;
-// out BJ31May2002     double rw = 0.0;
-// out BJ31May2002     double s  = 0.0;
-// out BJ31May2002     double sw = 0.0;
-// out BJ31May2002     double t  = 0.0;
-// out BJ31May2002     double tw = 0.0;
-// out BJ31May2002 
-// out BJ31May2002     short where = 0;
-// out BJ31May2002     double weight = 0.0;
-// out BJ31May2002 
-// out BJ31May2002     int dh_dim[] = {20,3};    
-// out BJ31May2002 
-// out BJ31May2002     tensor dh(2, dh_dim, 0.0);
-// out BJ31May2002 
-// out BJ31May2002     int h_dim[] = {20};	
-// out BJ31May2002     tensor H(1, h_dim, 0.0);
-// out BJ31May2002 
-// out BJ31May2002     double det_of_Jacobian = 0.0;
-// out BJ31May2002 
-// out BJ31May2002     tensor Jacobian;
-// out BJ31May2002 
-// out BJ31May2002 //    rho=(1-n)*rho_s+n*rho_f;
-// out BJ31May2002 //    double RHO;
-// out BJ31May2002 //    RHO= rho; 	 //global
-// out BJ31May2002     double RHO = rho;
-// out BJ31May2002 
-// out BJ31May2002 			 short GP_c_r;
-// out BJ31May2002     for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
-// out BJ31May2002       {
-// out BJ31May2002         r = get_Gauss_p_c( r_integration_order, GP_c_r );
-// out BJ31May2002         rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-// out BJ31May2002         
-// out BJ31May2002 	  short GP_c_s;
-// out BJ31May2002 	  for( GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
-// out BJ31May2002           {
-// out BJ31May2002             s = get_Gauss_p_c( s_integration_order, GP_c_s );
-// out BJ31May2002             sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-// out BJ31May2002             
-// out BJ31May2002 	   short GP_c_t;
-// out BJ31May2002 	   for( GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
-// out BJ31May2002               {
-// out BJ31May2002                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
-// out BJ31May2002                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
-// out BJ31May2002                 // this short routine is supposed to calculate position of
-// out BJ31May2002                 // Gauss point from 3D array of short's
-// out BJ31May2002                 where =
-// out BJ31May2002                 ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
-// out BJ31May2002                 // derivatives of local coordinates with respect to local coordinates
-// out BJ31May2002                 dh = dh_drst_at(r,s,t);
-// out BJ31May2002                 // Jacobian tensor ( matrix )
-// out BJ31May2002                 Jacobian = Jacobian_3D(dh);
-// out BJ31May2002                 // 		Jacobian.print("J","Jacobian");
-// out BJ31May2002                 // Inverse of Jacobian tensor ( matrix )
-// out BJ31May2002                 //                JacobianINV = Jacobian_3Dinv(dh);
-// out BJ31May2002                 // determinant of Jacobian tensor ( matrix )
-// out BJ31May2002                 det_of_Jacobian  = Jacobian.determinant();
-// out BJ31May2002                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
-// out BJ31May2002                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-// out BJ31May2002                 //                dhGlobal = dh("ij") * JacobianINV("jk");
-// out BJ31May2002                 // derivatives of local coordinates with respect to local coordinates
-// out BJ31May2002 
-// out BJ31May2002 
-// out BJ31May2002                 // printf("\n\nIN THE MASS TENSOR INTEGRATOR ----**************** where = %d \n", where);
-// out BJ31May2002                 // printf("  Mass_Tensor \n");
-// out BJ31May2002                 // printf("                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
-// out BJ31May2002                 //                             GP_c_r,GP_c_s,GP_c_t);
-// out BJ31May2002                 // 
-// out BJ31May2002                 H = interp_poli_at(r,s,t);
-// out BJ31May2002 
-// out BJ31May2002                 //weight
-// out BJ31May2002                 weight = rw * sw * tw * det_of_Jacobian;
-// out BJ31May2002   	        //	printf("weight = %6.2e \n",weight);
-// out BJ31May2002 
-// out BJ31May2002 		//M.print("M","BEFORE");
-// out BJ31May2002                 
-// out BJ31May2002 	        //	tensor temp = H("ib")*H("kb");
-// out BJ31May2002 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
-// out BJ31May2002 
-// out BJ31May2002 			      static tensor temp = H("K") * I2("ij");
-// out BJ31May2002 		              M = M + temp("Kij") * H("L") * (RHO *weight);
-// out BJ31May2002 	      	//Ms.printshort("M");
-// out BJ31May2002               }
-// out BJ31May2002           }
-// out BJ31May2002       }
-// out BJ31May2002 //    M.printshort("M");
-// out BJ31May2002 
-// out BJ31May2002     return M;
-// out BJ31May2002 
+    //int M_dim[] = {8,3,3,8};
+    int M_dim[] = {60,60};
+    tensor Mm(2,M_dim,0.0);
+
+    double r  = 0.0;
+    double rw = 0.0;
+    double s  = 0.0;
+    double sw = 0.0;
+    double t  = 0.0;
+    double tw = 0.0;
+
+    short where = 0;
+    double weight = 0.0;
+
+    int dh_dim[] = {20,3};
+
+    tensor dh(2, dh_dim, 0.0);
+
+    int h_dim[] = {60,3};	// Xiaoyan changed from {60,3} to {24,3}
+    tensor H(2, h_dim, 0.0);
+
+    double det_of_Jacobian = 0.0;
+
+    tensor Jacobian;
+
+    double RHO;
+    RHO= rho; 	 //global
+
+    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+      {
+        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
+        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+          {
+            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
+            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+              {
+                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
+                // this short routine is supposed to calculate position of
+                // Gauss point from 3D array of short's
+                where =
+                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+                // derivatives of local coordinates with respect to local coordinates
+                dh = dh_drst_at(r,s,t);
+                // Jacobian tensor ( matrix )
+                Jacobian = Jacobian_3D(dh);
+                // 		Jacobian.print("J","Jacobian");
+                // Inverse of Jacobian tensor ( matrix )
+                //                JacobianINV = Jacobian_3Dinv(dh);
+                // determinant of Jacobian tensor ( matrix )
+                det_of_Jacobian  = Jacobian.determinant();
+                // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
+                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                // derivatives of local coordinates with respect to local coordinates
 
 
-//out BJ 30May2002 
-//out BJ 30May2002 
-     //int M_dim[] = {8,3,3,8};
-      int M_dim[] = {60,60};
-      tensor Mm(2,M_dim,0.0);
-  
-      double r  = 0.0;
-      double rw = 0.0;
-      double s  = 0.0;
-      double sw = 0.0;
-      double t  = 0.0;
-      double tw = 0.0;
-  
-      short where = 0;
-      double weight = 0.0;
-  
-      int dh_dim[] = {20,3};
-  
-      tensor dh(2, dh_dim, 0.0);
-  
-      int h_dim[] = {60,3};	// Xiaoyan changed from {60,3} to {24,3}
-      tensor H(2, h_dim, 0.0);
-  
-      double det_of_Jacobian = 0.0;
-  
-      tensor Jacobian;
-  
-      double RHO;
-      RHO= rho; 	 //global
-  
-      for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
-        {
-          r = get_Gauss_p_c( r_integration_order, GP_c_r );
-          rw = get_Gauss_p_w( r_integration_order, GP_c_r );
-          for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
-            {
-              s = get_Gauss_p_c( s_integration_order, GP_c_s );
-              sw = get_Gauss_p_w( s_integration_order, GP_c_s );
-              for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
-                {
+                // printf("\n\nIN THE MASS TENSOR INTEGRATOR ----**************** where = %d \n", where);
+                // printf("  Mass_Tensor \n");
+                // printf("                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
+                //                             GP_c_r,GP_c_s,GP_c_t);
+                //
+                H = H_3D(r,s,t);
+
+                //	double sum = 0.0;
+                //	for (int i=1; i<=60 ; i++)
+                //           {
+                // //  	    sum+=H.cval(i,1);
+                // 	    for (int j=1; j<= 3; j++)
+                // 	       {
+                //        	          sum+=H.cval(i,j);
+                // 	          ::printf( "  %+9.2e", H.cval(i,j) );
+                // 	        }
+                //             ::printf( "  %d \n", i);
+                // 	   }
+                // 	    ::printf( " \n sum= %+6.2e\n", sum );
 
 
 
-                  t = get_Gauss_p_c( t_integration_order, GP_c_t );
-                  tw = get_Gauss_p_w( t_integration_order, GP_c_t );
-                  // this short routine is supposed to calculate position of
-                  // Gauss point from 3D array of short's
-                  where =
-                  ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
-                  // derivatives of local coordinates with respect to local coordinates
-                  dh = dh_drst_at(r,s,t);
-                  // Jacobian tensor ( matrix )
-                  Jacobian = Jacobian_3D(dh);
 
+                // matpoint GaPo = MatPoint3D::GP()+where;
 
-printf("\n\nIN THE MASS TENSOR INTEGRATOR ----**************** where = %d \n", where);
-printf("  Mass_Tensor \n");
-printf("                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
-                            GP_c_r,GP_c_s,GP_c_t);
-Jacobian.print("J","Jacobian");
-                  // Inverse of Jacobian tensor ( matrix )
-                  //                JacobianINV = Jacobian_3Dinv(dh);
-                  // determinant of Jacobian tensor ( matrix )
-                  det_of_Jacobian  = Jacobian.determinant();
-printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
-                  // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                  //                dhGlobal = dh("ij") * JacobianINV("jk");
-                  // derivatives of local coordinates with respect to local coordinates
-  
-  
-                  H = H_3D(r,s,t);
+                weight = rw * sw * tw * RHO * det_of_Jacobian;
 
-double sum = 0.0;
-for (int i=1; i<=60 ; i++)
-  {
-    sum+=H.cval(i,1);
-	   }
-::printf( "in TwentyNodeBrick::getMassTensor(void) ->  \n sum= %+6.2e\n", sum );
-H.print("h");
-  
-  
-  
-  
-                  // matpoint GaPo = MatPoint3D::GP()+where;
-  
-                  weight = rw * sw * tw * RHO * det_of_Jacobian;
-  
-                		Mm = Mm + H("ib")*H("kb")*weight;
-  	       //	printf("\n +++++++++++++++++++++++++ \n\n");
-  	      	//Mm.printshort("M");
-                }
-            }
-        }
-      //M = Mm;
-      //Mm.printshort("M");
-      return Mm;
-
+              		Mm = Mm + H("ib")*H("kb")*weight;
+	       //	printf("\n +++++++++++++++++++++++++ \n\n");
+	      	//Mm.printshort("M");
+              }
+          }
+      }
+    //M = Mm;
+    //Mm.printshort("M");
+    return Mm;
   }
 
 
@@ -2912,147 +2829,8 @@ const Matrix &TwentyNodeBrick::getDamp ()
 
 //=============================================================================
 //Get lumped mass
-const Matrix &TwentyNodeBrick::getMass ()
-{
-//out BJ 31May2002
-//out BJ 31May2002      tensor masstensor = getMassTensor();
-//out BJ 31May2002      //int Ki=0;
-//out BJ 31May2002      //int Kj=0;
-//out BJ 31May2002 
-//out BJ 31May2002      double tot_mass = 0.0;
-//out BJ 31May2002      double column_mass = 0.0;
-//out BJ 31May2002 
-//out BJ 31May2002 
-//out BJ 31May2002      int Mi=0;
-//out BJ 31May2002      int Mj=0;
-//out BJ 31May2002 
-//out BJ 31May2002      for ( int i=1 ; i<=nodes_in_brick ; i++ )
-//out BJ 31May2002      {
-//out BJ 31May2002 							 for ( int j=1 ; j<=nodes_in_brick ; j++ )
-//out BJ 31May2002         {
-//out BJ 31May2002            for ( int k=1 ; k<=3 ; k++ )
-//out BJ 31May2002            {
-//out BJ 31May2002               for ( int l=1 ; l<=3 ; l++ )
-//out BJ 31May2002               {
-//out BJ 31May2002                  Mi = k+3*(i-1);
-//out BJ 31May2002                  Mj = l+3*(j-1);
-//out BJ 31May2002                  M( Mi-1 , Mj-1 ) = masstensor.cval(i,k,l,j);
-//out BJ 31May2002               }
-//out BJ 31May2002            }
-//out BJ 31May2002         }
-//out BJ 31May2002      }
-//out BJ 31May2002 
-//out BJ 31May2002 
-//out BJ 31May2002 
-//out BJ 31May2002      for ( int i=1 ; i<=nodes_in_brick*3 ; i++ )
-//out BJ 31May2002      {
-//out BJ 31May2002         column_mass = 0.0;
-//out BJ 31May2002        	for ( int j=1 ; j<=nodes_in_brick*3 ; j++ )
-//out BJ 31May2002            {
-//out BJ 31May2002 
-//out BJ 31May2002 	   //M( i-1 , j-1 ) = masstensor.cval(i,j);
-//out BJ 31May2002 
-//out BJ 31May2002          	   column_mass += M(i,j);
-//out BJ 31May2002          	   M( i-1 , j-1 ) = 0;
-//out BJ 31May2002 	            tot_mass += M( i-1 , j-1 );
-//out BJ 31May2002            }
-//out BJ 31May2002          	
-//out BJ 31May2002 								M( i-1 , i-1 ) = column_mass;
-//out BJ 31May2002 
-//out BJ 31May2002      }
-//out BJ 31May2002 
-//out BJ 31May2002      cerr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << endln;
-//out BJ 31May2002 
-//out BJ 31May2002  					ofstream out("M20n.dat");	
-//out BJ 31May2002  				 M.Output(out);
-//out BJ 31May2002 //     cerr << "" << M.Output(cout);
-//out BJ 31May2002 //     cerr << " M " << M;
-//out BJ 31May2002 
-//out BJ 31May2002      return M;
-//out BJ 31May2002 
-
-// consistent
-// consistent 
-       tensor masstensor = getMassTensor();
-  
-  				 double total_mass = 0.0;
-  
-       int Mi=0;
-       int Mj=0;
-  
-       for ( int i=1 ; i<=nodes_in_brick*3 ; i++ )
-       {
-  							 for ( int j=1 ; j<=nodes_in_brick*3 ; j++ )
-          {
-                   M( i-1 , j-1 ) = masstensor.cval(i,j);
-  																 total_mass += M( i-1 , j-1 ); 
-          }
-       }
-  
-       //cout << " K " << K << endln;
-       //K.Output(cout);
-         
-  					ofstream out("M20n.CONSISTENT.dat");	
-  				 M.Output(out);
- 
-   				fprintf(stderr,"CONSISTENT total_mass = %20.6e", total_mass);
-  				 
-  				 return M;
- 
-
-
-// lumped
-// lumped //out BJ 30May2002 
-// lumped //out BJ 30May2002 
-// lumped //out BJ 30May2002      //int Ki=0;
-// lumped //out BJ 30May2002      //int Kj=0;
-// lumped //out BJ 30May2002 
-// lumped //out BJ 30May2002      //double tot_mass = 0.0;
-// lumped //out BJ 30May2002      //double diag_mass = 0.0;
-// lumped //out BJ 30May2002 
-// lumped //out BJ 30May2002 
-// lumped //out BJ 30May2002      tensor masstensor = getMassTensor();
-// lumped //out BJ 30May2002
-// lumped //out BJ 30May2002 				 masstensor.print("masstensor");
-// lumped //out BJ 30May2002
-// lumped //out BJ 30May2002      
-// lumped //out BJ 30May2002
-// lumped //out BJ 30May2002      double column_mass = 0.0;
-// lumped //out BJ 30May2002 				 double total_mass = 0.0;
-// lumped //out BJ 30May2002 
-// lumped //out BJ 30May2002      for ( int i=1 ; i<=nodes_in_brick*3 ; i++ )
-// lumped //out BJ 30May2002      {
-// lumped //out BJ 30May2002         column_mass = 0.0;
-// lumped //out BJ 30May2002        	for ( int j=1 ; j<=nodes_in_brick*3 ; j++ )
-// lumped //out BJ 30May2002           {
-// lumped //out BJ 30May2002 
-// lumped //out BJ 30May2002 	   //M( i-1 , j-1 ) = masstensor.cval(i,j);
-// lumped //out BJ 30May2002 
-// lumped //out BJ 30May2002         	   column_mass += masstensor.cval(i,j);
-// lumped //out BJ 30May2002         	   M( i-1 , j-1 ) = 0;
-// lumped //out BJ 30May2002 	   //tot_mass += M( i-1 , j-1 );
-// lumped //out BJ 30May2002 	   //if (i == j)
-// lumped //out BJ 30May2002 	   //   diag_mass += M( i-1 , j-1 );
-// lumped //out BJ 30May2002           }
-// lumped //out BJ 30May2002         	  M( i-1 , i-1 ) = column_mass;
-// lumped //out BJ 30May2002 										 total_mass += M( i-1 , i-1 ); 
-// lumped //out BJ 30May2002 
-// lumped //out BJ 30May2002      }
-// lumped //out BJ 30May2002 
-// lumped //out BJ 30May2002      //cerr << " tot_mass= "<< tot_mass << " column_mass =" << column_mass << " diag_mass= " <<  diag_mass << endln;
-// lumped //out BJ 30May2002      //cerr << "" << M.Output(cout);
-// lumped //out BJ 30May2002      //cerr << " M " << M;
-// lumped //out BJ 30May2002
-// lumped //out BJ 30May2002 					ofstream out("M20n.LUMPED.dat");	
-// lumped //out BJ 30May2002 				 M.Output(out);
-// lumped //out BJ 30May2002
-// lumped //out BJ 30May2002 				fprintf(stderr,"LUMPED total_mass = %20.6e", total_mass);
-
-     return M;
-}
-//=============================================================================
-//Get lumped mass
-const Matrix &TwentyNodeBrick::getLumpedMass ()
+//const Matrix &TwentyNodeBrick::getMass ()
+const Matrix &TwentyNodeBrick::getConsMass ()
 {
      tensor masstensor = getMassTensor();
      //int Ki=0;
@@ -3089,8 +2867,8 @@ const Matrix &TwentyNodeBrick::getLumpedMass ()
 
 //=============================================================================
 //Get consistent mass
-
-const Matrix &TwentyNodeBrick::getConsMass ()
+//const Matrix &TwentyNodeBrick::getConsMass ()
+const Matrix &TwentyNodeBrick::getMass ()
 {
      tensor masstensor = getMassTensor();
      //int Ki=0;
@@ -3251,15 +3029,15 @@ int TwentyNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
 		return 0;
 
 	// Get R * accel from the nodes
-	const Vector &Raccel1 = nd1Ptr->getRV(accel);
-	const Vector &Raccel2 = nd2Ptr->getRV(accel);
-	const Vector &Raccel3 = nd3Ptr->getRV(accel);
-	const Vector &Raccel4 = nd4Ptr->getRV(accel);
-	const Vector &Raccel5 = nd5Ptr->getRV(accel);
-	const Vector &Raccel6 = nd6Ptr->getRV(accel);
-	const Vector &Raccel7 = nd7Ptr->getRV(accel);
-	const Vector &Raccel8 = nd8Ptr->getRV(accel);
-	const Vector &Raccel9 = nd9Ptr->getRV(accel);
+	const Vector &Raccel1  = nd1Ptr->getRV(accel);
+	const Vector &Raccel2  = nd2Ptr->getRV(accel);
+	const Vector &Raccel3  = nd3Ptr->getRV(accel);
+	const Vector &Raccel4  = nd4Ptr->getRV(accel);
+	const Vector &Raccel5  = nd5Ptr->getRV(accel);
+	const Vector &Raccel6  = nd6Ptr->getRV(accel);
+	const Vector &Raccel7  = nd7Ptr->getRV(accel);
+	const Vector &Raccel8  = nd8Ptr->getRV(accel);
+	const Vector &Raccel9  = nd9Ptr->getRV(accel);
 	const Vector &Raccel10 = nd10Ptr->getRV(accel);
 	const Vector &Raccel11 = nd11Ptr->getRV(accel);
 	const Vector &Raccel12 = nd12Ptr->getRV(accel);
@@ -3297,7 +3075,7 @@ int TwentyNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
 	ra( 9) = Raccel4(0);
 	ra(10) = Raccel4(1);
 	ra(11) = Raccel4(2);
- ra(12) = Raccel5(0);
+    	ra(12) = Raccel5(0);
 	ra(13) = Raccel5(1);
 	ra(14) = Raccel5(2);
 	ra(15) = Raccel6(0);
@@ -3310,7 +3088,7 @@ int TwentyNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
 	ra(22) = Raccel8(1);
 	ra(23) = Raccel8(2);
 	ra(24) = Raccel9(0);
- ra(25) = Raccel9(1);
+ 	ra(25) = Raccel9(1);
 	ra(26) = Raccel9(2);
 	ra(27) = Raccel10(0);
 	ra(28) = Raccel10(1);
@@ -3358,10 +3136,9 @@ int TwentyNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
 
     //cerr << " addInerti... column_mass " << column_mass << endln;
 
-			 Q += M*ra*-1.0;
-
-//BJ31May2002 out    for (int i = 0; i < nodes_in_brick*3; i++)
-//BJ31May2002 out		Q(i) += -M(i,i)*ra(i);
+    //for (int i = 0; i < nodes_in_brick*3; i++)
+    //		Q(i) += -M(i,i)*ra(i);
+    Q.addMatrixVector(1.0, M, ra, -1.0);
 
     return 0;
 }
@@ -3604,7 +3381,7 @@ const Vector &TwentyNodeBrick::getResistingForceIncInertia ()
 	a( 9) = accel4(0);
 	a(10) = accel4(1);
 	a(11) = accel4(2);
- a(12) = accel5(0);
+    	a(12) = accel5(0);
 	a(13) = accel5(1);
 	a(14) = accel5(2);
 	a(15) = accel6(0);
@@ -3617,7 +3394,7 @@ const Vector &TwentyNodeBrick::getResistingForceIncInertia ()
 	a(22) = accel8(1);
 	a(23) = accel8(2);
 	a(24) = accel9(0);
- a(25) = accel9(1);
+ 	a(25) = accel9(1);
 	a(26) = accel9(2);
 	a(27) = accel10(0);
 	a(28) = accel10(1);
@@ -3665,15 +3442,15 @@ const Vector &TwentyNodeBrick::getResistingForceIncInertia ()
         //   column_mass += M(1,i);
         //column_mass = column_mass/3.0;
 
-		 P = M*a;
+	//for (int i = 0; i < 60; i++)
+	//{
+	//   P(i) += M(i,i)*a(i);
+	//   //cout << " " << M(i, i);
+	//}
 
-//BJ31May2002 out	for (int i = 0; i < 60; i++)
-//BJ31May2002 out//	{
-//BJ31May2002 out	   P(i) += M(i,i)*a(i);
-//BJ31May2002 out	   //cout << " " << M(i, i);
-//BJ31May2002 out	}
 	//cout << endln;
 	//cerr << "P+=Ma" << P<< endl;
+        P.addMatrixVector(1.0, M, a, 1.0);
 	return P;
 }
 

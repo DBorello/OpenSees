@@ -2679,7 +2679,8 @@ const Matrix &EightNodeBrick::getDamp ()
 
 //=============================================================================
 //Get lumped mass
-const Matrix &EightNodeBrick::getMass () 
+//const Matrix &EightNodeBrick::getMass () 
+const Matrix &EightNodeBrick::getConsMass () 
 {
      tensor masstensor = getMassTensor();
      //int Ki=0;
@@ -2716,7 +2717,8 @@ const Matrix &EightNodeBrick::getMass ()
 
 //=============================================================================
 //Get consistent mass
-const Matrix &EightNodeBrick::getConsMass () 
+//const Matrix &EightNodeBrick::getConsMass () 
+const Matrix &EightNodeBrick::getMass () 
 {
      tensor masstensor = getMassTensor();
      //int Ki=0;
@@ -2884,9 +2886,10 @@ int EightNodeBrick::addInertiaLoadToUnbalance(const Vector &accel)
 
     //cerr << " addInerti... column_mass " << column_mass << endln;
 
-    for (int i = 0; i < 24; i++)   
-		Q(i) += -M(i,i)*ra(i);
+    //for (int i = 0; i < 24; i++)   
+    //		Q(i) += -M(i,i)*ra(i);
 
+    Q.addMatrixVector(1.0, M, ra, -1.0);
     return 0;
 }
 
@@ -3037,13 +3040,15 @@ const Vector &EightNodeBrick::getResistingForceIncInertia ()
         //   column_mass += M(1,i);
         //column_mass = column_mass/3.0;
 
-	for (int i = 0; i < 24; i++)
-	{   
-	   P(i) += M(i,i)*a(i);
-	   //cout << " " << M(i, i);
-	}
+	//for (int i = 0; i < 24; i++)
+	//{   
+	//   P(i) += M(i,i)*a(i);
+	//   //cout << " " << M(i, i);
+	//}
+
 	//cout << endln;
 	//cerr << "P+=Ma" << P<< endl;
+        P.addMatrixVector(1.0, M, a, 1.0);
 	return P;
 } 
 
