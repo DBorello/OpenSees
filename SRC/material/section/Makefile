@@ -11,6 +11,7 @@ OBJS       = SectionForceDeformation.o \
 all:         $(OBJS)
 	@$(CD) $(FE)/material/section/repres; $(MAKE);
 	@$(CD) $(FE)/material/section/fiber; $(MAKE);
+	@$(CD) $(FE)/material/section/yieldSurface; $(MAKE);
 
 # Miscellaneous
 
@@ -25,5 +26,6 @@ spotless: clean
 wipe: spotless
 	@$(CD) $(FE)/material/section/repres; $(MAKE) wipe;
 	@$(CD) $(FE)/material/section/fiber; $(MAKE) wipe;
+	@$(CD) $(FE)/material/section/yieldSurface; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depends on it.

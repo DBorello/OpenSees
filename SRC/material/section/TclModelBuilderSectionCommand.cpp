@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2002-07-23 17:31:27 $
+// $Revision: 1.18 $
+// $Date: 2002-11-05 21:55:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -81,6 +81,10 @@ int
 TclModelBuilder_addUCFiberSection (ClientData clientData, Tcl_Interp *interp, int argc,
 				   char **argv, TclModelBuilder *theBuilder);
 
+
+SectionForceDeformation *
+TclModelBuilderYS_SectionCommand(ClientData clientData, Tcl_Interp *interp, int argc, 
+				 char **argv, TclModelBuilder *theTclBuilder);
 
 int
 TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int argc,
@@ -547,17 +551,15 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	theSection = new Bidirectional(tag, E, sigY, Hi, Hk);
 	}
 		
-		else {
-	cerr << "WARNING unknown type of section: " << argv[2];
-	cerr << "Valid types: Elastic, Uniaxial, Aggregator, Fiber\n";
-	return TCL_ERROR;
+    else {
+      theSection = TclModelBuilderYS_SectionCommand(clientData, interp, argc, 
+						    argv, theTclBuilder);
     }
     
     // Ensure we have created the Material, out of memory if got here and no section
     if (theSection == 0) {
-	cerr << "WARNING ran out of memory creating section\n";
-	cerr << argv[2] << endl;
-	return TCL_ERROR;
+      cerr << "WARNING could not create section " << argv[1] << endl;
+      return TCL_ERROR;
     }
     
     // Now add the material to the modelBuilder
