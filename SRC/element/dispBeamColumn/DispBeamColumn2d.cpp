@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2003-03-04 00:48:14 $
+// $Revision: 1.20 $
+// $Date: 2003-03-04 23:31:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -1396,33 +1396,25 @@ int
 DispBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
 {
 
-    // Get basic deformation sensitivities
-    static Vector vsens(3);
+    // Get basic deformation and sensitivities
+	const Vector &v = crdTransf->getBasicTrialDisp();
+
+	static Vector vsens(3);
 	vsens = crdTransf->getBasicDisplSensitivity(gradNumber);
-
-
-	static Vector v(3);
-	v = crdTransf->getBasicTrialDisp();
 
 	double L = crdTransf->getInitialLength();
 	double oneOverL = 1.0/L;
 	const Matrix &pts = quadRule.getIntegrPointCoords(numSections);
 	const Vector &wts = quadRule.getIntegrPointWeights(numSections);
 
-	// Assuming member is prismatic ... have to move inside
-	// the loop if it is not prismatic
-	int order = theSections[0]->getOrder();
-	const ID &code = theSections[0]->getType();
-	Vector e(workArea, order);
 	// Some extra declarations
 	double d1oLdh=0.0;
 
-
 	// Check if a nodal coordinate is random
 	bool randomNodeCoordinate = false;
-	Vector nodeParameterID(2);
-	nodeParameterID(0) = (double)theNodes[0]->getCrdsSensitivity();
-	nodeParameterID(1) = (double)theNodes[1]->getCrdsSensitivity();
+	static Vector nodeParameterID(2);
+	nodeParameterID(0) = theNodes[0]->getCrdsSensitivity();
+	nodeParameterID(1) = theNodes[1]->getCrdsSensitivity();
 	if (nodeParameterID.Norm() != 0.0) {
 
 		vsens += crdTransf->getBasicTrialDispShapeSensitivity();
@@ -1460,12 +1452,16 @@ DispBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
 		}
 	}
 
-
-
-
 	// Loop over the integration points
 	for (int i = 0; i < numSections; i++) {
 
+		// Assuming member is prismatic ... have to move inside
+		// the loop if it is not prismatic
+		int order = theSections[i]->getOrder();
+		const ID &code = theSections[i]->getType();
+		
+		Vector e(workArea, order);
+		
 		double xi6 = 6.0*pts(i,0);
 
 		int j;
@@ -1484,7 +1480,6 @@ DispBeamColumn2d::commitSensitivity(int gradNumber, int numGrads)
 				break;
 			}
 		}
-
 
 		// Set the section deformations
 		theSections[i]->commitSensitivity(e,gradNumber,numGrads);
