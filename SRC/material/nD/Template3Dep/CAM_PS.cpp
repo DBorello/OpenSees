@@ -1,8 +1,8 @@
- //================================================================================
+//================================================================================
 //# COPYRIGHT (C):     :-))                                                      #
 //# PROJECT:           Object Oriented Finite Element Program                    #
-//# PURPOSE:           Cam Clay potential criterion                          	 #
-//#                      (Ref. Wood p113)                    			 #
+//# PURPOSE:           Cam Clay potential criterion                             #
+//#                      (Ref. Wood p113)                           #
 //# CLASS:             CAMPotentialSurface                                       #
 //#                                                                              #
 //# VERSION:                                                                     #
@@ -68,8 +68,8 @@ tensor CAMPotentialSurface::dQods(const EPState *EPS) const {
   double p = EPS->getStress().p_hydrostatic();
   double q = EPS->getStress().q_deviatoric();
   double po = EPS->getScalarVar( 1 );
-	 tensor DpoDs = EPS->getStress().dpoverds();
-	 tensor DqoDs = EPS->getStress().dqoverds();
+   tensor DpoDs = EPS->getStress().dpoverds();
+   tensor DqoDs = EPS->getStress().dqoverds();
 
   double dQoverdp = -1.0*M*M*( po - 2.0*p );
   double dQoverdq = 2.0*q;
@@ -385,7 +385,7 @@ tensor CAMPotentialSurface::d2Qods2(const EPState *EPS) const
 //             + t("pq")*t("mn") * temptt
 //             + p               * tempp
 //             + w               * tempw );
-// 	        
+//           
 //     ret.null_indices();
 //     return ret;
 //   }
