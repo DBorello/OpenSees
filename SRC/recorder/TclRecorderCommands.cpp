@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.19 $
-// $Date: 2003-03-04 00:48:18 $
+// $Revision: 1.20 $
+// $Date: 2003-05-07 22:12:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -58,20 +58,21 @@
 #include <Element.h>
 #include <MeshRegion.h>
 #include <GSA_Recorder.h>
+#include <YsVisual.h> //!!
 
 #include <EquiSolnAlgo.h>
 
 static EquiSolnAlgo *theAlgorithm =0;
 
-int 
-TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc, 
+int
+TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 		  TCL_Char **argv, Domain &theDomain, Recorder **theRecorder)
 {
     // make sure at least one other argument to contain integrator
     if (argc < 2) {
-	opserr << "WARNING need to specify a Recorder type\n"; 
+	opserr << "WARNING need to specify a Recorder type\n";
 	return TCL_ERROR;
-    }    
+    }
 
     //
     // check argv[1] for type of Recorder, parse in rest of arguments
@@ -80,7 +81,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
     (*theRecorder) = 0;
 
     // an Element Recorder or ElementEnvelope Recorder
-    if ((strcmp(argv[1],"Element") == 0) || (strcmp(argv[1],"EnvelopeElement") == 0) 
+    if ((strcmp(argv[1],"Element") == 0) || (strcmp(argv[1],"EnvelopeElement") == 0)
 	|| (strcmp(argv[1],"ElementEnvelope") == 0)) {
 
         /* KEEP - FOR LEGACY REASONS NEED TO KEEP THE FOLLOWING UGLY STUFF */
@@ -726,15 +727,52 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 					      temp, dT);
 	(*theRecorder) = theR;
     }
-
+    
+    else if (strcmp(argv[1],"YsVisual") == 0)
+      { //!!
+	
+	int eleTag, xLoc, yLoc, width, height;
+	double scale;
+	
+	if (argc < 7)
+	  {
+	    opserr << "WARNING recorder YsVisual eleTag title scale, xLoc yLoc pixelsX pixelsY \n";
+	    return TCL_ERROR;
+	  }
+	
+	if (Tcl_GetInt(interp, argv[2], &eleTag) != TCL_OK)
+	  return TCL_ERROR;
+	if (Tcl_GetDouble(interp, argv[4], &scale) != TCL_OK)
+	  return TCL_ERROR;
+	if (Tcl_GetInt(interp, argv[5], &xLoc) != TCL_OK)
+	  return TCL_ERROR;
+	if (Tcl_GetInt(interp, argv[6], &yLoc) != TCL_OK)
+	  return TCL_ERROR;
+	if (Tcl_GetInt(interp, argv[7], &width) != TCL_OK)
+	  return TCL_ERROR;
+	if (Tcl_GetInt(interp, argv[8], &height) != TCL_OK)
+	  return TCL_ERROR;
+	
+	Element *theEle = theDomain.getElement(eleTag);
+	if(theEle==0)
+	  {
+	    opserr << "WARNING no element of tag " << eleTag << "\n";
+	    return TCL_ERROR;
+	  }
+	//void createView(char *title, int x, int y, int cx, int cy, char displaytype = 'l');
+	YsVisual *theVisual = new YsVisual(theEle, argv[3], scale, xLoc, yLoc, width, height);
+	(*theRecorder) = theVisual;
+	return TCL_OK;
+      }
+    
     // no recorder type specified yet exists
     else {
-	opserr << "WARNING No recorder type exists ";
-	opserr << "for recorder of type:" << argv[1];
-    
-	return TCL_ERROR;
+      opserr << "WARNING No recorder type exists ";
+      opserr << "for recorder of type:" << argv[1];
+      
+      return TCL_ERROR;
     }    
-
+    
     // check we instantiated a recorder .. if not ran out of memory
     if ((*theRecorder) == 0) {
 	opserr << "WARNING ran out of memory - recorder " << argv[1]<< endln;
