@@ -4,7 +4,7 @@
 //# PROJECT:           Object Oriented Finite Element Program                    #
 //# PURPOSE:           Cam Clay potential criterion                          	 #
 //#                      (Ref. Wood p113)                    			 #
-//# CLASS:             CAMPotentialSurface                                         #
+//# CLASS:             CAMPotentialSurface                                       #
 //#                                                                              #
 //# VERSION:                                                                     #
 //# LANGUAGE:          C++.ver >= 2.0 ( Borland C++ ver=3.00, SUN C++ ver=2.1 )  #

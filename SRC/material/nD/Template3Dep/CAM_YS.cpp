@@ -72,7 +72,7 @@ double CAMYieldSurface::f(const EPState *EPS) const
   double po = EPS->getScalarVar(1);
   double temp3 = q*q - M*M*p*(po - p);
 
-  //printf("\n========Inside f  temp3 = %.4f x = %.4f\n ", temp3, x);
+  //printf("\n========Inside f = %.4f \n ", temp3);
 
   return temp3;
 }

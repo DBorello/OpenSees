@@ -83,7 +83,7 @@ tensor MDPotentialSurface::dQods(const EPState *EPS) const {
     //exit(1);
   }
   
-  dQoverds =  n + D * I2 *(1.0/3.0);
+  dQoverds =  n + I2 * D *(1.0/3.0);
 
   return dQoverds;
 }
@@ -154,13 +154,13 @@ tensor MDPotentialSurface::d2Qods2(const EPState *EPS) const
   
   //tensor dtods = dthetaods("pq"); 
 
-  tensor dDds1 = A*dthetaods*(dgodthetac*Mc+dgodthetacd*kcd*xi)*sqrt(2.0/3.0); 
-  tensor dDds2 = A*apqdnods(EPS); 
+  tensor dDds1 = dthetaods*A*(dgodthetac*Mc+dgodthetacd*kcd*xi)*sqrt(2.0/3.0); 
+  tensor dDds2 = apqdnods(EPS)*A;
   tensor dDds = dDds1 - dDds2;
   dDds.null_indices(); 
    
-  d2Qoverds2 = dnds + dDds("mn")*I2("pq")*0.33333333;
-  d2Qoverds2.null_indices();
+  //d2Qoverds2 = dnds + dDds("mn")*I2("pq")*0.33333333;
+  //d2Qoverds2.null_indices();
 
   return d2Qoverds2;
 }
@@ -207,7 +207,7 @@ tensor MDPotentialSurface::dnods(const EPState *EPS) const
   tensor Ipmnq = I2("pm") * I2("nq");
   tensor Imnpq = I2("mn") * I2("pq");
   tensor Apqmn = alpha("pq") * I2("mn");
-  tensor X  = Ipmnq - (1.0/3.0)*Imnpq  - (1.0/3.0)*Apqmn;
+  tensor X  = Ipmnq - Imnpq*(1.0/3.0)  - Apqmn*(1.0/3.0);
 
   //Ipmnq.print("in MD_PS01", "");
   
@@ -215,17 +215,17 @@ tensor MDPotentialSurface::dnods(const EPState *EPS) const
   double sad =sa.trace();
   tensor aa = alpha("ij") * alpha("ij");
   double aad =aa.trace();
-  tensor Y = S - ( p + 0.333333333*(sad-p*aad) )*I2;
+  tensor Y = S - I2*( p + 0.333333333*(sad-p*aad) );
   Y.null_indices();
 
-  tensor s_bar = S("ij") - p*alpha("ij");
+  tensor s_bar = S("ij") - alpha("ij")*p;
   s_bar.null_indices();
   tensor norm2 = s_bar("ij") * s_bar("ij");
   double norm =  norm2.trace();
 
   s_bar.null_indices();
   tensor tmp = s_bar("pq")*Y("mn");
-  dnods = ( X - 2.0 * tmp)*(1.0/norm);
+  dnods = ( X - tmp*2.0)*(1.0/norm);
   
   return  dnods;
 
@@ -290,10 +290,10 @@ tensor MDPotentialSurface::apqdnods(const EPState *EPS) const
   //Ymn
   tensor sa = S("ij") * alpha("ij");
   double sad =sa.trace();
-  tensor Y = S - ( p + 0.333333333*(sad-p*aad) )*I2;
+  tensor Y = S - I2*( p + 0.333333333*(sad-p*aad) );
   Y.null_indices();
   
-  tensor s_bar = S - p*alpha;
+  tensor s_bar = S - alpha*p;
   s_bar.null_indices();
 
   tensor as_bar = alpha("pq") * s_bar("pq");

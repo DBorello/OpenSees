@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-09-20 20:03:13 $
+// $Revision: 1.4 $
+// $Date: 2002-02-26 06:25:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/Template3Dep/TclTemplate3DepCommand.cpp,v $
                                                                         
 // Written: fmk 
@@ -297,7 +297,7 @@ YieldSurface *EvaluateYieldSurfaceArgs(ClientData clientData, Tcl_Interp *interp
   // 3. Cam Clay yield surface
   if ((strcmp(argv[0],"-CC") == 0) || (strcmp(argv[0],"-cc") == 0)) {
 
-    double mp = 0.0;
+    double mp = 1.2;
     if (argc > 1) {
       if (Tcl_GetDouble(interp, argv[1], &mp) != TCL_OK) {
         g3ErrorHandler->warning("invalid M: %s for -PS CamClay M", argv[1]);
@@ -347,7 +347,7 @@ PotentialSurface *EvaluatePotentialSurfaceArgs(ClientData clientData, Tcl_Interp
   // 3. CamClay potential surface
   else if ((strcmp(argv[0],"-CC") == 0) || (strcmp(argv[0],"-cc") == 0)) {
 
-    double mp = 1.1;
+    double mp = 1.2;
     if (argc == 2) {
       if (Tcl_GetDouble(interp, argv[1], &mp) != TCL_OK) {
         g3ErrorHandler->warning("nDMaterial Templated3Dep - invalid M %s",
@@ -408,9 +408,9 @@ int EvaluateStressTensor(ClientData clientData, Tcl_Interp *interp, char *tclStr
   for (i=1; i<9; i++) {
      values[i] = 0;
      if ((i == 4)|| (i==8))
-        values[i] = values[0];
+        values[i] = -1.0 * values[0];
   }
-
+  values[0] = -1.0 * values[0];
   stresstensor newStress(values);
   
   //newStress.printshort("tcl:");

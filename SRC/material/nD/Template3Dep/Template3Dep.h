@@ -170,7 +170,7 @@ class Template3Dep : public NDMaterial
   private:
     
      //These are from formerly CDriver
-     EPState ForwardEulerEPState( straintensor &strain_increment);
+     EPState ForwardEulerEPState( const straintensor &strain_increment);
      
      EPState SemiBackwardEulerEPState( const straintensor &strain_increment);
      

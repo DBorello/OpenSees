@@ -135,9 +135,11 @@ tensor EvolutionLaw_NL_EijMD::h_t( EPState *EPS, PotentialSurface *PS)
     //Calculate the state parameters xi 
     double e = gete(); // Stored in MD ELT
     
+       cerr << " p: " << p;
     if (p < 0.0)
     {
-       g3ErrorHandler->fatal("EvolutionLaw_NL_EijMD::h_t   p < 0, Program exits.");
+       //cerr << " p: " << p;
+       g3ErrorHandler->warning("EvolutionLaw_NL_EijMD::h_t   p < 0, Program exits.");
        exit(-1);
     }
     double ec = getec_ref() - getLambda() * log( p/getp_ref() );
@@ -204,7 +206,7 @@ tensor EvolutionLaw_NL_EijMD::h_t( EPState *EPS, PotentialSurface *PS)
     //double A = getAo()*(1.0 + temp);
 
         
-    tensor ht = h * b;
+    tensor ht = b * h;
 
     return ht;
 
@@ -326,8 +328,9 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
 
        if (p < 0.0)
        {
-          g3ErrorHandler->fatal("EvolutionLaw_NL_EijMD::updateEeDm   p < 0, Program exits.");
-          exit(-1);
+          p = 0.1;
+	  g3ErrorHandler->warning("EvolutionLaw_NL_EijMD::updateEeDm   p < 0, Program exits.");
+          //exit(-1);
        }
        
        double ec = getec_ref() - getLambda() * log( p/getp_ref() );       
@@ -355,7 +358,7 @@ int EvolutionLaw_NL_EijMD::updateEeDm(EPState *EPS, double st_vol, double dLamda
        //}         
 
        if ( D > 0.0 ) D = 0.0;
-       dF =  dLamda * getCf() * (-D) * ( n("ij") * getFmax()  + F("ij") );
+       dF =  ( n("ij") * getFmax()  + F("ij") ) * dLamda * getCf() * (-D);
        //cout << "dF" << dF;       
        F = F ;//- dF;
        EPS->setTensorVar(2, F);

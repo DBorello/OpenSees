@@ -74,7 +74,7 @@ double MDYieldSurface::f(const EPState *EPS) const
   
   double m = EPS->getScalarVar(1);
 
-  stresstensor temp1 = S - p*alpha;
+  stresstensor temp1 = S - alpha*p;
   temp1.null_indices();
   stresstensor temp2 = temp1("ij") * temp1("ij");  
 
@@ -144,7 +144,7 @@ tensor MDYieldSurface::dFods(const EPState *EPS) const {
   double N = temp.trace() + sqrt(2.0/3.0)*m; 
   //printf("    N =  %e\n", N);
 
-  dFoverds =  n - N *I2 *(1.0/3.0);
+  dFoverds =  n - I2 * N*(1.0/3.0);
 
   return dFoverds;
 
@@ -191,7 +191,7 @@ tensor MDYieldSurface::xi_t1( const EPState *EPS) const {
     exit(-1);
   }
     
-  return (-1.0) * n * p;
+  return  n  * (-1.0)* p;
 }
 
 
