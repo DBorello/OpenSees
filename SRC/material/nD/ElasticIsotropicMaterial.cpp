@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $                                                              
-// $Date: 2001-05-18 05:33:18 $                                                                  
+// $Revision: 1.7 $                                                              
+// $Date: 2001-05-26 05:33:05 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -61,7 +61,7 @@ ElasticIsotropicMaterial::ElasticIsotropicMaterial
 
 ElasticIsotropicMaterial::~ElasticIsotropicMaterial()
 {
-
+	
 }
 
 NDMaterial*
@@ -88,7 +88,7 @@ ElasticIsotropicMaterial::getCopy (const char *type)
 		// prior to copying the material model (calling this function)
 	return theModel;
     }
-    else if (strcmp(type,"ElasticIsotropic3D") == 0)
+    else if (strcmp(type,"ThreeDimensional") == 0)
     {
 	ElasticIsotropic3D *theModel;
 	theModel = new ElasticIsotropic3D (this->getTag(), E, v, 100.0, 0.0);
@@ -279,7 +279,7 @@ const char*
 ElasticIsotropicMaterial::getType (void) const
 {
 	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getType -- subclass responsibility");
-
+	
 	return 0;
 }
 

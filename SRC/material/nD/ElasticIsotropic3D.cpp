@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $                                                              
-// $Date: 2001-01-24 07:09:55 $                                                                  
+// $Revision: 1.7 $                                                              
+// $Date: 2001-05-26 05:33:05 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $                                                                
 
 //Boris Jeremic and Zhaohui Yang ___ 02-10-2000
@@ -29,21 +29,22 @@
 #include <Channel.h>
 #include <Tensor.h>
 
+Matrix ElasticIsotropic3D::D(6,6);
+Vector ElasticIsotropic3D::sigma(6);
+
 ElasticIsotropic3D::ElasticIsotropic3D
 (int tag, double E, double nu, double expp, double pr, double pop):
  ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropic3D, E, nu),
- sigma(6), D(6,6), epsilon(6), exp(expp), p_ref(pr), po(pop) 
+ epsilon(6), exp(expp), p_ref(pr), po(pop) 
 {
 	// Set up the elastic constant matrix for 3D elastic isotropic 
-	D.Zero();
-        Dt = tensor( 4, def_dim_4, 0.0 ); 
+	Dt = tensor( 4, def_dim_4, 0.0 ); 
 	setInitElasticStiffness();
-
 }
 
 ElasticIsotropic3D::ElasticIsotropic3D():
  ElasticIsotropicMaterial (0, ND_TAG_ElasticIsotropic3D, 0.0, 0.0),
- sigma(6), D(6,6), epsilon(6)
+ epsilon(6)
 {
        Dt = tensor( 4, def_dim_4, 0.0 );
 }
@@ -88,13 +89,41 @@ ElasticIsotropic3D::setTrialStrainIncr (const Vector &v, const Vector &r)
 const Matrix&
 ElasticIsotropic3D::getTangent (void)
 {
+	double mu2 = E/(1.0+v);
+	double lam = v*mu2/(1.0-2.0*v);
+	double mu = 0.50*mu2;
+
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++)
+			D(j,i) = lam;
+		D(i,i) += mu2;
+		D(i+3,i+3) = mu;
+	}
+
 	return D;
 }
 
 const Vector&
 ElasticIsotropic3D::getStress (void)
 {
-	sigma = D*epsilon;
+	double mu2 = E/(1.0+v);
+	double lam = v*mu2/(1.0-2.0*v);
+	double mu = 0.50*mu2;
+
+	double tmp1 = lam+mu2;
+	
+	double eps0 = epsilon(0);
+	double eps1 = epsilon(1);
+	double eps2 = epsilon(2);
+
+	sigma(0) = tmp1*eps0 + lam*(eps1+eps2);
+	sigma(1) = tmp1*eps1 + lam*(eps2+eps0);
+	sigma(2) = tmp1*eps2 + lam*(eps0+eps1);
+
+	sigma(3) = mu*epsilon(3);
+	sigma(4) = mu*epsilon(4);
+	sigma(5) = mu*epsilon(5);
+
 	return sigma;
 }
 
@@ -216,7 +245,6 @@ ElasticIsotropic3D::getCopy (void)
 	ElasticIsotropic3D *theCopy =
 		new ElasticIsotropic3D (this->getTag(), E, v);
 	theCopy->epsilon = this->epsilon;
-	theCopy->sigma = this->sigma;
 	theCopy->Strain = this->Strain;
 	theCopy->Stress = this->Stress;
 	// D and Dt are created in the constructor call
@@ -227,7 +255,7 @@ ElasticIsotropic3D::getCopy (void)
 const char*
 ElasticIsotropic3D::getType (void) const
 {
-	return "ElasticIsotropic3D";
+	return "ThreeDimensional";
 }
 
 int

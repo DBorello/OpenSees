@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $                                                              
-// $Date: 2001-01-24 07:09:55 $                                                                  
+// $Revision: 1.6 $                                                              
+// $Date: 2001-05-26 05:33:05 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $                                                                
                                                                         
                                                                         
@@ -91,8 +91,8 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
   protected:
 
   private:
-    Vector sigma;		// Stress vector
-    Matrix D;			// Elastic constants
+    static Vector sigma;		// Stress vector
+    static Matrix D;			// Elastic constants
     Vector epsilon;		// Strain vector
 
     double exp;                 // exponent usually 0.6
