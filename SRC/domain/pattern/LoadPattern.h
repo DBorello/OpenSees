@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-04-12 22:57:34 $
+// $Revision: 1.5 $
+// $Date: 2002-10-10 21:06:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.h,v $
                                                                         
                                                                         
@@ -99,10 +99,10 @@ class LoadPattern : public DomainComponent
 	const Vector & gradient(bool compute, int identifier);
 // AddingSensitivity:END ////////////////////////////////
   protected:
+    int    isConstant;     // to indictae whether setConstant has been called
 	
   private:
     double loadFactor;     // current load factor
-    int    isConstant;     // to indictae whether setConstant has been called
 
     TimeSeries *theSeries; // pointer to associated TimeSeries
 
