@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-11-26 22:53:51 $
+// $Revision: 1.6 $
+// $Date: 2001-11-27 07:01:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/BbarBrick.cpp,v $
 
 // Ed "C++" Love
@@ -296,9 +296,11 @@ BbarBrick::addInertiaLoadToUnbalance(const Vector &accel)
   static const int numberGauss = 8 ;
   static const int ndf = 3 ; 
 
+  int i;
+
   // check to see if have mass
   int haveRho = 0;
-  for (int i = 0; i < numberGauss; i++) {
+  for (i = 0; i < numberGauss; i++) {
     if (materialPointers[i]->getRho() != 0.0)
       haveRho = 1;
   }
@@ -312,7 +314,7 @@ BbarBrick::addInertiaLoadToUnbalance(const Vector &accel)
 
   // store computed RV fro nodes in resid vector
   int count = 0;
-  for (int i=0; i<numberNodes; i++) {
+  for (i=0; i<numberNodes; i++) {
     const Vector &Raccel = nodePointers[i]->getRV(accel);
     for (int j=0; j<ndf; j++)
       resid(count++) = Raccel(i);

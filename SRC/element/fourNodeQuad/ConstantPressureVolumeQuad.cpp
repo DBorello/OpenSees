@@ -274,9 +274,11 @@ ConstantPressureVolumeQuad::addInertiaLoadToUnbalance(const Vector &accel)
   static const int numberNodes = 9 ;
   static const int ndf = 2 ; 
 
+  int i;
+
   // check to see if have mass
   int haveRho = 0;
-  for (int i = 0; i < numberGauss; i++) {
+  for (i = 0; i < numberGauss; i++) {
     if (materialPointers[i]->getRho() != 0.0)
       haveRho = 1;
   }
@@ -291,7 +293,7 @@ ConstantPressureVolumeQuad::addInertiaLoadToUnbalance(const Vector &accel)
   // store computed RV fro nodes in resid vector
   int count = 0;
 
-  for (int i=0; i<numberNodes; i++) {
+  for (i=0; i<numberNodes; i++) {
     const Vector &Raccel = nodePointers[i]->getRV(accel);
     for (int j=0; j<ndf; j++)
       resid(count++) = Raccel(i);

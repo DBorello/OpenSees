@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-11-26 22:53:55 $
+// $Revision: 1.6 $
+// $Date: 2001-11-27 07:01:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -431,7 +431,7 @@ ShellMITC4::addInertiaLoadToUnbalance(const Vector &accel)
     return 0;
 
   int count = 0;
-  for (int i=0; i<4; i++) {
+  for (i=0; i<4; i++) {
     const Vector &Raccel = nodePointers[i]->getRV(accel);
     for (int j=0; j<6; j++)
       resid(count++) = Raccel(i);
