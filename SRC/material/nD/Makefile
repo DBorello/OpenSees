@@ -30,7 +30,7 @@ TEMPLATE_OBJS =              \
 
 all:	$(OBJS) 
 	@$(CD) $(FE)/material/nD/soil; $(MAKE);
-	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE); $(AR) -rv $(MATMOD_LIBRARY) $(TEMPLATE_OBJS)
+	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE); 
 
 # Miscellaneous
 
