@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-16 23:59:03 $
+// $Revision: 1.3 $
+// $Date: 2000-10-18 06:00:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
                                                                         
                                                                         
@@ -67,12 +67,13 @@ FourNodeQuad::FourNodeQuad (int tag, int nd1, int nd2, int nd3, int nd4,
     // Change this later so object comes through constructor
     theQuadRule = new GaussQuadRule1d (2);
     // theQuadRule = rule.getCopy(); ???
-	order = theQuadRule->getOrder();
     
     if (theQuadRule == 0) {
 	g3ErrorHandler->fatal("FATAL ERROR FourNodeQuad - failed to get a copy of quadrature rule");
     }
-    
+
+   	order = theQuadRule->getOrder();
+
     int i, j;
     
     // Allocate arrays of pointers to NDMaterials
