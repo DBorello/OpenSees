@@ -21,7 +21,7 @@
 //# LANGUAGE:          C++
 //# TARGET OS:         all...
 //# DESIGN:            Zhaohui Yang, Boris Jeremic
-//# PROGRAMMER(S):     Jinxou Liao, Zhaohui Yang, Boris Jeremic
+//# PROGRAMMER(S):     Jinxiu Liao, Zhaohui Yang, Boris Jeremic
 //#
 //#
 //# DATE:              21Oct2002
