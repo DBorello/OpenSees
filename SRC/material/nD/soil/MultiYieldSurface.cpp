@@ -1,5 +1,5 @@
-// $Revision: 1.6 $
-// $Date: 2002-02-08 19:54:39 $
+// $Revision: 1.7 $
+// $Date: 2002-06-21 00:28:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/MultiYieldSurface.cpp,v $
                                                                         
 // Written: ZHY
@@ -40,7 +40,7 @@ void MultiYieldSurface::setData(const Vector & theCenter_init,
                                 double theSize_init, double plas_modul)
 {
   theSize = theSize_init;
-	theCenter = theCenter_init;
+  theCenter = theCenter_init;
   plastShearModulus = plas_modul;
 }
 

@@ -1,5 +1,5 @@
-// $Revision: 1.21 $
-// $Date: 2002-06-10 22:22:23 $
+// $Revision: 1.22 $
+// $Date: 2002-06-21 00:28:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -426,7 +426,8 @@ const Vector & PressureDependMultiYield::getStress (void)
     trialStress.setData(workV6);
   }
   else {
-    for (i=1; i<=numOfSurfaces; i++) theSurfaces[i] = committedSurfaces[i];
+    for (i=1; i<=numOfSurfaces; i++) 
+      theSurfaces[i] = committedSurfaces[i];
     activeSurfaceNum = committedActiveSurf;
     pressureD = pressureDCommitted;
     reversalStress = reversalStressCommitted;
@@ -443,6 +444,7 @@ const Vector & PressureDependMultiYield::getStress (void)
 
     subStrainRate = strainRate;
     setTrialStress(currentStress);
+
     if (activeSurfaceNum>0 && isLoadReversal()) {
       updateInnerSurface();
       activeSurfaceNum = 0;
@@ -671,11 +673,6 @@ int PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel,
   int i, res = 0;
 
   static ID idData(4);
-  idData(0) = this->getTag();
-  idData(1) = numOfSurfaces;
-  idData(2) = loadStage;
-  idData(3) = ndm;
-
   res += theChannel.recvID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
     g3ErrorHandler->warning("%s -- could not send Vector",
@@ -756,12 +753,13 @@ int PressureDependMultiYield::recvSelf(int commitTag, Channel &theChannel,
     numOfSurfaces = idData(1);
     theSurfaces = new MultiYieldSurface[numOfSurfaces+1]; //first surface not used
     committedSurfaces = new MultiYieldSurface[numOfSurfaces+1]; 
-    
-    this->setUpSurfaces();
+
+    for (int i=1; i<=numOfSurfaces; i++) 
+      committedSurfaces[i] = MultiYieldSurface();    
   }
 
   for(i = 0; i < numOfSurfaces; i++) {
-    int k = 70 + i*8;
+    int k = 69 + i*8;
     workV6(0) = data(k+2);
     workV6(1) = data(k+3);
     workV6(2) = data(k+4);
@@ -854,8 +852,8 @@ const Vector & PressureDependMultiYield::getCommittedStrain (void)
   if (ndm==3)
     return currentStrain.t2Vector(1);
   else {
-		static Vector workV(3);
-		workV6 = currentStrain.t2Vector(1);
+    static Vector workV(3);
+    workV6 = currentStrain.t2Vector(1);
     workV[0] = workV6[0];
     workV[1] = workV6[1];
     workV[2] = workV6[3];
@@ -1114,6 +1112,8 @@ int PressureDependMultiYield::isLoadReversal(void)
   if(activeSurfaceNum == 0) return 0;
 
   getSurfaceNormal(currentStress, workT2V);
+
+
   //if (((trialStress.t2Vector() - currentStress.t2Vector()) 
   //	&& workT2V.t2Vector()) < 0) return 1;
 
@@ -1138,7 +1138,7 @@ PressureDependMultiYield::getSurfaceNormal(const T2Vector & stress, T2Vector &no
   workV6.addVector(1.0, center, -conHeig);
   workV6 *= 3.0;
   workT2V.setData(workV6, volume);
-  
+
   normal.setData(workT2V.unitT2Vector());
 }
 

@@ -1,5 +1,5 @@
-// $Revision: 1.18 $
-// $Date: 2002-06-10 22:22:25 $
+// $Revision: 1.19 $
+// $Date: 2002-06-21 00:28:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -560,8 +560,9 @@ int PressureIndependMultiYield::recvSelf(int commitTag, Channel &theChannel,
     numOfSurfaces = idData(1);
     theSurfaces = new MultiYieldSurface[numOfSurfaces+1]; //first surface not used
     committedSurfaces = new MultiYieldSurface[numOfSurfaces+1]; 
-    
-    this->setUpSurfaces();
+
+    for (int i=1; i<=numOfSurfaces; i++) 
+      committedSurfaces[i] = MultiYieldSurface();    
   }
   
   for(i = 0; i < numOfSurfaces; i++) {
