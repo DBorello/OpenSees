@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-19 18:20:45 $
+// $Revision: 1.5 $
+// $Date: 2002-10-03 18:52:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.cpp,v $
                                                                         
                                                                         
@@ -229,6 +229,17 @@ ElasticSection3d::getInitialTangent(void)
 
 const Matrix &
 ElasticSection3d::getSectionFlexibility (void)
+{
+  ks(0,0) = 1.0/(E*A);
+  ks(1,1) = 1.0/(E*Iz);
+  ks(2,2) = 1.0/(E*Iy);
+  ks(3,3) = 1.0/(G*J);
+  
+  return ks;
+}
+
+const Matrix &
+ElasticSection3d::getInitialFlexibility (void)
 {
   ks(0,0) = 1.0/(E*A);
   ks(1,1) = 1.0/(E*Iz);

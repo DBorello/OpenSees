@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-19 18:20:45 $
+// $Revision: 1.5 $
+// $Date: 2002-10-03 18:52:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.cpp,v $
                                                                         
                                                                         
@@ -124,6 +124,16 @@ GenericSection1d::getSectionFlexibility ()
     ks(0,0) = 1.0/tangent;
   else
     ks(0,0) = 1.0e12;
+
+  return ks;
+}
+
+const Matrix&
+GenericSection1d::getInitialFlexibility ()
+{
+  double tangent = theModel->getInitialTangent();
+
+  ks(0,0) = 1.0/tangent;
 
   return ks;
 }

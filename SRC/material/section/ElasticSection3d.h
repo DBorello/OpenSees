@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-19 18:20:45 $
+// $Revision: 1.5 $
+// $Date: 2002-10-03 18:52:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.h,v $
                                                                         
                                                                         
@@ -64,6 +64,7 @@ class ElasticSection3d: public SectionForceDeformation
     const Matrix &getSectionTangent (void);
     const Matrix &getInitialTangent (void);
     const Matrix &getSectionFlexibility (void);
+    const Matrix &getInitialFlexibility(void);
     
     SectionForceDeformation *getCopy (void);
     const ID &getType (void);

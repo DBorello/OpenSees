@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-19 18:20:45 $
+// $Revision: 1.8 $
+// $Date: 2002-10-03 18:52:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -379,6 +379,35 @@ SectionAggregator::getSectionFlexibility(void)
     }
     else
       (*fs)(i,i) = 1/k;
+  }	
+  
+  return *fs;
+}
+
+const Matrix &
+SectionAggregator::getInitialFlexibility(void)
+{
+  int i = 0;
+    
+  int theSectionOrder = 0;
+
+  // Zero before assembly
+  fs->Zero();
+
+  if (theSection) {
+    const Matrix &fSec = theSection->getInitialFlexibility();
+    theSectionOrder = theSection->getOrder();
+
+    for (i = 0; i < theSectionOrder; i++)
+      for (int j = 0; j < theSectionOrder; j++)
+	(*fs)(i,j) = fSec(i,j);
+  }
+  
+  int order = theSectionOrder + numMats;
+
+  for ( ; i < order; i++) {
+    double k = theAdditions[i-theSectionOrder]->getInitialTangent();
+    (*fs)(i,i) = 1.0/k;
   }	
   
   return *fs;

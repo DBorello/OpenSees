@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-19 18:20:46 $
+// $Revision: 1.8 $
+// $Date: 2002-10-03 18:52:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.h,v $
                                                                         
                                                                         
@@ -67,6 +67,7 @@ class SectionAggregator : public SectionForceDeformation
     const Matrix &getSectionTangent(void);
     const Matrix &getInitialTangent(void);
     const Matrix &getSectionFlexibility(void);
+    const Matrix &getInitialFlexibility(void);
 
     int   commitState(void);
     int   revertToLastCommit(void);    

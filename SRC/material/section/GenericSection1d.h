@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-06-19 18:20:45 $
+// $Revision: 1.4 $
+// $Date: 2002-10-03 18:52:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.h,v $
                                                                         
                                                                         
@@ -60,6 +60,7 @@ class GenericSection1d : public SectionForceDeformation
     const Matrix &getSectionTangent (void);
     const Matrix &getInitialTangent (void);
     const Matrix &getSectionFlexibility (void);
+    const Matrix &getInitialFlexibility(void);
     
     int commitState (void);
     int revertToLastCommit (void);
