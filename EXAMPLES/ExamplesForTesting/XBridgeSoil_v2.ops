@@ -117,7 +117,7 @@ set accNam  rrsmv1_1.txt ;# acc. file name
 set accMul   9.81    ;# acc. time history multiplier
 set accDt   0.005  ;# time step of input acc
 set deltaT   0.005   ;# time step for analysis
-set numSteps 20     ;# number of time steps
+set numSteps 2     ;# number of time steps
 set alpha    0.6    ;# Newmark integration parameter
 set crack    1      ;# use cracked concrete section
 set z 3.281  ;#conversion from feet to meter
@@ -1289,7 +1289,10 @@ algorithm ModifiedNewton
 integrator LoadControl 0.05 1 0.05 0.05
 analysis Static
 
+set startT [clock seconds]
 analyze 20
+set endT [clock seconds]
+puts "Execution time: [expr $endT-$startT] seconds."
 
 puts "bridge gravity analysis completed"
 
