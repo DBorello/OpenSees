@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-26 18:50:41 $
+// $Revision: 1.7 $
+// $Date: 2003-10-10 21:37:13 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
-// File: ~/database/FileDatastore.C
-//
 // Written: fmk 
 // Created: 10/98
 // Revision: A
@@ -99,7 +97,7 @@ FileDatastore::~FileDatastore()
 {
 
   for (int i=0; i<maxIDsize; i++) 
-    if (ids[i] != 0) ids[i]->close();
+    if (ids[i] != 0) ids[i]->close(); 
   for (int j=0; j<maxVectSize; j++)
     if (vects[j] != 0) vects[j]->close();
   for (int k=0; k<maxMatSize; k++)
@@ -124,13 +122,13 @@ int
 FileDatastore::commitState(int commitTag)
 {
     int result = FE_Datastore::commitState(commitTag);
-
+    
     // if sucessfull, we close the files to flush the buffers
     if (result == commitTag) {
 	for (int i=0; i<maxIDsize; i++) 
 	    if (ids[i] != 0) {
-		ids[i]->close();
-		ids[i] = 0;
+	      ids[i]->close(); 
+	      ids[i] = 0;
 	    }
 	for (int j=0; j<maxVectSize; j++)
 	    if (vects[j] != 0) {
@@ -192,6 +190,11 @@ FileDatastore::sendMatrix(int dataTag, int commitTag,
     strcat(fileName,".Mats.");
     strcat(fileName,intName);
     mats[matSize] = this->openFile(fileName);    
+    if (mats[matSize] == 0) {
+      opserr << "FileDatastore::sendMatrix() - could not open file\n";
+      return -1;
+    }
+    
     int loc = mats[matSize]->tellg();
     if (loc == -1) 
       loc = 0;
@@ -322,6 +325,10 @@ FileDatastore::recvMatrix(int dataTag, int commitTag,
     strcat(fileName,".Mats.");
     strcat(fileName,intName);
     mats[matSize] = this->openFile(fileName);    
+    if (mats[matSize] == 0) {
+      opserr << "FileDatastore::recvMatrix() - could not open file\n";
+      return -1;
+    }
     int loc = mats[matSize]->tellg();
     if (loc == -1) 
       loc = 0;
@@ -423,6 +430,10 @@ FileDatastore::sendVector(int dataTag, int commitTag,
     strcat(fileName,".Vects.");
     strcat(fileName,intName);
     vects[vectSize] = this->openFile(fileName);    
+    if (vects[vectSize] == 0) {
+      opserr << "FileDatastore::sendVector() - could not open file\n";
+      return -1;
+    }
     int loc = vects[vectSize]->tellg();
     if (loc == -1) 
       loc = 0;
@@ -541,6 +552,10 @@ FileDatastore::recvVector(int dataTag, int commitTag,
     strcat(fileName,".Vects.");
     strcat(fileName,intName);
     vects[vectSize] = this->openFile(fileName);    
+    if (vects[vectSize] == 0) {
+      opserr << "FileDatastore::recvVector() - could not open file\n";
+      return -1;
+    }
     int loc = vects[vectSize]->tellg();
     if (loc == -1) 
       loc = 0;
@@ -632,12 +647,15 @@ FileDatastore::sendID(int dataTag, int commitTag,
     char fileName[70];
     char intName[10];
     strcpy(fileName, dataBase);
-	sprintf(intName,"%d",idSize);
-//    itoa(idSize, intName);
+    sprintf(intName,"%d",idSize);
     strcat(fileName,".IDs.");
     strcat(fileName,intName);
 
     ids[idSize] = this->openFile(fileName);  
+    if (ids[idSize] == 0) {
+      opserr << "FileDatastore::sendID() - could not open file\n";
+      return -1;
+    }
 	
     int loc = ids[idSize]->tellg();
     if (loc == -1) 
@@ -664,6 +682,7 @@ FileDatastore::sendID(int dataTag, int commitTag,
     }
     fileEnds.ids[idSize] = loc;
   }
+
 
   // we now found the location in the file to write the data
   fstream *theStream = ids[idSize];
@@ -731,7 +750,7 @@ FileDatastore::sendID(int dataTag, int commitTag,
   // update the size of file if we have added to eof
   if (fileEnd <= pos)
     fileEnds.ids[idSize] += stepSize;  
-  
+
   return 0;
 }		       
 
@@ -753,11 +772,16 @@ FileDatastore::recvID(int dataTag, int commitTag,
     char fileName[70];
     char intName[10];
     strcpy(fileName, dataBase);
-	sprintf(intName,"%d",idSize);
-//    itoa(idSize, intName);
+    sprintf(intName,"%d",idSize);
     strcat(fileName,".IDs.");
     strcat(fileName,intName);
+
     ids[idSize] = this->openFile(fileName);    
+    if (ids[idSize] == 0) {
+      opserr << "FileDatastore::recvID() - could not open file\n";
+      return -1;
+    }
+
     int loc = ids[idSize]->tellg();
     if (loc == -1) 
       loc = 0;
@@ -770,12 +794,6 @@ FileDatastore::recvID(int dataTag, int commitTag,
       int maxCommitTag = 0;
       while (pos < loc) {
 	  theStream->read((char *)&idBuffer, stepSize);
-	  /*
-	  opserr << idBuffer.dbTag << " " << idBuffer.commitTag;
-	  for (int i=0; i<idSize; i++)
-	    opserr << " " << idBuffer.data[i];
-	  opserr << endln;
-	  */
 	  
 	  if ((idBuffer.dbTag >= dataTag) && 
 	      (idBuffer.commitTag >= commitTag)) {
@@ -839,6 +857,9 @@ FileDatastore::recvID(int dataTag, int commitTag,
   return 0;
 }		       
 
+#include <fstream>
+using std::ofstream;
+using std::cerr;
 
 /*******************************************************************
  *              MISC METHODS & FUNCTONS FOR OPENING THE FILE       *
@@ -847,22 +868,36 @@ FileDatastore::recvID(int dataTag, int commitTag,
 fstream *
 FileDatastore::openFile(char *fileName)
 {
-#ifdef _WIN32    
-    fstream *res = new fstream(fileName, ios::in | ios::out | ios::binary);
-#else
-    fstream *res = new fstream(fileName, ios::in | ios::out);    
-#endif
-    
-    if (res == 0) {
-	opserr << "FATAL - FileDatastore::openFile() - could not open file ";
-	opserr << fileName << endln;
-	exit(-1);
-    }
   
-    // set the position for writing to eof
-    res->seekp(0,ios::end);
+  fstream *res = new fstream();
+  if (res == 0) {
+    opserr << "FileDatastore::openFile - out of memory; failed to open file: " << fileName << endln;
+    return 0;
+  }
 
-    return res;
+  res->open(fileName, ios::in | ios::out | ios::binary); 
+
+  // if file did not exist, need to pass trunc flag to open it
+  if (res->bad() == true || res->is_open() == false) {
+    // delete & new again for unix gcc compiler to work!
+    delete res;
+    res = new fstream();
+    if (res == 0) {
+      opserr << "FileDatastore::openFile - out of memory; failed to open file: " << fileName << endln;
+      return 0;
+    }
+    res->open(fileName, ios::in | ios::out | ios::trunc | ios::binary);   
+  }
+
+  if (res->bad() == true || res->is_open() == false) {
+    opserr << "FATAL - FileDatastore::openFile() - could not open file " << fileName << endln;
+    delete res;
+    return 0;
+  }
+
+  // set the position for writing to eof
+  res->seekp(0,ios::end);  
+  return res;
 }
 
 /*
