@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 05:56:43 $
+// $Revision: 1.3 $
+// $Date: 2001-01-11 06:48:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -556,6 +556,100 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
          return TCL_ERROR;
       }  
   }
+    
+    
+    // check argv[1] for type of patch  and create the object
+    else if (strcmp(argv[1], "rect") == 0 || 
+	     strcmp(argv[1], "rectangular") == 0) {
+	
+	int numSubdivIJ, numSubdivJK, matTag, secTag;
+	double vertexCoordY, vertexCoordZ;
+	Matrix vertexCoords(4,2);
+	int j, argi;
+
+	if (argc < 9) {
+	    interp->result = "WARNING invalid number of parameters: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertK zVertK";
+	    return TCL_ERROR;
+	}
+  
+	argi = 2;
+      
+	if (Tcl_GetInt(interp, argv[argi++], &matTag) != TCL_OK) {
+	    interp->result = "WARNING invalid matTag: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+	    return TCL_ERROR;
+	}
+
+	if (Tcl_GetInt(interp, argv[argi++], &numSubdivIJ) != TCL_OK) {
+	    interp->result = "WARNING invalid numSubdivIJ: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+	    return TCL_ERROR;
+	}
+ 
+	if (Tcl_GetInt(interp, argv[argi++], &numSubdivJK) != TCL_OK) {
+	    interp->result = "WARNING invalid numSubdivJK: patch quad matTag numSubdivIJ numSubdivJK yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+	    return TCL_ERROR;
+	}
+
+	for (j=0; j < 2; j++) {
+	    if (Tcl_GetDouble(interp, argv[argi++], &vertexCoordY) != TCL_OK) {
+		interp->result = "WARNING invalid Coordinate y: ...yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+		return TCL_ERROR;
+	    }
+
+	    if (Tcl_GetDouble(interp, argv[argi++], &vertexCoordZ) != TCL_OK) {
+		interp->result = "WARNING invalid Coordinate z: ...yVertI zVertI yVertJ zVertJ yVertK zVertK yVertL zVertL";
+		return TCL_ERROR;
+	    }
+
+	    vertexCoords(j*2,0) = vertexCoordY;
+	    vertexCoords(j*2,1) = vertexCoordZ;
+	}
+
+	vertexCoords(1,0) = vertexCoords(2,0);
+	vertexCoords(1,1) = vertexCoords(0,1);	
+	vertexCoords(3,0) = vertexCoords(0,0);
+	vertexCoords(3,1) = vertexCoords(2,1);		
+	    
+      // get section representation
+      secTag = currentSectionTag;
+      
+      SectionRepres *sectionRepres = theTclModelBuilder->getSectionRepres(secTag);
+      if (sectionRepres == 0) {
+         interp->result = "WARNING cannot retrieve section";
+         return TCL_ERROR;
+      }    
+     
+      if (sectionRepres->getType() != SEC_TAG_FiberSection) {
+         interp->result = "WARNING section invalid: patch can only be added to fiber sections";
+         return TCL_ERROR;
+      }
+
+      FiberSectionRepr *fiberSectionRepr = (FiberSectionRepr *) sectionRepres;
+
+      // create patch
+
+      QuadPatch *patch = new QuadPatch(matTag, numSubdivIJ, numSubdivJK, vertexCoords);
+      if (!patch)
+      {
+         interp->result = "WARNING cannot alocate patch";
+         return TCL_ERROR;
+      }
+
+      //cerr << "\n\tpatch: " << *patch;
+      
+      // add patch to section representation
+
+      int error = fiberSectionRepr->addPatch(*patch);
+      delete patch;
+      
+      if (error)
+      {
+         interp->result = "WARNING cannot add patch to section";
+         return TCL_ERROR;
+      }  
+  }    
+    
+    
+    
          
     else if (strcmp(argv[1], "circ") == 0) {
 	int numSubdivRad, numSubdivCirc, matTag, secTag;
