@@ -255,10 +255,6 @@ SOURCE=..\..\..\OTHER\SuperLU\dsp_defs.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\OTHER\SuperLU\SuperLU_supermatrix.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\OTHER\SuperLU\supermatrix.h
 # End Source File
 # Begin Source File
