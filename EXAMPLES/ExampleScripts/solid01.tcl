@@ -63,7 +63,7 @@ nDMaterial ElasticIsotropic3D 1 70000 0.3 1.8
 #nDMaterial Template 1 -YS $YS -PS $PS -EPS $EPS ......
 
 #            tag     8 nodes      matID  bforce1 bforce2 bforce3 	 massdensity
-element brick  1  5 6 7 8 1 2 3 4   1      0.0     0.0    -9.81    1.8
+element Brick8N  1  5 6 7 8 1 2 3 4   1      0.0     0.0    -9.81    1.8
 
 set Series "Path -filePath NR228.txt -dt 0.02 -factor $g"
 
@@ -73,7 +73,7 @@ pattern UniformExcitation  1   2  -accel $Series
 #recorder Node Node.out disp -time -node  1 2 3 4 5 6 7 8 -dof 1 2 3
 recorder Node node.out disp -time -node 5 -dof 1 2 3
 #recorder plot node.out "PEER solid01.tcl: Top_of_soil"  10 10 300 300 -columns 1 2 
-recorder plot node.out "PEER solid01.tcl: Top_of_soil"  0 0 500 150 -columns 1 3
+#recorder plot node.out "PEER solid01.tcl: Top_of_soil"  0 0 500 150 -columns 1 3
 
 # ################################
 # create the analysis

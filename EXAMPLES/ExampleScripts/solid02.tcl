@@ -115,14 +115,14 @@ nDMaterial ElasticIsotropic3D 1 $Es 0.3 $rho_s
 
 #            tag            8 nodes                  matID    bforce1,2&3    	 massdensity
 #element brick  1   5    6    7    8    1    2    3   4 1  0.0 0.0 -9.81     
-element brick  1    2    5    4    1   11   14   13  10 1  0.0 0.0 [expr -$g]	 1.8
-element brick  2    3    6    5    2   12   15   14  11 1  0.0 0.0 [expr -$g]	 1.8
-element brick  3    5    8    7    4   14   17   16  13 1  0.0 0.0 [expr -$g]	 1.8
-element brick  4    6    9    8    5   15   18   17  14 1  0.0 0.0 [expr -$g]	 1.8
-element brick  5   11   14   13   10   20   23   22  19 1  0.0 0.0 [expr -$g]	 1.8
-element brick  6   12   15   14   11   21   24   23  20 1  0.0 0.0 [expr -$g]	 1.8
-element brick  7   14   17   16   13   23   26   25  22 1  0.0 0.0 [expr -$g]	 1.8
-element brick  8   15   18   17   14   24   27   26  23 1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  1    2    5    4    1   11   14   13  10 1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  2    3    6    5    2   12   15   14  11 1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  3    5    8    7    4   14   17   16  13 1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  4    6    9    8    5   15   18   17  14 1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  5   11   14   13   10   20   23   22  19 1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  6   12   15   14   11   21   24   23  20 1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  7   14   17   16   13   23   26   25  22 1  0.0 0.0 [expr -$g]	 1.8
+element Brick8N  8   15   18   17   14   24   27   26  23 1  0.0 0.0 [expr -$g]	 1.8
 
 # Elastic modulus of aluminium kPa
 set Ea 7.0e7
@@ -159,8 +159,8 @@ recorder Node node1.out disp -time -node 14 23 30 -dof 2
 #recorder plot node.out HelloJoey 10 10 300 300 -columns 2 1
 
 #recorder plot node.out Middel_of_soil 10 10 300 300 -columns 2 1
-recorder plot node1.out "PEER workshop, solid02.tcl: Top_of_soil" 0 0 500 100 -columns 1 3 
-recorder plot node1.out "PEER workshop, solid02.tcl: Superstructure" 0 130 500 100 -columns 1 4 
+#recorder plot node1.out "PEER workshop, solid02.tcl: Top_of_soil" 0 0 500 100 -columns 1 3 
+#recorder plot node1.out "PEER workshop, solid02.tcl: Superstructure" 0 130 500 100 -columns 1 4 
 
 # #################################
 # create the transient analysis
