@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-12-10 21:57:07 $
+// $Revision: 1.4 $
+// $Date: 2003-02-19 19:47:01 $
 // $Source: /usr/local/cvs/OpenSees/EXAMPLES/Example1/main.cpp,v $
 
 
@@ -38,11 +38,11 @@
 //	   the analysis operation.
 
 // standard C++ includes
-#include <stdlib.h>
-#include <iostream.h>
 
-#include <G3Globals.h>
-#include <ConsoleErrorHandler.h>
+#include <stdlib.h>
+
+#include <OPS_Globals.h>
+#include <StandardStream.h>
 
 #include <ArrayOfTaggedObjects.h>
 
@@ -67,8 +67,11 @@
 #include <BandSPDLinSOE.h>
 #include <BandSPDLinLapackSolver.h>
 
-// init the global variabled defined in G3Globals.h
-ErrorHandler *g3ErrorHandler =0;
+
+// init the global variabled defined in OPS_Globals.h
+StandardStream sserr;
+OPS_Stream &opserr = sserr;
+
 double        ops_Dt = 0;
 Domain       *ops_TheActiveDomain = 0;
 Element      *ops_TheActiveElement = 0;
@@ -78,9 +81,6 @@ Element      *ops_TheActiveElement = 0;
 // main routine
 int main(int argc, char **argv)
 {
-    //  first build our error handler
-    g3ErrorHandler = new ConsoleErrorHandler();
-
     //
     //	now create a domain and a modelbuilder
     //  and build the model
@@ -170,7 +170,7 @@ int main(int argc, char **argv)
     
     AnalysisModel     *theModel = new AnalysisModel();
     EquiSolnAlgo      *theSolnAlgo = new Linear();
-    StaticIntegrator  *theIntegrator = new LoadControl(1.0, 1.0, 1.0, 1.0);
+    StaticIntegrator  *theIntegrator = new LoadControl(1.0, 1, 1.0, 1.0);
     ConstraintHandler *theHandler = new PenaltyConstraintHandler(1.0e8,1.0e8);
     RCM               *theRCM = new RCM();
     DOF_Numberer      *theNumberer = new DOF_Numberer(*theRCM);    
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
     // perform the analysis & print out the results for the domain
     int numSteps = 1;
     theAnalysis.analyze(numSteps);
-    cerr << *theDomain;
+    opserr << *theDomain;
 
     exit(0);
 }	
