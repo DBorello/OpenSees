@@ -1,7 +1,7 @@
 include ../../../Makefile.def
 
 OBJS       = SensitivityAlgorithm.o SensitivityIntegrator.o \
-	PathDepSensitivityAlgorithm.o StaticSensitivityIntegrator.o
+	StaticSensitivityIntegrator.o
 
 # Compilation control
 all:         $(OBJS)

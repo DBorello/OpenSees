@@ -51,7 +51,6 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/domain/distributions/ShiftedRayleighRV.o \
 		$(FE)/reliability/domain/distributions/Type3SmallestValueRV.o \
 		$(FE)/reliability/FEsensitivity/SensitivityAlgorithm.o \
-		$(FE)/reliability/FEsensitivity/PathDepSensitivityAlgorithm.o \
 		$(FE)/reliability/FEsensitivity/SensitivityIntegrator.o \
 		$(FE)/reliability/FEsensitivity/StaticSensitivityIntegrator.o \
 		$(FE)/reliability/tcl/TclReliabilityBuilder.o
