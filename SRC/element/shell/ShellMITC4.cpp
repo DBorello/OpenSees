@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-01-06 19:44:16 $
+// $Revision: 1.9 $
+// $Date: 2002-06-07 00:14:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.cpp,v $
 
 // Ed "C++" Love
@@ -44,6 +44,10 @@
 #include <R3vectors.h>
 #include <Renderer.h>
 
+
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
+
 #define min(a,b) ( (a)<(b) ? (a):(b) )
 
 //static data
@@ -62,7 +66,11 @@ Matrix**  ShellMITC4::Bhat           = 0 ;
 //quadrature data
 const double  ShellMITC4::root3 = sqrt(3.0) ;
 const double  ShellMITC4::one_over_root3 = 1.0 / root3 ;
+double ShellMITC4::sg[4] ;
+double ShellMITC4::tg[4] ;
+double ShellMITC4::wg[4] ;
 
+/*
 const double  ShellMITC4::sg[] = { -one_over_root3,  
 				one_over_root3, 
 				one_over_root3, 
@@ -74,52 +82,20 @@ const double  ShellMITC4::tg[] = { -one_over_root3,
                                 one_over_root3 } ;
 
 const double  ShellMITC4::wg[] = { 1.0, 1.0, 1.0, 1.0 } ;
-
+*/
   
 
 //null constructor
 ShellMITC4::ShellMITC4( ) :
 Element( 0, ELE_TAG_ShellMITC4 ),
-connectedExternalNodes(4)
-{ 
-
-}
-
-
-//*********************************************************************
-//full constructor
-ShellMITC4::ShellMITC4(  int tag, 
-                         int node1,
-                         int node2,
-   	                 int node3,
-                         int node4,
-	                 SectionForceDeformation &theMaterial ) :
-Element( tag, ELE_TAG_ShellMITC4 ),
 connectedExternalNodes(4), load(0)
-{
-  connectedExternalNodes(0) = node1 ;
-  connectedExternalNodes(1) = node2 ;
-  connectedExternalNodes(2) = node3 ;
-  connectedExternalNodes(3) = node4 ;
-
-  int i ;
-  for ( i = 0 ;  i < 4; i++ ) {
-
-      materialPointers[i] = theMaterial.getCopy( ) ;
-
-      if (materialPointers[i] == 0) {
-
-	  g3ErrorHandler->fatal("ShellMITC4::constructor %s",
-		"- failed to get a material of type: ShellSection");
-      } //end if
-      
-  } //end for i 
-
+{ 
+  for (int i = 0 ;  i < 4; i++ ) 
+    materialPointers[i] = 0;
 
   //shear matrix pointers
-
   if ( GammaB1pointer == 0 ) {
-	GammaB1pointer = new Matrix*[4] ;    //four matrix pointers
+	GammaB1pointer = new Matrix*[4] ;      //four matrix pointers
 	GammaB1pointer[0] = new Matrix(1,3) ;  //
 	GammaB1pointer[1] = new Matrix(1,3) ;  //    four
 	GammaB1pointer[2] = new Matrix(1,3) ;  //  1x3 matrices
@@ -158,6 +134,123 @@ connectedExternalNodes(4), load(0)
 	Bhat[3] = new Matrix(2,3) ;
   } //end if Bhat
 
+}
+
+
+//*********************************************************************
+//full constructor
+ShellMITC4::ShellMITC4(  int tag, 
+                         int node1,
+                         int node2,
+   	                 int node3,
+                         int node4,
+	                 SectionForceDeformation &theMaterial ) :
+Element( tag, ELE_TAG_ShellMITC4 ),
+connectedExternalNodes(4), load(0)
+{
+  int i, j ;
+  static Vector eig(3) ;
+  static Matrix ddMembrane(3,3) ;
+
+  connectedExternalNodes(0) = node1 ;
+  connectedExternalNodes(1) = node2 ;
+  connectedExternalNodes(2) = node3 ;
+  connectedExternalNodes(3) = node4 ;
+
+  for ( i = 0 ;  i < 4; i++ ) {
+
+      materialPointers[i] = theMaterial.getCopy( ) ;
+
+      if (materialPointers[i] == 0) {
+
+	  g3ErrorHandler->fatal("ShellMITC4::constructor %s",
+		"- failed to get a material of type: ShellSection");
+      } //end if
+      
+  } //end for i 
+
+  //shear matrix pointers
+  if ( GammaB1pointer == 0 ) {
+	GammaB1pointer = new Matrix*[4] ;      //four matrix pointers
+	GammaB1pointer[0] = new Matrix(1,3) ;  //
+	GammaB1pointer[1] = new Matrix(1,3) ;  //    four
+	GammaB1pointer[2] = new Matrix(1,3) ;  //  1x3 matrices
+	GammaB1pointer[3] = new Matrix(1,3) ;  //
+  } //end if B1
+
+  if ( GammaD1pointer == 0 ) {
+	GammaD1pointer = new Matrix*[4] ;
+	GammaD1pointer[0] = new Matrix(1,3) ;
+	GammaD1pointer[1] = new Matrix(1,3) ;
+	GammaD1pointer[2] = new Matrix(1,3) ;
+	GammaD1pointer[3] = new Matrix(1,3) ;
+  } //end if D1
+
+  if ( GammaA2pointer == 0 ) {
+	GammaA2pointer = new Matrix*[4] ;
+	GammaA2pointer[0] = new Matrix(1,3) ;
+	GammaA2pointer[1] = new Matrix(1,3) ;
+	GammaA2pointer[2] = new Matrix(1,3) ;
+	GammaA2pointer[3] = new Matrix(1,3) ;
+  } //end if A2
+
+  if ( GammaC2pointer == 0 ) {
+	GammaC2pointer = new Matrix*[4] ;
+	GammaC2pointer[0] = new Matrix(1,3) ;
+	GammaC2pointer[1] = new Matrix(1,3) ;
+	GammaC2pointer[2] = new Matrix(1,3) ;
+	GammaC2pointer[3] = new Matrix(1,3) ;
+  } //end if C2
+
+  if ( Bhat == 0 ) {
+	Bhat = new Matrix*[4] ;
+	Bhat[0] = new Matrix(2,3) ;
+	Bhat[1] = new Matrix(2,3) ;
+	Bhat[2] = new Matrix(2,3) ;
+	Bhat[3] = new Matrix(2,3) ;
+  } //end if Bhat
+
+  sg[0] = -one_over_root3;
+  sg[1] = one_over_root3;
+  sg[2] = one_over_root3;
+  sg[3] = -one_over_root3;  
+
+  tg[0] = -one_over_root3;
+  tg[1] = -one_over_root3;
+  tg[2] = one_over_root3;
+  tg[3] = one_over_root3;  
+
+  wg[0] = 1.0;
+  wg[1] = 1.0;
+  wg[2] = 1.0;
+  wg[3] = 1.0;
+
+  //compute drilling stiffness penalty parameter
+  static Vector strain(8) ;
+  strain.Zero( ) ;
+
+  //send the (zero) strain to the material 
+  int success = materialPointers[0]->setTrialSectionDeformation( strain ) ;
+
+  //compute the stress (should be zero)
+  const Vector &stress = materialPointers[0]->getStressResultant( ) ;
+
+  //compute the material tangent
+  const Matrix &dd = materialPointers[0]->getSectionTangent( ) ;
+
+  //assemble ddMembrane ;
+  for ( i = 0; i < 3; i++ ) {
+      for ( j = 0; j < 3; j++ )
+         ddMembrane(i,j) = dd(i,j) ;
+  } //end for i 
+
+  //eigenvalues of ddMembrane
+  eig = LovelyEig( ddMembrane ) ;
+  
+  //set ktt 
+  //Ktt = dd(2,2) ;  //shear modulus 
+  Ktt = min( eig(2), min( eig(0), eig(1) ) ) ;
+  //Ktt = dd(2,2);
 }
 //******************************************************************
 
@@ -231,44 +324,17 @@ ShellMITC4::~ShellMITC4( )
 //set domain
 void  ShellMITC4::setDomain( Domain *theDomain ) 
 {  
-
-  static Matrix ddMembrane(3,3) ;
-
-  static Vector eig(3) ;
-
   int i, j ;
 
   //node pointers
-  for ( i = 0; i < 4; i++ ) 
+  for ( i = 0; i < 4; i++ ) {
      nodePointers[i] = theDomain->getNode( connectedExternalNodes(i) ) ;
-
-
-  //compute drilling stiffness penalty parameter
-
-  static Vector strain(8) ;
-  strain.Zero( ) ;
-
-  //send the (zero) strain to the material 
-  int success = materialPointers[0]->setTrialSectionDeformation( strain ) ;
-
-  //compute the stress (should be zero)
-  const Vector &stress = materialPointers[0]->getStressResultant( ) ;
-
-  //compute the material tangent
-  const Matrix &dd = materialPointers[0]->getSectionTangent( ) ;
-
-  //assemble ddMembrane ;
-  for ( i = 0; i < 3; i++ ) {
-      for ( j = 0; j < 3; j ++ )
-         ddMembrane(i,j) = dd(i,j) ;
-  } //end for i 
-  
-  //eigenvalues of ddMembrane
-  eig = LovelyEig( ddMembrane ) ;
-
-  //set ktt 
-  //Ktt = dd(2,2) ;  //shear modulus 
-  Ktt = min( eig(2), min( eig(0), eig(1) ) ) ;
+     
+     if (nodePointers[i] == 0) {
+       cerr << "ShellMITC4::setDomain - no node " << connectedExternalNodes(i);
+       cerr << " exists in the model\n";
+     }
+  }
 
   //basis vectors and local coordinates
   computeBasis( ) ;
@@ -1687,14 +1753,152 @@ ShellMITC4::transpose( int dim1,
 
 int  ShellMITC4::sendSelf (int commitTag, Channel &theChannel)
 {
-    return -1;
+
+  int res = 0;
+
+  // note: we don't check for dataTag == 0 for Element
+  // objects as that is taken care of in a commit by the Domain
+  // object - don't want to have to do the check if sending data
+  int dataTag = this->getDbTag();
+  
+
+  // Now quad sends the ids of its materials
+  int matDbTag;
+  
+  static ID idData(13);
+  
+  int i;
+  for (i = 0; i < 4; i++) {
+    idData(i) = materialPointers[i]->getClassTag();
+    matDbTag = materialPointers[i]->getDbTag();
+    // NOTE: we do have to ensure that the material has a database
+    // tag if we are sending to a database channel.
+    if (matDbTag == 0) {
+      matDbTag = theChannel.getDbTag();
+			if (matDbTag != 0)
+			  materialPointers[i]->setDbTag(matDbTag);
+    }
+    idData(i+4) = matDbTag;
+  }
+  
+  idData(8) = this->getTag();
+  idData(9) = connectedExternalNodes(0);
+  idData(10) = connectedExternalNodes(1);
+  idData(11) = connectedExternalNodes(2);
+  idData(12) = connectedExternalNodes(3);
+
+  res += theChannel.sendID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING ShellMITC4::sendSelf() - %d failed to send ID\n",
+			    this->getTag());
+    return res;
+  }
+
+  static Vector vectData(1);
+  vectData(0) = Ktt;
+
+  res += theChannel.sendVector(dataTag, commitTag, vectData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING ShellMITC4::sendSelf() - %d failed to send ID\n",
+			    this->getTag());
+    return res;
+  }
+
+  // Finally, quad asks its material objects to send themselves
+  for (i = 0; i < 4; i++) {
+    res += materialPointers[i]->sendSelf(commitTag, theChannel);
+    if (res < 0) {
+      g3ErrorHandler->warning("WARNING ShellMITC4::sendSelf() - %d failed to send its Material\n",this->getTag());
+      return res;
+    }
+  }
+  
+  return res;
 }
     
 int  ShellMITC4::recvSelf (int commitTag, 
 		       Channel &theChannel, 
 		       FEM_ObjectBroker &theBroker)
 {
-    return -1;
+  int res = 0;
+  
+  int dataTag = this->getDbTag();
+
+  static ID idData(13);
+  // Quad now receives the tags of its four external nodes
+  res += theChannel.recvID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING ShellMITC4::recvSelf() - %d failed to receive ID\n", this->getTag());
+    return res;
+  }
+
+  this->setTag(idData(8));
+  connectedExternalNodes(0) = idData(9);
+  connectedExternalNodes(1) = idData(10);
+  connectedExternalNodes(2) = idData(11);
+  connectedExternalNodes(3) = idData(12);
+
+  static Vector vectData(1);
+  res += theChannel.recvVector(dataTag, commitTag, vectData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING ShellMITC4::sendSelf() - %d failed to send ID\n",
+			    this->getTag());
+    return res;
+  }
+
+  Ktt = vectData(0);
+
+  int i;
+
+  if (materialPointers[0] == 0) {
+    for (i = 0; i < 4; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+4);
+      // Allocate new material with the sent class tag
+      materialPointers[i] = theBroker.getNewSection(matClassTag);
+      if (materialPointers[i] == 0) {
+	g3ErrorHandler->warning("ShellMITC4::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	return -1;
+      }
+      // Now receive materials into the newly allocated space
+      materialPointers[i]->setDbTag(matDbTag);
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+  // Number of materials is the same, receive materials into current space
+  else {
+    for (i = 0; i < 4; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+4);
+      // Check that material is of the right type; if not,
+      // delete it and create a new one of the right type
+      if (materialPointers[i]->getClassTag() != matClassTag) {
+	delete materialPointers[i];
+	materialPointers[i] = theBroker.getNewSection(matClassTag);
+	if (materialPointers[i] == 0) {
+	  g3ErrorHandler->fatal("ShellMITC4::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	  return -1;
+	}
+      }
+      // Receive the material
+      materialPointers[i]->setDbTag(matDbTag);
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("ShellMITC4::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+  
+  return res;
 }
 //**************************************************************************
 

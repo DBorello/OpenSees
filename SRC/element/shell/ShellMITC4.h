@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-11-26 22:53:55 $
+// $Revision: 1.6 $
+// $Date: 2002-06-07 00:14:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/shell/ShellMITC4.h,v $
 
 // Ed "C++" Love
@@ -124,9 +124,9 @@ class ShellMITC4 : public Element {
     //quadrature data
     static const double root3 ;
     static const double one_over_root3 ;    
-    static const double sg[4] ;
-    static const double tg[4] ;
-    static const double wg[4] ;
+    static double sg[4] ;
+    static double tg[4] ;
+    static double wg[4] ;
 
     //B-bar data
     static Matrix  **GammaB1pointer ;  

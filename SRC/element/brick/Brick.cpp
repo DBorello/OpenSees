@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-04-29 22:09:48 $
+// $Revision: 1.11 $
+// $Date: 2002-06-07 00:11:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/brick/Brick.cpp,v $
 
 // Ed "C++" Love
@@ -43,6 +43,9 @@
 #include <shp3d.h>
 #include <Renderer.h>
 #include <ElementResponse.h>
+
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
 
 //static data
 double  Brick::xl[3][8] ;
@@ -70,7 +73,10 @@ Brick::Brick( ) :
 Element( 0, ELE_TAG_Brick ),
 connectedExternalNodes(8), load(0)
 { 
-
+  for (int i=0; i<8; i++ ) {
+    materialPointers[i] = 0;
+    nodePointers[i] = 0;
+  }
 }
 
 
@@ -799,14 +805,146 @@ Matrix  Brick::transpose( int dim1,
 
 int  Brick::sendSelf (int commitTag, Channel &theChannel)
 {
-    return -1;
+  int res = 0;
+  
+  // note: we don't check for dataTag == 0 for Element
+  // objects as that is taken care of in a commit by the Domain
+  // object - don't want to have to do the check if sending data
+  int dataTag = this->getDbTag();
+  
+  // Quad packs its data into a Vector and sends this to theChannel
+  // along with its dbTag and the commitTag passed in the arguments
+
+  // Now quad sends the ids of its materials
+  int matDbTag;
+  
+  static ID idData(25);
+
+  idData(24) = this->getTag();
+  
+  int i;
+  for (i = 0; i < 8; i++) {
+    idData(i) = materialPointers[i]->getClassTag();
+    matDbTag = materialPointers[i]->getDbTag();
+    // NOTE: we do have to ensure that the material has a database
+    // tag if we are sending to a database channel.
+    if (matDbTag == 0) {
+      matDbTag = theChannel.getDbTag();
+			if (matDbTag != 0)
+			  materialPointers[i]->setDbTag(matDbTag);
+    }
+    idData(i+8) = matDbTag;
+  }
+  
+  idData(16) = connectedExternalNodes(0);
+  idData(17) = connectedExternalNodes(1);
+  idData(18) = connectedExternalNodes(2);
+  idData(19) = connectedExternalNodes(3);
+  idData(20) = connectedExternalNodes(4);
+  idData(21) = connectedExternalNodes(5);
+  idData(22) = connectedExternalNodes(6);
+  idData(23) = connectedExternalNodes(7);
+
+  res += theChannel.sendID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING Brick::sendSelf() - %d failed to send ID\n",
+			    this->getTag());
+    return res;
+  }
+
+
+  // Finally, quad asks its material objects to send themselves
+  for (i = 0; i < 8; i++) {
+    res += materialPointers[i]->sendSelf(commitTag, theChannel);
+    if (res < 0) {
+      g3ErrorHandler->warning("WARNING Brick::sendSelf() - %d failed to send its Material\n",this->getTag());
+      return res;
+    }
+  }
+  
+  return res;
+
 }
     
 int  Brick::recvSelf (int commitTag, 
 		       Channel &theChannel, 
 		       FEM_ObjectBroker &theBroker)
 {
-    return -1;
+  int res = 0;
+  
+  int dataTag = this->getDbTag();
+
+  static ID idData(25);
+  // Quad now receives the tags of its four external nodes
+  res += theChannel.recvID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING Brick::recvSelf() - %d failed to receive ID\n", this->getTag());
+    return res;
+  }
+
+  this->setTag(idData(24));
+
+  connectedExternalNodes(0) = idData(16);
+  connectedExternalNodes(1) = idData(17);
+  connectedExternalNodes(2) = idData(18);
+  connectedExternalNodes(3) = idData(19);
+  connectedExternalNodes(4) = idData(20);
+  connectedExternalNodes(5) = idData(21);
+  connectedExternalNodes(6) = idData(22);
+  connectedExternalNodes(7) = idData(23);
+  
+
+  int i;
+  if (materialPointers[0] == 0) {
+    for (i = 0; i < 8; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+8);
+      // Allocate new material with the sent class tag
+      materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
+      if (materialPointers[i] == 0) {
+	g3ErrorHandler->warning("Brick::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	return -1;
+      }
+      // Now receive materials into the newly allocated space
+      materialPointers[i]->setDbTag(matDbTag);
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+  // materials exist , ensure materials of correct type and recvSelf on them
+  else {
+    for (i = 0; i < 8; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+8);
+      // Check that material is of the right type; if not,
+      // delete it and create a new one of the right type
+      if (materialPointers[i]->getClassTag() != matClassTag) {
+	delete materialPointers[i];
+	materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
+	if (materialPointers[i] == 0) {
+	  g3ErrorHandler->fatal("Brick::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	  return -1;
+	}
+      materialPointers[i]->setDbTag(matDbTag);
+      }
+      // Receive the material
+
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("Brick::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+
+  return res;
 }
 //**************************************************************************
 
