@@ -9,16 +9,16 @@ NDARRAY  = BJtensor.o \
 	   nDarray.o  \
 	   basics.o   \
 	   stresst.o  \
-	   straint.o  \
+	   straint.o  
 
 
 OBJS       = Vector.o ID.o Matrix.o  $(NDARRAY)
 
 ################### TARGETS ########################
-all: $(OBJS); $(AR) -rv $(NDARRAY_LIBRARY) $(NDARRAY)
+all: $(OBJS) $(NDARRAY); $(AR) $(ARFLAGS) $(NDARRAY_LIBRARY) $(NDARRAY)
 
 libndarray.a: $(NDARRAY)
-	$(AR) -rv $(NDARRAY_LIBRARY) $(NDARRAY)
+	$(AR) $(ARFLAGS) $(NDARRAY_LIBRARY) $(NDARRAY)
 
 
 test: $(OBJS) main.o
