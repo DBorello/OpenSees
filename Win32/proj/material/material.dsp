@@ -90,11 +90,83 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasBond1Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasBond1Material.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasBond2Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasBond2Material.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr1Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr1Material.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr2Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr2Material.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr3Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr3Material.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasHardeningMaterial.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasHardeningMaterial.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasHyster1Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasHyster1Material.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasHyster2Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasHyster2Material.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasSteel1Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasSteel1Material.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasSteel2Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasSteel2Material.h
 # End Source File
 # End Group
 # Begin Group "drain"
