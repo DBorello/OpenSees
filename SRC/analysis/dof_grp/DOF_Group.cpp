@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-03-04 00:48:07 $
+// $Revision: 1.9 $
+// $Date: 2003-10-28 17:39:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -832,6 +832,59 @@ DOF_Group::addM_ForceSensitivity(const Vector &Udotdot, double fact)
     }		
 }
 
+void
+DOF_Group::addD_Force(const Vector &Udot, double fact)
+{
+    if (myNode == 0) {
+        opserr << "DOF_Group::addD_Force() - no Node associated";
+        opserr << " subclass should not call this method \n";
+        return;
+    }
+
+    Vector vel(numDOF);
+    // get velocity for the unconstrained dof
+    for (int i=0; i<numDOF; i++) {
+        int loc = myID(i);
+        if (loc >= 0)
+            vel(i) = Udot(loc);
+        else vel(i) = 0.0;
+    }
+
+    if (unbalance->addMatrixVector(1.0, myNode->getDamp(), vel, fact) < 0) {
+        opserr << "DOF_Group::addD_Force() ";
+        opserr << " invoking addMatrixVector() on the unbalance failed\n";
+    }
+    else {
+
+    }
+}
+
+void
+DOF_Group::addD_ForceSensitivity(const Vector &Udot, double fact)
+{
+    if (myNode == 0) {
+        opserr << "DOF_Group::addD_ForceSensitivity() - no Node associated";
+        opserr << " subclass should not call this method \n";
+        return;
+    }
+
+    Vector vel(numDOF);
+    // get velocity for the unconstrained dof
+    for (int i=0; i<numDOF; i++) {
+        int loc = myID(i);
+        if (loc >= 0)
+            vel(i) = Udot(loc);
+        else vel(i) = 0.0;
+    }
+
+    if (unbalance->addMatrixVector(1.0, myNode->getDampSensitivity(), vel, fact) < 0) {
+        opserr << "DOF_Group::addD_ForceSensitivity() ";
+        opserr << " invoking addMatrixVector() on the unbalance failed\n";
+    }
+    else {
+
+    }
+}
 
 // AddingSensitivity:END //////////////////////////////////////////
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-04-24 20:49:49 $
+// $Revision: 1.15 $
+// $Date: 2003-10-28 17:39:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -1069,6 +1069,21 @@ Node::getDamp(void)
     } 
 }
 
+const Matrix &
+Node::getDampSensitivity(void)
+{
+  // make sure it was created before we return it
+  if (mass == 0 || alphaM == 0.0) {
+    theMatrices[index]->Zero();
+    return *theMatrices[index];
+  } else {
+    Matrix &result = *theMatrices[index];
+    result.Zero();
+    //result = *mass;
+    //result *= alphaM;
+    return result;
+  }
+}
 
 int
 Node::setMass(const Matrix &newMass)
