@@ -284,8 +284,8 @@ class EightNodeBrick: public Element
     void reportshort(char *);
     void reportPAK(char *);
     void reportpqtheta(int);
-    void reportLM(char *);
-    void reportTensor(char *);
+    //void reportLM(char *);
+    Vector reportTensor(char *);
     void reportCIPIC(char *);
     void reportTensorF(FILE *);
 

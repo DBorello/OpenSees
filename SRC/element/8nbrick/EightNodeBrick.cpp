@@ -51,6 +51,8 @@ Matrix EightNodeBrick::K(24, 24);
 Matrix EightNodeBrick::C(24, 24);      
 Matrix EightNodeBrick::M(24, 24);      
 Vector EightNodeBrick::P(24);	       
+Vector InfoP(33);
+Vector InfoS(49);
 
 //====================================================================
 //Reorganized constructor ____ Zhaohui 02-10-2000
@@ -619,6 +621,25 @@ tensor EightNodeBrick::H_3D(double r1, double r2, double r3)
     H.val(2,2)=H.val(1,1); //(1.0+r1)*(1.0+r2)*(1.0+r3)*0.125;//- (H.val(36,3)+H.val(51,3)+H.val(27,3))/2.0;
     H.val(3,3)=H.val(1,1); //(1.0+r1)*(1.0+r2)*(1.0+r3)*0.125;//- (H.val(36,3)+H.val(51,3)+H.val(27,3))/2.0;
 
+					       // The second part were commented by Xiaoyan
+    //         double sum = 0;
+    // 
+    // 	for (int i=1; i<=60 ; i++)
+    //           {
+    // //  	    sum+=H.cval(i,1);
+    // 	    for (int j=1; j<= 1; j++)
+    // 	       {
+    //        	          sum+=H.cval(i,1);
+    // 	          ::printf( "  %+9.2e", H.cval(i,j) );
+    // 	        }
+    //            // ::printf( "  %d \n", i);
+    // 	   }
+    // 	    ::printf( " \n sum= %+6.2e\n", sum );
+    
+
+    //    printf("r1 = %lf, r2 = %lf, r3 = %lf\n", r1, r2, r3);
+    //    H.print("h");
+
     return H;
   }
 
@@ -629,8 +650,9 @@ tensor EightNodeBrick::interp_poli_at(double r1, double r2, double r3)
 
     int dimension[] = {8};  // Xiaoyan changed from {20} to {8} for 8 nodes 07/12
     tensor h(1, dimension, 0.0);
+	   
 
-
+    // Commented by Xiaoyan
 
     // influence of the node number 8
     h.val(8)=(1.0+r1)*(1.0-r2)*(1.0-r3)/8.0;// - (h.val(15)+h.val(16)+h.val(20))/2.0;
@@ -2096,26 +2118,31 @@ void EightNodeBrick::reportpqtheta(int GP_numb)
     matpoint[where]->reportpqtheta("");
   }
 
-//#############################################################################
-void EightNodeBrick::reportLM(char * msg) 
-  {
-    if ( msg ) ::printf("%s",msg);
-    ::printf("Element # %d, LM->", this->get_Brick_Number());
-    for (int count = 0 ; count < 24 ; count++)
-      {
-        ::printf(" %d", LM[count]);
-      }
-    ::printf("\n");
+////#############################################################################
+//Vector EightNodeBrick::reportLM(char * msg) 
+//  {
+//    if ( msg ) ::printf("%s",msg);
+//    ::printf("Element # %d, LM->", this->get_Brick_Number());
+//    for (int count = 0 ; count < 24 ; count++)
+//      {
+//        ::printf(" %d", LM[count]);
+//      }
+//    ::printf("\n");
+//
+//  }
 
-  }
-
 //#############################################################################
-void EightNodeBrick::reportTensor(char * msg)
+Vector EightNodeBrick::reportTensor(char * msg)
   {
     //    if ( msg ) ::printf("** %s\n",msg);
     
     // special case for 8 nodes only
     // special case for 8 nodes only
+    int count;
+    count = FixedOrder*FixedOrder*FixedOrder;
+    Vector Gsc(count*3+1); //+1: number of Gauss point in element
+    Gsc(0) = count;
+
     double r  = 0.0;
     double s  = 0.0;
     double t  = 0.0;
@@ -2200,10 +2227,14 @@ void EightNodeBrick::reportTensor(char * msg)
 
 		  }
 		  			  
-    ::printf("gauss point# %d   %+.6e %+.6e %+.6e \n", where+1, 
-                                                       matpointCoord.val(1,where+1),
-                                                       matpointCoord.val(2,where+1),
-                                                       matpointCoord.val(3,where+1));
+               //::printf("gauss point# %d   %+.6e %+.6e %+.6e \n", where+1, 
+               //                                        matpointCoord.val(1,where+1),
+               //                                        matpointCoord.val(2,where+1),
+               //                                        matpointCoord.val(3,where+1));
+	       
+	       Gsc(where*3+1) = matpointCoord.val(1,where+1);
+	       Gsc(where*3+2) = matpointCoord.val(2,where+1);
+	       Gsc(where*3+3) = matpointCoord.val(3,where+1);
 
     //matpoint[where].reportTensor("");
 
@@ -2211,7 +2242,7 @@ void EightNodeBrick::reportTensor(char * msg)
               }
           }
       }
-
+      return Gsc;
  }
 
 
@@ -3095,28 +3126,33 @@ Response * EightNodeBrick::setResponse (char **argv, int argc, Information &eleI
 		return new ElementResponse(this, 1, P);
     
     //========================================================
-    //else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
-    //		return new ElementResponse(this, 2, K);
+    else if (strcmp(argv[0],"stiff") == 0 || strcmp(argv[0],"stiffness") == 0)
+    		return new ElementResponse(this, 2, K);
 
     //========================================================
     else if (strcmp(argv[0],"plastify") == 0 || strcmp(argv[0],"plastified") == 0)
     {
        //checking if element plastified
-       int count  = r_integration_order* s_integration_order * t_integration_order;
-       straintensor pl_stn;
-       int plastify = 0;
-       
-       for (int i = 0; i < count; i++) {
-         pl_stn = matpoint[i]->getPlasticStrainTensor();
-	 double  p_plastc = pl_stn.p_hydrostatic();
-	 
-	 if (  fabs(p_plastc) > 0 ) { 
-	    plastify = 1;
-	    break;
-	 }
-       }
+       //int count  = r_integration_order* s_integration_order * t_integration_order;
+       //straintensor pl_stn;
+       //int plastify = 0;
+       //
+       //for (int i = 0; i < count; i++) {
+       //  pl_stn = matpoint[i]->getPlasticStrainTensor();
+       //	 double  p_plastc = pl_stn.p_hydrostatic();
+       //	 
+       //	 if (  fabs(p_plastc) > 0 ) { 
+       //	    plastify = 1;
+       //	    break;
+       //	 }
+       //}
   
-       return new ElementResponse(this, 2, plastify);    
+       return new ElementResponse(this, 3, InfoP);
+    } 
+    //========================================================
+    else if (strcmp(argv[0],"stress") == 0 || strcmp(argv[0],"stresses") == 0)
+    {
+       return new ElementResponse(this, 4, InfoS);
     } 
 
     //========================================================
@@ -3132,8 +3168,8 @@ Response * EightNodeBrick::setResponse (char **argv, int argc, Information &eleI
     else
  	return 0;
 }
-//=============================================================================
 
+//=============================================================================
 int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
 {
        switch (responseID) {
@@ -3142,25 +3178,74 @@ int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
 	   	return eleInfo.setVector(this->getResistingForce());
       
 	   case 2:
+	   	return eleInfo.setMatrix(this->getTangentStiff());
+	   case 3:
        	      {
 		//checking if element plastified
        	        int count  = r_integration_order* s_integration_order * t_integration_order;
-       	        straintensor pl_stn;
-       	        int plastify = 0;
-       	        
-       	        for (int i = 0; i < count; i++) {
-       	          pl_stn = matpoint[i]->getPlasticStrainTensor();
-       	        	 double  p_plastc = pl_stn.p_hydrostatic();
-       	        	 
-       	        	 if (  fabs(p_plastc) > 0 ) { 
-       	        	    plastify = 1;
-       	        	    break;
-       	        	 }
-       	        }
-	   	eleInfo.setInt( plastify );
-		return plastify;
 
+       	        Vector Gsc(24+1);  // 8*3 + count
+		Gsc = this->reportTensor("Gauss Point Coor.");
+
+		//Vector Info(109); // count * 4 +1
+		InfoP(0) = Gsc(0); //Number of Gauss point
+
+       	        straintensor pl_stn;
+       	        
+		int plastify;
+       	        for (int i = 0; i < count; i++) {
+       	          plastify = 0;
+	   	  InfoP(i*4+1) = Gsc(i*3+1); //x
+	   	  InfoP(i*4+2) = Gsc(i*3+2); //y
+	   	  InfoP(i*4+3) = Gsc(i*3+3); //z
+       	          pl_stn = matpoint[i]->getPlasticStrainTensor();
+       	          //double  p_plastc = pl_stn.p_hydrostatic();
+       	          double  q_plastc = pl_stn.q_deviatoric();
+     	          
+	   	  InfoP(i*4+4) = q_plastc; //plastify; //Plastified?
+
+       	        }
+	   	return eleInfo.setVector( InfoP );
+		//return plastify;
 	   
+	      }
+
+	   case 4:
+	      {
+       	        int count = r_integration_order* s_integration_order * t_integration_order;
+		int i;
+                stresstensor sts;
+       	        //Vector Gsc(81+1);  // 8*3 + count
+		//Gsc = this->reportTensor("Gauss Point Coor.");
+
+		//Vector Info(109 + 3 ); //Z values, x-disp. and corresponding avg. moment
+		InfoS(0) = count;
+				
+                for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+                {
+                    //r = get_Gauss_p_c( r_integration_order, GP_c_r );
+                    for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+                    {
+                        //s = get_Gauss_p_c( s_integration_order, GP_c_s );             
+                        //rs = (GP_c_r-1)*s_integration_order+GP_c_s-1;
+                        
+			for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+                        {		
+		          //for (int i = 0; i < count; i++) 
+                          i =
+                             ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+
+                          sts = matpoint[i]->getStressTensor();
+	   		  InfoS(i*6+1) = sts.cval(1,1); //sigma_xx
+	   		  InfoS(i*6+2) = sts.cval(2,2); //sigma_yy
+	   		  InfoS(i*6+3) = sts.cval(3,3); //sigma_zz
+	   		  InfoS(i*6+4) = sts.cval(1,2); //Assign sigma_xy
+	   		  InfoS(i*6+5) = sts.cval(1,3); //Assign sigma_xz
+	   		  InfoS(i*6+6) = sts.cval(2,3); //Assign sigma_yz
+	        	}
+		    }
+		}
+ 	   	return eleInfo.setVector( InfoS );
 	      }
 	   /*case 2:
 	   	return eleInfo.setMatrix(this->getTangentStiff());

@@ -30,7 +30,6 @@
 #include "bool.h"
 #endif
 
-#include <fstream>
 #include <Element.h>
 #include <Node.h> 
 
@@ -98,9 +97,9 @@ class TwentyNodeBrick: public Element
     const Matrix &getConsMass (); 
 
     void zeroLoad ();
-    int addLoad(ElementalLoad *theLoad, double loadFactor);
+    int addLoad(ElementalLoad *theLoad, double loadFactor);    
+    //int addLoad(const Vector &addP);
     int addInertiaLoadToUnbalance(const Vector &accel);
-
     const Vector  FormEquiBodyForce(void);
     const Vector &getResistingForce ();
     const Vector &getResistingForceIncInertia ();
@@ -247,6 +246,8 @@ class TwentyNodeBrick: public Element
     Vector reportTensor(char *);
     void reportCIPIC(char *);
     void reportTensorF(FILE *);
+    Vector getWeightofGP(void);
+
 
     // Setting initial E according to the initial pressure
     //void setInitE(void);
