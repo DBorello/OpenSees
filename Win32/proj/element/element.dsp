@@ -199,14 +199,6 @@ SOURCE=..\..\..\SRC\element\zeroLength\ZeroLength.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\element\zeroLength\ZeroLengthND.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\element\zeroLength\ZeroLengthND.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\SRC\element\zeroLength\ZeroLengthSection.cpp
 # End Source File
 # Begin Source File
