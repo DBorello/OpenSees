@@ -33,6 +33,8 @@
 //#                     of cubic bowl is now facilitated ...
 //#                    10Oct2003 split ifstream to three separate files as
 //#                     as it was giving some strange output on some systems...
+//#                    18May2004 put those files back (actually 6 of them, weird)
+//#                     Guanzhou, Matthias and Boris
 //#
 //===============================================================================
 
@@ -76,12 +78,12 @@ PBowlLoading::PBowlLoading(int tag,
              PATTERN_TAG_PBowlLoading),
              PBTimeIncr(theTimeIncr),
              cFactor(theFactor),
-	     xPlus(xplus),
-	     xMinus(xminus),
-	     yPlus(yplus),
-	     yMinus(yminus),
-	     zPlus(zplus),
-	     zMinus(zminus)
+       xPlus(xplus),
+       xMinus(xminus),
+       yPlus(yplus),
+       yMinus(yminus),
+       zPlus(zplus),
+       zMinus(zminus)
   {
     // determine the number of data points .. open file and count num entries
     int timeSteps1 = 0;
@@ -128,8 +130,9 @@ PBowlLoading::PBowlLoading(int tag,
     if (numDataPoints != 0) {
 
     // first open the file
-    theFileDIS.open(DispfName, ios::in);
-    if (theFileDIS.bad()) {
+    ifstream theFileDIS1;
+    theFileDIS1.open(DispfName, ios::in);
+    if (theFileDIS1.bad()) {
       opserr << "WARNING - PBowlLoading::PBowlLoading()";
       opserr << " - could not open file " << DispfName << endln;
      } else {
@@ -154,17 +157,18 @@ PBowlLoading::PBowlLoading(int tag,
 
       // read the data from the file
       else {
-         theFileDIS >> timeSteps1;
+         theFileDIS1 >> timeSteps1;
          for (int t=0; t< thetimeSteps; t++)
            for  (int j=0;j<cols; j++) {
-               theFileDIS >> dataPoint;
+               theFileDIS1 >> dataPoint;
                (*U)(j, t) = dataPoint;
+               fprintf(stdout, "U ( %d, %d ) = %12.6e \n", j, t, (*U)(j, t));
            }
       }
      }
 
       // finally close the file
-      theFileDIS.close();
+      theFileDIS1.close();
   }
 
   //--------------------------------
@@ -199,8 +203,9 @@ PBowlLoading::PBowlLoading(int tag,
     {
 
       // first open the file
-      theFileACC.open(AccefName, ios::in);
-      if (theFileACC.bad()) 
+      ifstream theFileACC1;
+      theFileACC1.open(AccefName, ios::in);
+      if (theFileACC1.bad()) 
         {
           opserr << "WARNING - PBowlLoading::PBowlLoading()";
           opserr << " - could not open file " << AccefName << endln;
@@ -229,12 +234,12 @@ PBowlLoading::PBowlLoading(int tag,
           // read the data from the file
           else 
             {
-              theFileACC >> timeSteps2;
+              theFileACC1 >> timeSteps2;
               for (int t=0; t< thetimeSteps; t++)
                 {
                   for  (int j=0;j<cols; j++) 
                     {
-                      theFileACC >> dataPoint;
+                      theFileACC1 >> dataPoint;
                       (*Udd)(j, t) = dataPoint;
                       fprintf(stdout, "Udd ( %d, %d ) = %12.6e \n", j, t, (*Udd)(j, t));
                     }
@@ -243,7 +248,7 @@ PBowlLoading::PBowlLoading(int tag,
         }
 
       // finally close the file
-      theFileACC.close();
+      theFileACC1.close();
     }
 
 
@@ -280,10 +285,11 @@ PBowlLoading::PBowlLoading(int tag,
   if (numDataPoints != 0) {
 
     // first open the file
-    theFileELE.open(PBEfName, ios::in);
-    if (theFileELE.bad()) {
+    ifstream theFileELE1;
+    theFileELE1.open(PBEfName, ios::in);
+    if (theFileELE1.bad()) {
       opserr << "WARNING - PBowlLoading::PBowlLoading()";
-      opserr << " - could not open file " << AccefName << endln;
+      opserr << " - could not open file " << PBEfName << endln;
     } else {
 
       // now create the vector
@@ -301,16 +307,16 @@ PBowlLoading::PBowlLoading(int tag,
 
       // read the data from the file
       else {
-        theFileELE >> numPBE;
+        theFileELE1 >> numPBE;
         int i;
-	for (i=0; i< numPBE; i++) {
-              theFileELE >> eleID;
+  for (i=0; i< numPBE; i++) {
+              theFileELE1 >> eleID;
               (*PBowlElements)(i) = eleID;
         }
       }
 
       // finally close the file
-      theFileELE.close();
+      theFileELE1.close();
 
       //Check if read in correctly
 //BJ test
@@ -740,7 +746,7 @@ PBowlLoading::CompPBLoads()
     for (j = 0; j < no_bnode; j++) {
        if ( (*Bowl_node)(j) == (*Bound_node)(i) ) {
           (*Bowl_node)(j) = 0; //zero this boundary nodes
-	  no_exteriornodes --;
+    no_exteriornodes --;
        }
     }//end of sifting loop
   }//end of adding boundary node loop
@@ -832,7 +838,7 @@ PBowlLoading::CompPBLoads()
     for (int id = 0; id < no_boundarynodes; id++) {
        if ( nd(ii) == (*BoundaryNodes)(id) ) {
          bdnode = true;
-       	 break;
+          break;
        }
     }
 
@@ -895,7 +901,7 @@ PBowlLoading::CompPBLoads()
      for (int k=0;k<NIE; k++)
         for (int d=0;d<NDOF;d++) {
             (*F)( nd(k)*NDOF-NDOF+d,t) = (*F)( nd(k)*NDOF-NDOF+d,t) + (*Fk)(k*NDOF+d) + (*Fm)(k*NDOF+d);
-	}
+  }
 
    } //end for timestep
 
