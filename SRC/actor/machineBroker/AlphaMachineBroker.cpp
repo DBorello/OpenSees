@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:39 $
+// $Revision: 1.3 $
+// $Date: 2003-08-29 07:19:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/machineBroker/AlphaMachineBroker.cpp,v $
                                                                         
                                                                         
@@ -42,8 +42,8 @@
 #include <remote.h>
 #include <Channel.h>
 
-AlphaMachineBroker::AlphaMachineBroker()
-:currentMachine(0),maxNumMachines(8)
+AlphaMachineBroker::AlphaMachineBroker(FEM_ObjectBroker *theBroker)
+  :MachineBroker(theBroker), currentMachine(0),maxNumMachines(8)
 {
     char *alpha1 = "alpha-1";
     char *alpha2 = "alpha-2";

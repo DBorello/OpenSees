@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2003-08-29 07:19:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/machineBroker/DecMachineBroker.h,v $
                                                                         
                                                                         
@@ -43,7 +43,7 @@
 class DecMachineBroker : public MachineBroker
 {
   public:
-    DecMachineBroker();
+    DecMachineBroker(FEM_ObjectBroker *theBroker);
     virtual ~DecMachineBroker();
 
     virtual int startActor(char *actorProgram, 

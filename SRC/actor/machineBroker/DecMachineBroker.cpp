@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:39 $
+// $Revision: 1.3 $
+// $Date: 2003-08-29 07:19:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/machineBroker/DecMachineBroker.cpp,v $
                                                                         
                                                                         
@@ -43,8 +43,8 @@
 #include <Channel.h>
 
 
-DecMachineBroker::DecMachineBroker()
-:currentMachine(0),maxNumMachines(9)
+DecMachineBroker::DecMachineBroker(FEM_ObjectBroker *theBroker)
+:MachineBroker(theBroker), currentMachine(0), maxNumMachines(9)
 {
     char *dec1 = "dec-1";
     char *dec2 = "dec-2";
