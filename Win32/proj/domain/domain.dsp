@@ -235,6 +235,22 @@ SOURCE=..\..\..\SRC\domain\load\NodalLoadIter.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\SRC\domain\constraints\ImposedMotionSP.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\constraints\ImposedMotionSP.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\constraints\ImposedMotionSP1.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\constraints\ImposedMotionSP1.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\domain\constraints\MP_Constraint.cpp
 # End Source File
 # Begin Source File
@@ -279,27 +295,11 @@ SOURCE=..\..\..\SRC\domain\constraints\SP_Constraint.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\SRC\domain\pattern\ConstantSeries.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\pattern\ConstantSeries.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\SRC\domain\pattern\EarthquakePattern.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\domain\pattern\EarthquakePattern.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\pattern\LinearSeries.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\pattern\LinearSeries.h
 # End Source File
 # Begin Source File
 
@@ -316,6 +316,78 @@ SOURCE=..\..\..\SRC\domain\pattern\LoadPatternIter.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\domain\pattern\LoadPatternIter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\MultiSupportPattern.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\MultiSupportPattern.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\TclPatternCommand.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\UniformExcitation.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\UniformExcitation.h
+# End Source File
+# End Group
+# Begin Group "groundMotion"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\groundMotion\GroundMotion.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\groundMotion\GroundMotion.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\groundMotion\GroundMotionRecord.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\groundMotion\GroundMotionRecord.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\groundMotion\InterpolatedGroundMotion.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\groundMotion\InterpolatedGroundMotion.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\groundMotion\TclGroundMotionCommand.cpp
+# End Source File
+# End Group
+# Begin Group "timeSeries"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\ConstantSeries.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\ConstantSeries.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\LinearSeries.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\LinearSeries.h
 # End Source File
 # Begin Source File
 
@@ -343,7 +415,11 @@ SOURCE=..\..\..\SRC\domain\pattern\RectangularSeries.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\domain\pattern\TclPatternCommand.cpp
+SOURCE=..\..\..\SRC\domain\pattern\TclSeriesCommand.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\TclSeriesIntegratorCommand.cpp
 # End Source File
 # Begin Source File
 
@@ -355,55 +431,27 @@ SOURCE=..\..\..\SRC\domain\pattern\TimeSeries.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\domain\pattern\TimeSeriesIntegrator.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\TimeSeriesIntegrator.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\TrapezoidalTimeSeriesIntegrator.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\domain\pattern\TrapezoidalTimeSeriesIntegrator.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\domain\pattern\TrigSeries.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\domain\pattern\TrigSeries.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\pattern\UniformExcitation.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\pattern\UniformExcitation.h
-# End Source File
-# End Group
-# Begin Group "groundMotion"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\groundMotion\GroundMotion.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\groundMotion\GroundMotion.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\groundMotion\GroundMotionIntegrator.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\groundMotion\GroundMotionIntegrator.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\groundMotion\GroundMotionRecord.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\groundMotion\GroundMotionRecord.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\groundMotion\TrapezoidalGroundMotionIntegrator.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\domain\groundMotion\TrapezoidalGroundMotionIntegrator.h
 # End Source File
 # End Group
 # End Target

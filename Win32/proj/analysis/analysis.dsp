@@ -133,6 +133,14 @@ SOURCE=..\..\..\SRC\analysis\analysis\TransientAnalysis.cpp
 
 SOURCE=..\..\..\SRC\analysis\analysis\TransientAnalysis.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\analysis\VariableTimeStepDirectIntegrationAnalysis.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\analysis\VariableTimeStepDirectIntegrationAnalysis.h
+# End Source File
 # End Group
 # Begin Group "model"
 
@@ -300,6 +308,14 @@ SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\ModifiedNewton.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\ModifiedNewton.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\NewtonLineSearch.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\analysis\algorithm\equiSolnAlgo\NewtonLineSearch.h
 # End Source File
 # Begin Source File
 

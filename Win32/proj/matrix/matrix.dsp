@@ -115,6 +115,14 @@ SOURCE=..\..\..\SRC\matrix\nDarray.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\matrix\straint.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\matrix\stresst.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\matrix\Vector.cpp
 # End Source File
 # End Group
@@ -148,6 +156,14 @@ SOURCE=..\..\..\SRC\matrix\Matrix.h
 # Begin Source File
 
 SOURCE=..\..\..\SRC\matrix\nDarray.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\matrix\straint.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\matrix\stresst.h
 # End Source File
 # Begin Source File
 
