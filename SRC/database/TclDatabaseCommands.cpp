@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:32:40 $
+// $Revision: 1.6 $
+// $Date: 2004-01-29 23:10:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/TclDatabaseCommands.cpp,v $
                                                                         
                                                                         
@@ -119,7 +119,45 @@ TclAddDatabase(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **a
     if (theDatabase != 0)
       delete theDatabase;
 
-    theDatabase = new MySqlDatastore(argv[2], theDomain, theBroker);
+    if (argc == 3)
+      theDatabase = new MySqlDatastore(argv[2], theDomain, theBroker);
+    else {
+      char *database = argv[2];
+      char *host = NULL;
+      char *user = NULL;
+      char *passwd = NULL;
+      char *socket = NULL;
+      int port = 0;
+      int clientFlag = 0;
+
+      int counter = 3;
+      while (counter < argc) {
+	if (strcmp(argv[counter],"-host") == 0) {
+	  host = argv[counter + 1];
+	  counter += 2;
+	} else if (strcmp(argv[counter],"-user") == 0) {
+	  user = argv[counter + 1];
+	  counter += 2;
+	} else if (strcmp(argv[counter],"-passwd") == 0) {
+	  passwd = argv[counter + 1];
+	  counter += 2;
+	} else if (strcmp(argv[counter],"-socket") == 0) {
+	  socket = argv[counter + 1];
+	  counter += 2;
+	} else if (strcmp(argv[counter],"-port") == 0) {
+	  if (Tcl_GetInt(interp, argv[counter+1], &port) != TCL_OK)	
+	    return TCL_ERROR;	      
+	  counter += 2;
+	} else if (strcmp(argv[counter],"-clientFlag") == 0) {
+	  if (Tcl_GetInt(interp, argv[counter+1], &clientFlag) != TCL_OK)	
+	    return TCL_ERROR;	      
+	  counter += 2;
+	} else {
+	  counter++;
+	}
+      }
+      theDatabase = new MySqlDatastore(database, host, user, passwd, port, socket, clientFlag, theDomain, theBroker);
+    }
   }
 #endif
 
