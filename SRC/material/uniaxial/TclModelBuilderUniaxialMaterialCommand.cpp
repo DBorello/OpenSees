@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-06-10 23:04:02 $
+// $Revision: 1.13 $
+// $Date: 2002-07-12 19:04:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -68,6 +68,10 @@ TclModelBuilder_addFedeasMaterial(ClientData clientData, Tcl_Interp *interp, int
 
 UniaxialMaterial *
 TclModelBuilder_addDrainMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
+				char **argv, TclModelBuilder *theTclBuilder);
+
+UniaxialMaterial *
+TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int argc, 
 				char **argv, TclModelBuilder *theTclBuilder);
 
 UniaxialMaterial *
@@ -898,6 +902,10 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 		// Drain
 		if (theMaterial == 0)
 			theMaterial = TclModelBuilder_addDrainMaterial(clientData, interp, argc, argv, theTclBuilder);
+
+		// SNAP
+		if (theMaterial == 0)
+			theMaterial = TclModelBuilder_addSnapMaterial(clientData, interp, argc, argv, theTclBuilder);
 		
 		// Py, Tz, Qz models
 		if (theMaterial == 0)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.32 $
-// $Date: 2002-06-18 01:08:45 $
+// $Revision: 1.33 $
+// $Date: 2002-07-12 19:04:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -132,6 +132,7 @@
 #define MAT_TAG_Clough2	202
 #define MAT_TAG_Pinch1	203
 #define MAT_TAG_BiLinear	204
+#define MAT_TAG_Pinching	205
 
 
 #define SEC_TAG_Elastic2d   3

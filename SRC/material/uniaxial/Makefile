@@ -12,6 +12,7 @@ include ../../../Makefile.def
 all:         $(OBJS)
 	@$(CD) $(FE)/material/uniaxial/fedeas; $(MAKE);
 	@$(CD) $(FE)/material/uniaxial/drain; $(MAKE);
+	@$(CD) $(FE)/material/uniaxial/snap; $(MAKE);
 	@$(CD) $(FE)/material/uniaxial/PY; $(MAKE);
 
 # Miscellaneous
@@ -25,6 +26,7 @@ clean: tidy
 spotless: clean
 	@$(CD) $(FE)/material/uniaxial/fedeas; $(MAKE) wipe;
 	@$(CD) $(FE)/material/uniaxial/drain; $(MAKE) wipe;
+	@$(CD) $(FE)/material/uniaxial/snap; $(MAKE) wipe;
 	@$(CD) $(FE)/material/uniaxial/PY; $(MAKE) wipe;
 
 wipe: spotless

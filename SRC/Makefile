@@ -34,7 +34,7 @@ all:
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) $(GGD_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
-	$(DRAIN_LIBS) $(FMK_LIBS)
+	$(DRAIN_LIBS) $(SNAP_LIBS) $(FMK_LIBS)
 	@$(RANLIB) $(FE_LIBRARY)
 
 else
@@ -68,7 +68,7 @@ all:
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) $(GGD_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
-	$(DRAIN_LIBS) $(FMK_LIBS)
+	$(DRAIN_LIBS) $(SNAP_LIBS) $(FMK_LIBS)
 	@$(RANLIB) $(FE_LIBRARY)
 
 endif
@@ -379,6 +379,9 @@ DRAIN_LIBS = $(FE)/material/uniaxial/DrainMaterial.o \
 	$(FE)/material/uniaxial/drain/DrainClough2Material.o \
 	$(FE)/material/uniaxial/drain/DrainPinch1Material.o \
 	$(FE)/material/uniaxial/drain/TclDrainMaterialCommand.o 
+
+SNAP_LIBS = $(FE)/material/uniaxial/snap/TclSnapMaterialCommand.o \
+	$(FE)/material/uniaxial/snap/Pinching.o
 
 SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 	$(FE)/material/section/ElasticSection2d.o \
