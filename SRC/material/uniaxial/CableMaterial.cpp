@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-19 02:10:31 $
+// $Revision: 1.4 $
+// $Date: 2002-03-05 16:48:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/CableMaterial.cpp,v $
                                                                         
 // Written: Charles Chadwell 
@@ -206,7 +206,7 @@ CableMaterial::sendSelf(int cTag, Channel &theChannel)
   data(2) = E;
   data(3) = Mue;
   data(4) = L;
-  data(6) = commitStrain;
+  data(5) = commitStrain;
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
     cerr << "CableMaterial::sendSelf() - failed to send data\n";
