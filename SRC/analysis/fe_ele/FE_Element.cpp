@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-03-29 05:36:55 $
+// $Revision: 1.3 $
+// $Date: 2001-03-31 14:58:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -694,9 +694,6 @@ FE_Element::addKiForce(const Vector &disp, double fact)
     cerr << "- this should not be called on a Subdomain!\n";
   }
 
-  // check for some quick returns	    
-  if (Ki == 0) 
-    return;
   if (fact == 0.0) 
     return;
 
@@ -713,7 +710,7 @@ FE_Element::addKiForce(const Vector &disp, double fact)
   }
 
   // now do the matrix vector multiply and addition to the residual
-  if (theResidual->addMatrixVector(1.0, *Ki, tmp,fact) < 0) {
+  if (theResidual->addMatrixVector(1.0, myEle->getKi(), tmp,fact) < 0) {
     cerr << "WARNING FE_Element::addK_Force() - ";
     cerr << "- addMatrixVector returned error\n";		 
   }
@@ -1157,17 +1154,13 @@ FE_Element::addLocalKiForce(const Vector &disp, double fact)
 {
     if (myEle != 0) {    
 
-      // return if Ki has not been initialised
-      if (Ki == 0) 
-	return;
-
       // check for a quick return	
       if (fact == 0.0) 
 	return;
 
       if (myEle->isSubdomain() == false) {
 	
-	if (theResidual->addMatrixVector(1.0, *Ki,
+	if (theResidual->addMatrixVector(1.0, myEle->getKi(),
 					 disp, fact) < 0) {
 
 	  cerr << "WARNING FE_Element::addLocalK_Force() - ";
