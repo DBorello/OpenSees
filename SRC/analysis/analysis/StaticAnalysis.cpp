@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-03-04 00:48:07 $
+// $Revision: 1.8 $
+// $Date: 2005-03-30 03:06:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/StaticAnalysis.cpp,v $
                                                                         
                                                                         
@@ -246,6 +246,14 @@ StaticAnalysis::domainChanged(void)
 	return -2;
     }	    
     
+
+    result = theConstraintHandler->doneNumberingDOF();
+    if (result < 0) {
+	opserr << "StaticAnalysis::handle() - ";
+	opserr << "ConstraintHandler::doneNumberingDOF() failed";
+	return -2;
+    }	    
+
     // we invoke setSize() on the LinearSOE which
     // causes that object to determine its size
 

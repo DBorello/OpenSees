@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:44 $
+// $Revision: 1.3 $
+// $Date: 2005-03-30 03:06:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/EigenAnalysis.cpp,v $
                                                                         
                                                                         
@@ -138,6 +138,7 @@ EigenAnalysis::domainChanged()
     theConstraintHandler->handle();
 
     theDOF_Numberer->numberDOF();
+    theConstraintHandler->doneNumberingDOF();
 
     Graph &theGraph = theAnalysisModel->getDOFGraph();
     theSOE->setSize(theGraph);

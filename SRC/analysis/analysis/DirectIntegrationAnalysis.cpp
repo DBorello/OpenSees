@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-03-04 00:48:07 $
+// $Revision: 1.6 $
+// $Date: 2005-03-30 03:06:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -232,8 +232,10 @@ DirectIntegrationAnalysis::domainChanged(void)
 
     theDOF_Numberer->numberDOF();
 
-    // opserr << theAnalysisModel->getDOFGraph();
 
+    theConstraintHandler->doneNumberingDOF();
+
+    // opserr << theAnalysisModel->getDOFGraph();
 
     /*
     DOF_GrpIter &theDOFs1 = theAnalysisModel->getDOFs();
