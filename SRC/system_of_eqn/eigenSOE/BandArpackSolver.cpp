@@ -213,12 +213,12 @@ BandArpackSolver::solve(void)
 	     &ncv, v, &ldv,
 	     iparam, ipntr, workd, workl, &lworkl, &info);
 	   */
-	DSAUPD(&ido, &bmat, &n, which, &nev, &tol, resid, 
-	     &ncv, v, &ldv,
-	     iparam, ipntr, workd, workl, &lworkl, &info);
+	  DSAUPD(&ido, &bmat, &n, which, &nev, &tol, resid, 
+		 &ncv, v, &ldv,
+		 iparam, ipntr, workd, workl, &lworkl, &info);
 #else
-      dsaupd_(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv, v, &ldv,
-	      iparam, ipntr, workd, workl, &lworkl, &info);
+	  dsaupd_(&ido, &bmat, &n, which, &nev, &tol, resid, &ncv, v, &ldv,
+		  iparam, ipntr, workd, workl, &lworkl, &info);
 #endif
 
       if (ido == -1) {
@@ -494,13 +494,8 @@ BandArpackSolver::myMv(int n, double *v, double *result)
     FE_Element *elePtr;
     FE_EleIter &theEles = theAnalysisModel->getFEs();    
     while((elePtr = theEles()) != 0) {
-        elePtr->zeroResidual();
-	elePtr->addM_Force(x,1.0);
-	const Vector &a = elePtr->getResidual(0);
-	y.Assemble(a,elePtr->getID(),1.0);
-	//      const Vector &a = elePtr->getM_Force(x,1.0);
-	//      y.Assemble(a,elePtr->getID(),1.0);
-
+      const Vector &b = elePtr->getM_Force(x, 1.0);
+      y.Assemble(b, elePtr->getID(), 1.0);
     }
 
     // loop over the DOF_Groups
@@ -508,10 +503,8 @@ BandArpackSolver::myMv(int n, double *v, double *result)
     DOF_GrpIter &theDofs = theAnalysisModel->getDOFs();
     Integrator *theIntegrator = 0;
     while ((dofPtr = theDofs()) != 0) {
-        dofPtr->zeroUnbalance();
-	dofPtr->addM_Force(x,1.0);
-	const Vector &a = dofPtr->getUnbalance(theIntegrator);
-	y.Assemble(a,dofPtr->getID(),1.0);
+      const Vector &a = dofPtr->getM_Force(x,1.0);      
+      y.Assemble(a,dofPtr->getID(),1.0);
     }
 }
 

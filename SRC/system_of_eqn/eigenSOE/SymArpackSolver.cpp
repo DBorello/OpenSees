@@ -330,12 +330,8 @@ SymArpackSolver::myMv(int n, double *v, double *result)
     FE_Element *elePtr;
     FE_EleIter &theEles = theAnalysisModel->getFEs();    
     while((elePtr = theEles()) != 0) {
-        elePtr->zeroResidual();
-	elePtr->addM_Force(x,1.0);
-	const Vector &a = elePtr->getResidual(0);
-	y.Assemble(a,elePtr->getID(),1.0);
-	// const Vector &a = elePtr->getM_Force(x,1.0);
-	// y.Assemble(a,elePtr->getID(),1.0);
+      const Vector &a = elePtr->getM_Force(x,1.0);
+      y.Assemble(a,elePtr->getID(),1.0);
     }
 
     // loop over the DOF_Groups
@@ -343,10 +339,8 @@ SymArpackSolver::myMv(int n, double *v, double *result)
     DOF_Group *dofPtr;
     DOF_GrpIter &theDofs = theAnalysisModel->getDOFs();
     while ((dofPtr = theDofs()) != 0) {
-        dofPtr->zeroUnbalance();
-	dofPtr->addM_Force(x,1.0);
-	const Vector &a = dofPtr->getUnbalance(theIntegrator);
-	y.Assemble(a,dofPtr->getID(),1.0);
+      const Vector &a = dofPtr->getM_Force(x,1.0);      
+      y.Assemble(a,dofPtr->getID(),1.0);
     }
 
     for (i=0; i<n; i++) {
