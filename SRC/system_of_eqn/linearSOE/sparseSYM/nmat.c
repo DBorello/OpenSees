@@ -108,7 +108,10 @@ int pfsfct(int neqns, double *diag, double **penv, int nblks,
 	     js->nz[ii] /= diag[ii + jbeg]; 	    
 	 }
 	 diag[jrow] -= dot_real(js->nz, work, iband);
-	 if (diag[jrow] == 0) return (1);
+	 if (diag[jrow] == 0) {
+	     printf("!!!pfsfct(): The diagonal entry %d is zero !!!\n", jrow);
+	     return (1);
+	 }
 	 free (work);
 	 
 	 if (ks->row < blkend )
@@ -122,7 +125,7 @@ int pfsfct(int neqns, double *diag, double **penv, int nblks,
 	       kb = pos - ks->beg ;
 	       pos = jrow - krow + (penv[krow + 1] - penv[krow]) ;
 	       *(penv[krow] + pos) -= 
-		  dot_real(js->nz+jb, ks->nz+kb, iband);
+		   dot_real(js->nz+jb, ks->nz+kb, iband);
             }
          }
 	 for ( ; ks->beg < blkend ; ks = ks->bnext)
@@ -220,7 +223,10 @@ int pfefct(int neqns, double **penv, double *diag)
       
       free (work);
 
-      if ( fabs(diag[i]) < 1.0e-16)  return (1);  
+      if ( fabs(diag[i]) < 1.0e-60)  {
+	  printf("!!! pfefct(): diagonal %d is zero !!!\n", i); 
+	  return (1); 
+      } 
    }
 
    return(0) ;

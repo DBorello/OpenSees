@@ -29,11 +29,11 @@
 void zeroi(int, int *);
 
 /***********************************************************
-************************nodfac ******************************
+************************ nodfac *****************************
 *************************************************************
 
        Purpose:  to construct structure of lower triangular
-                 factor by rows.  It is based on teh node
+                 factor by rows.  It is based on the node
                  addition model with ordered tree.
 
        Input:
@@ -64,13 +64,13 @@ int nodfac(int *perm, int *invp, int **padj, int *ancstr , int *list, int neqns,
    OFFDBLK *p, *po, *nbeg ;
    OFFDBLK junk ;
 
-   cnz &= 0 ;
+   cnz = 0 ;
    p = NULL ;
    *first = NULL ;
    po = &junk ;
    count = 0 ;
    bcount = 0 ;
-   segprv = (OFFDBLK **) calloc((nblks+1),sizeof(OFFDBLK *)) ;
+   segprv = (OFFDBLK **) calloc((nblks+1), sizeof(OFFDBLK *)) ;
    len = (int *) calloc(nblks, sizeof(int)) ;
    assert (segprv && len != NULL) ;
    for (i=0;i<=nblks;i++)
@@ -96,7 +96,7 @@ int nodfac(int *perm, int *invp, int **padj, int *ancstr , int *list, int neqns,
          do
          {  m = qm ;
             qm = list[m] ;
-         }  while(qm<=nbr) ;
+         }  while (qm<=nbr);
          list[m] = nbr ;
          list[nbr] = qm ;
       }
@@ -132,7 +132,7 @@ int nodfac(int *perm, int *invp, int **padj, int *ancstr , int *list, int neqns,
       }
       /* part of the diagonal envelop block */
       envlen[node] = node - nbr ;
-/*    should now allocate space for row  and set up pointers */
+/*    should now allocate space for row and set up pointers */
       if (knz > 0) 
       {  
 	 nbeg->nz = (double *)calloc(knz, sizeof(double)) ;
@@ -147,7 +147,6 @@ int nodfac(int *perm, int *invp, int **padj, int *ancstr , int *list, int neqns,
       }
       cnz += knz ;   
    }  /* end for node */
-   printf("nozeros in row segments %d\n",cnz) ;
 
 /* -----------------------------------------------
    add on ending pieces for loops in factorization
@@ -201,13 +200,14 @@ int setenvlpe(int neqns, double **penv, int *envlen)
    int i, knz ;
 
    knz = 0 ;
-   for (i=1;i<neqns;i++)
+   for (i=1; i<neqns; i++)
       knz += envlen[i] ;
-   
+
    penv[0] = (double *)calloc(knz+1,sizeof(double)) ;
    assert(penv[0] != NULL ) ;
    for (i=0;i<neqns;i++)
-   {  penv[i+1] = penv[i] + envlen[i] ;
+   { 
+       penv[i+1] = penv[i] + envlen[i] ;
    }
 
    return(knz);

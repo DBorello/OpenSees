@@ -30,7 +30,7 @@
 
 
 #ifdef _WIN32
-extern int MYGENMMD(int *neq, int *fxadj, int *adjncy, int *winvp,
+extern int _stdcall MYGENMMD(int *neq, int *fxadj, int *adjncy, int *winvp,
 			     int *wperm, int *delta, int *fchild, int *parent,
 			     int *sibling, int *marker, int *maxint, int *nofsub,
 			     int *kdx);
@@ -85,13 +85,13 @@ int symFactorization(int *fxadj, int *adjncy, int neq, int LSPARSE,
     double *diag;
 
 
- /*   set up storage space  and pointers */ 
+ /* set up storage space and pointers */ 
 
-    perm = (int *)calloc(neq +1   ,sizeof(int)) ;
-    invp = (int *)calloc(neq +1   ,sizeof(int )) ;
-    parent = (int *)calloc(neq +1   ,sizeof(int)) ;
-    fchild = (int *)calloc(neq +1   ,sizeof(int)) ;
-    sibling = (int *)calloc(neq +1  ,sizeof(int)) ;
+    perm = (int *)calloc(neq +1   , sizeof(int)) ;
+    invp = (int *)calloc(neq +1   , sizeof(int)) ;
+    parent = (int *)calloc(neq +1 , sizeof(int)) ;
+    fchild = (int *)calloc(neq +1 , sizeof(int)) ;
+    sibling = (int *)calloc(neq +1, sizeof(int)) ;
     marker = (int *) calloc(neq +1, sizeof(int)) ;
     winvp  = (int *) calloc(neq +1, sizeof(int)) ;
     wperm  = (int *) calloc(neq +1, sizeof(int)) ;
@@ -100,8 +100,8 @@ int symFactorization(int *fxadj, int *adjncy, int neq, int LSPARSE,
 
     kdx = 0;
     delta = 1;
-    maxint = 9999999;
-    nofsub = 9999999;
+    maxint = 99999999;
+    nofsub = 99999999;
 
  /* Using (fxadj, adjncy) pair to form the padj  */
 

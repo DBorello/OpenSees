@@ -14,8 +14,8 @@
 // What: "@(#) SymSparseLinSOE.C, revA"
 
 
+#include <fstream>
 #include <stdlib.h>
-#include <string.h>
 
 #include <SymSparseLinSOE.h>
 #include <SymSparseLinSolver.h>
@@ -48,60 +48,82 @@ SymSparseLinSOE::SymSparseLinSOE(SymSparseLinSolver &the_Solver, int lSparse)
  */
 SymSparseLinSOE::~SymSparseLinSOE()
 {
+
     int lastRow;
+
+    // free the diagonal vector
     if (diag != 0) free(diag);
 
+    // free the diagonal blocks
     if (penv != 0) {
-        free(penv[0]);
+	if (penv[0] != 0) {
+	    free(penv[0]);
+	}
         free(penv);
     }
 
+    // free the row segments.
     OFFDBLK *blkPtr = first;
     OFFDBLK *tempBlk = first;
     OFFDBLK *nzBlk = 0;
 
-    // clean the first row segement.
-    if (first->next != 0) {
-       blkPtr = first->next;
-       if (tempBlk != 0) {
-	   if (tempBlk->nz != 0)  free(tempBlk->nz);
-	   free(tempBlk);
-       }
+    if (tempBlk->next == tempBlk) {
+	free (tempBlk);
+	tempBlk = 0;
+	blkPtr = 0;
+	first = 0;
+    } else {
+
+	lastRow = blkPtr->row;
+
+	// clean the first row segement.
+	if (first->next != 0) {
+	    blkPtr = first->next;
+	    if (tempBlk != 0) {
+		if (tempBlk->nz != 0)  free(tempBlk->nz);
+		free(tempBlk);
+		tempBlk = 0;
+	    }
+	}
+	
+	while (1) {
+	    // the last row segment is reached
+	    if (blkPtr->beg == size && blkPtr->next == blkPtr) {
+		if (blkPtr != 0)  {
+		    free (blkPtr);
+		    blkPtr = 0;
+		}
+		break;
+	    }
+	    tempBlk = blkPtr;
+	    blkPtr = blkPtr->next;
+
+	    // free the beginning row segment of each row.
+	    if (nzBlk != 0) {
+		if (nzBlk->nz != 0)  free(nzBlk->nz);
+		free(nzBlk);
+	        nzBlk = 0;
+	    }
+
+	    // find the beginning row segment of each row, use nzBlk to point to it.       
+	    if (blkPtr->row != lastRow) {
+		lastRow = blkPtr->row;
+		nzBlk = blkPtr;
+	    }
+
+	    if (tempBlk != 0)  { 
+		free(tempBlk);
+		tempBlk = 0;
+	    }
+	}
     }
 
-    lastRow = blkPtr->row;
-
-    while (1) {
-       // the last row segment is reached
-       if (blkPtr->beg == size) {
-	   if (blkPtr != 0)  free (blkPtr);
-	   break;
-       }
-       tempBlk = blkPtr;
-       blkPtr = blkPtr->next;
-
-       // free the beginning row segment of each row.
-       if (nzBlk != 0) {
-	   if (nzBlk->nz != 0)  free(nzBlk->nz);
-	   free(nzBlk);
-	   nzBlk = 0;
-       }
-
-       // find the beginning row segment of each row, use nzBlk to point to it.       
-       if (blkPtr->row != lastRow) {
-	   lastRow = blkPtr->row;
-	   nzBlk = blkPtr;
-       }
-
-       if (tempBlk != 0)  free(tempBlk);
-       tempBlk = 0;
-    }
-
-
+    // free the "C" style vectors.
     if (xblk != 0)  free(xblk);
     if (rowblks != 0)   free(rowblks);
     if (invp != 0)  free(invp);
     
+    // free the "C++" style vectors.
     if (B != 0) delete [] B;
     if (X != 0) delete [] X;
     if (vectX != 0) delete vectX;    
@@ -264,7 +286,7 @@ int SymSparseLinSOE::addA(const Matrix &in_m, const ID &in_id, double fact)
    // check that m and id are of similar size
    if (idSize != in_m.noRows() && idSize != in_m.noCols()) {
        opserr << "SymSparseLinSOE::addA() ";
-       opserr << " - Matrix and ID not of similar sizes\n";
+       opserr << " - Matrix and ID not of similiar sizes\n";
        return -1;
    }
 
@@ -272,8 +294,7 @@ int SymSparseLinSOE::addA(const Matrix &in_m, const ID &in_id, double fact)
    int newPt = 0;
    int *id = new int[idSize];
    
-   int ii;
-   for (ii = 0; ii < idSize; ii++) {
+   for (int ii = 0; ii < idSize; ii++) {
        if (in_id(ii) >= 0 && in_id(ii) < size) {
 	   id[newPt] = in_id(ii);
 	   newPt++;
@@ -285,7 +306,7 @@ int SymSparseLinSOE::addA(const Matrix &in_m, const ID &in_id, double fact)
    double *m = new double[idSize*idSize];
 
    int newII = 0;
-   for (ii = 0; ii < in_id.Size(); ii++) {
+   for (int ii = 0; ii < in_id.Size(); ii++) {
        if (in_id(ii) >= 0 && in_id(ii) < size) {
 
 	   int newJJ = 0;
@@ -309,7 +330,7 @@ int SymSparseLinSOE::addA(const Matrix &in_m, const ID &in_id, double fact)
        return -1;
    }
 
-   for (ii=0; ii<idSize; ii++) {
+   for (int ii=0; ii<idSize; ii++) {
        newID[ii] = id[ii];
        if (newID[ii] >= 0)
 	   newID[ii] = invp[newID[ii]];
@@ -438,8 +459,11 @@ int SymSparseLinSOE::addB(const Vector &in_v, const ID &in_id, double fact)
    }
 
    idSize = newPt;
-   if (idSize == 0)  return 0;
-
+   if (idSize == 0)  {
+       delete [] id;
+       delete [] v;
+       return 0;
+   }
     int *newID = new int[idSize];
     if (newID == 0) {
        opserr << "WARNING SymSparseLinSOE::SymSparseLinSOE :";
