@@ -12,6 +12,7 @@ include ../../../Makefile.def
 all:         $(OBJS)
 	@$(CD) $(FE)/material/uniaxial/fedeas; $(MAKE);
 	@$(CD) $(FE)/material/uniaxial/drain; $(MAKE);
+	@$(CD) $(FE)/material/uniaxial/PY; $(MAKE);
 
 # Miscellaneous
 
