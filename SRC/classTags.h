@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.55 $
-// $Date: 2003-10-31 22:08:40 $
+// $Revision: 1.56 $
+// $Date: 2003-11-25 23:50:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -292,6 +292,8 @@
 #define ELE_TAG_InternalSpring   9900
 #define ELE_TAG_SimpleJoint2D    9901
 #define ELE_TAG_Joint2D    9902
+#define ELE_TAG_Joint3D    9903
+
 
 // Terje:
 #define ELE_TAG_FourNodeQuad02  9903
@@ -329,6 +331,7 @@
 #define CNSTRNT_TAG_ImposedMotionSP1	4
 #define CNSTRNT_TAG_MP_Joint2D          5
 #define CNSTRNT_TAG_MP_SimpleJoint2D    6
+#define CNSTRNT_TAG_MP_Joint3D          7
 
 
 #define MATRIX_TAG_Matrix 	1
