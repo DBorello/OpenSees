@@ -1,6 +1,6 @@
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
-// $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJmatrix.h,v $
+// $Revision: 1.2 $                                                              
+// $Date: 2001-01-11 09:23:56 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJmatrix.h,v $                                                                
 
 //#############################################################################
 //                                                                            #

@@ -1,7 +1,7 @@
 
-// $Revision: 1.2 $
-// $Date: 2000-10-10 05:31:36 $
-// $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJtensor.h,v $
+// $Revision: 1.3 $                                                              
+// $Date: 2001-01-11 09:23:57 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJtensor.h,v $                                                                
 
 //#############################################################################
 //                                                                            #
@@ -75,7 +75,6 @@
 
 #include "nDarray.h"
 #include "BJmatrix.h"
-#include <iostream.h>
 
 
 class BJtensor : public nDarray
@@ -96,7 +95,7 @@ class BJtensor : public nDarray
     BJtensor(const BJtensor & x);  // instead of: "BJtensor(nDarray & x):"   :-)
     BJtensor(const nDarray & x);
 
-//....    ~BJtensor( );
+    //~BJtensor( );
 
     BJtensor&  operator=( const BJtensor & rval);       // BJtensor assignment
 
@@ -143,17 +142,12 @@ class BJtensor : public nDarray
 //K    char *BJtensor::f_indices2( ) const;
     char *f_indices2( ) const;
 
-    
-    friend ostream &operator<<(ostream &s, const BJtensor &t);    
-    
   private:
 //K    int BJtensor::contracted_ind(char *, char *, int *, int *, int , int );
 //K    int BJtensor::uncontracted_ind(int *, int *, int);
     int contracted_ind(char *, char *, int *, int *, int , int );
     int uncontracted_ind(int *, int *, int);
 
-    
-    
 };
 
 #endif

@@ -1,7 +1,7 @@
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
-// $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJtensor.cpp,v $
+// $Revision: 1.2 $                                                              
+// $Date: 2001-01-11 09:23:56 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJtensor.cpp,v $                                                                
                                                                         
                                                                         
 //############################################################################
@@ -144,23 +144,23 @@ BJtensor::BJtensor(const nDarray & x):
 
 
 
-//.... // IT IS NOT INHERITED so must be defined in all derived classes
-//.... // See ARM page 277.
-//.... //##############################################################################
-//.... BJtensor::~BJtensor()
-//.... {
-//....   if (reference_count(-1) == 0)  // if reference count  goes to 0
-//....     {
-//.... // DEallocate memory of the actual nDarray
-//.... // delete [pc_nDarray_rep->pc_nDarray_rep->total_numb] pc_nDarray_rep->pd_nDdata;
-//.... // nema potrebe za brojem clanova koji se brisu!! see ELLIS & STROUSTRUP $18.3
-//.... //                                                and note on the p.65($5.3.4)
-//.... //  and the page 276 ($12.4)
-//....     delete data();
-//....     delete dim();
-//....     delete pc_nDarray_rep;
-//....   }
-//.... }
+ // IT IS NOT INHERITED so must be defined in all derived classes
+ // See ARM page 277.
+ //##############################################################################
+// BJtensor::~BJtensor()
+// {
+//   if (reference_count(-1) == 0)  // if reference count  goes to 0
+//     {
+// // DEallocate memory of the actual nDarray
+// // delete [pc_nDarray_rep->pc_nDarray_rep->total_numb] pc_nDarray_rep->pd_nDdata;
+// // nema potrebe za brojem clanova koji se brisu!! see ELLIS & STROUSTRUP $18.3
+// //                                                and note on the p.65($5.3.4)
+// //  and the page 276 ($12.4)
+//     delete data();
+//     delete dim();
+//     delete pc_nDarray_rep;
+//   }
+// }
 
 
 
