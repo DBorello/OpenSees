@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-12 19:53:08 $
+// $Revision: 1.2 $
+// $Date: 2001-07-12 20:10:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/BFGS.cpp,v $
                                                                         
 // Written: Ed Love
@@ -46,9 +46,9 @@ BFGS::BFGS(int theTangentToUse, int n )
 :EquiSolnAlgo(EquiALGORITHM_TAGS_BFGS),
  theTest(0), tangent(theTangentToUse), numberLoops(n) 
 {
-  s  = new (Vector*)[numberLoops+3];
+  s  = new Vector*[numberLoops+3];
 
-  z  = new (Vector*)[numberLoops+3];
+  z  = new Vector*[numberLoops+3];
 
   //  r  = new (Vector*)[numberLoops+3];
 
@@ -74,9 +74,9 @@ BFGS::BFGS(ConvergenceTest &theT, int theTangentToUse, int n)
 :EquiSolnAlgo(EquiALGORITHM_TAGS_BFGS),
  theTest(&theT), tangent(theTangentToUse), numberLoops(n) 
 {
-  s  = new (Vector*)[numberLoops+3];
+  s  = new Vector*[numberLoops+3];
 
-  z  = new (Vector*)[numberLoops+3];
+  z  = new Vector*[numberLoops+3];
 
   residOld = 0;
   residNew = 0;
@@ -372,8 +372,8 @@ void  BFGS::BFGSUpdate(IncrementalIntegrator *theIntegrator,
   *z[nBFGS] = theSOE->getX(); 
   //  *z[nBFGS] *= (-1.0);
 
-
-  for ( int i=1; i<=(nBFGS-1); i++ ) {
+    int i;
+  for ( i=1; i<=(nBFGS-1); i++ ) {
 
     if ( sdotr[i] < eps ) 
       break; 
@@ -423,7 +423,7 @@ void  BFGS::BFGSUpdate(IncrementalIntegrator *theIntegrator,
 
 
   //BFGS modifications to du
-  for ( int i=1; i<=nBFGS; i++ ) {
+  for ( i=1; i<=nBFGS; i++ ) {
 
     if ( sdotr[i] < eps )
       break;

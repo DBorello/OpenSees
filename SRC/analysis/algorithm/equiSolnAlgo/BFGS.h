@@ -18,14 +18,12 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-12 19:53:08 $
+// $Revision: 1.2 $
+// $Date: 2001-07-12 20:10:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/BFGS.h,v $
                                                                         
 #ifndef BFGS_h
 #define BFGS_h
-
-#define EquiALGORITHM_TAGS_BFGS 9831
 
 // File: ~/OOP/analysis/algorithm/BFGS.h 
 // 
