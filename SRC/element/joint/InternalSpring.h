@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-04-30 21:33:46 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:41:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/InternalSpring.h,v $
                                                                         
 // Written: AAA 03/02
@@ -57,7 +57,6 @@ class InternalSpring : public Element
     int revertToStart(void);            
     
     const Matrix &getTangentStiff(void);
-    const Matrix &getSecantStiff(void);    
     const Matrix &getDamp(void);    
     const Matrix &getMass(void);    
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-04-30 21:33:46 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:41:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/InternalSpring.cpp,v $
 
 // Written: A. Altoontash & G. Deierlein 03/02
@@ -179,29 +179,6 @@ InternalSpring::getTangentStiff(void)
 
     return (*Kd);
 }
-
-const Matrix &
-InternalSpring::getSecantStiff(void)
-{
-	double S;
-	double delta;
-
-	const Vector &disp = nodPtr->getTrialDisp();
-	
-	delta = disp(DOF2) - disp(DOF1);
-
-	int dummy = Spring->setTrialStrain(delta);
-	S = Spring->getSecant();
-
-	Kd->Zero();
-    (*Kd)(DOF1,DOF1) = S;
-	(*Kd)(DOF2,DOF2) = S;
-	(*Kd)(DOF1,DOF2) = -S;
-	(*Kd)(DOF2,DOF1) = -S;
-
-    return (*Kd);
-}
-
 
 const Matrix &
 InternalSpring::getDamp(void)

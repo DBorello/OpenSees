@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-04-30 21:33:46 $
+// $Revision: 1.2 $
+// $Date: 2002-06-10 22:41:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/SimpleJoint2D.cpp,v $
 
 // Written: AAA 03/02
@@ -328,11 +328,6 @@ int SimpleJoint2D::getNumDOF(void)
 const Matrix &SimpleJoint2D::getTangentStiff(void)
 {
 
-  return K;
-}
-
-const Matrix &SimpleJoint2D::getSecantStiff(void)
-{
   return K;
 }
 
