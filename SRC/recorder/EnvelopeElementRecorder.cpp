@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2004-11-25 00:53:12 $
+// $Revision: 1.9 $
+// $Date: 2005-01-13 23:53:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -444,9 +444,12 @@ EnvelopeElementRecorder::initialize(void)
       theResponses[ii] = 0;
     } else {
       theResponses[ii] = theEle->setResponse((const char **)responseArgs, numArgs, eleInfo);
-      Information &eleInfo = theResponses[ii]->getInformation();
-      const Vector &eleData = eleInfo.getData();
-      numDbColumns += eleData.Size();
+      if (theResponses[ii] != 0) {
+	// from the response type determine no of cols for each      
+	Information &eleInfo = theResponses[ii]->getInformation();
+	const Vector &eleData = eleInfo.getData();
+	numDbColumns += eleData.Size();
+      }
     }
   }
 
