@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2001-12-07 00:53:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.cpp,v $
                                                                         
                                                                         
@@ -237,16 +237,24 @@ DomainDecompositionAnalysis::getNumExternalEqn(void)
 int
 DomainDecompositionAnalysis::getNumInternalEqn(void)
 {
-    return numEqn-numExtEqn;
+  return numEqn-numExtEqn;
 }
 
 
 
 
 int  
+DomainDecompositionAnalysis::newStep(double dT)
+{
+  return theIntegrator->newStep(dT);
+}
+
+
+
+int  
 DomainDecompositionAnalysis::computeInternalResponse(void)
 {
-    return theAlgorithm->solveCurrentStep();
+  return theAlgorithm->solveCurrentStep();
 }
 
 

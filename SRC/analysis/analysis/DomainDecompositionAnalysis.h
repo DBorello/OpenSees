@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2001-12-07 00:53:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DomainDecompositionAnalysis.h,v $
                                                                         
                                                                         
@@ -84,6 +84,7 @@ class DomainDecompositionAnalysis: public Analysis, public MovableObject
 
     virtual int  getNumExternalEqn(void);
     virtual int  getNumInternalEqn(void);
+    virtual int  newStep(double dT);
     virtual int  computeInternalResponse(void);
     virtual int  formTangent(void);
     virtual int  formResidual(void);
