@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-05 06:01:09 $
+// $Revision: 1.3 $
+// $Date: 2002-06-07 22:13:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.h,v $
                                                                         
                                                                         
@@ -92,8 +92,8 @@ class LinearCrdTransf3d: public CrdTransf3d
     double *nodeIOffset, *nodeJOffset;	// rigid joint offsets
 
     double R[3][3];	// Transformation matrix
-
-    double L;                // undeformed element length
+    
+    double L;           // undeformed element length
 };
 
 #endif

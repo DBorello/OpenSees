@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:59:17 $
+// $Revision: 1.3 $
+// $Date: 2002-06-07 22:13:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf2d.h,v $
                                                                         
                                                                         
@@ -95,7 +95,7 @@ class PDeltaCrdTransf2d: public CrdTransf2d
     double cosTheta, sinTheta;
 
     double L;                // undeformed element length
-	double ul14;	// Transverse local displacement offset of P-Delta
+    double ul14;	// Transverse local displacement offset of P-Delta
 };
 
 #endif

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-11-26 22:59:17 $
+// $Revision: 1.4 $
+// $Date: 2002-06-07 22:13:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -686,21 +686,33 @@ PDeltaCrdTransf2d::sendSelf(int cTag, Channel &theChannel)
 {
 	int res = 0;
 
-	static Vector data(9);
-
-	data(0) = this->getTag();
-	data(6) = L;
-	data(7) = cosTheta;
-	data(8) = sinTheta;
-
-	res += theChannel.sendVector(this->getDbTag(), cTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s - failed to send Vector",
-			"PDeltaCrdTransf2d::sendSelf");
-		return res;
-	}
-
+  static Vector data(10);
+  data(0) = this->getTag();
+  data(1) = L;
+  if (nodeIOffset != 0) {
+    data(2) = 1.0;
+    data(3) = nodeIOffset[0];
+    data(4) = nodeIOffset[1];
+    data(5) = nodeIOffset[2];
+  } else
+    data(2) = 0.0;
+  
+  if (nodeJOffset != 0) {
+    data(6) = 1.0;
+    data(7) = nodeJOffset[0];
+    data(8) = nodeJOffset[1];
+    data(9) = nodeJOffset[2];
+  } else
+    data(6) = 0.0;
+  
+  res += theChannel.sendVector(this->getDbTag(), cTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s - failed to send Vector",
+			    "PDeltaCrdTransf2d2d::sendSelf");
     return res;
+  }
+  
+  return res;
 }
 
     
@@ -708,23 +720,38 @@ PDeltaCrdTransf2d::sendSelf(int cTag, Channel &theChannel)
 int 
 PDeltaCrdTransf2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-	int res = 0;
-
-	static Vector data(9);
-
-	res += theChannel.recvVector(this->getDbTag(), cTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s - failed to receive Vector",
-			"PDeltaCrdTransf2d::recvSelf");
-		return res;
-	}
-
-	this->setTag((int)data(0));
-	L = data(6);
-	cosTheta = data(7);
-	sinTheta = data(8);
-
+  int res = 0;
+  
+  static Vector data(10);
+  
+  res += theChannel.recvVector(this->getDbTag(), cTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s - failed to receive Vector",
+			    "PDeltaCrdTransf2d2d::recvSelf");
     return res;
+  }
+  
+  this->setTag((int)data(0));
+  L = data(1);
+  data(0) = this->getTag();
+  data(1) = L;
+  if (data(2) == 1.0) {
+    if (nodeIOffset == 0)
+      nodeIOffset = new double[3];
+    nodeIOffset[0] = data(3);
+    nodeIOffset[1] = data(4);
+    nodeIOffset[2] = data(5);
+  } 
+  
+  if (data(6) == 1.0) {
+    if (nodeJOffset == 0)
+      nodeJOffset = new double[3];
+    nodeJOffset[0] = data(7);
+    nodeJOffset[1] = data(8);
+    nodeJOffset[2] = data(9);
+  } 
+
+  return res;
 }
  	
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-01-06 19:22:27 $
+// $Revision: 1.6 $
+// $Date: 2002-06-07 22:13:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf3d.cpp,v $
                                                                         
                                                                         
@@ -763,21 +763,39 @@ LinearCrdTransf3d::getCopy(void)
 int 
 LinearCrdTransf3d::sendSelf(int cTag, Channel &theChannel)
 {
-	int res = 0;
+  int res = 0;
+  
+  static Vector data(13);
+  data(0) = this->getTag();
+  data(1) = L;
+  if (nodeIOffset != 0) {
+    data(2) = 1.0;
+    data(3) = nodeIOffset[0];
+    data(4) = nodeIOffset[1];
+    data(5) = nodeIOffset[2];
+  } else
+    data(2) = 0.0;
+  
+  if (nodeJOffset != 0) {
+    data(6) = 1.0;
+    data(7) = nodeJOffset[0];
+    data(8) = nodeJOffset[1];
+    data(9) = nodeJOffset[2];
+  } else
+    data(6) = 0.0;
 
-	static Vector data(9);
-
-	data(0) = this->getTag();
-	data(6) = L;
-
-	res += theChannel.sendVector(this->getDbTag(), cTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s - failed to send Vector",
-			"LinearCrdTransf3d::sendSelf");
-		return res;
-	}
-
+  data(10) = R[2][0];
+  data(11) = R[2][1];
+  data(12) = R[2][2];
+  
+  res += theChannel.sendVector(this->getDbTag(), cTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s - failed to send Vector",
+			    "LinearCrdTransf3d::sendSelf");
     return res;
+  }
+  
+  return res;
 }
 
     
@@ -785,21 +803,42 @@ LinearCrdTransf3d::sendSelf(int cTag, Channel &theChannel)
 int 
 LinearCrdTransf3d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-	int res = 0;
-
-	static Vector data(9);
-
-	res += theChannel.recvVector(this->getDbTag(), cTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s - failed to receive Vector",
-			"LinearCrdTransf3d::recvSelf");
-		return res;
-	}
-
-	this->setTag((int)data(0));
-	L = data(6);
-
+  int res = 0;
+  
+  static Vector data(13);
+  
+  res += theChannel.recvVector(this->getDbTag(), cTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s - failed to receive Vector",
+			    "LinearCrdTransf3d::recvSelf");
     return res;
+  }
+  
+  this->setTag((int)data(0));
+  L = data(1);
+  data(0) = this->getTag();
+  data(1) = L;
+  if (data(2) == 1.0) {
+    if (nodeIOffset == 0)
+      nodeIOffset = new double[3];
+    nodeIOffset[0] = data(3);
+    nodeIOffset[1] = data(4);
+    nodeIOffset[2] = data(5);
+  } 
+  
+  if (data(6) == 1.0) {
+    if (nodeJOffset == 0)
+      nodeJOffset = new double[3];
+    nodeJOffset[0] = data(7);
+    nodeJOffset[1] = data(8);
+    nodeJOffset[2] = data(9);
+  } 
+
+  R[2][0] = data(10);
+  R[2][1] = data(11);
+  R[2][2] = data(12);
+
+  return res;
 }
  	
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-11-26 22:59:17 $
+// $Revision: 1.5 $
+// $Date: 2002-06-07 22:13:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -221,51 +221,51 @@ LinearCrdTransf2d::getDeformedLength(void)
 const Vector &
 LinearCrdTransf2d::getBasicTrialDisp (void)
 {
-	// determine global displacements
-	const Vector &disp1 = nodeIPtr->getTrialDisp();
-	const Vector &disp2 = nodeJPtr->getTrialDisp();
+  // determine global displacements
+  const Vector &disp1 = nodeIPtr->getTrialDisp();
+  const Vector &disp2 = nodeJPtr->getTrialDisp();
+  
+  static double ug[6];
+  for (int i = 0; i < 3; i++) {
+    ug[i]   = disp1(i);
+    ug[i+3] = disp2(i);
+  }
+  
+  static Vector ub(3);
+  
+  double oneOverL = 1.0/L;
+  double sl = sinTheta*oneOverL;
+  double cl = cosTheta*oneOverL;
 
-	static double ug[6];
-	for (int i = 0; i < 3; i++) {
-		ug[i]   = disp1(i);
-		ug[i+3] = disp2(i);
-	}
-
-	static Vector ub(3);
-
-	double oneOverL = 1.0/L;
-	double sl = sinTheta*oneOverL;
-	double cl = cosTheta*oneOverL;
-
-	if (nodeIOffset == 0) {
-		ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] +
-			cosTheta*ug[3] + sinTheta*ug[4];
-
-		ub(1) = -sl*ug[0] + cl*ug[1] + ug[2] +
-			sl*ug[3] - cl*ug[4];
-
-		//ub(2) = -sl*ug[0] + cl*ug[1] +
-		//	sl*ug[3] - cl*ug[4] + ug[5];
-		ub(2) = ub(1) + ug[5] - ug[2];
-	}
-	else {
-		double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
-		double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
-		double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
-		double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
-
-		ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] - t02*ug[2] +
-			cosTheta*ug[3] + sinTheta*ug[4] + t35*ug[5];
-
-		ub(1) = -sl*ug[0] + cl*ug[1] + (1.0+oneOverL*t12)*ug[2] +
-			sl*ug[3] - cl*ug[4] - oneOverL*t45*ug[5];
-
-		//ub(2) = -sl*ug[0] + cl*ug[1] + oneOverL*t12*ug[2] +
-		//	sl*ug[3] - cl*ug[4] + (1.0-oneOverL*t45)*ug[5];
-		ub(2) = ub(1) + ug[5] - ug[2];
-	}
-
-	return ub;
+  if (nodeIOffset == 0) {
+    ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] +
+      cosTheta*ug[3] + sinTheta*ug[4];
+    
+    ub(1) = -sl*ug[0] + cl*ug[1] + ug[2] +
+      sl*ug[3] - cl*ug[4];
+    
+    //ub(2) = -sl*ug[0] + cl*ug[1] +
+    //	sl*ug[3] - cl*ug[4] + ug[5];
+    ub(2) = ub(1) + ug[5] - ug[2];
+  }
+  else {
+    double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+    double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+    double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+    double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+    
+    ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] - t02*ug[2] +
+      cosTheta*ug[3] + sinTheta*ug[4] + t35*ug[5];
+    
+    ub(1) = -sl*ug[0] + cl*ug[1] + (1.0+oneOverL*t12)*ug[2] +
+      sl*ug[3] - cl*ug[4] - oneOverL*t45*ug[5];
+    
+    //ub(2) = -sl*ug[0] + cl*ug[1] + oneOverL*t12*ug[2] +
+    //	sl*ug[3] - cl*ug[4] + (1.0-oneOverL*t45)*ug[5];
+    ub(2) = ub(1) + ug[5] - ug[2];
+  }
+  
+  return ub;
 }
 
 
@@ -577,23 +577,35 @@ LinearCrdTransf2d::getCopy(void)
 int 
 LinearCrdTransf2d::sendSelf(int cTag, Channel &theChannel)
 {
-	int res = 0;
-
-	static Vector data(9);
-
-	data(0) = this->getTag();
-	data(6) = L;
-	data(7) = cosTheta;
-	data(8) = sinTheta;
-
-	res += theChannel.sendVector(this->getDbTag(), cTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s - failed to send Vector",
-			"LinearCrdTransf2d::sendSelf");
-		return res;
-	}
-
+  int res = 0;
+  
+  static Vector data(10);
+  data(0) = this->getTag();
+  data(1) = L;
+  if (nodeIOffset != 0) {
+    data(2) = 1.0;
+    data(3) = nodeIOffset[0];
+    data(4) = nodeIOffset[1];
+    data(5) = nodeIOffset[2];
+  } else
+    data(2) = 0.0;
+  
+  if (nodeJOffset != 0) {
+    data(6) = 1.0;
+    data(7) = nodeJOffset[0];
+    data(8) = nodeJOffset[1];
+    data(9) = nodeJOffset[2];
+  } else
+    data(6) = 0.0;
+  
+  res += theChannel.sendVector(this->getDbTag(), cTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s - failed to send Vector",
+			    "LinearCrdTransf2d::sendSelf");
     return res;
+  }
+  
+  return res;
 }
 
     
@@ -601,23 +613,38 @@ LinearCrdTransf2d::sendSelf(int cTag, Channel &theChannel)
 int 
 LinearCrdTransf2d::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-	int res = 0;
-
-	static Vector data(9);
-
-	res += theChannel.recvVector(this->getDbTag(), cTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("%s - failed to receive Vector",
-			"LinearCrdTransf2d::recvSelf");
-		return res;
-	}
-
-	this->setTag((int)data(0));
-	L = data(6);
-	cosTheta = data(7);
-	sinTheta = data(8);
-
+  int res = 0;
+  
+  static Vector data(10);
+  
+  res += theChannel.recvVector(this->getDbTag(), cTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("%s - failed to receive Vector",
+			    "LinearCrdTransf2d::recvSelf");
     return res;
+  }
+  
+  this->setTag((int)data(0));
+  L = data(1);
+  data(0) = this->getTag();
+  data(1) = L;
+  if (data(2) == 1.0) {
+    if (nodeIOffset == 0)
+      nodeIOffset = new double[3];
+    nodeIOffset[0] = data(3);
+    nodeIOffset[1] = data(4);
+    nodeIOffset[2] = data(5);
+  } 
+  
+  if (data(6) == 1.0) {
+    if (nodeJOffset == 0)
+      nodeJOffset = new double[3];
+    nodeJOffset[0] = data(7);
+    nodeJOffset[1] = data(8);
+    nodeJOffset[2] = data(9);
+  } 
+
+  return res;
 }
  	
 
