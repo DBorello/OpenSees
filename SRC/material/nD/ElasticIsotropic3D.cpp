@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $                                                              
-// $Date: 2001-01-23 22:10:40 $                                                                  
+// $Revision: 1.6 $                                                              
+// $Date: 2001-01-24 07:09:55 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $                                                                
 
 //Boris Jeremic and Zhaohui Yang ___ 02-10-2000
@@ -30,9 +30,9 @@
 #include <Tensor.h>
 
 ElasticIsotropic3D::ElasticIsotropic3D
-(int tag, double E, double nu, double pr, double pop) :
+(int tag, double E, double nu, double expp, double pr, double pop):
  ElasticIsotropicMaterial (tag, ND_TAG_ElasticIsotropic3D, E, nu),
- sigma(6), D(6,6), epsilon(6), p_ref(pr), po(pop)
+ sigma(6), D(6,6), epsilon(6), exp(expp), p_ref(pr), po(pop) 
 {
 	// Set up the elastic constant matrix for 3D elastic isotropic 
 	D.Zero();
@@ -156,11 +156,12 @@ ElasticIsotropic3D::getStrainTensor (void)
     return Strain;
 }
 
-int ElasticIsotropic3D::commitState (void)
+int
+ElasticIsotropic3D::commitState (void)
 {
     //Set the new Elastic constants
     tensor ret( 4, def_dim_4, 0.0 );
-
+    				       
     // Kronecker delta tensor
     tensor I2("I", 2, def_dim_2);
 
@@ -171,26 +172,26 @@ int ElasticIsotropic3D::commitState (void)
     tensor I_ikjl = I_ijkl.transpose0110();
     tensor I_iljk = I_ijkl.transpose0111();
     tensor I4s = (I_ikjl+I_iljk)*0.5;
-
-    //Update E according to
+    
+    //Update E according to 
     Stress = getStressTensor();
     //Dt("ijkl") * Strain("kl");
     double p = Stress.p_hydrostatic();
     //cerr << " p = " <<  p;
 
-    if (p <= 0.5)
+    if (p <= 0.5) 
       p = 0.5;
 
     double Ec = E * pow(p/p_ref, exp);
     //cerr << " Eo = " << E << " Ec = " << Ec << endln;
 
     // Building elasticity tensor
-    ret = I_ijkl*( Ec*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( Ec / (1.0 + v));
-
+    ret = I_ijkl*( Ec*v / ( (1.0+v)*(1.0 - 2.0*v) ) ) + I4s*( Ec / (1.0 + v) );
+    
     //ret.print();
     Dt_commit = ret;
     Dt = ret;
-
+    
     return 0;
 
 }
@@ -209,9 +210,11 @@ ElasticIsotropic3D::revertToStart (void)
 	return 0;
 }
 
-NDMaterial* ElasticIsotropic3D::getCopy (void)
+NDMaterial*
+ElasticIsotropic3D::getCopy (void)
 {
-	ElasticIsotropic3D *theCopy = new ElasticIsotropic3D (this->getTag(), E, v);
+	ElasticIsotropic3D *theCopy =
+		new ElasticIsotropic3D (this->getTag(), E, v);
 	theCopy->epsilon = this->epsilon;
 	theCopy->sigma = this->sigma;
 	theCopy->Strain = this->Strain;
@@ -287,7 +290,8 @@ ElasticIsotropic3D::Print(ostream &s, int flag)
 	s << "\ttag: " << this->getTag() << endl;
 	s << "\tE: " << E << endl;
 	s << "\tv: " << v << endl;
-	s << "\tpo: " << po << endl;
+	s << "\texp: " << exp << endl;
+	s << "\tp_ref: " << p_ref << endl;
 	//s << "\tD: " << D << endl;
 }
 
@@ -317,7 +321,7 @@ void ElasticIsotropic3D::setInitElasticStiffness(void)
     //double po = 100.0; //kPa
     if (po <= 0.5) 
       po = 0.5;
-    double Eo = E * pow(po/p_ref, 0.6);
+    double Eo = E * pow(po/p_ref, exp);
 
     //cerr << " E@ref = " << E << " Eo = " << Eo << endln;
 

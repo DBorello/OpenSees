@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $                                                              
-// $Date: 2001-01-23 08:45:25 $                                                                  
+// $Revision: 1.5 $                                                              
+// $Date: 2001-01-24 07:09:55 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $                                                                
                                                                         
                                                                         
@@ -46,11 +46,10 @@
 #include <stresst.h>
 #include <straint.h>
 
-
 class ElasticIsotropic3D : public ElasticIsotropicMaterial
 {
   public:
-    ElasticIsotropic3D (int tag, double E, double nu, double pr = 100.0, double pop = 0.0);
+    ElasticIsotropic3D (int tag, double E, double nu, double expp = 0.6, double pr = 100.0, double pop = 0.0);
     ElasticIsotropic3D ();
     ~ElasticIsotropic3D ();
 
@@ -96,6 +95,7 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     Matrix D;			// Elastic constants
     Vector epsilon;		// Strain vector
 
+    double exp;                 // exponent usually 0.6
     double p_ref;               // Reference pressure, usually atmosphere pressure, i.e. 100kPa
     double po;                  // Initial pressure of this material point
     stresstensor Stress;	// Stress tensor    
