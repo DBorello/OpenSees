@@ -52,9 +52,11 @@ Matrix EightNodeBrick::K(24, 24);
 Matrix EightNodeBrick::C(24, 24);      
 Matrix EightNodeBrick::M(24, 24);      
 Vector EightNodeBrick::P(24);	       
-Vector InfoP(FixedOrder*FixedOrder*FixedOrder*4+1); //Plastic info 32+1 2X2X2
+Vector InfoP(FixedOrder*FixedOrder*FixedOrder*4+1); //Plastic info(coor+pls) 32+1 2X2X2
 Vector InfoP1(FixedOrder*FixedOrder*FixedOrder+1); //Plastic info, no Gauss point coordinates
 Vector InfoS(FixedOrder*FixedOrder*FixedOrder*6+1); //Stress 8*6+1  2X2X2
+Vector InfoSpq(2); //p and q of count/2
+Vector InfoSpq_all(2*FixedOrder*FixedOrder*FixedOrder+4); //p and q of all GS points + Sig11-33 +Strain_plastic_vv +psi
 Vector Gsc8(FixedOrder*FixedOrder*FixedOrder*3+1); //Gauss point coordinates
 
 //====================================================================
@@ -3221,6 +3223,23 @@ Response * EightNodeBrick::setResponse (const char **argv, int argc, Information
     {
        return new ElementResponse(this, 4, InfoS);
     } 
+    //========================================================
+    else if (strcmp(argv[0],"pq") == 0 || strcmp(argv[0],"PQ") == 0)
+    {
+       return new ElementResponse(this, 41, InfoSpq);
+    } 
+    //Added 06-27-02 for p-q
+    //========================================================
+    else if (strcmp(argv[0],"stresspq") == 0 || strcmp(argv[0],"stressespq") == 0)
+    {
+       return new ElementResponse(this, 41, InfoSpq);
+    } 
+    //Added 07-22-02 for all p-q, e_v_pl, xi
+    //========================================================
+    else if (strcmp(argv[0],"pqall") == 0 )
+    {
+       return new ElementResponse(this, 42, InfoSpq_all);
+    } 
 
     //========================================================
     else if (strcmp(argv[0],"gausspoint") == 0 || strcmp(argv[0],"GaussPoint") == 0)
@@ -3320,6 +3339,64 @@ int EightNodeBrick::getResponse (int responseID, Information &eleInfo)
 		    }
 		}
  	   	return eleInfo.setVector( InfoS );
+	      }
+	   case 41:
+	      {
+       	        int count = r_integration_order* s_integration_order * t_integration_order;
+		count = count / 2;
+                stresstensor sts;
+                sts = matpoint[count]->getStressTensor();
+		InfoSpq(0) =sts.p_hydrostatic(); 
+		InfoSpq(1) =sts.q_deviatoric(); 
+ 	   	return eleInfo.setVector( InfoSpq );
+	      }
+       	   case 42:
+	      {
+       	        int count = r_integration_order* s_integration_order * t_integration_order;
+		int i;
+                stresstensor sts, principle;
+
+		//InfoSpq_all(0) = count;
+				
+                for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+                {
+                    //r = get_Gauss_p_c( r_integration_order, GP_c_r );
+                    for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+                    {
+                        //s = get_Gauss_p_c( s_integration_order, GP_c_s );             
+                        //rs = (GP_c_r-1)*s_integration_order+GP_c_s-1;
+                        
+			for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+                        {		
+		          //for (int i = 0; i < count; i++) 
+                          i =
+                             ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+
+                          sts = matpoint[i]->getStressTensor();
+		          InfoSpq_all(i*2+0) =sts.p_hydrostatic(); 
+	        	  //deviatoric stress sqrt(J2/3)
+			  InfoSpq_all(i*2+1) =sts.q_deviatoric(); 
+			  //deviator stress +/-
+			  principle = sts.principal();
+	        	  //InfoSpq_all(i*2+1) =principle.val(1,1)-principle.val(3,3); 
+       	                  
+       	                  if (i == 7)  {
+			    InfoSpq_all(i*2+2) = principle.val(1,1); 
+			    //InfoSpq_all(i*2+3) = principle.val(2,2); 
+			    InfoSpq_all(i*2+3) = principle.val(3,3); 
+			   
+			    //Output volumetric strain for the eight Gauss point
+			    straintensor pl_stn;
+			    pl_stn = matpoint[i]->getPlasticStrainTensor();
+			    //pl_stn = matpoint[i]->getStrainTensor();
+			    InfoSpq_all(i*2+4) = pl_stn.Iinvariant1();
+			    double psi = matpoint[i]->getpsi();
+			    InfoSpq_all(i*2+5) = psi;
+			  }
+	        	}
+		    }
+		}
+ 	   	return eleInfo.setVector( InfoSpq_all );
 	      }
 	   case 5:
 	   {

@@ -51,6 +51,7 @@ Vector Info(109+3);  //For computing moment
 Vector InfoPt(FixedOrder*FixedOrder*FixedOrder*4+1); //Plastic info
 Vector InfoSt(FixedOrder*FixedOrder*FixedOrder*6+1); //Stress info
 Vector Gsc(FixedOrder*FixedOrder*FixedOrder*3+1); //Gauss point coordinates
+Vector InfoSpq2(2); //p and q of count/2
 //====================================================================
 // Constructor
 //====================================================================
@@ -1530,8 +1531,8 @@ tensor TwentyNodeBrick::nodal_forces(void)
 //
 		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
 		if ( err) {
-		   opserr << "incr_strn " <<  incremental_strain;
-      		   opserr << "incr_disp " <<  incremental_displacements;		
+		   //cout << "incr_strn " <<  incremental_strain;
+      		   //cout << "incr_disp " <<  incremental_displacements;		
                	   opserr << "TwentyNodeBrick::nodal_forces (tag: " << this->getTag() << ", not converged\n";
 		   exit(-1);
 		}
@@ -2833,7 +2834,7 @@ const Matrix &TwentyNodeBrick::getTangentStiff ()
 //=============================================================================
 const Matrix &TwentyNodeBrick::getInitialStiff ()
 {
-  opserr << "WARNING - TwentyNodeBrick::getInitialStiff() - not yet implemented\n";
+  //opserr << "WARNING - TwentyNodeBrick::getInitialStiff() - not yet implemented\n";
   return this->getTangentStiff();
 }
 
@@ -3605,6 +3606,13 @@ Response * TwentyNodeBrick::setResponse (const char **argv, int argc, Informatio
     {
        return new ElementResponse(this, 4, InfoSt);
     } 
+
+    //========================================================
+    else if (strcmp(argv[0],"pq") == 0 || strcmp(argv[0],"PQ") == 0)
+    {
+       return new ElementResponse(this, 41, InfoSpq2);
+    } 
+
     //========================================================
     else if (strcmp(argv[0],"GaussPoint") == 0 || strcmp(argv[0],"gausspoint") == 0)
     {
@@ -3833,6 +3841,17 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
 		    }
 		}
  	   	return eleInfo.setVector( InfoSt );
+	      }
+	   //Added Joey 03-12-03
+	   case 41:
+	      {
+       	        int count = r_integration_order* s_integration_order * t_integration_order;
+		count = count / 2;
+                stresstensor sts;
+                sts = matpoint[count]->getStressTensor();
+		InfoSpq2(0) =sts.p_hydrostatic(); 
+		InfoSpq2(1) =sts.q_deviatoric(); 
+ 	   	return eleInfo.setVector( InfoSpq2 );
 	      }
 	   case 5:
 	   	return eleInfo.setMatrix(this->getTangentStiff());
