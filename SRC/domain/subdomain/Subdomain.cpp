@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-02-26 06:31:36 $
+// $Revision: 1.4 $
+// $Date: 2002-12-05 22:27:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.cpp,v $
                                                                         
                                                                         
@@ -252,6 +252,12 @@ Subdomain::getNodes()
     return *theNodIter;
 }
 
+Node **
+Subdomain::getNodePtrs(void)
+{
+  cerr << "Subdomain::getNodePtrs() - should not be called\n";
+  return 0;
+}
 Node *
 Subdomain::getNode(int tag) 
 {

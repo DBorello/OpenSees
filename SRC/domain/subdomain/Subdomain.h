@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-12-07 00:48:03 $
+// $Revision: 1.3 $
+// $Date: 2002-12-05 22:27:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/subdomain/Subdomain.h,v $
                                                                         
                                                                         
@@ -77,6 +77,8 @@ class Subdomain: public Element, public Domain
     virtual Node *removeNode(int tag);        
     virtual NodeIter &getNodes(void);    
     virtual Node *getNode(int tag);            
+    virtual Node **getNodePtrs(void);            
+
     virtual int getNumNodes(void) const;    
     virtual int commit(void);
     virtual int revertToLastCommit(void);    
