@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 08:27:10 $
+// $Revision: 1.3 $
+// $Date: 2001-03-29 05:23:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT.cpp,v $
                                                                         
                                                                         
@@ -134,13 +134,6 @@ HHT::formNodUnbalance(DOF_Group *theDof)
 int
 HHT::initialize(void)
 {
-
-  // loop through the FE_Elements getting them to set Ki
-  AnalysisModel *theModel = this->getAnalysisModelPtr();
-  FE_EleIter &theEles = theModel->getFEs();    
-  FE_Element *elePtr;    
-  while((elePtr = theEles()) != 0) 
-    elePtr->setKi();
   return 0;
 }
 
@@ -236,16 +229,40 @@ int
 HHT::formEleTangent(FE_Element *theEle)
 {
   theEle->zeroTangent();
-  if (rayleighDamping == false) {
+  if (statusFlag == CURRENT_TANGENT) {
+    if (rayleighDamping == false) {
       theEle->addKtToTang(c1);
       theEle->addCtoTang(c2);
       theEle->addMtoTang(c3);
-  } else {
+    } else {
       theEle->addKtToTang(c1 + c2*betaK);
       theEle->addMtoTang(c3 + c2*alphaM);
       theEle->addKiToTang(c2*betaKi);
       theEle->addKcToTang(c2*betaKc);
-  }    
+    }    
+  } else if (statusFlag == INITIAL_TANGENT) {
+    if (rayleighDamping == false) {
+      theEle->addKiToTang(c1);
+      theEle->addCtoTang(c2);
+      theEle->addMtoTang(c3);
+    } else {
+      theEle->addKtToTang(c2*betaK);
+      theEle->addMtoTang(c3 + c2*alphaM);
+      theEle->addKiToTang(c1 + c2*betaKi);
+      theEle->addKcToTang(c2*betaKc);
+    }    
+  } else if (statusFlag == CURRENT_SECANT) {
+    if (rayleighDamping == false) {
+      theEle->addKsToTang(c1);
+      theEle->addCtoTang(c2);
+      theEle->addMtoTang(c3);
+    } else {
+      theEle->addKsToTang(c1 + c2*betaK);
+      theEle->addMtoTang(c3 + c2*alphaM);
+      theEle->addKiToTang(c2*betaKi);
+      theEle->addKcToTang(c2*betaKc);
+    }    
+  }
 
   return 0;
 }    

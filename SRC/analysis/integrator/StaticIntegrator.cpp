@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2001-03-29 05:23:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/StaticIntegrator.cpp,v $
                                                                         
                                                                         
@@ -59,8 +59,18 @@ int
 StaticIntegrator::formEleTangent(FE_Element *theEle)
 {
     // only elements stiffness matrix needed
+
+  if (statusFlag == CURRENT_TANGENT) {
     theEle->zeroTangent();
     theEle->addKtToTang();
+  } else if (statusFlag == INITIAL_TANGENT) {
+    theEle->zeroTangent();
+    theEle->addKiToTang();
+  } else if (statusFlag == CURRENT_SECANT) {
+    theEle->zeroTangent();
+    theEle->addKsToTang();
+  }
+
     return 0;
 }    
 

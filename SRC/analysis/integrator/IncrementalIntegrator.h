@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 08:27:10 $
+// $Revision: 1.3 $
+// $Date: 2001-03-29 05:23:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.h,v $
                                                                         
                                                                         
@@ -51,6 +51,11 @@ class FE_Element;
 class DOF_Group;
 class Vector;
 
+#define CURRENT_TANGENT 0
+#define INITIAL_TANGENT 1
+#define CURRENT_SECANT  2
+
+
 class IncrementalIntegrator : public Integrator
 {
   public:
@@ -61,7 +66,7 @@ class IncrementalIntegrator : public Integrator
 			  LinearSOE &theSOE);
 
     // methods to set up the system of equations
-    virtual int  formTangent(void);    
+    virtual int  formTangent(int statusFlag = CURRENT_TANGENT);    
     virtual int  formUnbalance(void);        
 
     // pure virtual methods to define the FE_ELe and DOF_Group contributions
@@ -74,15 +79,18 @@ class IncrementalIntegrator : public Integrator
     virtual int update(const Vector &deltaU) =0;
     virtual int commit(void);
     virtual int revertToLastStep(void);
+    virtual int initialize(void);
     
     // method introduced for domain decomposition
     virtual int getLastResponse(Vector &result, const ID &id);
+
     
   protected:
     LinearSOE *getLinearSOEPtr(void) const;
     AnalysisModel *getAnalysisModelPtr(void) const;
     virtual int  formNodalUnbalance(void);        
     virtual int  formElementResidual(void);            
+    int statusFlag;
     
   private:
     LinearSOE *theSOE;

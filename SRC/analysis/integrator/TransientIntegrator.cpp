@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2001-03-29 05:23:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/TransientIntegrator.cpp,v $
                                                                         
                                                                         
@@ -58,9 +58,11 @@ TransientIntegrator::~TransientIntegrator()
 }
 
 int 
-TransientIntegrator::formTangent(void)
+TransientIntegrator::formTangent(int statFlag)
 {
     int result = 0;
+    statusFlag = statFlag;
+
     LinearSOE *theLinSOE = this->getLinearSOEPtr();
     AnalysisModel *theModel = this->getAnalysisModelPtr();
     if (theLinSOE == 0 || theModel == 0) {

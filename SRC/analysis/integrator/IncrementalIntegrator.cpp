@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-13 08:27:10 $
+// $Revision: 1.3 $
+// $Date: 2001-03-29 05:23:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.cpp,v $
                                                                         
                                                                         
@@ -44,6 +44,7 @@
 
 IncrementalIntegrator::IncrementalIntegrator(int clasTag)
 :Integrator(clasTag),
+ statusFlag(CURRENT_TANGENT),
  theSOE(0),theAnalysisModel(0)
 {
 
@@ -63,10 +64,11 @@ IncrementalIntegrator::setLinks(AnalysisModel &theModel, LinearSOE &theLinSOE)
 
 
 int 
-IncrementalIntegrator::formTangent(void)
+IncrementalIntegrator::formTangent(int statFlag)
 {
     int result = 0;
-    
+    statusFlag = statFlag;
+
     if (theAnalysisModel == 0 || theSOE == 0) {
 	cerr << "WARNING IncrementalIntegrator::formTangent() -";
 	cerr << " no AnalysisModel or LinearSOE have been set\n";
@@ -91,6 +93,7 @@ IncrementalIntegrator::formTangent(void)
 
     return result;
 }
+
 
 int 
 IncrementalIntegrator::formUnbalance(void)
@@ -148,6 +151,11 @@ IncrementalIntegrator::getLastResponse(Vector &result, const ID &id)
     return res;
 }
 
+int
+IncrementalIntegrator::initialize(void)
+{
+  return 0;
+}
 
 int
 IncrementalIntegrator::commit(void) 
