@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-12 06:03:23 $
+// $Revision: 1.4 $
+// $Date: 2001-02-17 06:40:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -223,6 +223,8 @@ int g3AppInit(Tcl_Interp *interp) {
     Tcl_CreateCommand(interp, "database", addDatabase, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
     Tcl_CreateCommand(interp, "playback", playbackRecorders, 
+		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);        
+    Tcl_CreateCommand(interp, "playbackAlgo", playbackAlgorithmRecorders, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);        
     Tcl_CreateCommand(interp, "rigidLink", rigidLink, 
 		      (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);                
@@ -446,6 +448,8 @@ int
 analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc, 
 	     char **argv)
 {
+  int result = 0;
+
 
   if (theStaticAnalysis != 0) {
     if (argc < 2) {
@@ -453,9 +457,10 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc,
       return TCL_ERROR;
     }
     int numIncr;
+
     if (Tcl_GetInt(interp, argv[1], &numIncr) != TCL_OK)	
       return TCL_ERROR;	      
-    return theStaticAnalysis->analyze(numIncr);
+    result = theStaticAnalysis->analyze(numIncr);
   } else if (theTransientAnalysis != 0) {
     if (argc < 3) {
       interp->result = "WARNING transient analysis: analysis numIncr? deltaT?";
@@ -479,20 +484,28 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;
 
       if (theVariableTimeStepTransientAnalysis != 0)
-	return theVariableTimeStepTransientAnalysis->analyze(numIncr, dT, dtMin, dtMax, Jd);
+	result =  theVariableTimeStepTransientAnalysis->analyze(numIncr, dT, dtMin, dtMax, Jd);
       else {
 	interp->result = "WARNING analyze - no variable time step transient analysis object constructed";
 	return TCL_ERROR;
       }
 
-    }else {
-      return theTransientAnalysis->analyze(numIncr, dT);
+    } else {
+      result = theTransientAnalysis->analyze(numIncr, dT);
     }
 
   } else {
     interp->result = "WARNING No Analysis type has been specified ";
     return TCL_ERROR;
   }    
+
+  if (result < 0) {
+    g3ErrorHandler->warning("OpenSees > analyze failed, returned %d error flag\n",result);
+  }
+
+  sprintf(interp->result,"%d",result);    
+  return TCL_OK;
+
 }
 
 
@@ -1345,7 +1358,7 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
   else if (strcmp(argv[1],"MinUnbalDispNorm") == 0) {
       double lambda11, minlambda, maxlambda;
       int numIter;
-      if (argc != 6) {
+      if (argc < 6) {
 	cerr << "WARNING integrator MinUnbalDispNorm lambda11 Jd minLambda1j maxLambda1j\n";
 	return TCL_ERROR;
       }    
@@ -1357,7 +1370,14 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;	
       if (Tcl_GetDouble(interp, argv[5], &maxlambda) != TCL_OK)	
 	return TCL_ERROR;	
-      theStaticIntegrator = new MinUnbalDispNorm(lambda11,numIter,minlambda,maxlambda);
+
+      int signFirstStepMethod = SIGN_LAST_STEP;
+      if (argc == 7)
+	if ((strcmp(argv[6],"-determinant") == 0) ||
+	    (strcmp(argv[6],"-det") == 0))
+	    signFirstStepMethod = CHANGE_DETERMINANT;	    
+
+      theStaticIntegrator = new MinUnbalDispNorm(lambda11,numIter,minlambda,maxlambda,signFirstStepMethod);
   }
   
   else if (strcmp(argv[1],"DisplacementControl") == 0) {
@@ -1639,6 +1659,28 @@ playbackRecorders(ClientData clientData, Tcl_Interp *interp, int argc,
 
 }
 
+int 
+playbackAlgorithmRecorders(ClientData clientData, Tcl_Interp *interp, int argc, 
+			   char **argv)
+{
+  // make sure at least one other argument to contain integrator
+  if (argc < 2) {
+      interp->result = "WARNING need to specify the commitTag ";
+      return TCL_ERROR;
+  }    
+
+  // check argv[1] for type of Numberer and create the object
+  int cTag;
+  if (Tcl_GetInt(interp, argv[1], &cTag) != TCL_OK)	
+      return TCL_ERROR;	
+  if (theAlgorithm != 0)
+    theAlgorithm->playback(cTag);
+
+  return TCL_OK;
+
+}
+
+
 /*
 int 
 groundExcitation(ClientData clientData, Tcl_Interp *interp, int argc, 
@@ -1878,13 +1920,18 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
 {
     
     // make sure at least one other argument to contain type of system
-    if (argc < 3) {
-	interp->result = "WARNING want - remove objectType? objectTag?\n";
+      if (argc < 2) {
+	interp->result = "WARNING want - remove objectType?\n";
 	return TCL_ERROR;
-   }    
+      }    
 
     int tag;
     if (strcmp(argv[1],"element") == 0) {
+      if (argc < 3) {
+	interp->result = "WARNING want - remove element eleTag?\n";
+	return TCL_ERROR;
+      }    
+
       if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	cerr << "WARNING remove element tag? failed to read tag: " << argv[2] << endl;
 	return TCL_ERROR;
@@ -1916,8 +1963,29 @@ removeObject(ClientData clientData, Tcl_Interp *interp, int argc,
       }
     }
 
+
+    else if (strcmp(argv[1],"loadPattern") == 0) {
+      if (argc < 3) {
+	interp->result = "WARNING want - remove loadPattern patternTag?\n";
+	return TCL_ERROR;
+      }    
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	cerr << "WARNING remove loadPattern tag? failed to read tag: " << argv[2] << endl;
+	return TCL_ERROR;
+      }      
+      LoadPattern *thePattern = theDomain.removeLoadPattern(tag);
+      if (thePattern != 0) {
+	delete thePattern;
+      }
+    }
+
+
+    else if (strcmp(argv[1],"recorders") == 0) {
+      theDomain.removeRecorders();
+    }
+
     else
-      cerr << "WARNING remove element tag? - only command available at the moment: " << endl;
+      cerr << "WARNING remove element, loadPattern - only commands  available at the moment: " << endl;
 
     return TCL_OK;
 }

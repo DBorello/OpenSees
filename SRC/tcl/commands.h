@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 06:03:23 $
+// $Revision: 1.3 $
+// $Date: 2001-02-17 06:40:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.h,v $
                                                                         
                                                                         
@@ -102,6 +102,11 @@ addDatabase(ClientData clientData, Tcl_Interp *interp, int argc, char **argv);
 int 
 playbackRecorders(ClientData clientData, Tcl_Interp *interp, int argc, 
 		  char **argv);
+
+int 
+playbackAlgorithmRecorders(ClientData clientData, Tcl_Interp *interp, int argc, 
+			   char **argv);
+
 int 
 groundExcitation(ClientData clientData, Tcl_Interp *interp, int argc, 
 		 char **argv);
