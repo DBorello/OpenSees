@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-07-26 01:36:57 $
+// $Revision: 1.9 $
+// $Date: 2001-09-21 20:29:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -222,7 +222,7 @@ OpenGLRenderer::startImage(void)
 	v(i) = vuv(i);
     }
 
-    if (n.Normalize() == 0) {
+    if (n.Normalize() != 0) {
 	cerr << "View::update() - VPN cannot have zero length\n";
 	return -1;
     }
@@ -232,7 +232,7 @@ OpenGLRenderer::startImage(void)
     u(1) = v(2)*n(0) - v(0)*n(2) ;
     u(2) = v(0)*n(1) - v(1)*n(0) ;
 
-    if (u.Normalize() == 0) {
+    if (u.Normalize() != 0) {
 	cerr << "View::update() - VUV X VPN cannot have zero length\n";
 	return -1;
     }
