@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-03-21 01:10:01 $
+// $Revision: 1.8 $
+// $Date: 2003-04-03 23:40:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -146,6 +146,30 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       return TCL_ERROR;
     }
     
+    int argi = 8;
+    int numIter = 0;
+    double tol = 0.0;
+    if (argc > argi) {
+      if (strcmp(argv[argi],"-iter") == 0) {
+	if (argc < argi+3) {
+	  opserr << "WARNING not enough -iter args need -iter numIter? tol?\n";
+	  opserr << "forceBeamColumn element: " << eleTag << endln;
+	  return TCL_ERROR;
+	}
+	if (Tcl_GetInt(interp, argv[argi+1], &numIter) != TCL_OK) {
+	  opserr << "WARNING invalid numIter\n";
+	  opserr << "forceBeamColumn element: " << eleTag << endln;
+	  return TCL_ERROR;
+	}
+	if (Tcl_GetDouble(interp, argv[argi+2], &tol) != TCL_OK) {
+	  opserr << "WARNING invalid numIter\n";
+	  opserr << "forceBeamColumn element: " << eleTag << endln;
+	  return TCL_ERROR;
+	}
+      }
+    }
+	
+      
     if (ndm == 2) {
       
       theTransf2d = theTclBuilder->getCrdTransf2d(transfTag);
@@ -178,12 +202,22 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     LobattoBeamIntegration beamIntegr;
 
 
-    if (ndm == 2)
-      theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
-					 beamIntegr, *theTransf2d);
-    else
-      theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
-					 beamIntegr, *theTransf3d);
+    if (ndm == 2) {
+      if (tol == 0.0)
+	theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
+					   beamIntegr, *theTransf2d);
+      else
+	theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
+					   beamIntegr, *theTransf2d, 0.0, numIter, tol);
+    }
+    else {
+      if (tol == 0.0)      
+	theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
+					   beamIntegr, *theTransf3d);
+      else
+	theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
+					   beamIntegr, *theTransf3d, 0.0, numIter, tol);
+    }
 
     delete [] sections;    
     if (theElement == 0) {
