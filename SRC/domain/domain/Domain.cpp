@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-10-19 23:10:28 $
+// $Revision: 1.9 $
+// $Date: 2001-11-26 23:01:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -663,7 +663,7 @@ Domain::addNodalLoad(NodalLoad *load, int pattern)
       return false;
     }
 
-    load->setDomain(this);    
+    // load->setDomain(this);    // done in LoadPattern::addNodalLoad()
     this->domainChange();
 
     return result;
@@ -705,7 +705,7 @@ Domain::addElementalLoad(ElementalLoad *load, int pattern)
     }
 
 
-    load->setDomain(this);
+    // load->setDomain(this); // done in LoadPattern::addElementalLoad()
     this->domainChange();
     return result;
 }
