@@ -19,7 +19,7 @@ set g   9.81
 set p   5.0
 set np -5.0
 set lf1 0.01
-set NN1 100
+set NN1 5
 # ################################
 # build the model
 # #################################
@@ -127,7 +127,7 @@ recorder Node node_z.out disp -time -node 5 -dof 3
 recorder Element 1 -file element.out force
 #recorder plot element.out "nodal force displ horizontal" 10 800 300 300 -columns 1 3
 
-set NN2 100
+set NN2 5
 set ndz -0.0001
 
 system UmfPack
