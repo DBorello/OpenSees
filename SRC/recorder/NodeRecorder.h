@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-19 23:09:44 $
+// $Revision: 1.3 $
+// $Date: 2002-04-02 18:49:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -44,6 +44,7 @@
 
 #include <fstream.h>
 class Domain;
+class FE_Datastore;
 
 class NodeRecorder: public Recorder
 {
@@ -52,6 +53,15 @@ class NodeRecorder: public Recorder
 		 const ID &theNodes, 
 		 Domain &theDomain,
 		 char *fileName,
+		 char *dataToStore,
+		 double deltaT = 0.0,
+		 int startFlag = 0); 
+
+    NodeRecorder(const ID &theDof, 
+		 const ID &theNodes, 
+		 Domain &theDomain,
+		 FE_Datastore *database,
+		 char *dbTable,
 		 char *dataToStore,
 		 double deltaT = 0.0,
 		 int startFlag = 0); 
@@ -68,14 +78,20 @@ class NodeRecorder: public Recorder
     ID theNodes;
     Vector disp;
     Domain *theDomain;
+
     int flag;   // flag indicating whether time, load factor or nothing printed
 	        // at start of each line in file
-    char theFileName[MAX_FILENAMELENGTH];    
+    char *fileName;
     ofstream theFile;     
+
     int dataFlag; // flag indicating what it is to be stored in recorder
-    
+
     double deltaT;
     double nextTimeStampToRecord;
+
+    FE_Datastore *db;
+    char **dbColumns;
+    int numDbColumns;
 };
 
 #endif

@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.6 $
-// $Date: 2002-01-06 19:59:17 $
+// $Revision: 1.7 $
+// $Date: 2002-04-02 18:49:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -44,6 +44,7 @@
 #include <Vector.h>
 #include <ID.h>
 #include <Matrix.h>
+#include <FE_Datastore.h>
 
 #include <iostream.h>
 #include <fstream.h>
@@ -52,19 +53,25 @@
 NodeRecorder::NodeRecorder(const ID &dofs, 
 			   const ID &nodes, 
 			   Domain &theDom,
-			   char *fileName,
+			   char *theFileName,
 			   char *dataToStore,
 			   double dT,
 			   int startFlag)
-:theDofs(dofs), theNodes(nodes), disp(nodes.Size()*dofs.Size()), 
-  theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0)
+:theDofs(dofs), theNodes(nodes), disp(1 + nodes.Size()*dofs.Size()), 
+  theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0), db(0), dbColumns(0)
 {
-  if (strlen(fileName) > MAX_FILENAMELENGTH) 
-    g3ErrorHandler->fatal("FileNodeDispRecorder::FileNodeDispREcorder - fileName too long %d max\n",
-		     MAX_FILENAMELENGTH);
+  // create char array to store file name
+  int fileNameLength = strlen(theFileName) + 1;
+  fileName = new char[fileNameLength];
+  if (fileName == 0) {
+    g3ErrorHandler->fatal("FileNodeDispRecorder::FileNodeDispRecorder - out of memory creating string %d long\n",
+			  fileNameLength);
+  }
 
-  strcpy(theFileName, fileName);    
-    
+  // copy the strings
+  strcpy(fileName, theFileName);    
+
+  // open the file
   theFile.open(fileName, ios::out);
   if (theFile.bad()) {
     cerr << "WARNING - FileNodeDispRecorder::FileNodeDispRecorder()";
@@ -96,10 +103,98 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   }
 }
 
+
+NodeRecorder::NodeRecorder(const ID &dofs, 
+			   const ID &nodes, 
+			   Domain &theDom,
+			   FE_Datastore *database,
+			   char *dbTable,
+			   char *dataToStore,
+			   double dT,
+			   int startFlag)
+:theDofs(dofs), theNodes(nodes), disp(1 + nodes.Size()*dofs.Size()), 
+  theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0), 
+  db(database), dbColumns(0)
+{
+
+  // create char array to store table name
+  int fileNameLength = strlen(dbTable) + 1;
+  fileName = new char[fileNameLength];
+  if (fileName == 0) {
+    g3ErrorHandler->fatal("FileNodeDispRecorder::FileNodeDispRecorder - out of memory creating string %d long\n",
+			  fileNameLength);
+  }
+
+  // copy the strings
+  strcpy(fileName, dbTable);
+
+  disp.Zero();
+
+  if ((strcmp(dataToStore, "disp") == 0)) {
+    dataFlag = 0;
+  } else if ((strcmp(dataToStore, "vel") == 0)) {
+    dataFlag = 1;
+  } else if ((strcmp(dataToStore, "accel") == 0)) {
+    dataFlag = 2;
+  } else if ((strcmp(dataToStore, "incrDisp") == 0)) {
+    dataFlag = 3;
+  } else if ((strcmp(dataToStore, "incrDeltaDisp") == 0)) {
+    dataFlag = 4;
+  } else if ((strncmp(dataToStore, "eigen",5) == 0)) {
+    int mode = atoi(&(dataToStore[5]));
+    if (mode > 0)
+      dataFlag = 10 + mode;
+    else
+      dataFlag = 6;
+  } else {
+    dataFlag = 6;
+    cerr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
+    cerr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
+  }
+
+  // now create the columns strings for the database
+  numDbColumns = 1 + nodes.Size()*dofs.Size();
+  dbColumns = new (char *)[numDbColumns];
+
+  char aColumn[256]; // assumes a column name will not be longer than 256 characters
+  
+  char *newColumn = new char[5];
+  sprintf(newColumn, "%s","time");  
+  dbColumns[0] = newColumn;
+  
+  int counter = 1;
+  for (int i=0; i<nodes.Size(); i++) {
+    int nodeTag = nodes(i);
+    for (int j=0; j<dofs.Size(); j++) {
+      int dof = dofs(j);
+      sprintf(aColumn, "%s_%d_%d",dataToStore,nodeTag,dof);
+      int lenColumn = strlen(aColumn+1);
+      char *newColumn = new char[lenColumn];
+      sprintf(newColumn, "%s",aColumn);
+      dbColumns[counter] = newColumn;
+      counter++;
+    }
+  }
+
+  // create the table in the database
+  db->createTable(dbTable, numDbColumns, dbColumns);
+}
+
+
 NodeRecorder::~NodeRecorder()
 {
     if (!theFile)
 	theFile.close();
+
+    if (fileName != 0)
+      delete fileName;
+
+    if (dbColumns != 0) {
+      for (int i=0; i<numDbColumns; i++)
+	delete [] dbColumns[i];
+      
+      delete [] dbColumns;
+    }
 }
 
 int 
@@ -108,14 +203,14 @@ NodeRecorder::record(int commitTag, double timeStamp)
     // now we go get the displacements from the nodes
     int numDOF = theDofs.Size();
     int numNodes = theNodes.Size();
-
+    
     if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
       
       if (deltaT != 0.0) 
 	nextTimeStampToRecord = timeStamp + deltaT;
 
       for (int i=0; i<numNodes; i++) {
-	int cnt = i*numDOF;
+	int cnt = i*numDOF + 1;
 	Node *theNode = theDomain->getNode(theNodes(i));
 	if (theNode != 0) {
 	  if (dataFlag == 0) {
@@ -197,20 +292,26 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	}
       }
 
-    
-      // now we write them to the file
-      if (flag == 1)
-	theFile << timeStamp << " ";
-      else if (flag == 2)
-	theFile << timeStamp << " ";
+      if (db == 0) {      
 
+	// write them to the file
+	if (flag == 1)
+	  theFile << timeStamp << " ";
+	else if (flag == 2)
+	  theFile << timeStamp << " ";
+	
+	for (int j=1; j<=numNodes*numDOF; j++)
+	  theFile << disp(j) << " ";
       
-      for (int j=0; j<numNodes*numDOF; j++)
-	theFile << disp(j) << " ";
-      
-      theFile << endl;
-      theFile.flush();
+	theFile << endl;
+	theFile.flush();
 
+      } else {
+
+	// insert the data into the database
+	disp(0) = timeStamp;
+	db->insertData(fileName, dbColumns, commitTag, disp);
+      }
     }    
 
     return 0;
@@ -230,10 +331,10 @@ NodeRecorder::playback(int commitTag)
   
   // open a stream for reading from the file
   ifstream inputFile;
-  inputFile.open(theFileName, ios::in);
+  inputFile.open(fileName, ios::in);
   if (inputFile.bad()) {
     cerr << "WARNING - FileNodeDispRecorder::playback() - could not open file ";
-    cerr << theFileName << endl;
+    cerr << fileName << endl;
     return -1;
   }   
 
@@ -260,10 +361,10 @@ NodeRecorder::playback(int commitTag)
   inputFile.close();
       
     // open file again for writing
-    theFile.open(theFileName, ios::app);
+    theFile.open(fileName, ios::app);
     if (theFile.bad()) {
       cerr << "WARNING - FileNodeDispRecorder::playback() - could not open file ";
-      cerr << theFileName << endl;
+      cerr << fileName << endl;
       return -1;
     }    
   
@@ -275,10 +376,10 @@ void
 NodeRecorder::restart(void)
 {
   theFile.close();
-  theFile.open(theFileName, ios::out);
+  theFile.open(fileName, ios::out);
   if (theFile.bad()) {
     cerr << "WARNING - FileNodeDispRecorder::restart() - could not open file ";
-    cerr << theFileName << endl;
+    cerr << fileName << endl;
   }
 }
 

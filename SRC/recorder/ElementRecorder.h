@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-10-19 23:09:43 $
+// $Revision: 1.4 $
+// $Date: 2002-04-02 18:49:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
                                                                         
@@ -51,12 +51,16 @@ class Vector;
 class Matrix;
 class Element;
 class Response;
+class FE_Datastore;
 
 class ElementRecorder: public Recorder
 {
   public:
     ElementRecorder(const ID &eleID, Domain &theDomain, char **argv, int argc,
 		    bool echoTime, double deltaT = 0.0, char *fileName =0);
+
+    ElementRecorder(const ID &eleID, Domain &theDomain, char **argv, int argc,
+		    bool echoTime, FE_Datastore *db, char *tableName, double deltaT = 0.0);
 
     ~ElementRecorder();
     int record(int commitTag, double timeStamp);
@@ -69,18 +73,23 @@ class ElementRecorder: public Recorder
   private:	
     int numEle;
     ID responseID;                 // integer element returns in setResponse
-    Information	*eleInfoObjects;  // object into whcih element places the response
+    Information	*eleInfoObjects;   // object into whcih element places the response
     Element **theElements;         // pointer to the elements
 
-	Response **theResponses;
+    Response **theResponses;
 
     Domain *theDomain;
-    bool echoTimeFlag;     // flag indicating if pseudo time also printed
-    char theFileName[MAX_FILENAMELENGTH];  // file name  
-    ofstream theFile; 	   // output stream
+    bool echoTimeFlag;             // flag indicating if pseudo time also printed
+    char *fileName;                // file name  
+    ofstream theFile; 	           // output stream
 
     double deltaT;
     double nextTimeStampToRecord;
+
+    FE_Datastore *db;
+    char **dbColumns;
+    int numDbColumns;
+    Vector *data;
 };
 
 
