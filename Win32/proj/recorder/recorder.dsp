@@ -95,6 +95,10 @@ SOURCE=..\..\..\SRC\recorder\DatastoreRecorder.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\recorder\DriftRecorder.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\recorder\ElementRecorder.cpp
 # End Source File
 # Begin Source File
@@ -124,6 +128,10 @@ SOURCE=..\..\..\SRC\recorder\AlgorithmIncrements.h
 # Begin Source File
 
 SOURCE=..\..\..\SRC\recorder\DatastoreRecorder.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\recorder\DriftRecorder.h
 # End Source File
 # Begin Source File
 
