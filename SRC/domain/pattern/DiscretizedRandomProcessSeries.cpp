@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-03-06 18:08:30 $
+// $Revision: 1.3 $
+// $Date: 2003-03-10 21:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/DiscretizedRandomProcessSeries.cpp,v $
 
 
@@ -242,25 +242,36 @@ DiscretizedRandomProcessSeries::setParameter (const char **argv, int argc, Infor
 		int nrv = kickInTimes->Size();
 
 
-		// Loop over all modulating functions
+		// Loop over modulating functions
 		double denominator = 0.0;
 		for (int k=0; k<numModFuncs; k++) {
 
 			// Get value of modulating function number k at time t
 			Filter *theFilter_k = theModulatingFunctions[k]->getFilter();
 			double modFuncAmplitude_k = theModulatingFunctions[k]->getAmplitude(maxStdvTime);
+	
 			
+			// Loop over modulating functions
+			for (int l=0; l<numModFuncs; l++) {
 
-			// Loop over all rv's (even though some may be zero at this time)
-			double sum2 = 0.0;
-			for (int i=0; i<nrv; i++) {
 
-				// Get value of filter for argument (t-ti)
-				double filterAmplitude_k = theFilter_k->getAmplitude(maxStdvTime-(*kickInTimes)(i));
-				
-				// Add contribution 'ui * hi'
-				denominator += filterAmplitude_k*filterAmplitude_k
-					         * modFuncAmplitude_k*modFuncAmplitude_k;
+				// Get value of modulating function number l at time t
+				Filter *theFilter_l = theModulatingFunctions[l]->getFilter();
+				double modFuncAmplitude_l = theModulatingFunctions[l]->getAmplitude(maxStdvTime);
+
+
+				// Loop over all rv's (even though some may be zero at this time)
+				double sum2 = 0.0;
+				for (int i=0; i<nrv; i++) {
+
+					// Get value of filters for argument (t-ti)
+					double filterAmplitude_k = theFilter_k->getAmplitude(maxStdvTime-(*kickInTimes)(i));
+					double filterAmplitude_l = theFilter_l->getAmplitude(maxStdvTime-(*kickInTimes)(i));
+					
+					// Add contribution 'ui * hi'
+					denominator += filterAmplitude_k*filterAmplitude_l
+								 * modFuncAmplitude_k*modFuncAmplitude_l;
+				}
 			}
 		}
 
