@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2001-02-17 06:32:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectSolver.cpp,v $
                                                                         
                                                                         
@@ -214,12 +214,12 @@ ProfileSPDLinDirectSolver::solve(void)
 	    }
 	    
 	    // check that the diag > the tolerance specified
-	    if (aii <= 0.0) {
+	    if (aii == 0.0) {
 		cerr << "ProfileSPDLinDirectSolver::solve() - ";
 		cerr << " aii < 0 (i, aii): (" << i << ", " << aii << ")\n"; 
 		return(-2);
 	    }
-	    if (aii <= minDiagTol) {
+	    if (fabs(aii) <= minDiagTol) {
 		cerr << "ProfileSPDLinDirectSolver::solve() - ";
 		cerr << " aii < minDiagTol (i, aii): (" << i;
 		cerr << ", " << aii << ")\n"; 
@@ -295,6 +295,17 @@ ProfileSPDLinDirectSolver::solve(void)
     */
     
     return 0;
+}
+
+double
+ProfileSPDLinDirectSolver::getDeterminant(void) 
+{
+   int theSize = theSOE->size;
+   double determinant = 1.0;
+   for (int i=0; i<theSize; i++)
+     determinant *= invD[i];
+   determinant = 1.0/determinant;
+   return determinant;
 }
 
 int 

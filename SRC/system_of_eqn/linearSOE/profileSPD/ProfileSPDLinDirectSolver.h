@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2001-02-17 06:32:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/profileSPD/ProfileSPDLinDirectSolver.h,v $
                                                                         
                                                                         
@@ -50,7 +50,9 @@ class ProfileSPDLinDirectSolver : public ProfileSPDLinSolver
 
     virtual int solve(void);        
     virtual int setSize(void);    
+    double getDeterminant(void);
 
+    
     virtual int factor(int n);
     virtual int setProfileSOE(ProfileSPDLinSOE &theSOE);
 

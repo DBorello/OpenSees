@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2001-02-17 06:32:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/LinearSOESolver.h,v $
                                                                         
                                                                         
@@ -52,7 +52,8 @@ class LinearSOESolver : public Solver
     virtual int solve(void) = 0;
 //    virtual int setLinearSOE(LinearSOE &theSOE) =0;
     virtual int setSize(void) = 0;
-
+    virtual double getDeterminant(void) {return 1.0;};
+    
   protected:
     
   private:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:27 $
+// $Revision: 1.2 $
+// $Date: 2001-02-17 06:32:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/LinearSOE.h,v $
                                                                         
                                                                         
@@ -75,6 +75,7 @@ class LinearSOE : public SystemOfEqn
 
     virtual const Vector &getX(void) = 0;
     virtual const Vector &getB(void) = 0;    
+    virtual double getDeterminant(void);
     virtual double normRHS(void) = 0;
 
     virtual void setX(int loc, double value) =0;
