@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-08-15 15:52:13 $
+// $Revision: 1.2 $
+// $Date: 2001-08-18 21:42:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/DrainMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -303,8 +303,20 @@ DrainMaterial::Print(ostream &s, int flag)
 	case MAT_TAG_DrainHardening:
 		s << "Hardening" << endl;
 		break;
-
+	case MAT_TAG_DrainBilinear:
+		s << "Bilinear" << endl;
+		break;
+	case MAT_TAG_DrainClough1:
+		s << "Clough1" << endl;
+		break;
+	case MAT_TAG_DrainClough2:
+		s << "Clough2" << endl;
+		break;
+	case MAT_TAG_DrainPinch1:
+		s << "Pinch1" << endl;
+		break;
 	// Add more cases as needed
+
 	default:
 		s << "Material identifier = " << this->getClassTag() << endl;
 		break;
@@ -313,6 +325,7 @@ DrainMaterial::Print(ostream &s, int flag)
 
 #ifdef _WIN32
 
+// Declarations for the Hardening subroutines
 extern "C" int _stdcall FILL00(double *data, double *hstv, double *stateP);
 extern "C" int _stdcall RESP00(int *kresis, int *ksave, int *kgem, int *kstep,
 							   int *ndof, int *kst, int *kenr,
@@ -327,8 +340,80 @@ extern "C" int _stdcall GET00(double *hstv);
 #define stif00_		STIF00
 #define get00_		GET00
 
+
+// I don't know which subroutines to call, so fill in the XX for Bilinear later -- MHS
+// Declarations for the Bilinear subroutines
+//extern "C" int _stdcall FILLXX(double *data, double *hstv, double *stateP);
+//extern "C" int _stdcall RESPXX(int *kresis, int *ksave, int *kgem, int *kstep,
+//							   int *ndof, int *kst, int *kenr,
+//							   double *ener, double *ened, double *enso, double *beto,
+//							   double *relas, double *rdamp, double *rinit,
+//							   double *ddise, double *dise, double *vele);
+//extern "C" int _stdcall STIFXX(int *kstt, int *ktype, int *ndof, double *fk);
+//extern "C" int _stdcall GETXX(double *hstv);
+
+//#define fillXX_		FILLXX
+//#define respXX_		RESPXX
+//#define stifXX_		STIFXX
+//#define getXX_		GETXX
+
+
+// I don't know which subroutines to call, so fill in the XX for Clough1 later -- MHS
+// Declarations for the Clough1 subroutines
+//extern "C" int _stdcall FILLXX(double *data, double *hstv, double *stateP);
+//extern "C" int _stdcall RESPXX(int *kresis, int *ksave, int *kgem, int *kstep,
+//							   int *ndof, int *kst, int *kenr,
+//							   double *ener, double *ened, double *enso, double *beto,
+//							   double *relas, double *rdamp, double *rinit,
+//							   double *ddise, double *dise, double *vele);
+//extern "C" int _stdcall STIFXX(int *kstt, int *ktype, int *ndof, double *fk);
+//extern "C" int _stdcall GETXX(double *hstv);
+
+//#define fillXX_		FILLXX
+//#define respXX_		RESPXX
+//#define stifXX_		STIFXX
+//#define getXX_		GETXX
+
+
+// I don't know which subroutines to call, so fill in the XX for Clough2 later -- MHS
+// Declarations for the Clough2 subroutines
+//extern "C" int _stdcall FILLXX(double *data, double *hstv, double *stateP);
+//extern "C" int _stdcall RESPXX(int *kresis, int *ksave, int *kgem, int *kstep,
+//							   int *ndof, int *kst, int *kenr,
+//							   double *ener, double *ened, double *enso, double *beto,
+//							   double *relas, double *rdamp, double *rinit,
+//							   double *ddise, double *dise, double *vele);
+//extern "C" int _stdcall STIFXX(int *kstt, int *ktype, int *ndof, double *fk);
+//extern "C" int _stdcall GETXX(double *hstv);
+
+//#define fillXX_		FILLXX
+//#define respXX_		RESPXX
+//#define stifXX_		STIFXX
+//#define getXX_		GETXX
+
+
+// I don't know which subroutines to call, so fill in the XX for Pinch1 later -- MHS
+// Declarations for the Pinch1 subroutines
+//extern "C" int _stdcall FILLXX(double *data, double *hstv, double *stateP);
+//extern "C" int _stdcall RESPXX(int *kresis, int *ksave, int *kgem, int *kstep,
+//							   int *ndof, int *kst, int *kenr,
+//							   double *ener, double *ened, double *enso, double *beto,
+//							   double *relas, double *rdamp, double *rinit,
+//							   double *ddise, double *dise, double *vele);
+//extern "C" int _stdcall STIFXX(int *kstt, int *ktype, int *ndof, double *fk);
+//extern "C" int _stdcall GETXX(double *hstv);
+
+//#define fillXX_		FILLXX
+//#define respXX_		RESPXX
+//#define stifXX_		STIFXX
+//#define getXX_		GETXX
+
+
+// Add more declarations as needed
+
 #else
 
+// Declarations for the Hardening subroutines
 extern "C" int fill00_(double *data, double *hstv, double *stateP);
 extern "C" int resp00_(int *kresis, int *ksave, int *kgem, int *kstep,
 								int *ndof, int *kst, int *kenr,
@@ -337,6 +422,57 @@ extern "C" int resp00_(int *kresis, int *ksave, int *kgem, int *kstep,
 								double *ddise, double *dise, double *vele);
 extern "C" int stif00_(int *kstt, int *ktype, int *ndof, double *fk);
 extern "C" int get00_(double *hstv);
+
+
+// I don't know which subroutines to call, so fill in the XX for Bilinear later -- MHS
+// Declarations for the Bilinear subroutines
+//extern "C" int fillXX_(double *data, double *hstv, double *stateP);
+//extern "C" int respXX_(int *kresis, int *ksave, int *kgem, int *kstep,
+//								int *ndof, int *kst, int *kenr,
+//								double *ener, double *ened, double *enso, double *beto,
+//								double *relas, double *rdamp, double *rinit,
+//								double *ddise, double *dise, double *vele);
+//extern "C" int stifXX_(int *kstt, int *ktype, int *ndof, double *fk);
+//extern "C" int getXX_(double *hstv);
+
+
+// I don't know which subroutines to call, so fill in the XX for Clough1 later -- MHS
+// Declarations for the Clough1 subroutines
+//extern "C" int fillXX_(double *data, double *hstv, double *stateP);
+//extern "C" int respXX_(int *kresis, int *ksave, int *kgem, int *kstep,
+//								int *ndof, int *kst, int *kenr,
+//								double *ener, double *ened, double *enso, double *beto,
+//								double *relas, double *rdamp, double *rinit,
+//								double *ddise, double *dise, double *vele);
+//extern "C" int stifXX_(int *kstt, int *ktype, int *ndof, double *fk);
+//extern "C" int getXX_(double *hstv);
+
+
+// I don't know which subroutines to call, so fill in the XX for Clough2 later -- MHS
+// Declarations for the Clough2 subroutines
+//extern "C" int fillXX_(double *data, double *hstv, double *stateP);
+//extern "C" int respXX_(int *kresis, int *ksave, int *kgem, int *kstep,
+//								int *ndof, int *kst, int *kenr,
+//								double *ener, double *ened, double *enso, double *beto,
+//								double *relas, double *rdamp, double *rinit,
+//								double *ddise, double *dise, double *vele);
+//extern "C" int stifXX_(int *kstt, int *ktype, int *ndof, double *fk);
+//extern "C" int getXX_(double *hstv);
+
+
+// I don't know which subroutines to call, so fill in the XX for Pinch1 later -- MHS
+// Declarations for the Pinch1 subroutines
+//extern "C" int fillXX_(double *data, double *hstv, double *stateP);
+//extern "C" int respXX_(int *kresis, int *ksave, int *kgem, int *kstep,
+//								int *ndof, int *kst, int *kenr,
+//								double *ener, double *ened, double *enso, double *beto,
+//								double *relas, double *rdamp, double *rinit,
+//								double *ddise, double *dise, double *vele);
+//extern "C" int stifXX_(int *kstt, int *ktype, int *ndof, double *fk);
+//extern "C" int getXX_(double *hstv);
+
+
+// Add more declarations as needed
 
 #endif
 
@@ -409,7 +545,56 @@ DrainMaterial::invokeSubroutine(void)
 		get00_(&hstv[numHstv]);
 		break;
 
+	case MAT_TAG_DrainBilinear:
+		// I don't know which subroutines to call, so fill in the XX for Bilinear later -- MHS
+		g3ErrorHandler->fatal("%s -- Bilinear subroutine not yet linked",
+			"DrainMaterial::invokeSubroutine"); 
+
+		//fillXX_(data, hstv, stateP);
+		//respXX_(&kresis, &ksave, &kgem, &kstep, &ndof, &kst, &kenr,
+		//	&ener, &ened, &enso, &beto, relas, rdamp, rinit, ddise, dise, vele);
+		//stifXX_(&kstt, &ktype, &ndof, fk);
+		//getXX_(&hstv[numHstv]);
+		break;
+
+	case MAT_TAG_DrainClough1:
+		// I don't know which subroutines to call, so fill in the XX for Clough1 later -- MHS
+		g3ErrorHandler->fatal("%s -- Clough1 subroutine not yet linked",
+			"DrainMaterial::invokeSubroutine"); 
+
+		//fillXX_(data, hstv, stateP);
+		//respXX_(&kresis, &ksave, &kgem, &kstep, &ndof, &kst, &kenr,
+		//	&ener, &ened, &enso, &beto, relas, rdamp, rinit, ddise, dise, vele);
+		//stifXX_(&kstt, &ktype, &ndof, fk);
+		//getXX_(&hstv[numHstv]);
+		break;
+
+	case MAT_TAG_DrainClough2:
+		// I don't know which subroutines to call, so fill in the XX for Clough2 later -- MHS
+		g3ErrorHandler->fatal("%s -- Clough2 subroutine not yet linked",
+			"DrainMaterial::invokeSubroutine"); 
+		
+		//fillXX_(data, hstv, stateP);
+		//respXX_(&kresis, &ksave, &kgem, &kstep, &ndof, &kst, &kenr,
+		//	&ener, &ened, &enso, &beto, relas, rdamp, rinit, ddise, dise, vele);
+		//stifXX_(&kstt, &ktype, &ndof, fk);
+		//getXX_(&hstv[numHstv]);
+		break;
+
+	case MAT_TAG_DrainPinch1:
+		// I don't know which subroutines to call, so fill in the XX for Pinch1 later -- MHS
+		g3ErrorHandler->fatal("%s -- Pinch1 subroutine not yet linked",
+			"DrainMaterial::invokeSubroutine"); 
+		
+		//fillXX_(data, hstv, stateP);
+		//respXX_(&kresis, &ksave, &kgem, &kstep, &ndof, &kst, &kenr,
+		//	&ener, &ened, &enso, &beto, relas, rdamp, rinit, ddise, dise, vele);
+		//stifXX_(&kstt, &ktype, &ndof, fk);
+		//getXX_(&hstv[numHstv]);
+		break;
+
 	// Add more cases as needed
+
 	default:
 		g3ErrorHandler->fatal("%s -- unknown material type",
 			"DrainMaterial::invokeSubroutine");
