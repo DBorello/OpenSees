@@ -4,8 +4,9 @@ OBJS       = NDMaterial.o ElasticIsotropic3D.o ElasticIsotropicMaterial.o \
 	ElasticIsotropicPlaneStrain2D.o ElasticIsotropicPlaneStress2D.o \
 	ElasticIsotropicPlateFiber.o ElasticIsotropicAxiSymm.o\
 	TclModelBuilderNDMaterialCommand.o J2PlaneStrain.o \
+	PlateFiberMaterial.o PlaneStressMaterial.o \
 	J2PlaneStress.o  J2Plasticity.o J2AxiSymm.o J2ThreeDimensional.o \
-	BidirectionalMaterial.o J2PlateFiber.o  PressureDependentElastic3D.o
+	BidirectionalMaterial.o J2PlateFiber.o PressureDependentElastic3D.o
 
 
 TEMPLATE_OBJS =              \
