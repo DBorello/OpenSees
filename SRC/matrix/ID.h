@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-12 07:14:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/ID.h,v $
                                                                         
                                                                         
@@ -115,3 +115,5 @@ ID::operator()(int x) const
 }
 
 #endif
+
+

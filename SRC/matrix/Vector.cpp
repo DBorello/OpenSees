@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-18 05:31:24 $
+// $Revision: 1.3 $
+// $Date: 2000-12-12 07:14:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -149,7 +149,7 @@ Vector::~Vector()
 int 
 Vector::setData(double *newData, int size){
   if (sz != 0 && fromFree == 0) 
-    free((void *)theData);
+    delete [] theData;      
   sz = size;
   theData = newData;
   fromFree = 1;
@@ -178,7 +178,7 @@ Vector::resize(int newSize){
 
     // delete the old array
     if (sz != 0 && fromFree == 0) 
-      free((void *)theData);
+	delete [] theData;
     sz = 0;
     fromFree = 0;
     
@@ -190,6 +190,7 @@ Vector::resize(int newSize){
       sz = 0;
       return -2;
     }
+    sz = newSize;
   }  
 
   // just set the size to be newSize .. penalty of holding onto additional

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-18 05:29:52 $
+// $Revision: 1.3 $
+// $Date: 2000-12-12 07:14:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -190,7 +190,9 @@ Matrix::resize(int rows, int cols) {
       numRows = 0; numCols =0; dataSize = 0;
       return -2;
     }
-
+    dataSize = newSize;
+    numRows = rows;
+    numCols = cols;
   }
 
   // just reset the cols and rows - save two memory calls at expense of holding 
