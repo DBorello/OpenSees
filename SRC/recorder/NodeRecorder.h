@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2004-01-29 23:30:30 $
+// $Revision: 1.9 $
+// $Date: 2004-05-11 00:07:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
                                                                         
 #ifndef NodeRecorder_h
@@ -68,7 +68,8 @@ class NodeRecorder: public Recorder
 		 const char *dbTable,
 		 const char *dataToStore,
 		 double deltaT = 0.0,
-		 int startFlag = 0); 
+		 int startFlag = 0,
+		 bool invokeDatabaseDestructor = false); 
     
     ~NodeRecorder();
     int record(int commitTag, double timeStamp);
@@ -97,6 +98,7 @@ class NodeRecorder: public Recorder
     char **dbColumns;
     int numDbColumns;
 
+    bool destroyDatabase;
     // AddingSensitivity:BEGIN //////////////////////////////
     int sensitivity;
     // AddingSensitivity:END ////////////////////////////////

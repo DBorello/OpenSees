@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2004-01-29 23:30:29 $
+// $Revision: 1.9 $
+// $Date: 2004-05-11 00:07:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
                                                                         
@@ -59,7 +59,8 @@ class ElementRecorder: public Recorder
 		    bool echoTime, double deltaT = 0.0, const char *fileName =0);
 
     ElementRecorder(const ID &eleID, Domain &theDomain, const char **argv, int argc,
-		    bool echoTime, FE_Datastore *db, const char *tableName, double deltaT = 0.0);
+		    bool echoTime, FE_Datastore *db, const char *tableName, double deltaT = 0.0,
+		    bool invokeDatabaseDestructor = false);
 
     ~ElementRecorder();
     int record(int commitTag, double timeStamp);
@@ -87,6 +88,8 @@ class ElementRecorder: public Recorder
     char **dbColumns;
     int numDbColumns;
     Vector *data;
+
+    bool destroyDatabase;
 };
 
 

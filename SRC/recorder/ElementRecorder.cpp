@@ -18,14 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2004-02-19 01:06:27 $
+// $Revision: 1.16 $
+// $Date: 2004-05-11 00:07:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
 // Written: fmk 
 // Created: 09/99
-// Revision: A
 //
 // Description: This file contains the class implementatation of ElementRecorder.
 //
@@ -50,8 +49,8 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
 				 const char **argv, int argc,
 				 bool echoTime, double dT, const char *theFileName)
 :numEle(eleID.Size()), responseID(eleID.Size()), theDomain(&theDom),
- echoTimeFlag(echoTime), deltaT(dT), nextTimeStampToRecord(0.0), 
- db(0), dbColumns(0), numDbColumns(0), data(0)
+ echoTimeFlag(echoTime), fileName(0), deltaT(dT), nextTimeStampToRecord(0.0), 
+ db(0), dbColumns(0), numDbColumns(0), data(0), destroyDatabase(false)
 {
   theResponses = new Response *[numEle];
   for (int j=0; j<numEle; j++)
@@ -71,7 +70,6 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
 
   // if file is specified, copy name and open the file
   if (theFileName != 0) {
-
     // create char array to store file name
     int fileNameLength = strlen(theFileName) + 1;
     fileName = new char[fileNameLength];
@@ -90,7 +88,6 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
       opserr << "WARNING - ElementRecorder::ElementRecorder()";
       opserr << " - could not open file " << fileName << endln;
     }    
-
   }
   
   // no file .. results will be sent to opserr
@@ -104,10 +101,12 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
 				 bool echoTime, 
 				 FE_Datastore *database, 
 				 const char *tableName, 
-				 double dT)
+				 double dT,
+				 bool invokeDatabaseDestructor)
 :numEle(eleID.Size()), responseID(eleID.Size()), theDomain(&theDom),
- echoTimeFlag(echoTime), deltaT(dT), nextTimeStampToRecord(0.0), 
- db(database), dbColumns(0), numDbColumns(0), data(0)
+ echoTimeFlag(echoTime), fileName(0), deltaT(dT), nextTimeStampToRecord(0.0), 
+ db(database), dbColumns(0), numDbColumns(0), data(0), 
+ destroyDatabase(invokeDatabaseDestructor)
 {
 
   numDbColumns = 0;
@@ -139,27 +138,32 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   }
 
   // create char array to store table name
-  int fileNameLength = strlen(tableName) + 1;
-  fileName = new char[fileNameLength];
-  if (fileName == 0) {
+  if (db != 0 && tableName != 0) {
+    int fileNameLength = strlen(tableName) + 1;
+    fileName = new char[fileNameLength];
+    if (fileName == 0) {
       opserr << "ElementRecorder::ElementRecorder - out of memory creating string " <<
 	fileNameLength << " long\n";
       exit(-1);
+    }
+    
+    // copy the strings
+    strcpy(fileName, tableName);    
+  } else {
+    db = 0;
+    fileName = 0;
   }
-
-  // copy the strings
-  strcpy(fileName, tableName);    
 
   // now create the columns strings for the database
   // for each element do a getResponse() & print the result
   dbColumns = new char *[numDbColumns];
-
+  
   static char aColumn[1012]; // assumes a column name will not be longer than 256 characters
   
   char *newColumn = new char[5];
   sprintf(newColumn, "%s","time");  
   dbColumns[0] = newColumn;
-
+  
   int lengthString = 0;
   for (i=0; i<argc; i++)
     lengthString += strlen(argv[i])+1;
@@ -175,7 +179,7 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
     } else
       lengthString += argLength+1;
   }
-
+  
   int counter = 1;
   for (i=0; i<eleID.Size(); i++) {
     int eleTag = eleID(i);
@@ -193,12 +197,12 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
 	dbColumns[counter] = newColumn;
 	counter++;
       }
-
+      
       else if (eleInfo.theType == VectorType) 
 	numVariables = eleInfo.theVector->Size();
       else if (eleInfo.theType == IdType) 
 	numVariables = eleInfo.theID->Size();
-
+      
       // create the column headings for multiple data for the element
       for (int j=1; j<=numVariables; j++) {
 	sprintf(aColumn, "Element%d_%s_%d",eleTag, dataToStore, j);
@@ -220,12 +224,12 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   }
 
   // create the table in the database
-  if (db != 0)
+  if (db != 0 && fileName != 0)
     db->createTable(fileName, numDbColumns, dbColumns);
   else {
     opserr << "ElementRecorder::ElementRecorder - database pointer is NULL\n";
   }
-
+  
   // create the vector to hold the data
   data = new Vector(numDbColumns);
 }
@@ -252,6 +256,9 @@ ElementRecorder::~ElementRecorder()
 
       delete [] dbColumns;
   }
+
+  if (destroyDatabase == true && db != 0)
+    delete db;
 }
 
 
@@ -318,12 +325,10 @@ ElementRecorder::record(int commitTag, double timeStamp)
 	  if (( res = theResponses[i]->getResponse()) < 0)
 	    result = res;
 	  else {
-	    // print results to file or stderr depending on whether
-	    // a file was opened
 	    Information &eleInfo = theResponses[i]->getInformation();
 	    const Vector &eleData = eleInfo.getData();
 	    for (int j=0; j<eleData.Size(); j++)
-	      (*data)(loc++) = eleData(i);
+	      (*data)(loc++) = eleData(j);
 	  }
 	} 
       }

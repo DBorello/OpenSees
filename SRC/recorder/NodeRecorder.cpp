@@ -18,15 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-
-
-// $Revision: 1.16 $
-// $Date: 2004-01-29 23:30:30 $
+// $Revision: 1.17 $
+// $Date: 2004-05-11 00:07:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
-
 // Written: fmk 
-// Created: 11/98
 //
 // Description: This file contains the class definition for NodeRecorder.
 // A NodeRecorder is used to record the specified dof responses 
@@ -60,11 +56,13 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   double dT,
 			   int startFlag)
 :theDofs(0), theNodes(0), disp(1 + nodes.Size()*dofs.Size()), 
- theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0), 
- db(0), dbColumns(0), numDbColumns(0), sensitivity(psensitivity){
+ theDomain(&theDom), flag(startFlag), fileName(0), dataFlag(0), 
+ deltaT(dT), nextTimeStampToRecord(0.0), 
+ db(0), dbColumns(0), numDbColumns(0), destroyDatabase(false), sensitivity(psensitivity){
   // verify dof are valid 
   int numDOF = dofs.Size();
   theDofs = new ID(0, numDOF);
+
 
   int count = 0;
   int i;
@@ -95,27 +93,31 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   }
 
   // create char array to store file name
-  int fileNameLength = strlen(theFileName) + 1;
-  fileName = new char[fileNameLength];
-  if (fileName == 0) {
-    opserr << "NodeRecorder::NodeRecorder - out of memory creating string of size: " <<
-      fileNameLength << endln;
-    exit(-1);
+  if (theFileName != 0) {
+    int fileNameLength = strlen(theFileName) + 1;
+    fileName = new char[fileNameLength];
+    if (fileName == 0) {
+      opserr << "NodeRecorder::NodeRecorder - out of memory creating string of size: " <<
+	fileNameLength << endln;
+      exit(-1);
+    }
+    
+    // copy the strings
+    strcpy(fileName, theFileName);    
+
+    // open the file
+    theFile.open(fileName, ios::out);
+    if (theFile.bad()) {
+      opserr << "WARNING - NodeRecorder::NodeRecorder()";
+      opserr << " - could not open file " << fileName << endln;
+      delete [] fileName;
+      fileName = 0;
+    }
   }
-
-  // copy the strings
-  strcpy(fileName, theFileName);    
-
-  // open the file
-  theFile.open(fileName, ios::out);
-  if (theFile.bad()) {
-    opserr << "WARNING - NodeRecorder::NodeRecorder()";
-    opserr << " - could not open file " << fileName << endln;
-  }    
 
   disp.Zero();
 
-  if ((strcmp(dataToStore, "disp") == 0)) {
+  if (dataToStore == 0 || (strcmp(dataToStore, "disp") == 0)) {
     dataFlag = 0;
   } else if ((strcmp(dataToStore, "vel") == 0)) {
     dataFlag = 1;
@@ -136,7 +138,6 @@ NodeRecorder::NodeRecorder(const ID &dofs,
     opserr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
     opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
   }
-
 }
 
 
@@ -148,10 +149,12 @@ NodeRecorder::NodeRecorder(const ID &dofs,
 			   const char *dbTable,
 			   const char *dataToStore,
 			   double dT,
-			   int startFlag)
+			   int startFlag,
+			   bool invokeDatabaseDestructor )
 :theDofs(0), theNodes(0), disp(1 + nodes.Size()*dofs.Size()), 
-  theDomain(&theDom), flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0), 
- db(database), dbColumns(0), numDbColumns(0), sensitivity(psensitivity)
+ theDomain(&theDom), flag(startFlag), fileName(0), dataFlag(0), 
+ deltaT(dT), nextTimeStampToRecord(0.0), 
+ db(database), dbColumns(0), numDbColumns(0), destroyDatabase(invokeDatabaseDestructor), sensitivity(psensitivity)
 {
   // verify dof are valid 
   int numDOF = dofs.Size();
@@ -165,8 +168,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
       (*theDofs)[count] = dof;
       count++;
     } else {
-      opserr << "NodeRecorder::NodeRecorder - invalid dof  " << dof;
-      opserr << " will be ignored\n";
+      opserr << "NodeRecorder::NodeRecorder - invalid dof  " << dof << " will be ignored\n";
     }
   }
 
@@ -187,19 +189,25 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   }
 
   // create char array to store table name
-  int fileNameLength = strlen(dbTable) + 1;
-  fileName = new char[fileNameLength];
-  if (fileName == 0) {
-    opserr << "NodeRecorder::NodeRecorder - out of memory creating string of size: " << 
-      fileNameLength << endln;
-  }
+  if (dbTable != 0) {
+    int fileNameLength = strlen(dbTable) + 1;
+    fileName = new char[fileNameLength];
+    if (fileName == 0) {
+      opserr << "NodeRecorder::NodeRecorder - out of memory creating string of size: " << 
+	fileNameLength << endln;
+      db = 0;
+    }
 
-  // copy the strings
-  strcpy(fileName, dbTable);
+    // copy the strings
+    strcpy(fileName, dbTable);
+  } else {
+    fileName = 0;
+    db = 0;
+  }
 
   disp.Zero();
 
-  if ((strcmp(dataToStore, "disp") == 0)) {
+  if (dataToStore == 0 || (strcmp(dataToStore, "disp") == 0)) {
     dataFlag = 0;
   } else if ((strcmp(dataToStore, "vel") == 0)) {
     dataFlag = 1;
@@ -222,31 +230,36 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   }
 
   // now create the columns strings for the database
-  numDbColumns = 1 + nodes.Size()*dofs.Size();
-  dbColumns = new char *[numDbColumns];
 
-  static char aColumn[256]; // assumes a column name will not be longer than 256 characters
-  
-  char *newColumn = new char[5];
-  sprintf(newColumn, "%s","time");  
-  dbColumns[0] = newColumn;
-
-  int counter = 1;
-  for (i=0; i<theNodes->Size(); i++) {
-    int nodeTag = (*theNodes)(i);
-    for (int j=0; j<theDofs->Size(); j++) {
-      int dof = (*theDofs)(j);
-      sprintf(aColumn, "Node%d_%s_%d", nodeTag, dataToStore, dof);
-      int lenColumn = strlen(aColumn);
-      char *newColumn = new char[lenColumn+1];
-      strcpy(newColumn, aColumn);
-      dbColumns[counter] = newColumn;
-      counter++;
+  if (fileName != 0 && db != 0) {
+    numDbColumns = 1 + nodes.Size()*dofs.Size();
+    dbColumns = new char *[numDbColumns];
+    
+    static char aColumn[256]; // assumes a column name will not be longer than 256 characters
+    
+    char *newColumn = new char[5];
+    sprintf(newColumn, "%s","time");  
+    dbColumns[0] = newColumn;
+    
+    int counter = 1;
+    for (i=0; i<theNodes->Size(); i++) {
+      int nodeTag = (*theNodes)(i);
+      for (int j=0; j<theDofs->Size(); j++) {
+	int dof = (*theDofs)(j);
+	sprintf(aColumn, "Node%d_%s_%d", nodeTag, dataToStore, dof+1);
+	int lenColumn = strlen(aColumn);
+	char *newColumn = new char[lenColumn+1];
+	strcpy(newColumn, aColumn);
+	dbColumns[counter] = newColumn;
+	counter++;
+      }
     }
-  }
-  
-  // create the table in the database
-  db->createTable(dbTable, numDbColumns, dbColumns);
+    
+    // create the table in the database
+    db->createTable(dbTable, numDbColumns, dbColumns);
+
+  } else 
+    opserr << "NodeRecorder::NodeRecorder - no database or table name supplied, standard out will be used instead!\n";
 }
 
 
@@ -271,7 +284,9 @@ NodeRecorder::~NodeRecorder()
 
       delete [] dbColumns;
   }
-  
+
+  if (destroyDatabase == true && db != 0)
+    delete db;
 }
 
 int 
@@ -379,31 +394,50 @@ NodeRecorder::record(int commitTag, double timeStamp)
 	}
       }
 
-      if (db == 0) {      
+
+      if (fileName == 0 && db == 0) {      
+
+	// write them to opserr
+	if (flag == 1)
+	  opserr << timeStamp << " ";
+	else if (flag == 2)
+	  opserr << timeStamp << " ";
+	
+	for (int j=1; j<=numNodes*numDOF; j++) {
+	  char outputstring[50];
+	  sprintf(outputstring,"%26.16e",disp(j));
+	  opserr << outputstring << " ";
+	}
+	
+	opserr << endln;
+	
+      } else if (fileName != 0 && db == 0) {
+
 	// write them to the file
 	if (flag == 1)
 	  theFile << timeStamp << " ";
 	else if (flag == 2)
 	  theFile << timeStamp << " ";
 	
-// AddingSensitivity:BEGIN ///////////////////////////////////////
+	// AddingSensitivity:BEGIN ///////////////////////////////////////
 	for (int j=1; j<=numNodes*numDOF; j++) {
-      char outputstring[50];
+	  char outputstring[50];
 	  sprintf(outputstring,"%26.16e",disp(j));
 	  theFile << outputstring << " ";
 	}
-// AddingSensitivity:END /////////////////////////////////////////
-      
+	// AddingSensitivity:END /////////////////////////////////////////
+	
 	theFile << endln;
 	theFile.flush();
-	  
-      } else {
+	
+      } else {	  
+
 	// insert the data into the database
 	disp(0) = timeStamp;
 	db->insertData(fileName, dbColumns, commitTag, disp);
       }
-    }    
-
+    }
+    
     return 0;
 }
 
