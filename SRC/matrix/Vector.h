@@ -18,10 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2000-10-18 05:31:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.h,v $
-                                                                        
+
                                                                         
 // File: ~/matrix/Vector.h
 //
@@ -67,10 +67,13 @@ class Vector
     int Assemble(const Vector &V, const ID &l, double fact = 1.0);
     double Norm(void) const;
     inline int Size(void) const;
+    int resize(int newSize);
     inline void Zero(void);
+    
     int addVector(double factThis, const Vector &other, double factOther);
-    int addMatrixVector(double factThis, const Matrix &m, const Vector &v, double factOther);
+    int addMatrixVector(double factThis, const Matrix &m, const Vector &v, double factOther); 
     int addMatrixTransposeVector(double factThis, const Matrix &m, const Vector &v, double factOther);
+
     
     // overloaded operators
     inline double operator()(int x) const;
@@ -97,7 +100,6 @@ class Vector
     Vector operator+(const Vector &V) const;
     Vector operator-(const Vector &V) const;
     double operator^(const Vector &V) const;
-
     Vector operator/(const Matrix &M) const;    
 
     // methods added by Remo
@@ -106,7 +108,8 @@ class Vector
   
     friend ostream &operator<<(ostream &s, const Vector &V);
     friend istream &operator>>(istream &s, Vector &V);    
-
+    friend Vector operator*(double a, const Vector &V);
+    
     friend class Message;
     friend class SystemOfEqn;
     friend class TCP_SocketNoDelay;    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2000-10-18 05:31:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -74,7 +74,8 @@ Vector::Vector(int size)
 #endif
 
   // get some space for the vector
-  theData = (double *)malloc(size*sizeof(double));
+  //  theData = (double *)malloc(size*sizeof(double));
+  theData = new double [size];
 
   if (theData == 0) {
     g3ErrorHandler->fatal("Vector::Vector(int) - out of memory creating vector of size %d\n",size);
@@ -116,7 +117,8 @@ Vector::Vector(const Vector &other)
   }
 #endif
 
-  theData = (double *)malloc(other.sz*sizeof(double));    
+  //  theData = (double *)malloc(other.sz*sizeof(double));    
+  theData = new double [other.sz];    
   
   if (theData == 0) {
     g3ErrorHandler->fatal("Vector::Vector(int) - out of memory creating vector of size %d\n",sz);
@@ -139,9 +141,9 @@ Vector::Vector(const Vector &other)
 Vector::~Vector()
 {
   if (sz != 0 && fromFree == 0) 
-    free((void *)theData);
+    delete [] theData;
+  //  free((void *)theData);
 }
-
 
 
 int 
@@ -156,6 +158,44 @@ Vector::setData(double *newData, int size){
     g3ErrorHandler->warning("Vector::Vector(double *, size) - size %d specified <= 0\n",size);
     sz = 0;
   }
+
+  return 0;
+}
+
+
+
+int 
+Vector::resize(int newSize){
+
+  // first check that newSize is valid
+  if (newSize <= 0) {
+    g3ErrorHandler->warning("Vector::resize) - size %d specified <= 0\n",newSize); 
+    return -1;
+  } 
+  
+  // otherwise if newSize is gretaer than oldSize free old space and get new space
+  else if (newSize > sz) {
+
+    // delete the old array
+    if (sz != 0 && fromFree == 0) 
+      free((void *)theData);
+    sz = 0;
+    fromFree = 0;
+    
+    // create new memory
+    // theData = (double *)malloc(newSize*sizeof(double));    
+    theData = new double[newSize];
+    if (theData == 0) {
+      g3ErrorHandler->fatal("Vector::resize() - out of memory for size %d\n",newSize);
+      sz = 0;
+      return -2;
+    }
+  }  
+
+  // just set the size to be newSize .. penalty of holding onto additional
+  // memory .. but then save the free() and malloc() calls
+  else 
+    sz = newSize;    
 
   return 0;
 }
@@ -1018,6 +1058,12 @@ istream &operator>>(istream &s, Vector &V)
     return s;
 }
 
+
+
+Vector operator*(double a, const Vector &V)
+{
+  return V * a;
+}
 
 
 int
