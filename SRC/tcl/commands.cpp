@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2001-08-20 04:57:34 $
+// $Revision: 1.14 $
+// $Date: 2001-09-10 20:34:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1703,7 +1703,7 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
       double alpha;
       double alphaM, betaK, betaKi, betaKc;
       if (argc != 3 && argc != 7) {
-	interp->result = "WARNING integrator HHT alpha <alphaM> <betaKcurrent> <betaKi> <betaKlastCommitted>";
+	interp->result = "WARNING integrator HHT alpha <alphaM betaKcurrent betaKi betaKlastCommitted>";
 	return TCL_ERROR;
       }    
       if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK) {
@@ -1732,6 +1732,49 @@ specifyIntegrator(ClientData clientData, Tcl_Interp *interp, int argc,
 	  theTransientIntegrator = new HHT(alpha);       
       else
 	  theTransientIntegrator = new HHT(alpha,alphaM,betaK, betaKi, betaKc);       
+  }    
+
+  else if (strcmp(argv[1],"GeneralizedHHT") == 0) {
+      double alpha, beta, gamma;
+      double alphaM, betaK, betaKi, betaKc;
+      if (argc != 5 && argc != 9) {
+	interp->result = "WARNING integrator HHT alpha beta gamma <alphaM betaKcurrent betaKi betaKlastCommitted>";
+	return TCL_ERROR;
+      }    
+      if (Tcl_GetDouble(interp, argv[2], &alpha) != TCL_OK) {
+	  interp->result = "WARNING integrator HHT alpha beta gamma - undefined alpha";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[3], &beta) != TCL_OK) {
+	  interp->result = "WARNING integrator HHT alpha beta gamma - undefined beta";	  
+	  return TCL_ERROR;	
+      }
+      if (Tcl_GetDouble(interp, argv[4], &gamma) != TCL_OK) {
+	  interp->result = "WARNING integrator HHT alpha beta gamma - undefined gamma";	  
+	  return TCL_ERROR;	
+      }
+      if (argc == 9) {
+	  if (Tcl_GetDouble(interp, argv[5], &alphaM) != TCL_OK) {
+	      cerr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - alphaM";	  
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[6], &betaK) != TCL_OK) {
+	      cerr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - betaK";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[7], &betaKi) != TCL_OK) {
+	      cerr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - betaKi";
+	      return TCL_ERROR;	
+	  }
+	  if (Tcl_GetDouble(interp, argv[8], &betaKc) != TCL_OK) {
+	      cerr << "WARNING integrator HHT alpha beta gamma alphaM betaK betaKi betaKc - betaKc";
+	      return TCL_ERROR;	
+	  }
+      }      
+      if (argc == 5)
+	  theTransientIntegrator = new HHT(alpha, beta, gamma);       
+      else
+	  theTransientIntegrator = new HHT(alpha, beta, gamma, alphaM,betaK, betaKi, betaKc);       
   }    
 
 
