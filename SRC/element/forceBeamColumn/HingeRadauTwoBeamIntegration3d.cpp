@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2003-02-21 22:27:48 $
+// $Revision: 1.4 $
+// $Date: 2003-03-15 00:09:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauTwoBeamIntegration3d.cpp,v $
 
 #include <HingeRadauTwoBeamIntegration3d.h>
@@ -28,6 +28,7 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <Information.h>
 
 HingeRadauTwoBeamIntegration3d::HingeRadauTwoBeamIntegration3d(double e,
 							 double a,
@@ -193,5 +194,86 @@ HingeRadauTwoBeamIntegration3d::recvSelf(int cTag, Channel &theChannel,
   lpI = data(6);
   lpJ = data(7);
 
+  return 0;
+}
+
+int
+HingeRadauTwoBeamIntegration3d::setParameter(const char **argv,
+					     int argc, Information &info)
+{
+  if (strcmp(argv[0],"E") == 0) {
+    info.theType = DoubleType;
+    return 1;
+  }
+  else if (strcmp(argv[0],"A") == 0) {
+    info.theType = DoubleType;
+    return 2;
+  }
+  else if (strcmp(argv[0],"Iz") == 0) {
+    info.theType = DoubleType;
+    return 3;
+  }
+  else if (strcmp(argv[0],"Iy") == 0) {
+    info.theType = DoubleType;
+    return 4;
+  }
+  else if (strcmp(argv[0],"G") == 0) {
+    info.theType = DoubleType;
+    return 5;
+  }
+  else if (strcmp(argv[0],"J") == 0) {
+    info.theType = DoubleType;
+    return 6;
+  }
+  else if (strcmp(argv[0],"lpI") == 0) {
+    info.theType = DoubleType;
+    return 7;
+  }
+  else if (strcmp(argv[0],"lpJ") == 0) {
+    info.theType = DoubleType;
+    return 8;
+  }
+  else 
+    return -1;
+}
+
+int
+HingeRadauTwoBeamIntegration3d::updateParameter(int parameterID,
+						Information &info)
+{
+  switch (parameterID) {
+  case 1:
+    E = info.theDouble;
+    return 0;
+  case 2:
+    A = info.theDouble;
+    return 0;
+  case 3:
+    Iz = info.theDouble;
+    return 0;
+  case 4:
+    Iy = info.theDouble;
+    return 0;
+  case 5:
+    G = info.theDouble;
+    return 0;
+  case 6:
+    J = info.theDouble;
+    return 0;
+  case 7:
+    lpI = info.theDouble;
+    return 0;
+  case 8:
+    lpJ = info.theDouble;
+    return 0;
+  default:
+    return -1;
+  }
+}
+
+int
+HingeRadauTwoBeamIntegration3d::activateParameter(int parameterID)
+{
+  // For Terje to do
   return 0;
 }

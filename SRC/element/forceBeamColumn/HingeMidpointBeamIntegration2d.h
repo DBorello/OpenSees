@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-12-17 22:43:07 $
+// $Revision: 1.2 $
+// $Date: 2003-03-15 00:09:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeMidpointBeamIntegration2d.h,v $
 
 #ifndef HingeMidpointBeamIntegration2d_h
@@ -51,6 +51,10 @@ class HingeMidpointBeamIntegration2d : public BeamIntegration
 
   int sendSelf(int cTag, Channel &theChannel);
   int recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
+
+  int setParameter(const char **argv, int argc, Information &info);
+  int updateParameter(int parameterID, Information &info);
+  int activateParameter(int parameterID);
 
  private:
   double E;

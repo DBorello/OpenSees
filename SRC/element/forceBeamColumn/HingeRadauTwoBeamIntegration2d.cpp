@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2003-02-21 22:27:48 $
+// $Revision: 1.4 $
+// $Date: 2003-03-15 00:09:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauTwoBeamIntegration2d.cpp,v $
 
 #include <HingeRadauTwoBeamIntegration2d.h>
@@ -28,6 +28,7 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <Information.h>
 
 HingeRadauTwoBeamIntegration2d::HingeRadauTwoBeamIntegration2d(double e,
 							       double a,
@@ -173,5 +174,66 @@ HingeRadauTwoBeamIntegration2d::recvSelf(int cTag, Channel &theChannel,
   lpI = data(3);
   lpJ = data(4);
 
+  return 0;
+}
+
+
+int
+HingeRadauTwoBeamIntegration2d::setParameter(const char **argv,
+					     int argc, Information &info)
+{
+  if (strcmp(argv[0],"E") == 0) {
+    info.theType = DoubleType;
+    return 1;
+  }
+  else if (strcmp(argv[0],"A") == 0) {
+    info.theType = DoubleType;
+    return 2;
+  }
+  else if (strcmp(argv[0],"I") == 0 || strcmp(argv[0],"Iz") == 0) {
+    info.theType = DoubleType;
+    return 3;
+  }
+  else if (strcmp(argv[0],"lpI") == 0) {
+    info.theType = DoubleType;
+    return 4;
+  }
+  else if (strcmp(argv[0],"lpJ") == 0) {
+    info.theType = DoubleType;
+    return 5;
+  }
+  else 
+    return -1;
+}
+
+int
+HingeRadauTwoBeamIntegration2d::updateParameter(int parameterID,
+						Information &info)
+{
+  switch (parameterID) {
+  case 1:
+    E = info.theDouble;
+    return 0;
+  case 2:
+    A = info.theDouble;
+    return 0;
+  case 3:
+    I = info.theDouble;
+    return 0;
+  case 4:
+    lpI = info.theDouble;
+    return 0;
+  case 5:
+    lpJ = info.theDouble;
+    return 0;
+  default:
+    return -1;
+  }
+}
+
+int
+HingeRadauTwoBeamIntegration2d::activateParameter(int parameterID)
+{
+  // For Terje to do
   return 0;
 }

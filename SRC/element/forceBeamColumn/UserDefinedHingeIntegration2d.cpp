@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:10 $
+// $Revision: 1.3 $
+// $Date: 2003-03-15 00:09:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/UserDefinedHingeIntegration2d.cpp,v $
 
 #include <UserDefinedHingeIntegration2d.h>
@@ -28,6 +28,7 @@
 #include <Vector.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
+#include <Information.h>
 
 UserDefinedHingeIntegration2d::UserDefinedHingeIntegration2d(int npL,
 							     const Vector &ptL,
@@ -183,4 +184,50 @@ UserDefinedHingeIntegration2d::recvSelf(int cTag, Channel &theChannel,
 				      FEM_ObjectBroker &theBroker)
 {
   return -1;
+}
+
+int
+UserDefinedHingeIntegration2d::setParameter(const char **argv,
+					    int argc, Information &info)
+{
+  if (strcmp(argv[0],"E") == 0) {
+    info.theType = DoubleType;
+    return 1;
+  }
+  else if (strcmp(argv[0],"A") == 0) {
+    info.theType = DoubleType;
+    return 2;
+  }
+  else if (strcmp(argv[0],"I") == 0 || strcmp(argv[0],"Iz") == 0) {
+    info.theType = DoubleType;
+    return 3;
+  }
+  else 
+    return -1;
+}
+
+int
+UserDefinedHingeIntegration2d::updateParameter(int parameterID,
+					     Information &info)
+{
+  switch (parameterID) {
+  case 1:
+    E = info.theDouble;
+    return 0;
+  case 2:
+    A = info.theDouble;
+    return 0;
+  case 3:
+    I = info.theDouble;
+    return 0;
+  default:
+    return -1;
+  }
+}
+
+int
+UserDefinedHingeIntegration2d::activateParameter(int parameterID)
+{
+  // For Terje to do
+  return 0;
 }

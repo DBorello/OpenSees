@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.1 $
-// $Date: 2002-12-13 22:25:47 $
+// $Revision: 1.2 $
+// $Date: 2003-03-15 00:09:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/BeamIntegration.h,v $
 
 #ifndef BeamIntegration_h
@@ -29,6 +29,7 @@
 
 class Matrix;
 class ElementalLoad;
+class Information;
 
 class BeamIntegration : public MovableObject
 {
@@ -46,7 +47,10 @@ class BeamIntegration : public MovableObject
   virtual int addElasticFlexibility(double L, Matrix &fe) {return 0;}
 
   virtual BeamIntegration *getCopy(void) = 0;
-  
+
+  virtual int setParameter(const char **argv, int argc, Information &info);
+  virtual int updateParameter(int parameterID, Information &info);
+  virtual int activateParameter(int parameterID);
 };
 
 #endif
