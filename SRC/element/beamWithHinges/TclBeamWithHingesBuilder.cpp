@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 03:44:21 $
+// $Revision: 1.5 $
+// $Date: 2003-02-14 18:15:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/TclBeamWithHingesBuilder.cpp,v $
                                                                         
                                                                         
@@ -40,16 +40,15 @@
 #include <Node.h>
 #include <Matrix.h>
 
-#include <BeamWithHinges2d.h>
-
 #include <ForceBeamColumn2d.h>
 #include <HingeMidpointBeamIntegration2d.h>
 #include <HingeRadauTwoBeamIntegration2d.h>
+#include <HingeRadauBeamIntegration2d.h>
+
 #include <ForceBeamColumn3d.h>
 #include <HingeMidpointBeamIntegration3d.h>
 #include <HingeRadauTwoBeamIntegration3d.h>
-
-#include <BeamWithHinges3d.h>
+#include <HingeRadauBeamIntegration3d.h>
 
 #include <SectionForceDeformation.h>
 
@@ -248,7 +247,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 					     sections, beamIntegr,
 					     *theTransf);
 	}
-	else {
+	else if (strcmp(argv[1],"beamWithHinges2") == 0) {
 	  HingeRadauTwoBeamIntegration2d beamIntegr(E, A, I, lenI, lenJ);
 	  
 	  SectionForceDeformation *sections[4];
@@ -261,6 +260,18 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 					     sections, beamIntegr,
 					     *theTransf);
 	}
+	else {
+	  HingeRadauBeamIntegration2d beamIntegr(E, A, I, lenI, lenJ);
+	  
+	  SectionForceDeformation *sections[2];
+	  sections[0] = sectionI;
+	  sections[1] = sectionJ;
+	  
+	  theElement = new ForceBeamColumn2d(tag, ndI, ndJ, 2,
+					     sections, beamIntegr,
+					     *theTransf);
+	}
+
 	// Ensure we have created the element, out of memory if got here and no element
 	if (theElement == 0) {
 	    cerr << "WARNING ran out of memory creating element\n";
@@ -464,7 +475,7 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 					     sections, beamIntegr,
 					     *theTransf);
 	}
-	else {
+	else if (strcmp(argv[1],"beamWithHinges2") == 0) {
 	  HingeRadauTwoBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lenI, lenJ);
 	  
 	  SectionForceDeformation *sections[4];
@@ -474,6 +485,17 @@ TclModelBuilder_addBeamWithHinges (ClientData clientData, Tcl_Interp *interp,
 	  sections[3] = sectionJ;
 	  
 	  theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 4,
+					     sections, beamIntegr,
+					     *theTransf);
+	}
+	else {
+	  HingeRadauBeamIntegration3d beamIntegr(E, A, Iz, Iy, G, J, lenI, lenJ);
+	  
+	  SectionForceDeformation *sections[2];
+	  sections[0] = sectionI;
+	  sections[1] = sectionJ;
+	  
+	  theElement = new ForceBeamColumn3d(tag, ndI, ndJ, 2,
 					     sections, beamIntegr,
 					     *theTransf);
 	}
