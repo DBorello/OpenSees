@@ -403,6 +403,12 @@
 			Name="upU"
 			Filter="">
 			<File
+				RelativePath="..\..\..\SRC\element\upU\BrickUP.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\upU\BrickUP.h">
+			</File>
+			<File
 				RelativePath="..\..\..\Src\element\upU\EightNodeBrick_u_p_U.cpp">
 			</File>
 			<File
@@ -413,6 +419,12 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Src\element\upU\FourNodeQuadUP.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\upU\Nine_Four_Node_QuadUP.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\upU\Nine_Four_Node_QuadUP.h">
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\element\upU\TclEightNodeBrick_u_p_U.cpp">
@@ -428,6 +440,18 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Src\element\upU\TwentyNodeBrick_u_p_U.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\upU\Twenty_Eight_Node_BrickUP.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\upU\Twenty_Eight_Node_BrickUP.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\upU\shp3dv.cpp">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\element\upU\shp3dv.h">
 			</File>
 		</Filter>
 		<Filter

@@ -111,6 +111,9 @@
 				RelativePath="..\..\..\SRC\database\FileDatastore.cpp">
 			</File>
 			<File
+				RelativePath="..\..\..\SRC\database\NEESData.cpp">
+			</File>
+			<File
 				RelativePath="..\..\..\SRC\database\TclDatabaseCommands.cpp">
 			</File>
 		</Filter>
@@ -122,6 +125,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\SRC\database\FileDatastore.h">
+			</File>
+			<File
+				RelativePath="..\..\..\SRC\database\NEESData.h">
 			</File>
 		</Filter>
 	</Files>
