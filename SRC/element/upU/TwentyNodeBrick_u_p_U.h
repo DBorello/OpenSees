@@ -87,7 +87,7 @@ class TwentyNodeBrick_u_p_U: public Element
                    NDMaterial * Globalmmodel, double b1, double b2, double b3,
 		   double nn, double alf, double rs,double rf,
 		   double permb_x, double permb_y, double permb_z, 
-		   double kkf,double pp);
+		   double kks, double kkf,double pp);
 		   // int dir, double surflevel);
 		   //, EPState *InitEPS);   const char * type,
 

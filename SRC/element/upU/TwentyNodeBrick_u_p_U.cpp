@@ -57,7 +57,7 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
                                NDMaterial * Globalmmodel, double b1, double b2,double b3,
 			       double nn, double alf, double rs, double rf, 
 			       double permb_x,double permb_y,double permb_z, 
-			       double kkf, double pp)	  
+			       double kks, double kkf, double pp)	  
 			       // wxy added rs and rf for the solid and fluid density    08/28/2001
 
 			       //, EPState *InitEPS)  const char * type,
@@ -66,7 +66,7 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
 		               
   :Element(element_number, ELE_TAG_TwentyNodeBrick_u_p_U ),
   connectedExternalNodes(20), Q(140), bf(3), 
-  n(nn), alpha(alf), rho_s(rs), rho_f(rf), kf(kkf), pressure(pp)
+  n(nn), alpha(alf), rho_s(rs), rho_f(rf), ks(kks), kf(kkf), pressure(pp)
   {
     //elem_numb = element_number;
     rho=(1-n)*rho_s+n*rho_f;
@@ -78,7 +78,7 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
     k.val(1,1)=permb_x;
     k.val(2,2)=permb_y;
     k.val(3,3)=permb_z;
-    k.print("k","\n test the permeability tensor k \n");
+//    k.print("k","\n test the permeability tensor k \n");    // out 06/26/2002
 
     determinant_of_Jacobian = 0.0;
     
@@ -1010,11 +1010,11 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
 //    double RHO_F=rho_f;
     double N=n;
     double ALPHA=alpha;
-    double KS;//=ks;
+    double KS=ks;
     double KF=kf;
-    double QQ;//= N/KF+(ALPHA-N)/KS;
-    double e;
-    double nu;
+    double QQ= N/KF+(ALPHA-N)/KS;
+//    double e;
+//    double nu;
      short GP_c_r;
     for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
@@ -1060,13 +1060,13 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
-		e = (matpoint[where]->matmodel)->getE();
+//		e = (matpoint[where]->matmodel)->getE();
 //		cout<<"e=  "<<e<<endl;
-		nu = (matpoint[where]->matmodel)->getnu();
+//		nu = (matpoint[where]->matmodel)->getnu();
 //		cout<<"nu=  "<<nu<<endl;
-		KS=e/(3*(1-2*nu));
+//		KS=e/(3*(1-2*nu));
 //		cout<<"KS="<<KS<<endl;
-		QQ= N/KF+(ALPHA-N)/KS;
+//		QQ= N/KF+(ALPHA-N)/KS;
 		P = P + hp("K") * hp("L")*QQ*weight;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");

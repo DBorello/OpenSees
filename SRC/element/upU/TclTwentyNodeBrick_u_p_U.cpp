@@ -58,12 +58,12 @@ TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inte
   //  solid_bulk_modulus? fluid_bulk_modulus?   pressure?
   //       argv[34]            argv[35]     	 argv[36] 
   // Xiaoyan added this comments. 01/07/2002
-  if ((argc-eleArgStart) < 34) {
+  if ((argc-eleArgStart) < 35) {
       g3ErrorHandler->warning("command: element Brick20N_u_p_U - insufficient args - want %s",
           "element Brick20N_u_p_U eleTag? node1? node2? .. node20?  matTag? bforce1? bforce2? bforce3?\n" 
 	  "porosity? alpha?  solidDensity? fluidDensity? \n"
  	  "permeability_in_x_dir? permeability_in_y_dir? permeability_in_z_dir?"
-	  "fluid_bulk_modulus? pressure?\n");
+	  "fluid_bulk_modulus, fluid_bulk_modulus? pressure?\n");
       return TCL_ERROR;
   }    
 
@@ -71,7 +71,7 @@ TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inte
   int eleID, matID;
   int nodes[20];
   double bodyforces[3], porosity, alpha, solidDensity, fluidDensity;
-  double perm_x, perm_y, perm_z,kkf;
+  double perm_x, perm_y, perm_z,kks, kkf;
   //char *type;
   
   // read the eleTag
@@ -163,16 +163,16 @@ TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inte
     			  eleID, argv[32+eleArgStart]);      
       return TCL_ERROR;
   }  
-//  // now get the bulk modulus of solid
-//     if (Tcl_GetDouble(interp, argv[33+eleArgStart], &kks) != TCL_OK) {        // wxy added 01/07/2002
-//      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of solid %s",      
-//    			  eleID, argv[33+eleArgStart]);      
-//      return TCL_ERROR;
-//  }  
-  // now get the bulk modulus of fluid
-     if (Tcl_GetDouble(interp, argv[33+eleArgStart], &kkf) != TCL_OK) {        // wxy added 01/07/2002
-      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of fluid %s",      
+  // now get the bulk modulus of solid
+     if (Tcl_GetDouble(interp, argv[33+eleArgStart], &kks) != TCL_OK) {        // wxy added 01/07/2002
+      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of solid %s",      
     			  eleID, argv[33+eleArgStart]);      
+      return TCL_ERROR;
+  }  
+  // now get the bulk modulus of fluid
+     if (Tcl_GetDouble(interp, argv[34+eleArgStart], &kkf) != TCL_OK) {        // wxy added 01/07/2002
+      g3ErrorHandler->warning("command: element Brick8_u_p_U %d - invalid bulk modulus of fluid %s",      
+    			  eleID, argv[34+eleArgStart]);      
       return TCL_ERROR;
   }  
   
@@ -183,7 +183,7 @@ TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inte
                                                       nodes[15], nodes[16], nodes[17], nodes[18], nodes[19],
 					              theMaterial, bodyforces[0], bodyforces[1], bodyforces[2], 
 						      porosity, alpha, solidDensity, fluidDensity,
-						      perm_x, perm_y, perm_z, kkf, 0.0);
+						      perm_x, perm_y, perm_z, kks, kkf, 0.0);
 					      
   if (theEle == 0) {
       g3ErrorHandler->warning("command: element Brick20N_u_p_U %d - out of memory", eleID);      
