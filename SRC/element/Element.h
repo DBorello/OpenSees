@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-03-04 00:48:13 $
+// $Revision: 1.10 $
+// $Date: 2003-03-11 20:22:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -96,7 +96,7 @@ class Element : public DomainComponent
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
     virtual int addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag);
-    virtual int setParameter(char **argv, int argc, Information &info);
+    virtual int setParameter(const char **argv, int argc, Information &info);
     virtual int updateParameter(int parameterID, Information &info);
     virtual int activateParameter(int parameterID);
     virtual const Vector & getResistingForceSensitivity(int gradNumber);

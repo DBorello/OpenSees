@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-03-04 00:48:13 $
+// $Revision: 1.13 $
+// $Date: 2003-03-11 20:22:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -391,7 +391,7 @@ Element::getResponse(int responseID, Information &eleInformation)
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
 int
-Element::setParameter     (char **argv, int argc, Information &info)
+Element::setParameter     (const char **argv, int argc, Information &info)
 {
 	return 0;
 }

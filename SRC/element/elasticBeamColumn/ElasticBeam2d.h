@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-25 01:08:21 $
+// $Revision: 1.9 $
+// $Date: 2003-03-11 20:23:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.h,v $
                                                                         
                                                                         
@@ -86,7 +86,7 @@ class ElasticBeam2d : public Element
     Response *setResponse (char **argv, int argc, Information &info);
     int getResponse (int responseID, Information &info);
  
-    int setParameter (char **argv, int argc, Information &info);
+    int setParameter (const char **argv, int argc, Information &info);
     int updateParameter (int parameterID, Information &info);
 
   private:

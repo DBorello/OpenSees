@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-02-25 23:32:50 $
+// $Revision: 1.15 $
+// $Date: 2003-03-11 20:23:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -680,7 +680,7 @@ ElasticBeam2d::getResponse (int responseID, Information &eleInfo)
 }
 
 int
-ElasticBeam2d::setParameter (char **argv, int argc, Information &info)
+ElasticBeam2d::setParameter (const char **argv, int argc, Information &info)
 {
     // E of the beam interior
     if (strcmp(argv[0],"E") == 0) {
