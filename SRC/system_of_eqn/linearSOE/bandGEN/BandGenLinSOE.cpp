@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:28 $
+// $Revision: 1.2 $
+// $Date: 2001-12-07 00:17:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/BandGenLinSOE.cpp,v $
                                                                         
                                                                         
@@ -45,7 +45,7 @@
 
 BandGenLinSOE::BandGenLinSOE(BandGenLinSolver &theSolvr)
 :LinearSOE(theSolvr, LinSOE_TAGS_BandGenLinSOE),
- size(0), numSubD(0), numSuperD(0), A(0), B(0), X(0), 
+ size(0), numSuperD(0), numSubD(0), A(0), B(0), X(0), 
  vectX(0), vectB(0), Asize(0), Bsize(0), factored(false)
 {
     theSolvr.setLinearSOE(*this);
@@ -55,7 +55,7 @@ BandGenLinSOE::BandGenLinSOE(BandGenLinSolver &theSolvr)
 BandGenLinSOE::BandGenLinSOE(int N, int numSuperDiag, int numSubDiag,
 			     BandGenLinSolver &theSolvr)
 :LinearSOE(theSolvr, LinSOE_TAGS_BandGenLinSOE),
- size(N), numSubD(numSubDiag), numSuperD(numSuperDiag), A(0), B(0), 
+ size(N), numSuperD(numSuperDiag), numSubD(numSubDiag), A(0), B(0), 
  X(0), vectX(0), vectB(0), Asize(0), Bsize(0), factored(false)
 {
     Asize = N * (2*numSubD + numSuperD +1);
@@ -429,6 +429,14 @@ BandGenLinSOE::setX(int loc, double value)
     if (loc < size && loc >= 0)
 	X[loc] = value;
 }
+
+void 
+BandGenLinSOE::setX(const Vector &x)
+{
+    if (x.Size() == size && vectX != 0)
+      *vectX = x;
+}
+
 
 int
 BandGenLinSOE::setBandGenSolver(BandGenLinSolver &newSolver)

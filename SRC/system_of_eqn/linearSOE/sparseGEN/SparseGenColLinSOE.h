@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:30 $
+// $Revision: 1.2 $
+// $Date: 2001-12-07 00:17:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.h,v $
                                                                         
                                                                         
@@ -67,6 +67,7 @@ class SparseGenColLinSOE : public LinearSOE
     double normRHS(void);
 
     void setX(int loc, double value);        
+    void setX(const Vector &x);        
     int setSparseGenColSolver(SparseGenColLinSolver &newSolver);    
 
     int sendSelf(int commitTag, Channel &theChannel);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2001-12-07 00:17:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSOE.h,v $
                                                                         
                                                                         
@@ -76,6 +76,7 @@ class PetscSOE : public LinearSOE
     double normRHS(void);
 
     void setX(int loc, double value);    
+    void setX(const Vector &x);    
 
     int setSolver(PetscSolver &newSolver);    
 

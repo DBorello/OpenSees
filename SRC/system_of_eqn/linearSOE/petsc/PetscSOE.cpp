@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:29 $
+// $Revision: 1.2 $
+// $Date: 2001-12-07 00:17:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/petsc/PetscSOE.cpp,v $
                                                                         
                                                                         
@@ -468,6 +468,14 @@ void
 PetscSOE::setX(int loc, double value)
 {
   int ierr = VecSetValues(x,1,&loc,&value,INSERT_VALUES); CHKERRA(ierr);   
+}
+
+void 
+PetscSOE::setX(const Vector &x)
+{
+  double value;
+  for (int i=0; i<x.Size(); i++)
+    int ierr = VecSetValues(x,1,&i,&value,INSERT_VALUES); CHKERRA(ierr);   
 }
 
 int

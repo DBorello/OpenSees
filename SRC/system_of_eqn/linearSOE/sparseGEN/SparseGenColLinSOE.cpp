@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-10-05 00:52:29 $
+// $Revision: 1.3 $
+// $Date: 2001-12-07 00:17:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.cpp,v $
                                                                         
                                                                         
@@ -46,7 +46,7 @@
 
 SparseGenColLinSOE::SparseGenColLinSOE(SparseGenColLinSolver &the_Solver)
 :LinearSOE(the_Solver, LinSOE_TAGS_SparseGenColLinSOE),
- size(0), nnz(0), A(0), B(0), X(0), colStartA(0), rowA(0),
+ size(0), nnz(0), A(0), B(0), X(0), rowA(0), colStartA(0),
  vectX(0), vectB(0),
  Asize(0), Bsize(0),
  factored(false)
@@ -59,7 +59,7 @@ SparseGenColLinSOE::SparseGenColLinSOE(int N, int NNZ, int *ColStartA, int *RowA
 				 SparseGenColLinSolver &the_Solver)
 :LinearSOE(the_Solver, LinSOE_TAGS_SparseGenColLinSOE),
  size(N), nnz(NNZ), A(0), B(0), X(0), 
- colStartA(ColStartA), rowA(RowA),
+ rowA(RowA), colStartA(ColStartA), 
  vectX(0), vectB(0),
  Asize(0), Bsize(0),
  factored(false)
@@ -436,6 +436,13 @@ SparseGenColLinSOE::setX(int loc, double value)
 {
     if (loc < size && loc >=0)
 	X[loc] = value;
+}
+
+void 
+SparseGenColLinSOE::setX(const Vector &x)
+{
+  if (x.Size() == size && vectX != 0)
+    *vectX = x;
 }
 
 const Vector &

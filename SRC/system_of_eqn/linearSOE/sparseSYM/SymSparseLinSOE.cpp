@@ -484,6 +484,15 @@ SymSparseLinSOE::setX(int loc, double value)
 	X[loc] = value;
 }
 
+void 
+SymSparseLinSOE::setX(const Vector &x)
+{
+  if (x.Size() == size && vectX != 0)
+    *vectX = x;
+}
+
+
+
 const Vector &
 SymSparseLinSOE::getX(void)
 {

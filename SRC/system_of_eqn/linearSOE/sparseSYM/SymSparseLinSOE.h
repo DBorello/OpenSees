@@ -51,6 +51,7 @@ class SymSparseLinSOE : public LinearSOE
     double normRHS(void);
 
     void setX(int loc, double value);        
+    void setX(const Vector &x);        
     int setSymSparseLinSolver(SymSparseLinSolver &newSolver);    
 
     int sendSelf(int commitTag, Channel &theChannel);
