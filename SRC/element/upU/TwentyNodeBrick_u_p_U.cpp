@@ -820,7 +820,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorG1()  //(double rho_s, double n,
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
-		G1 = G1 + (ALPHA-N)*dhGlobal("Ki")*hp("L")*weight;
+		G1 = G1 + dhGlobal("Ki")*hp("L")*weight * (ALPHA-N);
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
               }
@@ -916,7 +916,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorG2()  //(double rho_s, double n,
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
-		G2 = G2 + N * dhGlobal("Ki")*hp("L")*weight;
+		G2 = G2 +  dhGlobal("Ki")*hp("L")*weight * N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
               }
@@ -1304,7 +1304,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC1()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		C1 = C1 + N*N*H("K")* k_inverse("ij") *H("L")*weight;
+		C1 = C1 + H("K")* k_inverse("ij") *H("L")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
               }
@@ -1405,7 +1405,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC2()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		C2 = C2 + N*N*H("L")* k_inverse("ij") *HU("K")*weight;
+		C2 = C2 + H("L")* k_inverse("ij") *HU("K")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
               }
@@ -1505,7 +1505,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC3()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		C3 = C3 + N*N*HU("L")* k_inverse("ij") *HU("K")*weight;
+		C3 = C3 + HU("L")* k_inverse("ij") *HU("K")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
               }
@@ -2847,12 +2847,12 @@ const Matrix &TwentyNodeBrick_u_p_U::getSecantStiff ()
      return K;
 }
 //=============================================================================
-const Matrix &TwentyNodeBrick_u_p_U::getDampC () 
+const Matrix &TwentyNodeBrick_u_p_U::getDamp () 
 {    
      return C;
 }
 //=============================================================================
-const Matrix &TwentyNodeBrick_u_p_U::getMassM () 
+const Matrix &TwentyNodeBrick_u_p_U::getMass () 
 {
       return M;
 }

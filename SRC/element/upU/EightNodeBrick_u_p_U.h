@@ -152,9 +152,9 @@ class EightNodeBrick_u_p_U: public Element
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff (); 
     const Matrix &getSecantStiff ();     
-    const Matrix &getMassM (); 
+    const Matrix &getMass (); 
     const Matrix &getConsMassM (); 
-    const Matrix &getDampC ();     
+    const Matrix &getDamp ();     
 
 //    const Matrix &getConsMassMs (); 
 //    const Matrix &getConsMassMf (); 
