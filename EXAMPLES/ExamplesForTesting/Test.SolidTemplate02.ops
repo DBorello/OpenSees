@@ -41,14 +41,17 @@ fix 4 0 0 1
  
 
 # Elastic material
+#==========================================================
 # Linear elastic material
-nDMaterial ElasticIsotropic3D 1 70000 0.3 1.8
+nDMaterial ElasticIsotropic3D  1 70000 0.3 1.8
 
+#==========================================================
 # Pressure independent elastic material
-#nDMaterial PressureDependentElastic3D 1 70000.0 0.3 1.8 0.6 100 5
+#nDMaterial PressureDependentElastic3D 1  70000.0 0.3 1.8 0.6 100 5
+
 
 #Elastic-plastic model
-#================================================================
+#==========================================================
 # Drucker-Prager model
 #Yield surface 
 set ys "-DP"
@@ -65,14 +68,14 @@ set ET1  "-Linear  0.0"
 # initial stress
 set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
 
-#EPS <-NOD nod> -NOS nos nos1 nos2 ... <-stressp $stressp>
+#
 set EPS "-NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
 #
 # where
 #alpha = 2 sin(phi) / (3^0.5) / (3-sin(phi) ), phi is the friction angle
 # and k is the cohesion
 
-#================================================================
+#==========================================================
 ## Cam clay model
 # yield surface M = 1.2
 #set ys "-CC 1.2"
@@ -80,8 +83,8 @@ set EPS "-NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
 # Potential surface M = 1.2
 #set ps "-CC 1.2"
 
-#Scalar evolution law___void ratio___Lamda___Kappa 
-#set ES1  "-NLp           0.65        0.19   0.06"
+#Scalar evolution law___void ration___Lamda___Kappa 
+#set ES1  "-NLp            0.65       0.19    0.06"
 
 #Tensorial evolution law
 #set ET1  "-Linear  0.0"
@@ -89,11 +92,11 @@ set EPS "-NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
 # initial stress
 #set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
 
-#EPS <-NOD nod> -NOS nos nos1 nos2 ... <-stressp $stressp>
+#
 #set EPS "-NOD 1 -NOS 1 200.0 -stressp $stressp"
 
-#================================================================
-# von Mises model
+#==========================================================  
+## von Mises model
 # Yield surface
 #set ys "-VM"
 
@@ -109,13 +112,11 @@ set EPS "-NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
 # initial stress
 #set stressp "0.10 0 0 0 0.0 0 0 0 0.0"
 
-#EPS <-NOD nod> -NOS nos nos1 nos2 ... <-stressp $stressp>
+#________________Cu(undrained shear strength)
 #set EPS "-NOD 1 -NOS 2 10.0 0.0 -stressp $stressp"
 
-#=================================================================
-#nDMaterial Template3Dep--eleTag--ETag--YS--PS--EPS--ELS1--ELT1--
-nDMaterial Template3Dep    2       1  -YS $ys -PS $ps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
-
+#==========================================================  
+nDMaterial Template3Dep 2 1  -YS $ys -PS $ps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
 
 #____________tag_____8 nodes______matID__bforce1_bforce2_bforce3_rho
 element Brick8N  1  5 6 7 8 1 2 3 4   2      0.0     0.0    -9.81  1.8
@@ -134,7 +135,7 @@ load 8 $np $p  $np -pattern 2
 }
 
 #Set up recorder
-recorder Node -file node_iso.out -time -node 5 -dof 3 disp
+recorder Node -file node_iso.out  -time -node 5 -dof 3 disp
 #recorder plot node_iso.out "disp load"  10 10 300 300 -columns 2 1
 
 system UmfPack
@@ -154,40 +155,58 @@ analyze $NN1
 wipeAnalysis
 #loadConst
 
-equalDOF 5 6 3 3
-equalDOF 5 7 3 3
-equalDOF 5 8 3 3
+equalDOF 5 6 2 2
+equalDOF 5 7 2 2
+equalDOF 5 8 2 2
        	  
 
 #set previous load constant
 loadConst time 0
 
-# Before shifting to disp. control, apply reference load on the top
-pattern Plain 3 "Linear" {
-load 5 0.0 0.0 $np 
-load 6 0.0 0.0 $np
-load 7 0.0 0.0 $np 
-load 8 0.0 0.0 $np
-}
+## Before shifting to disp. control, apply reference load on the top
+#pattern Plain 3 "Linear" {
+#load 5 0.0 0.0 $np 
+#load 6 0.0 0.0 $np
+#load 7 0.0 0.0 $np 
+#load 8 0.0 0.0 $np
+#}
+
+set Series "Path -filePath NR228.txt -dt 0.005 -factor 1"
+
+pattern UniformExcitation  1   2  -accel $Series 
+
 
 #Set up recorder for axial loading stage
-recorder Node -file node_z.out -time -node 5 -dof 3 disp
-#recorder plot node_z.out "disp load vertical" 10 400 300 300 -columns 1 2 
+recorder Node -file node_y.out -time -node 5 -dof 2 disp
+#recorder plot node_y.out "disp time horizontal" 10 400 600 300 -columns 1 2
 
-recorder Element -ele 1 -file element.out force
-#recorder plot element.out "nodal force displ horizontal" 10 800 300 300 -columns 1 3
+#recorder Element -ele 1 -file element.out force
+#recorder plot element.out "nodal force time horizontal" 10 800 300 300 -columns 1 2
 
-set NN2 100
-set ndz -0.0001
 
-system UmfPack
+# #################################
+# create the transient analysis
+# #################################
+
+integrator Newmark  0.55  0.2756
+#constraints Plain
 constraints Penalty 1e12 1e12
-test NormDispIncr 1.0e-08 30  0
-integrator DisplacementControl 5 3 $ndz 1 $ndz $ndz
+#constraints Transformation    
+test NormDispIncr 2.0e-5 20 0
+
 algorithm Newton
 numberer RCM
-analysis Static
+system UmfPack
+analysis Transient
 
-analyze $NN2
+# ################################
+# perform the analysis
+# #################################
+
+analyze 200 0.02
+
 
 wipe
+
+
+
