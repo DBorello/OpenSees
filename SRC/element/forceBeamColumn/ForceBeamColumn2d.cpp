@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-04-04 01:01:05 $
+// $Revision: 1.11 $
+// $Date: 2003-05-12 23:44:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -1619,27 +1619,35 @@ ForceBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 
   // Point of inflection
   else if (responseID == 5) {
-    double L = crdTransf->getInitialLength();
+    double LI = 0.0;
 
-    double LI = Se(1)/(Se(1)+Se(2))*L;
+    if (fabs(Se(1)+Se(2)) > DBL_EPSILON) {
+      double L = crdTransf->getInitialLength();
+      
+      LI = Se(1)/(Se(1)+Se(2))*L;
+    }
 
     return eleInfo.setDouble(LI);
   }
 
   // Tangent drift
   else if (responseID == 6) {
-    double L = crdTransf->getInitialLength();
+    double d2 = 0.0;
+    double d3 = 0.0;
 
+    double L = crdTransf->getInitialLength();
+    
+    // Location of inflection point from node I
+    double LI = 0.0;
+    if (fabs(Se(1)+Se(2)) > DBL_EPSILON)
+      LI = Se(1)/(Se(1)+Se(2))*L;
+      
     double wts[maxNumSections];
     beamIntegr->getSectionWeights(numSections, L, wts);
-
+    
     double pts[maxNumSections];
     beamIntegr->getSectionLocations(numSections, L, pts);
-
-    // Location of inflection point from node I
-    double LI = Se(1)/(Se(1)+Se(2))*L;
-
-    double d2 = 0.0;
+    
     int i;
     for (i = 0; i < numSections; i++) {
       double x = pts[i]*L;
@@ -1654,10 +1662,9 @@ ForceBeamColumn2d::getResponse(int responseID, Information &eleInfo)
       double b = -LI+x;
       d2 += (wts[i]*L)*kappa*b;
     }
-
-    d2 += beamIntegr->getTangentDriftI(L, Se(1), Se(2));
-
-    double d3 = 0.0;
+    
+    d2 += beamIntegr->getTangentDriftI(L, LI, Se(1), Se(2));
+    
     for (i = numSections-1; i >= 0; i--) {
       double x = pts[i]*L;
       if (x < LI)
@@ -1671,8 +1678,8 @@ ForceBeamColumn2d::getResponse(int responseID, Information &eleInfo)
       double b = x-LI;
       d3 += (wts[i]*L)*kappa*b;
     }
-
-    d3 += beamIntegr->getTangentDriftJ(L, Se(1), Se(2));
+    
+    d3 += beamIntegr->getTangentDriftJ(L, LI, Se(1), Se(2));
 
     static Vector d(2);
     d(0) = d2;

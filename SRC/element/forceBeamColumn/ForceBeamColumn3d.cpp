@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-05-08 20:20:17 $
+// $Revision: 1.9 $
+// $Date: 2003-05-12 23:44:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -2026,18 +2026,28 @@ ForceBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 
   // Point of inflection
   else if (responseID == 5) {
+    static Vector LI(2);
+    LI(0) = 0.0;
+    LI(1) = 0.0;
+
     double L = crdTransf->getInitialLength();
 
-    static Vector LI(2);
+    if (fabs(Se(1)+Se(2)) > DBL_EPSILON)
+      LI(0) = Se(1)/(Se(1)+Se(2))*L;
 
-    LI(0) = Se(1)/(Se(1)+Se(2))*L;
-    LI(1) = Se(3)/(Se(3)+Se(4))*L;
+    if (fabs(Se(3)+Se(4)) > DBL_EPSILON)
+      LI(1) = Se(3)/(Se(3)+Se(4))*L;
 
     return eleInfo.setVector(LI);
   }
 
   // Tangent drift
   else if (responseID == 6) {
+    double d2z = 0.0;
+    double d2y = 0.0;
+    double d3z = 0.0;
+    double d3y = 0.0;
+
     double L = crdTransf->getInitialLength();
 
     double wts[maxNumSections];
@@ -2047,11 +2057,14 @@ ForceBeamColumn3d::getResponse(int responseID, Information &eleInfo)
     beamIntegr->getSectionLocations(numSections, L, pts);
 
     // Location of inflection point from node I
-    double LIz = Se(1)/(Se(1)+Se(2))*L;
-    double LIy = Se(3)/(Se(3)+Se(4))*L;
+    double LIz = 0.0;
+    if (fabs(Se(1)+Se(2)) > DBL_EPSILON)
+      LIz = Se(1)/(Se(1)+Se(2))*L;
 
-    double d2z = 0.0;
-    double d2y = 0.0;
+    double LIy = 0.0;
+    if (fabs(Se(3)+Se(4)) > DBL_EPSILON)
+      LIy = Se(3)/(Se(3)+Se(4))*L;
+
     int i;
     for (i = 0; i < numSections; i++) {
       double x = pts[i]*L;
@@ -2075,11 +2088,9 @@ ForceBeamColumn3d::getResponse(int responseID, Information &eleInfo)
       }
     }
 
-    d2z += beamIntegr->getTangentDriftI(L, Se(1), Se(2));
-    d2y += beamIntegr->getTangentDriftI(L, Se(3), Se(4), true);
+    d2z += beamIntegr->getTangentDriftI(L, LIz, Se(1), Se(2));
+    d2y += beamIntegr->getTangentDriftI(L, LIy, Se(3), Se(4), true);
 
-    double d3z = 0.0;
-    double d3y = 0.0;
     for (i = numSections-1; i >= 0; i--) {
       double x = pts[i]*L;
       const ID &type = sections[i]->getType();
@@ -2102,8 +2113,8 @@ ForceBeamColumn3d::getResponse(int responseID, Information &eleInfo)
       }
     }
 
-    d3z += beamIntegr->getTangentDriftJ(L, Se(1), Se(2));
-    d3y += beamIntegr->getTangentDriftJ(L, Se(3), Se(4), true);
+    d3z += beamIntegr->getTangentDriftJ(L, LIz, Se(1), Se(2));
+    d3y += beamIntegr->getTangentDriftJ(L, LIy, Se(3), Se(4), true);
 
     static Vector d(4);
     d(0) = d2z;

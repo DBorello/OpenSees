@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.6 $
-// $Date: 2003-04-02 22:02:37 $
+// $Revision: 1.7 $
+// $Date: 2003-05-12 23:44:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauBeamIntegration2d.cpp,v $
 #include <math.h>
 #include <HingeRadauBeamIntegration2d.h>
@@ -130,7 +130,8 @@ HingeRadauBeamIntegration2d::addElasticDeformations(ElementalLoad *theLoad,
 }
 
 double
-HingeRadauBeamIntegration2d::getTangentDriftI(double L, double q2, double q3)
+HingeRadauBeamIntegration2d::getTangentDriftI(double L, double LI,
+					      double q2, double q3)
 {
   double oneOverL = 1.0/L;
 
@@ -142,8 +143,6 @@ HingeRadauBeamIntegration2d::getTangentDriftI(double L, double q2, double q3)
 
   double qqq2 = (1-betaI)*q2 - betaI*q3;
 
-  double LI = q2/(q2+q3)*L;
-
   if (LI < lpI)
     return 0.0;
   else
@@ -152,7 +151,8 @@ HingeRadauBeamIntegration2d::getTangentDriftI(double L, double q2, double q3)
 }
 
 double
-HingeRadauBeamIntegration2d::getTangentDriftJ(double L, double q2, double q3)
+HingeRadauBeamIntegration2d::getTangentDriftJ(double L, double LI,
+					      double q2, double q3)
 {
   double oneOverL = 1.0/L;
 
@@ -163,8 +163,6 @@ HingeRadauBeamIntegration2d::getTangentDriftJ(double L, double q2, double q3)
   betaJ = 8.0/3*lpJ*oneOverL;
 
   double qqq3 = (1-betaJ)*q3 - betaJ*q2;
-
-  double LI = q2/(q2+q3)*L;
 
   if (LI > L-lpJ)
     return 0.0;

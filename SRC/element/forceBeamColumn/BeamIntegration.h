@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2003-04-02 01:51:51 $
+// $Revision: 1.4 $
+// $Date: 2003-05-12 23:44:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/BeamIntegration.h,v $
 
 #ifndef BeamIntegration_h
@@ -46,9 +46,9 @@ class BeamIntegration : public MovableObject
   // Return 0 if there is no elastic interior, -1 otherwise
   virtual int addElasticFlexibility(double L, Matrix &fe) {return 0;}
 
-  virtual double getTangentDriftI(double L, double q2,
+  virtual double getTangentDriftI(double L, double LI, double q2,
 				  double q3, bool yAxis = false) {return 0.0;}
-  virtual double getTangentDriftJ(double L, double q2,
+  virtual double getTangentDriftJ(double L, double LI, double q2,
 				  double q3, bool yAxis = false) {return 0.0;}
 
   virtual BeamIntegration *getCopy(void) = 0;
