@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2005-03-07 21:32:29 $
+// $Revision: 1.23 $
+// $Date: 2005-03-31 19:04:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -641,10 +641,6 @@ FiberSection2d::Print(OPS_Stream &s, int flag)
 Response*
 FiberSection2d::setResponse(const char **argv, int argc, Information &sectInfo)
 {
-  opserr << "START\n";
-  for (int i=0; i<argc; i++)
-    opserr << argv[i] << endln;
-  opserr << "END\n";
   // See if the response is one of the defaults
   Response *res = SectionForceDeformation::setResponse(argv, argc, sectInfo);
   if (res != 0)
