@@ -263,6 +263,7 @@ ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
                   $(FE)/element/upU/TclEightNodeBrick_u_p_U.o \
                   $(FE)/element/upU/TclTwentyNodeBrick_u_p_U.o
 
+
 FINITE_DEFORMATION_BJ_LIBS = $(FE)/material/nD/FiniteDeformation/NeoHookeanWEnergy.o \
                              $(FE)/material/nD/FiniteDeformation/OgdenWEnergy.o \
                              $(FE)/material/nD/FiniteDeformation/SimoPisterWEnergy.o \
@@ -271,12 +272,23 @@ FINITE_DEFORMATION_BJ_LIBS = $(FE)/material/nD/FiniteDeformation/NeoHookeanWEner
                              $(FE)/material/nD/FiniteDeformation/MooneyRivlinWEnergy.o \
                              $(FE)/material/nD/FiniteDeformation/OgdenSimoWEnergy.o \
                              $(FE)/material/nD/FiniteDeformation/MooneyRivlinSimoWEnergy.o \
-                             $(FE)/material/nD/FiniteDeformation/W.o \
-                             $(FE)/material/nD/FiniteDeformation/TclFiniteDeformationElastic3DCommand.o 
-
-
-
-
+			     $(FE)/material/nD/FiniteDeformation/W.o \
+			     $(FE)/material/nD/FiniteDeformation/NeoHookeanCompressible3D.o \
+			     $(FE)/material/nD/FiniteDeformation/FDdecoupledElastic3D.o \
+			     $(FE)/material/nD/FiniteDeformation/TclFiniteDeformationElastic3DCommand.o \
+			     $(FE)/material/nD/FiniteDeformation/FDEPState.o \
+			     $(FE)/material/nD/FiniteDeformation/FiniteDeformationEP3D.o \
+			     $(FE)/material/nD/FiniteDeformation/fdEvolution/fdEvolution_S.o \
+                             $(FE)/material/nD/FiniteDeformation/fdEvolution/fdEvolution_SLS.o \
+			     $(FE)/material/nD/FiniteDeformation/fdEvolution/fdEvolution_T.o \
+			     $(FE)/material/nD/FiniteDeformation/fdEvolution/fdEvolution_TL.o \
+                             $(FE)/material/nD/FiniteDeformation/fdFlow/fdFlow.o \
+                             $(FE)/material/nD/FiniteDeformation/fdFlow/fdFlowVM.o \
+			     $(FE)/material/nD/FiniteDeformation/fdFlow/fdFlowDP.o \
+                             $(FE)/material/nD/FiniteDeformation/fdYield/fdYield.o \
+			     $(FE)/material/nD/FiniteDeformation/fdYield/fdYieldVM.o \
+			     $(FE)/material/nD/FiniteDeformation/fdYield/fdYieldDP.o \
+			     $(FE)/material/nD/FiniteDeformation/TclFiniteDeformationEP3DCommand.o
 
 
 

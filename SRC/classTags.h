@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.57 $
-// $Date: 2004-06-15 18:59:24 $
+// $Revision: 1.58 $
+// $Date: 2004-07-20 22:23:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -190,7 +190,9 @@
 #define ND_TAG_GeneralizedPlasticity 3002
 #define ND_TAG_J2Plasticity02  3003
 #define ND_TAG_FiniteDeformationElastic3D	8002
-
+#define ND_TAG_NeoHookeanCompressible3D	        8003
+#define ND_TAG_FDdecoupledElastic3D	        8004
+#define ND_TAG_FiniteDeformationEP3D	        8005
 
 #define FIBER_TAG_Uniaxial2d	1
 #define FIBER_TAG_Uniaxial3d	2
