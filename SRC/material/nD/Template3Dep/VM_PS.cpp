@@ -55,7 +55,11 @@ tensor VMPotentialSurface::dQods(const EPState *EPS) const {
     
     // Deviatoric stress tensor of sigma - alpha
     stresstensor sigma = EPS->getStress();
-    stresstensor alpha = EPS->getTensorVar(1);
+    int nod = EPS->getNTensorVar();
+    stresstensor alpha;
+
+    if ( nod >=1 ) //May not have kinematic hardening
+      alpha = EPS->getTensorVar(1);
 
     stresstensor sigma_bar = sigma - alpha;   
     stresstensor s_bar = sigma_bar.deviator();

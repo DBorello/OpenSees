@@ -53,8 +53,12 @@ YieldSurface * VMYieldSurface::newObj() {
 
 double VMYieldSurface::f(const EPState *EPS) const {
     //deviatoric stress tensor
+    int nod = EPS->getNTensorVar();
+    stresstensor alpha;
+
     stresstensor sigma = EPS->getStress();
-    stresstensor alpha = EPS->getTensorVar(1);
+    if ( nod >=1 ) //May not have kinematic hardening
+      alpha = EPS->getTensorVar(1);
 
     stresstensor sigma_bar = sigma - alpha;   
     stresstensor s_bar = sigma_bar.deviator();
@@ -79,8 +83,12 @@ double VMYieldSurface::f(const EPState *EPS) const {
 
 tensor VMYieldSurface::dFods(const EPState *EPS) const {
 
+    int nod = EPS->getNTensorVar();
+
     stresstensor sigma = EPS->getStress();
-    stresstensor alpha = EPS->getTensorVar(1);
+    stresstensor alpha;
+    if ( nod >=1 ) //May not have kinematic hardening
+      alpha = EPS->getTensorVar(1);
 
     stresstensor sigma_bar = sigma - alpha;   
     stresstensor s_bar = sigma_bar.deviator();

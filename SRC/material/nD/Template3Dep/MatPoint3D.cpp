@@ -66,7 +66,7 @@ MatPoint3D::MatPoint3D(short int INr_direction_point_number,
     //    gpEPS = 0;
     
     if (p_INmatmodel)
-        matmodel = p_INmatmodel->getCopy();  
+        matmodel = p_INmatmodel->getCopy();
     else 
         matmodel = 0;		
 
@@ -242,6 +242,16 @@ NDMaterial* MatPoint3D::getNDMat() const {
 double MatPoint3D::getrho() const 
 {
     return matmodel->getRho(); 
+}
+
+const char* MatPoint3D::getType (void) const
+{
+	return matmodel->getType();
+}
+
+int MatPoint3D::getTag (void) const
+{
+	return matmodel->getTag();
 }
 
 //=============================================================================

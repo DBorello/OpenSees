@@ -37,13 +37,13 @@
 //################################################################################
 //*/
 
-#ifndef DP_H
-#define DP_H
+#ifndef DP_YS_H
+#define DP_YS_H
 
 #include <stresst.h>
+#include <BJtensor.h>
 #include "EPState.h"
 #include "YS.h"
-#include <BJtensor.h>
 
 
 class DPYieldSurface : public YieldSurface
@@ -57,7 +57,7 @@ class DPYieldSurface : public YieldSurface
     YieldSurface *newObj();  //create a clone of itself
     
     DPYieldSurface ( ) {}    // Default constructor
-    virtual ~DPYieldSurface ( );     // Destructor
+    virtual ~DPYieldSurface ( );   // Destructor //Virtual functions not all redefined
     //DPYieldSurface (const DPYieldSurface & );   // copy constructor
 
     double f(const EPState *EPS) const;

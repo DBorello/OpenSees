@@ -64,21 +64,21 @@ class EPState
     int NScalarVar;    	  	  //Actual Number of internal scalar vars 
     int NTensorVar;    	  	  //Actual Number of internal tensor vars 
     double       ScalarVar[ MaxNScalarVar ]; // scalar variable array for scalar hardening vars 
-    stresstensor TensorVar[ MaxNTensorVar ]; // tensor variable array for tensor hardening vars 
+    static stresstensor TensorVar[ MaxNTensorVar ]; // tensor variable array for tensor hardening vars 
     //straintensor TensorVar[ MaxNTensorVar ]; // tensor variable array for tensor hardening vars 
 
     // Commited state
     stresstensor Stress_commit;   // Commited stress  --total               
     straintensor Strain_commit;	  // Commited strain  --total 	            
     double       ScalarVar_commit[ MaxNScalarVar ]; // Commited scalar variable array for scalar hardening vars 
-    stresstensor TensorVar_commit[ MaxNTensorVar ]; // Commited tensor variable array for tensor hardening vars 
+    static stresstensor TensorVar_commit[ MaxNTensorVar ]; // Commited tensor variable array for tensor hardening vars 
     tensor       Eep_commit;      // Current Elastic plastic stifness tensor
 
     //Initial state
     stresstensor Stress_init;     // Initial stress  --total               
     straintensor Strain_init;	  // Initial strain  --total 	            
     double       ScalarVar_init[ MaxNScalarVar ]; // initial scalar variable array for scalar hardening vars 
-    stresstensor TensorVar_init[ MaxNTensorVar ]; // initial tensor variable array for tensor hardening vars 
+    static stresstensor TensorVar_init[ MaxNTensorVar ]; // initial tensor variable array for tensor hardening vars 
     tensor       Eep_init;             // initial Elastic plastic stifness tensor
 
     bool Converged;      // Bool to indicate whether this is the converged EPState by current CDriver

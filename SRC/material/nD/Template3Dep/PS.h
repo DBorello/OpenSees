@@ -38,7 +38,8 @@ class PotentialSurface
 {
   public:
     virtual PotentialSurface *newObj()  = 0;  //create a colne of itself
-    double  q() const { return 0.0; };
+    virtual ~PotentialSurface() {};	      // Codewizard requires virtual destructor
+    double  q() const { return 0.0; }; // Codewizard does not like function defined in class definition
     virtual tensor dQods(const EPState *EPS ) const =  0;  //pure virtual func
     virtual tensor d2Qods2(const EPState *EPS ) const = 0; //pure virtual func   
     virtual void print() = 0; //pure virtual func

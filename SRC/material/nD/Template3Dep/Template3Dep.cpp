@@ -739,56 +739,56 @@ int Template3Dep::setTrialStrain(const Tensor &v, const Tensor &r)
 int Template3Dep::setTrialStrainIncr(const Tensor &v)
 {
     
-    ////cout << "\nBE: " << endln;
-    //EPState StartEPS( *(this->getEPS()) );
-    //stresstensor start_stress = StartEPS.getStress();
-    ////cout << "start_stress 0 " << start_stress;
-    //
-    //EPState tmp_EPS = BackwardEulerEPState(v);
-    //if ( tmp_EPS.getConverged() ) {
-    //     //setTrialEPS( tmp_EPS );
-    //     setEPS( tmp_EPS );
-    //     return 0;
-    //}
-    //
-    ////cout << endln;    
-    ////setEPS( StartEPS );
-    ////int number_of_subincrements = 5;
-    ////Cascading subdividing in case that some incr_step is too big
-    //
-    //int loop = 0;
-    //while ( !tmp_EPS.getConverged()  && (loop < 100) ) {
-    //
-    //   setEPS( StartEPS );
-    //   EPState startEPS( *(this->getEPS()) );
-    //   stresstensor start_stress = startEPS.getStress();
-    //   cout << " Step Start Stress:" << start_stress << endln;
-    //
-    //   loop += 1;
-    //   cout << "\n "<< loop << "th Sub-BE, total subdivision: " << 10*loop*NUM_OF_SUB_INCR << endln;
-    //   tmp_EPS = BESubIncrementation(v, 10*loop*NUM_OF_SUB_INCR);
-    //   if ( tmp_EPS.getConverged() ) {
-    //       //setTrialEPS( tmp_EPS );
-    //       setEPS( tmp_EPS );
-    //       return 0;
-    //   }
-    //   //else {
-    //   //    cout << "\n2nd Sub BE: " << 3*NUM_OF_SUB_INCR << endln;
-    //   //	   tmp_EPS = BESubIncrementation(v, 3*NUM_OF_SUB_INCR);
-    //   //	   
-    //   //    if ( tmp_EPS.getConverged() ) {
-    //   //       setEPS( tmp_EPS );
-    //   //	      return 0;
-    //   //	   }
-    //   //	   else
-    //   //	      return 1;
-    //   //}
-    //}
+    //cout << "\nBE: " << endln;
+    EPState StartEPS( *(this->getEPS()) );
+    stresstensor start_stress = StartEPS.getStress();
+    //cout << "start_stress 0 " << start_stress;
+    
+    EPState tmp_EPS = BackwardEulerEPState(v);
+    if ( tmp_EPS.getConverged() ) {
+         //setTrialEPS( tmp_EPS );
+         setEPS( tmp_EPS );
+         return 0;
+    }
+    
+    //cout << endln;    
+    //setEPS( StartEPS );
+    //int number_of_subincrements = 5;
+    //Cascading subdividing in case that some incr_step is too big
+    
+    int loop = 0;
+    while ( !tmp_EPS.getConverged()  && (loop < 100) ) {
+    
+       setEPS( StartEPS );
+       EPState startEPS( *(this->getEPS()) );
+       stresstensor start_stress = startEPS.getStress();
+       cout << " Step Start Stress:" << start_stress << endln;
+    
+       loop += 1;
+       cout << "\n "<< loop << "th Sub-BE, total subdivision: " << 10*loop*NUM_OF_SUB_INCR << endln;
+       tmp_EPS = BESubIncrementation(v, 10*loop*NUM_OF_SUB_INCR);
+       if ( tmp_EPS.getConverged() ) {
+           //setTrialEPS( tmp_EPS );
+           setEPS( tmp_EPS );
+           return 0;
+       }
+       //else {
+       //    cout << "\n2nd Sub BE: " << 3*NUM_OF_SUB_INCR << endln;
+       //	   tmp_EPS = BESubIncrementation(v, 3*NUM_OF_SUB_INCR);
+       //	   
+       //    if ( tmp_EPS.getConverged() ) {
+       //       setEPS( tmp_EPS );
+       //	      return 0;
+       //	   }
+       //	   else
+       //	      return 1;
+       //}
+    }
        
-    //// for testing MD model only for no BE
-    //EPState tmp_EPS = FESubIncrementation(v, NUM_OF_SUB_INCR);
-    EPState tmp_EPS = ForwardEulerEPState(v);
-    setEPS( tmp_EPS );
+    ////// for testing MD model only for no BE
+    ////EPState tmp_EPS = FESubIncrementation(v, NUM_OF_SUB_INCR);
+    //EPState tmp_EPS = ForwardEulerEPState(v);
+    //setEPS( tmp_EPS );
     //setEPS( StartEPS );
     return 0;
 }
@@ -1013,8 +1013,7 @@ EPS->setConverged(rval.getConverged());
     EPS->setdPlasticStrain(rval.getdPlasticStrain());
     EPS->setNScalarVar( rval.getNScalarVar() );
 
-	int i;
-    for (i = 0; i <rval.getNScalarVar(); i++)
+    for (int i = 0; i <rval.getNScalarVar(); i++)
       EPS->setScalarVar(i+1, rval.getScalarVar(i+1));
     
     
@@ -1024,20 +1023,20 @@ EPS->setConverged(rval.getConverged());
     EPS->setStress_commit(rval.getStress_commit());      	 
     EPS->setStrain_commit(rval.getStrain_commit());      	 
     
-    for (i = 0; i <rval.getNScalarVar(); i++)
+    for (int i = 0; i <rval.getNScalarVar(); i++)
       EPS->setScalarVar_commit(i+1, rval.getScalarVar_commit(i+1));   	 
     
-    for (i = 0; i <rval.getNTensorVar(); i++)
+    for (int i = 0; i <rval.getNTensorVar(); i++)
        EPS->setTensorVar_commit(i+1, rval.getTensorVar_commit(i+1));   	 
     
     EPS->Eep_commit = (rval.getEep_commit());
     EPS->Stress_init = rval.getStress_init();
     EPS->Strain_init = rval.getStrain_init();
 
-    for (i = 0; i <rval.getNScalarVar(); i++)
+    for (int i = 0; i <rval.getNScalarVar(); i++)
        EPS->setScalarVar_init(i+1, rval.getScalarVar_init(i+1));
 
-    for (i = 0; i <rval.getNTensorVar(); i++)
+    for (int i = 0; i <rval.getNTensorVar(); i++)
        EPS->setTensorVar_init(i+1, rval.getTensorVar_init(i+1));
 
     EPS->Eep_init = rval.getEep_init();
@@ -1575,8 +1574,7 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
 	double dS= 0.0;
 	double S = 0.0;
 
-	int ii;
-	for (ii = 1; ii <= NS; ii++) {
+	for (int ii = 1; ii <= NS; ii++) {
               dS = Delta_lambda * h_s[ii-1] ;       // Increment to the scalar internal var
               S  = forwardEPS.getScalarVar(ii);     // Get the old value of the scalar internal var
               forwardEPS.setScalarVar(ii, S + dS ); // Update internal scalar var
@@ -1586,7 +1584,7 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
 	stresstensor T;
 	stresstensor new_T;
 
-	for (ii = 1; ii <= NT; ii++) {
+	for (int ii = 1; ii <= NT; ii++) {
 	      dT = h_t[ii-1]*Delta_lambda  ;       // Increment to the tensor internal var
               T  = forwardEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
               new_T = T + dT;
@@ -1803,8 +1801,7 @@ EPState Template3Dep::SemiBackwardEulerEPState( const straintensor &strain_incre
 	int NS = SemibackwardEPS.getNScalarVar();
 	int NT = SemibackwardEPS.getNTensorVar();
 
-	int ii;
-	for (ii = 1; ii <= NS; ii++) {
+	for (int ii = 1; ii <= NS; ii++) {
               dS = Delta_lambda * h_s[ii-1] ;       // Increment to the scalar internal var
               S  = SemibackwardEPS.getScalarVar(ii);     // Get the old value of the scalar internal var
               SemibackwardEPS.setScalarVar(ii, S + dS ); // Update internal scalar var
@@ -1821,7 +1818,7 @@ EPState Template3Dep::SemiBackwardEulerEPState( const straintensor &strain_incre
 
 	stresstensor new_T;
 
-	for (ii = 1; ii <= NT; ii++) {
+	for (int ii = 1; ii <= NT; ii++) {
 	      dT = h_t[ii-1] * Delta_lambda;            // Increment to the tensor internal var
               T  = SemibackwardEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
               new_T = T + dT;

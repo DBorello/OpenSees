@@ -30,6 +30,14 @@
 
 #include "EPState.h"
 #include <G3Globals.h>
+
+stresstensor EPState::TensorVar[ 4 ];
+stresstensor EPState::TensorVar_commit[ 4 ];
+stresstensor EPState::TensorVar_init[ 4 ];
+
+//tensor  EPState::Eep( 4, def_dim_4, 0.0 );
+//tensor  EPState::Eep_commit( 4, def_dim_4, 0.0 );
+//tensor  EPState::Eep_init( 4, def_dim_4, 0.0 );
 		     
 //================================================================================
 //Normal Constructor 1
@@ -742,7 +750,7 @@ stresstensor EPState::getTensorVar(int WhichOne) const {
          return TensorVar[ WhichOne - 1 ]; 
       else 
       {
-         g3ErrorHandler->fatal("EPState::getTensorVar %d: Out of Tensortial Var's range %d!", WhichOne, getNTensorVar() );
+         g3ErrorHandler->fatal("EPState::getTensorVar No. %d: Out of Tensortial Var's range %d out of %d !", WhichOne, getNTensorVar() );
 	 exit(1);
       }
 

@@ -123,6 +123,8 @@ class MatPoint3D
     //void setEPS(EPState *eps);
     //EPState *getEPS() const;
     NDMaterial* getNDMat() const;
+    const char* getType (void) const;
+    int getTag (void) const;
     double getrho() const;
     const stresstensor getStressTensor() const;
     const straintensor getStrainTensor() const;
