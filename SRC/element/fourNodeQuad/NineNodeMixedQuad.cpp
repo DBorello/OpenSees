@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-31 03:47:30 $
+// $Revision: 1.3 $
+// $Date: 2001-10-01 20:23:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.cpp,v $
 
 // Ed "C++" Love
@@ -249,7 +249,7 @@ NineNodeMixedQuad::getSecantStiff( )
 }
     
 
-//return damping matrix because frank is a dumb ass 
+//return damping matrix
 const Matrix& 
 NineNodeMixedQuad::getDamp( ) 
 {

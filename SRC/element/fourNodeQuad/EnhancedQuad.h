@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-08-07 21:05:28 $
+// $Revision: 1.4 $
+// $Date: 2001-10-01 20:23:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.h,v $
                                                                         
 #include <iostream.h>
@@ -54,7 +54,8 @@ class EnhancedQuad : public Element {
     virtual ~EnhancedQuad();
 
 
-    //set domain because frank is a dumb ass 
+
+    //set domain
     void setDomain( Domain *theDomain ) ;
 
     //get the number of external nodes
@@ -84,7 +85,7 @@ class EnhancedQuad : public Element {
     //return secant matrix 
     const Matrix &getSecantStiff( ) ;
     
-    //return damping matrix because frank is a dumb ass 
+    //return damping matrix
     const Matrix &getDamp( ) ;
     
     //return mass matrix

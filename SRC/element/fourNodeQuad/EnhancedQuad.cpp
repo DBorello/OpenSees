@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-08-07 21:05:30 $
+// $Revision: 1.3 $
+// $Date: 2001-10-01 20:23:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.cpp,v $
 
 #include <iostream.h>
@@ -249,7 +249,7 @@ const Matrix&  EnhancedQuad::getSecantStiff( )
 }
     
 
-//return damping matrix because frank is a dumb ass 
+//return damping matrix 
 const Matrix&  EnhancedQuad::getDamp( ) 
 {
   //not supported
@@ -1120,9 +1120,27 @@ int  EnhancedQuad::recvSelf (int commitTag,
 int
 EnhancedQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
-    // first determine the end points of the quad based on
+    // first set the quantity to be displayed at the nodes;
+    // if displayMode is 1 through 3 we will plot material stresses otherwise 0.0
+
+    static Vector values(4) ;
+
+    for (int j=0; j<4; j++)
+      values(j) = 0.0;
+
+    // until someone projects the stress to the nodes will display the stress 
+    // at the guass points at the nodes .. could also just display the average!
+    if (displayMode < 4 && displayMode > 0) {
+	for (int i=0; i<4; i++) {
+	  const Vector &stress = materialPointers[i]->getStress();
+	  values(i) = stress(displayMode-1);
+	}
+    }
+
+    // now determine the end points of the quad based on
     // the display factor (a measure of the distorted image)
     // store this information in 4 3d vectors v1 through v4
+
     const Vector &end1Crd = nodePointers[0]->getCrds();
     const Vector &end2Crd = nodePointers[1]->getCrds();	
     const Vector &end3Crd = nodePointers[2]->getCrds();	
@@ -1134,33 +1152,18 @@ EnhancedQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
     const Vector &end4Disp = nodePointers[3]->getDisp();
 
     static Matrix coords(4,3) ;
-    static Vector values(4) ;
     static Vector P(8) ;
-
-    coords.Zero( ) ;
-
-    values(0) = 1 ;
-    values(1) = 1 ;
-    values(2) = 1 ;
-    values(3) = 1 ;
-
-    if (displayMode < 3 && displayMode > 0)
-      P = this->getResistingForce();
 
     for (int i = 0; i < 2; i++) {
       coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
       coords(1,i) = end2Crd(i) + end2Disp(i)*fact;    
       coords(2,i) = end3Crd(i) + end3Disp(i)*fact;    
       coords(3,i) = end4Crd(i) + end4Disp(i)*fact;    
-      /*      if (displayMode < 3 && displayMode > 0)
-	values(i) = P(displayMode*2+i);
-      else
-      values(i) = 1;  */
     }
 
-    //cerr << coords;
     int error = 0;
 
+    // finally we draw the element using drawPolygon
     error += theViewer.drawPolygon (coords, values);
 
     return error;

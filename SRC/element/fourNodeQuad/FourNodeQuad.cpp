@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-07-11 22:58:58 $
+// $Revision: 1.11 $
+// $Date: 2001-10-01 20:23:06 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -757,7 +757,22 @@ FourNodeQuad::Print(ostream &s, int flag)
 int
 FourNodeQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
-    // first determine the end points of the quad based on
+    // first set the quantity to be displayed at the nodes;
+    // if displayMode is 1 through 3 we will plot material stresses otherwise 0.0
+
+    static Vector values(4);
+
+    for (int j=0; j<4; j++)
+	   values(j) = 0.0;
+
+    if (displayMode < 4 && displayMode > 0) {
+	for (int i=0; i<4; i++) {
+	  const Vector &stress = theMaterial[i]->getStress();
+	  values(i) = stress(displayMode-1);
+	}
+    }
+
+    // now  determine the end points of the quad based on
     // the display factor (a measure of the distorted image)
     // store this information in 4 3d vectors v1 through v4
     const Vector &end1Crd = nd1Ptr->getCrds();
@@ -771,24 +786,17 @@ FourNodeQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
     const Vector &end4Disp = nd4Ptr->getDisp();
 
     static Matrix coords(4,3);
-    static Vector values(4);
-
-    if (displayMode < 3 && displayMode > 0)
-	this->getResistingForce();
 
     for (int i = 0; i < 2; i++) {
       coords(0,i) = end1Crd(i) + end1Disp(i)*fact;
       coords(1,i) = end2Crd(i) + end2Disp(i)*fact;    
       coords(2,i) = end3Crd(i) + end3Disp(i)*fact;    
       coords(3,i) = end4Crd(i) + end4Disp(i)*fact;    
-      if (displayMode < 3 && displayMode > 0)
-	values(i) = P(displayMode*2+i);
-      else
-	values(i) = 1;
     }
 
     int error = 0;
 
+    // finally we draw the element using drawPolygon
     error += theViewer.drawPolygon (coords, values);
 
     return error;

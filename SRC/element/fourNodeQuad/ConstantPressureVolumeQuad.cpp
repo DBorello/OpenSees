@@ -228,7 +228,7 @@ const Matrix& ConstantPressureVolumeQuad :: getSecantStiff( )
 }
     
 
-//return damping matrix because frank is a dumb ass 
+//return damping matrix
 const Matrix& ConstantPressureVolumeQuad :: getDamp( ) 
 {
   //not supported

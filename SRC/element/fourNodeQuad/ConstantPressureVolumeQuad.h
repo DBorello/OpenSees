@@ -36,7 +36,7 @@ class ConstantPressureVolumeQuad : public Element
     //destructor 
     virtual ~ConstantPressureVolumeQuad( ) ;
 
-    //set domain because frank is a dumb ass 
+    //set domain
     void setDomain( Domain *theDomain ) ;
 
     //get the number of external nodes
@@ -66,7 +66,7 @@ class ConstantPressureVolumeQuad : public Element
     //return secant matrix 
     const Matrix &getSecantStiff( ) ;
     
-    //return damping matrix because frank is a dumb ass 
+    //return damping matrix
     const Matrix &getDamp( ) ;
     
     //return mass matrix
