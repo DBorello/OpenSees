@@ -14,7 +14,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.cpp,v 1.3 2001-08-18 00:35:28 fmk Exp $
+ * RCS: @(#) $Id: tkMain.cpp,v 1.4 2001-10-25 21:49:46 fmk Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -66,10 +66,17 @@ Tcl_ThreadDataKey dataKey;
  * some systems.
  */
 
-#if !defined(__WIN32__) && !defined(_WIN32)
+#if !defined(__WIN32__) && !defined(_WIN32) && !defined(_KAI)
 extern "C" int		isatty _ANSI_ARGS_((int fd));
 extern "C" char *	strrchr _ANSI_ARGS_((CONST char *string, int c)) throw();
 #endif
+
+#if !defined(__WIN32__) && !defined(_WIN32) && defined(_KAI)
+extern "C" int		isatty _ANSI_ARGS_((int fd));
+extern "C" char *	strrchr _ANSI_ARGS_((CONST char *string, int c));
+#endif
+
+
 extern "C" void		TkpDisplayWarning _ANSI_ARGS_((char *msg,
 						       char *title));
 
