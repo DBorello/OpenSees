@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-03-04 00:48:09 $
+// $Revision: 1.10 $
+// $Date: 2003-03-04 23:30:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.cpp,v $
                                                                         
                                                                         
@@ -1058,25 +1058,10 @@ LinearCrdTransf2d::getBasicDisplSensitivity(int gradNumber)
 	// up the nodal displacements we just pick up 
 	// the nodal displacement sensitivities. 
 
-
-	// Initial declarations
-	int i;
-
-
-	// determine global displacement sensitivities
-	Vector disp1(3);
-	Vector disp2(3);
-	for (i = 0; i < 3; i++) {
-		disp1(i) = nodeIPtr->getDispSensitivity((i+1),gradNumber);
-		disp2(i) = nodeJPtr->getDispSensitivity((i+1),gradNumber);
-	}
-
-	// ... so from here on, everything stays the same ...
-
 	static double ug[6];
-	for (i = 0; i < 3; i++) {
-		ug[i]   = disp1(i);
-		ug[i+3] = disp2(i);
+	for (int i = 0; i < 3; i++) {
+		ug[i]   = nodeIPtr->getDispSensitivity((i+1),gradNumber);
+		ug[i+3] = nodeJPtr->getDispSensitivity((i+1),gradNumber);
 	}
 
 	static Vector ub(3);
@@ -1085,33 +1070,27 @@ LinearCrdTransf2d::getBasicDisplSensitivity(int gradNumber)
 	double sl = sinTheta*oneOverL;
 	double cl = cosTheta*oneOverL;
 
-	if (nodeIOffset == 0) {
-		ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] +
-			cosTheta*ug[3] + sinTheta*ug[4];
+  ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] +
+    cosTheta*ug[3] + sinTheta*ug[4];
+  
+  ub(1) = -sl*ug[0] + cl*ug[1] + ug[2] +
+    sl*ug[3] - cl*ug[4];
 
-		ub(1) = -sl*ug[0] + cl*ug[1] + ug[2] +
-			sl*ug[3] - cl*ug[4];
+  if (nodeIOffset != 0) {
+    double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
+    double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
+    ub(0) -= t02*ug[2];
+    ub(1) += oneOverL*t12*ug[2];
+  }
 
-		//ub(2) = -sl*ug[0] + cl*ug[1] +
-		//	sl*ug[3] - cl*ug[4] + ug[5];
-		ub(2) = ub(1) + ug[5] - ug[2];
-	}
-	else {
-		double t02 = -cosTheta*nodeIOffset[1] + sinTheta*nodeIOffset[0];
-		double t12 =  sinTheta*nodeIOffset[1] + cosTheta*nodeIOffset[0];
-		double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
-		double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+  if (nodeJOffset != 0) {
+    double t35 = -cosTheta*nodeJOffset[1] + sinTheta*nodeJOffset[0];
+    double t45 =  sinTheta*nodeJOffset[1] + cosTheta*nodeJOffset[0];
+    ub(0) += t35*ug[5];
+    ub(1) -= oneOverL*t45*ug[5];
+  }
 
-		ub(0) = -cosTheta*ug[0] - sinTheta*ug[1] - t02*ug[2] +
-			cosTheta*ug[3] + sinTheta*ug[4] + t35*ug[5];
-
-		ub(1) = -sl*ug[0] + cl*ug[1] + (1.0+oneOverL*t12)*ug[2] +
-			sl*ug[3] - cl*ug[4] - oneOverL*t45*ug[5];
-
-		//ub(2) = -sl*ug[0] + cl*ug[1] + oneOverL*t12*ug[2] +
-		//	sl*ug[3] - cl*ug[4] + (1.0-oneOverL*t45)*ug[5];
-		ub(2) = ub(1) + ug[5] - ug[2];
-	}
+  ub(2) = ub(1) + ug[5] - ug[2];
 
 	return ub;
 }
