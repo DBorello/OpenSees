@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-04-17 19:52:58 $
+// $Revision: 1.7 $
+// $Date: 2004-04-15 22:28:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/handler/TransformationConstraintHandler.cpp,v $
                                                                         
                                                                         
@@ -439,7 +439,7 @@ TransformationConstraintHandler::enforceSPs(void)
 	theDof->enforceSPs();
     }
 
-    theModel->updateDomain();
+    //    theModel->updateDomain();
 
     return 0;
 }
