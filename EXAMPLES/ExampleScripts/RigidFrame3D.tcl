@@ -102,6 +102,9 @@ uniaxialMaterial Elastic     6   -600
 #                   tag mat1 mat2 mat3 ...
 uniaxialMaterial Parallel    3    4    5    6
 
+#uniaxialMaterial Steel01 3 100 30000 0.028
+
+
 # Torsional stiffness
 set G 2000
 
@@ -204,10 +207,12 @@ pattern Plain 1 Linear {
    load 18  0.0 0.0 $p 0.0 0.0 0.0 -const
 }
 
+set accelSeries "Path -filePath tabasFN.txt -dt 0.02 -factor $g"
+
 # Define the ground motion excitation using Tabas fault parallel and fault normal records
-#                         tag dir   factor           filename   dt
-pattern UniformExcitation  2   1  [expr $g] -accel tabasFP.txt 0.02
-pattern UniformExcitation  3   2  [expr $g] -accel tabasFN.txt 0.02
+#                         tag dir         accel series args
+pattern UniformExcitation  2   1  -accel    $accelSeries
+pattern UniformExcitation  3   2  -accel    $accelSeries
 
 # Record DOF 1 and 2 displacements at nodes 9, 14, and 19
 recorder Node RigidFrame3D.out disp -time -node 9 14 19 -dof 1 2
@@ -243,7 +248,6 @@ analysis Transient
 
 # Perform the analysis
 analyze 1000 0.01
-
 
 
 

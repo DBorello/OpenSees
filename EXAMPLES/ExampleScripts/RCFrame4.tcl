@@ -22,8 +22,8 @@
 # NOTE: to RUN this example, run the g3 interpreter and 
 #       type the command: source RCFrame4.tcl
 #
-# $Revision: 1.1.1.1 $
-# $Date: 2000-09-15 08:23:09 $
+# $Revision: 1.2 $
+# $Date: 2000-12-14 08:21:07 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/RCFrame4.tcl,v $
 
 
@@ -158,8 +158,10 @@ if {$analysis == "LINEAR"} {
 }
 
 
-#                         tag dir  factor      fileName  timeInterval
-pattern UniformExcitation  1   1   $g   -accel tabasFN.txt 0.02
+set Series "Path -filePath tabasFN.txt -dt 0.02 -factor $g"
+
+#                         tag dir        accel series
+pattern UniformExcitation  1   1  -accel   $Series
 
 # Create a recorder which writes to Node.out and prints
 # the current time and all dof displacement at node 3 and 2
