@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2004-09-01 03:52:56 $
+// $Revision: 1.5 $
+// $Date: 2005-01-14 23:45:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/TclSnapMaterialCommand.cpp,v $
 
 // Written: Arash Altoontash, Gregory Deierlein,
@@ -370,10 +370,6 @@ TclModelBuilder_addSnapMaterial(ClientData clientData, Tcl_Interp *interp, int a
 		theMaterial = new PinchingDamage(tag, input, strength, stiffness, accelerated, capping);
 	}
 	
-	if (theMaterial == 0) {
-		opserr << "WARNING SNAP material model could not be created\n";
-		exit (-1);
-	}
 	return theMaterial;
 }
 
