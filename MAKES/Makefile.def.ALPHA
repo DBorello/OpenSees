@@ -57,6 +57,9 @@ DIRS        = $(SUPERLUdir) $(ARPACKdir) $(UMFPACKdir) $(METISdir) $(SRCdir)
 # library!!
 
 FE_LIBRARY      = $(HOME)/lib/libOpenSees.a
+NDARRAY_LIBRARY = $(HOME)/lib/libndarray.a # BJ_UCD jeremic@ucdavis.edu
+MATMOD_LIBRARY  = $(HOME)/lib/libmatmod.a  # BJ_UCD jeremic@ucdavis.edu
+BJMISC_LIBRARY  = $(HOME)/lib/libBJmisc.a  # BJ_UCD jeremic@ucdavis.edu
 LAPACK_LIBRARY  = -ldxml
 BLAS_LIBRARY    = 
 SUPERLU_LIBRARY = $(HOME)/lib/libSuperLU.a

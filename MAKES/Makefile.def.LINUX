@@ -62,6 +62,9 @@ DIRS        = $(BLASdir) $(CBLASdir) $(LAPACKdir) \
 # make sure the directory exsists where you want the library to go!
 
 FE_LIBRARY      = $(HOME)/lib/libOpenSees.a
+NDARRAY_LIBRARY = $(HOME)/lib/libndarray.a # BJ_UCD jeremic@ucdavis.edu
+MATMOD_LIBRARY  = $(HOME)/lib/libmatmod.a  # BJ_UCD jeremic@ucdavis.edu
+BJMISC_LIBRARY  = $(HOME)/lib/libBJmisc.a  # BJ_UCD jeremic@ucdavis.edu
 LAPACK_LIBRARY  = $(HOME)/lib/libLapack.a
 BLAS_LIBRARY    = $(HOME)/lib/libBlas.a
 SUPERLU_LIBRARY = $(HOME)/lib/libSuperLU.a
