@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2001-12-07 00:44:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.h,v $
                                                                         
                                                                         
@@ -55,6 +55,7 @@ class SingleDomEleIter;
 class PartitionedDomain: public Domain
 {
   public:
+    PartitionedDomain();    
     PartitionedDomain(DomainPartitioner &thePartitioner);    
 
     PartitionedDomain(int numNodes, int numElements, 
@@ -88,9 +89,13 @@ class PartitionedDomain: public Domain
     virtual  void applyLoad(double pseudoTime);
     virtual  void setLoadConstant(void);    
 
-    virtual  int update(void);        
     virtual  int commit(void);    
     virtual  int revertToLastCommit(void);        
+    virtual  int revertToStart(void);    
+
+    virtual  int update(void);        
+    virtual  int update(double newTime, double dT);
+
     
     virtual  void Print(ostream &s, int flag =0);    
 
@@ -109,7 +114,7 @@ class PartitionedDomain: public Domain
     friend class PartitionedDomainEleIter;
     
   protected:    
-    DomainPartitioner &getPartitioner(void) const;
+    DomainPartitioner *getPartitioner(void) const;
     virtual int buildEleGraph(Graph *theEleGraph);
     
   private:

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2001-12-07 00:44:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/partitioned/PartitionedDomain.cpp,v $
                                                                         
                                                                         
@@ -57,6 +57,29 @@
 #include <SingleDomEleIter.h>
 #include <Vertex.h>
 #include <Graph.h>
+
+PartitionedDomain::PartitionedDomain()
+:Domain(),
+ theSubdomains(0),theDomainPartitioner(0),
+ theSubdomainIter(0), mySubdomainGraph(0)
+{
+    elements = new ArrayOfTaggedObjects(1024);    
+    theSubdomains = new ArrayOfTaggedObjects(32);
+    theSubdomainIter = new PartitionedDomainSubIter(theSubdomains);
+
+    mainEleIter = new SingleDomEleIter(elements);    
+    theEleIter = new PartitionedDomainEleIter(this);
+    
+    if (theSubdomains == 0 || elements == 0 ||
+	theSubdomainIter == 0 || 
+	theEleIter == 0 || mainEleIter == 0) {
+	
+	cerr << "FATAL: PartitionedDomain::PartitionedDomain ";
+	cerr << "  - ran out of memory\n";
+	exit(-1);
+    }
+}
+
 
 PartitionedDomain::PartitionedDomain(DomainPartitioner &thePartitioner)
 :Domain(),
@@ -98,7 +121,7 @@ PartitionedDomain::PartitionedDomain(int numNodes, int numElements,
     theEleIter = new PartitionedDomainEleIter(this);
     
     if (theSubdomains == 0 || elements == 0 ||
-	theSubdomainIter == 0 || theDomainPartitioner == 0 ||
+	theSubdomainIter == 0 || 
 	theEleIter == 0 || mainEleIter == 0) {
 	
 	cerr << "FATAL: PartitionedDomain::PartitionedDomain(int ..) ";
@@ -470,6 +493,26 @@ PartitionedDomain::update(void)
     return 0;
 }
 
+
+int
+PartitionedDomain::update(double newTime, double dT)
+{
+  this->Domain::applyLoad(newTime);
+  this->Domain::update();
+
+
+  // do the same for all the subdomains
+  if (theSubdomains != 0) {
+    ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+    TaggedObject *theObject;
+    while ((theObject = theSubsIter()) != 0) {
+      Subdomain *theSub = (Subdomain *)theObject;	    
+      theSub->newStep(dT);
+    }
+  }
+  return 0;
+}
+
 int
 PartitionedDomain::commit(void)
 {
@@ -494,9 +537,9 @@ PartitionedDomain::commit(void)
 	}
     }
 
-    // now we load balance if we have subdomains
+    // now we load balance if we have subdomains and a partitioner
     int numSubdomains = this->getNumSubdomains();
-    if (numSubdomains != 0) 
+    if (numSubdomains != 0 && theDomainPartitioner != 0) 
 	theDomainPartitioner->balance(this->getSubdomainGraph());
     
     return 0;
@@ -519,6 +562,33 @@ PartitionedDomain::revertToLastCommit(void)
 	while ((theObject = theSubsIter()) != 0) {
 	    Subdomain *theSub = (Subdomain *)theObject;	    
 	    int res = theSub->revertToLastCommit();
+	    if (res < 0) {
+		cerr << "PartitionedDomain::revertToLastCommit(void)";
+		cerr << " - failed in Subdomain::revertToLastCommit()\n";
+		return res;
+	    }	    
+	}
+    }
+
+    return 0;
+}
+
+int
+PartitionedDomain::revertToStart(void)
+{
+    int result = this->Domain::revertToStart();
+    if (result < 0) {
+	cerr << "PartitionedDomain::revertToLastCommit(void) - failed in Domain::revertToLastCommit()\n";
+	return result;
+    }
+
+    // do the same for all the subdomains
+    if (theSubdomains != 0) {
+	ArrayOfTaggedObjectsIter theSubsIter(*theSubdomains);	
+	TaggedObject *theObject;
+	while ((theObject = theSubsIter()) != 0) {
+	    Subdomain *theSub = (Subdomain *)theObject;	    
+	    int res = theSub->revertToStart();
 	    if (res < 0) {
 		cerr << "PartitionedDomain::revertToLastCommit(void)";
 		cerr << " - failed in Subdomain::revertToLastCommit()\n";
@@ -572,10 +642,14 @@ PartitionedDomain::partition(int numPartitions)
 	}
     } 
     // now we call partition on the domainPartitioner which does the partitioning
-    DomainPartitioner &thePartitioner = this->getPartitioner();
-    thePartitioner.setPartitionedDomain(*this);
-
-    return thePartitioner.partition(numPartitions);
+    DomainPartitioner *thePartitioner = this->getPartitioner();
+    if (thePartitioner != 0) {
+      thePartitioner->setPartitionedDomain(*this);
+      return thePartitioner->partition(numPartitions);
+    } else {
+      cerr << "PartitionedDomain::partition(int numPartitions) - no associated partitioner\n";
+      return -1;
+    }
 }   
 
 bool 
@@ -620,10 +694,10 @@ PartitionedDomain::getSubdomains(void)
 
 
 
-DomainPartitioner &
+DomainPartitioner *
 PartitionedDomain::getPartitioner(void) const
 {
-    return *theDomainPartitioner;
+    return theDomainPartitioner;
 }
 	
 
