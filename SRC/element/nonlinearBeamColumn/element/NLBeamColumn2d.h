@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-02-27 17:15:16 $
+// $Revision: 1.16 $
+// $Date: 2004-06-07 23:42:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.h,v $
                                                                         
                                                                         
@@ -162,7 +162,7 @@ class NLBeamColumn2d: public Element
     static Vector *vsSubdivide; 
     static Matrix *fsSubdivide; 
     static Vector *SsrSubdivide;
-    static int NLBeamColumn2d::maxNumSections;
+    static int maxNumSections;
 };
 
 #endif
