@@ -47,15 +47,6 @@ PySimple1::PySimple1()
 :UniaxialMaterial(0,0),
  soilType(0), pult(0.0), y50(0.0), drag(0.0), dashpot(0.0)
 {
-  // Initialize variables .. WILL NOT WORK AS NOTHING SET
-  // this->revertToStart();
-
-  // need to set iterations and tolerance
-
-  // BTW maxIterations and tolerance should not be private variables, they
-  // should be static .. all PySimple1 materials share the same values & 
-  // these values don't change
-
   PYmaxIterations = 20;
   PYtolerance     = 1.0e-12;
 }
@@ -89,6 +80,10 @@ void PySimple1::getGap(double ylast, double dy, double dy_old)
 	getDrag(ylast,dy);
 	TGap_p = TDrag_p + TClose_p;
 	TGap_tang = TDrag_tang + TClose_tang;
+
+	// Ensure that |p|<pmax.
+	//
+	if(fabs(TGap_p)>=pult) TGap_p =(TGap_p/fabs(TGap_p))*(1.0-PYtolerance)*pult;
 
 	return;
 }
@@ -248,6 +243,7 @@ void PySimple1::getNearField(double ylast, double dy, double dy_old)
 	if(CNF_p > CNFpinr && NFdy <0.0){				// from pos to neg
 		changeDirection = true;
 		TNFpinr = CNF_p;
+		if(fabs(TNFpinr)>=(1.0-PYtolerance)*pult){TNFpinr=(1.0-2.0*PYtolerance)*pult;}
 		TNFpinl = TNFpinr - 2.0*pult*Elast;
 		if (TNFpinl > -minE*pult) {TNFpinl = -minE*pult;}
 		TNFyinr = CNF_y;
@@ -256,6 +252,7 @@ void PySimple1::getNearField(double ylast, double dy, double dy_old)
 	if(CNF_p < CNFpinl && NFdy > 0.0){				// from neg to pos
 		changeDirection = true;
 		TNFpinl = CNF_p;
+		if(fabs(TNFpinl)>=(1.0-PYtolerance)*pult){TNFpinl=(-1.0+2.0*PYtolerance)*pult;}
 		TNFpinr = TNFpinl + 2.0*pult*Elast;
 		if (TNFpinr < minE*pult) {TNFpinr = minE*pult;}
 		TNFyinl = CNF_y;
@@ -353,7 +350,6 @@ PySimple1::setTrialStrain (double newy, double yRate)
 	for (int j=1; j < PYmaxIterations; j++)
 	{
 		Tp = Tp + dp;
-		if(fabs(Tp) >(1.0-PYtolerance)*pult) Tp=(1.0-PYtolerance)*pult*(Tp/fabs(Tp));
 
 		// Stress & strain update in Near Field element
 		double dy_nf = (Tp - TNF_p)/TNF_tang;
@@ -455,6 +451,11 @@ PySimple1::getDampTangent(void)
 	//
 	if(DampTangent < TFar_tang * 1.0e-12) DampTangent = TFar_tang * 1.0e-12;
 
+	// Check if damping force is being limited
+	//
+	double totalForce = Tp + dashpot * TyRate * ratio_disp;
+	if(fabs(totalForce) >= (1.0-PYtolerance)*pult) DampTangent = 0.0;
+
 	return DampTangent;
 }
 /////////////////////////////////////////////////////////////////////
@@ -518,11 +519,7 @@ PySimple1::commitState(void)
 int 
 PySimple1::revertToLastCommit(void)
 {
-  // Nothing to do here -- WRONG -- have a look at setTrialStrain() .. everything
-  // calculated based on trial values & trial values updated in method .. need to 
-  // reset to committed values
-  
-  // for convenience i am just gonna do the reverse of commit
+  // Reset to committed values
   
   Ty       = Cy;
   Tp       = Cp;
