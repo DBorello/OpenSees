@@ -35,7 +35,7 @@ class MDYieldSurface : public YieldSurface
   private:		  // Private vars to define the Mazari-Dafalias Yield Surface
 
   public:
-    MDYieldSurface *newObj();                  //create a colne of itself
+    YieldSurface *newObj();                  //create a colne of itself
     MDYieldSurface();                          // Default constructor
     //MDYieldSurface(const MDYieldSurface &);  // Default constructor
 

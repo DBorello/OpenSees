@@ -39,7 +39,7 @@ class VMPotentialSurface : public PotentialSurface
   private:		  
   
   public:
-    VMPotentialSurface *newObj();  //create a colne of itself
+    PotentialSurface *newObj();  //create a colne of itself
     VMPotentialSurface ( ) {}      // Default constructor
     //VMPotentialSurface (const VMPotentialSurface & );   // copy constructor
 

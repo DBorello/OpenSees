@@ -1,6 +1,6 @@
 
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-10-10 05:31:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/BJtensor.h,v $
 
 //#############################################################################
@@ -75,6 +75,7 @@
 
 #include "nDarray.h"
 #include "BJmatrix.h"
+#include <iostream.h>
 
 
 class BJtensor : public nDarray
@@ -142,12 +143,17 @@ class BJtensor : public nDarray
 //K    char *BJtensor::f_indices2( ) const;
     char *f_indices2( ) const;
 
+    
+    friend ostream &operator<<(ostream &s, const BJtensor &t);    
+    
   private:
 //K    int BJtensor::contracted_ind(char *, char *, int *, int *, int , int );
 //K    int BJtensor::uncontracted_ind(int *, int *, int);
     int contracted_ind(char *, char *, int *, int *, int , int );
     int uncontracted_ind(int *, int *, int);
 
+    
+    
 };
 
 #endif

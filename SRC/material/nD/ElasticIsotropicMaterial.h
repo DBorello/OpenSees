@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2000-10-10 05:31:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.h,v $
                                                                         
                                                                         
@@ -67,7 +67,16 @@ class ElasticIsotropicMaterial : public NDMaterial
     virtual int setTrialStrainIncr (const Vector &v, const Vector &r);
     virtual const Matrix &getTangent (void);
     virtual const Vector &getStress (void);
-	virtual const Vector &getStrain (void);
+    virtual const Vector &getStrain (void);
+
+    int setTrialStrain (const Tensor &v);
+    int setTrialStrain (const Tensor &v, const Tensor &r);
+    int setTrialStrainIncr (const Tensor &v);
+    int setTrialStrainIncr (const Tensor &v, const Tensor &r);
+    const Tensor &getTangentTensor (void);
+    const Tensor &getStressTensor (void);
+    const Tensor &getStrainTensor (void);
+    
     
     virtual int commitState (void);
     virtual int revertToLastCommit (void);

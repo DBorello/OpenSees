@@ -2,17 +2,6 @@
 #  Created: Aug2000
 
 
-
-# #LD = /usr/local/gnu/bin/ld
-# MACHINE = LINUX
-# 
-# #MPI_INCLUDE_DIR = -I/home/zhyang/mpich/include
-# MPI_INCLUDE_DIR = -I/usr/local/mpi/mpich/include
-# #zhaohui
-# MPI_LIB_DIR     = -L/usr/local/mpi/mpich/lib
-# #MPI_LIB_DIR     = -L/home/zhyang/mpich/build/LINUX/ch_p4/lib  
-# 
-
 include ../../../../Makefile.def
 
 
@@ -27,8 +16,6 @@ OBJS  = Template3Dep.o \
         EL_S.o	  \
         EL_T.o	  \
         EPState.o \
-        MD_PS.o	  \
-        MD_YS.o	  \
         VM_PS.o	  \
         VM_YS.o	  \
         YS.o	  \
@@ -44,7 +31,10 @@ OBJS  = Template3Dep.o \
         mrslade.o \
         parabol.o \
         plastbas.o\
-        vmises.o  \
+        vmises.o  
+
+#        MD_PS.o	  \
+#        MD_YS.o	  \
 #        MD_EL.o	  \
 #        bmodel.o  \
 #        ldemodel.o\
@@ -60,8 +50,6 @@ all: $(OBJS)
 
 libmatmod.a: $(OBJS)
 	$(AR) -rv $(MATMOD_LIBRARY) $(OBJS)
-
-
 
 
 # Miscellaneous

@@ -40,7 +40,7 @@ class VMYieldSurface : public YieldSurface
   
   public:
     // Create a colne of itself
-    VMYieldSurface *newObj();  
+    YieldSurface *newObj();  
 
     // Default constructor
     VMYieldSurface ( ) {}     

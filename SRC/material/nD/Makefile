@@ -5,6 +5,7 @@ OBJS       = NDMaterial.o ElasticIsotropic3D.o ElasticIsotropicMaterial.o \
 	TclModelBuilderNDMaterialCommand.o
 
 all:	$(OBJS)
+	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE);
 
 # Miscellaneous
 
@@ -15,6 +16,7 @@ clean: tidy
 	@$(RM) $(RMFLAGS) $(OBJS) *.o
 
 spotless: clean
+	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE) wipe;
 
 wipe: spotless
 

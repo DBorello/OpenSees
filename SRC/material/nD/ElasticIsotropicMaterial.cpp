@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $                                                              
-// $Date: 2000-10-07 06:49:37 $                                                                  
+// $Revision: 1.3 $                                                              
+// $Date: 2000-10-10 05:31:36 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -305,4 +305,16 @@ ElasticIsotropicMaterial::Print (ostream &s, int flag)
 	s << "\tv:  " << v << endl;
 
 	return;
+}
+
+int 
+ElasticIsotropicMaterial::setParameter(char **argv, int argc, Information &info)
+{
+  return -1;
+}
+
+int 
+ElasticIsotropicMaterial::updateParameter(int parameterID, Information &info)
+{ 
+  return -1;
 }

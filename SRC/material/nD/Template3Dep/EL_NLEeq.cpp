@@ -49,7 +49,7 @@ EvolutionLaw_NL_Eeq::EvolutionLaw_NL_Eeq(const EvolutionLaw_NL_Eeq &NLE ) {
 //================================================================================
 //  Create a clone of itself 
 //================================================================================
-EvolutionLaw_NL_Eeq * EvolutionLaw_NL_Eeq::newObj() {
+EvolutionLaw_S * EvolutionLaw_NL_Eeq::newObj() {
     
     EvolutionLaw_NL_Eeq *newEL = new EvolutionLaw_NL_Eeq( *this );
     

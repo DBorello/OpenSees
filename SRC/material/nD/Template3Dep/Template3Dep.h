@@ -215,7 +215,7 @@ class Template3Dep : public NDMaterial
     tensor ElasticComplianceTensor(void) const;
     tensor ElasticStiffnessTensor(void) const;
 
-   private:
+    // private:  fmk - COMMENTED OUT THIS LINE 
     YieldSurface * getYS() const;
     PotentialSurface * getPS() const;
 

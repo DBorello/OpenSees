@@ -12,6 +12,7 @@ FE_INCLUDES        = -I$(FE)/matrix \
 		-I$(FE)/material/state/deformation \
 		-I$(FE)/material/state/strength \
 		  -I$(FE)/material/nD \
+		  -I$(FE)/material/nD/Template3Dep \
 		  -I$(FE)/material/section \
 		  -I$(FE)/material/section/repres/cell \
 		  -I$(FE)/material/section/repres/patch \
@@ -59,6 +60,7 @@ FE_INCLUDES        = -I$(FE)/matrix \
 		  -I$(FE)/element/zeroLength	\
 		  -I$(FE)/element/fourNodeQuad	\
 		  -I$(FE)/element/beamWithHinges \
+		  -I$(FE)/element/8nbrick \
 		  -I$(FE)/analysis    \
 		  -I$(FE)/analysis/analysis \
 		  -I$(FE)/analysis/handler \

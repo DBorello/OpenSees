@@ -53,7 +53,7 @@ DPPotentialSurface::DPPotentialSurface(const DPPotentialSurface &DPPS ) {
 //create a colne of itself
 //================================================================================
 
-DPPotentialSurface * DPPotentialSurface::newObj() {  
+PotentialSurface * DPPotentialSurface::newObj() {  
 
      DPPotentialSurface  *new_PS = new DPPotentialSurface( this->getalfa2() );
      return new_PS;

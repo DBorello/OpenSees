@@ -25,7 +25,7 @@ all:
 	@$(CD) $(FE)/coordTransformation; $(MAKE);
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS)\
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
-	$(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)  \
+	$(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)  $(JERMANIC_LIBS)\
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ERRORHANDLER_LIBS)
@@ -86,6 +86,9 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 ERRORHANDLER_LIBS = $(FE)/handler/ErrorHandler.o \
 	$(FE)/handler/ConsoleErrorHandler.o 
 
+
+JERMANIC_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o 
+
 RENDERER_LIBS = $(FE)/renderer/db.o \
 	$(FE)/renderer/View.o \
 	$(FE)/renderer/Projection.o \
@@ -121,6 +124,8 @@ MATRIX_LIBS   = $(FE)/matrix/Matrix.o \
 	$(FE)/matrix/BJtensor.o \
 	$(FE)/matrix/BJmatrix.o \
 	$(FE)/matrix/BJvector.o \
+	$(FE)/matrix/straint.o \
+	$(FE)/matrix/stresst.o \
 	$(FE)/matrix/basics.o
 
 TAGGED_LIBS =   $(FE)/tagged/TaggedObject.o \

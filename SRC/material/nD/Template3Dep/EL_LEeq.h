@@ -50,7 +50,7 @@ class EvolutionLaw_L_Eeq : public EvolutionLaw_S
                          
     EvolutionLaw_L_Eeq(const EvolutionLaw_L_Eeq &LEL );   // Copy constructor
     
-    EvolutionLaw_L_Eeq *newObj();                     //create a colne of itself
+    EvolutionLaw_S *newObj();                     //create a colne of itself
     
     //void InitVars(EPState *EPS);    // Initialize all hardening vars called only once 
     //                                // after material point is formed if necessary.

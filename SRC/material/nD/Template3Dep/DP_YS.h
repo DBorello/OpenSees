@@ -52,7 +52,7 @@ class DPYieldSurface : public YieldSurface
     //double alfa1;	  // Cone orientation angle now in EPState's first scalar var 
   
   public:
-    DPYieldSurface *newObj();  //create a colne of itself
+    YieldSurface *newObj();  //create a colne of itself
     DPYieldSurface ( ) {}   // Default constructor
     //DPYieldSurface (const DPYieldSurface & );   // copy constructor
 

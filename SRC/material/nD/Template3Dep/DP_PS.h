@@ -53,7 +53,7 @@ class DPPotentialSurface : public PotentialSurface
   public:
     DPPotentialSurface( double a2d = 0.0 ) : alfa2(a2d) {}   // Default constructor
     DPPotentialSurface( const DPPotentialSurface &DPPS ); //Copy constructor
-    DPPotentialSurface *newObj();              //create a colne of itself
+    PotentialSurface *newObj();              //create a colne of itself
     double getalfa2() const;
 
     tensor dQods(const EPState *EPS) const;

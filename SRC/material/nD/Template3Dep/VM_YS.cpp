@@ -39,7 +39,7 @@
 //create a colne of itself
 //================================================================================
 
-VMYieldSurface * VMYieldSurface::newObj() {  
+YieldSurface * VMYieldSurface::newObj() {  
 
      VMYieldSurface  *new_YS = new VMYieldSurface();
      return new_YS;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:15 $
+// $Revision: 1.2 $
+// $Date: 2000-10-10 05:31:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -96,6 +96,9 @@
 #define ND_TAG_ElasticIsotropic					10
 #define ND_TAG_ElasticIsotropicPlaneStrain2d	11
 #define ND_TAG_ElasticIsotropicPlaneStress2d	12
+#define ND_TAG_ElasticIsotropic3D               21
+#define ND_TAG_Template3Dep 			31
+
 
 #define FIBER_TAG_Uniaxial2d	1
 #define FIBER_TAG_Uniaxial3d	2

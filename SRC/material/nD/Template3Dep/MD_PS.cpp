@@ -40,7 +40,7 @@ MDPotentialSurface::MDPotentialSurface( ) { }
 //create a colne of itself
 //================================================================================
 
-MDPotentialSurface * MDPotentialSurface::newObj() {  
+PotentialSurface * MDPotentialSurface::newObj() {  
 
      MDPotentialSurface  *new_PS = new MDPotentialSurface();
      return new_PS;

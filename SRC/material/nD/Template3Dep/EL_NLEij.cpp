@@ -47,7 +47,7 @@ EvolutionLaw_NL_Eij::EvolutionLaw_NL_Eij(const EvolutionLaw_NL_Eij &LE ) {
 //================================================================================
 //  Create a clone of itself 
 //================================================================================
-EvolutionLaw_NL_Eij * EvolutionLaw_NL_Eij::newObj() {
+EvolutionLaw_T * EvolutionLaw_NL_Eij::newObj() {
     
     EvolutionLaw_NL_Eij *newEL = new EvolutionLaw_NL_Eij( *this );
     

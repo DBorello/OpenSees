@@ -39,7 +39,7 @@
 //create a colne of itself
 //================================================================================
 
-VMPotentialSurface * VMPotentialSurface::newObj() {  
+PotentialSurface * VMPotentialSurface::newObj() {  
 
      VMPotentialSurface  *new_YS = new VMPotentialSurface();
      return new_YS;

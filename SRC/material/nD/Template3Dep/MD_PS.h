@@ -43,7 +43,7 @@ class MDPotentialSurface : public PotentialSurface
 {
 
   public:
-    MDPotentialSurface *newObj();  //create a colne of itself
+    PotentialSurface *newObj();  //create a colne of itself
     MDPotentialSurface();          // Default constructor
 
     tensor dQods(const EPState *EPS) const; 

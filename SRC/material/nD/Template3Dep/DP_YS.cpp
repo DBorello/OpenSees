@@ -45,7 +45,7 @@
 //create a colne of itself
 //================================================================================
 
-DPYieldSurface * DPYieldSurface::newObj() {  
+YieldSurface * DPYieldSurface::newObj() {  
 
      DPYieldSurface  *new_YS = new DPYieldSurface();
      return new_YS;
