@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-05-15 21:45:35 $
+// $Revision: 1.9 $
+// $Date: 2004-11-24 23:58:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.cpp,v $
                                                                         
 // Written: fmk 
@@ -105,7 +105,8 @@ TclFeViewer_clearImage(ClientData clientData, Tcl_Interp *interp, int argc,
 TclFeViewer::TclFeViewer(const char *title, int xLoc, int yLoc, int width, int height,
 			 Domain &_theDomain, int WipeFlag,
 			 Tcl_Interp *interp)
-  :theMap(0),theRenderer(0), theDomain(&_theDomain), 
+  :Recorder(RECORDER_TAGS_TclFeViewer),
+  theMap(0),theRenderer(0), theDomain(&_theDomain), 
   theEleMode(-1), theNodeMode(-1), theDisplayFact(1), wipeFlag(WipeFlag),
   vrpSet(0),vpwindowSet(0),clippingPlaneDistancesSet(0)
 {
@@ -167,9 +168,10 @@ TclFeViewer::TclFeViewer(const char *title, int xLoc, int yLoc, int width, int h
 			 const char *fileName,
 			 Domain &_theDomain,
 			 Tcl_Interp *interp)
-  :theMap(0),theRenderer(0), theDomain(&_theDomain),
+  :Recorder(RECORDER_TAGS_TclFeViewer),
+   theMap(0),theRenderer(0), theDomain(&_theDomain),
    theEleMode(-1), theNodeMode(-1), theDisplayFact(1), wipeFlag(1), 
-  vrpSet(0),vpwindowSet(0),clippingPlaneDistancesSet(0)
+   vrpSet(0),vpwindowSet(0),clippingPlaneDistancesSet(0)
 {
 
   // set the static pointer used in the class
@@ -312,10 +314,10 @@ TclFeViewer::playback(int cTag)
   return 0;
 }
 
-void
+int
 TclFeViewer::restart(void)
 {
-    
+  return 0;
 }
 
 

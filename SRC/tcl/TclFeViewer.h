@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-05-15 21:45:35 $
+// $Revision: 1.7 $
+// $Date: 2004-11-24 23:58:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.h,v $
                                                                         
                                                                         
@@ -63,7 +63,7 @@ class TclFeViewer : public Recorder
     
     int record(int commitTag, double timeStamp);
     int playback(int commitTag);
-    void restart(void);    
+    int restart(void);    
 
     // methods invoked on the ViewingSystem
     int setVRP(float, float, float); // point on view plane    
