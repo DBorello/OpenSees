@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-31 01:34:06 $
+// $Revision: 1.3 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.h,v $
                                                                         
 // Written: fmk
@@ -60,7 +60,7 @@ class FiberSection3d : public SectionForceDeformation
     int   revertToStart(void);
  
     SectionForceDeformation *getCopy(void);
-    const ID &getType (void) const;
+    const ID &getType (void);
     int getOrder (void) const;
     
     int sendSelf(int cTag, Channel &theChannel);

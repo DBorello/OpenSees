@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:45:31 $
+// $Revision: 1.3 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -342,7 +342,7 @@ SectionAggregator::getCopy(void)
 }
 
 const ID&
-SectionAggregator::getType () const
+SectionAggregator::getType ()
 {
     return *code;
 }

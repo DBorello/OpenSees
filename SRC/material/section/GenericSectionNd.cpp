@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSectionNd.cpp,v $
                                                                         
                                                                         
@@ -133,7 +133,7 @@ GenericSectionNd::revertToStart ()
 }
 
 const ID&
-GenericSectionNd::getType () const
+GenericSectionNd::getType ()
 {
     return *code;
 }

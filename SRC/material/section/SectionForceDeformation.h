@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-20 00:37:25 $
+// $Revision: 1.5 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.h,v $
                                                                         
                                                                         
@@ -77,7 +77,7 @@ class SectionForceDeformation : public Material
 		virtual int revertToStart (void) = 0;
 
 		virtual SectionForceDeformation *getCopy (void) = 0;
-		virtual const ID &getType (void) const = 0;
+		virtual const ID &getType (void) = 0;
 		virtual int getOrder (void) const = 0;
 
 		virtual Response *setResponse(char **argv, int argc, Information &info);

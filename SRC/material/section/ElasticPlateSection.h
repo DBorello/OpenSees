@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-26 23:36:20 $
+// $Revision: 1.5 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticPlateSection.h,v $
 
 // Ed "C++" Love
@@ -67,7 +67,7 @@ class ElasticPlateSection : public SectionForceDeformation {
     int getOrder( ) const ;
 
     //send back order of strain in vector form
-    const ID& getType( ) const ;
+    const ID& getType( ) ;
 
     //swap history variables
     int commitState( ) ; 

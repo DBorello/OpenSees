@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-01-06 20:00:48 $
+// $Revision: 1.4 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/MembranePlateFiberSection.cpp,v $
 
 // Ed "C++" Love
@@ -126,7 +126,7 @@ int MembranePlateFiberSection::getOrder( ) const
 
 
 //send back order of strainResultant in vector form
-const ID& MembranePlateFiberSection::getType( ) const 
+const ID& MembranePlateFiberSection::getType( ) 
 {
   return array ;
 }

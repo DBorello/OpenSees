@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.h,v $
                                                                         
                                                                         
@@ -65,7 +65,7 @@ class GenericSection1d : public SectionForceDeformation
     int revertToStart (void);
     
     SectionForceDeformation *getCopy (void);
-    const ID &getType (void) const;
+    const ID &getType (void);
     int getOrder (void) const;
     
     int sendSelf (int commitTag, Channel &theChannel);

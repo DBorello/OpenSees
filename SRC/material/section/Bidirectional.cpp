@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-04-09 05:39:45 $
+// $Revision: 1.3 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/Bidirectional.cpp,v $
 
 #include <Bidirectional.h>           
@@ -277,7 +277,7 @@ Bidirectional::getCopy(void)
 }
 
 const ID&
-Bidirectional::getType(void) const
+Bidirectional::getType(void)
 {
 	return code;
 }

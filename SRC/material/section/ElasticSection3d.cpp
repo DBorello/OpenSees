@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-22 07:33:54 $
+// $Revision: 1.3 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.cpp,v $
                                                                         
                                                                         
@@ -244,7 +244,7 @@ ElasticSection3d::getCopy ()
 }
 
 const ID&
-ElasticSection3d::getType () const
+ElasticSection3d::getType ()
 {
     return code;
 }

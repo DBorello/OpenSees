@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-22 07:33:54 $
+// $Revision: 1.3 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection2d.h,v $
                                                                         
                                                                         
@@ -67,7 +67,7 @@ class ElasticSection2d: public SectionForceDeformation
     const Matrix &getSectionFlexibility (void);
     
     SectionForceDeformation *getCopy (void);
-    const ID &getType (void) const;
+    const ID &getType (void);
     int getOrder (void) const;
     
     int sendSelf (int commitTag, Channel &theChannel);

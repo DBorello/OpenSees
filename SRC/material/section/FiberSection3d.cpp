@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-08-10 17:57:39 $
+// $Revision: 1.6 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -318,7 +318,7 @@ FiberSection3d::getCopy(void)
 }
 
 const ID&
-FiberSection3d::getType () const
+FiberSection3d::getType ()
 {
   return code;
 }

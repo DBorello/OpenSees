@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-28 00:03:55 $
+// $Revision: 1.3 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.cpp,v $
                                                                         
                                                                         
@@ -141,7 +141,7 @@ GenericSection1d::revertToStart ()
 }
 
 const ID&
-GenericSection1d::getType () const
+GenericSection1d::getType ()
 {
 	static ID c(1);	// static for class-wide returns
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-22 07:33:23 $
+// $Revision: 1.4 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection.cpp,v $
                                                                         
 // Written: MHS
@@ -242,7 +242,7 @@ FiberSection::getCopy(void)
 }
 
 const ID&
-FiberSection::getType () const
+FiberSection::getType ()
 {
     return *code;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-01-06 20:00:48 $
+// $Revision: 1.5 $
+// $Date: 2002-05-16 19:50:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticPlateSection.cpp,v $
 
 // Ed "C++" Love
@@ -92,7 +92,7 @@ int ElasticPlateSection::getOrder( ) const
 
 
 //send back order of strain in vector form
-const ID& ElasticPlateSection::getType( ) const 
+const ID& ElasticPlateSection::getType( ) 
 {
   return array ;
 }
