@@ -55,26 +55,36 @@ fix 20 0 1 1
 
 # specific large deformation material model
 
-# Neo-Hookean
-#set WE "-NH 11.83e5 0.4"
-
-## Logarithmic
-set WE "-Log 11.83e5 0.4"
-
-## Ogden
-#set WE "-Ogden 11.83e5 0.4 3 6.3e5 0.012e5 -0.1e5 1.3 5.0 -2.0"
-
-#Mooney-Rivlin
-#set WE "-MR 11.83e5 0.4 1.8484375e5 0.2640625e5"
-
 # finite deformation elastic 3D material model
-nDMaterial FiniteDeformationElastic3D 1 -WEnergy $WE 0.0
+nDMaterial FiniteDeformationElastic3D 1 NeoHookean3D 1971.67 422.5 0.0
+
+## Von Mises *****************************************
+## finite deformation yield function
+set fdy "-VM 60"
+## finite deformation flow rule
+set fdf "-VM 60"
+## finite deformation isotropic (scalar) evolution law
+set fdes "-LS 500.0"
+## finite deformation kinematic (tensor) evolution law
+set fdet "-Linear 0.0"
+
+## Druke-Prager **************************************
+# fd yield surface
+#set fdy "-DP 0 30"
+# fd flow rule
+#set fdf "-DP 5"
+# fd isotropic (scalar) evolution law
+#set fdes "-LS 100.0"
+
+# finite deformation material
+nDMaterial FiniteDeformationEP3D 2  1 -fdY $fdy -fdF $fdf -fdES $fdes -fdET $fdet
+#nDMaterial FiniteDeformationEP3D 2  1 -fdY $fdy -fdF $fdf -fdES $fdes
 
 # total lagrangian finite deformation node brick
-element TLFD20nBrick 1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 1 0.0 0.0 0.0
+element TLFD20nBrick 1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 2 0.0 0.0 0.0
 
-set load1 -2.0e5
-set load2 8.0e5
+set load1 -200
+set load2 800
 
 pattern Plain 1 "Linear"      {
            load   1  $load1 0 0
@@ -100,7 +110,7 @@ equalDOF 17  20  1  1
 #
 
 
-set ndz 0.02
+set ndz 0.01
 
 #integrator LoadControl 0.01
 integrator DisplacementControl 1 1 $ndz 2 $ndz $ndz
@@ -111,14 +121,14 @@ algorithm Newton
 numberer Plain
 analysis Static
 
-set NN2 100
+set NN2 20
 
-#recorder Element 1 -file SSelement.out stress
-#recorder Node  -file SSnode1.out  -node 1 -node 2 -dof 1 disp
-#recorder Element 1 -file SSforce.out force
+recorder Element 1 -file SSelement.out stress
+recorder Node  -file SSnode1.out  -time -node 1 -dof 1
+recorder Element 1 -file SSforce.out force
 
 analyze $NN2
 
-print node 1 2   17 18
+print node 1 2
 
 wipe

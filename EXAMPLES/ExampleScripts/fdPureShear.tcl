@@ -1,7 +1,7 @@
 # Material model: FiniteDeformationElastic3D
 # Element model: TotalLagrangianFD20NodeBrick
 # Pure Shear Test
-# By Zhao Cheng, zcheng@ucdavis.edu
+# Zhao Cheng and Boris Jeremic [zcheng,jeremic]@ucdavis.edu
 
 # wipe previous analysis
 wipeAnalysis
