@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
-// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $
+// $Revision: 1.2 $                                                              
+// $Date: 2000-10-07 06:49:14 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
                                                                         
 // File: ~/material/NDMaterial.C
@@ -51,76 +51,21 @@ NDMaterial::~NDMaterial()
 
 }
 
-int 
-NDMaterial::setTrialStrain(const Tensor &v)
+//Boris Jeremic and Zhaohui Yang
+void
+NDMaterial::setEPS( const EPState &EPS )
 {
-	g3ErrorHandler->warning("%s -- not yet implemented for Tensors",
-		"NDMaterial::setTrialStrain");
-
-	return -1;
+    // Do nothing
+    return;
 }
 
-int 
-NDMaterial::setTrialStrain(const Tensor &v, const Tensor &r)
+EPState *
+NDMaterial::getEPS() const
 {
-	g3ErrorHandler->warning("%s -- not yet implemented for Tensors",
-		"NDMaterial::setTrialStrain");
-
-	return -1;
+    EPState *eps;
+    return   eps;
 }
 
-int 
-NDMaterial::setTrialStrainIncr(const Tensor &v)
-{
-	g3ErrorHandler->warning("%s -- not yet implemented for Tensors",
-		"NDMaterial::setTrialStrainIncr");
-
-	return -1;
-}
-
-int 
-NDMaterial::setTrialStrainIncr(const Tensor &v, const Tensor &r)
-{
-	g3ErrorHandler->warning("%s -- not yet implemented for Tensors",
-		"NDMaterial::setTrialStrainIncr");
-
-	return -1;
-}
-
-const Tensor&
-NDMaterial::getTangentTensor(void)
-{
-	g3ErrorHandler->warning("%s -- not yet implemented",
-		"NDMaterial::getTangentTensor");
-
-	Tensor *newTensor = new Tensor;
-
-	return *newTensor;
-}
-
-const Tensor&
-NDMaterial::getStressTensor(void)
-{
-	g3ErrorHandler->warning("%s -- not yet implemented",
-		"NDMaterial::getStressTensor");
-
-	Tensor *newTensor = new Tensor;
-
-	return *newTensor;
-
-}
-
-const Tensor&
-NDMaterial::getStrainTensor(void)
-{
-	g3ErrorHandler->warning("%s -- not yet implemented",
-		"NDMaterial::getStrainTensor");
-
-	Tensor *newTensor = new Tensor;
-
-	return *newTensor;
-
-}
 
 int
 NDMaterial::setResponse (char **argv, int argc, Information &matInfo)

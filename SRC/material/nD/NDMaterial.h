@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
-// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $
+// $Revision: 1.2 $                                                              
+// $Date: 2000-10-07 06:49:14 $                                                                  
+// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.h,v $                                                                
                                                                         
                                                                         
 #ifndef NDMaterial_h
@@ -41,6 +41,9 @@
 
 #include <Material.h>
 #include <Tensor.h>
+#include <EPState.h>
+#include <YS.h>
+#include <PS.h>
 
 class Matrix;
 class ID;
@@ -61,16 +64,22 @@ class NDMaterial : public Material
     virtual int setTrialStrainIncr(const Vector &v, const Vector &r) = 0;
     virtual const Matrix &getTangent(void) = 0;
     virtual const Vector &getStress(void) = 0;
-	virtual const Vector &getStrain(void) = 0;
+    virtual const Vector &getStrain(void) = 0;
 
     // methods to set and retrieve state using the Tensor class    
-    virtual int setTrialStrain(const Tensor &v);
-    virtual int setTrialStrain(const Tensor &v, const Tensor &r);
-    virtual int setTrialStrainIncr(const Tensor &v);
-    virtual int setTrialStrainIncr(const Tensor &v, const Tensor &r);
-    virtual const Tensor &getTangentTensor(void);
-    virtual const Tensor &getStressTensor(void);
-    virtual const Tensor &getStrainTensor(void);
+    virtual int setTrialStrain(const Tensor &v) = 0;
+    virtual int setTrialStrain(const Tensor &v, const Tensor &r) = 0;    
+    virtual int setTrialStrainIncr(const Tensor &v) = 0;
+    virtual int setTrialStrainIncr(const Tensor &v, const Tensor &r) = 0;
+    virtual const Tensor &getTangentTensor(void) = 0;
+    virtual const Tensor &getStressTensor(void) = 0;
+    virtual const Tensor &getStrainTensor(void) = 0;
+    
+    //Boris Jeremic and Zhaohui added____10-01-2000
+    //set and get the EPState used in Elasto-plastic 3D material
+    virtual void     setEPS( const EPState &EPS );
+    virtual EPState *getEPS( void ) const;  
+    
 
     virtual int commitState(void) = 0;
     virtual int revertToLastCommit(void) = 0;
