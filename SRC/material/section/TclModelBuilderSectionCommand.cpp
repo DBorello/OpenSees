@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2001-09-06 02:22:06 $
+// $Revision: 1.11 $
+// $Date: 2001-11-28 00:03:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -150,24 +150,26 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    theSection = new ElasticSection2d (tag, E, A, Iz);
     }	
 	
-    else if (strcmp(argv[1],"Generic1D") == 0 || strcmp(argv[1],"Generic1d") == 0) {
+    else if (strcmp(argv[1],"Generic1D") == 0 ||
+	     strcmp(argv[1],"Generic1d") == 0 ||
+	     strcmp(argv[1],"Uniaxial") == 0) {
 	if (argc < 5) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: section Generic1D tag? 1DTag? code?" << endl;
+	    cerr << "Want: section Uniaxial tag? 1DTag? code?" << endl;
 	    return TCL_ERROR;
 	}
 
 	int tag, uniTag, code;
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-	    cerr << "WARNING invalid section Generic1D tag" << endl;
+	    cerr << "WARNING invalid section Uniaxial tag" << endl;
 	    return TCL_ERROR;		
 	}
 
 	if (Tcl_GetInt(interp, argv[3], &uniTag) != TCL_OK) {
 	    cerr << "WARNING invalid 1DTag" << endl;
-	    cerr << "Generic1D section: " << tag << endl;	    
+	    cerr << "Uniaxial section: " << tag << endl;	    
 	    return TCL_ERROR;		
 	}
 
@@ -185,7 +187,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	    code = SECTION_RESPONSE_T;
 	else {
 	    cerr << "WARNING invalid code" << endl;
-	    cerr << "Generic1D section: " << tag << endl;
+	    cerr << "Uniaxial section: " << tag << endl;
 	    return TCL_ERROR;		
 	}
 		
@@ -195,7 +197,7 @@ TclModelBuilderSectionCommand (ClientData clientData, Tcl_Interp *interp, int ar
 	if (theMat == 0) {
 	    cerr << "WARNING uniaxial material does not exist\n";
 	    cerr << "uniaxial material: " << uniTag; 
-	    cerr << "\nGeneric1D section: " << tag << endl;
+	    cerr << "\nUniaxial section: " << tag << endl;
 	    return TCL_ERROR;
 	}
 	

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-11-28 00:03:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.cpp,v $
                                                                         
                                                                         
@@ -257,6 +257,7 @@ GenericSection1d::recvSelf(int cTag, Channel &theChannel,
 void
 GenericSection1d::Print (ostream &s, int flag)
 {
-    s << "GenericSection1d, tag: " << this->getTag() << endl;
+    s << "GenericSection1d (Uniaxial), tag: " << this->getTag() << endl;
     s << "\tResponse code: " << code << endl;
+    s << "\tUniaxialMaterial: " << theModel->getTag() << endl;
 }
