@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-11-26 22:53:47 $
+// $Revision: 1.7 $
+// $Date: 2002-12-05 22:18:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -43,12 +43,18 @@
 #include <Node.h>
 #include <Domain.h>
 
+Matrix **Element::theMatrices; 
+Vector **Element::theVectors1; 
+Vector **Element::theVectors2; 
+int  Element::numMatrices(0);
+
 // Element(int tag, int noExtNodes);
 // 	constructor that takes the element's unique tag and the number
 //	of external nodes for the element.
 
 Element::Element(int tag, int cTag) 
-  :DomainComponent(tag, cTag), Ki(0)
+  :DomainComponent(tag, cTag), alphaM(0), betaK(0), betaK0(0), index(-1)
+
 {
     // does nothing
 }
@@ -56,8 +62,7 @@ Element::Element(int tag, int cTag)
 
 Element::~Element() 
 {
-  if (Ki != 0)
-    delete Ki;
+
 }
 
 int
@@ -72,41 +77,219 @@ Element::revertToStart(void)
     return 0;
 }
 
+
 int
-Element::setKi(void) {
-  if (Ki != 0)
-    delete Ki;
+Element::setRayleighDampingFactors(double alpham, double betak, double betak0)
+{
+  alphaM = alpham;
+  betaK  = betak;
+  betaK0 = betak0;
 
-  Ki = new Matrix(this->getTangentStiff());
+  // check that memory has been allocated to store compute/return
+  // damping matrix & residual force calculations
+  if (index == -1) {
+    int numDOF = this->getNumDOF();
+    for (int i=0; i<numMatrices; i++) {
+      Matrix *aMatrix = theMatrices[i];
+      if (aMatrix->noRows() == numDOF) {
+	index = i;
+	i = numMatrices;
+      }
+    }
+    if (index == -1) {
+      Matrix **nextMatrices = new Matrix *[numMatrices+1];
+      if (nextMatrices == 0) {
+	g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+      }
+      for (int j=0; j<numMatrices; j++)
+	nextMatrices[j] = theMatrices[j];
+      Matrix *theMatrix = new Matrix(numDOF, numDOF);
+      if (theMatrix == 0) {
+	g3ErrorHandler->fatal("Element::getTheMatrix - out of memory");
+      }
+      nextMatrices[numMatrices] = theMatrix;
 
-  if (Ki == 0) {
-    cerr << "Element::setKi(void) - out of memory for element " << this->getTag() << endl;
-    return -1;
+      Vector **nextVectors1 = new Vector *[numMatrices+1];
+      Vector **nextVectors2 = new Vector *[numMatrices+1];
+      if (nextVectors1 == 0 || nextVectors2 == 0) {
+	g3ErrorHandler->fatal("Element::getTheVector - out of memory");
+      }
+
+      for (int j=0; j<numMatrices; j++) {
+	nextVectors1[j] = theVectors1[j];
+	nextVectors2[j] = theVectors2[j];
+      }
+	
+      Vector *theVector1 = new Vector(numDOF);
+      Vector *theVector2 = new Vector(numDOF);
+      if (theVector1 == 0 || theVector2 == 0) {
+	g3ErrorHandler->fatal("Element::getTheVector - out of memory");
+      }
+      nextVectors1[numMatrices] = theVector1;
+      nextVectors2[numMatrices] = theVector2;
+
+      if (numMatrices != 0) {
+	delete [] theMatrices;
+	delete [] theVectors1;
+	delete [] theVectors2;
+      }
+      index = numMatrices;
+      numMatrices++;
+      theMatrices = nextMatrices;
+      theVectors1 = nextVectors1;
+      theVectors2 = nextVectors2;
+    }
   }
 
   return 0;
 }
-      
-  
+
 const Matrix &
-Element::getKi(void) {
-  if (Ki != 0)
-    return *Ki;
-  else {
-    this->setKi();
-    if (Ki == 0)
-      return this->getTangentStiff();
-    else
-      return *Ki;
+Element::getDamp(void) 
+{
+  if (index  == -1) {
+    this->setRayleighDampingFactors(0.0, 0.0, 0.0);
   }
+
+  // now compute the damping matrix
+  Matrix *theMatrix = theMatrices[index]; 
+  theMatrix->Zero();
+  if (alphaM != 0.0)
+    theMatrix->addMatrix(0.0, this->getMass(), alphaM);
+  if (betaK != 0.0)
+    theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);      
+  if (betaK0 != 0.0)
+    theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);      
+
+  // return the computed matrix
+  return *theMatrix;
 }
 
+
+
+const Matrix &
+Element::getMass(void)
+{
+  if (index  == -1) {
+    this->setRayleighDampingFactors(0.0, 0.0, 0.0);
+  }
+
+  // zero the matrix & return it
+  Matrix *theMatrix = theMatrices[index]; 
+  theMatrix->Zero();
+  return *theMatrix;
+}
+
+const Vector &
+Element::getResistingForceIncInertia(void) 
+{
+  if (index == -1) {
+    this->setRayleighDampingFactors(0.0, 0.0, 0.0);
+  }
+
+  Matrix *theMatrix = theMatrices[index]; 
+  Vector *theVector = theVectors2[index];
+  Vector *theVector2 = theVectors1[index];
+
+  //
+  // perform: R = P(U) - Pext(t);
+  //
+
+  (*theVector) = this->getResistingForce();
+
+  //
+  // perform: R = R - M * a
+  //
+
+  int loc = 0;
+  Node **theNodes = this->getNodePtrs();
+  int numNodes = this->getNumExternalNodes();
+
+  for (int i=0; i<numNodes; i++) {
+    const Vector &acc = theNodes[i]->getAccel();
+    for (int i=0; i<acc.Size(); i++) {
+      (*theVector2)(loc++) = acc(i);
+    }
+  }
+  theVector->addMatrixVector(1.0, this->getMass(), *theVector2, +1.0);
+
+  //
+  // perform: R = R + (alphaM * M + betaK0 * K0 + betaK * K) * v
+  //            = R + D * v
+  //
+
+  // determine the vel vector from ele nodes
+  loc = 0;
+  for (int i=0; i<numNodes; i++) {
+    const Vector &vel = theNodes[i]->getTrialVel();
+    for (int i=0; i<vel.Size(); i++) {
+      (*theVector2)(loc++) = vel[i];
+    }
+  }
+
+  // now compute the damping matrix
+  theMatrix->Zero();
+  if (alphaM != 0.0)
+    theMatrix->addMatrix(0.0, this->getMass(), alphaM);
+  if (betaK != 0.0)
+    theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);      
+  if (betaK0 != 0.0)
+    theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);      
+
+  // finally the D * v
+  theVector->addMatrixVector(1.0, *theMatrix, *theVector2, 1.0);
+
+  return *theVector;
+}
+
+
+const Vector &
+Element::getRayleighDampingForces(void) 
+{
+
+  if (index == -1) {
+    this->setRayleighDampingFactors(0.0, 0.0, 0.0);
+  }
+
+  Matrix *theMatrix = theMatrices[index]; 
+  Vector *theVector = theVectors2[index];
+  Vector *theVector2 = theVectors1[index];
+
+  //
+  // perform: R = (alphaM * M + betaK0 * K0 + betaK * K) * v
+  //            = D * v
+  //
+
+  // determine the vel vector from ele nodes
+  Node **theNodes = this->getNodePtrs();
+  int numNodes = this->getNumExternalNodes();
+  int loc = 0;
+  for (int i=0; i<numNodes; i++) {
+    const Vector &vel = theNodes[i]->getTrialVel();
+    for (int i=0; i<vel.Size(); i++) {
+      (*theVector2)(loc++) = vel[i];
+    }
+  }
+
+  // now compute the damping matrix
+  theMatrix->Zero();
+  if (alphaM != 0.0)
+    theMatrix->addMatrix(0.0, this->getMass(), alphaM);
+  if (betaK != 0.0)
+    theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);      
+  if (betaK0 != 0.0)
+    theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);      
+
+  // finally the D * v
+  theVector->addMatrixVector(0.0, *theMatrix, *theVector2, 1.0);
+
+  return *theVector;
+}
 
 int 
 Element::addLoad(ElementalLoad *theLoad, double loadFactor) {
   return 0;
 }
-
 
 /*
 int 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-05-15 23:23:26 $
+// $Revision: 1.6 $
+// $Date: 2002-12-05 22:18:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -54,6 +54,7 @@ class Info;
 class Information;
 class Response;
 class ElementalLoad;
+class Node;
 
 class Element : public DomainComponent
 {
@@ -64,6 +65,7 @@ class Element : public DomainComponent
     // methods dealing with nodes and number of external dof
     virtual int getNumExternalNodes(void) const =0;
     virtual const ID &getExternalNodes(void)  =0;	
+    virtual Node **getNodePtrs(void)  =0;	
     virtual int getNumDOF(void) =0;
 
     // methods dealing with committed state and update
@@ -75,32 +77,37 @@ class Element : public DomainComponent
     
     // methods to return the current linearized stiffness,
     // damping and mass matrices
-    virtual const Matrix &getTangentStiff(void)=0;
-    virtual const Matrix &getSecantStiff(void){ return this->getTangentStiff();};
-    virtual const Matrix &getDamp(void)=0;    
-    virtual const Matrix &getMass(void)=0;    
-
-    // methods to set and return an initial tangent
-    virtual int   setKi(void);
-    virtual const Matrix &getKi(void);
+    virtual const Matrix &getTangentStiff(void) =0;
+    virtual const Matrix &getInitialStiff(void) =0;
+    virtual const Matrix &getDamp(void);    
+    virtual const Matrix &getMass(void);    
 
     // methods for applying loads
     virtual void zeroLoad(void) =0;	
     virtual int addLoad(ElementalLoad *theLoad, double loadFactor) =0;
     virtual int addInertiaLoadToUnbalance(const Vector &accel) =0;
+    virtual int setRayleighDampingFactors(double alphaM, double betaK, double betaK0);
 
     // methods for obtaining resisting force (force includes elemental loads)
     virtual const Vector &getResistingForce(void) =0;
-    virtual const Vector &getResistingForceIncInertia(void) =0;        
+    virtual const Vector &getResistingForceIncInertia(void);        
 
     // method for obtaining information specific to an element
     virtual Response *setResponse(char **argv, int argc, Information &eleInformation);
     virtual int getResponse(int responseID, Information &eleInformation);
 	
   protected:
-    Matrix *Ki;
-    
+    const Vector &getRayleighDampingForces(void);
+
+    double alphaM, betaK, betaK0;
+
   private:
+    int index;
+
+    static Matrix ** theMatrices; 
+    static Vector ** theVectors1; 
+    static Vector ** theVectors2; 
+    static int numMatrices;
 };
 
 
