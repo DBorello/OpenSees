@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-10 05:31:36 $
+// $Revision: 1.3 $
+// $Date: 2000-10-28 05:50:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -149,6 +149,8 @@
 #define ELE_TAG_fElmt02	           2
 // #define ELE_TAG_MyTruss    	 4002
 #define ELE_TAG_ZeroLength	 5000
+#define ELE_TAG_ZeroLengthSection	 5001
+#define ELE_TAG_ZeroLengthND	 5002
 #define ELE_TAG_NLBeamColumn2d	 6000
 #define ELE_TAG_NLBeamColumn3d	 6001
 #define ELE_TAG_FourNodeQuad	 1010

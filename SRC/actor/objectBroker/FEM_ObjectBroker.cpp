@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2000-10-28 05:50:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -87,6 +87,8 @@
 #include <Truss.h>
 #include <TrussSection.h>
 #include <ZeroLength.h>
+#include <ZeroLengthSection.h>
+#include <ZeroLengthND.h>
 #include <FourNodeQuad.h>
 #include <ElasticBeam2d.h>
 #include <ElasticBeam3d.h>
@@ -260,6 +262,12 @@ FEM_ObjectBroker::getNewElement(int classTag)
 	     
 	case ELE_TAG_ZeroLength:  
 	     return new ZeroLength(); 	     
+
+	case ELE_TAG_ZeroLengthSection:  
+	     return new ZeroLengthSection(); 	     
+
+	case ELE_TAG_ZeroLengthND:  
+	     return new ZeroLengthND(); 	     
 	     
 	case ELE_TAG_FourNodeQuad:  
 	     return new FourNodeQuad(); 	     

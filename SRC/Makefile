@@ -42,7 +42,9 @@ metis:
 
 # the files that make up the FE_LIBRARY
 GLF_LIBS = $(FE)/element/zeroLength/ZeroLength.o \
-	$(FE)/element/zeroLength/TclZeroLength.o 
+	$(FE)/element/zeroLength/ZeroLengthSection.o \
+	$(FE)/element/zeroLength/ZeroLengthND.o \
+	$(FE)/element/zeroLength/TclZeroLength.o
 
 REMO_LIBS = $(FE)/element/nonlinearBeamColumn/quadrule/QuadRule.o \
 	$(FE)/element/nonlinearBeamColumn/quadrule/QuadRule1d.o \
