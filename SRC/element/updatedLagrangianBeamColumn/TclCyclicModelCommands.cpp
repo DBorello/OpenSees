@@ -14,7 +14,7 @@
 
 
 int TclModelBuilder_addLinearCylic(ClientData clientData, Tcl_Interp *interp,
-				 int argc, char **argv,
+				 int argc, TCL_Char **argv,
 				 TclModelBuilder *theBuilder)
 {
 int tag;
@@ -43,7 +43,7 @@ int tag;
 }
 
 int TclModelBuilder_addBilinearCyclic(ClientData clientData, Tcl_Interp *interp,
-				 int argc, char **argv,
+				 int argc, TCL_Char **argv,
 				 TclModelBuilder *theBuilder)
 {
 int tag;
@@ -74,7 +74,7 @@ double wt;
 
 
 int TclModelBuilder_addQuadraticCyclic(ClientData clientData, Tcl_Interp *interp,
-				 int argc, char **argv,
+				 int argc, TCL_Char **argv,
 				 TclModelBuilder *theBuilder)
 {
 int tag;
@@ -112,7 +112,7 @@ double wt, qy;
 /*******************************************************************************************/
 int
 TclModelBuilderCyclicModelCommand (ClientData clientData, Tcl_Interp *interp, int argc,
-					               char **argv, TclModelBuilder *theTclBuilder)
+					               TCL_Char **argv, TclModelBuilder *theTclBuilder)
 {
 
   if (strcmp(argv[1],"linear") == 0) {

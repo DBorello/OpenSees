@@ -26,7 +26,7 @@ Inelastic2DYS02::Inelastic2DYS02(int tag, double a, double e, double iz,
   A(a), E(e), Iz(iz), resFactor(1.0),
   //cycType(cyc_type), wT(wt),
   alfa(Alfa), beta(Beta),
-  delPmax(delpmax), delPMaxPos(0.0), delPMaxNeg(0,0)
+  delPmax(delpmax), delPMaxPos(0.0), delPMaxNeg(0.0)
 {
   massDof = A*L*rho;
   massDof = massDof/2;

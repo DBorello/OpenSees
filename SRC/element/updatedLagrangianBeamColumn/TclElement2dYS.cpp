@@ -23,7 +23,7 @@
 
 int
 TclModelBuilder_addElement2dYS01 (ClientData clientData, Tcl_Interp *interp,
-								   int argc, char **argv,
+								   int argc, TCL_Char **argv,
 								   Domain *theDomain, TclModelBuilder *theBuilder)
 {
 	//cerr << "Press key to continue...\n";
@@ -158,7 +158,7 @@ TclModelBuilder_addElement2dYS01 (ClientData clientData, Tcl_Interp *interp,
 
 int
 TclModelBuilder_addElement2dYS02 (ClientData clientData, Tcl_Interp *interp,
-								   int argc, char **argv,
+								   int argc, TCL_Char **argv,
 								   Domain *theDomain, TclModelBuilder *theBuilder)
 {
 	//cerr << "Press key to continue...\n";
@@ -332,7 +332,7 @@ Element *theElement = new Inelastic2DYS02(tag, A, E, I, ndI, ndJ, theYS1, theYS2
 
 int
 TclModelBuilder_addElement2dYS03 (ClientData clientData, Tcl_Interp *interp,
-								   int argc, char **argv,
+								   int argc, TCL_Char **argv,
 								   Domain *theDomain, TclModelBuilder *theBuilder)
 {
 	//cerr << "Press key to continue...\n";
@@ -760,7 +760,7 @@ TclModelBuilder_addElement2dYS05 (ClientData clientData, Tcl_Interp *interp,
 /*******************************************************************************************/
 int
 TclModelBuilder_addElement2dYS (ClientData clientData, Tcl_Interp *interp,
-								   int argc, char **argv,
+								   int argc, TCL_Char **argv,
 								   Domain *theTclDomain, TclModelBuilder *theTclBuilder)
 {
 
