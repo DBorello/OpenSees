@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-25 23:32:41 $
+// $Revision: 1.7 $
+// $Date: 2005-03-11 22:08:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathTimeSeries.cpp,v $
                                                                         
                                                                         
-// File: ~/domain/pattern/PathTimeSeries.C
-//
 // Written: fmk 
 // Created: 07/99
 // Revision: A
@@ -106,7 +104,7 @@ PathTimeSeries::PathTimeSeries(const char *filePathName,
   
   // first open and go through file containg path
   theFile.open(filePathName, ios::in);
-  if (theFile.bad()) {
+  if (theFile.bad() || !theFile.is_open()) {
     opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
     opserr << " - could not open file " << filePathName << endln;
   } else {
@@ -118,7 +116,7 @@ PathTimeSeries::PathTimeSeries(const char *filePathName,
   // now open and go through file containg time
   ifstream theFile1;
   theFile1.open(fileTimeName, ios::in);
-  if (theFile1.bad()) {
+  if (theFile1.bad() || !theFile1.is_open()) {
     opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
     opserr << " - could not open file " << fileTimeName << endln;
   } else {
@@ -157,7 +155,7 @@ PathTimeSeries::PathTimeSeries(const char *filePathName,
       // first open the path file and read in the data
       ifstream theFile2;
       theFile2.open(filePathName, ios::in);
-      if (theFile2.bad()) {
+      if (theFile2.bad() || !theFile2.is_open()) {
 	opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
 	opserr << " - could not open file " << filePathName << endln;
 	delete thePath;
@@ -177,7 +175,7 @@ PathTimeSeries::PathTimeSeries(const char *filePathName,
 	// now open the time file and read in the data
 	ifstream theFile3;
 	theFile3.open(fileTimeName, ios::in);
-	if (theFile3.bad()) {
+	if (theFile3.bad() || !theFile3.is_open()) {
 	  opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
 	  opserr << " - could not open file " << fileTimeName << endln;
 	  delete thePath;
@@ -204,6 +202,8 @@ PathTimeSeries::PathTimeSeries(const char *fileName,
    thePath(0), time(0), currentTimeLoc(0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0)
 {
+
+
 	// determine the number of data points
 	int numDataPoints = 0;
 	double dataPoint;
@@ -211,17 +211,19 @@ PathTimeSeries::PathTimeSeries(const char *fileName,
   
 	// first open and go through file counting entries
 	theFile.open(fileName, ios::in);
-	if (theFile.bad()) {
-		opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
-		opserr << " - could not open file " << fileName << endln;
+	if (theFile.bad() || !theFile.is_open()) {
+	  opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
+	  opserr << " - could not open file " << fileName << endln;
 	}
 	else {
-		while (theFile >> dataPoint) {
-			numDataPoints++;
-			theFile >> dataPoint;	// Read in second value of pair
-		}
+	  while (theFile >> dataPoint) {
+	    numDataPoints++;
+	    theFile >> dataPoint;	// Read in second value of pair
+	  }
 	}
 	theFile.close();
+
+
 
 	// create a vector and read in the data
 	if (numDataPoints != 0) {
@@ -245,7 +247,8 @@ PathTimeSeries::PathTimeSeries(const char *fileName,
 		// first open the file and read in the data
 		ifstream theFile1;
 		theFile1.open(fileName, ios::in);
-		if (theFile1.bad()) {
+		if (theFile1.bad() || !theFile1.is_open()) {
+
 			opserr << "WARNING - PathTimeSeries::PathTimeSeries()";
 			opserr << " - could not open file " << fileName << endln;
 			delete thePath;

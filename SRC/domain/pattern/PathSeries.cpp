@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:32:41 $
+// $Revision: 1.6 $
+// $Date: 2005-03-11 22:08:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PathSeries.cpp,v $
                                                                         
                                                                         
@@ -89,7 +89,7 @@ PathSeries::PathSeries(const char *fileName,
   ifstream theFile;
   theFile.open(fileName);
 
-  if (theFile.bad()) {
+  if (theFile.bad() || !theFile.is_open()) {
     opserr << "WARNING - PathSeries::PathSeries()";
     opserr << " - could not open file " << fileName << endln;
   } else {
@@ -105,7 +105,7 @@ PathSeries::PathSeries(const char *fileName,
     // first open the file
     ifstream theFile1;
     theFile1.open(fileName, ios::in);
-    if (theFile1.bad()) {
+    if (theFile1.bad() || !theFile1.is_open()) {
       opserr << "WARNING - PathSeries::PathSeries()";
       opserr << " - could not open file " << fileName << endln;
     } else {
