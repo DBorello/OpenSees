@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2001-05-26 06:21:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/model/AnalysisModel.h,v $
                                                                         
                                                                         
@@ -118,10 +118,12 @@ class AnalysisModel: public MovableObject
 			 FEM_ObjectBroker &theBroker);
 
     friend class SimpleFE_Iter;
-    friend class SimpleDOF_Iter;    
-    
-  protected:    
+    friend class SimpleDOF_Iter;
+
     Domain *getDomainPtr(void) const;
+
+  protected:
+
     
   private:
     Domain *myDomain;
