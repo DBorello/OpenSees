@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2004-01-29 22:59:33 $
+// $Revision: 1.4 $
+// $Date: 2004-06-03 19:41:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/MySqlDatastore.h,v $
 
 #ifndef MySqlDatastore_h
@@ -37,7 +37,7 @@
 // What: "@(#) MySqlDatastore.h, revA"
 
 #include <FE_Datastore.h>
-#include <mysql/mysql.h>
+#include <mysql.h>
 
 class MySqlDatastore: public FE_Datastore
 {
