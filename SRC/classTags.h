@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2000-12-13 08:30:04 $
+// $Revision: 1.5 $
+// $Date: 2001-01-12 03:48:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -165,6 +165,7 @@
 #define ELE_TAG_FourNodeQuad	 1010
 #define ELE_TAG_BeamWithHinges2d  401  
 #define ELE_TAG_BeamWithHinges3d  402
+#define ELE_TAG_EightNodeBrick   7001
 
 #define CRDTR_TAG_LinearCrdTransf2d 1
 #define CRDTR_TAG_CorotCrdTransf2d  2
