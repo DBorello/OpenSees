@@ -347,12 +347,21 @@ PotentialSurface *EvaluatePotentialSurfaceArgs(ClientData clientData, Tcl_Interp
 
   //1. Drucker-Prager Potential Surface
   if ((strcmp(argv[0],"-DP") == 0) || (strcmp(argv[0],"-dp") == 0)) {
-    double alpha = 0.0;
-    if (argc > 1)
-      if (Tcl_GetDouble(interp, argv[1], &alpha) != TCL_OK) {
-       opserr << "nDMaterial Templated3Dep - invalid alpha " << argv[1] << endln;
-       cleanup(argv);
-       return 0;
+    double alpha = 0.2;
+    if (argc == 2)
+      {
+        if (Tcl_GetDouble(interp, argv[1], &alpha) != TCL_OK) 
+          {
+            opserr << "nDMaterial Templated3Dep PS.Drucker-Prager - invalid or missing alpha " << argv[1] << endln;
+            cleanup(argv);
+            return 0;
+          }
+      }
+    else
+      {
+        opserr << "nDMaterial Templated3Dep PS.Drucker-Prager - missing alpha " << endln;
+        cleanup(argv);
+        return 0;
       }
     PS = new DPPotentialSurface(alpha);
   }
@@ -365,12 +374,14 @@ PotentialSurface *EvaluatePotentialSurfaceArgs(ClientData clientData, Tcl_Interp
   // 3. CamClay potential surface
   else if ((strcmp(argv[0],"-CC") == 0) || (strcmp(argv[0],"-cc") == 0)) {
     double mp = 1.2;
-    if (argc == 2) {
-      if (Tcl_GetDouble(interp, argv[1], &mp) != TCL_OK) {
-        opserr << "nDMaterial Templated3Dep - invalid M " << argv[1] << endln;
-    return 0;
-      }
-    }
+//    if (argc == 2) 
+//      {
+        if (Tcl_GetDouble(interp, argv[1], &mp) != TCL_OK) 
+          {
+            opserr << "nDMaterial Templated3Dep PS.CamClay - invalid or missing M " << argv[1] << endln;
+            return 0;
+          }
+//      }
     PS = new CAMPotentialSurface(mp);
   }
 
