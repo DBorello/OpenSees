@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-03-29 03:51:07 $
+// $Revision: 1.5 $
+// $Date: 2001-07-13 22:42:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.h,v $
                                                                         
                                                                         
@@ -98,6 +98,7 @@ class Truss : public Element
     
   private:
     double computeCurrentStrain(void) const;
+    double computeCurrentStrainRate(void) const;
     
     // private attributes - a copy for each object of the class
     UniaxialMaterial *theMaterial;  // pointer to a material

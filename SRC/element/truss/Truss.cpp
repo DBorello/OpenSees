@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-06-14 22:16:06 $
+// $Revision: 1.6 $
+// $Date: 2001-07-13 22:42:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -376,7 +376,8 @@ Truss::update(void)
 {
     // determine the current strain given trial displacements at nodes
     double strain = this->computeCurrentStrain();
-    return theMaterial->setTrialStrain(strain);
+    double rate = this->computeCurrentStrainRate();
+    return theMaterial->setTrialStrain(strain, rate);
 }
 
 
@@ -427,8 +428,22 @@ Truss::getSecantStiff(void)
 const Matrix &
 Truss::getDamp(void)
 {
-    theMatrix->Zero();
-    return *theMatrix; 
+    if (L == 0.0) { // - problem in setDomain() no further warnings
+	theMatrix->Zero();
+	return *theMatrix;
+    }
+    
+    double eta = theMaterial->getDampTangent();
+
+    // come back later and redo this if too slow
+    Matrix &damp = *theMatrix;
+    Matrix &trans = *t;
+
+    damp = trans^trans;
+
+    damp *= A*eta/L;
+
+    return *theMatrix;
 }
 
 
@@ -796,6 +811,24 @@ Truss::computeCurrentStrain(void) const
     double dLength = 0.0;
     for (int i=0; i<dimension; i++){
 	dLength -= (disp2(i)-disp1(i))* (*t)(0,i);
+    }
+
+    // this method should never be called with L == 0
+    return dLength/L;
+}
+
+double
+Truss::computeCurrentStrainRate(void) const
+{
+    // NOTE method will not be called if L == 0
+
+    // determine the strain
+    const Vector &vel1 = end1Ptr->getTrialVel();
+    const Vector &vel2 = end2Ptr->getTrialVel();	
+
+    double dLength = 0.0;
+    for (int i=0; i<dimension; i++){
+	dLength -= (vel2(i)-vel1(i))* (*t)(0,i);
     }
 
     // this method should never be called with L == 0
