@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2004-08-26 23:14:16 $
+// $Revision: 1.4 $
+// $Date: 2004-10-19 00:37:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/NEESData.cpp,v $
                                                                         
 // Written: fmk 
@@ -191,7 +191,6 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
     opserr << "NEESData::insertData - out of memory creating copy of string " << fileName << endln;
     return -1;
   }
-  
 
   strcpy(copyTableName, tableName);
   if (tableNameLength > 4 && strcmp(".out", &tableName[tableNameLength-4]) == 0) {
@@ -285,14 +284,20 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
   nextTable->name = fileName;
   nextTable->numColumns = numColumns;
   nextTable->columns = new char *[numColumns];
+  for (int ii=0; ii<numColumns; ii++)
+    nextTable->columns[ii] = 0;
   nextTable->hasOutExtension = hasOutExtension;
+
   if (nextTable->columns == 0) {
     opserr << "NEESData::createData - out of memory creating Table structure for table: " << copyTableName << endln;
     delete nextTable;
     res = -1;
   }
+
   for (int k=0; k<numColumns; k++) {
-    nextTable->columns[k] = new char [strlen(columns[k])];
+
+    nextTable->columns[k] = new char [strlen(columns[k])+1];
+
     if (nextTable->columns[k] == 0) {
       opserr << "NEESData::createData - out of memory creating Table structure for table: " << copyTableName << endln;
       for (int l=0; l<k-1; l++)
@@ -300,8 +305,10 @@ NEESData::createTable(const char *tableName, int numColumns, char *columns[])
       delete nextTable;
       res = -1;    
     }
+
     strcpy(nextTable->columns[k], columns[k]);
   }    
+
   nextTable->next = tables;
   tables = nextTable;
   numTables++;
