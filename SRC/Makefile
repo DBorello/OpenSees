@@ -359,7 +359,8 @@ RENDERER_LIBS = $(FE)/renderer/db.o \
 
 endif
 
-RECORDER_LIBS = $(FE)/recorder/MaxNodeDispRecorder.o \
+RECORDER_LIBS = $(FE)/recorder/Recorder.o \
+	$(FE)/recorder/MaxNodeDispRecorder.o \
 	$(FE)/recorder/DatastoreRecorder.o \
 	$(FE)/recorder/NodeRecorder.o \
 	$(FE)/recorder/EnvelopeNodeRecorder.o \
