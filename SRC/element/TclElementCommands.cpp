@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-01-09 23:14:09 $
+// $Revision: 1.13 $
+// $Date: 2002-04-02 21:04:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -128,36 +128,36 @@ TclModelBuilder_addDispBeamColumn(ClientData, Tcl_Interp *, int, char **,
 //Boris Jeremic & Zhaohui
 extern int TclModelBuilder_addEightNodeBrick(ClientData, 
                                              Tcl_Interp *,  
-																																	            int, 
-																																	            char **,
-                     			                     Domain*, 
-																																	            TclModelBuilder *, 
-																																	            int);
+					     int, 
+					     char **,
+					     Domain*, 
+					     TclModelBuilder *, 
+					     int);
 //Boris Jeremic & Zhaohui
 extern int TclModelBuilder_addTwentyNodeBrick(ClientData, 
                                               Tcl_Interp *,  
-																													           					 int, 
-																													           					 char **,
-                      			                     Domain*, 
-																													           					 TclModelBuilder *, 
-																													           					 int);
+					      int, 
+					      char **,
+					      Domain*, 
+					      TclModelBuilder *, 
+					      int);
 
 //Boris Jeremic & Xiaoyan 01/07/2002
 extern int TclModelBuilder_addEightNodeBrick_u_p_U(ClientData, 
                                                    Tcl_Interp *,  
-																																							            int, 
-																																							            char **,
-                           			                     Domain*, 
-																																							            TclModelBuilder *, 
-																																							            int);
+						   int, 
+						   char **,
+						   Domain*, 
+						   TclModelBuilder *, 
+						   int);
 //Boris Jeremic & Xiaoyan 01/07/2002
 extern int TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData, 
                                                     Tcl_Interp *,  
-																																																			 int, 
-																																																			 char **,
-                                       			          Domain*, 
-																																																			 TclModelBuilder *, 
-																																																			 int);
+						    int, 
+						    char **,
+						    Domain*, 
+						    TclModelBuilder *, 
+						    int);
 
 
 int
@@ -236,64 +236,68 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 					       eleArgStart);
     return result;
   } 
-	 else if (strcmp(argv[1],"Brick8N") == 0) 
-	   {  //Boris Jeremic & Zhaohui
-          int eleArgStart = 1;
-	  int result = TclModelBuilder_addEightNodeBrick(clientData, 
-		                                                interp, 
-																																																	 argc, 
-																																																	 argv,
-                                      					       theTclDomain, 
-																																																	 theTclBuilder, 
-																																																	 eleArgStart);
-	  return result;
-    } 
-	 else if (strcmp(argv[1],"Brick20N") == 0) 
-	   {  //Boris Jeremic & Zhaohui
-          int eleArgStart = 1;
-       	  int result = TclModelBuilder_addTwentyNodeBrick(clientData, 
-		                                                        interp, 
-																		       																																 argc, 
-																		       																																 argv,
-					                                                     theTclDomain, 
-																		       																																 theTclBuilder, 
-																		     		  																														 eleArgStart);
-	  return result;
-    } 
-	 else if (strcmp(argv[1],"Brick8N_u_p_U") == 0) 
-	 {  //Boris Jeremic & Xiaoyan
-          int eleArgStart = 1;
-	         int result = TclModelBuilder_addEightNodeBrick_u_p_U(clientData, 
-									                                                      interp, 
-																																																														 argc, 
-																																																														 argv,
-                                                   					       theTclDomain, 
-																																																														 theTclBuilder, 
-																																																														 eleArgStart);
-	        return result;
+
+  //Boris Jeremic & Zhaohui
+  else if (strcmp(argv[1],"Brick8N") == 0) {
+
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addEightNodeBrick(clientData, 
+						   interp, 
+						   argc, 
+						   argv,
+						   theTclDomain, 
+						   theTclBuilder, 
+						   eleArgStart);
+    return result;
   } 
-	 else if (strcmp(argv[1],"Brick20N_u_p_U") == 0) 
-	 { 	   //Boris Jeremic & Xiaoyan
-          int eleArgStart = 1;
-	         int result = TclModelBuilder_addTwentyNodeBrick_u_p_U(clientData, 
-									                                                       interp, 
-																																																															 argc, 
-																																																															 argv,
-					                                                           theTclDomain, 
-																																																															 theTclBuilder, 
-																																																															 eleArgStart);
-      	  return result;
+
+  //Boris Jeremic & Zhaohui
+  else if (strcmp(argv[1],"Brick20N") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addTwentyNodeBrick(clientData, 
+						    interp, 
+						    argc, 
+						    argv,
+						    theTclDomain, 
+						    theTclBuilder, 
+						    eleArgStart);
+    return result;
   } 
-	 else if (strcmp(argv[1],"stdBrick") == 0) {
-          int eleArgStart = 1;
-	  int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,
+
+  //Boris Jeremic & Zhaohui  
+  else if (strcmp(argv[1],"Brick8N_u_p_U") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addEightNodeBrick_u_p_U(clientData, 
+							 interp, 
+							 argc, 
+							 argv,
+							 theTclDomain, 
+							 theTclBuilder, 
+							 eleArgStart);
+    return result;
+  } 
+  //Boris Jeremic & Zhaohui  
+  else if (strcmp(argv[1],"Brick20N_u_p_U") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addTwentyNodeBrick_u_p_U(clientData, 
+							  interp, 
+							  argc, 
+							  argv,
+							  theTclDomain, 
+							  theTclBuilder, 
+							  eleArgStart);
+    return result;
+  } 
+  else if (strcmp(argv[1],"stdBrick") == 0) {
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addBrick(clientData, interp, argc, argv,
 						theTclDomain, theTclBuilder, eleArgStart);
-	  return result;
+    return result;
   } else if (strcmp(argv[1],"bbarBrick") == 0) {
-          int eleArgStart = 1;
-	  int result = TclModelBuilder_addBBarBrick(clientData, interp, argc, argv,
+    int eleArgStart = 1;
+    int result = TclModelBuilder_addBBarBrick(clientData, interp, argc, argv,
 					       theTclDomain, theTclBuilder, eleArgStart);
-	  return result;
+    return result;
   } else if (strcmp(argv[1],"zeroLength") == 0) {
     int result = TclModelBuilder_addZeroLength(clientData, interp, argc, argv,
 					       theTclDomain, theTclBuilder);
