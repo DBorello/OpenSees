@@ -1013,7 +1013,8 @@ EPS->setConverged(rval.getConverged());
     EPS->setdPlasticStrain(rval.getdPlasticStrain());
     EPS->setNScalarVar( rval.getNScalarVar() );
 
-    for (int i = 0; i <rval.getNScalarVar(); i++)
+	int i;
+    for (i = 0; i <rval.getNScalarVar(); i++)
       EPS->setScalarVar(i+1, rval.getScalarVar(i+1));
     
     
@@ -1023,20 +1024,20 @@ EPS->setConverged(rval.getConverged());
     EPS->setStress_commit(rval.getStress_commit());      	 
     EPS->setStrain_commit(rval.getStrain_commit());      	 
     
-    for (int i = 0; i <rval.getNScalarVar(); i++)
+    for (i = 0; i <rval.getNScalarVar(); i++)
       EPS->setScalarVar_commit(i+1, rval.getScalarVar_commit(i+1));   	 
     
-    for (int i = 0; i <rval.getNTensorVar(); i++)
+    for (i = 0; i <rval.getNTensorVar(); i++)
        EPS->setTensorVar_commit(i+1, rval.getTensorVar_commit(i+1));   	 
     
     EPS->Eep_commit = (rval.getEep_commit());
     EPS->Stress_init = rval.getStress_init();
     EPS->Strain_init = rval.getStrain_init();
 
-    for (int i = 0; i <rval.getNScalarVar(); i++)
+    for (i = 0; i <rval.getNScalarVar(); i++)
        EPS->setScalarVar_init(i+1, rval.getScalarVar_init(i+1));
 
-    for (int i = 0; i <rval.getNTensorVar(); i++)
+    for (i = 0; i <rval.getNTensorVar(); i++)
        EPS->setTensorVar_init(i+1, rval.getTensorVar_init(i+1));
 
     EPS->Eep_init = rval.getEep_init();
@@ -1574,7 +1575,8 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
 	double dS= 0.0;
 	double S = 0.0;
 
-	for (int ii = 1; ii <= NS; ii++) {
+	int ii;
+	for (ii = 1; ii <= NS; ii++) {
               dS = Delta_lambda * h_s[ii-1] ;       // Increment to the scalar internal var
               S  = forwardEPS.getScalarVar(ii);     // Get the old value of the scalar internal var
               forwardEPS.setScalarVar(ii, S + dS ); // Update internal scalar var
@@ -1584,7 +1586,7 @@ EPState Template3Dep::ForwardEulerEPState( const straintensor &strain_increment)
 	stresstensor T;
 	stresstensor new_T;
 
-	for (int ii = 1; ii <= NT; ii++) {
+	for (ii = 1; ii <= NT; ii++) {
 	      dT = h_t[ii-1]*Delta_lambda  ;       // Increment to the tensor internal var
               T  = forwardEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
               new_T = T + dT;
@@ -1801,7 +1803,8 @@ EPState Template3Dep::SemiBackwardEulerEPState( const straintensor &strain_incre
 	int NS = SemibackwardEPS.getNScalarVar();
 	int NT = SemibackwardEPS.getNTensorVar();
 
-	for (int ii = 1; ii <= NS; ii++) {
+	int ii;
+	for (ii = 1; ii <= NS; ii++) {
               dS = Delta_lambda * h_s[ii-1] ;       // Increment to the scalar internal var
               S  = SemibackwardEPS.getScalarVar(ii);     // Get the old value of the scalar internal var
               SemibackwardEPS.setScalarVar(ii, S + dS ); // Update internal scalar var
@@ -1818,7 +1821,7 @@ EPState Template3Dep::SemiBackwardEulerEPState( const straintensor &strain_incre
 
 	stresstensor new_T;
 
-	for (int ii = 1; ii <= NT; ii++) {
+	for (ii = 1; ii <= NT; ii++) {
 	      dT = h_t[ii-1] * Delta_lambda;            // Increment to the tensor internal var
               T  = SemibackwardEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
               new_T = T + dT;
