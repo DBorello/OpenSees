@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-01-23 21:23:42 $
+// $Revision: 1.8 $
+// $Date: 2004-01-29 22:57:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.h,v $
                                                                         
                                                                         
@@ -131,6 +131,11 @@ class FileDatastore: public FE_Datastore
     int recvID(int dbTag, int commitTag,
 	       ID &theID,
 	       ChannelAddress *theAddress =0);
+
+    int createTable(const char *tableName, int numColumns, char *columns[]);
+    int insertData(const char *tableName, char *columns[], 
+		   int commitTag, const Vector &data);
+    int getData(const char *tableName, char *columns[], int commitTag, Vector &data);
 
     // the commitState method
     int commitState(int commitTag);        

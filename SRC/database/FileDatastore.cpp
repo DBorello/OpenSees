@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2004-01-23 21:23:42 $
+// $Revision: 1.9 $
+// $Date: 2004-01-29 22:57:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/FileDatastore.cpp,v $
                                                                         
                                                                         
@@ -41,7 +41,9 @@
 #include <stdio.h>
 #include <bool.h>
 #include <iostream>
+#include <iomanip>
 using std::ios;
+using std::setiosflags;
 
 #include <FEM_ObjectBroker.h>
 #include <Domain.h>
@@ -856,9 +858,94 @@ FileDatastore::recvID(int dataTag, int commitTag,
   return 0;
 }		       
 
+
 #include <fstream>
 using std::ofstream;
 using std::cerr;
+
+
+int 
+FileDatastore::createTable(const char *tableName, int numColumns, char *columns[])
+{
+  // open the file
+  int res = 0;
+  char *fileName = new char[strlen(tableName) + strlen(dataBase) + 1];
+  if (fileName == 0) {
+    opserr << "FileDatastore::insertData - out of memory; failed to open file: " << fileName << endln;
+    return -1;
+  }
+
+  strcpy(fileName, dataBase);    
+  strcat(fileName,".");
+  strcat(fileName, tableName);
+
+  ofstream table;
+  table.open(fileName, ios::out | ios::trunc); 
+
+  if (table.is_open()) {
+    // write the data
+    for (int i=0; i<numColumns; i++) {
+      table << columns[i] << "\t";
+    }
+    table << "\n";
+    table.close();
+    
+  } else {
+    opserr << "FileDatastore::insertData - failed to open file: " << fileName << endln;
+    res = -1;
+  }
+  
+  delete [] fileName;
+  return res;
+}
+
+int 
+FileDatastore::insertData(const char *tableName, char *columns[], 
+			  int commitTag, const Vector &data)
+{
+  // open the file
+  char *fileName = new char[strlen(tableName) + strlen(dataBase) + 1];
+  if (fileName == 0) {
+    opserr << "FileDatastore::insertData - out of memory; failed to open file: " << fileName << endln;
+    return -1;
+  }
+
+  strcpy(fileName, dataBase);    
+  strcat(fileName,".");
+  strcat(fileName, tableName);
+
+  ofstream table;
+  table.open(fileName, ios::app); 
+
+  table << setiosflags(ios::scientific);
+  table << std::setprecision(16);
+
+  if (table.is_open()) {
+    // write the data
+    for (int i=0; i<data.Size(); i++) {
+      table << data(i) << "\t";
+    }
+    
+    table << "\n";
+    table.close();
+
+  } else {
+    opserr << "FileDatastore::insertData - failed to open file: " << fileName << endln;
+    return -1;
+  }
+
+  delete [] fileName;
+  return 0;
+}
+
+
+int 
+FileDatastore::getData(const char *tableName, char *columns[], int commitTag, Vector &data)
+{
+  return 0;
+}
+
+
 
 /*******************************************************************
  *              MISC METHODS & FUNCTONS FOR OPENING THE FILE       *
