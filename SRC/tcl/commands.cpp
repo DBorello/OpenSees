@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2001-09-22 02:02:55 $
+// $Revision: 1.17 $
+// $Date: 2001-09-22 03:15:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2125,6 +2125,8 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;	
     }	
 
+	BandArpackSolver *theEigenSolver = 0;
+
     if (theEigenAnalysis == 0) {
       EigenAlgorithm *theEigenAlgo = new FrequencyAlgo();
       EigenIntegrator  *theEigenIntegrator = new EigenIntegrator();    
@@ -2138,7 +2140,6 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
       */
 
       BandArpackSOE *theEigenSOE;
-      BandArpackSolver *theEigenSolver;    
       theEigenSolver = new BandArpackSolver(numEigen); 
       theEigenSOE = new BandArpackSOE(*theEigenSolver, *theEigenModel);    
 
@@ -2179,7 +2180,8 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
       Tcl_SetResult(interp, resDataPtr, TCL_STATIC);
     }
 
-	delete theEigenSolver;
+	if (theEigenSolver != 0)
+		delete theEigenSolver;
     delete theEigenAnalysis;
     theEigenAnalysis = 0;
 
