@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-03-12 03:13:00 $
+// $Revision: 1.10 $
+// $Date: 2003-03-12 03:40:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -364,7 +364,7 @@ CorotTruss::getTangentStiff(void)
     // Material stiffness
     //
     // Get material tangent
-    double EA = A*theMaterial->getInitialTangent();
+    double EA = A*theMaterial->getTangent();
     EA /= (Ln * Ln * Lo);
 
     int i,j;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-02-25 23:33:02 $
+// $Revision: 1.11 $
+// $Date: 2003-03-12 03:40:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -434,7 +434,7 @@ TrussSection::getTangentStiff(void)
     int order = theSection->getOrder();
     const ID &code = theSection->getType();
 	
-    const Matrix &k = theSection->getInitialTangent();
+    const Matrix &k = theSection->getSectionTangent();
     double AE = 0.0;
     for (int i = 0; i < order; i++) {
       if (code(i) == SECTION_RESPONSE_P)
@@ -455,8 +455,30 @@ TrussSection::getTangentStiff(void)
 const Matrix &
 TrussSection::getInitialStiff(void)
 {
-  opserr << "TrussSection::getInitialStiff - not implemented, returning current tangent\n";
-  return this->getTangentStiff();
+    if (L == 0.0) { // - problem in setDomain() no further warnings
+	theMatrix->Zero();
+	return *theMatrix;
+    }
+    
+    int order = theSection->getOrder();
+    const ID &code = theSection->getType();
+	
+    const Matrix &k = theSection->getInitialTangent();
+    double AE = 0.0;
+    for (int i = 0; i < order; i++) {
+      if (code(i) == SECTION_RESPONSE_P)
+	AE += k(i,i);
+    }
+
+    // come back later and redo this if too slow
+    Matrix &stiff = *theMatrix;
+    Matrix &trans = *t;
+
+    stiff = trans^trans;
+
+    stiff *= AE/L;  
+
+    return *theMatrix;
 }
     
 const Matrix &
@@ -703,8 +725,8 @@ TrussSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
   }	      
 
   this->setTag((int)data(0));
-  dimension = data(1);
-  numDOF = data(2);
+  dimension = (int)data(1);
+  numDOF = (int)data(2);
   M = data(3);
 
   // truss now receives the tags of it's two external nodes
@@ -716,8 +738,8 @@ TrussSection::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &the
 
   // finally truss creates a new section object of the correct type,
   // sets its database tag and asks this new object to recveive itself.
-  int sectClass = data(4);
-  int sectDb = data(5);
+  int sectClass = (int)data(4);
+  int sectDb = (int)data(5);
 
   // Get new section if null
   if (theSection == 0)
