@@ -19,8 +19,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.22 $
-// $Date: 2003-03-11 21:30:06 $
+// $Revision: 1.23 $
+// $Date: 2003-03-11 21:54:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -1220,8 +1220,6 @@ DispBeamColumn2d::getResistingForceSensitivity(int gradNumber)
 	static Matrix kbmine(3,3);
 	kbmine.Zero();
 
-	//Matrix dkbdh(3,3);
-
 	int j, k;
 	double d1oLdh = 0.0;
 
@@ -1258,11 +1256,11 @@ DispBeamColumn2d::getResistingForceSensitivity(int gradNumber)
 	  const ID &code = theSections[i]->getType();
 
 		double xi6 = 6.0*pts(i,0);
+		double wti = wts(i);
 
 		// Get section stress resultant gradient
 		const Vector &s = theSections[i]->getStressResultant();
-		const Vector & sens = theSections[i]->getStressResultantSensitivity(gradNumber,true);
-		const Matrix &ks = theSections[i]->getSectionTangent();
+		const Vector &sens = theSections[i]->getStressResultantSensitivity(gradNumber,true);
 
 		// Perform numerical integration on internal force gradient
 		//q.addMatrixTransposeVector(1.0, *B, s, wts(i));
@@ -1270,8 +1268,8 @@ DispBeamColumn2d::getResistingForceSensitivity(int gradNumber)
 		double si;
 		double sensi;
 		for (j = 0; j < order; j++) {
-			si = s(j)*wts(i);
-			sensi = sens(j)*wts(i);
+			si = s(j)*wti;
+			sensi = sens(j)*wti;
 			switch(code(j)) {
 			case SECTION_RESPONSE_P:
 				q(0) += si;
@@ -1293,10 +1291,12 @@ DispBeamColumn2d::getResistingForceSensitivity(int gradNumber)
 
 			// Perform numerical integration to obtain basic stiffness matrix
 			//kb.addMatrixTripleProduct(1.0, *B, ks, wts(i)/L);
-			double wti = wts(i);
 			double tmp;
+
+			const Matrix &ks = theSections[i]->getSectionTangent();
 			Matrix ka(workArea, order, 3);
 			ka.Zero();
+
 			for (j = 0; j < order; j++) {
 				switch(code(j)) {
 				case SECTION_RESPONSE_P:
