@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.36 $
-// $Date: 2002-07-17 19:41:35 $
+// $Revision: 1.37 $
+// $Date: 2002-09-26 22:28:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -356,6 +356,14 @@ int
 reliability(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
 {
   if (theReliabilityBuilder == 0) {
+
+    cerr << "**********************************************************" << endl;
+    cerr << "YOU ARE USING AN OUT-DATED VERSION OF THE RELIABILITY AND " << endl;
+    cerr << "SENSITIVITY CODE IN OPENSEES.  INFORMATION ABOUT THE " << endl;
+    cerr << "UPCOMING REVISED AND EXTENDED VERSION CAN BE FOUND AT: " << endl;
+    cerr << "http://www.ce.berkeley.edu/~haukaas " << endl;
+    cerr << "**********************************************************" << endl;
+
     theReliabilityBuilder = new TclReliabilityBuilder(theDomain,interp);
     return TCL_OK;
   }
