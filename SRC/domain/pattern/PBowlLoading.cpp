@@ -1,14 +1,13 @@
 //===============================================================================
 //# COPYRIGHT (C): Woody's license (by BJ):
-//#                ``This  source  code  is  Copyrighted in
-//#                U.S.,  for  an  indefinite  period,  and
-//#                anybody  caught  using  it  without  our
-//#                permission,  will be mighty good friends
-//#                of  ourn,  cause  we  don't give a darn.
-//#                Hack  it.  Compile it. Debug it. Run it.
-//#                Yodel  it. Enjoy it. We wrote it, that's
-//#                all we wanted to do.''																		
-//#
+//                 ``This    source  code is Copyrighted in
+//                 U.S.,  for  an  indefinite  period,  and anybody
+//                 caught  using it without our permission, will be
+//                 mighty good friends of ourn, cause we don't give
+//                 a  darn.  Hack it. Compile it. Debug it. Run it.
+//                 Yodel  it.  Enjoy it. We wrote it, that's all we
+//                 wanted to do.''
+//
 //# PROJECT:           Object Oriented Finite Element Program
 //# PURPOSE:           Plastic Bowl (aka Domain Reduction) implementation:
 //#                    This file contains the class definition
@@ -25,8 +24,13 @@
 //#
 //# DATE:              21Oct2002
 //# UPDATE HISTORY:    31Oct2002 fixed some memory leaks
-//#                    04Nov2002 changed the way plastic bowl elements are 
-//#                    input.  
+//#                    04Nov2002 changed the way plastic bowl elements are
+//#                     input.
+//#                    10Nov2002 Zeroing diagonal and out of diagaonal blocks
+//#                     for b<->e nodes
+//#                    13Nov2002 changes to split "b" and "e" nodes within
+//#                     the plastic bowl elements. Also, simple definition of
+//#                     of cubic bowl is now facilitated ...
 //#
 //#
 //#
@@ -42,7 +46,8 @@
 PBowlLoading::PBowlLoading()
 :LoadPattern(0, PATTERN_TAG_PBowlLoading),
 PBowlElements(0),
-PBowlNodes(0),
+ExteriorNodes(0),
+BoundaryNodes(0),
 PBowlLoads(0),
 U(0),
 Udd(0)
@@ -55,11 +60,23 @@ PBowlLoading::PBowlLoading(int tag,
                            char *DispfName,
                            char *AccefName,
                            double theTimeIncr,
-                           double theFactor)
+                           double theFactor,
+                           double xplus,
+                           double xminus,
+                           double yplus,
+                           double yminus,
+                           double zplus,
+                           double zminus)
 :LoadPattern(tag,
              PATTERN_TAG_PBowlLoading),
              PBTimeIncr(theTimeIncr),
-             cFactor(theFactor)
+             cFactor(theFactor),
+	     xPlus(xplus),
+	     xMinus(xminus),
+	     yPlus(yplus),
+	     yMinus(yminus),
+	     zPlus(zplus),
+	     zMinus(zminus)
   {
     // determine the number of data points .. open file and count num entries
     int timeSteps1, timeSteps2;
@@ -288,8 +305,23 @@ PBowlLoading::~PBowlLoading()
 {
   // invoke the destructor on all ground motions supplied
 
-  if ( PBowlNodes != 0)
-    delete PBowlNodes;
+  if ( PBowlElements != 0)
+    delete PBowlElements;
+
+  if ( ExteriorNodes != 0)
+    delete ExteriorNodes;
+
+  if ( BoundaryNodes != 0)
+    delete BoundaryNodes;
+
+  if ( PBowlLoads != 0)
+    delete PBowlLoads;
+
+  if ( U != 0)
+    delete U;
+
+  if ( Udd != 0)
+    delete Udd;
 
 }
 
@@ -332,18 +364,27 @@ PBowlLoading::applyLoad(double time)
      this->CompPBLoads();
 
   // see if quick return, i.e. no plastic bowl nodes or domain set
-  int numPBnodes = PBowlNodes->Size();
-  if (numPBnodes == 0)
+  int numBnodes = BoundaryNodes->Size();
+  int numEnodes = ExteriorNodes->Size();
+  if ( (numBnodes + numEnodes) == 0)
     return;
 
-  //Apply loads on each plastic bowl nodes
+  //Apply loads on each boundary bowl nodes
   Node *theNode;
-  for (int i=0; i<numPBnodes; i++) {
-    const Vector &load=this->getNodalLoad((*PBowlNodes)[i], time);
-    theNode = theDomain->getNode( (*PBowlNodes)[i] );
+  for (int i=0; i<numBnodes; i++) {
+    Vector load=this->getNodalLoad((*BoundaryNodes)[i], time);
+    //Take care of the minus sign in the effective seismic force for boundary nodes
+    load = load*(-1.0);
+    theNode = theDomain->getNode( (*BoundaryNodes)[i] );
     theNode->addUnbalancedLoad(load);
   }
 
+  //Apply loads on each exterior bowl nodes
+  for (int i=0; i<numEnodes; i++) {
+    const Vector &load=this->getNodalLoad((*ExteriorNodes)[i], time);
+    theNode = theDomain->getNode( (*ExteriorNodes)[i] );
+    theNode->addUnbalancedLoad(load);
+  }
 }
 
 int
@@ -554,7 +595,7 @@ void
 PBowlLoading::CompPBLoads()
 {
   //===========================================================
-  // Finding all plastic bowl nodes
+  // Finding all plastic bowl nodes, Joey Yang Oct. 18, 2002
   //===========================================================
   Domain *theDomain = this->getDomain();
 
@@ -564,18 +605,16 @@ PBowlLoading::CompPBLoads()
 
   int max_bnode = PBowlElements->Size() * NIE;
   ID *Bowl_node = new ID(max_bnode);
-  ID FirstEle = theElement->getExternalNodes();
+  ID *Bound_node = new ID(max_bnode);
+  ID NidesinFirstEle = theElement->getExternalNodes();
 
   int i, j, k;
   //Inital node list from the first plastic bowl element
   for (i = 0; i<NIE; i++)
-     (*Bowl_node)(i) = FirstEle(i);
-
-  //--------------------------------------------------
-  //Just make a list of all plastic bowl nodes, no need to sort??? Joey Yang Oct. 18, 2002
-  //--------------------------------------------------
+     (*Bowl_node)(i) = NidesinFirstEle(i);
 
   int no_bnode = NIE;
+  int no_boundarynodes = 0, no_exteriornodes = 0;
   int Bowl_elem_nb = PBowlElements->Size();
   ID Temp;
 
@@ -602,26 +641,113 @@ PBowlLoading::CompPBLoads()
   }
   //--Joey------------------------------------------------
 
-  //check the bowl nodes
-//test  cout << "\nCheck all plastic bowl nodes...\n";
-//test  for (int bi=0;bi<no_bnode;bi++)
-//test       cout<< (*Bowl_node)(bi) <<"  ";
-//test  cout<< endl << "# of pbowl nodes = " << no_bnode<<endl;
-  //cout<<"finish inputting  and organizing the Bowl_node array"<<endl;
+  //test //check the bowl nodes
+  //test cout << "\nCheck all plastic bowl nodes...\n";
+  //test for (int bi=0;bi<no_bnode;bi++)
+  //test    cout<< (*Bowl_node)(bi) <<"  ";
+  //test cout<< endl << "# of pbowl nodes = " << no_bnode<<endl;
+  //test //cout<<"finish inputting  and organizing the Bowl_node array"<<endl;
 
 
-  //Adding all plastic bowl nodes
-  PBowlNodes = new ID(no_bnode);
-
-  if (PBowlNodes == 0 || PBowlNodes->Size() == 0) {
-    cerr << "PBowlLoading::PBowlLoading() - ran out of memory constructing";
-    cerr << " a Vector of size: " <<  PBowlNodes->Size() << endl;
-    if (PBowlNodes != 0)
-      delete PBowlNodes;
-    PBowlNodes = 0;
+  //Find all nodes on the boundary Joey Yang & Boris Jeremic 11/06/02
+  if ( (BoundaryNodes == 0) && ( (xPlus == xMinus) || (yPlus == yMinus) || (zPlus == zMinus) ) ) {
+    cerr << "PBowlLoading::CompPBLoads() - Boundary node specification not correct..." << endl;
+    exit(1);
   }
-  for (i =0; i < no_bnode; i++)
-   (*PBowlNodes)(i) = (*Bowl_node)(i);
+
+  no_boundarynodes = 0;
+  for (i =0; i < no_bnode; i++) {
+    Node *theNode = theDomain->getNode( (*Bowl_node)(i) );
+    const Vector &coor = theNode->getCrds();
+
+    //right face
+    if ( (coor(0) == xPlus) && (coor(1) >= yMinus) && (coor(1) <= yPlus) && (coor(2) >= zMinus) && (coor(2) <= zPlus) ) {
+       (*Bound_node)(no_boundarynodes) = (*Bowl_node)(i);
+       no_boundarynodes++;
+    }
+    //left face
+    else if ( (coor(0) == xMinus) && (coor(1) >= yMinus) && (coor(1) <= yPlus) && (coor(2) >= zMinus) && (coor(2) <= zPlus)) {
+       (*Bound_node)(no_boundarynodes) = (*Bowl_node)(i);
+       no_boundarynodes++;
+    }
+    //upper face
+    else if ( (coor(1) == yPlus) && (coor(0) >= xMinus) && (coor(0) <= xPlus) && (coor(2) >= zMinus) && (coor(2) <= zPlus)) {
+       (*Bound_node)(no_boundarynodes) = (*Bowl_node)(i);
+       no_boundarynodes++;
+    }
+    //lower face
+    else if ( (coor(1) == yMinus) && (coor(0) >= xMinus) && (coor(0) <= xPlus) && (coor(2) >= zMinus) && (coor(2) <= zPlus)) {
+       (*Bound_node)(no_boundarynodes) = (*Bowl_node)(i);
+       no_boundarynodes++;
+    }
+    //top face
+    else if ( (coor(2) == zPlus) && (coor(0) >= xMinus) && (coor(0) <= xPlus) && (coor(1) >= yMinus) && (coor(1) <= yPlus)) {
+       (*Bound_node)(no_boundarynodes) = (*Bowl_node)(i);
+       no_boundarynodes++;
+    }
+    //bottom face
+    else if ( (coor(2) == zMinus) && (coor(0) >= xMinus) && (coor(0) <= xPlus) && (coor(1) >= yMinus) && (coor(1) <= yPlus)) {
+       (*Bound_node)(no_boundarynodes) = (*Bowl_node)(i);
+       no_boundarynodes++;
+    }
+  }
+
+  //Adding all boundary nodes on the plastic bowl
+  BoundaryNodes = new ID(no_boundarynodes);
+
+  if (BoundaryNodes == 0 || BoundaryNodes->Size() == 0) {
+    cerr << "PBowlLoading::CompPBLoads() - ran out of memory constructing";
+    cerr << " a Vector of size: " <<  BoundaryNodes->Size() << endl;
+    if (BoundaryNodes != 0)
+      delete BoundaryNodes;
+    BoundaryNodes = 0;
+  }
+
+  no_exteriornodes = no_bnode;
+  for (i =0; i < no_boundarynodes; i++) {
+    (*BoundaryNodes)(i) = (*Bound_node)(i);
+
+    //Sift out all the boundary nodes from Bowl_node
+    for (j = 0; j < no_bnode; j++) {
+       if ( (*Bowl_node)(j) == (*Bound_node)(i) ) {
+          (*Bowl_node)(j) = 0; //zero this boundary nodes
+	  no_exteriornodes --;
+       }
+    }//end of sifting loop
+  }//end of adding boundary node loop
+
+  //Adding all exterior nodes on the plastic bowl
+  ExteriorNodes = new ID(no_exteriornodes);
+  if (ExteriorNodes == 0 || ExteriorNodes->Size() == 0) {
+    cerr << "PBowlLoading::CompPBLoads() - ran out of memory constructing";
+    cerr << " a Vector of size: " <<  ExteriorNodes->Size() << endl;
+    if (ExteriorNodes != 0)
+      delete ExteriorNodes;
+    ExteriorNodes = 0;
+  }
+
+  j = 0;
+  for (i =0; i < no_bnode; i++) {
+    if ( (*Bowl_node)(i) != 0 ) {
+       (*ExteriorNodes)(j) = (*Bowl_node)(i);
+       j++;
+    }
+  }
+
+  //test //check the boundary bowl nodes
+  //test cout << "\nCheck all boundary bowl nodes...\n";
+  //test for (int bi = 0; bi < no_boundarynodes; bi++)
+  //test      cout << (*BoundaryNodes)(bi) <<"  ";
+  //test cout<< endl << "# of boundary bowl nodes = " << no_boundarynodes << endl;
+  //test
+  //test //check the exterior bowl nodes
+  //test cout << "\nCheck all exterior bowl nodes...\n";
+  //test for (int bi = 0; bi < no_exteriornodes; bi++)
+  //test      cout << (*ExteriorNodes)(bi) <<"  ";
+  //test cout<< endl << "# of exterior bowl nodes = " << no_exteriornodes << endl;
+  //test
+  //test cout<<"finish inputting  and organizing the Bowl_node array"<<endl;
+
 
   //===========================================================
   // Computing the equivalent(effective) forces for all plastic bowl nodes
@@ -632,7 +758,7 @@ PBowlLoading::CompPBLoads()
   Matrix *F = new Matrix(cols, thetimeSteps);
 
   //Assume all plastic bowl nodes have the same number of DOFs
-  Node *theNode = theDomain->getNode((*PBowlNodes)(0));
+  Node *theNode = theDomain->getNode((*BoundaryNodes)(0));
   int NDOF = theNode->getNumberDOF();
 
   Vector *Fm = new Vector(NIE*NDOF);
@@ -656,8 +782,63 @@ PBowlLoading::CompPBLoads()
    theBowlElements = theDomain->getElement( (*PBowlElements)(i) );
    const ID &nd = theBowlElements->getExternalNodes();
 
-   //Matrix Ke = theBowlElements ->getTangentStiff();
-   //Matrix Me = theBowlElements ->getMass();
+   Matrix Me = theBowlElements ->getMass();
+   Matrix Ke = theBowlElements ->getTangentStiff();
+
+   //-------------------------------------------------------------------------
+   //Zero diagonal block entries of boundary and exterior nodes, respectively
+   //-------------------------------------------------------------------------
+
+   //Find out the boundary and exterior nodes in this element
+   ID *B_node = new ID(NIE);  //array to store the indices of all boundary nodes
+   ID *E_node = new ID(NIE);  //array to store the indices of all exterior nodes
+   int nB=0, nE=0;
+   bool bdnode;
+
+   for ( int ii = 0; ii < NIE; ii++) {
+    //Check if nd(ii) is boundary node or not
+    bdnode = false;
+    for (int id = 0; id < no_boundarynodes; id++) {
+       if ( nd(ii) == (*BoundaryNodes)(id) ) {
+         bdnode = true;
+       	 break;
+       }
+    }
+
+    if ( bdnode ) {
+       (*B_node)(nB) = ii;
+       nB ++;
+    }
+    else {
+       (*E_node)(nE) = ii;
+       nE ++;
+    }
+   }
+
+   //test cout << "B nodes: " << nB << " " << *B_node;
+   //test cout << "E nodes: " << nE << " " << *E_node;
+
+   //cout << " ...Me before  " << Me;
+   //Zero out the diagonal block of Boundary nodes
+   for (int m = 0; m < nB; m++)
+     for (int n = 0; n < nB; n++)
+      for (int d = 0; d < NDOF; d++)
+        for (int e= 0; e < NDOF; e++) {
+          Me( (*B_node)(m)*NDOF+d, (*B_node)(n)*NDOF+e ) = 0.0;
+          Ke( (*B_node)(m)*NDOF+d, (*B_node)(n)*NDOF+e ) = 0.0;
+        }
+
+   //Zero out the diagonal block of Exterior nodes
+   for (int m = 0; m < nE; m++)
+     for (int n = 0; n < nE; n++)
+      for (int d = 0; d < NDOF; d++)
+        for (int e= 0; e < NDOF; e++) {
+          Me( (*E_node)(m)*NDOF+d, (*E_node)(n)*NDOF+e ) = 0.0;
+          Ke( (*E_node)(m)*NDOF+d, (*E_node)(n)*NDOF+e ) = 0.0;
+        }
+
+   //test cout << " ...Me after  " << Me;
+   //test cout << " ...Ke after  " << Ke;
 
    //   get the u and u_dotdot for this element
    for ( int t=0;t<thetimeSteps; t++)
@@ -667,18 +848,18 @@ PBowlLoading::CompPBLoads()
      {
        for (int d=0;d<NDOF;d++)
        {
-         (*u_e)(j*NDOF+d)      = (*U)( nd(j)*NDOF-NDOF+d,t);
+           (*u_e)(j*NDOF+d)    =   (*U)( nd(j)*NDOF-NDOF+d,t);
          (*udd_e)(j*NDOF+d)    = (*Udd)( nd(j)*NDOF-NDOF+d,t);
        }
      }
 
-     Fm->addMatrixVector(0.0, theBowlElements ->getMass(), (*udd_e), 1.0);
-
-     Fk->addMatrixVector(0.0, theBowlElements ->getTangentStiff(), (*u_e), 1.0);
+     Fm->addMatrixVector(0.0, Me, (*udd_e), 1.0);
+     Fk->addMatrixVector(0.0, Ke, (*u_e), 1.0);
 
      for (int k=0;k<NIE; k++)
-        for (int d=0;d<NDOF;d++)
-            (*F)( nd(k)*NDOF-NDOF+d,t) = (*F)( nd(k)*NDOF-NDOF+d,t) - (*Fm)(k*NDOF+d) - (*Fk)(k*NDOF+d);
+        for (int d=0;d<NDOF;d++) {
+            (*F)( nd(k)*NDOF-NDOF+d,t) = (*F)( nd(k)*NDOF-NDOF+d,t) + (*Fk)(k*NDOF+d) + (*Fm)(k*NDOF+d);
+	}
 
    } //end for timestep
 
@@ -735,14 +916,16 @@ PBowlLoading::getNodalLoad(int nodeTag, double time)
   double value1=0, value2=0;
 
   int i;
-  if ( incr2 == thetimeSteps )
+  if ( incr2 == thetimeSteps ) {
     for (i = 0; i < numDOF; i++)
        (*nodalLoad)(i) = (*PBowlLoads)(i, incr1);
+  }
+
   //If beyond time step, return 0 loads
   else if (incr2 > thetimeSteps ) {
-//test    if ( nodeTag == 109)
-//test       cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad)(0) << " "<< (*nodalLoad)(1) << " "<< (*nodalLoad)(2) << endl;
-    return (*nodalLoad);
+      //test if ( nodeTag == 109)
+      //test    cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad) << endl;
+      return (*nodalLoad);
   }
 
   //If within time step, return interpolated values
@@ -754,8 +937,9 @@ PBowlLoading::getNodalLoad(int nodeTag, double time)
     }
   }
 
-//test  if ( nodeTag == 109)
-//test    cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad)(0) << " "<< (*nodalLoad)(1) << " "<< (*nodalLoad)(2) << endl;
+  //test if ( nodeTag == 109) {
+  //test    cout << "Time = " << time << " Node # " << nodeTag  << " " << (*nodalLoad) << endl;
+  //test }
 
   return (*nodalLoad);
 
