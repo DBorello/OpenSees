@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2001-08-23 16:45:47 $
+// $Revision: 1.2 $
+// $Date: 2002-02-26 06:23:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/math_tst.cpp,v $
                                                                         
                                                                         
@@ -487,7 +487,7 @@ res2.print("r2","\n result");
 	 tensor Ipmnq = I2("pm") * I2("nq");
   tensor Imnpq = I2("mn") * I2("pq");
 //  tensor Apqmn = alpha("pq") * I2("mn");
-  tensor X  = (1.0/3.0) * Imnpq ;// - Apqmn * (1.0/3.0);
+  tensor X  =  Imnpq * (1.0/3.0) ;// - Apqmn * (1.0/3.0);
 	 X.print();
 
 
@@ -499,13 +499,13 @@ res2.print("r2","\n result");
   tensor I2PI = I2*PI;
   I2PI.print("I2PI","\ntensor I2 * PI");
 
-// tensor multiplications ( from left)
-  tensor PII2 = PI*I2;
-  PII2.print("PII2","\ntensor PI * I2");
+//// tensor multiplications ( from left)
+//  tensor PII2 = PI*I2;
+//  PII2.print("PII2","\ntensor PI * I2");
 
-// Unary minus
-  tensor mPII2 = -PII2;
-  mPII2.print("mPII2","\ntensor -PI * I2");
+//// Unary minus
+//  tensor mPII2 = -PII2;
+//  mPII2.print("mPII2","\ntensor -PI * I2");
 
 // trace function
   double deltatrace = I2.trace();
