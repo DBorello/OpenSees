@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-02-14 23:01:08 $
+// $Revision: 1.13 $
+// $Date: 2003-02-25 01:08:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -206,6 +206,12 @@ int
 ElasticBeam2d::revertToStart()
 {
     return theCoordTransf->revertToStart();
+}
+
+int
+ElasticBeam2d::update(void)
+{
+  return theCoordTransf->update();
 }
 
 const Matrix &
