@@ -27,6 +27,7 @@ template <class T> class LIST_CONTAINER
   ~LIST_CONTAINER()
     {
       Unlink();
+      delete data;
     }
     
   void LinkBefore(LIST_CONTAINER<T> *x)
