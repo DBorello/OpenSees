@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-19 06:59:05 $
+// $Revision: 1.3 $
+// $Date: 2001-07-24 18:28:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclUniaxialMaterialTester.cpp,v $
                                                                         
 // File: ~/modelbuilder/tcl/TclUniaxialMaterialTester.C
@@ -72,7 +72,7 @@ static int countsTillCommit;
 				    
 // constructor: the constructor will add certain commands to the interpreter
 TclUniaxialMaterialTester::TclUniaxialMaterialTester(Domain &theDomain, Tcl_Interp *interp, int cTC)
-  :TclModelBuilder(theDomain, interp, 1, 1)
+  :TclModelBuilder(theDomain, interp, 1, 1), theInterp(interp)
 {
   countsTillCommit = cTC;
   Tcl_CreateCommand(interp, "uniaxialTest", TclUniaxialMaterialTester_setUniaxialMaterial,
@@ -96,7 +96,11 @@ TclUniaxialMaterialTester::~TclUniaxialMaterialTester()
 {
 
   theTclBuilder =0;
-  // may possibly invoke Tcl_DeleteCommand() later
+
+  Tcl_DeleteCommand(theInterp, "uniaxialTest");
+  Tcl_DeleteCommand(theInterp, "strainUniaxialTest");
+  Tcl_DeleteCommand(theInterp, "stressUniaxialTest");
+  Tcl_DeleteCommand(theInterp, "tangUniaxialTest");
 }
 
 

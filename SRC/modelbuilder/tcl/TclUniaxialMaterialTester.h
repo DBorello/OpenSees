@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-19 06:59:05 $
+// $Revision: 1.3 $
+// $Date: 2001-07-24 18:28:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclUniaxialMaterialTester.h,v $
                                                                         
 // File: ~/modelbuilder/tcl/TclUniaxialMaterialTester.h
@@ -59,6 +59,7 @@ class TclUniaxialMaterialTester : public TclModelBuilder
   protected:
 
   private:
+    Tcl_Interp *theInterp;
 };
 
 #endif

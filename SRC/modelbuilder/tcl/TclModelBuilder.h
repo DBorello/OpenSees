@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2001-07-24 18:28:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.h,v $
                                                                         
                                                                         
@@ -102,6 +102,8 @@ class TclModelBuilder : public ModelBuilder
     TaggedObjectStorage *theSectionRepresents;
     TaggedObjectStorage *the2dGeomTransfs;
     TaggedObjectStorage *the3dGeomTransfs;
+
+    Tcl_Interp *theInterp;
 };
 
 #endif

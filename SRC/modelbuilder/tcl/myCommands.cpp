@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-19 06:59:05 $
+// $Revision: 1.4 $
+// $Date: 2001-07-24 18:28:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/myCommands.cpp,v $
                                                                         
                                                                         
@@ -71,6 +71,12 @@ specifyModelBuilder(ClientData clientData, Tcl_Interp *interp, int argc,
       cerr << "\tBasicBuilder\n";
       return TCL_ERROR;
     }    
+
+    // invoke the descructor on the old builder
+    if (theBuilder != 0) {
+      delete theBuilder;
+      theBuilder = 0;
+    }
 
     // check argv[1] for type of ModelBuilder and create the object 
     if (strcmp(argv[1],"basic") == 0 || strcmp(argv[1],"BasicBuilder") == 0) {

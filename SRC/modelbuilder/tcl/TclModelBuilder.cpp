@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-07-23 19:58:17 $
+// $Revision: 1.8 $
+// $Date: 2001-07-24 18:28:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -230,7 +230,7 @@ TclModelBuilder_addGeomTransf(ClientData, Tcl_Interp *, int, char **,
 
 // constructor: the constructor will add certain commands to the interpreter
 TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM, int NDF)
-  :ModelBuilder(theDomain), ndm(NDM), ndf(NDF)
+  :ModelBuilder(theDomain), ndm(NDM), ndf(NDF), theInterp(interp)
 {
   theUniaxialMaterials = new ArrayOfTaggedObjects(32);
   theNDMaterials = new ArrayOfTaggedObjects(32);
@@ -351,6 +351,30 @@ TclModelBuilder::~TclModelBuilder()
   theTclMultiSupportPattern = 0;  
   
   // may possibly invoke Tcl_DeleteCommand() later
+  Tcl_DeleteCommand(theInterp, "node");
+  Tcl_DeleteCommand(theInterp, "element");
+  Tcl_DeleteCommand(theInterp, "uniaxialMaterial");
+  Tcl_DeleteCommand(theInterp, "nDMaterial");
+  Tcl_DeleteCommand(theInterp, "section");
+  Tcl_DeleteCommand(theInterp, "pattern");
+  Tcl_DeleteCommand(theInterp, "load");
+  Tcl_DeleteCommand(theInterp, "mass");
+  Tcl_DeleteCommand(theInterp, "fix");
+  Tcl_DeleteCommand(theInterp, "fixX");
+  Tcl_DeleteCommand(theInterp, "fixY");
+  Tcl_DeleteCommand(theInterp, "fixZ");
+  Tcl_DeleteCommand(theInterp, "sp");
+  Tcl_DeleteCommand(theInterp, "imposedSupportMotion");
+  Tcl_DeleteCommand(theInterp, "groundMotion");
+  Tcl_DeleteCommand(theInterp, "equalDOF");
+  Tcl_DeleteCommand(theInterp, "mp");
+  Tcl_DeleteCommand(theInterp, "block2D");
+  Tcl_DeleteCommand(theInterp, "block3D");
+  Tcl_DeleteCommand(theInterp, "patch");
+  Tcl_DeleteCommand(theInterp, "layer");
+  Tcl_DeleteCommand(theInterp, "fiber");
+  Tcl_DeleteCommand(theInterp, "geomTransf");
+  Tcl_DeleteCommand(theInterp, "updateMaterialStage");
 }
 
 
