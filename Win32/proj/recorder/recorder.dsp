@@ -103,6 +103,14 @@ SOURCE=..\..\..\SRC\recorder\ElementRecorder.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\recorder\EnvelopeElementRecorder.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\recorder\EnvelopeNodeRecorder.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\recorder\FilePlotter.cpp
 # End Source File
 # Begin Source File
@@ -136,6 +144,14 @@ SOURCE=..\..\..\SRC\recorder\DriftRecorder.h
 # Begin Source File
 
 SOURCE=..\..\..\SRC\recorder\ElementRecorder.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\recorder\EnvelopeElementRecorder.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\recorder\EnvelopeNodeRecorder.h
 # End Source File
 # Begin Source File
 
