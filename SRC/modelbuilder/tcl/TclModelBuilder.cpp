@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 08:23:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -52,6 +52,7 @@
 #include <Domain.h>
 #include <Node.h>
 #include <SP_Constraint.h>
+#include <SP_ConstraintIter.h>
 #include <MP_Constraint.h>
 #include <NodalLoad.h>
 #include <LoadPattern.h>
@@ -65,6 +66,9 @@
 #include <UniaxialMaterial.h>
 #include <NDMaterial.h>
 #include <TclModelBuilder.h>
+#include <ImposedMotionSP.h>
+#include <ImposedMotionSP1.h>
+#include <MultiSupportPattern.h>
 
 //
 // SOME STATIC POINTERS USED IN THE FUNCTIONS INVOKED BY THE INTERPRETER
@@ -73,6 +77,7 @@
 static Domain *theTclDomain =0;
 static TclModelBuilder *theTclBuilder =0;
 extern LoadPattern *theTclLoadPattern;
+extern MultiSupportPattern *theTclMultiSupportPattern;
 static int eleArgStart = 0;
 static int nodeLoadTag = 0;
 // 
@@ -128,25 +133,57 @@ TclModelBuilder_addNodalMass(ClientData clientData, Tcl_Interp *interp, int argc
 int
 TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,   
 		      char **argv);
-		      
-int
-TclModelBuilder_addRemoPatch(ClientData clientData, Tcl_Interp *interp, int argc,   
-			     char **argv);		      
 
 int
-TclModelBuilder_addRemoLayer(ClientData clientData, Tcl_Interp *interp, int argc,   
-			       char **argv);		      			     
+TclModelBuilder_addImposedMotionSP(ClientData clientData, 
+				   Tcl_Interp *interp, 
+				   int argc,    
+				   char **argv);	
 
 int
-TclModelBuilder_addRemoGeomTransf(ClientData clientData, Tcl_Interp *interp, int argc,   
-			       char **argv);		      			     
+TclModelBuilder_addRemoPatch(ClientData clientData, 
+			     Tcl_Interp *interp, 
+			     int argc,   
+			     char **argv);  
 
+int
+TclModelBuilder_addRemoLayer(ClientData clientData, 
+			     Tcl_Interp *interp, 
+			     int argc,   
+			     char **argv);   
+			       
+int
+TclModelBuilder_addRemoFiber(ClientData clientData, 
+			     Tcl_Interp *interp, 
+			     int argc,    
+			     char **argv);   
+
+int
+TclModelBuilder_addRemoGeomTransf(ClientData clientData, 
+				  Tcl_Interp *interp, 
+				  int argc,   
+				  char **argv); 
+
+				  
+
+int
+TclModelBuilder_addGroundMotion(ClientData clientData, 
+				Tcl_Interp *interp, 
+				int argc,    
+				char **argv);
+				
 // REMO
 extern int
 TclModelBuilder_addPatch (ClientData clientData, Tcl_Interp *interp,
 			  int argc, char **argv,
 			  TclModelBuilder *theTclBuilder);
 
+			  
+extern int
+TclModelBuilder_addFiber (ClientData clientData, Tcl_Interp *interp,
+			  int argc, char **argv,
+			  TclModelBuilder *theTclBuilder);
+			  
 
 extern int
 TclModelBuilder_addReinfLayer (ClientData clientData, Tcl_Interp *interp,
@@ -205,6 +242,14 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 
   Tcl_CreateCommand(interp, "sp", TclModelBuilder_addSP,
 		    (ClientData)NULL, NULL);
+  
+  Tcl_CreateCommand(interp, "imposedSupportMotion", 
+		    TclModelBuilder_addImposedMotionSP,
+		    (ClientData)NULL, NULL);  
+  
+  Tcl_CreateCommand(interp, "groundMotion", 
+		    TclModelBuilder_addGroundMotion,
+		    (ClientData)NULL, NULL);    
 
   Tcl_CreateCommand(interp, "equalDOF", TclModelBuilder_addEqualDOF_MP,
 		    (ClientData)NULL, NULL);
@@ -217,6 +262,9 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
 
   Tcl_CreateCommand(interp, "layer", TclModelBuilder_addRemoLayer,
 		    (ClientData)NULL, NULL);    
+  
+  Tcl_CreateCommand(interp, "fiber", TclModelBuilder_addRemoFiber,
+		    (ClientData)NULL, NULL);    
 
   Tcl_CreateCommand(interp, "geomTransf", TclModelBuilder_addRemoGeomTransf,
 		    (ClientData)NULL, NULL);    
@@ -225,6 +273,7 @@ TclModelBuilder::TclModelBuilder(Domain &theDomain, Tcl_Interp *interp, int NDM,
   theTclBuilder = this;
   theTclDomain = &theDomain;
   theTclLoadPattern = 0;
+  theTclMultiSupportPattern = 0;  
 
   nodeLoadTag = 0;
   eleArgStart = 0;
@@ -251,7 +300,8 @@ TclModelBuilder::~TclModelBuilder()
   theTclDomain =0;
   theTclBuilder =0;
   theTclLoadPattern =0;
-
+  theTclMultiSupportPattern = 0;  
+  
   // may possibly invoke Tcl_DeleteCommand() later
 }
 
@@ -647,6 +697,24 @@ TclModelBuilder_addPattern(ClientData clientData, Tcl_Interp *interp,
 
 
 
+
+extern int
+TclGroundMotionCommand(ClientData clientData, 
+		       Tcl_Interp *interp, 
+		       int argc,    
+		       char **argv,
+		       MultiSupportPattern *thePattern);
+
+int
+TclModelBuilder_addGroundMotion(ClientData clientData, Tcl_Interp *interp, 
+			   int argc, char **argv)
+			  
+{
+  return TclGroundMotionCommand(clientData, interp, argc, argv, 
+				theTclMultiSupportPattern);
+}
+
+
 int
 TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc,   
 			 char **argv)
@@ -718,7 +786,7 @@ TclModelBuilder_addNodalLoad(ClientData clientData, Tcl_Interp *interp, int argc
 	cerr << " " << ndf << " forces\n";
 	return TCL_ERROR;
     } else 
-      loadPatternTag = theTclLoadPattern->getTag();
+	loadPatternTag = theTclLoadPattern->getTag();
 
   // create the load
   theLoad = new NodalLoad(nodeLoadTag, nodeId, forces, isLoadConst);
@@ -873,7 +941,6 @@ TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
   }
 
   int ndf = theTclBuilder->getNDF();
-  int numSPs = theTclDomain->getNumSPs();
 
   // check number of arguments
   if (argc < 4) {
@@ -935,7 +1002,15 @@ TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
     } else	
       loadPatternTag = theTclLoadPattern->getTag();
   }
-
+  
+  LoadPattern *thePattern = theTclDomain->getLoadPattern(loadPatternTag);
+  SP_ConstraintIter &theSPs = thePattern->getSPs();
+  int numSPs = 0;
+  SP_Constraint *theSP2;
+  while ((theSP2 = theSPs()) != 0)
+      numSPs++;
+  
+  
   // create a homogeneous constraint
   SP_Constraint *theSP = new SP_Constraint(numSPs, nodeId, dofId, value, isSpConst);
 
@@ -954,6 +1029,105 @@ TclModelBuilder_addSP(ClientData clientData, Tcl_Interp *interp, int argc,
   // if get here we have sucessfully created the node and added it to the domain
   return TCL_OK;
 }
+
+
+
+int
+TclModelBuilder_addImposedMotionSP(ClientData clientData, 
+				   Tcl_Interp *interp, 
+				   int argc,   
+				   char **argv)
+{
+  // ensure the destructor has not been called - 
+  if (theTclBuilder == 0) {
+    cerr << "WARNING builder has been destroyed - sp \n";    
+    return TCL_ERROR;
+  }
+
+  int ndf = theTclBuilder->getNDF();
+
+  // check number of arguments
+  if (argc < 4) {
+    cerr << "WARNING bad command - want: imposedSupportMotion nodeId dofID gMotionID\n";
+    printCommand(argc, argv);
+    return TCL_ERROR;
+  }    
+
+  // get the nodeID, dofId and value of the constraint
+  int nodeId, dofId, gMotionID;
+
+  if (Tcl_GetInt(interp, argv[1], &nodeId) != TCL_OK) {
+    cerr << "WARNING invalid nodeId: " << argv[1];
+    cerr << " - imposedSupportMotion nodeId dofID gMotionID\n";    
+    return TCL_ERROR;
+  }
+
+  if (Tcl_GetInt(interp, argv[2], &dofId) != TCL_OK) {
+    cerr << "WARNING invalid dofId: " << argv[2] << " -  imposedSupportMotion ";
+    cerr << nodeId << " dofID gMotionID\n";    
+      return TCL_ERROR;
+  }
+  dofId--; // DECREMENT THE DOF VALUE BY 1 TO GO TO OUR C++ INDEXING
+
+  if (Tcl_GetInt(interp, argv[3], &gMotionID) != TCL_OK) {
+    cerr << "WARNING invalid gMotionID: " << argv[3] << " -  imposedSupportMotion ";
+    cerr << nodeId << " dofID gMotionID\n";
+    return TCL_ERROR;
+  }
+
+  bool alt = false;
+  if (argc == 5) {
+    if (strcmp(argv[4],"-other") == 0) 
+      alt = true;
+  }
+
+  MultiSupportPattern *thePattern = theTclMultiSupportPattern;
+  int loadPatternTag = thePattern->getTag();
+  
+  GroundMotion *theGMotion = thePattern->getMotion(gMotionID);
+  if (theGMotion == 0) {
+    cerr << "WARNING no GroundMotion with tag: " << argv[3];
+    cerr << " in current MultipleSupportPattern\n";
+    return TCL_ERROR;      
+  }
+  
+  SP_ConstraintIter &theSPs = thePattern->getSPs();
+  int numSPs = 0;
+  SP_Constraint *theSP2;
+  while ((theSP2 = theSPs()) != 0)
+      numSPs++;
+  
+  // create a new ImposedMotionSP
+  SP_Constraint *theSP;
+  if (alt == true) {
+    theSP = new ImposedMotionSP1(numSPs, nodeId, dofId, 
+				*theGMotion, false);
+  }
+  else {
+    theSP = new ImposedMotionSP(numSPs, nodeId, dofId, 
+				*theGMotion, false);
+  }
+  if (theSP == 0) {
+    cerr << "WARNING ran out of memory for ImposedMotionSP ";
+    cerr << " -  imposedSupportMotion ";
+    cerr << nodeId << " " << dofId++ << " " << gMotionID << endl;
+    return TCL_ERROR;
+  }
+  if (thePattern->addSP_Constraint(theSP) == false) {
+    cerr << "WARNING could not add SP_Constraint to pattern ";
+    printCommand(argc, argv);
+    delete theSP;
+    return TCL_ERROR;
+  }
+
+  // if get here we have sucessfully created the node and added it to the domain
+  return TCL_OK;
+}
+
+
+
+
+
 
 int
 TclModelBuilder_addEqualDOF_MP (ClientData clientData, Tcl_Interp *interp,
@@ -1055,6 +1229,14 @@ TclModelBuilder_addRemoPatch(ClientData clientData, Tcl_Interp *interp, int argc
 {
   return TclModelBuilder_addPatch(clientData, interp, argc,argv,
 				    theTclBuilder);
+}
+
+int
+TclModelBuilder_addRemoFiber(ClientData clientData, Tcl_Interp *interp, int argc,   
+			   char **argv)
+{
+  return TclModelBuilder_addFiber(clientData, interp, argc,argv,
+				  theTclBuilder);
 }
 
 int
