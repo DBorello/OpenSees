@@ -18,8 +18,8 @@ model BasicBuilder -ndm 3 -ndf 3
 set g   9.81
 set p   5.0
 set np -5.0
-set lf1 0.01
-set NN1 100
+set lf1 0.05
+set NN1 20
 # ################################
 # build the model
 # #################################
@@ -84,6 +84,8 @@ load 8 $np $p  $np -pattern 2
 #Set up recorder
 recorder Node node_iso.out disp -time -node 5 -dof 3
 recorder plot node_iso.out "disp load"  10 10 300 300 -columns 2 1
+recorder Element 1 -time -file stress_iso.out stress
+recorder plot stress_iso.out "time Stress"  10 400 300 300 -columns 3 1
 
 system UmfPack
 constraints Penalty 1e12 1e12
@@ -95,6 +97,7 @@ analysis Static
 
 analyze $NN1
 
+puts "Isotropic consolidation done..."
 
 #stage 2
 #===========================================================
@@ -108,7 +111,7 @@ equalDOF 5 8 3 3
        	  
 
 #set previous load constant
-loadConst time 0
+loadConst -time 0.0
 
 # Before shifting to disp. control, apply reference load on the top
 pattern Plain 3 "Linear" {
@@ -118,16 +121,30 @@ load 7 0.0 0.0 $np
 load 8 0.0 0.0 $np
 }
 
+# Stop the old recorders by destroying them
+remove recorders
+
 #Set up recorder for axial loading stage
 #recorder Node node_z.out disp -time -node 5 -dof 3
 
-recorder Node node_z.out disp -time -node 5 -dof 3
-recorder plot node_z.out "disp load vertical" 10 400 300 300 -columns 1 2
+recorder Node node_z.out disp -time -node all -dof 1 2 3
+recorder plot node_z.out "disp load vertical" 10 10 300 300 -columns 6 1
 
-recorder Element 1 -file element.out force
-recorder plot element.out "nodal force displ horizontal" 10 800 300 300 -columns 1 3
+# Elemental Recorder
+#  arg's            output
+# force     --    nodal force
+# stiff     --    current stiffness matrix
+# plastify  -- 	  number of gauss points, gauss coor. and accumulated deviatoric plastic strain
+# stress    -- 	  number of gauss points, stresses(Sigma_x, y, z, xy, xz, yz
 
-set NN2 100
+
+#recorder Element 1 -file element.out force
+#recorder plot element.out "nodal force displ horizontal" 10 800 300 300 -columns 1 3
+recorder Element 1 -time -file element.out plastify
+recorder plot element.out "Plastified?" 10 400 300 300 -columns  6 1
+
+
+set NN2 50
 set ndz -0.0001
 
 system UmfPack
