@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-03-04 00:48:12 $
+// $Revision: 1.7 $
+// $Date: 2004-08-26 20:38:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/EarthquakePattern.cpp,v $
                                                                         
 // Written: fmk 11/98
@@ -84,7 +84,7 @@ EarthquakePattern::applyLoad(double time)
 
   // set the vel and accel vector
   for (int i=0; i<numMotions; i++) {
-    (*uDotG)(i) = theMotions[i]->getVel(currentTime);
+    //    (*uDotG)(i) = theMotions[i]->getVel(currentTime);
     (*uDotDotG)(i) = theMotions[i]->getAccel(currentTime);
   }
 
