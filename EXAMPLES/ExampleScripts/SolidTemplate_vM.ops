@@ -18,8 +18,8 @@ model BasicBuilder -ndm 3 -ndf 3
 set g   9.81
 set p   5.0
 set np -5.0
-set lf1 0.05
-set NN1 20
+set lf1 0.1
+set NN1 10
 # ################################
 # build the model
 # #################################
@@ -66,7 +66,7 @@ set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2 10.0 0.0 -stressp $stressp"
 nDMaterial Template3Dep 1 -YS $DPys -PS $DPps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
 
 #____________tag_____8 nodes______matID__bforce1_bforce2_bforce3_rho
-element Brick8N  1  5 6 7 8 1 2 3 4   1      0.0     0.0    -9.81  1.8
+element Brick8N  1  5 6 7 8 1 2 3 4   1      0.0     0.0  -10.0  1.0
     
 #stage 1
 #===========================================================
@@ -80,6 +80,10 @@ load 6 $p  $np $np -pattern 2
 load 7 $p  $p  $np -pattern 2
 load 8 $np $p  $np -pattern 2
 }
+
+##Add elemental load-- SelfWeight
+#puts "applying self-weight..."
+eleLoad -ele 1 -type -EightNodeBrickW
 
 #Set up recorder
 recorder Node node_iso.out disp -time -node 5 -dof 3
@@ -127,7 +131,7 @@ remove recorders
 #Set up recorder for axial loading stage
 #recorder Node node_z.out disp -time -node 5 -dof 3
 
-recorder Node node_z.out disp -time -node all -dof 1 2 3
+recorder Node node_z.out disp -time -node all -dof 3
 recorder plot node_z.out "disp load vertical" 10 10 300 300 -columns 6 1
 
 # Elemental Recorder
