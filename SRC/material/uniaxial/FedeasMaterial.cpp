@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-29 22:59:23 $
+// $Revision: 1.2 $
+// $Date: 2001-07-31 16:49:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -38,11 +38,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-FedeasMaterial::FedeasMaterial(int tag, int classTag, int type,
-			       int nhv, int ndata)
+FedeasMaterial::FedeasMaterial(int tag, int classTag, int nhv, int ndata)
   :UniaxialMaterial(tag,classTag),
    data(0), hstv(0), numData(ndata), numHstv(nhv),
-   epsilonP(0.0), sigmaP(0.0), matType(type),
+   epsilonP(0.0), sigmaP(0.0),
    epsilon(0.0), sigma(0.0), tangent(0.0)
 {
   if (numHstv < 0)
@@ -53,7 +52,7 @@ FedeasMaterial::FedeasMaterial(int tag, int classTag, int type,
     hstv = new double[2*numHstv];
     if (hstv == 0)
       g3ErrorHandler->fatal("%s -- failed to allocate history array -- type %d",
-			    "FedeasMaterial::FedeasMaterial", matType);
+			    "FedeasMaterial::FedeasMaterial", this->getClassTag());
   }
   
   if (numData < 0)
@@ -64,39 +63,7 @@ FedeasMaterial::FedeasMaterial(int tag, int classTag, int type,
     data = new double[numData];
     if (data == 0)
       g3ErrorHandler->fatal("%s -- failed to allocate data array -- type %d",
-			    "FedeasMaterial::FedeasMaterial", matType);
-  }
-  
-  // Initialize history variables
-  this->revertToStart();
-}
-
-FedeasMaterial::FedeasMaterial(int classTag, int type, int nhv, int ndata)
-  :UniaxialMaterial(0,classTag),
-   data(0), hstv(0), numData(ndata), numHstv(nhv),
-   epsilonP(0.0), sigmaP(0.0), matType(type),
-   epsilon(0.0), sigma(0.0), tangent(0.0)
-{
-  if (numHstv < 0)
-    numHstv = 0;
-  
-  if (numHstv > 0) {
-    // Allocate history array
-    hstv = new double[2*numHstv];
-    if (hstv == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate history array -- type %d",
-			    "FedeasMaterial::FedeasMaterial", matType);
-  }
-  
-  if (numData < 0)
-    numData = 0;
-  
-  if (numData > 0) {
-    // Allocate material parameter array
-    data = new double[numData];
-    if (data == 0)
-      g3ErrorHandler->fatal("%s -- failed to allocate data array -- type %d",
-			    "FedeasMaterial::FedeasMaterial", matType);
+			    "FedeasMaterial::FedeasMaterial", this->getClassTag());
   }
   
   // Initialize history variables
@@ -206,7 +173,7 @@ UniaxialMaterial*
 FedeasMaterial::getCopy(void)
 {
   FedeasMaterial *theCopy = 
-    new FedeasMaterial(this->getTag(), this->getClassTag(), matType, numHstv, numData);
+    new FedeasMaterial(this->getTag(), this->getClassTag(), numHstv, numData);
   
   // Copy history variables
   int i;
@@ -227,12 +194,11 @@ FedeasMaterial::sendSelf(int commitTag, Channel &theChannel)
 {
   int res = 0;
   
-  static ID idData(4);
+  static ID idData(3);
   
   idData(0) = this->getTag();
   idData(1) = numHstv;
   idData(2) = numData;
-  idData(3) = matType;
   
   res += theChannel.sendID(this->getDbTag(), commitTag, idData);
   if (res < 0) 
@@ -265,7 +231,7 @@ FedeasMaterial::recvSelf(int commitTag, Channel &theChannel,
 {
   int res = 0;
   
-  static ID idData(4);
+  static ID idData(3);
   
   res += theChannel.recvID(this->getDbTag(), commitTag, idData);
   if (res < 0) {
@@ -276,7 +242,6 @@ FedeasMaterial::recvSelf(int commitTag, Channel &theChannel,
   this->setTag(idData(0));
   numHstv = idData(1);
   numData = idData(2);
-  matType = idData(3);
   
   Vector vecData(numHstv+numData+2);
   
@@ -306,41 +271,41 @@ FedeasMaterial::Print(ostream &s, int flag)
 {
   s << "FedeasMaterial, type: ";
 	
-  switch (matType) {
-  case FEDEAS_Bond1:
+  switch (this->getClassTag()) {
+  case MAT_TAG_FedeasBond1:
     s << "Bond1" << endl;
     break;
-  case FEDEAS_Bond2:
+  case MAT_TAG_FedeasBond2:
     s << "Bond2" << endl;
     break;
-  case FEDEAS_Concrete1:
+  case MAT_TAG_FedeasConcrete1:
     s << "Concrete1" << endl;
     break;
-  case FEDEAS_Concrete2:
+  case MAT_TAG_FedeasConcrete2:
     s << "Concrete2" << endl;
     break;
-  case FEDEAS_Concrete3:
+  case MAT_TAG_FedeasConcrete3:
     s << "Concrete3" << endl;
     break;
-  case FEDEAS_Hardening:
+  case MAT_TAG_FedeasHardening:
     s << "Hardening" << endl;
     break;
-  case FEDEAS_Hysteretic1:
+  case MAT_TAG_FedeasHysteretic1:
     s << "Hysteretic1" << endl;
     break;
-  case FEDEAS_Hysteretic2:
+  case MAT_TAG_FedeasHysteretic2:
     s << "Hysteretic2" << endl;
     break;
-  case FEDEAS_Steel1:
+  case MAT_TAG_FedeasSteel1:
     s << "Steel1" << endl;
     break;
-  case FEDEAS_Steel2:
+  case MAT_TAG_FedeasSteel2:
     s << "Steel2" << endl;
     break;
     // Add more cases as needed
     
   default:
-    s << "Material identifier = " << matType << endl;
+    s << "Material identifier = " << this->getClassTag() << endl;
     break;
   }
 }
@@ -452,53 +417,53 @@ FedeasMaterial::invokeSubroutine(int ist)
   // Compute strain increment
   double dEpsilon = epsilon-epsilonP;
   
-  switch (matType) {
-  case FEDEAS_Bond1:
+  switch (this->getClassTag()) {
+  case MAT_TAG_FedeasBond1:
     //bond_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
     //	&sigma, &tangent, &ist);
     break;
     
-  case FEDEAS_Bond2:
+  case MAT_TAG_FedeasBond2:
     //bond_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon,
     //	&sigma, &tangent, &ist);
     break;
     
-  case FEDEAS_Concrete1:
+  case MAT_TAG_FedeasConcrete1:
     //concrete_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
     //	&sigma, &tangent, &ist);
     break;
     
-  case FEDEAS_Concrete2:
+  case MAT_TAG_FedeasConcrete2:
     //concrete_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
     //	&sigma, &tangent, &ist);
     break;
     
-  case FEDEAS_Concrete3:
+  case MAT_TAG_FedeasConcrete3:
     //concrete_3_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
     //	&sigma, &tangent, &ist);
     break;
     
-  case FEDEAS_Hardening:
+  case MAT_TAG_FedeasHardening:
     //hard_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
     //	&sigma, &tangent, &ist);
     break;
     
-  case FEDEAS_Hysteretic1:
+  case MAT_TAG_FedeasHysteretic1:
     //hyster_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
     //	&sigma, &tangent, &ist);
     break;
     
-  case FEDEAS_Hysteretic2:
+  case MAT_TAG_FedeasHysteretic2:
     //hyster_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
     //	&sigma, &tangent, &ist);
     break;
     
-  case FEDEAS_Steel1:
+  case MAT_TAG_FedeasSteel1:
     //steel_1_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
     //	&sigma, &tangent, &ist);
     break;
     
-  case FEDEAS_Steel2:
+  case MAT_TAG_FedeasSteel2:
     //steel_2_(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
     //	&sigma, &tangent, &ist);
     break;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-29 22:59:23 $
+// $Revision: 1.2 $
+// $Date: 2001-07-31 16:49:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.h,v $
                                                                       
 // Written: MHS
@@ -33,26 +33,12 @@
 #ifndef FedeasMaterial_h
 #define FedeasMaterial_h
 
-// Pre-defined values for the matType variable
-#define FEDEAS_Bond1		1
-#define FEDEAS_Bond2		2
-#define FEDEAS_Concrete1	3
-#define FEDEAS_Concrete2	4
-#define FEDEAS_Concrete3	5
-#define FEDEAS_Hardening	6
-#define FEDEAS_Hysteretic1	7
-#define FEDEAS_Hysteretic2	8
-#define FEDEAS_Steel1		9
-#define FEDEAS_Steel2		10
-// Add more #defines as needed
-
 #include <UniaxialMaterial.h>
 
 class FedeasMaterial : public UniaxialMaterial
 {
  public:
-  FedeasMaterial(int tag, int classTag, int type, int numHV, int numData);
-  FedeasMaterial(int classTag, int type, int numHV, int numData);
+  FedeasMaterial(int tag, int classTag, int numHV, int numData);
   virtual ~FedeasMaterial();
   
   virtual int setTrialStrain(double strain, double strainRate = 0.0);
@@ -89,8 +75,6 @@ class FedeasMaterial : public UniaxialMaterial
   double sigmaP;	// Committed stress
   
  private:
-  int matType;		// Material type ... tells which subroutine to call
-  
   double epsilon;	// Trial strain
   double sigma;		// Trial stress
   double tangent;	// Trial tangent
