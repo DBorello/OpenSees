@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:18 $
+// $Revision: 1.2 $
+// $Date: 2000-10-13 05:11:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -858,14 +858,18 @@ Domain::removeLoadPattern(int tag)
       theElementalLoad->setDomain(0);
     }
 
+    int numSPs = 0;
     SP_Constraint *theSP_Constraint;
     SP_ConstraintIter &theSP_Constraints = result->getSPs();
     while ((theSP_Constraint = theSP_Constraints()) != 0) {
+	numSPs++;
 	theSP_Constraint->setDomain(0);
     }
 
-    // mark the domain has having changed 
-    this->domainChange();
+    // mark the domain has having changed if numSPs > 0
+    // as the constraint handlers have to be redone
+    if (numSPs > 0)
+	this->domainChange();
 
     // finally return the load pattern
     return result;    
