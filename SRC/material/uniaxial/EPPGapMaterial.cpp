@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-10 22:57:40 $
+// $Revision: 1.6 $
+// $Date: 2002-06-11 17:51:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.cpp,v $
 
 // File: ~/material/EPPGapMaterial.C
@@ -136,15 +136,6 @@ EPPGapMaterial::getInitialTangent(void)
     return 0.0; 
   else 
     return E;
-}
-
-double 
-EPPGapMaterial::getSecant ()
-{
-    if (fabs(trialStrain-minElasticYieldStrain) > DBL_EPSILON)
-        return this->getStress()/(trialStrain-minElasticYieldStrain);
-    else
-        return 0;
 }
 
 int 

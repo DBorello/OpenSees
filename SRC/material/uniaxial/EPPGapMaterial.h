@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-06-10 22:57:40 $
+// $Revision: 1.3 $
+// $Date: 2002-06-11 17:51:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.h,v $
 
 // File: ~/material/EPPGapMaterial.h
@@ -62,8 +62,6 @@ class EPPGapMaterial : public UniaxialMaterial
     double getStress(void);
     double getTangent(void);
     double getInitialTangent(void);
-
-    double getSecant (void);
 
     int commitState(void);
     int revertToLastCommit(void);    
