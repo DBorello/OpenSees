@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-11-08 01:42:32 $
+// $Revision: 1.8 $
+// $Date: 2001-11-10 17:38:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -369,13 +369,16 @@ ZeroLength::update(void)
     
     // loop over 1d materials
     
-    Matrix& tran = *t1d;;
+    Matrix& tran = *t1d;
+	int ret = 0;
     for (int mat=0; mat<numMaterials1d; mat++) {
 	// compute strain and rate; set as current trial for material
 	strain     = this->computeCurrentStrain1d(mat,diff );
         strainRate = this->computeCurrentStrain1d(mat,diffv);
-	theMaterial1d[mat]->setTrialStrain(strain,strainRate);
+	ret += theMaterial1d[mat]->setTrialStrain(strain,strainRate);
     }
+
+	return ret;
 }
 
 const Matrix &
