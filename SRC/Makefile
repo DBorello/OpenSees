@@ -30,7 +30,8 @@ all:
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS) \
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
-	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) $(ELEMENT_BJ_LIBS) $(PY_RWB_BJ_LIBS) \
+	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) $(ELEMENT_BJ_LIBS) \
+	$(FINITE_DEFORMATION_BJ_LIBS) $(PY_RWB_BJ_LIBS) \
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) $(GGD_LIBS)\
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
@@ -64,7 +65,8 @@ all:
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(MATRIX_LIBS) $(ELE_LIBS) \
 	$(MATERIAL_LIBS) $(HYSTERETIC_LIBS) $(SECTION_LIBS) $(DATABASE_LIBS) \
 	$(FEDEAS_LIBS) $(MODEL_BUILDER_LIBS) $(DOMAIN_LIBS)\
-	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) $(ELEMENT_BJ_LIBS) $(PY_RWB_BJ_LIBS) \
+	$(MATMOD_BJ_LIBS) $(NDARRAY_BJ_LIBS) $(ELEMENT_BJ_LIBS) \
+	$(FINITE_DEFORMATION_BJ_LIBS) $(PY_RWB_BJ_LIBS) \
 	$(ANALYSIS_LIBS) $(SysOfEqn_LIBS) $(GRAPH_LIBS) $(TAGGED_LIBS) \
 	$(UTILITY_LIBS) $(ACTOR_LIBS) $(RECORDER_LIBS) $(LAW_LIBS) $(GGD_LIBS) \
 	$(RENDERER_LIBS) $(REMO_LIBS) $(GLF_LIBS) $(ZHY_LIBS) $(ERRORHANDLER_LIBS) \
@@ -74,11 +76,11 @@ all:
 endif
 
 skypack:
-	@$(CD) $(HOME)/lib; rm -f $(HOME)/lib/libskypack.a;     
+	@$(CD) $(HOME)/lib; rm -f $(HOME)/lib/libskypack.a;
 	@$(CD) $(FE)/system_of_eqn/linearSOE/profileSPD/skypack; creator;
 
 metis:
-	@$(CD) $(HOME)/lib; rm -f $(METIS_LIBRARY);     
+	@$(CD) $(HOME)/lib; rm -f $(METIS_LIBRARY);
 	@$(CD) $(FE)/graph/partitioner/metis-2.0; $(MAKE) clean;
 	@$(CD) $(FE)/graph/partitioner/metis-2.0; $(MAKE) lib;
 
@@ -148,7 +150,7 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 	$(FE)/analysis/integrator/EigenIntegrator.o \
 	$(FE)/analysis/algorithm/eigenAlgo/EigenAlgorithm.o \
 	$(FE)/analysis/algorithm/eigenAlgo/FrequencyAlgo.o \
-	$(FE)/analysis/algorithm/eigenAlgo/StandardEigenAlgo.o 
+	$(FE)/analysis/algorithm/eigenAlgo/StandardEigenAlgo.o
 
 
 GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
@@ -198,7 +200,7 @@ GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/NullPlasticMaterial.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/PlasticHardeningMaterial.o \
 	$(FE)/material/yieldSurface/plasticHardeningMaterial/TclModelBuilderYSPlasticMaterialCommand.o \
-	$(FE)/recorder/YsVisual.o 
+	$(FE)/recorder/YsVisual.o
 
 ERRORHANDLER_LIBS = $(FE)/handler/StandardStream.o \
 	$(FE)/handler/FileStream.o \
@@ -211,7 +213,7 @@ NDARRAY_BJ_LIBS = $(FE)/nDarray/basics.o \
                   $(FE)/nDarray/BJvector.o \
                   $(FE)/nDarray/BJtensor.o \
                   $(FE)/nDarray/straint.o  \
-                  $(FE)/nDarray/stresst.o 
+                  $(FE)/nDarray/stresst.o
 
 
 MATMOD_BJ_LIBS = $(FE)/material/nD/ElasticIsotropic3D.o  \
@@ -248,16 +250,34 @@ ELEMENT_BJ_LIBS = $(FE)/element/8nbrick/EightNodeBrick.o \
                   $(FE)/element/8nbrick/TclEightNodeBrickCommand.o \
                   $(FE)/element/20nbrick/TwentyNodeBrick.o \
                   $(FE)/element/20nbrick/TclTwentyNodeBrickCommand.o \
+                  $(FE)/element/TotalLagrangianFD20NodeBrick/FD20NodeBrick.o \
+                  $(FE)/element/TotalLagrangianFD20NodeBrick/TclFD20NodeBrickCommand.o \
                   $(FE)/element/upU/EightNodeBrick_u_p_U.o \
                   $(FE)/element/upU/TwentyNodeBrick_u_p_U.o \
                   $(FE)/element/upU/TclEightNodeBrick_u_p_U.o \
                   $(FE)/element/upU/TclTwentyNodeBrick_u_p_U.o
 
+FINITE_DEFORMATION_BJ_LIBS = $(FE)/material/nD/FiniteDeformation/NeoHookeanWEnergy.o \
+                             $(FE)/material/nD/FiniteDeformation/OgdenWEnergy.o \
+                             $(FE)/material/nD/FiniteDeformation/SimoPisterWEnergy.o \
+                             $(FE)/material/nD/FiniteDeformation/FiniteDeformationElastic3D.o \
+                             $(FE)/material/nD/FiniteDeformation/LogWEnergy.o \
+                             $(FE)/material/nD/FiniteDeformation/MooneyRivlinWEnergy.o \
+                             $(FE)/material/nD/FiniteDeformation/W.o
+
+
+
+
+
+
+
+
 
 PY_RWB_BJ_LIBS = $(FE)/material/uniaxial/PY/PySimple1.o \
-		 $(FE)/material/uniaxial/PY/QzSimple1.o \
-		 $(FE)/material/uniaxial/PY/TzSimple1.o \
-		 $(FE)/material/uniaxial/PY/TclPyTzQzMaterialCommand.o 
+                 $(FE)/material/uniaxial/PY/QzSimple1.o \
+                 $(FE)/material/uniaxial/PY/TzSimple1.o \
+                 $(FE)/material/uniaxial/PY/TclPyTzQzMaterialCommand.o
+
 
 
 ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
@@ -274,7 +294,7 @@ ifeq ($(GRAPHICS), UsingOpenGL)
 RENDERER_LIBS = $(FE)/renderer/OpenGlDevice.o \
 	$(FE)/renderer/Renderer.o \
 	$(FE)/renderer/PlainMap.o \
-	$(FE)/renderer/OpenGlRenderer.o 
+	$(FE)/renderer/OpenGlRenderer.o
 
 else
 
@@ -328,7 +348,7 @@ TAGGED_LIBS =   $(FE)/tagged/TaggedObject.o \
 	$(FE)/tagged/storage/ArrayOfTaggedObjects.o \
 	$(FE)/tagged/storage/ArrayOfTaggedObjectsIter.o  \
 	$(FE)/tagged/storage/MapOfTaggedObjects.o \
-	$(FE)/tagged/storage/MapOfTaggedObjectsIter.o  
+	$(FE)/tagged/storage/MapOfTaggedObjectsIter.o
 
 UTILITY_LIBS = $(FE)/utility/Timer.o
 
@@ -342,7 +362,7 @@ GRAPH_LIBS = $(FE)/graph/graph/DOF_Graph.o \
 	$(FE)/graph/numberer/MyRCM.o \
 	$(FE)/graph/numberer/GraphNumberer.o \
 	$(FE)/graph/numberer/SimpleNumberer.o \
-	$(FE)/graph/partitioner/Metis.o 
+	$(FE)/graph/partitioner/Metis.o
 
 ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/Information.o \
@@ -391,7 +411,7 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/brick/Brick.o \
 	$(FE)/element/brick/BbarBrick.o \
 	$(FE)/element/brick/shp3d.o \
-	$(FE)/element/brick/TclBrickCommand.o 
+	$(FE)/element/brick/TclBrickCommand.o
 
 
 MATERIAL_LIBS   =  $(FE)/material/Material.o \
@@ -440,7 +460,7 @@ MATERIAL_LIBS   =  $(FE)/material/Material.o \
 	$(FE)/material/nD/PlateFiberMaterial.o \
 	$(FE)/material/nD/BeamFiberMaterial.o \
 	$(FE)/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.o \
-	$(FE)/material/nD/TclModelBuilderNDMaterialCommand.o 
+	$(FE)/material/nD/TclModelBuilderNDMaterialCommand.o
 
 FEDEAS_LIBS = $(FE)/material/uniaxial/FedeasMaterial.o \
 	$(FE)/material/uniaxial/fedeas/FedeasHardeningMaterial.o \
@@ -465,7 +485,7 @@ DRAIN_LIBS = $(FE)/material/uniaxial/DrainMaterial.o \
 	$(FE)/material/uniaxial/drain/DrainClough1Material.o \
 	$(FE)/material/uniaxial/drain/DrainClough2Material.o \
 	$(FE)/material/uniaxial/drain/DrainPinch1Material.o \
-	$(FE)/material/uniaxial/drain/TclDrainMaterialCommand.o 
+	$(FE)/material/uniaxial/drain/TclDrainMaterialCommand.o
 
 SNAP_LIBS = $(FE)/material/uniaxial/snap/TclSnapMaterialCommand.o \
 	$(FE)/material/uniaxial/snap/Pinching.o
@@ -504,9 +524,9 @@ SECTION_LIBS = $(FE)/material/section/SectionForceDeformation.o \
 
 
 ifeq ($(PROGRAMMING_MODE), THREADS)
-SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/ThreadedSuperLU.o 
+SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/ThreadedSuperLU.o
 else
-SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o 
+SUPER_LU_OBJ = $(FE)/system_of_eqn/linearSOE/sparseGEN/SuperLU.o
 endif
 
 SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
@@ -533,7 +553,7 @@ SysOfEqn_LIBS = $(FE)/system_of_eqn/SystemOfEqn.o \
 	$(FE)/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSolver.o \
 	$(SUPER_LU_OBJ) \
 	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSOE.o \
-	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.o 
+	$(FE)/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.o
 
 
 MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
@@ -541,7 +561,7 @@ MODEL_BUILDER_LIBS = $(FE)/modelbuilder/ModelBuilder.o \
 	$(FE)/modelbuilder/tcl/TclUniaxialMaterialTester.o \
 	$(FE)/modelbuilder/tcl/TclModelBuilder.o \
 	$(FE)/modelbuilder/tcl/Block2D.o \
-	$(FE)/modelbuilder/tcl/Block3D.o 
+	$(FE)/modelbuilder/tcl/Block3D.o
 
 DOMAIN_LIBS =  $(FE)/domain/component/DomainComponent.o \
 	$(FE)/domain/domain/Domain.o \
@@ -666,7 +686,7 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 	$(FE)/analysis/fe_ele/penalty/PenaltyMP_FE.o \
 	$(FE)/analysis/fe_ele/lagrange/LagrangeSP_FE.o \
 	$(FE)/analysis/fe_ele/lagrange/LagrangeMP_FE.o \
-	$(FE)/analysis/fe_ele/transformation/TransformationFE.o 
+	$(FE)/analysis/fe_ele/transformation/TransformationFE.o
 
 
 ACTOR_LIBS = $(FE)/actor/channel/Channel.o \

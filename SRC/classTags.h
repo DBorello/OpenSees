@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.51 $
-// $Date: 2003-08-29 07:39:28 $
+// $Revision: 1.52 $
+// $Date: 2003-10-02 20:26:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
 // Written: fmk
@@ -183,6 +183,7 @@
 #define ND_TAG_PlateFiberMaterial          2001
 #define ND_TAG_BeamFiberMaterial		2002
 #define ND_TAG_CompressibleFluid		3001
+#define ND_TAG_FiniteDeformationElastic3D	8002
 
 
 #define FIBER_TAG_Uniaxial2d	1
@@ -258,6 +259,7 @@
 #define ELE_TAG_EightNodeBrick_u_p_U            7003
 #define ELE_TAG_TwentyNodeBrick_u_p_U            7004
 #define ELE_TAG_FourNodeQuadUP  7005
+#define ELE_TAG_TotalLagrangianFD20NodeBrick 7006 // ZC added
 #define ELE_TAG_PlateMITC4      2023 
 #define ELE_TAG_ShellMITC4      2024 
 #define ELE_TAG_Plate1          2022 
