@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-06-14 05:20:01 $
+// $Revision: 1.9 $
+// $Date: 2001-07-12 00:24:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -88,7 +88,8 @@
 #define MAT_TAG_Clough2	202
 #define MAT_TAG_Pinch1	203
 #define MAT_TAG_BiLinear	204
-
+#define MAT_TAG_FedeasMaterial         1000
+#define MAT_TAG_DrainMaterial          2000
 
 #define SEC_TAG_Elastic2d   3
 #define SEC_TAG_Elastic3d   4
@@ -102,6 +103,7 @@
 #define ND_TAG_ElasticIsotropic					10
 #define ND_TAG_ElasticIsotropicPlaneStrain2d	11
 #define ND_TAG_ElasticIsotropicPlaneStress2d	12
+#define ND_TAG_ElasticIsotropicAxiSymm          13 
 #define ND_TAG_ElasticIsotropic3D               21
 #define ND_TAG_Template3Dep 			31
 #define ND_TAG_J2PlaneStrain                  3005 
@@ -109,6 +111,8 @@
 #define ND_TAG_J2AxiSymm                      3007 
 #define ND_TAG_J2ThreeDimensional             3009 
 #define MAT_TAG_FluidSolidPorousMaterial       102
+#define ND_TAG_FeapMaterial                 1000
+#define ND_TAG_PlaneStressMaterial          2000
 
 #define FIBER_TAG_Uniaxial2d	1
 #define FIBER_TAG_Uniaxial3d	2
@@ -170,9 +174,12 @@
 #define ELE_TAG_BeamWithHinges3d  402
 #define ELE_TAG_EightNodeBrick   7001
 #define ELE_TAG_PlateMITC4      2023 
+#define ELE_TAG_ShellMITC4      2024 
 #define ELE_TAG_Plate1          2022 
-
-
+#define ELE_TAG_Brick                      3458 
+#define ELE_TAG_BbarBrick                  3457 
+#define ELE_TAG_EnhancedQuad               3459
+#define ELE_TAG_ConstantPressureVolumeQuad 3456 
 
 #define CRDTR_TAG_LinearCrdTransf2d 1
 #define CRDTR_TAG_PDeltaCrdTransf2d 2
@@ -220,9 +227,10 @@
 #define EquiALGORITHM_TAGS_Linear 		1
 #define EquiALGORITHM_TAGS_NewtonRaphson       	2
 #define EquiALGORITHM_TAGS_ModifiedNewton 	3
-#define EquiALGORITHM_TAGS_BFGS 		4
-#define EquiALGORITHM_TAGS_SplitNewton 		5
-#define EquiALGORITHM_TAGS_Broyden 		6
+#define EquiALGORITHM_TAGS_Broyden 		4
+#define EquiALGORITHM_TAGS_BFGS 		5
+#define EquiALGORITHM_TAGS_SplitNewton 		6
+#define EquiALGORITHM_TAGS_KrylovNewton         7
 
 #define INTEGRATOR_TAGS_Newmark          	2
 #define INTEGRATOR_TAGS_HHT 	          	3
@@ -248,6 +256,7 @@
 #define LinSOE_TAGS_ActorPetscSOE		9
 #define LinSOE_TAGS_UmfpackGenLinSOE		10
 #define LinSOE_TAGS_SymSparseLinSOE         11
+#define LinSOE_TAGS_DiagonalLinSOE         12
 
 #define SOLVER_TAGS_FullGenLinLapackSolver  	1
 #define SOLVER_TAGS_BandGenLinLapackSolver  	2
@@ -264,6 +273,7 @@
 #define SOLVER_TAGS_PetscSolver      			13
 #define SOLVER_TAGS_UmfpackGenLinSolver      		14
 #define SOLVER_TAGS_SymSparseLinSolver 15
+#define SOLVER_TAGS_DiagonalLinSolver 16
 
 #define DomDecompALGORITHM_TAGS_DomainDecompAlgo 1
 
