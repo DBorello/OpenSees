@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2000-10-28 05:43:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/TclZeroLength.cpp,v $
                                                                         
                                                                         
@@ -38,6 +38,8 @@
 #include <tcl.h>
 
 #include <ZeroLength.h>
+#include <ZeroLengthND.h>
+#include <ZeroLengthSection.h>
 #include <G3Globals.h>
 #include <TclModelBuilder.h>
 #include <ID.h>
@@ -311,3 +313,320 @@ TclModelBuilder_addZeroLength(ClientData clientData, Tcl_Interp *interp,
 
 
 
+int
+TclModelBuilder_addZeroLengthSection(ClientData clientData, Tcl_Interp *interp,
+			      int argc, char **argv,
+			      Domain *theDomain,
+			      TclModelBuilder *theBuilder) {
+
+    int ndm = theBuilder->getNDM(); // the spatial dimension of the problem
+
+    //
+    // first scan the command line to obtain eleID, iNode, jNode, material ID's
+    // and their directions, and the orientation of ele xPrime and yPrime not
+    // along the global x and y axis
+    //
+    
+    int eleTag, iNode, jNode;
+    
+    // a quick check on number of args
+    if (argc < 6) {
+	g3ErrorHandler->warning("WARNING too few arguments %s %s %s\n",
+				"want - element zeroLengthSection eleTag? iNode? jNode? ",
+				"secTag? ",
+				"<-orient x1? x2? x3? y1? y2? y3?>");
+	return TCL_ERROR;
+    }
+
+    // get the ele tag 
+    if (Tcl_GetInt(interp, argv[2], &eleTag) != TCL_OK) {
+	g3ErrorHandler->warning("WARNING invalied eleTag %s %s %s %s\n", 
+				argv[2],
+				"- element zeroLengthSection eleTag? iNode? jNode? ",
+				"secTag? ",
+				"<-orient x1? x2? x3? y1? y2? y3?>");	
+	return TCL_ERROR;
+    }
+
+    // get the two end nodes
+    if (Tcl_GetInt(interp, argv[3], &iNode) != TCL_OK) {
+	g3ErrorHandler->warning("WARNING invalied iNode %s %s %s %s\n", 
+				argv[3],
+				"- element zeroLengthSection eleTag? iNode? jNode? ",
+				"secTag? ",
+				"<-orient x1? x2? x3? y1? y2? y3?>");	
+	return TCL_ERROR;
+    }
+
+    if (Tcl_GetInt(interp, argv[4], &jNode) != TCL_OK) {
+	g3ErrorHandler->warning("WARNING invalid jNode %s %s %s %s\n", 
+				argv[4],
+				"- element zeroLengthSection eleTag? iNode? jNode? ",
+				"secTag? ",
+				"<-orient x1? x2? x3? y1? y2? y3?>");	
+	return TCL_ERROR;
+    }
+
+	int secTag;
+
+    if (Tcl_GetInt(interp, argv[5], &secTag) != TCL_OK) {
+	g3ErrorHandler->warning("WARNING invalid secTag %s %s %s %s\n", 
+				argv[5],
+				"- element zeroLengthSection eleTag? iNode? jNode? ",
+				"secTag? ",
+				"<-orient x1? x2? x3? y1? y2? y3?>");	
+	return TCL_ERROR;
+    }
+
+    // create the vectors for the element orientation
+    Vector x(3); x(0) = 1.0; x(1) = 0.0; x(2) = 0.0;
+    Vector y(3); y(0) = 0.0; y(1) = 1.0; y(2) = 0.0;
+
+	int argi = 6;
+
+    // finally check the command line to see if user specified orientation
+    if (argi < argc) {
+	if (strcmp(argv[argi],"-orient") == 0) {
+	    if (argc < (argi+7)) {
+		g3ErrorHandler->warning("WARNING %s %d %s %s %s %s\n", 
+				"not enough paramaters after -orient flag for ele ",
+				eleTag,
+				"- element zeroLengthSection eleTag? iNode? jNode? ",
+				"secTag? ",
+				"<-orient x1? x2? x3? y1? y2? y3?>");			
+		return TCL_ERROR;		
+	    } else {
+		argi++;
+		double value;
+		// read the x values
+		for (int i=0; i<3; i++)  {
+		    if (Tcl_GetDouble(interp, argv[argi], &value) != TCL_OK) {
+			g3ErrorHandler->warning("WARNING %s %d %s %s %s %s\n", 
+						"invalid -orient value for ele  ",
+						eleTag,
+						argv[argi],
+						"- element zeroLengthSection eleTag? iNode? jNode? ",
+						"secTag? ",
+						"<-orient x1? x2? x3? y1? y2? y3?>");	
+			return TCL_ERROR;
+		    } else {
+			argi++;
+			x(i) = value;
+		    }
+		}
+		// read the y values
+		for (int j=0; j<3; j++)  {
+		    if (Tcl_GetDouble(interp, argv[argi], &value) != TCL_OK) {
+			g3ErrorHandler->warning("WARNING %s %d %s %s %s %s\n", 
+						"invalid -orient value for ele  ",
+						eleTag,
+						argv[argi],
+						"- element zeroLengthSection eleTag? iNode? jNode? ",
+						"secTag? ",
+						"<-orient x1? x2? x3? y1? y2? y3?>");	
+			return TCL_ERROR;
+		    } else {
+			argi++;
+			y(j) = value;		
+		    }
+		}
+	    }
+	}
+    }
+    
+    //
+    // now we create the element and add it to the domain
+    //
+
+	SectionForceDeformation *theSection = theBuilder->getSection(secTag);
+
+	if (theSection == 0) {
+		g3ErrorHandler->warning("%s -- no section with tag %d exists in Domain\n", 
+			"zeroLengthSection", secTag);	
+		return TCL_ERROR;		
+	}
+
+    Element *theEle = new ZeroLengthSection(eleTag, ndm, iNode, jNode, x, y, *theSection);
+    
+	if (theEle == 0)
+	return TCL_ERROR;
+   
+    if (theDomain->addElement(theEle) == false)
+	return TCL_ERROR;
+
+    return TCL_OK;
+}
+
+
+int
+TclModelBuilder_addZeroLengthND(ClientData clientData, Tcl_Interp *interp,
+			      int argc, char **argv,
+			      Domain *theDomain,
+			      TclModelBuilder *theBuilder) {
+
+    int ndm = theBuilder->getNDM(); // the spatial dimension of the problem
+
+    //
+    // first scan the command line to obtain eleID, iNode, jNode, material ID's
+    // and their directions, and the orientation of ele xPrime and yPrime not
+    // along the global x and y axis
+    //
+    
+    int eleTag, iNode, jNode;
+    
+    // a quick check on number of args
+    if (argc < 6) {
+	g3ErrorHandler->warning("WARNING too few arguments %s %s %s\n",
+				"want - element zeroLengthND eleTag? iNode? jNode? ",
+				"NDTag? <1DTag?>",
+				"<-orient x1? x2? x3? y1? y2? y3?>");
+	return TCL_ERROR;
+    }
+
+    // get the ele tag 
+    if (Tcl_GetInt(interp, argv[2], &eleTag) != TCL_OK) {
+	g3ErrorHandler->warning("WARNING invalied eleTag %s %s %s %s\n", 
+				argv[2],
+				"- element zeroLengthND eleTag? iNode? jNode? ",
+				"NDTag? <1DTag?>",
+				"<-orient x1? x2? x3? y1? y2? y3?>");	
+	return TCL_ERROR;
+    }
+
+    // get the two end nodes
+    if (Tcl_GetInt(interp, argv[3], &iNode) != TCL_OK) {
+	g3ErrorHandler->warning("WARNING invalied iNode %s %s %s %s\n", 
+				argv[3],
+				"- element zeroLengthND eleTag? iNode? jNode? ",
+				"NDTag? <1DTag?>",
+				"<-orient x1? x2? x3? y1? y2? y3?>");	
+	return TCL_ERROR;
+    }
+
+    if (Tcl_GetInt(interp, argv[4], &jNode) != TCL_OK) {
+	g3ErrorHandler->warning("WARNING invalid jNode %s %s %s %s\n", 
+				argv[4],
+				"- element zeroLengthND eleTag? iNode? jNode? ",
+				"NDTag? <1DTag?>",
+				"<-orient x1? x2? x3? y1? y2? y3?>");	
+	return TCL_ERROR;
+    }
+
+	int NDTag;
+
+    if (Tcl_GetInt(interp, argv[5], &NDTag) != TCL_OK) {
+	g3ErrorHandler->warning("WARNING invalid NDTag %s %s %s %s\n", 
+				argv[5],
+				"- element zeroLengthND eleTag? iNode? jNode? ",
+				"NDTag? <1DTag?>",
+				"<-orient x1? x2? x3? y1? y2? y3?>");	
+	return TCL_ERROR;
+    }
+
+	UniaxialMaterial *the1DMat = 0;
+
+	int argi = 6;
+
+	if (argc > 6 && strcmp(argv[6],"-orient") != 0) {
+
+		int uniTag;
+
+		if (Tcl_GetInt(interp, argv[6], &uniTag) != TCL_OK) {
+			g3ErrorHandler->warning("WARNING invalid 1DTag %s %s %s %s\n", 
+					argv[5],
+					"- element zeroLengthND eleTag? iNode? jNode? ",
+					"NDTag? <1DTag?>",
+					"<-orient x1? x2? x3? y1? y2? y3?>");	
+			return TCL_ERROR;
+		}
+
+		the1DMat = theBuilder->getUniaxialMaterial(uniTag);
+
+		if (the1DMat == 0)
+			g3ErrorHandler->warning("WARNING UniaxialMaterial %d not found in model, %s",
+				uniTag, "proceeding without");
+
+		argi = 7;
+	}
+
+    // create the vectors for the element orientation
+    Vector x(3); x(0) = 1.0; x(1) = 0.0; x(2) = 0.0;
+    Vector y(3); y(0) = 0.0; y(1) = 1.0; y(2) = 0.0;
+
+    // finally check the command line to see if user specified orientation
+    if (argi < argc) {
+	if (strcmp(argv[argi],"-orient") == 0) {
+	    if (argc < (argi+7)) {
+		g3ErrorHandler->warning("WARNING %s %d %s %s %s %s\n", 
+				"not enough paramaters after -orient flag for ele ",
+				eleTag,
+				"- element zeroLengthND eleTag? iNode? jNode? ",
+				"NDTag? <1DTag?>",
+				"<-orient x1? x2? x3? y1? y2? y3?>");	
+		return TCL_ERROR;		
+	    } else {
+		argi++;
+		double value;
+		// read the x values
+		for (int i=0; i<3; i++)  {
+		    if (Tcl_GetDouble(interp, argv[argi], &value) != TCL_OK) {
+			g3ErrorHandler->warning("WARNING %s %d %s %s %s %s\n", 
+						"invalid -orient value for ele  ",
+						eleTag,
+						argv[argi],
+						"- element zeroLengthND eleTag? iNode? jNode? ",
+						"NDTag? <1DTag?>",
+						"<-orient x1? x2? x3? y1? y2? y3?>");	
+			return TCL_ERROR;
+		    } else {
+			argi++;
+			x(i) = value;
+		    }
+		}
+		// read the y values
+		for (int j=0; j<3; j++)  {
+		    if (Tcl_GetDouble(interp, argv[argi], &value) != TCL_OK) {
+			g3ErrorHandler->warning("WARNING %s %d %s %s %s %s\n", 
+						"invalid -orient value for ele  ",
+						eleTag,
+						argv[argi],
+						"- element zeroLengthND eleTag? iNode? jNode? ",
+						"NDTag? <1DTag?>",
+						"<-orient x1? x2? x3? y1? y2? y3?>");	
+			return TCL_ERROR;
+		    } else {
+			argi++;
+			y(j) = value;		
+		    }
+		}
+	    }
+	}
+    }
+    
+    //
+    // now we create the element and add it to the domain
+    //
+
+	NDMaterial *theNDMat = theBuilder->getNDMaterial(NDTag);
+
+	if (theNDMat == 0) {
+		g3ErrorHandler->warning("%s -- no NDMaterial with tag %d exists in Domain\n", 
+			"zeroLengthND", NDTag);	
+		return TCL_ERROR;		
+	}
+
+	Element *theEle = 0;
+
+	if (the1DMat == 0)
+		theEle = new ZeroLengthND(eleTag, ndm, iNode, jNode, x, y, *theNDMat);
+	else
+		theEle = new ZeroLengthND(eleTag, ndm, iNode, jNode, x, y, *theNDMat, *the1DMat);
+    
+	if (theEle == 0)
+		return TCL_ERROR;
+   
+    if (theDomain->addElement(theEle) == false)
+		return TCL_ERROR;
+
+    return TCL_OK;
+}
