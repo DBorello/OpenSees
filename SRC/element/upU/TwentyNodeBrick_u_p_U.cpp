@@ -37,6 +37,8 @@
 #include <TwentyNodeBrick_u_p_U.h>
 #define FixedOrder 3
 
+#include <fstream.h>
+
 // Changed to static data members on 01/16/2002
 
 Matrix TwentyNodeBrick_u_p_U::K(140, 140);      
