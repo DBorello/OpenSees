@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2001-08-15 15:57:17 $
+// $Revision: 1.18 $
+// $Date: 2001-08-26 23:34:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -86,10 +86,7 @@
 #define MAT_TAG_SeriesMaterial			12
 #define MAT_TAG_CableMaterial          13
 #define MAT_TAG_ENTMaterial				14
-#define MAT_TAG_Clough1	202
-#define MAT_TAG_Clough2	202
-#define MAT_TAG_Pinch1	203
-#define MAT_TAG_BiLinear	204
+#define MAT_TAG_Penalty					15
 
 #define MAT_TAG_FedeasMaterial         1000
 #define MAT_TAG_FedeasBond1       1001
@@ -111,6 +108,11 @@
 #define MAT_TAG_DrainPinch1			2005
 #define MAT_TAG_DrainPinch2			2006
 
+#define MAT_TAG_Clough1	202
+#define MAT_TAG_Clough2	202
+#define MAT_TAG_Pinch1	203
+#define MAT_TAG_BiLinear	204
+
 
 #define SEC_TAG_Elastic2d   3
 #define SEC_TAG_Elastic3d   4
@@ -120,25 +122,37 @@
 #define SEC_TAG_Fiber		8
 #define SEC_TAG_FiberSection2d		9
 #define SEC_TAG_FiberSection3d		10
+#define SEC_TAG_BeamFiberSection	11
+#define SEC_TAG_ElasticPlateSection	12
+#define SEC_TAG_ElasticMembranePlateSection	13
+#define SEC_TAG_MembranePlateFiberSection	14 
 
 #define ND_TAG_ElasticIsotropic					10
 #define ND_TAG_ElasticIsotropicPlaneStrain2d	11
 #define ND_TAG_ElasticIsotropicPlaneStress2d	12
-#define ND_TAG_ElasticIsotropicAxiSymm          13 
-#define ND_TAG_ElasticIsotropic3D               21
-#define ND_TAG_PressureDependentElastic3D       22
-#define ND_TAG_Template3Dep 			                 31
+#define ND_TAG_ElasticIsotropicAxiSymm          13
+#define ND_TAG_ElasticIsotropicPlateFiber		14
+#define ND_TAG_ElasticIsotropicBeamFiber		15 
+#define ND_TAG_ElasticIsotropic3D               16
 #define ND_TAG_J2PlaneStrain                  3005 
 #define ND_TAG_J2PlaneStress                  3006 
 #define ND_TAG_J2AxiSymm                      3007 
 #define ND_TAG_J2ThreeDimensional             3009 
-#define MAT_TAG_FluidSolidPorousMaterial       102
+#define ND_TAG_J2PlateFiber					3010
+#define ND_TAG_J2BeamFiber					3011
+#define ND_TAG_PressureDependentElastic3D       22
+#define ND_TAG_Template3Dep 			        31
+#define ND_TAG_FluidSolidPorousMaterial        100
+#define ND_TAG_PressureDependMultiYield		101
+#define ND_TAG_PressureIndependMultiYield		102
+#define ND_TAG_Bidirectional                1234
 #define ND_TAG_FeapMaterial                 1000
 #define ND_TAG_FeapMaterial01                 1001
 #define ND_TAG_FeapMaterial02                 1002
 #define ND_TAG_FeapMaterial03                 1003
 #define ND_TAG_PlaneStressMaterial          2000
 #define ND_TAG_PlateFiberMaterial          2001
+#define ND_TAG_BeamFiberMaterial		2002
 
 #define FIBER_TAG_Uniaxial2d	1
 #define FIBER_TAG_Uniaxial3d	2
