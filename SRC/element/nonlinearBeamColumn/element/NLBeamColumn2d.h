@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-11-26 22:53:54 $
+// $Revision: 1.9 $
+// $Date: 2002-05-14 19:07:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.h,v $
                                                                         
                                                                         
@@ -112,7 +112,6 @@ class NLBeamColumn2d: public Element
     void getForceInterpolatMatrix(double xi, Matrix &b, const ID &code);
     void getDistrLoadInterpolatMatrix(double xi, Matrix &bp, const ID &code);
     void compSectionDisplacements(Vector sectionCoords[], Vector sectionDispls[]) const;
-    void setSectionInterpolation (void);
     void initializeSectionHistoryVariables (void);
  
 
@@ -127,14 +126,12 @@ class NLBeamColumn2d: public Element
     int    maxIters;               // maximum number of local iterations
     double tol;	                   // tolerance for relative energy norm for local iterations
 
-    double L;                      // length
+    // THESE SHOULD BE REMOVED!!! -- MHS
     double cosTheta, sinTheta;     // cossine directors
+
     int    initialFlag;            // indicates if the element has been initialized
 			       
     Node   *node1Ptr, *node2Ptr;   // pointers to the nodes
-
-	static Matrix theMatrix;
-	static Vector theVector;
 
     Vector load;                   // equivalent nodal loads ????
 
@@ -144,16 +141,16 @@ class NLBeamColumn2d: public Element
     Matrix kvcommit;               // commited stiffness matrix in the basic system
     Vector Secommit;               // commited element end forces in the basic system
 
-    Matrix *b;                     // array of force interpolation matrices 
-
     Matrix *fs;                    // array of section flexibility matrices
     Vector *vs;                    // array of section deformation vectors
     Vector *Ssr;                   // array of section resisting force vectors
 
     Vector *vscommit;              // array of commited section deformation vectors
 
+    static Matrix theMatrix;
+    static Vector theVector;
     static GaussLobattoQuadRule1d01 quadRule;
-
+    static double workArea[];
 };
 
 #endif
