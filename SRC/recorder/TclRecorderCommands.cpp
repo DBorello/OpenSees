@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-10-20 23:16:40 $
+// $Revision: 1.7 $
+// $Date: 2001-10-25 21:31:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -136,6 +136,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	char *fileName = 0;
 	int endMarker = endEleIDs;
 	int flags = 0;
+	int eleData = 0;
 	while (flags == 0 && endMarker < argc) {
 	  if (strcmp(argv[endMarker],"-time") == 0) {
 	    // allow user to specify const load
@@ -155,12 +156,20 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    fileName = argv[endMarker];
 	    endMarker++;
 	  }
-	  else
-	    flags = 1;
+	  else {
+	    // if first unknown string then it is assumed to be element response requested
+	    if (eleData == 0) {
+	      eleData = endMarker;
+	      endMarker++;
+	    }
+	    // otherwise assume a comment or garbage
+	    else
+	      flags = 1;
+	  }
 	}
 	
-	(*theRecorder) = new ElementRecorder(eleIDs, theDomain, &argv[endMarker], 
-					  argc-endMarker, echoTime, dT, fileName);
+	(*theRecorder) = new ElementRecorder(eleIDs, theDomain, &argv[eleData], 
+					     argc-endMarker, echoTime, dT, fileName);
     }
     
     // a MaxNodeDisp Recorder

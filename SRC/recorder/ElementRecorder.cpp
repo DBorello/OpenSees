@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-10-19 23:09:43 $
+// $Revision: 1.6 $
+// $Date: 2001-10-25 21:31:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -110,7 +110,6 @@ int
 ElementRecorder::record(int commitTag, double timeStamp)
 {
   int result = 0;
-
   if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
       
     if (deltaT != 0.0) 
