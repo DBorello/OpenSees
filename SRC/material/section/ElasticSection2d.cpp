@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2001-05-08 06:28:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection2d.cpp,v $
                                                                         
                                                                         
@@ -102,19 +102,19 @@ ElasticSection2d::ElasticSection2d
 ElasticSection2d::ElasticSection2d
 (int tag, double EA_in, double EI_in)
 :SectionForceDeformation(tag, SEC_TAG_Elastic2d),
- k(2,2), f(2,2), e(2), eCommit(2),
- E(1), A(EA_in), I(EI_in)
+ E(1), A(EA_in), I(EI_in),
+ k(2,2), f(2,2), e(2), eCommit(2)
 {
     if (A <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input EA <= 0.0 ... setting EA to 1.0",
-			"ElasticSection2d::ElasticSection2d");
-		A = 1.0;
+      g3ErrorHandler->warning("%s -- Input EA <= 0.0 ... setting EA to 1.0",
+			      "ElasticSection2d::ElasticSection2d");
+      A = 1.0;
     }
 	
     if (I <= 0.0)  {
-		g3ErrorHandler->warning("%s -- Input EI <= 0.0 ... setting EI to 1.0",
-			"ElasticSection2d::ElasticSection2d");
-		I = 1.0;
+      g3ErrorHandler->warning("%s -- Input EI <= 0.0 ... setting EI to 1.0",
+			      "ElasticSection2d::ElasticSection2d");
+      I = 1.0;
     }
 	
     k(0,0) = A;
