@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:52 $
+// $Revision: 1.3 $
+// $Date: 2002-01-06 19:30:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam2d.cpp,v $
                                                                         
                                                                         
@@ -469,8 +469,8 @@ ElasticBeam2d::Print(ostream &s, int flag)
     s << "\tConnected Nodes: " << connectedExternalNodes ;
     s << "\tCoordTransf: " << theCoordTransf->getTag() << endl;
     double V = (q(1)+q(2))/L;
-    s << "\tEnd 1 Forces (P V M): " << -q(0)+q0(0) << ' ' << V + q0(1) << ' ' << q(1) << endl;
-    s << "\tEnd 2 Forces (P V M): " << q(0) << ' ' << -V+q0(4) << ' ' << q(2) << endl;
+    s << "\tEnd 1 Forces (P V M): " << -q(0)+q0(0) << " " << V + q0(1) << " " << q(1) << endl;
+    s << "\tEnd 2 Forces (P V M): " << q(0) << " " << -V+q0(4) << " " << q(2) << endl;
 }
 
 int
