@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-09-10 16:35:07 $
+// $Revision: 1.6 $
+// $Date: 2001-09-19 16:47:17 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -709,9 +709,13 @@ Vector::operator=(const Vector &V)
 	  g3ErrorHandler->warning("Vector::operator=() - vectors of differing sizes\n");
 #endif
 
-	  delete [] this->theData;
+	  // Check that we are not deleting an empty Vector
+	  if (this->theData != 0) delete [] this->theData;
+
 	  this->sz = V.sz;
-	  theData = new double[sz];
+	  
+	  // Check that we are not creating an empty Vector
+	  theData = (sz != 0) ? new double[sz] : 0;
       }
 
 
