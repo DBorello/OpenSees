@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:23 $
+// $Revision: 1.2 $
+// $Date: 2001-05-22 06:35:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/f2c.h,v $
                                                                         
                                                                         
@@ -308,9 +308,9 @@ extern integer e_wsli(void);
 extern integer e_wsue(void);
 extern int ef1asc_(ftnint *, ftnlen *, ftnint *, ftnlen *);
 extern integer ef1cmc_(ftnint *, ftnlen *, ftnint *, ftnlen *);
-extern double erf(double);
+extern double erf(double) throw();
 extern double erf_(float *);
-extern double erfc(double);
+extern double erfc(double) throw();
 extern double erfc_(float *);
 extern integer f_back(alist *);
 extern integer f_clos(cllist *);

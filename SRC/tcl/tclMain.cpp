@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-12 06:00:23 $
+// $Revision: 1.3 $
+// $Date: 2001-05-22 06:35:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/tclMain.cpp,v $
                                                                         
                                                                         
@@ -73,7 +73,7 @@ int (*tclDummyLinkVarPtr)(Tcl_Interp *interp, char *a,
  */
 
 extern "C" int	isatty _ANSI_ARGS_((int fd));
-extern "C" char * strcpy _ANSI_ARGS_((char *dst, CONST char *src));
+extern "C" char * strcpy _ANSI_ARGS_((char *dst, CONST char *src)) throw();
 
 extern "C" int TclFormatInt _ANSI_ARGS_((char *buffer, long n));
 extern "C" int TclObjCommandComplete _ANSI_ARGS_((Tcl_Obj *cmdPtr));
