@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-10-27 23:45:41 $
+// $Revision: 1.2 $
+// $Date: 2004-08-27 17:55:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/ParametricReliabilityAnalysis.cpp,v $
 
 
@@ -133,7 +133,10 @@ ParametricReliabilityAnalysis::analyze(void)
 
 
 		// "Download" limit-state function from reliability domain
-		int lsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
+		// fmk to Terje: you just set it so why do you need the tag again
+		//     also you can't do a redef inside a loop with the same def as loop variable!!!!
+		// => changing int lst to int newLsf in line below
+		int newLsf = theReliabilityDomain->getTagOfActiveLimitStateFunction();
 		LimitStateFunction *theLimitStateFunction = theReliabilityDomain->getLimitStateFunctionPtr(lsf);
 		if (theLimitStateFunction == 0) {
 			opserr << "ParametricReliabilityAnalysis::analyze() - could not find" << endln
