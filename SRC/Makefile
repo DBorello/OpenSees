@@ -105,7 +105,6 @@ NDARRAY_BJ_LIBS = $(FE)/nDarray/basics.o \
 
 
 MATMOD_BJ_LIBS = $(FE)/material/nD/ElasticIsotropic3D.o  \
-                 $(FE)/element/upU/TwentyNodeBrickCommand.o \
                  $(FE)/material/nD/PressureDependentElastic3D.o \
                  $(FE)/material/nD/Template3Dep/MatPoint3D.o \
                  $(FE)/material/nD/Template3Dep/TclTemplate3DepCommand.o \
