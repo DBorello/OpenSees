@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2004-07-06 17:58:04 $
+// $Revision: 1.9 $
+// $Date: 2004-07-07 00:51:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/groundMotion/GroundMotion.cpp,v $
                                                                         
 // Written: fmk 
@@ -29,6 +29,7 @@
 
 #include <GroundMotion.h>
 #include <TimeSeriesIntegrator.h>
+#include <TrapezoidalTimeSeriesIntegrator.h>
 #include <OPS_Globals.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
@@ -84,7 +85,12 @@ GroundMotion::integrate(TimeSeries *theSeries, double delta)
 {
   // check that an integrator & accel series exist
   if(theIntegrator == 0) {
-    return 0;
+    opserr << "WARNING:GroundMotion::integrate() - no TimeSeriesIntegrator provided - will use Trapezoidal. \n";
+    theIntegrator = new TrapezoidalTimeSeriesIntegrator();
+    if(theIntegrator == 0) {
+      opserr << "WARNING:GroundMotion::integrate() - no TimeSeriesIntegrator provided - failed to create a Trapezoidal .. memory problems! \n";
+      return 0;
+    }
   }
 
   if(theSeries == 0) {
@@ -200,17 +206,21 @@ GroundMotion::getVel(double time)
   if (time < 0.0)
     return 0.0;
 
-  if (theVelSeries != 0) 
+  if (theVelSeries != 0)
     return theVelSeries->getFactor(time);      
-  
+
   // if theAccel is not 0, integrate accel series to get a vel series
   else if (theAccelSeries != 0) {
-    opserr << " WARNING: GroundMotion::getVel(double time) - default integration required to get the ground velocities from the ground accelerations\n";
+    opserr << " WARNING: GroundMotion::getVel(double time) - integration is required to get the ground velocities from the ground accelerations\n";
     theVelSeries = this->integrate(theAccelSeries, delta);
-    if (theVelSeries != 0)
+
+    if (theVelSeries != 0) {
       return theVelSeries->getFactor(time);      
-    else
+
+    } else {
+      opserr << " WARNING: GroundMotion::getVel(double time) - failed to integrate\n";
       return 0.0;
+    }
   }
 
   return 0.0;
@@ -227,7 +237,7 @@ GroundMotion::getDisp(double time)
 
   // if theVel is not 0, integrate vel series to get disp series
   else if (theVelSeries != 0) {
-    opserr << " WARNING: GroundMotion::getDisp(double time) - default integration required to get the ground displacements from the ground velocities\n";
+    opserr << " WARNING: GroundMotion::getDisp(double time) - integration is required to get the ground displacements from the ground velocities\n";
     theDispSeries = this->integrate(theVelSeries, delta);
     if (theDispSeries != 0)
       return theDispSeries->getFactor(time);      
