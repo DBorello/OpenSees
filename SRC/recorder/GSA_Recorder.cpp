@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.3 $
-// $Date: 2003-07-28 23:10:40 $
+// $Revision: 1.4 $
+// $Date: 2004-01-29 23:30:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/GSA_Recorder.cpp,v $
 
 // Written: fmk 

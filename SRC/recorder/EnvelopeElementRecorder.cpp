@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:34:29 $
+// $Revision: 1.4 $
+// $Date: 2004-01-29 23:30:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -51,11 +51,17 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
  db(0), dbColumns(0), numDbColumns(0), 
  data(0), currentData(0), first(true)
 {
+  opserr << "ELE: " << eleID << endln;
+
   theResponses = new Response *[numEle];
   for (int j=0; j<numEle; j++)
     theResponses[j] = 0;
 
+  opserr << "HELLO 1\n";
+
   Information eleInfo(1.0);
+  opserr << "HELLO 2\n";
+
 
   for (int i=0; i<numEle; i++) {
     Element *theEle = theDom.getElement(eleID(i));
@@ -70,6 +76,8 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
       numDbColumns += eleData.Size();
     }
   }
+  opserr << "HELLO 5\n";
+
 
   // create the matrix & vector that holds the data
   data = new Matrix(3, numDbColumns);
@@ -78,6 +86,8 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
     opserr << "EnvelopeElementRecorder::EnvelopeElementRecorder() - out of memory\n";
     exit(-1);
   }
+  opserr << "HELLO 6\n";
+
   
   // if file is specified, copy name and open the file
   if (theFileName != 0) {
@@ -94,6 +104,9 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
     // copy file name string
     strcpy(fileName, theFileName);    
   }
+  opserr << "HELLO 7\n";
+
+
 }
 
 
@@ -150,34 +163,77 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID &eleID, Domain &theDom
   // for each element do a getResponse() & print the result
   dbColumns = new char *[numDbColumns];
 
-  char aColumn[256]; // assumes a column name will not be longer than 256 characters
+  static char aColumn[1012]; // assumes a column name will not be longer than 256 characters
   
-  int counter = 0;
-  const char *dataToStore = argv[argc-1];
+  char *newColumn = new char[5];
+  sprintf(newColumn, "%s","time");  
+  dbColumns[0] = newColumn;
 
+  int lengthString = 0;
+  for (int i=0; i<argc; i++)
+    lengthString += strlen(argv[i])+1;
+  char *dataToStore = new char[lengthString];
+  lengthString = 0;
+  for (int j=0; j<argc; j++) {
+    int argLength = strlen(argv[j]);
+    strcpy(&dataToStore[lengthString], argv[j]);
+    if (j<(argc-1)) {
+      lengthString += argLength;
+      dataToStore[lengthString] = ' ';
+      lengthString ++;
+    } else
+      lengthString += argLength+1;
+  }
+
+  int counter = 1;
   for (i=0; i<eleID.Size(); i++) {
     int eleTag = eleID(i);
     int numVariables = 0;
     if (theResponses[i]!= 0) {
-      Information &eleInfo = theResponses[i]->getInformation();
-      const Vector &eleData = eleInfo.getData();
-      numVariables = eleData.Size();
+      const Information &eleInfo = theResponses[i]->getInformation();
+      
+      if (eleInfo.theType == IntType || eleInfo.theType == DoubleType) {
+	// create column heading for single data item for element
+	numVariables = 0;
+	sprintf(aColumn, "Element%d_%s", eleTag, dataToStore);
+	int lenColumn = strlen(aColumn);
+	char *newColumn = new char[lenColumn+1];
+	strcpy(newColumn, aColumn);
+	dbColumns[counter] = newColumn;
+	counter++;
+      }
+
+      else if (eleInfo.theType == VectorType) 
+	numVariables = eleInfo.theVector->Size();
+      else if (eleInfo.theType == IdType) 
+	numVariables = eleInfo.theID->Size();
 
       // create the column headings for multiple data for the element
-
       for (int j=1; j<=numVariables; j++) {
-	sprintf(aColumn, "%s_%d_%d",dataToStore,eleTag,j);
-	int lenColumn = strlen(aColumn+1);
-	char *newColumn = new char[lenColumn];
-	sprintf(newColumn, "%s",aColumn);
+	sprintf(aColumn, "Element%d_%s_%d",eleTag, dataToStore, j);
+	int lenColumn = strlen(aColumn);
+	char *newColumn = new char[lenColumn+1];
+	strcpy(newColumn, aColumn);
 	dbColumns[counter] = newColumn;
 	counter++;
       }
     }
   }
-  
+
+  // replace spaces with undescore for tables
+  for (i=0; i<numDbColumns; i++) {
+    char *data = dbColumns[i];
+    int length = strlen(data);
+    for (int j=0; j<length; j++)
+      if (data[j] == ' ') data[j]='_';
+  }
+
   // create the table in the database
-  db->createTable(tableName, numDbColumns, dbColumns);
+  if (db != 0)
+    db->createTable(fileName, numDbColumns, dbColumns);
+  else {
+    opserr << "ElementRecorder::ElementRecorder - database pointer is NULL\n";
+  }
 }
   
 EnvelopeElementRecorder::~EnvelopeElementRecorder()
@@ -196,6 +252,14 @@ EnvelopeElementRecorder::~EnvelopeElementRecorder()
     
     if (currentData != 0)
       delete currentData;
+
+  if (dbColumns != 0) {
+
+    for (int i=0; i<numDbColumns; i++) 
+      delete [] dbColumns[i];
+
+      delete [] dbColumns;
+  }
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-25 23:34:31 $
+// $Revision: 1.3 $
+// $Date: 2004-01-29 23:30:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/GSA_Recorder.h,v $
                                                                         
 #ifndef GSA_Recorder_h

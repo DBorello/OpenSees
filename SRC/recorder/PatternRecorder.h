@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-06-18 23:26:54 $
+// $Revision: 1.4 $
+// $Date: 2004-01-29 23:30:30 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/PatternRecorder.h,v $
                                                                         
 #ifndef PatternRecorder_h

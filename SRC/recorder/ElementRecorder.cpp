@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-02-25 23:34:29 $
+// $Revision: 1.14 $
+// $Date: 2004-01-29 23:30:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -153,13 +153,27 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
   // for each element do a getResponse() & print the result
   dbColumns = new char *[numDbColumns];
 
-  char aColumn[256]; // assumes a column name will not be longer than 256 characters
+  static char aColumn[1012]; // assumes a column name will not be longer than 256 characters
   
-  char *newColumn = new char[10];
+  char *newColumn = new char[5];
   sprintf(newColumn, "%s","time");  
   dbColumns[0] = newColumn;
-  
-  const char *dataToStore = argv[argc-1];
+
+  int lengthString = 0;
+  for (int i=0; i<argc; i++)
+    lengthString += strlen(argv[i])+1;
+  char *dataToStore = new char[lengthString];
+  lengthString = 0;
+  for (int j=0; j<argc; j++) {
+    int argLength = strlen(argv[j]);
+    strcpy(&dataToStore[lengthString], argv[j]);
+    if (j<(argc-1)) {
+      lengthString += argLength;
+      dataToStore[lengthString] = ' ';
+      lengthString ++;
+    } else
+      lengthString += argLength+1;
+  }
 
   int counter = 1;
   for (i=0; i<eleID.Size(); i++) {
@@ -171,32 +185,45 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
       if (eleInfo.theType == IntType || eleInfo.theType == DoubleType) {
 	// create column heading for single data item for element
 	numVariables = 0;
-	sprintf(aColumn, "%s_%d",dataToStore,eleTag);
-	int lenColumn = strlen(aColumn+1);
-	char *newColumn = new char[lenColumn];
-	sprintf(newColumn, "%s",aColumn);
+	sprintf(aColumn, "Element%d_%s", eleTag, dataToStore);
+	int lenColumn = strlen(aColumn);
+	char *newColumn = new char[lenColumn+1];
+	strcpy(newColumn, aColumn);
 	dbColumns[counter] = newColumn;
 	counter++;
       }
+
       else if (eleInfo.theType == VectorType) 
 	numVariables = eleInfo.theVector->Size();
       else if (eleInfo.theType == IdType) 
-	numVariables = eleInfo.theVector->Size();
+	numVariables = eleInfo.theID->Size();
 
       // create the column headings for multiple data for the element
       for (int j=1; j<=numVariables; j++) {
-	sprintf(aColumn, "%s_%d_%d",dataToStore,eleTag,j);
-	int lenColumn = strlen(aColumn+1);
-	char *newColumn = new char[lenColumn];
-	sprintf(newColumn, "%s",aColumn);
+	sprintf(aColumn, "Element%d_%s_%d",eleTag, dataToStore, j);
+	int lenColumn = strlen(aColumn);
+	char *newColumn = new char[lenColumn+1];
+	strcpy(newColumn, aColumn);
 	dbColumns[counter] = newColumn;
 	counter++;
       }
     }
   }
-  
+
+  // replace spaces with undescore for tables
+  for (i=0; i<numDbColumns; i++) {
+    char *data = dbColumns[i];
+    int length = strlen(data);
+    for (int j=0; j<length; j++)
+      if (data[j] == ' ') data[j]='_';
+  }
+
   // create the table in the database
-  db->createTable(fileName, numDbColumns, dbColumns);
+  if (db != 0)
+    db->createTable(fileName, numDbColumns, dbColumns);
+  else {
+    opserr << "ElementRecorder::ElementRecorder - database pointer is NULL\n";
+  }
 
   // create the vector to hold the data
   data = new Vector(numDbColumns);
@@ -216,6 +243,14 @@ ElementRecorder::~ElementRecorder()
 
     if (fileName != 0)
       delete [] fileName;
+
+  if (dbColumns != 0) {
+
+    for (int i=0; i<numDbColumns; i++) 
+      delete [] dbColumns[i];
+
+      delete [] dbColumns;
+  }
 }
 
 

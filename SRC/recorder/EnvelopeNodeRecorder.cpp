@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.5 $
-// $Date: 2003-04-02 22:02:47 $
+// $Revision: 1.6 $
+// $Date: 2004-01-29 23:30:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -206,36 +206,42 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID &dofs,
     dataFlag = 4;
   } else if ((strncmp(dataToStore, "eigen",5) == 0)) {
     int mode = atoi(&(dataToStore[5]));
+    opserr << "MODE: " << mode << endln;
     if (mode > 0)
       dataFlag = 10 + mode;
     else
       dataFlag = 6;
   } else {
     dataFlag = 6;
-    opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - dataToStore " << dataToStore;
+    opserr << "NodeRecorder::NodeRecorder - dataToStore " << dataToStore;
     opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
   }
 
   // now create the columns strings for the database
-  numDbColumns = theNodes->Size()*dofs.Size();
+  numDbColumns = 1 + nodes.Size()*dofs.Size();
   dbColumns = new char *[numDbColumns];
 
-  char aColumn[256]; // assumes a column name will not be longer than 256 characters
+
+  static char aColumn[256]; // assumes a column name will not be longer than 256 characters
   
-  int counter = 0;
+  char *newColumn = new char[5];
+  sprintf(newColumn, "%s","time");  
+  dbColumns[0] = newColumn;
+
+  int counter = 1;
   for (i=0; i<theNodes->Size(); i++) {
     int nodeTag = (*theNodes)(i);
-    for (int j=0; j<dofs.Size(); j++) {
-      int dof = dofs(j);
-      sprintf(aColumn, "%s_%d_%d",dataToStore,nodeTag,dof);
-      int lenColumn = strlen(aColumn+1);
-      char *newColumn = new char[lenColumn];
-      sprintf(newColumn, "%s",aColumn);
+    for (int j=0; j<theDofs->Size(); j++) {
+      int dof = (*theDofs)(j);
+      sprintf(aColumn, "Node%d_%s_%d", nodeTag, dataToStore, dof);
+      int lenColumn = strlen(aColumn);
+      char *newColumn = new char[lenColumn+1];
+      strcpy(newColumn, aColumn);
       dbColumns[counter] = newColumn;
       counter++;
     }
   }
-
+  
   // create the table in the database
   db->createTable(dbTable, numDbColumns, dbColumns);
 }
