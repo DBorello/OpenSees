@@ -2800,8 +2800,18 @@ const Matrix &TwentyNodeBrick::getTangentStiff ()
         }
      }
 
-     //cout << " K " << K << endln;
-     //K.Output(cout);
+   ofstream out("K20n.dat");
+   K.Output(out);
+//     cout << " K " << K << endl;
+//     K.Output(cout);
+/*     matrix k;
+     for(int i=0; i<60; i++)
+      {
+       for (int j=0; j<60; j++)
+         k.val(i,j)=K(i,j);
+      }
+     k.write_standard("K20n.dat", "stiffness part of 20 node brick");
+*/
      return K;
 }
 

@@ -30,6 +30,7 @@
 #include "bool.h"
 #endif
 
+#include <fstream>
 #include <Element.h>
 #include <Node.h> 
 
