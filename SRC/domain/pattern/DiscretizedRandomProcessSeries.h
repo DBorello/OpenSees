@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-03-06 18:08:30 $
+// $Revision: 1.3 $
+// $Date: 2003-10-30 22:46:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/DiscretizedRandomProcessSeries.h,v $
 
 
@@ -44,8 +44,7 @@ public:
     DiscretizedRandomProcessSeries(int num, 
 								   ModulatingFunction **theModFuncs,
 								   double p_mean,
-								   double targetStdv,
-								   double targetStdvTime);
+								   double targetStdv);
     ~DiscretizedRandomProcessSeries();
 
     // method to get load factor

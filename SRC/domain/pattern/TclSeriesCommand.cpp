@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2003-03-06 18:08:30 $
+// $Revision: 1.11 $
+// $Date: 2003-10-30 22:46:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -194,7 +194,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 	else if (strcmp(argv[0],"DiscretizedRandomProcess") == 0) {
 
 
-		double mean, maxStdv, maxStdvTime;
+		double mean, maxStdv;
 		ModulatingFunction *theModFunc;
 
 		if (Tcl_GetDouble(interp, argv[1], &mean) != TCL_OK) {
@@ -209,14 +209,9 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 			return 0;
 		}
 
-		if (Tcl_GetDouble(interp, argv[3], &maxStdvTime) != TCL_OK) {
-			opserr << "WARNING invalid input: random process max stdv time \n";
-			cleanup(argv);
-			return 0;
-		}
 
 		// Number of modulating functions
-		int argsBeforeModList = 4;
+		int argsBeforeModList = 3;
 		int numModFuncs = argc-argsBeforeModList;
 
 		// Create an array to hold pointers to modulating functions
@@ -247,7 +242,7 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, TCL_Char *arg)
 		}	
 
 		// Parsing was successful, create the random process series object
-		theSeries = new DiscretizedRandomProcessSeries(numModFuncs,theModFUNCS,mean,maxStdv,maxStdvTime);       	
+		theSeries = new DiscretizedRandomProcessSeries(numModFuncs,theModFUNCS,mean,maxStdv);       	
 	}
 
  

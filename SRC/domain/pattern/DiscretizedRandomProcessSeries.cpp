@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-03-10 21:30:27 $
+// $Revision: 1.4 $
+// $Date: 2003-10-30 22:46:56 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/DiscretizedRandomProcessSeries.cpp,v $
 
 
@@ -43,8 +43,7 @@
 DiscretizedRandomProcessSeries::DiscretizedRandomProcessSeries(int num, 
 							       ModulatingFunction **theModFuncs,
 							       double p_mean,
-							       double p_maxStdv,
-								   double p_maxStdvTime)
+							       double p_maxStdv)
 :TimeSeries(TSERIES_TAG_DiscretizedRandomProcessSeries)
 {
 	randomVariables = 0;
@@ -53,8 +52,6 @@ DiscretizedRandomProcessSeries::DiscretizedRandomProcessSeries(int num,
 	numModFuncs = num;
 	mean = p_mean;
 	maxStdv = p_maxStdv;
-	maxStdvTime = p_maxStdvTime;
-
 
 	c = 0.0;
 }
@@ -113,6 +110,7 @@ DiscretizedRandomProcessSeries::getFactor(double time)
 				
 				// Add contribution 'ui * hi'
 				sum2 += (*randomVariables)(i) * filterAmplitude;
+
 				// Break when we get to inactive rv's
 				if (time-(*kickInTimes)(i) < 0.0) {
 					break;
@@ -241,41 +239,57 @@ DiscretizedRandomProcessSeries::setParameter (const char **argv, int argc, Infor
 		// Number of discretizing random variables
 		int nrv = kickInTimes->Size();
 
+		double new_c;
+		double denominator;
 
-		// Loop over modulating functions
-		double denominator = 0.0;
-		for (int k=0; k<numModFuncs; k++) {
+		// Loop over all time instances
+		for (int t=1; t<=nrv; t++) {
 
-			// Get value of modulating function number k at time t
-			Filter *theFilter_k = theModulatingFunctions[k]->getFilter();
-			double modFuncAmplitude_k = theModulatingFunctions[k]->getAmplitude(maxStdvTime);
-	
-			
+			denominator = 0.0;
+
 			// Loop over modulating functions
-			for (int l=0; l<numModFuncs; l++) {
+			for (int k=0; k<numModFuncs; k++) {
+
+				// Get value of modulating function number k at time t
+				Filter *theFilter_k = theModulatingFunctions[k]->getFilter();
+				double modFuncAmplitude_k = theModulatingFunctions[k]->getAmplitude((*kickInTimes)(t-1));
+		
+				
+				// Loop over modulating functions
+				for (int l=0; l<numModFuncs; l++) {
 
 
-				// Get value of modulating function number l at time t
-				Filter *theFilter_l = theModulatingFunctions[l]->getFilter();
-				double modFuncAmplitude_l = theModulatingFunctions[l]->getAmplitude(maxStdvTime);
+					// Get value of modulating function number l at time t
+					Filter *theFilter_l = theModulatingFunctions[l]->getFilter();
+					double modFuncAmplitude_l = theModulatingFunctions[l]->getAmplitude((*kickInTimes)(t-1));
 
 
-				// Loop over all rv's (even though some may be zero at this time)
-				double sum2 = 0.0;
-				for (int i=0; i<nrv; i++) {
+					// Loop over all rv's (even though some may be zero at this time)
+					for (int i=0; i<nrv; i++) {
 
-					// Get value of filters for argument (t-ti)
-					double filterAmplitude_k = theFilter_k->getAmplitude(maxStdvTime-(*kickInTimes)(i));
-					double filterAmplitude_l = theFilter_l->getAmplitude(maxStdvTime-(*kickInTimes)(i));
-					
-					// Add contribution 'ui * hi'
-					denominator += filterAmplitude_k*filterAmplitude_l
-								 * modFuncAmplitude_k*modFuncAmplitude_l;
+						// Get value of filters for argument (t-ti)
+						double filterAmplitude_k = theFilter_k->getAmplitude(((*kickInTimes)(t-1))-(*kickInTimes)(i));
+						double filterAmplitude_l = theFilter_l->getAmplitude(((*kickInTimes)(t-1))-(*kickInTimes)(i));
+						
+						// Add contribution 'ui * hi'
+						denominator += filterAmplitude_k*filterAmplitude_l
+									 * modFuncAmplitude_k*modFuncAmplitude_l;
+					}
 				}
 			}
 		}
 
-		c = sqrt(maxStdv*maxStdv/denominator);
+		new_c = sqrt(maxStdv*maxStdv/denominator);
+
+		if (c==0.0) {
+			c = new_c;
+		}
+		else if (new_c < c) {
+			c = new_c;
+		}
+
+c = maxStdv;
+opserr << "c: " << c << endln;
 
 		//////////////////////////////////////
 	}
