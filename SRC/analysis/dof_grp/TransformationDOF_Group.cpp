@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-09-25 17:36:36 $
+// $Revision: 1.5 $
+// $Date: 2002-04-22 23:28:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -187,7 +187,6 @@ TransformationDOF_Group::TransformationDOF_Group(int tag, Node *node)
  theMP(0),Trans(0),modTangent(0),modUnbalance(0),modID(0),theSPs(0) 
 {
     modNumDOF = node->getNumberDOF();
-
     // create space for the SP_Constraint array
     theSPs = new SP_Constraint *[modNumDOF];
     for (int i=0; i<modNumDOF; i++) 
@@ -313,8 +312,8 @@ TransformationDOF_Group::getTangent(Integrator *theIntegrator)
 	modTangent->addMatrixTripleProduct(0.0, *T, unmodTangent, 1.0);
 	return *modTangent;
 	
-    } else
-	return unmodTangent;
+    } else 
+      return unmodTangent;
 }
 
 const Vector &
@@ -676,7 +675,7 @@ TransformationDOF_Group::doneID(void)
 	return 0;
     
     // get number of DOF & verify valid
-    int numNodalDOF = this->getNumDOF();
+    int numNodalDOF = myNode->getNumberDOF();
     const ID &retainedDOF = theMP->getRetainedDOFs();
     const ID &constrainedDOF = theMP->getConstrainedDOFs();    
     int numNodalDOFConstrained = constrainedDOF.Size();

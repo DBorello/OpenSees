@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-31 22:11:33 $
+// $Revision: 1.5 $
+// $Date: 2002-04-22 23:28:59 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -583,7 +583,6 @@ DOF_Group::incrNodeDisp(const Vector &u)
     }
 
     myNode->incrTrialDisp(disp);
-
 }
 	
 	
