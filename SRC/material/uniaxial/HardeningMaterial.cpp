@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2001-12-17 19:23:39 $
+// $Revision: 1.5 $
+// $Date: 2002-03-12 19:21:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.cpp,v $
 
 // Written: MHS
@@ -193,16 +193,17 @@ HardeningMaterial::sendSelf(int cTag, Channel &theChannel)
 {
   int res = 0;
   
-  static Vector data(8);
+  static Vector data(9);
   
   data(0) = this->getTag();
   data(1) = E;
   data(2) = sigmaY;
   data(3) = Hiso;
   data(4) = Hkin;
-  data(5) = CplasticStrain;
-  data(6) = CbackStress;
-  data(7) = Chardening;
+  data(5) = eta;
+  data(6) = CplasticStrain;
+  data(7) = CbackStress;
+  data(8) = Chardening;
   
   res = theChannel.sendVector(this->getDbTag(), cTag, data);
   if (res < 0) 
@@ -217,7 +218,7 @@ HardeningMaterial::recvSelf(int cTag, Channel &theChannel,
 {
   int res = 0;
   
-  static Vector data(8);
+  static Vector data(9);
   res = theChannel.recvVector(this->getDbTag(), cTag, data);
   
   if (res < 0) {
@@ -231,9 +232,10 @@ HardeningMaterial::recvSelf(int cTag, Channel &theChannel,
     sigmaY = data(2);
     Hiso = data(3);
     Hkin = data(4);
-    CplasticStrain = data(5);
-    CbackStress = data(6);
-    Chardening = data(7);
+    eta = data(5);
+    CplasticStrain = data(6);
+    CbackStress = data(7);
+    Chardening = data(8);
   }
     
   return res;
@@ -247,6 +249,5 @@ HardeningMaterial::Print(ostream &s, int flag)
     s << "  sigmaY: " << sigmaY << endl;
     s << "  Hiso: " << Hiso << endl;
     s << "  Hkin: " << Hkin << endl;
+    s << "  eta: " << eta << endl;
 }
-
-
