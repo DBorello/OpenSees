@@ -87,16 +87,10 @@ wipe:
 		$(CD) $$f; \
 		$(ECHO) Making lib in $$f; \
 		$(MAKE) wipe; \
-		$(CD) ..; \
+		$(CD) $(HOME); \
 	done );
-	@$(RM) $(RMFLAGS) $(WIPE_LIBS) *.o *~ core
+	@$ (RM) $(RMFLAGS) $(WIPE_LIBS) *.o *~ core
 	@$(CD) $(FE)/../EXAMPLES;  $(MAKE) wipe;
 
 help:
     @$(ECHO) "usage: make ?"
-
-
-
-
-
-

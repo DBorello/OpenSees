@@ -33,9 +33,9 @@ BASE		= /usr/local
 HOME		= /home/jeremic
 FE		= $(HOME)/oofep/OpenSees/SRC
 
-BLASdir      = 
-CBLASdir     = 
-LAPACKdir    = 
+#BLASdir      = 
+#CBLASdir     = 
+#LAPACKdir    = 
 SUPERLUdir   = $(HOME)/oofep/OpenSees/OTHER/SuperLU
 ARPACKdir    = $(HOME)/oofep/OpenSees/OTHER/ARPACK
 UMFPACKdir   = $(HOME)/oofep/OpenSees/OTHER/UMFPACK
@@ -60,11 +60,10 @@ DIRS        = $(SUPERLUdir) $(ARPACKdir) $(UMFPACKdir) $(METISdir) $(SRCdir)
 # Note: For libraries that will be created (any in DIRS above)
 # make sure the directory exsists where you want the library to go!
 			      
-FE_LIBRARY      = $(HOME)/lib/libg3.a
-#FE_LIBRARY      = $(HOME)/lib/libOpenSees.a
+#FE_LIBRARY      = $(HOME)/lib/libg3.a
+FE_LIBRARY      = $(HOME)/lib/libOpenSees.a
 NDARRAY_LIBRARY = $(HOME)/lib/libndarray.a # BJ_UCD jeremic@ucdavis.edu
 MATMOD_LIBRARY  = $(HOME)/lib/libmatmod.a  # BJ_UCD jeremic@ucdavis.edu
-BJMISC_LIBRARY  = $(HOME)/lib/libBJmisc.a  # BJ_UCD jeremic@ucdavis.edu
 LAPACK_LIBRARY  = $(HOME)/lib/libLapack.a
 BLAS_LIBRARY    = $(HOME)/lib/libBlas.a
 SUPERLU_LIBRARY = $(HOME)/lib/libSuperLU.a
@@ -78,14 +77,11 @@ TCL_LIBRARY = /usr/lib/libtk8.0.so /usr/X11R6/lib/libX11.a /usr/lib/libtcl8.0.so
 # WATCH OUT .. These libraries are removed when 'make wipe' is invoked.
 # $(FE_LIBRARY) \
 WIPE_LIBS	= $(NDARRAY_LIBRARY) \
-		$(MAT_MOD_LIBRARY) \
-		$(LAPACK_LIBRARY) \
-		$(BLAS_LIBRARY) \
-		$(CBLAS_LIBRARY) \
-		$(SUPERLU_LIBRARY) \
-		$(ARPACK_LIBRARY) \
-		$(UMFPACK_LIBRARY) \
-	        $(METIS_LIBRARY)
+		          $(MAT_MOD_LIBRARY) \
+          		$(SUPERLU_LIBRARY) \
+		        	 $(ARPACK_LIBRARY)  \
+		        	 $(UMFPACK_LIBRARY) \
+	           $(METIS_LIBRARY)
 
 # %---------------------------------------------------------%
 # | SECTION 4: COMPILERS                                    |
@@ -95,46 +91,100 @@ WIPE_LIBS	= $(NDARRAY_LIBRARY) \
 # | these are correct for your system.                      |
 # %---------------------------------------------------------%
 
-# Compilers
-CC++	= g++
-CC      = gcc
-FC	= g77
+# ################################################### 
+# # Compilers
+# ################################################### 
+# # DEFAULT
+# ################################################### 
+# CC++	  = g++
+# CC     = gcc
+# FC	    = g77
 
 
 # Boris Jeremic BJ_UCD jeremic@ucdavis.edu
 ###################################################  Portland Group
-##########  PGI PGI  PGI PGI PGI PGI PGI PGI  PGI PGI PGI PGI      
-##CC++ =  pgCC
-##CC   =  pgcc
-##FC   =  pgf77
-##FC   =  pgf90
-##LINK = pgCC 
-######..
+# ########  PGI PGI  PGI PGI PGI PGI PGI PGI  PGI PGI PGI PGI      
+# CC++            =  pgCC
+# CC              =  pgcc
+# FC              =  pgf77
+# LINK            = pgCC 
+# 
+# C++FLAGS        =  -g -D_UNIX -Minfo=all 
+# CFLAGS          =  -g	 -Minfo=all 
+# FFLAGS          =  -g
+# LINKFLAGS       =  -g
+# ####..
+# ######..CCFLAGS = -c -O2 -Munroll -Mnoframe -tp p6 -Minfo=all -Minline -Mconcur -o $*.o  ##>0.350u 29.360s 0:29.73 99.9%    0+0k 0+0io 284pf+0w
+# ######..CCFLAGS = -c -O2 -Munroll -Mnoframe -tp p6 -Minfo=all -Minline -o $*.o  ##>0.350u 29.360s 0:29.73 99.9%    0+0k 0+0io 284pf+0w
+# ######..CCFLAGS = -c -Mprof=lines -o $*.o  ##
+# ######..CCFLAGS = -c -g -o $*.o  ##>0.330u 38.820s 0:39.18 99.9%     0+0k 0+0io 283pf+0w
+# ######..CCFLAGS = -c  -Mvect  -O2 -o $*.o  ##  1.930u 6.880s 0:08.83 99.7%     0+0k 0+0io 151pf+0w
+# ##CCFLAGS = -c -g -Minfo=all -o $*.o  ## 
+######..LINKFLAGS = -Mconcur 
+##LINKFLAGS = -lm
 
-####################################  Kuck and Associates Inc.
-##########  KAI KAI  KAI KAI KAI KAI KAI KAI  KAI KAI KAI KAI      
-##..CC = KCC
-##..LINK = KCC
+# ################################  Kuck and Associates Inc.
+# ######  KAI KAI  KAI KAI KAI KAI KAI KAI  KAI KAI KAI KAI      
+# CC++ =  KCC
+# CC =   KCC
+# LINK = KCC
+# FC   =  g77
+# #FC   =  pgf90
+# LINK = KCC 
+# 
+# C++FLAGS        =  -g -D_UNIX -Wall 
+# CFLAGS          =  -g	 -Wall
+# FFLAGS          =  -g
+# # ####..
+# ##..##..CCFLAGS = -c  --strict_warnings +K0 --cpfe_only --display_error_number  -o $*.o   
+# ##..##..CCFLAGS = -c  --strict_warnings +K0 --display_error_number  -o $*.o    
+# ##..##..CCFLAGS = -c  --strict_warnings  --inline_auto_space_time=1.0 -O --display_error_number -o $*.o # 60.680u 6.590s 1:12.85 92.3% 0+0k 0+0io 61184pf+0w
+# ##..##..CCFLAGS = -c  +K3  --strict_warnings  -O --abstract_pointer --abstract_float  --display_error_number -o $*.o #  1.570u 7.090s 0:08.67 99.8%     0+0k 0+0io 292pf+0w
+# ##..CCFLAGS = -c  +K2  --strict_warnings  -O --display_error_number -o $*.o 
+# ##..##..CCFLAGS = -c   --strict_warnings --inline_auto_space_time=1.0 +K3 --display_error_number -o $*.o # 196.760u 6.930s 3:26.86 98.4% 0+0k 0+0io 61538pf+0w
+# ##..##..CCFLAGS = -c   --strict_warnings --inline_auto_space_time=75.0 +K3 --display_error_number -o $*.o # 196.760u 6.930s 3:26.86 98.4% 0+0k 0+0io 61538pf+0w
+# ##..
+##..
+
 
 ########################################    GNU
+CC++            =  g++
+CC              =  gcc
+FC              =  g77
+LINKER          =  g++
+
+C++FLAGS        =  -g -D_UNIX -Wall
+CFLAGS          =  -g	 -Wall
+FFLAGS          =  -g
+LINKFLAGS       =  -g
+####..
 ##..CC++ = g++
 ##..CC   = gcc
 ##..FC	  = g77
 ##..LINK = g++
 
 ########################################     EGCS
-##..
-##..CC++ = egcs
-##..LINK = egcs
-  
+# ##..
+# ##..CC++ = egcs
+# ##..LINK = egcs
+#   
 ########################################    MPI CC
 
 ##CC++ = mpiCC
 ##CC   = mpicc
 ##LINK = mpiCC
 
-########################################     INSURE++  CODEWIZARD
-
+##..########################################     INSURE++  CODEWIZARD
+##..CC++            =  insure
+##..CC              =  gcc
+##..FC              =  g77
+##..LINK            =  g++ 
+##..
+##..C++FLAGS        =  -g -Zvm -Zvm -Zvm -D_UNIX -Wall
+##..CFLAGS          =  -g	 -Wall
+##..FFLAGS          =  -g
+##..LINKFLAGS       =  -g
+##..
 ##..CC++ = insure
 ##..CC   = gcc
 ##..LINK = insure
@@ -165,26 +215,30 @@ RANLIB		= ranlib
 # Compiler Flags
 #
 # NOTES:
-#    C++ FLAGS TAKE need _UNIX or _WIN32 for preprocessor dircetives
+#    C++ FLAGS TAKE need _UNIX or _WIN32 for preprocessor directives
 #         - the _WIN32 for the Windows95/98 or NT operating system.
 #    C FLAGS used -DUSE_VENDOR_BLAS (needed in SuperLU) if UNIX in C++ FLAGS
 #
 
-C++FLAGS        = -Wall -g -D_UNIX
-CFLAGS          = -Wall -g
-FFLAGS          = -Wall -g
+# DEFINED ABOVE
+# C++FLAGS        = -Wall -g -D_UNIX
+# CFLAGS          = -Wall -g
+# FFLAGS          = -Wall -g
 
 #C++FLAGS        = -Wall -O2 -D_UNIX
 #CFLAGS          = -Wall -O2
 #FFLAGS          = -Wall -O
 
 
-# Linker
-LINKER          = $(CC++)
-LINKFLAGS       =  -g
+# DEFINED ABOVE
+# # Linker
+# #LINKER          = $(CC++)
+# #LINKER          = g++
+# LINKER          = pgCC
+# LINKFLAGS       =  -g
 
 # Misc
-MAKE		= make
+MAKE		          = make
 CD              = cd
 ECHO            = echo
 RM              = rm
