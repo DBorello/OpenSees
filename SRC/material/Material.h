@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:21 $
+// $Revision: 1.2 $
+// $Date: 2000-12-18 10:32:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/Material.h,v $
                                                                         
                                                                         
@@ -43,6 +43,7 @@
 #include <MovableObject.h>
 
 class Information;
+class Response;
 
 class Material : public TaggedObject, public MovableObject
 {
@@ -50,15 +51,18 @@ class Material : public TaggedObject, public MovableObject
     Material(int tag, int classTag);    
     virtual ~Material();
 
-	virtual int setVariable(const char *argv);
-	virtual int getVariable(int variableID, double &info);
+    virtual int setVariable(const char *argv);
+    virtual int getVariable(int variableID, double &info);
 
     // methods for sensitivity studies
     virtual int setParameter(char **argv, int argc, Information &eleInformation);
     virtual int updateParameter(int responseID, Information &eleInformation);	
-    
-	// method for this material to update itself according to its new parameters
-	virtual void update(void) {return;}
+
+    virtual Response *setResponse(char **argv, int argc, Information &info);
+    virtual int getResponse(int responseID, Information &info);
+
+    // method for this material to update itself according to its new parameters
+    virtual void update(void) {return;}
 
   protected:
     
