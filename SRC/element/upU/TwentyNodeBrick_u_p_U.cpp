@@ -34,6 +34,7 @@
 #ifndef TWENTYNODEBRICK_U_P_U_CPP
 #define TWENTYNODEBRICK_U_P_U_CPP
 
+#include <fstream.h>
 #include <TwentyNodeBrick_u_p_U.h>
 #define FixedOrder 3
 

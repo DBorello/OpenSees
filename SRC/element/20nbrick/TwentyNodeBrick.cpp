@@ -38,6 +38,7 @@
 #include <FEM_ObjectBroker.h>
 #include <ElementResponse.h>
 
+#include <fstream.h>
 #include "TwentyNodeBrick.h"
 #define FixedOrder 3
 
