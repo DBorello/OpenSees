@@ -17,8 +17,8 @@ ElTawil2D::ElTawil2D(int tag, double xbal, double ybal, double ypos, double yneg
 		 xBal(xbal), yBal(ybal), yPosCap(ypos), yNegCap(yneg), cz(cz_),
 		 yPosCap_orig(ypos), yNegCap_orig(yneg), ty(ty_), qy(0.005) //0.01
 {
-	//capY = yPosCap;
-	capY    = yPosCap - yBal;
+	capY = yPosCap; //!! why did I change this ?
+	// capY    = yPosCap - yBal;
 
 	// set to origin
 	yPosCap -= yBal;
@@ -209,8 +209,8 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
 	}
 
 
-	double incr = ((yPosCap/capY) - (yNegCap/capY)) / 10;
-	//double incr =  fabs(0.33333333*yNegCap/capY);
+	// double incr = ((yPosCap/capY) - (yNegCap/capY)) / 10;
+	double incr =  fabs(0.33333333*yNegCap/capY);
 	if(fact < 1) incr = fact;
  	
  	double xOld = 0;

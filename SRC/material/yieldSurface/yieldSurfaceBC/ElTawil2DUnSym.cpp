@@ -31,7 +31,7 @@ ElTawil2DUnSym::ElTawil2DUnSym
 	if(yPosBal < 0 || yNegBal < 0)
 		opserr << "WARNING - ElTawil2DUnSym() - yBalance < 0" << endln;
 		
-	//capY = yPosCap;
+	//capY = yPosCap; // why did I change this?
 	yBal = yPosBal;
 
 	if(yNegBal < yBal)
@@ -40,7 +40,8 @@ ElTawil2DUnSym::ElTawil2DUnSym
 //    opserr << "yBal= " << yBal << ", yPosBal= " << yPosBal
 //	     << ", yNegBal= " << yNegBal << endl << endln;
 
-	capY    = yPosCap - yBal;
+// 	capY    = yPosCap - yBal;//!!
+	capY = yPosCap;
 
 	// set to origin
 	yPosCap -= yBal;
@@ -317,6 +318,8 @@ int ElTawil2DUnSym::displaySelf(Renderer &theViewer, int displayMode, float fact
 Vector pOld(3), pCurr(3);
 Vector rgb(3);
 rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
+// rgb(0) = 0.0; rgb(1) = 0.0; rgb(2) = 0.0;
+
 	if(displayMode == this->SurfOnly)
 	{
 		rgb(0) = 0.7; rgb(1) = 0.7; rgb(2) = 1.0;
@@ -325,7 +328,9 @@ rgb(0) = 0.1; rgb(1) = 0.5; rgb(2) = 0.5;
 
 
 	// double incr = 0.101;
-	double incr =  fabs(0.33333333*yNegCap/capY);
+ 	double incr =  fabs(0.33333333*yNegCap/capY);
+//	double incr =  fabs(0.1*yNegCap/capY);
+
 	if(fact < 1) incr = fact;
  	
  	double xOld = 0;
