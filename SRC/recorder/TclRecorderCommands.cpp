@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2002-12-16 20:57:35 $
+// $Revision: 1.14 $
+// $Date: 2002-12-17 23:36:29 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -143,7 +143,9 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 
 	while (flags == 0 && loc < argc) {
 
-	  if (strcmp(argv[loc],"-ele") == 0) {
+	  if ((strcmp(argv[loc],"-ele") == 0) ||
+	      (strcmp(argv[loc],"-eles") == 0) ||
+	      (strcmp(argv[loc],"-element") == 0)) {
       
 	    // ensure no segmentation fault if user messes up
 	    if (argc < loc+2) {
@@ -156,10 +158,11 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    //
 	    loc++;
 	    int eleTag;
-	    while (loc < argc && Tcl_GetInt(interp, argv[loc++], &eleTag) == TCL_OK) {
+	    while (loc < argc && Tcl_GetInt(interp, argv[loc], &eleTag) == TCL_OK) {
 	      eleIDs[numEle++] = eleTag;
+	      loc++;
+
 	    }
-	    if (loc < argc) loc--;
 
 	    if (strcmp(argv[loc],"all") == 0) {
 	      ElementIter &theEleIter = theDomain.getElements();
