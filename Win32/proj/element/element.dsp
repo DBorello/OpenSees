@@ -507,6 +507,14 @@ SOURCE=..\..\..\Src\element\upU\TwentyNodeBrick_u_p_U.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\joint\InternalSpring.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\joint\InternalSpring.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\Src\element\joint\Joint2D.cpp
 # End Source File
 # Begin Source File
