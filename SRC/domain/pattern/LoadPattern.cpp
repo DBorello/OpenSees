@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-06-18 21:11:14 $
+// $Revision: 1.9 $
+// $Date: 2003-11-19 19:16:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/LoadPattern.cpp,v $
                                                                         
-                                                                        
-// File: ~/domain/pattern/LoadPattern.C
-//
 // Written: fmk 07/99
 // Revised:
 //
@@ -447,7 +444,7 @@ LoadPattern::sendSelf(int cTag, Channel &theChannel)
   // now check if data defining the objects in the LoadPAttern needs to be sent 
   // NOTE THIS APPROACH MAY NEED TO CHANGE FOR VERY LARGE PROBLEMS IF CHANNEL CANNOT
   // HANDLE VERY LARGE ID OBJECTS.
-  if (lastGeoSendTag != currentGeoTag) {
+  if (lastGeoSendTag != currentGeoTag || theChannel.isDatastore() == 0) {
 
     //
     // into an ID we are gonna place the class and db tags for each node so can rebuild
@@ -633,7 +630,7 @@ LoadPattern::recvSelf(int cTag, Channel &theChannel, FEM_ObjectBroker &theBroker
     }
   }
 
-  if (currentGeoTag != lpData(0)) {
+  if (currentGeoTag != lpData(0) || theChannel.isDatastore() == 0) {
 
     // clear out the all the components in the current load pattern
     this->clearAll();
