@@ -1,9 +1,9 @@
 //<<<<<<< PressureDependMultiYield.h
-// $Revision: 1.3 $
-// $Date: 2004-08-26 20:39:13 $
+// $Revision: 1.4 $
+// $Date: 2005-01-18 21:29:16 $
 //=======
-// $Revision: 1.3 $
-// $Date: 2004-08-26 20:39:13 $
+// $Revision: 1.4 $
+// $Date: 2005-01-18 21:29:16 $
 //>>>>>>> 1.7
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.h,v $
 
@@ -29,33 +29,33 @@ class PressureDependMultiYield02 : public NDMaterial
 public:
      // Initialization constructor
      PressureDependMultiYield02 (int tag,
-			       int nd,
-					double rho,
-			       double refShearModul,
-			       double refBulkModul,
-			       double frictionAng,
-			       double peakShearStra,
-			       double refPress,
-			       double pressDependCoe,
-			       double phaseTransformAngle,
-			       double contractionParam1,
-			       double contractionParam3,
-			       double dilationParam1,
-			       double liquefactionParam1,
-			       double liquefactionParam2,
-			       int   numberOfYieldSurf = 20,
-				   double * gredu = 0,
-			       double contractionParam2 = 25,
-			       double dilationParam2 = 1.5,
-			       double dilationParam3 = 0.5,
-		           double e = 0.6,
-			       double volLimit1 = 0.9,
-			       double volLimit2 = 0.02,
-			       double volLimit3 = 0.7,
-			       double atm = 101.,
-				   double cohesi = 0.1,
-				   double hv = 0.,
-				   double pv = 1.);
+				 int nd,
+				 double rho,
+				 double refShearModul,
+				 double refBulkModul,
+				 double frictionAng,
+				 double peakShearStra,
+				 double refPress,
+				 double pressDependCoe,
+				 double phaseTransformAngle,
+				 double contractionParam1,
+				 double contractionParam3,
+				 double dilationParam1,
+				 double liquefactionParam1,
+				 double liquefactionParam2,
+				 int   numberOfYieldSurf = 20,
+				 double * gredu = 0,
+				 double contractionParam2 = 25,
+				 double dilationParam2 = 1.5,
+				 double dilationParam3 = 0.5,
+				 double e = 0.6,
+				 double volLimit1 = 0.9,
+				 double volLimit2 = 0.02,
+				 double volLimit3 = 0.7,
+				 double atm = 101.,
+				 double cohesi = 0.1,
+				 double hv = 0.,
+				 double pv = 1.);
 
      // Default constructor
      PressureDependMultiYield02 ();

@@ -52,6 +52,7 @@ TEMPLATE_OBJS =              \
 all: $(OBJS) 
 	@$(CD) $(FE)/material/nD/soil; $(MAKE);
 	@$(CD) $(FE)/material/nD/feap; $(MAKE);
+	@$(CD) $(FE)/material/nD/cyclicSoil; $(MAKE);
 	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE);  $(AR) -rv $(MATMOD_LIBRARY) $(TEMPLATE_OBJS)
 	@$(CD) $(FE)/material/nD/FiniteDeformation; $(MAKE); 
 
@@ -68,6 +69,7 @@ clean: tidy
 spotless: clean
 	@$(CD) $(FE)/material/nD/soil; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/feap; $(MAKE) wipe;
+	@$(CD) $(FE)/material/nD/cyclicSoil; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/Template3Dep; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/FiniteDeformation; $(MAKE) wipe;
 

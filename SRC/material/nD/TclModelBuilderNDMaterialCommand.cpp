@@ -25,8 +25,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.37 $
-// $Date: 2004-08-27 17:07:48 $
+// $Revision: 1.38 $
+// $Date: 2005-01-18 21:29:15 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                              
@@ -43,6 +43,9 @@
 #include <ElasticCrossAnisotropic.h>
 #include <J2Plasticity.h>
 
+#include <MultiaxialCyclicPlasticity.h> //Gang Wang
+
+
 #include <PlaneStressMaterial.h>
 #include <PlateFiberMaterial.h>
 #include <BeamFiberMaterial.h>
@@ -51,6 +54,7 @@
 #include <PressureDependMultiYield.h>
 #include <PressureDependMultiYield02.h>
 #include <FluidSolidPorousMaterial.h>
+
 
 #include <string.h>
 
@@ -410,6 +414,99 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 					delta, H, eta);
     }	
 
+
+    //
+    //  MultiAxialCyclicPlasticity Model   by Gang Wang
+    //  
+    //  nDMaterial MultiaxialCyclicPlasticity $tag, $rho, $K, $G,
+    //      $Su , $Ho , $h, $m, $beta, $KCoeff
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // Check argv[1] for MultiaxialCyclicPlasticity material type
+    else if ((strcmp(argv[1],"MultiaxialCyclicPlasticity") == 0)  ||
+	     (strcmp(argv[1],"MCP") == 0)) {
+      if (argc < 12) {
+	opserr << "WARNING insufficient arguments\n";
+	printCommand(argc,argv);
+	opserr << "Want: nDMaterial MultiaxialCyclicPlasticity tag? rho? K? G? Su? Ho? h? m? beta? KCoeff? <eta?>" << endln;
+	return TCL_ERROR;
+      }    
+      
+      int tag;
+      double K, G, rho, Su, Ho, h, m, beta, Kcoeff;
+      double eta = 0.0;
+      
+      if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+	opserr << "WARNING invalid MultiaxialCyclicPlasticity tag" << endln;
+	return TCL_ERROR;		
+      }
+      
+      if (Tcl_GetDouble(interp, argv[3], &rho) != TCL_OK) {
+	opserr << "WARNING invalid rho\n";
+	opserr << "nDMaterial MultiaxialCyclicPlasticity: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (Tcl_GetDouble(interp, argv[4], &K) != TCL_OK) {
+	opserr << "WARNING invalid K\n";
+	opserr << "nDMaterial MultiaxialCyclicPlasticity: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (Tcl_GetDouble(interp, argv[5], &G) != TCL_OK) {
+	opserr << "WARNING invalid G\n";
+	opserr << "nDMaterial MultiaxialCyclicPlasticity: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      
+      if (Tcl_GetDouble(interp, argv[6], &Su) != TCL_OK) {
+	opserr << "WARNING invalid alpha1\n";
+	opserr << "nDMaterial MultiaxialCyclicPlasticity: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (Tcl_GetDouble(interp, argv[7], &Ho) != TCL_OK) {
+	opserr << "WARNING invalid Ho\n";
+	opserr << "nDMaterial MultiaxialCyclicPlasticity: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (Tcl_GetDouble(interp, argv[8], &h) != TCL_OK) {
+	opserr << "WARNING invalid h\n";
+	opserr << "nDMaterial MultiaxialCyclicPlasticity: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (Tcl_GetDouble(interp, argv[9], &m) != TCL_OK) {
+	opserr << "WARNING invalid m\n";
+	opserr << "nDMaterial MultiaxialCyclicPlasticity: " << tag << endln;
+	return TCL_ERROR;	
+      }
+      
+      if (Tcl_GetDouble(interp, argv[10], &beta) != TCL_OK) {
+	opserr << "WARNING invalid beta\n";
+	opserr << "nDMaterial MultiaxialCyclicPlasticity: " << tag << endln;
+	return TCL_ERROR;	
+      }	
+      if (Tcl_GetDouble(interp, argv[11], &Kcoeff) != TCL_OK) {
+	opserr << "WARNING invalid Kcoeff\n";
+	opserr << "nDMaterial MultiaxialCyclicPlasticity: " << tag << endln;
+	return TCL_ERROR;	
+      }			
+      
+      
+      if (argc > 12 && Tcl_GetDouble(interp, argv[12], &eta) != TCL_OK) {
+	opserr << "WARNING invalid eta\n";
+	opserr << "nDMaterial MultiaxialCyclicPlasticity: " << tag << endln;
+	return TCL_ERROR;	
+      }		
+      
+      theMaterial = new MultiaxialCyclicPlasticity (tag, 0, rho, K, G, Su, Ho, h,m, 
+						    beta, Kcoeff, eta);
+    }	 
+
+
     // Pressure Independend Multi-yield, by ZHY
     else if (strcmp(argv[1],"PressureIndependMultiYield") == 0) {
 	const int numParam = 6;
@@ -450,22 +547,22 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	static double * gredu = 0;
 	// user defined yield surfaces
 	if (param[9] < 0 && param[9] > -40) {
-     param[9] = -int(param[9]);
-     gredu = new double[int(2*param[9])];
-		 for (int i=0; i<2*param[9]; i++) 
-	      if (Tcl_GetDouble(interp, argv[i+13], &gredu[i]) != TCL_OK) {
-		      opserr << "WARNING invalid " << arg[i-3] << "\n";
-		      opserr << "nDMaterial PressureIndependMultiYield: " << tag << endln;
-		      return TCL_ERROR;	
-				}
-  }
-
+	  param[9] = -int(param[9]);
+	  gredu = new double[int(2*param[9])];
+	  for (int i=0; i<2*param[9]; i++) 
+	    if (Tcl_GetDouble(interp, argv[i+13], &gredu[i]) != TCL_OK) {
+	      opserr << "WARNING invalid " << arg[i-3] << "\n";
+	      opserr << "nDMaterial PressureIndependMultiYield: " << tag << endln;
+	      return TCL_ERROR;	
+	    }
+	}
+	
 	PressureIndependMultiYield * temp = 
-	    new PressureIndependMultiYield (tag, param[0], param[1], param[2], 
-					    param[3], param[4], param[5], param[6], 
-					    param[7], param[8], param[9], gredu);
+	  new PressureIndependMultiYield (tag, param[0], param[1], param[2], 
+					  param[3], param[4], param[5], param[6], 
+					  param[7], param[8], param[9], gredu);
 	theMaterial = temp;
-
+	
 	if (gredu != 0) delete [] gredu;
     }	
     
@@ -627,36 +724,36 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	static double * gredu = 0;
 	// user defined yield surfaces
 	if (param[numParam] < 0 && param[numParam] > -100) {
-     param[numParam] = -int(param[numParam]);
-     gredu = new double[int(2*param[numParam])];
-
-		 for (int i=0; i<2*param[numParam]; i++) 
-	      if (Tcl_GetDouble(interp, argv[i+in], &gredu[i]) != TCL_OK) {
-		      opserr << "WARNING invalid " << arg[i-3] << "\n";
-		      opserr << "nDMaterial PressureIndependMultiYield: " << tag << endln;
-		      return TCL_ERROR;	
-		  }
+	  param[numParam] = -int(param[numParam]);
+	  gredu = new double[int(2*param[numParam])];
+	  
+	  for (int i=0; i<2*param[numParam]; i++) 
+	    if (Tcl_GetDouble(interp, argv[i+in], &gredu[i]) != TCL_OK) {
+	      opserr << "WARNING invalid " << arg[i-3] << "\n";
+	      opserr << "nDMaterial PressureIndependMultiYield: " << tag << endln;
+	      return TCL_ERROR;	
+	    }
 	}
-  
+	
 	if (gredu != 0) {
 	  for (int i=in+int(2*param[numParam]); i<argc; i++) 
 	    if (Tcl_GetDouble(interp, argv[i], &param[i-3-int(2*param[numParam])]) != TCL_OK) {
-		      opserr << "WARNING invalid " << arg[i-3-int(2*param[numParam])] << "\n";
-		      opserr << "nDMaterial PressureDependMultiYield02: " << tag << endln;
-		      return TCL_ERROR;	
-			}
+	      opserr << "WARNING invalid " << arg[i-3-int(2*param[numParam])] << "\n";
+	      opserr << "nDMaterial PressureDependMultiYield02: " << tag << endln;
+	      return TCL_ERROR;	
+	    }
 	} else {
 	  for (int i=in; i<argc; i++) 
 	    if (Tcl_GetDouble(interp, argv[i], &param[i-3]) != TCL_OK) {
-		      opserr << "WARNING invalid " << arg[i-3-int(2*param[numParam])] << "\n";
-		      opserr << "nDMaterial PressureDependMultiYield02: " << tag << endln;
-		      return TCL_ERROR;	
-		}
+	      opserr << "WARNING invalid " << arg[i-3-int(2*param[numParam])] << "\n";
+	      opserr << "nDMaterial PressureDependMultiYield02: " << tag << endln;
+	      return TCL_ERROR;	
+	    }
 	} 
-
-
+	
+	
 	PressureDependMultiYield02 * temp =
-	    new PressureDependMultiYield02 (tag, param[0], param[1], param[2], 
+	  new PressureDependMultiYield02 (tag, param[0], param[1], param[2], 
 					  param[3], param[4], param[5], 
 					  param[6], param[7], param[8], 
 					  param[9], param[10], param[11], 
