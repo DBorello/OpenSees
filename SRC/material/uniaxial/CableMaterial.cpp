@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-18 22:05:53 $
+// $Revision: 1.2 $
+// $Date: 2001-07-19 00:18:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/CableMaterial.cpp,v $
                                                                         
 // Written: Charles Chadwell 
