@@ -133,6 +133,10 @@ SOURCE=..\..\..\SRC\tcl\commands.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\nD\FiniteDeformation\FiniteDeformationElastic3D.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\OPS_Globals.h
 # End Source File
 # Begin Source File
