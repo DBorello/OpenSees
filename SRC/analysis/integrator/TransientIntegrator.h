@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-12-07 00:49:46 $
+// $Revision: 1.4 $
+// $Date: 2002-10-02 21:43:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/TransientIntegrator.h,v $
                                                                         
                                                                         
@@ -53,7 +53,7 @@ class TransientIntegrator : public IncrementalIntegrator
     TransientIntegrator(int classTag);
     virtual ~TransientIntegrator();
 
-    virtual int formTangent(int statFlag);    
+    virtual int formTangent(int statFlag);
     virtual int formEleResidual(FE_Element *theEle);
     virtual int formNodUnbalance(DOF_Group *theDof);    
 

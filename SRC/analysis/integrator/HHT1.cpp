@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-12-07 00:49:46 $
+// $Revision: 1.4 $
+// $Date: 2002-10-02 21:43:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT1.cpp,v $
                                                                         
                                                                         
@@ -203,7 +203,10 @@ HHT1::newStep(double deltaT)
   // increment the time and apply the load
   double time = theModel->getCurrentDomainTime();
   time +=deltaT;
-  theModel->updateDomain(time, deltaT);
+  if (theModel->updateDomain(time, deltaT) < 0) {
+    cerr << "HHT::newStep() - failed to update the domain\n";
+    return -4;
+  }
 
   return 0;
 }
@@ -426,7 +429,10 @@ HHT1::update(const Vector &deltaU)
   
   // update the responses at the DOFs
   theModel->setResponse(*Ualpha,*Udotalpha,*Udotdot);        
-  theModel->updateDomain();
+  if (theModel->updateDomain() < 0) {
+    cerr << "HHT1::update() - failed to update the domain\n";
+    return -4;
+  }
 		    
   return 0;
 }    

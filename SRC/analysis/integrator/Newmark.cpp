@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-12-07 00:49:46 $
+// $Revision: 1.7 $
+// $Date: 2002-10-02 21:43:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
                                                                         
                                                                         
@@ -266,7 +266,10 @@ Newmark::newStep(double deltaT)
   // increment the time and apply the load
   double time = theModel->getCurrentDomainTime();
   time +=deltaT;
-  theModel->updateDomain(time, deltaT);
+  if (theModel->updateDomain(time, deltaT) < 0) {
+    cerr << "Newmark::newStep() - failed to update the domain\n";
+    return -4;
+  }
   
   return 0;
 }
@@ -458,7 +461,6 @@ Newmark::domainChanged()
       }
     }
     *******************************************************************************/
-
   }    
   
   return 0;
@@ -500,7 +502,10 @@ Newmark::update(const Vector &deltaU)
   
   // update the responses at the DOFs
   theModel->setResponse(*U,*Udot,*Udotdot);        
-  theModel->updateDomain();
+  if (theModel->updateDomain() < 0) {
+    cerr << "Newmark::update() - failed to update the domain\n";
+    return -4;
+  }
 
   return 0;
 }    

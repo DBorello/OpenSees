@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-12-07 00:50:52 $
+// $Revision: 1.6 $
+// $Date: 2002-10-02 21:43:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/MinUnbalDispNorm.cpp,v $
                                                                         
                                                                         
@@ -149,7 +149,10 @@ MinUnbalDispNorm::newStep(void)
     // update model with delta lambda and delta U
     theModel->incrDisp(*deltaU);    
     theModel->applyLoadDomain(currentLambda);    
-    theModel->updateDomain();
+    if (theModel->updateDomain() < 0) {
+      cerr << "MinUnbalDispNorm::newStep - model failed to update for new dU\n";
+      return -1;
+    }
 
     return 0;
 }
@@ -194,7 +197,11 @@ MinUnbalDispNorm::update(const Vector &dU)
     // update the model
     theModel->incrDisp(*deltaU);    
     theModel->applyLoadDomain(currentLambda);    
-    theModel->updateDomain();
+
+    if (theModel->updateDomain() < 0) {
+      cerr << "MinUnbalDispNorm::update - model failed to update for new dU\n";
+      return -1;
+    }
     
     // set the X soln in linearSOE to be deltaU for convergence Test
     theLinSOE->setX(*deltaU);
