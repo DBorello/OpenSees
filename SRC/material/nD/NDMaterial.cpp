@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $                                                              
-// $Date: 2000-12-18 10:48:08 $                                                                  
+// $Revision: 1.5 $                                                              
+// $Date: 2001-01-20 04:26:14 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -58,6 +58,13 @@ NDMaterial::NDMaterial()
 NDMaterial::~NDMaterial()
 {
 
+}
+
+
+double
+NDMaterial::getRho(void)
+{
+  return 0.0;
 }
 
 const Vector &
