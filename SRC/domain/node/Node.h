@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-10-28 17:39:47 $
+// $Revision: 1.8 $
+// $Date: 2005-02-17 22:28:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.h,v $
                                                                         
                                                                         
@@ -139,6 +139,10 @@ class Node : public DomainComponent
     int    setParameter(const char **argv, int argc, Information &info);
     int    updateParameter(int parameterID, Information &info);
     int    activateParameter(int parameterID);
+
+    virtual const Vector &getReaction();
+    virtual int   addReactionForce(const Vector &, double factor);
+    virtual int   resetReactionForce(bool inclInertia);
     // AddingSensitivity:END ///////////////////////////////////////////
     
   private:
@@ -179,6 +183,8 @@ class Node : public DomainComponent
     static Matrix **theMatrices;
     static int numMatrices;
     int index;
+
+    Vector *reaction;
 };
 
 #endif

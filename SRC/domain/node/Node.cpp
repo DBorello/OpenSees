@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-10-30 22:38:01 $
+// $Revision: 1.17 $
+// $Date: 2005-02-17 22:28:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -63,7 +63,8 @@ Node::Node(int theClassTag)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0), 
  incrDeltaDisp(0),
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
- R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), index(-1)
+ R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), 
+ index(-1), reaction(0)
 {
   // for FEM_ObjectBroker, recvSelf() must be invoked on object
 
@@ -83,7 +84,8 @@ Node::Node(int tag, int theClassTag)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
  incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
-  R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), index(-1)
+  R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), 
+ index(-1), reaction(0)
 {
   // for subclasses - they must implement all the methods with
   // their own data structures.
@@ -103,7 +105,8 @@ Node::Node(int tag, int ndof, double Crd1)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
  incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
- R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), index(-1)
+ R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0), 
+ index(-1), reaction(0)
 {
   // AddingSensitivity:BEGIN /////////////////////////////////////////
   dispSensitivity = 0;
@@ -155,7 +158,8 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
  incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
- R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0),
+ reaction(0)
 {
   // AddingSensitivity:BEGIN /////////////////////////////////////////
   dispSensitivity = 0;
@@ -209,7 +213,8 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2, double Crd3)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
  incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
- R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0),
+ reaction(0)
 {
   // AddingSensitivity:BEGIN /////////////////////////////////////////
   dispSensitivity = 0;
@@ -262,7 +267,8 @@ Node::Node(const Node *otherNode)
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
  incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
- R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0),
+ reaction(0)
 {
   // AddingSensitivity:BEGIN /////////////////////////////////////////
   dispSensitivity = 0;
@@ -398,6 +404,9 @@ Node::~Node()
     if (accSensitivity != 0)
       delete accSensitivity;
     // AddingSensitivity:END /////////////////////////////////////////
+
+    if (reaction != 0)
+      delete reaction;
 }
 
 
@@ -917,6 +926,7 @@ Node::getUnbalancedLoadIncInertia(void)
       (*unbalLoadWithInertia) = this->getUnbalancedLoad();
 
     if (mass != 0) {
+
       const Vector &theAccel = this->getTrialAccel(); // in case accel not created
       unbalLoadWithInertia->addMatrixVector(1.0, *mass, theAccel, -1.0);
 
@@ -924,8 +934,10 @@ Node::getUnbalancedLoadIncInertia(void)
 	const Vector &theVel = this->getTrialVel(); // in case accel not created
 	unbalLoadWithInertia->addMatrixVector(1.0, *mass, theVel, -alphaM);
       }
-    }
-    
+    } 
+
+
+
     return *unbalLoadWithInertia;
 }
 
@@ -1509,6 +1521,8 @@ Node::Print(OPS_Stream &s, int flag)
 	s << "\tcommitAccels: " << *trialAccel;
     if (unbalLoad != 0)
       s << "\t unbalanced Load: " << *unbalLoad;
+    if (reaction != 0)
+      s << "\t reaction: " << *reaction;
     if (mass != 0) 
 	s << "\tMass : " << *mass;
     if (theEigenvectors != 0)
@@ -1811,4 +1825,67 @@ Node::getAccSensitivity(int dof, int gradNum)
 
 
 
+const Vector &
+Node::getReaction() {
+  if (reaction == 0) {
+    reaction = new Vector(numberDOF);
+    if (reaction == 0) {
+      opserr << "FATAL Node::getReaction() - out of memory\n";
+      exit(-1);
+    }
+  }
 
+  return *reaction;
+}
+
+int   
+Node::addReactionForce(const Vector &add, double factor){
+
+  // create rection vector if have not done so already
+  if (reaction == 0) {
+    reaction = new Vector(numberDOF);
+    if (reaction == 0) {
+      opserr << "WARNING Node::addReactionForce() - out of memory\n";
+      return -1;
+    }
+  }
+
+  // check vector of appropraie size
+  if (add.Size() != numberDOF) {
+    opserr << "WARNING Node::addReactionForce() - vector not of correct size\n";
+    return -1;
+  }
+
+  if (factor == 1.0) 
+    *reaction += add;
+  else if (factor == -1.0)
+    *reaction -= add;
+  else
+    *reaction = add * factor;
+
+  return 0;
+}
+
+int   
+Node::resetReactionForce(bool inclInertia){
+
+  // create rection vector if have not done so already
+  if (reaction == 0) {
+    reaction = new Vector(numberDOF);
+    if (reaction == 0) {
+      opserr << "WARNING Node::addReactionForce() - out of memory\n";
+      return -1;
+    }
+  }
+
+  reaction->Zero();
+
+  // add unbalance, the negative of applied forces hence the -=
+  if (inclInertia == false) {
+    *reaction -= this->getUnbalancedLoad();
+  } else {
+    *reaction -= this->getUnbalancedLoadIncInertia();
+  }
+
+  return 0;
+}
