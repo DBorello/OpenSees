@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.3 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.h,v $
                                                                         
                                                                         
@@ -58,6 +58,7 @@ class GenericSection1d : public SectionForceDeformation
 
     const Vector &getStressResultant (void);
     const Matrix &getSectionTangent (void);
+    const Matrix &getInitialTangent (void);
     const Matrix &getSectionFlexibility (void);
     
     int commitState (void);
@@ -78,6 +79,9 @@ class GenericSection1d : public SectionForceDeformation
     UniaxialMaterial *theModel;
     int code;
 
+    static Vector s;
+    static Matrix ks;
+    static ID c;
   private:
 };
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.3 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/Bidirectional.h,v $
                                                                         
                                                                         
@@ -51,8 +51,9 @@ class Bidirectional : public SectionForceDeformation
 
     int setTrialSectionDeformation(const Vector &v);
     const Matrix &getSectionTangent(void);
+    const Matrix &getInitialTangent(void);
     const Vector &getStressResultant(void);
-	const Vector &getSectionDeformation(void);
+    const Vector &getSectionDeformation(void);
 
     int commitState(void);
     int revertToLastCommit(void);

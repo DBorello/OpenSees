@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.4 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection2d.h,v $
                                                                         
                                                                         
@@ -64,6 +64,7 @@ class ElasticSection2d: public SectionForceDeformation
 
     const Vector &getStressResultant (void);
     const Matrix &getSectionTangent (void);
+    const Matrix &getInitialTangent (void);
     const Matrix &getSectionFlexibility (void);
     
     SectionForceDeformation *getCopy (void);
@@ -83,8 +84,10 @@ class ElasticSection2d: public SectionForceDeformation
     double E, A, I;
 
     Vector e;			// section trial deformations
-	Vector eCommit;
+    Vector eCommit;
     
+    static Vector s;
+    static Matrix ks;
     static ID code;
 };
 

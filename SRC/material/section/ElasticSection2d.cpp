@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-10 22:32:11 $
+// $Revision: 1.6 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection2d.cpp,v $
                                                                         
                                                                         
@@ -47,6 +47,8 @@
 #include <G3Globals.h>
 #include <classTags.h>
 
+Vector ElasticSection2d::s(2);
+Matrix ElasticSection2d::ks(2,2);
 ID ElasticSection2d::code(2);
 
 ElasticSection2d::ElasticSection2d(void)
@@ -163,34 +165,37 @@ ElasticSection2d::getSectionDeformation (void)
 const Vector &
 ElasticSection2d::getStressResultant (void)
 {
-	static Vector s(2);
+  s(0) = E*A*e(0);
+  s(1) = E*I*e(1);    
 
-    s(0) = E*A*e(0);
-    s(1) = E*I*e(1);    
-
-    return s;
+  return s;
 }
 
 const Matrix &
 ElasticSection2d::getSectionTangent(void)
 {
-	static Matrix ks(2,2);
+  ks(0,0) = E*A;
+  ks(1,1) = E*I;
+  
+  return ks;
+}
 
-	ks(0,0) = E*A;
-	ks(1,1) = E*I;
-
-    return ks;
+const Matrix &
+ElasticSection2d::getInitialTangent(void)
+{
+  ks(0,0) = E*A;
+  ks(1,1) = E*I;
+  
+  return ks;
 }
 
 const Matrix &
 ElasticSection2d::getSectionFlexibility (void)
 {
-	static Matrix fs(2,2);
-
-	fs(0,0) = 1.0/(E*A);
-	fs(1,1) = 1.0/(E*I);
-
-    return fs;
+  ks(0,0) = 1.0/(E*A);
+  ks(1,1) = 1.0/(E*I);
+  
+  return ks;
 }
 
 SectionForceDeformation*
@@ -273,9 +278,9 @@ ElasticSection2d::recvSelf(int commitTag, Channel &theChannel,
 void
 ElasticSection2d::Print(ostream &s, int flag)
 {
-    s << "ElasticSection2d, tag: " << this->getTag() << endl;
-    s << "\tE: " << E << endl;
-	s << "\tA: " << A << endl;
-	s << "\tI: " << I << endl;
+  s << "ElasticSection2d, tag: " << this->getTag() << endl;
+  s << "\tE: " << E << endl;
+  s << "\tA: " << A << endl;
+  s << "\tI: " << I << endl;
 }
 

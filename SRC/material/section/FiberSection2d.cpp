@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-06-10 22:32:11 $
+// $Revision: 1.9 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.cpp,v $
                                                                         
 // Written: fmk
@@ -203,8 +203,6 @@ int FiberSection2d::setTrialSectionDeformation (const Vector &deforms)
 {
   int res = 0;
 
-  //  cerr << deforms;
-
   e = deforms;
 
   kData[0] = 0.0; kData[1] = 0.0; kData[2] = 0.0; kData[3] = 0.0;
@@ -248,11 +246,36 @@ FiberSection2d::getSectionDeformation(void)
 }
 
 const Matrix&
+FiberSection2d::getInitialTangent(void)
+{
+  kData[0] = 0.0; kData[1] = 0.0; kData[2] = 0.0; kData[3] = 0.0;
+
+  int loc = 0;
+
+  for (int i = 0; i < numFibers; i++) {
+    UniaxialMaterial *theMat = theMaterials[i];
+    double y = matData[loc++];
+    double A = matData[loc++];
+
+    double tangent = theMat->getInitialTangent();
+
+    double ks0 = tangent * A;
+    double ks1 = ks0 * y;
+    kData[0] += ks0;
+    kData[1] += ks1;
+    kData[3] += ks1 * y;
+  }
+
+  kData[2] = kData[1];
+
+  return *ks;
+}
+
+const Matrix&
 FiberSection2d::getSectionTangent(void)
 {
   return *ks;
 }
-
 
 const Vector&
 FiberSection2d::getStressResultant(void)

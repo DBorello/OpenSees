@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-10 22:32:12 $
+// $Revision: 1.8 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -193,7 +193,8 @@ FiberSection3d::~FiberSection3d()
     delete ks;
 }
 
-int FiberSection3d::setTrialSectionDeformation (const Vector &deforms)
+int
+FiberSection3d::setTrialSectionDeformation (const Vector &deforms)
 {
   int res = 0;
   e = deforms;
@@ -245,6 +246,45 @@ int FiberSection3d::setTrialSectionDeformation (const Vector &deforms)
   kData[7] = kData[5];
 
   return res;
+}
+
+const Matrix&
+FiberSection3d::getInitialTangent(void)
+{
+  kData[0] = 0.0; kData[1] = 0.0; kData[2] = 0.0; kData[3] = 0.0;
+  kData[4] = 0.0; kData[5] = 0.0; kData[6] = 0.0; kData[7] = 0.0;
+  kData[8] = 0.0; 
+
+  int loc = 0;
+
+  for (int i = 0; i < numFibers; i++) {
+    UniaxialMaterial *theMat = theMaterials[i];
+    double y = matData[loc++];
+    double z = matData[loc++];
+    double A = matData[loc++];
+
+    double tangent = theMat->getInitialTangent();
+
+    double value = tangent * A;
+    double vas1 = y*value;
+    double vas2 = z*value;
+    double vas1as2 = vas1*z;
+
+    kData[0] += value;
+    kData[1] += vas1;
+    kData[2] += vas2;
+    
+    kData[4] += vas1 * y;
+    kData[5] += vas1as2;
+    
+    kData[8] += vas2 * z; 
+  }
+
+  kData[3] = kData[1];
+  kData[6] = kData[2];
+  kData[7] = kData[5];
+
+  return *ks;
 }
 
 const Vector&

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.7 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticMembranePlateSection.h,v $
 
 // Ed "C++" Love
@@ -91,6 +91,9 @@ class ElasticMembranePlateSection : public SectionForceDeformation{
 
     //send back the tangent 
     const Matrix& getSectionTangent( ) ;
+
+    //send back the initial tangent 
+    const Matrix& getInitialTangent( ) ;
 
     //print out data
     void Print( ostream &s, int flag ) ;

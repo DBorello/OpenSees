@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.4 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/Bidirectional.cpp,v $
 
 #include <Bidirectional.h>           
@@ -150,6 +150,15 @@ Bidirectional::getSectionTangent(void)
 	}
 
 	return ks;
+}
+
+const Matrix&
+Bidirectional::getInitialTangent(void)
+{
+  ks(0,0) = ks(1,1) = E;
+  ks(0,1) = ks(1,0) = 0.0;
+
+  return ks;
 }
 
 const Vector&

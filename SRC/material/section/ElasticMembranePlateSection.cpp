@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-06-10 22:32:11 $
+// $Revision: 1.8 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticMembranePlateSection.cpp,v $
 
 // Ed "C++" Love
@@ -199,6 +199,53 @@ const Vector&  ElasticMembranePlateSection::getStressResultant( )
 
 //send back the tangent 
 const Matrix&  ElasticMembranePlateSection::getSectionTangent( )
+{
+
+  double M  = E / ( 1.0 - nu*nu ) ; //membrane modulus
+
+  double G  =  0.5 * E / ( 1.0 + nu ) ; //shear modulus
+
+  G *= h ;  //multiply by thickness
+  M *= h ;
+
+  tangent.Zero() ;
+
+  //membrane tangent terms
+
+  tangent(0,0) = M ;
+  tangent(1,1) = M ;
+
+  tangent(0,1) = nu*M ;
+  tangent(1,0) = tangent(0,1) ;
+
+  tangent(2,2) = G ;
+
+
+
+  G *= five6 ;  //multiply by shear correction factor
+
+  double D  =  E * (h*h*h) / 12.0 / ( 1.0 - nu*nu ) ;  //bending modulus
+
+  //bending tangent terms
+
+  tangent(3,3) = -D ;
+  tangent(4,4) = -D ;
+
+  tangent(3,4) = -nu*D ;
+  tangent(4,3) = tangent(3,4) ;
+
+  tangent(5,5) = -0.5 * D * ( 1.0 - nu ) ;
+
+  tangent(6,6) = G ;
+
+  tangent(7,7) = G ;
+
+  return this->tangent ;
+}
+
+
+//send back the initial tangent 
+const Matrix&  ElasticMembranePlateSection::getInitialTangent( )
 {
 
   double M  = E / ( 1.0 - nu*nu ) ; //membrane modulus

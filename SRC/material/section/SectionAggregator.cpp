@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-05-28 19:29:13 $
+// $Revision: 1.7 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionAggregator.cpp,v $
                                                                         
                                                                         
@@ -318,6 +318,33 @@ SectionAggregator::getSectionTangent(void)
 
   for ( ; i < order; i++)
     (*ks)(i,i) = theAdditions[i-theSectionOrder]->getTangent();
+  
+  return *ks;
+}
+
+const Matrix &
+SectionAggregator::getInitialTangent(void)
+{
+  int i = 0;
+
+  int theSectionOrder = 0;
+
+  // Zero before assembly
+  ks->Zero();
+
+  if (theSection) {
+    const Matrix &kSec = theSection->getInitialTangent();
+    theSectionOrder = theSection->getOrder();
+
+    for (i = 0; i < theSectionOrder; i++)
+      for (int j = 0; j < theSectionOrder; j++)
+	(*ks)(i,j) = kSec(i,j);
+  }
+  
+  int order = theSectionOrder + numMats;
+
+  for ( ; i < order; i++)
+    (*ks)(i,i) = theAdditions[i-theSectionOrder]->getInitialTangent();
   
   return *ks;
 }

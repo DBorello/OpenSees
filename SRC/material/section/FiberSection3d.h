@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2002-06-10 22:32:12 $
+// $Revision: 1.5 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.h,v $
                                                                         
 // Written: fmk
@@ -53,6 +53,7 @@ class FiberSection3d : public SectionForceDeformation
 
     const Vector &getStressResultant(void);
     const Matrix &getSectionTangent(void);
+    const Matrix &getInitialTangent(void);
 
     int   commitState(void);
     int   revertToLastCommit(void);    

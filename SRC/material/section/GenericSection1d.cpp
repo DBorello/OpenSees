@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.4 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/GenericSection1d.cpp,v $
                                                                         
                                                                         
@@ -48,8 +48,12 @@
 
 #include <string.h>
 
-GenericSection1d::GenericSection1d(int tag, UniaxialMaterial &m, int c)
-:SectionForceDeformation(tag,SEC_TAG_Generic1d), code(c)
+Vector GenericSection1d::s(1);
+Matrix GenericSection1d::ks(1,1);
+ID GenericSection1d::c(1);
+
+GenericSection1d::GenericSection1d(int tag, UniaxialMaterial &m, int type)
+:SectionForceDeformation(tag,SEC_TAG_Generic1d), code(type)
 {
     theModel = m.getCopy();
 
@@ -90,36 +94,38 @@ GenericSection1d::getSectionDeformation ()
 const Vector&
 GenericSection1d::getStressResultant ()
 {
-	static Vector s(1);	// static for class-wide returns
+  s(0) = theModel->getStress();
 
-    s(0) = theModel->getStress();
-
-    return s;
+  return s;
 }
 
 const Matrix&
 GenericSection1d::getSectionTangent ()
 {
-	static Matrix k(1,1);	// static for class-wide returns
+  ks(0,0) = theModel->getTangent();
+  
+  return ks;
+}
 
-    k(0,0) = theModel->getTangent();
-
-    return k;
+const Matrix&
+GenericSection1d::getInitialTangent ()
+{
+  ks(0,0) = theModel->getInitialTangent();
+  
+  return ks;
 }
 
 const Matrix&
 GenericSection1d::getSectionFlexibility ()
 {
-	static Matrix f(1,1);	// static for class-wide returns
+  double tangent = theModel->getTangent();
 
-    double tangent = theModel->getTangent();
+  if (tangent != 0.0)
+    ks(0,0) = 1.0/tangent;
+  else
+    ks(0,0) = 1.0e12;
 
-    if (tangent != 0.0)
-		f(0,0) = 1.0/tangent;
-	else
-		f(0,0) = 1.0e12;
-
-    return f;
+  return ks;
 }
 
 int
@@ -143,11 +149,9 @@ GenericSection1d::revertToStart ()
 const ID&
 GenericSection1d::getType ()
 {
-	static ID c(1);	// static for class-wide returns
+  c(0) = code;
 
-	c(0) = code;
-
-    return c;
+  return c;
 }
 
 int

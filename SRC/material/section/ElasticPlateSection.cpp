@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-06-10 22:32:11 $
+// $Revision: 1.7 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticPlateSection.cpp,v $
 
 // Ed "C++" Love
@@ -167,6 +167,33 @@ const Vector& ElasticPlateSection::getStressResultant( )
 
 //send back the tangent 
 const Matrix& ElasticPlateSection::getSectionTangent( )
+{
+
+  double D  =  E * (h*h*h) / 12.0 / ( 1.0 - nu*nu ) ;
+
+  double G  =  0.5 * E / ( 1.0 + nu ) ;
+
+
+  tangent.Zero() ;
+
+  tangent(0,0) = -D ;
+  tangent(1,1) = -D ;
+
+  tangent(0,1) = -nu*D ;
+  tangent(1,0) = tangent(0,1) ;
+
+  tangent(2,2) = -0.5 * D * ( 1.0 - nu ) ;
+
+  tangent(3,3) = five6*G*h ;
+
+  tangent(4,4) = tangent(3,3) ;
+
+
+  return this->tangent ;
+}
+
+//send back the initial tangent 
+const Matrix& ElasticPlateSection::getInitialTangent( )
 {
 
   double D  =  E * (h*h*h) / 12.0 / ( 1.0 - nu*nu ) ;

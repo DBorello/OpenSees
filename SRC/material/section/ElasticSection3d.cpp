@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2002-05-16 19:50:22 $
+// $Revision: 1.4 $
+// $Date: 2002-06-19 18:20:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/ElasticSection3d.cpp,v $
                                                                         
                                                                         
@@ -43,6 +43,8 @@
 
 #include <classTags.h>
 
+Vector ElasticSection3d::s(4);
+Matrix ElasticSection3d::ks(4,4);
 ID ElasticSection3d::code(4);
 
 ElasticSection3d::ElasticSection3d(void)
@@ -195,40 +197,45 @@ ElasticSection3d::getSectionDeformation (void)
 const Vector &
 ElasticSection3d::getStressResultant (void)
 {
-    static Vector s(4);
-
-    s(0) = E*A*e(0);
-    s(1) = E*Iz*e(1);
-    s(2) = E*Iy*e(2);
-    s(3) = G*J*e(3);
-
-    return s;
+  s(0) = E*A*e(0);
+  s(1) = E*Iz*e(1);
+  s(2) = E*Iy*e(2);
+  s(3) = G*J*e(3);
+  
+  return s;
 }
 
 const Matrix &
 ElasticSection3d::getSectionTangent(void)
 {
-	static Matrix ks(4,4);
+  ks(0,0) = E*A;
+  ks(1,1) = E*Iz;
+  ks(2,2) = E*Iy;
+  ks(3,3) = G*J;
+  
+  return ks;
+}
 
-	ks(0,0) = E*A;
-	ks(1,1) = E*Iz;
-	ks(2,2) = E*Iy;
-	ks(3,3) = G*J;
-
-    return ks;
+const Matrix &
+ElasticSection3d::getInitialTangent(void)
+{
+  ks(0,0) = E*A;
+  ks(1,1) = E*Iz;
+  ks(2,2) = E*Iy;
+  ks(3,3) = G*J;
+  
+  return ks;
 }
 
 const Matrix &
 ElasticSection3d::getSectionFlexibility (void)
 {
-	static Matrix fs(4,4);
-
-	fs(0,0) = 1.0/(E*A);
-	fs(1,1) = 1.0/(E*Iz);
-	fs(2,2) = 1.0/(E*Iy);
-	fs(3,3) = 1.0/(G*J);
-
-    return fs;
+  ks(0,0) = 1.0/(E*A);
+  ks(1,1) = 1.0/(E*Iz);
+  ks(2,2) = 1.0/(E*Iy);
+  ks(3,3) = 1.0/(G*J);
+  
+  return ks;
 }
 
 SectionForceDeformation*
@@ -321,11 +328,11 @@ ElasticSection3d::recvSelf(int commitTag, Channel &theChannel,
 void
 ElasticSection3d::Print(ostream &s, int flag)
 {
-    s << "ElasticSection3d, tag: " << this->getTag() << endl;
-    s << "\t E: " << E << endl;
-	s << "\t A: " << A << endl;
-	s << "\tIz: " << Iz << endl;
-	s << "\tIy: " << Iy << endl;
-	s << "\t G: " << G << endl;
-	s << "\t J: " << J << endl;
+  s << "ElasticSection3d, tag: " << this->getTag() << endl;
+  s << "\t E: " << E << endl;
+  s << "\t A: " << A << endl;
+  s << "\tIz: " << Iz << endl;
+  s << "\tIy: " << Iy << endl;
+  s << "\t G: " << G << endl;
+  s << "\t J: " << J << endl;
 }
