@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-07-31 01:34:05 $
+// $Revision: 1.5 $
+// $Date: 2001-08-10 17:57:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -313,9 +313,6 @@ FiberSection3d::getCopy(void)
   theCopy->sData[0] = sData[0];
   theCopy->sData[1] = sData[1];
   theCopy->sData[2] = sData[2];
-
-  theCopy->s = new Vector(theCopy->sData, 3);
-  theCopy->ks = new Matrix(theCopy->kData, 3, 3);
 
   return theCopy;
 }
@@ -612,9 +609,14 @@ FiberSection3d::Print(ostream &s, int flag)
   s << "\tSection code: " << code;
   s << "\tNumber of Fibers: " << numFibers << endl;
   
-  if (flag == 1)
-	  for (int i = 0; i < numFibers; i++)
+  if (flag == 1) {
+	  int loc = 0;
+	  for (int i = 0; i < numFibers; i++) {
+		  s << "\nLocation (y, z) = (" << matData[loc++] << ", " << matData[loc++] << ")";
+		  s << "\nArea = " << matData[loc++] << endl;
 		  theMaterials[i]->Print(s, flag);
+	  }
+  }
 }
 
 Response*
