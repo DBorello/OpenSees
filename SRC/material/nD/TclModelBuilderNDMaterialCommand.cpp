@@ -16,10 +16,17 @@
 **   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
+** With a lot additions from                                          **
+**   Boris Jeremic    (jeremic@ucdavis.edu)                           **
+**   Zaohui Yang      (zhyang@ucdavis.edu)                            **
+**                                                                    **
+**                                                                    **
+**                                                                    **
+**                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.27 $
-// $Date: 2003-02-25 23:33:23 $
+// $Revision: 1.28 $
+// $Date: 2003-04-10 05:46:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -33,6 +40,7 @@
 #include <ElasticIsotropicMaterial.h>
 #include <ElasticIsotropic3D.h>
 #include <PressureDependentElastic3D.h>
+#include <ElasticCrossAnisotropic.h>
 #include <J2Plasticity.h>
 
 #include <PlaneStressMaterial.h>
@@ -258,16 +266,76 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	    return TCL_ERROR;	
 	}
 
- if (argc > 5 && Tcl_GetDouble(interp, argv[5], &rho) != TCL_OK) 
-   {
-     opserr << "WARNING invalid rho\n";
-     opserr << "nDMaterial ElasticIsotropic: " << tag << endln;
-     return TCL_ERROR;   
-   }
+ 	if (argc > 5 && Tcl_GetDouble(interp, argv[5], &rho) != TCL_OK) 
+	   {
+	     opserr << "WARNING invalid rho\n";
+	     opserr << "nDMaterial ElasticIsotropic: " << tag << endln;
+	     return TCL_ERROR;   
+	   }
 
 	theMaterial = new ElasticIsotropicMaterial (tag, E, v, rho);
     }	
     
+//March 20, 2003 Zhaohui Yang, Yi Bian, Boris Jeremic Anisotropic Elastic Material Model
+    else if (strcmp(argv[1],"ElasticCrossAnisotropic") == 0) {
+ //cout << "argc" << argc;
+ if (argc < 8) {
+     cerr << "WARNING insufficient arguments\n";
+     printCommand(argc,argv);
+     cerr << "Want: nDMaterial ElasticCrossAnisotropic tag? Ehh? Ehv? nuhv? nuvv? Ghv? <rho?>" << endl;
+     return TCL_ERROR;
+ }    
+
+ int tag;
+ double Eh, Ev, nuhv, nuhh, Ghv;
+ double rho = 0.0;
+ 
+ if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
+     cerr << "WARNING invalid ElasticCrossAnisotropic tag" << endl;
+     return TCL_ERROR;  
+ }
+
+ if (Tcl_GetDouble(interp, argv[3], &Eh) != TCL_OK) {
+     cerr << "WARNING invalid Eh\n";
+     cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+     return TCL_ERROR; 
+ }
+
+ if (Tcl_GetDouble(interp, argv[4], &Ev) != TCL_OK) {
+     cerr << "WARNING invalid Ev\n";
+     cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+     return TCL_ERROR; 
+ }
+ 
+ if (Tcl_GetDouble(interp, argv[5], &nuhv) != TCL_OK) {
+     cerr << "WARNING invalid nuhv\n";
+     cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+     return TCL_ERROR; 
+ }
+
+ if (Tcl_GetDouble(interp, argv[6], &nuhh) != TCL_OK) {
+     cerr << "WARNING invalid nuhh\n";
+     cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+     return TCL_ERROR; 
+ }
+
+ if (Tcl_GetDouble(interp, argv[7], &Ghv) != TCL_OK) {
+     cerr << "WARNING invalid Ghv\n";
+     cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+     return TCL_ERROR; 
+ }
+
+        if (argc > 8 && Tcl_GetDouble(interp, argv[8], &rho) != TCL_OK) {
+            cerr << "WARNING invalid rho\n";
+            cerr << "nDMaterial ElasticCrossAnisotropic: " << tag << endl;
+            return TCL_ERROR;   
+        }
+
+ //cout << "Ev" << Ev << " Eh " << Eh << " nuhv " << nuhv << " nuhh "<< nuhh << " Ghv " << Ghv << "rho " <<rho << "\n"; 
+ theMaterial = new ElasticCrossAnisotropic(tag, Eh, Ev, nuhv, nuhh, Ghv, rho);
+    } 
+
+
     // Check argv[1] for J2PlaneStrain material type
     else if ((strcmp(argv[1],"J2Plasticity") == 0)  ||
 	     (strcmp(argv[1],"J2") == 0)) {
