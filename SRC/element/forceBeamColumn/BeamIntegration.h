@@ -18,13 +18,14 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-05-12 23:44:32 $
+// $Revision: 1.5 $
+// $Date: 2003-06-10 00:18:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/BeamIntegration.h,v $
 
 #ifndef BeamIntegration_h
 #define BeamIntegration_h
 
+#include <OPS_Globals.h>
 #include <MovableObject.h>
 
 class Matrix;
@@ -56,6 +57,8 @@ class BeamIntegration : public MovableObject
   virtual int setParameter(const char **argv, int argc, Information &info);
   virtual int updateParameter(int parameterID, Information &info);
   virtual int activateParameter(int parameterID);
+
+  virtual void Print(OPS_Stream &s, int flag = 0) = 0;
 };
 
 #endif
