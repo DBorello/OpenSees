@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\matrix\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\matrix" /I "..\..\..\src\handler" /I "..\..\..\src" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\matrix" /I "..\..\..\src\handler" /I "..\..\..\src" /I "..\..\..\src\nDarray" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\obj\matrix\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\matrix" /I "..\..\..\src\handler" /I "..\..\..\src" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\matrix" /I "..\..\..\src\handler" /I "..\..\..\src" /I "..\..\..\src\nDarray" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -87,19 +87,19 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\basics.cpp
+SOURCE=..\..\..\Src\nDarray\basics.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\BJmatrix.cpp
+SOURCE=..\..\..\Src\nDarray\BJmatrix.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\BJtensor.cpp
+SOURCE=..\..\..\Src\nDarray\BJtensor.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\BJvector.cpp
+SOURCE=..\..\..\Src\nDarray\BJvector.cpp
 # End Source File
 # Begin Source File
 
@@ -111,15 +111,15 @@ SOURCE=..\..\..\SRC\matrix\Matrix.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\nDarray.cpp
+SOURCE=..\..\..\Src\nDarray\nDarray.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\straint.cpp
+SOURCE=..\..\..\Src\nDarray\straint.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\stresst.cpp
+SOURCE=..\..\..\Src\nDarray\stresst.cpp
 # End Source File
 # Begin Source File
 
@@ -131,19 +131,19 @@ SOURCE=..\..\..\SRC\matrix\Vector.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\basics.h
+SOURCE=..\..\..\Src\nDarray\basics.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\BJmatrix.h
+SOURCE=..\..\..\Src\nDarray\BJmatrix.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\BJtensor.h
+SOURCE=..\..\..\Src\nDarray\BJtensor.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\BJvector.h
+SOURCE=..\..\..\Src\nDarray\BJvector.h
 # End Source File
 # Begin Source File
 
@@ -155,19 +155,19 @@ SOURCE=..\..\..\SRC\matrix\Matrix.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\nDarray.h
+SOURCE=..\..\..\Src\nDarray\nDarray.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\straint.h
+SOURCE=..\..\..\Src\nDarray\straint.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\stresst.h
+SOURCE=..\..\..\Src\nDarray\stresst.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\matrix\Tensor.h
+SOURCE=..\..\..\Src\nDarray\Tensor.h
 # End Source File
 # Begin Source File
 
