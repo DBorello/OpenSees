@@ -154,8 +154,11 @@ LAW_LIBS = $(FE)/system_of_eqn/linearSOE/sparseSYM/SymSparseLinSOE.o \
 
 
 GGD_LIBS = $(FE)/element/joint/MP_Joint2D.o \
+	$(FE)/element/joint/MP_Joint3D.o \
 	$(FE)/element/joint/Joint2D.o \
+	$(FE)/element/joint/Joint3D.o \
 	$(FE)/element/joint/TclJoint2dCommand.o \
+	$(FE)/element/joint/TclJoint3dCommand.o \
 	$(FE)/element/joint/BeamColumnJoint2d.o \
 	$(FE)/element/joint/BeamColumnJoint3d.o \
 	$(FE)/element/joint/TclBeamColumnJointCommand.o \
@@ -692,6 +695,7 @@ ANALYSIS_LIBS = $(FE)/analysis/analysis/Analysis.o \
 
 
 ACTOR_LIBS = $(FE)/actor/channel/Channel.o \
+	$(FE)/actor/channel/TCP_Socket.o \
 	$(FE)/actor/message/Message.o \
 	$(FE)/actor/machineBroker/AlphaMachineBroker.o \
 	$(FE)/actor/machineBroker/MillMachineBroker.o \
