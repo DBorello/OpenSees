@@ -2,6 +2,14 @@
  * File:  grcm.c
  * =============
  * Do the general reverse Cuthill-Mckee ordering
+ *
+ * Originally written by:  David R. Mackay
+ *
+ * Modified by:
+ *  Jun Peng (junpeng@stanford.edu)
+ *  Prof. Kincho H. Law
+ *  Stanford University
+ * --------------------
  */
 
 #include <assert.h>
@@ -99,7 +107,7 @@ void genrcm(int neqns, int **padj, int *perm, int *mask, int *xls, int *work)
 void subrcm (int neqns, int root, int **padj, int *perm, 
 	     int *mask, int *xls, int *work)
 {  
-   int num, i, nlvl, ccsize ;
+   int num, nlvl, ccsize ;
    zeroi(neqns, work) ;
 
    num = 0 ;

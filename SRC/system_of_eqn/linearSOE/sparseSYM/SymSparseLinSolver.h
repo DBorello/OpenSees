@@ -1,6 +1,8 @@
 // File: ~/system_of_eqn/linearSOE/LawSolver/SymSparseLinSolver.h
 //
-// Written: Jun Peng
+// Written: Jun Peng  (junpeng@stanford.edu)
+//          Prof. Kincho H. Law
+//          Stanford University
 // Created: 12/98
 // Revision: A
 //
@@ -40,7 +42,6 @@ class SymSparseLinSolver : public LinearSOESolver
   private:
 
     SymSparseLinSOE *theSOE;
-    bool factored;
     
 };
 

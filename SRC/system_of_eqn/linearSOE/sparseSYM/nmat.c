@@ -2,9 +2,16 @@
  * File:  nmat.c
  * =============
  *
- * Changed by Jun Peng (junpeng@leland.stanford.edu)
- * on April 2000.
+ * Changed by Jun Peng on April 2000.
  * altered to improve data access. Use division instead of sqrt.
+ *
+ * Originally written by:  David R. Mackay
+ *
+ * Modified by:
+ *  Jun Peng (junpeng@stanford.edu)
+ *  Prof. Kincho H. Law
+ *  Stanford University
+ * --------------------
  */
 
 
@@ -227,7 +234,7 @@ int pfefct(int neqns, double **penv, double *diag)
  
    input parameters -
         neqns  - number of equations.
-        dia   - diagonal components of l.
+        diag   - diagonal components of l.
         (penv,env) - block diag envelope of l.
         (plnz,lnz) - structure of nonzeros in l.
         (nblks, xblk) - partitioning blocks.
@@ -304,9 +311,9 @@ void pfsslv(int neqns, double *diag, double **penv, int nblks,
          irow = is->row ;
 	 saxpy((rhs+j), ptr, -rhs[irow], (blkend-is->beg)) ;
       }
-/*         ----------------------------------------------------------
+/*    ----------------------------------------------------------
            then upper solve using diag block.
-           ----------------------------------------------------------
+      ----------------------------------------------------------
 */
       pfuslv( blksze, penv+blkbeg, diag+blkbeg, rhs+blkbeg ) ;
    }
@@ -336,10 +343,9 @@ void pflslv (int neqns, double **penv, double *diag, double *rhs)
   int i, iband ;
 
    if ( neqns <= 1 )  return ;
-/*      -----------------------------------------------
+/* -----------------------------------------------
         for each row i, do ...
-        -----------------------------------------------
-*/
+   ----------------------------------------------- */
    for (i = 1; i < neqns; i++)
    {  
       iband = penv[i+1] - penv[i] ;
@@ -394,8 +400,9 @@ void pfuslv(int neqns, double **penv, double *diag, double *rhs)
       ------------------------------------------------
 */
       k = i-1 ;
-      for (ptr = penv[i+1]-1; ptr >= penv[i] ; ptr--,k--)
+      for (ptr = penv[i+1]-1; ptr >= penv[i] ; ptr--,k--) {
          rhs[k] -= ( *ptr * s) ;
+      }
 /*    or saxpy operation */
    }
    return ;

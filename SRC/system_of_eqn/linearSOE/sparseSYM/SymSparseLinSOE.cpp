@@ -1,6 +1,8 @@
 // File: ~/system_of_eqn/linearSOE/symLinSolver/SymSparseLinSOE.C
 //
-// Written: Jun Peng
+// Written: Jun Peng  (junpeng@stanford.edu)
+//          Prof. Kincho H. Law
+//          Stanford University
 // Created: 12/98
 // Revision: A
 //
@@ -13,9 +15,10 @@
 
 
 #include <fstream.h>
+#include <stdlib.h>
 
-#include "SymSparseLinSOE.h"
-#include "SymSparseLinSolver.h"
+#include <SymSparseLinSOE.h>
+#include <SymSparseLinSolver.h>
 #include <Matrix.h>
 #include <Graph.h>
 #include <Vertex.h>
@@ -28,7 +31,7 @@ extern "C" {
    #include "FeStructs.h"
 }
 
-SymSparseLinSOE::SymSparseLinSOE(SymSparseLinSolver &the_Solver)
+SymSparseLinSOE::SymSparseLinSOE(SymSparseLinSolver &the_Solver, int lSparse)
 :LinearSOE(the_Solver, LinSOE_TAGS_SymSparseLinSOE),
  size(0), nnz(0), B(0), X(0), colA(0), rowStartA(0),
  vectX(0), vectB(0), 
@@ -37,28 +40,73 @@ SymSparseLinSOE::SymSparseLinSOE(SymSparseLinSolver &the_Solver)
  begblk(0), first(0) 
 {	
     the_Solver.setLinearSOE(*this);
+    this->LSPARSE = lSparse;
 }
 
 
 SymSparseLinSOE::~SymSparseLinSOE()
 {
-	
-    if (invp != 0) delete [] invp;
-    if (xblk != 0) delete [] xblk;
+
+    int lastRow;
+    if (diag != 0) free(diag);
+
+
     if (penv != 0) {
-        delete [] penv[0];
-        delete [] penv;
+        free(penv[0]);
+        free(penv);
     }
-    if (diag != 0) delete [] diag;
-    if (rowblks != 0) delete [] rowblks;
-    if (begblk != 0) delete [] begblk;
-    if (first != 0) delete [] first;
+
+    OFFDBLK *blkPtr = first;
+    OFFDBLK *tempBlk = first;
+    OFFDBLK *nzBlk = 0;
+
+    if (first->next != 0) {
+       blkPtr = first->next;
+       if (tempBlk != 0) {
+	   if (tempBlk->nz != 0)  free (tempBlk->nz);
+	   free (tempBlk);
+       }
+    }
+
+    lastRow = blkPtr->row;
+
+
+    while (1) {
+       if (blkPtr->beg == size) {
+	 if (blkPtr != 0)  free(blkPtr);
+	   break;
+       }
+       tempBlk = blkPtr;
+       blkPtr = blkPtr->next;
+
+       if (nzBlk != 0) {
+	 if (nzBlk->nz != 0)  free(nzBlk->nz);
+	   free(nzBlk);
+	   nzBlk = 0;
+       }
+       
+       if (blkPtr->row == lastRow) {
+	 //if (tempBlk != 0)  free (tempBlk);
+	   tempBlk = 0;
+       } 
+       else {
+	   lastRow = blkPtr->row;
+	   nzBlk = blkPtr;
+       }
+    }
+
+
+    if (xblk != 0)  free(xblk);
+    if (rowblks != 0)   free(rowblks);
+    if (invp != 0)  free(invp);
+    
     if (B != 0) delete [] B;
     if (X != 0) delete [] X;
     if (vectX != 0) delete vectX;    
     if (vectB != 0) delete vectB;
     if (rowStartA != 0) delete [] rowStartA;
     if (colA != 0) delete [] colA;
+
 }
 
 
@@ -68,7 +116,6 @@ SymSparseLinSOE::getNumEqn(void) const
     return size;
 }
 
-// extern "C" int symFactorization(int *fxadj, int *adjncy, int neq, int LSPARSE);
 
 extern "C" int symFactorization(int *fxadj, int *adjncy, int neq, int LSPARSE, 
 				int **xblkMY, int **invpMY, int **rowblksMY, 
@@ -191,14 +238,11 @@ SymSparseLinSOE::setSize(Graph &theGraph)
     }
     
     // begin to choose different ordering schema.
-    cout<< "Enter DOF Numberer Type: \n";
-    cout<< "[1] Minimum Degree, [2] Nested Dissection, [3] RCM: ";
-    int LSPARSE;
-    cin >>LSPARSE;
-
+   
     // call "C" function to form elimination tree and do the symbolic factorization.
-    nblks = symFactorization(rowStartA, colA, size, LSPARSE,
+    nblks = symFactorization(rowStartA, colA, size, this->LSPARSE,
 			     &xblk, &invp, &rowblks, &begblk, &first, &penv, &diag);
+
     return result;
 }
 
@@ -233,12 +277,11 @@ SymSparseLinSOE::addA(const Matrix &m, const ID &id, double fact)
              newID[ii] = invp[newID[ii]];
     }
        
-   long int  i_eq, j_eq, iadd;
+   long int  i_eq, j_eq;
    int  i, j, nee, lnee;
    int  k, ipos, jpos;
    int  it, jt;
    int  iblk;
-   int  jblk;
    OFFDBLK  *ptr;
    OFFDBLK  *saveblk;
    double  *fpt, *iloc, *loc;
@@ -250,8 +293,8 @@ SymSparseLinSOE::addA(const Matrix &m, const ID &id, double fact)
    for( i = 0, k = 0; i < lnee ; i++ )
    {
        if( newID[i] >= 0 ) {
-	    isort[k] = i;
-	     k++;
+	   isort[k] = i;
+	   k++;
        }
    }
       
@@ -306,7 +349,7 @@ SymSparseLinSOE::addA(const Matrix &m, const ID &id, double fact)
 	        loc = iloc + j_eq ;
 		*loc += m(it,jt) * fact;
             } 
-	    else /* row segment *//**/
+	    else /* row segment */
 	    { 
 	        while((j_eq >= (ptr->next)->beg) && ((ptr->next)->row == i_eq))
 		    ptr = ptr->next ;
@@ -333,7 +376,7 @@ SymSparseLinSOE::addB(const Vector &v, const ID &id, double fact)
     int idSize = id.Size();    
     // check that m and id are of similar size
     if (idSize != v.Size() ) {
-	cerr << "UmfpackGenLinSOE::addB() ";
+	cerr << "SymSparseLinSOE::addB() ";
 	cerr << " - Vector and ID not of similar sizes\n";
 	return -1;
     }    
@@ -383,7 +426,7 @@ SymSparseLinSOE::setB(const Vector &v, double fact)
     if (fact == 0.0)  return 0;
 
     if (v.Size() != size) {
-	cerr << "WARNING BandGenLinSOE::setB() -";
+	cerr << "WARNING SymSparseLinSOE::setB() -";
 	cerr << " incomptable sizes " << size << " and " << v.Size() << endl;
 	return -1;
     }
@@ -408,6 +451,21 @@ SymSparseLinSOE::setB(const Vector &v, double fact)
 void 
 SymSparseLinSOE::zeroA(void)
 {
+    memset(diag, 0, size*sizeof(double));
+
+    int profileSize = penv[size] - penv[0];
+    memset(penv[0], 0, profileSize*sizeof(double));
+    
+    OFFDBLK *blkPtr = first;
+    int rLen = 0;
+    while (1) {
+        if (blkPtr->beg == size)  break;
+	rLen = xblk[rowblks[blkPtr->beg]+1] - blkPtr->beg;
+	memset(blkPtr->nz, 0, rLen*sizeof(double));
+
+	blkPtr = blkPtr->next;
+    }
+
     factored = false;
 }
 	
@@ -430,7 +488,7 @@ const Vector &
 SymSparseLinSOE::getX(void)
 {
     if (vectX == 0) {
-	cerr << "FATAL UmfpackGenLinSOE::getX - vectX == 0";
+	cerr << "FATAL SymSparseLinSOE::getX - vectX == 0";
 	exit(-1);
     }
     return *vectX;
@@ -440,7 +498,7 @@ const Vector &
 SymSparseLinSOE::getB(void)
 {
     if (vectB == 0) {
-	cerr << "FATAL UmfpackGenLinSOE::getB - vectB == 0";
+	cerr << "FATAL SymSparseLinSOE::getB - vectB == 0";
 	exit(-1);
     }        
     return *vectB;

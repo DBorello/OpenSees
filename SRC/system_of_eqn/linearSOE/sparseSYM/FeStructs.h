@@ -4,6 +4,11 @@
  * Data structures for finite element program.
  * This is changed from the original program by only including
  * the define of OFFDBLK.
+ * ----------------------
+ * Written by:
+ * Jun Peng (junpeng@stanford.edu)
+ * Prof. Kincho H. Law
+ * Stanford University
  */
 
 #ifndef FeStructs_h

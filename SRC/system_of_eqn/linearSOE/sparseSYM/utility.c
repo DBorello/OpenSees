@@ -3,6 +3,14 @@
  * ================
  * This file contains miscellaneous utility routines used throughout
  * the finite element program.
+ *
+ * Originally written by:  David R. Mackay
+ *
+ * Modified by:
+ *  Jun Peng (junpeng@stanford.edu)
+ *  Prof. Kincho H. Law
+ *  Stanford University
+ * --------------------
  */
     
 

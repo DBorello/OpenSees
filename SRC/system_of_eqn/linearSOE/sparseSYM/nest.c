@@ -2,6 +2,13 @@
  * File:  nest.c
  * =============
  * Do the nested dissection ordering.
+ * Originally written by:  David R. Mackay
+ *
+ * Modified by:
+ *  Jun Peng (junpeng@stanford.edu)
+ *  Prof. Kincho H. Law
+ *  Stanford University
+ * --------------------
  */
 
 

@@ -3,17 +3,28 @@
  * ================
  * Subroutines in this file form the elimination tree, and postorder
  * the elimination tree.
- * March 1990 David Mackay
+ * March 1990 
+ * Originally written by:  David R. Mackay
+ *
+ * Modified by:
+ *  Jun Peng (junpeng@stanford.edu)
+ *  Prof. Kincho H. Law
+ *  Stanford University
+ * --------------------
  */
 
-
+/* define the static variables for the recursive function */
+static int count = 0 ;
+static int xcount = -1 ;
 
 void etree(int neqns, int **padj, int *perm, int *invp, int *parent, int *ancstr);
 void bntree (int neqns, int *parent, int *fchild, int *sibling);
 void zeroi(int, int *);
-void  minoni( int n, int *v );
+void minoni( int n, int *v );
 void postordr(int i, int *parent, int *fchild, int *sibling, int *oinvp, int *operm, 
 	      int *ninvp, int *nperm, int *list, int *rowblks);
+void initValues();
+
 
 /************************************************************************
  ************  pfordr ..... profile reordering  *************************
@@ -57,9 +68,12 @@ int pfordr(int neqns, int **padj, int *perm, int *invp, int *parent, int *fchild
    bntree ( neqns, parent, fchild, sibling ) ;
    zeroi(neqns, list ) ;
    list[0] = neqns ;
-   minoni(neqns,list) ;
+   minoni(neqns, list);
+
+   /* set the static variables to the right values */
+   initValues();
    postordr ( neqns-1, parent, fchild, sibling, winvp, wperm,
-      invp, perm, list, rowblks  ) ;
+	      invp, perm, list, rowblks  ) ;
 
 
 /* count number of blocks */
@@ -83,6 +97,13 @@ int pfordr(int neqns, int **padj, int *perm, int *invp, int *parent, int *fchild
 
 }
 
+void initValues()
+{
+   count = 0 ;
+   xcount = -1 ;
+}
+
+
 /*
   revised and written in c by David Mackay Jan 1990
   
@@ -92,7 +113,7 @@ int pfordr(int neqns, int **padj, int *perm, int *invp, int *parent, int *fchild
     department of computer science, york university.
  
  ***********************************************************************
- ****************     etree ..... elimination tree     *****************
+ ****************     etree ..... elimination tree    ******************
  ***********************************************************************
  
         purpose -
@@ -120,8 +141,9 @@ void etree(int neqns, int **padj, int *perm, int *invp, int *parent, int *ancstr
 
    mone = -1 ;
 
-   for (i = 0;i<neqns;i++)
-   {  parent[i] |= mone ;
+   for (i = 0; i<neqns;i++)
+   { 
+      parent[i] |= mone ;
       ancstr[i] |= mone ;
       node = perm[i] ;
       for (pt = padj[node ] ; pt < padj[node+1] ; pt++)
@@ -215,9 +237,6 @@ page 231
         list 
  
  ************************************************************************/
- static int count = 0 ;
- static int xcount = -1 ;
-     
 void postordr(int i, int *parent, int *fchild, int *sibling, int *oinvp, int *operm, 
 	      int *ninvp, int *nperm, int *list, int *rowblks)
 {
@@ -226,7 +245,7 @@ void postordr(int i, int *parent, int *fchild, int *sibling, int *oinvp, int *op
 /* ----------------------------------------------------------
       postordr all children
    ----------------------------------------------------------*/
-   if (fchild[i] >= 0)  postordr(fchild[i],parent,fchild,
+   if (fchild[i] >= 0)  postordr(fchild[i], parent, fchild,
       sibling, oinvp, operm, ninvp, nperm, list, rowblks  ) ;
    else
    {  /* add count to list of nodes begining a new block */

@@ -6,7 +6,14 @@
  * for the generalized profile matrix solver
  *
  * Altered to avoid eliminate the realloc calls in setting up pplnz 
- * March 8 1990 David Mackay
+ * March 8 1990 
+ * Originally written by:  David R. Mackay
+ *
+ * Modified by:
+ *  Jun Peng (junpeng@stanford.edu)
+ *  Prof. Kincho H. Law
+ *  Stanford University
+ * --------------------
  */
 
 
@@ -155,6 +162,7 @@ int nodfac(int *perm, int *invp, int **padj, int *ancstr , int *list, int neqns,
    po->next = p ;
    p->next = p ;
    p->bnext = p ;
+
    for (i=0 ; i<=nblks ; i++)
    {
       if (segfirst[i] == NULL) segfirst[i] = p ;
@@ -164,7 +172,7 @@ int nodfac(int *perm, int *invp, int **padj, int *ancstr , int *list, int neqns,
 
    free(len) ;
    free(segprv) ;
-   return ;
+   return 0;
 }
 
 
@@ -176,7 +184,7 @@ int nodfac(int *perm, int *invp, int **padj, int *ancstr , int *list, int neqns,
     purpose - allocate space for the envelope structure
 	      and setup pointers
 
-    input parameters -
+    input parameters -penv
         neqns - no of equations
 	penv - array of pointers to be filled
 	envlen - an array with the lengths of each row.

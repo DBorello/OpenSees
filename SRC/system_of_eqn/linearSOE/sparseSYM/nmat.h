@@ -2,9 +2,14 @@
  * File:  nmat.h
  * =============
  * altered to improve data access
- * Written by:  David Mackay
- *		Kincho Law
- *		Jun Peng
+ *
+ * Originally written by:  David R. Mackay
+ *
+ * Modified by:
+ *  Jun Peng (junpeng@stanford.edu)
+ *  Prof. Kincho H. Law
+ *  Stanford University
+ * --------------------
  */
 
 

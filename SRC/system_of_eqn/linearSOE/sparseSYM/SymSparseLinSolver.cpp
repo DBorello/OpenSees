@@ -1,6 +1,8 @@
 // File: ~/system_of_eqn/linearSOE/symLinSolver/SymSparseLinSolver.C
 //
-// Written: Jun Peng
+// Written: Jun Peng  (junpeng@stanford.edu)
+//          Prof. Kincho H. Law
+//          Stanford University
 // Created: 12/98
 // Revision: A
 //
@@ -21,16 +23,13 @@
 
 extern "C" {
   #include "FeStructs.h"
-  #include "globalVars.h"
-  #include "tim.h"
 }
-
 
 
 
 SymSparseLinSolver::SymSparseLinSolver()
 :LinearSOESolver(SOLVER_TAGS_SymSparseLinSolver),
- theSOE(0), factored(false)
+ theSOE(0)
 {
     // nothing to do.
 }
@@ -66,8 +65,7 @@ SymSparseLinSolver::solve(void)
     int      *rowblks = theSOE->rowblks;
     OFFDBLK  **begblk = theSOE->begblk;
     OFFDBLK  *first = theSOE->first;
-    
-    
+
     int neq = theSOE->size;
 
     // check for quick return
@@ -81,32 +79,30 @@ SymSparseLinSolver::solve(void)
     }
     double *Xptr = theSOE->X;
 
-    timer (FACTOR);
-    if (factored == false) {
+    if (theSOE->factored == false) {
 
         //factor the matrix
         //call the "C" function to do the numerical factorization.
         int factor;
 	factor = pfsfct(neq, diag, penv, nblks, xblk, begblk, first, rowblks);
-	if (factor>0) {
+	if (factor > 0) {
 	    cerr << "In SymSparseLinSolver: error in factorization.\n";
 	    return -1;
 	}
-	factored = true;
+	theSOE->factored = true;
     }
 
-    //do forward and backward substitution.
-    //call the "C" function.
-    timer (SOLVE);
+    // do forward and backward substitution.
+    // call the "C" function.
+
     pfsslv(neq, diag, penv, nblks, xblk, Xptr, begblk);
 
-
-    //Since the X we get by solving AX=B is P*X, we need to reordering
-    //the Xptr to ge the wanted X.
+    // Since the X we get by solving AX=B is P*X, we need to reordering
+    // the Xptr to ge the wanted X.
 
     double *tempX = new double[neq];
     if (tempX == 0) {
-        cerr << "WARNING LawSparseLinSover::SymSparseLinSolver :";
+        cerr << "WARNING SymSparseLinSover::SymSparseLinSolver :";
 	cerr << " ran out of memory for vectors (tempX) ";
 	return -1;
     } 
@@ -120,9 +116,6 @@ SymSparseLinSolver::solve(void)
     }
 	
     delete [] tempX;
-
-    timer (END);
-
     return 0;
 }
 
@@ -146,7 +139,7 @@ SymSparseLinSolver::setLinearSOE(SymSparseLinSOE &theLinearSOE)
 int
 SymSparseLinSolver::sendSelf(int cTAg, Channel &theChannel)
 {
-    // nothing to do
+    // doing nothing
     return 0;
 }
 

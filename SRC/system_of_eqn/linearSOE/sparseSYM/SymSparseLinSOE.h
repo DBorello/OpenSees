@@ -1,6 +1,8 @@
 // File: ~/system_of_eqn/linearSOE/LawSolver/SymSparseLinSOE.h
 //
-// Written: Jun Peng
+// Written: Jun Peng  (junpeng@stanford.edu)
+//          Prof. Kincho H. Law
+//          Stanford University
 // Created: 12/98
 // Revision: A
 //
@@ -29,9 +31,9 @@ class SymSparseLinSolver;
 class SymSparseLinSOE : public LinearSOE
 {
   public:
-    SymSparseLinSOE(SymSparseLinSolver &theSolver);        
+    SymSparseLinSOE(SymSparseLinSolver &theSolver, int lSparse);        
     SymSparseLinSOE(int N, int NNZ, int *rowStartA, int *colA,
-		    SymSparseLinSolver &theSolver);        
+		    SymSparseLinSolver &theSolver, int lSparse);        
 
     ~SymSparseLinSOE();
 
@@ -70,12 +72,14 @@ class SymSparseLinSOE : public LinearSOE
     int Bsize;
     bool factored;
 
-    int 	   nblks;
+    int      LSPARSE;
+    int      nblks;
     int      *xblk,  *invp;
     double   *diag, **penv;
     int      *rowblks;
     OFFDBLK  **begblk;
     OFFDBLK  *first;
+
 };
 
 #endif

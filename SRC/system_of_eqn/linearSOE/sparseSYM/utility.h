@@ -4,6 +4,13 @@
  * This file contains the interface to the utility routines implemented in
  * utility.c.
  *
+ * Originally written by:  David R. Mackay
+ *
+ * Modified by:
+ *  Jun Peng (junpeng@stanford.edu)
+ *  Prof. Kincho H. Law
+ *  Stanford University
+ * --------------------
  */
 
 #ifndef UTILITY_H
