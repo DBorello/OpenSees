@@ -1,12 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// COPYLEFT (C):     :-))
-//``This  source code is Copyrighted in U.S., by the The Regents of the University
-//of California, for an indefinite period, and anybody caught using it without our
-//permission,  will  be  mighty  good friends of ourn, cause we don't give a darn.
-//Hack  it.  Compile it. Debug it. Run it. Yodel it. Enjoy it. We wrote it, that's
-//all we wanted to do.'' bj
-//
+// COPYRIGHT (C):     :-))
 // PROJECT:           Object Oriented Finite Element Program
 // FILE:              TwentyNodeBrick.h
 // CLASS:             TwentyNodeBrick
@@ -59,7 +53,6 @@
 #include <stresst.h>
 #include <straint.h>
 
-#include <NDMaterial.h>
 #include <MatPoint3D.h>
 
 #include <Template3Dep.h>
@@ -156,13 +149,10 @@ class TwentyNodeBrick: public Element
     Node *nd19Ptr;
     Node *nd20Ptr;
 
-
-
-
-    static Matrix K;		// Element stiffness Matrix
-    static Matrix C;		// Element damping matrix
-    static Matrix M;		// Element mass matrix
-    static Vector P;		// Element resisting force vector
+    static Matrix K;    // Element stiffness Matrix
+    static Matrix C;    // Element damping matrix
+    static Matrix M;    // Element mass matrix
+    static Vector P;    // Element resisting force vector
     Vector Q;		// Applied nodal loads
     Vector bf;  	// Body forces
     
@@ -171,9 +161,9 @@ class TwentyNodeBrick: public Element
     double pressure;	// Normal surface traction (pressure) over entire element
     int    order;  	// Order of the quadrature rule
 
-//    Matrix J;		// Jacobian of transformation
-//    Matrix L;		// Inverse of J
-//    Matrix B;		// Strain interpolation matrix
+    //Matrix J;		// Jacobian of transformation
+    //Matrix L;		// Inverse of J
+    //Matrix B;		// Strain interpolation matrix
     
 	
   private:
@@ -193,7 +183,7 @@ class TwentyNodeBrick: public Element
     MatPoint3D ** matpoint;  // pointer to array of Material Points
     
     // this is LM array. This array holds DOFs for this element
-    int  LM[60]; // for 20noded x 3 = 60
+    //int  LM[60]; // for 20noded x 3 = 60
   public:
     
     void incremental_Update(void);
@@ -228,7 +218,7 @@ class TwentyNodeBrick: public Element
     int  get_Brick_Number(void);
 
 
-    int * get_LM(void);
+    //int * get_LM(void);
     //void set_LM(Node * node); // commented out temporarily 09-27-2000 Zhaohui
 
     //these two files are originally in fe.h
@@ -251,8 +241,8 @@ class TwentyNodeBrick: public Element
     void reportshort(char *);
     void reportPAK(char *);
     void reportpqtheta(int);
-    void reportLM(char *);
-    void reportTensor(char *);
+    //void reportLM(char *);
+    Vector reportTensor(char *);
     void reportCIPIC(char *);
     void reportTensorF(FILE *);
 

@@ -1,14 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// COPYLEFT (C):     :-))
-//``This  source code is Copyrighted in U.S., by the The Regents of the University
-//of California, for an indefinite period, and anybody caught using it without our
-//permission,  will  be  mighty  good friends of ourn, cause we don't give a darn.
-//Hack  it.  Compile it. Debug it. Run it. Yodel it. Enjoy it. We wrote it, that's
-//all we wanted to do.'' bj
-//
-//
-//
+// COPYRIGHT (C):     :-))
 // PROJECT:           Object Oriented Finite Element Program
 // FILE:              TwentyNodeBrick.cpp
 // CLASS:             TwentyNodeBrick
@@ -25,7 +17,6 @@
 // PROGRAMMER:        Boris Jeremic, Zhaohui Yang  and Xiaoyan Wu
 // DATE:              Aug. 2001
 // UPDATE HISTORY:
-//																			 Sept 2001 optimized to some extent (static tensors...)
 //
 //
 //
@@ -50,10 +41,10 @@
 #include "TwentyNodeBrick.h"
 #define FixedOrder 3
 
-Matrix TwentyNodeBrick::K(60, 60);
-Matrix TwentyNodeBrick::C(60, 60);
-Matrix TwentyNodeBrick::M(60, 60);
-Vector TwentyNodeBrick::P(60);
+Matrix TwentyNodeBrick::K(60, 60);      
+Matrix TwentyNodeBrick::C(60, 60);      
+Matrix TwentyNodeBrick::M(60, 60);      
+Vector TwentyNodeBrick::P(60);	       
 
 //====================================================================
 // Constructor
@@ -162,7 +153,7 @@ TwentyNodeBrick::TwentyNodeBrick(int element_number,
       connectedExternalNodes( 5) = node_numb_6;
       connectedExternalNodes( 6) = node_numb_7;
       connectedExternalNodes( 7) = node_numb_8;
-
+			      
       connectedExternalNodes( 8) = node_numb_9;
       connectedExternalNodes( 9) = node_numb_10;
       connectedExternalNodes(10) = node_numb_11;
@@ -431,7 +422,7 @@ tensor TwentyNodeBrick::H_3D(double r1, double r2, double r3)
 tensor TwentyNodeBrick::interp_poli_at(double r1, double r2, double r3)
   {
 
-    int dimension[] = {20};
+    int dimension[] = {20}; 
     tensor h(1, dimension, 0.0);
 
 
@@ -700,7 +691,7 @@ tensor TwentyNodeBrick::getStiffnessTensor(void)
 		//09-02-2001 Zhaohui
 		//              incremental_strain =
                 //     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-
+                
 		//incremental_strain.null_indices();
                 //incremental_strain.report("\n incremental_strain tensor at GAUSS point\n");
 
@@ -882,7 +873,7 @@ void TwentyNodeBrick::set_strain_stress_tensor(FILE *fp, double * u)
                 // if set total displ, then it should be elstic material
               		Constitutive =  ( matpoint[where]->matmodel)->getTangentTensor();
 
-              		stress = Constitutive("ijkl") * strain("kl");
+              		stress = Constitutive("ijkl") * strain("kl");  
                 stress.null_indices();
 
                 ::printf("\n  strain tensor at GAUSS point %d \n", where+1);
@@ -1071,7 +1062,7 @@ tensor TwentyNodeBrick::Jacobian_3Dinv(tensor dh)
 ////#############################################################################
 tensor TwentyNodeBrick::Nodal_Coordinates(void)
   {
-    const int dimensions[] = {20,3};
+    const int dimensions[] = {20,3}; 
     tensor N_coord(2, dimensions, 0.0);
 
     //Zhaohui using node pointers, which come from the Domain
@@ -1099,7 +1090,7 @@ tensor TwentyNodeBrick::Nodal_Coordinates(void)
     const Vector &nd18Crds = nd18Ptr->getCrds();
     const Vector &nd19Crds = nd19Ptr->getCrds();
     const Vector &nd20Crds = nd20Ptr->getCrds();
-
+    
     N_coord.val(1,1)=nd1Crds(0); N_coord.val(1,2)=nd1Crds(1); N_coord.val(1,3)=nd1Crds(2);
     N_coord.val(2,1)=nd2Crds(0); N_coord.val(2,2)=nd2Crds(1); N_coord.val(2,3)=nd2Crds(2);
     N_coord.val(3,1)=nd3Crds(0); N_coord.val(3,2)=nd3Crds(1); N_coord.val(3,3)=nd3Crds(2);
@@ -1118,12 +1109,12 @@ tensor TwentyNodeBrick::Nodal_Coordinates(void)
     N_coord.val(14,1)=nd14Crds(0); N_coord.val(14,2)=nd14Crds(1); N_coord.val(14,3)=nd14Crds(2);
     N_coord.val(15,1)=nd15Crds(0); N_coord.val(15,2)=nd15Crds(1); N_coord.val(15,3)=nd15Crds(2);
     N_coord.val(16,1)=nd16Crds(0); N_coord.val(16,2)=nd16Crds(1); N_coord.val(16,3)=nd16Crds(2);
-
+    
     N_coord.val(17,1)=nd17Crds(0); N_coord.val(17,2)=nd17Crds(1); N_coord.val(17,3)=nd17Crds(2);
     N_coord.val(18,1)=nd18Crds(0); N_coord.val(18,2)=nd18Crds(1); N_coord.val(18,3)=nd18Crds(2);
     N_coord.val(19,1)=nd19Crds(0); N_coord.val(19,2)=nd19Crds(1); N_coord.val(19,3)=nd19Crds(2);
     N_coord.val(20,1)=nd20Crds(0); N_coord.val(20,2)=nd20Crds(1); N_coord.val(20,3)=nd20Crds(2);
-
+    
     return N_coord;
 
   }
@@ -1169,7 +1160,7 @@ tensor TwentyNodeBrick::incr_disp(void)
     const Vector &IncrDis14 = nd14Ptr->getIncrDeltaDisp();
     const Vector &IncrDis15 = nd15Ptr->getIncrDeltaDisp();
     const Vector &IncrDis16 = nd16Ptr->getIncrDeltaDisp();
-
+    
     const Vector &IncrDis17 = nd17Ptr->getIncrDeltaDisp();
     const Vector &IncrDis18 = nd18Ptr->getIncrDeltaDisp();
     const Vector &IncrDis19 = nd19Ptr->getIncrDeltaDisp();
@@ -1188,12 +1179,12 @@ tensor TwentyNodeBrick::incr_disp(void)
     increment_disp.val(10,1)=IncrDis10(0); increment_disp.val(10,2)=IncrDis10(1);increment_disp.val(10,3)=IncrDis10(2);
     increment_disp.val(11,1)=IncrDis11(0); increment_disp.val(11,2)=IncrDis11(1);increment_disp.val(11,3)=IncrDis11(2);
     increment_disp.val(12,1)=IncrDis12(0); increment_disp.val(12,2)=IncrDis12(1);increment_disp.val(12,3)=IncrDis12(2);
-
+																						   										   																							   										   																						   										   
     increment_disp.val(13,1)=IncrDis13(0); increment_disp.val(13,2)=IncrDis13(1);increment_disp.val(13,3)=IncrDis13(2);
     increment_disp.val(14,1)=IncrDis14(0); increment_disp.val(14,2)=IncrDis14(1);increment_disp.val(14,3)=IncrDis14(2);
     increment_disp.val(15,1)=IncrDis15(0); increment_disp.val(15,2)=IncrDis15(1);increment_disp.val(15,3)=IncrDis15(2);
     increment_disp.val(16,1)=IncrDis16(0); increment_disp.val(16,2)=IncrDis16(1);increment_disp.val(16,3)=IncrDis16(2);
-
+																						   										   																							   										   																						   										   
     increment_disp.val(17,1)=IncrDis17(0); increment_disp.val(17,2)=IncrDis17(1);increment_disp.val(17,3)=IncrDis17(2);
     increment_disp.val(18,1)=IncrDis18(0); increment_disp.val(18,2)=IncrDis18(1);increment_disp.val(18,3)=IncrDis18(2);
     increment_disp.val(19,1)=IncrDis19(0); increment_disp.val(19,2)=IncrDis19(1);increment_disp.val(19,3)=IncrDis19(2);
@@ -1308,9 +1299,9 @@ tensor TwentyNodeBrick::total_disp(FILE *fp, double * u)
     //    total_disp.val(i+1,3) = TotalTranDis(2);
     //
     //  }
-
+    
     // Need more work
-
+    
     //Zhaohui using node pointers, which come from the Domain
     const Vector &TotDis1 = nd1Ptr->getTrialDisp();
     const Vector &TotDis2 = nd2Ptr->getTrialDisp();
@@ -1347,6 +1338,41 @@ int  TwentyNodeBrick::get_Brick_Number(void)
   //return elem_numb;
   return this->getTag();
 }
+
+//////#############################################################################
+//int * TwentyNodeBrick::get_LM(void)
+//  {
+//    return 0;
+//  }
+
+//Commented out Zhaohui 09-27-2000
+
+//////#############################################################################
+//void TwentyNodeBrick::set_LM(Node * node)
+//  {
+////    unsigned int BrickNumber = this->get_Brick_Number();
+////    this->reportshort("");
+//// for element numbered BrickNumber create LM array (see Bathe pp984
+////    for (int LocalNodeNumber = 1 ; LocalNodeNumber<=20 ; LocalNodeNumber++ )
+//    for (int LocalNodeNumber = 1 ; LocalNodeNumber<=8 ; LocalNodeNumber++ )// for 8noded brick
+//      {
+////        unsigned int global_node_number = b3d[BrickNumber-1].get_global_number_of_node(LocalNodeNumber-1);
+//        unsigned int global_node_number = this->get_global_number_of_node(LocalNodeNumber-1);
+//        LM[3*LocalNodeNumber-3] = node[global_node_number].eqn_tx();
+//        LM[3*LocalNodeNumber-2] = node[global_node_number].eqn_ty();
+//        LM[3*LocalNodeNumber-1] = node[global_node_number].eqn_tz();
+//      }
+//
+//      // ::printf("\n\n");
+//
+////===   this->reportLM("LM");
+////   for (int count01=1;count01<=8;count01++)
+////     {
+////       ::printf("element %4d localNode %4d Globalnode %4d  LM   %4d   %4d   %4d\n", BrickNumber, count01,this->get_global_number_of_node(count01-1),  LM[count01*3-3], LM[count01*3-2], LM[count01*3-1] );
+////     }
+//
+//  }
+
 
 ////#############################################################################
 // returns nodal forces for given stress field in an element
@@ -1450,6 +1476,22 @@ tensor TwentyNodeBrick::nodal_forces(void)
                 ////                integr_type = (matpoint)->operator[](where).integration_type();
                 ////                if ( !strcmp(integr_type,"BakcwardEuler")
 
+                //..   dakle ovde posalji strain_increment jer se stari stress cuva u okviru svake
+                //..   Gauss tacke a samo saljes strain_increment koji ce da se prenese
+                //..   u integracionu rutinu pa ce ta da vrati krajnji napon i onda moze da
+                //..   se pravi ConstitutiveStiffnessTensor.
+                //.. Ustvari posalji sve sto imas ( incremental_strain, start_stress,
+                //.. number_of_subincrements . . . u ovu Constitutive_tensor funkciju
+                //.. pa ona nek ide, u zavisnosti od modela koji se koristi i neka
+                //.. onda tamo u svakoj posebnoj modelskoj funkciji vrati sta treba
+                //.. ( recimo Elastic odmah vraca Eelastic a recimo MRS_Lade prvo
+                //.. pita koji nacin integracije da koristi pa onda u zvisnosti od toga
+                //.. zove funkcuju koja integrali za taj algoritam ( ForwardEuler, BakcwardEuler,
+                //.. SemiBackwardEuler, . . . ) i onda kada funkcija vrati napon onda
+                //.. se opet pita koji je tip integracije bio u pitanju pa pravi odgovarajuci
+                //.. ConstitutiveTensor i vraca ga nazad!
+
+                //                   stress_at_GP = (GPstress)->operator[](where);
                 //stress_at_GP = GPstress[where];
 
 	        //EPState *tmp_eps = (matpoint[where]->matmodel)->getEPS();
@@ -1485,6 +1527,36 @@ tensor TwentyNodeBrick::nodal_forces(void)
 //		if (strcmp(matpoint[where]->matmodel->getType(),"Template3Dep") != 0)
 		   stress_at_GP = matpoint[where]->getStressTensor();
 
+//				 stress_at_GP.report("PROBLEM");
+//				 getchar();
+
+//		else
+//		{
+//	           //Some thing funny happened when getting stress directly from matpoint[where], i have to do it this way!
+//		   EPState *tmp_eps = ((Template3Dep *)(matpoint[where]->matmodel))->getEPS();
+//		   stress_at_GP = tmp_eps->getStress();
+//		   //delete tmp_eps;
+//	       	}
+
+           	//double  p = stress_at_GP.p_hydrostatic();
+                //if ( p < 0.0 )
+	        //{
+	        //  cerr << getTag();
+	        //  cerr << " ***p  =    " << p << endln;
+	        //}
+
+		//cerr << " nodal_force ::: stress_at_GP " << stress_at_GP << endln;
+
+		//}
+		//else if ( tmp_ndm ) { //Elastic case
+             	//    stress_at_GP = (matpoint[where].getNDMat())->getStressTensor();
+		//}
+		//else {
+               	//   g3ErrorHandler->fatal("TwentyNodeBrick::nodal_forces (tag: %d), could not getStress", this->getTag());
+		//   exit(1);
+		//}
+
+                //stress_at_GP.report("\n stress_at_GPtensor at GAUSS point for nodal forces \n");
 
                 // nodal forces See Zienkievicz part 1 pp 108
                 nodal_forces =
@@ -1828,6 +1900,128 @@ tensor TwentyNodeBrick::linearized_nodal_forces(void)
 
   }
 
+//....////#############################################################################
+//....// updates Gauss point stresses and strains from given displacements
+//....void TwentyNodeBrick::update_stress_strain(tensor & displacementsT)
+//....  {
+//....//    int force_dim[] = {20,3};
+//....//    tensor nodal_forces(2,force_dim,0.0);
+//....
+//....    double r  = 0.0;
+//....    double rw = 0.0;
+//....    double s  = 0.0;
+//....    double sw = 0.0;
+//....    double t  = 0.0;
+//....    double tw = 0.0;
+//....
+//....    short where = 0;
+//....    double weight = 0.0;
+//....
+//....    int dh_dim[] = {20,3};
+//....    tensor dh(2, dh_dim, 0.0);
+//....
+//....    stresstensor stress_at_GP(0.0);
+//....    straintensor strain_at_GP(0.0);
+//....
+//....    double det_of_Jacobian = 0.0;
+//....
+//....    tensor Jacobian;
+//....    tensor JacobianINV;
+//....    tensor dhGlobal;
+//....
+//....    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+//....      {
+//....        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+//....        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
+//....
+//....        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+//....          {
+//....            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+//....            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
+//....
+//....            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+//....              {
+//....                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+//....                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
+//....
+//....// this short routine is supposed to calculate position of
+//....// Gauss point from 3D array of short's
+//....                where =
+//....                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+//....
+//....//........................................................
+//....//........................................................
+//....// interpolation functions
+//....                tensor h = b3darray[0].interp_poli_at(r,s,t);
+//....                ::printf("\n\n r = %f, s = %f, t = %f\n", r, s, t);
+//....//  h.print("h");
+//....
+//....// displacements
+//....//....   tensor disp_at_rst = h("i")*displacementsT("ia");
+//....//....   disp_at_rst.print("disp");
+//....
+//....// derivatives of interpolation functions
+//....                dh = dh_drst_at(r,s,t);
+//....//                ::printf("\n\n r = %f, s = %f, t = %f\n", r, s, t);
+//....//  dh.print("dh");
+//....
+//....                Jacobian = b3darray[0].Jacobian_3D(dh);
+//....//                Jacobian.print("J");
+//....
+//....                JacobianINV = b3darray[0].Jacobian_3Dinv(dh);
+//....//                JacobianINV.print("JINV");
+//....
+//....//                det_of_Jacobian = Jacobian.determinant();
+//....//                ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
+//....
+//....// Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+//....                dhGlobal = dh("ij") * JacobianINV("jk");
+//....// straines
+//....//  strain = (dh("ib")*displacements("ia")).symmetrize11();
+//....                strain = (dhGlobal("ib")*displacementsT("ia")).symmetrize11();
+//....//  straintensor strain = dh("ib")*displacements("ia");
+//....                strain.reportshort("\n strain tensor\n");
+//....                strain.null_indices();
+//....
+//....//                tensor E = mmElastic.ElasticStiffness();
+//....
+//....//stresses
+//....                stress = E("ijkl") * strain("kl");
+//....                stress.reportshort("\n\n stress tensor \n");
+//....//...
+//....//........................................................
+//....//........................................................
+//....//........................................................
+//....//........................................................
+//....//........................................................
+//....//........................................................
+//....//........................................................
+//....
+//....
+//....              }
+//....          }
+//....      }
+//....
+//....  }
+
+////#############################################################################
+////#############################################################################
+//double TwentyNodeBrick::get_first_q_ast(void)
+//  {
+//    double ret = matpoint[0].kappa_cone_get();
+//
+//    return ret;
+//
+//  }
+////#############################################################################
+//double TwentyNodeBrick::get_first_etacone(void)
+//  {
+//    double ret = matpoint[0].etacone();
+//
+//    return ret;
+//
+//  }
+//
 
 //#############################################################################
 void TwentyNodeBrick::report(char * msg)
@@ -1976,12 +2170,30 @@ void TwentyNodeBrick::reportpqtheta(int GP_numb)
   }
 
 //#############################################################################
-void TwentyNodeBrick::reportTensor(char * msg)
-  {
+//void TwentyNodeBrick::reportLM(char * msg)
+//  {
+//    if ( msg ) ::printf("%s",msg);
+//    ::printf("Element # %d, LM->", this->get_Brick_Number());
+//    for (int count = 0 ; count < 24 ; count++)
+//      {
+//        ::printf(" %d", LM[count]);
+//      }
+//    ::printf("\n");
+//
+//  }
+
+//#############################################################################
+Vector TwentyNodeBrick::reportTensor(char * msg)
+{
     //    if ( msg ) ::printf("** %s\n",msg);
 
     // special case for 8 nodes only
     // special case for 8 nodes only
+    int count;
+    count = FixedOrder*FixedOrder*FixedOrder;
+    Vector Gsc(count*3+1); //+1: number of Gauss point in element
+    Gsc(0) = count;
+
     double r  = 0.0;
     double s  = 0.0;
     double t  = 0.0;
@@ -1990,9 +2202,10 @@ void TwentyNodeBrick::reportTensor(char * msg)
 
     // special case for 8 nodes only
     static const int dim[] = {3, 20}; // static-> see ARM pp289-290
+    static const int dim27[] = {3, count}; // static-> see ARM pp289-290
     tensor NodalCoord(2, dim, 0.0);
-    tensor matpointCoord(2, dim, 0.0);
-    int h_dim[] = {60,3};   // Xiaoyan changed from {60,3} to {24,3} for 8 nodes
+    tensor matpointCoord(2, dim27, 0.0);
+    int h_dim[] = {60,3};   
     tensor H(2, h_dim, 0.0);
 
     //for (int ncount = 1 ; ncount <= 8 ; ncount++ )
@@ -2021,32 +2234,36 @@ void TwentyNodeBrick::reportTensor(char * msg)
     const Vector &nd2Crds = nd2Ptr->getCrds();
     const Vector &nd3Crds = nd3Ptr->getCrds();
     const Vector &nd4Crds = nd4Ptr->getCrds();
+
     const Vector &nd5Crds = nd5Ptr->getCrds();
     const Vector &nd6Crds = nd6Ptr->getCrds();
     const Vector &nd7Crds = nd7Ptr->getCrds();
     const Vector &nd8Crds = nd8Ptr->getCrds();
-    const Vector &nd9Crds = nd9Ptr->getCrds();
+
+    const Vector &nd9Crds  = nd9Ptr->getCrds();
     const Vector &nd10Crds = nd10Ptr->getCrds();
     const Vector &nd11Crds = nd11Ptr->getCrds();
     const Vector &nd12Crds = nd12Ptr->getCrds();
+
     const Vector &nd13Crds = nd13Ptr->getCrds();
     const Vector &nd14Crds = nd14Ptr->getCrds();
     const Vector &nd15Crds = nd15Ptr->getCrds();
     const Vector &nd16Crds = nd16Ptr->getCrds();
+    
     const Vector &nd17Crds = nd17Ptr->getCrds();
     const Vector &nd18Crds = nd18Ptr->getCrds();
     const Vector &nd19Crds = nd19Ptr->getCrds();
     const Vector &nd20Crds = nd20Ptr->getCrds();
 
-    NodalCoord.val(1,1)=nd1Crds(0); NodalCoord.val(2,1)=nd1Crds(1); NodalCoord.val(3,1)=nd1Crds(2);
-    NodalCoord.val(1,2)=nd2Crds(0); NodalCoord.val(2,2)=nd2Crds(1); NodalCoord.val(3,2)=nd2Crds(2);
-    NodalCoord.val(1,3)=nd3Crds(0); NodalCoord.val(2,3)=nd3Crds(1); NodalCoord.val(3,3)=nd3Crds(2);
-    NodalCoord.val(1,4)=nd4Crds(0); NodalCoord.val(2,4)=nd4Crds(1); NodalCoord.val(3,4)=nd4Crds(2);
-    NodalCoord.val(1,5)=nd5Crds(0); NodalCoord.val(2,5)=nd5Crds(1); NodalCoord.val(3,5)=nd5Crds(2);
-    NodalCoord.val(1,6)=nd6Crds(0); NodalCoord.val(2,6)=nd6Crds(1); NodalCoord.val(3,6)=nd6Crds(2);
-    NodalCoord.val(1,7)=nd7Crds(0); NodalCoord.val(2,7)=nd7Crds(1); NodalCoord.val(3,7)=nd7Crds(2);
-    NodalCoord.val(1,8)=nd8Crds(0); NodalCoord.val(2,8)=nd8Crds(1); NodalCoord.val(3,8)=nd8Crds(2);
-    NodalCoord.val(1,9)=nd9Crds(0); NodalCoord.val(2,9)=nd8Crds(1); NodalCoord.val(3,9)=nd9Crds(2);
+    NodalCoord.val(1, 1)=nd1Crds( 0); NodalCoord.val(2, 1)=nd1Crds( 1); NodalCoord.val(3, 1)=nd1Crds( 2);
+    NodalCoord.val(1, 2)=nd2Crds( 0); NodalCoord.val(2, 2)=nd2Crds( 1); NodalCoord.val(3, 2)=nd2Crds( 2);
+    NodalCoord.val(1, 3)=nd3Crds( 0); NodalCoord.val(2, 3)=nd3Crds( 1); NodalCoord.val(3, 3)=nd3Crds( 2);
+    NodalCoord.val(1, 4)=nd4Crds( 0); NodalCoord.val(2, 4)=nd4Crds( 1); NodalCoord.val(3, 4)=nd4Crds( 2);
+    NodalCoord.val(1, 5)=nd5Crds( 0); NodalCoord.val(2, 5)=nd5Crds( 1); NodalCoord.val(3, 5)=nd5Crds( 2);
+    NodalCoord.val(1, 6)=nd6Crds( 0); NodalCoord.val(2, 6)=nd6Crds( 1); NodalCoord.val(3, 6)=nd6Crds( 2);
+    NodalCoord.val(1, 7)=nd7Crds( 0); NodalCoord.val(2, 7)=nd7Crds( 1); NodalCoord.val(3, 7)=nd7Crds( 2);
+    NodalCoord.val(1, 8)=nd8Crds( 0); NodalCoord.val(2, 8)=nd8Crds( 1); NodalCoord.val(3, 8)=nd8Crds( 2);
+    NodalCoord.val(1, 9)=nd9Crds( 0); NodalCoord.val(2, 9)=nd9Crds( 1); NodalCoord.val(3, 9)=nd9Crds( 2);
     NodalCoord.val(1,10)=nd10Crds(0); NodalCoord.val(2,10)=nd10Crds(1); NodalCoord.val(3,10)=nd10Crds(2);
     NodalCoord.val(1,11)=nd11Crds(0); NodalCoord.val(2,11)=nd11Crds(1); NodalCoord.val(3,11)=nd11Crds(2);
     NodalCoord.val(1,12)=nd12Crds(0); NodalCoord.val(2,12)=nd12Crds(1); NodalCoord.val(3,12)=nd12Crds(2);
@@ -2059,6 +2276,7 @@ void TwentyNodeBrick::reportTensor(char * msg)
     NodalCoord.val(1,19)=nd19Crds(0); NodalCoord.val(2,19)=nd19Crds(1); NodalCoord.val(3,19)=nd19Crds(2);
     NodalCoord.val(1,20)=nd20Crds(0); NodalCoord.val(2,20)=nd20Crds(1); NodalCoord.val(3,20)=nd20Crds(2);
 
+    //NodalCoord.print("NC");		      
 
     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
@@ -2076,10 +2294,11 @@ void TwentyNodeBrick::reportTensor(char * msg)
                 // derivatives of local coordinates with respect to local coordinates
 
                H = H_3D(r,s,t);
+	       //H.print("H");
 
  	       for (int encount=1 ; encount <= nodes_in_brick; encount++ )
-                //	       for (int encount=0 ; encount <= 7 ; encount++ )
-	         {
+               //	       for (int encount=0 ; encount <= 7 ; encount++ )
+	       {
                   //  matpointCoord.val(1,where+1) =+NodalCoord.val(1,where+1) * H.val(encount*3-2,1);
                   //  matpointCoord.val(2,where+1) =+NodalCoord.val(2,where+1) * H.val(encount*3-1,2);
                   //  matpointCoord.val(3,where+1) =+NodalCoord.val(3,where+1) * H.val(encount*3-0,3);
@@ -2087,20 +2306,22 @@ void TwentyNodeBrick::reportTensor(char * msg)
                   //::printf("-- NO nodal, H_val :%d %+.2e %+.2e %+.5e\n", encount,NodalCoord.val(1,encount),H.val(encount*3-2,1),matpointCoord.val(1,where+1) );
                   matpointCoord.val(2,where+1) +=NodalCoord.val(2,encount) * H.val(encount*3-1,2);
                   matpointCoord.val(3,where+1) +=NodalCoord.val(3,encount) * H.val(encount*3-0,3);
+	       }
 
-		  }
+               //::printf("gauss point# %d   %+.6e %+.6e %+.6e \n", where+1,
+               //                               matpointCoord.val(1,where+1),
+               //                               matpointCoord.val(2,where+1),
+               //                               matpointCoord.val(3,where+1));
 
-    ::printf("gauss point# %d   %+.6e %+.6e %+.6e \n", where+1,
-                                                       matpointCoord.val(1,where+1),
-                                                       matpointCoord.val(2,where+1),
-                                                       matpointCoord.val(3,where+1));
-
-    //matpoint[where].reportTensor("");
+	       Gsc(where*3+1) = matpointCoord.val(1,where+1);
+	       Gsc(where*3+2) = matpointCoord.val(2,where+1);
+	       Gsc(where*3+3) = matpointCoord.val(3,where+1);
 
 
               }
           }
       }
+      return Gsc;
 
  }
 
@@ -2238,6 +2459,12 @@ void TwentyNodeBrick::reportTensorF(FILE * fp)
 
  }
 
+//=============================================================================
+//  The following are come from FourNodeQuad.cc	 Xiaoyan 07/06/00
+//  The following are come from FourNodeQuad.cc	 Xiaoyan 07/06/00
+//  The following are come from FourNodeQuad.cc	 Xiaoyan 07/06/00
+//=============================================================================
+
 
 //=============================================================================
 int TwentyNodeBrick::getNumExternalNodes () const
@@ -2308,7 +2535,7 @@ void TwentyNodeBrick::setDomain (Domain *theDomain)
       int Nd17 = connectedExternalNodes(16);
       int Nd18 = connectedExternalNodes(17);
       int Nd19 = connectedExternalNodes(18);
-      int Nd20 = connectedExternalNodes(19);
+      int Nd20 = connectedExternalNodes(19);					 
 
 
       nd1Ptr = theDomain->getNode(Nd1);
@@ -2365,7 +2592,7 @@ void TwentyNodeBrick::setDomain (Domain *theDomain)
       int dofNd19 = nd19Ptr->getNumberDOF();
       int dofNd20 = nd20Ptr->getNumberDOF();
 
-      if (dofNd1  != 3 || dofNd2  != 3 || dofNd3  != 3 || dofNd4  != 3 ||
+      if (dofNd1  != 3 || dofNd2  != 3 || dofNd3  != 3 || dofNd4  != 3 ||  
           dofNd5  != 3 || dofNd6  != 3 || dofNd7  != 3 || dofNd8  != 3 ||
           dofNd9  != 3 || dofNd10 != 3 || dofNd11 != 3 || dofNd12 != 3 ||
           dofNd13 != 3 || dofNd14 != 3 || dofNd15 != 3 || dofNd16 != 3 ||
@@ -2890,6 +3117,54 @@ const Vector TwentyNodeBrick::FormEquiBodyForce(void)
 }
 
 //=============================================================================
+// Setting initial E according to the initial pressure p
+//void TwentyNodeBrick::setInitE(void)
+//{
+//    //Get the coors of each node
+//
+//    const Vector &nd1Crds = nd1Ptr->getCrds();
+//    const Vector &nd2Crds = nd2Ptr->getCrds();
+//    const Vector &nd3Crds = nd3Ptr->getCrds();
+//    const Vector &nd4Crds = nd4Ptr->getCrds();
+//    const Vector &nd5Crds = nd5Ptr->getCrds();
+//    const Vector &nd6Crds = nd6Ptr->getCrds();
+//    const Vector &nd7Crds = nd7Ptr->getCrds();
+//    const Vector &nd8Crds = nd8Ptr->getCrds();
+//
+//    //dir is the ID for vertial direction, e.g. 1 means x-dir is vertical...
+//    double Zavg = nd1Crds( dir-1)+
+//    		   nd2Crds( dir-1)+
+//    		   nd3Crds( dir-1)+
+//    		   nd4Crds( dir-1)+
+//    		   nd5Crds( dir-1)+
+//    		   nd6Crds( dir-1)+
+//    		   nd7Crds( dir-1)+
+//    		   nd8Crds( dir-1);
+//    Zavg = Zavg / 8;
+//
+//    //Estimate the pressure at that depth
+//    double sigma_v = (Zavg - surflevel) * rho * 9.81; //units in SI system
+//    double ko = 0.5;
+//    double p_est = sigma_v*( 2.0*ko+1.0)/3.0;
+//    //cerr << " Initial P " << p_est << endln;
+//
+//    int i;
+//
+//    // Loop over the integration points and set the initial material state
+//    int count  = r_integration_order* s_integration_order * t_integration_order;
+//
+//    //For elastic-isotropic material
+//    if (strcmp(matpoint[i]->matmodel->getType(),"ElasticIsotropic3D") == 0)
+//    {
+//       for (i = 0; i < count; i++)
+//           (matpoint[i]->matmodel)->setElasticStiffness( p_est );
+//    }
+//
+//    //return ;
+//}
+
+
+//=============================================================================
 const Vector &TwentyNodeBrick::getResistingForce ()
 {
     int force_dim[] = {20,3};
@@ -3226,19 +3501,19 @@ Response * TwentyNodeBrick::setResponse (char **argv, int argc, Information &ele
        int count  = r_integration_order* s_integration_order * t_integration_order;
        straintensor pl_stn;
        int plastify = 0;
-
+       
        for (int i = 0; i < count; i++) {
          pl_stn = matpoint[i]->getPlasticStrainTensor();
 	 double  p_plastc = pl_stn.p_hydrostatic();
-
-	 if (  fabs(p_plastc) > 0 ) {
+	 
+	 if (  fabs(p_plastc) > 0 ) { 
 	    plastify = 1;
 	    break;
 	 }
        }
-
-       return new ElementResponse(this, 2, plastify);
-    }
+  
+       return new ElementResponse(this, 2, plastify);    
+    } 
 	/*else if (strcmp(argv[0],"material") == 0 || strcmp(argv[0],"integrPoint") == 0) {
 		int pointNum = atoi(argv[1]);
 		if (pointNum > 0 && pointNum <= 4)
@@ -3258,7 +3533,7 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
        switch (responseID) {
 
 	   case 1:
-	   	return eleInfo.setVector(this->getResistingForce());
+	   	return eleInfo.setVector( this->getResistingForce() );
 
 	   case 2:
        	      {
@@ -3266,21 +3541,40 @@ int TwentyNodeBrick::getResponse (int responseID, Information &eleInfo)
        	        int count  = r_integration_order* s_integration_order * t_integration_order;
        	        straintensor pl_stn;
        	        int plastify = 0;
-
+       	        
        	        for (int i = 0; i < count; i++) {
        	          pl_stn = matpoint[i]->getPlasticStrainTensor();
        	        	 double  p_plastc = pl_stn.p_hydrostatic();
-
-       	        	 if (  fabs(p_plastc) > 0 ) {
+       	        	 
+       	        	 if (  fabs(p_plastc) > 0 ) { 
        	        	    plastify = 1;
        	        	    break;
        	        	 }
        	        }
-	   	eleInfo.setInt( plastify );
-		return plastify;
-
+	   	return eleInfo.setInt( plastify );
+		//return plastify;
+	   
 	      }
-	   /*case 2:
+	   case 3:
+	      {
+       	        int count = r_integration_order* s_integration_order * t_integration_order;
+                stresstensor sts;
+       	        Vector Gsc(81+1);  // count + r_integration_order^3 
+		Gsc = this->reportTensor("Gauss Point Coor.");
+		Vector Info(109);
+		Info(0) = Gsc(0);
+		for (int i = 0; i < count; i++) {
+                  sts = matpoint[i]->getStressTensor();
+	   	  Info(i*4+1) = Gsc(i*3+1);
+	   	  Info(i*4+2) = Gsc(i*3+2);
+	   	  Info(i*4+3) = Gsc(i*3+3);
+	   	  Info(i*4+4) = sts.cval(3,3);//Assign sigma_zz
+		  //cout << Info(i*4+0) << " "<< Info(i*4+1) << " "; 
+		  //cout << Info(i*4+2) << " "<< Info(i*4+3) << "\n "; 
+		}
+ 	   	return eleInfo.setVector( Info );
+	      }
+	   /*case 4:
 	   	return eleInfo.setMatrix(this->getTangentStiff());
 	    */
 	   default:
