@@ -42,8 +42,8 @@ EvolutionLaw_L_Eij::EvolutionLaw_L_Eij( double ad)
 // Copy constructor
 //================================================================================
 
-EvolutionLaw_L_Eij::EvolutionLaw_L_Eij(const EvolutionLaw_L_Eij &LE ) {
-
+EvolutionLaw_L_Eij::EvolutionLaw_L_Eij(const EvolutionLaw_L_Eij &LE ) 
+{
     this->a = LE.geta();
 }
 
