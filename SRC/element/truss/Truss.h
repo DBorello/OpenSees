@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-18 10:40:48 $
+// $Revision: 1.4 $
+// $Date: 2001-03-29 03:51:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.h,v $
                                                                         
                                                                         
@@ -68,7 +68,8 @@ class Truss : public Element
     int commitState(void);
     int revertToLastCommit(void);        
     int revertToStart(void);        
-
+    int update(void);
+    
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);
     const Matrix &getSecantStiff(void);    

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:40:48 $
+// $Revision: 1.3 $
+// $Date: 2001-03-29 03:51:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/TrussSection.cpp,v $
                                                                         
                                                                         
@@ -372,6 +372,8 @@ TrussSection::setDomain(Domain *theDomain)
     // determine the nodal mass for lumped mass approach
     //    double A = theSection->getA();
     M = M * L/2;
+
+    this->update();
 }   	 
 
 
@@ -394,6 +396,33 @@ TrussSection::revertToStart()
 }
 
 
+
+
+int
+TrussSection::update()
+{
+    if (L == 0.0) { // - problem in setDomain() no further warnings
+	return -1;
+    }
+    
+    // determine the current strain given trial displacements at nodes
+    double strain = this->computeCurrentStrain();
+
+    int order = theSection->getOrder();
+    const ID &code = theSection->getType();
+	
+    Vector e (order);
+	
+    int i;
+    for (i = 0; i < order; i++) {
+      if (code(i) == SECTION_RESPONSE_P)
+	e(i) = strain;
+    }
+    
+    return theSection->setTrialSectionDeformation(e);
+}
+
+
 const Matrix &
 TrussSection::getTangentStiff(void)
 {
@@ -402,28 +431,15 @@ TrussSection::getTangentStiff(void)
 	return *theMatrix;
     }
     
-    // determine the current strain given trial displacements at nodes
-    double strain = this->computeCurrentStrain();
-
-	int order = theSection->getOrder();
-	const ID &code = theSection->getType();
+    int order = theSection->getOrder();
+    const ID &code = theSection->getType();
 	
-	Vector e (order);
-	
-	int i;
-	for (i = 0; i < order; i++) {
-		if (code(i) == SECTION_RESPONSE_P)
-			e(i) = strain;
-	}
-	
-	theSection->setTrialSectionDeformation(e);
-    
-	const Matrix &k = theSection->getSectionTangent();
-	double AE = 0.0;
-	for (i = 0; i < order; i++) {
-		if (code(i) == SECTION_RESPONSE_P)
-			AE += k(i,i);
-	}
+    const Matrix &k = theSection->getSectionTangent();
+    double AE = 0.0;
+    for (int i = 0; i < order; i++) {
+      if (code(i) == SECTION_RESPONSE_P)
+	AE += k(i,i);
+    }
 
     // come back later and redo this if too slow
     Matrix &stiff = *theMatrix;
@@ -439,41 +455,7 @@ TrussSection::getTangentStiff(void)
 const Matrix &
 TrussSection::getSecantStiff(void)
 {
-    if (L == 0.0) { // - problem in setDomain() no further warnings
-	theMatrix->Zero();
-	return *theMatrix;
-    }
-    
-    // determine the current strain given trial displacements at nodes
-    double strain = this->computeCurrentStrain();
-
-	int order = theSection->getOrder();
-	const ID &code = theSection->getType();
-	
-	Vector e (order);
-	
-	int i;
-	for (i = 0; i < order; i++) {
-		if (code(i) == SECTION_RESPONSE_P)
-			e(i) = strain;
-	}
-	
-	theSection->setTrialSectionDeformation(e);
-    
-	const Matrix &k = theSection->getSectionTangent();
-	double AE = 0.0;
-	for (i = 0; i < order; i++) {
-		if (code(i) == SECTION_RESPONSE_P)
-			AE += k(i,i);
-	}
-    
-    // come back later and redo this if too slow
-    Matrix &stiff = *theMatrix;
-    Matrix &trans = *t;
-    stiff = trans^trans;
-    stiff *= AE/L;  
-    
-    return *theMatrix;
+  return this->getTangentStiff();
 }
     
 const Matrix &
@@ -608,28 +590,15 @@ TrussSection::getResistingForce()
 	return *theVector;
     }
     
-    // determine the current strain
-    double strain = this->computeCurrentStrain();
-
-	int order = theSection->getOrder();
-	const ID &code = theSection->getType();
+    int order = theSection->getOrder();
+    const ID &code = theSection->getType();
 	
-	Vector e (order);
-	
-	int i;
-	for (i = 0; i < order; i++) {
-		if (code(i) == SECTION_RESPONSE_P)
-			e(i) = strain;
-	}
-	
-	theSection->setTrialSectionDeformation(e);
-    
-	const Vector &s = theSection->getStressResultant();
-	double force = 0.0;
-	for (i = 0; i < order; i++) {
-		if (code(i) == SECTION_RESPONSE_P)
-			force += s(i);
-	}
+    const Vector &s = theSection->getStressResultant();
+    double force = 0.0;
+    for (int i = 0; i < order; i++) {
+      if (code(i) == SECTION_RESPONSE_P)
+	force += s(i);
+    }
 
     for (i=0; i<numDOF; i++)
 	(*theVector)(i) = (*t)(0,i)*force;

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-18 10:40:48 $
+// $Revision: 1.4 $
+// $Date: 2001-03-29 03:51:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -348,6 +348,8 @@ Truss::setDomain(Domain *theDomain)
     
     // determine the nodal mass for lumped mass approach
     M = M * A * L/2;
+    
+    this->update();
 }   	 
 
 
@@ -369,6 +371,14 @@ Truss::revertToStart()
     return theMaterial->revertToStart();
 }
 
+int
+Truss::update(void)
+{
+    // determine the current strain given trial displacements at nodes
+    double strain = this->computeCurrentStrain();
+    return theMaterial->setTrialStrain(strain);
+}
+
 
 const Matrix &
 Truss::getTangentStiff(void)
@@ -378,11 +388,6 @@ Truss::getTangentStiff(void)
 	return *theMatrix;
     }
     
-    // determine the current strain given trial displacements at nodes
-    double strain = this->computeCurrentStrain();
-
-    // get the current E from the material for this strain
-    theMaterial->setTrialStrain(strain);
     double E = theMaterial->getTangent();
 
     // come back later and redo this if too slow
@@ -404,11 +409,9 @@ Truss::getSecantStiff(void)
 	return *theMatrix;
     }
     
-    // determine the current strain given trial displacements at nodes
+    // get the current E from the material for this strain
     double strain = this->computeCurrentStrain();
 
-    // get the current E from the material for this strain
-    theMaterial->setTrialStrain(strain);
     double stress = theMaterial->getStress();    
     double E = stress/strain;
 
@@ -543,12 +546,6 @@ Truss::getResistingForce()
 	return *theVector;
     }
     
-    // determine the current strain
-    double strain = this->computeCurrentStrain();
-
-    // get the current E from the material for this strain
-    theMaterial->setTrialStrain(strain);
-
     // R = Ku - Pext
     // Ku = F * transformation
     double force = A*theMaterial->getStress();
