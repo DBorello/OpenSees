@@ -1,7 +1,8 @@
 #!/home/jeremic/bin/OpenSees.debub
 # jeremic@ucdavis.edu
-# 08 April 2004
-# solid model, 8 node brick, linear elastic
+# 15 April 2004
+# solid model, 8 node brick, inelastic material, testing integrators and
+# constraint equations
 # Examples for the course:  
 # Computational Geomechanics: 
 # Inelastic Finite Elements for Pressure Sensitive Materials  
@@ -38,8 +39,25 @@ fix 4   0 1 1
 #fix 7 1 0 1
 #fix 8 1 0 1
 
-# linear elastic material     tag		  E		  nu	   rho
-nDMaterial ElasticIsotropic3D 1      100  0.2   1.8
+#Elastic-plastic model
+# von Mises model
+set DPys "-VM"
+set DPps "-VM"
+set ES1  "-Leq  0.0"
+set ET1  "-Linear  0.0"
+set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
+    
+# ElasticFlag = 0, Pressure independent Isotropic
+#             = 1, Pressure dendent Isotropic
+#             = 2, Pressure independent Cross Anisotropic
+#             = 3, Pressure dependent Cross Anisotropic
+#      default: 0, Pressure indendent Isotropic 
+    
+set EPS "100.0 100.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp -ElasticFlag 0"
+#
+#
+nDMaterial Template3Dep 1 -YS $DPys -PS $DPps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
+
 
 #            tag     8 nodes          matID  bforce1 bforce2 bforce3   massdensity
 element Brick8N  1  5 6 7 8 1 2 3 4   1      0.0     0.0     -9.81     1.8
@@ -57,24 +75,47 @@ pattern Plain 1 Linear {
 # create the analysis
 # #################################
 
-set lf1 1.0
 
 constraints Penalty 1e9 1e9
 
 
-integrator LoadControl $lf1 
 
-# CHOOSE algorithm
-#set different_algorithms  Linear
-set different_algorithms  Newton
-puts "USING  $different_algorithms ALGORITHM"
+#
+# Different types of load/displacement control
+#
+# 
+# set lf1 0.02
+# integrator LoadControl $lf1 
+# 
+# 
+set dU 0.001
+integrator DisplacementControl  5   3   $dU 
+# 
+
+# set delta_l 0.0075
+# integrator ArcLength delta_l 1.0
 
 
+# set Arclength 0.000001
+# set psi_u 1
+# set psi_f 1
+# set u_ref 1
+# integrator HSConstraint $Arclength $psi_u $psi_f $u_ref
+# 
+
+
+
+
+#
+# Convergence Tests
+#
 # this is needed by Newton 
-#test NormDispIncr 1.0e-8 30 4
-test NormUnbalance 1.0e-8 30 4
+test NormDispIncr 1.0e-6 30 1
+#test NormUnbalance 1.0e-6 30 1
 
-algorithm $different_algorithms
+
+
+algorithm Newton
 
 
 numberer RCM
@@ -86,28 +127,28 @@ analysis Static
 # perform the analysis
 # #################################
 
-for {set i 1} {$i <=3} {incr i} {
- puts $i
- analyze 1
+for {set i 1} {$i <=1} {incr i} {
+    puts $i
+    analyze 1
 
 
-print node 1
-print node 2
-print node 3
-print node 4
+#print node 1
+#print node 2
+#print node 3
+#print node 4
+#print node 5
+#print node 6
+#print node 7
+#print node 8
+##
+##
+#print -ele 1
+  }
+
+
 print node 5
-print node 6
-print node 7
-print node 8
-#
-#
 print -ele 1
 
-
-
-
-}
-
-
-
 wipe
+
+
