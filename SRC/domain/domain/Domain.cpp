@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-05-18 04:51:55 $
+// $Revision: 1.6 $
+// $Date: 2001-08-28 19:05:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -770,7 +770,7 @@ Domain::removeElement(int tag)
   // perform a downward cast to an Element (safe as only Element added to
   // this container, 0 the Elements DomainPtr and return the result of the cast  
   Element *result = (Element *)mc;
-  result->setDomain(0);
+  //  result->setDomain(0);
   return result;
 }
 
@@ -790,7 +790,7 @@ Domain::removeNode(int tag)
   // perform a downward cast to a Node (safe as only Node added to
   // this container and return the result of the cast
   Node *result = (Node *)mc;
-  result->setDomain(0);
+  // result->setDomain(0);
   return result;
 }
 
@@ -811,7 +811,7 @@ Domain::removeSP_Constraint(int tag)
     // perform a downward cast, set the objects domain pointer to 0
     // and return the result of the cast    
     SP_Constraint *result = (SP_Constraint *)mc;
-    result->setDomain(0);
+    // result->setDomain(0);
 
     // should check that theLoad and result are the same    
     return result;
@@ -833,7 +833,7 @@ Domain::removeMP_Constraint(int tag)
     // perform a downward cast, set the objects domain pointer to 0
     // and return the result of the cast        
     MP_Constraint *result = (MP_Constraint *)mc;
-    result->setDomain(0);
+    // result->setDomain(0);
     return result;
 }    
 
@@ -850,7 +850,7 @@ Domain::removeLoadPattern(int tag)
     // perform a downward cast, set the objects domain pointer to 0
     // and return the result of the cast            
     LoadPattern *result = (LoadPattern *)obj;
-    result->setDomain(0);
+    // result->setDomain(0);
 
     //
     // now set the Domain pointer for all loads and SP constraints 
@@ -860,13 +860,13 @@ Domain::removeLoadPattern(int tag)
     NodalLoad *theNodalLoad;
     NodalLoadIter &theNodalLoads = result->getNodalLoads();
     while ((theNodalLoad = theNodalLoads()) != 0) {
-      theNodalLoad->setDomain(0);
+      // theNodalLoad->setDomain(0);
     }
 
     ElementalLoad *theElementalLoad;
     ElementalLoadIter &theElementalLoads = result->getElementalLoads();
     while ((theElementalLoad = theElementalLoads()) != 0) {
-      theElementalLoad->setDomain(0);
+      // theElementalLoad->setDomain(0);
     }
 
     int numSPs = 0;
@@ -874,7 +874,7 @@ Domain::removeLoadPattern(int tag)
     SP_ConstraintIter &theSP_Constraints = result->getSPs();
     while ((theSP_Constraint = theSP_Constraints()) != 0) {
 	numSPs++;
-	theSP_Constraint->setDomain(0);
+	// theSP_Constraint->setDomain(0);
     }
 
     // mark the domain has having changed if numSPs > 0
