@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2003-02-14 23:01:49 $
+// $Revision: 1.16 $
+// $Date: 2003-02-20 08:00:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -243,7 +243,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    // allow user to specify load pattern other than current
 	    loc++;
 	    fileName = argv[loc];
-	    opserr << *argv[loc];
 	    loc++;
 	  }
 	  else {
