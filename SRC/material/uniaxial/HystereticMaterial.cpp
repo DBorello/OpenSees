@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-06-10 23:03:58 $
+// $Revision: 1.7 $
+// $Date: 2002-06-27 00:03:20 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -178,7 +178,6 @@ HystereticMaterial::setTrialStrain(double strain, double strainRate)
 	    positiveIncrement(dStrain);
 	}
 
-	cerr << dStrain << " " << Ttangent << " " << Tstress << endl;
 	TenergyD = CenergyD + 0.5*(Cstress+Tstress)*dStrain;
 
 	return 0;
@@ -480,7 +479,7 @@ HystereticMaterial::sendSelf(int commitTag, Channel &theChannel)
 
   res = theChannel.sendVector(this->getDbTag(), commitTag, data);
   if (res < 0) 
-    cerr << "HysteriticMaterial::sendSelf() - failed to send data\n";
+    cerr << "HystereticMaterial::sendSelf() - failed to send data\n";
 
 
   return res;
@@ -496,7 +495,7 @@ HystereticMaterial::recvSelf(int commitTag, Channel &theChannel,
   res = theChannel.recvVector(this->getDbTag(), commitTag, data);
   
   if (res < 0) {
-      cerr << "HysteriticMaterial::recvSelf() - failed to receive data\n";
+      cerr << "HystereticMaterial::recvSelf() - failed to receive data\n";
       return res;
   }
   else {
