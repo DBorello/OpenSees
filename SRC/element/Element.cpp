@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 03:41:36 $
+// $Revision: 1.4 $
+// $Date: 2001-06-23 05:41:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -134,6 +134,7 @@ Element::addInertiaLoadToUnbalance(const Vector &accel)
   load *= -1.0;
 
   this->addLoad(load);
+	 return 1; //added by jeremic@ucdavis.edu 22June2001 function has int return type!
 }
 
 bool
