@@ -18,15 +18,13 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-04-02 18:47:50 $
+// $Revision: 1.3 $
+// $Date: 2004-01-29 22:59:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/database/MySqlDatastore.h,v $
 
 #ifndef MySqlDatastore_h
 #define MySqlDatastore_h
 
-// File: ~/database/MySqlDatastore.h
-//
 // Written:  fmk
 // Created:  02/02
 //
@@ -44,7 +42,18 @@
 class MySqlDatastore: public FE_Datastore
 {
  public:
-  MySqlDatastore(const char *projectName,
+  MySqlDatastore(const char *databaseName,
+		 Domain &theDomain, 
+		 FEM_ObjectBroker &theBroker,
+		 int dbRun = 0);    
+
+  MySqlDatastore(const char *databaseName,
+		 const char *host,
+		 const char *user,
+		 const char *passwd,
+		 unsigned int port,
+		 const char *socket,
+		 unsigned int clientFlag,
 		 Domain &theDomain, 
 		 FEM_ObjectBroker &theBroker,
 		 int dbRun = 0);    
