@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2002-12-13 21:29:47 $
+// $Revision: 1.13 $
+// $Date: 2002-12-16 20:57:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -545,28 +545,30 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	double dT = 0.0;
 	loc = 0;
 	ID cols(0,16);
+	int numCols = 0;
 	while (loc < argc) {
-	  if (strcmp(argv[loc],"-columns") == 0) {
+	  if ((strcmp(argv[loc],"-columns") == 0) ||
+	      (strcmp(argv[loc],"-cols") == 0) ||
+	      (strcmp(argv[loc],"-col") == 0)) {
 	    if (argc < loc+2)
 	      return TCL_ERROR;
 
 	    int colX, colY;
-	    loc++;
-	    if (Tcl_GetInt(interp, argv[loc], &colX) != TCL_OK)	
+	    if (Tcl_GetInt(interp, argv[loc+1], &colX) != TCL_OK)	
 	      return TCL_ERROR;	
-	    loc++;
-	    if (Tcl_GetInt(interp, argv[loc], &colY) != TCL_OK)	
+
+	    if (Tcl_GetInt(interp, argv[loc+2], &colY) != TCL_OK)	
 	      return TCL_ERROR;	
-	    loc++;
-	    cols[loc] = colX;
-	    cols[loc+1] = colY;
-	    loc+=2;
+
+	    cols[numCols++] = colX;
+	    cols[numCols++] = colY;
+	    loc += 3;
 	  } 
 	  else if (strcmp(argv[loc],"-dT") == 0) {
-	    loc++;
-	    if (Tcl_GetDouble(interp, argv[loc], &dT) != TCL_OK)	
+
+	    if (Tcl_GetDouble(interp, argv[loc+1], &dT) != TCL_OK)	
 	      return TCL_ERROR;	
-	    loc++;	    
+	    loc += 2;	    
 	  }
 	  else
 	    loc++;
