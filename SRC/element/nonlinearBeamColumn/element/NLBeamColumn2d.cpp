@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-01-26 06:51:20 $
+// $Revision: 1.6 $
+// $Date: 2001-01-26 07:29:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -335,7 +335,7 @@ NLBeamColumn2d::commitState()
       return err;
    
    // commit the transformation between coord. systems
-   if ((err = crdTransf->commitState()) == 0)
+   if ((err = crdTransf->commitState()) != 0)
       return err;
       
    // commit the element variables state
@@ -372,7 +372,7 @@ int NLBeamColumn2d::revertToLastCommit()
       return err;
    
    // revert the transformation to last commit
-   if ((err = crdTransf->revertToLastCommit()) == 0)
+   if ((err = crdTransf->revertToLastCommit()) != 0)
       return err;
      
    // revert the element state to last commit
