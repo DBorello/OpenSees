@@ -38,17 +38,6 @@
 
 #include <PBowlLoading.h>
 
-#include <Domain.h>
-#include <NodeIter.h>
-#include <Node.h>
-#include <ElementIter.h>
-#include <Element.h>
-#include <stdlib.h>
-#include <Channel.h>
-#include <ErrorHandler.h>
-
-#include <fstream.h>
-#include <iostream.h>
 
 
 PBowlLoading::PBowlLoading()
