@@ -6,6 +6,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/material/uniaxial; $(MAKE);
 	@$(CD) $(FE)/material/nD; $(MAKE);
 	@$(CD) $(FE)/material/section; $(MAKE);
+	@$(CD) $(FE)/material/yieldSurface; $(MAKE);
 
 # Miscellaneous
 
@@ -19,6 +20,7 @@ spotless: clean
 	@$(CD) $(FE)/material/uniaxial; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD; $(MAKE) wipe;
 	@$(CD) $(FE)/material/section; $(MAKE) wipe;
+	@$(CD) $(FE)/material/yieldSurface; $(MAKE) wipe;
 
 wipe: spotless
 
