@@ -89,7 +89,10 @@ ERRORHANDLER_LIBS = $(FE)/handler/ErrorHandler.o \
 	$(FE)/handler/ConsoleErrorHandler.o 
 
 
-JERMANIC_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o 
+JERMANIC_LIBS = 	$(FE)/material/nD/ElasticIsotropic3D.o  \
+	$(FE)/material/nD/Template3Dep/MatPoint3D.o \
+	$(FE)/element/8nbrick/EightNodeBrick.o \
+	$(FE)/element/8nbrick/TclEightNodeBrickCommand.o 
 
 ZHY_LIBS =	$(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
 	$(FE)/material/nD/soil/MultiYieldSurface.o \
