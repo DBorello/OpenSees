@@ -25,8 +25,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2003-04-11 18:08:28 $
+// $Revision: 1.30 $
+// $Date: 2003-08-29 00:25:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/TclModelBuilderNDMaterialCommand.cpp,v $
                                                                        
                                                                       
@@ -462,7 +462,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     // Pressure Dependend Multi-yield, by ZHY
     else if (strcmp(argv[1],"PressureDependMultiYield") == 0) {
 	const int numParam = 15; 
-	const int totParam = 22;
+	const int totParam = 24;
 	int tag;  
 	double param[totParam];
  	param[15] = 20;
@@ -471,7 +471,9 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	param[18] = 0.02;
 	param[19] = 0.7;
 	param[20] = 101.;
-	param[21] = .5;
+	param[21] = .3;
+	param[22] = 0.;
+	param[23] = 1.;
 
 	char * arg[] = {"nd", "rho", "refShearModul", 
 		  "refBulkModul", "frictionAng", 
@@ -481,7 +483,8 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 			"liquefactionParam1", "liquefactionParam2", 
 			"liquefactionParam4", "numberOfYieldSurf (=20)", 
 			"e (=0.6)", "volLimit1 (=0.9)", "volLimit2 (=0.02)", 
-			"volLimit3 (=0.7)", "Atmospheric pressure (=101)", "cohesi (=.5)"};
+			"volLimit3 (=0.7)", "Atmospheric pressure (=101)", "cohesi (=.5)",
+	        "Hv (=0)", "Pv (=1.)" };
 	if (argc < (3+numParam)) {
 	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
@@ -520,8 +523,8 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 		      opserr << "WARNING invalid " << arg[i-3] << "\n";
 		      opserr << "nDMaterial PressureIndependMultiYield: " << tag << endln;
 		      return TCL_ERROR;	
-				}
-  }
+		  }
+	}
   
 	if (gredu != 0) {
 	  for (int i=19+int(2*param[15]); i<argc; i++) 
@@ -530,14 +533,14 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 		      opserr << "nDMaterial PressureDependMultiYield: " << tag << endln;
 		      return TCL_ERROR;	
 			}
-  } else {
+	} else {
 	  for (int i=19; i<argc; i++) 
 	    if (Tcl_GetDouble(interp, argv[i], &param[i-3]) != TCL_OK) {
 		      opserr << "WARNING invalid " << arg[i-3-int(2*param[15])] << "\n";
 		      opserr << "nDMaterial PressureDependMultiYield: " << tag << endln;
 		      return TCL_ERROR;	
-			}
-  } 
+		}
+	} 
 
 	PressureDependMultiYield * temp =
 	    new PressureDependMultiYield (tag, param[0], param[1], param[2], 
@@ -546,7 +549,7 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 					  param[9], param[10], param[11], 
 					  param[12], param[13], param[14], 
 					  param[15], gredu, param[16], param[17], 
-					  param[18], param[19], param[20], param[21]);
+					  param[18], param[19], param[20], param[21], param[22], param[23]);
 					  
 	   theMaterial = temp;	
 	   if (gredu != 0) delete [] gredu;
@@ -555,8 +558,8 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
     // Fluid Solid Porous, by ZHY
     else if (strcmp(argv[1],"FluidSolidPorous") == 0) {
 
-	int tag;  double param[3]; 	
-	char * arg[] = {"nd", "soilMatTag", "combinedBulkModul"};
+	int tag;  double param[4]; 	
+	char * arg[] = {"nd", "soilMatTag", "combinedBulkModul", "Atmospheric pressure"};
 	if (argc < 6) {
 	    opserr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
@@ -585,9 +588,20 @@ TclModelBuilderNDMaterialCommand (ClientData clientData, Tcl_Interp *interp, int
 	      return TCL_ERROR;	
 	}
 
+	param[3] = 101.;
+	if (argc == 7) {
+	  if (Tcl_GetDouble(interp, argv[6], &param[3] ) != TCL_OK) {
+	      opserr << "WARNING invalid " << arg[3] << "\n";
+	      opserr << "nDMaterial FluidSolidPorous: " << tag << endln;
+	      return TCL_ERROR;	
+	  }
+	}
+
 	theMaterial = new FluidSolidPorousMaterial (tag, param[0], *soil, 
-						    param[2]);
+						    param[2],param[3]);
     }	    
+
+
     else if (strcmp(argv[1],"Template3Dep") == 0) {
       theMaterial = TclModelBuilder_addTemplate3Dep(clientData, interp, argc, argv, 
 						    theTclBuilder, 2);
