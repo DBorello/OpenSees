@@ -37,8 +37,8 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\..\lib"
-# PROP Intermediate_Dir "..\..\obj\system"
+# PROP Output_Dir "..\..\lib\release"
+# PROP Intermediate_Dir "..\..\obj\system\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\system_of_eqn\linearSOE\sparseSYM" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\system_of_eqn\eigenSOE" /I "..\..\..\src\handler" /I "..\..\..\symSparse" /I "..\..\..\src\analysis\model\simple" /I "..\..\..\src\system_of_eqn\linearSOE\umfGEN" /I "..\..\..\src\system_of_eqn\linearSOE\fullGEN" /I "..\..\..\src\system_of_eqn\linearSOE\sparseGEN" /I "..\..\..\src\system_of_eqn\linearSOE\bandSPD" /I "..\..\..\src\system_of_eqn\linearSOE\bandGEN" /I "..\..\..\src\domain\domain" /I "..\..\..\src\analysis\model" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\actor\channel" /I "..\..\..\src\tagged" /I "..\..\..\src\graph\graph" /I "..\..\..\src\system_of_eqn\linearSOE\profileSPD" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\actor\actor" /I "..\..\..\src\system_of_eqn" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
@@ -61,8 +61,8 @@ LIB32=link.exe -lib
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\..\lib"
-# PROP Intermediate_Dir "..\..\obj\system"
+# PROP Output_Dir "..\..\lib\debug"
+# PROP Intermediate_Dir "..\..\obj\system\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\system_of_eqn\linearSOE\sparseSYM" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\analysis\fe_ele" /I "..\..\..\src\analysis\dof_grp" /I "..\..\..\src\system_of_eqn\eigenSOE" /I "..\..\..\src\handler" /I "..\..\..\symSparse" /I "..\..\..\src\analysis\model\simple" /I "..\..\..\src\system_of_eqn\linearSOE\umfGEN" /I "..\..\..\src\system_of_eqn\linearSOE\fullGEN" /I "..\..\..\src\system_of_eqn\linearSOE\sparseGEN" /I "..\..\..\src\system_of_eqn\linearSOE\bandSPD" /I "..\..\..\src\system_of_eqn\linearSOE\bandGEN" /I "..\..\..\src\domain\domain" /I "..\..\..\src\analysis\model" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\actor\channel" /I "..\..\..\src\tagged" /I "..\..\..\src\graph\graph" /I "..\..\..\src\system_of_eqn\linearSOE\profileSPD" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\actor\actor" /I "..\..\..\src\system_of_eqn" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "_WIN32" /FR /FD /GZ /c

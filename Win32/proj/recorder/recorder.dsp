@@ -37,11 +37,11 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\..\lib"
-# PROP Intermediate_Dir "..\..\obj\recorder"
+# PROP Output_Dir "..\..\lib\release"
+# PROP Intermediate_Dir "..\..\obj\recorder\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\material" /I "..\..\..\src\recorder\response" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\handler" /I "..\..\..\src\renderer" /I "..\..\..\src\tcl" /I "..\..\..\src\actor\channel" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\database" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src" /I "..\..\..\src\recorder" /I "..\..\..\src\domain\node" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\material" /I "..\..\..\src\recorder\response" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\handler" /I "..\..\..\src\renderer" /I "..\..\..\src\tcl" /I "..\..\..\src\actor\channel" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\database" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src" /I "..\..\..\src\recorder" /I "..\..\..\src\domain\node" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -61,11 +61,11 @@ LIB32=link.exe -lib
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\..\lib"
-# PROP Intermediate_Dir "..\..\obj\recorder"
+# PROP Output_Dir "..\..\lib\debug"
+# PROP Intermediate_Dir "..\..\obj\recorder\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\domain\pattern" /I "c:\Program Files\tcl\include" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\material" /I "..\..\..\src\recorder\response" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\handler" /I "..\..\..\src\renderer" /I "..\..\..\src\tcl" /I "..\..\..\src\actor\channel" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\database" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src" /I "..\..\..\src\recorder" /I "..\..\..\src\domain\node" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\domain\pattern" /I "c:\Program Files\tcl\include" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\material" /I "..\..\..\src\recorder\response" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\handler" /I "..\..\..\src\renderer" /I "..\..\..\src\tcl" /I "..\..\..\src\actor\channel" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\database" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src" /I "..\..\..\src\recorder" /I "..\..\..\src\domain\node" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -85,6 +85,10 @@ LIB32=link.exe -lib
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+# Begin Source File
+
+SOURCE=..\..\..\SRC\recorder\AlgorithmIncrements.cpp
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\recorder\DatastoreRecorder.cpp
@@ -113,6 +117,10 @@ SOURCE=..\..\..\SRC\recorder\TclRecorderCommands.cpp
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=..\..\..\SRC\recorder\AlgorithmIncrements.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\recorder\DatastoreRecorder.h

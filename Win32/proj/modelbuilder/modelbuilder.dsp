@@ -37,8 +37,8 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\..\lib"
-# PROP Intermediate_Dir "..\..\obj\modelbuilder"
+# PROP Output_Dir "..\..\lib\release"
+# PROP Intermediate_Dir "..\..\obj\modelbuilder\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD CPP /nologo /MLd /W3 /GX /O2 /I "..\..\..\src\coordTransformation" /I "..\..\..\src\handler" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\domain\load" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\element\beam3d" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\element\beam2d" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
@@ -61,8 +61,8 @@ LIB32=link.exe -lib
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\..\lib"
-# PROP Intermediate_Dir "..\..\obj\modelbuilder"
+# PROP Output_Dir "..\..\lib\debug"
+# PROP Intermediate_Dir "..\..\obj\modelbuilder\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\coordTransformation" /I "..\..\..\src\handler" /I "..\..\..\src\domain\pattern" /I "..\..\..\src\domain\load" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\element\beam3d" /I "..\..\..\src" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\element\beam2d" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c

@@ -37,8 +37,8 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\..\lib"
-# PROP Intermediate_Dir "..\..\obj\material"
+# PROP Output_Dir "..\..\lib\release"
+# PROP Intermediate_Dir "..\..\obj\material\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
@@ -61,8 +61,8 @@ LIB32=link.exe -lib
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\..\lib"
-# PROP Intermediate_Dir "..\..\obj\material"
+# PROP Output_Dir "..\..\lib\debug"
+# PROP Intermediate_Dir "..\..\obj\material\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD CPP /nologo /W3 /GX /ZI /Od /I "c:\Program Files\tcl\include" /I "..\..\..\src\renderer" /I "..\..\..\src\material\nD\soil" /I "..\..\..\src\material\nD\template3dep" /I "..\..\..\src\recorder\response" /I "..\..\..\src\material\backbone" /I "..\..\..\src\material\state" /I "..\..\..\src\material\state\strength" /I "..\..\..\src\material\state\deformation" /I "..\..\..\src\material\state\stiffness" /I "..\..\..\src\material\section\repres\section" /I "..\..\..\src\material\section\repres\cell" /I "..\..\..\src\material\section\repres\patch" /I "..\..\..\src\material\section\repres\reinfBar" /I "..\..\..\src\material\section\repres\reinfLayer" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\fiber" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\material\section" /I "..\..\..\src\handler" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\material\nD" /I "..\..\..\src\element" /I "..\..\..\src\actor\channel" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\domain\component" /I "..\..\..\src\material" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\material\nd\template3dep" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "MHS_INSURE" /FR /FD /GZ /c
@@ -224,6 +224,14 @@ SOURCE=..\..\..\SRC\material\nD\ElasticIsotropicPlaneStress2D.cpp
 
 SOURCE=..\..\..\SRC\material\nD\ElasticIsotropicPlaneStress2D.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\ElasticIsotropicPlateFiber.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\ElasticIsotropicPlateFiber.h
+# End Source File
 # End Group
 # Begin Group "j2Plasticity"
 
@@ -259,6 +267,14 @@ SOURCE=..\..\..\SRC\material\nD\J2Plasticity.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\nD\J2Plasticity.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\J2PlateFiber.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\J2PlateFiber.h
 # End Source File
 # Begin Source File
 
@@ -643,6 +659,22 @@ SOURCE=..\..\..\SRC\material\section\fiber\UniaxialFiber3d.h
 # End Group
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\section\ElasticMembranePlateSection.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\section\ElasticMembranePlateSection.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\section\ElasticPlateSection.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\section\ElasticPlateSection.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\section\ElasticSection2d.cpp
 # End Source File
 # Begin Source File
@@ -667,6 +699,22 @@ SOURCE=..\..\..\SRC\material\section\FiberSection.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\section\FiberSection2d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\section\FiberSection2d.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\section\FiberSection3d.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\section\FiberSection3d.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\section\GenericSection1d.cpp
 # End Source File
 # Begin Source File
@@ -680,6 +728,14 @@ SOURCE=..\..\..\SRC\material\section\GenericSectionNd.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\section\GenericSectionNd.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\section\MembranePlateFiberSection.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\section\MembranePlateFiberSection.h
 # End Source File
 # Begin Source File
 
