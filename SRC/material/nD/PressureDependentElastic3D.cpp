@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $                                                              
-// $Date: 2001-07-21 20:14:49 $                                     
+// $Revision: 1.2 $                                                              
+// $Date: 2001-07-25 19:58:14 $                                     
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PressureDependentElastic3D.cpp,v $
 
 //Boris Jeremic and Zhaohui Yang ___ 07-07-2001
@@ -30,10 +30,21 @@
 #include <Channel.h>
 #include <Tensor.h>
 
+
+ Matrix PressureDependentElastic3D::D(6,6);			 // global for ElasticIsotropic3D only, efficiency improved 
+ Vector PressureDependentElastic3D::sigma(6);	 // global for ElasticIsotropic3D only, efficiency improved  
+
+
 PressureDependentElastic3D::PressureDependentElastic3D
-(int tag, double E, double nu, double expp, double pr, double pop):
+(int tag, 
+ double E, 
+ double nu, 
+ double rho, 
+ double expp, 
+ double pr, 
+ double pop):
  ElasticIsotropicMaterial (tag, ND_TAG_PressureDependentElastic3D, E, nu),
- sigma(6), D(6,6), epsilon(6), exp(expp), p_ref(pr), po(pop) 
+ epsilon(6), exp(expp), p_ref(pr), po(pop) 
 {
 	// Set up the elastic constant matrix for 3D elastic isotropic 
 	D.Zero();
@@ -44,7 +55,7 @@ PressureDependentElastic3D::PressureDependentElastic3D
 
 PressureDependentElastic3D::PressureDependentElastic3D():
  ElasticIsotropicMaterial (0, ND_TAG_PressureDependentElastic3D, 0.0, 0.0),
- sigma(6), D(6,6), epsilon(6)
+ epsilon(6)
 {
        Dt = tensor( 4, def_dim_4, 0.0 );
 }

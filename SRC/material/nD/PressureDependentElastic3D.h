@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $                                                              
-// $Date: 2001-07-21 20:14:49 $                                                                  
+// $Revision: 1.2 $                                                              
+// $Date: 2001-07-25 19:58:14 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PressureDependentElastic3D.h,v $                                                                
 // Pressure dependent elastic isotropic material
                                                                         
@@ -40,7 +40,14 @@
 class PressureDependentElastic3D : public ElasticIsotropicMaterial
 {
   public:
-    PressureDependentElastic3D (int tag, double E, double nu, double expp = 0.6, double pr = 100.0, double pop = 0.5);
+    PressureDependentElastic3D (int tag, 
+			                             double E = 0.0, 
+																															 double nu = 0.0, 
+																															 double rho = 0.0, 
+																															 double expp = 0.6, 
+																															 double pr = 100.0, 
+																															 double pop = 0.5);
+
     PressureDependentElastic3D ();
     ~PressureDependentElastic3D ();
 
@@ -83,8 +90,8 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
   protected:
 
   private:
-    Vector sigma;		// Stress vector
-    Matrix D;			// Elastic constants
+    static Vector sigma;		// Stress vector
+    static Matrix D;			// Elastic constants
     Vector epsilon;		// Strain vector
 
     double exp;                 // exponent usually 0.6
