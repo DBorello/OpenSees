@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2003-08-29 19:57:50 $
+// $Revision: 1.22 $
+// $Date: 2003-10-07 22:38:00 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -886,7 +886,7 @@ TclModelBuilder_addElement(ClientData clientData, Tcl_Interp *interp,
 
 extern int
 TclModelBuilderUniaxialMaterialCommand (ClientData clienData, Tcl_Interp *interp, int argc,
-				 TCL_Char **argv, TclModelBuilder *theTclBuilder);
+				 TCL_Char **argv, TclModelBuilder *theTclBuilder, Domain *theDomain);
 
 int
 TclModelBuilder_addUniaxialMaterial(ClientData clientData, Tcl_Interp *interp, 
@@ -894,7 +894,7 @@ TclModelBuilder_addUniaxialMaterial(ClientData clientData, Tcl_Interp *interp,
                           
 {
   return TclModelBuilderUniaxialMaterialCommand(clientData, interp, 
-						argc, argv, theTclBuilder);
+						argc, argv, theTclBuilder, theTclDomain);
 }
 
 extern int
