@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-30 01:42:34 $
+// $Revision: 1.3 $
+// $Date: 2001-09-18 00:48:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/ArcLength.cpp,v $
                                                                         
                                                                         
@@ -66,6 +66,8 @@ ArcLength::~ArcLength()
 	delete deltaU;
     if (deltaUstep != 0)
 	delete deltaUstep;
+    if (deltaUbar != 0)
+	delete deltaUbar;
     if (phat != 0)
 	delete phat;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-05-30 01:42:35 $
+// $Revision: 1.4 $
+// $Date: 2001-09-18 00:48:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/MinUnbalDispNorm.cpp,v $
                                                                         
                                                                         
@@ -67,6 +67,8 @@ MinUnbalDispNorm::~MinUnbalDispNorm()
 	delete deltaU;
     if (deltaUstep != 0)
 	delete deltaUstep;
+    if (deltaUbar != 0)
+	delete deltaUbar;
     if (phat != 0)
 	delete phat;
 }
