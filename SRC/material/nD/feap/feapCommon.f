@@ -4,7 +4,7 @@ c .....................................................................
 c     feapCommon - a fortran subroutine to fill the named common block
 c              used by Feap material models
 c     ADD MORE ARGUMENTS AS NEEDED!!!
-d
+c
 c     written:  MHS
 c     created:  June 2001
 c .....................................................................
