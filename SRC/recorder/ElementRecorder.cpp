@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2002-04-03 00:06:20 $
+// $Revision: 1.9 $
+// $Date: 2002-07-29 21:03:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -92,7 +92,9 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
       cerr << "WARNING - ElementRecorder::ElementRecorder()";
       cerr << " - could not open file " << fileName << endl;
     }    
-  } 
+  }
+  else
+	  fileName = 0;
 }
 
 
