@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-10-25 21:33:41 $
+// $Revision: 1.6 $
+// $Date: 2002-10-03 18:01:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.cpp,v $
                                                                         
                                                                         
@@ -70,6 +70,39 @@ SectionForceDeformation::getSectionFlexibility ()
 	}
 
 	const Matrix &k = this->getSectionTangent();
+
+	switch(order) {
+	case 1:
+		if (k(0,0) != 0.0)
+			(*fDefault)(0,0) = 1.0/k(0,0);
+		break;
+	case 2:
+		invert2by2Matrix(k,*fDefault);
+		break;
+	case 3:
+		invert3by3Matrix(k,*fDefault);
+		break;
+	default:
+		invertMatrix(order,k,*fDefault);
+		break;
+	}
+
+	return *fDefault;
+}
+
+const Matrix&
+SectionForceDeformation::getInitialFlexibility ()
+{
+	int order = this->getOrder();
+
+	if (fDefault == 0) {		
+		fDefault = new Matrix(order,order);
+		if (fDefault == 0)
+			g3ErrorHandler->fatal("%s -- failed to allocate flexibility matrix",
+				"SectionForceDeformation::getInitialFlexibility");
+	}
+
+	const Matrix &k = this->getInitialTangent();
 
 	switch(order) {
 	case 1:

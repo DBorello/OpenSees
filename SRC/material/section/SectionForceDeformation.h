@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-06-19 18:20:46 $
+// $Revision: 1.7 $
+// $Date: 2002-10-03 18:01:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/SectionForceDeformation.h,v $
                                                                         
                                                                         
@@ -70,6 +70,7 @@ class SectionForceDeformation : public Material
 		virtual const Matrix &getSectionTangent (void) = 0;
 		virtual const Matrix &getInitialTangent (void) = 0;
 		virtual const Matrix &getSectionFlexibility (void);
+		virtual const Matrix &getInitialFlexibility (void);
 		
 		virtual double getRho(void);
  
