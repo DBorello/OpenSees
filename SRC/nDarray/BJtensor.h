@@ -1,6 +1,6 @@
 
-// $Revision: 1.1 $                                                              
-// $Date: 2001-08-23 16:45:51 $                                                                  
+// $Revision: 1.2 $                                                              
+// $Date: 2002-01-15 20:56:50 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/nDarray/BJtensor.h,v $                                                                
 
 //#############################################################################
@@ -147,6 +147,8 @@ class BJtensor : public nDarray
 //K    int BJtensor::uncontracted_ind(int *, int *, int);
     int contracted_ind(char *, char *, int *, int *, int , int );
     int uncontracted_ind(int *, int *, int);
+
+
 
 };
 // GLOBAL
