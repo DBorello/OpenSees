@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:24 $
+// $Revision: 1.2 $
+// $Date: 2001-05-16 04:19:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.cpp,v $
                                                                         
                                                                         
@@ -42,6 +42,8 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <ctype.h>
+#include <ID.h>
+
 #ifdef _WIN32
 #include <OpenGLRenderer.h>
 #else
@@ -55,7 +57,7 @@
 FilePlotter::FilePlotter(char *_fileName, 
 			 char *windowTitle, 
 			 int xLoc, int yLoc, int width, int height)
-  :theMap(0), theRenderer(0), colX(0), colY(1)
+  :theMap(0), theRenderer(0), cols(0)
 {
 
   // create the window in which we plot on the screen
@@ -76,6 +78,7 @@ FilePlotter::FilePlotter(char *_fileName,
 
   // copy the file name
   strcpy(fileName, _fileName);    
+
 }
 
 FilePlotter::~FilePlotter()
@@ -85,6 +88,9 @@ FilePlotter::~FilePlotter()
   // and set pointer to NULL
   delete theMap;
   delete theRenderer;
+
+  if (cols != 0)
+    delete cols;
 }
     
 int 
@@ -123,7 +129,7 @@ FilePlotter::plotFile(void)
      *             4) close the file
      */
   
-  // open file
+     // open file
     ifstream theFile; 
     theFile.open(fileName, ios::in);
     if (!theFile) {
@@ -146,16 +152,20 @@ FilePlotter::plotFile(void)
       if (!isspace(c)) {
 	theFile.putback(c);
 
-	if (numLineEntries == colX) {
-	  theFile >> xValue;
-	  if (xValue < xMin) xMin = xValue;
-	  if (xValue > xMax) xMax = xValue;
-	} else if (numLineEntries == colY) {
-	  theFile >> yValue;
-	  if (yValue < yMin) yMin = yValue;
-	  if (yValue > yMax) yMax = yValue;	  
-	} else
-	  theFile >> xValue;
+	theFile >> xValue;
+	for (int i=0; i<cols->Size(); i++) {
+	  if (i%2 == 0) { // an xValue if numLineEntries == colX
+	    if (numLineEntries == (*cols)(i)) {
+	      if (xValue < xMin) xMin = xValue;
+	      if (xValue > xMax) xMax = xValue;
+	    }
+	  } else { // a y value if (numLineEntries == colY) {
+	    if (numLineEntries == (*cols)(i)) {
+	      if (yValue < yMin) yMin = xValue;
+	      if (yValue > yMax) yMax = xValue;	  
+	    } 
+	  }
+	}
 
 	numLineEntries ++;
       }
@@ -164,31 +174,33 @@ FilePlotter::plotFile(void)
 
     // check colX and colY for valid entries
     if (numLines > 0) {
-      if (colX >= numLineEntries || colY >= numLineEntries) {
-	g3ErrorHandler->warning("FilePLotter::plotFile() colX %d or colY %d >= numLineEntries %d\n",
-				colX, colY, numLineEntries);
+      if (cols == 0) {
+	g3ErrorHandler->warning("FilePLotter::plotFile() - no valid columns have beed set\n");
 
       } else {
 
 	// parse through file checking the bounds
 	Vector data(numLineEntries);
 	while (theFile >> data(0)) {
-	  for (int i=1; i<numLineEntries; i++)
-	    theFile >> data(i);
-	  xValue = data(colX);
-	  yValue = data(colY);
-	  if (xValue < xMin) xMin = xValue;
-	  if (xValue > xMax) xMax = xValue;
-	  if (yValue < yMin) yMin = yValue;
-	  if (yValue > yMax) yMax = yValue;
-	  numLines++;
-	}    
+	  for (int j=1; j<numLineEntries; j++)
+	    theFile >> data(j);
+
+	  for (int i=0; i<cols->Size(); i += 2) {
+	    xValue = data((*cols)(i));
+	    yValue = data((*cols)(i+1));
+	    if (xValue < xMin) xMin = xValue;
+	    if (xValue > xMax) xMax = xValue;
+	    if (yValue < yMin) yMin = yValue;
+	    if (yValue > yMax) yMax = yValue;
+	    numLines++;
+	  }    
+	}
 
 	// set the window bounds NOTE small border around the edges
 	double xBnd = (xMax-xMin)/10;
 	double yBnd = (yMax-yMin)/10;
     
-	theRenderer->setViewWindow(xMin-xBnd,xMax+xBnd,yMin-yBnd,yMax+yBnd);
+	theRenderer->setViewWindow(xMin-xBnd,xMax+2*xBnd,yMin-yBnd,yMax+yBnd);
       }
     }
 
@@ -204,13 +216,6 @@ FilePlotter::plotFile(void)
 
     if (numLines > 1) {
 
-      // open the file
-      theFile.open(fileName, ios::in);
-      if (!theFile) {
-	cerr << "WARNING - FileNodeDispRecorder::FileNodeDispRecorder()";
-	cerr << " - could not open file " << fileName << endl;
-	return -1;
-      }    
 
       Vector pt1(3); Vector pt2(3);
       pt1(2) = 0.0;  pt2(2) = 0.0;
@@ -224,23 +229,57 @@ FilePlotter::plotFile(void)
       pt1(1) = 0.0;  pt2(1) = 0.0;
       theRenderer->drawLine(pt1, pt2, 0.0, 0.0);    
 
+      static char theText[20];
+      if (xMin != 0.0 && -100*xMin > xMax) {
+	sprintf(theText,"%.2e",xMin);
+	theRenderer->drawGText(pt1, theText, strlen(theText));
+      }
+      if (xMax != 0.0) {
+	sprintf(theText,"%.2e",xMax);
+	theRenderer->drawGText(pt2, theText, strlen(theText));
+      }
+
       // draw the y axis
       pt1(0) = 0.0; pt2(0) = 0.0;
       pt1(1) = yMin;  pt2(1) = yMax;
       theRenderer->drawLine(pt1, pt2, 0.0, 0.0);        
+      
+      if (yMin != 0.0 && -100 *yMin > yMax) {
+	sprintf(theText,"%.2e",yMin);
+	theRenderer->drawGText(pt1, theText, strlen(theText));
+      }
+      if (yMax != 0.0) {
+	sprintf(theText,"%.2e",yMax);
+	theRenderer->drawGText(pt2, theText, strlen(theText));
+      }
 
-      Vector data(numLineEntries);
-      theFile >> data;
-      pt1(0) = data(colX); 
-      pt1(1) = data(colY);
+      Vector data1(numLineEntries);
+      Vector data2(numLineEntries);
 
+
+      // open the file
+      theFile.open(fileName, ios::in);
+      if (!theFile) {
+	cerr << "WARNING - FileNodeDispRecorder::FileNodeDispRecorder()";
+	cerr << " - could not open file " << fileName << endl;
+	return -1;
+      }    
+    
+      theFile >> data1;
+      
       for (int i=1; i<numLines; i++) {
-	theFile >> data;
-	pt2(0) = data(colX); 
-	pt2(1) = data(colY);
-	theRenderer->drawLine(pt1, pt2, 1.0, 1.0);
-	pt1(0) = pt2(0);
-	pt1(1) = pt2(1);
+	theFile >> data2;
+
+	for (int j=0; j<cols->Size(); j+=2) {
+	  pt1(0) = data1((*cols)(j)); 
+	  pt1(1) = data1((*cols)(j+1));
+	  pt2(0) = data2((*cols)(j)); 
+	  pt2(1) = data2((*cols)(j+1));
+	  theRenderer->drawLine(pt1, pt2, 1.0, 1.0);
+	}
+
+	data1 = data2;
+
       }
       
       theRenderer->doneImage();
@@ -254,26 +293,38 @@ FilePlotter::plotFile(void)
 
 
 int
-FilePlotter::setCol(int _colX, int _colY)
+FilePlotter::setCol(const ID &theCols)
 {
+  if (theCols.Size()%2 != 0) {
+    g3ErrorHandler->warning("FilePlotter::setCol() - the size of the cols ID %d is not a multiple of 2",
+			    theCols.Size());
+    return -1;
+  }
+
+  for (int i=0; i<theCols.Size(); i++) {
+    if (theCols(i) < 1) {
+      g3ErrorHandler->warning("FilePlotter::FilePlotter() - a value of the cols %d is < 1",
+			      theCols(i));
+      return -2;
+    }
+  }
   // check colX is valid, i.e. >= 1
   // if valid set colX using c indexing
-  if (_colX > 0) 
-    colX = _colX-1;
-  else {
-    g3ErrorHandler->warning("WARNING FilePlotter::setFile() colX %d must be >= 1\n",_colX);
-    return -1;
+
+  if (cols != 0) {
+    if (cols->Size() != theCols.Size()) {
+      delete cols;
+      cols = 0;
+    } else
+      *cols = theCols;
   }
 
-  // check colY is valid, i.e. >= 1
-  // if valid set colY using c indexing
-  if (_colY > 0) 
-    colY = _colY-1;
-  else {
-    g3ErrorHandler->warning("WARNING FilePlotter::setFile() colY %d must be >= 1\n",_colX);
-    return -1;
-  }
+  if (cols == 0)
+    cols = new ID(theCols);
 
+  for (int j=0; j<cols->Size(); j++)
+    (*cols)(j) -= 1;
+    
   return 0;
 }
 

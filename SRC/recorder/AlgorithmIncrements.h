@@ -18,58 +18,67 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
+// $Revision: 1.1 $
 // $Date: 2001-05-16 04:19:11 $
-// $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/recorder/AlgorithmIncrements.h,v $
                                                                         
                                                                         
-// File: ~/recorder/tcl/FilePlotter.h.h
+// File: ~/recorder/tcl/AlgorithmIncrements.h.h
 // 
 // Written: fmk 
-// Created: 11/99
+// Created: 01/01
 // Revision: A
 //
-// Description: This file contains the class definition for FilePlotter.
-// A FilePlotter will create a line graph using xy points found in a file.
+// Description: This file contains the class definition for AlgorithmIncrements.
+// A AlgorithmIncrements will display the X and B in the SOE associated with the
+// algorithm on a record.
 
 //
 // What: "@(#) ModelBuilder.h, revA"
 
-#ifndef FilePlotter_h
-#define FilePlotter_h
+#ifndef AlgorithmIncrements_h
+#define AlgorithmIncrements_h
 
 #include <Recorder.h>
 #include <G3Globals.h>
 
+
+#include <fstream.h>
+
+class EquiSolnAlgo;
 class Renderer;
 class ColorMap;
 class ID;
+class Vector;
 
-class FilePlotter : public Recorder
+class AlgorithmIncrements : public Recorder
 {
   public:
-    FilePlotter(char *fileName,
-		char *windowTitle, 
-		int xLoc, int yLoc, int width, int height);
+    AlgorithmIncrements(EquiSolnAlgo *theAlgo,
+			char *windowTitle, 
+			int xLoc, int yLoc, int width, int height,
+			bool displayRecord = false,
+			char *fileName = 0);
     
-    ~FilePlotter();    
+    ~AlgorithmIncrements();    
 
-    int plotFile();
+    int plotData(const Vector &X, const Vector &B);
 
     int record(int cTag);
     int playback(int cTag);
     void restart(void);    
-
-    int setFile(char *newFile);
-    int setCol(const ID &theCols);
 
   protected:
 
   private:
     ColorMap *theMap;
     Renderer *theRenderer;
-    ID *cols;
-    char fileName[MAX_FILENAMELENGTH];
+    EquiSolnAlgo *theAlgo;
+
+    int numRecord;
+    bool displayRecord;
+    char *fileName;
+    ofstream theFile;     
 };
 
 #endif

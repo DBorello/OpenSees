@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.2 $
-// $Date: 2001-05-03 05:59:20 $
+// $Revision: 1.3 $
+// $Date: 2001-05-16 04:19:12 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.cpp,v $
                                                                         
 
@@ -65,7 +65,7 @@ NodeRecorder::NodeRecorder(const ID &dofs,
   strcpy(theFileName, fileName);    
     
   theFile.open(fileName, ios::out);
-  if (!theFile) {
+  if (theFile.bad()) {
     cerr << "WARNING - FileNodeDispRecorder::FileNodeDispRecorder()";
     cerr << " - could not open file " << fileName << endl;
   }    
@@ -209,7 +209,7 @@ NodeRecorder::record(int commitTag)
 int 
 NodeRecorder::playback(int commitTag)
 {
-  if (!theFile)
+  if (theFile.bad())
     return 0;
     
   // close o/p file to ensure all buffered data gets written to file
@@ -221,7 +221,7 @@ NodeRecorder::playback(int commitTag)
   // open a stream for reading from the file
   ifstream inputFile;
   inputFile.open(theFileName, ios::in);
-  if (!inputFile) {
+  if (inputFile.bad()) {
     cerr << "WARNING - FileNodeDispRecorder::playback() - could not open file ";
     cerr << theFileName << endl;
     return -1;
@@ -251,7 +251,7 @@ NodeRecorder::playback(int commitTag)
       
     // open file again for writing
     theFile.open(theFileName, ios::app);
-    if (!theFile) {
+    if (theFile.bad()) {
       cerr << "WARNING - FileNodeDispRecorder::playback() - could not open file ";
       cerr << theFileName << endl;
       return -1;
@@ -266,7 +266,7 @@ NodeRecorder::restart(void)
 {
   theFile.close();
   theFile.open(theFileName, ios::out);
-  if (!theFile) {
+  if (theFile.bad()) {
     cerr << "WARNING - FileNodeDispRecorder::restart() - could not open file ";
     cerr << theFileName << endl;
   }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:03:11 $
+// $Revision: 1.3 $
+// $Date: 2001-05-16 04:19:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -65,8 +65,7 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
       numEle = 0;
       return;
     } else {
-		theResponses[i] = theEle->setResponse(argv, argc, eleInfoObjects[i]);
-      //responseID(i) = theEle->setResponse(argv, argc, eleInfoObjects[i]);
+      theResponses[i] = theEle->setResponse(argv, argc, eleInfoObjects[i]);
       theElements[i] = theEle;
     }
   }
@@ -79,7 +78,7 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
     else {
       strcpy(theFileName, fileName);    
       theFile.open(fileName, ios::out);
-      if (!theFile) {
+      if (theFile.bad()) {
 	cerr << "WARNING - ElementRecorder::ElementRecorder()";
 	cerr << " - could not open file " << fileName << endl;
       }    
@@ -90,17 +89,17 @@ ElementRecorder::ElementRecorder(const ID &eleID, Domain &theDom,
 ElementRecorder::~ElementRecorder()
 {
     // close the file
-    if (!theFile)
+    if (!theFile.bad())
 	theFile.close();    
 
     if (theElements != 0)
       delete [] theElements;
 
     if (theResponses != 0) {
-		for (int i = 0; i < numEle; i++)
-			delete theResponses[i];
-		delete [] theResponses;
-	}
+      for (int i = 0; i < numEle; i++)
+	delete theResponses[i];
+      delete [] theResponses;
+    }
 
     if (eleInfoObjects != 0)
       delete [] eleInfoObjects;
@@ -127,34 +126,24 @@ ElementRecorder::record(int commitTag)
       // ask the element for the reponse
       int res;
       Information &eleInfo = eleInfoObjects[i];
-      //if (( res = theElements[i]->getResponse(theID, eleInfo)) < 0)
-	  //	result = res;
-
-	  if (( res = theResponses[i]->getResponse()) < 0)
+      if (( res = theResponses[i]->getResponse()) < 0)
 	result = res;
-
       else {
 	// print results to file or stderr depending on whether
 	// a file was opened
 	
-	if (!theFile)
-		theResponses[i]->Print(cerr);	    
+	if (theFile.bad())
+	  theResponses[i]->Print(cerr);	    
 	else
-		theResponses[i]->Print(theFile);
-      
-	  }
-    }
-    if (!theFile) 
-      cerr << " ";
-    else
-      theFile << " ";
+	  theResponses[i]->Print(theFile);
+      }
+    } 
   }
 
-  //if (!theFile) 
-  //  cerr << endl;
-  //else
-  //  theFile << endl;
-
+  if (theFile.bad()) 
+    cerr << endl;
+  else
+    theFile << " \n";
 
   // succesfull completion - return 0
   return result;
