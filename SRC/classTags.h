@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2002-04-09 05:41:32 $
+// $Revision: 1.29 $
+// $Date: 2002-04-30 21:31:02 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -252,6 +252,8 @@
 #define ELE_TAG_HingedBeam2d     9872
 #define ELE_TAG_HingedBeam3d     9873
 
+#define ELE_TAG_InternalSpring   9900
+#define ELE_TAG_SimpleJoint2D    9901
 
 #define CRDTR_TAG_LinearCrdTransf2d 1
 #define CRDTR_TAG_PDeltaCrdTransf2d 2
@@ -273,6 +275,8 @@
 #define CNSTRNT_TAG_MP_Constraint 	2
 #define CNSTRNT_TAG_ImposedMotionSP	3
 #define CNSTRNT_TAG_ImposedMotionSP1	4
+#define CNSTRNT_TAG_MP_ForJoint2D       5
+
 
 #define MATRIX_TAG_Matrix 	1
 
