@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-25 23:34:46 $
+// $Revision: 1.8 $
+// $Date: 2003-05-15 21:45:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.cpp,v $
                                                                         
-                                                                        
-// File: ~/tcl/TclFeViewer.C
-// 
 // Written: fmk 
 // Created: 04/98
 // Revision: A
@@ -95,7 +92,9 @@ TclFeViewer_setPortWindow(ClientData clientData, Tcl_Interp *interp, int argc,
 int
 TclFeViewer_displayModel(ClientData clientData, Tcl_Interp *interp, int argc, 
 			  TCL_Char **argv);		   			 
-			  
+int
+TclFeViewer_saveImage(ClientData clientData, Tcl_Interp *interp, int argc, 
+			  TCL_Char **argv);		   			 
 int
 TclFeViewer_clearImage(ClientData clientData, Tcl_Interp *interp, int argc, 
 		  TCL_Char **argv);		 
@@ -157,6 +156,9 @@ TclFeViewer::TclFeViewer(const char *title, int xLoc, int yLoc, int width, int h
   
   Tcl_CreateCommand(interp, "clearImage", TclFeViewer_clearImage,
 		    (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);      
+
+  Tcl_CreateCommand(interp, "saveImage", TclFeViewer_saveImage,
+		    (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);      
 }
 
 
@@ -176,7 +178,7 @@ TclFeViewer::TclFeViewer(const char *title, int xLoc, int yLoc, int width, int h
 #ifdef _WGL
   theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap, 0, fileName);
 #elif _GLX
-  theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap, 0, fileName);
+  theRenderer = new OpenGLRenderer(title, xLoc, yLoc, width, height, *theMap, fileName, 0);
 #else
   theRenderer = new X11Renderer(title, xLoc, yLoc, width, height, *theMap, fileName);
 #endif
@@ -213,6 +215,9 @@ TclFeViewer::TclFeViewer(const char *title, int xLoc, int yLoc, int width, int h
   
   Tcl_CreateCommand(interp, "clearImage", TclFeViewer_clearImage,
 		    (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);      
+
+  Tcl_CreateCommand(interp, "saveImage", TclFeViewer_saveImage,
+		    (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL); 
 }
 
 TclFeViewer::~TclFeViewer()
@@ -396,6 +401,18 @@ int
 TclFeViewer::clearImage(void)
 {
   return theRenderer->clearImage();
+}
+
+int
+TclFeViewer::saveImage(const char *fileName)
+{
+  return theRenderer->saveImage(fileName);
+}
+
+int
+TclFeViewer::saveImage(const char *imageName, const char *fileName)
+{
+  return theRenderer->saveImage(imageName, fileName);
 }
     
 
@@ -724,13 +741,54 @@ TclFeViewer_displayModel(ClientData clientData, Tcl_Interp *interp, int argc,
 
 int
 TclFeViewer_clearImage(ClientData clientData, Tcl_Interp *interp, int argc, 
-			  TCL_Char **argv)
+		       TCL_Char **argv)
 {
   // check destructor has not been called
   if (theTclFeViewer == 0)
       return TCL_OK;    
   
   theTclFeViewer->clearImage();
+  return TCL_OK;
+}
+
+int
+TclFeViewer_saveImage(ClientData clientData, Tcl_Interp *interp, int argc, 
+		      TCL_Char **argv)
+{
+  // check destructor has not been called
+  if (theTclFeViewer == 0)
+      return TCL_OK;    
+
+  // check number of args  
+  if (argc != 3 && argc != 5) {
+      opserr << "WARNING args incorrect - saveImage -image imageName? -file fileName?\n";
+      return TCL_ERROR;
+  }    
+
+  int loc = 1;
+  const char *imageName =0;
+  const char *fileName =0;
+  while (loc < argc) {
+    if (strcmp(argv[loc], "-image") == 0) 
+      imageName = argv[loc+1];
+    else if (strcmp(argv[loc], "-file") == 0) 
+      fileName = argv[loc+1];
+    else {
+      opserr << "WARNING invalid option: " << argv[loc] << " - saveImage -image imageName? -file fileName?\n";
+      return TCL_ERROR;
+    }
+    loc+= 2;
+  }
+  
+  if (imageName == 0 && fileName != 0)
+    theTclFeViewer->saveImage(fileName);
+  else if (imageName != 0 && fileName != 0)
+    theTclFeViewer->saveImage(imageName, fileName);
+  else {
+    opserr << "WARNING saveImage - need a fileName\n";
+    return TCL_ERROR;
+  }
+
   return TCL_OK;
 }
 

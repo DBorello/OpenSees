@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:34:46 $
+// $Revision: 1.6 $
+// $Date: 2003-05-15 21:45:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.h,v $
                                                                         
                                                                         
@@ -87,6 +87,8 @@ class TclFeViewer : public Recorder
     // methods invoked on the FE_Viewer
     int displayModel(int eleFlag, int nodeFlag, float displayFact);
     int clearImage(void);
+    int saveImage(const char *fileName);
+    int saveImage(const char *imageName, const char *fileName);
 
   protected:
 
