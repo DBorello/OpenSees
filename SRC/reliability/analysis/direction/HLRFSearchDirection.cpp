@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-06-14 08:06:01 $
+// $Revision: 1.3 $
+// $Date: 2001-08-02 18:12:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/HLRFSearchDirection.cpp,v $
 
 
@@ -39,14 +39,12 @@
 
 
 HLRFSearchDirection::HLRFSearchDirection()
-:SearchDirection()
+:SearchDirection(), searchDirection(1)
 {
-	searchDirection = new Vector(1);
 }
 
 HLRFSearchDirection::~HLRFSearchDirection()
 {
-	delete searchDirection;
 }
 
 
@@ -55,7 +53,7 @@ HLRFSearchDirection::~HLRFSearchDirection()
 Vector
 HLRFSearchDirection::getSearchDirection()
 {
-	return (*searchDirection);
+	return searchDirection;
 }
 
 
@@ -87,7 +85,7 @@ HLRFSearchDirection::computeSearchDirection(
 	Vector direction = alpha * ( gFunctionValue / normOfGradient + alpha_times_u ) - u;
 
 
-	(*searchDirection) = direction;
+	searchDirection = direction;
 
 	return 0;
 }
