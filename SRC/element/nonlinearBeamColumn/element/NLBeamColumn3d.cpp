@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2002-06-07 21:58:33 $
+// $Revision: 1.17 $
+// $Date: 2002-10-03 21:31:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn3d.cpp,v $
                                                                         
                                                                         
@@ -916,7 +916,7 @@ NLBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
       // Shear
       s_p(2,i) += wy*(x-0.5*L);
       // Moment
-      s_p(3,i) += wz*0.5*x*(x-L);
+      s_p(3,i) += wz*0.5*x*(L-x);
       // Shear
       s_p(4,i) += wz*(x-0.5*L);
     }
@@ -1674,7 +1674,7 @@ NLBeamColumn3d::getResponse(int responseID, Information &eleInfo)
     M2 = Se(4);
     force(4)  = M1;
     force(10) = M2;
-    V = (M1+M2)/L;
+    V = -(M1+M2)/L;
     force(2) = -V+p0[3];
     force(8) =  V+p0[4];
       
