@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2005-01-13 23:53:47 $
+// $Revision: 1.10 $
+// $Date: 2005-03-21 22:09:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -128,6 +128,9 @@ EnvelopeElementRecorder::~EnvelopeElementRecorder()
   for (int i=0; i<numArgs; i++)
     delete [] responseArgs[i];
   delete [] responseArgs;
+
+  if (theHandler != 0)
+    delete theHandler;
 }
 
 

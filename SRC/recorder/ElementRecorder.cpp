@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2005-02-14 20:35:49 $
+// $Revision: 1.21 $
+// $Date: 2005-03-21 22:09:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.cpp,v $
                                                                         
                                                                         
@@ -114,6 +114,10 @@ ElementRecorder::~ElementRecorder()
   for (int i=0; i<numArgs; i++)
     delete [] responseArgs[i];
   delete [] responseArgs;
+
+
+  if (theHandler != 0)
+    delete theHandler;
 }
 
 
