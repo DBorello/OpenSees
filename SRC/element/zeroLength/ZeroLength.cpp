@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-06-07 22:01:04 $
+// $Revision: 1.11 $
+// $Date: 2002-06-07 22:57:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -75,8 +75,8 @@ ZeroLength::ZeroLength(int tag,
  :Element(tag,ELE_TAG_ZeroLength),     
   connectedExternalNodes(2),
   dimension(dim), numDOF(0), transformation(3,3),
-  theMatrix(0), theVector(0),
   end1Ptr(0), end2Ptr(0),
+  theMatrix(0), theVector(0),
   numMaterials1d(1), theMaterial1d(0), dir1d(0), t1d(0)
 {
     // allocate memory for numMaterials1d uniaxial material models
@@ -112,8 +112,8 @@ ZeroLength::ZeroLength(int tag,
  :Element(tag,ELE_TAG_ZeroLength),     
   connectedExternalNodes(2),
   dimension(dim), numDOF(0), transformation(3,3),
-  theMatrix(0), theVector(0),
   end1Ptr(0), end2Ptr(0),
+  theMatrix(0), theVector(0),
   numMaterials1d(n1dMat), theMaterial1d(0), dir1d(0), t1d(0)
 {
 
@@ -147,11 +147,11 @@ ZeroLength::ZeroLength(int tag,
 ZeroLength::ZeroLength(void)
 :Element(0,ELE_TAG_ZeroLength),     
  connectedExternalNodes(2),
- dimension(0), numDOF(0), 
- theMatrix(0), theVector(0),
+  dimension(0), numDOF(0), transformation(3,3),
  end1Ptr(0), end2Ptr(0),
- theMaterial1d(0), numMaterials1d(0), 
- dir1d(0), t1d(0), transformation(3,3)
+ theMatrix(0), theVector(0),
+  numMaterials1d(0), theMaterial1d(0),
+ dir1d(0), t1d(0)
 {
     // ensure the connectedExternalNode ID is of correct size 
     if (connectedExternalNodes.Size() != 2)

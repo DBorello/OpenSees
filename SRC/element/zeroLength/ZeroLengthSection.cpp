@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-11-26 22:53:58 $
+// $Revision: 1.4 $
+// $Date: 2002-06-07 22:57:26 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLengthSection.cpp,v $
                                                                         
 // Written: MHS
@@ -61,7 +61,7 @@ ZeroLengthSection::ZeroLengthSection(int tag, int dim, int Nd1, int Nd2,
 Element(tag, ELE_TAG_ZeroLengthSection),
 connectedExternalNodes(2),
 dimension(dim), numDOF(0), 
-transformation(3,3), v(0), K(0), P(0), A(0),
+transformation(3,3), A(0), v(0), K(0), P(0),
 end1Ptr(0), end2Ptr(0), theSection(0), order(0)
 {
 	// Obtain copy of section model
@@ -82,7 +82,7 @@ ZeroLengthSection::ZeroLengthSection() :
 Element(0, ELE_TAG_ZeroLengthSection),
 connectedExternalNodes(2),
 dimension(0), numDOF(0), 
-transformation(3,3), v(0), K(0), P(0), A(0),
+transformation(3,3), A(0), v(0), K(0), P(0),
 end1Ptr(0), end2Ptr(0), theSection(0), order(0)
 {
 
