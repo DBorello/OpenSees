@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 00:32:47 $
+// $Revision: 1.5 $
+// $Date: 2003-04-10 17:47:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FORMAnalysis.cpp,v $
 
 
@@ -121,7 +121,9 @@ FORMAnalysis::analyze(void)
 
 
 	// Loop over number of limit-state functions and perform FORM analysis
-	for (lsf=1; lsf<=numLsf; lsf++ ) {
+	lsf = 1;     // Boris Jeremic moved this out of the loop since it is
+              // non-portable (C++ standard is violated) to change loop counter in the loop (lsf)
+	for (; lsf<=numLsf; lsf++ ) {
 
 
 		// Inform the user which limit-state function is being evaluated

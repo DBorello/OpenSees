@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-03-06 18:12:25 $
+// $Revision: 1.3 $
+// $Date: 2003-04-10 17:47:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/analysis/FragilityAnalysis.cpp,v $
 
 
@@ -121,7 +121,9 @@ FragilityAnalysis::analyze(void)
 
 
 	// Loop over number of limit-state functions and perform FORM analysis
-	for (int lsf=1; lsf<=numLsf; lsf++ ) {
+	int lsf = 1; // Boris Jeremic moved this out of the loop since it is
+              // non-portable (C++ standard is violated) to change loop counter in the loop (lsf)
+ for ( ; lsf<=numLsf; lsf++ ) {
 
 
 		// Inform the user which limit-state function is being evaluated
