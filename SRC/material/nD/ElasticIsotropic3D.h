@@ -1,26 +1,29 @@
-/* ****************************************************************** **
-**    OpenSees - Open System for Earthquake Engineering Simulation    **
-**          Pacific Earthquake Engineering Research Center            **
-**                                                                    **
-**                                                                    **
-** (C) Copyright 1999, The Regents of the University of California    **
-** All Rights Reserved.                                               **
-**                                                                    **
-** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
-** file 'COPYRIGHT'  in main directory for information on usage and   **
-** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-**                                                                    **
-** Developed by:                                                      **
-**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-**                                                                    **
-** ****************************************************************** */
-                                                                        
-// $Revision: 1.12 $                                                              
-// $Date: 2002-06-10 22:24:04 $                                                                  
-// $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $                                                                
+//===============================================================================
+//# COPYRIGHT (C): Woody's license (by BJ):
+//                 ``This    source  code is Copyrighted in
+//                 U.S.,  for  an  indefinite  period,  and anybody
+//                 caught  using it without our permission, will be
+//                 mighty good friends of ourn, cause we don't give
+//                 a  darn.  Hack it. Compile it. Debug it. Run it.
+//                 Yodel  it.  Enjoy it. We wrote it, that's all we
+//                 wanted to do.''
+//
+//# PROJECT:           Object Oriented Finite Element Program
+//# PURPOSE:           Elastic Isotropic Material implementation:
+//# CLASS:             ElasticIsotropic3D
+//#
+//# VERSION:           0.61803398874989 (golden section)
+//# LANGUAGE:          C++
+//# TARGET OS:         all...
+//# DESIGN:            Zhaohui Yang, Boris Jeremic (jeremic@ucdavis.edu)
+//# PROGRAMMER(S):     Zhaohui Yang, Boris Jeremic
+//#
+//#
+//# DATE:              10Oct2000
+//# UPDATE HISTORY:    22Nov2002 small fixes 
+//#
+//#
+//===============================================================================
                                                                         
                                                                         
 #ifndef ElasticIsotropic3D_h
@@ -34,6 +37,8 @@
 #include <straint.h>
 #include <stresst.h>
 #include <Tensor.h>
+
+#include <Channel.h>
 
 class ElasticIsotropic3D : public ElasticIsotropicMaterial
 {
