@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-06-10 00:36:09 $
+// $Revision: 1.13 $
+// $Date: 2003-06-23 19:09:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
 
 #include <math.h>
@@ -1012,24 +1012,32 @@ ForceBeamColumn2d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 ForceBeamColumn2d::getResistingForceIncInertia()
 {	
-  // Check for a quick return
-  if (rho == 0.0)
-    return this->getResistingForce();
-  
-  const Vector &accel1 = theNodes[0]->getTrialAccel();
-  const Vector &accel2 = theNodes[1]->getTrialAccel();
-  
   // Compute the current resisting force
   theVector = this->getResistingForce();
-  
-  double L = crdTransf->getInitialLength();
-  double m = 0.5*rho*L;
-  
-  theVector(0) += m*accel1(0);
-  theVector(1) += m*accel1(1);
-  theVector(3) += m*accel2(0);
-  theVector(4) += m*accel2(1);
-  
+
+  // Check for a quick return
+  if (rho != 0.0) {
+    const Vector &accel1 = theNodes[0]->getTrialAccel();
+    const Vector &accel2 = theNodes[1]->getTrialAccel();
+    
+    double L = crdTransf->getInitialLength();
+    double m = 0.5*rho*L;
+    
+    theVector(0) += m*accel1(0);
+    theVector(1) += m*accel1(1);
+    theVector(3) += m*accel2(0);
+    theVector(4) += m*accel2(1);
+    
+    // add the damping forces if rayleigh damping
+    if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+      theVector += this->getRayleighDampingForces();
+
+  } else {
+    // add the damping forces if rayleigh damping
+    if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+      theVector += this->getRayleighDampingForces();
+  }
+
   return theVector;
 }
 
