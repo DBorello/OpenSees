@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-29 23:55:03 $
+// $Revision: 1.3 $
+// $Date: 2002-01-19 16:20:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PathIndependentMaterial.cpp,v $
 
 // Written: MHS
@@ -39,8 +39,7 @@
 #include <G3Globals.h>
 
 PathIndependentMaterial::PathIndependentMaterial(int tag, UniaxialMaterial &material)
-:UniaxialMaterial(tag,MAT_TAG_PathIndependent),
- Tstrain(0.0), theMaterial(0)
+:UniaxialMaterial(tag,MAT_TAG_PathIndependent), theMaterial(0)
 {
 	theMaterial = material.getCopy();
 
@@ -50,8 +49,7 @@ PathIndependentMaterial::PathIndependentMaterial(int tag, UniaxialMaterial &mate
 }
 
 PathIndependentMaterial::PathIndependentMaterial()
-:UniaxialMaterial(0,MAT_TAG_PathIndependent),
- Tstrain(0.0), theMaterial(0)
+:UniaxialMaterial(0,MAT_TAG_PathIndependent), theMaterial(0)
 {
 
 }
@@ -65,9 +63,7 @@ PathIndependentMaterial::~PathIndependentMaterial()
 int 
 PathIndependentMaterial::setTrialStrain(double strain, double strainRate)
 {
-    Tstrain = strain;
-
-    return theMaterial->setTrialStrain(Tstrain, strainRate);
+    return theMaterial->setTrialStrain(strain, strainRate);
 }
 
 double 
@@ -83,6 +79,12 @@ PathIndependentMaterial::getTangent(void)
 }
 
 double 
+PathIndependentMaterial::getDampTangent(void)
+{
+    return theMaterial->getDampTangent();
+}
+
+double 
 PathIndependentMaterial::getSecant(void)
 {
     return theMaterial->getSecant();
@@ -91,7 +93,13 @@ PathIndependentMaterial::getSecant(void)
 double 
 PathIndependentMaterial::getStrain(void)
 {
-    return Tstrain;
+    return theMaterial->getStrain();
+}
+
+double 
+PathIndependentMaterial::getStrainRate(void)
+{
+    return theMaterial->getStrainRate();
 }
 
 int 
@@ -109,7 +117,7 @@ PathIndependentMaterial::revertToLastCommit(void)
 int 
 PathIndependentMaterial::revertToStart(void)
 {
-    return 0;
+    return theMaterial->revertToStart();
 }
 
 UniaxialMaterial *
@@ -117,9 +125,7 @@ PathIndependentMaterial::getCopy(void)
 {
     PathIndependentMaterial *theCopy = 
 		new PathIndependentMaterial(this->getTag(), *theMaterial);
-    
-	theCopy->Tstrain = Tstrain;
-    
+        
 	return theCopy;
 }
 
