@@ -87,6 +87,14 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\uniaxial\CableMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\CableMaterial.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\uniaxial\Concrete01.cpp
 # End Source File
 # Begin Source File
