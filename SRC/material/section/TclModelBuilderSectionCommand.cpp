@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-08-15 20:17:21 $
+// $Revision: 1.9 $
+// $Date: 2001-09-06 00:23:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -935,7 +935,7 @@ TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc,
     }	   
     
     // make sure at least one other argument to contain patch type
-    if (argc < 6) {
+    if (argc < 5) {
 	interp->result = "WARNING invalid num args: fiber yLoc zLoc area matTag";
 	return TCL_ERROR;
     }    
