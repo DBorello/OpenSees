@@ -18,82 +18,80 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
+// $Revision: 1.1 $
 // $Date: 2004-09-01 03:53:13 $
-// $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Pinching.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Clough.h,v $
 //
 //
-// Pinching.h: implementation of the Pinching class from Fortran version.
+// Clough.h: implementation of the Clough class from Fortran version.
 // Originally from SNAP PROGRAM by Prof H.K. Krawinkler
 //
 // Written: Arash Altoontash, Gregory Deierlein, 12/01
-// Revised: 05/03
+// Revised: 03/02
 //
-// Purpose: This file contains the implementation for the Pinching class.
-//
-//////////////////////////////////////////////////////////////////////
-
-// Pinching.h: interface for the Pinching class.
+// Purpose: This file contains the implementation for the Clough class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef PINCHING_H
-#define PINCHING_H
+// Clough.h: interface for the Clough class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#ifndef Clough_H
+#define Clough_H
 
 #include <UniaxialMaterial.h>
 #include <Vector.h>
 #include <stdio.h>
 
-class Pinching : public UniaxialMaterial  
+class Clough : public UniaxialMaterial
 {
- public:
-  Pinching();
-  Pinching(int tag, Vector inputParam );
-  virtual ~Pinching();
-  
-  int setTrialStrain(double d, double strainRate = 0.0);
-  double getStrain(void);
-  
-  double getStress(void);
-  double getTangent(void);
-  double getInitialTangent(void);
-  int commitState(void);
-  int revertToLastCommit(void);    
-  int revertToStart(void);  
-  
-  //virtual
-  UniaxialMaterial *getCopy(void);
-  
-  int sendSelf(int commitTag, Channel &theChannel);  
-  int recvSelf(int commitTag, Channel &theChannel,
-	       FEM_ObjectBroker &theBroker);    
-  
-  void Print(OPS_Stream &s, int flag =0);
-  
- protected:
-  void envelPosCap(double fy, double alfaPos, double alfaCap,
-		   double cpDsp, double d, double *f, double *ek );
-  
-  void envelNegCap(double fy, double alfaNeg, double alfaCap,
-		   double cpDsp, double d, double *f, double *ek);
-  
-  void recordInfo(int cond =0);
-  
-  
- private:
-  
-  // Input parameters
-  double elstk,fyieldPos,fyieldNeg,alpha,Resfac; // Properties
-  double capSlope,capDispPos,capDispNeg;	 // Cap
-  double ecaps,ecapk,ecapa,ecapd,cs,ck,ca,cd;	 // Degradation parameters
-  double fpPos,fpNeg,a_pinch;                    // Pinching
-  
-  // Parameters calculated from input data
-  double dyieldPos,dyieldNeg,Enrgts,Enrgta,Enrgtk,Enrgtd;
-  
-  double hsTrial[22], hsCommit[22], hsLastCommit[22];
-  
-  FILE *OutputFile;		// For debugging
+public:
+	Clough();
+	Clough(int tag, Vector inputParam );
+	virtual ~Clough();
+	
+	int setTrialStrain(double d, double strainRate = 0.0);
+	double getStrain(void);
+	
+	double getStress(void);
+	double getTangent(void);
+	double getInitialTangent(void);
+	int commitState(void);
+	int revertToLastCommit(void);    
+	int revertToStart(void);  
+	
+	//virtual
+	UniaxialMaterial *getCopy(void);
+	
+	int sendSelf(int commitTag, Channel &theChannel);  
+	int recvSelf(int commitTag, Channel &theChannel,FEM_ObjectBroker &theBroker);
+	
+	void Print(OPS_Stream &s, int flag =0);
+	
+protected:
+	void envelPosCap(double fy, double alphaPos, double alphaCap,
+		double cpDsp, double d, double *f, double *ek );
+	
+	void envelNegCap(double fy, double alphaNeg, double alphaCap,
+		double cpDsp, double d, double *f, double *ek);
+	
+	void recordInfo(int cond =0);
+	
+	
+private:
+	// Input parameters
+	double elstk,fyieldPos,fyieldNeg,alpha,Resfac;		//	Properties
+	double capSlope,capDispPos,capDispNeg;	 // Cap
+	double ecaps,ecapk,ecapa,ecapd,cs,ck,ca,cd;	 // Degradation parameters
+
+	// Parameters calculated from input data
+	double dyieldPos,dyieldNeg;
+	double Enrgts,Enrgtk,Enrgta,Enrgtd;
+
+	double hsTrial[24], hsCommit[24], hsLastCommit[24];
+	
+	FILE *OutputFile;		// For debugging
 };
 
 #endif

@@ -18,38 +18,40 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
+// $Revision: 1.1 $
 // $Date: 2004-09-01 03:53:13 $
-// $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/Pinching.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/snap/PinchingDamage.h,v $
 //
 //
-// Pinching.h: implementation of the Pinching class from Fortran version.
+// PinchingDamage.h: implementation of the PinchingDamage class from Fortran version.
 // Originally from SNAP PROGRAM by Prof H.K. Krawinkler
 //
-// Written: Arash Altoontash, Gregory Deierlein, 12/01
+// Written: A. Altoontash & Prof. G. Deierlein 12/01
 // Revised: 05/03
 //
-// Purpose: This file contains the implementation for the Pinching class.
+// Purpose: This file contains the implementation for the PinchingDamage class.
 //
 //////////////////////////////////////////////////////////////////////
 
-// Pinching.h: interface for the Pinching class.
+// PinchingDamage.h: interface for the PinchingDamage class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef PINCHING_H
-#define PINCHING_H
+#ifndef PinchingDamage_H
+#define PinchingDamage_H
 
 #include <UniaxialMaterial.h>
 #include <Vector.h>
 #include <stdio.h>
 
-class Pinching : public UniaxialMaterial  
+class DamageModel;
+
+class PinchingDamage : public UniaxialMaterial  
 {
  public:
-  Pinching();
-  Pinching(int tag, Vector inputParam );
-  virtual ~Pinching();
+  PinchingDamage();
+  PinchingDamage(int tag, Vector inputParam , DamageModel *strength, DamageModel *stiffness, DamageModel *accelerated, DamageModel *capping );
+  virtual ~PinchingDamage();
   
   int setTrialStrain(double d, double strainRate = 0.0);
   double getStrain(void);
@@ -85,13 +87,17 @@ class Pinching : public UniaxialMaterial
   // Input parameters
   double elstk,fyieldPos,fyieldNeg,alpha,Resfac; // Properties
   double capSlope,capDispPos,capDispNeg;	 // Cap
-  double ecaps,ecapk,ecapa,ecapd,cs,ck,ca,cd;	 // Degradation parameters
   double fpPos,fpNeg,a_pinch;                    // Pinching
   
   // Parameters calculated from input data
-  double dyieldPos,dyieldNeg,Enrgts,Enrgta,Enrgtk,Enrgtd;
+  double dyieldPos,dyieldNeg;
+  DamageModel *StrDamage;
+  DamageModel *StfDamage;
+  DamageModel *AccDamage;
+  DamageModel *CapDamage;
   
-  double hsTrial[22], hsCommit[22], hsLastCommit[22];
+  
+  double hsTrial[24], hsCommit[24], hsLastCommit[24];
   
   FILE *OutputFile;		// For debugging
 };
