@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.33 $
-// $Date: 2002-07-01 22:10:16 $
+// $Revision: 1.34 $
+// $Date: 2002-07-17 18:27:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2303,15 +2303,17 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	return TCL_ERROR;
     }    
 
-    int typeAlgo = 0; // 0 - frequency (default), 1 - standard, 2 - buckling
-    int typeSolver = 0; // 0 - SymmBandArpack (default), 1 - SymmSparseArpack, 2 - GenBandArpack
+    int typeAlgo = 0; // 0 - frequency/generalized (default), 2 - standard, 2 - buckling
+    int typeSolver = 2; // 0 - SymmBandArpack, 1 - SymmSparseArpack, 2 - GenBandArpack (default)
     int loc = 1;
 
     // Check type of eigenvalue analysis
     while (loc < (argc-1)) {
       
       if ((strcmp(argv[loc],"frequency") == 0) || 
-	  (strcmp(argv[loc],"-frequency") == 0))
+	  (strcmp(argv[loc],"-frequency") == 0) ||
+	  (strcmp(argv[loc],"generalized") == 0) ||
+	  (strcmp(argv[loc],"-generalized") == 0))
 	typeAlgo = 0;
 
       else if ((strcmp(argv[loc],"standard") == 0) || 
@@ -2357,9 +2359,15 @@ eigenAnalysis(ClientData clientData, Tcl_Interp *interp, int argc,
 	theEigenAlgo = new StandardEigenAlgo();
 
     // create the eigen system and solver
-    if (typeSolver == 0) {
-      SymBandEigenSolver *theEigenSolver = new SymBandEigenSolver(); 
-      theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theEigenModel);    
+    if (typeSolver == 0 ) {
+      if (typeAlgo == 1) {
+	SymBandEigenSolver *theEigenSolver = new SymBandEigenSolver(); 
+	theEigenSOE = new SymBandEigenSOE(*theEigenSolver, *theEigenModel);    
+      } else {
+	cerr << "WARNING - cannot yet use SymBandEigenSolver in generalized eigen value problem\n";
+	BandArpackSolver *theEigenSolver = new BandArpackSolver(numEigen); 
+	theEigenSOE = new BandArpackSOE(*theEigenSolver, *theEigenModel);    
+      }
     } else if (typeSolver == 1) {
       SymArpackSolver *theEigenSolver = new SymArpackSolver(numEigen); 
       theEigenSOE = new SymArpackSOE(*theEigenSolver, *theEigenModel);    
