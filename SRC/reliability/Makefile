@@ -61,9 +61,7 @@ all:
 	     @$(CD) $(FE)/reliability/domain; $(MAKE);
 	     @$(CD) $(FE)/reliability/FEsensitivity; $(MAKE);
 	     @$(CD) $(FE)/reliability/tcl; $(MAKE);
-
-libReliability: all
-	$(AR) $(ARFLAGS) $(RELIABILITY_LIBRARY) $(RELIABILITY_OBJS)
+	     $(AR) $(ARFLAGS) $(RELIABILITY_LIBRARY) $(RELIABILITY_OBJS)
 
 # Miscellaneous
 tidy:	
