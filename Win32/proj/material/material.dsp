@@ -168,10 +168,38 @@ SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasSteel2Material.cpp
 
 SOURCE=..\..\..\SRC\material\uniaxial\fedeas\FedeasSteel2Material.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\fedeas\TclFedeasMaterialCommand.cpp
+# End Source File
 # End Group
 # Begin Group "drain"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainBilinearMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainBilinearMaterial.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainClough1Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainClough1Material.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainClough2Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainClough2Material.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainHardeningMaterial.cpp
@@ -179,6 +207,18 @@ SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainHardeningMaterial.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainHardeningMaterial.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainPinch1Material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\drain\DrainPinch1Material.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\drain\TclDrainMaterialCommand.cpp
 # End Source File
 # End Group
 # Begin Source File
