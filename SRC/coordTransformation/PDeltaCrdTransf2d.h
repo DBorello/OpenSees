@@ -18,42 +18,43 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-30 07:14:37 $
-// $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/LinearCrdTransf2d.h,v $
+// $Revision: 1.1 $
+// $Date: 2001-05-30 07:14:38 $
+// $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/PDeltaCrdTransf2d.h,v $
                                                                         
                                                                         
-// File: ~/crdTransf/LinearCrdTransf2d.h
+// File: ~/crdTransf/PDeltaCrdTransf2d.h
 //
 // Written: Remo Magalhaes de Souza (rmsouza@ce.berkeley.edu)
 // Created: 04/2000
 // Revision: A
 //
+// Modified: May 2001 
+//
 // Description: This file contains the class definition for
-// LinearCrdTransf2d.h. LinearCrdTransf2d provides the
+// PDeltaCrdTransf2d.h. PDeltaCrdTransf2d provides the
 // abstraction of a linear transformation for a spatial frame
 // between the global and basic coordinate systems
 
-// What: "@(#) LinearCrdTransf2d.h, revA"
+// What: "@(#) PDeltaCrdTransf2d.h, revA"
 
-#ifndef LinearCrdTransf2d_h
-#define LinearCrdTransf2d_h
+#ifndef PDeltaCrdTransf2d_h
+#define PDeltaCrdTransf2d_h
 
 #include <CrdTransf2d.h>
 #include <Vector.h>
 #include <Matrix.h>
 
-
-class LinearCrdTransf2d: public CrdTransf2d
+class PDeltaCrdTransf2d: public CrdTransf2d
 {
   public:
-    LinearCrdTransf2d (int tag);
-    LinearCrdTransf2d (int tag,
+    PDeltaCrdTransf2d (int tag);
+    PDeltaCrdTransf2d (int tag,
 		const Vector &rigJntOffsetI,
 		const Vector &rigJntOffsetJ);
     
-    LinearCrdTransf2d();
-    ~LinearCrdTransf2d();
+    PDeltaCrdTransf2d();
+    ~PDeltaCrdTransf2d();
 
     int    initialize(Node *node1Pointer, Node *node2Pointer);
     int    update(void);
@@ -94,6 +95,7 @@ class LinearCrdTransf2d: public CrdTransf2d
     double cosTheta, sinTheta;
 
     double L;                // undeformed element length
+	double ul14;	// Transverse local displacement offset of P-Delta
 };
 
 #endif

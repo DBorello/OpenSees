@@ -1,6 +1,6 @@
 include ../../Makefile.def
 
-OBJS       = CrdTransf.o CrdTransf2d.o LinearCrdTransf2d.o \
+OBJS       = CrdTransf.o CrdTransf2d.o LinearCrdTransf2d.o PDeltaCrdTransf2d.o\
                          CrdTransf3d.o LinearCrdTransf3d.o 
 
 # Compilation control
