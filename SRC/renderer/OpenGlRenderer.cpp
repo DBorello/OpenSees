@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.16 $
-// $Date: 2003-06-30 21:29:05 $
+// $Revision: 1.17 $
+// $Date: 2004-06-03 19:52:41 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
-// File: ~/renderer/OpenGLRenderer.C
-//
 // Written: fmk 
 // Created: 10/98
 // Revision: A
@@ -50,7 +48,7 @@ using std::ios;
 
 #elif _GLX
 
-#include <GL/glut.h>
+#include <GL/glu.h>
 
 #endif
 
@@ -60,7 +58,7 @@ using std::ios;
 #define WIRE_MODE 0
 #define FILL_MODE 1
 
-#include <db.H>
+//#include <db.H>
 #include <Vector.h>
 
 OpenGLRenderer::OpenGLRenderer(const char *_title, int _xLoc, int _yLoc, 
