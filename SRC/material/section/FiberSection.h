@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 05:56:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection.h,v $
                                                                         
 // Written: MHS
@@ -66,7 +66,7 @@ class FiberSection : public SectionForceDeformation
 		 FEM_ObjectBroker &theBroker);
     void Print(ostream &s, int flag = 0);
 	    
-	int addFiber(Fiber &theFiber);
+    int addFiber(Fiber &theFiber);
 
   protected:
     

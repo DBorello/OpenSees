@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 05:56:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/section/FiberSectionRepr.cpp,v $
                                                                         
                                                                         
@@ -48,8 +48,18 @@ FiberSectionRepr::FiberSectionRepr(int sectionID, int maxNumPatches, int maxNumR
 				   maxNReinfLayers (maxNumReinfLayers),
                                    nPatches(0), 
                                    nReinfLayers(0), 
-                                   patch(0), reinfLayer(0)
+                                   patch(0), reinfLayer(0), 
+				   numFibers(0), theFibers(0), sizeFibers(32)
 {
+
+    theFibers = new Fiber *[sizeFibers];
+
+    if (theFibers == 0) {
+	g3ErrorHandler->warning("%s -- failed to allocate Fiber pointers",
+			      "FiberSectionRepr::FiberSectionRepr");
+	sizeFibers = 0;
+    }
+
    patch      = new Patch*[maxNumPatches];
    if (!patch)
    {
@@ -127,6 +137,10 @@ FiberSectionRepr::~FiberSectionRepr(void)
       
       delete [] reinfLayer;
    } 
+   
+   if (theFibers != 0)
+       delete [] theFibers;  // NOTE: don't delete fiber objects themselves
+                             //       leave this to FiberSection destructor
 }
         
  
@@ -236,3 +250,62 @@ ostream &operator<<(ostream &s, FiberSectionRepr &fiberSectionRepr)
    return s;
 }
   
+
+
+int
+FiberSectionRepr::addFiber(Fiber &newFiber)
+{
+    if (numFibers < sizeFibers) {
+	// space available in array .. set new pointer and increment number
+	theFibers[numFibers] = &newFiber;
+	numFibers++;
+    }
+    else {
+	// need to create a larger array
+	int newSize = 2*numFibers;
+	if (newSize == 0) 
+	    newSize = 2; // in case failed in constructor
+	
+	Fiber **newArray = new Fiber *[newSize]; 
+	
+	if (newArray == 0) {
+	    g3ErrorHandler->warning("%s -- failed to allocate Fiber pointers",
+				  "FiberSection::addFiber");
+	    return -1;
+	}
+	    
+	// set the new size of the array
+	sizeFibers = newSize;
+	
+	// copy the old pointers
+	for (int i = 0; i < numFibers; i++)
+	    newArray[i] = theFibers[i];
+	
+	// add the new pointer
+	newArray[numFibers] = &newFiber;
+	numFibers++;
+	
+	// zero the last elements of the array
+	for (int j = numFibers; j < newSize; j++) 
+	    newArray[j] = 0;
+	
+	delete [] theFibers;
+	
+	theFibers = newArray;
+    }
+  
+    return 0;
+}
+
+
+int
+FiberSectionRepr::getNumFibers(void) const
+{
+    return numFibers;
+}
+
+Fiber **
+FiberSectionRepr::getFibers(void) const
+{
+    return theFibers;
+}

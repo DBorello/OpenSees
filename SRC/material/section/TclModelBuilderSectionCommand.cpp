@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 05:56:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/TclModelBuilderSectionCommand.cpp,v $
                                                                         
                                                                         
@@ -694,6 +694,111 @@ TclModelBuilder_addPatch(ClientData clientData, Tcl_Interp *interp, int argc,
 
 
 
+// add patch to fiber section
+int
+TclModelBuilder_addFiber(ClientData clientData, Tcl_Interp *interp, int argc, 
+			 char **argv, TclModelBuilder *theTclModelBuilder)
+{
+    // check if a section is being processed
+    if (currentSectionTag == 0) {
+	interp->result = "WARNING subcommand 'fiber' is only valid inside a 'section' command";
+	return TCL_ERROR;
+    }	   
+    
+    // make sure at least one other argument to contain patch type
+    if (argc < 6) {
+	interp->result = "WARNING invalid num args: fiber yLoc zLoc area matTag";
+	return TCL_ERROR;
+    }    
+
+    SectionRepres *sectionRepres = 
+	theTclModelBuilder->getSectionRepres(currentSectionTag);
+    
+    if (sectionRepres == 0) {
+	interp->result = "WARNING cannot retrieve section";
+	return TCL_ERROR;
+    }    
+	
+    if (sectionRepres->getType() != SEC_TAG_FiberSection) {
+	interp->result = "WARNING section invalid: patch can only be added to fiber sections";
+	return TCL_ERROR;
+    }
+
+    FiberSectionRepr *fiberSectionRepr = (FiberSectionRepr *) sectionRepres;
+    int numFibers = fiberSectionRepr->getNumFibers();    
+    
+    int NDM = theTclModelBuilder->getNDM();  
+    
+    Fiber *theFiber =0;
+      
+    int matTag;
+    double yLoc, zLoc, area;
+
+    
+    if (Tcl_GetDouble(interp, argv[1], &yLoc) != TCL_OK) {
+         interp->result = "WARNING invalid yLoc: fiber yLoc zLoc area matTag";
+         return TCL_ERROR;
+     }    
+    if (Tcl_GetDouble(interp, argv[2], &zLoc) != TCL_OK) {
+         interp->result = "WARNING invalid zLoc: fiber yLoc zLoc area matTag";
+         return TCL_ERROR;
+     }        
+    if (Tcl_GetDouble(interp, argv[3], &area) != TCL_OK) {
+         interp->result = "WARNING invalid area: fiber yLoc zLoc area matTag";
+         return TCL_ERROR;
+     }            
+    
+    if (Tcl_GetInt(interp, argv[4], &matTag) != TCL_OK) {
+         interp->result = "WARNING invalid matTag: fiber yLoc zLoc area matTag";
+         return TCL_ERROR;
+     }                
+    
+    UniaxialMaterial *material = theTclModelBuilder->getUniaxialMaterial(matTag);
+    
+    // creates 2d section      
+    if (NDM == 2) {
+
+	if (material == 0) {
+	    interp->result = "WARNING invalid material ID for patch";
+	    return TCL_ERROR;
+	}   
+
+	theFiber = new UniaxialFiber2d(numFibers, *material, area, zLoc);
+	if (theFiber == 0) {
+	    interp->result = "WARNING unable to allocate fiber ";
+	    return TCL_ERROR;
+	}    
+    }
+
+    else if (NDM == 3) {
+
+	Vector fiberPosition(2);
+	fiberPosition(0) = yLoc;
+	fiberPosition(1) = zLoc;
+	    
+	theFiber = new UniaxialFiber3d(numFibers, *material, area, fiberPosition);
+	if (theFiber != 0) {
+	    interp->result = "WARNING unable to allocate fiber ";
+	    return TCL_ERROR;
+	}    
+    }
+
+    else {
+	interp->result = "WARNING fiber command for FiberSection only fo 2 or 3d ";
+	return TCL_ERROR;
+    }    
+	
+    // add patch to section representation
+    int error = fiberSectionRepr->addFiber(*theFiber);
+      
+    if (error) {
+	interp->result = "WARNING cannot add patch to section";
+	return TCL_ERROR;
+    }  
+}
+
+
+
 
 // add layers of reinforcing bars to fiber section
           
@@ -990,8 +1095,11 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
       patch          = fiberSectionRepr->getPatches();
       numReinfLayers = fiberSectionRepr->getNumReinfLayers();
       reinfLayer     = fiberSectionRepr->getReinfLayers(); 
-   
-      numFibers = 0;
+
+      int numSectionRepresFibers = fiberSectionRepr->getNumFibers();
+      Fiber **sectionRepresFibers = fiberSectionRepr->getFibers();
+      
+      numFibers = numSectionRepresFibers;
       for (i = 0; i < numPatches; i++)
          numFibers += patch[i]->getNumCells();
       
@@ -1003,9 +1111,9 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
       Vector fiberPosition(2);
       int    matTag;
       
-      ID     fibersMaterial(numFibers);
-      Matrix fibersPosition(2,numFibers);
-      Vector fibersArea(numFibers);
+      ID     fibersMaterial(numFibers-numSectionRepresFibers);
+      Matrix fibersPosition(2,numFibers-numSectionRepresFibers);
+      Vector fibersArea(numFibers-numSectionRepresFibers);
 
       int  numCells;
       Cell **cell;
@@ -1075,19 +1183,24 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
       
       int NDM = theTclModelBuilder->getNDM();   // dimension of the structure (1d, 2d, or 3d)
 
-      // creates 2d section
+
+      Fiber **fiber = new Fiber *[numFibers];
+      if (fiber == 0) {
+	  interp->result = "WARNING unable to allocate fibers ";
+	  return TCL_ERROR;
+      }          
       
+      // copy the section repres fibers
+      for (i=0; i<numSectionRepresFibers; i++)
+	  fiber[i] = sectionRepresFibers[i];
+
+      // creates 2d section      
+
+
       if (NDM == 2)     
       {
-         Fiber **fiber = new Fiber *[numFibers];
-          
-         if (fiber == 0)
-         {
-            interp->result = "WARNING unable to allocate fibers ";
-            return TCL_ERROR;
-         }    
-
-	 for (k = 0; k < numFibers; k++)
+	 k = 0;
+	 for (i = numSectionRepresFibers; i < numFibers; i++)
 	 {    
             material = theTclModelBuilder->getUniaxialMaterial(fibersMaterial(k));
             if (material == 0)
@@ -1096,7 +1209,7 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
                return TCL_ERROR;
             }   
 	    
-	    fiber[k] = new UniaxialFiber2d(k, *material, fibersArea(k), fibersPosition(0,k));
+	    fiber[i] = new UniaxialFiber2d(k, *material, fibersArea(k), fibersPosition(0,k));
             if (!fiber[k]) 
             {
                interp->result = "WARNING unable to allocate fiber ";
@@ -1104,6 +1217,7 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
             }    
    
             //cerr << *fiber[k];
+	    k++;
 	 }
 	
 	 SectionForceDeformation *section = new FiberSection(secTag, numFibers, fiber);
@@ -1125,18 +1239,10 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
       }
       else if (NDM == 3)     
       {
-      
-         Fiber **fiber = new Fiber *[numFibers];
-          
-         if (fiber == 0)
-         {
-            interp->result = "WARNING unable to allocate fibers ";
-            return TCL_ERROR;
-         }    
 
 	 Vector fiberPosition(2);
-	 
-	 for (k = 0; k < numFibers; k++)
+	 k = 0;
+	 for (i = numSectionRepresFibers; i < numFibers; i++)
 	 {    
             material = theTclModelBuilder->getUniaxialMaterial(fibersMaterial(k));
             if (material == 0)
@@ -1148,13 +1254,13 @@ buildSection (Tcl_Interp *interp, TclModelBuilder *theTclModelBuilder, int secTa
 	    fiberPosition(0) = fibersPosition(0,k);
 	    fiberPosition(1) = fibersPosition(1,k);
 	    
-	    fiber[k] = new UniaxialFiber3d(k, *material, fibersArea(k), fiberPosition);
+	    fiber[i] = new UniaxialFiber3d(k, *material, fibersArea(k), fiberPosition);
             if (!fiber[k]) 
             {
                interp->result = "WARNING unable to allocate fiber ";
                return TCL_ERROR;
             }    
-   
+	    k++;
             //cerr << *fiber[k];
 	 }
 	

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 05:56:44 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/repres/section/FiberSectionRepr.h,v $
                                                                         
                                                                         
@@ -35,6 +35,7 @@
 
 class Patch;
 class ReinfLayer;
+class Fiber;
 
 #define SEC_TAG_FiberSection 1
 
@@ -59,16 +60,18 @@ class FiberSectionRepr: public SectionRepres
  
     int  addPatch          (const Patch & aPatch);
     int  addReinfLayer     (const ReinfLayer & aReinfLayer);
+    int  addFiber(Fiber &theFiber);    
 
     // inquiring functions
-
     int  getType(void) const;
       
     int          getNumPatches     (void) const;
     int          getNumReinfLayers (void) const;
+    int          getNumFibers(void) const;    
     Patch      **getPatches        (void) const;     
     ReinfLayer **getReinfLayers    (void) const;
-   
+    Fiber     **getFibers(void) const;
+    
     void Print(ostream &s, int flag =0);
     friend ostream &operator<<(ostream &s, FiberSectionRepr &fiberSectionRepr);    
   
@@ -76,6 +79,7 @@ class FiberSectionRepr: public SectionRepres
   protected:
     
   private:
+    
     int        sectID;
     int        maxNPatches;       // maximum number of patches that can be stored
     int        maxNReinfLayers;   // maximum number of reinforcing layers  that can be stored
@@ -84,6 +88,11 @@ class FiberSectionRepr: public SectionRepres
                                   // list later!!!!!!!!)
     int        nPatches;          // current number of patches
     int        nReinfLayers;      // current number of reinforcing layers
+
+    int numFibers;       // number of fibers in the section
+    Fiber **theFibers;   // array of pointers to fibers
+                         // that form the section
+    int sizeFibers;      // size of the fibers array
 };
 
 
