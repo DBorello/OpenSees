@@ -2,7 +2,8 @@ include ../../../Makefile.def
 
 OBJS       = DomainUser.o Analysis.o StaticAnalysis.o TransientAnalysis.o \
 	     DirectIntegrationAnalysis.o DomainDecompositionAnalysis.o \
-	     SubstructuringAnalysis.o EigenAnalysis.o
+	     SubstructuringAnalysis.o EigenAnalysis.o \
+	     VariableTimeStepDirectIntegrationAnalysis.o
 
 # Compilation control
 all:         $(OBJS)

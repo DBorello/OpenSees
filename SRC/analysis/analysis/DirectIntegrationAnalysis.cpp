@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 04:47:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.cpp,v $
                                                                         
                                                                         
@@ -156,6 +156,7 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 	    cerr << "DirectIntegrationAnalysis::analyze() - the Algorithm failed";
 	    cerr << " at time " << the_Domain->getCurrentTime() << endl;
 	    the_Domain->revertToLastCommit();	    
+	    theIntegrator->revertToLastStep();
 	    return -3;
 	}    
 	
@@ -165,6 +166,7 @@ DirectIntegrationAnalysis::analyze(int numSteps, double dT)
 	    cerr << "the Integrator failed to commit";
 	    cerr << " at time " << the_Domain->getCurrentTime() << endl;
 	    the_Domain->revertToLastCommit();	    
+	    theIntegrator->revertToLastStep();
 	    return -4;
 	} 
    
@@ -332,8 +334,37 @@ DirectIntegrationAnalysis::setLinearSOE(LinearSOE &theNewSOE)
 
 
 
+int
+DirectIntegrationAnalysis::checkDomainChange(void)
+{
+  Domain *the_Domain = this->getDomainPtr();
+
+  // check if domain has undergone change
+  int stamp = the_Domain->hasDomainChanged();
+  if (stamp != domainStamp) {
+    domainStamp = stamp;	
+    if (this->domainChanged() < 0) {
+      cerr << "DirectIntegrationAnalysis::initialize() - domainChanged() failed\n";
+      return -1;
+    }	
+  }
+
+  return 0;
+}
 
 
+EquiSolnAlgo *
+DirectIntegrationAnalysis::getAlgorithm(void)
+{
+  return theAlgorithm;
+}
+
+
+TransientIntegrator *
+DirectIntegrationAnalysis::getIntegrator(void)
+{
+  return theIntegrator;
+}
 
 
 

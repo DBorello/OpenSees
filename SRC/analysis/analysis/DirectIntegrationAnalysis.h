@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2000-12-13 04:47:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/analysis/DirectIntegrationAnalysis.h,v $
                                                                         
                                                                         
@@ -58,7 +58,7 @@ class DirectIntegrationAnalysis: public TransientAnalysis
 			      EquiSolnAlgo &theSolnAlgo,		   
 			      LinearSOE &theSOE,
 			      TransientIntegrator &theIntegrator);
-    ~DirectIntegrationAnalysis();
+    virtual ~DirectIntegrationAnalysis();
 
     void clearAll(void);	    
     
@@ -69,7 +69,11 @@ class DirectIntegrationAnalysis: public TransientAnalysis
     
     int setAlgorithm(EquiSolnAlgo &theAlgorithm);
     int setIntegrator(TransientIntegrator &theIntegrator);
-    int setLinearSOE(LinearSOE &theSOE);    
+    int setLinearSOE(LinearSOE &theSOE); 
+    
+    int checkDomainChange(void);
+    EquiSolnAlgo *getAlgorithm(void);
+    TransientIntegrator *getIntegrator();
     
   protected:
     
