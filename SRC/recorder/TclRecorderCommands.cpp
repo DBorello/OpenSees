@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.20 $
-// $Date: 2003-05-07 22:12:23 $
+// $Revision: 1.21 $
+// $Date: 2003-06-18 23:18:11 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -47,6 +47,7 @@
 #include <NodeRecorder.h>
 #include <EnvelopeNodeRecorder.h>
 #include <EnvelopeElementRecorder.h>
+#include <PatternRecorder.h>
 #include <DriftRecorder.h>
 #include <ElementRecorder.h>
 #include <TclFeViewer.h>
@@ -475,6 +476,31 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 						  fileName, responseID, dT);
     } 
 
+    else if (strcmp(argv[1],"Pattern") == 0) {
+      if (argc < 4) {
+	opserr << "WARNING recorder Pattern filename? <startFlag> patternTag?";
+	return TCL_ERROR;
+      }
+      
+      
+      int flag = 0;
+      if (strcmp(argv[3],"-time") == 0)
+	flag = 1;
+      if (strcmp(argv[3],"-load") == 0)
+	flag = 2;
+      
+      int pos = 3;
+      if (flag != 0) pos = 4;
+      
+      int patternTag;
+      
+      if (Tcl_GetInt(interp, argv[pos++], &patternTag) != TCL_OK)
+	return TCL_ERROR;
+      
+      (*theRecorder) = new PatternRecorder(patternTag, theDomain, argv[2], 0.0
+					   , flag);
+    }
+    
     // Create a recorder to write nodal drifts to a file
     else if (strcmp(argv[1],"Drift") == 0) {
       if (argc < 7) {
