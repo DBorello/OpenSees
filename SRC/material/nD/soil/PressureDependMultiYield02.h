@@ -1,9 +1,9 @@
 //<<<<<<< PressureDependMultiYield.h
-// $Revision: 1.4 $
-// $Date: 2005-01-18 21:29:16 $
+// $Revision: 1.5 $
+// $Date: 2005-04-01 20:21:29 $
 //=======
-// $Revision: 1.4 $
-// $Date: 2005-01-18 21:29:16 $
+// $Revision: 1.5 $
+// $Date: 2005-04-01 20:21:29 $
 //>>>>>>> 1.7
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield02.h,v $
 
@@ -29,33 +29,33 @@ class PressureDependMultiYield02 : public NDMaterial
 public:
      // Initialization constructor
      PressureDependMultiYield02 (int tag,
-				 int nd,
-				 double rho,
-				 double refShearModul,
-				 double refBulkModul,
-				 double frictionAng,
-				 double peakShearStra,
-				 double refPress,
-				 double pressDependCoe,
-				 double phaseTransformAngle,
-				 double contractionParam1,
-				 double contractionParam3,
-				 double dilationParam1,
-				 double liquefactionParam1,
-				 double liquefactionParam2,
-				 int   numberOfYieldSurf = 20,
-				 double * gredu = 0,
-				 double contractionParam2 = 25,
-				 double dilationParam2 = 1.5,
-				 double dilationParam3 = 0.5,
-				 double e = 0.6,
-				 double volLimit1 = 0.9,
-				 double volLimit2 = 0.02,
-				 double volLimit3 = 0.7,
-				 double atm = 101.,
-				 double cohesi = 0.1,
-				 double hv = 0.,
-				 double pv = 1.);
+			       int nd,
+				   double rho,
+			       double refShearModul,
+			       double refBulkModul,
+			       double frictionAng,
+			       double peakShearStra,
+			       double refPress,
+			       double pressDependCoe,
+			       double phaseTransformAngle,
+			       double contractionParam1,
+			       double contractionParam3,
+			       double dilationParam1,
+			       double dilationParam3,
+			       int   numberOfYieldSurf = 20,
+				   double * gredu = 0,
+			       double contractionParam2 = 5.,
+			       double dilationParam2 = 3.,
+			       double liquefactionParam1 = 1. ,
+			       double liquefactionParam2 = 0. ,
+		           double e = 0.6,
+			       double volLimit1 = 0.9,
+			       double volLimit2 = 0.02,
+			       double volLimit3 = 0.7,
+			       double atm = 101.,
+				   double cohesi = 0.1,
+				   double hv = 0.,
+				   double pv = 1.);
 
      // Default constructor
      PressureDependMultiYield02 ();
@@ -124,7 +124,7 @@ public:
      //void setCurrentStress(const Vector stress) { currentStress=T2Vector(stress); }
      int updateParameter(int responseID, Information &eleInformation);
 
-	 
+
     // RWB; PyLiq1 & TzLiq1 need to see the excess pore pressure and initial stresses.
     friend class PyLiq1;
     friend class TzLiq1;
