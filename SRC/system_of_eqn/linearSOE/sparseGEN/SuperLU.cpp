@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:02:03 $
+// $Revision: 1.4 $
+// $Date: 2005-03-17 20:47:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SuperLU.cpp,v $
                                                                         
                                                                         
@@ -41,12 +41,30 @@
 #include <FEM_ObjectBroker.h>
 
 
-SuperLU::SuperLU(int perm, double thrsh, int relx, int panel)
-:SparseGenColLinSolver(SOLVER_TAGS_SuperLU),perm_r(0),perm_c(0),
- etree(0), sizePerm(0),
- relax(relx), permSpec(perm),  panelSize(panel), thresh(thrsh)
+SuperLU::SuperLU(int perm, 
+		 double drop_tolerance, 
+		 int panel, 
+		 int relx, 
+		 char symm)
+:SparseGenColLinSolver(SOLVER_TAGS_SuperLU),
+ perm_r(0),perm_c(0), etree(0), sizePerm(0),
+ relax(relx), permSpec(perm), panelSize(panel), 
+ drop_tol(drop_tolerance), symmetric(symm)
 {
-  refact[0] = 'N';    
+  // set_default_options(&options);
+  options.Fact = DOFACT;
+  options.Equil = YES;
+  options.ColPerm = COLAMD;
+  options.DiagPivotThresh = 1.0;
+  options.Trans = NOTRANS;
+  options.IterRefine = NOREFINE;
+  options.SymmetricMode = NO;
+  options.PivotGrowth = NO;
+  options.ConditionNumber = NO;
+  options.PrintStat = YES;
+
+  if (symmetric == 'Y')
+    options.SymmetricMode = YES;
 }
 
 
@@ -60,6 +78,7 @@ SuperLU::~SuperLU()
 	delete [] etree;
 }
 
+/*
 extern "C" void  dgstrf (char *refact, SuperMatrix* A, double pivThresh, 
 			 double dropTol, int relax, 
 			 int panelSize, int *etree,
@@ -84,6 +103,7 @@ extern "C" void    sp_preorder (char*, SuperMatrix*, int*, int*, SuperMatrix*);
 extern "C" void    dCreate_Dense_Matrix(SuperMatrix *, int, int, double *, int,
 	       	                     Stype_t, Dtype_t, Mtype_t);
 
+*/
 
 int
 SuperLU::solve(void)
@@ -115,22 +135,28 @@ SuperLU::solve(void)
     if (theSOE->factored == false) {
 	// factor the matrix
 	int info;
+
+	dgstrf(&options, &AC, drop_tol, relax, panelSize,
+	       etree, NULL, 0, perm_c, perm_r, &L, &U, &stat, &info);
+
+	/*
 	dgstrf(refact, &AC, thresh, 0.0, relax, panelSize, etree, NULL, 0,
 	       perm_r, perm_c, &L, &U, &info);
+	*/
 
 	if (info != 0) {	
 	   opserr << "WARNING SuperLU::solve(void)- ";
 	   opserr << " Error " << info << " returned in factorization dgstrf()\n";
 	   return -info;
 	}
-	refact[0] = 'Y';
+	options.Fact = FACTORED;
 	theSOE->factored = true;
     }	
 
     // do forward and backward substitution
-    char trans[1]; trans[0] = 'N';
+    trans_t trans = NOTRANS;
     int info;
-    dgstrs (trans, &L, &U, perm_r, perm_c, &B, &info);    
+    dgstrs (trans, &L, &U, perm_c, perm_r, &B, &stat, &info);    
 
     if (info != 0) {	
        opserr << "WARNING SuperLU::solve(void)- ";
@@ -176,24 +202,24 @@ SuperLU::setSize()
       }
 
       // initialisation
-      StatInit(panelSize, relax);
+      StatInit(&stat);
 
       // create the SuperMatrix A	
       dCreate_CompCol_Matrix(&A, n, n, theSOE->nnz, theSOE->A, 
 			     theSOE->rowA, theSOE->colStartA, 
-			     NC, _D, GE);
+			     SLU_NC, SLU_D, SLU_GE);
 
       // obtain and apply column permutation to give SuperMatrix AC
       get_perm_c(permSpec, &A, perm_c);
 
-      sp_preorder(refact, &A, perm_c, etree, &AC);
+      sp_preorder(&options, &A, perm_c, etree, &AC);
 
       // create the rhs SuperMatrix B 
-      dCreate_Dense_Matrix(&B, n, 1, theSOE->X, n, DN, _D, GE);
+      dCreate_Dense_Matrix(&B, n, 1, theSOE->X, n, SLU_DN, SLU_D, SLU_GE);
 	
       // set the refact variable to 'N' after first factorization with new size 
       // can set to 'Y'.
-      refact[0] = 'N';
+      options.Fact = DOFACT;
 
     } else if (n == 0)
 	return 0;

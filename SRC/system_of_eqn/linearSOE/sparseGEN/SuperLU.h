@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-01-25 20:27:10 $
+// $Revision: 1.3 $
+// $Date: 2005-03-17 20:47:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SuperLU.h,v $
                                                                         
                                                                         
@@ -45,13 +45,17 @@
 // What: "@(#) SuperLU.h, revA"
 
 #include <SparseGenColLinSolver.h>
+#include <dsp_defs.h>
 #include <supermatrix.h>
 
 class SuperLU : public SparseGenColLinSolver
 {
   public:
-    SuperLU(int permSpec = 0, double thresh = 0.0, int panelSize = 6, 
-	    int relax = 6);     
+    SuperLU(int permSpec = 0, 
+	    double drop_tol = 0.0, 
+	    int panelSize = 6, 
+	    int relax = 6,
+	    char symmetric = 'N');
     ~SuperLU();
 
     int solve(void);
@@ -69,8 +73,10 @@ class SuperLU : public SparseGenColLinSolver
     int *etree;
     int sizePerm;
     int relax, permSpec, panelSize;
-    float thresh;
-    char refact[1];
+    double drop_tol;
+    char symmetric;
+    superlu_options_t options;
+    SuperLUStat_t stat;
 };
 
 #endif

@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:02:03 $
+// $Revision: 1.5 $
+// $Date: 2005-03-17 20:47:09 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.cpp,v $
                                                                         
                                                                         
-// File: ~/system_of_eqn/linearSOE/sparseGEN/SparseGenColLinSOE.h
-//
 // Written: fmk 
 // Created: 04/98
 // Revision: A
