@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-11-26 22:55:34 $
+// $Revision: 1.2 $
+// $Date: 2001-11-27 06:55:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dUniformLoad.cpp,v $
                                                                         
 
@@ -71,7 +71,7 @@ Beam2dUniformLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroke
 }
 
 void 
-Beam2dUniformLoad::Print(ostream &s, int flag =0)
+Beam2dUniformLoad::Print(ostream &s, int flag)
 {
   s << "Beam2dUniformLoad - reference load : " << w << endl;
   s << "  elements acted on: " << this->getElementTags();

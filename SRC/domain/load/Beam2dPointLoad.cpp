@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-11-26 22:55:34 $
+// $Revision: 1.2 $
+// $Date: 2001-11-27 06:55:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/load/Beam2dPointLoad.cpp,v $
                                                                         
 // Written: fmk 
@@ -70,7 +70,7 @@ Beam2dPointLoad::recvSelf(int commitTag, Channel &theChannel,  FEM_ObjectBroker 
 }
 
 void 
-Beam2dPointLoad::Print(ostream &s, int flag =0)
+Beam2dPointLoad::Print(ostream &s, int flag)
 {
   s << "Beam2dPointLoad - reference load : " << P << " acting at : " << x << " relative to length\n";
   s << "  elements acted on: " << this->getElementTags();
