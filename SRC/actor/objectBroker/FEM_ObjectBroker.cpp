@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-10-28 05:50:01 $
+// $Revision: 1.3 $
+// $Date: 2001-05-03 06:35:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBroker.cpp,v $
                                                                         
                                                                         
@@ -68,6 +68,8 @@
 #include <GenericSectionNd.h>
 #include <SectionAggregator.h>
 #include <FiberSection.h>
+#include <FiberSection2d.h>
+#include <FiberSection3d.h>
 
 // NDMaterials
 #include <ElasticIsotropicPlaneStrain2D.h>
@@ -477,8 +479,14 @@ FEM_ObjectBroker::getNewSection(int classTag)
 	     return new SectionAggregator();
 
 	case SEC_TAG_Fiber:
-		return new FiberSection();
-	     
+	  return new FiberSection();
+
+        case SEC_TAG_FiberSection2d:
+	  return new FiberSection2d();
+      
+        case SEC_TAG_FiberSection3d:
+	  return new FiberSection3d();
+
 	default:
 	     cerr << "FEM_ObjectBroker::getNewSection - ";
 	     cerr << " - no section type exists for class tag ";
