@@ -21,23 +21,20 @@
 //#
 //# DATE:              19AUg2003
 //# UPDATE HISTORY:    Sept 2003
-//#
+//#		       28May2004
 //#
 //===============================================================================
 #include <tcl.h>
 #include <OPS_Globals.h>
-
-//#include <stdlib.h>
-//#include <string.h>
-
-#include <Vector.h>
 
 #include <Domain.h>
 
 #include <ErrorHandler.h>
 #include <TclModelBuilder.h>
 
-#include <FiniteDeformationElastic3D.h>
+#include <NeoHookeanCompressible3D.h>
+#include <FDdecoupledElastic3D.h>
+
 #include <W.h>
 #include <LogWEnergy.h>
 #include <MooneyRivlinWEnergy.h>
@@ -47,326 +44,368 @@
 #include <OgdenSimoWEnergy.h>
 #include <MooneyRivlinSimoWEnergy.h>
 
-
-// the functions to create the component objects (defined at eof)
-WEnergy *EvaluateWEnergyArgs(ClientData, Tcl_Interp *, TCL_Char *tclString);
-
-// little function to free memory after invoke Tcl_SplitList
-// note Tcl_Split list stores the array of pointers and the strings in
-// one array, which is why Tcl_Free needs only be called on the array.
-
-static void cleanup(TCL_Char **argv)
-{
-    Tcl_Free((char *) argv);
-}
+//static void cleanup(TCL_Char **argv)
+//{
+//    Tcl_Free((char *) argv);
+//}
 
 FiniteDeformationElastic3D *
 TclModelBuilder_addFiniteDeformationElastic3D(ClientData clientData, Tcl_Interp *interp,  int argc,
           TCL_Char **argv, TclModelBuilder *theTclBuilder, int eleArgStart)
 {
-  // create some empty pointers which we fill in as parse the command line
-  int tag = 0;
-  double rho_in = 0.0;
-  WEnergy  *wenergy =0;
+  //int argc;
+  //TCL_Char **argv;
 
+  int tag = 0;
+  
   int loc = eleArgStart;
 
-  if (argc < 6) {
-    opserr << "WARNING FiniteDeformation3DElastic -insufficient number of arguments\n";
-    return 0;
-  }
-
-  if (Tcl_GetInt(interp, argv[loc+1], &tag) != TCL_OK)
-  {
-    opserr << "nDMaterial FiniteDeformationElastic3D - invalid tag " << argv[loc+1] << endln;
-    return 0;
-  }
-
-  if ( (strcmp(argv[loc+2],"-wenergy") == 0) || (strcmp(argv[loc+2],"-WEnergy") == 0)
-          || (strcmp(argv[loc+2],"-w") == 0) || (strcmp(argv[loc+2],"-W") == 0) )
-  {
-      wenergy = EvaluateWEnergyArgs(clientData, interp, argv[loc+3]);
-      if (wenergy == 0)
-      {
-        opserr << "nDMaterial FiniteDeformationElastic3D - could not create a WEnergy from" << argv[loc+3] << endln;
-        return 0;
-      }
-  }
-
-  if (Tcl_GetDouble(interp, argv[loc+4], &rho_in) != TCL_OK)
-  {
-    opserr << "nDMaterial FiniteDeformationElastic3D - invalid rho " << argv[loc+4] << endln;
-    return 0;
-  }
-
   FiniteDeformationElastic3D *theMaterial = 0;
-  if ( wenergy != 0)
-    theMaterial = new FiniteDeformationElastic3D(tag, wenergy, rho_in);
 
-  else
-    opserr << "invalid number of args used to create a FiniteDeformationElastic3D material\n";
+  if (Tcl_GetInt(interp, argv[loc+1], &tag) != TCL_OK) {
+    opserr << "Warning: nDMaterial FiniteDeformationElastic3D - invalid tag " << argv[loc+1] << "\n";
+    exit (-1);
+  }
+  
+  // Neo-Hookean (Compressible)
+  if ( (strcmp(argv[loc+2],"NeoHookean3D") == 0) || (strcmp(argv[loc+2],"NeoHookeanCompressible3D") == 0) ) {    
 
+    double rho_in = 0.0;
+    double K_in = 0.0;
+    double G_in = 0.0;
+
+    if (argc < 7) {
+      opserr << "Warning: NeoHookeanCompressible3D -insufficient number of arguments\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+3], &K_in) != TCL_OK) {
+      opserr << "nDMaterial NeoHookeanCompressible3D - invalid K " << argv[loc+3] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+4], &G_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial NeoHookeanCompressible3D - invalid G " << argv[loc+4] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+5], &rho_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial NeoHookeanCompressible3D - invalid rho " << argv[loc+5] << "\n";
+      exit (-1);
+    }
+    
+    theMaterial = new NeoHookeanCompressible3D(tag, K_in, G_in, rho_in);
+  }
+
+  // DecoupledLog3D
+  else if ( (strcmp(argv[loc+2],"DecoupledLog3D") == 0) || (strcmp(argv[loc+2],"DecoupledLogarithmic3D") == 0) ) {
+    
+    double K_in = 0.0;
+    double G_in = 0.0;
+    double rho_in = 0.0;
+    WEnergy  *wenergy =0;
+
+    if (argc < 7) {
+      opserr << "Warning: DecoupledLogarithmic3D -insufficient number of arguments\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+3], &K_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledLogarithmic3D - invalid K " << argv[loc+3] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+4], &G_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledLogarithmic3D - invalid G " << argv[loc+4] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+5], &rho_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledLogarithmic3D - invalid rho " << argv[loc+5] << "\n";
+      exit (-1);
+    }
+    
+    wenergy = new LogWEnergy(K_in, G_in);
+    
+    if ( wenergy != 0 ) {
+      theMaterial = new FDdecoupledElastic3D(tag, wenergy, rho_in);
+    }
+    else {
+      opserr << "Error: nDMaterial DecoupledLogarithmic3D -invalid material model\n";
+      exit (-1);
+    }
+  
+  }
+  
+  // DecoupledNeoHookean3D
+  else if ( (strcmp(argv[loc+2],"DecoupledNeoHookean3D") == 0) || (strcmp(argv[loc+2],"DecoupledNH3D") == 0) ) {
+    
+    double K_in = 0.0;
+    double G_in = 0.0;
+    double rho_in = 0.0;
+    WEnergy  *wenergy =0;
+
+    if (argc < 7) {
+      opserr << "Warning: DecoupledNeoHookean3D -insufficient number of arguments\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+3], &K_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledNeoHookean3D - invalid K " << argv[loc+3] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+4], &G_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledNeoHookean3D - invalid G " << argv[loc+4] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+5], &rho_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledNeoHookean3D - invalid rho " << argv[loc+5] << "\n";
+      exit (-1);
+    }
+    
+    wenergy = new NeoHookeanWEnergy(K_in, G_in);
+    
+    if ( wenergy != 0 ) {
+      theMaterial = new FDdecoupledElastic3D(tag, wenergy, rho_in);
+    }
+    else {
+      opserr << "Error: nDMaterial DecoupledNeoHookean3D -invalid material model\n";
+      exit (-1);
+    }
+  
+  }
+
+  // DecoupledMooneyRivlinSimo3D
+  else if ( (strcmp(argv[loc+2],"DecoupledMooneyRivlinSimo3D") == 0) || (strcmp(argv[loc+2],"DecoupledMRS3D") == 0) ) {
+    
+    double c1_in = 0.0;
+    double c2_in = 0.0;
+    double K_in = 0.0;
+    double rho_in = 0.0;
+    WEnergy  *wenergy =0;
+
+    if (argc < 8) {
+      opserr << "Warning: DecoupledNeoHookean3D -insufficient number of arguments\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+3], &c1_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledNeoHookean3D - invalid c1 " << argv[loc+3] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+4], &c2_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledNeoHookean3D - invalid c2 " << argv[loc+4] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+5], &K_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledNeoHookean3D - invalid K " << argv[loc+5] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+6], &rho_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledNeoHookean3D - invalid rho " << argv[loc+6] << "\n";
+      exit (-1);
+    }
+    
+    wenergy = new MooneyRivlinSimoWEnergy(c1_in, c2_in, K_in);
+    
+    if ( wenergy != 0 ) {
+      theMaterial = new FDdecoupledElastic3D(tag, wenergy, rho_in);
+    }
+    else {
+      opserr << "Error: nDMaterial DecoupledMooneyRivlinSimo3D -invalid material model\n";
+      exit (-1);
+    }
+  
+  }
+
+  // DecoupleOgdenSimo3D
+  else if ( (strcmp(argv[loc+2],"DecoupledOgdenSimo3D") == 0) || (strcmp(argv[loc+2],"DecoupledOS3D") == 0) ) {
+    
+    int N_in = 0;
+    double K_in = 0.0;
+    double rho_in = 0.0;
+    WEnergy  *wenergy =0;
+
+    if (argc > 2*N_in+5) {
+      if (Tcl_GetInt(interp, argv[loc+3], &N_in) != TCL_OK) {
+        opserr << "Warning: invalid vector parameter number for Ogden Strain Energy Function\n";
+        exit (-1);
+      }
+      
+      double *cr_in = new double[N_in];
+      double *mur_in = new double[N_in];
+
+      for (int i=0; i<N_in; i++) {
+        if (Tcl_GetDouble(interp, argv[loc+4+i], &cr_in[i]) != TCL_OK) {
+          opserr << "Warning: invalid parameter for Ogden Strain Energy Function\n";
+          exit (-1);
+        }
+        if (Tcl_GetDouble(interp, argv[loc+4+N_in+i], &mur_in[i]) != TCL_OK) {
+          opserr << "Warning: invalid parameter for Ogden Strain Energy Function\n";
+          exit (-1);
+        }
+      }
+
+      if (Tcl_GetDouble(interp, argv[loc+2*N_in+4], &K_in) != TCL_OK) {
+        opserr << "Warning: invalid Bulk Modulus number for Ogden Strain Energy Function\n";
+        exit (-1);
+      }
+
+      if (Tcl_GetDouble(interp, argv[loc+2*N_in+5], &rho_in) != TCL_OK) {
+        opserr << "Warning: nDMaterial DecoupledSimoPister3D - invalid rho\n";
+        exit (-1);
+      }
+    
+      wenergy = new OgdenSimoWEnergy(N_in, cr_in, mur_in, K_in);
+    
+    if ( wenergy != 0 ) {
+      theMaterial = new FDdecoupledElastic3D(tag, wenergy, rho_in);
+      //if ( cr_in  ) delete cr_in;
+      //if ( mur_in ) delete mur_in;
+    }
+    else {
+      opserr << "Error: nDMaterial DecoupledOgdenSimo3D -invalid material model\n";
+      exit (-1);
+    }
+  
+    }
+  }
+
+  // DecoupledMooneyRivlin3D
+  else if ( (strcmp(argv[loc+2],"DecoupledMooneyRivlin3D") == 0) || (strcmp(argv[loc+2],"DecoupledMR3D") == 0) ) {
+    
+    double c1_in = 0.0;
+    double c2_in = 0.0;
+    double rho_in = 0.0;
+    WEnergy  *wenergy =0;
+
+    if (argc < 7) {
+      opserr << "Warning: DecoupledNeoHookean3D -insufficient number of arguments\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+3], &c1_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledNeoHookean3D - invalid c1 " << argv[loc+3] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+4], &c2_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledNeoHookean3D - invalid c2 " << argv[loc+4] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+5], &rho_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledNeoHookean3D - invalid rho " << argv[loc+5] << "\n";
+      exit (-1);
+    }
+    
+    wenergy = new MooneyRivlinWEnergy(c1_in, c2_in);
+    
+    if ( wenergy != 0 ) {
+      theMaterial = new FDdecoupledElastic3D(tag, wenergy, rho_in);
+    }
+    else {
+      opserr << "Error: nDMaterial DecoupledMooneyRivlin3D -invalid material model\n";
+      exit (-1);
+    }
+  
+  }
+
+  // DecoupleOgden3D
+  else if ( (strcmp(argv[loc+2],"DecoupledOgden3D") == 0) ) {
+    
+    int N_in = 0;
+    double rho_in = 0.0;    
+    WEnergy  *wenergy =0;
+
+    if (argc > 2*N_in+4) {
+      if (Tcl_GetInt(interp, argv[loc+3], &N_in) != TCL_OK) {
+        opserr << "Warning: invalid vector parameter number for Ogden Strain Energy Function\n";
+        exit (-1);
+      }
+      
+      double *cr_in = new double[N_in];
+      double *mur_in = new double[N_in];
+
+      for (int i=0; i<N_in; i++) {
+        if (Tcl_GetDouble(interp, argv[loc+4+i], &cr_in[i]) != TCL_OK) {
+          opserr << "Warning: invalid parameter for Ogden Strain Energy Function\n";
+          exit (-1);
+        }
+        if (Tcl_GetDouble(interp, argv[loc+4+N_in+i], &mur_in[i]) != TCL_OK) {
+          opserr << "Warning: invalid parameter for Ogden Strain Energy Function\n";
+          exit (-1);
+        }
+      }
+
+      if (Tcl_GetDouble(interp, argv[loc+2*N_in+4], &rho_in) != TCL_OK) {
+        opserr << "Warning: nDMaterial Ogden - invalid rho\n";
+        exit (-1);
+      }
+    
+      wenergy = new OgdenWEnergy(N_in, cr_in, mur_in);
+    
+    if ( wenergy != 0 ) {
+      theMaterial = new FDdecoupledElastic3D(tag, wenergy, rho_in);
+      //if ( cr_in  ) delete cr_in;
+      //if ( mur_in ) delete mur_in;
+    }
+    else {
+      opserr << "Error: nDMaterial DecoupledOgden3D -invalid material model\n";
+      exit (-1);
+    }
+  
+    }
+  }
+
+  // DecoupledSimoPister3D
+  else if ( (strcmp(argv[loc+2],"DecoupledSimoPister3D") == 0) || (strcmp(argv[loc+2],"DecoupledSP3D") == 0) ) {
+    
+    double K_in = 0.0;
+    double rho_in = 0.0;
+    WEnergy  *wenergy =0;
+
+    if (argc < 6) {
+      opserr << "Warning: DecoupledSimoPister3D -insufficient number of arguments\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+3], &K_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledSimoPister3D - invalid K " << argv[loc+3] << "\n";
+      exit (-1);
+    }
+
+    if (Tcl_GetDouble(interp, argv[loc+4], &rho_in) != TCL_OK) {
+      opserr << "Warning: nDMaterial DecoupledSimoPister3D - invalid rho " << argv[loc+4] << "\n";
+      exit (-1);
+    }
+    
+    wenergy = new SimoPisterWEnergy(K_in);
+    
+    if ( wenergy != 0 ) {
+      theMaterial = new FDdecoupledElastic3D(tag, wenergy, rho_in);
+    }
+    else {
+      opserr << "Error: nDMaterial DecoupledSimoPister3D -invalid material model\n";
+      exit (-1);
+    }
+  
+  }
+  
+  // Else
+  else {
+    opserr << "Error: nDMaterial - unknown FiniteDeformationElastic3D material model\n";
+    exit (-1);
+  }
+
+  //cleanup(argv);
+  
   return theMaterial;
-}
-
-
-
-WEnergy *EvaluateWEnergyArgs(ClientData clientData, Tcl_Interp *interp, TCL_Char *tclString)
-{
-  int argc;
-  TCL_Char **argv;
-
-  // split the list
-  if (Tcl_SplitList(interp, tclString, &argc, &argv) != TCL_OK)
-    return 0;
-
-  if (argc == 0)
-    return 0;
-
-  // now parse the list & construct the required object
-  WEnergy *wenergy = 0;
-
-  // #1 Logarithmic
-  if ((strcmp(argv[0],"-Log") == 0) || (strcmp(argv[0],"-log") == 0) || (strcmp(argv[0],"-Logarithmic") == 0) )
-    {
-      double E_in = 0.0;
-      double nu_in = 0.0;
-      if (argc > 2)
-      {
-        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid Young's Module for Logarithmic Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid Poisson Ratio for Logarithmic Strain Energy Function.";
-          return 0;
-        }
-
-      wenergy = new LogWEnergy(E_in, nu_in);
-     }
-   }
-
-  // #2 Mooney Rivlin
-    if ((strcmp(argv[0],"-MR") == 0) || (strcmp(argv[0],"-MooneyRivlin") == 0) )
-    {
-      double E_in = 0.0;
-      double nu_in = 0.0;
-      double c1_in = 0.0;
-      double c2_in = 0.0;
-      if (argc > 4)
-      {
-        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid 1st material parameter for Mooney-Rivlin Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid 2nd material parameter for Mooney-Rivlin Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetDouble(interp, argv[3], &c1_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid 1st material parameter for Mooney-Rivlin Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetDouble(interp, argv[4], &c2_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid 2nd material parameter for Mooney-Rivlin Strain Energy Function.";
-          return 0;
-        }
-
-      wenergy = new MooneyRivlinWEnergy(E_in, nu_in, c1_in, c2_in);
-     }
-   }
-
-  // #3 Neo Hookean
-    if ((strcmp(argv[0],"-NH") == 0) || (strcmp(argv[0],"-NeoHookean") == 0) )
-    {
-      double E_in = 0.0;
-      double nu_in = 0.0;
-      if (argc > 2)
-      {
-        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid Young's Module for Neo-Hookean Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid Poisson Ratio for Neo-Hookean Strain Energy Function.";
-          return 0;
-        }
-
-      wenergy = new NeoHookeanWEnergy(E_in, nu_in);
-     }
-   }
-
-  // #4 Ogden
-  if ((strcmp(argv[0],"-Ogden") == 0) || (strcmp(argv[0],"-ogden") == 0) )
-    {  
-      double E_in = 0.0;
-      double nu_in = 0.0; 
-      int N_in = 0;
-
-      if (argc > 2*N_in+3)
-      {
-        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid vector parameter number for Ogden Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid vector parameter number for Ogden Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetInt(interp, argv[3], &N_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid vector parameter number for Ogden Strain Energy Function.";
-          return 0;
-        }
-      
-      double *cr_in = new double[N_in];
-      double *mur_in = new double[N_in];
-         
-      for (int i=0; i<N_in; i++)
-        {
-          if (Tcl_GetDouble(interp, argv[4+i], &cr_in[i]) != TCL_OK)
-          {
-            opserr << "Warning: invalid parameter for Ogden Strain Energy Function.";
-            return 0;
-          }
-          if (Tcl_GetDouble(interp, argv[4+N_in+i], &mur_in[i]) != TCL_OK)
-          {
-            opserr << "Warning: invalid parameter for Ogden Strain Energy Function.";
-            return 0;
-          }
-        }
-
-      wenergy = new OgdenWEnergy(E_in, nu_in, N_in, cr_in, mur_in);
-     }
-   }
-
-  // #5 Simo Pister
-    if ((strcmp(argv[0],"-SP") == 0) || (strcmp(argv[0],"-SimoPister") == 0) )
-    {
-      double E_in = 0.0;
-      double nu_in = 0.0;
-      if (argc > 2)
-      {
-        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid Young's Module for Simo-Pister Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid Poisson Ratio for Simo-Pister Strain Energy Function.";
-          return 0;
-        }
-
-      wenergy = new SimoPisterWEnergy(E_in, nu_in);
-     }
-   }
-
-  // #6 Ogden-Simo
-  if ((strcmp(argv[0],"-OgdenSimo") == 0) || (strcmp(argv[0],"-OS") == 0) )
-    {  
-      double E_in = 0.0;
-      double nu_in = 0.0; 
-      int N_in = 0;
-
-      if (argc > 2*N_in+3)
-      {
-        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid vector parameter number for Ogden Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid vector parameter number for Ogden Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetInt(interp, argv[3], &N_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid vector parameter number for Ogden Strain Energy Function.";
-          return 0;
-        }
-      
-      double *cr_in = new double[N_in];
-      double *mur_in = new double[N_in];
-         
-      for (int i=0; i<N_in; i++)
-        {
-          if (Tcl_GetDouble(interp, argv[4+i], &cr_in[i]) != TCL_OK)
-          {
-            opserr << "Warning: invalid parameter for Ogden Strain Energy Function.";
-            return 0;
-          }
-          if (Tcl_GetDouble(interp, argv[4+N_in+i], &mur_in[i]) != TCL_OK)
-          {
-            opserr << "Warning: invalid parameter for Ogden Strain Energy Function.";
-            return 0;
-          }
-        }
-
-      wenergy = new OgdenSimoWEnergy(E_in, nu_in, N_in, cr_in, mur_in);
-     }
-   }
-
-  // #7 Mooney Rivlin Simo
-    if ((strcmp(argv[0],"-MRS") == 0) || (strcmp(argv[0],"-MooneyRivlinSimo") == 0) )
-    {
-      double E_in = 0.0;
-      double nu_in = 0.0;
-      double c1_in = 0.0;
-      double c2_in = 0.0;
-      if (argc > 4)
-      {
-        if (Tcl_GetDouble(interp, argv[1], &E_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid 1st material parameter for Mooney-Rivlin Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetDouble(interp, argv[2], &nu_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid 2nd material parameter for Mooney-Rivlin Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetDouble(interp, argv[3], &c1_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid 1st material parameter for Mooney-Rivlin Strain Energy Function.";
-          return 0;
-        }
-
-        if (Tcl_GetDouble(interp, argv[4], &c2_in) != TCL_OK)
-        {
-          opserr << "Warning: invalid 2nd material parameter for Mooney-Rivlin Strain Energy Function.";
-          return 0;
-        }
-
-      wenergy = new MooneyRivlinSimoWEnergy(E_in, nu_in, c1_in, c2_in);
-     }
-   }
-
-  cleanup(argv);
-  return wenergy;
 
 }
 

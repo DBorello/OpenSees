@@ -21,7 +21,7 @@
 //#
 //# DATE:              19AUg2003
 //# UPDATE HISTORY:    Sept 2003
-//#
+//#		       28May2004
 //#
 //===============================================================================
 
@@ -33,26 +33,15 @@
 //================================================================================
 // Normal constructor
 //================================================================================
-LogWEnergy::LogWEnergy(double E_in, double nu_in )
+LogWEnergy::LogWEnergy(double K_in, double G_in ) :K(K_in), G(G_in)
 {
-   E = E_in;
-   nu = nu_in;
-   if (nu != -1.0)
-     G = 0.5*E/(1.0+nu);
-   else
-     opserr << "Poisson's ratio = -1.0, not permited for this model (LogWEnergy)";
-   
-   if (nu != 0.5)
-     K = 0.33333333333333*E/(1.0-2.0*nu);
-   else
-     opserr << "Poisson's ratio = 0.5, not permited for this model (LogWEnergy)";
-//      K = 1.0e20;
+
 }
 
-//LogWEnergy::LogWEnergy( )
-//{
-//
-//}
+LogWEnergy::LogWEnergy( ) :K(0.0), G(0.0)
+{
+
+}
 
 //================================================================================
 // Normal destructor
@@ -67,18 +56,8 @@ LogWEnergy::~LogWEnergy( )
 //================================================================================
 WEnergy * LogWEnergy::newObj( )
   {
-    LogWEnergy  *new_WEnergy = new LogWEnergy( E,  nu);
+    LogWEnergy  *new_WEnergy = new LogWEnergy(K, G);
     return new_WEnergy;
-  }
-
-const double LogWEnergy::getE()
-  {
-    return E;
-  }
-
-const double LogWEnergy::getnu()
-  {
-    return nu;
   }
 
 //================================================================================
@@ -139,6 +118,7 @@ const double LogWEnergy::d2volwOdJ2(const double &J_in)
 //   printf("d2W/dJ2=%lf\n",d2colwOverdJ2);
    return  d2colwOverdJ2;
 }
+
 
 #endif
 

@@ -19,41 +19,39 @@
 //# PROGRAMMER(S):     Zhao Cheng, Boris Jeremic
 //#
 //#
-//# DATE:              19AUg2003
-//# UPDATE HISTORY:    28May2004
-//#
+//# DATE:              July 2004
+//# UPDATE HISTORY:
 //#
 //===============================================================================
 
-#ifndef MooneyRivlinSimoWEnergy_H
-#define MooneyRivlinSimoWEnergy_H
+#ifndef fdYieldVM_H
+#define fdYieldVM_H
 
-#include <Vector.h>
-#include <Tensor.h>
-#include <OPS_Globals.h>
-#include <W.h>
+#include "fdYield.h"
 
-
-class MooneyRivlinSimoWEnergy : public WEnergy
+class fdYieldVM : public fdYield
 {
   private:
-    double c1;
-    double c2;
-    double K;
+    double Y0;
   public:
-    MooneyRivlinSimoWEnergy(double, double, double );
-    MooneyRivlinSimoWEnergy( );
-    ~MooneyRivlinSimoWEnergy( );
-    WEnergy *newObj( );
+    fdYieldVM(double Y0_in);
+    // virtual ~fdYieldVM() {}; 
+    
+    fdYield *newObj();   
 
-    const double wE(const double &, const Vector &);
-    const Vector disowOdlambda(const Vector &);
-    const Vector d2isowOdlambda2(const Vector & );
-    //const tensor d2isowOdlambda1dlambda2(const vector &);
-    const double dvolwOdJ( const double &);
-    const double d2volwOdJ2(const double &);
+    int getNumRank();
+    double getTolerance();
+    
+    double Yd(const stresstensor &sts, const FDEPState &fdepstate ) const;	
 
+    stresstensor dYods(const stresstensor &sts, const FDEPState &fdepstate ) const; 
+    double dYodq(const stresstensor &sts, const FDEPState &fdepstate ) const;	    
+    stresstensor dYoda(const stresstensor &sts, const FDEPState &fdepstate ) const;
+    
+    void print() { opserr << *this; };   
+
+    friend OPS_Stream& operator<< (OPS_Stream& os, const fdYieldVM & fdydVM);
 };
 
-#endif
 
+#endif

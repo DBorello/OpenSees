@@ -20,7 +20,7 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:
+//# UPDATE HISTORY:    28May2004
 //#
 //#
 //===============================================================================
@@ -33,34 +33,29 @@
 #include <Vector.h>
 #include <Tensor.h>
 #include <math.h>
+#include <OPS_Globals.h>
 #include <W.h>
 
 
 class LogWEnergy : public WEnergy
 {
   private:
-
-    double E;
-    double nu;
-    double  K;
+    double K;
     double G;
-  public:
 
+  public:
     LogWEnergy(double , double );
-//    LogWEnergy();
+    LogWEnergy();
     ~LogWEnergy();
     WEnergy *newObj( );
 
-    const double getE();
-    const double getnu();
     const double wE(const double &, const Vector &) ;
     const Vector disowOdlambda(const Vector &) ;
     const Vector d2isowOdlambda2(const Vector &) ;
-//  const tensor d2isowOdlambda1dlambda2(const Vector &) ;
+    //const tensor d2isowOdlambda1dlambda2(const Vector &) ;
     const double dvolwOdJ(const double &) ;
     const double d2volwOdJ2(const double &) ;
 
-//    friend OPS_Stream& operator<< (OPS_Stream& os, const LogWEnergy &W);
 };
 
 #endif

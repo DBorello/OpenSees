@@ -21,60 +21,51 @@
 //#
 //# DATE:              19AUg2003
 //# UPDATE HISTORY:    Sept 2003
-//#
-//#
+//#		       May28, 2004
+//#		       
 //===============================================================================
 
 #ifndef FiniteDeformationElastic3D_h
 #define FiniteDeformationElastic3D_h
 
-#include <NDMaterial.h>
+#include <math.h>
+
+#include <ID.h>
+#include <Channel.h>
+#include <OPS_Globals.h>
+#include <ConsoleErrorHandler.h>
+
 #include <Matrix.h>
 #include <Vector.h>
 #include <Tensor.h>
 #include <stresst.h>
 #include <straint.h>
 
-#include <ID.h>
-#include <Channel.h>
-#include <G3Globals.h>
-
-#include <ConsoleErrorHandler.h>
-
-
-#include <W.h>  // for W Strain Energy Functions
+#include <NDMaterial.h>
 
 class FiniteDeformationElastic3D : public NDMaterial
 {
   public:
-    FiniteDeformationElastic3D(int tag, int classTag, WEnergy * , double );
-    FiniteDeformationElastic3D(int tag, WEnergy * , double );
-    FiniteDeformationElastic3D(int tag, WEnergy * );
-    FiniteDeformationElastic3D();
+    
+    FiniteDeformationElastic3D(int tag, int classTag, double );
+    FiniteDeformationElastic3D();      
+    
     virtual ~FiniteDeformationElastic3D();
 
     virtual double getRho(void);
-    virtual double getE(void);
-    virtual double getnu(void);
 
-    virtual int setTrialF(const Tensor &f);
-    virtual int setTrialF(const Tensor &f, const Tensor &d);
-    virtual int setTrialFIncr(const Tensor &f);
-    virtual int setTrialFIncr(const Tensor &f, const Tensor &d);
+    virtual int setTrialF(const straintensor &f);
+    virtual int setTrialFIncr(const straintensor &df);
+    virtual int setTrialC(const straintensor &c);
+    virtual int setTrialCIncr(const straintensor &dc);
 
-    virtual const Tensor& getTangentTensor(void) ;
+    virtual const Tensor& getTangentTensor(void) ;	  // Default Lagrangian Tangent Tensor
     virtual const Tensor& getInitialTangentTensor(void) ;
 
-    virtual const  straintensor getStrainTensor(void) ;  // Default Green Strain
-    virtual const  stresstensor getStressTensor(void) ; // Default 2nd Piola Kirchhoff Stress
-
-//    virtual const Vector &getStress(void);
-//    virtual const Vector &getStrain(void);
-
-//    virtual const stresstensor getCommittedStress(void);
-//    virtual const straintensor getCommittedStrain(void);
-
-//    virtual const straintensor getPlasticStrainTensor(void);
+    virtual const  straintensor getStrainTensor(void) ;   // Default Green Lagrangian Strain
+    virtual const  stresstensor getStressTensor(void) ;   // Default 2nd Piola Kirchhoff Stress
+    virtual const  straintensor getF(void);
+    virtual const  straintensor getC(void);
 
     virtual int commitState(void) ;
     virtual int revertToLastCommit(void) ;
@@ -89,7 +80,7 @@ class FiniteDeformationElastic3D : public NDMaterial
     virtual int sendSelf(int commitTag, Channel &theChannel);
     virtual int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
 
-    void Print(OPS_Stream &s, int flag = 0);
+    virtual void Print(OPS_Stream &s, int flag = 0);
 
     virtual int setParameter(char **argv, int argc, Information &info);
     virtual int updateParameter(int parameterID, Information &info);
@@ -97,45 +88,9 @@ class FiniteDeformationElastic3D : public NDMaterial
     virtual const  stresstensor getPK1StressTensor(void) ;
     virtual const  stresstensor getCauchyStressTensor(void) ;
 
-  private:
-
-    WEnergy *getWEnergy(void);
-
-    const Tensor getF(void);
-    const Tensor getC(void);
-    const double getJ(void) ;
-    const Vector getlambda(void) ;
-    const Vector getlambda_wave(void) ;
-
-    const Vector wa(void) ;
-    const Tensor Yab(void) ;
-    const Tensor FDisoStiffness(void) ;
-    const Tensor FDvolStiffness(void) ;
-
-
-//    int setInitialTangentTensor(void);
-    int ComputeTrials(void);
-    int getCaseIndex(void);
-
   protected:
 
-     WEnergy * W;
-
-     double rho;
-     double E;
-     double nu;
-
-     Tensor F;
-     Tensor C;
-     double J;
-     Tensor Cinv;
-     double lambda1, lambda2, lambda3;
-     double lambda_wave1, lambda_wave2, lambda_wave3;
-     int caseIndex; 
-
-     Tensor Stiffness;
-     straintensor thisGreenStrain;
-     stresstensor thisPK2Stress;
+    double rho;
 
 };
 

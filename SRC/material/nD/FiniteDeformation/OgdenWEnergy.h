@@ -20,7 +20,7 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:
+//# UPDATE HISTORY:    28May2004
 //#
 //#
 //===============================================================================
@@ -30,28 +30,24 @@
 
 #include <Vector.h>
 #include <Tensor.h>
-//#include <BJvector.h>
-//#include <BJtensor.h>
-
+#include <OPS_Globals.h>
 #include <W.h>
+
+#include <math.h>
 
 
 class OgdenWEnergy : public WEnergy
 {
   private:
-    double E;
-    double nu;
     int N_Ogden;
     double *cr_Ogden;
     double *mur_Ogden;
   public:
-    OgdenWEnergy(double, double, int , double * , double *  );
-//    OgdenWEnergy( );
+    OgdenWEnergy(int , double * , double * );
+    OgdenWEnergy( );
     ~OgdenWEnergy( );
     WEnergy *newObj( );
 
-    const double getE();
-    const double getnu();
     const double  wE(const double &, const Vector &) ;
     const Vector  disowOdlambda(const Vector & )  ;
     const Vector  d2isowOdlambda2(const Vector & )  ;
@@ -59,7 +55,6 @@ class OgdenWEnergy : public WEnergy
 //    const double  dvolwOdJ( const double &)  ;
 //    const double  d2volwOdJ2( const double &) ;
 
-//    friend OPS_Stream& operator<< (OPS_Stream& os, const OgdenWEnergy &W);
 
 };
 

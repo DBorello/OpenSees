@@ -29,34 +29,22 @@
 #ifndef MooneyRivlinSimoWEnergy_CPP
 #define MooneyRivlinSimoWEnergy_CPP
 
-#include <math.h>
 #include <MooneyRivlinSimoWEnergy.h>
 
 //================================================================================
 // Normal constructor
 //================================================================================
-MooneyRivlinSimoWEnergy::MooneyRivlinSimoWEnergy( double E_in,  double nu_in, double c1_in,  double c2_in)
+MooneyRivlinSimoWEnergy::MooneyRivlinSimoWEnergy(double c1_in,  double c2_in, double K_in)
+ : c1(c1_in), c2(c2_in), K(K_in) 
 {
-        E = E_in;
-        nu = nu_in;
-        c1 = c1_in;
-        c2 = c2_in;
-        if (nu != -1.0)
-          G = 0.5*E/(1.0+nu);
-        else
-          opserr << "Poisson's ratio = -1.0, not permited for this model (MooneyRivlinSimoWEnergy)";
-        
-        if (nu != 0.5)
-          K = 0.33333333333333*E/(1.0-2.0*nu);
-        else
-         opserr << "Poisson's ratio = 0.5, not permited for this model (MooneyRivlinSimoWEnergy)";
-//        K = 1.0e20;
+
 }
 
-//MooneyRivlinSimoWEnergy::MooneyRivlinSimoWEnergy( )
-//{
-//
-//}
+MooneyRivlinSimoWEnergy::MooneyRivlinSimoWEnergy( )
+ : c1(0.0), c2(0.0), K(0.0)
+{
+
+}
 
 //================================================================================
 // Normal destructor
@@ -71,19 +59,10 @@ MooneyRivlinSimoWEnergy::~MooneyRivlinSimoWEnergy( )
 //================================================================================
 WEnergy * MooneyRivlinSimoWEnergy::newObj()
   {
-    WEnergy  *new_WEnergy = new MooneyRivlinSimoWEnergy (E, nu, c1, c2);
+    WEnergy  *new_WEnergy = new MooneyRivlinSimoWEnergy (c1, c2, K);
     return new_WEnergy;
   }
 
-const double MooneyRivlinSimoWEnergy::getE()
-  {
-    return E;
-  }
-
-const double MooneyRivlinSimoWEnergy::getnu()
-  {
-    return nu;
-  }
 
 //================================================================================
 // w
@@ -141,6 +120,7 @@ const double  MooneyRivlinSimoWEnergy::d2volwOdJ2(const double &J_in )
    double d2colwOverdJ2 = K * (2.0 / J_in / J_in + 2.0) * 0.25;
    return d2colwOverdJ2;
 }
+
 
 #endif
 

@@ -19,41 +19,38 @@
 //# PROGRAMMER(S):     Zhao Cheng, Boris Jeremic
 //#
 //#
-//# DATE:              19AUg2003
-//# UPDATE HISTORY:    28May2004
-//#
+//# DATE:              July 2004
+//# UPDATE HISTORY:
 //#
 //===============================================================================
 
-#ifndef MooneyRivlinSimoWEnergy_H
-#define MooneyRivlinSimoWEnergy_H
+#ifndef fdEvolution_TL_H
+#define fdEvolution_TL_H
 
-#include <Vector.h>
-#include <Tensor.h>
-#include <OPS_Globals.h>
-#include <W.h>
+#include "fdEvolution_T.h"
 
-
-class MooneyRivlinSimoWEnergy : public WEnergy
+class fdEvolution_TL : public fdEvolution_T
 {
-  private:
-    double c1;
-    double c2;
-    double K;
-  public:
-    MooneyRivlinSimoWEnergy(double, double, double );
-    MooneyRivlinSimoWEnergy( );
-    ~MooneyRivlinSimoWEnergy( );
-    WEnergy *newObj( );
+ private:
+    double H_linear;
 
-    const double wE(const double &, const Vector &);
-    const Vector disowOdlambda(const Vector &);
-    const Vector d2isowOdlambda2(const Vector & );
-    //const tensor d2isowOdlambda1dlambda2(const vector &);
-    const double dvolwOdJ( const double &);
-    const double d2volwOdJ2(const double &);
+ public:
+    
+    fdEvolution_TL(double H_linear_in = 0.0);
+    fdEvolution_TL(const stresstensor &sts, const FDEPState &fdepstate);
+    //virtual ~fdEvolution_TL() {};
+
+    fdEvolution_T *newObj();
+    
+    // Derivative of stress like hardening variable to strain like variable
+    tensor HModulus(const stresstensor &sts, const FDEPState &fdepstate) const;  
+
+
+    void print();
+
+    friend OPS_Stream& operator<< (OPS_Stream& os, const fdEvolution_TL & fdetl);
 
 };
 
-#endif
 
+#endif

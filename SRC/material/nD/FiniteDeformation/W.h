@@ -20,7 +20,7 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:
+//# UPDATE HISTORY:    28May2004
 //#
 //#
 //===============================================================================
@@ -32,41 +32,19 @@
 #include <Vector.h>
 #include <Tensor.h>
 
-//#include "LogWEnergy.h"
-//#include "MooneyRivlinWEnergy.h"
-//#include "NeoHookeanWEnergy.h"
-//#include "OgdenWEnergy.h"
-//#include "SimoPisterWEnergy.h"
-//
-#include <ID.h>
-
-#include <Channel.h>
-//#include <G3Globals.h>
-#include <OPS_Globals.h>
-
-
-
-//#include <BJvector.h>
-//#include <BJtensor.h>
-
 class WEnergy
 {
   public:
     WEnergy();
     virtual ~WEnergy();
     virtual WEnergy*newObj( ) =0;
-    virtual const double getE();
-    virtual const double getnu();
+
     virtual const  double wE(const double &, const Vector &) ;
     virtual const Vector disowOdlambda(const Vector &) ;
     virtual const Vector d2isowOdlambda2(const Vector &) ;
     virtual const Tensor d2isowOdlambda1dlambda2(const Vector &) ;
     virtual const double dvolwOdJ(const double &) ;
     virtual const double d2volwOdJ2(const double &) ;
-
-    protected:
-      double E;
-      double nu;
 
 };
 

@@ -19,41 +19,38 @@
 //# PROGRAMMER(S):     Zhao Cheng, Boris Jeremic
 //#
 //#
-//# DATE:              19AUg2003
-//# UPDATE HISTORY:    28May2004
-//#
+//# DATE:              July 2004
+//# UPDATE HISTORY:
 //#
 //===============================================================================
 
-#ifndef MooneyRivlinSimoWEnergy_H
-#define MooneyRivlinSimoWEnergy_H
+#ifndef fdEvolution_T_CPP
+#define fdEvolution_T_CPP
 
-#include <Vector.h>
-#include <Tensor.h>
-#include <OPS_Globals.h>
-#include <W.h>
+#include "fdEvolution_T.h"
 
+fdEvolution_T * fdEvolution_T::newObj() 
+{   
+    fdEvolution_T *newEL = new fdEvolution_T( *this );    
+    return newEL;
+}
 
-class MooneyRivlinSimoWEnergy : public WEnergy
+tensor fdEvolution_T::HModulus(const stresstensor &sts, const FDEPState &fdepstate) const
 {
-  private:
-    double c1;
-    double c2;
-    double K;
-  public:
-    MooneyRivlinSimoWEnergy(double, double, double );
-    MooneyRivlinSimoWEnergy( );
-    ~MooneyRivlinSimoWEnergy( );
-    WEnergy *newObj( );
+    tensor Z400(4, def_dim_4, 0.0);
+    return Z400;
+}
 
-    const double wE(const double &, const Vector &);
-    const Vector disowOdlambda(const Vector &);
-    const Vector d2isowOdlambda2(const Vector & );
-    //const tensor d2isowOdlambda1dlambda2(const vector &);
-    const double dvolwOdJ( const double &);
-    const double d2volwOdJ2(const double &);
+void fdEvolution_T::print()
+{
+    opserr << (*this);
+}
 
-};
+OPS_Stream& operator<< (OPS_Stream& os, const fdEvolution_T & ev)
+{
+   os << "Tensor Evolution Law's Parameters: " << "\n";
+   return os;
+}
 
 #endif
 

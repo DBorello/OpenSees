@@ -20,7 +20,7 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:
+//# UPDATE HISTORY:    28May2004
 //#
 //#
 //===============================================================================
@@ -29,38 +29,26 @@
 #ifndef OgdenSimoWEnergy_CPP
 #define OgdenSimoWEnergy_CPP
 
-#include <math.h>
 #include <OgdenSimoWEnergy.h>
 
 //================================================================================
 // Normal constructor
 //================================================================================
-OgdenSimoWEnergy::OgdenSimoWEnergy(double E_in, double nu_in, int N_in, double  *cr_in, double *mur_in )
+OgdenSimoWEnergy::OgdenSimoWEnergy(int N_in, double  *cr_in, double *mur_in, double K_in)
 {
-    E = E_in;
-    nu = nu_in;
     N_Ogden = N_in;
     cr_Ogden = cr_in;
-    mur_Ogden = mur_in; 
-
-
-    if (nu != -1.0)
-      G = 0.5*E/(1.0+nu);
-    else
-      opserr << "Poisson's ratio = -1.0, not permited for this model (OgdenSimoWEnergy)";
-
-
-    if (nu != 0.5)
-      K = 0.3333333333333333*E/(1.0-2.0*nu);
-    else
-      opserr << "Poisson's ratio = 0.5, not permited for this model (OgdenSimoWEnergy)";
-//      K = 1.0e20;
+    mur_Ogden = mur_in;
+    K = K_in; 
 }
 
-//OgdenSimoWEnergy::OgdenSimoWEnergy( )
-//{
-//
-//}
+OgdenSimoWEnergy::OgdenSimoWEnergy( )
+{
+    N_Ogden = 0;
+    cr_Ogden = 0;
+    mur_Ogden = 0;
+    K = 0.0;
+}
 
 //================================================================================
 // Normal destructor
@@ -75,19 +63,10 @@ OgdenSimoWEnergy::~OgdenSimoWEnergy( )
 //================================================================================
 WEnergy * OgdenSimoWEnergy::newObj( )
   {
-    WEnergy  *new_WEnergy = new OgdenSimoWEnergy( E, nu, N_Ogden,  cr_Ogden,  mur_Ogden);
+    WEnergy  *new_WEnergy = new OgdenSimoWEnergy(N_Ogden,  cr_Ogden,  mur_Ogden, K);
     return new_WEnergy;
   }
 
-const double OgdenSimoWEnergy::getE()
-  {
-    return E;
-  }
-
-const double OgdenSimoWEnergy::getnu()
-  {
-    return nu;
-  }
 
 //================================================================================
 // w
@@ -156,5 +135,6 @@ const double  OgdenSimoWEnergy::d2volwOdJ2(const double &J_in )
    return d2colwOverdJ2;
 }
 
-#endif
 
+
+#endif

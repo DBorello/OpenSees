@@ -42,16 +42,6 @@ WEnergy::~WEnergy()
 
 }
 
-const double WEnergy::getE()
-{
-  return 0.0;
-}
-
-const double WEnergy::getnu()
-{
-  return 0.0;
-}
-
 const double WEnergy::wE(const double &J_in, const Vector &lambda_wave_in)
 {
   return 0.0;
@@ -60,13 +50,12 @@ const double WEnergy::wE(const double &J_in, const Vector &lambda_wave_in)
 
 const Vector WEnergy::disowOdlambda( const Vector &lambda_wave_in)
 {
-        return Vector(3);
+  return Vector(3);
 }
 
 const Vector WEnergy::d2isowOdlambda2( const Vector &lambda_wave_in)
 {
-
-        return Vector(3);
+  return Vector(3);
 }
 
 const Tensor WEnergy::d2isowOdlambda1dlambda2(const Vector &lambda_wave_in)
@@ -82,8 +71,10 @@ const double WEnergy::dvolwOdJ(const double &J_in)
 
 const double WEnergy::d2volwOdJ2(const double &J_in)
 {
-  return 0.0;
+  return 0.0;;
+
 }
+
 
 #endif
 

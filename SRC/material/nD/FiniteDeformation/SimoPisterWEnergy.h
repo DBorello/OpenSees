@@ -20,7 +20,7 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:
+//# UPDATE HISTORY:    28May2004
 //#
 //#
 //===============================================================================
@@ -30,35 +30,28 @@
 
 #include <Vector.h>
 #include <Tensor.h>
-//#include <BJvector.h>
-//#include <BJtensor.h>
-
+#include <Channel.h>
+#include <OPS_Globals.h>
 #include <W.h>
+
 
 
 class SimoPisterWEnergy : public WEnergy
 {
   private:
-    double E;
-    double nu;
-    double G;
     double K;
   public:
-    SimoPisterWEnergy( double , double  );
-//    SimoPisterWEnergy(  );
+    SimoPisterWEnergy( double  );
+    SimoPisterWEnergy(  );
     ~SimoPisterWEnergy( ) ;
     WEnergy *newObj( );
 
-    const double getE();
-    const double getnu();
     const double  wE(const double &, const Vector & )  ;
 //  const Vector   disowOdlambda(const Vector &lambda_wave_in ) ;
 //  const Vector const d2isowOdlambda2(const Vector &lambda_wave_in )  ;
 //  const Tensor const d2isowOdlambda1dlambda2( const Vector &lambda_wave_in)  ;
     const double   dvolwOdJ( const double &J_in) ;
     const double  d2volwOdJ2( const double &J_in) ;
-
-//    friend OPS_Stream& operator<< (OPS_Stream& os, const LogWEnergy &W);
 
 };
 

@@ -20,7 +20,7 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:
+//# UPDATE HISTORY:    28May2004
 //#
 //#
 //===============================================================================
@@ -29,25 +29,24 @@
 #ifndef OgdenWEnergy_CPP
 #define OgdenWEnergy_CPP
 
-#include <math.h>
 #include <OgdenWEnergy.h>
 
 //================================================================================
 // Normal constructor
 //================================================================================
-OgdenWEnergy::OgdenWEnergy(double E_in, double nu_in, int N_in, double  *cr_in, double *mur_in )
+OgdenWEnergy::OgdenWEnergy(int N_in, double  *cr_in, double *mur_in )
 {
-    E = E_in;
-    nu = nu_in;
     N_Ogden = N_in;
     cr_Ogden = cr_in;
     mur_Ogden = mur_in; 
 }
 
-//OgdenWEnergy::OgdenWEnergy( )
-//{
-//
-//}
+OgdenWEnergy::OgdenWEnergy( )
+{
+    N_Ogden = 0;
+    cr_Ogden = 0;
+    mur_Ogden = 0;
+}
 
 //================================================================================
 // Normal destructor
@@ -62,19 +61,10 @@ OgdenWEnergy::~OgdenWEnergy( )
 //================================================================================
 WEnergy * OgdenWEnergy::newObj( )
   {
-    WEnergy  *new_WEnergy = new OgdenWEnergy( E, nu, N_Ogden,  cr_Ogden,  mur_Ogden);
+    WEnergy  *new_WEnergy = new OgdenWEnergy( N_Ogden,  cr_Ogden,  mur_Ogden);
     return new_WEnergy;
   }
 
-const double OgdenWEnergy::getE()
-  {
-    return E;
-  }
-
-const double OgdenWEnergy::getnu()
-  {
-    return nu;
-  }
 
 //================================================================================
 // w
@@ -124,6 +114,8 @@ const Vector  OgdenWEnergy::d2isowOdlambda2(const Vector &lambda_wave_in )
      }
     return d2isowOverdlambda2;
   }
+
+
 
 #endif
 

@@ -29,24 +29,22 @@
 #ifndef MooneyRivlinWEnergy_CPP
 #define MooneyRivlinWEnergy_CPP
 
-#include <math.h>
 #include <MooneyRivlinWEnergy.h>
 
 //================================================================================
 // Normal constructor
 //================================================================================
-MooneyRivlinWEnergy::MooneyRivlinWEnergy( double E_in,  double nu_in, double c1_in,  double c2_in)
+MooneyRivlinWEnergy::MooneyRivlinWEnergy( double c1_in,  double c2_in)
+ : c1(c1_in), c2(c2_in)
 {
-        E = E_in;
-        nu = nu_in;
-        c1 = c1_in;
-        c2 = c2_in;
+
 }
 
-//MooneyRivlinWEnergy::MooneyRivlinWEnergy( )
-//{
-//
-//}
+MooneyRivlinWEnergy::MooneyRivlinWEnergy( )
+ : c1(0.0), c2(0.0)
+{
+
+}
 
 //================================================================================
 // Normal destructor
@@ -61,19 +59,10 @@ MooneyRivlinWEnergy::~MooneyRivlinWEnergy( )
 //================================================================================
 WEnergy * MooneyRivlinWEnergy::newObj()
   {
-    WEnergy  *new_WEnergy = new MooneyRivlinWEnergy (E, nu, c1, c2);
+    WEnergy  *new_WEnergy = new MooneyRivlinWEnergy (c1, c2);
     return new_WEnergy;
   }
 
-const double MooneyRivlinWEnergy::getE()
-  {
-    return E;
-  }
-
-const double MooneyRivlinWEnergy::getnu()
-  {
-    return nu;
-  }
 
 //================================================================================
 // w
@@ -114,24 +103,6 @@ const Vector MooneyRivlinWEnergy::d2isowOdlambda2(const Vector &lambda_wave_in)
     return d2isowOverdlambda2;
   }
 
-//================================================================================
-// d(vol)w / dJ
-//================================================================================
-//const double MooneyRivlinWEnergy::dvolwOdJ(const double &J_in)
-//{
-//   return  0.0;
-//}
-
-//================================================================================
-// d2(vol)w / dJ2
-//================================================================================
-//const double MooneyRivlinWEnergy::d2volwOdJ2(const double &J_in)
-//{
-//   if (nu != 0.5)
-//   	return  E/3.0/(1-2.0*nu);
-//   else
-//   	return 1.0e20;
-//}
 
 #endif
 

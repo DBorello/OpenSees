@@ -30,27 +30,21 @@
 
 #include <Vector.h>
 #include <Tensor.h>
-//#include <BJvector.h>
-//#include <BJtensor.h>
-
+#include <OPS_Globals.h>
 #include <W.h>
 
 
 class MooneyRivlinWEnergy : public WEnergy
 {
   private:
-    double E;
-    double nu;
     double c1;
     double c2;
   public:
-    MooneyRivlinWEnergy(double , double, double, double );
-//    MooneyRivlinWEnergy( );
+    MooneyRivlinWEnergy(double , double);
+    MooneyRivlinWEnergy( );
     ~MooneyRivlinWEnergy( );
     WEnergy *newObj( );
 
-    const double getE();
-    const double getnu();
     const double wE(const double &, const Vector &);
     const Vector disowOdlambda(const Vector &);
     const Vector d2isowOdlambda2(const Vector & );
@@ -58,7 +52,6 @@ class MooneyRivlinWEnergy : public WEnergy
 //  const double dvolwOdJ( const double &);
 //  const double d2volOdj2(const double &);
 
-//    friend OPS_Stream& operator<< (OPS_Stream& os, const MooneyRivlinWEnergy &W);
 
 };
 

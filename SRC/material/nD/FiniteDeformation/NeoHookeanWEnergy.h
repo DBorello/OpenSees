@@ -20,7 +20,7 @@
 //#
 //#
 //# DATE:              19AUg2003
-//# UPDATE HISTORY:
+//# UPDATE HISTORY:    28May2004
 //#
 //#
 /**********************************************************************/
@@ -31,35 +31,29 @@
 #ifndef NeoHookeanWEnergy_H
 #define NeoHookeanWEnergy_H
 
-#include <BJvector.h>
-#include <BJtensor.h>
-
+#include <Vector.h>
+#include <Tensor.h>
+#include <OPS_Globals.h>
 #include <W.h>
 
 
 class NeoHookeanWEnergy : public WEnergy
 {
   private:
-        double E;
-        double nu;
         double K;
         double G;
   public:
     NeoHookeanWEnergy(double , double  );
-//    NeoHookeanWEnergy( );
+    NeoHookeanWEnergy( );
     ~NeoHookeanWEnergy( );
     WEnergy *newObj( );
 
-     const double getE();
-     const double getnu();
      const double wE(const double &, const Vector &)  ;
      const Vector disowOdlambda(const Vector &l)  ;
      const Vector d2isowOdlambda2(const Vector &)  ;
 //   const tensor d2isowOdlambda1dlambda2(const Vector &) const ;
      const double dvolwOdJ(const double &)  ;
      const double d2volwOdJ2(const double &)  ;
-
-//    friend OPS_Stream& operator<< (OPS_Stream& os, const NeoKookeanWEnergy &W);
 
 };
 

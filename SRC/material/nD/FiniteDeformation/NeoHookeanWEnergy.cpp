@@ -21,39 +21,29 @@
 //#
 //# DATE:              19AUg2003
 //# UPDATE HISTORY:    Sept 2003
-//#
+//#		       28May2004
 //#
 //===============================================================================
 
 #ifndef NeoHookeanWEnergy_CPP
 #define NeoHookeanWEnergy_CPP
 
-#include <math.h>
 #include <NeoHookeanWEnergy.h>
 
 //================================================================================
 // Normal constructor
 //================================================================================
-NeoHookeanWEnergy::NeoHookeanWEnergy(double E_in, double nu_in )
+NeoHookeanWEnergy::NeoHookeanWEnergy(double K_in, double G_in )
+ :K(K_in), G(G_in)
 {
-   E = E_in;
-   nu = nu_in;
-   if (nu != -1.0)
-     G = 0.5*E_in/(1.0+nu_in);
-   else
-     opserr << "Poisson's ratio = -1.0, not permited for this model (NeoHookeanWEnergy)";
 
-   if (nu != 0.5)
-      K = 0.3333333333333333333*E/(1.0-2.0*nu);
-   else
-      opserr << "Poisson's ratio = 0.5, not permited for this model (NeoHookeanWEnergy)";
-//      K = 1.0e20;
 }
 
-//NeoHookeanWEnergy::NeoHookeanWEnergy(  )
-//{
-//
-//}
+NeoHookeanWEnergy::NeoHookeanWEnergy(  )
+ :K(0.0), G(0.0)
+{
+
+}
 
 //================================================================================
 // Normal destructor
@@ -68,19 +58,10 @@ NeoHookeanWEnergy::~NeoHookeanWEnergy( )
 //================================================================================
 WEnergy * NeoHookeanWEnergy::newObj( )
   {
-    WEnergy  *new_WEnergy = new NeoHookeanWEnergy(E,  nu);
+    WEnergy  *new_WEnergy = new NeoHookeanWEnergy(K,  G);
     return new_WEnergy;
   }
 
-const double NeoHookeanWEnergy::getE()
-  {
-    return E;
-  }
-
-const double NeoHookeanWEnergy::getnu()
-  {
-    return nu;
-  }
 
 //================================================================================
 // w
@@ -143,6 +124,7 @@ const double  NeoHookeanWEnergy::d2volwOdJ2(const double &J_in )
 //  double temp2 = 0.0;
   return temp2;
 }
+
 
 #endif
 
