@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:02:01 $
+// $Revision: 1.3 $
+// $Date: 2003-04-02 22:02:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandGEN/BandGenLinLapackSolver.cpp,v $
                                                                         
                                                                         
@@ -56,11 +56,11 @@ BandGenLinLapackSolver::~BandGenLinLapackSolver()
 
 #ifdef _WIN32
 
-extern "C" int _stdcall DGBSV(int *N, int *KL, int *KU, int *NRHS, double *A, 
+extern "C" int DGBSV(int *N, int *KL, int *KU, int *NRHS, double *A, 
 			      int *LDA, int *iPiv, double *B, int *LDB, 
 			      int *INFO);
 
-extern "C" int _stdcall DGBTRS(char *TRANS, unsigned int *sizeC, 
+extern "C" int DGBTRS(char *TRANS, 
 			       int *N, int *KL, int *KU, int *NRHS,
 			       double *A, int *LDA, int *iPiv, 
 			       double *B, int *LDB, int *INFO);
@@ -118,7 +118,8 @@ BandGenLinLapackSolver::solve(void)
     else  {
 	// solve only using factored matrix
 	unsigned int sizeC = 1;
-	DGBTRS("N", &sizeC, &n,&kl,&ku,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);
+	//DGBTRS("N", &sizeC, &n,&kl,&ku,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);
+	DGBTRS("N", &n,&kl,&ku,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);
     }}
 #else
     {if (theSOE->factored == false)      

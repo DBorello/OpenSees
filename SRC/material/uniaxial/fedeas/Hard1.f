@@ -1,4 +1,4 @@
-      subroutine Hard_1(matpar,hstvP,hstv,epsP,sigP,deps,sig,tang,ist)
+      subroutine HARD_1(matpar,hstvP,hstv,epsP,sigP,deps,sig,tang,ist)
 c I  matpar contains fixed properties (4)
 c     E    = Elastic modulus             --> matpar(1)
 c     sigY = Yield stress                --> matpar(2)

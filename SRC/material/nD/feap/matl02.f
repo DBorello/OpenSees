@@ -1,4 +1,4 @@
-      subroutine matl02(eps,trace,td,d,ud,hn,h1,nh,sig,dd,isw)
+      subroutine MATL02(eps,trace,td,d,ud,hn,h1,nh,sig,dd,isw)
 
 c      * * F E A P * * A Finite Element Analysis Program
 

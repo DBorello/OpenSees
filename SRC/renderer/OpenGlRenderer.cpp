@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-02-25 23:34:41 $
+// $Revision: 1.13 $
+// $Date: 2003-04-02 22:02:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlRenderer.cpp,v $
                                                                         
                                                                         
@@ -68,7 +68,7 @@ OpenGLRenderer::OpenGLRenderer(const char *_title, int _xLoc, int _yLoc,
 			       ColorMap &_theMap)
   :Renderer(_theMap),  
   windowTitle(0), height(_height), width(_width), xLoc(_xLoc), yLoc(_yLoc),
-  count(-1), theFile(0), theOutputFileName(0), 
+  count(-1), theOutputFileName(0), 
   theDevice(0),
   vrp(3), vuv(3), vpn(3), cop(3), ViewMat(4,4), 
   projectionMode(0), vpWindow(4), ProjMat(4,4),
@@ -107,7 +107,7 @@ OpenGLRenderer::OpenGLRenderer(const char *_title, int _xLoc, int _yLoc,
 			       const char *bitmapFileName)
   :Renderer(_theMap),  
   windowTitle(0), height(_height), width(_width), xLoc(_xLoc), yLoc(_yLoc),
-  count(-1), theFile(0), theOutputFileName(0), 
+  count(-1), theOutputFileName(0), 
   theDevice(0),
   vrp(3), vuv(3), vpn(3), cop(3), ViewMat(4,4), 
   projectionMode(0), vpWindow(4), ProjMat(4,4),

@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:39:05 $
+// $Revision: 1.2 $
+// $Date: 2003-04-02 22:02:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/analysis/direction/SQPsearchDirectionMeritFunctionAndHessian.cpp,v $
 
 
@@ -31,6 +31,7 @@
 // Written by Terje Haukaas (haukaas@ce.berkeley.edu) 
 //
 
+#include <math.h>
 #include <SQPsearchDirectionMeritFunctionAndHessian.h>
 #include <SearchDirection.h>
 #include <MeritFunctionCheck.h>

@@ -18,10 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:17 $
+// $Revision: 1.4 $
+// $Date: 2003-04-02 22:02:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/matrixutil/MatrixUtil.cpp,v $
-                                                                        
+ 
+#include <math.h>
                                                                         
 #include <stdlib.h>
 #include <Vector.h>

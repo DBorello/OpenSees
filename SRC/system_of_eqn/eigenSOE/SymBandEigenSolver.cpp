@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:02:00 $
+// $Revision: 1.4 $
+// $Date: 2003-04-02 22:02:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/eigenSOE/SymBandEigenSolver.cpp,v $
 
 // Written: MHS
@@ -59,8 +59,7 @@ SymBandEigenSolver::~SymBandEigenSolver()
 
 #ifdef _WIN32
 
-extern "C" int _stdcall DSBEVX(char *jobz, unsigned int *a, char *range, unsigned int *b, 
-							   char *uplo, unsigned int *c, int *n, int *kd,
+extern "C" int DSBEVX(char *jobz, char *range, char *uplo, int *n, int *kd,
 			       double *ab, int *ldab, double *q, int *ldq,
 			       double *vl, double *vu, int *il, int *iu, double *abstol,
 			       int *m, double *w, double *z, int *ldz,
@@ -165,7 +164,7 @@ SymBandEigenSolver::solve(int nModes)
   // Call the LAPACK eigenvalue subroutine
 #ifdef _WIN32
   unsigned int sizeC = 1;
-  DSBEVX(jobz, &sizeC, range, &sizeC, uplo, &sizeC, &n, &kd, ab, &ldab,
+  DSBEVX(jobz, range, uplo, &n, &kd, ab, &ldab,
 	 q, &ldq, &vl, &vu, &il, &iu, &abstol, &m,
 	 eigenvalue, eigenvector, &ldz, work, iwork, ifail, &info);
 #else

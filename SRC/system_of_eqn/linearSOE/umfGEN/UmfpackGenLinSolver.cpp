@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:02:09 $
+// $Revision: 1.3 $
+// $Date: 2003-04-02 22:02:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/umfGEN/UmfpackGenLinSolver.cpp,v $
                                                                         
                                                                         
@@ -43,7 +43,7 @@
 #include <FEM_ObjectBroker.h>
 
 #ifdef _WIN32
-extern "C" int _stdcall UMD21I(int *keep, double *cntl, int *icntl);
+extern "C" int UMD21I(int *keep, double *cntl, int *icntl);
 #else
 extern "C" int umd21i_(int *keep, double *cntl, int *icntl);
 #endif
@@ -73,7 +73,7 @@ UmfpackGenLinSolver::~UmfpackGenLinSolver()
 }
 
 #ifdef _WIN32
-extern "C" int _stdcall UMD2FA(int *n, int *ne, int *job, logical *transa,
+extern "C" int UMD2FA(int *n, int *ne, int *job, logical *transa,
 		       int *lvalue, int *lindex, double *value,
 		       int *index, int *keep, double *cntl, int *icntl,
 		       int *info, double *rinfo);
@@ -84,7 +84,7 @@ extern "C" int umd2rf_(int *n, int *ne, int *job, logical *transa,
 		       int *index, int *keep, double *cntl, int *icntl,
 		       int *info, double *rinfo);
 */
-extern "C" int _stdcall UMD2SO(int *n, int *job, logical *transa,
+extern "C" int  UMD2SO(int *n, int *job, logical *transa,
 		       int *lvalue, int *lindex, double *value,
 		       int *index, int *keep, double *b, double *x, 
 		       double *w, double *cntl, int *icntl,

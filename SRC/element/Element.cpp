@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.13 $
-// $Date: 2003-03-11 20:22:29 $
+// $Revision: 1.14 $
+// $Date: 2003-04-02 22:02:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -32,6 +32,8 @@
 //
 // The interface:
 //
+
+#include <stdlib.h>
 
 #include "Element.h"
 #include <Renderer.h>

@@ -18,10 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.5 $
-// $Date: 2003-04-02 01:51:53 $
+// $Revision: 1.6 $
+// $Date: 2003-04-02 22:02:37 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauBeamIntegration2d.cpp,v $
-
+#include <math.h>
 #include <HingeRadauBeamIntegration2d.h>
 
 #include <Matrix.h>

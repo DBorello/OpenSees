@@ -1,4 +1,4 @@
-      subroutine elmt01(d,ul,xl,ix,tl,s,p,ndf,ndm,nst,isw)
+      SUBROUTINE ELMT01(d,ul,xl,ix,tl,s,p,ndf,ndm,nst,isw)
 
       implicit none
 

@@ -1,4 +1,4 @@
-      subroutine feapCommon (mydt, myniter)
+      subroutine FEAPCOMMON (mydt, myniter)
 
 c .....................................................................
 c     feapCommon - a fortran subroutine to fill the named common block

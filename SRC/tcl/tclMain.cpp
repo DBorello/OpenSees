@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclMain.cpp,v 1.14 2003-02-25 23:34:47 fmk Exp $
+ * RCS: @(#) $Id: tclMain.cpp,v 1.15 2003-04-02 22:02:54 mhscott Exp $
  */
 
 /*                       MODIFIED   FOR                              */
@@ -18,7 +18,6 @@
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
 ** ****************************************************************** */
-
 
 extern "C" {
 #include <tcl.h>

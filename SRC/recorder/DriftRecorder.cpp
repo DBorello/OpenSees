@@ -18,14 +18,16 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-02-25 23:34:27 $
+// $Revision: 1.5 $
+// $Date: 2003-04-02 22:02:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
 // Created: Oct 2001
 //
 // Description: This file contains the class definition for DriftRecorder.
+
+#include <math.h>
 
 #include <DriftRecorder.h>
 #include <Domain.h>

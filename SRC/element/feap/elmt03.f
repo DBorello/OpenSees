@@ -1,5 +1,4 @@
-      subroutine elmt03(d,ul,xl,ix,tl,s,p,ndf,ndm,nst,isw)
-
+      subroutine ELMT03(d,ul,xl,ix,tl,s,p,ndf,ndm,nst,isw)
       implicit none
 
       real*8  d(*), ul(*), xl(*), tl(*), s(*), p(*)

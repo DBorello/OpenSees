@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:43 $
+// $Revision: 1.2 $
+// $Date: 2003-04-02 22:02:48 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/filter/StandardLinearOscillatorAccelerationFilter.cpp,v $
 
 
@@ -34,6 +34,7 @@
 #include <StandardLinearOscillatorAccelerationFilter.h>
 #include <Filter.h>
 #include <classTags.h>
+#include <math.h>
 
 
 StandardLinearOscillatorAccelerationFilter::StandardLinearOscillatorAccelerationFilter(int tag, double period, double dampingRatio)

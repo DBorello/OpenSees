@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:02:01 $
+// $Revision: 1.3 $
+// $Date: 2003-04-02 22:02:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/bandSPD/BandSPDLinLapackSolver.cpp,v $
                                                                         
                                                                         
@@ -52,12 +52,12 @@ BandSPDLinLapackSolver::~BandSPDLinLapackSolver()
 
 
 #ifdef _WIN32
-extern "C" int _stdcall DPBSV(char *UPLO, unsigned int sizeUPLO,
+extern "C" int  DPBSV(char *UPLO,
 			      int *N, int *KD, int *NRHS, 
 			      double *A, int *LDA, double *B, int *LDB, 
 			      int *INFO);
 
-extern "C" int _stdcall DPBTRS(char *UPLO, unsigned int sizeUPLO,
+extern "C" int  DPBTRS(char *UPLO,
 			       int *N, int *KD, int *NRHS, 
 			       double *A, int *LDA, double *B, int *LDB, 
 			       int *INFO);
@@ -106,12 +106,13 @@ BandSPDLinLapackSolver::solve(void)
     if (theSOE->factored == false) {
 	// factor and solve 	
 	unsigned int sizeC = 1;
-	DPBSV("U", sizeC, &n,&kd,&nrhs,Aptr,&ldA,Xptr,&ldB,&info);	
+	DPBSV("U", &n,&kd,&nrhs,Aptr,&ldA,Xptr,&ldB,&info);	
     }
       else {
 	// solve only using factored matrix	  
 	unsigned int sizeC = 1;	
-	DPBTRS("U", sizeC, &n,&kd,&nrhs,Aptr,&ldA,Xptr,&ldB,&info);	
+	//DPBTRS("U", sizeC, &n,&kd,&nrhs,Aptr,&ldA,Xptr,&ldB,&info);	
+	DPBTRS("U", &n,&kd,&nrhs,Aptr,&ldA,Xptr,&ldB,&info);
     }
 #else	
     { if (theSOE->factored == false)          

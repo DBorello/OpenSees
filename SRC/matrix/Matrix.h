@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-15 02:34:35 $
+// $Revision: 1.10 $
+// $Date: 2003-04-02 22:02:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.h,v $
                                                                         
                                                                         
@@ -44,7 +44,9 @@
 class Vector;
 class ID;
 class Message;
-#include <Tensor.h>
+
+#include <Tensor.h> // cannot use class as Tensor is itself defined in Tensor.h
+
 
 #define MATRIX_VERY_LARGE_VALUE 1.0e213
 

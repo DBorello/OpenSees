@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:55 $
+// $Revision: 1.3 $
+// $Date: 2003-04-02 22:02:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/RigidRod.cpp,v $
                                                                         
                                                                         
@@ -29,6 +29,7 @@
 // Revised:
 //
 // Purpose: This file contains the class implementation for RigidRod.
+#include <stdlib.h>
 
 #include <OPS_Globals.h>
 #include <Domain.h>

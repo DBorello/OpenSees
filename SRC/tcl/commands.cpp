@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.48 $
-// $Date: 2003-03-14 23:37:52 $
+// $Revision: 1.49 $
+// $Date: 2003-04-02 22:02:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -1291,7 +1291,7 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
 
   // check argv[1] for type of SOE and create it
   // BAND GENERAL SOE & SOLVER
-  if (strcmp(argv[1],"BandGeneral") == 0) {
+  if ((strcmp(argv[1],"BandGeneral") == 0) || (strcmp(argv[1],"BandGEN") == 0)){
       BandGenLinSolver    *theSolver = new BandGenLinLapackSolver();
       theSOE = new BandGenLinSOE(*theSolver);      
   } 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:42 $
+// $Revision: 1.4 $
+// $Date: 2003-04-02 22:02:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasHyster1Material.cpp,v $
                                                                       
 // Written: MHS
@@ -29,6 +29,7 @@
 // FedeasHyster1Material. FedeasHyster1Material wraps the FEDEAS
 // 1d material subroutine Hyster_1.
 
+#include <stdlib.h>
 #include <FedeasHyster1Material.h>
 
 FedeasHyster1Material::FedeasHyster1Material(int tag,

@@ -19,6 +19,8 @@
 //
 // Description: This file contains the class implementation for TzSimple1
 
+#include <stdlib.h>
+
 #include "TzSimple1.h"
 #include <Vector.h>
 #include <Channel.h>

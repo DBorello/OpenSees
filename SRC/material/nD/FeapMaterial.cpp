@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:25 $
+// $Revision: 1.4 $
+// $Date: 2003-04-02 22:02:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/FeapMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -457,17 +457,17 @@ FeapMaterial::Print(OPS_Stream &s, int flag)
 
 #ifdef _WIN32
 
-extern "C" int _stdcall FEAPCOMMON(double *dt, int *niter);
+extern "C" int FEAPCOMMON(double *dt, int *niter);
 
-extern "C" int _stdcall MATL01(double *eps, double *trace, double *td, double *d,
+extern "C" int MATL01(double *eps, double *trace, double *td, double *d,
 			       double *ud, double *hn, double *h1, int *nh,
 			       double *sig, double *dd, int *isw);
 
-extern "C" int _stdcall MATL02(double *eps, double *trace, double *td, double *d,
+extern "C" int MATL02(double *eps, double *trace, double *td, double *d,
 			       double *ud, double *hn, double *h1, int *nh,
 			       double *sig, double *dd, int *isw);
 
-extern "C" int _stdcall MATL03(double *eps, double *trace, double *td, double *d,
+extern "C" int MATL03(double *eps, double *trace, double *td, double *d,
 			       double *ud, double *hn, double *h1, int *nh,
 			       double *sig, double *dd, int *isw);
 

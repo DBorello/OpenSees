@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2003-02-14 23:00:42 $
+// $Revision: 1.8 $
+// $Date: 2003-04-02 22:02:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/KrylovNewton.cpp,v $
 
 // Written: MHS
@@ -265,7 +265,7 @@ KrylovNewton::Print(OPS_Stream &s, int flag)
 
 #ifdef _WIN32
 
-extern "C" int _stdcall DGELS(char *T, unsigned int *SZ, int *M, int *N, int *NRHS,
+extern "C" int  DGELS(char *T, unsigned int *SZ, int *M, int *N, int *NRHS,
 			      double *A, int *LDA, double *B, int *LDB,
 			      double *WORK, int *LWORK, int *INFO);
 

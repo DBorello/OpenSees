@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-14 23:01:39 $
+// $Revision: 1.10 $
+// $Date: 2003-04-02 22:02:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HystereticMaterial.cpp,v $
 
 // Written: MHS
@@ -31,7 +31,7 @@
 // force and deformation, damage due to deformation and energy, and
 // degraded unloading stiffness based on maximum ductility.  This
 // is a modified implementation of Hyster2.f90 by Filippou.
-
+#include <stdlib.h>
 #include <HystereticMaterial.h>
 #include <OPS_Globals.h>
 #include <math.h>

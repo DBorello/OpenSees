@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:42 $
+// $Revision: 1.4 $
+// $Date: 2003-04-02 22:02:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasSteel1Material.cpp,v $
                                                                       
 // Written: MHS
@@ -29,6 +29,7 @@
 // FedeasSteel1Material. FedeasSteel1Material wraps the FEDEAS
 // 1d material subroutine Steel_1.
 
+#include <stdlib.h>
 #include <FedeasSteel1Material.h>
 
 FedeasSteel1Material::FedeasSteel1Material(int tag,

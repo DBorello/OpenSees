@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-02-15 02:34:35 $
+// $Revision: 1.8 $
+// $Date: 2003-04-02 22:02:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.h,v $
 
                                                                         
@@ -47,7 +47,8 @@ class Matrix;
 class Message;
 class SystemOfEqn;
 
-#include <Tensor.h>
+#include <Tensor.h> // cannot use class as Tensor is itself defined in Tensor.h
+
 
 class Vector
 {

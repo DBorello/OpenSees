@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.4 $
-// $Date: 2003-02-25 23:34:30 $
+// $Revision: 1.5 $
+// $Date: 2003-04-02 22:02:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.cpp,v $
                                                                         
 // Written: fmk 
@@ -32,6 +32,8 @@
 // last commitTag).
 //
 // What: "@(#) EnvelopeNodeRecorder.C, revA"
+
+#include <math.h>
 
 #include <EnvelopeNodeRecorder.h>
 #include <Domain.h>

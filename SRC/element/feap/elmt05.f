@@ -1,4 +1,4 @@
-      subroutine elmt05(d,ul,xl,ix,tl,s,p,ndf,ndm,nst,isw)
+      subroutine ELMT05(d,ul,xl,ix,tl,s,p,ndf,ndm,nst,isw)
 
       implicit none
 

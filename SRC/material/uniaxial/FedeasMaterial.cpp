@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-02-15 00:56:14 $
+// $Revision: 1.15 $
+// $Date: 2003-04-02 22:02:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -292,43 +292,43 @@ FedeasMaterial::Print(OPS_Stream &s, int flag)
 
 #ifdef _WIN32
 
-extern "C" int _stdcall BOND_1(double *matpar, double *hstvP, double *hstv,
+extern "C" int BOND_1(double *matpar, double *hstvP, double *hstv,
 			       double *strainP, double *stressP, double *dStrain,
 			       double *tangent, double *stress, int *ist);
 
-extern "C" int _stdcall BOND_2(double *matpar, double *hstvP, double *hstv,
+extern "C" int BOND_2(double *matpar, double *hstvP, double *hstv,
 			       double *strainP, double *stressP, double *dStrain,
 			       double *tangent, double *stress, int *ist);
 
-extern "C" int _stdcall CONCRETE_1(double *matpar, double *hstvP, double *hstv,
+extern "C" int CONCRETE_1(double *matpar, double *hstvP, double *hstv,
 				   double *strainP, double *stressP, double *dStrain,
 				   double *tangent, double *stress, int *ist);
 
-extern "C" int _stdcall CONCRETE_2(double *matpar, double *hstvP, double *hstv,
+extern "C" int CONCRETE_2(double *matpar, double *hstvP, double *hstv,
 				   double *strainP, double *stressP, double *dStrain,
 				   double *tangent, double *stress, int *ist);
 
-extern "C" int _stdcall CONCRETE_3(double *matpar, double *hstvP, double *hstv,
+extern "C" int CONCRETE_3(double *matpar, double *hstvP, double *hstv,
 				   double *strainP, double *stressP, double *dStrain,
 				   double *tangent, double *stress, int *ist);
 
-extern "C" int _stdcall HARD_1(double *matpar, double *hstvP, double *hstv,
+extern "C" int HARD_1(double *matpar, double *hstvP, double *hstv,
 			       double *strainP, double *stressP, double *dStrain,
 			       double *tangent, double *stress, int *ist);
 
-extern "C" int _stdcall HYSTER_1(double *matpar, double *hstvP, double *hstv,
+extern "C" int HYSTER_1(double *matpar, double *hstvP, double *hstv,
 				 double *strainP, double *stressP, double *dStrain,
 				 double *tangent, double *stress, int *ist);
 
-extern "C" int _stdcall HYSTER_2(double *matpar, double *hstvP, double *hstv,
+extern "C" int HYSTER_2(double *matpar, double *hstvP, double *hstv,
 				 double *strainP, double *stressP, double *dStrain,
 				 double *tangent, double *stress, int *ist);
 
-extern "C" int _stdcall STEEL_1(double *matpar, double *hstvP, double *hstv,
+extern "C" int STEEL_1(double *matpar, double *hstvP, double *hstv,
 				double *strainP, double *stressP, double *dStrain,
 				double *tangent, double *stress, int *ist);
 
-extern "C" int _stdcall STEEL_2(double *matpar, double *hstvP, double *hstv,
+extern "C" int  STEEL_2(double *matpar, double *hstvP, double *hstv,
 				double *strainP, double *stressP, double *dStrain,
 				double *tangent, double *stress, int *ist);
 

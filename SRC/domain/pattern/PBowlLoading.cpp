@@ -40,6 +40,7 @@
 // PBowlLoading is an subclass of loadPattern.
 
 #include <PBowlLoading.h>
+#include <math.h>
 
 #include <iomanip>
 using std::ios;

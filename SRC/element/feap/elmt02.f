@@ -1,5 +1,5 @@
 c.... *****************************************************************<-70
-      subroutine elmt02(d,ul,xl,ix,tl,s,r,ndf,ndm,nst,isw)
+      subroutine ELMT02(d,ul,xl,ix,tl,s,r,ndf,ndm,nst,isw)
 c .....................................................................
 c     elmt02 - Two dimensional truss element
 c

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:02:01 $
+// $Revision: 1.3 $
+// $Date: 2003-04-02 22:02:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/system_of_eqn/linearSOE/fullGEN/FullGenLinLapackSolver.cpp,v $
                                                                         
                                                                         
@@ -56,10 +56,10 @@ FullGenLinLapackSolver::~FullGenLinLapackSolver()
 
 
 #ifdef _WIN32
-extern "C" int _stdcall DGESV(int *N, int *NRHS, double *A, int *LDA, 
+extern "C" int  DGESV(int *N, int *NRHS, double *A, int *LDA, 
 			      int *iPiv, double *B, int *LDB, int *INFO);
 			     
-extern "C" int _stdcall DGETRS(char *TRANS, unsigned int sizeT,
+extern "C" int  DGETRS(char *TRANS,
 			       int *N, int *NRHS, double *A, int *LDA, 
 			       int *iPiv, double *B, int *LDB, int *INFO);
 #else
@@ -114,7 +114,7 @@ FullGenLinLapackSolver::solve(void)
      else {
 	// solve only using factored matrix	 
 	 unsigned int sizeC = 1;
-	 DGETRS("N", sizeC, &n,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);	 
+	 DGETRS("N", &n,&nrhs,Aptr,&ldA,iPIV,Xptr,&ldB,&info);	 
      }}
 #else
     {if (theSOE->factored == false)      

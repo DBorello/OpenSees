@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:40 $
+// $Revision: 1.5 $
+// $Date: 2003-04-02 22:02:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/ViscousMaterial.cpp,v $
                                                                         
 // Written: Mehrdad Sasani 
@@ -28,6 +28,8 @@
 //
 // Description: This file contains the class implementation for 
 // ViscousMaterial. 
+
+#include <math.h>
 
 #include <ViscousMaterial.h>
 #include <Vector.h>

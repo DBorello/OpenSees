@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:38 $
+// $Revision: 1.5 $
+// $Date: 2003-04-02 22:02:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/DrainMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -328,14 +328,14 @@ DrainMaterial::Print(OPS_Stream &s, int flag)
 #ifdef _WIN32
 
 // Declarations for the Hardening subroutines
-extern "C" int _stdcall FILL00(double *data, double *hstv, double *stateP);
-extern "C" int _stdcall RESP00(int *kresis, int *ksave, int *kgem, int *kstep,
+extern "C" int FILL00(double *data, double *hstv, double *stateP);
+extern "C" int RESP00(int *kresis, int *ksave, int *kgem, int *kstep,
 							   int *ndof, int *kst, int *kenr,
 							   double *ener, double *ened, double *enso, double *beto,
 							   double *relas, double *rdamp, double *rinit,
 							   double *ddise, double *dise, double *vele);
-extern "C" int _stdcall STIF00(int *kstt, int *ktype, int *ndof, double *fk);
-extern "C" int _stdcall GET00(double *hstv);
+extern "C" int STIF00(int *kstt, int *ktype, int *ndof, double *fk);
+extern "C" int GET00(double *hstv);
 
 #define fill00_		FILL00
 #define resp00_		RESP00

@@ -18,10 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-25 23:32:39 $
+// $Revision: 1.4 $
+// $Date: 2003-04-02 22:02:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/coordTransformation/TclGeomTransfCommand.cpp,v $
-
+#include <string.h>
 #include <TclModelBuilder.h>
 
 #include <LinearCrdTransf2d.h>

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-14 23:01:38 $
+// $Revision: 1.9 $
+// $Date: 2003-04-02 22:02:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/EPPGapMaterial.cpp,v $
 
 // File: ~/material/EPPGapMaterial.C
@@ -33,6 +33,7 @@
 //
 // What: "@(#) EPPGapMaterial.C, revA"
 
+#include <stdlib.h>
 
 #include <EPPGapMaterial.h>
 #include <Vector.h>

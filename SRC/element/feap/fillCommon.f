@@ -1,5 +1,5 @@
 c.... *****************************************************************<-70
-      subroutine fillcommon(mynen, mydm, myn, myior, myiow, mynh1, 
+      subroutine FILLCOMMON(mynen, mydm, myn, myior, myiow, mynh1, 
      1                      mynh2, mynh3, sumnh, myh, myctan, nrcount)
 c .....................................................................
 c     fillCommon - a fortran subroutine to fill the named common block

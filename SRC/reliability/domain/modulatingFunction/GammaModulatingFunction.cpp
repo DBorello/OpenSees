@@ -22,8 +22,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2003-03-04 00:44:47 $
+// $Revision: 1.2 $
+// $Date: 2003-04-02 22:02:49 $
 // $Source: /usr/local/cvs/OpenSees/SRC/reliability/domain/modulatingFunction/GammaModulatingFunction.cpp,v $
 
 
@@ -34,6 +34,7 @@
 #include <GammaModulatingFunction.h>
 #include <ModulatingFunction.h>
 #include <classTags.h>
+#include <math.h>
 
 
 GammaModulatingFunction::GammaModulatingFunction(int tag,

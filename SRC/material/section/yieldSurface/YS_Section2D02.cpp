@@ -1,6 +1,7 @@
 // @ rkaul@stanford.edu
 //   ggd@stanford.edu
 
+#include <math.h>
 #include <YS_Section2D02.h>
 #define SEC_TAG_YS2D02 -1
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-03-04 21:07:18 $
+// $Revision: 1.5 $
+// $Date: 2003-04-02 22:02:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/joint/MP_Joint2D.cpp,v $
 
 // Written: Arash & GGD
@@ -32,6 +32,8 @@
 #include <MP_Joint2D.h>
 
 #include <stdlib.h>
+#include <math.h>
+
 #include <Matrix.h>
 #include <ID.h>
 #include <Channel.h>

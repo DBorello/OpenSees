@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:17 $
+// $Revision: 1.4 $
+// $Date: 2003-04-02 22:02:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/quadrule/GaussLobattoQuadRule1d01.cpp,v $
                                                                         
                                                                         
@@ -28,6 +28,8 @@
 //
 // Description: This file contains the implementation of 
 // GaussLobattoQuadRule1d01 (Quadrature Rule,0).
+
+#include <stdlib.h>
 
 #include <Vector.h>
 #include <Matrix.h>

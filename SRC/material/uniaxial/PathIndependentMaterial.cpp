@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:39 $
+// $Revision: 1.6 $
+// $Date: 2003-04-02 22:02:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/PathIndependentMaterial.cpp,v $
 
 // Written: MHS
@@ -31,6 +31,7 @@
 // it is path-independent, no state information is stored by
 // PathIndependentMaterial.
 
+#include <stdlib.h>
 #include <PathIndependentMaterial.h>
 #include <ID.h>
 #include <Channel.h>

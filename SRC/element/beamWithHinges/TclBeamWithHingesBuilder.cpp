@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-26 22:36:10 $
+// $Revision: 1.9 $
+// $Date: 2003-04-02 22:02:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/TclBeamWithHingesBuilder.cpp,v $
                                                                         
                                                                         
@@ -34,6 +34,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include <Domain.h>
 #include <Node.h>

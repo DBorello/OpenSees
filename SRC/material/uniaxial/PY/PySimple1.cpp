@@ -19,10 +19,12 @@
 //
 // Description: This file contains the class implementation for PySimple1
 
+#include <stdlib.h>
+#include <math.h>
+
 #include "PySimple1.h"
 #include <Vector.h>
 #include <Channel.h>
-#include <math.h>
 
 /////////////////////////////////////////////////////////////////////
 //	Constructor with data

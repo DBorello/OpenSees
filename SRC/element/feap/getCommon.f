@@ -1,5 +1,5 @@
 c.... *****************************************************************<-70
-      subroutine getcommon(mynh1, mynh3, sumnh, myh)
+      subroutine GETCOMMON(mynh1, mynh3, sumnh, myh)
 c .....................................................................
 c     getCommon - a fortran subroutine to read info from the feap
 c                 common blocks

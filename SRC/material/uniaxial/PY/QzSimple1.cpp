@@ -19,10 +19,11 @@
 //
 // Description: This file contains the class implementation for QzSimple1
 
+#include <stdlib.h>
+#include <math.h>
 #include "QzSimple1.h"
 #include <Vector.h>
 #include <Channel.h>
-#include <math.h>
 
 /////////////////////////////////////////////////////////////////////
 //	Constructor with data

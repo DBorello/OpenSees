@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2003-02-14 23:01:39 $
+// $Revision: 1.5 $
+// $Date: 2003-04-02 22:02:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/MinMaxMaterial.cpp,v $
 
 // Written: MHS
@@ -28,6 +28,8 @@
 // Description: This file contains the class definition for 
 // MinMaxMaterial.  MinMaxMaterial wraps a UniaxialMaterial
 // and imposes min and max strain limits.
+
+#include <stdlib.h>
 
 #include <MinMaxMaterial.h>
 #include <ID.h>

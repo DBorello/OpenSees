@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:42 $
+// $Revision: 1.4 $
+// $Date: 2003-04-02 22:02:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasConcr3Material.cpp,v $
                                                                       
 // Written: MHS
@@ -29,6 +29,7 @@
 // FedeasConcr3Material. FedeasConcr3Material wraps the FEDEAS
 // 1d material subroutine Concr_3.
 
+#include <stdlib.h>
 #include <FedeasConcr3Material.h>
 
 FedeasConcr3Material::FedeasConcr3Material(int tag,

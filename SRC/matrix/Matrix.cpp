@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2003-02-15 02:34:34 $
+// $Revision: 1.12 $
+// $Date: 2003-04-02 22:02:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -36,6 +36,7 @@
 #include "Matrix.h"
 #include "Vector.h"
 #include "ID.h"
+#include <Tensor.h>
 
 #include <stdlib.h>
 
@@ -308,17 +309,17 @@ Matrix::Assemble(const Matrix &V, const ID &rows, const ID &cols, double fact)
 }
 
 #ifdef _WIN32
-extern "C" int _stdcall DGESV(int *N, int *NRHS, double *A, int *LDA, 
+extern "C" int  DGESV(int *N, int *NRHS, double *A, int *LDA, 
 			      int *iPiv, double *B, int *LDB, int *INFO);
 
-extern "C" int _stdcall DGETRF(int *M, int *N, double *A, int *LDA, 
+extern "C" int  DGETRF(int *M, int *N, double *A, int *LDA, 
 			      int *iPiv, int *INFO);
 
-extern "C" int _stdcall DGETRS(char *TRANS, unsigned int sizeT,
+extern "C" int  DGETRS(char *TRANS, unsigned int sizeT,
 			       int *N, int *NRHS, double *A, int *LDA, 
 			       int *iPiv, double *B, int *LDB, int *INFO);
 
-extern "C" int _stdcall DGETRI(int *N, double *A, int *LDA, 
+extern "C" int  DGETRI(int *N, double *A, int *LDA, 
 			      int *iPiv, double *Work, int *WORKL, int *INFO);
 
 #else
@@ -931,7 +932,6 @@ Matrix::operator=(const Matrix &other)
 
 
 
-
 Matrix &
 Matrix::operator=(const Tensor &V)
 {
@@ -1026,7 +1026,6 @@ Matrix::operator=(const Tensor &V)
   }
   return *this;
 }
-
 
 
 // virtual Matrix &operator+=(double fact);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2003-02-14 23:01:08 $
+// $Revision: 1.7 $
+// $Date: 2003-04-02 22:02:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/feap/fElement.cpp,v $
                                                                         
                                                                         
@@ -740,33 +740,33 @@ fElement::Print(OPS_Stream &s, int flag)
 
 #ifdef _WIN32
 
-extern "C" int _stdcall GETCOMMON(int *mynh1, int *mynh3, int *sizeH, 
+extern "C" int GETCOMMON(int *mynh1, int *mynh3, int *sizeH, 
 				  double *myh);
 
 
-extern "C" int _stdcall FILLCOMMON(int *mynen, double *mydm, int *myn, 
+extern "C" int FILLCOMMON(int *mynen, double *mydm, int *myn, 
 				   int *myior, int *myiow, int *mynh1, 
 				   int *mynh2, int *mynh3, int *sumnh, 
 				   double *myh, double *myctan,
 				   int *nrCount);
 
-extern "C" int _stdcall ELMT01(double *d, double *ul, double *xl, int *ix, 
+extern "C" int ELMT01(double *d, double *ul, double *xl, int *ix, 
 			       double *tl, double *s, double *r, int *ndf, 
 			       int *ndm, int *nst, int *isw);
 
-extern "C" int _stdcall ELMT02(double *d, double *ul, double *xl, int *ix, 
+extern "C" int ELMT02(double *d, double *ul, double *xl, int *ix, 
 			       double *tl, double *s, double *r, int *ndf, 
 			       int *ndm, int *nst, int *isw);
 		       
-extern "C" int _stdcall ELMT03(double *d, double *ul, double *xl, int *ix, 
+extern "C" int ELMT03(double *d, double *ul, double *xl, int *ix, 
 			       double *tl, double *s, double *r, int *ndf, 
 			       int *ndm, int *nst, int *isw);
 		       
-extern "C" int _stdcall ELMT04(double *d, double *ul, double *xl, int *ix, 
+extern "C" int ELMT04(double *d, double *ul, double *xl, int *ix, 
 			       double *tl, double *s, double *r, int *ndf, 
 			       int *ndm, int *nst, int *isw);
 		       
-extern "C" int _stdcall ELMT05(double *d, double *ul, double *xl, int *ix, 
+extern "C" int ELMT05(double *d, double *ul, double *xl, int *ix, 
 			       double *tl, double *s, double *r, int *ndf, 
 			       int *ndm, int *nst, int *isw);		       
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:42 $
+// $Revision: 1.3 $
+// $Date: 2003-04-02 22:02:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/InitialInterpolatedLineSearch.cpp,v $
 
 // Written: fmk 
@@ -33,6 +33,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Vector.h>
+#include <math.h>
 
 
 InitialInterpolatedLineSearch::InitialInterpolatedLineSearch(double tol, int mIter, double mnEta,

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2003-02-14 23:01:42 $
+// $Revision: 1.4 $
+// $Date: 2003-04-02 22:02:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/fedeas/FedeasBond1Material.cpp,v $
                                                                       
 // Written: MHS
@@ -28,6 +28,8 @@
 // Description: This file contains the class definition for 
 // FedeasBond1Material. FedeasBond1Material wraps the FEDEAS
 // 1d material subroutine Bond_1.
+
+#include <stdlib.h>
 
 #include <FedeasBond1Material.h>
 

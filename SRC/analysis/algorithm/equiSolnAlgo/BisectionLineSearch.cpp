@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:42 $
+// $Revision: 1.3 $
+// $Date: 2003-04-02 22:02:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/BisectionLineSearch.cpp,v $
 
 // Written: fmk 
@@ -33,7 +33,7 @@
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
 #include <Vector.h>
-
+#include <math.h>
 
 BisectionLineSearch::BisectionLineSearch(double tol, int mIter, double mnEta, double mxEta, int pFlag)
 :LineSearch(LINESEARCH_TAGS_BisectionLineSearch),

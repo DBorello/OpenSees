@@ -1,6 +1,8 @@
 // @ rkaul@stanford.edu
 // @ ggd@stanford.edu
 
+#include <math.h>
+
 #include <YieldSurfaceSection2d.h>
 #include <Matrix.h>
 #include <Vector.h>

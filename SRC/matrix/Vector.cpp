@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-02-15 02:34:35 $
+// $Revision: 1.9 $
+// $Date: 2003-04-02 22:02:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -36,6 +36,7 @@
 #include "Vector.h"
 #include "Matrix.h"
 #include "ID.h"
+#include <Tensor.h>
 
 #include <stdlib.h>
 #include <math.h>
@@ -760,7 +761,6 @@ Vector::operator=(const Tensor &V)
   }
   return *this;
 }
-
 
 
 

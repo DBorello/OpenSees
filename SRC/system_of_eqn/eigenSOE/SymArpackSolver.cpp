@@ -32,18 +32,18 @@ extern "C" {
 }
 
 #ifdef _WIN32
-extern "C" int _stdcall DSAUPD(int *ido, char* bmat, unsigned int *, 
-			       int *n, char *which, unsigned int *,
+extern "C" int  DSAUPD(int *ido, char* bmat, 
+			       int *n, char *which,
 			       int *nev, 
 			       double *tol, double *resid, int *ncv, double *v, 
 			       int *ldv,
 			       int *iparam, int *ipntr, double *workd, double *workl,
 			       int *lworkl, int *info);
 
-extern "C" int _stdcall DSEUPD(bool *rvec, char *howmny, unsigned int *,
+extern "C" int DSEUPD(bool *rvec, char *howmny,
 			       logical *select, double *d, double *z,
-			       int *ldz, double *sigma, char *bmat, unsigned int *,
-			       int 	*n, char *which, unsigned int *,
+			       int *ldz, double *sigma, char *bmat,
+			       int 	*n, char *which,
 			       int *nev, double *tol, double *resid, int *ncv, 
 			       double *v,
 			       int *ldv, int *iparam, int *ipntr, double *workd, 
@@ -176,8 +176,7 @@ SymArpackSolver::solve(void)
     while (1) { 
  
 #ifdef _WIN32
-	DSAUPD(&ido, &bmat, &sizeBmat, &n, "LM", &sizeWhich, &nev, &tol, resid, 
-	       &ncv, v, &ldv,
+	DSAUPD(&ido, &bmat, &n, "LM", &nev, &tol, resid, &ncv, v, &ldv,
 	       iparam, ipntr, workd, workl, &lworkl, &info);
 #else
 	dsaupd_(&ido, &bmat, &n, "LM", &nev, &tol, resid, &ncv, v, &ldv,
@@ -218,8 +217,7 @@ SymArpackSolver::solve(void)
 	double sigma = theSOE->shift;
 	if (iparam[4] > 0) {
 #ifdef _WIN32
-	    DSEUPD(&rvec, &howmy, &sizeHowmany, select, d, v, &ldv, &sigma, &bmat,
-		   &sizeBmat, &n, "LM", &sizeWhich,
+	    DSEUPD(&rvec, &howmy, select, d, v, &ldv, &sigma, &bmat, &n, "LM",
 		   &nev, &tol, resid, &ncv, v, &ldv, iparam, ipntr, workd,
 		   workl, &lworkl, &info);
 #else

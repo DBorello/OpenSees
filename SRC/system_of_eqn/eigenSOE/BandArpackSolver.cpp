@@ -19,6 +19,7 @@
 #include <FE_EleIter.h>
 #include <FE_Element.h>
 #include <Integrator.h>
+#include <string.h>
 
 BandArpackSolver::BandArpackSolver(int numE)
 :EigenSolver(EigenSOLVER_TAGS_BandArpackSolver),
@@ -42,19 +43,19 @@ BandArpackSolver::~BandArpackSolver()
 
 #ifdef _WIN32
 
-extern "C" int _stdcall DGBSV(int *N, int *KL, int *KU, int *NRHS, double *A, 
+extern "C" int  DGBSV(int *N, int *KL, int *KU, int *NRHS, double *A, 
 			      int *LDA, int *iPiv, double *B, int *LDB, 
 			      int *INFO);
 
-extern "C" int _stdcall DGBTRF(int *M, int *N, int *KL, int *KU, double *A, int *LDA, 
+extern "C" int  DGBTRF(int *M, int *N, int *KL, int *KU, double *A, int *LDA, 
 			       int *iPiv, int *INFO);
-
-extern "C" int _stdcall DGBTRS(char *TRANS, unsigned int *sizeC, 
+/*
+extern "C" int  DGBTRS(char *TRANS, unsigned int *sizeC, 
 			       int *N, int *KL, int *KU, int *NRHS,
 			       double *A, int *LDA, int *iPiv, 
 			       double *B, int *LDB, int *INFO);
 
-extern "C" int _stdcall DSAUPD(int *ido, char* bmat, unsigned int *, 
+extern "C" int  DSAUPD(int *ido, char* bmat, unsigned int *, 
 			       int *n, char *which, unsigned int *,
 			       int *nev, 
 			       double *tol, double *resid, int *ncv, double *v, 
@@ -62,10 +63,33 @@ extern "C" int _stdcall DSAUPD(int *ido, char* bmat, unsigned int *,
 			       int *iparam, int *ipntr, double *workd, double *workl,
 			       int *lworkl, int *info);
 
-extern "C" int _stdcall DSEUPD(bool *rvec, char *howmny, unsigned int *,
+extern "C" int  DSEUPD(bool *rvec, char *howmny, unsigned int *,
 			       logical *select, double *d, double *z,
 			       int *ldz, double *sigma, char *bmat, unsigned int *,
 			       int 	*n, char *which, unsigned int *,
+			       int *nev, double *tol, double *resid, int *ncv, 
+			       double *v,
+			       int *ldv, int *iparam, int *ipntr, double *workd, 
+			       double *workl, int *lworkl, int *info);
+*/
+
+extern "C" int  DGBTRS(char *TRANS, 
+			       int *N, int *KL, int *KU, int *NRHS,
+			       double *A, int *LDA, int *iPiv, 
+			       double *B, int *LDB, int *INFO);
+
+extern "C" int  DSAUPD(int *ido, char* bmat, 
+			       int *n, char *which,
+			       int *nev, 
+			       double *tol, double *resid, int *ncv, double *v, 
+			       int *ldv,
+			       int *iparam, int *ipntr, double *workd, double *workl,
+			       int *lworkl, int *info);
+
+extern "C" int  DSEUPD(bool *rvec, char *howmny,
+			       logical *select, double *d, double *z,
+			       int *ldz, double *sigma, char *bmat,
+			       int 	*n, char *which,
 			       int *nev, double *tol, double *resid, int *ncv, 
 			       double *v,
 			       int *ldv, int *iparam, int *ipntr, double *workd, 
@@ -102,7 +126,6 @@ extern "C" int dseupd_(bool *rvec, char *howmny, logical *select, double *d, dou
 int
 BandArpackSolver::solve(void)
 {
-
     if (theSOE == 0) {
 	opserr << "WARNING BandGenLinLapackSolver::solve(void)- ";
 	opserr << " No LinearSOE object has been set\n";
@@ -185,7 +208,12 @@ BandArpackSolver::solve(void)
       unsigned int sizeBmat =1;
       unsigned int sizeHowmany =1;
 	  unsigned int sizeOne = 1;
+	  /*
       DSAUPD(&ido, &bmat, &sizeBmat, &n, which, &sizeWhich, &nev, &tol, resid, 
+	     &ncv, v, &ldv,
+	     iparam, ipntr, workd, workl, &lworkl, &info);
+	   */
+	DSAUPD(&ido, &bmat, &n, which, &nev, &tol, resid, 
 	     &ncv, v, &ldv,
 	     iparam, ipntr, workd, workl, &lworkl, &info);
 #else
@@ -197,7 +225,11 @@ BandArpackSolver::solve(void)
 
 	  myMv(n, &workd[ipntr[0]-1], &workd[ipntr[1]-1]); 
 #ifdef _WIN32
+	  /*
 	  DGBTRS("N", &sizeOne, &n, &kl, &ku, &nrhs, Aptr, &ldA, iPIV, 
+		 &workd[ipntr[1] - 1], &ldB, &ierr);
+		 */
+	  DGBTRS("N", &n, &kl, &ku, &nrhs, Aptr, &ldA, iPIV, 
 		 &workd[ipntr[1] - 1], &ldB, &ierr);
 #else
 	  dgbtrs_("N", &n, &kl, &ku, &nrhs, Aptr, &ldA, iPIV, 
@@ -215,7 +247,11 @@ BandArpackSolver::solve(void)
 	  myCopy(n, &workd[ipntr[2]-1], &workd[ipntr[1]-1]);
 
 #ifdef _WIN32
+	  /*
 	  DGBTRS("N", &sizeOne, &n, &kl, &ku, &nrhs, Aptr, &ldA, iPIV, 
+		 &workd[ipntr[1] - 1], &ldB, &ierr);
+		 */
+	  DGBTRS("N", &n, &kl, &ku, &nrhs, Aptr, &ldA, iPIV, 
 		 &workd[ipntr[1] - 1], &ldB, &ierr);
 #else
 	  dgbtrs_("N", &n, &kl, &ku, &nrhs, Aptr, &ldA, iPIV, 
@@ -323,8 +359,13 @@ BandArpackSolver::solve(void)
 	    unsigned int sizeWhich =2;
 	    unsigned int sizeBmat =1;
 	    unsigned int sizeHowmany =1;
+		/*
 	    DSEUPD(&rvec, &howmy, &sizeHowmany, select, d, z, &ldv, &sigma, &bmat,
 		   &sizeBmat, &n, which, &sizeWhich,
+		   &nev, &tol, resid, &ncv, v, &ldv, iparam, ipntr, workd,
+		   workl, &lworkl, &info);
+		   */
+		DSEUPD(&rvec, &howmy, select, d, z, &ldv, &sigma, &bmat, &n, which,
 		   &nev, &tol, resid, &ncv, v, &ldv, iparam, ipntr, workd,
 		   workl, &lworkl, &info);
 #else
