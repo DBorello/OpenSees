@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2002-12-17 22:43:07 $
+// $Revision: 1.3 $
+// $Date: 2002-12-19 21:06:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/TclForceBeamColumnCommand.cpp,v $
                                                                         
 // Written: MHS
@@ -36,13 +36,17 @@
 #include <TclModelBuilder.h>
 
 #include <ForceBeamColumn2d.h>
+#include <ForceBeamColumn3d.h>
 
 #include <LobattoBeamIntegration.h>
 #include <UserDefinedBeamIntegration.h>
 
 #include <HingeMidpointBeamIntegration2d.h>
+#include <HingeMidpointBeamIntegration3d.h>
 #include <HingeRadauBeamIntegration2d.h>
+#include <HingeRadauBeamIntegration3d.h>
 #include <UserDefinedHingeIntegration2d.h>
+#include <UserDefinedHingeIntegration3d.h>
 
 extern void printCommand(int argc, char **argv);
 
@@ -66,8 +70,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
   if (ndm == 2 && ndf == 3)
     ok = 1;
   if (ndm == 3 && ndf == 6)
-    //ok = 1;
-    ok = 0;
+    ok = 1;
   
   if (ok == 0) {
     cerr << "WARNING -- NDM = " << ndm << " and NDF = " << ndf
@@ -172,8 +175,12 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     
     LobattoBeamIntegration beamIntegr;
 
-    theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
-				       beamIntegr, *theTransf2d);
+    if (ndm == 2)
+      theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
+					 beamIntegr, *theTransf2d);
+    else
+      theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
+					 beamIntegr, *theTransf3d);
 
     delete [] sections;
   }
@@ -184,13 +191,13 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     if (argc < 14) {
       cerr << "WARNING insufficient arguments\n";
       printCommand(argc, argv);
-      cerr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? type secTagI? lpI? secTagJ? lpJ? E? A? I?\n";
+      cerr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? type secTagI? lpI? secTagJ? lpJ? E? A? Iz? <Iy? G? J?>\n";
       return TCL_ERROR;
     }
 
     int secTagI, secTagJ;
     double lpI, lpJ;
-    double E, A, I;
+    double E, A, Iz, Iy, G, J;
     
     if (Tcl_GetInt(interp, argv[7], &secTagI) != TCL_OK) {
       cerr << "WARNING invalid secTagI\n";
@@ -222,12 +229,30 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       cerr << "forceBeamColumn element: " << eleTag << endl;
       return TCL_ERROR;
     }
-    if (Tcl_GetDouble(interp, argv[13], &I) != TCL_OK) {
+    if (Tcl_GetDouble(interp, argv[13], &Iz) != TCL_OK) {
       cerr << "WARNING invalid I\n";
       cerr << "forceBeamColumn element: " << eleTag << endl;
       return TCL_ERROR;
     }
     
+    if (ndm == 3 && argc > 16) {
+      if (Tcl_GetDouble(interp, argv[14], &Iy) != TCL_OK) {
+	cerr << "WARNING invalid Iy\n";
+	cerr << "forceBeamColumn element: " << eleTag << endl;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[15], &G) != TCL_OK) {
+	cerr << "WARNING invalid G\n";
+	cerr << "forceBeamColumn element: " << eleTag << endl;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[16], &J) != TCL_OK) {
+	cerr << "WARNING invalid J\n";
+	cerr << "forceBeamColumn element: " << eleTag << endl;
+	return TCL_ERROR;
+      }
+    }
+
     SectionForceDeformation *sectionI = theTclBuilder->getSection(secTagI);
     if (sectionI == 0) {
       cerr << "WARNING section not found\n";
@@ -247,18 +272,30 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     sections[0] = sectionI;
     sections[1] = sectionJ;
 
-    if (strcmp(argv[6],"HingeMidpoint") == 0) {
-      HingeMidpointBeamIntegration2d beamIntegr(E, A, I, lpI, lpJ);
+    BeamIntegration *beamIntegr = 0;
 
+    if (ndm == 2) {
+      if (strcmp(argv[6],"HingeMidpoint") == 0)
+	beamIntegr = new HingeMidpointBeamIntegration2d(E, A, Iz, lpI, lpJ);
+      else
+	beamIntegr = new HingeRadauBeamIntegration2d(E, A, Iz, lpI, lpJ);
+      
       theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, 2, sections,
-					 beamIntegr, *theTransf2d);
+					 *beamIntegr, *theTransf2d);
     }
-    if (strcmp(argv[6],"HingeRadau") == 0) {
-      HingeRadauBeamIntegration2d beamIntegr(E, A, I, lpI, lpJ);
+    else {
+      if (strcmp(argv[6],"HingeMidpoint") == 0)
+	beamIntegr =
+	  new HingeMidpointBeamIntegration3d(E, A, Iz, Iy, G, J, lpI, lpJ);
+      else
+	beamIntegr =
+	  new HingeRadauBeamIntegration3d(E, A, Iz, Iy, G, J, lpI, lpJ);
+      
+      theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, 2, sections,
+					 *beamIntegr, *theTransf3d);
+    }
 
-      theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, 2, sections,
-					 beamIntegr, *theTransf2d);
-    }
+    delete beamIntegr;
   }
 
   else if (strcmp(argv[6],"UserDefined") == 0) {
@@ -320,8 +357,12 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     
     UserDefinedBeamIntegration beamIntegr(nIP, pts, wts);
 
-    theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
+    if (ndm == 2)
+      theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
 					 beamIntegr, *theTransf2d);
+    else
+      theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
+					 beamIntegr, *theTransf3d);
     
     delete [] sections;
   }
@@ -331,11 +372,11 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     if (argc < 9) {
       cerr << "WARNING insufficient arguments\n";
       printCommand(argc, argv);
-      cerr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? UserHinge E? A? I? npL? secTagL1? ... ptL1? ... wtL1? ... npR? secTagR1? ... ptR1? ... wtR1? ...\n";
+      cerr << "Want: element forceBeamColumn eleTag? iNode? jNode? transfTag? UserHinge E? A? Iz? <Iy? G? J?> npL? secTagL1? ... ptL1? ... wtL1? ... npR? secTagR1? ... ptR1? ... wtR1? ...\n";
       return TCL_ERROR;
     }
 
-    double E, A, I;
+    double E, A, Iz, Iy, G, J;
     
     if (Tcl_GetDouble(interp, argv[7], &E) != TCL_OK) {
       cerr << "WARNING invalid E\n";
@@ -347,20 +388,40 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       cerr << "forceBeamColumn element: " << eleTag << endl;
       return TCL_ERROR;
     }
-    if (Tcl_GetDouble(interp, argv[9], &I) != TCL_OK) {
+    if (Tcl_GetDouble(interp, argv[9], &Iz) != TCL_OK) {
       cerr << "WARNING invalid I\n";
       cerr << "forceBeamColumn element: " << eleTag << endl;
       return TCL_ERROR;
     }
-    
+
+    int argStart = 10;
+    if (ndm == 3) {
+      if (Tcl_GetDouble(interp, argv[10], &Iy) != TCL_OK) {
+	cerr << "WARNING invalid I\n";
+	cerr << "forceBeamColumn element: " << eleTag << endl;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[11], &G) != TCL_OK) {
+	cerr << "WARNING invalid G\n";
+	cerr << "forceBeamColumn element: " << eleTag << endl;
+	return TCL_ERROR;
+      }
+      if (Tcl_GetDouble(interp, argv[12], &J) != TCL_OK) {
+	cerr << "WARNING invalid J\n";
+	cerr << "forceBeamColumn element: " << eleTag << endl;
+	return TCL_ERROR;
+      }
+      argStart = 13;
+    }
+
     int npL, npR;
       
-    if (Tcl_GetInt(interp, argv[10], &npL) != TCL_OK) {
+    if (Tcl_GetInt(interp, argv[argStart], &npL) != TCL_OK) {
       cerr << "WARNING invalid npL\n";
       cerr << "forceBeamColumn element: " << eleTag << endl;
       return TCL_ERROR;
     }
-    if (Tcl_GetInt(interp, argv[10+3*npL+1], &npR) != TCL_OK) {
+    if (Tcl_GetInt(interp, argv[argStart+3*npL+1], &npR) != TCL_OK) {
       cerr << "WARNING invalid npR\n";
       cerr << "forceBeamColumn element: " << eleTag << endl;
       return TCL_ERROR;
@@ -375,7 +436,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
     Vector wtsR(npR);
 
     int i, j;
-    for (i = 0, j = 11; i < npL; i++, j++) {
+    for (i = 0, j = argStart+1; i < npL; i++, j++) {
       int sec;
       double pt, wt;
       if (Tcl_GetInt(interp, argv[j], &sec) != TCL_OK) {
@@ -397,7 +458,7 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       ptsL(i) = pt;
       wtsL(i) = wt;
     }
-    for (i = 0, j = 1+11+3*npL; i < npR; i++, j++) {
+    for (i = 0, j = 1+(argStart+1)+3*npL; i < npR; i++, j++) {
       int sec;
       double pt, wt;
       if (Tcl_GetInt(interp, argv[j], &sec) != TCL_OK) {
@@ -432,12 +493,22 @@ TclModelBuilder_addForceBeamColumn(ClientData clientData, Tcl_Interp *interp,
       sections[i] = theSection;
     }
     
-    UserDefinedHingeIntegration2d beamIntegr(npL, ptsL, wtsL,
-					     npR, ptsR, wtsR,
-					     E, A, I);
-
-    theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
-				       beamIntegr, *theTransf2d);
+    if (ndm == 2) {
+      UserDefinedHingeIntegration2d beamIntegr(npL, ptsL, wtsL,
+					       npR, ptsR, wtsR,
+					       E, A, Iz);
+    
+      theElement = new ForceBeamColumn2d(eleTag, iNode, jNode, nIP, sections,
+					 beamIntegr, *theTransf2d);
+    }
+    else {
+      UserDefinedHingeIntegration3d beamIntegr(npL, ptsL, wtsL,
+					       npR, ptsR, wtsR,
+					       E, A, Iz, Iy, G, J);
+    
+      theElement = new ForceBeamColumn3d(eleTag, iNode, jNode, nIP, sections,
+					 beamIntegr, *theTransf3d);
+    }
     
     delete [] sections;
   }

@@ -18,9 +18,9 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
+// $Revision: 1.1 $
 // $Date: 2002-12-19 21:06:23 $
-// $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn2d.cpp,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
 #include <stdlib.h>
@@ -29,7 +29,7 @@
 #include <iomanip.h>
 
 #include <Information.h>
-#include <ForceBeamColumn2d.h>
+#include <ForceBeamColumn3d.h>
 #include <MatrixUtil.h>
 #include <Domain.h>
 #include <Channel.h>
@@ -40,24 +40,24 @@
 #include <ElementResponse.h>
 #include <ElementalLoad.h>
 
-#define  NDM   2         // dimension of the problem (2d)
-#define  NL    2         // size of uniform load vector
-#define  NND   3         // number of nodal dof's
-#define  NEGD  6         // number of element global dof's
-#define  NEBD  3         // number of element dof's in the basic system
+#define  NDM   3         // dimension of the problem (3d)
+#define  NL    3         // size of uniform load vector
+#define  NND   6         // number of nodal dof's
+#define  NEGD  12        // number of element global dof's
+#define  NEBD  6         // number of element dof's in the basic system
 
-Matrix ForceBeamColumn2d::theMatrix(6,6);
-Vector ForceBeamColumn2d::theVector(6);
-double ForceBeamColumn2d::workArea[100];
+Matrix ForceBeamColumn3d::theMatrix(12,12);
+Vector ForceBeamColumn3d::theVector(12);
+double ForceBeamColumn3d::workArea[200];
 
-Vector *ForceBeamColumn2d::vsSubdivide = 0;
-Matrix *ForceBeamColumn2d::fsSubdivide = 0;
-Vector *ForceBeamColumn2d::SsrSubdivide = 0;
+Vector *ForceBeamColumn3d::vsSubdivide = 0;
+Matrix *ForceBeamColumn3d::fsSubdivide = 0;
+Vector *ForceBeamColumn3d::SsrSubdivide = 0;
 
 // constructor:
 // invoked by a FEM_ObjectBroker, recvSelf() needs to be invoked on this object.
-ForceBeamColumn2d::ForceBeamColumn2d(): 
-  Element(0,ELE_TAG_ForceBeamColumn2d), connectedExternalNodes(2), 
+ForceBeamColumn3d::ForceBeamColumn3d(): 
+  Element(0,ELE_TAG_ForceBeamColumn3d), connectedExternalNodes(2), 
   beamIntegr(0), numSections(0), sections(0), crdTransf(0),
   rho(0.0), maxIters(0), tol(0.0),
   initialFlag(0),
@@ -71,10 +71,14 @@ ForceBeamColumn2d::ForceBeamColumn2d():
   p0[0] = 0.0;
   p0[1] = 0.0;
   p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
   
   v0[0] = 0.0;
   v0[1] = 0.0;
   v0[2] = 0.0;
+  v0[3] = 0.0;
+  v0[4] = 0.0;
 
   if (vsSubdivide == 0)
     vsSubdivide  = new Vector [maxNumSections];
@@ -83,7 +87,7 @@ ForceBeamColumn2d::ForceBeamColumn2d():
   if (SsrSubdivide == 0)
     SsrSubdivide  = new Vector [maxNumSections];
   if (!vsSubdivide || !fsSubdivide || !SsrSubdivide) {
-    cerr << "ForceBeamColumn2d::ForceBeamColumn2d() -- failed to allocate Subdivide arrays";   
+    cerr << "ForceBeamColumn3d::ForceBeamColumn3d() -- failed to allocate Subdivide arrays";   
     exit(-1);
   }
 }
@@ -91,12 +95,12 @@ ForceBeamColumn2d::ForceBeamColumn2d():
 // constructor which takes the unique element tag, sections,
 // and the node ID's of it's nodal end points. 
 // allocates the necessary space needed by each object
-ForceBeamColumn2d::ForceBeamColumn2d (int tag, int nodeI, int nodeJ,
-					  int numSec, SectionForceDeformation **sec,
-					  BeamIntegration &bi,
-					  CrdTransf2d &coordTransf, double massDensPerUnitLength,
-					  int maxNumIters, double tolerance):
-  Element(tag,ELE_TAG_ForceBeamColumn2d), connectedExternalNodes(NL),
+ForceBeamColumn3d::ForceBeamColumn3d (int tag, int nodeI, int nodeJ,
+				      int numSec, SectionForceDeformation **sec,
+				      BeamIntegration &bi,
+				      CrdTransf3d &coordTransf, double massDensPerUnitLength,
+				      int maxNumIters, double tolerance):
+  Element(tag,ELE_TAG_ForceBeamColumn3d), connectedExternalNodes(NL),
   beamIntegr(0), numSections(0), sections(0), crdTransf(0),
   rho(massDensPerUnitLength),maxIters(maxNumIters), tol(tolerance), 
   initialFlag(0),
@@ -112,14 +116,14 @@ ForceBeamColumn2d::ForceBeamColumn2d (int tag, int nodeI, int nodeJ,
   
   beamIntegr = bi.getCopy();
   if (beamIntegr == 0) {
-    cerr << "Error: ForceBeamColumn2d::ForceBeamColumn2d: could not create copy of beam integration object" << endl;
+    cerr << "Error: ForceBeamColumn3d::ForceBeamColumn3d: could not create copy of beam integration object" << endl;
     exit(-1);
   }
   
   // get copy of the transformation object   
   crdTransf = coordTransf.getCopy(); 
   if (crdTransf == 0) {
-    cerr << "Error: ForceBeamColumn2d::ForceBeamColumn2d: could not create copy of coordinate transformation object" << endl;
+    cerr << "Error: ForceBeamColumn3d::ForceBeamColumn3d: could not create copy of coordinate transformation object" << endl;
     exit(-1);
   }
 
@@ -128,10 +132,14 @@ ForceBeamColumn2d::ForceBeamColumn2d (int tag, int nodeI, int nodeJ,
   p0[0] = 0.0;
   p0[1] = 0.0;
   p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
   
   v0[0] = 0.0;
   v0[1] = 0.0;
   v0[2] = 0.0;
+  v0[3] = 0.0;
+  v0[4] = 0.0;
 
   if (vsSubdivide == 0)
     vsSubdivide  = new Vector [maxNumSections];
@@ -140,15 +148,15 @@ ForceBeamColumn2d::ForceBeamColumn2d (int tag, int nodeI, int nodeJ,
   if (SsrSubdivide == 0)
     SsrSubdivide  = new Vector [maxNumSections];
   if (!vsSubdivide || !fsSubdivide || !SsrSubdivide) {
-    cerr << "ForceBeamColumn2d::ForceBeamColumn2d() -- failed to allocate Subdivide arrays";   
+    cerr << "ForceBeamColumn3d::ForceBeamColumn3d() -- failed to allocate Subdivide arrays";   
     exit(-1);
   }
 }
 
-// ~ForceBeamColumn2d():
+// ~ForceBeamColumn3d():
 // 	destructor
 //      delete must be invoked on any objects created by the object
-ForceBeamColumn2d::~ForceBeamColumn2d()
+ForceBeamColumn3d::~ForceBeamColumn3d()
 {
   if (sections != 0) {
     for (int i=0; i < numSections; i++)
@@ -183,38 +191,38 @@ ForceBeamColumn2d::~ForceBeamColumn2d()
 }
 
 int
-ForceBeamColumn2d::getNumExternalNodes(void) const
+ForceBeamColumn3d::getNumExternalNodes(void) const
 {
   return 2;
 }
 
 const ID &
-ForceBeamColumn2d::getExternalNodes(void) 
+ForceBeamColumn3d::getExternalNodes(void) 
 {
   return connectedExternalNodes;
 }
 
 Node **
-ForceBeamColumn2d::getNodePtrs()
+ForceBeamColumn3d::getNodePtrs()
 {
   return theNodes;
 }
 
 int
-ForceBeamColumn2d::getNumDOF(void) 
+ForceBeamColumn3d::getNumDOF(void) 
 {
   return NEGD;
 }
 
 void
-ForceBeamColumn2d::setDomain(Domain *theDomain)
+ForceBeamColumn3d::setDomain(Domain *theDomain)
 {
   // check Domain is not null - invoked when object removed from a domain
   if (theDomain == 0) {
     theNodes[0] = 0;
     theNodes[1] = 0;
     
-    cerr << "ForceBeamColumn2d::setDomain:  theDomain = 0 ";
+    cerr << "ForceBeamColumn3d::setDomain:  theDomain = 0 ";
     exit(0); 
   }
 
@@ -227,13 +235,13 @@ ForceBeamColumn2d::setDomain(Domain *theDomain)
   theNodes[1] = theDomain->getNode(Nd2);  
   
   if (theNodes[0] == 0) {
-    cerr << "ForceBeamColumn2d::setDomain: Nd1: ";
+    cerr << "ForceBeamColumn3d::setDomain: Nd1: ";
     cerr << Nd1 << "does not exist in model\n";
     exit(0);
   }
   
   if (theNodes[1] == 0) {
-    cerr << "ForceBeamColumn2d::setDomain: Nd2: ";
+    cerr << "ForceBeamColumn3d::setDomain: Nd2: ";
     cerr << Nd2 << "does not exist in model\n";
     exit(0);
   }
@@ -246,20 +254,20 @@ ForceBeamColumn2d::setDomain(Domain *theDomain)
   int dofNode2 = theNodes[1]->getNumberDOF();
   
   if ((dofNode1 != NND) || (dofNode2 != NND)) {
-    cerr << "ForceBeamColumn2d::setDomain(): Nd2 or Nd1 incorrect dof ";
+    cerr << "ForceBeamColumn3d::setDomain(): Nd2 or Nd1 incorrect dof ";
     exit(0);
   }
    
   // initialize the transformation
   if (crdTransf->initialize(theNodes[0], theNodes[1])) {
-    cerr << "ForceBeamColumn2d::setDomain(): Error initializing coordinate transformation";  
+    cerr << "ForceBeamColumn3d::setDomain(): Error initializing coordinate transformation";  
     exit(0);
   }
     
   // get element length
   double L = crdTransf->getInitialLength();
   if (L == 0.0) {
-    cerr << "ForceBeamColumn2d::setDomain(): Zero element length:" << this->getTag();  
+    cerr << "ForceBeamColumn3d::setDomain(): Zero element length:" << this->getTag();  
     exit(0);
   }
 
@@ -268,14 +276,14 @@ ForceBeamColumn2d::setDomain(Domain *theDomain)
 }
 
 int
-ForceBeamColumn2d::commitState()
+ForceBeamColumn3d::commitState()
 {
   int err = 0;
   int i = 0;
 
   // call element commitState to do any base class stuff
   if ((err = this->Element::commitState()) != 0) {
-    cerr << "ForceBeamColumn2d::commitState () - failed in base class";
+    cerr << "ForceBeamColumn3d::commitState () - failed in base class";
   }    
   
   do {
@@ -301,7 +309,7 @@ ForceBeamColumn2d::commitState()
   return err;
 }
 
-int ForceBeamColumn2d::revertToLastCommit()
+int ForceBeamColumn3d::revertToLastCommit()
 {
   int err;
   int i = 0;
@@ -335,7 +343,7 @@ int ForceBeamColumn2d::revertToLastCommit()
   return err;
 }
 
-int ForceBeamColumn2d::revertToStart()
+int ForceBeamColumn3d::revertToStart()
 {
   // revert the sections state to start
   int err;
@@ -370,7 +378,7 @@ int ForceBeamColumn2d::revertToStart()
 
 
 const Matrix &
-ForceBeamColumn2d::getInitialStiff(void)
+ForceBeamColumn3d::getInitialStiff(void)
 {
   // check for quick return
   if (Ki != 0)
@@ -389,7 +397,7 @@ ForceBeamColumn2d::getInitialStiff(void)
   static Matrix kvInit(NEBD, NEBD);
   if (f.Solve(I, kvInit) < 0)
     g3ErrorHandler->warning("%s -- could not invert flexibility",
-                           "ForceBeamColumn2d::getInitialStiff()");
+                           "ForceBeamColumn3d::getInitialStiff()");
 
   Ki = new Matrix(crdTransf->getInitialGlobalStiffMatrix(kvInit));
   
@@ -397,25 +405,25 @@ ForceBeamColumn2d::getInitialStiff(void)
 }
 
 const Matrix &
-ForceBeamColumn2d::getTangentStiff(void)
+ForceBeamColumn3d::getTangentStiff(void)
 {
-  crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
+  crdTransf->update();	// Will remove once we clean up the corotational 3d transformation -- MHS
   return crdTransf->getGlobalStiffMatrix(kv, Se);
 }
     
 const Vector &
-ForceBeamColumn2d::getResistingForce(void)
+ForceBeamColumn3d::getResistingForce(void)
 {
-  // Will remove once we clean up the corotational 2d transformation -- MHS
+  // Will remove once we clean up the corotational 3d transformation -- MHS
   crdTransf->update();
   
-  Vector p0Vec(p0, 3);
+  Vector p0Vec(p0, 5);
   
   return crdTransf->getGlobalResistingForce(Se, p0Vec);
 }
 
 void
-ForceBeamColumn2d::initializeSectionHistoryVariables (void)
+ForceBeamColumn3d::initializeSectionHistoryVariables (void)
 {
   for (int i = 0; i < numSections; i++) {
     int order = sections[i]->getOrder();
@@ -431,7 +439,7 @@ ForceBeamColumn2d::initializeSectionHistoryVariables (void)
 /********* NEWTON , SUBDIVIDE AND INITIAL ITERATIONS ********************
  */
 int
-ForceBeamColumn2d::update()
+ForceBeamColumn3d::update()
 {
   // if have completed a recvSelf() - do a revertToLastCommit
   // to get Ssr, etc. set correctly
@@ -537,12 +545,17 @@ ForceBeamColumn2d::update()
 	    vr(0) += f(0,0)*SeTrial(0);
 	    vr(1) += f(1,1)*SeTrial(1) + f(1,2)*SeTrial(2);
 	    vr(2) += f(2,1)*SeTrial(1) + f(2,2)*SeTrial(2);
+	    vr(3) += f(3,3)*SeTrial(3) + f(3,4)*SeTrial(4);
+	    vr(4) += f(4,3)*SeTrial(3) + f(4,4)*SeTrial(4);
+	    vr(5) += f(5,5)*SeTrial(5);
 	  }
 
 	  // Add effects of element loads
 	  vr(0) += v0[0];
 	  vr(1) += v0[1];
 	  vr(2) += v0[2];
+	  vr(3) += v0[3];
+	  vr(4) += v0[4];
 	  
 	  for (i=0; i<numSections; i++) {
 	    
@@ -573,10 +586,19 @@ ForceBeamColumn2d::update()
 		Ss(ii) = SeTrial(0);
 		break;
 	      case SECTION_RESPONSE_MZ:
-		Ss(ii) =  xL1*SeTrial(1) + xL*SeTrial(2);
+		Ss(ii) = xL1*SeTrial(1) + xL*SeTrial(2);
 		break;
 	      case SECTION_RESPONSE_VY:
 		Ss(ii) = oneOverL*(SeTrial(1)+SeTrial(2));
+		break;
+	      case SECTION_RESPONSE_MY:
+		Ss(ii) = xL1*SeTrial(3) + xL*SeTrial(4);
+		break;
+	      case SECTION_RESPONSE_VZ:
+		Ss(ii) = oneOverL*(SeTrial(3)+SeTrial(4));
+		break;
+	      case SECTION_RESPONSE_T:
+		Ss(ii) = SeTrial(5);
 		break;
 	      default:
 		Ss(ii) = 0.0;
@@ -597,6 +619,12 @@ ForceBeamColumn2d::update()
 		  break;
 		case SECTION_RESPONSE_VY:
 		  Ss(ii) += s_p(2,i);
+		  break;
+		case SECTION_RESPONSE_MY:
+		  Ss(ii) += s_p(3,i);
+		  break;
+		case SECTION_RESPONSE_VZ:
+		  Ss(ii) += s_p(4,i);
 		  break;
 		default:
 		  break;
@@ -684,6 +712,24 @@ ForceBeamColumn2d::update()
 		  fb(jj,2) += tmp;
 		}
 		break;
+	      case SECTION_RESPONSE_MY:
+		for (jj = 0; jj < order; jj++) {
+		  tmp = fSec(jj,ii)*wtL;
+		  fb(jj,3) += xL1*tmp;
+		  fb(jj,4) += xL*tmp;
+		}
+		break;
+	      case SECTION_RESPONSE_VZ:
+		for (jj = 0; jj < order; jj++) {
+		  tmp = oneOverL*fSec(jj,ii)*wtL;
+		  fb(jj,3) += tmp;
+		  fb(jj,4) += tmp;
+		}
+		break;
+	      case SECTION_RESPONSE_T:
+		for (jj = 0; jj < order; jj++)
+		  fb(jj,5) += fSec(jj,ii)*wtL;
+		break;
 	      default:
 		break;
 	      }
@@ -709,6 +755,24 @@ ForceBeamColumn2d::update()
 		  f(2,jj) += tmp;
 		}
 		break;
+	      case SECTION_RESPONSE_MY:
+		for (jj = 0; jj < NEBD; jj++) {
+		  tmp = fb(ii,jj);
+		  f(3,jj) += xL1*tmp;
+		  f(4,jj) += xL*tmp;
+		}
+		break;
+	      case SECTION_RESPONSE_VZ:
+		for (jj = 0; jj < NEBD; jj++) {
+		  tmp = oneOverL*fb(ii,jj);
+		  f(3,jj) += tmp;
+		  f(4,jj) += tmp;
+		}
+		break;
+	      case SECTION_RESPONSE_T:
+		for (jj = 0; jj < NEBD; jj++)
+		  f(5,jj) += fb(ii,jj);
+		break;
 	      default:
 		break;
 	      }
@@ -730,7 +794,17 @@ ForceBeamColumn2d::update()
 		break;
 	      case SECTION_RESPONSE_VY:
 		tmp = oneOverL*dei;
-		vr(1) += tmp; vr(2) += tmp; 
+		vr(1) += tmp; vr(2) += tmp;
+		break;
+	      case SECTION_RESPONSE_MY:
+		vr(3) += xL1*dei; vr(4) += xL*dei;
+		break;
+	      case SECTION_RESPONSE_VZ:
+		tmp = oneOverL*dei;
+		vr(3) += tmp; vr(4) += tmp;
+		break;
+	      case SECTION_RESPONSE_T:
+		vr(5) += dei;
 		break;
 	      default:
 		break;
@@ -742,7 +816,7 @@ ForceBeamColumn2d::update()
 	  // invert3by3Matrix(f, kv);	  
 	  if (f.Solve(I, kvTrial) < 0)
 	    g3ErrorHandler->warning("%s -- could not invert flexibility",
-				    "ForceBeamColumn2d::update()");
+				    "ForceBeamColumn3d::update()");
 
 	  // dv = vin + dvTrial  - vr
 	  dv = vin;
@@ -810,7 +884,7 @@ ForceBeamColumn2d::update()
   // if fail to converge we return an error flag & print an error message
 
   if (converged == false) {
-    cerr << "WARNING - ForceBeamColumn2d::update - failed to get compatible ";
+    cerr << "WARNING - ForceBeamColumn3d::update - failed to get compatible ";
     cerr << "element forces & deformations for element: ";
     cerr << this->getTag() << "(dW: << " << dW << ")\n";
     return -1;
@@ -821,7 +895,7 @@ ForceBeamColumn2d::update()
   return 0;
 }
 
-void ForceBeamColumn2d::getForceInterpolatMatrix(double xi, Matrix &b, const ID &code)
+void ForceBeamColumn3d::getForceInterpolatMatrix(double xi, Matrix &b, const ID &code)
 {
   b.Zero();
   
@@ -838,13 +912,23 @@ void ForceBeamColumn2d::getForceInterpolatMatrix(double xi, Matrix &b, const ID 
     case SECTION_RESPONSE_VY:		// Shear, Vy, interpolation
       b(i,1) = b(i,2) = 1.0/L;
       break;
+    case SECTION_RESPONSE_MY:              // Moment, My, interpolation
+      b(i,3) = xi - 1.0;
+      b(i,4) = xi;
+      break;
+    case SECTION_RESPONSE_VZ:              // Shear, Vz, interpolation
+      b(i,3) = b(i,4) = 1.0/L;
+      break;
+    case SECTION_RESPONSE_T:               // Torque, T, interpolation
+      b(i,5) = 1.0;
+      break;
     default:
       break;
     }
   }
 }
 
-void ForceBeamColumn2d::getDistrLoadInterpolatMatrix(double xi, Matrix &bp, const ID &code)
+void ForceBeamColumn3d::getDistrLoadInterpolatMatrix(double xi, Matrix &bp, const ID &code)
 {
   bp.Zero();
   
@@ -860,6 +944,14 @@ void ForceBeamColumn2d::getDistrLoadInterpolatMatrix(double xi, Matrix &bp, cons
     case SECTION_RESPONSE_VY:		// Shear, Vy, interpolation
       bp(i,1) = (xi-0.5)*L;
       break;
+    case SECTION_RESPONSE_MY:              // Moment, My, interpolation
+      bp(i,2) = xi*(1-xi)*L*L/2;
+      break;
+    case SECTION_RESPONSE_VZ:              // Shear, Vz, interpolation
+      bp(i,2) = (0.5-xi)*L;
+      break;
+    case SECTION_RESPONSE_T:               // Torsion, T, interpolation
+      break;
     default:
       break;
     }
@@ -867,7 +959,7 @@ void ForceBeamColumn2d::getDistrLoadInterpolatMatrix(double xi, Matrix &bp, cons
 }
 
 const Matrix &
-ForceBeamColumn2d::getDamp(void)
+ForceBeamColumn3d::getDamp(void)
 {
   theMatrix.Zero();
   
@@ -875,19 +967,20 @@ ForceBeamColumn2d::getDamp(void)
 }
 
 const Matrix &
-ForceBeamColumn2d::getMass(void)
+ForceBeamColumn3d::getMass(void)
 { 
   theMatrix.Zero();
   
   double L = crdTransf->getInitialLength();
   if (rho != 0.0)
-    theMatrix(0,0) = theMatrix(1,1) = theMatrix(3,3) = theMatrix(4,4) = 0.5*L*rho;
+    theMatrix(0,0) = theMatrix(1,1) = theMatrix(2,2) =
+      theMatrix(6,6) = theMatrix(7,7) = theMatrix(8,8) = 0.5*L*rho;
   
   return theMatrix;
 }
 
 void 
-ForceBeamColumn2d::zeroLoad(void)
+ForceBeamColumn3d::zeroLoad(void)
 {
   if (sp != 0)
     sp->Zero();
@@ -895,23 +988,27 @@ ForceBeamColumn2d::zeroLoad(void)
   p0[0] = 0.0;
   p0[1] = 0.0;
   p0[2] = 0.0;
+  p0[3] = 0.0;
+  p0[4] = 0.0;
 
   v0[0] = 0.0;
   v0[1] = 0.0;
   v0[2] = 0.0;
+  v0[3] = 0.0;
+  v0[4] = 0.0;
 }
 
 int
-ForceBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
+ForceBeamColumn3d::addLoad(ElementalLoad *theLoad, double loadFactor)
 {
   int type;
   const Vector &data = theLoad->getData(type, loadFactor);
   
   if (sp == 0) {
-    sp = new Matrix(3,numSections);
+    sp = new Matrix(5,numSections);
     if (sp == 0)
       g3ErrorHandler->fatal("%s -- out of memory",
-			    "ForceBeamColumn2d::addLoad");
+			    "ForceBeamColumn3d::addLoad");
   }
 
   double L = crdTransf->getInitialLength();
@@ -919,9 +1016,10 @@ ForceBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
   double xi[maxNumSections];
   beamIntegr->getSectionLocations(numSections, L, xi);
 
-  if (type == LOAD_TAG_Beam2dUniformLoad) {
-    double wa = data(1)*loadFactor;  // Axial
+  if (type == LOAD_TAG_Beam3dUniformLoad) {
     double wy = data(0)*loadFactor;  // Transverse
+    double wz = data(1)*loadFactor;  // Transverse
+    double wx = data(2)*loadFactor;  // Axial
 
     Matrix &s_p = *sp;
 
@@ -929,30 +1027,42 @@ ForceBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
     for (int i = 0; i < numSections; i++) {
       double x = xi[i]*L;
       // Axial
-      s_p(0,i) += wa*(L-x);
+      s_p(0,i) += wx*(L-x);
       // Moment
       s_p(1,i) += wy*0.5*x*(x-L);
       // Shear
       s_p(2,i) += wy*(x-0.5*L);
+      // Moment
+      s_p(3,i) += wz*0.5*x*(L-x);
+      // Shear
+      s_p(4,i) += wz*(x-0.5*L);
     }
 
     // Accumulate reactions in basic system
-    p0[0] -= wa*L;
-    double V = 0.5*wy*L;
+    p0[0] -= wx*L;
+    double V;
+    V = 0.5*wy*L;
     p0[1] -= V;
     p0[2] -= V;
+    V = 0.5*wz*L;
+    p0[3] -= V;
+    p0[4] -= V;
 
     // Accumulate initial deformations in basic system
     beamIntegr->addElasticDeformations(theLoad, loadFactor, L, v0);
   }
-  else if (type == LOAD_TAG_Beam2dPointLoad) {
-    double P = data(0)*loadFactor;
-    double N = data(1)*loadFactor;
-    double aOverL = data(2);
+  else if (type == LOAD_TAG_Beam3dPointLoad) {
+    double Py = data(0)*loadFactor;
+    double Pz = data(1)*loadFactor;
+    double N  = data(2)*loadFactor;
+    double aOverL = data(3);
     double a = aOverL*L;
 
-    double V1 = P*(1.0-aOverL);
-    double V2 = P*aOverL;
+    double Vy2 = Py*aOverL;
+    double Vy1 = Py-Vy2;
+
+    double Vz2 = Pz*aOverL;
+    double Vz1 = Pz-Vz2;
 
     Matrix &s_p = *sp;
 
@@ -960,20 +1070,26 @@ ForceBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
     for (int i = 0; i < numSections; i++) {
       double x = xi[i]*L;
       if (x <= a) {
-	s_p(0,i) += N;
-	s_p(1,i) -= x*V1;
-	s_p(2,i) -= V1;
+        s_p(0,i) += N;
+        s_p(1,i) -= x*Vy1;
+        s_p(2,i) -= Vy1;
+        s_p(3,i) -= x*Vz1;
+        s_p(4,i) -= Vz1;
       }
       else {
-	s_p(1,i) -= (L-x)*V2;
-	s_p(2,i) += V2;
+        s_p(1,i) -= (L-x)*Vy2;
+        s_p(2,i) += Vy2;
+        s_p(3,i) -= (L-x)*Vz2;
+        s_p(4,i) += Vz2;
       }
     }
 
     // Accumulate reactions in basic system
     p0[0] -= N;
-    p0[1] -= V1;
-    p0[2] -= V2;
+    p0[1] -= Vy1;
+    p0[2] -= Vy2;
+    p0[3] -= Vz1;
+    p0[4] -= Vz2;
 
     // Accumulate initial deformations in basic system
     beamIntegr->addElasticDeformations(theLoad, loadFactor, L, v0);
@@ -981,7 +1097,7 @@ ForceBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 
   else {
     g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
-			    "ForceBeamColumn2d::addLoad()", this->getTag());
+			    "ForceBeamColumn3d::addLoad()", this->getTag());
     return -1;
   }
 
@@ -989,7 +1105,7 @@ ForceBeamColumn2d::addLoad(ElementalLoad *theLoad, double loadFactor)
 }
 
 int 
-ForceBeamColumn2d::addInertiaLoadToUnbalance(const Vector &accel)
+ForceBeamColumn3d::addInertiaLoadToUnbalance(const Vector &accel)
 {
   // Check for a quick return
   if (rho == 0.0)
@@ -1006,15 +1122,17 @@ ForceBeamColumn2d::addInertiaLoadToUnbalance(const Vector &accel)
   /*
   load(0) -= m*Raccel1(0);
   load(1) -= m*Raccel1(1);
-  load(3) -= m*Raccel2(0);
-  load(4) -= m*Raccel2(1);
+  load(2) -= m*Raccel1(2);
+  load(6) -= m*Raccel2(0);
+  load(7) -= m*Raccel2(1);
+  load(8) -= m*Raccel2(2);
   */
 
   return 0;
 }
 
 const Vector &
-ForceBeamColumn2d::getResistingForceIncInertia()
+ForceBeamColumn3d::getResistingForceIncInertia()
 {	
   // Check for a quick return
   if (rho == 0.0)
@@ -1031,14 +1149,16 @@ ForceBeamColumn2d::getResistingForceIncInertia()
   
   theVector(0) += m*accel1(0);
   theVector(1) += m*accel1(1);
-  theVector(3) += m*accel2(0);
-  theVector(4) += m*accel2(1);
+  theVector(2) += m*accel1(2);
+  theVector(6) += m*accel2(0);
+  theVector(7) += m*accel2(1);
+  theVector(8) += m*accel2(2);
   
   return theVector;
 }
 
 int
-ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
+ForceBeamColumn3d::sendSelf(int commitTag, Channel &theChannel)
 {  
   // place the integer data into an ID
   int dbTag = this->getDbTag();
@@ -1063,7 +1183,7 @@ ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   
 
   if (theChannel.sendID(dbTag, commitTag, idData) < 0) {
-    g3ErrorHandler->warning("ForceBeamColumn2d::sendSelf() - %s\n",
+    g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
 			    "failed to send ID data");
     return -1;
   }    
@@ -1071,7 +1191,7 @@ ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   // send the coordinate transformation
   
   if (crdTransf->sendSelf(commitTag, theChannel) < 0) {
-    g3ErrorHandler->warning("ForceBeamColumn2d::sendSelf() - %s\n",
+    g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
 			    "failed to send crdTranf");
     return -1;
   }      
@@ -1098,7 +1218,7 @@ ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   }
 
   if (theChannel.sendID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("ForceBeamColumn2d::sendSelf() - %s\n",
+    g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
 			    "failed to send ID data");
     return -1;
   }    
@@ -1109,7 +1229,7 @@ ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
   
   for (j = 0; j<numSections; j++) {
     if (sections[j]->sendSelf(commitTag, theChannel) < 0) {
-      g3ErrorHandler->warning("ForceBeamColumn2d::sendSelf() - section %d %s\n",
+      g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - section %d %s\n",
 			      j,"failed to send itself");
       return -1;
     }
@@ -1148,7 +1268,7 @@ ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
 	dData(loc++) = (vscommit[k])(i);
   
   if (theChannel.sendVector(dbTag, commitTag, dData) < 0) {
-     g3ErrorHandler->warning("ForceBeamColumn2d::sendSelf() - %s\n",
+     g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
 	 		     "failed to send Vector data");
      return -1;
   }    
@@ -1157,7 +1277,7 @@ ForceBeamColumn2d::sendSelf(int commitTag, Channel &theChannel)
 }    
 
 int
-ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
+ForceBeamColumn3d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
   //
   // receive the integer data containing tag, numSections and coord transformation info
@@ -1168,7 +1288,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   static ID idData(9); // one bigger than needed 
 
   if (theChannel.recvID(dbTag, commitTag, idData) < 0)  {
-    g3ErrorHandler->warning("ForceBeamColumn2d::recvSelf() - %s\n",
+    g3ErrorHandler->warning("ForceBeamColumn3d::recvSelf() - %s\n",
 			    "failed to recv ID data");
     return -1;
   }    
@@ -1187,10 +1307,10 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
       if (crdTransf != 0)
 	  delete crdTransf;
 
-      crdTransf = theBroker.getNewCrdTransf2d(crdTransfClassTag);
+      crdTransf = theBroker.getNewCrdTransf3d(crdTransfClassTag);
 
       if (crdTransf == 0) {
-	  g3ErrorHandler->warning("ForceBeamColumn2d::recvSelf() - %s %d\n",
+	  g3ErrorHandler->warning("ForceBeamColumn3d::recvSelf() - %s %d\n",
 				  "failed to obtain a CrdTrans object with classTag",
 				  crdTransfClassTag);
 	  return -2;	  
@@ -1202,7 +1322,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   // invoke recvSelf on the crdTransf obkject
   if (crdTransf->recvSelf(commitTag, theChannel, theBroker) < 0)  
   {
-     g3ErrorHandler->warning("ForceBeamColumn2d::sendSelf() - %s\n",
+     g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
 	     		     "failed to recv crdTranf");
      return -3;
   }      
@@ -1215,7 +1335,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   int loc = 0;
 
   if (theChannel.recvID(dbTag, commitTag, idSections) < 0)  {
-    g3ErrorHandler->warning("ForceBeamColumn2d::recvSelf() - %s\n",
+    g3ErrorHandler->warning("ForceBeamColumn3d::recvSelf() - %s\n",
 			    "failed to recv ID data");
     return -1;
   }    
@@ -1248,7 +1368,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     vscommit = new Vector[numSections];
     if (vscommit == 0) {
       g3ErrorHandler->warning("%s -- failed to allocate vscommit array",
-			      "ForceBeamColumn2d::recvSelf");
+			      "ForceBeamColumn3d::recvSelf");
       return -1;
     }
 
@@ -1260,7 +1380,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     fs = new Matrix[numSections];  
     if (fs == 0) {
       g3ErrorHandler->warning("%s -- failed to allocate fs array",
-			      "ForceBeamColumn2d::recvSelf");
+			      "ForceBeamColumn3d::recvSelf");
       return -1;
     }
 
@@ -1272,7 +1392,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     vs = new Vector[numSections];  
     if (vs == 0) {
       g3ErrorHandler->warning("%s -- failed to allocate vs array",
-			      "ForceBeamColumn2d::recvSelf");
+			      "ForceBeamColumn3d::recvSelf");
       return -1;
     }
 
@@ -1284,14 +1404,14 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
     Ssr = new Vector[numSections];  
     if (Ssr == 0) {
       g3ErrorHandler->warning("%s -- failed to allocate Ssr array",
-			      "ForceBeamColumn2d::recvSelf");
+			      "ForceBeamColumn3d::recvSelf");
       return -1;
     }
 
     // create a new array to hold pointers
     sections = new SectionForceDeformation *[idData(3)];
     if (sections == 0) {
-      g3ErrorHandler->fatal("ForceBeamColumn2d::recvSelf() - %s %d\n",
+      g3ErrorHandler->fatal("ForceBeamColumn3d::recvSelf() - %s %d\n",
 			      "out of memory creating sections array of size",idData(3));
       return -1;
     }    
@@ -1304,13 +1424,13 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
       loc += 2;
       sections[i] = theBroker.getNewSection(sectClassTag);
       if (sections[i] == 0) {
-	g3ErrorHandler->fatal("ForceBeamColumn2d::recvSelf() - %s %d\n",
+	g3ErrorHandler->fatal("ForceBeamColumn3d::recvSelf() - %s %d\n",
 			      "Broker could not create Section of class type",sectClassTag);
 	return -1;
       }
       sections[i]->setDbTag(sectDbTag);
       if (sections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("ForceBeamColumn2d::recvSelf() - section %d %s\n",
+	g3ErrorHandler->warning("ForceBeamColumn3d::recvSelf() - section %d %s\n",
 				i,"failed to recv itself");
 	return -1;
       }     
@@ -1337,7 +1457,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 	delete sections[i];
 	sections[i] = theBroker.getNewSection(sectClassTag);
 	if (sections[i] == 0) {
-	  g3ErrorHandler->fatal("ForceBeamColumn2d::recvSelf() - %s %d\n",
+	  g3ErrorHandler->fatal("ForceBeamColumn3d::recvSelf() - %s %d\n",
 				"Broker could not create Section of class type",sectClassTag);
 	  return -1;
 	}
@@ -1346,7 +1466,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
       // recvvSelf on it
       sections[i]->setDbTag(sectDbTag);
       if (sections[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-	g3ErrorHandler->warning("ForceBeamColumn2d::recvSelf() - section %d %s\n",
+	g3ErrorHandler->warning("ForceBeamColumn3d::recvSelf() - section %d %s\n",
 				i,"failed to recv itself");
 	return -1;
       }     
@@ -1363,7 +1483,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
   Vector dData(1+1+NEBD+NEBD*NEBD+secDefSize);   
   
   if (theChannel.recvVector(dbTag, commitTag, dData) < 0)  {
-    g3ErrorHandler->warning("ForceBeamColumn2d::sendSelf() - %s\n",
+    g3ErrorHandler->warning("ForceBeamColumn3d::sendSelf() - %s\n",
 			    "failed to send Vector data");
     return -1;
   }    
@@ -1405,7 +1525,7 @@ ForceBeamColumn2d::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker
 }
 
 int
-ForceBeamColumn2d::getInitialFlexibility(Matrix &fe)
+ForceBeamColumn3d::getInitialFlexibility(Matrix &fe)
 {
   fe.Zero();
   
@@ -1456,6 +1576,24 @@ ForceBeamColumn2d::getInitialFlexibility(Matrix &fe)
 	  fb(jj,2) += tmp;
 	}
 	break;
+      case SECTION_RESPONSE_MY:
+	for (jj = 0; jj < order; jj++) {
+	  tmp = fSec(jj,ii)*wtL;
+	  fb(jj,3) += xL1*tmp;
+	  fb(jj,4) += xL*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_VZ:
+	for (jj = 0; jj < order; jj++) {
+	  tmp = oneOverL*fSec(jj,ii)*wtL;
+	  fb(jj,3) += tmp;
+	  fb(jj,4) += tmp;
+	}
+	break;
+      case SECTION_RESPONSE_T:
+	for (jj = 0; jj < order; jj++)
+	  fb(jj,5) += fSec(jj,ii)*wtL;
+	break;
       default:
 	break;
       }
@@ -1480,6 +1618,24 @@ ForceBeamColumn2d::getInitialFlexibility(Matrix &fe)
 	  fe(2,jj) += tmp;
 	}
 	break;
+      case SECTION_RESPONSE_MY:
+	for (jj = 0; jj < NEBD; jj++) {
+	  tmp = fb(ii,jj);
+	  fe(3,jj) += xL1*tmp;
+	  fe(4,jj) += xL*tmp;
+	}
+	break;
+      case SECTION_RESPONSE_VZ:
+	for (jj = 0; jj < NEBD; jj++) {
+	  tmp = oneOverL*fb(ii,jj);
+	  fe(3,jj) += tmp;
+	  fe(4,jj) += tmp;
+	}
+	break;
+      case SECTION_RESPONSE_T:
+	for (jj = 0; jj < NEBD; jj++)
+	  fe(5,jj) += fb(ii,jj);
+	break;
       default:
 	break;
       }
@@ -1489,27 +1645,35 @@ ForceBeamColumn2d::getInitialFlexibility(Matrix &fe)
   return 0;
 }
 
-void ForceBeamColumn2d::compSectionDisplacements(Vector sectionCoords[], Vector sectionDispls[]) const
+void ForceBeamColumn3d::compSectionDisplacements(Vector sectionCoords[], Vector sectionDispls[]) const
 {
   return;	       
 }
 
 void
-ForceBeamColumn2d::Print(ostream &s, int flag)
+ForceBeamColumn3d::Print(ostream &s, int flag)
 {
-  s << "\nElement: " << this->getTag() << " Type: ForceBeamColumn2d ";
+  s << "\nElement: " << this->getTag() << " Type: ForceBeamColumn3d ";
   s << "\tConnected Nodes: " << connectedExternalNodes ;
   s << "\tNumber of Sections: " << numSections;
   s << "\tMass density: " << rho << endl;
   double P  = Secommit(0);
-  double M1 = Secommit(1);
-  double M2 = Secommit(2);
+  double MZ1 = Secommit(1);
+  double MZ2 = Secommit(2);
+  double MY1 = Secommit(3);
+  double MY2 = Secommit(4);
   double L = crdTransf->getInitialLength();
-  double V = (M1+M2)/L;
-  theVector(1) = V;
-  theVector(4) = -V;
-  s << "\tEnd 1 Forces (P V M): " << -P+p0[0] << " " << V+p0[1] << " " << M1 << endl;
-  s << "\tEnd 2 Forces (P V M): " << P << " " << -V+p0[2] << " " << M2 << endl;
+  double VY = (MZ1+MZ2)/L;
+  theVector(1) =  VY;
+  theVector(4) = -VY;
+  double VZ = (MY1+MY2)/L;
+  double T  = Secommit(5);
+  s << "\tEnd 1 Forces (P MZ VY MY VZ T): "
+    << -P+p0[0] << " " << MZ1 << " " <<  VY+p0[1] << " " 
+    << MY1 << " " << -VZ+p0[3] << " " << T << endl;
+  s << "\tEnd 2 Forces (P MZ VY MY VZ T): "
+    << P        << " " << MZ2 << " " << -VY+p0[2] << " " 
+    << MY2 << " " <<  VZ+p0[4] << " " << T << endl;
   
   if (flag == 1) { 
     for (int i = 0; i < numSections; i++)
@@ -1517,14 +1681,14 @@ ForceBeamColumn2d::Print(ostream &s, int flag)
   }
 }
 
-ostream &operator<<(ostream &s, ForceBeamColumn2d &E)
+ostream &operator<<(ostream &s, ForceBeamColumn3d &E)
 {
   E.Print(s);
   return s;
 }
 
 int
-ForceBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
+ForceBeamColumn3d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 {
   // first determine the end points of the beam based on
   // the display factor (a measure of the distorted image)
@@ -1537,7 +1701,7 @@ ForceBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
   static Vector v1(3);
   static Vector v2(3);
   
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 3; i++) {
     v1(i) = end1Crd(i) + end1Disp(i)*fact;
     v2(i) = end2Crd(i) + end2Disp(i)*fact;    
   }
@@ -1546,7 +1710,7 @@ ForceBeamColumn2d::displaySelf(Renderer &theViewer, int displayMode, float fact)
 }
 
 Response*
-ForceBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformation)
+ForceBeamColumn3d::setResponse(char **argv, int argc, Information &eleInformation)
 {
   //
   // we compare argv[0] for known response types 
@@ -1564,11 +1728,11 @@ ForceBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformatio
   // chord rotation -
   else if (strcmp(argv[0],"chordRotation") == 0 || strcmp(argv[0],"chordDeformation") == 0
 	   || strcmp(argv[0],"basicDeformation") == 0)
-    return new ElementResponse(this, 3, Vector(3));
+    return new ElementResponse(this, 3, Vector(6));
   
   // plastic rotation -
   else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0)
-    return new ElementResponse(this, 4, Vector(3));
+    return new ElementResponse(this, 4, Vector(6));
   
   // section response -
   else if (strcmp(argv[0],"section") ==0) {
@@ -1587,23 +1751,46 @@ ForceBeamColumn2d::setResponse(char **argv, int argc, Information &eleInformatio
 }
 
 int 
-ForceBeamColumn2d::getResponse(int responseID, Information &eleInfo)
+ForceBeamColumn3d::getResponse(int responseID, Information &eleInfo)
 {
-  static Vector vp(3);
-  static Matrix fe(3,3);
+  static Vector vp(6);
+  static Matrix fe(6,6);
 
   if (responseID == 1)
     return eleInfo.setVector(this->getResistingForce());
   
   else if (responseID == 2) {
-    theVector(3) =  Se(0);
-    theVector(0) = -Se(0)+p0[0];
-    theVector(2) = Se(1);
-    theVector(5) = Se(2);
-    double V = (Se(1)+Se(2))/crdTransf->getInitialLength();
+    // Axial
+    double N = Se(0);
+    theVector(6) =  N;
+    theVector(0) = -N+p0[0];
+    
+    // Torsion
+    double T = Se(5);
+    theVector(9) =  T;
+    theVector(3) = -T;
+    
+    // Moments about z and shears along y
+    double M1 = Se(1);
+    double M2 = Se(2);
+    theVector(5)  = M1;
+    theVector(11) = M2;
+    double L = crdTransf->getInitialLength();
+    double V = (M1+M2)/L;
     theVector(1) =  V+p0[1];
-    theVector(4) = -V+p0[2];
+    theVector(7) = -V+p0[2];
+    
+    // Moments about y and shears along z
+    M1 = Se(3);
+    M2 = Se(4);
+    theVector(4)  = M1;
+    theVector(10) = M2;
+    V = -(M1+M2)/L;
+    theVector(2) = -V+p0[3];
+    theVector(8) =  V+p0[4];
+      
     return eleInfo.setVector(theVector);
+
   }
       
   // Chord rotation
@@ -1625,7 +1812,7 @@ ForceBeamColumn2d::getResponse(int responseID, Information &eleInfo)
 }
 
 int
-ForceBeamColumn2d::setParameter (char **argv, int argc, Information &info)
+ForceBeamColumn3d::setParameter (char **argv, int argc, Information &info)
 {
   //
   // From the parameterID value it should be possible to extract
@@ -1676,7 +1863,7 @@ ForceBeamColumn2d::setParameter (char **argv, int argc, Information &info)
     
     // Check if the parameterID is valid
     if (parameterID < 0) {
-      cerr << "ForceBeamColumn2d::setParameter() - could not set parameter. " << endl;
+      cerr << "ForceBeamColumn3d::setParameter() - could not set parameter. " << endl;
       return -1;
     }
     else {
@@ -1692,7 +1879,7 @@ ForceBeamColumn2d::setParameter (char **argv, int argc, Information &info)
 }
 
 int
-ForceBeamColumn2d::updateParameter (int parameterID, Information &info)
+ForceBeamColumn3d::updateParameter (int parameterID, Information &info)
 {
   // If the parameterID value is not equal to 1 it belongs 
   // to section or material further down in the hierarchy. 
@@ -1716,7 +1903,7 @@ ForceBeamColumn2d::updateParameter (int parameterID, Information &info)
     }
     
     if (ok < 0) {
-      cerr << "ForceBeamColumn2d::updateParameter() - could not update parameter. " << endl;
+      cerr << "ForceBeamColumn3d::updateParameter() - could not update parameter. " << endl;
       return ok;
     }
     else {
@@ -1724,61 +1911,61 @@ ForceBeamColumn2d::updateParameter (int parameterID, Information &info)
     }
   }
   else {
-    cerr << "ForceBeamColumn2d::updateParameter() - could not update parameter. " << endl;
+    cerr << "ForceBeamColumn3d::updateParameter() - could not update parameter. " << endl;
     return -1;
   }       
 }
 
 void
-ForceBeamColumn2d::setSectionPointers(int numSec, SectionForceDeformation **secPtrs)
+ForceBeamColumn3d::setSectionPointers(int numSec, SectionForceDeformation **secPtrs)
 {
   if (numSec > maxNumSections) {
-    cerr << "Error: ForceBeamColumn2d::setSectionPointers -- max number of sections exceeded";
+    cerr << "Error: ForceBeamColumn3d::setSectionPointers -- max number of sections exceeded";
   }
   
   numSections = numSec;
   
   if (secPtrs == 0) {
-    cerr << "Error: ForceBeamColumn2d::setSectionPointers -- invalid section pointer";
+    cerr << "Error: ForceBeamColumn3d::setSectionPointers -- invalid section pointer";
   }	  
   
   sections = new SectionForceDeformation *[numSections];
   if (sections == 0) {
-    cerr << "Error: ForceBeamColumn2d::setSectionPointers -- could not allocate section pointers";
+    cerr << "Error: ForceBeamColumn3d::setSectionPointers -- could not allocate section pointers";
   }  
   
   for (int i = 0; i < numSections; i++) {
     
     if (secPtrs[i] == 0) {
-      cerr << "Error: ForceBeamColumn2d::setSectionPointers -- null section pointer " << i << endl;
+      cerr << "Error: ForceBeamColumn3d::setSectionPointers -- null section pointer " << i << endl;
     }
     
     sections[i] = secPtrs[i]->getCopy();
     
     if (sections[i] == 0) {
-      cerr << "Error: ForceBeamColumn2d::setSectionPointers -- could not create copy of section " << i << endl;
+      cerr << "Error: ForceBeamColumn3d::setSectionPointers -- could not create copy of section " << i << endl;
     }
   }
   
   // allocate section flexibility matrices and section deformation vectors
   fs  = new Matrix [numSections];
   if (fs == 0) {
-    cerr << "ForceBeamColumn2d::setSectionPointers -- failed to allocate fs array";
+    cerr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate fs array";
   }
   
   vs = new Vector [numSections];
   if (vs == 0) {
-    cerr << "ForceBeamColumn2d::setSectionPointers -- failed to allocate vs array";
+    cerr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate vs array";
   }
   
   Ssr  = new Vector [numSections];
   if (Ssr == 0) {
-    cerr << "ForceBeamColumn2d::setSectionPointers -- failed to allocate Ssr array";
+    cerr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate Ssr array";
   }
   
   vscommit = new Vector [numSections];
   if (vscommit == 0) {
-    cerr << "ForceBeamColumn2d::setSectionPointers -- failed to allocate vscommit array";   
+    cerr << "ForceBeamColumn3d::setSectionPointers -- failed to allocate vscommit array";   
   }
   
 }
