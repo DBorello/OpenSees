@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2001-05-22 05:04:06 $
+// $Revision: 1.3 $
+// $Date: 2001-08-07 22:31:05 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/T2Vector.cpp,v $
                                                                         
 // Written: ZHY
@@ -14,7 +14,7 @@
 #include <iomanip.h>
 #include <math.h>
 #include <stdlib.h>
-#include "T2Vector.h"
+#include <T2Vector.h>
 
 #define UP_LIMIT    10e+30
 #define LOW_LIMIT   10e-15

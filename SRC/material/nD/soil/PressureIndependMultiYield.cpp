@@ -1,5 +1,5 @@
-// $Revision: 1.5 $
-// $Date: 2001-08-04 01:52:56 $
+// $Revision: 1.6 $
+// $Date: 2001-08-07 22:31:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -14,14 +14,14 @@
 #include <iomanip.h>
 #include <math.h>
 #include <stdlib.h>
-#include "PressureIndependMultiYield.h"
+#include <PressureIndependMultiYield.h>
 #include <Information.h>
 
 int PressureIndependMultiYield::loadStage = 0;
-Matrix PressureIndependMultiYield::theTangent = Matrix(6,6);
+Matrix PressureIndependMultiYield::theTangent(6,6);
 T2Vector PressureIndependMultiYield::subStrainRate = Vector(6);
-Vector PressureIndependMultiYield::workV = Vector(3);
-Matrix PressureIndependMultiYield::workM = Matrix(3,3);
+Vector PressureIndependMultiYield::workV(3);
+Matrix PressureIndependMultiYield::workM(3,3);
 
 const Vector zeroVector(6);
 
@@ -191,7 +191,7 @@ void PressureIndependMultiYield::elast2Plast(void)
 
 int PressureIndependMultiYield::setTrialStrain (const Vector &strain)
 {
-	Vector temp(6);
+	static Vector temp(6);
 	if (ndm==3 && strain.Size()==6) 
 		temp = strain;
 	else if (ndm==2 && strain.Size()==3) {
@@ -219,7 +219,7 @@ int PressureIndependMultiYield::setTrialStrain (const Vector &strain, const Vect
 
 int PressureIndependMultiYield::setTrialStrainIncr (const Vector &strain)
 {
-	Vector temp(6);
+	static Vector temp(6);
 	if (ndm==3 && strain.Size()==6) 
 		temp = strain;
 	else if (ndm==2 && strain.Size()==3) {
@@ -257,7 +257,8 @@ const Matrix & PressureIndependMultiYield::getTangent (void)
 		}
 	}
 	else {
-	  double coeff;  Vector devia(6);
+	  double coeff;
+	  static Vector devia(6);
 
 	  if (committedActiveSurf > 0) {
 		  devia = currentStress.deviator()-committedSurfaces[committedActiveSurf].center();
@@ -387,7 +388,7 @@ NDMaterial * PressureIndependMultiYield::getCopy (const char *code)
 
 const char * PressureIndependMultiYield::getType (void) const
 {
-  return "PressureIndependMultiYield";
+	return (ndm == 2) ? "PlaneStrain" : "ThreeDimensional";
 }
 
 

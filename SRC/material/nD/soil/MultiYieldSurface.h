@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2000-12-19 03:35:02 $
+// $Revision: 1.2 $
+// $Date: 2001-08-07 22:31:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/MultiYieldSurface.h,v $
                                                                         
 // Written: ZHY
@@ -12,7 +12,7 @@
 #ifndef _MultiYieldSurface_H_
 #define _MultiYieldSurface_H_
 
-#include "T2Vector.h"
+#include <T2Vector.h>
 
 #define UP_LIMIT    1.0e+30
 #define LOW_LIMIT   1.0e-15

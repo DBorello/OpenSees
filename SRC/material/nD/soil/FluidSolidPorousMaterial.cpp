@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2001-08-04 01:52:56 $
+// $Revision: 1.3 $
+// $Date: 2001-08-07 22:31:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -13,17 +13,20 @@
 #include <iomanip.h>
 #include <math.h>
 #include <stdlib.h>
-#include "FluidSolidPorousMaterial.h"
+#include <FluidSolidPorousMaterial.h>
 #include <Information.h>
 #include <MaterialResponse.h>
 
 int FluidSolidPorousMaterial::loadStage = 0;
 double FluidSolidPorousMaterial::AtmoPress = 0.;
-Vector * FluidSolidPorousMaterial::workV = 0;
-Matrix * FluidSolidPorousMaterial::workM = 0;
 const Vector zeroVector(6);
 
-FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial * soilMat,
+Vector FluidSolidPorousMaterial::workV3(3);
+Vector FluidSolidPorousMaterial::workV6(6);
+Matrix FluidSolidPorousMaterial::workM3(3,3);
+Matrix FluidSolidPorousMaterial::workM6(6,6);
+
+FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial &soilMat,
                                       double combinedBulkModul, double atm)
  : NDMaterial(tag, MAT_TAG_FluidSolidPorousMaterial)
 {
@@ -34,24 +37,16 @@ FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial 
   }
 	ndm = nd;
 	loadStage = 0;  //default
-  theSoilMaterial = soilMat;
+  theSoilMaterial = soilMat.getCopy();
 	AtmoPress = atm;
   combinedBulkModulus = combinedBulkModul;
   trialExcessPressure = currentExcessPressure = 0.;
 	trialVolumeStrain = currentVolumeStrain = 0.;
-	if (ndm==2) {
-		workV = new Vector(3);
-		workM = new Matrix(3,3);
-	} 
-	else if (ndm==3) {
-		workV = new Vector(6);
-		workM = new Matrix(6,6);
-	} 
 }
    
 
 FluidSolidPorousMaterial::FluidSolidPorousMaterial () 
- : NDMaterial(0,MAT_TAG_FluidSolidPorousMaterial), theSoilMaterial()
+ : NDMaterial(0,MAT_TAG_FluidSolidPorousMaterial), theSoilMaterial(0)
 {
 	ndm = 3; 
 	combinedBulkModulus = 0.;
@@ -75,7 +70,8 @@ FluidSolidPorousMaterial::FluidSolidPorousMaterial (const FluidSolidPorousMateri
 
 FluidSolidPorousMaterial::~FluidSolidPorousMaterial ()
 {
-  delete theSoilMaterial;
+	if (theSoilMaterial != 0)
+		delete theSoilMaterial;
 }
 
 
@@ -145,7 +141,9 @@ int FluidSolidPorousMaterial::setTrialStrainIncr (const Vector &strain, const Ve
 
 const Matrix & FluidSolidPorousMaterial::getTangent (void)
 {
-  *workM = theSoilMaterial->getTangent();
+	Matrix *workM = (ndm == 2) ? &workM3 : &workM6;
+  
+	*workM = theSoilMaterial->getTangent();
 
 	if (loadStage != 0) { 
 	  for (int i=0; i<ndm; i++) 
@@ -159,7 +157,9 @@ const Matrix & FluidSolidPorousMaterial::getTangent (void)
 
 const Vector & FluidSolidPorousMaterial::getStress (void)
 {
-  *workV = theSoilMaterial->getStress();
+	Vector *workV = (ndm == 2) ? &workV3 : &workV6;
+  
+	*workV = theSoilMaterial->getStress();
 
 	if (loadStage != 0) { 
 		trialExcessPressure = currentExcessPressure;
@@ -182,22 +182,13 @@ int FluidSolidPorousMaterial::updateParameter(int responseID, Information &info)
 
 const Vector & FluidSolidPorousMaterial::getCommittedStress (void)
 {
-
-	*workV = theSoilMaterial->getCommittedStress();
-
-	//if (loadStage != 0) { 
-	//  for (int i=0; i<ndm; i++) 
-  //    stress.theVector[i] += currentExcessPressure;
-  //}
-
-	return *workV;
+	return theSoilMaterial->getCommittedStress();
 }
 
 
 const Vector & FluidSolidPorousMaterial::getCommittedStrain (void)
 {
-	*workV = theSoilMaterial->getCommittedStrain();
-  return *workV;
+	return theSoilMaterial->getCommittedStrain();
 }
 
 
@@ -226,9 +217,13 @@ int FluidSolidPorousMaterial::commitState (void)
 
 int FluidSolidPorousMaterial::revertToLastCommit (void)
 {
-	return 0;
+	return theSoilMaterial->revertToLastCommit();
 }
 
+int FluidSolidPorousMaterial::revertToStart (void)
+{
+	return theSoilMaterial->revertToStart();
+}
 
 NDMaterial * FluidSolidPorousMaterial::getCopy (void)
 {
@@ -251,7 +246,7 @@ NDMaterial * FluidSolidPorousMaterial::getCopy (const char *code)
 
 const char * FluidSolidPorousMaterial::getType (void) const
 {
-  return "FluidSolidPorous";
+	return (ndm == 2) ? "PlaneStrain" : "ThreeDimensional";
 }
 
 

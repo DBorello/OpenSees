@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2000-12-19 03:35:02 $
+// $Revision: 1.2 $
+// $Date: 2001-08-07 22:31:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.h,v $
                                                                         
 // Written: ZHY
@@ -14,7 +14,7 @@
 #define FluidSolidPorousMaterial_h
 
 #include <NDMaterial.h>
-#include "MultiYieldSurface.h"
+#include <MultiYieldSurface.h>
 #include <Matrix.h>
 #include <Tensor.h>
 
@@ -24,7 +24,7 @@ class FluidSolidPorousMaterial : public NDMaterial
 {
   public:
      // Initialization constructor
-     FluidSolidPorousMaterial (int tag, int nd, NDMaterial * soilMat,
+     FluidSolidPorousMaterial (int tag, int nd, NDMaterial &soilMat,
 			       double combinedBulkModul, double atm);
 
      // Default constructor
@@ -62,18 +62,18 @@ class FluidSolidPorousMaterial : public NDMaterial
      // Revert the stress/strain states to the last committed states. Return 0 on success.
      int revertToLastCommit (void);
 
-     int revertToStart(void) {return 0;}
+     int revertToStart(void);
 
      // Return an exact copy of itself.
      NDMaterial *getCopy (void);
 
-     // Return a copy of itself if "code"="FluidSolidPorous", otherwise return null.
+     // Return a copy of itself if "code"="PlainStrain" or "ThreeDimensional", otherwise return null.
      NDMaterial *getCopy (const char *code);
 
-     // Return the string "FluidSolidPorous".
+     // Return the string "PlaneStrain" or "ThreeDimensional".
      const char *getType (void) const ;
 
-     // Return 2 (2D material).
+     // Return 3 or 6.
      int getOrder (void) const ;
 
      int sendSelf(int commitTag, Channel &theChannel);  
@@ -91,14 +91,17 @@ class FluidSolidPorousMaterial : public NDMaterial
      int ndm;
      static int loadStage;
      static double AtmoPress;
-     static Vector * workV;
-     static Matrix * workM;
      double combinedBulkModulus;
      NDMaterial * theSoilMaterial;
      double trialExcessPressure;
      double currentExcessPressure;
      double trialVolumeStrain;
      double currentVolumeStrain;
+
+	 static Vector workV3;
+	 static Vector workV6;
+	 static Matrix workM3;
+	 static Matrix workM6;
 };
 
 #endif

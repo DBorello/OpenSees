@@ -1,5 +1,5 @@
-// $Revision: 1.1 $
-// $Date: 2000-12-19 03:35:02 $
+// $Revision: 1.2 $
+// $Date: 2001-08-07 22:31:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/MultiYieldSurface.cpp,v $
                                                                         
 // Written: ZHY
@@ -14,7 +14,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "MultiYieldSurface.h"
+#include <MultiYieldSurface.h>
 
 const Vector zeroVector = Vector(6);
 

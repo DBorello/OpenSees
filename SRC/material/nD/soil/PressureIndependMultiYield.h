@@ -1,5 +1,5 @@
-// $Revision: 1.2 $
-// $Date: 2001-01-23 08:43:35 $
+// $Revision: 1.3 $
+// $Date: 2001-08-07 22:31:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -13,7 +13,7 @@
 #define PressureIndependMultiYield_h
 
 #include <NDMaterial.h>
-#include "MultiYieldSurface.h"
+#include <MultiYieldSurface.h>
 #include <Matrix.h>
 #include <Tensor.h>
 

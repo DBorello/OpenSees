@@ -1,5 +1,5 @@
-// $Revision: 1.5 $
-// $Date: 2001-08-04 01:52:56 $
+// $Revision: 1.6 $
+// $Date: 2001-08-07 22:31:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -14,16 +14,16 @@
 #include <iomanip.h>
 #include <math.h>
 #include <stdlib.h>
-#include "PressureDependMultiYield.h"
+#include <PressureDependMultiYield.h>
 #include <Information.h>
 
 int PressureDependMultiYield::loadStage = 0;
 double PressureDependMultiYield::AtmoPress = 0.;
-Matrix PressureDependMultiYield::theTangent = Matrix(6,6);
+Matrix PressureDependMultiYield::theTangent(6,6);
 T2Vector PressureDependMultiYield::trialStrain = Vector(6);
 T2Vector PressureDependMultiYield::subStrainRate = Vector(6);
-Vector PressureDependMultiYield::workV = Vector(3);
-Matrix PressureDependMultiYield::workM = Matrix(3,3);
+Vector PressureDependMultiYield::workV(3);
+Matrix PressureDependMultiYield::workM(3,3);
 
 const Vector zeroVector(6);
 const	double pi = 3.14159265358979;
@@ -275,7 +275,7 @@ void PressureDependMultiYield::elast2Plast(void)
 
 int PressureDependMultiYield::setTrialStrain (const Vector &strain)
 {
-	Vector temp(6);
+	static Vector temp(6);
 	if (ndm==3 && strain.Size()==6) 
 		temp = strain;
 	else if (ndm==2 && strain.Size()==3) {
@@ -302,7 +302,7 @@ int PressureDependMultiYield::setTrialStrain (const Vector &strain, const Vector
 
 int PressureDependMultiYield::setTrialStrainIncr (const Vector &strain)
 {
-	Vector temp(6);
+	static Vector temp(6);
 	if (ndm==3 && strain.Size()==6) 
 		temp = strain;
 	else if (ndm==2 && strain.Size()==3) {
@@ -341,7 +341,7 @@ const Matrix & PressureDependMultiYield::getTangent (void)
 	}
 	else {
 	  double coeff1, coeff2;
-  	Vector devia(6);
+  	static Vector devia(6);
   	double factor = getModulusFactor(currentStress);
   	double shearModulus = factor*refShearModulus;
   	double bulkModulus = factor*refBulkModulus;		
@@ -502,7 +502,7 @@ NDMaterial * PressureDependMultiYield::getCopy (const char *code)
 
 const char * PressureDependMultiYield::getType (void) const
 {
-  return "PressureDependMultiYield";
+	return (ndm == 2) ? "PlaneStrain" : "ThreeDimensional";
 }
 
 
