@@ -653,6 +653,12 @@
 					RelativePath="..\..\..\SRC\material\nD\Template3Dep\MatPoint3D.h">
 				</File>
 				<File
+					RelativePath="..\..\..\SRC\material\nD\Template3Dep\PS.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\SRC\material\nD\Template3Dep\PS.h">
+				</File>
+				<File
 					RelativePath="..\..\..\SRC\material\nD\Template3Dep\RMC01.cpp">
 				</File>
 				<File
