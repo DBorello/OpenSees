@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.2 $
-// $Date: 2003-03-15 00:09:47 $
+// $Revision: 1.3 $
+// $Date: 2003-04-02 01:51:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauBeamIntegration2d.h,v $
 
 #ifndef HingeRadauBeamIntegration2d_h
@@ -46,6 +46,9 @@ class HingeRadauBeamIntegration2d : public BeamIntegration
   void addElasticDeformations(ElementalLoad *theLoad, double loadFactor,
 			      double L, double *v0);
   int addElasticFlexibility(double L, Matrix &fe);
+
+  double getTangentDriftI(double L, double q2, double q3);
+  double getTangentDriftJ(double L, double q2, double q3);
 
   BeamIntegration *getCopy(void);
 

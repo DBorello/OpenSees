@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-25 23:32:52 $
+// $Revision: 1.6 $
+// $Date: 2003-04-02 01:51:52 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/ForceBeamColumn3d.cpp,v $
 
 #include <math.h>
@@ -1736,6 +1736,14 @@ ForceBeamColumn3d::setResponse(const char **argv, int argc, Information &eleInfo
   else if (strcmp(argv[0],"plasticRotation") == 0 || strcmp(argv[0],"plasticDeformation") == 0)
     return new ElementResponse(this, 4, Vector(6));
   
+  // point of inflection
+  else if (strcmp(argv[0],"inflectionPoint") == 0)
+    return new ElementResponse(this, 5, Vector(2));
+  
+  // tangent drift
+  else if (strcmp(argv[0],"tangentDrift") == 0)
+    return new ElementResponse(this, 6, Vector(4));
+
   // section response -
   else if (strcmp(argv[0],"section") ==0) {
     if (argc <= 2)
@@ -1807,6 +1815,96 @@ ForceBeamColumn3d::getResponse(int responseID, Information &eleInfo)
     vp = crdTransf->getBasicTrialDisp();
     vp.addMatrixVector(1.0, fe, Se, -1.0);
     return eleInfo.setVector(vp);
+  }
+
+  // Point of inflection
+  else if (responseID == 5) {
+    double L = crdTransf->getInitialLength();
+
+    static Vector LI(2);
+
+    LI(0) = Se(1)/(Se(1)+Se(2))*L;
+    LI(1) = Se(3)/(Se(3)+Se(4))*L;
+
+    return eleInfo.setVector(LI);
+  }
+
+  // Tangent drift
+  else if (responseID == 6) {
+    double L = crdTransf->getInitialLength();
+
+    double wts[maxNumSections];
+    beamIntegr->getSectionWeights(numSections, L, wts);
+
+    double pts[maxNumSections];
+    beamIntegr->getSectionLocations(numSections, L, pts);
+
+    // Location of inflection point from node I
+    double LIz = Se(1)/(Se(1)+Se(2))*L;
+    double LIy = Se(3)/(Se(3)+Se(4))*L;
+
+    double d2z = 0.0;
+    double d2y = 0.0;
+    int i;
+    for (i = 0; i < numSections; i++) {
+      double x = pts[i]*L;
+      const ID &type = sections[i]->getType();
+      int order = sections[i]->getOrder();
+      double kappa = 0.0;
+      if (x < LIz) {
+	for (int j = 0; j < order; j++)
+	  if (type(j) == SECTION_RESPONSE_MZ)
+	    kappa += vs[i](j);
+	double b = -LIz+x;
+	d2z += (wts[i]*L)*kappa*b;
+      }
+      kappa = 0.0;
+      if (x < LIy) {
+	for (int j = 0; j < order; j++)
+	  if (type(j) == SECTION_RESPONSE_MY)
+	    kappa += vs[i](j);
+	double b = -LIy+x;
+	d2y += (wts[i]*L)*kappa*b;
+      }
+    }
+
+    d2z += beamIntegr->getTangentDriftI(L, Se(1), Se(2));
+    d2y += beamIntegr->getTangentDriftI(L, Se(3), Se(4), true);
+
+    double d3z = 0.0;
+    double d3y = 0.0;
+    for (i = numSections-1; i >= 0; i--) {
+      double x = pts[i]*L;
+      const ID &type = sections[i]->getType();
+      int order = sections[i]->getOrder();
+      double kappa = 0.0;
+      if (x > LIz) {
+	for (int j = 0; j < order; j++)
+	  if (type(j) == SECTION_RESPONSE_MZ)
+	    kappa += vs[i](j);
+	double b = x-LIz;
+	d3z += (wts[i]*L)*kappa*b;
+      }
+      kappa = 0.0;
+      if (x > LIy) {
+	for (int j = 0; j < order; j++)
+	  if (type(j) == SECTION_RESPONSE_MY)
+	    kappa += vs[i](j);
+	double b = x-LIy;
+	d3y += (wts[i]*L)*kappa*b;
+      }
+    }
+
+    d3z += beamIntegr->getTangentDriftJ(L, Se(1), Se(2));
+    d3y += beamIntegr->getTangentDriftJ(L, Se(3), Se(4), true);
+
+    static Vector d(4);
+    d(0) = d2z;
+    d(1) = d3z;
+    d(2) = d2y;
+    d(3) = d3y;
+
+    return eleInfo.setVector(d);
   }
 
   else

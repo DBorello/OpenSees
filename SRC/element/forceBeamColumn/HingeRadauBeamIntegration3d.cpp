@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-03-15 00:09:47 $
+// $Revision: 1.5 $
+// $Date: 2003-04-02 01:51:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauBeamIntegration3d.cpp,v $
 
 #include <HingeRadauBeamIntegration3d.h>
@@ -139,6 +139,56 @@ HingeRadauBeamIntegration3d::addElasticDeformations(ElementalLoad *theLoad,
 						    double L, double *v0)
 {
   return;
+}
+
+double
+HingeRadauBeamIntegration3d::getTangentDriftI(double L, double q2,
+					      double q3, bool yAxis)
+{
+  double oneOverL = 1.0/L;
+
+  double betaI = 4*lpI*oneOverL;
+
+  double qq2 = (1-betaI)*q2 - betaI*q3;
+
+  betaI = 8.0/3*lpI*oneOverL;
+
+  double qqq2 = (1-betaI)*q2 - betaI*q3;
+
+  double LI = q2/(q2+q3)*L;
+
+  if (LI < lpI)
+    return 0.0;
+  else {
+    double EI = yAxis ? E*Iy : E*Iz;
+    return (3*lpI)*(LI-8.0/3*lpI)*qqq2/EI +
+      (LI-4*lpI)/3*(LI-4*lpI)*qq2/EI;
+  }
+}
+
+double
+HingeRadauBeamIntegration3d::getTangentDriftJ(double L, double q2,
+					      double q3, bool yAxis)
+{
+  double oneOverL = 1.0/L;
+
+  double betaJ = 4*lpJ*oneOverL;
+
+  double qq3 = (1-betaJ)*q3 - betaJ*q2;
+
+  betaJ = 8.0/3*lpJ*oneOverL;
+
+  double qqq3 = (1-betaJ)*q3 - betaJ*q2;
+
+  double LI = q2/(q2+q3)*L;
+
+  if (LI > L-lpJ)
+    return 0.0;
+  else {
+    double EI = yAxis ? E*Iy : E*Iz;
+    return (3*lpJ)*(L-LI-8.0/3*lpJ)*qqq3/(EI) +
+      (L-LI-4*lpJ)/3*(L-LI-4*lpJ)*qq3/(EI);
+  }
 }
 
 BeamIntegration*

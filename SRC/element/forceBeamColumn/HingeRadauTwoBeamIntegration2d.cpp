@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.4 $
-// $Date: 2003-03-15 00:09:47 $
+// $Revision: 1.5 $
+// $Date: 2003-04-02 01:51:53 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/forceBeamColumn/HingeRadauTwoBeamIntegration2d.cpp,v $
 
 #include <HingeRadauTwoBeamIntegration2d.h>
@@ -126,6 +126,40 @@ HingeRadauTwoBeamIntegration2d::addElasticDeformations(ElementalLoad *theLoad,
 						       double L, double *v0)
 {
   return;
+}
+
+double
+HingeRadauTwoBeamIntegration2d::getTangentDriftI(double L, double q2, double q3)
+{
+  double oneOverL = 1.0/L;
+
+  double betaI = lpI*oneOverL;
+
+  double qq2 = (1-betaI)*q2 - betaI*q3;
+
+  double LI = q2/(q2+q3)*L;
+
+  if (LI < lpI)
+    return 0.0;
+  else
+    return (LI-lpI)/3*(LI-lpI)*qq2/(E*I);
+}
+
+double
+HingeRadauTwoBeamIntegration2d::getTangentDriftJ(double L, double q2, double q3)
+{
+  double oneOverL = 1.0/L;
+
+  double betaJ = lpJ*oneOverL;
+
+  double qq3 = (1-betaJ)*q3 - betaJ*q2;
+
+  double LI = q2/(q2+q3)*L;
+
+  if (LI > L-lpJ)
+    return 0.0;
+  else
+    return (L-LI-lpJ)/3*(L-LI-lpJ)*qq3/(E*I);
 }
 
 BeamIntegration*
