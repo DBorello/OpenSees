@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-12 07:45:59 $
+// $Revision: 1.2 $
+// $Date: 2000-12-14 08:43:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TclSeriesCommand.cpp,v $
 
 // Written: fmk 
@@ -223,7 +223,8 @@ TclSeriesCommand(ClientData clientData, Tcl_Interp *interp, char *arg)
       
   }
     
-  else if (strcmp(argv[0],"Series") == 0) {
+  else if ((strcmp(argv[0],"Series") == 0) ||
+	   (strcmp(argv[0],"Path") == 0)) {
 
     // LoadPattern and PathSeries - read args and create RectangularSeries object
     double cFactor = 1.0;
