@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.11 $
-// $Date: 2002-05-25 00:25:53 $
+// $Revision: 1.12 $
+// $Date: 2002-05-25 17:21:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/beamWithHinges/BeamWithHinges2d.cpp,v $
 
 #include <BeamWithHinges2d.h>
@@ -324,7 +324,7 @@ BeamWithHinges2d::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 BeamWithHinges2d::getResistingForce(void)
 {
-  static Vector dummy(2);
+  static Vector dummy(3);
   
   // Will remove once we clean up the corotational 2d transformation -- MHS
   theCoordTransf->update();
