@@ -60,7 +60,6 @@ class BandArpackSOE : public EigenSOE
     bool factored;
     double shift;
     AnalysisModel *theModel;
-    
 };
 
 

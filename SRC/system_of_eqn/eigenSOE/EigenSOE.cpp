@@ -26,7 +26,7 @@ EigenSOE::EigenSOE(EigenSolver &theEigenSolver, int classTag)
 
 EigenSOE::~EigenSOE()
 {
-
+  delete theSolver;
 }
 
 int 
