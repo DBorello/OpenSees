@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-02-17 04:03:10 $
+// $Revision: 1.4 $
+// $Date: 2001-07-23 20:41:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.h,v $
 
                                                                         
@@ -69,6 +69,7 @@ class Vector
     inline int Size(void) const;
     int resize(int newSize);
     inline void Zero(void);
+    int Normalize(void);
     
     int addVector(double factThis, const Vector &other, double factOther);
     int addMatrixVector(double factThis, const Matrix &m, const Vector &v, double factOther); 

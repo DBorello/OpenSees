@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2000-12-12 07:14:39 $
+// $Revision: 1.4 $
+// $Date: 2001-07-23 20:41:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Vector.cpp,v $
                                                                         
                                                                         
@@ -234,6 +234,21 @@ Vector::Assemble(const Vector &V, const ID &l, double fact )
 }
     
 
+int
+Vector::Normalize(void) 
+{
+  double length = 0.0;
+  for (int i=0; i<sz; i++)
+    length += theData[i] * theData[i];
+  length = sqrt(length);
+  
+  if (length == 0.0) 
+    return -1;
+
+  length = 1.0/length;
+  for (int j=0; j<sz; j++)
+    theData[j] *= length;  
+}
 
 int
 Vector::addVector(double thisFact, const Vector &other, double otherFact )
