@@ -3,8 +3,9 @@
 #  Program:  OpenSees
 #
 #  Purpose:  A Top-level Makefile to create the libraries needed
-#	     to use the OpenSees framework.
+#            to use the OpenSees framework.
 #
+#   version created for LINUX setup at UC Davis
 #  Written: jeremic@ucdavis.edu; zhyang@ucdavis.edu 
 #  Created: 01/2001
 #
@@ -29,9 +30,9 @@ OpenSees_PROGRAM = $(HOME)/bin/OpenSees
 # any of the libraries already leave the directory location blank AND
 # remove the directory from DIRS.
 
-BASE		= /usr/local
-HOME		= /home/jeremic
-FE		= $(HOME)/oofep/OpenSees/SRC
+BASE  = /usr/local
+HOME  = /home/jeremic
+FE    = $(HOME)/oofep/OpenSees/SRC
 
 GRAPHICS = UsingOpenGL
 
@@ -46,20 +47,22 @@ METISdir     = $(HOME)/oofep/OpenSees/OTHER/METIS
 SRCdir       = $(HOME)/oofep/OpenSees/SRC
 
 
-DIRS        = $(SUPERLUdir)\
+DIRS        = $(BLASdir) \
+              $(CBLASdir) \
+              $(SUPERLUdir) \
+              $(LAPACKdir) \
               $(ARPACKdir) \
               $(UMFPACKdir) \
               $(METISdir) \
               $(SUPERLUdir) \
               $(ARPACKdir) \
               $(UMFPACKdir) \
-              $(SRCdir)
-
+              $(SRCdir) \
 # %-------------------------------------------------------%
 # | SECTION 3: LIBRARIES                                  |
 # |                                                       |
 # | The following section defines the libraries that will |
-# | be created and/or linked with when the libraries are  | 
+# | be created and/or linked with when the libraries are  |
 # | being created or linked with.                         |
 # %-------------------------------------------------------%
 #
@@ -69,12 +72,12 @@ DIRS        = $(SUPERLUdir)\
 #
 # Note: For libraries that will be created (any in DIRS above)
 # make sure the directory exsists where you want the library to go!
-			      
+
 FE_LIBRARY          = $(HOME)/lib/libOpenSees.a
 NDARRAY_LIBRARY     = $(HOME)/lib/libndarray.a  # BJ_UCD jeremic@ucdavis.edu 
 MATMOD_LIBRARY      = $(HOME)/lib/libmatmod.a   # BJ_UCD jeremic@ucdavis.edu 
 BJMISC_LIBRARY      = $(HOME)/lib/libBJmisc.a  # BJ_UCD jeremic@ucdavis.edu
-LAPACK_LIBRARY      = $(HOME)/lib/libLapack.a	
+LAPACK_LIBRARY      = $(HOME)/lib/libLapack.a
 BLAS_LIBRARY        = $(HOME)/lib/libBlas.a
 SUPERLU_LIBRARY     = $(HOME)/lib/libSuperLU.a
 CBLAS_LIBRARY       = $(HOME)/lib/libCBlas.a
@@ -87,21 +90,24 @@ BLITZ_LIBRARY       = $(HOME)/lib/libblitz.a
 GRAPHIC_LIBRARY     = /usr/lib/libGL.a\
                       /usr/X11R6/lib/libX11.a\
                       /usr/X11R6/lib/libXext.a\
-	                     /usr/lib/libGLU.a
+                      /usr/lib/libGLU.a
 RELIABILITY_LIBRARY = $(HOME)/lib/libReliability.a
+# BLITZ_LIBRARY = $(HOME)/blitz/lib/libblitz.a
 
 
 # WATCH OUT .. These libraries are removed when 'make wipe' is invoked.
 # $(FE_LIBRARY) \
 #WIPE_LIBS	= $(NDARRAY_LIBRARY)  $(MAT_MOD_LIBRARY)  $(FE_LIBRARY)
 WIPE_LIBS	= $(FE_LIBRARY) \
-	           $(NDARRAY_LIBRARY) \
-            $(MATMOD_LIBRARY)
-#		          $(SUPERLU_LIBRARY) \
-#		          $(ARPACK_LIBRARY) \
-#		          $(UMFPACK_LIBRARY) \
-#	           $(METIS_LIBRARY)	 \
-
+           $(NDARRAY_LIBRARY) \
+           $(MATMOD_LIBRARY) \
+           $(SUPERLU_LIBRARY) \
+           $(ARPACK_LIBRARY) \
+           $(UMFPACK_LIBRARY) \
+           $(METIS_LIBRARY) \
+           $(LAPACK_LIBRARY) \
+           $(BLAS_LIBRARY) \
+           $(CBLAS_LIBRARY)
 # %---------------------------------------------------------%
 # | SECTION 4: COMPILERS                                    |
 # |                                                         |
@@ -170,16 +176,16 @@ WIPE_LIBS	= $(FE_LIBRARY) \
 CC++            =  g++
 CC              =  gcc
 FC              =  g77
-F90           	 = 
+F90             =
 LINKER          =  g++
-																					 
+
 #C++FLAGS        =  -O2 -D_UNIX
 #CFLAGS          =  -O2
 #FFLAGS          =  -O2
 #LINKFLAGS       =  
 
 C++FLAGS        =  -g -D_LINUX -D_UNIX -D_GLX -Wall
-CFLAGS          =  -g	 -Wall
+CFLAGS          =  -g -Wall
 FFLAGS          =  -Wall -O
 LINKFLAGS       =  -g
 #####..
@@ -233,9 +239,9 @@ LINKFLAGS       =  -g
 
 
 
-AR		= ar 
-ARFLAGS		= cqls
-RANLIB		= ranlib
+AR      = ar 
+ARFLAGS = cqls
+RANLIB  = ranlib
 
 # Compiler Flags
 #
@@ -263,7 +269,7 @@ RANLIB		= ranlib
 # LINKFLAGS       =  -g
 
 # Misc
-MAKE		          = make
+MAKE            = make
 CD              = cd
 ECHO            = echo
 RM              = rm
@@ -338,7 +344,7 @@ MACHINE_NUMERICAL_LIBS  = -lm \
   $(LAPACK_LIBRARY)  \
   $(BLAS_LIBRARY) \
   $(CBLAS_LIBRARY) \
-		$(GRAPHIC_LIBRARY)\
+  $(GRAPHIC_LIBRARY)\
   -lg2c -ldl
 #  $(MPI_LIB_DIR) \ # BJ_UCD
 
@@ -357,9 +363,9 @@ MACHINE_SPECIFIC_LIBS =
 
 
 MACHINE_INCLUDES        = -I/usr/include      \
-                     			  -I$(BASE)/include   \
-              		          -I/usr/include/cxx  \
-              		          -I$(HOME)/include   \
+                          -I$(BASE)/include   \
+                          -I/usr/include/cxx  \
+                          -I$(HOME)/include   \
 # BJ_UCD		  -I$(MPI_INCLUDE_DIR) 
 
 
@@ -369,11 +375,3 @@ include $(FE)/Makefile.incl
 TCL_INCLUDES = -I/usr/local/include
 
 INCLUDES = $(TCL_INCLUDES) $(FE_INCLUDES) $(MACHINE_INCLUDES)
-
-
-
-
-
-
-
-
