@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-01-23 08:04:22 $
+// $Revision: 1.5 $
+// $Date: 2001-06-22 03:45:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -811,6 +811,11 @@ ZeroLength::setResponse(char **argv, int argc, Information &eleInformation)
 		strcmp(argv[0],"deformation") == 0)
 		return new ElementResponse(this, 2, Vector(numMaterials1d));
 
+    else if ((strcmp(argv[0],"defoANDforce") == 0) ||
+	     (strcmp(argv[0],"deformationANDforces") == 0) ||
+	     (strcmp(argv[0],"deformationsANDforces") == 0))
+		return new ElementResponse(this, 4, Vector(2*numMaterials1d));
+
     // tangent stiffness matrix
     else if (strcmp(argv[0],"stiff") == 0)
 		return new ElementResponse(this, 3, Matrix(numMaterials1d,numMaterials1d));
@@ -836,6 +841,8 @@ ZeroLength::getResponse(int responseID, Information &eleInformation)
   const Vector& disp1 = end1Ptr->getTrialDisp();
   const Vector& disp2 = end2Ptr->getTrialDisp();
   const Vector  diff  = disp2-disp1;
+
+  
   
   switch (responseID) {
     case -1:
@@ -852,6 +859,15 @@ ZeroLength::getResponse(int responseID, Information &eleInformation)
 		if (eleInformation.theVector != 0) {
 			for (int i = 0; i < numMaterials1d; i++)
 				(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStrain();
+		}
+      return 0;      
+
+    case 4:
+                if (eleInformation.theVector != 0) {
+                         for (int i = 0; i < numMaterials1d; i++) {
+				(*(eleInformation.theVector))(i) = theMaterial1d[i]->getStrain();
+				(*(eleInformation.theVector))(i+numMaterials1d) = theMaterial1d[i]->getStress();
+                         }
 		}
       return 0;      
       
