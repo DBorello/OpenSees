@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:19 $
+// $Revision: 1.2 $
+// $Date: 2001-01-09 03:30:51 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/node/Node.cpp,v $
                                                                         
                                                                         
@@ -53,9 +53,10 @@ Node::Node(int theClassTag)
 :DomainComponent(0,theClassTag), 
  numberDOF(0), theDOF_GroupPtr(0), 
  Crd(0), commitDisp(0), commitVel(0), commitAccel(0), 
- trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
+ trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0), 
+ incrDeltaDisp(0),
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
-  R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
 {
     // for FEM_ObjectBroker, recvSelf() must be invoked on object
 }    
@@ -66,8 +67,9 @@ Node::Node(int tag, int theClassTag)
  numberDOF(0), theDOF_GroupPtr(0), 
  Crd(0), commitDisp(0), commitVel(0), commitAccel(0), 
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
+ incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
-  R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
 {
     // for subclasses - they must implement all the methods with
     // their own data structures.
@@ -78,8 +80,9 @@ Node::Node(int tag, int ndof, double Crd1)
  numberDOF(ndof), theDOF_GroupPtr(0),
  Crd(0), commitDisp(0), commitVel(0), commitAccel(0), 
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
+ incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
-  R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
 {
     Crd = new Vector(1);
     (*Crd)(0) = Crd1;
@@ -93,8 +96,9 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2)
  numberDOF(ndof), theDOF_GroupPtr(0),
  Crd(0), commitDisp(0), commitVel(0), commitAccel(0), 
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
+ incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
-  R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
 {
     Crd = new Vector(2);
     (*Crd)(0) = Crd1;
@@ -110,8 +114,9 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2, double Crd3)
  numberDOF(ndof), theDOF_GroupPtr(0),
  Crd(0), commitDisp(0), commitVel(0), commitAccel(0), 
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
+ incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
-  R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
 {
     Crd = new Vector(3);
     (*Crd)(0) = Crd1;
@@ -126,8 +131,9 @@ Node::Node(const Node *otherNode)
  numberDOF(otherNode->numberDOF), theDOF_GroupPtr(0),
  Crd(0), commitDisp(0), commitVel(0), commitAccel(0), 
  trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
+ incrDeltaDisp(0), 
  disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
-  R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
+ R(0), mass(0), unbalLoadWithInertia(0), theEigenvectors(0)
 {
     if (otherNode->Crd != 0) {
 	Crd = new Vector(*(otherNode->Crd));
@@ -216,6 +222,12 @@ Node::~Node()
     if (trialAccel != 0)
 	delete trialAccel;
 
+    if (incrDisp != 0)
+	delete incrDisp;
+    
+    if (incrDeltaDisp != 0)
+	delete incrDeltaDisp;    
+    
     if (unbalLoad != 0)
 	delete unbalLoad;
     
