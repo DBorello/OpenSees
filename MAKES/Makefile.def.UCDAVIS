@@ -1,0 +1,289 @@
+############################################################################
+#
+#  Program:  G3
+#
+#  Purpose:  A Top-level Makefile to create the libraries needed
+#	     to use the G3 framework.
+#
+#  Written: jeremic@ucdavis.edu; zhyang@ucdavis.edu 
+#  Created: 01/2001
+#
+#  Send bug reports, comments or suggestions to jeremic@ucdavis.edu
+#
+############################################################################
+
+# %---------------------------------%
+# |  SECTION 1: PROGRAM             |
+# %---------------------------------%
+#
+# Specify the location and name of the g3 interpreter program
+# that will be created (if this all works!)
+
+OpenSees_PROGRAM = $(HOME)/bin/OpenSees
+
+# %---------------------------------%
+# |  SECTION 2: PATHS               |
+# %---------------------------------%
+#
+# Note: if vendor supplied BLAS and LAPACK libraries or if you have
+# any of the libraries already leave the directory location blank AND
+# remove the directory from DIRS.
+
+BASE		= /usr/local
+HOME		= /home/jeremic
+FE		= $(HOME)/oofep/OpenSees/SRC
+
+BLASdir      = 
+CBLASdir     = 
+LAPACKdir    = 
+SUPERLUdir   = $(HOME)/oofep/OpenSees/OTHER/SuperLU
+ARPACKdir    = $(HOME)/oofep/OpenSees/OTHER/ARPACK
+UMFPACKdir   = $(HOME)/oofep/OpenSees/OTHER/UMFPACK
+METISdir     = $(HOME)/oofep/OpenSees/OTHER/METIS
+SRCdir       = $(HOME)/oofep/OpenSees/SRC
+
+
+DIRS        = $(SUPERLUdir) $(ARPACKdir) $(UMFPACKdir) $(METISdir) $(SRCdir)
+
+# %-------------------------------------------------------%
+# | SECTION 3: LIBRARIES                                  |
+# |                                                       |
+# | The following section defines the libraries that will |
+# | be created and/or linked with when the libraries are  | 
+# | being created or linked with.                         |
+# %-------------------------------------------------------%
+#
+# Note: if vendor supplied BLAS and LAPACK libraries leave the
+# libraries blank. You have to get your own copy of the tcl/tk 
+# library!! 
+#
+# Note: For libraries that will be created (any in DIRS above)
+# make sure the directory exsists where you want the library to go!
+			      
+FE_LIBRARY      = $(HOME)/lib/libg3.a
+#FE_LIBRARY      = $(HOME)/lib/libOpenSees.a
+NDARRAY_LIBRARY = $(HOME)/lib/libndarray.a # BJ_UCD jeremic@ucdavis.edu
+MATMOD_LIBRARY  = $(HOME)/lib/libmatmod.a  # BJ_UCD jeremic@ucdavis.edu
+BJMISC_LIBRARY  = $(HOME)/lib/libBJmisc.a  # BJ_UCD jeremic@ucdavis.edu
+LAPACK_LIBRARY  = $(HOME)/lib/libLapack.a
+BLAS_LIBRARY    = $(HOME)/lib/libBlas.a
+SUPERLU_LIBRARY = $(HOME)/lib/libSuperLU.a
+CBLAS_LIBRARY   = $(HOME)/lib/libCBlas.a
+ARPACK_LIBRARY  = $(HOME)/lib/libArpack.a
+UMFPACK_LIBRARY = $(HOME)/lib/libUmfpack.a
+METIS_LIBRARY   = $(HOME)/lib/libMetis.a
+TCL_LIBRARY = /usr/lib/libtk8.0.so /usr/X11R6/lib/libX11.a /usr/lib/libtcl8.0.so
+
+
+# WATCH OUT .. These libraries are removed when 'make wipe' is invoked.
+# $(FE_LIBRARY) \
+WIPE_LIBS	= $(NDARRAY_LIBRARY) \
+		$(MAT_MOD_LIBRARY) \
+		$(LAPACK_LIBRARY) \
+		$(BLAS_LIBRARY) \
+		$(CBLAS_LIBRARY) \
+		$(SUPERLU_LIBRARY) \
+		$(ARPACK_LIBRARY) \
+		$(UMFPACK_LIBRARY) \
+	        $(METIS_LIBRARY)
+
+# %---------------------------------------------------------%
+# | SECTION 4: COMPILERS                                    |
+# |                                                         |
+# | The following macros specify compilers, linker/loaders, |
+# | the archiver, and their options.  You need to make sure |
+# | these are correct for your system.                      |
+# %---------------------------------------------------------%
+
+# Compilers
+CC++	= g++
+CC      = gcc
+FC	= g77
+
+
+# Boris Jeremic BJ_UCD jeremic@ucdavis.edu
+###################################################  Portland Group
+##########  PGI PGI  PGI PGI PGI PGI PGI PGI  PGI PGI PGI PGI      
+##CC++ =  pgCC
+##CC   =  pgcc
+##FC   =  pgf77
+##FC   =  pgf90
+##LINK = pgCC 
+######..
+
+####################################  Kuck and Associates Inc.
+##########  KAI KAI  KAI KAI KAI KAI KAI KAI  KAI KAI KAI KAI      
+##..CC = KCC
+##..LINK = KCC
+
+########################################    GNU
+##..CC++ = g++
+##..CC   = gcc
+##..FC	  = g77
+##..LINK = g++
+
+########################################     EGCS
+##..
+##..CC++ = egcs
+##..LINK = egcs
+  
+########################################    MPI CC
+
+##CC++ = mpiCC
+##CC   = mpicc
+##LINK = mpiCC
+
+########################################     INSURE++  CODEWIZARD
+
+##..CC++ = insure
+##..CC   = gcc
+##..LINK = insure
+##..#CC++ = codewizard
+##..#CC   = gcc
+##..#LINK = codewizard
+##..
+
+########################################       I B M   AIX
+##..# AIX C++   on IBM AIX
+##..CC++ = xlC
+##..CC   = xlc
+##..LINK = xlC
+
+
+########################################     BORLAND
+# DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS DOS
+##..CC = bcc
+##..CCFLAGS = -c -w -rd -C -N -P -f87 -I\cmp\bc\include -L\cmp\bc\lib -i64 -mh -o $*.o
+##..
+
+
+
+AR		= ar 
+ARFLAGS		= cqls
+RANLIB		= ranlib
+
+# Compiler Flags
+#
+# NOTES:
+#    C++ FLAGS TAKE need _UNIX or _WIN32 for preprocessor dircetives
+#         - the _WIN32 for the Windows95/98 or NT operating system.
+#    C FLAGS used -DUSE_VENDOR_BLAS (needed in SuperLU) if UNIX in C++ FLAGS
+#
+
+C++FLAGS        = -Wall -g -D_UNIX
+CFLAGS          = -Wall -g
+FFLAGS          = -Wall -g
+
+#C++FLAGS        = -Wall -O2 -D_UNIX
+#CFLAGS          = -Wall -O2
+#FFLAGS          = -Wall -O
+
+
+# Linker
+LINKER          = $(CC++)
+LINKFLAGS       =  -g
+
+# Misc
+MAKE		= make
+CD              = cd
+ECHO            = echo
+RM              = rm
+RMFLAGS         = -f
+SHELL           = /bin/sh
+
+# %---------------------------------------------------------%
+# | SECTION 5: COMPILATION                                  |
+# |                                                         |
+# | The following macros specify the macros used in         |
+# | to compile the source code into object code.            |
+# %---------------------------------------------------------%
+
+.SUFFIXES:
+.SUFFIXES:	.C .c .f .f90 .cpp .o .cpp
+
+#
+# %------------------%
+# | Default command. |
+# %------------------%
+#
+.DEFAULT:
+	@$(ECHO) "Unknown target $@, try:  make help"
+#
+# %-------------------------------------------%
+# |  Command to build .o files from .f files. |
+# %-------------------------------------------%
+#
+
+.cpp.o:
+	@$(ECHO) Making $@ from $<
+	$(CC++) $(C++FLAGS) $(INCLUDES) -c $< -o $@
+
+.C.o:
+	@$(ECHO) Making $@ from $<
+	$(CC++) $(C++FLAGS) $(INCLUDES) -c $< -o $@
+.c.o:
+	@$(ECHO) Making $@ from $<
+	$(CC) $(CFLAGS) -c $< -o $@
+.f.o:      
+	@$(ECHO) Making $@ from $<
+	$(FC) $(FFLAGS) -c $< -o $@
+
+# %---------------------------------------------------------%
+# | SECTION 6: OTHER LIBRARIES                              |
+# |                                                         |
+# | The following macros specify other libraries that must  |
+# | be linked with when creating executables. These are     |
+# | platform specific and typically order does matter!!     |
+# %---------------------------------------------------------%
+MACHINE_LINKLIBS  = -L$(BASE)/lib \
+                    -L$(HOME)/lib \
+
+
+
+#MPI_LIB_DIR     = /usr/local/mpi/mpich/lib/ # BJ_UCD
+
+MACHINE_NUMERICAL_LIBS  = -lm \
+  $(ARPACK_LIBRARY) \
+  $(SUPERLU_LIBRARY) \
+  $(UMFPACK_LIBRARY) \
+  $(LAPACK_LIBRARY)  \
+  $(BLAS_LIBRARY) \
+  $(CBLAS_LIBRARY) \
+  -lg2c -ldl
+#  $(MPI_LIB_DIR) \ # BJ_UCD
+
+
+
+MACHINE_SPECIFIC_LIBS = 
+
+
+# %---------------------------------------------------------%
+# | SECTION 7: INCLUDE FILES                                |
+# |                                                         |
+# | The following macros specify include files needed for   |
+# | compilation.                                            |
+# %---------------------------------------------------------%
+# BJ_UCD  MPI_INCLUDE_DIR = -I/usr/local/mpi/mpich/include
+
+
+MACHINE_INCLUDES        = -I/usr/include      \
+			  -I$(BASE)/include   \
+		          -I/usr/include/cxx  \
+		          -I$(HOME)/include   \
+# BJ_UCD		  -I$(MPI_INCLUDE_DIR) 
+
+
+# this file contains all the g3/SRC includes
+include $(FE)/Makefile.incl
+
+TCL_INCLUDES = 
+
+INCLUDES = $(TCL_INCLUDES) $(FE_INCLUDES) $(MACHINE_INCLUDES)
+
+
+
+
+
+
+
+
