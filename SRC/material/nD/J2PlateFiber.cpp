@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-05-18 05:32:05 $
+// $Revision: 1.2 $
+// $Date: 2001-07-16 22:19:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlateFiber.cpp,v $
 
 // Written: Ed "C++" Love
@@ -103,7 +103,7 @@ NDMaterial* J2PlateFiber :: getCopy( )
 //send back type of material
 const char* J2PlateFiber :: getType( ) const 
 {
-  return "J2PlateFiber" ;
+  return "PlateFiber" ;
 }
 
 

@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-18 05:33:18 $
+// $Revision: 1.3 $
+// $Date: 2001-07-16 22:19:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2Plasticity.cpp,v $
 
 // Written: Ed "C++" Love
@@ -151,21 +151,21 @@ J2Plasticity :: ~J2Plasticity( )
 NDMaterial*
 J2Plasticity :: getCopy (const char *type)
 {
-    if (strcmp(type,"PlaneStress2D") == 0)
+    if (strcmp(type,"PlaneStress2D") == 0 || strcmp(type,"PlaneStress") == 0)
     {
 	J2PlaneStress  *clone ;
 	clone = new J2PlaneStress(this->getTag(), bulk, shear, sigma_0,
 				  sigma_infty, delta, Hard, eta) ;
 	return clone ;
     }
-    else if (strcmp(type,"PlaneStrain2D") == 0)
+    else if (strcmp(type,"PlaneStrain2D") == 0 || strcmp(type,"PlaneStrain") == 0)
     {
 	J2PlaneStrain  *clone ;
 	clone = new J2PlaneStrain(this->getTag(), bulk, shear, sigma_0,
 				  sigma_infty, delta, Hard, eta) ;
 	return clone ;
     }
-    else if (strcmp(type,"AxiSymmetric2D") == 0)
+    else if (strcmp(type,"AxiSymmetric2D") == 0 || strcmp(type,"AxiSymmetric") == 0)
     {
 	J2AxiSymm  *clone ;
 	clone = new J2AxiSymm(this->getTag(), bulk, shear, sigma_0,

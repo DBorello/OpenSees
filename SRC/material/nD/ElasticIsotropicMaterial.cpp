@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $                                                              
-// $Date: 2001-06-16 04:41:14 $                                                                  
+// $Revision: 1.9 $                                                              
+// $Date: 2001-07-16 22:19:33 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -74,7 +74,7 @@ ElasticIsotropicMaterial::getRho()
 NDMaterial*
 ElasticIsotropicMaterial::getCopy (const char *type)
 {
-    if (strcmp(type,"PlaneStress2D") == 0)
+    if (strcmp(type,"PlaneStress2D") == 0 || strcmp(type,"PlaneStress") == 0)
     {
 	ElasticIsotropicPlaneStress2D *theModel;
 	theModel = new ElasticIsotropicPlaneStress2D (this->getTag(), E, v, rho);
@@ -85,7 +85,7 @@ ElasticIsotropicMaterial::getCopy (const char *type)
 	return theModel;
     }
 
-    else if (strcmp(type,"PlaneStrain2D") == 0)
+    else if (strcmp(type,"PlaneStrain2D") == 0 || strcmp(type,"PlaneStrain") == 0)
     {
 	ElasticIsotropicPlaneStrain2D *theModel;
 	theModel = new ElasticIsotropicPlaneStrain2D (this->getTag(), E, v, rho);
@@ -95,7 +95,7 @@ ElasticIsotropicMaterial::getCopy (const char *type)
 		// prior to copying the material model (calling this function)
 	return theModel;
     }
-    else if (strcmp(type,"ThreeDimensional") == 0)
+    else if (strcmp(type,"ThreeDimensional") == 0 || strcmp(type,"3D") == 0)
     {
 	ElasticIsotropic3D *theModel;
 	theModel = new ElasticIsotropic3D (this->getTag(), E, v, 100.0, 0.0);
