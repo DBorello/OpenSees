@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2002-04-12 21:42:24 $
+// $Revision: 1.15 $
+// $Date: 2002-05-17 01:05:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -169,6 +169,10 @@ extern int TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData,
 						    TclModelBuilder *, 
 						    int);
 
+// Zhaohui Yang
+extern int 
+TclModelBuilder_addFourNodeQuadUP(ClientData, Tcl_Interp *, int, char **,
+				Domain*, TclModelBuilder *);
 
 int
 TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
@@ -296,6 +300,12 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 							  theTclDomain, 
 							  theTclBuilder, 
 							  eleArgStart);
+    return result;
+  } 
+  // Zhaohui Yang
+  else if (strcmp(argv[1],"quadUP") == 0) {
+    int result = TclModelBuilder_addFourNodeQuadUP(clientData, interp, argc, argv,
+						       theTclDomain, theTclBuilder);
     return result;
   } 
   else if (strcmp(argv[1],"stdBrick") == 0) {
