@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:22 $
+// $Revision: 1.2 $
+// $Date: 2001-08-24 04:07:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/SeriesMaterial.cpp,v $
 
 // Written: MHS
@@ -232,7 +232,9 @@ SeriesMaterial::commitState(void)
 	for (int i = 0; i < numMaterials; i++)
 		err += theModels[i]->commitState();
 
-	initialFlag = false;
+	// Commented out for the same reason it was taken
+	// out of the NLBeamColumn commitState() -- MHS
+	//initialFlag = false;
 
 	return err;
 }
