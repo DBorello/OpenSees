@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2003-02-25 23:34:32 $
+// $Revision: 1.18 $
+// $Date: 2003-02-26 21:21:55 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -259,7 +259,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    eleIDs[numEle++] = theEle->getTag();
 	}
 
-	const char **data = new (const char *)[argc-eleData];
+	const char **data = new const char *[argc-eleData];
 
 	int i,j;
 	for (i=eleData, j=0; i<argc; i++, j++)
