@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-04-02 19:15:33 $
+// $Revision: 1.7 $
+// $Date: 2002-05-03 22:10:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/algorithm/equiSolnAlgo/NewtonRaphson.cpp,v $
                                                                         
                                                                         
@@ -169,13 +169,6 @@ NewtonRaphson::solveCurrentStep(void)
       cerr << "the ConvergenceTest object failed in test()\n";
       return -3;
     }
-
-     // open file
-    ofstream theFile; 
-    theFile.open("tmp", ios::app);
-    theFile << count << endl;
-    theFile.close();
-
 
     // note - if postive result we are returning what the convergence test returned
     // which should be the number of iterations
