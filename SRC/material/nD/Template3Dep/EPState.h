@@ -245,7 +245,7 @@ class EPState
 
     EPState *newObj();                 //create a clone of itself
     EPState( const EPState &rhs );     // Copy constructor    
-    const EPState & EPState::operator=(const EPState &rhs );  //Overloading assignment
+    const EPState &operator=(const EPState &rhs );  //Overloading assignment
 
 //ZC05/2004    int getElasticflag() const;
 
