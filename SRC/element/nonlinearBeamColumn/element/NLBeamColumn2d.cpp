@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2002-12-16 21:10:06 $
+// $Revision: 1.29 $
+// $Date: 2002-12-17 02:09:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -1722,11 +1722,7 @@ NLBeamColumn2d::Print(ostream &s, int flag)
 	<< V+p0[1] << " " << M1 << endl;
       s << "\tEnd 2 Forces (P V M): " << P << " "
 	<< -V+p0[2] << " " << M2 << endl;
-      
-      s << this->getInitialStiff();
-      s << this->getTangentStiff();
    }
-
 }
 
 
