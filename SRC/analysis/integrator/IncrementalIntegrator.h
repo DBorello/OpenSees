@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-12-07 00:50:21 $
+// $Revision: 1.5 $
+// $Date: 2002-04-02 19:13:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.h,v $
                                                                         
                                                                         
@@ -54,6 +54,7 @@ class Vector;
 #define CURRENT_TANGENT 0
 #define INITIAL_TANGENT 1
 #define CURRENT_SECANT  2
+#define INITIAL_THEN_CURRENT_TANGENT  2
 
 
 class IncrementalIntegrator : public Integrator
@@ -67,7 +68,7 @@ class IncrementalIntegrator : public Integrator
 
     // methods to set up the system of equations
     virtual int  formTangent(int statusFlag = CURRENT_TANGENT);    
-    virtual int  formUnbalance(void);        
+    virtual int  formUnbalance(void);
 
     // pure virtual methods to define the FE_ELe and DOF_Group contributions
     virtual int formEleTangent(FE_Element *theEle) =0;
