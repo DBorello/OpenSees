@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2001-08-15 01:58:53 $
+// $Revision: 1.4 $
+// $Date: 2001-12-17 19:23:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.h,v $
 
 #ifndef HardeningMaterial_h
@@ -38,8 +38,9 @@
 class HardeningMaterial : public UniaxialMaterial
 {
   public:
-    HardeningMaterial(int tag, double E, double sigmaY, double K, double H);
-	HardeningMaterial();
+    HardeningMaterial(int tag, double E, double sigmaY,
+		      double K, double H, double eta = 0.0);
+    HardeningMaterial();
     ~HardeningMaterial();
 
     int setTrialStrain(double strain, double strainRate = 0.0); 
@@ -67,6 +68,7 @@ class HardeningMaterial : public UniaxialMaterial
     double sigmaY;	// Yield stress
     double Hiso;	// Isotropic hardening parameter
     double Hkin;	// Kinematic hardening parameter
+    double eta;
 	
     // Committed history variables
     double CplasticStrain;	// Committed plastic strain

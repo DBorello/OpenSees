@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-08-18 21:44:31 $
+// $Revision: 1.8 $
+// $Date: 2001-12-17 19:23:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/TclModelBuilderUniaxialMaterialCommand.cpp,v $
                                                                         
                                                                         
@@ -237,12 +237,13 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	if (argc < 7) {
 	    cerr << "WARNING insufficient arguments\n";
 	    printCommand(argc,argv);
-	    cerr << "Want: uniaxialMaterial Hardening tag? E? sigmaY? H_iso? H_kin?" << endl;
+	    cerr << "Want: uniaxialMaterial Hardening tag? E? sigmaY? H_iso? H_kin? <eta?>" << endl;
 	    return TCL_ERROR;
 	}
 
 	int tag;
 	double E, sigmaY, Hiso, Hkin;
+	double eta = 0.0;
 
 	if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
 	    cerr << "WARNING invalid uniaxialMaterial Hardening tag" << endl;
@@ -272,8 +273,15 @@ TclModelBuilderUniaxialMaterialCommand (ClientData clientData, Tcl_Interp *inter
 	    cerr << "uniaxialMaterial Hardening: " << tag << endl;
 	    return TCL_ERROR;	
 	}
+
+	if (argc > 7 && Tcl_GetDouble(interp, argv[7], &eta) != TCL_OK) {
+	    cerr << "WARNING invalid eta\n";
+	    cerr << "uniaxialMaterial Hardening: " << tag << endl;
+	    return TCL_ERROR;	
+	}
+
 	// Parsing was successful, allocate the material
-	theMaterial = new HardeningMaterial (tag, E, sigmaY, Hiso, Hkin);       
+	theMaterial = new HardeningMaterial (tag, E, sigmaY, Hiso, Hkin, eta);
     }
 
     else if (strcmp(argv[1],"Parallel") == 0) {

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
-// $Date: 2001-08-15 01:58:53 $
+// $Revision: 1.4 $
+// $Date: 2001-12-17 19:23:39 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/HardeningMaterial.cpp,v $
 
 // Written: MHS
@@ -35,9 +35,9 @@
 #include <math.h>
 
 HardeningMaterial::HardeningMaterial(int tag, double e, double s,
-				 double hi, double hk)
+				     double hi, double hk, double n)
 :UniaxialMaterial(tag,MAT_TAG_Hardening),
- E(e), sigmaY(s), Hiso(hi), Hkin(hk)
+ E(e), sigmaY(s), Hiso(hi), Hkin(hk), eta(n)
 {
 	// Initialize variables
     this->revertToStart();
@@ -45,7 +45,7 @@ HardeningMaterial::HardeningMaterial(int tag, double e, double s,
 
 HardeningMaterial::HardeningMaterial()
 :UniaxialMaterial(0,MAT_TAG_Hardening),
- E(0.0), sigmaY(0.0), Hiso(0.0), Hkin(0.0)
+ E(0.0), sigmaY(0.0), Hiso(0.0), Hkin(0.0), eta(0.0)
 {
 	// Initialize variables
 	this->revertToStart();
@@ -80,8 +80,10 @@ HardeningMaterial::setTrialStrain (double strain, double strainRate)
     // Plastic step ... perform return mapping algorithm
     else
     {
+      double etadt = eta/ops_Dt;
+
 	// Compute consistency parameter
-	double dGamma = f / (E+Hiso+Hkin);
+	double dGamma = f / (E+Hiso+Hkin+etadt);
 
 	// Find sign of xsi
 	int sign = (xsi < 0) ? -1 : 1;
@@ -99,7 +101,7 @@ HardeningMaterial::setTrialStrain (double strain, double strainRate)
 	Thardening = Chardening + dGamma;
 	
 	// Set trial tangent
-	Ttangent = E*(Hkin+Hiso) / (E+Hkin+Hiso);
+	Ttangent = E*(Hkin+Hiso+etadt) / (E+Hkin+Hiso+etadt);
     }
 
     return 0;
@@ -166,7 +168,7 @@ UniaxialMaterial *
 HardeningMaterial::getCopy(void)
 {
     HardeningMaterial *theCopy =
-	new HardeningMaterial(this->getTag(), E, sigmaY, Hiso, Hkin);
+	new HardeningMaterial(this->getTag(), E, sigmaY, Hiso, Hkin, eta);
 
     // Copy committed history variables
     theCopy->CplasticStrain = CplasticStrain;
