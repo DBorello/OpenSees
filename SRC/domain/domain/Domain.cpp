@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.23 $
-// $Date: 2003-10-30 22:49:04 $
+// $Revision: 1.24 $
+// $Date: 2003-11-18 01:56:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -579,7 +579,6 @@ Domain::addSP_Constraint(SP_Constraint *spConstraint, int pattern)
     if (nodePtr == 0) {
       opserr << "Domain::addSP_Constraint - cannot add as node with tag" <<
 	nodeTag << "does not exist in model\n";
-				
 	return false;
     }
 
@@ -1227,6 +1226,8 @@ Domain::setLoadConstant(void)
       thePattern->setLoadConstant();
 }
 
+
+
 int
 Domain::initialize(void)
 {
@@ -1266,13 +1267,12 @@ Domain::commit(void)
     // 
     // first invoke commit on all nodes and elements in the domain
     //
-
     Node *nodePtr;
     NodeIter &theNodeIter = this->getNodes();
     while ((nodePtr = theNodeIter()) != 0) {
       nodePtr->commitState();
     }
-    
+
     Element *elePtr;
     ElementIter &theElemIter = this->getElements();    
     while ((elePtr = theElemIter()) != 0) {
@@ -1388,6 +1388,16 @@ Domain::update(double newTime, double dT)
   return 0;
 }
 
+
+
+int
+Domain::newStep(double dT)
+{
+  return 0;
+}
+
+
+
 int
 Domain::setEigenvalues(const Vector &theValues)
 {
@@ -1438,6 +1448,12 @@ Domain::setDomainChangeStamp(int newStamp)
 }
 
 
+void
+Domain::domainChange(void)
+{
+    hasDomainChangedFlag = true;
+}
+
 
 int
 Domain::hasDomainChanged(void)
@@ -1457,7 +1473,6 @@ Domain::hasDomainChanged(void)
     // since their last call to this method
     return currentGeoTag;
 }
-
 
 void
 Domain::Print(OPS_Stream &s, int flag) 
@@ -1570,12 +1585,6 @@ Domain::playback(int cTag)
     return 0;
 }
 
-
-void
-Domain::domainChange(void)
-{
-    hasDomainChangedFlag = true;
-}
 
 int 
 Domain::buildEleGraph(Graph *theEleGraph)

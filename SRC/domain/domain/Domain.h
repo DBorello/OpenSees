@@ -1,4 +1,4 @@
-/* ****************************************************************** **
+ /* ****************************************************************** **
 **    OpenSees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
 **                                                                    **
@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-02-14 23:00:56 $
+// $Revision: 1.10 $
+// $Date: 2003-11-18 01:56:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.h,v $
                                                                         
-                                                                        
-// File: ~/domain/domain/Domain.h
-// 
 // Written: fmk 
 // Created: Fri Sep 20 15:27:47: 1996
 // Revision: A
@@ -75,7 +72,6 @@ class Channel;
 class FEM_ObjectBroker;
 
 class TaggedObjectStorage;
-
 
 class Domain
 {
@@ -159,6 +155,7 @@ class Domain
     virtual  int  revertToStart(void);    
     virtual  int  update(void);
     virtual  int  update(double newTime, double dT);
+    virtual  int  newStep(double dT);
 
     
     // methods for eigenvalue analysis
@@ -167,6 +164,7 @@ class Domain
     virtual double getTimeEigenvaluesSet(void);
     
     // methods for other objects to determine if model has changed
+    virtual void domainChange(void);    
     virtual int hasDomainChanged(void);
     virtual void setDomainChangeStamp(int newStamp);
     
@@ -185,7 +183,6 @@ class Domain
 			 FEM_ObjectBroker &theBroker);    
 
   protected:    
-    virtual void domainChange(void);    
     virtual int buildEleGraph(Graph *theEleGraph);
     virtual int buildNodeGraph(Graph *theNodeGraph);
     
