@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.28 $
-// $Date: 2003-06-11 18:20:39 $
+// $Revision: 1.29 $
+// $Date: 2003-08-21 00:34:18 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -240,7 +240,7 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
 	  int result = TclModelBuilder_addBeamWithHinges(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
     return result;
-  } else if (strcmp(argv[1],"quad") == 0) {
+  } else if ((strcmp(argv[1],"quad") == 0) || (strcmp(argv[1],"stdQuad") == 0)) {
     int result = TclModelBuilder_addFourNodeQuad(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
 	  return result;
