@@ -97,7 +97,7 @@ tensor CAMPotentialSurface::d2Qodsds1(const EPState *EPS) const
 {  
   tensor d2Qoverdsds1(2, def_dim_2, 0.0);
   tensor DpoDs = EPS->getStress().dpoverds();
-  tensor D2QoDpDs1 = -M*M;
+  double D2QoDpDs1 = -M*M;
   d2Qoverdsds1 = DpoDs * D2QoDpDs1;
   return d2Qoverdsds1;
 }
