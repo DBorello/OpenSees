@@ -9,26 +9,27 @@
 // MEMBER VARIABLES
 //
 // PURPOSE:           Finite Element Class for coupled system
-// RETURN:
-// VERSION:
-// LANGUAGE:          C++.ver >= 3.0
-// TARGET OS:         DOS || UNIX || . . .
-// DESIGNER:          Boris Jeremic, Xiaoyan Wu
-// PROGRAMMER:        Boris Jeremic, Xiaoyan Wu
-// DATE:              Sept. 2001
-// UPDATE HISTORY:    Modified from EightNodeBrick.h.  Reorganized a lot by Xiaoyan
-//		      01/24/2002    Xiaoyan
-//		      Add the permeability tensor and ks, kf  to the constructor  Xiaoyan 
-						       
-//
 //  "Coupled system": Solid and fluid coexist.
 //                    u-- Solid displacement
 //                    p-- Pore pressure
 //                    U-- Absolute fluid displacement
+// RETURN:
+// VERSION:
+// LANGUAGE:          C++.ver >= 3.0
+// TARGET OS:         DOS || UNIX || . . .
+// DESIGNER:          Boris Jeremic, Xiaoyan Wu, Chao Cheng (main for last revision)
+// PROGRAMMER:        Boris Jeremic, Xiaoyan Wu, Zhaohui Yang, Zhao Cheng (main for last revision)
+// DATE:              Sept. 2001
+// UPDATE HISTORY:    Modified from EightNodeBrick.h.  Reorganized a lot by Xiaoyan
+//                    01/24/2002    Xiaoyan
+//                    Add the permeability tensor and ks, kf  to the constructor  Xiaoyan
+//
+//
+//
+//                    Clean-up and re-write by Zhao Cheng, 10/20/2004
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-
 
 
 #ifndef EIGHTNODEBRICK_U_P_U_H
@@ -38,275 +39,129 @@
 #include "bool.h"
 #endif
 
-#include <Element.h>
-#include <Node.h> 
-#include <NDMaterial.h>
-#include <Matrix.h>
-#include <Vector.h>
 #include <Information.h>
+#include <ElementResponse.h>
+#include <ElementalLoad.h>
+#include <Domain.h>
+#include <Node.h>
 #include <Channel.h>
 #include <FEM_ObjectBroker.h>
-#include <ElementResponse.h>
-#include <ID.h>
 #include <Renderer.h>
-#include <Domain.h>
-#include <string.h>
+#include <OPS_Globals.h>
 
-#include <GaussQuadRule1d.h>
+#include <Element.h>
+#include <NDMaterial.h>
 
-// Xiaoyan added from brick3d.hh   07/11/00
-#include <basics.h>
+#include <Vector.h>
+#include <Matrix.h>
 #include <BJtensor.h>
-#include <nDarray.h>
-#include <BJmatrix.h>
-#include <BJvector.h>
 #include <stresst.h>
 #include <straint.h>
-#include <MatPoint3D.h>
-#include <Template3Dep.h>
-
-
-class Node;
-//class NDMaterial;
-//class QuadRule1d;
 
 class EightNodeBrick_u_p_U: public Element
 {
-
-  public:
+public:
    EightNodeBrick_u_p_U(int element_number,
                    int node_numb_1, int node_numb_2, int node_numb_3, int node_numb_4,
                    int node_numb_5, int node_numb_6, int node_numb_7, int node_numb_8,
-                   NDMaterial * Globalmmodel, double b1, double b2, double b3,
-		   double nn, double alf, double rs,double rf, 
-		   double permb_x, double permb_y, double permb_z, 
-		   double kks, double kkf, double pp);
-		   // int dir, double surflevel);
-		   //, EPState *InitEPS);   const char * type,
+                   NDMaterial *Globalmmodel, double b1, double b2, double b3,
+                   double nn, double alf, double rs,double rf,
+                   double permb_x, double permb_y, double permb_z,
+                   double kks, double kkf, double pp);
+                   EightNodeBrick_u_p_U ();
+                   ~EightNodeBrick_u_p_U();
 
-
-   EightNodeBrick_u_p_U ();
-   ~EightNodeBrick_u_p_U();
-
-    tensor H_3D(double r1, double r2, double r3);
-    tensor dH_drst_at(double r1, double r2, double r3);	   // wxy added 08/27/2001
-    tensor interp_poli_at(double r1, double r2, double r3);
-    tensor dh_drst_at(double r1, double r2, double r3);
-//    tensor k_at(double r1, double r2, double r3);	   // wxy added 08/27/2001
-//    tensor HU_drst_at(double r1, double r2, double r3);	   // wxy added 08/27/2001
-//    tensor dHU_drst_at(double r1, double r2, double r3);   // wxy added 08/27/2001
-
-
-    tensor getStiffnessTensorKep();
-    tensor getStiffnessTensorG1();        //wxy added 08/27/2001
-    tensor getStiffnessTensorG2();        //wxy added 08/27/2001
-    tensor getStiffnessTensorP();         //wxy added 08/27/2001
-
-
-    tensor getMassTensorMs();   //wxy added 08/27/2001
-    tensor getMassTensorMf();   //wxy added 08/27/2001
-
-    tensor getDampTensorC1();    //wxy added 08/27/2001
-    tensor getDampTensorC2();    //wxy added 08/27/2001
-    tensor getDampTensorC3();    //wxy added 08/27/2001
-
-    matrix stiffness_matrixKep(const tensor  Kep);
-    matrix stiffness_matrixG1(const tensor  G1);
-    matrix stiffness_matrixG2(const tensor  G2);
-    matrix stiffness_matrixP(const tensor  P);
-//    void set_stiffness_MatrixK();
-
-    matrix damping_matrixC1(const tensor C1);
-    matrix damping_matrixC2(const tensor C2);
-    matrix damping_matrixC3(const tensor C3);
-//    void set_damping_MatrixC();
-
-    matrix mass_matrixMs(const tensor  Ms);	   // wxy added 08/27/2001
-    matrix mass_matrixMf(const tensor  Mf);	   // wxy added 08/27/2001
-    matrix mass_matrix(const tensor  M);	   // wxy added 06/02/2002
-//    void  set_mass_MatrixM();              	   // wxy added 08/27/2001
-
-    tensor Jacobian_3D(tensor dh);
-    tensor Jacobian_3Dinv(tensor dh);
-    tensor Nodal_Coordinates();
-
-    tensor incr_dispDu();
-    tensor incr_dispDp();
-    tensor incr_dispDU();
-    tensor total_dispDu();
-    tensor total_dispDU();
-
-    tensor total_dispDu(FILE *fp, double * u);
-    tensor total_dispDU(FILE *fp, double * u);
-
-    void incremental_UpdateDu();
-    void incremental_UpdateDU();
-
-    void set_strain_stress_tensorDu(FILE *fp, double * u);
-    void set_strain_stress_tensorDU(FILE *fp, double * u);
-    EightNodeBrick_u_p_U & operator[](int subscript);
-
-    // public methods to set the state of the element    
-    int commitState ();
-    int revertToLastCommit ();
-    int revertToStart ();
-
-    // public methods to obtain ...    
-    double getrho();		   
-    int getNumExternalNodes () const;
-    const ID &getExternalNodes ();
-    Node **getNodePtrs();
-
-    int getNumDOF ();	
+    // public methods to obtain information about dof & connectivity
+    int getNumExternalNodes(void) const;
+    const ID &getExternalNodes(void);
+    Node **getNodePtrs(void);
+    int getNumDOF(void);
     void setDomain(Domain *theDomain);
-    
-    // public methods to obtain stiffness, mass, damping and residual information    
-    const Matrix &getTangentStiff (); 
-    const Matrix &getInitialStiff();     
-    const Matrix &getMass (); 
-    const Matrix &getConsMassM (); 
-    const Matrix &getDamp ();     
 
-//    const Matrix &getConsMassMs (); 
-//    const Matrix &getConsMassMf (); 
+    // public methods to set the state of the element
+    int commitState(void);
+    int revertToLastCommit(void);
+    int revertToStart(void);
+    int update(void);
 
-    void zeroLoad ();
+    // public methods to obtain stiffness, mass, damping and residual information
+    const Matrix &getTangentStiff(void);
+    const Matrix &getInitialStiff(void);
+    const Matrix &getDamp(void);
+    const Matrix &getMass(void);
+
+    void zeroLoad(void);
     int addLoad(ElementalLoad *theLoad, double loadFactor);
     int addInertiaLoadToUnbalance(const Vector &accel);
-
-    const Vector  FormEquiBodyForce();
-    const Vector &getResistingForce ();
-    const Vector &getResistingForceIncInertia ();
-    int  get_global_number_of_node(int local_node_number);
-    int  get_Brick_Number();
-    double get_Gauss_p_c(short order, short point_numb);
-    double get_Gauss_p_w(short order, short point_numb);
-  
-    int * get_LM();
-
-    // returns nodal forces for given stress field in an element
-    tensor nodal_forcesFu();
-    tensor nodal_forcesFU();
-    tensor nodal_forces();
-    // returns nodal forces for ITERATIVE stress field in an element
-     tensor iterative_nodal_forcesFu();
-     tensor iterative_nodal_forcesFU();
-    // returns nodal forces for given constant stress field in the element
-    tensor nodal_forces_from_stress(stresstensor & );
-    // returns nodal forces for given incremental strain field in an element
-    // by using the linearized constitutive tensor from the begining of the step !
-    tensor linearized_nodal_forces();
-    // updates Material point stresses and strains from given displacements
-    tensor update_stress_strain(tensor & disp);
+    const Vector &getResistingForce(void);
+    const Vector &getResistingForceIncInertia(void);
 
     // public methods for element output
-    int sendSelf (int commitTag, Channel &theChannel);
-    int recvSelf (int commitTag, Channel &theChannel, FEM_ObjectBroker 
-		  &theBroker);
-    int displaySelf (Renderer &theViewer, int displayMode, float fact);
-    void Print(OPS_Stream &s, int flag =0);   
-    //    Do nothing with void Print (OPS_Stream &s, int flag =0);
-    //    use Brick3D report.  08/16/00
-    Response *setResponse (const char **argv, int argc, Information &eleInformation);
-    int getResponse (int responseID, Information &eleInformation);
+    int sendSelf(int commitTag, Channel &theChannel);
+    int recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker);
+    int displaySelf(Renderer &theViewer, int displayMode, float fact);
+    void Print(OPS_Stream &s, int flag =0);
 
+    Response *setResponse(const char **argv, int argc, Information &eleInfo);
+    int getResponse(int responseID, Information &eleInformation);
 
-    void report(char *);
-    void reportshort(char *);
-    void reportPAK(char *);
-    void reportpqtheta(int);
-    void reportLM(char *);
-    void reportTensor(char *);
-    void reportCIPIC(char *);
-    void reportTensorF(FILE *);
+    //int setParameter (const char **argv, int argc, Information &info);
+    //int updateParameter (int parameterID, Information &info);
 
-    // Setting initial E according to the initial pressure
-    //void setInitE();
-    //void reportStressTensorF(FILE *);
+private:
+    tensor shapeFunction(double, double, double);
+    tensor shapeFunctionDerivative(double, double, double);
+    tensor getGaussPts(void);
+    tensor getNodesCrds(void);
+    tensor getNodesDisp(void);
+    tensor Jacobian_3D(tensor dh);
+    tensor Jacobian_3Dinv(tensor dh);
+    tensor dh_Global(tensor dh);
 
-  protected:
-    
-  private:
-    // private attributes - a copy for each object of the class
+    tensor getStiffnessTensorKep();
+    tensor getStiffnessTensorG12();
+    tensor getStiffnessTensorP();
+    tensor getMassTensorMsf();
+    tensor getDampTensorC123();
+    const Matrix &getStiff(int Ki_flag);
+    double getPorePressure(double, double, double);
+    Vector getInForceS();
+    Vector getInForceP();
+    Vector getExForceS();
+    Vector getExForceF();
 
-    //NDMaterial * **theMaterial; // pointer to the ND material objects
-    
-    int numDOF;	    		// Number of element DOF
-    ID  connectedExternalNodes; // Tags of quad nodes
+private:
+    ID  connectedExternalNodes;    // tags of nodes
+    Node *theNodes[8] ;            // pointers to eight nodes
+    NDMaterial **theMaterial;      // pointers to the ND material objects
 
-    Node *nd1Ptr;		// Pointers to quad nodes
-    Node *nd2Ptr;
-    Node *nd3Ptr;
-    Node *nd4Ptr;
-    
-    // Xiaoyan added 5-8 07/06/00
-    Node *nd5Ptr;
-    Node *nd6Ptr;
-    Node *nd7Ptr;
-    Node *nd8Ptr;
+    static Matrix K;               // Stiffness
+    static Matrix C;               // Damping
+    static Matrix M;               // Mass
+    static Vector P;               // Residual
 
-    static Matrix K;		// Element total stiffness Matrix (56*56) (including Kep, G1, G2, P)
-//    matrix Kep;		// Element stiffness Matrix (24*24) (Solid part)
-//    matrix G1;		// (24*8)
-//    matrix G2;		// (24*8)
-//    matrix P;		// Pore pressure matrix (8*8)
+    static const int  Num_IntegrationPts;
+    static const int  Num_TotalGaussPts;
+    static const int  Num_Nodes;
+    static const int  Num_Dim;
+    static const int  Num_Dof;
+    static const int  Num_ElemDof;
+    static const double pts[2];    // Stores quadrature points
+    static const double wts[2];    // Stores quadrature weights
+    static tensor perm;      // Permeability = k/(rho_f*g)
 
-    static Matrix C;		// The total damping matrix (56*56)    // wxy added 08/27/2001
-//    matrix C1;		//           damping matrix (24*24)    // wxy added 08/27/2001
-//    matrix C2;		//           damping matrix (24*24)    // wxy added 08/27/2001
-//    matrix C3;		//           damping matrix (24*24)    // wxy added 08/27/2001
+    Vector bf;               // Body forces
+    double poro;                   // Porosity
+    double alpha;       // Coefficient for soil (approximate equal 1)
+    double rho_s;             // Solid density
+    double rho_f;             // Fluid density
+    double ks;                     // Bulk modulus of solid
+    double kf;                     // Bulk modulus of fluid
+    double pressure;          // Normal surface traction (pressure) over entire element  //?
 
-    static Matrix M;		// Element total mass matrix (56*56) (including Ms and Mf) // wxy added 08/27/2001
-//    matrix Ms;		// Element solid mass matrix (24*24) // wxy added 08/27/2001
-//    matrix Mf;		// Element fluid mass matrix (24*24)  // wxy added 08/27/2001
-
-    static Vector p;		// Element resisting force vector (56). 
-                        // I changed P to p. P for the matrix. Xiaoyan 09/24/2001
-    Vector Q;		// Applied nodal loads
-    Vector bf;  	// Body forces
-
-    tensor fs;          // Force      // wxy added 09/20/2001
-    tensor fp;			      // wxy added 09/20/2001
-    tensor ff;			      // wxy added 09/20/2001
-    static tensor k;		// wxy added 01/16/2002
- 
-    // double thickness;	// Element thickness
-    double n;          		     // porosity                              // wxy added 08/27/2001
-    double alpha;		     // coefficient for soil approximate equal 1. 
-                                     //  // wxy added 08/27/2001
-    double rho;      		     // Total density.
-    double rho_s;      		     // Solid density         // wxy added 08/27/2001
-    double rho_f;      		     // Fluid density         // wxy added 08/27/2001
-    double ks;                       // Bulk modulus of solid. //  wxy added 09/22/2001
-    double kf;                       // Bulk modulus of fluid. //  wxy added 09/22/2001
-//    double rho=(1-n)*rho_s+n*rho_f;  // Total density       // wxy added 08/27/2001
-    double pressure;   		     // Normal surface traction (pressure) over entire element
-    int    order;      		     // Order of the quadrature rule
-
-
-    Matrix J;		// Jacobian of transformation
-    Matrix L;		// Inverse of J
-    Matrix B;		// Strain interpolation matrix
-  
-    double determinant_of_Jacobian;
-    //int  G_N_numbs[8];     // Global node numbers for this element  Xiaoyan changed from 20 to 8
-        
-    int nodes_in_brick;      // number of nodes   
-    
-    //Node * nodes;          // pointer to GLOBAL nodes
-    
-    NDMaterial * mmodel;     // pointer to GLOBAL material models
-    
-    int r_integration_order; // Gauss-Legendre integration order in r direction
-    int s_integration_order; // Gauss-Legendre integration order in s direction
-    int t_integration_order; // Gauss-Legendre integration order in t direction
-    
-    MatPoint3D ** matpoint;  // pointer to array of Material Points
-    
-    int  LM[24]; // for 8noded x 3 = 24
-
+    Vector *Q;
+    Vector *eleQ;
     Matrix *Ki;
-    static Node *theNodes[8];
 };
 
 
