@@ -18,13 +18,10 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:00:44 $
+// $Revision: 1.3 $
+// $Date: 2004-10-12 21:52:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/LagrangeDOF_Group.cpp,v $
                                                                         
-                                                                        
-// File: ~/analysis/dof_grp/LagrangeDOF_Group.h
-//
 // Written: fmk 
 // Created: 02/99
 // Revision: A
@@ -215,3 +212,27 @@ LagrangeDOF_Group::addM_Force(const Vector &Udotdot, double fact)
 {
 
 }
+
+const Vector &
+LagrangeDOF_Group::getTangForce(const Vector &disp, double fact)
+{
+  opserr << "WARNING LagrangeDOF_Group::getTangForce() - not yet implemented\n";
+  unbalance->Zero();
+  return *unbalance;
+}
+
+const Vector &
+LagrangeDOF_Group::getC_Force(const Vector &disp, double fact)
+{
+  unbalance->Zero();
+  return *unbalance;
+}
+
+const Vector &
+LagrangeDOF_Group::getM_Force(const Vector &disp, double fact)
+{
+  unbalance->Zero();
+  return *unbalance;
+}
+
+

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2003-10-28 17:39:47 $
+// $Revision: 1.8 $
+// $Date: 2004-10-12 21:52:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.h,v $
                                                                         
                                                                         
@@ -79,6 +79,10 @@ class DOF_Group
     virtual void  addPtoUnbalance(double fact = 1.0);
     virtual void  addPIncInertiaToUnbalance(double fact = 1.0);    
     virtual void  addM_Force(const Vector &Udotdot, double fact = 1.0);        
+
+    virtual const Vector &getTangForce(const Vector &x, double fact = 1.0);
+    virtual const Vector &getC_Force(const Vector &x, double fact = 1.0);
+    virtual const Vector &getM_Force(const Vector &x, double fact = 1.0);
 
     // methods to obtain committed responses from the nodes
     virtual const Vector & getCommittedDisp(void);

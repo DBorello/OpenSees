@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:16 $
+// $Revision: 1.2 $
+// $Date: 2004-10-12 21:52:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/LagrangeDOF_Group.h,v $
                                                                         
                                                                         
@@ -75,6 +75,10 @@ class LagrangeDOF_Group: public DOF_Group
     virtual void  addPtoUnbalance(double fact = 1.0);
     virtual void  addPIncInertiaToUnbalance(double fact = 1.0);    
     virtual void  addM_Force(const Vector &Udotdot, double fact = 1.0);        
+
+    virtual const Vector &getTangForce(const Vector &x, double fact = 1.0);
+    virtual const Vector &getC_Force(const Vector &x, double fact = 1.0);
+    virtual const Vector &getM_Force(const Vector &x, double fact = 1.0);
     
   protected:
     

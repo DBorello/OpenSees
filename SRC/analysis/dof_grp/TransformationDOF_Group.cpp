@@ -18,13 +18,11 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-04-24 20:52:28 $
+// $Revision: 1.9 $
+// $Date: 2004-10-12 21:52:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
-// File: ~/analysis/dof_grp/TransformationDOF_Group.C
-//
 // Written: fmk 
 // Created: 05/99
 // Revision: A
@@ -821,5 +819,55 @@ TransformationDOF_Group::addM_Force(const Vector &Udotdot, double fact)
     Vector unmod(Trans->noRows());
     //unmod = (*Trans) * (*modUnbalance);
 	unmod.addMatrixVector(0.0, *Trans, *modUnbalance, 1.0);
-    this->addLocalM_Force(unmod,fact);
+    this->addLocalM_Force(unmod, fact);
+}
+
+
+const Vector &
+TransformationDOF_Group::getM_Force(const Vector &Udotdot, double fact)
+{
+  // call base class method and return if no MP_Constraint
+  if (theMP == 0 || modID == 0) {
+    return this->DOF_Group::getM_Force(Udotdot, fact);
+  }
+
+  this->DOF_Group::zeroTangent();    
+  this->DOF_Group::addMtoTang();    
+  const Matrix &unmodTangent = this->DOF_Group::getTangent(0);
+
+    
+  Vector data(modNumDOF);
+  for (int i=0; i<modNumDOF; i++) {
+    int loc = (*modID)(i);
+    if (loc >= 0)
+      data(i) = Udotdot(loc);
+    else 	// DO THE SP STUFF
+      data(i) = 0.0;	    
+  }    
+
+  Matrix *T = this->getT();
+  if (T != 0) {
+    // *modTangent = (*T) ^ unmodTangent * (*T);
+    modTangent->addMatrixTripleProduct(0.0, *T, unmodTangent, 1.0);
+    modUnbalance->addMatrixVector(0.0, *modTangent, data, 1.0);
+    
+    return *modUnbalance;
+  } else {
+      modUnbalance->addMatrixVector(0.0, unmodTangent, data, 1.0);
+      return *modUnbalance;
+  }
+}
+
+const Vector &
+TransformationDOF_Group::getC_Force(const Vector &Udotdot, double fact)
+{
+  opserr << "TransformationDOF_Group::getC_Force() - not yet implemented\n";
+  return *modUnbalance;
+}
+
+const Vector &
+TransformationDOF_Group::getTangForce(const Vector &Udotdot, double fact)
+{
+  opserr << "TransformationDOF_Group::getTangForce() - not yet implemented\n";
+  return *modUnbalance;
 }

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2003-10-28 17:39:47 $
+// $Revision: 1.10 $
+// $Date: 2004-10-12 21:52:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/DOF_Group.cpp,v $
                                                                         
                                                                         
@@ -450,6 +450,69 @@ DOF_Group::addM_Force(const Vector &Udotdot, double fact)
 }
 
 
+
+const Vector &
+DOF_Group::getTangForce(const Vector &Udotdot, double fact)
+{
+  opserr << "DOF_Group::getTangForce() - not yet implemented";
+  return *unbalance;
+}
+
+
+const Vector &
+DOF_Group::getM_Force(const Vector &Udotdot, double fact)
+{
+    if (myNode == 0) {
+	opserr << "DOF_Group::getM_Force() - no Node associated";	
+	opserr << " subclass should not call this method \n";	    
+	return *unbalance;
+    }
+
+    Vector accel(numDOF);
+    // get accel for the unconstrained dof
+    for (int i=0; i<numDOF; i++) {
+	int loc = myID(i);
+	if (loc >= 0)
+	    accel(i) = Udotdot(loc); 
+	else accel(i) = 0.0;
+    }
+	
+    if (unbalance->addMatrixVector(0.0, myNode->getMass(), accel, fact) < 0) {  
+	opserr << "DOF_Group::getM_Force() ";
+	opserr << " invoking addMatrixVector() on the unbalance failed\n";
+    }
+    
+    return *unbalance;
+}
+
+
+
+const Vector &
+DOF_Group::getC_Force(const Vector &Udotdot, double fact)
+{
+    if (myNode == 0) {
+	opserr << "DOF_Group::getC_Force() - no Node associated";	
+	opserr << " subclass should not call this method \n";	    
+	return *unbalance;
+    }
+
+    Vector accel(numDOF);
+    // get accel for the unconstrained dof
+    for (int i=0; i<numDOF; i++) {
+	int loc = myID(i);
+	if (loc >= 0)
+	    accel(i) = Udotdot(loc); 
+	else accel(i) = 0.0;
+    }
+	
+    if (unbalance->addMatrixVector(0.0, myNode->getDamp(), accel, fact) < 0) {  
+	opserr << "DOF_Group::getC_Force() ";
+	opserr << " invoking addMatrixVector() on the unbalance failed\n";
+    }
+    return *unbalance;
+}
+
+
 const Vector & 
 DOF_Group::getCommittedDisp(void)
 {
@@ -702,7 +765,7 @@ DOF_Group::addLocalM_Force(const Vector &accel, double fact)
     if (myNode != 0) {
 	if (unbalance->addMatrixVector(1.0, myNode->getMass(), accel, fact) < 0) {  
 				       
-	    opserr << "DOF_Group::addM_Force() ";
+	    opserr << "DOF_Group::addLocalM_Force() ";
 	    opserr << " invoking addMatrixVector() on the unbalance failed\n"; 
 	}
     }

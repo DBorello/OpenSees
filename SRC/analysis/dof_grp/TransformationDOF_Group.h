@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-05-03 06:14:16 $
+// $Revision: 1.3 $
+// $Date: 2004-10-12 21:52:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.h,v $
                                                                         
                                                                         
@@ -67,6 +67,10 @@ class TransformationDOF_Group: public DOF_Group
     // methods to form the unbalance
     const Vector &getUnbalance(Integrator *theIntegrator);
     virtual void  addM_Force(const Vector &Udotdot, double fact = 1.0);        
+
+    virtual const Vector &getTangForce(const Vector &x, double fact = 1.0);
+    virtual const Vector &getC_Force(const Vector &x, double fact = 1.0);
+    virtual const Vector &getM_Force(const Vector &x, double fact = 1.0);
     
     // methods to obtain committed responses from the nodes
     const Vector & getCommittedDisp(void);
