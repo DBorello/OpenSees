@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-07-19 00:18:44 $
+// $Revision: 1.3 $
+// $Date: 2001-07-19 02:10:31 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/CableMaterial.cpp,v $
                                                                         
 // Written: Charles Chadwell 
@@ -160,8 +160,10 @@ CableMaterial::getTangent(void)
     // Geometric Part
 	derivG = 1 / 12. * Mue * Mue * L * L / (stress * stress * stress);
     
-	if (derivE + derivG != 0.0) {return 1.0 / (derivE + derivG);}
-	if (derivE + derivG == 0.0) {return 1e-8;}
+	if (derivE + derivG != 0.0)
+		return 1.0 / (derivE + derivG);
+	else 
+		return 1e-8;
 };
  
 int 
