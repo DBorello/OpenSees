@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-07-31 18:46:10 $
+// $Revision: 1.4 $
+// $Date: 2001-11-08 01:42:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.h,v $
                                                                         
                                                                         
@@ -92,6 +92,7 @@ class ZeroLength : public Element
     int commitState(void);
     int revertToLastCommit(void);        
     int revertToStart(void);        
+    int update(void);
 
     // public methods to obtain stiffness, mass, damping and residual information    
     const Matrix &getTangentStiff(void);

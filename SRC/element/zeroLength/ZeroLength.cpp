@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-07-31 18:46:10 $
+// $Revision: 1.7 $
+// $Date: 2001-11-08 01:42:32 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/zeroLength/ZeroLength.cpp,v $
                                                                         
                                                                         
@@ -353,16 +353,12 @@ ZeroLength::revertToStart()
 }
 
 
-const Matrix &
-ZeroLength::getTangentStiff(void)
+int
+ZeroLength::update(void)
 {
-    double E;
     double strain;
     double strainRate;
 
-    // stiff is a reference to the matrix holding the stiffness matrix
-    Matrix& stiff = *theMatrix;
-    
     // get trial displacements and take difference
     const Vector& disp1 = end1Ptr->getTrialDisp();
     const Vector& disp2 = end2Ptr->getTrialDisp();
@@ -370,7 +366,26 @@ ZeroLength::getTangentStiff(void)
     const Vector& vel1  = end1Ptr->getTrialVel();
     const Vector& vel2  = end2Ptr->getTrialVel();
     const Vector  diffv = vel2-vel1;
+    
+    // loop over 1d materials
+    
+    Matrix& tran = *t1d;;
+    for (int mat=0; mat<numMaterials1d; mat++) {
+	// compute strain and rate; set as current trial for material
+	strain     = this->computeCurrentStrain1d(mat,diff );
+        strainRate = this->computeCurrentStrain1d(mat,diffv);
+	theMaterial1d[mat]->setTrialStrain(strain,strainRate);
+    }
+}
 
+const Matrix &
+ZeroLength::getTangentStiff(void)
+{
+    double E;
+
+    // stiff is a reference to the matrix holding the stiffness matrix
+    Matrix& stiff = *theMatrix;
+    
     // zero stiffness matrix
     stiff.Zero();
     
@@ -378,11 +393,6 @@ ZeroLength::getTangentStiff(void)
     
     Matrix& tran = *t1d;;
     for (int mat=0; mat<numMaterials1d; mat++) {
-	
-	// compute strain and rate; set as current trial for material
-	strain     = this->computeCurrentStrain1d(mat,diff );
-        strainRate = this->computeCurrentStrain1d(mat,diffv);
-	theMaterial1d[mat]->setTrialStrain(strain,strainRate);
 	
 	// get tangent for material
 	E = theMaterial1d[mat]->getTangent();
@@ -417,31 +427,16 @@ const Matrix &
 ZeroLength::getDamp(void)
 {
     double eta;
-    double strain;
-    double strainRate;
 
     // damp is a reference to the matrix holding the damping matrix
     Matrix& damp = *theMatrix;
  
-    // get trial displacements and take difference
-    const Vector& disp1 = end1Ptr->getTrialDisp();
-    const Vector& disp2 = end2Ptr->getTrialDisp();
-    const Vector  diff  = disp2-disp1;
-    const Vector& vel1  = end1Ptr->getTrialVel();
-    const Vector& vel2  = end2Ptr->getTrialVel();
-    const Vector  diffv = vel2-vel1;
-    
     // zero stiffness matrix
     damp.Zero();
     
     // loop over 1d materials
     Matrix& tran = *t1d;;
     for (int mat=0; mat<numMaterials1d; mat++) {
-	
-	// compute strain and rate; set as current trial for material
-	strain     = this->computeCurrentStrain1d(mat,diff );
-        strainRate = this->computeCurrentStrain1d(mat,diffv);
-	theMaterial1d[mat]->setTrialStrain(strain,strainRate);
 	
 	// get tangent for material
 	eta = theMaterial1d[mat]->getDampTangent();
@@ -495,28 +490,13 @@ ZeroLength::addInertiaLoadToUnbalance(const Vector &accel)
 const Vector &
 ZeroLength::getResistingForce()
 {
-    double strain;
-    double strainRate;
     double force;
     
-    // get trial displacements and take difference
-    const Vector& disp1 = end1Ptr->getTrialDisp();
-    const Vector& disp2 = end2Ptr->getTrialDisp();
-    const Vector  diff  = disp2-disp1;
-    const Vector& vel1  = end1Ptr->getTrialVel();
-    const Vector& vel2  = end2Ptr->getTrialVel();
-    const Vector  diffv = vel2-vel1;
-
     // zero the residual
     theVector->Zero();
     
     // loop over 1d materials
     for (int mat=0; mat<numMaterials1d; mat++) {
-	
-	// compute strain and set as current trial for material
-	strain     = this->computeCurrentStrain1d(mat,diff );
-	strainRate = this->computeCurrentStrain1d(mat,diffv);
-	theMaterial1d[mat]->setTrialStrain(strain,strainRate);
 	
 	// get resisting force for material
 	force = theMaterial1d[mat]->getStress();
@@ -793,6 +773,7 @@ ZeroLength::Print(ostream &s, int flag)
 	for (int j = 0; j < numMaterials1d; j++) {
 		s << "\tMaterial1d, tag: " << theMaterial1d[j]->getTag() 
 			<< ", dir: " << (*dir1d)(j) << endl;
+		s << *(theMaterial1d[j]);
 	}
     } else if (flag == 1) {
 	s << this->getTag() << "  " << strain << "  ";
