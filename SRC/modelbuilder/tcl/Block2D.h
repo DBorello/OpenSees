@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2001-07-12 23:08:08 $
+// $Revision: 1.2 $
+// $Date: 2001-08-30 22:13:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/Block2D.h,v $
                                                                         
 // Written: Ed Love
@@ -43,7 +43,8 @@ class Block2D {
   //constructor
   Block2D(int numx, int numy, 
 	  const ID& nodeID, 
-	  const Matrix& coorArray);
+	  const Matrix& coorArray,
+	  int numNodeElement);
 
   //destructor
   ~Block2D();
@@ -79,4 +80,6 @@ class Block2D {
 	       double x2, 
 	       double shape[9]);
 
+  int numNodesElement; // 4 or 9
+  int errorFlag;       // flag indicating if odd nx and ny ok for 9-noded elements
 };

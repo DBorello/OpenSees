@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-08-20 00:36:19 $
+// $Revision: 1.10 $
+// $Date: 2001-08-30 22:13:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/TclModelBuilder.cpp,v $
                                                                         
                                                                         
@@ -1587,6 +1587,10 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
     return TCL_ERROR;
   }
 
+  if (argc < 8) {
+    cerr << "WARNING incorrect numer of args :block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+    return TCL_ERROR;
+  }
   int numX, numY, startNodeNum, startEleNum;
   if (Tcl_GetInt (interp, argv[1], &numX) != TCL_OK) {
     cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
@@ -1609,12 +1613,42 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
     return TCL_ERROR;
   }
 
+
   static Matrix Coordinates(9,3);
   static ID     haveNode(9);
   Coordinates.Zero();
   for (int k=0; k<9; k++) haveNode(k) = -1;
 
-  char *nodalInfo = argv[7];
+  int numNodes = 4;
+  if (argc == 10) {
+    if (strcmp(argv[7],"-numEleNodes") == 0) 
+      if (Tcl_GetInt (interp, argv[8], &numNodes) != TCL_OK) {
+	cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs?";
+	cerr << " -numEleNodes numNodes?: invalid numNodes: " << argv[8] << endl;
+	return TCL_ERROR;
+      }
+    if (numNodes != 4 && numNodes != 9) {
+      cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs? ";
+      cerr << "-numEleNodes numNodes?: invalid numNodes: " << argv[8] << " 4 or 9 only\n";
+      return TCL_ERROR;
+    }
+
+    if (numNodes == 9) {
+      if (((numX % 2) != 0) || ((numY % 2) != 0)) {
+	cerr << "WARNING block2D numX? numY? startNode? startEle? eleType? eleArgs? ";
+	cerr << "-numEleNodes 9: numX and numY MUST BOTH BE EVEN\n";
+	return TCL_ERROR;
+      }
+    }
+  }
+
+
+  char *nodalInfo;
+  if (numNodes == 4)
+    nodalInfo = argv[7];
+  else
+    nodalInfo = argv[9];
+
   char **argvNodes;
   int  argcNodes;
   
@@ -1659,7 +1693,7 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
 
   Tcl_Free((char *)argvNodes);
 
-  Block2D  theBlock(numX, numY, haveNode, Coordinates);
+  Block2D  theBlock(numX, numY, haveNode, Coordinates, numNodes);
 
   // create the nodes: (numX+1)*(numY+1) nodes to be created
   int nodeID = startNodeNum;
@@ -1694,18 +1728,25 @@ TclModelBuilder_doBlock2D(ClientData clientData, Tcl_Interp *interp, int argc,
     }
   }
     
-  // create the elements: numX*numY elements to be created
+  // create the elements: numX*numY elements to be created if 4 node elements
+  //                      numX/2 * numY /2 nodes to be v=created if 9 node elements
   char *eleType = argv[5];
   char *additionalEleArgs = argv[6];
-  const ID &nodeTags = theBlock.getElementNodes(0,0);  
-  int numNodes = nodeTags.Size();
+  //  const ID &nodeTags = theBlock.getElementNodes(0,0);  
+  //  int numNodes = nodeTags.Size();
 
   // assumes 15 is largest string for individual nodeTags
   count = 10 + strlen(eleType) + strlen(additionalEleArgs) + 15 * (numNodes+1);
   char *eleCommand = new char[count];
   int initialCount = 8 + strlen(eleType);
 
-  int  eleID = startEleNum;  
+  int  eleID = startEleNum; 
+  if (numNodes == 9) {
+    numX /= 2;
+    numY /= 2;
+  }
+    
+
   for (jj=0; jj<numY; jj++) {
     for (int ii=0; ii<numX; ii++) {
       count = initialCount;
