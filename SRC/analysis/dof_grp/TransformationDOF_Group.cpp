@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2004-10-12 21:52:25 $
+// $Revision: 1.10 $
+// $Date: 2005-02-04 22:36:07 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/dof_grp/TransformationDOF_Group.cpp,v $
                                                                         
                                                                         
@@ -818,7 +818,7 @@ TransformationDOF_Group::addM_Force(const Vector &Udotdot, double fact)
 
     Vector unmod(Trans->noRows());
     //unmod = (*Trans) * (*modUnbalance);
-	unmod.addMatrixVector(0.0, *Trans, *modUnbalance, 1.0);
+    unmod.addMatrixVector(0.0, *Trans, *modUnbalance, 1.0);
     this->addLocalM_Force(unmod, fact);
 }
 
@@ -871,3 +871,200 @@ TransformationDOF_Group::getTangForce(const Vector &Udotdot, double fact)
   opserr << "TransformationDOF_Group::getTangForce() - not yet implemented\n";
   return *modUnbalance;
 }
+
+
+
+// AddingSensitivity:BEGIN ////////////////////////////////////////
+const Vector &
+TransformationDOF_Group::getDispSensitivity(int gradNumber)
+{
+  const Vector &result = this->DOF_Group::getDispSensitivity(gradNumber);
+
+  Matrix *T = this->getT();
+  if (T != 0) {
+    // *modUnbalance = (*T) ^ unmodUnbalance;
+    modUnbalance->addMatrixTransposeVector(0.0, *T, result, 1.0);
+    return *modUnbalance;    
+  } else
+    return result;
+
+}
+
+const Vector &
+TransformationDOF_Group::getVelSensitivity(int gradNumber)
+{
+  const Vector &result = this->DOF_Group::getVelSensitivity(gradNumber);
+
+  Matrix *T = this->getT();
+  if (T != 0) {
+    // *modUnbalance = (*T) ^ unmodUnbalance;
+    modUnbalance->addMatrixTransposeVector(0.0, *T, result, 1.0);
+    return *modUnbalance;    
+  } else
+    return result;
+}
+
+const Vector &
+TransformationDOF_Group::getAccSensitivity(int gradNumber)
+{
+  const Vector &result = this->DOF_Group::getAccSensitivity(gradNumber);
+
+  Matrix *T = this->getT();
+  if (T != 0) {
+    // *modUnbalance = (*T) ^ unmodUnbalance;
+    modUnbalance->addMatrixTransposeVector(0.0, *T, result, 1.0);
+    return *modUnbalance;    
+  } else
+    return result;
+}
+	
+	
+
+int 
+TransformationDOF_Group::saveSensitivity(Vector *u,Vector *udot,Vector *udotdot, int gradNum,int numGrads)
+{
+  // call base class method and return if no MP_Constraint
+  if (theMP == 0) {
+    return this->DOF_Group::saveSensitivity(u, udot, udotdot, gradNum, numGrads);
+  }
+  
+  // Get sensitivities for my dof out of vectors
+  Vector *myV = new Vector(modNumDOF);
+  Vector *myVdot = 0;
+  Vector *myVdotdot = 0;
+  int i;
+  
+
+	
+  const ID &theID = this->getID();
+  for (int i=0; i<modNumDOF; i++) {
+    int loc = theID(i);
+    if (loc >= 0)
+      (*modUnbalance)(i) = (*u)(loc);
+    // DO THE SP STUFF
+  }    
+  Matrix *T = this->getT();
+  if (T != 0) {
+    
+    // *unbalance = (*T) * (*modUnbalance);
+    myV->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
+    
+  } else
+    *myV = *modUnbalance;
+
+
+  // Vel and Acc sensitivities only if they are being delivered
+  if ((udot != 0) && (udotdot != 0)) {
+    myVdot = new Vector(modNumDOF);
+    myVdotdot = new Vector(modNumDOF);
+    for (int i=0; i<modNumDOF; i++) {
+      int loc = theID(i);
+      if (loc >= 0)
+	(*modUnbalance)(i) = (*udot)(loc);
+      // DO THE SP STUFF
+    }    
+
+    if (T != 0) {
+      
+      // *unbalance = (*T) * (*modUnbalance);
+      myVdot->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
+    
+    } else
+      *myVdot = *modUnbalance;
+
+    for (int i=0; i<modNumDOF; i++) {
+      int loc = theID(i);
+      if (loc >= 0)
+	(*modUnbalance)(i) = (*udotdot)(loc);
+      // DO THE SP STUFF
+    }    
+
+    if (T != 0) {
+      
+      // *unbalance = (*T) * (*modUnbalance);
+      myVdotdot->addMatrixVector(0.0, *T, *modUnbalance, 1.0);
+    
+    } else
+      *myVdotdot = *modUnbalance;
+
+  }
+
+  myNode->saveSensitivity(myV, myVdot, myVdotdot, gradNum, numGrads);
+  
+  if (myV != 0) delete myV;
+  if (myVdot != 0) delete myVdot;
+  if (myVdotdot != 0) delete myVdotdot;
+
+  return 0;
+}
+
+void  
+TransformationDOF_Group::addM_ForceSensitivity(const Vector &Udotdot, double fact)
+{
+    // call base class method and return if no MP_Constraint
+    if (theMP == 0 || modID == 0) {
+	this->DOF_Group::addM_ForceSensitivity(Udotdot, fact);
+	return;
+    }
+    
+   for (int i=0; i<modNumDOF; i++) {
+	int loc = (*modID)(i);
+	if (loc >= 0)
+	    (*modUnbalance)(i) = Udotdot(loc);
+	else 	// DO THE SP STUFF
+	    (*modUnbalance)(i) = 0.0;	    
+    }    
+
+    Vector unmod(Trans->noRows());
+    //unmod = (*Trans) * (*modUnbalance);
+    unmod.addMatrixVector(0.0, *Trans, *modUnbalance, 1.0);
+    this->DOF_Group::addM_ForceSensitivity(unmod, fact);
+}
+
+void
+TransformationDOF_Group::addD_Force(const Vector &Udot, double fact)
+{
+    // call base class method and return if no MP_Constraint
+    if (theMP == 0 || modID == 0) {
+	this->DOF_Group::addD_Force(Udot, fact);
+	return;
+    }
+    
+   for (int i=0; i<modNumDOF; i++) {
+	int loc = (*modID)(i);
+	if (loc >= 0)
+	    (*modUnbalance)(i) = Udot(loc);
+	else 	// DO THE SP STUFF
+	    (*modUnbalance)(i) = 0.0;	    
+    }    
+
+    Vector unmod(Trans->noRows());
+    //unmod = (*Trans) * (*modUnbalance);
+    unmod.addMatrixVector(0.0, *Trans, *modUnbalance, 1.0);
+    this->DOF_Group::addD_Force(unmod, fact);
+}
+
+void
+TransformationDOF_Group::addD_ForceSensitivity(const Vector &Udot, double fact)
+{
+    // call base class method and return if no MP_Constraint
+    if (theMP == 0 || modID == 0) {
+	this->DOF_Group::addD_ForceSensitivity(Udot, fact);
+	return;
+    }
+    
+   for (int i=0; i<modNumDOF; i++) {
+	int loc = (*modID)(i);
+	if (loc >= 0)
+	    (*modUnbalance)(i) = Udot(loc);
+	else 	// DO THE SP STUFF
+	    (*modUnbalance)(i) = 0.0;	    
+    }    
+
+    Vector unmod(Trans->noRows());
+    //unmod = (*Trans) * (*modUnbalance);
+    unmod.addMatrixVector(0.0, *Trans, *modUnbalance, 1.0);
+    this->DOF_Group::addD_ForceSensitivity(unmod, fact);
+}
+
+// AddingSensitivity:END //////////////////////////////////////////
