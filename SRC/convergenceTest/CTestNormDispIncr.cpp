@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-06-14 05:26:47 $
+// $Revision: 1.5 $
+// $Date: 2002-07-04 15:30:27 $
 // $Source: /usr/local/cvs/OpenSees/SRC/convergenceTest/CTestNormDispIncr.cpp,v $
                                                                         
                                                                         
@@ -107,11 +107,11 @@ CTestNormDispIncr::test(void)
 
   // print the data if required
   if (printFlag == 1) {
-    cerr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
+    cerr << "\t printFlag == 1 0  CTestNormDispIncr::test() - iteration: " << currentIter;
     cerr << " current Norm: " << norm << " (max: " << tol << ")\n";
   } 
   if (printFlag == 4) {
-    cerr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
+    cerr << "\t printFlag == 4 CTestNormDispIncr::test() - iteration: " << currentIter;
     cerr << " current Norm: " << norm << " (max: " << tol << ")\n";
     cerr << " Norm deltaX: " << norm << "  Norm deltaR: " << (theSOE->getB()).Norm() << endl;
     cerr << "deltaX: " << x << "deltaR: " << theSOE->getB();
@@ -129,7 +129,7 @@ CTestNormDispIncr::test(void)
       if (printFlag == 1) 
 	cerr << endl;
       else if (printFlag == 2) {
-	cerr << "\t CTestNormDispIncr::test() - iteration: " << currentIter;
+	cerr << "\t printFlag == 1 1 CTestNormDispIncr::test() - iteration: " << currentIter;
 	cerr << " current Norm: " << norm << " (max permissable: " << tol << ")\n";
       }
     }
