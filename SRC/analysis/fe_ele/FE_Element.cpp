@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $
-// $Date: 2003-10-30 22:34:04 $
+// $Revision: 1.13 $
+// $Date: 2004-04-15 22:29:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.cpp,v $
                                                                         
                                                                         
@@ -802,3 +802,11 @@ FE_Element::addKiForceSensitivity(int gradNumber, const Vector &vect, double fac
 // AddingSensitivity:END ////////////////////////////////////
 
 
+int  
+FE_Element::updateElement(void)
+{
+  if (myEle != 0)
+    return myEle->update();
+
+  return 0;
+}

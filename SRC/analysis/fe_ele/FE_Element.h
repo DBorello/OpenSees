@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2003-10-30 22:34:04 $
+// $Revision: 1.9 $
+// $Date: 2004-04-15 22:29:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/fe_ele/FE_Element.h,v $
                                                                         
                                                                         
@@ -78,6 +78,8 @@ class FE_Element
     virtual const Vector &getTangForce(const Vector &x, double fact = 1.0);
     virtual void  addM_Force(const Vector &accel, double fact = 1.0);    
     virtual void  addD_Force(const Vector &vel, double fact = 1.0);    
+
+    virtual int updateElement(void);
 
     virtual Integrator *getLastIntegrator(void);
     virtual const Vector &getLastResponse(void);
