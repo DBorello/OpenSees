@@ -531,6 +531,22 @@ SOURCE=..\..\..\Src\element\joint\TclJoint2dCommand.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\BilinearCyclic.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\BilinearCyclic.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\CyclicModel.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\CyclicModel.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\Elastic2DGNL.cpp
 # End Source File
 # Begin Source File
@@ -568,6 +584,26 @@ SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\InelasticYS2DGNL.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\InelasticYS2DGNL.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\LinearCyclic.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\LinearCyclic.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\QuadraticCyclic.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\QuadraticCyclic.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\updatedLagrangianBeamColumn\TclCyclicModelCommands.cpp
 # End Source File
 # Begin Source File
 

@@ -1210,6 +1210,14 @@ SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Hajjar2D.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\NullYS2D.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\NullYS2D.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Orbison2D.cpp
 # End Source File
 # Begin Source File
@@ -1383,14 +1391,6 @@ SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\PlasticHarden
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\PlasticHardeningMaterial.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\QuadrReducing.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\QuadrReducing.h
 # End Source File
 # Begin Source File
 

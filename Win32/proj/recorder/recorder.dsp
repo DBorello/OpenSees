@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\recorder\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\material" /I "..\..\..\src\recorder\response" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\handler" /I "..\..\..\src\renderer" /I "..\..\..\src\tcl" /I "..\..\..\src\actor\channel" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\database" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src" /I "..\..\..\src\recorder" /I "..\..\..\src\domain\node" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /I "..\..\..\src\domain\constraints" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_WGL" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\material" /I "..\..\..\src\recorder\response" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\handler" /I "..\..\..\src\renderer" /I "..\..\..\src\tcl" /I "..\..\..\src\actor\channel" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\database" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src" /I "..\..\..\src\recorder" /I "..\..\..\src\domain\node" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\element\updatedlagrangianbeamcolumn" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\material\yieldsurface\yieldSurfaceBC" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_WGL" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\obj\recorder\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\domain\pattern" /I "c:\Program Files\tcl\include" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\material" /I "..\..\..\src\recorder\response" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\handler" /I "..\..\..\src\renderer" /I "..\..\..\src\tcl" /I "..\..\..\src\actor\channel" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\database" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src" /I "..\..\..\src\recorder" /I "..\..\..\src\domain\node" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /I "..\..\..\src\domain\constraints" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_WGL" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\domain\pattern" /I "c:\Program Files\tcl\include" /I "..\..\..\src\system_of_eqn" /I "..\..\..\src\system_of_eqn\linearSOE" /I "..\..\..\src\analysis\integrator" /I "..\..\..\src\material\section\fiber" /I "..\..\..\src\material" /I "..\..\..\src\recorder\response" /I "..\..\..\src\analysis\algorithm" /I "..\..\..\src\analysis\algorithm\equiSolnAlgo" /I "..\..\..\src\handler" /I "..\..\..\src\renderer" /I "..\..\..\src\tcl" /I "..\..\..\src\actor\channel" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\database" /I "..\..\..\src\tagged" /I "..\..\..\src\actor\actor" /I "..\..\..\src\domain\component" /I "..\..\..\src\element" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\domain" /I "..\..\..\src" /I "..\..\..\src\recorder" /I "..\..\..\src\domain\node" /I "..\..\..\src\nDarray" /I "..\..\..\src\domain\region" /I "..\..\..\src\domain\constraints" /I "..\..\..\src\element\updatedlagrangianbeamcolumn" /I "..\..\..\src\material\yieldSurface\evolution" /I "..\..\..\src\material\yieldsurface\yieldSurfaceBC" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "_WGL" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -129,6 +129,10 @@ SOURCE=..\..\..\SRC\recorder\NodeRecorder.cpp
 
 SOURCE=..\..\..\SRC\recorder\TclRecorderCommands.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\recorder\YsVisual.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -176,6 +180,10 @@ SOURCE=..\..\..\SRC\recorder\NodeRecorder.h
 # Begin Source File
 
 SOURCE=..\..\..\SRC\recorder\Recorder.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\recorder\YsVisual.h
 # End Source File
 # End Group
 # Begin Group "response"
