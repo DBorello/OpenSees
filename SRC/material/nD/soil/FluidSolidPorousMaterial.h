@@ -1,5 +1,5 @@
-// $Revision: 1.4 $
-// $Date: 2002-02-08 19:54:39 $
+// $Revision: 1.5 $
+// $Date: 2002-05-16 00:07:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.h,v $
                                                                         
 // Written: ZHY
@@ -25,7 +25,7 @@ class FluidSolidPorousMaterial : public NDMaterial
   public:
      // Initialization constructor
      FluidSolidPorousMaterial (int tag, int nd, NDMaterial &soilMat,
-			       double combinedBulkModul, double atm);
+			       double combinedBulkModul);
 
      // Default constructor
      FluidSolidPorousMaterial ();
@@ -47,7 +47,9 @@ class FluidSolidPorousMaterial : public NDMaterial
 
      // Calculates current tangent stiffness.
      const Matrix &getTangent (void);
-        
+
+		 double getRho(void);
+
      // Calculates the corresponding stress increment (rate), for a given strain increment. 
      const Vector &getStress (void);
      const Vector &getStrain (void);
@@ -90,7 +92,6 @@ class FluidSolidPorousMaterial : public NDMaterial
    private:
      int ndm;
      static int loadStage;
-     static double AtmoPress;
      double combinedBulkModulus;
      NDMaterial * theSoilMaterial;
      double trialExcessPressure;

@@ -1,5 +1,5 @@
-// $Revision: 1.7 $
-// $Date: 2002-02-08 19:54:40 $
+// $Revision: 1.8 $
+// $Date: 2002-05-16 00:07:47 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -23,15 +23,15 @@ public:
      // Initialization constructor
      PressureIndependMultiYield (int tag, 
 				 int nd,
+				 double rho, 
 				 double refShearModul,
 				 double refBulkModul,
-				 double frictionAng,
-				 double peakShearStra,
-				 double refPress,
 				 double cohesi,
-				 double pressDependCoe,
-				 int   numberOfYieldSurf,
-				 double rho = 0. );
+				 double peakShearStra,
+				 double frictionAng = 0.,
+				 double refPress = 100, 
+				 double pressDependCoe = 0.0,
+				 int   numberOfYieldSurf = 20);
 
      // Default constructor
      PressureIndependMultiYield ();

@@ -1,5 +1,10 @@
-// $Revision: 1.9 $
-// $Date: 2002-02-08 19:54:40 $
+//<<<<<<< PressureDependMultiYield.h
+// $Revision: 1.10 $
+// $Date: 2002-05-16 00:07:46 $
+//=======
+// $Revision: 1.10 $
+// $Date: 2002-05-16 00:07:46 $
+//>>>>>>> 1.7
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
                                                                         
 // Written: ZHY
@@ -25,27 +30,27 @@ public:
      // Initialization constructor
      PressureDependMultiYield (int tag, 
 			       int nd,
+						 double rho,
 			       double refShearModul,
 			       double refBulkModul,
 			       double frictionAng,
 			       double peakShearStra,
 			       double refPress,
-			       double cohesi,
 			       double pressDependCoe,
-			       int   numberOfYieldSurf,
 			       double phaseTransformAngle, 
 			       double contractionParam1,
-			       double contractionParam2,
 			       double dilationParam1,
 			       double dilationParam2,
-			       double volLimit,
 			       double liquefactionParam1,
 			       double liquefactionParam2,
-			       double liquefactionParam3,
 			       double liquefactionParam4,
-			       double atm,
-						 double rho = 0.,
-		         double e = 0.);
+			       int   numberOfYieldSurf = 20,
+		         double e = 0.6,
+			       double volLimit1 = 0.8,
+			       double volLimit2 = 0.2,
+			       double volLimit3 = 0.2,
+			       double atm = 101.,
+						 double cohesi = 0.5);
 
      // Default constructor
      PressureDependMultiYield ();
@@ -117,7 +122,6 @@ private:
      int ndm;  //num of dimensions (2 or 3)
      static int loadStage;  //=0 if elastic; =1 or 2 if plastic
 		 double rho;  //mass density
-		 double e;    //void ratio
      double refShearModulus;
      double refBulkModulus;
      double frictionAngle;
@@ -128,15 +132,16 @@ private:
      int    numOfSurfaces;
      double phaseTransfAngle; 
      double contractParam1;
-     double contractParam2;
      double dilateParam1;
      double dilateParam2;
-     double volumeLimit;
      double liquefyParam1;
      double liquefyParam2;
-     double liquefyParam3;
      double liquefyParam4;
-     static double AtmoPress;
+		 double einit;    //initial void ratio
+     double volLimit1;
+     double volLimit2;
+     double volLimit3;
+     static double pAtm;
 
      // internal
      double residualPress;
@@ -198,6 +203,7 @@ private:
      // Return num_strain_subincre
      int setSubStrainRate(void);
      int isLoadReversal(void);
+     int isCriticalState(const T2Vector & stress);
      void getContactStress(T2Vector &contactStress);
      void getSurfaceNormal(const T2Vector & stress, T2Vector &normal); 
      double getModulusFactor(T2Vector & stress);

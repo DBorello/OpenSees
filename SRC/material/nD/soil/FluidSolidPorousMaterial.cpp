@@ -1,5 +1,5 @@
-// $Revision: 1.8 $
-// $Date: 2002-02-08 19:54:39 $
+// $Revision: 1.9 $
+// $Date: 2002-05-16 00:07:45 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -20,7 +20,6 @@
 #include <FEM_ObjectBroker.h>
 
 int FluidSolidPorousMaterial::loadStage = 0;
-double FluidSolidPorousMaterial::AtmoPress = 0.;
 
 Vector FluidSolidPorousMaterial::workV3(3);
 Vector FluidSolidPorousMaterial::workV6(6);
@@ -28,7 +27,7 @@ Matrix FluidSolidPorousMaterial::workM3(3,3);
 Matrix FluidSolidPorousMaterial::workM6(6,6);
 
 FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial &soilMat,
-                                      double combinedBulkModul, double atm)
+                                      double combinedBulkModul)
  : NDMaterial(tag, ND_TAG_FluidSolidPorousMaterial)
 {
 	if (combinedBulkModul < 0) {
@@ -39,7 +38,6 @@ FluidSolidPorousMaterial::FluidSolidPorousMaterial (int tag, int nd, NDMaterial 
 	ndm = nd;
 	loadStage = 0;  //default
   theSoilMaterial = soilMat.getCopy();
-	AtmoPress = atm;
   combinedBulkModulus = combinedBulkModul;
   trialExcessPressure = currentExcessPressure = 0.;
 	trialVolumeStrain = currentVolumeStrain = 0.;
@@ -155,6 +153,10 @@ const Matrix & FluidSolidPorousMaterial::getTangent (void)
 	return *workM;
 }
 
+double FluidSolidPorousMaterial::getRho(void)
+{
+  return theSoilMaterial->getRho();
+}
 
 const Vector & FluidSolidPorousMaterial::getStress (void)
 {
@@ -277,14 +279,13 @@ int FluidSolidPorousMaterial::sendSelf(int commitTag, Channel &theChannel)
 {
 	int res = 0;
 
-	static Vector data(7);
+	static Vector data(6);
 	data(0) = this->getTag();
 	data(1) = ndm;
 	data(2) = loadStage;
-  data(3) = AtmoPress;
-  data(4) = combinedBulkModulus;
-	data(5) = currentExcessPressure;
-  data(6) = currentVolumeStrain;
+  data(3) = combinedBulkModulus;
+	data(4) = currentExcessPressure;
+  data(5) = currentVolumeStrain;
 
   res += theChannel.sendVector(this->getDbTag(), commitTag, data);
 	if (res < 0) {
@@ -329,7 +330,7 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 {
 	int res = 0;
 
-	static Vector data(7);
+	static Vector data(6);
 
 	res += theChannel.recvVector(this->getDbTag(), commitTag, data);
 	if (res < 0) {
@@ -341,10 +342,9 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 	this->setTag((int)data(0));
 	ndm = data(1);
 	loadStage = data(2);
-  AtmoPress = data(3);
-  combinedBulkModulus = data(4);
-	currentExcessPressure = data(5);
-  currentVolumeStrain = data(6);
+  combinedBulkModulus = data(3);
+	currentExcessPressure = data(4);
+  currentVolumeStrain = data(5);
 
 	// now receives the ids of its material
 	ID classTags(2);
@@ -380,7 +380,6 @@ int FluidSolidPorousMaterial::recvSelf(int commitTag, Channel &theChannel,
 
 	return res;
 }
-
 
 
 Response*

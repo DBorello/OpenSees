@@ -1,5 +1,5 @@
-// $Revision: 1.16 $
-// $Date: 2002-02-08 19:54:40 $
+// $Revision: 1.17 $
+// $Date: 2002-05-16 00:07:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureIndependMultiYield.cpp,v $
                                                                         
 // Written: ZHY
@@ -21,11 +21,12 @@ int PressureIndependMultiYield::loadStage = 0;
 Matrix PressureIndependMultiYield::theTangent(6,6);
 T2Vector PressureIndependMultiYield::subStrainRate;
 
-PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double refShearModul,
-							double refBulkModul, double frictionAng,
-							double peakShearStra, double refPress, 
-							double cohesi, 	double pressDependCoe,
-							int numberOfYieldSurf, double r)
+PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, 
+							double r, double refShearModul,
+							double refBulkModul, 
+							double cohesi, double peakShearStra, 
+							double frictionAng, double refPress, double pressDependCoe,
+							int numberOfYieldSurf)
  : NDMaterial(tag,ND_TAG_PressureIndependMultiYield), currentStress(),
    trialStress(), currentStrain(), strainRate()
 {
@@ -80,9 +81,9 @@ PressureIndependMultiYield::PressureIndependMultiYield (int tag, int nd, double 
     numberOfYieldSurf = 40;
   }
   if (r < 0) {
-    cerr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: numberOfSurfaces <= 0" << endl;
-    cerr << "Will use 10 yield surfaces." << endl;
-    numberOfYieldSurf = 10;
+    cerr << "WARNING:PressureIndependMultiYield::PressureIndependMultiYield: mass density < 0" << endl;
+    cerr << "Will use rho = 0." << endl;
+    r = 0.;
   }
 
   ndm = nd;
