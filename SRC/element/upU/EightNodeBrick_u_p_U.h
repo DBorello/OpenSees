@@ -84,7 +84,7 @@ class EightNodeBrick_u_p_U: public Element
                    NDMaterial * Globalmmodel, double b1, double b2, double b3,
 		   double nn, double alf, double rs,double rf, 
 		   double permb_x, double permb_y, double permb_z, 
-		   double kks, double kkf, double pp);
+		   double kkf, double pp);
 		   // int dir, double surflevel);
 		   //, EPState *InitEPS);   const char * type,
 
@@ -127,6 +127,7 @@ class EightNodeBrick_u_p_U: public Element
 
     matrix mass_matrixMs(const tensor  Ms);	   // wxy added 08/27/2001
     matrix mass_matrixMf(const tensor  Mf);	   // wxy added 08/27/2001
+    matrix mass_matrix(const tensor  M);	   // wxy added 06/02/2002
 //    void  set_mass_MatrixM();              	   // wxy added 08/27/2001
 
     tensor Jacobian_3D(tensor dh);
@@ -134,6 +135,7 @@ class EightNodeBrick_u_p_U: public Element
     tensor Nodal_Coordinates();
 
     tensor incr_dispDu();
+    tensor incr_dispDp();
     tensor incr_dispDU();
     tensor total_dispDu();
     tensor total_dispDU();

@@ -37,6 +37,7 @@
 #include "bool.h"
 #endif
 
+
 #include <fstream.h>	  // add for the output of stiffness matrix K  02/04/2002
 
 #include <Element.h>
@@ -86,7 +87,7 @@ class TwentyNodeBrick_u_p_U: public Element
                    NDMaterial * Globalmmodel, double b1, double b2, double b3,
 		   double nn, double alf, double rs,double rf,
 		   double permb_x, double permb_y, double permb_z, 
-		   double kks, double kkf,double pp);
+		   double kkf,double pp);
 		   // int dir, double surflevel);
 		   //, EPState *InitEPS);   const char * type,
 
@@ -136,6 +137,7 @@ class TwentyNodeBrick_u_p_U: public Element
     tensor Nodal_Coordinates();
 
     tensor incr_dispDu();
+    tensor incr_dispDp();
     tensor incr_dispDU();
     tensor total_dispDu();
     tensor total_dispDU();

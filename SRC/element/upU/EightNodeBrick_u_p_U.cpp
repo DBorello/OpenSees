@@ -34,6 +34,8 @@
 #define EIGHTNODEBRICK_U_P_U_CPP
 
 #include <EightNodeBrick_u_p_U.h>
+#include <ElementalLoad.h>	     //06/03/2002
+
 #define FixedOrder 2
 
 // Changed to static data members on 01/16/2002
@@ -54,7 +56,7 @@ EightNodeBrick_u_p_U::EightNodeBrick_u_p_U(int element_number,
                                NDMaterial * Globalmmodel, double b1, double b2,double b3,
 			       double nn, double alf, double rs, double rf,
 			       double permb_x,double permb_y,double permb_z, 
-			       double kks, double kkf, double pp)	  
+			       double kkf, double pp)	  
 			       // wxy added rs and rf for the solid and fluid density    08/28/2001
 
 			       //, EPState *InitEPS)  const char * type,
@@ -63,7 +65,7 @@ EightNodeBrick_u_p_U::EightNodeBrick_u_p_U(int element_number,
 		               
   :Element(element_number, ELE_TAG_EightNodeBrick_u_p_U ),
   connectedExternalNodes(8), Q(56), bf(3), 
-  n(nn), alpha(alf), rho_s(rs), rho_f(rf),ks(kks), kf(kkf), pressure(pp)
+  n(nn), alpha(alf), rho_s(rs), rho_f(rf), kf(kkf), pressure(pp)
   {
     //elem_numb = element_number;
     rho=(1-n)*rho_s+n*rho_f;
@@ -739,7 +741,7 @@ tensor EightNodeBrick_u_p_U::getStiffnessTensorKep()
                 // determinant of Jacobian tensor ( matrix )
                 det_of_Jacobian  = Jacobian.determinant();
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //        ::fprintf(stdout," # %d \n\n\n\n\n\n\n\n", El_count);
 		//dhGlobal.print("dhGlobal");
                 //weight
@@ -846,7 +848,7 @@ tensor EightNodeBrick_u_p_U::getStiffnessTensorG1()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 	  
@@ -940,7 +942,7 @@ tensor EightNodeBrick_u_p_U::getStiffnessTensorG2()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dhU("ij") * JacobianINV("jk");
+                dhGlobal = dhU("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
                 //weight
@@ -1006,9 +1008,11 @@ tensor EightNodeBrick_u_p_U::getStiffnessTensorP()
 //    double RHO_F=rho_f;
     double N=n;
     double ALPHA=alpha;
-    double KS=ks;
+    double KS;//=ks;
     double KF=kf;
-    double QQ= N/KF+(ALPHA-N)/KS;
+    double QQ;//= N/KF+(ALPHA-N)/KS;
+    double e;
+    double nu;
 
     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
@@ -1038,7 +1042,7 @@ tensor EightNodeBrick_u_p_U::getStiffnessTensorP()
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dhU("ij") * JacobianINV("jk");
+                dhGlobal = dhU("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
                 //weight
@@ -1050,6 +1054,11 @@ tensor EightNodeBrick_u_p_U::getStiffnessTensorP()
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
+		e = (matpoint[where]->matmodel)->getE();
+		nu = (matpoint[where]->matmodel)->getnu();
+		KS=e/(3*(1-2*nu));
+//		cout<<"KS="<<KS<<endl;
+		QQ= N/KF+(ALPHA-N)/KS;
 		P = P + hp("K") * hp("L")* QQ*weight;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
@@ -1067,8 +1076,17 @@ tensor EightNodeBrick_u_p_U::getStiffnessTensorP()
 //=========================================================================
 tensor EightNodeBrick_u_p_U::getMassTensorMs()  //(double rho_s, double n,)
   {
+// add some lines to test whether H^T*H =? dh^t*\delta_{ij}*dh? 
+// xiaoyan 06/02/2002
+
     int M_dim[] = {8,3,3,8}; 
     tensor Ms(4,M_dim,0.0);
+//out06/03/2002    tensor M83(4,M_dim,0.0);          // 06/02/2002-------
+
+//out06/03/2002    int M24_dim[]={24,24};	      // 06/02/2002-------
+//out06/03/2002    tensor M24(2,M24_dim,0.0);	      // 06/02/2002-------
+
+
 
     tensor I2("I", 2, def_dim_2);
 
@@ -1088,8 +1106,10 @@ tensor EightNodeBrick_u_p_U::getMassTensorMs()  //(double rho_s, double n,)
 
     int h_dim[] = {8};	
     tensor H(1, h_dim, 0.0);
-
-    double det_of_Jacobian = 0.0;
+// add the following two lines
+//out06/03/2002     int h24_dim[]={24,3};	       	// 06/02/2002-------
+//out06/03/2002     tensor H24(2,h24_dim,0.0);		// 06/02/2002-------
+    double det_of_Jacobian = 0.0;	
 
     tensor Jacobian;
 
@@ -1126,7 +1146,7 @@ tensor EightNodeBrick_u_p_U::getMassTensorMs()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                //                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 
@@ -1135,24 +1155,40 @@ tensor EightNodeBrick_u_p_U::getMassTensorMs()  //(double rho_s, double n,)
                 // printf("                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
                 //                             GP_c_r,GP_c_s,GP_c_t);
                 // 
-                H = interp_poli_at(r,s,t);
-
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
+                H = interp_poli_at(r,s,t);
+		
+//out06/03/2002 		H24=H_3D(r,s,t);             // 06/02/2002-------
+//out06/03/2002 		M24=M24+H24("ib")*H24("kb")*((1-N)*RHO_S *weight); // 06/02/2002-------
+//out06/03/2002 //		tensor tem=H("K")*I2("ij");  // 06/02/2002-------
+//out06/03/2002 //		Ms=Ms+tem("Kij")*H("L")*((1-N)*RHO_S *weight);   // 06/02/2002-------
+//out06/03/2002 //                //weight
+//out06/03/2002 //                weight = rw * sw * tw * det_of_Jacobian;
   	        //	printf("weight = %6.2e \n",weight);
 
 		//M.print("M","BEFORE");
                 
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
-		 static tensor temp=H("K") * I2("ij");
-                 Ms = Ms + temp("Kij") * H("L") * ((1-N)*RHO_S *weight);
-	      	//Ms.printshort("M");
+		 tensor t=H("K") * I2("ij");
+                 Ms = Ms + t("Kij") * H("L") * ((1-N)*RHO_S *weight);
+//		 M24 = M24 +H24("ib")*H24("kb") * ((1-N)*RHO_S *weight);
+		 //Ms.printshort("M");
               }
           }
       }
     //Ms.printshort("M");
-    return Ms;
+//out06/03/2002 //    M83.printshort("M83_short");	                       // 06/02/2002-------
+//out06/03/2002     M24.printshort("M24_short");	                       // 06/02/2002-------
+//out06/03/2002 //    matrix mM83 = mass_matrixMs(M83);                          // 06/02/2002-------
+//out06/03/2002 //    mM83.write_standard("mM83", "4th tensor to mass matrix");  // 06/02/2002-------
+//out06/03/2002     matrix mMs=mass_matrixMs(Ms);                              // 06/02/2002-------
+//out06/03/2002     mMs.write_standard("mMs", "4th tensor to mass matrix");    // 06/02/2002-------
+//out06/03/2002     matrix mM24=mass_matrix(M24);				// 06/02/2002-------
+//out06/03/2002     mM24.write_standard("mM24", "4th tensor to mass matrix");    // 06/02/2002-------
+
+    return Ms;				
   }
 
 ////#############################################################################
@@ -1224,7 +1260,7 @@ tensor EightNodeBrick_u_p_U::getMassTensorMf()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                //                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 
@@ -1240,7 +1276,7 @@ tensor EightNodeBrick_u_p_U::getMassTensorMf()  //(double rho_s, double n,)
                 
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
-		static tensor temp=HU("K")* I2("ij");
+		tensor temp=HU("K")* I2("ij");
 		Mf = Mf + temp("Kij") * HU("L")* N * RHO_F * weight;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
@@ -1249,6 +1285,9 @@ tensor EightNodeBrick_u_p_U::getMassTensorMf()  //(double rho_s, double n,)
       }
     //M = Mf;
     //Mf.printshort("M");
+//    matrix mMf=mass_matrixMs(Mf);                              // 06/02/2002-------
+//    mMf.write_standard("mMf", "4th tensor to mass matrix");    // 06/02/2002-------
+
     return Mf;
   }
 
@@ -1318,7 +1357,7 @@ tensor EightNodeBrick_u_p_U::getDampTensorC1()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                //                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 
@@ -1340,7 +1379,7 @@ tensor EightNodeBrick_u_p_U::getDampTensorC1()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		static tensor temp=   H("K")* k_inverse("ij");
+		tensor temp=   H("K")* k_inverse("ij");
 		C1 = C1 + temp("Kij") *H("L")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
@@ -1419,7 +1458,7 @@ tensor EightNodeBrick_u_p_U::getDampTensorC2()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                //                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 
@@ -1442,7 +1481,7 @@ tensor EightNodeBrick_u_p_U::getDampTensorC2()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		static tensor temp=  H("L")* k_inverse("ij") ;
+		tensor temp=  H("L")* k_inverse("ij") ;
 		C2 = C2 + temp("Lij") *HU("K")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
@@ -1520,7 +1559,7 @@ tensor EightNodeBrick_u_p_U::getDampTensorC3()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                //                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 
@@ -1543,7 +1582,7 @@ tensor EightNodeBrick_u_p_U::getDampTensorC3()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		static tensor temp =  HU("L")* k_inverse("ij");
+		tensor temp =  HU("L")* k_inverse("ij");
 		C3 = C3 + temp("Lij") *HU("K")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
@@ -1768,8 +1807,8 @@ const Matrix &EightNodeBrick_u_p_U::getTangentStiff ()
 	  }
       }
 
-     ofstream outK("K8.dat");	// want to check the whole K
-     K.Output(outK);
+//     ofstream outK("K8.dat");	// want to check the whole K
+//     K.Output(outK);
 
      return K;
   }
@@ -1883,12 +1922,16 @@ matrix EightNodeBrick_u_p_U::damping_matrixC3(const tensor  C3)
 const Matrix &EightNodeBrick_u_p_U::getDamp () 
 						       
   {						  
+
     tensor tC1  = getDampTensorC1();
     tensor tC2  = getDampTensorC2();
     tensor tC3  = getDampTensorC3();
     matrix C1 = damping_matrixC1(tC1);
     matrix C2 = damping_matrixC2(tC2);
     matrix C3 = damping_matrixC3(tC3);
+//    C1.write_standard("C1", " damping  matrix");    // 06/04/2002
+//    C2.write_standard("C2", " damping  matrix");    // 06/04/2002
+//    C3.write_standard("C3", " damping  matrix");    // 06/04/2002
 
     matrix C2t=C2.transpose();
 
@@ -1953,7 +1996,7 @@ const Matrix &EightNodeBrick_u_p_U::getDamp ()
   }
 
 //=========================================================================
-// Converting mass tensor to mass matrix Ms ___Xiaoyan 08/27/2001          
+// Converting mass tensor(8,3,3,8) to mass matrix Ms ___Xiaoyan 08/27/2001          
 //=========================================================================
 matrix EightNodeBrick_u_p_U::mass_matrixMs(const tensor  Ms)
   {
@@ -1983,7 +2026,7 @@ matrix EightNodeBrick_u_p_U::mass_matrixMs(const tensor  Ms)
 }
     
 //=========================================================================
-// Converting mass tensor to mass matrix Mf___Xiaoyan 08/27/2001           
+// Converting mass tensor(8,3,3,8) to mass matrix Mf___Xiaoyan 08/27/2001           
 //=========================================================================
 
 matrix EightNodeBrick_u_p_U::mass_matrixMf(const tensor  Mf)
@@ -2013,7 +2056,27 @@ matrix EightNodeBrick_u_p_U::mass_matrixMf(const tensor  Mf)
     return Mfmatrix;
 }
 ////#############################################################################
+//=========================================================================
+// Converting mass tensor(24,24) to mass matrix Mf___Xiaoyan 08/27/2001           
+//=========================================================================
  
+matrix EightNodeBrick_u_p_U::mass_matrix(const tensor  M)
+  {
+    //    int K_dim[] = {20,3,3,20};
+    //    tensor K(4,K_dim,0.0);
+    matrix Mmatrix(24,24,0.0);       
+				     
+    for ( int i=1 ; i<=24 ; i++ )    
+      {				     
+        for ( int j=1 ; j<=24 ; j++ )
+          {
+             Mmatrix.val( i , j ) = M.cval(i,j);
+          }
+      }
+    return Mmatrix;
+  }
+
+
 //#############################################################################  
 //=========================================================================
 // Constructing Mass matrix of the whole system M (including Ms and Mf 56*56    
@@ -2021,6 +2084,7 @@ matrix EightNodeBrick_u_p_U::mass_matrixMf(const tensor  Mf)
 
 const Matrix &EightNodeBrick_u_p_U::getMass () 
  {
+
     tensor tMs  = getMassTensorMs();
     tensor tMf  = getMassTensorMf();
     matrix  Ms =  mass_matrixMs(tMs);
@@ -2054,8 +2118,8 @@ const Matrix &EightNodeBrick_u_p_U::getMass ()
 	  }
       }
 
-     ofstream outM("M8.dat");	// want to check the whole M
-     M.Output(outM);
+//     ofstream outM("M8.dat");	// want to check the whole M
+//     M.Output(outM);
 
      return M;
   }
@@ -2195,6 +2259,38 @@ tensor EightNodeBrick_u_p_U::incr_dispDu()
     return increment_dispDu;
   }
 
+////#############################################################################
+//=========================================================================
+// Incremental displacement of pressure part-- p        05/20/2002
+//=========================================================================
+tensor EightNodeBrick_u_p_U::incr_dispDp()
+  {
+    const int dimensions[] = {8};  
+    tensor increment_dispDp(1, dimensions, 0.0);
+
+     
+    const Vector &IncrDis1 = nd1Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis2 = nd2Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis3 = nd3Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis4 = nd4Ptr->getIncrDeltaDisp();
+
+    const Vector &IncrDis5 = nd5Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis6 = nd6Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis7 = nd7Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis8 = nd8Ptr->getIncrDeltaDisp();
+
+ // Get the fourth incremental displacement for pressure part. Xiaoyan 05/20/2002
+    increment_dispDp.val(1)=IncrDis1(3);
+    increment_dispDp.val(2)=IncrDis2(3);
+    increment_dispDp.val(3)=IncrDis3(3);
+    increment_dispDp.val(4)=IncrDis4(3);
+    increment_dispDp.val(5)=IncrDis5(3);
+    increment_dispDp.val(6)=IncrDis6(3);
+    increment_dispDp.val(7)=IncrDis7(3);
+    increment_dispDp.val(8)=IncrDis8(3);
+
+    return increment_dispDp;
+  }
 ////#############################################################################
 //=========================================================================
 // Incremental displacement of fluid part-- U     02/10/2002
@@ -2535,7 +2631,7 @@ void EightNodeBrick_u_p_U::incremental_UpdateDu()
                 //--                det_of_Jacobian  = Jacobian.determinant();
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //....                dhGlobal.print("dh","dhGlobal");
                 //weight
                 //                weight = rw * sw * tw * det_of_Jacobian;
@@ -2628,6 +2724,7 @@ void EightNodeBrick_u_p_U::incremental_UpdateDu()
       }
   }
 //============================================================================
+
 void EightNodeBrick_u_p_U::incremental_UpdateDU()
   {
     double r  = 0.0;
@@ -2697,7 +2794,7 @@ void EightNodeBrick_u_p_U::incremental_UpdateDU()
                 //--                det_of_Jacobian  = Jacobian.determinant();
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //....                dhGlobal.print("dh","dhGlobal");
                 //weight
                 //                weight = rw * sw * tw * det_of_Jacobian;
@@ -2853,7 +2950,7 @@ void EightNodeBrick_u_p_U::set_strain_stress_tensorDu(FILE *fp, double * u)
                 // determinant of Jacobian tensor ( matrix )
                 det_of_Jacobian  = Jacobian.determinant();
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //weight
                 // straines at this Gauss point from displacement
                 strain = (dhGlobal("ib")*total_displacements("ia")).symmetrize11();
@@ -2944,7 +3041,7 @@ void EightNodeBrick_u_p_U::set_strain_stress_tensorDU(FILE *fp, double * u)
                 // determinant of Jacobian tensor ( matrix )
                 det_of_Jacobian  = Jacobian.determinant();
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //weight
                 // straines at this Gauss point from displacement
                 strain = (dhGlobal("ib")*total_displacements("ia")).symmetrize11();
@@ -3279,10 +3376,101 @@ void EightNodeBrick_u_p_U::zeroLoad()
 int 
 EightNodeBrick_u_p_U::addLoad(ElementalLoad *theLoad, double loadFactor)
 {  
-  g3ErrorHandler->warning("EightNodeBrick_u_p_U::addLoad - load type unknown for ele with tag: %d\n",
+/*  g3ErrorHandler->warning("EightNodeBrick_u_p_U::addLoad - load type unknown for ele with tag: %d\n",
 			  this->getTag());
   
   return -1;
+*/
+  int type;
+  const Vector &data = theLoad->getData(type, loadFactor);
+  
+  if (type == LOAD_TAG_BrickSelfWeight) {
+  
+    Vector bforce(56);  
+    // Check for a quick return
+    //cerr << "rho " << rho << endln;
+    if (rho == 0.0)
+    	return 0;
+  
+    Vector ba(56), bfx(3);  
+    bfx(0) = bf(0) * loadFactor;
+    bfx(1) = bf(1) * loadFactor;
+    bfx(2) = bf(2) * loadFactor;
+  
+    ba( 0) = bfx(0);    
+    ba( 1) = bfx(1);    
+    ba( 2) = bfx(2);
+    ba( 3)=  0.0;
+    ba( 4) = bfx(0);    
+    ba( 5) = bfx(1);    
+    ba( 6) = bfx(2);    
+
+    ba( 7) = bfx(0);    
+    ba( 8) = bfx(1);    
+    ba( 9) = bfx(2);    
+    ba(10) = 0.0;    
+    ba(11) = bfx(0);    
+    ba(12) = bfx(1);    
+    ba(13) = bfx(2); 
+       
+    ba(14) = bfx(0);    
+    ba(15) = bfx(1);    
+    ba(16) = bfx(2);    
+    ba(17) = 0.0;      
+    ba(18) = bfx(0);    
+    ba(19) = bfx(1);    
+    ba(20) = bfx(2);    
+
+    ba(21) = bfx(0);    
+    ba(22) = bfx(1);    
+    ba(23) = bfx(2);    
+    ba(24) = 0.0;      
+    ba(25) = bfx(0);    
+    ba(26) = bfx(1);    
+    ba(27) = bfx(2);    
+
+    ba(28) = bfx(0);    
+    ba(29) = bfx(1);    
+    ba(30) = bfx(2);    
+    ba(31) = 0.0;      
+    ba(32) = bfx(0);    
+    ba(33) = bfx(1);    
+    ba(34) = bfx(2);    
+
+    ba(35) = bfx(0);    
+    ba(36) = bfx(1);    
+    ba(37) = bfx(2);    
+    ba(38) = 0.0;      
+    ba(39) = bfx(0);    
+    ba(40) = bfx(1);    
+    ba(41) = bfx(2);    
+
+    ba(42) = bfx(0);    
+    ba(43) = bfx(1);    
+    ba(44) = bfx(2);    
+    ba(45) = 0.0;      
+    ba(46) = bfx(0);    
+    ba(47) = bfx(1);    
+    ba(48) = bfx(2);    
+
+    ba(49) = bfx(0);    
+    ba(50) = bfx(1);    
+    ba(51) = bfx(2);    
+    ba(52) = 0.0;      
+    ba(53) = bfx(0);    
+    ba(54) = bfx(1);    
+    ba(55) = bfx(2);
+
+    //Form equivalent body force
+    this->getMass();
+    bforce.addMatrixVector(0.0, M, ba, 1.0);
+    Q.addVector(1.0, bforce, 1.0);       
+  } else  {
+    g3ErrorHandler->warning("EightNodeBrick_u_p_U::addLoad() - 8NodeBrick_u_p_U %d,load type %d unknown\n", 
+  			    this->getTag(), type);
+    return -1;
+  }
+  return 0;
 }
 
 
@@ -3333,7 +3521,7 @@ int EightNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 	ra(14) = Raccel3(0);
 	ra(15) = Raccel3(1);
 	ra(16) = Raccel3(2);
- ra(17) = 0.0;
+        ra(17) = 0.0;
 	ra(18) = Raccel3(4);
 	ra(19) = Raccel3(5);
 	ra(20) = Raccel3(6);
@@ -3342,7 +3530,7 @@ int EightNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 	ra(22) = Raccel4(1);
 	ra(23) = Raccel4(2);
 	ra(24) = 0.0;
- ra(25) = Raccel4(4);
+        ra(25) = Raccel4(4);
 	ra(26) = Raccel4(5);
 	ra(27) = Raccel4(6);
 
@@ -3389,9 +3577,9 @@ int EightNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 
     //cerr << " addInerti... column_mass " << column_mass << endln;
 
-    for (int i = 0; i < 56; i++)   
-	    	Q(i) += -M(i,i)*ra(i);
-
+//    for (int i = 0; i < 56; i++)   
+//	    	Q(i) += -M(i,i)*ra(i);
+    Q.addMatrixVector(1.0,M,ra,-1.0);
     return 0;
 }
 
@@ -3422,7 +3610,7 @@ const Vector EightNodeBrick_u_p_U::FormEquiBodyForce()
     ba( 9) = bf(2);    
     ba(10) = 0.0;    
     ba(11) = bf(0);    
-    ba(15) = bf(1);    
+    ba(12) = bf(1);    
     ba(13) = bf(2); 
        
     ba(14) = bf(0);    
@@ -3547,7 +3735,8 @@ const Vector &EightNodeBrick_u_p_U::getResistingForce ()
     //cerr << "p" << p;
     //cerr << "Q" << Q;
 
-    p = p - Q;
+//    p = p - Q;
+    p.addVector(1.0, Q, -1.0);	     // 06/03/2002
 
     //cerr << "p-Q" << p;
     return p;
@@ -3603,7 +3792,7 @@ const Vector &EightNodeBrick_u_p_U::getResistingForceIncInertia ()
 	a( 9) = accel2(2);
 	a(10) = 0.0;
 	a(11) = accel2(4);
- a(15) = accel2(5);
+        a(12) = accel2(5);
 	a(13) = accel2(6);
 
 	a(14) = accel3(0);
@@ -3618,7 +3807,7 @@ const Vector &EightNodeBrick_u_p_U::getResistingForceIncInertia ()
 	a(22) = accel4(1);
 	a(23) = accel4(2);
 	a(24) = 0.0;
- a(25) = accel4(4);
+        a(25) = accel4(4);
 	a(26) = accel4(5);
 	a(27) = accel4(6);
 
@@ -3666,13 +3855,15 @@ const Vector &EightNodeBrick_u_p_U::getResistingForceIncInertia ()
         //   column_mass += M(1,i);
         //column_mass = column_mass/3.0;
 
-	for (int i = 0; i < 56; i++)
+/*	for (int i = 0; i < 56; i++)
 	{   
 	   p(i) += M(i,i)*a(i);
 	   //cout << " " << M(i, i);
 	}
 	//cout << endln;
 	//cerr << "P+=Ma" << P<< endl;
+*/
+	p.addMatrixVector(1.0, M, a,1.0);
 	return p;
 } 
 
@@ -3863,7 +4054,7 @@ tensor EightNodeBrick_u_p_U::nodal_forcesFu()
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -3908,9 +4099,12 @@ tensor EightNodeBrick_u_p_U::nodal_forcesFu()
 tensor EightNodeBrick_u_p_U::nodal_forcesFU()
   {
  // This is a function for a generelized force for the fluid component...  
+ // For fluid there is only pressure not shear force, so the force for 
+ // fluid will be p*delta_{ij}      xiaoyan 05/20/2002
     int force_dim[] = {8,3};  
 
     tensor nodal_forcesFU(2,force_dim,0.0);
+    tensor I2("I", 2, def_dim_2);	   // delta_{ij} added 05/20/2002
 
     double r  = 0.0;
     double rw = 0.0;
@@ -3923,19 +4117,23 @@ tensor EightNodeBrick_u_p_U::nodal_forcesFU()
     double weight = 0.0;
 
     int dh_dim[] = {8,3};  
+    int h_dim[] = {8};     // added for shape function h  05/21/2002
 
     tensor dh(2, dh_dim, 0.0);
+    tensor h(1, h_dim, 0.0);
 
     stresstensor stress_at_GP(0.0);
+    tensor p_at_GP;		  // added 05/21/2002
+    double pp;			  // added 05/21/2002
 
     double det_of_Jacobian = 0.0;
 
-    straintensor incremental_strain;
+//    straintensor incremental_strain;
 
-    static int disp_dim[] = {8,3};   
-    tensor incremental_displacements(2,disp_dim,0.0); // \Delta U
+    static int disp_dim[] = {8};     // changed from {8,1}
+    tensor incremental_p(1,disp_dim,0.0); // \Delta U
 
-    incremental_displacements = incr_dispDU();
+    incremental_p = incr_dispDp();
 
     tensor Jacobian;
     tensor JacobianINV;
@@ -3963,6 +4161,7 @@ tensor EightNodeBrick_u_p_U::nodal_forcesFU()
 
                 // derivatives of local coordiantes with respect to local coordiantes
                 dh = dh_drst_at(r,s,t);
+		h=interp_poli_at(r,s,t);
 
                 // Jacobian tensor ( matrix )
                 Jacobian = Jacobian_3D(dh);
@@ -3977,21 +4176,21 @@ tensor EightNodeBrick_u_p_U::nodal_forcesFU()
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
                 
-		incremental_strain =
-                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+//		incremental_strain =
+//                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
 //		if (where == 0)
 //   		//cout << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
 ////		cout << " el tag = "<< getTag();
 //		
-		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
-		if ( err)
-               	   g3ErrorHandler->warning("EightNodeBrick_u_p_U::getStiffnessTensor (tag: %d), not converged",
-		    		 this->getTag());
+//		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
+//		if ( err)
+//               	   g3ErrorHandler->warning("EightNodeBrick_u_p_U::getStiffnessTensor (tag: %d), not converged",
+//		    		 this->getTag());
 
 
 
@@ -3999,11 +4198,12 @@ tensor EightNodeBrick_u_p_U::nodal_forcesFU()
 		// fmk - changing if so if into else block must be Template3Dep
 //		if (strcmp(matpoint[where]->matmodel->getType(),"Template3Dep") != 0)
 		   stress_at_GP = matpoint[where]->getStressTensor();
-
+		   p_at_GP=h("i")*incremental_p("i");
+		   pp=p_at_GP.val(1);
 
                 // nodal forces See Zienkievicz part 1 pp 108
                 nodal_forcesFU =
-                     nodal_forcesFU + dhGlobal("ib")*stress_at_GP("ab")*weight;
+                     nodal_forcesFU + dhGlobal("ib")*I2("ab")*pp*weight;
                 //nodal_forces.print("nf","\n\n Nodal Forces \n");
  
               }
@@ -4040,6 +4240,10 @@ tensor EightNodeBrick_u_p_U::nodal_forces()
           nodal_FORCES.val(i,6) = nodalForceFU.val(i,2);
           nodal_FORCES.val(i,7) = nodalForceFU.val(i,3);
       }
+// the following two lines are added  on 05/02/2002
+//     cout << "\n element no. " << getTag() << endln;
+//     nodal_FORCES.print("nf","\n Nodal Forces \n");
+
      return nodal_FORCES;
   }
 
@@ -4116,7 +4320,7 @@ tensor EightNodeBrick_u_p_U::iterative_nodal_forcesFu()
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 	  
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -4149,6 +4353,7 @@ tensor EightNodeBrick_u_p_U::iterative_nodal_forcesFU()
     int force_dim[] = {8,3}; 
 
     tensor nodal_forcesFU(2,force_dim,0.0);
+    tensor I2("I", 2, def_dim_2);	   // delta_{ij} added 05/20/2002
 
     double r  = 0.0;
     double rw = 0.0;
@@ -4161,12 +4366,18 @@ tensor EightNodeBrick_u_p_U::iterative_nodal_forcesFU()
     double weight = 0.0;
 
     int dh_dim[] = {8,3};   
+    int h_dim[] = {8};     // added for shape function h  05/21/2002
 
     tensor dh(2, dh_dim, 0.0);
+    tensor h(1, h_dim, 0.0);
 
     stresstensor stress_at_GP(0.0);
+    tensor p_at_GP;		  // added 05/21/2002
+    double pp;			  // added 05/21/2002
 
     double det_of_Jacobian = 0.0;
+    static int disp_dim[] = {8};   	// changed from {20,1}  05/20/2002
+    tensor incremental_p(1,disp_dim,0.0); // \Delta U
 
     tensor Jacobian;
     tensor JacobianINV;
@@ -4198,6 +4409,7 @@ tensor EightNodeBrick_u_p_U::iterative_nodal_forcesFU()
                 //.....                           GP_c_r,GP_c_s,GP_c_t);
                 // derivatives of local coordiantes with respect to local coordiantes
                 dh = dh_drst_at(r,s,t);
+		h=interp_poli_at(r,s,t);
 
                 // Jacobian tensor ( matrix )
                 Jacobian = Jacobian_3D(dh);
@@ -4212,7 +4424,7 @@ tensor EightNodeBrick_u_p_U::iterative_nodal_forcesFU()
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 	  
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -4221,12 +4433,14 @@ tensor EightNodeBrick_u_p_U::iterative_nodal_forcesFU()
                 //stress_at_GP = GPiterative_stress[where];
                 
 		//stress_at_GP = ( matpoint[where].getTrialEPS() )->getStress();
-                stress_at_GP = matpoint[where]->getStressTensor();
-                stress_at_GP.reportshortpqtheta("\n iterative_stress at GAUSS point in iterative_nodal_force\n");
+//                stress_at_GP = matpoint[where]->getStressTensor();
+//                stress_at_GP.reportshortpqtheta("\n iterative_stress at GAUSS point in iterative_nodal_force\n");
+ 		   p_at_GP=h("i")*incremental_p("i");
+		   pp=p_at_GP.val(1);
 
                 // nodal forces See Zienkievicz part 1 pp 108
                 nodal_forcesFU =
-                  nodal_forcesFU + dhGlobal("ib")*stress_at_GP("ab")*weight;
+                  nodal_forcesFU + dhGlobal("ib")*I2("ab")*pp*weight;
                 //nodal_forces.print("nf","\n EightNodeBrick_u_p_U::iterative_nodal_forces Nodal Forces ~~~~\n");
 
               }
@@ -4305,7 +4519,7 @@ tensor EightNodeBrick_u_p_U::nodal_forces_from_stress(stresstensor & stress)
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -4407,7 +4621,7 @@ tensor EightNodeBrick_u_p_U::linearized_nodal_forces()
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;

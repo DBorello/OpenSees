@@ -57,7 +57,7 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
                                NDMaterial * Globalmmodel, double b1, double b2,double b3,
 			       double nn, double alf, double rs, double rf, 
 			       double permb_x,double permb_y,double permb_z, 
-			       double kks, double kkf, double pp)	  
+			       double kkf, double pp)	  
 			       // wxy added rs and rf for the solid and fluid density    08/28/2001
 
 			       //, EPState *InitEPS)  const char * type,
@@ -66,7 +66,7 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
 		               
   :Element(element_number, ELE_TAG_TwentyNodeBrick_u_p_U ),
   connectedExternalNodes(20), Q(140), bf(3), 
-  n(nn), alpha(alf), rho_s(rs), rho_f(rf),ks(kks), kf(kkf), pressure(pp)
+  n(nn), alpha(alf), rho_s(rs), rho_f(rf), kf(kkf), pressure(pp)
   {
     //elem_numb = element_number;
     rho=(1-n)*rho_s+n*rho_f;
@@ -740,9 +740,9 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorKep()
                 // incremental straines at this Gauss point
                 //GPstress[where].reportshortpqtheta("\n stress at GAUSS point in stiffness_tensor1\n");
                 
- /*		incremental_strain =
+		incremental_strain =
                      (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-  wxy 01/14/2002 */  		
+  		
 		Constitutive = (matpoint[where]->matmodel)->getTangentTensor();
                       
 		Kkt = dhGlobal("ib")*Constitutive("abcd");
@@ -844,7 +844,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorG1()  //(double rho_s, double n,
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 	  
@@ -943,7 +943,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorG2()  //(double rho_s, double n,
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dhU("ij") * JacobianINV("jk");
+                dhGlobal = dhU("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
                 //weight
@@ -997,6 +997,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
 //    tensor dH(2, h_dim, 0.0);
 //    tensor Hp(1, Hp_dim,0.0);    // Xiaoyan added 08/27/2001
 
+
     double det_of_Jacobian = 0.0;
 
     tensor Jacobian;
@@ -1009,11 +1010,12 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
 //    double RHO_F=rho_f;
     double N=n;
     double ALPHA=alpha;
-    double KS=ks;
+    double KS;//=ks;
     double KF=kf;
-    double QQ= N/KF+(ALPHA-N)/KS;
-
-			 short GP_c_r;
+    double QQ;//= N/KF+(ALPHA-N)/KS;
+    double e;
+    double nu;
+     short GP_c_r;
     for( GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
         r = get_Gauss_p_c( r_integration_order, GP_c_r );
@@ -1046,7 +1048,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dhU("ij") * JacobianINV("jk");
+                dhGlobal = dhU("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
                 //weight
@@ -1058,6 +1060,13 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
+		e = (matpoint[where]->matmodel)->getE();
+//		cout<<"e=  "<<e<<endl;
+		nu = (matpoint[where]->matmodel)->getnu();
+//		cout<<"nu=  "<<nu<<endl;
+		KS=e/(3*(1-2*nu));
+//		cout<<"KS="<<KS<<endl;
+		QQ= N/KF+(ALPHA-N)/KS;
 		P = P + hp("K") * hp("L")*QQ*weight;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
@@ -1139,7 +1148,7 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMs()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                //                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 
@@ -1159,7 +1168,7 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMs()  //(double rho_s, double n,)
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
-			      static tensor temp = H("K") * I2("ij");
+			      tensor temp = H("K") * I2("ij");
 		              Ms = Ms + temp("Kij") * H("L") * ((1-N)*RHO_S *weight);
 	      	//Ms.printshort("M");
               }
@@ -1243,7 +1252,7 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMf()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                //                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 
@@ -1260,7 +1269,7 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMf()  //(double rho_s, double n,)
 	        //	tensor temp = H("ib")*H("kb");
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
-		static tensor temp = HU("K")* I2("ij");
+		tensor temp = HU("K")* I2("ij");
 		Mf = Mf + temp("Kij") * HU("L")* N * RHO_F * weight;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
@@ -1344,7 +1353,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC1()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                //                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 
@@ -1366,7 +1375,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC1()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		static tensor temp=H("K")* k_inverse("ij");
+		tensor temp=H("K")* k_inverse("ij");
 		
 		C1 = C1 + temp("Kij")*H("L")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
@@ -1451,7 +1460,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC2()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                //                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 
@@ -1474,7 +1483,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC2()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		static tensor temp=H("L")* k_inverse("ij");
+		tensor temp=H("L")* k_inverse("ij");
 		C2 = C2 + temp("Lij")*HU("K")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
@@ -1557,7 +1566,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC3()  //(double rho_s, double n,)
                 det_of_Jacobian  = Jacobian.determinant();
                 // 		printf("det_of_Jacobian = %6.2e \n",det_of_Jacobian);
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                //                dhGlobal = dh("ij") * JacobianINV("jk");
+                //                dhGlobal = dh("ij") * JacobianINV("kj");
                 // derivatives of local coordinates with respect to local coordinates
 
 
@@ -1580,7 +1589,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC3()  //(double rho_s, double n,)
 		//temp.print("t","temporary tensor H(\"ib\")*H(\"kb\") \n\n" );
 
 		tensor k_inverse=k("mn").inverse();
-		static tensor temp= HU("L")* k_inverse("ij");
+		tensor temp= HU("L")* k_inverse("ij");
 		C3 = C3 + temp("Lij") *HU("K")*weight * N*N;
 	       //	printf("\n +++++++++++++++++++++++++ \n\n");
 	      	//Mf.printshort("M");
@@ -1829,8 +1838,8 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
        	  }
       }
 
-     ofstream outK("K.dat");	// want to check the whole K
-     K.Output(outK);
+//     ofstream outK("K20.dat");	// want to check the whole K
+//     K.Output(outK);
 
      return K;
   }
@@ -1956,6 +1965,7 @@ matrix TwentyNodeBrick_u_p_U::damping_matrixC3(const tensor  C3)
 const Matrix &TwentyNodeBrick_u_p_U::getDamp() 
 						       
   {						  
+
     tensor tC1  = getDampTensorC1();
     tensor tC2  = getDampTensorC2();
     tensor tC3  = getDampTensorC3();
@@ -2160,8 +2170,8 @@ const Matrix &TwentyNodeBrick_u_p_U::getMass()
        	  }
       }
 
-     ofstream outM("M20.dat");	// want to check the whole M
-     M.Output(outM);
+//     ofstream outM("M20.dat");	// want to check the whole M
+//     M.Output(outM);
 
      return M;
   }
@@ -2396,6 +2406,91 @@ tensor TwentyNodeBrick_u_p_U::incr_dispDu()
 //=========================================================================
 // Incremental displacement of fluid part-- U     02/10/2002
 //=========================================================================
+
+//=========================================================================
+// Incremental displacement of pressure part-- p         05/20/2002
+//=========================================================================
+
+tensor TwentyNodeBrick_u_p_U::incr_dispDp()
+  {
+    const int dimensions[] = {20};  
+    tensor increment_dispDp(1, dimensions, 0.0);
+
+    //for ( int i=0 ; i<8 ; i++ )	 // Xiaoyan changed from 20 to 8 for 8 nodes
+    //
+    //  {
+    //    // increment_disp.val(i+1,1) = nodes[ G_N_numbs[i] ].incremental_translation_x();
+    //    // increment_disp.val(i+1,2) = nodes[ G_N_numbs[i] ].incremental_translation_y();
+    //    // increment_disp.val(i+1,3) = nodes[ G_N_numbs[i] ].incremental_translation_z();
+    //    // Xiaoyan changed to the following 09/27/00
+    //    Vector IncremenDis = nodes[ G_N_numbs[i] ].getIncrDisp();
+    //
+    //    increment_disp.val(i+1,1) = IncremenDis(0);
+    //    increment_disp.val(i+1,2) = IncremenDis(1); 
+    //    increment_disp.val(i+1,3) = IncremenDis(2);
+    //	
+    //  }
+    
+    //Zhaohui using node pointers, which come from the Domain
+    //const Vector &TotDis1 = nd1Ptr->getTrialDisp();
+    //const Vector &incrdelDis1 = nd1Ptr->getIncrDisp();
+    //Have to get IncrDeltaDisp, not IncrDisp for cumulation of incr_disp
+    const Vector &IncrDis1 = nd1Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis2 = nd2Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis3 = nd3Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis4 = nd4Ptr->getIncrDeltaDisp();
+
+    const Vector &IncrDis5 = nd5Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis6 = nd6Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis7 = nd7Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis8 = nd8Ptr->getIncrDeltaDisp();
+
+    const Vector &IncrDis9  = nd9Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis10 = nd10Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis11 = nd11Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis12 = nd12Ptr->getIncrDeltaDisp();
+
+    const Vector &IncrDis13 = nd13Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis14 = nd14Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis15 = nd15Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis16 = nd16Ptr->getIncrDeltaDisp();
+    
+    const Vector &IncrDis17 = nd17Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis18 = nd18Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis19 = nd19Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis20 = nd20Ptr->getIncrDeltaDisp();
+
+// Get the fourth incremental displacement for pressure part. Xiaoyan 05/20/2002
+ 
+    increment_dispDp.val(1)=IncrDis1(3); 
+    increment_dispDp.val(2)=IncrDis2(3); 
+    increment_dispDp.val(3)=IncrDis3(3); 
+    increment_dispDp.val(4)=IncrDis4(3);
+    increment_dispDp.val(5)=IncrDis5(3); 
+    increment_dispDp.val(6)=IncrDis6(3);
+    increment_dispDp.val(7)=IncrDis7(3); 
+    increment_dispDp.val(8)=IncrDis8(3); 
+    increment_dispDp.val(9)=IncrDis9(3); 
+    increment_dispDp.val(10)=IncrDis10(3); 
+    increment_dispDp.val(11)=IncrDis11(3); 
+    increment_dispDp.val(12)=IncrDis12(3); 
+    increment_dispDp.val(13)=IncrDis13(3); 
+    increment_dispDp.val(14)=IncrDis14(3); 
+    increment_dispDp.val(15)=IncrDis15(3); 
+    increment_dispDp.val(16)=IncrDis16(3); 
+    increment_dispDp.val(17)=IncrDis17(3); 
+    increment_dispDp.val(18)=IncrDis18(3);
+    increment_dispDp.val(19)=IncrDis19(3); 
+    increment_dispDp.val(20)=IncrDis20(3);
+           
+    return increment_dispDp;
+  }
+
+////#############################################################################
+
+//=========================================================================
+// Incremental displacement of fluid part-- U     02/10/2002
+//=========================================================================
 tensor TwentyNodeBrick_u_p_U::incr_dispDU()
   {
     const int dimensions[] = {20,3};  
@@ -2550,6 +2645,7 @@ tensor TwentyNodeBrick_u_p_U::incr_dispDU()
             
     return increment_dispDU;
   }
+
 
 ////#############################################################################
 //=========================================================================
@@ -3172,7 +3268,7 @@ void TwentyNodeBrick_u_p_U::incremental_UpdateDu()
                 //--                det_of_Jacobian  = Jacobian.determinant();
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //....                dhGlobal.print("dh","dhGlobal");
                 //weight
                 //                weight = rw * sw * tw * det_of_Jacobian;
@@ -3266,6 +3362,7 @@ void TwentyNodeBrick_u_p_U::incremental_UpdateDu()
   }
 
 //============================================================================
+
 void TwentyNodeBrick_u_p_U::incremental_UpdateDU()
   {
     double r  = 0.0;
@@ -3335,7 +3432,7 @@ void TwentyNodeBrick_u_p_U::incremental_UpdateDU()
                 //--                det_of_Jacobian  = Jacobian.determinant();
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //....                dhGlobal.print("dh","dhGlobal");
                 //weight
                 //                weight = rw * sw * tw * det_of_Jacobian;
@@ -3428,7 +3525,6 @@ void TwentyNodeBrick_u_p_U::incremental_UpdateDU()
       }
   }
 
-
 //#############################################################################
 // This function is not called now. Keep here for future use.  Xiaoyan 02/108/2002
 void TwentyNodeBrick_u_p_U::set_strain_stress_tensorDu(FILE *fp, double * u)
@@ -3490,7 +3586,7 @@ void TwentyNodeBrick_u_p_U::set_strain_stress_tensorDu(FILE *fp, double * u)
                 // determinant of Jacobian tensor ( matrix )
                 det_of_Jacobian  = Jacobian.determinant();
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //weight
                 // straines at this Gauss point from displacement
                 strain = (dhGlobal("ib")*total_displacements("ia")).symmetrize11();
@@ -3581,7 +3677,7 @@ void TwentyNodeBrick_u_p_U::set_strain_stress_tensorDU(FILE *fp, double * u)
                 // determinant of Jacobian tensor ( matrix )
                 det_of_Jacobian  = Jacobian.determinant();
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
                 //weight
                 // straines at this Gauss point from displacement
                 strain = (dhGlobal("ib")*total_displacements("ia")).symmetrize11();
@@ -4207,12 +4303,12 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 	ra(137) = Raccel20(4);
 	ra(138) = Raccel20(5);
 	ra(139) = Raccel20(6);
-      int i;
-					 for ( i=0; i<140; i++)
-       {
-         if(i%10==0) cout<<endl;
-     	   cout<<" "<<ra(i);
-       }     // added to check the value of ra      02/18/2002
+//out 06/03/2002      int i;
+//out 06/03/2002      for ( i=0; i<140; i++)
+//out 06/03/2002       {
+//out 06/03/2002         if(i%10==0) cout<<endl;
+//out 06/03/2002     	   cout<<" "<<ra(i);
+//out 06/03/2002       }     // added to check the value of ra      02/18/2002
 
     // Want to add ( - fact * M R * accel ) to unbalance
     // Take advantage of lumped mass matrix
@@ -4225,10 +4321,12 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 
     //cerr << " addInerti... column_mass " << column_mass << endln;
 
-    for ( i = 0; i < nodes_in_brick*7; i++)
-  	   {
-      		Q(i)    += -M(i,i)*ra(i);
-  	   }
+//    for ( i = 0; i < nodes_in_brick*7; i++)
+//  	   {
+//      		Q(i)    += -M(i,i)*ra(i);
+//		cout<<Q(i);  // 05/02/2002
+//  	   }
+    Q.addMatrixVector(1.0, M, ra, -1.0);
     return 0;
 }
 
@@ -4258,7 +4356,7 @@ const Vector TwentyNodeBrick_u_p_U::FormEquiBodyForce()
     ba( 9) = bf(2);    
     ba(10) = 0.0;    
     ba(11) = bf(0);    
-    ba(15) = bf(1);    
+    ba(12) = bf(1);    
     ba(13) = bf(2); 
        
     ba(14) = bf(0);    
@@ -4411,7 +4509,7 @@ const Vector TwentyNodeBrick_u_p_U::FormEquiBodyForce()
     //cerr << " ba " << ba;
     //cerr << " M " << M;
     //if (getTag() == 886)
-    //cerr << " @@@@@ FormEquiBodyForce  " << bforce;
+//    cerr << " @@@@@ FormEquiBodyForce  " << bforce;
 
     return bforce;
 }
@@ -4468,7 +4566,7 @@ const Vector TwentyNodeBrick_u_p_U::FormEquiBodyForce()
 const Vector &TwentyNodeBrick_u_p_U::getResistingForce () 
 {     
     int force_dim[] = {20,7}; 
-    static tensor nodalforces(2,force_dim,0.0);   // The index of tensor starts from 1
+    tensor nodalforces(2,force_dim,0.0);   // The index of tensor starts from 1
      					   // See SRC/nDarray/BJtensor.cpp
     nodalforces = nodal_forces();          // The index of Vector starts from 0
 				           // SRC/matrix/Vector.h  Xiaoyan 02/10/20002
@@ -4477,22 +4575,23 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForce ()
       for (int j = 0; j < 7; j++)
 	p(i *7 + j) = nodalforces.cval(i+1, j+1);    // p--Vector--start 0
 						     // nodalforces--tensor start 1
-    //cerr << "p" << p;
-    //cerr << "Q" << Q;
-   // for ( int i=0; i<140; i++)
-   // {
-   //   printf("p(%d) = %lf    ",i, p(i));
-   //   printf("Q(%d) = %lf    ",i, Q(i));
-   //   p(i)=p(i)-Q(i);
-   //   printf("           --->>>  p(%d) = %lf    ",i, p(i));
-   //   printf("p(%d)-Q(%d) = %lf   \n ",i, i, p(i));
-   //
-   // }
+   // cerr << "p" << p;
+   // cerr << "Q" << Q;
+/*   for ( int i=0; i<140; i++)
+    {
+      printf("p(%d) = %lf    ",i, p(i));
+      printf("Q(%d) = %lf    ",i, Q(i));
+      p(i)=p(i)-Q(i);
+//      printf("           --->>>  p(%d) = %lf    ",i, p(i));
+      printf("p(%d)-Q(%d) = %lf   \n ",i, i, p(i));
+   
+    }
+*/
     p = p - Q;
-  //  for ( int i=0; i<140; i++)
-  //    printf("p(%d) = %lf   ",i, p(i));   // check
-  //  //cerr << "p-Q" << p;
-  //  fflush(stdout);
+//    for ( int i=0; i<140; i++)
+//      printf("p(%d) = %lf   ",i, p(i));   // check
+//    //cerr << "p-Q" << p;
+//    fflush(stdout);
     return p;
 }
 
@@ -4583,7 +4682,7 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForceIncInertia ()
 	a( 9) = accel2(2);
 	a(10) = 0.0;
 	a(11) = accel2(4);
-    	a(15) = accel2(5);
+    	a(12) = accel2(5);
 	a(13) = accel2(6);
 
 	a(14) = accel3(0);
@@ -4744,13 +4843,15 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForceIncInertia ()
         //   column_mass += M(1,i);
         //column_mass = column_mass/3.0;
 
-	for (int i = 0; i < 140; i++)
+/*	for (int i = 0; i < 140; i++)
 	{   
 	   p(i ) += M(i,i)*a(i);
 	   //cout << " " << M(i, i);
 	}
 	//cout << endln;
 	//cerr << "P+=Ma" << P<< endl;
+*/
+	p.addMatrixVector(1.0, M, a, 1.0);
 	return p;
 } 
 
@@ -4941,7 +5042,7 @@ tensor TwentyNodeBrick_u_p_U::nodal_forcesFu()
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -4974,8 +5075,8 @@ tensor TwentyNodeBrick_u_p_U::nodal_forcesFu()
           }
       }
 
-    //cout << "\n element no. " << getTag() << endln;
-    //nodal_forces.print("nf","\n Nodal Forces \n");
+//    cout << "\n element no. " << getTag() << endln;
+//    nodal_forcesFu.print("Fu","\n Nodal Forces \n");
     return nodal_forcesFu;
 
   }
@@ -4984,9 +5085,12 @@ tensor TwentyNodeBrick_u_p_U::nodal_forcesFu()
 tensor TwentyNodeBrick_u_p_U::nodal_forcesFU()
   {
  // This is a function for a generelized force for the fluid component...  
+ // For fluid there is only pressure not shear force, so the force for 
+ // fluid will be p*delta_{ij}      xiaoyan 05/20/2002
     int force_dim[] = {20,3};  
 
     tensor nodal_forcesFU(2,force_dim,0.0);
+    tensor I2("I", 2, def_dim_2);	   // delta_{ij} added 05/20/2002
 
     double r  = 0.0;
     double rw = 0.0;
@@ -4999,19 +5103,24 @@ tensor TwentyNodeBrick_u_p_U::nodal_forcesFU()
     double weight = 0.0;
 
     int dh_dim[] = {20,3};  
+    int h_dim[] = {20};     // added for shape function h  05/21/2002
 
     tensor dh(2, dh_dim, 0.0);
+    tensor h(1, h_dim, 0.0);
 
     stresstensor stress_at_GP(0.0);
+//    double  p_at_GP = 0;
+    tensor p_at_GP;		  // added 05/21/2002
+    double pp;			  // added 05/21/2002
 
     double det_of_Jacobian = 0.0;
 
-    straintensor incremental_strain;
+//    straintensor incremental_p;
 
-    static int disp_dim[] = {20,3};   
-    tensor incremental_displacements(2,disp_dim,0.0); // \Delta U
+    static int disp_dim[] = {20};   	// changed from {20,1}  05/20/2002
+    tensor incremental_p(1,disp_dim,0.0); // \Delta U
 
-    incremental_displacements = incr_dispDU();
+    incremental_p = incr_dispDp();
 
     tensor Jacobian;
     tensor JacobianINV;
@@ -5039,7 +5148,7 @@ tensor TwentyNodeBrick_u_p_U::nodal_forcesFU()
 
                 // derivatives of local coordiantes with respect to local coordiantes
                 dh = dh_drst_at(r,s,t);
-
+		h=interp_poli_at(r,s,t);
                 // Jacobian tensor ( matrix )
                 Jacobian = Jacobian_3D(dh);
                 //....                Jacobian.print("J");
@@ -5053,41 +5162,55 @@ tensor TwentyNodeBrick_u_p_U::nodal_forcesFU()
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
                 
-		incremental_strain =
-                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+//		incremental_strain =
+//                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
 //		if (where == 0)
 //   		//cout << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
 ////		cout << " el tag = "<< getTag();
 //		
-		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
-		if ( err)
-               	   g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::getStiffnessTensor (tag: %d), not converged",
-		    		 this->getTag());
+//		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
+//		if ( err)
+//               	   g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::getStiffnessTensor (tag: %d), not converged",
+//		    		 this->getTag());
 
 
 
 		//char *test = matpoint[where]->matmodel->getType();
 		// fmk - changing if so if into else block must be Template3Dep
 //		if (strcmp(matpoint[where]->matmodel->getType(),"Template3Dep") != 0)
-		   stress_at_GP = matpoint[where]->getStressTensor();
-
+//		   stress_at_GP = matpoint[where]->getStressTensor();
+		   p_at_GP=h("i")*incremental_p("i");
+		   pp=p_at_GP.val(1);
+/*		   p_at_GP = h.val(1)*incremental_p.val(1)+h.val(2)*incremental_p.val(2)
+		            +h.val(3)*incremental_p.val(3)+h.val(4)*incremental_p.val(4)
+			    +h.val(5)*incremental_p.val(5)+h.val(6)*incremental_p.val(6)
+			    +h.val(7)*incremental_p.val(7)+h.val(8)*incremental_p.val(8)
+			    +h.val(9)*incremental_p.val(9)+h.val(10)*incremental_p.val(10)
+			    +h.val(11)*incremental_p.val(11)+h.val(12)*incremental_p.val(12)
+			    +h.val(13)*incremental_p.val(13)+h.val(14)*incremental_p.val(14)
+			    +h.val(15)*incremental_p.val(15)+h.val(16)*incremental_p.val(16)
+			    +h.val(17)*incremental_p.val(17)+h.val(18)*incremental_p.val(18)
+			    +h.val(19)*incremental_p.val(19)+h.val(20)*incremental_p.val(20);
+ */			  
+//	        stress_at_GP = p_at_GP*I2("ab");
 
                 // nodal forces See Zienkievicz part 1 pp 108
                 nodal_forcesFU =
-                     nodal_forcesFU + dhGlobal("ib")*stress_at_GP("ab")*weight;
-                //nodal_forces.print("nf","\n\n Nodal Forces FU \n");
+                     nodal_forcesFU + dhGlobal("ib")*I2("ab")*pp*weight;
+                //nodal_forces.print("nf","\n\n Nodal Forces \n");
  
               }
           }
       }
 
-    //cout << "\n element no. " << getTag() << endln;
-    //nodal_forces.print("nf","\n Nodal Forces \n");
+//    cout << "\n element no. " << getTag() << endln;
+//    nodal_forcesFU.print("FU","\n Nodal Forces \n");
+ 
     return nodal_forcesFU;
 
   }
@@ -5115,6 +5238,9 @@ tensor TwentyNodeBrick_u_p_U::nodal_forces()
           nodal_FORCES.val(i,6) = nodalForceFU.val(i,2);
           nodal_FORCES.val(i,7) = nodalForceFU.val(i,3);
       }
+// the following two lines are added  on 05/02/2002
+//     cout << "\n element no. " << getTag() << endln;
+//     nodal_FORCES.print("nf","\n Nodal Forces \n");
      return nodal_FORCES;
   }
 
@@ -5190,7 +5316,7 @@ tensor TwentyNodeBrick_u_p_U::iterative_nodal_forcesFu()
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 	  
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -5221,8 +5347,8 @@ tensor TwentyNodeBrick_u_p_U::iterative_nodal_forcesFu()
 tensor TwentyNodeBrick_u_p_U::iterative_nodal_forcesFU()
   {
     int force_dim[] = {20,3}; 
-
     tensor nodal_forcesFU(2,force_dim,0.0);
+    tensor I2("I", 2, def_dim_2);	   // delta_{ij} added 05/20/2002
 
     double r  = 0.0;
     double rw = 0.0;
@@ -5235,12 +5361,20 @@ tensor TwentyNodeBrick_u_p_U::iterative_nodal_forcesFU()
     double weight = 0.0;
 
     int dh_dim[] = {20,3};   
+    int h_dim[] = {20};     // added for shape function h  05/21/2002
 
     tensor dh(2, dh_dim, 0.0);
+    tensor h(1, h_dim, 0.0);
 
     stresstensor stress_at_GP(0.0);
+    tensor p_at_GP;		  // added 05/21/2002
+    double pp;			  // added 05/21/2002
 
     double det_of_Jacobian = 0.0;
+    static int disp_dim[] = {20};   	// changed from {20,1}  05/20/2002
+    tensor incremental_p(1,disp_dim,0.0); // \Delta U
+
+    incremental_p = incr_dispDp();
 
     tensor Jacobian;
     tensor JacobianINV;
@@ -5272,6 +5406,7 @@ tensor TwentyNodeBrick_u_p_U::iterative_nodal_forcesFU()
                 //.....                           GP_c_r,GP_c_s,GP_c_t);
                 // derivatives of local coordiantes with respect to local coordiantes
                 dh = dh_drst_at(r,s,t);
+		h=interp_poli_at(r,s,t);
 
                 // Jacobian tensor ( matrix )
                 Jacobian = Jacobian_3D(dh);
@@ -5286,7 +5421,7 @@ tensor TwentyNodeBrick_u_p_U::iterative_nodal_forcesFU()
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 	  
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -5295,12 +5430,14 @@ tensor TwentyNodeBrick_u_p_U::iterative_nodal_forcesFU()
                 //stress_at_GP = GPiterative_stress[where];
                 
 		//stress_at_GP = ( matpoint[where].getTrialEPS() )->getStress();
-                stress_at_GP = matpoint[where]->getStressTensor();
-                stress_at_GP.reportshortpqtheta("\n iterative_stress at GAUSS point in iterative_nodal_force\n");
+//                stress_at_GP = matpoint[where]->getStressTensor();
+//                stress_at_GP.reportshortpqtheta("\n iterative_stress at GAUSS point in iterative_nodal_force\n");
+ 		   p_at_GP=h("i")*incremental_p("i");
+		   pp=p_at_GP.val(1);
 
                 // nodal forces See Zienkievicz part 1 pp 108
                 nodal_forcesFU =
-                  nodal_forcesFU + dhGlobal("ib")*stress_at_GP("ab")*weight;
+                  nodal_forcesFU + dhGlobal("ib")*I2("ab")*pp*weight;
                 //nodal_forces.print("nf","\n TwentyNodeBrick_u_p_U::iterative_nodal_forces Nodal Forces ~~~~\n");
 
               }
@@ -5381,7 +5518,7 @@ tensor TwentyNodeBrick_u_p_U::nodal_forces_from_stress(stresstensor & stress)
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
@@ -5484,7 +5621,7 @@ tensor TwentyNodeBrick_u_p_U::linearized_nodal_forces()
                 //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
 
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
