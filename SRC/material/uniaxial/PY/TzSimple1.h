@@ -24,6 +24,11 @@
 
 #include <UniaxialMaterial.h>
 
+	// Controls on internal iteration between spring components
+	static int TZmaxIterations = 20;      
+	static double TZtolerance  = 1.0e-12; 
+
+
 class TzSimple1 : public UniaxialMaterial
 {
   public:
@@ -78,10 +83,6 @@ class TzSimple1 : public UniaxialMaterial
     double Tt;			// Trial t
     double Ttangent;	// Trial tangent
 	double TzRate;      // Trial velocity
-
-	// Controls on internal iteration between spring components
-	int maxIterations;
-	double tolerance;
 
 	// Committed internal parameters for the NearField plastic component
 	double CNF_tin;			//  t at start of current plastic loading cycle

@@ -54,8 +54,8 @@ PySimple1::PySimple1()
   // should be static .. all PySimple1 materials share the same values & 
   // these values don't change
 
-  maxIterations = 20;
-  tolerance     = 1.0e-12;
+  PYmaxIterations = 20;
+  PYtolerance     = 1.0e-12;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -140,9 +140,9 @@ void PySimple1::getDrag(double ylast, double dy)
 	double pmax=drag*pult;
 	double dyTotal=TDrag_y - CDrag_y;
 
-	// Treat as elastic if dyTotal is below tolerance
+	// Treat as elastic if dyTotal is below PYtolerance
 	//
-	if(fabs(dyTotal*TDrag_tang/pult) < 10.0*tolerance) 
+	if(fabs(dyTotal*TDrag_tang/pult) < 10.0*PYtolerance) 
 	{
 		TDrag_p = TDrag_p + dy*TDrag_tang;
 		if(fabs(TDrag_p) >=pmax) TDrag_p =(TDrag_p/fabs(TDrag_p))*(1.0-1.0e-8)*pmax;
@@ -193,7 +193,7 @@ void PySimple1::getDrag(double ylast, double dy)
 	// Ensure that |p|<pmax and tangent not zero or negative.
 	//
 	if(fabs(TDrag_p) >=pmax) {
-		TDrag_p =(TDrag_p/fabs(TDrag_p))*(1.0-tolerance)*pmax;}
+		TDrag_p =(TDrag_p/fabs(TDrag_p))*(1.0-PYtolerance)*pmax;}
 	if(TDrag_tang <=1.0e-2*pult/y50) TDrag_tang = 1.0e-2*pult/y50;
 
 	return;
@@ -216,12 +216,12 @@ void PySimple1::getNearField(double ylast, double dy, double dy_old)
 	TNF_y = ylast + dy;
 	double NFdy = TNF_y - CNF_y;
 
-	// Treat as elastic if NFdy is below tolerance
+	// Treat as elastic if NFdy is below PYtolerance
 	//
-	if(fabs(NFdy*TNF_tang/pult) < 10.0*tolerance) 
+	if(fabs(NFdy*TNF_tang/pult) < 10.0*PYtolerance) 
 	{
 		TNF_p = TNF_p + dy*TNF_tang;
-		if(fabs(TNF_p) >=pult) TNF_p=(TNF_p/fabs(TNF_p))*(1.0-tolerance)*pult;
+		if(fabs(TNF_p) >=pult) TNF_p=(TNF_p/fabs(TNF_p))*(1.0-PYtolerance)*pult;
 		return;
 	}
 
@@ -302,7 +302,7 @@ void PySimple1::getNearField(double ylast, double dy, double dy_old)
 
 	// Ensure that |p|<pult and tangent not zero or negative.
 	//
-	if(fabs(TNF_p) >=pult) TNF_p=(TNF_p/fabs(TNF_p))*(1.0-tolerance)*pult;
+	if(fabs(TNF_p) >=pult) TNF_p=(TNF_p/fabs(TNF_p))*(1.0-PYtolerance)*pult;
 	if(TNF_tang <= 1.0e-2*pult/y50) TNF_tang = 1.0e-2*pult/y50;
 
     return;
@@ -348,10 +348,10 @@ PySimple1::setTrialStrain (double newy, double yRate)
 	// Iterate to distribute displacement among the series components.
 	// Use the incremental iterative strain & iterate at this strain.
 	//
-	for (int j=1; j < maxIterations; j++)
+	for (int j=1; j < PYmaxIterations; j++)
 	{
 		Tp = Tp + dp;
-		if(fabs(Tp) >(1.0-tolerance)*pult) Tp=(1.0-tolerance)*pult*(Tp/fabs(Tp));
+		if(fabs(Tp) >(1.0-PYtolerance)*pult) Tp=(1.0-PYtolerance)*pult*(Tp/fabs(Tp));
 
 		// Stress & strain update in Near Field element
 		double dy_nf = (Tp - TNF_p)/TNF_tang;
@@ -392,7 +392,7 @@ PySimple1::setTrialStrain (double newy, double yRate)
 
 		// Test for convergence
 		double psum = fabs(p_unbalance) + fabs(p_unbalance2) + fabs(p_unbalance3);
-		if(psum/pult < tolerance) break;
+		if(psum/pult < PYtolerance) break;
 	}
 	}
 
@@ -416,8 +416,8 @@ PySimple1::getStress(void)
 
 	// Limit the combined force to pult.
 	//
-	if(fabs(Tp + dashForce) >= (1.0-tolerance)*pult)
-		return (1.0-tolerance)*pult*(Tp+dashForce)/fabs(Tp+dashForce);
+	if(fabs(Tp + dashForce) >= (1.0-PYtolerance)*pult)
+		return (1.0-PYtolerance)*pult*(Tp+dashForce)/fabs(Tp+dashForce);
 	else return Tp + dashForce;
 }
 /////////////////////////////////////////////////////////////////////
@@ -562,8 +562,8 @@ PySimple1::revertToLastCommit(void)
 int 
 PySimple1::revertToStart(void)
 {
-	maxIterations = 20;
-	tolerance     = 1.0e-12;
+	PYmaxIterations = 20;
+	PYtolerance     = 1.0e-12;
 
 	// If soilType = 0, then it is entering with the default constructor.
 	// To avoid division by zero, set small nonzero values for terms.
@@ -575,7 +575,7 @@ PySimple1::revertToStart(void)
 
 	// Reset gap "drag" if zero (or negative).
 	//
-	if(drag <= tolerance) drag = tolerance;
+	if(drag <= PYtolerance) drag = PYtolerance;
 
 	// Only allow zero or positive dashpot values
 	//

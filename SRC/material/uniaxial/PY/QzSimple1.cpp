@@ -54,8 +54,8 @@ QzSimple1::QzSimple1()
   // should be static .. all PySimple1 materials share the same values & 
   // these values don't change
 
-  maxIterations = 20;
-  tolerance     = 1.0e-12;
+  QZmaxIterations = 20;
+  QZtolerance     = 1.0e-12;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -71,8 +71,8 @@ void QzSimple1::getGap(double zlast, double dz, double dz_old)
 	// For stability in Closure spring, limit "dz" step size to avoid
 	// overshooting on the "closing" or "opening" of the gap.
 	//
-	if(zlast > 0.0 && (zlast + dz) < -tolerance) dz = -tolerance - zlast;
-	if(zlast < 0.0 && (zlast + dz) >  tolerance) dz =  tolerance - zlast;
+	if(zlast > 0.0 && (zlast + dz) < -QZtolerance) dz = -QZtolerance - zlast;
+	if(zlast < 0.0 && (zlast + dz) >  QZtolerance) dz =  QZtolerance - zlast;
 	TGap_z = zlast + dz;
 
 	// Combine the Suction and Closure elements in parallel
@@ -126,9 +126,9 @@ void QzSimple1::getSuction(double zlast, double dz)
 	double Qmax=suction*Qult;
 	double dzTotal=TSuction_z - CSuction_z;
 
-	// Treat as elastic if dzTotal is below tolerance
+	// Treat as elastic if dzTotal is below QZtolerance
 	//
-	if(fabs(dzTotal*TSuction_tang/Qult) < 3.0*tolerance) 
+	if(fabs(dzTotal*TSuction_tang/Qult) < 3.0*QZtolerance) 
 	{
 		TSuction_Q = TSuction_Q + dz*TSuction_tang;
 		if(fabs(TSuction_Q) >= Qmax) 
@@ -182,8 +182,8 @@ void QzSimple1::getSuction(double zlast, double dz)
 
 	// Ensure that |Q|<Qmax and tangent not zero or negative.
 	//
-	if(fabs(TSuction_Q) >= (1.0-tolerance)*Qmax) {
-		TSuction_Q =(TSuction_Q/fabs(TSuction_Q))*(1.0-tolerance)*Qmax;}
+	if(fabs(TSuction_Q) >= (1.0-QZtolerance)*Qmax) {
+		TSuction_Q =(TSuction_Q/fabs(TSuction_Q))*(1.0-QZtolerance)*Qmax;}
 	if(TSuction_tang <=1.0e-4*Qult/z50) TSuction_tang = 1.0e-4*Qult/z50;
 
 	return;
@@ -207,12 +207,12 @@ void QzSimple1::getNearField(double zlast, double dz, double dz_old)
 	TNF_z = zlast + dz;
 	double NFdz = TNF_z - CNF_z;
 
-	// Treat as elastic if NFdz is below tolerance
+	// Treat as elastic if NFdz is below QZtolerance
 	//
-	if(fabs(NFdz*TNF_tang/Qult) < 3.0*tolerance) 
+	if(fabs(NFdz*TNF_tang/Qult) < 3.0*QZtolerance) 
 	{
 		TNF_Q = TNF_Q + dz*TNF_tang;
-		if(fabs(TNF_Q) >=Qult) TNF_Q=(TNF_Q/fabs(TNF_Q))*(1.0-tolerance)*Qult;
+		if(fabs(TNF_Q) >=Qult) TNF_Q=(TNF_Q/fabs(TNF_Q))*(1.0-QZtolerance)*Qult;
 		return;
 	}
 
@@ -295,8 +295,8 @@ void QzSimple1::getNearField(double zlast, double dz, double dz_old)
 
 	// Ensure that |Q|<Qult and tangent not zero or negative.
 	//
-	if(fabs(TNF_Q) >= (1.0-tolerance)*Qult) { 
-		TNF_Q=(TNF_Q/fabs(TNF_Q))*(1.0-tolerance)*Qult;
+	if(fabs(TNF_Q) >= (1.0-QZtolerance)*Qult) { 
+		TNF_Q=(TNF_Q/fabs(TNF_Q))*(1.0-QZtolerance)*Qult;
 		TNF_tang = 1.0e-4*Qult/z50;
 	}
 	if(TNF_tang <= 1.0e-4*Qult/z50) TNF_tang = 1.0e-4*Qult/z50;
@@ -344,10 +344,10 @@ QzSimple1::setTrialStrain (double newz, double zRate)
 	// Iterate to distribute displacement among the series components.
 	// Use the incremental iterative strain & iterate at this strain.
 	//
-	for (int j=1; j < maxIterations; j++)
+	for (int j=1; j < QZmaxIterations; j++)
 	{
 		TQ = TQ + dQ;
-		if(fabs(TQ) >(1.0-tolerance)*Qult) TQ=(1.0-tolerance)*Qult*(TQ/fabs(TQ));
+		if(fabs(TQ) >(1.0-QZtolerance)*Qult) TQ=(1.0-QZtolerance)*Qult*(TQ/fabs(TQ));
 
 		// Stress & strain update in Near Field element
 		double dz_nf = (TQ - TNF_Q)/TNF_tang;
@@ -388,7 +388,7 @@ QzSimple1::setTrialStrain (double newz, double zRate)
 
 		// Test for convergence
 		double Qsum = (fabs(Q_unbalance) + fabs(Q_unbalance2) + fabs(Q_unbalance3))/3.0;
-		if(Qsum/Qult < tolerance) break;
+		if(Qsum/Qult < QZtolerance) break;
 	}
 	}
 
@@ -412,8 +412,8 @@ QzSimple1::getStress(void)
 
 	// Limit the combined force to Qult.
 	//
-	if(fabs(TQ + dashForce) >= (1.0-tolerance)*Qult)
-		return (1.0-tolerance)*Qult*(TQ+dashForce)/fabs(TQ+dashForce);
+	if(fabs(TQ + dashForce) >= (1.0-QZtolerance)*Qult)
+		return (1.0-QZtolerance)*Qult*(TQ+dashForce)/fabs(TQ+dashForce);
 	else return TQ + dashForce;
 }
 /////////////////////////////////////////////////////////////////////
@@ -552,12 +552,12 @@ QzSimple1::revertToLastCommit(void)
 int 
 QzSimple1::revertToStart(void)
 {
-	maxIterations = 20;
-	tolerance     = 1.0e-12;
+	QZmaxIterations = 20;
+	QZtolerance     = 1.0e-12;
 
 	// Reset gap "suction" if zero (or negative) or exceeds max value of 0.1
 	//
-	if(suction <= tolerance) suction = tolerance;
+	if(suction <= QZtolerance) suction = QZtolerance;
 	if(suction > 0.1){
 		suction = 0.1;
 		g3ErrorHandler->warning("%s -- setting suction to max value of 0.1",

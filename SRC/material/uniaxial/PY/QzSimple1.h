@@ -25,6 +25,12 @@
 
 #include <UniaxialMaterial.h>
 
+
+	// Controls on internal iteration between components
+	static int QZmaxIterations = 20;      
+	static double QZtolerance  = 1.0e-12; 
+
+
 class QzSimple1 : public UniaxialMaterial
 {
   public:
@@ -90,10 +96,6 @@ class QzSimple1 : public UniaxialMaterial
     double TQ;			// Trial Q
     double Ttangent;	// Trial tangent
 	double TzRate;      // Trial velocity
-
-	// Controls on internal iteration between components
-	int maxIterations;
-	double tolerance;
 
 	// Committed internal parameters for the NearField rigid-plastic component
 	double CNF_Qinr;		//  Q at start of current plastic loading cycle - right

@@ -53,8 +53,8 @@ TzSimple1::TzSimple1()
   // should be static .. all PySimple1 materials share the same values & 
   // these values don't change
 
-  maxIterations = 20;
-  tolerance     = 1.0e-12;
+  TZmaxIterations = 20;
+  TZtolerance     = 1.0e-12;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -86,13 +86,13 @@ void TzSimple1::getNearField(double zlast, double dz, double dz_old)
 	TNF_z = zlast + dz;
 	double dzTotal = TNF_z - CNF_z;
 
-	// Treat as elastic if dzTotal is below tolerance
+	// Treat as elastic if dzTotal is below TZtolerance
 	//
-	if(fabs(dzTotal*TNF_tang/tult) < 10.0*tolerance) 
+	if(fabs(dzTotal*TNF_tang/tult) < 10.0*TZtolerance) 
 	{
 		TNF_t = TNF_t + dz*TNF_tang;
-		if(fabs(TNF_t) >=(1.0-tolerance)*tult) 
-			TNF_t =(TNF_t/fabs(TNF_t))*(1.0-tolerance)*tult;
+		if(fabs(TNF_t) >=(1.0-TZtolerance)*tult) 
+			TNF_t =(TNF_t/fabs(TNF_t))*(1.0-TZtolerance)*tult;
 		return;
 	}
 
@@ -143,7 +143,7 @@ void TzSimple1::getNearField(double zlast, double dz, double dz_old)
 	// Ensure that |t|<tult and tangent not zero or negative.
 	//
 	if(fabs(TNF_t) >=tult) {
-		TNF_t =(TNF_t/fabs(TNF_t))*(1.0-tolerance)*tult;}
+		TNF_t =(TNF_t/fabs(TNF_t))*(1.0-TZtolerance)*tult;}
 	if(TNF_tang <=1.0e-4*tult/z50) TNF_tang = 1.0e-4*tult/z50;
 
 	return;
@@ -187,10 +187,10 @@ TzSimple1::setTrialStrain (double newz, double zRate)
 	// Iterate to distribute displacement between elastic & plastic components.
 	// Use the incremental iterative strain & iterate at this strain.
 	//
-	for (int j=1; j < maxIterations; j++)
+	for (int j=1; j < TZmaxIterations; j++)
 	{
 		Tt = Tt + dt;
-		if(fabs(Tt) >(1.0-tolerance)*tult) Tt=(1.0-tolerance)*tult*(Tt/fabs(Tt));
+		if(fabs(Tt) >(1.0-TZtolerance)*tult) Tt=(1.0-TZtolerance)*tult*(Tt/fabs(Tt));
 
 		// Stress & strain update in Near Field element
 		double dz_nf = (Tt - TNF_t)/TNF_tang;
@@ -221,7 +221,7 @@ TzSimple1::setTrialStrain (double newz, double zRate)
 
 		// Test for convergence
 		double tsum = fabs(t_unbalance) + fabs(t_unbalance2);
-		if(tsum/tult < tolerance) break;
+		if(tsum/tult < TZtolerance) break;
 	}
 	}
 
@@ -245,8 +245,8 @@ TzSimple1::getStress(void)
 
 	// Limit the combined force to tult.
 	//
-	if(fabs(Tt + dashForce) >= (1.0-tolerance)*tult)
-		return (1.0-tolerance)*tult*(Tt+dashForce)/fabs(Tt+dashForce);
+	if(fabs(Tt + dashForce) >= (1.0-TZtolerance)*tult)
+		return (1.0-TZtolerance)*tult*(Tt+dashForce)/fabs(Tt+dashForce);
 	else return Tt + dashForce;
 }
 /////////////////////////////////////////////////////////////////////
@@ -350,8 +350,8 @@ TzSimple1::revertToLastCommit(void)
 int 
 TzSimple1::revertToStart(void)
 {
-	maxIterations = 20;
-	tolerance     = 1.0e-12;
+	TZmaxIterations = 20;
+	TZtolerance     = 1.0e-12;
 
 	// If tzType = 0, then it is entering with the default constructor.
 	// To avoid division by zero, set small nonzero values for terms.

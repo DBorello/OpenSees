@@ -25,6 +25,10 @@
 
 #include <UniaxialMaterial.h>
 
+	// Controls on internal iteration between spring components
+	static int PYmaxIterations = 20;
+	static double PYtolerance  = 1.0e-12;
+
 class PySimple1 : public UniaxialMaterial
 {
   public:
@@ -90,10 +94,6 @@ class PySimple1 : public UniaxialMaterial
     double Tp;			// Trial y
     double Ttangent;	// Trial tangent
 	double TyRate;      // Trial velocity
-
-	// Controls on internal iteration between spring components
-	int maxIterations;
-	double tolerance;
 
 	// Committed internal parameters for the NearField rigid-plastic component
 	double CNFpinr;		//  p at start of current plastic loading cycle - right side
