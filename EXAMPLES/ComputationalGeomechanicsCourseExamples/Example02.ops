@@ -40,22 +40,28 @@ fix 4   0 1 1
 #fix 8 1 0 1
 
 #Elastic-plastic model
+#================================================================
 # von Mises model
+# Yield surface
 set DPys "-VM"
+
+# Potential surface
 set DPps "-VM"
-set ES1  "-Leq  0.0"
-set ET1  "-Linear  0.0"
-set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
-    
-# ElasticFlag = 0, Pressure independent Isotropic
-#             = 1, Pressure dendent Isotropic
-#             = 2, Pressure independent Cross Anisotropic
-#             = 3, Pressure dependent Cross Anisotropic
-#      default: 0, Pressure indendent Isotropic 
-    
-set EPS "100.0 100.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp -ElasticFlag 0"
-#
-#
+
+#Scalar evolution law
+set ES1  "-Leq "
+
+#Tensorial evolution law
+set ET1  "-Linear"
+
+# initial stress
+set stressp "0.10 0 0 0 0.10 0 0 0 0.10"
+
+# EPState
+#____________E______Eo_____v__rho________________Cu(undrained shear strength)
+set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2 10.0 0.0 -stressp $stressp"
+
+# Creating nDMaterial using Template Elastic-PLastic Model
 nDMaterial Template3Dep 1 -YS $DPys -PS $DPps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
 
 
@@ -110,8 +116,8 @@ integrator DisplacementControl  5   3   $dU
 # Convergence Tests
 #
 # this is needed by Newton 
-test NormDispIncr 1.0e-6 30 1
-#test NormUnbalance 1.0e-6 30 1
+#test NormDispIncr 1.0e-6 30 1
+test NormUnbalance 1.0e-6 30 1
 
 
 
@@ -136,7 +142,7 @@ for {set i 1} {$i <=1} {incr i} {
 #print node 2
 #print node 3
 #print node 4
-#print node 5
+print node 5
 #print node 6
 #print node 7
 #print node 8
@@ -146,8 +152,8 @@ for {set i 1} {$i <=1} {incr i} {
   }
 
 
-print node 5
-print -ele 1
+#print node 5
+#print -ele 1
 
 wipe
 
