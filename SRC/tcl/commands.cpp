@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2001-06-13 05:13:21 $
+// $Revision: 1.7 $
+// $Date: 2001-06-14 22:22:22 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -2116,7 +2116,7 @@ nodeDisp(ClientData clientData, Tcl_Interp *interp, int argc, char **argv)
     }
     
     // now we copy the value to the tcl string that is returned
-    sprintf(interp->result,"%f",value);
+    sprintf(interp->result,"%35.20f",value);
     
 	
     return TCL_OK;
