@@ -596,8 +596,8 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
     //cerr << " p = " <<  p;
 
     double po = 100.0; //kPa
-    if (p <= 0.5) 
-      p = 0.5;
+    if (p <= 0.001) 
+      p = 0.001;
     Ey = Ey * pow(p/po, 0.5); //0.5
     //cerr << " Ec = " << Ey << endln;
 
@@ -633,8 +633,8 @@ tensor Template3Dep::ElasticStiffnessTensor(void) const
     //cerr << " p = " <<  p;
 
     double po = 100.0; //kPa
-    if (p <= 0.5) 
-      p = 0.5;
+    if (p <= 0.001) 
+      p = 0.001;
     double E = Ey * pow(p/po, 0.5);//0.5
     //cerr << " Eo = " << Ey ;
     //cerr << " Ec = " << E << endln;
@@ -793,11 +793,6 @@ const stresstensor  Template3Dep::getStressTensor(void)
     return ret;
 }
 
-////================================================================================
-//const Tensor& Template3Dep::getStrainTensor(void)
-//{
-//    return EPS->getStrain();
-//}
 
 //================================================================================
 const straintensor Template3Dep::getStrainTensor(void)
@@ -806,11 +801,18 @@ const straintensor Template3Dep::getStrainTensor(void)
 }
 
 //================================================================================
+const straintensor Template3Dep::getPlasticStrainTensor(void)
+{
+    return EPS->getPlasticStrain();
+}
+
+
+//================================================================================
 int Template3Dep::commitState(void)
 {
-	int err;
-	err = getEPS()->commitState();
-	return err;
+    int err;
+    err = getEPS()->commitState();
+    return err;
 }
 
 //================================================================================
@@ -984,8 +986,7 @@ EPS->setConverged(rval.getConverged());
     EPS->setdPlasticStrain(rval.getdPlasticStrain());
     EPS->setNScalarVar( rval.getNScalarVar() );
 
-	int i;
-    for (i = 0; i <rval.getNScalarVar(); i++)
+    for (int i = 0; i <rval.getNScalarVar(); i++)
       EPS->setScalarVar(i+1, rval.getScalarVar(i+1));
     
     
@@ -995,20 +996,20 @@ EPS->setConverged(rval.getConverged());
     EPS->setStress_commit(rval.getStress_commit());      	 
     EPS->setStrain_commit(rval.getStrain_commit());      	 
     
-    for (i = 0; i <rval.getNScalarVar(); i++)
+    for (int i = 0; i <rval.getNScalarVar(); i++)
       EPS->setScalarVar_commit(i+1, rval.getScalarVar_commit(i+1));   	 
     
-    for (i = 0; i <rval.getNTensorVar(); i++)
+    for (int i = 0; i <rval.getNTensorVar(); i++)
        EPS->setTensorVar_commit(i+1, rval.getTensorVar_commit(i+1));   	 
     
     EPS->Eep_commit = (rval.getEep_commit());
     EPS->Stress_init = rval.getStress_init();
     EPS->Strain_init = rval.getStrain_init();
 
-    for (i = 0; i <rval.getNScalarVar(); i++)
+    for (int i = 0; i <rval.getNScalarVar(); i++)
        EPS->setScalarVar_init(i+1, rval.getScalarVar_init(i+1));
 
-    for (i = 0; i <rval.getNTensorVar(); i++)
+    for (int i = 0; i <rval.getNTensorVar(); i++)
        EPS->setTensorVar_init(i+1, rval.getTensorVar_init(i+1));
 
     EPS->Eep_init = rval.getEep_init();
@@ -1016,10 +1017,6 @@ EPS->setConverged(rval.getConverged());
    
    
 }    	   
-
-
-
-
 
 
 
@@ -1547,8 +1544,7 @@ EPState Template3Dep::ForwardEulerEPState( straintensor &strain_increment)
 	double dS= 0.0;
 	double S = 0.0;
 
-	int ii;
-	for (ii = 1; ii <= NS; ii++) {
+	for (int ii = 1; ii <= NS; ii++) {
               dS = Delta_lambda * h_s[ii-1] ;       // Increment to the scalar internal var
               S  = forwardEPS.getScalarVar(ii);     // Get the old value of the scalar internal var
               forwardEPS.setScalarVar(ii, S + dS ); // Update internal scalar var
@@ -1558,7 +1554,7 @@ EPState Template3Dep::ForwardEulerEPState( straintensor &strain_increment)
 	stresstensor T;
 	stresstensor new_T;
 
-	for (ii = 1; ii <= NT; ii++) {
+	for (int ii = 1; ii <= NT; ii++) {
 	      dT = h_t[ii-1]*Delta_lambda  ;       // Increment to the tensor internal var
               T  = forwardEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
               new_T = T + dT;
@@ -1774,8 +1770,7 @@ EPState Template3Dep::SemiBackwardEulerEPState( const straintensor &strain_incre
 	int NS = SemibackwardEPS.getNScalarVar();
 	int NT = SemibackwardEPS.getNTensorVar();
 
-	int ii;
-	for (ii = 1; ii <= NS; ii++) {
+	for (int ii = 1; ii <= NS; ii++) {
               dS = Delta_lambda * h_s[ii-1] ;       // Increment to the scalar internal var
               S  = SemibackwardEPS.getScalarVar(ii);     // Get the old value of the scalar internal var
               SemibackwardEPS.setScalarVar(ii, S + dS ); // Update internal scalar var
@@ -1792,7 +1787,7 @@ EPState Template3Dep::SemiBackwardEulerEPState( const straintensor &strain_incre
 
 	stresstensor new_T;
 
-	for (ii = 1; ii <= NT; ii++) {
+	for (int ii = 1; ii <= NT; ii++) {
 	      dT = h_t[ii-1] * Delta_lambda;            // Increment to the tensor internal var
               T  = SemibackwardEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
               new_T = T + dT;
@@ -1881,11 +1876,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
 
   double Fold = 0.0;
   tensor temp3lower;
-  tensor temp4lower;
-  tensor temp5lower;
   tensor temp5;
-  tensor Ttemp6;
-  tensor Ttemp7;
   double temp6 = 0.0;
   double upper = 0.0;
 
@@ -2224,12 +2215,9 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           //outfornow          d2Qodqast = d2Qoverdqast(elastic_plastic_predictor_stress);
           //outfornow          dQodsextended = dQods + d2Qodqast * Delta_lambda * h_;
           //outfornow          temp3lower = dFods("mn")*Tinv("ijmn")*E("ijkl")*dQodsextended("kl");
-//          temp3lower = dFods("mn")*Tinv("ijmn")*E("ijkl")*dQods("kl"); (fails with new g++...
-          temp3lower = dFods("mn")*Tinv("ijmn");
-          temp4lower = E("ijkl")*dQods("kl");
-          temp5lower = temp3lower("ij")* temp4lower("ij");
-          temp5lower.null_indices();
-          lower = temp5lower.trace();	  
+          temp3lower = dFods("mn")*Tinv("ijmn")*E("ijkl")*dQods("kl");
+          temp3lower.null_indices();
+          lower = temp3lower.trace();	  
           lower = lower - hardMod_;
 
           temp5 = (residual("ij") * Tinv("ijmn")) * dFods("mn");
@@ -2255,11 +2243,8 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
           //outfornow            ((residual("ij")*Tinv("ijmn"))+
           //outfornow            ((E("ijkl")*dQodsextended("kl"))*Tinv("ijmn")*Delta_lambda) )*-1.0;
           //::printf("    Delta_lambda = %.8e\n", Delta_lambda);
-//          dsigma = ( (residual("ij")*Tinv("ijmn") ) +
-//                   ( (E("ijkl")*dQods("kl"))*Tinv("ijmn")*delta_lambda) )*(-1.0); //*-1.0???
-									 Ttemp6 = 	 E("ijkl")*dQods("kl");
-									 Ttemp7 =   residual("ij")*Tinv("ijmn");
-          dsigma = ( Ttemp7 + (Ttemp6("ij")*Tinv("ijmn")*delta_lambda) )*(-1.0); //*-1.0???
+          dsigma = ( (residual("ij")*Tinv("ijmn") )+
+                   ( (E("ijkl")*dQods("kl"))*Tinv("ijmn")*delta_lambda) )*(-1.0); //*-1.0???
 
           dsigma.null_indices();
 	  //dsigma.reportshortpqtheta("\n......dsigma ");
@@ -2285,15 +2270,14 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   	  stresstensor dT;
   	  stresstensor T;
   	  stresstensor new_T;
-
-	  int ii;
-	  for (ii = 1; ii <= NS; ii++) {
+  	       
+	  for (int ii = 1; ii <= NS; ii++) {
              dS = delta_lambda * h_s[ii-1] ;             // Increment to the scalar internal var
              S  = EP_PredictorEPS.getScalarVar(ii);      // Get the old value of the scalar internal var
              EP_PredictorEPS.setScalarVar(ii, S + dS );  // Update internal scalar var
 	  }
 
-	  for (ii = 1; ii <= NT; ii++) {
+	  for (int ii = 1; ii <= NT; ii++) {
 	     dT = h_t[ii-1] * delta_lambda;            // Increment to the tensor internal var
              T  = EP_PredictorEPS.getTensorVar(ii);     // Get the old value of the tensor internal var
              new_T = T + dT;
@@ -2503,15 +2487,16 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
     	   double lower = temp3lower.trace();
     	   lower = lower - hardMod_;  // h
     	      
-//    	   tensor upper = R("pqkl")*dQods("kl")*dFods("ij")*R("ijmn");
-//									 fprintf(stderr,"line 2507 Template3Dep.cpp\n");
-    	   temp5  = R("pqkl")*dQods("kl");
-    	   Ttemp6 = dFods("ij")*R("ijmn");
-    	   tensor Tupper = temp5("pq")*Ttemp6("mn");
-    	   Tupper.null_indices();
-    	   tensor Ep = Tupper*(1./lower);
+    	   //tensor upper = R("pqkl")*dQods("kl")*dFods("ij")*R("ijmn");
+    	   tensor upper11 = R("pqkl")*dQods("kl");
+    	   tensor upper22 = dFods("ij")*R("ijmn");
+	   upper11.null_indices();
+	   upper22.null_indices();
+    	   tensor upper = upper11("pq")*upper22("mn");    	   
+	   
+	   upper.null_indices();
+    	   tensor Ep = upper*(1./lower);
     	   tensor Eep =  R - Ep; // elastoplastic constitutive tensor
-//									 fprintf(stderr,"line 2514 Template3Dep.cpp\n");
 
            //Set Elasto-Plastic stiffness tensor
            EP_PredictorEPS.setEep(Eep);
@@ -2946,6 +2931,7 @@ ostream& operator<< (ostream& os, const Template3Dep & MP)
     os << endln;           
     return os;
 }  
+
 
 #endif
 

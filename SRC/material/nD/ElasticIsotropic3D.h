@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $                                                              
-// $Date: 2001-07-25 19:56:34 $                                                                  
+// $Revision: 1.11 $                                                              
+// $Date: 2001-08-14 22:46:16 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $                                                                
                                                                         
                                                                         
@@ -57,7 +57,7 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     const Tensor &getTangentTensor (void);
     const stresstensor getStressTensor (void);
     const straintensor getStrainTensor (void);
-    //const Tensor& getStrainTensor (void);
+    const straintensor getPlasticStrainTensor (void);
 
     int commitState (void);
     int revertToLastCommit (void);
@@ -73,6 +73,8 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     
     void Print(ostream &s, int flag =0);
     void setInitElasticStiffness(void);
+
+  protected:
 
   private:
     static Vector sigma;               // Stress vector

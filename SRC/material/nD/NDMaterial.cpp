@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $                                                              
-// $Date: 2001-07-21 20:13:13 $                                                                  
+// $Revision: 1.8 $                                                              
+// $Date: 2001-08-14 22:46:16 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -38,12 +38,14 @@
 #include <Matrix.h>
 #include <Vector.h>
 #include <stresst.h>
+#include <straint.h>
 #include <MaterialResponse.h>
 
 Matrix NDMaterial::errMatrix(1,1);
 Vector NDMaterial::errVector(1);
 Tensor NDMaterial::errTensor(2, def_dim_2, 0.0 );
 stresstensor NDMaterial::errstresstensor;
+straintensor NDMaterial::errstraintensor;
 
 NDMaterial::NDMaterial(int tag, int classTag)
 :Material(tag,classTag)
@@ -175,8 +177,22 @@ const stresstensor NDMaterial::getStressTensor(void)
 const straintensor NDMaterial::getStrainTensor(void)
 {
    g3ErrorHandler->fatal("NDMaterial::getStrainTensor -- subclass responsibility");
-   return errTensor;    
+   return errstraintensor;    
 }
+
+const straintensor NDMaterial::getPlasticStrainTensor(void)
+{
+   g3ErrorHandler->fatal("NDMaterial::getPlasticStrainTensor -- subclass responsibility");
+   return errstraintensor;    
+}
+
+
+//const Tensor &
+//NDMaterial::getStrainTensor(void)
+//{
+//   g3ErrorHandler->fatal("NDMaterial::getStrainTensor -- subclass responsibility");
+//   return errTensor;    
+//}
 
 Response*
 NDMaterial::setResponse (char **argv, int argc, Information &matInfo)

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-21 20:13:13 $
+// $Revision: 1.6 $
+// $Date: 2001-08-14 22:46:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.h,v $
                                                                         
                                                                         
@@ -78,6 +78,7 @@ class ElasticIsotropicMaterial : public NDMaterial
     const Tensor &getTangentTensor (void);
     const stresstensor getStressTensor (void);
     const straintensor getStrainTensor (void);
+    const straintensor getPlasticStrainTensor (void);
     
     
     virtual int commitState (void);

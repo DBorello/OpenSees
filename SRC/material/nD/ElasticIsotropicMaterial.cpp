@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $                                                              
-// $Date: 2001-07-25 19:57:35 $                                                                  
+// $Revision: 1.13 $                                                              
+// $Date: 2001-08-14 22:46:16 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -124,7 +124,7 @@ ElasticIsotropicMaterial::getCopy (const char *type)
     else if (strcmp(type,"PressureDependentElastic3D") == 0 ) 
     {
       PressureDependentElastic3D *theModel;
-      theModel = new PressureDependentElastic3D(this->getTag(), E, v, 0.6, 100.0, 0.0);
+      theModel = new PressureDependentElastic3D(this->getTag(), E, v, 0.0, 0.5, 100.0, 0.0);
     // DOES NOT COPY sigma, D, and epsilon ...
     // This function should only be called during element instantiation, so
     // no state determination is performed on the material model object
@@ -251,7 +251,7 @@ ElasticIsotropicMaterial::setTrialStrainIncr (const Tensor &v, const Tensor &r)
 const Tensor&
 ElasticIsotropicMaterial::getTangentTensor (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getTangent -- subclass responsibility");
+	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getTangentTensor -- subclass responsibility");
 
 	// Just to make it compile
 	Tensor *t = new Tensor;
@@ -260,19 +260,27 @@ ElasticIsotropicMaterial::getTangentTensor (void)
 
 const stresstensor ElasticIsotropicMaterial::getStressTensor (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStress -- subclass responsibility");
+	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStressTensor -- subclass responsibility");
 
 	// Just to make it compile
-     stresstensor t;
-	 return t;
+        stresstensor t;
+	return t;
 }
 
 const straintensor ElasticIsotropicMaterial::getStrainTensor (void)
 {
-	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStrain -- subclass responsibility");
+	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStrainTensor -- subclass responsibility");
 	// Just to make it compile
-     straintensor t;
-	 return t;
+        straintensor t;
+        return t;
+}
+
+const straintensor ElasticIsotropicMaterial::getPlasticStrainTensor (void)
+{
+	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getPlasticStrainTensor -- subclass responsibility");
+	// Just to make it compile
+	straintensor t;
+        return t;
 }
 
 int

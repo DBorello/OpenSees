@@ -142,19 +142,18 @@ class Template3Dep : public NDMaterial
     int setTrialStrainIncr(const Tensor &v, const Tensor &r) ;
     const Tensor &getTangentTensor(void) ;
     const stresstensor getStressTensor(void) ;
-    //const Tensor &getStrainTensor(void) ;
     const straintensor getStrainTensor(void) ;
+    const straintensor getPlasticStrainTensor(void); //Added Joey Aug. 13, 2001
 
     EPState * getEPS() const;
     void setEPS( EPState &eps);
 
-    int commitState(void) ;
-    int revertToLastCommit(void) ;
-    int revertToStart(void) ;
+    int commitState(void);
+    int revertToLastCommit(void);
+    int revertToStart(void);
     
     NDMaterial *getCopy(void);
     NDMaterial *getCopy(const char *code) ;
-
 
     //Template3Dep getCopy(void);  //????/
     //Template3Dep getCopy(const char *code) ;///???/
@@ -253,7 +252,7 @@ class Template3Dep : public NDMaterial
 
     PotentialSurface *PS;
 
-    EPState *EPS;    
+    EPState *EPS;
                                
     //Scalar variable evolution laws (currently at most 4  allowed)
     EvolutionLaw_S *ELS1; 

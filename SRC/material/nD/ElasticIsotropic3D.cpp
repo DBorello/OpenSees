@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.12 $                                                              
-// $Date: 2001-07-25 20:54:07 $                                                                  
+// $Revision: 1.13 $                                                              
+// $Date: 2001-08-14 22:46:16 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $                                                                
 
 //Boris Jeremic and Zhaohui Yang ___ 02-10-2000
@@ -174,7 +174,7 @@ ElasticIsotropic3D::setTrialStrainIncr (const Tensor &v, const Tensor &r)
 const Tensor&
 ElasticIsotropic3D::getTangentTensor (void)
 {
-			 return Dt_commit;
+    return Dt_commit;
 }
 
 const stresstensor
@@ -184,11 +184,18 @@ ElasticIsotropic3D::getStressTensor (void)
     return Stress;
 }
 
-//const Tensor&
 const straintensor
 ElasticIsotropic3D::getStrainTensor (void)
 {
     return Strain;
+}
+
+const straintensor
+ElasticIsotropic3D::getPlasticStrainTensor (void)
+{
+    //Return zero straintensor
+    straintensor t;
+    return t;
 }
 
 int

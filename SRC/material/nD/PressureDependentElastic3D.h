@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $                                                              
-// $Date: 2001-07-25 19:58:14 $                                                                  
+// $Revision: 1.3 $                                                              
+// $Date: 2001-08-14 22:46:16 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/PressureDependentElastic3D.h,v $                                                                
 // Pressure dependent elastic isotropic material
                                                                         
@@ -40,14 +40,7 @@
 class PressureDependentElastic3D : public ElasticIsotropicMaterial
 {
   public:
-    PressureDependentElastic3D (int tag, 
-			                             double E = 0.0, 
-																															 double nu = 0.0, 
-																															 double rho = 0.0, 
-																															 double expp = 0.6, 
-																															 double pr = 100.0, 
-																															 double pop = 0.5);
-
+    PressureDependentElastic3D (int tag, double E, double nu, double rhop, double expp = 0.6, double pr = 100.0, double pop = 0.5);
     PressureDependentElastic3D ();
     ~PressureDependentElastic3D ();
 
@@ -66,7 +59,7 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
     const Tensor &getTangentTensor (void);
     const stresstensor getStressTensor (void);
     const straintensor getStrainTensor (void);
-    //const Tensor& getStrainTensor (void);
+    const straintensor getPlasticStrainTensor (void);
 
     int commitState (void);
     int revertToLastCommit (void);
@@ -90,8 +83,8 @@ class PressureDependentElastic3D : public ElasticIsotropicMaterial
   protected:
 
   private:
-    static Vector sigma;		// Stress vector
-    static Matrix D;			// Elastic constants
+    Vector sigma;		// Stress vector
+    Matrix D;			// Elastic constants
     Vector epsilon;		// Strain vector
 
     double exp;                 // exponent usually 0.6
