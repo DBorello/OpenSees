@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2001-07-12 00:24:42 $
+// $Revision: 1.10 $
+// $Date: 2001-07-13 21:12:38 $
 // $Source: /usr/local/cvs/OpenSees/SRC/classTags.h,v $
                                                                         
                                                                         
@@ -180,6 +180,11 @@
 #define ELE_TAG_BbarBrick                  3457 
 #define ELE_TAG_EnhancedQuad               3459
 #define ELE_TAG_ConstantPressureVolumeQuad 3456 
+#define ELE_TAG_DispBeamColumn2d 9870
+#define ELE_TAG_DispBeamColumn3d 9871
+#define ELE_TAG_HingedBeam2d     9872
+#define ELE_TAG_HingedBeam3d     9873
+
 
 #define CRDTR_TAG_LinearCrdTransf2d 1
 #define CRDTR_TAG_PDeltaCrdTransf2d 2

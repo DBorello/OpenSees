@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-07-11 23:08:10 $
+// $Revision: 1.6 $
+// $Date: 2001-07-13 21:11:24 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/TclElementCommands.cpp,v $
                                                                         
                                                                         
@@ -123,11 +123,9 @@ TclModelBuilder_addBeamWithHinges(ClientData, Tcl_Interp *, int, char **,
 extern int 
 TclModelBuilder_addFourNodeQuad(ClientData, Tcl_Interp *, int, char **,
 				Domain*, TclModelBuilder *);
-/*  ELEMENTS NOT YET ADDED TO CVS
 extern int 
 TclModelBuilder_addDispBeamColumn(ClientData, Tcl_Interp *, int, char **,
 				  Domain*, TclModelBuilder *);
-*/
 		   
 
 //BJ Joey 
@@ -174,14 +172,10 @@ TclModelBuilderElementCommand(ClientData clientData, Tcl_Interp *interp,
           int result = TclModelBuilder_addFrameElement(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
     return result;
-
-  /* ** ELEMENT NOT YET ADDED TO CVS
   } else if (strcmp(argv[1],"dispBeamColumn") == 0) {
           int result = TclModelBuilder_addDispBeamColumn(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);
     return result;
-  ********************************* */
-
   } else if (strcmp(argv[1],"beamWithHinges") == 0) {
 	  int result = TclModelBuilder_addBeamWithHinges(clientData, interp, argc, argv,
 						 theTclDomain, theTclBuilder);

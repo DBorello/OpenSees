@@ -197,7 +197,10 @@ ELE_LIBS   =  $(FE)/element/Element.o \
 	$(FE)/element/beamWithHinges/BeamWithHinges2d.o \
 	$(FE)/element/beamWithHinges/BeamWithHinges3d.o \
 	$(FE)/element/fourNodeQuad/TclFourNodeQuadCommand.o \
-	$(FE)/element/fourNodeQuad/FourNodeQuad.o 
+	$(FE)/element/fourNodeQuad/FourNodeQuad.o \
+	$(FE)/element/dispBeamColumn/DispBeamColumn2d.o \
+	$(FE)/element/dispBeamColumn/DispBeamColumn3d.o \
+	$(FE)/element/dispBeamColumn/TclDispBeamColumnCommand.o
 
 
 MATERIAL_LIBS   =  $(FE)/material/Material.o \
