@@ -89,8 +89,21 @@ wipe:
 		$(MAKE) wipe; \
 		$(CD) ..; \
 	done );
+	@$(RM) $(RMFLAGS) $(WIPE_LIBS) *.o *~ core 
+	@$(CD) $(FE)/../EXAMPLES;  $(MAKE) wipe;
+
+wipeall: 
+	@( \
+	for f in $(DIRS); \
+	do \
+		$(CD) $$f; \
+		$(ECHO) Making lib in $$f; \
+		$(MAKE) wipe; \
+		$(CD) ..; \
+	done );
 	@$(RM) $(RMFLAGS) $(WIPE_LIBS) *.o *~ core
 	@$(CD) $(FE)/../EXAMPLES;  $(MAKE) wipe;
+	@$(RM) $(OpenSees_PROGRAM)
 
 help:
     @$(ECHO) "usage: make ?"
