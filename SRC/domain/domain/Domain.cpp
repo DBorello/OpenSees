@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.26 $
-// $Date: 2004-11-24 22:49:16 $
+// $Revision: 1.27 $
+// $Date: 2005-01-08 00:33:08 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/domain/Domain.cpp,v $
                                                                         
                                                                         
@@ -1592,17 +1592,6 @@ Domain::getRegion(int tag)
     return 0;
 }
 
-
-//BorisJeremic took it out 13Nov2004
-//out BJ
-//out BJ int  
-//out BJ Domain::playback(int cTag)
-//out BJ {
-//out BJ     for (int i=0; i<numRecorders; i++)
-//out BJ 	theRecorders[i]->playback(cTag);
-//out BJ     return 0;
-//out BJ }
-//BorisJeremic took it out 13Nov2004 
 
 int 
 Domain::buildEleGraph(Graph *theEleGraph)
