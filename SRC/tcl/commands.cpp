@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.58 $
-// $Date: 2005-01-27 04:34:38 $
+// $Revision: 1.59 $
+// $Date: 2005-01-27 22:32:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -167,6 +167,8 @@ OPS_Stream &opserr = sserr;
 #include <FullGenLinLapackSolver.h>
 #include <ProfileSPDLinSOE.h>
 #include <ProfileSPDLinDirectSolver.h>
+#include <DiagonalSOE.h>
+#include <DiagonalDirectSolver.h>
 
 // #include <ProfileSPDLinDirectBlockSolver.h>
 // #include <ProfileSPDLinDirectThreadSolver.h>
@@ -195,6 +197,7 @@ OPS_Stream &opserr = sserr;
 #include <BandArpackSolver.h>
 #include <SymBandEigenSOE.h>
 #include <SymBandEigenSolver.h>
+
 
 // graph
 #include <RCM.h>
@@ -1312,6 +1315,12 @@ specifySOE(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   else if (strcmp(argv[1],"BandSPD") == 0) {
       BandSPDLinSolver    *theSolver = new BandSPDLinLapackSolver();   
       theSOE = new BandSPDLinSOE(*theSolver);        
+  } 
+
+  // Diagonal SOE & SOLVER
+  else if (strcmp(argv[1],"Diagonal") == 0) {
+      DiagonalSolver    *theSolver = new DiagonalDirectSolver();   
+      theSOE = new DiagonalSOE(*theSolver);
   } 
 
   // PROFILE SPD SOE * SOLVER
