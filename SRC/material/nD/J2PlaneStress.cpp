@@ -13,8 +13,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2003-02-14 23:01:25 $
+// $Revision: 1.6 $
+// $Date: 2004-02-24 22:53:34 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/J2PlaneStress.cpp,v $
 
 // Written: Ed "C++" Love
@@ -109,7 +109,7 @@ NDMaterial* J2PlaneStress :: getCopy( )
 //send back type of material
 const char* J2PlaneStress :: getType( ) const 
 {
-  return "PlaneStress2D" ;
+  return "PlaneStress" ;
 }
 
 
