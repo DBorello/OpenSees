@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2003-02-25 23:33:34 $
+// $Revision: 1.15 $
+// $Date: 2003-05-08 22:51:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.cpp,v $
                                                                         
 // Written: fmk
@@ -728,8 +728,14 @@ FiberSection3d::setResponse(const char **argv, int argc, Information &sectInfo)
     if (argc <= 2)          // not enough data input
       return 0;
     
-    if (argc <= 3)		  // fiber number was input directly
+	if (argc <= 3)	{  // fiber number was input directly
       key = atoi(argv[1]);
+	  if (key < numFibers)
+		return theMaterials[key]->setResponse(&argv[passarg],argc-passarg,sectInfo);
+	   else
+        return 0;
+	}
+	
     
     if (argc > 4) {         // find fiber closest to coord. with mat tag
       int matTag = atoi(argv[3]);
