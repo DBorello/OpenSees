@@ -36,7 +36,7 @@ c	Fill in previous state information
 	sigP  = stateP(2)
 	tangP = stateP(3)
 	
-	end subroutine
+	end
 	
 	
 	
@@ -67,4 +67,4 @@ c	Get the history variables
 	hstv(2) = alpha
 	hstv(3) = kappa
 
-	end subroutine
+	end

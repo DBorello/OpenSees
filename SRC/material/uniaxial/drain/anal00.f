@@ -77,7 +77,8 @@ c     Yield function
       f = dabs(xsi) - (sigY + Hiso*alpha)
 
 c     Inside yield surface
-      if (f <= 0.0) then
+c					 if (f <= 0.0) then
+      if (f.le.0.0) then
          tang = E
 c     Outside yield surface ... do return mapping
       else
@@ -85,7 +86,8 @@ c     Consistency parameter
          dGamma = f / (E+Hiso+Hkin)
 
 c     Normal to yield surface
-         if (xsi <= 0.d0) then
+c         if (xsi <= 0.d0) then
+         if (xsi.le.0.d0) then
             sgn = -1
          else
             sgn = 1
