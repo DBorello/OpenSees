@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-10-09 20:27:14 $
+// $Revision: 1.8 $
+// $Date: 2002-07-04 15:36:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.cpp,v $
                                                                         
                                                                         
@@ -1124,7 +1124,7 @@ Matrix::Output(ostream &s) const
 {
     for (int i=0; i<noRows(); i++) {
 	for (int j=0; j<noCols(); j++)
-	    s << (*this)(i,j) << " ";
+	    s <<  (*this)(i,j) << " ";
 	s << "\n";
     }
 }

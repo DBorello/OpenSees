@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-02-13 02:01:24 $
+// $Revision: 1.6 $
+// $Date: 2002-07-04 15:36:10 $
 // $Source: /usr/local/cvs/OpenSees/SRC/matrix/Matrix.h,v $
                                                                         
                                                                         
@@ -39,6 +39,7 @@
 //
 // What: "@(#) Matrix.h, revA"
 
+#include <iomanip.h> // BJ31May2002
 #include <iostream.h>
 #include <G3Globals.h>
 
