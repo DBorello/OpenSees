@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2001-12-10 21:56:31 $
+// $Revision: 1.26 $
+// $Date: 2001-12-17 18:52:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -215,7 +215,7 @@ static Timer *theTimer = 0;
 
 // init the global variabled defined in G3Globals.h
 ErrorHandler *g3ErrorHandler =0;
-double        ops_Dt = 0;
+double        ops_Dt = 1.0;
 Domain       *ops_TheActiveDomain = 0;
 Element      *ops_TheActiveElement = 0;
 
@@ -647,6 +647,9 @@ analyzeModel(ClientData clientData, Tcl_Interp *interp, int argc,
     double dT;
     if (Tcl_GetDouble(interp, argv[2], &dT) != TCL_OK)	
       return TCL_ERROR;
+
+    // Set global timestep variable
+    ops_Dt = dT;
 
     if (argc == 6) {
       int Jd;
