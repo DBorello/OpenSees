@@ -2616,7 +2616,7 @@ const ID& EightNodeBrick_u_p_U::getExternalNodes ()
 //=============================================================================
 int EightNodeBrick_u_p_U::getNumDOF ()
 {
-    return 24;	     //Changed from 2*4=8 to 3*8=24 Xiaoyan 07/06/00
+    return 7*8;	     // one node has 7 DOF. Xiaoyan 01/13/2002
 }
 
 //=============================================================================

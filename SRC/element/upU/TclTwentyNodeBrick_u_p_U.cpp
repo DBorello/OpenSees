@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-01-09 23:12:30 $
+// $Revision: 1.2 $
+// $Date: 2002-01-15 02:08:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/TclTwentyNodeBrick_u_p_U.cpp,v $
                                                                         
                                                                         
@@ -67,8 +67,7 @@ TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inte
   // Xiaoyan added this comments. 01/07/2002
   if ((argc-eleArgStart) < 30) {
       g3ErrorHandler->warning("command: element Brick20N_u_p_U - insufficient args - want %s",
-          "element Brick20N_u_p_U eleTag? node1? node2? .. node20?  matTag? bforce1? bforce2? bforce3?\n
-	   porosity? alpha? solidDensity? fluidDensity? \n");
+          "element Brick20N_u_p_U eleTag? node1? node2? .. node20?  matTag? bforce1? bforce2? bforce3?\n porosity? alpha? solidDensity? fluidDensity? \n");
       return TCL_ERROR;
   }    
 

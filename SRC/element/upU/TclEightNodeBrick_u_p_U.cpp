@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2002-01-09 23:12:30 $
+// $Revision: 1.2 $
+// $Date: 2002-01-15 02:08:23 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/upU/TclEightNodeBrick_u_p_U.cpp,v $
                                                                         
                                                                         
@@ -67,8 +67,7 @@ TclModelBuilder_addEightNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inter
 
   if ((argc-eleArgStart) < 18) {
       g3ErrorHandler->warning("command: element Brick8_u_p_U - insufficient args - want %s",
-          "element Brick8_u_p_U eleTag? node1? node2? ... node8? matTag? bforce1? bforce2? bforce3? \n
-	   porosity? alpha? solidDensity? fluidDensity? pressure?\n");
+          "element Brick8_u_p_U eleTag? node1? node2? ... node8? matTag? bforce1? bforce2? bforce3? \n  porosity? alpha? solidDensity? fluidDensity? pressure?\n");
       return TCL_ERROR;
   }    
 

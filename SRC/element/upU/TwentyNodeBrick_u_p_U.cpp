@@ -703,7 +703,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorKep()
                 // determinant of Jacobian tensor ( matrix )
                 det_of_Jacobian  = Jacobian.determinant();
                 // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
-                dhGlobal = dh("ij") * JacobianINV("jk");
+                dhGlobal = dh("ij") * JacobianINV("kj");  // changed form jk to kj 02/14/2002
                 //        ::fprintf(stdout," # %d \n\n\n\n\n\n\n\n", El_count);
 		//dhGlobal.print("dhGlobal");
                 //weight
@@ -711,9 +711,9 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorKep()
                 // incremental straines at this Gauss point
                 //GPstress[where].reportshortpqtheta("\n stress at GAUSS point in stiffness_tensor1\n");
                 
-		incremental_strain =
+ /*		incremental_strain =
                      (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-   		
+  wxy 01/14/2002 */  		
 		Constitutive = (matpoint[where]->matmodel)->getTangentTensor();
                       
 		Kkt = dhGlobal("ib")*Constitutive("abcd");
@@ -1647,6 +1647,7 @@ void TwentyNodeBrick_u_p_U::set_stiffness_MatrixK()
     tensor tG2  = getStiffnessTensorG2();
     tensor tP   = getStiffnessTensorP();
     matrix Kep = stiffness_matrixKep(tKep);
+    Kep.write_standard("K.matlab.dat", "stiffness part of KupU");
     matrix G1  = stiffness_matrixG1(tG1);
     matrix G2  = stiffness_matrixG1(tG2);
     matrix P   = stiffness_matrixP(tP);
@@ -2699,7 +2700,7 @@ const ID& TwentyNodeBrick_u_p_U::getExternalNodes ()
 //=============================================================================
 int TwentyNodeBrick_u_p_U::getNumDOF ()
 {
-    return 3*nodes_in_brick;	     // 3*20=60 Xiaoyan 09/28/2001
+    return 7*nodes_in_brick;	     // 3*20=60 Xiaoyan 09/28/2001
 }
 
 //=============================================================================
@@ -2839,6 +2840,12 @@ void TwentyNodeBrick_u_p_U::setDomain (Domain *theDomain)
 //=============================================================================
 const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff () 
 { 
+     cout<<"stiffness matrix\n\n";
+     for (int i=0;i<60;i++)
+       for(int j=0;j<60;j++)
+        cout<<K(i,j);
+     cout<<endl;
+      
      return K;
 }
 //=============================================================================
