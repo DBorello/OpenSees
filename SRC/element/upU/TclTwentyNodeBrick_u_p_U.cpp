@@ -63,7 +63,7 @@ TclModelBuilder_addTwentyNodeBrick_u_p_U(ClientData clientData, Tcl_Interp *inte
           "element Brick20N_u_p_U eleTag? node1? node2? .. node20?  matTag? bforce1? bforce2? bforce3?\n" 
 	  "porosity? alpha?  solidDensity? fluidDensity? \n"
  	  "permeability_in_x_dir? permeability_in_y_dir? permeability_in_z_dir?"
-	  "fluid_bulk_modulus, fluid_bulk_modulus? pressure?\n");
+	  "solid_bulk_modulus, fluid_bulk_modulus? pressure?\n");
       return TCL_ERROR;
   }    
 
