@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:31:06 $
+// $Revision: 1.3 $
+// $Date: 2001-03-29 03:41:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.h,v $
                                                                         
                                                                         
@@ -79,6 +79,10 @@ class Element : public DomainComponent
     virtual const Matrix &getDamp(void)=0;    
     virtual const Matrix &getMass(void)=0;    
 
+    // methods to set and return an initial tangent
+    virtual int   setKi(void);
+    virtual const Matrix &getKi(void);
+
     // methods for returning and applying loads
     virtual void zeroLoad(void) =0;	
     virtual int addLoad(const Vector &addP) =0;
@@ -91,6 +95,7 @@ class Element : public DomainComponent
     virtual int getResponse(int responseID, Information &eleInformation);
 	
   protected:
+    Matrix *Ki;
     
   private:
 };

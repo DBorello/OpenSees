@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2000-12-18 10:31:06 $
+// $Revision: 1.3 $
+// $Date: 2001-03-29 03:41:36 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
                                                                         
                                                                         
@@ -48,7 +48,7 @@
 //	of external nodes for the element.
 
 Element::Element(int tag, int cTag) 
-  :DomainComponent(tag, cTag)
+  :DomainComponent(tag, cTag), Ki(0)
 {
     // does nothing
 }
@@ -56,7 +56,8 @@ Element::Element(int tag, int cTag)
 
 Element::~Element() 
 {
-    // does nothing
+  if (Ki != 0)
+    delete Ki;
 }
 
 int
@@ -70,6 +71,28 @@ Element::revertToStart(void)
 {
     return 0;
 }
+
+int
+Element::setKi(void) {
+  if (Ki != 0)
+    delete Ki;
+  Ki = new Matrix(this->getTangentStiff());
+  if (Ki == 0) {
+    cerr << "Element::setKi(void) - out of memory for element " << this->getTag() << endl;
+    return -1;
+  }
+  return 0;
+}
+      
+  
+const Matrix &
+Element::getKi(void) {
+  if (Ki != 0)
+    return *Ki;
+  else
+    return this->getTangentStiff();
+}
+
 
 
 int 
