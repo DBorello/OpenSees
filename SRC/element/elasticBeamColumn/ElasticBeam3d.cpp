@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-07 18:01:47 $
+// $Revision: 1.6 $
+// $Date: 2002-10-03 17:56:19 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/elasticBeamColumn/ElasticBeam3d.cpp,v $
                                                                         
                                                                         
@@ -297,8 +297,8 @@ ElasticBeam3d::addLoad(ElementalLoad *theLoad, double loadFactor)
     q0[0] -= 0.5*P;
     q0[1] -= Mz;
     q0[2] += Mz;
-    q0[3] -= My;
-    q0[4] += My;
+    q0[3] += My;
+    q0[4] -= My;
   }
   else if (type == LOAD_TAG_Beam3dPointLoad) {
     double Py = data(0)*loadFactor;
@@ -333,8 +333,8 @@ ElasticBeam3d::addLoad(ElementalLoad *theLoad, double loadFactor)
     q0[2] += M2;
     M1 = -a * b2 * Pz * L2;
     M2 = a2 * b * Pz * L2;
-    q0[3] += M1;
-    q0[4] += M2;
+    q0[3] -= M1;
+    q0[4] -= M2;
   }
   else {
     g3ErrorHandler->warning("%s -- load type unknown for element with tag: %d",
@@ -573,7 +573,7 @@ ElasticBeam3d::Print(ostream &s, int flag)
   Vy  = (Mz1+Mz2)*oneOverL;
   My1 = q(3);
   My2 = q(4);
-  Vz  = (My1+My2)*oneOverL;
+  Vz  = -(My1+My2)*oneOverL;
   T   = q(5);
 
   s << "\tEnd 1 Forces (P Mz Vy My Vz T): "
