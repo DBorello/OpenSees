@@ -763,7 +763,7 @@ tensor TwentyNodeBrick::getStiffnessTensor(void)
 	        //NDMaterial *tmp_ndm = (matpoint[where]).getNDMat();
 
               		Constitutive = (matpoint[where]->matmodel)->getTangentTensor();
-                //Constitutive.print("C","\n\n C tensor \n");
+//                Constitutive.print("C","\n\n C tensor \n");
 
 		//    matpoint[where].setEPS( mmodel->getEPS() );
 		//}
@@ -805,7 +805,7 @@ tensor TwentyNodeBrick::getStiffnessTensor(void)
               }
           }
       }
-    //Kk.print("K","\n\n K tensor \n");
+//    Kk.print("K","\n\n K tensor \n");
     //K = Kk;
     return Kk;
   }
