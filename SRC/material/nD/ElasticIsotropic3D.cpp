@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $                                                              
-// $Date: 2001-01-11 09:29:14 $                                                                  
+// $Revision: 1.4 $                                                              
+// $Date: 2001-01-23 08:45:25 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.cpp,v $                                                                
 
 //Boris Jeremic and Zhaohui Yang ___ 02-10-2000
@@ -143,8 +143,7 @@ ElasticIsotropic3D::getTangentTensor (void)
     return Dt_commit;
 }
 
-const Tensor&
-ElasticIsotropic3D::getStressTensor (void)
+const stresstensor ElasticIsotropic3D::getStressTensor (void)
 {
     Stress = Dt("ijkl") * Strain("kl");
     //setElasticStiffness();
@@ -211,11 +210,9 @@ ElasticIsotropic3D::revertToStart (void)
 	return 0;
 }
 
-NDMaterial*
-ElasticIsotropic3D::getCopy (void)
+NDMaterial* ElasticIsotropic3D::getCopy (void)
 {
-	ElasticIsotropic3D *theCopy =
-		new ElasticIsotropic3D (this->getTag(), E, v);
+	ElasticIsotropic3D *theCopy = new ElasticIsotropic3D (this->getTag(), E, v);
 	theCopy->epsilon = this->epsilon;
 	theCopy->sigma = this->sigma;
 	theCopy->Strain = this->Strain;

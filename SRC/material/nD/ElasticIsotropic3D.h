@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $                                                              
-// $Date: 2001-01-11 09:29:14 $                                                                  
+// $Revision: 1.4 $                                                              
+// $Date: 2001-01-23 08:45:25 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropic3D.h,v $                                                                
                                                                         
                                                                         
@@ -67,7 +67,7 @@ class ElasticIsotropic3D : public ElasticIsotropicMaterial
     int setTrialStrainIncr (const Tensor &v);
     int setTrialStrainIncr (const Tensor &v, const Tensor &r);
     const Tensor &getTangentTensor (void);
-    const Tensor &getStressTensor (void);
+    const stresstensor getStressTensor (void);
     const Tensor &getStrainTensor (void);
 
     int commitState (void);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $                                                              
-// $Date: 2001-01-20 04:26:14 $                                                                  
+// $Revision: 1.6 $                                                              
+// $Date: 2001-01-23 08:47:09 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/NDMaterial.cpp,v $                                                                
                                                                         
 // File: ~/material/NDMaterial.C
@@ -37,11 +37,13 @@
 #include <G3Globals.h>
 #include <Matrix.h>
 #include <Vector.h>
+#include <stresst.h>
 #include <MaterialResponse.h>
 
 Matrix NDMaterial::errMatrix(1,1);
 Vector NDMaterial::errVector(1);
 Tensor NDMaterial::errTensor(2, def_dim_2, 0.0 );
+stresstensor NDMaterial::errstresstensor;
 
 NDMaterial::NDMaterial(int tag, int classTag)
 :Material(tag,classTag)
@@ -164,11 +166,10 @@ NDMaterial::getTangentTensor(void)
    return errTensor;    
 }
 
-const Tensor &
-NDMaterial::getStressTensor(void)
+const stresstensor NDMaterial::getStressTensor(void)
 {
    g3ErrorHandler->fatal("NDMaterial::getStressTensor -- subclass responsibility");
-   return errTensor;    
+   return errstresstensor;    
 }
 
 const Tensor &

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $                                                              
-// $Date: 2001-01-11 09:29:51 $                                                                  
+// $Revision: 1.5 $                                                              
+// $Date: 2001-01-23 08:48:36 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -212,14 +212,13 @@ ElasticIsotropicMaterial::getTangentTensor (void)
 	return *t;
 }
 
-const Tensor&
-ElasticIsotropicMaterial::getStressTensor (void)
+const stresstensor ElasticIsotropicMaterial::getStressTensor (void)
 {
 	g3ErrorHandler->fatal("ElasticIsotropicMaterial::getStress -- subclass responsibility");
 
 	// Just to make it compile
-     Tensor *t = new Tensor;
-	 return *t;
+     stresstensor t;
+	 return t;
 }
 
 const Tensor&
