@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-12 07:26:49 $
+// $Revision: 1.2 $
+// $Date: 2001-01-11 06:46:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/ImposedMotionSP.cpp,v $
                                                                         
                                                                         
@@ -76,8 +76,8 @@ ImposedMotionSP::~ImposedMotionSP()
 double
 ImposedMotionSP::getValue(void)
 {
-  // always return 0.0 - applyConstraint() sets the values at Node 
-    return 0.0;
+  // no longer return 0 for TransformationConstraints also set response at nodes
+    return theGroundMotionResponse(0);    
 }
 
 
@@ -146,6 +146,8 @@ void
 ImposedMotionSP::Print(ostream &s, int flag) 
 {
     s << "ImposedMotionSP: " << this->getTag();
+    s << "\t Node: " << this->getNodeTag();
+    s << " DOF: " << this->getDOF_Number() << endl;
 }
 
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2000-12-12 07:26:49 $
+// $Revision: 1.2 $
+// $Date: 2001-01-11 06:46:01 $
 // $Source: /usr/local/cvs/OpenSees/SRC/domain/constraints/ImposedMotionSP1.cpp,v $
                                                                         
                                                                         
@@ -122,6 +122,8 @@ void
 ImposedMotionSP1::Print(ostream &s, int flag) 
 {
     s << "ImposedMotionSP1: " << this->getTag();
+    s << "\t Node: " << this->getNodeTag();
+    s << " DOF: " << this->getDOF_Number() << endl;    
 }
 
 
