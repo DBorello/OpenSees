@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.21 $
-// $Date: 2003-03-28 20:57:13 $
+// $Revision: 1.22 $
+// $Date: 2003-06-23 19:09:57 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/Truss.cpp,v $
                                                                         
                                                                         
@@ -667,7 +667,16 @@ Truss::getResistingForceIncInertia()
 	    (*theVector)(i) += M*accel1(i);
 	    (*theVector)(i+numDOF2) += M*accel2(i);
 	}
-    }    
+
+	// add the damping forces if rayleigh damping
+	if (alphaM != 0.0 || betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+	  (*theVector) += this->getRayleighDampingForces();
+    }  else {
+
+      // add the damping forces if rayleigh damping
+      if (betaK != 0.0 || betaK0 != 0.0 || betaKc != 0.0)
+	(*theVector) += this->getRayleighDampingForces();
+    }
     
     return *theVector;
 }
