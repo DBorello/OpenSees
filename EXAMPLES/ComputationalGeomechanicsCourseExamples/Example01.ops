@@ -1,4 +1,5 @@
-#!/home/jeremic/bin/OpenSees.debub
+#!/home/jeremic/bin/OpenSees.debug
+# put your path and exec name above aftetr #! to make script self-executable
 # jeremic@ucdavis.edu
 # 08 April 2004
 # solid model, 8 node brick, linear elastic

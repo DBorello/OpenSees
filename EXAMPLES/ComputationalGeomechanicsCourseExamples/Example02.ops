@@ -1,4 +1,5 @@
-#!/home/jeremic/bin/OpenSees.debub
+#!/home/jeremic/bin/OpenSees.debug
+# put your path and exec name above aftetr #! to make script self-executable
 # jeremic@ucdavis.edu
 # 15 April 2004
 # solid model, 8 node brick, inelastic material, testing integrators and
@@ -57,7 +58,7 @@ set ES1  "-Leq "
 set ET1  "-Linear"
 
 # initial stress
-set stressp "0.10 0 0 0 0.10 0 0 0 0.10"
+set stressp "-0.10 0 0 0 -0.10 0 0 0 -0.10"
 
 # EPState
 #____________E______Eo_____v__rho________________Cu(undrained shear strength)
@@ -91,11 +92,11 @@ constraints Penalty 1e9 1e9
 #
 # Different types of load/displacement control
 #
+
+set lf1 0.02
+integrator LoadControl $lf1 
+
 # 
-# set lf1 0.02
-# integrator LoadControl $lf1 
-# 
-# # 
 # set dU 0.001
 # integrator DisplacementControl  5   3   $dU 
 # 
@@ -104,11 +105,11 @@ constraints Penalty 1e9 1e9
 # integrator ArcLength delta_l 1.0
 
 
-set Arclength 0.000001
-set psi_u 1
-set psi_f 1
-set u_ref 1
-integrator HSConstraint $Arclength $psi_u $psi_f $u_ref
+# set Arclength 0.000001
+# set psi_u 1
+# set psi_f 1
+# set u_ref 1
+# integrator HSConstraint $Arclength $psi_u $psi_f $u_ref
 
 
 

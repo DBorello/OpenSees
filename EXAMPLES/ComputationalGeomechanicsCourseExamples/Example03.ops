@@ -1,8 +1,8 @@
-#!/home/jeremic/bin/OpenSees.debub
+#!/home/jeremic/bin/OpenSees.debug
+# put your path and exec name above aftetr #! to make script self-executable
 # jeremic@ucdavis.edu
 # 15 April 2004
-# solid model, 8 node brick, inelastic material, testing integrators and
-# constraint equations
+# solid model, 8 node brick, inelastic material, Elasto-Plasticity
 # Examples for the course:  
 # Computational Geomechanics: 
 # Inelastic Finite Elements for Pressure Sensitive Materials  
@@ -13,7 +13,6 @@
 #two load stages:
 # stage 1: isotropic compression
 # stage 2: triaxial shearing
-#April 18, 2002
 
 
 # ################################
@@ -24,7 +23,6 @@ model BasicBuilder -ndm 3 -ndf 3
 
 set g   9.81
 set ld -8.0 
-set lf1 0.01
 # ################################
 # build the model
 # #################################
@@ -45,16 +43,7 @@ fix 3 1 0 1
 fix 4 0 0 1
  
 
-# Elastic material
-# Linear elastic material
-#nDMaterial ElasticIsotropic3D  2 70000 0.3 1.8
-
-#================================================================
-
-# initial stress
-set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
-
-
+#----------------------------------------------------------------------------------------
 #Elastic-plastic model
 #==========================================================
 # Drucker-Prager model
@@ -71,11 +60,11 @@ set ES1  "-Leq  0.0"
 set ET1  "-Linear  0.0"
 
 # initial stress
-set stressp "0.10 0 0  0 0.10 0  0 0 0.10"
+set stressp "-0.10 0 0  0 -0.10 0  0 0 -0.10"
 
 #
-#__________E________Eo____v___rho______________alpha___k
-set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
+#__________E________Eo____v___rho________________alpha___k
+set EPS "100.0     100.0 0.2  1.8 -NOD 1 -NOS 2   0.3    0.0 -stressp $stressp"
 #
 # where
 #alpha = 2 sin(phi) / (3^0.5) / (3-sin(phi) ), phi is the friction angle
@@ -83,9 +72,12 @@ set EPS "70000.0 70000.0 0.2 1.8 -NOD 1 -NOS 2  0.2    0.0 -stressp $stressp"
 
 # Creating nDMaterial using Template Elastic-PLastic Model
 nDMaterial Template3Dep 1 -YS $DPys -PS $DPps -EPS $EPS -ELS1 $ES1 -ELT1 $ET1
+#----------------------------------------------------------------------------------------
 
+#----------------------------------------------------------------------------------------
 ## elastic material
-#nDMaterial ElasticIsotropic3D 1 70000 0.3 1.8
+#nDMaterial ElasticIsotropic3D 1 100.0   0.2   1.8
+#----------------------------------------------------------------------------------------
 
 
 #____________tag_____8 nodes______matID__bforce1_bforce2_bforce3_rho
@@ -110,19 +102,41 @@ load 8 $np $p  $np -pattern 2
 recorder Node -file node_iso.out -time -node 5 -dof 3 disp
 #recorder plot node_iso.out "disp load"  10 10 300 300 -columns 2 1
 
+set lf1 0.01
+
 system UmfPack
 constraints Penalty 1e12 1e12
 test NormDispIncr 1.0e-8 30 1
-integrator LoadControl $lf1 1 $lf1 $lf1
+integrator LoadControl $lf1 
 algorithm Newton
 numberer RCM
 analysis Static
 
 set NN1 5
-analyze $NN1
+
+for {set i 1} {$i <=$NN1} {incr i} {
+puts "\n\n\n\n\n  ----------------"
+    puts $i
+    analyze 1
 
 
-print -ele 1
+#print node 1
+#print node 2
+#print node 3
+#print node 4
+puts "\n\n\n\n\n  Node 5 ----------------"
+print node 5
+#print node 6
+#print node 7
+#print node 8
+##
+##																																										 #
+#puts "\n\n\n\n\n  Element 1 ----------------"
+#print -ele 1
+  }
+
+#puts "\n\n\n\n\n  ----------------"
+#print -ele 1
 
 #stage 2
 #===========================================================
@@ -153,18 +167,18 @@ recorder Node -file node_z.out -time -node 5 -dof 3 disp
 recorder Element -ele 1 -file element.out force
 #recorder plot element.out "nodal force displ horizontal" 10 800 300 300 -columns 1 3
 
-set NN2 1
 set ndz -0.001
 
 system UmfPack
 constraints Penalty 1e12 1e12
 test NormDispIncr 1.0e-08 30  1
-integrator DisplacementControl 5 3 $ndz 1 $ndz $ndz
+integrator DisplacementControl 5 3 $ndz
 algorithm Newton
 numberer RCM
 analysis Static
 
 
+set NN2 10
 for {set i 1} {$i <=$NN2} {incr i} {
     puts $i
     analyze 1
@@ -174,6 +188,7 @@ for {set i 1} {$i <=$NN2} {incr i} {
 #print node 2
 #print node 3
 #print node 4
+puts "\n\n\n\n\n  Stage 2: Node 5 ----------------"
 print node 5
 #print node 6
 #print node 7
@@ -184,7 +199,8 @@ print node 5
   }
 
 
-#print node 5
+##print node 5
+#puts "\n\n\n\n\n END of Stage 2: Element 1 ----------------"
 #print -ele 1
 
 wipe
