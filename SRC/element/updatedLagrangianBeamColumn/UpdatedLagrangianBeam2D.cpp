@@ -170,7 +170,7 @@ int UpdatedLagrangianBeam2D::commitState()
   }    
 
 #ifdef _G3DEBUG
-	cout << m_Iter << " "; // cin.get();
+	opserr << m_Iter << " "; // cin.get();
 #endif
 		m_Iter = 0;
 	
