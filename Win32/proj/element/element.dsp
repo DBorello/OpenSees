@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\obj\element\release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\element\dispBeamColumn" /I "..\..\..\src\element\brick" /I "..\..\..\src\element\shell" /I "..\..\..\src\element\8nbrick" /I "..\..\..\src\recorder\response" /I "..\..\..\src\element\nonlinearBeamColumn\quadRule" /I "..\..\..\src\material\nD" /I "..\..\..\src\element\fourNodeQuad" /I "..\..\..\src\element\damper" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\element\beamWithHinges" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\element\zeroLength" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\element\feap" /I "..\..\..\src\handler" /I "..\..\..\src\element" /I "..\..\..\src\element\truss" /I "..\..\..\src\material\section" /I "..\..\..\src\element\beam3d" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\material" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\load" /I "..\..\..\src\renderer" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src" /I "..\..\..\src\domain\domain" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\element\20nbrick" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# ADD CPP /nologo /MLd /W3 /GX /O2 /I "c:\Program Files\tcl\include" /I "..\..\..\src\element\dispBeamColumn" /I "..\..\..\src\element\brick" /I "..\..\..\src\element\shell" /I "..\..\..\src\element\8nbrick" /I "..\..\..\src\recorder\response" /I "..\..\..\src\element\nonlinearBeamColumn\quadRule" /I "..\..\..\src\material\nD" /I "..\..\..\src\element\fourNodeQuad" /I "..\..\..\src\element\damper" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\element\beamWithHinges" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\element\zeroLength" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\element\feap" /I "..\..\..\src\handler" /I "..\..\..\src\element" /I "..\..\..\src\element\truss" /I "..\..\..\src\material\section" /I "..\..\..\src\element\beam3d" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\material" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\load" /I "..\..\..\src\renderer" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src" /I "..\..\..\src\domain\domain" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\element\20nbrick" /I "..\..\..\src\element\elasticBeamColumn" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\obj\element\debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\element\material\nd\template3dep" /I "c:\Program Files\tcl\include" /I "..\..\..\src\element\dispBeamColumn" /I "..\..\..\src\element\brick" /I "..\..\..\src\element\shell" /I "..\..\..\src\element\8nbrick" /I "..\..\..\src\recorder\response" /I "..\..\..\src\element\nonlinearBeamColumn\quadRule" /I "..\..\..\src\material\nD" /I "..\..\..\src\element\fourNodeQuad" /I "..\..\..\src\element\damper" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\element\beamWithHinges" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\element\zeroLength" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\element\feap" /I "..\..\..\src\handler" /I "..\..\..\src\element" /I "..\..\..\src\element\truss" /I "..\..\..\src\material\section" /I "..\..\..\src\element\beam3d" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\material" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\load" /I "..\..\..\src\renderer" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src" /I "..\..\..\src\domain\domain" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\element\20nbrick" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /GX /ZI /Od /I "..\..\..\src\element\material\nd\template3dep" /I "c:\Program Files\tcl\include" /I "..\..\..\src\element\dispBeamColumn" /I "..\..\..\src\element\brick" /I "..\..\..\src\element\shell" /I "..\..\..\src\element\8nbrick" /I "..\..\..\src\recorder\response" /I "..\..\..\src\element\nonlinearBeamColumn\quadRule" /I "..\..\..\src\material\nD" /I "..\..\..\src\element\fourNodeQuad" /I "..\..\..\src\element\damper" /I "..\..\..\src\coordTransformation" /I "..\..\..\src\element\beamWithHinges" /I "..\..\..\src\element\nonlinearBeamColumn\matrixutil" /I "..\..\..\src\element\zeroLength" /I "..\..\..\src\modelbuilder" /I "..\..\..\src\modelbuilder\tcl" /I "..\..\..\src\element\feap" /I "..\..\..\src\handler" /I "..\..\..\src\element" /I "..\..\..\src\element\truss" /I "..\..\..\src\material\section" /I "..\..\..\src\element\beam3d" /I "..\..\..\src\element\beam2d" /I "..\..\..\src\material" /I "..\..\..\src\material\uniaxial" /I "..\..\..\src\actor\objectBroker" /I "..\..\..\src\matrix" /I "..\..\..\src\domain\load" /I "..\..\..\src\renderer" /I "..\..\..\src\actor\channel" /I "..\..\..\src\domain\node" /I "..\..\..\src\actor\actor" /I "..\..\..\src\tagged" /I "..\..\..\src\domain\component" /I "..\..\..\src" /I "..\..\..\src\domain\domain" /I "..\..\..\src\material\nd\template3dep" /I "..\..\..\src\nDarray" /I "..\..\..\src\element\20nbrick" /I "..\..\..\src\element\elasticBeamColumn" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -346,7 +346,7 @@ SOURCE=..\..\..\SRC\coordTransformation\PDeltaCrdTransf3d.cpp
 SOURCE=..\..\..\SRC\coordTransformation\PDeltaCrdTransf3d.h
 # End Source File
 # End Group
-# Begin Group "fourNodeQuad"
+# Begin Group "quad"
 
 # PROP Default_Filter ""
 # Begin Source File
@@ -375,6 +375,14 @@ SOURCE=..\..\..\SRC\element\fourNodeQuad\FourNodeQuad.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\element\fourNodeQuad\NineNodeMixedQuad.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\fourNodeQuad\NineNodeMixedQuad.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\element\fourNodeQuad\TclFourNodeQuadCommand.cpp
 # End Source File
 # End Group
@@ -383,19 +391,23 @@ SOURCE=..\..\..\SRC\element\fourNodeQuad\TclFourNodeQuadCommand.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\SRC\element\beam2d\ElasticBeam2d.cpp
+SOURCE=..\..\..\SRC\element\elasticBeamColumn\ElasticBeam2d.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\element\beam2d\ElasticBeam2d.h
+SOURCE=..\..\..\SRC\element\elasticBeamColumn\ElasticBeam2d.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\element\beam3d\ElasticBeam3d.cpp
+SOURCE=..\..\..\SRC\element\elasticBeamColumn\ElasticBeam3d.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\SRC\element\beam3d\ElasticBeam3d.h
+SOURCE=..\..\..\SRC\element\elasticBeamColumn\ElasticBeam3d.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\element\elasticBeamColumn\TclElasticBeamCommand.cpp
 # End Source File
 # End Group
 # Begin Group "eightNodeBrick"

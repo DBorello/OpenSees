@@ -721,14 +721,9 @@ SOURCE=..\..\..\SRC\material\nD\Template3Dep\YS.cpp
 SOURCE=..\..\..\SRC\material\nD\Template3Dep\YS.h
 # End Source File
 # End Group
-# Begin Source File
+# Begin Group "wrappers"
 
-SOURCE=..\..\..\SRC\material\nD\NDMaterial.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\SRC\material\nD\NDMaterial.h
-# End Source File
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\nD\PlaneStressMaterial.cpp
@@ -744,6 +739,15 @@ SOURCE=..\..\..\SRC\material\nD\PlateFiberMaterial.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\nD\PlateFiberMaterial.h
+# End Source File
+# End Group
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NDMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\NDMaterial.h
 # End Source File
 # Begin Source File
 
