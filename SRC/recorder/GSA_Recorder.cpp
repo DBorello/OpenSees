@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.2 $
-// $Date: 2003-02-25 23:34:31 $
+// $Revision: 1.3 $
+// $Date: 2003-07-28 23:10:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/GSA_Recorder.cpp,v $
 
 // Written: fmk 
@@ -68,14 +68,51 @@ GSA_Recorder::GSA_Recorder(Domain &theDom,
     theFile << "TITLE\t" << title1;
   else
     theFile << "TITLE\t" << "No Title";
-  theFile << "\t" << title2;
-  theFile << "\t" << title3;
-  theFile << "\t" << jobno << "\t" << initials << endln;
-  theFile << "SPEC\t" << spec << endln;
-  theFile << "CURRENCY\t" << currency << endln;
-  theFile << "UNIT_DATA\tLENGTH\t" << length << endln; 
-  theFile << "UNIT_DATA\tFORCE\t" << force << endln;
-  theFile << "UNIT_DATA\tTEMP\t" << temp << endln;
+
+
+  if (title2 != 0)
+    theFile << "\t" << title2;
+  else
+    theFile << "\t" << "BLANK";
+
+
+  if (title3 != 0)
+    theFile << "\t" << title3;
+  else
+    theFile << "\t" << "BLANK";  
+
+
+  if (jobno != 0)
+    theFile << "\t" << jobno;
+  else
+    theFile << "\t" << "0000";
+
+
+  if (initials != 0)
+    theFile<< "\t" << initials << endln;
+  else
+    theFile << "\t" << "ANOTHER\n";  
+
+
+  if (spec != 0)
+    theFile << "SPEC\t" << spec << endln;
+
+
+  if (currency != 0)
+    theFile << "CURRENCY\t" << currency << endln;
+
+
+  if (length != 0)
+    theFile << "UNIT_DATA\tLENGTH\t" << length << endln; 
+
+
+  if (force != 0)
+    theFile << "UNIT_DATA\tFORCE\t" << force << endln;
+
+
+  if (temp != 0)
+    theFile << "UNIT_DATA\tTEMP\t" << temp << endln;
+
 
   // spit out nodal data
   NodeIter &theNodes = theDomain->getNodes();
@@ -144,6 +181,7 @@ GSA_Recorder::~GSA_Recorder()
 int 
 GSA_Recorder::record(int commitTag, double timeStamp)
 {
+
   if (deltaT == 0.0 || timeStamp >= nextTimeStampToRecord) {
       
     if (deltaT != 0.0) 
