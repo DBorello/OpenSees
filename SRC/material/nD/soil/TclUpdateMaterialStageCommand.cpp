@@ -1,5 +1,5 @@
-// $Revision: 1.7 $
-// $Date: 2003-07-15 20:31:59 $
+// $Revision: 1.8 $
+// $Date: 2003-08-29 00:23:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/TclUpdateMaterialStageCommand.cpp,v $
                                                                         
 // Written: ZHY
@@ -92,13 +92,13 @@ TclModelBuilderUpdateParameterCommand(ClientData clientData,
   int tag, id; double value; 
 
   if (Tcl_GetInt(interp, argv[2], &tag) != TCL_OK) {
-      opserr << "WARNING MYSstage: invalid material tag" << endln;
+      opserr << "WARNING UpdateParameter: invalid material tag" << endln;
       return TCL_ERROR;		
   }
 
   NDMaterial * a = theTclBuilder->getNDMaterial(tag);
   if (a==0) {
-      opserr << "WARNING UpdateMaterialStage: couldn't get NDmaterial tagged: " << tag << endln;
+      opserr << "WARNING UpdateParameter: couldn't get NDmaterial tagged: " << tag << endln;
       return TCL_ERROR;		
   }
 
@@ -107,12 +107,12 @@ TclModelBuilderUpdateParameterCommand(ClientData clientData,
 	else if (strcmp(argv[3],"-refB") == 0) 
 	  id = 11;
 	else {
-      opserr << "WARNING UpdateMaterialStage: Only accept parameter '-refG' or '-refB' for now" << endln;
+      opserr << "WARNING UpdateParameter: Only accept parameter '-refG' or '-refB' for now" << endln;
       return TCL_ERROR;		
   }		
 
   if (Tcl_GetDouble(interp, argv[4], &value) != TCL_OK) {
-      opserr << "WARNING UpdateMaterialStage: invalid parameter value" << endln;
+      opserr << "WARNING UpdateParameter: invalid parameter value" << endln;
       return TCL_ERROR;		
   }	
 
@@ -124,7 +124,7 @@ TclModelBuilderUpdateParameterCommand(ClientData clientData,
       a->updateParameter(id,info); 
   }
   else {
-      opserr << "WARNING UpdateMaterialStage: The tagged is not a "<<endln;
+      opserr << "WARNING UpdateParameter: The tagged is not a "<<endln;
       opserr << "PressureDependMultiYield/PressureIndependMultiYield/FluidSolidPorous material. " << endln;
       return TCL_ERROR;		
   }

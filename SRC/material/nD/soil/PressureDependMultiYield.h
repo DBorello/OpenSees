@@ -1,9 +1,9 @@
 //<<<<<<< PressureDependMultiYield.h
-// $Revision: 1.17 $
-// $Date: 2003-07-15 20:31:57 $
+// $Revision: 1.18 $
+// $Date: 2003-08-29 00:23:40 $
 //=======
-// $Revision: 1.17 $
-// $Date: 2003-07-15 20:31:57 $
+// $Revision: 1.18 $
+// $Date: 2003-08-29 00:23:40 $
 //>>>>>>> 1.7
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/PressureDependMultiYield.h,v $
                                                                         
@@ -45,13 +45,15 @@ public:
 			       double liquefactionParam2,
 			       double liquefactionParam4,
 			       int   numberOfYieldSurf = 20,
-						 double * gredu = 0,
-		         double e = 0.6,
+				   double * gredu = 0,
+		           double e = 0.6,
 			       double volLimit1 = 0.9,
 			       double volLimit2 = 0.02,
 			       double volLimit3 = 0.7,
 			       double atm = 101.,
-						 double cohesi = 0.1);
+				   double cohesi = 0.1,
+				   double hv = 0.,
+				   double pv = 1.);
 
      // Default constructor
      PressureDependMultiYield ();
@@ -148,6 +150,8 @@ private:
      static double* volLimit2x;
      static double* volLimit3x;
      static double pAtm;
+	 static double* Hvx;
+	 static double* Pvx;
 
      // internal
      static double* residualPressx;
@@ -197,6 +201,7 @@ private:
      T2Vector lockStressCommitted;
      static Vector workV6;
      static T2Vector workT2V;
+	 double maxPress;
      
      void elast2Plast(void);
      // Called by constructor

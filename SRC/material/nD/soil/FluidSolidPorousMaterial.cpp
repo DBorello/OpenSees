@@ -1,5 +1,5 @@
-// $Revision: 1.16 $
-// $Date: 2003-07-15 20:31:55 $
+// $Revision: 1.17 $
+// $Date: 2003-08-29 00:23:40 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/soil/FluidSolidPorousMaterial.cpp,v $
                                                                         
 // Written: ZHY
@@ -224,8 +224,8 @@ const Vector & FluidSolidPorousMaterial::getStress (void)
 		trialExcessPressure = currentExcessPressure;
         trialExcessPressure += 
 			       (trialVolumeStrain - currentVolumeStrain) * combinedBulkModulus;
-		//if (trialExcessPressure > pAtm-initMaxPress) 
-		//	trialExcessPressure = pAtm-initMaxPress;
+		if (trialExcessPressure > pAtm-initMaxPress) 
+			trialExcessPressure = pAtm-initMaxPress;
 		//if (trialExcessPressure < initMaxPress)
 		//	trialExcessPressure = initMaxPress;
 	  for (int i=0; i<ndm; i++) 
@@ -267,7 +267,7 @@ const Vector & FluidSolidPorousMaterial::getCommittedPressure (void)
 	static Vector temp(2);
 
 	temp[0] = currentExcessPressure;
-    temp[1] = fabs(temp[0]/initMaxPress);
+    temp[1] = temp[0]/initMaxPress;
     
 	return temp;
 }
