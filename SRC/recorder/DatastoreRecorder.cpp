@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2004-01-29 23:30:29 $
+// $Revision: 1.4 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DatastoreRecorder.cpp,v $
                                                                         
                                                                         
@@ -40,7 +40,7 @@
 #include <FE_Datastore.h>
 
 DatastoreRecorder::DatastoreRecorder(FE_Datastore &theDb)
-:theDatastore(&theDb)
+:Recorder(RECORDER_TAGS_DatastoreRecorder), theDatastore(&theDb)
 {
     
 }
@@ -65,7 +65,7 @@ DatastoreRecorder::playback(int commitTag)
     return theDatastore->restoreState(commitTag);
 }
 
-void
+int
 DatastoreRecorder::restart(void)
 {
 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-01-29 23:30:30 $
+// $Revision: 1.5 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/PatternRecorder.cpp,v $
 
 // Written: MHS 
@@ -47,7 +47,8 @@ PatternRecorder::PatternRecorder(int pattern,
 				 const char *theFileName,
 				 double dT,
 				 int startFlag)
-  :thePattern(pattern), theDomain(&theDom),
+  :Recorder(RECORDER_TAGS_PatternRecorder),
+   thePattern(pattern), theDomain(&theDom),
    flag(startFlag), deltaT(dT), nextTimeStampToRecord(0.0)
 {
   // create char array to store file name
@@ -157,7 +158,7 @@ PatternRecorder::playback(int commitTag)
   return 0;
 }
 
-void
+int
 PatternRecorder::restart(void)
 {
   theFile.close();
@@ -166,4 +167,5 @@ PatternRecorder::restart(void)
     opserr << "WARNING - PatternRecorder::restart() - could not open file ";
     opserr << fileName << endln;
   }
+  return 0;
 }

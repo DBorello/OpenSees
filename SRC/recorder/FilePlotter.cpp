@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.9 $
-// $Date: 2004-01-29 23:30:30 $
+// $Revision: 1.10 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/FilePlotter.cpp,v $
                                                                         
                                                                         
@@ -62,7 +62,8 @@ using std::ios;
 FilePlotter::FilePlotter(const char *_fileName, 
 			 const char *windowTitle, 
 			 int xLoc, int yLoc, int width, int height, double dT)
-  :theMap(0), theRenderer(0), cols(0), deltaT(dT), nextTimeStampToRecord(0.0)
+  :Recorder(RECORDER_TAGS_FilePlotter), 
+   theMap(0), theRenderer(0), cols(0), deltaT(dT), nextTimeStampToRecord(0.0)
 {
 
   // create the window in which we plot on the screen
@@ -131,10 +132,10 @@ FilePlotter::playback(int cTag)
   return 0;
 }
 
-void
+int
 FilePlotter::restart(void)
 {
-    
+  return 0;
 }
 
 int

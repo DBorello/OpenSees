@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-01-29 23:30:30 $
+// $Revision: 1.5 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/MaxNodeDispRecorder.cpp,v $
                                                                         
                                                                         
@@ -45,7 +45,7 @@
 MaxNodeDispRecorder::MaxNodeDispRecorder(int theDof, 
 					 const ID &nodes, 
 					 Domain &theDom)
-:theNodes(nodes), maxDisp(nodes.Size()), 
+:Recorder(RECORDER_TAGS_MaxNodeDispRecorder), theNodes(nodes), maxDisp(nodes.Size()), 
  dof(theDof), theDomain(&theDom)
 {
     if (dof < 0) dof = 0;
@@ -84,9 +84,10 @@ MaxNodeDispRecorder::playback(int commitTag)
 }
 
 
-void
+int
 MaxNodeDispRecorder::restart(void)
 {
     maxDisp.Zero();
+    return 0;
 }
 

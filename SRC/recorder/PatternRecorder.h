@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2004-01-29 23:30:30 $
+// $Revision: 1.5 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/PatternRecorder.h,v $
                                                                         
 #ifndef PatternRecorder_h
@@ -54,7 +54,7 @@ class PatternRecorder: public Recorder
     ~PatternRecorder();
     int record(int commitTag, double timeStamp);
     int playback(int commitTag);
-    void restart(void);    
+    int restart(void);    
     
   protected:
     

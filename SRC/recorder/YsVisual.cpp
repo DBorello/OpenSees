@@ -19,8 +19,9 @@
 //////////////////////////////////////////////////////////////////////
 
 YsVisual::YsVisual(Element *theEle, const char *title, double scale,
-                   int xLoc, int yLoc, int width, int height):
-				   pView(0), theMap(0), displayMode(0)
+                   int xLoc, int yLoc, int width, int height)
+  :Recorder(RECORDER_TAGS_YsVisual),
+   pView(0), theMap(0), displayMode(0)
 {
 const char *argv[1] = {"ysVisual"};
 Information eleInfo(1);
@@ -98,7 +99,8 @@ int YsVisual::playback(int cTag)
   return 0;
 }
 
-void YsVisual::restart(void)
+int 
+YsVisual::restart(void)
 {
-
+  return 0;
 }

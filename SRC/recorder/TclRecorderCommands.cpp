@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.29 $
-// $Date: 2004-11-13 00:58:08 $
+// $Revision: 1.30 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -50,9 +50,8 @@
 #include <PatternRecorder.h>
 #include <DriftRecorder.h>
 #include <ElementRecorder.h>
-#include <TclFeViewer.h>
-#include <FilePlotter.h>
-#include <AlgorithmIncrements.h>
+
+
 #include <NodeIter.h>
 #include <ElementIter.h>
 #include <Node.h>
@@ -61,7 +60,6 @@
 #include <DamageRecorder.h>
 #include <MeshRegion.h>
 #include <GSA_Recorder.h>
-#include <YsVisual.h> //!!
 #include <TclModelBuilder.h>
 
 #include <NEESData.h>
@@ -73,6 +71,17 @@
 extern TclModelBuilder *theDamageTclModelBuilder;
 
 #include <EquiSolnAlgo.h>
+
+#ifdef _NOGRAPHICS
+
+#else
+#include <TclFeViewer.h>
+#include <FilePlotter.h>
+#include <YsVisual.h> //!!
+#include <AlgorithmIncrements.h>
+#endif
+
+
 
 static EquiSolnAlgo *theAlgorithm =0;
 extern FE_Datastore *theDatabase;
@@ -504,8 +513,6 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
       double dT = 0.0;
       int numNodes = 0;
 
-      bool destroyDatabase = false;
-	
       // create ID's to contain the node tags & the dofs
       ID theNodes(0,16);
       ID theDofs(0, 6);
@@ -924,10 +931,15 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  if (strcmp(argv[7],"-wipe") == 0) 
 	    wipeFlag = 1;
 
+
+#ifdef _NOGRAPHICS
+      return TCL_OK;
+#else
 	if (argc == 7 || argc == 8)
 	  (*theRecorder) = new TclFeViewer(argv[2], xLoc, yLoc, width, height, theDomain, wipeFlag, interp);
 	else if (argc == 9)
 	  (*theRecorder) = new TclFeViewer(argv[2], xLoc, yLoc, width, height, argv[8], theDomain, interp);
+#endif
     }
 
     else if (strcmp(argv[1],"plot") == 0) {
@@ -980,9 +992,13 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    loc++;
 	}
 
+#ifdef _NOGRAPHICS
+	return TCL_OK;
+#else
 	FilePlotter *thePlotter = new FilePlotter(argv[2], argv[3], xLoc, yLoc, width, height, dT);
 	(*theRecorder) = thePlotter;    
 	thePlotter->setCol(cols);
+#endif
     }
 
 
@@ -1027,12 +1043,14 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    loc++;
 	}
 
-	
+#ifdef _NOGRAPHICS
+	return TCL_OK;
+#else
 	AlgorithmIncrements *thePlotter =  new AlgorithmIncrements(theAlgorithm, 
 								   argv[2], xLoc, yLoc, width, height, 
 								   displayRecord, fileName);
 	(*theRecorder) = thePlotter;
-
+#endif
     }
 
     else if (strcmp(argv[1],"GSA") == 0) {
@@ -1148,9 +1166,13 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    return TCL_ERROR;
 	  }
 	//void createView(char *title, int x, int y, int cx, int cy, char displaytype = 'l');
+#ifdef _NOGRAPHICS
+	return TCL_OK;
+#else
 	YsVisual *theVisual = new YsVisual(theEle, argv[3], scale, xLoc, yLoc, width, height);
 	(*theRecorder) = theVisual;
 	return TCL_OK;
+#endif
       }
     
     // no recorder type specified yet exists

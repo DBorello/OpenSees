@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1 $
-// $Date: 2004-09-01 04:03:16 $
+// $Revision: 1.2 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DamageRecorder.cpp,v $
                                                                         
 // Written: Arash Altoontash, Gregory Deierlein, 
@@ -48,7 +48,8 @@ using std::ios;
 
 DamageRecorder::DamageRecorder( int elemid, ID &secIDs, int dofid, DamageModel *dmgPtr,
 				Domain &theDomainPtr, bool echotimeflag, double deltat , const char *theFileName )
-  :eleID(elemid) , numSec(secIDs.Size()), dofID(dofid),
+  :Recorder(RECORDER_TAGS_DamageRecorder),
+   eleID(elemid) , numSec(secIDs.Size()), dofID(dofid),
    responseID(secIDs.Size()), sectionTags(secIDs.Size()),theDomain(&theDomainPtr),
    echoTimeFlag(echotimeflag), deltaT(deltat), nextTimeStampToRecord(0.0)				
 {
@@ -257,7 +258,7 @@ DamageRecorder::playback(int commitTag)
     return 0;
 }
 
-void 
+int
 DamageRecorder::restart(void)
 {
   theFile.close();
@@ -266,4 +267,5 @@ DamageRecorder::restart(void)
     opserr << "WARNING - ElementRecorder::restart() - could not open file ";
     opserr << fileName << endln;
   }    
+  return 0;
 }

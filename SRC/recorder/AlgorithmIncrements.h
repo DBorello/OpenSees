@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2004-01-29 23:30:29 $
+// $Revision: 1.6 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/AlgorithmIncrements.h,v $
                                                                         
                                                                         
@@ -63,7 +63,7 @@ class AlgorithmIncrements : public Recorder
 
     int record(int commitTag, double timeStamp);
     int playback(int commitTag);
-    void restart(void);    
+    int restart(void);    
 
   protected:
 

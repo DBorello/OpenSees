@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2004-11-13 00:57:22 $
+// $Revision: 1.7 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.h,v $
                                                                         
 #ifndef DriftRecorder_h
@@ -52,7 +52,12 @@ class DriftRecorder: public Recorder
   ~DriftRecorder();
 
   int record(int commitTag, double timeStamp);
-  void restart(void);    
+  int restart(void);    
+
+  int setDomain(Domain &theDomain);
+  int sendSelf(int commitTag, Channel &theChannel);  
+  int recvSelf(int commitTag, Channel &theChannel, 
+	       FEM_ObjectBroker &theBroker);
   
  protected:
   

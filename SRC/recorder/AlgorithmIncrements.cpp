@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2004-01-29 23:30:29 $
+// $Revision: 1.8 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/AlgorithmIncrements.cpp,v $
                                                                         
                                                                         
@@ -66,7 +66,8 @@ AlgorithmIncrements::AlgorithmIncrements(EquiSolnAlgo *theEquiAlgo,
 					 const char *windowTitle, 
 					 int xLoc, int yLoc, int width, int height,
 					 bool displayOnRecord, const char *theFileName)
-  :theMap(0), theRenderer(0), numRecord(0), displayRecord(displayOnRecord), fileName(0)
+  :Recorder(RECORDER_TAGS_AlgorithmIncrements),
+   theMap(0), theRenderer(0), numRecord(0), displayRecord(displayOnRecord), fileName(0)
 {
   
   theAlgo = theEquiAlgo;
@@ -177,17 +178,17 @@ AlgorithmIncrements::playback(int cTag)
       for (ii=0; X.Size(); ii++) theFile << B(ii);
 
       this->plotData(X,B);
-      char c = getchar();
+      //      char c = getchar();
     }
   }
 
   return 0;
 }
 
-void
+int
 AlgorithmIncrements::restart(void)
 {
-    
+  return 0;
 }
 
 int

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.7 $
-// $Date: 2004-11-13 00:57:22 $
+// $Revision: 1.8 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/DriftRecorder.cpp,v $
 
 // Written: MHS
@@ -40,7 +40,8 @@
 
 DriftRecorder::DriftRecorder(int ni, int nj, int df, int dirn,
 			     Domain &theDom, DataOutputHandler &theDataOutputHandler)
-  :ndI(1), ndJ(1), dof(df), perpDirn(dirn), oneOverL(1), data(2),
+  :Recorder(RECORDER_TAGS_DriftRecorder),
+   ndI(1), ndJ(1), dof(df), perpDirn(dirn), oneOverL(1), data(2),
    theDomain(&theDom), theHandler(&theDataOutputHandler)
 {
   ndI(0) = ni;
@@ -100,7 +101,8 @@ DriftRecorder::DriftRecorder(int ni, int nj, int df, int dirn,
 
 DriftRecorder::DriftRecorder(const ID &nI, const ID &nJ, int df, int dirn,
 			     Domain &theDom, DataOutputHandler &theDataOutputHandler)
-  :ndI(nI), ndJ(nJ), dof(df), perpDirn(dirn), oneOverL(nI.Size()), data(nI.Size()+1),
+  :Recorder(RECORDER_TAGS_DriftRecorder),
+   ndI(nI), ndJ(nJ), dof(df), perpDirn(dirn), oneOverL(nI.Size()), data(nI.Size()+1),
    theDomain(&theDom), theHandler(&theDataOutputHandler)
  {
    int ndIsize = ndI.Size();
@@ -204,9 +206,32 @@ DriftRecorder::record(int commitTag, double timeStamp)
   return 0;
 }
 
-void
+int
 DriftRecorder::restart(void)
 {
   opserr << "DriftRecorder::restart() - should not be called\n";
   //  theHandler->restart();
+  return 0;
+}
+
+int 
+DriftRecorder::setDomain(Domain &theDomain)
+{
+  opserr << "DriftRecorder::sendSelf() - NOT YET IMPLEMENTED\n";
+  return -1;
+}
+
+int
+DriftRecorder::sendSelf(int commitTag, Channel &theChannel)
+{
+  opserr << "DriftRecorder::sendSelf() - NOT YET IMPLEMENTED\n";
+  return -1;
+}
+
+int 
+DriftRecorder::recvSelf(int commitTag, Channel &theChannel, 
+		 FEM_ObjectBroker &theBroker)
+{
+  opserr << "DriftRecorder::recvSelf() - NOT YET IMPLEMENTED\n";
+  return -1;
 }

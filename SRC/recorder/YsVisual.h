@@ -23,7 +23,7 @@ public:
 
     int record(int cTag, double d);
     int playback(int cTag);
-    void restart(void);    
+    int restart(void);    
 
   private:
 

@@ -20,8 +20,8 @@
                                                                         
 
 
-// $Revision: 1.4 $
-// $Date: 2004-01-29 23:30:30 $
+// $Revision: 1.5 $
+// $Date: 2004-11-24 22:45:28 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/GSA_Recorder.cpp,v $
 
 // Written: fmk 
@@ -54,7 +54,8 @@ GSA_Recorder::GSA_Recorder(Domain &theDom,
 			   const char *force,
 			   const char *temp,
 			   double dT)
-: theDomain(&theDom), ndm(3), ndf(6), counter(0), deltaT(dT), nextTimeStampToRecord(0.0)
+: Recorder(RECORDER_TAGS_GSA_Recorder),
+  theDomain(&theDom), ndm(3), ndf(6), counter(0), deltaT(dT), nextTimeStampToRecord(0.0)
 {
   // open file 
   if (theFile.setFile(fileName, OVERWRITE) < 0) {
@@ -230,10 +231,10 @@ GSA_Recorder::playback(int commitTag)
   return 0;
 }
 
-void
+int
 GSA_Recorder::restart(void)
 {
-
+  return 0;
 }
 
 
