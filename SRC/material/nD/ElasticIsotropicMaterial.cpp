@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $                                                              
-// $Date: 2000-10-10 05:31:36 $                                                                  
+// $Revision: 1.4 $                                                              
+// $Date: 2001-01-11 09:29:51 $                                                                  
 // $Source: /usr/local/cvs/OpenSees/SRC/material/nD/ElasticIsotropicMaterial.cpp,v $                                                                
                                                                         
                                                                         
@@ -90,7 +90,7 @@ ElasticIsotropicMaterial::getCopy (const char *type)
     else if (strcmp(type,"ElasticIsotropic3D") == 0)
     {
 	ElasticIsotropic3D *theModel;
-	theModel = new ElasticIsotropic3D (this->getTag(), E, v);
+	theModel = new ElasticIsotropic3D (this->getTag(), E, v, 100.0, 0.0);
 		// DOES NOT COPY sigma, D, and epsilon ...
 		// This function should only be called during element instantiation, so
 		// no state determination is performed on the material model object
