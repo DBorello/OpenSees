@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2003-02-14 23:01:47 $
+// $Revision: 1.3 $
+// $Date: 2004-06-07 23:36:03 $
 // $Source: /usr/local/cvs/OpenSees/SRC/modelbuilder/tcl/Block3D.cpp,v $
                                                                         
 // Written: Ed Love
@@ -204,13 +204,13 @@ Block3D::getNodalCoords( int i, int j, int k )
 
   double hy = 2.0 / ny;
 
-  double hz = 2.0 / nz;
+  double hhz = 2.0 / nz;
 
   double x = -1.0 + (i*hx);
 
   double y = -1.0 + (j*hy);
 
-  double z = -1.0 + (k*hz);
+  double z = -1.0 + (k*hhz);
 
   coor(0) = x;
   coor(1) = y;
