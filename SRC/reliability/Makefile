@@ -3,7 +3,8 @@ include ../../Makefile.def
 RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/analysis/analysis/FragilityAnalysis.o \
 		$(FE)/reliability/analysis/analysis/GFunVisualizationAnalysis.o \
-		$(FE)/reliability/analysis/analysis/MVFOSMAnalysis.o \
+		$(FE)/reliability/analysis/analysis/FOSMAnalysis.o \
+		$(FE)/reliability/analysis/analysis/ParametricReliabilityAnalysis.o \
 		$(FE)/reliability/analysis/analysis/OutCrossingAnalysis.o \
 		$(FE)/reliability/analysis/analysis/SamplingAnalysis.o \
 		$(FE)/reliability/analysis/analysis/ReliabilityAnalysis.o \
@@ -68,10 +69,12 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/domain/distributions/NormalRV.o \
 		$(FE)/reliability/domain/distributions/ShiftedRayleighRV.o \
 		$(FE)/reliability/domain/distributions/Type3SmallestValueRV.o \
+		$(FE)/reliability/domain/distributions/UserDefinedRV.o \
 		$(FE)/reliability/domain/modulatingFunction/ModulatingFunction.o \
 		$(FE)/reliability/domain/modulatingFunction/ConstantModulatingFunction.o \
 		$(FE)/reliability/domain/modulatingFunction/GammaModulatingFunction.o \
 		$(FE)/reliability/domain/modulatingFunction/TrapezoidalModulatingFunction.o \
+		$(FE)/reliability/domain/modulatingFunction/KooModulatingFunction.o \
 		$(FE)/reliability/domain/spectrum/JonswapSpectrum.o \
 		$(FE)/reliability/domain/spectrum/NarrowBandSpectrum.o \
 		$(FE)/reliability/domain/spectrum/PointsSpectrum.o \
@@ -80,6 +83,7 @@ RELIABILITY_OBJS = $(FE)/reliability/analysis/analysis/FORMAnalysis.o \
 		$(FE)/reliability/domain/filter/StandardLinearOscillatorAccelerationFilter.o \
 		$(FE)/reliability/domain/filter/StandardLinearOscillatorDisplacementFilter.o \
 		$(FE)/reliability/domain/filter/StandardLinearOscillatorVelocityFilter.o \
+		$(FE)/reliability/domain/filter/KooFilter.o \
 		$(FE)/reliability/FEsensitivity/SensitivityAlgorithm.o \
 		$(FE)/reliability/FEsensitivity/SensitivityIntegrator.o \
 		$(FE)/reliability/FEsensitivity/StaticSensitivityIntegrator.o \

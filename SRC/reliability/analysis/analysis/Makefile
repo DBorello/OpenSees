@@ -1,10 +1,11 @@
 include ../../../../Makefile.def
 
 OBJS       = 	FORMAnalysis.o\
+	FOSMAnalysis.o \
 	FragilityAnalysis.o \
 	GFunVisualizationAnalysis.o \
-	MVFOSMAnalysis.o \
 	OutCrossingAnalysis.o \
+	ParametricReliabilityAnalysis.o \
 	SamplingAnalysis.o \
 	ReliabilityAnalysis.o \
 	SORMAnalysis.o \
