@@ -85,6 +85,10 @@ LIB32=link.exe -lib
 # Begin Group "uniaxial"
 
 # PROP Default_Filter ""
+# Begin Group "fedeas"
+
+# PROP Default_Filter ""
+# End Group
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\uniaxial\CableMaterial.cpp
@@ -124,6 +128,14 @@ SOURCE=..\..\..\SRC\material\uniaxial\EPPGapMaterial.cpp
 # Begin Source File
 
 SOURCE=..\..\..\SRC\material\uniaxial\EPPGapMaterial.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\FedeasMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\FedeasMaterial.h
 # End Source File
 # Begin Source File
 
