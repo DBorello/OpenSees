@@ -193,6 +193,8 @@ recorder Node nodeGravity.out disp -time -node 3 4 -dof 1 2 3
 # Finally perform the analysis
 # ------------------------------
 
+# initialize in case we need to do an initial stiffness iteration
+initialize
 
 # perform the gravity load analysis, requires 10 steps to reach the load level
 analyze 10
