@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.25 $
-// $Date: 2004-09-01 04:03:37 $
+// $Revision: 1.26 $
+// $Date: 2004-10-05 20:46:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -102,7 +102,8 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	int allFlag = 0;
 	while (Tcl_GetInt(interp, argv[endEleIDs], &eleID) == TCL_OK) {
 	  endEleIDs++;
-	}
+	} 
+	Tcl_ResetResult(interp);
 
 	// determine the number of elements
 	int numEle = 0;
@@ -163,7 +164,12 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	    while (loc < argc && Tcl_GetInt(interp, argv[loc], &eleTag) == TCL_OK) {
 	      eleIDs[numEle++] = eleTag;
 	      loc++;
-
+	    }
+	    Tcl_ResetResult(interp);
+	    
+	    if (loc == argc) {
+	      opserr << "ERROR: No response type specified for element recorder. " << endln;
+	      return TCL_ERROR;
 	    }
 
 	    if (strcmp(argv[loc],"all") == 0) {
@@ -265,6 +271,13 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  while ((theEle = theEleIter()) != 0)
 	    eleIDs[numEle++] = theEle->getTag();
 	}
+
+	if (eleData >= argc) {
+	  opserr << "ERROR: No response type specified for element recorder. " << endln;
+	  return TCL_ERROR;
+	}
+
+	opserr << eleData << " " << argc << endln;
 
 	const char **data = new const char *[argc-eleData];
 
@@ -480,9 +493,10 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  } else {
 	    int node;
 	    for (int j=pos; j< argc; j++) 
-	      if (Tcl_GetInt(interp, argv[pos], &node) != TCL_OK) 
+	      if (Tcl_GetInt(interp, argv[pos], &node) != TCL_OK) {
 		j = argc;
-	      else {
+		Tcl_ResetResult(interp);
+	      } else {
 		theNodes[numNodes] = node;
 		numNodes++;
 		pos++;
@@ -551,9 +565,10 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	  int numDOF = 0;
 	  int dof;
 	  for (int j=pos; j< argc; j++) 
-	    if (Tcl_GetInt(interp, argv[pos], &dof) != TCL_OK) 
+	    if (Tcl_GetInt(interp, argv[pos], &dof) != TCL_OK) {
 	      j = argc;
-	    else {
+	      Tcl_ResetResult(interp);
+	    } else {
 	      theDofs[numDOF] = dof-1;  // -1 for c indexing of the dof's
 	      numDOF++;
 	      pos++;
@@ -572,7 +587,12 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	else	 
 	  flags = 1;
 	}
-     
+      
+      if (pos >= argc) {
+	opserr << "ERROR: No response type (disp, vel or accel) specified for node recorder. " << endln;
+	return TCL_ERROR;
+      }
+      
       if (responseID == 0) {
 	responseID  = argv[pos];
       }
