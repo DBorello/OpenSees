@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.10 $
-// $Date: 2002-06-10 22:57:40 $
+// $Revision: 1.11 $
+// $Date: 2002-06-10 23:27:54 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/uniaxial/FedeasMaterial.cpp,v $
                                                                         
 // Written: MHS
@@ -512,8 +512,13 @@ FedeasMaterial::invokeSubroutine(int ist)
     break;
     
   case MAT_TAG_FedeasSteel2:
+#ifdef _WIN32
     steel_2__(data, hstv, &hstv[numHstv], &epsilonP, &sigmaP, &dEpsilon, 
 	      &sigma, &tangent, &ist);
+#else
+	g3ErrorHandler->fatal("%s -- Steel2 subroutine not yet linked",
+		"FedeasMaterial::invokeSubroutine"); 
+#endif
     break;
     
     // Add more cases as needed
