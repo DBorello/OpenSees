@@ -13,10 +13,12 @@
 #              P
 #
 #
-# $Revision: 1.1.1.1 $
-# $Date: 2000-09-15 08:23:09 $
+# $Revision: 1.2 $
+# $Date: 2000-10-17 07:04:48 $
 # $Source: /usr/local/cvs/OpenSees/EXAMPLES/ExampleScripts/truss1.tcl,v $
 
+set DISPLAY ON
+# set DISPLAY OFF
 
 #some variables
 set p 10
@@ -82,10 +84,19 @@ pattern Plain 1 Linear {
     load 3 0.0 $p
 }
 
+# create a LoadPattern with a Linear time series
+pattern Plain 2 Linear {
+    # add a load
+    load 3 0.0 $p
+}
+
 #create the recorder
 recorder Node Node.out disp -load -node 3  -dof 2
 recorder Element 1 -time -file Element.out axialForce
-recorder plot Node.out Node2Disp 50 350 200 200 -columns 2 1
+
+if {$DISPLAY == "ON"} {
+    recorder plot Node.out Node2Disp 50 350 200 200 -columns 2 1
+}
 
 # create the SOE, ConstraintHandler, Integrator, Algorithm and Numberer
 system SparseGeneral
@@ -99,18 +110,20 @@ numberer RCM
 # create the Analysis
 analysis Static 
 
-# create the display
-recorder display g3 10 10 800 200
-prp 20 5.0 100.0
-vrp 20 5.0 0
-vup 0 1 0
-vpn 0 0 1
-viewWindow -30 30 -10 10
-plane 0 150
-port -1 1 -1 1
-projection 0
-fill 1
-display 1 0 5
+if {$DISPLAY == "ON"} {
+    # create the display
+    recorder display g3 10 10 800 200
+    prp 20 5.0 100.0
+    vrp 20 5.0 0
+    vup 0 1 0
+    vpn 0 0 1
+    viewWindow -30 30 -10 10
+    plane 0 150
+    port -1 1 -1 1
+    projection 0
+    fill 1
+    display 1 0 5
+}
 
 #analyze the structure
 analyze $numAnalysisSteps
