@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2001-10-25 21:31:37 $
+// $Revision: 1.8 $
+// $Date: 2001-10-26 18:06:25 $
 // $Source: /usr/local/cvs/OpenSees/SRC/recorder/TclRecorderCommands.cpp,v $
                                                                         
                                                                         
@@ -169,7 +169,7 @@ TclCreateRecorder(ClientData clientData, Tcl_Interp *interp, int argc,
 	}
 	
 	(*theRecorder) = new ElementRecorder(eleIDs, theDomain, &argv[eleData], 
-					     argc-endMarker, echoTime, dT, fileName);
+					     argc-eleData, echoTime, dT, fileName);
     }
     
     // a MaxNodeDisp Recorder
