@@ -13,7 +13,6 @@ NDARRAY  = BJtensor.o \
 	   Cosseratstresst.o  \
 	   Cosseratstraint.o  
 
-
 OBJS       = $(NDARRAY)
 
 ################### TARGETS ########################
