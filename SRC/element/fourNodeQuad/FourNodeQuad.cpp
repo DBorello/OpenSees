@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.8 $
-// $Date: 2001-05-28 06:27:45 $
+// $Revision: 1.9 $
+// $Date: 2001-06-16 05:32:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -326,17 +326,28 @@ FourNodeQuad::getMass()
 {
 	K.Zero();
 
-	if (rho == 0.0)
-		return K;
+	int i;
+	static double rhoi[4];
+	double sum = this->rho;
+	for (i = 0; i < 4; i++) {
+	  rhoi[i] = theMaterial[i]->getRho();
+	  sum += rhoi[i];
+	}
+
+	if (sum == 0.0)
+	  return K;
 
 	double rhodvol, Nrho;
 
 	// Compute a lumped mass matrix
-	for (int i = 0; i < 4; i++) {
+	for (i = 0; i < 4; i++) {
 
 		// Determine Jacobian for this integration point
 		rhodvol = this->shapeFunction(pts[i][0], pts[i][1]);
-		rhodvol *= (rho*thickness*wts[i]);
+
+		// Element plus material density ... MAY WANT TO REMOVE ELEMENT DENSITY
+		double tmp = rho + rhoi[i];
+		rhodvol *= (tmp*thickness*wts[i]);
 
 		for (int alpha = 0, ia = 0; alpha < 4; alpha++, ia++) {
 			Nrho = shp[2][alpha]*rhodvol;
@@ -376,9 +387,16 @@ FourNodeQuad::addLoad(const Vector &addLoad)
 int 
 FourNodeQuad::addInertiaLoadToUnbalance(const Vector &accel)
 {
-	// Check for a quick return
-	if (rho == 0.0) 
-		return 0;
+	int i;
+	static double rhoi[4];
+	double sum = this->rho;
+	for (i = 0; i < 4; i++) {
+	  rhoi[i] = theMaterial[i]->getRho();
+	  sum += rhoi[i];
+	}
+
+	if (sum == 0.0)
+	  return 0;
 
 	// Get R * accel from the nodes
 	const Vector &Raccel1 = nd1Ptr->getRV(accel);
@@ -409,7 +427,7 @@ FourNodeQuad::addInertiaLoadToUnbalance(const Vector &accel)
 
     // Want to add ( - fact * M R * accel ) to unbalance
 	// Take advantage of lumped mass matrix
-    for (int i = 0; i < 8; i++)
+    for (i = 0; i < 8; i++)
 		Q(i) += -K(i,i)*ra[i];
 
     return 0;
@@ -496,9 +514,16 @@ FourNodeQuad::getResistingForce()
 const Vector&
 FourNodeQuad::getResistingForceIncInertia()
 {
-	// Check for a quick return
-	if (rho == 0.0)
-		return this->getResistingForce();
+	int i;
+	static double rhoi[4];
+	double sum = this->rho;
+	for (i = 0; i < 4; i++) {
+	  rhoi[i] = theMaterial[i]->getRho();
+	  sum += rhoi[i];
+	}
+
+	if (sum == 0.0)
+	  return this->getResistingForce();
 
 	const Vector &accel1 = nd1Ptr->getTrialAccel();
 	const Vector &accel2 = nd2Ptr->getTrialAccel();
@@ -523,7 +548,7 @@ FourNodeQuad::getResistingForceIncInertia()
 	this->getMass();
 
 	// Take advantage of lumped mass matrix
-	for (int i = 0; i < 8; i++)
+	for (i = 0; i < 8; i++)
 		P(i) += K(i,i)*a[i];
 
 	return P;
