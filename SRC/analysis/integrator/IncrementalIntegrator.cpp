@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 05:23:32 $
+// $Revision: 1.4 $
+// $Date: 2001-12-07 00:50:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.cpp,v $
                                                                         
                                                                         
@@ -150,6 +150,14 @@ IncrementalIntegrator::getLastResponse(Vector &result, const ID &id)
     }	    
     return res;
 }
+
+
+int
+IncrementalIntegrator::newStep(double deltaT)
+{
+  return 0;
+}
+
 
 int
 IncrementalIntegrator::initialize(void)

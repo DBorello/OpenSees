@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-03-29 05:23:32 $
+// $Revision: 1.4 $
+// $Date: 2001-12-07 00:50:21 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/IncrementalIntegrator.h,v $
                                                                         
                                                                         
@@ -76,6 +76,7 @@ class IncrementalIntegrator : public Integrator
     virtual int formNodUnbalance(DOF_Group *theDof) =0;    
 
     // methods to update the domain
+    virtual int newStep(double deltaT);
     virtual int update(const Vector &deltaU) =0;
     virtual int commit(void);
     virtual int revertToLastStep(void);

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.1.1.1 $
-// $Date: 2000-09-15 08:23:17 $
+// $Revision: 1.2 $
+// $Date: 2001-12-07 00:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/CentralDifference.cpp,v $
                                                                         
                                                                         
@@ -102,16 +102,13 @@ CentralDifference::newStep(double _deltaT)
   (*Udotdot) *= c3;   
   Udotdot->addVector(1.0, *Ut, c3);
     
-
   // set the new trial response quantities
   AnalysisModel *theModel = this->getAnalysisModelPtr();
   theModel->setResponse(*U,*Udot,*Udotdot);        
 
   // increment the time and apply the load
   double time = theModel->getCurrentDomainTime();
-  theModel->applyLoadDomain(time);
-
-  theModel->updateDomain();
+  theModel->updateDomain(time, deltaT);
   
   return 0;
 }

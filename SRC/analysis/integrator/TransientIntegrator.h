@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-03-29 05:23:32 $
+// $Revision: 1.3 $
+// $Date: 2001-12-07 00:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/TransientIntegrator.h,v $
                                                                         
                                                                         
@@ -58,7 +58,6 @@ class TransientIntegrator : public IncrementalIntegrator
     virtual int formNodUnbalance(DOF_Group *theDof);    
 
     virtual int initialize(void) {return 0;};
-    virtual int newStep(double deltaT) =0;
     
   protected:
     

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-03-29 05:23:32 $
+// $Revision: 1.3 $
+// $Date: 2001-12-07 00:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/HHT1.cpp,v $
                                                                         
                                                                         
@@ -203,9 +203,7 @@ HHT1::newStep(double deltaT)
   // increment the time and apply the load
   double time = theModel->getCurrentDomainTime();
   time +=deltaT;
-  theModel->applyLoadDomain(time);
-
-  theModel->updateDomain();
+  theModel->updateDomain(time, deltaT);
 
   return 0;
 }

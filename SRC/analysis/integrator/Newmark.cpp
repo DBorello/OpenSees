@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2001-11-27 23:07:54 $
+// $Revision: 1.6 $
+// $Date: 2001-12-07 00:49:46 $
 // $Source: /usr/local/cvs/OpenSees/SRC/analysis/integrator/Newmark.cpp,v $
                                                                         
                                                                         
@@ -136,7 +136,6 @@ Newmark::formNodUnbalance(DOF_Group *theDof)
 int
 Newmark::initialize(void)
 {
-
   /***********************************************
   U->Zero();
   Udot->Zero();
@@ -205,7 +204,6 @@ Newmark::newStep(double deltaT)
   // get a pointer to the AnalysisModel
   AnalysisModel *theModel = this->getAnalysisModelPtr();
 
-
   // if alphaKc is specified .. 
   //    loop over FE_Elements getting them to do a setKc()
   if (rayleighDamping == true && betaKc != 0.0) {
@@ -268,9 +266,7 @@ Newmark::newStep(double deltaT)
   // increment the time and apply the load
   double time = theModel->getCurrentDomainTime();
   time +=deltaT;
-  theModel->applyLoadDomain(time);
-
-  theModel->updateDomain();
+  theModel->updateDomain(time, deltaT);
   
   return 0;
 }
