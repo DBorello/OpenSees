@@ -1,9 +1,32 @@
+/* ****************************************************************** **
+**    OpenSees - Open System for Earthquake Engineering Simulation    **
+**          Pacific Earthquake Engineering Research Center            **
+**                                                                    **
+**                                                                    **
+** (C) Copyright 1999, The Regents of the University of California    **
+** All Rights Reserved.                                               **
+**                                                                    **
+** Commercial use of this program without express permission of the   **
+** University of California, Berkeley, is strictly prohibited.  See   **
+** file 'COPYRIGHT'  in main directory for information on usage and   **
+** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
+**                                                                    **
+** Developed by:                                                      **
+**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
+**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
+**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
+**                                                                    **
+** ****************************************************************** */
+                                                                        
+// $Revision: 1.9 $
+// $Date: 2002-06-07 00:28:42 $
+// $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/ConstantPressureVolumeQuad.cpp,v $
+
 // Ed "C++" Love
-// Do not ask Prashant about this code.  He has no clue. 
 //
 // Constant Presssure/Volume Four Node Quadrilateral
 // Plane Strain (NOT PLANE STRESS)
-//
+
 
 #include <iostream.h>
 #include <stdio.h> 
@@ -20,6 +43,9 @@
 #include <ErrorHandler.h>
 #include <ConstantPressureVolumeQuad.h>
 #include <Renderer.h>
+
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
 
 //static data
 Matrix ConstantPressureVolumeQuad :: stiff(8,8)   ;
@@ -55,7 +81,8 @@ ConstantPressureVolumeQuad :: ConstantPressureVolumeQuad( ) :
 Element( 0, ELE_TAG_ConstantPressureVolumeQuad ),
 connectedExternalNodes(4), load(0)
 { 
-  return ; 
+  for (int i=0; i<9; i++)
+    materialPointers[i] = 0;
 }
 
 
@@ -949,13 +976,131 @@ ConstantPressureVolumeQuad::displaySelf(Renderer &theViewer, int displayMode, fl
 
 int ConstantPressureVolumeQuad :: sendSelf (int commitTag, Channel &theChannel)
 {
-    return -1;
+  int res = 0;
+  
+  // note: we don't check for dataTag == 0 for Element
+  // objects as that is taken care of in a commit by the Domain
+  // object - don't want to have to do the check if sending data
+  int dataTag = this->getDbTag();
+  
+
+  // Now quad sends the ids of its materials
+  int matDbTag;
+  
+  static ID idData(13);
+  
+  int i;
+  for (i = 0; i < 4; i++) {
+    idData(i) = materialPointers[i]->getClassTag();
+    matDbTag = materialPointers[i]->getDbTag();
+    // NOTE: we do have to ensure that the material has a database
+    // tag if we are sending to a database channel.
+    if (matDbTag == 0) {
+      matDbTag = theChannel.getDbTag();
+			if (matDbTag != 0)
+			  materialPointers[i]->setDbTag(matDbTag);
+    }
+    idData(i+4) = matDbTag;
+  }
+  
+  idData(8) = this->getTag();
+  idData(9) = connectedExternalNodes(0);
+  idData(10) = connectedExternalNodes(1);
+  idData(11) = connectedExternalNodes(2);
+  idData(12) = connectedExternalNodes(3);
+
+  res += theChannel.sendID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING ConstantPressureVolumeQuad::sendSelf() - %d failed to send ID\n",
+			    this->getTag());
+    return res;
+  }
+
+  // Finally, quad asks its material objects to send themselves
+  for (i = 0; i < 4; i++) {
+    res += materialPointers[i]->sendSelf(commitTag, theChannel);
+    if (res < 0) {
+      g3ErrorHandler->warning("WARNING ConstantPressureVolumeQuad::sendSelf() - %d failed to send its Material\n",this->getTag());
+      return res;
+    }
+  }
+  
+  return res;
 }
     
-int ConstantPressureVolumeQuad :: recvSelf (int commitTag, 
+int 
+ConstantPressureVolumeQuad :: recvSelf (int commitTag, 
 					Channel &theChannel, 
 					FEM_ObjectBroker &theBroker)
 {
-    return -1;
+  int res = 0;
+  
+  int dataTag = this->getDbTag();
+
+  static ID idData(13);
+  // Quad now receives the tags of its four external nodes
+  res += theChannel.recvID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING ConstantPressureVolumeQuad::recvSelf() - %d failed to receive ID\n", this->getTag());
+    return res;
+  }
+
+  this->setTag(idData(8));
+  connectedExternalNodes(0) = idData(19);
+  connectedExternalNodes(1) = idData(10);
+  connectedExternalNodes(2) = idData(11);
+  connectedExternalNodes(3) = idData(12);
+
+  int i;
+
+  if (materialPointers[0] == 0) {
+    for (i = 0; i < 4; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+4);
+      // Allocate new material with the sent class tag
+      materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
+      if (materialPointers[i] == 0) {
+	g3ErrorHandler->warning("ConstantPressureVolumeQuad::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	return -1;
+      }
+      // Now receive materials into the newly allocated space
+      materialPointers[i]->setDbTag(matDbTag);
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+  // Number of materials is the same, receive materials into current space
+  else {
+    for (i = 0; i < 4; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+4);
+      // Check that material is of the right type; if not,
+      // delete it and create a new one of the right type
+      if (materialPointers[i]->getClassTag() != matClassTag) {
+	delete materialPointers[i];
+	materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
+	if (materialPointers[i] == 0) {
+	  g3ErrorHandler->fatal("ConstantPressureVolumeQuad::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	  return -1;
+	}
+      }
+      // Receive the material
+      materialPointers[i]->setDbTag(matDbTag);
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("ConstantPressureVolumeQuad::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+  
+  return res;
 }
 

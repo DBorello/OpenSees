@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2002-05-17 20:15:10 $
+// $Revision: 1.18 $
+// $Date: 2002-06-07 00:28:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/FourNodeQuad.cpp,v $
 
 // Written: MHS
@@ -51,8 +51,8 @@ double FourNodeQuad::pts[4][2];
 double FourNodeQuad::wts[4];
 
 FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
-	NDMaterial &m, const char *type, double t,
-	double p, double r, double b1, double b2)
+			   NDMaterial &m, const char *type, double t,
+			   double p, double r, double b1, double b2)
 :Element (tag, ELE_TAG_FourNodeQuad), 
   theMaterial(0), connectedExternalNodes(4), 
   nd1Ptr(0), nd2Ptr(0), nd3Ptr(0), nd4Ptr(0),
@@ -84,20 +84,20 @@ FourNodeQuad::FourNodeQuad(int tag, int nd1, int nd2, int nd3, int nd4,
     // Allocate arrays of pointers to NDMaterials
     theMaterial = new NDMaterial *[4];
     
-	if (theMaterial == 0)
-	    g3ErrorHandler->fatal("%s - failed allocate material model pointer",
+    if (theMaterial == 0)
+      g3ErrorHandler->fatal("%s - failed allocate material model pointer",
 			"FourNodeQuad::FourNodeQuad");
 
     for (int i = 0; i < 4; i++) {
-
-		// Get copies of the material model for each integration point
-		theMaterial[i] = m.getCopy(type);
+      
+      // Get copies of the material model for each integration point
+      theMaterial[i] = m.getCopy(type);
 			
-		// Check allocation
-		if (theMaterial[i] == 0)
-			g3ErrorHandler->fatal("%s -- failed to get a copy of material model",
-				"FourNodeQuad::FourNodeQuad");
-	}
+      // Check allocation
+      if (theMaterial[i] == 0)
+	g3ErrorHandler->fatal("%s -- failed to get a copy of material model",
+			      "FourNodeQuad::FourNodeQuad");
+    }
 
     // Set connected external node IDs
     connectedExternalNodes(0) = nd1;
@@ -129,14 +129,14 @@ FourNodeQuad::FourNodeQuad()
 
 FourNodeQuad::~FourNodeQuad()
 {    
-    for (int i = 0; i < 4; i++) {
-		if (theMaterial[i])
-			delete theMaterial[i];
-	}
+  for (int i = 0; i < 4; i++) {
+    if (theMaterial[i])
+      delete theMaterial[i];
+  }
 
-    // Delete the array of pointers to NDMaterial pointer arrays
-    if (theMaterial)
-		delete [] theMaterial;
+  // Delete the array of pointers to NDMaterial pointer arrays
+  if (theMaterial)
+    delete [] theMaterial;
 }
 
 int
@@ -544,186 +544,168 @@ FourNodeQuad::getResistingForceIncInertia()
 int
 FourNodeQuad::sendSelf(int commitTag, Channel &theChannel)
 {
-	int res = 0;
+  int res = 0;
+  
+  // note: we don't check for dataTag == 0 for Element
+  // objects as that is taken care of in a commit by the Domain
+  // object - don't want to have to do the check if sending data
+  int dataTag = this->getDbTag();
+  
+  // Quad packs its data into a Vector and sends this to theChannel
+  // along with its dbTag and the commitTag passed in the arguments
+  static Vector data(6);
+  data(0) = this->getTag();
+  data(1) = thickness;
+  data(2) = rho;
+  data(3) = b[0];
+  data(4) = b[1];
+  data(5) = pressure;
+  
+  res += theChannel.sendVector(dataTag, commitTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING FourNodeQuad::sendSelf() - %d failed to send Vector\n",this->getTag());
+    return res;
+  }	      
+  
 
-	// note: we don't check for dataTag == 0 for Element
-	// objects as that is taken care of in a commit by the Domain
-	// object - don't want to have to do the check if sending data
-	int dataTag = this->getDbTag();
-
-	// Quad packs its data into a Vector and sends this to theChannel
-	// along with its dbTag and the commitTag passed in the arguments
-	static Vector data(7);
-	data(0) = this->getTag();
-	data(1) = thickness;
-	data(2) = rho;
-	data(3) = b[0];
-	data(4) = b[1];
-	data(5) = pressure;
-	data(6) = 4;
-
-	res += theChannel.sendVector(dataTag, commitTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("WARNING FourNodeQuad::sendSelf() - %d failed to send Vector\n",this->getTag());
-		return res;
-	}	      
-
-	// Quad then sends the tags of its four end nodes
-	res += theChannel.sendID(dataTag, commitTag, connectedExternalNodes);
-	if (res < 0) {
-		g3ErrorHandler->warning("WARNING FourNodeQuad::sendSelf() - %d failed to send ID\n",this->getTag());
-		return res;
-	}
-
-	// Now quad sends the ids of its materials
-	int matDbTag;
-	int numMats = 4;
-	ID classTags(2*numMats);
-
-	int i;
-	for (i = 0; i < 4; i++) {
-		classTags(i) = theMaterial[i]->getClassTag();
-		matDbTag = theMaterial[i]->getDbTag();
-		// NOTE: we do have to ensure that the material has a database
-		// tag if we are sending to a database channel.
-		if (matDbTag == 0) {
-			matDbTag = theChannel.getDbTag();
+  // Now quad sends the ids of its materials
+  int matDbTag;
+  
+  static ID idData(12);
+  
+  int i;
+  for (i = 0; i < 4; i++) {
+    idData(i) = theMaterial[i]->getClassTag();
+    matDbTag = theMaterial[i]->getDbTag();
+    // NOTE: we do have to ensure that the material has a database
+    // tag if we are sending to a database channel.
+    if (matDbTag == 0) {
+      matDbTag = theChannel.getDbTag();
 			if (matDbTag != 0)
-				theMaterial[i]->setDbTag(matDbTag);
-		}
-		classTags(i+numMats) = matDbTag;
-	}
+			  theMaterial[i]->setDbTag(matDbTag);
+    }
+    idData(i+4) = matDbTag;
+  }
+  
+  idData(8) = connectedExternalNodes(0);
+  idData(9) = connectedExternalNodes(1);
+  idData(10) = connectedExternalNodes(2);
+  idData(11) = connectedExternalNodes(3);
 
-	res += theChannel.sendID(dataTag, commitTag, classTags);
-	if (res < 0) {
-		g3ErrorHandler->warning("WARNING FourNodeQuad::sendSelf() - %d failed to send ID\n",
-			this->getTag());
-		return res;
-	}
+  res += theChannel.sendID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING FourNodeQuad::sendSelf() - %d failed to send ID\n",
+			    this->getTag());
+    return res;
+  }
 
-	// Finally, quad asks its material objects to send themselves
-	for (i = 0; i < 4; i++) {
-		res += theMaterial[i]->sendSelf(commitTag, theChannel);
-		if (res < 0) {
-			g3ErrorHandler->warning("WARNING FourNodeQuad::sendSelf() - %d failed to send its Material\n",this->getTag());
-			return res;
-		}
-	}
-
-	return res;
+  // Finally, quad asks its material objects to send themselves
+  for (i = 0; i < 4; i++) {
+    res += theMaterial[i]->sendSelf(commitTag, theChannel);
+    if (res < 0) {
+      g3ErrorHandler->warning("WARNING FourNodeQuad::sendSelf() - %d failed to send its Material\n",this->getTag());
+      return res;
+    }
+  }
+  
+  return res;
 }
 
 int
 FourNodeQuad::recvSelf(int commitTag, Channel &theChannel,
 						FEM_ObjectBroker &theBroker)
 {
-	int res = 0;
-
-	int dataTag = this->getDbTag();
-
-	// Quad creates a Vector, receives the Vector and then sets the 
-	// internal data with the data in the Vector
-	static Vector data(7);
-	res += theChannel.recvVector(dataTag, commitTag, data);
-	if (res < 0) {
-		g3ErrorHandler->warning("WARNING FourNodeQuad::recvSelf() - failed to receive Vector\n");
-		return res;
-	}
-
-	this->setTag((int)data(0));
-	thickness = data(1);
-	rho = data(2);
-	b[0] = data(3);
-	b[1] = data(4);
-	pressure = data(5);
+  int res = 0;
   
-	// Quad now receives the tags of its four external nodes
-	res += theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
-	if (res < 0) {
-		g3ErrorHandler->warning("WARNING FourNodeQuad::recvSelf() - %d failed to receive ID\n", this->getTag());
-		return res;
-	}
+  int dataTag = this->getDbTag();
 
-	// Quad now receives the ids of its materials
-	int newOrder = (int)data(6);
-	int numMats = newOrder;
-	ID classTags(2*numMats);
+  // Quad creates a Vector, receives the Vector and then sets the 
+  // internal data with the data in the Vector
+  static Vector data(6);
+  res += theChannel.recvVector(dataTag, commitTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING FourNodeQuad::recvSelf() - failed to receive Vector\n");
+	  return res;
+  }
+  
+  this->setTag((int)data(0));
+  thickness = data(1);
+  rho = data(2);
+  b[0] = data(3);
+  b[1] = data(4);
+  pressure = data(5);
 
-	res += theChannel.recvID(dataTag, commitTag, classTags);
-	if (res < 0)  {
-		g3ErrorHandler->warning("FourNodeQuad::recvSelf() - %s\n",
-			    "failed to recv ID data");
-		return res;
-	}    
+  static ID idData(12);
+  // Quad now receives the tags of its four external nodes
+  res += theChannel.recvID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING FourNodeQuad::recvSelf() - %d failed to receive ID\n", this->getTag());
+    return res;
+  }
 
-	int i;
+  connectedExternalNodes(0) = idData(8);
+  connectedExternalNodes(1) = idData(9);
+  connectedExternalNodes(2) = idData(10);
+  connectedExternalNodes(3) = idData(11);
+  
 
-	// If the number of materials (quadrature order) is not the same,
-	// delete the old materials, allocate new ones and then receive
-	if (4 != newOrder) {
-		// Delete the materials
-		for (i = 0; i < 4; i++) {
-			if (theMaterial[i])
-				delete theMaterial[i];
-		}
-		if (theMaterial)
-			delete [] theMaterial;
-
-		// Allocate new materials
-		theMaterial = new NDMaterial *[4];
-		if (theMaterial == 0) {
-			g3ErrorHandler->warning("FourNodeQuad::recvSelf() - %s\n",
-				"Could not allocate NDMaterial* array");
-			return -1;
-		}
-		for (i = 0; i < 4; i++) {
-			int matClassTag = classTags(i);
-			int matDbTag = classTags(i+numMats);
-			// Allocate new material with the sent class tag
-			theMaterial[i] = theBroker.getNewNDMaterial(matClassTag);
-			if (theMaterial[i] == 0) {
-				g3ErrorHandler->warning("FourNodeQuad::recvSelf() - %s %d\n",
-					"Broker could not create NDMaterial of class type",matClassTag);
-				return -1;
-			}
-			// Now receive materials into the newly allocated space
-			theMaterial[i]->setDbTag(matDbTag);
-			res += theMaterial[i]->recvSelf(commitTag, theChannel, theBroker);
-			if (res < 0) {
-				g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
-					i,"failed to recv itself");
-				return res;
-			}
-		}
-	}
-	// Number of materials is the same, receive materials into current space
-	else {
-		for (i = 0; i < 4; i++) {
-			int matClassTag = classTags(i);
-			int matDbTag = classTags(i+numMats);
-			// Check that material is of the right type; if not,
-			// delete it and create a new one of the right type
-			if (theMaterial[i]->getClassTag() != matClassTag) {
-				delete theMaterial[i];
-				theMaterial[i] = theBroker.getNewNDMaterial(matClassTag);
-				if (theMaterial[i] == 0) {
-					g3ErrorHandler->fatal("FourNodeQuad::recvSelf() - %s %d\n",
-						"Broker could not create NDMaterial of class type",matClassTag);
-					return -1;
-				}
-			}
-			// Receive the material
-			theMaterial[i]->setDbTag(matDbTag);
-			res += theMaterial[i]->recvSelf(commitTag, theChannel, theBroker);
-			if (res < 0) {
-				g3ErrorHandler->warning("FourNodeQuad::recvSelf() - material %d, %s\n",
-					i,"failed to recv itself");
-				return res;
-			}
-		}
-	}
-
+  if (theMaterial == 0) {
+    // Allocate new materials
+    theMaterial = new NDMaterial *[4];
+    if (theMaterial == 0) {
+      g3ErrorHandler->warning("FourNodeQuad::recvSelf() - %s\n",
+			      "Could not allocate NDMaterial* array");
+      return -1;
+    }
+    for (int i = 0; i < 4; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+4);
+      // Allocate new material with the sent class tag
+      theMaterial[i] = theBroker.getNewNDMaterial(matClassTag);
+      if (theMaterial[i] == 0) {
+	g3ErrorHandler->warning("FourNodeQuad::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	return -1;
+      }
+      // Now receive materials into the newly allocated space
+      theMaterial[i]->setDbTag(matDbTag);
+      res += theMaterial[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
 	return res;
+      }
+    }
+  }
+
+  // materials exist , ensure materials of correct type and recvSelf on them
+  else {
+    for (int i = 0; i < 4; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+4);
+      // Check that material is of the right type; if not,
+      // delete it and create a new one of the right type
+      if (theMaterial[i]->getClassTag() != matClassTag) {
+	delete theMaterial[i];
+	theMaterial[i] = theBroker.getNewNDMaterial(matClassTag);
+	if (theMaterial[i] == 0) {
+	  g3ErrorHandler->fatal("FourNodeQuad::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	  return -1;
+	}
+      }
+      // Receive the material
+      theMaterial[i]->setDbTag(matDbTag);
+      res += theMaterial[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("FourNodeQuad::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+  
+  return res;
 }
 
 void

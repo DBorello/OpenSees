@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-01-06 19:34:59 $
+// $Revision: 1.7 $
+// $Date: 2002-06-07 00:28:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/NineNodeMixedQuad.cpp,v $
 
 // Ed "C++" Love
@@ -45,6 +45,9 @@
 
 #include <Renderer.h>
 
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
+
 //static data
 Matrix  NineNodeMixedQuad :: stiff(18,18)   ;
 Vector  NineNodeMixedQuad :: resid(18)     ;
@@ -63,7 +66,8 @@ NineNodeMixedQuad :: NineNodeMixedQuad( ) :
 Element( 0, ELE_TAG_NineNodeMixedQuad ),
 connectedExternalNodes(9) , load(0)
 { 
-  return ; 
+  for (int i=0; i<9; i++)
+    materialPointers[i] = 0;
 }
 
 
@@ -1105,7 +1109,62 @@ NineNodeMixedQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
 int 
 NineNodeMixedQuad::sendSelf (int commitTag, Channel &theChannel)
 {
-    return -1;
+  int res = 0;
+  
+  // note: we don't check for dataTag == 0 for Element
+  // objects as that is taken care of in a commit by the Domain
+  // object - don't want to have to do the check if sending data
+  int dataTag = this->getDbTag();
+  
+
+  // Now quad sends the ids of its materials
+  int matDbTag;
+  
+  static ID idData(28);
+  
+  int i;
+  for (i = 0; i < 9; i++) {
+    idData(i) = materialPointers[i]->getClassTag();
+    matDbTag = materialPointers[i]->getDbTag();
+    // NOTE: we do have to ensure that the material has a database
+    // tag if we are sending to a database channel.
+    if (matDbTag == 0) {
+      matDbTag = theChannel.getDbTag();
+			if (matDbTag != 0)
+			  materialPointers[i]->setDbTag(matDbTag);
+    }
+    idData(i+9) = matDbTag;
+  }
+  
+  idData(18) = this->getTag();
+  idData(19) = connectedExternalNodes(0);
+  idData(20) = connectedExternalNodes(1);
+  idData(21) = connectedExternalNodes(2);
+  idData(22) = connectedExternalNodes(3);
+  idData(23) = connectedExternalNodes(4);
+  idData(24) = connectedExternalNodes(5);
+  idData(25) = connectedExternalNodes(6);
+  idData(26) = connectedExternalNodes(7);
+  idData(27) = connectedExternalNodes(8);
+
+
+  res += theChannel.sendID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING NineNodeMixedQuad::sendSelf() - %d failed to send ID\n",
+			    this->getTag());
+    return res;
+  }
+
+  // Finally, quad asks its material objects to send themselves
+  for (i = 0; i < 9; i++) {
+    res += materialPointers[i]->sendSelf(commitTag, theChannel);
+    if (res < 0) {
+      g3ErrorHandler->warning("WARNING NineNodeMixedQuad::sendSelf() - %d failed to send its Material\n",this->getTag());
+      return res;
+    }
+  }
+  
+  return res;
 }
     
 int 
@@ -1113,6 +1172,80 @@ NineNodeMixedQuad::recvSelf (int commitTag,
 			     Channel &theChannel, 
 			     FEM_ObjectBroker &theBroker)
 {
-    return -1;
+  int res = 0;
+  
+  int dataTag = this->getDbTag();
+
+  static ID idData(28);
+  // Quad now receives the tags of its four external nodes
+  res += theChannel.recvID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING NineNodeMixedQuad::recvSelf() - %d failed to receive ID\n", this->getTag());
+    return res;
+  }
+
+  this->setTag(idData(18));
+  connectedExternalNodes(0) = idData(19);
+  connectedExternalNodes(1) = idData(20);
+  connectedExternalNodes(2) = idData(21);
+  connectedExternalNodes(3) = idData(22);
+  connectedExternalNodes(4) = idData(23);
+  connectedExternalNodes(5) = idData(24);
+  connectedExternalNodes(6) = idData(25);
+  connectedExternalNodes(7) = idData(26);
+  connectedExternalNodes(8) = idData(27);
+  
+
+  int i;
+
+  if (materialPointers[0] == 0) {
+    for (i = 0; i < 9; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+9);
+      // Allocate new material with the sent class tag
+      materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
+      if (materialPointers[i] == 0) {
+	g3ErrorHandler->warning("NineNodeMixedQuad::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	return -1;
+      }
+      // Now receive materials into the newly allocated space
+      materialPointers[i]->setDbTag(matDbTag);
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+  // Number of materials is the same, receive materials into current space
+  else {
+    for (i = 0; i < 9; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+9);
+      // Check that material is of the right type; if not,
+      // delete it and create a new one of the right type
+      if (materialPointers[i]->getClassTag() != matClassTag) {
+	delete materialPointers[i];
+	materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
+	if (materialPointers[i] == 0) {
+	  g3ErrorHandler->fatal("NineNodeMixedQuad::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	  return -1;
+	}
+      }
+      // Receive the material
+      materialPointers[i]->setDbTag(matDbTag);
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("NineNodeMixedQuad::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+  
+  return res;
 }
 

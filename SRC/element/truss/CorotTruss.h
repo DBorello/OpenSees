@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.2 $
-// $Date: 2001-11-26 22:53:55 $
+// $Revision: 1.3 $
+// $Date: 2002-06-07 00:24:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.h,v $
 
 #ifndef CorotTruss_h
@@ -96,16 +96,16 @@ class CorotTruss : public Element
     int numDOF;	                    // number of dof for CorotTruss
     int numDIM;                     // number of dimensions
 
-    double Lo;	    // initial length of truss
+    double Lo;	        // initial length of truss
     double Ln;		// current length of truss
     double d21[3];	// current displacement offsets in basic system
-    double A; 	    // area of CorotTruss
-    double M; 	    // rho and M*A*L/2 after setDomain()
+    double A; 	        // area of CorotTruss
+    double M; 	        // rho and M*A*L/2 after setDomain()
 
     Node *end1Ptr;  // pointer to the end1 node object
     Node *end2Ptr;  // pointer to the end1 node object
 
-	Matrix R;	// Rotation matrix
+    Matrix R;	// Rotation matrix
 
     Matrix *theMatrix;
 

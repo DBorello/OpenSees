@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.3 $
-// $Date: 2001-11-26 22:53:55 $
+// $Revision: 1.4 $
+// $Date: 2002-06-07 00:24:50 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/truss/CorotTruss.cpp,v $
                                                                         
 // Written: MHS 
@@ -492,13 +492,121 @@ CorotTruss::getResistingForceIncInertia()
 int
 CorotTruss::sendSelf(int commitTag, Channel &theChannel)
 {
-	return -1;
+  int res;
+
+  // note: we don't check for dataTag == 0 for Element
+  // objects as that is taken care of in a commit by the Domain
+  // object - don't want to have to do the check if sending data
+  int dataTag = this->getDbTag();
+
+  // truss packs it's data into a Vector and sends this to theChannel
+  // along with it's dbTag and the commitTag passed in the arguments
+
+  static Vector data(7);
+  data(0) = this->getTag();
+  data(1) = numDIM;
+  data(2) = numDOF;
+  data(3) = A;
+  if (Lo != 0)
+      data(6) = M * 2 / (Lo*A);
+  else
+      data(6) = M;
+  
+  data(4) = theMaterial->getClassTag();
+  int matDbTag = theMaterial->getDbTag();
+
+  // NOTE: we do have to ensure that the material has a database
+  // tag if we are sending to a database channel.
+  if (matDbTag == 0) {
+    matDbTag = theChannel.getDbTag();
+    if (matDbTag != 0)
+      theMaterial->setDbTag(matDbTag);
+  }
+  data(5) = matDbTag;
+
+  res = theChannel.sendVector(dataTag, commitTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING Truss::sendSelf() - %d failed to send Vector\n",this->getTag());
+    return -1;
+  }	      
+
+  // truss then sends the tags of it's two end nodes
+
+  res = theChannel.sendID(dataTag, commitTag, connectedExternalNodes);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING Truss::sendSelf() - %d failed to send Vector\n",this->getTag());
+    return -2;
+  }
+
+  // finally truss asks it's material object to send itself
+  res = theMaterial->sendSelf(commitTag, theChannel);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING Truss::sendSelf() - %d failed to send its Material\n",this->getTag());
+    return -3;
+  }
+
+  return 0;
 }
 
 int
 CorotTruss::recvSelf(int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker)
 {
-	return -1;
+  int res;
+  int dataTag = this->getDbTag();
+
+  // truss creates a Vector, receives the Vector and then sets the 
+  // internal data with the data in the Vector
+
+  static Vector data(7);
+  res = theChannel.recvVector(dataTag, commitTag, data);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING Truss::recvSelf() - failed to receive Vector\n");
+    return -1;
+  }	      
+
+  this->setTag((int)data(0));
+  numDIM = data(1);
+  numDOF = data(2);
+  A = data(3);
+  M = data(6);
+  
+  // truss now receives the tags of it's two external nodes
+  res = theChannel.recvID(dataTag, commitTag, connectedExternalNodes);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING Truss::recvSelf() - %d failed to receive ID\n", this->getTag());
+    return -2;
+  }
+
+  // finally truss creates a material object of the correct type,
+  // sets its database tag and asks this new object to recveive itself.
+
+  int matClass = data(4);
+  int matDb = data(5);
+
+  // check if we have a material object already & if we do if of right type
+  if ((theMaterial == 0) || (theMaterial->getClassTag() != matClass)) {
+
+    // if old one .. delete it
+    if (theMaterial != 0)
+      delete theMaterial;
+
+    // create a new material object
+    theMaterial = theBroker.getNewUniaxialMaterial(matClass);
+    if (theMaterial == 0) {
+      g3ErrorHandler->warning("WARNING Truss::recvSelf() - %d failed to get a blank Material of type %d\n", 
+			      this->getTag(), matClass);
+      return -3;
+    }
+  }
+
+  theMaterial->setDbTag(matDb); // note: we set the dbTag before we receive the material
+  res = theMaterial->recvSelf(commitTag, theChannel, theBroker);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING Truss::recvSelf() - %d failed to receive its Material\n", this->getTag());
+    return -3;    
+  }
+
+  return 0;
 }
 
 int

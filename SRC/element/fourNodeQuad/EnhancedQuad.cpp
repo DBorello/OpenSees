@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.7 $
-// $Date: 2002-05-17 20:15:10 $
+// $Revision: 1.8 $
+// $Date: 2002-06-07 00:28:42 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/fourNodeQuad/EnhancedQuad.cpp,v $
 
 #include <iostream.h>
@@ -37,6 +37,9 @@
 #include <ErrorHandler.h>
 #include <EnhancedQuad.h>
 #include <Renderer.h>
+
+#include <Channel.h>
+#include <FEM_ObjectBroker.h>
 
 
 //static data
@@ -74,7 +77,12 @@ Element( 0, ELE_TAG_EnhancedQuad ),
 connectedExternalNodes(4),
 alpha(4) , load(0)
 { 
+  for ( int i = 0 ;  i < 4; i++ ) {
+    materialPointers[i] = 0;
+  }
 
+  //zero enhanced parameters
+  alpha.Zero( ) ;
 }
 
 
@@ -115,6 +123,9 @@ alpha(4), load(0)
       
   } //end for i 
 
+  //zero enhanced parameters
+  alpha.Zero( ) ;
+
 }
 
 
@@ -122,14 +133,9 @@ alpha(4), load(0)
 EnhancedQuad::~EnhancedQuad( )
 {
   int i ;
-  for ( i = 0 ;  i < 4; i++ ) {
-
-    delete materialPointers[i] ;
-    materialPointers[i] = 0 ; 
-
-    nodePointers[i] = 0 ;
-
-  } //end for i
+  for ( i = 0 ;  i < 4; i++ ) 
+    if (materialPointers[i] != 0)
+      delete materialPointers[i] ;
 
   if (load != 0)
     delete load;
@@ -141,9 +147,6 @@ void  EnhancedQuad::setDomain( Domain *theDomain )
 {  
 
   int i ;
-
-  //zero enhanced parameters
-  alpha.Zero( ) ;
 
   //node pointers
   for ( i = 0; i < 4; i++ ) 
@@ -507,7 +510,6 @@ void  EnhancedQuad::formResidAndTangent( int tang_flag )
   int jj, kk ;
 
   int success ;
-  
 
   static double xsj[numberGauss] ;  // determinant jacaobian matrix 
 
@@ -640,10 +642,9 @@ void  EnhancedQuad::formResidAndTangent( int tang_flag )
 
         //compute the strain
         //strain += (BJ*ul) ; 
-	strain.addMatrixVector(1.0, BJ,ul,1.0) ;
+	strain.addMatrixVector(1.0, BJ, ul, 1.0) ;
 
       } // end for j
-
 
       // j-node loop to compute enhanced strain contributions
       for ( j = 0; j < nModes; j++ )  {
@@ -657,12 +658,10 @@ void  EnhancedQuad::formResidAndTangent( int tang_flag )
 
         //compute the strain
         //strain += (BJ*Umode) ; 
-	strain.addMatrixVector(1.0, BJ,Umode,1.0) ;
+	strain.addMatrixVector(1.0, BJ, Umode, 1.0) ;
 
       } // end for j
 
-
-      //send the strain to the material 
       success = materialPointers[i]->setTrialStrain( strain ) ;
 
       //compute the stress
@@ -736,12 +735,14 @@ void  EnhancedQuad::formResidAndTangent( int tang_flag )
 
     Kee.Solve( residE, dalpha ) ;
 
+    if (dalpha(0) > 1.0e10)  cerr << "dalpha: " << residE << dalpha;
+
     this->alpha += dalpha ;
 
     count++ ;
     if ( count > nIterations ) {
       cerr << "Exceeded " << nIterations
-	   << " solving for enhanced strain parameters " << endl ;
+	   << " iterations solving for enhanced strain parameters " << endl ;
       break ;
     } //end if 
 
@@ -875,12 +876,23 @@ void  EnhancedQuad::formResidAndTangent( int tang_flag )
 
   return ;
 }
+
+
+
+
+
+int  
+EnhancedQuad::update(void) 
+{
+  return 0;
+}
   
 
 //************************************************************************
-void   EnhancedQuad::saveData( int gp, 
-			       const Vector &stress,
-			       const Matrix &tangent ) 
+void   
+EnhancedQuad::saveData(int gp, 
+		       const Vector &stress,
+		       const Matrix &tangent ) 
 {
 
   int i, j ;
@@ -1170,14 +1182,153 @@ EnhancedQuad::transpose( const Matrix &M )
 
 int  EnhancedQuad::sendSelf (int commitTag, Channel &theChannel)
 {
-    return -1;
+  int res = 0;
+  
+  // note: we don't check for dataTag == 0 for Element
+  // objects as that is taken care of in a commit by the Domain
+  // object - don't want to have to do the check if sending data
+  int dataTag = this->getDbTag();
+  
+  // Quad packs its data into a Vector and sends this to theChannel
+  // along with its dbTag and the commitTag passed in the arguments
+
+  // Now quad sends the ids of its materials
+  int matDbTag;
+  
+  static ID idData(13);
+
+  idData(12) = this->getTag();
+  
+  int i;
+  for (i = 0; i < 4; i++) {
+    idData(i) = materialPointers[i]->getClassTag();
+    matDbTag = materialPointers[i]->getDbTag();
+    // NOTE: we do have to ensure that the material has a database
+    // tag if we are sending to a database channel.
+    if (matDbTag == 0) {
+      matDbTag = theChannel.getDbTag();
+			if (matDbTag != 0)
+			  materialPointers[i]->setDbTag(matDbTag);
+    }
+    idData(i+4) = matDbTag;
+  }
+  
+  idData(8) = connectedExternalNodes(0);
+  idData(9) = connectedExternalNodes(1);
+  idData(10) = connectedExternalNodes(2);
+  idData(11) = connectedExternalNodes(3);
+
+  res += theChannel.sendID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING EnhancedQuad::sendSelf() - %d failed to send ID\n",
+			    this->getTag());
+    return res;
+  }
+
+
+  res += theChannel.sendVector(dataTag, commitTag, alpha);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING EnhancedQuad::sendSelf() - %d failed to send ID\n",
+			    this->getTag());
+    return res;
+  }
+
+  // Finally, quad asks its material objects to send themselves
+  for (i = 0; i < 4; i++) {
+    res += materialPointers[i]->sendSelf(commitTag, theChannel);
+    if (res < 0) {
+      g3ErrorHandler->warning("WARNING EnhancedQuad::sendSelf() - %d failed to send its Material\n",this->getTag());
+      return res;
+    }
+  }
+  
+  return res;
 }
     
 int  EnhancedQuad::recvSelf (int commitTag, 
 		       Channel &theChannel, 
 		       FEM_ObjectBroker &theBroker)
 {
-    return -1;
+  int res = 0;
+  
+  int dataTag = this->getDbTag();
+
+  static ID idData(13);
+  // Quad now receives the tags of its four external nodes
+  res += theChannel.recvID(dataTag, commitTag, idData);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING EnhancedQuad::recvSelf() - %d failed to receive ID\n", this->getTag());
+    return res;
+  }
+
+  this->setTag(idData(12));
+
+  connectedExternalNodes(0) = idData(8);
+  connectedExternalNodes(1) = idData(9);
+  connectedExternalNodes(2) = idData(10);
+  connectedExternalNodes(3) = idData(11);
+  
+
+  res += theChannel.recvVector(dataTag, commitTag, alpha);
+  if (res < 0) {
+    g3ErrorHandler->warning("WARNING EnhancedQuad::sendSelf() - %d failed to send ID\n",
+			    this->getTag());
+    return res;
+  }
+
+  int i;
+
+  if (materialPointers[0] == 0) {
+    for (i = 0; i < 4; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+4);
+      // Allocate new material with the sent class tag
+      materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
+      if (materialPointers[i] == 0) {
+	g3ErrorHandler->warning("EnhancedQuad::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	return -1;
+      }
+      // Now receive materials into the newly allocated space
+      materialPointers[i]->setDbTag(matDbTag);
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("NLBeamColumn3d::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+
+  // materials exist , ensure materials of correct type and recvSelf on them
+  else {
+    for (i = 0; i < 4; i++) {
+      int matClassTag = idData(i);
+      int matDbTag = idData(i+4);
+      // Check that material is of the right type; if not,
+      // delete it and create a new one of the right type
+      if (materialPointers[i]->getClassTag() != matClassTag) {
+	delete materialPointers[i];
+	materialPointers[i] = theBroker.getNewNDMaterial(matClassTag);
+	if (materialPointers[i] == 0) {
+	  g3ErrorHandler->fatal("EnhancedQuad::recvSelf() - %s %d\n",
+				"Broker could not create NDMaterial of class type",matClassTag);
+	  return -1;
+	}
+      materialPointers[i]->setDbTag(matDbTag);
+      }
+      // Receive the material
+
+      res += materialPointers[i]->recvSelf(commitTag, theChannel, theBroker);
+      if (res < 0) {
+	g3ErrorHandler->warning("EnhancedQuad::recvSelf() - material %d, %s\n",
+				i,"failed to recv itself");
+	return res;
+      }
+    }
+  }
+
+  return res;
 }
 //**************************************************************************
 
@@ -1233,56 +1384,3 @@ EnhancedQuad::displaySelf(Renderer &theViewer, int displayMode, float fact)
     return error;
 }
 
-//***************************************************************************
-/* 
-
-    //zero the strains
-    strain.Zero( ) ;
-
-
-    // j-node loop to compute strain 
-    for ( j = 0; j < numberNodes; j++ )  {
-
-      //compute B matrix 
-      BJ = computeB( j, shp ) ;
-      
-      //nodal displacements 
-      const Vector &ul = nodePointers[j]->getTrialDisp( ) ;
-
-      //compute the strain
-      strain += (BJ*ul) ; 
-
-    } // end for j
-
-
-    // j-node loop to compute enhanced strain contributions
-    for ( j = 0; j < nModes; j++ )  {
-
-      //compute B matrix 
-      BJ = computeBenhanced( j, sg[i], tg[i], xsj[i], J0inv ) ; 
-      
-      //enhanced "displacements" 
-      Umode(0) = this->alpha( 2*j     ) ;
-      Umode(1) = this->alpha( 2*j + 1 ) ;
-
-      //compute the strain
-      strain += (BJ*Umode) ; 
-
-    } // end for j
-
-
-    //send the strain to the material 
-    success = materialPointers[i]->setTrialStrain( strain ) ;
-
-    //compute the stress
-    stress = materialPointers[i]->getStress( ) ;
-
-    //multiply by volume element
-    stress  *= dvol[i] ;
-
-    if ( tang_flag == 1 ) {
-      dd = materialPointers[i]->getTangent( ) ;
-      dd *= dvol[i] ;
-    } //end if tang_flag
-    
-*/
