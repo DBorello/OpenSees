@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.43 $
-// $Date: 2003-02-25 23:34:47 $
+// $Revision: 1.44 $
+// $Date: 2003-02-26 19:06:14 $
 // $Source: /usr/local/cvs/OpenSees/SRC/tcl/commands.cpp,v $
                                                                         
                                                                         
@@ -601,6 +601,7 @@ setLoadConst(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **arg
 	      return TCL_ERROR;
 	  } else {
 	      theDomain.setCurrentTime(newTime);
+	      theDomain.setCommittedTime(newTime);
 	  }
       }    	  
   }
@@ -620,8 +621,10 @@ setTime(ClientData clientData, Tcl_Interp *interp, int argc, TCL_Char **argv)
   if (Tcl_GetDouble(interp, argv[1], &newTime) != TCL_OK) {
       opserr << "WARNING reading time value - time pseudoTime? \n";
       return TCL_ERROR;
-  } else
+  } else {
       theDomain.setCurrentTime(newTime);
+      theDomain.setCommittedTime(newTime);
+  }
   return TCL_OK;
 }
 
