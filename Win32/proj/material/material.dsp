@@ -575,6 +575,22 @@ SOURCE=..\..\..\SRC\material\nD\NDMaterial.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\nD\PlaneStressMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\PlaneStressMaterial.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\PlateFiberMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\nD\PlateFiberMaterial.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\nD\TclModelBuilderNDMaterialCommand.cpp
 # End Source File
 # End Group
