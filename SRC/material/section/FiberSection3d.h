@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.5 $
-// $Date: 2002-06-19 18:20:45 $
+// $Revision: 1.6 $
+// $Date: 2002-09-23 22:00:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection3d.h,v $
                                                                         
 // Written: fmk
@@ -73,8 +73,8 @@ class FiberSection3d : public SectionForceDeformation
 
     int addFiber(Fiber &theFiber);
 
-	int setParameter(char **argv, int argc, Information &info);
-	int updateParameter(int parameterID, Information &info);
+    int setParameter(char **argv, int argc, Information &info);
+    int updateParameter(int parameterID, Information &info);
 
   protected:
     
@@ -84,7 +84,10 @@ class FiberSection3d : public SectionForceDeformation
     double   *matData;               // data for the materials [yloc and area]
     double   kData[9];               // data for ks matrix 
     double   sData[3];               // data for s vector 
-      
+    
+    double yBar;       // Section centroid
+    double zBar;
+  
     static ID code;
 
     Vector e;          // trial section deformations 

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.6 $
-// $Date: 2002-06-19 18:20:45 $
+// $Revision: 1.7 $
+// $Date: 2002-09-23 22:00:16 $
 // $Source: /usr/local/cvs/OpenSees/SRC/material/section/FiberSection2d.h,v $
                                                                         
 // Written: fmk
@@ -73,11 +73,11 @@ class FiberSection2d : public SectionForceDeformation
 
     int addFiber(Fiber &theFiber);
 
-	int setParameter(char **argv, int argc, Information &info);
-	int updateParameter(int parameterID, Information &info);
+    int setParameter(char **argv, int argc, Information &info);
+    int updateParameter(int parameterID, Information &info);
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
-	int gradient(bool compute, int identifier, Vector & gradient);
+    int gradient(bool compute, int identifier, Vector & gradient);
 // AddingSensitivity:END ///////////////////////////////////////////
 
   protected:
@@ -88,7 +88,9 @@ class FiberSection2d : public SectionForceDeformation
     double   *matData;               // data for the materials [yloc and area]
     double   kData[4];               // data for ks matrix 
     double   sData[2];               // data for s vector 
-      
+    
+    double yBar;       // Section centroid
+  
     static ID code;
 
     Vector e;          // trial section deformations 
@@ -98,7 +100,7 @@ class FiberSection2d : public SectionForceDeformation
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
     int gradientIdentifier;
-	int gradientMaterialTag;
+    int gradientMaterialTag;
 // AddingSensitivity:END ///////////////////////////////////////////
 };
 
