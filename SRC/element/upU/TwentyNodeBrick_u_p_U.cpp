@@ -16,9 +16,10 @@
 // DESIGNER:          Boris Jeremic, Xiaoyan Wu
 // PROGRAMMER:        Boris Jeremic, Xiaoyan Wu
 // DATE:              Sep. 2001
-// UPDATE HISTORY:    Modified from EightNodeBrick_u_p_U.cpp Sep. 2001      
+// UPDATE HISTORY:    Modified from EightNodeBrick_u_p_U.cpp Sep. 2001   
+//   
 //		      01/16/2002    Xiaoyan
-//		      Add the permeability tensor and ks, kf  to the constructor  Xiaoyan 
+//		      Add the permeability tensor and ks, kf  to the constructor  
 //
 //
 //  "Coupled system": Solid and fluid coexist.
@@ -41,7 +42,7 @@
 Matrix TwentyNodeBrick_u_p_U::K(140, 140);      
 Matrix TwentyNodeBrick_u_p_U::C(140, 140);      
 Matrix TwentyNodeBrick_u_p_U::M(140, 140);      
-Vector TwentyNodeBrick_u_p_U::p(60);	   
+Vector TwentyNodeBrick_u_p_U::p(140);	   
 tensor TwentyNodeBrick_u_p_U::k(2,def_dim_2,0.0);
 //=========================================================================
 // Constructor. The dimension of K, C and M are(140,140)     Wxy 08/28/2001
@@ -64,7 +65,7 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
 			       //tensor * IN_tangent_E,  //stresstensor * INstress, //stresstensor * INiterative_stress, //double * IN_q_ast_iterative, //straintensor * INstrain):  __ZHaohui 09-29-2000
 		               
   :Element(element_number, ELE_TAG_TwentyNodeBrick_u_p_U ),
-  connectedExternalNodes(20), Q(60), bf(3), 
+  connectedExternalNodes(20), Q(140), bf(3), 
   n(nn), alpha(alf), rho_s(rs), rho_f(rf),ks(kks), kf(kkf), pressure(pp)
   {
     //elem_numb = element_number;
@@ -185,7 +186,7 @@ TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U(int element_number,
 //=================================================================================
 
 TwentyNodeBrick_u_p_U::TwentyNodeBrick_u_p_U ():Element(0, ELE_TAG_TwentyNodeBrick_u_p_U ),
-connectedExternalNodes(20), Q(60), bf(3), 
+connectedExternalNodes(20), Q(140), bf(3), 
 n(0), alpha(1), rho_s(0.0),rho_f(0.0), ks(0.0), kf(0.0), pressure(0.0), mmodel(0)
 {
      matpoint = 0;
@@ -217,13 +218,13 @@ TwentyNodeBrick_u_p_U::~TwentyNodeBrick_u_p_U ()
 //=========================================================================
 // Shape functions in "element golbal level". dimension are(60,3)          
 // Since we define the mass Matrix Mf or Ms as four order tensor this 
-// function will not used.  Just keep here. Wxy 09/26/2001
+// function will not be used.  Just keep here. Wxy 09/26/2001
 //=========================================================================
 tensor TwentyNodeBrick_u_p_U::H_3D(double r1, double r2, double r3)
   {
 
-    int dimension[] = {60,3}; // Xiaoyan changed from {60,3} to {24,3} for 8 nodes
-                              // 3*8=24  07/12/00
+    int dimension[] = {60,3}; 
+                              
     tensor H(2, dimension, 0.0);
 
     // influence of the node number 20
@@ -335,7 +336,7 @@ tensor TwentyNodeBrick_u_p_U::H_3D(double r1, double r2, double r3)
 // Derivative of Shape functions in "element golbal level". dimension are(60,3) 
 // Xiaoyna added this function  08/28/2001                                      
 // Since we define the mass Matrix G1 or G2 as four order tensor this           
-// function will not used.  Just keep here. Wxy 09/26/2001                      
+// function will not be used.  Just keep here. Wxy 09/26/2001                   
 //==============================================================================
 tensor TwentyNodeBrick_u_p_U::dH_drst_at(double r1, double r2, double r3)
   {
@@ -459,7 +460,7 @@ tensor TwentyNodeBrick_u_p_U::dH_drst_at(double r1, double r2, double r3)
 
 
 //=========================================================================
-// Shape functions in "element local level". dimension are(8)     Wxy 09/26/2001
+// Shape functions in "element local level". dimension are(20)     Wxy 09/26/2001
 //=========================================================================
 tensor TwentyNodeBrick_u_p_U::interp_poli_at(double r1, double r2, double r3)
   {
@@ -623,6 +624,8 @@ tensor TwentyNodeBrick_u_p_U::dh_drst_at(double r1, double r2, double r3)
 // Permeability tensor  dimension are(3,3)     Wxy 09/26/2001              
 //=========================================================================
 
+// The permeability tensor has been moved in to the condtructor 01/16/2002
+
 // Xiaoyan added this function just want to test program. the values of k are not correct. 08/28/2001
 /*tensor TwentyNodeBrick_u_p_U::k_at(double r1, double r2, double r3)
   {
@@ -649,6 +652,7 @@ tensor TwentyNodeBrick_u_p_U::dh_drst_at(double r1, double r2, double r3)
 //    //DB//-------------------------------------------
 //    return el_p;
 //  }
+
 //=========================================================================
 // Definition of Stiffness tensor Kep(20,3,3,8)     Wxy 09/26/2001          
 //=========================================================================
@@ -704,7 +708,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorKep()
                 t = get_Gauss_p_c( t_integration_order, GP_c_t );
                 tw = get_Gauss_p_w( t_integration_order, GP_c_t );
                 // this short routine is supposed to calculate position of
-                // Gauss point from 3D array of short's
+                // Gauss point fr04-Feb-2002om 3D array of short's
                 where =
                    ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
                 // derivatives of local coordinates with respect to local coordinates
@@ -866,7 +870,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorG2()  //(double rho_s, double n,
     short where = 0;
     double weight = 0.0;
 
-    int dh_dim[] = {20,3};    // Xiaoyan changed from {20,3} to {8,3}
+    int dh_dim[] = {20,3};    
 
     tensor dhU(2, dh_dim, 0.0);
 
@@ -961,7 +965,7 @@ tensor TwentyNodeBrick_u_p_U::getStiffnessTensorP()
     short where = 0;
     double weight = 0.0;
 
-    int dh_dim[] = {20,3};    // Xiaoyan changed from {20,3} to {8,3}
+    int dh_dim[] = {20,3};    
 
     tensor dhU(2, dh_dim, 0.0);
 
@@ -1061,7 +1065,7 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMs()  //(double rho_s, double n,)
     short where = 0;
     double weight = 0.0;
 
-    int dh_dim[] = {20,3};    // Xiaoyan changed from {20,3} to {8,3}
+    int dh_dim[] = {20,3};    
 
     tensor dh(2, dh_dim, 0.0);
 
@@ -1157,7 +1161,7 @@ tensor TwentyNodeBrick_u_p_U::getMassTensorMf()  //(double rho_s, double n,)
     short where = 0;
     double weight = 0.0;
 
-    int dh_dim[] = {20,3};    // Xiaoyan changed from {20,3} to {8,3}
+    int dh_dim[] = {20,3};    
 
     tensor dh(2, dh_dim, 0.0);
 
@@ -1254,7 +1258,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC1()  //(double rho_s, double n,)
     short where = 0;
     double weight = 0.0;
 
-    int dh_dim[] = {20,3};    // Xiaoyan changed from {20,3} to {8,3}
+    int dh_dim[] = {20,3};    
 
     tensor dh(2, dh_dim, 0.0);
 
@@ -1354,7 +1358,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC2()  //(double rho_s, double n,)
     short where = 0;
     double weight = 0.0;
 
-    int dh_dim[] = {20,3};    // Xiaoyan changed from {20,3} to {8,3}
+    int dh_dim[] = {20,3};    
 
     tensor dh(2, dh_dim, 0.0);
 
@@ -1456,7 +1460,7 @@ tensor TwentyNodeBrick_u_p_U::getDampTensorC3()  //(double rho_s, double n,)
     short where = 0;
     double weight = 0.0;
 
-    int dh_dim[] = {20,3};    // Xiaoyan changed from {20,3} to {8,3}
+    int dh_dim[] = {20,3};    
 
     tensor dh(2, dh_dim, 0.0);
 
@@ -1657,7 +1661,7 @@ matrix TwentyNodeBrick_u_p_U::stiffness_matrixP(const tensor P)
   }
 
 //=========================================================================
-// Constructing the whole system K (including Kep G1 and G2 56*56)   Wxy 09/26/2001
+// Constructing the whole system K(140*140) (including Kep G1 and G2 56*56)   Wxy 09/26/2001
 //=========================================================================
 
 const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff() 
@@ -1668,12 +1672,16 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
     tensor tG2  = getStiffnessTensorG2();
     tensor tP   = getStiffnessTensorP();
     matrix Kep = stiffness_matrixKep(tKep);
-    Kep.write_standard("K.matlab.dat", "stiffness part of KupU");
     matrix G1  = stiffness_matrixG1(tG1);
     matrix G2  = stiffness_matrixG1(tG2);
     matrix P   = stiffness_matrixP(tP);
-    matrix G1t=G1.transpose();
-    matrix G2t=G2.transpose();
+
+    Kep.write_standard("Kupu.dat", "stiffness part of KupU");
+    G1.write_standard("G1upu.dat", "stiffness part of G1upU");
+    G2.write_standard("G2upu.dat", "stiffness part of G2upU");
+    P.write_standard("Pupu.dat", "stiffness part of PupU");
+//    matrix G1t=G1.transpose();
+//    matrix G2t=G2.transpose();
 
 	int i;
     for ( i=1 ; i<=60 ; i++ )  		
@@ -1697,8 +1705,8 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
       {
         for ( int j=1 ; j<=60 ; j++ )
           {
-	    K(60+i-1,   j-1)=G1t.val(i,j);     // Add G1^T to K
-	    K(60+i-1,80+j-1)=G2t.val(i,j);     // Add G2^T to K
+	    K(60+i-1,   j-1)=G1.val(j,i);     // Add G1^T to K
+	    K(60+i-1,80+j-1)=G2.val(j,i);     // Add G2^T to K
 	  }
       }
 
@@ -1709,6 +1717,8 @@ const Matrix &TwentyNodeBrick_u_p_U::getTangentStiff()
 	    K(60+i-1,60+j-1)=P.val(i,j);	     // Add P (pore pressure) to K
 	  }
       }
+     ofstream outK("K.dat");	// want to check the whole K
+     K.Output(outK);
 
      return K;
   }
@@ -1816,7 +1826,7 @@ matrix TwentyNodeBrick_u_p_U::damping_matrixC3(const tensor  C3)
   }
 
 //=========================================================================
-// Constructing Damping matrix of the whole system C(56*56) (including C1 C2 and C3) 
+// Constructing Damping matrix of the whole system C(140*140) (including C1 C2 and C3) 
 //=========================================================================
 
 const Matrix &TwentyNodeBrick_u_p_U::getDamp() 
@@ -1846,7 +1856,7 @@ const Matrix &TwentyNodeBrick_u_p_U::getDamp()
   }
 
 //=========================================================================
-// Converting mass tensor to mass matrix Ms ___Xiaoyan 08/27/2001          
+// Converting mass tensor to mass matrix Ms(60,60) ___Xiaoyan 08/27/2001          
 //=========================================================================
 matrix TwentyNodeBrick_u_p_U::mass_matrixMs(const tensor  Ms)
   {
@@ -1876,7 +1886,7 @@ matrix TwentyNodeBrick_u_p_U::mass_matrixMs(const tensor  Ms)
 }
     
 //=========================================================================
-// Converting mass tensor to mass matrix Mf___Xiaoyan 08/27/2001           
+// Converting mass tensor to mass matrix Mf(60,60)___Xiaoyan 08/27/2001    
 //=========================================================================
 
 matrix TwentyNodeBrick_u_p_U::mass_matrixMf(const tensor  Mf)
@@ -1909,7 +1919,7 @@ matrix TwentyNodeBrick_u_p_U::mass_matrixMf(const tensor  Mf)
  
 //#############################################################################  
 //=========================================================================
-// Constructing Mass matrix of the whole system M (including Ms and Mf 56*56    
+// Constructing Mass matrix of the whole system M(140,140) (including Ms and Mf)
 //=========================================================================
 
 const Matrix &TwentyNodeBrick_u_p_U::getMass()
@@ -1927,6 +1937,8 @@ const Matrix &TwentyNodeBrick_u_p_U::getMass()
 	    M(80+i-1,80+j-1)=Mf.val(i,j);	   // Add Mf to M
 	  }
       }
+     ofstream outM("M.dat");	// want to check the whole M
+     M.Output(outM);
 
      return M;
   }
@@ -1939,26 +1951,28 @@ const Matrix &TwentyNodeBrick_u_p_U::getMass()
 //=========================================================================
 tensor TwentyNodeBrick_u_p_U::Jacobian_3D(tensor dh)
   {                       
-     //       dh ( 20*3)  // dh(20*3) Xiaoyan
-     tensor N_C = Nodal_Coordinates(); // 20*3	  // 20*3 Xiaoyan
+     						  // dh(20*3) Xiaoyan
+     tensor N_C = Nodal_Coordinates();  	  
      tensor Jacobian_3D = dh("ij") * N_C("ik");
+     //         (3*3)      (20*3)      (20*3)
      return Jacobian_3D;
   }
 
 //#############################################################################
 //=========================================================================
-// Jacobian tensor J^(-1)  wxy 09/26/2001          
+// Jacobian inverse J^(-1)  wxy 09/26/2001          
 //=========================================================================
 tensor TwentyNodeBrick_u_p_U::Jacobian_3Dinv(tensor dh)
   {                       
      //       dh ( 20*3)	  // dh(20*3) Xiaoyan  
-     tensor N_C = Nodal_Coordinates(); // 20*3	  	  // 20*3 Xiaoyan   
+     tensor N_C = Nodal_Coordinates(); 	  	  // 20*3 Xiaoyan   
      tensor Jacobian_3Dinv = (dh("ij") * N_C("ik")).inverse();
      return Jacobian_3Dinv;
   }
 
 
 ////#############################################################################
+//=========================================================================
 tensor TwentyNodeBrick_u_p_U::Nodal_Coordinates()
   {
     const int dimensions[] = {20,3};  
@@ -2018,10 +2032,13 @@ tensor TwentyNodeBrick_u_p_U::Nodal_Coordinates()
   }
 
 ////#############################################################################
-tensor TwentyNodeBrick_u_p_U::incr_disp()
+//=========================================================================
+// Incremental displacement of solid part--u     02/10/2002
+//=========================================================================
+tensor TwentyNodeBrick_u_p_U::incr_dispDu()
   {
-    const int dimensions[] = {20,3};  // Xiaoyan changed from {20,3} to {8,3} for 8 nodes
-    tensor increment_disp(2, dimensions, 0.0);
+    const int dimensions[] = {20,3};  
+    tensor increment_dispDu(2, dimensions, 0.0);
 
     //for ( int i=0 ; i<8 ; i++ )	 // Xiaoyan changed from 20 to 8 for 8 nodes
     //
@@ -2066,143 +2083,597 @@ tensor TwentyNodeBrick_u_p_U::incr_disp()
     const Vector &IncrDis18 = nd18Ptr->getIncrDeltaDisp();
     const Vector &IncrDis19 = nd19Ptr->getIncrDeltaDisp();
     const Vector &IncrDis20 = nd20Ptr->getIncrDeltaDisp();
+
+// Get the first three incremental displacement for solid part. Xiaoyan 02/08/2002
  
-    increment_disp.val(1,1)=IncrDis1(0); increment_disp.val(1,2)=IncrDis1(1);increment_disp.val(1,3)=IncrDis1(2);
-    increment_disp.val(2,1)=IncrDis2(0); increment_disp.val(2,2)=IncrDis2(1);increment_disp.val(2,3)=IncrDis2(2);
-    increment_disp.val(3,1)=IncrDis3(0); increment_disp.val(3,2)=IncrDis3(1);increment_disp.val(3,3)=IncrDis3(2);
-    increment_disp.val(4,1)=IncrDis4(0); increment_disp.val(4,2)=IncrDis4(1);increment_disp.val(4,3)=IncrDis4(2);
+    increment_dispDu.val(1,1)=IncrDis1(0); increment_dispDu.val(1,2)=IncrDis1(1);increment_dispDu.val(1,3)=IncrDis1(2);
+//    increment_disp.val(1,4)=IncrDis1(3); increment_disp.val(1,5)=IncrDis1(4);increment_disp.val(1,6)=IncrDis1(5);
+//    increment_disp.val(1,7)=IncrDis1(6);
 
-    increment_disp.val(5,1)=IncrDis5(0); increment_disp.val(5,2)=IncrDis5(1);increment_disp.val(5,3)=IncrDis5(2);
-    increment_disp.val(6,1)=IncrDis6(0); increment_disp.val(6,2)=IncrDis6(1);increment_disp.val(6,3)=IncrDis6(2);
-    increment_disp.val(7,1)=IncrDis7(0); increment_disp.val(7,2)=IncrDis7(1);increment_disp.val(7,3)=IncrDis7(2);
-    increment_disp.val(8,1)=IncrDis8(0); increment_disp.val(8,2)=IncrDis8(1);increment_disp.val(8,3)=IncrDis8(2);
+    increment_dispDu.val(2,1)=IncrDis2(0); increment_dispDu.val(2,2)=IncrDis2(1);increment_dispDu.val(2,3)=IncrDis2(2);
+//    increment_disp.val(2,4)=IncrDis2(3); increment_disp.val(2,5)=IncrDis2(4);increment_disp.val(2,6)=IncrDis2(5);
+//    increment_disp.val(2,7)=IncrDis2(6);
 
-    increment_disp.val(9 ,1)=IncrDis9(0);  increment_disp.val(9 ,2)=IncrDis9(1); increment_disp.val(9 ,3)=IncrDis9(2);
-    increment_disp.val(10,1)=IncrDis10(0); increment_disp.val(10,2)=IncrDis10(1);increment_disp.val(10,3)=IncrDis10(2);
-    increment_disp.val(11,1)=IncrDis11(0); increment_disp.val(11,2)=IncrDis11(1);increment_disp.val(11,3)=IncrDis11(2);
-    increment_disp.val(12,1)=IncrDis12(0); increment_disp.val(12,2)=IncrDis12(1);increment_disp.val(12,3)=IncrDis12(2);
+    increment_dispDu.val(3,1)=IncrDis3(0); increment_dispDu.val(3,2)=IncrDis3(1);increment_dispDu.val(3,3)=IncrDis3(2);
+//    increment_disp.val(3,4)=IncrDis3(3); increment_disp.val(3,5)=IncrDis3(4);increment_disp.val(3,6)=IncrDis3(5);
+//    increment_disp.val(3,7)=IncrDis3(6);
+
+    increment_dispDu.val(4,1)=IncrDis4(0); increment_dispDu.val(4,2)=IncrDis4(1);increment_dispDu.val(4,3)=IncrDis4(2);
+//    increment_disp.val(4,4)=IncrDis4(3); increment_disp.val(4,5)=IncrDis4(4);increment_disp.val(4,6)=IncrDis4(5);
+//    increment_disp.val(4,7)=IncrDis4(6);
+ 
+    increment_dispDu.val(5,1)=IncrDis5(0); increment_dispDu.val(5,2)=IncrDis5(1);increment_dispDu.val(5,3)=IncrDis5(2);
+//    increment_disp.val(5,4)=IncrDis5(3); increment_disp.val(5,5)=IncrDis5(4);increment_disp.val(5,6)=IncrDis5(5);
+//    increment_disp.val(5,7)=IncrDis5(6);
+ 
+    increment_dispDu.val(6,1)=IncrDis6(0); increment_dispDu.val(6,2)=IncrDis6(1);increment_dispDu.val(6,3)=IncrDis6(2);
+//    increment_disp.val(6,4)=IncrDis6(3); increment_disp.val(6,5)=IncrDis6(4);increment_disp.val(4,6)=IncrDis6(5);
+//    increment_disp.val(6,7)=IncrDis6(6);
+ 
+    increment_dispDu.val(7,1)=IncrDis7(0); increment_dispDu.val(7,2)=IncrDis7(1);increment_dispDu.val(7,3)=IncrDis7(2);
+//    increment_disp.val(7,4)=IncrDis7(3); increment_disp.val(7,5)=IncrDis7(4);increment_disp.val(7,6)=IncrDis7(5);
+//    increment_disp.val(7,7)=IncrDis7(6);
+ 
+    increment_dispDu.val(8,1)=IncrDis8(0); increment_dispDu.val(8,2)=IncrDis8(1);increment_dispDu.val(8,3)=IncrDis8(2);
+//    increment_disp.val(8,4)=IncrDis8(3); increment_disp.val(8,5)=IncrDis8(4);increment_disp.val(8,6)=IncrDis8(5);
+//    increment_disp.val(8,7)=IncrDis8(6);
+
+    increment_dispDu.val(9,1)=IncrDis9(0); increment_dispDu.val(9,2)=IncrDis9(1);increment_dispDu.val(9,3)=IncrDis9(2);
+//    increment_disp.val(9,4)=IncrDis9(3); increment_disp.val(9,5)=IncrDis9(4);increment_disp.val(9,6)=IncrDis9(5);
+//    increment_disp.val(9,7)=IncrDis9(6);
+ 
+    increment_dispDu.val(10,1)=IncrDis10(0); increment_dispDu.val(10,2)=IncrDis10(1);increment_dispDu.val(10,3)=IncrDis10(2);
+//    increment_disp.val(10,4)=IncrDis10(3); increment_disp.val(10,5)=IncrDis10(4);increment_disp.val(10,6)=IncrDis10(5);
+//    increment_disp.val(10,7)=IncrDis10(6);
+ 
+    increment_dispDu.val(11,1)=IncrDis11(0); increment_dispDu.val(11,2)=IncrDis11(1);increment_dispDu.val(11,3)=IncrDis11(2);
+//    increment_disp.val(11,4)=IncrDis11(3); increment_disp.val(11,5)=IncrDis11(4);increment_disp.val(11,6)=IncrDis11(5);
+//    increment_disp.val(11,7)=IncrDis11(6);
+ 
+    increment_dispDu.val(12,1)=IncrDis12(0); increment_dispDu.val(12,2)=IncrDis12(1);increment_dispDu.val(12,3)=IncrDis12(2);
+//    increment_disp.val(12,4)=IncrDis12(3); increment_disp.val(12,5)=IncrDis12(4);increment_disp.val(12,6)=IncrDis12(5);
+//    increment_disp.val(12,7)=IncrDis12(6);
 																						   										   																							   										   																						   										   
-    increment_disp.val(13,1)=IncrDis13(0); increment_disp.val(13,2)=IncrDis13(1);increment_disp.val(13,3)=IncrDis13(2);
-    increment_disp.val(14,1)=IncrDis14(0); increment_disp.val(14,2)=IncrDis14(1);increment_disp.val(14,3)=IncrDis14(2);
-    increment_disp.val(15,1)=IncrDis15(0); increment_disp.val(15,2)=IncrDis15(1);increment_disp.val(15,3)=IncrDis15(2);
-    increment_disp.val(16,1)=IncrDis16(0); increment_disp.val(16,2)=IncrDis16(1);increment_disp.val(16,3)=IncrDis16(2);
+    increment_dispDu.val(13,1)=IncrDis13(0); increment_dispDu.val(13,2)=IncrDis13(1);increment_dispDu.val(13,3)=IncrDis13(2);
+//    increment_disp.val(13,4)=IncrDis13(3); increment_disp.val(13,5)=IncrDis13(4);increment_disp.val(13,6)=IncrDis13(5);
+//    increment_disp.val(13,7)=IncrDis13(6);
+ 
+    increment_dispDu.val(14,1)=IncrDis14(0); increment_dispDu.val(14,2)=IncrDis14(1);increment_dispDu.val(14,3)=IncrDis14(2);
+//    increment_disp.val(14,4)=IncrDis14(3); increment_disp.val(14,5)=IncrDis14(4);increment_disp.val(14,6)=IncrDis14(5);
+//    increment_disp.val(14,7)=IncrDis14(6);
+ 
+    increment_dispDu.val(15,1)=IncrDis15(0); increment_dispDu.val(15,2)=IncrDis15(1);increment_dispDu.val(15,3)=IncrDis15(2);
+//    increment_disp.val(15,4)=IncrDis15(3); increment_disp.val(15,5)=IncrDis15(4);increment_disp.val(15,6)=IncrDis15(5);
+//    increment_disp.val(15,7)=IncrDis15(6);
+ 
+    increment_dispDu.val(16,1)=IncrDis16(0); increment_dispDu.val(16,2)=IncrDis16(1);increment_dispDu.val(16,3)=IncrDis16(2);
+//    increment_disp.val(16,4)=IncrDis16(3); increment_disp.val(16,5)=IncrDis16(4);increment_disp.val(16,6)=IncrDis16(5);
+//    increment_disp.val(16,7)=IncrDis16(6);
 																						   										   																							   										   																						   										   
-    increment_disp.val(17,1)=IncrDis17(0); increment_disp.val(17,2)=IncrDis17(1);increment_disp.val(17,3)=IncrDis17(2);
-    increment_disp.val(18,1)=IncrDis18(0); increment_disp.val(18,2)=IncrDis18(1);increment_disp.val(18,3)=IncrDis18(2);
-    increment_disp.val(19,1)=IncrDis19(0); increment_disp.val(19,2)=IncrDis19(1);increment_disp.val(19,3)=IncrDis19(2);
-    increment_disp.val(20,1)=IncrDis20(0); increment_disp.val(20,2)=IncrDis20(1);increment_disp.val(20,3)=IncrDis20(2);
+    increment_dispDu.val(17,1)=IncrDis17(0); increment_dispDu.val(17,2)=IncrDis17(1);increment_dispDu.val(17,3)=IncrDis17(2);
+//    increment_disp.val(17,4)=IncrDis17(3); increment_disp.val(17,5)=IncrDis17(4);increment_disp.val(17,6)=IncrDis17(5);
+//    increment_disp.val(17,7)=IncrDis17(6);
+ 
+    increment_dispDu.val(18,1)=IncrDis18(0); increment_dispDu.val(18,2)=IncrDis18(1);increment_dispDu.val(18,3)=IncrDis18(2);
+//    increment_disp.val(18,4)=IncrDis18(3); increment_disp.val(18,5)=IncrDis18(4);increment_disp.val(18,6)=IncrDis18(5);
+//    increment_disp.val(18,7)=IncrDis18(6);
+ 
+    increment_dispDu.val(19,1)=IncrDis19(0); increment_dispDu.val(19,2)=IncrDis19(1);increment_dispDu.val(19,3)=IncrDis19(2);
+//    increment_disp.val(19,4)=IncrDis19(3); increment_disp.val(19,5)=IncrDis19(4);increment_disp.val(19,6)=IncrDis19(5);
+//    increment_disp.val(19,7)=IncrDis19(6);
+ 
+    increment_dispDu.val(20,1)=IncrDis20(0); increment_dispDu.val(20,2)=IncrDis20(1);increment_dispDu.val(20,3)=IncrDis20(2);
+//    increment_disp.val(20,4)=IncrDis20(3); increment_disp.val(20,5)=IncrDis20(4);increment_disp.val(20,6)=IncrDis20(5);
+//    increment_disp.val(20,7)=IncrDis20(6);
+ 
             
-    return increment_disp;
+    return increment_dispDu;
+  }
+////#############################################################################
+//=========================================================================
+// Incremental displacement of fluid part-- U     02/10/2002
+//=========================================================================
+tensor TwentyNodeBrick_u_p_U::incr_dispDU()
+  {
+    const int dimensions[] = {20,3};  
+    tensor increment_dispDU(2, dimensions, 0.0);
+
+    //for ( int i=0 ; i<8 ; i++ )	 // Xiaoyan changed from 20 to 8 for 8 nodes
+    //
+    //  {
+    //    // increment_disp.val(i+1,1) = nodes[ G_N_numbs[i] ].incremental_translation_x();
+    //    // increment_disp.val(i+1,2) = nodes[ G_N_numbs[i] ].incremental_translation_y();
+    //    // increment_disp.val(i+1,3) = nodes[ G_N_numbs[i] ].incremental_translation_z();
+    //    // Xiaoyan changed to the following 09/27/00
+    //    Vector IncremenDis = nodes[ G_N_numbs[i] ].getIncrDisp();
+    //
+    //    increment_disp.val(i+1,1) = IncremenDis(0);
+    //    increment_disp.val(i+1,2) = IncremenDis(1); 
+    //    increment_disp.val(i+1,3) = IncremenDis(2);
+    //	
+    //  }
+    
+    //Zhaohui using node pointers, which come from the Domain
+    //const Vector &TotDis1 = nd1Ptr->getTrialDisp();
+    //const Vector &incrdelDis1 = nd1Ptr->getIncrDisp();
+    //Have to get IncrDeltaDisp, not IncrDisp for cumulation of incr_disp
+    const Vector &IncrDis1 = nd1Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis2 = nd2Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis3 = nd3Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis4 = nd4Ptr->getIncrDeltaDisp();
+
+    const Vector &IncrDis5 = nd5Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis6 = nd6Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis7 = nd7Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis8 = nd8Ptr->getIncrDeltaDisp();
+
+    const Vector &IncrDis9  = nd9Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis10 = nd10Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis11 = nd11Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis12 = nd12Ptr->getIncrDeltaDisp();
+
+    const Vector &IncrDis13 = nd13Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis14 = nd14Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis15 = nd15Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis16 = nd16Ptr->getIncrDeltaDisp();
+    
+    const Vector &IncrDis17 = nd17Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis18 = nd18Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis19 = nd19Ptr->getIncrDeltaDisp();
+    const Vector &IncrDis20 = nd20Ptr->getIncrDeltaDisp();
+
+// Get the Last three incremental displacement for fluid part. Xiaoyan 02/08/2002
+ 
+//    increment_disp.val(1,1)=IncrDis1(0); increment_disp.val(1,2)=IncrDis1(1);increment_disp.val(1,3)=IncrDis1(2);
+//    increment_disp.val(1,4)=IncrDis1(3); 
+    increment_dispDU.val(1,1)=IncrDis1(4);increment_dispDU.val(1,2)=IncrDis1(5); 
+    increment_dispDU.val(1,3)=IncrDis1(6);
+
+//    increment_disp.val(2,1)=IncrDis2(0); increment_disp.val(2,2)=IncrDis2(1);increment_disp.val(2,3)=IncrDis2(2);
+//    increment_disp.val(2,4)=IncrDis2(3); 
+    increment_dispDU.val(2,1)=IncrDis2(4);increment_dispDU.val(2,2)=IncrDis2(5); 
+    increment_dispDU.val(2,3)=IncrDis2(6);
+
+//    increment_disp.val(3,1)=IncrDis3(0); increment_disp.val(3,2)=IncrDis3(1);increment_disp.val(3,3)=IncrDis3(2);
+//    increment_disp.val(3,4)=IncrDis3(3); 
+    increment_dispDU.val(3,1)=IncrDis3(4);increment_dispDU.val(3,2)=IncrDis3(5); 
+    increment_dispDU.val(3,3)=IncrDis3(6);
+
+//    increment_disp.val(4,1)=IncrDis4(0); increment_disp.val(4,2)=IncrDis4(1);increment_disp.val(4,3)=IncrDis4(2);
+//    increment_disp.val(4,4)=IncrDis4(3);
+    increment_dispDU.val(4,1)=IncrDis4(4);increment_dispDU.val(4,2)=IncrDis4(5); 
+    increment_dispDU.val(4,3)=IncrDis4(6);
+ 
+//    increment_disp.val(5,1)=IncrDis5(0); increment_disp.val(5,2)=IncrDis5(1);increment_disp.val(5,3)=IncrDis5(2);
+//    increment_disp.val(5,4)=IncrDis5(3); 
+    increment_dispDU.val(5,1)=IncrDis5(4);increment_dispDU.val(5,2)=IncrDis5(5); 
+    increment_dispDU.val(5,3)=IncrDis5(6);
+ 
+//    increment_disp.val(6,1)=IncrDis6(0); increment_disp.val(6,2)=IncrDis6(1);increment_disp.val(6,3)=IncrDis6(2);
+//    increment_disp.val(6,4)=IncrDis6(3);
+    increment_dispDU.val(6,1)=IncrDis6(4);increment_dispDU.val(4,2)=IncrDis6(5); 
+    increment_dispDU.val(6,3)=IncrDis6(6);
+ 
+//    increment_disp.val(7,1)=IncrDis7(0); increment_disp.val(7,2)=IncrDis7(1);increment_disp.val(7,3)=IncrDis7(2);
+//    increment_disp.val(7,4)=IncrDis7(3); 
+    increment_dispDU.val(7,1)=IncrDis7(4);increment_dispDU.val(7,2)=IncrDis7(5); 
+    increment_dispDU.val(7,3)=IncrDis7(6);
+ 
+//    increment_disp.val(8,1)=IncrDis8(0); increment_disp.val(8,2)=IncrDis8(1);increment_disp.val(8,3)=IncrDis8(2);
+//    increment_disp.val(8,4)=IncrDis8(3); 
+    increment_dispDU.val(8,1)=IncrDis8(4);increment_dispDU.val(8,2)=IncrDis8(5); 
+    increment_dispDU.val(8,3)=IncrDis8(6);
+
+//    increment_disp.val(9,1)=IncrDis9(0); increment_disp.val(9,2)=IncrDis9(1);increment_disp.val(9,3)=IncrDis9(2);
+//    increment_disp.val(9,4)=IncrDis9(3); 
+    increment_dispDU.val(9,1)=IncrDis9(4);increment_dispDU.val(9,2)=IncrDis9(5); 
+    increment_dispDU.val(9,3)=IncrDis9(6);
+ 
+//    increment_disp.val(10,1)=IncrDis10(0); increment_disp.val(10,2)=IncrDis10(1);increment_disp.val(10,3)=IncrDis10(2);
+//    increment_disp.val(10,4)=IncrDis10(3); 
+    increment_dispDU.val(10,1)=IncrDis10(4);increment_dispDU.val(10,2)=IncrDis10(5); 
+    increment_dispDU.val(10,3)=IncrDis10(6);
+ 
+//    increment_disp.val(11,1)=IncrDis11(0); increment_disp.val(11,2)=IncrDis11(1);increment_disp.val(11,3)=IncrDis11(2);
+//    increment_disp.val(11,4)=IncrDis11(3); 
+    increment_dispDU.val(11,1)=IncrDis11(4);increment_dispDU.val(11,2)=IncrDis11(5); 
+    increment_dispDU.val(11,3)=IncrDis11(6);
+ 
+//    increment_disp.val(12,1)=IncrDis12(0); increment_disp.val(12,2)=IncrDis12(1);increment_disp.val(12,3)=IncrDis12(2);
+//    increment_disp.val(12,4)=IncrDis12(3); 
+    increment_dispDU.val(12,1)=IncrDis12(4);increment_dispDU.val(12,2)=IncrDis12(5);
+    increment_dispDU.val(12,3)=IncrDis12(6);
+																						   										   																							   										   																						   										   
+//    increment_disp.val(13,1)=IncrDis13(0); increment_disp.val(13,2)=IncrDis13(1);increment_disp.val(13,3)=IncrDis13(2);
+//    increment_disp.val(13,4)=IncrDis13(3); 
+    increment_dispDU.val(13,1)=IncrDis13(4);increment_dispDU.val(13,2)=IncrDis13(5); 
+    increment_dispDU.val(13,3)=IncrDis13(6);
+ 
+//    increment_disp.val(14,1)=IncrDis14(0); increment_disp.val(14,2)=IncrDis14(1);increment_disp.val(14,3)=IncrDis14(2);
+//    increment_disp.val(14,4)=IncrDis14(3); 
+    increment_dispDU.val(14,1)=IncrDis14(4);increment_dispDU.val(14,2)=IncrDis14(5);
+    increment_dispDU.val(14,3)=IncrDis14(6);
+ 
+//    increment_disp.val(15,1)=IncrDis15(0); increment_disp.val(15,2)=IncrDis15(1);increment_disp.val(15,3)=IncrDis15(2);
+//    increment_disp.val(15,4)=IncrDis15(3); 
+    increment_dispDU.val(15,1)=IncrDis15(4);increment_dispDU.val(15,2)=IncrDis15(5);
+    increment_dispDU.val(15,3)=IncrDis15(6);
+ 
+//    increment_disp.val(16,1)=IncrDis16(0); increment_disp.val(16,2)=IncrDis16(1);increment_disp.val(16,3)=IncrDis16(2);
+//    increment_disp.val(16,4)=IncrDis16(3); 
+    increment_dispDU.val(16,1)=IncrDis16(4);increment_dispDU.val(16,2)=IncrDis16(5);
+    increment_dispDU.val(16,3)=IncrDis16(6);
+																						   										   																							   										   																						   										   
+//    increment_disp.val(17,1)=IncrDis17(0); increment_disp.val(17,2)=IncrDis17(1);increment_disp.val(17,3)=IncrDis17(2);
+//    increment_disp.val(17,4)=IncrDis17(3); 
+    increment_dispDU.val(17,1)=IncrDis17(4);increment_dispDU.val(17,2)=IncrDis17(5);
+    increment_dispDU.val(17,3)=IncrDis17(6);
+ 
+//    increment_disp.val(18,1)=IncrDis18(0); increment_disp.val(18,2)=IncrDis18(1);increment_disp.val(18,3)=IncrDis18(2);
+//    increment_disp.val(18,4)=IncrDis18(3);
+    increment_dispDU.val(18,1)=IncrDis18(4);increment_dispDU.val(18,2)=IncrDis18(5);
+    increment_dispDU.val(18,3)=IncrDis18(6);
+ 
+//    increment_disp.val(19,1)=IncrDis19(0); increment_disp.val(19,2)=IncrDis19(1);increment_disp.val(19,3)=IncrDis19(2);
+//    increment_disp.val(19,4)=IncrDis19(3); 
+    increment_dispDU.val(19,1)=IncrDis19(4);increment_dispDU.val(19,2)=IncrDis19(5);
+    increment_dispDU.val(19,3)=IncrDis19(6);
+ 
+//    increment_disp.val(20,1)=IncrDis20(0); increment_disp.val(20,2)=IncrDis20(1);increment_disp.val(20,3)=IncrDis20(2);
+//    increment_disp.val(20,4)=IncrDis20(3);
+    increment_dispDU.val(20,1)=IncrDis20(4);increment_dispDU.val(20,2)=IncrDis20(5);
+    increment_dispDU.val(20,3)=IncrDis20(6);
+ 
+            
+    return increment_dispDU;
   }
 
 ////#############################################################################
-tensor TwentyNodeBrick_u_p_U::total_disp()
+//=========================================================================
+// Total displacement of solid part --u    02/10/2002
+//=========================================================================
+tensor TwentyNodeBrick_u_p_U::total_dispDu()
   {
-    const int dimensions[] = {20,3};  // Xiaoyan changed from {20,3} to {8,3} for 8 nodes
-    tensor total_disp(2, dimensions, 0.0);
+    const int dimensions[] = {20,3};  
+    tensor total_dispDu(2, dimensions, 0.0);
+      
+    // Get first three total displacement for solid part. Xiaoyan 02/08/2002
+    const Vector &TotDis1 = nd1Ptr->getTrialDisp();
+    cout<<"\ntot node " << nd1Ptr->getTag() <<" ux "<< TotDis1(0) <<" uy "<< TotDis1(1) << " uz "<< TotDis1(2) 
+                        << endln;
+
+    const Vector &TotDis2 = nd2Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd2Ptr->getTag() << " ux " << TotDis2(0) <<" uy "<< TotDis2(1) << " uz "<< TotDis2(2) 
+                        << endln;
+
+    const Vector &TotDis3 = nd3Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd3Ptr->getTag() << " ux " << TotDis3(0) <<" uy "<< TotDis3(1) << " uz "<< TotDis3(2) 
+                        << endln;
+
+    const Vector &TotDis4 = nd4Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd4Ptr->getTag() << " ux " << TotDis4(0) <<"uy "<< TotDis4(1) << " uz "<< TotDis4(2)
+                        << endln;
+
+    const Vector &TotDis5 = nd5Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd5Ptr->getTag() << " ux " << TotDis5(0) <<" uy "<< TotDis5(1) << " uz "<< TotDis5(2) 
+                        << endln;
+
+    const Vector &TotDis6 = nd6Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd6Ptr->getTag() << " ux " << TotDis6(0) <<" uy "<< TotDis6(1) << " uz "<< TotDis6(2) 
+                        << endln;
+
+    const Vector &TotDis7 = nd7Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd7Ptr->getTag() << " ux " << TotDis7(0) <<" uy "<< TotDis7(1) << " uz "<< TotDis7(2) 
+                        << endln;
+
+    const Vector &TotDis8 = nd8Ptr->getTrialDisp();			    		          
+    cout << "tot node " << nd8Ptr->getTag() << " ux " << TotDis8(0) <<" uy "<< TotDis8(1) << " uz "<< TotDis8(2) 
+                        << endln;
+
+    const Vector &TotDis9 = nd9Ptr->getTrialDisp();
+    cout << "tot node " << nd9Ptr->getTag() << " ux " << TotDis9(0) <<" uy "<< TotDis9(1) << " uz "<< TotDis9(2) 
+                        << endln;
+
+    const Vector &TotDis10 = nd10Ptr->getTrialDisp();
+    cout << "tot node " << nd10Ptr->getTag() << " ux " << TotDis10(0) <<" uy "<< TotDis10(1) << " uz "<< TotDis10(2) 
+                        << endln;
+
+    const Vector &TotDis11 = nd11Ptr->getTrialDisp();
+    cout << "tot node " << nd11Ptr->getTag() << " ux " << TotDis11(0) <<" uy "<< TotDis11(1) << " uz "<< TotDis11(2) 
+                        << endln;
+
+    const Vector &TotDis12 = nd12Ptr->getTrialDisp();
+    cout << "tot node " << nd12Ptr->getTag() << " ux " << TotDis12(0) <<" uy "<< TotDis12(1) << " uz "<< TotDis12(2) 
+                        << endln;
+
+
+    const Vector &TotDis13 = nd13Ptr->getTrialDisp();
+    cout << "tot node " << nd13Ptr->getTag() << " ux " << TotDis13(0) <<" uy "<< TotDis13(1) << " uz "<< TotDis13(2) 
+                        << endln;
+
+    const Vector &TotDis14 = nd14Ptr->getTrialDisp();
+    cout << "tot node " << nd14Ptr->getTag() << " ux " << TotDis14(0) <<" uy "<< TotDis14(1) << " uz "<< TotDis14(2) 
+                        << endln;
+
+    const Vector &TotDis15 = nd15Ptr->getTrialDisp();
+    cout << "tot node " << nd15Ptr->getTag() << " ux " << TotDis15(0) <<" uy "<< TotDis15(1) << " uz "<< TotDis15(2) 
+                        << endln;
+
+    const Vector &TotDis16 = nd16Ptr->getTrialDisp();
+    cout << "tot node " << nd16Ptr->getTag() << " ux " << TotDis16(0) <<" uy "<< TotDis16(1) << " uz "<< TotDis16(2) 
+                        << endln;
+
+    const Vector &TotDis17 = nd17Ptr->getTrialDisp();
+    cout << "tot node " << nd17Ptr->getTag() << " ux " << TotDis17(0) <<" uy "<< TotDis17(1) << " uz "<< TotDis17(2)
+                        << endln;
+
+    const Vector &TotDis18 = nd18Ptr->getTrialDisp();
+    cout << "tot node " << nd18Ptr->getTag() << " ux " << TotDis18(0) <<" uy "<< TotDis18(1) << " uz "<< TotDis18(2) 
+                        << endln;
+
+    const Vector &TotDis19 = nd19Ptr->getTrialDisp();
+    cout << "tot node " << nd19Ptr->getTag() << " ux " << TotDis19(0) <<" uy "<< TotDis19(1) << " uz "<< TotDis19(2) 
+                        << endln;
+
+    const Vector &TotDis20 = nd20Ptr->getTrialDisp();
+    cout << "tot node " << nd20Ptr->getTag() << " ux " << TotDis20(0) <<" uy "<< TotDis20(1) << " uz "<< TotDis20(2) 
+                        << endln;
+
+
+
+    total_dispDu.val(1,1)=TotDis1(0); total_dispDu.val(1,2)=TotDis1(1);total_dispDu.val(1,3)=TotDis1(2);
+//    total_disp.val(1,4)=TotDis1(3); total_disp.val(1,5)=TotDis1(4);total_disp.val(1,6)=TotDis1(5);
+//    total_disp.val(1,7)=TotDis1(6);
+
+    total_dispDu.val(2,1)=TotDis2(0); total_dispDu.val(2,2)=TotDis2(1);total_dispDu.val(2,3)=TotDis2(2);
+//    total_disp.val(2,4)=TotDis2(3); total_disp.val(2,5)=TotDis2(4);total_disp.val(2,6)=TotDis2(5);
+//    total_disp.val(2,7)=TotDis2(6);
+
+    total_dispDu.val(3,1)=TotDis3(0); total_dispDu.val(3,2)=TotDis3(1);total_dispDu.val(3,3)=TotDis3(2);
+//    total_disp.val(3,4)=TotDis3(3); total_disp.val(3,5)=TotDis3(4);total_disp.val(3,6)=TotDis3(5);
+//    total_disp.val(3,7)=TotDis3(6);
+
+    total_dispDu.val(4,1)=TotDis4(0); total_dispDu.val(4,2)=TotDis4(1);total_dispDu.val(4,3)=TotDis4(2);
+//    total_disp.val(4,4)=TotDis4(3); total_disp.val(4,5)=TotDis4(4);total_disp.val(4,6)=TotDis4(5);
+//    total_disp.val(4,7)=TotDis4(6);
+
+    total_dispDu.val(5,1)=TotDis5(0); total_dispDu.val(5,2)=TotDis5(1);total_dispDu.val(5,3)=TotDis5(2);
+//    total_disp.val(5,4)=TotDis5(3); total_disp.val(5,5)=TotDis5(4);total_disp.val(5,6)=TotDis5(5);
+//    total_disp.val(5,7)=TotDis5(6);
+
+    total_dispDu.val(6,1)=TotDis6(0); total_dispDu.val(6,2)=TotDis6(1);total_dispDu.val(6,3)=TotDis6(2);
+//    total_disp.val(6,4)=TotDis6(3); total_disp.val(6,5)=TotDis6(4);total_disp.val(6,6)=TotDis6(5);
+//    total_disp.val(6,7)=TotDis6(6);
+
+    total_dispDu.val(7,1)=TotDis7(0); total_dispDu.val(7,2)=TotDis7(1);total_dispDu.val(7,3)=TotDis7(2);
+//    total_disp.val(7,4)=TotDis7(3); total_disp.val(7,5)=TotDis7(4);total_disp.val(7,6)=TotDis7(5);
+//    total_disp.val(7,7)=TotDis7(6);
+
+    total_dispDu.val(8,1)=TotDis8(0); total_dispDu.val(8,2)=TotDis8(1);total_dispDu.val(8,3)=TotDis8(2);
+//    total_disp.val(8,4)=TotDis8(3); total_disp.val(8,5)=TotDis8(4);total_disp.val(8,6)=TotDis8(5);
+//    total_disp.val(8,7)=TotDis8(6);
+
+
+    total_dispDu.val(9,1)=TotDis9(0); total_dispDu.val(9,2)=TotDis9(1);total_dispDu.val(9,3)=TotDis9(2);
+//    total_disp.val(9,4)=TotDis9(3); total_disp.val(9,5)=TotDis9(4);total_disp.val(9,6)=TotDis9(5);
+//    total_disp.val(9,7)=TotDis9(6);
+
+    total_dispDu.val(10,1)=TotDis10(0); total_dispDu.val(10,2)=TotDis10(1);total_dispDu.val(10,3)=TotDis10(2);
+//    total_disp.val(10,4)=TotDis10(3); total_disp.val(10,5)=TotDis10(4);total_disp.val(10,6)=TotDis10(5);
+//    total_disp.val(10,7)=TotDis10(6);
+
+    total_dispDu.val(11,1)=TotDis11(0); total_dispDu.val(11,2)=TotDis11(1);total_dispDu.val(11,3)=TotDis11(2);
+//    total_disp.val(11,4)=TotDis11(3); total_disp.val(11,5)=TotDis11(4);total_disp.val(11,6)=TotDis11(5);
+//    total_disp.val(11,7)=TotDis11(6);
+
+    total_dispDu.val(12,1)=TotDis12(0); total_dispDu.val(12,2)=TotDis12(1);total_dispDu.val(12,3)=TotDis12(2);
+//    total_disp.val(12,4)=TotDis12(3); total_disp.val(12,5)=TotDis12(4);total_disp.val(12,6)=TotDis12(5);
+//    total_disp.val(12,7)=TotDis12(6);
+
+
+    total_dispDu.val(13,1)=TotDis13(0); total_dispDu.val(13,2)=TotDis13(1);total_dispDu.val(13,3)=TotDis13(2);
+//    total_disp.val(13,4)=TotDis13(3); total_disp.val(13,5)=TotDis13(4);total_disp.val(13,6)=TotDis13(5);
+//    total_disp.val(13,7)=TotDis13(6);
+
+    total_dispDu.val(14,1)=TotDis14(0); total_dispDu.val(14,2)=TotDis14(1);total_dispDu.val(14,3)=TotDis14(2);
+//    total_disp.val(14,4)=TotDis14(3); total_disp.val(14,5)=TotDis14(4);total_disp.val(14,6)=TotDis14(5);
+//    total_disp.val(14,7)=TotDis14(6);
+
+    total_dispDu.val(15,1)=TotDis15(0); total_dispDu.val(15,2)=TotDis15(1);total_dispDu.val(15,3)=TotDis15(2);
+//    total_disp.val(15,4)=TotDis15(3); total_disp.val(15,5)=TotDis15(4);total_disp.val(15,6)=TotDis15(5);
+//    total_disp.val(15,7)=TotDis15(6);
+
+    total_dispDu.val(16,1)=TotDis16(0); total_dispDu.val(16,2)=TotDis16(1);total_dispDu.val(16,3)=TotDis16(2);
+//    total_disp.val(16,4)=TotDis16(3); total_disp.val(16,5)=TotDis16(4);total_disp.val(16,6)=TotDis16(5);
+//    total_disp.val(16,7)=TotDis16(6);
+
+    total_dispDu.val(17,1)=TotDis17(0); total_dispDu.val(17,2)=TotDis17(1);total_dispDu.val(17,3)=TotDis17(2);
+//    total_disp.val(17,4)=TotDis17(3); total_disp.val(17,5)=TotDis17(4);total_disp.val(17,6)=TotDis17(5);
+//    total_disp.val(17,7)=TotDis17(6);
+
+    total_dispDu.val(18,1)=TotDis18(0); total_dispDu.val(18,2)=TotDis18(1);total_dispDu.val(18,3)=TotDis18(2);
+//    total_disp.val(18,4)=TotDis18(3); total_disp.val(18,5)=TotDis18(4);total_disp.val(18,6)=TotDis18(5);
+//    total_disp.val(18,7)=TotDis18(6);
+
+    total_dispDu.val(19,1)=TotDis19(0); total_dispDu.val(19,2)=TotDis19(1);total_dispDu.val(19,3)=TotDis19(2);
+//    total_disp.val(19,4)=TotDis19(3); total_disp.val(19,5)=TotDis19(4);total_disp.val(19,6)=TotDis19(5);
+//    total_disp.val(19,7)=TotDis19(6);
+
+    total_dispDu.val(20,1)=TotDis20(0); total_dispDu.val(20,2)=TotDis20(1);total_dispDu.val(20,3)=TotDis20(2);
+//    total_disp.val(20,4)=TotDis20(3); total_disp.val(20,5)=TotDis20(4);total_disp.val(20,6)=TotDis20(5);
+//    total_disp.val(20,7)=TotDis20(6);
+
+
+    return total_dispDu;
+  }
+
+////#############################################################################
+//=========================================================================
+// Total displacement of fluid part--U     02/10/2002
+//=========================================================================
+tensor TwentyNodeBrick_u_p_U::total_dispDU()
+  {
+    const int dimensions[] = {20,3};  
+    tensor total_dispDU(2, dimensions, 0.0);
       
     //Zhaohui using node pointers, which come from the Domain
     const Vector &TotDis1 = nd1Ptr->getTrialDisp();
-    cout<<"\ntot node " << nd1Ptr->getTag() <<" x "<< TotDis1(0) <<" y "<< TotDis1(1) << " z "<< TotDis1(2) << endln;
+    cout<<"\ntot node " << nd1Ptr->getTag() 
+			<<" Ux "<< TotDis1(4) << " Uy "<< TotDis1(5)<< " Uz "<< TotDis1(6)<< endln;
+
     const Vector &TotDis2 = nd2Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd2Ptr->getTag() << " x " << TotDis2(0) <<" y "<< TotDis2(1) << " z "<< TotDis2(2) << endln;
+    cout << "tot node " << nd2Ptr->getTag() 
+    			<<" Ux "<< TotDis2(4) << " Uy "<< TotDis2(5)<< " Uz "<< TotDis2(6)<< endln;
+
     const Vector &TotDis3 = nd3Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd3Ptr->getTag() << " x " << TotDis3(0) <<" y "<< TotDis3(1) << " z "<< TotDis3(2) << endln;
+    cout << "tot node " << nd3Ptr->getTag()  
+			<<" Ux "<< TotDis3(4) << " Uy "<< TotDis3(5)<< " Uz "<< TotDis3(6)<< endln;
+
     const Vector &TotDis4 = nd4Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd4Ptr->getTag() << " x " << TotDis4(0) <<" y "<< TotDis4(1) << " z "<< TotDis4(2) << endln;
+    cout << "tot node " << nd4Ptr->getTag() 
+			<<" Ux "<< TotDis4(4) << " Uy "<< TotDis4(5)<< " Uz "<< TotDis4(6)<< endln;
 
     const Vector &TotDis5 = nd5Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd5Ptr->getTag() << " x " << TotDis5(0) <<" y "<< TotDis5(1) << " z "<< TotDis5(2) << endln;
+    cout << "tot node " << nd5Ptr->getTag()  
+			<<" Ux "<< TotDis5(4) << " Uy "<< TotDis5(5)<< " Uz "<< TotDis5(6)<< endln;
+
     const Vector &TotDis6 = nd6Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd6Ptr->getTag() << " x " << TotDis6(0) <<" y "<< TotDis6(1) << " z "<< TotDis6(2) << endln;
+    cout << "tot node " << nd6Ptr->getTag()  
+			<<" Ux "<< TotDis6(4) << " Uy "<< TotDis6(5)<< " Uz "<< TotDis6(6)<< endln;
+
     const Vector &TotDis7 = nd7Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd7Ptr->getTag() << " x " << TotDis7(0) <<" y "<< TotDis7(1) << " z "<< TotDis7(2) << endln;
+    cout << "tot node " << nd7Ptr->getTag() 
+			<<" Ux "<< TotDis7(4) << " Uy "<< TotDis7(5)<< " Uz "<< TotDis7(6)<< endln;
+
     const Vector &TotDis8 = nd8Ptr->getTrialDisp();			    		          
-    cout << "tot node " << nd8Ptr->getTag() << " x " << TotDis8(0) <<" y "<< TotDis8(1) << " z "<< TotDis8(2) << endln;
-    
+    cout << "tot node " << nd8Ptr->getTag() 
+			<<" Ux "<< TotDis8(4) << " Uy "<< TotDis8(5)<< " Uz "<< TotDis8(6)<< endln;
+
     const Vector &TotDis9 = nd9Ptr->getTrialDisp();
-    cout << "tot node " << nd9Ptr->getTag() << " x " << TotDis9(0) <<" y "<< TotDis9(1) << " z "<< TotDis9(2) << endln;
+    cout << "tot node " << nd9Ptr->getTag() 
+			<<" Ux "<< TotDis9(4) << " Uy "<< TotDis9(5)<< " Uz "<< TotDis9(6)<< endln;
+
     const Vector &TotDis10 = nd10Ptr->getTrialDisp();
-    cout << "tot node " << nd10Ptr->getTag() << " x " << TotDis10(0) <<" y "<< TotDis10(1) << " z "<< TotDis10(2) << endln;
+    cout << "tot node " << nd10Ptr->getTag()  
+			<<" Ux "<< TotDis10(4) << " Uy "<< TotDis10(5)<< " Uz "<< TotDis10(6)<< endln;
+
     const Vector &TotDis11 = nd11Ptr->getTrialDisp();
-    cout << "tot node " << nd11Ptr->getTag() << " x " << TotDis11(0) <<" y "<< TotDis11(1) << " z "<< TotDis11(2) << endln;
+    cout << "tot node " << nd11Ptr->getTag()  
+			<<" Ux "<< TotDis11(4) << " Uy "<< TotDis11(5)<< " Uz "<< TotDis11(6)<< endln;
+
     const Vector &TotDis12 = nd12Ptr->getTrialDisp();
-    cout << "tot node " << nd12Ptr->getTag() << " x " << TotDis12(0) <<" y "<< TotDis12(1) << " z "<< TotDis12(2) << endln;
+    cout << "tot node " << nd12Ptr->getTag()  
+			<<" Ux "<< TotDis12(4) << " Uy "<< TotDis12(5)<< " Uz "<< TotDis12(6)<< endln;
+
 
     const Vector &TotDis13 = nd13Ptr->getTrialDisp();
-    cout << "tot node " << nd13Ptr->getTag() << " x " << TotDis13(0) <<" y "<< TotDis13(1) << " z "<< TotDis13(2) << endln;
+    cout << "tot node " << nd13Ptr->getTag() 
+			<<" Ux "<< TotDis13(4) << " Uy "<< TotDis13(5)<< " Uz "<< TotDis13(6)<< endln;
+
     const Vector &TotDis14 = nd14Ptr->getTrialDisp();
-    cout << "tot node " << nd14Ptr->getTag() << " x " << TotDis14(0) <<" y "<< TotDis14(1) << " z "<< TotDis14(2) << endln;
+    cout << "tot node " << nd14Ptr->getTag()  
+			<<" Ux "<< TotDis14(4) << " Uy "<< TotDis14(5)<< " Uz "<< TotDis14(6)<< endln;
+
     const Vector &TotDis15 = nd15Ptr->getTrialDisp();
-    cout << "tot node " << nd15Ptr->getTag() << " x " << TotDis15(0) <<" y "<< TotDis15(1) << " z "<< TotDis15(2) << endln;
+    cout << "tot node " << nd15Ptr->getTag()  
+			<<" Ux "<< TotDis15(4) << " Uy "<< TotDis15(5)<< " Uz "<< TotDis15(6)<< endln;
+
     const Vector &TotDis16 = nd16Ptr->getTrialDisp();
-    cout << "tot node " << nd16Ptr->getTag() << " x " << TotDis16(0) <<" y "<< TotDis16(1) << " z "<< TotDis16(2) << endln;
+    cout << "tot node " << nd16Ptr->getTag()  
+			<<" Ux "<< TotDis16(4) << " Uy "<< TotDis16(5)<< " Uz "<< TotDis16(6)<< endln;
 
     const Vector &TotDis17 = nd17Ptr->getTrialDisp();
-    cout << "tot node " << nd17Ptr->getTag() << " x " << TotDis17(0) <<" y "<< TotDis17(1) << " z "<< TotDis17(2) << endln;
+    cout << "tot node " << nd17Ptr->getTag()  
+			<<" Ux "<< TotDis17(4) << " Uy "<< TotDis17(5)<< " Uz "<< TotDis17(6)<< endln;
+
     const Vector &TotDis18 = nd18Ptr->getTrialDisp();
-    cout << "tot node " << nd18Ptr->getTag() << " x " << TotDis18(0) <<" y "<< TotDis18(1) << " z "<< TotDis18(2) << endln;
+    cout << "tot node " << nd18Ptr->getTag() 
+			<<" Ux "<< TotDis18(4) << " Uy "<< TotDis18(5)<< " Uz "<< TotDis18(6)<< endln;
+
     const Vector &TotDis19 = nd19Ptr->getTrialDisp();
-    cout << "tot node " << nd19Ptr->getTag() << " x " << TotDis19(0) <<" y "<< TotDis19(1) << " z "<< TotDis19(2) << endln;
+    cout << "tot node " << nd19Ptr->getTag()  
+			<<" Ux "<< TotDis19(4) << " Uy "<< TotDis19(5)<< " Uz "<< TotDis19(6)<< endln;
+
     const Vector &TotDis20 = nd20Ptr->getTrialDisp();
-    cout << "tot node " << nd20Ptr->getTag() << " x " << TotDis20(0) <<" y "<< TotDis20(1) << " z "<< TotDis20(2) << endln;
+    cout << "tot node " << nd20Ptr->getTag()  
+			<<" Ux "<< TotDis20(4) << " Uy "<< TotDis20(5)<< " Uz "<< TotDis20(6)<< endln;
 
 
-    total_disp.val(1,1)=TotDis1(0); total_disp.val(1,2)=TotDis1(1);total_disp.val(1,3)=TotDis1(2);
-    total_disp.val(2,1)=TotDis2(0); total_disp.val(2,2)=TotDis2(1);total_disp.val(2,3)=TotDis2(2);
-    total_disp.val(3,1)=TotDis3(0); total_disp.val(3,2)=TotDis3(1);total_disp.val(3,3)=TotDis3(2);
-    total_disp.val(4,1)=TotDis4(0); total_disp.val(4,2)=TotDis4(1);total_disp.val(4,3)=TotDis4(2);
 
-    total_disp.val(5,1)=TotDis5(0); total_disp.val(5,2)=TotDis5(1);total_disp.val(5,3)=TotDis5(2);
-    total_disp.val(6,1)=TotDis6(0); total_disp.val(6,2)=TotDis6(1);total_disp.val(6,3)=TotDis6(2);
-    total_disp.val(7,1)=TotDis7(0); total_disp.val(7,2)=TotDis7(1);total_disp.val(7,3)=TotDis7(2);
-    total_disp.val(8,1)=TotDis8(0); total_disp.val(8,2)=TotDis8(1);total_disp.val(8,3)=TotDis8(2);
+    total_dispDU.val(1,1)=TotDis1(4);total_dispDU.val(1,2)=TotDis1(5);
+    total_dispDU.val(1,3)=TotDis1(6);
 
-    total_disp.val(9,1)=TotDis9(0); total_disp.val(9,2)=TotDis9(1);total_disp.val(9,3)=TotDis9(2);
-    total_disp.val(10,1)=TotDis10(0); total_disp.val(10,2)=TotDis10(1);total_disp.val(10,3)=TotDis10(2);
-    total_disp.val(11,1)=TotDis11(0); total_disp.val(11,2)=TotDis11(1);total_disp.val(11,3)=TotDis11(2);
-    total_disp.val(12,1)=TotDis12(0); total_disp.val(12,2)=TotDis12(1);total_disp.val(12,3)=TotDis12(2);
+    total_dispDU.val(2,1)=TotDis2(4);total_dispDU.val(2,2)=TotDis2(5);
+    total_dispDU.val(2,3)=TotDis2(6);
 
-    total_disp.val(13,1)=TotDis13(0); total_disp.val(13,2)=TotDis13(1);total_disp.val(13,3)=TotDis13(2);
-    total_disp.val(14,1)=TotDis14(0); total_disp.val(14,2)=TotDis14(1);total_disp.val(14,3)=TotDis14(2);
-    total_disp.val(15,1)=TotDis15(0); total_disp.val(15,2)=TotDis15(1);total_disp.val(15,3)=TotDis15(2);
-    total_disp.val(16,1)=TotDis16(0); total_disp.val(16,2)=TotDis16(1);total_disp.val(16,3)=TotDis16(2);
+    total_dispDU.val(3,1)=TotDis3(4);total_dispDU.val(3,2)=TotDis3(5);
+    total_dispDU.val(3,3)=TotDis3(6);
 
-    total_disp.val(17,1)=TotDis17(0); total_disp.val(17,2)=TotDis17(1);total_disp.val(17,3)=TotDis17(2);
-    total_disp.val(18,1)=TotDis18(0); total_disp.val(18,2)=TotDis18(1);total_disp.val(18,3)=TotDis18(2);
-    total_disp.val(19,1)=TotDis19(0); total_disp.val(19,2)=TotDis19(1);total_disp.val(19,3)=TotDis19(2);
-    total_disp.val(20,1)=TotDis20(0); total_disp.val(20,2)=TotDis20(1);total_disp.val(20,3)=TotDis20(2);
+    total_dispDU.val(4,1)=TotDis4(4);total_dispDU.val(4,2)=TotDis4(5);
+    total_dispDU.val(4,3)=TotDis4(6);
 
-    return total_disp;
+    total_dispDU.val(5,1)=TotDis5(4);total_dispDU.val(5,2)=TotDis5(5);
+    total_dispDU.val(5,3)=TotDis5(6);
+
+    total_dispDU.val(6,1)=TotDis6(4);total_dispDU.val(6,2)=TotDis6(5);
+    total_dispDU.val(6,3)=TotDis6(6);
+
+    total_dispDU.val(7,1)=TotDis7(4);total_dispDU.val(7,2)=TotDis7(5);
+    total_dispDU.val(7,3)=TotDis7(6);
+
+    total_dispDU.val(8,1)=TotDis8(4);total_dispDU.val(8,2)=TotDis8(5);
+    total_dispDU.val(8,3)=TotDis8(6);
+
+
+    total_dispDU.val(9,1)=TotDis9(4);total_dispDU.val(9,2)=TotDis9(5);
+    total_dispDU.val(9,3)=TotDis9(6);
+
+    total_dispDU.val(10,1)=TotDis10(4);total_dispDU.val(10,2)=TotDis10(5);
+    total_dispDU.val(10,3)=TotDis10(6);
+
+    total_dispDU.val(11,1)=TotDis11(4);total_dispDU.val(11,2)=TotDis11(5);
+    total_dispDU.val(11,3)=TotDis11(6);
+
+    total_dispDU.val(12,1)=TotDis12(4);total_dispDU.val(12,2)=TotDis12(5);
+    total_dispDU.val(12,3)=TotDis12(6);
+
+
+    total_dispDU.val(13,1)=TotDis13(4);total_dispDU.val(13,2)=TotDis13(5);
+    total_dispDU.val(13,3)=TotDis13(6);
+
+    total_dispDU.val(14,1)=TotDis14(4);total_dispDU.val(14,2)=TotDis14(5);
+    total_dispDU.val(14,3)=TotDis14(6);
+
+    total_dispDU.val(15,1)=TotDis15(4);total_dispDU.val(15,2)=TotDis15(5);
+    total_dispDU.val(15,3)=TotDis15(6);
+
+    total_dispDU.val(16,1)=TotDis16(4);total_dispDU.val(16,2)=TotDis16(5);
+    total_dispDU.val(16,3)=TotDis16(6);
+
+    total_dispDU.val(17,1)=TotDis17(4);total_dispDU.val(17,2)=TotDis17(5);
+    total_dispDU.val(17,3)=TotDis17(6);	
+						 
+    total_dispDU.val(18,1)=TotDis18(4);total_dispDU.val(18,2)=TotDis18(5);
+    total_dispDU.val(18,3)=TotDis18(6);
+	      
+    total_dispDU.val(19,1)=TotDis19(4);total_dispDU.val(19,2)=TotDis19(5);
+    total_dispDU.val(19,3)=TotDis19(6);
+
+    total_dispDU.val(20,1)=TotDis20(4);total_dispDU.val(20,2)=TotDis20(5);
+    total_dispDU.val(20,3)=TotDis20(6);
+
+
+    return total_dispDU;
   }
 
 
 ////#############################################################################
-tensor TwentyNodeBrick_u_p_U::total_disp(FILE *fp, double * u)
-  {
-    const int dimensions[] = {20,3};  // Xiaoyan changed from {20,3} to {8,3} for 8 nodes
-    tensor total_disp(2, dimensions, 0.0);
-    //    double totalx, totaly, totalz;
-    //    totalx=0;
-    //    totaly=0;
-    //    totalz=0;
 
-    //for ( int i=0 ; i<8 ; i++ )  // Xiaoyan changed from 20 to 8 for 8 nodes
-    //
-    //  {
-    //    // total_disp.val(i+1,1) = nodes[ G_N_numbs[i] ].total_translation_x(u);
-    //    // total_disp.val(i+1,2) = nodes[ G_N_numbs[i] ].total_translation_y(u);
-    //    // total_disp.val(i+1,3) = nodes[ G_N_numbs[i] ].total_translation_z(u);
-    //    // Xiaoyan changed to the following 09/27/00
-    //    Vector TotalTranDis = nodes[ G_N_numbs[i] ].getDisp();
-    //
-    //    total_disp.val(i+1,1) = TotalTranDis(0);
-    //	total_disp.val(i+1,2) = TotalTranDis(1);
-    //    total_disp.val(i+1,3) = TotalTranDis(2);
-    //
-    //  }
-      
-    //Zhaohui using node pointers, which come from the Domain
+tensor TwentyNodeBrick_u_p_U::total_dispDu(FILE *fp, double * u)
+  {
+    const int dimensions[] = {20,3};  
+    tensor total_dispDu(2, dimensions, 0.0);
+  
     const Vector &TotDis1  = nd1Ptr->getTrialDisp();
     const Vector &TotDis2  = nd2Ptr->getTrialDisp();
     const Vector &TotDis3  = nd3Ptr->getTrialDisp();
@@ -2223,37 +2694,193 @@ tensor TwentyNodeBrick_u_p_U::total_disp(FILE *fp, double * u)
     const Vector &TotDis18 = nd18Ptr->getTrialDisp();
     const Vector &TotDis19 = nd19Ptr->getTrialDisp();
     const Vector &TotDis20 = nd20Ptr->getTrialDisp();
-    
-    total_disp.val(1,1)=TotDis1(0); total_disp.val(1,2)=TotDis1(1);total_disp.val(1,3)=TotDis1(2);
-    total_disp.val(2,1)=TotDis2(0); total_disp.val(2,2)=TotDis2(1);total_disp.val(2,3)=TotDis2(2);
-    total_disp.val(3,1)=TotDis3(0); total_disp.val(3,2)=TotDis3(1);total_disp.val(3,3)=TotDis3(2);
-    total_disp.val(4,1)=TotDis4(0); total_disp.val(4,2)=TotDis4(1);total_disp.val(4,3)=TotDis4(2);
 
-    total_disp.val(5,1)=TotDis5(0); total_disp.val(5,2)=TotDis5(1);total_disp.val(5,3)=TotDis5(2);
-    total_disp.val(6,1)=TotDis6(0); total_disp.val(6,2)=TotDis6(1);total_disp.val(6,3)=TotDis6(2);
-    total_disp.val(7,1)=TotDis7(0); total_disp.val(7,2)=TotDis7(1);total_disp.val(7,3)=TotDis7(2);
-    total_disp.val(8,1)=TotDis8(0); total_disp.val(8,2)=TotDis8(1);total_disp.val(8,3)=TotDis8(2);
+// Get first three total displacement for solid part    
+    total_dispDu.val(1,1)=TotDis1(0); total_dispDu.val(1,2)=TotDis1(1);total_dispDu.val(1,3)=TotDis1(2);
+//    total_disp.val(1,4)=TotDis1(3); total_disp.val(1,5)=TotDis1(4);total_disp.val(1,6)=TotDis1(5);
+//    total_disp.val(1,7)=TotDis1(6);
 
-    total_disp.val(9,1)=TotDis9(0); total_disp.val(9,2)=TotDis9(1);total_disp.val(9,3)=TotDis9(2);
-    total_disp.val(10,1)=TotDis10(0); total_disp.val(10,2)=TotDis10(1);total_disp.val(10,3)=TotDis10(2);
-    total_disp.val(11,1)=TotDis11(0); total_disp.val(11,2)=TotDis11(1);total_disp.val(11,3)=TotDis11(2);
-    total_disp.val(12,1)=TotDis12(0); total_disp.val(12,2)=TotDis12(1);total_disp.val(12,3)=TotDis12(2);
+    total_dispDu.val(2,1)=TotDis2(0); total_dispDu.val(2,2)=TotDis2(1);total_dispDu.val(2,3)=TotDis2(2);
+//    total_disp.val(2,4)=TotDis2(3); total_disp.val(2,5)=TotDis2(4);total_disp.val(2,6)=TotDis2(5);
+//    total_disp.val(2,7)=TotDis2(6);
 
-    total_disp.val(13,1)=TotDis13(0); total_disp.val(13,2)=TotDis13(1);total_disp.val(13,3)=TotDis13(2);
-    total_disp.val(14,1)=TotDis14(0); total_disp.val(14,2)=TotDis14(1);total_disp.val(14,3)=TotDis14(2);
-    total_disp.val(15,1)=TotDis15(0); total_disp.val(15,2)=TotDis15(1);total_disp.val(15,3)=TotDis15(2);
-    total_disp.val(16,1)=TotDis16(0); total_disp.val(16,2)=TotDis16(1);total_disp.val(16,3)=TotDis16(2);
+    total_dispDu.val(3,1)=TotDis3(0); total_dispDu.val(3,2)=TotDis3(1);total_dispDu.val(3,3)=TotDis3(2);
+//    total_disp.val(3,4)=TotDis3(3); total_disp.val(3,5)=TotDis3(4);total_disp.val(3,6)=TotDis3(5);
+//    total_disp.val(3,7)=TotDis3(6);
 
-    total_disp.val(17,1)=TotDis17(0); total_disp.val(17,2)=TotDis17(1);total_disp.val(17,3)=TotDis17(2);
-    total_disp.val(18,1)=TotDis18(0); total_disp.val(18,2)=TotDis18(1);total_disp.val(18,3)=TotDis18(2);
-    total_disp.val(19,1)=TotDis19(0); total_disp.val(19,2)=TotDis19(1);total_disp.val(19,3)=TotDis19(2);
-    total_disp.val(20,1)=TotDis20(0); total_disp.val(20,2)=TotDis20(1);total_disp.val(20,3)=TotDis20(2);
+    total_dispDu.val(4,1)=TotDis4(0); total_dispDu.val(4,2)=TotDis4(1);total_dispDu.val(4,3)=TotDis4(2);
+//    total_disp.val(4,4)=TotDis4(3); total_disp.val(4,5)=TotDis4(4);total_disp.val(4,6)=TotDis4(5);
+//    total_disp.val(4,7)=TotDis4(6);
+
+    total_dispDu.val(5,1)=TotDis5(0); total_dispDu.val(5,2)=TotDis5(1);total_dispDu.val(5,3)=TotDis5(2);
+//    total_disp.val(5,4)=TotDis5(3); total_disp.val(5,5)=TotDis5(4);total_disp.val(5,6)=TotDis5(5);
+//    total_disp.val(5,7)=TotDis5(6);
+
+    total_dispDu.val(6,1)=TotDis6(0); total_dispDu.val(6,2)=TotDis6(1);total_dispDu.val(6,3)=TotDis6(2);
+//    total_disp.val(6,4)=TotDis6(3); total_disp.val(6,5)=TotDis6(4);total_disp.val(6,6)=TotDis6(5);
+//    total_disp.val(6,7)=TotDis6(6);
+
+    total_dispDu.val(7,1)=TotDis7(0); total_dispDu.val(7,2)=TotDis7(1);total_dispDu.val(7,3)=TotDis7(2);
+//    total_disp.val(7,4)=TotDis7(3); total_disp.val(7,5)=TotDis7(4);total_disp.val(7,6)=TotDis7(5);
+//    total_disp.val(7,7)=TotDis7(6);
+
+    total_dispDu.val(8,1)=TotDis8(0); total_dispDu.val(8,2)=TotDis8(1);total_dispDu.val(8,3)=TotDis8(2);
+//    total_disp.val(8,4)=TotDis8(3); total_disp.val(8,5)=TotDis8(4);total_disp.val(8,6)=TotDis8(5);
+//    total_disp.val(8,7)=TotDis8(6);
 
 
-    return total_disp;
+    total_dispDu.val(9,1)=TotDis9(0); total_dispDu.val(9,2)=TotDis9(1);total_dispDu.val(9,3)=TotDis9(2);
+//    total_disp.val(9,4)=TotDis9(3); total_disp.val(9,5)=TotDis9(4);total_disp.val(9,6)=TotDis9(5);
+//    total_disp.val(9,7)=TotDis9(6);
+
+    total_dispDu.val(10,1)=TotDis10(0); total_dispDu.val(10,2)=TotDis10(1);total_dispDu.val(10,3)=TotDis10(2);
+//    total_disp.val(10,4)=TotDis10(3); total_disp.val(10,5)=TotDis10(4);total_disp.val(10,6)=TotDis10(5);
+//    total_disp.val(10,7)=TotDis10(6);
+
+    total_dispDu.val(11,1)=TotDis11(0); total_dispDu.val(11,2)=TotDis11(1);total_dispDu.val(11,3)=TotDis11(2);
+//    total_disp.val(11,4)=TotDis11(3); total_disp.val(11,5)=TotDis11(4);total_disp.val(11,6)=TotDis11(5);
+//    total_disp.val(11,7)=TotDis11(6);
+
+    total_dispDu.val(12,1)=TotDis12(0); total_dispDu.val(12,2)=TotDis12(1);total_dispDu.val(12,3)=TotDis12(2);
+//    total_disp.val(12,4)=TotDis12(3); total_disp.val(12,5)=TotDis12(4);total_disp.val(12,6)=TotDis12(5);
+//    total_disp.val(12,7)=TotDis12(6);
+
+
+    total_dispDu.val(13,1)=TotDis13(0); total_dispDu.val(13,2)=TotDis13(1);total_dispDu.val(13,3)=TotDis13(2);
+//    total_disp.val(13,4)=TotDis13(3); total_disp.val(13,5)=TotDis13(4);total_disp.val(13,6)=TotDis13(5);
+//    total_disp.val(13,7)=TotDis13(6);
+
+    total_dispDu.val(14,1)=TotDis14(0); total_dispDu.val(14,2)=TotDis14(1);total_dispDu.val(14,3)=TotDis14(2);
+//    total_disp.val(14,4)=TotDis14(3); total_disp.val(14,5)=TotDis14(4);total_disp.val(14,6)=TotDis14(5);
+//    total_disp.val(14,7)=TotDis14(6);
+
+    total_dispDu.val(15,1)=TotDis15(0); total_dispDu.val(15,2)=TotDis15(1);total_dispDu.val(15,3)=TotDis15(2);
+//    total_disp.val(15,4)=TotDis15(3); total_disp.val(15,5)=TotDis15(4);total_disp.val(15,6)=TotDis15(5);
+//    total_disp.val(15,7)=TotDis15(6);
+
+    total_dispDu.val(16,1)=TotDis16(0); total_dispDu.val(16,2)=TotDis16(1);total_dispDu.val(16,3)=TotDis16(2);
+//    total_disp.val(16,4)=TotDis16(3); total_disp.val(16,5)=TotDis16(4);total_disp.val(16,6)=TotDis16(5);
+//    total_disp.val(16,7)=TotDis16(6);
+
+    total_dispDu.val(17,1)=TotDis17(0); total_dispDu.val(17,2)=TotDis17(1);total_dispDu.val(17,3)=TotDis17(2);
+//    total_disp.val(17,4)=TotDis17(3); total_disp.val(17,5)=TotDis17(4);total_disp.val(17,6)=TotDis17(5);
+//    total_disp.val(17,7)=TotDis17(6);
+
+    total_dispDu.val(18,1)=TotDis18(0); total_dispDu.val(18,2)=TotDis18(1);total_dispDu.val(18,3)=TotDis18(2);
+//    total_disp.val(18,4)=TotDis18(3); total_disp.val(18,5)=TotDis18(4);total_disp.val(18,6)=TotDis18(5);
+//    total_disp.val(18,7)=TotDis18(6);
+
+    total_dispDu.val(19,1)=TotDis19(0); total_dispDu.val(19,2)=TotDis19(1);total_dispDu.val(19,3)=TotDis19(2);
+//    total_disp.val(19,4)=TotDis19(3); total_disp.val(19,5)=TotDis19(4);total_disp.val(19,6)=TotDis19(5);
+//    total_disp.val(19,7)=TotDis19(6);
+
+    total_dispDu.val(20,1)=TotDis20(0); total_dispDu.val(20,2)=TotDis20(1);total_dispDu.val(20,3)=TotDis20(2);
+//    total_disp.val(20,4)=TotDis20(3); total_disp.val(20,5)=TotDis20(4);total_disp.val(20,6)=TotDis20(5);
+//    total_disp.val(20,7)=TotDis20(6);
+
+
+    return total_dispDu;
+
   }
+////#############################################################################
+
+tensor TwentyNodeBrick_u_p_U::total_dispDU(FILE *fp, double * u)
+  {
+    const int dimensions[] = {20,3};  
+    tensor total_dispDU(2, dimensions, 0.0);
+  
+    const Vector &TotDis1  = nd1Ptr->getTrialDisp();
+    const Vector &TotDis2  = nd2Ptr->getTrialDisp();
+    const Vector &TotDis3  = nd3Ptr->getTrialDisp();
+    const Vector &TotDis4  = nd4Ptr->getTrialDisp();
+    const Vector &TotDis5  = nd5Ptr->getTrialDisp();
+    const Vector &TotDis6  = nd6Ptr->getTrialDisp();
+    const Vector &TotDis7  = nd7Ptr->getTrialDisp();
+    const Vector &TotDis8  = nd8Ptr->getTrialDisp();
+    const Vector &TotDis9  = nd9Ptr->getTrialDisp();
+    const Vector &TotDis10 = nd10Ptr->getTrialDisp();
+    const Vector &TotDis11 = nd11Ptr->getTrialDisp();
+    const Vector &TotDis12 = nd12Ptr->getTrialDisp();
+    const Vector &TotDis13 = nd13Ptr->getTrialDisp();
+    const Vector &TotDis14 = nd14Ptr->getTrialDisp();
+    const Vector &TotDis15 = nd15Ptr->getTrialDisp();
+    const Vector &TotDis16 = nd16Ptr->getTrialDisp();
+    const Vector &TotDis17 = nd17Ptr->getTrialDisp();
+    const Vector &TotDis18 = nd18Ptr->getTrialDisp();
+    const Vector &TotDis19 = nd19Ptr->getTrialDisp();
+    const Vector &TotDis20 = nd20Ptr->getTrialDisp();
+
+//  Get last three total displacement for fluid part.
+    total_dispDU.val(1,1)=TotDis1(4);total_dispDU.val(1,2)=TotDis1(5);
+    total_dispDU.val(1,3)=TotDis1(6);
+
+    total_dispDU.val(2,1)=TotDis2(4);total_dispDU.val(2,2)=TotDis2(5);
+    total_dispDU.val(2,3)=TotDis2(6);
+
+    total_dispDU.val(3,1)=TotDis3(4);total_dispDU.val(3,2)=TotDis3(5);
+    total_dispDU.val(3,3)=TotDis3(6);
+
+    total_dispDU.val(4,1)=TotDis4(4);total_dispDU.val(4,2)=TotDis4(5);
+    total_dispDU.val(4,3)=TotDis4(6);
+
+    total_dispDU.val(5,1)=TotDis5(4);total_dispDU.val(5,2)=TotDis5(5);
+    total_dispDU.val(5,3)=TotDis5(6);
+
+    total_dispDU.val(6,1)=TotDis6(4);total_dispDU.val(6,2)=TotDis6(5);
+    total_dispDU.val(6,3)=TotDis6(6);
+
+    total_dispDU.val(7,1)=TotDis7(4);total_dispDU.val(7,2)=TotDis7(5);
+    total_dispDU.val(7,3)=TotDis7(6);
+
+    total_dispDU.val(8,1)=TotDis8(4);total_dispDU.val(8,2)=TotDis8(5);
+    total_dispDU.val(8,3)=TotDis8(6);
+
+
+    total_dispDU.val(9,1)=TotDis9(4);total_dispDU.val(9,2)=TotDis9(5);
+    total_dispDU.val(9,3)=TotDis9(6);
+
+    total_dispDU.val(10,1)=TotDis10(4);total_dispDU.val(10,2)=TotDis10(5);
+    total_dispDU.val(10,3)=TotDis10(6);
+
+    total_dispDU.val(11,1)=TotDis11(4);total_dispDU.val(11,2)=TotDis11(5);
+    total_dispDU.val(11,3)=TotDis11(6);
+
+    total_dispDU.val(12,1)=TotDis12(4);total_dispDU.val(12,2)=TotDis12(5);
+    total_dispDU.val(12,3)=TotDis12(6);
+
+
+    total_dispDU.val(13,1)=TotDis13(4);total_dispDU.val(13,2)=TotDis13(5);
+    total_dispDU.val(13,3)=TotDis13(6);
+
+    total_dispDU.val(14,1)=TotDis14(4);total_dispDU.val(14,2)=TotDis14(5);
+    total_dispDU.val(14,3)=TotDis14(6);
+
+    total_dispDU.val(15,1)=TotDis15(4);total_dispDU.val(15,2)=TotDis15(5);
+    total_dispDU.val(15,3)=TotDis15(6);
+
+    total_dispDU.val(16,1)=TotDis16(4);total_dispDU.val(16,2)=TotDis16(5);
+    total_dispDU.val(16,3)=TotDis16(6);
+
+    total_dispDU.val(17,1)=TotDis17(4);total_dispDU.val(17,2)=TotDis17(5);
+    total_dispDU.val(17,3)=TotDis17(6);
+
+    total_dispDU.val(18,1)=TotDis18(4);total_dispDU.val(18,2)=TotDis18(5);
+    total_dispDU.val(18,3)=TotDis18(6);
+	      
+    total_dispDU.val(19,1)=TotDis19(4);total_dispDU.val(19,2)=TotDis19(5);
+    total_dispDU.val(19,3)=TotDis19(6);		 
+
+    total_dispDU.val(20,1)=TotDis20(4);total_dispDU.val(20,2)=TotDis20(5);
+    total_dispDU.val(20,3)=TotDis20(6);
+
+
+    return total_dispDU;
+}
+
 //====================================================================
-void TwentyNodeBrick_u_p_U::incremental_Update()
+// This function is not used. Just keep here and add another function
+// incremental_UpdateDU for furture use. // Xiaoyan 02/08/2002
+void TwentyNodeBrick_u_p_U::incremental_UpdateDu()
   {
     double r  = 0.0;
     // double rw = 0.0;
@@ -2267,14 +2894,14 @@ void TwentyNodeBrick_u_p_U::incremental_Update()
     
     //double this_one_PP = (matpoint)->operator[](where).IS_Perfect_Plastic();
 
-    int dh_dim[] = {20,3};   //Xiaoyan changed from {20,3} to {8,3}  07/12/00
+    int dh_dim[] = {20,3};   
     tensor dh(2, dh_dim, 0.0);
 
 //    tensor Constitutive( 4, def_dim_4, 0.0);
 
     //    double det_of_Jacobian = 0.0;
 
-    static int disp_dim[] = {20,3}; //Xiaoyan changed from {20,3} to {8,3}  07/12/00
+    static int disp_dim[] = {20,3}; 
     tensor incremental_displacements(2,disp_dim,0.0);
 
     straintensor incremental_strain;
@@ -2292,7 +2919,7 @@ void TwentyNodeBrick_u_p_U::incremental_Update()
     
     ///    stresstensor incremental_stress;
     // tensor of incremental displacements taken from node objects
-    incremental_displacements = incr_disp();
+    incremental_displacements = incr_dispDu();
 
     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
       {
@@ -2415,10 +3042,175 @@ void TwentyNodeBrick_u_p_U::incremental_Update()
       }
   }
 
-//#############################################################################
-void TwentyNodeBrick_u_p_U::set_strain_stress_tensor(FILE *fp, double * u)
+//============================================================================
+void TwentyNodeBrick_u_p_U::incremental_UpdateDU()
   {
-    int dh_dim[] = {20,3};   // Xiaoyan changed from {20,3} to {8,3}
+    double r  = 0.0;
+    // double rw = 0.0;
+    double s  = 0.0;
+    // double sw = 0.0;
+    double t  = 0.0;
+    // double tw = 0.0;
+
+    short where = 0;
+    //,,,,,    double weight = 0.0;
+    
+    //double this_one_PP = (matpoint)->operator[](where).IS_Perfect_Plastic();
+
+    int dh_dim[] = {20,3};   
+    tensor dh(2, dh_dim, 0.0);
+
+//    tensor Constitutive( 4, def_dim_4, 0.0);
+
+    //    double det_of_Jacobian = 0.0;
+
+    static int disp_dim[] = {20,3}; 
+    tensor incremental_displacements(2,disp_dim,0.0);
+
+    straintensor incremental_strain;
+//    straintensor total_strain_at_GP;
+
+    tensor Jacobian;
+    tensor JacobianINV;
+    tensor dhGlobal;
+
+    //....    int number_of_subincrements = 1;
+    //....    double this_one_PP = 1.0; // if set to 0.0 -> perfectly plastic
+    //....                              // if set to 1.0 -> elasto plastic
+
+//    stresstensor final_stress_after_integration;
+    
+    ///    stresstensor incremental_stress;
+    // tensor of incremental displacements taken from node objects
+    incremental_displacements = incr_dispDU();
+
+    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+      {
+        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+        //--        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
+        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+          {
+            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+            //--            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
+            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+            {
+                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+                //--                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
+                // this short routine is supposed to calculate position of
+                // Gauss point from 3D array of short's
+                where =
+                   ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+                // derivatives of local coordiantes with respect to local coordiantes
+                dh = dh_drst_at(r,s,t);
+                // Jacobian tensor ( matrix )
+                Jacobian = Jacobian_3D(dh);
+                //....                Jacobian.print("J");
+                // Inverse of Jacobian tensor ( matrix )
+                JacobianINV = Jacobian_3Dinv(dh);
+                //....                JacobianINV.print("JINV");
+                // determinant of Jacobian tensor ( matrix )
+                //--                det_of_Jacobian  = Jacobian.determinant();
+                //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
+                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                dhGlobal = dh("ij") * JacobianINV("jk");
+                //....                dhGlobal.print("dh","dhGlobal");
+                //weight
+                //                weight = rw * sw * tw * det_of_Jacobian;
+                //::::::   ::printf("\n\nIN THE STIFFNESS TENSOR INTEGRATOR ----**************** where = %d \n", where);
+                //::::::   ::printf(" void TwentyNodeBrick_u_p_U::incremental_Update()\n");
+                //::::::   ::printf(" GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d    --->>>  where = %d \n",
+                //::::::                      GP_c_r,GP_c_s,GP_c_t,where);
+                //::::::   ::printf("WEIGHT = %f", weight);
+                //::::::   ::printf("determinant of Jacobian = %f", determinant_of_Jacobian);
+                //::::::   matpoint[where].report("Gauss Point\n");
+                // incremental straines at this Gauss point
+                // now in Update we know the incremental displacements so let's find
+                // the incremental strain
+                incremental_strain =
+                    (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+                incremental_strain.null_indices();
+                //incremental_strain.reportshort("\n incremental_strain tensor at GAUSS point\n");
+
+                // here comes the final_stress calculation actually on only needs to copy stresses
+                // from the iterative data . . .
+                //(GPstress+where)->reportshortpqtheta("\n stress START GAUSS \n");
+
+		// Getting final_stress_after_integration is  Done inside CDriver on EPState____ZHaohui 
+		//final_stress_after_integration = GPiterative_stress[where];
+		//(matpoint)->operator[](where).kappa_set(final_stress_after_integration,
+                //                                 GPq_ast_iterative[where]);
+                
+		//....         final_stress_after_integration =
+                //....           (matpoint)->operator[](where).FinalStress(*(GPstress+where),
+                //....                                                     incremental_strain,
+                //....                                                     (matpoint)->operator[](where),
+                //....                                                     number_of_subincrements,
+                //....                                                     this_one_PP);
+                //....//final_stress_after_integration.reportshortpqtheta("\n final_stress_after_integration GAUSS \n");
+                // calculate the constitutive tensor
+
+                // We do not need: final_stress_after_integration
+
+	        
+	        //Constitutive =
+                //  (matpoint)->operator[](where).ConstitutiveTensor(final_stress_after_integration,
+                //                                                   *(GPstress+where),
+                //                                                   incremental_strain,
+                //                                                   (matpoint)->operator[](where),
+                //                                                   this_one_PP);
+	        
+		// ZHaohui modified __09-29-2000
+			      		
+	        // Now no EPState  but NDMaterial for each MatPoint
+		//EPState *tmp_eps = (matpoint[where]).getEPS();
+	        //NDMaterial *tmp_ndm = (matpoint[where]).getNDMat();
+
+		//if ( tmp_eps ) { //if there is an EPState for the MatPoint3D
+		//  mmodel->setEPS( *tmp_eps );
+		
+		if ( ! ( (matpoint[where]->matmodel)->setTrialStrainIncr( incremental_strain)) )
+               	   g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::incremental_Update (tag: %d), not converged",
+		 		 this->getTag());
+		//matpoint[where].setEPS( mmodel->getEPS() );
+		//}
+		
+		//else if ( tmp_ndm ) 
+		//  (matpoint[where].p_matmodel)->setTrialStrainIncr( incremental_strain );
+		//else {
+               	//   g3ErrorHandler->fatal("TwentyNodeBrick_u_p_U::incremental_Update (tag: %d), no strain or stress state vars", this->getTag());
+		//   exit(1);
+		//}
+		   	        
+		//Constitutive = trialEPS.getEep();	        
+	        
+		//::::::                   Constitutive.print("C","\n\n C tensor \n");
+	        // this is update of constitutive tensor at this Gauss point
+                
+		// All done in EPState when calling setTrialStrainIncr and converged
+		//GPtangent_E[where].Initialize(Constitutive);
+	        //GPtangent_E[where].print("\n tangent E at GAUSS point \n");
+	        
+                //total_strain_at_GP.Initialize(*(GPstrain+where));
+                //total_strain_at_GP.reportshort("\n total_strain tensor at GAUSS point \n");
+                //total_strain_at_GP = total_strain_at_GP + incremental_strain;
+                //total_strain_at_GP.reportshort("\n total_strain tensor at GAUSS point AFTER\n");
+                //GPstress[where].Initialize(final_stress_after_integration);
+                //GPstress[where].reportshortpqtheta("\n stress at GAUSS point \n");
+                
+		//GPstrain[where].Initialize(total_strain_at_GP);
+                
+		//GPstrain[where].reportshort("\n strain at GAUSS point \n");
+            }
+          }
+      }
+  }
+
+
+//#############################################################################
+// This function is not called now. Keep here for future use.  Xiaoyan 02/108/2002
+void TwentyNodeBrick_u_p_U::set_strain_stress_tensorDu(FILE *fp, double * u)
+  {
+    int dh_dim[] = {20,3};   
     tensor dh(2, dh_dim, 0.0);
 
 //    tensor Constitutive( 4, def_dim_4, 0.0);
@@ -2438,10 +3230,10 @@ void TwentyNodeBrick_u_p_U::set_strain_stress_tensor(FILE *fp, double * u)
     tensor dhGlobal;
 
 
-    static int disp_dim[] = {20,3};    // Xiaoyan changed from {20,3} to {8,3}
+    static int disp_dim[] = {20,3};    
     tensor total_displacements(2,disp_dim,0.0); //
 
-    total_displacements = total_disp(fp, u);
+    total_displacements = total_dispDu(fp, u);
 
     ::printf("\n  displacement(x-y-z) at GAUSS pt %d \n\n", where+1);
     for (int ii=1; ii<=8;ii++)
@@ -2505,6 +3297,96 @@ void TwentyNodeBrick_u_p_U::set_strain_stress_tensor(FILE *fp, double * u)
 
 ////#############################################################################
 
+//#############################################################################
+// This function is not called now. Keep here for future use.  Xiaoyan 02/108/2002
+void TwentyNodeBrick_u_p_U::set_strain_stress_tensorDU(FILE *fp, double * u)
+  {
+    int dh_dim[] = {20,3};   
+    tensor dh(2, dh_dim, 0.0);
+
+//    tensor Constitutive( 4, def_dim_4, 0.0);
+    tensor Constitutive;
+    double r  = 0.0;
+    double s  = 0.0;
+    double t  = 0.0;
+    int where = 0;
+
+    double det_of_Jacobian;
+
+    straintensor strain;
+    stresstensor stress;
+
+    tensor Jacobian;
+    tensor JacobianINV;
+    tensor dhGlobal;
+
+
+    static int disp_dim[] = {20,3};    
+    tensor total_displacements(2,disp_dim,0.0); //
+
+    total_displacements = total_dispDU(fp, u);
+
+    ::printf("\n  displacement(x-y-z) at GAUSS pt %d \n\n", where+1);
+    for (int ii=1; ii<=8;ii++)
+     {
+      ::printf("Global# %d Local#%d  %+0.5e %+0.5e %+0.5e\n",
+                     //G_N_numbs[ii-1], 
+		     connectedExternalNodes(ii-1),
+		     ii,total_displacements.val(ii,1),
+        	     total_displacements.val(ii,2),
+		     total_displacements.val(ii,3));
+     }							     		 
+    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+      {
+        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+          {
+            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+              {
+                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+                // this short routine is supposed to calculate position of
+                // Gauss point from 3D array of short's
+                where =
+                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+                // derivatives of local coordinates with respect to local coordinates
+                dh = dh_drst_at(r,s,t);
+                // Jacobian tensor ( matrix )
+                Jacobian = Jacobian_3D(dh);
+                // Inverse of Jacobian tensor ( matrix )
+                JacobianINV = Jacobian_3Dinv(dh);
+                // determinant of Jacobian tensor ( matrix )
+                det_of_Jacobian  = Jacobian.determinant();
+                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                dhGlobal = dh("ij") * JacobianINV("jk");
+                //weight
+                // straines at this Gauss point from displacement
+                strain = (dhGlobal("ib")*total_displacements("ia")).symmetrize11();
+                strain.null_indices();
+                // here comes the final_stress calculation
+                // at this Gauss point.
+
+                //Constitutive =  GPtangent_E[where];
+                //Constitutive =  (matpoint->getEPS() )->getEep();
+                // if set total displ, then it should be elstic material
+		Constitutive =  ( matpoint[where]->matmodel)->getTangentTensor();
+
+       		stress = Constitutive("ijkl") * strain("kl");   //<<<<<<<<<<<<<<<
+                stress.null_indices();
+
+                ::printf("\n  strain tensor at GAUSS point %d \n", where+1);
+                strain.reportshort("");
+                ::printf("\n  stress tensor at GAUSS point %d \n", where+1);
+                stress.reportshort("");
+                
+															 
+              }
+          }
+      }
+  }
+
+
+////#############################################################################
 
 ////#############################################################################
 TwentyNodeBrick_u_p_U & TwentyNodeBrick_u_p_U::operator[](int subscript)
@@ -2929,20 +3811,21 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 	const Vector &Raccel18 = nd18Ptr->getRV(accel);
 	const Vector &Raccel19 = nd19Ptr->getRV(accel);
 	const Vector &Raccel20 = nd20Ptr->getRV(accel);
-
-    if (3 != Raccel1.Size()  || 3 != Raccel2.Size()  || 3 != Raccel3.Size()  || 3 != Raccel4.Size() ||
-        3 != Raccel5.Size()  || 3 != Raccel6.Size()  || 3 != Raccel7.Size()  || 3 != Raccel8.Size() ||
-        3 != Raccel9.Size()  || 3 != Raccel10.Size() || 3 != Raccel11.Size() || 3 != Raccel12.Size()||
-        3 != Raccel13.Size() || 3 != Raccel14.Size() || 3 != Raccel15.Size() || 3 != Raccel16.Size()||
-        3 != Raccel17.Size() || 3 != Raccel18.Size() || 3 != Raccel19.Size() || 3 != Raccel20.Size()   ){
+// change the size of Raccel??.Size() to 7   Xiaoyan 02/08/2002
+    if (7 != Raccel1.Size()  || 7 != Raccel2.Size()  || 7 != Raccel7.Size()  || 7 != Raccel4.Size() ||
+        7 != Raccel5.Size()  || 7 != Raccel6.Size()  || 7 != Raccel7.Size()  || 7 != Raccel8.Size() ||
+        7 != Raccel9.Size()  || 7 != Raccel10.Size() || 7 != Raccel11.Size() || 7 != Raccel12.Size()||
+        7 != Raccel17.Size() || 7 != Raccel14.Size() || 7 != Raccel15.Size() || 7 != Raccel16.Size()||
+        7 != Raccel17.Size() || 7 != Raccel18.Size() || 7 != Raccel19.Size() || 7 != Raccel20.Size()   ){
 	// Xiaoyan changed 2 to 3 and added Racce15-18  09/27/00
-		g3ErrorHandler->warning("TwentyNodeBrick::addInertiaLoadToUnbalance %s\n",
+		g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance %s\n",
 				"matrix and vector sizes are incompatable");
 		return -1;
     }
 
-	static Vector ra(60);  // Changed form 8 to 24(3*8)  Xiaoyan 09/27/00
+	static Vector ra(140);  // change from ra(60) to ra(140)  Xiaoyan 02/01/02
 
+// Acceleration for solid part
 	ra( 0) = Raccel1(0);
 	ra( 1) = Raccel1(1);
 	ra( 2) = Raccel1(2);
@@ -3003,6 +3886,67 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 	ra(57) = Raccel20(0);
 	ra(58) = Raccel20(1);
 	ra(59) = Raccel20(2);
+// Acceleration for fluid part
+	ra( 80) = Raccel1(4);
+	ra( 81) = Raccel1(5);
+	ra( 82) = Raccel1(6);
+	ra( 83) = Raccel2(4);
+	ra( 84) = Raccel2(5);
+	ra( 85) = Raccel2(6);
+	ra( 86) = Raccel3(4);
+	ra( 87) = Raccel3(5);
+	ra( 88) = Raccel3(6);
+	ra( 89) = Raccel4(4);
+	ra(90) = Raccel4(5);
+	ra(91) = Raccel4(6);
+    	ra(92) = Raccel5(4);
+	ra(93) = Raccel5(5);
+	ra(94) = Raccel5(6);
+	ra(95) = Raccel6(4);
+	ra(96) = Raccel6(5);
+	ra(97) = Raccel6(6);
+	ra(98) = Raccel7(4);
+	ra(99) = Raccel7(5);
+	ra(100) = Raccel7(6);
+	ra(101) = Raccel8(4);
+	ra(102) = Raccel8(5);
+	ra(103) = Raccel8(6);
+	ra(104) = Raccel9(4);
+ 	ra(105) = Raccel9(5);
+	ra(106) = Raccel9(6);
+	ra(107) = Raccel10(4);
+	ra(108) = Raccel10(5);
+	ra(109) = Raccel10(6);
+	ra(110) = Raccel11(4);
+	ra(111) = Raccel11(5);
+	ra(112) = Raccel11(6);
+	ra(113) = Raccel12(4);
+	ra(114) = Raccel12(5);
+	ra(115) = Raccel12(6);
+	ra(116) = Raccel13(4);
+	ra(117) = Raccel13(5);
+	ra(118) = Raccel13(6);
+	ra(119) = Raccel14(4);
+	ra(120) = Raccel14(5);
+	ra(121) = Raccel14(6);
+	ra(122) = Raccel15(4);
+	ra(123) = Raccel15(5);
+	ra(124) = Raccel15(6);
+	ra(125) = Raccel16(4);
+	ra(126) = Raccel16(5);
+	ra(127) = Raccel16(6);
+	ra(128) = Raccel17(4);
+	ra(129) = Raccel17(5);
+	ra(130) = Raccel17(6);
+	ra(131) = Raccel18(4);
+	ra(132) = Raccel18(5);
+	ra(133) = Raccel18(6);
+	ra(134) = Raccel19(4);
+	ra(135) = Raccel19(5);
+	ra(136) = Raccel19(6);
+	ra(137) = Raccel20(4);
+	ra(138) = Raccel20(5);
+	ra(139) = Raccel20(6);
 
 
     // Want to add ( - fact * M R * accel ) to unbalance
@@ -3016,84 +3960,86 @@ int TwentyNodeBrick_u_p_U::addInertiaLoadToUnbalance(const Vector &accel)
 
     //cerr << " addInerti... column_mass " << column_mass << endln;
 
-    for (int i = 0; i < nodes_in_brick*3; i++)
-		Q(i) += -M(i,i)*ra(i);
-
+    for (int i = 0; i < nodes_in_brick*7; i++)
+	   {
+		Q(i)    += -M(i,i)*ra(i);
+	   }
     return 0;
 }
 
 //=============================================================================
 const Vector TwentyNodeBrick_u_p_U::FormEquiBodyForce()
 {
-    Vector bforce(60);  
+    Vector bforce(140);  
 
     // Check for a quick return
     //cerr << "rho " << rho << endln;
     if (rho == 0.0) 
     	return bforce;
 
-    Vector ba(60);  
-
-    ba( 0) = bf(0);
-    ba( 1) = bf(1);
-    ba( 2) = bf(2);
-    ba( 3) = bf(0);
-    ba( 4) = bf(1);
-    ba( 5) = bf(2);
-    ba( 6) = bf(0);
-    ba( 7) = bf(1);
-    ba( 8) = bf(2);
-    ba( 9) = bf(0);
-    ba(10) = bf(1);
-    ba(11) = bf(2);
-    ba(15) = bf(0);
-    ba(13) = bf(1);
-    ba(14) = bf(2);
-    ba(15) = bf(0);
-    ba(16) = bf(1);
-    ba(17) = bf(2);
-    ba(18) = bf(0);
-    ba(19) = bf(1);
-    ba(20) = bf(2);
-    ba(21) = bf(0);
-    ba(22) = bf(1);
-    ba(23) = bf(2);
-    ba(24) = bf(0);
-    ba(25) = bf(1);
-    ba(26) = bf(2);
-    ba(27) = bf(0);
-    ba(28) = bf(1);
-    ba(29) = bf(2);
-    ba(30) = bf(0);
-    ba(31) = bf(1);
-    ba(32) = bf(2);
-    ba(33) = bf(0);
-    ba(34) = bf(1);
-    ba(35) = bf(2);
-    ba(36) = bf(0);
-    ba(37) = bf(1);
-    ba(38) = bf(2);
-    ba(39) = bf(0);
-    ba(40) = bf(1);
-    ba(41) = bf(2);
-    ba(42) = bf(0);
-    ba(43) = bf(1);
-    ba(44) = bf(2);
-    ba(45) = bf(0);
-    ba(46) = bf(1);
-    ba(47) = bf(2);
-    ba(48) = bf(0);
-    ba(49) = bf(1);
-    ba(50) = bf(2);
-    ba(51) = bf(0);
-    ba(52) = bf(1);
-    ba(53) = bf(2);
-    ba(54) = bf(0);
-    ba(55) = bf(1);
-    ba(56) = bf(2);
-    ba(57) = bf(0);
-    ba(58) = bf(1);
-    ba(59) = bf(2);
+    Vector ba(140);  
+// The body force(gravity g) are same for solid part and fluid part
+//     Solid part         Fluid part 
+    ba( 0) = bf(0);    ba(80)  = bf(0);
+    ba( 1) = bf(1);    ba(81)  = bf(1);
+    ba( 2) = bf(2);    ba(82)  = bf(2);
+    ba( 3) = bf(0);    ba(83)  = bf(0);
+    ba( 4) = bf(1);    ba(84)  = bf(1);
+    ba( 5) = bf(2);    ba(85)  = bf(2);
+    ba( 6) = bf(0);    ba(86)  = bf(0);
+    ba( 7) = bf(1);    ba(87)  = bf(1);
+    ba( 8) = bf(2);    ba(88)  = bf(2);
+    ba( 9) = bf(0);    ba(89)  = bf(0);
+    ba(10) = bf(1);    ba(90)  = bf(1);
+    ba(11) = bf(2);    ba(91)  = bf(2);
+    ba(15) = bf(0);    ba(92)  = bf(0);
+    ba(13) = bf(1);    ba(93)  = bf(1);
+    ba(14) = bf(2);    ba(94)  = bf(2);
+    ba(15) = bf(0);    ba(95)  = bf(0);
+    ba(16) = bf(1);    ba(96)  = bf(1);
+    ba(17) = bf(2);    ba(97)  = bf(2);
+    ba(18) = bf(0);    ba(98)  = bf(0);
+    ba(19) = bf(1);    ba(99)  = bf(1);
+    ba(20) = bf(2);    ba(100) = bf(2);
+    ba(21) = bf(0);    ba(101)  = bf(0);
+    ba(22) = bf(1);    ba(102)  = bf(1);
+    ba(23) = bf(2);    ba(103)  = bf(2);
+    ba(24) = bf(0);    ba(104)  = bf(0);
+    ba(25) = bf(1);    ba(105)  = bf(1);
+    ba(26) = bf(2);    ba(106)  = bf(2);
+    ba(27) = bf(0);    ba(107)  = bf(0);
+    ba(28) = bf(1);    ba(108)  = bf(1);
+    ba(29) = bf(2);    ba(109)  = bf(2);
+    ba(30) = bf(0);    ba(110)  = bf(0);
+    ba(31) = bf(1);    ba(111)  = bf(1);
+    ba(32) = bf(2);    ba(112)  = bf(2);
+    ba(33) = bf(0);    ba(113)  = bf(0);
+    ba(34) = bf(1);    ba(114)  = bf(1);
+    ba(35) = bf(2);    ba(115)  = bf(2);
+    ba(36) = bf(0);    ba(116)  = bf(0);
+    ba(37) = bf(1);    ba(117)  = bf(1);
+    ba(38) = bf(2);    ba(118)  = bf(2);
+    ba(39) = bf(0);    ba(119)  = bf(0);
+    ba(40) = bf(1);    ba(120)  = bf(1);
+    ba(41) = bf(2);    ba(121)  = bf(2);
+    ba(42) = bf(0);    ba(122)  = bf(0);
+    ba(43) = bf(1);    ba(123)  = bf(1);
+    ba(44) = bf(2);    ba(124)  = bf(2);
+    ba(45) = bf(0);    ba(125)  = bf(0);
+    ba(46) = bf(1);    ba(126)  = bf(1);
+    ba(47) = bf(2);    ba(127)  = bf(2);
+    ba(48) = bf(0);    ba(128)  = bf(0);
+    ba(49) = bf(1);    ba(129)  = bf(1);
+    ba(50) = bf(2);    ba(130)  = bf(2);
+    ba(51) = bf(0);    ba(131)  = bf(0);
+    ba(52) = bf(1);    ba(132)  = bf(1);
+    ba(53) = bf(2);    ba(133)  = bf(2);
+    ba(54) = bf(0);    ba(134)  = bf(0);
+    ba(55) = bf(1);    ba(135)  = bf(1);
+    ba(56) = bf(2);    ba(136)  = bf(2);
+    ba(57) = bf(0);    ba(137)  = bf(0);
+    ba(58) = bf(1);    ba(138)  = bf(1);
+    ba(59) = bf(2);    ba(139)  = bf(2);
 
     //Form equivalent body force
     bforce.addMatrixVector(0.0, M, ba, 1.0);
@@ -3156,22 +4102,32 @@ const Vector TwentyNodeBrick_u_p_U::FormEquiBodyForce()
 //=============================================================================
 const Vector &TwentyNodeBrick_u_p_U::getResistingForce () 
 {     
-    int force_dim[] = {20,3}; 
-    tensor nodalforces(2,force_dim,0.0);
-     
-    nodalforces = nodal_forces();
-
+    int force_dim[] = {20,7}; 
+    static tensor nodalforces(2,force_dim,0.0);   // The index of tensor starts from 1
+     					   // See SRC/nDarray/BJtensor.cpp
+    nodalforces = nodal_forces();          // The index of Vector starts from 0
+				           // SRC/matrix/Vector.h  Xiaoyan 02/10/20002
     //converting nodalforce tensor to vector
     for (int i = 0; i<nodes_in_brick; i++)
-      for (int j = 0; j < 3; j++)
-	p(i *3 + j) = nodalforces.cval(i+1, j+1);
-
+      for (int j = 0; j < 7; j++)
+	p(i *7 + j) = nodalforces.cval(i+1, j+1);    // p--Vector--start 0
+						     // nodalforces--tensor start 1
     //cerr << "p" << p;
     //cerr << "Q" << Q;
-
+   // for(int i=0; i<140; i++)
+   // {
+   //   printf("p(%d) = %lf    ",i, p(i));
+   //   printf("Q(%d) = %lf    ",i, Q(i));
+   //   p(i)=p(i)-Q(i);
+   //   printf("           --->>>  p(%d) = %lf    ",i, p(i));
+   //   printf("p(%d)-Q(%d) = %lf   \n ",i, i, p(i));
+   //
+   // }
     p = p - Q;
-
-    //cerr << "p-Q" << p;
+  //  for(int i=0; i<140; i++)
+  //    printf("p(%d) = %lf   ",i, p(i));   // check
+  //  //cerr << "p-Q" << p;
+  //  fflush(stdout);
     return p;
 }
 
@@ -3185,69 +4141,70 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForceIncInertia ()
 	//cerr << "Node555 trialDisp " << nd1Ptr->getTrialDisp();
 
 	const Vector &accel1 = nd1Ptr->getTrialAccel();
-        //cout << "\nnode accel " << nd1Ptr->getTag() << " x " << accel1(0) <<" y "<< accel1(1) << " z "<< accel1(2) << endln;
+        //cout << "\nnode accel " << nd1Ptr->getTag() << " ux " << accel1(0) <<" uy "<< accel1(1) << " uz "<< accel1(2) << endln;
 
 	const Vector &accel2 = nd2Ptr->getTrialAccel();
-        //cout << "node accel " << nd2Ptr->getTag() << " x " << accel2(0) <<" y "<< accel2(1) << " z "<< accel2(2) << endln;
+        //cout << "node accel " << nd2Ptr->getTag() << " ux " << accel2(0) <<" uy "<< accel2(1) << " uz "<< accel2(2) << endln;
 							               		    
 	const Vector &accel3 = nd3Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd3Ptr->getTag() << " x " << accel3(0) <<" y "<< accel3(1) << " z "<< accel3(2) << endln;
+        //cout << "node accel " << nd3Ptr->getTag() << " ux " << accel3(0) <<" uy "<< accel3(1) << " uz "<< accel3(2) << endln;
 							               		    
 	const Vector &accel4 = nd4Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd4Ptr->getTag() << " x " << accel4(0) <<" y "<< accel4(1) << " z "<< accel4(2) << endln;
+        //cout << "node accel " << nd4Ptr->getTag() << " ux " << accel4(0) <<" uy "<< accel4(1) << " uz "<< accel4(2) << endln;
 							               		    
         // Xiaoyan added the following four 09/27/00
 	const Vector &accel5 = nd5Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd5Ptr->getTag() << " x " << accel5(0) <<" y "<< accel5(1) << " z "<< accel5(2) << endln;
+        //cout << "node accel " << nd5Ptr->getTag() << " ux " << accel5(0) <<" uy "<< accel5(1) << " uz "<< accel5(2) << endln;
 							               		    
 	const Vector &accel6 = nd6Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd6Ptr->getTag() << " x " << accel6(0) <<" y "<< accel6(1) << " z "<< accel6(2) << endln;
+        //cout << "node accel " << nd6Ptr->getTag() << " ux " << accel6(0) <<" uy "<< accel6(1) << " uz "<< accel6(2) << endln;
 							               		    
 	const Vector &accel7 = nd7Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd7Ptr->getTag() << " x " << accel7(0) <<" y "<< accel7(1) << " z "<< accel7(2) << endln;
+        //cout << "node accel " << nd7Ptr->getTag() << " ux " << accel7(0) <<" uy "<< accel7(1) << " uz "<< accel7(2) << endln;
 							               		    
 	const Vector &accel8 = nd8Ptr->getTrialAccel();	               		    
-        //cout << "node accel " << nd8Ptr->getTag() << " x " << accel8(0) <<" y "<< accel8(1) << " z "<< accel8(2) << endln;
+        //cout << "node accel " << nd8Ptr->getTag() << " ux " << accel8(0) <<" uy "<< accel8(1) << " uz "<< accel8(2) << endln;
 	
 	const Vector &accel9 = nd9Ptr->getTrialAccel();
-        //cout << "node accel " << nd9Ptr->getTag() << " x " << accel9(0) <<" y "<< accel9(1) << " z "<< accel9(2) << endln;
+        //cout << "node accel " << nd9Ptr->getTag() << " ux " << accel9(0) <<" uy "<< accel9(1) << " uz "<< accel9(2) << endln;
 
 	const Vector &accel10 = nd10Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
+        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel11 = nd11Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
+        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel12 = nd12Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
+        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel13 = nd13Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
+        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel14 = nd14Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
+        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel15 = nd15Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
+        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel16 = nd16Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
+        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel17 = nd17Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
+        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel18 = nd18Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
+        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel19 = nd19Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
+        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 	const Vector &accel20 = nd20Ptr->getTrialAccel();
-        //cout << "node accel " << nd10Ptr->getTag() << " x " << accel10(0) <<" y "<< accel10(1) << " z "<< accel10(2) << endln;
+        //cout << "node accel " << nd10Ptr->getTag() << " ux " << accel10(0) <<" uy "<< accel10(1) << " uz "<< accel10(2) << endln;
 
 
-	static Vector a(60);  // originally 8
+	static Vector a(140);  // originally 8
 
+// Acceleration for solid part	      Xioayan 02/08/2002
 	a( 0) = accel1(0);
 	a( 1) = accel1(1);
 	a( 2) = accel1(2);
@@ -3308,7 +4265,67 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForceIncInertia ()
 	a(57) = accel20(0);
 	a(58) = accel20(1);
 	a(59) = accel20(2);
-
+// Acceleration for fluid part	    Xioayan 02/08/2002
+	a( 80) = accel1(4);
+	a( 81) = accel1(5);
+	a( 82) = accel1(6);
+	a( 83) = accel2(4);
+	a( 84) = accel2(5);
+	a( 85) = accel2(6);
+	a( 86) = accel3(4);
+	a( 87) = accel3(5);
+	a( 88) = accel3(6);
+	a( 89) = accel4(4);
+	a(90) = accel4(5);
+	a(91) = accel4(6);
+    	a(92) = accel5(4);
+	a(93) = accel5(5);
+	a(94) = accel5(6);
+	a(95) = accel6(4);
+	a(96) = accel6(5);
+	a(97) = accel6(6);
+	a(98) = accel7(4);
+	a(99) = accel7(5);
+	a(100) = accel7(6);
+	a(101) = accel8(4);
+	a(102) = accel8(5);
+	a(103) = accel8(6);
+	a(104) = accel9(4);
+ 	a(105) = accel9(5);
+	a(106) = accel9(6);
+	a(107) = accel10(4);
+	a(108) = accel10(5);
+	a(109) = accel10(6);
+	a(110) = accel11(4);
+	a(111) = accel11(5);
+	a(112) = accel11(6);
+	a(113) = accel12(4);
+	a(114) = accel12(5);
+	a(115) = accel12(6);
+	a(116) = accel13(4);
+	a(117) = accel13(5);
+	a(118) = accel13(6);
+	a(119) = accel14(4);
+	a(120) = accel14(5);
+	a(121) = accel14(6);
+	a(122) = accel15(4);
+	a(123) = accel15(5);
+	a(124) = accel15(6);
+	a(125) = accel16(4);
+	a(126) = accel16(5);
+	a(127) = accel16(6);
+	a(128) = accel17(4);
+	a(129) = accel17(5);
+	a(130) = accel17(6);
+	a(131) = accel18(4);
+	a(132) = accel18(5);
+	a(133) = accel18(6);
+	a(134) = accel19(4);
+	a(135) = accel19(5);
+	a(136) = accel19(6);
+	a(137) = accel20(4);
+	a(138) = accel20(5);
+	a(139) = accel20(6);
  
 		   		   
 	// Compute the current resisting force
@@ -3323,9 +4340,9 @@ const Vector &TwentyNodeBrick_u_p_U::getResistingForceIncInertia ()
         //   column_mass += M(1,i);
         //column_mass = column_mass/3.0;
 
-	for (int i = 0; i < 60; i++)
+	for (int i = 0; i < 140; i++)
 	{   
-	   p(i) += M(i,i)*a(i);
+	   p(i ) += M(i,i)*a(i);
 	   //cout << " " << M(i, i);
 	}
 	//cout << endln;
@@ -3448,12 +4465,12 @@ int * TwentyNodeBrick_u_p_U::get_LM()
 
 
 ////#############################################################################
-// returns nodal forces for given stress field in an element
-tensor TwentyNodeBrick_u_p_U::nodal_forces()
+// returns nodal forces of solid part in an element
+tensor TwentyNodeBrick_u_p_U::nodal_forcesFu()
   {
-    int force_dim[] = {20,3};  // Xiaoyan changed from {20,3 to {8,3} for 8 nodes
+    int force_dim[] = {20,3};  
 
-    tensor nodal_forces(2,force_dim,0.0);
+    tensor nodal_forcesFu(2,force_dim,0.0);
 
     double r  = 0.0;
     double rw = 0.0;
@@ -3465,7 +4482,7 @@ tensor TwentyNodeBrick_u_p_U::nodal_forces()
     short where = 0;
     double weight = 0.0;
 
-    int dh_dim[] = {20,3};  // Xiaoyan changed from {20,3 to {8,3} for 8 nodes
+    int dh_dim[] = {20,3};  
 
     tensor dh(2, dh_dim, 0.0);
 
@@ -3475,10 +4492,10 @@ tensor TwentyNodeBrick_u_p_U::nodal_forces()
 
     straintensor incremental_strain;
 
-    static int disp_dim[] = {20,3};   // Xiaoyan changed from {20,3} to {8,3}
+    static int disp_dim[] = {20,3};   
     tensor incremental_displacements(2,disp_dim,0.0); // \Delta u
 
-    incremental_displacements = incr_disp();
+    incremental_displacements = incr_dispDu();
 
     tensor Jacobian;
     tensor JacobianINV;
@@ -3524,63 +4541,7 @@ tensor TwentyNodeBrick_u_p_U::nodal_forces()
 
                 //weight
                 weight = rw * sw * tw * det_of_Jacobian;
-                //..::printf("\n\nIN THE nodal forces ----**************** where = %d \n", where);
-                //..::printf("                    GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
-                //..                           GP_c_r,GP_c_s,GP_c_t);
-                //..::printf("WEIGHT = %f", weight);
-                //..::printf("determinant of Jacobian = %f", det_of_Jacobian);
-                //..matpoint[where].report("Gauss Point\n");
-
-                //..   // samo jos odredi ovaj tensor E i to za svaku gauss tacku drugaciji !!!!!!!!!!!!
-                //..   ovde negde bi trebalo da se na osnovu inkrementalnih pomeranja
-                //..   nadje inkrementalna deformacija ( strain_increment ) pa sa njom dalje:
-                //..
-                //// tensor of incremental displacements taken from node objects
-                //                incremental_displacements = incr_disp();
-                //
-                //// incremental straines at this Gauss point
-                //                incremental_strain =
-                //                  (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
-                //
-                //                incremental_strain.null_indices();
-                ////incremental_strain.reportshort("\n incremental_strain tensor at GAUSS point\n");
-                //
-                ////                integr_type = (matpoint)->operator[](where).integration_type();
-                ////                if ( !strcmp(integr_type,"BakcwardEuler")
-
-                //..   dakle ovde posalji strain_increment jer se stari stress cuva u okviru svake
-                //..   Gauss tacke a samo saljes strain_increment koji ce da se prenese
-                //..   u integracionu rutinu pa ce ta da vrati krajnji napon i onda moze da
-                //..   se pravi ConstitutiveStiffnessTensor.
-                //.. Ustvari posalji sve sto imas ( incremental_strain, start_stress,
-                //.. number_of_subincrements . . . u ovu Constitutive_tensor funkciju
-                //.. pa ona nek ide, u zavisnosti od modela koji se koristi i neka
-                //.. onda tamo u svakoj posebnoj modelskoj funkciji vrati sta treba
-                //.. ( recimo Elastic odmah vraca Eelastic a recimo MRS_Lade prvo
-                //.. pita koji nacin integracije da koristi pa onda u zvisnosti od toga
-                //.. zove funkcuju koja integrali za taj algoritam ( ForwardEuler, BakcwardEuler,
-                //.. SemiBackwardEuler, . . . ) i onda kada funkcija vrati napon onda
-                //.. se opet pita koji je tip integracije bio u pitanju pa pravi odgovarajuci
-                //.. ConstitutiveTensor i vraca ga nazad!
-
-                //                   stress_at_GP = (GPstress)->operator[](where);
-                //stress_at_GP = GPstress[where];
-
-	        //EPState *tmp_eps = (matpoint[where]->matmodel)->getEPS();
-		//stress_at_GP = tmp_eps->getStress();
-		//cout << "tmp_eps" << (*tmp_eps);
-
-	        //NDMaterial *tmp_ndm = (matpoint[where]).getNDMat();
-		
-		//if ( tmp_eps ) {     //Elasto-plastic case
- 		
-		//stress_at_GP = (matpoint[where].matmodel->getEPS())->getStress();
-		
-		//   EPState *tmp_eps = (matpoint[where]->matmodel)->getEPS();
-		//   stress_at_GP = tmp_eps->getStress();
-
-		
-		
+                
 		incremental_strain =
                      (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
 //		if (where == 0)
@@ -3599,40 +4560,10 @@ tensor TwentyNodeBrick_u_p_U::nodal_forces()
 //		if (strcmp(matpoint[where]->matmodel->getType(),"Template3Dep") != 0)
 		   stress_at_GP = matpoint[where]->getStressTensor();
 
-//				 stress_at_GP.report("PROBLEM");
-//				 getchar();
-
-//		else
-//		{
-//	           //Some thing funny happened when getting stress directly from matpoint[where], i have to do it this way!
-//		   EPState *tmp_eps = ((Template3Dep *)(matpoint[where]->matmodel))->getEPS();
-//		   stress_at_GP = tmp_eps->getStress();
-//		   //delete tmp_eps;
-//	       	}
-		
-           	//double  p = stress_at_GP.p_hydrostatic();
-                //if ( p < 0.0 ) 
-	        //{
-	        //  cerr << getTag();
-	        //  cerr << " ***p  =    " << p << endln;
-	        //}
-
-		//cerr << " nodal_force ::: stress_at_GP " << stress_at_GP << endln;
-		
-		//}
-		//else if ( tmp_ndm ) { //Elastic case
-             	//    stress_at_GP = (matpoint[where].getNDMat())->getStressTensor();
-		//}
-		//else {
-               	//   g3ErrorHandler->fatal("TwentyNodeBrick_u_p_U::nodal_forces (tag: %d), could not getStress", this->getTag());
-		//   exit(1);
-		//}
-
-                //stress_at_GP.report("\n stress_at_GPtensor at GAUSS point for nodal forces \n");
 
                 // nodal forces See Zienkievicz part 1 pp 108
-                nodal_forces =
-                     nodal_forces + dhGlobal("ib")*stress_at_GP("ab")*weight;
+                nodal_forcesFu =
+                     nodal_forcesFu + dhGlobal("ib")*stress_at_GP("ab")*weight;
                 //nodal_forces.print("nf","\n\n Nodal Forces \n");
  
               }
@@ -3641,17 +4572,17 @@ tensor TwentyNodeBrick_u_p_U::nodal_forces()
 
     //cout << "\n element no. " << getTag() << endln;
     //nodal_forces.print("nf","\n Nodal Forces \n");
-    return nodal_forces;
+    return nodal_forcesFu;
 
   }
-
 ////#############################################################################
-// returns nodal forces for given ITERATIVE stress field in an element
-tensor TwentyNodeBrick_u_p_U::iterative_nodal_forces()
+// returns nodal forces of fluid part in an element
+tensor TwentyNodeBrick_u_p_U::nodal_forcesFU()
   {
-    int force_dim[] = {20,3}; // Xiaoyan changed from {20,3 to {8,3} for 8 nodes
+ // This is a function for a generelized force for the fluid component...  
+    int force_dim[] = {20,3};  
 
-    tensor nodal_forces(2,force_dim,0.0);
+    tensor nodal_forcesFU(2,force_dim,0.0);
 
     double r  = 0.0;
     double rw = 0.0;
@@ -3663,7 +4594,147 @@ tensor TwentyNodeBrick_u_p_U::iterative_nodal_forces()
     short where = 0;
     double weight = 0.0;
 
-    int dh_dim[] = {20,3};   // Xiaoyan changed from {20,3 to {8,3} for 8 nodes
+    int dh_dim[] = {20,3};  
+
+    tensor dh(2, dh_dim, 0.0);
+
+    stresstensor stress_at_GP(0.0);
+
+    double det_of_Jacobian = 0.0;
+
+    straintensor incremental_strain;
+
+    static int disp_dim[] = {20,3};   
+    tensor incremental_displacements(2,disp_dim,0.0); // \Delta U
+
+    incremental_displacements = incr_dispDU();
+
+    tensor Jacobian;
+    tensor JacobianINV;
+    tensor dhGlobal;
+
+    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+      {
+        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
+
+        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+          {
+            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
+
+            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+              {
+                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
+
+                // this short routine is supposed to calculate position of
+                // Gauss point from 3D array of short's
+                where =
+                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+
+                // derivatives of local coordiantes with respect to local coordiantes
+                dh = dh_drst_at(r,s,t);
+
+                // Jacobian tensor ( matrix )
+                Jacobian = Jacobian_3D(dh);
+                //....                Jacobian.print("J");
+
+                // Inverse of Jacobian tensor ( matrix )
+                JacobianINV = Jacobian_3Dinv(dh);
+                //....                JacobianINV.print("JINV");
+
+                // determinant of Jacobian tensor ( matrix )
+                det_of_Jacobian  = Jacobian.determinant();
+                //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
+
+                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                dhGlobal = dh("ij") * JacobianINV("jk");
+
+                //weight
+                weight = rw * sw * tw * det_of_Jacobian;
+                
+		incremental_strain =
+                     (dhGlobal("ib")*incremental_displacements("ia")).symmetrize11();
+//		if (where == 0)
+//   		//cout << " In nodal_force delta_incremental_strain tag "<< getTag() <<"  " <<incremental_strain << endln;
+////		cout << " el tag = "<< getTag();
+//		
+		int err = ( matpoint[where]->matmodel )->setTrialStrainIncr( incremental_strain);
+		if ( err)
+               	   g3ErrorHandler->warning("TwentyNodeBrick_u_p_U::getStiffnessTensor (tag: %d), not converged",
+		    		 this->getTag());
+
+
+
+		//char *test = matpoint[where]->matmodel->getType();
+		// fmk - changing if so if into else block must be Template3Dep
+//		if (strcmp(matpoint[where]->matmodel->getType(),"Template3Dep") != 0)
+		   stress_at_GP = matpoint[where]->getStressTensor();
+
+
+                // nodal forces See Zienkievicz part 1 pp 108
+                nodal_forcesFU =
+                     nodal_forcesFU + dhGlobal("ib")*stress_at_GP("ab")*weight;
+                //nodal_forces.print("nf","\n\n Nodal Forces \n");
+ 
+              }
+          }
+      }
+
+    //cout << "\n element no. " << getTag() << endln;
+    //nodal_forces.print("nf","\n Nodal Forces \n");
+    return nodal_forcesFU;
+
+  }
+////#############################################################################
+// returns nodal forces for given stress field in an element
+tensor TwentyNodeBrick_u_p_U::nodal_forces()
+  {
+    int force_dim[] = {20,7};  
+
+    tensor nodalForceFu = nodal_forcesFu();
+    tensor nodalForceFU = nodal_forcesFU();
+
+    tensor nodal_FORCES(2,force_dim,0.0);
+
+    for( int i=0; i<20; i++)
+      {
+	  // part for u
+          nodal_FORCES.val(i,0) = nodalForceFu.val(i,0);
+          nodal_FORCES.val(i,1) = nodalForceFu.val(i,1);
+          nodal_FORCES.val(i,2) = nodalForceFu.val(i,2);
+	  // part for p
+          nodal_FORCES.val(i,3) = 0.0;
+	  // part for U
+          nodal_FORCES.val(i,4) = nodalForceFU.val(i,4);
+          nodal_FORCES.val(i,5) = nodalForceFU.val(i,5);
+          nodal_FORCES.val(i,6) = nodalForceFU.val(i,6);
+      }
+     return nodal_FORCES;
+  }
+
+
+////#############################################################################
+// returns nodal forces for given ITERATIVE stress field in an element
+// Solid part  Xiaoyan 02/08/2002
+tensor TwentyNodeBrick_u_p_U::iterative_nodal_forcesFu()
+  {
+    int force_dim[] = {20,3}; 
+
+    tensor nodal_forcesFu(2,force_dim,0.0);
+
+    double r  = 0.0;
+    double rw = 0.0;
+    double s  = 0.0;
+    double sw = 0.0;
+    double t  = 0.0;
+    double tw = 0.0;
+
+    short where = 0;
+    double weight = 0.0;
+
+    int dh_dim[] = {20,3};   
 
     tensor dh(2, dh_dim, 0.0);
 
@@ -3728,8 +4799,8 @@ tensor TwentyNodeBrick_u_p_U::iterative_nodal_forces()
                 stress_at_GP.reportshortpqtheta("\n iterative_stress at GAUSS point in iterative_nodal_force\n");
 
                 // nodal forces See Zienkievicz part 1 pp 108
-                nodal_forces =
-                  nodal_forces + dhGlobal("ib")*stress_at_GP("ab")*weight;
+                nodal_forcesFu =
+                  nodal_forcesFu + dhGlobal("ib")*stress_at_GP("ab")*weight;
                 //nodal_forces.print("nf","\n TwentyNodeBrick_u_p_U::iterative_nodal_forces Nodal Forces ~~~~\n");
 
               }
@@ -3737,15 +4808,113 @@ tensor TwentyNodeBrick_u_p_U::iterative_nodal_forces()
       }
 
 
-    return nodal_forces;
+    return nodal_forcesFu;
+
+  }
+////#############################################################################
+// returns nodal forces for given ITERATIVE stress field in an element
+// Fluid part  Xiaoyan 02/08/2002
+tensor TwentyNodeBrick_u_p_U::iterative_nodal_forcesFU()
+  {
+    int force_dim[] = {20,3}; 
+
+    tensor nodal_forcesFU(2,force_dim,0.0);
+
+    double r  = 0.0;
+    double rw = 0.0;
+    double s  = 0.0;
+    double sw = 0.0;
+    double t  = 0.0;
+    double tw = 0.0;
+
+    short where = 0;
+    double weight = 0.0;
+
+    int dh_dim[] = {20,3};   
+
+    tensor dh(2, dh_dim, 0.0);
+
+    stresstensor stress_at_GP(0.0);
+
+    double det_of_Jacobian = 0.0;
+
+    tensor Jacobian;
+    tensor JacobianINV;
+    tensor dhGlobal;
+
+    for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
+      {
+        r = get_Gauss_p_c( r_integration_order, GP_c_r );
+        rw = get_Gauss_p_w( r_integration_order, GP_c_r );
+
+        for( short GP_c_s = 1 ; GP_c_s <= s_integration_order ; GP_c_s++ )
+          {
+            s = get_Gauss_p_c( s_integration_order, GP_c_s );
+            sw = get_Gauss_p_w( s_integration_order, GP_c_s );
+
+            for( short GP_c_t = 1 ; GP_c_t <= t_integration_order ; GP_c_t++ )
+              {
+                t = get_Gauss_p_c( t_integration_order, GP_c_t );
+                tw = get_Gauss_p_w( t_integration_order, GP_c_t );
+
+                // this short routine is supposed to calculate position of
+                // Gauss point from 3D array of short's
+                where =
+                ((GP_c_r-1)*s_integration_order+GP_c_s-1)*t_integration_order+GP_c_t-1;
+                //.....
+                //.....::printf("TwentyNodeBrick_u_p_U::iterative_nodal_forces()  ----**************** where = %d \n", where);
+                //.....::printf("UPDATE ");
+                //.....::printf("   GP_c_r = %d,  GP_c_s = %d,  GP_c_t = %d\n",
+                //.....                           GP_c_r,GP_c_s,GP_c_t);
+                // derivatives of local coordiantes with respect to local coordiantes
+                dh = dh_drst_at(r,s,t);
+
+                // Jacobian tensor ( matrix )
+                Jacobian = Jacobian_3D(dh);
+                //....                Jacobian.print("J");
+
+                // Inverse of Jacobian tensor ( matrix )
+                JacobianINV = Jacobian_3Dinv(dh);
+                //....                JacobianINV.print("JINV");
+
+                // determinant of Jacobian tensor ( matrix )
+                det_of_Jacobian  = Jacobian.determinant();
+                //....  ::printf("determinant of Jacobian is %f\n",Jacobian_determinant );
+	  
+                // Derivatives of local coordinates multiplied with inverse of Jacobian (see Bathe p-202)
+                dhGlobal = dh("ij") * JacobianINV("jk");
+
+                //weight
+                weight = rw * sw * tw * det_of_Jacobian;
+
+                //                   stress_at_GP = (GPstress)->operator[](where);
+                //stress_at_GP = GPiterative_stress[where];
+                
+		//stress_at_GP = ( matpoint[where].getTrialEPS() )->getStress();
+                stress_at_GP = matpoint[where]->getStressTensor();
+                stress_at_GP.reportshortpqtheta("\n iterative_stress at GAUSS point in iterative_nodal_force\n");
+
+                // nodal forces See Zienkievicz part 1 pp 108
+                nodal_forcesFU =
+                  nodal_forcesFU + dhGlobal("ib")*stress_at_GP("ab")*weight;
+                //nodal_forces.print("nf","\n TwentyNodeBrick_u_p_U::iterative_nodal_forces Nodal Forces ~~~~\n");
+
+              }
+          }
+      }
+
+
+    return nodal_forcesFU;
 
   }
 
+
 ////#############################################################################
 // returns nodal forces for given constant stress field in the element
+// This function is not called. Xiaoyan 02/08/2002
 tensor TwentyNodeBrick_u_p_U::nodal_forces_from_stress(stresstensor & stress)
   {
-    int force_dim[] = {20,3};  // Xiaoyan changed from {20,3 to {8,3} for 8 nodes
+    int force_dim[] = {20,3};  
 
     tensor nodal_forces(2,force_dim,0.0);
 
@@ -3834,6 +5003,7 @@ tensor TwentyNodeBrick_u_p_U::nodal_forces_from_stress(stresstensor & stress)
 ////#############################################################################
 // returns nodal forces for given incremental strain field in an element
 // by using the linearized constitutive tensor from the begining of the step !
+// This function is not called  Xiaoyan 02/08/2002
 tensor TwentyNodeBrick_u_p_U::linearized_nodal_forces()
   {
     int force_dim[] = {20,3};  // Xiaoyan changed from {20,3 to {8,3} for 8 nodes
@@ -3871,7 +5041,7 @@ tensor TwentyNodeBrick_u_p_U::linearized_nodal_forces()
     stresstensor final_linearized_stress;
     //    stresstensor incremental_stress;
     // tensor of incremental displacements taken from node objects for this element !
-    incremental_displacements = incr_disp();
+    incremental_displacements = incr_dispDu();
     //incremental_displacements.print("disp","\n incremental_displacements tensor at GAUSS point in iterative_Update\n");
 
     for( short GP_c_r = 1 ; GP_c_r <= r_integration_order ; GP_c_r++ )
@@ -4218,7 +5388,7 @@ void TwentyNodeBrick_u_p_U::report(char * msg)
   {
     if ( msg ) ::printf("** %s",msg);
     ::printf("\n Element Number = %d\n", this->getTag() );
-    ::printf("\n Number of nodes in a EightNodebrick = %d\n",
+    ::printf("\n Number of nodes in a EightNodebrick_u_p_U = %d\n",
                                               nodes_in_brick);
     ::printf("\n Determinant of Jacobian (! ==0 before comp.) = %f\n",
                                                   determinant_of_Jacobian);
@@ -4226,7 +5396,7 @@ void TwentyNodeBrick_u_p_U::report(char * msg)
     ::printf("Node numbers \n");
     ::printf(
 ".....1.....2.....3.....4.....5.....6.....7.....8.....9.....0.....1.....2\n");
-           for ( int i=0 ; i<8 ; i++ ) 
+           for ( int i=0 ; i<20 ; i++ ) 
 	    //::printf("%6d",G_N_numbs[i]);
 	    ::printf("%6d",connectedExternalNodes(i));
     ::printf("\n");
@@ -4326,7 +5496,7 @@ void TwentyNodeBrick_u_p_U::reportshort(char * msg)
     ::printf("Node numbers \n");
     ::printf(
 ".....1.....2.....3.....4.....5.....6.....7.....8.....9.....0.....1.....2\n");
-           for ( int i=0 ; i<8 ; i++ )
+           for ( int i=0 ; i<20 ; i++ )
              //::printf("%6d",G_N_numbs[i]);
              ::printf( "%6d",connectedExternalNodes(i) );
            
@@ -4377,7 +5547,7 @@ void TwentyNodeBrick_u_p_U::reportLM(char * msg)
 //#############################################################################
 void TwentyNodeBrick_u_p_U::reportTensor(char * msg)
   {
-    //    if ( msg ) ::printf("** %s\n",msg);
+        if ( msg ) ::printf("** %s\n",msg);
     
     // special case for 8 nodes only
     // special case for 8 nodes only
