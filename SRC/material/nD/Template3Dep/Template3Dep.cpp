@@ -31,7 +31,8 @@
 #define ITMAX 30
 #define MAX_STEP_COUNT 20
 #define	NUM_OF_SUB_INCR 30
-#define po 100000.0 //Reference pressure Pa
+#define KK 1000.0  //conversion between Pa and kPa, or N and kN 1 - kPa, kN; 1000 - Pa, N
+#define po 100.0 //Reference pressure Pa
 //#include <string.h>
 
 #include "Template3Dep.h"
@@ -597,9 +598,8 @@ tensor Template3Dep::ElasticComplianceTensor(void) const
     //cerr << " p = " <<  p;
 
     //double po = 100.0; //kPa
-    if (p <= 500.0) 
-      p = 500.0;
-    Ey = Ey * pow(p/po, 0.6); //0.5
+    if (p <= 0.5000*KK) p = 0.500*KK;
+    Ey = Ey * pow(p/po/KK, 0.5); //0.5
     //cerr << " Ec = " << Ey << endln;
 
     // Kronecker delta tensor
@@ -634,9 +634,8 @@ tensor Template3Dep::ElasticStiffnessTensor(void) const
     //cerr << " p = " <<  p;
 
     //double po = 100.0; //kPa
-    if (p <= 500.0) 
-      p = 500.0;
-    double E = Ey * pow(p/po, 0.6);//0.5
+    if (p <= 0.5000*KK) p = 0.5000*KK;
+    double E = Ey * pow(p/po/KK, 0.5);//0.5
     //cerr << " Eo = " << Ey ;
     //cerr << " Ec = " << E << endln;
 
@@ -1896,7 +1895,7 @@ EPState Template3Dep::BackwardEulerEPState( const straintensor &strain_increment
   //  double Ftolerance = pow(d_macheps(),(1.0/2.0))*1000000.00; //FORWARD no iterations
   //double Ftolerance = pow( d_macheps(), 0.5)*1.00;
   
-  double Ftolerance = pow( d_macheps(), 0.5)*1000000.00;  //Zhaohui UCD 10e6 for Pa, kg and m 1000 for kPa, ton and m
+  double Ftolerance = pow( d_macheps(), 0.5)*1000*KK;  //Zhaohui UCD 10e6 for Pa, kg and m 1000 for kPa, ton and m
   //cout << Ftolerance << endln;
   //  double Ftolerance = pow(d_macheps(),(1.0/2.0))*1.0;
   //  double entry_kappa_cone = Criterion.kappa_cone_get();
