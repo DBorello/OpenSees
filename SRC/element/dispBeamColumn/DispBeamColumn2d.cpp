@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.4 $
-// $Date: 2001-08-24 17:56:47 $
+// $Revision: 1.5 $
+// $Date: 2001-09-21 19:14:33 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/dispBeamColumn/DispBeamColumn2d.cpp,v $
 
 // Written: MHS
@@ -359,6 +359,7 @@ DispBeamColumn2d::getTangentStiff()
 	}
 
 	// Transform to global stiffness
+	crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
 	K = crdTransf->getGlobalStiffMatrix(kb, q);
 
 	return K;
@@ -499,6 +500,7 @@ DispBeamColumn2d::getResistingForce()
 
 	// Transform forces
 	static Vector dummy(2);		// No distributed loads
+	crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
 	P = crdTransf->getGlobalResistingForce(q,dummy);
 
 	// Subtract other external nodal loads ... P_res = P_int - P_ext

@@ -18,8 +18,8 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.15 $
-// $Date: 2001-09-20 19:54:36 $
+// $Revision: 1.16 $
+// $Date: 2001-09-21 19:14:35 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/nonlinearBeamColumn/element/NLBeamColumn2d.cpp,v $
                                                                         
                                                                         
@@ -426,6 +426,7 @@ int NLBeamColumn2d::revertToStart()
 const Matrix &
 NLBeamColumn2d::getTangentStiff(void)
 {
+	crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
 	return crdTransf->getGlobalStiffMatrix(kv, Se);
 }
     
@@ -435,7 +436,8 @@ NLBeamColumn2d::getResistingForce(void)
 {
 	static Vector dummy(2);
 
-	return crdTransf->getGlobalResistingForce(Se, dummy);;
+	crdTransf->update();	// Will remove once we clean up the corotational 2d transformation -- MHS
+	return crdTransf->getGlobalResistingForce(Se, dummy);
 }
 
 
