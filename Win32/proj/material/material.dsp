@@ -271,6 +271,14 @@ SOURCE=..\..\..\SRC\material\uniaxial\snap\TclSnapMaterialCommand.cpp
 # End Group
 # Begin Source File
 
+SOURCE=..\..\..\SRC\material\uniaxial\BoucWenMaterial.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\SRC\material\uniaxial\BoucWenMaterial.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\SRC\material\uniaxial\CableMaterial.cpp
 # End Source File
 # Begin Source File
